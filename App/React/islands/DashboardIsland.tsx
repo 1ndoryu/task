@@ -7,6 +7,7 @@
 import {useEffect} from 'react';
 import {DashboardEncabezado, DashboardFooter, DashboardGrid, DashboardModales} from '../components/dashboard';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
+import {VERSION_ACTUAL} from '../data/changelog';
 
 import '../styles/dashboard/componentes/experimentos.css';
 
@@ -30,7 +31,7 @@ function IndicadorCarga({texto = 'Cargando datos...'}: {texto?: string}): JSX.El
     );
 }
 
-export function DashboardIsland({titulo = 'DASHBOARD_01', version = 'v1.0.2-beta', usuario = 'user@admin'}: DashboardIslandProps): JSX.Element {
+export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTUAL, usuario = 'user@admin'}: DashboardIslandProps): JSX.Element {
     const ctx = useDashboardCompleto();
     const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones} = ctx;
 

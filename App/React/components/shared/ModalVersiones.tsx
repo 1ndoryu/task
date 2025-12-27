@@ -1,7 +1,7 @@
 import React from 'react';
 import {Modal} from './Modal';
 import {HISTORIAL_VERSIONES, Version, Cambio} from '../../data/changelog';
-import {Tag, Calendar, CheckCircle, PlusCircle, AlertCircle} from 'lucide-react';
+import {Tag, Calendar, CheckCircle, PlusCircle, Wrench} from 'lucide-react';
 import '../../styles/dashboard/shared/modalVersiones.css';
 
 interface ModalVersionesProps {
@@ -16,7 +16,7 @@ const IconoTipoCambio = ({tipo}: {tipo: Cambio['tipo']}) => {
         case 'mejora':
             return <CheckCircle size={14} className="iconoCambio iconoMejora" />;
         case 'arreglo':
-            return <AlertCircle size={14} className="iconoCambio iconoArreglo" />;
+            return <Wrench size={14} className="iconoCambio iconoArreglo" />;
         default:
             return <Tag size={14} className="iconoCambio" />;
     }

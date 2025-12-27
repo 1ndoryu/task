@@ -11,6 +11,29 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.6-beta',
+        fecha: '2025-12-27',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Panel de Actividad con mapa de calor tipo GitHub'},
+            {tipo: 'nuevo', descripcion: 'Mapa de calor por habito (en modal de configuracion)'},
+            {tipo: 'nuevo', descripcion: 'Mapa de calor por proyecto (tareas completadas)'},
+            {tipo: 'nuevo', descripcion: 'Historial de 7 dias inline en tabla de habitos'},
+            {tipo: 'nuevo', descripcion: 'Click para marcar/desmarcar dias pasados (hasta 30 dias)'},
+            {tipo: 'nuevo', descripcion: 'Click derecho para marcar como pospuesto'},
+            {tipo: 'nuevo', descripcion: 'Calculo dinamico de semanas segun ancho del contenedor'},
+            {tipo: 'mejora', descripcion: 'Cache de actividad con TTL 5 min (persistido en sessionStorage)'},
+            {tipo: 'mejora', descripcion: 'Cache de historial de habitos con TTL 10 min'},
+            {tipo: 'mejora', descripcion: 'Actualizacion optimista al marcar/desmarcar dias'},
+            {tipo: 'mejora', descripcion: 'Panel mantiene datos anteriores mientras recarga'},
+            {tipo: 'arreglo', descripcion: 'Zona horaria: obtenerFechaLocalISO() evita problemas UTC'},
+            {tipo: 'arreglo', descripcion: 'Desmarcar habito elimina registro de actividad correctamente'},
+            {tipo: 'arreglo', descripcion: 'Sincronizacion panel - modal al marcar desde checkbox'},
+            {tipo: 'arreglo', descripcion: 'Dias no relevantes se muestran con opacidad reducida'},
+            {tipo: 'arreglo', descripcion: 'Click unico para cambiar estado (sin multiples clicks)'},
+            {tipo: 'arreglo', descripcion: 'Alineacion correcta de dias de semana en heatmap'}
+        ]
+    },
+    {
         version: 'v1.0.4-beta',
         fecha: '2025-12-25',
         cambios: [
@@ -106,3 +129,6 @@ export const HISTORIAL_VERSIONES: Version[] = [
         ]
     }
 ];
+
+/* Versión actual siempre es la primera del historial */
+export const VERSION_ACTUAL = HISTORIAL_VERSIONES[0].version;
