@@ -5,11 +5,24 @@
  */
 
 /*
+ * Convierte una fecha a formato ISO (YYYY-MM-DD) usando la zona horaria local
+ * IMPORTANTE: Esta funcion NO usa toISOString() porque convierte a UTC,
+ * lo cual causa errores cuando la hora local es diferente al dia UTC.
+ * Ejemplo: 23:00 en UTC-4 seria el dia siguiente en UTC.
+ */
+export function obtenerFechaLocalISO(fecha: Date = new Date()): string {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+}
+
+/*
  * Obtiene la fecha de hoy en formato ISO (YYYY-MM-DD)
  * Usado para comparaciones y registros de completados
  */
 export function obtenerFechaHoy(): string {
-    return new Date().toISOString().split('T')[0];
+    return obtenerFechaLocalISO();
 }
 
 /*
@@ -42,7 +55,7 @@ export function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean 
 export function crearFechaHaceNDias(dias: number): string {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() - dias);
-    return fecha.toISOString().split('T')[0];
+    return obtenerFechaLocalISO(fecha);
 }
 
 /*
@@ -52,7 +65,7 @@ export function crearFechaHaceNDias(dias: number): string {
 export function crearFechaEnNDias(dias: number): string {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() + dias);
-    return fecha.toISOString().split('T')[0];
+    return obtenerFechaLocalISO(fecha);
 }
 
 /*
@@ -76,10 +89,10 @@ export function calcularDiasAntesDePerderRacha(diasInactividad: number, umbral: 
  * Retorna la nueva fecha en formato ISO (YYYY-MM-DD)
  */
 export function sumarDias(fechaIso: string, dias: number): string {
-    const fecha = new Date(fechaIso);
-    /* Usar metodos UTC para evitar problemas de zona horaria al sumar dias */
-    fecha.setUTCDate(fecha.getUTCDate() + dias);
-    return fecha.toISOString().split('T')[0];
+    /* Parsear fecha agregando hora al mediodia para evitar problemas de zona horaria */
+    const fecha = new Date(fechaIso + 'T12:00:00');
+    fecha.setDate(fecha.getDate() + dias);
+    return obtenerFechaLocalISO(fecha);
 }
 
 /*

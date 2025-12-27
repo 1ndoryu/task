@@ -1,0 +1,184 @@
+/*
+ * HISTORIAL DE HABITOS
+ * Estilos para la visualizacion compacta
+ * de los ultimos 7 dias de un habito
+ */
+
+/* 
+ * Contenedor Principal 
+ */
+.historialHabitoContenedor {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.historialHabitoContenedor--compacto {
+    gap: 2px;
+}
+
+/* 
+ * Mensaje de vacio 
+ */
+.historialHabitoVacio {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 9px;
+    color: var(--dashboard-textoMuyApagado);
+}
+
+/* 
+ * Dias individuales 
+ */
+.historialHabitoDia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+/* 
+ * Etiqueta del dia 
+ */
+.historialHabitoDiaLabel {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 8px;
+    color: var(--dashboard-textoSecundario);
+    line-height: 1;
+}
+
+/* 
+ * Indicador visual 
+ */
+.historialHabitoDiaIndicador {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
+}
+
+/* 
+ * Estados de los indicadores 
+ */
+.historialHabitoDia--vacio .historialHabitoDiaIndicador {
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.historialHabitoDia--completado .historialHabitoDiaIndicador {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #22c55e;
+}
+
+.historialHabitoDia--pospuesto .historialHabitoDiaIndicador {
+    background: rgba(234, 179, 8, 0.2);
+    border: 1px solid rgba(234, 179, 8, 0.4);
+    color: #eab308;
+}
+
+.historialHabitoDia--omitido .historialHabitoDiaIndicador {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+/* 
+ * Dia actual 
+ */
+.historialHabitoDia--hoy .historialHabitoDiaIndicador {
+    box-shadow: 0 0 0 1px var(--dashboard-textoSecundario);
+}
+
+.historialHabitoDia--hoy .historialHabitoDiaLabel {
+    color: var(--dashboard-textoNormal);
+    font-weight: 600;
+}
+
+/* 
+ * Interactividad 
+ */
+.historialHabitoDia--clickeable {
+    cursor: pointer;
+}
+
+.historialHabitoDia--clickeable:hover .historialHabitoDiaIndicador {
+    transform: scale(1.15);
+}
+
+.historialHabitoDia--clickeable:focus {
+    outline: none;
+}
+
+.historialHabitoDia--clickeable:focus-visible .historialHabitoDiaIndicador {
+    box-shadow: 0 0 0 2px var(--dashboard-textoSecundario);
+}
+
+/* 
+ * Iconos dentro del indicador 
+ */
+.historialHabitoIcono {
+    width: 10px;
+    height: 10px;
+}
+
+/* 
+ * Modo compacto 
+ */
+.historialHabitoContenedor--compacto .historialHabitoDiaIndicador {
+    width: 12px;
+    height: 12px;
+}
+
+.historialHabitoContenedor--compacto .historialHabitoIcono {
+    width: 8px;
+    height: 8px;
+}
+
+/* 
+ * Dias no relevantes (segun frecuencia del habito)
+ * Se muestran con opacidad reducida
+ * Los dias vacios tienen patron rayado, los completados muestran su estado
+ */
+.historialHabitoDia--noRelevante {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* 
+ * Dias no relevantes VACIOS - verde con opacidad baja para indicar que no aplica 
+ */
+.historialHabitoDia--noRelevante.historialHabitoDia--vacio .historialHabitoDiaIndicador {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+/* 
+ * Dias no relevantes COMPLETADOS - verde con opacidad 
+ * Muestra que se cumplio aunque no tocaba ese dia
+ */
+.historialHabitoDia--noRelevante.historialHabitoDia--completado .historialHabitoDiaIndicador {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: rgba(34, 197, 94, 0.7);
+}
+
+/* 
+ * Dias no relevantes POSPUESTOS - amarillo con opacidad 
+ */
+.historialHabitoDia--noRelevante.historialHabitoDia--pospuesto .historialHabitoDiaIndicador {
+    background: rgba(234, 179, 8, 0.15);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    color: rgba(234, 179, 8, 0.7);
+}
+
+/* 
+ * Dias no relevantes OMITIDOS - rojo con opacidad 
+ */
+.historialHabitoDia--noRelevante.historialHabitoDia--omitido .historialHabitoDiaIndicador {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: rgba(239, 68, 68, 0.7);
+}

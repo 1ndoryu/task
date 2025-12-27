@@ -16,6 +16,7 @@ import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Parti
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
 import {AccionesFormulario, Modal, SeccionPanel, SelectorNivel} from '../shared';
+import {MapaCalorHabito} from '../shared/MapaCalorHabito';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
 
@@ -197,6 +198,14 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
             <div className="formularioCampo">
                 <SelectorFrecuencia frecuencia={frecuencia} onChange={setFrecuencia} />
             </div>
+
+            {/* Mapa de calor - solo en modo edición */}
+            {modoEdicion && habito && habito.id > 0 && (
+                <div className="formularioCampo formularioCampo--mapaCalor">
+                    <label className="formularioEtiqueta">Historial de cumplimiento</label>
+                    <MapaCalorHabito habitoId={habito.id} periodo="mes" enModal={true} frecuencia={habito.frecuencia} fechaCreacion={habito.fechaCreacion} />
+                </div>
+            )}
         </>
     );
 

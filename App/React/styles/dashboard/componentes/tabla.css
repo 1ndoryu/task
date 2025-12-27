@@ -76,6 +76,14 @@
     text-align: center;
 }
 
+
+.tablaColumnaHistorial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+}
+
 .tablaColumnaAccion {
     text-align: right;
 }

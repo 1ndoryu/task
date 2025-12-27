@@ -18,6 +18,15 @@
     gap: var(--dashboard-espacioXs);
 }
 
+/* 
+ * Campo de mapa de calor (historial de habito)
+ * Se asegura de ocupar todo el ancho disponible
+ */
+.formularioCampo--mapaCalor {
+    width: 100%;
+    margin-top: var(--dashboard-espacioSm);
+}
+
 .formularioEtiqueta {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);

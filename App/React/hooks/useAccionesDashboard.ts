@@ -6,6 +6,8 @@
 
 import {useCallback} from 'react';
 import {useAlertasContext} from '../context/AlertasContext';
+import {invalidarCache} from '../services/actividadStore';
+import {invalidarTodoCacheHistorial} from '../services/historialHabitosStore';
 import type {Proyecto, NivelPrioridad, NivelUrgencia, TareaConfiguracion} from '../types/dashboard';
 import type {EstadoFiltro} from './useFiltroTareas';
 
@@ -38,6 +40,7 @@ interface UseAccionesDashboardReturn {
     manejarClickNotificaciones: (evento: React.MouseEvent) => void;
     manejarClickNotificacionIndividual: (notificacion: any) => void;
     crearNotificacionPrueba: () => Promise<boolean>;
+    limpiarActividadCompleta: () => Promise<boolean>;
 }
 
 export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccionesDashboardReturn {
@@ -137,6 +140,26 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
         }
     }, [refrescarNotificaciones]);
 
+    const limpiarActividadCompleta = useCallback(async (): Promise<boolean> => {
+        try {
+            const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
+            const response = await fetch('/wp-json/glory/v1/actividad/limpiar', {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json', 'X-WP-Nonce': nonce}
+            });
+            const data = await response.json();
+            if (data.success) {
+                /* Limpiar cache local de actividad y historial */
+                invalidarCache();
+                invalidarTodoCacheHistorial();
+                return true;
+            }
+            return false;
+        } catch {
+            return false;
+        }
+    }, []);
+
     return {
         manejarCambioFiltro,
         manejarLimpiarScratchpad,
@@ -145,6 +168,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
         manejarGuardarEdicionProyecto,
         manejarClickNotificaciones,
         manejarClickNotificacionIndividual,
-        crearNotificacionPrueba
+        crearNotificacionPrueba,
+        limpiarActividadCompleta
     };
 }

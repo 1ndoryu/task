@@ -4,7 +4,7 @@
  * Click en un icono vuelve a mostrar el panel
  */
 
-import {Target, Folder, Terminal, FileText} from 'lucide-react';
+import {Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 
 interface BarraPanelesOcultosProps {
@@ -29,6 +29,10 @@ const PANELES_INFO: Record<PanelId, {icono: JSX.Element; nombre: string}> = {
     scratchpad: {
         icono: <FileText size={14} />,
         nombre: 'Scratchpad'
+    },
+    actividad: {
+        icono: <Activity size={14} />,
+        nombre: 'Actividad'
     }
 };
 

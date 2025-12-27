@@ -7,7 +7,7 @@
  */
 
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import {Target, Folder, Terminal, FileText} from 'lucide-react';
+import {Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
 
 /* Nombres e iconos de los paneles */
 const INFO_PANELES: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
@@ -26,6 +26,10 @@ const INFO_PANELES: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
     scratchpad: {
         nombre: 'Scratchpad',
         icono: <FileText size={14} />
+    },
+    actividad: {
+        nombre: 'Actividad',
+        icono: <Activity size={14} />
     }
 };
 

@@ -11,7 +11,7 @@ import {useCallback, useMemo} from 'react';
 export type ModoColumnas = 1 | 2 | 3;
 
 /* Identificadores de paneles del dashboard */
-export type PanelId = 'focoPrioritario' | 'proyectos' | 'ejecucion' | 'scratchpad';
+export type PanelId = 'focoPrioritario' | 'proyectos' | 'ejecucion' | 'scratchpad' | 'actividad';
 
 /* Configuración de ancho de columnas (en porcentaje 0-100) */
 export interface AnchoColumnas {
@@ -26,6 +26,7 @@ export interface VisibilidadPaneles {
     proyectos: boolean;
     ejecucion: boolean;
     scratchpad: boolean;
+    actividad: boolean;
 }
 
 /*
@@ -44,6 +45,7 @@ export interface AlturasPaneles {
     proyectos: string;
     ejecucion: string;
     scratchpad: string;
+    actividad: string;
 }
 
 /* Configuración completa del layout */
@@ -61,7 +63,7 @@ export const ANCHO_MINIMO_COLUMNA = 20;
 export const ANCHO_MAXIMO_COLUMNA = 60;
 
 /* Lista de todos los paneles en orden */
-export const TODOS_LOS_PANELES: PanelId[] = ['focoPrioritario', 'proyectos', 'ejecucion', 'scratchpad'];
+export const TODOS_LOS_PANELES: PanelId[] = ['focoPrioritario', 'proyectos', 'ejecucion', 'scratchpad', 'actividad'];
 
 /*
  * Orden de paneles por defecto según modo de columnas
@@ -75,19 +77,22 @@ export const ORDEN_PANELES_DEFECTO: Record<ModoColumnas, OrdenPanel[]> = {
         {id: 'ejecucion', columna: 1, posicion: 0},
         {id: 'focoPrioritario', columna: 1, posicion: 1},
         {id: 'proyectos', columna: 1, posicion: 2},
-        {id: 'scratchpad', columna: 1, posicion: 3}
+        {id: 'scratchpad', columna: 1, posicion: 3},
+        {id: 'actividad', columna: 1, posicion: 4}
     ],
     2: [
         {id: 'ejecucion', columna: 1, posicion: 0},
         {id: 'focoPrioritario', columna: 1, posicion: 1},
         {id: 'proyectos', columna: 2, posicion: 0},
-        {id: 'scratchpad', columna: 2, posicion: 1}
+        {id: 'scratchpad', columna: 2, posicion: 1},
+        {id: 'actividad', columna: 2, posicion: 2}
     ],
     3: [
         {id: 'ejecucion', columna: 1, posicion: 0},
         {id: 'focoPrioritario', columna: 2, posicion: 0},
         {id: 'proyectos', columna: 3, posicion: 0},
-        {id: 'scratchpad', columna: 3, posicion: 1}
+        {id: 'scratchpad', columna: 3, posicion: 1},
+        {id: 'actividad', columna: 3, posicion: 2}
     ]
 };
 
@@ -103,14 +108,16 @@ export const CONFIG_LAYOUT_DEFECTO: ConfiguracionLayout = {
         focoPrioritario: true,
         proyectos: true,
         ejecucion: true,
-        scratchpad: true
+        scratchpad: true,
+        actividad: false
     },
     ordenPaneles: ORDEN_PANELES_DEFECTO[2],
     alturas: {
         focoPrioritario: 'auto',
         proyectos: 'auto',
         ejecucion: 'auto',
-        scratchpad: '200px'
+        scratchpad: '200px',
+        actividad: '150px'
     }
 };
 
@@ -303,45 +310,44 @@ export function useConfiguracionLayout() {
      */
     const reordenarPanel = useCallback(
         (panelId: PanelId, nuevaColumna: 1 | 2 | 3, nuevaPosicion: number) => {
-            setValor(prev => {
-                const paneles = [...(prev.ordenPaneles || ORDEN_PANELES_DEFECTO[prev.modoColumnas])];
-                const indicePanel = paneles.findIndex(p => p.id === panelId);
+            /* Usar configuracionNormalizada para asegurar que paneles migrados esten incluidos */
+            const paneles = [...configuracionNormalizada.ordenPaneles];
+            const indicePanel = paneles.findIndex(p => p.id === panelId);
 
-                if (indicePanel === -1) return prev;
+            if (indicePanel === -1) return;
 
-                const panelActual = paneles[indicePanel];
+            const panelActual = paneles[indicePanel];
 
-                /* Remover panel de su posición actual */
-                paneles.splice(indicePanel, 1);
+            /* Remover panel de su posición actual */
+            paneles.splice(indicePanel, 1);
 
-                /* Ajustar posiciones en la columna origen */
-                paneles
-                    .filter(p => p.columna === panelActual.columna && p.posicion > panelActual.posicion)
-                    .forEach(p => {
-                        p.posicion--;
-                    });
-
-                /* Ajustar posiciones en la columna destino para hacer espacio */
-                paneles
-                    .filter(p => p.columna === nuevaColumna && p.posicion >= nuevaPosicion)
-                    .forEach(p => {
-                        p.posicion++;
-                    });
-
-                /* Insertar panel en nueva posición */
-                paneles.push({
-                    id: panelId,
-                    columna: nuevaColumna,
-                    posicion: nuevaPosicion
+            /* Ajustar posiciones en la columna origen */
+            paneles
+                .filter(p => p.columna === panelActual.columna && p.posicion > panelActual.posicion)
+                .forEach(p => {
+                    p.posicion--;
                 });
 
-                return {
-                    ...prev,
-                    ordenPaneles: normalizarPosiciones(paneles)
-                };
+            /* Ajustar posiciones en la columna destino para hacer espacio */
+            paneles
+                .filter(p => p.columna === nuevaColumna && p.posicion >= nuevaPosicion)
+                .forEach(p => {
+                    p.posicion++;
+                });
+
+            /* Insertar panel en nueva posición */
+            paneles.push({
+                id: panelId,
+                columna: nuevaColumna,
+                posicion: nuevaPosicion
             });
+
+            setValor(prev => ({
+                ...prev,
+                ordenPaneles: normalizarPosiciones(paneles)
+            }));
         },
-        [setValor, normalizarPosiciones]
+        [setValor, normalizarPosiciones, configuracionNormalizada.ordenPaneles]
     );
 
     /* Mover un panel una posición hacia arriba dentro de su columna */

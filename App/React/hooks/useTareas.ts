@@ -9,6 +9,7 @@ import type {Tarea, DatosEdicionTarea} from '../types/dashboard';
 import {obtenerFechaHoy, sumarDias} from '../utils/fecha';
 import {obtenerSubtareas} from '../utils/jerarquiaTareas';
 import {registrarEventoSistema, type AccionSistema} from './useMensajes';
+import {registrarTareaCompletada, registrarTareaDesmarcada} from '../services/actividadService';
 
 export interface UseTareasParams {
     tareas: Tarea[];
@@ -169,6 +170,14 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                     return listaRestaurada;
                 });
             });
+
+            /* Registrar actividad para el mapa de calor (silencioso) */
+            if (!estadoAnterior) {
+                registrarTareaCompletada(tarea.id, tarea.proyectoId);
+            } else {
+                /* Desmarcar tarea - tambien registrar en actividad */
+                registrarTareaDesmarcada(tarea.id, tarea.proyectoId);
+            }
         },
         [tareas, setTareas, registrarAccion]
     );

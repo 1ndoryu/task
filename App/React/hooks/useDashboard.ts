@@ -21,6 +21,7 @@ import {obtenerFechaHoy, calcularDiasDesde, fueCompletadoHoy} from '../utils/fec
 import {validarHabitos, validarTareas, validarNotas, validarProyectos} from '../utils/validadores';
 import {migrarYActualizarHabitos} from '../utils/migracionHabitos';
 import {habitosIniciales, tareasIniciales, notasIniciales, proyectosIniciales, tareasProyectosIniciales} from '../data/datosIniciales';
+import {registrarHabitoCumplido, registrarHabitoDesmarcado, registrarHabitoPospuesto} from '../services/actividadService';
 
 /*
  * Configuracion por defecto del dashboard
@@ -407,6 +408,9 @@ export function useDashboard(): UseDashboardReturn {
                 registrarAccion(`"${habito.nombre}" desmarcado`, () => {
                     setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
                 });
+
+                /* Registrar actividad para el mapa de calor (silencioso) */
+                registrarHabitoDesmarcado(habito.id);
             } else {
                 /* Completar: marcar como completado hoy */
                 const estadoAnterior = {...habito};
@@ -430,6 +434,9 @@ export function useDashboard(): UseDashboardReturn {
                 registrarAccion(`"${habito.nombre}" completado`, () => {
                     setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
                 });
+
+                /* Registrar actividad para el mapa de calor (silencioso) */
+                registrarHabitoCumplido(habito.id);
             }
         },
         [habitos, setHabitos, registrarAccion]
@@ -483,6 +490,9 @@ export function useDashboard(): UseDashboardReturn {
                 registrarAccion(`"${habito.nombre}" pospuesto`, () => {
                     setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
                 });
+
+                /* Registrar actividad para el mapa de calor */
+                registrarHabitoPospuesto(habito.id);
             }
         },
         [habitos, setHabitos, registrarAccion, mostrarMensaje]

@@ -56,6 +56,10 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
             etiqueta: 'Nombre',
             descripcion: 'El nombre del habito (fijo)'
         },
+        historial: {
+            etiqueta: 'Historial (7 dias)',
+            descripcion: 'Indicadores visuales de los ultimos 7 dias'
+        },
         racha: {
             etiqueta: 'Racha',
             descripcion: 'Contador de dias seguidos'

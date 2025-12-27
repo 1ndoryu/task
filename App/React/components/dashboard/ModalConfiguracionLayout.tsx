@@ -6,7 +6,7 @@
 
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
-import {Columns2, Columns3, Square, Target, Folder, Terminal, FileText, RotateCcw, ArrowUpDown} from 'lucide-react';
+import {Columns2, Columns3, Square, Target, Folder, Terminal, FileText, RotateCcw, ArrowUpDown, Activity} from 'lucide-react';
 import {ListaOrdenPaneles} from './ListaOrdenPaneles';
 import type {ModoColumnas, VisibilidadPaneles, PanelId, OrdenPanel} from '../../hooks/useConfiguracionLayout';
 
@@ -50,6 +50,12 @@ const PANELES: {id: PanelId; nombre: string; icono: JSX.Element; descripcion: st
         nombre: 'Scratchpad',
         icono: <FileText size={14} />,
         descripcion: 'Notas rápidas'
+    },
+    {
+        id: 'actividad',
+        nombre: 'Actividad',
+        icono: <Activity size={14} />,
+        descripcion: 'Mapa de calor de actividad'
     }
 ];
 

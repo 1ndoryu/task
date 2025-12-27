@@ -4,7 +4,7 @@
  * Permite mover paneles arriba/abajo y cambiar de columna
  */
 
-import {ChevronUp, ChevronDown, Target, Folder, Terminal, FileText} from 'lucide-react';
+import {ChevronUp, ChevronDown, Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
 import type {PanelId, OrdenPanel, ModoColumnas} from '../../hooks/useConfiguracionLayout';
 
 interface ListaOrdenPanelesProps {
@@ -32,6 +32,10 @@ const INFO_PANELES: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
     scratchpad: {
         nombre: 'Scratchpad',
         icono: <FileText size={14} />
+    },
+    actividad: {
+        nombre: 'Actividad',
+        icono: <Activity size={14} />
     }
 };
 

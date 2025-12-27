@@ -11,6 +11,27 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.4-beta',
+        fecha: '2025-12-25',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Sistema de notas guardadas en Scratchpad (guardar, buscar, recuperar)'},
+            {tipo: 'nuevo', descripcion: 'Habitos editables y eliminables desde panel de Ejecucion'},
+            {tipo: 'nuevo', descripcion: 'Sistema de posponer habitos sin romper racha'},
+            {tipo: 'nuevo', descripcion: 'Tolerancia de urgencia configurable (4 presets)'},
+            {tipo: 'nuevo', descripcion: 'Redimensionar ancho de columnas con handles'},
+            {tipo: 'nuevo', descripcion: 'Redimensionar altura de paneles (modo auto/fijo)'},
+            {tipo: 'mejora', descripcion: 'Doble clic en handle iguala anchos de columnas'},
+            {tipo: 'mejora', descripcion: 'Indicador visual de modo auto en paneles (linea verde)'},
+            {tipo: 'mejora', descripcion: 'Eliminacion optimista de notas (respuesta instantanea)'},
+            {tipo: 'arreglo', descripcion: 'Subtareas ahora persisten correctamente'},
+            {tipo: 'arreglo', descripcion: 'Nombre de tarea persiste al editar'},
+            {tipo: 'arreglo', descripcion: 'Error 403 en mensajes por timing de sincronizacion'},
+            {tipo: 'arreglo', descripcion: 'Scroll visual en Scratchpad llega al borde'},
+            {tipo: 'arreglo', descripcion: 'Cargando notas centrado correctamente'},
+            {tipo: 'arreglo', descripcion: 'Notas se sincronizan al abrir carpeta'}
+        ]
+    },
+    {
         version: 'v1.0.3-beta',
         fecha: '2025-12-24',
         cambios: [

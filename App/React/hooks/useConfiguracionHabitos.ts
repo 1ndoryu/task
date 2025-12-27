@@ -3,6 +3,7 @@ import {useLocalStorage} from './useLocalStorage';
 export interface ColumnasHabitos {
     indice: boolean;
     nombre: boolean;
+    historial: boolean;
     racha: boolean;
     frecuencia: boolean;
     importancia: boolean;
@@ -42,6 +43,7 @@ export interface ConfiguracionHabitos {
 export const COLUMNAS_POR_DEFECTO: ColumnasHabitos = {
     indice: true,
     nombre: true,
+    historial: true /* Visible por defecto - muestra 7 dias */,
     racha: false /* Oculta por defecto */,
     frecuencia: true /* Visible por defecto */,
     importancia: true /* Prioridad visible */,

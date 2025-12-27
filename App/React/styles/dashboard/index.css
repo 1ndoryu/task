@@ -42,6 +42,10 @@
 @import './shared/indicadorAlmacenamiento.css';
 @import './shared/resizePanel.css';
 @import './shared/resizeHandleColumna.css';
+@import './shared/mapaCalor.css';
+@import './shared/historialHabito.css';
+@import './shared/mapaCalorHabito.css';
+@import './shared/mapaCalorProyecto.css';
 
 /* Componentes */
 @import './componentes/encabezado.css';
@@ -83,3 +87,6 @@
 
 /* Chat e Historial */
 @import './componentes/chatHistorial.css';
+
+/* Panel de Actividad */
+@import './componentes/panelActividad.css';

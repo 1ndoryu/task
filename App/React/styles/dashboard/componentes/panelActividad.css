@@ -1,0 +1,117 @@
+/*
+ * PANEL DE ACTIVIDAD
+ * Estilos para el panel de heatmap de actividad
+ */
+
+/* 
+ * Contenedor Principal 
+ */
+.panelActividadContenedor {
+    min-height: 120px;
+}
+
+/* 
+ * Cuerpo con el mapa 
+ */
+
+/* 
+ * Estados de carga y error 
+ */
+.panelActividadCargando,
+.panelActividadError {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-align: center;
+    padding: var(--dashboard-espacioMd);
+}
+
+.panelActividadError {
+    color: var(--dashboard-colorError);
+}
+
+/* 
+ * Estadisticas en encabezado 
+ */
+.panelActividadStats {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.panelActividadStat {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 9px;
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoHover);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* 
+ * Modal de configuracion - Selector de periodo 
+ */
+.selectorPeriodoActividad {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    flex-wrap: wrap;
+}
+
+.selectorPeriodoBoton {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 4px;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorPeriodoBoton:hover {
+    background: var(--dashboard-fondoActivo);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorPeriodoBoton--activo {
+    background: var(--dashboard-fondoActivo);
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+/* 
+ * Opciones visuales en modal 
+ */
+.opcionesVisualesActividad {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.opcionVisualActividad {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+}
+
+.opcionVisualActividad:hover span {
+    color: var(--dashboard-textoNormal);
+}
+
+/* 
+ * Responsive 
+ */
+@media (max-width: 768px) {
+    .panelActividadStats {
+        display: none;
+    }
+
+    .panelActividadCuerpo {
+        padding: var(--dashboard-espacioXs);
+    }
+}

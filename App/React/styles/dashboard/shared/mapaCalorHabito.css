@@ -1,0 +1,395 @@
+/*
+ * MAPA DE CALOR DE HÁBITOS
+ * Estilos para el historial interactivo de cumplimiento
+ * Permite marcar días pasados como completados o pospuestos
+ */
+
+/* 
+ * Contenedor Principal 
+ */
+.mapaCalorHabitoContenedor {
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 6px;
+    padding: var(--dashboard-espacioMd);
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.mapaCalorHabitoContenedor--compacto {
+    padding: var(--dashboard-espacioSm);
+    background: transparent;
+    border: none;
+}
+
+.mapaCalorHabitoContenedor--guardando {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* 
+ * Modo modal: se extiende al 100% del ancho
+ * Sin leyenda ni estadisticas (controlado por JS)
+ */
+.mapaCalorHabitoContenedor--modal {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.mapaCalorHabitoContenedor--modal .mapaCalorHabitoCuerpo {
+    width: 100%;
+}
+
+.mapaCalorHabitoContenedor--modal .mapaCalorHabitoGridContenedor {
+    width: 100%;
+}
+
+.mapaCalorHabitoContenedor--modal .mapaCalorHabitoGrid {
+    justify-content: space-between;
+    width: 100%;
+}
+
+.mapaCalorHabitoContenedor--modal .mapaCalorHabitoSemana {
+    flex: 1;
+    align-items: center;
+}
+
+/* En modo modal NO cambiar el tamaño de las celdas para mantener consistencia */
+
+/* 
+ * Estado cargando: NO usar animacion de opacidad
+ * Solo reducir opacidad ligeramente, sin bloquear interaccion
+ * Los datos cacheados siempre son correctos (habitos son personales)
+ */
+.mapaCalorHabitoContenedor--cargando {
+    opacity: 0.7;
+}
+
+.mapaCalorHabitoContenedor--error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+}
+
+.mapaCalorHabitoCargando {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.mapaCalorHabitoError {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* 
+ * Encabezado 
+ */
+.mapaCalorHabitoEncabezado {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.mapaCalorHabitoTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mapaCalorHabitoStats {
+    display: flex;
+    gap: var(--dashboard-espacioMd);
+    flex-wrap: wrap;
+}
+
+.mapaCalorHabitoStat {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 11px;
+    color: var(--dashboard-textoSecundario);
+}
+
+.mapaCalorHabitoStat strong {
+    color: var(--dashboard-textoNormal);
+}
+
+.mapaCalorHabitoStat--completado strong {
+    color: var(--dashboard-estadoExito);
+}
+
+.mapaCalorHabitoStat--pospuesto strong {
+    color: var(--dashboard-estadoMedia);
+}
+
+/* 
+ * Cuerpo del mapa 
+ */
+.mapaCalorHabitoCuerpo {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* 
+ * Etiquetas de días de la semana 
+ */
+.mapaCalorHabitoDiasSemana {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 14px;
+    /* Padding-top = altura de meses (12px) + gap del contenedor (2px) = 14px */
+    padding-top: 14px;
+}
+
+.mapaCalorHabitoDiaSemana {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 9px;
+    color: var(--dashboard-textoSecundario);
+    /* Altura igual a las celdas (12px) para alinear correctamente */
+    height: 12px;
+    min-height: 12px;
+    display: flex;
+    align-items: center;
+}
+
+/* 
+ * Contenedor del grid con indicadores 
+ */
+.mapaCalorHabitoGridContenedor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 2px;
+}
+
+/* 
+ * Indicadores de mes 
+ */
+.mapaCalorHabitoMeses {
+    display: flex;
+    gap: 3px;
+    height: 12px;
+}
+
+.mapaCalorHabitoMes {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 9px;
+    color: var(--dashboard-textoSecundario);
+    width: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    white-space: nowrap;
+    overflow: visible;
+}
+
+/* 
+ * Grid de celdas 
+ */
+.mapaCalorHabitoGrid {
+    display: flex;
+    gap: 3px;
+    flex: 1;
+}
+
+.mapaCalorHabitoSemana {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+/* 
+ * Celdas individuales (12px como el panel de actividad)
+ */
+.mapaCalorHabitoCelda {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    transition: transform var(--dashboard-transicionRapida), box-shadow var(--dashboard-transicionRapida);
+}
+
+.mapaCalorHabitoCelda--leyenda {
+    width: 12px;
+    height: 12px;
+}
+
+.mapaCalorHabitoCelda--placeholder {
+    background: transparent;
+}
+
+/* 
+ * Estado: Vacío (sin registro) 
+ */
+.mapaCalorHabitoCelda--vacio {
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+/* 
+ * Estado: Completado 
+ */
+.mapaCalorHabitoCelda--completado {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border: 1px solid #15803d;
+    box-shadow: 0 0 4px rgba(34, 197, 94, 0.3);
+}
+
+/* 
+ * Estado: Pospuesto 
+ */
+.mapaCalorHabitoCelda--pospuesto {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: 1px solid #b45309;
+    box-shadow: 0 0 4px rgba(245, 158, 11, 0.3);
+}
+
+/* 
+ * Estado: Omitido 
+ */
+.mapaCalorHabitoCelda--omitido {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    border: 1px solid #374151;
+}
+
+/* 
+ * Celda de Hoy 
+ */
+.mapaCalorHabitoCelda--hoy {
+    border-width: 1px;
+    border-color: #3b82f6;
+}
+
+.mapaCalorHabitoCelda--hoy.mapaCalorHabitoCelda--vacio {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+/* 
+ * Celda Editable (interactiva) 
+ */
+.mapaCalorHabitoCelda--editable {
+    cursor: pointer;
+}
+
+.mapaCalorHabitoCelda--editable:hover {
+    transform: scale(1.2);
+    z-index: 1;
+}
+
+.mapaCalorHabitoCelda--editable:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
+}
+
+.mapaCalorHabitoCelda--editable.mapaCalorHabitoCelda--vacio:hover {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+/* 
+ * Dias no relevantes (segun frecuencia del habito)
+ * Se muestran con opacidad reducida
+ * Los dias vacios tienen patron rayado, los completados muestran su estado
+ */
+.mapaCalorHabitoCelda--noRelevante {
+    opacity: 0.45;
+}
+
+/* 
+ * Dias no relevantes VACIOS - verde con opacidad baja para indicar que no aplica 
+ */
+.mapaCalorHabitoCelda--noRelevante.mapaCalorHabitoCelda--vacio {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+/* 
+ * Dias no relevantes COMPLETADOS - verde con opacidad 
+ * Muestra que se cumplio aunque no tocaba ese dia
+ */
+.mapaCalorHabitoCelda--noRelevante.mapaCalorHabitoCelda--completado {
+    background: rgba(34, 197, 94, 0.25);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    box-shadow: none;
+}
+
+/* 
+ * Dias no relevantes POSPUESTOS - amarillo con opacidad 
+ */
+.mapaCalorHabitoCelda--noRelevante.mapaCalorHabitoCelda--pospuesto {
+    background: rgba(234, 179, 8, 0.25);
+    border: 1px solid rgba(234, 179, 8, 0.4);
+    box-shadow: none;
+}
+
+/* 
+ * Dias no relevantes OMITIDOS - gris con opacidad 
+ */
+.mapaCalorHabitoCelda--noRelevante.mapaCalorHabitoCelda--omitido {
+    background: rgba(107, 114, 128, 0.25);
+    border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+/* 
+ * Leyenda 
+ */
+.mapaCalorHabitoLeyenda {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    margin-top: var(--dashboard-espacioMd);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    flex-wrap: wrap;
+}
+
+.mapaCalorHabitoLeyendaItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+.mapaCalorHabitoLeyendaItem span {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 10px;
+    color: var(--dashboard-textoSecundario);
+}
+
+.mapaCalorHabitoLeyendaItem--instruccion {
+    margin-left: auto;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 9px;
+    color: var(--dashboard-textoApagado);
+    font-style: italic;
+}
+
+/* 
+ * Responsive 
+ */
+@media (max-width: 600px) {
+    .mapaCalorHabitoStats {
+        gap: var(--dashboard-espacioSm);
+    }
+
+    .mapaCalorHabitoStat {
+        font-size: 10px;
+    }
+
+    .mapaCalorHabitoLeyenda {
+        justify-content: center;
+    }
+
+    .mapaCalorHabitoLeyendaItem--instruccion {
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+        margin-top: var(--dashboard-espacioXs);
+    }
+}

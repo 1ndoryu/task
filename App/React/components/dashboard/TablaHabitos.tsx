@@ -4,7 +4,7 @@
  * Responsabilidad única: renderizar lista de hábitos con su estado
  */
 
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useMemo} from 'react';
 import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
@@ -16,6 +16,9 @@ import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
 import {AccionesItem} from '../shared/AccionesItem';
 import type {VarianteBadge} from '../shared/BadgeInfo';
 import {ConfiguracionHabitos, CONFIG_HABITOS_POR_DEFECTO} from '../../hooks/useConfiguracionHabitos';
+import {HistorialHabitoInline} from '../shared/HistorialHabito';
+import type {EstadoHabito} from '../../hooks/useHabitosHistorial';
+import {obtenerFechaHoy} from '../../utils/fecha';
 
 interface TablaHabitosProps {
     habitos: Habito[];
@@ -43,7 +46,7 @@ function obtenerVariantePrioridad(importancia: Habito['importancia']): VarianteB
  */
 function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean {
     if (!ultimoCompletado) return false;
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = obtenerFechaHoy();
     return ultimoCompletado === hoy;
 }
 
@@ -52,7 +55,7 @@ function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean {
  */
 function fuePospuestoHoy(historialPospuestos: string[] | undefined): boolean {
     if (!historialPospuestos || historialPospuestos.length === 0) return false;
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = obtenerFechaHoy();
     return historialPospuestos.includes(hoy);
 }
 
@@ -102,6 +105,27 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     const diasAntesDePerder = umbralInactividad - habito.diasInactividad;
     const rachaEnPeligro = habito.racha > 0 && diasAntesDePerder <= DIAS_ADVERTENCIA_RACHA && diasAntesDePerder > 0;
     const rachaPerdida = habito.diasInactividad > umbralInactividad;
+
+    /* Construir historial para el componente de 7 dias */
+    const historialParaComponente = useMemo((): {[fecha: string]: EstadoHabito} => {
+        const resultado: {[fecha: string]: EstadoHabito} = {};
+
+        /* Marcar dias completados */
+        if (habito.historialCompletados) {
+            for (const fecha of habito.historialCompletados) {
+                resultado[fecha] = 'completado';
+            }
+        }
+
+        /* Marcar dias pospuestos (sobrescribe completados si hay conflicto) */
+        if (habito.historialPospuestos) {
+            for (const fecha of habito.historialPospuestos) {
+                resultado[fecha] = 'pospuesto';
+            }
+        }
+
+        return resultado;
+    }, [habito.historialCompletados, habito.historialPospuestos]);
 
     const manejarToggle = useCallback(
         (evento: React.MouseEvent) => {
@@ -206,6 +230,13 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                     </div>
                 </div>
 
+                {/* Historial 7 dias */}
+                {configuracion.columnasVisibles.historial && (
+                    <div className="tablaColumnaHistorial">
+                        <HistorialHabitoInline historial={historialParaComponente} frecuencia={frecuencia} fechaCreacion={habito.fechaCreacion} />
+                    </div>
+                )}
+
                 {/* Prioridad */}
                 {configuracion.columnasVisibles.importancia && (
                     <div className="tablaColumnaPrioridad">
@@ -269,8 +300,9 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
     const obtenerGridTemplate = () => {
         const widths = [];
         if (configuracion.columnasVisibles.indice) widths.push('2rem');
-        // Nombre siempre visible
+        /* Nombre siempre visible */
         widths.push('3fr');
+        if (configuracion.columnasVisibles.historial) widths.push('auto');
         if (configuracion.columnasVisibles.importancia) widths.push('1fr');
         if (configuracion.columnasVisibles.inactividad) widths.push('1fr');
         if (configuracion.columnasVisibles.urgencia) widths.push('2fr');
@@ -287,6 +319,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
             <div className="tablaEncabezado" style={estiloGrid}>
                 {configuracion.columnasVisibles.indice && <div className="tablaColumnaCheckbox"></div>}
                 <div className="tablaColumnaNombre">HABITO</div>
+                {configuracion.columnasVisibles.historial && <div className="tablaColumnaHistorial">7 DIAS</div>}
                 {configuracion.columnasVisibles.importancia && <div className="tablaColumnaPrioridad">PRIO</div>}
                 {configuracion.columnasVisibles.inactividad && <div className="tablaColumnaInactividad">DIAS</div>}
                 {configuracion.columnasVisibles.urgencia && <div className="tablaColumnaUrgencia">URGENCIA</div>}

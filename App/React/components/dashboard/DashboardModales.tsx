@@ -4,7 +4,7 @@
  * Extraído para reducir la complejidad de DashboardIsland
  */
 
-import {Bell} from 'lucide-react';
+import {Bell, Trash2} from 'lucide-react';
 import {ModalHabito} from './ModalHabito';
 import {ModalProyecto} from './proyectos/ModalProyecto';
 import {ModalLogin} from './ModalLogin';
@@ -16,6 +16,7 @@ import {ModalPerfil} from './ModalPerfil';
 import {ModalConfiguracionTareas} from './ModalConfiguracionTareas';
 import {ModalConfiguracionHabitos} from './ModalConfiguracionHabitos';
 import {ModalConfiguracionScratchpad} from './ModalConfiguracionScratchpad';
+import {ModalConfiguracionActividad} from './ModalConfiguracionActividad';
 
 import {ToastDeshacer, ModalUpgrade, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones} from '../shared';
 import {PanelAdministracion} from '../admin';
@@ -32,15 +33,22 @@ interface DashboardModalesProps {
 }
 
 export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
-    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, layout, arrastre, acciones} = ctx;
+    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, acciones} = ctx;
 
     const accionesExperimentos: AccionExperimento[] = [
         {
             id: 'notificacion-prueba',
-            nombre: 'Crear Notificación de Prueba',
-            descripcion: 'Crea una notificación de tipo solicitud_equipo para probar el sistema.',
+            nombre: 'Crear Notificacion de Prueba',
+            descripcion: 'Crea una notificacion de tipo solicitud_equipo para probar el sistema.',
             icono: <Bell size={20} />,
             ejecutar: acciones.crearNotificacionPrueba
+        },
+        {
+            id: 'limpiar-actividad',
+            nombre: 'Limpiar Actividad Completa',
+            descripcion: 'Elimina todo el historial de actividad del mapa de calor.',
+            icono: <Trash2 size={20} />,
+            ejecutar: acciones.limpiarActividadCompleta
         }
     ];
 
@@ -69,6 +77,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             <ModalConfiguracionHabitos estaAbierto={modales.modalConfigHabitosAbierto} onCerrar={modales.cerrarModalConfigHabitos} configuracion={configHabitos.configuracion} onToggleCompletadosHoy={configHabitos.toggleOcultarCompletadosHoy} onToggleModoCompacto={configHabitos.toggleModoCompacto} onToggleColumna={configHabitos.toggleColumnaVisible} onCambiarTolerancia={configHabitos.cambiarToleranciaPreset} />
             <ModalConfiguracionProyectos estaAbierto={modales.modalConfigProyectosAbierto} onCerrar={modales.cerrarModalConfigProyectos} configuracion={configProyectos.configuracion} onToggleCompletados={configProyectos.toggleOcultarCompletados} onToggleTareasCompletadas={configProyectos.toggleOcultarTareasCompletadas} onToggleProgreso={configProyectos.toggleMostrarProgreso} />
             <ModalConfiguracionScratchpad estaAbierto={modales.modalConfigScratchpadAbierto} onCerrar={modales.cerrarModalConfigScratchpad} configuracion={configScratchpad.configuracion} onCambiarFuente={configScratchpad.cambiarTamanoFuente} onCambiarAltura={configScratchpad.cambiarAltura} onCambiarIntervalo={configScratchpad.cambiarAutoGuardado} />
+            <ModalConfiguracionActividad estaAbierto={modales.modalConfigActividadAbierto} onCerrar={modales.cerrarModalConfigActividad} configuracion={configActividad.configuracion} onCambiarPeriodo={configActividad.cambiarPeriodo} onCambiarFiltroTipo={configActividad.cambiarFiltroTipo} onCambiarTamanoCelda={configActividad.cambiarTamanoCelda} onToggleLeyenda={configActividad.toggleLeyenda} />
             <ModalConfiguracionLayout estaAbierto={modales.modalConfigLayoutAbierto} onCerrar={modales.cerrarModalConfigLayout} modoColumnas={layout.modoColumnas} visibilidad={layout.visibilidad} ordenPaneles={layout.ordenPaneles} onCambiarModo={layout.cambiarModoColumnas} onTogglePanel={layout.toggleVisibilidadPanel} onMoverPanelArriba={layout.moverPanelArriba} onMoverPanelAbajo={layout.moverPanelAbajo} onMoverPanelAColumna={layout.moverPanelAColumna} onResetearOrden={layout.resetearOrdenPaneles} onResetear={layout.resetearLayout} />
 
             {/* Modales Misceláneos */}

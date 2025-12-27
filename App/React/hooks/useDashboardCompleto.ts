@@ -18,6 +18,7 @@ import {useConfiguracionTareas} from './useConfiguracionTareas';
 import {useConfiguracionHabitos} from './useConfiguracionHabitos';
 import {useConfiguracionProyectos} from './useConfiguracionProyectos';
 import {useConfiguracionScratchpad} from './useConfiguracionScratchpad';
+import {useConfiguracionActividad} from './useConfiguracionActividad';
 import {useArrastrePaneles} from './useArrastrePaneles';
 import {useModalesDashboard} from './useModalesDashboard';
 import {useCompartirDashboard} from './useCompartirDashboard';
@@ -44,6 +45,7 @@ export function useDashboardCompleto() {
     const configHabitos = useConfiguracionHabitos();
     const configProyectos = useConfiguracionProyectos();
     const configScratchpad = useConfiguracionScratchpad();
+    const configActividad = useConfiguracionActividad();
 
     /* Hook para convertir hábitos en tareas virtuales */
     const habitosComoTareas = useHabitosComoTareas({
@@ -117,6 +119,7 @@ export function useDashboardCompleto() {
         configHabitos,
         configProyectos,
         configScratchpad,
+        configActividad,
         layout,
         arrastre,
         opciones,

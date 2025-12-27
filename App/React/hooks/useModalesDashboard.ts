@@ -66,6 +66,9 @@ interface UseModalesDashboardReturn {
     modalConfigScratchpadAbierto: boolean;
     abrirModalConfigScratchpad: () => void;
     cerrarModalConfigScratchpad: () => void;
+    modalConfigActividadAbierto: boolean;
+    abrirModalConfigActividad: () => void;
+    cerrarModalConfigActividad: () => void;
     modalConfigLayoutAbierto: boolean;
     abrirModalConfigLayout: () => void;
     cerrarModalConfigLayout: () => void;
@@ -105,6 +108,7 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalConfigHabitosAbierto, setModalConfigHabitosAbierto] = useState(false);
     const [modalConfigProyectosAbierto, setModalConfigProyectosAbierto] = useState(false);
     const [modalConfigScratchpadAbierto, setModalConfigScratchpadAbierto] = useState(false);
+    const [modalConfigActividadAbierto, setModalConfigActividadAbierto] = useState(false);
     const [modalConfigLayoutAbierto, setModalConfigLayoutAbierto] = useState(false);
     /* Versiones */
     const [modalVersionesAbierto, setModalVersionesAbierto] = useState(false);
@@ -165,6 +169,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const cerrarModalConfigProyectos = useCallback(() => setModalConfigProyectosAbierto(false), []);
     const abrirModalConfigScratchpad = useCallback(() => setModalConfigScratchpadAbierto(true), []);
     const cerrarModalConfigScratchpad = useCallback(() => setModalConfigScratchpadAbierto(false), []);
+    const abrirModalConfigActividad = useCallback(() => setModalConfigActividadAbierto(true), []);
+    const cerrarModalConfigActividad = useCallback(() => setModalConfigActividadAbierto(false), []);
     const abrirModalConfigLayout = useCallback(() => setModalConfigLayoutAbierto(true), []);
     const cerrarModalConfigLayout = useCallback(() => setModalConfigLayoutAbierto(false), []);
 
@@ -220,6 +226,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         modalConfigScratchpadAbierto,
         abrirModalConfigScratchpad,
         cerrarModalConfigScratchpad,
+        modalConfigActividadAbierto,
+        abrirModalConfigActividad,
+        cerrarModalConfigActividad,
         modalConfigLayoutAbierto,
         abrirModalConfigLayout,
         cerrarModalConfigLayout,

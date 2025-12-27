@@ -28,3 +28,9 @@ export {useMensajes, useMensajesNoLeidos, registrarEventoSistema, obtenerTipoVis
 export type {MensajeTimeline, TipoMensaje, AccionSistema} from './useMensajes';
 export {useNotas} from './useNotas';
 export type {Nota, NotaActiva} from './useNotas';
+export {useActividad} from './useActividad';
+export type {DatosHeatmap, EstadisticasActividad, PeriodoActividad, FiltrosActividad} from './useActividad';
+export {useHabitosHistorial} from './useHabitosHistorial';
+export type {EstadoHabito, DiaHistorial, HistorialHabito, EstadisticasHabito, HistorialMultiple} from './useHabitosHistorial';
+export {useConfiguracionActividad, CONFIG_ACTIVIDAD_DEFECTO} from './useConfiguracionActividad';
+export type {ConfiguracionActividad, PeriodoActividad as PeriodoActividadConfig, FiltroTipoActividad, TamanoCeldaActividad} from './useConfiguracionActividad';

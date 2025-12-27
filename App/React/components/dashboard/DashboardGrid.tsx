@@ -6,7 +6,7 @@
 
 import {useCallback, useMemo, CSSProperties} from 'react';
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn} from '../shared';
-import {PanelFocoPrioritario, PanelProyectos, PanelEjecucion, PanelScratchpad} from '../paneles';
+import {PanelFocoPrioritario, PanelProyectos, PanelEjecucion, PanelScratchpad, PanelActividad} from '../paneles';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
@@ -16,7 +16,7 @@ interface DashboardGridProps {
 }
 
 export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
-    const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, layout, arrastre, opciones, acciones, valorFiltroActual} = ctx;
+    const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, opciones, acciones, valorFiltroActual} = ctx;
 
     /*
      * Handler que intercepta toggles de tareas-hábito
@@ -62,6 +62,11 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
         /* Scratchpad tiene su propio sistema de resize interno y gestiona sus notas */
         if (panelId === 'scratchpad') {
             return <PanelScratchpad configuracion={configScratchpad.configuracion} onAbrirModalConfigScratchpad={modales.abrirModalConfigScratchpad} onCambiarAltura={configScratchpad.cambiarAltura} handleArrastre={handleArrastreElement} handleMinimizar={handleMinimizarElement} />;
+        }
+
+        /* Panel de Actividad */
+        if (panelId === 'actividad') {
+            return <PanelActividad configuracion={configActividad.configuracion} onAbrirModalConfigActividad={modales.abrirModalConfigActividad} handleArrastre={handleArrastreElement} handleMinimizar={handleMinimizarElement} />;
         }
 
         /* Obtener altura del panel desde configuración */

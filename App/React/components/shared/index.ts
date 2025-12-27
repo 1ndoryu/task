@@ -30,3 +30,7 @@ export * from './ContenedorAlertas';
 export * from './BotonMinimizarPanel';
 export * from './ResizeHandlePanel';
 export * from './ResizeHandleColumn';
+export * from './MapaCalor';
+export * from './HistorialHabito';
+export * from './MapaCalorHabito';
+export * from './MapaCalorProyecto';

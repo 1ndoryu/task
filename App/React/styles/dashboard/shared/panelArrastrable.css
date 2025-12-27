@@ -197,16 +197,17 @@
 /* 
  * ESTADO GLOBAL DE ARRASTRE
  * Estilos cuando hay un arrastre activo
+ * Nota: la clase arrastrandoPanel se aplica a .dashboardGridColumnas
  */
-.dashboardContenedor.arrastrandoPanel {
+.dashboardGridColumnas.arrastrandoPanel {
     cursor: grabbing;
 }
 
-.dashboardContenedor.arrastrandoPanel .panelDashboard {
+.dashboardGridColumnas.arrastrandoPanel .panelDashboard {
     pointer-events: none;
 }
 
-.dashboardContenedor.arrastrandoPanel .panelArrastrable {
+.dashboardGridColumnas.arrastrandoPanel .panelArrastrable {
     pointer-events: auto;
 }
 

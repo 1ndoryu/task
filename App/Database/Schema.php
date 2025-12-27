@@ -6,9 +6,9 @@ class Schema
 {
     /**
      * Versión actual de la base de datos
-     * v1.0.9: Tabla de notas para sistema de guardado del Scratchpad
+     * v1.0.10: Tablas para mapa de calor de actividad e historial de hábitos
      */
-    public const DB_VERSION = '1.0.9';
+    public const DB_VERSION = '1.0.10';
 
     /**
      * Nombre de la opción donde guardamos la versión instalada
@@ -294,6 +294,54 @@ class Schema
             KEY fecha_creacion (fecha_creacion)
         ) $charset_collate;";
 
+        /* 
+         * Tabla de Actividad (Mapa de Calor)
+         * Registra cada acción completada para visualización en heatmap
+         * tipo: 'tarea_completada', 'habito_cumplido', 'nota_creada', 'adjunto_subido'
+         */
+        $table_actividad = $wpdb->prefix . 'glory_actividad';
+        $sql_actividad = "CREATE TABLE $table_actividad (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            tipo varchar(50) NOT NULL,
+            elemento_id bigint(20) DEFAULT NULL,
+            elemento_tipo varchar(50) DEFAULT NULL,
+            proyecto_id bigint(20) DEFAULT NULL,
+            fecha date NOT NULL,
+            hora time DEFAULT NULL,
+            detalles longtext DEFAULT NULL,
+            fecha_creacion datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY tipo (tipo),
+            KEY elemento_id (elemento_id),
+            KEY proyecto_id (proyecto_id),
+            KEY fecha (fecha),
+            KEY user_fecha (user_id, fecha)
+        ) $charset_collate;";
+
+        /* 
+         * Tabla de Historial de Hábitos (Retroactivo)
+         * Permite marcar días pasados como completados/pospuestos
+         * estado: 'completado', 'pospuesto', 'omitido'
+         */
+        $table_habitos_historial = $wpdb->prefix . 'glory_habitos_historial';
+        $sql_habitos_historial = "CREATE TABLE $table_habitos_historial (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            habito_id bigint(20) NOT NULL,
+            fecha date NOT NULL,
+            estado varchar(50) NOT NULL DEFAULT 'completado',
+            notas text DEFAULT NULL,
+            fecha_registro datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY habito_id (habito_id),
+            KEY fecha (fecha),
+            KEY habito_fecha (habito_id, fecha),
+            UNIQUE KEY habito_fecha_unico (habito_id, fecha)
+        ) $charset_collate;";
+
         dbDelta($sql_habitos);
         dbDelta($sql_equipos);
         dbDelta($sql_notificaciones);
@@ -303,6 +351,8 @@ class Schema
         dbDelta($sql_mensajes);
         dbDelta($sql_mensajes_leidos);
         dbDelta($sql_notas);
+        dbDelta($sql_actividad);
+        dbDelta($sql_habitos_historial);
     }
 
     /**

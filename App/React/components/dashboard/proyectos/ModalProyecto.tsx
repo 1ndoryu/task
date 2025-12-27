@@ -14,7 +14,8 @@ import {useState, useCallback, useEffect, useRef} from 'react';
 import {MessageSquare, MessageSquareOff} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante} from '../../../types/dashboard';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
-import {AccionesFormulario, Modal, CampoTexto, CampoPrioridad, CampoUrgencia, CampoFechaLimite} from '../../shared';
+import {AccionesFormulario, Modal, CampoTexto, CampoPrioridad, CampoUrgencia, CampoFechaLimite, SeccionPanel} from '../../shared';
+import {MapaCalorProyecto} from '../../shared/MapaCalorProyecto';
 import {PanelChatHistorial} from '../PanelChatHistorial';
 import {useMensajesNoLeidos} from '../../../hooks/useMensajes';
 
@@ -198,6 +199,13 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                                 <CampoPrioridad<NivelPrioridad> tipo="prioridad" valor={prioridad} onChange={val => setPrioridad(val || 'media')} permitirNulo={false} />
                                 <CampoUrgencia valor={urgencia} onChange={setUrgencia} permitirNulo={true} />
                                 <CampoFechaLimite titulo="Fecha limite (opcional)" valor={fechaLimite} onChange={setFechaLimite} mostrarBotonLimpiar={true} />
+
+                                {/* Mapa de calor - actividad del proyecto */}
+                                {proyecto && proyecto.id > 0 && (
+                                    <SeccionPanel titulo="Actividad del proyecto">
+                                        <MapaCalorProyecto proyectoId={proyecto.id} periodo="mes" />
+                                    </SeccionPanel>
+                                )}
                             </div>
 
                             {/* Acciones - sin botón eliminar */}

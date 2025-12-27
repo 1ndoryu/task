@@ -9,7 +9,7 @@ export {validarHabitos, validarTareas, validarNotas} from './validadores';
 
 export {migrarYActualizarHabitos} from './migracionHabitos';
 
-export {tocaHoy, diasHastaProximaRepeticion, calcularUmbralInactividad, describirFrecuencia, obtenerIntervaloFrecuencia} from './frecuenciaHabitos';
+export {tocaHoy, diasHastaProximaRepeticion, calcularUmbralInactividad, describirFrecuencia, obtenerIntervaloFrecuencia, esFechaRelevante, generarFechasRelevantes} from './frecuenciaHabitos';
 
 export {obtenerSubtareas, obtenerPadre, tieneSubtareas, contarSubtareas, esDescendiente, esTareaPadre, esSubtarea, obtenerTareasPrincipales, obtenerIndiceTarea, obtenerTareaAnterior, puedeSerSubtareaDe, moverConHijos, calcularNuevoParent, ordenarConJerarquia, asignarOrden, detectarContextoDrop} from './jerarquiaTareas';
 export type {CalculoParentResult, ContextoDropResult} from './jerarquiaTareas';

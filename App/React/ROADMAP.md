@@ -8,8 +8,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Fecha de inicio:** 2025-12-19  
 **Version:** v1.0.5-beta  
-**Ultima actualizacion:** 2025-12-25
-**Estado:** Fase 7.6 - COMPLETADA
+**Ultima actualizacion:** 2025-12-27
+**Estado:** Fase 8.6 COMPLETADA - Cache de historial implementado
 
 ---
 
@@ -101,395 +101,272 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-## Fases 5-7: Completadas (v1.0.3-beta)
+## Fases 5-7.6: Completadas (v1.0.3-beta a v1.0.4-beta)
 
 > **Detalle completo:** Ver historial de commits o changelog.
 
-| Fase | Nombre                  | Descripción Resumida                                                            |
-| ---- | ----------------------- | ------------------------------------------------------------------------------- |
-| 5    | Sistema de Urgencia     | Niveles bloqueante/urgente/normal/chill, ordenamiento inteligente mejorado      |
-| 6    | Mejoras UX Rápidas      | Lectura automática notificaciones, exportar/importar al menú perfil             |
-| 6.3  | Auto-Guardado Modales   | Guardado al cerrar modal (overlay/ESC/X), detección de cambios                  |
-| 6.5  | Refact. Formularios     | ModalHabito y ModalProyecto con auto-guardado                                   |
-| 6.6  | Hábitos en Ejecución    | Hábitos como tareas virtuales, urgencia automática por días inactivos           |
-| 7    | Modal Chat + Historial  | Timeline unificado, mensajes + eventos sistema, notificaciones, mensajes leídos |
-| 7.1  | Diseño Modal Expandido  | 2 columnas: formulario + chat/historial, responsive                             |
-| 7.2  | Sistema Mensajes        | Tabla BD, endpoints API, hook useMensajes, registro eventos                     |
-| 7.3  | Mensajes No Leídos      | Badge en tareas, marcar como leído automático                                   |
-| 7.4  | UI Timeline             | Burbujas usuario, líneas sistema, fechas separadoras                            |
-| 7.5  | Participantes           | Lista participantes con avatar, nombre, rol                                     |
-| 7.6  | Proyectos y Hábitos     | Chat/historial reutilizable en todos los modales                                |
-| 7.7  | Notificaciones Mensajes | Notificar a participantes al recibir mensaje                                    |
+| Fase | Nombre                   | Descripcion Resumida                                                            |
+| ---- | ------------------------ | ------------------------------------------------------------------------------- |
+| 5    | Sistema de Urgencia      | Niveles bloqueante/urgente/normal/chill, ordenamiento inteligente mejorado      |
+| 6    | Mejoras UX Rapidas       | Lectura automatica notificaciones, exportar/importar al menu perfil             |
+| 6.3  | Auto-Guardado Modales    | Guardado al cerrar modal (overlay/ESC/X), deteccion de cambios                  |
+| 6.5  | Refact. Formularios      | ModalHabito y ModalProyecto con auto-guardado                                   |
+| 6.6  | Habitos en Ejecucion     | Habitos como tareas virtuales, urgencia automatica por dias inactivos           |
+| 7    | Modal Chat + Historial   | Timeline unificado, mensajes + eventos sistema, notificaciones, mensajes leidos |
+| 7.1  | Diseno Modal Expandido   | 2 columnas: formulario + chat/historial, responsive                             |
+| 7.2  | Sistema Mensajes         | Tabla BD, endpoints API, hook useMensajes, registro eventos                     |
+| 7.3  | Mensajes No Leidos       | Badge en tareas, marcar como leido automatico                                   |
+| 7.4  | UI Timeline              | Burbujas usuario, lineas sistema, fechas separadoras                            |
+| 7.5  | Correcciones UX + Resize | Redimensionar columnas/paneles, notas guardadas, botones minimizar              |
+| 7.6  | Mejoras Habitos + Bugs   | Posponer habitos, tolerancia urgencia, bugs criticos corregidos                 |
+| 7.7  | Notificaciones Mensajes  | Notificar a participantes al recibir mensaje                                    |
+
+<details>
+<summary>Ver detalle de Fases 7.5 y 7.6</summary>
+
+### Fase 7.5: Correcciones UX y Redimensionamiento
+
+| Tarea                            | Estado |
+| -------------------------------- | ------ |
+| Ocultar chat en creacion         | Hecho  |
+| Filtro mis asignadas sin habitos | Hecho  |
+| Columnas visibles habitos        | Hecho  |
+| Orden paneles por defecto        | Hecho  |
+| Boton minimizar paneles          | Hecho  |
+| Redimensionar ancho columnas     | Hecho  |
+| Redimensionar altura paneles     | Hecho  |
+| Scroll unificado + bug parpadeo  | Hecho  |
+| Scratchpad guardado notas        | Hecho  |
+| Bug fuente pequena Scratchpad    | Hecho  |
+
+### Fase 7.6: Mejoras de Habitos y Correcciones
+
+| Tarea                             | Estado |
+| --------------------------------- | ------ |
+| Habitos editables desde Ejecucion | Hecho  |
+| Sistema de posponer habitos       | Hecho  |
+| Tolerancia de urgencia habitos    | Hecho  |
+| Ocultar completadas en Proyectos  | Hecho  |
+| Bug: Subtareas no persisten       | Hecho  |
+| Bug: Scroll en Scratchpad         | Hecho  |
+| Bug: Nombre tarea no persiste     | Hecho  |
+| Bug: Error 403 en mensajes/evento | Hecho  |
+| Bug: Cargando notas no centrado   | Hecho  |
+| Bug: Retraso al eliminar notas    | Hecho  |
+| Bug: Notas desincronizadas        | Hecho  |
+
+</details>
 
 ---
 
-## Fase 7.5: Correcciones UX y Redimensionamiento [COMPLETADA]
-
-**Objetivo:** Pulir la experiencia de usuario con correcciones específicas y añadir funcionalidades de redimensionamiento.
-
-### 7.5.1 Modal de Tarea - Ocultar Chat en Creación ✅
-
-> **Problema:** Al crear tarea desde el badge "+", aparece el panel de chat/historial aunque no tiene sentido (tarea nueva, sin historial).
-
-**Implementado:**
-- [x] Detectar si la tarea es nueva (sin `id` o `esModoCreacion`)
-- [x] Ocultar columna derecha (chat/historial) cuando es modo creación
-- [x] Mostrar solo formulario de creación centrado (modal sin clase --expandido)
-- [x] Ocultar pestañas móvil y botón toggle chat en modo creación
-- [x] Al guardar y reabrir, ya mostrar chat/historial normalmente
-
-**Bug corregido: Doble padding en modo creación**
-
-> **Problema resuelto:** `.panelConfiguracionColumnaScroll` y `modalContenido` tenían padding simultáneo.
-
-**Solución aplicada:**
-- En `modal.css`: Añadida regla `.panelConfiguracionContenedor:not(.modalContenedor--expandido) .modalContenido { padding: 0; overflow: visible; }`
-- Esto hace que en modo creación, `.modalContenido` no tenga padding ni scroll
-- El padding y scroll los maneja `.panelConfiguracionColumnaScroll` 
-- Los botones quedan fijos gracias a la estructura flexbox existente
-
-
-### 7.5.2 Filtro "Mis Asignadas" - Excluir Hábitos ✅
-
-> **Problema:** Cuando se filtra por "Mis Asignadas" se muestran hábitos aunque "Mostrar hábitos en Ejecución" esté activo.
-
-- [x] El filtro "Mis Asignadas" muestra SOLO tareas asignadas por otros usuarios
-- [x] Cuando el filtro es "asignadas", no se incluyen hábitos-como-tareas
-- [x] Modificado `useDashboardCompleto.ts` para excluir hábitos del combinar
-
-### 7.5.3 Columnas Visibles por Defecto en Hábitos ✅
-
-> **Problema:** Por defecto se muestran columnas poco útiles en la tabla de hábitos.
-
-**Columnas visibles por defecto:**
-- [x] Frecuencia ✅
-- [x] Importancia (Prioridad) ✅
-- [x] TocaHoy (Días) ✅
-
-**Columnas ocultas por defecto:**
-- [x] Racha ❌
-- [x] Urgencia ❌
-- [x] Inactividad ❌
-
-- [x] Actualizado `COLUMNAS_POR_DEFECTO` en `useConfiguracionHabitos.ts`
-- [x] Usuarios existentes no se ven afectados (solo nuevos usuarios)
-
-### 7.5.4 Orden de Paneles por Defecto ✅
-
-> **Problema:** El orden inicial de los paneles no es óptimo.
-
-**Nuevo orden por defecto:**
-| Fila | Columna 1 | Columna 2  | Columna 3 |
-| ---- | --------- | ---------- | --------- |
-| 1    | Ejecución | Proyectos  | ...       |
-| 2    | Hábitos   | Scratchpad | ...       |
-
-- [x] Ejecución ahora está en la primera fila
-- [x] Hábitos en la segunda fila
-- [x] Actualizado `ORDEN_PANELES_DEFECTO` en `useConfiguracionLayout.ts`
-
-### 7.5.5 Botón Minimizar en Paneles ✅
-
-> **Problema:** No hay forma rápida de ocultar un panel sin ir a configuración.
-
-- [x] Creado componente `BotonMinimizarPanel.tsx`
-- [x] Icono: `Minus` de Lucide
-- [x] Al hacer clic: oculta panel usando `layout.ocultarPanel()`
-- [x] Agregado a todos los paneles (FocoPrioritario, Proyectos, Ejecucion, Scratchpad)
-- [x] Para restaurar: usar la barra de paneles ocultos existente
-
-### 7.5.6 Redimensionar Ancho de Columnas ✅
-
-> **Problema resuelto:** Las columnas no se podían redimensionar manualmente.
-
-**Implementación:**
-- [x] Componente `ResizeHandleColumn` para handles internos y externos
-- [x] Handles internos entre columnas (1 para 2 col, 2 para 3 col)
-- [x] Handle externo para controlar ancho total del grid (60-100%)
-- [x] Estilo minimalista: línea delgada, visible al hover, cursor resize
-- [x] Anchos persistidos en localStorage
-- [x] CSS grid con unidades `fr` para distribución proporcional
-
-**Asistencia automática de balance:**
-- [x] Doble clic en handle interno: iguala anchos de todas las columnas
-- [x] Doble clic en handle externo: resetea a 100%
-
-### 7.5.7 Redimensionar Altura de Paneles ✅
-
-> **Problema resuelto:** Otros paneles no tenían resize de altura como Scratchpad.
-
-**Implementación inteligente:**
-- [x] Componente reutilizable `ResizeHandlePanel` con lógica de anclaje automático
-- [x] Modo "auto": el panel crece con su contenido (comportamiento por defecto)
-- [x] Si se arrastra hacia abajo y supera el contenido: se ancla automáticamente a "auto"
-- [x] Si se arrastra hacia arriba: altura fija con scroll interno
-- [x] Indicador visual: línea verde = modo auto (anclado), línea gris = altura fija
-- [x] Doble clic en handle: alterna entre modo auto y modo fijo
-- [x] Alturas persistidas en localStorage por panel
-- [x] Mínimo 120px para evitar paneles demasiado pequeños
-
-### 7.5.8 Scroll Unificado y Bug de Parpadeo ✅
-
-> **Problema resuelto:** El scroll parpadeaba al editar tareas debido al uso de `overflow-y: auto`.
-
-**Scroll unificado:**
-- [x] Estilos de scrollbar globales ya estaban en `base.css`
-- [x] Todas las variables CSS de scrollbar centralizadas en `variables.css`
-- [x] Eliminado código redundante de scrollbar en `panelConfiguracion.css`
-
-**Bug de parpadeo:**
-- [x] Causa identificada: `overflow-y: auto` causa recálculo del layout al aparecer/desaparecer scrollbar
-- [x] Solución aplicada: usar `overflow-y: scroll` fijo en `.panelConfiguracionColumnaScroll`
-
-### 7.5.9 Scratchpad - Sistema de Guardado ✅
-
-> **Requisito completado:** Sistema de guardado de notas implementado.
-
-**Funcionalidad implementada:**
-- [x] Botón badge "Guardar nota" (icono: `Save`) en el encabezado del Scratchpad
-- [x] Al guardar: almacenar nota con título automático (primeras palabras) y fecha
-- [x] Botón badge "Carpeta" (icono: `FolderOpen`) junto al de guardar
-- [x] Al hacer clic en Carpeta: abrir modal de notas guardadas
-- [x] Las notas guardadas se pueden reabrir en el Scratchpad
-- [x] Las notas se pueden buscar por título/contenido con debounce
-
-**Backend implementado:**
-- [x] Tabla BD: `wp_glory_notas` (id, user_id, titulo, contenido, fecha_creacion, fecha_modificacion)
-- [x] `NotasRepository.php`: CRUD completo con búsqueda y título automático
-- [x] `NotasApiController.php`: Endpoints REST (GET, POST, PUT, DELETE, búsqueda)
-
-**UI implementada:**
-- [x] `ModalNotasGuardadas.tsx`: Modal con lista de notas, búsqueda y eliminación
-- [x] Preview del contenido en cada nota
-- [x] Indicadores de fecha relativa
-- [x] Hook `useNotas.ts` para gestionar estado
-
-### 7.5.10 Bug Fuente Pequeña en Scratchpad ✅
-
-> **Problema resuelto:** La fuente "pequeña" era igual a "normal" (ambas 12px).
-
-- [x] Identificado que `--dashboard-tamanoBase` = 12px y `0.75rem` = 12px (iguales)
-- [x] Corregidos tamaños a valores fijos con diferencia visible:
-  - Pequeña: 11px
-  - Normal: 13px 
-  - Grande: 16px
-- [x] Añadido `line-height` apropiado para cada tamaño
-
----
-
-### Resumen de Fase 7.5
-
-| Tarea                            | Complejidad | Prioridad | Estado |
-| -------------------------------- | ----------- | --------- | ------ |
-| Ocultar chat en creación         | Baja        | Alta      | ✅      |
-| Filtro mis asignadas sin hábitos | Baja        | Alta      | ✅      |
-| Columnas visibles hábitos        | Baja        | Media     | ✅      |
-| Orden paneles por defecto        | Baja        | Media     | ✅      |
-| Botón minimizar paneles          | Baja        | Alta      | ✅      |
-| Redimensionar ancho columnas     | Media-Alta  | Media     | ✅      |
-| Redimensionar altura paneles     | Media       | Media     | ✅      |
-| Scroll unificado + bug parpadeo  | Media       | Alta      | ✅      |
-| Scratchpad guardado              | Media-Alta  | Alta      | ✅      |
-| Bug fuente pequeña Scratchpad    | Baja        | Baja      | ✅      |
-
-**Complejidad Total:** Media | **Dependencias:** Fase 7 (modales completados)
-
----
-
-## Fase 7.6: Mejoras de Habitos y Correcciones [COMPLETADA]
-
-**Objetivo:** Mejorar la funcionalidad de hábitos en el panel de ejecución, añadir sistema de posponer, y corregir bugs críticos.
-
-### 7.6.1 Hábitos Editables desde Panel de Ejecución ✅
-
-> **Problema resuelto:** Los hábitos mostrados como "tareas virtuales" en Ejecución ahora se pueden editar y eliminar.
-
-**Implementación:**
-- [x] Al hacer clic en editar un hábito-tarea: abrir `ModalHabito` (no `PanelConfiguracionTarea`)
-- [x] Al eliminar: se elimina el hábito directamente (mismo comportamiento que desde panel de hábitos)
-- [x] Los cambios modifican directamente el hábito subyacente
-- [x] Menú contextual adaptado con opciones "Editar hábito" y "Eliminar hábito"
-
-### 7.6.2 Sistema de Posponer Habitos ✅
-
-> **Implementado:** Permite posponer habitos cuando no es posible cumplirlos.
-
-**Estados del habito (3 estados):**
-- [x] **Pendiente**: estado por defecto, toca hoy pero no se ha hecho
-- [x] **Completado**: se cumplio el habito
-- [x] **Pospuesto**: se decidio no hacerlo hoy, se "perdona" sin romper racha
-
-**Metodos para posponer:**
-- [x] Menu contextual: opcion "Posponer hoy" en tareas-habito
-- [x] La funcion `posponerHabito` agrega fecha al historial de pospuestos
-
-**Logica de posponer:**
-- [x] Pospuesto no cuenta como incumplimiento para la racha
-- [x] Habitos pospuestos no aparecen en panel de Ejecucion ese dia
-- [x] Campo `historialPospuestos` agregado al tipo `Habito`
-
-### 7.6.3 Configuracion de Tolerancia de Urgencia de Habitos ✅
-
-> **Implementado:** Cada usuario puede definir que tan estricto es el sistema de urgencia.
-
-**Presets de tolerancia implementados:**
-| Preset       | Normal | Urgente | Bloqueante |
-| ------------ | ------ | ------- | ---------- |
-| Muy Estricto | 1 dia  | 1 dia   | 2+ dias    |
-| Estricto     | 1 dia  | 2 dias  | 4+ dias    |
-| Moderado     | 1 dia  | 3 dias  | 5+ dias    |
-| Relajado     | 3 dias | 7 dias  | 14+ dias   |
-
-**Implementacion:**
-- [x] Tipos `ToleranciaPreset` y `UmbralesUrgencia` en `useConfiguracionHabitos.ts`
-- [x] Presets predefinidos con umbrales configurables
-- [x] UI con botones tipo card en `ModalConfiguracionHabitos`
-- [x] Funcion `calcularUrgenciaAutomatica` actualizada para usar umbrales
-- [x] Hook `useHabitosComoTareas` recibe umbrales via props
-- [x] CSS para `.gridOpcionesTolerancia` y `.botonPresetTolerancia`
-
-### 7.6.4 Ocultar Tareas Completadas en Proyectos
-
-> **Problema:** El panel de Proyectos no tiene opción de ocultar tareas completadas como sí la tiene Ejecución.
-
-- [ ] Nueva opción en configuración de Proyectos: "Ocultar tareas completadas"
-- [ ] Aplicar filtro en `ListaProyectos` o `ProyectoExpandido`
-- [ ] Persistir en `useConfiguracionProyectos`
-
-### 7.6.5 Bug: Subtareas no Persisten ✅
-
-> **Bug crítico corregido:** El backend buscaba el campo `padreId` pero el frontend enviaba `parentId`.
-
-**Causa raíz:**
-- [x] En `TareasRepository.php` línea 98: `$tarea['padreId']` → `$tarea['parentId']`
-- [x] También corregido `completada` → `completado` para consistencia
-
-### 7.6.6 Bug Visual: Scroll en Scratchpad ✅
-
-> **Bug visual corregido:** Padding movido del panel al textarea para que el scroll llegue al borde.
-
-- [x] Eliminado `padding` de `.scratchpadPanel`
-- [x] Agregado `padding` a `.scratchpadTextarea`
-- [x] Ajustada posición de `.scratchpadBarraEstado`
-
-### 7.6.7 Bug: Nombre de Tarea no Persiste al Editar ✅
-
-> **Bug crítico corregido:** El sistema de detección de cambios solo verificaba `length` de arrays, no el contenido.
-
-**Causa raíz (mismo problema que 7.6.5):**
-- [x] En `useDashboard.ts` la detección de cambios usaba `tareas.length`
-- [x] Cambios en el contenido (parentId, texto, etc.) no cambiaban el length
-- [x] Solución: usar hash del contenido serializado para detectar cambios reales
-
-### 7.6.8 Bug: Error 403 en Endpoint de Mensajes ✅
-
-> **Bug corregido:** El endpoint `/mensajes/evento` devolvía 403 por timing de sincronización.
-
-**Causa raíz:**
-- [x] `registrarEventoSistema` se llamaba inmediatamente después de editar localmente
-- [x] La tarea aún no estaba guardada en la BD cuando el endpoint verificaba acceso
-- [x] `tieneAccesoAElemento()` no encontraba el elemento y retornaba 403
-
-**Solución aplicada:**
-- [x] El endpoint ahora devuelve 200 con `{success: false, skipped: true}` en lugar de 403
-- [x] El frontend maneja silenciosamente cuando un evento es saltado por timing
-- [x] No afecta funcionalidad: los eventos se registran cuando la tarea ya existe
-
-### 7.6.9 Bug: "Cargando notas..." no está centrado ✅
-
-> **Bug visual corregido:** El texto "Cargando notas..." ahora está centrado en el modal de notas guardadas.
-
-- [x] Centrar el indicador de carga en el modal `ModalNotasGuardadas`
-- [x] Aplicar `grid-column: 1 / -1` y `min-height: 300px` para ocupar todo el ancho del grid
-
-### 7.6.10 Bug: Retraso al eliminar notas ✅
-
-> **Bug UX corregido:** Ahora las notas desaparecen instantáneamente al eliminar gracias a optimistic update.
-
-- [x] Eliminar la nota del estado local inmediatamente (optimistic update)
-- [x] Revertir si la API falla
-- [x] La nota desaparece sin delay, mejorando la experiencia de usuario
-
-### 7.6.11 Bug: Notas desincronizadas al abrir carpeta ✅
-
-> **Bug UX corregido:** Al abrir la carpeta de notas, primero se guarda la nota actual si hay cambios pendientes.
-
-- [x] Al abrir el modal, forzar guardado del scratchpad si hay contenido modificado
-- [x] La función `manejarAbrirCarpeta` espera a que se guarde antes de abrir el modal
-- [x] Los cambios siempre se sincronizan antes de mostrar la lista de notas
-
----
-
-### Resumen de Fase 7.6
-
-| Tarea                             | Complejidad | Prioridad | Estado |
-| --------------------------------- | ----------- | --------- | ------ |
-| Habitos editables desde Ejecucion | Media       | Alta      | ✅      |
-| Sistema de posponer habitos       | Alta        | Media     | ✅      |
-| Tolerancia de urgencia habitos    | Media-Alta  | Media     | ✅      |
-| Ocultar completadas en Proyectos  | Baja        | Media     | ✅      |
-| Bug: Subtareas no persisten       | Media       | Critica   | ✅      |
-| Bug: Scroll en Scratchpad         | Baja        | Baja      | ✅      |
-| Bug: Nombre tarea no persiste     | Media       | Critica   | ✅      |
-| Bug: Error 403 en mensajes/evento | Baja        | Media     | ✅      |
-| Bug: Cargando notas no centrado   | Baja        | Baja      | ✅      |
-| Bug: Retraso al eliminar notas    | Baja        | Media     | ✅      |
-| Bug: Notas desincronizadas        | Media       | Media     | ✅      |
-
-**Complejidad Total:** Alta | **Dependencias:** Fase 7.5, sistema de hábitos-como-tareas
-
----
-
-## Fase 8: Mapa de Calor de Actividad [PLANIFICADA]
+## Fase 8: Mapa de Calor de Actividad [COMPLETADA]
 
 **Objetivo:** Visualizar la actividad del usuario en un mapa de calor tipo GitHub.
 
-### 8.1 Rastreo de Actividad
+### 8.1 Rastreo de Actividad [COMPLETADO]
 
-> **Investigar:** ¿Ya existe registro de `fecha_completado` en tareas/hábitos?
+> **Investigacion completada:** No existia registro previo de `fecha_completado`. Se creo sistema nuevo.
 
 **Datos a rastrear:**
-- [ ] Tabla BD: `wp_glory_actividad` (id, user_id, tipo, elemento_id, fecha, detalles)
-- [ ] Tipos: `tarea_completada`, `habito_cumplido`, `nota_creada`, `adjunto_subido`
-- [ ] Al completar tarea → registrar en actividad
-- [ ] Al cumplir hábito → registrar en actividad
+- [x] Tabla BD: `wp_glory_actividad` (id, user_id, tipo, elemento_id, fecha, detalles)
+- [x] Tipos: `tarea_completada`, `habito_cumplido`, `nota_creada`, `adjunto_subido`
+- [x] Al completar tarea → registrar en actividad
+- [x] Al cumplir habito → registrar en actividad
 
-### 8.2 Componente Mapa de Calor
+**Archivos creados:**
+- `App/Repository/ActividadRepository.php`
+- `App/Api/ActividadApiController.php`
+- `App/React/hooks/useActividad.ts`
+- `App/React/services/actividadService.ts`
+
+### 8.2 Componente Mapa de Calor [COMPLETADO]
 
 ```
 components/shared/
-  MapaCalor.tsx             (componente reutilizable)
-  hooks/
-    useActividad.ts         (hook para obtener datos)
+  MapaCalor.tsx             (componente reutilizable) ✅
+  HistorialHabito.tsx       (columna 7 dias) ✅
+hooks/
+  useActividad.ts           (hook para obtener datos) ✅
+  useHabitosHistorial.ts    (hook para historial) ✅
 ```
 
-**Configuraciones:**
-- [ ] Período: última semana, mes, 3 meses, año
-- [ ] Filtrar por tipo: solo tareas, solo hábitos, todo
-- [ ] Filtrar por proyecto específico
-- [ ] Filtrar por hábito específico
-- [ ] Nivel de detalle: días, semanas
+**Configuraciones implementadas:**
+- [x] Periodo: ultima semana, mes, 3 meses, año
+- [x] Filtrar por tipo: solo tareas, solo habitos, todo
+- [x] Filtrar por proyecto especifico
+- [x] Filtrar por habito especifico
+- [x] Nivel de actividad: 0-4 (escala tipo GitHub)
 
-### 8.3 Integración
+**Estilos creados:**
+- `styles/dashboard/shared/mapaCalor.css`
+- `styles/dashboard/shared/historialHabito.css`
+
+### 8.3 Integracion [COMPLETADO]
 
 **Panel nuevo en Dashboard:**
-- [ ] Nuevo bloque "Actividad" con mapa de calor general
-- [ ] Configurable desde modal de configuración
+- [x] Nuevo bloque "Actividad" con mapa de calor general
+- [x] Configurable desde modal de configuracion (periodo, filtros, tamaño celdas)
 
-**En modal de Hábito:**
-- [ ] Mostrar mapa de calor específico del hábito
-- [ ] Historial de cumplimiento visual
+**En modal de Habito:**
+- [x] Mostrar mapa de calor especifico del habito (MapaCalorHabito.tsx)
+- [x] Historial de cumplimiento visual interactivo
 
 **En modal de Proyecto:**
-- [ ] Mostrar mapa de calor de tareas completadas del proyecto
+- [x] Mostrar mapa de calor de tareas completadas del proyecto (MapaCalorProyecto.tsx)
 
-### 8.4 Múltiples Heatmaps
+**Archivos creados:**
+- `App/React/components/shared/MapaCalorProyecto.tsx`
+- `App/React/styles/dashboard/shared/mapaCalorProyecto.css`
 
-- [ ] Poder agregar múltiples widgets de mapa de calor al dashboard
-- [ ] Cada uno con configuración independiente
-- [ ] Nombrar cada widget (ej: "Mi actividad general", "Hábito: Ejercicio")
+### 8.4 Multiples Heatmaps [PENDIENTE]
+
+- [ ] Poder agregar multiples widgets de mapa de calor al dashboard
+- [ ] Cada uno con configuracion independiente
+- [ ] Nombrar cada widget (ej: "Mi actividad general", "Habito: Ejercicio")
 
 **Complejidad:** Media-Alta | **Dependencias:** Historial de actividad
+
+### 8.5 Historial Resumido de Habitos (Columna + Mapa de Calor) [COMPLETADO]
+
+> **Idea nueva (2025-12-25):** Permitir ver y marcar dias anteriores de habitos.
+
+**Problema a resolver:**
+- Si no usas la app por unos dias, no hay forma de marcar los habitos que si hiciste.
+- No hay visibilidad rapida del historial reciente del habito.
+
+**Solucion - Columna de historial (7 dias):**
+- [x] Componente `HistorialHabito.tsx` creado
+- [x] Agregar columna junto a cada habito mostrando los ultimos 7 dias
+- [x] Visualizacion tipo "pildoras" o indicadores compactos
+- [x] Estados: completado, pospuesto, vacio
+- [x] Adaptar visualizacion segun frecuencia del habito (diario, semanal, etc.)
+- [x] Solo mostrar dias relevantes segun la frecuencia configurada (con opacidad reducida para no relevantes)
+
+**Solucion - Mapa de calor interactivo en configuracion:**
+- [x] Hook `useHabitosHistorial.ts` creado
+- [x] En el modal de configuracion del habito, mostrar mapa de calor (MapaCalorHabito.tsx)
+- [x] Clickear en dia pasado → marcar como completado
+- [x] Click derecho o long-press → marcar como pospuesto
+- [x] Limite de dias editables (30 dias implementado en backend)
+- [x] Sincronizar cambios con backend
+
+**Utilidades creadas:**
+- `esFechaRelevante()` - Determina si una fecha aplica segun frecuencia
+- `generarFechasRelevantes()` - Genera array de fechas relevantes
+
+**Bugs corregidos (2025-12-25):**
+- [x] Historial no se actualizaba en tiempo real al marcar/desmarcar dias
+- [x] Lentitud al marcar dias (esperaba respuesta del servidor antes de mostrar cambio)
+- **Solucion:** Implementar actualizacion optimista en `useHabitosHistorial` (marcarDia, desmarcarDia)
+
+**Backend requerido: [COMPLETADO]**
+- [x] Tabla BD: `wp_glory_habitos_historial` (id, habito_id, fecha, estado, notas)
+- [x] Estados: `completado`, `pospuesto`, `omitido`
+- [x] Endpoints: GET historial, POST/PUT marcar dia, DELETE desmarcar
+- [x] Validar que solo se marquen fechas pasadas
+
+**Complejidad:** Media | **Dependencias:** Fase 8.1 (rastreo actividad)
+
+### 8.6 Mejoras del Mapa de Calor [COMPLETADO]
+
+
+
+- [x] Mapa de calor se actualiza en tiempo real (suscripcion a cambios en actividadStore)
+- [x] Datos del heatmap cacheados con TTL de 5 minutos (actividadStore.ts)
+- [x] Invalidacion de cache al registrar actividades (invalidarCache, invalidarCacheParcial)
+- [x] Panel de actividad ahora se puede arrastrar correctamente (fix: usar configuracionNormalizada)
+
+**Optimizacion de carga del panel [COMPLETADO]:**
+- [x] Panel siempre muestra datos anteriores mientras recarga (no desaparece)
+- [x] Solo muestra "Cargando actividad..." si no hay datos en absoluto
+- [x] Cache persistido en sessionStorage (sobrevive recargas de pagina, TTL 5 min)
+- [x] Eliminado indicador visual de recarga (punto pulsante naranja)
+
+**Historial de cumplimiento en Modal [COMPLETADO]:**
+- [x] Cache de historial persistido en sessionStorage (TTL 10 min)
+- [x] Al abrir modal despues de cargarlo una vez, carga instantaneo
+- [x] Hook useHabitosHistorial acepta habitoId inicial para cache
+
+**Mapa de calor en Modal de Habito [CORREGIDO]:**
+- [x] Quitar leyenda de colores (cuando enModal=true)
+- [x] Quitar estadisticas (cuando enModal=true)
+- [x] Agregar tooltip al hacer hover para mostrar la fecha
+- [x] **Calculo dinamico de semanas** - Ahora usa ResizeObserver para calcular cuantas semanas
+    caben segun el ancho disponible del contenedor (min 4, max 26)
+- [x] Las celdas ahora llenan todo el ancho disponible correctamente
+
+**Bug: Fecha usa zona horaria incorrecta [CORREGIDO]:**
+> **Solucion final (2025-12-27):**
+> - Funcion `obtenerFechaLocalISO()` en utils/fecha.ts evita problemas de UTC
+> - `formatearFecha()` en MapaCalor.tsx ahora agrega T12:00:00 al parsear (fix tooltip)
+> - `agruparPorSemanas()` en ambos componentes usa T12:00:00
+> - El tooltip ahora muestra la fecha correcta
+- [x] toISOString() reemplazado por obtenerFechaLocalISO() en todo el proyecto frontend
+- [x] Frontend envia fechaHoyLocal correctamente con zona horaria local
+- [x] agruparPorSemanas: agregado T12:00:00 para evitar problemas de zona horaria
+- [x] **Tooltip del ultimo dia corregido** (agregado T12:00:00 en formatearFecha)
+
+**Bug: Desmarcar habito NO elimina registro de actividad [CORREGIDO]:**
+> **Solucion (2025-12-27):**
+> - Modificado `registrarActividad()` en ActividadApiController.php
+> - Ahora cuando se recibe `habito_desmarcado`, primero elimina el registro de `habito_cumplido`
+> - Esto funciona tanto al desmarcar desde el modal como desde el checkbox del panel
+- [x] Al desmarcar un dia, el registro de actividad SE BORRA correctamente
+- [x] Backend: metodo `eliminarPorHabito()` agregado en ActividadRepository.php
+- [x] Backend: se llama desde `desmarcarDiaHabito()` Y desde `registrarActividad()` (tipo desmarcado)
+
+**Bug: Sincronizacion entre panel y modal [CORREGIDO]:**
+> **Solucion (2025-12-27):**
+> - Modificado `actividadService.ts` para emitir `notificarCambioHabito()` al historialHabitosStore
+> - Ahora cuando se marca/desmarca desde el checkbox del panel, el modal se actualiza automaticamente
+> - El MapaCalorHabito se suscribe a estos cambios y recarga cuando detecta modificaciones
+- [x] Codigo: se bloquean clicks mientras cargando=true en MapaCalorHabito
+- [x] Modal de habito se sincroniza con cambios hechos DENTRO del modal
+- [x] **Marcar habito desde checkbox del panel AHORA actualiza el historial de cumplimiento**
+- [x] El flujo del checkbox ahora emite `notificarCambioHabito()` via actividadService
+- [x] **Cache de historial implementado** - historialHabitosStore.ts ahora cachea el historial
+- [x] **Backend sincronizado** - POST /actividad con habito_cumplido ahora inserta en wp_glory_habitos_historial
+- [x] **Actualizacion optimista** - actualizarFechaEnCache() actualiza el cache local inmediatamente
+
+**Bug: "Cargando actividad" aparece innecesariamente [CORREGIDO]:**
+> **Solucion (2025-12-27):**
+> - Modificado PanelActividad.tsx: ahora usa `estado.cargaInicial` en lugar de `estado.cargando`
+> - Solo muestra "Cargando actividad..." en la primera carga sin datos previos
+> - Al recargar en segundo plano, mantiene los datos anteriores visibles
+
+**Bug: Dias de semana desalineados en MapaCalorHabito [CORREGIDO]:**
+> **Solucion (2025-12-27):**
+> - Eliminado override de tamano de celdas en modo modal (16px -> 14px consistente)
+> - Agregado min-height a los dias de semana para alineacion correcta
+> - Los indicadores L, X, V ahora se alinean correctamente con las celdas
+
+**Herramientas de desarrollo (para Modal Experimentos):**
+- [x] Boton para limpiar toda la actividad del usuario (solo admin)
+
+**Opcion de estadisticas [ELIMINADA]:**
+- [x] Eliminada opcion "Mostrar estadisticas" del modal de configuracion (no funcionaba)
+- [x] Se mantiene mostrarEstadisticas en config local pero no tiene efecto
+
+**Bug: Dias no relevantes no se muestran correctamente [CORREGIDO]:**
+> **Solución (2025-12-27):**
+> - Implementada lógica dinámica que calcula días libres basándose en los días MARCADOS en el historial
+> - Para `diasEspecificos`: verifica si el día de la semana está en la lista
+> - Para `cadaXDias`, `semanal`, `mensual`: busca el día completado más cercano anterior
+>   y marca como "libre" los días dentro del intervalo
+> - Estilo cambiado de patrón rayado a verde con opacidad baja (rgba(34, 197, 94, 0.15))
+- [x] `esFechaRelevante()` se usa para diasEspecificos, lógica dinámica para otros tipos
+- [x] Los días no relevantes vacíos se muestran en verde con opacidad baja
+- [x] Los días no relevantes completados se muestran en verde con opacidad
+
+**Bug: Cambiar estado requiere multiples clicks [CORREGIDO]:**
+> **Solución (2025-12-27):**
+> - Implementado estado local `historialLocal` en MapaCalorHabito.tsx para actualizaciones inmediatas
+> - Cambiado `manejarClick` a fire-and-forget (sin `await`) para no bloquear
+> - Reemplazado flag global `guardando` por bloqueo por fecha individual (Set)
+> - Modificadas funciones `marcarDia`/`desmarcarDia` en useHabitosHistorial.ts para no recrear
+>   callbacks innecesariamente (removido `estado.historial` de dependencias de useCallback)
+- [x] Revisar lógica de ciclo de estados en `manejarClick`
+- [x] Verificar si hay condiciones de bloqueo o race conditions
 
 ---
 
@@ -654,7 +531,7 @@ styles/
 | 7    | **Modal Chat + Historial**     | Muy Alta    | ✅ Completada   |
 | 7.5  | **Correcciones UX + Resize**   | Media       | ✅ Completada   |
 | 7.6  | **Mejoras Habitos + Bugs**     | Alta        | ✅ Completada   |
-| 8    | Mapa de Calor + historial      | Media-Alta  | Planificada    |
+| 8    | Mapa de Calor + historial      | Media-Alta  | ✅ Completada   |
 | 9    | Scratchpad + File Manager      | Alta        | Baja Prioridad |
 | 10   | Compartir Hábitos              | Media       | Baja Prioridad |
 | 11   | Futuro                         | Variable    | Pendiente      |
