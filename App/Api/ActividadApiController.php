@@ -382,18 +382,30 @@ class ActividadApiController
 
             /* 
              * Si es habito_desmarcado, eliminar el registro de habito_cumplido existente
-             * y también eliminar del historial de hábitos
+             * y también eliminar del historial de hábitos.
+             * NO registrar nueva actividad - solo eliminar y retornar éxito.
              */
             if ($tipo === 'habito_desmarcado' && $elementoId && $elementoTipo === 'habito') {
                 $repo->eliminarPorHabito($elementoId, $fechaActividad);
                 $historialRepo->desmarcarDia($elementoId, $fechaActividad);
+
+                return new \WP_REST_Response([
+                    'success' => true,
+                    'accion' => 'eliminado'
+                ], 200);
             }
 
             /* 
-             * Si es tarea_desmarcada, eliminar el registro de tarea_completada existente
+             * Si es tarea_desmarcada, eliminar el registro de tarea_completada existente.
+             * NO registrar nueva actividad - solo eliminar y retornar éxito.
              */
             if ($tipo === 'tarea_desmarcada' && $elementoId && $elementoTipo === 'tarea') {
                 $repo->eliminarPorTarea($elementoId, $fechaActividad);
+
+                return new \WP_REST_Response([
+                    'success' => true,
+                    'accion' => 'eliminado'
+                ], 200);
             }
 
             /* 

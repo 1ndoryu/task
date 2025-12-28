@@ -1,9 +1,10 @@
 /**
  * Tipos para el historial de habitos
  *
- * Estos tipos se comparten entre:
- * - hooks/useHabitosHistorial.ts
- * - services/historialHabitosStore.ts
+ * Estos tipos se usan en:
+ * - stores/habitosStore.ts (fuente única de verdad)
+ * - components/shared/MapaCalorHabito.tsx
+ * - services/actividadService.ts
  *
  * @package App/React/types
  */

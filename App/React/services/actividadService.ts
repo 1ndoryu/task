@@ -9,8 +9,6 @@
  */
 
 import {invalidarCache, invalidarCacheParcial} from './actividadStore';
-import {notificarCambioHabito, actualizarFechaEnCache} from './historialHabitosStore';
-import {obtenerFechaLocalISO} from '../utils/fecha';
 
 /* Base URL de la API */
 const API_BASE = '/wp-json/glory/v1/actividad';
@@ -37,6 +35,10 @@ export interface RegistroActividadParams {
  * Registra una actividad en el backend
  * Se ejecuta de forma silenciosa (no bloquea la UI)
  * Invalida el cache del heatmap para reflejar cambios en tiempo real
+ *
+ * NOTA: La sincronización del estado de hábitos se maneja en habitosStore.ts
+ * usando Zustand. Este servicio solo registra la actividad y invalida el cache
+ * del panel de actividad.
  */
 export async function registrarActividad(params: RegistroActividadParams): Promise<boolean> {
     try {
@@ -69,28 +71,6 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
 
             /* Siempre invalidar el cache general tambien */
             invalidarCache();
-
-            /*
-             * Notificar al historialHabitosStore para sincronizar MapaCalorHabito
-             * Esto permite que el modal se actualice cuando se marca desde el panel
-             * Usamos actualizacion optimista para UI instantanea
-             */
-            const tiposHabito = ['habito_cumplido', 'habito_desmarcado', 'habito_pospuesto'];
-            if (tiposHabito.includes(params.tipo) && params.elementoId) {
-                const fechaHoy = obtenerFechaLocalISO();
-
-                /* Actualizar cache de forma optimista segun el tipo de accion */
-                if (params.tipo === 'habito_cumplido') {
-                    actualizarFechaEnCache(params.elementoId, fechaHoy, 'completado');
-                } else if (params.tipo === 'habito_pospuesto') {
-                    actualizarFechaEnCache(params.elementoId, fechaHoy, 'pospuesto');
-                } else if (params.tipo === 'habito_desmarcado') {
-                    actualizarFechaEnCache(params.elementoId, fechaHoy, null);
-                }
-
-                /* Notificar a otros componentes del cambio */
-                notificarCambioHabito(params.elementoId, fechaHoy);
-            }
         }
 
         return exito;

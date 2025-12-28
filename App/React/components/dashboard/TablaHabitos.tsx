@@ -17,7 +17,7 @@ import {AccionesItem} from '../shared/AccionesItem';
 import type {VarianteBadge} from '../shared/BadgeInfo';
 import {ConfiguracionHabitos, CONFIG_HABITOS_POR_DEFECTO} from '../../hooks/useConfiguracionHabitos';
 import {HistorialHabitoInline} from '../shared/HistorialHabito';
-import type {EstadoHabito} from '../../hooks/useHabitosHistorial';
+import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaHoy} from '../../utils/fecha';
 
 interface TablaHabitosProps {
@@ -27,6 +27,8 @@ interface TablaHabitosProps {
     onEditarHabito?: (habito: Habito) => void;
     onEliminarHabito?: (id: number) => void;
     onPosponerHabito?: (id: number) => void;
+    onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
+    onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
     configuracion?: ConfiguracionHabitos;
 }
 
@@ -66,6 +68,8 @@ interface FilaHabitoProps {
     onEditar?: (habito: Habito) => void;
     onEliminar?: (id: number) => void;
     onPosponer?: (id: number) => void;
+    onMarcarDia?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
+    onDesmarcarDia?: (habitoId: number, fecha: string) => void;
     configuracion: ConfiguracionHabitos;
     estiloGrid: React.CSSProperties;
 }
@@ -76,7 +80,7 @@ interface MenuContextualEstado {
     y: number;
 }
 
-function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
+function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onMarcarDia, onDesmarcarDia, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
     /* Advertencia de racha: mostrar cuando faltan pocos dias para perderla */
     const DIAS_ADVERTENCIA_RACHA = 2;
 
@@ -106,7 +110,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     const rachaEnPeligro = habito.racha > 0 && diasAntesDePerder <= DIAS_ADVERTENCIA_RACHA && diasAntesDePerder > 0;
     const rachaPerdida = habito.diasInactividad > umbralInactividad;
 
-    /* Construir historial para el componente de 7 dias */
+    /* Construir historial directamente desde los arrays del hábito */
     const historialParaComponente = useMemo((): {[fecha: string]: EstadoHabito} => {
         const resultado: {[fecha: string]: EstadoHabito} = {};
 
@@ -230,10 +234,21 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                     </div>
                 </div>
 
-                {/* Historial 7 dias */}
+                {/* Historial 5 dias - Actividad */}
                 {configuracion.columnasVisibles.historial && (
                     <div className="tablaColumnaHistorial">
-                        <HistorialHabitoInline historial={historialParaComponente} frecuencia={frecuencia} fechaCreacion={habito.fechaCreacion} />
+                        <HistorialHabitoInline
+                            historial={historialParaComponente}
+                            frecuencia={frecuencia}
+                            fechaCreacion={habito.fechaCreacion}
+                            onClickDia={(fecha, estadoActual) => {
+                                if (estadoActual) {
+                                    onDesmarcarDia?.(habito.id, fecha);
+                                } else {
+                                    onMarcarDia?.(habito.id, fecha, 'completado');
+                                }
+                            }}
+                        />
                     </div>
                 )}
 
@@ -288,7 +303,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     );
 }
 
-export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
+export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
     // Filtrar habitos segun configuracion
     const habitosVisibles = habitos.filter(habito => {
         if (configuracion.ocultarCompletadosHoy && fueCompletadoHoy(habito.ultimoCompletado)) {
@@ -319,7 +334,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
             <div className="tablaEncabezado" style={estiloGrid}>
                 {configuracion.columnasVisibles.indice && <div className="tablaColumnaCheckbox"></div>}
                 <div className="tablaColumnaNombre">HABITO</div>
-                {configuracion.columnasVisibles.historial && <div className="tablaColumnaHistorial">7 DIAS</div>}
+                {configuracion.columnasVisibles.historial && <div className="tablaColumnaHistorial">ACTIVIDAD</div>}
                 {configuracion.columnasVisibles.importancia && <div className="tablaColumnaPrioridad">PRIO</div>}
                 {configuracion.columnasVisibles.inactividad && <div className="tablaColumnaInactividad">DIAS</div>}
                 {configuracion.columnasVisibles.urgencia && <div className="tablaColumnaUrgencia">URGENCIA</div>}
@@ -329,7 +344,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
 
             {/* Filas de habitos */}
             {habitosVisibles.map((habito, index) => (
-                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
+                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
             ))}
 
             {/* Añadir habito */}

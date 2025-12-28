@@ -11,9 +11,9 @@
  */
 
 import {useMemo, useCallback, useEffect, useRef, useState} from 'react';
-import {useHabitosHistorial, type EstadoHabito} from '../../hooks/useHabitosHistorial';
+import {useHabitosStore, useHabito} from '../../stores/habitosStore';
+import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaLocalISO} from '../../utils/fecha';
-import {suscribirACambiosHistorial} from '../../services/historialHabitosStore';
 import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 
@@ -119,45 +119,45 @@ function esEditable(fecha: string): boolean {
  * Componente principal del Mapa de Calor para Hábitos
  */
 export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, enModal = false, frecuencia, fechaCreacion}: MapaCalorHabitoProps): JSX.Element {
-    /* Pasar habitoId al hook para que cargue del cache inmediatamente */
-    const {estado, cargarHistorial, marcarDia, desmarcarDia} = useHabitosHistorial(habitoId);
-    const {cargando, error, historial: historialDelHook} = estado;
+    /* Obtener el hábito del store para tener acceso a su historial */
+    const habito = useHabito(habitoId);
+    const estadoGuardado = useHabitosStore(state => state.estadoGuardado);
+
+    /* Obtener acciones del store */
+    const marcarDia = useHabitosStore(state => state.marcarDia);
+    const desmarcarDia = useHabitosStore(state => state.desmarcarDia);
+    const cargarHistorialDetallado = useHabitosStore(state => state.cargarHistorialDetallado);
+
+    /* Obtener historial detallado si existe (para el modal con más días) */
+    const historialDetallado = useHabitosStore(state => state.historialDetallado[habitoId]);
 
     /* Set para trackear fechas que están en proceso de guardado (evita doble-click en misma celda) */
     const fechasEnProcesoRef = useRef<Set<string>>(new Set());
 
     /*
-     * Estado local del historial para actualizaciones inmediatas
-     * Se sincroniza con el hook pero permite cambios instantáneos al hacer click
+     * Construir historial local a partir del hábito del store
+     * Esto reemplaza el estado local que teníamos antes
      */
-    const [historialLocal, setHistorialLocal] = useState(historialDelHook);
+    const historialLocal = useMemo(() => {
+        const historial: Record<string, {estado: EstadoHabito; notas: string | null; fechaRegistro: string}> = {};
 
-    /*
-     * Sincronizar historialLocal cuando el hook trae nuevos datos
-     * IMPORTANTE: No sobreescribir fechas que están en proceso de guardado
-     * para evitar perder cambios optimistas
-     */
-    useEffect(() => {
-        setHistorialLocal(prevLocal => {
-            /* Si no hay fechas en proceso, simplemente usar los datos del hook */
-            if (fechasEnProcesoRef.current.size === 0) {
-                return historialDelHook;
-            }
+        /* Si hay historial detallado cargado, usarlo (tiene más información) */
+        if (historialDetallado?.historial) {
+            return historialDetallado.historial;
+        }
 
-            /* Merge: usar datos del hook pero preservar fechas en proceso */
-            const merged = {...historialDelHook};
-            for (const fecha of fechasEnProcesoRef.current) {
-                /* Mantener el valor local para fechas en proceso */
-                if (prevLocal[fecha] !== undefined) {
-                    merged[fecha] = prevLocal[fecha];
-                } else {
-                    /* Si fue borrada localmente, no restaurar del hook */
-                    delete merged[fecha];
-                }
+        /* Si no, construir desde los arrays del hábito */
+        if (habito) {
+            for (const fecha of habito.historialCompletados || []) {
+                historial[fecha] = {estado: 'completado', notas: null, fechaRegistro: ''};
             }
-            return merged;
-        });
-    }, [historialDelHook]);
+            for (const fecha of habito.historialPospuestos || []) {
+                historial[fecha] = {estado: 'pospuesto', notas: null, fechaRegistro: ''};
+            }
+        }
+
+        return historial;
+    }, [habito, historialDetallado]);
 
     /* Ref para medir el ancho del contenedor en modo modal */
     const contenedorRef = useRef<HTMLDivElement>(null);
@@ -209,26 +209,12 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
         return periodo === 'semana' ? 7 : 30;
     }, [periodo, enModal, semanasCalculadas]);
 
-    /* Cargar historial al montar y cuando cambian los días */
+    /* Cargar historial detallado al montar (solo en modo modal que necesita más días) */
     useEffect(() => {
-        if (habitoId > 0 && diasPeriodo > 0) {
-            cargarHistorial(habitoId, diasPeriodo);
+        if (habitoId > 0 && diasPeriodo > 30 && enModal) {
+            cargarHistorialDetallado(habitoId, diasPeriodo);
         }
-    }, [habitoId, diasPeriodo, cargarHistorial]);
-
-    /* Suscribirse a cambios externos del historial */
-    /* Esto permite sincronizar con cambios hechos desde otros componentes */
-    useEffect(() => {
-        const desuscribir = suscribirACambiosHistorial((idHabitoCambiado, fecha) => {
-            /* Solo recargar si el cambio afecta a este habito */
-            /* Y solo si la fecha no está siendo procesada por este componente */
-            if (idHabitoCambiado === habitoId && !fechasEnProcesoRef.current.has(fecha)) {
-                cargarHistorial(habitoId, diasPeriodo);
-            }
-        });
-
-        return desuscribir;
-    }, [habitoId, diasPeriodo, cargarHistorial]);
+    }, [habitoId, diasPeriodo, enModal, cargarHistorialDetallado]);
 
     /* Generar fechas y agruparlas */
     const {fechas, semanas} = useMemo(() => {
@@ -241,12 +227,6 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
         };
     }, [diasPeriodo]);
 
-    /* Ref para el historial local, para poder acceder al valor actual en callbacks */
-    const historialLocalRef = useRef(historialLocal);
-    useEffect(() => {
-        historialLocalRef.current = historialLocal;
-    }, [historialLocal]);
-
     /* Obtener estado de un día */
     const obtenerEstadoDia = useCallback(
         (fecha: string): EstadoHabito | null => {
@@ -258,10 +238,8 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
     /*
      * Manejar click: cicla entre estados (vacio -> completado -> pospuesto -> vacio)
      *
-     * IMPORTANTE: Este callback es fire-and-forget para máxima responsividad.
-     * - No usa `await` para no bloquear
-     * - Bloqueo por fecha individual, no global
-     * - Actualiza el estado local inmediatamente para re-render instantáneo
+     * IMPORTANTE: El store maneja las actualizaciones optimistas internamente.
+     * Este callback solo determina el nuevo estado y llama a la acción correspondiente.
      */
     const manejarClick = useCallback(
         (fecha: string, e: React.MouseEvent) => {
@@ -272,8 +250,8 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
 
             if (!esEditable(fecha)) return;
 
-            /* Leer el estado actual del ref para obtener el valor más reciente */
-            const estadoActual = historialLocalRef.current[fecha]?.estado || null;
+            /* Leer el estado actual del historial */
+            const estadoActual = historialLocal[fecha]?.estado || null;
 
             /* Marcar esta fecha como en proceso */
             fechasEnProcesoRef.current.add(fecha);
@@ -288,25 +266,7 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
                 nuevoEstado = null; /* Desmarcar */
             }
 
-            /* Actualizar estado local inmediatamente para re-render instantáneo */
-            setHistorialLocal(prev => {
-                if (nuevoEstado) {
-                    return {
-                        ...prev,
-                        [fecha]: {
-                            estado: nuevoEstado,
-                            notas: null,
-                            fechaRegistro: new Date().toISOString()
-                        }
-                    };
-                } else {
-                    const nuevoHistorial = {...prev};
-                    delete nuevoHistorial[fecha];
-                    return nuevoHistorial;
-                }
-            });
-
-            /* Ejecutar la operación sin await (fire-and-forget) */
+            /* Ejecutar la operación (el store actualiza optimistamente) */
             const operacion = nuevoEstado ? marcarDia(habitoId, fecha, nuevoEstado) : desmarcarDia(habitoId, fecha);
 
             /* Limpiar el bloqueo cuando termine (éxito o error) */
@@ -314,7 +274,7 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
                 fechasEnProcesoRef.current.delete(fecha);
             });
         },
-        [habitoId, marcarDia, desmarcarDia]
+        [habitoId, marcarDia, desmarcarDia, historialLocal]
     );
 
     /* Clase CSS segun estado */
@@ -463,10 +423,13 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
     /* Ya no bloqueamos con "Cargando...", mostramos el mapa directamente */
     /* El estado de carga se refleja con opacidad reducida en el contenedor */
 
-    if (error) {
+    /* Usar el estado del store para mostrar errores */
+    const errorGuardado = useHabitosStore(state => state.errorGuardado);
+
+    if (errorGuardado && estadoGuardado === 'error') {
         return (
             <div className="mapaCalorHabitoContenedor mapaCalorHabitoContenedor--error">
-                <span className="mapaCalorHabitoError">{error}</span>
+                <span className="mapaCalorHabitoError">{errorGuardado}</span>
             </div>
         );
     }
@@ -476,10 +439,9 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
     /* Ocultar leyenda si estamos en modal */
     const mostrarLeyenda = !compacto && !enModal;
 
-    /* Solo mostrar estado de carga visual si NO hay datos en cache */
-    /* Si hay datos, siempre los mostramos sin indicador de carga */
+    /* Solo mostrar estado de carga visual si NO hay datos y está guardando */
     const hayDatos = Object.keys(historialLocal).length > 0;
-    const mostrarEstadoCargando = cargando && !hayDatos;
+    const mostrarEstadoCargando = estadoGuardado === 'guardando' && !hayDatos;
 
     return (
         <div ref={contenedorRef} id="mapa-calor-habito" className={`mapaCalorHabitoContenedor ${compacto ? 'mapaCalorHabitoContenedor--compacto' : ''} ${enModal ? 'mapaCalorHabitoContenedor--modal' : ''} ${mostrarEstadoCargando ? 'mapaCalorHabitoContenedor--cargando' : ''}`}>

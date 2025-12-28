@@ -7,7 +7,7 @@
 import {useCallback} from 'react';
 import {useAlertasContext} from '../context/AlertasContext';
 import {invalidarCache} from '../services/actividadStore';
-import {invalidarTodoCacheHistorial} from '../services/historialHabitosStore';
+import {habitosActions} from '../stores/habitosStore';
 import type {Proyecto, NivelPrioridad, NivelUrgencia, TareaConfiguracion} from '../types/dashboard';
 import type {EstadoFiltro} from './useFiltroTareas';
 
@@ -151,7 +151,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
             if (data.success) {
                 /* Limpiar cache local de actividad y historial */
                 invalidarCache();
-                invalidarTodoCacheHistorial();
+                habitosActions.limpiarTodoHistorialDetallado();
                 return true;
             }
             return false;

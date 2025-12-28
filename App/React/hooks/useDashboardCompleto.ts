@@ -4,7 +4,7 @@
  * Simplifica el componente principal evitando múltiples llamadas a hooks
  */
 
-import {useMemo} from 'react';
+import {useMemo, useCallback} from 'react';
 import {useDashboard} from './useDashboard';
 import {useAuth} from './useAuth';
 import {useSuscripcion} from './useSuscripcion';
@@ -25,6 +25,7 @@ import {useCompartirDashboard} from './useCompartirDashboard';
 import {useOpcionesDashboard} from './useOpcionesDashboard';
 import {useAccionesDashboard} from './useAccionesDashboard';
 import {useHabitosComoTareas} from './useHabitosComoTareas';
+import {useHabitosStore} from '../stores/habitosStore';
 import type {Tarea} from '../types/dashboard';
 
 export function useDashboardCompleto() {
@@ -54,6 +55,32 @@ export function useDashboardCompleto() {
         onToggleHabito: dashboard.toggleHabito,
         umbralesUrgencia: configHabitos.obtenerUmbralesActuales()
     });
+
+    /* Acciones del store de hábitos para marcar/desmarcar días */
+    const marcarDiaStore = useHabitosStore(state => state.marcarDia);
+    const desmarcarDiaStore = useHabitosStore(state => state.desmarcarDia);
+
+    /*
+     * Wrappers para marcar/desmarcar días
+     * Ahora usamos directamente el store de Zustand que maneja:
+     * - Actualización optimista de la UI
+     * - Llamada a la API
+     * - Rollback en caso de error
+     * - Sincronización de historialDetallado
+     */
+    const marcarDiaHabitoConSync = useCallback(
+        async (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => {
+            await marcarDiaStore(habitoId, fecha, estado);
+        },
+        [marcarDiaStore]
+    );
+
+    const desmarcarDiaHabitoConSync = useCallback(
+        async (habitoId: number, fecha: string) => {
+            await desmarcarDiaStore(habitoId, fecha);
+        },
+        [desmarcarDiaStore]
+    );
 
     /*
      * Combinar tareas filtradas con tareas-hábito
@@ -115,6 +142,8 @@ export function useDashboardCompleto() {
         filtroTareas,
         ordenTareas,
         habitosComoTareas,
+        marcarDiaHabitoConSync,
+        desmarcarDiaHabitoConSync,
         configTareas,
         configHabitos,
         configProyectos,

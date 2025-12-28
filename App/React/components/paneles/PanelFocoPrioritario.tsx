@@ -21,12 +21,14 @@ interface PanelFocoPrioritarioProps {
     onEditarHabito: (habito: Habito) => void;
     onEliminarHabito: (id: number) => void;
     onPosponerHabito: (id: number) => void;
+    onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
+    onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
     onCambiarModoHabitos: (modo: any) => void;
     handleArrastre: JSX.Element;
     handleMinimizar: JSX.Element;
 }
 
-export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHabitos, configuracion, onAbrirModalCrearHabito, onAbrirModalConfigHabitos, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onCambiarModoHabitos, handleArrastre, handleMinimizar}: PanelFocoPrioritarioProps): JSX.Element {
+export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHabitos, configuracion, onAbrirModalCrearHabito, onAbrirModalConfigHabitos, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onCambiarModoHabitos, handleArrastre, handleMinimizar}: PanelFocoPrioritarioProps): JSX.Element {
     return (
         <>
             <SeccionEncabezado
@@ -50,7 +52,7 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
                     </>
                 }
             />
-            <TablaHabitos habitos={habitos} onAñadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} configuracion={configuracion} />
+            <TablaHabitos habitos={habitos} onAñadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
         </>
     );
 }

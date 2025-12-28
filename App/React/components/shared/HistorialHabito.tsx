@@ -14,7 +14,7 @@
  * @package App/React/components/shared
  */
 
-import type {EstadoHabito} from '../../hooks/useHabitosHistorial';
+import type {EstadoHabito} from '../../types/historialHabitos';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
 import {obtenerFechaLocalISO} from '../../utils/fecha';
@@ -50,6 +50,8 @@ export interface HistorialHabitoProps {
     habitoId?: number;
     /* Ocultar días no relevantes (en lugar de mostrarlos con opacidad) */
     ocultarNoRelevantes?: boolean;
+    /* Cantidad de días a mostrar (por defecto 5) */
+    cantidadDias?: number;
 }
 
 /* Iconos SVG inline para cada estado */
@@ -72,19 +74,20 @@ const iconos = {
 };
 
 /**
- * Genera el resumen de 7 días a partir del historial
+ * Genera el resumen de N días a partir del historial
  * @param historial - Mapa de fecha -> estado
  * @param frecuencia - Frecuencia del hábito para determinar relevancia
  * @param fechaCreacion - Fecha de creación del hábito para calcular ciclos
+ * @param cantidadDias - Número de días a mostrar (por defecto 5)
  */
-function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, frecuencia?: FrecuenciaHabito, fechaCreacion?: string): DiaResumen[] {
+function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, frecuencia?: FrecuenciaHabito, fechaCreacion?: string, cantidadDias: number = 5): DiaResumen[] {
     const diasSemana = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
     const resumen: DiaResumen[] = [];
 
-    for (let i = 6; i >= 0; i--) {
+    for (let i = cantidadDias - 1; i >= 0; i--) {
         const fecha = new Date(hoy);
         fecha.setDate(fecha.getDate() - i);
         const fechaStr = obtenerFechaLocalISO(fecha);
@@ -129,9 +132,9 @@ function formatearFechaTooltip(fecha: string, estado: EstadoHabito | null, esRel
 /**
  * Componente principal de historial de hábito
  */
-export function HistorialHabito({resumen, historial, frecuencia, fechaCreacion, onClickDia, mostrarEtiquetas = false, compacto = true, habitoId, ocultarNoRelevantes = false}: HistorialHabitoProps): JSX.Element {
+export function HistorialHabito({resumen, historial, frecuencia, fechaCreacion, onClickDia, mostrarEtiquetas = false, compacto = true, habitoId, ocultarNoRelevantes = false, cantidadDias = 5}: HistorialHabitoProps): JSX.Element {
     /* Usar resumen proporcionado o generarlo desde el historial */
-    const diasCompletos = resumen ?? (historial ? generarResumenDeHistorial(historial, frecuencia, fechaCreacion) : []);
+    const diasCompletos = resumen ?? (historial ? generarResumenDeHistorial(historial, frecuencia, fechaCreacion, cantidadDias) : []);
 
     /* Filtrar días si se pide ocultar los no relevantes */
     const dias = ocultarNoRelevantes ? diasCompletos.filter(d => d.esRelevante) : diasCompletos;
@@ -160,12 +163,20 @@ export function HistorialHabito({resumen, historial, frecuencia, fechaCreacion, 
                         key={dia.fecha}
                         className={`historialHabitoDia ${claseEstado} ${dia.esHoy ? 'historialHabitoDia--hoy' : ''} ${esClickeable ? 'historialHabitoDia--clickeable' : ''} ${claseRelevancia}`}
                         title={formatearFechaTooltip(dia.fecha, dia.estado, dia.esRelevante)}
-                        onClick={esClickeable ? () => handleClickDia(dia.fecha, dia.estado) : undefined}
+                        onClick={
+                            esClickeable
+                                ? e => {
+                                      e.stopPropagation();
+                                      handleClickDia(dia.fecha, dia.estado);
+                                  }
+                                : undefined
+                        }
                         role={esClickeable ? 'button' : undefined}
                         tabIndex={esClickeable ? 0 : undefined}
                         onKeyDown={
                             esClickeable
                                 ? e => {
+                                      e.stopPropagation();
                                       if (e.key === 'Enter') handleClickDia(dia.fecha, dia.estado);
                                   }
                                 : undefined

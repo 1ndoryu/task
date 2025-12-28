@@ -3,6 +3,7 @@
  * Hook personalizado para la logica del dashboard
  * Responsabilidad unica: orquestar estado y acciones del dashboard
  * Delega lógica de tareas a useTareas
+ * Delega lógica de hábitos al store de Zustand
  * Incluye persistencia automatica en localStorage
  */
 
@@ -16,12 +17,13 @@ import {useProyectos, DatosNuevoProyecto} from './useProyectos';
 import {useSincronizacion} from './useSincronizacion';
 import type {DashboardData} from './useDashboardApi';
 
+/* Store de Zustand para hábitos (fuente única de verdad) */
+import {useHabitosStore} from '../stores/habitosStore';
+
 /* Utilidades extraidas a modulos separados */
-import {obtenerFechaHoy, calcularDiasDesde, fueCompletadoHoy} from '../utils/fecha';
-import {validarHabitos, validarTareas, validarNotas, validarProyectos} from '../utils/validadores';
+import {validarTareas, validarNotas, validarProyectos} from '../utils/validadores';
 import {migrarYActualizarHabitos} from '../utils/migracionHabitos';
-import {habitosIniciales, tareasIniciales, notasIniciales, proyectosIniciales, tareasProyectosIniciales} from '../data/datosIniciales';
-import {registrarHabitoCumplido, registrarHabitoDesmarcado, registrarHabitoPospuesto} from '../services/actividadService';
+import {tareasIniciales, notasIniciales, proyectosIniciales, tareasProyectosIniciales} from '../data/datosIniciales';
 
 /*
  * Configuracion por defecto del dashboard
@@ -43,6 +45,8 @@ interface UseDashboardReturn {
     actualizarNotas: (valor: string) => void;
     toggleHabito: (id: number) => void;
     posponerHabito: (id: number) => void;
+    /* Actualiza el historial de un hábito (para sincronizar con columna de actividad) */
+    actualizarHistorialHabito: (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => void;
     crearHabito: (datos: DatosNuevoHabito) => void;
     editarHabito: (id: number, datos: DatosNuevoHabito) => void;
     eliminarHabito: (id: number) => void;
@@ -85,17 +89,22 @@ interface UseDashboardReturn {
 
 export function useDashboard(): UseDashboardReturn {
     /*
-     * Hooks de localStorage para persistencia automática
-     * Los datos se cargan al montar y se guardan automáticamente al cambiar
+     * Store de Zustand para hábitos (fuente única de verdad)
+     * El store maneja persistencia automática via middleware persist
      */
-    const {
-        valor: habitosRaw,
-        setValor: setHabitos,
-        cargando: cargandoHabitos
-    } = useLocalStorage<Habito[]>(CLAVES_LOCALSTORAGE.habitos, {
-        valorPorDefecto: habitosIniciales,
-        validarValor: validarHabitos
-    });
+    const habitosRaw = useHabitosStore(state => state.habitos);
+    const storeSetHabitos = useHabitosStore(state => state.setHabitos);
+    const storeToggleHabito = useHabitosStore(state => state.toggleHabito);
+    const storePosponerHabito = useHabitosStore(state => state.posponerHabito);
+    const storeCrearHabito = useHabitosStore(state => state.crearHabito);
+    const storeEditarHabito = useHabitosStore(state => state.editarHabito);
+    const storeEliminarHabito = useHabitosStore(state => state.eliminarHabito);
+    const storeActualizarHistorial = useHabitosStore(state => state.actualizarHistorialHabito);
+    const storeRestaurarHabito = useHabitosStore(state => state.restaurarHabito);
+    const storeInicializado = useHabitosStore(state => state.inicializado);
+
+    /* Flag de cargando para hábitos desde store */
+    const cargandoHabitos = !storeInicializado;
 
     /* Configuracion del dashboard (por ahora usa valores por defecto) */
     const configuracion = CONFIGURACION_POR_DEFECTO;
@@ -158,12 +167,12 @@ export function useDashboard(): UseDashboardReturn {
              * NO verificamos si hay datos - el servidor puede tener arrays vacíos
              * que son datos válidos (el usuario borró todo).
              */
-            if (datos.habitos !== undefined) setHabitos(datos.habitos);
+            if (datos.habitos !== undefined) storeSetHabitos(datos.habitos);
             if (datos.tareas !== undefined) setTareas(datos.tareas);
             if (datos.proyectos !== undefined) setProyectos(datos.proyectos);
             if (datos.notas !== undefined) setNotas(datos.notas);
         },
-        [setHabitos, setTareas, setProyectos, setNotas]
+        [storeSetHabitos, setTareas, setProyectos, setNotas]
     );
 
     const {estado: estadoSync, sincronizarAhora, marcarCambiosPendientes, estaLogueado, cargandoDesdeServidor} = useSincronizacion(datosParaSync, handleDatosServidor);
@@ -289,213 +298,103 @@ export function useDashboard(): UseDashboardReturn {
     }, []);
 
     /*
-     * Crea un nuevo habito con los datos proporcionados
-     * Genera un ID unico basado en timestamp
+     * Crea un nuevo habito usando el store de Zustand
      */
     const crearHabito = useCallback(
         (datos: DatosNuevoHabito) => {
-            const hoy = obtenerFechaHoy();
-            const nuevoHabito: Habito = {
-                id: Date.now(),
-                nombre: datos.nombre,
-                importancia: datos.importancia,
-                tags: datos.tags,
-                frecuencia: datos.frecuencia,
-                diasInactividad: 0,
-                racha: 0,
-                historialCompletados: [],
-                ultimoCompletado: undefined,
-                fechaCreacion: hoy
-            };
-
-            setHabitos(prev => [...prev, nuevoHabito]);
+            storeCrearHabito(datos);
             setModalCrearHabitoAbierto(false);
             mostrarMensaje(`Habito "${datos.nombre}" creado`, 'exito');
         },
-        [setHabitos, mostrarMensaje]
+        [storeCrearHabito, mostrarMensaje]
     );
 
     /*
-     * Edita un habito existente
-     * Mantiene los datos que no se modifican (racha, historial, etc)
+     * Edita un habito existente usando el store de Zustand
      */
     const editarHabito = useCallback(
         (id: number, datos: DatosNuevoHabito) => {
             const habitoAnterior = habitos.find(h => h.id === id);
             if (!habitoAnterior) return;
 
-            setHabitos(prev =>
-                prev.map(h => {
-                    if (h.id !== id) return h;
-                    return {
-                        ...h,
-                        nombre: datos.nombre,
-                        importancia: datos.importancia,
-                        tags: datos.tags,
-                        frecuencia: datos.frecuencia
-                    };
-                })
-            );
-
+            storeEditarHabito(id, datos);
             setHabitoEditando(null);
             mostrarMensaje(`Habito "${datos.nombre}" actualizado`, 'exito');
 
             registrarAccion(`"${datos.nombre}" editado`, () => {
-                setHabitos(prev => prev.map(h => (h.id === id ? habitoAnterior : h)));
+                storeRestaurarHabito(habitoAnterior);
             });
         },
-        [habitos, setHabitos, mostrarMensaje, registrarAccion]
+        [habitos, storeEditarHabito, storeRestaurarHabito, mostrarMensaje, registrarAccion]
     );
 
     /*
-     * Elimina un habito
-     * Registra accion para poder deshacer
+     * Elimina un habito usando el store de Zustand
      */
     const eliminarHabito = useCallback(
         (id: number) => {
-            const habitoEliminado = habitos.find(h => h.id === id);
+            const habitoEliminado = storeEliminarHabito(id);
             if (!habitoEliminado) return;
 
-            setHabitos(prev => prev.filter(h => h.id !== id));
             setHabitoEditando(null);
             mostrarMensaje(`Habito "${habitoEliminado.nombre}" eliminado`, 'exito');
 
             registrarAccion(`"${habitoEliminado.nombre}" eliminado`, () => {
-                setHabitos(prev => [...prev, habitoEliminado]);
+                storeRestaurarHabito(habitoEliminado);
             });
         },
-        [habitos, setHabitos, mostrarMensaje, registrarAccion]
+        [storeEliminarHabito, storeRestaurarHabito, mostrarMensaje, registrarAccion]
     );
 
     /*
-     * Toggle de habito: completa o desmarca segun estado actual
-     * Registra accion para deshacer
+     * Toggle de habito usando el store de Zustand
      */
     const toggleHabito = useCallback(
         (id: number) => {
-            const hoy = obtenerFechaHoy();
-            const habito = habitos.find(h => h.id === id);
+            const resultado = storeToggleHabito(id);
+            if (!resultado) return;
 
-            if (!habito) return;
+            const {accion, estadoAnterior} = resultado;
+            const mensaje = accion === 'completado' ? `"${estadoAnterior.nombre}" completado` : `"${estadoAnterior.nombre}" desmarcado`;
 
-            const estabaCompletadoHoy = fueCompletadoHoy(habito.ultimoCompletado);
-
-            if (estabaCompletadoHoy) {
-                /* Desmarcar: remover del historial y restaurar estado anterior */
-                const estadoAnterior = {...habito};
-
-                setHabitos(prev =>
-                    prev.map(h => {
-                        if (h.id !== id) return h;
-
-                        /* Remover la fecha de hoy del historial */
-                        const historialSinHoy = (h.historialCompletados || []).filter(f => f !== hoy);
-                        const ultimoAnterior = historialSinHoy.length > 0 ? historialSinHoy[historialSinHoy.length - 1] : undefined;
-
-                        /* Si no hay historial previo, usar fechaCreacion */
-                        const diasInactividadCalculado = ultimoAnterior ? calcularDiasDesde(ultimoAnterior) : calcularDiasDesde(h.fechaCreacion);
-
-                        return {
-                            ...h,
-                            diasInactividad: diasInactividadCalculado,
-                            racha: Math.max(0, h.racha - 1),
-                            ultimoCompletado: ultimoAnterior,
-                            historialCompletados: historialSinHoy
-                        };
-                    })
-                );
-
-                registrarAccion(`"${habito.nombre}" desmarcado`, () => {
-                    setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
-                });
-
-                /* Registrar actividad para el mapa de calor (silencioso) */
-                registrarHabitoDesmarcado(habito.id);
-            } else {
-                /* Completar: marcar como completado hoy */
-                const estadoAnterior = {...habito};
-                const diasDesdeUltimo = calcularDiasDesde(habito.ultimoCompletado);
-                const nuevaRacha = diasDesdeUltimo <= 1 ? habito.racha + 1 : 1;
-                const nuevoHistorial = [...(habito.historialCompletados || []), hoy].slice(-365);
-
-                setHabitos(prev =>
-                    prev.map(h => {
-                        if (h.id !== id) return h;
-                        return {
-                            ...h,
-                            diasInactividad: 0,
-                            racha: nuevaRacha,
-                            ultimoCompletado: hoy,
-                            historialCompletados: nuevoHistorial
-                        };
-                    })
-                );
-
-                registrarAccion(`"${habito.nombre}" completado`, () => {
-                    setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
-                });
-
-                /* Registrar actividad para el mapa de calor (silencioso) */
-                registrarHabitoCumplido(habito.id);
-            }
+            registrarAccion(mensaje, () => {
+                storeRestaurarHabito(estadoAnterior);
+            });
         },
-        [habitos, setHabitos, registrarAccion]
+        [storeToggleHabito, storeRestaurarHabito, registrarAccion]
     );
 
     /*
-     * Posponer hábito: marca como pospuesto hoy sin romper la racha
-     * El hábito pospuesto no cuenta como incumplimiento
+     * Posponer hábito usando el store de Zustand
      */
     const posponerHabito = useCallback(
         (id: number) => {
-            const hoy = obtenerFechaHoy();
-            const habito = habitos.find(h => h.id === id);
+            const resultado = storePosponerHabito(id);
+            if (!resultado) return;
 
-            if (!habito) return;
+            const {accion, estadoAnterior} = resultado;
 
-            const estadoAnterior = {...habito, historialPospuestos: [...(habito.historialPospuestos || [])]};
-            const estabaPospuestoHoy = habito.historialPospuestos?.includes(hoy) ?? false;
-
-            if (estabaPospuestoHoy) {
-                /* Quitar pospuesto */
-                setHabitos(prev =>
-                    prev.map(h => {
-                        if (h.id !== id) return h;
-                        return {
-                            ...h,
-                            historialPospuestos: (h.historialPospuestos || []).filter(f => f !== hoy)
-                        };
-                    })
-                );
-
-                registrarAccion(`"${habito.nombre}" ya no está pospuesto`, () => {
-                    setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
-                });
-            } else {
-                /* Posponer hoy */
-                const nuevoHistorialPospuestos = [...(habito.historialPospuestos || []), hoy].slice(-90);
-
-                setHabitos(prev =>
-                    prev.map(h => {
-                        if (h.id !== id) return h;
-                        return {
-                            ...h,
-                            historialPospuestos: nuevoHistorialPospuestos
-                        };
-                    })
-                );
-
-                mostrarMensaje(`"${habito.nombre}" pospuesto para hoy`, 'exito');
-
-                registrarAccion(`"${habito.nombre}" pospuesto`, () => {
-                    setHabitos(prev => prev.map(h => (h.id === id ? estadoAnterior : h)));
-                });
-
-                /* Registrar actividad para el mapa de calor */
-                registrarHabitoPospuesto(habito.id);
+            if (accion === 'pospuesto') {
+                mostrarMensaje(`"${estadoAnterior.nombre}" pospuesto para hoy`, 'exito');
             }
+
+            const mensaje = accion === 'pospuesto' ? `"${estadoAnterior.nombre}" pospuesto` : `"${estadoAnterior.nombre}" ya no está pospuesto`;
+
+            registrarAccion(mensaje, () => {
+                storeRestaurarHabito(estadoAnterior);
+            });
         },
-        [habitos, setHabitos, registrarAccion, mostrarMensaje]
+        [storePosponerHabito, storeRestaurarHabito, registrarAccion, mostrarMensaje]
+    );
+
+    /*
+     * Actualizar historial de hábito usando el store de Zustand
+     */
+    const actualizarHistorialHabito = useCallback(
+        (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => {
+            storeActualizarHistorial(id, fecha, estado);
+        },
+        [storeActualizarHistorial]
     );
 
     const exportarTodosDatos = useCallback(() => {
@@ -512,7 +411,7 @@ export function useDashboard(): UseDashboardReturn {
             setImportando(true);
             try {
                 const datos = await importarDatos(archivo);
-                setHabitos(datos.habitos);
+                storeSetHabitos(datos.habitos);
                 setTareas(datos.tareas);
                 if (datos.proyectos) setProyectos(datos.proyectos);
                 setNotas(datos.notas || '');
@@ -524,7 +423,7 @@ export function useDashboard(): UseDashboardReturn {
                 setImportando(false);
             }
         },
-        [mostrarMensaje, setHabitos, setTareas, setProyectos, setNotas]
+        [mostrarMensaje, storeSetHabitos, setTareas, setProyectos, setNotas]
     );
 
     return {
@@ -543,6 +442,7 @@ export function useDashboard(): UseDashboardReturn {
         actualizarNotas,
         toggleHabito,
         posponerHabito,
+        actualizarHistorialHabito,
         crearHabito,
         editarHabito,
         eliminarHabito,

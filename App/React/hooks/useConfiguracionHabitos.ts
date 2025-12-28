@@ -43,7 +43,7 @@ export interface ConfiguracionHabitos {
 export const COLUMNAS_POR_DEFECTO: ColumnasHabitos = {
     indice: true,
     nombre: true,
-    historial: true /* Visible por defecto - muestra 7 dias */,
+    historial: false /* Oculta por defecto - columna de actividad de 5 dias */,
     racha: false /* Oculta por defecto */,
     frecuencia: true /* Visible por defecto */,
     importancia: true /* Prioridad visible */,
@@ -62,9 +62,22 @@ export const CONFIG_HABITOS_POR_DEFECTO: ConfiguracionHabitos = {
 };
 
 export function useConfiguracionHabitos() {
-    const {valor, setValor} = useLocalStorage<ConfiguracionHabitos>('glory_config_habitos', {
+    const {valor: valorGuardado, setValor} = useLocalStorage<ConfiguracionHabitos>('glory_config_habitos', {
         valorPorDefecto: CONFIG_HABITOS_POR_DEFECTO
     });
+
+    /*
+     * Merge de columnas: asegurar que nuevas columnas se agreguen
+     * aunque el usuario tenga configuración antigua
+     */
+    const valor: ConfiguracionHabitos = {
+        ...CONFIG_HABITOS_POR_DEFECTO,
+        ...valorGuardado,
+        columnasVisibles: {
+            ...COLUMNAS_POR_DEFECTO,
+            ...valorGuardado.columnasVisibles
+        }
+    };
 
     const toggleOcultarCompletadosHoy = () => {
         setValor(prev => ({...prev, ocultarCompletadosHoy: !prev.ocultarCompletadosHoy}));
