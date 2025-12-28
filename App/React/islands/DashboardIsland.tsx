@@ -8,6 +8,7 @@ import {useEffect} from 'react';
 import {DashboardEncabezado, DashboardFooter, DashboardGrid, DashboardModales} from '../components/dashboard';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
+import {Landing} from '../components/landing/Landing';
 
 import '../styles/dashboard/componentes/experimentos.css';
 
@@ -43,6 +44,16 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
 
     if (auth.loading && !modales.modalLoginAbierto) {
         return <IndicadorCarga texto="Autenticando..." />;
+    }
+
+    /* Usuario no logueado: mostrar landing page */
+    if (!auth.user && !modales.modalLoginAbierto) {
+        return (
+            <>
+                <Landing onLogin={modales.abrirModalLogin} />
+                <DashboardModales ctx={ctx} />
+            </>
+        );
     }
 
     return (

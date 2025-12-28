@@ -90,3 +90,6 @@
 
 /* Panel de Actividad */
 @import './componentes/panelActividad.css';
+
+/* Landing Page */
+@import './componentes/landing.css';
