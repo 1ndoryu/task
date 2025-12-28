@@ -16,11 +16,11 @@ import type {ConfiguracionActividad} from '../../hooks/useConfiguracionActividad
 interface PanelActividadProps {
     configuracion: ConfiguracionActividad;
     onAbrirModalConfigActividad: () => void;
-    handleArrastre: JSX.Element;
+    renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
 }
 
-export function PanelActividad({configuracion, onAbrirModalConfigActividad, handleArrastre, handleMinimizar}: PanelActividadProps): JSX.Element {
+export function PanelActividad({configuracion, onAbrirModalConfigActividad, renderHandleArrastre, handleMinimizar}: PanelActividadProps): JSX.Element {
     /* Calcular filtros para pasar al hook (para cache inicial) */
     const tipoFiltro = configuracion.filtroTipo === 'todo' ? undefined : configuracion.filtroTipo;
     const filtrosIniciales = useMemo(
@@ -54,14 +54,14 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, hand
     const totalActividades = estadisticas ? Object.values(estadisticas.totales).reduce((a, b) => a + b, 0) : 0;
 
     return (
-        <div className="panelDashboard panelActividadContenedor">
+        <div className="panelDashboard internaColumna">
             <SeccionEncabezado
-                icono={<Activity size={12} />}
-                titulo="Actividad"
+                icono={null}
+                titulo={renderHandleArrastre('Actividad') as any}
                 subtitulo={obtenerSubtitulo()}
                 acciones={
                     <>
-                        {handleArrastre}
+                        {/* {handleArrastre} eliminado */}
                         {/* Estadisticas compactas */}
                         {estadisticas && (
                             <span className="panelActividadStats">

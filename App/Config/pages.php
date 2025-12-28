@@ -29,6 +29,6 @@ PageManager::setDefaultContentMode('code');
  * Incluye: Hábitos, Tareas, Notas rápidas
  */
 PageManager::reactPage('home', 'DashboardIsland', [
-    'titulo' => 'DASHBOARD_01',
+    'titulo' => 'Tasks',
     'usuario' => 'user@admin'
 ]);

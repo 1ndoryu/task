@@ -26,8 +26,8 @@
  * Cuadrado interactivo para completar rapidamente
  */
 .habitoCheckbox {
-    width: 1rem;
-    height: 1rem;
+    width: 0.75rem;
+    height: 0.75rem;
     border: 1px solid var(--dashboard-textoIndice);
     display: flex;
     align-items: center;
@@ -76,7 +76,6 @@
     text-align: center;
 }
 
-
 .tablaColumnaHistorial {
     display: flex;
     align-items: center;
@@ -103,7 +102,7 @@
     grid-template-columns: 2rem 3fr 1fr 1fr 2fr 1.5fr auto;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    /*border-bottom: 1px solid var(--dashboard-bordePrincipal); */
     align-items: center;
     transition: background-color var(--dashboard-transicionNormal);
     cursor: default;

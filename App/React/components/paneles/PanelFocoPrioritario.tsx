@@ -24,19 +24,19 @@ interface PanelFocoPrioritarioProps {
     onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
     onCambiarModoHabitos: (modo: any) => void;
-    handleArrastre: JSX.Element;
+    renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
 }
 
-export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHabitos, configuracion, onAbrirModalCrearHabito, onAbrirModalConfigHabitos, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onCambiarModoHabitos, handleArrastre, handleMinimizar}: PanelFocoPrioritarioProps): JSX.Element {
+export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHabitos, configuracion, onAbrirModalCrearHabito, onAbrirModalConfigHabitos, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onCambiarModoHabitos, renderHandleArrastre, handleMinimizar}: PanelFocoPrioritarioProps): JSX.Element {
     return (
         <>
             <SeccionEncabezado
-                icono={<AlertCircle size={12} />}
-                titulo="Foco Prioritario"
+                icono={null}
+                titulo={renderHandleArrastre('Habitos') as any}
                 acciones={
                     <>
-                        {handleArrastre}
+                        {/* {handleArrastre} eliminado */}
                         <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor as any)} icono={<ArrowUpDown size={10} />} titulo="Ordenar hábitos" />
                         <button className="selectorBadgeBoton" onClick={onAbrirModalCrearHabito} title="Nuevo Hábito">
                             <span className="selectorBadgeIcono">

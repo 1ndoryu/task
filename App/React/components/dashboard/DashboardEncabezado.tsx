@@ -8,6 +8,7 @@ import {useState, useRef} from 'react';
 import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../shared';
 import {VERSION_ACTUAL} from '../../data/changelog';
+import {APP_TEXTS} from '../../constants/appTexts';
 import type {InfoSuscripcion} from '../../types/dashboard';
 
 interface SincronizacionInfo {
@@ -49,7 +50,7 @@ interface MenuUsuarioState {
     y: number;
 }
 
-export function DashboardEncabezado({titulo = 'DASHBOARD_01', version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos}: DashboardEncabezadoProps): JSX.Element {
+export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
     const [menuUsuario, setMenuUsuario] = useState<MenuUsuarioState>({visible: false, x: 0, y: 0});
     const inputArchivoRef = useRef<HTMLInputElement>(null);

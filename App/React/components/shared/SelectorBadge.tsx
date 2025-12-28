@@ -5,7 +5,6 @@
  */
 
 import {useState, useRef, useEffect, useCallback} from 'react';
-import {ChevronDown} from 'lucide-react';
 import type {ReactNode} from 'react';
 
 export interface OpcionBadge<T extends string = string> {
@@ -109,7 +108,6 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
             <button type="button" className={`selectorBadgeBoton selectorBadgeBotonCompacto ${menuAbierto ? 'selectorBadgeBotonActivo' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
                 {icono && <span className="selectorBadgeIcono">{icono}</span>}
                 {opcionActual?.icono && <span className="selectorBadgeOpcionIcono">{opcionActual.icono}</span>}
-                <ChevronDown size={10} className={`selectorBadgeFlecha ${menuAbierto ? 'selectorBadgeFlechaAbierta' : ''}`} />
             </button>
 
             {menuAbierto && (

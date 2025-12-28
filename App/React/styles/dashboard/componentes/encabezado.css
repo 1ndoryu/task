@@ -36,7 +36,7 @@
 
 .encabezadoNav {
     display: flex;
-    gap: var(--dashboard-espacioLg);
+    gap: var(--dashboard-espacioSm);
 }
 
 .encabezadoEnlace {

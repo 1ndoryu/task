@@ -20,11 +20,11 @@ interface PanelScratchpadProps {
     configuracion: ConfiguracionScratchpad;
     onAbrirModalConfigScratchpad: () => void;
     onCambiarAltura: (altura: string) => void;
-    handleArrastre: JSX.Element;
+    renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
 }
 
-export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, handleArrastre, handleMinimizar}: PanelScratchpadProps): JSX.Element {
+export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar}: PanelScratchpadProps): JSX.Element {
     const [modalNotasAbierto, setModalNotasAbierto] = useState(false);
     const {estado, seleccionarNota, crearNuevaNota, actualizarContenido, obtenerTituloDeContenido, guardarNotaActiva} = useNotas();
     const {mostrarExito} = useAlertas();
@@ -63,12 +63,12 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
     return (
         <div className="panelDashboard internaColumna">
             <SeccionEncabezado
-                icono={<FileText size={12} />}
-                titulo="Scratchpad"
+                icono={null}
+                titulo={renderHandleArrastre('Notas') as any}
                 subtitulo={esNotaNueva ? 'Nueva nota' : tituloActivo}
                 acciones={
                     <>
-                        {handleArrastre}
+                        {/* {handleArrastre} eliminado */}
                         {/* Botón nueva nota */}
                         <button className="selectorBadgeBoton selectorBadgeBotonCompacto" onClick={manejarNuevaNota} title="Nueva nota">
                             <span className="selectorBadgeIcono">

@@ -4,29 +4,40 @@
  * Se coloca en el SeccionEncabezado de cada panel
  */
 
+import {GripVertical} from 'lucide-react';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 
 interface HandleArrastreProps {
     panelId: PanelId;
     onMouseDown: (panelId: PanelId, evento: React.MouseEvent) => void;
     estaArrastrando: boolean;
+    titulo?: string;
 }
 
-export function HandleArrastre({panelId, onMouseDown, estaArrastrando}: HandleArrastreProps): JSX.Element {
+export function HandleArrastre({panelId, onMouseDown, estaArrastrando, titulo}: HandleArrastreProps): JSX.Element {
     const manejarMouseDown = (evento: React.MouseEvent) => {
         onMouseDown(panelId, evento);
     };
 
+    const estiloConTitulo: React.CSSProperties = titulo
+        ? {
+              width: 'auto',
+              padding: 0,
+              gap: '6px',
+              justifyContent: 'flex-start',
+              background: 'transparent',
+              border: 'none',
+              height: 'auto' /* Permitir altura natural */,
+              minHeight: 'unset'
+          }
+        : {};
+
     return (
-        <button className={`handleArrastre ${estaArrastrando ? 'activo' : ''}`} onMouseDown={manejarMouseDown} title="Arrastrar para mover panel" type="button">
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
-                <circle cx="3.5" cy="2" r="1.2" />
-                <circle cx="3.5" cy="5" r="1.2" />
-                <circle cx="3.5" cy="8" r="1.2" />
-                <circle cx="6.5" cy="2" r="1.2" />
-                <circle cx="6.5" cy="5" r="1.2" />
-                <circle cx="6.5" cy="8" r="1.2" />
-            </svg>
+        <button className={`selectorBadgeBoton handleArrastre ${estaArrastrando ? 'activo' : ''}`} onMouseDown={manejarMouseDown} title="Arrastrar para mover panel" type="button" style={estiloConTitulo}>
+            <span className="selectorBadgeIcono">
+                <GripVertical size={10} />
+            </span>
+            {titulo && <span style={{fontSize: '0.75rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--dashboard-textoNormal)'}}>{titulo}</span>}
         </button>
     );
 }

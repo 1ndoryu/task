@@ -11,7 +11,7 @@
     align-items: flex-start;
     gap: var(--dashboard-espacioMd);
     padding: var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    /* border-bottom: 1px solid var(--dashboard-bordePrincipal); */
     transition: background-color var(--dashboard-transicionNormal);
     position: relative;
 }

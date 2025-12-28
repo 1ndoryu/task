@@ -29,22 +29,21 @@ interface PanelProyectosProps {
     onEditarTarea: (id: number, datos: any) => void;
     onEliminarTarea: (id: number) => void;
     onReordenarTareas: (tareas: Tarea[]) => void;
-    handleArrastre: JSX.Element;
+    renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
 }
 
-export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenProyectos, onAbrirModalCrearProyecto, onAbrirModalEditarProyecto, onAbrirModalConfigProyectos, onEliminarProyecto, onCambiarEstadoProyecto, onCambiarOrdenProyectos, onCompartirProyecto, estaCompartido, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, handleArrastre, handleMinimizar}: PanelProyectosProps): JSX.Element {
+export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenProyectos, onAbrirModalCrearProyecto, onAbrirModalEditarProyecto, onAbrirModalConfigProyectos, onEliminarProyecto, onCambiarEstadoProyecto, onCambiarOrdenProyectos, onCompartirProyecto, estaCompartido, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, renderHandleArrastre, handleMinimizar}: PanelProyectosProps): JSX.Element {
     /* Estado local para el proyecto seleccionado/expandido */
     const [proyectoSeleccionadoId, setProyectoSeleccionadoId] = useState<number | null>(null);
 
     return (
         <>
             <SeccionEncabezado
-                titulo="Proyectos"
-                icono={<Folder size={12} />}
+                icono={null}
+                titulo={renderHandleArrastre('Proyectos') as any}
                 acciones={
                     <>
-                        {handleArrastre}
                         <SelectorBadge opciones={opcionesOrdenProyectos} valorActual={configuracion.ordenDefecto} onChange={valor => onCambiarOrdenProyectos(valor as any)} icono={<ArrowUpDown size={10} />} titulo="Ordenar proyectos" />
                         <button className="selectorBadgeBoton" onClick={onAbrirModalCrearProyecto} title="Nuevo Proyecto">
                             <span className="selectorBadgeIcono">

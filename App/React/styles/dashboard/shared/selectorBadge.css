@@ -18,26 +18,25 @@
 .selectorBadgeBoton {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
+    justify-content: center; /* Centrar contenido */
+    gap: 0; /* Sin gap para icono único */
+    padding: 0; /* Sin padding */
+    width: 26px; /* Aumentado de 22px para más espacio */
+    height: 26px; /* Alto fijo igual al ancho */
     font-size: 0.65rem;
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-weight: 500;
     color: var(--dashboard-textoApagado);
     background-color: var(--dashboard-fondoHover);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: 0;
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
     white-space: nowrap;
-    min-height: 22px;
+    min-height: 0; /* Eliminar min-height anterior */
 }
 
-/* Modo compacto - solo iconos */
-.selectorBadgeBotonCompacto {
-    padding: 2px 6px;
-    gap: 3px;
-}
+/* Modo compacto - DEPRECADO (eliminado) */
 
 .selectorBadgeBoton:hover {
     border-color: var(--dashboard-bordePrincipal);
@@ -55,14 +54,14 @@
  * ICONOS 
  */
 .selectorBadgeIcono {
-    display: inline-flex;
+    display: flex; /* Cambiado a flex para mejor centrado vertical */
     align-items: center;
-    opacity: 0.7;
+    justify-content: center;
 }
 
 .selectorBadgeFlecha {
     transition: transform var(--dashboard-transicionRapida);
-    opacity: 0.6;
+    opacity: 0.8; /* Unificado ligeramente menos que 1 para jerarquía visual, pero más consistente */
 }
 
 .selectorBadgeFlechaAbierta {

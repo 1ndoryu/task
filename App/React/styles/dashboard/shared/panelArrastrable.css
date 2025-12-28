@@ -9,32 +9,22 @@
  * Botón en el encabezado de cada panel
  */
 .handleArrastre {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
-    color: var(--dashboard-textoApagado);
+    /* Dimensiones y estilos visuales heredados de .selectorBadgeBoton */
     cursor: grab;
-    transition: all var(--dashboard-transicionRapida);
 }
 
+/* Hover manejado por .selectorBadgeBoton */
 .handleArrastre:hover {
     color: var(--dashboard-textoSecundario);
-    background: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
+    /* El resto lo maneja la clase base */
 }
 
 .handleArrastre:active,
 .handleArrastre.activo {
     cursor: grabbing;
     color: var(--dashboard-acentoPrimario);
-    border-color: var(--dashboard-acentoPrimario);
     background: rgba(139, 92, 246, 0.1);
+    border-color: var(--dashboard-acentoPrimario);
 }
 
 /* 

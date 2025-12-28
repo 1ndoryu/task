@@ -1,25 +1,19 @@
 /*
  * DashboardFooter
  * Pie de página del dashboard
- * Responsabilidad única: mostrar información del sistema y fecha
+ * Responsabilidad única: mostrar información de copyright
  */
 
-interface DashboardFooterProps {
-    mensaje?: string;
-}
+import {APP_TEXTS} from '../../constants/appTexts';
 
-export function DashboardFooter({mensaje = 'SYSTEM_READY'}: DashboardFooterProps): JSX.Element {
-    const fechaFormateada = new Date().toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+export function DashboardFooter(): JSX.Element {
+    const anioActual = new Date().getFullYear();
+    const {producto, empresa, derechos} = APP_TEXTS.footer;
 
     return (
         <footer id="dashboard-footer" className="dashboardFooter">
             <p>
-                {mensaje} • {fechaFormateada}
+                {producto} es un producto de {empresa}. © {anioActual} {derechos}.
             </p>
         </footer>
     );

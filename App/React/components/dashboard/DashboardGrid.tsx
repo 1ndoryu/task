@@ -56,17 +56,17 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
     );
 
     const renderizarContenidoPanel = (panelId: PanelId): JSX.Element | null => {
-        const handleArrastreElement = <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} />;
+        const renderHandleArrastre = (titulo?: string) => <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />;
         const handleMinimizarElement = <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
         /* Scratchpad tiene su propio sistema de resize interno y gestiona sus notas */
         if (panelId === 'scratchpad') {
-            return <PanelScratchpad configuracion={configScratchpad.configuracion} onAbrirModalConfigScratchpad={modales.abrirModalConfigScratchpad} onCambiarAltura={configScratchpad.cambiarAltura} handleArrastre={handleArrastreElement} handleMinimizar={handleMinimizarElement} />;
+            return <PanelScratchpad configuracion={configScratchpad.configuracion} onAbrirModalConfigScratchpad={modales.abrirModalConfigScratchpad} onCambiarAltura={configScratchpad.cambiarAltura} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />;
         }
 
         /* Panel de Actividad */
         if (panelId === 'actividad') {
-            return <PanelActividad configuracion={configActividad.configuracion} onAbrirModalConfigActividad={modales.abrirModalConfigActividad} handleArrastre={handleArrastreElement} handleMinimizar={handleMinimizarElement} />;
+            return <PanelActividad configuracion={configActividad.configuracion} onAbrirModalConfigActividad={modales.abrirModalConfigActividad} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />;
         }
 
         /* Obtener altura del panel desde configuración */
@@ -75,12 +75,12 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
         const panelesContenido: Partial<Record<PanelId, (alturaProps: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => JSX.Element>> = {
             focoPrioritario: ({altura, contenedorRef, esAuto}) => (
                 <div ref={contenedorRef} className="panelDashboard" style={esAuto ? undefined : {height: altura}}>
-                    <PanelFocoPrioritario habitos={ordenHabitos.habitosOrdenados} modoOrdenHabitos={ordenHabitos.modoActual} opcionesOrdenHabitos={opciones.opcionesOrdenHabitos} configuracion={configHabitos.configuracion} onAbrirModalCrearHabito={dashboard.abrirModalCrearHabito} onAbrirModalConfigHabitos={modales.abrirModalConfigHabitos} onToggleHabito={dashboard.toggleHabito} onEditarHabito={dashboard.abrirModalEditarHabito} onEliminarHabito={dashboard.eliminarHabito} onPosponerHabito={dashboard.posponerHabito} onMarcarDiaHabito={ctx.marcarDiaHabitoConSync} onDesmarcarDiaHabito={ctx.desmarcarDiaHabitoConSync} onCambiarModoHabitos={ordenHabitos.cambiarModo} handleArrastre={handleArrastreElement} handleMinimizar={handleMinimizarElement} />
+                    <PanelFocoPrioritario habitos={ordenHabitos.habitosOrdenados} modoOrdenHabitos={ordenHabitos.modoActual} opcionesOrdenHabitos={opciones.opcionesOrdenHabitos} configuracion={configHabitos.configuracion} onAbrirModalCrearHabito={dashboard.abrirModalCrearHabito} onAbrirModalConfigHabitos={modales.abrirModalConfigHabitos} onToggleHabito={dashboard.toggleHabito} onEditarHabito={dashboard.abrirModalEditarHabito} onEliminarHabito={dashboard.eliminarHabito} onPosponerHabito={dashboard.posponerHabito} onMarcarDiaHabito={ctx.marcarDiaHabitoConSync} onDesmarcarDiaHabito={ctx.desmarcarDiaHabitoConSync} onCambiarModoHabitos={ordenHabitos.cambiarModo} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
                 </div>
             ),
             proyectos: ({altura, contenedorRef, esAuto}) => (
                 <div ref={contenedorRef} className="panelDashboard" style={esAuto ? undefined : {height: altura}}>
-                    <PanelProyectos proyectos={dashboard.proyectos || []} tareas={dashboard.tareas} configuracion={configProyectos.configuracion} opcionesOrdenProyectos={opciones.opcionesOrdenProyectos} onAbrirModalCrearProyecto={modales.abrirModalCrearProyecto} onAbrirModalEditarProyecto={modales.abrirModalEditarProyecto} onAbrirModalConfigProyectos={modales.abrirModalConfigProyectos} onEliminarProyecto={dashboard.eliminarProyecto} onCambiarEstadoProyecto={dashboard.cambiarEstadoProyecto} onCambiarOrdenProyectos={configProyectos.cambiarOrdenDefecto} onCompartirProyecto={compartir.manejarCompartirProyecto} estaCompartido={compartir.estaCompartidoProyecto} onToggleTarea={dashboard.toggleTarea} onCrearTarea={dashboard.crearTarea} onEditarTarea={dashboard.editarTarea} onEliminarTarea={dashboard.eliminarTarea} onReordenarTareas={dashboard.reordenarTareas} handleArrastre={handleArrastreElement} handleMinimizar={handleMinimizarElement} />
+                    <PanelProyectos proyectos={dashboard.proyectos || []} tareas={dashboard.tareas} configuracion={configProyectos.configuracion} opcionesOrdenProyectos={opciones.opcionesOrdenProyectos} onAbrirModalCrearProyecto={modales.abrirModalCrearProyecto} onAbrirModalEditarProyecto={modales.abrirModalEditarProyecto} onAbrirModalConfigProyectos={modales.abrirModalConfigProyectos} onEliminarProyecto={dashboard.eliminarProyecto} onCambiarEstadoProyecto={dashboard.cambiarEstadoProyecto} onCambiarOrdenProyectos={configProyectos.cambiarOrdenDefecto} onCompartirProyecto={compartir.manejarCompartirProyecto} estaCompartido={compartir.estaCompartidoProyecto} onToggleTarea={dashboard.toggleTarea} onCrearTarea={dashboard.crearTarea} onEditarTarea={dashboard.editarTarea} onEliminarTarea={dashboard.eliminarTarea} onReordenarTareas={dashboard.reordenarTareas} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
                 </div>
             ),
             ejecucion: ({altura, contenedorRef, esAuto}) => (
@@ -108,7 +108,7 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
                         onCompartirTarea={compartir.manejarCompartirTarea}
                         estaCompartida={compartir.estaCompartidaTarea}
                         obtenerParticipantes={compartir.obtenerParticipantesTarea}
-                        handleArrastre={handleArrastreElement}
+                        renderHandleArrastre={renderHandleArrastre}
                         handleMinimizar={handleMinimizarElement}
                         onEditarHabito={manejarEditarHabitoPorId}
                         onEliminarHabito={dashboard.eliminarHabito}
