@@ -11,9 +11,9 @@
  * Fase 9.2.4: Seccion de responsables integrada
  */
 
-import {useState, useCallback, useEffect, useRef} from 'react';
-import {MessageSquare, MessageSquareOff} from 'lucide-react';
-import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEquipo, RolCompartido} from '../../../types/dashboard';
+import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
+import {MessageSquare, MessageSquareOff, Activity, BarChart2} from 'lucide-react';
+import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea} from '../../../types/dashboard';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
 import {AccionesFormulario, Modal, SeccionPanel} from '../../shared';
 import {MapaCalorProyecto} from '../../shared/MapaCalorProyecto';
@@ -34,11 +34,13 @@ interface ModalProyectoProps {
     onAgregarParticipante?: (companeroId: number, rol: RolCompartido) => void;
     onRemoverParticipante?: (participanteId: number) => void;
     onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
+    /* Tareas para calcular estadisticas (Fase 9.2.7) */
+    tareas?: Tarea[];
 }
 
 type PestanaModal = 'configuracion' | 'chat';
 
-export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante}: ModalProyectoProps): JSX.Element | null {
+export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, tareas = []}: ModalProyectoProps): JSX.Element | null {
     const modoEdicion = !!proyecto;
 
     /* Estado local para edicion */
@@ -49,6 +51,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const [prioridad, setPrioridad] = useState<NivelPrioridad>(proyecto?.prioridad || 'media');
     const [urgencia, setUrgencia] = useState<NivelUrgencia | null>(proyecto?.urgencia || null);
     const [fechaLimite, setFechaLimite] = useState(proyecto?.fechaLimite || '');
+    const [adjuntos, setAdjuntos] = useState<Adjunto[]>(proyecto?.adjuntos || []);
     const [errores, setErrores] = useState<{nombre?: string}>({});
 
     /* Estado para pestañas responsive */
@@ -69,6 +72,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
         prioridad: NivelPrioridad;
         urgencia: NivelUrgencia | null;
         fechaLimite: string;
+        adjuntos: Adjunto[];
     } | null>(null);
 
     /* Sincronizar estado cuando cambia el proyecto */
@@ -90,7 +94,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                 colorIcono: proyecto.colorIcono || '#888888',
                 prioridad: proyecto.prioridad,
                 urgencia: proyecto.urgencia || null,
-                fechaLimite: proyecto.fechaLimite || ''
+                fechaLimite: proyecto.fechaLimite || '',
+                adjuntos: proyecto.adjuntos || []
             };
         } else {
             /* Resetear si no hay proyecto (modo creacion) */
@@ -101,6 +106,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             setPrioridad('media');
             setUrgencia(null);
             setFechaLimite('');
+            setAdjuntos([]);
             estadoInicialRef.current = null;
         }
         setErrores({});
@@ -123,9 +129,10 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
         if (prioridad !== inicial.prioridad) return true;
         if (urgencia !== inicial.urgencia) return true;
         if (fechaLimite !== inicial.fechaLimite) return true;
+        if (JSON.stringify(adjuntos) !== JSON.stringify(inicial.adjuntos)) return true;
 
         return false;
-    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite]);
+    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos]);
 
     const validarFormulario = useCallback((): boolean => {
         const nuevosErrores: {nombre?: string} = {};
@@ -150,10 +157,11 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             colorIcono,
             prioridad,
             urgencia: urgencia || undefined,
-            fechaLimite: fechaLimite || undefined
+            fechaLimite: fechaLimite || undefined,
+            adjuntos
         });
         onCerrar();
-    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, validarFormulario, onGuardar, onCerrar]);
+    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, validarFormulario, onGuardar, onCerrar]);
 
     /* Auto-guardado: al cerrar el modal, guardar solo si hay cambios */
     const manejarCerrarConGuardado = useCallback(() => {
@@ -194,11 +202,78 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const mostrarChat = modoEdicion;
     const mostrarChatColumna = mostrarChat && chatVisible;
 
+    /* Calcular estadisticas de tareas (Fase 9.2.7) */
+    const {tareasCompletadas, tareasPendientes} = useMemo(() => {
+        if (!proyecto || !tareas.length) return {tareasCompletadas: 0, tareasPendientes: 0};
+
+        const tareasProyecto = tareas.filter(t => t.proyectoId === proyecto.id);
+        return {
+            tareasCompletadas: tareasProyecto.filter(t => t.completado).length,
+            tareasPendientes: tareasProyecto.filter(t => !t.completado).length
+        };
+    }, [proyecto?.id, tareas]);
+
     /* Clase extra para modal expandido */
     const claseModal = mostrarChat ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
 
+    /* Header Icons (Fase 9.2.8) */
+    const accionesHeader = (
+        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+            {/* Estadisticas (Placeholder) */}
+            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)">
+                <BarChart2 size={16} className="textoApagado" />
+            </button>
+
+            {/* Actividad / Chat */}
+            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'}>
+                {tieneMensajesSinLeer ? (
+                    <div style={{position: 'relative'}}>
+                        <Activity size={16} />
+                        <span className="indicadorBadge" />
+                    </div>
+                ) : (
+                    <Activity size={16} />
+                )}
+            </button>
+        </div>
+    );
+
+    /* Boton del encabezado (Chat/Historial) */
+    const botonChat = modoEdicion ? (
+        <button
+            type="button"
+            style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: chatVisible || (tieneMensajesSinLeer && !chatVisible) ? 'var(--dashboard-textoActivo)' : 'var(--dashboard-textoApagado)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px',
+                transition: 'color 0.2s',
+                position: 'relative'
+            }}
+            onClick={toggleChatVisible}
+            title={chatVisible ? 'Ocultar chat' : `Mostrar chat${tieneMensajesSinLeer ? ' (mensajes sin leer)' : ''}`}>
+            {chatVisible ? <MessageSquareOff size={18} /> : <MessageSquare size={18} />}
+            {tieneMensajesSinLeer && !chatVisible && (
+                <span
+                    style={{
+                        position: 'absolute',
+                        top: '2px',
+                        right: '2px',
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--dashboard-estadoAlta)'
+                    }}
+                />
+            )}
+        </button>
+    ) : null;
+
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Editar Proyecto' : 'Nuevo Proyecto'} claseExtra={claseModal}>
+        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? nombre : 'Nuevo Proyecto'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={true}>
             {mostrarChat ? (
                 <>
                     {/* Pestañas para móvil */}
@@ -241,23 +316,15 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                                     onRemoverParticipante={onRemoverParticipante}
                                     onCambiarRolParticipante={onCambiarRolParticipante}
                                     puedeGestionarParticipantes={modoEdicion}
+                                    adjuntos={adjuntos}
+                                    onAdjuntosChange={setAdjuntos}
+                                    tareasCompletadas={tareasCompletadas}
+                                    tareasPendientes={tareasPendientes}
                                 />
-
-                                {/* Mapa de calor - actividad del proyecto */}
-                                {proyecto && proyecto.id > 0 && (
-                                    <SeccionPanel titulo="Actividad del proyecto">
-                                        <MapaCalorProyecto proyectoId={proyecto.id} periodo="mes" />
-                                    </SeccionPanel>
-                                )}
                             </div>
 
-                            {/* Acciones - sin botón eliminar */}
-                            <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Guardar cambios">
-                                {/* Botón para toggle del chat */}
-                                <button type="button" className={`accionesFormularioBotonChat ${tieneMensajesSinLeer && !chatVisible ? 'accionesFormularioBotonChat--noLeidos' : ''}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : `Mostrar chat${tieneMensajesSinLeer ? ' (mensajes sin leer)' : ''}`}>
-                                    {chatVisible ? <MessageSquareOff size={14} /> : <MessageSquare size={14} />}
-                                </button>
-                            </AccionesFormulario>
+                            {/* Acciones - sin botón eliminar y sin chat (ahora en header) */}
+                            <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Guardar cambios" />
                         </div>
 
                         {/* Columna Derecha: Chat e Historial */}
@@ -287,6 +354,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                             onFechaLimiteChange={setFechaLimite}
                             errorNombre={errores.nombre}
                             modoEdicion={false}
+                            adjuntos={adjuntos}
+                            onAdjuntosChange={setAdjuntos}
                         />
                     </div>
                     <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Crear proyecto" />

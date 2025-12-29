@@ -39,8 +39,7 @@ interface PanelEjecucionProps {
     onCompartirTarea: (tarea: Tarea) => void;
     estaCompartida: (id: number) => boolean;
     obtenerParticipantes: (tarea: Tarea) => Participante[];
-    handleArrastre: JSX.Element /* Se elimina esta */;
-    renderHandleArrastre: (titulo?: string) => JSX.Element /* Nueva prop */;
+    renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
     /* Callbacks para editar/eliminar habitos desde tareas-habito (Fase 7.6.1) */
     onEditarHabito?: (habitoId: number) => void;

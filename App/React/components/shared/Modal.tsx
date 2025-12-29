@@ -13,9 +13,13 @@ export interface ModalProps {
     titulo: string;
     children: React.ReactNode;
     claseExtra?: string;
+    /* Elementos opcionales a mostrar a la derecha del encabezado */
+    accionesEncabezado?: React.ReactNode;
+    /* Si true, no muestra la X de cerrar */
+    ocultarBotonCerrar?: boolean;
 }
 
-export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = ''}: ModalProps): JSX.Element | null {
+export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', accionesEncabezado, ocultarBotonCerrar = false}: ModalProps): JSX.Element | null {
     /*
      * Cierra el modal al presionar Escape
      */
@@ -55,9 +59,14 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = ''}
                     <h2 id="modal-titulo" className="modalTitulo">
                         {titulo}
                     </h2>
-                    <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">
-                        <X size={16} />
-                    </button>
+                    <div className="modalAccionesEncabezado" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                        {accionesEncabezado}
+                        {!ocultarBotonCerrar && (
+                            <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="modalContenido">{children}</div>
             </div>

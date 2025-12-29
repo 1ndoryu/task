@@ -149,6 +149,8 @@ export interface Proyecto {
     propietarioNombre?: string;
     propietarioAvatar?: string;
     miRol?: RolCompartido;
+    /* Adjuntos del proyecto (Fase 9) */
+    adjuntos?: Adjunto[];
 }
 
 export interface Tarea {

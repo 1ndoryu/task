@@ -123,28 +123,28 @@ export function SelectorIconoProyecto({iconoId, colorIcono, onCambio}: SelectorI
 
     return (
         <div ref={contenedorRef} className="selectorIconoProyecto">
-            <button type="button" className="selectorIconoProyecto__trigger" onClick={() => setAbierto(!abierto)} title="Cambiar icono">
-                <IconoActual size={20} style={{color: colorIcono}} />
+            <button type="button" className="selectorIconoProyecto__trigger" style={{width: '32px', height: '32px'}} onClick={() => setAbierto(!abierto)} title="Cambiar icono">
+                <IconoActual size={16} style={{color: colorIcono}} />
             </button>
 
             {abierto && (
-                <div className="selectorIconoProyecto__dropdown">
+                <div className="selectorIconoProyecto__dropdown" style={{minWidth: '220px', padding: '12px'}}>
                     {Object.entries(CATEGORIAS_ICONOS).map(([categoria, iconos]) => (
                         <div key={categoria} className="selectorIconoProyecto__categoria">
                             <div className="selectorIconoProyecto__categoriaTitulo">{NOMBRES_CATEGORIAS[categoria]}</div>
-                            <div className="selectorIconoProyecto__grid">
+                            <div className="selectorIconoProyecto__grid" style={{gap: '4px'}}>
                                 {iconos.map(({id, Icono}) => (
-                                    <button key={id} type="button" className={`selectorIconoProyecto__opcion${id === iconoId ? ' selectorIconoProyecto__opcion--seleccionado' : ''}`} onClick={() => manejarSeleccionIcono(id)} title={id}>
-                                        <Icono size={16} style={{color: colorIcono}} />
+                                    <button key={id} type="button" className={`selectorIconoProyecto__opcion${id === iconoId ? ' selectorIconoProyecto__opcion--seleccionado' : ''}`} style={{width: '28px', height: '28px'}} onClick={() => manejarSeleccionIcono(id)} title={id}>
+                                        <Icono size={14} style={{color: colorIcono}} />
                                     </button>
                                 ))}
                             </div>
                         </div>
                     ))}
 
-                    <div className="selectorColores">
+                    <div className="selectorColores" style={{paddingTop: '8px', gap: '6px'}}>
                         {COLORES_DISPONIBLES.map(({id, valor}) => (
-                            <button key={id} type="button" className={`selectorColores__opcion${valor === colorIcono ? ' selectorColores__opcion--seleccionado' : ''}`} style={{backgroundColor: valor}} onClick={() => manejarSeleccionColor(valor)} title={id} />
+                            <button key={id} type="button" className={`selectorColores__opcion${valor === colorIcono ? ' selectorColores__opcion--seleccionado' : ''}`} style={{backgroundColor: valor, width: '20px', height: '20px'}} onClick={() => manejarSeleccionColor(valor)} title={id} />
                         ))}
                     </div>
                 </div>

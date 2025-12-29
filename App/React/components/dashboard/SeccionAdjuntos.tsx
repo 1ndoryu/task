@@ -15,11 +15,13 @@ interface SeccionAdjuntosProps {
     adjuntos: Adjunto[];
     onChange: (adjuntos: Adjunto[]) => void;
     modoLegacy?: boolean;
+    estilo?: 'clasico' | 'moderno';
+    etiqueta?: string;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false}: SeccionAdjuntosProps): JSX.Element {
+export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo = 'clasico', etiqueta = 'Adjuntos'}: SeccionAdjuntosProps): JSX.Element {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioRefs = useRef<{[key: number]: HTMLAudioElement}>({});
     const [error, setError] = useState<string | null>(null);
@@ -312,7 +314,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false}: Seccio
         return adjunto.url;
     };
 
-    return (
+    const renderContenidoClasico = () => (
         <SeccionPanel titulo="Adjuntos">
             <div className="adjuntosContenedor">
                 {/* Lista de adjuntos */}
@@ -458,4 +460,63 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false}: Seccio
             </div>
         </SeccionPanel>
     );
+
+    const renderContenidoModerno = () => (
+        <div className="propiedadesCompactas">
+            <span className="propiedadesCompactas__etiqueta">{etiqueta}</span>
+            <div className="propiedadesCompactas__contenido">
+                {adjuntos.map(adjunto => (
+                    <div
+                        key={adjunto.id}
+                        className="pillOpcion"
+                        onClick={() => {
+                            const urlPreview = obtenerUrlPreview(adjunto);
+                            if (adjunto.tipo === 'imagen' && urlPreview) setPreviewImage({...adjunto, url: urlPreview});
+                            else if (adjunto.tipo !== 'imagen' && !esCifrado(adjunto)) window.open(adjunto.url, '_blank');
+                        }}
+                        title={adjunto.nombre}>
+                        {adjunto.tipo === 'imagen' ? <ImageIcon size={14} /> : adjunto.tipo === 'audio' ? <Music size={14} /> : <File size={14} />}
+                        <span style={{maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis'}}>{adjunto.nombre}</span>
+                        <button
+                            className="botonSinEstilo"
+                            onClick={e => {
+                                e.stopPropagation();
+                                eliminarAdjunto(adjunto.id);
+                            }}>
+                            <X size={12} className="textoApagado hover:text-red-500" />
+                        </button>
+                    </div>
+                ))}
+
+                {/* Boton Agregar Compacto */}
+                <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => fileInputRef.current?.click()} title="Agregar adjunto" disabled={estadoSubida.subiendo}>
+                    {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
+                    <span>Agregar</span>
+                </button>
+
+                <input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={handleFileSelect} accept="image/*,audio/*,.pdf,.doc,.docx,.txt" disabled={estadoSubida.subiendo} />
+
+                {/* Mensaje de error (Toast pequeño) */}
+                {(error || estadoSubida.error) && (
+                    <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
+                        {error || estadoSubida.error}
+                    </div>
+                )}
+
+                {/* Reutilizamos el overlay de imagen si es necesario (el mismo de clasico funciona) */}
+                {previewImage && (
+                    <div className="adjuntoOverlay" onClick={() => setPreviewImage(null)}>
+                        <div className="adjuntoOverlayContenido" onClick={e => e.stopPropagation()}>
+                            <button className="adjuntoBotonCerrar" onClick={() => setPreviewImage(null)}>
+                                <X size={24} />
+                            </button>
+                            <img src={contenidoDescifrado[previewImage.id] || previewImage.url} alt={previewImage.nombre} className="adjuntoImagenFull" />
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    return estilo === 'moderno' ? renderContenidoModerno() : renderContenidoClasico();
 }

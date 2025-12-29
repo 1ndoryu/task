@@ -7,8 +7,9 @@
  * Fase 9.2.4: Seccion de responsables para proyectos compartidos
  */
 
-import type {NivelPrioridad, NivelUrgencia, Participante, CompaneroEquipo, RolCompartido} from '../../../types/dashboard';
-import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, PropiedadesCompactas, SeccionResponsables} from '../../shared';
+import type {NivelPrioridad, NivelUrgencia, Participante, CompaneroEquipo, RolCompartido, Adjunto} from '../../../types/dashboard';
+import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, PropiedadesCompactas, SeccionResponsables, ResumenTareasProyecto} from '../../shared';
+import {SeccionAdjuntos} from '../SeccionAdjuntos';
 
 interface FormularioProyectoModernoProps {
     nombre: string;
@@ -36,9 +37,15 @@ interface FormularioProyectoModernoProps {
     onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
     /* Si el usuario puede gestionar participantes */
     puedeGestionarParticipantes?: boolean;
+    /* Adjuntos del proyecto (Fase 9.2.5) */
+    adjuntos?: Adjunto[];
+    onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
+    /* Estadisticas de tareas (Fase 9.2.7) */
+    tareasCompletadas?: number;
+    tareasPendientes?: number;
 }
 
-export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false}: FormularioProyectoModernoProps): JSX.Element {
+export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, tareasCompletadas = 0, tareasPendientes = 0}: FormularioProyectoModernoProps): JSX.Element {
     /* Mostrar seccion de responsables solo en modo edicion */
     const mostrarResponsables = modoEdicion;
 
@@ -55,6 +62,12 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
 
             {/* Seccion de responsables (solo en modo edicion) */}
             {mostrarResponsables && <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={puedeGestionarParticipantes} etiqueta="Responsables" />}
+
+            {/* Seccion de adjuntos (Inline - Fase 9.2.5) */}
+            {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}
+
+            {/* Resumen de Tareas (Solo en modo edicion) */}
+            {modoEdicion && (tareasCompletadas > 0 || tareasPendientes > 0) && <ResumenTareasProyecto completadas={tareasCompletadas} pendientes={tareasPendientes} />}
         </div>
     );
 }

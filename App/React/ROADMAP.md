@@ -9,6 +9,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Fecha de inicio:** 2025-12-19  
 **Version:** v1.0.9-beta  
 **Ultima actualizacion:** 2025-12-29
+22. ✅ **Fase 9.10** - Cambiar botones de creación a Creación Rápida (Proyectos, Tareas, etc)
 **Estado:** Fase 9 EN PROGRESO - Refactorización Visual Configuración (Estilo Linear)
 
 ## Funcionalidades Completadas
@@ -126,11 +127,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Estilos centralizados en configuracionModerna.css
 
 #### 9.2.5 Sección de Adjuntos (Separada)
-- [~] Componente `SeccionAdjuntos` ya existe en dashboard/ (462 líneas)
+- [x] Componente `SeccionAdjuntos` ya existe en dashboard/ (462 líneas)
   - Grid de thumbnails para imágenes - implementado
   - Lista compacta para otros archivos - implementado
   - Preview inline para imágenes - implementado
-  - TODO: Adaptar al layout inline estilo Linear (etiqueta + pills)
+  - [x] Adaptar al layout inline estilo Linear (etiqueta + pills)
 
 #### 9.2.6 Descripción sin Borde
 - [x] Reutilizar componente `CampoSubtituloLimpio`
@@ -145,10 +146,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Link "Ver todas →" con callback opcional
 
 #### 9.2.8 Header Derecha - Iconos de Acción
-- [ ] Mover botón de cerrar (X) y reemplazar con:
+- [x] Mover botón de cerrar (X) y reemplazar con:
   - Icono de Actividad (historial/chat) - reemplaza el botón de chat actual
   - Icono de Estadísticas (futuro)
-- [ ] Quitar botón de cerrar tradicional
+- [x] Quitar botón de cerrar tradicional
   - Click fuera del modal cierra (ya existe)
   - ESC cierra (ya existe)
 
@@ -194,7 +195,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 | `BotonOpcionCompacta`   | Pill reutilizable con menú      | ✅ Completado |
 | `SeccionResponsables`   | Lista de avatares + agregar     | ✅ Completado |
 | `ResumenTareasProyecto` | Contador compacto + barra       | ✅ Completado |
-| `SeccionAdjuntos`       | Grid/lista de archivos          | 🛠️ Existente  |
+| `SeccionAdjuntos`       | Grid/lista de archivos          | ✅ Completado |
 
 ### 9.8 Estilos CSS Nuevos
 
@@ -214,9 +215,9 @@ Todos centralizados en `configuracionModerna.css`:
 4. ✅ **Fase 9.3** - Tamaño del modal (600px)
 5. ✅ **Fase 9.2.6** - Descripción sin borde
 6. ✅ **Fase 9.2.4** - Responsables
-7. 🛠️ **Fase 9.2.5** - Adjuntos (existente, adaptar a Linear)
+7. ✅ **Fase 9.2.5** - Adjuntos (existente, adaptar a Linear)
 8. ✅ **Fase 9.2.7** - Resumen de tareas
-9. ⏳ **Fase 9.2.8** - Header icons (pendiente)
+9. ✅ **Fase 9.2.8** - Header icons
 10. ⏳ **Fase 9.4** - Aplicar a Tareas
 11. ⏳ **Fase 9.5** - Aplicar a Hábitos
 
