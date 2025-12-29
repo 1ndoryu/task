@@ -7,10 +7,10 @@
  * Fase 9.2.4: Seccion de responsables para proyectos compartidos
  */
 
-import type {NivelPrioridad, NivelUrgencia, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea} from '../../../types/dashboard';
+import type {NivelPrioridad, NivelUrgencia, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea, Hito} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, PropiedadesCompactas, SeccionResponsables} from '../../shared';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
-import {ListaTareasCompacta} from './ListaTareasCompacta';
+import {ListaHitos} from './ListaHitos';
 
 interface FormularioProyectoModernoProps {
     nombre: string;
@@ -41,19 +41,27 @@ interface FormularioProyectoModernoProps {
     /* Adjuntos del proyecto (Fase 9.2.5) */
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
-    /* Tareas para la lista compacta (Fase 9.2.7) */
+    /* Tareas para la lista compacta (Fase 9.2.7) - DEPRECADO POR HITOS */
     tareas?: Tarea[];
     onToggleTarea?: (id: number) => void;
+    /* Hitos del proyecto (Fase 9.2.7) */
+    hitos?: Hito[];
+    onHitosChange?: (hitos: Hito[]) => void;
 }
 
-export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, tareas = [], onToggleTarea}: FormularioProyectoModernoProps): JSX.Element {
+export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, tareas = [], onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
     /* Mostrar seccion de responsables solo en modo edicion */
     const mostrarResponsables = modoEdicion;
 
     return (
         <div id="formulario-proyecto-moderno" className="formularioProyectoModerno">
-            {/* Titulo con icono */}
-            <CampoTituloLimpio id="proyecto-nombre" valor={nombre} onChange={onNombreChange} placeholder="Nombre del proyecto..." error={errorNombre} autoFocus={!modoEdicion} iconoIzquierda={<SelectorIconoProyecto iconoId={icono} colorIcono={colorIcono} onCambio={onIconoChange} />} />
+            {/* Icono del proyecto (arriba del titulo) */}
+            <div style={{marginBottom: 'var(--dashboard-espacioXs)'}}>
+                <SelectorIconoProyecto iconoId={icono} colorIcono={colorIcono} onCambio={onIconoChange} />
+            </div>
+
+            {/* Titulo sin icono integrado */}
+            <CampoTituloLimpio id="proyecto-nombre" valor={nombre} onChange={onNombreChange} placeholder="Nombre del proyecto..." error={errorNombre} autoFocus={!modoEdicion} />
 
             {/* Descripcion/Lead */}
             <CampoSubtituloLimpio id="proyecto-descripcion" valor={descripcion} onChange={onDescripcionChange} placeholder="Describe brevemente el objetivo del proyecto..." />
@@ -67,8 +75,8 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
             {/* Seccion de adjuntos (Inline - Fase 9.2.5) */}
             {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}
 
-            {/* Lista de Tareas Compacta (Solo en modo edicion y si existe el callback) */}
-            {modoEdicion && onToggleTarea && tareas.length > 0 && <ListaTareasCompacta tareas={tareas} onToggleTarea={onToggleTarea} />}
+            {/* Lista de Hitos (Fase 9.2.7) */}
+            {onHitosChange && <ListaHitos hitos={hitos} onChange={onHitosChange} />}
         </div>
     );
 }

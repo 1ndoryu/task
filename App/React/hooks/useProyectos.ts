@@ -5,7 +5,7 @@
  */
 
 import {useCallback} from 'react';
-import type {Proyecto, NivelPrioridad, NivelUrgencia, Adjunto} from '../types/dashboard';
+import type {Proyecto, NivelPrioridad, NivelUrgencia, Adjunto, Hito} from '../types/dashboard';
 import {obtenerFechaHoy} from '../utils/fecha';
 
 export interface DatosNuevoProyecto {
@@ -17,6 +17,7 @@ export interface DatosNuevoProyecto {
     icono?: string;
     colorIcono?: string;
     adjuntos?: Adjunto[];
+    hitos?: Hito[];
 }
 
 export interface UseProyectosParams {
@@ -54,7 +55,8 @@ export function useProyectos({proyectos, setProyectos, registrarAccion, mostrarM
                 estado: 'activo',
                 fechaCreacion: hoy,
                 progreso: 0,
-                adjuntos: datos.adjuntos
+                adjuntos: datos.adjuntos,
+                hitos: datos.hitos || []
             };
 
             setProyectos(prev => [nuevoProyecto, ...prev]);

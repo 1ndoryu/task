@@ -13,7 +13,7 @@
 
 import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
 import {MessageSquare, MessageSquareOff, Activity, BarChart2} from 'lucide-react';
-import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea} from '../../../types/dashboard';
+import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea, Hito} from '../../../types/dashboard';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
 import {AccionesFormulario, Modal, SeccionPanel} from '../../shared';
 import {MapaCalorProyecto} from '../../shared/MapaCalorProyecto';
@@ -53,6 +53,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const [urgencia, setUrgencia] = useState<NivelUrgencia | null>(proyecto?.urgencia || null);
     const [fechaLimite, setFechaLimite] = useState(proyecto?.fechaLimite || '');
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>(proyecto?.adjuntos || []);
+    const [hitos, setHitos] = useState<Hito[]>(proyecto?.hitos || []);
     const [errores, setErrores] = useState<{nombre?: string}>({});
 
     /* Estado para pestañas responsive */
@@ -73,7 +74,9 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
         prioridad: NivelPrioridad;
         urgencia: NivelUrgencia | null;
         fechaLimite: string;
+
         adjuntos: Adjunto[];
+        hitos: Hito[];
     } | null>(null);
 
     /* Sincronizar estado cuando cambia el proyecto */
@@ -86,6 +89,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             setPrioridad(proyecto.prioridad);
             setUrgencia(proyecto.urgencia || null);
             setFechaLimite(proyecto.fechaLimite || '');
+            setAdjuntos(proyecto.adjuntos || []);
+            setHitos(Array.isArray(proyecto.hitos) ? proyecto.hitos : []);
 
             /* Guardar estado inicial para detección de cambios */
             estadoInicialRef.current = {
@@ -96,7 +101,9 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                 prioridad: proyecto.prioridad,
                 urgencia: proyecto.urgencia || null,
                 fechaLimite: proyecto.fechaLimite || '',
-                adjuntos: proyecto.adjuntos || []
+
+                adjuntos: proyecto.adjuntos || [],
+                hitos: Array.isArray(proyecto.hitos) ? proyecto.hitos : []
             };
         } else {
             /* Resetear si no hay proyecto (modo creacion) */
@@ -108,6 +115,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             setUrgencia(null);
             setFechaLimite('');
             setAdjuntos([]);
+            setHitos([]);
             estadoInicialRef.current = null;
         }
         setErrores({});
@@ -131,9 +139,10 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
         if (urgencia !== inicial.urgencia) return true;
         if (fechaLimite !== inicial.fechaLimite) return true;
         if (JSON.stringify(adjuntos) !== JSON.stringify(inicial.adjuntos)) return true;
+        if (JSON.stringify(hitos) !== JSON.stringify(inicial.hitos)) return true;
 
         return false;
-    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos]);
+    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, hitos]);
 
     const validarFormulario = useCallback((): boolean => {
         const nuevosErrores: {nombre?: string} = {};
@@ -159,10 +168,12 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             prioridad,
             urgencia: urgencia || undefined,
             fechaLimite: fechaLimite || undefined,
-            adjuntos
+
+            adjuntos,
+            hitos
         });
         onCerrar();
-    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, validarFormulario, onGuardar, onCerrar]);
+    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, hitos, validarFormulario, onGuardar, onCerrar]);
 
     /* Auto-guardado: al cerrar el modal, guardar solo si hay cambios */
     const manejarCerrarConGuardado = useCallback(() => {
@@ -223,21 +234,21 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
 
     /* Header Icons (Fase 9.2.8) */
     const accionesHeader = (
-        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
             {/* Estadisticas (Placeholder) */}
-            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)">
-                <BarChart2 size={14} className="textoApagado" />
+            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                <BarChart2 size={16} className="textoApagado" />
             </button>
 
             {/* Actividad / Chat */}
-            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'}>
+            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
                 {tieneMensajesSinLeer ? (
                     <div style={{position: 'relative'}}>
-                        <Activity size={14} />
+                        <Activity size={16} />
                         <span className="indicadorBadge" />
                     </div>
                 ) : (
-                    <Activity size={14} />
+                    <Activity size={16} />
                 )}
             </button>
         </div>
@@ -323,8 +334,9 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                                     puedeGestionarParticipantes={modoEdicion}
                                     adjuntos={adjuntos}
                                     onAdjuntosChange={setAdjuntos}
-                                    tareas={tareasProyecto}
-                                    onToggleTarea={onToggleTarea}
+                                    // Tareas eliminadas de la vista
+                                    hitos={hitos}
+                                    onHitosChange={setHitos}
                                 />
                             </div>
 
@@ -360,6 +372,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                             modoEdicion={false}
                             adjuntos={adjuntos}
                             onAdjuntosChange={setAdjuntos}
+                            hitos={hitos}
+                            onHitosChange={setHitos}
                         />
                     </div>
                     <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Crear proyecto" />

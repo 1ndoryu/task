@@ -139,11 +139,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Placeholder cuando vacío: "Añade una descripción..."
   - Sin borde visible, focus con borde sutil (estilos en configuracionModerna.css)
 
-#### 9.2.7 Resumen de Tareas (Solo Proyectos)
-- [x] Crear componente `ListaTareasCompacta` (Evolución de Resumen)
-  - Lista jerárquica con subtareas
-  - Checkbox funcional (toggle de estado)
-  - Estilos consistentes (gap y tipografía)
+#### 9.2.7 Hitos del Proyecto (Milestones)
+- [x] Crear componente `ListaHitos` (Reemplaza a Resumen de Tareas)
+  - Lista de hitos (objetivos clave del proyecto)
+  - Ordenados automáticamente por prioridad
+  - Funcionalidad: Agregar, Editar, Eliminar
+  - Prioridades: Alta, Media, Baja
+  - No admiten subtareas
+  - Reutilizar lógica visual de tareas pero adaptada
 
 #### 9.2.8 Header Derecha - Iconos de Acción
 - [x] Mover botón de cerrar (X) y reemplazar con:
@@ -207,6 +210,16 @@ Todos centralizados en `configuracionModerna.css`:
 - `.resumenTareasProyecto`, `.barraProgresoMini`
 - `.selectorIconoProyecto`, `.selectorColores`
 
+### 9.2.10 Visualización Grid de Adjuntos (Explorador Minimalista)
+- [ ] Separador visual estilo Hitos
+- [ ] Componente `GridAdjuntos`:
+  - Ubicado debajo de la sección de controles de adjuntos
+  - Grid auto-responsive (3 columnas base)
+  - Cards minimalistas:
+    - Preview (imágenes) o Icono tipo archivo
+    - Nombre truncado elegante
+    - Acciones al hover (Descargar, Eliminar)
+
 ### 9.9 Orden de Implementación
 
 1. ✅ **Fase 9.2.2** - Título/Subtítulo limpio
@@ -216,10 +229,21 @@ Todos centralizados en `configuracionModerna.css`:
 5. ✅ **Fase 9.2.6** - Descripción sin borde
 6. ✅ **Fase 9.2.4** - Responsables
 7. ✅ **Fase 9.2.5** - Adjuntos (existente, adaptar a Linear)
-8. ✅ **Fase 9.2.7** - Resumen de tareas
+8. ✅ **Fase 9.2.7** - Hitos del Proyecto (Milestones)
 9. ✅ **Fase 9.2.8** - Header icons
-10. ⏳ **Fase 9.4** - Aplicar a Tareas
-11. ⏳ **Fase 9.5** - Aplicar a Hábitos
+10. ✅ **Fase 9.2.9** - Refinamientos Visuales (Ajustes finos)
+      - [x] Cursor correcto en iconos header (chat, actividad)
+      - [x] Ajustar gap entre iconos header
+      - [x] Mover selector de icono arriba del título
+      - [x] Quitar bordes y padding en input título/descripción (estado focus)
+11. ⏳ **Fase 9.2.10** - Visualización Grid de Adjuntos
+      - [ ] Separador visual
+      - [ ] Componente GridAdjuntos (3 columnas)
+      - [ ] Cards de archivo minimalistas
+12. ⏳ **Fase 9.3** - Corrección de Bugs
+      - [ ] Subtarea hereda proyecto del padre (Panel Ejecución)
+13. ⏳ **Fase 9.4** - Aplicar a Tareas
+14. ⏳ **Fase 9.5** - Aplicar a Hábitos
 
 ---
 

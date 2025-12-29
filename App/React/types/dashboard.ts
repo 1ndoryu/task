@@ -151,6 +151,16 @@ export interface Proyecto {
     miRol?: RolCompartido;
     /* Adjuntos del proyecto (Fase 9) */
     adjuntos?: Adjunto[];
+    /* Hitos del proyecto (Fase 9) */
+    hitos?: Hito[];
+}
+
+export interface Hito {
+    id: number;
+    titulo: string;
+    completado: boolean;
+    prioridad: NivelPrioridad;
+    fechaLimite?: string;
 }
 
 export interface Tarea {
