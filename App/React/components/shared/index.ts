@@ -42,3 +42,5 @@ export * from './CampoSubtituloLimpio';
 export * from './SelectorIconoProyecto';
 export * from './PropiedadesCompactas';
 export * from './SeccionResponsables';
+export * from './BotonOpcionCompacta';
+export * from './ResumenTareasProyecto';

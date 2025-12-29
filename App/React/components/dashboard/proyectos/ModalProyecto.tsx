@@ -195,7 +195,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const mostrarChatColumna = mostrarChat && chatVisible;
 
     /* Clase extra para modal expandido */
-    const claseModal = mostrarChat ? 'panelConfiguracionContenedor modalContenedor--expandido' : '';
+    const claseModal = mostrarChat ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Editar Proyecto' : 'Nuevo Proyecto'} claseExtra={claseModal}>

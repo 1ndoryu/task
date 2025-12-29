@@ -147,6 +147,21 @@
     width: 90vw;
 }
 
+/* 
+ * MODAL MODERNO - ESTILO LINEAR
+ * Para la nueva UI de configuracion de proyectos/tareas/habitos
+ * Fase 9.3: Aumentar tamaño del modal
+ */
+.modalContenedor--moderno {
+    max-width: 600px;
+}
+
+@media (max-width: 700px) {
+    .modalContenedor--moderno {
+        max-width: calc(100vw - 2rem);
+    }
+}
+
 @media (max-width: 960px) {
     .modalNotasContenedor {
         max-width: calc(100vw - 2rem);

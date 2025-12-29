@@ -100,49 +100,49 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **ENFOQUE CORRECTO:** Extraer `creacionRapidaBotonOpcion` como componente base reutilizable.
 
-- [ ] Crear componente `BotonOpcionCompacta` (extraído de modalCreacionRapida)
+- [x] Crear componente `BotonOpcionCompacta` (extraído de modalCreacionRapida)
   - Pill clickeable con icono + texto
   - Soporte para menú contextual (usando `MenuContextual` existente)
   - Estados: normal, vacío, activo
-  - Estilos: reutilizar `.creacionRapidaBotonOpcion` como base
+  - Estilos: clase `.pillOpcion` centralizada en configuracionModerna.css
   - Props: `icono`, `texto`, `opciones[]`, `onSeleccionar`, `valorActual`
   
-- [ ] Crear componente `PropiedadesCompactas`
-  - Layout inline: etiqueta "Propiedades" + lista de `BotonOpcionCompacta`
-  - Usa `BotonOpcionCompacta` para cada propiedad:
+- [x] Crear componente `PropiedadesCompactas`
+  - Layout inline: etiqueta "Propiedades" + lista de pills
+  - Propiedades soportadas:
     - Prioridad (opciones: Alta, Media, Baja)
     - Urgencia (opciones: Bloqueante, Urgente, Normal, Chill, Sin urgencia)
     - Fecha Límite (input date en menú)
   - Cada botón abre su menú contextual con las opciones
-  - Sin overlays ni modales
+  - Sin overlays ni modales - estilos de menus en configuracionModerna.css
 
 #### 9.2.4 Sección de Responsables
-- [ ] Crear componente `SeccionResponsables`
-  - Usa el mismo layout inline que `PropiedadesCompactas`
-  - Muestra participantes como `BotonOpcionCompacta` (avatar + nombre)
-  - "Ninguno" si no hay asignados (pill vacío)
+- [x] Crear componente `SeccionResponsables`
+  - Layout inline con etiqueta + pills de participantes
+  - Muestra participantes con avatar + nombre usando `.pillOpcion`
+  - "Ninguno asignado" si no hay participantes (pill vacío)
   - Click en participante abre menú con opciones: Cambiar rol, Remover
   - Botón "+ Agregar" abre menú con lista de compañeros disponibles
-  - Reutiliza estilos de `.creacionRapidaBotonOpcion`
+  - Estilos centralizados en configuracionModerna.css
 
 #### 9.2.5 Sección de Adjuntos (Separada)
-- [ ] Crear componente `SeccionAdjuntos`
-  - Grid de thumbnails para imágenes
-  - Lista compacta para otros archivos
-  - Botón `BotonOpcionCompacta` para "+ Agregar"
-  - Preview inline para imágenes
+- [~] Componente `SeccionAdjuntos` ya existe en dashboard/ (462 líneas)
+  - Grid de thumbnails para imágenes - implementado
+  - Lista compacta para otros archivos - implementado
+  - Preview inline para imágenes - implementado
+  - TODO: Adaptar al layout inline estilo Linear (etiqueta + pills)
 
 #### 9.2.6 Descripción sin Borde
-- [ ] Reutilizar/adaptar componente de textarea limpio
-  - Auto-expand al escribir
+- [x] Reutilizar componente `CampoSubtituloLimpio`
+  - Auto-expand al escribir (con limit de filas)
   - Placeholder cuando vacío: "Añade una descripción..."
-  - Sin borde, solo focus sutil
+  - Sin borde visible, focus con borde sutil (estilos en configuracionModerna.css)
 
 #### 9.2.7 Resumen de Tareas (Solo Proyectos)
-- [ ] Crear componente `ResumenTareasProyecto`
-  - Contador compacto: "3 completadas │ 5 pendientes"
-  - Barra de progreso mini opcional
-  - Link "Ver todas →" que podría abrir pestaña Issues (futuro)
+- [x] Crear componente `ResumenTareasProyecto`
+  - Contador compacto: "X completadas │ Y pendientes" con iconos
+  - Barra de progreso mini opcional (porcentaje)
+  - Link "Ver todas →" con callback opcional
 
 #### 9.2.8 Header Derecha - Iconos de Acción
 - [ ] Mover botón de cerrar (X) y reemplazar con:
@@ -153,9 +153,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - ESC cierra (ya existe)
 
 ### 9.3 Tamaño del Modal
-- [ ] Aumentar `max-width` del modal de proyecto a ~600px
-- [ ] Responsive: en móvil ocupa casi todo el ancho
-- [ ] Altura: auto hasta max-height, luego scroll interno
+- [x] Aumentar `max-width` del modal de proyecto a ~600px (clase `.modalContenedor--moderno`)
+- [x] Responsive: en móvil ocupa casi todo el ancho (media query 700px)
+- [x] Altura: auto hasta max-height, luego scroll interno (ya implementado en modal base)
 
 ### 9.4 Aplicar Patrón a Tareas (Después de Proyectos)
 - [ ] Adaptar `PanelConfiguracionTarea` con misma estructura
@@ -183,41 +183,42 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Actividad: historial y chat
 - [ ] Navegación fluida entre pestañas
 
-### 9.7 Componentes Compartidos a Crear
+### 9.7 Componentes Compartidos - Estado
 
-| Componente              | Descripción                  | Prioridad |
-| ----------------------- | ---------------------------- | --------- |
-| `SelectorIconoProyecto` | Grid de iconos con colores   | Alta      |
-| `CampoTituloLimpio`     | Input sin borde, font grande | Alta      |
-| `PropiedadesCompactas`  | Grid de propiedades inline   | Alta      |
-| `SeccionResponsables`   | Lista de avatares + agregar  | Media     |
-| `SeccionAdjuntos`       | Grid/lista de archivos       | Media     |
-| `ResumenTareasProyecto` | Contador compacto            | Media     |
+| Componente              | Descripción                     | Estado       |
+| ----------------------- | ------------------------------- | ------------ |
+| `SelectorIconoProyecto` | Grid de iconos con colores      | ✅ Completado |
+| `CampoTituloLimpio`     | Input sin borde, font grande    | ✅ Completado |
+| `CampoSubtituloLimpio`  | Textarea sin borde, auto-expand | ✅ Completado |
+| `PropiedadesCompactas`  | Grid de propiedades inline      | ✅ Completado |
+| `BotonOpcionCompacta`   | Pill reutilizable con menú      | ✅ Completado |
+| `SeccionResponsables`   | Lista de avatares + agregar     | ✅ Completado |
+| `ResumenTareasProyecto` | Contador compacto + barra       | ✅ Completado |
+| `SeccionAdjuntos`       | Grid/lista de archivos          | 🛠️ Existente  |
 
 ### 9.8 Estilos CSS Nuevos
 
-```css
-/* configuracionModerna.css */
-.configuracionModerna { }
-.campoTituloLimpio { }
-.propiedadesCompactasGrid { }
-.seccionResponsables { }
-.seccionAdjuntos { }
-```
+Todos centralizados en `configuracionModerna.css`:
+- `.campoTituloLimpio`, `.campoSubtituloLimpio__input`
+- `.pillOpcion`, `.botonOpcionCompacta`
+- `.propiedadesCompactas`, `.propiedadesCompactas__menu`
+- `.seccionResponsables--inline`
+- `.resumenTareasProyecto`, `.barraProgresoMini`
+- `.selectorIconoProyecto`, `.selectorColores`
 
 ### 9.9 Orden de Implementación
 
-1. **Fase 9.2.2** - Título/Subtítulo limpio (base del nuevo look)
-2. **Fase 9.2.1** - Selector de icono
-3. **Fase 9.2.3** - Propiedades compactas
-4. **Fase 9.3** - Tamaño del modal
-5. **Fase 9.2.6** - Descripción sin borde
-6. **Fase 9.2.4** - Responsables
-7. **Fase 9.2.5** - Adjuntos separados
-8. **Fase 9.2.7** - Resumen de tareas
-9. **Fase 9.2.8** - Header icons
-10. **Fase 9.4** - Aplicar a Tareas
-11. **Fase 9.5** - Aplicar a Hábitos
+1. ✅ **Fase 9.2.2** - Título/Subtítulo limpio
+2. ✅ **Fase 9.2.1** - Selector de icono
+3. ✅ **Fase 9.2.3** - Propiedades compactas + BotonOpcionCompacta
+4. ✅ **Fase 9.3** - Tamaño del modal (600px)
+5. ✅ **Fase 9.2.6** - Descripción sin borde
+6. ✅ **Fase 9.2.4** - Responsables
+7. 🛠️ **Fase 9.2.5** - Adjuntos (existente, adaptar a Linear)
+8. ✅ **Fase 9.2.7** - Resumen de tareas
+9. ⏳ **Fase 9.2.8** - Header icons (pendiente)
+10. ⏳ **Fase 9.4** - Aplicar a Tareas
+11. ⏳ **Fase 9.5** - Aplicar a Hábitos
 
 ---
 

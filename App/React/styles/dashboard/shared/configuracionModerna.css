@@ -181,6 +181,10 @@
     flex-wrap: wrap;
 }
 
+.propiedadesCompactas__item {
+    position: relative;
+}
+
 /* 
  * SECCION GENERICA
  * Contenedor para secciones como Responsables, Adjuntos

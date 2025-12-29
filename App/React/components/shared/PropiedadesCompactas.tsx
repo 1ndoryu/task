@@ -4,10 +4,12 @@
  * Muestra propiedades como Prioridad, Urgencia, Fecha en formato compacto
  *
  * Fase 9.2.3: Propiedades compactas (Key Properties)
+ * Usa el MenuContextual existente para consistencia visual
  */
 
-import {useState, useRef, useEffect} from 'react';
+import {useState, useRef} from 'react';
 import {Calendar, Flag, Zap} from 'lucide-react';
+import {MenuContextual} from './MenuContextual';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 
 /* Mapeo de etiquetas en espanol */
@@ -33,127 +35,135 @@ interface PropiedadesCompactasProps {
     onFechaLimiteChange: (valor: string) => void;
 }
 
+type MenuActivo = 'prioridad' | 'urgencia' | 'fecha' | null;
+
 export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange}: PropiedadesCompactasProps): JSX.Element {
-    const [menuAbierto, setMenuAbierto] = useState<'prioridad' | 'urgencia' | 'fecha' | null>(null);
-    const menuRef = useRef<HTMLDivElement>(null);
+    const [menuActivo, setMenuActivo] = useState<MenuActivo>(null);
+    const [posicionMenu, setPosicionMenu] = useState({x: 0, y: 0});
 
-    /* Cerrar menu al hacer clic fuera */
-    useEffect(() => {
-        const manejarClickFuera = (evento: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(evento.target as Node)) {
-                setMenuAbierto(null);
-            }
-        };
-
-        if (menuAbierto) {
-            document.addEventListener('mousedown', manejarClickFuera);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', manejarClickFuera);
-        };
-    }, [menuAbierto]);
+    const prioridadRef = useRef<HTMLButtonElement>(null);
+    const urgenciaRef = useRef<HTMLButtonElement>(null);
+    const fechaRef = useRef<HTMLButtonElement>(null);
 
     const formatearFecha = (fechaISO: string): string => {
         const fecha = new Date(fechaISO);
         return fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'});
     };
 
+    const abrirMenu = (tipo: MenuActivo, ref: React.RefObject<HTMLButtonElement>) => {
+        if (menuActivo === tipo) {
+            setMenuActivo(null);
+            return;
+        }
+
+        if (ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            setPosicionMenu({x: rect.left, y: rect.bottom + 4});
+        }
+        setMenuActivo(tipo);
+    };
+
+    const cerrarMenu = () => setMenuActivo(null);
+
+    /* Opciones para cada menu */
+    const opcionesPrioridad = Object.entries(ETIQUETAS_PRIORIDAD).map(([key, label]) => ({
+        id: key,
+        etiqueta: label,
+        icono: <Flag size={12} />
+    }));
+
+    const opcionesUrgencia = [
+        {id: 'ninguna', etiqueta: 'Sin urgencia', icono: <Zap size={12} />},
+        ...Object.entries(ETIQUETAS_URGENCIA).map(([key, label]) => ({
+            id: key,
+            etiqueta: label,
+            icono: <Zap size={12} />
+        }))
+    ];
+
     return (
         <div className="propiedadesCompactas">
             <span className="propiedadesCompactas__etiqueta">Propiedades</span>
             <div className="propiedadesCompactas__contenido">
                 {/* Prioridad */}
-                <div className="propiedadesCompactas__item" ref={menuAbierto === 'prioridad' ? menuRef : null}>
-                    <button type="button" className="pillOpcion" onClick={() => setMenuAbierto(menuAbierto === 'prioridad' ? null : 'prioridad')} title="Prioridad">
+                <div className="propiedadesCompactas__item">
+                    <button ref={prioridadRef} type="button" className="pillOpcion" onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad">
                         <Flag size={14} />
                         <span>{ETIQUETAS_PRIORIDAD[prioridad]}</span>
                     </button>
-                    {menuAbierto === 'prioridad' && (
-                        <div className="propiedadesCompactas__menu">
-                            {Object.entries(ETIQUETAS_PRIORIDAD).map(([key, label]) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    className={`propiedadesCompactas__menuOpcion ${prioridad === key ? 'propiedadesCompactas__menuOpcion--activo' : ''}`}
-                                    onClick={() => {
-                                        onPrioridadChange(key as NivelPrioridad);
-                                        setMenuAbierto(null);
-                                    }}>
-                                    <Flag size={12} />
-                                    <span>{label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 {/* Urgencia */}
-                <div className="propiedadesCompactas__item" ref={menuAbierto === 'urgencia' ? menuRef : null}>
-                    <button type="button" className={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => setMenuAbierto(menuAbierto === 'urgencia' ? null : 'urgencia')} title="Urgencia">
+                <div className="propiedadesCompactas__item">
+                    <button ref={urgenciaRef} type="button" className={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia">
                         <Zap size={14} />
                         <span>{urgencia ? ETIQUETAS_URGENCIA[urgencia] : 'Urgencia'}</span>
                     </button>
-                    {menuAbierto === 'urgencia' && (
-                        <div className="propiedadesCompactas__menu">
-                            <button
-                                type="button"
-                                className={`propiedadesCompactas__menuOpcion ${!urgencia ? 'propiedadesCompactas__menuOpcion--activo' : ''}`}
-                                onClick={() => {
-                                    onUrgenciaChange(null);
-                                    setMenuAbierto(null);
-                                }}>
-                                <span>Sin urgencia</span>
-                            </button>
-                            {Object.entries(ETIQUETAS_URGENCIA).map(([key, label]) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    className={`propiedadesCompactas__menuOpcion ${urgencia === key ? 'propiedadesCompactas__menuOpcion--activo' : ''}`}
-                                    onClick={() => {
-                                        onUrgenciaChange(key as NivelUrgencia);
-                                        setMenuAbierto(null);
-                                    }}>
-                                    <Zap size={12} />
-                                    <span>{label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 {/* Fecha Limite */}
-                <div className="propiedadesCompactas__item" ref={menuAbierto === 'fecha' ? menuRef : null}>
-                    <button type="button" className={`pillOpcion${!fechaLimite ? ' pillOpcion--vacio' : ''}`} onClick={() => setMenuAbierto(menuAbierto === 'fecha' ? null : 'fecha')} title="Fecha Limite">
+                <div className="propiedadesCompactas__item">
+                    <button ref={fechaRef} type="button" className={`pillOpcion${!fechaLimite ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('fecha', fechaRef)} title="Fecha Limite">
                         <Calendar size={14} />
                         <span>{fechaLimite ? formatearFecha(fechaLimite) : 'Fecha'}</span>
                     </button>
-                    {menuAbierto === 'fecha' && (
-                        <div className="propiedadesCompactas__menu propiedadesCompactas__menu--fecha">
-                            <input
-                                type="date"
-                                className="propiedadesCompactas__inputFecha"
-                                value={fechaLimite}
-                                onChange={e => {
-                                    onFechaLimiteChange(e.target.value);
-                                    setMenuAbierto(null);
-                                }}
-                            />
-                            {fechaLimite && (
-                                <button
-                                    type="button"
-                                    className="propiedadesCompactas__menuOpcion propiedadesCompactas__menuOpcion--limpiar"
-                                    onClick={() => {
-                                        onFechaLimiteChange('');
-                                        setMenuAbierto(null);
-                                    }}>
-                                    <span>Quitar fecha</span>
-                                </button>
-                            )}
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {/* Menu Prioridad */}
+            {menuActivo === 'prioridad' && (
+                <MenuContextual
+                    opciones={opcionesPrioridad}
+                    posicionX={posicionMenu.x}
+                    posicionY={posicionMenu.y}
+                    onSeleccionar={id => {
+                        onPrioridadChange(id as NivelPrioridad);
+                        cerrarMenu();
+                    }}
+                    onCerrar={cerrarMenu}
+                />
+            )}
+
+            {/* Menu Urgencia */}
+            {menuActivo === 'urgencia' && (
+                <MenuContextual
+                    opciones={opcionesUrgencia}
+                    posicionX={posicionMenu.x}
+                    posicionY={posicionMenu.y}
+                    onSeleccionar={id => {
+                        onUrgenciaChange(id === 'ninguna' ? null : (id as NivelUrgencia));
+                        cerrarMenu();
+                    }}
+                    onCerrar={cerrarMenu}
+                />
+            )}
+
+            {/* Menu Fecha - usa opciones rapidas */}
+            {menuActivo === 'fecha' && (
+                <MenuContextual
+                    opciones={[{id: 'hoy', etiqueta: 'Hoy', icono: <Calendar size={12} />}, {id: 'manana', etiqueta: 'Mañana', icono: <Calendar size={12} />}, {id: 'semana', etiqueta: 'En 7 días', icono: <Calendar size={12} />}, ...(fechaLimite ? [{id: 'quitar', etiqueta: 'Quitar fecha', peligroso: true}] : [])]}
+                    posicionX={posicionMenu.x}
+                    posicionY={posicionMenu.y}
+                    onSeleccionar={id => {
+                        const hoy = new Date();
+                        if (id === 'hoy') {
+                            onFechaLimiteChange(hoy.toISOString().split('T')[0]);
+                        } else if (id === 'manana') {
+                            const manana = new Date(hoy);
+                            manana.setDate(manana.getDate() + 1);
+                            onFechaLimiteChange(manana.toISOString().split('T')[0]);
+                        } else if (id === 'semana') {
+                            const semana = new Date(hoy);
+                            semana.setDate(semana.getDate() + 7);
+                            onFechaLimiteChange(semana.toISOString().split('T')[0]);
+                        } else if (id === 'quitar') {
+                            onFechaLimiteChange('');
+                        }
+                        cerrarMenu();
+                    }}
+                    onCerrar={cerrarMenu}
+                />
+            )}
         </div>
     );
 }
