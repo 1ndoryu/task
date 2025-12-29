@@ -62,6 +62,8 @@
     --dashboard-superposicionMuyClara: rgba(125, 125, 125, 0.01);
     --dashboard-superposicionSutil: rgba(125, 125, 125, 0.1);
     --dashboard-superposicionMedia: rgba(125, 125, 125, 0.15);
+    --dashboard-superposicioMedioOscuro: rgb(37 37 37 / 16%);
+    --dashboard-superposicionOscuro: rgb(2 2 2 / 60%);
 
     /* 
      * SOMBRAS 

@@ -68,6 +68,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Título convertido en botón con menú dropdown
   - Opciones de navegación implementadas (Dashboard, Calendario, Archivos)
   - Estilo visual mejorado con indicador chevron
+- [x] Botón de creación rápida (+) (8.13) ✅
+  - Selector de tipo (Tarea, Hábito, Proyecto)
+  - Modales minimalistas con efecto glass
+  - Selector de proyecto para tareas
 
 **UI - Headers de Paneles:**
 - [x] Reducir opacidad de elementos en header de paneles (8.11) ✅

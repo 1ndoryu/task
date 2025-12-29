@@ -24,6 +24,7 @@ import {ModalEquipos} from '../equipos';
 import {ModalNotificaciones} from '../notificaciones';
 import {ModalCompartir} from '../compartidos';
 import {ModalExperimentos} from '../experimentos/ModalExperimentos';
+import {ModalCreacionRapida} from './ModalCreacionRapida';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {AccionExperimento} from '../experimentos/ModalExperimentos';
@@ -51,6 +52,50 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             ejecutar: acciones.limpiarActividadCompleta
         }
     ];
+
+    const manejarGuardarRapido = async (datos: any) => {
+        const {tipo, texto, ...opciones} = datos;
+
+        /* Helper para calcular fechas */
+        const calcularFecha = (fechaKey?: string) => {
+            if (!fechaKey) return undefined;
+            const hoy = new Date();
+            if (fechaKey === 'hoy') return hoy.toISOString().split('T')[0];
+            if (fechaKey === 'manana') {
+                const manana = new Date(hoy);
+                manana.setDate(manana.getDate() + 1);
+                return manana.toISOString().split('T')[0];
+            }
+            if (fechaKey === 'semana') {
+                const semana = new Date(hoy);
+                semana.setDate(semana.getDate() + 7);
+                return semana.toISOString().split('T')[0];
+            }
+            return undefined;
+        };
+
+        if (tipo === 'tarea') {
+            const configTarea: any = {
+                fechaMaxima: calcularFecha(opciones.fecha),
+                adjuntos: opciones.adjuntos || []
+            };
+            acciones.manejarCrearNuevaTareaGlobal(configTarea, opciones.prioridad || null, texto, undefined, opciones.urgencia || null, opciones.proyectoId);
+        } else if (tipo === 'habito') {
+            await dashboard.crearHabito({
+                nombre: texto,
+                importancia: opciones.importancia || 'Media',
+                tags: [],
+                frecuencia: {tipo: opciones.frecuencia || 'diario'}
+            });
+        } else if (tipo === 'proyecto') {
+            acciones.manejarGuardarNuevoProyecto({
+                nombre: texto,
+                prioridad: opciones.prioridad || 'media',
+                urgencia: opciones.urgencia || undefined,
+                fechaLimite: calcularFecha(opciones.fecha)
+            });
+        }
+    };
 
     return (
         <>
@@ -100,6 +145,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             {auth.user && <BarraPanelesOcultos panelesOcultos={layout.panelesOcultos} onMostrarPanel={layout.mostrarPanel} />}
             <TooltipSystem />
             <IndicadorArrastre panelArrastrando={arrastre.panelArrastrando} posicionMouse={arrastre.posicionMouse} />
+
+            {/* Modal Creación Rápida */}
+            {modales.modalCreacionRapida && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
         </>
     );
 }

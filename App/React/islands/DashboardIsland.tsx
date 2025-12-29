@@ -91,6 +91,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onSeleccionarTarea={modales.abrirModalEditarTarea}
                 onSeleccionarHabito={dashboard.abrirModalEditarHabito}
                 onSeleccionarProyecto={modales.abrirModalEditarProyecto}
+                onCrearRapido={modales.abrirCreacionRapida}
             />
 
             {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} />}

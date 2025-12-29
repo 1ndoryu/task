@@ -36,7 +36,7 @@ interface UseAccionesDashboardProps {
 interface UseAccionesDashboardReturn {
     manejarCambioFiltro: (valor: string) => void;
     manejarLimpiarScratchpad: () => Promise<void>;
-    manejarCrearNuevaTareaGlobal: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
+    manejarCrearNuevaTareaGlobal: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, proyectoIdOverride?: number) => void;
     manejarGuardarNuevoProyecto: (datos: any) => void;
     manejarGuardarEdicionProyecto: (datos: any) => void;
     manejarGuardarEdicionTareaGlobal: (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
@@ -77,9 +77,9 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
     }, [notas, confirmar, actualizarNotas]);
 
     const manejarCrearNuevaTareaGlobal = useCallback(
-        (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, _asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => {
+        (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, _asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, proyectoIdOverride?: number) => {
             if (!texto) return;
-            const proyectoId = filtroActual.tipo === 'proyecto' ? filtroActual.proyectoId : undefined;
+            const proyectoId = proyectoIdOverride !== undefined ? proyectoIdOverride : filtroActual.tipo === 'proyecto' ? filtroActual.proyectoId : undefined;
             crearTarea({texto, prioridad, urgencia, configuracion, proyectoId, completado: false});
             cerrarModalNuevaTarea();
         },

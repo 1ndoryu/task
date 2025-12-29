@@ -5,7 +5,7 @@
  */
 
 import {useState, useRef} from 'react';
-import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText} from 'lucide-react';
+import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../shared';
 import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
@@ -50,6 +50,7 @@ interface DashboardEncabezadoProps {
     onSeleccionarTarea?: (tarea: Tarea) => void;
     onSeleccionarHabito?: (habito: Habito) => void;
     onSeleccionarProyecto?: (proyecto: Proyecto) => void;
+    onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
 }
 
 interface MenuState {
@@ -58,10 +59,11 @@ interface MenuState {
     y: number;
 }
 
-export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto}: DashboardEncabezadoProps): JSX.Element {
+export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
+    const [menuCrear, setMenuCrear] = useState<MenuState>({visible: false, x: 0, y: 0});
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
     /* Determinar si mostrar badge de plan en header (solo FREE y TRIAL) */
@@ -77,6 +79,30 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
         {id: 'calendario', etiqueta: 'Calendario', icono: <Calendar size={12} />, disabled: true},
         {id: 'archivos', etiqueta: 'Archivos', icono: <FileText size={12} />, disabled: true}
     ];
+
+    /* Opciones del menu de creación rápida */
+    const opcionesMenuCrear = [
+        {id: 'tarea', etiqueta: 'Tarea', icono: <CheckSquare size={12} />},
+        {id: 'habito', etiqueta: 'Hábito', icono: <Activity size={12} />},
+        {id: 'proyecto', etiqueta: 'Proyecto', icono: <Folder size={12} />}
+    ];
+
+    const manejarClickCrear = (evento: React.MouseEvent) => {
+        evento.preventDefault();
+        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
+        setMenuCrear({
+            visible: true,
+            x: rect.left,
+            y: rect.bottom + 4
+        });
+    };
+
+    const manejarSeleccionCrear = (opcionId: string) => {
+        if (onCrearRapido) {
+            onCrearRapido(opcionId as 'tarea' | 'habito' | 'proyecto');
+        }
+        setMenuCrear({...menuCrear, visible: false});
+    };
 
     const manejarClickUsuario = (evento: React.MouseEvent) => {
         evento.preventDefault();
@@ -203,6 +229,16 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
             <nav className="encabezadoNav">
                 {/* Indicador de Plan - Solo para FREE y TRIAL */}
                 {mostrarBadgePlanEnHeader && <IndicadorPlan suscripcion={suscripcion} onClick={onClickPlan} />}
+
+                {/* Crear Nuevo (Tarea/Hábito/Proyecto) */}
+                {onCrearRapido && (
+                    <>
+                        <button type="button" className="botonIconoEncabezado" onClick={manejarClickCrear} title="Crear nuevo...">
+                            <Plus size={14} />
+                        </button>
+                        {menuCrear.visible && <MenuContextual opciones={opcionesMenuCrear} posicionX={menuCrear.x} posicionY={menuCrear.y} onSeleccionar={manejarSeleccionCrear} onCerrar={() => setMenuCrear({...menuCrear, visible: false})} />}
+                    </>
+                )}
 
                 {/* Configurar Layout */}
                 {onClickLayout && (

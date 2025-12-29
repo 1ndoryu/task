@@ -17,6 +17,8 @@ export const HISTORIAL_VERSIONES: Version[] = [
             {tipo: 'nuevo', descripcion: 'Buscador Global centrado en header (Tareas, Hábitos, Proyectos)'},
             {tipo: 'nuevo', descripcion: 'Menu contextual "Dashboard" para navegación rápida'},
             {tipo: 'nuevo', descripcion: 'Selector de estado de hábito (Completado, Pospuesto, Pendiente) en edicion'},
+            {tipo: 'nuevo', descripcion: 'Opción de mover tarea a otro proyecto desde el modal de configuración'},
+            {tipo: 'nuevo', descripcion: 'Selector de estado de tarea (Pendiente/Completada) en modal de edición'},
             {tipo: 'mejora', descripcion: 'Headers de paneles con opacidad reducida para menor ruido visual'},
             {tipo: 'arreglo', descripcion: 'Tooltips se ocultan al abrir menús contextuales'}
         ]

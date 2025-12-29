@@ -84,6 +84,10 @@ interface UseModalesDashboardReturn {
     tareaEditando: Tarea | null;
     abrirModalEditarTarea: (tarea: Tarea) => void;
     cerrarModalEditarTarea: () => void;
+    /* Creación Rápida */
+    modalCreacionRapida: 'tarea' | 'habito' | 'proyecto' | null;
+    abrirCreacionRapida: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
+    cerrarCreacionRapida: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -120,6 +124,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalNuevaTareaAbierto, setModalNuevaTareaAbierto] = useState(false);
     /* Editar Tarea */
     const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null);
+    /* Creación Rápida */
+    const [modalCreacionRapida, setModalCreacionRapida] = useState<'tarea' | 'habito' | 'proyecto' | null>(null);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -192,6 +198,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const abrirModalEditarTarea = useCallback((tarea: Tarea) => setTareaEditando(tarea), []);
     const cerrarModalEditarTarea = useCallback(() => setTareaEditando(null), []);
 
+    /* Handlers Creación Rápida */
+    const abrirCreacionRapida = useCallback((tipo: 'tarea' | 'habito' | 'proyecto') => setModalCreacionRapida(tipo), []);
+    const cerrarCreacionRapida = useCallback(() => setModalCreacionRapida(null), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -250,6 +260,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalNuevaTarea,
         tareaEditando,
         abrirModalEditarTarea,
-        cerrarModalEditarTarea
+        cerrarModalEditarTarea,
+        modalCreacionRapida,
+        abrirCreacionRapida,
+        cerrarCreacionRapida
     };
 }
