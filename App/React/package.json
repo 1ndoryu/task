@@ -10,6 +10,9 @@
     },
     "dependencies": {
         "framer-motion": "^12.23.26",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
+        "satori": "^0.18.3",
         "zustand": "^5.0.9"
     }
 }

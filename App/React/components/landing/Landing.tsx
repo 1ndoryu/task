@@ -3,7 +3,11 @@
  * Componente de landing page minimalista estilo Linear.app
  */
 
-import '../../styles/dashboard/componentes/landing.css';
+import '../../styles/dashboard/componentes/Landing/landing.css';
+import dashboardPreview from '../../../Assets/svg/test.svg';
+import LandingHabitAnimation from './LandingHabitAnimation';
+import LandingProjectsAnimation from './LandingProjectsAnimation';
+import LandingSortingAnimation from './LandingSortingAnimation';
 
 interface LandingProps {
     onLogin: () => void;
@@ -12,133 +16,100 @@ interface LandingProps {
 export function Landing({onLogin}: LandingProps): JSX.Element {
     return (
         <div id="landing-contenedor" className="landingContenedor">
-            <Nav onLogin={onLogin} />
-            <Hero onLogin={onLogin} />
-            <Features />
-            <ComoFunciona />
-            <CtaFinal onLogin={onLogin} />
-            <Footer />
-        </div>
-    );
-}
+            {/* NAVEGACION */}
+            <nav id="landing-nav" className="landingNav">
+                <span className="landingLogo">Nakomi Task</span>
 
-/*
- * NAVEGACION
- */
-function Nav({onLogin}: {onLogin: () => void}): JSX.Element {
-    return (
-        <nav id="landing-nav" className="landingNav">
-            <span className="landingLogo">Glory</span>
-            <button className="landingNavBoton" onClick={onLogin}>
-                Iniciar sesion
-            </button>
-        </nav>
-    );
-}
+                <div className="landingNavMenu">
+                    <a href="#producto" className="landingNavLink">
+                        Producto
+                    </a>
+                    <a href="#recursos" className="landingNavLink">
+                        Recursos
+                    </a>
+                    <a href="#precio" className="landingNavLink">
+                        Precio
+                    </a>
+                    <a href="#contacto" className="landingNavLink">
+                        Contacto
+                    </a>
+                </div>
 
-/*
- * HERO
- */
-function Hero({onLogin}: {onLogin: () => void}): JSX.Element {
-    return (
-        <section id="landing-hero" className="landingHero">
-            <h1 className="landingHeroTitulo">Glory</h1>
-            <p className="landingHeroSubtitulo">
-                Dashboard de productividad personal.
-                <br />
-                Habitos. Tareas. Privacidad.
-            </p>
-            <div className="landingHeroAcciones">
-                <button className="landingBotonPrimario" onClick={onLogin}>
-                    Empezar gratis
+                <button className="landingNavBoton" onClick={onLogin}>
+                    Iniciar sesion
                 </button>
-                <button className="landingBotonSecundario">Ver demo</button>
-            </div>
-        </section>
-    );
-}
+            </nav>
 
-/*
- * FEATURES
- */
-function Features(): JSX.Element {
-    const features = [
-        {
-            icono: '///',
-            titulo: 'Habitos',
-            descripcion: 'Seguimiento diario con visualizacion tipo GitHub.'
-        },
-        {
-            icono: '[ ]',
-            titulo: 'Tareas',
-            descripcion: 'Proyectos jerarquicos. Subtareas. Drag & drop.'
-        },
-        {
-            icono: '***',
-            titulo: 'Privacidad',
-            descripcion: 'Cifrado end-to-end. Tus datos nunca salen sin cifrar.'
-        }
-    ];
-
-    return (
-        <section id="landing-features" className="landingSeccion">
-            <h2 className="landingSeccionTitulo">Funcionalidades</h2>
-            <div className="landingFeaturesGrid">
-                {features.map((feature, index) => (
-                    <div key={index} className="landingFeature">
-                        <div className="landingFeatureIcono">{feature.icono}</div>
-                        <h3 className="landingFeatureTitulo">{feature.titulo}</h3>
-                        <p className="landingFeatureDescripcion">{feature.descripcion}</p>
+            {/* HERO */}
+            <section id="landing-hero" className="landingHero">
+                <div className="landingHeroHeader">
+                    <div className="landingHeroSubtituloLeft">
+                        <p>Dashboard de productividad personal. Habitos. Tareas. Privacidad.</p>
                     </div>
-                ))}
-            </div>
-        </section>
-    );
-}
-
-/*
- * COMO FUNCIONA
- */
-function ComoFunciona(): JSX.Element {
-    const pasos = ['Registra tu cuenta con Google o GitHub', 'Configura tus habitos y tareas', 'Visualiza tu progreso en tiempo real'];
-
-    return (
-        <section id="landing-como-funciona" className="landingSeccion">
-            <h2 className="landingSeccionTitulo">Como funciona</h2>
-            <div className="landingSteps">
-                {pasos.map((paso, index) => (
-                    <div key={index} className="landingStep">
-                        <span className="landingStepNumero">{index + 1}</span>
-                        <span className="landingStepTexto">{paso}</span>
+                    <div className="landingHeroSubtituloRight">
+                        <p>
+                            Tu vida, organizada en un solo lugar.
+                            <br />
+                            Sin distracciones.
+                        </p>
                     </div>
-                ))}
-            </div>
-        </section>
-    );
-}
+                </div>
 
-/*
- * CTA FINAL
- */
-function CtaFinal({onLogin}: {onLogin: () => void}): JSX.Element {
-    return (
-        <section id="landing-cta" className="landingCta">
-            <p className="landingCtaTexto">Empieza hoy. Sin tarjeta de credito.</p>
-            <button className="landingBotonPrimario" onClick={onLogin}>
-                Empezar gratis
-            </button>
-        </section>
-    );
-}
+                <div className="landingHeroPreview">
+                    <img src={dashboardPreview} alt="Dashboard Preview" width="1474" height="714" />
+                </div>
 
-/*
- * FOOTER
- */
-function Footer(): JSX.Element {
-    return (
-        <footer id="landing-footer" className="landingFooter">
-            <p className="landingFooterTexto">Glory &copy; {new Date().getFullYear()}</p>
-        </footer>
+                <div className="landingHeroGrid">
+                    <div className="landingHeroGridItem">Item 1</div>
+                    <div className="landingHeroGridItem">Item 2</div>
+                    <div className="landingHeroGridItem">Item 3</div>
+                    <div className="landingHeroGridItem">Item 4</div>
+                </div>
+            </section>
+
+            {/* FEATURES SECTION */}
+            <section id="landing-features" className="landingSeccion">
+                <div className="landingSectionHeader">
+                    <div className="landingSectionSubtituloLeft">
+                        Diseñado para ti.
+                        <br />
+                        Escalado para tu equipo.
+                    </div>
+                    <div className="landingSectionSubtituloRight">Un flujo de trabajo unificado que conecta tu productividad individual con la colaboración sin fricción.</div>
+                </div>
+                <div className="landingSectionGrid">
+                    <div className="landingSectionGridItem">
+                        <div className="landingFeatureVisual">
+                            <LandingHabitAnimation />
+                        </div>
+                        <div className="landingFeatureContent">
+                            <h3 className="landingFeatureTitle">Construye consistencia visualizando y marcando tu progreso diario.</h3>
+                        </div>
+                    </div>
+                    <div className="landingSectionGridItem">
+                        <div className="landingFeatureVisual">
+                            <LandingProjectsAnimation />
+                        </div>
+                        <div className="landingFeatureContent">
+                            <h3 className="landingFeatureTitle">Define flujos de trabajo claros para cada uno de tus proyectos.</h3>
+                        </div>
+                    </div>
+                    <div className="landingSectionGridItem">
+                        <div className="landingFeatureVisual">
+                            <LandingSortingAnimation />
+                        </div>
+                        <div className="landingFeatureContent">
+                            <h3 className="landingFeatureTitle">Prioriza automáticamente las tareas que requieren tu atención.</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer id="landing-footer" className="landingFooter">
+                <p className="landingFooterTexto">Glory &copy; {new Date().getFullYear()}</p>
+            </footer>
+        </div>
     );
 }
 
