@@ -1,0 +1,132 @@
+/*
+ * SELECTOR DE PROYECTO
+ * Estilos para el componente selector de proyecto colapsable
+ * Patron similar a selectorFrecuencia
+ */
+
+/* 
+ * CONTENEDOR PRINCIPAL 
+ */
+.selectorProyecto {
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
+/* 
+ * CABECERA COLAPSABLE 
+ */
+.selectorProyectoCabecera {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    cursor: pointer;
+    transition: background-color var(--dashboard-transicionNormal);
+}
+
+.selectorProyectoCabecera:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.selectorProyectoCabecera:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.selectorProyectoEtiqueta {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.selectorProyectoValor {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.selectorProyectoIcono {
+    opacity: 0.6;
+}
+
+.selectorProyectoFlecha {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: 8px;
+}
+
+/* 
+ * PANEL EXPANDIDO 
+ */
+.selectorProyectoPanel {
+    padding: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    max-height: 200px;
+    overflow-y: auto;
+    animation: selectorProyectoAparecer 0.15s ease-out;
+}
+
+@keyframes selectorProyectoAparecer {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 
+ * OPCIONES DE PROYECTO 
+ */
+.selectorProyectoOpcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorProyectoOpcion:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoSecundario);
+}
+
+.selectorProyectoOpcionActivo {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorProyectoOpcionIcono {
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.selectorProyectoSeparador {
+    height: 1px;
+    background-color: var(--dashboard-bordePrincipal);
+    margin: var(--dashboard-espacioXs) 0;
+}

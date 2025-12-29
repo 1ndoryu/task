@@ -34,3 +34,6 @@ export * from './MapaCalor';
 export * from './HistorialHabito';
 export * from './MapaCalorHabito';
 export * from './MapaCalorProyecto';
+export * from './SelectorProyecto';
+export * from './SelectorEstadoTarea';
+export * from './SelectorEstadoHabito';

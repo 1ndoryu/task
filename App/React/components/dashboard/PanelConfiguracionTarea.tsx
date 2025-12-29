@@ -5,11 +5,14 @@
  *
  * Usa campos compartidos: CampoTexto, CampoPrioridad, CampoFechaLimite
  * Layout: 2 columnas (configuracion + chat/historial)
+ *
+ * TODO: Refactorizar para usar un store de Zustand para tareas (similar a habitosStore)
+ * TODO: Extraer logica de estado inicial y deteccion de cambios a un hook personalizado
  */
 
 import {useState, useEffect, useRef, useCallback} from 'react';
-import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante} from '../../types/dashboard';
-import {AccionesFormulario, Modal, SeccionPanel, ToggleSwitch, CampoTexto, CampoPrioridad, CampoUrgencia, CampoFechaLimite} from '../shared';
+import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto} from '../../types/dashboard';
+import {AccionesFormulario, Modal, SeccionPanel, ToggleSwitch, CampoTexto, CampoPrioridad, CampoUrgencia, CampoFechaLimite, SelectorProyecto, SelectorEstadoTarea} from '../shared';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
 import {SeccionAdjuntos} from './SeccionAdjuntos';
 import {SelectorAsignado} from '../compartidos/SelectorAsignado';
@@ -25,11 +28,17 @@ export interface PanelConfiguracionTareaProps {
     onGuardar: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
     /* Participantes disponibles para asignar (opcional, solo si es tarea compartida) */
     participantes?: Participante[];
+    /* Proyectos disponibles para mover la tarea */
+    proyectos?: Proyecto[];
+    /* Callback para mover la tarea a otro proyecto */
+    onCambiarProyecto?: (proyectoId: number | undefined) => void;
+    /* Callback para cambiar el estado completado de la tarea */
+    onToggleCompletado?: (completado: boolean) => void;
 }
 
 type PestanaModal = 'configuracion' | 'chat';
 
-export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = []}: PanelConfiguracionTareaProps): JSX.Element | null {
+export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
     /* Estado local para edicion */
     const [prioridad, setPrioridad] = useState<NivelPrioridad | null>(tarea?.prioridad || null);
     const [urgencia, setUrgencia] = useState<NivelUrgencia | null>(tarea?.urgencia || null);
@@ -44,6 +53,10 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
     const [asignadoA, setAsignadoA] = useState<number | null>(tarea?.asignadoA || null);
     const [asignadoANombre, setAsignadoANombre] = useState<string>(tarea?.asignadoANombre || '');
     const [asignadoAAvatar, setAsignadoAAvatar] = useState<string>(tarea?.asignadoAAvatar || '');
+
+    /* Estado local para proyecto y completado (para actualización en tiempo real) */
+    const [proyectoIdLocal, setProyectoIdLocal] = useState<number | undefined>(tarea?.proyectoId);
+    const [completadoLocal, setCompletadoLocal] = useState<boolean>(tarea?.completado ?? false);
 
     /* Estado para pestañas responsive */
     const [pestanaActiva, setPestanaActiva] = useState<PestanaModal>('configuracion');
@@ -96,6 +109,8 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             setAsignadoA(tarea.asignadoA || null);
             setAsignadoANombre(tarea.asignadoANombre || '');
             setAsignadoAAvatar(tarea.asignadoAAvatar || '');
+            setProyectoIdLocal(tarea.proyectoId);
+            setCompletadoLocal(tarea.completado);
 
             /* Guardar estado inicial para detección de cambios */
             estadoInicialRef.current = {
@@ -164,6 +179,24 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         setAsignadoANombre(nombre);
         setAsignadoAAvatar(avatar);
     };
+
+    /* Manejador de cambio de proyecto (actualiza estado local + callback) */
+    const manejarCambioProyecto = useCallback(
+        (nuevoProyectoId: number | undefined) => {
+            setProyectoIdLocal(nuevoProyectoId);
+            onCambiarProyecto?.(nuevoProyectoId);
+        },
+        [onCambiarProyecto]
+    );
+
+    /* Manejador de cambio de estado completado (actualiza estado local + callback) */
+    const manejarCambioCompletado = useCallback(
+        (nuevoCompletado: boolean) => {
+            setCompletadoLocal(nuevoCompletado);
+            onToggleCompletado?.(nuevoCompletado);
+        },
+        [onToggleCompletado]
+    );
 
     const manejarGuardar = useCallback(() => {
         const configuracion: TareaConfiguracion = {};
@@ -284,6 +317,12 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                     <div className="panelConfiguracionColumnaScroll">
                         {/* Nombre de la tarea */}
                         <CampoTexto titulo="Nombre de la tarea" valor={texto} onChange={setTexto} placeholder="Nombre de la tarea" />
+
+                        {/* Estado de la tarea - Solo en modo edicion */}
+                        {!esModoCreacion && onToggleCompletado && <SelectorEstadoTarea completada={completadoLocal} onChange={manejarCambioCompletado} />}
+
+                        {/* Proyecto - Solo en modo edicion con callback */}
+                        {!esModoCreacion && proyectos.length > 0 && onCambiarProyecto && <SelectorProyecto proyectos={proyectos} proyectoActualId={proyectoIdLocal} onChange={manejarCambioProyecto} />}
 
                         {/* Prioridad */}
                         <CampoPrioridad<NivelPrioridad> tipo="prioridad" valor={prioridad} onChange={setPrioridad} permitirNulo={true} />

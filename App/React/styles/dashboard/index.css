@@ -46,6 +46,8 @@
 @import './shared/historialHabito.css';
 @import './shared/mapaCalorHabito.css';
 @import './shared/mapaCalorProyecto.css';
+@import './shared/selectorProyecto.css';
+@import './shared/selectorEstado.css';
 
 /* Componentes */
 @import './componentes/encabezado.css';

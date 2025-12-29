@@ -448,7 +448,27 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} />}
 
             {/* Panel de configuración */}
-            {tareaConfigurando && <PanelConfiguracionTarea tarea={tareaConfigurando} estaAbierto={true} onCerrar={() => setTareaConfigurando(null)} onGuardar={guardarConfiguracion} participantes={obtenerParticipantes ? obtenerParticipantes(tareaConfigurando) : []} />}
+            {tareaConfigurando && (
+                <PanelConfiguracionTarea
+                    tarea={tareaConfigurando}
+                    estaAbierto={true}
+                    onCerrar={() => setTareaConfigurando(null)}
+                    onGuardar={guardarConfiguracion}
+                    participantes={obtenerParticipantes ? obtenerParticipantes(tareaConfigurando) : []}
+                    proyectos={proyectos}
+                    onCambiarProyecto={nuevoProyectoId => {
+                        if (onEditarTarea) {
+                            onEditarTarea(tareaConfigurando.id, {proyectoId: nuevoProyectoId, parentId: undefined} as any);
+                        }
+                    }}
+                    onToggleCompletado={completado => {
+                        if (completado !== tareaConfigurando.completado) {
+                            onToggleTarea?.(tareaConfigurando.id);
+                            setTareaConfigurando({...tareaConfigurando, completado});
+                        }
+                    }}
+                />
+            )}
 
             {/* Modal Mover Proyecto */}
             <ModalMoverTarea estaAbierto={!!tareaMoviendo} onCerrar={() => setTareaMoviendo(null)} onMover={handleMoverProyecto} proyectos={proyectos} proyectoActualId={tareaMoviendo?.proyectoId} />

@@ -1,0 +1,236 @@
+/*
+ * SELECTOR DE ESTADO
+ * Estilos para selectores de estado de tarea y habito
+ * Patron similar a selectorFrecuencia
+ */
+
+/* 
+ * SELECTOR ESTADO TAREA
+ */
+.selectorEstadoTarea {
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
+.selectorEstadoTareaCabecera {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    cursor: pointer;
+    transition: background-color var(--dashboard-transicionNormal);
+}
+
+.selectorEstadoTareaCabecera:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.selectorEstadoTareaCabecera:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.selectorEstadoTareaEtiqueta {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.selectorEstadoTareaValor {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.selectorEstadoTareaValor--completada {
+    color: var(--dashboard-estadoExito);
+}
+
+.selectorEstadoTareaIcono {
+    opacity: 0.6;
+}
+
+.selectorEstadoTareaFlecha {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: 8px;
+}
+
+.selectorEstadoTareaPanel {
+    padding: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    animation: selectorEstadoAparecer 0.15s ease-out;
+}
+
+@keyframes selectorEstadoAparecer {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.selectorEstadoTareaOpcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorEstadoTareaOpcion:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoSecundario);
+}
+
+.selectorEstadoTareaOpcionActivo {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorEstadoTareaOpcion--completada {
+    color: var(--dashboard-estadoExito);
+}
+
+.selectorEstadoTareaOpcion--completada.selectorEstadoTareaOpcionActivo {
+    color: var(--dashboard-estadoExito);
+}
+
+/* 
+ * SELECTOR ESTADO HABITO
+ */
+.selectorEstadoHabito {
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
+.selectorEstadoHabitoCabecera {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    cursor: pointer;
+    transition: background-color var(--dashboard-transicionNormal);
+}
+
+.selectorEstadoHabitoCabecera:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.selectorEstadoHabitoCabecera:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.selectorEstadoHabitoEtiqueta {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.selectorEstadoHabitoValor {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.selectorEstadoHabitoValor--completado {
+    color: var(--dashboard-estadoExito);
+}
+
+.selectorEstadoHabitoValor--pospuesto {
+    color: var(--dashboard-estadoMedia);
+}
+
+.selectorEstadoHabitoValor--omitido {
+    color: var(--dashboard-estadoAlta);
+}
+
+.selectorEstadoHabitoFlecha {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: 8px;
+}
+
+.selectorEstadoHabitoPanel {
+    padding: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    animation: selectorEstadoAparecer 0.15s ease-out;
+}
+
+.selectorEstadoHabitoOpcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorEstadoHabitoOpcion:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoSecundario);
+}
+
+.selectorEstadoHabitoOpcionActivo {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorEstadoHabitoOpcion--completado {
+    color: var(--dashboard-estadoExito);
+}
+
+.selectorEstadoHabitoOpcion--pospuesto {
+    color: var(--dashboard-estadoMedia);
+}
+
+.selectorEstadoHabitoOpcion--omitido {
+    color: var(--dashboard-estadoAlta);
+}
