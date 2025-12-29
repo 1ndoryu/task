@@ -90,6 +90,14 @@ export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, o
         }
     }, [calcularPosicion]);
 
+    /* Agregar clase al body para ocultar tooltips */
+    useEffect(() => {
+        document.body.classList.add('menu-contextual-abierto');
+        return () => {
+            document.body.classList.remove('menu-contextual-abierto');
+        };
+    }, []);
+
     const manejarClick = useCallback(
         (opcion: OpcionMenu) => {
             if (opcion.deshabilitado) return;

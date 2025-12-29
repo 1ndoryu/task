@@ -5,7 +5,7 @@
  */
 
 import {useState, useCallback} from 'react';
-import type {Proyecto, Habito} from '../types/dashboard';
+import type {Proyecto, Habito, Tarea} from '../types/dashboard';
 
 interface PosicionModal {
     x: number;
@@ -80,6 +80,10 @@ interface UseModalesDashboardReturn {
     modalNuevaTareaAbierto: boolean;
     abrirModalNuevaTarea: () => void;
     cerrarModalNuevaTarea: () => void;
+    /* Editar Tarea */
+    tareaEditando: Tarea | null;
+    abrirModalEditarTarea: (tarea: Tarea) => void;
+    cerrarModalEditarTarea: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -114,6 +118,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalVersionesAbierto, setModalVersionesAbierto] = useState(false);
     /* Nueva Tarea */
     const [modalNuevaTareaAbierto, setModalNuevaTareaAbierto] = useState(false);
+    /* Editar Tarea */
+    const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -182,6 +188,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const abrirModalNuevaTarea = useCallback(() => setModalNuevaTareaAbierto(true), []);
     const cerrarModalNuevaTarea = useCallback(() => setModalNuevaTareaAbierto(false), []);
 
+    /* Handlers Editar Tarea */
+    const abrirModalEditarTarea = useCallback((tarea: Tarea) => setTareaEditando(tarea), []);
+    const cerrarModalEditarTarea = useCallback(() => setTareaEditando(null), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -237,6 +247,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalVersiones,
         modalNuevaTareaAbierto,
         abrirModalNuevaTarea,
-        cerrarModalNuevaTarea
+        cerrarModalNuevaTarea,
+        tareaEditando,
+        abrirModalEditarTarea,
+        cerrarModalEditarTarea
     };
 }

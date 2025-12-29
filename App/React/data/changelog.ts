@@ -11,6 +11,17 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.7-beta',
+        fecha: '2025-12-29',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Buscador Global centrado en header (Tareas, Hábitos, Proyectos)'},
+            {tipo: 'nuevo', descripcion: 'Menu contextual "Dashboard" para navegación rápida'},
+            {tipo: 'nuevo', descripcion: 'Selector de estado de hábito (Completado, Pospuesto, Pendiente) en edicion'},
+            {tipo: 'mejora', descripcion: 'Headers de paneles con opacidad reducida para menor ruido visual'},
+            {tipo: 'arreglo', descripcion: 'Tooltips se ocultan al abrir menús contextuales'}
+        ]
+    },
+    {
         version: 'v1.0.6-beta',
         fecha: '2025-12-27',
         cambios: [

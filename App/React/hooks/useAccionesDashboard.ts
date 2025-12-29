@@ -15,12 +15,14 @@ interface UseAccionesDashboardProps {
     filtroActual: EstadoFiltro;
     notas: string;
     crearTarea: (datos: {texto: string; prioridad: NivelPrioridad | null; urgencia?: NivelUrgencia | null; configuracion: TareaConfiguracion; proyectoId?: number; completado: boolean}) => void;
+    editarTarea: (id: number, datos: any) => void;
     actualizarNotas: (notas: string) => void;
     crearProyecto: (datos: any) => void;
     editarProyecto: (id: number, datos: any) => void;
     proyectoEditando: Proyecto | null;
     cambiarFiltro: (filtro: EstadoFiltro) => void;
     cerrarModalNuevaTarea: () => void;
+    cerrarModalEditarTarea: () => void;
     cerrarModalCrearProyecto: () => void;
     cerrarModalEditarProyecto: () => void;
     abrirModalEquipos: () => void;
@@ -37,6 +39,7 @@ interface UseAccionesDashboardReturn {
     manejarCrearNuevaTareaGlobal: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
     manejarGuardarNuevoProyecto: (datos: any) => void;
     manejarGuardarEdicionProyecto: (datos: any) => void;
+    manejarGuardarEdicionTareaGlobal: (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
     manejarClickNotificaciones: (evento: React.MouseEvent) => void;
     manejarClickNotificacionIndividual: (notificacion: any) => void;
     crearNotificacionPrueba: () => Promise<boolean>;
@@ -44,7 +47,7 @@ interface UseAccionesDashboardReturn {
 }
 
 export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccionesDashboardReturn {
-    const {filtroActual, notas, crearTarea, actualizarNotas, crearProyecto, editarProyecto, proyectoEditando, cambiarFiltro, cerrarModalNuevaTarea, cerrarModalCrearProyecto, cerrarModalEditarProyecto, abrirModalEquipos, abrirModalNotificaciones, cerrarModalNotificaciones, modalNotificacionesAbierto, cargarNotificaciones, refrescarNotificaciones} = props;
+    const {filtroActual, notas, crearTarea, editarTarea, actualizarNotas, crearProyecto, editarProyecto, proyectoEditando, cambiarFiltro, cerrarModalNuevaTarea, cerrarModalEditarTarea, cerrarModalCrearProyecto, cerrarModalEditarProyecto, abrirModalEquipos, abrirModalNotificaciones, cerrarModalNotificaciones, modalNotificacionesAbierto, cargarNotificaciones, refrescarNotificaciones} = props;
 
     const {confirmar} = useAlertasContext();
 
@@ -81,6 +84,29 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
             cerrarModalNuevaTarea();
         },
         [filtroActual, crearTarea, cerrarModalNuevaTarea]
+    );
+
+    const manejarGuardarEdicionTareaGlobal = useCallback(
+        (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => {
+            if (texto !== undefined && !texto) return; /* Si se pasa texto vacio */
+
+            const datosEdicion: any = {
+                configuracion
+            };
+
+            if (texto !== undefined) datosEdicion.texto = texto;
+            if (prioridad !== undefined) datosEdicion.prioridad = prioridad;
+            if (urgencia !== undefined) datosEdicion.urgencia = urgencia;
+            if (asignacion) {
+                datosEdicion.asignadoA = asignacion.asignadoA;
+                datosEdicion.asignadoANombre = asignacion.asignadoANombre;
+                datosEdicion.asignadoAAvatar = asignacion.asignadoAAvatar;
+            }
+
+            editarTarea(tareaId, datosEdicion);
+            cerrarModalEditarTarea();
+        },
+        [editarTarea, cerrarModalEditarTarea]
     );
 
     const manejarGuardarNuevoProyecto = useCallback(
@@ -164,6 +190,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
         manejarCambioFiltro,
         manejarLimpiarScratchpad,
         manejarCrearNuevaTareaGlobal,
+        manejarGuardarEdicionTareaGlobal,
         manejarGuardarNuevoProyecto,
         manejarGuardarEdicionProyecto,
         manejarClickNotificaciones,

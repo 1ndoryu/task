@@ -15,10 +15,13 @@ import {MessageSquare, MessageSquareOff} from 'lucide-react';
 import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
-import {AccionesFormulario, Modal, SeccionPanel, SelectorNivel} from '../shared';
+import {AccionesFormulario, Modal, SeccionPanel, SelectorNivel, SelectorEstadoHabito} from '../shared';
+import type {EstadoHabito} from '../shared';
 import {MapaCalorHabito} from '../shared/MapaCalorHabito';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
+import {useHabitosStore} from '../../stores/habitosStore';
+import {obtenerFechaHoy} from '../../utils/fecha';
 
 type DatosFormulario = DatosNuevoHabito;
 
@@ -173,6 +176,33 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
         avatar: p.avatar
     }));
 
+    /* Estado de cumplimiento de hoy (Fase 8.7) */
+    const toggleHabito = useHabitosStore(state => state.toggleHabito);
+    const posponerHabito = useHabitosStore(state => state.posponerHabito);
+    const hoy = obtenerFechaHoy();
+
+    let estadoHoy: EstadoHabito = 'pendiente';
+    if (habito) {
+        if (habito.historialCompletados?.includes(hoy)) estadoHoy = 'completado';
+        else if (habito.historialPospuestos?.includes(hoy)) estadoHoy = 'pospuesto';
+    }
+
+    const manejarCambioEstado = useCallback(
+        (nuevoEstado: EstadoHabito) => {
+            if (!habito) return;
+
+            if (nuevoEstado === 'completado') {
+                toggleHabito(habito.id);
+            } else if (nuevoEstado === 'pospuesto') {
+                posponerHabito(habito.id);
+            } else if (nuevoEstado === 'pendiente') {
+                if (estadoHoy === 'completado') toggleHabito(habito.id);
+                else if (estadoHoy === 'pospuesto') posponerHabito(habito.id);
+            }
+        },
+        [habito, estadoHoy, toggleHabito, posponerHabito]
+    );
+
     /* Mostrar chat siempre en modo edición (útil para ver historial) */
     const mostrarChat = modoEdicion;
     const mostrarChatColumna = mostrarChat && chatVisible;
@@ -187,6 +217,13 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
             <SeccionPanel titulo="Nombre del habito">
                 <input id="habito-nombre" type="text" className={`formularioInput ${errores.nombre ? 'formularioInputError' : ''}`} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej: Leer 30 minutos" autoFocus />
                 {errores.nombre && <span className="formularioMensajeError">{errores.nombre}</span>}
+
+                {/* Selector de Estado (Solo modo edición) */}
+                {modoEdicion && habito && (
+                    <div style={{marginTop: '0.75rem'}}>
+                        <SelectorEstadoHabito estado={estadoHoy} onChange={manejarCambioEstado} />
+                    </div>
+                )}
             </SeccionPanel>
 
             {/* Campo Importancia */}

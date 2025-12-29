@@ -5,11 +5,12 @@
  */
 
 import {useState, useRef} from 'react';
-import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload} from 'lucide-react';
+import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../shared';
+import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
 import {APP_TEXTS} from '../../constants/appTexts';
-import type {InfoSuscripcion} from '../../types/dashboard';
+import type {InfoSuscripcion, Tarea, Habito, Proyecto} from '../../types/dashboard';
 
 interface SincronizacionInfo {
     sincronizado: boolean;
@@ -42,17 +43,25 @@ interface DashboardEncabezadoProps {
     onClickExperimentos?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
+    /* Props para buscador global */
+    tareas?: Tarea[];
+    habitos?: Habito[];
+    proyectos?: Proyecto[];
+    onSeleccionarTarea?: (tarea: Tarea) => void;
+    onSeleccionarHabito?: (habito: Habito) => void;
+    onSeleccionarProyecto?: (proyecto: Proyecto) => void;
 }
 
-interface MenuUsuarioState {
+interface MenuState {
     visible: boolean;
     x: number;
     y: number;
 }
 
-export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos}: DashboardEncabezadoProps): JSX.Element {
+export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
-    const [menuUsuario, setMenuUsuario] = useState<MenuUsuarioState>({visible: false, x: 0, y: 0});
+    const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
+    const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
     /* Determinar si mostrar badge de plan en header (solo FREE y TRIAL) */
@@ -62,12 +71,29 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     /* Opciones del menu contextual del usuario */
     const opcionesMenuUsuario = [{id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />}, {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />}, ...(esPremiumActivo ? [{id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />}] : []), {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true}, {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />}, {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true}, {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}];
 
+    /* Opciones del menu de navegación de página */
+    const opcionesMenuPagina = [
+        {id: 'dashboard', etiqueta: 'Dashboard', icono: <LayoutDashboard size={12} />}, // Sin 'activo: true' en type, se puede manejar visualmente si se quiere
+        {id: 'calendario', etiqueta: 'Calendario', icono: <Calendar size={12} />, disabled: true},
+        {id: 'archivos', etiqueta: 'Archivos', icono: <FileText size={12} />, disabled: true}
+    ];
+
     const manejarClickUsuario = (evento: React.MouseEvent) => {
         evento.preventDefault();
         const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
         setMenuUsuario({
             visible: true,
             x: rect.right - 160,
+            y: rect.bottom + 4
+        });
+    };
+
+    const manejarClickPagina = (evento: React.MouseEvent) => {
+        evento.preventDefault();
+        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
+        setMenuPagina({
+            visible: true,
+            x: rect.left,
             y: rect.bottom + 4
         });
     };
@@ -96,6 +122,13 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 sincronizacion?.onLogout?.();
                 break;
         }
+        setMenuUsuario({...menuUsuario, visible: false});
+    };
+
+    const manejarOpcionPagina = (opcionId: string) => {
+        /* Aquí iría la navegación real */
+        console.log(`Navegar a: ${opcionId}`);
+        setMenuPagina({...menuPagina, visible: false});
     };
 
     const manejarCambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,15 +183,23 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
     return (
         <header id="dashboard-encabezado" className="dashboardEncabezado">
-            <div className="encabezadoLogo">
-                <div className="encabezadoIndicador"></div>
-                <span className="encabezadoTitulo">{titulo}</span>
-                {esAdmin && onClickAdmin && (
-                    <button type="button" className="botonIconoEncabezado botonIconoEncabezado--admin" onClick={onClickAdmin} title="Panel de Administración">
-                        <Settings size={14} />
+            <div className="encabezadoIzquierda">
+                <div className="encabezadoLogo">
+                    <button className="encabezadoTituloBoton" onClick={manejarClickPagina}>
+                        <span className="encabezadoTituloTexto">{titulo}</span>
+                        <ChevronDown size={14} className={`encabezadoTituloIcono ${menuPagina.visible ? 'rotado' : ''}`} />
                     </button>
-                )}
+                    {menuPagina.visible && <MenuContextual opciones={opcionesMenuPagina} posicionX={menuPagina.x} posicionY={menuPagina.y} onSeleccionar={manejarOpcionPagina} onCerrar={() => setMenuPagina({...menuPagina, visible: false})} />}
+                </div>
             </div>
+
+            {/* Buscador Global Centrado */}
+            {estaConectado && onSeleccionarTarea && onSeleccionarHabito && onSeleccionarProyecto && (
+                <div className="encabezadoBuscador">
+                    <BuscadorGlobal tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} />
+                </div>
+            )}
+
             <nav className="encabezadoNav">
                 {/* Indicador de Plan - Solo para FREE y TRIAL */}
                 {mostrarBadgePlanEnHeader && <IndicadorPlan suscripcion={suscripcion} onClick={onClickPlan} />}
@@ -180,8 +221,15 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* Laboratorio de Pruebas (solo admins) */}
                 {onClickExperimentos && (
-                    <button type="button" className="botonIconoEncabezado botonIconoEncabezado--test" onClick={onClickExperimentos} title="Laboratorio de Pruebas">
+                    <button type="button" className="botonIconoEncabezado" onClick={onClickExperimentos} title="Laboratorio de Pruebas">
                         <FlaskConical size={14} />
+                    </button>
+                )}
+
+                {/* Panel de Administración (solo admins) */}
+                {esAdmin && onClickAdmin && (
+                    <button type="button" className="botonIconoEncabezado" onClick={onClickAdmin} title="Panel de Administración">
+                        <Settings size={14} />
                     </button>
                 )}
 

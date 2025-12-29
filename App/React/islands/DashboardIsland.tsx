@@ -11,6 +11,7 @@ import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
 
 import '../styles/dashboard/componentes/experimentos.css';
+import '../styles/dashboard/componentes/buscador.css';
 
 interface DashboardIslandProps {
     titulo?: string;
@@ -84,6 +85,12 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
                 onExportarDatos={dashboard.exportarTodosDatos}
                 onImportarDatos={dashboard.importarTodosDatos}
+                tareas={dashboard.tareas}
+                habitos={dashboard.habitos}
+                proyectos={dashboard.proyectos}
+                onSeleccionarTarea={modales.abrirModalEditarTarea}
+                onSeleccionarHabito={dashboard.abrirModalEditarHabito}
+                onSeleccionarProyecto={modales.abrirModalEditarProyecto}
             />
 
             {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} />}

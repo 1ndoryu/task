@@ -15,11 +15,10 @@ interface SelectorEstadoHabitoProps {
     deshabilitado?: boolean;
 }
 
-const ESTADOS: {estado: EstadoHabito; etiqueta: string; icono: 'check' | 'clock' | 'x' | 'circle'}[] = [
+const ESTADOS: {estado: EstadoHabito; etiqueta: string; icono: 'check' | 'clock' | 'circle'}[] = [
     {estado: 'pendiente', etiqueta: 'Pendiente', icono: 'circle'},
     {estado: 'completado', etiqueta: 'Completado', icono: 'check'},
-    {estado: 'pospuesto', etiqueta: 'Pospuesto', icono: 'clock'},
-    {estado: 'omitido', etiqueta: 'Omitido', icono: 'x'}
+    {estado: 'pospuesto', etiqueta: 'Pospuesto', icono: 'clock'}
 ];
 
 const obtenerIcono = (icono: string, size: number) => {

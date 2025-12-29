@@ -6,6 +6,9 @@
 /* 
  * HEADER PRINCIPAL 
  */
+/* 
+ * HEADER PRINCIPAL 
+ */
 .dashboardEncabezado {
     display: flex;
     align-items: center;
@@ -13,6 +16,8 @@
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
     padding-bottom: var(--dashboard-espacioLg);
     margin-bottom: 2rem;
+    position: relative;
+    z-index: 100;
 }
 
 .encabezadoLogo {
@@ -37,6 +42,50 @@
 .encabezadoNav {
     display: flex;
     gap: var(--dashboard-espacioSm);
+}
+
+.encabezadoIzquierda {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioLg);
+}
+
+.encabezadoTituloBoton {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    background: none;
+    border: none;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--dashboard-textoActivo);
+    transition: background-color var(--dashboard-transicionNormal);
+    font-weight: 600;
+    font-size: var(--dashboard-tamanoBase);
+    letter-spacing: -0.025em;
+    margin-left: -0.5rem;
+}
+
+.encabezadoTituloBoton:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.encabezadoTituloIcono {
+    color: var(--dashboard-textoMuyApagado);
+    transition: transform var(--dashboard-transicionNormal);
+}
+
+.encabezadoTituloIcono.rotado {
+    transform: rotate(180deg);
+}
+
+.encabezadoBuscador {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    top: 0;
 }
 
 .encabezadoEnlace {
@@ -186,6 +235,21 @@
 
 .seccionBoton:hover {
     color: white;
+}
+
+/* 
+ * Variantes de Opacidad (8.11)
+ * Reducir opacidad cuando no esta en hover, para reducir ruido visual
+ */
+.seccionEncabezado--panelHeader .seccionTitulo,
+.seccionEncabezado--panelHeader .seccionAcciones {
+    opacity: 0.4;
+    transition: opacity var(--dashboard-transicionNormal);
+}
+
+.seccionEncabezado--panelHeader:hover .seccionTitulo,
+.seccionEncabezado--panelHeader:hover .seccionAcciones {
+    opacity: 1;
 }
 
 /* 
@@ -356,19 +420,6 @@
     transform: scale(0.95);
 }
 
-/* Variante admin - color violeta */
-.botonIconoEncabezado--admin {
-    background: rgba(139, 92, 246, 0.1);
-    border-color: rgba(139, 92, 246, 0.3);
-    color: #a78bfa;
-}
-
-.botonIconoEncabezado--admin:hover {
-    background: rgba(139, 92, 246, 0.2);
-    border-color: rgba(139, 92, 246, 0.5);
-    color: #c4b5fd;
-}
-
 /* 
  * ESTADO DE CONEXION - SOLO ICONO 
  */
@@ -475,19 +526,4 @@
     position: absolute;
     top: 2px;
     right: 2px;
-}
-
-/* 
- * TEMPORAL: Boton de test de notificaciones
- */
-.botonIconoEncabezado--test {
-    background: rgba(234, 179, 8, 0.15);
-    border-color: rgba(234, 179, 8, 0.3);
-    color: #eab308;
-}
-
-.botonIconoEncabezado--test:hover {
-    background: rgba(234, 179, 8, 0.25);
-    border-color: rgba(234, 179, 8, 0.5);
-    color: #facc15;
 }

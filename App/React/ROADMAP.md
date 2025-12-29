@@ -51,40 +51,34 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Integrado en `PanelConfiguracionTarea` en modo edición
 
 **UX - Modal de Hábitos:**
-- [ ] Selector de estado de hábito después del título (8.7)
-  - Mostrar los 3 estados disponibles: completado, pospuesto, omitido
-  - Solo para hábitos existentes (modo edición)
-  - Ubicar debajo del nombre del hábito
+- [x] Selector de estado de hábito después del título (8.7) ✅
+  - Integrado SelectorEstadoHabito en ModalHabito
+  - Visible solo en modo edición
+  - Opciones: Completado, Pospuesto, Pendiente (Omitido removido por feedback)
 
 **UI - Header del Dashboard:**
-- [ ] Unificar estilos de botones Admin y Experimentos (8.8)
-  - Quitar color violeta del botón de administración
-  - Quitar color amarillo del botón de experimentos
-  - Aplicar el mismo estilo neutro que los demás botones del header (botonIconoEncabezado base)
-  - Mover botón de Admin al lado del botón de Experimentos en la navegación
-- [ ] Buscador global centrado en el header (8.9)
-  - Input de búsqueda centrado en el header principal
-  - Búsqueda en tiempo real mientras se escribe
-  - Mostrar resultados: tareas, proyectos y hábitos
-  - Al hacer click en resultado, abrir su modal de configuración
-  - Dropdown de resultados con iconos distintivos por tipo
-- [ ] Menú de navegación "Dashboard" (8.10)
-  - Reemplazar el SVG "Tasks" por texto "Dashboard"
-  - Al hacer click, abrir menú contextual con opciones de página
-  - Agregar página de ejemplo para demostrar navegación
-  - Preparar estructura para futuras páginas
+- [x] Unificar estilos de botones Admin y Experimentos (8.8) ✅
+  - Estilos unificados a botonIconoEncabezado neutro
+  - Botón Admin movido a la barra de navegación lateral derecha
+- [x] Buscador global centrado en el header (8.9) ✅
+  - Implementado nuevo componente BuscadorGlobal
+  - Búsqueda en tiempo real de Tareas, Hábitos y Proyectos
+  - Dropdown flotante con iconos distintivos y navegación directa
+- [x] Menú de navegación "Dashboard" (8.10) ✅
+  - Título convertido en botón con menú dropdown
+  - Opciones de navegación implementadas (Dashboard, Calendario, Archivos)
+  - Estilo visual mejorado con indicador chevron
 
 **UI - Headers de Paneles:**
-- [ ] Reducir opacidad de elementos en header de paneles (8.11)
-  - Reducir opacidad de iconos y nombre del panel
-  - Mantener el icono de arrastre con opacidad actual
-  - Aplicar transición suave al hover para restaurar opacidad
+- [x] Reducir opacidad de elementos en header de paneles (8.11) ✅
+  - Opacidad reducida (0.4) para título y acciones en reposo
+  - Transición suave a opacidad total (1) en hover
+  - Mejora el foco visual en el contenido
 
 **UX - Menú Contextual:**
-- [ ] Ocultar tooltips cuando hay menú contextual abierto (8.12)
-  - Detectar cuando un menú contextual está visible
-  - Deshabilitar/ocultar tooltips globalmente mientras esté abierto
-  - Restaurar tooltips al cerrar el menú
+- [x] Ocultar tooltips cuando hay menú contextual abierto (8.12) ✅
+  - Implementado toggle de clase en body al abrir menú
+  - Regla CSS global para ocultar tooltips evitando superposición visual
 
 ### Baja Prioridad
 

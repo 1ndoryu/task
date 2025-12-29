@@ -92,6 +92,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             {/* Modal Nueva Tarea */}
             {modales.modalNuevaTareaAbierto && <PanelConfiguracionTarea estaAbierto={modales.modalNuevaTareaAbierto} onCerrar={modales.cerrarModalNuevaTarea} onGuardar={acciones.manejarCrearNuevaTareaGlobal} />}
 
+            {/* Modal Editar Tarea */}
+            {modales.tareaEditando && <PanelConfiguracionTarea estaAbierto={true} onCerrar={modales.cerrarModalEditarTarea} onGuardar={(config, priority, text, assignment, urgency) => acciones.manejarGuardarEdicionTareaGlobal(modales.tareaEditando!.id, config, priority, text, assignment, urgency)} tarea={modales.tareaEditando} />}
+
             {/* Componentes Auxiliares */}
             {dashboard.accionDeshacer && <ToastDeshacer mensaje={dashboard.accionDeshacer.mensaje} tiempoRestante={dashboard.accionDeshacer.tiempoRestante} tiempoTotal={5000} onDeshacer={dashboard.ejecutarDeshacer} onDescartar={dashboard.descartarDeshacer} />}
             {auth.user && <BarraPanelesOcultos panelesOcultos={layout.panelesOcultos} onMostrarPanel={layout.mostrarPanel} />}

@@ -32,3 +32,8 @@
 }
 
 /* Flecha del tooltip (opcional, por ahora simple) */
+
+/* Ocultar tooltip si hay un menú contextual abierto (8.12) */
+body.menu-contextual-abierto .tooltipContainer {
+    display: none !important;
+}
