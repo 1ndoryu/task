@@ -124,6 +124,11 @@ body::-webkit-scrollbar-thumb:hover {
     gap: var(--dashboard-espacioLg);
 }
 
+/* Cuando internaColumna es parte de panelDashboard, no debe tener gap */
+.panelDashboard.internaColumna {
+    gap: 0;
+}
+
 .columnaTareas {
     display: flex;
     flex-direction: column;
@@ -146,7 +151,9 @@ body::-webkit-scrollbar-thumb:hover {
 .panelDashboard {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioLg);
+    gap: 0; /* Sin gap para que header quede integrado */
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
 }
 
 /* Asegurar que las columnas dinámicas se comporten como las fijas */
@@ -166,10 +173,10 @@ body::-webkit-scrollbar-thumb:hover {
 
 /* 
  * PANEL (Contenedor de datos) 
+ * El borde lo maneja el contenedor padre .panelDashboard
  */
 .dashboardPanel {
     background-color: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
 }
 
 /* 

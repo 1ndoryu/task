@@ -127,4 +127,12 @@
     --dashboard-scrollbarFondo: transparent;
     --dashboard-scrollbarThumb: rgba(255, 255, 255, 0.15);
     --dashboard-scrollbarThumbHover: rgba(255, 255, 255, 0.25);
+
+    /* 
+     * PANEL HEADER 
+     * Header interno de paneles simulando barra de titulo de ventana
+     */
+    --dashboard-panelHeaderAltura: 42px;
+    --dashboard-panelHeaderFondo: var(--dashboard-fondoSecundario);
+    --dashboard-panelHeaderBorde: var(--dashboard-bordePrincipal);
 }

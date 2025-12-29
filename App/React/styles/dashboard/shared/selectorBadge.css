@@ -51,6 +51,27 @@
 }
 
 /* 
+ * VARIANTE SOLO ICONO
+ * Sin background ni borde, solo muestra el icono
+ * Usado en headers de paneles para acciones discretas
+ */
+.selectorBadgeBoton--soloIcono {
+    background: transparent;
+    border: none;
+    width: auto;
+    height: auto;
+    min-height: unset;
+    padding: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoActivo);
+}
+
+.selectorBadgeBoton--soloIcono:hover {
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+}
+
+/* 
  * ICONOS 
  */
 .selectorBadgeIcono {

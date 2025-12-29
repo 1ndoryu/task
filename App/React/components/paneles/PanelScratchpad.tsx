@@ -66,31 +66,31 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                 icono={null}
                 titulo={renderHandleArrastre('Notas') as any}
                 subtitulo={esNotaNueva ? 'Nueva nota' : tituloActivo}
+                variante="panelHeader"
                 acciones={
                     <>
-                        {/* {handleArrastre} eliminado */}
                         {/* Botón nueva nota */}
-                        <button className="selectorBadgeBoton selectorBadgeBotonCompacto" onClick={manejarNuevaNota} title="Nueva nota">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarNuevaNota} title="Nueva nota">
                             <span className="selectorBadgeIcono">
-                                <Plus size={10} />
+                                <Plus size={12} />
                             </span>
                         </button>
                         {/* Botón abrir notas guardadas */}
-                        <button className="selectorBadgeBoton selectorBadgeBotonCompacto" onClick={manejarAbrirCarpeta} title="Ver notas guardadas">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarAbrirCarpeta} title="Ver notas guardadas">
                             <span className="selectorBadgeIcono">
-                                <FolderOpen size={10} />
+                                <FolderOpen size={12} />
                             </span>
                         </button>
                         {/* Botón limpiar */}
-                        <button className="selectorBadgeBoton selectorBadgeBotonCompacto" onClick={manejarLimpiar} title="Limpiar / Nueva nota">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarLimpiar} title="Limpiar / Nueva nota">
                             <span className="selectorBadgeIcono">
-                                <Eraser size={10} />
+                                <Eraser size={12} />
                             </span>
                         </button>
                         {/* Botón configuración */}
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalConfigScratchpad} title="Configuración">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigScratchpad} title="Configuración">
                             <span className="selectorBadgeIcono">
-                                <Settings size={10} />
+                                <Settings size={12} />
                             </span>
                         </button>
                         {handleMinimizar}

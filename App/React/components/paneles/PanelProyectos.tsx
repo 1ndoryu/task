@@ -42,17 +42,18 @@ export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenP
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Proyectos') as any}
+                variante="panelHeader"
                 acciones={
                     <>
-                        <SelectorBadge opciones={opcionesOrdenProyectos} valorActual={configuracion.ordenDefecto} onChange={valor => onCambiarOrdenProyectos(valor as any)} icono={<ArrowUpDown size={10} />} titulo="Ordenar proyectos" />
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalCrearProyecto} title="Nuevo Proyecto">
+                        <SelectorBadge opciones={opcionesOrdenProyectos} valorActual={configuracion.ordenDefecto} onChange={valor => onCambiarOrdenProyectos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar proyectos" soloIcono={true} />
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalCrearProyecto} title="Nuevo Proyecto">
                             <span className="selectorBadgeIcono">
-                                <Plus size={10} />
+                                <Plus size={12} />
                             </span>
                         </button>
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalConfigProyectos} title="Configuración">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigProyectos} title="Configuración">
                             <span className="selectorBadgeIcono">
-                                <Settings size={10} />
+                                <Settings size={12} />
                             </span>
                         </button>
                         {handleMinimizar}

@@ -21,9 +21,10 @@ interface SelectorBadgeProps<T extends string = string> {
     icono?: ReactNode;
     titulo?: string;
     className?: string;
+    soloIcono?: boolean;
 }
 
-export function SelectorBadge<T extends string = string>({opciones, valorActual, onChange, icono, titulo, className = ''}: SelectorBadgeProps<T>): JSX.Element {
+export function SelectorBadge<T extends string = string>({opciones, valorActual, onChange, icono, titulo, className = '', soloIcono = false}: SelectorBadgeProps<T>): JSX.Element {
     const [menuAbierto, setMenuAbierto] = useState(false);
     const contenedorRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -105,7 +106,7 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
 
     return (
         <div id="selector-badge-contenedor" ref={contenedorRef} className={`selectorBadgeContenedor ${className}`.trim()}>
-            <button type="button" className={`selectorBadgeBoton selectorBadgeBotonCompacto ${menuAbierto ? 'selectorBadgeBotonActivo' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
+            <button type="button" className={`selectorBadgeBoton ${soloIcono ? 'selectorBadgeBoton--soloIcono' : 'selectorBadgeBotonCompacto'} ${menuAbierto ? 'selectorBadgeBotonActivo' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
                 {icono && <span className="selectorBadgeIcono">{icono}</span>}
                 {opcionActual?.icono && <span className="selectorBadgeOpcionIcono">{opcionActual.icono}</span>}
             </button>

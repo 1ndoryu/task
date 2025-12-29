@@ -11,11 +11,14 @@ interface SeccionEncabezadoProps {
     titulo: string;
     subtitulo?: string;
     acciones?: ReactNode;
+    variante?: 'default' | 'panelHeader';
 }
 
-export function SeccionEncabezado({icono, titulo, subtitulo, acciones}: SeccionEncabezadoProps): JSX.Element {
+export function SeccionEncabezado({icono, titulo, subtitulo, acciones, variante = 'default'}: SeccionEncabezadoProps): JSX.Element {
+    const claseVariante = variante === 'panelHeader' ? 'seccionEncabezado--panelHeader' : '';
+
     return (
-        <div className="seccionEncabezado">
+        <div className={`seccionEncabezado ${claseVariante}`}>
             <h2 className="seccionTitulo">
                 {icono} {titulo}
             </h2>

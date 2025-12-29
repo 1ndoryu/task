@@ -373,13 +373,13 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioMd);
-    border-bottom: 1px dashed var(--dashboard-bordePunteado);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
     transition: all var(--dashboard-transicionNormal);
 }
 
 .tareaNuevoInline:hover,
 .tareaNuevoInlineActivo {
-    border-bottom-color: var(--dashboard-bordePrincipal);
+    border-top-color: var(--dashboard-bordePrincipal);
     background-color: var(--dashboard-fondoHover);
 }
 

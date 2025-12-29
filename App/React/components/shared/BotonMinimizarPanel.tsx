@@ -14,9 +14,9 @@ interface BotonMinimizarPanelProps {
 
 export function BotonMinimizarPanel({panelId, onMinimizar}: BotonMinimizarPanelProps): JSX.Element {
     return (
-        <button className="selectorBadgeBoton botonMinimizarPanel" onClick={() => onMinimizar(panelId)} title="Minimizar panel">
+        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono botonMinimizarPanel" onClick={() => onMinimizar(panelId)} title="Minimizar panel">
             <span className="selectorBadgeIcono">
-                <Minus size={10} />
+                <Minus size={12} />
             </span>
         </button>
     );

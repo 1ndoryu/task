@@ -34,18 +34,18 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Habitos') as any}
+                variante="panelHeader"
                 acciones={
                     <>
-                        {/* {handleArrastre} eliminado */}
-                        <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor as any)} icono={<ArrowUpDown size={10} />} titulo="Ordenar hábitos" />
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalCrearHabito} title="Nuevo Hábito">
+                        <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar hábitos" soloIcono={true} />
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalCrearHabito} title="Nuevo Hábito">
                             <span className="selectorBadgeIcono">
-                                <Plus size={10} />
+                                <Plus size={12} />
                             </span>
                         </button>
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalConfigHabitos} title="Configuración">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigHabitos} title="Configuración">
                             <span className="selectorBadgeIcono">
-                                <Settings size={10} />
+                                <Settings size={12} />
                             </span>
                         </button>
                         {handleMinimizar}

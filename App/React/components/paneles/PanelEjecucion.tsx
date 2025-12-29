@@ -54,18 +54,19 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Tareas') as any}
+                variante="panelHeader"
                 acciones={
                     <>
-                        <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" />
-                        <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor as any)} icono={<ArrowUpDown size={10} />} titulo="Ordenar tareas" />
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalNuevaTarea} title="Nueva Tarea">
+                        <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" soloIcono={true} />
+                        <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalNuevaTarea} title="Nueva Tarea">
                             <span className="selectorBadgeIcono">
-                                <Plus size={10} />
+                                <Plus size={12} />
                             </span>
                         </button>
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalConfigTareas} title="Configuración">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigTareas} title="Configuración">
                             <span className="selectorBadgeIcono">
-                                <Settings size={10} />
+                                <Settings size={12} />
                             </span>
                         </button>
                         {handleMinimizar}

@@ -161,6 +161,20 @@
     gap: var(--dashboard-espacioSm);
 }
 
+/* 
+ * VARIANTE PANEL HEADER
+ * Simula barra de titulo de ventana de programa
+ * Altura fija de 42px, borde inferior para separar del contenido
+ */
+.seccionEncabezado--panelHeader {
+    height: var(--dashboard-panelHeaderAltura);
+    min-height: var(--dashboard-panelHeaderAltura);
+    padding: 0 var(--dashboard-espacioLg);
+    margin-bottom: 0;
+    background: var(--dashboard-panelHeaderFondo);
+    border-bottom: 1px solid var(--dashboard-panelHeaderBorde);
+}
+
 .seccionBoton {
     background: none;
     border: none;

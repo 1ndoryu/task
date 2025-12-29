@@ -6,7 +6,7 @@
 
 .dashboardPanel {
     background-color: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    /* border removido - lo maneja el contenedor padre .panelDashboard */
     display: flex;
     flex-direction: column;
     overflow: hidden; /* Para contener bordes redondeados */

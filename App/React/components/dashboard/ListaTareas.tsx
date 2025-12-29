@@ -353,8 +353,6 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     return (
         <DashboardPanel id="lista-tareas">
-            {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} />}
-
             {/* Modo manual: Reorder para tareas reales, hábitos aparte */}
             {habilitarDrag ? (
                 <>
@@ -445,6 +443,9 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
                     return <TareaItem key={tarea.id} tarea={tarea} esSubtarea={!!tarea.parentId} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={soloIcono} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} />;
                 })}
+
+            {/* Input de nueva tarea al final del panel */}
+            {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} />}
 
             {/* Panel de configuración */}
             {tareaConfigurando && <PanelConfiguracionTarea tarea={tareaConfigurando} estaAbierto={true} onCerrar={() => setTareaConfigurando(null)} onGuardar={guardarConfiguracion} participantes={obtenerParticipantes ? obtenerParticipantes(tareaConfigurando) : []} />}

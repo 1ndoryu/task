@@ -59,9 +59,9 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                 icono={null}
                 titulo={renderHandleArrastre('Actividad') as any}
                 subtitulo={obtenerSubtitulo()}
+                variante="panelHeader"
                 acciones={
                     <>
-                        {/* {handleArrastre} eliminado */}
                         {/* Estadisticas compactas */}
                         {estadisticas && (
                             <span className="panelActividadStats">
@@ -70,9 +70,9 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                             </span>
                         )}
                         {/* Boton configuracion */}
-                        <button className="selectorBadgeBoton" onClick={onAbrirModalConfigActividad} title="Configuracion">
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
                             <span className="selectorBadgeIcono">
-                                <Settings size={10} />
+                                <Settings size={12} />
                             </span>
                         </button>
                         {handleMinimizar}

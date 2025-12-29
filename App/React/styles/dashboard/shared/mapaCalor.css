@@ -9,7 +9,7 @@
  */
 .mapaCalorContenedor {
     background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    /* border removido - lo maneja el contenedor padre panelDashboard */
     padding: var(--dashboard-espacioLg);
 }
 
