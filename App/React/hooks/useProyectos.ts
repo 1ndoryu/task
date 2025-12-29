@@ -14,6 +14,8 @@ export interface DatosNuevoProyecto {
     prioridad: NivelPrioridad;
     urgencia?: NivelUrgencia;
     fechaLimite?: string;
+    icono?: string;
+    colorIcono?: string;
 }
 
 export interface UseProyectosParams {
@@ -43,6 +45,8 @@ export function useProyectos({proyectos, setProyectos, registrarAccion, mostrarM
                 id: nuevoId,
                 nombre: datos.nombre,
                 descripcion: datos.descripcion,
+                icono: datos.icono || 'folder',
+                colorIcono: datos.colorIcono || '#888888',
                 prioridad: datos.prioridad,
                 urgencia: datos.urgencia || 'normal',
                 fechaLimite: datos.fechaLimite,

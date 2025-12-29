@@ -48,6 +48,7 @@
 @import './shared/mapaCalorProyecto.css';
 @import './shared/selectorProyecto.css';
 @import './shared/selectorEstado.css';
+@import './shared/configuracionModerna.css';
 
 /* Componentes */
 @import './componentes/encabezado.css';

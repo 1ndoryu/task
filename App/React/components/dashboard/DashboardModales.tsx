@@ -115,7 +115,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modales de Proyectos */}
             <ModalProyecto estaAbierto={modales.modalCrearProyectoAbierto} onCerrar={modales.cerrarModalCrearProyecto} onGuardar={acciones.manejarGuardarNuevoProyecto} />
-            <ModalProyecto estaAbierto={modales.proyectoEditando !== null} onCerrar={modales.cerrarModalEditarProyecto} onGuardar={acciones.manejarGuardarEdicionProyecto} proyecto={modales.proyectoEditando ?? undefined} participantes={modales.proyectoEditando ? compartir.cacheParticipantesProyecto.get(modales.proyectoEditando.id) ?? [] : []} />
+            <ModalProyecto estaAbierto={modales.proyectoEditando !== null} onCerrar={modales.cerrarModalEditarProyecto} onGuardar={acciones.manejarGuardarEdicionProyecto} proyecto={modales.proyectoEditando ?? undefined} participantes={modales.proyectoEditando ? compartir.cacheParticipantesProyecto.get(modales.proyectoEditando.id) ?? [] : []} companeros={equipos.companeros} onAgregarParticipante={(companeroId, rol) => modales.proyectoEditando && compartir.manejarCompartirElemento(companeroId, rol)} onRemoverParticipante={compartir.manejarDejarDeCompartir} onCambiarRolParticipante={compartir.manejarCambiarRolCompartido} />
 
             {/* Modales de Configuración */}
             <ModalConfiguracionTareas estaAbierto={modales.modalConfigTareasAbierto} onCerrar={modales.cerrarModalConfigTareas} configuracion={configTareas.configuracion} onToggleCompletadas={configTareas.toggleOcultarCompletadas} onToggleBadgeProyecto={configTareas.toggleOcultarBadgeProyecto} onToggleEliminarCompletadas={configTareas.toggleEliminarCompletadasDespuesDeUnDia} onToggleMostrarHabitos={configTareas.toggleMostrarHabitosEnEjecucion} />

@@ -37,3 +37,8 @@ export * from './MapaCalorProyecto';
 export * from './SelectorProyecto';
 export * from './SelectorEstadoTarea';
 export * from './SelectorEstadoHabito';
+export * from './CampoTituloLimpio';
+export * from './CampoSubtituloLimpio';
+export * from './SelectorIconoProyecto';
+export * from './PropiedadesCompactas';
+export * from './SeccionResponsables';

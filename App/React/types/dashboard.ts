@@ -130,6 +130,10 @@ export interface Proyecto {
     id: number;
     nombre: string;
     descripcion?: string;
+    /* Icono del proyecto (id del icono de lucide) */
+    icono?: string;
+    /* Color del icono (hex) */
+    colorIcono?: string;
     prioridad: NivelPrioridad;
     /* Urgencia: temporalidad (bloqueante, urgente, normal, chill) */
     urgencia?: NivelUrgencia;

@@ -121,10 +121,10 @@
 
 /* 
  * MODAL COLAPSADO - CHAT OCULTO
- * Cuando el panel de chat está oculto, el modal es más angosto
+ * Cuando el panel de chat está oculto, modal más amplio para propiedades Linear
  */
 .modalContenedor--expandido:has(.panelConfiguracionDosColumnas--sinChat) {
-    max-width: 425px;
+    max-width: 550px;
 }
 
 /* 
