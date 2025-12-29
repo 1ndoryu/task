@@ -236,10 +236,10 @@ Todos centralizados en `configuracionModerna.css`:
       - [x] Ajustar gap entre iconos header
       - [x] Mover selector de icono arriba del título
       - [x] Quitar bordes y padding en input título/descripción (estado focus)
-11. ⏳ **Fase 9.2.10** - Visualización Grid de Adjuntos
-      - [ ] Separador visual
-      - [ ] Componente GridAdjuntos (3 columnas)
-      - [ ] Cards de archivo minimalistas
+11. ✅ **Fase 9.2.10** - Visualización Grid de Adjuntos
+      - [x] Separador visual
+      - [x] Componente GridAdjuntos (3 columnas)
+      - [x] Cards de archivo minimalistas
 12. ⏳ **Fase 9.3** - Corrección de Bugs
       - [ ] Subtarea hereda proyecto del padre (Panel Ejecución)
 13. ⏳ **Fase 9.4** - Aplicar a Tareas

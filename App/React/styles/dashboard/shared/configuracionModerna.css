@@ -970,3 +970,214 @@
     text-align: left;
     opacity: 0.5;
 }
+
+/* 
+ * AUDIO PLAYER
+ */
+.adjuntoAudioControl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--dashboard-superposicionClara);
+    padding: 2px 6px;
+    border-radius: 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.adjuntoBotonPlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoNormal);
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.adjuntoBotonPlay:hover {
+    border-color: var(--dashboard-textoActivo);
+}
+
+.adjuntoAudioBarra {
+    width: 40px;
+    height: 3px;
+    background: var(--dashboard-bordeSutil);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.adjuntoAudioProgreso {
+    height: 100%;
+    background: var(--dashboard-textoActivo);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+/*
+ * ADJUNTOS GRID (Fase 9.2.10)
+ * Visualización grid minimalista para adjuntos
+ */
+.adjuntosContenedorGrid {
+    padding-top: var(--dashboard-espacioMd);
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+    margin-top: var(--dashboard-espacioMd);
+}
+
+.adjuntosGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
+}
+
+.adjuntosGrid__item {
+    position: relative;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-fondoPrincipal);
+    overflow: hidden;
+    transition: all var(--dashboard-transicionRapida);
+    display: flex;
+    flex-direction: column;
+}
+
+.adjuntosGrid__item:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    transform: translateY(-1px);
+    box-shadow: var(--dashboard-sombraSutil);
+}
+
+.adjuntosGrid__preview {
+    height: 80px;
+    background: var(--dashboard-superposicionClara);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+}
+
+.adjuntosGrid__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dashboard-transicionNormal);
+}
+
+.adjuntosGrid__item:hover .adjuntosGrid__preview img {
+    transform: scale(1.05);
+}
+
+.adjuntosGrid__icono {
+    color: var(--dashboard-textoApagado);
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.adjuntosGrid__item:hover .adjuntosGrid__icono {
+    color: var(--dashboard-textoNormal);
+}
+
+.adjuntosGrid__info {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    min-height: 32px;
+}
+
+.adjuntosGrid__nombre {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: var(--dashboard-espacioXs);
+    flex: 1;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.adjuntosGrid__iconoCifrado {
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+}
+
+.adjuntosGrid__acciones {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.adjuntosGrid__item:hover .adjuntosGrid__acciones {
+    opacity: 1;
+}
+
+.adjuntosGrid__accion {
+    padding: 4px;
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.adjuntosGrid__accion:hover {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-superposicionClara);
+}
+
+.adjuntosGrid__accion--peligro:hover {
+    color: var(--dashboard-estadoAlta);
+    background: hsla(0, 70%, 45%, 0.1);
+}
+
+/* Audio Player Minimalista para Grid */
+.adjuntosGrid__audio {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-superposicionClara);
+    position: relative;
+}
+
+.adjuntosGrid__audioBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--dashboard-textoNormal);
+    transition: all var(--dashboard-transicionRapida);
+    z-index: 2;
+}
+
+.adjuntosGrid__audioBtn:hover {
+    transform: scale(1.1);
+    border-color: var(--dashboard-textoActivo);
+}
+
+@media (max-width: 500px) {
+    .adjuntosGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

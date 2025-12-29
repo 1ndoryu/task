@@ -6,7 +6,7 @@
  */
 
 import {useRef, useState, useCallback} from 'react';
-import {X, File, Image as ImageIcon, Trash2, AlertTriangle, Music, Play, Pause, Upload, Loader2, Lock} from 'lucide-react';
+import {X, File, Image as ImageIcon, Trash2, AlertTriangle, Music, Play, Pause, Upload, Loader2, Lock, Download} from 'lucide-react';
 import type {Adjunto} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
 import {useAdjuntos} from '../../hooks/useAdjuntos';
@@ -462,59 +462,116 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
     );
 
     const renderContenidoModerno = () => (
-        <div className="propiedadesCompactas">
-            <span className="propiedadesCompactas__etiqueta">{etiqueta}</span>
-            <div className="propiedadesCompactas__contenido">
-                {adjuntos.map(adjunto => (
-                    <div
-                        key={adjunto.id}
-                        className="pillOpcion"
-                        onClick={() => {
-                            const urlPreview = obtenerUrlPreview(adjunto);
-                            if (adjunto.tipo === 'imagen' && urlPreview) setPreviewImage({...adjunto, url: urlPreview});
-                            else if (adjunto.tipo !== 'imagen' && !esCifrado(adjunto)) window.open(adjunto.url, '_blank');
-                        }}
-                        title={adjunto.nombre}>
-                        {adjunto.tipo === 'imagen' ? <ImageIcon size={14} /> : adjunto.tipo === 'audio' ? <Music size={14} /> : <File size={14} />}
-                        <span style={{maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis'}}>{adjunto.nombre}</span>
-                        <button
-                            className="botonSinEstilo"
-                            onClick={e => {
-                                e.stopPropagation();
-                                eliminarAdjunto(adjunto.id);
-                            }}>
-                            <X size={12} className="textoApagado hover:text-red-500" />
-                        </button>
-                    </div>
-                ))}
+        <div className="propiedadesCompactas" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0}}>
+            <div style={{display: 'flex', alignItems: 'center', width: '100%', gap: '16px'}}>
+                <span className="propiedadesCompactas__etiqueta">{etiqueta}</span>
+                <div className="propiedadesCompactas__contenido">
+                    {/* Boton Agregar Compacto */}
+                    <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => fileInputRef.current?.click()} title="Agregar adjunto" disabled={estadoSubida.subiendo}>
+                        {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
+                        <span>Agregar</span>
+                    </button>
 
-                {/* Boton Agregar Compacto */}
-                <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => fileInputRef.current?.click()} title="Agregar adjunto" disabled={estadoSubida.subiendo}>
-                    {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
-                    <span>Agregar</span>
-                </button>
-
-                <input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={handleFileSelect} accept="image/*,audio/*,.pdf,.doc,.docx,.txt" disabled={estadoSubida.subiendo} />
-
-                {/* Mensaje de error (Toast pequeño) */}
-                {(error || estadoSubida.error) && (
-                    <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
-                        {error || estadoSubida.error}
-                    </div>
-                )}
-
-                {/* Reutilizamos el overlay de imagen si es necesario (el mismo de clasico funciona) */}
-                {previewImage && (
-                    <div className="adjuntoOverlay" onClick={() => setPreviewImage(null)}>
-                        <div className="adjuntoOverlayContenido" onClick={e => e.stopPropagation()}>
-                            <button className="adjuntoBotonCerrar" onClick={() => setPreviewImage(null)}>
-                                <X size={24} />
-                            </button>
-                            <img src={contenidoDescifrado[previewImage.id] || previewImage.url} alt={previewImage.nombre} className="adjuntoImagenFull" />
+                    {/* Mensaje de error (Toast pequeño) */}
+                    {(error || estadoSubida.error) && (
+                        <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
+                            {error || estadoSubida.error}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
+
+            {/* Grid de Adjuntos (Solo si hay adjuntos) */}
+            {adjuntos.length > 0 && (
+                <div className="adjuntosContenedorGrid" style={{width: '100%'}}>
+                    <div className="adjuntosGrid">
+                        {adjuntos.map(adjunto => {
+                            const urlPreview = obtenerUrlPreview(adjunto);
+                            const estaCifrado = esCifrado(adjunto);
+
+                            return (
+                                <div key={adjunto.id} className="adjuntosGrid__item">
+                                    {/* Preview Area */}
+                                    <div
+                                        className="adjuntosGrid__preview"
+                                        onClick={() => {
+                                            if (adjunto.tipo === 'imagen' && urlPreview) setPreviewImage({...adjunto, url: urlPreview});
+                                            else if (adjunto.tipo !== 'audio' && !esCifrado(adjunto)) window.open(adjunto.url, '_blank');
+                                        }}>
+                                        {/* Content based on type */}
+                                        {adjunto.tipo === 'imagen' && urlPreview ? (
+                                            <img src={urlPreview} alt={adjunto.nombre} />
+                                        ) : adjunto.tipo === 'audio' ? (
+                                            <div className="adjuntosGrid__audio">
+                                                <button
+                                                    type="button"
+                                                    className="adjuntosGrid__audioBtn"
+                                                    onClick={e => {
+                                                        e.stopPropagation();
+                                                        toggleAudio(adjunto.id);
+                                                    }}>
+                                                    {playingId === adjunto.id ? <Pause size={14} /> : <Play size={14} style={{marginLeft: '2px'}} />}
+                                                </button>
+                                                {/* Hidden Audio Element */}
+                                                <audio
+                                                    ref={el => {
+                                                        if (el) audioRefs.current[adjunto.id] = el;
+                                                    }}
+                                                    src={adjunto.url}
+                                                    onTimeUpdate={() => handleTimeUpdate(adjunto.id)}
+                                                    onEnded={() => handleAudioEnded(adjunto.id)}
+                                                    style={{display: 'none'}}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <File size={32} strokeWidth={1.5} className="adjuntosGrid__icono" />
+                                        )}
+                                    </div>
+
+                                    {/* Info Area */}
+                                    <div className="adjuntosGrid__info">
+                                        <div className="adjuntosGrid__nombre" title={adjunto.nombre}>
+                                            {estaCifrado && <Lock size={12} className="adjuntosGrid__iconoCifrado" />}
+                                            <span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{adjunto.nombre}</span>
+                                        </div>
+                                        <div className="adjuntosGrid__acciones">
+                                            {/* Download */}
+                                            <a href={adjunto.url} download={adjunto.nombre} className="adjuntosGrid__accion" title="Descargar" onClick={e => e.stopPropagation()}>
+                                                <Download size={12} />
+                                            </a>
+                                            {/* Delete */}
+                                            <button
+                                                type="button"
+                                                className="adjuntosGrid__accion adjuntosGrid__accion--peligro"
+                                                title="Eliminar"
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    eliminarAdjunto(adjunto.id);
+                                                }}>
+                                                <Trash2 size={12} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            <input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={handleFileSelect} accept="image/*,audio/*,.pdf,.doc,.docx,.txt" disabled={estadoSubida.subiendo} />
+
+            {/* Reutilizamos el overlay de imagen si es necesario */}
+            {previewImage && (
+                <div className="adjuntoOverlay" onClick={() => setPreviewImage(null)}>
+                    <div className="adjuntoOverlayContenido" onClick={e => e.stopPropagation()}>
+                        <button className="adjuntoBotonCerrar" onClick={() => setPreviewImage(null)}>
+                            <X size={24} />
+                        </button>
+                        <img src={contenidoDescifrado[previewImage.id] || previewImage.url} alt={previewImage.nombre} className="adjuntoImagenFull" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 
