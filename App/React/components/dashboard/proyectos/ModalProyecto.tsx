@@ -36,11 +36,12 @@ interface ModalProyectoProps {
     onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
     /* Tareas para calcular estadisticas (Fase 9.2.7) */
     tareas?: Tarea[];
+    onToggleTarea?: (id: number) => void;
 }
 
 type PestanaModal = 'configuracion' | 'chat';
 
-export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, tareas = []}: ModalProyectoProps): JSX.Element | null {
+export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, tareas = [], onToggleTarea}: ModalProyectoProps): JSX.Element | null {
     const modoEdicion = !!proyecto;
 
     /* Estado local para edicion */
@@ -203,15 +204,19 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const mostrarChatColumna = mostrarChat && chatVisible;
 
     /* Calcular estadisticas de tareas (Fase 9.2.7) */
-    const {tareasCompletadas, tareasPendientes} = useMemo(() => {
-        if (!proyecto || !tareas.length) return {tareasCompletadas: 0, tareasPendientes: 0};
+    /* Filtrar tareas del proyecto */
+    const tareasProyecto = useMemo(() => {
+        if (!proyecto || !tareas.length) return [];
+        return tareas.filter(t => t.proyectoId === proyecto.id);
+    }, [proyecto?.id, tareas]);
 
-        const tareasProyecto = tareas.filter(t => t.proyectoId === proyecto.id);
+    /* Calcular estadisticas */
+    const {tareasCompletadas, tareasPendientes} = useMemo(() => {
         return {
             tareasCompletadas: tareasProyecto.filter(t => t.completado).length,
             tareasPendientes: tareasProyecto.filter(t => !t.completado).length
         };
-    }, [proyecto?.id, tareas]);
+    }, [tareasProyecto]);
 
     /* Clase extra para modal expandido */
     const claseModal = mostrarChat ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
@@ -221,18 +226,18 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
         <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
             {/* Estadisticas (Placeholder) */}
             <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)">
-                <BarChart2 size={16} className="textoApagado" />
+                <BarChart2 size={14} className="textoApagado" />
             </button>
 
             {/* Actividad / Chat */}
             <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'}>
                 {tieneMensajesSinLeer ? (
                     <div style={{position: 'relative'}}>
-                        <Activity size={16} />
+                        <Activity size={14} />
                         <span className="indicadorBadge" />
                     </div>
                 ) : (
-                    <Activity size={16} />
+                    <Activity size={14} />
                 )}
             </button>
         </div>
@@ -318,13 +323,12 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                                     puedeGestionarParticipantes={modoEdicion}
                                     adjuntos={adjuntos}
                                     onAdjuntosChange={setAdjuntos}
-                                    tareasCompletadas={tareasCompletadas}
-                                    tareasPendientes={tareasPendientes}
+                                    tareas={tareasProyecto}
+                                    onToggleTarea={onToggleTarea}
                                 />
                             </div>
 
-                            {/* Acciones - sin botón eliminar y sin chat (ahora en header) */}
-                            <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Guardar cambios" />
+                            {/* Acciones - sin botones visibles ya que hay auto-guardado */}
                         </div>
 
                         {/* Columna Derecha: Chat e Historial */}

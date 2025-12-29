@@ -87,16 +87,16 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
             <div className="propiedadesCompactas__contenido">
                 {/* Prioridad */}
                 <div className="propiedadesCompactas__item">
-                    <button ref={prioridadRef} type="button" className="pillOpcion" onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad">
-                        <Flag size={14} />
+                    <button ref={prioridadRef} type="button" className={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'var(--dashboard-textoNormal)'} : undefined}>
+                        <Flag size={14} fill={prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'none'} />
                         <span>{ETIQUETAS_PRIORIDAD[prioridad]}</span>
                     </button>
                 </div>
 
                 {/* Urgencia */}
                 <div className="propiedadesCompactas__item">
-                    <button ref={urgenciaRef} type="button" className={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia">
-                        <Zap size={14} />
+                    <button ref={urgenciaRef} type="button" className={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: 'var(--dashboard-estadoMedia)'} : undefined}>
+                        <Zap size={14} fill={urgencia ? 'var(--dashboard-estadoMedia)' : 'none'} />
                         <span>{urgencia ? ETIQUETAS_URGENCIA[urgencia] : 'Urgencia'}</span>
                     </button>
                 </div>

@@ -10,7 +10,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Version:** v1.0.9-beta  
 **Ultima actualizacion:** 2025-12-29
 22. ✅ **Fase 9.10** - Cambiar botones de creación a Creación Rápida (Proyectos, Tareas, etc)
-**Estado:** Fase 9 EN PROGRESO - Refactorización Visual Configuración (Estilo Linear)
+**Estado:** Fase 9 EN PROGRESO - Refactorización Visual (Proyectos Finalizado ✅)
 
 ## Funcionalidades Completadas
 
@@ -140,10 +140,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Sin borde visible, focus con borde sutil (estilos en configuracionModerna.css)
 
 #### 9.2.7 Resumen de Tareas (Solo Proyectos)
-- [x] Crear componente `ResumenTareasProyecto`
-  - Contador compacto: "X completadas │ Y pendientes" con iconos
-  - Barra de progreso mini opcional (porcentaje)
-  - Link "Ver todas →" con callback opcional
+- [x] Crear componente `ListaTareasCompacta` (Evolución de Resumen)
+  - Lista jerárquica con subtareas
+  - Checkbox funcional (toggle de estado)
+  - Estilos consistentes (gap y tipografía)
 
 #### 9.2.8 Header Derecha - Iconos de Acción
 - [x] Mover botón de cerrar (X) y reemplazar con:
@@ -194,7 +194,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 | `PropiedadesCompactas`  | Grid de propiedades inline      | ✅ Completado |
 | `BotonOpcionCompacta`   | Pill reutilizable con menú      | ✅ Completado |
 | `SeccionResponsables`   | Lista de avatares + agregar     | ✅ Completado |
-| `ResumenTareasProyecto` | Contador compacto + barra       | ✅ Completado |
+| `ListaTareasCompacta`   | Árbol de tareas interactivo     | ✅ Completado |
 | `SeccionAdjuntos`       | Grid/lista de archivos          | ✅ Completado |
 
 ### 9.8 Estilos CSS Nuevos

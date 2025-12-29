@@ -63,7 +63,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                         {accionesEncabezado}
                         {!ocultarBotonCerrar && (
                             <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">
-                                <X size={16} />
+                                <X size={14} />
                             </button>
                         )}
                     </div>

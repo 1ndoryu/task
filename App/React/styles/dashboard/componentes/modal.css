@@ -34,7 +34,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
     flex-shrink: 0;
 }

@@ -136,7 +136,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                 </div>
                 {puedeGestionar && companeroDisponibles.length > 0 && (
                     <button type="button" className="seccionResponsables__botonAgregarCompacto" onClick={() => setMenuAgregarAbierto(!menuAgregarAbierto)} title="Agregar responsable">
-                        <UserPlus size={12} />
+                        <UserPlus size={14} />
                     </button>
                 )}
             </div>
@@ -154,7 +154,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                     puedeGestionar && companeroDisponibles.length > 0 ? (
                         <div className="seccionResponsables__agregarContenedor" ref={menuAgregarRef}>
                             <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => setMenuAgregarAbierto(!menuAgregarAbierto)}>
-                                <User size={12} />
+                                <User size={14} />
                                 <span>Agregar</span>
                             </button>
 
@@ -192,7 +192,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                         </div>
                     ) : (
                         <span className="pillOpcion pillOpcion--vacio pillOpcion--disabled">
-                            <User size={12} />
+                            <User size={14} />
                             <span>Ninguno</span>
                         </span>
                     )
@@ -237,7 +237,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                         {puedeGestionar && companeroDisponibles.length > 0 && (
                             <div className="seccionResponsables__agregarContenedor" ref={menuAgregarRef}>
                                 <button type="button" className="seccionResponsables__botonAgregarSmall" onClick={() => setMenuAgregarAbierto(!menuAgregarAbierto)} title="Agregar participante">
-                                    <UserPlus size={12} />
+                                    <UserPlus size={14} />
                                 </button>
 
                                 {menuAgregarAbierto && (

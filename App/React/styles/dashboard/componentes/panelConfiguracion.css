@@ -253,10 +253,9 @@
 .panelConfiguracionColumnaScroll {
     flex: 1;
     /* 
-     * Usar scroll fijo en vez de auto para evitar parpadeo 
-     * del scrollbar al escribir/editar contenido 
+     * Usar scroll auto para que solo aparezca cuando sea necesario
      */
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: var(--dashboard-espacioLg);
     display: flex;
     flex-direction: column;
