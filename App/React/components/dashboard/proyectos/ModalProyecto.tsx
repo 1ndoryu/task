@@ -339,8 +339,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                                     onHitosChange={setHitos}
                                 />
                             </div>
-
-                            {/* Acciones - sin botones visibles ya que hay auto-guardado */}
+                            {/* Input de comentario cuando el chat esta oculto */}
+                            {!mostrarChatColumna && proyecto && <PanelChatHistorial elementoId={proyecto.id} elementoTipo="proyecto" participantes={participantesChat} soloInput />}
                         </div>
 
                         {/* Columna Derecha: Chat e Historial */}

@@ -8,8 +8,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Fecha de inicio:** 2025-12-19  
 **Version:** v1.0.9-beta  
-**Ultima actualizacion:** 2025-12-29
-**Estado:** Fase 9 COMPLETA - Iniciando Fase 9.7
+**Ultima actualizacion:** 2025-12-30
+**Estado:** Fase 9 COMPLETA - Finalizando Fase 9.7
 
 ## Funcionalidades Completadas
 
@@ -307,11 +307,12 @@ Todos centralizados en `configuracionModerna.css`:
 - [x] Distinguir visualmente Responsable vs Colaboradores
 
 ### 9.7.5 Panel de Comentarios (Rediseño)
-- [ ] Cambiar "Enviar mensaje" por "Dejar comentario"
-- [ ] Input de comentario más compacto estilo red social
-- [ ] Mostrar foto del usuario junto al input
-- [ ] Comentarios con menos padding
-- [ ] Input ubicado abajo por defecto
+- [x] Cambiar "Enviar mensaje" por "Dejar comentario"
+- [x] Input de comentario más compacto estilo red social
+- [x] Mostrar foto del usuario junto al input
+- [x] Comentarios con menos padding
+- [x] Input ubicado abajo por defecto (fijo en parte inferior)
+- [x] Input visible en columna izquierda cuando chat está oculto
 
 ### 9.7.6 Mejoras Visuales en Hábitos (Feedback)
 - [x] Separador visual entre configuración y historial visual
@@ -327,7 +328,7 @@ Todos centralizados en `configuracionModerna.css`:
 <summary>Mejoras menores</summary>
 
 **Chat/Mensajes:**
-- [ ] Compactar mensajes (menos padding)
+- [x] Compactar mensajes (menos padding)
 - [ ] Verificar historial de cambios en chat de proyectos
 
 **Hábitos:**

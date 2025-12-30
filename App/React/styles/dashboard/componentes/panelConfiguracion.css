@@ -204,10 +204,10 @@
 .panelConfiguracionDosColumnas {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    max-height: 600px;
+    /* max-height: 600px; */
     min-height: 400px;
+    height: 100%;
 }
-
 /* Variante sin chat: una sola columna */
 .panelConfiguracionDosColumnas--sinChat {
     grid-template-columns: 1fr;
@@ -229,6 +229,7 @@
     flex-direction: column;
     border-right: 1px solid var(--dashboard-bordePrincipal);
     overflow: hidden;
+    position: relative;
 }
 
 /* 
@@ -247,6 +248,8 @@
     flex-direction: column;
     overflow: hidden;
     background-color: var(--dashboard-fondoPrincipal);
+    min-height: 0;
+    height: 100%;
 }
 
 .panelConfiguracionColumnaScroll {

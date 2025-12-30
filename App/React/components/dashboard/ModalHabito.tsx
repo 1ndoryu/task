@@ -199,7 +199,8 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
                                     errorNombre={errores.nombre}
                                 />
                             </div>
-                            {/* Sin botones de acciones - auto-guardado */}
+                            {/* Input de comentario cuando el chat esta oculto */}
+                            {!mostrarChatColumna && habito && <PanelChatHistorial elementoId={habito.id} elementoTipo="habito" participantes={participantesChat} soloInput />}
                         </div>
 
                         {/* Columna Derecha: Chat e Historial */}

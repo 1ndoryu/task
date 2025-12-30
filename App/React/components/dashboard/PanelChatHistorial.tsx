@@ -23,6 +23,12 @@ export interface PanelChatHistorialProps {
         nombre: string;
         avatar: string;
     }>;
+    /* Avatar del usuario actual para mostrar junto al input */
+    avatarUsuario?: string;
+    /* Nombre del usuario actual */
+    nombreUsuario?: string;
+    /* Mostrar solo el input sin el timeline (para cuando el chat está oculto) */
+    soloInput?: boolean;
 }
 
 /* Mapeo de iconos para mensajes del sistema */
@@ -82,10 +88,16 @@ function formatearFechaDia(fechaIso: string): string {
     return fecha.toLocaleDateString('es', {weekday: 'long', day: 'numeric', month: 'long'});
 }
 
-export function PanelChatHistorial({elementoId, elementoTipo, participantes = []}: PanelChatHistorialProps): JSX.Element {
+export function PanelChatHistorial({elementoId, elementoTipo, participantes = [], avatarUsuario, nombreUsuario, soloInput = false}: PanelChatHistorialProps): JSX.Element {
     const [mostrandoParticipantes, setMostrandoParticipantes] = useState(false);
     const [mensajeNuevo, setMensajeNuevo] = useState('');
     const refContenedor = useRef<HTMLDivElement>(null);
+
+    /* Obtener usuario actual de WordPress si no se pasan props */
+    const wpData = typeof window !== 'undefined' ? (window as any).gloryDashboard : null;
+    const usuarioActual = wpData?.currentUser;
+    const avatarFinal = avatarUsuario || usuarioActual?.avatarUrl || '';
+    const nombreFinal = nombreUsuario || usuarioActual?.name || 'Usuario';
 
     const tieneParticipantes = participantes.length > 0;
 
@@ -172,7 +184,7 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
             return (
                 <div className="panelChatHistorialVacio">
                     <MessageCircle size={24} />
-                    <span>Sin mensajes aun</span>
+                    <span>Sin comentarios aun</span>
                 </div>
             );
         }
@@ -195,6 +207,19 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
 
         return elementos;
     };
+
+    /* Modo solo input: renderiza solo el input de comentario */
+    if (soloInput) {
+        return (
+            <div className="timelineInput timelineInput--flotante">
+                <div className="timelineInputAvatar">{avatarFinal ? <img src={avatarFinal} alt={nombreFinal} /> : <span>{nombreFinal.charAt(0).toUpperCase()}</span>}</div>
+                <input type="text" value={mensajeNuevo} onChange={e => setMensajeNuevo(e.target.value)} onKeyDown={manejarTecla} placeholder="Dejar un comentario..." className="timelineInputTexto" disabled={estado.enviando} />
+                <button type="button" onClick={manejarEnviarMensaje} className="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Comentar">
+                    {estado.enviando ? <Loader size={14} className="animacionGirar" /> : <Send size={14} />}
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div id="panel-chat-historial" className="panelChatHistorial">
@@ -221,10 +246,11 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
                             {renderizarEstadoTimeline()}
                         </div>
 
-                        {/* Input de mensaje */}
+                        {/* Input de comentario */}
                         <div className="timelineInput">
-                            <input type="text" value={mensajeNuevo} onChange={e => setMensajeNuevo(e.target.value)} onKeyDown={manejarTecla} placeholder="Escribe un mensaje..." className="timelineInputTexto" disabled={estado.enviando} />
-                            <button type="button" onClick={manejarEnviarMensaje} className="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Enviar mensaje">
+                            <div className="timelineInputAvatar">{avatarFinal ? <img src={avatarFinal} alt={nombreFinal} /> : <span>{nombreFinal.charAt(0).toUpperCase()}</span>}</div>
+                            <input type="text" value={mensajeNuevo} onChange={e => setMensajeNuevo(e.target.value)} onKeyDown={manejarTecla} placeholder="Dejar un comentario..." className="timelineInputTexto" disabled={estado.enviando} />
+                            <button type="button" onClick={manejarEnviarMensaje} className="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Comentar">
                                 {estado.enviando ? <Loader size={14} className="animacionGirar" /> : <Send size={14} />}
                             </button>
                         </div>

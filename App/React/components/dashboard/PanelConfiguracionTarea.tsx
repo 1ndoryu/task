@@ -321,7 +321,8 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                                     modoEdicion={true}
                                 />
                             </div>
-                            {/* Sin botones de acciones - auto-guardado */}
+                            {/* Input de comentario cuando el chat esta oculto */}
+                            {!mostrarChatColumna && tarea && <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} soloInput />}
                         </div>
 
                         {/* Columna Derecha: Chat e Historial */}

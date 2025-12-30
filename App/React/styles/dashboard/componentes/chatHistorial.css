@@ -15,6 +15,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
 }
 
 /* 
@@ -75,6 +76,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    height: 100%;
 }
 
 /* 
@@ -83,16 +86,19 @@
 .panelChatHistorialTimeline {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
     height: 100%;
 }
 
 .timelineContenedor {
     flex: 1;
     overflow-y: auto;
-    padding: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm);
+    gap: var(--dashboard-espacioXs);
+    min-height: 0;
 }
 
 /* Scrollbar */
@@ -142,7 +148,7 @@
 
 .timelineMensajeSistemaTexto {
     color: var(--dashboard-textoApagado);
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     font-style: italic;
 }
 
@@ -159,7 +165,7 @@
 .timelineMensajeUsuario {
     display: flex;
     gap: var(--dashboard-espacioXs);
-    max-width: 85%;
+    max-width: 90%;
 }
 
 .timelineMensajeUsuario--enviado {
@@ -172,8 +178,8 @@
 }
 
 .timelineMensajeAvatar {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -192,14 +198,14 @@
 
 .timelineMensajeAvatar span {
     color: var(--dashboard-textoApagado);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
 }
 
 .timelineMensajeBurbuja {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -233,25 +239,61 @@
 }
 
 /* 
- * INPUT DE MENSAJE
+ * INPUT DE COMENTARIO
+ * Estilo compacto red social con avatar
  */
 .timelineInput {
     display: flex;
+    align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-top: 1px solid var(--dashboard-bordePrincipal);
     background-color: var(--dashboard-fondoSecundario);
     flex-shrink: 0;
-    max-height: 58px;
+}
+
+/* Input flotante: para cuando el chat esta oculto */
+.timelineInput--flotante {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.timelineInputAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.timelineInputAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.timelineInputAvatar span {
+    color: var(--dashboard-textoApagado);
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .timelineInputTexto {
     flex: 1;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background-color: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: 16px;
     color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     outline: none;
     transition: border-color var(--dashboard-transicionNormal);
@@ -274,21 +316,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
+    flex-shrink: 0;
 }
 
 .timelineBotonEnviar:hover:not(:disabled) {
     color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
 }
 
 .timelineBotonEnviar:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
