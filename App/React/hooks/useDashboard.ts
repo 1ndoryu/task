@@ -311,11 +311,33 @@ export function useDashboard(): UseDashboardReturn {
 
     /*
      * Edita un habito existente usando el store de Zustand
+     * Solo guarda y registra acción si hubo cambios reales
      */
     const editarHabito = useCallback(
         (id: number, datos: DatosNuevoHabito) => {
             const habitoAnterior = habitos.find(h => h.id === id);
             if (!habitoAnterior) return;
+
+            /* Verificar si hubo cambios reales comparando campos relevantes */
+            /* Normalizamos valores para evitar falsos positivos (undefined vs '') */
+            const descripcionAnterior = habitoAnterior.descripcion || '';
+            const descripcionNueva = datos.descripcion || '';
+            const iconoAnterior = habitoAnterior.icono || 'check-circle';
+            const iconoNuevo = datos.icono || 'check-circle';
+            const colorAnterior = habitoAnterior.colorIcono || '#888888';
+            const colorNuevo = datos.colorIcono || '#888888';
+
+            /* Normalizamos frecuencia (puede ser undefined en hábitos antiguos) */
+            const frecuenciaAnterior = habitoAnterior.frecuencia || {tipo: 'diario'};
+            const frecuenciaNueva = datos.frecuencia || {tipo: 'diario'};
+
+            const huboCambios = habitoAnterior.nombre !== datos.nombre || habitoAnterior.importancia !== datos.importancia || descripcionAnterior !== descripcionNueva || iconoAnterior !== iconoNuevo || colorAnterior !== colorNuevo || JSON.stringify(frecuenciaAnterior) !== JSON.stringify(frecuenciaNueva);
+
+            /* Si no hubo cambios, solo cerrar el modal sin guardar ni registrar acción */
+            if (!huboCambios) {
+                setHabitoEditando(null);
+                return;
+            }
 
             storeEditarHabito(id, datos);
             setHabitoEditando(null);

@@ -204,7 +204,6 @@
 .panelConfiguracionDosColumnas {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    height: calc(100vh - 10rem);
     max-height: 600px;
     min-height: 400px;
 }
