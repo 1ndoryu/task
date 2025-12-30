@@ -41,6 +41,8 @@ export interface TareaItemProps {
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
+    /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
+    tieneSubtareas?: boolean;
 }
 
 export interface MenuContextualEstado {
@@ -49,7 +51,7 @@ export interface MenuContextualEstado {
     y: number;
 }
 
-export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito}: TareaItemProps): JSX.Element {
+export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, tieneSubtareas = false}: TareaItemProps): JSX.Element {
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
     const [editando, setEditando] = useState(false);
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
@@ -385,7 +387,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     return (
         <>
-            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''}`} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} onContextMenu={manejarClickDerecho}>
+            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''}`} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} onContextMenu={manejarClickDerecho}>
                 <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`} onClick={onToggle}>
                     {tarea.completado && <Check size={8} color="white" />}
                 </div>

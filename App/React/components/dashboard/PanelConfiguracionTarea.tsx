@@ -29,6 +29,8 @@ export interface PanelConfiguracionTareaProps {
     onToggleCompletado?: (completado: boolean) => void;
 }
 
+import {useAutoguardado} from '../../hooks/useAutoguardado';
+
 export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
     const modoEdicion = !!tarea;
 
@@ -62,78 +64,18 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         habilitado: modoEdicion
     });
 
-    /* Sincronizar estado cuando cambia la tarea */
-    useEffect(() => {
-        if (tarea) {
-            setTexto(tarea.texto);
-            setDescripcion(tarea.configuracion?.descripcion || '');
-            setPrioridad(tarea.prioridad || null);
-            setUrgencia(tarea.urgencia || null);
-            setFechaMaxima(tarea.configuracion?.fechaMaxima || '');
-            setTieneRepeticion(!!tarea.configuracion?.repeticion);
-
-            /* Convertir RepeticionTarea a FrecuenciaHabito */
-            if (tarea.configuracion?.repeticion) {
-                const {intervalo, diasSemana} = tarea.configuracion.repeticion;
-                if (diasSemana && diasSemana.length > 0) {
-                    setFrecuencia({tipo: 'diasEspecificos', diasSemana});
-                } else if (intervalo === 1) {
-                    setFrecuencia({tipo: 'diario'});
-                } else if (intervalo === 7) {
-                    setFrecuencia({tipo: 'semanal'});
-                } else {
-                    setFrecuencia({tipo: 'cadaXDias', cadaDias: intervalo});
-                }
-            } else {
-                setFrecuencia({tipo: 'diario'});
-            }
-
-            setAdjuntos(tarea.configuracion?.adjuntos || []);
-            setAsignadoA(tarea.asignadoA || null);
-            setAsignadoANombre(tarea.asignadoANombre || '');
-            setAsignadoAAvatar(tarea.asignadoAAvatar || '');
-            setProyectoIdLocal(tarea.proyectoId);
-            setCompletadoLocal(tarea.completado);
-        } else {
-            /* Resetear si no hay tarea (modo creacion) */
-            setTexto('');
-            setDescripcion('');
-            setPrioridad(null);
-            setUrgencia(null);
-            setFechaMaxima('');
-            setTieneRepeticion(false);
-            setFrecuencia({tipo: 'diario'});
-            setAdjuntos([]);
-            setAsignadoA(null);
-            setAsignadoANombre('');
-            setAsignadoAAvatar('');
-        }
-    }, [tarea?.id, estaAbierto]);
-
-    /* Manejador de cambio de asignacion */
-    const manejarAsignacion = useCallback((usuarioId: number | null, nombre: string, avatar: string) => {
-        setAsignadoA(usuarioId);
-        setAsignadoANombre(nombre);
-        setAsignadoAAvatar(avatar);
-    }, []);
-
-    /* Manejador de cambio de proyecto */
-    const manejarCambioProyecto = useCallback(
-        (nuevoProyectoId: number | undefined) => {
-            setProyectoIdLocal(nuevoProyectoId);
-            onCambiarProyecto?.(nuevoProyectoId);
-        },
-        [onCambiarProyecto]
-    );
-
-    /* Manejador de cambio de estado completado */
-    const manejarCambioCompletado = useCallback(
-        (nuevoCompletado: boolean) => {
-            setCompletadoLocal(nuevoCompletado);
-            onToggleCompletado?.(nuevoCompletado);
-        },
-        [onToggleCompletado]
-    );
+    /* Campos actuales para deteccion de cambios */
+    const camposActuales = {
+        texto,
+        descripcion,
+        prioridad,
+        urgencia,
+        fechaMaxima,
+        tieneRepeticion,
+        frecuencia,
+        adjuntos,
+        asignadoA
+    };
 
     /* Guardar tarea */
     const manejarGuardar = useCallback(() => {
@@ -184,17 +126,106 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         };
 
         onGuardar(configuracion, prioridad, texto.trim(), asignacion, urgencia);
-        onCerrar();
-    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, onGuardar, onCerrar]);
+    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, onGuardar]);
 
-    /* Auto-guardado: al cerrar el modal, guardar si hay texto */
-    const manejarCerrarConGuardado = useCallback(() => {
-        if (texto.trim().length > 0) {
+    /* Hook de autoguardado */
+    const {guardarEstadoInicial, manejarCerrarConGuardado} = useAutoguardado({
+        camposActuales,
+        onGuardar: () => {
             manejarGuardar();
-        } else {
             onCerrar();
+        },
+        onCerrar,
+        validar: () => texto.trim().length > 0
+    });
+
+    /* Sincronizar estado cuando cambia la tarea */
+    useEffect(() => {
+        if (tarea) {
+            setTexto(tarea.texto);
+            setDescripcion(tarea.configuracion?.descripcion || '');
+            setPrioridad(tarea.prioridad || null);
+            setUrgencia(tarea.urgencia || null);
+            setFechaMaxima(tarea.configuracion?.fechaMaxima || '');
+            setTieneRepeticion(!!tarea.configuracion?.repeticion);
+
+            let nuevaFrecuencia: FrecuenciaHabito = {tipo: 'diario'};
+            /* Convertir RepeticionTarea a FrecuenciaHabito */
+            if (tarea.configuracion?.repeticion) {
+                const {intervalo, diasSemana} = tarea.configuracion.repeticion;
+                if (diasSemana && diasSemana.length > 0) {
+                    nuevaFrecuencia = {tipo: 'diasEspecificos', diasSemana};
+                } else if (intervalo === 1) {
+                    nuevaFrecuencia = {tipo: 'diario'};
+                } else if (intervalo === 7) {
+                    nuevaFrecuencia = {tipo: 'semanal'};
+                } else {
+                    nuevaFrecuencia = {tipo: 'cadaXDias', cadaDias: intervalo};
+                }
+            }
+            setFrecuencia(nuevaFrecuencia);
+
+            setAdjuntos(tarea.configuracion?.adjuntos || []);
+            setAsignadoA(tarea.asignadoA || null);
+            setAsignadoANombre(tarea.asignadoANombre || '');
+            setAsignadoAAvatar(tarea.asignadoAAvatar || '');
+            setProyectoIdLocal(tarea.proyectoId);
+            setCompletadoLocal(tarea.completado);
+
+            /* Guardar estado inicial para detectar cambios */
+            guardarEstadoInicial({
+                texto: tarea.texto,
+                descripcion: tarea.configuracion?.descripcion || '',
+                prioridad: tarea.prioridad || null,
+                urgencia: tarea.urgencia || null,
+                fechaMaxima: tarea.configuracion?.fechaMaxima || '',
+                tieneRepeticion: !!tarea.configuracion?.repeticion,
+                frecuencia: nuevaFrecuencia,
+                adjuntos: tarea.configuracion?.adjuntos || [],
+                asignadoA: tarea.asignadoA || null
+            });
+        } else {
+            /* Resetear si no hay tarea (modo creacion) */
+            setTexto('');
+            setDescripcion('');
+            setPrioridad(null);
+            setUrgencia(null);
+            setFechaMaxima('');
+            setTieneRepeticion(false);
+            setFrecuencia({tipo: 'diario'});
+            setAdjuntos([]);
+            setAsignadoA(null);
+            setAsignadoANombre('');
+            setAsignadoAAvatar('');
+
+            /* No llamamos a guardarEstadoInicial aqui porque es modo creacion */
         }
-    }, [texto, manejarGuardar, onCerrar]);
+    }, [tarea?.id, estaAbierto, guardarEstadoInicial]);
+
+    /* Manejador de cambio de asignacion */
+    const manejarAsignacion = useCallback((usuarioId: number | null, nombre: string, avatar: string) => {
+        setAsignadoA(usuarioId);
+        setAsignadoANombre(nombre);
+        setAsignadoAAvatar(avatar);
+    }, []);
+
+    /* Manejador de cambio de proyecto */
+    const manejarCambioProyecto = useCallback(
+        (nuevoProyectoId: number | undefined) => {
+            setProyectoIdLocal(nuevoProyectoId);
+            onCambiarProyecto?.(nuevoProyectoId);
+        },
+        [onCambiarProyecto]
+    );
+
+    /* Manejador de cambio de estado completado */
+    const manejarCambioCompletado = useCallback(
+        (nuevoCompletado: boolean) => {
+            setCompletadoLocal(nuevoCompletado);
+            onToggleCompletado?.(nuevoCompletado);
+        },
+        [onToggleCompletado]
+    );
 
     /* Header Icons (similar a ModalProyecto) */
     const accionesHeader = modoEdicion ? (

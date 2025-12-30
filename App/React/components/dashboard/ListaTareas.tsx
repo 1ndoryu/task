@@ -201,11 +201,25 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
      * tareaActualId indica despues de cual tarea insertar
      */
     const handleCrearNueva = (parentId: number | undefined, tareaActualId: number) => {
+        let idProyectoHeredado = proyectoId;
+
+        /* Si es subtarea, heredar proyecto del padre */
+        if (parentId) {
+            const tareaPadre = tareas.find(t => t.id === parentId);
+            if (tareaPadre?.proyectoId) {
+                idProyectoHeredado = tareaPadre.proyectoId;
+            }
+        } else {
+            /* Si no es subtarea, heredar de la tarea anterior (si estamos en Inbox/Hoy y la tarea tiene proyecto) */
+            /* Nota: Esto es opcional, depende de la UX deseada. Por ahora solo padre */
+            /* Si estamos en una lista general, tal vez queramos heredar de la tarea hermana? Mejor no por ahora */
+        }
+
         onCrearTarea?.({
             texto: '',
             parentId: parentId,
             insertarDespuesDe: tareaActualId,
-            proyectoId: proyectoId
+            proyectoId: idProyectoHeredado
         });
     };
 
@@ -329,7 +343,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
         return (
             <div className="tareaConColapsador" key={`wrapper-${tarea.id}`}>
-                <TareaItem tarea={tarea} esSubtarea={esSubtarea} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onIndent={() => handleIndent(tarea.id)} onOutdent={() => handleOutdent(tarea.id)} onCrearNueva={handleCrearNueva} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={soloIcono} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} />
+                <TareaItem tarea={tarea} esSubtarea={esSubtarea} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onIndent={() => handleIndent(tarea.id)} onOutdent={() => handleOutdent(tarea.id)} onCrearNueva={handleCrearNueva} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={soloIcono} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} tieneSubtareas={esColapsable} />
                 {/* Boton de colapsar a la derecha, solo si tiene subtareas */}
                 {esColapsable && (
                     <button className="tareaColapsadorBoton" onClick={() => toggleColapsar(tarea.id)} title={estaColapsada ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>

@@ -8,6 +8,7 @@
 
 import {useState, useRef, useEffect, useCallback} from 'react';
 import {User, UserPlus, X, Crown, Edit3, Eye} from 'lucide-react';
+import {MenuFlotante} from './MenuFlotante';
 import type {Participante, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
 
 interface SeccionResponsablesProps {
@@ -33,31 +34,39 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
     const [menuAgregarAbierto, setMenuAgregarAbierto] = useState(false);
     const [menuParticipanteAbierto, setMenuParticipanteAbierto] = useState<number | null>(null);
     const [rolSeleccionado, setRolSeleccionado] = useState<RolCompartido>('colaborador');
-    const menuAgregarRef = useRef<HTMLDivElement>(null);
-    const menuParticipanteRef = useRef<HTMLDivElement>(null);
+    const [menuAgregarPos, setMenuAgregarPos] = useState({x: 0, y: 0});
+    const [menuParticipantePos, setMenuParticipantePos] = useState({x: 0, y: 0});
 
     /* Filtrar companeros que ya son participantes */
     const companeroDisponibles = companeros.filter(comp => !participantes.some(p => p.usuarioId === comp.companeroId));
 
     /* Cerrar menus al hacer clic fuera */
-    useEffect(() => {
-        const manejarClickFuera = (evento: MouseEvent) => {
-            if (menuAgregarRef.current && !menuAgregarRef.current.contains(evento.target as Node)) {
-                setMenuAgregarAbierto(false);
-            }
-            if (menuParticipanteRef.current && !menuParticipanteRef.current.contains(evento.target as Node)) {
-                setMenuParticipanteAbierto(null);
-            }
-        };
+    /* Handlers para abrir menus calculando posicion */
+    const toggleMenuAgregar = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-        if (menuAgregarAbierto || menuParticipanteAbierto !== null) {
-            document.addEventListener('mousedown', manejarClickFuera);
+        if (!menuAgregarAbierto) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setMenuAgregarPos({x: rect.left, y: rect.bottom + 4});
         }
+        setMenuAgregarAbierto(!menuAgregarAbierto);
+        setMenuParticipanteAbierto(null); // Cerrar otros
+    };
 
-        return () => {
-            document.removeEventListener('mousedown', manejarClickFuera);
-        };
-    }, [menuAgregarAbierto, menuParticipanteAbierto]);
+    const toggleMenuParticipante = (e: React.MouseEvent, participanteId: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (menuParticipanteAbierto !== participanteId) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setMenuParticipantePos({x: rect.left, y: rect.bottom + 4});
+            setMenuParticipanteAbierto(participanteId);
+        } else {
+            setMenuParticipanteAbierto(null);
+        }
+        setMenuAgregarAbierto(false); // Cerrar otros
+    };
 
     const manejarAgregarParticipante = useCallback(
         (companeroId: number) => {
@@ -119,27 +128,62 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
     /* Modo compacto: solo fila de avatares */
     if (modoCompacto) {
         return (
-            <div id="seccion-responsables-compacto" className="seccionResponsables seccionResponsables--compacto">
-                <div className="seccionResponsables__avatares">
-                    {participantes.length === 0 ? (
-                        <div className="seccionResponsables__vacio seccionResponsables__vacio--compacto">
-                            <User size={14} />
-                        </div>
-                    ) : (
-                        participantes.slice(0, 3).map(participante => <img key={participante.id} src={participante.avatar} alt={participante.nombre} className="seccionResponsables__avatarCompacto" title={`${participante.nombre} (${obtenerEtiquetaRol(participante.rol)})`} />)
-                    )}
-                    {participantes.length > 3 && (
-                        <div className="seccionResponsables__avatarMas" title={`+${participantes.length - 3} mas`}>
-                            +{participantes.length - 3}
-                        </div>
+            <>
+                <div id="seccion-responsables-compacto" className="seccionResponsables seccionResponsables--compacto">
+                    <div className="seccionResponsables__avatares">
+                        {participantes.length === 0 ? (
+                            <div className="seccionResponsables__vacio seccionResponsables__vacio--compacto">
+                                <User size={14} />
+                            </div>
+                        ) : (
+                            participantes.slice(0, 3).map(participante => <img key={participante.id} src={participante.avatar} alt={participante.nombre} className="seccionResponsables__avatarCompacto" title={`${participante.nombre} (${obtenerEtiquetaRol(participante.rol)})`} />)
+                        )}
+                        {participantes.length > 3 && (
+                            <div className="seccionResponsables__avatarMas" title={`+${participantes.length - 3} mas`}>
+                                +{participantes.length - 3}
+                            </div>
+                        )}
+                    </div>
+                    {puedeGestionar && companeroDisponibles.length > 0 && (
+                        <button type="button" className="seccionResponsables__botonAgregarCompacto" onClick={toggleMenuAgregar} title="Agregar responsable">
+                            <UserPlus size={14} />
+                        </button>
                     )}
                 </div>
-                {puedeGestionar && companeroDisponibles.length > 0 && (
-                    <button type="button" className="seccionResponsables__botonAgregarCompacto" onClick={() => setMenuAgregarAbierto(!menuAgregarAbierto)} title="Agregar responsable">
-                        <UserPlus size={14} />
-                    </button>
+                {/* Menu agregar para modo compacto */}
+                {menuAgregarAbierto && modoCompacto && (
+                    <MenuFlotante posicionX={menuAgregarPos.x} posicionY={menuAgregarPos.y} onCerrar={() => setMenuAgregarAbierto(false)}>
+                        <div className="seccionResponsables__menuAgregar" style={{position: 'static', marginTop: 0}}>
+                            <div className="seccionResponsables__menuTitulo">Agregar participante</div>
+
+                            {/* Selector de rol */}
+                            <div className="seccionResponsables__selectorRol">
+                                <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
+                                    <Edit3 size={12} />
+                                    <span>Colaborador</span>
+                                </button>
+                                <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
+                                    <Eye size={12} />
+                                    <span>Observador</span>
+                                </button>
+                            </div>
+
+                            {/* Lista de companeros disponibles */}
+                            <div className="seccionResponsables__listaCompaneros">
+                                {companeroDisponibles.map(companero => (
+                                    <button key={companero.companeroId} type="button" className="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
+                                        <img src={companero.avatar} alt={companero.nombre} className="seccionResponsables__companeroAvatar" />
+                                        <div className="seccionResponsables__companeroInfo">
+                                            <span className="seccionResponsables__companeroNombre">{companero.nombre}</span>
+                                            <span className="seccionResponsables__companeroEmail">{companero.email}</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </MenuFlotante>
                 )}
-            </div>
+            </>
         );
     }
 
@@ -152,43 +196,11 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                 {participantes.length === 0 ? (
                     /* Sin participantes: mostrar pill "Ninguno" con boton agregar */
                     puedeGestionar && companeroDisponibles.length > 0 ? (
-                        <div className="seccionResponsables__agregarContenedor" ref={menuAgregarRef}>
-                            <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => setMenuAgregarAbierto(!menuAgregarAbierto)}>
+                        <div className="seccionResponsables__agregarContenedor">
+                            <button type="button" className="pillOpcion pillOpcion--vacio" onClick={toggleMenuAgregar}>
                                 <User size={14} />
                                 <span>Agregar</span>
                             </button>
-
-                            {/* Menu para agregar participante */}
-                            {menuAgregarAbierto && (
-                                <div className="seccionResponsables__menuAgregar">
-                                    <div className="seccionResponsables__menuTitulo">Agregar participante</div>
-
-                                    {/* Selector de rol */}
-                                    <div className="seccionResponsables__selectorRol">
-                                        <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
-                                            <Edit3 size={12} />
-                                            <span>Colaborador</span>
-                                        </button>
-                                        <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
-                                            <Eye size={12} />
-                                            <span>Observador</span>
-                                        </button>
-                                    </div>
-
-                                    {/* Lista de companeros disponibles */}
-                                    <div className="seccionResponsables__listaCompaneros">
-                                        {companeroDisponibles.map(companero => (
-                                            <button key={companero.companeroId} type="button" className="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
-                                                <img src={companero.avatar} alt={companero.nombre} className="seccionResponsables__companeroAvatar" />
-                                                <div className="seccionResponsables__companeroInfo">
-                                                    <span className="seccionResponsables__companeroNombre">{companero.nombre}</span>
-                                                    <span className="seccionResponsables__companeroEmail">{companero.email}</span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     ) : (
                         <span className="pillOpcion pillOpcion--vacio pillOpcion--disabled">
@@ -200,77 +212,93 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                     /* Con participantes: mostrar avatares + boton agregar */
                     <>
                         {participantes.map(participante => (
-                            <div key={participante.id} className="seccionResponsables__participante" ref={menuParticipanteAbierto === participante.id ? menuParticipanteRef : null}>
-                                <button type="button" className="pillOpcion" onClick={() => puedeGestionar && !participante.esPropietario && setMenuParticipanteAbierto(menuParticipanteAbierto === participante.id ? null : participante.id)} disabled={!puedeGestionar || participante.esPropietario}>
+                            <div key={participante.id} className="seccionResponsables__participante">
+                                <button type="button" className="pillOpcion" onClick={e => puedeGestionar && !participante.esPropietario && toggleMenuParticipante(e, participante.id)} disabled={!puedeGestionar || participante.esPropietario}>
                                     <img src={participante.avatar} alt={participante.nombre} className="seccionResponsables__participanteAvatar" />
                                     <span>{participante.nombre}</span>
                                     <span className="seccionResponsables__participanteRol" title={obtenerEtiquetaRol(participante.rol)}>
                                         {obtenerIconoRol(participante.rol)}
                                     </span>
                                 </button>
-
-                                {/* Menu de opciones del participante */}
-                                {menuParticipanteAbierto === participante.id && !participante.esPropietario && (
-                                    <div className="seccionResponsables__menuParticipante">
-                                        <div className="seccionResponsables__menuSeccion">
-                                            <span className="seccionResponsables__menuEtiqueta">Cambiar rol</span>
-                                            <button type="button" className={`seccionResponsables__menuOpcion ${participante.rol === 'colaborador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'colaborador')}>
-                                                <Edit3 size={12} />
-                                                <span>Colaborador</span>
-                                            </button>
-                                            <button type="button" className={`seccionResponsables__menuOpcion ${participante.rol === 'observador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'observador')}>
-                                                <Eye size={12} />
-                                                <span>Observador</span>
-                                            </button>
-                                        </div>
-                                        <div className="seccionResponsables__menuDivisor" />
-                                        <button type="button" className="seccionResponsables__menuOpcion seccionResponsables__menuOpcion--peligro" onClick={() => manejarRemoverParticipante(participante.id)}>
-                                            <X size={12} />
-                                            <span>Remover</span>
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         ))}
 
                         {/* Boton agregar mas */}
                         {puedeGestionar && companeroDisponibles.length > 0 && (
-                            <div className="seccionResponsables__agregarContenedor" ref={menuAgregarRef}>
-                                <button type="button" className="seccionResponsables__botonAgregarSmall" onClick={() => setMenuAgregarAbierto(!menuAgregarAbierto)} title="Agregar participante">
+                            <div className="seccionResponsables__agregarContenedor">
+                                <button type="button" className="seccionResponsables__botonAgregarSmall" onClick={toggleMenuAgregar} title="Agregar participante">
                                     <UserPlus size={14} />
                                 </button>
-
-                                {menuAgregarAbierto && (
-                                    <div className="seccionResponsables__menuAgregar">
-                                        <div className="seccionResponsables__menuTitulo">Agregar participante</div>
-                                        <div className="seccionResponsables__selectorRol">
-                                            <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
-                                                <Edit3 size={12} />
-                                                <span>Colaborador</span>
-                                            </button>
-                                            <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
-                                                <Eye size={12} />
-                                                <span>Observador</span>
-                                            </button>
-                                        </div>
-                                        <div className="seccionResponsables__listaCompaneros">
-                                            {companeroDisponibles.map(companero => (
-                                                <button key={companero.companeroId} type="button" className="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
-                                                    <img src={companero.avatar} alt={companero.nombre} className="seccionResponsables__companeroAvatar" />
-                                                    <div className="seccionResponsables__companeroInfo">
-                                                        <span className="seccionResponsables__companeroNombre">{companero.nombre}</span>
-                                                        <span className="seccionResponsables__companeroEmail">{companero.email}</span>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </>
                 )}
             </div>
+
+            {/* Menu agregar para modo inline */}
+            {menuAgregarAbierto && !modoCompacto && (
+                <MenuFlotante posicionX={menuAgregarPos.x} posicionY={menuAgregarPos.y} onCerrar={() => setMenuAgregarAbierto(false)}>
+                    <div className="seccionResponsables__menuAgregar" style={{position: 'static', marginTop: 0}}>
+                        <div className="seccionResponsables__menuTitulo">Agregar participante</div>
+
+                        {/* Selector de rol */}
+                        <div className="seccionResponsables__selectorRol">
+                            <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
+                                <Edit3 size={12} />
+                                <span>Colaborador</span>
+                            </button>
+                            <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
+                                <Eye size={12} />
+                                <span>Observador</span>
+                            </button>
+                        </div>
+
+                        {/* Lista de companeros disponibles */}
+                        <div className="seccionResponsables__listaCompaneros">
+                            {companeroDisponibles.map(companero => (
+                                <button key={companero.companeroId} type="button" className="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
+                                    <img src={companero.avatar} alt={companero.nombre} className="seccionResponsables__companeroAvatar" />
+                                    <div className="seccionResponsables__companeroInfo">
+                                        <span className="seccionResponsables__companeroNombre">{companero.nombre}</span>
+                                        <span className="seccionResponsables__companeroEmail">{companero.email}</span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </MenuFlotante>
+            )}
+
+            {/* Menu de opciones del participante */}
+            {menuParticipanteAbierto !== null && !modoCompacto && (
+                <MenuFlotante posicionX={menuParticipantePos.x} posicionY={menuParticipantePos.y} onCerrar={() => setMenuParticipanteAbierto(null)} anchoMinimo={160}>
+                    {(() => {
+                        const participante = participantes.find(p => p.id === menuParticipanteAbierto);
+                        if (!participante) return null;
+
+                        return (
+                            <div className="seccionResponsables__menuParticipante" style={{position: 'static', marginTop: 0}}>
+                                <div className="seccionResponsables__menuSeccion">
+                                    <span className="seccionResponsables__menuEtiqueta">Cambiar rol</span>
+                                    <button type="button" className={`seccionResponsables__menuOpcion ${participante.rol === 'colaborador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'colaborador')}>
+                                        <Edit3 size={12} />
+                                        <span>Colaborador</span>
+                                    </button>
+                                    <button type="button" className={`seccionResponsables__menuOpcion ${participante.rol === 'observador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'observador')}>
+                                        <Eye size={12} />
+                                        <span>Observador</span>
+                                    </button>
+                                </div>
+                                <div className="seccionResponsables__menuDivisor" />
+                                <button type="button" className="seccionResponsables__menuOpcion seccionResponsables__menuOpcion--peligro" onClick={() => manejarRemoverParticipante(participante.id)}>
+                                    <X size={12} />
+                                    <span>Remover</span>
+                                </button>
+                            </div>
+                        );
+                    })()}
+                </MenuFlotante>
+            )}
         </div>
     );
 }

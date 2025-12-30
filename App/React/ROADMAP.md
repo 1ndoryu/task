@@ -9,7 +9,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Fecha de inicio:** 2025-12-19  
 **Version:** v1.0.9-beta  
 **Ultima actualizacion:** 2025-12-29
-**Estado:** Fase 9 CASI COMPLETA - Solo pendiente: Bug subtarea hereda proyecto del padre
+**Estado:** Fase 9 COMPLETA - Iniciando Fase 9.7
 
 ## Funcionalidades Completadas
 
@@ -240,7 +240,7 @@ Todos centralizados en `configuracionModerna.css`:
       - [x] Componente GridAdjuntos (3 columnas)
       - [x] Cards de archivo minimalistas
 12. ⏳ **Fase 9.3** - Corrección de Bugs
-      - [ ] Subtarea hereda proyecto del padre (Panel Ejecución)
+      - [x] Subtarea hereda proyecto del padre (Panel Ejecución)
 13. ✅ **Fase 9.3.1** - Refactorización Pre-Fase 9.4
       - [x] Hook `useAutoguardado` (detección de cambios y auto-guardado)
       - [x] Hook `usePanelChat` (visibilidad del panel de chat)
@@ -270,6 +270,47 @@ Todos centralizados en `configuracionModerna.css`:
 - [x] Agregar selector de estado a proyectos (`SelectorEstadoProyectoPill`)
 - [x] Estilo pill inline como PropiedadesCompactas
 - [x] Integrar en FormularioProyectoModerno
+
+---
+
+## Fase 9.7: Refinamientos Post-Fase 9 (Planificación)
+
+### 9.7.1 Ajustes Visuales
+- [x] Botón eliminar choca con contador de subtareas (mover botones cuando hay subtareas)
+- [x] Modal de responsables se ve cortado y no se centra bien al mouse
+- [x] Mensajes del chat con demasiado padding (compactar)
+
+### 9.7.2 Bugs de Lógica
+- [x] Deshacer acción se dispara al abrir configuración sin cambios reales
+  - Detectar cuando no hubo cambios para no guardar innecesariamente
+  - Evitar "cambio prioridad: sin prioridad → sin prioridad"
+- [x] Subtarea hereda proyecto del padre (Panel Ejecución)
+
+### 9.7.3 Organización de Propiedades en Tareas
+- [ ] Dividir opciones en 3 FilaPropiedades con etiquetas descriptivas
+  - Grupo 1: Estado, Prioridad, Urgencia, Fecha
+  - Grupo 2: Proyecto, Responsable, Repetición
+  - Grupo 3: Tags (nuevo)
+- [ ] Agregar sistema de Tags con estilo pill
+  - Input para agregar tags
+  - Tags como pills removibles
+  - Autocompletado de tags existentes
+
+### 9.7.4 Responsables vs Compartir (Conceptos Diferentes)
+**Responsable**: Usuario asignado a completar la tarea
+**Compartir**: Usuarios que pueden ver/editar pero no son responsables directos
+
+- [ ] Agregar opción de Responsable en tareas (ya existe en proyectos)
+- [ ] Agregar opción de Compartir en tareas (menú para seleccionar usuarios)
+- [ ] Agregar opción de Compartir visible en proyectos (actualmente solo desde SeccionResponsables)
+- [ ] Distinguir visualmente Responsable vs Colaboradores
+
+### 9.7.5 Panel de Comentarios (Rediseño)
+- [ ] Cambiar "Enviar mensaje" por "Dejar comentario"
+- [ ] Input de comentario más compacto estilo red social
+- [ ] Mostrar foto del usuario junto al input
+- [ ] Comentarios con menos padding
+- [ ] Input ubicado abajo por defecto
 
 ---
 

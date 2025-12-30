@@ -89,10 +89,10 @@
 .timelineContenedor {
     flex: 1;
     overflow-y: auto;
-    padding: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioMd);
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioSm);
 }
 
 /* Scrollbar */
@@ -158,7 +158,7 @@
  */
 .timelineMensajeUsuario {
     display: flex;
-    gap: var(--dashboard-espacioSm);
+    gap: var(--dashboard-espacioXs);
     max-width: 85%;
 }
 
@@ -172,8 +172,8 @@
 }
 
 .timelineMensajeAvatar {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -192,7 +192,7 @@
 
 .timelineMensajeAvatar span {
     color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoPequeno);
+    font-size: 10px;
     font-weight: 600;
 }
 
@@ -200,7 +200,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     max-width: 100%;

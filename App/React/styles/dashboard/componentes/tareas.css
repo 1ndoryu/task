@@ -23,6 +23,10 @@
 /* 
  * SUBTAREAS
  */
+.tareaItem--conSubtareas {
+    padding-right: 45px;
+}
+
 .tareaItemSubtarea {
     padding-left: 30px;
     width: calc(100% - var(--dashboard-espacioLg));
