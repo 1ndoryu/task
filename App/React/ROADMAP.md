@@ -396,7 +396,7 @@ Todos centralizados en `configuracionModerna.css`:
 
 ### 9.7.8 Bugs Pendientes
 
-- [ ] **Input comentarios fijo cubre contenido**: El input de comentario fijo en la parte inferior (cuando el chat está oculto) está cubriendo parte del contenido scrolleable. Se necesita agregar padding-bottom al contenedor scroll para compensar la altura del input fijo.
+- [x] **Input comentarios fijo cubre contenido**: El input de comentario fijo en la parte inferior (cuando el chat está oculto) está cubriendo parte del contenido scrolleable. Se necesita agregar padding-bottom al contenedor scroll para compensar la altura del input fijo.
 
 ---
 
