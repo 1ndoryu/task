@@ -26,9 +26,12 @@
     flex-direction: column;
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
     animation: deslizarModal 0.2s ease-out;
+    max-height: 90vh;
+    max-width: 480px;
+    overflow: hidden;
 }
-
 .modalEncabezado {
     display: flex;
     justify-content: space-between;
@@ -84,7 +87,7 @@
 
 .modalContenido::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .modalContenido::-webkit-scrollbar-thumb:hover {

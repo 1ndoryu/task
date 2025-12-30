@@ -433,20 +433,20 @@ Todos centralizados en `configuracionModerna.css`:
 
 **Chat/Mensajes:**
 - [x] Compactar mensajes (menos padding)
-- [ ] Verificar historial de cambios en chat de proyectos
+- [x] Verificar historial de cambios en chat de proyectos
 
 **Hábitos:**
-- [ ] Animación de entrada/salida
-- [ ] Umbral de reseteo editable
-- [ ] Adaptar racha a frecuencia
+- [x] Animación de entrada/salida
+- [x] Umbral de reseteo editable
+- [x] Adaptar racha a frecuencia
 
 **Tareas:**
-- [ ] Animación de arrastre más fluida
-- [ ] Soporte markdown en descripción
+- [x] Animación de arrastre más fluida
+- [x] Soporte markdown en descripción
 
 **Ordenamiento:**
-- [ ] Drag & drop manual para hábitos
-- [ ] Buscar hábitos por nombre
+- [x] Drag & drop manual para hábitos
+- [x] Buscar hábitos por nombre
 
 **Responsive/PWA:**
 - [ ] Layout móvil adaptativo

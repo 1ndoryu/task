@@ -118,7 +118,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .panelConfiguracionAlertaVencida {
@@ -152,7 +152,7 @@
     border: 1px solid transparent;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     transition: all var(--dashboard-transicionRapida);
 }
 
@@ -176,6 +176,7 @@
     outline: none;
     resize: vertical;
     min-height: 80px;
+    border-radius: var(--dashboard-radioSm);
     transition: border-color var(--dashboard-transicionNormal);
 }
 

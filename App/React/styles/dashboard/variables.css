@@ -181,8 +181,8 @@
 
     /* Radios de borde (más suaves) */
     --dashboard-radioSm: 4px;
-    --dashboard-radioMd: 6px;
-    --dashboard-radioLg: 8px;
+    --dashboard-radioMd: 4px;
+    --dashboard-radioLg: 4px;
 }
 
 /* 

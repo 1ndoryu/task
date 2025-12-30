@@ -24,7 +24,7 @@
 .formularioSolicitud {
     padding: var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     border: 1px solid var(--dashboard-bordePrincipal);
 }
 
@@ -47,7 +47,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoNormal);
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -75,7 +75,7 @@
     background: var(--dashboard-estadoExitoFondo);
     border: 1px solid var(--dashboard-estadoExitoBorde);
     color: var(--dashboard-estadoExito);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     text-transform: uppercase;
@@ -118,7 +118,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -148,7 +148,7 @@
     padding: 0 4px;
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-size: 9px;
     font-weight: 600;
 }
@@ -217,7 +217,7 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoSecundario);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     text-transform: uppercase;
@@ -249,7 +249,7 @@
 
 .equiposListaContenedor::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .equiposListaContenedor::-webkit-scrollbar-thumb:hover {
@@ -276,7 +276,7 @@
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     border: 1px solid var(--dashboard-bordePrincipal);
     transition: border-color var(--dashboard-transicionNormal);
 }
@@ -299,7 +299,7 @@
 .companeroAvatar {
     width: 32px;
     height: 32px;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -308,7 +308,7 @@
 .solicitudAvatarPlaceholder {
     width: 32px;
     height: 32px;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-fondoHover);
     border: 1px solid var(--dashboard-bordePrincipal);
     display: flex;
@@ -369,7 +369,7 @@
 .solicitudEstado {
     font-size: 9px;
     padding: 2px 4px;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -399,7 +399,7 @@
     padding: var(--dashboard-espacioXs);
     background: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);

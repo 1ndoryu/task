@@ -26,6 +26,7 @@
 .modalExperimentos {
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
     width: 400px;
     max-width: 90vw;
     max-height: 80vh;
@@ -71,7 +72,7 @@
     width: 28px;
     height: 28px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     background: transparent;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
@@ -109,7 +110,7 @@
     gap: 12px;
     padding: 12px;
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioMd);
     background: var(--dashboard-fondoPrincipal);
     cursor: pointer;
     transition: all 0.15s ease;
@@ -150,7 +151,7 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioSm);
     background: rgba(234, 179, 8, 0.15);
     color: #eab308;
     flex-shrink: 0;

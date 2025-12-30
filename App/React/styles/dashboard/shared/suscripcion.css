@@ -12,7 +12,7 @@
     align-items: center;
     gap: var(--dashboard-espacioXs);
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
@@ -194,7 +194,7 @@
 .modalUpgrade__comparativa {
     margin-bottom: var(--dashboard-espacioLg);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioSm);
     overflow: hidden;
     background: var(--dashboard-fondoSecundario);
 }
@@ -294,7 +294,7 @@
 
 .modalUpgrade__boton {
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
     font-weight: 500;
@@ -371,7 +371,7 @@
     padding: var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -436,7 +436,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     color: #f87171;
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);

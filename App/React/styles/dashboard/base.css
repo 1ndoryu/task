@@ -40,7 +40,7 @@ body::-webkit-scrollbar-track {
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 html::-webkit-scrollbar-thumb:hover,
@@ -154,6 +154,8 @@ body::-webkit-scrollbar-thumb:hover {
     gap: 0; /* Sin gap para que header quede integrado */
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    overflow: hidden;
 }
 
 /* Asegurar que las columnas dinámicas se comporten como las fijas */
@@ -194,7 +196,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .dashboardContenedor *::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .dashboardContenedor *::-webkit-scrollbar-thumb:hover {
@@ -218,7 +220,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .dashboardContenedor textarea::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .dashboardContenedor textarea::-webkit-scrollbar-thumb:hover {

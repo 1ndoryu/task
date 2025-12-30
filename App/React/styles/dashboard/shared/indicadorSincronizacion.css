@@ -8,7 +8,7 @@
     align-items: center;
     gap: var(--dashboard-espacioXs);
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;

@@ -40,7 +40,8 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-acentoPrimario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioMd);
+    overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(139, 92, 246, 0.2);
     pointer-events: none;
     animation: aparecer 0.15s ease-out;
@@ -81,7 +82,7 @@
     right: 0;
     height: 3px;
     background: var(--dashboard-acentoPrimario);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     z-index: 100;
     box-shadow: 0 0 12px var(--dashboard-acentoPrimario), 0 0 24px rgba(139, 92, 246, 0.4);
     animation: pulsoZona 1s ease-in-out infinite;
@@ -116,7 +117,7 @@
     height: 60px; /* Altura minima visual */
     background: rgba(139, 92, 246, 0.05);
     border: 2px dashed var(--dashboard-acentoPrimario);
-    border-radius: var(--dashboard-bordeRadio);
+    border-radius: var(--dashboard-radioMd);
     margin: var(--dashboard-espacioMd) 0;
     display: flex;
     align-items: center;
