@@ -5,10 +5,12 @@
  *
  * Fase 9: Layout moderno con titulo limpio, icono y propiedades compactas
  * Fase 9.2.4: Seccion de responsables para proyectos compartidos
+ * Fase 9.6: Selector de estado de proyecto
  */
 
 import type {NivelPrioridad, NivelUrgencia, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea, Hito} from '../../../types/dashboard';
-import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, PropiedadesCompactas, SeccionResponsables} from '../../shared';
+import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, PropiedadesCompactas, SeccionResponsables, SelectorEstadoProyectoPill, FilaPropiedades} from '../../shared';
+import type {EstadoProyecto} from '../../shared';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {ListaHitos} from './ListaHitos';
 
@@ -26,6 +28,9 @@ interface FormularioProyectoModernoProps {
     onUrgenciaChange: (valor: NivelUrgencia | null) => void;
     fechaLimite: string;
     onFechaLimiteChange: (valor: string) => void;
+    /* Estado del proyecto (Fase 9.6) */
+    estado?: EstadoProyecto;
+    onEstadoChange?: (estado: EstadoProyecto) => void;
     errorNombre?: string;
     modoEdicion?: boolean;
     /* Participantes del proyecto (Fase 9.2.4) */
@@ -49,7 +54,7 @@ interface FormularioProyectoModernoProps {
     onHitosChange?: (hitos: Hito[]) => void;
 }
 
-export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, tareas = [], onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
+export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, estado = 'activo', onEstadoChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, tareas = [], onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
     /* Mostrar seccion de responsables solo en modo edicion */
     const mostrarResponsables = modoEdicion;
 
@@ -68,6 +73,13 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
 
             {/* Propiedades compactas con menus inline */}
             <PropiedadesCompactas prioridad={prioridad} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} />
+
+            {/* Estado del proyecto (Fase 9.6) - Solo en modo edicion */}
+            {modoEdicion && onEstadoChange && (
+                <FilaPropiedades etiqueta="Estado">
+                    <SelectorEstadoProyectoPill estado={estado} onChange={onEstadoChange} />
+                </FilaPropiedades>
+            )}
 
             {/* Seccion de responsables (solo en modo edicion) */}
             {mostrarResponsables && <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={puedeGestionarParticipantes} etiqueta="Responsables" />}

@@ -1,25 +1,22 @@
 /*
  * ModalHabito
  * Modal para crear/editar un habito con auto-guardado
- * Maneja su propio Modal interno (similar a PanelConfiguracionTarea)
  *
- * Auto-guardado: al cerrar (overlay, ESC, X)
- * Cancelar: descarta cambios y cierra
- *
- * Fase 7.6: Incluye panel de chat/historial siempre en modo edición
- * El historial es útil para ver cambios aunque no esté compartido
+ * Fase 9.5: Refactorizado para usar componentes modernos estilo Linear
+ * - FormularioHabitoModerno para el formulario principal
+ * - usePanelChat para la gestión del panel de chat
+ * - PestanasModal para las pestañas responsive
  */
 
-import {useState, useCallback, useEffect, useRef} from 'react';
-import {MessageSquare, MessageSquareOff} from 'lucide-react';
+import {useState, useCallback, useEffect} from 'react';
+import {Activity, BarChart2} from 'lucide-react';
 import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
-import {SelectorFrecuencia} from './SelectorFrecuencia';
-import {AccionesFormulario, Modal, SeccionPanel, SelectorNivel, SelectorEstadoHabito} from '../shared';
-import type {EstadoHabito} from '../shared';
-import {MapaCalorHabito} from '../shared/MapaCalorHabito';
+import {AccionesFormulario, Modal, PestanasModal} from '../shared';
+import type {PestanaId, EstadoHabito} from '../shared';
+import {FormularioHabitoModerno} from './habitos/FormularioHabitoModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
-import {useMensajesNoLeidos} from '../../hooks/useMensajes';
+import {usePanelChat} from '../../hooks/usePanelChat';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {obtenerFechaHoy} from '../../utils/fecha';
 
@@ -30,13 +27,8 @@ interface ModalHabitoProps {
     onCerrar: () => void;
     onGuardar: (datos: DatosFormulario) => void;
     habito?: Habito;
-    /* Participantes del hábito (si está compartido - futuro Fase 10) */
     participantes?: Participante[];
 }
-
-const IMPORTANCIAS: NivelImportancia[] = ['Alta', 'Media', 'Baja'];
-
-type PestanaModal = 'configuracion' | 'chat';
 
 export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participantes = []}: ModalHabitoProps): JSX.Element | null {
     const modoEdicion = !!habito;
@@ -44,139 +36,21 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
     /* Estado local para edicion */
     const [nombre, setNombre] = useState(habito?.nombre || '');
     const [importancia, setImportancia] = useState<NivelImportancia>(habito?.importancia || 'Media');
-    const [tags, setTags] = useState<string[]>(habito?.tags || []);
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(habito?.frecuencia || FRECUENCIA_POR_DEFECTO);
-    const [nuevoTag, setNuevoTag] = useState('');
     const [errores, setErrores] = useState<{nombre?: string}>({});
 
     /* Estado para pestañas responsive */
-    const [pestanaActiva, setPestanaActiva] = useState<PestanaModal>('configuracion');
+    const [pestanaActiva, setPestanaActiva] = useState<PestanaId>('configuracion');
 
-    /* Estado para visibilidad del panel de chat (persistido) */
-    const [chatVisible, setChatVisible] = useState<boolean>(() => {
-        const guardado = localStorage.getItem('glory_chat_panel_visible');
-        return guardado !== 'false';
+    /* Hook para panel de chat */
+    const {chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna} = usePanelChat({
+        elementoId: habito?.id,
+        elementoTipo: 'habito',
+        participantes,
+        habilitado: modoEdicion
     });
 
-    /* Referencia al estado inicial para detectar cambios */
-    const estadoInicialRef = useRef<{
-        nombre: string;
-        importancia: NivelImportancia;
-        tags: string[];
-        frecuenciaTipo: string;
-    } | null>(null);
-
-    /* Sincronizar estado cuando cambia el habito */
-    useEffect(() => {
-        if (habito) {
-            setNombre(habito.nombre);
-            setImportancia(habito.importancia);
-            setTags(habito.tags);
-            setFrecuencia(habito.frecuencia || FRECUENCIA_POR_DEFECTO);
-
-            /* Guardar estado inicial para detección de cambios */
-            estadoInicialRef.current = {
-                nombre: habito.nombre,
-                importancia: habito.importancia,
-                tags: habito.tags,
-                frecuenciaTipo: (habito.frecuencia || FRECUENCIA_POR_DEFECTO).tipo
-            };
-        } else {
-            /* Resetear si no hay habito (modo creacion) */
-            setNombre('');
-            setImportancia('Media');
-            setTags([]);
-            setFrecuencia(FRECUENCIA_POR_DEFECTO);
-            estadoInicialRef.current = null;
-        }
-        setNuevoTag('');
-        setErrores({});
-    }, [habito?.id, estaAbierto]);
-
-    /* Detectar si hubo cambios respecto al estado inicial */
-    const hayCambios = useCallback((): boolean => {
-        const inicial = estadoInicialRef.current;
-
-        /* Si es modo creación, hay cambios si hay nombre */
-        if (!inicial) {
-            return nombre.trim().length >= 3;
-        }
-
-        /* Comparar cada campo */
-        if (nombre.trim() !== inicial.nombre) return true;
-        if (importancia !== inicial.importancia) return true;
-        if (frecuencia.tipo !== inicial.frecuenciaTipo) return true;
-
-        /* Comparar tags */
-        if (tags.length !== inicial.tags.length) return true;
-        const tagsActuales = [...tags].sort().join(',');
-        const tagsIniciales = [...inicial.tags].sort().join(',');
-        if (tagsActuales !== tagsIniciales) return true;
-
-        return false;
-    }, [nombre, importancia, tags, frecuencia]);
-
-    const validarFormulario = useCallback((): boolean => {
-        const nuevosErrores: {nombre?: string} = {};
-
-        if (!nombre.trim()) {
-            nuevosErrores.nombre = 'El nombre es obligatorio';
-        } else if (nombre.trim().length < 3) {
-            nuevosErrores.nombre = 'El nombre debe tener al menos 3 caracteres';
-        }
-
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
-    }, [nombre]);
-
-    const manejarGuardar = useCallback(() => {
-        if (!validarFormulario()) return;
-
-        onGuardar({
-            nombre: nombre.trim(),
-            importancia,
-            tags,
-            frecuencia
-        });
-        onCerrar();
-    }, [nombre, importancia, tags, frecuencia, validarFormulario, onGuardar, onCerrar]);
-
-    /* Auto-guardado: al cerrar el modal, guardar solo si hay cambios */
-    const manejarCerrarConGuardado = useCallback(() => {
-        if (hayCambios() && nombre.trim().length >= 3) {
-            manejarGuardar();
-        } else {
-            onCerrar();
-        }
-    }, [hayCambios, nombre, manejarGuardar, onCerrar]);
-
-    /* Cancelar: cerrar sin guardar (descartar cambios) */
-    const manejarCancelar = useCallback(() => {
-        onCerrar();
-    }, [onCerrar]);
-
-    /* Toggle visibilidad del panel de chat */
-    const toggleChatVisible = useCallback(() => {
-        setChatVisible(prev => {
-            const nuevoValor = !prev;
-            localStorage.setItem('glory_chat_panel_visible', String(nuevoValor));
-            return nuevoValor;
-        });
-    }, []);
-
-    /* Obtener mensajes no leídos para este hábito */
-    const habitoIdParaMensajes = habito?.id && habito.id > 0 ? [habito.id] : [];
-    const {noLeidos: mensajesNoLeidos} = useMensajesNoLeidos('habito', habitoIdParaMensajes);
-    const tieneMensajesSinLeer = habito?.id ? (mensajesNoLeidos[habito.id] || 0) > 0 : false;
-
-    /* Participantes para el panel de chat */
-    const participantesChat = participantes.map(p => ({
-        id: p.usuarioId,
-        nombre: p.nombre,
-        avatar: p.avatar
-    }));
-
-    /* Estado de cumplimiento de hoy (Fase 8.7) */
+    /* Estado de cumplimiento de hoy */
     const toggleHabito = useHabitosStore(state => state.toggleHabito);
     const posponerHabito = useHabitosStore(state => state.posponerHabito);
     const hoy = obtenerFechaHoy();
@@ -187,6 +61,21 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
         else if (habito.historialPospuestos?.includes(hoy)) estadoHoy = 'pospuesto';
     }
 
+    /* Sincronizar estado cuando cambia el habito */
+    useEffect(() => {
+        if (habito) {
+            setNombre(habito.nombre);
+            setImportancia(habito.importancia);
+            setFrecuencia(habito.frecuencia || FRECUENCIA_POR_DEFECTO);
+        } else {
+            setNombre('');
+            setImportancia('Media');
+            setFrecuencia(FRECUENCIA_POR_DEFECTO);
+        }
+        setErrores({});
+    }, [habito?.id, estaAbierto]);
+
+    /* Manejador de cambio de estado del habito */
     const manejarCambioEstado = useCallback(
         (nuevoEstado: EstadoHabito) => {
             if (!habito) return;
@@ -203,89 +92,99 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
         [habito, estadoHoy, toggleHabito, posponerHabito]
     );
 
-    /* Mostrar chat siempre en modo edición (útil para ver historial) */
-    const mostrarChat = modoEdicion;
-    const mostrarChatColumna = mostrarChat && chatVisible;
+    /* Validar formulario */
+    const validarFormulario = useCallback((): boolean => {
+        const nuevosErrores: {nombre?: string} = {};
 
-    /* Clase extra para modal expandido */
-    const claseModal = mostrarChat ? 'panelConfiguracionContenedor modalContenedor--expandido' : '';
+        if (!nombre.trim()) {
+            nuevosErrores.nombre = 'El nombre es obligatorio';
+        } else if (nombre.trim().length < 3) {
+            nuevosErrores.nombre = 'El nombre debe tener al menos 3 caracteres';
+        }
 
-    /* Contenido del formulario (reutilizado en ambos modos) */
-    const renderizarFormulario = () => (
-        <>
-            {/* Campo Nombre */}
-            <SeccionPanel titulo="Nombre del habito">
-                <input id="habito-nombre" type="text" className={`formularioInput ${errores.nombre ? 'formularioInputError' : ''}`} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej: Leer 30 minutos" autoFocus />
-                {errores.nombre && <span className="formularioMensajeError">{errores.nombre}</span>}
+        setErrores(nuevosErrores);
+        return Object.keys(nuevosErrores).length === 0;
+    }, [nombre]);
 
-                {/* Selector de Estado (Solo modo edición) */}
-                {modoEdicion && habito && (
-                    <div style={{marginTop: '0.75rem'}}>
-                        <SelectorEstadoHabito estado={estadoHoy} onChange={manejarCambioEstado} />
+    /* Guardar habito */
+    const manejarGuardar = useCallback(() => {
+        if (!validarFormulario()) return;
+
+        onGuardar({
+            nombre: nombre.trim(),
+            importancia,
+            tags: [] /* Tags deprecados por ahora */,
+            frecuencia
+        });
+        onCerrar();
+    }, [nombre, importancia, frecuencia, validarFormulario, onGuardar, onCerrar]);
+
+    /* Auto-guardado: al cerrar el modal, guardar si hay nombre válido */
+    const manejarCerrarConGuardado = useCallback(() => {
+        if (nombre.trim().length >= 3) {
+            manejarGuardar();
+        } else {
+            onCerrar();
+        }
+    }, [nombre, manejarGuardar, onCerrar]);
+
+    /* Header Icons (similar a ModalProyecto) */
+    const accionesHeader = modoEdicion ? (
+        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+            {/* Estadisticas (Placeholder) */}
+            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                <BarChart2 size={16} className="textoApagado" />
+            </button>
+
+            {/* Actividad / Chat */}
+            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+                {tieneMensajesSinLeer ? (
+                    <div style={{position: 'relative'}}>
+                        <Activity size={16} />
+                        <span className="indicadorBadge" />
                     </div>
+                ) : (
+                    <Activity size={16} />
                 )}
-            </SeccionPanel>
+            </button>
+        </div>
+    ) : undefined;
 
-            {/* Campo Importancia */}
-            <SeccionPanel titulo="Importancia">
-                <SelectorNivel<NivelImportancia> niveles={IMPORTANCIAS} seleccionado={importancia} onSeleccionar={setImportancia} />
-            </SeccionPanel>
-
-            {/* Campo Frecuencia */}
-            <div className="formularioCampo">
-                <SelectorFrecuencia frecuencia={frecuencia} onChange={setFrecuencia} />
-            </div>
-
-            {/* Mapa de calor - solo en modo edición */}
-            {modoEdicion && habito && habito.id > 0 && (
-                <div className="formularioCampo formularioCampo--mapaCalor">
-                    <label className="formularioEtiqueta">Historial de cumplimiento</label>
-                    <MapaCalorHabito habitoId={habito.id} periodo="mes" enModal={true} frecuencia={habito.frecuencia} fechaCreacion={habito.fechaCreacion} />
-                </div>
-            )}
-        </>
-    );
+    /* Clase del modal */
+    const claseModal = modoEdicion ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Editar Habito' : 'Nuevo Habito'} claseExtra={claseModal}>
-            {mostrarChat ? (
+        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? nombre || 'Editar Hábito' : 'Nuevo Hábito'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
+            {modoEdicion ? (
                 <>
                     {/* Pestañas para móvil */}
-                    <div className="panelConfiguracionPestanas">
-                        <button type="button" className={`panelConfiguracionPestana ${pestanaActiva === 'configuracion' ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => setPestanaActiva('configuracion')}>
-                            Configuracion
-                        </button>
-                        <button type="button" className={`panelConfiguracionPestana ${pestanaActiva === 'chat' ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => setPestanaActiva('chat')}>
-                            Chat / Historial
-                        </button>
-                    </div>
+                    <PestanasModal pestanaActiva={pestanaActiva} onCambiar={setPestanaActiva} tieneNotificaciones={tieneMensajesSinLeer} />
 
                     {/* Layout de 2 columnas */}
                     <div className={`panelConfiguracionDosColumnas ${!mostrarChatColumna ? 'panelConfiguracionDosColumnas--sinChat' : ''}`}>
                         {/* Columna Izquierda: Formulario */}
                         <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
-                            <div className="panelConfiguracionColumnaScroll">{renderizarFormulario()}</div>
-
-                            {/* Acciones - sin botón eliminar */}
-                            <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Guardar cambios">
-                                {/* Botón para toggle del chat */}
-                                <button type="button" className={`accionesFormularioBotonChat ${tieneMensajesSinLeer && !chatVisible ? 'accionesFormularioBotonChat--noLeidos' : ''}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : `Mostrar chat${tieneMensajesSinLeer ? ' (mensajes sin leer)' : ''}`}>
-                                    {chatVisible ? <MessageSquareOff size={14} /> : <MessageSquare size={14} />}
-                                </button>
-                            </AccionesFormulario>
+                            <div className="panelConfiguracionColumnaScroll">
+                                <FormularioHabitoModerno nombre={nombre} onNombreChange={setNombre} importancia={importancia} onImportanciaChange={setImportancia} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} estadoHoy={estadoHoy} onEstadoChange={manejarCambioEstado} habito={habito} modoEdicion={true} errorNombre={errores.nombre} />
+                            </div>
+                            {/* Sin botones de acciones - auto-guardado */}
                         </div>
 
                         {/* Columna Derecha: Chat e Historial */}
-                        {mostrarChatColumna && <div className={`panelConfiguracionColumnaDerecha ${pestanaActiva === 'chat' ? 'panelConfiguracionColumnaDerecha--activa' : ''}`}>{habito && <PanelChatHistorial elementoId={habito.id} elementoTipo="habito" participantes={participantesChat} />}</div>}
+                        {mostrarChatColumna && habito && (
+                            <div className={`panelConfiguracionColumnaDerecha ${pestanaActiva === 'chat' ? 'panelConfiguracionColumnaDerecha--activa' : ''}`}>
+                                <PanelChatHistorial elementoId={habito.id} elementoTipo="habito" participantes={participantesChat} />
+                            </div>
+                        )}
                     </div>
                 </>
             ) : (
-                /* Modo simple para crear hábito nuevo */
+                /* Modo creación simple */
                 <>
                     <div id="modal-habito-contenido" className="formularioHabito">
-                        {renderizarFormulario()}
+                        <FormularioHabitoModerno nombre={nombre} onNombreChange={setNombre} importancia={importancia} onImportanciaChange={setImportancia} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} modoEdicion={false} errorNombre={errores.nombre} />
                     </div>
-                    <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar="Crear habito" />
+                    <AccionesFormulario onCancelar={onCerrar} onGuardar={manejarGuardar} textoGuardar="Crear hábito" />
                 </>
             )}
         </Modal>

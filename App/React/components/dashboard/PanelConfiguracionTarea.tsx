@@ -1,24 +1,21 @@
 /*
  * PanelConfiguracionTarea
  * Panel modal para configurar opciones avanzadas de una tarea
- * Responsabilidad: prioridad, fecha limite, descripcion, repeticion, asignacion
  *
- * Usa campos compartidos: CampoTexto, CampoPrioridad, CampoFechaLimite
- * Layout: 2 columnas (configuracion + chat/historial)
- *
- * TODO: Refactorizar para usar un store de Zustand para tareas (similar a habitosStore)
- * TODO: Extraer logica de estado inicial y deteccion de cambios a un hook personalizado
+ * Fase 9.4: Refactorizado para usar componentes modernos estilo Linear
+ * - FormularioTareaModerno para el formulario principal
+ * - usePanelChat para la gestión del panel de chat
+ * - PestanasModal para las pestañas responsive
  */
 
-import {useState, useEffect, useRef, useCallback} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto} from '../../types/dashboard';
-import {AccionesFormulario, Modal, SeccionPanel, ToggleSwitch, CampoTexto, CampoPrioridad, CampoUrgencia, CampoFechaLimite, SelectorProyecto, SelectorEstadoTarea} from '../shared';
-import {SelectorFrecuencia} from './SelectorFrecuencia';
-import {SeccionAdjuntos} from './SeccionAdjuntos';
-import {SelectorAsignado} from '../compartidos/SelectorAsignado';
+import {AccionesFormulario, Modal, PestanasModal} from '../shared';
+import type {PestanaId} from '../shared';
+import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
-import {useMensajesNoLeidos} from '../../hooks/useMensajes';
-import {MessageSquare, MessageSquareOff} from 'lucide-react';
+import {usePanelChat} from '../../hooks/usePanelChat';
+import {MessageSquare, MessageSquareOff, Activity, BarChart2} from 'lucide-react';
 import type {FrecuenciaHabito, Adjunto} from '../../types/dashboard';
 
 export interface PanelConfiguracionTareaProps {
@@ -26,66 +23,53 @@ export interface PanelConfiguracionTareaProps {
     estaAbierto: boolean;
     onCerrar: () => void;
     onGuardar: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
-    /* Participantes disponibles para asignar (opcional, solo si es tarea compartida) */
     participantes?: Participante[];
-    /* Proyectos disponibles para mover la tarea */
     proyectos?: Proyecto[];
-    /* Callback para mover la tarea a otro proyecto */
     onCambiarProyecto?: (proyectoId: number | undefined) => void;
-    /* Callback para cambiar el estado completado de la tarea */
     onToggleCompletado?: (completado: boolean) => void;
 }
 
-type PestanaModal = 'configuracion' | 'chat';
-
 export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
+    const modoEdicion = !!tarea;
+
     /* Estado local para edicion */
+    const [texto, setTexto] = useState(tarea?.texto || '');
+    const [descripcion, setDescripcion] = useState(tarea?.configuracion?.descripcion || '');
     const [prioridad, setPrioridad] = useState<NivelPrioridad | null>(tarea?.prioridad || null);
     const [urgencia, setUrgencia] = useState<NivelUrgencia | null>(tarea?.urgencia || null);
     const [fechaMaxima, setFechaMaxima] = useState<string>(tarea?.configuracion?.fechaMaxima || '');
-    const [descripcion, setDescripcion] = useState<string>(tarea?.configuracion?.descripcion || '');
     const [tieneRepeticion, setTieneRepeticion] = useState<boolean>(!!tarea?.configuracion?.repeticion);
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>({tipo: 'diario'});
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>(tarea?.configuracion?.adjuntos || []);
-    const [texto, setTexto] = useState(tarea?.texto || '');
 
     /* Estado para asignacion */
     const [asignadoA, setAsignadoA] = useState<number | null>(tarea?.asignadoA || null);
     const [asignadoANombre, setAsignadoANombre] = useState<string>(tarea?.asignadoANombre || '');
     const [asignadoAAvatar, setAsignadoAAvatar] = useState<string>(tarea?.asignadoAAvatar || '');
 
-    /* Estado local para proyecto y completado (para actualización en tiempo real) */
+    /* Estado local para proyecto y completado */
     const [proyectoIdLocal, setProyectoIdLocal] = useState<number | undefined>(tarea?.proyectoId);
     const [completadoLocal, setCompletadoLocal] = useState<boolean>(tarea?.completado ?? false);
 
     /* Estado para pestañas responsive */
-    const [pestanaActiva, setPestanaActiva] = useState<PestanaModal>('configuracion');
+    const [pestanaActiva, setPestanaActiva] = useState<PestanaId>('configuracion');
 
-    /* Estado para visibilidad del panel de chat (persistido) */
-    const [chatVisible, setChatVisible] = useState<boolean>(() => {
-        const guardado = localStorage.getItem('glory_chat_panel_visible');
-        return guardado !== 'false';
+    /* Hook para panel de chat */
+    const {chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna} = usePanelChat({
+        elementoId: tarea?.id,
+        elementoTipo: 'tarea',
+        participantes,
+        habilitado: modoEdicion
     });
 
-    /* Referencia al estado inicial para detectar cambios */
-    const estadoInicialRef = useRef<{
-        prioridad: NivelPrioridad | null;
-        urgencia: NivelUrgencia | null;
-        fechaMaxima: string;
-        descripcion: string;
-        tieneRepeticion: boolean;
-        texto: string;
-        asignadoA: number | null;
-        adjuntos: Adjunto[];
-    } | null>(null);
-
-    /* Sincronizar estado cuando cambia la tarea (solo por ID, no por referencia) */
+    /* Sincronizar estado cuando cambia la tarea */
     useEffect(() => {
         if (tarea) {
+            setTexto(tarea.texto);
+            setDescripcion(tarea.configuracion?.descripcion || '');
             setPrioridad(tarea.prioridad || null);
             setUrgencia(tarea.urgencia || null);
             setFechaMaxima(tarea.configuracion?.fechaMaxima || '');
-            setDescripcion(tarea.configuracion?.descripcion || '');
             setTieneRepeticion(!!tarea.configuracion?.repeticion);
 
             /* Convertir RepeticionTarea a FrecuenciaHabito */
@@ -105,82 +89,35 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             }
 
             setAdjuntos(tarea.configuracion?.adjuntos || []);
-            setTexto(tarea.texto);
             setAsignadoA(tarea.asignadoA || null);
             setAsignadoANombre(tarea.asignadoANombre || '');
             setAsignadoAAvatar(tarea.asignadoAAvatar || '');
             setProyectoIdLocal(tarea.proyectoId);
             setCompletadoLocal(tarea.completado);
-
-            /* Guardar estado inicial para detección de cambios */
-            estadoInicialRef.current = {
-                prioridad: tarea.prioridad || null,
-                urgencia: tarea.urgencia || null,
-                fechaMaxima: tarea.configuracion?.fechaMaxima || '',
-                descripcion: tarea.configuracion?.descripcion || '',
-                tieneRepeticion: !!tarea.configuracion?.repeticion,
-                texto: tarea.texto,
-                asignadoA: tarea.asignadoA || null,
-                adjuntos: tarea.configuracion?.adjuntos || []
-            };
         } else {
             /* Resetear si no hay tarea (modo creacion) */
+            setTexto('');
+            setDescripcion('');
             setPrioridad(null);
             setUrgencia(null);
             setFechaMaxima('');
-            setDescripcion('');
             setTieneRepeticion(false);
             setFrecuencia({tipo: 'diario'});
             setAdjuntos([]);
-            setTexto('');
             setAsignadoA(null);
             setAsignadoANombre('');
             setAsignadoAAvatar('');
-            estadoInicialRef.current = null;
         }
-    }, [tarea?.id]);
-
-    /* Detectar si hubo cambios respecto al estado inicial */
-    const hayCambios = useCallback((): boolean => {
-        const inicial = estadoInicialRef.current;
-
-        /* Si es modo creación, hay cambios si hay texto */
-        if (!inicial) {
-            return texto.trim().length > 0;
-        }
-
-        /* Comparar cada campo */
-        if (prioridad !== inicial.prioridad) return true;
-        if (urgencia !== inicial.urgencia) return true;
-        if (fechaMaxima !== inicial.fechaMaxima) return true;
-        if (descripcion.trim() !== inicial.descripcion) return true;
-        if (tieneRepeticion !== inicial.tieneRepeticion) return true;
-        if (texto.trim() !== inicial.texto) return true;
-        if (asignadoA !== inicial.asignadoA) return true;
-
-        /* Comparar adjuntos (por longitud y IDs) */
-        if (adjuntos.length !== inicial.adjuntos.length) return true;
-        const idsActuales = adjuntos
-            .map(a => a.id)
-            .sort()
-            .join(',');
-        const idsIniciales = inicial.adjuntos
-            .map(a => a.id)
-            .sort()
-            .join(',');
-        if (idsActuales !== idsIniciales) return true;
-
-        return false;
-    }, [prioridad, urgencia, fechaMaxima, descripcion, tieneRepeticion, texto, asignadoA, adjuntos]);
+    }, [tarea?.id, estaAbierto]);
 
     /* Manejador de cambio de asignacion */
-    const manejarAsignacion = (usuarioId: number | null, nombre: string, avatar: string) => {
+    const manejarAsignacion = useCallback((usuarioId: number | null, nombre: string, avatar: string) => {
         setAsignadoA(usuarioId);
         setAsignadoANombre(nombre);
         setAsignadoAAvatar(avatar);
-    };
+    }, []);
 
-    /* Manejador de cambio de proyecto (actualiza estado local + callback) */
+    /* Manejador de cambio de proyecto */
     const manejarCambioProyecto = useCallback(
         (nuevoProyectoId: number | undefined) => {
             setProyectoIdLocal(nuevoProyectoId);
@@ -189,7 +126,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         [onCambiarProyecto]
     );
 
-    /* Manejador de cambio de estado completado (actualiza estado local + callback) */
+    /* Manejador de cambio de estado completado */
     const manejarCambioCompletado = useCallback(
         (nuevoCompletado: boolean) => {
             setCompletadoLocal(nuevoCompletado);
@@ -198,6 +135,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         [onToggleCompletado]
     );
 
+    /* Guardar tarea */
     const manejarGuardar = useCallback(() => {
         const configuracion: TareaConfiguracion = {};
 
@@ -210,7 +148,6 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         }
 
         if (tieneRepeticion) {
-            /* Convertir FrecuenciaHabito a RepeticionTarea */
             const repeticion: any = {
                 tipo: 'despuesCompletar',
                 intervalo: 1
@@ -238,10 +175,8 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             configuracion.repeticion = repeticion;
         }
 
-        /* Siempre incluir adjuntos para permitir eliminación */
         configuracion.adjuntos = adjuntos;
 
-        /* Preparar datos de asignacion */
         const asignacion = {
             asignadoA,
             asignadoANombre,
@@ -252,134 +187,74 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         onCerrar();
     }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, onGuardar, onCerrar]);
 
-    /* Auto-guardado: al cerrar el modal, guardar solo si hay cambios */
+    /* Auto-guardado: al cerrar el modal, guardar si hay texto */
     const manejarCerrarConGuardado = useCallback(() => {
-        if (hayCambios()) {
+        if (texto.trim().length > 0) {
             manejarGuardar();
         } else {
             onCerrar();
         }
-    }, [hayCambios, manejarGuardar, onCerrar]);
+    }, [texto, manejarGuardar, onCerrar]);
 
-    /* Cancelar: cerrar sin guardar (descartar cambios) */
-    const manejarCancelar = useCallback(() => {
-        onCerrar();
-    }, [onCerrar]);
+    /* Header Icons (similar a ModalProyecto) */
+    const accionesHeader = modoEdicion ? (
+        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+            {/* Estadisticas (Placeholder) */}
+            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                <BarChart2 size={16} className="textoApagado" />
+            </button>
 
-    const esModoCreacion = !tarea;
-    const tieneParticipantes = participantes.length > 0;
+            {/* Actividad / Chat */}
+            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+                {tieneMensajesSinLeer ? (
+                    <div style={{position: 'relative'}}>
+                        <Activity size={16} />
+                        <span className="indicadorBadge" />
+                    </div>
+                ) : (
+                    <Activity size={16} />
+                )}
+            </button>
+        </div>
+    ) : undefined;
 
-    /*
-     * En modo creación, ocultar el panel de chat/historial
-     * No tiene sentido mostrar historial de algo que no existe aún
-     */
-    const mostrarPanelChat = !esModoCreacion && chatVisible;
-
-    /* Toggle visibilidad del panel de chat */
-    const toggleChatVisible = useCallback(() => {
-        setChatVisible(prev => {
-            const nuevoValor = !prev;
-            localStorage.setItem('glory_chat_panel_visible', String(nuevoValor));
-            return nuevoValor;
-        });
-    }, []);
-
-    /* Obtener mensajes no leídos para esta tarea */
-    const tareaIdParaMensajes = tarea?.id && tarea.id > 0 ? [tarea.id] : [];
-    const {noLeidos: mensajesNoLeidos} = useMensajesNoLeidos('tarea', tareaIdParaMensajes);
-    const tieneMensajesSinLeer = tarea?.id ? (mensajesNoLeidos[tarea.id] || 0) > 0 : false;
-
-    /* Participantes para el panel de chat */
-    const participantesChat = participantes.map(p => ({
-        id: p.usuarioId,
-        nombre: p.nombre,
-        avatar: p.avatar
-    }));
+    /* Clase del modal */
+    const claseModal = modoEdicion ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={esModoCreacion ? 'Nueva Tarea' : 'Configurar Tarea'} claseExtra={`panelConfiguracionContenedor ${esModoCreacion ? '' : 'modalContenedor--expandido'}`}>
-            {/* Pestañas para móvil - Solo en modo edición */}
-            {!esModoCreacion && (
-                <div className="panelConfiguracionPestanas">
-                    <button type="button" className={`panelConfiguracionPestana ${pestanaActiva === 'configuracion' ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => setPestanaActiva('configuracion')}>
-                        Configuracion
-                    </button>
-                    <button type="button" className={`panelConfiguracionPestana ${pestanaActiva === 'chat' ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => setPestanaActiva('chat')}>
-                        Chat / Historial
-                    </button>
-                </div>
-            )}
+        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? texto || 'Configurar Tarea' : 'Nueva Tarea'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
+            {modoEdicion ? (
+                <>
+                    {/* Pestañas para móvil */}
+                    <PestanasModal pestanaActiva={pestanaActiva} onCambiar={setPestanaActiva} tieneNotificaciones={tieneMensajesSinLeer} />
 
-            {/* Layout de 2 columnas (o 1 si chat está oculto/modo creación) */}
-            <div className={`panelConfiguracionDosColumnas ${!mostrarPanelChat ? 'panelConfiguracionDosColumnas--sinChat' : ''}`}>
-                {/* Columna Izquierda: Configuracion */}
-                <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
-                    <div className="panelConfiguracionColumnaScroll">
-                        {/* Nombre de la tarea */}
-                        <CampoTexto titulo="Nombre de la tarea" valor={texto} onChange={setTexto} placeholder="Nombre de la tarea" />
-
-                        {/* Estado de la tarea - Solo en modo edicion */}
-                        {!esModoCreacion && onToggleCompletado && <SelectorEstadoTarea completada={completadoLocal} onChange={manejarCambioCompletado} />}
-
-                        {/* Proyecto - Solo en modo edicion con callback */}
-                        {!esModoCreacion && proyectos.length > 0 && onCambiarProyecto && <SelectorProyecto proyectos={proyectos} proyectoActualId={proyectoIdLocal} onChange={manejarCambioProyecto} />}
-
-                        {/* Prioridad */}
-                        <CampoPrioridad<NivelPrioridad> tipo="prioridad" valor={prioridad} onChange={setPrioridad} permitirNulo={true} />
-
-                        {/* Urgencia */}
-                        <CampoUrgencia valor={urgencia} onChange={setUrgencia} permitirNulo={true} />
-
-                        {/* Fecha Limite */}
-                        <CampoFechaLimite valor={fechaMaxima} onChange={setFechaMaxima} />
-
-                        {/* Descripcion */}
-                        <CampoTexto titulo="Descripcion" valor={descripcion} onChange={setDescripcion} placeholder="Notas adicionales sobre esta tarea..." tipo="textarea" filas={3} />
-
-                        {/* Asignacion (solo si hay participantes) */}
-                        {tieneParticipantes && (
-                            <SeccionPanel titulo="Asignar a">
-                                <SelectorAsignado participantes={participantes} asignadoActual={asignadoA} onAsignar={manejarAsignacion} />
-                            </SeccionPanel>
-                        )}
-
-                        {/* Repeticion */}
-                        <SeccionPanel titulo="Repeticion">
-                            <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '-1.5rem'}}>
-                                <ToggleSwitch checked={tieneRepeticion} onChange={setTieneRepeticion} className="panelConfiguracionToggle" />
+                    {/* Layout de 2 columnas */}
+                    <div className={`panelConfiguracionDosColumnas ${!mostrarChatColumna ? 'panelConfiguracionDosColumnas--sinChat' : ''}`}>
+                        {/* Columna Izquierda: Formulario */}
+                        <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
+                            <div className="panelConfiguracionColumnaScroll">
+                                <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={completadoLocal} onCompletadoChange={onToggleCompletado ? manejarCambioCompletado : undefined} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} proyectoId={proyectoIdLocal} proyectos={proyectos} onProyectoChange={onCambiarProyecto ? manejarCambioProyecto : undefined} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} participantes={participantes} asignadoA={asignadoA} asignadoANombre={asignadoANombre} asignadoAAvatar={asignadoAAvatar} onAsignacionChange={participantes.length > 0 ? manejarAsignacion : undefined} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} modoEdicion={true} />
                             </div>
+                            {/* Sin botones de acciones - auto-guardado */}
+                        </div>
 
-                            {tieneRepeticion && (
-                                <div className="panelConfiguracionRepeticion">
-                                    <div style={{marginTop: '1rem'}}>
-                                        <SelectorFrecuencia frecuencia={frecuencia} onChange={setFrecuencia} />
-                                    </div>
-                                </div>
-                            )}
-                        </SeccionPanel>
-
-                        {/* Adjuntos */}
-                        <SeccionAdjuntos adjuntos={adjuntos} onChange={setAdjuntos} />
-                    </div>
-
-                    {/* Acciones del formulario */}
-                    <AccionesFormulario onCancelar={manejarCancelar} onGuardar={manejarGuardar} textoGuardar={esModoCreacion ? 'Crear Tarea' : 'Guardar'}>
-                        {/* Botón para toggle del chat - Solo en modo edición */}
-                        {!esModoCreacion && (
-                            <button type="button" className={`accionesFormularioBotonChat ${tieneMensajesSinLeer && !chatVisible ? 'accionesFormularioBotonChat--noLeidos' : ''}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : `Mostrar chat${tieneMensajesSinLeer ? ' (mensajes sin leer)' : ''}`}>
-                                {chatVisible ? <MessageSquareOff size={14} /> : <MessageSquare size={14} />}
-                            </button>
+                        {/* Columna Derecha: Chat e Historial */}
+                        {mostrarChatColumna && tarea && (
+                            <div className={`panelConfiguracionColumnaDerecha ${pestanaActiva === 'chat' ? 'panelConfiguracionColumnaDerecha--activa' : ''}`}>
+                                <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} />
+                            </div>
                         )}
-                    </AccionesFormulario>
-                </div>
-
-                {/* Columna Derecha: Chat e Historial - Solo en modo edición */}
-                {mostrarPanelChat && tarea && (
-                    <div className={`panelConfiguracionColumnaDerecha ${pestanaActiva === 'chat' ? 'panelConfiguracionColumnaDerecha--activa' : ''}`}>
-                        <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} />
                     </div>
-                )}
-            </div>
+                </>
+            ) : (
+                /* Modo creación simple */
+                <>
+                    <div id="panel-tarea-contenido" className="formularioHabito">
+                        <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={false} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} modoEdicion={false} asignadoA={null} asignadoANombre="" asignadoAAvatar="" />
+                    </div>
+                    <AccionesFormulario onCancelar={onCerrar} onGuardar={manejarGuardar} textoGuardar="Crear tarea" />
+                </>
+            )}
         </Modal>
     );
 }

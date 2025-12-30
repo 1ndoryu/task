@@ -44,3 +44,13 @@ export * from './PropiedadesCompactas';
 export * from './SeccionResponsables';
 export * from './BotonOpcionCompacta';
 export * from './ResumenTareasProyecto';
+export * from './PestanasModal';
+/* Fase 9.4, 9.5, 9.6 - Nuevos selectores pill */
+export * from './SelectorEstadoPill';
+export * from './SelectorProyectoPill';
+export * from './SelectorRepeticionPill';
+export * from './SelectorEstadoHabitoPill';
+export * from './SelectorImportanciaPill';
+export * from './SelectorFrecuenciaPill';
+export * from './SelectorEstadoProyectoPill';
+export * from './FilaPropiedades';

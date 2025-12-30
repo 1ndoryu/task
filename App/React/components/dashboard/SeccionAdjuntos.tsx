@@ -462,8 +462,9 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
     );
 
     const renderContenidoModerno = () => (
-        <div className="propiedadesCompactas" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0}}>
-            <div style={{display: 'flex', alignItems: 'center', width: '100%', gap: '16px'}}>
+        <>
+            {/* Fila de etiqueta + boton Agregar */}
+            <div className="propiedadesCompactas">
                 <span className="propiedadesCompactas__etiqueta">{etiqueta}</span>
                 <div className="propiedadesCompactas__contenido">
                     {/* Boton Agregar Compacto */}
@@ -483,7 +484,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
 
             {/* Grid de Adjuntos (Solo si hay adjuntos) */}
             {adjuntos.length > 0 && (
-                <div className="adjuntosContenedorGrid" style={{width: '100%'}}>
+                <div className="adjuntosContenedorGrid">
                     <div className="adjuntosGrid">
                         {adjuntos.map(adjunto => {
                             const urlPreview = obtenerUrlPreview(adjunto);
@@ -572,7 +573,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 
     return estilo === 'moderno' ? renderContenidoModerno() : renderContenidoClasico();

@@ -9,8 +9,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Fecha de inicio:** 2025-12-19  
 **Version:** v1.0.9-beta  
 **Ultima actualizacion:** 2025-12-29
-22. ✅ **Fase 9.10** - Cambiar botones de creación a Creación Rápida (Proyectos, Tareas, etc)
-**Estado:** Fase 9 EN PROGRESO - Refactorización Visual (Proyectos Finalizado ✅)
+**Estado:** Fase 9 CASI COMPLETA - Solo pendiente: Bug subtarea hereda proyecto del padre
 
 ## Funcionalidades Completadas
 
@@ -242,8 +241,35 @@ Todos centralizados en `configuracionModerna.css`:
       - [x] Cards de archivo minimalistas
 12. ⏳ **Fase 9.3** - Corrección de Bugs
       - [ ] Subtarea hereda proyecto del padre (Panel Ejecución)
-13. ⏳ **Fase 9.4** - Aplicar a Tareas
-14. ⏳ **Fase 9.5** - Aplicar a Hábitos
+13. ✅ **Fase 9.3.1** - Refactorización Pre-Fase 9.4
+      - [x] Hook `useAutoguardado` (detección de cambios y auto-guardado)
+      - [x] Hook `usePanelChat` (visibilidad del panel de chat)
+      - [x] Componente `PestanasModal` (pestañas responsive)
+      - [x] Documento de análisis `REFACTORIZACION_FASE_9.4.md`
+      - [x] `FormularioTareaModerno.tsx` (estructura base)
+      - [x] `FormularioHabitoModerno.tsx` (estructura base)
+      - [x] Carpetas organizadas: `tareas/`, `habitos/`
+14. ✅ **Fase 9.4** - Aplicar a Tareas (Estilo Linear Completo)
+      - [x] Crear `FormularioTareaModerno.tsx` (estructura base)
+      - [x] Integrar en `PanelConfiguracionTarea.tsx`
+      - [x] Header icons estilo Linear (Activity, BarChart2)
+      - [x] Auto-guardado al cerrar
+      - [x] **Selector Estado** adaptado a estilo pill (`SelectorEstadoPill`)
+      - [x] **Selector Proyecto** adaptado a estilo pill (`SelectorProyectoPill`)
+      - [x] **Repetición** adaptada a estilo pill moderno (`SelectorRepeticionPill`)
+15. ✅ **Fase 9.5** - Aplicar a Hábitos (Estilo Linear Completo)
+      - [x] Crear `FormularioHabitoModerno.tsx` (estructura base)
+      - [x] Integrar en `ModalHabito.tsx`
+      - [x] Header icons estilo Linear
+      - [x] Auto-guardado al cerrar
+      - [x] **Importancia** adaptada a estilo pill (`SelectorImportanciaPill`)
+      - [x] **Estado del día** adaptado a estilo pill (`SelectorEstadoHabitoPill`)
+      - [x] **Frecuencia** adaptada a estilo pill moderno (`SelectorFrecuenciaPill`)
+
+### 9.6 Estado de Proyectos (Nuevo) ✅
+- [x] Agregar selector de estado a proyectos (`SelectorEstadoProyectoPill`)
+- [x] Estilo pill inline como PropiedadesCompactas
+- [x] Integrar en FormularioProyectoModerno
 
 ---
 
@@ -251,6 +277,10 @@ Todos centralizados en `configuracionModerna.css`:
 
 <details>
 <summary>Mejoras menores</summary>
+
+**Chat/Mensajes:**
+- [ ] Compactar mensajes (menos padding)
+- [ ] Verificar historial de cambios en chat de proyectos
 
 **Hábitos:**
 - [ ] Animación de entrada/salida

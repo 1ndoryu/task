@@ -33,3 +33,5 @@ export type {DatosHeatmap, EstadisticasActividad, PeriodoActividad, FiltrosActiv
 export type {EstadoHabito, DiaHistorial, HistorialHabito, EstadisticasHabito, HistorialMultiple} from '../types/historialHabitos';
 export {useConfiguracionActividad, CONFIG_ACTIVIDAD_DEFECTO} from './useConfiguracionActividad';
 export type {ConfiguracionActividad, PeriodoActividad as PeriodoActividadConfig, FiltroTipoActividad, TamanoCeldaActividad} from './useConfiguracionActividad';
+export {useAutoguardado} from './useAutoguardado';
+export {usePanelChat} from './usePanelChat';

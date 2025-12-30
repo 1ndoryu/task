@@ -11,6 +11,21 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.9-beta',
+        fecha: '2025-12-29',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Selectores estilo pill para tareas: Estado, Proyecto, Repetición'},
+            {tipo: 'nuevo', descripcion: 'Selectores estilo pill para hábitos: Importancia, Estado, Frecuencia'},
+            {tipo: 'nuevo', descripcion: 'Selector de estado de proyecto: Activo, Pausado, Completado'},
+            {tipo: 'nuevo', descripcion: 'Componente FilaPropiedades reutilizable con etiqueta + pills'},
+            {tipo: 'nuevo', descripcion: 'Panel de repetición expandible con configuración avanzada'},
+            {tipo: 'nuevo', descripcion: 'Panel de frecuencia expandible para hábitos'},
+            {tipo: 'mejora', descripcion: 'Formularios modernos con layout estilo Linear'},
+            {tipo: 'mejora', descripcion: 'Consistencia visual en gaps y espaciados de propiedades'},
+            {tipo: 'arreglo', descripcion: 'Gap inconsistente en sección de adjuntos moderno'}
+        ]
+    },
+    {
         version: 'v1.0.7-beta',
         fecha: '2025-12-29',
         cambios: [

@@ -1181,3 +1181,162 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* 
+ * PILL OPCION - Boton quitar interno
+ * Para pills que pueden ser removidos (ej: repeticion)
+ */
+.pillOpcion__quitar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.pillOpcion__quitar:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* 
+ * SELECTOR REPETICION/FRECUENCIA PANEL
+ * Panel expandible para configurar repeticion o frecuencia
+ */
+.selectorRepeticionPanel {
+    min-width: 220px;
+    max-width: 280px;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraFuerte);
+    padding: var(--dashboard-espacioMd);
+}
+
+.selectorRepeticionPanel__titulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.selectorRepeticionPanel__tipos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.selectorRepeticionPanel__tipo {
+    padding: 4px 10px;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorRepeticionPanel__tipo:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorRepeticionPanel__tipo--activo {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoApagado);
+    color: var(--dashboard-textoActivo);
+}
+
+.selectorRepeticionPanel__config {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.selectorRepeticionPanel__label {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.selectorRepeticionPanel__numero {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    background: var(--dashboard-superposicionClara);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    padding: 2px;
+}
+
+.selectorRepeticionPanel__numero button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioXs);
+    font-size: 14px;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorRepeticionPanel__numero button:hover:not(:disabled) {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorRepeticionPanel__numero button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.selectorRepeticionPanel__numero span {
+    min-width: 24px;
+    text-align: center;
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * PROPIEDADES COMPACTAS EXTENDIDAS
+ * Fila de propiedades para tareas/habitos estilo Linear
+ */
+.propiedadesCompactasExtendidas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.propiedadesCompactasExtendidas__grupo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.propiedadesCompactasExtendidas__separador {
+    width: 1px;
+    height: 20px;
+    background: var(--dashboard-bordeSutil);
+    margin: 0 var(--dashboard-espacioXs);
+}
