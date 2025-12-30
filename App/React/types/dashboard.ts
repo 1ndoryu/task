@@ -191,6 +191,8 @@ export interface Tarea {
     propietarioNombre?: string;
     propietarioAvatar?: string;
     miRol?: RolCompartido;
+    /* Tags (Fase 9.7.3) */
+    tags?: string[];
 }
 
 /*
@@ -282,6 +284,8 @@ export interface DatosEdicionTarea {
     asignadoA?: number | null;
     asignadoANombre?: string;
     asignadoAAvatar?: string;
+
+    tags?: string[];
 }
 
 /*

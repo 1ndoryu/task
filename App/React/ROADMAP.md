@@ -287,14 +287,14 @@ Todos centralizados en `configuracionModerna.css`:
 - [x] Subtarea hereda proyecto del padre (Panel Ejecución)
 
 ### 9.7.3 Organización de Propiedades en Tareas
-- [ ] Dividir opciones en 3 FilaPropiedades con etiquetas descriptivas
+- [x] Dividir opciones en 3 FilaPropiedades con etiquetas descriptivas
   - Grupo 1: Estado, Prioridad, Urgencia, Fecha
   - Grupo 2: Proyecto, Responsable, Repetición
   - Grupo 3: Tags (nuevo)
-- [ ] Agregar sistema de Tags con estilo pill
-  - Input para agregar tags
-  - Tags como pills removibles
-  - Autocompletado de tags existentes
+- [x] Agregar sistema de Tags con estilo pill
+  - [x] Input para agregar tags
+  - [x] Tags como pills removibles
+  - [x] Autocompletado de tags existentes (Parcial: solo lista actual sin historial global por ahora)
 
 ### 9.7.4 Responsables vs Compartir (Conceptos Diferentes)
 **Responsable**: Usuario asignado a completar la tarea

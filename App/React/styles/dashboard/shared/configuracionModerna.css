@@ -134,7 +134,7 @@
     white-space: nowrap;
 }
 
-.pillOpcion:hover {
+.pillOpcion:hover:not(.pillOpcion--input) {
     background: var(--dashboard-superposicionClara);
     border-color: var(--dashboard-bordePrincipal);
 }
@@ -156,6 +156,50 @@
 .pillOpcion--disabled:hover {
     background: transparent;
     border-color: var(--dashboard-bordeSutil);
+}
+
+/* Icono que solo aparece al hover (para quitar) */
+.pillOpcion__hoverIcon {
+    display: none;
+    margin-left: 2px;
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.pillOpcion:hover .pillOpcion__hoverIcon {
+    display: flex;
+}
+
+.pillOpcion:hover .pillOpcion__hoverIcon:hover {
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Pill que actúa como input */
+.pillOpcion.pillOpcion--input {
+    cursor: text;
+    padding: 0 10px;
+    height: 32px;
+    background: transparent;
+    /* Maintain border consistent with .pillOpcion */
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.pillOpcion.pillOpcion--input:hover {
+    background: transparent;
+    cursor: text;
+    /* Do NOT change border color on hover for input mode to keep it clean */
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.pillOpcion.pillOpcion--input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    padding: 0;
+    margin: 0;
+    width: 100px;
 }
 
 /* 

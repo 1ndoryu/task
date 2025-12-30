@@ -22,7 +22,7 @@ export interface PanelConfiguracionTareaProps {
     tarea?: Tarea;
     estaAbierto: boolean;
     onCerrar: () => void;
-    onGuardar: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
+    onGuardar: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => void;
     participantes?: Participante[];
     proyectos?: Proyecto[];
     onCambiarProyecto?: (proyectoId: number | undefined) => void;
@@ -43,6 +43,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
     const [tieneRepeticion, setTieneRepeticion] = useState<boolean>(!!tarea?.configuracion?.repeticion);
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>({tipo: 'diario'});
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>(tarea?.configuracion?.adjuntos || []);
+    const [tags, setTags] = useState<string[]>(tarea?.tags || []);
 
     /* Estado para asignacion */
     const [asignadoA, setAsignadoA] = useState<number | null>(tarea?.asignadoA || null);
@@ -74,7 +75,8 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         tieneRepeticion,
         frecuencia,
         adjuntos,
-        asignadoA
+        asignadoA,
+        tags
     };
 
     /* Guardar tarea */
@@ -125,22 +127,29 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             asignadoAAvatar
         };
 
-        onGuardar(configuracion, prioridad, texto.trim(), asignacion, urgencia);
-    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, onGuardar]);
+        onGuardar(configuracion, prioridad, texto.trim(), asignacion, urgencia, tags);
+    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, onGuardar]);
 
     /* Hook de autoguardado */
     const {guardarEstadoInicial, manejarCerrarConGuardado} = useAutoguardado({
         camposActuales,
         onGuardar: () => {
             manejarGuardar();
-            onCerrar();
+            /* No cerrarmos aquí para permitir auto-guardado mientras se edita */
         },
         onCerrar,
         validar: () => texto.trim().length > 0
     });
 
+    /* Ref para evitar loops infinitos en useEffect */
+    const lastTareaIdRef = useRef<number | undefined>(undefined);
+
     /* Sincronizar estado cuando cambia la tarea */
     useEffect(() => {
+        /* Si el ID es el mismo que ya procesamos, ignorar (evita loops) */
+        if (tarea?.id === lastTareaIdRef.current) return;
+        lastTareaIdRef.current = tarea?.id;
+
         if (tarea) {
             setTexto(tarea.texto);
             setDescripcion(tarea.configuracion?.descripcion || '');
@@ -171,6 +180,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             setAsignadoAAvatar(tarea.asignadoAAvatar || '');
             setProyectoIdLocal(tarea.proyectoId);
             setCompletadoLocal(tarea.completado);
+            setTags(tarea.tags || []);
 
             /* Guardar estado inicial para detectar cambios */
             guardarEstadoInicial({
@@ -182,7 +192,8 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                 tieneRepeticion: !!tarea.configuracion?.repeticion,
                 frecuencia: nuevaFrecuencia,
                 adjuntos: tarea.configuracion?.adjuntos || [],
-                asignadoA: tarea.asignadoA || null
+                asignadoA: tarea.asignadoA || null,
+                tags: tarea.tags || []
             });
         } else {
             /* Resetear si no hay tarea (modo creacion) */
@@ -197,10 +208,11 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             setAsignadoA(null);
             setAsignadoANombre('');
             setAsignadoAAvatar('');
+            setTags([]);
 
             /* No llamamos a guardarEstadoInicial aqui porque es modo creacion */
         }
-    }, [tarea?.id, estaAbierto, guardarEstadoInicial]);
+    }, [tarea?.id]);
 
     /* Manejador de cambio de asignacion */
     const manejarAsignacion = useCallback((usuarioId: number | null, nombre: string, avatar: string) => {
@@ -264,7 +276,37 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                         {/* Columna Izquierda: Formulario */}
                         <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
                             <div className="panelConfiguracionColumnaScroll">
-                                <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={completadoLocal} onCompletadoChange={onToggleCompletado ? manejarCambioCompletado : undefined} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} proyectoId={proyectoIdLocal} proyectos={proyectos} onProyectoChange={onCambiarProyecto ? manejarCambioProyecto : undefined} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} participantes={participantes} asignadoA={asignadoA} asignadoANombre={asignadoANombre} asignadoAAvatar={asignadoAAvatar} onAsignacionChange={participantes.length > 0 ? manejarAsignacion : undefined} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} modoEdicion={true} />
+                                <FormularioTareaModerno
+                                    texto={texto}
+                                    onTextoChange={setTexto}
+                                    descripcion={descripcion}
+                                    onDescripcionChange={setDescripcion}
+                                    completado={completadoLocal}
+                                    onCompletadoChange={onToggleCompletado ? manejarCambioCompletado : undefined}
+                                    prioridad={prioridad}
+                                    onPrioridadChange={setPrioridad}
+                                    urgencia={urgencia}
+                                    onUrgenciaChange={setUrgencia}
+                                    fechaLimite={fechaMaxima}
+                                    onFechaLimiteChange={setFechaMaxima}
+                                    proyectoId={proyectoIdLocal}
+                                    proyectos={proyectos}
+                                    onProyectoChange={onCambiarProyecto ? manejarCambioProyecto : undefined}
+                                    tieneRepeticion={tieneRepeticion}
+                                    onTieneRepeticionChange={setTieneRepeticion}
+                                    frecuencia={frecuencia}
+                                    onFrecuenciaChange={setFrecuencia}
+                                    participantes={participantes}
+                                    asignadoA={asignadoA}
+                                    asignadoANombre={asignadoANombre}
+                                    asignadoAAvatar={asignadoAAvatar}
+                                    onAsignacionChange={participantes.length > 0 ? manejarAsignacion : undefined}
+                                    adjuntos={adjuntos}
+                                    onAdjuntosChange={setAdjuntos}
+                                    tags={tags}
+                                    onTagsChange={setTags}
+                                    modoEdicion={true}
+                                />
                             </div>
                             {/* Sin botones de acciones - auto-guardado */}
                         </div>
@@ -281,7 +323,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                 /* Modo creación simple */
                 <>
                     <div id="panel-tarea-contenido" className="formularioHabito">
-                        <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={false} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} modoEdicion={false} asignadoA={null} asignadoANombre="" asignadoAAvatar="" />
+                        <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={false} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} tags={tags} onTagsChange={setTags} modoEdicion={false} asignadoA={null} asignadoANombre="" asignadoAAvatar="" />
                     </div>
                     <AccionesFormulario onCancelar={onCerrar} onGuardar={manejarGuardar} textoGuardar="Crear tarea" />
                 </>

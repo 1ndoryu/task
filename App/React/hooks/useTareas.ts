@@ -227,7 +227,8 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                     urgencia: datos.urgencia ?? undefined,
                     asignadoA: datos.asignadoA ?? undefined,
                     asignadoANombre: datos.asignadoANombre,
-                    asignadoAAvatar: datos.asignadoAAvatar
+                    asignadoAAvatar: datos.asignadoAAvatar,
+                    tags: datos.tags
                 };
 
                 /* Insertar y recalcular orden de todas las tareas */
@@ -319,12 +320,17 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                      * Crear objeto base excluyendo campos que pueden ser null o no pertenecen a Tarea
                      * Para prioridad/urgencia/asignadoA, null significa "quitar"
                      */
-                    const {prioridad: nuevaPrioridad, urgencia: nuevaUrgencia, configuracion: nuevaConfiguracion, asignadoA: nuevoAsignadoA, asignadoANombre, asignadoAAvatar, insertarDespuesDe: _, ...restoDatos} = datos;
+                    const {prioridad: nuevaPrioridad, urgencia: nuevaUrgencia, configuracion: nuevaConfiguracion, asignadoA: nuevoAsignadoA, asignadoANombre, asignadoAAvatar, tags: nuevosTags, insertarDespuesDe: _, ...restoDatos} = datos;
 
                     const tareaActualizada: Tarea = {
                         ...t,
                         ...restoDatos
                     };
+
+                    /* Si tags vienen en datos, actualizar */
+                    if (nuevosTags !== undefined) {
+                        tareaActualizada.tags = nuevosTags;
+                    }
 
                     /* Si prioridad es null, eliminar; si tiene valor, asignar */
                     if (nuevaPrioridad === null) {

@@ -33,11 +33,12 @@ interface PropiedadesCompactasProps {
     onUrgenciaChange: (valor: NivelUrgencia | null) => void;
     fechaLimite: string;
     onFechaLimiteChange: (valor: string) => void;
+    mostrarEtiqueta?: boolean;
 }
 
 type MenuActivo = 'prioridad' | 'urgencia' | 'fecha' | null;
 
-export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange}: PropiedadesCompactasProps): JSX.Element {
+export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, mostrarEtiqueta = true}: PropiedadesCompactasProps): JSX.Element {
     const [menuActivo, setMenuActivo] = useState<MenuActivo>(null);
     const [posicionMenu, setPosicionMenu] = useState({x: 0, y: 0});
 
@@ -83,7 +84,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
 
     return (
         <div className="propiedadesCompactas">
-            <span className="propiedadesCompactas__etiqueta">Propiedades</span>
+            {mostrarEtiqueta && <span className="propiedadesCompactas__etiqueta">Propiedades</span>}
             <div className="propiedadesCompactas__contenido">
                 {/* Prioridad */}
                 <div className="propiedadesCompactas__item">

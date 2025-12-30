@@ -54,3 +54,4 @@ export * from './SelectorImportanciaPill';
 export * from './SelectorFrecuenciaPill';
 export * from './SelectorEstadoProyectoPill';
 export * from './FilaPropiedades';
+export * from './SelectorTags';

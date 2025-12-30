@@ -265,9 +265,9 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
      * Guardar configuración de tarea (incluye prioridad y urgencia)
      */
     const guardarConfiguracion = useCallback(
-        (configuracion: TareaConfiguracion, prioridad?: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => {
+        (configuracion: TareaConfiguracion, prioridad?: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => {
             if (tareaConfigurando && onEditarTarea) {
-                /* Actualizamos la tarea con la nueva configuración, prioridad, urgencia, texto y asignación */
+                /* Actualizamos la tarea con la nueva configuración, prioridad, urgencia, texto, asignación y tags */
                 onEditarTarea(tareaConfigurando.id, {
                     configuracion,
                     prioridad: prioridad === undefined ? tareaConfigurando.prioridad : prioridad,
@@ -277,10 +277,12 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                         asignadoA: asignacion.asignadoA,
                         asignadoANombre: asignacion.asignadoANombre,
                         asignadoAAvatar: asignacion.asignadoAAvatar
-                    })
+                    }),
+                    ...(tags && {tags})
                 });
             }
-            setTareaConfigurando(null);
+            /* Nota: No cerramos el panel (tareaConfigurando=null) aquí porque esto puede ser un auto-guardado.
+             * El cierre se maneja explícitamente vía onCerrar */
         },
         [tareaConfigurando, onEditarTarea]
     );

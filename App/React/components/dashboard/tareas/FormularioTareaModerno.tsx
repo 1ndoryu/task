@@ -8,10 +8,9 @@
  */
 
 import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito} from '../../../types/dashboard';
-import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades} from '../../shared';
+import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades, SelectorTags} from '../../shared';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {SelectorAsignado} from '../../compartidos/SelectorAsignado';
-import {SeccionPanel} from '../../shared';
 
 interface FormularioTareaModernoProps {
     /* Campos principales */
@@ -47,12 +46,15 @@ interface FormularioTareaModernoProps {
     /* Adjuntos */
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
+    /* Etiquetas (Fase 9.7.3) */
+    tags?: string[];
+    onTagsChange?: (tags: string[]) => void;
     /* Modo */
     modoEdicion?: boolean;
     errorTexto?: string;
 }
 
-export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, adjuntos = [], onAdjuntosChange, modoEdicion = false, errorTexto}: FormularioTareaModernoProps): JSX.Element {
+export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto}: FormularioTareaModernoProps): JSX.Element {
     /* Mostrar selector de proyecto solo si hay proyectos y callback */
     const mostrarProyecto = proyectos.length > 0 && onProyectoChange;
 
@@ -75,28 +77,37 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
             {/* Descripcion */}
             <CampoSubtituloLimpio id="tarea-descripcion" valor={descripcion} onChange={onDescripcionChange} placeholder="Notas adicionales sobre esta tarea..." />
 
-            {/* Propiedades compactas (Prioridad, Urgencia, Fecha) */}
-            <PropiedadesCompactas prioridad={prioridad || 'media'} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} />
+            {/* Grupo 1: Estado (Standalone if needed, or row) */}
+            {modoEdicion && onCompletadoChange && (
+                <FilaPropiedades etiqueta="Estado">
+                    <SelectorEstadoPill completada={completado} onChange={onCompletadoChange} />
+                </FilaPropiedades>
+            )}
 
-            {/* Opciones: Estado, Proyecto, Repeticion */}
-            {mostrarFilaOpciones && (
-                <FilaPropiedades etiqueta="Opciones">
-                    {/* Estado - Solo en modo edicion */}
-                    {modoEdicion && onCompletadoChange && <SelectorEstadoPill completada={completado} onChange={onCompletadoChange} />}
+            {/* Grupo 2: Propiedades (Prioridad, Urgencia, Fecha) */}
+            <FilaPropiedades etiqueta="Propiedades">
+                <PropiedadesCompactas prioridad={prioridad || 'media'} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} mostrarEtiqueta={false} />
+            </FilaPropiedades>
 
-                    {/* Proyecto - Solo si hay proyectos disponibles */}
+            {/* Grupo 2: Ubicacion y Asignacion */}
+            {(mostrarFilaOpciones || mostrarAsignacion) && (
+                <FilaPropiedades etiqueta="Ubicación">
+                    {/* Proyecto */}
                     {mostrarProyecto && <SelectorProyectoPill proyectos={proyectos} proyectoActualId={proyectoId} onChange={onProyectoChange} />}
+
+                    {/* Asignacion */}
+                    {mostrarAsignacion && <SelectorAsignado participantes={participantes} asignadoActual={asignadoA} onAsignar={manejarAsignacion} />}
 
                     {/* Repeticion */}
                     <SelectorRepeticionPill tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={onTieneRepeticionChange} frecuencia={frecuencia} onFrecuenciaChange={onFrecuenciaChange} />
                 </FilaPropiedades>
             )}
 
-            {/* Asignacion (solo si hay participantes) */}
-            {mostrarAsignacion && (
-                <SeccionPanel titulo="Asignar a">
-                    <SelectorAsignado participantes={participantes} asignadoActual={asignadoA} onAsignar={manejarAsignacion} />
-                </SeccionPanel>
+            {/* Grupo 3: Etiquetas (Tags) */}
+            {onTagsChange && (
+                <FilaPropiedades etiqueta="Etiquetas">
+                    <SelectorTags tags={tags} onTagsChange={onTagsChange} />
+                </FilaPropiedades>
             )}
 
             {/* Adjuntos */}
