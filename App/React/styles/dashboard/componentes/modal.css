@@ -124,7 +124,7 @@
  * Cuando el panel de chat está oculto, modal más amplio para propiedades Linear
  */
 .modalContenedor--expandido:has(.panelConfiguracionDosColumnas--sinChat) {
-    max-width: 550px;
+    max-width: 450px;
 }
 
 /* 

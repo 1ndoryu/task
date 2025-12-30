@@ -52,11 +52,12 @@ function sonIguales(a: unknown, b: unknown): boolean {
     /* Primitivos */
     if (a === b) return true;
 
-    /* Null/undefined */
-    if (a === null || b === null) return a === b;
-    if (a === undefined || b === undefined) return a === b;
+    /* Normalizar null/undefined para comparación */
+    const valorA = a === undefined ? null : a;
+    const valorB = b === undefined ? null : b;
+    if (valorA === null && valorB === null) return true;
 
-    /* Diferentes tipos */
+    /* Diferentes tipos (si uno es null y el otro no) */
     if (typeof a !== typeof b) return false;
 
     /* Arrays */

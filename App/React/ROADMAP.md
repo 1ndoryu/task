@@ -285,6 +285,7 @@ Todos centralizados en `configuracionModerna.css`:
   - Detectar cuando no hubo cambios para no guardar innecesariamente
   - Evitar "cambio prioridad: sin prioridad → sin prioridad"
 - [x] Subtarea hereda proyecto del padre (Panel Ejecución)
+- [x] BUG CRÍTICO: El modal de configuración de tareas ya no se cierra después de editar. Solo muestra "Tarea editada" y permanece abierto. Introducido en la corrección de 9.7.2 Bugs de Lógica (FIXED)
 
 ### 9.7.3 Organización de Propiedades en Tareas
 - [x] Dividir opciones en 3 FilaPropiedades con etiquetas descriptivas

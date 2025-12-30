@@ -14,7 +14,7 @@ import type {EstadoFiltro} from './useFiltroTareas';
 interface UseAccionesDashboardProps {
     filtroActual: EstadoFiltro;
     notas: string;
-    crearTarea: (datos: {texto: string; prioridad: NivelPrioridad | null; urgencia?: NivelUrgencia | null; configuracion: TareaConfiguracion; proyectoId?: number; completado: boolean}) => void;
+    crearTarea: (datos: {texto: string; prioridad: NivelPrioridad | null; urgencia?: NivelUrgencia | null; configuracion: TareaConfiguracion; proyectoId?: number; completado: boolean; tags?: string[]}) => void;
     editarTarea: (id: number, datos: any) => void;
     actualizarNotas: (notas: string) => void;
     crearProyecto: (datos: any) => void;
@@ -36,10 +36,10 @@ interface UseAccionesDashboardProps {
 interface UseAccionesDashboardReturn {
     manejarCambioFiltro: (valor: string) => void;
     manejarLimpiarScratchpad: () => Promise<void>;
-    manejarCrearNuevaTareaGlobal: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, proyectoIdOverride?: number) => void;
+    manejarCrearNuevaTareaGlobal: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[], proyectoIdOverride?: number) => void;
     manejarGuardarNuevoProyecto: (datos: any) => void;
     manejarGuardarEdicionProyecto: (datos: any) => void;
-    manejarGuardarEdicionTareaGlobal: (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => void;
+    manejarGuardarEdicionTareaGlobal: (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => void;
     manejarClickNotificaciones: (evento: React.MouseEvent) => void;
     manejarClickNotificacionIndividual: (notificacion: any) => void;
     crearNotificacionPrueba: () => Promise<boolean>;
@@ -77,17 +77,17 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
     }, [notas, confirmar, actualizarNotas]);
 
     const manejarCrearNuevaTareaGlobal = useCallback(
-        (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, _asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, proyectoIdOverride?: number) => {
+        (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, _asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[], proyectoIdOverride?: number) => {
             if (!texto) return;
             const proyectoId = proyectoIdOverride !== undefined ? proyectoIdOverride : filtroActual.tipo === 'proyecto' ? filtroActual.proyectoId : undefined;
-            crearTarea({texto, prioridad, urgencia, configuracion, proyectoId, completado: false});
+            crearTarea({texto, prioridad, urgencia, configuracion, proyectoId, completado: false, tags});
             cerrarModalNuevaTarea();
         },
         [filtroActual, crearTarea, cerrarModalNuevaTarea]
     );
 
     const manejarGuardarEdicionTareaGlobal = useCallback(
-        (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null) => {
+        (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => {
             if (texto !== undefined && !texto) return; /* Si se pasa texto vacio */
 
             const datosEdicion: any = {
@@ -97,6 +97,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
             if (texto !== undefined) datosEdicion.texto = texto;
             if (prioridad !== undefined) datosEdicion.prioridad = prioridad;
             if (urgencia !== undefined) datosEdicion.urgencia = urgencia;
+            if (tags !== undefined) datosEdicion.tags = tags;
             if (asignacion) {
                 datosEdicion.asignadoA = asignacion.asignadoA;
                 datosEdicion.asignadoANombre = asignacion.asignadoANombre;

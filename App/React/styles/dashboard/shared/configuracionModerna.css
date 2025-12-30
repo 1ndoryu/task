@@ -176,17 +176,16 @@
 /* Pill que actúa como input */
 .pillOpcion.pillOpcion--input {
     cursor: text;
-    padding: 0 10px;
-    height: 32px;
+    padding: 4px 10px;
+    /* Remove min-height to avoid forcing height increase */
+    /* Height will be determined by content (icon + input), same as button */
     background: transparent;
-    /* Maintain border consistent with .pillOpcion */
     border: 1px solid var(--dashboard-bordeSutil);
 }
 
 .pillOpcion.pillOpcion--input:hover {
     background: transparent;
     cursor: text;
-    /* Do NOT change border color on hover for input mode to keep it clean */
     border-color: var(--dashboard-bordeSutil);
 }
 
@@ -197,9 +196,12 @@
     color: var(--dashboard-textoNormal);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
+    /* Enforce line-height to match text */
+    line-height: inherit;
     padding: 0;
     margin: 0;
-    width: 100px;
+    /* Reduce width to minimize jump (approx length of 'Etiqueta') */
+    width: 70px;
 }
 
 /* 

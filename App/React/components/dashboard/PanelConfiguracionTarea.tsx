@@ -8,7 +8,7 @@
  * - PestanasModal para las pestañas responsive
  */
 
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback, useRef} from 'react';
 import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto} from '../../types/dashboard';
 import {AccionesFormulario, Modal, PestanasModal} from '../shared';
 import type {PestanaId} from '../shared';
@@ -128,15 +128,19 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         };
 
         onGuardar(configuracion, prioridad, texto.trim(), asignacion, urgencia, tags);
-    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, onGuardar]);
+
+        /*
+         * Forzamos el cierre del panel después de guardar.
+         * En edición estilo Linear, el guardado final ocurre al cerrar.
+         * Si es creación, el botón de guardado también debe cerrar el panel.
+         */
+        onCerrar();
+    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, onGuardar, onCerrar]);
 
     /* Hook de autoguardado */
     const {guardarEstadoInicial, manejarCerrarConGuardado} = useAutoguardado({
         camposActuales,
-        onGuardar: () => {
-            manejarGuardar();
-            /* No cerrarmos aquí para permitir auto-guardado mientras se edita */
-        },
+        onGuardar: manejarGuardar,
         onCerrar,
         validar: () => texto.trim().length > 0
     });
