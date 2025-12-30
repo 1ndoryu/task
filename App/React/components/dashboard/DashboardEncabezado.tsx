@@ -5,7 +5,7 @@
  */
 
 import {useState, useRef} from 'react';
-import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
+import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../shared';
 import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
@@ -41,6 +41,7 @@ interface DashboardEncabezadoProps {
     onClickEquipos?: () => void;
     onClickNotificaciones?: (evento: React.MouseEvent) => void;
     onClickExperimentos?: () => void;
+    onClickTemas?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
     /* Props para buscador global */
@@ -59,7 +60,7 @@ interface MenuState {
     y: number;
 }
 
-export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido}: DashboardEncabezadoProps): JSX.Element {
+export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
@@ -71,7 +72,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     const mostrarBadgePlanEnHeader = suscripcion && !esPremiumActivo;
 
     /* Opciones del menu contextual del usuario */
-    const opcionesMenuUsuario = [{id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />}, {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />}, ...(esPremiumActivo ? [{id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />}] : []), {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true}, {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />}, {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true}, {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}];
+    const opcionesMenuUsuario = [{id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />}, {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />}, {id: 'temas', etiqueta: 'Temas', icono: <Palette size={12} />}, ...(esPremiumActivo ? [{id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />}] : []), {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true}, {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />}, {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true}, {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}];
 
     /* Opciones del menu de navegación de página */
     const opcionesMenuPagina = [
@@ -137,6 +138,9 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 break;
             case 'plan':
                 onClickPlan?.();
+                break;
+            case 'temas':
+                onClickTemas?.();
                 break;
             case 'exportar':
                 onExportarDatos?.();

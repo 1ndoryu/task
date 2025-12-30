@@ -18,7 +18,7 @@ import {ModalConfiguracionHabitos} from './ModalConfiguracionHabitos';
 import {ModalConfiguracionScratchpad} from './ModalConfiguracionScratchpad';
 import {ModalConfiguracionActividad} from './ModalConfiguracionActividad';
 
-import {ToastDeshacer, ModalUpgrade, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones} from '../shared';
+import {ToastDeshacer, ModalUpgrade, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones, ModalTemas} from '../shared';
 import {PanelAdministracion} from '../admin';
 import {ModalEquipos} from '../equipos';
 import {ModalNotificaciones} from '../notificaciones';
@@ -34,7 +34,7 @@ interface DashboardModalesProps {
 }
 
 export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
-    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, acciones} = ctx;
+    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, acciones, temas} = ctx;
 
     const accionesExperimentos: AccionExperimento[] = [
         {
@@ -148,6 +148,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modal Creación Rápida */}
             {modales.modalCreacionRapida && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
+
+            {/* Modal de Temas */}
+            <ModalTemas estaAbierto={modales.modalTemasAbierto} onCerrar={modales.cerrarModalTemas} temaActual={temas.tema} onCambiarTema={temas.cambiarTema} />
         </>
     );
 }

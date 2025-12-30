@@ -55,3 +55,4 @@ export * from './SelectorFrecuenciaPill';
 export * from './SelectorEstadoProyectoPill';
 export * from './FilaPropiedades';
 export * from './SelectorTags';
+export * from './ModalTemas';

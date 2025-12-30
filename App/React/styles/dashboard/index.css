@@ -96,3 +96,6 @@
 
 /* Landing Page */
 @import './componentes/Landing/landing.css';
+
+/* Sistema de Temas */
+@import './modalTemas.css';

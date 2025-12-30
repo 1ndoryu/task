@@ -398,6 +398,32 @@ Todos centralizados en `configuracionModerna.css`:
 
 - [x] **Input comentarios fijo cubre contenido**: El input de comentario fijo en la parte inferior (cuando el chat está oculto) está cubriendo parte del contenido scrolleable. Se necesita agregar padding-bottom al contenedor scroll para compensar la altura del input fijo.
 
+### 9.7.9 Sistema de Temas Visuales
+
+**Objetivo:** Permitir al usuario cambiar el tema visual del dashboard.
+
+#### Implementación
+
+- [ ] **Menú de usuario**: Agregar opción "Temas" al menú contextual del usuario
+- [ ] **Modal de temas**: Crear modal con lista de temas disponibles
+- [ ] **Persistencia**: Guardar preferencia de tema en localStorage
+
+#### Temas Disponibles
+
+| Tema           | Descripción                                         |
+| -------------- | --------------------------------------------------- |
+| **Original**   | Tema actual (dark mode estilo terminal/minimalista) |
+| **Dark Mode**  | Dark mode genérico más estándar                     |
+| **Light Mode** | Tema claro para preferencias de día                 |
+
+#### Tareas de Implementación
+
+- [ ] Crear `ModalTemas.tsx` con selector visual de temas
+- [ ] Modificar `variables.css` para soportar múltiples temas (CSS custom properties)
+- [ ] Agregar opción al menú contextual del usuario
+- [ ] Crear hook `useTema` para gestionar el estado del tema
+- [ ] Definir paletas de colores para cada tema
+
 ---
 
 ### Baja Prioridad

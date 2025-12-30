@@ -35,3 +35,5 @@ export {useConfiguracionActividad, CONFIG_ACTIVIDAD_DEFECTO} from './useConfigur
 export type {ConfiguracionActividad, PeriodoActividad as PeriodoActividadConfig, FiltroTipoActividad, TamanoCeldaActividad} from './useConfiguracionActividad';
 export {useAutoguardado} from './useAutoguardado';
 export {usePanelChat} from './usePanelChat';
+export {useTema, TEMAS_DISPONIBLES} from './useTema';
+export type {TipoTema, InfoTema} from './useTema';

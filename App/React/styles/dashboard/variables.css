@@ -138,3 +138,131 @@
     --dashboard-panelHeaderFondo: var(--dashboard-fondoSecundario);
     --dashboard-panelHeaderBorde: var(--dashboard-bordePrincipal);
 }
+
+/* 1e1e1e
+ * TEMA OSCURO (Dark Mode Estándar)
+ * Paleta monocromática en grises 
+ */
+[data-theme='oscuro'] {
+    /* Colores de fondo */
+    --dashboard-fondoPrincipal: #070707;
+    --dashboard-fondoSecundario: #0c0c0c;
+    --dashboard-fondoHover: #1e1e1e;
+
+    /* Colores de borde */
+    --dashboard-bordePrincipal: #1a1a1a;
+    --dashboard-bordeSutil: #222;
+    --dashboard-fondoHover: #0c0c0c;
+
+    /* Colores de texto */
+    --dashboard-textoActivo: #f5f5f5;
+    --dashboard-textoNormal: #e0e0e0;
+    --dashboard-textoSecundario: #a0a0a0;
+    --dashboard-textoApagado: #808080;
+    --dashboard-textoMuyApagado: #606060;
+    --dashboard-textoIndice: #505050;
+    --dashboard-textoPlaceholder: #404040;
+
+    /* Barra de progreso */
+    --dashboard-barraFondo: #2a2a2a;
+    --dashboard-barraNormal: #555555;
+
+    /* Scrollbar */
+    --dashboard-scrollbarThumb: rgba(255, 255, 255, 0.2);
+    --dashboard-scrollbarThumbHover: rgba(255, 255, 255, 0.35);
+
+    /* Superposiciones */
+    --dashboard-superposicionClara: rgba(255, 255, 255, 0.03);
+    --dashboard-superposicionMuyClara: rgba(255, 255, 255, 0.01);
+    --dashboard-superposicionSutil: rgba(255, 255, 255, 0.06);
+    --dashboard-superposicionMedia: rgba(255, 255, 255, 0.1);
+    --dashboard-superposicioMedioOscuro: rgba(0, 0, 0, 0.3);
+    --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.6);
+
+    /* Radios de borde (más suaves) */
+    --dashboard-radioSm: 4px;
+    --dashboard-radioMd: 6px;
+    --dashboard-radioLg: 8px;
+}
+
+/* 
+ * TEMA CLARO (Light Mode)
+ * Para preferencias de día 
+ */
+[data-theme='claro'] {
+    /* Colores de fondo */
+    --dashboard-fondoPrincipal: #f8f9fa;
+    --dashboard-fondoSecundario: #ffffff;
+    --dashboard-fondoHover: #e9ecef;
+
+    /* Colores de borde */
+    --dashboard-bordePrincipal: #dee2e6;
+    --dashboard-bordeSutil: #ced4da;
+    --dashboard-bordePunteado: #dee2e6;
+
+    /* Colores de texto */
+    --dashboard-textoActivo: #1a1a1a;
+    --dashboard-textoNormal: #343a40;
+    --dashboard-textoSecundario: #6c757d;
+    --dashboard-textoApagado: #868e96;
+    --dashboard-textoMuyApagado: #adb5bd;
+    --dashboard-textoIndice: #ced4da;
+    --dashboard-textoPlaceholder: #dee2e6;
+
+    /* Colores de estado (más vibrantes para contraste en fondo claro) */
+    --dashboard-estadoAlta: #dc3545;
+    --dashboard-estadoAltaFondo: rgba(220, 53, 69, 0.1);
+    --dashboard-estadoAltaBorde: rgba(220, 53, 69, 0.3);
+
+    --dashboard-estadoMedia: #fd7e14;
+    --dashboard-estadoMediaFondo: rgba(253, 126, 20, 0.1);
+    --dashboard-estadoMediaBorde: rgba(253, 126, 20, 0.3);
+
+    --dashboard-estadoBaja: #6c757d;
+    --dashboard-estadoBajaBorde: #adb5bd;
+
+    --dashboard-estadoExito: #198754;
+    --dashboard-estadoExitoFondo: rgba(25, 135, 84, 0.1);
+    --dashboard-estadoExitoBorde: rgba(25, 135, 84, 0.3);
+
+    --dashboard-estadoInfo: #0d6efd;
+    --dashboard-estadoInfoFondo: rgba(13, 110, 253, 0.1);
+    --dashboard-estadoInfoBorde: rgba(13, 110, 253, 0.3);
+
+    --dashboard-estadoAltaTexto: #dc3545;
+    --dashboard-estadoMediaTexto: #fd7e14;
+
+    /* Barra de progreso */
+    --dashboard-barraFondo: #e9ecef;
+    --dashboard-barraNormal: #adb5bd;
+    --dashboard-barraUrgente: #dc3545;
+
+    /* Botón primario (invertido para tema claro) */
+    --dashboard-botonPrimarioFondo: #1a1a1a;
+    --dashboard-botonPrimarioTexto: #ffffff;
+    --dashboard-botonPrimarioHover: #333333;
+    --dashboard-botonPrimarioSombra: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    /* Sombras (más sutiles) */
+    --dashboard-sombraFuerte: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --dashboard-sombraMedia: 0 4px 6px rgba(0, 0, 0, 0.08);
+    --dashboard-sombraElevada: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --dashboard-sombraSutil: 0 20px 50px rgba(0, 0, 0, 0.08);
+
+    /* Superposiciones */
+    --dashboard-superposicionClara: rgba(0, 0, 0, 0.03);
+    --dashboard-superposicionMuyClara: rgba(0, 0, 0, 0.01);
+    --dashboard-superposicionSutil: rgba(0, 0, 0, 0.06);
+    --dashboard-superposicionMedia: rgba(0, 0, 0, 0.1);
+    --dashboard-superposicioMedioOscuro: rgba(0, 0, 0, 0.15);
+    --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.5);
+
+    /* Scrollbar */
+    --dashboard-scrollbarThumb: rgba(0, 0, 0, 0.15);
+    --dashboard-scrollbarThumbHover: rgba(0, 0, 0, 0.25);
+
+    /* Radios de borde (más suaves) */
+    --dashboard-radioSm: 4px;
+    --dashboard-radioMd: 6px;
+    --dashboard-radioLg: 8px;
+}

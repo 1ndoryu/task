@@ -21,9 +21,7 @@
 
 .modalContenedor {
     width: 100%;
-    max-width: 420px;
-    height: 95%;
-    /* max-height: calc(100vh - -10rem); */
+    max-height: calc(100vh - -10rem);
     display: flex;
     flex-direction: column;
     background-color: var(--dashboard-fondoSecundario);

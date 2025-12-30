@@ -1,0 +1,64 @@
+/*
+ * MODAL DE TEMAS
+ * Estilos minimalistas para el selector de temas
+ */
+
+/* 
+ * Contenedor del modal de temas 
+ */
+.modalContenedor--temas {
+    max-width: 280px;
+}
+
+/* 
+ * Selector de temas 
+ */
+.selectorTemas {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* 
+ * Opción de tema 
+ */
+.selectorTemas__opcion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: background var(--dashboard-transicionRapida);
+    text-align: left;
+    width: 100%;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.selectorTemas__opcion:hover {
+    background: var(--dashboard-superposicionSutil);
+}
+
+.selectorTemas__opcion--activa {
+    background: var(--dashboard-superposicionClara);
+}
+
+.selectorTemas__opcion--activa:hover {
+    background: var(--dashboard-superposicionSutil);
+}
+
+.selectorTemas__nombre {
+    font-weight: 400;
+}
+
+.selectorTemas__opcion--activa .selectorTemas__nombre {
+    color: var(--dashboard-textoActivo);
+}
+
+.selectorTemas__check {
+    color: var(--dashboard-estadoExito);
+    flex-shrink: 0;
+}

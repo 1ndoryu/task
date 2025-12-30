@@ -26,6 +26,7 @@ import {useOpcionesDashboard} from './useOpcionesDashboard';
 import {useAccionesDashboard} from './useAccionesDashboard';
 import {useHabitosComoTareas} from './useHabitosComoTareas';
 import {useHabitosStore} from '../stores/habitosStore';
+import {useTema} from './useTema';
 import type {Tarea} from '../types/dashboard';
 
 export function useDashboardCompleto() {
@@ -47,6 +48,7 @@ export function useDashboardCompleto() {
     const configProyectos = useConfiguracionProyectos();
     const configScratchpad = useConfiguracionScratchpad();
     const configActividad = useConfiguracionActividad();
+    const temas = useTema();
 
     /* Hook para convertir hábitos en tareas virtuales */
     const habitosComoTareas = useHabitosComoTareas({
@@ -155,7 +157,8 @@ export function useDashboardCompleto() {
         arrastre,
         opciones,
         acciones,
-        valorFiltroActual
+        valorFiltroActual,
+        temas
     };
 }
 
