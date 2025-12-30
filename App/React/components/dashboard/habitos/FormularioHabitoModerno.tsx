@@ -4,11 +4,12 @@
  * Usado dentro de ModalHabito para la entrada de datos
  *
  * Fase 9.5: Layout moderno con titulo limpio, propiedades compactas
+ * Fase 9.7.7.4: Estandarizado con FilaPropiedades
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, etc.)
  */
 
 import type {NivelImportancia, FrecuenciaHabito, Habito} from '../../../types/dashboard';
-import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill} from '../../shared';
+import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 
@@ -43,7 +44,7 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
         <div id="formulario-habito-moderno" className="formularioProyectoModerno">
             {/* Icono del habito */}
             {onIconoChange && (
-                <div style={{marginBottom: 'var(--dashboard-espacioXs)'}}>
+                <div className="formularioProyectoModerno__icono">
                     <SelectorIconoProyecto iconoId={icono || 'check-circle'} colorIcono={colorIcono || '#888888'} onCambio={onIconoChange} />
                 </div>
             )}
@@ -54,50 +55,31 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             {/* Descripcion (Subtitulo) */}
             {onDescripcionChange && <CampoSubtituloLimpio id="habito-descripcion" valor={descripcion || ''} onChange={onDescripcionChange} placeholder="Añade una descripción..." />}
 
-            {/* Configuracion: Separada por etiquetas */}
-
-            {/* Importancia */}
-            <div className="propiedadesCompactas">
-                <span className="propiedadesCompactas__etiqueta">Importancia</span>
-                <div className="propiedadesCompactas__contenido">
-                    <div className="propiedadesCompactas__item">
-                        <SelectorImportanciaPill importancia={importancia} onChange={onImportanciaChange} />
-                    </div>
-                </div>
-            </div>
-
-            {/* Estado (solo modo edicion) */}
+            {/* Estado (solo modo edicion) - Primero segun estandar 9.7.7 */}
             {modoEdicion && estadoHoy && onEstadoChange && (
-                <div className="propiedadesCompactas">
-                    <span className="propiedadesCompactas__etiqueta">Estado</span>
-                    <div className="propiedadesCompactas__contenido">
-                        <div className="propiedadesCompactas__item">
-                            <SelectorEstadoHabitoPill estado={estadoHoy} onChange={onEstadoChange} />
-                        </div>
-                    </div>
-                </div>
+                <FilaPropiedades etiqueta="Estado">
+                    <SelectorEstadoHabitoPill estado={estadoHoy} onChange={onEstadoChange} />
+                </FilaPropiedades>
             )}
 
+            {/* Importancia */}
+            <FilaPropiedades etiqueta="Importancia">
+                <SelectorImportanciaPill importancia={importancia} onChange={onImportanciaChange} />
+            </FilaPropiedades>
+
             {/* Frecuencia */}
-            <div className="propiedadesCompactas">
-                <span className="propiedadesCompactas__etiqueta">Frecuencia</span>
-                <div className="propiedadesCompactas__contenido">
-                    <div className="propiedadesCompactas__item">
-                        <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onFrecuenciaChange} />
-                    </div>
-                </div>
-            </div>
+            <FilaPropiedades etiqueta="Frecuencia">
+                <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onFrecuenciaChange} />
+            </FilaPropiedades>
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (
                 <>
-                    {/* Separator visual antes del historial - Estilo dashed igual a Proyectos */}
-                    <div style={{borderTop: '1px dashed var(--dashboard-bordeSutil)', margin: 'var(--dashboard-espacioMd) 0 var(--dashboard-espacioXs) 0'}} />
+                    {/* Separador visual antes del historial */}
+                    <div className="formularioHabitoModerno__separador" />
 
-                    <div className="formularioCampo formularioCampo--mapaCalor" style={{marginTop: 0}}>
-                        <label className="" style={{marginBottom: '10px', display: 'block', color: 'var(--dashboard-textoApagado)', fontSize: 'var(--dashboard-tamanoPequeno)', fontWeight: 'normal'}}>
-                            Historial de cumplimiento
-                        </label>
+                    <div className="formularioHabitoModerno__historial">
+                        <label className="formularioHabitoModerno__historialEtiqueta">Historial de cumplimiento</label>
                         <MapaCalorHabito habitoId={habito.id} periodo="mes" enModal={true} frecuencia={habito.frecuencia} fechaCreacion={habito.fechaCreacion} />
                     </div>
                 </>

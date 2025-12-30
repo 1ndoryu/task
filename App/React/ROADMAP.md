@@ -320,6 +320,84 @@ Todos centralizados en `configuracionModerna.css`:
 - [x] Propiedades compactas organizadas por etiquetas individuales
 - [x] Nuevos campos: Descripción e Icono personalizable para hábitos
 
+### 9.7.7 Estandarización de Propiedades Compactas
+
+**Problema detectado:** 
+- Las propiedades no están estandarizadas entre formularios
+- Etiquetas incorrectas (ej: "Ubicación" contiene Proyecto + Asignación + Repetición)
+- Estado de proyectos solo aparece en modo edición y después de propiedades
+- Orden inconsistente entre Tareas, Hábitos y Proyectos
+
+#### Estado Actual (Análisis)
+
+**Tareas (FormularioTareaModerno.tsx):**
+```
+- Estado (solo edición)
+- Propiedades: Prioridad, Urgencia, Fecha
+- Ubicación: Proyecto, Asignado, Repetición  ← ERROR: etiqueta incorrecta
+- Colaboradores
+- Etiquetas
+```
+
+**Hábitos (FormularioHabitoModerno.tsx):**
+```
+- Importancia
+- Estado (solo edición)
+- Frecuencia
+```
+
+**Proyectos (FormularioProyectoModerno.tsx):**
+```
+- Propiedades: Prioridad, Urgencia, Fecha (sin etiqueta)
+- Estado (solo edición)  ← aparece DESPUÉS de propiedades
+- Miembros
+```
+
+#### Propuesta de Estandarización
+
+**Orden propuesto para TAREAS:**
+| Etiqueta      | Contenido                    | Notas                        |
+| ------------- | ---------------------------- | ---------------------------- |
+| Estado        | Completado/Pendiente         | Solo edición                 |
+| Propiedades   | Prioridad, Urgencia, Fecha   | Siempre visible              |
+| Proyecto      | Selector de proyecto         | Si hay proyectos disponibles |
+| Asignado      | Selector de responsable      | Si hay participantes         |
+| Repetición    | Configuración de recurrencia | Siempre visible              |
+| Colaboradores | Compartir con otros          | Solo edición                 |
+| Etiquetas     | Tags                         | Si hay callback              |
+
+**Orden propuesto para HÁBITOS:**
+| Etiqueta    | Contenido                      | Notas           |
+| ----------- | ------------------------------ | --------------- |
+| Estado      | Completado/Pendiente/Pospuesto | Solo edición    |
+| Importancia | Alta/Media/Baja                | Siempre visible |
+| Frecuencia  | Configuración de frecuencia    | Siempre visible |
+
+**Orden propuesto para PROYECTOS:**
+| Etiqueta    | Contenido                     | Notas                            |
+| ----------- | ----------------------------- | -------------------------------- |
+| Estado      | Activo/Pausado/Completado/etc | Siempre visible (crear + editar) |
+| Propiedades | Prioridad, Urgencia, Fecha    | Siempre visible                  |
+| Miembros    | Participantes del proyecto    | Solo edición                     |
+
+#### Tareas de Implementación
+
+- [x] **9.7.7.1** Definir estándar (este documento) ✅
+- [x] **9.7.7.2** Corregir Tareas:
+  - [x] Renombrar "Ubicación" → separar en "Proyecto", "Asignado", "Repetición"
+  - [x] Cada selector en su propia FilaPropiedades
+- [x] **9.7.7.3** Corregir Proyectos:
+  - [x] Mover Estado ANTES de Propiedades
+  - [x] Mostrar Estado también en modo creación
+  - [x] Agregar etiqueta "Propiedades" consistente
+- [x] **9.7.7.4** Verificar Hábitos:
+  - [x] Estado antes de Importancia (corregido el orden)
+  - [x] Refactorizado a FilaPropiedades (eliminados divs manuales)
+
+### 9.7.8 Bugs Pendientes
+
+- [ ] **Input comentarios fijo cubre contenido**: El input de comentario fijo en la parte inferior (cuando el chat está oculto) está cubriendo parte del contenido scrolleable. Se necesita agregar padding-bottom al contenedor scroll para compensar la altura del input fijo.
+
 ---
 
 ### Baja Prioridad

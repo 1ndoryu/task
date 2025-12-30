@@ -70,10 +70,6 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
     const manejarAsignacion = (usuarioId: number | null, nombre: string, avatar: string) => {
         onAsignacionChange?.(usuarioId, nombre, avatar);
     };
-
-    /* Determinar si mostrar la fila de opciones */
-    const mostrarFilaOpciones = modoEdicion || mostrarProyecto || true; /* Siempre mostrar repeticion */
-
     return (
         <div id="formulario-tarea-moderno" className="formularioProyectoModerno">
             {/* Titulo */}
@@ -94,19 +90,24 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
                 <PropiedadesCompactas prioridad={prioridad || 'media'} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} mostrarEtiqueta={false} />
             </FilaPropiedades>
 
-            {/* Grupo 2: Ubicacion y Asignacion */}
-            {(mostrarFilaOpciones || mostrarAsignacion) && (
-                <FilaPropiedades etiqueta="Ubicación">
-                    {/* Proyecto */}
-                    {mostrarProyecto && <SelectorProyectoPill proyectos={proyectos} proyectoActualId={proyectoId} onChange={onProyectoChange} />}
-
-                    {/* Asignacion */}
-                    {mostrarAsignacion && <SelectorAsignado participantes={participantes} asignadoActual={asignadoA} onAsignar={manejarAsignacion} />}
-
-                    {/* Repeticion */}
-                    <SelectorRepeticionPill tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={onTieneRepeticionChange} frecuencia={frecuencia} onFrecuenciaChange={onFrecuenciaChange} />
+            {/* Proyecto - Solo si hay proyectos disponibles */}
+            {mostrarProyecto && (
+                <FilaPropiedades etiqueta="Proyecto">
+                    <SelectorProyectoPill proyectos={proyectos} proyectoActualId={proyectoId} onChange={onProyectoChange} />
                 </FilaPropiedades>
             )}
+
+            {/* Asignado - Solo si hay participantes */}
+            {mostrarAsignacion && (
+                <FilaPropiedades etiqueta="Asignado">
+                    <SelectorAsignado participantes={participantes} asignadoActual={asignadoA} onAsignar={manejarAsignacion} />
+                </FilaPropiedades>
+            )}
+
+            {/* Repetición - Siempre visible */}
+            <FilaPropiedades etiqueta="Repetición">
+                <SelectorRepeticionPill tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={onTieneRepeticionChange} frecuencia={frecuencia} onFrecuenciaChange={onFrecuenciaChange} />
+            </FilaPropiedades>
 
             {/* Grupo 2b: Compartido con (Colaboradores) - Solo en modo edición */}
             {modoEdicion && onAgregarParticipante && (

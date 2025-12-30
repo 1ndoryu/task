@@ -61,7 +61,7 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
     return (
         <div id="formulario-proyecto-moderno" className="formularioProyectoModerno">
             {/* Icono del proyecto (arriba del titulo) */}
-            <div style={{marginBottom: 'var(--dashboard-espacioXs)'}}>
+            <div className="formularioProyectoModerno__icono">
                 <SelectorIconoProyecto iconoId={icono} colorIcono={colorIcono} onCambio={onIconoChange} />
             </div>
 
@@ -71,15 +71,17 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
             {/* Descripcion/Lead */}
             <CampoSubtituloLimpio id="proyecto-descripcion" valor={descripcion} onChange={onDescripcionChange} placeholder="Describe brevemente el objetivo del proyecto..." />
 
-            {/* Propiedades compactas con menus inline */}
-            <PropiedadesCompactas prioridad={prioridad} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} />
-
-            {/* Estado del proyecto (Fase 9.6) - Solo en modo edicion */}
-            {modoEdicion && onEstadoChange && (
+            {/* Estado del proyecto - Siempre visible (Fase 9.7.7.3) */}
+            {onEstadoChange && (
                 <FilaPropiedades etiqueta="Estado">
                     <SelectorEstadoProyectoPill estado={estado} onChange={onEstadoChange} />
                 </FilaPropiedades>
             )}
+
+            {/* Propiedades compactas con menus inline - Despues del estado (Fase 9.7.7.3) */}
+            <FilaPropiedades etiqueta="Propiedades">
+                <PropiedadesCompactas prioridad={prioridad} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} mostrarEtiqueta={false} />
+            </FilaPropiedades>
 
             {/* Seccion de responsables (solo en modo edicion) */}
             {mostrarResponsables && <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={puedeGestionarParticipantes} etiqueta="Miembros" />}

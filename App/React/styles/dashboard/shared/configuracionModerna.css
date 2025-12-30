@@ -229,7 +229,6 @@
     flex-wrap: wrap;
 }
 
-
 .propiedadesCompactas__item {
     position: relative;
 }
@@ -505,6 +504,10 @@
     position: relative;
 }
 
+.formularioProyectoModerno__icono {
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
 .formularioProyectoModerno__menuOverlay {
     position: fixed;
     top: 0;
@@ -525,6 +528,27 @@
     border-radius: var(--dashboard-radioSm);
     padding: var(--dashboard-espacioMd);
     min-width: 200px;
+}
+
+/* 
+ * FORMULARIO HABITO MODERNO
+ * Estilos adicionales para el formulario de habitos (Fase 9.7.7.4)
+ */
+.formularioHabitoModerno__separador {
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+    margin: var(--dashboard-espacioMd) 0 var(--dashboard-espacioXs) 0;
+}
+
+.formularioHabitoModerno__historial {
+    margin-top: 0;
+}
+
+.formularioHabitoModerno__historialEtiqueta {
+    margin-bottom: 10px;
+    display: block;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: normal;
 }
 
 /* 

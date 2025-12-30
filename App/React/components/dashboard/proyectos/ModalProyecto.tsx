@@ -14,6 +14,7 @@
 import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
 import {MessageSquare, MessageSquareOff, Activity, BarChart2} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea, Hito} from '../../../types/dashboard';
+import type {EstadoProyecto} from '../../shared';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
 import {AccionesFormulario, Modal, SeccionPanel} from '../../shared';
 import {MapaCalorProyecto} from '../../shared/MapaCalorProyecto';
@@ -54,6 +55,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const [fechaLimite, setFechaLimite] = useState(proyecto?.fechaLimite || '');
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>(proyecto?.adjuntos || []);
     const [hitos, setHitos] = useState<Hito[]>(proyecto?.hitos || []);
+    /* Estado del proyecto (Fase 9.7.7.3) */
+    const [estado, setEstado] = useState<EstadoProyecto>(proyecto?.estado || 'activo');
     const [errores, setErrores] = useState<{nombre?: string}>({});
 
     /* Estado para pestañas responsive */
@@ -77,6 +80,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
 
         adjuntos: Adjunto[];
         hitos: Hito[];
+        estado: EstadoProyecto;
     } | null>(null);
 
     /* Sincronizar estado cuando cambia el proyecto */
@@ -91,6 +95,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             setFechaLimite(proyecto.fechaLimite || '');
             setAdjuntos(proyecto.adjuntos || []);
             setHitos(Array.isArray(proyecto.hitos) ? proyecto.hitos : []);
+            setEstado(proyecto.estado || 'activo');
 
             /* Guardar estado inicial para detección de cambios */
             estadoInicialRef.current = {
@@ -103,7 +108,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                 fechaLimite: proyecto.fechaLimite || '',
 
                 adjuntos: proyecto.adjuntos || [],
-                hitos: Array.isArray(proyecto.hitos) ? proyecto.hitos : []
+                hitos: Array.isArray(proyecto.hitos) ? proyecto.hitos : [],
+                estado: proyecto.estado || 'activo'
             };
         } else {
             /* Resetear si no hay proyecto (modo creacion) */
@@ -116,6 +122,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             setFechaLimite('');
             setAdjuntos([]);
             setHitos([]);
+            setEstado('activo');
             estadoInicialRef.current = null;
         }
         setErrores({});
@@ -140,9 +147,10 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
         if (fechaLimite !== inicial.fechaLimite) return true;
         if (JSON.stringify(adjuntos) !== JSON.stringify(inicial.adjuntos)) return true;
         if (JSON.stringify(hitos) !== JSON.stringify(inicial.hitos)) return true;
+        if (estado !== inicial.estado) return true;
 
         return false;
-    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, hitos]);
+    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, hitos, estado]);
 
     const validarFormulario = useCallback((): boolean => {
         const nuevosErrores: {nombre?: string} = {};
@@ -170,10 +178,11 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
             fechaLimite: fechaLimite || undefined,
 
             adjuntos,
-            hitos
+            hitos,
+            estado
         });
         onCerrar();
-    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, hitos, validarFormulario, onGuardar, onCerrar]);
+    }, [nombre, descripcion, icono, colorIcono, prioridad, urgencia, fechaLimite, adjuntos, hitos, estado, validarFormulario, onGuardar, onCerrar]);
 
     /* Auto-guardado: al cerrar el modal, guardar solo si hay cambios */
     const manejarCerrarConGuardado = useCallback(() => {
@@ -324,6 +333,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                                     onUrgenciaChange={setUrgencia}
                                     fechaLimite={fechaLimite}
                                     onFechaLimiteChange={setFechaLimite}
+                                    estado={estado}
+                                    onEstadoChange={setEstado}
                                     errorNombre={errores.nombre}
                                     modoEdicion={true}
                                     participantes={participantes}
@@ -368,6 +379,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                             onUrgenciaChange={setUrgencia}
                             fechaLimite={fechaLimite}
                             onFechaLimiteChange={setFechaLimite}
+                            estado={estado}
+                            onEstadoChange={setEstado}
                             errorNombre={errores.nombre}
                             modoEdicion={false}
                             adjuntos={adjuntos}

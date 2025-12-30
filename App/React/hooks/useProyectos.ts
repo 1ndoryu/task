@@ -18,6 +18,8 @@ export interface DatosNuevoProyecto {
     colorIcono?: string;
     adjuntos?: Adjunto[];
     hitos?: Hito[];
+    /* Estado del proyecto (Fase 9.7.7.3) - Por defecto: 'activo' */
+    estado?: 'activo' | 'completado' | 'pausado';
 }
 
 export interface UseProyectosParams {
@@ -52,7 +54,7 @@ export function useProyectos({proyectos, setProyectos, registrarAccion, mostrarM
                 prioridad: datos.prioridad,
                 urgencia: datos.urgencia || 'normal',
                 fechaLimite: datos.fechaLimite,
-                estado: 'activo',
+                estado: datos.estado || 'activo',
                 fechaCreacion: hoy,
                 progreso: 0,
                 adjuntos: datos.adjuntos,
