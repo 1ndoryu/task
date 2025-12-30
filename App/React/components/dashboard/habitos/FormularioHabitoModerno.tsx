@@ -8,7 +8,7 @@
  */
 
 import type {NivelImportancia, FrecuenciaHabito, Habito} from '../../../types/dashboard';
-import {CampoTituloLimpio, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
+import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 
@@ -16,6 +16,13 @@ interface FormularioHabitoModernoProps {
     /* Campos principales */
     nombre: string;
     onNombreChange: (valor: string) => void;
+    /* Nuevos campos esteticos */
+    descripcion?: string;
+    onDescripcionChange?: (valor: string) => void;
+    icono?: string;
+    colorIcono?: string;
+    onIconoChange?: (icono: string, color: string) => void;
+    /* Propiedades */
     importancia: NivelImportancia;
     onImportanciaChange: (valor: NivelImportancia) => void;
     /* Frecuencia */
@@ -31,30 +38,69 @@ interface FormularioHabitoModernoProps {
     errorNombre?: string;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, habito, modoEdicion = false, errorNombre}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, habito, modoEdicion = false, errorNombre}: FormularioHabitoModernoProps): JSX.Element {
     return (
         <div id="formulario-habito-moderno" className="formularioProyectoModerno">
+            {/* Icono del habito */}
+            {onIconoChange && (
+                <div style={{marginBottom: 'var(--dashboard-espacioXs)'}}>
+                    <SelectorIconoProyecto iconoId={icono || 'check-circle'} colorIcono={colorIcono || '#888888'} onCambio={onIconoChange} />
+                </div>
+            )}
+
             {/* Nombre del habito */}
             <CampoTituloLimpio id="habito-nombre" valor={nombre} onChange={onNombreChange} placeholder="Ej: Leer 30 minutos" error={errorNombre} autoFocus={!modoEdicion} />
 
-            {/* Configuracion: Importancia, Estado, Frecuencia */}
-            <FilaPropiedades etiqueta="Configuración">
-                {/* Importancia */}
-                <SelectorImportanciaPill importancia={importancia} onChange={onImportanciaChange} />
+            {/* Descripcion (Subtitulo) */}
+            {onDescripcionChange && <CampoSubtituloLimpio id="habito-descripcion" valor={descripcion || ''} onChange={onDescripcionChange} placeholder="Añade una descripción..." />}
 
-                {/* Estado del dia (Solo modo edicion) */}
-                {modoEdicion && estadoHoy && onEstadoChange && <SelectorEstadoHabitoPill estado={estadoHoy} onChange={onEstadoChange} />}
+            {/* Configuracion: Separada por etiquetas */}
 
-                {/* Frecuencia */}
-                <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onFrecuenciaChange} />
-            </FilaPropiedades>
+            {/* Importancia */}
+            <div className="propiedadesCompactas">
+                <span className="propiedadesCompactas__etiqueta">Importancia</span>
+                <div className="propiedadesCompactas__contenido">
+                    <div className="propiedadesCompactas__item">
+                        <SelectorImportanciaPill importancia={importancia} onChange={onImportanciaChange} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Estado (solo modo edicion) */}
+            {modoEdicion && estadoHoy && onEstadoChange && (
+                <div className="propiedadesCompactas">
+                    <span className="propiedadesCompactas__etiqueta">Estado</span>
+                    <div className="propiedadesCompactas__contenido">
+                        <div className="propiedadesCompactas__item">
+                            <SelectorEstadoHabitoPill estado={estadoHoy} onChange={onEstadoChange} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Frecuencia */}
+            <div className="propiedadesCompactas">
+                <span className="propiedadesCompactas__etiqueta">Frecuencia</span>
+                <div className="propiedadesCompactas__contenido">
+                    <div className="propiedadesCompactas__item">
+                        <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onFrecuenciaChange} />
+                    </div>
+                </div>
+            </div>
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (
-                <div className="formularioCampo formularioCampo--mapaCalor">
-                    <label className="formularioEtiqueta">Historial de cumplimiento</label>
-                    <MapaCalorHabito habitoId={habito.id} periodo="mes" enModal={true} frecuencia={habito.frecuencia} fechaCreacion={habito.fechaCreacion} />
-                </div>
+                <>
+                    {/* Separator visual antes del historial - Estilo dashed igual a Proyectos */}
+                    <div style={{borderTop: '1px dashed var(--dashboard-bordeSutil)', margin: 'var(--dashboard-espacioMd) 0 var(--dashboard-espacioXs) 0'}} />
+
+                    <div className="formularioCampo formularioCampo--mapaCalor" style={{marginTop: 0}}>
+                        <label className="" style={{marginBottom: '10px', display: 'block', color: 'var(--dashboard-textoApagado)', fontSize: 'var(--dashboard-tamanoPequeno)', fontWeight: 'normal'}}>
+                            Historial de cumplimiento
+                        </label>
+                        <MapaCalorHabito habitoId={habito.id} periodo="mes" enModal={true} frecuencia={habito.frecuencia} fechaCreacion={habito.fechaCreacion} />
+                    </div>
+                </>
             )}
         </div>
     );

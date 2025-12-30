@@ -82,7 +82,7 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
             )}
 
             {/* Seccion de responsables (solo en modo edicion) */}
-            {mostrarResponsables && <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={puedeGestionarParticipantes} etiqueta="Responsables" />}
+            {mostrarResponsables && <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={puedeGestionarParticipantes} etiqueta="Miembros" />}
 
             {/* Seccion de adjuntos (Inline - Fase 9.2.5) */}
             {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}

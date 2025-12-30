@@ -76,6 +76,10 @@ export interface Habito {
     fechaCreacion: string /* Fecha ISO de cuando se creo el habito */;
     /* Frecuencia del habito (opcional, por defecto diario) */
     frecuencia?: FrecuenciaHabito;
+    /* Campos esteticos */
+    descripcion?: string;
+    icono?: string;
+    colorIcono?: string;
 }
 
 /*
@@ -251,6 +255,9 @@ export interface DatosNuevoHabito {
     importancia: NivelImportancia;
     tags: string[];
     frecuencia?: FrecuenciaHabito;
+    descripcion?: string;
+    icono?: string;
+    colorIcono?: string;
 }
 
 /*

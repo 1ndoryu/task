@@ -9,7 +9,7 @@
  */
 
 import {useState, useEffect, useCallback, useRef} from 'react';
-import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto} from '../../types/dashboard';
+import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
 import {AccionesFormulario, Modal, PestanasModal} from '../shared';
 import type {PestanaId} from '../shared';
 import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
@@ -24,6 +24,11 @@ export interface PanelConfiguracionTareaProps {
     onCerrar: () => void;
     onGuardar: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => void;
     participantes?: Participante[];
+    /* Gestión de participantes (Compartir) */
+    companeros?: CompaneroEquipo[];
+    onAgregarParticipante?: (usuarioId: number, rol: RolCompartido) => void;
+    onRemoverParticipante?: (participanteId: number) => void;
+    onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
     proyectos?: Proyecto[];
     onCambiarProyecto?: (proyectoId: number | undefined) => void;
     onToggleCompletado?: (completado: boolean) => void;
@@ -31,7 +36,7 @@ export interface PanelConfiguracionTareaProps {
 
 import {useAutoguardado} from '../../hooks/useAutoguardado';
 
-export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
+export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
     const modoEdicion = !!tarea;
 
     /* Estado local para edicion */
@@ -305,6 +310,10 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                                     asignadoANombre={asignadoANombre}
                                     asignadoAAvatar={asignadoAAvatar}
                                     onAsignacionChange={participantes.length > 0 ? manejarAsignacion : undefined}
+                                    companeros={companeros}
+                                    onAgregarParticipante={onAgregarParticipante}
+                                    onRemoverParticipante={onRemoverParticipante}
+                                    onCambiarRolParticipante={onCambiarRolParticipante}
                                     adjuntos={adjuntos}
                                     onAdjuntosChange={setAdjuntos}
                                     tags={tags}

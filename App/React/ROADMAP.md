@@ -301,10 +301,10 @@ Todos centralizados en `configuracionModerna.css`:
 **Responsable**: Usuario asignado a completar la tarea
 **Compartir**: Usuarios que pueden ver/editar pero no son responsables directos
 
-- [ ] Agregar opción de Responsable en tareas (ya existe en proyectos)
-- [ ] Agregar opción de Compartir en tareas (menú para seleccionar usuarios)
-- [ ] Agregar opción de Compartir visible en proyectos (actualmente solo desde SeccionResponsables)
-- [ ] Distinguir visualmente Responsable vs Colaboradores
+- [x] Agregar opción de Responsable en tareas (ya existe en proyectos)
+- [x] Agregar opción de Compartir en tareas (menú para seleccionar usuarios)
+- [x] Agregar opción de Compartir visible en proyectos (actualmente solo desde SeccionResponsables)
+- [x] Distinguir visualmente Responsable vs Colaboradores
 
 ### 9.7.5 Panel de Comentarios (Rediseño)
 - [ ] Cambiar "Enviar mensaje" por "Dejar comentario"
@@ -312,6 +312,12 @@ Todos centralizados en `configuracionModerna.css`:
 - [ ] Mostrar foto del usuario junto al input
 - [ ] Comentarios con menos padding
 - [ ] Input ubicado abajo por defecto
+
+### 9.7.6 Mejoras Visuales en Hábitos (Feedback)
+- [x] Separador visual entre configuración y historial visual
+- [x] Corrección de meses repetidos en historial visual
+- [x] Propiedades compactas organizadas por etiquetas individuales
+- [x] Nuevos campos: Descripción e Icono personalizable para hábitos
 
 ---
 

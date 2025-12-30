@@ -318,23 +318,6 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
         return {completados, pospuestos, porcentajeCumplimiento};
     }, [historialLocal, fechas]);
 
-    /* Obtener indicador de mes para mostrar encima de cada semana */
-    const obtenerIndicadorMes = (fecha: string, esPrimeraSemana: boolean): string | null => {
-        if (!fecha) return null;
-        const fechaActual = new Date(fecha + 'T12:00:00');
-        const diaDelMes = fechaActual.getDate();
-
-        /*
-         * Mostrar indicador si:
-         * - Es la primera semana del periodo (siempre mostrar)
-         * - O si es la primera semana del mes (dia <= 7 sugiere que el mes empezo recientemente)
-         */
-        if (esPrimeraSemana || diaDelMes <= 7) {
-            return MESES[fechaActual.getMonth()];
-        }
-        return null;
-    };
-
     /* Renderizar celda */
     const renderCelda = (fecha: string, index: number) => {
         if (!fecha) {
@@ -482,10 +465,32 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
                         <div className="mapaCalorHabitoMeses">
                             {semanas.map((semana, idxSemana) => {
                                 const primeraFecha = semana.find(f => f);
-                                const indicador = primeraFecha ? obtenerIndicadorMes(primeraFecha, idxSemana === 0) : null;
+                                let mostrarMes = false;
+                                let mesTexto = '';
+
+                                if (primeraFecha) {
+                                    const fechaDate = new Date(primeraFecha + 'T12:00:00');
+                                    mesTexto = MESES[fechaDate.getMonth()];
+
+                                    if (idxSemana === 0) {
+                                        mostrarMes = true;
+                                    } else {
+                                        /* Verificar si cambió el mes respecto a la semana anterior */
+                                        const semanaAnterior = semanas[idxSemana - 1];
+                                        const fechaAnterior = semanaAnterior.find(f => f);
+                                        if (fechaAnterior) {
+                                            const fechaAntDate = new Date(fechaAnterior + 'T12:00:00');
+                                            const mesAnt = MESES[fechaAntDate.getMonth()];
+                                            if (mesAnt !== mesTexto) {
+                                                mostrarMes = true;
+                                            }
+                                        }
+                                    }
+                                }
+
                                 return (
                                     <span key={`mes-${idxSemana}`} className="mapaCalorHabitoMes">
-                                        {indicador || ''}
+                                        {mostrarMes ? mesTexto : ''}
                                     </span>
                                 );
                             })}

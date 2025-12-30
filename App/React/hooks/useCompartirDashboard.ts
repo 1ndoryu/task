@@ -21,6 +21,7 @@ interface UseCompartirDashboardReturn {
     participantesTarea: Participante[];
     /* Cache de participantes */
     cacheParticipantesProyecto: Map<number, Participante[]>;
+    cacheParticipantesTarea: Map<number, Participante[]>;
     /* Acciones de proyecto */
     manejarCompartirProyecto: (proyecto: Proyecto) => Promise<void>;
     manejarCompartirElemento: (usuarioId: number, rol: RolCompartido) => Promise<boolean>;
@@ -30,6 +31,9 @@ interface UseCompartirDashboardReturn {
     /* Acciones de tarea */
     manejarCompartirTarea: (tarea: Tarea) => Promise<void>;
     manejarCompartirTareaElemento: (usuarioId: number, rol: RolCompartido) => Promise<boolean>;
+    manejarCompartirTareaDesdeEdicion: (tareaId: number, usuarioId: number, rol: RolCompartido) => Promise<boolean>;
+    manejarCambiarRolTareaDesdeEdicion: (tareaId: number, compartidoId: number, nuevoRol: RolCompartido) => Promise<boolean>;
+    manejarDejarDeCompartirTareaDesdeEdicion: (tareaId: number, compartidoId: number) => Promise<boolean>;
     manejarCambiarRolTareaCompartida: (compartidoId: number, nuevoRol: RolCompartido) => Promise<boolean>;
     cerrarModalCompartirTarea: () => void;
     /* Utilidades */
@@ -51,7 +55,10 @@ export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): 
     const [participantesTarea, setParticipantesTarea] = useState<Participante[]>([]);
 
     /* Cache de participantes por proyecto para asignación de tareas */
+    /* Cache de participantes por proyecto para asignación de tareas */
     const [cacheParticipantesProyecto, setCacheParticipantesProyecto] = useState<Map<number, Participante[]>>(new Map());
+    /* Cache de participantes por tarea */
+    const [cacheParticipantesTarea, setCacheParticipantesTarea] = useState<Map<number, Participante[]>>(new Map());
 
     /*
      * Manejador para compartir proyecto
@@ -155,6 +162,42 @@ export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): 
         [tareaCompartiendo, compartidos]
     );
 
+    const manejarCompartirTareaDesdeEdicion = useCallback(
+        async (tareaId: number, usuarioId: number, rol: RolCompartido): Promise<boolean> => {
+            const exito = await compartidos.compartir('tarea', tareaId, usuarioId, rol);
+            if (exito) {
+                const parts = await compartidos.obtenerParticipantes('tarea', tareaId);
+                setCacheParticipantesTarea(prev => new Map(prev).set(tareaId, parts));
+            }
+            return exito;
+        },
+        [compartidos]
+    );
+
+    const manejarCambiarRolTareaDesdeEdicion = useCallback(
+        async (tareaId: number, compartidoId: number, nuevoRol: RolCompartido): Promise<boolean> => {
+            const exito = await compartidos.actualizarRol(compartidoId, nuevoRol);
+            if (exito) {
+                const parts = await compartidos.obtenerParticipantes('tarea', tareaId);
+                setCacheParticipantesTarea(prev => new Map(prev).set(tareaId, parts));
+            }
+            return exito;
+        },
+        [compartidos]
+    );
+
+    const manejarDejarDeCompartirTareaDesdeEdicion = useCallback(
+        async (tareaId: number, compartidoId: number): Promise<boolean> => {
+            const exito = await compartidos.dejarDeCompartir(compartidoId);
+            if (exito) {
+                const parts = await compartidos.obtenerParticipantes('tarea', tareaId);
+                setCacheParticipantesTarea(prev => new Map(prev).set(tareaId, parts));
+            }
+            return exito;
+        },
+        [compartidos]
+    );
+
     /*
      * Cambiar rol de compartido (tarea)
      */
@@ -178,6 +221,22 @@ export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): 
      */
     const obtenerParticipantesTarea = useCallback(
         (tarea: Tarea): Participante[] => {
+            /* 1. Revisar cache directa de tarea */
+            const participantesTareaCache = cacheParticipantesTarea.get(tarea.id);
+            if (participantesTareaCache && participantesTareaCache.length > 0) {
+                return participantesTareaCache;
+            }
+
+            /* 2. Revisar si debemos hacer fetch (esCompartido y no tenemos cache) */
+            if (tarea.esCompartido && !participantesTareaCache) {
+                compartidos.obtenerParticipantes('tarea', tarea.id).then(parts => {
+                    setCacheParticipantesTarea(prev => {
+                        if (prev.has(tarea.id)) return prev;
+                        return new Map(prev).set(tarea.id, parts);
+                    });
+                });
+            }
+
             if (tarea.proyectoId) {
                 const participantesDelProyecto = cacheParticipantesProyecto.get(tarea.proyectoId);
                 if (participantesDelProyecto && participantesDelProyecto.length > 0) {
@@ -194,7 +253,7 @@ export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): 
             }
             return [];
         },
-        [cacheParticipantesProyecto, proyectos, compartidos]
+        [cacheParticipantesTarea, cacheParticipantesProyecto, proyectos, compartidos]
     );
 
     /* Utilidades de verificación */
@@ -218,6 +277,7 @@ export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): 
         tareaCompartiendo,
         participantesTarea,
         cacheParticipantesProyecto,
+        cacheParticipantesTarea,
         manejarCompartirProyecto,
         manejarCompartirElemento,
         manejarCambiarRolCompartido,
@@ -225,6 +285,9 @@ export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): 
         cerrarModalCompartirProyecto,
         manejarCompartirTarea,
         manejarCompartirTareaElemento,
+        manejarCompartirTareaDesdeEdicion,
+        manejarCambiarRolTareaDesdeEdicion,
+        manejarDejarDeCompartirTareaDesdeEdicion,
         manejarCambiarRolTareaCompartida,
         cerrarModalCompartirTarea,
         obtenerParticipantesTarea,

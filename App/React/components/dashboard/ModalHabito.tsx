@@ -35,6 +35,9 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
 
     /* Estado local para edicion */
     const [nombre, setNombre] = useState(habito?.nombre || '');
+    const [descripcion, setDescripcion] = useState(habito?.descripcion || '');
+    const [icono, setIcono] = useState(habito?.icono || 'check-circle');
+    const [colorIcono, setColorIcono] = useState(habito?.colorIcono || '#888888');
     const [importancia, setImportancia] = useState<NivelImportancia>(habito?.importancia || 'Media');
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(habito?.frecuencia || FRECUENCIA_POR_DEFECTO);
     const [errores, setErrores] = useState<{nombre?: string}>({});
@@ -65,10 +68,16 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
     useEffect(() => {
         if (habito) {
             setNombre(habito.nombre);
+            setDescripcion(habito.descripcion || '');
+            setIcono(habito.icono || 'check-circle');
+            setColorIcono(habito.colorIcono || '#888888');
             setImportancia(habito.importancia);
             setFrecuencia(habito.frecuencia || FRECUENCIA_POR_DEFECTO);
         } else {
             setNombre('');
+            setDescripcion('');
+            setIcono('check-circle');
+            setColorIcono('#888888');
             setImportancia('Media');
             setFrecuencia(FRECUENCIA_POR_DEFECTO);
         }
@@ -114,7 +123,10 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
             nombre: nombre.trim(),
             importancia,
             tags: [] /* Tags deprecados por ahora */,
-            frecuencia
+            frecuencia,
+            descripcion: descripcion.trim() || undefined,
+            icono,
+            colorIcono
         });
         onCerrar();
     }, [nombre, importancia, frecuencia, validarFormulario, onGuardar, onCerrar]);
@@ -165,7 +177,27 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
                         {/* Columna Izquierda: Formulario */}
                         <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
                             <div className="panelConfiguracionColumnaScroll">
-                                <FormularioHabitoModerno nombre={nombre} onNombreChange={setNombre} importancia={importancia} onImportanciaChange={setImportancia} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} estadoHoy={estadoHoy} onEstadoChange={manejarCambioEstado} habito={habito} modoEdicion={true} errorNombre={errores.nombre} />
+                                <FormularioHabitoModerno
+                                    nombre={nombre}
+                                    onNombreChange={setNombre}
+                                    descripcion={descripcion}
+                                    onDescripcionChange={setDescripcion}
+                                    icono={icono}
+                                    colorIcono={colorIcono}
+                                    onIconoChange={(i, c) => {
+                                        setIcono(i);
+                                        setColorIcono(c);
+                                    }}
+                                    importancia={importancia}
+                                    onImportanciaChange={setImportancia}
+                                    frecuencia={frecuencia}
+                                    onFrecuenciaChange={setFrecuencia}
+                                    estadoHoy={estadoHoy}
+                                    onEstadoChange={manejarCambioEstado}
+                                    habito={habito}
+                                    modoEdicion={true}
+                                    errorNombre={errores.nombre}
+                                />
                             </div>
                             {/* Sin botones de acciones - auto-guardado */}
                         </div>
@@ -182,7 +214,24 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
                 /* Modo creación simple */
                 <>
                     <div id="modal-habito-contenido" className="formularioHabito">
-                        <FormularioHabitoModerno nombre={nombre} onNombreChange={setNombre} importancia={importancia} onImportanciaChange={setImportancia} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} modoEdicion={false} errorNombre={errores.nombre} />
+                        <FormularioHabitoModerno
+                            nombre={nombre}
+                            onNombreChange={setNombre}
+                            descripcion={descripcion}
+                            onDescripcionChange={setDescripcion}
+                            icono={icono}
+                            colorIcono={colorIcono}
+                            onIconoChange={(i, c) => {
+                                setIcono(i);
+                                setColorIcono(c);
+                            }}
+                            importancia={importancia}
+                            onImportanciaChange={setImportancia}
+                            frecuencia={frecuencia}
+                            onFrecuenciaChange={setFrecuencia}
+                            modoEdicion={false}
+                            errorNombre={errores.nombre}
+                        />
                     </div>
                     <AccionesFormulario onCancelar={onCerrar} onGuardar={manejarGuardar} textoGuardar="Crear hábito" />
                 </>

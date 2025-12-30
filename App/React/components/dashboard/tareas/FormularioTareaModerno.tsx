@@ -7,8 +7,8 @@
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, PropiedadesCompactas, etc.)
  */
 
-import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito} from '../../../types/dashboard';
-import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades, SelectorTags} from '../../shared';
+import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito, CompaneroEquipo, RolCompartido} from '../../../types/dashboard';
+import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades, SelectorTags, SeccionResponsables} from '../../shared';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {SelectorAsignado} from '../../compartidos/SelectorAsignado';
 
@@ -43,6 +43,11 @@ interface FormularioTareaModernoProps {
     asignadoANombre: string;
     asignadoAAvatar: string;
     onAsignacionChange?: (usuarioId: number | null, nombre: string, avatar: string) => void;
+    /* Compartir / Colaboradores */
+    companeros?: CompaneroEquipo[];
+    onAgregarParticipante?: (usuarioId: number, rol: RolCompartido) => void;
+    onRemoverParticipante?: (participanteId: number) => void;
+    onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
     /* Adjuntos */
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
@@ -54,7 +59,7 @@ interface FormularioTareaModernoProps {
     errorTexto?: string;
 }
 
-export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto}: FormularioTareaModernoProps): JSX.Element {
+export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto}: FormularioTareaModernoProps): JSX.Element {
     /* Mostrar selector de proyecto solo si hay proyectos y callback */
     const mostrarProyecto = proyectos.length > 0 && onProyectoChange;
 
@@ -100,6 +105,13 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
 
                     {/* Repeticion */}
                     <SelectorRepeticionPill tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={onTieneRepeticionChange} frecuencia={frecuencia} onFrecuenciaChange={onFrecuenciaChange} />
+                </FilaPropiedades>
+            )}
+
+            {/* Grupo 2b: Compartido con (Colaboradores) - Solo en modo edición */}
+            {modoEdicion && onAgregarParticipante && (
+                <FilaPropiedades etiqueta="Colaboradores">
+                    <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={true} etiqueta="" modoCompacto={true} />
                 </FilaPropiedades>
             )}
 
