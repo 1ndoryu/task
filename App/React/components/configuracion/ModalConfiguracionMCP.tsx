@@ -103,10 +103,10 @@ function obtenerNonce(): string {
     return wpData?.nonce || '';
 }
 
-/* Obtiene el nombre de usuario actual */
+/* Obtiene el nombre de usuario actual (login de WordPress) */
 function obtenerUsuario(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {userName?: string}}).gloryDashboard;
-    return wpData?.userName || 'usuario';
+    const wpData = (window as unknown as {gloryDashboard?: {currentUser?: {login?: string}}}).gloryDashboard;
+    return wpData?.currentUser?.login || 'usuario';
 }
 
 export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracionMCPProps): JSX.Element {

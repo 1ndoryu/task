@@ -155,3 +155,33 @@ El modal "Conectar con IA" genera automáticamente un contexto markdown que el u
 - Todos los endpoints disponibles
 - Ejemplos de uso
 - Valores válidos para cada campo
+
+---
+
+## 🚨 PROBLEMA PENDIENTE (31/12/2024)
+
+### Error 401 en producción + Username no incluido
+
+**Síntoma:** La API devuelve `rest_forbidden` (401) incluso con token válido.
+
+**Problemas identificados:**
+
+1. **Username no incluido automáticamente**
+   - El contexto copiable requiere que el usuario sepa su username
+   - Si el usuario está logueado, ya sabemos quién es
+   - **Solución:** Incluir el username en el contexto automáticamente
+
+2. **Formato del token**
+   - WordPress Application Passwords usan Basic Auth: `base64(usuario:password)`
+   - El usuario no debería tener que construir esto manualmente
+   - **Solución:** Generar el token Base64 completo y mostrarlo listo para usar
+
+3. **Posible problema de despliegue**
+   - El AIApiController.php debe estar cargado en WordPress
+   - Verificar que el archivo esté siendo incluido
+
+### TODO:
+- [ ] Modificar `generarContextoIA()` para incluir username automáticamente
+- [ ] Mostrar el header `Authorization: Basic xxx` completo y listo para copiar
+- [ ] Verificar que AIApiController.php esté registrado en WordPress
+- [ ] Probar en producción después de las correcciones
