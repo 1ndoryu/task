@@ -73,6 +73,18 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
     const textoFecha = obtenerTextoFechaLimite(proyecto.fechaLimite);
     const varianteFecha = obtenerVarianteFechaLimite(proyecto.fechaLimite);
 
+    /*
+     * Wrapper para crear tareas heredando prioridad y urgencia del proyecto
+     * Las tareas creadas dentro de un proyecto heredan sus propiedades
+     */
+    const crearTareaConHerencia = (datos: DatosEdicionTarea) => {
+        onCrearTarea({
+            ...datos,
+            prioridad: datos.prioridad ?? proyecto.prioridad,
+            urgencia: datos.urgencia ?? proyecto.urgencia
+        });
+    };
+
     /* Obtener variante de urgencia para badge */
     const obtenerVarianteUrgencia = (urgencia: NivelUrgencia): 'urgenciaBloqueante' | 'urgenciaUrgente' | 'urgenciaChill' | 'normal' => {
         switch (urgencia) {
@@ -148,7 +160,7 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
             {/* Tareas del proyecto (solo cuando está activo) */}
             {activo && (
                 <div className="proyectoTareas">
-                    <ListaTareas tareas={tareasVisibles} proyectoId={proyecto.id} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} />
+                    <ListaTareas tareas={tareasVisibles} proyectoId={proyecto.id} onToggleTarea={onToggleTarea} onCrearTarea={crearTareaConHerencia} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} />
                 </div>
             )}
         </div>
