@@ -43,6 +43,7 @@ export interface TareaItemProps {
     onPosponerHabito?: (habitoId: number) => void;
     /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
     tieneSubtareas?: boolean;
+    modoCompacto?: boolean;
 }
 
 export interface MenuContextualEstado {
@@ -51,7 +52,7 @@ export interface MenuContextualEstado {
     y: number;
 }
 
-export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, tieneSubtareas = false}: TareaItemProps): JSX.Element {
+export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
     const [editando, setEditando] = useState(false);
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
@@ -109,6 +110,9 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 guardarEdicion();
                 /* Crear nueva tarea debajo, heredando parentId si es subtarea */
                 onCrearNueva?.(tarea.parentId, tarea.id);
+            } else if (evento.key === 'Backspace' && textoEditado === '') {
+                evento.preventDefault();
+                onEliminar?.();
             } else if (evento.key === 'Escape') {
                 cancelarEdicion();
             } else if (evento.key === 'Tab') {
@@ -414,7 +418,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     if (editando) {
         return (
-            <div className={`tareaItem tareaItemEditando ${esSubtarea ? 'tareaItemSubtarea' : ''}`}>
+            <div className={`tareaItem tareaItemEditando ${esSubtarea ? 'tareaItemSubtarea' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`}>
                 <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`}>{tarea.completado && <Check size={8} color="white" />}</div>
                 <div className="tareaContenido">
                     <input ref={inputRef} type="text" className="tareaEdicionInput" value={textoEditado} onChange={(e: ChangeEvent<HTMLInputElement>) => setTextoEditado(e.target.value)} onKeyDown={manejarTecla} onBlur={guardarEdicion} />
@@ -425,13 +429,13 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     return (
         <>
-            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''}`} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} onContextMenu={manejarClickDerecho}>
+            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} onContextMenu={manejarClickDerecho}>
                 <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`} onClick={onToggle}>
                     {tarea.completado && <Check size={8} color="white" />}
                 </div>
                 <div className="tareaContenido" onClick={iniciarEdicion}>
                     <div className="tareaTextoWrapper">
-                        <p className={`tareaTexto ${tarea.completado ? 'tareaTextoCompletado' : ''}`}>{tarea.texto}</p>
+                        <p className={`tareaTexto ${tarea.completado ? 'tareaTextoCompletado' : ''} ${modoCompacto ? 'tareaTexto--compacto' : ''}`}>{tarea.texto}</p>
                         <BadgeGroup>
                             {renderBadgePropietario()}
                             {renderIndicadorFecha()}

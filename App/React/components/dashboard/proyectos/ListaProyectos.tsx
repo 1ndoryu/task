@@ -43,6 +43,7 @@ interface ListaProyectosProps {
     ocultarTareasCompletadas?: boolean;
     ordenDefecto?: 'nombre' | 'fecha' | 'prioridad';
     mostrarProgreso?: boolean;
+    modoCompacto?: boolean;
 }
 
 interface ProyectoItemProps {
@@ -61,13 +62,35 @@ interface ProyectoItemProps {
     onReordenarTareas: (tareas: Tarea[]) => void;
     mostrarProgreso?: boolean;
     ocultarTareasCompletadas?: boolean;
+    ordenDefecto?: 'nombre' | 'fecha' | 'prioridad';
+    modoCompacto?: boolean;
 }
 
-function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false, onToggle, onEditar, onEliminar, onContextMenu, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, mostrarProgreso = true, ocultarTareasCompletadas = false}: ProyectoItemProps): JSX.Element {
+function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false, onToggle, onEditar, onEliminar, onContextMenu, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, mostrarProgreso = true, ocultarTareasCompletadas = false, ordenDefecto = 'fecha', modoCompacto = false}: ProyectoItemProps): JSX.Element {
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
     const tareasCompletadas = tareasProyecto.filter(t => t.completado).length;
     const totalTareas = tareasProyecto.length;
-    const tareasVisibles = ocultarTareasCompletadas ? tareasProyecto.filter(t => !t.completado) : tareasProyecto;
+
+    // Ordenar tareas segun el ordenDefecto
+    const tareasOrdenadas = [...tareasProyecto].sort((a, b) => {
+        if (ordenDefecto === 'prioridad') {
+            const map: Record<string, number> = {alta: 1, media: 2, baja: 3};
+            const pA = map[a.prioridad || ''] || 4;
+            const pB = map[b.prioridad || ''] || 4;
+            if (pA !== pB) return pA - pB;
+        } else if (ordenDefecto === 'fecha') {
+            // Si tiene fecha, va antes que si no tiene
+            if (a.configuracion?.fechaMaxima && !b.configuracion?.fechaMaxima) return -1;
+            if (!a.configuracion?.fechaMaxima && b.configuracion?.fechaMaxima) return 1;
+            if (a.configuracion?.fechaMaxima && b.configuracion?.fechaMaxima) {
+                return new Date(a.configuracion.fechaMaxima).getTime() - new Date(b.configuracion.fechaMaxima).getTime();
+            }
+        }
+        // Fallback al orden manual
+        return (a.orden || 0) - (b.orden || 0);
+    });
+
+    const tareasVisibles = ocultarTareasCompletadas ? tareasOrdenadas.filter(t => !t.completado) : tareasOrdenadas;
 
     /* Usar funciones centralizadas para fecha */
     const textoFecha = obtenerTextoFechaLimite(proyecto.fechaLimite);
@@ -100,12 +123,12 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
     };
 
     return (
-        <div className={`proyectoItemWrapper ${activo ? 'proyectoItemWrapperActivo' : ''}`}>
-            <div className={`proyectoItem ${activo ? 'proyectoItemActivo' : ''}`} onClick={onToggle} onContextMenu={onContextMenu} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)}>
+        <div className={`proyectoItemWrapper ${activo ? 'proyectoItemWrapperActivo' : ''} ${modoCompacto ? 'proyectoItemWrapper--compacto' : ''}`}>
+            <div className={`proyectoItem ${activo ? 'proyectoItemActivo' : ''} ${modoCompacto ? 'proyectoItem--compacto' : ''}`} onClick={onToggle} onContextMenu={onContextMenu} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)}>
                 <div className="proyectoItemChevron">{activo ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</div>
 
                 <div className="proyectoItemContenido">
-                    <span className="proyectoNombre">{proyecto.nombre}</span>
+                    <span className={`proyectoNombre ${modoCompacto ? 'proyectoNombre--compacto' : ''}`}>{proyecto.nombre}</span>
                     <div className="proyectoMeta">
                         <span className={`etiquetaPrioridad etiqueta${proyecto.prioridad.charAt(0).toUpperCase() + proyecto.prioridad.slice(1)}`}>{proyecto.prioridad.toUpperCase()}</span>
                         {/* Badge de urgencia (si no es normal) */}
@@ -160,14 +183,14 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
             {/* Tareas del proyecto (solo cuando está activo) */}
             {activo && (
                 <div className="proyectoTareas">
-                    <ListaTareas tareas={tareasVisibles} proyectoId={proyecto.id} onToggleTarea={onToggleTarea} onCrearTarea={crearTareaConHerencia} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} />
+                    <ListaTareas tareas={tareasVisibles} proyectoId={proyecto.id} onToggleTarea={onToggleTarea} onCrearTarea={crearTareaConHerencia} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} modoCompacto={modoCompacto} />
                 </div>
             )}
         </div>
     );
 }
 
-export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSeleccionarProyecto, proyectoSeleccionadoId, onEditarProyecto, onEliminarProyecto, onCambiarEstadoProyecto, onCompartirProyecto, estaCompartido, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, ocultarCompletados = false, ocultarTareasCompletadas = false, ordenDefecto = 'fecha', mostrarProgreso = true}: ListaProyectosProps): JSX.Element {
+export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSeleccionarProyecto, proyectoSeleccionadoId, onEditarProyecto, onEliminarProyecto, onCambiarEstadoProyecto, onCompartirProyecto, estaCompartido, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, ocultarCompletados = false, ocultarTareasCompletadas = false, ordenDefecto = 'fecha', mostrarProgreso = true, modoCompacto = false}: ListaProyectosProps): JSX.Element {
     const [menuContexto, setMenuContexto] = useState<MenuContextoProyecto>({visible: false, x: 0, y: 0, proyectoId: null});
 
     /* Toggle: si ya está seleccionado, deseleccionar */
@@ -274,7 +297,7 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                         .map(proyecto => {
                             const tareasProyecto = tareas.filter(t => t.proyectoId === proyecto.id);
                             const proyectoCompartido = estaCompartido?.(proyecto.id) ?? false;
-                            return <ProyectoItem key={proyecto.id} proyecto={proyecto} activo={proyecto.id === proyectoSeleccionadoId} tareasProyecto={tareasProyecto} estaCompartido={proyectoCompartido} onToggle={() => toggleProyecto(proyecto.id)} onEditar={() => onEditarProyecto?.(proyecto)} onEliminar={() => onEliminarProyecto?.(proyecto.id)} onContextMenu={e => manejarContextMenu(e, proyecto.id)} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} mostrarProgreso={mostrarProgreso} ocultarTareasCompletadas={ocultarTareasCompletadas} />;
+                            return <ProyectoItem key={proyecto.id} proyecto={proyecto} activo={proyecto.id === proyectoSeleccionadoId} tareasProyecto={tareasProyecto} estaCompartido={proyectoCompartido} onToggle={() => toggleProyecto(proyecto.id)} onEditar={() => onEditarProyecto?.(proyecto)} onEliminar={() => onEliminarProyecto?.(proyecto.id)} onContextMenu={e => manejarContextMenu(e, proyecto.id)} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} mostrarProgreso={mostrarProgreso} ocultarTareasCompletadas={ocultarTareasCompletadas} ordenDefecto={ordenDefecto} modoCompacto={modoCompacto} />;
                         })}
 
                     {proyectos.length === 0 && (

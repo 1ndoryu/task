@@ -232,3 +232,30 @@
 .botonTexto:hover {
     opacity: 0.8;
 }
+
+/* 
+ * MODO COMPACTO
+ * Reducción de espaciado, fuente y layout de una sola fila
+ */
+.proyectoItemWrapper--compacto .proyectoItem {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Vertical reducido, horizontal normal */
+    gap: var(--dashboard-espacioSm);
+    min-height: 36px;
+}
+
+.proyectoItemWrapper--compacto .proyectoItemContenido {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioMd);
+}
+
+.proyectoNombre--compacto {
+    font-size: var(--dashboard-tamanoBase);
+    /* margin-bottom o padding reset si hubiera */
+}
+
+/* Ajustes para la lista de proyectos en modo compacto */
+.proyectoItemWrapper--compacto {
+    /* gap: 1px; ya manejado en listaProyectos */
+}

@@ -389,6 +389,7 @@ class AIApiController
 
         try {
             $repository = new TareasRepository($userId);
+            $actividadRepo = new \App\Repository\ActividadRepository($userId);
             $tareas = $repository->getAll();
 
             $indice = null;
@@ -406,10 +407,30 @@ class AIApiController
             /* Toggle completado */
             $estabaCompletada = !empty($tareas[$indice]['completado']);
             $tareas[$indice]['completado'] = !$estabaCompletada;
+            $proyectoId = $tareas[$indice]['proyectoId'] ?? null;
 
             if (!$estabaCompletada) {
+                // Marcar como completada
                 $tareas[$indice]['fechaCompletado'] = current_time('c');
+
+                // Registrar actividad
+                $actividadRepo->registrar(
+                    'tarea_completada',
+                    $tareaId,
+                    'tarea',
+                    $proyectoId,
+                    current_time('Y-m-d'),
+                    ['texto' => $tareas[$indice]['texto']]
+                );
             } else {
+                // Marcar como pendiente (desmarcar)
+                // Intentar obtener la fecha de completado original para eliminar la actividad correcta
+                $fechaCompletado = isset($tareas[$indice]['fechaCompletado'])
+                    ? date('Y-m-d', strtotime($tareas[$indice]['fechaCompletado']))
+                    : current_time('Y-m-d'); // Fallback a hoy si no existe
+
+                $actividadRepo->eliminarPorTarea($tareaId, $fechaCompletado);
+
                 unset($tareas[$indice]['fechaCompletado']);
             }
 

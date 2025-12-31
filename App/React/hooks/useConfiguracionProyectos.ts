@@ -7,13 +7,15 @@ export interface ConfiguracionProyectos {
     ocultarTareasCompletadas: boolean;
     ordenDefecto: OrdenamientoProyectos;
     mostrarProgreso: boolean;
+    modoCompacto: boolean;
 }
 
 export const CONFIG_PROYECTOS_DEFECTO: ConfiguracionProyectos = {
     ocultarCompletados: false,
     ocultarTareasCompletadas: false,
     ordenDefecto: 'fecha',
-    mostrarProgreso: true
+    mostrarProgreso: true,
+    modoCompacto: false
 };
 
 export function useConfiguracionProyectos() {
@@ -37,12 +39,17 @@ export function useConfiguracionProyectos() {
         setValor(prev => ({...prev, ocultarTareasCompletadas: !prev.ocultarTareasCompletadas}));
     };
 
+    const toggleModoCompacto = () => {
+        setValor(prev => ({...prev, modoCompacto: !prev.modoCompacto}));
+    };
+
     return {
         configuracion: valor,
         actualizarConfiguracion: setValor,
         toggleOcultarCompletados,
         toggleOcultarTareasCompletadas,
         cambiarOrdenDefecto,
-        toggleMostrarProgreso
+        toggleMostrarProgreso,
+        toggleModoCompacto
     };
 }

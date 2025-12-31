@@ -80,7 +80,28 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
             ),
             proyectos: ({altura, contenedorRef, esAuto}) => (
                 <div ref={contenedorRef} className="panelDashboard" style={esAuto ? undefined : {height: altura}}>
-                    <PanelProyectos proyectos={dashboard.proyectos || []} tareas={dashboard.tareas} configuracion={configProyectos.configuracion} opcionesOrdenProyectos={opciones.opcionesOrdenProyectos} onAbrirModalCrearProyecto={() => modales.abrirCreacionRapida('proyecto')} onAbrirModalEditarProyecto={modales.abrirModalEditarProyecto} onAbrirModalConfigProyectos={modales.abrirModalConfigProyectos} onEliminarProyecto={dashboard.eliminarProyecto} onCambiarEstadoProyecto={dashboard.cambiarEstadoProyecto} onCambiarOrdenProyectos={configProyectos.cambiarOrdenDefecto} onCompartirProyecto={compartir.manejarCompartirProyecto} estaCompartido={compartir.estaCompartidoProyecto} onToggleTarea={dashboard.toggleTarea} onCrearTarea={dashboard.crearTarea} onEditarTarea={dashboard.editarTarea} onEliminarTarea={dashboard.eliminarTarea} onReordenarTareas={dashboard.reordenarTareas} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
+                    <PanelProyectos
+                        proyectos={dashboard.proyectos || []}
+                        tareas={dashboard.tareas}
+                        configuracion={configProyectos.configuracion}
+                        opcionesOrdenProyectos={opciones.opcionesOrdenProyectos}
+                        onAbrirModalCrearProyecto={() => modales.abrirCreacionRapida('proyecto')}
+                        onAbrirModalEditarProyecto={modales.abrirModalEditarProyecto}
+                        onAbrirModalConfigProyectos={modales.abrirModalConfigProyectos}
+                        onEliminarProyecto={dashboard.eliminarProyecto}
+                        onCambiarEstadoProyecto={dashboard.cambiarEstadoProyecto}
+                        onCambiarOrdenProyectos={configProyectos.cambiarOrdenDefecto}
+                        onCompartirProyecto={compartir.manejarCompartirProyecto}
+                        estaCompartido={compartir.estaCompartidoProyecto}
+                        onToggleTarea={dashboard.toggleTarea}
+                        onCrearTarea={dashboard.crearTarea}
+                        onEditarTarea={dashboard.editarTarea}
+                        onEliminarTarea={dashboard.eliminarTarea}
+                        onReordenarTareas={dashboard.reordenarTareas}
+                        renderHandleArrastre={renderHandleArrastre}
+                        handleMinimizar={handleMinimizarElement}
+                        modoCompacto={configProyectos.configuracion.modoCompacto}
+                    />
                 </div>
             ),
             ejecucion: ({altura, contenedorRef, esAuto}) => (
@@ -113,6 +134,7 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
                         onEditarHabito={manejarEditarHabitoPorId}
                         onEliminarHabito={dashboard.eliminarHabito}
                         onPosponerHabito={dashboard.posponerHabito}
+                        modoCompacto={configTareas.configuracion.modoCompacto}
                     />
                 </div>
             )

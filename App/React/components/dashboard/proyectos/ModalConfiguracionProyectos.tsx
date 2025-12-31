@@ -15,9 +15,10 @@ interface ModalConfiguracionProyectosProps {
     onToggleCompletados: () => void;
     onToggleTareasCompletadas: () => void;
     onToggleProgreso: () => void;
+    onToggleModoCompacto: () => void;
 }
 
-export function ModalConfiguracionProyectos({estaAbierto, onCerrar, configuracion, onToggleCompletados, onToggleTareasCompletadas, onToggleProgreso}: ModalConfiguracionProyectosProps): JSX.Element {
+export function ModalConfiguracionProyectos({estaAbierto, onCerrar, configuracion, onToggleCompletados, onToggleTareasCompletadas, onToggleProgreso, onToggleModoCompacto}: ModalConfiguracionProyectosProps): JSX.Element {
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuración de Proyectos">
             <div className="contenedorOpcionesConfig">
@@ -50,6 +51,17 @@ export function ModalConfiguracionProyectos({estaAbierto, onCerrar, configuracio
                         <span className="descripcionOpcionConfig">Visualizar la barra de progreso de tareas</span>
                     </div>
                     <ToggleSwitch checked={configuracion.mostrarProgreso} onChange={onToggleProgreso} />
+                </div>
+
+                <div className="separadorOpcionesConfig" />
+
+                {/* Modo Compacto */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Modo Compacto</span>
+                        <span className="descripcionOpcionConfig">Reducir el tamaño de la fuente y el espaciado</span>
+                    </div>
+                    <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
                 </div>
             </div>
         </Modal>

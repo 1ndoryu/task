@@ -42,11 +42,15 @@
 /* 
  * CHECKBOX
  */
+/* 
+ * CHECKBOX
+ */
 .tareaCheckbox {
-    margin-top: 2px;
+    margin-top: 5px; /* Bajado aun mas (antes 5px) */
     width: 0.75rem;
     height: 0.75rem;
     border: 1px solid var(--dashboard-textoIndice);
+    border-radius: 0; /* Completamente cuadrado */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -660,4 +664,35 @@
     right: 0;
     height: 2px;
     background-color: var(--dashboard-estadoExito);
+}
+
+/* 
+ * MODO COMPACTO
+ * Reducción de espaciado y fuente
+ */
+.tareaItem--compacto {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Padding vertical reducido, horizontal normal */
+    gap: var(--dashboard-espacioMd); /* Gap normal para mantener alineacion */
+    min-height: 32px;
+}
+
+.tareaTexto--compacto {
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.4;
+}
+
+.tareaItem--compacto.tareaItemSubtarea {
+    padding-left: 30px; /* Mantener indentacion */
+}
+
+.tareaConColapsador--compacto .tareaColapsadorBoton {
+    margin-top: var(--dashboard-espacioSm);
+    width: 1rem;
+    height: 1rem;
+}
+
+.tareaItem--compacto .tareaCheckbox {
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-top: 6px; /* Bajado aun mas en modo compacto */
 }

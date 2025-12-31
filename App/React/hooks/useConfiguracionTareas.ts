@@ -6,13 +6,15 @@ export interface ConfiguracionTareas {
     eliminarCompletadasDespuesDeUnDia: boolean;
     /* Mostrar hábitos que "tocan hoy" como tareas en Ejecución */
     mostrarHabitosEnEjecucion: boolean;
+    modoCompacto: boolean;
 }
 
 export const CONFIG_POR_DEFECTO: ConfiguracionTareas = {
     ocultarCompletadas: true,
     ocultarBadgeProyecto: true,
     eliminarCompletadasDespuesDeUnDia: false,
-    mostrarHabitosEnEjecucion: false
+    mostrarHabitosEnEjecucion: false,
+    modoCompacto: false
 };
 
 export function useConfiguracionTareas() {
@@ -36,12 +38,17 @@ export function useConfiguracionTareas() {
         setValor(prev => ({...prev, mostrarHabitosEnEjecucion: !prev.mostrarHabitosEnEjecucion}));
     };
 
+    const toggleModoCompacto = () => {
+        setValor(prev => ({...prev, modoCompacto: !prev.modoCompacto}));
+    };
+
     return {
         configuracion: valor,
         actualizarConfiguracion: setValor,
         toggleOcultarCompletadas,
         toggleOcultarBadgeProyecto,
         toggleEliminarCompletadasDespuesDeUnDia,
-        toggleMostrarHabitosEnEjecucion
+        toggleMostrarHabitosEnEjecucion,
+        toggleModoCompacto
     };
 }

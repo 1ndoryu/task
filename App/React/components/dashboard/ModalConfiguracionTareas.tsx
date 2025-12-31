@@ -14,10 +14,12 @@ interface ModalConfiguracionTareasProps {
     onToggleCompletadas: () => void;
     onToggleBadgeProyecto: () => void;
     onToggleEliminarCompletadas: () => void;
+    onToggleEstilos?: () => void;
     onToggleMostrarHabitos: () => void;
+    onToggleModoCompacto: () => void;
 }
 
-export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos}: ModalConfiguracionTareasProps): JSX.Element {
+export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto}: ModalConfiguracionTareasProps): JSX.Element {
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Vista">
             <div className="contenedorOpcionesConfig">
@@ -59,6 +61,17 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                         <span className="descripcionOpcionConfig">Los hábitos que tocan hoy aparecerán como tareas en la lista</span>
                     </div>
                     <ToggleSwitch checked={configuracion.mostrarHabitosEnEjecucion} onChange={onToggleMostrarHabitos} />
+                </div>
+
+                <div className="separadorOpcionesConfig" />
+
+                {/* Opcion 5: Modo Compacto */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Modo Compacto</span>
+                        <span className="descripcionOpcionConfig">Reducir el tamaño de la fuente y el espaciado</span>
+                    </div>
+                    <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
                 </div>
             </div>
         </Modal>
