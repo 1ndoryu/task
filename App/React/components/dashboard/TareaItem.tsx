@@ -174,6 +174,10 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 onEditar?.({
                     prioridad: opcionId as NivelPrioridad
                 });
+            } else if (['bloqueante', 'urgente', 'normal', 'chill'].includes(opcionId)) {
+                onEditar?.({
+                    urgencia: opcionId as NivelUrgencia
+                });
             }
         },
         [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onPosponerHabito]
@@ -199,32 +203,66 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             separadorDespues: true
         },
         {
-            id: 'alta',
-            etiqueta: 'Prioridad Alta',
-            icono: <Flag size={12} color="#ef4444" />
+            id: 'prioridad-menu',
+            etiqueta: 'Prioridad',
+            icono: <Flag size={12} />,
+            separadorDespues: !tarea.prioridad,
+            subOpciones: [
+                {
+                    id: 'alta',
+                    etiqueta: 'Alta',
+                    icono: <Flag size={12} color="#ef4444" />
+                },
+                {
+                    id: 'media',
+                    etiqueta: 'Media',
+                    icono: <Flag size={12} color="#f59e0b" />
+                },
+                {
+                    id: 'baja',
+                    etiqueta: 'Baja',
+                    icono: <Flag size={12} color="#94a3b8" />
+                },
+                ...(tarea.prioridad
+                    ? [
+                          {
+                              id: 'sin-prioridad',
+                              etiqueta: 'Sin prioridad',
+                              icono: <X size={12} />,
+                              separadorDespues: false
+                          }
+                      ]
+                    : [])
+            ]
         },
         {
-            id: 'media',
-            etiqueta: 'Prioridad Media',
-            icono: <Flag size={12} color="#f59e0b" />
-        },
-        {
-            id: 'baja',
-            etiqueta: 'Prioridad Baja',
-            icono: <Flag size={12} color="#94a3b8" />,
-            separadorDespues: !tarea.prioridad
+            id: 'urgencia-menu',
+            etiqueta: 'Urgencia',
+            icono: <Zap size={12} />,
+            subOpciones: [
+                {
+                    id: 'bloqueante',
+                    etiqueta: 'Bloqueante',
+                    icono: <Zap size={12} color="#ef4444" />
+                },
+                {
+                    id: 'urgente',
+                    etiqueta: 'Urgente',
+                    icono: <Zap size={12} color="#f59e0b" />
+                },
+                {
+                    id: 'normal',
+                    etiqueta: 'Normal',
+                    icono: <Zap size={12} color="#94a3b8" />
+                },
+                {
+                    id: 'chill',
+                    etiqueta: 'Chill',
+                    icono: <Zap size={12} color="#3b82f6" />
+                }
+            ]
         }
     ];
-
-    /* Agregar opcion de quitar prioridad solo si tiene una */
-    if (tarea.prioridad) {
-        opcionesMenu.push({
-            id: 'sin-prioridad',
-            etiqueta: 'Sin prioridad',
-            icono: <X size={12} />,
-            separadorDespues: true
-        });
-    }
 
     /* Agregar opcion de eliminar al final */
     opcionesMenu.push({

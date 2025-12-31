@@ -101,3 +101,39 @@
     margin: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
     background-color: var(--dashboard-bordePrincipal);
 }
+
+/* 
+ * SUBMENU 
+ */
+.menuContextualItemWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.menuContextualSubmenu {
+    position: absolute !important; /* Importante para sobreescribir position: fixed del componente base */
+    top: -4px !important;
+    left: 100% !important;
+    margin-left: 4px;
+    margin-top: -4px;
+    z-index: 10001;
+    /* Resetear animación para submenús para que no sea molesta */
+    animation: menuContextualAparecer 0.1s ease-out;
+}
+
+.menuContextualFlecha {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 1rem;
+    margin-left: var(--dashboard-espacioXs);
+    opacity: 0.5;
+}
+
+.menuContextualOpcionActiva {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.menuContextualOpcion:hover .menuContextualFlecha {
+    opacity: 1;
+}
