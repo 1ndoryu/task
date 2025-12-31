@@ -69,18 +69,24 @@ class HabitosRepository
     }
 
     /**
-     * Guarda los hábitos (Sincronización total: Upsert + Soft Delete)
+     * Guarda los hábitos (Upsert + Soft Delete opcional)
+     * 
+     * @param array $habitos Lista de hábitos a guardar
+     * @param bool $partialUpdate Si es true, NO borra los hábitos que faltan (modo incremental)
      */
-    public function saveAll(array $habitos): bool
+    public function saveAll(array $habitos, bool $partialUpdate = false): bool
     {
         global $wpdb;
         $table = Schema::getTableName('habitos');
         $now = current_time('mysql');
 
-        $existingIds = $wpdb->get_col($wpdb->prepare(
-            "SELECT id_local FROM $table WHERE user_id = %d AND deleted_at IS NULL",
-            $this->userId
-        ));
+        $existingIds = [];
+        if (!$partialUpdate) {
+            $existingIds = $wpdb->get_col($wpdb->prepare(
+                "SELECT id_local FROM $table WHERE user_id = %d AND deleted_at IS NULL",
+                $this->userId
+            ));
+        }
 
         $incomingIds = [];
 
@@ -137,15 +143,17 @@ class HabitosRepository
             }
         }
 
-        /* Soft Delete para los que ya no vienen */
-        $toDelete = array_diff($existingIds, $incomingIds);
-        if (!empty($toDelete)) {
-            $idsList = implode(',', array_map('intval', $toDelete));
-            $wpdb->query($wpdb->prepare(
-                "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
-                $now,
-                $this->userId
-            ));
+        /* Soft Delete para los que ya no vienen (Solo si NO es actualización parcial) */
+        if (!$partialUpdate) {
+            $toDelete = array_diff($existingIds, $incomingIds);
+            if (!empty($toDelete)) {
+                $idsList = implode(',', array_map('intval', $toDelete));
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
+                    $now,
+                    $this->userId
+                ));
+            }
         }
 
         return true;

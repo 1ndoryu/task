@@ -69,18 +69,24 @@ class ProyectosRepository
     }
 
     /**
-     * Guarda los proyectos (Upsert + Soft Delete)
+     * Guarda los proyectos (Upsert + Soft Delete opcional)
+     * 
+     * @param array $proyectos Lista de proyectos a guardar
+     * @param bool $partialUpdate Si es true, NO borra los proyectos que faltan (modo incremental)
      */
-    public function saveAll(array $proyectos): bool
+    public function saveAll(array $proyectos, bool $partialUpdate = false): bool
     {
         global $wpdb;
         $table = Schema::getTableName('proyectos');
         $now = current_time('mysql');
 
-        $existingIds = $wpdb->get_col($wpdb->prepare(
-            "SELECT id_local FROM $table WHERE user_id = %d AND deleted_at IS NULL",
-            $this->userId
-        ));
+        $existingIds = [];
+        if (!$partialUpdate) {
+            $existingIds = $wpdb->get_col($wpdb->prepare(
+                "SELECT id_local FROM $table WHERE user_id = %d AND deleted_at IS NULL",
+                $this->userId
+            ));
+        }
 
         $incomingIds = [];
 
@@ -144,15 +150,17 @@ class ProyectosRepository
             }
         }
 
-        /* Soft Delete */
-        $toDelete = array_diff($existingIds, $incomingIds);
-        if (!empty($toDelete)) {
-            $idsList = implode(',', array_map('intval', $toDelete));
-            $wpdb->query($wpdb->prepare(
-                "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
-                $now,
-                $this->userId
-            ));
+        /* Soft Delete (Solo si NO es actualización parcial) */
+        if (!$partialUpdate) {
+            $toDelete = array_diff($existingIds, $incomingIds);
+            if (!empty($toDelete)) {
+                $idsList = implode(',', array_map('intval', $toDelete));
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
+                    $now,
+                    $this->userId
+                ));
+            }
         }
 
         return true;

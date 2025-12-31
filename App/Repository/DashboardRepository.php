@@ -145,21 +145,66 @@ class DashboardRepository
     }
 
     /* Metodos delegados para compatibilidad */
-    public function getHabitos(): array { return $this->habitosRepo->getAll(); }
-    public function setHabitos(array $habitos): bool { return $this->habitosRepo->saveAll($habitos); }
-    public function getTareas(): array { return $this->tareasRepo->getAll(); }
-    public function setTareas(array $tareas): bool { return $this->tareasRepo->saveAll($tareas); }
-    public function getProyectos(): array { return $this->proyectosRepo->getAll(); }
-    public function setProyectos(array $proyectos): bool { return $this->proyectosRepo->saveAll($proyectos); }
-    public function getNotas(): mixed { return $this->configRepo->getNotas(); }
-    public function setNotas(mixed $notas): bool { return $this->configRepo->setNotas($notas); }
-    public function getConfiguracion(): array { return $this->configRepo->getConfiguracion(); }
-    public function setConfiguracion(array $config): bool { return $this->configRepo->setConfiguracion($config); }
-    public function getSyncStatus(): array { return $this->configRepo->getSyncStatus(); }
-    public function getLastUpdate(): ?string { return $this->configRepo->getLastUpdate(); }
-    public function esCifradoActivo(): bool { return $this->habitosRepo->esCifradoActivo(); }
-    public function validateData(array $data): array { return ['valid' => true, 'errors' => []]; }
-    public function getChangesSince(int $since): array { return $this->configRepo->getChangesSince($since); }
+    public function getHabitos(): array
+    {
+        return $this->habitosRepo->getAll();
+    }
+    public function setHabitos(array $habitos): bool
+    {
+        return $this->habitosRepo->saveAll($habitos);
+    }
+    public function getTareas(): array
+    {
+        return $this->tareasRepo->getAll();
+    }
+    public function setTareas(array $tareas): bool
+    {
+        return $this->tareasRepo->saveAll($tareas);
+    }
+    public function getProyectos(): array
+    {
+        return $this->proyectosRepo->getAll();
+    }
+    public function setProyectos(array $proyectos): bool
+    {
+        return $this->proyectosRepo->saveAll($proyectos);
+    }
+    public function getNotas(): mixed
+    {
+        return $this->configRepo->getNotas();
+    }
+    public function setNotas(mixed $notas): bool
+    {
+        return $this->configRepo->setNotas($notas);
+    }
+    public function getConfiguracion(): array
+    {
+        return $this->configRepo->getConfiguracion();
+    }
+    public function setConfiguracion(array $config): bool
+    {
+        return $this->configRepo->setConfiguracion($config);
+    }
+    public function getSyncStatus(): array
+    {
+        return $this->configRepo->getSyncStatus();
+    }
+    public function getLastUpdate(): ?string
+    {
+        return $this->configRepo->getLastUpdate();
+    }
+    public function esCifradoActivo(): bool
+    {
+        return $this->habitosRepo->esCifradoActivo();
+    }
+    public function validateData(array $data): array
+    {
+        return ['valid' => true, 'errors' => []];
+    }
+    public function getChangesSince(int $since): array
+    {
+        return $this->configRepo->getChangesSince($since);
+    }
 
     public function applyChanges(array $changes, int $clientTimestamp): array
     {
@@ -174,10 +219,10 @@ class DashboardRepository
                 $this->softDeleteEntity($entity, (int)$data['id']);
                 $applied[] = $data['id'];
             } elseif (($type === 'create' || $type === 'update') && $data) {
-                match($entity) {
-                    'habito' => $this->habitosRepo->saveAll([$data]),
-                    'tarea' => $this->tareasRepo->saveAll([$data]),
-                    'proyecto' => $this->proyectosRepo->saveAll([$data]),
+                match ($entity) {
+                    'habito' => $this->habitosRepo->saveAll([$data], true),
+                    'tarea' => $this->tareasRepo->saveAll([$data], true),
+                    'proyecto' => $this->proyectosRepo->saveAll([$data], true),
                     default => null
                 };
                 $applied[] = $data['id'] ?? null;

@@ -69,18 +69,25 @@ class TareasRepository
     }
 
     /**
-     * Guarda las tareas (Upsert + Soft Delete)
+     * Guarda las tareas (Upsert + Soft Delete opcional)
+     * 
+     * @param array $tareas Lista de tareas a guardar
+     * @param bool $partialUpdate Si es true, NO borra las tareas que faltan en la lista (modo incremental)
      */
-    public function saveAll(array $tareas): bool
+    public function saveAll(array $tareas, bool $partialUpdate = false): bool
     {
         global $wpdb;
         $table = Schema::getTableName('tareas');
         $now = current_time('mysql');
 
-        $existingIds = $wpdb->get_col($wpdb->prepare(
-            "SELECT id_local FROM $table WHERE user_id = %d AND deleted_at IS NULL",
-            $this->userId
-        ));
+        // Solo necesitamos obtener IDs existentes si vamos a borrar los que faltan
+        $existingIds = [];
+        if (!$partialUpdate) {
+            $existingIds = $wpdb->get_col($wpdb->prepare(
+                "SELECT id_local FROM $table WHERE user_id = %d AND deleted_at IS NULL",
+                $this->userId
+            ));
+        }
 
         $incomingIds = [];
 
@@ -150,15 +157,17 @@ class TareasRepository
             }
         }
 
-        /* Soft Delete */
-        $toDelete = array_diff($existingIds, $incomingIds);
-        if (!empty($toDelete)) {
-            $idsList = implode(',', array_map('intval', $toDelete));
-            $wpdb->query($wpdb->prepare(
-                "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
-                $now,
-                $this->userId
-            ));
+        /* Soft Delete (Solo si NO es actualización parcial) */
+        if (!$partialUpdate) {
+            $toDelete = array_diff($existingIds, $incomingIds);
+            if (!empty($toDelete)) {
+                $idsList = implode(',', array_map('intval', $toDelete));
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
+                    $now,
+                    $this->userId
+                ));
+            }
         }
 
         return true;
