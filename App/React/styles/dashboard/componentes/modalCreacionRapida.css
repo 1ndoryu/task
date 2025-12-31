@@ -39,7 +39,6 @@
     position: relative;
     padding: var(--dashboard-espacioLg);
     transition: border-color var(--dashboard-transicionRapida);
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
 .creacionRapidaIcono {
