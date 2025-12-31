@@ -1,26 +1,46 @@
 {
     "name": "glory-mcp-server",
     "version": "1.0.0",
-    "description": "MCP Server para gestión de tareas Glory",
+    "description": "Servidor MCP para gestión de tareas, proyectos y hábitos con Glory Tasks",
     "type": "module",
     "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "glory-mcp-server": "./dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "tsc",
+        "prepublishOnly": "npm run build",
         "start": "node dist/index.js",
         "dev": "tsx src/index.ts",
         "inspect": "npx @modelcontextprotocol/inspector node dist/index.js"
     },
     "keywords": [
         "mcp",
+        "model-context-protocol",
         "glory",
         "tareas",
-        "productividad"
+        "tasks",
+        "productividad",
+        "ai",
+        "claude",
+        "antigravity"
     ],
-    "author": "",
-    "license": "ISC",
+    "author": "Glory Builder",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nakomidev/glory-mcp-server"
+    },
+    "homepage": "https://task.nakomi.studio",
+    "engines": {
+        "node": ">=18.0.0"
+    },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.0.0",
-        "dotenv": "^17.2.3",
         "zod": "^3.22.0"
     },
     "devDependencies": {

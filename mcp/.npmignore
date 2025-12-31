@@ -1,0 +1,35 @@
+# Archivos fuente (usamos 'files' en package.json para incluir solo dist)
+src/
+*.ts
+
+# Configuración de desarrollo
+.env
+.env.example
+.env.local
+*.log
+
+# Tests y scripts de desarrollo
+test-*.js
+test-*.ts
+check_tasks.ts
+diagnose-env.js
+claude_desktop_config.json
+
+# IDE y OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Documentación de desarrollo (solo README va a npm)
+*.md
+!README.md

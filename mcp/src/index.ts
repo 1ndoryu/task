@@ -3,51 +3,13 @@
  * Glory MCP Server
  * Servidor MCP para gestión de tareas, proyectos y hábitos
  *
- * Uso:
- *   node dist/index.js
+ * Uso con npx:
+ *   npx glory-mcp-server
  *
- * Variables de entorno requeridas:
- *   GLORY_API_URL - URL base de la API (default: http://glorybuilder.local/wp-json/glory/v1)
- *   GLORY_AUTH_TOKEN - Token de autenticación (Application Password en Base64)
+ * Variables de entorno requeridas (configuradas en el cliente MCP):
+ *   GLORY_API_URL - URL base de la API (ej: https://task.nakomi.studio/wp-json/glory/v1)
+ *   GLORY_AUTH_TOKEN - Token de autenticación (Application Password en Base64: user:token)
  */
-
-/*
- * Cargar variables de entorno manualmente para evitar logs de dotenv
- * que interfieren con el protocolo STDIO del MCP.
- * Las variables de entorno del proceso tienen PRIORIDAD sobre el archivo .env
- */
-import {readFileSync} from 'fs';
-import {resolve} from 'path';
-
-/* Cargar .env manualmente como fallback (sin ningún output) */
-try {
-    const envPath = resolve(process.cwd(), '.env');
-    const envContent = readFileSync(envPath, 'utf8');
-
-    envContent.split('\n').forEach(line => {
-        const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith('#')) {
-            const [key, ...valueParts] = trimmed.split('=');
-            const value = valueParts.join('=').trim();
-            /* Solo asignar si la variable NO existe ya en process.env */
-            if (key && value && !process.env[key.trim()]) {
-                process.env[key.trim()] = value;
-            }
-        }
-    });
-} catch (error) {
-    /* Si no existe .env o hay error, continuar sin problema */
-}
-
-/*
- * Debug desactivado: Los logs interfieren con el protocolo STDIO del MCP
- * Para debug, ejecutar: node dist/index.js 2>debug.log
- */
-// console.error('[Glory MCP] Configuración detectada:');
-// console.error(`  - GLORY_API_URL: ${process.env.GLORY_API_URL || '(no definida)'} ${envFromProcess.apiUrl ? '(del cliente)' : '(de .env)'}`);
-// console.error(`  - GLORY_WP_USERNAME: ${process.env.GLORY_WP_USERNAME || '(no definido)'} ${envFromProcess.username ? '(del cliente)' : '(de .env)'}`);
-// console.error(`  - GLORY_WP_PASSWORD: ${process.env.GLORY_WP_PASSWORD ? '***configurado***' : '(no definido)'} ${envFromProcess.password ? '(del cliente)' : '(de .env)'}`);
-// console.error(`  - GLORY_AUTH_TOKEN: ${process.env.GLORY_AUTH_TOKEN ? '***configurado***' : '(no definido)'} ${envFromProcess.token ? '(del cliente)' : '(de .env)'}`);
 
 import {Server} from '@modelcontextprotocol/sdk/server/index.js';
 import {StdioServerTransport} from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -281,6 +243,15 @@ const toolDefinitions = [
             type: 'object',
             properties: {}
         }
+    },
+    /* Herramienta de diagnóstico */
+    {
+        name: 'ping',
+        description: 'Herramienta de diagnóstico. Devuelve pong sin hacer peticiones HTTP.',
+        inputSchema: {
+            type: 'object',
+            properties: {}
+        }
     }
 ];
 
@@ -324,6 +295,17 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
             /* Dashboard */
             case 'resumen_dashboard':
                 return await handleResumenDashboard();
+
+            /* Diagnóstico */
+            case 'ping':
+                return {
+                    content: [
+                        {
+                            type: 'text' as const,
+                            text: 'pong - El servidor MCP está funcionando correctamente'
+                        }
+                    ]
+                };
 
             default:
                 return {
