@@ -9,6 +9,7 @@
  */
 
 import {invalidarCache, invalidarCacheParcial} from './actividadStore';
+import {obtenerFechaLocalISO} from '../utils/fecha';
 
 /* Base URL de la API */
 const API_BASE = '/wp-json/glory/v1/actividad';
@@ -83,13 +84,15 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
 
 /**
  * Atajos para registrar tipos comunes de actividad
+ * Todos envían la fecha local del cliente para evitar problemas de zona horaria
  */
 export function registrarTareaCompletada(tareaId: number, proyectoId?: number): Promise<boolean> {
     return registrarActividad({
         tipo: 'tarea_completada',
         elementoId: tareaId,
         elementoTipo: 'tarea',
-        proyectoId
+        proyectoId,
+        fecha: obtenerFechaLocalISO()
     });
 }
 
@@ -97,7 +100,8 @@ export function registrarHabitoCumplido(habitoId: number): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_cumplido',
         elementoId: habitoId,
-        elementoTipo: 'habito'
+        elementoTipo: 'habito',
+        fecha: obtenerFechaLocalISO()
     });
 }
 
@@ -105,7 +109,8 @@ export function registrarNotaCreada(notaId: number): Promise<boolean> {
     return registrarActividad({
         tipo: 'nota_creada',
         elementoId: notaId,
-        elementoTipo: 'nota'
+        elementoTipo: 'nota',
+        fecha: obtenerFechaLocalISO()
     });
 }
 
@@ -114,7 +119,8 @@ export function registrarAdjuntoSubido(tareaId: number, proyectoId?: number): Pr
         tipo: 'adjunto_subido',
         elementoId: tareaId,
         elementoTipo: 'tarea',
-        proyectoId
+        proyectoId,
+        fecha: obtenerFechaLocalISO()
     });
 }
 
@@ -124,7 +130,8 @@ export function registrarTareaDesmarcada(tareaId: number, proyectoId?: number): 
         tipo: 'tarea_desmarcada',
         elementoId: tareaId,
         elementoTipo: 'tarea',
-        proyectoId
+        proyectoId,
+        fecha: obtenerFechaLocalISO()
     });
 }
 
@@ -132,7 +139,8 @@ export function registrarHabitoDesmarcado(habitoId: number): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_desmarcado',
         elementoId: habitoId,
-        elementoTipo: 'habito'
+        elementoTipo: 'habito',
+        fecha: obtenerFechaLocalISO()
     });
 }
 
@@ -140,6 +148,7 @@ export function registrarHabitoPospuesto(habitoId: number): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_pospuesto',
         elementoId: habitoId,
-        elementoTipo: 'habito'
+        elementoTipo: 'habito',
+        fecha: obtenerFechaLocalISO()
     });
 }

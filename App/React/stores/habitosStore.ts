@@ -219,9 +219,8 @@ export const useHabitosStore = create<HabitosStore>()(
                         /* Actualizar historial detallado si existe */
                         get().actualizarHistorialHabito(id, hoy, null);
 
-                        /* Registrar actividad */
+                        /* Registrar actividad (invalida cache internamente al confirmar éxito) */
                         registrarHabitoDesmarcado(id);
-                        invalidarCache();
 
                         return {accion: 'desmarcado', estadoAnterior};
                     } else {
@@ -250,9 +249,8 @@ export const useHabitosStore = create<HabitosStore>()(
                         /* Actualizar historial detallado si existe */
                         get().actualizarHistorialHabito(id, hoy, 'completado');
 
-                        /* Registrar actividad */
+                        /* Registrar actividad (invalida cache internamente al confirmar éxito) */
                         registrarHabitoCumplido(id);
-                        invalidarCache();
 
                         return {accion: 'completado', estadoAnterior};
                     }
@@ -312,9 +310,8 @@ export const useHabitosStore = create<HabitosStore>()(
                         /* Actualizar historial detallado */
                         get().actualizarHistorialHabito(id, hoy, 'pospuesto');
 
-                        /* Registrar actividad */
+                        /* Registrar actividad (invalida cache internamente al confirmar éxito) */
                         registrarHabitoPospuesto(id);
-                        invalidarCache();
 
                         return {accion: 'pospuesto', estadoAnterior};
                     }

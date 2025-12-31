@@ -346,7 +346,7 @@
     max-width: 100px;
     height: 4px;
     background: var(--dashboard-barraFondo);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioSm);
     overflow: hidden;
 }
 

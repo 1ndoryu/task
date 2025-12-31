@@ -101,7 +101,7 @@
     max-width: 280px;
     background-color: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioSm);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     animation: selectorBadgeAparecer 0.15s ease-out;
