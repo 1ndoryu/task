@@ -59,6 +59,11 @@ class AIApiController
                         'validate_callback' => fn($param) => is_numeric($param),
                         'sanitize_callback' => 'absint',
                     ],
+                    'proyecto_id' => [
+                        'required' => false,
+                        'validate_callback' => fn($param) => is_numeric($param),
+                        'sanitize_callback' => 'absint',
+                    ],
                 ],
             ],
             [
@@ -115,6 +120,14 @@ class AIApiController
             'methods' => \WP_REST_Server::READABLE,
             'callback' => [self::class, 'obtenerProyecto'],
             'permission_callback' => [self::class, 'requireAuthentication'],
+            'args' => [
+                'filtro' => [
+                    'required' => false,
+                    'default' => 'todas',
+                    'enum' => ['pendientes', 'completadas', 'todas'],
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
         ]);
 
         /* 
@@ -224,7 +237,7 @@ class AIApiController
     {
         $userId = get_current_user_id();
         $filtro = $request->get_param('filtro');
-        $proyectoId = $request->get_param('proyectoId');
+        $proyectoId = $request->get_param('proyectoId') ?? $request->get_param('proyecto_id');
 
         try {
             $repository = new TareasRepository($userId);
@@ -500,8 +513,18 @@ class AIApiController
             $todasTareas = $tareasRepo->getAll();
             $tareasProyecto = array_values(array_filter($todasTareas, fn($t) => ($t['proyectoId'] ?? null) === $proyectoId));
 
+            // Calcular contadores antes de filtrar para la respuesta
             $pendientes = count(array_filter($tareasProyecto, fn($t) => empty($t['completado'])));
             $completadas = count($tareasProyecto) - $pendientes;
+
+            /* Aplicar filtro solicitado a la lista devuelta */
+            $filtro = $request->get_param('filtro');
+            if ($filtro === 'pendientes') {
+                $tareasProyecto = array_filter($tareasProyecto, fn($t) => empty($t['completado']));
+            } elseif ($filtro === 'completadas') {
+                $tareasProyecto = array_filter($tareasProyecto, fn($t) => !empty($t['completado']));
+            }
+            $tareasProyecto = array_values($tareasProyecto);
 
             return self::respuestaExitosa([
                 'proyecto' => $proyecto[0],
