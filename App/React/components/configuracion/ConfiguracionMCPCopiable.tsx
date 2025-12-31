@@ -17,11 +17,34 @@ export function ConfiguracionMCPCopiable({titulo, codigo}: ConfiguracionMCPCopia
 
     const manejarCopiar = useCallback(async () => {
         try {
-            await navigator.clipboard.writeText(codigo);
+            /* Intentar con la API moderna del clipboard */
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(codigo);
+            } else {
+                /* Fallback para HTTP/localhost sin HTTPS */
+                const textArea = document.createElement('textarea');
+                textArea.value = codigo;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                const exitoso = document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                if (!exitoso) {
+                    throw new Error('execCommand falló');
+                }
+            }
+
             setCopiado(true);
             setTimeout(() => setCopiado(false), 2000);
         } catch (error) {
             console.error('Error al copiar:', error);
+            /* Mostrar alerta como último recurso */
+            alert('No se pudo copiar automáticamente. Por favor, selecciona el texto manualmente y usa Ctrl+C.');
         }
     }, [codigo]);
 

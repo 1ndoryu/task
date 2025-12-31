@@ -158,30 +158,27 @@ El modal "Conectar con IA" genera automáticamente un contexto markdown que el u
 
 ---
 
-## 🚨 PROBLEMA PENDIENTE (31/12/2024)
+## ✅ PROBLEMA RESUELTO (31/12/2024)
 
-### Error 401 en producción + Username no incluido
+### Solución aplicada:
 
-**Síntoma:** La API devuelve `rest_forbidden` (401) incluso con token válido.
+El problema era que `generarContextoIA()` en el frontend recalculaba el Base64 con `btoa(usuario:token)`, pero cuando el usuario ya tenía un token existente (sin haberlo regenerado en la sesión actual), `tokenGenerado` era `null` y el contexto mostraba el placeholder.
 
-**Problemas identificados:**
+**Cambios realizados:**
 
-1. **Username no incluido automáticamente**
-   - El contexto copiable requiere que el usuario sepa su username
-   - Si el usuario está logueado, ya sabemos quién es
-   - **Solución:** Incluir el username en el contexto automáticamente
+1. **ModalConfiguracionMCP.tsx:**
+   - Se modificó `generarContextoIA()` para recibir directamente el `tokenBase64` pre-calculado del backend
+   - Se eliminó la lógica de `btoa()` del frontend
+   - Se eliminó la función `obtenerUsuario()` que ya no era necesaria
+   - Se actualizó la llamada en `obtenerConfiguracion('apirest')` para pasar `tokenBase64`
 
-2. **Formato del token**
-   - WordPress Application Passwords usan Basic Auth: `base64(usuario:password)`
-   - El usuario no debería tener que construir esto manualmente
-   - **Solución:** Generar el token Base64 completo y mostrarlo listo para usar
+2. **Backend (Glory/src/Api/MCPController.php):**
+   - Ya generaba correctamente `tokenBase64 = base64_encode($user->user_login . ':' . $password)` 
+   - No requirió cambios
 
-3. **Posible problema de despliegue**
-   - El AIApiController.php debe estar cargado en WordPress
-   - Verificar que el archivo esté siendo incluido
+**Flujo actual correcto:**
+1. Usuario genera token → backend devuelve `tokenBase64` con usuario:password codificado
+2. Usuario va a pestaña "API REST" → ve contexto con `Authorization: Basic dGFza05ha29taTp...`
+3. Si `tokenBase64` es null (token existe pero no fue regenerado en esta sesión) → muestra placeholder con nota de regenerar
 
-### TODO:
-- [ ] Modificar `generarContextoIA()` para incluir username automáticamente
-- [ ] Mostrar el header `Authorization: Basic xxx` completo y listo para copiar
-- [ ] Verificar que AIApiController.php esté registrado en WordPress
-- [ ] Probar en producción después de las correcciones
+

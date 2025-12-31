@@ -18,42 +18,39 @@ interface ModalConfiguracionMCPProps {
 
 type ClienteMCP = 'claude' | 'cursor' | 'apirest';
 
-/* URL de producción */
-const API_BASE_URL = 'https://task.nakomi.studio/wp-json/glory/v1';
-
 /* Genera el contexto copiable para asistentes IA como Antigravity */
-const generarContextoIA = (usuario: string, token: string): string => {
-    const tokenBase64 = token ? btoa(`${usuario}:${token}`) : 'TU_TOKEN_BASE64';
+const generarContextoIA = (tokenBase64: string, apiUrl: string): string => {
+    const tokenParaMostrar = tokenBase64 || 'TU_TOKEN_BASE64';
 
     return `# API de Tareas Glory
 
 ## Autenticación
 Todas las peticiones requieren el header:
-Authorization: Basic ${tokenBase64}
+Authorization: Basic ${tokenParaMostrar}
 
 ## Endpoints disponibles:
 
 ### Tareas
-- GET ${API_BASE_URL}/ai/tareas?filtro=pendientes|completadas|todas
-- POST ${API_BASE_URL}/ai/tareas (body: {texto, prioridad?, urgencia?})
-- GET ${API_BASE_URL}/ai/tareas/{id}
-- PUT ${API_BASE_URL}/ai/tareas/{id} (body: campos a editar)
-- POST ${API_BASE_URL}/ai/tareas/{id}/completar
-- DELETE ${API_BASE_URL}/ai/tareas/{id}
+- GET ${apiUrl}/ai/tareas?filtro=pendientes|completadas|todas
+- POST ${apiUrl}/ai/tareas (body: {texto, prioridad?, urgencia?})
+- GET ${apiUrl}/ai/tareas/{id}
+- PUT ${apiUrl}/ai/tareas/{id} (body: campos a editar)
+- POST ${apiUrl}/ai/tareas/{id}/completar
+- DELETE ${apiUrl}/ai/tareas/{id}
 
 ### Proyectos
-- GET ${API_BASE_URL}/ai/proyectos?estado=activo|completado|pausado|todos
-- GET ${API_BASE_URL}/ai/proyectos/{id}
+- GET ${apiUrl}/ai/proyectos?estado=activo|completado|pausado|todos
+- GET ${apiUrl}/ai/proyectos/{id}
 
 ### Hábitos
-- GET ${API_BASE_URL}/ai/habitos?importancia=Alta|Media|Baja
+- GET ${apiUrl}/ai/habitos?importancia=Alta|Media|Baja
 
 ### Resumen
-- GET ${API_BASE_URL}/ai/resumen
+- GET ${apiUrl}/ai/resumen
 
 ## Ejemplo crear tarea:
-POST ${API_BASE_URL}/ai/tareas
-Headers: Content-Type: application/json, Authorization: Basic ${tokenBase64}
+POST ${apiUrl}/ai/tareas
+Headers: Content-Type: application/json, Authorization: Basic ${tokenParaMostrar}
 Body: {"texto": "Mi tarea", "prioridad": "Alta", "urgencia": "urgente"}
 
 ## Valores válidos:
@@ -63,7 +60,7 @@ Body: {"texto": "Mi tarea", "prioridad": "Alta", "urgencia": "urgente"}
 };
 
 /* Configuraciones JSON para cada cliente MCP */
-const generarConfigClaude = (token: string) =>
+const generarConfigClaude = (token: string, apiUrl: string) =>
     JSON.stringify(
         {
             mcpServers: {
@@ -71,7 +68,7 @@ const generarConfigClaude = (token: string) =>
                     command: 'node',
                     args: ['C:/ruta/al/proyecto/glory/mcp/dist/index.js'],
                     env: {
-                        GLORY_API_URL: API_BASE_URL,
+                        GLORY_API_URL: apiUrl,
                         GLORY_AUTH_TOKEN: token || 'TOKEN_PLACEHOLDER'
                     }
                 }
@@ -81,14 +78,14 @@ const generarConfigClaude = (token: string) =>
         2
     );
 
-const generarConfigCursor = (token: string) =>
+const generarConfigCursor = (token: string, apiUrl: string) =>
     JSON.stringify(
         {
             'glory-tareas': {
                 command: 'node',
                 args: ['./mcp/dist/index.js'],
                 env: {
-                    GLORY_API_URL: API_BASE_URL,
+                    GLORY_API_URL: apiUrl,
                     GLORY_AUTH_TOKEN: token || 'TOKEN_PLACEHOLDER'
                 }
             }
@@ -103,12 +100,6 @@ function obtenerNonce(): string {
     return wpData?.nonce || '';
 }
 
-/* Obtiene el nombre de usuario actual (login de WordPress) */
-function obtenerUsuario(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {currentUser?: {login?: string}}}).gloryDashboard;
-    return wpData?.currentUser?.login || 'usuario';
-}
-
 export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracionMCPProps): JSX.Element {
     const [clienteActivo, setClienteActivo] = useState<ClienteMCP>('apirest');
     const [tokenExiste, setTokenExiste] = useState(false);
@@ -120,7 +111,6 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
 
     /* URL de API local para operaciones */
     const apiUrl = window.location.origin + '/wp-json/glory/v1';
-    const usuario = obtenerUsuario();
 
     /* Verificar estado del token al abrir el modal */
     useEffect(() => {
@@ -141,12 +131,16 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
                     setTokenExiste(true);
                     setFechaCreacion(datos.fechaCreacion);
                     setTokenGenerado(null);
-                    setTokenBase64(null);
+                    /* Recuperar tokenBase64 de localStorage si existe */
+                    const tokenGuardado = localStorage.getItem('glory_mcp_token_base64');
+                    setTokenBase64(tokenGuardado);
                 } else {
                     setTokenExiste(false);
                     setTokenGenerado(null);
                     setTokenBase64(null);
                     setFechaCreacion(null);
+                    /* Limpiar localStorage si no existe token */
+                    localStorage.removeItem('glory_mcp_token_base64');
                 }
             } catch (error) {
                 console.error('Error al verificar token:', error);
@@ -177,6 +171,10 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
                 setTokenBase64(datos.tokenBase64);
                 setTokenExiste(true);
                 setFechaCreacion(datos.fechaCreacion);
+                /* Guardar tokenBase64 en localStorage para persistencia */
+                if (datos.tokenBase64) {
+                    localStorage.setItem('glory_mcp_token_base64', datos.tokenBase64);
+                }
             } else {
                 console.error('Error al generar token:', datos.message);
             }
@@ -205,6 +203,8 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
                 setTokenBase64(null);
                 setTokenExiste(false);
                 setFechaCreacion(null);
+                /* Limpiar localStorage al revocar */
+                localStorage.removeItem('glory_mcp_token_base64');
             } else {
                 console.error('Error al revocar token:', datos.message);
             }
@@ -221,11 +221,11 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
 
         switch (cliente) {
             case 'claude':
-                return generarConfigClaude(tokenParaConfig);
+                return generarConfigClaude(tokenParaConfig, apiUrl);
             case 'cursor':
-                return generarConfigCursor(tokenParaConfig);
+                return generarConfigCursor(tokenParaConfig, apiUrl);
             case 'apirest':
-                return generarContextoIA(usuario, tokenGenerado || '');
+                return generarContextoIA(tokenBase64 || '', apiUrl);
             default:
                 return '';
         }
