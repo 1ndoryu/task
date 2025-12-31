@@ -39,6 +39,8 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
     flex-shrink: 0;
+    min-width: 0;
+    gap: var(--dashboard-espacioSm);
 }
 
 .modalTitulo {
@@ -48,6 +50,11 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 0;
+    /* Permitir salto de linea en titulos largos */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+    flex: 1;
 }
 
 .modalBotonCerrar {
@@ -64,6 +71,13 @@
 
 .modalBotonCerrar:hover {
     color: var(--dashboard-textoActivo);
+}
+
+.modalAccionesEncabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex-shrink: 0;
 }
 
 .modalContenido {

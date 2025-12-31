@@ -86,4 +86,5 @@ glory_docs
 mcp/dist/
 mcp/.env
 mcp/node_modules/
+
 .agent/

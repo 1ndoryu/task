@@ -59,7 +59,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                     <h2 id="modal-titulo" className="modalTitulo">
                         {titulo}
                     </h2>
-                    <div className="modalAccionesEncabezado" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                    <div className="modalAccionesEncabezado">
                         {accionesEncabezado}
                         {!ocultarBotonCerrar && (
                             <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">

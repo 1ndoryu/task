@@ -54,6 +54,11 @@
     margin: 0;
     outline: none;
     transition: color var(--dashboard-transicionRapida);
+    /* Propiedades para textarea con auto-resize */
+    resize: none;
+    overflow: hidden;
+    line-height: 1.3;
+    min-height: 1.95rem;
 }
 
 .campoTituloLimpio__input::placeholder {
