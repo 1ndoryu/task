@@ -25,6 +25,7 @@ import {ModalNotificaciones} from '../notificaciones';
 import {ModalCompartir} from '../compartidos';
 import {ModalExperimentos} from '../experimentos/ModalExperimentos';
 import {ModalCreacionRapida} from './ModalCreacionRapida';
+import {ModalConfiguracionMCP} from '../configuracion';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {AccionExperimento} from '../experimentos/ModalExperimentos';
@@ -151,6 +152,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modal de Temas */}
             <ModalTemas estaAbierto={modales.modalTemasAbierto} onCerrar={modales.cerrarModalTemas} temaActual={temas.tema} onCambiarTema={temas.cambiarTema} />
+
+            {/* Modal de Configuración MCP */}
+            <ModalConfiguracionMCP estaAbierto={modales.modalConfigMCPAbierto} onCerrar={modales.cerrarModalConfigMCP} />
         </>
     );
 }

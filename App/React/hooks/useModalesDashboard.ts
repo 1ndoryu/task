@@ -92,6 +92,10 @@ interface UseModalesDashboardReturn {
     modalTemasAbierto: boolean;
     abrirModalTemas: () => void;
     cerrarModalTemas: () => void;
+    /* Configuración MCP */
+    modalConfigMCPAbierto: boolean;
+    abrirModalConfigMCP: () => void;
+    cerrarModalConfigMCP: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -132,6 +136,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalCreacionRapida, setModalCreacionRapida] = useState<'tarea' | 'habito' | 'proyecto' | null>(null);
     /* Temas */
     const [modalTemasAbierto, setModalTemasAbierto] = useState(false);
+    /* Configuración MCP */
+    const [modalConfigMCPAbierto, setModalConfigMCPAbierto] = useState(false);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -212,6 +218,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const abrirModalTemas = useCallback(() => setModalTemasAbierto(true), []);
     const cerrarModalTemas = useCallback(() => setModalTemasAbierto(false), []);
 
+    /* Handlers Configuración MCP */
+    const abrirModalConfigMCP = useCallback(() => setModalConfigMCPAbierto(true), []);
+    const cerrarModalConfigMCP = useCallback(() => setModalConfigMCPAbierto(false), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -276,6 +286,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarCreacionRapida,
         modalTemasAbierto,
         abrirModalTemas,
-        cerrarModalTemas
+        cerrarModalTemas,
+        modalConfigMCPAbierto,
+        abrirModalConfigMCP,
+        cerrarModalConfigMCP
     };
 }

@@ -99,3 +99,6 @@
 
 /* Sistema de Temas */
 @import './modalTemas.css';
+
+/* Configuración MCP */
+@import './componentes/modalConfiguracionMCP.css';

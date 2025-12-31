@@ -81,3 +81,8 @@ status.md
 dev-tools/
 glory_docs/ 
 glory_docs
+
+# MCP Server
+mcp/dist/
+mcp/.env
+mcp/node_modules/

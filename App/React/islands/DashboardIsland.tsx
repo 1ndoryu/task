@@ -84,6 +84,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onClickNotificaciones={acciones.manejarClickNotificaciones}
                 onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
                 onClickTemas={modales.abrirModalTemas}
+                onClickConfigMCP={modales.abrirModalConfigMCP}
                 onExportarDatos={dashboard.exportarTodosDatos}
                 onImportarDatos={dashboard.importarTodosDatos}
                 tareas={dashboard.tareas}

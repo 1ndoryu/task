@@ -10,6 +10,7 @@
      */
     --dashboard-fondoPrincipal: #090909;
     --dashboard-fondoSecundario: #090909;
+    --dashboard-fondoTerciario: #111111;
     --dashboard-fondoHover: #0c0c0c;
 
     /* 
@@ -84,6 +85,7 @@
     --dashboard-fuenteMonoespaciada: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
     --dashboard-tamanoBase: 12px;
     --dashboard-tamanoPequeno: 10px;
+    --dashboard-tamanoMuyPequeno: 9px;
 
     /* 
      * ESPACIADO 
@@ -109,6 +111,12 @@
     --dashboard-botonPrimarioTexto: #000000;
     --dashboard-botonPrimarioHover: rgba(255, 255, 255, 0.9);
     --dashboard-botonPrimarioSombra: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    /* 
+     * COLOR ACENTO (ACCIONES PRINCIPALES) 
+     */
+    --dashboard-acento: #3b82f6;
+    --dashboard-acentoHover: #2563eb;
 
     /* 
      * SOMBRAS ADICIONALES 
@@ -147,7 +155,12 @@
     /* Colores de fondo */
     --dashboard-fondoPrincipal: #090909;
     --dashboard-fondoSecundario: #0c0c0c;
+    --dashboard-fondoTerciario: #151515;
     --dashboard-fondoHover: #1e1e1e;
+
+    /* Color acento */
+    --dashboard-acento: #60a5fa;
+    --dashboard-acentoHover: #3b82f6;
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #1a1a1a;
@@ -193,7 +206,12 @@
     /* Colores de fondo */
     --dashboard-fondoPrincipal: #f8f9fa;
     --dashboard-fondoSecundario: #ffffff;
+    --dashboard-fondoTerciario: #e9ecef;
     --dashboard-fondoHover: #e9ecef;
+
+    /* Color acento */
+    --dashboard-acento: #2563eb;
+    --dashboard-acentoHover: #1d4ed8;
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #dee2e6;

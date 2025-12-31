@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "glory-tareas": {
+            "command": "node",
+            "args": ["c:/Users/1u/Local Sites/glorybuilder/app/public/wp-content/themes/glory/mcp/dist/index.js"],
+            "env": {
+                "GLORY_API_URL": "http://glorybuilder.local/wp-json/glory/v1",
+                "GLORY_WP_USERNAME": "admin",
+                "GLORY_WP_PASSWORD": "jRZ29zhBWOdOBqcdge0FPIJE"
+            }
+        }
+    }
+}
