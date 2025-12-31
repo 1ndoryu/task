@@ -26,9 +26,11 @@
     -webkit-backdrop-filter: blur(20px);
     box-shadow: var(--dashboard-sombraFuerte);
     border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
     animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* Para que el contenido respete el radio del contenedor */
 }
 
 .creacionRapidaInputWrapper {
@@ -37,6 +39,7 @@
     position: relative;
     padding: var(--dashboard-espacioLg);
     transition: border-color var(--dashboard-transicionRapida);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
 .creacionRapidaIcono {
@@ -103,6 +106,7 @@
 .creacionRapidaBotonEnviar {
     background: transparent;
     border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
     width: 28px;
     height: 28px;
     display: flex;
@@ -137,6 +141,7 @@
 .creacionRapidaBotonOpcion {
     background: transparent;
     border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
     padding: 2px 8px; /* Más compacto */
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno); /* Texto más pequeño */
@@ -147,6 +152,12 @@
     transition: all var(--dashboard-transicionRapida);
     font-family: var(--dashboard-fuenteMonoespaciada);
     height: 22px;
+}
+
+.creacionRapidaBotonOpcion:hover:not(:disabled) {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
 }
 
 .creacionRapidaBotonOpcion span {

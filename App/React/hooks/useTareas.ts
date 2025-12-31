@@ -387,12 +387,25 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
 
     /*
      * Reordenar tareas (para drag & drop)
-     * Recalcula campo orden para mantener consistencia
+     * Fusiona las tareas reordenadas con las existentes que no están en la lista
+     * Esto permite reordenar tareas de un proyecto sin perder las de otros proyectos
      */
     const reordenarTareas = useCallback(
-        (nuevasTareas: Tarea[]) => {
-            /* Recalcular orden de todas las tareas */
-            setTareas(nuevasTareas.map((t, idx) => ({...t, orden: idx})));
+        (tareasReordenadas: Tarea[]) => {
+            setTareas(prev => {
+                /* Crear un Set de IDs de las tareas reordenadas para búsqueda O(1) */
+                const idsReordenados = new Set(tareasReordenadas.map(t => t.id));
+
+                /* Conservar las tareas que NO están en la lista de reordenamiento */
+                /* Estas son tareas de otros proyectos/contextos que no deben perderse */
+                const tareasNoAfectadas = prev.filter(t => !idsReordenados.has(t.id));
+
+                /* Combinar: primero las reordenadas (con nuevo orden), luego las no afectadas */
+                const tareasFinales = [...tareasReordenadas, ...tareasNoAfectadas];
+
+                /* Recalcular campo orden para todas las tareas */
+                return tareasFinales.map((t, idx) => ({...t, orden: idx}));
+            });
         },
         [setTareas]
     );
