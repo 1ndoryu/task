@@ -11,6 +11,29 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.10-beta',
+        fecha: '2026-01-01',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'API REST para asistentes de IA (tareas, proyectos, hábitos)'},
+            {tipo: 'nuevo', descripcion: 'Servidor MCP para integración con Claude, Antigravity y otros'},
+            {tipo: 'nuevo', descripcion: 'Submenús contextuales con opciones de Prioridad y Urgencia'},
+            {tipo: 'nuevo', descripcion: 'Modo compacto para tareas y proyectos'},
+            {tipo: 'nuevo', descripcion: 'Tareas heredan prioridad y urgencia del proyecto al crearse'},
+            {tipo: 'mejora', descripcion: 'Submenús se ajustan dinámicamente al borde de la pantalla'},
+            {tipo: 'mejora', descripcion: 'Menús de filtro/ordenar ya no se cortan por el panel'},
+            {tipo: 'mejora', descripcion: 'Texto por defecto en notas cambiado a "# Título de la nota"'},
+            {tipo: 'mejora', descripcion: 'Borrar tarea vacía con Backspace al editar'},
+            {tipo: 'mejora', descripcion: 'Cursor automático en tarea nueva al presionar Enter'},
+            {tipo: 'mejora', descripcion: 'Tareas con subtareas no se expanden automáticamente'},
+            {tipo: 'mejora', descripcion: 'Ordenamiento de tareas por prioridad dentro de proyectos'},
+            {tipo: 'arreglo', descripcion: 'Títulos con salto de línea en modales de configuración'},
+            {tipo: 'arreglo', descripcion: 'Arrastre de paneles no se queda pegado'},
+            {tipo: 'arreglo', descripcion: 'Padding en acciones de tareas para evitar cambios de layout'},
+            {tipo: 'arreglo', descripcion: 'Separador entre Prioridad y Urgencia en menú contextual'},
+            {tipo: 'arreglo', descripcion: 'API registra actividad al completar tareas'}
+        ]
+    },
+    {
         version: 'v1.0.9-beta',
         fecha: '2025-12-29',
         cambios: [

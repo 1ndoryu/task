@@ -237,7 +237,13 @@ class AIApiController
     {
         $userId = get_current_user_id();
         $filtro = $request->get_param('filtro');
-        $proyectoId = $request->get_param('proyectoId') ?? $request->get_param('proyecto_id');
+        $proyectoId = $request->get_param('proyectoId') ?? $request->get_param('proyecto_id') ?? $request->get_param('proyecto');
+        
+        /* Soporte para parámetro completado como alias de filtro */
+        $completado = $request->get_param('completado');
+        if ($completado !== null && $filtro === 'todas') {
+            $filtro = filter_var($completado, FILTER_VALIDATE_BOOLEAN) ? 'completadas' : 'pendientes';
+        }
 
         try {
             $repository = new TareasRepository($userId);
@@ -252,7 +258,7 @@ class AIApiController
 
             /* Aplicar filtro por proyecto */
             if ($proyectoId !== null) {
-                $tareas = array_filter($tareas, fn($t) => ($t['proyectoId'] ?? null) === $proyectoId);
+                $tareas = array_filter($tareas, fn($t) => ($t['proyectoId'] ?? null) === (int)$proyectoId);
             }
 
             $tareas = array_values($tareas);
