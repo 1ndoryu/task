@@ -139,11 +139,26 @@
 /* 
  * ACCIONES DE TAREA (eliminar, etc)
  */
+.tareaAccionesContenedor {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dashboard-transicionRapida);
+    /* Aseguramos que ocupe espacio aunque no se vea */
+    display: flex;
+    align-items: center;
+}
+
+.tareaItem:hover .tareaAccionesContenedor {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modificamos .tareaAcciones para que herede o se comporte bien dentro del contenedor */
 .tareaAcciones {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioXs);
-    opacity: 1;
+    /* opacity: 1; -> Ya no necesario, controlado por contenedor */
 }
 
 .tareaBotonEliminar {

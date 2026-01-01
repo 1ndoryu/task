@@ -123,6 +123,16 @@
 }
 
 /* 
+ * MOBILE: Forzar 1 columna 
+ */
+@media (max-width: 768px) {
+    .dashboardGridColumnas--2col,
+    .dashboardGridColumnas--3col {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* 
  * COLUMNA INDIVIDUAL 
  */
 .dashboardGridColumna {

@@ -53,8 +53,7 @@ export interface MenuContextualEstado {
 }
 
 export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
-    const [mostrarAcciones, setMostrarAcciones] = useState(false);
-    const [editando, setEditando] = useState(false);
+    const [editando, setEditando] = useState(tarea.texto === '');
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -429,8 +428,8 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     return (
         <>
-            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} onContextMenu={manejarClickDerecho}>
-                <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`} onClick={onToggle}>
+            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`} onContextMenu={manejarClickDerecho}>
+                <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`} onClick={onToggle} onPointerDown={e => e.stopPropagation()}>
                     {tarea.completado && <Check size={8} color="white" />}
                 </div>
                 <div className="tareaContenido" onClick={iniciarEdicion}>
@@ -452,8 +451,11 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                         </BadgeGroup>
                     </div>
                 </div>
-                {mostrarAcciones && !esHabito && <AccionesItem mostrarConfigurar={true} mostrarEliminar={true} onConfigurar={onConfigurar} onEliminar={onEliminar} />}
-                {mostrarAcciones && esHabito && onEditarHabito && <AccionesItem mostrarConfigurar={true} mostrarEliminar={!!onEliminarHabito} onConfigurar={() => onEditarHabito((tarea as TareaHabito).habitoId)} onEliminar={onEliminarHabito ? () => onEliminarHabito((tarea as TareaHabito).habitoId) : undefined} />}
+
+                <div className="tareaAccionesContenedor" onPointerDown={e => e.stopPropagation()}>
+                    {!esHabito && <AccionesItem mostrarConfigurar={true} mostrarEliminar={true} onConfigurar={onConfigurar} onEliminar={onEliminar} />}
+                    {esHabito && onEditarHabito && <AccionesItem mostrarConfigurar={true} mostrarEliminar={!!onEliminarHabito} onConfigurar={() => onEditarHabito((tarea as TareaHabito).habitoId)} onEliminar={onEliminarHabito ? () => onEliminarHabito((tarea as TareaHabito).habitoId) : undefined} />}
+                </div>
             </div>
 
             {menuContextual.visible && !esHabito && <MenuContextual opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} />}

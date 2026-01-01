@@ -5,7 +5,7 @@
  */
 
 import {useState, useRef} from 'react';
-import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette, Plug} from 'lucide-react';
+import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette, Plug, Menu, Search, X} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../shared';
 import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
@@ -66,6 +66,8 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuCrear, setMenuCrear] = useState<MenuState>({visible: false, x: 0, y: 0});
+    const [menuMovil, setMenuMovil] = useState<MenuState>({visible: false, x: 0, y: 0});
+    const [mostrarBuscadorMovil, setMostrarBuscadorMovil] = useState(false);
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
     /* Determinar si mostrar badge de plan en header (solo FREE y TRIAL) */
@@ -78,8 +80,8 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     /* Opciones del menu de navegación de página */
     const opcionesMenuPagina = [
         {id: 'dashboard', etiqueta: 'Dashboard', icono: <LayoutDashboard size={12} />}, // Sin 'activo: true' en type, se puede manejar visualmente si se quiere
-        {id: 'calendario', etiqueta: 'Calendario', icono: <Calendar size={12} />, disabled: true},
-        {id: 'archivos', etiqueta: 'Archivos', icono: <FileText size={12} />, disabled: true}
+        {id: 'calendario', etiqueta: 'Calendario', icono: <Calendar size={12} />, deshabilitado: true},
+        {id: 'archivos', etiqueta: 'Archivos', icono: <FileText size={12} />, deshabilitado: true}
     ];
 
     /* Opciones del menu de creación rápida */
@@ -124,6 +126,19 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
             x: rect.left,
             y: rect.bottom + 4
         });
+    };
+
+    const manejarClickMenuMovil = (evento: React.MouseEvent) => {
+        evento.preventDefault();
+        setMenuMovil({
+            visible: true,
+            x: 0,
+            y: 0
+        });
+    };
+
+    const toggleBuscadorMovil = () => {
+        setMostrarBuscadorMovil(!mostrarBuscadorMovil);
     };
 
     const manejarOpcionMenu = (opcionId: string) => {
@@ -173,6 +188,28 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 inputArchivoRef.current.value = '';
             }
         }
+    };
+
+    const manejarOpcionMovil = (opcionId: string) => {
+        setMenuMovil({...menuMovil, visible: false});
+
+        /* Acciones directas */
+        if (opcionId === 'notificaciones' && onClickNotificaciones) return onClickNotificaciones(undefined as any);
+        if (opcionId === 'layout') return onClickLayout?.();
+        if (opcionId === 'plan') return onClickPlan?.();
+        if (opcionId === 'admin') return onClickAdmin?.();
+        if (opcionId === 'experimentos') return onClickExperimentos?.();
+        if (opcionId === 'equipos') return onClickEquipos?.();
+        if (opcionId === 'login') return sincronizacion?.onLogin?.();
+        if (opcionId === 'sync') return sincronizacion?.sincronizarAhora();
+
+        /* Creación rápida */
+        if (['tarea', 'habito', 'proyecto'].includes(opcionId)) {
+            return onCrearRapido?.(opcionId as 'tarea' | 'habito' | 'proyecto');
+        }
+
+        /* Opciones de usuario (reutilizamos lógica) */
+        manejarOpcionMenu(opcionId);
     };
 
     /* Determinar icono y estado del indicador de conexion/sync */
@@ -310,7 +347,134 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* Input oculto para importar archivo */}
                 <input ref={inputArchivoRef} type="file" accept=".json" onChange={manejarCambioArchivo} style={{display: 'none'}} />
+
+                {/* BOTON BUSCAR MOVIL */}
+                {estaConectado && onSeleccionarTarea && (
+                    <button type="button" className="botonIconoEncabezado botonBuscadorMovil" onClick={toggleBuscadorMovil} title="Buscar">
+                        <Search size={14} />
+                    </button>
+                )}
+
+                {/* BOTON MENU MOVIL */}
+                <button type="button" className="botonIconoEncabezado botonMenuMovil" onClick={manejarClickMenuMovil} title="Menú">
+                    <Menu size={14} />
+                    {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
+                </button>
+
+                {menuMovil.visible && (
+                    <div className="menuMovilOverlay" onClick={() => setMenuMovil({...menuMovil, visible: false})}>
+                        <div className="menuMovilContenido" onClick={e => e.stopPropagation()}>
+                            <div className="menuMovilHeader">
+                                <h3 className="menuMovilTitulo">Menú</h3>
+                                <button className="menuMovilCerrar" onClick={() => setMenuMovil({...menuMovil, visible: false})}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div className="menuMovilGrid">
+                                {onCrearRapido && (
+                                    <>
+                                        <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('tarea')}>
+                                            <CheckSquare size={16} />
+                                            <span>Nueva Tarea</span>
+                                        </button>
+                                        <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('habito')}>
+                                            <Activity size={16} />
+                                            <span>Nuevo Hábito</span>
+                                        </button>
+                                        <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('proyecto')}>
+                                            <Folder size={16} />
+                                            <span>Nuevo Proyecto</span>
+                                        </button>
+                                        <div className="menuMovilSeparador" />
+                                    </>
+                                )}
+
+                                {onClickLayout && (
+                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('layout')}>
+                                        <LayoutGrid size={16} />
+                                        <span>Layout</span>
+                                    </button>
+                                )}
+
+                                {onClickEquipos && estaConectado && (
+                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('equipos')}>
+                                        <Users size={16} />
+                                        <span>Equipo</span>
+                                    </button>
+                                )}
+
+                                {esAdmin && onClickAdmin && (
+                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('admin')}>
+                                        <Settings size={16} />
+                                        <span>Admin</span>
+                                    </button>
+                                )}
+
+                                {onClickExperimentos && (
+                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('experimentos')}>
+                                        <FlaskConical size={16} />
+                                        <span>Labs</span>
+                                    </button>
+                                )}
+
+                                {esPremiumActivo && (
+                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('plan')}>
+                                        <Crown size={16} />
+                                        <span>Premium</span>
+                                    </button>
+                                )}
+
+                                <div className="menuMovilSeparador" />
+
+                                {/* Opciones de usuario principales */}
+                                <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('perfil')}>
+                                    <User size={16} />
+                                    <span>Perfil</span>
+                                </button>
+                                <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('mcp')}>
+                                    <Plug size={16} />
+                                    <span>IA</span>
+                                </button>
+                                <button className="menuMovilBoton menuMovilBoton--peligroso" onClick={() => manejarOpcionMovil('logout')}>
+                                    <LogOut size={16} />
+                                    <span>Salir</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </nav>
+
+            {/* MODAL BUSCADOR MOVIL */}
+            {mostrarBuscadorMovil && (
+                <div className="buscadorModalOverlay" onClick={() => setMostrarBuscadorMovil(false)}>
+                    <div className="buscadorModalContenido" onClick={e => e.stopPropagation()}>
+                        <div className="buscadorModalHeader">
+                            <h3 className="buscadorModalTitulo">Buscar</h3>
+                            <button className="buscadorModalCerrar" onClick={() => setMostrarBuscadorMovil(false)}>
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <BuscadorGlobal
+                            tareas={tareas}
+                            habitos={habitos}
+                            proyectos={proyectos}
+                            onSeleccionarTarea={t => {
+                                onSeleccionarTarea?.(t);
+                                setMostrarBuscadorMovil(false);
+                            }}
+                            onSeleccionarHabito={h => {
+                                onSeleccionarHabito?.(h);
+                                setMostrarBuscadorMovil(false);
+                            }}
+                            onSeleccionarProyecto={p => {
+                                onSeleccionarProyecto?.(p);
+                                setMostrarBuscadorMovil(false);
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
         </header>
     );
 }

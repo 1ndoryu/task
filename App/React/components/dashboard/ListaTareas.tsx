@@ -42,10 +42,11 @@ interface ListaTareasProps {
 
 export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onPosponerHabito, modoCompacto = false}: ListaTareasProps): JSX.Element {
     /*
-     * Estado para tareas padre colapsadas
-     * Set de IDs de tareas padre cuyas subtareas estan ocultas
+     * Estado para tareas padre expandidas
+     * Set de IDs de tareas padre cuyas subtareas son visibles
+     * Por defecto (Set vacío) todas están colapsadas (mejor UX)
      */
-    const [tareasColapsadas, setTareasColapsadas] = useState<Set<number>>(new Set());
+    const [tareasExpandidas, setTareasExpandidas] = useState<Set<number>>(new Set());
 
     /*
      * Estado para el panel de configuración
@@ -140,6 +141,13 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                         /* Convertir en subtarea */
                         onEditarTarea(tareaArrastrandoId, {parentId: posiblePadre.id});
 
+                        /* Expandir el nuevo padre automáticamente */
+                        setTareasExpandidas(prev => {
+                            const nuevo = new Set(prev);
+                            nuevo.add(posiblePadre.id);
+                            return nuevo;
+                        });
+
                         /* Reconstruir lista sin la tarea convertida (ahora es subtarea) */
                         const nuevaListaSinConvertida = nuevoOrdenPrincipales.filter(t => t.id !== tareaArrastrandoId);
 
@@ -187,6 +195,13 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             return;
         }
 
+        /* Expandir el nuevo padre automáticamente */
+        setTareasExpandidas(prev => {
+            const nuevo = new Set(prev);
+            nuevo.add(tareaAnterior.id);
+            return nuevo;
+        });
+
         onEditarTarea?.(tarea.id, {parentId: tareaAnterior.id});
     };
 
@@ -210,6 +225,13 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             if (tareaPadre?.proyectoId) {
                 idProyectoHeredado = tareaPadre.proyectoId;
             }
+
+            /* Expandir el padre automáticamente para ver la nueva subtarea */
+            setTareasExpandidas(prev => {
+                const nuevo = new Set(prev);
+                nuevo.add(parentId);
+                return nuevo;
+            });
         } else {
             /* Si no es subtarea, heredar de la tarea anterior (si estamos en Inbox/Hoy y la tarea tiene proyecto) */
             /* Nota: Esto es opcional, depende de la UX deseada. Por ahora solo padre */
@@ -238,7 +260,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
      * Colapsar/expandir subtareas de una tarea padre
      */
     const toggleColapsar = useCallback((tareaId: number) => {
-        setTareasColapsadas(prev => {
+        setTareasExpandidas(prev => {
             const nuevo = new Set(prev);
             if (nuevo.has(tareaId)) {
                 nuevo.delete(tareaId);
@@ -316,13 +338,14 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     /*
      * Obtener subtareas de una tarea padre (para renderizar debajo de ella)
+     * Solo devuelve tareas si el padre está expandido
      */
     const obtenerSubtareasVisibles = useCallback(
         (padreId: number): Tarea[] => {
-            if (tareasColapsadas.has(padreId)) return [];
+            if (!tareasExpandidas.has(padreId)) return [];
             return pendientes.filter(t => t.parentId === padreId);
         },
-        [pendientes, tareasColapsadas]
+        [pendientes, tareasExpandidas]
     );
 
     /*
@@ -330,7 +353,8 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
      */
     const renderTareaConColapsador = (tarea: Tarea, esSubtarea: boolean) => {
         const esColapsable = !esSubtarea && tieneSubtareasLocal(tarea.id);
-        const estaColapsada = tareasColapsadas.has(tarea.id);
+        const estaExpandida = tareasExpandidas.has(tarea.id);
+        const subtareasOcultas = !estaExpandida;
         const numSubtareas = contarSubtareasLocal(tarea.id);
 
         const proyecto = tarea.proyectoId ? proyectos.find(p => p.id === tarea.proyectoId) : undefined;
@@ -347,10 +371,9 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         return (
             <div className={`tareaConColapsador ${modoCompacto ? 'tareaConColapsador--compacto' : ''}`} key={`wrapper-${tarea.id}`}>
                 <TareaItem tarea={tarea} esSubtarea={esSubtarea} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onIndent={() => handleIndent(tarea.id)} onOutdent={() => handleOutdent(tarea.id)} onCrearNueva={handleCrearNueva} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={soloIcono} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} tieneSubtareas={esColapsable} modoCompacto={modoCompacto} />
-                {/* Boton de colapsar a la derecha, solo si tiene subtareas */}
                 {esColapsable && (
-                    <button className="tareaColapsadorBoton" onClick={() => toggleColapsar(tarea.id)} title={estaColapsada ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>
-                        {estaColapsada ? (
+                    <button className="tareaColapsadorBoton" onClick={() => toggleColapsar(tarea.id)} onPointerDown={e => e.stopPropagation()} title={subtareasOcultas ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>
+                        {subtareasOcultas ? (
                             <>
                                 <ChevronRight size={12} />
                                 <span className="tareaColapsadorContador">
