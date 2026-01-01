@@ -214,7 +214,7 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                 const nuevaTarea: Tarea = {
                     /* Campos obligatorios */
                     id: nuevoId,
-                    texto: datos.texto || 'Nueva tarea',
+                    texto: datos.texto !== undefined ? datos.texto : 'Nueva tarea',
                     completado: datos.completado ?? false,
                     fechaCreacion: hoy,
                     orden: indiceInsercion,

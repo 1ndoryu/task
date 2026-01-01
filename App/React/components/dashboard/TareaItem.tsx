@@ -106,9 +106,13 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
         (evento: KeyboardEvent<HTMLInputElement>) => {
             if (evento.key === 'Enter') {
                 evento.preventDefault();
-                guardarEdicion();
-                /* Crear nueva tarea debajo, heredando parentId si es subtarea */
-                onCrearNueva?.(tarea.parentId, tarea.id);
+                const textoLimpio = textoEditado.trim();
+                /* Solo crear nueva tarea si la actual tiene texto válido */
+                if (textoLimpio.length > 0) {
+                    guardarEdicion();
+                    /* Crear nueva tarea debajo, heredando parentId si es subtarea */
+                    onCrearNueva?.(tarea.parentId, tarea.id);
+                }
             } else if (evento.key === 'Backspace' && textoEditado === '') {
                 evento.preventDefault();
                 onEliminar?.();
