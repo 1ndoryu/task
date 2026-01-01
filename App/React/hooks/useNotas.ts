@@ -57,7 +57,7 @@ interface UseNotasReturn {
 const API_BASE = '/wp-json/glory/v1/notas';
 
 /* Contenido inicial para una nota nueva */
-const CONTENIDO_NOTA_NUEVA = '# Nueva nota\n\n';
+const CONTENIDO_NOTA_NUEVA = '# Título de la nota\n\n';
 
 /**
  * Obtiene el nonce de WordPress para autenticación

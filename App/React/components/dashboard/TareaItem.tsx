@@ -209,7 +209,6 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             id: 'prioridad-menu',
             etiqueta: 'Prioridad',
             icono: <Flag size={12} />,
-            separadorDespues: !tarea.prioridad,
             subOpciones: [
                 {
                     id: 'alta',
@@ -242,6 +241,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             id: 'urgencia-menu',
             etiqueta: 'Urgencia',
             icono: <Zap size={12} />,
+            separadorDespues: true,
             subOpciones: [
                 {
                     id: 'bloqueante',

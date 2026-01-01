@@ -148,7 +148,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             <IndicadorArrastre panelArrastrando={arrastre.panelArrastrando} posicionMouse={arrastre.posicionMouse} />
 
             {/* Modal Creación Rápida */}
-            {modales.modalCreacionRapida && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
+            {modales.modalCreacionRapida && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
 
             {/* Modal de Temas */}
             <ModalTemas estaAbierto={modales.modalTemasAbierto} onCerrar={modales.cerrarModalTemas} temaActual={temas.tema} onCambiarTema={temas.cambiarTema} />

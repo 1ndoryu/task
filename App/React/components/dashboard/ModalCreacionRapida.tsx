@@ -5,7 +5,7 @@
  */
 
 import {useState, useEffect, useRef} from 'react';
-import {X, CheckSquare, Activity, Folder, Calendar, Flag, Hash, ArrowRight, Layers, AlertCircle, Clock, Repeat, ChevronDown, Paperclip, Loader2} from 'lucide-react';
+import {X, CheckSquare, Activity, Folder, Calendar, Flag, Hash, ArrowRight, Layers, AlertCircle, Clock, Repeat, ChevronDown, Paperclip, Loader2, Plus} from 'lucide-react';
 import {MenuContextual} from '../shared';
 import type {Proyecto, Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../../hooks/useAdjuntos';
@@ -14,6 +14,11 @@ import '../../styles/dashboard/componentes/modalCreacionRapida.css';
 interface ModalCreacionRapidaProps {
     tipo: 'tarea' | 'habito' | 'proyecto';
     proyectos?: Proyecto[];
+    valoresIniciales?: {
+        proyectoId?: number;
+        prioridad?: string;
+        urgencia?: string;
+    };
     onCerrar: () => void;
     onGuardar: (datos: any) => Promise<void>;
     onCambiarTipo: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
@@ -28,9 +33,13 @@ interface EstadoOpciones {
     importancia?: string;
 }
 
-export function ModalCreacionRapida({tipo, proyectos = [], onCerrar, onGuardar, onCambiarTipo}: ModalCreacionRapidaProps): JSX.Element {
+export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}, onCerrar, onGuardar, onCambiarTipo}: ModalCreacionRapidaProps): JSX.Element {
     const [texto, setTexto] = useState('');
-    const [opciones, setOpciones] = useState<EstadoOpciones>({});
+    const [opciones, setOpciones] = useState<EstadoOpciones>({
+        proyectoId: valoresIniciales.proyectoId,
+        prioridad: valoresIniciales.prioridad,
+        urgencia: valoresIniciales.urgencia
+    });
     const [cargando, setCargando] = useState(false);
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
 
@@ -164,7 +173,6 @@ export function ModalCreacionRapida({tipo, proyectos = [], onCerrar, onGuardar, 
             <div className="creacionRapidaContenedor" onClick={manejarClickContenedor}>
                 <form onSubmit={manejarSubmit}>
                     <div className="creacionRapidaInputWrapper">
-
                         <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} onKeyDown={manejarKeyDown} placeholder={obtenerPlaceholder()} className="creacionRapidaInput" autoFocus />
                         <button type="submit" className="creacionRapidaBotonEnviar" disabled={!texto.trim() || cargando}>
                             <ArrowRight size={20} />

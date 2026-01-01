@@ -12,6 +12,12 @@ interface PosicionModal {
     y: number;
 }
 
+interface ValoresCreacionRapida {
+    proyectoId?: number;
+    prioridad?: string;
+    urgencia?: string;
+}
+
 interface UseModalesDashboardReturn {
     /* Auth */
     modalLoginAbierto: boolean;
@@ -86,7 +92,8 @@ interface UseModalesDashboardReturn {
     cerrarModalEditarTarea: () => void;
     /* Creación Rápida */
     modalCreacionRapida: 'tarea' | 'habito' | 'proyecto' | null;
-    abrirCreacionRapida: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
+    valoresCreacionRapida: ValoresCreacionRapida;
+    abrirCreacionRapida: (tipo: 'tarea' | 'habito' | 'proyecto', valores?: ValoresCreacionRapida) => void;
     cerrarCreacionRapida: () => void;
     /* Temas */
     modalTemasAbierto: boolean;
@@ -134,6 +141,7 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null);
     /* Creación Rápida */
     const [modalCreacionRapida, setModalCreacionRapida] = useState<'tarea' | 'habito' | 'proyecto' | null>(null);
+    const [valoresCreacionRapida, setValoresCreacionRapida] = useState<ValoresCreacionRapida>({});
     /* Temas */
     const [modalTemasAbierto, setModalTemasAbierto] = useState(false);
     /* Configuración MCP */
@@ -211,8 +219,14 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const cerrarModalEditarTarea = useCallback(() => setTareaEditando(null), []);
 
     /* Handlers Creación Rápida */
-    const abrirCreacionRapida = useCallback((tipo: 'tarea' | 'habito' | 'proyecto') => setModalCreacionRapida(tipo), []);
-    const cerrarCreacionRapida = useCallback(() => setModalCreacionRapida(null), []);
+    const abrirCreacionRapida = useCallback((tipo: 'tarea' | 'habito' | 'proyecto', valores?: ValoresCreacionRapida) => {
+        setValoresCreacionRapida(valores || {});
+        setModalCreacionRapida(tipo);
+    }, []);
+    const cerrarCreacionRapida = useCallback(() => {
+        setModalCreacionRapida(null);
+        setValoresCreacionRapida({});
+    }, []);
 
     /* Handlers Temas */
     const abrirModalTemas = useCallback(() => setModalTemasAbierto(true), []);
@@ -282,6 +296,7 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         abrirModalEditarTarea,
         cerrarModalEditarTarea,
         modalCreacionRapida,
+        valoresCreacionRapida,
         abrirCreacionRapida,
         cerrarCreacionRapida,
         modalTemasAbierto,

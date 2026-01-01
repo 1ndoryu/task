@@ -93,9 +93,8 @@
  * MENU DESPLEGABLE 
  */
 .selectorBadgeMenu {
-    position: absolute;
-    left: 0;
-    z-index: 1000;
+    position: fixed;
+    z-index: 10000;
     min-width: 220px;
     width: max-content;
     max-width: 280px;

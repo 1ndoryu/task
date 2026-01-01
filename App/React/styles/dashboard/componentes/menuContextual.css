@@ -111,13 +111,8 @@
 }
 
 .menuContextualSubmenu {
-    position: absolute !important; /* Importante para sobreescribir position: fixed del componente base */
-    top: -4px !important;
-    left: 100% !important;
-    margin-left: 4px;
-    margin-top: -4px;
+    position: absolute !important;
     z-index: 10001;
-    /* Resetear animación para submenús para que no sea molesta */
     animation: menuContextualAparecer 0.1s ease-out;
 }
 

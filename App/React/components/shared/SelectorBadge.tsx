@@ -65,7 +65,7 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
         };
     }, [menuAbierto, cerrarMenu]);
 
-    /* Posicionar menú */
+    /* Posicionar menú usando position: fixed para evitar que se corte por overflow: hidden */
     useEffect(() => {
         if (!menuAbierto || !menuRef.current || !contenedorRef.current) return;
 
@@ -74,29 +74,32 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
         const rectContenedor = contenedor.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
+
+        /* Posicionamiento inicial debajo del botón */
+        let top = rectContenedor.bottom + 4;
+        let left = rectContenedor.left;
+
+        /* Obtener dimensiones del menú después de renderizado */
         const rectMenu = menu.getBoundingClientRect();
 
         /* Ajuste Vertical: Mostrar arriba si no hay espacio abajo */
         const espacioAbajo = viewportHeight - rectContenedor.bottom;
         if (espacioAbajo < 150) {
-            menu.style.bottom = '100%';
-            menu.style.top = 'auto';
-            menu.style.marginBottom = '4px';
-        } else {
-            menu.style.top = '100%';
-            menu.style.bottom = 'auto';
-            menu.style.marginTop = '4px';
+            top = rectContenedor.top - rectMenu.height - 4;
         }
 
-        /* Ajuste Horizontal: Alinear a la derecha si se sale por la derecha */
-        // Usamos un margen de seguridad de 10px
-        if (rectContenedor.left + rectMenu.width > viewportWidth - 10) {
-            menu.style.left = 'auto';
-            menu.style.right = '0';
-        } else {
-            menu.style.left = '0';
-            menu.style.right = 'auto';
+        /* Ajuste Horizontal: Evitar que se salga por la derecha */
+        if (left + rectMenu.width > viewportWidth - 10) {
+            left = viewportWidth - rectMenu.width - 10;
         }
+
+        /* Evitar que se salga por la izquierda */
+        if (left < 10) {
+            left = 10;
+        }
+
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
     }, [menuAbierto]);
 
     const seleccionarOpcion = (opcion: OpcionBadge<T>) => {
