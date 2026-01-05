@@ -8,7 +8,7 @@
  */
 
 import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
-import type {Habito, Tarea, Proyecto, ConfiguracionDashboard, DatosNuevoHabito, DatosEdicionTarea} from '../types/dashboard';
+import type {Habito, Tarea, Proyecto, ConfiguracionDashboard, DatosNuevoHabito, DatosEdicionTarea} from 'si./types/dashboard';
 import {exportarDatos, importarDatos} from '../services/dataService';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from './useLocalStorage';
 import {useDeshacer} from './useDeshacer';
@@ -180,6 +180,14 @@ export function useDashboard(): UseDashboardReturn {
     /* Marcar cambios pendientes cuando los datos cambian */
     const datosVersion = useRef({habitos: '', tareas: '', proyectos: '', notas: ''});
 
+    /*
+     * FIX BUG SINCRONIZACION: Flag para bloquear guardado hasta que carga inicial termine.
+     * Problema: Al cargar la página, localStorage puede tener datos vacíos/demo mientras
+     * el servidor tiene datos reales. Sin este flag, los datos demo sobrescriben al servidor.
+     * Ver: .agent/docs/bug-sincronizacion-tareas.md
+     */
+    const cargaInicialCompletaRef = useRef(false);
+
     useEffect(() => {
         /*
          * Crear un hash simple del contenido para detectar cambios reales.
@@ -200,14 +208,29 @@ export function useDashboard(): UseDashboardReturn {
         };
 
         /*
-         * Solo sincronizar si hubo cambios reales después de la carga inicial.
-         * IMPORTANTE: No marcar cambios pendientes mientras estamos cargando datos del servidor,
-         * ya que esos datos ya están sincronizados y no necesitan subirse de nuevo.
-         * Esto evita el parpadeo rojo->verde del badge de sincronización.
+         * FIX: Solo sincronizar si:
+         * 1. No estamos cargando datos locales NI del servidor
+         * 2. La carga inicial YA completó (flag activado)
+         * 3. Hay cambios reales en los datos
+         *
+         * Si la carga inicial no ha completado, solo actualizamos el snapshot
+         * sin disparar sincronización. Esto evita sobrescribir el servidor.
          */
-        if (!cargandoDatos && !cargandoDesdeServidor && JSON.stringify(nuevaVersion) !== JSON.stringify(datosVersion.current)) {
-            datosVersion.current = nuevaVersion;
-            marcarCambiosPendientes();
+        if (!cargandoDatos && !cargandoDesdeServidor) {
+            if (cargaInicialCompletaRef.current) {
+                /* Carga inicial ya pasó: detectar cambios reales del usuario */
+                if (JSON.stringify(nuevaVersion) !== JSON.stringify(datosVersion.current)) {
+                    datosVersion.current = nuevaVersion;
+                    marcarCambiosPendientes();
+                }
+            } else {
+                /* Primera vez: marcar carga como completa y tomar snapshot sin sincronizar */
+                datosVersion.current = nuevaVersion;
+                /* Delay para que React termine de asentar los datos del servidor */
+                setTimeout(() => {
+                    cargaInicialCompletaRef.current = true;
+                }, 500);
+            }
         }
     }, [habitos, tareas, proyectos, notas, cargandoDatos, cargandoDesdeServidor, marcarCambiosPendientes]);
 
