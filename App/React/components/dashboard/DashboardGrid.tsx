@@ -2,6 +2,9 @@
  * DashboardGrid
  * Componente que renderiza el grid de paneles del Dashboard
  * Extraído para reducir la complejidad de DashboardIsland
+ *
+ * Fase 10.8.1: En móvil, solo se renderiza el panel correspondiente
+ * a la página activa seleccionada desde la navegación inferior
  */
 
 import {useCallback, useMemo, CSSProperties} from 'react';
@@ -10,12 +13,23 @@ import {PanelFocoPrioritario, PanelProyectos, PanelEjecucion, PanelScratchpad, P
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
+import type {PaginaMovil} from '../../hooks/usePaginaMovil';
 
 interface DashboardGridProps {
     ctx: DashboardCompletoRetorno;
+    esMovil?: boolean;
+    paginaMovilActiva?: PaginaMovil;
 }
 
-export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
+/* Mapeo de PaginaMovil a PanelId para renderizado selectivo */
+const PAGINA_A_PANEL: Record<PaginaMovil, PanelId> = {
+    ejecucion: 'ejecucion',
+    proyectos: 'proyectos',
+    habitos: 'focoPrioritario',
+    actividad: 'actividad'
+};
+
+export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecucion'}: DashboardGridProps): JSX.Element {
     const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, opciones, acciones, valorFiltroActual} = ctx;
 
     /*
@@ -56,8 +70,9 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
     );
 
     const renderizarContenidoPanel = (panelId: PanelId): JSX.Element | null => {
-        const renderHandleArrastre = (titulo?: string) => <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />;
-        const handleMinimizarElement = <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
+        /* En móvil, no renderizamos handle de arrastre ni botón minimizar */
+        const renderHandleArrastre = (titulo?: string) => (esMovil ? null : <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />);
+        const handleMinimizarElement = esMovil ? null : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
         /* Scratchpad tiene su propio sistema de resize interno y gestiona sus notas */
         if (panelId === 'scratchpad') {
@@ -74,12 +89,12 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
 
         const panelesContenido: Partial<Record<PanelId, (alturaProps: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => JSX.Element>> = {
             focoPrioritario: ({altura, contenedorRef, esAuto}) => (
-                <div ref={contenedorRef} className="panelDashboard" style={esAuto ? undefined : {height: altura}}>
+                <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
                     <PanelFocoPrioritario habitos={ordenHabitos.habitosOrdenados} modoOrdenHabitos={ordenHabitos.modoActual} opcionesOrdenHabitos={opciones.opcionesOrdenHabitos} configuracion={configHabitos.configuracion} onAbrirModalCrearHabito={() => modales.abrirCreacionRapida('habito')} onAbrirModalConfigHabitos={modales.abrirModalConfigHabitos} onToggleHabito={dashboard.toggleHabito} onEditarHabito={dashboard.abrirModalEditarHabito} onEliminarHabito={dashboard.eliminarHabito} onPosponerHabito={dashboard.posponerHabito} onMarcarDiaHabito={ctx.marcarDiaHabitoConSync} onDesmarcarDiaHabito={ctx.desmarcarDiaHabitoConSync} onCambiarModoHabitos={ordenHabitos.cambiarModo} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
                 </div>
             ),
             proyectos: ({altura, contenedorRef, esAuto}) => (
-                <div ref={contenedorRef} className="panelDashboard" style={esAuto ? undefined : {height: altura}}>
+                <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
                     <PanelProyectos
                         proyectos={dashboard.proyectos || []}
                         tareas={dashboard.tareas}
@@ -105,7 +120,7 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
                 </div>
             ),
             ejecucion: ({altura, contenedorRef, esAuto}) => (
-                <div ref={contenedorRef} className="panelDashboard internaColumna" style={esAuto ? undefined : {height: altura}}>
+                <div ref={contenedorRef} className={`panelDashboard internaColumna ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
                     <PanelEjecucion
                         tareas={ordenTareas.tareasOrdenadas}
                         proyectos={dashboard.proyectos || []}
@@ -143,6 +158,11 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
         const renderContenido = panelesContenido[panelId];
         if (!renderContenido) return null;
 
+        /* En móvil no usamos ResizeHandlePanel */
+        if (esMovil) {
+            return renderContenido({altura: 'auto', isResizing: false, contenedorRef: {current: null} as React.RefObject<HTMLDivElement>, esAuto: true});
+        }
+
         return (
             <ResizeHandlePanel panelId={panelId} alturaInicial={alturaPanel} onCambiarAltura={manejarCambiarAlturaPanel}>
                 {renderContenido}
@@ -171,6 +191,21 @@ export function DashboardGrid({ctx}: DashboardGridProps): JSX.Element {
         } as CSSProperties;
     }, [layout.anchos]);
 
+    /*
+     * MODO MÓVIL: Renderizamos solo el panel correspondiente a la página activa
+     * Layout simplificado sin columnas, handles ni arrastre
+     */
+    if (esMovil) {
+        const panelActivo = PAGINA_A_PANEL[paginaMovilActiva];
+
+        return (
+            <div className="dashboardGridContenedor dashboardGridContenedor--movil">
+                <div className="dashboardGridMovil">{renderizarContenidoPanel(panelActivo)}</div>
+            </div>
+        );
+    }
+
+    /* MODO DESKTOP: Grid normal con columnas y handles */
     return (
         <div className="dashboardGridContenedor" style={{width: `${layout.anchoTotal}%`}}>
             <div className={`dashboardGridColumnas dashboardGridColumnas--${layout.modoColumnas}col ${arrastre.panelArrastrando ? 'arrastrandoPanel' : ''}`} style={estiloGrid}>

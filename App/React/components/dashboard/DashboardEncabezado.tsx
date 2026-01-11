@@ -5,8 +5,9 @@
  */
 
 import {useState, useRef, useMemo} from 'react';
-import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette, Plug, Menu, Search, X} from 'lucide-react';
-import {IndicadorPlan, MenuContextual, DrawerMovil} from '../shared';
+import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette, Plug, Menu, Search, X, MoreVertical} from 'lucide-react';
+import {IndicadorPlan, MenuContextual, DrawerMovil, BottomSheet} from '../shared';
+import type {GrupoOpciones, OpcionMenu} from '../shared/MenuOpcionesPanel';
 import type {OpcionDrawer} from '../shared/DrawerMovil';
 import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
@@ -54,6 +55,13 @@ interface DashboardEncabezadoProps {
     onSeleccionarHabito?: (habito: Habito) => void;
     onSeleccionarProyecto?: (proyecto: Proyecto) => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
+    /* Props para menú opciones móvil (Fase 10.8.3) */
+    opcionesMovil?: {
+        titulo: string;
+        grupos?: GrupoOpciones[];
+        opciones?: OpcionMenu[];
+        tieneFiltrosActivos?: boolean;
+    };
 }
 
 interface MenuState {
@@ -62,13 +70,14 @@ interface MenuState {
     y: number;
 }
 
-export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigMCP, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido}: DashboardEncabezadoProps): JSX.Element {
+export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigMCP, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido, opcionesMovil}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuCrear, setMenuCrear] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [drawerAbierto, setDrawerAbierto] = useState(false);
     const [mostrarBuscadorMovil, setMostrarBuscadorMovil] = useState(false);
+    const [menuOpcionesMovilAbierto, setMenuOpcionesMovilAbierto] = useState(false);
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
     /* Determinar si mostrar badge de plan en header (solo FREE y TRIAL) */
@@ -402,6 +411,67 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                     <button type="button" className="botonIconoEncabezado botonBuscadorMovil" onClick={toggleBuscadorMovil} title="Buscar">
                         <Search size={18} />
                     </button>
+                )}
+
+                {/* BOTON OPCIONES MOVIL (3 puntos) - Fase 10.8.3 */}
+                {opcionesMovil && (
+                    <button type="button" className={`botonIconoEncabezado botonOpcionesMovil ${opcionesMovil.tieneFiltrosActivos ? 'botonOpcionesMovil--activo' : ''}`} onClick={() => setMenuOpcionesMovilAbierto(true)} title="Opciones del panel">
+                        <MoreVertical size={18} />
+                        {opcionesMovil.tieneFiltrosActivos && <span className="botonIconoEncabezado__puntoNotificacion" />}
+                    </button>
+                )}
+
+                {/* BOTTOM SHEET OPCIONES MOVIL */}
+                {opcionesMovil && (
+                    <BottomSheet estaAbierto={menuOpcionesMovilAbierto} onCerrar={() => setMenuOpcionesMovilAbierto(false)} titulo={opcionesMovil.titulo}>
+                        <div className="menuOpcionesPanelContenido">
+                            {/* Opciones sueltas primero */}
+                            {opcionesMovil.opciones && opcionesMovil.opciones.length > 0 && (
+                                <div className="menuOpcionesPanelGrupo">
+                                    {opcionesMovil.opciones.map(opcion => (
+                                        <button
+                                            key={opcion.id}
+                                            className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`}
+                                            onClick={() => {
+                                                opcion.onClick();
+                                                setMenuOpcionesMovilAbierto(false);
+                                            }}>
+                                            {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
+                                            <span className="menuOpcionesPanelItemTexto">
+                                                <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
+                                                {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
+                                            </span>
+                                            {opcion.activo && <span className="menuOpcionesPanelItemCheck">✓</span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Grupos de opciones */}
+                            {opcionesMovil.grupos?.map((grupo, idx) => (
+                                <div key={grupo.titulo} className="menuOpcionesPanelGrupo">
+                                    {(idx > 0 || (opcionesMovil.opciones && opcionesMovil.opciones.length > 0)) && <div className="menuOpcionesPanelSeparador" />}
+                                    <div className="menuOpcionesPanelGrupoTitulo">{grupo.titulo}</div>
+                                    {grupo.opciones.map(opcion => (
+                                        <button
+                                            key={opcion.id}
+                                            className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`}
+                                            onClick={() => {
+                                                opcion.onClick();
+                                                setMenuOpcionesMovilAbierto(false);
+                                            }}>
+                                            {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
+                                            <span className="menuOpcionesPanelItemTexto">
+                                                <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
+                                                {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
+                                            </span>
+                                            {opcion.activo && <span className="menuOpcionesPanelItemCheck">✓</span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </BottomSheet>
                 )}
 
                 {/* DRAWER MOVIL (navegacion lateral) */}

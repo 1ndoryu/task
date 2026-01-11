@@ -34,11 +34,13 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo}: BottomShe
         if (estaAbierto) {
             document.addEventListener('keydown', manejarTecla);
             document.body.style.overflow = 'hidden';
+            document.body.classList.add('bottomSheetAbierto');
         }
 
         return () => {
             document.removeEventListener('keydown', manejarTecla);
             document.body.style.overflow = '';
+            document.body.classList.remove('bottomSheetAbierto');
         };
     }, [estaAbierto, manejarTecla]);
 

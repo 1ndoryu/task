@@ -822,14 +822,20 @@
         gap: 0;
     }
 
-    /* Ocultar elementos de navegacion excepto busqueda y drawer */
-    .encabezadoNav > *:not(.botonBuscadorMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel) {
+    /* Ocultar elementos de navegacion excepto busqueda, opciones, drawer y bottomsheet */
+    .encabezadoNav > *:not(.botonBuscadorMovil):not(.botonOpcionesMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel):not(.bottomSheetOverlay):not(.bottomSheetPanel) {
         display: none !important;
     }
 
     /* Asegurar que el drawer sea visible cuando está abierto */
     .encabezadoNav .drawerMovilOverlay,
     .encabezadoNav .drawerMovilPanel {
+        display: flex;
+    }
+
+    /* Asegurar que el BottomSheet sea visible cuando está abierto */
+    .encabezadoNav .bottomSheetOverlay,
+    .encabezadoNav .bottomSheetPanel {
         display: flex;
     }
 
@@ -870,5 +876,46 @@
     /* Quitar el icono de dropdown en movil pequeño */
     .encabezadoTituloIcono {
         display: none;
+    }
+}
+
+/* 
+ * BOTON OPCIONES MOVIL (3 puntos) - Fase 10.8.3
+ * Solo visible en móvil, al lado de la lupa
+ */
+.botonOpcionesMovil {
+    display: none; /* Oculto por defecto en desktop */
+}
+
+@media (max-width: 768px) {
+    /* Mostrar botón de opciones móvil */
+    .botonOpcionesMovil {
+        display: inline-flex;
+        width: 44px;
+        height: 44px;
+        background: none !important;
+        border: none !important;
+        padding: 0;
+        align-items: center;
+        justify-content: center;
+        color: var(--dashboard-textoNormal);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .botonOpcionesMovil svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .botonOpcionesMovil--activo {
+        color: var(--dashboard-acento);
+    }
+
+    /* Nav con botones de búsqueda y opciones */
+    .encabezadoNav {
+        display: flex;
+        align-items: center;
+        gap: 0;
     }
 }

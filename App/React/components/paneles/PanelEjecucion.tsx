@@ -2,6 +2,7 @@
  * PanelEjecucion
  * Componente que renderiza el panel de ejecución (tareas)
  * Responsabilidad única: renderizar la lista de tareas con sus controles
+ * Nota: En móvil el header del panel se oculta via CSS (Fase 10.8.3)
  */
 
 import {useState} from 'react';

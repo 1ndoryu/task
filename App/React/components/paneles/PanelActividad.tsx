@@ -1,6 +1,7 @@
 /*
  * PanelActividad
  * Componente que renderiza el panel de actividad con mapa de calor
+ * Nota: En móvil el header del panel se oculta via CSS (Fase 10.8.3)
  *
  * Muestra un heatmap estilo GitHub con la actividad del usuario
  * Configurable por periodo y tipo de actividad

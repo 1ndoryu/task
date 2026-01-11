@@ -2,6 +2,7 @@
  * PanelProyectos
  * Componente que renderiza el panel de proyectos
  * Responsabilidad única: renderizar la lista de proyectos con sus controles
+ * Nota: En móvil el header del panel se oculta via CSS (Fase 10.8.3)
  */
 
 import {useState} from 'react';

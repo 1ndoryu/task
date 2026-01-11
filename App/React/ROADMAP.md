@@ -112,17 +112,204 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+### 10.8 Reestructuración UX Móvil 🚧 EN PROGRESO
+
+**Objetivo:** Transformar la experiencia móvil para que cada panel sea una página independiente con navegación nativa.  
+**Prioridad:** Alta | **Urgencia:** Alta  
+**Estado:** 🚧 EN PROGRESO
+
+> **Para ver cambios aplicados en móvil:**
+> ```powershell
+> # Desde ...\coolify-manager
+> .\manager.ps1 deploy -SiteName nakomi -Update
+> ```
+
+---
+
+#### 10.8.1 Sistema de Navegación por Páginas ✅
+
+**Objetivo:** Cada panel principal es una página independiente en móvil.
+
+```
+┌─────────────────────────────────────┐
+│  📋  │  📁  │  ➕  │  ✅  │  📊  │
+│ Tareas │ Proy │ FAB │ Hábi │ Acti │
+└─────────────────────────────────────┘
+```
+
+- [x] **Reestructurar Navegación Inferior:**
+  - [x] Botón 1: Panel Ejecución/Tareas (por defecto al abrir)
+  - [x] Botón 2: Panel Proyectos
+  - [x] Botón 3: FAB central (crear Tarea/Proyecto/Hábito)
+  - [x] Botón 4: Panel Hábitos
+  - [x] Botón 5: Panel Actividad/Mapa de Calor
+- [x] **Estado de navegación:**
+  - [x] Hook `usePaginaMovil` para gestionar página activa
+  - [x] Persistir última página visitada en localStorage
+  - [x] Transiciones suaves entre páginas (fade animation)
+- [x] **Renderizado condicional:**
+  - [x] Solo renderizar el panel activo en móvil
+  - [x] Mantener estado de cada panel al cambiar
+
+---
+
+#### 10.8.2 Paneles Fullscreen Sin Bordes ✅
+
+**Objetivo:** Los paneles ocupan el 100% del viewport sin decoraciones.
+
+- [x] **Estilos de panel móvil:**
+  - [x] Quitar `border`, `border-radius` de paneles en móvil
+  - [x] `width: 100%` con padding pequeño (8-12px)
+  - [x] Sin sombras ni separadores visuales
+  - [x] Fondo hereda del contenedor principal
+- [x] **Quitar elementos de control:**
+  - [x] Ocultar botones de minimizar/maximizar/cerrar panel
+  - [x] Ocultar cabecera de panel si solo contiene controles
+  - [x] Mantener solo el contenido funcional
+
+---
+
+#### 10.8.3 Menú de Opciones Unificado ✅
+
+**Objetivo:** Consolidar todas las opciones de panel en un solo botón.
+
+```
+┌─────────────────────────────────────┐
+│ Panel Tareas          [🔍] [⚙️]    │
+└─────────────────────────────────────┘
+               ↓ toca ⚙️
+┌─────────────────────────────────────┐
+│         OPCIONES                    │
+├─────────────────────────────────────┤
+│ 📊 Ordenar por...                   │
+│ 🔽 Orden ascendente/descendente     │
+│ 🏷️ Filtrar por etiqueta            │
+│ 📁 Filtrar por proyecto             │
+│ 📅 Filtrar por fecha                │
+│ ⚙️ Configuración del panel          │
+│ 🔄 Actualizar                       │
+└─────────────────────────────────────┘
+```
+
+- [x] **Componente `MenuOpcionesPanel`:**
+  - [x] Creado para desktop (wrapper que muestra children o BottomSheet)
+  - [x] En móvil: botón de 3 puntos movido al **header móvil superior** (junto a la lupa)
+  - [x] Abre BottomSheet con todas las opciones agrupadas
+  - [x] Opciones varían según el panel activo
+- [x] **Arquitectura móvil:**
+  - [x] **Ocultar encabezado de paneles** (`SeccionEncabezado`) en móvil via CSS
+  - [x] Hook `useOpcionesPanelMovil` construye opciones según `paginaMovil.paginaActiva`
+  - [x] `DashboardEncabezado` recibe `opcionesMovil` y muestra el botón de 3 puntos
+- [x] **Opciones a incluir:**
+  - [x] Ordenamiento con opción activa resaltada
+  - [x] Filtros con opción activa resaltada (solo tareas)
+  - [x] Configuración específica del panel
+- [x] **Indicador visual:**
+  - [x] Badge o punto cuando hay filtros activos
+  - [x] Helpers: `crearOpcionesOrdenamiento`, `crearOpcionesFiltro`, `crearOpcionConfiguracion`
+- [x] **CSS agregado:**
+  - [x] `.botonOpcionesMovil` en `encabezado.css`
+  - [x] `.menuOpcionesPanelContenido`, `.menuOpcionesPanelItem` en `movil.css`
+  - [x] Regla para ocultar `.seccionEncabezado` en móvil
+
+---
+
+#### 10.8.4 Eliminar Capacidad de Minimizar (Móvil) ✅
+
+**Objetivo:** En móvil no tiene sentido minimizar paneles.
+
+- [x] **Ocultar controles de minimizar:**
+  - [x] `display: none` para botón minimizar en móvil (CSS en movil.css línea 785)
+  - [x] Quitar animación de colapso en móvil (no se renderiza el componente)
+  - [x] Paneles siempre en estado "expandido" (móvil siempre renderiza panel activo)
+- [x] **Limpiar lógica:**
+  - [x] En DashboardGrid.tsx: `handleMinimizarElement = esMovil ? null : ...`
+  - [x] No es necesario condicional en hook: sin botón, la función nunca se invoca
+
+---
+
+#### 10.8.5 Modales y Botón Volver Compacto
+
+**Objetivo:** Hacer más compacto el header de modales en móvil.
+
+- [ ] **Header modal compacto:**
+  - [ ] Reducir altura del header (de ~48px a ~40px)
+  - [ ] Botón "← Volver" más pequeño o solo icono
+  - [ ] Título con font-size reducido (14-16px)
+  - [ ] Quitar subtítulos o metadata del header
+- [ ] **Layout del header:**
+  ```
+  ┌─────────────────────────────────────┐
+  │ ← │ Título del Modal          [✕] │
+  └─────────────────────────────────────┘
+  ```
+  - [ ] Icono de volver (←) sin texto "Volver"
+  - [ ] Título centrado o alineado a la izquierda
+  - [ ] Botón cerrar (✕) opcional a la derecha
+
+---
+
+#### 10.8.6 Menús Contextuales Bottom Sheet
+
+**Objetivo:** Los menús contextuales deben cubrir el ancho completo de la pantalla desde abajo.
+
+- [ ] **Estilo BottomSheet para menús contextuales:**
+  - [ ] `position: fixed; bottom: 0; left: 0; right: 0`
+  - [ ] `width: 100%` sin márgenes laterales
+  - [ ] Border-radius solo en esquinas superiores (12-16px)
+  - [ ] Overlay oscuro detrás
+- [ ] **Animación:**
+  - [ ] Slide-up desde abajo (transform: translateY)
+  - [ ] Duración: 200-250ms
+  - [ ] Cerrar con slide-down o tap en overlay
+- [ ] **Contenido:**
+  - [ ] Opciones con altura táctil (44-48px)
+  - [ ] Iconos a la izquierda de cada opción
+  - [ ] Separadores sutiles entre grupos
+  - [ ] Safe area bottom para dispositivos con gestos
+
+---
+
+#### 10.8.7 Header Móvil Ajustado
+
+**Objetivo:** Adaptar el header móvil fijo para la nueva arquitectura.
+
+- [ ] **Contenido dinámico:**
+  - [ ] Mostrar nombre del panel/página actual
+  - [ ] Hamburguesa a la izquierda (Drawer)
+  - [ ] Búsqueda y Opciones a la derecha
+- [ ] **Sincronización con navegación:**
+  - [ ] Título cambia según página activa
+  - [ ] Posiblemente quitar icono de búsqueda del nav inferior
+
+---
+
+### Orden de Tareas 10.8
+
+| Paso | Subtarea | Descripción                     | Prioridad |
+| ---- | -------- | ------------------------------- | --------- |
+| 1    | 10.8.1   | Sistema navegación por páginas  | Alta      |
+| 2    | 10.8.2   | Paneles fullscreen sin bordes   | Alta      |
+| 3    | 10.8.4   | Eliminar minimizar en móvil     | Media     |
+| 4    | 10.8.3   | Menú opciones unificado         | Media     |
+| 5    | 10.8.5   | Botón volver compacto           | Media     |
+| 6    | 10.8.6   | Menús contextuales bottom sheet | Alta      |
+| 7    | 10.8.7   | Header móvil ajustado           | Media     |
+
+---
+
 ### Orden de Implementación Fase 10
 
-| Paso | Subfase | Descripción             | Estado       |
-| ---- | ------- | ----------------------- | ------------ |
-| 1    | 10.1    | Fundamentos CSS         | ✅ Completado |
-| 2    | 10.2    | Componentes Adaptativos | ✅ Completado |
-| 3    | 10.3    | Header Móvil + Drawer   | ✅ Completado |
-| 4    | 10.4    | Optimización WebView    | ✅ Completado |
-| 5    | 10.5    | UX Mobile-First         | ✅ Completado |
-| 6    | 10.6    | Navegación Inferior     | ✅ Completado |
-| 7    | 10.7    | Preparación APK         | ⏳ Pendiente  |
+| Paso | Subfase | Descripción               | Estado        |
+| ---- | ------- | ------------------------- | ------------- |
+| 1    | 10.1    | Fundamentos CSS           | ✅ Completado  |
+| 2    | 10.2    | Componentes Adaptativos   | ✅ Completado  |
+| 3    | 10.3    | Header Móvil + Drawer     | ✅ Completado  |
+| 4    | 10.4    | Optimización WebView      | ✅ Completado  |
+| 5    | 10.5    | UX Mobile-First           | ✅ Completado  |
+| 6    | 10.6    | Navegación Inferior       | ✅ Completado  |
+| 7    | 10.7    | Preparación APK           | ⏳ Pendiente   |
+| 8    | 10.8    | Reestructuración UX Móvil | 🚧 EN PROGRESO |
 
 ---
 

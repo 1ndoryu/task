@@ -1,6 +1,7 @@
 /*
  * PanelScratchpad
  * Componente que renderiza el panel de notas rápidas (Scratchpad)
+ * Nota: En móvil el header del panel se oculta via CSS (Fase 10.8.3)
  *
  * Sistema de notas persistentes con autoguardado:
  * - Siempre hay una nota activa siendo editada

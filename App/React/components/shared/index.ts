@@ -67,3 +67,5 @@ export * from './DrawerMovil';
 export * from './MenuContextualAdaptivo';
 /* Fase 10.6 - Navegacion inferior movil */
 export * from './NavegacionInferior';
+/* Fase 10.8.3 - Menu opciones panel (unificado para movil) */
+export * from './MenuOpcionesPanel';

@@ -2,16 +2,18 @@
  * DashboardIsland
  * Componente principal del Dashboard
  * Refactorizado: Lógica dividida en subcomponentes y hook de composición
+ * Fase 10.8.3: Integración de opciones móvil en el header
  */
 
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {DashboardEncabezado, DashboardFooter, DashboardGrid, DashboardModales} from '../components/dashboard';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
 import {NavegacionInferior} from '../components/shared';
-import type {SeccionNavegacion} from '../components/shared/NavegacionInferior';
 import {useEsMovil} from '../hooks/useEsMovil';
+import {usePaginaMovil} from '../hooks/usePaginaMovil';
+import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -38,32 +40,40 @@ function IndicadorCarga({texto = 'Cargando datos...'}: {texto?: string}): JSX.El
 
 export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTUAL, usuario = 'user@admin'}: DashboardIslandProps): JSX.Element {
     const ctx = useDashboardCompleto();
-    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones} = ctx;
+    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones, filtroTareas, ordenTareas, ordenHabitos, opciones, configTareas, configHabitos, configProyectos, configActividad} = ctx;
     const {esMovil} = useEsMovil();
-    const [seccionActiva, setSeccionActiva] = useState<SeccionNavegacion>('home');
+    const paginaMovil = usePaginaMovil();
+
+    /* Construir opciones del menú móvil basadas en el panel activo */
+    const opcionesMovil = useOpcionesPanelMovil({
+        paginaActiva: paginaMovil.paginaActiva,
+        /* Tareas */
+        opcionesFiltroTareas: opciones.opcionesFiltro,
+        valorFiltroTareas: filtroTareas.filtroActual.tipo === 'proyecto' ? `proyecto-${filtroTareas.filtroActual.proyectoId}` : filtroTareas.filtroActual.tipo,
+        onCambiarFiltroTareas: acciones.manejarCambioFiltro,
+        opcionesOrdenTareas: opciones.opcionesOrdenTareas,
+        modoOrdenTareas: ordenTareas.modoActual,
+        onCambiarOrdenTareas: ordenTareas.cambiarModo,
+        onAbrirConfigTareas: modales.abrirModalConfigTareas,
+        /* Hábitos */
+        opcionesOrdenHabitos: opciones.opcionesOrdenHabitos,
+        modoOrdenHabitos: ordenHabitos.modoActual,
+        onCambiarOrdenHabitos: ordenHabitos.cambiarModo,
+        onAbrirConfigHabitos: modales.abrirModalConfigHabitos,
+        /* Proyectos */
+        opcionesOrdenProyectos: opciones.opcionesOrdenProyectos,
+        modoOrdenProyectos: configProyectos.configuracion.ordenDefecto,
+        onCambiarOrdenProyectos: configProyectos.cambiarOrdenDefecto,
+        onAbrirConfigProyectos: modales.abrirModalConfigProyectos,
+        /* Actividad */
+        onAbrirConfigActividad: modales.abrirModalConfigActividad
+    });
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         if (code) auth.handleCallback(code);
     }, [auth.handleCallback]);
-
-    /* Manejador de cambio de sección para navegación inferior */
-    const manejarCambioSeccion = (seccion: SeccionNavegacion) => {
-        setSeccionActiva(seccion);
-
-        switch (seccion) {
-            case 'notificaciones':
-                modales.abrirPopoverNotificaciones?.(null);
-                break;
-            case 'perfil':
-                modales.abrirModalPerfil();
-                break;
-            /* home y tareas mantienen el dashboard visible, solo cambia el estado visual */
-            default:
-                break;
-        }
-    };
 
     if (auth.loading && !modales.modalLoginAbierto) {
         return <IndicadorCarga texto="Autenticando..." />;
@@ -119,15 +129,16 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onSeleccionarHabito={dashboard.abrirModalEditarHabito}
                 onSeleccionarProyecto={modales.abrirModalEditarProyecto}
                 onCrearRapido={modales.abrirCreacionRapida}
+                opcionesMovil={esMovil ? opcionesMovil : undefined}
             />
 
-            {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} />}
+            {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} esMovil={esMovil} paginaMovilActiva={paginaMovil.paginaActiva} />}
 
             <DashboardFooter />
             <DashboardModales ctx={ctx} />
 
             {/* Navegación inferior móvil */}
-            {auth.user && <NavegacionInferior seccionActiva={seccionActiva} onCambiarSeccion={manejarCambioSeccion} onCrearRapido={modales.abrirCreacionRapida} notificacionesPendientes={notificaciones.noLeidas} visible={esMovil} />}
+            {auth.user && <NavegacionInferior paginaActiva={paginaMovil.paginaActiva} onCambiarPagina={paginaMovil.cambiarPagina} onCrearRapido={modales.abrirCreacionRapida} visible={esMovil} />}
         </div>
     );
 }

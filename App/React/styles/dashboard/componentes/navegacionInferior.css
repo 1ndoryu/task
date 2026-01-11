@@ -159,3 +159,11 @@
         padding-bottom: calc(52px + var(--dashboard-safeAreaBottom) + var(--dashboard-espacioLg));
     }
 }
+
+/* 
+ * OCULTAR NAVEGACIÓN CUANDO BOTTOMSHEET ESTÁ ABIERTO
+ * Evita conflictos de z-index
+ */
+body.bottomSheetAbierto .navegacionInferiorBarra {
+    display: none !important;
+}

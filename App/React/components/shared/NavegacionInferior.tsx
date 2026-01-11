@@ -1,29 +1,30 @@
 /*
  * NavegacionInferior
  * Barra de navegación fija inferior para móvil
- * Fase 10.6: Navegación Móvil
+ * Fase 10.8.1: Sistema de Navegación por Páginas
  *
  * Características:
  * - Fija en la parte inferior (position: fixed)
  * - 5 iconos sin etiquetas (minimalista)
- * - Indicador visual de sección activa
+ * - Cada botón navega a un panel específico
  * - FAB central para crear
+ *
+ * Estructura:
+ * [📋 Tareas] [📁 Proyectos] [➕ FAB] [✅ Hábitos] [📊 Actividad]
  */
 
 import {useState} from 'react';
-import {Home, CheckSquare, Plus, Bell, User, Activity, Folder, X} from 'lucide-react';
-
-export type SeccionNavegacion = 'home' | 'tareas' | 'notificaciones' | 'perfil';
+import {CheckSquare, Plus, Folder, Activity, BarChart3, X, Target} from 'lucide-react';
+import type {PaginaMovil} from '../../hooks/usePaginaMovil';
 
 export interface NavegacionInferiorProps {
-    seccionActiva: SeccionNavegacion;
-    onCambiarSeccion: (seccion: SeccionNavegacion) => void;
+    paginaActiva: PaginaMovil;
+    onCambiarPagina: (pagina: PaginaMovil) => void;
     onCrearRapido: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
-    notificacionesPendientes?: number;
     visible?: boolean;
 }
 
-export function NavegacionInferior({seccionActiva, onCambiarSeccion, onCrearRapido, notificacionesPendientes = 0, visible = true}: NavegacionInferiorProps): JSX.Element | null {
+export function NavegacionInferior({paginaActiva, onCambiarPagina, onCrearRapido, visible = true}: NavegacionInferiorProps): JSX.Element | null {
     const [menuFabAbierto, setMenuFabAbierto] = useState(false);
 
     if (!visible) return null;
@@ -66,14 +67,14 @@ export function NavegacionInferior({seccionActiva, onCambiarSeccion, onCrearRapi
 
             {/* Barra de navegación */}
             <nav className="navegacionInferiorBarra" role="navigation" aria-label="Navegación principal">
-                {/* Home */}
-                <button type="button" className={`navegacionInferiorItem ${seccionActiva === 'home' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarSeccion('home')} aria-label="Inicio" aria-current={seccionActiva === 'home' ? 'page' : undefined}>
-                    <Home size={20} />
+                {/* Tareas/Ejecución */}
+                <button type="button" className={`navegacionInferiorItem ${paginaActiva === 'ejecucion' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarPagina('ejecucion')} aria-label="Tareas" aria-current={paginaActiva === 'ejecucion' ? 'page' : undefined}>
+                    <CheckSquare size={20} />
                 </button>
 
-                {/* Tareas */}
-                <button type="button" className={`navegacionInferiorItem ${seccionActiva === 'tareas' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarSeccion('tareas')} aria-label="Tareas" aria-current={seccionActiva === 'tareas' ? 'page' : undefined}>
-                    <CheckSquare size={20} />
+                {/* Proyectos */}
+                <button type="button" className={`navegacionInferiorItem ${paginaActiva === 'proyectos' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarPagina('proyectos')} aria-label="Proyectos" aria-current={paginaActiva === 'proyectos' ? 'page' : undefined}>
+                    <Folder size={20} />
                 </button>
 
                 {/* FAB Central */}
@@ -81,17 +82,14 @@ export function NavegacionInferior({seccionActiva, onCambiarSeccion, onCrearRapi
                     <div className="navegacionInferiorFabCirculo">{menuFabAbierto ? <X size={18} /> : <Plus size={18} />}</div>
                 </button>
 
-                {/* Notificaciones */}
-                <button type="button" className={`navegacionInferiorItem ${seccionActiva === 'notificaciones' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarSeccion('notificaciones')} aria-label={`Notificaciones${notificacionesPendientes > 0 ? `, ${notificacionesPendientes} sin leer` : ''}`} aria-current={seccionActiva === 'notificaciones' ? 'page' : undefined}>
-                    <div className="navegacionInferiorIconoConBadge">
-                        <Bell size={20} />
-                        {notificacionesPendientes > 0 && <span className="navegacionInferiorBadge" />}
-                    </div>
+                {/* Hábitos */}
+                <button type="button" className={`navegacionInferiorItem ${paginaActiva === 'habitos' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarPagina('habitos')} aria-label="Hábitos" aria-current={paginaActiva === 'habitos' ? 'page' : undefined}>
+                    <Target size={20} />
                 </button>
 
-                {/* Perfil */}
-                <button type="button" className={`navegacionInferiorItem ${seccionActiva === 'perfil' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarSeccion('perfil')} aria-label="Perfil" aria-current={seccionActiva === 'perfil' ? 'page' : undefined}>
-                    <User size={20} />
+                {/* Actividad */}
+                <button type="button" className={`navegacionInferiorItem ${paginaActiva === 'actividad' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarPagina('actividad')} aria-label="Actividad" aria-current={paginaActiva === 'actividad' ? 'page' : undefined}>
+                    <BarChart3 size={20} />
                 </button>
             </nav>
         </>

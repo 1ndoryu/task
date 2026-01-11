@@ -2,6 +2,7 @@
  * PanelFocoPrioritario
  * Componente que renderiza el panel de hábitos (Foco Prioritario)
  * Responsabilidad única: renderizar la tabla de hábitos con sus controles
+ * Nota: En móvil el header del panel se oculta via CSS (Fase 10.8.3)
  */
 
 import {useState} from 'react';
@@ -60,10 +61,10 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
                     </>
                 }
             />
-            <TablaHabitos habitos={habitos} onAnadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
+            <TablaHabitos habitos={habitos} onAñadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
 
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Habitos">
-                <TablaHabitos habitos={habitos} onAnadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
+                <TablaHabitos habitos={habitos} onAñadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
             </OverlayEnfoque>
         </>
     );
