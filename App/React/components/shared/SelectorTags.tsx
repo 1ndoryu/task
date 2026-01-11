@@ -16,6 +16,8 @@ interface SelectorTagsProps {
 }
 
 export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta...'}: SelectorTagsProps): JSX.Element {
+    /* Normalizar tags - validación defensiva */
+    const tagsNormalizados = Array.isArray(tags) ? tags : [];
     const [mostrandoInput, setMostrandoInput] = useState(false);
     const [nuevoTag, setNuevoTag] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
@@ -47,8 +49,8 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
     const agregarTag = () => {
         if (nuevoTag.trim()) {
             const tagLimpio = nuevoTag.trim();
-            if (!tags.includes(tagLimpio)) {
-                onTagsChange([...tags, tagLimpio]);
+            if (!tagsNormalizados.includes(tagLimpio)) {
+                onTagsChange([...tagsNormalizados, tagLimpio]);
             }
 
             setNuevoTag('');
@@ -59,7 +61,7 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
     };
 
     const removerTag = (tagARemover: string) => {
-        onTagsChange(tags.filter(t => t !== tagARemover));
+        onTagsChange(tagsNormalizados.filter(t => t !== tagARemover));
     };
 
     const manejarKeyDown = (e: React.KeyboardEvent) => {
@@ -75,7 +77,7 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
     return (
         <div className="propiedadesCompactas__contenido" ref={contenedorRef} style={{flexWrap: 'wrap'}}>
             {/* Lista de tags existentes - Estilo Pill consistente */}
-            {tags.map(tag => (
+            {tagsNormalizados.map(tag => (
                 <div key={tag} className="propiedadesCompactas__item">
                     <button type="button" className="pillOpcion" onClick={() => removerTag(tag)} title={`Remover: ${tag}`}>
                         <Tag size={14} />

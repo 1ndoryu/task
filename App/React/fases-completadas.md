@@ -306,3 +306,24 @@ glory-adjuntos/
 - [x] Badge de solicitudes pendientes no se actualizaba en tiempo real
 - [x] Ajuste visual - contador de solicitudes en círculo rojo absoluto
 - [x] Falta indicador numérico para notificaciones pendientes
+
+---
+
+## Bugs Corregidos (2026-01-11)
+
+### Modal de Creación Rápida
+- [x] Error `e.map is not a function` al abrir configuración de tarea creada desde creación rápida
+  - **Causa:** El `proyectoId` se pasaba en la posición del parámetro `tags`, causando que tags fuera un número
+  - **Solución:** Corregido orden de argumentos en `manejarGuardarRapido` de `DashboardModales.tsx`
+  - **Archivo:** `components/dashboard/DashboardModales.tsx` línea 83
+
+### Validación Defensiva
+- [x] Agregada validación defensiva en `SelectorTags.tsx` para evitar crash si tags no es un array
+  - **Archivo:** `components/shared/SelectorTags.tsx`
+
+### Sistema de Hábitos
+- [x] Hábitos no se actualizaban globalmente al marcar días retroactivos
+  - **Causa:** Al marcar historial retroactivo, el campo `ultimoCompletado` no se recalculaba
+  - **Solución:** `actualizarHistorialHabito` ahora recalcula `ultimoCompletado` basándose en el historial
+  - **Archivo:** `stores/habitosStore.ts` función `actualizarHistorialHabito`
+

@@ -5,9 +5,9 @@
  */
 
 import {useState} from 'react';
-import {Folder, ArrowUpDown, Plus, Settings} from 'lucide-react';
+import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, ListaProyectos} from '../dashboard';
-import {SelectorBadge} from '../shared/SelectorBadge';
+import {SelectorBadge, OverlayEnfoque} from '../shared';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 import type {ConfiguracionProyectos} from '../../hooks/useConfiguracionProyectos';
 
@@ -37,6 +37,7 @@ interface PanelProyectosProps {
 export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenProyectos, onAbrirModalCrearProyecto, onAbrirModalEditarProyecto, onAbrirModalConfigProyectos, onEliminarProyecto, onCambiarEstadoProyecto, onCambiarOrdenProyectos, onCompartirProyecto, estaCompartido, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, renderHandleArrastre, handleMinimizar, modoCompacto = false}: PanelProyectosProps): JSX.Element {
     /* Estado local para el proyecto seleccionado/expandido */
     const [proyectoSeleccionadoId, setProyectoSeleccionadoId] = useState<number | null>(null);
+    const [modoEnfoque, setModoEnfoque] = useState(false);
 
     return (
         <>
@@ -57,11 +58,20 @@ export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenP
                                 <Settings size={12} />
                             </span>
                         </button>
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                            <span className="selectorBadgeIcono">
+                                <Maximize2 size={12} />
+                            </span>
+                        </button>
                         {handleMinimizar}
                     </>
                 }
             />
             <ListaProyectos proyectos={proyectos} tareas={tareas} onCrearProyecto={onAbrirModalCrearProyecto} onSeleccionarProyecto={setProyectoSeleccionadoId} proyectoSeleccionadoId={proyectoSeleccionadoId} onEditarProyecto={onAbrirModalEditarProyecto} onEliminarProyecto={onEliminarProyecto} onCambiarEstadoProyecto={onCambiarEstadoProyecto} onCompartirProyecto={onCompartirProyecto} estaCompartido={estaCompartido} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} ocultarCompletados={configuracion.ocultarCompletados} ocultarTareasCompletadas={configuracion.ocultarTareasCompletadas} ordenDefecto={configuracion.ordenDefecto} mostrarProgreso={configuracion.mostrarProgreso} modoCompacto={modoCompacto} />
+
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Proyectos">
+                <ListaProyectos proyectos={proyectos} tareas={tareas} onCrearProyecto={onAbrirModalCrearProyecto} onSeleccionarProyecto={setProyectoSeleccionadoId} proyectoSeleccionadoId={proyectoSeleccionadoId} onEditarProyecto={onAbrirModalEditarProyecto} onEliminarProyecto={onEliminarProyecto} onCambiarEstadoProyecto={onCambiarEstadoProyecto} onCompartirProyecto={onCompartirProyecto} estaCompartido={estaCompartido} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} ocultarCompletados={configuracion.ocultarCompletados} ocultarTareasCompletadas={configuracion.ocultarTareasCompletadas} ordenDefecto={configuracion.ordenDefecto} mostrarProgreso={configuracion.mostrarProgreso} modoCompacto={modoCompacto} />
+            </OverlayEnfoque>
         </>
     );
 }

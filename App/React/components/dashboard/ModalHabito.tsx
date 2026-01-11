@@ -166,7 +166,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
     const claseModal = modoEdicion ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? nombre || 'Editar Hábito' : 'Nuevo Hábito'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
+        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Modificar habito' : 'Nuevo habito'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
             {modoEdicion ? (
                 <>
                     {/* Pestañas para móvil */}

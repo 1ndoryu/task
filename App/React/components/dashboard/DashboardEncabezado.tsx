@@ -4,9 +4,10 @@
  * Responsabilidad única: mostrar logo, título y navegación
  */
 
-import {useState, useRef} from 'react';
+import {useState, useRef, useMemo} from 'react';
 import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette, Plug, Menu, Search, X} from 'lucide-react';
-import {IndicadorPlan, MenuContextual} from '../shared';
+import {IndicadorPlan, MenuContextual, DrawerMovil} from '../shared';
+import type {OpcionDrawer} from '../shared/DrawerMovil';
 import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
 import {APP_TEXTS} from '../../constants/appTexts';
@@ -66,7 +67,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuCrear, setMenuCrear] = useState<MenuState>({visible: false, x: 0, y: 0});
-    const [menuMovil, setMenuMovil] = useState<MenuState>({visible: false, x: 0, y: 0});
+    const [drawerAbierto, setDrawerAbierto] = useState(false);
     const [mostrarBuscadorMovil, setMostrarBuscadorMovil] = useState(false);
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
@@ -128,13 +129,8 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
         });
     };
 
-    const manejarClickMenuMovil = (evento: React.MouseEvent) => {
-        evento.preventDefault();
-        setMenuMovil({
-            visible: true,
-            x: 0,
-            y: 0
-        });
+    const manejarClickMenuMovil = () => {
+        setDrawerAbierto(true);
     };
 
     const toggleBuscadorMovil = () => {
@@ -190,9 +186,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
         }
     };
 
-    const manejarOpcionMovil = (opcionId: string) => {
-        setMenuMovil({...menuMovil, visible: false});
-
+    const manejarOpcionDrawer = (opcionId: string) => {
         /* Acciones directas */
         if (opcionId === 'notificaciones' && onClickNotificaciones) return onClickNotificaciones(undefined as any);
         if (opcionId === 'layout') return onClickLayout?.();
@@ -211,6 +205,54 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
         /* Opciones de usuario (reutilizamos lógica) */
         manejarOpcionMenu(opcionId);
     };
+
+    /* Construir opciones del drawer móvil */
+    const opcionesDrawer = useMemo((): OpcionDrawer[] => {
+        const opciones: OpcionDrawer[] = [];
+
+        /* Creación rápida */
+        if (onCrearRapido) {
+            opciones.push({id: 'tarea', etiqueta: 'Nueva Tarea', icono: <CheckSquare size={18} />}, {id: 'habito', etiqueta: 'Nuevo Hábito', icono: <Activity size={18} />}, {id: 'proyecto', etiqueta: 'Nuevo Proyecto', icono: <Folder size={18} />, separadorDespues: true});
+        }
+
+        /* Notificaciones */
+        if (onClickNotificaciones && estaConectado) {
+            opciones.push({id: 'notificaciones', etiqueta: 'Notificaciones', icono: <Bell size={18} />, badge: notificacionesPendientes});
+        }
+
+        /* Layout */
+        if (onClickLayout) {
+            opciones.push({id: 'layout', etiqueta: 'Configurar Layout', icono: <LayoutGrid size={18} />});
+        }
+
+        /* Equipos */
+        if (onClickEquipos && estaConectado) {
+            opciones.push({id: 'equipos', etiqueta: 'Mi Equipo', icono: <Users size={18} />, badge: equiposPendientes});
+        }
+
+        /* Admin */
+        if (esAdmin && onClickAdmin) {
+            opciones.push({id: 'admin', etiqueta: 'Administración', icono: <Settings size={18} />});
+        }
+
+        /* Experimentos */
+        if (onClickExperimentos) {
+            opciones.push({id: 'experimentos', etiqueta: 'Laboratorio', icono: <FlaskConical size={18} />, separadorDespues: true});
+        }
+
+        return opciones;
+    }, [onCrearRapido, onClickNotificaciones, estaConectado, notificacionesPendientes, onClickLayout, onClickEquipos, equiposPendientes, esAdmin, onClickAdmin, onClickExperimentos]);
+
+    /* Opciones secundarias del drawer (pie) */
+    const opcionesSecundariasDrawer = useMemo(
+        (): OpcionDrawer[] => [
+            {id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={18} />},
+            {id: 'temas', etiqueta: 'Temas', icono: <Palette size={18} />},
+            {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={18} />, separadorDespues: true},
+            {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={18} />, peligroso: true}
+        ],
+        []
+    );
 
     /* Determinar icono y estado del indicador de conexion/sync */
     const obtenerEstadoConexion = () => {
@@ -254,6 +296,13 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
     return (
         <header id="dashboard-encabezado" className="dashboardEncabezado">
+            {/* BOTON HAMBURGUESA (izquierda en movil) */}
+            <button type="button" className="botonIconoEncabezado botonMenuMovil" onClick={manejarClickMenuMovil} title="Menú" aria-label="Abrir menú de navegación">
+                <Menu size={18} />
+                {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
+            </button>
+
+            {/* LOGO/TITULO (centro en movil, izquierda en desktop) */}
             <div className="encabezadoIzquierda">
                 <div className="encabezadoLogo">
                     <button className="encabezadoTituloBoton" onClick={manejarClickPagina}>
@@ -351,98 +400,23 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 {/* BOTON BUSCAR MOVIL */}
                 {estaConectado && onSeleccionarTarea && (
                     <button type="button" className="botonIconoEncabezado botonBuscadorMovil" onClick={toggleBuscadorMovil} title="Buscar">
-                        <Search size={14} />
+                        <Search size={18} />
                     </button>
                 )}
 
-                {/* BOTON MENU MOVIL */}
-                <button type="button" className="botonIconoEncabezado botonMenuMovil" onClick={manejarClickMenuMovil} title="Menú">
-                    <Menu size={14} />
-                    {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
-                </button>
-
-                {menuMovil.visible && (
-                    <div className="menuMovilOverlay" onClick={() => setMenuMovil({...menuMovil, visible: false})}>
-                        <div className="menuMovilContenido" onClick={e => e.stopPropagation()}>
-                            <div className="menuMovilHeader">
-                                <h3 className="menuMovilTitulo">Menú</h3>
-                                <button className="menuMovilCerrar" onClick={() => setMenuMovil({...menuMovil, visible: false})}>
-                                    <X size={16} />
-                                </button>
-                            </div>
-                            <div className="menuMovilGrid">
-                                {onCrearRapido && (
-                                    <>
-                                        <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('tarea')}>
-                                            <CheckSquare size={16} />
-                                            <span>Nueva Tarea</span>
-                                        </button>
-                                        <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('habito')}>
-                                            <Activity size={16} />
-                                            <span>Nuevo Hábito</span>
-                                        </button>
-                                        <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('proyecto')}>
-                                            <Folder size={16} />
-                                            <span>Nuevo Proyecto</span>
-                                        </button>
-                                        <div className="menuMovilSeparador" />
-                                    </>
-                                )}
-
-                                {onClickLayout && (
-                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('layout')}>
-                                        <LayoutGrid size={16} />
-                                        <span>Layout</span>
-                                    </button>
-                                )}
-
-                                {onClickEquipos && estaConectado && (
-                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('equipos')}>
-                                        <Users size={16} />
-                                        <span>Equipo</span>
-                                    </button>
-                                )}
-
-                                {esAdmin && onClickAdmin && (
-                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('admin')}>
-                                        <Settings size={16} />
-                                        <span>Admin</span>
-                                    </button>
-                                )}
-
-                                {onClickExperimentos && (
-                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('experimentos')}>
-                                        <FlaskConical size={16} />
-                                        <span>Labs</span>
-                                    </button>
-                                )}
-
-                                {esPremiumActivo && (
-                                    <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('plan')}>
-                                        <Crown size={16} />
-                                        <span>Premium</span>
-                                    </button>
-                                )}
-
-                                <div className="menuMovilSeparador" />
-
-                                {/* Opciones de usuario principales */}
-                                <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('perfil')}>
-                                    <User size={16} />
-                                    <span>Perfil</span>
-                                </button>
-                                <button className="menuMovilBoton" onClick={() => manejarOpcionMovil('mcp')}>
-                                    <Plug size={16} />
-                                    <span>IA</span>
-                                </button>
-                                <button className="menuMovilBoton menuMovilBoton--peligroso" onClick={() => manejarOpcionMovil('logout')}>
-                                    <LogOut size={16} />
-                                    <span>Salir</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* DRAWER MOVIL (navegacion lateral) */}
+                <DrawerMovil
+                    estaAbierto={drawerAbierto}
+                    onCerrar={() => setDrawerAbierto(false)}
+                    usuario={{
+                        nombre: usuario,
+                        avatar: avatarUrl
+                    }}
+                    suscripcion={suscripcion}
+                    opciones={opcionesDrawer}
+                    onSeleccionar={manejarOpcionDrawer}
+                    opcionesSecundarias={opcionesSecundariasDrawer}
+                />
             </nav>
 
             {/* MODAL BUSCADOR MOVIL */}

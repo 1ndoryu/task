@@ -274,7 +274,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
     const claseModal = modoEdicion ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? texto || 'Configurar Tarea' : 'Nueva Tarea'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
+        <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Modificar tarea' : 'Nueva tarea'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
             {modoEdicion ? (
                 <>
                     {/* Pestañas para móvil */}

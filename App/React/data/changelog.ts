@@ -11,6 +11,26 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.11-beta',
+        fecha: '2026-01-11',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Header móvil con grid 3 columnas (hamburguesa | título | búsqueda)'},
+            {tipo: 'nuevo', descripcion: 'DrawerMovil con animación swipe y overlay'},
+            {tipo: 'nuevo', descripcion: 'Modales fullscreen en móvil con botón "Volver"'},
+            {tipo: 'nuevo', descripcion: 'BottomSheet para menús contextuales en móvil'},
+            {tipo: 'nuevo', descripcion: 'Búsqueda modal fullscreen en dispositivos móviles'},
+            {tipo: 'nuevo', descripcion: 'MenuContextualAdaptivo: detecta móvil/escritorio automáticamente'},
+            {tipo: 'mejora', descripcion: 'Layout una columna en móvil para mejor lectura'},
+            {tipo: 'mejora', descripcion: 'Iconos header unificados a 20px sin borders'},
+            {tipo: 'mejora', descripcion: 'Header fijo (position: fixed) para navegación constante'},
+            {tipo: 'arreglo', descripcion: 'Error e.map al abrir configuración de tarea desde creación rápida'},
+            {tipo: 'arreglo', descripcion: 'Proyecto no se asignaba a tareas creadas desde modal rápido'},
+            {tipo: 'arreglo', descripcion: 'Hábitos no actualizaban estado global al marcar días retroactivos'},
+            {tipo: 'arreglo', descripcion: 'Scroll horizontal eliminado en header móvil'},
+            {tipo: 'mejora', descripcion: 'Validación defensiva en SelectorTags para evitar crashes'}
+        ]
+    },
+    {
         version: 'v1.0.10-beta',
         fecha: '2026-01-01',
         cambios: [

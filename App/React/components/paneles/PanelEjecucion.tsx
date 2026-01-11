@@ -4,9 +4,10 @@
  * Responsabilidad única: renderizar la lista de tareas con sus controles
  */
 
-import {Terminal, ArrowUpDown, Plus, Settings} from 'lucide-react';
+import {useState} from 'react';
+import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, ListaTareas} from '../dashboard';
-import {SelectorBadge} from '../shared/SelectorBadge';
+import {SelectorBadge, OverlayEnfoque} from '../shared';
 import type {Tarea, Proyecto, Participante} from '../../types/dashboard';
 
 interface OpcionFiltro {
@@ -49,6 +50,8 @@ interface PanelEjecucionProps {
 }
 
 export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onPosponerHabito, modoCompacto = false}: PanelEjecucionProps): JSX.Element {
+    const [modoEnfoque, setModoEnfoque] = useState(false);
+
     return (
         <>
             <SeccionEncabezado
@@ -69,11 +72,20 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                                 <Settings size={12} />
                             </span>
                         </button>
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                            <span className="selectorBadgeIcono">
+                                <Maximize2 size={12} />
+                            </span>
+                        </button>
                         {handleMinimizar}
                     </>
                 }
             />
             <ListaTareas tareas={tareas} proyectoId={proyectoIdActual} proyectos={proyectos} ocultarCompletadas={ocultarCompletadas} ocultarBadgeProyecto={ocultarBadgeProyecto} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={esOrdenManual ? onReordenarTareas : undefined} habilitarDrag={esOrdenManual} onCompartirTarea={onCompartirTarea} estaCompartida={estaCompartida} obtenerParticipantes={obtenerParticipantes} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} modoCompacto={modoCompacto} />
+
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Tareas">
+                <ListaTareas tareas={tareas} proyectoId={proyectoIdActual} proyectos={proyectos} ocultarCompletadas={ocultarCompletadas} ocultarBadgeProyecto={ocultarBadgeProyecto} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={esOrdenManual ? onReordenarTareas : undefined} habilitarDrag={esOrdenManual} onCompartirTarea={onCompartirTarea} estaCompartida={estaCompartida} obtenerParticipantes={obtenerParticipantes} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} modoCompacto={modoCompacto} />
+            </OverlayEnfoque>
         </>
     );
 }

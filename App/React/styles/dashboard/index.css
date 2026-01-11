@@ -102,3 +102,18 @@
 
 /* Configuración MCP */
 @import './componentes/modalConfiguracionMCP.css';
+
+/* Overlay de Enfoque */
+@import './componentes/overlayEnfoque.css';
+
+/* Bottom Sheet (menus movil) */
+@import './componentes/bottomSheet.css';
+
+/* Drawer Movil (navegacion lateral) */
+@import './componentes/drawerMovil.css';
+
+/* Navegacion Inferior Movil (Fase 10.6) */
+@import './componentes/navegacionInferior.css';
+
+/* Estilos Movil (PWA) - Siempre al final para mayor especificidad */
+@import './movil.css';

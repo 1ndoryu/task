@@ -145,6 +145,47 @@
     --dashboard-panelHeaderAltura: 42px;
     --dashboard-panelHeaderFondo: var(--dashboard-fondoSecundario);
     --dashboard-panelHeaderBorde: var(--dashboard-bordePrincipal);
+
+    /* 
+     * BREAKPOINTS RESPONSIVE
+     * Puntos de quiebre para diseno adaptativo
+     */
+    --breakpointMovil: 480px;
+    --breakpointTablet: 768px;
+    --breakpointEscritorio: 1024px;
+
+    /* 
+     * ESPACIADO MOVIL
+     * Espaciados reducidos para pantallas pequenas
+     */
+    --dashboard-espacioMovilXs: 0.125rem;
+    --dashboard-espacioMovilSm: 0.25rem;
+    --dashboard-espacioMovilMd: 0.5rem;
+    --dashboard-espacioMovilLg: 0.75rem;
+
+    /* 
+     * TIPOGRAFIA MOVIL
+     * Tamanos ajustados para legibilidad en pantallas pequenas
+     */
+    --dashboard-tamanoMovilBase: 14px;
+    --dashboard-tamanoMovilPequeno: 12px;
+
+    /* 
+     * ELEMENTOS TACTILES
+     * Tamano minimo recomendado para touch: 44x44px
+     */
+    --dashboard-tamanoTactilMinimo: 44px;
+    --dashboard-espacioTactil: 8px;
+
+    /* 
+     * SAFE AREAS (WebView/Notch)
+     * Variables para dispositivos con notch o barra de navegación
+     * Usan env() con fallback a 0px para compatibilidad
+     */
+    --dashboard-safeAreaTop: env(safe-area-inset-top, 0px);
+    --dashboard-safeAreaBottom: env(safe-area-inset-bottom, 0px);
+    --dashboard-safeAreaLeft: env(safe-area-inset-left, 0px);
+    --dashboard-safeAreaRight: env(safe-area-inset-right, 0px);
 }
 
 /* 1e1e1e

@@ -4,11 +4,14 @@
  * Refactorizado: Lógica dividida en subcomponentes y hook de composición
  */
 
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {DashboardEncabezado, DashboardFooter, DashboardGrid, DashboardModales} from '../components/dashboard';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
+import {NavegacionInferior} from '../components/shared';
+import type {SeccionNavegacion} from '../components/shared/NavegacionInferior';
+import {useEsMovil} from '../hooks/useEsMovil';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -36,12 +39,31 @@ function IndicadorCarga({texto = 'Cargando datos...'}: {texto?: string}): JSX.El
 export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTUAL, usuario = 'user@admin'}: DashboardIslandProps): JSX.Element {
     const ctx = useDashboardCompleto();
     const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones} = ctx;
+    const {esMovil} = useEsMovil();
+    const [seccionActiva, setSeccionActiva] = useState<SeccionNavegacion>('home');
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         if (code) auth.handleCallback(code);
     }, [auth.handleCallback]);
+
+    /* Manejador de cambio de sección para navegación inferior */
+    const manejarCambioSeccion = (seccion: SeccionNavegacion) => {
+        setSeccionActiva(seccion);
+
+        switch (seccion) {
+            case 'notificaciones':
+                modales.abrirPopoverNotificaciones?.(null);
+                break;
+            case 'perfil':
+                modales.abrirModalPerfil();
+                break;
+            /* home y tareas mantienen el dashboard visible, solo cambia el estado visual */
+            default:
+                break;
+        }
+    };
 
     if (auth.loading && !modales.modalLoginAbierto) {
         return <IndicadorCarga texto="Autenticando..." />;
@@ -57,8 +79,11 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         );
     }
 
+    /* Clase del contenedor con padding extra para navegación móvil */
+    const clasesContenedor = `dashboardContenedor ${esMovil && auth.user ? 'dashboardContenedor--conNavegacionInferior' : ''}`;
+
     return (
-        <div id="dashboard-contenedor" className="dashboardContenedor">
+        <div id="dashboard-contenedor" className={clasesContenedor}>
             <DashboardEncabezado
                 titulo={titulo}
                 version={version}
@@ -100,6 +125,9 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
 
             <DashboardFooter />
             <DashboardModales ctx={ctx} />
+
+            {/* Navegación inferior móvil */}
+            {auth.user && <NavegacionInferior seccionActiva={seccionActiva} onCambiarSeccion={manejarCambioSeccion} onCrearRapido={modales.abrirCreacionRapida} notificacionesPendientes={notificaciones.noLeidas} visible={esMovil} />}
         </div>
     );
 }

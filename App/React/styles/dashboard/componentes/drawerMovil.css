@@ -1,0 +1,308 @@
+/*
+ * DRAWER MOVIL
+ * Panel de navegación deslizable desde la izquierda
+ * Fase 10.3: Header Móvil + Drawer
+ */
+
+/* 
+ * OVERLAY 
+ */
+.drawerMovilOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.drawerMovilOverlay--visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 
+ * PANEL PRINCIPAL
+ */
+.drawerMovilPanel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 80vw;
+    background: var(--dashboard-fondoSecundario);
+    border-right: 1px solid var(--dashboard-bordePrincipal);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Safe area para dispositivos con notch */
+    padding-left: env(safe-area-inset-left);
+}
+
+.drawerMovilPanel--visible {
+    transform: translateX(0);
+}
+
+/* 
+ * CABECERA CON PERFIL 
+ */
+.drawerMovilCabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoPrincipal);
+    /* Safe area para notch superior */
+    padding-top: calc(var(--dashboard-espacioLg) + env(safe-area-inset-top));
+}
+
+.drawerMovilPerfil {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    flex: 1;
+    min-width: 0;
+}
+
+.drawerMovilAvatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--dashboard-bordePrincipal);
+    flex-shrink: 0;
+}
+
+.drawerMovilAvatarInicial {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-acento);
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.drawerMovilPerfilInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.drawerMovilNombre {
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoBase);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.drawerMovilEmail {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 
+ * BADGE DE PLAN 
+ */
+.drawerMovilPlanBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--dashboard-radioSm);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+    width: fit-content;
+}
+
+.drawerMovilPlanBadge--premium {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.drawerMovilPlanBadge--trial {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.drawerMovilPlanBadge--free {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoApagado);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* 
+ * BOTON CERRAR 
+ */
+.drawerMovilCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: 50%;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.drawerMovilCerrar:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * NAVEGACION 
+ */
+.drawerMovilNavegacion {
+    flex: 1;
+    padding: var(--dashboard-espacioMd);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.drawerMovilItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioMd);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.drawerMovilItem:hover,
+.drawerMovilItem:active {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.drawerMovilItem--activo {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.drawerMovilItem--activo::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: var(--dashboard-acento);
+    border-radius: 0 2px 2px 0;
+}
+
+.drawerMovilItem--peligro {
+    color: var(--dashboard-estadoAlta);
+}
+
+.drawerMovilItem--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+}
+
+.drawerMovilItem--secundario {
+    font-size: var(--dashboard-tamanoPequeno);
+    min-height: 40px;
+    color: var(--dashboard-textoSecundario);
+}
+
+/* 
+ * ICONOS Y TEXTO DEL ITEM 
+ */
+.drawerMovilItemIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.drawerMovilItem:hover .drawerMovilItemIcono,
+.drawerMovilItem--activo .drawerMovilItemIcono {
+    opacity: 1;
+}
+
+.drawerMovilItemTexto {
+    flex: 1;
+}
+
+.drawerMovilItemBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--dashboard-estadoAlta);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+/* 
+ * SEPARADOR 
+ */
+.drawerMovilSeparador {
+    height: 1px;
+    background: var(--dashboard-bordePrincipal);
+    margin: var(--dashboard-espacioSm) 0;
+}
+
+/* 
+ * PIE DEL DRAWER 
+ */
+.drawerMovilPie {
+    padding: var(--dashboard-espacioMd);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    /* Safe area para dispositivos con barra inferior */
+    padding-bottom: calc(var(--dashboard-espacioMd) + env(safe-area-inset-bottom));
+}
+
+/* 
+ * OCULTAR EN DESKTOP
+ * El drawer solo se muestra en tablet y menor
+ */
+@media (min-width: 769px) {
+    .drawerMovilOverlay,
+    .drawerMovilPanel {
+        display: none !important;
+    }
+}

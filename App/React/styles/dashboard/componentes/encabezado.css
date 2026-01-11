@@ -708,9 +708,132 @@
     }
 }
 
+/* 
+ * HEADER MOVIL - Layout reorganizado
+ * ┌─────────────────────────────────────┐
+ * │  ☰  │    Logo/Título       │  🔍   │
+ * └─────────────────────────────────────┘
+ * 
+ * Estructura HTML:
+ * header.dashboardEncabezado
+ *   > button.botonMenuMovil (hamburguesa - izquierda)
+ *   > div.encabezadoIzquierda > div.encabezadoLogo (titulo - centro)
+ *   > nav.encabezadoNav > button.botonBuscadorMovil (busqueda - derecha)
+ */
 @media (max-width: 768px) {
-    /* Mostramos los botones moviles */
-    .botonMenuMovil,
+    /* 
+     * Reorganizar el header como grid de 3 columnas 
+     * Usar position fixed para que quede completamente fijo al hacer scroll
+     */
+    .dashboardEncabezado {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: var(--dashboard-espacioSm);
+        padding: var(--dashboard-espacioMd);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--dashboard-fondoPrincipal);
+        z-index: 100;
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        margin: 0;
+    }
+
+    /* Evitar scroll horizontal en movil */
+    html,
+    body,
+    .dashboardContenedor {
+        overflow-x: hidden;
+    }
+
+    /* Compensar altura del header fijo en el contenido */
+    .dashboardContenedor {
+        padding-top: calc(44px + var(--dashboard-espacioMd) * 2 + var(--dashboard-espacioMovilMd));
+    }
+
+    /* Columna 1: Boton hamburguesa (hijo directo del header) */
+    .dashboardEncabezado > .botonMenuMovil {
+        display: inline-flex !important;
+        grid-column: 1;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: none;
+        border: none;
+        color: var(--dashboard-textoNormal);
+        cursor: pointer;
+        padding: 0;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Unificar tamaño de iconos SVG en botones móvil */
+    .dashboardEncabezado > .botonMenuMovil svg,
+    .botonBuscadorMovil svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dashboardEncabezado > .botonMenuMovil:hover,
+    .dashboardEncabezado > .botonMenuMovil:active {
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Boton busqueda - mismo estilo que hamburguesa */
+    .botonBuscadorMovil {
+        width: 44px;
+        height: 44px;
+        background: none !important;
+        border: none !important;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dashboard-textoNormal);
+        cursor: pointer;
+    }
+
+    /* Columna 2: Logo/Titulo centrado */
+    .encabezadoIzquierda {
+        grid-column: 2;
+        justify-content: center;
+        display: flex;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .encabezadoLogo {
+        justify-content: center;
+    }
+
+    .encabezadoTituloBoton {
+        margin-left: 0;
+        font-size: var(--dashboard-tamanoMovilBase);
+    }
+
+    /* Columna 3: Nav con solo busqueda */
+    .encabezadoNav {
+        grid-column: 3;
+        gap: 0;
+    }
+
+    /* Ocultar elementos de navegacion excepto busqueda y drawer */
+    .encabezadoNav > *:not(.botonBuscadorMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel) {
+        display: none !important;
+    }
+
+    /* Asegurar que el drawer sea visible cuando está abierto */
+    .encabezadoNav .drawerMovilOverlay,
+    .encabezadoNav .drawerMovilPanel {
+        display: flex;
+    }
+
+    /* Mostrar solo el boton de busqueda en el nav */
     .botonBuscadorMovil {
         display: inline-flex;
     }
@@ -719,13 +842,33 @@
     .encabezadoBuscador {
         display: none;
     }
+}
 
-    /* Ocultamos los botones que ahora estan dentro del menu */
-    /* Excluimos los botones moviles para que no se oculten a si mismos */
-    /* Excluimos notificaciones para que se sigan viendo */
-    .encabezadoNav > button:not(.botonMenuMovil):not(.botonBuscadorMovil):not(.botonIconoEncabezado--notificaciones),
-    .encabezadoNav > .badgeEncabezado,
-    .encabezadoNav > .indicadorPlan {
-        display: none !important;
+/* Ocultar hamburguesa en desktop */
+.dashboardEncabezado > .botonMenuMovil {
+    display: none;
+}
+
+/* 
+ * MOVIL PEQUENO (< 480px) - Ajustes adicionales
+ */
+@media (max-width: 480px) {
+    .dashboardEncabezado {
+        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+        gap: var(--dashboard-espacioXs);
+    }
+
+    /* Compensar altura del header fijo (ajuste para movil pequeño) */
+    .dashboardContenedor {
+        padding-top: calc(44px + var(--dashboard-espacioSm) * 2 + var(--dashboard-espacioMovilSm));
+    }
+
+    .encabezadoTituloBoton {
+        font-size: 13px;
+    }
+
+    /* Quitar el icono de dropdown en movil pequeño */
+    .encabezadoTituloIcono {
+        display: none;
     }
 }

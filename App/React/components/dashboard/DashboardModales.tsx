@@ -80,7 +80,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                 fechaMaxima: calcularFecha(opciones.fecha),
                 adjuntos: opciones.adjuntos || []
             };
-            acciones.manejarCrearNuevaTareaGlobal(configTarea, opciones.prioridad || null, texto, undefined, opciones.urgencia || null, opciones.proyectoId);
+            acciones.manejarCrearNuevaTareaGlobal(configTarea, opciones.prioridad || null, texto, undefined, opciones.urgencia || null, [], opciones.proyectoId);
         } else if (tipo === 'habito') {
             await dashboard.crearHabito({
                 nombre: texto,

@@ -494,10 +494,15 @@ export const useHabitosStore = create<HabitosStore>()(
                                     historialCompletados = historialCompletados.filter(f => f !== fecha);
                                 }
 
+                                /* Recalcular ultimoCompletado basándose en el historial */
+                                const fechasOrdenadas = [...historialCompletados].sort();
+                                const ultimoCompletado = fechasOrdenadas.length > 0 ? fechasOrdenadas[fechasOrdenadas.length - 1] : undefined;
+
                                 return {
                                     ...h,
                                     historialCompletados,
-                                    historialPospuestos
+                                    historialPospuestos,
+                                    ultimoCompletado
                                 };
                             });
 

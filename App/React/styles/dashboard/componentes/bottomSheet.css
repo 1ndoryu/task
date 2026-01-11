@@ -1,0 +1,182 @@
+/*
+ * BOTTOM SHEET
+ * Menu deslizante desde abajo para dispositivos moviles
+ * Fase 10.2: Menus contextuales como Bottom Sheet
+ */
+
+/* Overlay oscuro detras del bottom sheet */
+.bottomSheetOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.bottomSheetOverlay--visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Panel principal del bottom sheet */
+.bottomSheetPanel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--dashboard-fondoSecundario);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: 16px 16px 0 0;
+    max-height: 70vh;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Safe area para dispositivos con notch */
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottomSheetPanel--visible {
+    transform: translateY(0);
+}
+
+/* Indicador de arrastre (pill gris en la parte superior) */
+.bottomSheetIndicador {
+    width: 40px;
+    height: 4px;
+    background: var(--dashboard-bordeSutil);
+    border-radius: 2px;
+    margin: 12px auto 8px;
+    flex-shrink: 0;
+}
+
+/* Cabecera con titulo */
+.bottomSheetCabecera {
+    padding: 0 var(--dashboard-espacioMd) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    flex-shrink: 0;
+}
+
+.bottomSheetTitulo {
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+    text-align: center;
+}
+
+/* Contenido scrolleable */
+.bottomSheetContenido {
+    padding: var(--dashboard-espacioMd);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Items dentro del bottom sheet (para menus) */
+.bottomSheetItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+    color: var(--dashboard-textoNormal);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioMd);
+    transition: background var(--dashboard-transicionRapida);
+}
+
+.bottomSheetItem:hover,
+.bottomSheetItem:active {
+    background: var(--dashboard-fondoHover);
+}
+
+.bottomSheetItem--activo {
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.bottomSheetItem--peligro {
+    color: var(--dashboard-estadoAlta);
+}
+
+.bottomSheetItem--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+}
+
+/* Icono del item */
+.bottomSheetItem__icono {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+/* Texto del item */
+.bottomSheetItem__texto {
+    flex: 1;
+}
+
+/* Separador entre grupos de items */
+.bottomSheetSeparador {
+    height: 1px;
+    background: var(--dashboard-bordePrincipal);
+    margin: var(--dashboard-espacioSm) 0;
+}
+
+/* Cancelar / Cerrar */
+.bottomSheetCancelar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioMd);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    width: 100%;
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    cursor: pointer;
+    margin-top: auto;
+}
+
+.bottomSheetCancelar:hover {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+}
+
+/* 
+ * ANIMACION DE ENTRADA DESDE ABAJO 
+ */
+@keyframes deslizarDesdeAbajo {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* 
+ * OCULTAR EN DESKTOP
+ * El bottom sheet solo se muestra en movil
+ */
+@media (min-width: 481px) {
+    .bottomSheetOverlay,
+    .bottomSheetPanel {
+        display: none !important;
+    }
+}

@@ -9,8 +9,9 @@
  */
 
 import {useState} from 'react';
-import {FileText, Eraser, Settings, FolderOpen, Plus} from 'lucide-react';
+import {Eraser, Settings, FolderOpen, Plus, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, Scratchpad, ModalNotasGuardadas} from '../dashboard';
+import {OverlayEnfoque} from '../shared';
 import {useNotas} from '../../hooks';
 import type {Nota} from '../../hooks';
 import type {ConfiguracionScratchpad} from '../../hooks/useConfiguracionScratchpad';
@@ -26,6 +27,7 @@ interface PanelScratchpadProps {
 
 export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar}: PanelScratchpadProps): JSX.Element {
     const [modalNotasAbierto, setModalNotasAbierto] = useState(false);
+    const [modoEnfoque, setModoEnfoque] = useState(false);
     const {estado, seleccionarNota, crearNuevaNota, actualizarContenido, obtenerTituloDeContenido, guardarNotaActiva} = useNotas();
     const {mostrarExito} = useAlertas();
 
@@ -93,6 +95,12 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                                 <Settings size={12} />
                             </span>
                         </button>
+                        {/* Botón modo enfoque */}
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                            <span className="selectorBadgeIcono">
+                                <Maximize2 size={12} />
+                            </span>
+                        </button>
                         {handleMinimizar}
                     </>
                 }
@@ -101,6 +109,11 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
 
             {/* Modal de notas guardadas */}
             <ModalNotasGuardadas abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} onSeleccionarNota={manejarSeleccionarNota} />
+
+            {/* Overlay modo enfoque */}
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo={esNotaNueva ? 'Nueva nota' : tituloActivo}>
+                <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={configuracion.tamanoFuente} altura="100%" delayGuardado={configuracion.autoGuardadoIntervalo} />
+            </OverlayEnfoque>
         </div>
     );
 }

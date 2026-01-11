@@ -183,3 +183,78 @@
         max-width: calc(100vw - 2rem);
     }
 }
+
+/* 
+ * MODAL FULLSCREEN EN MOVIL
+ * Fase 10.2: Modales ocupan toda la pantalla en dispositivos móviles
+ */
+@media (max-width: 480px) {
+    .modalOverlay {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .modalContenedor,
+    .modalContenedor--moderno,
+    .modalContenedor--expandido {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: 100vh !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+    }
+
+    .modalEncabezado {
+        position: sticky;
+        top: 0;
+        background: var(--dashboard-fondoSecundario);
+        z-index: 10;
+        padding: var(--dashboard-espacioMd);
+        min-height: var(--dashboard-tamanoTactilMinimo);
+    }
+
+    /* Ocultar boton X en movil, usar boton Volver del header */
+    .modalBotonCerrar {
+        display: none;
+    }
+
+    .modalContenido {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: var(--dashboard-espacioMovilMd);
+    }
+
+    /* Evitar scroll del body cuando modal esta abierto */
+    body:has(.modalOverlay) {
+        overflow: hidden;
+    }
+
+    /* Boton Volver para movil */
+    .modalBotonVolver {
+        display: flex;
+        align-items: center;
+        gap: var(--dashboard-espacioSm);
+        background: none;
+        border: none;
+        color: var(--dashboard-textoNormal);
+        font-size: var(--dashboard-tamanoMovilBase);
+        font-family: var(--dashboard-fuenteMonoespaciada);
+        cursor: pointer;
+        padding: var(--dashboard-espacioSm);
+        min-height: var(--dashboard-tamanoTactilMinimo);
+        transition: color var(--dashboard-transicionRapida);
+    }
+
+    .modalBotonVolver:hover,
+    .modalBotonVolver:active {
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Ocultar titulo en movil (ya se muestra en boton volver o no es necesario) */
+    .modalTitulo--movil {
+        display: none;
+    }
+}

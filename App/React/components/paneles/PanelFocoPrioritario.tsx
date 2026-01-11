@@ -4,9 +4,10 @@
  * Responsabilidad única: renderizar la tabla de hábitos con sus controles
  */
 
-import {AlertCircle, ArrowUpDown, Plus, Settings} from 'lucide-react';
+import {useState} from 'react';
+import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, TablaHabitos} from '../dashboard';
-import {SelectorBadge} from '../shared/SelectorBadge';
+import {SelectorBadge, OverlayEnfoque} from '../shared';
 import type {Habito} from '../../types/dashboard';
 import type {ConfiguracionHabitos} from '../../hooks/useConfiguracionHabitos';
 
@@ -29,6 +30,8 @@ interface PanelFocoPrioritarioProps {
 }
 
 export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHabitos, configuracion, onAbrirModalCrearHabito, onAbrirModalConfigHabitos, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onCambiarModoHabitos, renderHandleArrastre, handleMinimizar}: PanelFocoPrioritarioProps): JSX.Element {
+    const [modoEnfoque, setModoEnfoque] = useState(false);
+
     return (
         <>
             <SeccionEncabezado
@@ -48,11 +51,20 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
                                 <Settings size={12} />
                             </span>
                         </button>
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                            <span className="selectorBadgeIcono">
+                                <Maximize2 size={12} />
+                            </span>
+                        </button>
                         {handleMinimizar}
                     </>
                 }
             />
-            <TablaHabitos habitos={habitos} onAñadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
+            <TablaHabitos habitos={habitos} onAnadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
+
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Habitos">
+                <TablaHabitos habitos={habitos} onAnadirHabito={onAbrirModalCrearHabito} onToggleHabito={onToggleHabito} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} onMarcarDiaHabito={onMarcarDiaHabito} onDesmarcarDiaHabito={onDesmarcarDiaHabito} configuracion={configuracion} />
+            </OverlayEnfoque>
         </>
     );
 }

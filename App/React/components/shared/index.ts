@@ -35,6 +35,7 @@ export * from './HistorialHabito';
 export * from './MapaCalorHabito';
 export * from './MapaCalorProyecto';
 export * from './SelectorProyecto';
+export * from './SelectorBadge';
 export * from './SelectorEstadoTarea';
 export * from './SelectorEstadoHabito';
 export * from './CampoTituloLimpio';
@@ -56,3 +57,13 @@ export * from './SelectorEstadoProyectoPill';
 export * from './FilaPropiedades';
 export * from './SelectorTags';
 export * from './ModalTemas';
+export * from './OverlayEnfoque';
+export * from './BotonEnfocar';
+/* Fase 10.2 - Componente para menus movil */
+export * from './BottomSheet';
+/* Fase 10.3 - Drawer movil (navegacion lateral) */
+export * from './DrawerMovil';
+/* Fase 10.2 - Menu contextual adaptivo (detecta movil) */
+export * from './MenuContextualAdaptivo';
+/* Fase 10.6 - Navegacion inferior movil */
+export * from './NavegacionInferior';

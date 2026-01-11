@@ -1,0 +1,114 @@
+/*
+ * overlayEnfoque.css
+ * Estilos para el modo enfoque de paneles
+ * 
+ * Permite expandir un panel a pantalla completa con fondo difuminado
+ * para concentrarse en una sola tarea
+ */
+
+.overlayEnfoque {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-superposicionOscuro);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: overlayEnfoqueFadeIn 0.2s ease-out;
+}
+
+@keyframes overlayEnfoqueFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+}
+
+.overlayEnfoqueContenedor {
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--dashboard-fondoSecundario);
+    border-radius: var(--dashboard-radioLg);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    box-shadow: var(--dashboard-sombraFuerte);
+    animation: overlayEnfoqueSlideIn 0.25s ease-out;
+    overflow: hidden;
+}
+
+@keyframes overlayEnfoqueSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.overlayEnfoqueHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoTerciario);
+    min-height: 32px;
+}
+
+.overlayEnfoqueTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    color: var(--dashboard-textoSecundario);
+}
+
+.overlayEnfoqueBotonCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: var(--dashboard-transicionRapida);
+}
+
+.overlayEnfoqueBotonCerrar:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.overlayEnfoqueContenido {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+
+/* Panel dentro del overlay - ajustar estilos */
+.overlayEnfoqueContenido .panelDashboard {
+    height: 100%;
+    max-height: calc(90vh - 50px);
+}
+
+.overlayEnfoqueContenido .scratchpadContenedor {
+    height: 100%;
+}
+
+.overlayEnfoqueContenido .scratchpadTextarea {
+    height: calc(90vh - 150px) !important;
+    min-height: 400px;
+}

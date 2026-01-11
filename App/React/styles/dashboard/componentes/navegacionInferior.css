@@ -1,0 +1,161 @@
+/*
+ * NAVEGACION INFERIOR
+ * Estilos para la barra de navegación móvil
+ * Fase 10.6: Navegación Móvil
+ * 
+ * Diseño minimalista monocromático
+ */
+
+/* Barra de navegación principal */
+.navegacionInferiorBarra {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .navegacionInferiorBarra {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: calc(52px + var(--dashboard-safeAreaBottom));
+        padding-bottom: var(--dashboard-safeAreaBottom);
+        background: var(--dashboard-fondoSecundario);
+        border-top: 1px solid var(--dashboard-bordePrincipal);
+        z-index: 100;
+        align-items: center;
+        justify-content: space-around;
+    }
+}
+
+/* Item de navegación */
+.navegacionInferiorItem {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    padding: var(--dashboard-espacioMd);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+    transition: color var(--dashboard-transicionRapida), opacity var(--dashboard-transicionRapida);
+}
+
+.navegacionInferiorItem:active {
+    opacity: 0.7;
+}
+
+.navegacionInferiorItem--activo {
+    color: var(--dashboard-textoActivo);
+}
+
+/* Contenedor de icono con badge */
+.navegacionInferiorIconoConBadge {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Badge de notificaciones - punto simple */
+.navegacionInferiorBadge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 6px;
+    height: 6px;
+    background: var(--dashboard-textoActivo);
+    border-radius: 50%;
+}
+
+/* 
+ * FAB CENTRAL
+ * Círculo con el icono + al mismo nivel
+ */
+.navegacionInferiorFab {
+    flex: 1;
+}
+
+.navegacionInferiorFabCirculo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoSecundario);
+    color: var(--dashboard-textoNormal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+}
+
+.navegacionInferiorFab:active .navegacionInferiorFabCirculo {
+    background: var(--dashboard-fondoHover);
+}
+
+.navegacionInferiorFab--abierto .navegacionInferiorFabCirculo {
+    border-color: var(--dashboard-textoApagado);
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * MENU FAB
+ * Opciones que aparecen al tocar el FAB
+ */
+.navegacionInferiorMenuFab {
+    position: fixed;
+    bottom: calc(60px + var(--dashboard-safeAreaBottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    z-index: 150;
+    animation: deslizarDesdeAbajo 0.15s ease-out;
+}
+
+.navegacionInferiorMenuFabItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    cursor: pointer;
+    box-shadow: var(--dashboard-sombraMedia);
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    min-width: 120px;
+}
+
+.navegacionInferiorMenuFabItem:active {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+/* Overlay para cerrar menu */
+.navegacionInferiorOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--dashboard-superposicionOscuro);
+    z-index: 99;
+    animation: fadeIn 0.15s ease-out;
+}
+
+/* 
+ * COMPENSAR CONTENIDO
+ * Añadir padding al contenedor principal cuando la nav está visible
+ */
+@media (max-width: 480px) {
+    .dashboardContenedor--conNavegacionInferior {
+        padding-bottom: calc(52px + var(--dashboard-safeAreaBottom) + var(--dashboard-espacioLg));
+    }
+}

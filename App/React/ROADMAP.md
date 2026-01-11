@@ -4,12 +4,224 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+## Tareas del Proyecto SaaS Task (API)
+
+> **Última sincronización:** 2026-01-11 00:13
+
+---
+
+## Fase 10: Versión Móvil (WebView → APK) 📱 **PRIORITARIA**
+
+**Objetivo:** Preparar la webapp para ser embebida en un WebView de Android y generar un APK.  
+**Enfoque:** Optimizar la experiencia web móvil primero, luego empaquetar con WebView nativo.  
+**Prioridad:** Alta | **Urgencia:** Normal  
+**Estado:** 🚧 EN PROGRESO
+
+### 10.1 Fundamentos CSS Móvil ✅
+> Breakpoints definidos, `movil.css` creado, documentación en `docs/PATRONES_MOVIL.md`
+
+### 10.2 Componentes Adaptativos ✅
+> Una columna en móvil, búsqueda modal fullscreen, modales fullscreen con botón "← Volver", `BottomSheet` con animación y overlay, `MenuContextualAdaptivo` integrado
+
+### 10.3 Header Móvil ✅
+> Layout grid 3 columnas (hamburguesa | título | búsqueda), `DrawerMovil` con swipe y overlay, header fijo con `position: fixed`, iconos unificados (20px)
+
+---
+
+### 10.4 Optimización WebView ✅
+
+**Objetivo:** Asegurar compatibilidad y rendimiento en WebView Android.
+
+- [x] **Viewport y meta tags:**
+  - [x] `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">`
+  - [x] `<meta name="mobile-web-app-capable" content="yes">`
+  - [x] `<meta name="theme-color" content="#090909">` para barra de estado
+  - [x] `format-detection` para desactivar auto-links
+- [x] **Safe Areas:**
+  - [x] Variables CSS `--dashboard-safeArea*` con `env()` y fallbacks
+  - [x] Clase `.contenedorConSafeArea` utilitaria
+  - [x] Safe areas automáticos en header, drawer, modal, bottomsheet, navegación
+- [x] **Rendimiento WebView:**
+  - [x] Animaciones con `transform` y `opacity` únicamente
+  - [x] `will-change` y `backface-visibility` en elementos animados
+  - [x] `touch-action: manipulation` para eliminar delay 300ms
+  - [x] `-webkit-tap-highlight-color: transparent`
+- [ ] **Comunicación JS ↔ Android (Futuro):**
+  - [ ] Definir interfaz `window.Android` para callbacks nativos
+  - [ ] Notificaciones push vía Firebase (opcional)
+  - [ ] Acceso a cámara/galería nativo (opcional)
+
+### 10.5 UX Mobile-First ✅
+
+**Objetivo:** Experiencia táctil fluida y natural.
+
+- [x] **Tamaños táctiles:**
+  - [x] Variable `--dashboard-tamanoTactilMinimo: 44px`
+  - [x] Variable `--dashboard-espacioTactil: 8px`
+- [x] **Feedback táctil:**
+  - [x] Estados `:active` con `opacity` y `scale` en botones
+  - [x] Transiciones suaves de 0.1s en elementos interactivos
+- [x] **Scroll optimizado:**
+  - [x] `-webkit-overflow-scrolling: touch` en contenedores
+  - [x] `overflow-x: hidden` para evitar scroll horizontal
+  - [x] `overscroll-behavior: none` para evitar rebote
+- [x] **Modales fullscreen faltantes:**
+  - [x] Aplicar a: ConfiguraciónTarea, ConfiguraciónProyecto, ModalHabito (ya usan Modal base con fullscreen)
+
+### 10.6 Navegación Móvil ✅
+
+**Objetivo:** Navegación nativa estilo app.
+
+```
+┌─────────────────────────────────────┐
+│  🏠  │  📋  │  ➕  │  🔔  │  👤  │
+└─────────────────────────────────────┘
+```
+
+- [x] **Componente `NavegacionInferior`:**
+  - [x] Fijo en la parte inferior (position: fixed)
+  - [x] 5 iconos minimalistas sin etiquetas
+  - [x] Indicador visual de sección activa
+  - [x] Altura: ~52px + safe-area-inset-bottom
+- [x] **Botón FAB central (+):**
+  - [x] Círculo con borde sutil (monocromático)
+  - [x] Al tocar: abre menú con opciones (Tarea, Proyecto, Hábito)
+- [x] **Rutas de navegación:**
+  - [x] Home → Dashboard
+  - [x] Tasks → Lista de tareas
+  - [x] Notificaciones → Modal notificaciones
+  - [x] Perfil → Modal perfil
+
+### 10.7 Preparación APK (Futuro)
+
+**Objetivo:** Documentar y preparar el empaquetado Android.
+
+- [ ] **Documentación técnica:**
+  - [ ] Crear `docs/WEBVIEW_ANDROID.md` con instrucciones
+  - [ ] Requisitos mínimos de Android (API level)
+  - [ ] Configuración de WebView recomendada
+- [ ] **Assets para APK:**
+  - [ ] Icono de app (múltiples resoluciones)
+  - [ ] Splash screen
+  - [ ] Nombre de app y package name
+- [ ] **Configuración WebView:**
+  - [ ] JavaScript habilitado
+  - [ ] DOM Storage habilitado
+  - [ ] Cache configurado
+  - [ ] Manejo de permisos (cámara, archivos)
+
+---
+
+### Orden de Implementación Fase 10
+
+| Paso | Subfase | Descripción             | Estado       |
+| ---- | ------- | ----------------------- | ------------ |
+| 1    | 10.1    | Fundamentos CSS         | ✅ Completado |
+| 2    | 10.2    | Componentes Adaptativos | ✅ Completado |
+| 3    | 10.3    | Header Móvil + Drawer   | ✅ Completado |
+| 4    | 10.4    | Optimización WebView    | ✅ Completado |
+| 5    | 10.5    | UX Mobile-First         | ✅ Completado |
+| 6    | 10.6    | Navegación Inferior     | ✅ Completado |
+| 7    | 10.7    | Preparación APK         | ⏳ Pendiente  |
+
+---
+
+## Fase 11: Sistema de Notas Mejorado
+
+**Objetivo:** Mejorar la experiencia de escritura y gestión de notas.  
+**Prioridad:** Media | **Urgencia:** Chill
+
+#### 11.1 Editor de Notas con Markdown
+- [ ] Implementar parser de Markdown en el panel de escritura
+- [ ] Soporte para sintaxis básica: **negrita**, *cursiva*, listas, código
+- [ ] Preview en tiempo real o toggle vista previa
+- [ ] Atajos de teclado (Ctrl+B, Ctrl+I, etc.)
+
+#### 11.2 Vista Expandida de Notas
+- [ ] Botón "Expandir" en sección Notas Guardadas
+- [ ] Layout de dos columnas: lista de notas | editor
+- [ ] Navegación entre notas sin recargar página
+- [ ] Reutilizar componente existente (centralizar lógica)
+
+#### 11.3 Búsqueda de Notas
+- [ ] Integrar notas en el sistema de búsqueda global
+- [ ] Indexar título y contenido de notas
+- [ ] Mostrar resultados de notas en dropdown de búsqueda
+
+---
+
+## Fase 12: Gestión de Tiempo (Time Tracking)
+
+**Objetivo:** Agregar seguimiento de tiempo a hábitos y tareas.  
+**Prioridad:** Baja | **Urgencia:** Chill  
+**Nota:** Requiere planificación adicional y adaptación de la API.
+
+#### 12.1 Diseño y Planificación
+- [ ] Definir modelo de datos para registros de tiempo
+- [ ] Diseñar UI del cronómetro/timer
+- [ ] Definir integración con hábitos (opción "activar tracking")
+- [ ] Evaluar si aplicarlo también a tareas
+
+#### 12.2 Implementación Base
+- [ ] Componente `Cronometro` (play, pause, stop)
+- [ ] Hook `useTimeTracking` para gestionar estado
+- [ ] Almacenamiento de sesiones de tiempo
+- [ ] Integración con hábitos: botón play al lado del checkbox
+
+#### 12.3 Reportes de Tiempo
+- [ ] Vista de tiempo invertido por hábito/tarea
+- [ ] Gráficos de distribución de tiempo
+- [ ] Exportar datos de tiempo
+
+---
+
+### Tareas Completadas Recientes ✅
+
+<details>
+<summary>Fase 10: Móvil/PWA (Enero 2026)</summary>
+
+| Tarea                                                        | Subfase |
+| ------------------------------------------------------------ | ------- |
+| Breakpoints CSS definidos, `movil.css` creado, documentación | 10.1    |
+| Modales fullscreen con botón "Volver", layout una columna    | 10.2    |
+| BottomSheet, MenuContextualAdaptivo integrado                | 10.2    |
+| Header móvil grid 3 columnas, iconos 20px unificados         | 10.3    |
+| DrawerMovil con swipe, overlay y animación                   | 10.3    |
+| Búsqueda modal fullscreen en móvil                           | 10.2    |
+| Meta tags WebView, safe areas CSS, touch optimizations       | 10.4    |
+| Tamaños táctiles, feedback :active, scroll optimizado        | 10.5    |
+| NavegacionInferior con FAB monocromático, menú creación      | 10.6    |
+
+</details>
+
+<details>
+<summary>Fase 9: Refactorización Visual Linear (Dic 2025)</summary>
+
+| Componente/Feature                                                          | Estado |
+| --------------------------------------------------------------------------- | ------ |
+| SelectorIconoProyecto, CampoTituloLimpio, CampoSubtituloLimpio              | ✅      |
+| PropiedadesCompactas, BotonOpcionCompacta, SeccionResponsables              | ✅      |
+| ListaTareasCompacta, SeccionAdjuntos, GridAdjuntos                          | ✅      |
+| FormularioTareaModerno + selectores pill (Estado, Proyecto, Repetición)     | ✅      |
+| FormularioHabitoModerno + selectores pill (Importancia, Estado, Frecuencia) | ✅      |
+| FormularioProyectoModerno + SelectorEstadoProyectoPill                      | ✅      |
+| Sistema de Tags con autocompletado                                          | ✅      |
+| Responsables vs Compartir diferenciados                                     | ✅      |
+| Panel de Comentarios rediseñado (input fijo inferior)                       | ✅      |
+| Estandarización de FilaPropiedades (Tareas, Hábitos, Proyectos)             | ✅      |
+| Hooks: useAutoguardado, usePanelChat, PestanasModal                         | ✅      |
+
+</details>
+
+---
+
+
 ## Estado Actual
 
 **Fecha de inicio:** 2025-12-19  
-**Version:** v1.0.9-beta  
-**Ultima actualizacion:** 2025-12-30
-**Estado:** Fase 9 COMPLETA - Finalizando Fase 9.7
+**Version:** v1.0.11-beta  
+**Ultima actualizacion:** 2026-01-11  
+**Estado:** Fase 9 COMPLETA - Fase 10 EN PROGRESO
 
 ## Funcionalidades Completadas
 
@@ -37,378 +249,68 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-</details>
-
 ### Alta Prioridad
 
-## Fase 9: Refactorización Visual de Configuración (Estilo Linear)
+<details>
+<summary>Fase 9: Refactorización Visual de Configuración (Estilo Linear) ✅ COMPLETADA</summary>
 
-**Inspiración:** [Linear App Plan](https://linear.app/plan) - Gestión moderna de proyectos
-**Enfoque:** Competencia directa a Linear, pero orientado al usuario individual con capacidad de trabajo en equipo.
+**Inspiración:** [Linear App Plan](https://linear.app/plan)  
+**Enfoque:** Gestión moderna de proyectos, orientado al usuario individual con capacidad de trabajo en equipo.
 
-### 9.1 Estructura General del Nuevo Modal/Panel (PROYECTOS PRIMERO)
+#### Resumen de Logros
 
-**Layout objetivo (Estilo Linear Issue/Project View):**
-```
-┌──────────────────────────────────────────────────────────┐
-│  [Icono]  Título sin borde                               │
-│           Subtítulo/Lead sin borde                       │
-├──────────────────────────────────────────────────────────┤
-│  PROPIEDADES (Key Properties - inline, compactas)        │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │ Estado ○ En Progreso │ Prioridad 🚩 Alta │ ••• más │ │
-│  │ Fecha 📅 Dic 29      │ Urgencia ⚡ Normal │         │ │
-│  └─────────────────────────────────────────────────────┘ │
-├──────────────────────────────────────────────────────────┤
-│  RESPONSABLES                                            │
-│  👤 Ninguno asignado   [+ Agregar]                       │
-├──────────────────────────────────────────────────────────┤
-│  ADJUNTOS                                                │
-│  📎 Sin adjuntos       [+ Agregar]                       │
-│  [archivo1.pdf] [imagen.png] ...                         │
-├──────────────────────────────────────────────────────────┤
-│  DESCRIPCIÓN (textarea sin borde, expandible)            │
-│  Escribe una descripción...                              │
-├──────────────────────────────────────────────────────────┤
-│  TAREAS (resumen compacto - solo en Proyectos)           │
-│  ● 3 completadas │ ○ 5 pendientes  [Ver todas →]        │
-├──────────────────────────────────────────────────────────┤
-│  [Actividad 🔔] [Estadísticas 📊] (iconos header derecha)│
-└──────────────────────────────────────────────────────────┘
-```
+**Componentes Creados:**
+- `SelectorIconoProyecto`, `CampoTituloLimpio`, `CampoSubtituloLimpio`
+- `PropiedadesCompactas`, `BotonOpcionCompacta`, `SeccionResponsables`
+- `ListaTareasCompacta`, `SeccionAdjuntos`, `GridAdjuntos`
+- `FormularioTareaModerno`, `FormularioHabitoModerno`, `FormularioProyectoModerno`
+- Selectores Pill: Estado, Proyecto, Repetición, Importancia, Frecuencia
 
-### 9.2 Tareas de Implementación - Proyectos
+**Hooks Creados:**
+- `useAutoguardado`, `usePanelChat`, `PestanasModal`
 
-#### 9.2.1 Icono de Proyecto
-- [x] Crear componente `SelectorIconoProyecto`
-  - Lista de iconos predefinidos (categorias: trabajo, personal, vida, social, hobbies)
-  - Opcion de elegir color del icono (8 colores)
-  - Icono por defecto: carpeta generica
-  - Guardado en nuevo campo `icono?: string` y `colorIcono?: string` en tipo `Proyecto`
+**Mejoras Visuales:**
+- Layout estilo Linear con propiedades inline compactas
+- Modal de 600px responsive
+- Sistema de Tags con autocompletado
+- Responsables vs Compartir diferenciados
+- Panel de Comentarios rediseñado
 
-#### 9.2.2 Titulo y Subtitulo sin Borde
-- [x] Crear componente `CampoTituloLimpio`
-  - Input sin borde visible (border: none, background: transparent)
-  - Placeholder sutil cuando vacio
-  - Font-size mas grande para titulo principal
-  - Transicion suave en focus (borde sutil aparece)
-- [x] Crear componente `CampoSubtituloLimpio`
-  - Similar pero font-size menor, color mas apagado
-  - Campo "lead" o resumen breve del proyecto
-
-#### 9.2.3 Propiedades Compactas (Key Properties)
-
-**ENFOQUE CORRECTO:** Extraer `creacionRapidaBotonOpcion` como componente base reutilizable.
-
-- [x] Crear componente `BotonOpcionCompacta` (extraído de modalCreacionRapida)
-  - Pill clickeable con icono + texto
-  - Soporte para menú contextual (usando `MenuContextual` existente)
-  - Estados: normal, vacío, activo
-  - Estilos: clase `.pillOpcion` centralizada en configuracionModerna.css
-  - Props: `icono`, `texto`, `opciones[]`, `onSeleccionar`, `valorActual`
-  
-- [x] Crear componente `PropiedadesCompactas`
-  - Layout inline: etiqueta "Propiedades" + lista de pills
-  - Propiedades soportadas:
-    - Prioridad (opciones: Alta, Media, Baja)
-    - Urgencia (opciones: Bloqueante, Urgente, Normal, Chill, Sin urgencia)
-    - Fecha Límite (input date en menú)
-  - Cada botón abre su menú contextual con las opciones
-  - Sin overlays ni modales - estilos de menus en configuracionModerna.css
-
-#### 9.2.4 Sección de Responsables
-- [x] Crear componente `SeccionResponsables`
-  - Layout inline con etiqueta + pills de participantes
-  - Muestra participantes con avatar + nombre usando `.pillOpcion`
-  - "Ninguno asignado" si no hay participantes (pill vacío)
-  - Click en participante abre menú con opciones: Cambiar rol, Remover
-  - Botón "+ Agregar" abre menú con lista de compañeros disponibles
-  - Estilos centralizados en configuracionModerna.css
-
-#### 9.2.5 Sección de Adjuntos (Separada)
-- [x] Componente `SeccionAdjuntos` ya existe en dashboard/ (462 líneas)
-  - Grid de thumbnails para imágenes - implementado
-  - Lista compacta para otros archivos - implementado
-  - Preview inline para imágenes - implementado
-  - [x] Adaptar al layout inline estilo Linear (etiqueta + pills)
-
-#### 9.2.6 Descripción sin Borde
-- [x] Reutilizar componente `CampoSubtituloLimpio`
-  - Auto-expand al escribir (con limit de filas)
-  - Placeholder cuando vacío: "Añade una descripción..."
-  - Sin borde visible, focus con borde sutil (estilos en configuracionModerna.css)
-
-#### 9.2.7 Hitos del Proyecto (Milestones)
-- [x] Crear componente `ListaHitos` (Reemplaza a Resumen de Tareas)
-  - Lista de hitos (objetivos clave del proyecto)
-  - Ordenados automáticamente por prioridad
-  - Funcionalidad: Agregar, Editar, Eliminar
-  - Prioridades: Alta, Media, Baja
-  - No admiten subtareas
-  - Reutilizar lógica visual de tareas pero adaptada
-
-#### 9.2.8 Header Derecha - Iconos de Acción
-- [x] Mover botón de cerrar (X) y reemplazar con:
-  - Icono de Actividad (historial/chat) - reemplaza el botón de chat actual
-  - Icono de Estadísticas (futuro)
-- [x] Quitar botón de cerrar tradicional
-  - Click fuera del modal cierra (ya existe)
-  - ESC cierra (ya existe)
-
-### 9.3 Tamaño del Modal
-- [x] Aumentar `max-width` del modal de proyecto a ~600px (clase `.modalContenedor--moderno`)
-- [x] Responsive: en móvil ocupa casi todo el ancho (media query 700px)
-- [x] Altura: auto hasta max-height, luego scroll interno (ya implementado en modal base)
-
-### 9.4 Aplicar Patrón a Tareas (Después de Proyectos)
-- [ ] Adaptar `PanelConfiguracionTarea` con misma estructura
-  - Icono: checkbox con estado (pendiente/completado)
-  - Título limpio
-  - Propiedades compactas (Proyecto, Prioridad, Urgencia, Fecha)
-  - Responsable (asignado a)
-  - Adjuntos
-  - Descripción
-  - Subtareas (resumen compacto)
-
-### 9.5 Aplicar Patrón a Hábitos (Después de Tareas)
-- [ ] Adaptar `ModalHabito` con misma estructura
-  - Icono: estado del hábito (completado hoy, pendiente, pospuesto)
-  - Título limpio
-  - Propiedades: Frecuencia, Importancia, Racha
-  - Sin responsables (hábitos son personales por ahora)
-  - Sin adjuntos (por ahora)
-  - Descripción (nueva funcionalidad)
-
-### 9.6 Sistema de Pestañas (Overview / Issues) - FUTURO
-- [ ] Para proyectos: pestañas en el header del modal
-  - Overview: la vista actual con resumen
-  - Issues/Tareas: lista completa de tareas del proyecto
-  - Actividad: historial y chat
-- [ ] Navegación fluida entre pestañas
-
-### 9.7 Componentes Compartidos - Estado
-
-| Componente              | Descripción                     | Estado       |
-| ----------------------- | ------------------------------- | ------------ |
-| `SelectorIconoProyecto` | Grid de iconos con colores      | ✅ Completado |
-| `CampoTituloLimpio`     | Input sin borde, font grande    | ✅ Completado |
-| `CampoSubtituloLimpio`  | Textarea sin borde, auto-expand | ✅ Completado |
-| `PropiedadesCompactas`  | Grid de propiedades inline      | ✅ Completado |
-| `BotonOpcionCompacta`   | Pill reutilizable con menú      | ✅ Completado |
-| `SeccionResponsables`   | Lista de avatares + agregar     | ✅ Completado |
-| `ListaTareasCompacta`   | Árbol de tareas interactivo     | ✅ Completado |
-| `SeccionAdjuntos`       | Grid/lista de archivos          | ✅ Completado |
-
-### 9.8 Estilos CSS Nuevos
-
-Todos centralizados en `configuracionModerna.css`:
-- `.campoTituloLimpio`, `.campoSubtituloLimpio__input`
-- `.pillOpcion`, `.botonOpcionCompacta`
-- `.propiedadesCompactas`, `.propiedadesCompactas__menu`
-- `.seccionResponsables--inline`
-- `.resumenTareasProyecto`, `.barraProgresoMini`
+**Estilos CSS** en `configuracionModerna.css`:
+- `.campoTituloLimpio`, `.pillOpcion`, `.botonOpcionCompacta`
+- `.propiedadesCompactas`, `.seccionResponsables--inline`
 - `.selectorIconoProyecto`, `.selectorColores`
 
-### 9.2.10 Visualización Grid de Adjuntos (Explorador Minimalista)
-- [ ] Separador visual estilo Hitos
-- [ ] Componente `GridAdjuntos`:
-  - Ubicado debajo de la sección de controles de adjuntos
-  - Grid auto-responsive (3 columnas base)
-  - Cards minimalistas:
-    - Preview (imágenes) o Icono tipo archivo
-    - Nombre truncado elegante
-    - Acciones al hover (Descargar, Eliminar)
+#### Tareas Pendientes (Fase 9)
 
-### 9.9 Orden de Implementación
+- [ ] **9.4** Adaptar `PanelConfiguracionTarea` con misma estructura completa
+- [ ] **9.5** Adaptar `ModalHabito` con misma estructura completa
+- [ ] **9.6** Sistema de Pestañas (Overview / Issues) para proyectos
+- [ ] **9.7.9** Sistema de Temas Visuales (Original, Dark Mode, Light Mode)
 
-1. ✅ **Fase 9.2.2** - Título/Subtítulo limpio
-2. ✅ **Fase 9.2.1** - Selector de icono
-3. ✅ **Fase 9.2.3** - Propiedades compactas + BotonOpcionCompacta
-4. ✅ **Fase 9.3** - Tamaño del modal (600px)
-5. ✅ **Fase 9.2.6** - Descripción sin borde
-6. ✅ **Fase 9.2.4** - Responsables
-7. ✅ **Fase 9.2.5** - Adjuntos (existente, adaptar a Linear)
-8. ✅ **Fase 9.2.7** - Hitos del Proyecto (Milestones)
-9. ✅ **Fase 9.2.8** - Header icons
-10. ✅ **Fase 9.2.9** - Refinamientos Visuales (Ajustes finos)
-      - [x] Cursor correcto en iconos header (chat, actividad)
-      - [x] Ajustar gap entre iconos header
-      - [x] Mover selector de icono arriba del título
-      - [x] Quitar bordes y padding en input título/descripción (estado focus)
-11. ✅ **Fase 9.2.10** - Visualización Grid de Adjuntos
-      - [x] Separador visual
-      - [x] Componente GridAdjuntos (3 columnas)
-      - [x] Cards de archivo minimalistas
-12. ⏳ **Fase 9.3** - Corrección de Bugs
-      - [x] Subtarea hereda proyecto del padre (Panel Ejecución)
-13. ✅ **Fase 9.3.1** - Refactorización Pre-Fase 9.4
-      - [x] Hook `useAutoguardado` (detección de cambios y auto-guardado)
-      - [x] Hook `usePanelChat` (visibilidad del panel de chat)
-      - [x] Componente `PestanasModal` (pestañas responsive)
-      - [x] Documento de análisis `REFACTORIZACION_FASE_9.4.md`
-      - [x] `FormularioTareaModerno.tsx` (estructura base)
-      - [x] `FormularioHabitoModerno.tsx` (estructura base)
-      - [x] Carpetas organizadas: `tareas/`, `habitos/`
-14. ✅ **Fase 9.4** - Aplicar a Tareas (Estilo Linear Completo)
-      - [x] Crear `FormularioTareaModerno.tsx` (estructura base)
-      - [x] Integrar en `PanelConfiguracionTarea.tsx`
-      - [x] Header icons estilo Linear (Activity, BarChart2)
-      - [x] Auto-guardado al cerrar
-      - [x] **Selector Estado** adaptado a estilo pill (`SelectorEstadoPill`)
-      - [x] **Selector Proyecto** adaptado a estilo pill (`SelectorProyectoPill`)
-      - [x] **Repetición** adaptada a estilo pill moderno (`SelectorRepeticionPill`)
-15. ✅ **Fase 9.5** - Aplicar a Hábitos (Estilo Linear Completo)
-      - [x] Crear `FormularioHabitoModerno.tsx` (estructura base)
-      - [x] Integrar en `ModalHabito.tsx`
-      - [x] Header icons estilo Linear
-      - [x] Auto-guardado al cerrar
-      - [x] **Importancia** adaptada a estilo pill (`SelectorImportanciaPill`)
-      - [x] **Estado del día** adaptado a estilo pill (`SelectorEstadoHabitoPill`)
-      - [x] **Frecuencia** adaptada a estilo pill moderno (`SelectorFrecuenciaPill`)
-
-### 9.6 Estado de Proyectos (Nuevo) ✅
-- [x] Agregar selector de estado a proyectos (`SelectorEstadoProyectoPill`)
-- [x] Estilo pill inline como PropiedadesCompactas
-- [x] Integrar en FormularioProyectoModerno
+</details>
 
 ---
 
-## Fase 9.7: Refinamientos Post-Fase 9 (Planificación)
+<details>
+<summary>Fase 9.7: Refinamientos Post-Fase 9 ✅ COMPLETADA</summary>
 
-### 9.7.1 Ajustes Visuales
-- [x] Botón eliminar choca con contador de subtareas (mover botones cuando hay subtareas)
-- [x] Modal de responsables se ve cortado y no se centra bien al mouse
-- [x] Mensajes del chat con demasiado padding (compactar)
+**Logros:**
+- Ajustes visuales: botón eliminar, modal responsables, padding chat
+- Bugs lógica: deshacer acción, subtareas heredan proyecto, modal cierre
+- Organización propiedades en 3 filas con etiquetas
+- Sistema de Tags con autocompletado
+- Responsables vs Compartir diferenciados
+- Panel de Comentarios rediseñado
+- Mejoras visuales en Hábitos (separador, meses, descripción, icono)
+- Estandarización de propiedades (Tareas, Hábitos, Proyectos)
+- Fix: input comentarios fijo no cubre contenido
 
-### 9.7.2 Bugs de Lógica
-- [x] Deshacer acción se dispara al abrir configuración sin cambios reales
-  - Detectar cuando no hubo cambios para no guardar innecesariamente
-  - Evitar "cambio prioridad: sin prioridad → sin prioridad"
-- [x] Subtarea hereda proyecto del padre (Panel Ejecución)
-- [x] BUG CRÍTICO: El modal de configuración de tareas ya no se cierra después de editar. Solo muestra "Tarea editada" y permanece abierto. Introducido en la corrección de 9.7.2 Bugs de Lógica (FIXED)
+</details>
 
-### 9.7.3 Organización de Propiedades en Tareas
-- [x] Dividir opciones en 3 FilaPropiedades con etiquetas descriptivas
-  - Grupo 1: Estado, Prioridad, Urgencia, Fecha
-  - Grupo 2: Proyecto, Responsable, Repetición
-  - Grupo 3: Tags (nuevo)
-- [x] Agregar sistema de Tags con estilo pill
-  - [x] Input para agregar tags
-  - [x] Tags como pills removibles
-  - [x] Autocompletado de tags existentes (Parcial: solo lista actual sin historial global por ahora)
-
-### 9.7.4 Responsables vs Compartir (Conceptos Diferentes)
-**Responsable**: Usuario asignado a completar la tarea
-**Compartir**: Usuarios que pueden ver/editar pero no son responsables directos
-
-- [x] Agregar opción de Responsable en tareas (ya existe en proyectos)
-- [x] Agregar opción de Compartir en tareas (menú para seleccionar usuarios)
-- [x] Agregar opción de Compartir visible en proyectos (actualmente solo desde SeccionResponsables)
-- [x] Distinguir visualmente Responsable vs Colaboradores
-
-### 9.7.5 Panel de Comentarios (Rediseño)
-- [x] Cambiar "Enviar mensaje" por "Dejar comentario"
-- [x] Input de comentario más compacto estilo red social
-- [x] Mostrar foto del usuario junto al input
-- [x] Comentarios con menos padding
-- [x] Input ubicado abajo por defecto (fijo en parte inferior)
-- [x] Input visible en columna izquierda cuando chat está oculto
-
-### 9.7.6 Mejoras Visuales en Hábitos (Feedback)
-- [x] Separador visual entre configuración y historial visual
-- [x] Corrección de meses repetidos en historial visual
-- [x] Propiedades compactas organizadas por etiquetas individuales
-- [x] Nuevos campos: Descripción e Icono personalizable para hábitos
-
-### 9.7.7 Estandarización de Propiedades Compactas
-
-**Problema detectado:** 
-- Las propiedades no están estandarizadas entre formularios
-- Etiquetas incorrectas (ej: "Ubicación" contiene Proyecto + Asignación + Repetición)
-- Estado de proyectos solo aparece en modo edición y después de propiedades
-- Orden inconsistente entre Tareas, Hábitos y Proyectos
-
-#### Estado Actual (Análisis)
-
-**Tareas (FormularioTareaModerno.tsx):**
-```
-- Estado (solo edición)
-- Propiedades: Prioridad, Urgencia, Fecha
-- Ubicación: Proyecto, Asignado, Repetición  ← ERROR: etiqueta incorrecta
-- Colaboradores
-- Etiquetas
-```
-
-**Hábitos (FormularioHabitoModerno.tsx):**
-```
-- Importancia
-- Estado (solo edición)
-- Frecuencia
-```
-
-**Proyectos (FormularioProyectoModerno.tsx):**
-```
-- Propiedades: Prioridad, Urgencia, Fecha (sin etiqueta)
-- Estado (solo edición)  ← aparece DESPUÉS de propiedades
-- Miembros
-```
-
-#### Propuesta de Estandarización
-
-**Orden propuesto para TAREAS:**
-| Etiqueta      | Contenido                    | Notas                        |
-| ------------- | ---------------------------- | ---------------------------- |
-| Estado        | Completado/Pendiente         | Solo edición                 |
-| Propiedades   | Prioridad, Urgencia, Fecha   | Siempre visible              |
-| Proyecto      | Selector de proyecto         | Si hay proyectos disponibles |
-| Asignado      | Selector de responsable      | Si hay participantes         |
-| Repetición    | Configuración de recurrencia | Siempre visible              |
-| Colaboradores | Compartir con otros          | Solo edición                 |
-| Etiquetas     | Tags                         | Si hay callback              |
-
-**Orden propuesto para HÁBITOS:**
-| Etiqueta    | Contenido                      | Notas           |
-| ----------- | ------------------------------ | --------------- |
-| Estado      | Completado/Pendiente/Pospuesto | Solo edición    |
-| Importancia | Alta/Media/Baja                | Siempre visible |
-| Frecuencia  | Configuración de frecuencia    | Siempre visible |
-
-**Orden propuesto para PROYECTOS:**
-| Etiqueta    | Contenido                     | Notas                            |
-| ----------- | ----------------------------- | -------------------------------- |
-| Estado      | Activo/Pausado/Completado/etc | Siempre visible (crear + editar) |
-| Propiedades | Prioridad, Urgencia, Fecha    | Siempre visible                  |
-| Miembros    | Participantes del proyecto    | Solo edición                     |
-
-#### Tareas de Implementación
-
-- [x] **9.7.7.1** Definir estándar (este documento) ✅
-- [x] **9.7.7.2** Corregir Tareas:
-  - [x] Renombrar "Ubicación" → separar en "Proyecto", "Asignado", "Repetición"
-  - [x] Cada selector en su propia FilaPropiedades
-- [x] **9.7.7.3** Corregir Proyectos:
-  - [x] Mover Estado ANTES de Propiedades
-  - [x] Mostrar Estado también en modo creación
-  - [x] Agregar etiqueta "Propiedades" consistente
-- [x] **9.7.7.4** Verificar Hábitos:
-  - [x] Estado antes de Importancia (corregido el orden)
-  - [x] Refactorizado a FilaPropiedades (eliminados divs manuales)
-
-### 9.7.8 Bugs Pendientes
-
-- [x] **Input comentarios fijo cubre contenido**: El input de comentario fijo en la parte inferior (cuando el chat está oculto) está cubriendo parte del contenido scrolleable. Se necesita agregar padding-bottom al contenedor scroll para compensar la altura del input fijo.
-
-### 9.7.9 Sistema de Temas Visuales
+### 9.7.9 Sistema de Temas Visuales (Pendiente)
 
 **Objetivo:** Permitir al usuario cambiar el tema visual del dashboard.
-
-#### Implementación
-
-- [ ] **Menú de usuario**: Agregar opción "Temas" al menú contextual del usuario
-- [ ] **Modal de temas**: Crear modal con lista de temas disponibles
-- [ ] **Persistencia**: Guardar preferencia de tema en localStorage
-
-#### Temas Disponibles
 
 | Tema           | Descripción                                         |
 | -------------- | --------------------------------------------------- |
@@ -416,13 +318,11 @@ Todos centralizados en `configuracionModerna.css`:
 | **Dark Mode**  | Dark mode genérico más estándar                     |
 | **Light Mode** | Tema claro para preferencias de día                 |
 
-#### Tareas de Implementación
-
-- [ ] Crear `ModalTemas.tsx` con selector visual de temas
-- [ ] Modificar `variables.css` para soportar múltiples temas (CSS custom properties)
+**Tareas:**
+- [ ] Crear `ModalTemas.tsx` con selector visual
+- [ ] Modificar `variables.css` para soportar múltiples temas
 - [ ] Agregar opción al menú contextual del usuario
-- [ ] Crear hook `useTema` para gestionar el estado del tema
-- [ ] Definir paletas de colores para cada tema
+- [ ] Hook `useTema` para gestionar el estado
 
 ---
 
@@ -502,12 +402,15 @@ Todos centralizados en `configuracionModerna.css`:
 
 ## Resumen de Fases
 
-| Fase | Nombre                                   | Estado         |
-| ---- | ---------------------------------------- | -------------- |
-| 0-4  | Sistema Social                           | ✅ Completada   |
-| 5-7  | Urgencia, Chat, UX                       | ✅ Completada   |
-| 8    | Mapa de Calor + Historial + UX Dashboard | ✅ Completada   |
-| 9    | Refactorización Visual (Estilo Linear)   | 🚧 EN PROGRESO  |
-| 10   | Scratchpad + File Manager                | Baja Prioridad |
-| 11   | Compartir Hábitos                        | Baja Prioridad |
-| 12   | Futuro                                   | Pendiente      |
+| Fase  | Nombre                                   | Estado          |
+| ----- | ---------------------------------------- | --------------- |
+| 0-4   | Sistema Social                           | ✅ Completada    |
+| 5-7   | Urgencia, Chat, UX                       | ✅ Completada    |
+| 8     | Mapa de Calor + Historial + UX Dashboard | ✅ Completada    |
+| 9     | Refactorización Visual (Estilo Linear)   | ✅ Completada    |
+| 10    | Versión Móvil (PWA)                      | 🚧 EN PROGRESO   |
+| 11    | Sistema de Notas Mejorado                | Media Prioridad |
+| 12    | Gestión de Tiempo (Time Tracking)        | Baja Prioridad  |
+| Extra | Scratchpad + File Manager                | Baja Prioridad  |
+| Extra | Compartir Hábitos                        | Baja Prioridad  |
+

@@ -6,10 +6,10 @@
  * Configurable por periodo y tipo de actividad
  */
 
-import {useEffect, useMemo} from 'react';
-import {Activity, Settings} from 'lucide-react';
+import {useEffect, useMemo, useState} from 'react';
+import {Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
-import {MapaCalor} from '../shared';
+import {MapaCalor, OverlayEnfoque} from '../shared';
 import {useActividad} from '../../hooks/useActividad';
 import type {ConfiguracionActividad} from '../../hooks/useConfiguracionActividad';
 
@@ -32,6 +32,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
     );
 
     const {estado, cargarHeatmap} = useActividad(filtrosIniciales);
+    const [modoEnfoque, setModoEnfoque] = useState(false);
 
     /* Cargar datos al montar y cuando cambie la configuracion */
     useEffect(() => {
@@ -69,10 +70,14 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                                 <span className="panelActividadStat">{totalActividades} acciones</span>
                             </span>
                         )}
-                        {/* Boton configuracion */}
                         <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
                             <span className="selectorBadgeIcono">
                                 <Settings size={12} />
+                            </span>
+                        </button>
+                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                            <span className="selectorBadgeIcono">
+                                <Maximize2 size={12} />
                             </span>
                         </button>
                         {handleMinimizar}
@@ -82,6 +87,10 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
 
             {/* Mapa de calor - siempre muestra datos si existen, recarga en segundo plano */}
             <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapa" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} />}</div>
+
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Actividad">
+                <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapaEnfoque" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} />}</div>
+            </OverlayEnfoque>
         </div>
     );
 }

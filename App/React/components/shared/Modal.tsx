@@ -2,10 +2,12 @@
  * Modal
  * Componente modal reutilizable con overlay y animaciones
  * Responsabilidad unica: contenedor modal generico
+ *
+ * Fase 10.2: Agrega boton "Volver" para version movil
  */
 
-import {useEffect, useCallback} from 'react';
-import {X} from 'lucide-react';
+import {useEffect, useCallback, useState} from 'react';
+import {X, ArrowLeft} from 'lucide-react';
 
 export interface ModalProps {
     estaAbierto: boolean;
@@ -19,7 +21,26 @@ export interface ModalProps {
     ocultarBotonCerrar?: boolean;
 }
 
+/* Hook para detectar si estamos en movil */
+function useEsMovil(breakpoint: number = 480): boolean {
+    const [esMovil, setEsMovil] = useState(false);
+
+    useEffect(() => {
+        const verificar = () => {
+            setEsMovil(window.innerWidth <= breakpoint);
+        };
+
+        verificar();
+        window.addEventListener('resize', verificar);
+        return () => window.removeEventListener('resize', verificar);
+    }, [breakpoint]);
+
+    return esMovil;
+}
+
 export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', accionesEncabezado, ocultarBotonCerrar = false}: ModalProps): JSX.Element | null {
+    const esMovil = useEsMovil();
+
     /*
      * Cierra el modal al presionar Escape
      */
@@ -56,12 +77,19 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
         <div className="modalOverlay" onClick={manejarClickOverlay}>
             <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
                 <div className="modalEncabezado">
-                    <h2 id="modal-titulo" className="modalTitulo">
-                        {titulo}
+                    {/* Boton Volver en movil */}
+                    {esMovil && (
+                        <button className="modalBotonVolver" onClick={onCerrar} aria-label="Volver" type="button">
+                            <ArrowLeft size={20} />
+                            <span>Volver</span>
+                        </button>
+                    )}
+                    <h2 id="modal-titulo" className={`modalTitulo ${esMovil ? 'modalTitulo--movil' : ''}`}>
+                        {esMovil ? '' : titulo}
                     </h2>
                     <div className="modalAccionesEncabezado">
                         {accionesEncabezado}
-                        {!ocultarBotonCerrar && (
+                        {!ocultarBotonCerrar && !esMovil && (
                             <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">
                                 <X size={14} />
                             </button>
