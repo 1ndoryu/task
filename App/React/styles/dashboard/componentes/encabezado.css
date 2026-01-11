@@ -729,15 +729,15 @@
         display: grid;
         grid-template-columns: auto 1fr auto;
         align-items: center;
-        gap: var(--dashboard-espacioSm);
-        padding: var(--dashboard-espacioMd);
+        gap: var(--dashboard-espacioXs);
+        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         width: 100%;
         box-sizing: border-box;
-        background: var(--dashboard-fondoPrincipal);
+        background: var(--dashboard-fondoSecundario);
         z-index: 100;
         border-bottom: 1px solid var(--dashboard-bordePrincipal);
         margin: 0;
@@ -752,7 +752,7 @@
 
     /* Compensar altura del header fijo en el contenido */
     .dashboardContenedor {
-        padding-top: calc(44px + var(--dashboard-espacioMd) * 2 + var(--dashboard-espacioMovilMd));
+        padding-top: 72px;
     }
 
     /* Columna 1: Boton hamburguesa (hijo directo del header) */
@@ -854,13 +854,13 @@
  */
 @media (max-width: 480px) {
     .dashboardEncabezado {
-        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
         gap: var(--dashboard-espacioXs);
     }
 
     /* Compensar altura del header fijo (ajuste para movil pequeño) */
     .dashboardContenedor {
-        padding-top: calc(44px + var(--dashboard-espacioSm) * 2 + var(--dashboard-espacioMovilSm));
+        padding-top: 64px;
     }
 
     .encabezadoTituloBoton {

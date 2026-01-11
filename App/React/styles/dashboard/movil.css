@@ -98,13 +98,15 @@ body {
  */
 @media (max-width: 768px) {
     .dashboardContenedor {
-        padding: var(--dashboard-espacioMovilMd);
+        padding-inline: var(--dashboard-espacioMovilMd);
+        padding-bottom: var(--dashboard-espacioMovilMd);
     }
 }
 
 @media (max-width: 480px) {
     .dashboardContenedor {
-        padding: var(--dashboard-espacioMovilSm);
+        padding-inline: var(--dashboard-espacioMovilSm);
+        padding-bottom: var(--dashboard-espacioMovilSm);
         font-size: var(--dashboard-tamanoMovilBase);
     }
 }
