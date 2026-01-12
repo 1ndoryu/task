@@ -27,8 +27,10 @@ export interface PanelChatHistorialProps {
     avatarUsuario?: string;
     /* Nombre del usuario actual */
     nombreUsuario?: string;
-    /* Mostrar solo el input sin el timeline (para cuando el chat está oculto) */
+    /* Mostrar solo el input sin el timeline (para cuando el chat esta oculto) */
     soloInput?: boolean;
+    /* Modo compacto para movil inline (Fase 10.8.11) */
+    compacto?: boolean;
 }
 
 /* Mapeo de iconos para mensajes del sistema */
@@ -88,7 +90,7 @@ function formatearFechaDia(fechaIso: string): string {
     return fecha.toLocaleDateString('es', {weekday: 'long', day: 'numeric', month: 'long'});
 }
 
-export function PanelChatHistorial({elementoId, elementoTipo, participantes = [], avatarUsuario, nombreUsuario, soloInput = false}: PanelChatHistorialProps): JSX.Element {
+export function PanelChatHistorial({elementoId, elementoTipo, participantes = [], avatarUsuario, nombreUsuario, soloInput = false, compacto = false}: PanelChatHistorialProps): JSX.Element {
     const [mostrandoParticipantes, setMostrandoParticipantes] = useState(false);
     const [mensajeNuevo, setMensajeNuevo] = useState('');
     const refContenedor = useRef<HTMLDivElement>(null);
@@ -222,9 +224,9 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
     }
 
     return (
-        <div id="panel-chat-historial" className="panelChatHistorial">
-            {/* Header con toggle de participantes */}
-            {tieneParticipantes && (
+        <div id="panel-chat-historial" className={`panelChatHistorial ${compacto ? 'panelChatHistorial--compacto' : ''}`}>
+            {/* Header con toggle de participantes - Ocultar en modo compacto */}
+            {!compacto && tieneParticipantes && (
                 <div className="panelChatHistorialHeader">
                     <div className="panelChatHistorialTitulo">
                         <MessageCircle size={14} />

@@ -967,3 +967,218 @@ body {
         margin-left: auto;
     }
 }
+
+/* 
+ * FORMULARIO COMPACTO MÓVIL - FASE 10.8.10
+ * Compacta la vista de propiedades del formulario de tarea/hábito para móvil
+ */
+@media (max-width: 480px) {
+    /* 
+     * CONTENEDOR GENERAL DE FORMULARIO
+     * Elimina gap entre elementos - cada fila gestiona su propio espaciado
+     */
+    .formularioProyectoModerno {
+        gap: 8px;
+    }
+
+    /* 
+     * CAMPO TÍTULO - Más compacto
+     */
+    .campoTituloLimpio__input {
+        font-size: 1.25rem;
+        min-height: 1.6rem;
+    }
+
+    /* 
+     * CAMPO SUBTÍTULO - Más compacto
+     */
+    .campoSubtituloLimpio__input {
+        min-height: 24px;
+        font-size: var(--dashboard-tamanoMovilPequeno);
+    }
+
+    /* 
+     * FILA DE PROPIEDADES ULTRA COMPACTA
+     * Sin padding vertical, solo separación mínima entre elementos
+     */
+    .propiedadesCompactas {
+        gap: var(--dashboard-espacioMovilSm);
+        padding: 0;
+        min-height: 28px;
+    }
+
+    .propiedadesCompactas__etiqueta {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        min-width: 60px;
+    }
+
+    .propiedadesCompactas__contenido {
+        gap: var(--dashboard-espacioMovilSm);
+    }
+
+    /* 
+     * PILLS ULTRA COMPACTOS
+     * Mínimo padding posible manteniendo legibilidad
+     */
+    .pillOpcion {
+        padding: 2px 6px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        gap: 2px;
+        min-height: 24px;
+    }
+
+    /* 
+     * PILL INPUT - Más compacto
+     */
+    .pillOpcion.pillOpcion--input {
+        padding: 3px 8px;
+    }
+
+    .pillOpcion.pillOpcion--input input {
+        width: 55px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* 
+     * SELECTOR DE ICONO - Más pequeño
+     */
+    .selectorIconoProyecto__trigger {
+        width: 32px;
+        height: 32px;
+    }
+
+    .formularioProyectoModerno__icono {
+        margin-bottom: 0;
+    }
+
+    /* 
+     * ICONOS DENTRO DE PILLS - Más pequeños
+     */
+    .pillOpcion svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* 
+     * SECCIÓN RESPONSABLES COMPACTA
+     */
+    .seccionResponsables--inline {
+        gap: var(--dashboard-espacioMovilMd);
+        padding: var(--dashboard-espacioMovilXs) 0;
+    }
+
+    .seccionResponsables__etiqueta {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        min-width: 70px;
+    }
+
+    /* 
+     * AVATARES MÁS PEQUEÑOS
+     */
+    .seccionResponsables__avatarCompacto {
+        width: 20px;
+        height: 20px;
+        margin-left: -6px;
+    }
+
+    .seccionResponsables__avatarMas {
+        width: 20px;
+        height: 20px;
+        margin-left: -6px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .seccionResponsables__botonAgregarSmall {
+        width: 20px;
+        height: 20px;
+    }
+
+    .seccionResponsables__botonAgregarCompacto {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* 
+     * SECCIÓN MODERNA COMPACTA (Tags, Adjuntos)
+     */
+    .seccionModerna {
+        padding: var(--dashboard-espacioMovilXs) 0;
+    }
+
+    .seccionModerna__tituloTexto {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        min-width: 70px;
+    }
+
+    .seccionModerna__botonAgregar {
+        padding: 2px 6px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* 
+     * SEPARADOR DE HISTORIAL (Hábitos)
+     */
+    .formularioHabitoModerno__separador {
+        margin: var(--dashboard-espacioMovilMd) 0 var(--dashboard-espacioMovilXs) 0;
+    }
+
+    .formularioHabitoModerno__historialEtiqueta {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        margin-bottom: 6px;
+    }
+
+    /* 
+     * ADJUNTOS COMPACTOS
+     */
+    .seccionAdjuntos__boton {
+        padding: var(--dashboard-espacioMovilSm) var(--dashboard-espacioMovilMd);
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .gridAdjuntos {
+        gap: var(--dashboard-espacioMovilSm);
+    }
+
+    .gridAdjuntos__item {
+        padding: var(--dashboard-espacioMovilSm);
+    }
+
+    /* 
+     * MODAL MODERNA - Ajustes de padding
+     */
+    .modalModerna__header {
+        padding: var(--dashboard-espacioMovilMd);
+    }
+
+    .modalModerna__cuerpo {
+        padding: var(--dashboard-espacioMovilMd);
+    }
+
+    .modalModerna__footer {
+        padding: var(--dashboard-espacioMovilSm) var(--dashboard-espacioMovilMd);
+    }
+
+    /* 
+     * RESUMEN TAREAS PROYECTO - Más compacto
+     */
+    .resumenTareasProyecto {
+        padding: var(--dashboard-espacioMovilSm) 0;
+        gap: var(--dashboard-espacioMovilMd);
+    }
+
+    .resumenTareasProyecto__contador {
+        font-size: var(--dashboard-tamanoMovilPequeno);
+    }
+
+    .resumenTareasProyecto__link {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* 
+     * BARRA PROGRESO MINI - Más pequeña
+     */
+    .barraProgresoMini {
+        max-width: 80px;
+        height: 3px;
+    }
+}

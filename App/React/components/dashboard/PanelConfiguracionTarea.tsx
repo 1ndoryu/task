@@ -14,7 +14,8 @@ import {AccionesFormulario, Modal} from '../shared';
 import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {usePanelChat} from '../../hooks/usePanelChat';
-import {MessageSquare, MessageSquareOff, Activity, BarChart2} from 'lucide-react';
+import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
+import {Activity, BarChart2} from 'lucide-react';
 import type {FrecuenciaHabito, Adjunto} from '../../types/dashboard';
 
 export interface PanelConfiguracionTareaProps {
@@ -37,6 +38,7 @@ import {useAutoguardado} from '../../hooks/useAutoguardado';
 
 export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
     const modoEdicion = !!tarea;
+    const esMovil = useEsDispositivoMovil();
 
     /* Estado local para edicion */
     const [texto, setTexto] = useState(tarea?.texto || '');
@@ -246,27 +248,32 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         [onToggleCompletado]
     );
 
-    /* Header Icons (similar a ModalProyecto) */
-    const accionesHeader = modoEdicion ? (
-        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-            {/* Estadisticas (Placeholder) */}
-            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
-                <BarChart2 size={16} className="textoApagado" />
-            </button>
+    /*
+     * Header Icons (similar a ModalProyecto)
+     * Fase 10.8.11: En móvil no mostramos estos iconos,
+     * el chat se muestra inline al final del modal
+     */
+    const accionesHeader =
+        modoEdicion && !esMovil ? (
+            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                {/* Estadisticas (Placeholder) */}
+                <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                    <BarChart2 size={16} className="textoApagado" />
+                </button>
 
-            {/* Actividad / Chat */}
-            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
-                {tieneMensajesSinLeer ? (
-                    <div style={{position: 'relative'}}>
+                {/* Actividad / Chat */}
+                <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+                    {tieneMensajesSinLeer ? (
+                        <div style={{position: 'relative'}}>
+                            <Activity size={16} />
+                            <span className="indicadorBadge" />
+                        </div>
+                    ) : (
                         <Activity size={16} />
-                        <span className="indicadorBadge" />
-                    </div>
-                ) : (
-                    <Activity size={16} />
-                )}
-            </button>
-        </div>
-    ) : undefined;
+                    )}
+                </button>
+            </div>
+        ) : undefined;
 
     /* Clase del modal */
     const claseModal = modoEdicion ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
@@ -315,9 +322,16 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                                     onTagsChange={setTags}
                                     modoEdicion={true}
                                 />
+
+                                {/* Fase 10.8.11: Chat inline en móvil */}
+                                {esMovil && tarea && (
+                                    <div className="chatInlineMovil">
+                                        <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} compacto />
+                                    </div>
+                                )}
                             </div>
-                            {/* Input de comentario cuando el chat esta oculto */}
-                            {!mostrarChatColumna && tarea && <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} soloInput />}
+                            {/* Input de comentario cuando el chat esta oculto (solo desktop) */}
+                            {!esMovil && !mostrarChatColumna && tarea && <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} soloInput />}
                         </div>
 
                         {/* Columna Derecha: Chat e Historial (oculto en móvil) */}

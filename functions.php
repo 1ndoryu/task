@@ -43,6 +43,11 @@ if (file_exists($control_config)) {
 
 function incluirArchivos($directorio)
 {
+    /* Evitar escanear directorios de frontend que no contienen PHP */
+    if (str_contains($directorio, 'node_modules') || str_contains($directorio, 'React')) {
+        return;
+    }
+
     $ruta_completa = get_template_directory() . "/$directorio";
 
     $archivos = glob($ruta_completa . "*.php");
@@ -52,6 +57,12 @@ function incluirArchivos($directorio)
 
     $subdirectorios = glob($ruta_completa . "*/", GLOB_ONLYDIR);
     foreach ($subdirectorios as $subdirectorio) {
+        /* Extraer solo el nombre del directorio para verificar */
+        $dirname = basename($subdirectorio);
+        if ($dirname === 'node_modules' || $dirname === 'React') {
+            continue;
+        }
+
         $ruta_relativa = str_replace(get_template_directory() . '/', '', $subdirectorio);
         incluirArchivos($ruta_relativa);
     }

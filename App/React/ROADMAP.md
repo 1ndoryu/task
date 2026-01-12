@@ -437,11 +437,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-#### 10.8.10 Formulario Compacto Móvil
+#### 10.8.10 Formulario Compacto Móvil ✅
 
 **Objetivo:** Compactar la vista de propiedades del formulario de tarea/hábito para móvil.  
 **Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ Completado
 
 ```
 ┌─────────────────────────────────────┐
@@ -461,23 +461,66 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 └─────────────────────────────────────┘
 ```
 
-- [ ] **Layout compacto de propiedades:**
-  - [ ] Reducir padding vertical entre filas
-  - [ ] Labels más pequeños (`--dashboard-tamanoPequeno`)
-  - [ ] Pills de prioridad/urgencia en una sola fila horizontal
-  - [ ] Eliminar etiquetas redundantes (mostrar solo iconos con valor)
-- [ ] **Campos específicos:**
-  - [ ] Estado: pill compacto
-  - [ ] Prioridad + Urgencia: juntos en una fila
-  - [ ] Fecha: solo icono + fecha, sin label "Propiedades"
-  - [ ] Proyecto: selector compacto
-  - [ ] Repetición: toggle + frecuencia inline
-  - [ ] Etiquetas: chips compactos
-  - [ ] Adjuntos: botón compacto
-- [ ] **Variables CSS a usar:**
-  - [ ] `--dashboard-espacioMovilSm` para padding
-  - [ ] `--dashboard-tamanoMovilPequeno` para labels
-  - [ ] `--dashboard-tamanoTactilMinimo` para áreas táctiles
+- [x] **Layout compacto de propiedades:**
+  - [x] Reducir padding vertical entre filas (`espacioMovilXs`)
+  - [x] Labels más pequeños (`--dashboard-tamanoMuyPequeno`)
+  - [x] Pills de prioridad/urgencia más compactos (padding: 3px 8px)
+  - [x] Reducir gap entre elementos del formulario (`espacioMovilSm`)
+- [x] **Campos específicos:**
+  - [x] Título: font-size reducido a 1.25rem
+  - [x] Subtítulo: min-height 32px, font-size movil pequeño
+  - [x] Pills: font-size 9px (tamanoMuyPequeno), iconos 12px
+  - [x] Selector de icono: 32x32px (reducido de 40x40)
+  - [x] Avatares responsables: 20x20px (reducido de 24x24)
+- [x] **Variables CSS utilizadas:**
+  - [x] `--dashboard-espacioMovilSm` para padding
+  - [x] `--dashboard-tamanoMuyPequeno` para labels (9px)
+  - [x] `--dashboard-espacioMovilXs` para gaps mínimos
+
+---
+
+#### 10.8.11 Modal con Chat Integrado en Móvil
+
+**Objetivo:** Ocultar iconos del header modal en móvil y mostrar el chat/actividad inline al final del modal.  
+**Prioridad:** Alta | **Urgencia:** Normal  
+**Estado:** ⏳ Pendiente
+
+```
+┌─────────────────────────────────────┐
+│ ←        Editar Tarea               │  ← Sin iconos de acciones
+├─────────────────────────────────────┤
+│                                     │
+│  [Formulario de propiedades]        │
+│                                     │
+├─────────────────────────────────────┤
+│  💬 Actividad                       │  ← Chat inline compacto
+│  ─────────────────────────────────  │
+│  Usuario: Comentario...             │
+│  Hace 2h                            │
+│  ─────────────────────────────────  │
+│  [Escribir comentario...]           │
+└─────────────────────────────────────┘
+```
+
+- [ ] **Ocultar iconos del header modal en móvil:**
+  - [ ] Ocultar `.modalAccionesEncabezado` contenido via CSS en móvil
+  - [ ] Mantener el espacio reservado para simetría del grid
+  - [ ] Aplicar solo cuando `esMovil === true`
+- [ ] **Mostrar chat/actividad inline al final del modal:**
+  - [ ] En móvil, renderizar `PanelChat` dentro del contenido del modal
+  - [ ] Posicionar después de las propiedades del formulario
+  - [ ] Pasar prop `compacto={true}` para versión reducida
+- [ ] **Estilos del chat compacto móvil:**
+  - [ ] Altura máxima limitada (~200px) con scroll interno
+  - [ ] Input de comentario fijo o inline
+  - [ ] Mensajes más pequeños (font-size reducido)
+  - [ ] Separador visual antes del chat
+- [ ] **Componentes afectados:**
+  - [ ] `Modal.tsx`: Ocultar `accionesEncabezado` en móvil
+  - [ ] `PanelConfiguracionTarea.tsx`: Renderizar chat inline en móvil
+  - [ ] `ModalHabito.tsx`: Mismo patrón si aplica
+  - [ ] `modal.css`: Estilos para ocultar acciones en móvil
+  - [ ] `panelChat.css`: Variante compacta para móvil
 
 ---
 

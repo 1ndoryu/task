@@ -289,9 +289,18 @@
         line-height: 1.2;
     }
 
-    /* Espacio reservado derecho para simetría (donde iría el X) */
+    /* 
+     * Espacio reservado derecho para simetría (donde iría el X)
+     * Fase 10.8.11: Ocultar iconos de acciones en móvil
+     * El chat se muestra inline al final del modal
+     */
     .modalEncabezado--movil .modalAccionesEncabezado {
         justify-content: flex-end;
         min-width: 40px;
+    }
+
+    /* Ocultar iconos/botones dentro de las acciones del header en móvil */
+    .modalEncabezado--movil .modalAccionesEncabezado > * {
+        display: none !important;
     }
 }
