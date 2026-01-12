@@ -1181,4 +1181,126 @@ body {
         max-width: 80px;
         height: 3px;
     }
+
+    /* 
+     * CHAT INLINE MÓVIL - FASE 10.8.11
+     * Contenedor para el chat dentro del modal en móvil
+     */
+    .chatInlineMovil {
+        margin-top: var(--dashboard-espacioMd);
+        padding-top: var(--dashboard-espacioMd);
+        border-top: 1px dashed var(--dashboard-bordeSutil);
+    }
+
+    /* 
+     * PANEL CHAT COMPACTO - FASE 10.8.11  
+     * Versión reducida del chat para móvil inline
+     * Input fijo en la parte inferior de la pantalla
+     */
+    .panelChatHistorial--compacto {
+        border: none;
+        background: transparent;
+        /* Sin altura fija - el input es fixed en bottom */
+        padding-bottom: 60px;
+    }
+
+    .panelChatHistorial--compacto .panelChatHistorialContenido {
+        padding: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .panelChatHistorial--compacto .panelChatHistorialTimeline {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .panelChatHistorial--compacto .timelineContenedor {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--dashboard-espacioSm) 0;
+        min-height: 0;
+    }
+
+    /* Mensajes más pequeños en modo compacto */
+    .panelChatHistorial--compacto .timelineMensajeUsuario {
+        padding: var(--dashboard-espacioXs) 0;
+    }
+
+    .panelChatHistorial--compacto .timelineMensajeBurbuja {
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .panelChatHistorial--compacto .timelineMensajeContenido {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .panelChatHistorial--compacto .timelineMensajeFecha {
+        font-size: 8px;
+    }
+
+    .panelChatHistorial--compacto .timelineMensajeAvatar {
+        width: 20px;
+        height: 20px;
+    }
+
+    .panelChatHistorial--compacto .timelineMensajeAvatar img {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Input compacto - Fijo en la parte inferior de la pantalla */
+    .panelChatHistorial--compacto .timelineInput {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+        padding-bottom: calc(var(--dashboard-espacioSm) + var(--dashboard-safeAreaBottom));
+        gap: var(--dashboard-espacioSm);
+        border-top: 1px solid var(--dashboard-bordePrincipal);
+        background: var(--dashboard-fondoSecundario);
+        z-index: 100;
+    }
+
+    .panelChatHistorial--compacto .timelineInputAvatar {
+        width: 24px;
+        height: 24px;
+    }
+
+    .panelChatHistorial--compacto .timelineInputTexto {
+        font-size: var(--dashboard-tamanoMovilPequeno);
+        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    }
+
+    /* Mensajes del sistema más compactos */
+    .panelChatHistorial--compacto .timelineMensajeSistema {
+        padding: 2px 0;
+        font-size: 8px;
+    }
+
+    /* Separador de día más compacto */
+    .panelChatHistorial--compacto .timelineSeparadorDia {
+        padding: var(--dashboard-espacioXs) 0;
+    }
+
+    .panelChatHistorial--compacto .timelineSeparadorDiaTexto {
+        font-size: 8px;
+    }
+
+    /* Estado vacío más compacto */
+    .panelChatHistorial--compacto .panelChatHistorialVacio {
+        padding: var(--dashboard-espacioMd) 0;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .panelChatHistorial--compacto .panelChatHistorialVacio svg {
+        width: 16px;
+        height: 16px;
+    }
 }

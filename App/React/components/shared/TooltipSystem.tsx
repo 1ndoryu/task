@@ -37,9 +37,6 @@ export function TooltipSystem(): JSX.Element | null {
     const targetRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-    /* En móvil, no renderizamos tooltips */
-    if (esMovil) return null;
-
     /**
      * Calcula la mejor posición para el tooltip evitando desbordamiento
      */
@@ -147,6 +144,9 @@ export function TooltipSystem(): JSX.Element | null {
             window.removeEventListener('scroll', handleScroll, {capture: true});
         };
     }, [tooltip.visible, calcularPosicion]);
+
+    /* En móvil, no renderizamos tooltips - después de todos los hooks */
+    if (esMovil) return null;
 
     if (!tooltip.visible && !tooltip.content) return null;
 

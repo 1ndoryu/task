@@ -479,11 +479,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-#### 10.8.11 Modal con Chat Integrado en Móvil
+#### 10.8.11 Modal con Chat Integrado en Móvil ✅
 
 **Objetivo:** Ocultar iconos del header modal en móvil y mostrar el chat/actividad inline al final del modal.  
 **Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ Completado
 
 ```
 ┌─────────────────────────────────────┐
@@ -502,25 +502,68 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 └─────────────────────────────────────┘
 ```
 
-- [ ] **Ocultar iconos del header modal en móvil:**
-  - [ ] Ocultar `.modalAccionesEncabezado` contenido via CSS en móvil
-  - [ ] Mantener el espacio reservado para simetría del grid
-  - [ ] Aplicar solo cuando `esMovil === true`
-- [ ] **Mostrar chat/actividad inline al final del modal:**
-  - [ ] En móvil, renderizar `PanelChat` dentro del contenido del modal
-  - [ ] Posicionar después de las propiedades del formulario
-  - [ ] Pasar prop `compacto={true}` para versión reducida
-- [ ] **Estilos del chat compacto móvil:**
-  - [ ] Altura máxima limitada (~200px) con scroll interno
-  - [ ] Input de comentario fijo o inline
-  - [ ] Mensajes más pequeños (font-size reducido)
-  - [ ] Separador visual antes del chat
-- [ ] **Componentes afectados:**
-  - [ ] `Modal.tsx`: Ocultar `accionesEncabezado` en móvil
-  - [ ] `PanelConfiguracionTarea.tsx`: Renderizar chat inline en móvil
-  - [ ] `ModalHabito.tsx`: Mismo patrón si aplica
-  - [ ] `modal.css`: Estilos para ocultar acciones en móvil
-  - [ ] `panelChat.css`: Variante compacta para móvil
+- [x] **Ocultar iconos del header modal en móvil:**
+  - [x] Ocultar `.modalAccionesEncabezado > *` via CSS en móvil
+  - [x] Mantener el espacio reservado para simetría del grid
+  - [x] Aplicar solo cuando `esMovil === true` (condicional en JSX)
+- [x] **Mostrar chat/actividad inline al final del modal:**
+  - [x] En móvil, renderizar `PanelChatHistorial` dentro del contenido del modal
+  - [x] Posicionar después de las propiedades del formulario (`.chatInlineMovil`)
+  - [x] Pasar prop `compacto={true}` para versión reducida
+- [x] **Estilos del chat compacto móvil:**
+  - [x] Altura máxima limitada (200px) con scroll interno
+  - [x] Input de comentario inline
+  - [x] Mensajes más pequeños (font-size 9px y 8px)
+  - [x] Separador visual antes del chat (border-top dashed)
+- [x] **Componentes afectados:**
+  - [x] `modal.css`: Estilos para ocultar acciones en móvil
+  - [x] `PanelConfiguracionTarea.tsx`: Renderizar chat inline en móvil
+  - [x] `PanelChatHistorial.tsx`: Añadida prop `compacto` con clase CSS
+  - [x] `movil.css`: Estilos `.chatInlineMovil` y `.panelChatHistorial--compacto`
+
+---
+
+#### 10.8.12 Layout Listas Compactas Móvil
+
+**Objetivo:** Mejorar el layout de las listas de proyectos, tareas y hábitos en modo compacto móvil.  
+**Prioridad:** Alta | **Urgencia:** Normal  
+**Estado:** ⏳ Pendiente
+
+```
+Antes (1 columna - mal):
+┌─────────────────────────────────────┐
+│ Título del proyecto muy largo...    │
+│ 🟢 Activo  📊 75%  📋 5/20          │
+└─────────────────────────────────────┘
+
+Después (2 columnas - bien):
+┌─────────────────────────────────────┐
+│ Título del proyecto...   │ 🟢 📊 📋 │
+└─────────────────────────────────────┘
+```
+
+- [ ] **Proyectos - Layout 2 columnas:**
+  - [ ] Columna izquierda: Título (flex: 1, truncate con ellipsis)
+  - [ ] Columna derecha: Badges compactos (estado, progreso, contador)
+  - [ ] Ocultar columna de acciones en móvil
+  - [ ] Badges solo con iconos, sin texto
+- [ ] **Tareas - Layout 2 columnas:**
+  - [ ] Columna izquierda: Checkbox + Título (flex: 1)
+  - [ ] Columna derecha: Badges (prioridad, fecha, proyecto)
+  - [ ] Ocultar columna de acciones en móvil
+  - [ ] Mantener consistencia con proyectos
+- [ ] **Hábitos - Compactar más:**
+  - [ ] Reducir padding vertical
+  - [ ] Unificar font-size del título con tareas (consistencia)
+  - [ ] Layout 2 columnas: Título | Icono + Racha
+  - [ ] Ocultar controles secundarios
+- [ ] **Consistencia visual:**
+  - [ ] Mismo font-size para títulos en todos los items compactos
+  - [ ] Misma altura mínima para todos los items
+  - [ ] Badges con tamaño uniforme
+- [ ] **CSS a modificar:**
+  - [ ] `movil.css`: Añadir reglas para `.proyectoItem--compacto`, `.tareaItem--compacto`, `.habitoItem--compacto`
+  - [ ] Ocultar `.accionesColumna` o equivalente en móvil
 
 ---
 
