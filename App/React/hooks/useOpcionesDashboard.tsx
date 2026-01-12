@@ -5,7 +5,7 @@
  */
 
 import {useMemo} from 'react';
-import {Folder, CheckSquare, LayoutList, User} from 'lucide-react';
+import {Folder, CheckSquare, LayoutList, User, GripVertical, Sparkles, Calendar, Flag, SortAsc} from 'lucide-react';
 import type {Proyecto} from '../types/dashboard';
 import {MODOS_ORDEN_TAREAS} from './useOrdenarTareas';
 
@@ -16,41 +16,52 @@ interface UseOpcionesDashboardProps {
 }
 
 interface UseOpcionesDashboardReturn {
-    opcionesOrdenHabitos: Array<{id: string; etiqueta: string; descripcion: string}>;
-    opcionesOrdenProyectos: Array<{id: string; etiqueta: string; descripcion: string}>;
-    opcionesOrdenTareas: Array<{id: string; etiqueta: string; descripcion: string}>;
+    opcionesOrdenHabitos: Array<{id: string; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
+    opcionesOrdenProyectos: Array<{id: string; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
+    opcionesOrdenTareas: Array<{id: string; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
     opcionesFiltro: Array<{id: string; etiqueta: string; icono?: JSX.Element; descripcion: string}>;
 }
 
+/* Iconos para modos de ordenamiento */
+const ICONOS_ORDEN: Record<string, JSX.Element> = {
+    manual: <GripVertical size={14} />,
+    inteligente: <Sparkles size={14} />,
+    fecha: <Calendar size={14} />,
+    prioridad: <Flag size={14} />,
+    nombre: <SortAsc size={14} />
+};
+
 export function useOpcionesDashboard({proyectos, modosOrdenHabitos, contarAsignadas}: UseOpcionesDashboardProps): UseOpcionesDashboardReturn {
-    /* Opciones para SelectorBadge de hábitos */
+    /* Opciones para SelectorBadge de hábitos - Con iconos */
     const opcionesOrdenHabitos = useMemo(
         () =>
             modosOrdenHabitos.map(m => ({
                 id: m.id,
                 etiqueta: m.etiqueta,
-                descripcion: m.descripcion
+                descripcion: m.descripcion,
+                icono: ICONOS_ORDEN[m.id] || <SortAsc size={14} />
             })),
         [modosOrdenHabitos]
     );
 
-    /* Opciones para SelectorBadge de proyectos */
+    /* Opciones para SelectorBadge de proyectos - Con iconos */
     const opcionesOrdenProyectos = useMemo(
         () => [
-            {id: 'nombre', etiqueta: 'Nombre', descripcion: 'Alfabético'},
-            {id: 'fecha', etiqueta: 'Fecha Límite', descripcion: 'Vencimiento'},
-            {id: 'prioridad', etiqueta: 'Prioridad', descripcion: 'Importancia'}
+            {id: 'nombre', etiqueta: 'Nombre', descripcion: 'Alfabético', icono: ICONOS_ORDEN.nombre},
+            {id: 'fecha', etiqueta: 'Fecha Límite', descripcion: 'Vencimiento', icono: ICONOS_ORDEN.fecha},
+            {id: 'prioridad', etiqueta: 'Prioridad', descripcion: 'Importancia', icono: ICONOS_ORDEN.prioridad}
         ],
         []
     );
 
-    /* Opciones para SelectorBadge de tareas */
+    /* Opciones para SelectorBadge de tareas - Con iconos */
     const opcionesOrdenTareas = useMemo(
         () =>
             MODOS_ORDEN_TAREAS.map(m => ({
                 id: m.id,
                 etiqueta: m.etiqueta,
-                descripcion: m.descripcion
+                descripcion: m.descripcion,
+                icono: ICONOS_ORDEN[m.id]
             })),
         []
     );

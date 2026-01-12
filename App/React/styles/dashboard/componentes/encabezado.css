@@ -20,23 +20,11 @@
     z-index: 100;
 }
 
-.encabezadoLogo {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioMd);
-}
-
-.encabezadoIndicador {
-    height: 0.75rem;
-    width: 0.75rem;
-    background-color: white;
-    border-radius: 50%;
-}
-
 .encabezadoTitulo {
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     letter-spacing: -0.025em;
+    font-size: var(--dashboard-tamanoBase);
 }
 
 .encabezadoNav {
@@ -48,36 +36,6 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioLg);
-}
-
-.encabezadoTituloBoton {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    background: none;
-    border: none;
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: var(--dashboard-radioMd);
-    cursor: pointer;
-    color: var(--dashboard-textoActivo);
-    transition: background-color var(--dashboard-transicionNormal);
-    font-weight: 600;
-    font-size: var(--dashboard-tamanoBase);
-    letter-spacing: -0.025em;
-    margin-left: -0.5rem;
-}
-
-.encabezadoTituloBoton:hover {
-    background-color: var(--dashboard-fondoHover);
-}
-
-.encabezadoTituloIcono {
-    color: var(--dashboard-textoMuyApagado);
-    transition: transform var(--dashboard-transicionNormal);
-}
-
-.encabezadoTituloIcono.rotado {
-    transform: rotate(180deg);
 }
 
 .encabezadoBuscador {
@@ -528,10 +486,9 @@
     right: 2px;
 }
 /* 
- * BOTONES MOVIL (Menu y Buscar)
+ * BOTONES MOVIL (Menu)
  */
-.botonMenuMovil,
-.botonBuscadorMovil {
+.botonMenuMovil {
     display: none; /* Oculto por defecto en desktop */
 }
 
@@ -711,14 +668,14 @@
 /* 
  * HEADER MOVIL - Layout reorganizado
  * ┌─────────────────────────────────────┐
- * │  ☰  │    Logo/Título       │  🔍   │
+ * │  ☰  │       Título         │  ⋮   │
  * └─────────────────────────────────────┘
  * 
  * Estructura HTML:
  * header.dashboardEncabezado
  *   > button.botonMenuMovil (hamburguesa - izquierda)
- *   > div.encabezadoIzquierda > div.encabezadoLogo (titulo - centro)
- *   > nav.encabezadoNav > button.botonBuscadorMovil (busqueda - derecha)
+ *   > div.encabezadoIzquierda > span.encabezadoTitulo (titulo - centro)
+ *   > nav.encabezadoNav > button.botonOpcionesMovil (opciones - derecha)
  */
 @media (max-width: 768px) {
     /* 
@@ -772,9 +729,8 @@
         z-index: 10;
     }
 
-    /* Unificar tamaño de iconos SVG en botones móvil */
-    .dashboardEncabezado > .botonMenuMovil svg,
-    .botonBuscadorMovil svg {
+    /* Unificar tamano de iconos SVG en botones movil */
+    .dashboardEncabezado > .botonMenuMovil svg {
         width: 20px;
         height: 20px;
     }
@@ -784,21 +740,7 @@
         color: var(--dashboard-textoActivo);
     }
 
-    /* Boton busqueda - mismo estilo que hamburguesa */
-    .botonBuscadorMovil {
-        width: 44px;
-        height: 44px;
-        background: none !important;
-        border: none !important;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--dashboard-textoNormal);
-        cursor: pointer;
-    }
-
-    /* Columna 2: Logo/Titulo centrado */
+    /* Columna 2: Titulo centrado */
     .encabezadoIzquierda {
         grid-column: 2;
         justify-content: center;
@@ -807,12 +749,7 @@
         overflow: hidden;
     }
 
-    .encabezadoLogo {
-        justify-content: center;
-    }
-
-    .encabezadoTituloBoton {
-        margin-left: 0;
+    .encabezadoTitulo {
         font-size: var(--dashboard-tamanoMovilBase);
     }
 
@@ -822,26 +759,21 @@
         gap: 0;
     }
 
-    /* Ocultar elementos de navegacion excepto busqueda, opciones, drawer y bottomsheet */
-    .encabezadoNav > *:not(.botonBuscadorMovil):not(.botonOpcionesMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel):not(.bottomSheetOverlay):not(.bottomSheetPanel) {
+    /* Ocultar elementos de navegacion excepto opciones, drawer y bottomsheet */
+    .encabezadoNav > *:not(.botonOpcionesMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel):not(.bottomSheetOverlay):not(.bottomSheetPanel) {
         display: none !important;
     }
 
-    /* Asegurar que el drawer sea visible cuando está abierto */
+    /* Asegurar que el drawer sea visible cuando esta abierto */
     .encabezadoNav .drawerMovilOverlay,
     .encabezadoNav .drawerMovilPanel {
         display: flex;
     }
 
-    /* Asegurar que el BottomSheet sea visible cuando está abierto */
+    /* Asegurar que el BottomSheet sea visible cuando esta abierto */
     .encabezadoNav .bottomSheetOverlay,
     .encabezadoNav .bottomSheetPanel {
         display: flex;
-    }
-
-    /* Mostrar solo el boton de busqueda en el nav */
-    .botonBuscadorMovil {
-        display: inline-flex;
     }
 
     /* Ocultamos el buscador de escritorio */
@@ -869,13 +801,8 @@
         padding-top: 64px;
     }
 
-    .encabezadoTituloBoton {
+    .encabezadoTitulo {
         font-size: 13px;
-    }
-
-    /* Quitar el icono de dropdown en movil pequeño */
-    .encabezadoTituloIcono {
-        display: none;
     }
 }
 
@@ -908,8 +835,21 @@
         height: 20px;
     }
 
+    /* Estado activo: solo cambia el color, sin badge rojo */
     .botonOpcionesMovil--activo {
-        color: var(--dashboard-acento);
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Badge de filtros activos - sutil, no rojo */
+    .botonOpcionesMovil .badgeFiltrosActivos {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 6px;
+        height: 6px;
+        background: var(--dashboard-acento);
+        border-radius: 50%;
+        pointer-events: none;
     }
 
     /* Nav con botones de búsqueda y opciones */

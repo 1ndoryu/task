@@ -56,6 +56,23 @@
     flex-shrink: 0;
 }
 
+/* Indicador arrastrable - área táctil expandida */
+.bottomSheetIndicadorArrastrable {
+    cursor: grab;
+    /* Área táctil más grande usando position relative + pseudo-elemento */
+    position: relative;
+}
+
+/* Área táctil invisible extendida */
+.bottomSheetIndicadorArrastrable::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    bottom: -8px;
+    left: -20px;
+    right: -20px;
+}
+
 /* Cabecera con titulo */
 .bottomSheetCabecera {
     padding: 0 var(--dashboard-espacioMd) var(--dashboard-espacioMd);

@@ -282,12 +282,12 @@
  */
 
 /* 
- * PESTANAS PARA MOVIL
- * En pantallas pequeñas, las columnas se convierten en pestañas
+ * PESTANAS PARA MOVIL (DEPRECADO - Fase 10.8.6)
+ * Las pestañas ya no se usan, en móvil solo se muestra configuración
+ * Se mantiene el CSS por si hay referencias pero siempre oculto
  */
 .panelConfiguracionPestanas {
-    display: none;
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    display: none !important;
 }
 
 .panelConfiguracionPestana {
@@ -316,7 +316,8 @@
 }
 
 /* 
- * RESPONSIVE: Modo pestañas en móvil
+ * RESPONSIVE: Modo una columna en móvil (sin pestañas)
+ * Fase 10.8.6: Solo se muestra la columna de configuración
  */
 @media (max-width: 700px) {
     .panelConfiguracionDosColumnas {
@@ -324,23 +325,15 @@
         flex-direction: column;
     }
 
-    .panelConfiguracionPestanas {
-        display: flex;
-    }
-
     .panelConfiguracionColumnaIzquierda {
         border-right: none;
-    }
-
-    .panelConfiguracionColumnaIzquierda,
-    .panelConfiguracionColumnaDerecha {
-        display: none;
+        display: flex;
         flex: 1;
         min-height: 0;
     }
 
-    .panelConfiguracionColumnaIzquierda--activa,
-    .panelConfiguracionColumnaDerecha--activa {
-        display: flex;
+    /* Columna derecha (chat) oculta en móvil */
+    .panelConfiguracionColumnaDerecha {
+        display: none !important;
     }
 }

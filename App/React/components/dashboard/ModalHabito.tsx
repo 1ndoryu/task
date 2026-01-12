@@ -5,15 +5,15 @@
  * Fase 9.5: Refactorizado para usar componentes modernos estilo Linear
  * - FormularioHabitoModerno para el formulario principal
  * - usePanelChat para la gestión del panel de chat
- * - PestanasModal para las pestañas responsive
+ * - Fase 10.8.6: Removido PestanasModal (código muerto)
  */
 
 import {useState, useCallback, useEffect} from 'react';
 import {Activity, BarChart2} from 'lucide-react';
 import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
-import {AccionesFormulario, Modal, PestanasModal} from '../shared';
-import type {PestanaId, EstadoHabito} from '../shared';
+import {AccionesFormulario, Modal} from '../shared';
+import type {EstadoHabito} from '../shared';
 import {FormularioHabitoModerno} from './habitos/FormularioHabitoModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {usePanelChat} from '../../hooks/usePanelChat';
@@ -42,8 +42,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(habito?.frecuencia || FRECUENCIA_POR_DEFECTO);
     const [errores, setErrores] = useState<{nombre?: string}>({});
 
-    /* Estado para pestañas responsive */
-    const [pestanaActiva, setPestanaActiva] = useState<PestanaId>('configuracion');
+    /* Removido: Estado de pestañas móvil (código muerto - Fase 10.8.6) */
 
     /* Hook para panel de chat */
     const {chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna} = usePanelChat({
@@ -169,13 +168,10 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
         <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Modificar habito' : 'Nuevo habito'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
             {modoEdicion ? (
                 <>
-                    {/* Pestañas para móvil */}
-                    <PestanasModal pestanaActiva={pestanaActiva} onCambiar={setPestanaActiva} tieneNotificaciones={tieneMensajesSinLeer} />
-
-                    {/* Layout de 2 columnas */}
+                    {/* Layout de 2 columnas (en móvil solo se muestra configuración) */}
                     <div className={`panelConfiguracionDosColumnas ${!mostrarChatColumna ? 'panelConfiguracionDosColumnas--sinChat' : ''}`}>
                         {/* Columna Izquierda: Formulario */}
-                        <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
+                        <div className="panelConfiguracionColumnaIzquierda panelConfiguracionColumnaIzquierda--activa">
                             <div className="panelConfiguracionColumnaScroll">
                                 <FormularioHabitoModerno
                                     nombre={nombre}
@@ -203,9 +199,9 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
                             {!mostrarChatColumna && habito && <PanelChatHistorial elementoId={habito.id} elementoTipo="habito" participantes={participantesChat} soloInput />}
                         </div>
 
-                        {/* Columna Derecha: Chat e Historial */}
+                        {/* Columna Derecha: Chat e Historial (oculto en móvil) */}
                         {mostrarChatColumna && habito && (
-                            <div className={`panelConfiguracionColumnaDerecha ${pestanaActiva === 'chat' ? 'panelConfiguracionColumnaDerecha--activa' : ''}`}>
+                            <div className="panelConfiguracionColumnaDerecha panelConfiguracionColumnaDerecha--activa ocultarEnMovil">
                                 <PanelChatHistorial elementoId={habito.id} elementoTipo="habito" participantes={participantesChat} />
                             </div>
                         )}

@@ -1,15 +1,16 @@
 /*
  * PestanasModal
- * Componente para pestañas responsive en modales (configuración/chat)
  *
+ * @deprecated Fase 10.8.6 - Este componente ya no se usa.
+ * Las pestañas de Configuración/Chat se eliminaron porque en móvil
+ * ahora solo se muestra la vista de configuración.
+ *
+ * Se mantiene temporalmente por si hay referencias, pero debería
+ * eliminarse completamente en una futura limpieza de código.
+ *
+ * Anteriormente: Componente para pestañas responsive en modales (configuración/chat)
  * Responsabilidad única: Renderizar las pestañas de navegación mobile
  * Visible solo en pantallas pequeñas (CSS controla visibilidad)
- *
- * Uso:
- * <PestanasModal
- *     pestanaActiva={pestanaActiva}
- *     onCambiar={setPestanaActiva}
- * />
  */
 
 import {useMemo} from 'react';

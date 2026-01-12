@@ -250,24 +250,234 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-#### 10.8.6 Modales y Botón Volver Compacto
+#### 10.8.8 Bugs y Refinamientos del Menú Opciones Móvil
 
-**Objetivo:** Hacer más compacto el header de modales en móvil.
+**Objetivo:** Corregir comportamientos inesperados y refinar el diseño del BottomSheet de opciones.  
+**Prioridad:** Alta | **Urgencia:** Alta  
+**Estado:** ✅ Completado
 
-- [ ] **Header modal compacto:**
-  - [ ] Reducir altura del header (de ~48px a ~40px)
-  - [ ] Botón "← Volver" más pequeño o solo icono
-  - [ ] Título con font-size reducido (14-16px)
-  - [ ] Quitar subtítulos o metadata del header
-- [ ] **Layout del header:**
-  ```
-  ┌─────────────────────────────────────┐
-  │ ← │ Título del Modal          [✕] │
-  └─────────────────────────────────────┘
-  ```
-  - [ ] Icono de volver (←) sin texto "Volver"
-  - [ ] Título centrado o alineado a la izquierda
-  - [ ] Botón cerrar (✕) opcional a la derecha
+---
+
+##### 10.8.8.1 Bug: Botón de 3 Puntos con Estilo Incorrecto ✅
+
+**Problema resuelto:** El botón usaba `.botonIconoEncabezado__puntoNotificacion` (rojo).  
+**Solución:** Creada nueva clase `.badgeFiltrosActivos` con color acento sutil.
+
+- [x] Revisar estilos de `.botonOpcionesMovil` en `encabezado.css`
+- [x] Creada clase `.badgeFiltrosActivos` con color morado sutil
+- [x] El badge solo aparece si hay filtros activos
+- [x] Consistencia visual con otros botones del header
+
+---
+
+##### 10.8.8.2 Bug: Scroll Innecesario en Paneles ✅
+
+**Problema resuelto:** `min-height` forzado causaba scroll innecesario.  
+**Solución:** Removido `min-height` en `.dashboardGridMovil` y `.panelDashboard--movil`.
+
+- [x] Removido `min-height` que forzaba altura fija
+- [x] Panel ahora usa altura automática según contenido
+- [x] Sin scroll innecesario con pocas tareas
+
+---
+
+##### 10.8.8.3 Mejora: Arrastrar hacia Abajo para Cerrar ✅
+
+**Implementado:** Gesto drag-to-close en el BottomSheet.
+
+- [x] Detección de gesto swipe-down en el handle
+- [x] Cierre cuando se arrastra más del 30% de altura
+- [x] Velocidad del gesto también cierra (> 0.5 px/ms)
+- [x] Mantiene funcionalidad de tap en overlay para cerrar
+
+---
+
+##### 10.8.8.4 Mejora: Iconos para Opciones de Ordenamiento ✅
+
+**Implementado:** Iconos descriptivos para cada modo de ordenamiento.
+
+- [x] Icono para "Manual": `GripVertical`
+- [x] Icono para "Inteligente": `Sparkles`
+- [x] Icono para "Fecha límite": `Calendar`
+- [x] Icono para "Prioridad": `Flag`
+- [x] Actualizado `useOpcionesDashboard` con diccionario `ICONOS_ORDEN`
+
+---
+
+##### 10.8.8.5 Mejora: Compactar Menú - Quitar Subtítulos ✅
+
+**Implementado:** Menú más compacto sin subtítulos de grupo.
+
+- [x] Quitados subtítulos "Ordenar por", "Filtrar por", etc.
+- [x] Solo se muestran separadores sutiles entre grupos
+- [x] Removidas descripciones redundantes
+
+---
+
+##### Orden de Implementación 10.8.8 ✅
+
+| Paso | Subtarea | Descripción                        | Estado       |
+| ---- | -------- | ---------------------------------- | ------------ |
+| 1    | 10.8.8.1 | Fix botón 3 puntos (estilo)        | ✅ Completado |
+| 2    | 10.8.8.2 | Fix scroll innecesario             | ✅ Completado |
+| 3    | 10.8.8.5 | Compactar menú (quitar subtítulos) | ✅ Completado |
+| 4    | 10.8.8.4 | Añadir iconos ordenamiento         | ✅ Completado |
+| 5    | 10.8.8.3 | Gesto drag-to-close                | ✅ Completado |
+
+---
+
+#### 10.8.9 Limpieza del Header y UX Móvil ✅
+
+**Objetivo:** Simplificar el header eliminando elementos obsoletos y mejorar UX táctil.  
+**Prioridad:** Media | **Urgencia:** Normal  
+**Estado:** ✅ Completado
+
+---
+
+##### 10.8.9.1 Eliminar encabezadoLogo ✅
+
+**Problema resuelto:** El dropdown de navegación de página ya no era útil.  
+**Solución:** Eliminado completamente, ahora solo muestra título simple.
+
+- [x] Eliminar `.encabezadoLogo` y `.encabezadoTituloBoton` de `DashboardEncabezado.tsx`
+- [x] Eliminar estilos asociados en `encabezado.css`
+- [x] Eliminar menú de navegación de página (`menuPagina`)
+- [x] Simplificar la estructura del header (solo span con título)
+
+---
+
+##### 10.8.9.2 Quitar Tooltips en Móvil ✅
+
+**Problema resuelto:** Los tooltips (sistema personalizado `TooltipSystem`) aparecían en móvil.  
+**Solución:** Deshabilitar completamente el `TooltipSystem` en móvil.
+
+- [x] Modificar `TooltipSystem.tsx` para importar `useEsDispositivoMovil`
+- [x] Retornar `null` inmediatamente si `esMovil === true`
+- [x] Mantener `aria-label` para accesibilidad en botones del header
+
+---
+
+##### 10.8.9.3 Mover Búsqueda al Menú de Opciones ✅
+
+**Mejora:** El botón de búsqueda separado ocupaba espacio innecesario.  
+**Solución:** Búsqueda movida dentro del BottomSheet de opciones (3 puntos).
+
+- [x] Eliminar `botonBuscadorMovil` del header
+- [x] Añadir opción "Buscar" como primer item del menú de opciones
+- [x] Limpiar CSS asociado al botón de búsqueda móvil
+
+---
+
+##### Orden de Implementación 10.8.9 ✅
+
+| Paso | Subtarea | Descripción              | Estado       |
+| ---- | -------- | ------------------------ | ------------ |
+| 1    | 10.8.9.1 | Eliminar encabezadoLogo  | ✅ Completado |
+| 2    | 10.8.9.2 | Quitar tooltips en móvil | ✅ Completado |
+| 3    | 10.8.9.3 | Mover búsqueda al menú   | ✅ Completado |
+
+---
+
+
+#### 10.8.6 Modales y Botón Volver Compacto ✅
+
+**Objetivo:** Hacer más compacto el header de modales en móvil.  
+**Prioridad:** Media | **Urgencia:** Normal  
+**Estado:** ✅ Completado
+
+---
+
+##### 10.8.6.1 Header Modal Compacto ✅
+
+**Implementado:** Layout tipo barra de navegación móvil.
+
+- [x] Reducir altura del header (de ~48px a ~40px)
+- [x] Botón "← Volver" más pequeño - solo icono sin texto
+- [x] Título con font-size reducido (12px con `--dashboard-tamanoMovilPequeno`)
+- [x] Quitar subtítulos o metadata del header
+
+---
+
+##### 10.8.6.2 Layout del Header ✅
+
+**Implementado:** Estructura grid de 3 columnas `40px | 1fr | 40px`.
+
+```
+┌─────────────────────────────────────┐
+│ ←  │   Título del Modal    │ [   ] │
+└─────────────────────────────────────┘
+```
+
+- [x] Icono de volver (←) sin texto "Volver"
+- [x] Título centrado con truncamiento (ellipsis)
+- [x] Espacio reservado derecho para simetría
+- [x] CSS con grid-template-columns para layout consistente
+
+---
+
+##### Orden de Implementación 10.8.6 ✅
+
+| Paso | Subtarea | Descripción            | Estado       |
+| ---- | -------- | ---------------------- | ------------ |
+| 1    | 10.8.6.1 | Header compacto 40px   | ✅ Completado |
+| 2    | 10.8.6.2 | Layout grid 3 columnas | ✅ Completado |
+| 3    | 10.8.6.3 | Eliminar PestanasModal | ✅ Completado |
+
+---
+
+##### 10.8.6.3 Eliminar Pestañas Móvil (Código Muerto) ✅
+
+**Problema resuelto:** Las pestañas "Configuración" / "Chat / Historial" eran código muerto.  
+**Solución:** Eliminado `PestanasModal` de `PanelConfiguracionTarea` y `ModalHabito`.
+
+- [x] Eliminar importación y uso de `PestanasModal`
+- [x] Eliminar estado `pestanaActiva` de los componentes
+- [x] Actualizar CSS para ocultar columna derecha en móvil
+- [x] Simplificar: en móvil siempre se muestra solo la configuración
+
+---
+
+#### 10.8.10 Formulario Compacto Móvil
+
+**Objetivo:** Compactar la vista de propiedades del formulario de tarea/hábito para móvil.  
+**Prioridad:** Alta | **Urgencia:** Normal  
+**Estado:** ⏳ Pendiente
+
+```
+┌─────────────────────────────────────┐
+│ Estado        ○ Pendiente          │
+├─────────────────────────────────────┤
+│ 🚨 Alta       ⚡ Bloqueante         │ ← Pills compactos en fila
+├─────────────────────────────────────┤
+│ Propiedades   📅 31 dic            │
+├─────────────────────────────────────┤
+│ Proyecto      📁 test proyecto      │
+├─────────────────────────────────────┤
+│ Repetición    🔁 Repetir            │
+├─────────────────────────────────────┤
+│ Etiquetas     + Etiqueta            │
+├─────────────────────────────────────┤
+│ Adjuntos      📎 Agregar            │
+└─────────────────────────────────────┘
+```
+
+- [ ] **Layout compacto de propiedades:**
+  - [ ] Reducir padding vertical entre filas
+  - [ ] Labels más pequeños (`--dashboard-tamanoPequeno`)
+  - [ ] Pills de prioridad/urgencia en una sola fila horizontal
+  - [ ] Eliminar etiquetas redundantes (mostrar solo iconos con valor)
+- [ ] **Campos específicos:**
+  - [ ] Estado: pill compacto
+  - [ ] Prioridad + Urgencia: juntos en una fila
+  - [ ] Fecha: solo icono + fecha, sin label "Propiedades"
+  - [ ] Proyecto: selector compacto
+  - [ ] Repetición: toggle + frecuencia inline
+  - [ ] Etiquetas: chips compactos
+  - [ ] Adjuntos: botón compacto
+- [ ] **Variables CSS a usar:**
+  - [ ] `--dashboard-espacioMovilSm` para padding
+  - [ ] `--dashboard-tamanoMovilPequeno` para labels
+  - [ ] `--dashboard-tamanoTactilMinimo` para áreas táctiles
 
 ---
 

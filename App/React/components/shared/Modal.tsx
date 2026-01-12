@@ -4,6 +4,7 @@
  * Responsabilidad unica: contenedor modal generico
  *
  * Fase 10.2: Agrega boton "Volver" para version movil
+ * Fase 10.8.6: Header compacto movil - solo icono, titulo visible, layout <- | Titulo | X
  */
 
 import {useEffect, useCallback, useState} from 'react';
@@ -76,19 +77,20 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
     return (
         <div className="modalOverlay" onClick={manejarClickOverlay}>
             <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-                <div className="modalEncabezado">
-                    {/* Boton Volver en movil */}
+                <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
+                    {/* Boton Volver en movil - solo icono, sin texto */}
                     {esMovil && (
                         <button className="modalBotonVolver" onClick={onCerrar} aria-label="Volver" type="button">
-                            <ArrowLeft size={20} />
-                            <span>Volver</span>
+                            <ArrowLeft size={18} />
                         </button>
                     )}
-                    <h2 id="modal-titulo" className={`modalTitulo ${esMovil ? 'modalTitulo--movil' : ''}`}>
-                        {esMovil ? '' : titulo}
+                    {/* Titulo: siempre visible, con clase especial en movil */}
+                    <h2 id="modal-titulo" className={`modalTitulo ${esMovil ? 'modalTitulo--movilCompacto' : ''}`}>
+                        {titulo}
                     </h2>
                     <div className="modalAccionesEncabezado">
                         {accionesEncabezado}
+                        {/* En movil, mostrar X solo si no hay boton volver visible */}
                         {!ocultarBotonCerrar && !esMovil && (
                             <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">
                                 <X size={14} />

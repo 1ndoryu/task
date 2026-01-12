@@ -2,10 +2,12 @@
  * TooltipSystem
  * Sistema global de tooltips que intercepta atributos title nativos
  * Incluye detección de bordes para evitar desbordamiento
+ * NOTA: Deshabilitado en móvil ya que los tooltips son para dispositivos con mouse
  */
 
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {createPortal} from 'react-dom';
+import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
 
 interface TooltipState {
     visible: boolean;
@@ -22,6 +24,8 @@ const TOOLTIP_ANCHO_ESTIMADO = 250;
 const OFFSET_ELEMENTO = 8;
 
 export function TooltipSystem(): JSX.Element | null {
+    const esMovil = useEsDispositivoMovil();
+
     const [tooltip, setTooltip] = useState<TooltipState>({
         visible: false,
         content: '',
@@ -33,13 +37,16 @@ export function TooltipSystem(): JSX.Element | null {
     const targetRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
 
+    /* En móvil, no renderizamos tooltips */
+    if (esMovil) return null;
+
     /**
      * Calcula la mejor posición para el tooltip evitando desbordamiento
      */
     const calcularPosicion = useCallback((rect: DOMRect, contenidoAncho: number = TOOLTIP_ANCHO_ESTIMADO) => {
         const viewportAncho = window.innerWidth;
         const viewportAlto = window.innerHeight;
-        
+
         let x = rect.left + rect.width / 2;
         let y = rect.top;
         let posicion: TooltipState['posicion'] = 'arriba';
@@ -59,7 +66,7 @@ export function TooltipSystem(): JSX.Element | null {
 
         /* Ajustar posición horizontal para no salirse de la pantalla */
         const mitadTooltip = contenidoAncho / 2;
-        
+
         if (x - mitadTooltip < MARGEN_BORDE) {
             /* Se sale por la izquierda */
             x = Math.max(MARGEN_BORDE + mitadTooltip, rect.left + rect.width / 2);

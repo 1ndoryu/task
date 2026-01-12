@@ -109,6 +109,11 @@ body {
         padding-bottom: var(--dashboard-espacioMovilSm);
         font-size: var(--dashboard-tamanoMovilBase);
     }
+
+    /* Ocultar footer en móvil - no necesario con navegación por páginas */
+    .dashboardFooter {
+        display: none !important;
+    }
 }
 
 /* 
@@ -740,12 +745,12 @@ body {
         margin: 0;
     }
 
-    /* Grid simplificado para móvil */
+    /* Grid simplificado para móvil - sin altura forzada */
     .dashboardGridMovil {
         display: flex;
         flex-direction: column;
         width: 100%;
-        min-height: calc(100vh - 52px - var(--dashboard-safeAreaBottom) - 52px);
+        /* Removido min-height para evitar scroll innecesario */
         animation: fadeInMovil 0.2s ease-out;
     }
 
@@ -772,7 +777,7 @@ body {
     .panelDashboard--movil {
         width: 100%;
         height: auto;
-        min-height: calc(100vh - 52px - var(--dashboard-safeAreaBottom) - 52px);
+        /* Removido min-height para evitar scroll innecesario */
         border: none;
         border-radius: 0;
         box-shadow: none;

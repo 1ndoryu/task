@@ -5,13 +5,12 @@
  * Fase 9.4: Refactorizado para usar componentes modernos estilo Linear
  * - FormularioTareaModerno para el formulario principal
  * - usePanelChat para la gestión del panel de chat
- * - PestanasModal para las pestañas responsive
+ * - Fase 10.8.6: Removido PestanasModal (código muerto)
  */
 
 import {useState, useEffect, useCallback, useRef} from 'react';
 import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
-import {AccionesFormulario, Modal, PestanasModal} from '../shared';
-import type {PestanaId} from '../shared';
+import {AccionesFormulario, Modal} from '../shared';
 import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {usePanelChat} from '../../hooks/usePanelChat';
@@ -59,8 +58,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
     const [proyectoIdLocal, setProyectoIdLocal] = useState<number | undefined>(tarea?.proyectoId);
     const [completadoLocal, setCompletadoLocal] = useState<boolean>(tarea?.completado ?? false);
 
-    /* Estado para pestañas responsive */
-    const [pestanaActiva, setPestanaActiva] = useState<PestanaId>('configuracion');
+    /* Removido: Estado de pestañas móvil (código muerto - Fase 10.8.6) */
 
     /* Hook para panel de chat */
     const {chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna} = usePanelChat({
@@ -277,13 +275,10 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Modificar tarea' : 'Nueva tarea'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
             {modoEdicion ? (
                 <>
-                    {/* Pestañas para móvil */}
-                    <PestanasModal pestanaActiva={pestanaActiva} onCambiar={setPestanaActiva} tieneNotificaciones={tieneMensajesSinLeer} />
-
-                    {/* Layout de 2 columnas */}
+                    {/* Layout de 2 columnas (en móvil solo se muestra configuración) */}
                     <div className={`panelConfiguracionDosColumnas ${!mostrarChatColumna ? 'panelConfiguracionDosColumnas--sinChat' : ''}`}>
                         {/* Columna Izquierda: Formulario */}
-                        <div className={`panelConfiguracionColumnaIzquierda ${pestanaActiva === 'configuracion' ? 'panelConfiguracionColumnaIzquierda--activa' : ''}`}>
+                        <div className="panelConfiguracionColumnaIzquierda panelConfiguracionColumnaIzquierda--activa">
                             <div className="panelConfiguracionColumnaScroll">
                                 <FormularioTareaModerno
                                     texto={texto}
@@ -325,9 +320,9 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                             {!mostrarChatColumna && tarea && <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} soloInput />}
                         </div>
 
-                        {/* Columna Derecha: Chat e Historial */}
+                        {/* Columna Derecha: Chat e Historial (oculto en móvil) */}
                         {mostrarChatColumna && tarea && (
-                            <div className={`panelConfiguracionColumnaDerecha ${pestanaActiva === 'chat' ? 'panelConfiguracionColumnaDerecha--activa' : ''}`}>
+                            <div className="panelConfiguracionColumnaDerecha panelConfiguracionColumnaDerecha--activa ocultarEnMovil">
                                 <PanelChatHistorial elementoId={tarea.id} elementoTipo="tarea" participantes={participantesChat} />
                             </div>
                         )}

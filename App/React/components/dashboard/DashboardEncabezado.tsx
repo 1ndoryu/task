@@ -5,7 +5,8 @@
  */
 
 import {useState, useRef, useMemo} from 'react';
-import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, ChevronDown, LayoutDashboard, Calendar, FileText, Plus, CheckSquare, Activity, Folder, Palette, Plug, Menu, Search, X, MoreVertical} from 'lucide-react';
+import {Settings, LayoutGrid, Wifi, WifiOff, RefreshCw, User, LogOut, AlertTriangle, Shield, ClipboardList, Crown, Users, Bell, FlaskConical, Download, Upload, Plus, CheckSquare, Activity, Folder, Palette, Plug, Menu, Search, X, MoreVertical} from 'lucide-react';
+import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
 import {IndicadorPlan, MenuContextual, DrawerMovil, BottomSheet} from '../shared';
 import type {GrupoOpciones, OpcionMenu} from '../shared/MenuOpcionesPanel';
 import type {OpcionDrawer} from '../shared/DrawerMovil';
@@ -72,8 +73,8 @@ interface MenuState {
 
 export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigMCP, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido, opcionesMovil}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
+    const esTablet = useEsDispositivoMovil();
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
-    const [menuPagina, setMenuPagina] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [menuCrear, setMenuCrear] = useState<MenuState>({visible: false, x: 0, y: 0});
     const [drawerAbierto, setDrawerAbierto] = useState(false);
     const [mostrarBuscadorMovil, setMostrarBuscadorMovil] = useState(false);
@@ -86,13 +87,6 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
     /* Opciones del menu contextual del usuario */
     const opcionesMenuUsuario = [{id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />}, {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />}, {id: 'temas', etiqueta: 'Temas', icono: <Palette size={12} />}, {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={12} />}, ...(esPremiumActivo ? [{id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />}] : []), {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true}, {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />}, {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true}, {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}];
-
-    /* Opciones del menu de navegación de página */
-    const opcionesMenuPagina = [
-        {id: 'dashboard', etiqueta: 'Dashboard', icono: <LayoutDashboard size={12} />}, // Sin 'activo: true' en type, se puede manejar visualmente si se quiere
-        {id: 'calendario', etiqueta: 'Calendario', icono: <Calendar size={12} />, deshabilitado: true},
-        {id: 'archivos', etiqueta: 'Archivos', icono: <FileText size={12} />, deshabilitado: true}
-    ];
 
     /* Opciones del menu de creación rápida */
     const opcionesMenuCrear = [
@@ -124,16 +118,6 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
         setMenuUsuario({
             visible: true,
             x: rect.right - 160,
-            y: rect.bottom + 4
-        });
-    };
-
-    const manejarClickPagina = (evento: React.MouseEvent) => {
-        evento.preventDefault();
-        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
-        setMenuPagina({
-            visible: true,
-            x: rect.left,
             y: rect.bottom + 4
         });
     };
@@ -177,12 +161,6 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 break;
         }
         setMenuUsuario({...menuUsuario, visible: false});
-    };
-
-    const manejarOpcionPagina = (opcionId: string) => {
-        /* Aquí iría la navegación real */
-        console.log(`Navegar a: ${opcionId}`);
-        setMenuPagina({...menuPagina, visible: false});
     };
 
     const manejarCambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
@@ -306,20 +284,14 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     return (
         <header id="dashboard-encabezado" className="dashboardEncabezado">
             {/* BOTON HAMBURGUESA (izquierda en movil) */}
-            <button type="button" className="botonIconoEncabezado botonMenuMovil" onClick={manejarClickMenuMovil} title="Menú" aria-label="Abrir menú de navegación">
+            <button type="button" className="botonIconoEncabezado botonMenuMovil" onClick={manejarClickMenuMovil} title={esTablet ? undefined : 'Menú'} aria-label="Abrir menú de navegación">
                 <Menu size={18} />
                 {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
             </button>
 
-            {/* LOGO/TITULO (centro en movil, izquierda en desktop) */}
+            {/* TITULO (centro en movil, izquierda en desktop) */}
             <div className="encabezadoIzquierda">
-                <div className="encabezadoLogo">
-                    <button className="encabezadoTituloBoton" onClick={manejarClickPagina}>
-                        <span className="encabezadoTituloTexto">{titulo}</span>
-                        <ChevronDown size={14} className={`encabezadoTituloIcono ${menuPagina.visible ? 'rotado' : ''}`} />
-                    </button>
-                    {menuPagina.visible && <MenuContextual opciones={opcionesMenuPagina} posicionX={menuPagina.x} posicionY={menuPagina.y} onSeleccionar={manejarOpcionPagina} onCerrar={() => setMenuPagina({...menuPagina, visible: false})} />}
-                </div>
+                <span className="encabezadoTitulo">{titulo}</span>
             </div>
 
             {/* Buscador Global Centrado */}
@@ -336,7 +308,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 {/* Crear Nuevo (Tarea/Hábito/Proyecto) */}
                 {onCrearRapido && (
                     <>
-                        <button type="button" className="botonIconoEncabezado" onClick={manejarClickCrear} title="Crear nuevo...">
+                        <button type="button" className="botonIconoEncabezado" onClick={manejarClickCrear} title={esTablet ? undefined : 'Crear nuevo...'}>
                             <Plus size={14} />
                         </button>
                         {menuCrear.visible && <MenuContextual opciones={opcionesMenuCrear} posicionX={menuCrear.x} posicionY={menuCrear.y} onSeleccionar={manejarSeleccionCrear} onCerrar={() => setMenuCrear({...menuCrear, visible: false})} />}
@@ -345,14 +317,14 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* Configurar Layout */}
                 {onClickLayout && (
-                    <button type="button" className="botonIconoEncabezado" onClick={onClickLayout} title="Configurar Layout">
+                    <button type="button" className="botonIconoEncabezado" onClick={onClickLayout} title={esTablet ? undefined : 'Configurar Layout'}>
                         <LayoutGrid size={14} />
                     </button>
                 )}
 
                 {/* Notificaciones */}
                 {onClickNotificaciones && estaConectado && (
-                    <button type="button" className={`botonIconoEncabezado botonIconoEncabezado--notificaciones ${notificacionesPendientes > 0 ? 'tieneNuevas' : ''}`} onClick={onClickNotificaciones} title="Notificaciones">
+                    <button type="button" className={`botonIconoEncabezado botonIconoEncabezado--notificaciones ${notificacionesPendientes > 0 ? 'tieneNuevas' : ''}`} onClick={onClickNotificaciones} title={esTablet ? undefined : 'Notificaciones'}>
                         <Bell size={14} />
                         {notificacionesPendientes > 0 && <span className="botonIconoEncabezado__contadorNotificaciones">{notificacionesPendientes}</span>}
                     </button>
@@ -360,21 +332,21 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* Laboratorio de Pruebas (solo admins) */}
                 {onClickExperimentos && (
-                    <button type="button" className="botonIconoEncabezado" onClick={onClickExperimentos} title="Laboratorio de Pruebas">
+                    <button type="button" className="botonIconoEncabezado" onClick={onClickExperimentos} title={esTablet ? undefined : 'Laboratorio de Pruebas'}>
                         <FlaskConical size={14} />
                     </button>
                 )}
 
                 {/* Panel de Administración (solo admins) */}
                 {esAdmin && onClickAdmin && (
-                    <button type="button" className="botonIconoEncabezado" onClick={onClickAdmin} title="Panel de Administración">
+                    <button type="button" className="botonIconoEncabezado" onClick={onClickAdmin} title={esTablet ? undefined : 'Panel de Administración'}>
                         <Settings size={14} />
                     </button>
                 )}
 
                 {/* Mi Equipo (Social) */}
                 {onClickEquipos && estaConectado && (
-                    <button type="button" className="botonIconoEncabezado botonIconoEncabezado--equipo" onClick={onClickEquipos} title="Mi Equipo">
+                    <button type="button" className="botonIconoEncabezado botonIconoEncabezado--equipo" onClick={onClickEquipos} title={esTablet ? undefined : 'Mi Equipo'}>
                         <Users size={14} />
                         {equiposPendientes > 0 && <span className="botonIconoEncabezado__contador">{equiposPendientes}</span>}
                     </button>
@@ -394,7 +366,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* Usuario con menu contextual */}
                 {estaConectado && (
-                    <button type="button" className="badgeEncabezado badgeEncabezado--usuario" onClick={manejarClickUsuario} title="Opciones de usuario">
+                    <button type="button" className="badgeEncabezado badgeEncabezado--usuario" onClick={manejarClickUsuario} title={esTablet ? undefined : 'Opciones de usuario'}>
                         {avatarUrl ? <img src={avatarUrl} alt="" className="avatarEncabezado" /> : <span className="avatarEncabezadoInicial">{usuario.charAt(0).toUpperCase()}</span>}
                         <span className="nombreUsuarioEncabezado">{usuario}</span>
                     </button>
@@ -405,19 +377,11 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* Input oculto para importar archivo */}
                 <input ref={inputArchivoRef} type="file" accept=".json" onChange={manejarCambioArchivo} style={{display: 'none'}} />
-
-                {/* BOTON BUSCAR MOVIL */}
-                {estaConectado && onSeleccionarTarea && (
-                    <button type="button" className="botonIconoEncabezado botonBuscadorMovil" onClick={toggleBuscadorMovil} title="Buscar">
-                        <Search size={18} />
-                    </button>
-                )}
-
                 {/* BOTON OPCIONES MOVIL (3 puntos) - Fase 10.8.3 */}
                 {opcionesMovil && (
-                    <button type="button" className={`botonIconoEncabezado botonOpcionesMovil ${opcionesMovil.tieneFiltrosActivos ? 'botonOpcionesMovil--activo' : ''}`} onClick={() => setMenuOpcionesMovilAbierto(true)} title="Opciones del panel">
+                    <button type="button" className={`botonIconoEncabezado botonOpcionesMovil ${opcionesMovil.tieneFiltrosActivos ? 'botonOpcionesMovil--activo' : ''}`} onClick={() => setMenuOpcionesMovilAbierto(true)} title={esTablet ? undefined : 'Opciones del panel'}>
                         <MoreVertical size={18} />
-                        {opcionesMovil.tieneFiltrosActivos && <span className="botonIconoEncabezado__puntoNotificacion" />}
+                        {opcionesMovil.tieneFiltrosActivos && <span className="badgeFiltrosActivos" />}
                     </button>
                 )}
 
@@ -425,9 +389,29 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                 {opcionesMovil && (
                     <BottomSheet estaAbierto={menuOpcionesMovilAbierto} onCerrar={() => setMenuOpcionesMovilAbierto(false)}>
                         <div className="menuOpcionesPanelContenido">
-                            {/* Opciones sueltas primero */}
+                            {/* Opcion de busqueda primero */}
+                            {estaConectado && onSeleccionarTarea && (
+                                <div className="menuOpcionesPanelGrupo">
+                                    <button
+                                        className="menuOpcionesPanelItem"
+                                        onClick={() => {
+                                            setMenuOpcionesMovilAbierto(false);
+                                            setMostrarBuscadorMovil(true);
+                                        }}>
+                                        <span className="menuOpcionesPanelItemIcono">
+                                            <Search size={14} />
+                                        </span>
+                                        <span className="menuOpcionesPanelItemTexto">
+                                            <span className="menuOpcionesPanelItemEtiqueta">Buscar</span>
+                                        </span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Opciones sueltas */}
                             {opcionesMovil.opciones && opcionesMovil.opciones.length > 0 && (
                                 <div className="menuOpcionesPanelGrupo">
+                                    {estaConectado && onSeleccionarTarea && <div className="menuOpcionesPanelSeparador" />}
                                     {opcionesMovil.opciones.map(opcion => (
                                         <button
                                             key={opcion.id}
@@ -447,11 +431,10 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
                                 </div>
                             )}
 
-                            {/* Grupos de opciones */}
+                            {/* Grupos de opciones - Sin títulos, solo separador */}
                             {opcionesMovil.grupos?.map((grupo, idx) => (
                                 <div key={grupo.titulo} className="menuOpcionesPanelGrupo">
                                     {(idx > 0 || (opcionesMovil.opciones && opcionesMovil.opciones.length > 0)) && <div className="menuOpcionesPanelSeparador" />}
-                                    <div className="menuOpcionesPanelGrupoTitulo">{grupo.titulo}</div>
                                     {grupo.opciones.map(opcion => (
                                         <button
                                             key={opcion.id}

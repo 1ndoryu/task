@@ -187,6 +187,7 @@
 /* 
  * MODAL FULLSCREEN EN MOVIL
  * Fase 10.2: Modales ocupan toda la pantalla en dispositivos móviles
+ * Fase 10.8.6: Header compacto con layout <- | Titulo | X
  */
 @media (max-width: 480px) {
     .modalOverlay {
@@ -206,13 +207,25 @@
         border: none !important;
     }
 
-    .modalEncabezado {
+    /* 
+     * HEADER COMPACTO MOVIL - Fase 10.8.6
+     * Altura reducida (~40px), layout tipo barra de navegación
+     * Estructura: [<-] | Titulo | [X opcional]
+     */
+    .modalEncabezado--movil {
         position: sticky;
         top: 0;
         background: var(--dashboard-fondoSecundario);
         z-index: 10;
-        padding: var(--dashboard-espacioMd);
-        min-height: var(--dashboard-tamanoTactilMinimo);
+        display: grid;
+        grid-template-columns: 40px 1fr 40px;
+        align-items: center;
+        padding: 0 var(--dashboard-espacioSm);
+        height: 40px;
+        min-height: 40px;
+        max-height: 40px;
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        gap: var(--dashboard-espacioXs);
     }
 
     /* Ocultar boton X en movil, usar boton Volver del header */
@@ -232,29 +245,53 @@
         overflow: hidden;
     }
 
-    /* Boton Volver para movil */
+    /* 
+     * BOTON VOLVER COMPACTO - Fase 10.8.6
+     * Solo icono, sin texto, tamaño reducido
+     */
     .modalBotonVolver {
         display: flex;
         align-items: center;
-        gap: var(--dashboard-espacioSm);
+        justify-content: center;
         background: none;
         border: none;
         color: var(--dashboard-textoNormal);
-        font-size: var(--dashboard-tamanoMovilBase);
-        font-family: var(--dashboard-fuenteMonoespaciada);
         cursor: pointer;
-        padding: var(--dashboard-espacioSm);
-        min-height: var(--dashboard-tamanoTactilMinimo);
-        transition: color var(--dashboard-transicionRapida);
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: var(--dashboard-radioSm);
+        transition: color var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
     }
 
     .modalBotonVolver:hover,
     .modalBotonVolver:active {
         color: var(--dashboard-textoActivo);
+        background: var(--dashboard-superposicionClara);
     }
 
-    /* Ocultar titulo en movil (ya se muestra en boton volver o no es necesario) */
-    .modalTitulo--movil {
-        display: none;
+    /* 
+     * TITULO COMPACTO MOVIL - Fase 10.8.6
+     * Titulo visible en móvil, tamaño reducido (14px), centrado
+     */
+    .modalTitulo--movilCompacto {
+        font-size: var(--dashboard-tamanoMovilPequeno);
+        font-weight: 600;
+        color: var(--dashboard-textoActivo);
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+
+    /* Espacio reservado derecho para simetría (donde iría el X) */
+    .modalEncabezado--movil .modalAccionesEncabezado {
+        justify-content: flex-end;
+        min-width: 40px;
     }
 }
