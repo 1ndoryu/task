@@ -423,7 +423,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
                 {/* BOTTOM SHEET OPCIONES MOVIL */}
                 {opcionesMovil && (
-                    <BottomSheet estaAbierto={menuOpcionesMovilAbierto} onCerrar={() => setMenuOpcionesMovilAbierto(false)} titulo={opcionesMovil.titulo}>
+                    <BottomSheet estaAbierto={menuOpcionesMovilAbierto} onCerrar={() => setMenuOpcionesMovilAbierto(false)}>
                         <div className="menuOpcionesPanelContenido">
                             {/* Opciones sueltas primero */}
                             {opcionesMovil.opciones && opcionesMovil.opciones.length > 0 && (

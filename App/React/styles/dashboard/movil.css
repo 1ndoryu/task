@@ -865,7 +865,7 @@ body {
     .menuOpcionesPanelContenido {
         display: flex;
         flex-direction: column;
-        gap: var(--dashboard-espacioSm);
+        gap: var(--dashboard-espacioXs);
     }
 
     /* Grupo de opciones */
@@ -876,11 +876,11 @@ body {
 
     /* Título del grupo */
     .menuOpcionesPanelGrupoTitulo {
-        font-size: var(--dashboard-tamanoXs);
+        font-size: var(--dashboard-tamanoMuyPequeno);
         color: var(--dashboard-textoApagado);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
         margin-bottom: var(--dashboard-espacioXs);
     }
 
@@ -888,16 +888,16 @@ body {
     .menuOpcionesPanelSeparador {
         height: 1px;
         background: var(--dashboard-bordeSutil);
-        margin: var(--dashboard-espacioSm) 0;
+        margin: var(--dashboard-espacioXs) 0;
     }
 
-    /* Item del menú */
+    /* Item del menú - Diseño compacto */
     .menuOpcionesPanelItem {
         display: flex;
         align-items: center;
-        gap: var(--dashboard-espacioMd);
-        padding: var(--dashboard-espacioMd);
-        min-height: var(--dashboard-tamanoTactilMinimo);
+        gap: var(--dashboard-espacioSm);
+        padding: var(--dashboard-espacioSm);
+        min-height: 36px;
         background: none;
         border: none;
         color: var(--dashboard-textoNormal);
@@ -922,13 +922,13 @@ body {
         color: var(--dashboard-acento);
     }
 
-    /* Icono del item */
+    /* Icono del item - Más compacto */
     .menuOpcionesPanelItemIcono {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 24px;
-        height: 24px;
+        width: 18px;
+        height: 18px;
         color: var(--dashboard-textoApagado);
         flex-shrink: 0;
     }
@@ -941,24 +941,24 @@ body {
     .menuOpcionesPanelItemTexto {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1px;
         flex: 1;
     }
 
     .menuOpcionesPanelItemEtiqueta {
-        font-size: var(--dashboard-tamanoMovilBase);
+        font-size: var(--dashboard-tamanoMovilPequeno);
         font-weight: 500;
     }
 
     .menuOpcionesPanelItemDescripcion {
-        font-size: var(--dashboard-tamanoXs);
+        font-size: var(--dashboard-tamanoPequeno);
         color: var(--dashboard-textoApagado);
     }
 
     /* Check de item activo */
     .menuOpcionesPanelItemCheck {
         color: var(--dashboard-acento);
-        font-size: var(--dashboard-tamanoSm);
+        font-size: var(--dashboard-tamanoPequeno);
         margin-left: auto;
     }
 }

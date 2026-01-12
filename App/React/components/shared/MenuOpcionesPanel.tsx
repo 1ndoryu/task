@@ -87,7 +87,7 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                 {tieneFiltrosActivos && <span className="menuOpcionesPanelBadge" aria-label="Filtros activos" />}
             </button>
 
-            <BottomSheet estaAbierto={menuAbierto} onCerrar={cerrarMenu} titulo={titulo}>
+            <BottomSheet estaAbierto={menuAbierto} onCerrar={cerrarMenu}>
                 <div className="menuOpcionesPanelContenido">
                     {/* Opciones sueltas primero */}
                     {opciones.length > 0 && (
@@ -129,7 +129,7 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                             <div className="menuOpcionesPanelSeparador" />
                             <button className="menuOpcionesPanelItem menuOpcionesPanelItem--accion" onClick={() => manejarOpcion(onRefrescar)}>
                                 <span className="menuOpcionesPanelItemIcono">
-                                    <RefreshCw size={16} />
+                                    <RefreshCw size={14} />
                                 </span>
                                 <span className="menuOpcionesPanelItemTexto">
                                     <span className="menuOpcionesPanelItemEtiqueta">Actualizar</span>
@@ -152,7 +152,7 @@ export function crearOpcionesOrdenamiento(opciones: Array<{id: string; etiqueta:
         id: op.id,
         etiqueta: op.etiqueta,
         descripcion: op.descripcion,
-        icono: <ArrowUpDown size={16} />,
+        icono: <ArrowUpDown size={14} />,
         onClick: () => onChange(op.id),
         activo: valorActual === op.id
     }));
@@ -163,7 +163,7 @@ export function crearOpcionesFiltro(opciones: Array<{id: string; etiqueta: strin
         id: op.id,
         etiqueta: op.etiqueta,
         descripcion: op.descripcion,
-        icono: <Filter size={16} />,
+        icono: <Filter size={14} />,
         onClick: () => onChange(op.id),
         activo: valorActual === op.id
     }));
@@ -173,7 +173,7 @@ export function crearOpcionConfiguracion(onClick: () => void): OpcionMenu {
     return {
         id: 'configuracion',
         etiqueta: 'Configuración',
-        icono: <Settings size={16} />,
+        icono: <Settings size={14} />,
         onClick
     };
 }

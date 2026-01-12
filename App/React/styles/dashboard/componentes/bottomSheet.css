@@ -48,11 +48,11 @@
 
 /* Indicador de arrastre (pill gris en la parte superior) */
 .bottomSheetIndicador {
-    width: 40px;
+    width: 36px;
     height: 4px;
     background: var(--dashboard-bordeSutil);
     border-radius: 2px;
-    margin: 12px auto 8px;
+    margin: 8px auto 4px;
     flex-shrink: 0;
 }
 
@@ -73,7 +73,7 @@
 
 /* Contenido scrolleable */
 .bottomSheetContenido {
-    padding: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex: 1;

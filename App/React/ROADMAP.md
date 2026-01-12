@@ -228,7 +228,29 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-#### 10.8.5 Modales y Botón Volver Compacto
+#### 10.8.5 Mejoras Visuales del Menú Opciones Móvil ✅
+
+**Objetivo:** Refinar el diseño del BottomSheet de opciones para que sea más compacto y consistente.
+
+**Mejoras implementadas:**
+- [x] **Iconos consistentes:**
+  - [x] Usar iconos originales de las opciones (CheckSquare, User, LayoutList, Folder)
+  - [x] Fallback a iconos genéricos si no hay icono personalizado
+  - [x] Tamaño de iconos reducido a 14px para consistencia
+- [x] **Diseño compacto:**
+  - [x] Reducir padding de `.menuOpcionesPanelItem` (espacioSm)
+  - [x] Reducir altura mínima de items de 44px a 36px
+  - [x] Reducir tamaño de iconos de 24px a 18px en contenedor
+  - [x] Quitar título innecesario del BottomSheet
+  - [x] Reducir indicador de arrastre y padding del contenido
+- [x] **Variables CSS:**
+  - [x] Usar `--dashboard-tamanoMuyPequeno` para títulos de grupo
+  - [x] Usar `--dashboard-tamanoMovilPequeno` para etiquetas
+  - [x] Usar `--dashboard-tamanoPequeno` para descripciones
+
+---
+
+#### 10.8.6 Modales y Botón Volver Compacto
 
 **Objetivo:** Hacer más compacto el header de modales en móvil.
 
@@ -249,7 +271,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-#### 10.8.6 Menús Contextuales Bottom Sheet
+#### 10.8.7 Menús Contextuales Bottom Sheet
 
 **Objetivo:** Los menús contextuales deben cubrir el ancho completo de la pantalla desde abajo.
 

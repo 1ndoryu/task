@@ -16,12 +16,14 @@ interface OpcionOrden {
     id: string;
     etiqueta: string;
     descripcion?: string;
+    icono?: React.ReactNode;
 }
 
 interface OpcionFiltro {
     id: string;
     etiqueta: string;
     descripcion?: string;
+    icono?: React.ReactNode;
 }
 
 interface UseOpcionesPanelMovilParams {
@@ -80,7 +82,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                             id: op.id,
                             etiqueta: op.etiqueta,
                             descripcion: op.descripcion,
-                            icono: <Filter size={16} />,
+                            icono: op.icono || <Filter size={14} />,
                             onClick: () => onCambiarFiltroTareas(op.id),
                             activo: valorFiltroTareas === op.id
                         }))
@@ -96,7 +98,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                             id: op.id,
                             etiqueta: op.etiqueta,
                             descripcion: op.descripcion,
-                            icono: <ArrowUpDown size={16} />,
+                            icono: op.icono || <ArrowUpDown size={14} />,
                             onClick: () => onCambiarOrdenTareas(op.id),
                             activo: modoOrdenTareas === op.id
                         }))
@@ -108,7 +110,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                     opciones.push({
                         id: 'config',
                         etiqueta: 'Configuración',
-                        icono: <Settings size={16} />,
+                        icono: <Settings size={14} />,
                         onClick: onAbrirConfigTareas
                     });
                 }
@@ -124,7 +126,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                             id: op.id,
                             etiqueta: op.etiqueta,
                             descripcion: op.descripcion,
-                            icono: <ArrowUpDown size={16} />,
+                            icono: op.icono || <ArrowUpDown size={14} />,
                             onClick: () => onCambiarOrdenHabitos(op.id),
                             activo: modoOrdenHabitos === op.id
                         }))
@@ -136,7 +138,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                     opciones.push({
                         id: 'config',
                         etiqueta: 'Configuración',
-                        icono: <Settings size={16} />,
+                        icono: <Settings size={14} />,
                         onClick: onAbrirConfigHabitos
                     });
                 }
@@ -152,7 +154,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                             id: op.id,
                             etiqueta: op.etiqueta,
                             descripcion: op.descripcion,
-                            icono: <ArrowUpDown size={16} />,
+                            icono: op.icono || <ArrowUpDown size={14} />,
                             onClick: () => onCambiarOrdenProyectos(op.id),
                             activo: modoOrdenProyectos === op.id
                         }))
@@ -164,7 +166,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                     opciones.push({
                         id: 'config',
                         etiqueta: 'Configuración',
-                        icono: <Settings size={16} />,
+                        icono: <Settings size={14} />,
                         onClick: onAbrirConfigProyectos
                     });
                 }
@@ -177,7 +179,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                     opciones.push({
                         id: 'config',
                         etiqueta: 'Configuración',
-                        icono: <Settings size={16} />,
+                        icono: <Settings size={14} />,
                         onClick: onAbrirConfigActividad
                     });
                 }
