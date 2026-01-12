@@ -105,7 +105,7 @@ body {
 
 @media (max-width: 480px) {
     .dashboardContenedor {
-        padding-inline: var(--dashboard-espacioMovilSm);
+        padding-inline: 0;
         padding-bottom: var(--dashboard-espacioMovilSm);
         font-size: var(--dashboard-tamanoMovilBase);
     }
@@ -151,11 +151,15 @@ body {
         padding: var(--dashboard-espacioTactil);
     }
 
-    /* Items de lista */
+    /* 
+     * Items de lista - padding lateral consistente de 8px
+     * Este es el único lugar donde se define el padding lateral de items
+     */
     .tareaItem,
-    .habitoItem,
+    .tablaFila,
     .proyectoItem {
-        padding: var(--dashboard-espacioMovilMd);
+        padding-left: 15px;
+        padding-right: 15px;
         min-height: var(--dashboard-tamanoTactilMinimo);
     }
 }
@@ -773,7 +777,7 @@ body {
  * Los paneles ocupan el 100% del viewport sin decoraciones
  */
 @media (max-width: 480px) {
-    /* Panel en modo móvil: fullscreen sin bordes */
+    /* Panel en modo móvil: fullscreen sin bordes ni padding */
     .panelDashboard--movil {
         width: 100%;
         height: auto;
@@ -782,7 +786,7 @@ body {
         border-radius: 0;
         box-shadow: none;
         background: transparent;
-        padding: var(--dashboard-espacioMovilMd);
+        padding: 0;
     }
 
     /* Ocultar elementos de control de panel en móvil */
@@ -1193,10 +1197,205 @@ body {
     }
 
     /* 
-     * PANEL CHAT COMPACTO - FASE 10.8.11  
-     * Versión reducida del chat para móvil inline
-     * Input fijo en la parte inferior de la pantalla
-     */
+ * FILA DE PROPIEDADES ULTRA COMPACTA
+ * Sin padding vertical, solo separación mínima entre elementos
+ */
+    .propiedadesCompactas {
+        gap: var(--dashboard-espacioMovilSm);
+        padding: 0;
+        min-height: 28px;
+    }
+
+    .propiedadesCompactas__etiqueta {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        min-width: 60px;
+    }
+
+    .propiedadesCompactas__contenido {
+        gap: var(--dashboard-espacioMovilSm);
+    }
+
+    /* 
+ * PILLS ULTRA COMPACTOS
+ * Mínimo padding posible manteniendo legibilidad
+ */
+    .pillOpcion {
+        padding: 2px 6px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        gap: 2px;
+        min-height: 24px;
+    }
+
+    /* 
+ * PILL INPUT - Más compacto
+ */
+    .pillOpcion.pillOpcion--input {
+        padding: 3px 8px;
+    }
+
+    .pillOpcion.pillOpcion--input input {
+        width: 55px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* 
+ * SELECTOR DE ICONO - Más pequeño
+ */
+    .selectorIconoProyecto__trigger {
+        width: 32px;
+        height: 32px;
+    }
+
+    .formularioProyectoModerno__icono {
+        margin-bottom: 0;
+    }
+
+    /* 
+ * ICONOS DENTRO DE PILLS - Más pequeños
+ */
+    .pillOpcion svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* 
+ * SECCIÓN RESPONSABLES COMPACTA
+ */
+    .seccionResponsables--inline {
+        gap: var(--dashboard-espacioMovilMd);
+        padding: var(--dashboard-espacioMovilXs) 0;
+    }
+
+    .seccionResponsables__etiqueta {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        min-width: 70px;
+    }
+
+    /* 
+ * AVATARES MÁS PEQUEÑOS
+ */
+    .seccionResponsables__avatarCompacto {
+        width: 20px;
+        height: 20px;
+        margin-left: -6px;
+    }
+
+    .seccionResponsables__avatarMas {
+        width: 20px;
+        height: 20px;
+        margin-left: -6px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .seccionResponsables__botonAgregarSmall {
+        width: 20px;
+        height: 20px;
+    }
+
+    .seccionResponsables__botonAgregarCompacto {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* 
+ * SECCIÓN MODERNA COMPACTA (Tags, Adjuntos)
+ */
+    .seccionModerna {
+        padding: var(--dashboard-espacioMovilXs) 0;
+    }
+
+    .seccionModerna__tituloTexto {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        min-width: 70px;
+    }
+
+    .seccionModerna__botonAgregar {
+        padding: 2px 6px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* 
+ * SEPARADOR DE HISTORIAL (Hábitos)
+ */
+    .formularioHabitoModerno__separador {
+        margin: var(--dashboard-espacioMovilMd) 0 var(--dashboard-espacioMovilXs) 0;
+    }
+
+    .formularioHabitoModerno__historialEtiqueta {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        margin-bottom: 6px;
+    }
+
+    /* 
+ * ADJUNTOS COMPACTOS
+ */
+    .seccionAdjuntos__boton {
+        padding: var(--dashboard-espacioMovilSm) var(--dashboard-espacioMovilMd);
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    .gridAdjuntos {
+        gap: var(--dashboard-espacioMovilSm);
+    }
+
+    .gridAdjuntos__item {
+        padding: var(--dashboard-espacioMovilSm);
+    }
+
+    /* 
+ * MODAL MODERNA - Ajustes de padding
+ */
+    .modalModerna__header {
+        padding: var(--dashboard-espacioMovilMd);
+    }
+
+    .modalModerna__cuerpo {
+        padding: var(--dashboard-espacioMovilMd);
+    }
+
+    .modalModerna__footer {
+        padding: var(--dashboard-espacioMovilSm) var(--dashboard-espacioMovilMd);
+    }
+
+    /* 
+ * RESUMEN TAREAS PROYECTO - Más compacto
+ */
+    .resumenTareasProyecto {
+        padding: var(--dashboard-espacioMovilSm) 0;
+        gap: var(--dashboard-espacioMovilMd);
+    }
+
+    .resumenTareasProyecto__contador {
+        font-size: var(--dashboard-tamanoMovilPequeno);
+    }
+
+    .resumenTareasProyecto__link {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* 
+ * BARRA PROGRESO MINI - Más pequeña
+ */
+    .barraProgresoMini {
+        max-width: 80px;
+        height: 3px;
+    }
+
+    /* 
+ * CHAT INLINE MÓVIL - FASE 10.8.11
+ * Contenedor para el chat dentro del modal en móvil
+ */
+    .chatInlineMovil {
+        margin-top: var(--dashboard-espacioMd);
+        padding-top: var(--dashboard-espacioMd);
+        border-top: 1px dashed var(--dashboard-bordeSutil);
+    }
+
+    /* 
+ * PANEL CHAT COMPACTO - FASE 10.8.11  
+ * Versión reducida del chat para móvil inline
+ * Input fijo en la parte inferior de la pantalla
+ */
     .panelChatHistorial--compacto {
         border: none;
         background: transparent;
@@ -1302,5 +1501,214 @@ body {
     .panelChatHistorial--compacto .panelChatHistorialVacio svg {
         width: 16px;
         height: 16px;
+    }
+}
+
+/* 
+ * FASE 10.8.12 - LAYOUT LISTAS COMPACTAS MOVIL
+ * Proyectos en 2 filas, habitos mas compactos
+ */
+
+@media (max-width: 480px) {
+    /* 
+     * PROYECTOS - LAYOUT 2 FILAS EN MOVIL
+     * Fila 1: Titulo completo
+     * Fila 2: Badges (prioridad, tareas, fecha, etc.)
+     */
+
+    /* Quitar fondos y bordes de proyectos en movil */
+    .listaProyectos {
+        background-color: transparent;
+    }
+
+    .proyectoItemWrapper,
+    .proyectoItemWrapperActivo,
+    .proyectoItem {
+        background-color: transparent !important;
+        border-left: none !important;
+    }
+
+    /* Padding lateral unificado - el vertical lo maneja cada item */
+    .proyectoItem,
+    .proyectoItemWrapper--compacto .proyectoItem {
+        padding-top: var(--dashboard-espacioXs);
+        padding-bottom: var(--dashboard-espacioXs);
+    }
+
+    /* El contenido del proyecto se apila en 2 filas */
+    .proyectoItemContenido,
+    .proyectoItemWrapper--compacto .proyectoItemContenido {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: var(--dashboard-espacioXs) !important;
+        width: 100%;
+    }
+
+    /* Titulo en la primera fila - sin truncar, mismo tamaño que tareas compactas */
+    .proyectoNombre,
+    .proyectoNombre--compacto {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        line-height: 1.4;
+        font-size: var(--dashboard-tamanoPequeno);
+        width: 100%;
+    }
+
+    /* Meta (badges) en la segunda fila */
+    .proyectoMeta {
+        flex-wrap: wrap;
+        gap: var(--dashboard-espacioXs);
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        width: 100%;
+    }
+
+    /* Ocultar barra de progreso separada - info ya esta en meta */
+    .proyectoProgreso {
+        display: none !important;
+    }
+
+    /* Ocultar acciones inline en movil - usar menu contextual */
+    .proyectoAcciones,
+    .proyectoItem .accionesItem {
+        display: none !important;
+    }
+
+    /* Tareas del proyecto - menos indentacion en movil */
+    .proyectoTareas {
+        border-left-width: 2px;
+        margin-left: var(--dashboard-espacioSm);
+    }
+
+    /* 
+     * HABITOS - COMPACTACION ADICIONAL EN MOVIL
+     * Reducir padding y tamaños para mejor densidad
+     */
+
+    /* Fila de habito mas compacta */
+    .tablaFilaCompacta {
+        min-height: 36px;
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm) !important;
+        gap: var(--dashboard-espacioXs);
+    }
+
+    /* Checkbox mismo tamaño que tareas compactas (0.65rem) */
+    .tablaFilaCompacta .habitoCheckbox {
+        width: 0.65rem;
+        height: 0.65rem;
+    }
+
+    /* Nombre del habito - mismo tamaño que tareas compactas */
+    .tablaFilaCompacta .filaNombre {
+        font-size: var(--dashboard-tamanoPequeno);
+        line-height: 1.4;
+    }
+
+    /* Badges mas compactos */
+    .tablaFilaCompacta .badgeInfo {
+        padding: 1px 4px;
+        font-size: 8px;
+    }
+
+    .tablaFilaCompacta .badgeInfo svg {
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Contenedor de racha mas compacto */
+    .tablaFilaCompacta .rachaContenedor {
+        padding: 2px 6px;
+        gap: 2px;
+    }
+
+    .tablaFilaCompacta .rachaIcono,
+    .tablaFilaCompacta .rachaIconoActivo {
+        width: 10px;
+        height: 10px;
+    }
+
+    .tablaFilaCompacta .rachaNumero {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* Historial inline mas compacto */
+    .tablaFilaCompacta .historialHabitoInline {
+        gap: 2px;
+    }
+
+    .tablaFilaCompacta .historialDia {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Ocultar columnas secundarias en habitos movil compacto */
+    .tablaFilaCompacta .tablaColumnaInactividad,
+    .tablaFilaCompacta .tablaColumnaUrgencia,
+    .tablaFilaCompacta .tablaColumnaAcciones {
+        display: none;
+    }
+
+    /* Ocultar encabezado de tabla en movil */
+    .tablaEncabezado {
+        display: none;
+    }
+
+    /* 
+     * 10.8.14.1 - OCULTAR ACCIONES DE TAREAS EN MOVIL
+     * Los botones de tuerca y papelera son redundantes - el menu contextual ya ofrece estas opciones
+     */
+    .tareaAccionesContenedor {
+        display: none !important;
+    }
+
+    /* 
+     * 10.8.14.3 - PADDING VERTICAL DE HABITOS EN MOVIL
+     * El padding lateral lo maneja la regla general de items (8px)
+     */
+    .tablaFila {
+        padding-top: var(--dashboard-espacioXs);
+        padding-bottom: var(--dashboard-espacioXs);
+        gap: var(--dashboard-espacioXs);
+    }
+
+    .tablaFilaCompacta {
+        padding-top: 4px;
+        padding-bottom: 4px;
+        min-height: 36px;
+    }
+
+    /* Reducir gap interno de elementos en filas de habitos */
+    .filaNombreContenedor {
+        gap: var(--dashboard-espacioXs);
+    }
+
+    .rachaContenedor {
+        padding: 1px 4px;
+        gap: 2px;
+    }
+
+    /* 
+     * 10.8.15.3 - OCULTAR BOTONES AÑADIR EN MOVIL
+     * El FAB central ya proporciona esta funcionalidad de manera más accesible
+     */
+    .añadirHabito,
+    .tareaNuevoInline,
+    .tareaNuevoBoton {
+        display: none !important;
+    }
+
+    /* 
+     * PADDING LATERAL UNIFICADO - REGLA FINAL
+     * Garantiza 8px laterales en todos los items de lista
+     * Esta regla debe estar al final para máxima prioridad
+     */
+    .tareaItem,
+    .tareaItem--compacto,
+    .tablaFila,
+    .tablaFilaCompacta,
+    .proyectoItem,
+    .proyectoItemWrapper--compacto .proyectoItem {
+        padding-left: 15px;
+        padding-right: 15px;
     }
 }

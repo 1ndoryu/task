@@ -1,4 +1,5 @@
 import {useLocalStorage} from './useLocalStorage';
+import {useEsMovil} from './useEsMovil';
 
 export interface ColumnasHabitos {
     indice: boolean;
@@ -40,30 +41,77 @@ export interface ConfiguracionHabitos {
     umbralesPersonalizados: UmbralesUrgencia;
 }
 
-export const COLUMNAS_POR_DEFECTO: ColumnasHabitos = {
+/*
+ * Configuración de columnas por defecto para desktop
+ * Incluye frecuencia, tocaHoy y más opciones visuales
+ */
+export const COLUMNAS_DESKTOP_POR_DEFECTO: ColumnasHabitos = {
     indice: true,
     nombre: true,
-    historial: false /* Oculta por defecto - columna de actividad de 5 dias */,
-    racha: false /* Oculta por defecto */,
-    frecuencia: true /* Visible por defecto */,
-    importancia: true /* Prioridad visible */,
-    tocaHoy: true /* Días visible */,
+    historial: false,
+    racha: false,
+    frecuencia: true,
+    importancia: true,
+    tocaHoy: true,
     acciones: false,
-    urgencia: false /* Oculta por defecto */,
+    urgencia: false,
     inactividad: false
 };
 
-export const CONFIG_HABITOS_POR_DEFECTO: ConfiguracionHabitos = {
+/*
+ * Configuración de columnas por defecto para móvil
+ * Solo columnas esenciales: checkbox, nombre, historial e importancia
+ * Layout esperado: ☑ | Nombre del Hábito | ●○●●○ | ALTA
+ */
+export const COLUMNAS_MOVIL_POR_DEFECTO: ColumnasHabitos = {
+    indice: true,
+    nombre: true,
+    historial: true,
+    racha: false,
+    frecuencia: false,
+    importancia: true,
+    tocaHoy: false,
+    acciones: false,
+    urgencia: false,
+    inactividad: false
+};
+
+/* Mantener compatibilidad con código existente */
+export const COLUMNAS_POR_DEFECTO: ColumnasHabitos = COLUMNAS_DESKTOP_POR_DEFECTO;
+
+export const CONFIG_HABITOS_DESKTOP_POR_DEFECTO: ConfiguracionHabitos = {
     ocultarCompletadosHoy: false,
     modoCompacto: true,
-    columnasVisibles: COLUMNAS_POR_DEFECTO,
+    columnasVisibles: COLUMNAS_DESKTOP_POR_DEFECTO,
     toleranciaPreset: 'moderado',
     umbralesPersonalizados: {normal: 1, urgente: 3, bloqueante: 5}
 };
 
+export const CONFIG_HABITOS_MOVIL_POR_DEFECTO: ConfiguracionHabitos = {
+    ocultarCompletadosHoy: false,
+    modoCompacto: true,
+    columnasVisibles: COLUMNAS_MOVIL_POR_DEFECTO,
+    toleranciaPreset: 'moderado',
+    umbralesPersonalizados: {normal: 1, urgente: 3, bloqueante: 5}
+};
+
+/* Mantener compatibilidad con código existente */
+export const CONFIG_HABITOS_POR_DEFECTO: ConfiguracionHabitos = CONFIG_HABITOS_DESKTOP_POR_DEFECTO;
+
+/* Keys de localStorage separadas por dispositivo */
+const STORAGE_KEY_DESKTOP = 'glory_config_habitos_desktop';
+const STORAGE_KEY_MOVIL = 'glory_config_habitos_movil';
+
 export function useConfiguracionHabitos() {
-    const {valor: valorGuardado, setValor} = useLocalStorage<ConfiguracionHabitos>('glory_config_habitos', {
-        valorPorDefecto: CONFIG_HABITOS_POR_DEFECTO
+    const {esTablet: esMovil} = useEsMovil();
+
+    /* Seleccionar key y defaults según dispositivo */
+    const storageKey = esMovil ? STORAGE_KEY_MOVIL : STORAGE_KEY_DESKTOP;
+    const configPorDefecto = esMovil ? CONFIG_HABITOS_MOVIL_POR_DEFECTO : CONFIG_HABITOS_DESKTOP_POR_DEFECTO;
+    const columnasPorDefecto = esMovil ? COLUMNAS_MOVIL_POR_DEFECTO : COLUMNAS_DESKTOP_POR_DEFECTO;
+
+    const {valor: valorGuardado, setValor} = useLocalStorage<ConfiguracionHabitos>(storageKey, {
+        valorPorDefecto: configPorDefecto
     });
 
     /*
@@ -71,10 +119,10 @@ export function useConfiguracionHabitos() {
      * aunque el usuario tenga configuración antigua
      */
     const valor: ConfiguracionHabitos = {
-        ...CONFIG_HABITOS_POR_DEFECTO,
+        ...configPorDefecto,
         ...valorGuardado,
         columnasVisibles: {
-            ...COLUMNAS_POR_DEFECTO,
+            ...columnasPorDefecto,
             ...valorGuardado.columnasVisibles
         }
     };
@@ -119,6 +167,7 @@ export function useConfiguracionHabitos() {
 
     return {
         configuracion: valor,
+        esMovil,
         actualizarConfiguracion: setValor,
         toggleOcultarCompletadosHoy,
         toggleModoCompacto,

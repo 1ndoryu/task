@@ -73,19 +73,22 @@
     right: -20px;
 }
 
-/* Cabecera con titulo */
+/* Cabecera con titulo - Compacto */
 .bottomSheetCabecera {
-    padding: 0 var(--dashboard-espacioMd) var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    padding: 0 var(--dashboard-espacioSm) var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
     flex-shrink: 0;
 }
 
 .bottomSheetTitulo {
-    font-size: var(--dashboard-tamanoMovilBase);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     margin: 0;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Contenido scrolleable */
@@ -97,22 +100,22 @@
     min-height: 0;
 }
 
-/* Items dentro del bottom sheet (para menus) */
+/* Items dentro del bottom sheet (para menus) - Diseño compacto unificado */
 .bottomSheetItem {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioMd);
-    padding: var(--dashboard-espacioMd);
-    min-height: var(--dashboard-tamanoTactilMinimo);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
+    min-height: 36px;
     color: var(--dashboard-textoNormal);
     background: none;
     border: none;
     width: 100%;
     text-align: left;
-    font-size: var(--dashboard-tamanoMovilBase);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
-    border-radius: var(--dashboard-radioMd);
+    border-radius: var(--dashboard-radioSm);
     transition: background var(--dashboard-transicionRapida);
 }
 
@@ -134,15 +137,21 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
-/* Icono del item */
+/* Icono del item - Compacto */
 .bottomSheetItem__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
-    opacity: 0.7;
+    color: var(--dashboard-textoApagado);
 }
 
 /* Texto del item */
 .bottomSheetItem__texto {
     flex: 1;
+    font-weight: 500;
 }
 
 /* Separador entre grupos de items */

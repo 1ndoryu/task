@@ -120,7 +120,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 > **Para ver cambios aplicados en móvil:**
 > ```powershell
-> # Desde ...\coolify-manager
+> # Desde .agent\coolify-manager
 > .\manager.ps1 deploy -SiteName nakomi -Update
 > ```
 
@@ -525,66 +525,224 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 #### 10.8.12 Layout Listas Compactas Móvil
 
-**Objetivo:** Mejorar el layout de las listas de proyectos, tareas y hábitos en modo compacto móvil.  
+**Objetivo:** Mejorar el layout de las listas de proyectos y hábitos en modo compacto móvil.  
 **Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ Completado
+
+##### 10.8.12.1 Proyectos - Layout 2 Filas ✅
+
+**Problema resuelto:** Los proyectos se mostraban en una sola fila horizontal, causando truncamiento excesivo del título.  
+**Solución:** Layout apilado de 2 filas implementado.
 
 ```
-Antes (1 columna - mal):
-┌─────────────────────────────────────┐
-│ Título del proyecto muy largo...    │
-│ 🟢 Activo  📊 75%  📋 5/20          │
-└─────────────────────────────────────┘
+Antes (1 fila - mal):
+┌──────────────────────────────────────────────┐
+│ 📁 Título del proyec... │ 🟢 │ 75% │ 5/20 │ ⋮ │
+└──────────────────────────────────────────────┘
 
-Después (2 columnas - bien):
-┌─────────────────────────────────────┐
-│ Título del proyecto...   │ 🟢 📊 📋 │
-└─────────────────────────────────────┘
+Después (2 filas - bien):
+┌──────────────────────────────────────────────┐
+│ 📁 Título del proyecto completo              │
+│    🟢 Activo  │  📊 75%  │  📋 5/20          │
+└──────────────────────────────────────────────┘
 ```
 
-- [ ] **Proyectos - Layout 2 columnas:**
-  - [ ] Columna izquierda: Título (flex: 1, truncate con ellipsis)
-  - [ ] Columna derecha: Badges compactos (estado, progreso, contador)
-  - [ ] Ocultar columna de acciones en móvil
-  - [ ] Badges solo con iconos, sin texto
-- [ ] **Tareas - Layout 2 columnas:**
-  - [ ] Columna izquierda: Checkbox + Título (flex: 1)
-  - [ ] Columna derecha: Badges (prioridad, fecha, proyecto)
-  - [ ] Ocultar columna de acciones en móvil
-  - [ ] Mantener consistencia con proyectos
-- [ ] **Hábitos - Compactar más:**
-  - [ ] Reducir padding vertical
-  - [ ] Unificar font-size del título con tareas (consistencia)
-  - [ ] Layout 2 columnas: Título | Icono + Racha
-  - [ ] Ocultar controles secundarios
-- [ ] **Consistencia visual:**
-  - [ ] Mismo font-size para títulos en todos los items compactos
-  - [ ] Misma altura mínima para todos los items
-  - [ ] Badges con tamaño uniforme
-- [ ] **CSS a modificar:**
-  - [ ] `movil.css`: Añadir reglas para `.proyectoItem--compacto`, `.tareaItem--compacto`, `.habitoItem--compacto`
-  - [ ] Ocultar `.accionesColumna` o equivalente en móvil
+- [x] Fila 1: Icono + Título completo (sin truncar, white-space normal)
+- [x] Fila 2: Badges en línea (estado, progreso, contador) con flex-wrap
+- [x] Ocultar columna de acciones (menú ⋮) en móvil
+- [x] Reducir padding entre filas para mantener compacto (espacioXs)
+
+##### 10.8.12.2 Tareas - Sin Cambios ✅
+
+**Estado:** ✅ Ya están bien  
+Las tareas actualmente tienen un layout adecuado para móvil. No requieren modificaciones.
+
+##### 10.8.12.3 Hábitos - Compactar Versión Móvil ✅
+
+**Problema resuelto:** La versión compacta de hábitos tenía demasiado espaciado en móvil.  
+**Solución:** Reducidos padding, tamaños de iconos y badges.
+
+- [x] Reducir padding vertical del item (espacioXs)
+- [x] Reducir tamaño del checkbox (16px)
+- [x] Compactar badge de racha (10px iconos, 2px gap)
+- [x] Ocultar columnas secundarias (inactividad, urgencia, acciones)
+- [x] Ocultar encabezado de tabla en móvil
+
+##### 10.8.12.4 CSS Modificado ✅
+
+- [x] `movil.css`: Reglas para `.proyectoItem` en móvil (layout 2 filas, flex-direction column)
+- [x] `movil.css`: Reglas para `.tablaFilaCompacta` (mayor compactación de hábitos)
+- [x] Ocultar `.proyectoAcciones`, `.accionesItem`, columnas secundarias en móvil
 
 ---
 
-#### 10.8.7 Menús Contextuales Bottom Sheet
+#### 10.8.13 Configuración de Columnas Hábitos por Dispositivo ✅
 
-**Objetivo:** Los menús contextuales deben cubrir el ancho completo de la pantalla desde abajo.
+**Objetivo:** Separar la configuración de columnas visibles de hábitos entre móvil y desktop.  
+**Prioridad:** Alta | **Urgencia:** Normal  
+**Estado:** ✅ Completado
 
-- [ ] **Estilo BottomSheet para menús contextuales:**
-  - [ ] `position: fixed; bottom: 0; left: 0; right: 0`
-  - [ ] `width: 100%` sin márgenes laterales
-  - [ ] Border-radius solo en esquinas superiores (12-16px)
-  - [ ] Overlay oscuro detrás
-- [ ] **Animación:**
-  - [ ] Slide-up desde abajo (transform: translateY)
-  - [ ] Duración: 200-250ms
-  - [ ] Cerrar con slide-down o tap en overlay
-- [ ] **Contenido:**
-  - [ ] Opciones con altura táctil (44-48px)
-  - [ ] Iconos a la izquierda de cada opción
-  - [ ] Separadores sutiles entre grupos
-  - [ ] Safe area bottom para dispositivos con gestos
+**Problema resuelto:** La configuración de columnas era global, causando que columnas no relevantes ocuparan espacio en móvil.  
+**Solución:** Configuración separada por dispositivo con defaults optimizados.
+
+##### 10.8.13.1 Modificar Hook useConfiguracionHabitos ✅
+
+**Implementado:** El hook detecta el dispositivo y usa configuraciones separadas.
+
+- [x] Importar `useEsMovil` en el hook
+- [x] Definir `CONFIG_HABITOS_MOVIL_DEFECTO` con solo:
+  - `indice: true` (checkbox)
+  - `importancia: true` (badge prioridad)
+  - `historial: true` (actividad últimos días)
+  - Resto: `false`
+- [x] Definir `CONFIG_HABITOS_DESKTOP_DEFECTO` con las actuales
+- [x] Cargar/guardar en key diferente según `esMovil`
+- [x] Primera carga en móvil: aplicar defaults móvil automáticamente
+
+##### 10.8.13.2 Columnas Móvil por Defecto ✅
+
+**Layout implementado en móvil:**
+```
+┌────────────────────────────────────────────────┐
+│ ☑ │ Nombre del Hábito    │ ●○●●○ │ ALTA │
+└────────────────────────────────────────────────┘
+     ^                        ^       ^
+     checkbox                 historial  importancia
+```
+
+- [x] Solo 3 columnas visibles: checkbox, nombre+historial, importancia
+- [x] El grid se ajusta dinámicamente (sin columnas vacías)
+- [x] No mostrar: inactividad, urgencia, racha, acciones, frecuencia, tocaHoy
+
+##### 10.8.13.3 Persistencia Separada ✅
+
+- [x] Key móvil: `glory_config_habitos_movil`
+- [x] Key desktop: `glory_config_habitos_desktop`
+- [x] Al cambiar de dispositivo, cargar la config correspondiente
+- [x] El usuario puede personalizar cada una independientemente
+
+##### 10.8.13.4 Actualizar Componentes ✅
+
+- [x] `useConfiguracionHabitos.ts`: Detecta móvil, usa keys y defaults separados
+- [x] `ModalConfiguracionHabitos.tsx`: Muestra solo columnas relevantes en móvil, oculta tolerancia de urgencia
+- [x] El grid se ajusta automáticamente según columnas visibles (ya existente en `obtenerGridTemplate()`)
+
+##### Orden de Implementación 10.8.13 ✅
+
+| Paso | Subtarea  | Descripción                        | Estado       |
+| ---- | --------- | ---------------------------------- | ------------ |
+| 1    | 10.8.13.1 | Modificar hook con detección móvil | ✅ Completado |
+| 2    | 10.8.13.2 | Defaults móvil optimizados         | ✅ Completado |
+| 3    | 10.8.13.3 | Persistencia separada localStorage | ✅ Completado |
+| 4    | 10.8.13.4 | Actualizar componentes             | ✅ Completado |
+
+---
+
+#### 10.8.7 Menús Contextuales Bottom Sheet ✅
+
+**Objetivo:** Los menús contextuales deben cubrir el ancho completo de la pantalla desde abajo.  
+**Estado:** ✅ Completado
+
+- [x] **Estilo BottomSheet para menús contextuales:**
+  - [x] `position: fixed; bottom: 0; left: 0; right: 0` (en `bottomSheet.css`)
+  - [x] `width: 100%` sin márgenes laterales
+  - [x] Border-radius 16px en esquinas superiores
+  - [x] Overlay oscuro detrás (`.bottomSheetOverlay`)
+- [x] **Animación:**
+  - [x] Slide-up desde abajo con `transform: translateY(100%)` → `translateY(0)`
+  - [x] Duración: 300ms con cubic-bezier
+  - [x] Cerrar con slide-down (drag-to-close) o tap en overlay
+- [x] **Contenido:**
+  - [x] Opciones con altura táctil mínima (`--dashboard-tamanoTactilMinimo: 44px`)
+  - [x] Iconos a la izquierda de cada opción
+  - [x] Separadores sutiles entre grupos
+  - [x] Safe area bottom con `env(safe-area-inset-bottom)`
+- [x] **Componentes migrados a `MenuContextualAdaptivo`:**
+  - [x] `TablaHabitos.tsx`: Menú contextual de hábitos
+  - [x] `TareaItem.tsx`: Menú contextual de tareas y hábitos
+---
+
+#### 10.8.14 Limpieza Visual de Listas Móvil
+
+**Objetivo:** Simplificar la apariencia de las listas de tareas, hábitos y proyectos en móvil.  
+**Prioridad:** Alta | **Urgencia:** Normal  
+**Estado:** ✅ Completado
+
+##### 10.8.14.1 Ocultar Botones de Acciones en Tareas (Móvil) ✅
+
+**Problema resuelto:** Los botones de tuerca y papelera ocupaban espacio innecesario en móvil.  
+**Solución:** Ocultar `.tareaAccionesContenedor` en móvil - el menú contextual ya ofrece estas opciones.
+
+- [x] Añadir regla CSS para ocultar `.tareaAccionesContenedor` en `@media (max-width: 480px)`
+- [x] Verificar que el menú contextual (long-press) sigue funcionando
+
+##### 10.8.14.2 Eliminar Colores de Fondo en Hábitos (General) ✅
+
+**Problema resuelto:** Los fondos verde/amarillo en filas de hábitos (completado, toca hoy) eran visualmente ruidosos.  
+**Solución:** Eliminados colores de fondo, manteniendo solo indicadores sutiles (borde izquierdo, checkbox, badges).
+
+- [x] Revisar `.tablaFilaCompletada` - quitado fondo verde
+- [x] Revisar `.tablaFilaTocaHoy` - quitado fondo amarillo, mantenido borde sutil
+- [x] Mantener el estado visual mediante otros indicadores (checkbox, badges)
+- [x] Aplicar cambio globalmente (no solo móvil)
+
+##### 10.8.14.3 Reducir Padding Interno de Hábitos (Móvil) ✅
+
+**Problema resuelto:** Las filas de hábitos tenían demasiado espacio interno en móvil.  
+**Solución:** Compactado el padding de `.tablaFila` y `.tablaFilaCompacta` en móvil.
+
+- [x] Reducir padding de `.tablaFila` en móvil
+- [x] Reducir padding de `.tablaFilaCompacta` en móvil
+- [x] Ajustar gap entre elementos internos
+- [x] Verificar que el área táctil sigue siendo suficiente (mínimo 36px)
+
+---
+
+#### 10.8.15 Estandarización de Botones "Añadir" (Global)
+
+**Objetivo:** Unificar visualmente los botones de añadir en todos los paneles.  
+**Prioridad:** Media | **Urgencia:** Normal  
+**Estado:** ✅ Completado
+
+**Problema resuelto:** Los botones de añadir eran inconsistentes:
+- Tareas: `+ nueva tarea`
+- Hábitos: `+ Añadir nuevo habito de seguimiento` → Ahora: `+ Añadir`
+- Proyectos: Sin botón visible
+
+**Solución:** Estilo CSS compacto unificado aplicado. Botones ocultos en móvil (FAB es suficiente).
+
+##### 10.8.15.1 Diseño Unificado ✅
+
+```
+┌─────────────────────────────────────┐
+│  + Añadir                           │  ← Botón compacto, texto corto
+└─────────────────────────────────────┘
+```
+
+- [x] Definir estilo unificado: texto pequeño, padding mínimo, borde sutil dashed
+- [x] Texto genérico: `+ Añadir` (el contexto está claro por el panel)
+- [x] Hover/active sutil con fondo
+
+##### 10.8.15.2 Implementar en Componentes ✅
+
+- [x] `TablaHabitos.tsx`: Texto acortado a `+ Añadir`, CSS actualizado en `.añadirHabito`
+- [x] Tareas: Mantiene su input inline (`tareaNuevoInline`) - ya estaba compacto
+
+##### 10.8.15.3 Ocultar en Móvil ✅
+
+- [x] El botón FAB central hace innecesarios estos botones en móvil
+- [x] Ocultados con `display: none` en móvil: `.añadirHabito`, `.tareaNuevoInline`, `.tareaNuevoBoton`
+
+##### Orden de Implementación 10.8.14-15 ✅
+
+| Paso | Subtarea  | Descripción                       | Estado       |
+| ---- | --------- | --------------------------------- | ------------ |
+| 1    | 10.8.14.1 | Ocultar acciones tareas en móvil  | ✅ Completado |
+| 2    | 10.8.14.2 | Eliminar fondos color en hábitos  | ✅ Completado |
+| 3    | 10.8.14.3 | Reducir padding hábitos en móvil  | ✅ Completado |
+| 4    | 10.8.15.1 | Diseñar botón añadir unificado    | ✅ Completado |
+| 5    | 10.8.15.2 | Implementar en todos los paneles  | ✅ Completado |
+| 6    | 10.8.15.3 | Ocultar en móvil si es redundante | ✅ Completado |
 
 ---
 

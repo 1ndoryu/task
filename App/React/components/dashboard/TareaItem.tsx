@@ -7,7 +7,8 @@ import {useState, useCallback, useRef, useEffect, type KeyboardEvent, type Chang
 import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
-import {MenuContextual, type OpcionMenu} from '../shared/MenuContextual';
+import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
+import type {OpcionMenu} from '../shared/MenuContextual';
 import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
 import {AccionesItem} from '../shared/AccionesItem';
 import type {VarianteBadge} from '../shared/BadgeInfo';
@@ -462,8 +463,8 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 </div>
             </div>
 
-            {menuContextual.visible && !esHabito && <MenuContextual opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} />}
-            {menuContextual.visible && esHabito && <MenuContextual opciones={opcionesMenuHabito} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} />}
+            {menuContextual.visible && !esHabito && <MenuContextualAdaptivo opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} titulo={tarea.texto} />}
+            {menuContextual.visible && esHabito && <MenuContextualAdaptivo opciones={opcionesMenuHabito} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} titulo={tarea.texto} />}
         </>
     );
 }

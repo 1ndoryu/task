@@ -9,7 +9,7 @@ import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause} from 'lucide
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {tocaHoy, describirFrecuencia, obtenerIntervaloFrecuencia, calcularUmbralInactividad} from '../../utils/frecuenciaHabitos';
-import {MenuContextual} from '../shared/MenuContextual';
+import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
 import type {OpcionMenu} from '../shared/MenuContextual';
 import {DashboardPanel} from '../shared/DashboardPanel';
 import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
@@ -298,7 +298,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             </div>
 
             {/* Menu contextual */}
-            {menuContextual.visible && <MenuContextual opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} />}
+            {menuContextual.visible && <MenuContextualAdaptivo opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} titulo={habito.nombre} />}
         </>
     );
 }
@@ -349,7 +349,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
 
             {/* Añadir habito */}
             <div className="añadirHabito" onClick={onAñadirHabito}>
-                + Añadir nuevo habito de seguimiento
+                + Añadir
             </div>
         </DashboardPanel>
     );

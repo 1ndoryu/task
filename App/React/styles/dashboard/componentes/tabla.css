@@ -201,14 +201,14 @@
 
 /* 
  * FILA QUE TOCA HOY 
+ * El badge "Hoy" en el nombre ya indica el estado - sin fondo ni borde adicional
  */
 .tablaFilaTocaHoy {
-    background-color: rgba(251, 191, 36, 0.03);
-    border-left: 2px solid rgba(251, 191, 36, 0.4);
+    background-color: transparent;
 }
 
 .tablaFilaTocaHoy:hover {
-    background-color: rgba(251, 191, 36, 0.06);
+    background-color: var(--dashboard-fondoHover);
 }
 
 /* 
@@ -452,11 +452,12 @@
  * FILA COMPLETADA 
  */
 .tablaFilaCompletada {
-    background-color: rgba(34, 197, 94, 0.03);
+    /* Fondo removido para reducir ruido visual - el checkbox ya indica completado */
+    background-color: transparent;
 }
 
 .tablaFilaCompletada:hover {
-    background-color: rgba(34, 197, 94, 0.05);
+    background-color: var(--dashboard-fondoHover);
 }
 
 .filaNombreCompletado {
@@ -543,18 +544,25 @@
 
 /* 
  * AÑADIR HABITO 
+ * Estilo compacto unificado - Fase 10.8.15
  */
 .añadirHabito {
-    padding: var(--dashboard-espacioMd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     text-align: center;
-    color: var(--dashboard-textoIndice);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
-    border-top: 1px dashed var(--dashboard-bordePrincipal);
-    transition: color var(--dashboard-transicionNormal);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    transition: all var(--dashboard-transicionNormal);
 }
 
 .añadirHabito:hover {
-    color: var(--dashboard-textoMuyApagado);
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoHover);
 }
 
 /* 

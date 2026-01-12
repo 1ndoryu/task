@@ -8,12 +8,13 @@
  */
 .tareaItem {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--dashboard-espacioMd);
     padding: var(--dashboard-espacioMd);
     /* border-bottom: 1px solid var(--dashboard-bordePrincipal); */
     transition: background-color var(--dashboard-transicionNormal);
     position: relative;
+    align-content: center;
 }
 
 .tareaItem:hover {
@@ -709,5 +710,5 @@
 .tareaItem--compacto .tareaCheckbox {
     width: 0.65rem;
     height: 0.65rem;
-    margin-top: 6px; /* Bajado aun mas en modo compacto */
+    margin-top: 1px;
 }

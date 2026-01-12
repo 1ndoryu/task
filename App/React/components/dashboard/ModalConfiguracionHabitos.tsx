@@ -11,6 +11,7 @@ interface ModalConfiguracionHabitosProps {
     estaAbierto: boolean;
     onCerrar: () => void;
     configuracion: ConfiguracionHabitos;
+    esMovil?: boolean;
     onToggleCompletadosHoy: () => void;
     onToggleModoCompacto: () => void;
     onToggleColumna: (columna: keyof ColumnasHabitos) => void;
@@ -41,11 +42,14 @@ const PRESETS_INFO: Record<Exclude<ToleranciaPreset, 'personalizado'>, InfoPrese
     }
 };
 
-export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion, onToggleCompletadosHoy, onToggleModoCompacto, onToggleColumna, onCambiarTolerancia}: ModalConfiguracionHabitosProps): JSX.Element {
+export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion, esMovil = false, onToggleCompletadosHoy, onToggleModoCompacto, onToggleColumna, onCambiarTolerancia}: ModalConfiguracionHabitosProps): JSX.Element {
     interface InfoColumna {
         etiqueta: string;
         descripcion: string;
     }
+
+    /* En móvil solo mostramos columnas que tienen sentido para ese contexto */
+    const columnasRelevantesMovil: Array<keyof ColumnasHabitos> = ['indice', 'historial', 'importancia'];
 
     const infoColumnas: Record<keyof ColumnasHabitos, InfoColumna> = {
         indice: {
@@ -90,6 +94,9 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
         }
     };
 
+    /* Filtrar columnas según dispositivo */
+    const columnasAMostrar = esMovil ? (Object.keys(configuracion.columnasVisibles) as Array<keyof ColumnasHabitos>).filter(col => columnasRelevantesMovil.includes(col)) : (Object.keys(configuracion.columnasVisibles) as Array<keyof ColumnasHabitos>);
+
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Habitos">
             <div className="contenedorOpcionesConfig">
@@ -115,32 +122,37 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
 
                 <div className="separadorOpcionesConfig" />
 
-                {/* Seccion: Tolerancia de Urgencia */}
-                <div className="seccionConfiguracion">
-                    <h4 className="tituloSeccionConfig">Tolerancia de Urgencia</h4>
-                    <span className="descripcionSeccionConfig">Define que tan estricto es el sistema al marcar habitos como urgentes por inactividad</span>
-                    <div className="gridOpcionesTolerancia">
-                        {(Object.keys(PRESETS_INFO) as Array<Exclude<ToleranciaPreset, 'personalizado'>>).map(preset => {
-                            const info = PRESETS_INFO[preset];
-                            const estaActivo = configuracion.toleranciaPreset === preset;
+                {/* Seccion: Tolerancia de Urgencia - Solo en desktop (no relevante en móvil) */}
+                {!esMovil && (
+                    <>
+                        <div className="seccionConfiguracion">
+                            <h4 className="tituloSeccionConfig">Tolerancia de Urgencia</h4>
+                            <span className="descripcionSeccionConfig">Define que tan estricto es el sistema al marcar habitos como urgentes por inactividad</span>
+                            <div className="gridOpcionesTolerancia">
+                                {(Object.keys(PRESETS_INFO) as Array<Exclude<ToleranciaPreset, 'personalizado'>>).map(preset => {
+                                    const info = PRESETS_INFO[preset];
+                                    const estaActivo = configuracion.toleranciaPreset === preset;
 
-                            return (
-                                <button key={preset} type="button" className={`botonPresetTolerancia ${estaActivo ? 'botonPresetTolerancia--activo' : ''}`} onClick={() => onCambiarTolerancia(preset)}>
-                                    <span className="etiquetaPreset">{info.etiqueta}</span>
-                                    <span className="descripcionPreset">{info.descripcion}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
+                                    return (
+                                        <button key={preset} type="button" className={`botonPresetTolerancia ${estaActivo ? 'botonPresetTolerancia--activo' : ''}`} onClick={() => onCambiarTolerancia(preset)}>
+                                            <span className="etiquetaPreset">{info.etiqueta}</span>
+                                            <span className="descripcionPreset">{info.descripcion}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
 
-                <div className="separadorOpcionesConfig" />
+                        <div className="separadorOpcionesConfig" />
+                    </>
+                )}
 
                 {/* Seccion: Columnas Visibles */}
                 <div className="seccionConfiguracion">
                     <h4 className="tituloSeccionConfig">Columnas Visibles</h4>
+                    {esMovil && <span className="descripcionSeccionConfig">Columnas disponibles para móvil</span>}
                     <div className="gridOpcionesColumnas">
-                        {(Object.keys(configuracion.columnasVisibles) as Array<keyof ColumnasHabitos>).map(columna => {
+                        {columnasAMostrar.map(columna => {
                             if (columna === 'nombre') return null;
 
                             const info = infoColumnas[columna];
