@@ -86,3 +86,14 @@ add_filter('mime_types', function ($mimes) {
     $mimes['svg'] = 'image/svg+xml';
     return $mimes;
 });
+
+/* 
+ * Remover site icon de WordPress y usar favicon personalizado
+ */
+add_action('wp_head', function () {
+    $favicon_url = get_template_directory_uri() . '/Glory/assets/images/favicon.svg';
+    echo '<link rel="icon" type="image/svg+xml" href="' . esc_url($favicon_url) . '">' . "\n";
+}, 1);
+
+// Remover el site icon de WordPress
+remove_action('wp_head', 'wp_site_icon', 99);
