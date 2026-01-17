@@ -91,6 +91,9 @@ export function useHabitosComoTareas({habitos, mostrarHabitos, onToggleHabito, u
 
         return habitos
             .filter(habito => {
+                /* Los hábitos pausados nunca aparecen en el panel de ejecución */
+                if (habito.pausado) return false;
+
                 const frecuencia = habito.frecuencia || FRECUENCIA_POR_DEFECTO;
                 /* Solo incluir hábitos que tocan hoy y no están completados hoy ni pospuestos */
                 const tocaHoyResult = tocaHoy(frecuencia, habito.ultimoCompletado);
