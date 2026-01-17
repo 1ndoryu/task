@@ -59,6 +59,36 @@ const API_BASE = '/wp-json/glory/v1/notas';
 /* Contenido inicial para una nota nueva */
 const CONTENIDO_NOTA_NUEVA = '# Título de la nota\n\n';
 
+/* Clave para persistir el ID de la última nota activa */
+const STORAGE_KEY_NOTA_ACTIVA = 'glory_nota_activa_id';
+
+/**
+ * Guarda el ID de la nota activa en localStorage
+ */
+function persistirNotaActivaId(id: number | null): void {
+    try {
+        if (id !== null) {
+            localStorage.setItem(STORAGE_KEY_NOTA_ACTIVA, id.toString());
+        } else {
+            localStorage.removeItem(STORAGE_KEY_NOTA_ACTIVA);
+        }
+    } catch {
+        /* Ignorar errores de localStorage */
+    }
+}
+
+/**
+ * Recupera el ID de la nota activa de localStorage
+ */
+function obtenerNotaActivaIdGuardado(): number | null {
+    try {
+        const id = localStorage.getItem(STORAGE_KEY_NOTA_ACTIVA);
+        return id ? parseInt(id, 10) : null;
+    } catch {
+        return null;
+    }
+}
+
 /**
  * Obtiene el nonce de WordPress para autenticación
  */
@@ -276,6 +306,9 @@ export function useNotas(): UseNotasReturn {
 
                 notaGuardada = response.nota;
 
+                /* Persistir el ID de la nueva nota */
+                persistirNotaActivaId(notaGuardada.id);
+
                 /* Agregar al inicio de la lista y establecer como activa */
                 setEstado(prev => ({
                     ...prev,
@@ -393,6 +426,7 @@ export function useNotas(): UseNotasReturn {
      * Selecciona una nota existente como activa
      */
     const seleccionarNota = useCallback((nota: Nota) => {
+        persistirNotaActivaId(nota.id);
         setEstado(prev => ({
             ...prev,
             notaActiva: {
@@ -407,6 +441,7 @@ export function useNotas(): UseNotasReturn {
      * Crea una nueva nota (limpia la activa)
      */
     const crearNuevaNota = useCallback(() => {
+        persistirNotaActivaId(null);
         setEstado(prev => ({
             ...prev,
             notaActiva: {
@@ -455,6 +490,33 @@ export function useNotas(): UseNotasReturn {
             }
         };
     }, [cargarNotas]);
+
+    /*
+     * Restaurar la última nota activa guardada en localStorage
+     * Se ejecuta después de cargar las notas cuando cargando cambia a false
+     */
+    const yaRestauradoRef = useRef(false);
+    useEffect(() => {
+        /* Solo intentar restaurar cuando las notas se han cargado y no se ha restaurado antes */
+        if (estado.cargando || yaRestauradoRef.current) return;
+
+        const idGuardado = obtenerNotaActivaIdGuardado();
+        if (idGuardado === null) return;
+
+        /* Buscar la nota en la lista cargada */
+        const notaGuardada = estado.notas.find(n => n.id === idGuardado);
+        if (notaGuardada) {
+            yaRestauradoRef.current = true;
+            setEstado(prev => ({
+                ...prev,
+                notaActiva: {
+                    id: notaGuardada.id,
+                    contenido: notaGuardada.contenido,
+                    modificada: false
+                }
+            }));
+        }
+    }, [estado.cargando, estado.notas]);
 
     /*
      * Autoguardado con debounce

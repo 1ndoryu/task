@@ -112,11 +112,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-### 10.8 Reestructuración UX Móvil 🚧 EN PROGRESO
+### 10.8 Reestructuración UX Móvil ✅ COMPLETADA
 
 **Objetivo:** Transformar la experiencia móvil para que cada panel sea una página independiente con navegación nativa.  
 **Prioridad:** Alta | **Urgencia:** Alta  
-**Estado:** 🚧 EN PROGRESO
+**Estado:** ✅ Completado (v1.0.12-beta)
 
 > **Para ver cambios aplicados en móvil:**
 > ```powershell
@@ -124,629 +124,38 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 > .\manager.ps1 deploy -SiteName nakomi -Update
 > ```
 
----
+<details>
+<summary>✅ Tareas Completadas (10.8.1 - 10.8.15)</summary>
 
-#### 10.8.1 Sistema de Navegación por Páginas ✅
+| Tarea   | Descripción                                              |
+| ------- | -------------------------------------------------------- |
+| 10.8.1  | Sistema de Navegación por Páginas (5 botones inferiores) |
+| 10.8.2  | Paneles Fullscreen Sin Bordes                            |
+| 10.8.3  | Menú de Opciones Unificado (3 puntos → BottomSheet)      |
+| 10.8.4  | Eliminar Capacidad de Minimizar en Móvil                 |
+| 10.8.5  | Mejoras Visuales del Menú Opciones (iconos, compacto)    |
+| 10.8.6  | Modales con Header Compacto (40px, grid 3 columnas)      |
+| 10.8.7  | Menús Contextuales Bottom Sheet (drag-to-close)          |
+| 10.8.8  | Bugs y Refinamientos del Menú Opciones                   |
+| 10.8.9  | Limpieza del Header (sin logo, sin tooltips, búsqueda)   |
+| 10.8.10 | Formulario Compacto Móvil (pills, padding reducido)      |
+| 10.8.11 | Modal con Chat Integrado Inline                          |
+| 10.8.12 | Layout Listas Compactas (proyectos 2 filas, hábitos)     |
+| 10.8.13 | Configuración de Columnas Hábitos por Dispositivo        |
+| 10.8.14 | Limpieza Visual de Listas (sin fondos color, padding)    |
+| 10.8.15 | Estandarización de Botones "Añadir" (ocultos en móvil)   |
 
-**Objetivo:** Cada panel principal es una página independiente en móvil.
+**Componentes creados/modificados:**
+- `usePaginaMovil`, `useOpcionesPanelMovil`, `useConfiguracionHabitos` (detección móvil)
+- `NavegacionInferior` con FAB central
+- `MenuContextualAdaptivo`, `BottomSheet` con drag-to-close
+- CSS: `movil.css`, `bottomSheet.css`, `modal.css`, `encabezado.css`
 
-```
-┌─────────────────────────────────────┐
-│  📋  │  📁  │  ➕  │  ✅  │  📊  │
-│ Tareas │ Proy │ FAB │ Hábi │ Acti │
-└─────────────────────────────────────┘
-```
-
-- [x] **Reestructurar Navegación Inferior:**
-  - [x] Botón 1: Panel Ejecución/Tareas (por defecto al abrir)
-  - [x] Botón 2: Panel Proyectos
-  - [x] Botón 3: FAB central (crear Tarea/Proyecto/Hábito)
-  - [x] Botón 4: Panel Hábitos
-  - [x] Botón 5: Panel Actividad/Mapa de Calor
-- [x] **Estado de navegación:**
-  - [x] Hook `usePaginaMovil` para gestionar página activa
-  - [x] Persistir última página visitada en localStorage
-  - [x] Transiciones suaves entre páginas (fade animation)
-- [x] **Renderizado condicional:**
-  - [x] Solo renderizar el panel activo en móvil
-  - [x] Mantener estado de cada panel al cambiar
-
----
-
-#### 10.8.2 Paneles Fullscreen Sin Bordes ✅
-
-**Objetivo:** Los paneles ocupan el 100% del viewport sin decoraciones.
-
-- [x] **Estilos de panel móvil:**
-  - [x] Quitar `border`, `border-radius` de paneles en móvil
-  - [x] `width: 100%` con padding pequeño (8-12px)
-  - [x] Sin sombras ni separadores visuales
-  - [x] Fondo hereda del contenedor principal
-- [x] **Quitar elementos de control:**
-  - [x] Ocultar botones de minimizar/maximizar/cerrar panel
-  - [x] Ocultar cabecera de panel si solo contiene controles
-  - [x] Mantener solo el contenido funcional
+</details>
 
 ---
 
-#### 10.8.3 Menú de Opciones Unificado ✅
-
-**Objetivo:** Consolidar todas las opciones de panel en un solo botón.
-
-```
-┌─────────────────────────────────────┐
-│ Panel Tareas          [🔍] [⚙️]    │
-└─────────────────────────────────────┘
-               ↓ toca ⚙️
-┌─────────────────────────────────────┐
-│         OPCIONES                    │
-├─────────────────────────────────────┤
-│ 📊 Ordenar por...                   │
-│ 🔽 Orden ascendente/descendente     │
-│ 🏷️ Filtrar por etiqueta            │
-│ 📁 Filtrar por proyecto             │
-│ 📅 Filtrar por fecha                │
-│ ⚙️ Configuración del panel          │
-│ 🔄 Actualizar                       │
-└─────────────────────────────────────┘
-```
-
-- [x] **Componente `MenuOpcionesPanel`:**
-  - [x] Creado para desktop (wrapper que muestra children o BottomSheet)
-  - [x] En móvil: botón de 3 puntos movido al **header móvil superior** (junto a la lupa)
-  - [x] Abre BottomSheet con todas las opciones agrupadas
-  - [x] Opciones varían según el panel activo
-- [x] **Arquitectura móvil:**
-  - [x] **Ocultar encabezado de paneles** (`SeccionEncabezado`) en móvil via CSS
-  - [x] Hook `useOpcionesPanelMovil` construye opciones según `paginaMovil.paginaActiva`
-  - [x] `DashboardEncabezado` recibe `opcionesMovil` y muestra el botón de 3 puntos
-- [x] **Opciones a incluir:**
-  - [x] Ordenamiento con opción activa resaltada
-  - [x] Filtros con opción activa resaltada (solo tareas)
-  - [x] Configuración específica del panel
-- [x] **Indicador visual:**
-  - [x] Badge o punto cuando hay filtros activos
-  - [x] Helpers: `crearOpcionesOrdenamiento`, `crearOpcionesFiltro`, `crearOpcionConfiguracion`
-- [x] **CSS agregado:**
-  - [x] `.botonOpcionesMovil` en `encabezado.css`
-  - [x] `.menuOpcionesPanelContenido`, `.menuOpcionesPanelItem` en `movil.css`
-  - [x] Regla para ocultar `.seccionEncabezado` en móvil
-
----
-
-#### 10.8.4 Eliminar Capacidad de Minimizar (Móvil) ✅
-
-**Objetivo:** En móvil no tiene sentido minimizar paneles.
-
-- [x] **Ocultar controles de minimizar:**
-  - [x] `display: none` para botón minimizar en móvil (CSS en movil.css línea 785)
-  - [x] Quitar animación de colapso en móvil (no se renderiza el componente)
-  - [x] Paneles siempre en estado "expandido" (móvil siempre renderiza panel activo)
-- [x] **Limpiar lógica:**
-  - [x] En DashboardGrid.tsx: `handleMinimizarElement = esMovil ? null : ...`
-  - [x] No es necesario condicional en hook: sin botón, la función nunca se invoca
-
----
-
-#### 10.8.5 Mejoras Visuales del Menú Opciones Móvil ✅
-
-**Objetivo:** Refinar el diseño del BottomSheet de opciones para que sea más compacto y consistente.
-
-**Mejoras implementadas:**
-- [x] **Iconos consistentes:**
-  - [x] Usar iconos originales de las opciones (CheckSquare, User, LayoutList, Folder)
-  - [x] Fallback a iconos genéricos si no hay icono personalizado
-  - [x] Tamaño de iconos reducido a 14px para consistencia
-- [x] **Diseño compacto:**
-  - [x] Reducir padding de `.menuOpcionesPanelItem` (espacioSm)
-  - [x] Reducir altura mínima de items de 44px a 36px
-  - [x] Reducir tamaño de iconos de 24px a 18px en contenedor
-  - [x] Quitar título innecesario del BottomSheet
-  - [x] Reducir indicador de arrastre y padding del contenido
-- [x] **Variables CSS:**
-  - [x] Usar `--dashboard-tamanoMuyPequeno` para títulos de grupo
-  - [x] Usar `--dashboard-tamanoMovilPequeno` para etiquetas
-  - [x] Usar `--dashboard-tamanoPequeno` para descripciones
-
----
-
-#### 10.8.8 Bugs y Refinamientos del Menú Opciones Móvil
-
-**Objetivo:** Corregir comportamientos inesperados y refinar el diseño del BottomSheet de opciones.  
-**Prioridad:** Alta | **Urgencia:** Alta  
-**Estado:** ✅ Completado
-
----
-
-##### 10.8.8.1 Bug: Botón de 3 Puntos con Estilo Incorrecto ✅
-
-**Problema resuelto:** El botón usaba `.botonIconoEncabezado__puntoNotificacion` (rojo).  
-**Solución:** Creada nueva clase `.badgeFiltrosActivos` con color acento sutil.
-
-- [x] Revisar estilos de `.botonOpcionesMovil` en `encabezado.css`
-- [x] Creada clase `.badgeFiltrosActivos` con color morado sutil
-- [x] El badge solo aparece si hay filtros activos
-- [x] Consistencia visual con otros botones del header
-
----
-
-##### 10.8.8.2 Bug: Scroll Innecesario en Paneles ✅
-
-**Problema resuelto:** `min-height` forzado causaba scroll innecesario.  
-**Solución:** Removido `min-height` en `.dashboardGridMovil` y `.panelDashboard--movil`.
-
-- [x] Removido `min-height` que forzaba altura fija
-- [x] Panel ahora usa altura automática según contenido
-- [x] Sin scroll innecesario con pocas tareas
-
----
-
-##### 10.8.8.3 Mejora: Arrastrar hacia Abajo para Cerrar ✅
-
-**Implementado:** Gesto drag-to-close en el BottomSheet.
-
-- [x] Detección de gesto swipe-down en el handle
-- [x] Cierre cuando se arrastra más del 30% de altura
-- [x] Velocidad del gesto también cierra (> 0.5 px/ms)
-- [x] Mantiene funcionalidad de tap en overlay para cerrar
-
----
-
-##### 10.8.8.4 Mejora: Iconos para Opciones de Ordenamiento ✅
-
-**Implementado:** Iconos descriptivos para cada modo de ordenamiento.
-
-- [x] Icono para "Manual": `GripVertical`
-- [x] Icono para "Inteligente": `Sparkles`
-- [x] Icono para "Fecha límite": `Calendar`
-- [x] Icono para "Prioridad": `Flag`
-- [x] Actualizado `useOpcionesDashboard` con diccionario `ICONOS_ORDEN`
-
----
-
-##### 10.8.8.5 Mejora: Compactar Menú - Quitar Subtítulos ✅
-
-**Implementado:** Menú más compacto sin subtítulos de grupo.
-
-- [x] Quitados subtítulos "Ordenar por", "Filtrar por", etc.
-- [x] Solo se muestran separadores sutiles entre grupos
-- [x] Removidas descripciones redundantes
-
----
-
-##### Orden de Implementación 10.8.8 ✅
-
-| Paso | Subtarea | Descripción                        | Estado       |
-| ---- | -------- | ---------------------------------- | ------------ |
-| 1    | 10.8.8.1 | Fix botón 3 puntos (estilo)        | ✅ Completado |
-| 2    | 10.8.8.2 | Fix scroll innecesario             | ✅ Completado |
-| 3    | 10.8.8.5 | Compactar menú (quitar subtítulos) | ✅ Completado |
-| 4    | 10.8.8.4 | Añadir iconos ordenamiento         | ✅ Completado |
-| 5    | 10.8.8.3 | Gesto drag-to-close                | ✅ Completado |
-
----
-
-#### 10.8.9 Limpieza del Header y UX Móvil ✅
-
-**Objetivo:** Simplificar el header eliminando elementos obsoletos y mejorar UX táctil.  
-**Prioridad:** Media | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
----
-
-##### 10.8.9.1 Eliminar encabezadoLogo ✅
-
-**Problema resuelto:** El dropdown de navegación de página ya no era útil.  
-**Solución:** Eliminado completamente, ahora solo muestra título simple.
-
-- [x] Eliminar `.encabezadoLogo` y `.encabezadoTituloBoton` de `DashboardEncabezado.tsx`
-- [x] Eliminar estilos asociados en `encabezado.css`
-- [x] Eliminar menú de navegación de página (`menuPagina`)
-- [x] Simplificar la estructura del header (solo span con título)
-
----
-
-##### 10.8.9.2 Quitar Tooltips en Móvil ✅
-
-**Problema resuelto:** Los tooltips (sistema personalizado `TooltipSystem`) aparecían en móvil.  
-**Solución:** Deshabilitar completamente el `TooltipSystem` en móvil.
-
-- [x] Modificar `TooltipSystem.tsx` para importar `useEsDispositivoMovil`
-- [x] Retornar `null` inmediatamente si `esMovil === true`
-- [x] Mantener `aria-label` para accesibilidad en botones del header
-
----
-
-##### 10.8.9.3 Mover Búsqueda al Menú de Opciones ✅
-
-**Mejora:** El botón de búsqueda separado ocupaba espacio innecesario.  
-**Solución:** Búsqueda movida dentro del BottomSheet de opciones (3 puntos).
-
-- [x] Eliminar `botonBuscadorMovil` del header
-- [x] Añadir opción "Buscar" como primer item del menú de opciones
-- [x] Limpiar CSS asociado al botón de búsqueda móvil
-
----
-
-##### Orden de Implementación 10.8.9 ✅
-
-| Paso | Subtarea | Descripción              | Estado       |
-| ---- | -------- | ------------------------ | ------------ |
-| 1    | 10.8.9.1 | Eliminar encabezadoLogo  | ✅ Completado |
-| 2    | 10.8.9.2 | Quitar tooltips en móvil | ✅ Completado |
-| 3    | 10.8.9.3 | Mover búsqueda al menú   | ✅ Completado |
-
----
-
-
-#### 10.8.6 Modales y Botón Volver Compacto ✅
-
-**Objetivo:** Hacer más compacto el header de modales en móvil.  
-**Prioridad:** Media | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
----
-
-##### 10.8.6.1 Header Modal Compacto ✅
-
-**Implementado:** Layout tipo barra de navegación móvil.
-
-- [x] Reducir altura del header (de ~48px a ~40px)
-- [x] Botón "← Volver" más pequeño - solo icono sin texto
-- [x] Título con font-size reducido (12px con `--dashboard-tamanoMovilPequeno`)
-- [x] Quitar subtítulos o metadata del header
-
----
-
-##### 10.8.6.2 Layout del Header ✅
-
-**Implementado:** Estructura grid de 3 columnas `40px | 1fr | 40px`.
-
-```
-┌─────────────────────────────────────┐
-│ ←  │   Título del Modal    │ [   ] │
-└─────────────────────────────────────┘
-```
-
-- [x] Icono de volver (←) sin texto "Volver"
-- [x] Título centrado con truncamiento (ellipsis)
-- [x] Espacio reservado derecho para simetría
-- [x] CSS con grid-template-columns para layout consistente
-
----
-
-##### Orden de Implementación 10.8.6 ✅
-
-| Paso | Subtarea | Descripción            | Estado       |
-| ---- | -------- | ---------------------- | ------------ |
-| 1    | 10.8.6.1 | Header compacto 40px   | ✅ Completado |
-| 2    | 10.8.6.2 | Layout grid 3 columnas | ✅ Completado |
-| 3    | 10.8.6.3 | Eliminar PestanasModal | ✅ Completado |
-
----
-
-##### 10.8.6.3 Eliminar Pestañas Móvil (Código Muerto) ✅
-
-**Problema resuelto:** Las pestañas "Configuración" / "Chat / Historial" eran código muerto.  
-**Solución:** Eliminado `PestanasModal` de `PanelConfiguracionTarea` y `ModalHabito`.
-
-- [x] Eliminar importación y uso de `PestanasModal`
-- [x] Eliminar estado `pestanaActiva` de los componentes
-- [x] Actualizar CSS para ocultar columna derecha en móvil
-- [x] Simplificar: en móvil siempre se muestra solo la configuración
-
----
-
-#### 10.8.10 Formulario Compacto Móvil ✅
-
-**Objetivo:** Compactar la vista de propiedades del formulario de tarea/hábito para móvil.  
-**Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
-```
-┌─────────────────────────────────────┐
-│ Estado        ○ Pendiente          │
-├─────────────────────────────────────┤
-│ 🚨 Alta       ⚡ Bloqueante         │ ← Pills compactos en fila
-├─────────────────────────────────────┤
-│ Propiedades   📅 31 dic            │
-├─────────────────────────────────────┤
-│ Proyecto      📁 test proyecto      │
-├─────────────────────────────────────┤
-│ Repetición    🔁 Repetir            │
-├─────────────────────────────────────┤
-│ Etiquetas     + Etiqueta            │
-├─────────────────────────────────────┤
-│ Adjuntos      📎 Agregar            │
-└─────────────────────────────────────┘
-```
-
-- [x] **Layout compacto de propiedades:**
-  - [x] Reducir padding vertical entre filas (`espacioMovilXs`)
-  - [x] Labels más pequeños (`--dashboard-tamanoMuyPequeno`)
-  - [x] Pills de prioridad/urgencia más compactos (padding: 3px 8px)
-  - [x] Reducir gap entre elementos del formulario (`espacioMovilSm`)
-- [x] **Campos específicos:**
-  - [x] Título: font-size reducido a 1.25rem
-  - [x] Subtítulo: min-height 32px, font-size movil pequeño
-  - [x] Pills: font-size 9px (tamanoMuyPequeno), iconos 12px
-  - [x] Selector de icono: 32x32px (reducido de 40x40)
-  - [x] Avatares responsables: 20x20px (reducido de 24x24)
-- [x] **Variables CSS utilizadas:**
-  - [x] `--dashboard-espacioMovilSm` para padding
-  - [x] `--dashboard-tamanoMuyPequeno` para labels (9px)
-  - [x] `--dashboard-espacioMovilXs` para gaps mínimos
-
----
-
-#### 10.8.11 Modal con Chat Integrado en Móvil ✅
-
-**Objetivo:** Ocultar iconos del header modal en móvil y mostrar el chat/actividad inline al final del modal.  
-**Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
-```
-┌─────────────────────────────────────┐
-│ ←        Editar Tarea               │  ← Sin iconos de acciones
-├─────────────────────────────────────┤
-│                                     │
-│  [Formulario de propiedades]        │
-│                                     │
-├─────────────────────────────────────┤
-│  💬 Actividad                       │  ← Chat inline compacto
-│  ─────────────────────────────────  │
-│  Usuario: Comentario...             │
-│  Hace 2h                            │
-│  ─────────────────────────────────  │
-│  [Escribir comentario...]           │
-└─────────────────────────────────────┘
-```
-
-- [x] **Ocultar iconos del header modal en móvil:**
-  - [x] Ocultar `.modalAccionesEncabezado > *` via CSS en móvil
-  - [x] Mantener el espacio reservado para simetría del grid
-  - [x] Aplicar solo cuando `esMovil === true` (condicional en JSX)
-- [x] **Mostrar chat/actividad inline al final del modal:**
-  - [x] En móvil, renderizar `PanelChatHistorial` dentro del contenido del modal
-  - [x] Posicionar después de las propiedades del formulario (`.chatInlineMovil`)
-  - [x] Pasar prop `compacto={true}` para versión reducida
-- [x] **Estilos del chat compacto móvil:**
-  - [x] Altura máxima limitada (200px) con scroll interno
-  - [x] Input de comentario inline
-  - [x] Mensajes más pequeños (font-size 9px y 8px)
-  - [x] Separador visual antes del chat (border-top dashed)
-- [x] **Componentes afectados:**
-  - [x] `modal.css`: Estilos para ocultar acciones en móvil
-  - [x] `PanelConfiguracionTarea.tsx`: Renderizar chat inline en móvil
-  - [x] `PanelChatHistorial.tsx`: Añadida prop `compacto` con clase CSS
-  - [x] `movil.css`: Estilos `.chatInlineMovil` y `.panelChatHistorial--compacto`
-
----
-
-#### 10.8.12 Layout Listas Compactas Móvil
-
-**Objetivo:** Mejorar el layout de las listas de proyectos y hábitos en modo compacto móvil.  
-**Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
-##### 10.8.12.1 Proyectos - Layout 2 Filas ✅
-
-**Problema resuelto:** Los proyectos se mostraban en una sola fila horizontal, causando truncamiento excesivo del título.  
-**Solución:** Layout apilado de 2 filas implementado.
-
-```
-Antes (1 fila - mal):
-┌──────────────────────────────────────────────┐
-│ 📁 Título del proyec... │ 🟢 │ 75% │ 5/20 │ ⋮ │
-└──────────────────────────────────────────────┘
-
-Después (2 filas - bien):
-┌──────────────────────────────────────────────┐
-│ 📁 Título del proyecto completo              │
-│    🟢 Activo  │  📊 75%  │  📋 5/20          │
-└──────────────────────────────────────────────┘
-```
-
-- [x] Fila 1: Icono + Título completo (sin truncar, white-space normal)
-- [x] Fila 2: Badges en línea (estado, progreso, contador) con flex-wrap
-- [x] Ocultar columna de acciones (menú ⋮) en móvil
-- [x] Reducir padding entre filas para mantener compacto (espacioXs)
-
-##### 10.8.12.2 Tareas - Sin Cambios ✅
-
-**Estado:** ✅ Ya están bien  
-Las tareas actualmente tienen un layout adecuado para móvil. No requieren modificaciones.
-
-##### 10.8.12.3 Hábitos - Compactar Versión Móvil ✅
-
-**Problema resuelto:** La versión compacta de hábitos tenía demasiado espaciado en móvil.  
-**Solución:** Reducidos padding, tamaños de iconos y badges.
-
-- [x] Reducir padding vertical del item (espacioXs)
-- [x] Reducir tamaño del checkbox (16px)
-- [x] Compactar badge de racha (10px iconos, 2px gap)
-- [x] Ocultar columnas secundarias (inactividad, urgencia, acciones)
-- [x] Ocultar encabezado de tabla en móvil
-
-##### 10.8.12.4 CSS Modificado ✅
-
-- [x] `movil.css`: Reglas para `.proyectoItem` en móvil (layout 2 filas, flex-direction column)
-- [x] `movil.css`: Reglas para `.tablaFilaCompacta` (mayor compactación de hábitos)
-- [x] Ocultar `.proyectoAcciones`, `.accionesItem`, columnas secundarias en móvil
-
----
-
-#### 10.8.13 Configuración de Columnas Hábitos por Dispositivo ✅
-
-**Objetivo:** Separar la configuración de columnas visibles de hábitos entre móvil y desktop.  
-**Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
-**Problema resuelto:** La configuración de columnas era global, causando que columnas no relevantes ocuparan espacio en móvil.  
-**Solución:** Configuración separada por dispositivo con defaults optimizados.
-
-##### 10.8.13.1 Modificar Hook useConfiguracionHabitos ✅
-
-**Implementado:** El hook detecta el dispositivo y usa configuraciones separadas.
-
-- [x] Importar `useEsMovil` en el hook
-- [x] Definir `CONFIG_HABITOS_MOVIL_DEFECTO` con solo:
-  - `indice: true` (checkbox)
-  - `importancia: true` (badge prioridad)
-  - `historial: true` (actividad últimos días)
-  - Resto: `false`
-- [x] Definir `CONFIG_HABITOS_DESKTOP_DEFECTO` con las actuales
-- [x] Cargar/guardar en key diferente según `esMovil`
-- [x] Primera carga en móvil: aplicar defaults móvil automáticamente
-
-##### 10.8.13.2 Columnas Móvil por Defecto ✅
-
-**Layout implementado en móvil:**
-```
-┌────────────────────────────────────────────────┐
-│ ☑ │ Nombre del Hábito    │ ●○●●○ │ ALTA │
-└────────────────────────────────────────────────┘
-     ^                        ^       ^
-     checkbox                 historial  importancia
-```
-
-- [x] Solo 3 columnas visibles: checkbox, nombre+historial, importancia
-- [x] El grid se ajusta dinámicamente (sin columnas vacías)
-- [x] No mostrar: inactividad, urgencia, racha, acciones, frecuencia, tocaHoy
-
-##### 10.8.13.3 Persistencia Separada ✅
-
-- [x] Key móvil: `glory_config_habitos_movil`
-- [x] Key desktop: `glory_config_habitos_desktop`
-- [x] Al cambiar de dispositivo, cargar la config correspondiente
-- [x] El usuario puede personalizar cada una independientemente
-
-##### 10.8.13.4 Actualizar Componentes ✅
-
-- [x] `useConfiguracionHabitos.ts`: Detecta móvil, usa keys y defaults separados
-- [x] `ModalConfiguracionHabitos.tsx`: Muestra solo columnas relevantes en móvil, oculta tolerancia de urgencia
-- [x] El grid se ajusta automáticamente según columnas visibles (ya existente en `obtenerGridTemplate()`)
-
-##### Orden de Implementación 10.8.13 ✅
-
-| Paso | Subtarea  | Descripción                        | Estado       |
-| ---- | --------- | ---------------------------------- | ------------ |
-| 1    | 10.8.13.1 | Modificar hook con detección móvil | ✅ Completado |
-| 2    | 10.8.13.2 | Defaults móvil optimizados         | ✅ Completado |
-| 3    | 10.8.13.3 | Persistencia separada localStorage | ✅ Completado |
-| 4    | 10.8.13.4 | Actualizar componentes             | ✅ Completado |
-
----
-
-#### 10.8.7 Menús Contextuales Bottom Sheet ✅
-
-**Objetivo:** Los menús contextuales deben cubrir el ancho completo de la pantalla desde abajo.  
-**Estado:** ✅ Completado
-
-- [x] **Estilo BottomSheet para menús contextuales:**
-  - [x] `position: fixed; bottom: 0; left: 0; right: 0` (en `bottomSheet.css`)
-  - [x] `width: 100%` sin márgenes laterales
-  - [x] Border-radius 16px en esquinas superiores
-  - [x] Overlay oscuro detrás (`.bottomSheetOverlay`)
-- [x] **Animación:**
-  - [x] Slide-up desde abajo con `transform: translateY(100%)` → `translateY(0)`
-  - [x] Duración: 300ms con cubic-bezier
-  - [x] Cerrar con slide-down (drag-to-close) o tap en overlay
-- [x] **Contenido:**
-  - [x] Opciones con altura táctil mínima (`--dashboard-tamanoTactilMinimo: 44px`)
-  - [x] Iconos a la izquierda de cada opción
-  - [x] Separadores sutiles entre grupos
-  - [x] Safe area bottom con `env(safe-area-inset-bottom)`
-- [x] **Componentes migrados a `MenuContextualAdaptivo`:**
-  - [x] `TablaHabitos.tsx`: Menú contextual de hábitos
-  - [x] `TareaItem.tsx`: Menú contextual de tareas y hábitos
----
-
-#### 10.8.14 Limpieza Visual de Listas Móvil
-
-**Objetivo:** Simplificar la apariencia de las listas de tareas, hábitos y proyectos en móvil.  
-**Prioridad:** Alta | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
-##### 10.8.14.1 Ocultar Botones de Acciones en Tareas (Móvil) ✅
-
-**Problema resuelto:** Los botones de tuerca y papelera ocupaban espacio innecesario en móvil.  
-**Solución:** Ocultar `.tareaAccionesContenedor` en móvil - el menú contextual ya ofrece estas opciones.
-
-- [x] Añadir regla CSS para ocultar `.tareaAccionesContenedor` en `@media (max-width: 480px)`
-- [x] Verificar que el menú contextual (long-press) sigue funcionando
-
-##### 10.8.14.2 Eliminar Colores de Fondo en Hábitos (General) ✅
-
-**Problema resuelto:** Los fondos verde/amarillo en filas de hábitos (completado, toca hoy) eran visualmente ruidosos.  
-**Solución:** Eliminados colores de fondo, manteniendo solo indicadores sutiles (borde izquierdo, checkbox, badges).
-
-- [x] Revisar `.tablaFilaCompletada` - quitado fondo verde
-- [x] Revisar `.tablaFilaTocaHoy` - quitado fondo amarillo, mantenido borde sutil
-- [x] Mantener el estado visual mediante otros indicadores (checkbox, badges)
-- [x] Aplicar cambio globalmente (no solo móvil)
-
-##### 10.8.14.3 Reducir Padding Interno de Hábitos (Móvil) ✅
-
-**Problema resuelto:** Las filas de hábitos tenían demasiado espacio interno en móvil.  
-**Solución:** Compactado el padding de `.tablaFila` y `.tablaFilaCompacta` en móvil.
-
-- [x] Reducir padding de `.tablaFila` en móvil
-- [x] Reducir padding de `.tablaFilaCompacta` en móvil
-- [x] Ajustar gap entre elementos internos
-- [x] Verificar que el área táctil sigue siendo suficiente (mínimo 36px)
-
----
-
-#### 10.8.15 Estandarización de Botones "Añadir" (Global)
-
-**Objetivo:** Unificar visualmente los botones de añadir en todos los paneles.  
-**Prioridad:** Media | **Urgencia:** Normal  
-**Estado:** ✅ Completado
-
-**Problema resuelto:** Los botones de añadir eran inconsistentes:
-- Tareas: `+ nueva tarea`
-- Hábitos: `+ Añadir nuevo habito de seguimiento` → Ahora: `+ Añadir`
-- Proyectos: Sin botón visible
-
-**Solución:** Estilo CSS compacto unificado aplicado. Botones ocultos en móvil (FAB es suficiente).
-
-##### 10.8.15.1 Diseño Unificado ✅
-
-```
-┌─────────────────────────────────────┐
-│  + Añadir                           │  ← Botón compacto, texto corto
-└─────────────────────────────────────┘
-```
-
-- [x] Definir estilo unificado: texto pequeño, padding mínimo, borde sutil dashed
-- [x] Texto genérico: `+ Añadir` (el contexto está claro por el panel)
-- [x] Hover/active sutil con fondo
-
-##### 10.8.15.2 Implementar en Componentes ✅
-
-- [x] `TablaHabitos.tsx`: Texto acortado a `+ Añadir`, CSS actualizado en `.añadirHabito`
-- [x] Tareas: Mantiene su input inline (`tareaNuevoInline`) - ya estaba compacto
-
-##### 10.8.15.3 Ocultar en Móvil ✅
-
-- [x] El botón FAB central hace innecesarios estos botones en móvil
-- [x] Ocultados con `display: none` en móvil: `.añadirHabito`, `.tareaNuevoInline`, `.tareaNuevoBoton`
-
-##### Orden de Implementación 10.8.14-15 ✅
-
-| Paso | Subtarea  | Descripción                       | Estado       |
-| ---- | --------- | --------------------------------- | ------------ |
-| 1    | 10.8.14.1 | Ocultar acciones tareas en móvil  | ✅ Completado |
-| 2    | 10.8.14.2 | Eliminar fondos color en hábitos  | ✅ Completado |
-| 3    | 10.8.14.3 | Reducir padding hábitos en móvil  | ✅ Completado |
-| 4    | 10.8.15.1 | Diseñar botón añadir unificado    | ✅ Completado |
-| 5    | 10.8.15.2 | Implementar en todos los paneles  | ✅ Completado |
-| 6    | 10.8.15.3 | Ocultar en móvil si es redundante | ✅ Completado |
-
----
-
-#### 10.8.7 Header Móvil Ajustado
+#### 10.8.16 Header Móvil Ajustado (Pendiente)
 
 **Objetivo:** Adaptar el header móvil fijo para la nueva arquitectura.
 
@@ -760,32 +169,18 @@ Las tareas actualmente tienen un layout adecuado para móvil. No requieren modif
 
 ---
 
-### Orden de Tareas 10.8
-
-| Paso | Subtarea | Descripción                     | Prioridad |
-| ---- | -------- | ------------------------------- | --------- |
-| 1    | 10.8.1   | Sistema navegación por páginas  | Alta      |
-| 2    | 10.8.2   | Paneles fullscreen sin bordes   | Alta      |
-| 3    | 10.8.4   | Eliminar minimizar en móvil     | Media     |
-| 4    | 10.8.3   | Menú opciones unificado         | Media     |
-| 5    | 10.8.5   | Botón volver compacto           | Media     |
-| 6    | 10.8.6   | Menús contextuales bottom sheet | Alta      |
-| 7    | 10.8.7   | Header móvil ajustado           | Media     |
-
----
-
 ### Orden de Implementación Fase 10
 
-| Paso | Subfase | Descripción               | Estado        |
-| ---- | ------- | ------------------------- | ------------- |
-| 1    | 10.1    | Fundamentos CSS           | ✅ Completado  |
-| 2    | 10.2    | Componentes Adaptativos   | ✅ Completado  |
-| 3    | 10.3    | Header Móvil + Drawer     | ✅ Completado  |
-| 4    | 10.4    | Optimización WebView      | ✅ Completado  |
-| 5    | 10.5    | UX Mobile-First           | ✅ Completado  |
-| 6    | 10.6    | Navegación Inferior       | ✅ Completado  |
-| 7    | 10.7    | Preparación APK           | ⏳ Pendiente   |
-| 8    | 10.8    | Reestructuración UX Móvil | 🚧 EN PROGRESO |
+| Paso | Subfase | Descripción               | Estado       |
+| ---- | ------- | ------------------------- | ------------ |
+| 1    | 10.1    | Fundamentos CSS           | ✅ Completado |
+| 2    | 10.2    | Componentes Adaptativos   | ✅ Completado |
+| 3    | 10.3    | Header Móvil + Drawer     | ✅ Completado |
+| 4    | 10.4    | Optimización WebView      | ✅ Completado |
+| 5    | 10.5    | UX Mobile-First           | ✅ Completado |
+| 6    | 10.6    | Navegación Inferior       | ✅ Completado |
+| 7    | 10.7    | Preparación APK           | ⏳ Pendiente  |
+| 8    | 10.8    | Reestructuración UX Móvil | ✅ Completado |
 
 ---
 
@@ -841,6 +236,29 @@ Las tareas actualmente tienen un layout adecuado para móvil. No requieren modif
 ### Tareas Completadas Recientes ✅
 
 <details>
+<summary>Fase 10.8: Reestructuración UX Móvil (Enero 2026)</summary>
+
+| Tarea   | Descripción                                              |
+| ------- | -------------------------------------------------------- |
+| 10.8.1  | Sistema de Navegación por Páginas (5 botones inferiores) |
+| 10.8.2  | Paneles Fullscreen Sin Bordes                            |
+| 10.8.3  | Menú de Opciones Unificado (3 puntos → BottomSheet)      |
+| 10.8.4  | Eliminar Capacidad de Minimizar en Móvil                 |
+| 10.8.5  | Mejoras Visuales del Menú Opciones (iconos, compacto)    |
+| 10.8.6  | Modales con Header Compacto (40px, grid 3 columnas)      |
+| 10.8.7  | Menús Contextuales Bottom Sheet (drag-to-close)          |
+| 10.8.8  | Bugs: badge filtros, scroll innecesario                  |
+| 10.8.9  | Limpieza del Header (sin logo, tooltips, búsqueda)       |
+| 10.8.10 | Formulario Compacto Móvil (pills y padding reducido)     |
+| 10.8.11 | Modal con Chat Integrado Inline                          |
+| 10.8.12 | Layout Listas Compactas (proyectos 2 filas, hábitos)     |
+| 10.8.13 | Configuración de Columnas Hábitos por Dispositivo        |
+| 10.8.14 | Limpieza Visual de Listas                                |
+| 10.8.15 | Estandarización de Botones "Añadir"                      |
+
+</details>
+
+<details>
 <summary>Fase 10: Móvil/PWA (Enero 2026)</summary>
 
 | Tarea                                                        | Subfase |
@@ -882,9 +300,9 @@ Las tareas actualmente tienen un layout adecuado para móvil. No requieren modif
 ## Estado Actual
 
 **Fecha de inicio:** 2025-12-19  
-**Version:** v1.0.11-beta  
-**Ultima actualizacion:** 2026-01-11  
-**Estado:** Fase 9 COMPLETA - Fase 10 EN PROGRESO
+**Version:** v1.0.12-beta  
+**Ultima actualizacion:** 2026-01-16  
+**Estado:** Fase 10.8 COMPLETA - Queda pendiente 10.7 (APK) y 10.8.16 (Header dinámico)
 
 ## Funcionalidades Completadas
 

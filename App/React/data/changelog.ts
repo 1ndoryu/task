@@ -11,6 +11,30 @@ export interface Version {
 
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.12-beta',
+        fecha: '2026-01-16',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Navegación por páginas en móvil: cada panel es una página independiente'},
+            {tipo: 'nuevo', descripcion: 'NavegacionInferior con 5 botones: Tareas, Proyectos, FAB, Hábitos, Actividad'},
+            {tipo: 'nuevo', descripcion: 'Menú de opciones unificado (3 puntos) con BottomSheet en móvil'},
+            {tipo: 'nuevo', descripcion: 'Chat inline al final de modales en móvil (sin columna lateral)'},
+            {tipo: 'nuevo', descripcion: 'Configuración de columnas de hábitos separada por dispositivo'},
+            {tipo: 'nuevo', descripcion: 'Gesto drag-to-close en BottomSheet'},
+            {tipo: 'mejora', descripcion: 'Paneles fullscreen sin bordes ni sombras en móvil'},
+            {tipo: 'mejora', descripcion: 'Header modal compacto (40px) con layout grid 3 columnas'},
+            {tipo: 'mejora', descripcion: 'Formularios compactos: pills más pequeños, padding reducido'},
+            {tipo: 'mejora', descripcion: 'Proyectos en layout 2 filas: título completo + badges inline'},
+            {tipo: 'mejora', descripcion: 'Hábitos compactos: checkbox 16px, racha 10px, columnas optimizadas'},
+            {tipo: 'mejora', descripcion: 'Botones "Añadir" ocultos en móvil (FAB es suficiente)'},
+            {tipo: 'mejora', descripcion: 'Búsqueda movida al menú de opciones (3 puntos)'},
+            {tipo: 'mejora', descripcion: 'Iconos consistentes en opciones de ordenamiento'},
+            {tipo: 'arreglo', descripcion: 'Badge de filtros activos con color correcto (no rojo)'},
+            {tipo: 'arreglo', descripcion: 'Scroll innecesario en paneles con pocas tareas'},
+            {tipo: 'arreglo', descripcion: 'Tooltips deshabilitados en móvil'},
+            {tipo: 'arreglo', descripcion: 'Fondos de color eliminados en hábitos (interfieren con tema)'}
+        ]
+    },
+    {
         version: 'v1.0.11-beta',
         fecha: '2026-01-11',
         cambios: [
