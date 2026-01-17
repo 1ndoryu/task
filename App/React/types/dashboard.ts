@@ -80,6 +80,9 @@ export interface Habito {
     descripcion?: string;
     icono?: string;
     colorIcono?: string;
+    /* Estado de pausa: el habito no aparece en pendientes y la racha se congela */
+    pausado?: boolean;
+    fechaPausa?: string /* Fecha ISO de cuando se pauso el habito */;
 }
 
 /*

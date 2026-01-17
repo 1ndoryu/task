@@ -379,7 +379,9 @@
     background: var(--dashboard-superposicionClara);
     border: 1px solid var(--dashboard-bordeSutil);
     cursor: pointer;
-    transition: background var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        border-color var(--dashboard-transicionRapida);
 }
 
 .selectorIconoProyecto__trigger:hover {
@@ -432,7 +434,9 @@
     background: transparent;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: background var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        border-color var(--dashboard-transicionRapida);
 }
 
 .selectorIconoProyecto__opcion:hover {
@@ -461,7 +465,9 @@
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: border-color var(--dashboard-transicionRapida), transform var(--dashboard-transicionRapida);
+    transition:
+        border-color var(--dashboard-transicionRapida),
+        transform var(--dashboard-transicionRapida);
 }
 
 .selectorColores__opcion:hover {
@@ -554,6 +560,47 @@
     color: var(--dashboard-textoApagado);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: normal;
+}
+
+/* 
+ * BOTON PAUSA HABITO
+ * Estilo para el boton de pausar/reanudar habito (Fase 13)
+ */
+.botonPausaHabito {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 4px 10px;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonPausaHabito:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.botonPausaHabito--activo {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+}
+
+.botonPausaHabito--activo:hover {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.4);
+}
+
+.botonPausaHabito__fecha {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-left: var(--dashboard-espacioSm);
 }
 
 /* 

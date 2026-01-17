@@ -8,7 +8,7 @@
  */
 
 import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
-import type {Habito, Tarea, Proyecto, ConfiguracionDashboard, DatosNuevoHabito, DatosEdicionTarea} from 'si./types/dashboard';
+import type {Habito, Tarea, Proyecto, ConfiguracionDashboard, DatosNuevoHabito, DatosEdicionTarea} from '../types/dashboard';
 import {exportarDatos, importarDatos} from '../services/dataService';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from './useLocalStorage';
 import {useDeshacer} from './useDeshacer';
@@ -45,6 +45,7 @@ interface UseDashboardReturn {
     actualizarNotas: (valor: string) => void;
     toggleHabito: (id: number) => void;
     posponerHabito: (id: number) => void;
+    pausarHabito: (id: number) => void;
     /* Actualiza el historial de un hábito (para sincronizar con columna de actividad) */
     actualizarHistorialHabito: (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => void;
     crearHabito: (datos: DatosNuevoHabito) => void;
@@ -96,6 +97,7 @@ export function useDashboard(): UseDashboardReturn {
     const storeSetHabitos = useHabitosStore(state => state.setHabitos);
     const storeToggleHabito = useHabitosStore(state => state.toggleHabito);
     const storePosponerHabito = useHabitosStore(state => state.posponerHabito);
+    const storePausarHabito = useHabitosStore(state => state.pausarHabito);
     const storeCrearHabito = useHabitosStore(state => state.crearHabito);
     const storeEditarHabito = useHabitosStore(state => state.editarHabito);
     const storeEliminarHabito = useHabitosStore(state => state.eliminarHabito);
@@ -433,6 +435,31 @@ export function useDashboard(): UseDashboardReturn {
     );
 
     /*
+     * Pausar/Reanudar hábito usando el store de Zustand
+     */
+    const pausarHabito = useCallback(
+        (id: number) => {
+            const resultado = storePausarHabito(id);
+            if (!resultado) return;
+
+            const {accion, estadoAnterior} = resultado;
+
+            if (accion === 'pausado') {
+                mostrarMensaje(`"${estadoAnterior.nombre}" pausado`, 'exito');
+            } else {
+                mostrarMensaje(`"${estadoAnterior.nombre}" reanudado`, 'exito');
+            }
+
+            const mensaje = accion === 'pausado' ? `"${estadoAnterior.nombre}" pausado` : `"${estadoAnterior.nombre}" reanudado`;
+
+            registrarAccion(mensaje, () => {
+                storeRestaurarHabito(estadoAnterior);
+            });
+        },
+        [storePausarHabito, storeRestaurarHabito, registrarAccion, mostrarMensaje]
+    );
+
+    /*
      * Actualizar historial de hábito usando el store de Zustand
      */
     const actualizarHistorialHabito = useCallback(
@@ -487,6 +514,7 @@ export function useDashboard(): UseDashboardReturn {
         actualizarNotas,
         toggleHabito,
         posponerHabito,
+        pausarHabito,
         actualizarHistorialHabito,
         crearHabito,
         editarHabito,

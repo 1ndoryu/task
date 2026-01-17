@@ -308,7 +308,9 @@
     height: 100%;
     background-color: var(--dashboard-barraNormal);
     border-radius: 2px;
-    transition: width 0.3s ease, background-color 0.3s ease;
+    transition:
+        width 0.3s ease,
+        background-color 0.3s ease;
 }
 
 .barraRellenoAdvertencia {
@@ -571,4 +573,45 @@
 .tablaFilaCompacta {
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
     min-height: 40px;
+}
+
+/* 
+ * SECCION HABITOS PAUSADOS 
+ * Separador visual para agrupar habitos en pausa
+ */
+.tablaSeparadorPausados {
+    display: flex;
+    align-items: center;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    margin-top: var(--dashboard-espacioSm);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+}
+
+.tablaSeparadorPausados__texto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* 
+ * FILA PAUSADA 
+ * Estilo visual para habitos en pausa
+ */
+.tablaFilaPausada,
+.tablaFila[data-pausado='true'] {
+    opacity: 0.6;
+}
+
+.tablaFilaPausada:hover,
+.tablaFila[data-pausado='true']:hover {
+    opacity: 0.8;
+}
+
+.tablaFilaPausada .filaNombre,
+.tablaFila[data-pausado='true'] .filaNombre {
+    color: var(--dashboard-textoApagado);
 }

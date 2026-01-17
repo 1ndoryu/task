@@ -5,9 +5,11 @@
  *
  * Fase 9.5: Layout moderno con titulo limpio, propiedades compactas
  * Fase 9.7.7.4: Estandarizado con FilaPropiedades
+ * Fase 13: Soporte para pausar habitos
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, etc.)
  */
 
+import {Pause, Play} from 'lucide-react';
 import type {NivelImportancia, FrecuenciaHabito, Habito} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
 import type {EstadoHabito} from '../../shared';
@@ -32,6 +34,8 @@ interface FormularioHabitoModernoProps {
     /* Estado del dia (solo en modo edicion) */
     estadoHoy?: EstadoHabito;
     onEstadoChange?: (estado: EstadoHabito) => void;
+    /* Pausa (solo en modo edicion) */
+    onPausarHabito?: () => void;
     /* Habito original (para mapa de calor en modo edicion) */
     habito?: Habito;
     /* Modo */
@@ -39,7 +43,9 @@ interface FormularioHabitoModernoProps {
     errorNombre?: string;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, habito, modoEdicion = false, errorNombre}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre}: FormularioHabitoModernoProps): JSX.Element {
+    const estaPausado = habito?.pausado ?? false;
+
     return (
         <div id="formulario-habito-moderno" className="formularioProyectoModerno">
             {/* Icono del habito */}
@@ -71,6 +77,26 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             <FilaPropiedades etiqueta="Frecuencia">
                 <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onFrecuenciaChange} />
             </FilaPropiedades>
+
+            {/* Pausar habito (solo modo edicion) */}
+            {modoEdicion && onPausarHabito && (
+                <FilaPropiedades etiqueta="Pausar">
+                    <button type="button" className={`botonPausaHabito ${estaPausado ? 'botonPausaHabito--activo' : ''}`} onClick={onPausarHabito} title={estaPausado ? 'Reanudar habito' : 'Pausar habito'}>
+                        {estaPausado ? (
+                            <>
+                                <Play size={14} />
+                                <span>Reanudar</span>
+                            </>
+                        ) : (
+                            <>
+                                <Pause size={14} />
+                                <span>Pausar</span>
+                            </>
+                        )}
+                    </button>
+                    {estaPausado && habito?.fechaPausa && <span className="botonPausaHabito__fecha">desde {new Date(habito.fechaPausa).toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})}</span>}
+                </FilaPropiedades>
+            )}
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (

@@ -5,7 +5,7 @@
  */
 
 import {useState, useCallback, useMemo} from 'react';
-import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause} from 'lucide-react';
+import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause, Play} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {tocaHoy, describirFrecuencia, obtenerIntervaloFrecuencia, calcularUmbralInactividad} from '../../utils/frecuenciaHabitos';
@@ -27,6 +27,7 @@ interface TablaHabitosProps {
     onEditarHabito?: (habito: Habito) => void;
     onEliminarHabito?: (id: number) => void;
     onPosponerHabito?: (id: number) => void;
+    onPausarHabito?: (id: number) => void;
     onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
     configuracion?: ConfiguracionHabitos;
@@ -68,6 +69,7 @@ interface FilaHabitoProps {
     onEditar?: (habito: Habito) => void;
     onEliminar?: (id: number) => void;
     onPosponer?: (id: number) => void;
+    onPausar?: (id: number) => void;
     onMarcarDia?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDia?: (habitoId: number, fecha: string) => void;
     configuracion: ConfiguracionHabitos;
@@ -80,7 +82,7 @@ interface MenuContextualEstado {
     y: number;
 }
 
-function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onMarcarDia, onDesmarcarDia, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
+function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
     /* Advertencia de racha: mostrar cuando faltan pocos dias para perderla */
     const DIAS_ADVERTENCIA_RACHA = 2;
 
@@ -169,15 +171,19 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                 case 'posponer':
                     onPosponer?.(habito.id);
                     break;
+                case 'pausar':
+                    onPausar?.(habito.id);
+                    break;
                 case 'eliminar':
                     onEliminar?.(habito.id);
                     break;
             }
         },
-        [habito, onEditar, onToggle, onPosponer, onEliminar]
+        [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar]
     );
 
     /* Opciones del menu contextual */
+    const estaPausado = habito.pausado ?? false;
     const opcionesMenu: OpcionMenu[] = [
         {
             id: 'toggle',
@@ -188,6 +194,11 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             id: 'posponer',
             etiqueta: 'Posponer hoy',
             icono: <Calendar size={12} />
+        },
+        {
+            id: 'pausar',
+            etiqueta: estaPausado ? 'Reanudar habito' : 'Pausar habito',
+            icono: estaPausado ? <Play size={12} /> : <Pause size={12} />
         },
         {
             id: 'editar',
@@ -214,7 +225,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
     return (
         <>
-            <div className={`tablaFila tablaFilaEditable ${completadoHoy ? 'tablaFilaCompletada' : ''} ${configuracion.modoCompacto ? 'tablaFilaCompacta' : ''} ${habitoTocaHoy && !completadoHoy ? 'tablaFilaTocaHoy' : ''}`} onClick={manejarEditar} onContextMenu={manejarClickDerecho} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} style={estiloGrid}>
+            <div className={`tablaFila tablaFilaEditable ${completadoHoy ? 'tablaFilaCompletada' : ''} ${configuracion.modoCompacto ? 'tablaFilaCompacta' : ''} ${habitoTocaHoy && !completadoHoy ? 'tablaFilaTocaHoy' : ''} ${estaPausado ? 'tablaFilaPausada' : ''}`} onClick={manejarEditar} onContextMenu={manejarClickDerecho} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} style={estiloGrid}>
                 {/* Checkbox para completar rápidamente - Indice */}
                 {configuracion.columnasVisibles.indice && (
                     <div className="tablaColumnaCheckbox" onClick={manejarToggle}>
@@ -303,14 +314,21 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     );
 }
 
-export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
-    // Filtrar habitos segun configuracion
+export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onPausarHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
+    /* Filtrar habitos segun configuracion */
     const habitosVisibles = habitos.filter(habito => {
+        /* Ocultar habitos pausados (se muestran en seccion separada) */
+        if (habito.pausado) {
+            return false;
+        }
         if (configuracion.ocultarCompletadosHoy && fueCompletadoHoy(habito.ultimoCompletado)) {
             return false;
         }
         return true;
     });
+
+    /* Habitos pausados para mostrar en seccion separada */
+    const habitosPausados = habitos.filter(habito => habito.pausado);
 
     const obtenerGridTemplate = () => {
         const widths = [];
@@ -342,10 +360,22 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
                 {configuracion.columnasVisibles.acciones && <div className="tablaColumnaAcciones"></div>}
             </div>
 
-            {/* Filas de habitos */}
+            {/* Filas de habitos activos */}
             {habitosVisibles.map((habito, index) => (
-                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
+                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
             ))}
+
+            {/* Seccion de habitos pausados */}
+            {habitosPausados.length > 0 && (
+                <>
+                    <div className="tablaSeparadorPausados">
+                        <span className="tablaSeparadorPausados__texto">Pausados ({habitosPausados.length})</span>
+                    </div>
+                    {habitosPausados.map((habito, index) => (
+                        <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
+                    ))}
+                </>
+            )}
 
             {/* Añadir habito */}
             <div className="añadirHabito" onClick={onAñadirHabito}>

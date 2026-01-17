@@ -233,6 +233,45 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+## Fase 13: Pausar Hábitos
+
+**Objetivo:** Permitir al usuario pausar temporalmente un hábito sin eliminarlo ni afectar las estadísticas.  
+**Prioridad:** Media | **Urgencia:** Normal  
+**Estado:** ✅ Completado
+
+### 13.1 Modelo de Datos
+- [x] Agregar campo `pausado: boolean` al modelo de hábito
+- [x] Agregar campo `fechaPausa: Date | null` para registrar cuándo se pausó
+- [ ] Agregar campo `motivoPausa: string | null` (opcional, para contexto) - *Pendiente para siguiente iteración*
+- [ ] Actualizar API REST para soportar el nuevo estado - *Se sincroniza automáticamente via store*
+
+### 13.2 UI - Menú Contextual
+- [x] Agregar opción "Pausar hábito" / "Reanudar hábito" en el menú contextual del hábito
+- [x] Icono: ⏸️ para pausar, ▶️ para reanudar
+- [x] Feedback visual al usuario (toast/notificación)
+
+### 13.3 UI - Configuración del Hábito
+- [x] Agregar sección "Pausar" en el modal de configuración del hábito
+- [x] Botón para activar/desactivar pausa
+- [x] Mostrar fecha desde que está pausado si aplica
+
+### 13.4 Comportamiento de Hábitos Pausados
+- [x] Los hábitos pausados NO aparecen en la lista principal de pendientes
+- [x] Los hábitos pausados se muestran en una sección separada "Pausados"
+- [ ] Filtro en la lista de hábitos: "Mostrar pausados" / "Ocultar pausados" - *Pendiente*
+
+### 13.5 Indicadores Visuales
+- [x] Clase CSS `.tablaFilaPausada` con opacidad reducida
+- [x] Sección separada con contador de hábitos pausados
+- [x] Diferenciación clara entre hábitos activos y pausados en la tabla
+
+### 13.6 Integración Móvil
+- [x] Opción de pausar/reanudar en el menú contextual (BottomSheet adaptativo)
+- [x] Misma funcionalidad accesible desde configuración en móvil
+
+
+---
+
 ### Tareas Completadas Recientes ✅
 
 <details>
@@ -492,6 +531,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 | 10    | Versión Móvil (PWA)                      | 🚧 EN PROGRESO   |
 | 11    | Sistema de Notas Mejorado                | Media Prioridad |
 | 12    | Gestión de Tiempo (Time Tracking)        | Baja Prioridad  |
+| 13    | Pausar Hábitos                           | ✅ Completada    |
 | Extra | Scratchpad + File Manager                | Baja Prioridad  |
 | Extra | Compartir Hábitos                        | Baja Prioridad  |
 

@@ -26,11 +26,12 @@ interface ModalHabitoProps {
     estaAbierto: boolean;
     onCerrar: () => void;
     onGuardar: (datos: DatosFormulario) => void;
+    onPausarHabito?: (id: number) => void;
     habito?: Habito;
     participantes?: Participante[];
 }
 
-export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participantes = []}: ModalHabitoProps): JSX.Element | null {
+export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = []}: ModalHabitoProps): JSX.Element | null {
     const modoEdicion = !!habito;
 
     /* Estado local para edicion */
@@ -190,6 +191,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, habito, participa
                                     onFrecuenciaChange={setFrecuencia}
                                     estadoHoy={estadoHoy}
                                     onEstadoChange={manejarCambioEstado}
+                                    onPausarHabito={habito && onPausarHabito ? () => onPausarHabito(habito.id) : undefined}
                                     habito={habito}
                                     modoEdicion={true}
                                     errorNombre={errores.nombre}

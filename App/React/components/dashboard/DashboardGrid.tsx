@@ -71,8 +71,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
 
     const renderizarContenidoPanel = (panelId: PanelId): JSX.Element | null => {
         /* En móvil, no renderizamos handle de arrastre ni botón minimizar */
-        const renderHandleArrastre = (titulo?: string) => (esMovil ? null : <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />);
-        const handleMinimizarElement = esMovil ? null : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
+        const renderHandleArrastre = (titulo?: string) => (esMovil ? <></> : <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />);
+        const handleMinimizarElement = esMovil ? <></> : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
         /* Scratchpad tiene su propio sistema de resize interno y gestiona sus notas */
         if (panelId === 'scratchpad') {
@@ -90,7 +90,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         const panelesContenido: Partial<Record<PanelId, (alturaProps: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => JSX.Element>> = {
             focoPrioritario: ({altura, contenedorRef, esAuto}) => (
                 <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
-                    <PanelFocoPrioritario habitos={ordenHabitos.habitosOrdenados} modoOrdenHabitos={ordenHabitos.modoActual} opcionesOrdenHabitos={opciones.opcionesOrdenHabitos} configuracion={configHabitos.configuracion} onAbrirModalCrearHabito={() => modales.abrirCreacionRapida('habito')} onAbrirModalConfigHabitos={modales.abrirModalConfigHabitos} onToggleHabito={dashboard.toggleHabito} onEditarHabito={dashboard.abrirModalEditarHabito} onEliminarHabito={dashboard.eliminarHabito} onPosponerHabito={dashboard.posponerHabito} onMarcarDiaHabito={ctx.marcarDiaHabitoConSync} onDesmarcarDiaHabito={ctx.desmarcarDiaHabitoConSync} onCambiarModoHabitos={ordenHabitos.cambiarModo} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
+                    <PanelFocoPrioritario habitos={ordenHabitos.habitosOrdenados} modoOrdenHabitos={ordenHabitos.modoActual} opcionesOrdenHabitos={opciones.opcionesOrdenHabitos} configuracion={configHabitos.configuracion} onAbrirModalCrearHabito={() => modales.abrirCreacionRapida('habito')} onAbrirModalConfigHabitos={modales.abrirModalConfigHabitos} onToggleHabito={dashboard.toggleHabito} onEditarHabito={dashboard.abrirModalEditarHabito} onEliminarHabito={dashboard.eliminarHabito} onPosponerHabito={dashboard.posponerHabito} onPausarHabito={dashboard.pausarHabito} onMarcarDiaHabito={ctx.marcarDiaHabitoConSync} onDesmarcarDiaHabito={ctx.desmarcarDiaHabitoConSync} onCambiarModoHabitos={ordenHabitos.cambiarModo} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
                 </div>
             ),
             proyectos: ({altura, contenedorRef, esAuto}) => (

@@ -63,9 +63,10 @@ interface HabitosActions {
     editarHabito: (id: number, datos: DatosNuevoHabito) => void;
     eliminarHabito: (id: number) => Habito | null;
 
-    /* Toggle y posponer (día actual) */
+    /* Toggle, posponer y pausar (día actual) */
     toggleHabito: (id: number) => {accion: 'completado' | 'desmarcado'; estadoAnterior: Habito} | null;
     posponerHabito: (id: number) => {accion: 'pospuesto' | 'despospuesto'; estadoAnterior: Habito} | null;
+    pausarHabito: (id: number) => {accion: 'pausado' | 'reanudado'; estadoAnterior: Habito} | null;
 
     /* Historial retroactivo */
     marcarDia: (habitoId: number, fecha: string, estado: EstadoHabito) => Promise<boolean>;
@@ -314,6 +315,59 @@ export const useHabitosStore = create<HabitosStore>()(
                         registrarHabitoPospuesto(id);
 
                         return {accion: 'pospuesto', estadoAnterior};
+                    }
+                },
+
+                /* Pausar/Reanudar hábito */
+                pausarHabito: id => {
+                    const hoy = obtenerFechaHoy();
+                    const habito = get().habitos.find(h => h.id === id);
+
+                    if (!habito) return null;
+
+                    const estadoAnterior = {
+                        ...habito,
+                        pausado: habito.pausado,
+                        fechaPausa: habito.fechaPausa
+                    };
+                    const estaPausado = habito.pausado ?? false;
+
+                    if (estaPausado) {
+                        /* Reanudar habito */
+                        set(
+                            state => ({
+                                habitos: state.habitos.map(h => {
+                                    if (h.id !== id) return h;
+                                    return {
+                                        ...h,
+                                        pausado: false,
+                                        fechaPausa: undefined
+                                    };
+                                })
+                            }),
+                            false,
+                            'pausarHabito/reanudar'
+                        );
+
+                        return {accion: 'reanudado', estadoAnterior};
+                    } else {
+                        /* Pausar habito */
+                        set(
+                            state => ({
+                                habitos: state.habitos.map(h => {
+                                    if (h.id !== id) return h;
+                                    return {
+                                        ...h,
+                                        pausado: true,
+                                        fechaPausa: hoy
+                                    };
+                                })
+                            }),
+                            false,
+                            'pausarHabito/pausar'
+                        );
+
+                        return {accion: 'pausado', estadoAnterior};
                     }
                 },
 
@@ -733,6 +787,7 @@ export const habitosActions = {
     eliminarHabito: (id: number) => useHabitosStore.getState().eliminarHabito(id),
     toggleHabito: (id: number) => useHabitosStore.getState().toggleHabito(id),
     posponerHabito: (id: number) => useHabitosStore.getState().posponerHabito(id),
+    pausarHabito: (id: number) => useHabitosStore.getState().pausarHabito(id),
     marcarDia: (habitoId: number, fecha: string, estado: EstadoHabito) => useHabitosStore.getState().marcarDia(habitoId, fecha, estado),
     desmarcarDia: (habitoId: number, fecha: string) => useHabitosStore.getState().desmarcarDia(habitoId, fecha),
     actualizarHistorialHabito: (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => useHabitosStore.getState().actualizarHistorialHabito(id, fecha, estado),
