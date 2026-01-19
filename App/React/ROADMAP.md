@@ -304,16 +304,31 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - [x] Función `calcularDiasRetraso()` añadida para calcular diferencia entre fecha máxima y hoy.
 
 
-### 14.4 Mejoras de Interfaz (UI/UX) ✅ **COMPLETADA**
-- [x] **Bloqueo de Panel Expandido:**
-  - [x] Agregado botón "Candado" 🔒/🔓 en el header de paneles expandidos (`OverlayEnfoque.tsx`).
-  - [x] Funcionalidad: Si está activo, impide que el panel se cierre/colapse automáticamente al hacer click fuera.
-  - [x] Escape siempre cierra (incluso bloqueado) - por seguridad.
-  - [x] Estilos visuales: borde de acento cuando está bloqueado, iconos Lock/Unlock de Lucide.
-- [x] **Actividad y Días Libres:**
-  - [x] La columna de Actividad (5 días) ahora excluye visualmente los días libres (opacidad reducida).
-  - [x] Mejorada función `esFechaRelevante()` en `frecuenciaHabitos.ts` para aplicar a TODOS los tipos de frecuencia.
-  - [x] Los días libres se muestran con la clase `.historialHabitoDia--noRelevante` (opacidad 45%, no clickeables).
+### 14.4 Mejoras de Interfaz (UI/UX) 🚧 **PARCIALMENTE COMPLETADA**
+
+#### 14.4.1 Bloqueo de Panel Expandido ✅
+- [x] Agregado botón "Candado" 🔒/🔓 en header de paneles expandidos (`OverlayEnfoque.tsx`).
+- [x] Si está activo, impide que el panel se cierre al hacer click fuera.
+- [x] Escape siempre cierra (incluso bloqueado).
+- [x] Estilos visuales en `overlayEnfoque.css`.
+
+#### 14.4.2 Ocultar Días Libres en Columna Actividad (Pendiente)
+
+**Objetivo:** En la tabla de hábitos, la columna "Actividad" (5 días) debe ocultar los días donde el hábito NO tocaba hacerse según su frecuencia. Ejemplo: si un hábito es "cada 3 días" y lo completé el 16, los días 17 y 18 son "libres" (no deberían mostrarse o deberían verse con opacidad reducida).
+
+**Estado actual:**
+- El "Historial de cumplimiento" (en el modal de configuración del hábito, componente `MapaCalorHabito.tsx`) **SÍ funciona correctamente** - calcula los días libres basándose en el historial de completados.
+- La columna "Actividad" (componente `HistorialHabitoInline` en `TablaHabitos.tsx`) **NO funciona** para frecuencias `cadaXDias`, `semanal`, `mensual` - solo funciona para `diasEspecificos` (L, M, V).
+
+**El problema:**
+- `MapaCalorHabito.tsx` tiene acceso al historial completo y calcula correctamente: "busca el día completado más cercano anterior y verifica si han pasado suficientes días".
+- `HistorialHabitoInline` usa la función `esFechaRelevante()` que NO recibe el historial, solo `fechaCreacion`, lo cual no es suficiente.
+
+**Plan de implementación:**
+1. Extraer la lógica de días relevantes de `MapaCalorHabito.tsx` (líneas 338-375) a una función reutilizable en `frecuenciaHabitos.ts`.
+2. Crear función `esFechaRelevanteConHistorial(fecha, frecuencia, historialCompletados)`.
+3. Modificar `HistorialHabito.tsx` para usar esta nueva función, pasándole el historial que ya recibe como prop.
+4. Agregar opción de ocultar días libres (no solo reducir opacidad) si el usuario lo prefiere.
 
 
 ### 14.5 Planificación de Estructura (Sidebar)

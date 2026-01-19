@@ -93,16 +93,16 @@ function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, f
         const fechaStr = obtenerFechaLocalISO(fecha);
 
         /*
-         * Determinar si este día es relevante según la frecuencia del hábito
-         * Se usa fechaCreacion como referencia para calcular ciclos en frecuencias basadas en intervalos
+         * Determinar si este día es relevante según la frecuencia
          *
-         * Para 'diario': todos los días son relevantes
-         * Para 'diasEspecificos': solo L, M, V (o los días configurados)
-         * Para 'cadaXDias': solo días que caen en el ciclo (ej: cada 3 días desde creación)
-         * Para 'semanal': solo el día de la semana que corresponde
-         * Para 'mensual': basado en intervalo ideal del mes
+         * NOTA: Solo aplica para 'diasEspecificos' (ej: L, M, V) porque es determinístico.
+         * Para 'cadaXDias', 'semanal', 'mensual' se requiere un algoritmo más complejo
+         * que analice el historial de completados para determinar cuándo "tocaba" cada día.
+         *
+         * TODO: Implementar cálculo de días relevantes para frecuencias basadas en intervalos
+         * usando el historial de completados en lugar de fechaCreacion.
          */
-        const esRelevante = frecuencia ? esFechaRelevante(fechaStr, frecuencia, fechaCreacion) : true;
+        const esRelevante = frecuencia?.tipo === 'diasEspecificos' ? esFechaRelevante(fechaStr, frecuencia) : true;
 
         resumen.push({
             fecha: fechaStr,
