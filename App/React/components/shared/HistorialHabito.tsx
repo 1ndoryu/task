@@ -16,7 +16,7 @@
 
 import type {EstadoHabito} from '../../types/historialHabitos';
 import type {FrecuenciaHabito} from '../../types/dashboard';
-import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
+import {esFechaRelevante, esFechaRelevanteConHistorial} from '../../utils/frecuenciaHabitos';
 import {obtenerFechaLocalISO, obtenerFechaEfectiva} from '../../utils/fecha';
 
 /* Tipos */
@@ -75,42 +75,89 @@ const iconos = {
 
 /**
  * Genera el resumen de N días a partir del historial
+ *
+ * Comportamiento:
+ * - Siempre retorna exactamente `cantidadDias` días
+ * - Omite días libres (no relevantes según frecuencia) que NO fueron marcados
+ * - Incluye días libres que SÍ fueron marcados (completado/pospuesto/omitido)
+ * - Busca hacia atrás en el tiempo hasta completar los días necesarios
+ *
  * @param historial - Mapa de fecha -> estado
  * @param frecuencia - Frecuencia del hábito para determinar relevancia
- * @param fechaCreacion - Fecha de creación del hábito para calcular ciclos
+ * @param fechaCreacion - Fecha de creación del hábito (no usado actualmente)
  * @param cantidadDias - Número de días a mostrar (por defecto 5)
  */
 function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, frecuencia?: FrecuenciaHabito, fechaCreacion?: string, cantidadDias: number = 5): DiaResumen[] {
     const diasSemana = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
     /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
     const hoy = obtenerFechaEfectiva();
+    const hoyStr = obtenerFechaLocalISO(hoy);
 
     const resumen: DiaResumen[] = [];
 
-    for (let i = cantidadDias - 1; i >= 0; i--) {
+    /*
+     * Extraer historial de completados para calcular días libres
+     * Solo necesitamos las fechas con estado 'completado'
+     */
+    const historialCompletados = Object.entries(historial)
+        .filter(([, estado]) => estado === 'completado')
+        .map(([fecha]) => fecha);
+
+    /*
+     * Máximo de días a revisar hacia atrás para evitar loops infinitos
+     * 60 días debería ser suficiente para cualquier frecuencia
+     */
+    const maxDiasRevisar = 60;
+    let diasRevisados = 0;
+
+    /*
+     * Buscamos hacia atrás desde hoy hasta completar los días solicitados
+     * Un día se incluye si:
+     * 1. Es relevante según la frecuencia, O
+     * 2. Tiene un estado marcado (completado/pospuesto/omitido)
+     */
+    while (resumen.length < cantidadDias && diasRevisados < maxDiasRevisar) {
         const fecha = new Date(hoy);
-        fecha.setDate(fecha.getDate() - i);
+        fecha.setDate(fecha.getDate() - diasRevisados);
         const fechaStr = obtenerFechaLocalISO(fecha);
 
-        /*
-         * Determinar si este día es relevante según la frecuencia
-         *
-         * NOTA: Solo aplica para 'diasEspecificos' (ej: L, M, V) porque es determinístico.
-         * Para 'cadaXDias', 'semanal', 'mensual' se requiere un algoritmo más complejo
-         * que analice el historial de completados para determinar cuándo "tocaba" cada día.
-         *
-         * TODO: Implementar cálculo de días relevantes para frecuencias basadas en intervalos
-         * usando el historial de completados en lugar de fechaCreacion.
-         */
-        const esRelevante = frecuencia?.tipo === 'diasEspecificos' ? esFechaRelevante(fechaStr, frecuencia) : true;
+        /* Determinar si este día es relevante según la frecuencia */
+        let esRelevante = true;
 
-        resumen.push({
-            fecha: fechaStr,
-            diaSemana: diasSemana[fecha.getDay()],
-            estado: historial[fechaStr] || null,
-            esHoy: i === 0,
-            esRelevante
-        });
+        if (frecuencia) {
+            if (frecuencia.tipo === 'diasEspecificos') {
+                /* Para días específicos, solo verificar el día de la semana */
+                esRelevante = esFechaRelevante(fechaStr, frecuencia);
+            } else if (frecuencia.tipo !== 'diario') {
+                /*
+                 * Para cadaXDias, semanal, mensual: usar la nueva función
+                 * que calcula basándose en el historial de completados
+                 */
+                esRelevante = esFechaRelevanteConHistorial(fechaStr, frecuencia, historialCompletados);
+            }
+        }
+
+        /* Verificar si el día tiene un estado marcado */
+        const estadoDia = historial[fechaStr] || null;
+        const tieneMarcado = estadoDia !== null;
+
+        /*
+         * Incluir el día si:
+         * - Es relevante según la frecuencia, O
+         * - Fue marcado (aunque sea día libre, si el usuario lo marcó, mostrarlo)
+         */
+        if (esRelevante || tieneMarcado) {
+            /* Insertar al inicio para mantener orden cronológico (más antiguo primero) */
+            resumen.unshift({
+                fecha: fechaStr,
+                diaSemana: diasSemana[fecha.getDay()],
+                estado: estadoDia,
+                esHoy: fechaStr === hoyStr,
+                esRelevante
+            });
+        }
+
+        diasRevisados++;
     }
 
     return resumen;
@@ -138,11 +185,11 @@ function formatearFechaTooltip(fecha: string, estado: EstadoHabito | null, esRel
  * Componente principal de historial de hábito
  */
 export function HistorialHabito({resumen, historial, frecuencia, fechaCreacion, onClickDia, mostrarEtiquetas = false, compacto = true, habitoId, ocultarNoRelevantes = false, cantidadDias = 5}: HistorialHabitoProps): JSX.Element {
-    /* Usar resumen proporcionado o generarlo desde el historial */
-    const diasCompletos = resumen ?? (historial ? generarResumenDeHistorial(historial, frecuencia, fechaCreacion, cantidadDias) : []);
-
-    /* Filtrar días si se pide ocultar los no relevantes */
-    const dias = ocultarNoRelevantes ? diasCompletos.filter(d => d.esRelevante) : diasCompletos;
+    /*
+     * Usar resumen proporcionado o generarlo desde el historial
+     * generarResumenDeHistorial ya omite días libres sin marcar internamente
+     */
+    const dias = resumen ?? (historial ? generarResumenDeHistorial(historial, frecuencia, fechaCreacion, cantidadDias) : []);
 
     if (dias.length === 0) {
         return <div className="historialHabitoVacio">Sin datos</div>;

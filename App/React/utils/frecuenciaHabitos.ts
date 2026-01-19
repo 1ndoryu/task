@@ -319,3 +319,91 @@ export function generarFechasRelevantes(frecuencia: FrecuenciaHabito, cantidadDi
 
     return fechas;
 }
+
+/*
+ * Determina si una fecha específica es relevante para un hábito,
+ * basándose en el historial de completados en lugar de la fecha de creación.
+ *
+ * Para frecuencias 'cadaXDias', 'semanal', 'mensual':
+ * - Busca el día completado más cercano ANTES o IGUAL a la fecha evaluada
+ * - Si la diferencia de días es 0 (es el día marcado) o >= intervalo, es relevante
+ * - Los días entre marcados son "libres" y no son relevantes
+ *
+ * Para 'diasEspecificos': Solo días de la semana seleccionados son relevantes
+ * Para 'diario': Todos los días son relevantes
+ *
+ * @param fecha - Fecha a evaluar (YYYY-MM-DD)
+ * @param frecuencia - Configuración de frecuencia del hábito
+ * @param historialCompletados - Array de fechas completadas (YYYY-MM-DD) ordenadas
+ */
+export function esFechaRelevanteConHistorial(fecha: string, frecuencia: FrecuenciaHabito, historialCompletados: string[]): boolean {
+    const fechaDate = new Date(fecha + 'T12:00:00');
+
+    switch (frecuencia.tipo) {
+        case 'diario':
+            /* Todos los días son relevantes */
+            return true;
+
+        case 'diasEspecificos': {
+            /* Solo días de la semana seleccionados son relevantes */
+            const diaSemana = DIAS_JS_A_DIASEMANA[fechaDate.getDay()];
+            return (frecuencia.diasSemana || []).includes(diaSemana);
+        }
+
+        case 'cadaXDias':
+        case 'semanal':
+        case 'mensual': {
+            /* Calcular intervalo según el tipo de frecuencia */
+            let intervalo: number;
+            if (frecuencia.tipo === 'semanal') {
+                intervalo = 7;
+            } else if (frecuencia.tipo === 'cadaXDias') {
+                intervalo = frecuencia.cadaDias || 2;
+            } else {
+                /* mensual: dividir 30 días entre las veces al mes */
+                intervalo = Math.floor(30 / (frecuencia.vecesAlMes || 4));
+            }
+
+            /* Si no hay historial de completados, todos los días son relevantes */
+            if (!historialCompletados || historialCompletados.length === 0) {
+                return true;
+            }
+
+            /* Ordenar el historial (por si no viene ordenado) */
+            const fechasOrdenadas = [...historialCompletados].sort();
+
+            /*
+             * Encontrar la fecha completada más cercana ANTES o IGUAL a esta fecha
+             * Esto nos da el punto de referencia para calcular si "toca" hoy
+             */
+            let fechaReferenciaStr: string | null = null;
+            for (const fc of fechasOrdenadas) {
+                const fcDate = new Date(fc + 'T12:00:00');
+                if (fcDate <= fechaDate) {
+                    fechaReferenciaStr = fc;
+                } else {
+                    break;
+                }
+            }
+
+            if (fechaReferenciaStr) {
+                const refDate = new Date(fechaReferenciaStr + 'T12:00:00');
+                const diffDias = Math.floor((fechaDate.getTime() - refDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                /*
+                 * Es relevante si:
+                 * - diffDias === 0: Es el día marcado como completado
+                 * - diffDias >= intervalo: Ya pasó el intervalo, "toca" hacerlo
+                 * Los días con 0 < diffDias < intervalo son "libres"
+                 */
+                return diffDias === 0 || diffDias >= intervalo;
+            }
+
+            /* Si no hay fecha de referencia anterior, es relevante */
+            return true;
+        }
+
+        default:
+            return true;
+    }
+}

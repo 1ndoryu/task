@@ -312,23 +312,27 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Escape siempre cierra (incluso bloqueado).
 - [x] Estilos visuales en `overlayEnfoque.css`.
 
-#### 14.4.2 Ocultar Días Libres en Columna Actividad (Pendiente)
+#### 14.4.2 Ocultar Días Libres en Columna Actividad ✅ **COMPLETADA**
 
-**Objetivo:** En la tabla de hábitos, la columna "Actividad" (5 días) debe ocultar los días donde el hábito NO tocaba hacerse según su frecuencia. Ejemplo: si un hábito es "cada 3 días" y lo completé el 16, los días 17 y 18 son "libres" (no deberían mostrarse o deberían verse con opacidad reducida).
+**Objetivo:** En la tabla de hábitos, la columna "Actividad" (5 días) oculta los días donde el hábito NO tocaba hacerse según su frecuencia.
 
-**Estado actual:**
-- El "Historial de cumplimiento" (en el modal de configuración del hábito, componente `MapaCalorHabito.tsx`) **SÍ funciona correctamente** - calcula los días libres basándose en el historial de completados.
-- La columna "Actividad" (componente `HistorialHabitoInline` en `TablaHabitos.tsx`) **NO funciona** para frecuencias `cadaXDias`, `semanal`, `mensual` - solo funciona para `diasEspecificos` (L, M, V).
+**Implementación realizada (v1.0.14):**
 
-**El problema:**
-- `MapaCalorHabito.tsx` tiene acceso al historial completo y calcula correctamente: "busca el día completado más cercano anterior y verifica si han pasado suficientes días".
-- `HistorialHabitoInline` usa la función `esFechaRelevante()` que NO recibe el historial, solo `fechaCreacion`, lo cual no es suficiente.
+1. **Nueva función `esFechaRelevanteConHistorial()`** en `frecuenciaHabitos.ts`:
+   - Busca el día completado más cercano anterior en el historial
+   - Calcula si han pasado suficientes días según el intervalo de frecuencia
+   - Funciona para `cadaXDias`, `semanal`, `mensual` y `diasEspecificos`
 
-**Plan de implementación:**
-1. Extraer la lógica de días relevantes de `MapaCalorHabito.tsx` (líneas 338-375) a una función reutilizable en `frecuenciaHabitos.ts`.
-2. Crear función `esFechaRelevanteConHistorial(fecha, frecuencia, historialCompletados)`.
-3. Modificar `HistorialHabito.tsx` para usar esta nueva función, pasándole el historial que ya recibe como prop.
-4. Agregar opción de ocultar días libres (no solo reducir opacidad) si el usuario lo prefiere.
+2. **Modificada función `generarResumenDeHistorial()`** en `HistorialHabito.tsx`:
+   - Busca hacia atrás en el tiempo hasta encontrar exactamente 5 días relevantes
+   - Omite días libres sin marcar automáticamente
+   - **Incluye** días libres que SÍ fueron marcados (completado/pospuesto/omitido)
+   - Siempre retorna exactamente 5 días, buscando en hasta 60 días de historial
+
+3. **Comportamiento final:**
+   - Los días libres sin marcar **no aparecen** en la columna Actividad
+   - Si un día libre fue marcado manualmente, **sí aparece**
+   - Siempre se muestran exactamente 5 días de actividad
 
 
 ### 14.5 Planificación de Estructura (Sidebar)
