@@ -272,6 +272,52 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+## Fase 14: Mejoras de Configuración y UX (Enero 2026) 🌟 **NUEVA**
+
+**Objetivo:** Implementar personalización avanzada y refinar la experiencia de usuario basada en feedback reciente.  
+**Prioridad:** Alta | **Urgencia:** Alta
+
+### 14.1 Configuración de Jornada (Fin del Día) **PRIORITARIA**
+- [x] **Configuración de "Nuevo Día":**
+  - [x] Agregar opción global (persistente) para definir la hora de corte del día (ej. 06:00 AM).
+  - [x] Importante para usuarios nocturnos: las acciones realizadas a las 2 AM cuentan para el día anterior.
+  - [x] Ajustar lógica de cálculo de hábitos y tareas para respetar `HORA_FIN_DIA`.
+- [x] **Nueva Sección de Configuración:**
+  - [x] Agregar botón "Configuración" en el menú contextual del usuario (avatar).
+  - [x] Crear modal centralizado de preferencias de usuario.
+
+### 14.2 Refinamiento Visual de Hábitos
+- [ ] **Modo Compacto Mejorado:**
+  - [ ] Estandarizar tamaño de fuente (igual que vista normal, no más pequeño).
+  - [ ] Reducir padding lateral en celdas para aprovechar el espacio.
+  - [ ] Asegurar alineación vertical perfecta en fila compacta.
+
+### 14.3 Ordenamiento Inteligente 2.0
+- [ ] **Algoritmo de Prioridad Ponderada:**
+  - [ ] Mejorar lógica actual: Tareas antiguas deben pesar más.
+  - [ ] Fórmula propuesta: `Valor = PrioridadBase + (DiasRetraso * FactorPonderacion)`. (no se como funciona actualmente, pero esto es un borrador, la idea no es sobreescribir la logica sino mejorarla para tomar en cuenta los dias de retraso)
+  - [ ] Ejemplo: Una tarea media (prio 2) con 3 días de retraso > tarea media con 1 día de retraso.
+
+### 14.4 Mejoras de Interfaz (UI/UX)
+- [ ] **Bloqueo de Panel Expandido:**
+  - [ ] Agregar botón "Candado" 🔒 en el header de paneles expandidos.
+  - [ ] Funcionalidad: Si está activo, impide que el panel se cierre/colapse automáticamente al interactuar fuera.
+- [ ] **Actividad y Días Libres:**
+  - [ ] La columna/mapa de actividad debe excluir visualmente o lógicamente los días marcados como libres.
+
+### 14.5 Planificación de Estructura (Sidebar)
+- [ ] **Análisis de Navegación Lateral:**
+  - [ ] Evaluar implementación de sidebar fijo a la izquierda para escritorio.
+  - [ ] Objetivo: Soportar múltiples vistas futuras más allá del Dashboard (ej. Calendario completo, Wiki, Archivos).
+  - [ ] *Nota: Verificar consistencia con diseño actual tipo Dashboard único.*
+
+### 14.6 Deuda Técnica Visual
+- [ ] **Refactor CSS Perfil/Configuración:**
+  - [ ] Auditar `VistaPerfil` y modales de configuración.
+  - [ ] Eliminar estilos hardcodeados y aplicar variables `var(--...)` del sistema.
+
+---
+
 ### Tareas Completadas Recientes ✅
 
 <details>
@@ -532,6 +578,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 | 11    | Sistema de Notas Mejorado                | Media Prioridad |
 | 12    | Gestión de Tiempo (Time Tracking)        | Baja Prioridad  |
 | 13    | Pausar Hábitos                           | ✅ Completada    |
+| 14    | Mejoras Configuración y UX               | 🌟 NUEVA         |
 | Extra | Scratchpad + File Manager                | Baja Prioridad  |
 | Extra | Compartir Hábitos                        | Baja Prioridad  |
 

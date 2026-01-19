@@ -102,6 +102,7 @@
 
 /* Configuración MCP */
 @import './componentes/modalConfiguracionMCP.css';
+@import './componentes/modalConfiguracionUsuario.css';
 
 /* Overlay de Enfoque */
 @import './componentes/overlayEnfoque.css';

@@ -25,7 +25,7 @@ import {ModalNotificaciones} from '../notificaciones';
 import {ModalCompartir} from '../compartidos';
 import {ModalExperimentos} from '../experimentos/ModalExperimentos';
 import {ModalCreacionRapida} from './ModalCreacionRapida';
-import {ModalConfiguracionMCP} from '../configuracion';
+import {ModalConfiguracionMCP, ModalConfiguracionUsuario} from '../configuracion';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {AccionExperimento} from '../experimentos/ModalExperimentos';
@@ -155,6 +155,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modal de Configuración MCP */}
             <ModalConfiguracionMCP estaAbierto={modales.modalConfigMCPAbierto} onCerrar={modales.cerrarModalConfigMCP} />
+
+            {/* Modal Configuración Usuario */}
+            <ModalConfiguracionUsuario estaAbierto={modales.modalConfigUsuarioAbierto} onCerrar={modales.cerrarModalConfigUsuario} />
         </>
     );
 }

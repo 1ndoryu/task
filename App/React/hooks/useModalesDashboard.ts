@@ -103,6 +103,10 @@ interface UseModalesDashboardReturn {
     modalConfigMCPAbierto: boolean;
     abrirModalConfigMCP: () => void;
     cerrarModalConfigMCP: () => void;
+    /* Configuración Usuario */
+    modalConfigUsuarioAbierto: boolean;
+    abrirModalConfigUsuario: () => void;
+    cerrarModalConfigUsuario: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -146,6 +150,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalTemasAbierto, setModalTemasAbierto] = useState(false);
     /* Configuración MCP */
     const [modalConfigMCPAbierto, setModalConfigMCPAbierto] = useState(false);
+    /* Configuración Usuario */
+    const [modalConfigUsuarioAbierto, setModalConfigUsuarioAbierto] = useState(false);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -236,6 +242,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const abrirModalConfigMCP = useCallback(() => setModalConfigMCPAbierto(true), []);
     const cerrarModalConfigMCP = useCallback(() => setModalConfigMCPAbierto(false), []);
 
+    /* Handlers Configuración Usuario */
+    const abrirModalConfigUsuario = useCallback(() => setModalConfigUsuarioAbierto(true), []);
+    const cerrarModalConfigUsuario = useCallback(() => setModalConfigUsuarioAbierto(false), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -304,6 +314,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalTemas,
         modalConfigMCPAbierto,
         abrirModalConfigMCP,
-        cerrarModalConfigMCP
+        cerrarModalConfigMCP,
+        modalConfigUsuarioAbierto,
+        abrirModalConfigUsuario,
+        cerrarModalConfigUsuario
     };
 }

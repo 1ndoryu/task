@@ -4,6 +4,13 @@
  * Responsabilidad unica: operaciones de fecha para el dashboard
  */
 
+/* Configuracion global para el fin del dia (0-23) */
+let CONFIG_HORA_FIN_DIA = 0;
+
+export function configurarHoraFinDia(hora: number) {
+    CONFIG_HORA_FIN_DIA = hora;
+}
+
 /*
  * Convierte una fecha a formato ISO (YYYY-MM-DD) usando la zona horaria local
  * IMPORTANTE: Esta funcion NO usa toISOString() porque convierte a UTC,
@@ -19,10 +26,19 @@ export function obtenerFechaLocalISO(fecha: Date = new Date()): string {
 
 /*
  * Obtiene la fecha de hoy en formato ISO (YYYY-MM-DD)
- * Usado para comparaciones y registros de completados
+ * Usado para comparaciones y registros de completados.
+ * AHORA: Respeta la configuración de hora de fin del día.
+ * Si son las 2 AM y el fin del día es a las 4 AM, retorna la fecha de "ayer".
  */
 export function obtenerFechaHoy(): string {
-    return obtenerFechaLocalISO();
+    const ahora = new Date();
+
+    /* Si la hora actual es menor que el corte, restamos un día */
+    if (ahora.getHours() < CONFIG_HORA_FIN_DIA) {
+        ahora.setDate(ahora.getDate() - 1);
+    }
+
+    return obtenerFechaLocalISO(ahora);
 }
 
 /*

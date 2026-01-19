@@ -1,0 +1,101 @@
+/*
+ * Estilos para ModalConfiguracionUsuario
+ */
+
+.configuracionUsuarioDescripcion {
+    font-size: 13px; /* Valor aproximado para mejor lectura, ligeramente mayor que base (12px) */
+    color: var(--dashboard-textoSecundario);
+    margin-bottom: var(--dashboard-espacioLg); /* 12px */
+    line-height: 1.5;
+}
+
+.configuracionUsuarioControles {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioLg); /* 12px */
+}
+
+.configuracionUsuarioInputContenedor {
+    position: relative;
+    width: 140px; /* Ancho fijo reducido para que no se expanda */
+}
+
+.configuracionUsuarioInput {
+    width: 100%;
+    padding-left: 32px; /* Espacio para el icono */
+    padding-right: 42px; /* Espacio para el sufijo :00 */
+    background-color: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    height: 36px;
+    border-radius: var(--dashboard-radioSm);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    text-align: right; /* Alinear numero a la derecha cerca del :00 */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.configuracionUsuarioInput::-webkit-inner-spin-button,
+.configuracionUsuarioInput::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.configuracionUsuarioInput:hover {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.configuracionUsuarioInput:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 2px var(--dashboard-superposicionMedia);
+}
+
+.configuracionUsuarioSufijo {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    pointer-events: none;
+}
+
+.configuracionUsuarioIcono {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dashboard-textoApagado);
+    pointer-events: none;
+}
+
+.configuracionUsuarioInfo {
+    margin-top: var(--dashboard-espacioMd); /* 10px aprox */
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
+    background-color: var(--dashboard-fondoSecundario);
+    border-radius: var(--dashboard-radioMd); /* 6px si existe o 0 */
+    border: 1px solid var(--dashboard-bordeSutil);
+    font-size: var(--dashboard-tamanoPequeno); /* 12px */
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+}
+
+.configuracionUsuarioInfoIcono {
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+}
+
+.configuracionUsuarioInfoTexto {
+    color: var(--dashboard-textoSecundario);
+}
+
+.configuracionUsuarioInfoTexto strong {
+    color: var(--dashboard-textoNormal);
+    font-weight: 600;
+}
