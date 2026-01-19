@@ -14,7 +14,7 @@ import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
 import type {Habito, DatosNuevoHabito} from '../types/dashboard';
 import type {HistorialHabito, EstadoHabito, DiaHistorial, EstadisticasHabito} from '../types/historialHabitos';
-import {obtenerFechaHoy, calcularDiasDesde, fueCompletadoHoy, obtenerFechaLocalISO} from '../utils/fecha';
+import {obtenerFechaHoy, calcularDiasDesde, fueCompletadoHoy, obtenerFechaLocalISO, obtenerFechaEfectiva} from '../utils/fecha';
 import {registrarHabitoCumplido, registrarHabitoDesmarcado, registrarHabitoPospuesto} from '../services/actividadService';
 import {invalidarCache} from '../services/actividadStore';
 
@@ -744,7 +744,8 @@ export const useResumen7Dias = (habitoId: number): DiaHistorial[] => {
         if (!habito) return [];
 
         const dias: DiaHistorial[] = [];
-        const hoy = new Date();
+        /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+        const hoy = obtenerFechaEfectiva();
         const diasSemana = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 
         for (let i = 6; i >= 0; i--) {

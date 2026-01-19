@@ -5,7 +5,7 @@
  */
 
 import type {FrecuenciaHabito, DiaSemana} from '../types/dashboard';
-import {obtenerFechaLocalISO} from './fecha';
+import {obtenerFechaLocalISO, obtenerFechaEfectiva} from './fecha';
 
 /* Mapeo de dia de semana (0=domingo, 6=sabado) a DiaSemana */
 const DIAS_JS_A_DIASEMANA: DiaSemana[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
@@ -15,8 +15,8 @@ const DIAS_JS_A_DIASEMANA: DiaSemana[] = ['domingo', 'lunes', 'martes', 'miercol
  * y la fecha del ultimo completado
  */
 export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string): boolean {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
 
     switch (frecuencia.tipo) {
         case 'diario':
@@ -80,8 +80,7 @@ export function diasHastaProximaRepeticion(frecuencia: FrecuenciaHabito, ultimoC
         return 0;
     }
 
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const hoy = obtenerFechaEfectiva();
 
     if (!ultimoCompletado) return 0;
 
@@ -305,8 +304,8 @@ export function esFechaRelevante(fecha: string, frecuencia: FrecuenciaHabito, fe
  */
 export function generarFechasRelevantes(frecuencia: FrecuenciaHabito, cantidadDias: number = 7, fechaReferencia?: string): string[] {
     const fechas: string[] = [];
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
 
     for (let i = cantidadDias - 1; i >= 0; i--) {
         const fecha = new Date(hoy);

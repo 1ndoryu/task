@@ -13,7 +13,7 @@
 import {useMemo, useCallback, useEffect, useRef, useState} from 'react';
 import {useHabitosStore, useHabito} from '../../stores/habitosStore';
 import type {EstadoHabito} from '../../types/historialHabitos';
-import {obtenerFechaLocalISO} from '../../utils/fecha';
+import {obtenerFechaLocalISO, obtenerFechaEfectiva, obtenerFechaHoy} from '../../utils/fecha';
 import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 
@@ -42,8 +42,8 @@ const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'O
  */
 function generarFechasPeriodo(dias: number): string[] {
     const fechas: string[] = [];
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
 
     for (let i = dias - 1; i >= 0; i--) {
         const fecha = new Date(hoy);
@@ -99,18 +99,18 @@ function formatearFechaTooltip(fecha: string): string {
 }
 
 /**
- * Verifica si una fecha es hoy
+ * Verifica si una fecha es hoy (respeta hora de fin del día)
  */
 function esHoy(fecha: string): boolean {
-    return fecha === obtenerFechaLocalISO();
+    return fecha === obtenerFechaHoy();
 }
 
 /**
  * Verifica si una fecha es editable (puede ser hoy o pasado, no futuro)
  */
 function esEditable(fecha: string): boolean {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
     const fechaDate = new Date(fecha + 'T12:00:00');
     return fechaDate <= hoy;
 }

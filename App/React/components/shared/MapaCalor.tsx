@@ -9,7 +9,7 @@
  */
 
 import {useMemo, useRef, useState, useEffect, useCallback} from 'react';
-import {obtenerFechaLocalISO} from '../../utils/fecha';
+import {obtenerFechaLocalISO, obtenerFechaEfectiva, obtenerFechaHoy} from '../../utils/fecha';
 
 /* Tipos */
 export interface DatosHeatmapProps {
@@ -72,12 +72,12 @@ function generarRangoFechas(inicio: Date, fin: Date): string[] {
  * siempre se incluya en el rango (evita problemas de comparacion de milisegundos)
  */
 function calcularFechasPeriodo(periodo: string, diasAuto?: number): {inicio: Date; fin: Date} {
-    const fin = new Date();
-    /* Establecer fin al FINAL del dia de hoy (23:59:59.999) para que siempre se incluya */
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const fin = new Date(obtenerFechaEfectiva());
+    /* Establecer fin al FINAL del dia efectivo (23:59:59.999) para que siempre se incluya */
     fin.setHours(23, 59, 59, 999);
 
-    const inicio = new Date();
-    inicio.setHours(0, 0, 0, 0);
+    const inicio = obtenerFechaEfectiva();
 
     switch (periodo) {
         case 'auto':
@@ -255,8 +255,8 @@ export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titul
     /* Tamano de semana para calculos (celda + gap) */
     const tamanoSemana = TAMANO_CELDA[tamanoCelda] + GAP_CELDAS;
 
-    /* Fecha de hoy para dependencia del useMemo (se recalcula cuando cambia el dia) */
-    const fechaHoy = obtenerFechaLocalISO();
+    /* Fecha de hoy efectiva para dependencia del useMemo (respeta hora de fin del día) */
+    const fechaHoy = obtenerFechaHoy();
 
     /* Calcular el rango de fechas */
     const {fechas, semanas, mesesVisibles} = useMemo(() => {

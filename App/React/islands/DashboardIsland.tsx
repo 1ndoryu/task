@@ -6,6 +6,10 @@
  */
 
 import {useEffect} from 'react';
+
+/* Importar store de configuración temprano para inicializar horaFinDia antes que otros módulos */
+import '../stores/configuracionUsuarioStore';
+
 import {DashboardEncabezado, DashboardFooter, DashboardGrid, DashboardModales} from '../components/dashboard';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';

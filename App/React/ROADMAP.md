@@ -277,14 +277,17 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Objetivo:** Implementar personalización avanzada y refinar la experiencia de usuario basada en feedback reciente.  
 **Prioridad:** Alta | **Urgencia:** Alta
 
-### 14.1 Configuración de Jornada (Fin del Día) **PRIORITARIA**
+### 14.1 Configuración de Jornada (Fin del Día) ✅ **COMPLETADA**
 - [x] **Configuración de "Nuevo Día":**
   - [x] Agregar opción global (persistente) para definir la hora de corte del día (ej. 06:00 AM).
   - [x] Importante para usuarios nocturnos: las acciones realizadas a las 2 AM cuentan para el día anterior.
   - [x] Ajustar lógica de cálculo de hábitos y tareas para respetar `HORA_FIN_DIA`.
+  - [x] **Revisión (v1.0.13):** Centralizar lógica en `obtenerFechaEfectiva()` para que TODOS los componentes respeten la configuración.
 - [x] **Nueva Sección de Configuración:**
   - [x] Agregar botón "Configuración" en el menú contextual del usuario (avatar).
   - [x] Crear modal centralizado de preferencias de usuario.
+- [x] **Inicialización Inmediata:**
+  - [x] Leer configuración de localStorage antes de que el store se rehidrate para evitar race conditions.
 
 ### 14.2 Refinamiento Visual de Hábitos
 - [ ] **Modo Compacto Mejorado:**

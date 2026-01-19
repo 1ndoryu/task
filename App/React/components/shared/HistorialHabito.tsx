@@ -17,7 +17,7 @@
 import type {EstadoHabito} from '../../types/historialHabitos';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
-import {obtenerFechaLocalISO} from '../../utils/fecha';
+import {obtenerFechaLocalISO, obtenerFechaEfectiva} from '../../utils/fecha';
 
 /* Tipos */
 export interface DiaResumen {
@@ -82,8 +82,8 @@ const iconos = {
  */
 function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, frecuencia?: FrecuenciaHabito, fechaCreacion?: string, cantidadDias: number = 5): DiaResumen[] {
     const diasSemana = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
 
     const resumen: DiaResumen[] = [];
 

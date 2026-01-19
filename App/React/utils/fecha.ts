@@ -12,6 +12,20 @@ export function configurarHoraFinDia(hora: number) {
 }
 
 /*
+ * Obtiene un objeto Date ajustado según la configuración de hora de fin del día.
+ * Si la hora actual es menor que CONFIG_HORA_FIN_DIA, retorna la fecha del día anterior.
+ * Esta es la función base que deben usar TODAS las demás funciones de fecha.
+ */
+export function obtenerFechaEfectiva(): Date {
+    const ahora = new Date();
+    if (ahora.getHours() < CONFIG_HORA_FIN_DIA) {
+        ahora.setDate(ahora.getDate() - 1);
+    }
+    ahora.setHours(0, 0, 0, 0);
+    return ahora;
+}
+
+/*
  * Convierte una fecha a formato ISO (YYYY-MM-DD) usando la zona horaria local
  * IMPORTANTE: Esta funcion NO usa toISOString() porque convierte a UTC,
  * lo cual causa errores cuando la hora local es diferente al dia UTC.
@@ -27,30 +41,23 @@ export function obtenerFechaLocalISO(fecha: Date = new Date()): string {
 /*
  * Obtiene la fecha de hoy en formato ISO (YYYY-MM-DD)
  * Usado para comparaciones y registros de completados.
- * AHORA: Respeta la configuración de hora de fin del día.
+ * Respeta la configuración de hora de fin del día.
  * Si son las 2 AM y el fin del día es a las 4 AM, retorna la fecha de "ayer".
  */
 export function obtenerFechaHoy(): string {
-    const ahora = new Date();
-
-    /* Si la hora actual es menor que el corte, restamos un día */
-    if (ahora.getHours() < CONFIG_HORA_FIN_DIA) {
-        ahora.setDate(ahora.getDate() - 1);
-    }
-
-    return obtenerFechaLocalISO(ahora);
+    return obtenerFechaLocalISO(obtenerFechaEfectiva());
 }
 
 /*
  * Calcula los dias transcurridos desde una fecha ISO
  * Retorna 999 si no hay fecha (para ordenamiento)
+ * Respeta la configuración de hora de fin del día.
  */
 export function calcularDiasDesde(fechaIso: string | undefined): number {
     if (!fechaIso) return 999;
     const fecha = new Date(fechaIso);
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
     fecha.setHours(0, 0, 0, 0);
+    const hoy = obtenerFechaEfectiva();
     const diferencia = hoy.getTime() - fecha.getTime();
     return Math.floor(diferencia / (1000 * 60 * 60 * 24));
 }
@@ -125,12 +132,12 @@ export interface InfoUrgenciaFecha {
 /*
  * Calcula la urgencia de una fecha limite
  * Retorna null si no hay fecha
+ * Respeta la configuración de hora de fin del día.
  */
 export function calcularUrgenciaFechaLimite(fechaLimite: string | undefined): InfoUrgenciaFecha | null {
     if (!fechaLimite) return null;
 
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const hoy = obtenerFechaEfectiva();
     const fecha = new Date(fechaLimite);
     fecha.setHours(0, 0, 0, 0);
 

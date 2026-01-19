@@ -11,6 +11,25 @@ import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 import {configurarHoraFinDia} from '../utils/fecha';
 
+/*
+ * Inicialización inmediata: Leer la hora de fin del día directamente de localStorage
+ * para evitar race conditions antes de que el store se rehidrate completamente.
+ */
+function inicializarHoraFinDiaInmediatamente() {
+    try {
+        const stored = localStorage.getItem('glory-config-usuario');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.state && typeof parsed.state.horaFinDia === 'number') {
+                configurarHoraFinDia(parsed.state.horaFinDia);
+            }
+        }
+    } catch {
+        /* Si falla la lectura, mantener el valor por defecto (0) */
+    }
+}
+inicializarHoraFinDiaInmediatamente();
+
 interface ConfiguracionUsuarioState {
     horaFinDia: number; // 0 - 23 (hora de corte)
 }

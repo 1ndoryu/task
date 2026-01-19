@@ -6,6 +6,7 @@
 
 import {X, AlertCircle} from 'lucide-react';
 import {SeccionPanel} from './SeccionPanel';
+import {obtenerFechaEfectiva} from '../../utils/fecha';
 
 type EstadoFecha = 'vencida' | 'urgente' | 'proxima' | 'normal' | null;
 
@@ -20,8 +21,8 @@ interface CampoFechaLimiteProps {
 function calcularEstadoFecha(fecha: string): EstadoFecha {
     if (!fecha) return null;
 
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
     const fechaLimite = new Date(fecha);
     const diferenciaDias = Math.ceil((fechaLimite.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
