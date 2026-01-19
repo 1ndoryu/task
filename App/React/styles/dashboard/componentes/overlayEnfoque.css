@@ -72,6 +72,57 @@
     color: var(--dashboard-textoSecundario);
 }
 
+/* Contenedor de botones (bloqueo + cerrar) */
+.overlayEnfoqueBotones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* Estilo base para botón de bloqueo */
+.overlayEnfoqueBotonBloqueo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: var(--dashboard-transicionRapida);
+}
+
+.overlayEnfoqueBotonBloqueo:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+/* Estado activo del bloqueo */
+.overlayEnfoqueBotonBloqueo--activo {
+    color: var(--dashboard-acento);
+    background: var(--dashboard-acentoFondo);
+}
+
+.overlayEnfoqueBotonBloqueo--activo:hover {
+    background: var(--dashboard-acentoFondo);
+    color: var(--dashboard-acento);
+}
+
+/* Indicador visual cuando el overlay está bloqueado */
+.overlayEnfoque--bloqueado {
+    cursor: not-allowed;
+}
+
+.overlayEnfoque--bloqueado .overlayEnfoqueContenedor {
+    cursor: default;
+    box-shadow:
+        0 0 0 2px var(--dashboard-acento),
+        var(--dashboard-sombraFuerte);
+}
+
 .overlayEnfoqueBotonCerrar {
     display: flex;
     align-items: center;

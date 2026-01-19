@@ -4,10 +4,15 @@
  *
  * Muestra el fondo difuminado y renderiza el contenido del panel
  * centrado en la pantalla
+ *
+ * Funcionalidad de bloqueo:
+ * - Botón candado permite bloquear el panel
+ * - Cuando está bloqueado, click fuera NO cierra el panel
+ * - Escape siempre cierra (incluso bloqueado)
  */
 
-import {useEffect, useCallback} from 'react';
-import {X, Minimize2} from 'lucide-react';
+import {useEffect, useCallback, useState} from 'react';
+import {Minimize2, Lock, Unlock} from 'lucide-react';
 
 interface OverlayEnfoqueProps {
     estaActivo: boolean;
@@ -17,7 +22,17 @@ interface OverlayEnfoqueProps {
 }
 
 export function OverlayEnfoque({estaActivo, onCerrar, children, titulo}: OverlayEnfoqueProps): JSX.Element | null {
-    /* Cerrar con Escape */
+    /* Estado de bloqueo: si está bloqueado, click fuera no cierra */
+    const [bloqueado, setBloqueado] = useState(false);
+
+    /* Resetear bloqueo cuando se cierra el overlay */
+    useEffect(() => {
+        if (!estaActivo) {
+            setBloqueado(false);
+        }
+    }, [estaActivo]);
+
+    /* Cerrar con Escape (siempre funciona, incluso bloqueado) */
     const manejarTecla = useCallback(
         (evento: KeyboardEvent) => {
             if (evento.key === 'Escape') {
@@ -40,19 +55,31 @@ export function OverlayEnfoque({estaActivo, onCerrar, children, titulo}: Overlay
     if (!estaActivo) return null;
 
     const manejarClickOverlay = (evento: React.MouseEvent<HTMLDivElement>) => {
+        /* Si está bloqueado, no cerrar al hacer click fuera */
+        if (bloqueado) return;
+
         if (evento.target === evento.currentTarget) {
             onCerrar();
         }
     };
 
+    const toggleBloqueo = () => {
+        setBloqueado(prev => !prev);
+    };
+
     return (
-        <div id="overlay-enfoque" className="overlayEnfoque" onClick={manejarClickOverlay}>
+        <div id="overlay-enfoque" className={`overlayEnfoque ${bloqueado ? 'overlayEnfoque--bloqueado' : ''}`} onClick={manejarClickOverlay}>
             <div className="overlayEnfoqueContenedor">
                 <div className="overlayEnfoqueHeader">
                     {titulo && <span className="overlayEnfoqueTitulo">{titulo}</span>}
-                    <button className="overlayEnfoqueBotonCerrar" onClick={onCerrar} title="Salir del modo enfoque (Esc)" type="button">
-                        <Minimize2 size={16} />
-                    </button>
+                    <div className="overlayEnfoqueBotones">
+                        <button className={`overlayEnfoqueBotonBloqueo ${bloqueado ? 'overlayEnfoqueBotonBloqueo--activo' : ''}`} onClick={toggleBloqueo} title={bloqueado ? 'Desbloquear panel (permitir cierre al hacer click fuera)' : 'Bloquear panel (impedir cierre al hacer click fuera)'} type="button">
+                            {bloqueado ? <Lock size={14} /> : <Unlock size={14} />}
+                        </button>
+                        <button className="overlayEnfoqueBotonCerrar" onClick={onCerrar} title="Salir del modo enfoque (Esc)" type="button">
+                            <Minimize2 size={16} />
+                        </button>
+                    </div>
                 </div>
                 <div className="overlayEnfoqueContenido">{children}</div>
             </div>

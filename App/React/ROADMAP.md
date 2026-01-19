@@ -295,18 +295,26 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - [ ] Reducir padding lateral en celdas para aprovechar el espacio.
   - [ ] Asegurar alineación vertical perfecta en fila compacta.
 
-### 14.3 Ordenamiento Inteligente 2.0
-- [ ] **Algoritmo de Prioridad Ponderada:**
-  - [ ] Mejorar lógica actual: Tareas antiguas deben pesar más.
-  - [ ] Fórmula propuesta: `Valor = PrioridadBase + (DiasRetraso * FactorPonderacion)`. (no se como funciona actualmente, pero esto es un borrador, la idea no es sobreescribir la logica sino mejorarla para tomar en cuenta los dias de retraso)
-  - [ ] Ejemplo: Una tarea media (prio 2) con 3 días de retraso > tarea media con 1 día de retraso.
+### 14.3 Ordenamiento Inteligente 2.0 ✅ **COMPLETADA**
+- [x] **Algoritmo de Prioridad Ponderada:**
+  - [x] Se mejoró la lógica existente: Tareas vencidas con más días de retraso ahora pesan más.
+  - [x] Fórmula v6.0: `PesoTotal = Urgencia + Prioridad + Fecha + (DiasRetraso * 50)`.
+  - [x] Ejemplo: Una tarea media (prio 100) con 3 días de retraso = 100 + 150 = 250 vs tarea media con 1 día de retraso = 100 + 50 = 150.
+  - [x] Factor configurable: `FACTOR_PONDERACION_RETRASO = 50` puntos por día.
+  - [x] Función `calcularDiasRetraso()` añadida para calcular diferencia entre fecha máxima y hoy.
 
-### 14.4 Mejoras de Interfaz (UI/UX)
-- [ ] **Bloqueo de Panel Expandido:**
-  - [ ] Agregar botón "Candado" 🔒 en el header de paneles expandidos.
-  - [ ] Funcionalidad: Si está activo, impide que el panel se cierre/colapse automáticamente al interactuar fuera.
-- [ ] **Actividad y Días Libres:**
-  - [ ] La columna/mapa de actividad debe excluir visualmente o lógicamente los días marcados como libres.
+
+### 14.4 Mejoras de Interfaz (UI/UX) ✅ **COMPLETADA**
+- [x] **Bloqueo de Panel Expandido:**
+  - [x] Agregado botón "Candado" 🔒/🔓 en el header de paneles expandidos (`OverlayEnfoque.tsx`).
+  - [x] Funcionalidad: Si está activo, impide que el panel se cierre/colapse automáticamente al hacer click fuera.
+  - [x] Escape siempre cierra (incluso bloqueado) - por seguridad.
+  - [x] Estilos visuales: borde de acento cuando está bloqueado, iconos Lock/Unlock de Lucide.
+- [x] **Actividad y Días Libres:**
+  - [x] La columna de Actividad (5 días) ahora excluye visualmente los días libres (opacidad reducida).
+  - [x] Mejorada función `esFechaRelevante()` en `frecuenciaHabitos.ts` para aplicar a TODOS los tipos de frecuencia.
+  - [x] Los días libres se muestran con la clase `.historialHabitoDia--noRelevante` (opacidad 45%, no clickeables).
+
 
 ### 14.5 Planificación de Estructura (Sidebar)
 - [ ] **Análisis de Navegación Lateral:**

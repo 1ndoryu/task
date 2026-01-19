@@ -3,9 +3,13 @@
  * Permite ordenar por: manual (default), inteligente, fecha, prioridad
  * Respeta la jerarquía (ordena padres y ordena hijos internamente) o modo plano
  *
- * Formula inteligente (v5.5):
- * - Peso total = urgencia_peso + prioridad_peso + fecha_peso
+ * Formula inteligente (v6.0 - Ordenamiento Inteligente 2.0):
+ * - Peso total = urgencia_peso + prioridad_peso + fecha_peso + retraso_peso
+ * - retraso_peso = diasRetraso * FACTOR_PONDERACION_RETRASO
  * - Mayor peso = primero
+ *
+ * Esto hace que tareas antiguas vencidas pesen más:
+ * - Tarea media (prio 2) con 3 días de retraso > tarea media con 1 día de retraso
  */
 
 import {useMemo} from 'react';
@@ -23,12 +27,19 @@ export interface OpcionOrdenTarea {
 
 export const MODOS_ORDEN_TAREAS: OpcionOrdenTarea[] = [
     {id: 'manual', etiqueta: 'Manual', descripcion: 'Drag & Drop'},
-    {id: 'inteligente', etiqueta: 'Inteligente', descripcion: 'Urgencia + Prioridad + Fecha'},
+    {id: 'inteligente', etiqueta: 'Inteligente', descripcion: 'Urgencia + Prioridad + Fecha + Retraso'},
     {id: 'fecha', etiqueta: 'Fecha límite', descripcion: 'Vencimiento'},
     {id: 'prioridad', etiqueta: 'Prioridad', descripcion: 'Importancia'}
 ];
 
 const KEY_ORDEN_TAREAS = 'glory_orden_tareas';
+
+/*
+ * Factor de ponderación por día de retraso
+ * Cada día de retraso suma 50 puntos al peso total
+ * Esto permite que tareas "olvidadas" suban gradualmente en prioridad
+ */
+const FACTOR_PONDERACION_RETRASO = 50;
 
 /*
  * Pesos de urgencia (temporalidad)
@@ -58,6 +69,25 @@ const PESO_PRIORIDAD: Record<NivelPrioridad | 'default', number> = {
 };
 
 /*
+ * Calcula los días de retraso de una tarea vencida
+ * Retorna 0 si no está vencida o no tiene fecha
+ */
+const calcularDiasRetraso = (fechaMaxima?: string): number => {
+    if (!fechaMaxima) return 0;
+
+    const hoy = obtenerFechaHoy();
+    if (fechaMaxima >= hoy) return 0;
+
+    /* Calcular diferencia en días */
+    const fechaMax = new Date(fechaMaxima + 'T00:00:00');
+    const fechaHoy = new Date(hoy + 'T00:00:00');
+    const diffMs = fechaHoy.getTime() - fechaMax.getTime();
+    const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    return Math.max(0, diffDias);
+};
+
+/*
  * Calcula el peso de fecha según proximidad
  * Vencida: +400, Hoy: +300, Mañana: +200, Esta semana: +100, Sin fecha: 0
  */
@@ -78,13 +108,16 @@ const calcularPesoFecha = (fechaMaxima?: string): number => {
 
 /*
  * Calcula el peso total de una tarea para ordenamiento
+ * Fórmula v6.0: urgencia + prioridad + fecha + (diasRetraso * factor)
  */
 const calcularPesoTotal = (tarea: Tarea): number => {
     const pesoUrgencia = PESO_URGENCIA[tarea.urgencia || 'normal'];
     const pesoPrioridad = PESO_PRIORIDAD[tarea.prioridad || 'default'];
     const pesoFecha = calcularPesoFecha(tarea.configuracion?.fechaMaxima);
+    const diasRetraso = calcularDiasRetraso(tarea.configuracion?.fechaMaxima);
+    const pesoRetraso = diasRetraso * FACTOR_PONDERACION_RETRASO;
 
-    return pesoUrgencia + pesoPrioridad + pesoFecha;
+    return pesoUrgencia + pesoPrioridad + pesoFecha + pesoRetraso;
 };
 
 export function useOrdenarTareas(tareas: Tarea[]) {
