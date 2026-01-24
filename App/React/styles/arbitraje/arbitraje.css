@@ -64,6 +64,7 @@
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     padding: var(--dashboard-espacioMd);
+    overflow: hidden;
 }
 
 .tituloSeccion {
@@ -104,6 +105,8 @@
 
 .inputNumerico {
     flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
     background-color: var(--dashboard-fondoTerciario);
     border: 1px solid var(--dashboard-bordeSutil);
     color: var(--dashboard-textoActivo);
