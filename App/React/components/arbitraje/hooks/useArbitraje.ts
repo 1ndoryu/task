@@ -4,6 +4,7 @@
  */
 
 import {useState, useMemo} from 'react';
+import {useLocalStorage} from '../../../hooks/useLocalStorage';
 import type {RangoValor, TasasConversion, ResultadoEscenario, DetalleRuta, ModoSimulacion, EstadoViabilidad, SimulacionCiclos, ResultadoSimulacionEscenario} from '../types/arbitraje.types';
 
 interface UseArbitrajeReturn {
@@ -28,25 +29,39 @@ interface UseArbitrajeReturn {
 }
 
 export function useArbitraje(): UseArbitrajeReturn {
-    /* Estados para inputs de compra */
-    const [costoProducto, setCostoProducto] = useState<RangoValor>({min: 200, max: 200});
-    const [costoEnvio, setCostoEnvio] = useState<RangoValor>({min: 50, max: 100});
-
-    /* Estados para inputs de venta */
-    const [precioVenta, setPrecioVenta] = useState<RangoValor>({min: 300, max: 500});
-
-    /* Estados para tasas de conversión */
-    const [tasas, setTasas] = useState<TasasConversion>({
-        usdABs: 470,
-        bsAPaypal: 431,
-        usdtAPaypal: 0.996,
-        comisionBinance: 0.1,
-        comisionPaypal: 5.7 /* Comisión porcentual de PayPal al recibir fondos */
+    /* Estados para inputs de compra (Persistentes) */
+    const {valor: costoProducto, setValor: setCostoProducto} = useLocalStorage<RangoValor>('arbitraje_costoProducto', {
+        valorPorDefecto: {min: 200, max: 200}
     });
 
-    /* Estado para simulador de ciclos */
-    const [numeroCiclos, setNumeroCiclos] = useState(5);
-    const [modoSimulacion, setModoSimulacion] = useState<ModoSimulacion>('fijo');
+    const {valor: costoEnvio, setValor: setCostoEnvio} = useLocalStorage<RangoValor>('arbitraje_costoEnvio', {
+        valorPorDefecto: {min: 50, max: 100}
+    });
+
+    /* Estados para inputs de venta (Persistentes) */
+    const {valor: precioVenta, setValor: setPrecioVenta} = useLocalStorage<RangoValor>('arbitraje_precioVenta', {
+        valorPorDefecto: {min: 300, max: 500}
+    });
+
+    /* Estados para tasas de conversión (Persistentes) */
+    const {valor: tasas, setValor: setTasas} = useLocalStorage<TasasConversion>('arbitraje_tasas', {
+        valorPorDefecto: {
+            usdABs: 470,
+            bsAPaypal: 431,
+            usdtAPaypal: 0.996,
+            comisionBinance: 0.1,
+            comisionPaypal: 5.7
+        }
+    });
+
+    /* Estado para simulador de ciclos (Persistentes) */
+    const {valor: numeroCiclos, setValor: setNumeroCiclos} = useLocalStorage<number>('arbitraje_numeroCiclos', {
+        valorPorDefecto: 5
+    });
+
+    const {valor: modoSimulacion, setValor: setModoSimulacion} = useLocalStorage<ModoSimulacion>('arbitraje_modoSimulacion', {
+        valorPorDefecto: 'fijo'
+    });
 
     /* Cálculo de escenarios */
     const escenarios = useMemo((): ResultadoEscenario[] => {
