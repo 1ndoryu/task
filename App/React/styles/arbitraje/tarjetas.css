@@ -117,3 +117,50 @@
 .valorDetalle {
     color: var(--dashboard-textoSecundario);
 }
+
+/* Comparación de rutas dentro de tarjeta */
+.comparacionRutas {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin: var(--dashboard-espacioSm) 0;
+}
+
+.gananciaRuta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionClara);
+    border-radius: 4px;
+    text-align: center;
+    transition:
+        background-color 0.2s ease,
+        border 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.gananciaRuta.rutaMejor {
+    background-color: var(--dashboard-superposicionMedia);
+    border-color: var(--dashboard-estadoExito);
+}
+
+.etiquetaRuta {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    font-weight: 500;
+}
+
+.valorRuta {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+}
+
+.valorRuta.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.valorRuta.negativo {
+    color: var(--dashboard-estadoAlta);
+}

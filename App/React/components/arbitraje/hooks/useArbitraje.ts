@@ -40,7 +40,8 @@ export function useArbitraje(): UseArbitrajeReturn {
         usdABs: 470,
         bsAPaypal: 431,
         usdtAPaypal: 0.996,
-        comisionBinance: 0.1
+        comisionBinance: 0.1,
+        comisionPaypal: 5.7 /* Comisión porcentual de PayPal al recibir fondos */
     });
 
     /* Estado para simulador de ciclos */
@@ -58,7 +59,11 @@ export function useArbitraje(): UseArbitrajeReturn {
             const usdtObtenidos = bolivaresRutaA / tasas.usdABs;
             const comisionVentaUsdt = usdtObtenidos * (tasas.comisionBinance / 100);
             const usdtNeto = usdtObtenidos - comisionVentaUsdt;
-            const paypalRutaA = usdtNeto * tasas.usdtAPaypal;
+            /* Paso 1: Exchange USDT → USD PayPal (antes de comisión PayPal) */
+            const paypalBrutoRutaA = usdtNeto * tasas.usdtAPaypal;
+            /* Paso 2: PayPal cobra comisión sobre el monto recibido */
+            const comisionPaypalRutaA = paypalBrutoRutaA * (tasas.comisionPaypal / 100);
+            const paypalRutaA = paypalBrutoRutaA - comisionPaypalRutaA;
             const gananciaRutaA = paypalRutaA - costoTotal;
 
             const detalleRutaA: DetalleRuta = {
@@ -91,11 +96,19 @@ export function useArbitraje(): UseArbitrajeReturn {
                     {
                         descripcion: 'Vender USDT para PayPal (Binance P2P - Maker)',
                         entrada: usdtObtenidos,
-                        salida: paypalRutaA,
+                        salida: paypalBrutoRutaA,
                         unidadEntrada: 'USDT',
-                        unidadSalida: 'USD PayPal',
+                        unidadSalida: 'USD PayPal (bruto)',
                         tasa: `${tasas.usdtAPaypal} $/USDT`,
                         comision: comisionVentaUsdt
+                    },
+                    {
+                        descripcion: `Comisión PayPal (${tasas.comisionPaypal}%)`,
+                        entrada: paypalBrutoRutaA,
+                        salida: paypalRutaA,
+                        unidadEntrada: 'USD PayPal (bruto)',
+                        unidadSalida: 'USD PayPal (neto)',
+                        comision: comisionPaypalRutaA
                     }
                 ],
                 totalFinal: paypalRutaA,

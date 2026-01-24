@@ -13,6 +13,7 @@ export interface TasasConversion {
     bsAPaypal: number;
     usdtAPaypal: number;
     comisionBinance: number;
+    comisionPaypal: number; /* Porcentaje de comisión que cobra PayPal, ej: 5.7 */
 }
 
 export interface PasoConversion {
