@@ -1,0 +1,103 @@
+/*
+ * ESTILOS PANEL INPUTS - Calculadora de Arbitraje
+ * Panel lateral con inputs de costos, venta y tasas
+ */
+
+/* Panel de inputs */
+.panelInputs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Secciones de inputs */
+.seccionInputs {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+    overflow: hidden;
+}
+
+.tituloSeccion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--dashboard-espacioMd);
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.iconoSeccion {
+    opacity: 0.5;
+}
+
+/* Grupo de inputs con rango */
+.grupoInputRango {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.etiquetaInput {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.contenedorRango {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+}
+
+.inputNumerico {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    background-color: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    text-align: right;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.inputNumerico:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.inputNumerico::placeholder {
+    color: var(--dashboard-textoPlaceholder);
+}
+
+.separadorRango {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+/* Input simple (una sola columna) */
+.grupoInputSimple {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.inputConUnidad {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+.unidadInput {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 40px;
+}

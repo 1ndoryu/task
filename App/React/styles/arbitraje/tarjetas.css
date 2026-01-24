@@ -1,0 +1,119 @@
+/*
+ * ESTILOS TARJETAS ESCENARIOS - Calculadora de Arbitraje
+ * Tarjetas de escenario pesimista/realista/optimista
+ */
+
+/* Tarjetas de escenario */
+.tarjetasEscenarios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioMd);
+}
+
+@media (max-width: 700px) {
+    .tarjetasEscenarios {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tarjetaEscenario {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.tarjetaEscenario.escenarioPesimista {
+    border-left: 2px solid var(--dashboard-estadoAlta);
+}
+
+.tarjetaEscenario.escenarioRealista {
+    border-left: 2px solid var(--dashboard-estadoMedia);
+}
+
+.tarjetaEscenario.escenarioOptimista {
+    border-left: 2px solid var(--dashboard-estadoExito);
+}
+
+.cabeceraEscenario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nombreEscenario {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badgeEscenario {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: 2px 6px;
+    background-color: var(--dashboard-superposicionClara);
+}
+
+.badgePesimista {
+    color: var(--dashboard-estadoAlta);
+}
+
+.badgeRealista {
+    color: var(--dashboard-estadoMedia);
+}
+
+.badgeOptimista {
+    color: var(--dashboard-estadoExito);
+}
+
+/* Métricas principales */
+.metricaPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.valorMetrica {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+}
+
+.valorMetrica.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.valorMetrica.negativo {
+    color: var(--dashboard-estadoAlta);
+}
+
+.etiquetaMetrica {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Lista de detalles */
+.listaDetalles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+}
+
+.itemDetalle {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+.claveDetalle {
+    color: var(--dashboard-textoApagado);
+}
+
+.valorDetalle {
+    color: var(--dashboard-textoSecundario);
+}

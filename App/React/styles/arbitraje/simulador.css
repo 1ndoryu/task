@@ -1,0 +1,150 @@
+/*
+ * ESTILOS SIMULADOR - Calculadora de Arbitraje
+ * Simulador de ciclos de inversión
+ */
+
+/* Simulador de ciclos */
+.seccionSimulador {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+}
+
+.cabeceraSimulador {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.tituloSimulador {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.controlesSimulador {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+}
+
+.controlCiclos {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.inputCiclos {
+    width: 60px;
+    background-color: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    text-align: center;
+}
+
+.inputCiclos:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.etiquetaCiclos {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Toggle modo simulación */
+.toggleModoSimulacion {
+    display: flex;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.botonModo {
+    background-color: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonModo:first-child {
+    border-right: 1px solid var(--dashboard-bordeSutil);
+}
+
+.botonModo:hover {
+    color: var(--dashboard-textoNormal);
+}
+
+.botonModo.activo {
+    background-color: var(--dashboard-acento);
+    color: var(--dashboard-fondoPrincipal);
+}
+
+/* Descripción del modo */
+.descripcionModo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    margin-bottom: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionMuyClara);
+    border-left: 2px solid var(--dashboard-bordeSutil);
+}
+
+/* Resultados del simulador */
+.resultadosSimulador {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioMd);
+}
+
+@media (max-width: 600px) {
+    .resultadosSimulador {
+        grid-template-columns: 1fr;
+    }
+}
+
+.resultadoCiclo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionMuyClara);
+}
+
+.valorCiclo {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+}
+
+.valorCiclo.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.etiquetaCiclo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Capital final en resultados ciclo */
+.capitalFinalCiclo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: var(--dashboard-espacioXs);
+}
+
+/* Nota informativa */
+.notaInfo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+}

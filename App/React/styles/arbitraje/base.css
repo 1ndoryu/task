@@ -1,0 +1,37 @@
+/*
+ * ESTILOS BASE - Calculadora de Arbitraje
+ * Contenedor principal, layout y tipografía base
+ */
+
+/* Contenedor principal */
+.contenedorArbitraje {
+    min-height: 100vh;
+    background-color: var(--dashboard-fondoPrincipal);
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+/* Layout principal en grid */
+.layoutArbitraje {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--dashboard-espacioLg);
+}
+
+@media (max-width: 900px) {
+    .layoutArbitraje {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Panel de resultados */
+.panelResultados {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}

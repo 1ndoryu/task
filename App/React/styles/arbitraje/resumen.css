@@ -1,0 +1,36 @@
+/*
+ * ESTILOS RESUMEN RÁPIDO - Calculadora de Arbitraje
+ * Barra de métricas principales
+ */
+
+.resumenRapido {
+    display: flex;
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-superposicionMuyClara);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+@media (max-width: 600px) {
+    .resumenRapido {
+        flex-direction: column;
+        gap: var(--dashboard-espacioSm);
+    }
+}
+
+.itemResumen {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.valorResumen {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+}
+
+.etiquetaResumen {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}

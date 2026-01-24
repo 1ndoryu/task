@@ -1,0 +1,57 @@
+/*
+ * ESTILOS CABECERA - Calculadora de Arbitraje
+ * Header, título y estado de viabilidad
+ */
+
+/* Cabecera */
+.cabeceraArbitraje {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.tituloArbitraje {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.subtituloArbitraje {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Estado de viabilidad */
+.estadoViabilidad {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.estadoViabilidad.viable {
+    background-color: var(--dashboard-estadoExitoFondo);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
+    color: var(--dashboard-estadoExito);
+}
+
+.estadoViabilidad.riesgoso {
+    background-color: var(--dashboard-estadoMediaFondo);
+    border: 1px solid var(--dashboard-estadoMediaBorde);
+    color: var(--dashboard-estadoMedia);
+}
+
+.estadoViabilidad.noViable {
+    background-color: var(--dashboard-estadoAltaFondo);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAlta);
+}
+
+.iconoViabilidad {
+    font-size: 12px;
+}
