@@ -484,3 +484,282 @@
 .iconoViabilidad {
     font-size: 12px;
 }
+
+/* Botón de detalle en tabla */
+.botonDetalle {
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonDetalle:hover {
+    background-color: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoActivo);
+}
+
+/* Toggle modo simulación */
+.controlesSimulador {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+}
+
+.toggleModoSimulacion {
+    display: flex;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.botonModo {
+    background-color: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonModo:first-child {
+    border-right: 1px solid var(--dashboard-bordeSutil);
+}
+
+.botonModo:hover {
+    color: var(--dashboard-textoNormal);
+}
+
+.botonModo.activo {
+    background-color: var(--dashboard-acento);
+    color: var(--dashboard-fondoPrincipal);
+}
+
+/* Descripción del modo */
+.descripcionModo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    margin-bottom: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionMuyClara);
+    border-left: 2px solid var(--dashboard-bordeSutil);
+}
+
+/* Capital final en resultados ciclo */
+.capitalFinalCiclo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: var(--dashboard-espacioXs);
+}
+
+/* Modal de detalle de ruta */
+.fondoModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--dashboard-superposicionOscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--dashboard-espacioLg);
+}
+
+.contenidoModal {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--dashboard-sombraFuerte);
+}
+
+.cabeceraModal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    position: sticky;
+    top: 0;
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.tituloModal {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.subtituloModal {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    font-weight: normal;
+}
+
+.botonCerrarModal {
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    font-size: 14px;
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs);
+    line-height: 1;
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.botonCerrarModal:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+.cuerpoModal {
+    padding: var(--dashboard-espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Secciones del modal */
+.seccionModal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.tituloSeccionModal {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+    padding-bottom: var(--dashboard-espacioXs);
+    border-bottom: 1px dashed var(--dashboard-bordePunteado);
+}
+
+.filaModal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+.filaModal.filaInversion {
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+}
+
+.filaModal.filaGanancia {
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionClara);
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+}
+
+.claveModal {
+    color: var(--dashboard-textoApagado);
+}
+
+.valorModal {
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+.valorModal.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.valorModal.negativo {
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Lista de pasos de conversión */
+.listaPasos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.pasoConversion {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionMuyClara);
+    border-left: 2px solid var(--dashboard-bordeSutil);
+}
+
+.numeroPaso {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.contenidoPaso {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    flex: 1;
+    min-width: 0;
+}
+
+.descripcionPaso {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+}
+
+.detallesPaso {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+.entradaPaso {
+    color: var(--dashboard-textoApagado);
+}
+
+.flechaPaso {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.salidaPaso {
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+.tasaPaso {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    background-color: var(--dashboard-superposicionClara);
+    padding: 1px 4px;
+}
+
+.comisionPaso {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Sección resultado final en modal */
+.seccionModal.seccionResultado {
+    background-color: var(--dashboard-superposicionMuyClara);
+    padding: var(--dashboard-espacioMd);
+    margin-top: var(--dashboard-espacioSm);
+}
