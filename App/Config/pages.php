@@ -42,3 +42,12 @@ PageManager::reactPage('prueba-ocp', 'PaginaPruebaIsland', [
     'titulo' => 'Sistema OCP Funcionando',
     'mensaje' => 'Esta página fue creada usando el nuevo sistema de auto-registro.'
 ]);
+
+/*
+ * CALCULADORA DE ARBITRAJE
+ * Herramienta para calcular viabilidad de compra/venta internacional
+ * Compara rutas de conversión USD → Bs → USDT/PayPal
+ */
+PageManager::reactPage('arbitraje', 'ArbitrajeIsland', [
+    'titulo' => 'Calculadora de Arbitraje'
+]);

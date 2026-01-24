@@ -23,13 +23,17 @@ import {registrarIsland, marcarIslandsInicializadas} from './registroIslands';
 
 import {DashboardIsland} from '../islands/DashboardIsland';
 import {PaginaPruebaIsland} from '../islands/PaginaPruebaIsland';
+import {ArbitrajeIsland} from '../islands/ArbitrajeIsland';
 
 /* Estilos específicos de islands */
 import '../styles/prueba/paginaPrueba.css';
+import '../styles/arbitraje/arbitraje.css';
 
 registrarIsland('DashboardIsland', DashboardIsland, 'Panel principal de productividad con tareas, hábitos y notas');
 
 registrarIsland('PaginaPruebaIsland', PaginaPruebaIsland, 'Página de prueba para validar el sistema OCP de auto-registro');
+
+registrarIsland('ArbitrajeIsland', ArbitrajeIsland, 'Calculadora de arbitraje para compra/venta internacional con conversión de divisas');
 
 /* ============================================
  * TO-DO: Futuras islands se agregan aquí

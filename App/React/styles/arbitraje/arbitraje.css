@@ -1,0 +1,483 @@
+/*
+ * ESTILOS CALCULADORA DE ARBITRAJE
+ * Diseño minimalista estilo terminal
+ * Usa variables de dashboard/variables.css
+ */
+
+/* Contenedor principal */
+.contenedorArbitraje {
+    min-height: 100vh;
+    background-color: var(--dashboard-fondoPrincipal);
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+/* Cabecera */
+.cabeceraArbitraje {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.tituloArbitraje {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.subtituloArbitraje {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Layout principal en grid */
+.layoutArbitraje {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--dashboard-espacioLg);
+}
+
+@media (max-width: 900px) {
+    .layoutArbitraje {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Panel de inputs */
+.panelInputs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Secciones de inputs */
+.seccionInputs {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+}
+
+.tituloSeccion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--dashboard-espacioMd);
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.iconoSeccion {
+    opacity: 0.5;
+}
+
+/* Grupo de inputs con rango */
+.grupoInputRango {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.etiquetaInput {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.contenedorRango {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+}
+
+.inputNumerico {
+    flex: 1;
+    background-color: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    text-align: right;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.inputNumerico:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.inputNumerico::placeholder {
+    color: var(--dashboard-textoPlaceholder);
+}
+
+.separadorRango {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+/* Input simple (una sola columna) */
+.grupoInputSimple {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.inputConUnidad {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+.unidadInput {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 40px;
+}
+
+/* Panel de resultados */
+.panelResultados {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Tarjetas de escenario */
+.tarjetasEscenarios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioMd);
+}
+
+@media (max-width: 700px) {
+    .tarjetasEscenarios {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tarjetaEscenario {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.tarjetaEscenario.escenarioPesimista {
+    border-left: 2px solid var(--dashboard-estadoAlta);
+}
+
+.tarjetaEscenario.escenarioRealista {
+    border-left: 2px solid var(--dashboard-estadoMedia);
+}
+
+.tarjetaEscenario.escenarioOptimista {
+    border-left: 2px solid var(--dashboard-estadoExito);
+}
+
+.cabeceraEscenario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nombreEscenario {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badgeEscenario {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: 2px 6px;
+    background-color: var(--dashboard-superposicionClara);
+}
+
+.badgePesimista {
+    color: var(--dashboard-estadoAlta);
+}
+
+.badgeRealista {
+    color: var(--dashboard-estadoMedia);
+}
+
+.badgeOptimista {
+    color: var(--dashboard-estadoExito);
+}
+
+/* Métricas principales */
+.metricaPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.valorMetrica {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+}
+
+.valorMetrica.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.valorMetrica.negativo {
+    color: var(--dashboard-estadoAlta);
+}
+
+.etiquetaMetrica {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Lista de detalles */
+.listaDetalles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+}
+
+.itemDetalle {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+.claveDetalle {
+    color: var(--dashboard-textoApagado);
+}
+
+.valorDetalle {
+    color: var(--dashboard-textoSecundario);
+}
+
+/* Comparación de rutas */
+.seccionComparacion {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+}
+
+.tituloComparacion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.tablaComparacion {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tablaComparacion th,
+.tablaComparacion td {
+    padding: var(--dashboard-espacioSm);
+    text-align: left;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.tablaComparacion th {
+    color: var(--dashboard-textoApagado);
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.tablaComparacion td {
+    color: var(--dashboard-textoNormal);
+}
+
+.rutaGanadora {
+    color: var(--dashboard-estadoExito);
+    font-weight: 500;
+}
+
+.rutaPerdedora {
+    color: var(--dashboard-textoApagado);
+}
+
+.indicadorMejor {
+    display: inline-block;
+    margin-left: var(--dashboard-espacioXs);
+    font-size: 8px;
+    color: var(--dashboard-estadoExito);
+}
+
+/* Simulador de ciclos */
+.seccionSimulador {
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioMd);
+}
+
+.cabeceraSimulador {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.tituloSimulador {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.controlCiclos {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.inputCiclos {
+    width: 60px;
+    background-color: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    text-align: center;
+}
+
+.inputCiclos:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.etiquetaCiclos {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Resultados del simulador */
+.resultadosSimulador {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioMd);
+}
+
+@media (max-width: 600px) {
+    .resultadosSimulador {
+        grid-template-columns: 1fr;
+    }
+}
+
+.resultadoCiclo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-superposicionMuyClara);
+}
+
+.valorCiclo {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+}
+
+.valorCiclo.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.etiquetaCiclo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Nota informativa */
+.notaInfo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+}
+
+/* Resumen rápido */
+.resumenRapido {
+    display: flex;
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-superposicionMuyClara);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+@media (max-width: 600px) {
+    .resumenRapido {
+        flex-direction: column;
+        gap: var(--dashboard-espacioSm);
+    }
+}
+
+.itemResumen {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.valorResumen {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+}
+
+.etiquetaResumen {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Estado de viabilidad */
+.estadoViabilidad {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.estadoViabilidad.viable {
+    background-color: var(--dashboard-estadoExitoFondo);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
+    color: var(--dashboard-estadoExito);
+}
+
+.estadoViabilidad.riesgoso {
+    background-color: var(--dashboard-estadoMediaFondo);
+    border: 1px solid var(--dashboard-estadoMediaBorde);
+    color: var(--dashboard-estadoMedia);
+}
+
+.estadoViabilidad.noViable {
+    background-color: var(--dashboard-estadoAltaFondo);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAlta);
+}
+
+.iconoViabilidad {
+    font-size: 12px;
+}
