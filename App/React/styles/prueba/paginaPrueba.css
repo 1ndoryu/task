@@ -1,0 +1,166 @@
+/*
+ * paginaPrueba.css
+ * Estilos para la página de prueba del sistema OCP
+ */
+
+.contenedorPrueba {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--espacio-xl, 2rem);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.tarjetaPrueba {
+    max-width: 600px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.cabeceraPrueba {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--espacio-lg, 1.5rem);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tituloPrueba {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.horaPrueba {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    font-family: monospace;
+}
+
+.contenidoPrueba {
+    padding: var(--espacio-lg, 1.5rem);
+}
+
+.mensajePrueba {
+    font-size: 1rem;
+    color: #e2e8f0;
+    margin-bottom: var(--espacio-lg, 1.5rem);
+    line-height: 1.6;
+}
+
+.seccionContador {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacio-md, 1rem);
+    padding: var(--espacio-lg, 1.5rem);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    margin-bottom: var(--espacio-lg, 1.5rem);
+}
+
+.etiquetaContador {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.controlesContador {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-md, 1rem);
+}
+
+.botonContador {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.botonContador:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.botonDecrementar:hover {
+    border-color: #fc8181;
+    color: #fc8181;
+}
+
+.botonIncrementar:hover {
+    border-color: #68d391;
+    color: #68d391;
+}
+
+.valorContador {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 80px;
+    text-align: center;
+    font-family: monospace;
+}
+
+.infoSistema {
+    padding: var(--espacio-md, 1rem);
+    background: rgba(72, 187, 120, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(72, 187, 120, 0.2);
+}
+
+.subtituloInfo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #68d391;
+    margin: 0 0 var(--espacio-sm, 0.5rem) 0;
+}
+
+.listaValidacion {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.itemValidacion {
+    padding: var(--espacio-xs, 0.25rem) 0;
+    font-size: 0.875rem;
+    color: #a0aec0;
+}
+
+.itemValidacion.validado {
+    color: #68d391;
+}
+
+.piePrueba {
+    padding: var(--espacio-md, 1rem) var(--espacio-lg, 1.5rem);
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.notaPie {
+    font-size: 0.75rem;
+    color: #718096;
+    margin: 0;
+    text-align: center;
+    line-height: 1.5;
+}

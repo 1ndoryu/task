@@ -1,21 +1,27 @@
 /*
  * App Islands Registry
  *
- * Punto de registro de TODAS las islas específicas de este proyecto.
+ * Punto de entrada de TODAS las islas específicas de este proyecto.
  * Glory/main.tsx importa este archivo para mantener Glory agnóstico del proyecto.
  *
+ * SISTEMA NUEVO (OCP - Open/Closed Principle):
+ * Las islands se registran automáticamente en config/inicializarIslands.ts
  * Para agregar una nueva isla:
  * 1. Crear el componente en App/React/islands/NombreIsla.tsx
- * 2. Importarlo y agregarlo al objeto appIslands abajo
- * 3. Crear la función PHP en App/Templates/pages/nombre-isla.php
- * 4. Registrar en App/Config/pages.php
+ * 2. Registrar en App/React/config/inicializarIslands.ts
+ * 3. Definir ruta en App/Config/pages.php
+ *
+ * COMPATIBILIDAD (proyectos legacy):
+ * El objeto islandsManuales mantiene compatibilidad con el método anterior.
+ * Las islands manuales tienen prioridad sobre las auto-registradas.
  */
 
-/* Inicializar registro de paneles ANTES de cualquier otra importación */
+/* Inicializar registros ANTES de cualquier otra importación */
 import './config/inicializarPaneles';
+import './config/inicializarIslands';
 
-/* Islas del proyecto */
-import {DashboardIsland} from './islands/DashboardIsland';
+/* Obtener islands del registro */
+import {obtenerMapaComponentes, fusionarConIslandsManuales} from './config/registroIslands';
 
 /* Provider global de la app */
 import {ProveedorAlertas} from './context/AlertasContext';
@@ -24,12 +30,19 @@ import {ProveedorAlertas} from './context/AlertasContext';
 import './styles/dashboard/index.css';
 
 /*
- * Registro de islas de la aplicación
- * La clave es el nombre usado en data-island, el valor es el componente
+ * Islands manuales (COMPATIBILIDAD)
+ * Proyectos legacy pueden seguir agregando islands aquí.
+ * Estas tienen prioridad sobre las auto-registradas.
  */
-export const appIslands: Record<string, React.ComponentType<Record<string, unknown>>> = {
-    DashboardIsland: DashboardIsland
+const islandsManuales: Record<string, React.ComponentType<Record<string, unknown>>> = {
+    /* TO-DO: Agregar aquí islands que no usen el sistema de auto-registro */
 };
+
+/*
+ * Registro combinado de islas de la aplicación
+ * Fusiona islands auto-registradas con islands manuales
+ */
+export const appIslands: Record<string, React.ComponentType<Record<string, unknown>>> = fusionarConIslandsManuales(islandsManuales);
 
 /*
  * Provider global de la aplicación

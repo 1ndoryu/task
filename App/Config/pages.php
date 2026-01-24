@@ -32,3 +32,13 @@ PageManager::reactPage('home', 'DashboardIsland', [
     'titulo' => 'Tasks',
     'usuario' => 'user@admin'
 ]);
+
+/*
+ * PÁGINA DE PRUEBA OCP
+ * Demuestra el cumplimiento del principio Open/Closed
+ * La island se registró en inicializarIslands.ts sin modificar appIslands.tsx
+ */
+PageManager::reactPage('prueba-ocp', 'PaginaPruebaIsland', [
+    'titulo' => 'Sistema OCP Funcionando',
+    'mensaje' => 'Esta página fue creada usando el nuevo sistema de auto-registro.'
+]);
