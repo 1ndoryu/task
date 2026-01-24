@@ -35,19 +35,28 @@ export function SimuladorCiclos({numeroCiclos, modoSimulacion, simulacionCiclos,
 
             <div className="resultadosSimulador">
                 <div className="resultadoCiclo">
-                    <span className={`valorCiclo ${simulacionCiclos.pesimista >= 0 ? 'positivo' : ''}`}>{formatearMoneda(simulacionCiclos.pesimista)}</span>
-                    <span className="etiquetaCiclo">Ganancia pesimista</span>
-                    <span className="capitalFinalCiclo">Capital final: {formatearMoneda(simulacionCiclos.capitalFinalPesimista)}</span>
+                    <span className={`valorCiclo ${simulacionCiclos.pesimista.gananciaMejor >= 0 ? 'positivo' : ''}`}>{formatearMoneda(simulacionCiclos.pesimista.gananciaMejor)}</span>
+                    <span className="etiquetaCiclo">Ganancia pesimista (Ruta {simulacionCiclos.pesimista.rutaMejor})</span>
+                    <span className="capitalFinalCiclo">Capital final: {formatearMoneda(simulacionCiclos.pesimista.capitalFinalMejor)}</span>
+                    <small className="detalleAlternativo">
+                        vs Ruta {simulacionCiclos.pesimista.rutaMejor === 'A' ? 'B' : 'A'}: {formatearMoneda(simulacionCiclos.pesimista.rutaMejor === 'A' ? simulacionCiclos.pesimista.gananciaB : simulacionCiclos.pesimista.gananciaA)}
+                    </small>
                 </div>
                 <div className="resultadoCiclo">
-                    <span className={`valorCiclo ${simulacionCiclos.realista >= 0 ? 'positivo' : ''}`}>{formatearMoneda(simulacionCiclos.realista)}</span>
-                    <span className="etiquetaCiclo">Ganancia realista</span>
-                    <span className="capitalFinalCiclo">Capital final: {formatearMoneda(simulacionCiclos.capitalFinalRealista)}</span>
+                    <span className={`valorCiclo ${simulacionCiclos.realista.gananciaMejor >= 0 ? 'positivo' : ''}`}>{formatearMoneda(simulacionCiclos.realista.gananciaMejor)}</span>
+                    <span className="etiquetaCiclo">Ganancia realista (Ruta {simulacionCiclos.realista.rutaMejor})</span>
+                    <span className="capitalFinalCiclo">Capital final: {formatearMoneda(simulacionCiclos.realista.capitalFinalMejor)}</span>
+                    <small className="detalleAlternativo">
+                        vs Ruta {simulacionCiclos.realista.rutaMejor === 'A' ? 'B' : 'A'}: {formatearMoneda(simulacionCiclos.realista.rutaMejor === 'A' ? simulacionCiclos.realista.gananciaB : simulacionCiclos.realista.gananciaA)}
+                    </small>
                 </div>
                 <div className="resultadoCiclo">
-                    <span className={`valorCiclo ${simulacionCiclos.optimista >= 0 ? 'positivo' : ''}`}>{formatearMoneda(simulacionCiclos.optimista)}</span>
-                    <span className="etiquetaCiclo">Ganancia optimista</span>
-                    <span className="capitalFinalCiclo">Capital final: {formatearMoneda(simulacionCiclos.capitalFinalOptimista)}</span>
+                    <span className={`valorCiclo ${simulacionCiclos.optimista.gananciaMejor >= 0 ? 'positivo' : ''}`}>{formatearMoneda(simulacionCiclos.optimista.gananciaMejor)}</span>
+                    <span className="etiquetaCiclo">Ganancia optimista (Ruta {simulacionCiclos.optimista.rutaMejor})</span>
+                    <span className="capitalFinalCiclo">Capital final: {formatearMoneda(simulacionCiclos.optimista.capitalFinalMejor)}</span>
+                    <small className="detalleAlternativo">
+                        vs Ruta {simulacionCiclos.optimista.rutaMejor === 'A' ? 'B' : 'A'}: {formatearMoneda(simulacionCiclos.optimista.rutaMejor === 'A' ? simulacionCiclos.optimista.gananciaB : simulacionCiclos.optimista.gananciaA)}
+                    </small>
                 </div>
             </div>
 

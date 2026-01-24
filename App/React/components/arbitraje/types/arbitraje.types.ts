@@ -56,14 +56,21 @@ export interface EstadoViabilidad {
     mensaje: string;
 }
 
+export interface ResultadoSimulacionEscenario {
+    gananciaMejor: number;
+    gananciaA: number;
+    gananciaB: number;
+    capitalFinalMejor: number;
+    capitalFinalA: number;
+    capitalFinalB: number;
+    rutaMejor: 'A' | 'B';
+}
+
 export interface SimulacionCiclos {
-    pesimista: number;
-    realista: number;
-    optimista: number;
+    pesimista: ResultadoSimulacionEscenario;
+    realista: ResultadoSimulacionEscenario;
+    optimista: ResultadoSimulacionEscenario;
     inversionTotal: number;
-    capitalFinalPesimista: number;
-    capitalFinalRealista: number;
-    capitalFinalOptimista: number;
 }
 
 /* Props de los componentes */

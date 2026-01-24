@@ -4,7 +4,7 @@
  */
 
 import {useState, useMemo} from 'react';
-import type {RangoValor, TasasConversion, ResultadoEscenario, DetalleRuta, ModoSimulacion, EstadoViabilidad, SimulacionCiclos} from '../types/arbitraje.types';
+import type {RangoValor, TasasConversion, ResultadoEscenario, DetalleRuta, ModoSimulacion, EstadoViabilidad, SimulacionCiclos, ResultadoSimulacionEscenario} from '../types/arbitraje.types';
 
 interface UseArbitrajeReturn {
     /* Estados */
@@ -194,57 +194,78 @@ export function useArbitraje(): UseArbitrajeReturn {
 
     /* Simulación de ciclos con opción de reinversión */
     const simulacionCiclos = useMemo((): SimulacionCiclos => {
-        const pesimista = escenarios[0];
-        const realista = escenarios[1];
-        const optimista = escenarios[2];
+        const calcularEscenarioSimulacion = (escenario: ResultadoEscenario): ResultadoSimulacionEscenario => {
+            const capitalInicial = escenario.costoTotal;
 
-        const mejorGananciaPesimista = Math.max(pesimista.gananciaRutaA, pesimista.gananciaRutaB);
-        const mejorGananciaRealista = Math.max(realista.gananciaRutaA, realista.gananciaRutaB);
-        const mejorGananciaOptimista = Math.max(optimista.gananciaRutaA, optimista.gananciaRutaB);
+            if (modoSimulacion === 'fijo') {
+                const gananciaA = escenario.gananciaRutaA * numeroCiclos;
+                const gananciaB = escenario.gananciaRutaB * numeroCiclos;
+                const mejorGanancia = Math.max(gananciaA, gananciaB);
+                const rutaMejor = gananciaA >= gananciaB ? 'A' : 'B';
+                const capitalFinalMejor = capitalInicial + mejorGanancia;
 
-        if (modoSimulacion === 'fijo') {
-            return {
-                pesimista: mejorGananciaPesimista * numeroCiclos,
-                realista: mejorGananciaRealista * numeroCiclos,
-                optimista: mejorGananciaOptimista * numeroCiclos,
-                inversionTotal: realista.costoTotal * numeroCiclos,
-                capitalFinalPesimista: realista.costoTotal + mejorGananciaPesimista * numeroCiclos,
-                capitalFinalRealista: realista.costoTotal + mejorGananciaRealista * numeroCiclos,
-                capitalFinalOptimista: realista.costoTotal + mejorGananciaOptimista * numeroCiclos
-            };
-        }
-
-        /* Modo reinversión: compounding */
-        const calcularCompounding = (capitalInicial: number, gananciaBase: number, costoBase: number, ciclos: number) => {
-            let capital = capitalInicial;
-            let gananciaAcumulada = 0;
-
-            for (let i = 0; i < ciclos; i++) {
-                const productosComprables = Math.floor(capital / costoBase);
-                if (productosComprables <= 0) break;
-
-                const gananciaDelCiclo = productosComprables * gananciaBase;
-                gananciaAcumulada += gananciaDelCiclo;
-                capital = capital + gananciaDelCiclo;
+                return {
+                    gananciaMejor: mejorGanancia,
+                    gananciaA,
+                    gananciaB,
+                    capitalFinalMejor,
+                    capitalFinalA: capitalInicial + gananciaA,
+                    capitalFinalB: capitalInicial + gananciaB,
+                    rutaMejor
+                };
             }
 
-            return {gananciaTotal: gananciaAcumulada, capitalFinal: capital};
+            /* Modo reinversión: compounding */
+            const calcularCompounding = (gananciaBase: number, costoBase: number) => {
+                let capital = costoBase; /* Empezamos con el capital justo para 1 unidad en este escenario */
+                let gananciaAcumulada = 0;
+
+                for (let i = 0; i < numeroCiclos; i++) {
+                    const productosComprables = Math.floor(capital / costoBase);
+                    if (productosComprables <= 0) break;
+
+                    const gananciaDelCiclo = productosComprables * gananciaBase;
+                    gananciaAcumulada += gananciaDelCiclo;
+                    capital = capital + gananciaDelCiclo;
+                }
+
+                return {gananciaTotal: gananciaAcumulada, capitalFinal: capital};
+            };
+
+            const simA = calcularCompounding(escenario.gananciaRutaA, escenario.costoTotal);
+            const simB = calcularCompounding(escenario.gananciaRutaB, escenario.costoTotal);
+
+            const mejorGanancia = Math.max(simA.gananciaTotal, simB.gananciaTotal);
+            const rutaMejor = simA.gananciaTotal >= simB.gananciaTotal ? 'A' : 'B';
+
+            return {
+                gananciaMejor: mejorGanancia,
+                gananciaA: simA.gananciaTotal,
+                gananciaB: simB.gananciaTotal,
+                capitalFinalMejor: rutaMejor === 'A' ? simA.capitalFinal : simB.capitalFinal,
+                capitalFinalA: simA.capitalFinal,
+                capitalFinalB: simB.capitalFinal,
+                rutaMejor
+            };
         };
 
-        const capitalInicial = realista.costoTotal;
+        const pesimista = calcularEscenarioSimulacion(escenarios[0]);
+        const realista = calcularEscenarioSimulacion(escenarios[1]);
+        const optimista = calcularEscenarioSimulacion(escenarios[2]);
 
-        const resultadoPesimista = calcularCompounding(capitalInicial, mejorGananciaPesimista, pesimista.costoTotal, numeroCiclos);
-        const resultadoRealista = calcularCompounding(capitalInicial, mejorGananciaRealista, realista.costoTotal, numeroCiclos);
-        const resultadoOptimista = calcularCompounding(capitalInicial, mejorGananciaOptimista, optimista.costoTotal, numeroCiclos);
+        /* Inversión total mostrada (basada en realista para referencia) */
+        let inversionTotalRef = 0;
+        if (modoSimulacion === 'fijo') {
+            inversionTotalRef = escenarios[1].costoTotal * numeroCiclos;
+        } else {
+            inversionTotalRef = escenarios[1].costoTotal;
+        }
 
         return {
-            pesimista: resultadoPesimista.gananciaTotal,
-            realista: resultadoRealista.gananciaTotal,
-            optimista: resultadoOptimista.gananciaTotal,
-            inversionTotal: capitalInicial,
-            capitalFinalPesimista: resultadoPesimista.capitalFinal,
-            capitalFinalRealista: resultadoRealista.capitalFinal,
-            capitalFinalOptimista: resultadoOptimista.capitalFinal
+            pesimista,
+            realista,
+            optimista,
+            inversionTotal: inversionTotalRef
         };
     }, [escenarios, numeroCiclos, modoSimulacion]);
 

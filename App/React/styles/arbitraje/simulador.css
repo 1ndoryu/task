@@ -148,3 +148,12 @@
     padding-top: var(--dashboard-espacioSm);
     border-top: 1px dashed var(--dashboard-bordePunteado);
 }
+
+/* Detalle alternativo (comparación ruta) */
+.detalleAlternativo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    margin-top: 4px;
+    opacity: 0.7;
+    display: block;
+}
