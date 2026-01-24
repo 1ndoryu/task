@@ -117,7 +117,11 @@ export function useArbitraje(): UseArbitrajeReturn {
 
             /* Ruta B: USD → Bs → PayPal directo */
             const bolivaresRutaB = ventaUsd * tasas.usdABs;
-            const paypalRutaB = bolivaresRutaB / tasas.bsAPaypal;
+            /* Paso 1: Comprar saldo PayPal (Monto Bruto enviado por el tercero) */
+            const paypalBrutoRutaB = bolivaresRutaB / tasas.bsAPaypal;
+            /* Paso 2: Comisión PayPal sobre el monto recibido */
+            const comisionPaypalRutaB = paypalBrutoRutaB * (tasas.comisionPaypal / 100);
+            const paypalRutaB = paypalBrutoRutaB - comisionPaypalRutaB;
             const gananciaRutaB = paypalRutaB - costoTotal;
 
             const detalleRutaB: DetalleRuta = {
@@ -139,12 +143,20 @@ export function useArbitraje(): UseArbitrajeReturn {
                         tasa: `${tasas.usdABs} Bs/$`
                     },
                     {
-                        descripcion: 'Comprar saldo PayPal directamente',
+                        descripcion: 'Comprar saldo PayPal (Monto Bruto)',
                         entrada: bolivaresRutaB,
-                        salida: paypalRutaB,
+                        salida: paypalBrutoRutaB,
                         unidadEntrada: 'Bs',
-                        unidadSalida: 'USD PayPal',
+                        unidadSalida: 'USD PayPal (bruto)',
                         tasa: `${tasas.bsAPaypal} Bs/$PP`
+                    },
+                    {
+                        descripcion: `Comisión PayPal (${tasas.comisionPaypal}%)`,
+                        entrada: paypalBrutoRutaB,
+                        salida: paypalRutaB,
+                        unidadEntrada: 'USD PayPal (bruto)',
+                        unidadSalida: 'USD PayPal (neto)',
+                        comision: comisionPaypalRutaB
                     }
                 ],
                 totalFinal: paypalRutaB,

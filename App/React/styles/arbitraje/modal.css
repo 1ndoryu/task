@@ -210,3 +210,18 @@
     padding: var(--dashboard-espacioMd);
     margin-top: var(--dashboard-espacioSm);
 }
+
+/* Sección de pérdidas en conversión */
+.seccionModal.seccionPerdidas {
+    background-color: var(--dashboard-estadoAltaFondoSutil, rgba(239, 68, 68, 0.05));
+    padding: var(--dashboard-espacioMd);
+    border-left: 2px solid var(--dashboard-estadoAlta);
+}
+
+/* Contenedor de metadatos del paso (tasa + pérdida) */
+.metasPaso {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+}

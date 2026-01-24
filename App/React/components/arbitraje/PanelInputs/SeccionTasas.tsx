@@ -56,6 +56,9 @@ export function SeccionTasas({tasas, onTasaChange}: SeccionTasasProps): JSX.Elem
                     <input type="number" className="inputNumerico" value={tasas.comisionPaypal} onChange={e => onTasaChange('comisionPaypal', e.target.value)} step="0.1" />
                     <span className="unidadInput">%</span>
                 </div>
+                <p className="notaInput" style={{fontSize: '11px', color: 'var(--dashboard-textoApagado)', marginTop: '4px', fontStyle: 'italic'}}>
+                    * Pon 0% si el vendedor cubre la comisión
+                </p>
             </div>
         </section>
     );
