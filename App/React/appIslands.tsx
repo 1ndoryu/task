@@ -11,6 +11,9 @@
  * 4. Registrar en App/Config/pages.php
  */
 
+/* Inicializar registro de paneles ANTES de cualquier otra importación */
+import './config/inicializarPaneles';
+
 /* Islas del proyecto */
 import {DashboardIsland} from './islands/DashboardIsland';
 

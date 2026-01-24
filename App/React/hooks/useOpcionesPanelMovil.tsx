@@ -3,12 +3,15 @@
  * Hook que construye las opciones del menú móvil basadas en el panel activo
  * Fase 10.8.3: Menú de Opciones Unificado
  *
- * Retorna las opciones de ordenamiento, filtrado y configuración
- * para mostrar en el botón de 3 puntos del header móvil
+ * Refactor OCP - Fase 4: Usa registro de paneles para títulos dinámicos
+ * El switch de opciones se mantiene porque cada panel tiene configuración específica
+ *
+ * TO-DO futuro: Cada panel podría registrar sus propias opciones en el registro
  */
 
 import {useMemo} from 'react';
 import {ArrowUpDown, Filter, Settings} from 'lucide-react';
+import {obtenerTituloPanelMovil, paginaMovilAPanelId} from '../config/registroPaneles';
 import type {GrupoOpciones, OpcionMenu} from '../components/shared/MenuOpcionesPanel';
 import type {PaginaMovil} from './usePaginaMovil';
 
@@ -57,12 +60,16 @@ interface UseOpcionesPanelMovilResult {
     tieneFiltrosActivos: boolean;
 }
 
-const TITULOS_PAGINA: Record<PaginaMovil, string> = {
-    ejecucion: 'Opciones de Tareas',
-    proyectos: 'Opciones de Proyectos',
-    habitos: 'Opciones de Hábitos',
-    actividad: 'Opciones de Actividad'
-};
+/*
+ * Genera título dinámico desde el registro
+ * Formato: "Opciones de [Título del Panel]"
+ */
+function generarTituloPagina(pagina: PaginaMovil): string {
+    const panelId = paginaMovilAPanelId(pagina);
+    if (!panelId) return `Opciones de ${pagina}`;
+    const tituloPanel = obtenerTituloPanelMovil(panelId);
+    return `Opciones de ${tituloPanel}`;
+}
 
 export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseOpcionesPanelMovilResult {
     const {paginaActiva, opcionesFiltroTareas = [], valorFiltroTareas = 'todas', onCambiarFiltroTareas, opcionesOrdenTareas = [], modoOrdenTareas = '', onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos = [], modoOrdenHabitos = '', onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos = [], modoOrdenProyectos = '', onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad} = params;
@@ -72,7 +79,14 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
         const opciones: OpcionMenu[] = [];
         let tieneFiltrosActivos = false;
 
-        switch (paginaActiva) {
+        /* Obtener el panelId correspondiente a la página */
+        const panelId = paginaMovilAPanelId(paginaActiva) || paginaActiva;
+
+        /*
+         * Generar opciones según el panel activo
+         * TO-DO: En el futuro cada panel podría registrar sus propias opciones
+         */
+        switch (panelId) {
             case 'ejecucion': {
                 /* Filtros de tareas */
                 if (opcionesFiltroTareas.length > 0 && onCambiarFiltroTareas) {
@@ -117,7 +131,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                 break;
             }
 
-            case 'habitos': {
+            case 'focoPrioritario': {
                 /* Ordenamiento de hábitos */
                 if (opcionesOrdenHabitos.length > 0 && onCambiarOrdenHabitos) {
                     grupos.push({
@@ -188,7 +202,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
         }
 
         return {
-            titulo: TITULOS_PAGINA[paginaActiva],
+            titulo: generarTituloPagina(paginaActiva),
             grupos,
             opciones,
             tieneFiltrosActivos

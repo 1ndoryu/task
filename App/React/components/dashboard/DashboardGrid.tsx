@@ -3,17 +3,19 @@
  * Componente que renderiza el grid de paneles del Dashboard
  * Extraído para reducir la complejidad de DashboardIsland
  *
- * Fase 10.8.1: En móvil, solo se renderiza el panel correspondiente
- * a la página activa seleccionada desde la navegación inferior
+ * Refactor OCP - Fase 3: Ahora obtiene componentes dinámicamente del registro
+ * ya no hay mapeos hardcodeados de paneles
  */
 
 import {useCallback, useMemo, CSSProperties} from 'react';
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn} from '../shared';
-import {PanelFocoPrioritario, PanelProyectos, PanelEjecucion, PanelScratchpad, PanelActividad} from '../paneles';
+import {obtenerPanel, panelManejaAlturaPropia, paginaMovilAPanelId} from '../../config/registroPaneles';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import type {PaginaMovil} from '../../hooks/usePaginaMovil';
+
+/* Tipo para pages móviles - ahora dinámico desde el registro */
+type PaginaMovil = string;
 
 interface DashboardGridProps {
     ctx: DashboardCompletoRetorno;
@@ -21,16 +23,172 @@ interface DashboardGridProps {
     paginaMovilActiva?: PaginaMovil;
 }
 
-/* Mapeo de PaginaMovil a PanelId para renderizado selectivo */
-const PAGINA_A_PANEL: Record<PaginaMovil, PanelId> = {
-    ejecucion: 'ejecucion',
-    proyectos: 'proyectos',
-    habitos: 'focoPrioritario',
-    actividad: 'actividad'
+/*
+ * Props que se pasan a cada panel según su tipo
+ * Centraliza la lógica de qué props necesita cada panel
+ */
+interface PropsContextoPaneles {
+    dashboard: DashboardCompletoRetorno['dashboard'];
+    modales: DashboardCompletoRetorno['modales'];
+    compartir: DashboardCompletoRetorno['compartir'];
+    ordenHabitos: DashboardCompletoRetorno['ordenHabitos'];
+    filtroTareas: DashboardCompletoRetorno['filtroTareas'];
+    ordenTareas: DashboardCompletoRetorno['ordenTareas'];
+    habitosComoTareas: DashboardCompletoRetorno['habitosComoTareas'];
+    configTareas: DashboardCompletoRetorno['configTareas'];
+    configHabitos: DashboardCompletoRetorno['configHabitos'];
+    configProyectos: DashboardCompletoRetorno['configProyectos'];
+    configScratchpad: DashboardCompletoRetorno['configScratchpad'];
+    configActividad: DashboardCompletoRetorno['configActividad'];
+    opciones: DashboardCompletoRetorno['opciones'];
+    acciones: DashboardCompletoRetorno['acciones'];
+    valorFiltroActual: DashboardCompletoRetorno['valorFiltroActual'];
+    marcarDiaHabitoConSync: DashboardCompletoRetorno['marcarDiaHabitoConSync'];
+    desmarcarDiaHabitoConSync: DashboardCompletoRetorno['desmarcarDiaHabitoConSync'];
+}
+
+/*
+ * Factory para generar las props específicas de cada panel
+ * Esto permite que DashboardGrid no necesite conocer los detalles de cada panel
+ */
+function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element, manejarToggleTarea: (id: number) => void, manejarEditarHabitoPorId: (habitoId: number) => void) {
+    const {dashboard, modales, compartir, filtroTareas, ordenTareas, configTareas, opciones, acciones, valorFiltroActual} = ctx;
+    return {
+        tareas: ordenTareas.tareasOrdenadas,
+        proyectos: dashboard.proyectos || [],
+        proyectoIdActual: filtroTareas.filtroActual.tipo === 'proyecto' ? filtroTareas.filtroActual.proyectoId : undefined,
+        ocultarCompletadas: configTareas.configuracion.ocultarCompletadas,
+        ocultarBadgeProyecto: configTareas.configuracion.ocultarBadgeProyecto,
+        modoOrden: ordenTareas.modoActual,
+        valorFiltroActual: valorFiltroActual,
+        opcionesFiltro: opciones.opcionesFiltro,
+        opcionesOrdenTareas: opciones.opcionesOrdenTareas,
+        esOrdenManual: ordenTareas.esOrdenManual,
+        onAbrirModalNuevaTarea: () => modales.abrirCreacionRapida('tarea'),
+        onAbrirModalConfigTareas: modales.abrirModalConfigTareas,
+        onToggleTarea: manejarToggleTarea,
+        onCrearTarea: dashboard.crearTarea,
+        onEditarTarea: dashboard.editarTarea,
+        onEliminarTarea: dashboard.eliminarTarea,
+        onReordenarTareas: dashboard.reordenarTareas,
+        onCambiarFiltro: acciones.manejarCambioFiltro,
+        onCambiarModoOrden: ordenTareas.cambiarModo,
+        onCompartirTarea: compartir.manejarCompartirTarea,
+        estaCompartida: compartir.estaCompartidaTarea,
+        obtenerParticipantes: compartir.obtenerParticipantesTarea,
+        renderHandleArrastre,
+        handleMinimizar,
+        onEditarHabito: manejarEditarHabitoPorId,
+        onEliminarHabito: dashboard.eliminarHabito,
+        onPosponerHabito: dashboard.posponerHabito,
+        modoCompacto: configTareas.configuracion.modoCompacto
+    };
+}
+
+function generarPropsPanelFocoPrioritario(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    const {dashboard, modales, ordenHabitos, configHabitos, opciones} = ctx;
+    return {
+        habitos: ordenHabitos.habitosOrdenados,
+        modoOrdenHabitos: ordenHabitos.modoActual,
+        opcionesOrdenHabitos: opciones.opcionesOrdenHabitos,
+        configuracion: configHabitos.configuracion,
+        onAbrirModalCrearHabito: () => modales.abrirCreacionRapida('habito'),
+        onAbrirModalConfigHabitos: modales.abrirModalConfigHabitos,
+        onToggleHabito: dashboard.toggleHabito,
+        onEditarHabito: dashboard.abrirModalEditarHabito,
+        onEliminarHabito: dashboard.eliminarHabito,
+        onPosponerHabito: dashboard.posponerHabito,
+        onPausarHabito: dashboard.pausarHabito,
+        onMarcarDiaHabito: ctx.marcarDiaHabitoConSync,
+        onDesmarcarDiaHabito: ctx.desmarcarDiaHabitoConSync,
+        onCambiarModoHabitos: ordenHabitos.cambiarModo,
+        renderHandleArrastre,
+        handleMinimizar
+    };
+}
+
+function generarPropsPanelProyectos(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    const {dashboard, modales, compartir, configProyectos, opciones} = ctx;
+    return {
+        proyectos: dashboard.proyectos || [],
+        tareas: dashboard.tareas,
+        configuracion: configProyectos.configuracion,
+        opcionesOrdenProyectos: opciones.opcionesOrdenProyectos,
+        onAbrirModalCrearProyecto: () => modales.abrirCreacionRapida('proyecto'),
+        onAbrirModalEditarProyecto: modales.abrirModalEditarProyecto,
+        onAbrirModalConfigProyectos: modales.abrirModalConfigProyectos,
+        onEliminarProyecto: dashboard.eliminarProyecto,
+        onCambiarEstadoProyecto: dashboard.cambiarEstadoProyecto,
+        onCambiarOrdenProyectos: configProyectos.cambiarOrdenDefecto,
+        onCompartirProyecto: compartir.manejarCompartirProyecto,
+        estaCompartido: compartir.estaCompartidoProyecto,
+        onToggleTarea: dashboard.toggleTarea,
+        onCrearTarea: dashboard.crearTarea,
+        onEditarTarea: dashboard.editarTarea,
+        onEliminarTarea: dashboard.eliminarTarea,
+        onReordenarTareas: dashboard.reordenarTareas,
+        renderHandleArrastre,
+        handleMinimizar,
+        modoCompacto: configProyectos.configuracion.modoCompacto
+    };
+}
+
+function generarPropsPanelScratchpad(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    const {modales, configScratchpad} = ctx;
+    return {
+        configuracion: configScratchpad.configuracion,
+        onAbrirModalConfigScratchpad: modales.abrirModalConfigScratchpad,
+        onCambiarAltura: configScratchpad.cambiarAltura,
+        renderHandleArrastre,
+        handleMinimizar
+    };
+}
+
+function generarPropsPanelActividad(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    const {modales, configActividad} = ctx;
+    return {
+        configuracion: configActividad.configuracion,
+        onAbrirModalConfigActividad: modales.abrirModalConfigActividad,
+        renderHandleArrastre,
+        handleMinimizar
+    };
+}
+
+/*
+ * Mapeo de panelId a función generadora de props
+ * TO-DO: En el futuro, cada panel podría registrar su propia función generadora
+ */
+const GENERADORES_PROPS: Record<string, Function> = {
+    ejecucion: generarPropsPanelEjecucion,
+    focoPrioritario: generarPropsPanelFocoPrioritario,
+    proyectos: generarPropsPanelProyectos,
+    scratchpad: generarPropsPanelScratchpad,
+    actividad: generarPropsPanelActividad
 };
 
 export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecucion'}: DashboardGridProps): JSX.Element {
     const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, opciones, acciones, valorFiltroActual} = ctx;
+
+    /* Contexto de props compartido para los generadores */
+    const propsContexto: PropsContextoPaneles = {
+        dashboard,
+        modales,
+        compartir,
+        ordenHabitos,
+        filtroTareas,
+        ordenTareas,
+        habitosComoTareas,
+        configTareas,
+        configHabitos,
+        configProyectos,
+        configScratchpad,
+        configActividad,
+        opciones,
+        acciones,
+        valorFiltroActual,
+        marcarDiaHabitoConSync: ctx.marcarDiaHabitoConSync,
+        desmarcarDiaHabitoConSync: ctx.desmarcarDiaHabitoConSync
+    };
 
     /*
      * Handler que intercepta toggles de tareas-hábito
@@ -69,103 +227,62 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         [layout]
     );
 
+    /*
+     * Renderiza el contenido de un panel usando el registro
+     * Obtiene el componente y genera las props dinámicamente
+     */
     const renderizarContenidoPanel = (panelId: PanelId): JSX.Element | null => {
+        const definicionPanel = obtenerPanel(panelId);
+        if (!definicionPanel) {
+            console.warn(`Panel "${panelId}" no encontrado en el registro`);
+            return null;
+        }
+
         /* En móvil, no renderizamos handle de arrastre ni botón minimizar */
         const renderHandleArrastre = (titulo?: string) => (esMovil ? <></> : <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />);
         const handleMinimizarElement = esMovil ? <></> : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
-        /* Scratchpad tiene su propio sistema de resize interno y gestiona sus notas */
-        if (panelId === 'scratchpad') {
-            return <PanelScratchpad configuracion={configScratchpad.configuracion} onAbrirModalConfigScratchpad={modales.abrirModalConfigScratchpad} onCambiarAltura={configScratchpad.cambiarAltura} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />;
+        /* Obtener el generador de props para este panel */
+        const generadorProps = GENERADORES_PROPS[panelId];
+        if (!generadorProps) {
+            console.warn(`No hay generador de props para panel "${panelId}"`);
+            return null;
         }
 
-        /* Panel de Actividad */
-        if (panelId === 'actividad') {
-            return <PanelActividad configuracion={configActividad.configuracion} onAbrirModalConfigActividad={modales.abrirModalConfigActividad} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />;
+        /* Generar props según el tipo de panel */
+        let props: any;
+        if (panelId === 'ejecucion') {
+            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, manejarToggleTarea, manejarEditarHabitoPorId);
+        } else {
+            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement);
+        }
+
+        const Componente = definicionPanel.componente;
+        const manejaAltura = panelManejaAlturaPropia(panelId);
+
+        /* Paneles que manejan su propia altura (scratchpad, actividad) */
+        if (manejaAltura) {
+            return <Componente {...props} />;
         }
 
         /* Obtener altura del panel desde configuración */
         const alturaPanel = layout.obtenerAlturaPanel(panelId);
 
-        const panelesContenido: Partial<Record<PanelId, (alturaProps: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => JSX.Element>> = {
-            focoPrioritario: ({altura, contenedorRef, esAuto}) => (
-                <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
-                    <PanelFocoPrioritario habitos={ordenHabitos.habitosOrdenados} modoOrdenHabitos={ordenHabitos.modoActual} opcionesOrdenHabitos={opciones.opcionesOrdenHabitos} configuracion={configHabitos.configuracion} onAbrirModalCrearHabito={() => modales.abrirCreacionRapida('habito')} onAbrirModalConfigHabitos={modales.abrirModalConfigHabitos} onToggleHabito={dashboard.toggleHabito} onEditarHabito={dashboard.abrirModalEditarHabito} onEliminarHabito={dashboard.eliminarHabito} onPosponerHabito={dashboard.posponerHabito} onPausarHabito={dashboard.pausarHabito} onMarcarDiaHabito={ctx.marcarDiaHabitoConSync} onDesmarcarDiaHabito={ctx.desmarcarDiaHabitoConSync} onCambiarModoHabitos={ordenHabitos.cambiarModo} renderHandleArrastre={renderHandleArrastre} handleMinimizar={handleMinimizarElement} />
-                </div>
-            ),
-            proyectos: ({altura, contenedorRef, esAuto}) => (
-                <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
-                    <PanelProyectos
-                        proyectos={dashboard.proyectos || []}
-                        tareas={dashboard.tareas}
-                        configuracion={configProyectos.configuracion}
-                        opcionesOrdenProyectos={opciones.opcionesOrdenProyectos}
-                        onAbrirModalCrearProyecto={() => modales.abrirCreacionRapida('proyecto')}
-                        onAbrirModalEditarProyecto={modales.abrirModalEditarProyecto}
-                        onAbrirModalConfigProyectos={modales.abrirModalConfigProyectos}
-                        onEliminarProyecto={dashboard.eliminarProyecto}
-                        onCambiarEstadoProyecto={dashboard.cambiarEstadoProyecto}
-                        onCambiarOrdenProyectos={configProyectos.cambiarOrdenDefecto}
-                        onCompartirProyecto={compartir.manejarCompartirProyecto}
-                        estaCompartido={compartir.estaCompartidoProyecto}
-                        onToggleTarea={dashboard.toggleTarea}
-                        onCrearTarea={dashboard.crearTarea}
-                        onEditarTarea={dashboard.editarTarea}
-                        onEliminarTarea={dashboard.eliminarTarea}
-                        onReordenarTareas={dashboard.reordenarTareas}
-                        renderHandleArrastre={renderHandleArrastre}
-                        handleMinimizar={handleMinimizarElement}
-                        modoCompacto={configProyectos.configuracion.modoCompacto}
-                    />
-                </div>
-            ),
-            ejecucion: ({altura, contenedorRef, esAuto}) => (
-                <div ref={contenedorRef} className={`panelDashboard internaColumna ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
-                    <PanelEjecucion
-                        tareas={ordenTareas.tareasOrdenadas}
-                        proyectos={dashboard.proyectos || []}
-                        proyectoIdActual={filtroTareas.filtroActual.tipo === 'proyecto' ? filtroTareas.filtroActual.proyectoId : undefined}
-                        ocultarCompletadas={configTareas.configuracion.ocultarCompletadas}
-                        ocultarBadgeProyecto={configTareas.configuracion.ocultarBadgeProyecto}
-                        modoOrden={ordenTareas.modoActual}
-                        valorFiltroActual={valorFiltroActual}
-                        opcionesFiltro={opciones.opcionesFiltro}
-                        opcionesOrdenTareas={opciones.opcionesOrdenTareas}
-                        esOrdenManual={ordenTareas.esOrdenManual}
-                        onAbrirModalNuevaTarea={() => modales.abrirCreacionRapida('tarea')}
-                        onAbrirModalConfigTareas={modales.abrirModalConfigTareas}
-                        onToggleTarea={manejarToggleTarea}
-                        onCrearTarea={dashboard.crearTarea}
-                        onEditarTarea={dashboard.editarTarea}
-                        onEliminarTarea={dashboard.eliminarTarea}
-                        onReordenarTareas={dashboard.reordenarTareas}
-                        onCambiarFiltro={acciones.manejarCambioFiltro}
-                        onCambiarModoOrden={ordenTareas.cambiarModo}
-                        onCompartirTarea={compartir.manejarCompartirTarea}
-                        estaCompartida={compartir.estaCompartidaTarea}
-                        obtenerParticipantes={compartir.obtenerParticipantesTarea}
-                        renderHandleArrastre={renderHandleArrastre}
-                        handleMinimizar={handleMinimizarElement}
-                        onEditarHabito={manejarEditarHabitoPorId}
-                        onEliminarHabito={dashboard.eliminarHabito}
-                        onPosponerHabito={dashboard.posponerHabito}
-                        modoCompacto={configTareas.configuracion.modoCompacto}
-                    />
-                </div>
-            )
-        };
-
-        const renderContenido = panelesContenido[panelId];
-        if (!renderContenido) return null;
+        /* Función de renderizado para ResizeHandlePanel */
+        const renderConContenedor = ({altura, contenedorRef, esAuto}: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => (
+            <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
+                <Componente {...props} />
+            </div>
+        );
 
         /* En móvil no usamos ResizeHandlePanel */
         if (esMovil) {
-            return renderContenido({altura: 'auto', isResizing: false, contenedorRef: {current: null} as React.RefObject<HTMLDivElement>, esAuto: true});
+            return renderConContenedor({altura: 'auto', isResizing: false, contenedorRef: {current: null} as React.RefObject<HTMLDivElement>, esAuto: true});
         }
 
         return (
             <ResizeHandlePanel panelId={panelId} alturaInicial={alturaPanel} onCambiarAltura={manejarCambiarAlturaPanel}>
-                {renderContenido}
+                {renderConContenedor}
             </ResizeHandlePanel>
         );
     };
@@ -196,7 +313,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
      * Layout simplificado sin columnas, handles ni arrastre
      */
     if (esMovil) {
-        const panelActivo = PAGINA_A_PANEL[paginaMovilActiva];
+        /* Obtener el panelId desde la página móvil usando el registro */
+        const panelActivo = paginaMovilAPanelId(paginaMovilActiva) || 'ejecucion';
 
         return (
             <div className="dashboardGridContenedor dashboardGridContenedor--movil">

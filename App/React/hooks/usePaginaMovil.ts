@@ -3,16 +3,18 @@
  * Hook para gestionar la navegación por páginas en móvil
  * Fase 10.8.1: Sistema de navegación por páginas
  *
- * Cada panel principal es una página independiente en móvil:
- * - ejecucion: Panel de Tareas/Ejecución (por defecto)
- * - proyectos: Panel de Proyectos
- * - habitos: Panel de Hábitos (focoPrioritario)
- * - actividad: Panel de Actividad/Mapa de Calor
+ * Refactor OCP - Fase 4: Ahora deriva páginas válidas del registro de paneles
+ * Ya no hay tipos hardcodeados de páginas
  */
 
 import {useState, useEffect, useCallback} from 'react';
+import {obtenerPaginasMovilValidas, paginaMovilAPanelId} from '../config/registroPaneles';
 
-export type PaginaMovil = 'ejecucion' | 'proyectos' | 'habitos' | 'actividad';
+/*
+ * PaginaMovil ahora es string dinámico
+ * Las páginas válidas se derivan del registro de paneles
+ */
+export type PaginaMovil = string;
 
 interface UsePaginaMovilResult {
     paginaActiva: PaginaMovil;
@@ -23,9 +25,11 @@ interface UsePaginaMovilResult {
 const STORAGE_KEY = 'gloryPaginaMovilActiva';
 const PAGINA_DEFECTO: PaginaMovil = 'ejecucion';
 
-/* Validar que el valor sea una PaginaMovil válida */
+/* Validar que el valor sea una PaginaMovil válida usando el registro */
 function esPaginaValida(valor: string | null): valor is PaginaMovil {
-    return valor === 'ejecucion' || valor === 'proyectos' || valor === 'habitos' || valor === 'actividad';
+    if (!valor) return false;
+    const paginasValidas = obtenerPaginasMovilValidas();
+    return paginasValidas.includes(valor);
 }
 
 /* Obtener la página guardada del localStorage */
@@ -79,15 +83,8 @@ export function usePaginaMovil(): UsePaginaMovilResult {
 
 /*
  * Mapeo de PaginaMovil a PanelId para renderizado selectivo
- * focoPrioritario se mapea desde 'habitos'
+ * Ahora usa el registro de paneles
  */
 export function paginaAPanelId(pagina: PaginaMovil): string {
-    const mapeo: Record<PaginaMovil, string> = {
-        ejecucion: 'ejecucion',
-        proyectos: 'proyectos',
-        habitos: 'focoPrioritario',
-        actividad: 'actividad'
-    };
-
-    return mapeo[pagina];
+    return paginaMovilAPanelId(pagina) || pagina;
 }
