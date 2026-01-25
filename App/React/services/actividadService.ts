@@ -9,7 +9,7 @@
  */
 
 import {invalidarCache, invalidarCacheParcial} from './actividadStore';
-import {obtenerFechaLocalISO} from '../utils/fecha';
+import {obtenerFechaHoy} from '../utils/fecha';
 
 /* Base URL de la API */
 const API_BASE = '/wp-json/glory/v1/actividad';
@@ -92,7 +92,7 @@ export function registrarTareaCompletada(tareaId: number, proyectoId?: number): 
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }
 
@@ -101,7 +101,7 @@ export function registrarHabitoCumplido(habitoId: number): Promise<boolean> {
         tipo: 'habito_cumplido',
         elementoId: habitoId,
         elementoTipo: 'habito',
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }
 
@@ -110,7 +110,7 @@ export function registrarNotaCreada(notaId: number): Promise<boolean> {
         tipo: 'nota_creada',
         elementoId: notaId,
         elementoTipo: 'nota',
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }
 
@@ -120,7 +120,7 @@ export function registrarAdjuntoSubido(tareaId: number, proyectoId?: number): Pr
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }
 
@@ -131,7 +131,7 @@ export function registrarTareaDesmarcada(tareaId: number, proyectoId?: number): 
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }
 
@@ -140,7 +140,7 @@ export function registrarHabitoDesmarcado(habitoId: number): Promise<boolean> {
         tipo: 'habito_desmarcado',
         elementoId: habitoId,
         elementoTipo: 'habito',
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }
 
@@ -149,6 +149,6 @@ export function registrarHabitoPospuesto(habitoId: number): Promise<boolean> {
         tipo: 'habito_pospuesto',
         elementoId: habitoId,
         elementoTipo: 'habito',
-        fecha: obtenerFechaLocalISO()
+        fecha: obtenerFechaHoy()
     });
 }

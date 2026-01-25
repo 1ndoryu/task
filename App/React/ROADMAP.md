@@ -346,6 +346,25 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - [ ] Auditar `VistaPerfil` y modales de configuración.
   - [ ] Eliminar estilos hardcodeados y aplicar variables `var(--...)` del sistema.
 
+### 14.7 Actividad Diaria Detallada
+- [ ] **Detalle por día en el panel de actividad:**
+  - [ ] Click en un día del mapa de calor muestra la lista de acciones de ese día.
+  - [ ] Permitir ocultar el detalle con el mismo control (toggle).
+  - [ ] Mantener el detalle sincronizado con el filtro actual (tipo/proyecto/hábito).
+- [x] **Registro de actividad respeta fin del día:**
+  - [x] Enviar fecha efectiva al backend para evitar que acciones nocturnas caigan en el día siguiente.
+  - [x] Alinear fecha local del heatmap con la jornada del usuario.
+
+### 14.8 Hábitos: Frecuencia y Subtareas
+- [ ] **Frecuencia personalizada consistente (cada X días):**
+  - [ ] Unificar cálculo entre indicador "Hoy", panel de ejecución y columna Actividad.
+  - [ ] Revisar casos con historial reciente y frecuencia personalizada.
+- [ ] **Subtareas de hábitos en panel de ejecución:**
+  - [ ] Permitir crear tareas internas dentro de un hábito.
+  - [ ] Mostrar estas tareas en el panel de ejecución como subtareas del hábito.
+  - [ ] Mantener orden manual definido en la configuración del hábito.
+  - [ ] Heredar importancia del hábito y sin urgencia propia.
+
 ---
 
 ### Tareas Completadas Recientes ✅

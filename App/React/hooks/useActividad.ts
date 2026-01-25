@@ -16,7 +16,7 @@
 
 import {useState, useCallback, useRef, useEffect} from 'react';
 import {obtenerDelCache, guardarEnCache, suscribirACambios} from '../services/actividadStore';
-import {obtenerFechaLocalISO} from '../utils/fecha';
+import {obtenerFechaHoy} from '../utils/fecha';
 
 /* Tipos para el mapa de calor */
 export interface DatosHeatmap {
@@ -187,7 +187,7 @@ export function useActividad(filtrosIniciales?: FiltrosActividad): UseActividadR
                 const params = new URLSearchParams();
 
                 /* Enviar fecha local del usuario para evitar problemas de zona horaria */
-                const fechaHoyLocal = obtenerFechaLocalISO();
+                const fechaHoyLocal = obtenerFechaHoy();
                 params.append('fechaHoyLocal', fechaHoyLocal);
 
                 if (filtros.periodo) {
