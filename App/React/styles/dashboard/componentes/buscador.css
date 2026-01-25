@@ -127,6 +127,9 @@
 .iconoResultado--proyecto {
     color: #10b981;
 } /* Verde */
+.iconoResultado--nota {
+    color: #f59e0b;
+}
 
 .buscadorSinResultados {
     padding: var(--dashboard-espacioMd);

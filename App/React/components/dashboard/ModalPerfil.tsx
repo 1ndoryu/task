@@ -162,15 +162,15 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Mi Perfil">
-            <div className="contenedorPerfil">
+            <div id="modal-perfil" className="contenedorPerfil">
                 {/* Avatar y Datos Basicos */}
                 <div className="avatarContainer">
-                    <div className="avatarPreview">{datos.avatarUrl ? <img src={datos.avatarUrl} alt="Avatar" /> : <span style={{fontSize: '24px'}}>{datos.nombre.charAt(0).toUpperCase()}</span>}</div>
-                    <button className="botonPerfil" style={{background: 'var(--dashboard-fondoSecundario)', border: '1px solid var(--dashboard-bordePrincipal)', color: 'var(--dashboard-textoActivo)', display: 'flex', gap: '8px', alignItems: 'center'}} onClick={handleAvatarClick}>
+                    <div className="avatarPreview">{datos.avatarUrl ? <img src={datos.avatarUrl} alt="Avatar" /> : <span className="avatarInicial">{datos.nombre.charAt(0).toUpperCase()}</span>}</div>
+                    <button className="botonPerfil botonCambiarFoto" onClick={handleAvatarClick}>
                         <Camera size={14} />
                         Cambiar Foto
                     </button>
-                    <input type="file" ref={fileInputRef} style={{display: 'none'}} accept="image/*" onChange={handleFileChange} />
+                    <input type="file" ref={fileInputRef} className="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
                 </div>
 
                 <div className="seccionPerfil">
@@ -183,7 +183,7 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
 
                     <div className="grupoInputPerfil">
                         <label className="labelPerfil">Breve Descripción</label>
-                        <textarea className="inputPerfil" value={datos.descripcion} onChange={e => handleChange('descripcion', e.target.value)} placeholder="Developer, Designer, etc." rows={2} style={{resize: 'none'}} />
+                        <textarea className="inputPerfil inputPerfil--descripcion" value={datos.descripcion} onChange={e => handleChange('descripcion', e.target.value)} placeholder="Developer, Designer, etc." rows={2} />
                     </div>
                 </div>
 
@@ -218,8 +218,8 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
                         Cancelar
                     </button>
                     <button className="botonPerfil botonGuardar" onClick={handleSubmit} disabled={cargando}>
-                        <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-                            {cargando ? <span className="cargandoSpinner" style={{width: '12px', height: '12px', borderWidth: '2px'}}></span> : <Save size={14} />}
+                        <div className="botonPerfilContenido">
+                            {cargando ? <span className="cargandoSpinner cargandoSpinner--pequeno"></span> : <Save size={14} />}
                             Guardar Cambios
                         </div>
                     </button>

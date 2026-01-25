@@ -11,10 +11,9 @@
 
 import {useState} from 'react';
 import {Eraser, Settings, FolderOpen, Plus, Maximize2} from 'lucide-react';
-import {SeccionEncabezado, Scratchpad, ModalNotasGuardadas} from '../dashboard';
+import {SeccionEncabezado, Scratchpad, ModalNotasExpandido} from '../dashboard';
 import {OverlayEnfoque} from '../shared';
 import {useNotas} from '../../hooks';
-import type {Nota} from '../../hooks';
 import type {ConfiguracionScratchpad} from '../../hooks/useConfiguracionScratchpad';
 import {useAlertas} from '../../hooks/useAlertas';
 
@@ -27,18 +26,12 @@ interface PanelScratchpadProps {
 }
 
 export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar}: PanelScratchpadProps): JSX.Element {
-    const [modalNotasAbierto, setModalNotasAbierto] = useState(false);
+    const [modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto] = useState(false);
     const [modoEnfoque, setModoEnfoque] = useState(false);
-    const {estado, seleccionarNota, crearNuevaNota, actualizarContenido, obtenerTituloDeContenido, guardarNotaActiva} = useNotas();
+    const {estado, cargarNotas, eliminarNota, buscarNotas, seleccionarNota, crearNuevaNota, actualizarContenido, obtenerTituloDeContenido, guardarNotaActiva} = useNotas();
     const {mostrarExito} = useAlertas();
 
     const {notaActiva} = estado;
-
-    const manejarSeleccionarNota = (nota: Nota) => {
-        seleccionarNota(nota);
-        setModalNotasAbierto(false);
-        mostrarExito(`Editando: ${nota.titulo}`);
-    };
 
     const manejarNuevaNota = () => {
         crearNuevaNota();
@@ -56,7 +49,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
         if (notaActiva.modificada && notaActiva.contenido.trim()) {
             await guardarNotaActiva();
         }
-        setModalNotasAbierto(true);
+        setModalNotasExpandidoAbierto(true);
     };
 
     /* Título de la nota activa para mostrar en el encabezado */
@@ -108,12 +101,23 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
             />
             <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={configuracion.tamanoFuente} altura={configuracion.altura} delayGuardado={configuracion.autoGuardadoIntervalo} onCambiarAltura={onCambiarAltura} />
 
-            {/* Modal de notas guardadas */}
-            <ModalNotasGuardadas abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} onSeleccionarNota={manejarSeleccionarNota} />
+            <ModalNotasExpandido
+                abierto={modalNotasExpandidoAbierto}
+                onCerrar={() => setModalNotasExpandidoAbierto(false)}
+                estado={estado}
+                cargarNotas={cargarNotas}
+                eliminarNota={eliminarNota}
+                buscarNotas={buscarNotas}
+                seleccionarNota={seleccionarNota}
+                actualizarContenido={actualizarContenido}
+                obtenerTituloDeContenido={obtenerTituloDeContenido}
+                tamanoFuente={configuracion.tamanoFuente}
+                delayGuardado={configuracion.autoGuardadoIntervalo}
+            />
 
             {/* Overlay modo enfoque */}
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo={esNotaNueva ? 'Nueva nota' : tituloActivo}>
-                <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={configuracion.tamanoFuente} altura="100%" delayGuardado={configuracion.autoGuardadoIntervalo} />
+                <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={configuracion.tamanoFuente} altura="100%" delayGuardado={configuracion.autoGuardadoIntervalo} mostrarResizeHandle={false} />
             </OverlayEnfoque>
         </div>
     );

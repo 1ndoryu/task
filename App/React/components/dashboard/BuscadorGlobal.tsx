@@ -5,8 +5,10 @@
  */
 
 import {useState, useEffect, useRef} from 'react';
-import {Search, CheckCircle2, Repeat, Folder, X} from 'lucide-react';
+import {Search, CheckCircle2, Repeat, Folder, X, FileText} from 'lucide-react';
 import type {Tarea, Habito, Proyecto} from '../../types/dashboard';
+import {useNotas} from '../../hooks';
+import type {Nota} from '../../hooks';
 
 interface BuscadorGlobalProps {
     tareas: Tarea[];
@@ -18,10 +20,10 @@ interface BuscadorGlobalProps {
 }
 
 type ResultadoBusqueda = {
-    tipo: 'tarea' | 'habito' | 'proyecto';
+    tipo: 'tarea' | 'habito' | 'proyecto' | 'nota';
     id: number;
     titulo: string;
-    original: Tarea | Habito | Proyecto;
+    original: Tarea | Habito | Proyecto | Nota;
 };
 
 export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto}: BuscadorGlobalProps): JSX.Element {
@@ -29,6 +31,8 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
     const [resultados, setResultados] = useState<ResultadoBusqueda[]>([]);
     const [mostrarResultados, setMostrarResultados] = useState(false);
     const contenedorRef = useRef<HTMLDivElement>(null);
+    const requestIdRef = useRef(0);
+    const {buscarNotas, seleccionarNota} = useNotas();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -49,10 +53,10 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
             return;
         }
 
+        const requestId = ++requestIdRef.current;
         const termino = busqueda.toLowerCase();
         const nuevosResultados: ResultadoBusqueda[] = [];
 
-        /* Buscar en Tareas */
         tareas.forEach(tarea => {
             if (tarea.texto.toLowerCase().includes(termino)) {
                 nuevosResultados.push({
@@ -64,7 +68,6 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
             }
         });
 
-        /* Buscar en Habitos */
         habitos.forEach(habito => {
             if (habito.nombre.toLowerCase().includes(termino)) {
                 nuevosResultados.push({
@@ -76,7 +79,6 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
             }
         });
 
-        /* Buscar en Proyectos */
         proyectos.forEach(proyecto => {
             if (proyecto.nombre.toLowerCase().includes(termino)) {
                 nuevosResultados.push({
@@ -88,9 +90,25 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
             }
         });
 
-        /* Limitar resultados para no saturar */
         setResultados(nuevosResultados.slice(0, 10));
-    }, [busqueda, tareas, habitos, proyectos]);
+
+        const timeout = setTimeout(async () => {
+            const notasEncontradas = await buscarNotas(busqueda);
+            if (requestIdRef.current !== requestId) return;
+
+            const resultadosNotas = notasEncontradas.map(nota => ({
+                tipo: 'nota' as const,
+                id: nota.id,
+                titulo: nota.titulo,
+                original: nota
+            }));
+
+            const resultadosCombinados = [...nuevosResultados, ...resultadosNotas];
+            setResultados(resultadosCombinados.slice(0, 10));
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [busqueda, tareas, habitos, proyectos, buscarNotas]);
 
     const manejarSeleccion = (resultado: ResultadoBusqueda) => {
         if (resultado.tipo === 'tarea') {
@@ -99,12 +117,14 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
             onSeleccionarHabito(resultado.original as Habito);
         } else if (resultado.tipo === 'proyecto') {
             onSeleccionarProyecto(resultado.original as Proyecto);
+        } else if (resultado.tipo === 'nota') {
+            seleccionarNota(resultado.original as Nota);
         }
         setBusqueda('');
         setMostrarResultados(false);
     };
 
-    const getIcono = (tipo: 'tarea' | 'habito' | 'proyecto') => {
+    const getIcono = (tipo: 'tarea' | 'habito' | 'proyecto' | 'nota') => {
         switch (tipo) {
             case 'tarea':
                 return <CheckCircle2 size={14} className="iconoResultado iconoResultado--tarea" />;
@@ -112,6 +132,8 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
                 return <Repeat size={14} className="iconoResultado iconoResultado--habito" />;
             case 'proyecto':
                 return <Folder size={14} className="iconoResultado iconoResultado--proyecto" />;
+            case 'nota':
+                return <FileText size={14} className="iconoResultado iconoResultado--nota" />;
         }
     };
 

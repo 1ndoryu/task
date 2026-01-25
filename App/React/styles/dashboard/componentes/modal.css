@@ -163,6 +163,10 @@
     width: 90vw;
 }
 
+.modalNotasExpandidoContenedor .modalContenido {
+    overflow: hidden;
+}
+
 /* 
  * MODAL MODERNO - ESTILO LINEAR
  * Para la nueva UI de configuracion de proyectos/tareas/habitos

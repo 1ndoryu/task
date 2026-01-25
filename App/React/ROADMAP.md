@@ -189,21 +189,20 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Prioridad:** Media | **Urgencia:** Chill
 
 #### 11.1 Editor de Notas con Markdown
-- [ ] Implementar parser de Markdown en el panel de escritura
-- [ ] Soporte para sintaxis básica: **negrita**, *cursiva*, listas, código
-- [ ] Preview en tiempo real o toggle vista previa
-- [ ] Atajos de teclado (Ctrl+B, Ctrl+I, etc.)
+- [x] Implementar parser de Markdown en el panel de escritura
+- [x] Soporte para sintaxis básica: **negrita**, *cursiva*, listas, código
+- [x] Preview en tiempo real (sin toggle para vista en tiempo real, las letras cambian de color automaticamente NO TIENE QUE SER UNA VISTA PREVIA SEPARADA; NO; TIENE QUE SER IGUAL COMO FUNCIONA EN UN IDE, SI PONGO **hola** AUTOMATICAMENTE CAMBIA DE COLOR EL EL TEXTO; SOLO ESO; Y SI PONGO *HOLA* CAMBIA DE COLOR Y SE PONE CURSIVA; Y SI PONGO - [ ] SE AJUSTA AUTOMATICAMENTE, ETC, ASI COMO UN IDE, SI ESTO ES COMPLICADO, DIVIDIR EN TAREAS PEQUENAS, ESTE SARA EL MODO GENERAL, MODO EDITOR), LUEGO SE AGREGA UN BOTOON ARRIBA EN EL HEADER PARA CAMBIAR A VISTA PREVIA; ES TODO.
+- [ ] Atajos de teclado (Ctrl+B, Ctrl+I, etc.) (no agregar botones)
 
 #### 11.2 Vista Expandida de Notas
-- [ ] Botón "Expandir" en sección Notas Guardadas
-- [ ] Layout de dos columnas: lista de notas | editor
+- [ ] Botón "Expandir" en sección Notas Guardadas (esto se mal intepreto, lo explico brevemente, la idea es la siguiente, cuando se abre las notas guardadas, no debe aparecer el boton de expandir, no, debe aparecer lo que se supone que estamos expandiendo ( el layout dividido), o sea, no abrir dentro de las notas guardadas, quitar el boton de expandir)
+- [ ] Layout de dos columnas: lista de notas | editor (mal interpretado, corregir, hay bug visuales generados por el efecto de vista previa y editor, no debe haber un editor ni una vista previa, debe ser igual como el preview en tiempo real que se hizo anteriormente)
 - [ ] Navegación entre notas sin recargar página
-- [ ] Reutilizar componente existente (centralizar lógica)
 
 #### 11.3 Búsqueda de Notas
-- [ ] Integrar notas en el sistema de búsqueda global
-- [ ] Indexar título y contenido de notas
-- [ ] Mostrar resultados de notas en dropdown de búsqueda
+- [x] Integrar notas en el sistema de búsqueda global
+- [x] Indexar título y contenido de notas
+- [x] Mostrar resultados de notas en dropdown de búsqueda
 
 ---
 
@@ -340,10 +339,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - [ ] Objetivo: Soportar múltiples vistas futuras más allá del Dashboard (ej. Calendario completo, Wiki, Archivos).
   - [ ] *Nota: Verificar consistencia con diseño actual tipo Dashboard único.*
 
-### 14.6 Deuda Técnica Visual
-- [ ] **Refactor CSS Perfil/Configuración:**
-  - [ ] Auditar `VistaPerfil` y modales de configuración.
-  - [ ] Eliminar estilos hardcodeados y aplicar variables `var(--...)` del sistema.
+### 14.6 Deuda Técnica Visual 🚧 **PARCIALMENTE COMPLETADA**
+- [x] **Refactor CSS Perfil/Configuración (VistaPerfil):**
+  - [x] Eliminar estilos hardcodeados y aplicar variables `var(--...)` del sistema.
+  - [ ] Auditar modales de configuración restantes.
 
 ### 14.7 Actividad Diaria Detallada
 - [ ] **Detalle por día en el panel de actividad:**
@@ -534,10 +533,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 | **Light Mode** | Tema claro para preferencias de día                 |
 
 **Tareas:**
-- [ ] Crear `ModalTemas.tsx` con selector visual
-- [ ] Modificar `variables.css` para soportar múltiples temas
-- [ ] Agregar opción al menú contextual del usuario
-- [ ] Hook `useTema` para gestionar el estado
+- [x] Crear `ModalTemas.tsx` con selector visual
+- [x] Modificar `variables.css` para soportar múltiples temas
+- [x] Agregar opción al menú contextual del usuario
+- [x] Hook `useTema` para gestionar el estado
 
 ---
 

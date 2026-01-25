@@ -21,5 +21,6 @@ export {ModalPerfil} from './ModalPerfil';
 export {DashboardGrid} from './DashboardGrid';
 export {DashboardModales} from './DashboardModales';
 export {ModalNotasGuardadas} from './ModalNotasGuardadas';
+export {ModalNotasExpandido} from './notas/ModalNotasExpandido';
 export {BuscadorGlobal} from './BuscadorGlobal';
 export type {DatosFormulario} from './FormularioHabito';

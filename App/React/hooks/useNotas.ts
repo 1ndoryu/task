@@ -61,6 +61,7 @@ const CONTENIDO_NOTA_NUEVA = '# Título de la nota\n\n';
 
 /* Clave para persistir el ID de la última nota activa */
 const STORAGE_KEY_NOTA_ACTIVA = 'glory_nota_activa_id';
+const EVENTO_NOTA_ACTIVA = 'glory_evento_nota_activa';
 
 /**
  * Guarda el ID de la nota activa en localStorage
@@ -75,6 +76,18 @@ function persistirNotaActivaId(id: number | null): void {
     } catch {
         /* Ignorar errores de localStorage */
     }
+}
+
+function emitirCambioNotaActiva(id: number | null): void {
+    if (typeof window === 'undefined') return;
+
+    window.dispatchEvent(
+        new CustomEvent(EVENTO_NOTA_ACTIVA, {
+            detail: {
+                id
+            }
+        })
+    );
 }
 
 /**
@@ -427,6 +440,7 @@ export function useNotas(): UseNotasReturn {
      */
     const seleccionarNota = useCallback((nota: Nota) => {
         persistirNotaActivaId(nota.id);
+        emitirCambioNotaActiva(nota.id);
         setEstado(prev => ({
             ...prev,
             notaActiva: {
@@ -490,6 +504,46 @@ export function useNotas(): UseNotasReturn {
             }
         };
     }, [cargarNotas]);
+
+    useEffect(() => {
+        const manejarNotaActiva = (evento: Event) => {
+            const detalle = (evento as CustomEvent<{id: number | null}>).detail;
+            if (!detalle) return;
+
+            setEstado(prev => {
+                if (prev.notaActiva.id === detalle.id) return prev;
+
+                if (detalle.id === null) {
+                    return {
+                        ...prev,
+                        notaActiva: {
+                            id: null,
+                            contenido: CONTENIDO_NOTA_NUEVA,
+                            modificada: false
+                        }
+                    };
+                }
+
+                const notaEncontrada = prev.notas.find(nota => nota.id === detalle.id);
+                if (!notaEncontrada) return prev;
+
+                return {
+                    ...prev,
+                    notaActiva: {
+                        id: notaEncontrada.id,
+                        contenido: notaEncontrada.contenido,
+                        modificada: false
+                    }
+                };
+            });
+        };
+
+        window.addEventListener(EVENTO_NOTA_ACTIVA, manejarNotaActiva);
+
+        return () => {
+            window.removeEventListener(EVENTO_NOTA_ACTIVA, manejarNotaActiva);
+        };
+    }, []);
 
     /*
      * Restaurar la última nota activa guardada en localStorage

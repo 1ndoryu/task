@@ -5,11 +5,11 @@
  */
 
 import {useState, useEffect, useCallback} from 'react';
-import {Search, Trash2, Clock, FileText, Loader, AlertCircle} from 'lucide-react';
+import {Search, FileText, Loader, AlertCircle} from 'lucide-react';
 import {Modal} from '../shared';
 import {useNotas} from '../../hooks';
 import type {Nota} from '../../hooks';
-import {formatearFechaRelativa} from '../../utils/fecha';
+import {ListaNotasGuardadas} from './notas/ListaNotasGuardadas';
 
 interface ModalNotasGuardadasProps {
     abierto: boolean;
@@ -58,9 +58,7 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
     );
 
     const manejarEliminar = useCallback(
-        (e: React.MouseEvent, notaId: number) => {
-            e.stopPropagation();
-            /* Optimistic update: la nota desaparece inmediatamente */
+        (notaId: number) => {
             eliminarNota(notaId);
         },
         [eliminarNota]
@@ -71,7 +69,12 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
     if (!abierto) return null;
 
     return (
-        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra="modalNotasContenedor">
+        <Modal
+            estaAbierto={abierto}
+            titulo="Notas Guardadas"
+            onCerrar={onCerrar}
+            claseExtra="modalNotasContenedor"
+        >
             <div id="modal-notas-guardadas" className="modalNotasGuardadas">
                 {/* Barra de búsqueda */}
                 <div className="modalNotasBusqueda">
@@ -99,24 +102,7 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
                             {!terminoBusqueda && <p>Guarda notas desde el Scratchpad usando el botón de guardar</p>}
                         </div>
                     ) : (
-                        notasMostrar.map(nota => (
-                            <div key={nota.id} className="modalNotasItem" onClick={() => manejarSeleccionar(nota)}>
-                                <button className="modalNotasItemEliminar" onClick={e => manejarEliminar(e, nota.id)} title="Eliminar nota">
-                                    <Trash2 size={14} />
-                                </button>
-                                <div className="modalNotasItemContenido">
-                                    <div className="modalNotasItemTitulo">{nota.titulo}</div>
-                                    <div className="modalNotasItemPreview">
-                                        {nota.contenido.slice(0, 150)}
-                                        {nota.contenido.length > 150 ? '...' : ''}
-                                    </div>
-                                    <div className="modalNotasItemFecha">
-                                        <Clock size={10} />
-                                        <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
+                        <ListaNotasGuardadas notas={notasMostrar} modo="grid" onSeleccionar={manejarSeleccionar} onEliminar={manejarEliminar} />
                     )}
                 </div>
 
