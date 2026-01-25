@@ -48,6 +48,97 @@
     border-radius: 3px;
 }
 
+.panelActividadDetalle {
+    margin-top: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd);
+    border: 1px dashed var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+}
+
+.panelActividadDetalleEncabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.panelActividadDetalleTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+}
+
+.panelActividadDetalleBoton {
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.panelActividadDetalleBoton:hover {
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
+.panelActividadDetalleEstado,
+.panelActividadDetalleError,
+.panelActividadDetalleVacio {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.panelActividadDetalleError {
+    color: var(--dashboard-colorError);
+}
+
+.panelActividadDetalleLista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.panelActividadDetalleItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.panelActividadDetalleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.panelActividadDetalleTipo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+}
+
+.panelActividadDetalleElemento,
+.panelActividadDetalleProyecto {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.panelActividadDetalleHora {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
 /* 
  * Modal de configuracion - Selector de periodo 
  */

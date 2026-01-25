@@ -130,6 +130,72 @@ class ActividadRepository
         return array_values($actividad);
     }
 
+    public function obtenerDetalleDia(
+        string $fecha,
+        ?string $tipo = null,
+        ?int $proyectoId = null,
+        ?int $habitoId = null
+    ): array {
+        global $wpdb;
+        $table = Schema::getTableName('actividad');
+        $tableTareas = Schema::getTableName('tareas');
+        $tableHabitos = Schema::getTableName('habitos');
+        $tableNotas = Schema::getTableName('notas');
+        $tableProyectos = Schema::getTableName('proyectos');
+
+        $sql = "SELECT a.id, a.tipo, a.elemento_id, a.elemento_tipo, a.proyecto_id, a.fecha, a.hora, a.detalles,
+                       t.texto as tarea_texto,
+                       h.nombre as habito_nombre,
+                       n.titulo as nota_titulo,
+                       p.nombre as proyecto_nombre
+                FROM $table a
+                LEFT JOIN $tableTareas t ON a.elemento_id = t.id AND a.elemento_tipo = 'tarea'
+                LEFT JOIN $tableHabitos h ON a.elemento_id = h.id AND a.elemento_tipo = 'habito'
+                LEFT JOIN $tableNotas n ON a.elemento_id = n.id AND a.elemento_tipo = 'nota'
+                LEFT JOIN $tableProyectos p ON a.proyecto_id = p.id
+                WHERE a.user_id = %d AND a.fecha = %s";
+
+        $params = [$this->userId, $fecha];
+
+        if ($tipo) {
+            $sql .= " AND a.tipo = %s";
+            $params[] = $tipo;
+        }
+
+        if ($proyectoId) {
+            $sql .= " AND a.proyecto_id = %d";
+            $params[] = $proyectoId;
+        }
+
+        if ($habitoId) {
+            $sql .= " AND a.elemento_tipo = 'habito' AND a.elemento_id = %d";
+            $params[] = $habitoId;
+        }
+
+        $sql .= " ORDER BY a.hora DESC, a.id DESC";
+
+        $results = $wpdb->get_results($wpdb->prepare($sql, $params), 'ARRAY_A');
+
+        $detalle = [];
+        foreach ($results as $row) {
+            $elementoNombre = $row['tarea_texto'] ?? $row['habito_nombre'] ?? $row['nota_titulo'] ?? null;
+            $detalle[] = [
+                'id' => (int)$row['id'],
+                'tipo' => $row['tipo'],
+                'elementoId' => $row['elemento_id'] ? (int)$row['elemento_id'] : null,
+                'elementoTipo' => $row['elemento_tipo'],
+                'proyectoId' => $row['proyecto_id'] ? (int)$row['proyecto_id'] : null,
+                'fecha' => $row['fecha'],
+                'hora' => $row['hora'],
+                'elementoNombre' => $elementoNombre,
+                'proyectoNombre' => $row['proyecto_nombre'] ?? null,
+                'detalles' => $row['detalles'] ? json_decode($row['detalles'], true) : null
+            ];
+        }
+
+        return $detalle;
+    }
+
     /**
      * Obtiene el resumen de actividad para el mapa de calor
      * Devuelve un array asociativo fecha => nivel (0-4)

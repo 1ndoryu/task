@@ -348,9 +348,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### 14.7 Actividad Diaria Detallada
 - [ ] **Detalle por día en el panel de actividad:**
-  - [ ] Click en un día del mapa de calor muestra la lista de acciones de ese día.
-  - [ ] Permitir ocultar el detalle con el mismo control (toggle).
+  - [x] Click en un día del mapa de calor muestra la lista de acciones de ese día.
+  - [x] Permitir ocultar el detalle con el mismo control (toggle).
   - [ ] Mantener el detalle sincronizado con el filtro actual (tipo/proyecto/hábito).
+  - Detalle dice por ejemplo "habito cumplido", pero no dice cual habito, me parece importante que diga cual o cual tarea,
 - [x] **Registro de actividad respeta fin del día:**
   - [x] Enviar fecha efectiva al backend para evitar que acciones nocturnas caigan en el día siguiente.
   - [x] Alinear fecha local del heatmap con la jornada del usuario.

@@ -32,6 +32,26 @@ export interface RegistroActividadParams {
     fecha?: string;
 }
 
+export interface DetalleActividadItem {
+    id: number;
+    tipo: TipoActividad;
+    elementoId: number | null;
+    elementoTipo: 'tarea' | 'habito' | 'nota' | 'proyecto' | null;
+    proyectoId: number | null;
+    fecha: string;
+    hora: string | null;
+    elementoNombre?: string | null;
+    proyectoNombre?: string | null;
+    detalles?: Record<string, unknown> | null;
+}
+
+export interface ObtenerDetalleActividadParams {
+    fecha: string;
+    tipo?: TipoActividad;
+    proyectoId?: number;
+    habitoId?: number;
+}
+
 /**
  * Registra una actividad en el backend
  * Se ejecuta de forma silenciosa (no bloquea la UI)
@@ -80,6 +100,35 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
         console.warn('[Actividad] Error de red:', error);
         return false;
     }
+}
+
+export async function obtenerDetalleActividadDia(params: ObtenerDetalleActividadParams): Promise<DetalleActividadItem[]> {
+    const query = new URLSearchParams();
+    query.append('fecha', params.fecha);
+    if (params.tipo) query.append('tipo', params.tipo);
+    if (params.proyectoId) query.append('proyectoId', String(params.proyectoId));
+    if (params.habitoId) query.append('habitoId', String(params.habitoId));
+
+    const response = await fetch(`${API_BASE}/dia?${query.toString()}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': obtenerNonce()
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al cargar detalle de actividad');
+    }
+
+    const data = (await response.json()) as {success: boolean; detalle?: DetalleActividadItem[]; error?: string};
+
+    if (!data.success) {
+        throw new Error(data.error || 'Error al cargar detalle de actividad');
+    }
+
+    return data.detalle || [];
 }
 
 /**

@@ -95,6 +95,35 @@ class ActividadApiController
             ]
         ]);
 
+        register_rest_route('glory/v1', '/actividad/dia', [
+            'methods' => 'GET',
+            'callback' => [self::class, 'obtenerDetalleDia'],
+            'permission_callback' => [self::class, 'verificarPermisos'],
+            'args' => [
+                'fecha' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => fn($param) => is_string($param) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $param)
+                ],
+                'tipo' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'proyectoId' => [
+                    'required' => false,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint'
+                ],
+                'habitoId' => [
+                    'required' => false,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint'
+                ]
+            ]
+        ]);
+
         /* Registrar actividad manualmente */
         register_rest_route('glory/v1', '/actividad', [
             'methods' => 'POST',
@@ -336,6 +365,44 @@ class ActividadApiController
                     'inicio' => $fechaInicio,
                     'fin' => $fechaFin
                 ]
+            ], 200);
+        } catch (\Exception $e) {
+            return new \WP_REST_Response([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public static function obtenerDetalleDia(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $userId = get_current_user_id();
+            $repo = new ActividadRepository($userId);
+            $fecha = $request->get_param('fecha');
+
+            if (!$fecha || !is_string($fecha) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+                return new \WP_REST_Response([
+                    'success' => false,
+                    'error' => 'Fecha inválida'
+                ], 400);
+            }
+
+            $tipo = $request->get_param('tipo');
+            $proyectoId = $request->get_param('proyectoId');
+            $habitoId = $request->get_param('habitoId');
+
+            $detalle = $repo->obtenerDetalleDia(
+                $fecha,
+                $tipo ?: null,
+                $proyectoId ?: null,
+                $habitoId ?: null
+            );
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'fecha' => $fecha,
+                'detalle' => $detalle
             ], 200);
         } catch (\Exception $e) {
             return new \WP_REST_Response([

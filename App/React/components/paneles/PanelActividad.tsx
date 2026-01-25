@@ -7,12 +7,13 @@
  * Configurable por periodo y tipo de actividad
  */
 
-import {useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MapaCalor, OverlayEnfoque} from '../shared';
 import {useActividad} from '../../hooks/useActividad';
 import type {ConfiguracionActividad} from '../../hooks/useConfiguracionActividad';
+import {obtenerDetalleActividadDia, type DetalleActividadItem} from '../../services/actividadService';
 
 interface PanelActividadProps {
     configuracion: ConfiguracionActividad;
@@ -34,6 +35,10 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
 
     const {estado, cargarHeatmap} = useActividad(filtrosIniciales);
     const [modoEnfoque, setModoEnfoque] = useState(false);
+    const [fechaDetalle, setFechaDetalle] = useState<string | null>(null);
+    const [detalleItems, setDetalleItems] = useState<DetalleActividadItem[]>([]);
+    const [detalleCargando, setDetalleCargando] = useState(false);
+    const [detalleError, setDetalleError] = useState<string | null>(null);
 
     /* Cargar datos al montar y cuando cambie la configuracion */
     useEffect(() => {
@@ -42,6 +47,47 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
             tipo: tipoFiltro
         });
     }, [configuracion.periodo, configuracion.filtroTipo, cargarHeatmap, tipoFiltro]);
+
+    const cargarDetalleDia = useCallback(
+        async (fecha: string) => {
+            setDetalleCargando(true);
+            setDetalleError(null);
+            try {
+                const items = await obtenerDetalleActividadDia({
+                    fecha,
+                    tipo: tipoFiltro
+                });
+                setDetalleItems(items);
+            } catch (error) {
+                const mensaje = error instanceof Error ? error.message : 'Error al cargar detalle de actividad';
+                setDetalleError(mensaje);
+                setDetalleItems([]);
+            } finally {
+                setDetalleCargando(false);
+            }
+        },
+        [tipoFiltro]
+    );
+
+    const manejarClickDia = useCallback(
+        (fecha: string) => {
+            if (fechaDetalle === fecha) {
+                setFechaDetalle(null);
+                setDetalleItems([]);
+                setDetalleError(null);
+                return;
+            }
+            setFechaDetalle(fecha);
+            cargarDetalleDia(fecha);
+        },
+        [fechaDetalle, cargarDetalleDia]
+    );
+
+    useEffect(() => {
+        if (fechaDetalle) {
+            cargarDetalleDia(fechaDetalle);
+        }
+    }, [fechaDetalle, cargarDetalleDia]);
 
     /* Determinar titulo segun filtro */
     const obtenerSubtitulo = (): string => {
@@ -54,6 +100,81 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
     const estadisticas = estado.estadisticas;
     const diasActivos = estadisticas?.diasActivos ?? 0;
     const totalActividades = estadisticas ? Object.values(estadisticas.totales).reduce((a, b) => a + b, 0) : 0;
+
+    const formatearFechaDetalle = useCallback((fecha: string) => {
+        const fechaObj = new Date(`${fecha}T12:00:00`);
+        return fechaObj.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }, []);
+
+    const obtenerEtiquetaTipo = useCallback((tipo: DetalleActividadItem['tipo']) => {
+        switch (tipo) {
+            case 'tarea_completada':
+                return 'Tarea completada';
+            case 'habito_cumplido':
+                return 'Habito cumplido';
+            case 'nota_creada':
+                return 'Nota creada';
+            case 'adjunto_subido':
+                return 'Adjunto subido';
+            case 'tarea_desmarcada':
+                return 'Tarea desmarcada';
+            case 'habito_desmarcado':
+                return 'Habito desmarcado';
+            case 'habito_pospuesto':
+                return 'Habito pospuesto';
+            default:
+                return 'Actividad';
+        }
+    }, []);
+
+    const formatearHora = useCallback((hora: string | null) => {
+        if (!hora) return '--:--';
+        return hora.slice(0, 5);
+    }, []);
+
+    const DetalleActividadDia = useCallback(
+        () => {
+            if (!fechaDetalle) return null;
+
+            return (
+                <div className="panelActividadDetalle">
+                    <div className="panelActividadDetalleEncabezado">
+                        <span className="panelActividadDetalleTitulo">Detalle del {formatearFechaDetalle(fechaDetalle)}</span>
+                        <button className="panelActividadDetalleBoton" onClick={() => setFechaDetalle(null)}>
+                            Ocultar
+                        </button>
+                    </div>
+
+                    {detalleCargando ? (
+                        <div className="panelActividadDetalleEstado">Cargando detalle...</div>
+                    ) : detalleError ? (
+                        <div className="panelActividadDetalleError">{detalleError}</div>
+                    ) : detalleItems.length === 0 ? (
+                        <div className="panelActividadDetalleVacio">Sin actividad registrada</div>
+                    ) : (
+                        <ul className="panelActividadDetalleLista">
+                            {detalleItems.map(item => (
+                                <li key={item.id} className="panelActividadDetalleItem">
+                                    <div className="panelActividadDetalleInfo">
+                                        <span className="panelActividadDetalleTipo">{obtenerEtiquetaTipo(item.tipo)}</span>
+                                        {item.elementoNombre && <span className="panelActividadDetalleElemento">{item.elementoNombre}</span>}
+                                        {item.proyectoNombre && <span className="panelActividadDetalleProyecto">{item.proyectoNombre}</span>}
+                                    </div>
+                                    <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            );
+        },
+        [fechaDetalle, detalleCargando, detalleError, detalleItems, formatearFechaDetalle, formatearHora, obtenerEtiquetaTipo]
+    );
 
     return (
         <div className="panelDashboard internaColumna">
@@ -87,10 +208,12 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
             />
 
             {/* Mapa de calor - siempre muestra datos si existen, recarga en segundo plano */}
-            <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapa" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} />}</div>
+            <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapa" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} onClickDia={manejarClickDia} />}</div>
+            <DetalleActividadDia />
 
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Actividad">
-                <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapaEnfoque" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} />}</div>
+                <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapaEnfoque" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} onClickDia={manejarClickDia} />}</div>
+                <DetalleActividadDia />
             </OverlayEnfoque>
         </div>
     );
