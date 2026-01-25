@@ -30,6 +30,7 @@ export interface RegistroActividadParams {
     elementoTipo?: 'tarea' | 'habito' | 'nota' | 'proyecto';
     proyectoId?: number;
     fecha?: string;
+    detalles?: Record<string, unknown>;
 }
 
 export interface DetalleActividadItem {
@@ -135,22 +136,24 @@ export async function obtenerDetalleActividadDia(params: ObtenerDetalleActividad
  * Atajos para registrar tipos comunes de actividad
  * Todos envían la fecha local del cliente para evitar problemas de zona horaria
  */
-export function registrarTareaCompletada(tareaId: number, proyectoId?: number): Promise<boolean> {
+export function registrarTareaCompletada(tareaId: number, proyectoId?: number, tareaNombre?: string): Promise<boolean> {
     return registrarActividad({
         tipo: 'tarea_completada',
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
-        fecha: obtenerFechaHoy()
+        fecha: obtenerFechaHoy(),
+        detalles: tareaNombre ? {elementoNombre: tareaNombre} : undefined
     });
 }
 
-export function registrarHabitoCumplido(habitoId: number): Promise<boolean> {
+export function registrarHabitoCumplido(habitoId: number, habitoNombre?: string): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_cumplido',
         elementoId: habitoId,
         elementoTipo: 'habito',
-        fecha: obtenerFechaHoy()
+        fecha: obtenerFechaHoy(),
+        detalles: habitoNombre ? {elementoNombre: habitoNombre} : undefined
     });
 }
 
@@ -163,41 +166,45 @@ export function registrarNotaCreada(notaId: number): Promise<boolean> {
     });
 }
 
-export function registrarAdjuntoSubido(tareaId: number, proyectoId?: number): Promise<boolean> {
+export function registrarAdjuntoSubido(tareaId: number, proyectoId?: number, tareaNombre?: string): Promise<boolean> {
     return registrarActividad({
         tipo: 'adjunto_subido',
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
-        fecha: obtenerFechaHoy()
+        fecha: obtenerFechaHoy(),
+        detalles: tareaNombre ? {elementoNombre: tareaNombre} : undefined
     });
 }
 
 /* Funciones para registrar desmarcar/posponer */
-export function registrarTareaDesmarcada(tareaId: number, proyectoId?: number): Promise<boolean> {
+export function registrarTareaDesmarcada(tareaId: number, proyectoId?: number, tareaNombre?: string): Promise<boolean> {
     return registrarActividad({
         tipo: 'tarea_desmarcada',
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
-        fecha: obtenerFechaHoy()
+        fecha: obtenerFechaHoy(),
+        detalles: tareaNombre ? {elementoNombre: tareaNombre} : undefined
     });
 }
 
-export function registrarHabitoDesmarcado(habitoId: number): Promise<boolean> {
+export function registrarHabitoDesmarcado(habitoId: number, habitoNombre?: string): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_desmarcado',
         elementoId: habitoId,
         elementoTipo: 'habito',
-        fecha: obtenerFechaHoy()
+        fecha: obtenerFechaHoy(),
+        detalles: habitoNombre ? {elementoNombre: habitoNombre} : undefined
     });
 }
 
-export function registrarHabitoPospuesto(habitoId: number): Promise<boolean> {
+export function registrarHabitoPospuesto(habitoId: number, habitoNombre?: string): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_pospuesto',
         elementoId: habitoId,
         elementoTipo: 'habito',
-        fecha: obtenerFechaHoy()
+        fecha: obtenerFechaHoy(),
+        detalles: habitoNombre ? {elementoNombre: habitoNombre} : undefined
     });
 }

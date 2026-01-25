@@ -14,6 +14,7 @@ interface ModalConfiguracionHabitosProps {
     esMovil?: boolean;
     onToggleCompletadosHoy: () => void;
     onToggleModoCompacto: () => void;
+    onToggleMostrarPausados: () => void;
     onToggleColumna: (columna: keyof ColumnasHabitos) => void;
     onCambiarTolerancia: (preset: ToleranciaPreset) => void;
 }
@@ -42,7 +43,7 @@ const PRESETS_INFO: Record<Exclude<ToleranciaPreset, 'personalizado'>, InfoPrese
     }
 };
 
-export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion, esMovil = false, onToggleCompletadosHoy, onToggleModoCompacto, onToggleColumna, onCambiarTolerancia}: ModalConfiguracionHabitosProps): JSX.Element {
+export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion, esMovil = false, onToggleCompletadosHoy, onToggleModoCompacto, onToggleMostrarPausados, onToggleColumna, onCambiarTolerancia}: ModalConfiguracionHabitosProps): JSX.Element {
     interface InfoColumna {
         etiqueta: string;
         descripcion: string;
@@ -118,6 +119,17 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
                         <span className="descripcionOpcionConfig">Reducir el espaciado vertical de las filas</span>
                     </div>
                     <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
+                </div>
+
+                <div className="separadorOpcionesConfig" />
+
+                {/* Opcion 3: Mostrar Pausados */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Mostrar habitos pausados</span>
+                        <span className="descripcionOpcionConfig">Incluye una seccion separada con los habitos en pausa</span>
+                    </div>
+                    <ToggleSwitch checked={configuracion.mostrarPausados} onChange={onToggleMostrarPausados} />
                 </div>
 
                 <div className="separadorOpcionesConfig" />

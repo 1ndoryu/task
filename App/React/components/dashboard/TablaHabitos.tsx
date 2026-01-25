@@ -366,7 +366,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
             ))}
 
             {/* Seccion de habitos pausados */}
-            {habitosPausados.length > 0 && (
+            {configuracion.mostrarPausados && habitosPausados.length > 0 && (
                 <>
                     <div className="tablaSeparadorPausados">
                         <span className="tablaSeparadorPausados__texto">Pausados ({habitosPausados.length})</span>

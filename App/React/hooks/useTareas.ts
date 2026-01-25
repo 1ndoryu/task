@@ -173,10 +173,10 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
 
             /* Registrar actividad para el mapa de calor (silencioso) */
             if (!estadoAnterior) {
-                registrarTareaCompletada(tarea.id, tarea.proyectoId);
+                registrarTareaCompletada(tarea.id, tarea.proyectoId, tarea.texto);
             } else {
                 /* Desmarcar tarea - tambien registrar en actividad */
-                registrarTareaDesmarcada(tarea.id, tarea.proyectoId);
+                registrarTareaDesmarcada(tarea.id, tarea.proyectoId, tarea.texto);
             }
         },
         [tareas, setTareas, registrarAccion]

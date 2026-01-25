@@ -571,8 +571,28 @@
  * MODO COMPACTO 
  */
 .tablaFilaCompacta {
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
-    min-height: 40px;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    min-height: 32px;
+    gap: var(--dashboard-espacioMd);
+    align-items: center;
+}
+
+.tablaFilaCompacta .habitoCheckbox {
+    width: 0.65rem;
+    height: 0.65rem;
+}
+
+.tablaFilaCompacta .filaNombre {
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.4;
+}
+
+.tablaFilaCompacta .filaNombreContenedor {
+    align-items: center;
+}
+
+.tablaFilaCompacta .filaTags {
+    margin-top: 0;
 }
 
 /* 

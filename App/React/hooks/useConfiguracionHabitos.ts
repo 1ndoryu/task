@@ -36,6 +36,7 @@ export const TOLERANCIA_PRESETS: Record<ToleranciaPreset, UmbralesUrgencia> = {
 export interface ConfiguracionHabitos {
     ocultarCompletadosHoy: boolean;
     modoCompacto: boolean;
+    mostrarPausados: boolean;
     columnasVisibles: ColumnasHabitos;
     toleranciaPreset: ToleranciaPreset;
     umbralesPersonalizados: UmbralesUrgencia;
@@ -82,6 +83,7 @@ export const COLUMNAS_POR_DEFECTO: ColumnasHabitos = COLUMNAS_DESKTOP_POR_DEFECT
 export const CONFIG_HABITOS_DESKTOP_POR_DEFECTO: ConfiguracionHabitos = {
     ocultarCompletadosHoy: false,
     modoCompacto: true,
+    mostrarPausados: true,
     columnasVisibles: COLUMNAS_DESKTOP_POR_DEFECTO,
     toleranciaPreset: 'moderado',
     umbralesPersonalizados: {normal: 1, urgente: 3, bloqueante: 5}
@@ -90,6 +92,7 @@ export const CONFIG_HABITOS_DESKTOP_POR_DEFECTO: ConfiguracionHabitos = {
 export const CONFIG_HABITOS_MOVIL_POR_DEFECTO: ConfiguracionHabitos = {
     ocultarCompletadosHoy: false,
     modoCompacto: true,
+    mostrarPausados: true,
     columnasVisibles: COLUMNAS_MOVIL_POR_DEFECTO,
     toleranciaPreset: 'moderado',
     umbralesPersonalizados: {normal: 1, urgente: 3, bloqueante: 5}
@@ -135,6 +138,10 @@ export function useConfiguracionHabitos() {
         setValor(prev => ({...prev, modoCompacto: !prev.modoCompacto}));
     };
 
+    const toggleMostrarPausados = () => {
+        setValor(prev => ({...prev, mostrarPausados: !prev.mostrarPausados}));
+    };
+
     const toggleColumnaVisible = (columna: keyof ColumnasHabitos) => {
         setValor(prev => ({
             ...prev,
@@ -171,6 +178,7 @@ export function useConfiguracionHabitos() {
         actualizarConfiguracion: setValor,
         toggleOcultarCompletadosHoy,
         toggleModoCompacto,
+        toggleMostrarPausados,
         toggleColumnaVisible,
         cambiarToleranciaPreset,
         actualizarUmbralesPersonalizados,

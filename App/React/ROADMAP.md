@@ -258,7 +258,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### 13.4 Comportamiento de Hábitos Pausados
 - [x] Los hábitos pausados NO aparecen en la lista principal de pendientes
 - [x] Los hábitos pausados se muestran en una sección separada "Pausados"
-- [ ] Filtro en la lista de hábitos: "Mostrar pausados" / "Ocultar pausados" - *Pendiente*
+- [x] Filtro en la lista de hábitos: "Mostrar pausados" / "Ocultar pausados"
 
 ### 13.5 Indicadores Visuales
 - [x] Clase CSS `.tablaFilaPausada` con opacidad reducida
@@ -289,11 +289,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] **Inicialización Inmediata:**
   - [x] Leer configuración de localStorage antes de que el store se rehidrate para evitar race conditions.
 
-### 14.2 Refinamiento Visual de Hábitos
-- [ ] **Modo Compacto Mejorado:**
-  - [ ] Estandarizar tamaño de fuente (igual que vista normal, no más pequeño).
-  - [ ] Reducir padding lateral en celdas para aprovechar el espacio.
-  - [ ] Asegurar alineación vertical perfecta en fila compacta.
+### 14.2 Refinamiento Visual de Hábitos ✅ **COMPLETADA**
+- [x] **Modo Compacto Mejorado:**
+  - [x] Estandarizar tamaño de fuente (alineado con tareas compactas).
+  - [x] Reducir padding lateral en celdas para aprovechar el espacio.
+  - [x] Asegurar alineación vertical perfecta en fila compacta.
 
 ### 14.3 Ordenamiento Inteligente 2.0 ✅ **COMPLETADA**
 - [x] **Algoritmo de Prioridad Ponderada:**
@@ -350,8 +350,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [ ] **Detalle por día en el panel de actividad:**
   - [x] Click en un día del mapa de calor muestra la lista de acciones de ese día.
   - [x] Permitir ocultar el detalle con el mismo control (toggle).
-  - [ ] Mantener el detalle sincronizado con el filtro actual (tipo/proyecto/hábito).
-  - Detalle dice por ejemplo "habito cumplido", pero no dice cual habito, me parece importante que diga cual o cual tarea,
+  - [x] Mantener el detalle sincronizado con el filtro actual (tipo/proyecto/hábito).
+  - [x] Detalle indica el hábito/tarea concreto (incluye fallback por ID si falta el nombre).
 - [x] **Registro de actividad respeta fin del día:**
   - [x] Enviar fecha efectiva al backend para evitar que acciones nocturnas caigan en el día siguiente.
   - [x] Alinear fecha local del heatmap con la jornada del usuario.

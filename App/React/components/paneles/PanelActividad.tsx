@@ -89,6 +89,12 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
         }
     }, [fechaDetalle, cargarDetalleDia]);
 
+    useEffect(() => {
+        if (!fechaDetalle) return;
+        setDetalleItems([]);
+        setDetalleError(null);
+    }, [tipoFiltro, fechaDetalle]);
+
     /* Determinar titulo segun filtro */
     const obtenerSubtitulo = (): string => {
         if (configuracion.filtroTipo === 'tarea_completada') return 'Tareas completadas';
@@ -137,6 +143,25 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
         return hora.slice(0, 5);
     }, []);
 
+    const obtenerNombreElemento = useCallback((item: DetalleActividadItem): string | null => {
+        const nombreDetalles = typeof item.detalles?.elementoNombre === 'string' ? item.detalles.elementoNombre : null;
+        const nombreDirecto = item.elementoNombre || nombreDetalles;
+        if (nombreDirecto) return nombreDirecto;
+        if (item.elementoId) {
+            if (item.elementoTipo === 'habito' || item.tipo.startsWith('habito_')) return `Habito #${item.elementoId}`;
+            if (item.elementoTipo === 'tarea' || item.tipo.startsWith('tarea_') || item.tipo === 'adjunto_subido') return `Tarea #${item.elementoId}`;
+            if (item.elementoTipo === 'nota' || item.tipo === 'nota_creada') return `Nota #${item.elementoId}`;
+            if (item.elementoTipo === 'proyecto') return `Proyecto #${item.elementoId}`;
+            return `Elemento #${item.elementoId}`;
+        }
+        return null;
+    }, []);
+
+    const obtenerNombreProyecto = useCallback((item: DetalleActividadItem): string | null => {
+        const nombreDetalles = typeof item.detalles?.proyectoNombre === 'string' ? item.detalles.proyectoNombre : null;
+        return item.proyectoNombre || nombreDetalles || null;
+    }, []);
+
     const DetalleActividadDia = useCallback(
         () => {
             if (!fechaDetalle) return null;
@@ -158,22 +183,27 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                         <div className="panelActividadDetalleVacio">Sin actividad registrada</div>
                     ) : (
                         <ul className="panelActividadDetalleLista">
-                            {detalleItems.map(item => (
+                            {detalleItems.map(item => {
+                                const nombreElemento = obtenerNombreElemento(item);
+                                const nombreProyecto = obtenerNombreProyecto(item);
+
+                                return (
                                 <li key={item.id} className="panelActividadDetalleItem">
                                     <div className="panelActividadDetalleInfo">
                                         <span className="panelActividadDetalleTipo">{obtenerEtiquetaTipo(item.tipo)}</span>
-                                        {item.elementoNombre && <span className="panelActividadDetalleElemento">{item.elementoNombre}</span>}
-                                        {item.proyectoNombre && <span className="panelActividadDetalleProyecto">{item.proyectoNombre}</span>}
+                                        {nombreElemento && <span className="panelActividadDetalleElemento">{nombreElemento}</span>}
+                                        {nombreProyecto && <span className="panelActividadDetalleProyecto">{nombreProyecto}</span>}
                                     </div>
                                     <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
                                 </li>
-                            ))}
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
             );
         },
-        [fechaDetalle, detalleCargando, detalleError, detalleItems, formatearFechaDetalle, formatearHora, obtenerEtiquetaTipo]
+        [fechaDetalle, detalleCargando, detalleError, detalleItems, formatearFechaDetalle, formatearHora, obtenerEtiquetaTipo, obtenerNombreElemento, obtenerNombreProyecto]
     );
 
     return (

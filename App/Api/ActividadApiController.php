@@ -154,6 +154,11 @@ class ActividadApiController
                     'required' => false,
                     'type' => 'string',
                     'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'detalles' => [
+                    'required' => false,
+                    'type' => 'array',
+                    'sanitize_callback' => fn($param) => is_array($param) ? $param : []
                 ]
             ]
         ]);
@@ -380,6 +385,7 @@ class ActividadApiController
             $userId = get_current_user_id();
             $repo = new ActividadRepository($userId);
             $fecha = $request->get_param('fecha');
+            $detalles = $request->get_param('detalles');
 
             if (!$fecha || !is_string($fecha) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
                 return new \WP_REST_Response([
@@ -495,7 +501,8 @@ class ActividadApiController
                 $elementoId ?: null,
                 $elementoTipo ?: null,
                 $proyectoId ?: null,
-                $fecha ?: null
+                $fecha ?: null,
+                is_array($detalles) ? $detalles : []
             );
 
             if (!$resultado) {

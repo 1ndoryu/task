@@ -178,7 +178,9 @@ class ActividadRepository
 
         $detalle = [];
         foreach ($results as $row) {
-            $elementoNombre = $row['tarea_texto'] ?? $row['habito_nombre'] ?? $row['nota_titulo'] ?? null;
+            $detalles = $row['detalles'] ? json_decode($row['detalles'], true) : null;
+            $elementoNombre = $row['tarea_texto'] ?? $row['habito_nombre'] ?? $row['nota_titulo'] ?? ($detalles['elementoNombre'] ?? null);
+            $proyectoNombre = $row['proyecto_nombre'] ?? ($detalles['proyectoNombre'] ?? null);
             $detalle[] = [
                 'id' => (int)$row['id'],
                 'tipo' => $row['tipo'],
@@ -188,8 +190,8 @@ class ActividadRepository
                 'fecha' => $row['fecha'],
                 'hora' => $row['hora'],
                 'elementoNombre' => $elementoNombre,
-                'proyectoNombre' => $row['proyecto_nombre'] ?? null,
-                'detalles' => $row['detalles'] ? json_decode($row['detalles'], true) : null
+                'proyectoNombre' => $proyectoNombre,
+                'detalles' => $detalles
             ];
         }
 
