@@ -14,9 +14,26 @@ import {ArrowUpDown, Filter, Settings} from 'lucide-react';
 import {obtenerTituloPanelMovil, paginaMovilAPanelId} from '../config/registroPaneles';
 import type {GrupoOpciones, OpcionMenu} from '../components/shared/MenuOpcionesPanel';
 import type {PaginaMovil} from './usePaginaMovil';
+import type {ModoOrdenTareas} from './useOrdenarTareas';
+import type {ModoOrdenHabitos} from './useOrdenarHabitos';
+import type {OrdenamientoProyectos} from './useConfiguracionProyectos';
 
-interface OpcionOrden {
-    id: string;
+interface OpcionOrdenTareas {
+    id: ModoOrdenTareas;
+    etiqueta: string;
+    descripcion?: string;
+    icono?: React.ReactNode;
+}
+
+interface OpcionOrdenHabitos {
+    id: ModoOrdenHabitos;
+    etiqueta: string;
+    descripcion?: string;
+    icono?: React.ReactNode;
+}
+
+interface OpcionOrdenProyectos {
+    id: OrdenamientoProyectos;
     etiqueta: string;
     descripcion?: string;
     icono?: React.ReactNode;
@@ -35,19 +52,19 @@ interface UseOpcionesPanelMovilParams {
     opcionesFiltroTareas?: OpcionFiltro[];
     valorFiltroTareas?: string;
     onCambiarFiltroTareas?: (valor: string) => void;
-    opcionesOrdenTareas?: OpcionOrden[];
-    modoOrdenTareas?: string;
-    onCambiarOrdenTareas?: (modo: string) => void;
+    opcionesOrdenTareas?: OpcionOrdenTareas[];
+    modoOrdenTareas?: ModoOrdenTareas;
+    onCambiarOrdenTareas?: (modo: ModoOrdenTareas) => void;
     onAbrirConfigTareas?: () => void;
     /* Hábitos */
-    opcionesOrdenHabitos?: OpcionOrden[];
-    modoOrdenHabitos?: string;
-    onCambiarOrdenHabitos?: (modo: string) => void;
+    opcionesOrdenHabitos?: OpcionOrdenHabitos[];
+    modoOrdenHabitos?: ModoOrdenHabitos;
+    onCambiarOrdenHabitos?: (modo: ModoOrdenHabitos) => void;
     onAbrirConfigHabitos?: () => void;
     /* Proyectos */
-    opcionesOrdenProyectos?: OpcionOrden[];
-    modoOrdenProyectos?: string;
-    onCambiarOrdenProyectos?: (modo: string) => void;
+    opcionesOrdenProyectos?: OpcionOrdenProyectos[];
+    modoOrdenProyectos?: OrdenamientoProyectos;
+    onCambiarOrdenProyectos?: (modo: OrdenamientoProyectos) => void;
     onAbrirConfigProyectos?: () => void;
     /* Actividad */
     onAbrirConfigActividad?: () => void;
@@ -72,7 +89,7 @@ function generarTituloPagina(pagina: PaginaMovil): string {
 }
 
 export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseOpcionesPanelMovilResult {
-    const {paginaActiva, opcionesFiltroTareas = [], valorFiltroTareas = 'todas', onCambiarFiltroTareas, opcionesOrdenTareas = [], modoOrdenTareas = '', onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos = [], modoOrdenHabitos = '', onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos = [], modoOrdenProyectos = '', onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad} = params;
+    const {paginaActiva, opcionesFiltroTareas = [], valorFiltroTareas = 'todas', onCambiarFiltroTareas, opcionesOrdenTareas = [], modoOrdenTareas, onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos = [], modoOrdenHabitos, onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos = [], modoOrdenProyectos, onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad} = params;
 
     const resultado = useMemo((): UseOpcionesPanelMovilResult => {
         const grupos: GrupoOpciones[] = [];

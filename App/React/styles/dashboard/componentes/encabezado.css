@@ -760,7 +760,7 @@
     }
 
     /* Ocultar elementos de navegacion excepto opciones, drawer y bottomsheet */
-    .encabezadoNav > *:not(.botonOpcionesMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel):not(.bottomSheetOverlay):not(.bottomSheetPanel) {
+    .encabezadoNav > *:not(.botonOpcionesMovil):not(.botonBuscadorMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel):not(.bottomSheetOverlay):not(.bottomSheetPanel) {
         display: none !important;
     }
 
@@ -816,7 +816,8 @@
 
 @media (max-width: 768px) {
     /* Mostrar botón de opciones móvil */
-    .botonOpcionesMovil {
+    .botonOpcionesMovil,
+    .botonBuscadorMovil {
         display: inline-flex;
         width: 44px;
         height: 44px;
@@ -830,7 +831,8 @@
         position: relative;
     }
 
-    .botonOpcionesMovil svg {
+    .botonOpcionesMovil svg,
+    .botonBuscadorMovil svg {
         width: 20px;
         height: 20px;
     }

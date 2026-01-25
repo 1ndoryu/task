@@ -12,6 +12,7 @@ import type {GrupoOpciones, OpcionMenu} from '../shared/MenuOpcionesPanel';
 import type {OpcionDrawer} from '../shared/DrawerMovil';
 import {BuscadorGlobal} from './BuscadorGlobal';
 import {VERSION_ACTUAL} from '../../data/changelog';
+import {obtenerTituloPanelMovil, paginaMovilAPanelId} from '../../config/registroPaneles';
 import {APP_TEXTS} from '../../constants/appTexts';
 import type {InfoSuscripcion, Tarea, Habito, Proyecto} from '../../types/dashboard';
 
@@ -64,6 +65,7 @@ interface DashboardEncabezadoProps {
         opciones?: OpcionMenu[];
         tieneFiltrosActivos?: boolean;
     };
+    paginaMovilActiva?: string;
 }
 
 interface MenuState {
@@ -72,7 +74,7 @@ interface MenuState {
     y: number;
 }
 
-export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickConfigMCP, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido, opcionesMovil}: DashboardEncabezadoProps): JSX.Element {
+export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, version = VERSION_ACTUAL, usuario = 'user@admin', avatarUrl, sincronizacion, suscripcion, esAdmin = false, equiposPendientes = 0, notificacionesPendientes = 0, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickConfigMCP, onExportarDatos, onImportarDatos, tareas = [], habitos = [], proyectos = [], onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, onCrearRapido, opcionesMovil, paginaMovilActiva}: DashboardEncabezadoProps): JSX.Element {
     const estaConectado = sincronizacion?.estaLogueado ?? false;
     const esTablet = useEsDispositivoMovil();
     const [menuUsuario, setMenuUsuario] = useState<MenuState>({visible: false, x: 0, y: 0});
@@ -81,6 +83,7 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
     const [mostrarBuscadorMovil, setMostrarBuscadorMovil] = useState(false);
     const [menuOpcionesMovilAbierto, setMenuOpcionesMovilAbierto] = useState(false);
     const inputArchivoRef = useRef<HTMLInputElement>(null);
+    const puedeBuscar = Boolean(estaConectado && onSeleccionarTarea && onSeleccionarHabito && onSeleccionarProyecto);
 
     /* Determinar si mostrar badge de plan en header (solo FREE y TRIAL) */
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
@@ -245,6 +248,12 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
         []
     );
 
+    const tituloEncabezado = useMemo(() => {
+        if (!esTablet || !paginaMovilActiva) return titulo;
+        const panelId = paginaMovilAPanelId(paginaMovilActiva);
+        return obtenerTituloPanelMovil(panelId || paginaMovilActiva);
+    }, [esTablet, paginaMovilActiva, titulo]);
+
     /* Determinar icono y estado del indicador de conexion/sync */
     const obtenerEstadoConexion = () => {
         if (!estaConectado) {
@@ -295,17 +304,22 @@ export function DashboardEncabezado({titulo = APP_TEXTS.dashboard.titulo, versio
 
             {/* TITULO (centro en movil, izquierda en desktop) */}
             <div className="encabezadoIzquierda">
-                <span className="encabezadoTitulo">{titulo}</span>
+                <span className="encabezadoTitulo">{tituloEncabezado}</span>
             </div>
 
             {/* Buscador Global Centrado */}
-            {estaConectado && onSeleccionarTarea && onSeleccionarHabito && onSeleccionarProyecto && (
+            {puedeBuscar && (
                 <div className="encabezadoBuscador">
-                    <BuscadorGlobal tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} />
+                    <BuscadorGlobal tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea!} onSeleccionarHabito={onSeleccionarHabito!} onSeleccionarProyecto={onSeleccionarProyecto!} />
                 </div>
             )}
 
             <nav className="encabezadoNav">
+                {puedeBuscar && esTablet && (
+                    <button type="button" className="botonIconoEncabezado botonBuscadorMovil" onClick={toggleBuscadorMovil} title={esTablet ? undefined : 'Buscar'}>
+                        <Search size={18} />
+                    </button>
+                )}
                 {/* Indicador de Plan - Solo para FREE y TRIAL */}
                 {mostrarBadgePlanEnHeader && <IndicadorPlan suscripcion={suscripcion} onClick={onClickPlan} />}
 

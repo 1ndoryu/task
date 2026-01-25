@@ -8,17 +8,20 @@ import {useMemo} from 'react';
 import {Folder, CheckSquare, LayoutList, User, GripVertical, Sparkles, Calendar, Flag, SortAsc} from 'lucide-react';
 import type {Proyecto} from '../types/dashboard';
 import {MODOS_ORDEN_TAREAS} from './useOrdenarTareas';
+import type {ModoOrdenTareas} from './useOrdenarTareas';
+import type {ModoOrdenHabitos} from './useOrdenarHabitos';
+import type {OrdenamientoProyectos} from './useConfiguracionProyectos';
 
 interface UseOpcionesDashboardProps {
     proyectos: Proyecto[];
-    modosOrdenHabitos: Array<{id: string; etiqueta: string; descripcion: string}>;
+    modosOrdenHabitos: Array<{id: ModoOrdenHabitos; etiqueta: string; descripcion: string}>;
     contarAsignadas: number;
 }
 
 interface UseOpcionesDashboardReturn {
-    opcionesOrdenHabitos: Array<{id: string; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
-    opcionesOrdenProyectos: Array<{id: string; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
-    opcionesOrdenTareas: Array<{id: string; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
+    opcionesOrdenHabitos: Array<{id: ModoOrdenHabitos; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
+    opcionesOrdenProyectos: Array<{id: OrdenamientoProyectos; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
+    opcionesOrdenTareas: Array<{id: ModoOrdenTareas; etiqueta: string; descripcion: string; icono?: JSX.Element}>;
     opcionesFiltro: Array<{id: string; etiqueta: string; icono?: JSX.Element; descripcion: string}>;
 }
 
@@ -45,7 +48,7 @@ export function useOpcionesDashboard({proyectos, modosOrdenHabitos, contarAsigna
     );
 
     /* Opciones para SelectorBadge de proyectos - Con iconos */
-    const opcionesOrdenProyectos = useMemo(
+    const opcionesOrdenProyectos = useMemo<UseOpcionesDashboardReturn['opcionesOrdenProyectos']>(
         () => [
             {id: 'nombre', etiqueta: 'Nombre', descripcion: 'Alfabético', icono: ICONOS_ORDEN.nombre},
             {id: 'fecha', etiqueta: 'Fecha Límite', descripcion: 'Vencimiento', icono: ICONOS_ORDEN.fecha},

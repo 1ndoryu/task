@@ -155,17 +155,16 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-#### 10.8.16 Header Móvil Ajustado (Pendiente)
+#### 10.8.16 Header Móvil Ajustado ✅ COMPLETADA
 
 **Objetivo:** Adaptar el header móvil fijo para la nueva arquitectura.
 
-- [ ] **Contenido dinámico:**
-  - [ ] Mostrar nombre del panel/página actual
-  - [ ] Hamburguesa a la izquierda (Drawer)
-  - [ ] Búsqueda y Opciones a la derecha
-- [ ] **Sincronización con navegación:**
-  - [ ] Título cambia según página activa
-  - [ ] Posiblemente quitar icono de búsqueda del nav inferior
+- [x] **Contenido dinámico:**
+  - [x] Mostrar nombre del panel/página actual
+  - [x] Hamburguesa a la izquierda (Drawer)
+  - [x] Búsqueda y Opciones a la derecha
+- [x] **Sincronización con navegación:**
+  - [x] Título cambia según página activa
 
 ---
 

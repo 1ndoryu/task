@@ -44,7 +44,7 @@ function IndicadorCarga({texto = 'Cargando datos...'}: {texto?: string}): JSX.El
 
 export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTUAL, usuario = 'user@admin'}: DashboardIslandProps): JSX.Element {
     const ctx = useDashboardCompleto();
-    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones, filtroTareas, ordenTareas, ordenHabitos, opciones, configTareas, configHabitos, configProyectos, configActividad} = ctx;
+    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones, filtroTareas, ordenTareas, ordenHabitos, opciones, configProyectos} = ctx;
     const {esMovil} = useEsMovil();
     const paginaMovil = usePaginaMovil();
 
@@ -135,6 +135,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onSeleccionarProyecto={modales.abrirModalEditarProyecto}
                 onCrearRapido={modales.abrirCreacionRapida}
                 opcionesMovil={esMovil ? opcionesMovil : undefined}
+                paginaMovilActiva={esMovil ? paginaMovil.paginaActiva : undefined}
             />
 
             {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} esMovil={esMovil} paginaMovilActiva={paginaMovil.paginaActiva} />}
