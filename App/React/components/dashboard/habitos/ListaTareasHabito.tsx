@@ -218,7 +218,7 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
                     <input
                         type="text"
                         className="listaTareasHabito__input"
-                        placeholder="Ej: Bajar 5 kilos..."
+                        placeholder="Leer un libro..."
                         value={textoNuevaTarea}
                         onChange={e => setTextoNuevaTarea(e.target.value)}
                         onKeyDown={manejarKeyDown}
