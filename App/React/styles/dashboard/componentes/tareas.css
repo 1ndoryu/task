@@ -56,7 +56,9 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color var(--dashboard-transicionNormal), background-color var(--dashboard-transicionNormal);
+    transition:
+        border-color var(--dashboard-transicionNormal),
+        background-color var(--dashboard-transicionNormal);
     flex-shrink: 0;
 }
 
@@ -690,6 +692,10 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Padding vertical reducido, horizontal normal */
     gap: var(--dashboard-espacioMd); /* Gap normal para mantener alineacion */
     min-height: 32px;
+}
+
+.tareaItem--compacto.tareaItem--conSubtareas {
+    padding-right: 40px; /* Mantener espacio para el colapsador */
 }
 
 .tareaTexto--compacto {

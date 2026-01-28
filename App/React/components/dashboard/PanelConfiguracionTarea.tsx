@@ -336,6 +336,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                                     onEliminarSubtarea={onEliminarSubtarea}
                                     onConfigurarSubtarea={onConfigurarSubtarea}
                                     onEditarSubtarea={onEditarSubtarea}
+                                    esSubtarea={!!tarea.parentId}
                                 />
 
                                 {/* Fase 10.8.11: Chat inline en móvil */}

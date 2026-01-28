@@ -65,11 +65,12 @@ interface FormularioTareaModernoProps {
     /* Modo */
     modoEdicion?: boolean;
     errorTexto?: string;
+    esSubtarea?: boolean;
 }
 
 import {ListaSubtareas} from './ListaSubtareas';
 
-export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto, tareaId, subtareas, onCrearSubtarea, onToggleSubtarea, onEliminarSubtarea, onConfigurarSubtarea, onEditarSubtarea}: FormularioTareaModernoProps): JSX.Element {
+export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto, tareaId, subtareas, onCrearSubtarea, onToggleSubtarea, onEliminarSubtarea, onConfigurarSubtarea, onEditarSubtarea, esSubtarea = false}: FormularioTareaModernoProps): JSX.Element {
     /* Mostrar selector de proyecto solo si hay proyectos y callback */
     const mostrarProyecto = proyectos.length > 0 && onProyectoChange;
 
@@ -136,8 +137,8 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
             {/* Adjuntos */}
             {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}
 
-            {/* Subtareas: Movido al final despues de Adjuntos */}
-            {modoEdicion && typeof tareaId === 'number' && (
+            {/* Subtareas: Solo si no es ya una subtarea (evitar anidado infinito) */}
+            {modoEdicion && !esSubtarea && typeof tareaId === 'number' && (
                 <div className="panelConfiguracionSubtareas">
                     <ListaSubtareas tareas={subtareas || []} parentId={tareaId} prioridadPadre={prioridad || undefined} onToggleTarea={onToggleSubtarea || (() => {})} onCrearTarea={onCrearSubtarea || (() => {})} onEliminarTarea={onEliminarSubtarea || (() => {})} onConfigurarTarea={onConfigurarSubtarea} onEditarTarea={onEditarSubtarea} />
                 </div>

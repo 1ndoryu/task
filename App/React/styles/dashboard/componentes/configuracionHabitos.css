@@ -177,7 +177,7 @@
 .listaTareasHabito__lista {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px; /* Gap externo entre subtareas */
     list-style: none;
     padding: 0;
     margin: 0;
@@ -190,8 +190,15 @@
     padding: 6px 0px;
     background: var(--dashboard-fondoSecundario);
     border-radius: 4px;
-    cursor: grab;
+    padding: 6px 0px;
+    background: var(--dashboard-fondoSecundario);
+    border-radius: 4px;
+    cursor: default;
     transition: all var(--dashboard-transicionRapida);
+    /* Match exacto con tareaItem--compacto, pero sin padding lateral */
+    padding: 2px 0; /* Sin padding lateral, minimo vertical */
+    gap: var(--dashboard-espacioMd); /* Gap interno restaurado */
+    min-height: 32px;
 }
 
 /* Padding condicional para drag */
@@ -201,10 +208,6 @@
 
 .listaTareasHabito__item:hover {
     background: var(--dashboard-fondoHover);
-}
-
-.listaTareasHabito__item:active {
-    cursor: grabbing;
 }
 
 .listaTareasHabito__item--completado {
@@ -246,9 +249,24 @@
     color: var(--dashboard-exito);
 }
 
-.listaTareasHabito__texto {
+/* Override para el checkbox dentro de lista subtasks/habitos para igualar modo compacto */
+.listaTareasHabito__item .tareaCheckbox {
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-top: 1px;
+}
+
+.listaTareasHabito__contenido {
     flex: 1;
-    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0; /* Para que el text-overflow funcione */
+}
+
+.listaTareasHabito__texto {
+    font-size: var(--dashboard-tamanoPequeno); /* 0.75rem / 12px */
+    line-height: 1.4;
     color: var(--dashboard-textoNormal);
     cursor: pointer;
     transition: color var(--dashboard-transicionRapida);
@@ -261,33 +279,7 @@
     color: var(--dashboard-primario);
 }
 
-/* Estilos para el pill de prioridad */
-.listaTareasHabito__pillPrioridad {
-    padding: 2px 8px;
-    height: 24px;
-    font-size: 11px;
-    margin-right: 8px;
-    background: transparent;
-    border-radius: var(--dashboard-radioSm);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    border: 1px solid transparent; /* Borde por defecto */
-    color: var(--dashboard-textoApagado); /* Color por defecto */
-}
-
-.listaTareasHabito__pillPrioridad--alta {
-    color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAlta);
-}
-
-.listaTareasHabito__pillPrioridad--baja {
-    color: var(--dashboard-estadoBaja);
-}
-
-.listaTareasHabito__pillPrioridad--media {
-    /* Por defecto estilo vacio/neutral */
-}
+/* Estilos para el pill de prioridad - Eliminados (ahora se usa BadgeInfo global) */
 
 .listaTareasHabito__eliminar {
     display: flex;
@@ -337,7 +329,9 @@
 }
 
 .listaTareasHabito__input:focus {
-    border-color: var(--dashboard-primario);
+    border-color: var(--dashboard-bordePrincipal);
+    box-shadow: none;
+    outline: none;
 }
 
 .listaTareasHabito__input::placeholder {

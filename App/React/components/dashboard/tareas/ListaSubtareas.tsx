@@ -5,8 +5,7 @@
  */
 
 import {useState, useCallback, useEffect} from 'react';
-import {CheckSquare, Square, Plus, Trash2, GripVertical, Flag} from 'lucide-react';
-import {Reorder, useDragControls} from 'framer-motion';
+import {Check, Plus, Trash2, Flag} from 'lucide-react';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Tarea, DatosEdicionTarea, NivelPrioridad} from '../../../types/dashboard';
@@ -28,56 +27,54 @@ interface ListaSubtareasProps {
     onReordenarTareas?: (tareasIds: number[]) => void;
 }
 
-/* Componente interno para Item reordenable */
-const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrioridad, dragEnabled}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onMenuPrioridad: (e: React.MouseEvent, id: number) => void; dragEnabled: boolean}) => {
-    const controls = useDragControls();
+/* Componente interno para Item (sin drag) */
+const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrioridad}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onMenuPrioridad: (e: React.MouseEvent, id: number) => void}) => {
     const p = tarea.prioridad || 'media';
 
-    const itemContent = (
-        <div className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''} ${dragEnabled ? 'listaTareasHabito__item--conDrag' : 'listaTareasHabito__item--sinDrag'}`}>
-            {/* Handle Drag - Solo si habilitado */}
-            {dragEnabled && (
-                <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)} style={{touchAction: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', paddingRight: 4, color: 'var(--texto-terciario)'}}>
-                    <GripVertical size={14} />
-                </div>
-            )}
-
-            {/* Checkbox - Cuadrado */}
-            <button
-                type="button"
-                className="listaTareasHabito__checkbox"
+    return (
+        <div className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''} listaTareasHabito__item--sinDrag`}>
+            {/* Checkbox - Estilo unificado con TareaItem */}
+            <div
+                className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`}
                 onClick={e => {
                     e.stopPropagation();
                     onToggle(tarea.id);
                 }}
                 onPointerDown={e => e.stopPropagation()}>
-                {tarea.completado ? <CheckSquare size={16} className="iconoCheck" /> : <Square size={16} className="iconoCirculo" />}
-            </button>
+                {tarea.completado && <Check size={10} color="white" />}
+            </div>
 
-            {/* Texto de la tarea */}
-            <span
-                className="listaTareasHabito__texto"
-                onClick={e => {
-                    e.stopPropagation();
-                    onConfigurar?.(tarea);
-                }}
-                onPointerDown={e => e.stopPropagation()}
-                title="Click para configurar">
-                {tarea.texto}
-            </span>
+            {/* Contenido (Texto + Badge) */}
+            <div className="listaTareasHabito__contenido">
+                {/* Texto de la tarea */}
+                <span
+                    className="listaTareasHabito__texto"
+                    onClick={e => {
+                        e.stopPropagation();
+                        onConfigurar?.(tarea);
+                    }}
+                    onPointerDown={e => e.stopPropagation()}
+                    title="Click para configurar">
+                    {tarea.texto}
+                </span>
 
-            {/* Badge de Prioridad - Estilo Hito (Pill) */}
-            <button
-                type="button"
-                className={`pillOpcion listaTareasHabito__pillPrioridad ${p === 'media' ? 'listaTareasHabito__pillPrioridad--media pillOpcion--vacio' : ''} ${p === 'alta' ? 'listaTareasHabito__pillPrioridad--alta' : ''} ${p === 'baja' ? 'listaTareasHabito__pillPrioridad--baja' : ''}`}
-                title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
-                onClick={e => {
-                    e.stopPropagation();
-                    onMenuPrioridad(e, tarea.id);
-                }}>
-                <Flag size={12} fill={p === 'alta' ? 'currentColor' : 'none'} />
-                <span>{ETIQUETAS_PRIORIDAD[p]}</span>
-            </button>
+                {
+                    /* Badge de Prioridad - Estilo Panel Ejecucion (Texto) */
+                    p && p !== 'media' && (
+                        <button
+                            type="button"
+                            className={`badgeInfo badgeInfo--prioridad${p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
+                            style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}
+                            title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
+                            onClick={e => {
+                                e.stopPropagation();
+                                onMenuPrioridad(e, tarea.id);
+                            }}>
+                            <span className="badgeInfoTexto">{ETIQUETAS_PRIORIDAD[p].toUpperCase()}</span>
+                        </button>
+                    )
+                }
+            </div>
 
             {/* Botón eliminar */}
             <button
@@ -93,16 +90,6 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
             </button>
         </div>
     );
-
-    if (dragEnabled) {
-        return (
-            <Reorder.Item value={tarea} as="div" dragListener={false} dragControls={controls} layout dragElastic={0} whileDrag={{scale: 1.02, cursor: 'grabbing'}}>
-                {itemContent}
-            </Reorder.Item>
-        );
-    }
-
-    return <div>{itemContent}</div>;
 };
 
 export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas, onEditarTarea}: ListaSubtareasProps): JSX.Element {
@@ -113,7 +100,14 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
     const [tareasLocales, setTareasLocales] = useState(tareas);
 
     useEffect(() => {
-        setTareasLocales(tareas);
+        /* Ordenar por prioridad: Alta > Media > Baja */
+        const peso: Record<string, number> = {alta: 3, media: 2, baja: 1};
+        const tareasOrdenadas = [...tareas].sort((a, b) => {
+            const pesoA = peso[a.prioridad || 'media'] || 2;
+            const pesoB = peso[b.prioridad || 'media'] || 2;
+            return pesoB - pesoA;
+        });
+        setTareasLocales(tareasOrdenadas);
     }, [tareas]);
 
     /* Estado para menú contextual de prioridad */
@@ -157,14 +151,6 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
         [manejarCrearTarea]
     );
 
-    /* Manejar reordenamiento optimista */
-    const manejarReorder = (nuevoOrden: Tarea[]) => {
-        setTareasLocales(nuevoOrden);
-        if (onReordenarTareas) {
-            onReordenarTareas(nuevoOrden.map(t => t.id));
-        }
-    };
-
     const completadas = tareas.filter(t => t.completado).length;
     const total = tareas.length;
 
@@ -180,21 +166,14 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
                 )}
             </div>
 
-            {/* Lista */}
-            {tareasLocales.length > 0 &&
-                (onReordenarTareas ? (
-                    <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista" layoutScroll>
-                        {tareasLocales.map(tarea => (
-                            <SubtareaItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} dragEnabled={true} />
-                        ))}
-                    </Reorder.Group>
-                ) : (
-                    <div className="listaTareasHabito__lista">
-                        {tareasLocales.map(tarea => (
-                            <SubtareaItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} dragEnabled={false} />
-                        ))}
-                    </div>
-                ))}
+            {/* Lista solo visual (sin DnD) */}
+            {tareasLocales.length > 0 && (
+                <div className="listaTareasHabito__lista">
+                    {tareasLocales.map(tarea => (
+                        <SubtareaItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} />
+                    ))}
+                </div>
+            )}
 
             {/* Empty State */}
             {tareas.length === 0 && !mostrarInput && <div className="listaTareasHabito__vacio">No hay subtareas</div>}

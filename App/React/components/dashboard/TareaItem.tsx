@@ -170,8 +170,10 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             /* Acciones para tareas normales */
             if (opcionId === 'eliminar') {
                 onEliminar?.();
-            } else if (opcionId === 'configurar' || opcionId === 'agregar-subtarea') {
+            } else if (opcionId === 'configurar') {
                 onConfigurar?.();
+            } else if (opcionId === 'agregar-subtarea') {
+                onCrearNueva?.(tarea.id, tarea.id);
             } else if (opcionId === 'sin-prioridad') {
                 onEditar?.({prioridad: null});
             } else if (opcionId === 'mover-proyecto') {

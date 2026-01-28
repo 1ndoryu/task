@@ -54,6 +54,13 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### 14.9 Gestión Avanzada de Subtareas (Prioritario)
 - [x] **Configuración Tareas:** Añadir sección "Subtareas" (Movido al final). *Bug: No se listan las subtareas.*
 
+### 14.10 Refinamiento UX Subtareas & Configuración (Feedback)
+- [x] **Estilo Checkbox:** Grosor 1px y tamaño reducido (-1px) en configuración de hábitos.
+- [x] **Prevención Anidado:** Ocultar sección de subtareas en configuración de una subtarea.
+- [x] **Ordenamiento:** Eliminar Drag & Drop en configuración, usar orden por prioridad.
+- [x] **Menú Contextual:** "Agregar subtarea" debe abrir modal rápido, no modal completo.
+- [x] **UI Compacta:** Corregir colisión de selector de subtareas con acciones SVG en panel de ejecución (modo compacto).
+
 ---
 
 ## Fases Futuras 🚀
