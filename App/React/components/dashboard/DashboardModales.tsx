@@ -125,6 +125,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                 onEliminarTarea={dashboard.eliminarTarea}
                 onConfigurarTarea={modales.abrirModalEditarTarea}
                 onActualizarOrdenTareasHabito={dashboard.actualizarOrdenTareasHabito}
+                onEditarTarea={dashboard.editarTarea}
             />
 
             {/* Modales de Proyectos */}

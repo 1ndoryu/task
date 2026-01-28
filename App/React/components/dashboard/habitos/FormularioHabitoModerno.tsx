@@ -50,9 +50,10 @@ interface FormularioHabitoModernoProps {
     onEliminarTareaHabito?: (id: number) => void;
     onConfigurarTareaHabito?: (tarea: Tarea) => void;
     onReordenarTareasHabito?: (tareasIds: number[]) => void;
+    onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, tareasHabito, onToggleTareaHabito, onCrearTareaHabito, onEliminarTareaHabito, onConfigurarTareaHabito, onReordenarTareasHabito}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, tareasHabito, onToggleTareaHabito, onCrearTareaHabito, onEliminarTareaHabito, onConfigurarTareaHabito, onReordenarTareasHabito, onEditarTareaHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
 
     /* Determinar si mostrar la sección de tareas */
@@ -111,7 +112,7 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             )}
 
             {/* Tareas/Metas del habito - Fase 14.8 */}
-            {mostrarTareasHabito && <ListaTareasHabito tareas={tareasHabito || []} habitoId={habito.id} onToggleTarea={onToggleTareaHabito} onCrearTarea={onCrearTareaHabito} onEliminarTarea={onEliminarTareaHabito} onConfigurarTarea={onConfigurarTareaHabito} onReordenarTareas={onReordenarTareasHabito} />}
+            {mostrarTareasHabito && <ListaTareasHabito tareas={tareasHabito || []} habitoId={habito.id} onToggleTarea={onToggleTareaHabito} onCrearTarea={onCrearTareaHabito} onEliminarTarea={onEliminarTareaHabito} onConfigurarTarea={onConfigurarTareaHabito} onReordenarTareas={onReordenarTareasHabito} importancia={habito.importancia} onEditarTarea={onEditarTareaHabito} />}
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (

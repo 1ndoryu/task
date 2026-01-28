@@ -327,3 +327,122 @@ glory-adjuntos/
   - **Solución:** `actualizarHistorialHabito` ahora recalcula `ultimoCompletado` basándose en el historial
   - **Archivo:** `stores/habitosStore.ts` función `actualizarHistorialHabito`
 
+
+---
+
+## Fase 5 - 8: Sistema Social, Urgencia, UX Heatmap (Dic 2025) ✅
+
+**Estado:** Completado. Ver historial de cambios.
+
+---
+
+## Fase 9: Refactorización Visual de Configuración (Estilo Linear) ✅
+
+**Inspiración:** [Linear App Plan](https://linear.app/plan)
+**Enfoque:** Gestión moderna de proyectos, orientado al usuario individual con capacidad de trabajo en equipo.
+
+#### Resumen de Logros
+
+**Componentes Creados:**
+- `SelectorIconoProyecto`, `CampoTituloLimpio`, `CampoSubtituloLimpio`
+- `PropiedadesCompactas`, `BotonOpcionCompacta`, `SeccionResponsables`
+- `ListaTareasCompacta`, `SeccionAdjuntos`, `GridAdjuntos`
+- `FormularioTareaModerno`, `FormularioHabitoModerno`, `FormularioProyectoModerno`
+- Selectores Pill: Estado, Proyecto, Repetición, Importancia, Frecuencia
+
+**Hooks Creados:**
+- `useAutoguardado`, `usePanelChat`, `PestanasModal`
+
+**Mejoras Visuales:**
+- Layout estilo Linear con propiedades inline compactas
+- Modal de 600px responsive
+- Sistema de Tags con autocompletado
+- Responsables vs Compartir diferenciados
+- Panel de Comentarios rediseñado
+
+**Estilos CSS** en `configuracionModerna.css`:
+- `.campoTituloLimpio`, `.pillOpcion`, `.botonOpcionCompacta`
+- `.propiedadesCompactas`, `.seccionResponsables--inline`
+- `.selectorIconoProyecto`, `.selectorColores`
+
+---
+
+## Fase 10: Versión Móvil (WebView → APK) 📱 ✅ PARCIAL
+
+**Estado:** Base implementada, falta empaquetado final APK.
+
+### 10.1 Fundamentos CSS Móvil ✅
+> Breakpoints definidos, `movil.css` creado, documentación en `docs/PATRONES_MOVIL.md`
+
+### 10.2 Componentes Adaptativos ✅
+> Una columna en móvil, búsqueda modal fullscreen, modales fullscreen con botón "← Volver", `BottomSheet` con animación y overlay, `MenuContextualAdaptivo` integrado
+
+### 10.3 Header Móvil ✅
+> Layout grid 3 columnas (hamburguesa | título | búsqueda), `DrawerMovil` con swipe y overlay, header fijo con `position: fixed`, iconos unificados (20px)
+
+### 10.4 Optimización WebView ✅
+- Viewport y meta tags optimizados
+- Safe Areas con variables CSS
+- Rendimiento WebView (will-change, touch-action)
+
+### 10.5 UX Mobile-First ✅
+- Tamaños táctiles mínimos 44px
+- Feedback táctil (:active)
+- Scroll optimizado
+
+### 10.6 Navegación Móvil ✅
+- `NavegacionInferior` con 5 iconos
+- FAB central
+- Rutas de navegación definidas
+
+### 10.8 Reestructuración UX Móvil ✅
+- Sistema de Navegación por Páginas
+- Paneles Fullscreen Sin Bordes
+- Menú de Opciones Unificado
+- Formulario Compacto Móvil
+- Listas Compactas
+- Header Dinámico
+
+---
+
+## Fase 13: Pausar Hábitos ✅
+
+**Objetivo:** Permitir al usuario pausar temporalmente un hábito sin eliminarlo ni afectar las estadísticas.
+
+**Logros:**
+- Campo `pausado` y `fechaPausa` en modelo
+- Menú contextual con opción Pausar/Reanudar
+- Sección separada visual para hábitos pausados
+- Lógica de filtrado en listas
+- Indicadores visuales (opacidad)
+
+---
+
+## Fase 14: Mejoras de Configuración y UX (Enero 2026) ✅ PARCIAL
+
+**Estado:** Funcionalidades Core completadas.
+
+### 14.1 Configuración de Jornada (Fin del Día) ✅
+> Ajuste de hora de corte para usuarios nocturnos.
+
+### 14.2 Refinamiento Visual de Hábitos ✅
+> Modo compacto mejorado, fuentes y alineación.
+
+### 14.3 Ordenamiento Inteligente 2.0 ✅
+> Prioridad ponderada por días de retraso.
+
+### 14.4 Mejoras de Interfaz ✅
+- Bloqueo de panel expandido (candado)
+- Columna Actividad oculta días libres no marcados
+
+### 14.7 Actividad Detallada ✅
+> Click en heatmap para ver detalle diario.
+
+### 14.8 Subtareas de Hábitos (Core) ✅
+- Infraestructura de datos (ids tareas en habito)
+- UI básica de lista de metas
+- Sincronización básica
+
+### 9.7 Refinamientos y Temas Visuales ✅
+- Sistema de Temas (Dark/Light/Original)
+- Refinamientos varios de UI/UX

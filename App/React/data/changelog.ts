@@ -8,8 +8,24 @@ export interface Version {
     fecha: string;
     cambios: Cambio[];
 }
-
+/* changelog */
 export const HISTORIAL_VERSIONES: Version[] = [
+    {
+        version: 'v1.0.14-beta',
+        fecha: '2026-01-27',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Sistema de pausar hábitos: permite congelar racha sin perder progreso'},
+            {tipo: 'nuevo', descripcion: 'Configuración de "Fin del Día": ajusta la jornada para usuarios nocturnos'},
+            {tipo: 'nuevo', descripcion: 'Subtareas y metas en hábitos: gestión integrada en configuración y panel'},
+            {tipo: 'nuevo', descripcion: 'Bloqueo de paneles expandidos con botón de candado'},
+            {tipo: 'nuevo', descripcion: 'Detalle de actividad diaria al hacer clic en el mapa de calor'},
+            {tipo: 'mejora', descripcion: 'Algoritmo de prioridad 2.0: tareas retrasadas aumentan peso drásticamente'},
+            {tipo: 'mejora', descripcion: 'Columna Actividad (5 días) oculta días libres no marcados automáticamente'},
+            {tipo: 'mejora', descripcion: 'Refinamiento visual de hábitos en modo compacto'},
+            {tipo: 'mejora', descripcion: 'Cálculo de frecuencias consistente entre vistas (corrige desfase horario)'},
+            {tipo: 'arreglo', descripcion: 'Registro de actividad respeta la configuración de hora de corte'}
+        ]
+    },
     {
         version: 'v1.0.12-beta',
         fecha: '2026-01-16',

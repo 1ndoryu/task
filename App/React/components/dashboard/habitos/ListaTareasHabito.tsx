@@ -10,9 +10,9 @@
  */
 
 import {useState, useCallback} from 'react';
-import {CheckCircle2, Circle, Plus, Trash2} from 'lucide-react';
-import {Reorder} from 'framer-motion';
-import type {Tarea, DatosEdicionTarea} from '../../../types/dashboard';
+import {CheckSquare, Square, Plus, Trash2, GripVertical} from 'lucide-react';
+import {Reorder, useDragControls} from 'framer-motion';
+import type {Tarea, DatosEdicionTarea, NivelImportancia, NivelPrioridad} from '../../../types/dashboard';
 
 interface ListaTareasHabitoProps {
     /* Tareas asociadas al hábito */
@@ -26,9 +26,105 @@ interface ListaTareasHabitoProps {
     onConfigurarTarea?: (tarea: Tarea) => void;
     /* Callback para actualizar el orden de las tareas en el hábito */
     onReordenarTareas?: (tareasIds: number[]) => void;
+    /* Importancia del hábito para herencia */
+    importancia?: NivelImportancia;
+    /* Callback para editar tarea (cambiar prioridad inline) */
+    onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
-export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas}: ListaTareasHabitoProps): JSX.Element {
+/* Componente interno para Item reordenable */
+const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onCambiarPrioridad}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onCambiarPrioridad: (id: number, actual: NivelPrioridad) => void}) => {
+    const controls = useDragControls();
+
+    const prioridadColor = {
+        alta: 'var(--rojo-500)',
+        media: 'var(--naranja-500)',
+        baja: 'var(--azul-500)'
+    };
+
+    const prioridadLabel = {
+        alta: 'Alta',
+        media: 'Media',
+        baja: 'Baja'
+    };
+
+    const p = tarea.prioridad || 'media';
+
+    return (
+        <Reorder.Item value={tarea} as="div" className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`} dragListener={false} dragControls={controls}>
+            {/* Handle Drag */}
+            <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)} style={{touchAction: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', paddingRight: 4, color: 'var(--texto-terciario)'}}>
+                <GripVertical size={14} />
+            </div>
+
+            {/* Checkbox - Cuadrado */}
+            <button
+                type="button"
+                className="listaTareasHabito__checkbox"
+                onClick={e => {
+                    e.stopPropagation();
+                    onToggle(tarea.id);
+                }}
+                onPointerDown={e => e.stopPropagation()}>
+                {tarea.completado ? <CheckSquare size={16} className="iconoCheck" /> : <Square size={16} className="iconoCirculo" />}
+            </button>
+
+            {/* Texto de la tarea */}
+            <span
+                className="listaTareasHabito__texto"
+                onClick={e => {
+                    e.stopPropagation();
+                    onConfigurar?.(tarea);
+                }}
+                onPointerDown={e => e.stopPropagation()}
+                title="Click para configurar">
+                {tarea.texto}
+            </span>
+
+            {/* Badge Prioridad */}
+            <button
+                type="button"
+                className="listaTareasHabito__badgePrioridad"
+                onClick={e => {
+                    e.stopPropagation();
+                    onCambiarPrioridad(tarea.id, p);
+                }}
+                style={{
+                    fontSize: '10px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: `${prioridadColor[p]}20`,
+                    color: prioridadColor[p],
+                    border: 'none',
+                    marginRight: '8px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                    letterSpacing: '0.02em',
+                    minWidth: '45px',
+                    textAlign: 'center'
+                }}
+                title="Cambiar prioridad">
+                {prioridadLabel[p]}
+            </button>
+
+            {/* Botón eliminar */}
+            <button
+                type="button"
+                className="listaTareasHabito__eliminar"
+                onClick={e => {
+                    e.stopPropagation();
+                    onEliminar(tarea.id);
+                }}
+                onPointerDown={e => e.stopPropagation()}
+                title="Eliminar">
+                <Trash2 size={14} />
+            </button>
+        </Reorder.Item>
+    );
+};
+
+export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas, importancia, onEditarTarea}: ListaTareasHabitoProps): JSX.Element {
     const [textoNuevaTarea, setTextoNuevaTarea] = useState('');
     const [mostrarInput, setMostrarInput] = useState(false);
 
@@ -36,14 +132,18 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
     const manejarCrearTarea = useCallback(() => {
         if (!textoNuevaTarea.trim()) return;
 
+        /* Convertir importancia del hábito a prioridad de tarea */
+        const prioridadHeredada: NivelPrioridad = (importancia?.toLowerCase() as NivelPrioridad) || 'media';
+
         onCrearTarea({
             texto: textoNuevaTarea.trim(),
-            habitoId
+            habitoId,
+            prioridad: prioridadHeredada
         });
 
         setTextoNuevaTarea('');
         /* Mantener el input visible para crear más tareas */
-    }, [textoNuevaTarea, habitoId, onCrearTarea]);
+    }, [textoNuevaTarea, habitoId, onCrearTarea, importancia]);
 
     /* Manejar Enter en el input */
     const manejarKeyDown = useCallback(
@@ -89,44 +189,24 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
             {tareas.length > 0 && (
                 <Reorder.Group axis="y" values={tareas} onReorder={manejarReorder} className="listaTareasHabito__lista">
                     {tareas.map(tarea => (
-                        <Reorder.Item key={tarea.id} value={tarea} as="div" className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`}>
-                            {/* Checkbox - stopPropagation para no interferir con drag */}
-                            <button
-                                type="button"
-                                className="listaTareasHabito__checkbox"
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    onToggleTarea(tarea.id);
-                                }}
-                                onPointerDown={e => e.stopPropagation()}>
-                                {tarea.completado ? <CheckCircle2 size={14} className="iconoCheck" /> : <Circle size={14} className="iconoCirculo" />}
-                            </button>
-
-                            {/* Texto de la tarea - clickeable para configurar */}
-                            <span
-                                className="listaTareasHabito__texto"
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    onConfigurarTarea?.(tarea);
-                                }}
-                                onPointerDown={e => e.stopPropagation()}
-                                title="Click para configurar">
-                                {tarea.texto}
-                            </span>
-
-                            {/* Botón eliminar - solo visible en hover */}
-                            <button
-                                type="button"
-                                className="listaTareasHabito__eliminar"
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    onEliminarTarea(tarea.id);
-                                }}
-                                onPointerDown={e => e.stopPropagation()}
-                                title="Eliminar">
-                                <Trash2 size={12} />
-                            </button>
-                        </Reorder.Item>
+                        <TareaHabitoItem
+                            key={tarea.id}
+                            tarea={tarea}
+                            onToggle={onToggleTarea}
+                            onConfigurar={onConfigurarTarea}
+                            onEliminar={onEliminarTarea}
+                            onCambiarPrioridad={(id, actual) => {
+                                const ciclo: Record<NivelPrioridad, NivelPrioridad> = {
+                                    baja: 'media',
+                                    media: 'alta',
+                                    alta: 'baja'
+                                };
+                                const nueva = ciclo[actual];
+                                if (onEditarTarea) {
+                                    onEditarTarea(id, {prioridad: nueva});
+                                }
+                            }}
+                        />
                     ))}
                 </Reorder.Group>
             )}

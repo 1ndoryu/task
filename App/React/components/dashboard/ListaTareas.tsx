@@ -218,12 +218,33 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
      */
     const handleCrearNueva = (parentId: number | undefined, tareaActualId: number) => {
         let idProyectoHeredado = proyectoId;
+        let idHabitoHeredado: number | undefined = undefined;
+        let prioridadHeredada: NivelPrioridad | undefined = undefined;
 
-        /* Si es subtarea, heredar proyecto del padre */
+        /* Si es subtarea, heredar propiedades del padre */
         if (parentId) {
             const tareaPadre = tareas.find(t => t.id === parentId);
-            if (tareaPadre?.proyectoId) {
-                idProyectoHeredado = tareaPadre.proyectoId;
+            if (tareaPadre) {
+                if (tareaPadre.proyectoId) {
+                    idProyectoHeredado = tareaPadre.proyectoId;
+                }
+
+                /* Herencia de Hábito */
+                if (esTareaHabito(tareaPadre)) {
+                    idHabitoHeredado = tareaPadre.habitoId;
+                    const mapImportancia: Record<string, NivelPrioridad> = {
+                        Alta: 'alta',
+                        Media: 'media',
+                        Baja: 'baja'
+                    };
+                    prioridadHeredada = mapImportancia[tareaPadre.habitoImportancia] || 'media';
+                } else if (tareaPadre.habitoId) {
+                    idHabitoHeredado = tareaPadre.habitoId;
+                    /* Heredar prioridad solo si no está definida (o mantener la del padre) */
+                    if (tareaPadre.prioridad) {
+                        prioridadHeredada = tareaPadre.prioridad;
+                    }
+                }
             }
 
             /* Expandir el padre automáticamente para ver la nueva subtarea */
@@ -232,17 +253,15 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                 nuevo.add(parentId);
                 return nuevo;
             });
-        } else {
-            /* Si no es subtarea, heredar de la tarea anterior (si estamos en Inbox/Hoy y la tarea tiene proyecto) */
-            /* Nota: Esto es opcional, depende de la UX deseada. Por ahora solo padre */
-            /* Si estamos en una lista general, tal vez queramos heredar de la tarea hermana? Mejor no por ahora */
         }
 
         onCrearTarea?.({
             texto: '',
             parentId: parentId,
             insertarDespuesDe: tareaActualId,
-            proyectoId: idProyectoHeredado
+            proyectoId: idProyectoHeredado,
+            habitoId: idHabitoHeredado,
+            prioridad: prioridadHeredada
         });
     };
 

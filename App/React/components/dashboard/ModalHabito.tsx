@@ -37,9 +37,10 @@ interface ModalHabitoProps {
     onEliminarTarea?: (id: number) => void;
     onConfigurarTarea?: (tarea: Tarea) => void;
     onActualizarOrdenTareasHabito?: (habitoId: number, tareasIds: number[]) => void;
+    onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
-export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = [], tareas = [], onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito}: ModalHabitoProps): JSX.Element | null {
+export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = [], tareas = [], onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito, onEditarTarea}: ModalHabitoProps): JSX.Element | null {
     const modoEdicion = !!habito;
 
     /* Estado local para edicion */
@@ -242,6 +243,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onEliminarTareaHabito={onEliminarTarea}
                                     onConfigurarTareaHabito={onConfigurarTarea}
                                     onReordenarTareasHabito={manejarReordenarTareas}
+                                    onEditarTareaHabito={onEditarTarea}
                                 />
                             </div>
                             {/* Input de comentario cuando el chat esta oculto */}
