@@ -183,6 +183,13 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                     onToggleCompletado={completado => {
                         if (modales.tareaEditando && completado !== modales.tareaEditando.completado) dashboard.toggleTarea(modales.tareaEditando.id);
                     }}
+                    /* Subtareas - Fase 14.9 */
+                    subtareas={dashboard.tareas.filter(t => t.parentId === modales.tareaEditando?.id).sort((a, b) => (a.orden || 0) - (b.orden || 0))}
+                    onCrearSubtarea={dashboard.crearTarea}
+                    onToggleSubtarea={dashboard.toggleTarea}
+                    onEliminarSubtarea={dashboard.eliminarTarea}
+                    onConfigurarSubtarea={modales.abrirModalEditarTarea}
+                    onEditarSubtarea={dashboard.editarTarea}
                 />
             )}
 

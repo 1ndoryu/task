@@ -47,8 +47,12 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - [x] **Herencia:** Subtareas creadas en panel ejecución no heredan importancia.
   - [x] **Visibilidad:** Subtareas creadas en panel ejecución no aparecen en "Metas".
 
-### 14.9 Gestión Avanzada de Subtareas (Futuro)
-- [ ] **Gestión Interna:** Tareas normales con gestión de subtareas estilo "Metas".
+### 14.8 Subtareas de Hábitos - Feedback UX/UI 🚧
+- [x] **Badge Prioridad (Estilo Hito):** Reemplazar ciclo simple por Menú/Pill igual al de Hitos de Proyecto.
+- [x] **Drag & Drop (Fix):** Se implementó actualización optimista local para evitar saltos.
+
+### 14.9 Gestión Avanzada de Subtareas (Prioritario)
+- [x] **Configuración Tareas:** Añadir sección "Subtareas" (estilo Hábitos/Metas) en el panel de configuración de tareas normales.
 - [ ] **Acceso Rápido:** Opción "Agregar subtarea" en menú contextual.
 
 ---

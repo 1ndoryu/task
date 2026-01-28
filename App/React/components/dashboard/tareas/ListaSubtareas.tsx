@@ -1,12 +1,7 @@
 /*
- * ListaTareasHabito
- * Componente para gestionar las tareas asociadas a un hábito
- * Similar a ListaTareasCompacta pero con funcionalidad de creación inline
- *
- * Fase 14.8: Subtareas de hábitos
- * - Las tareas heredan el orden definido en el hábito
- * - Se pueden reordenar con drag & drop
- * - Funcionan como tareas normales con todos sus campos
+ * ListaSubtareas
+ * Componente para gestionar subtareas dentro de la configuración de una Tarea padre.
+ * Basado en ListaTareasHabito pero adaptado para tareas normales.
  */
 
 import {useState, useCallback, useEffect} from 'react';
@@ -14,37 +9,38 @@ import {CheckSquare, Square, Plus, Trash2, GripVertical, Flag} from 'lucide-reac
 import {Reorder, useDragControls} from 'framer-motion';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
-import type {Tarea, DatosEdicionTarea, NivelImportancia, NivelPrioridad} from '../../../types/dashboard';
+import type {Tarea, DatosEdicionTarea, NivelPrioridad} from '../../../types/dashboard';
 
-interface ListaTareasHabitoProps {
-    /* Tareas asociadas al hábito */
+interface ListaSubtareasProps {
+    /* Subtareas asociadas */
     tareas: Tarea[];
-    /* ID del hábito para crear nuevas tareas */
-    habitoId: number;
+    /* ID de la tarea padre */
+    parentId: number;
+    /* Prioridad del padre para herencia */
+    prioridadPadre?: NivelPrioridad;
     /* Callbacks */
     onToggleTarea: (id: number) => void;
     onCrearTarea: (datos: DatosEdicionTarea) => void;
     onEliminarTarea: (id: number) => void;
     onConfigurarTarea?: (tarea: Tarea) => void;
-    /* Callback para actualizar el orden de las tareas en el hábito */
-    onReordenarTareas?: (tareasIds: number[]) => void;
-    /* Importancia del hábito para herencia */
-    importancia?: NivelImportancia;
-    /* Callback para editar tarea (cambiar prioridad inline) */
     onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
+    /* Callback opcional para reordenar (si se implementa en el futuro para tareas normales) */
+    onReordenarTareas?: (tareasIds: number[]) => void;
 }
 
 /* Componente interno para Item reordenable */
-const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrioridad}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onMenuPrioridad: (e: React.MouseEvent, id: number) => void}) => {
+const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrioridad, dragEnabled}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onMenuPrioridad: (e: React.MouseEvent, id: number) => void; dragEnabled: boolean}) => {
     const controls = useDragControls();
     const p = tarea.prioridad || 'media';
 
-    return (
-        <Reorder.Item value={tarea} as="div" className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`} dragListener={false} dragControls={controls}>
-            {/* Handle Drag */}
-            <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)} style={{touchAction: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', paddingRight: 4, color: 'var(--texto-terciario)'}}>
-                <GripVertical size={14} />
-            </div>
+    const itemContent = (
+        <div className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`} style={{paddingLeft: dragEnabled ? 0 : 8}}>
+            {/* Handle Drag - Solo si habilitado */}
+            {dragEnabled && (
+                <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)} style={{touchAction: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', paddingRight: 4, color: 'var(--texto-terciario)'}}>
+                    <GripVertical size={14} />
+                </div>
+            )}
 
             {/* Checkbox - Cuadrado */}
             <button
@@ -104,22 +100,27 @@ const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrior
                 title="Eliminar">
                 <Trash2 size={14} />
             </button>
-        </Reorder.Item>
+        </div>
     );
+
+    if (dragEnabled) {
+        return (
+            <Reorder.Item value={tarea} as="div" dragListener={false} dragControls={controls}>
+                {itemContent}
+            </Reorder.Item>
+        );
+    }
+
+    return <div>{itemContent}</div>;
 };
 
-export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas, importancia, onEditarTarea}: ListaTareasHabitoProps): JSX.Element {
+export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas, onEditarTarea}: ListaSubtareasProps): JSX.Element {
     const [textoNuevaTarea, setTextoNuevaTarea] = useState('');
     const [mostrarInput, setMostrarInput] = useState(false);
 
-    /*
-     * Estado local optimista para Drag & Drop fluido
-     * Reorder de Framer Motion necesita feedback inmediato
-     */
+    /* Estado local optimista */
     const [tareasLocales, setTareasLocales] = useState(tareas);
 
-    /* Sincronizar props con estado local cuando cambian externamente */
-    /* Importante: Usamos JSON.stringify para comparación profunda simple y evitar loops */
     useEffect(() => {
         setTareasLocales(tareas);
     }, [tareas]);
@@ -138,24 +139,20 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
 
     const cerrarMenu = () => setMenuAbiertoId(null);
 
-    /* Crear nueva tarea del hábito */
+    /* Crear nueva subtarea */
     const manejarCrearTarea = useCallback(() => {
         if (!textoNuevaTarea.trim()) return;
 
-        /* Convertir importancia del hábito a prioridad de tarea */
-        const prioridadHeredada: NivelPrioridad = (importancia?.toLowerCase() as NivelPrioridad) || 'media';
-
         onCrearTarea({
             texto: textoNuevaTarea.trim(),
-            habitoId,
-            prioridad: prioridadHeredada
+            parentId: parentId,
+            prioridad: prioridadPadre || 'media'
         });
 
         setTextoNuevaTarea('');
-        /* Mantener el input visible para crear más tareas */
-    }, [textoNuevaTarea, habitoId, onCrearTarea, importancia]);
+    }, [textoNuevaTarea, parentId, onCrearTarea, prioridadPadre]);
 
-    /* Manejar Enter en el input */
+    /* Manejar Enter */
     const manejarKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -177,30 +174,39 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
         }
     };
 
-    /* Contador de progreso */
     const completadas = tareas.filter(t => t.completado).length;
     const total = tareas.length;
 
     return (
         <div className="listaTareasHabito listaTareasHabito--compacto">
-            {/* Header con contador - solo si hay tareas */}
-            {total > 0 && (
-                <div className="listaTareasHabito__encabezado">
-                    <span className="listaTareasHabito__titulo">Metas</span>
+            {/* Header con contador */}
+            <div className="listaTareasHabito__encabezado">
+                <span className="listaTareasHabito__titulo">Subtareas</span>
+                {total > 0 && (
                     <span className="listaTareasHabito__contador">
                         {completadas}/{total}
                     </span>
-                </div>
-            )}
+                )}
+            </div>
 
-            {/* Lista de tareas con drag & drop - item completo arrastrable */}
-            {tareasLocales.length > 0 && (
-                <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista">
-                    {tareasLocales.map(tarea => (
-                        <TareaHabitoItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} />
-                    ))}
-                </Reorder.Group>
-            )}
+            {/* Lista */}
+            {tareasLocales.length > 0 &&
+                (onReordenarTareas ? (
+                    <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista">
+                        {tareasLocales.map(tarea => (
+                            <SubtareaItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} dragEnabled={true} />
+                        ))}
+                    </Reorder.Group>
+                ) : (
+                    <div className="listaTareasHabito__lista">
+                        {tareasLocales.map(tarea => (
+                            <SubtareaItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} dragEnabled={false} />
+                        ))}
+                    </div>
+                ))}
+
+            {/* Empty State */}
+            {tareas.length === 0 && !mostrarInput && <div className="listaTareasHabito__vacio">No hay subtareas</div>}
 
             {/* Menu Contextual Prioridad */}
             {menuAbiertoId && (
@@ -222,16 +228,13 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
                 />
             )}
 
-            {/* Mensaje vacío */}
-            {tareas.length === 0 && !mostrarInput && <div className="listaTareasHabito__vacio">No hay metas o tareas para este hábito</div>}
-
-            {/* Input para nueva tarea */}
+            {/* Input */}
             {mostrarInput ? (
                 <div className="listaTareasHabito__inputContenedor">
                     <input
                         type="text"
                         className="listaTareasHabito__input"
-                        placeholder="Ej: Bajar 5 kilos..."
+                        placeholder="Nueva subtarea..."
                         value={textoNuevaTarea}
                         onChange={e => setTextoNuevaTarea(e.target.value)}
                         onKeyDown={manejarKeyDown}
@@ -246,7 +249,7 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
             ) : (
                 <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
                     <Plus size={12} />
-                    <span>Añadir</span>
+                    <span>Añadir subtarea</span>
                 </button>
             )}
         </div>

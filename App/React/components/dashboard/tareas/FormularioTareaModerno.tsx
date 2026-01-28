@@ -54,12 +54,22 @@ interface FormularioTareaModernoProps {
     /* Etiquetas (Fase 9.7.3) */
     tags?: string[];
     onTagsChange?: (tags: string[]) => void;
+    /* Subtareas */
+    tareaId?: number;
+    subtareas?: any[]; /* Usamos any temporalmente para evitar problemas de importación circular de tipos, pero en realidad es Tarea[] */
+    onCrearSubtarea?: (datos: any) => void;
+    onToggleSubtarea?: (id: number) => void;
+    onEliminarSubtarea?: (id: number) => void;
+    onConfigurarSubtarea?: (tarea: any) => void;
+    onEditarSubtarea?: (id: number, datos: any) => void;
     /* Modo */
     modoEdicion?: boolean;
     errorTexto?: string;
 }
 
-export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto}: FormularioTareaModernoProps): JSX.Element {
+import {ListaSubtareas} from './ListaSubtareas';
+
+export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto, tareaId, subtareas, onCrearSubtarea, onToggleSubtarea, onEliminarSubtarea, onConfigurarSubtarea, onEditarSubtarea}: FormularioTareaModernoProps): JSX.Element {
     /* Mostrar selector de proyecto solo si hay proyectos y callback */
     const mostrarProyecto = proyectos.length > 0 && onProyectoChange;
 
@@ -114,6 +124,13 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
                 <FilaPropiedades etiqueta="Colaboradores">
                     <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={true} etiqueta="" modoCompacto={true} />
                 </FilaPropiedades>
+            )}
+
+            {/* Subtareas */}
+            {modoEdicion && tareaId && onCrearSubtarea && onToggleSubtarea && onEliminarSubtarea && (
+                <div style={{marginTop: 16}}>
+                    <ListaSubtareas tareas={subtareas || []} parentId={tareaId} prioridadPadre={prioridad || undefined} onToggleTarea={onToggleSubtarea} onCrearTarea={onCrearSubtarea} onEliminarTarea={onEliminarSubtarea} onConfigurarTarea={onConfigurarSubtarea} onEditarTarea={onEditarSubtarea} />
+                </div>
             )}
 
             {/* Grupo 3: Etiquetas (Tags) */}

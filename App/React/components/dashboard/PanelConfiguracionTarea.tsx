@@ -9,7 +9,7 @@
  */
 
 import {useState, useEffect, useCallback, useRef} from 'react';
-import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
+import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto, CompaneroEquipo, RolCompartido, DatosEdicionTarea} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
 import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
@@ -32,11 +32,18 @@ export interface PanelConfiguracionTareaProps {
     proyectos?: Proyecto[];
     onCambiarProyecto?: (proyectoId: number | undefined) => void;
     onToggleCompletado?: (completado: boolean) => void;
+    /* Subtareas - Fase 14.9 */
+    subtareas?: Tarea[];
+    onCrearSubtarea?: (datos: DatosEdicionTarea) => void;
+    onToggleSubtarea?: (id: number) => void;
+    onEliminarSubtarea?: (id: number) => void;
+    onConfigurarSubtarea?: (tarea: Tarea) => void;
+    onEditarSubtarea?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
 import {useAutoguardado} from '../../hooks/useAutoguardado';
 
-export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, proyectos = [], onCambiarProyecto, onToggleCompletado}: PanelConfiguracionTareaProps): JSX.Element | null {
+export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, proyectos = [], onCambiarProyecto, onToggleCompletado, subtareas, onCrearSubtarea, onToggleSubtarea, onEliminarSubtarea, onConfigurarSubtarea, onEditarSubtarea}: PanelConfiguracionTareaProps): JSX.Element | null {
     const modoEdicion = !!tarea;
     const esMovil = useEsDispositivoMovil();
 
@@ -321,6 +328,14 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                                     tags={tags}
                                     onTagsChange={setTags}
                                     modoEdicion={true}
+                                    /* Subtareas */
+                                    tareaId={tarea.id}
+                                    subtareas={subtareas}
+                                    onCrearSubtarea={onCrearSubtarea}
+                                    onToggleSubtarea={onToggleSubtarea}
+                                    onEliminarSubtarea={onEliminarSubtarea}
+                                    onConfigurarSubtarea={onConfigurarSubtarea}
+                                    onEditarSubtarea={onEditarSubtarea}
                                 />
 
                                 {/* Fase 10.8.11: Chat inline en móvil */}
