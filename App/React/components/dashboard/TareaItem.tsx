@@ -4,7 +4,7 @@
  */
 
 import {useState, useCallback, useRef, useEffect, type KeyboardEvent, type ChangeEvent} from 'react';
-import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle} from 'lucide-react';
+import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle, Plus} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
@@ -170,7 +170,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             /* Acciones para tareas normales */
             if (opcionId === 'eliminar') {
                 onEliminar?.();
-            } else if (opcionId === 'configurar') {
+            } else if (opcionId === 'configurar' || opcionId === 'agregar-subtarea') {
                 onConfigurar?.();
             } else if (opcionId === 'sin-prioridad') {
                 onEditar?.({prioridad: null});
@@ -197,6 +197,12 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             id: 'configurar',
             etiqueta: 'Configurar tarea',
             icono: <Settings size={12} />,
+            separadorDespues: false
+        },
+        {
+            id: 'agregar-subtarea',
+            etiqueta: 'Agregar subtarea',
+            icono: <Plus size={12} />,
             separadorDespues: true
         },
         {

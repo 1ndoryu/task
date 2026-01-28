@@ -35,14 +35,14 @@ interface ListaTareasHabitoProps {
 }
 
 /* Componente interno para Item reordenable */
-const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrioridad}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onMenuPrioridad: (e: React.MouseEvent, id: number) => void}) => {
+const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrioridad, onDragEnd}: {tarea: Tarea; onToggle: (id: number) => void; onConfigurar?: (t: Tarea) => void; onEliminar: (id: number) => void; onMenuPrioridad: (e: React.MouseEvent, id: number) => void; onDragEnd?: () => void}) => {
     const controls = useDragControls();
     const p = tarea.prioridad || 'media';
 
     return (
-        <Reorder.Item value={tarea} as="div" className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`} dragListener={false} dragControls={controls}>
+        <Reorder.Item value={tarea} as="div" className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`} dragListener={false} dragControls={controls} onDragEnd={() => onDragEnd?.()} layout dragElastic={0} whileDrag={{scale: 1.02, cursor: 'grabbing'}}>
             {/* Handle Drag */}
-            <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)} style={{touchAction: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', paddingRight: 4, color: 'var(--texto-terciario)'}}>
+            <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)}>
                 <GripVertical size={14} />
             </div>
 
@@ -73,20 +73,11 @@ const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrior
             {/* Badge de Prioridad - Estilo Hito (Pill) */}
             <button
                 type="button"
-                className={`pillOpcion ${p === 'media' ? 'pillOpcion--vacio' : ''}`}
+                className={`pillOpcion listaTareasHabito__pillPrioridad ${p === 'media' ? 'listaTareasHabito__pillPrioridad--media pillOpcion--vacio' : ''} ${p === 'alta' ? 'listaTareasHabito__pillPrioridad--alta' : ''} ${p === 'baja' ? 'listaTareasHabito__pillPrioridad--baja' : ''}`}
                 title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
                 onClick={e => {
                     e.stopPropagation();
                     onMenuPrioridad(e, tarea.id);
-                }}
-                style={{
-                    padding: '2px 8px',
-                    height: '24px',
-                    fontSize: '11px',
-                    marginRight: '8px',
-                    color: p === 'alta' ? 'var(--dashboard-estadoAlta)' : p === 'baja' ? 'var(--dashboard-estadoBaja)' : undefined,
-                    borderColor: p === 'alta' ? 'var(--dashboard-estadoAlta)' : undefined,
-                    background: 'transparent'
                 }}>
                 <Flag size={12} fill={p === 'alta' ? 'currentColor' : 'none'} />
                 <span>{ETIQUETAS_PRIORIDAD[p]}</span>
@@ -172,8 +163,12 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
     /* Manejar reordenamiento optimista */
     const manejarReorder = (nuevoOrden: Tarea[]) => {
         setTareasLocales(nuevoOrden);
+    };
+
+    /* Manejar fin del arrastre - Solo aquí actualizamos al padre para evitar saltos */
+    const manejarDragEnd = () => {
         if (onReordenarTareas) {
-            onReordenarTareas(nuevoOrden.map(t => t.id));
+            onReordenarTareas(tareasLocales.map(t => t.id));
         }
     };
 
@@ -195,9 +190,9 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
 
             {/* Lista de tareas con drag & drop - item completo arrastrable */}
             {tareasLocales.length > 0 && (
-                <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista">
+                <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista" layoutScroll>
                     {tareasLocales.map(tarea => (
-                        <TareaHabitoItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} />
+                        <TareaHabitoItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} onDragEnd={manejarDragEnd} />
                     ))}
                 </Reorder.Group>
             )}

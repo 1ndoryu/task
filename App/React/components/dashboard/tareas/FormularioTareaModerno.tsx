@@ -126,13 +126,6 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
                 </FilaPropiedades>
             )}
 
-            {/* Subtareas */}
-            {modoEdicion && tareaId && onCrearSubtarea && onToggleSubtarea && onEliminarSubtarea && (
-                <div style={{marginTop: 16}}>
-                    <ListaSubtareas tareas={subtareas || []} parentId={tareaId} prioridadPadre={prioridad || undefined} onToggleTarea={onToggleSubtarea} onCrearTarea={onCrearSubtarea} onEliminarTarea={onEliminarSubtarea} onConfigurarTarea={onConfigurarSubtarea} onEditarTarea={onEditarSubtarea} />
-                </div>
-            )}
-
             {/* Grupo 3: Etiquetas (Tags) */}
             {onTagsChange && (
                 <FilaPropiedades etiqueta="Etiquetas">
@@ -142,6 +135,13 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
 
             {/* Adjuntos */}
             {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}
+
+            {/* Subtareas: Movido al final despues de Adjuntos */}
+            {modoEdicion && typeof tareaId === 'number' && (
+                <div className="panelConfiguracionSubtareas">
+                    <ListaSubtareas tareas={subtareas || []} parentId={tareaId} prioridadPadre={prioridad || undefined} onToggleTarea={onToggleSubtarea || (() => {})} onCrearTarea={onCrearSubtarea || (() => {})} onEliminarTarea={onEliminarSubtarea || (() => {})} onConfigurarTarea={onConfigurarSubtarea} onEditarTarea={onEditarSubtarea} />
+                </div>
+            )}
         </div>
     );
 }

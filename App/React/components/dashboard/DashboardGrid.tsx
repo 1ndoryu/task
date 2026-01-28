@@ -81,7 +81,8 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
         onEditarHabito: manejarEditarHabitoPorId,
         onEliminarHabito: dashboard.eliminarHabito,
         onPosponerHabito: dashboard.posponerHabito,
-        modoCompacto: configTareas.configuracion.modoCompacto
+        modoCompacto: configTareas.configuracion.modoCompacto,
+        onConfigurarTarea: modales.abrirModalEditarTarea
     };
 }
 

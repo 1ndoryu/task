@@ -34,7 +34,7 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
     const p = tarea.prioridad || 'media';
 
     const itemContent = (
-        <div className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''}`} style={{paddingLeft: dragEnabled ? 0 : 8}}>
+        <div className={`listaTareasHabito__item ${tarea.completado ? 'listaTareasHabito__item--completado' : ''} ${dragEnabled ? 'listaTareasHabito__item--conDrag' : 'listaTareasHabito__item--sinDrag'}`}>
             {/* Handle Drag - Solo si habilitado */}
             {dragEnabled && (
                 <div className="listaTareasHabito__dragHandle" onPointerDown={e => controls.start(e)} style={{touchAction: 'none', cursor: 'grab', display: 'flex', alignItems: 'center', paddingRight: 4, color: 'var(--texto-terciario)'}}>
@@ -69,20 +69,11 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
             {/* Badge de Prioridad - Estilo Hito (Pill) */}
             <button
                 type="button"
-                className={`pillOpcion ${p === 'media' ? 'pillOpcion--vacio' : ''}`}
+                className={`pillOpcion listaTareasHabito__pillPrioridad ${p === 'media' ? 'listaTareasHabito__pillPrioridad--media pillOpcion--vacio' : ''} ${p === 'alta' ? 'listaTareasHabito__pillPrioridad--alta' : ''} ${p === 'baja' ? 'listaTareasHabito__pillPrioridad--baja' : ''}`}
                 title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
                 onClick={e => {
                     e.stopPropagation();
                     onMenuPrioridad(e, tarea.id);
-                }}
-                style={{
-                    padding: '2px 8px',
-                    height: '24px',
-                    fontSize: '11px',
-                    marginRight: '8px',
-                    color: p === 'alta' ? 'var(--dashboard-estadoAlta)' : p === 'baja' ? 'var(--dashboard-estadoBaja)' : undefined,
-                    borderColor: p === 'alta' ? 'var(--dashboard-estadoAlta)' : undefined,
-                    background: 'transparent'
                 }}>
                 <Flag size={12} fill={p === 'alta' ? 'currentColor' : 'none'} />
                 <span>{ETIQUETAS_PRIORIDAD[p]}</span>
@@ -105,7 +96,7 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
 
     if (dragEnabled) {
         return (
-            <Reorder.Item value={tarea} as="div" dragListener={false} dragControls={controls}>
+            <Reorder.Item value={tarea} as="div" dragListener={false} dragControls={controls} layout dragElastic={0} whileDrag={{scale: 1.02, cursor: 'grabbing'}}>
                 {itemContent}
             </Reorder.Item>
         );
@@ -192,7 +183,7 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
             {/* Lista */}
             {tareasLocales.length > 0 &&
                 (onReordenarTareas ? (
-                    <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista">
+                    <Reorder.Group axis="y" values={tareasLocales} onReorder={manejarReorder} className="listaTareasHabito__lista" layoutScroll>
                         {tareasLocales.map(tarea => (
                             <SubtareaItem key={tarea.id} tarea={tarea} onToggle={onToggleTarea} onConfigurar={onConfigurarTarea} onEliminar={onEliminarTarea} onMenuPrioridad={abrirMenuPrioridad} dragEnabled={true} />
                         ))}

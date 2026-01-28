@@ -194,6 +194,11 @@
     transition: all var(--dashboard-transicionRapida);
 }
 
+/* Padding condicional para drag */
+.listaTareasHabito__item--conDrag {
+    padding-left: 0;
+}
+
 .listaTareasHabito__item:hover {
     background: var(--dashboard-fondoHover);
 }
@@ -208,6 +213,15 @@
 
 .listaTareasHabito__item--completado .listaTareasHabito__texto {
     text-decoration: line-through;
+    color: var(--dashboard-textoApagado);
+}
+
+.listaTareasHabito__dragHandle {
+    touch-action: none;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    padding-right: 4px;
     color: var(--dashboard-textoApagado);
 }
 
@@ -245,6 +259,34 @@
 
 .listaTareasHabito__texto:hover {
     color: var(--dashboard-primario);
+}
+
+/* Estilos para el pill de prioridad */
+.listaTareasHabito__pillPrioridad {
+    padding: 2px 8px;
+    height: 24px;
+    font-size: 11px;
+    margin-right: 8px;
+    background: transparent;
+    border-radius: var(--dashboard-radioSm);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid transparent; /* Borde por defecto */
+    color: var(--dashboard-textoApagado); /* Color por defecto */
+}
+
+.listaTareasHabito__pillPrioridad--alta {
+    color: var(--dashboard-estadoAlta);
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.listaTareasHabito__pillPrioridad--baja {
+    color: var(--dashboard-estadoBaja);
+}
+
+.listaTareasHabito__pillPrioridad--media {
+    /* Por defecto estilo vacio/neutral */
 }
 
 .listaTareasHabito__eliminar {

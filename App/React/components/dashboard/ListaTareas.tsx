@@ -38,9 +38,11 @@ interface ListaTareasProps {
     onEliminarHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
     modoCompacto?: boolean;
+    /* Callback opcional para abrir configuración externa (usa el modal global) */
+    onConfigurarTarea?: (tarea: Tarea) => void;
 }
 
-export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onPosponerHabito, modoCompacto = false}: ListaTareasProps): JSX.Element {
+export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onPosponerHabito, modoCompacto = false, onConfigurarTarea}: ListaTareasProps): JSX.Element {
     /*
      * Estado para tareas padre expandidas
      * Set de IDs de tareas padre cuyas subtareas son visibles
@@ -297,10 +299,14 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         (tareaId: number) => {
             const tarea = tareas.find(t => t.id === tareaId);
             if (tarea) {
-                setTareaConfigurando(tarea);
+                if (onConfigurarTarea) {
+                    onConfigurarTarea(tarea);
+                } else {
+                    setTareaConfigurando(tarea);
+                }
             }
         },
-        [tareas]
+        [tareas, onConfigurarTarea]
     );
 
     /*
