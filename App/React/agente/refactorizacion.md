@@ -34,6 +34,10 @@ La refactorización será **progresiva y atómica**. No se detendrá el desarrol
     *   Reducir el uso de `any` a 0.
     *   Definir interfaces claras en `types/` y compartirlas.
 
+6.  **Documentación Viva (Bitácora y Métricas)**:
+    *   Mantener un **resumen muy compacto** de los cambios en la sección "Bitácora de Refactorización" de este archivo.
+    *   **Obligatorio**: Ejecutar `generate_stats.ps1` para actualizar `TOP-20-ARCHIVOS.md` después de cada refactor significativo.
+
 ## Problemas Críticos Detectados
 
 1.  **Exceso de Props (Prop Drilling) vs Estado Global**:
@@ -59,3 +63,23 @@ La refactorización será **progresiva y atómica**. No se detendrá el desarrol
 - Este documento es un **organismo vivo**.
 - No empezar un refactor si no se tiene tiempo para terminarlo y probarlo.
 - Preferir pequeños commits frecuentes.
+
+## Bitácora de Refactorización
+
+> Formato: `YYYY-MM-DD`: **Archivo/Modulo** -> Resumen compacto de cambios (Líneas antes -> después).
+
+*   **2026-01-28**: `habitosStore.ts` (823 líneas -> ~254 en store)
+    *   **Extracción**: API movida a `services/habitosService.ts`, lógica pura a `utils/habitosLogica.ts`.
+    *   **Resultado**: SRP aplicado, código desacoplado y testable. `TOP-20` actualizado.
+
+*   **2026-01-28 (Fase 2)**: `habitosStore.ts` (650 líneas -> ~530 lines).
+    *   **Extracción**: `historialDetallado` (pesado, usado en modales) movido a `stores/habitosHistorialStore.ts`.
+    *   **Resultado**: Store principal más ligero. Creación de nuevo store especializado.
+
+*   **2026-01-28**: `useNotas.ts` (627 líneas -> ~150 líneas).
+    *   **Refactor**: Lógica movida a `stores/notasStore.ts`, API a `services/notasService.ts` y utils a `utils/notasUtils.ts`.
+    *   **Resultado**: SRP aplicado. El hook `useNotas` ahora es solo un wrapper de compatibilidad para el store.
+
+*   **2026-01-28**: `useConfiguracionLayout.ts` (585 líneas -> ~408 líneas).
+    *   **Refactor**: Extracción de factory a `utils/layoutFactory.ts` y lógica de negocio a `utils/layoutLogica.ts`.
+    *   **Resultado**: hook más limpio, lógica de migración y normalización desacoplada.

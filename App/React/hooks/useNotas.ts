@@ -1,34 +1,22 @@
 /**
  * Hook para el sistema de notas del Scratchpad
  *
- * Sistema de notas persistentes donde:
- * - Siempre hay una "nota activa" siendo editada
- * - Al guardar, se actualiza la nota activa (no se crea una nueva)
- * - Al seleccionar otra nota, esa se convierte en la activa
- * - El título se extrae de la primera línea con #
+ * REFACTORIZADO: Ahora actúa como un wrapper/controlador sobre `notasStore`.
+ * Mantiene la interfaz original para no romper componentes existentes,
+ * pero delega la lógica de estado y negocio al store de Zustand.
  *
  * @package App/React/hooks
  */
 
-import {useState, useCallback, useRef, useEffect} from 'react';
+import {useEffect, useRef, useCallback} from 'react';
+import {useNotasStore} from '../stores/notasStore';
+import {EVENTO_NOTA_ACTIVA, extraerTitulo, obtenerNotaActivaIdGuardado, CONTENIDO_NOTA_NUEVA} from '../utils/notasUtils';
+import {Nota, NotaActiva} from '../types/notas';
 
-/* Tipos para el sistema de notas */
-export interface Nota {
-    id: number;
-    titulo: string;
-    contenido: string;
-    fechaCreacion: string;
-    fechaModificacion: string;
-}
+/* Re-exportamos tipos para compatibilidad */
+export type {Nota, NotaActiva};
 
-/* Nota activa: puede tener ID (existente) o no (nueva) */
-export interface NotaActiva {
-    id: number | null;
-    contenido: string;
-    modificada: boolean;
-}
-
-interface EstadoNotas {
+export interface EstadoNotas {
     cargando: boolean;
     guardando: boolean;
     eliminando: boolean;
@@ -53,552 +41,66 @@ interface UseNotasReturn {
     obtenerTituloDeContenido: (contenido: string) => string;
 }
 
-/* Base URL de la API */
-const API_BASE = '/wp-json/glory/v1/notas';
-
-/* Contenido inicial para una nota nueva */
-const CONTENIDO_NOTA_NUEVA = '# Título de la nota\n\n';
-
-/* Clave para persistir el ID de la última nota activa */
-const STORAGE_KEY_NOTA_ACTIVA = 'glory_nota_activa_id';
-const EVENTO_NOTA_ACTIVA = 'glory_evento_nota_activa';
-
 /**
- * Guarda el ID de la nota activa en localStorage
- */
-function persistirNotaActivaId(id: number | null): void {
-    try {
-        if (id !== null) {
-            localStorage.setItem(STORAGE_KEY_NOTA_ACTIVA, id.toString());
-        } else {
-            localStorage.removeItem(STORAGE_KEY_NOTA_ACTIVA);
-        }
-    } catch {
-        /* Ignorar errores de localStorage */
-    }
-}
-
-function emitirCambioNotaActiva(id: number | null): void {
-    if (typeof window === 'undefined') return;
-
-    window.dispatchEvent(
-        new CustomEvent(EVENTO_NOTA_ACTIVA, {
-            detail: {
-                id
-            }
-        })
-    );
-}
-
-/**
- * Recupera el ID de la nota activa de localStorage
- */
-function obtenerNotaActivaIdGuardado(): number | null {
-    try {
-        const id = localStorage.getItem(STORAGE_KEY_NOTA_ACTIVA);
-        return id ? parseInt(id, 10) : null;
-    } catch {
-        return null;
-    }
-}
-
-/**
- * Obtiene el nonce de WordPress para autenticación
- */
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
-}
-
-/**
- * Extrae el título de la primera línea con # del contenido
- */
-function extraerTitulo(contenido: string): string {
-    const lineas = contenido.split('\n');
-    const primeraLinea = lineas[0]?.trim() || '';
-
-    /* Si empieza con #, extraer el texto después del # */
-    if (primeraLinea.startsWith('#')) {
-        const titulo = primeraLinea.replace(/^#+\s*/, '').trim();
-        return titulo || 'Sin título';
-    }
-
-    /* Si no tiene #, usar las primeras palabras */
-    const palabras = primeraLinea.split(' ').slice(0, 5).join(' ');
-    return palabras || 'Sin título';
-}
-
-/**
- * Hook principal para el sistema de notas
+ * Hook principal para el sistema de notas (Legacy Wrapper)
  */
 export function useNotas(): UseNotasReturn {
-    const [estado, setEstado] = useState<EstadoNotas>({
-        cargando: false,
-        guardando: false,
-        eliminando: false,
-        error: null,
-        notas: [],
-        total: 0,
-        hayMas: false,
-        notaActiva: {
-            id: null,
-            contenido: CONTENIDO_NOTA_NUEVA,
-            modificada: false
-        }
-    });
+    /* Consumir el store */
+    const {notas, notaActiva, total, hayMas, cargando, guardando, eliminando, error, cargarNotas: cargarNotasStore, cargarMas: cargarMasStore, buscarNotas: buscarNotasStore, seleccionarNota, crearNuevaNota, actualizarContenidoNotaActiva, guardarNotaActiva, eliminarNota, limpiarError, establecerNotaActivaDesdeId, restaurarNotaActivaGuardada} = useNotasStore();
 
-    const abortControllerRef = useRef<AbortController | null>(null);
-    const offsetRef = useRef(0);
-    const limiteRef = useRef(50);
+    /* Refs para control de efectos (migrados del hook original) */
+    const yaRestauradoRef = useRef(false);
+    const autoguardadoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const contenidoAnteriorRef = useRef<string>(notaActiva.contenido);
 
-    /**
-     * Realiza una petición a la API de notas
-     */
-    const fetchApi = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-        const url = `${API_BASE}${endpoint}`;
-
-        const defaultOptions: RequestInit = {
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            }
-        };
-
-        const response = await fetch(url, {...defaultOptions, ...options});
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('No autenticado. Inicia sesión para continuar.');
-            }
-            if (response.status === 403) {
-                throw new Error('Sin permisos para acceder a las notas.');
-            }
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-
-        return response.json();
-    }, []);
-
-    /**
-     * Carga las notas del usuario
-     */
-    const cargarNotas = useCallback(async (): Promise<void> => {
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-        abortControllerRef.current = new AbortController();
-
-        setEstado(prev => ({...prev, cargando: true, error: null}));
-        offsetRef.current = 0;
-
-        try {
-            const response = await fetchApi<{
-                success: boolean;
-                notas: Nota[];
-                total: number;
-                hayMas: boolean;
-            }>(`?limite=${limiteRef.current}&offset=0`);
-
-            if (!response.success) {
-                throw new Error('Error al cargar notas');
-            }
-
-            setEstado(prev => ({
-                ...prev,
-                cargando: false,
-                notas: response.notas,
-                total: response.total,
-                hayMas: response.hayMas
-            }));
-
-            offsetRef.current = response.notas.length;
-        } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-                return;
-            }
-            const mensaje = error instanceof Error ? error.message : 'Error desconocido';
-            setEstado(prev => ({...prev, cargando: false, error: mensaje}));
-        }
-    }, [fetchApi]);
-
-    /**
-     * Carga más notas (paginación)
-     */
-    const cargarMas = useCallback(async (): Promise<void> => {
-        if (estado.cargando || !estado.hayMas) return;
-
-        setEstado(prev => ({...prev, cargando: true}));
-
-        try {
-            const response = await fetchApi<{
-                success: boolean;
-                notas: Nota[];
-                total: number;
-                hayMas: boolean;
-            }>(`?limite=${limiteRef.current}&offset=${offsetRef.current}`);
-
-            if (!response.success) {
-                throw new Error('Error al cargar más notas');
-            }
-
-            setEstado(prev => ({
-                ...prev,
-                cargando: false,
-                notas: [...prev.notas, ...response.notas],
-                hayMas: response.hayMas
-            }));
-
-            offsetRef.current += response.notas.length;
-        } catch (error) {
-            const mensaje = error instanceof Error ? error.message : 'Error desconocido';
-            setEstado(prev => ({...prev, cargando: false, error: mensaje}));
-        }
-    }, [fetchApi, estado.cargando, estado.hayMas]);
-
-    /**
-     * Guarda la nota activa (crea nueva o actualiza existente)
-     */
-    const guardarNotaActiva = useCallback(async (): Promise<Nota | null> => {
-        const {notaActiva} = estado;
-
-        if (!notaActiva.contenido.trim()) return null;
-
-        setEstado(prev => ({...prev, guardando: true, error: null}));
-
-        const titulo = extraerTitulo(notaActiva.contenido);
-
-        try {
-            let notaGuardada: Nota;
-
-            if (notaActiva.id) {
-                /* Actualizar nota existente */
-                const response = await fetchApi<{
-                    success: boolean;
-                    nota: Nota;
-                }>(`/${notaActiva.id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        contenido: notaActiva.contenido,
-                        titulo
-                    })
-                });
-
-                if (!response.success) {
-                    throw new Error('Error al actualizar nota');
-                }
-
-                notaGuardada = response.nota;
-
-                /* Actualizar en la lista de notas */
-                setEstado(prev => ({
-                    ...prev,
-                    guardando: false,
-                    notas: prev.notas.map(n => (n.id === notaActiva.id ? notaGuardada : n)),
-                    notaActiva: {
-                        ...prev.notaActiva,
-                        modificada: false
-                    }
-                }));
-            } else {
-                /* Crear nota nueva */
-                const response = await fetchApi<{
-                    success: boolean;
-                    nota: Nota;
-                }>('', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contenido: notaActiva.contenido,
-                        titulo
-                    })
-                });
-
-                if (!response.success) {
-                    throw new Error('Error al guardar nota');
-                }
-
-                notaGuardada = response.nota;
-
-                /* Persistir el ID de la nueva nota */
-                persistirNotaActivaId(notaGuardada.id);
-
-                /* Agregar al inicio de la lista y establecer como activa */
-                setEstado(prev => ({
-                    ...prev,
-                    guardando: false,
-                    notas: [notaGuardada, ...prev.notas],
-                    total: prev.total + 1,
-                    notaActiva: {
-                        id: notaGuardada.id,
-                        contenido: notaGuardada.contenido,
-                        modificada: false
-                    }
-                }));
-            }
-
-            return notaGuardada;
-        } catch (error) {
-            const mensaje = error instanceof Error ? error.message : 'Error desconocido';
-            setEstado(prev => ({...prev, guardando: false, error: mensaje}));
-            return null;
-        }
-    }, [estado.notaActiva, fetchApi]);
-
-    /**
-     * Elimina una nota (optimistic update)
-     * Elimina visualmente de inmediato y restaura si hay error
-     */
-    const eliminarNota = useCallback(
-        async (id: number): Promise<boolean> => {
-            /* Guardar nota actual para posible restauración */
-            let notaEliminada: Nota | undefined;
-            let notaActivaAnterior: NotaActiva | undefined;
-
-            /* Optimistic update: eliminar inmediatamente del estado */
-            setEstado(prev => {
-                notaEliminada = prev.notas.find(n => n.id === id);
-                notaActivaAnterior = prev.notaActiva;
-
-                const nuevasNotas = prev.notas.filter(n => n.id !== id);
-                const nuevaActiva = prev.notaActiva.id === id ? {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false} : prev.notaActiva;
-
-                return {
-                    ...prev,
-                    eliminando: true,
-                    error: null,
-                    notas: nuevasNotas,
-                    total: prev.total - 1,
-                    notaActiva: nuevaActiva
-                };
-            });
-
-            try {
-                const response = await fetchApi<{
-                    success: boolean;
-                }>(`/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.success) {
-                    throw new Error('Error al eliminar nota');
-                }
-
-                /* Confirmar eliminación exitosa */
-                setEstado(prev => ({...prev, eliminando: false}));
-                return true;
-            } catch (error) {
-                /* Rollback: restaurar la nota eliminada */
-                const mensaje = error instanceof Error ? error.message : 'Error desconocido';
-
-                setEstado(prev => {
-                    const notasRestauradas = notaEliminada ? [...prev.notas, notaEliminada].sort((a, b) => new Date(b.fechaModificacion).getTime() - new Date(a.fechaModificacion).getTime()) : prev.notas;
-
-                    return {
-                        ...prev,
-                        eliminando: false,
-                        error: mensaje,
-                        notas: notasRestauradas,
-                        total: prev.total + 1,
-                        notaActiva: notaActivaAnterior ?? prev.notaActiva
-                    };
-                });
-
-                return false;
-            }
-        },
-        [fetchApi]
-    );
-
-    /**
-     * Busca notas por término
-     */
-    const buscarNotas = useCallback(
-        async (termino: string): Promise<Nota[]> => {
-            if (!termino.trim()) return [];
-
-            try {
-                const response = await fetchApi<{
-                    success: boolean;
-                    notas: Nota[];
-                }>(`/buscar?q=${encodeURIComponent(termino)}`);
-
-                if (!response.success) {
-                    return [];
-                }
-
-                return response.notas;
-            } catch (error) {
-                console.error('Error buscando notas:', error);
-                return [];
-            }
-        },
-        [fetchApi]
-    );
-
-    /**
-     * Selecciona una nota existente como activa
-     */
-    const seleccionarNota = useCallback((nota: Nota) => {
-        persistirNotaActivaId(nota.id);
-        emitirCambioNotaActiva(nota.id);
-        setEstado(prev => ({
-            ...prev,
-            notaActiva: {
-                id: nota.id,
-                contenido: nota.contenido,
-                modificada: false
-            }
-        }));
-    }, []);
-
-    /**
-     * Crea una nueva nota (limpia la activa)
-     */
-    const crearNuevaNota = useCallback(() => {
-        persistirNotaActivaId(null);
-        setEstado(prev => ({
-            ...prev,
-            notaActiva: {
-                id: null,
-                contenido: CONTENIDO_NOTA_NUEVA,
-                modificada: false
-            }
-        }));
-    }, []);
-
-    /**
-     * Actualiza el contenido de la nota activa
-     */
-    const actualizarContenido = useCallback((contenido: string) => {
-        setEstado(prev => ({
-            ...prev,
-            notaActiva: {
-                ...prev.notaActiva,
-                contenido,
-                modificada: true
-            }
-        }));
-    }, []);
-
-    /**
-     * Obtiene el título de un contenido (helper público)
-     */
-    const obtenerTituloDeContenido = useCallback((contenido: string): string => {
-        return extraerTitulo(contenido);
-    }, []);
-
-    /**
-     * Limpia el error actual
-     */
-    const limpiarError = useCallback(() => {
-        setEstado(prev => ({...prev, error: null}));
-    }, []);
-
-    /* Cargar notas al montar */
+    /* 1. Cargar notas al montar */
     useEffect(() => {
-        cargarNotas();
+        cargarNotasStore(true);
+    }, []); // eslint-disable-line
 
-        return () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-        };
-    }, [cargarNotas]);
-
+    /* 2. Escuchar cambios de nota activa en otras instancias/ventanas */
     useEffect(() => {
         const manejarNotaActiva = (evento: Event) => {
             const detalle = (evento as CustomEvent<{id: number | null}>).detail;
-            if (!detalle) return;
-
-            setEstado(prev => {
-                if (prev.notaActiva.id === detalle.id) return prev;
-
-                if (detalle.id === null) {
-                    return {
-                        ...prev,
-                        notaActiva: {
-                            id: null,
-                            contenido: CONTENIDO_NOTA_NUEVA,
-                            modificada: false
-                        }
-                    };
-                }
-
-                const notaEncontrada = prev.notas.find(nota => nota.id === detalle.id);
-                if (!notaEncontrada) return prev;
-
-                return {
-                    ...prev,
-                    notaActiva: {
-                        id: notaEncontrada.id,
-                        contenido: notaEncontrada.contenido,
-                        modificada: false
-                    }
-                };
-            });
+            if (detalle !== undefined) {
+                establecerNotaActivaDesdeId(detalle.id);
+            }
         };
 
         window.addEventListener(EVENTO_NOTA_ACTIVA, manejarNotaActiva);
-
         return () => {
             window.removeEventListener(EVENTO_NOTA_ACTIVA, manejarNotaActiva);
         };
-    }, []);
+    }, [establecerNotaActivaDesdeId]);
 
-    /*
-     * Restaurar la última nota activa guardada en localStorage
-     * Se ejecuta después de cargar las notas cuando cargando cambia a false
-     */
-    const yaRestauradoRef = useRef(false);
+    /* 3. Restaurar última nota activa del localStorage */
     useEffect(() => {
-        /* Solo intentar restaurar cuando las notas se han cargado y no se ha restaurado antes */
-        if (estado.cargando || yaRestauradoRef.current) return;
+        if (cargando || yaRestauradoRef.current) return;
 
         const idGuardado = obtenerNotaActivaIdGuardado();
-        if (idGuardado === null) return;
-
-        /* Buscar la nota en la lista cargada */
-        const notaGuardada = estado.notas.find(n => n.id === idGuardado);
-        if (notaGuardada) {
+        if (idGuardado !== null) {
+            restaurarNotaActivaGuardada();
             yaRestauradoRef.current = true;
-            setEstado(prev => ({
-                ...prev,
-                notaActiva: {
-                    id: notaGuardada.id,
-                    contenido: notaGuardada.contenido,
-                    modificada: false
-                }
-            }));
         }
-    }, [estado.cargando, estado.notas]);
+    }, [cargando, restaurarNotaActivaGuardada]);
 
-    /*
-     * Autoguardado con debounce
-     * Guarda automáticamente cuando el usuario deja de escribir
-     */
-    const autoguardadoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const contenidoAnteriorRef = useRef<string>(estado.notaActiva.contenido);
-
+    /* 4. Autoguardado con debounce */
     useEffect(() => {
-        const {notaActiva} = estado;
-
         /* No autoguardar si el contenido no ha cambiado */
         if (notaActiva.contenido === contenidoAnteriorRef.current) {
             return;
         }
 
-        /* No autoguardar contenido vacío o nota nueva sin contenido real */
+        /* No autoguardar contenido vacío o placeholder por defecto */
         if (!notaActiva.contenido.trim() || notaActiva.contenido === CONTENIDO_NOTA_NUEVA) {
             contenidoAnteriorRef.current = notaActiva.contenido;
             return;
         }
 
-        /* Cancelar timeout anterior */
         if (autoguardadoTimeoutRef.current) {
             clearTimeout(autoguardadoTimeoutRef.current);
         }
 
-        /* Programar autoguardado después de 2 segundos de inactividad */
         autoguardadoTimeoutRef.current = setTimeout(async () => {
             contenidoAnteriorRef.current = notaActiva.contenido;
             await guardarNotaActiva();
@@ -609,19 +111,47 @@ export function useNotas(): UseNotasReturn {
                 clearTimeout(autoguardadoTimeoutRef.current);
             }
         };
-    }, [estado.notaActiva.contenido, estado.notaActiva.id, guardarNotaActiva]);
+    }, [notaActiva.contenido, guardarNotaActiva]);
+
+    /* Wrappers para mantener la firma original */
+    const cargarNotasWrapper = useCallback(async () => {
+        await cargarNotasStore(true);
+    }, [cargarNotasStore]);
+
+    const buscarNotasWrapper = useCallback(
+        async (termino: string) => {
+            return await buscarNotasStore(termino);
+        },
+        [buscarNotasStore]
+    );
+
+    const obtenerTituloDeContenido = useCallback((contenido: string) => {
+        return extraerTitulo(contenido);
+    }, []);
+
+    /* Construir el objeto estado compatible */
+    const estado: EstadoNotas = {
+        cargando,
+        guardando,
+        eliminando,
+        error,
+        notas,
+        total,
+        hayMas,
+        notaActiva
+    };
 
     return {
         estado,
-        cargarNotas,
+        cargarNotas: cargarNotasWrapper,
         guardarNotaActiva,
         eliminarNota,
-        buscarNotas,
-        cargarMas,
+        buscarNotas: buscarNotasWrapper,
+        cargarMas: cargarMasStore,
         limpiarError,
         seleccionarNota,
         crearNuevaNota,
-        actualizarContenido,
+        actualizarContenido: actualizarContenidoNotaActiva,
         obtenerTituloDeContenido
     };
 }

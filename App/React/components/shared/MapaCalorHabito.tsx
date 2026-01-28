@@ -12,6 +12,7 @@
 
 import {useMemo, useCallback, useEffect, useRef, useState} from 'react';
 import {useHabitosStore, useHabito} from '../../stores/habitosStore';
+import {useHabitosHistorialStore, useHistorialDetallado} from '../../stores/habitosHistorialStore';
 import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaLocalISO, obtenerFechaEfectiva, obtenerFechaHoy} from '../../utils/fecha';
 import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
@@ -126,10 +127,10 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
     /* Obtener acciones del store */
     const marcarDia = useHabitosStore(state => state.marcarDia);
     const desmarcarDia = useHabitosStore(state => state.desmarcarDia);
-    const cargarHistorialDetallado = useHabitosStore(state => state.cargarHistorialDetallado);
+    const cargarHistorialDetallado = useHabitosHistorialStore(state => state.cargarHistorialDetallado);
 
     /* Obtener historial detallado si existe (para el modal con más días) */
-    const historialDetallado = useHabitosStore(state => state.historialDetallado[habitoId]);
+    const historialDetallado = useHistorialDetallado(habitoId);
 
     /* Set para trackear fechas que están en proceso de guardado (evita doble-click en misma celda) */
     const fechasEnProcesoRef = useRef<Set<string>>(new Set());
