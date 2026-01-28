@@ -112,7 +112,20 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modales de Hábitos */}
             <ModalHabito estaAbierto={dashboard.modalCrearHabitoAbierto} onCerrar={dashboard.cerrarModalCrearHabito} onGuardar={dashboard.crearHabito} />
-            <ModalHabito estaAbierto={dashboard.habitoEditando !== null} onCerrar={dashboard.cerrarModalEditarHabito} onGuardar={datos => dashboard.editarHabito(dashboard.habitoEditando!.id, datos)} onPausarHabito={dashboard.pausarHabito} habito={dashboard.habitoEditando ?? undefined} />
+            <ModalHabito
+                estaAbierto={dashboard.habitoEditando !== null}
+                onCerrar={dashboard.cerrarModalEditarHabito}
+                onGuardar={datos => dashboard.editarHabito(dashboard.habitoEditando!.id, datos)}
+                onPausarHabito={dashboard.pausarHabito}
+                habito={dashboard.habitoEditando ?? undefined}
+                /* Props para tareas del hábito - Fase 14.8 */
+                tareas={dashboard.tareas}
+                onToggleTarea={dashboard.toggleTarea}
+                onCrearTarea={dashboard.crearTarea}
+                onEliminarTarea={dashboard.eliminarTarea}
+                onConfigurarTarea={modales.abrirModalEditarTarea}
+                onActualizarOrdenTareasHabito={dashboard.actualizarOrdenTareasHabito}
+            />
 
             {/* Modales de Proyectos */}
             <ModalProyecto estaAbierto={modales.modalCrearProyectoAbierto} onCerrar={modales.cerrarModalCrearProyecto} onGuardar={acciones.manejarGuardarNuevoProyecto} tareas={dashboard.tareas} />
@@ -139,7 +152,38 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             {modales.modalNuevaTareaAbierto && <PanelConfiguracionTarea estaAbierto={modales.modalNuevaTareaAbierto} onCerrar={modales.cerrarModalNuevaTarea} onGuardar={acciones.manejarCrearNuevaTareaGlobal} />}
 
             {/* Modal Editar Tarea */}
-            {modales.tareaEditando && <PanelConfiguracionTarea estaAbierto={true} onCerrar={modales.cerrarModalEditarTarea} onGuardar={(config, priority, text, assignment, urgency, tags) => acciones.manejarGuardarEdicionTareaGlobal(modales.tareaEditando!.id, config, priority, text, assignment, urgency, tags)} tarea={modales.tareaEditando} participantes={compartir.obtenerParticipantesTarea(modales.tareaEditando)} companeros={equipos.companeros} onAgregarParticipante={(usuarioId, rol) => modales.tareaEditando && compartir.manejarCompartirTareaDesdeEdicion(modales.tareaEditando.id, usuarioId, rol)} onRemoverParticipante={participanteId => modales.tareaEditando && compartir.manejarDejarDeCompartirTareaDesdeEdicion(modales.tareaEditando.id, participanteId)} onCambiarRolParticipante={(participanteId, nuevoRol) => modales.tareaEditando && compartir.manejarCambiarRolTareaDesdeEdicion(modales.tareaEditando.id, participanteId, nuevoRol)} />}
+            {modales.tareaEditando && (
+                <PanelConfiguracionTarea
+                    key={modales.tareaEditando.id}
+                    estaAbierto={true}
+                    onCerrar={modales.cerrarModalEditarTarea}
+                    onGuardar={(config, priority, text, assignment, urgency, tags) => acciones.manejarGuardarEdicionTareaGlobal(modales.tareaEditando!.id, config, priority, text, assignment, urgency, tags)}
+                    /* FIX: Buscar tarea fresca y aplicar herencia de prioridad del hábito si aplica */
+                    tarea={(() => {
+                        const tareaReal = dashboard.tareas.find(t => t.id === modales.tareaEditando?.id) || modales.tareaEditando;
+                        if (!tareaReal) return undefined;
+
+                        /* Heredar prioridad si es tarea de habito y no tiene prioridad propia */
+                        if (!tareaReal.prioridad && tareaReal.habitoId) {
+                            const habito = dashboard.habitos.find(h => h.id === tareaReal.habitoId);
+                            if (habito) {
+                                return {
+                                    ...tareaReal,
+                                    prioridad: habito.importancia.toLowerCase() as 'alta' | 'media' | 'baja'
+                                };
+                            }
+                        }
+                        return tareaReal;
+                    })()}
+                    participantes={[]}
+                    companeros={[]}
+                    proyectos={dashboard.proyectos}
+                    onCambiarProyecto={nuevoId => modales.tareaEditando && dashboard.editarTarea(modales.tareaEditando.id, {proyectoId: nuevoId})}
+                    onToggleCompletado={completado => {
+                        if (modales.tareaEditando && completado !== modales.tareaEditando.completado) dashboard.toggleTarea(modales.tareaEditando.id);
+                    }}
+                />
+            )}
 
             {/* Componentes Auxiliares */}
             {dashboard.accionDeshacer && <ToastDeshacer mensaje={dashboard.accionDeshacer.mensaje} tiempoRestante={dashboard.accionDeshacer.tiempoRestante} tiempoTotal={5000} onDeshacer={dashboard.ejecutarDeshacer} onDescartar={dashboard.descartarDeshacer} />}

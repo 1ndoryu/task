@@ -85,6 +85,9 @@ interface HabitosActions {
     /* Restaurar estado (para deshacer) */
     restaurarHabito: (habito: Habito) => void;
     restaurarHabitos: (habitos: Habito[]) => void;
+
+    /* Actualizar orden de tareas del hábito - Fase 14.8 */
+    actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => void;
 }
 
 export type HabitosStore = HabitosState & HabitosActions;
@@ -693,6 +696,23 @@ export const useHabitosStore = create<HabitosStore>()(
 
                 restaurarHabitos: habitos => {
                     set({habitos}, false, 'restaurarHabitos');
+                },
+
+                /* Actualizar orden de tareas del hábito - Fase 14.8 */
+                actualizarOrdenTareasHabito: (habitoId, tareasIds) => {
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => {
+                                if (h.id !== habitoId) return h;
+                                return {
+                                    ...h,
+                                    tareasIds
+                                };
+                            })
+                        }),
+                        false,
+                        'actualizarOrdenTareasHabito'
+                    );
                 }
             }),
             {
@@ -798,5 +818,6 @@ export const habitosActions = {
     restaurarHabito: (habito: Habito) => useHabitosStore.getState().restaurarHabito(habito),
     getHabitos: () => useHabitosStore.getState().habitos,
     getHabito: (id: number) => useHabitosStore.getState().habitos.find(h => h.id === id),
-    obtenerHistorialDetallado: (habitoId: number, diasRequeridos?: number) => useHabitosStore.getState().obtenerHistorialDetallado(habitoId, diasRequeridos)
+    obtenerHistorialDetallado: (habitoId: number, diasRequeridos?: number) => useHabitosStore.getState().obtenerHistorialDetallado(habitoId, diasRequeridos),
+    actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => useHabitosStore.getState().actualizarOrdenTareasHabito(habitoId, tareasIds)
 };

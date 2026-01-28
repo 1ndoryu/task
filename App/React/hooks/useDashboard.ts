@@ -48,6 +48,8 @@ interface UseDashboardReturn {
     pausarHabito: (id: number) => void;
     /* Actualiza el historial de un hábito (para sincronizar con columna de actividad) */
     actualizarHistorialHabito: (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => void;
+    /* Actualizar orden de tareas del hábito - Fase 14.8 */
+    actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => void;
     crearHabito: (datos: DatosNuevoHabito) => void;
     editarHabito: (id: number, datos: DatosNuevoHabito) => void;
     eliminarHabito: (id: number) => void;
@@ -102,6 +104,7 @@ export function useDashboard(): UseDashboardReturn {
     const storeEditarHabito = useHabitosStore(state => state.editarHabito);
     const storeEliminarHabito = useHabitosStore(state => state.eliminarHabito);
     const storeActualizarHistorial = useHabitosStore(state => state.actualizarHistorialHabito);
+    const storeActualizarOrdenTareasHabito = useHabitosStore(state => state.actualizarOrdenTareasHabito);
     const storeRestaurarHabito = useHabitosStore(state => state.restaurarHabito);
     const storeInicializado = useHabitosStore(state => state.inicializado);
 
@@ -469,6 +472,17 @@ export function useDashboard(): UseDashboardReturn {
         [storeActualizarHistorial]
     );
 
+    /*
+     * Actualizar orden de tareas del hábito - Fase 14.8
+     * Delega al store de Zustand
+     */
+    const actualizarOrdenTareasHabito = useCallback(
+        (habitoId: number, tareasIds: number[]) => {
+            storeActualizarOrdenTareasHabito(habitoId, tareasIds);
+        },
+        [storeActualizarOrdenTareasHabito]
+    );
+
     const exportarTodosDatos = useCallback(() => {
         try {
             exportarDatos(habitos, tareas, notas, proyectos);
@@ -516,6 +530,7 @@ export function useDashboard(): UseDashboardReturn {
         posponerHabito,
         pausarHabito,
         actualizarHistorialHabito,
+        actualizarOrdenTareasHabito,
         crearHabito,
         editarHabito,
         eliminarHabito,

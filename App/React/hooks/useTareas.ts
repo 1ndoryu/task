@@ -221,6 +221,7 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                     /* Campos opcionales de DatosEdicionTarea */
                     parentId: datos.parentId,
                     proyectoId: datos.proyectoId,
+                    habitoId: datos.habitoId,
                     configuracion: datos.configuracion,
                     /* Normalizar campos que pueden ser null -> undefined */
                     prioridad: datos.prioridad ?? undefined,

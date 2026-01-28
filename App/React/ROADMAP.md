@@ -355,14 +355,40 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - [x] Alinear fecha local del heatmap con la jornada del usuario.
 
 ### 14.8 Hábitos: Frecuencia y Subtareas
-- [ ] **Frecuencia personalizada consistente (cada X días):**
-  - [ ] Unificar cálculo entre indicador "Hoy", panel de ejecución y columna Actividad.
-  - [ ] Revisar casos con historial reciente y frecuencia personalizada.
-- [ ] **Subtareas de hábitos en panel de ejecución:**
-  - [ ] Permitir crear tareas internas dentro de un hábito.
-  - [ ] Mostrar estas tareas en el panel de ejecución como subtareas del hábito.
-  - [ ] Mantener orden manual definido en la configuración del hábito.
-  - [ ] Heredar importancia del hábito y sin urgencia propia.
+- [x] **Frecuencia personalizada consistente (cada X días):**
+  - [x] Unificar cálculo entre indicador "Hoy", panel de ejecución y columna Actividad.
+  - [x] Corregido bug de parseo de fechas UTC en `tocaHoy()` que causaba desfase de 1 día.
+  - [x] Ahora todas las funciones usan format 'T12:00:00' para evitar problemas de zona horaria.
+- [x] **Infraestructura de subtareas de hábitos (completado):**
+  - [x] Agregar `habitoId` a interfaces `Tarea` y `DatosEdicionTarea`.
+  - [x] Agregar `tareasIds` al `Habito` para orden personalizado.
+  - [x] Crear componente `ListaTareasHabito` para gestionar tareas en configuración.
+  - [x] Integrar en `FormularioHabitoModerno` y `ModalHabito`.
+  - [x] Agregar acción `actualizarOrdenTareasHabito` al store de hábitos.
+  - [x] Conectar `DashboardModales` con las nuevas props.
+- [x] **Subtareas de hábitos - UI pendiente:**
+  - [x] Hacer la sección "Metas / Tareas" más compacta y minimalista.
+  - [x] Quitar el ícono de arrastre visible, permitir arrastrar la tarea directamente.
+  - [x] Reducir tamaño de fuente de los items.
+  - [x] Centrar y reducir tamaño del botón "+ agregar meta o tarea".
+- [ ] **Subtareas de hábitos - Bugs pendientes:**
+  - [x] Al crear tarea, el texto no se guarda correctamente (aparece vacío en modal de edición).
+  - [x] **Inconsistencia de Modales:** El modal "Modificar tarea" desde la configuración del hábito es diferente (y carga mal propiedades) comparado con el del panel de ejecución (que es el correcto).
+  - [x] En panel de ejecución, el hábito aparece pero sin sus subtareas asociadas.
+  - [x] Mostrar estas tareas en el panel de ejecución como subtareas del hábito.
+  - [x] Mantener orden manual definido en la configuración del hábito.
+  - [x] Heredar importancia del hábito y sin urgencia propia.
+- [ ] **Revisión UX/UI Subtareas Hábito (Feedback):**
+  - [ ] **Drag & Drop:** El reordenamiento en configuración se siente tosco/mal comparado con la lista principal. Revisar.
+  - [ ] **Badge Prioridad:** Debe aparecer en la lista interna y ser editable inline (estilo milestone).
+  - [ ] **Checkbox:** Cambiar círculo por cuadrado para consistencia con tareas.
+- [ ] **Bugs Sincronización Subtareas:**
+  - [ ] **Herencia:** Subtareas creadas en panel ejecución (Enter) no están heredando la importancia del hábito padre.
+  - [ ] **Visibilidad:** Subtareas creadas en panel ejecución no aparecen reflejadas en la lista "Metas" de la configuración del hábito.
+
+### 14.9 Gestión Avanzada de Subtareas (Futuro)
+- [ ] **Gestión Interna:** Las tareas normales deberían permitir gestionar sus subtareas desde su modal de configuración (similar a la nueva UI de metas de hábitos).
+- [ ] **Acceso Rápido:** Agregar opción "Agregar subtarea" en el menú contextual de las tareas (creación inline o modal).
 
 ---
 

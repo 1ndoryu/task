@@ -435,11 +435,22 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                     </Reorder.Group>
 
                     {/* Tareas-hábito en modo manual (sin drag, al final) */}
-                    {tareasHabitoPendientes.map(tareaHabito => (
-                        <div key={tareaHabito.id} className="tareaHabitoContenedor">
-                            {renderTareaConColapsador(tareaHabito, false)}
-                        </div>
-                    ))}
+                    {/* Tareas-hábito en modo manual (sin drag, al final) */}
+                    {tareasHabitoPendientes.map(tareaHabito => {
+                        const subtareasVisibles = obtenerSubtareasVisibles(tareaHabito.id);
+                        return (
+                            <div key={tareaHabito.id} className="tareaHabitoContenedor">
+                                {renderTareaConColapsador(tareaHabito, false)}
+
+                                {/* Subtareas del hábito */}
+                                {subtareasVisibles.map(subtarea => (
+                                    <div key={subtarea.id} className="subtareaContenedor">
+                                        {renderTareaConColapsador(subtarea, true)}
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })}
                 </>
             ) : (
                 /* Modo no-manual: renderizar en orden (tareas + hábitos mezclados por algoritmo inteligente) */
@@ -453,13 +464,12 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                 <div key={tareaPadre.id} className="tareaPadreContenedor">
                                     {renderTareaConColapsador(tareaPadre, false)}
 
-                                    {/* Subtareas (solo para tareas reales, no hábitos) */}
-                                    {!esTareaHabito(tareaPadre) &&
-                                        subtareasVisibles.map(subtarea => (
-                                            <div key={subtarea.id} className="subtareaContenedor">
-                                                {renderTareaConColapsador(subtarea, true)}
-                                            </div>
-                                        ))}
+                                    {/* Subtareas (incluyendo las de hábitos) */}
+                                    {subtareasVisibles.map(subtarea => (
+                                        <div key={subtarea.id} className="subtareaContenedor">
+                                            {renderTareaConColapsador(subtarea, true)}
+                                        </div>
+                                    ))}
                                 </div>
                             );
                         })}

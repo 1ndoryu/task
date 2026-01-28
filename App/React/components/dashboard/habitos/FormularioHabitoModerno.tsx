@@ -6,14 +6,16 @@
  * Fase 9.5: Layout moderno con titulo limpio, propiedades compactas
  * Fase 9.7.7.4: Estandarizado con FilaPropiedades
  * Fase 13: Soporte para pausar habitos
+ * Fase 14.8: Soporte para tareas/metas del habito
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, etc.)
  */
 
 import {Pause, Play} from 'lucide-react';
-import type {NivelImportancia, FrecuenciaHabito, Habito} from '../../../types/dashboard';
+import type {NivelImportancia, FrecuenciaHabito, Habito, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
+import {ListaTareasHabito} from './ListaTareasHabito';
 
 interface FormularioHabitoModernoProps {
     /* Campos principales */
@@ -41,10 +43,20 @@ interface FormularioHabitoModernoProps {
     /* Modo */
     modoEdicion?: boolean;
     errorNombre?: string;
+    /* Tareas del habito - Fase 14.8 */
+    tareasHabito?: Tarea[];
+    onToggleTareaHabito?: (id: number) => void;
+    onCrearTareaHabito?: (datos: DatosEdicionTarea) => void;
+    onEliminarTareaHabito?: (id: number) => void;
+    onConfigurarTareaHabito?: (tarea: Tarea) => void;
+    onReordenarTareasHabito?: (tareasIds: number[]) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, tareasHabito, onToggleTareaHabito, onCrearTareaHabito, onEliminarTareaHabito, onConfigurarTareaHabito, onReordenarTareasHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
+
+    /* Determinar si mostrar la sección de tareas */
+    const mostrarTareasHabito = modoEdicion && habito && habito.id > 0 && onCrearTareaHabito && onToggleTareaHabito && onEliminarTareaHabito;
 
     return (
         <div id="formulario-habito-moderno" className="formularioProyectoModerno">
@@ -97,6 +109,9 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
                     {estaPausado && habito?.fechaPausa && <span className="botonPausaHabito__fecha">desde {new Date(habito.fechaPausa).toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})}</span>}
                 </FilaPropiedades>
             )}
+
+            {/* Tareas/Metas del habito - Fase 14.8 */}
+            {mostrarTareasHabito && <ListaTareasHabito tareas={tareasHabito || []} habitoId={habito.id} onToggleTarea={onToggleTareaHabito} onCrearTarea={onCrearTareaHabito} onEliminarTarea={onEliminarTareaHabito} onConfigurarTarea={onConfigurarTareaHabito} onReordenarTareas={onReordenarTareasHabito} />}
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (

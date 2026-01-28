@@ -2,10 +2,13 @@
  * useHabitosComoTareas
  * Hook que convierte hábitos que "tocan hoy" en tareas virtuales para Ejecución
  * La urgencia se calcula automáticamente basada en días de inactividad
+ *
+ * Fase 14.8: Ahora también incluye las tareas asociadas al hábito como subtareas
+ * Las tareas heredan prioridad del hábito y mantienen su orden definido en tareasIds
  */
 
 import {useMemo} from 'react';
-import type {Habito, TareaHabito, NivelUrgencia, NivelPrioridad} from '../types/dashboard';
+import type {Habito, Tarea, TareaHabito, NivelUrgencia, NivelPrioridad} from '../types/dashboard';
 import {tocaHoy} from '../utils/frecuenciaHabitos';
 import {FRECUENCIA_POR_DEFECTO} from '../types/dashboard';
 import {obtenerFechaHoy} from '../utils/fecha';
@@ -71,6 +74,7 @@ const fuePospuestoHoy = (habito: Habito, fechaHoy: string): boolean => {
 
 interface UseHabitosComoTareasParams {
     habitos: Habito[];
+    tareas: Tarea[];
     mostrarHabitos: boolean;
     onToggleHabito: (habitoId: number) => void;
     umbralesUrgencia?: UmbralesUrgencia;
@@ -78,12 +82,17 @@ interface UseHabitosComoTareasParams {
 
 interface UseHabitosComoTareasReturn {
     tareasHabito: TareaHabito[];
+    /* Incluye tanto tareas virtuales de hábito como las subtareas reales del hábito */
+    tareasConSubtareas: Tarea[];
     manejarToggleTareaHabito: (tareaId: number) => boolean;
 }
 
-export function useHabitosComoTareas({habitos, mostrarHabitos, onToggleHabito, umbralesUrgencia}: UseHabitosComoTareasParams): UseHabitosComoTareasReturn {
+export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleHabito, umbralesUrgencia}: UseHabitosComoTareasParams): UseHabitosComoTareasReturn {
     const umbrales = umbralesUrgencia || UMBRALES_DEFECTO;
 
+    /*
+     * Tareas virtuales de hábitos que tocan hoy
+     */
     const tareasHabito = useMemo<TareaHabito[]>(() => {
         if (!mostrarHabitos) return [];
 
@@ -124,6 +133,56 @@ export function useHabitosComoTareas({habitos, mostrarHabitos, onToggleHabito, u
     }, [habitos, mostrarHabitos, umbrales]);
 
     /*
+     * Tareas virtuales + subtareas reales del hábito
+     * Fase 14.8: Las subtareas heredan prioridad del hábito y no tienen urgencia propia
+     * Mantienen el orden definido en tareasIds del hábito
+     */
+    const tareasConSubtareas = useMemo<Tarea[]>(() => {
+        if (!mostrarHabitos) return [];
+
+        const resultado: Tarea[] = [];
+
+        for (const tareaHabito of tareasHabito) {
+            /* Agregar la tarea virtual del hábito */
+            resultado.push(tareaHabito);
+
+            /* Buscar hábito original para obtener tareasIds (orden) */
+            const habito = habitos.find(h => h.id === tareaHabito.habitoId);
+            if (!habito) continue;
+
+            /* Filtrar tareas que pertenecen a este hábito */
+            const tareasDelHabito = tareas.filter(t => t.habitoId === habito.id && !t.completado);
+
+            /* Ordenar según tareasIds si existe */
+            let tareasOrdenadas: Tarea[];
+            if (habito.tareasIds && habito.tareasIds.length > 0) {
+                const ordenMap = new Map(habito.tareasIds.map((id, index) => [id, index]));
+                tareasOrdenadas = [...tareasDelHabito].sort((a, b) => {
+                    const ordenA = ordenMap.get(a.id) ?? 999;
+                    const ordenB = ordenMap.get(b.id) ?? 999;
+                    return ordenA - ordenB;
+                });
+            } else {
+                tareasOrdenadas = tareasDelHabito;
+            }
+
+            /* Agregar las subtareas con parentId apuntando al ID virtual del hábito */
+            for (const tarea of tareasOrdenadas) {
+                resultado.push({
+                    ...tarea,
+                    parentId: tareaHabito.id,
+                    /* Heredar prioridad del hábito */
+                    prioridad: tareaHabito.prioridad,
+                    /* Sin urgencia propia (heredada del hábito visual) */
+                    urgencia: undefined
+                });
+            }
+        }
+
+        return resultado;
+    }, [tareasHabito, tareas, habitos, mostrarHabitos]);
+
+    /*
      * Maneja el toggle de una tarea-hábito
      * Retorna true si fue manejado (era una tarea-hábito), false si no
      */
@@ -142,6 +201,7 @@ export function useHabitosComoTareas({habitos, mostrarHabitos, onToggleHabito, u
 
     return {
         tareasHabito,
+        tareasConSubtareas,
         manejarToggleTareaHabito
     };
 }

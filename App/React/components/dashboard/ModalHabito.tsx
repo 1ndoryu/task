@@ -6,11 +6,12 @@
  * - FormularioHabitoModerno para el formulario principal
  * - usePanelChat para la gestión del panel de chat
  * - Fase 10.8.6: Removido PestanasModal (código muerto)
+ * - Fase 14.8: Soporte para tareas/metas del habito
  */
 
-import {useState, useCallback, useEffect} from 'react';
+import {useState, useCallback, useEffect, useMemo} from 'react';
 import {Activity, BarChart2} from 'lucide-react';
-import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante} from '../../types/dashboard';
+import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
 import type {EstadoHabito} from '../shared';
@@ -29,9 +30,16 @@ interface ModalHabitoProps {
     onPausarHabito?: (id: number) => void;
     habito?: Habito;
     participantes?: Participante[];
+    /* Tareas del hábito - Fase 14.8 */
+    tareas?: Tarea[];
+    onToggleTarea?: (id: number) => void;
+    onCrearTarea?: (datos: DatosEdicionTarea) => void;
+    onEliminarTarea?: (id: number) => void;
+    onConfigurarTarea?: (tarea: Tarea) => void;
+    onActualizarOrdenTareasHabito?: (habitoId: number, tareasIds: number[]) => void;
 }
 
-export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = []}: ModalHabitoProps): JSX.Element | null {
+export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = [], tareas = [], onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito}: ModalHabitoProps): JSX.Element | null {
     const modoEdicion = !!habito;
 
     /* Estado local para edicion */
@@ -63,6 +71,28 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
         if (habito.historialCompletados?.includes(hoy)) estadoHoy = 'completado';
         else if (habito.historialPospuestos?.includes(hoy)) estadoHoy = 'pospuesto';
     }
+
+    /*
+     * Filtrar tareas que pertenecen a este hábito
+     * Las tareas se ordenan según tareasIds del hábito, o por orden de creación si no hay orden definido
+     */
+    const tareasDelHabito = useMemo(() => {
+        if (!habito) return [];
+        const tareasHabito = tareas.filter(t => t.habitoId === habito.id);
+
+        /* Si el hábito tiene orden definido, usarlo */
+        if (habito.tareasIds && habito.tareasIds.length > 0) {
+            const ordenMap = new Map(habito.tareasIds.map((id, index) => [id, index]));
+            return [...tareasHabito].sort((a, b) => {
+                const ordenA = ordenMap.get(a.id) ?? 999;
+                const ordenB = ordenMap.get(b.id) ?? 999;
+                return ordenA - ordenB;
+            });
+        }
+
+        /* Si no hay orden, ordenar por fecha de creación */
+        return tareasHabito;
+    }, [habito, tareas]);
 
     /* Sincronizar estado cuando cambia el habito */
     useEffect(() => {
@@ -140,6 +170,16 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
         }
     }, [nombre, manejarGuardar, onCerrar]);
 
+    /* Callback para reordenar tareas del hábito */
+    const manejarReordenarTareas = useCallback(
+        (tareasIds: number[]) => {
+            if (habito && onActualizarOrdenTareasHabito) {
+                onActualizarOrdenTareasHabito(habito.id, tareasIds);
+            }
+        },
+        [habito, onActualizarOrdenTareasHabito]
+    );
+
     /* Header Icons (similar a ModalProyecto) */
     const accionesHeader = modoEdicion ? (
         <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
@@ -195,6 +235,13 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     habito={habito}
                                     modoEdicion={true}
                                     errorNombre={errores.nombre}
+                                    /* Props para tareas del hábito - Fase 14.8 */
+                                    tareasHabito={tareasDelHabito}
+                                    onToggleTareaHabito={onToggleTarea}
+                                    onCrearTareaHabito={onCrearTarea}
+                                    onEliminarTareaHabito={onEliminarTarea}
+                                    onConfigurarTareaHabito={onConfigurarTarea}
+                                    onReordenarTareasHabito={manejarReordenarTareas}
                                 />
                             </div>
                             {/* Input de comentario cuando el chat esta oculto */}

@@ -50,9 +50,10 @@ export function useDashboardCompleto() {
     const configActividad = useConfiguracionActividad();
     const temas = useTema();
 
-    /* Hook para convertir hábitos en tareas virtuales */
+    /* Hook para convertir hábitos en tareas virtuales + sus subtareas */
     const habitosComoTareas = useHabitosComoTareas({
         habitos: dashboard.habitos,
+        tareas: dashboard.tareas,
         mostrarHabitos: configTareas.configuracion.mostrarHabitosEnEjecucion,
         onToggleHabito: dashboard.toggleHabito,
         umbralesUrgencia: configHabitos.obtenerUmbralesActuales()
@@ -85,17 +86,21 @@ export function useDashboardCompleto() {
     );
 
     /*
-     * Combinar tareas filtradas con tareas-hábito
+     * Combinar tareas filtradas con tareas-hábito (incluye subtareas)
      * NOTA: Cuando el filtro es "asignadas", NO incluir hábitos
      * Los hábitos nunca son "asignados" por otros usuarios
+     * Fase 14.8: Usamos tareasConSubtareas para incluir subtareas del hábito
      */
     const tareasConHabitos = useMemo<Tarea[]>(() => {
         /* Si el filtro es "asignadas", solo mostrar tareas reales asignadas */
         if (filtroTareas.filtroActual.tipo === 'asignadas') {
             return filtroTareas.tareasFiltradas;
         }
-        return [...filtroTareas.tareasFiltradas, ...habitosComoTareas.tareasHabito];
-    }, [filtroTareas.tareasFiltradas, filtroTareas.filtroActual.tipo, habitosComoTareas.tareasHabito]);
+
+        /* Excluir tareas con habitoId de las filtradas (se incluyen via tareasConSubtareas) */
+        const tareasNoHabito = filtroTareas.tareasFiltradas.filter(t => !t.habitoId);
+        return [...tareasNoHabito, ...habitosComoTareas.tareasConSubtareas];
+    }, [filtroTareas.tareasFiltradas, filtroTareas.filtroActual.tipo, habitosComoTareas.tareasConSubtareas]);
 
     /* Ordenar la combinación de tareas + tareas-hábito */
     const ordenTareas = useOrdenarTareas(tareasConHabitos);

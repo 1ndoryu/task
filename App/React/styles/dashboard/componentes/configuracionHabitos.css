@@ -133,3 +133,197 @@
         grid-template-columns: 1fr;
     }
 }
+
+/*
+ * LISTA DE TAREAS DE HABITO - VERSION COMPACTA
+ * Componente para gestionar tareas asociadas a un hábito
+ * Fase 14.8: Subtareas de hábitos
+ */
+
+.listaTareasHabito {
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+/* Modo compacto (aplicado por defecto) */
+.listaTareasHabito--compacto .listaTareasHabito__encabezado {
+    margin-bottom: 4px;
+}
+
+.listaTareasHabito__encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
+.listaTareasHabito__titulo {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--dashboard-textoApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.listaTareasHabito__contador {
+    font-size: 0.6rem;
+    color: var(--dashboard-textoApagado);
+    background: var(--dashboard-fondoSecundario);
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.listaTareasHabito__lista {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.listaTareasHabito__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0px;
+    background: var(--dashboard-fondoSecundario);
+    border-radius: 4px;
+    cursor: grab;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.listaTareasHabito__item:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.listaTareasHabito__item:active {
+    cursor: grabbing;
+}
+
+.listaTareasHabito__item--completado {
+    opacity: 0.5;
+}
+
+.listaTareasHabito__item--completado .listaTareasHabito__texto {
+    text-decoration: line-through;
+    color: var(--dashboard-textoApagado);
+}
+
+.listaTareasHabito__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dashboard-textoApagado);
+    transition: color var(--dashboard-transicionRapida);
+    flex-shrink: 0;
+}
+
+.listaTareasHabito__checkbox:hover {
+    color: var(--dashboard-primario);
+}
+
+.listaTareasHabito__checkbox .iconoCheck {
+    color: var(--dashboard-exito);
+}
+
+.listaTareasHabito__texto {
+    flex: 1;
+    font-size: 0.7rem;
+    color: var(--dashboard-textoNormal);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.listaTareasHabito__texto:hover {
+    color: var(--dashboard-primario);
+}
+
+.listaTareasHabito__eliminar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dashboard-textoApagado);
+    opacity: 0;
+    transition: all var(--dashboard-transicionRapida);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.listaTareasHabito__item:hover .listaTareasHabito__eliminar {
+    opacity: 1;
+}
+
+.listaTareasHabito__eliminar:hover {
+    color: var(--dashboard-error);
+}
+
+.listaTareasHabito__vacio {
+    font-size: 0.65rem;
+    color: var(--dashboard-textoApagado);
+    text-align: center;
+    padding: var(--dashboard-espacioSm);
+    font-style: italic;
+}
+
+.listaTareasHabito__inputContenedor {
+    margin-top: 4px;
+}
+
+.listaTareasHabito__input {
+    width: 100%;
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 4px;
+    color: var(--dashboard-textoNormal);
+    outline: none;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.listaTareasHabito__input:focus {
+    border-color: var(--dashboard-primario);
+}
+
+.listaTareasHabito__input::placeholder {
+    color: var(--dashboard-textoApagado);
+}
+
+/* Boton agregar - compacto y centrado */
+.listaTareasHabito__botonAgregar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: var(--dashboard-espacioXs);
+    padding: 4px 10px;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.65rem;
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: 1px dashed var(--dashboard-bordeSutil);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.listaTareasHabito__botonAgregar:hover {
+    color: var(--dashboard-primario);
+    border-color: var(--dashboard-primario);
+    background: var(--dashboard-fondoSecundario);
+}

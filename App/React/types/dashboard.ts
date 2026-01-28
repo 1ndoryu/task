@@ -83,6 +83,8 @@ export interface Habito {
     /* Estado de pausa: el habito no aparece en pendientes y la racha se congela */
     pausado?: boolean;
     fechaPausa?: string /* Fecha ISO de cuando se pauso el habito */;
+    /* IDs de tareas asociadas al habito, en orden personalizado (Fase 14.8) */
+    tareasIds?: number[];
 }
 
 /*
@@ -182,6 +184,8 @@ export interface Tarea {
     parentId?: number;
     /* ID del proyecto al que pertenece la tarea (opcional) */
     proyectoId?: number;
+    /* ID del habito al que pertenece la tarea - Fase 14.8 (opcional) */
+    habitoId?: number;
     /* Campos opcionales */
     prioridad?: NivelPrioridad;
     /* Urgencia: temporalidad (bloqueante, urgente, normal, chill) */
@@ -290,6 +294,8 @@ export interface DatosEdicionTarea {
     /* Configuración avanzada de la tarea */
     configuracion?: TareaConfiguracion;
     proyectoId?: number;
+    /* ID del habito al que pertenece la tarea - Fase 14.8 */
+    habitoId?: number;
     /* Asignación de tarea */
     asignadoA?: number | null;
     asignadoANombre?: string;

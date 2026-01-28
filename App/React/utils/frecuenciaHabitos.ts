@@ -25,8 +25,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'cadaXDias': {
             if (!ultimoCompletado) return true;
 
-            const ultimaFecha = new Date(ultimoCompletado);
-            ultimaFecha.setHours(0, 0, 0, 0);
+            /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
+            const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
 
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -36,8 +36,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'semanal': {
             if (!ultimoCompletado) return true;
 
-            const ultimaFecha = new Date(ultimoCompletado);
-            ultimaFecha.setHours(0, 0, 0, 0);
+            /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
+            const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
 
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -52,14 +52,13 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'mensual': {
             if (!ultimoCompletado) return true;
 
-            const ultimaFecha = new Date(ultimoCompletado);
+            /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
+            const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
             const diasEnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
             const vecesAlMes = frecuencia.vecesAlMes || 4;
 
             /* Intervalo aproximado entre completados */
             const intervaloIdeal = Math.floor(diasEnMes / vecesAlMes);
-
-            ultimaFecha.setHours(0, 0, 0, 0);
 
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -84,8 +83,8 @@ export function diasHastaProximaRepeticion(frecuencia: FrecuenciaHabito, ultimoC
 
     if (!ultimoCompletado) return 0;
 
-    const ultimaFecha = new Date(ultimoCompletado);
-    ultimaFecha.setHours(0, 0, 0, 0);
+    /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
+    const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
 
     const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
