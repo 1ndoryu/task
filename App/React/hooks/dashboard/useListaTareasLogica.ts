@@ -1,0 +1,160 @@
+import {useState, useCallback} from 'react';
+import {Tarea, DatosEdicionTarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
+import {esTareaHabito} from '../../types/dashboard';
+
+interface UseListaTareasLogicaProps {
+    tareas: Tarea[];
+    proyectoId?: number;
+    onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
+    onCrearTarea?: (datos: DatosEdicionTarea) => void;
+    onConfigurarTarea?: (tarea: Tarea) => void;
+    pendientes: Tarea[];
+}
+
+export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrearTarea, onConfigurarTarea, pendientes}: UseListaTareasLogicaProps) {
+    const [tareasExpandidas, setTareasExpandidas] = useState<Set<number>>(new Set());
+    const [tareaConfigurando, setTareaConfigurando] = useState<Tarea | null>(null);
+    const [tareaMoviendo, setTareaMoviendo] = useState<Tarea | null>(null);
+
+    const toggleColapsar = useCallback((tareaId: number) => {
+        setTareasExpandidas(prev => {
+            const nuevo = new Set(prev);
+            if (nuevo.has(tareaId)) nuevo.delete(tareaId);
+            else nuevo.add(tareaId);
+            return nuevo;
+        });
+    }, []);
+
+    const abrirConfiguracion = useCallback(
+        (tareaId: number) => {
+            const tarea = tareas.find(t => t.id === tareaId);
+            if (tarea) {
+                if (onConfigurarTarea) {
+                    onConfigurarTarea(tarea);
+                } else {
+                    setTareaConfigurando(tarea);
+                }
+            }
+        },
+        [tareas, onConfigurarTarea]
+    );
+
+    const guardarConfiguracion = useCallback(
+        (configuracion: TareaConfiguracion, prioridad?: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => {
+            if (tareaConfigurando && onEditarTarea) {
+                onEditarTarea(tareaConfigurando.id, {
+                    configuracion,
+                    prioridad: prioridad === undefined ? tareaConfigurando.prioridad : prioridad,
+                    urgencia: urgencia === undefined ? tareaConfigurando.urgencia : urgencia,
+                    ...(texto !== undefined && {texto}),
+                    ...(asignacion && {
+                        asignadoA: asignacion.asignadoA,
+                        asignadoANombre: asignacion.asignadoANombre,
+                        asignadoAAvatar: asignacion.asignadoAAvatar
+                    }),
+                    ...(tags && {tags})
+                });
+            }
+        },
+        [tareaConfigurando, onEditarTarea]
+    );
+
+    const handleIndent = (tareaId: number) => {
+        const index = pendientes.findIndex(t => t.id === tareaId);
+        if (index <= 0) return;
+
+        const tarea = pendientes[index];
+        const tareaAnterior = pendientes[index - 1];
+
+        if (tareaAnterior.parentId) return;
+
+        setTareasExpandidas(prev => {
+            const nuevo = new Set(prev);
+            nuevo.add(tareaAnterior.id);
+            return nuevo;
+        });
+
+        onEditarTarea?.(tarea.id, {parentId: tareaAnterior.id});
+    };
+
+    const handleOutdent = (tareaId: number) => {
+        const tarea = pendientes.find(t => t.id === tareaId);
+        if (!tarea || !tarea.parentId) return;
+        onEditarTarea?.(tareaId, {parentId: undefined} as any);
+    };
+
+    const handleCrearNueva = (parentId: number | undefined, tareaActualId: number) => {
+        let idProyectoHeredado = proyectoId;
+        let idHabitoHeredado: number | undefined = undefined;
+        let prioridadHeredada: NivelPrioridad | undefined = undefined;
+
+        if (parentId) {
+            const tareaPadre = tareas.find(t => t.id === parentId);
+            if (tareaPadre) {
+                if (tareaPadre.proyectoId) idProyectoHeredado = tareaPadre.proyectoId;
+
+                if (esTareaHabito(tareaPadre)) {
+                    idHabitoHeredado = tareaPadre.habitoId;
+                    const mapImportancia: Record<string, NivelPrioridad> = {Alta: 'alta', Media: 'media', Baja: 'baja'};
+                    prioridadHeredada = mapImportancia[tareaPadre.habitoImportancia] || 'media';
+                } else if (tareaPadre.habitoId) {
+                    idHabitoHeredado = tareaPadre.habitoId;
+                    if (tareaPadre.prioridad) prioridadHeredada = tareaPadre.prioridad;
+                }
+            }
+
+            setTareasExpandidas(prev => {
+                const nuevo = new Set(prev);
+                nuevo.add(parentId);
+                return nuevo;
+            });
+        }
+
+        onCrearTarea?.({
+            texto: '',
+            parentId: parentId,
+            insertarDespuesDe: tareaActualId,
+            proyectoId: idProyectoHeredado,
+            habitoId: idHabitoHeredado,
+            prioridad: prioridadHeredada
+        });
+    };
+
+    const handleMoverProyecto = useCallback(
+        (nuevoProyectoId: number | undefined) => {
+            if (tareaMoviendo && onEditarTarea) {
+                onEditarTarea(tareaMoviendo.id, {
+                    proyectoId: nuevoProyectoId,
+                    parentId: undefined
+                } as any);
+            }
+            setTareaMoviendo(null);
+        },
+        [tareaMoviendo, onEditarTarea]
+    );
+
+    const obtenerSubtareasVisibles = useCallback(
+        (padreId: number): Tarea[] => {
+            if (!tareasExpandidas.has(padreId)) return [];
+            return pendientes.filter(t => t.parentId === padreId);
+        },
+        [pendientes, tareasExpandidas]
+    );
+
+    return {
+        tareasExpandidas,
+        setTareasExpandidas,
+        tareaConfigurando,
+        setTareaConfigurando,
+        tareaMoviendo,
+        setTareaMoviendo,
+        toggleColapsar,
+        abrirConfiguracion,
+        guardarConfiguracion,
+        handleIndent,
+        handleOutdent,
+        handleCrearNueva,
+        handleMoverProyecto,
+        obtenerSubtareasVisibles
+    };
+}

@@ -15,7 +15,7 @@ import {useHabitosStore, useHabito} from '../../stores/habitosStore';
 import {useHabitosHistorialStore, useHistorialDetallado} from '../../stores/habitosHistorialStore';
 import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaLocalISO, obtenerFechaEfectiva, obtenerFechaHoy} from '../../utils/fecha';
-import {esFechaRelevante} from '../../utils/frecuenciaHabitos';
+import {generarFechasPeriodo, agruparPorSemanas, formatearFechaTooltip, esHoy, esEditable, calcularRelevanciaDia, DIAS_SEMANA_CORTO, MESES} from '../../utils/mapaCalorUtils';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 
 /* Tipos */
@@ -29,91 +29,6 @@ interface MapaCalorHabitoProps {
     frecuencia?: FrecuenciaHabito;
     /* Fecha de creación del hábito (para calcular ciclos) */
     fechaCreacion?: string;
-}
-
-/* Nombres de días de la semana abreviados */
-const DIAS_SEMANA_COMPLETO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-const DIAS_SEMANA_CORTO = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
-
-/* Nombres de meses abreviados */
-const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-/**
- * Genera un array de fechas para el período indicado
- */
-function generarFechasPeriodo(dias: number): string[] {
-    const fechas: string[] = [];
-    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
-    const hoy = obtenerFechaEfectiva();
-
-    for (let i = dias - 1; i >= 0; i--) {
-        const fecha = new Date(hoy);
-        fecha.setDate(fecha.getDate() - i);
-        fechas.push(obtenerFechaLocalISO(fecha));
-    }
-
-    return fechas;
-}
-
-/**
- * Agrupa las fechas por semanas
- * NOTA: Agregamos T12:00:00 al parsear fechas para evitar problemas de zona horaria
- */
-function agruparPorSemanas(fechas: string[]): string[][] {
-    const semanas: string[][] = [];
-    let semanaActual: string[] = [];
-
-    const primerDia = new Date(fechas[0] + 'T12:00:00');
-    const diaInicio = primerDia.getDay();
-
-    for (let i = 0; i < diaInicio; i++) {
-        semanaActual.push('');
-    }
-
-    for (const fecha of fechas) {
-        const diaSemana = new Date(fecha + 'T12:00:00').getDay();
-
-        if (diaSemana === 0 && semanaActual.length > 0) {
-            semanas.push(semanaActual);
-            semanaActual = [];
-        }
-
-        semanaActual.push(fecha);
-    }
-
-    if (semanaActual.length > 0) {
-        semanas.push(semanaActual);
-    }
-
-    return semanas;
-}
-
-/**
- * Formatea una fecha para mostrar en tooltip
- */
-function formatearFechaTooltip(fecha: string): string {
-    const date = new Date(fecha + 'T12:00:00');
-    const dia = date.getDate();
-    const mes = MESES[date.getMonth()];
-    const diaSemana = DIAS_SEMANA_COMPLETO[date.getDay()];
-    return `${diaSemana}, ${dia} ${mes}`;
-}
-
-/**
- * Verifica si una fecha es hoy (respeta hora de fin del día)
- */
-function esHoy(fecha: string): boolean {
-    return fecha === obtenerFechaHoy();
-}
-
-/**
- * Verifica si una fecha es editable (puede ser hoy o pasado, no futuro)
- */
-function esEditable(fecha: string): boolean {
-    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
-    const hoy = obtenerFechaEfectiva();
-    const fechaDate = new Date(fecha + 'T12:00:00');
-    return fechaDate <= hoy;
 }
 
 /**
@@ -236,6 +151,14 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
         [historialLocal]
     );
 
+    /* Obtener array de fechas completadas para cálculos de relevancia */
+    const fechasCompletadas = useMemo(() => {
+        return Object.entries(historialLocal)
+            .filter(([, info]) => info.estado === 'completado')
+            .map(([f]) => f)
+            .sort();
+    }, [historialLocal]);
+
     /*
      * Manejar click: cicla entre estados (vacio -> completado -> pospuesto -> vacio)
      *
@@ -330,51 +253,9 @@ export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, en
         const esHoyFecha = esHoy(fecha);
         /*
          * Determinar si esta fecha es relevante según la frecuencia del hábito
-         *
-         * Para 'diasEspecificos': Solo días de la semana seleccionados son relevantes
-         * Para 'cadaXDias', 'semanal', 'mensual': Se calcula dinámicamente basándose
-         * en los días MARCADOS en el historial. Los días entre marcados son "libres".
+         * Usa utilidad compartida que contiene toda la lógica de negocio
          */
-        let esRelevante = true;
-
-        if (frecuencia?.tipo === 'diasEspecificos') {
-            /* diasEspecificos: verificar si el día de la semana está en la lista */
-            esRelevante = esFechaRelevante(fecha, frecuencia);
-        } else if (frecuencia?.tipo === 'cadaXDias' || frecuencia?.tipo === 'semanal' || frecuencia?.tipo === 'mensual') {
-            /* Para intervalos: buscar el día completado más cercano anterior */
-            const fechaDate = new Date(fecha + 'T12:00:00');
-            const intervalo = frecuencia.tipo === 'semanal' ? 7 : frecuencia.tipo === 'cadaXDias' ? frecuencia.cadaDias || 2 : Math.floor(30 / (frecuencia.vecesAlMes || 4));
-
-            /* Buscar fechas marcadas como completadas en el historial */
-            const fechasCompletadas = Object.entries(historialLocal)
-                .filter(([, info]) => info.estado === 'completado')
-                .map(([f]) => f)
-                .sort();
-
-            if (fechasCompletadas.length > 0) {
-                /* Encontrar la fecha completada más cercana ANTES o IGUAL a esta fecha */
-                let fechaReferenciaStr: string | null = null;
-                for (const fc of fechasCompletadas) {
-                    const fcDate = new Date(fc + 'T12:00:00');
-                    if (fcDate <= fechaDate) {
-                        fechaReferenciaStr = fc;
-                    } else {
-                        break;
-                    }
-                }
-
-                if (fechaReferenciaStr) {
-                    const refDate = new Date(fechaReferenciaStr + 'T12:00:00');
-                    const diffDias = Math.floor((fechaDate.getTime() - refDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                    /* Si la diferencia es 0 (es el día marcado) o es múltiplo del intervalo, es relevante */
-                    /* Si no, es un día "libre" entre marcados */
-                    esRelevante = diffDias === 0 || diffDias >= intervalo;
-                }
-            }
-            /* Si no hay fechas completadas, todos son relevantes (el usuario puede marcar cualquiera) */
-        }
-        /* Para 'diario': todos los días son relevantes (esRelevante ya es true) */
+        const esRelevante = calcularRelevanciaDia(fecha, frecuencia, fechasCompletadas);
 
         const clase = obtenerClaseEstado(estadoDia, esEditableDia, esHoyFecha, esRelevante);
 

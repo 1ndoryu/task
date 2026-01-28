@@ -83,3 +83,19 @@ La refactorización será **progresiva y atómica**. No se detendrá el desarrol
 *   **2026-01-28**: `useConfiguracionLayout.ts` (585 líneas -> ~408 líneas).
     *   **Refactor**: Extracción de factory a `utils/layoutFactory.ts` y lógica de negocio a `utils/layoutLogica.ts`.
     *   **Resultado**: hook más limpio, lógica de migración y normalización desacoplada.
+
+*   **2026-01-28**: `SeccionAdjuntos.tsx` (581 líneas -> 140 líneas).
+    *   **Refactor**: Extracción de subcomponentes (`AdjuntoItemClasico/Moderno`, `AdjuntoOverlay`) y hooks (`useAudioPlayer`, `useAdjuntosCifrados`, `useGestionAdjuntos`) siguiendo SRP.
+    *   **Resultado**: Componente principal limpio, lógica de UI desacoplada de la lógica de negocio y API.
+
+*   **2026-01-28**: `useDashboard.ts` (570 líneas -> ~180 líneas).
+    *   **Refactor**: Descompuesto en `hooks/dashboard/useDashboardData.ts`, `useDashboardSync.ts`, y `useDashboardHabitos.ts`.
+    *   **Resultado**: Hook principal ahora actúa como fachada/orquestador. Lógica compleja segregada por dominio.
+
+*   **2026-01-28**: `ListaTareas.tsx` (552 líneas -> ~243 líneas).
+    *   **Refactor**: Extracción de lógica a `useListaTareasLogica` y `useTareaOrdenamiento`. UI cíclica extraída a `TareaConColapsador`.
+    *   **Resultado**: Componente principal enfocado en composición. SRP cumplido.
+
+*   **2026-01-28**: `MapaCalorHabito.tsx` (532 líneas -> 355 líneas).
+    *   **Refactor**: Extracción de utilidades y lógica de negocio a `utils/mapaCalorUtils.ts` (cálculo de fechas, semanas y relevancia).
+    *   **Resultado**: Componente enfocado en renderizado. Lógica compleja movida a funciones puras testables.

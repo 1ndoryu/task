@@ -4,18 +4,23 @@
  * Responsabilidad única: renderizar tareas con checkbox, input de creación, edición inline y acciones
  */
 
-import {useState, useCallback, useMemo, useRef} from 'react';
+import {useMemo} from 'react';
 import {Reorder} from 'framer-motion';
-import {ChevronRight} from 'lucide-react';
-import type {Tarea, DatosEdicionTarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Proyecto, Participante} from '../../types/dashboard';
+import type {Tarea, DatosEdicionTarea, Proyecto, Participante} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
 import {InputNuevaTarea} from './InputNuevaTarea';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
 import {ModalMoverTarea} from './ModalMoverTarea';
-import {obtenerSubtareas, tieneSubtareas as utilTieneSubtareas, contarSubtareas as utilContarSubtareas, puedeSerSubtareaDe} from '../../utils/jerarquiaTareas';
 import {DashboardPanel} from '../shared/DashboardPanel';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
+
+// Hooks extraídos
+import {useListaTareasLogica} from '../../hooks/dashboard/useListaTareasLogica';
+import {useTareaOrdenamiento} from '../../hooks/dashboard/useTareaOrdenamiento';
+
+// Componentes extraídos
+import {TareaConColapsador} from './lista-tareas/TareaConColapsador';
 
 interface ListaTareasProps {
     tareas: Tarea[];
@@ -31,245 +36,48 @@ interface ListaTareasProps {
     ocultarBadgeProyecto?: boolean;
     onCompartirTarea?: (tarea: Tarea) => void;
     estaCompartida?: (tareaId: number) => boolean;
-    /* Callback para obtener participantes de una tarea (para asignación) */
     obtenerParticipantes?: (tarea: Tarea) => Participante[];
-    /* Callbacks para editar/eliminar habitos desde tareas-habito (Fase 7.6.1) */
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
     modoCompacto?: boolean;
-    /* Callback opcional para abrir configuración externa (usa el modal global) */
     onConfigurarTarea?: (tarea: Tarea) => void;
 }
 
 export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onPosponerHabito, modoCompacto = false, onConfigurarTarea}: ListaTareasProps): JSX.Element {
-    /*
-     * Estado para tareas padre expandidas
-     * Set de IDs de tareas padre cuyas subtareas son visibles
-     * Por defecto (Set vacío) todas están colapsadas (mejor UX)
-     */
-    const [tareasExpandidas, setTareasExpandidas] = useState<Set<number>>(new Set());
+    /* Filtros básicos */
+    const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
+    const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
 
-    /*
-     * Estado para el panel de configuración
-     * Guarda la tarea que se está configurando (null si el panel está cerrado)
-     */
-    const [tareaConfigurando, setTareaConfigurando] = useState<Tarea | null>(null);
+    /* Lógica Principal y Estado */
+    const {tareasExpandidas, setTareasExpandidas, tareaConfigurando, setTareaConfigurando, tareaMoviendo, setTareaMoviendo, toggleColapsar, abrirConfiguracion, guardarConfiguracion, handleIndent, handleOutdent, handleCrearNueva, handleMoverProyecto, obtenerSubtareasVisibles} = useListaTareasLogica({
+        tareas,
+        proyectoId,
+        onEditarTarea,
+        onCrearTarea,
+        onConfigurarTarea,
+        pendientes
+    });
 
-    /*
-     * Estado para mover tarea de proyecto
-     */
-    const [tareaMoviendo, setTareaMoviendo] = useState<Tarea | null>(null);
+    /* Lógica de Ordenamiento (Drag & Drop) */
+    const {tareaArrastrandoId, esGestoSubtarea, setEsGestoSubtarea, dragStartXRef, dragCurrentXRef, handleDragStart, handleDragEnd, handleReorder, UMBRAL_INDENT} = useTareaOrdenamiento({
+        tareas,
+        pendientes,
+        completadas,
+        onReordenarTareas,
+        onEditarTarea,
+        setTareasExpandidas
+    });
 
-    /*
-     * Estado para tracking de drag & drop con gestos horizontales
-     * Fase D: Detectamos el offset X para convertir tareas en subtareas
-     */
-    const [tareaArrastrandoId, setTareaArrastrandoId] = useState<number | null>(null);
-    const [esGestoSubtarea, setEsGestoSubtarea] = useState(false);
-    const dragStartXRef = useRef<number>(0);
-    const dragCurrentXRef = useRef<number>(0);
-
-    /* Filtramos pendientes y completadas */
-    const pendientes = tareas.filter(t => !t.completado);
-    const completadas = tareas.filter(t => t.completado);
-
-    /*
-     * Obtener solo tareas principales para el reorder
-     * Las subtareas se moverán automáticamente con su padre
-     * Las tareas-hábito se excluyen del reorder (no son arrastrables)
-     */
+    /* Datos calculados */
     const tareasPrincipalesPendientes = useMemo(() => pendientes.filter(t => !t.parentId && !esTareaHabito(t)), [pendientes]);
-
-    /*
-     * Tareas-hábito pendientes (se renderizan sin drag)
-     */
     const tareasHabitoPendientes = useMemo(() => pendientes.filter(t => esTareaHabito(t)), [pendientes]);
 
-    /*
-     * Hook para obtener mensajes no leídos de todas las tareas
-     * Solo consultamos tareas reales (no hábitos virtuales con IDs negativos)
-     */
+    // Mensajes no leídos
     const tareasIdsReales = useMemo(() => tareas.filter(t => t.id > 0).map(t => t.id), [tareas]);
     const {noLeidos: mensajesNoLeidosPorTarea} = useMensajesNoLeidos('tarea', tareasIdsReales);
 
-    /*
-     * Umbral de pixels para detectar gesto horizontal
-     * Si el usuario arrastra más de este valor a la derecha, la tarea se convierte en subtarea
-     */
-    const UMBRAL_INDENT = 40;
-
-    /*
-     * Handlers de eventos de drag para capturar posición X
-     * Framer Motion Reorder no expone el offset X, así que lo capturamos manualmente
-     */
-    const handleDragStart = useCallback((tareaId: number, evento: React.PointerEvent) => {
-        setTareaArrastrandoId(tareaId);
-        dragStartXRef.current = evento.clientX;
-        dragCurrentXRef.current = evento.clientX;
-    }, []);
-
-    const handleDragEnd = useCallback(() => {
-        setTareaArrastrandoId(null);
-        setEsGestoSubtarea(false);
-    }, []);
-
-    /*
-     * Reconstruir la lista completa manteniendo subtareas con sus padres
-     * Cuando se reordena, solo movemos las tareas principales,
-     * las subtareas siguen a su padre automáticamente
-     *
-     * Fase C: Detectar contexto de drop para conversión de jerarquía
-     * Fase D: Usar offset X para determinar si convertir en subtarea
-     */
-    const handleReorder = useCallback(
-        (nuevoOrdenPrincipales: Tarea[]) => {
-            if (!onReordenarTareas || !onEditarTarea) return;
-
-            /* Calcular offset X del gesto horizontal */
-            const offsetX = dragCurrentXRef.current - dragStartXRef.current;
-
-            /* Si hay una tarea siendo arrastrada y hay offset significativo hacia la derecha */
-            if (tareaArrastrandoId !== null && offsetX > UMBRAL_INDENT) {
-                /* Encontrar la nueva posición de la tarea arrastrada */
-                const nuevaPosicion = nuevoOrdenPrincipales.findIndex(t => t.id === tareaArrastrandoId);
-
-                if (nuevaPosicion > 0) {
-                    /* La tarea de arriba será el nuevo padre */
-                    const posiblePadre = nuevoOrdenPrincipales[nuevaPosicion - 1];
-
-                    /* Validar que puede ser subtarea */
-                    if (puedeSerSubtareaDe(tareas, tareaArrastrandoId, posiblePadre.id)) {
-                        /* Convertir en subtarea */
-                        onEditarTarea(tareaArrastrandoId, {parentId: posiblePadre.id});
-
-                        /* Expandir el nuevo padre automáticamente */
-                        setTareasExpandidas(prev => {
-                            const nuevo = new Set(prev);
-                            nuevo.add(posiblePadre.id);
-                            return nuevo;
-                        });
-
-                        /* Reconstruir lista sin la tarea convertida (ahora es subtarea) */
-                        const nuevaListaSinConvertida = nuevoOrdenPrincipales.filter(t => t.id !== tareaArrastrandoId);
-
-                        const nuevaListaPendientes: Tarea[] = [];
-                        for (const padre of nuevaListaSinConvertida) {
-                            nuevaListaPendientes.push(padre);
-                            const subtareas = obtenerSubtareas(pendientes, padre.id);
-                            nuevaListaPendientes.push(...subtareas);
-                        }
-
-                        onReordenarTareas([...nuevaListaPendientes, ...completadas]);
-                        return;
-                    }
-                }
-            }
-
-            /* Comportamiento normal: reconstruir lista con jerarquía */
-            const nuevaListaPendientes: Tarea[] = [];
-
-            for (const padre of nuevoOrdenPrincipales) {
-                nuevaListaPendientes.push(padre);
-                /* Añadir subtareas de este padre en su orden original */
-                const subtareas = obtenerSubtareas(pendientes, padre.id);
-                nuevaListaPendientes.push(...subtareas);
-            }
-
-            /* Combinar con completadas al final */
-            onReordenarTareas([...nuevaListaPendientes, ...completadas]);
-        },
-        [pendientes, completadas, onReordenarTareas, onEditarTarea, tareaArrastrandoId, tareas]
-    );
-
-    /*
-     * Manejadores de indentacion
-     */
-    const handleIndent = (tareaId: number) => {
-        const index = pendientes.findIndex(t => t.id === tareaId);
-        if (index <= 0) return;
-
-        const tarea = pendientes[index];
-        const tareaAnterior = pendientes[index - 1];
-
-        // Validacion: No anidar mas de 1 nivel
-        if (tareaAnterior.parentId) {
-            return;
-        }
-
-        /* Expandir el nuevo padre automáticamente */
-        setTareasExpandidas(prev => {
-            const nuevo = new Set(prev);
-            nuevo.add(tareaAnterior.id);
-            return nuevo;
-        });
-
-        onEditarTarea?.(tarea.id, {parentId: tareaAnterior.id});
-    };
-
-    const handleOutdent = (tareaId: number) => {
-        const tarea = pendientes.find(t => t.id === tareaId);
-        if (!tarea || !tarea.parentId) return;
-
-        onEditarTarea?.(tareaId, {parentId: undefined} as any);
-    };
-
-    /*
-     * Crear nueva tarea debajo de la actual (hereda parentId y proyectoId si aplica)
-     * tareaActualId indica despues de cual tarea insertar
-     */
-    const handleCrearNueva = (parentId: number | undefined, tareaActualId: number) => {
-        let idProyectoHeredado = proyectoId;
-        let idHabitoHeredado: number | undefined = undefined;
-        let prioridadHeredada: NivelPrioridad | undefined = undefined;
-
-        /* Si es subtarea, heredar propiedades del padre */
-        if (parentId) {
-            const tareaPadre = tareas.find(t => t.id === parentId);
-            if (tareaPadre) {
-                if (tareaPadre.proyectoId) {
-                    idProyectoHeredado = tareaPadre.proyectoId;
-                }
-
-                /* Herencia de Hábito */
-                if (esTareaHabito(tareaPadre)) {
-                    idHabitoHeredado = tareaPadre.habitoId;
-                    const mapImportancia: Record<string, NivelPrioridad> = {
-                        Alta: 'alta',
-                        Media: 'media',
-                        Baja: 'baja'
-                    };
-                    prioridadHeredada = mapImportancia[tareaPadre.habitoImportancia] || 'media';
-                } else if (tareaPadre.habitoId) {
-                    idHabitoHeredado = tareaPadre.habitoId;
-                    /* Heredar prioridad solo si no está definida (o mantener la del padre) */
-                    if (tareaPadre.prioridad) {
-                        prioridadHeredada = tareaPadre.prioridad;
-                    }
-                }
-            }
-
-            /* Expandir el padre automáticamente para ver la nueva subtarea */
-            setTareasExpandidas(prev => {
-                const nuevo = new Set(prev);
-                nuevo.add(parentId);
-                return nuevo;
-            });
-        }
-
-        onCrearTarea?.({
-            texto: '',
-            parentId: parentId,
-            insertarDespuesDe: tareaActualId,
-            proyectoId: idProyectoHeredado,
-            habitoId: idHabitoHeredado,
-            prioridad: prioridadHeredada
-        });
-    };
-
-    /*
-     * Wrapper para crear tareas desde el input, incluyendo proyectoId
-     */
+    /* Wrapper para crear tarea con proyecto */
     const crearTareaConProyecto = (datos: DatosEdicionTarea) => {
         onCrearTarea?.({
             ...datos,
@@ -277,148 +85,39 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         });
     };
 
-    /*
-     * Colapsar/expandir subtareas de una tarea padre
-     */
-    const toggleColapsar = useCallback((tareaId: number) => {
-        setTareasExpandidas(prev => {
-            const nuevo = new Set(prev);
-            if (nuevo.has(tareaId)) {
-                nuevo.delete(tareaId);
-            } else {
-                nuevo.add(tareaId);
-            }
-            return nuevo;
-        });
-    }, []);
-
-    /*
-     * Abrir panel de configuración para una tarea
-     */
-    const abrirConfiguracion = useCallback(
-        (tareaId: number) => {
-            const tarea = tareas.find(t => t.id === tareaId);
-            if (tarea) {
-                if (onConfigurarTarea) {
-                    onConfigurarTarea(tarea);
-                } else {
-                    setTareaConfigurando(tarea);
-                }
-            }
-        },
-        [tareas, onConfigurarTarea]
+    /* Renderizado de Tarea Individual (Wrapper común) */
+    const renderTareaItem = (tarea: Tarea, esSubtarea: boolean) => (
+        <TareaConColapsador
+            key={`wrapper-${tarea.id}`}
+            tarea={tarea}
+            esSubtarea={esSubtarea}
+            tareas={tareas}
+            tareasExpandidas={tareasExpandidas}
+            onToggleExpandir={toggleColapsar}
+            proyectos={proyectos}
+            modoCompacto={modoCompacto}
+            ocultarBadgeProyecto={ocultarBadgeProyecto}
+            mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0}
+            estaCompartida={estaCompartida?.(tarea.id) ?? false}
+            // Acciones
+            onToggleTarea={onToggleTarea}
+            onEditarTarea={onEditarTarea}
+            onEliminarTarea={onEliminarTarea}
+            onIndent={handleIndent}
+            onOutdent={handleOutdent}
+            onCrearNueva={handleCrearNueva}
+            onConfigurar={abrirConfiguracion}
+            onMoverProyecto={t => setTareaMoviendo(t)}
+            onCompartir={onCompartirTarea}
+            // Habitos
+            onEditarHabito={onEditarHabito}
+            onEliminarHabito={onEliminarHabito}
+            onPosponerHabito={onPosponerHabito}
+        />
     );
-
-    /*
-     * Guardar configuración de tarea (incluye prioridad y urgencia)
-     */
-    const guardarConfiguracion = useCallback(
-        (configuracion: TareaConfiguracion, prioridad?: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => {
-            if (tareaConfigurando && onEditarTarea) {
-                /* Actualizamos la tarea con la nueva configuración, prioridad, urgencia, texto, asignación y tags */
-                onEditarTarea(tareaConfigurando.id, {
-                    configuracion,
-                    prioridad: prioridad === undefined ? tareaConfigurando.prioridad : prioridad,
-                    urgencia: urgencia === undefined ? tareaConfigurando.urgencia : urgencia,
-                    ...(texto !== undefined && {texto}),
-                    ...(asignacion && {
-                        asignadoA: asignacion.asignadoA,
-                        asignadoANombre: asignacion.asignadoANombre,
-                        asignadoAAvatar: asignacion.asignadoAAvatar
-                    }),
-                    ...(tags && {tags})
-                });
-            }
-            /* Nota: No cerramos el panel (tareaConfigurando=null) aquí porque esto puede ser un auto-guardado.
-             * El cierre se maneja explícitamente vía onCerrar */
-        },
-        [tareaConfigurando, onEditarTarea]
-    );
-
-    /*
-     * Manejar movimiento de tarea a proyecto
-     */
-    const handleMoverProyecto = useCallback(
-        (nuevoProyectoId: number | undefined) => {
-            if (tareaMoviendo && onEditarTarea) {
-                /*
-                 * Al mover de proyecto, convertimos en tarea principal (sin padre)
-                 * para evitar inconsistencias de jerarquia
-                 */
-                onEditarTarea(tareaMoviendo.id, {
-                    proyectoId: nuevoProyectoId,
-                    parentId: undefined
-                } as any); /* Casting necesario para enviar null/undefined si la interfaz lo requiere */
-            }
-            setTareaMoviendo(null);
-        },
-        [tareaMoviendo, onEditarTarea]
-    );
-
-    /*
-     * Usar funciones de utilidades para verificar subtareas
-     */
-    const tieneSubtareasLocal = (tareaId: number): boolean => utilTieneSubtareas(tareas, tareaId);
-    const contarSubtareasLocal = (tareaId: number) => utilContarSubtareas(tareas, tareaId);
-
-    /*
-     * Obtener subtareas de una tarea padre (para renderizar debajo de ella)
-     * Solo devuelve tareas si el padre está expandido
-     */
-    const obtenerSubtareasVisibles = useCallback(
-        (padreId: number): Tarea[] => {
-            if (!tareasExpandidas.has(padreId)) return [];
-            return pendientes.filter(t => t.parentId === padreId);
-        },
-        [pendientes, tareasExpandidas]
-    );
-
-    /*
-     * Renderizar una tarea con su estructura visual
-     */
-    const renderTareaConColapsador = (tarea: Tarea, esSubtarea: boolean) => {
-        const esColapsable = !esSubtarea && tieneSubtareasLocal(tarea.id);
-        const estaExpandida = tareasExpandidas.has(tarea.id);
-        const subtareasOcultas = !estaExpandida;
-        const numSubtareas = contarSubtareasLocal(tarea.id);
-
-        const proyecto = tarea.proyectoId ? proyectos.find(p => p.id === tarea.proyectoId) : undefined;
-        let nombreProyecto: string | undefined = undefined;
-        const soloIcono = ocultarBadgeProyecto;
-
-        if (proyecto?.nombre) {
-            nombreProyecto = proyecto.nombre;
-            if (!soloIcono && nombreProyecto.length > 20) {
-                nombreProyecto = nombreProyecto.substring(0, 20) + '...';
-            }
-        }
-
-        return (
-            <div className={`tareaConColapsador ${modoCompacto ? 'tareaConColapsador--compacto' : ''}`} key={`wrapper-${tarea.id}`}>
-                <TareaItem tarea={tarea} esSubtarea={esSubtarea} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onIndent={() => handleIndent(tarea.id)} onOutdent={() => handleOutdent(tarea.id)} onCrearNueva={handleCrearNueva} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={soloIcono} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} tieneSubtareas={esColapsable} modoCompacto={modoCompacto} />
-                {esColapsable && (
-                    <button className="tareaColapsadorBoton" onClick={() => toggleColapsar(tarea.id)} onPointerDown={e => e.stopPropagation()} title={subtareasOcultas ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>
-                        {subtareasOcultas ? (
-                            <>
-                                <ChevronRight size={12} />
-                                <span className="tareaColapsadorContador">
-                                    {numSubtareas.completadas}/{numSubtareas.total}
-                                </span>
-                            </>
-                        ) : (
-                            <span className="tareaColapsadorContador tareaColapsadorContadorExpandido">
-                                {numSubtareas.completadas}/{numSubtareas.total}
-                            </span>
-                        )}
-                    </button>
-                )}
-            </div>
-        );
-    };
 
     return (
         <DashboardPanel id="lista-tareas">
-            {/* Modo manual: Reorder para tareas reales, hábitos aparte */}
             {habilitarDrag ? (
                 <>
                     <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes">
@@ -442,16 +141,13 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                             setEsGestoSubtarea(nuevoEsGesto);
                                         }
                                     }}>
-                                    {/* Indicador visual de gesto horizontal hacia subtarea */}
                                     {tareaArrastrandoId === tareaPadre.id && esGestoSubtarea && <div className="tareaDropIndicador tareaDropIndicadorSubtarea tareaDropIndicadorActivo" style={{top: 0}} />}
 
-                                    {/* Tarea padre */}
-                                    {renderTareaConColapsador(tareaPadre, false)}
+                                    {renderTareaItem(tareaPadre, false)}
 
-                                    {/* Subtareas (no son draggables individualmente) */}
                                     {subtareasVisibles.map(subtarea => (
                                         <div key={subtarea.id} className="subtareaContenedor">
-                                            {renderTareaConColapsador(subtarea, true)}
+                                            {renderTareaItem(subtarea, true)}
                                         </div>
                                     ))}
                                 </Reorder.Item>
@@ -459,18 +155,14 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                         })}
                     </Reorder.Group>
 
-                    {/* Tareas-hábito en modo manual (sin drag, al final) */}
-                    {/* Tareas-hábito en modo manual (sin drag, al final) */}
                     {tareasHabitoPendientes.map(tareaHabito => {
                         const subtareasVisibles = obtenerSubtareasVisibles(tareaHabito.id);
                         return (
                             <div key={tareaHabito.id} className="tareaHabitoContenedor">
-                                {renderTareaConColapsador(tareaHabito, false)}
-
-                                {/* Subtareas del hábito */}
+                                {renderTareaItem(tareaHabito, false)}
                                 {subtareasVisibles.map(subtarea => (
                                     <div key={subtarea.id} className="subtareaContenedor">
-                                        {renderTareaConColapsador(subtarea, true)}
+                                        {renderTareaItem(subtarea, true)}
                                     </div>
                                 ))}
                             </div>
@@ -478,21 +170,17 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                     })}
                 </>
             ) : (
-                /* Modo no-manual: renderizar en orden (tareas + hábitos mezclados por algoritmo inteligente) */
                 <div className="listaTareasPendientes">
                     {pendientes
                         .filter(t => !t.parentId)
                         .map(tareaPadre => {
                             const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
-
                             return (
                                 <div key={tareaPadre.id} className="tareaPadreContenedor">
-                                    {renderTareaConColapsador(tareaPadre, false)}
-
-                                    {/* Subtareas (incluyendo las de hábitos) */}
+                                    {renderTareaItem(tareaPadre, false)}
                                     {subtareasVisibles.map(subtarea => (
                                         <div key={subtarea.id} className="subtareaContenedor">
-                                            {renderTareaConColapsador(subtarea, true)}
+                                            {renderTareaItem(subtarea, true)}
                                         </div>
                                     ))}
                                 </div>
@@ -503,26 +191,10 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
             {pendientes.length > 0 && completadas.length > 0 && !ocultarCompletadas && <div className="listaTareasSeparador" />}
 
-            {!ocultarCompletadas &&
-                completadas.map(tarea => {
-                    const proyecto = tarea.proyectoId ? proyectos.find(p => p.id === tarea.proyectoId) : undefined;
-                    let nombreProyecto: string | undefined = undefined;
-                    const soloIcono = ocultarBadgeProyecto;
+            {!ocultarCompletadas && completadas.map(tarea => <TareaItem key={tarea.id} tarea={tarea} esSubtarea={!!tarea.parentId} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={tarea.proyectoId ? proyectos?.find(p => p.id === tarea.proyectoId)?.nombre : undefined} soloIconoProyecto={ocultarBadgeProyecto} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} modoCompacto={modoCompacto} />)}
 
-                    if (proyecto?.nombre) {
-                        nombreProyecto = proyecto.nombre;
-                        if (!soloIcono && nombreProyecto.length > 20) {
-                            nombreProyecto = nombreProyecto.substring(0, 20) + '...';
-                        }
-                    }
-
-                    return <TareaItem key={tarea.id} tarea={tarea} esSubtarea={!!tarea.parentId} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={soloIcono} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} modoCompacto={modoCompacto} />;
-                })}
-
-            {/* Input de nueva tarea al final del panel */}
             {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} />}
 
-            {/* Panel de configuración */}
             {tareaConfigurando && (
                 <PanelConfiguracionTarea
                     tarea={tareaConfigurando}
@@ -545,7 +217,6 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                 />
             )}
 
-            {/* Modal Mover Proyecto */}
             <ModalMoverTarea estaAbierto={!!tareaMoviendo} onCerrar={() => setTareaMoviendo(null)} onMover={handleMoverProyecto} proyectos={proyectos} proyectoActualId={tareaMoviendo?.proyectoId} />
         </DashboardPanel>
     );

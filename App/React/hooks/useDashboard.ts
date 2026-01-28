@@ -2,37 +2,22 @@
  * useDashboard
  * Hook personalizado para la logica del dashboard
  * Responsabilidad unica: orquestar estado y acciones del dashboard
- * Delega lógica de tareas a useTareas
- * Delega lógica de hábitos al store de Zustand
- * Incluye persistencia automatica en localStorage
+ * Refactorizado: Delega lógica a hooks especializados en ./dashboard/
  */
 
-import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
+import {useState, useCallback, useEffect, useRef} from 'react';
 import type {Habito, Tarea, Proyecto, ConfiguracionDashboard, DatosNuevoHabito, DatosEdicionTarea} from '../types/dashboard';
 import {exportarDatos, importarDatos} from '../services/dataService';
-import {useLocalStorage, CLAVES_LOCALSTORAGE} from './useLocalStorage';
 import {useDeshacer} from './useDeshacer';
 import {useTareas} from './useTareas';
 import {useProyectos, DatosNuevoProyecto} from './useProyectos';
-import {useSincronizacion} from './useSincronizacion';
 import type {DashboardData} from './useDashboardApi';
+import {useHabitosStore} from '../stores/habitosStore'; // Necesario para importación masiva
 
-/* Store de Zustand para hábitos (fuente única de verdad) */
-import {useHabitosStore} from '../stores/habitosStore';
-
-/* Utilidades extraidas a modulos separados */
-import {validarTareas, validarNotas, validarProyectos} from '../utils/validadores';
-import {migrarYActualizarHabitos} from '../utils/migracionHabitos';
-import {tareasIniciales, notasIniciales, proyectosIniciales, tareasProyectosIniciales} from '../data/datosIniciales';
-
-/*
- * Configuracion por defecto del dashboard
- * Umbral de 7 dias para resetear racha, advertencia a 2 dias
- */
-const CONFIGURACION_POR_DEFECTO: ConfiguracionDashboard = {
-    umbralReseteoRacha: 7,
-    diasAdvertenciaRacha: 2
-};
+/* Hooks segregados */
+import {useDashboardData} from './dashboard/useDashboardData';
+import {useDashboardSync} from './dashboard/useDashboardSync';
+import {useDashboardHabitos} from './dashboard/useDashboardHabitos';
 
 interface UseDashboardReturn {
     habitos: Habito[];
@@ -46,9 +31,7 @@ interface UseDashboardReturn {
     toggleHabito: (id: number) => void;
     posponerHabito: (id: number) => void;
     pausarHabito: (id: number) => void;
-    /* Actualiza el historial de un hábito (para sincronizar con columna de actividad) */
     actualizarHistorialHabito: (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => void;
-    /* Actualizar orden de tareas del hábito - Fase 14.8 */
     actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => void;
     crearHabito: (datos: DatosNuevoHabito) => void;
     editarHabito: (id: number, datos: DatosNuevoHabito) => void;
@@ -56,17 +39,15 @@ interface UseDashboardReturn {
     modalCrearHabitoAbierto: boolean;
     abrirModalCrearHabito: () => void;
     cerrarModalCrearHabito: () => void;
-    /* Modal de edicion */
     habitoEditando: Habito | null;
     abrirModalEditarHabito: (habito: Habito) => void;
     cerrarModalEditarHabito: () => void;
     exportarTodosDatos: () => void;
     importarTodosDatos: (archivo: File) => void;
-    importando: boolean;
+    importando: importandoState;
     mensajeEstado: string | null;
     tipoMensaje: 'exito' | 'error' | null;
     cargandoDatos: boolean;
-    /* Sistema de deshacer */
     accionDeshacer: {
         mensaje: string;
         tiempoRestante: number;
@@ -74,13 +55,11 @@ interface UseDashboardReturn {
     ejecutarDeshacer: () => void;
     descartarDeshacer: () => void;
     reordenarTareas: (tareas: Tarea[]) => void;
-    /* Proyectos */
     proyectos?: Proyecto[];
     crearProyecto: (datos: DatosNuevoProyecto) => void;
     editarProyecto: (id: number, datos: Partial<Proyecto>) => void;
     eliminarProyecto: (id: number) => void;
     cambiarEstadoProyecto: (id: number, nuevoEstado: Proyecto['estado']) => void;
-    /* Sincronización */
     sincronizacion: {
         sincronizado: boolean;
         pendiente: boolean;
@@ -90,177 +69,17 @@ interface UseDashboardReturn {
     };
 }
 
+// Fix for importando type in interface
+type importandoState = boolean;
+
 export function useDashboard(): UseDashboardReturn {
-    /*
-     * Store de Zustand para hábitos (fuente única de verdad)
-     * El store maneja persistencia automática via middleware persist
-     */
-    const habitosRaw = useHabitosStore(state => state.habitos);
-    const storeSetHabitos = useHabitosStore(state => state.setHabitos);
-    const storeToggleHabito = useHabitosStore(state => state.toggleHabito);
-    const storePosponerHabito = useHabitosStore(state => state.posponerHabito);
-    const storePausarHabito = useHabitosStore(state => state.pausarHabito);
-    const storeCrearHabito = useHabitosStore(state => state.crearHabito);
-    const storeEditarHabito = useHabitosStore(state => state.editarHabito);
-    const storeEliminarHabito = useHabitosStore(state => state.eliminarHabito);
-    const storeActualizarHistorial = useHabitosStore(state => state.actualizarHistorialHabito);
-    const storeActualizarOrdenTareasHabito = useHabitosStore(state => state.actualizarOrdenTareasHabito);
-    const storeRestaurarHabito = useHabitosStore(state => state.restaurarHabito);
-    const storeInicializado = useHabitosStore(state => state.inicializado);
+    // 1. Gestión de Datos Locales (Tareas, Notas, Proyectos)
+    const {tareas, setTareas, notas, setNotas, proyectos, setProyectos, cargandoDatosLocales} = useDashboardData();
 
-    /* Flag de cargando para hábitos desde store */
-    const cargandoHabitos = !storeInicializado;
-
-    /* Configuracion del dashboard (por ahora usa valores por defecto) */
-    const configuracion = CONFIGURACION_POR_DEFECTO;
-
-    /* Habitos migrados, con dias de inactividad actualizados y rachas reseteadas si aplica */
-    const habitos = migrarYActualizarHabitos(habitosRaw, configuracion);
-
-    const {
-        valor: tareas,
-        setValor: setTareas,
-        cargando: cargandoTareas
-    } = useLocalStorage<Tarea[]>(CLAVES_LOCALSTORAGE.tareas, {
-        valorPorDefecto: [...tareasIniciales, ...tareasProyectosIniciales],
-        validarValor: validarTareas
-    });
-
-    const {
-        valor: notas,
-        setValor: setNotas,
-        cargando: cargandoNotas
-    } = useLocalStorage<string>(CLAVES_LOCALSTORAGE.notas, {
-        valorPorDefecto: notasIniciales,
-        validarValor: validarNotas
-    });
-
-    /*
-     * Hook de proyectos - delega logica CRUD a useProyectos
-     */
-    const {
-        valor: proyectos,
-        setValor: setProyectos,
-        cargando: cargandoProyectos
-    } = useLocalStorage<Proyecto[]>(CLAVES_LOCALSTORAGE.proyectos, {
-        valorPorDefecto: proyectosIniciales,
-        validarValor: validarProyectos
-    });
-
-    const cargandoDatos = cargandoHabitos || cargandoTareas || cargandoNotas || cargandoProyectos;
-
-    /*
-     * Sincronización con servidor WordPress
-     * Solo activa si el usuario está logueado
-     */
-    const datosParaSync = useMemo(
-        () => ({
-            habitos,
-            tareas,
-            proyectos,
-            notas
-        }),
-        [habitos, tareas, proyectos, notas]
-    );
-
-    const handleDatosServidor = useCallback(
-        (datos: DashboardData) => {
-            /*
-             * Al recibir datos del servidor, REEMPLAZAR completamente los datos locales.
-             * Esto es importante porque al iniciar sesión en otro dispositivo,
-             * los datos del servidor son la fuente de verdad.
-             * NO verificamos si hay datos - el servidor puede tener arrays vacíos
-             * que son datos válidos (el usuario borró todo).
-             */
-            if (datos.habitos !== undefined) storeSetHabitos(datos.habitos);
-            if (datos.tareas !== undefined) setTareas(datos.tareas);
-            if (datos.proyectos !== undefined) setProyectos(datos.proyectos);
-            if (datos.notas !== undefined) setNotas(datos.notas);
-        },
-        [storeSetHabitos, setTareas, setProyectos, setNotas]
-    );
-
-    const {estado: estadoSync, sincronizarAhora, marcarCambiosPendientes, estaLogueado, cargandoDesdeServidor} = useSincronizacion(datosParaSync, handleDatosServidor);
-
-    /* Marcar cambios pendientes cuando los datos cambian */
-    const datosVersion = useRef({habitos: '', tareas: '', proyectos: '', notas: ''});
-
-    /*
-     * FIX BUG SINCRONIZACION: Flag para bloquear guardado hasta que carga inicial termine.
-     * Problema: Al cargar la página, localStorage puede tener datos vacíos/demo mientras
-     * el servidor tiene datos reales. Sin este flag, los datos demo sobrescriben al servidor.
-     * Ver: .agent/docs/bug-sincronizacion-tareas.md
-     */
-    const cargaInicialCompletaRef = useRef(false);
-
-    useEffect(() => {
-        /*
-         * Crear un hash simple del contenido para detectar cambios reales.
-         * No solo contamos el length porque cambios en el contenido (parentId, texto, etc.)
-         * no cambiarían el length pero sí necesitan sincronizarse.
-         */
-        const hashSimple = (arr: unknown[]): string => {
-            if (arr.length === 0) return '0';
-            /* Usamos JSON.stringify para capturar cambios en cualquier campo */
-            return `${arr.length}_${JSON.stringify(arr).length}`;
-        };
-
-        const nuevaVersion = {
-            habitos: hashSimple(habitos),
-            tareas: hashSimple(tareas),
-            proyectos: hashSimple(proyectos),
-            notas: notas.slice(0, 100)
-        };
-
-        /*
-         * FIX: Solo sincronizar si:
-         * 1. No estamos cargando datos locales NI del servidor
-         * 2. La carga inicial YA completó (flag activado)
-         * 3. Hay cambios reales en los datos
-         *
-         * Si la carga inicial no ha completado, solo actualizamos el snapshot
-         * sin disparar sincronización. Esto evita sobrescribir el servidor.
-         */
-        if (!cargandoDatos && !cargandoDesdeServidor) {
-            if (cargaInicialCompletaRef.current) {
-                /* Carga inicial ya pasó: detectar cambios reales del usuario */
-                if (JSON.stringify(nuevaVersion) !== JSON.stringify(datosVersion.current)) {
-                    datosVersion.current = nuevaVersion;
-                    marcarCambiosPendientes();
-                }
-            } else {
-                /* Primera vez: marcar carga como completa y tomar snapshot sin sincronizar */
-                datosVersion.current = nuevaVersion;
-                /* Delay para que React termine de asentar los datos del servidor */
-                setTimeout(() => {
-                    cargaInicialCompletaRef.current = true;
-                }, 500);
-            }
-        }
-    }, [habitos, tareas, proyectos, notas, cargandoDatos, cargandoDesdeServidor, marcarCambiosPendientes]);
-
-    const [importando, setImportando] = useState(false);
+    // 2. Sistema de Mensajes y Deshacer
     const [mensajeEstado, setMensajeEstado] = useState<string | null>(null);
     const [tipoMensaje, setTipoMensaje] = useState<'exito' | 'error' | null>(null);
-    const [modalCrearHabitoAbierto, setModalCrearHabitoAbierto] = useState(false);
-    const [habitoEditando, setHabitoEditando] = useState<Habito | null>(null);
-
-    /* Sistema de deshacer */
-    const {accionActual, registrarAccion, deshacer: ejecutarDeshacer, descartarAccion: descartarDeshacer, tiempoRestante} = useDeshacer();
-
-    /*
-     * Ref para el timeout de mensajes
-     * Permite limpiar correctamente al desmontar
-     */
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(() => {
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-        };
-    }, []);
 
     const mostrarMensaje = useCallback((mensaje: string, tipo: 'exito' | 'error') => {
         setMensajeEstado(mensaje);
@@ -276,9 +95,33 @@ export function useDashboard(): UseDashboardReturn {
         }, 4000);
     }, []);
 
-    /*
-     * Hook de proyectos - delega logica CRUD a useProyectos
-     */
+    const {accionActual, registrarAccion, deshacer: ejecutarDeshacer, descartarAccion: descartarDeshacer, tiempoRestante} = useDeshacer();
+
+    // Limpieza de timeout
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, []);
+
+    // 3. Gestión de Hábitos
+    const {habitos, cargandoHabitos, toggleHabito, posponerHabito, pausarHabito, actualizarHistorialHabito, actualizarOrdenTareasHabito, crearHabito, editarHabito, eliminarHabito, modalCrearHabitoAbierto, abrirModalCrearHabito, cerrarModalCrearHabito, habitoEditando, abrirModalEditarHabito, cerrarModalEditarHabito} = useDashboardHabitos({registrarAccion, mostrarMensaje});
+
+    const cargandoDatos = cargandoHabitos || cargandoDatosLocales;
+
+    // 4. Sincronización
+    const {sincronizacion} = useDashboardSync({
+        habitos,
+        tareas,
+        proyectos,
+        notas,
+        setTareas,
+        setProyectos,
+        setNotas,
+        cargandoDatos
+    });
+
+    // 5. Hooks delegados para Proyectos y Tareas
     const {crearProyecto, editarProyecto, eliminarProyecto, cambiarEstadoProyecto} = useProyectos({
         proyectos,
         setProyectos,
@@ -286,9 +129,6 @@ export function useDashboard(): UseDashboardReturn {
         mostrarMensaje
     });
 
-    /*
-     * Hook de tareas - delega toda la lógica CRUD a useTareas
-     */
     const {toggleTarea, crearTarea, editarTarea, eliminarTarea, reordenarTareas} = useTareas({
         tareas,
         setTareas,
@@ -296,191 +136,12 @@ export function useDashboard(): UseDashboardReturn {
         mostrarMensaje
     });
 
+    // 6. Utilidades Varias (Notas, Import/Export)
     const actualizarNotas = useCallback(
         (valor: string) => {
             setNotas(valor);
         },
         [setNotas]
-    );
-
-    /*
-     * Control del modal de crear hábito
-     */
-    const abrirModalCrearHabito = useCallback(() => {
-        setModalCrearHabitoAbierto(true);
-    }, []);
-
-    const cerrarModalCrearHabito = useCallback(() => {
-        setModalCrearHabitoAbierto(false);
-    }, []);
-
-    /*
-     * Control del modal de editar habito
-     */
-    const abrirModalEditarHabito = useCallback((habito: Habito) => {
-        setHabitoEditando(habito);
-    }, []);
-
-    const cerrarModalEditarHabito = useCallback(() => {
-        setHabitoEditando(null);
-    }, []);
-
-    /*
-     * Crea un nuevo habito usando el store de Zustand
-     */
-    const crearHabito = useCallback(
-        (datos: DatosNuevoHabito) => {
-            storeCrearHabito(datos);
-            setModalCrearHabitoAbierto(false);
-            mostrarMensaje(`Habito "${datos.nombre}" creado`, 'exito');
-        },
-        [storeCrearHabito, mostrarMensaje]
-    );
-
-    /*
-     * Edita un habito existente usando el store de Zustand
-     * Solo guarda y registra acción si hubo cambios reales
-     */
-    const editarHabito = useCallback(
-        (id: number, datos: DatosNuevoHabito) => {
-            const habitoAnterior = habitos.find(h => h.id === id);
-            if (!habitoAnterior) return;
-
-            /* Verificar si hubo cambios reales comparando campos relevantes */
-            /* Normalizamos valores para evitar falsos positivos (undefined vs '') */
-            const descripcionAnterior = habitoAnterior.descripcion || '';
-            const descripcionNueva = datos.descripcion || '';
-            const iconoAnterior = habitoAnterior.icono || 'check-circle';
-            const iconoNuevo = datos.icono || 'check-circle';
-            const colorAnterior = habitoAnterior.colorIcono || '#888888';
-            const colorNuevo = datos.colorIcono || '#888888';
-
-            /* Normalizamos frecuencia (puede ser undefined en hábitos antiguos) */
-            const frecuenciaAnterior = habitoAnterior.frecuencia || {tipo: 'diario'};
-            const frecuenciaNueva = datos.frecuencia || {tipo: 'diario'};
-
-            const huboCambios = habitoAnterior.nombre !== datos.nombre || habitoAnterior.importancia !== datos.importancia || descripcionAnterior !== descripcionNueva || iconoAnterior !== iconoNuevo || colorAnterior !== colorNuevo || JSON.stringify(frecuenciaAnterior) !== JSON.stringify(frecuenciaNueva);
-
-            /* Si no hubo cambios, solo cerrar el modal sin guardar ni registrar acción */
-            if (!huboCambios) {
-                setHabitoEditando(null);
-                return;
-            }
-
-            storeEditarHabito(id, datos);
-            setHabitoEditando(null);
-            mostrarMensaje(`Habito "${datos.nombre}" actualizado`, 'exito');
-
-            registrarAccion(`"${datos.nombre}" editado`, () => {
-                storeRestaurarHabito(habitoAnterior);
-            });
-        },
-        [habitos, storeEditarHabito, storeRestaurarHabito, mostrarMensaje, registrarAccion]
-    );
-
-    /*
-     * Elimina un habito usando el store de Zustand
-     */
-    const eliminarHabito = useCallback(
-        (id: number) => {
-            const habitoEliminado = storeEliminarHabito(id);
-            if (!habitoEliminado) return;
-
-            setHabitoEditando(null);
-            mostrarMensaje(`Habito "${habitoEliminado.nombre}" eliminado`, 'exito');
-
-            registrarAccion(`"${habitoEliminado.nombre}" eliminado`, () => {
-                storeRestaurarHabito(habitoEliminado);
-            });
-        },
-        [storeEliminarHabito, storeRestaurarHabito, mostrarMensaje, registrarAccion]
-    );
-
-    /*
-     * Toggle de habito usando el store de Zustand
-     */
-    const toggleHabito = useCallback(
-        (id: number) => {
-            const resultado = storeToggleHabito(id);
-            if (!resultado) return;
-
-            const {accion, estadoAnterior} = resultado;
-            const mensaje = accion === 'completado' ? `"${estadoAnterior.nombre}" completado` : `"${estadoAnterior.nombre}" desmarcado`;
-
-            registrarAccion(mensaje, () => {
-                storeRestaurarHabito(estadoAnterior);
-            });
-        },
-        [storeToggleHabito, storeRestaurarHabito, registrarAccion]
-    );
-
-    /*
-     * Posponer hábito usando el store de Zustand
-     */
-    const posponerHabito = useCallback(
-        (id: number) => {
-            const resultado = storePosponerHabito(id);
-            if (!resultado) return;
-
-            const {accion, estadoAnterior} = resultado;
-
-            if (accion === 'pospuesto') {
-                mostrarMensaje(`"${estadoAnterior.nombre}" pospuesto para hoy`, 'exito');
-            }
-
-            const mensaje = accion === 'pospuesto' ? `"${estadoAnterior.nombre}" pospuesto` : `"${estadoAnterior.nombre}" ya no está pospuesto`;
-
-            registrarAccion(mensaje, () => {
-                storeRestaurarHabito(estadoAnterior);
-            });
-        },
-        [storePosponerHabito, storeRestaurarHabito, registrarAccion, mostrarMensaje]
-    );
-
-    /*
-     * Pausar/Reanudar hábito usando el store de Zustand
-     */
-    const pausarHabito = useCallback(
-        (id: number) => {
-            const resultado = storePausarHabito(id);
-            if (!resultado) return;
-
-            const {accion, estadoAnterior} = resultado;
-
-            if (accion === 'pausado') {
-                mostrarMensaje(`"${estadoAnterior.nombre}" pausado`, 'exito');
-            } else {
-                mostrarMensaje(`"${estadoAnterior.nombre}" reanudado`, 'exito');
-            }
-
-            const mensaje = accion === 'pausado' ? `"${estadoAnterior.nombre}" pausado` : `"${estadoAnterior.nombre}" reanudado`;
-
-            registrarAccion(mensaje, () => {
-                storeRestaurarHabito(estadoAnterior);
-            });
-        },
-        [storePausarHabito, storeRestaurarHabito, registrarAccion, mostrarMensaje]
-    );
-
-    /*
-     * Actualizar historial de hábito usando el store de Zustand
-     */
-    const actualizarHistorialHabito = useCallback(
-        (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => {
-            storeActualizarHistorial(id, fecha, estado);
-        },
-        [storeActualizarHistorial]
-    );
-
-    /*
-     * Actualizar orden de tareas del hábito - Fase 14.8
-     * Delega al store de Zustand
-     */
-    const actualizarOrdenTareasHabito = useCallback(
-        (habitoId: number, tareasIds: number[]) => {
-            storeActualizarOrdenTareasHabito(habitoId, tareasIds);
-        },
-        [storeActualizarOrdenTareasHabito]
     );
 
     const exportarTodosDatos = useCallback(() => {
@@ -491,6 +152,9 @@ export function useDashboard(): UseDashboardReturn {
             mostrarMensaje('Error al exportar datos', 'error');
         }
     }, [habitos, tareas, notas, proyectos, mostrarMensaje]);
+
+    const [importando, setImportando] = useState(false);
+    const storeSetHabitos = useHabitosStore(state => state.setHabitos);
 
     const importarTodosDatos = useCallback(
         async (archivo: File) => {
@@ -537,7 +201,6 @@ export function useDashboard(): UseDashboardReturn {
         modalCrearHabitoAbierto,
         abrirModalCrearHabito,
         cerrarModalCrearHabito,
-        /* Modal de edicion */
         habitoEditando,
         abrirModalEditarHabito,
         cerrarModalEditarHabito,
@@ -547,7 +210,6 @@ export function useDashboard(): UseDashboardReturn {
         mensajeEstado,
         tipoMensaje,
         cargandoDatos,
-        /* Sistema de deshacer */
         accionDeshacer: accionActual
             ? {
                   mensaje: accionActual.mensaje,
@@ -557,13 +219,6 @@ export function useDashboard(): UseDashboardReturn {
         ejecutarDeshacer,
         descartarDeshacer,
         reordenarTareas,
-        /* Sincronización */
-        sincronizacion: {
-            sincronizado: estadoSync.sincronizado,
-            pendiente: estadoSync.pendiente,
-            error: estadoSync.error,
-            estaLogueado,
-            sincronizarAhora
-        }
+        sincronizacion
     };
 }
