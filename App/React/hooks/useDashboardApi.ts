@@ -124,7 +124,11 @@ export function useDashboardApi(): UseDashboardApiReturn {
         };
 
         try {
+            const controller = abortControllerRef.current;
+            const timeoutId = setTimeout(() => controller?.abort(), 15000);
+
             const response = await fetch(url, {...defaultOptions, ...options});
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -140,7 +144,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
             return data as ApiResponse<T>;
         } catch (error) {
             if (error instanceof Error && error.name === 'AbortError') {
-                throw new Error('Petición cancelada');
+                throw new Error('La petición ha excedido el tiempo de espera (15s)');
             }
             throw error;
         }

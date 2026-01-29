@@ -231,8 +231,9 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
         modalCrearHabitoAbierto,
         abrirModalCrearHabito,
         cerrarModalCrearHabito,
-        habitoEditando,
         abrirModalEditarHabito,
-        cerrarModalEditarHabito
+        cerrarModalEditarHabito,
+        /* Utilidades de sistema */
+        setHabitos: useHabitosStore.getState().setHabitos
     };
 }

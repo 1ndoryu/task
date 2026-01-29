@@ -119,12 +119,12 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                      * No descargamos ciegamente del servidor.
                      */
                     console.log('[Sync] Detectados cambios locales sin sincronizar. Subiendo...');
-                    await guardarEnServidor();
-
+                    const resultado = await guardarEnServidor();
+                    console.log('[Sync] Subida de cambios locales completada. Resultado:', resultado);
+                    
                     /* Después de guardar, podríamos descargar para obtener actualizaciones de otros dispositivos,
                      * pero por seguridad terminamos aquí y dejamos que futuras syncs manejen eso.
                      */
-                    setEstado(prev => ({...prev, cargandoServidor: false}));
                     return;
                 }
 
@@ -146,7 +146,6 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                             ...prev,
                             sincronizado: true,
                             ultimaSync: new Date(),
-                            cargandoServidor: false,
                             error: null
                         }));
                     }, 50);
@@ -161,7 +160,6 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                      */
                     setEstado(prev => ({
                         ...prev,
-                        cargandoServidor: false,
                         sincronizado: false
                     }));
                     /*
@@ -173,11 +171,13 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                 }
             } catch (error) {
                 const mensaje = error instanceof Error ? error.message : 'Error de conexión';
+                console.error('[Sync] Error en carga inicial:', mensaje);
                 setEstado(prev => ({
                     ...prev,
-                    cargandoServidor: false,
                     error: mensaje
                 }));
+            } finally {
+                setEstado(prev => ({...prev, cargandoServidor: false}));
             }
         };
 
