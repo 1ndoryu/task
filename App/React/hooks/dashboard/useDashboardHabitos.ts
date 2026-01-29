@@ -231,6 +231,7 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
         modalCrearHabitoAbierto,
         abrirModalCrearHabito,
         cerrarModalCrearHabito,
+        habitoEditando,
         abrirModalEditarHabito,
         cerrarModalEditarHabito,
         /* Utilidades de sistema */
