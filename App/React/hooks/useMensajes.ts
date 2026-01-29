@@ -351,6 +351,13 @@ export function useMensajesNoLeidos(tipoElemento: 'tarea' | 'proyecto' | 'habito
     const abortControllerRef = useRef<AbortController | null>(null);
 
     const refrescar = useCallback(async (): Promise<void> => {
+        /* Guard: No ejecutar si no hay usuario autenticado */
+        const nonce = obtenerNonce();
+        if (!nonce) {
+            setNoLeidos({});
+            return;
+        }
+
         if (elementoIds.length === 0) {
             setNoLeidos({});
             return;
@@ -378,6 +385,12 @@ export function useMensajesNoLeidos(tipoElemento: 'tarea' | 'proyecto' | 'habito
                 }),
                 signal: abortControllerRef.current.signal
             });
+
+            /* Silenciar errores 401 (usuario no autenticado) */
+            if (response.status === 401) {
+                setNoLeidos({});
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error('Error al obtener mensajes no leídos');

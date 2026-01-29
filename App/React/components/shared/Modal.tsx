@@ -16,6 +16,8 @@ export interface ModalProps {
     titulo: string;
     children: React.ReactNode;
     claseExtra?: string;
+    /* Clase CSS adicional para el overlay (fondo) */
+    claseOverlay?: string;
     /* Elementos opcionales a mostrar a la derecha del encabezado */
     accionesEncabezado?: React.ReactNode;
     /* Si true, no muestra la X de cerrar */
@@ -39,7 +41,7 @@ function useEsMovil(breakpoint: number = 480): boolean {
     return esMovil;
 }
 
-export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', accionesEncabezado, ocultarBotonCerrar = false}: ModalProps): JSX.Element | null {
+export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false}: ModalProps): JSX.Element | null {
     const esMovil = useEsMovil();
 
     /*
@@ -75,7 +77,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
     if (!estaAbierto) return null;
 
     return (
-        <div className="modalOverlay" onClick={manejarClickOverlay}>
+        <div className={`modalOverlay ${claseOverlay}`} onClick={manejarClickOverlay}>
             <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
                 <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
                     {/* Boton Volver en movil - solo icono, sin texto */}

@@ -1,3 +1,12 @@
+/*
+ * Modal Login - Overlay Opaco
+ * Cuando el usuario no está autenticado, el overlay debe ser completamente
+ * opaco para no mostrar la app de fondo
+ */
+.modalLoginOverlay {
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
 .modalLoginContenido {
     padding: 0 0.5rem;
 }

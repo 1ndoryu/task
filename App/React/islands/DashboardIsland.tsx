@@ -95,7 +95,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     }
 
     /* Usuario no logueado: mostrar landing page */
-    if (!auth.user && !modales.modalLoginAbierto) {
+    if (!auth.user) {
         return (
             <>
                 <Landing onLogin={modales.abrirModalLogin} />

@@ -71,6 +71,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] **Modal de login con pantalla negra:** Error React #310 por useMemo dentro del JSX.
 - [x] **Guards de autenticación:** Verificación de nonce antes de ejecutar API calls.
 - [x] **Manejo de errores 401:** Mejorar feedback en hooks de compartidos y equipos.
+- [x] **Modal login overlay opaco:** Cuando no hay usuario, el modal de login oculta completamente la app de fondo.
+- [x] **Guard en useMensajesNoLeidos:** Prevenir llamadas API sin autenticación en hook de mensajes.
 
 ---
 

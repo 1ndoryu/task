@@ -1,11 +1,15 @@
 ---
 applyTo: '**'
 ---
-# Protocolo de Desarrollo y Conducta (v3.1)
+# Protocolo de Desarrollo y Conducta (v3.2)
+
+## 0. VSCODE INSTRUCCIÓN
+
+* **Flujo**: Al iniciar una tarea o recibir instrucciones del usuario, trabaja prolongadamente en cumplir cada una de las tareas, no te detengas a realizar consultas o dudas al usuario, o dividir la tarea en pasos. Cada vez que te detienes a consultar al usuario, consumes una llamada de credito del usuario, por eso debes evitarlo al máximo posible y solo realizar consultas cuando sea estrictamente necesario. Si tienes varios pasos o varias metas o varias tareas, hazlas todas de una vez. Si puedes asegurarte por tu cuenta que todo este bien, testear por tu cuenta, revisiones extra, mejor para asegurar el menor numero de llamadas posibles, aprovechar para hacer refactorizaciones que no impliquen riesgos, mejoras pequeñas, etc.
 
 ## 1. Principios Generales y Comunicación
 * **Idioma:** Español obligatorio en toda comunicación y nombres de clases CSS.
-* **Ambigüedad:** Ante la duda, **PREGUNTA** antes de escribir código.
+* **Ambigüedad:** Ante la duda, **PREGUNTA** antes de escribir código. (No es relevante en VSCODE)
 * **Prohibiciones:** Cero emojis en código/comentarios.
 * **Integridad:** Prohibido omitir código (`// ...resto`). Ediciones atómicas y completas.
 * **Mentalidad:** Entender antes de modificar. Si ves una mejora arquitectónica posible, **hazla** (si es rápida) o deja un **TO-DO** comentado.

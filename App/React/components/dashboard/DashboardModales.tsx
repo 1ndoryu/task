@@ -102,7 +102,17 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
     return (
         <>
             {/* Modales de Autenticación y Usuario */}
-            <ModalLogin estaAbierto={modales.modalLoginAbierto} onCerrar={modales.cerrarModalLogin} onLoginGoogle={auth.loginWithGoogle} onLoginCredentials={auth.loginWithCredentials} onRegister={auth.register} loading={auth.loading} error={auth.error} />
+            <ModalLogin 
+                estaAbierto={modales.modalLoginAbierto} 
+                onCerrar={modales.cerrarModalLogin} 
+                onLoginGoogle={auth.loginWithGoogle} 
+                onLoginCredentials={auth.loginWithCredentials} 
+                onRegister={auth.register} 
+                loading={auth.loading} 
+                error={auth.error} 
+                /* Overlay opaco cuando no hay usuario autenticado para ocultar la app */
+                overlayOpaco={!auth.user}
+            />
             <ModalUpgrade visible={modales.modalUpgradeAbierto} onCerrar={modales.cerrarModalUpgrade} suscripcion={suscripcion} />
             <PanelSeguridad visible={modales.panelSeguridadAbierto} onCerrar={modales.cerrarPanelSeguridad} />
             <ModalPerfil estaAbierto={modales.modalPerfilAbierto} onCerrar={modales.cerrarModalPerfil} />

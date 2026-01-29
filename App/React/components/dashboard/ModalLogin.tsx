@@ -12,9 +12,11 @@ interface ModalLoginProps {
     onRegister: (u: string, e: string, p: string) => Promise<void>;
     loading: boolean;
     error: string | null;
+    /* Si true, el overlay será opaco para ocultar la app de fondo */
+    overlayOpaco?: boolean;
 }
 
-export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredentials, onRegister, loading, error}: ModalLoginProps): JSX.Element {
+export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredentials, onRegister, loading, error, overlayOpaco = false}: ModalLoginProps): JSX.Element {
     const [modo, setModo] = useState<'login' | 'registro' | 'recuperar'>('login');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -61,7 +63,7 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
     const tituloModal = modo === 'login' ? 'Acceso a Glory Dashboard' : modo === 'registro' ? 'Registro de Usuario' : 'Recuperar Contraseña';
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo={tituloModal}>
+        <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo={tituloModal} claseOverlay={overlayOpaco ? 'modalLoginOverlay' : ''}>
             <div className="modalLoginContenido">
                 {modo !== 'recuperar' ? (
                     <>
