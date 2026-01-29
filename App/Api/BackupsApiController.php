@@ -40,6 +40,21 @@ class BackupsApiController
                 ],
             ]
         ]);
+
+        /* Eliminar backup */
+        register_rest_route(self::API_NAMESPACE, '/backups/(?P<backup_id>\d+)', [
+            [
+                'methods' => \WP_REST_Server::DELETABLE,
+                'callback' => [self::class, 'deleteBackup'],
+                'permission_callback' => [self::class, 'checkPermission'],
+                'args' => [
+                    'backup_id' => [
+                        'required' => true,
+                        'validate_callback' => fn($param) => is_numeric($param),
+                    ],
+                ],
+            ]
+        ]);
     }
 
     public static function checkPermission(): bool
@@ -125,6 +140,27 @@ class BackupsApiController
                 'message' => 'Error en restauración: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public static function deleteBackup(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $userId = get_current_user_id();
+        $backupId = (int)$request->get_param('backup_id');
+
+        $backupsRepo = new BackupsRepository($userId);
+        $deleted = $backupsRepo->deleteById($backupId);
+
+        if ($deleted) {
+            return new \WP_REST_Response([
+                'success' => true,
+                'message' => 'Backup eliminado'
+            ]);
+        }
+
+        return new \WP_REST_Response([
+            'success' => false,
+            'message' => 'No se pudo eliminar el backup'
+        ], 400);
     }
 }
 

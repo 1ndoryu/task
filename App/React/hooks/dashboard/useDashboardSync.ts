@@ -14,9 +14,10 @@ interface UseDashboardSyncProps {
     setProyectos: (p: Proyecto[]) => void;
     setNotas: (n: string) => void;
     cargandoDatos: boolean;
+    cargandoDatosLocales: boolean;
 }
 
-export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, setProyectos, setNotas, cargandoDatos}: UseDashboardSyncProps) {
+export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, setProyectos, setNotas, cargandoDatos, cargandoDatosLocales}: UseDashboardSyncProps) {
     const storeSetHabitos = useHabitosStore(state => state.setHabitos);
     const {esPremium} = useSuscripcion();
 
@@ -70,6 +71,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         currentData: datosActuales,
         onDataReceived: handleDatosServidor,
         debounceMs: 2000,
+        isDataReady: !cargandoDatosLocales,
         onInitComplete: () => {
             /*
              * Safety fallback: Si la sync termina (éxito, error o skip por breaker),

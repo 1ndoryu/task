@@ -15,9 +15,10 @@ interface UseSyncManagerProps {
     onDataReceived: (data: DashboardData) => void;
     debounceMs?: number;
     onInitComplete?: () => void;
+    isDataReady?: boolean;
 }
 
-export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete}: UseSyncManagerProps) {
+export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete, isDataReady = true}: UseSyncManagerProps) {
     const {esPremium} = useSuscripcion();
 
     // 1. Detector de Cambios
@@ -36,6 +37,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
     });
 
     const [isInitialized, setIsInitialized] = useState(false);
+    const initializationStarted = useRef(false);
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // --- Lógica de Inicialización (Load Strategy) ---
@@ -96,12 +98,13 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
         }
     }, [syncMeta, saveData, loadData, currentData, markChangesAsSynced, resetVersion, onDataReceived, setSyncMeta, esPremium, onInitComplete]);
 
-    // Ejecutar inicialización una vez cargado el Meta
+    // Ejecutar inicialización una vez cargado el Meta y los datos externos
     useEffect(() => {
-        if (!loadingMeta && !isInitialized) {
+        if (!loadingMeta && !isInitialized && isDataReady && !initializationStarted.current) {
+            initializationStarted.current = true;
             performInitialSync();
         }
-    }, [loadingMeta, isInitialized, performInitialSync]);
+    }, [loadingMeta, isInitialized, isDataReady, performInitialSync]);
 
     // --- Lógica de Sincronización Continua (Save Loop) ---
 

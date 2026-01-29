@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import {Modal} from '../shared/Modal';
 import {useBackups} from '../../hooks/dashboard/useBackups';
-import {RotateCcw, ShieldCheck, AlertTriangle, Database} from 'lucide-react';
+import {RotateCcw, ShieldCheck, AlertTriangle, Database, Trash2} from 'lucide-react';
 
 interface ModalHistorialBackupsProps {
     estaAbierto: boolean;
@@ -9,7 +9,7 @@ interface ModalHistorialBackupsProps {
 }
 
 export function ModalHistorialBackups({estaAbierto, onCerrar}: ModalHistorialBackupsProps) {
-    const {backups, cargando, error, obtenerBackups, restaurarBackup} = useBackups();
+    const {backups, cargando, error, obtenerBackups, restaurarBackup, eliminarBackup} = useBackups();
 
     useEffect(() => {
         if (estaAbierto) {
@@ -23,6 +23,12 @@ export function ModalHistorialBackups({estaAbierto, onCerrar}: ModalHistorialBac
         }
     };
 
+    const handleEliminar = async (id: string) => {
+        if (window.confirm('¿Eliminar esta copia? Esta acción no se puede deshacer.')) {
+            await eliminarBackup(id);
+        }
+    };
+
     const formatBytes = (bytes: number) => {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -32,10 +38,19 @@ export function ModalHistorialBackups({estaAbierto, onCerrar}: ModalHistorialBac
     };
 
     const formatDate = (timestamp: number) => {
-        return new Date(timestamp * 1000).toLocaleString('es-ES', {
+        if (!timestamp) return 'Fecha desconocida';
+        return new Date(timestamp).toLocaleString('es-ES', {
             dateStyle: 'medium',
             timeStyle: 'medium'
         });
+    };
+
+    const formatTrigger = (trigger: string) => {
+        if (!trigger) return '';
+        if (trigger === 'sync') return 'Sincronización';
+        if (trigger === 'manual') return 'Manual';
+        if (trigger === 'auto') return 'Automática';
+        return trigger;
     };
 
     return (
@@ -46,7 +61,12 @@ export function ModalHistorialBackups({estaAbierto, onCerrar}: ModalHistorialBac
                     <p className="textoInfo">Copias automáticas con cada cambio importante (Premium). Restaura versiones anteriores al instante.</p>
                 </div>
 
-                {error && <div className="mensajeError">{error}</div>}
+                {error && (
+                    <div className="mensajeError">
+                        <AlertTriangle size={14} />
+                        <span>{error}</span>
+                    </div>
+                )}
 
                 {cargando && <div className="spinnerCarga">Cargando copias...</div>}
 
@@ -64,15 +84,23 @@ export function ModalHistorialBackups({estaAbierto, onCerrar}: ModalHistorialBac
                                 <div className="infoBackup">
                                     <span className="fechaBackup">{formatDate(backup.timestamp)}</span>
                                     <div className="metaBackup">
-                                        <span className="badgeTrigger">{backup.trigger}</span>
+                                        {formatTrigger(backup.trigger) && (
+                                            <span className="badgeTrigger">{formatTrigger(backup.trigger)}</span>
+                                        )}
                                         <span className="tamanoBackup">{formatBytes(backup.sizeBytes)}</span>
                                         <span className="dispositivoBackup">{backup.device}</span>
                                     </div>
                                 </div>
-                                <button className="botonRestaurar" onClick={() => handleRestaurar(backup.id)} title="Restaurar esta versión">
-                                    <RotateCcw size={14} />
-                                    <span>Restaurar</span>
-                                </button>
+                                <div className="accionesBackup">
+                                    <button className="botonRestaurar" onClick={() => handleRestaurar(backup.id)} title="Restaurar esta versión">
+                                        <RotateCcw size={14} />
+                                        <span>Restaurar</span>
+                                    </button>
+                                    <button className="botonEliminar" onClick={() => handleEliminar(backup.id)} title="Eliminar esta copia">
+                                        <Trash2 size={14} />
+                                        <span>Eliminar</span>
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

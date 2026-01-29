@@ -6,6 +6,9 @@ use App\Database\Schema;
 
 class BackupsRepository
 {
+    private const MAX_BACKUPS = 50;
+    private const RETENCION_DIAS = 30;
+    private const INTERVALO_MINUTOS = 30;
     private int $userId;
     private string $table;
 
@@ -62,6 +65,11 @@ class BackupsRepository
     {
         global $wpdb;
 
+        /* Ajuste: limitamos frecuencia para evitar exceso de copias. */
+        if (!$this->puedeCrearBackup()) {
+            return 0;
+        }
+
         /* Asegurar que los datos sean JSON */
         $json = wp_json_encode($data);
 
@@ -97,9 +105,19 @@ class BackupsRepository
     /**
      * Mantiene solo los últimos N backups para ahorrar espacio
      */
-    private function cleanupOldBackups(int $keep = 50): void
+    private function cleanupOldBackups(int $keep = self::MAX_BACKUPS): void
     {
         global $wpdb;
+
+        /* Eliminamos backups fuera de la ventana de retención. */
+        $limite = date('Y-m-d H:i:s', current_time('timestamp') - (self::RETENCION_DIAS * DAY_IN_SECONDS));
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$this->table} WHERE user_id = %d AND created_at < %s",
+                $this->userId,
+                $limite
+            )
+        );
 
         /* Obtener IDs de los backups que sobran */
         $ids = $wpdb->get_col(
@@ -117,5 +135,49 @@ class BackupsRepository
             $idsList = implode(',', array_map('intval', $ids));
             $wpdb->query("DELETE FROM {$this->table} WHERE id IN ($idsList)");
         }
+    }
+
+    /**
+     * Verifica si se puede crear un backup segun la frecuencia definida.
+     */
+    private function puedeCrearBackup(): bool
+    {
+        global $wpdb;
+
+        $ultimo = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT created_at FROM {$this->table} WHERE user_id = %d ORDER BY created_at DESC LIMIT 1",
+                $this->userId
+            )
+        );
+
+        if (!$ultimo) return true;
+
+        $ultimoTimestamp = strtotime($ultimo);
+        if (!$ultimoTimestamp) return true;
+
+        $ahora = current_time('timestamp');
+        $intervalo = self::INTERVALO_MINUTOS * MINUTE_IN_SECONDS;
+
+        return ($ahora - $ultimoTimestamp) >= $intervalo;
+    }
+
+    /**
+     * Elimina un backup por ID.
+     */
+    public function deleteById(int $id): bool
+    {
+        global $wpdb;
+
+        $deleted = $wpdb->delete(
+            $this->table,
+            [
+                'id' => $id,
+                'user_id' => $this->userId
+            ],
+            ['%d', '%d']
+        );
+
+        return $deleted !== false && $deleted > 0;
     }
 }

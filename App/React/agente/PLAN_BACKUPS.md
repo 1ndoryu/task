@@ -130,3 +130,16 @@ Necesitaremos endpoints específicos en el plugin/backend de WordPress:
     *   *Mitigación:* Backend debe implementar deduplicación o diffs. Frontend asume que es "caja negra".
 *   **Archivos:** Recordar excluir `Adjuntos` del blob JSON si estos se manejan por referencia (URLs). El backup guarda los metadatos (URLs), pero no los binarios.
 
+---
+
+## 6. Actualizaciones Recientes
+
+*   Se normalizan fechas y metadatos de backups en UI para evitar `Invalid Date`.
+*   Se agregó eliminación de backups desde el modal.
+*   Se aplicó retención: 1 backup cada 30 minutos y eliminación de copias mayores a 30 días.
+*   Se compactaron acciones del modal y se eliminó el padding del contenedor principal.
+
+### TO-DO Arquitectura
+
+*   Exponer la política de retención (intervalo y días) desde configuración global para evitar constantes rígidas.
+

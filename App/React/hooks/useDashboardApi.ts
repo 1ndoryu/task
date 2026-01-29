@@ -10,7 +10,7 @@
  * @package App/React/hooks
  */
 
-import {useState, useCallback, useRef} from 'react';
+import {useState, useCallback, useRef, useEffect} from 'react';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 
 /*
@@ -101,6 +101,16 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
     const abortControllerRef = useRef<AbortController | null>(null);
 
+    /* Cleanup: Abortar peticiones pendientes al desmontar */
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                console.debug('[DashboardApi] Aborting pending requests due to unmount');
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+
     /**
      * Realiza una petición a la API
      */
@@ -111,7 +121,6 @@ export function useDashboardApi(): UseDashboardApiReturn {
         }
 
         abortControllerRef.current = new AbortController();
-
         const url = `${API_BASE}${endpoint}`;
 
         const defaultOptions: RequestInit = {
@@ -123,12 +132,26 @@ export function useDashboardApi(): UseDashboardApiReturn {
             signal: abortControllerRef.current.signal
         };
 
+        const controller = abortControllerRef.current;
+
         try {
-            const controller = abortControllerRef.current;
-            const timeoutId = setTimeout(() => controller?.abort(), 15000);
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            console.group('[DashboardApi] Fetch Start');
+            console.log('URL:', url);
+            console.log('Method:', options.method || 'GET');
+            if (options.body) console.log('Payload Size:', (options.body as string).length);
 
             const response = await fetch(url, {...defaultOptions, ...options});
             clearTimeout(timeoutId);
+
+            console.log('Status:', response.status);
+
+            // Debug: Clone and read text to see raw response (PHP errors often hidden here)
+            const responseClone = response.clone();
+            const rawText = await responseClone.text();
+            console.log('Raw Response Body:', rawText.substring(0, 1000) + (rawText.length > 1000 ? '...' : ''));
+            console.groupEnd();
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -137,15 +160,35 @@ export function useDashboardApi(): UseDashboardApiReturn {
                 if (response.status === 403) {
                     throw new Error('Sin permisos para realizar esta acción.');
                 }
-                throw new Error(`Error del servidor: ${response.status}`);
+
+                // Try to extract error message from JSON if possible, otherwise use status
+                try {
+                    const errorJson = JSON.parse(rawText);
+                    throw new Error(errorJson.message || `Error del servidor: ${response.status}`);
+                } catch {
+                    throw new Error(`Error del servidor: ${response.status} - ${rawText.substring(0, 100)}`);
+                }
             }
 
             const data = await response.json();
             return data as ApiResponse<T>;
-        } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-                throw new Error('La petición ha excedido el tiempo de espera (15s)');
+        } catch (error: any) {
+            // Ignorar errores de cancelación (AbortError / DOMException)
+            if (error?.name === 'AbortError') {
+                if (abortControllerRef.current !== controller) {
+                    // Fue cancelado por una nueva petición
+                    console.debug('[DashboardApi] Petición silenciada (reemplazada).');
+                } else {
+                    // Fue cancelado por timeout o desmontaje
+                    console.warn('[DashboardApi] Petición cancelada o timeout.');
+                }
+
+                // Lanzamos un error controlado para que el caller sepa que no hubo datos,
+                // pero con un mensaje que no asuste en los logs si se imprime
+                throw new Error('Petición cancelada');
             }
+
+            console.error('[DashboardApi] Fetch Error:', error);
             throw error;
         }
     }, []);

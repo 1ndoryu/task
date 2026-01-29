@@ -65,7 +65,8 @@ interface UseDashboardReturn {
         pendiente: boolean;
         error: string | null;
         estaLogueado: boolean;
-        sincronizarAhora: () => Promise<void>;
+        sincronizarAhora: () => Promise<boolean>;
+        cargandoDesdeServidor: boolean;
     };
 }
 
@@ -118,7 +119,8 @@ export function useDashboard(): UseDashboardReturn {
         setTareas,
         setProyectos,
         setNotas,
-        cargandoDatos
+        cargandoDatos,
+        cargandoDatosLocales
     });
 
     // 5. Hooks delegados para Proyectos y Tareas

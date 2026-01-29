@@ -1,6 +1,6 @@
 /* Estilos para el Modal de Historial de Backups */
 .contenedorBackups {
-    padding: var(--dashboard-espacioLg);
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioLg);
@@ -16,6 +16,18 @@
     font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.mensajeError {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-estadoPeligroFondo);
+    color: var(--dashboard-estadoPeligro);
+    border: 1px solid var(--dashboard-estadoPeligro);
+    border-radius: var(--dashboard-radioSm);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .iconoInfo {
@@ -91,17 +103,23 @@
     border: 1px solid var(--dashboard-bordeSutil);
 }
 
+.accionesBackup {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+}
+
 .botonRestaurar {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoSecundario);
     border-radius: var(--dashboard-radioSm);
     cursor: pointer;
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     transition: all var(--dashboard-transicionRapida);
 }
 
@@ -109,6 +127,26 @@
     background: var(--dashboard-estadoAltaFondo);
     border-color: var(--dashboard-estadoAlta);
     color: var(--dashboard-estadoAlta);
+}
+
+.botonEliminar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoPequeno);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonEliminar:hover {
+    background: var(--dashboard-estadoPeligroFondo);
+    border-color: var(--dashboard-estadoPeligro);
+    color: var(--dashboard-estadoPeligro);
 }
 
 .estadoVacio {
