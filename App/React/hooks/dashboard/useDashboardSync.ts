@@ -76,9 +76,18 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             /*
              * Safety fallback: Si la sync termina (éxito, error o skip por breaker),
              * asegurarnos de que la UI se desbloquea marcando el store como inicializado.
+             * No mostrar warning si el error es de autenticación (usuario no logueado).
              */
             if (!useHabitosStore.getState().inicializado) {
-                console.warn('[useDashboardSync] Forzando inicialización de store post-sync (Degradación Graciosa).');
+                /* Solo mostrar warning si no es un error de autenticación */
+                const esErrorAuth = syncState.error && (
+                    syncState.error.includes('No autenticado') || 
+                    syncState.error.includes('401')
+                );
+                
+                if (!esErrorAuth) {
+                    console.warn('[useDashboardSync] Forzando inicialización de store post-sync (Degradación Graciosa).');
+                }
                 useHabitosStore.getState().marcarInicializado();
             }
         }

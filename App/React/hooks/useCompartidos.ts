@@ -43,9 +43,11 @@ export function useCompartidos(): UseCompartidosReturn {
         async (url: string, opciones: RequestInit = {}): Promise<Response> => {
             const nonce = obtenerNonce();
             
-            /* Si no hay nonce, lanzar error inmediatamente */
+            /* Si no hay nonce, lanzar error silencioso */
             if (!nonce) {
-                throw new Error('No autenticado. Inicia sesión para continuar.');
+                const error = new Error('No autenticado');
+                (error as any).silent = true;
+                throw error;
             }
 
             const response = await fetch(url, {
@@ -58,9 +60,11 @@ export function useCompartidos(): UseCompartidosReturn {
                 credentials: 'same-origin'
             });
 
-            /* Si recibimos 401, lanzar error específico */
+            /* Si recibimos 401, lanzar error silencioso para evitar ruido en consola */
             if (response.status === 401) {
-                throw new Error('No autenticado. Inicia sesión para continuar.');
+                const error = new Error('No autenticado');
+                (error as any).silent = true;
+                throw error;
             }
 
             return response;
@@ -122,6 +126,11 @@ export function useCompartidos(): UseCompartidosReturn {
             });
         } catch (error) {
             if (error instanceof Error && error.name !== 'AbortError') {
+                /* No mostrar error si es de tipo silent (401 sin auth) */
+                if ((error as any).silent) {
+                    setEstado(prev => ({...prev, cargando: false}));
+                    return;
+                }
                 setEstado(prev => ({
                     ...prev,
                     cargando: false,

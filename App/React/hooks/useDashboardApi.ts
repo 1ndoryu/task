@@ -150,12 +150,19 @@ export function useDashboardApi(): UseDashboardApiReturn {
             // Debug: Clone and read text to see raw response (PHP errors often hidden here)
             const responseClone = response.clone();
             const rawText = await responseClone.text();
-            console.log('Raw Response Body:', rawText.substring(0, 1000) + (rawText.length > 1000 ? '...' : ''));
+            
+            /* Solo mostrar respuesta si no es 401 (para evitar ruido sin autenticación) */
+            if (response.status !== 401) {
+                console.log('Raw Response Body:', rawText.substring(0, 1000) + (rawText.length > 1000 ? '...' : ''));
+            }
             console.groupEnd();
 
             if (!response.ok) {
                 if (response.status === 401) {
-                    throw new Error('No autenticado. Inicia sesión para continuar.');
+                    /* Marcar error como silencioso para evitar logs innecesarios */
+                    const error = new Error('No autenticado. Inicia sesión para continuar.');
+                    (error as any).silent = true;
+                    throw error;
                 }
                 if (response.status === 403) {
                     throw new Error('Sin permisos para realizar esta acción.');
@@ -186,6 +193,11 @@ export function useDashboardApi(): UseDashboardApiReturn {
                 // Lanzamos un error controlado para que el caller sepa que no hubo datos,
                 // pero con un mensaje que no asuste en los logs si se imprime
                 throw new Error('Petición cancelada');
+            }
+
+            /* Silenciar errores 401 esperados (sin autenticación) */
+            if (error?.silent || error?.message?.includes('No autenticado')) {
+                throw error;
             }
 
             console.error('[DashboardApi] Fetch Error:', error);

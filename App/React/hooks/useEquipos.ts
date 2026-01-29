@@ -57,6 +57,13 @@ export function useEquipos() {
      * Obtiene el equipo completo del usuario
      */
     const cargarEquipo = useCallback(async (): Promise<void> => {
+        /* No ejecutar si no hay nonce (usuario no autenticado) */
+        const nonce = obtenerNonce();
+        if (!nonce) {
+            setEstado(prev => ({...prev, cargando: false}));
+            return;
+        }
+
         setCargando(true);
         setError(null);
 
@@ -81,6 +88,11 @@ export function useEquipos() {
                 throw new Error(data.message || 'Error al cargar equipo');
             }
         } catch (error) {
+            /* Silenciar errores 401 (no autenticado) para evitar ruido en consola */
+            if (error instanceof Error && error.message.includes('401')) {
+                setEstado(prev => ({...prev, cargando: false}));
+                return;
+            }
             const mensaje = error instanceof Error ? error.message : 'Error desconocido';
             setEstado(prev => ({
                 ...prev,
@@ -94,12 +106,23 @@ export function useEquipos() {
      * Cuenta solicitudes pendientes (para el badge del header)
      */
     const contarPendientes = useCallback(async (): Promise<number> => {
+        /* No ejecutar si no hay nonce (usuario no autenticado) */
+        const nonce = obtenerNonce();
+        if (!nonce) {
+            return 0;
+        }
+
         try {
             const response = await fetch('/wp-json/glory/v1/equipos/pendientes', {
                 method: 'GET',
                 headers: obtenerHeaders(),
                 credentials: 'same-origin'
             });
+
+            /* Silenciar errores 401 esperados */
+            if (response.status === 401) {
+                return 0;
+            }
 
             const data = await response.json();
 

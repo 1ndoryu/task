@@ -55,15 +55,15 @@ export function useCifrado(): UseCifradoReturn {
     const [error, setError] = useState<string | null>(null);
 
     const cargarEstado = useCallback(async () => {
-        setCargando(true);
-        setError(null);
-
         const config = obtenerConfigWP();
+        /* No cargar si no hay usuario autenticado */
         if (!config) {
-            setError('No se pudo obtener la configuración de autenticación');
             setCargando(false);
             return;
         }
+
+        setCargando(true);
+        setError(null);
 
         try {
             const response = await fetch(`${config.apiBase}/seguridad/cifrado`, {
@@ -74,6 +74,12 @@ export function useCifrado(): UseCifradoReturn {
                     'X-WP-Nonce': config.nonce
                 }
             });
+
+            /* Silenciar errores 401 (no autenticado) */
+            if (response.status === 401) {
+                setCargando(false);
+                return;
+            }
 
             const data = await response.json();
 
