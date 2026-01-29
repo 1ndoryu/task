@@ -69,6 +69,7 @@
 @import './componentes/modalMoverTarea.css';
 @import './componentes/listaOrdenPaneles.css';
 @import './componentes/configuracionProyectos.css';
+@import './componentes/historialBackups.css';
 
 /* Utilidades */
 @import './utilidades/estados.css';

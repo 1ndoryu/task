@@ -43,8 +43,14 @@ interface UseNotasReturn {
 
 /**
  * Hook principal para el sistema de notas (Legacy Wrapper)
+ * @deprecated Este hook causa re-renders masivos al suscribirse a todo el store.
+ * Por favor usar `useNotasStore` directamente con selectores atómicos.
  */
 export function useNotas(): UseNotasReturn {
+    useEffect(() => {
+        console.warn('useNotas is deprecated. Use useNotasStore instead to prevent performance issues.');
+    }, []);
+
     /* Consumir el store */
     const {notas, notaActiva, total, hayMas, cargando, guardando, eliminando, error, cargarNotas: cargarNotasStore, cargarMas: cargarMasStore, buscarNotas: buscarNotasStore, seleccionarNota, crearNuevaNota, actualizarContenidoNotaActiva, guardarNotaActiva, eliminarNota, limpiarError, establecerNotaActivaDesdeId, restaurarNotaActivaGuardada} = useNotasStore();
 

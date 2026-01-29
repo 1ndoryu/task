@@ -1,0 +1,129 @@
+/* Estilos para el Modal de Historial de Backups */
+.contenedorBackups {
+    padding: var(--dashboard-espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+.panelInfoBackup {
+    background: var(--dashboard-fondoTerciario);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Más compacto */
+    border-radius: var(--dashboard-radioSm);
+    display: flex;
+    gap: var(--dashboard-espacioMd);
+    align-items: center;
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.iconoInfo {
+    color: var(--dashboard-estadoExito);
+    flex-shrink: 0;
+}
+
+.textoInfo {
+    line-height: 1.4;
+}
+
+.listaBackups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--dashboard-espacioXS);
+}
+
+/* Scrollbar personalizada para la lista */
+.listaBackups::-webkit-scrollbar {
+    width: var(--dashboard-scrollbarAncho);
+}
+
+.listaBackups::-webkit-scrollbar-thumb {
+    background-color: var(--dashboard-scrollbarThumb);
+    border-radius: 4px;
+}
+
+.itemBackup {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.itemBackup:hover {
+    border-color: var(--dashboard-acento);
+}
+
+.infoBackup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.fechaBackup {
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.metaBackup {
+    display: flex;
+    gap: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    align-items: center;
+}
+
+.badgeTrigger {
+    text-transform: uppercase;
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.botonRestaurar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoBase);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonRestaurar:hover {
+    background: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAlta);
+    color: var(--dashboard-estadoAlta);
+}
+
+.estadoVacio {
+    text-align: center;
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoApagado);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioLg);
+}
+
+.spinnerCarga {
+    text-align: center;
+    padding: var(--dashboard-espacioLg);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoBase);
+}

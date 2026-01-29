@@ -4,11 +4,11 @@
  * Permite buscar tareas, habitos y proyectos
  */
 
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useMemo} from 'react';
 import {Search, CheckCircle2, Repeat, Folder, X, FileText} from 'lucide-react';
 import type {Tarea, Habito, Proyecto} from '../../types/dashboard';
-import {useNotas} from '../../hooks';
-import type {Nota} from '../../hooks';
+import {useNotasStore} from '../../stores/notasStore';
+import type {Nota} from '../../types/notas';
 
 interface BuscadorGlobalProps {
     tareas: Tarea[];
@@ -28,32 +28,19 @@ type ResultadoBusqueda = {
 
 export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto}: BuscadorGlobalProps): JSX.Element {
     const [busqueda, setBusqueda] = useState('');
-    const [resultados, setResultados] = useState<ResultadoBusqueda[]>([]);
+    const [resultadosNotas, setResultadosNotas] = useState<ResultadoBusqueda[]>([]);
     const [mostrarResultados, setMostrarResultados] = useState(false);
+
     const contenedorRef = useRef<HTMLDivElement>(null);
     const requestIdRef = useRef(0);
-    const {buscarNotas, seleccionarNota} = useNotas();
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (contenedorRef.current && !contenedorRef.current.contains(event.target as Node)) {
-                setMostrarResultados(false);
-            }
-        };
+    // FIX BUG-001: Eliminar suscripción al store para evitar loops de renderizado.
+    // Accedemos a las acciones directamente via getState().
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    /* 1. Filtrado de datos locales (Tareas, Habitos, Proyectos) - SIN EFFECT */
+    const resultadosLocales = useMemo(() => {
+        if (!busqueda.trim()) return [];
 
-    useEffect(() => {
-        if (busqueda.trim() === '') {
-            setResultados([]);
-            return;
-        }
-
-        const requestId = ++requestIdRef.current;
         const termino = busqueda.toLowerCase();
         const nuevosResultados: ResultadoBusqueda[] = [];
 
@@ -90,25 +77,54 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
             }
         });
 
-        setResultados(nuevosResultados.slice(0, 10));
+        return nuevosResultados;
+    }, [busqueda, tareas, habitos, proyectos]);
+
+    /* 2. Busqueda asincrona de notas - CON EFFECT */
+    /* useEffect(() => {
+        if (busqueda.trim() === '') {
+            setResultadosNotas(prev => (prev.length === 0 ? prev : []));
+            return;
+        }
+
+        const requestId = ++requestIdRef.current;
 
         const timeout = setTimeout(async () => {
-            const notasEncontradas = await buscarNotas(busqueda);
+            // Usar getState() evita dependencias en el Effect
+            const notasEncontradas = await useNotasStore.getState().buscarNotas(busqueda);
             if (requestIdRef.current !== requestId) return;
 
-            const resultadosNotas = notasEncontradas.map(nota => ({
+            const resultadosMapeados = notasEncontradas.map(nota => ({
                 tipo: 'nota' as const,
                 id: nota.id,
                 titulo: nota.titulo,
                 original: nota
             }));
 
-            const resultadosCombinados = [...nuevosResultados, ...resultadosNotas];
-            setResultados(resultadosCombinados.slice(0, 10));
+            setResultadosNotas(resultadosMapeados);
         }, 300);
 
         return () => clearTimeout(timeout);
-    }, [busqueda, tareas, habitos, proyectos, buscarNotas]);
+    }, [busqueda]); */
+
+    /* 3. Combinar resultados finales */
+    const resultados = useMemo(() => {
+        return [...resultadosLocales, ...resultadosNotas].slice(0, 10);
+    }, [resultadosLocales, resultadosNotas]);
+
+    /* Manejo de clicks fuera */
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (contenedorRef.current && !contenedorRef.current.contains(event.target as Node)) {
+                setMostrarResultados(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const manejarSeleccion = (resultado: ResultadoBusqueda) => {
         if (resultado.tipo === 'tarea') {
@@ -118,7 +134,7 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
         } else if (resultado.tipo === 'proyecto') {
             onSeleccionarProyecto(resultado.original as Proyecto);
         } else if (resultado.tipo === 'nota') {
-            seleccionarNota(resultado.original as Nota);
+            useNotasStore.getState().seleccionarNota(resultado.original as Nota);
         }
         setBusqueda('');
         setMostrarResultados(false);

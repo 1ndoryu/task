@@ -301,7 +301,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
 /**
  * Obtiene el nonce de WordPress para autenticación
  */
-function obtenerNonce(): string {
+export function obtenerNonce(): string {
     /* El nonce debería estar disponible en una variable global */
     const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
     return wpData?.nonce || '';

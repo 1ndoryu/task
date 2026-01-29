@@ -9,6 +9,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## Tareas del Proyecto SaaS Task (API)
 
 > **Última sincronización:** 2026-01-11 00:13
+> **Planificación Backups:** [Ver Plan Detallado](./PLAN_BACKUPS.md)
 
 ---
 

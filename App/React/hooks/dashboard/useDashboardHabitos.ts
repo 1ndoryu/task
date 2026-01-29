@@ -1,4 +1,4 @@
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useMemo} from 'react';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {migrarYActualizarHabitos} from '../../utils/migracionHabitos';
 import type {Habito, ConfiguracionDashboard, DatosNuevoHabito} from '../../types/dashboard';
@@ -30,7 +30,7 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
     const cargandoHabitos = !storeInicializado;
 
     /* Habitos migrados, con dias de inactividad actualizados y rachas reseteadas si aplica */
-    const habitos = migrarYActualizarHabitos(habitosRaw, CONFIGURACION_POR_DEFECTO);
+    const habitos = useMemo(() => migrarYActualizarHabitos(habitosRaw, CONFIGURACION_POR_DEFECTO), [habitosRaw]);
 
     const [modalCrearHabitoAbierto, setModalCrearHabitoAbierto] = useState(false);
     const [habitoEditando, setHabitoEditando] = useState<Habito | null>(null);

@@ -26,6 +26,7 @@ import {ModalCompartir} from '../compartidos';
 import {ModalExperimentos} from '../experimentos/ModalExperimentos';
 import {ModalCreacionRapida} from './ModalCreacionRapida';
 import {ModalConfiguracionMCP, ModalConfiguracionUsuario} from '../configuracion';
+import {ModalHistorialBackups} from './ModalHistorialBackups';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {AccionExperimento} from '../experimentos/ModalExperimentos';
@@ -210,6 +211,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modal Configuración Usuario */}
             <ModalConfiguracionUsuario estaAbierto={modales.modalConfigUsuarioAbierto} onCerrar={modales.cerrarModalConfigUsuario} />
+
+            {/* Modal Backups */}
+            <ModalHistorialBackups estaAbierto={modales.modalBackupsAbierto} onCerrar={modales.cerrarModalBackups} />
         </>
     );
 }

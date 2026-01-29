@@ -7,8 +7,8 @@
 import {useState, useEffect, useCallback} from 'react';
 import {Search, FileText, Loader, AlertCircle} from 'lucide-react';
 import {Modal} from '../shared';
-import {useNotas} from '../../hooks';
-import type {Nota} from '../../hooks';
+import {useNotasStore} from '../../stores/notasStore';
+import type {Nota} from '../../types/notas';
 import {ListaNotasGuardadas} from './notas/ListaNotasGuardadas';
 
 interface ModalNotasGuardadasProps {
@@ -18,7 +18,13 @@ interface ModalNotasGuardadasProps {
 }
 
 export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: ModalNotasGuardadasProps): JSX.Element | null {
-    const {estado, cargarNotas, eliminarNota, buscarNotas} = useNotas();
+    const notas = useNotasStore(s => s.notas);
+    const cargando = useNotasStore(s => s.cargando);
+    const error = useNotasStore(s => s.error);
+    const total = useNotasStore(s => s.total);
+    const cargarNotas = useNotasStore(s => s.cargarNotas);
+    const eliminarNota = useNotasStore(s => s.eliminarNota);
+    const buscarNotas = useNotasStore(s => s.buscarNotas);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const [resultadosBusqueda, setResultadosBusqueda] = useState<Nota[] | null>(null);
     const [buscando, setBuscando] = useState(false);
@@ -64,17 +70,12 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
         [eliminarNota]
     );
 
-    const notasMostrar = resultadosBusqueda ?? estado.notas;
+    const notasMostrar = resultadosBusqueda ?? notas;
 
     if (!abierto) return null;
 
     return (
-        <Modal
-            estaAbierto={abierto}
-            titulo="Notas Guardadas"
-            onCerrar={onCerrar}
-            claseExtra="modalNotasContenedor"
-        >
+        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra="modalNotasContenedor">
             <div id="modal-notas-guardadas" className="modalNotasGuardadas">
                 {/* Barra de búsqueda */}
                 <div className="modalNotasBusqueda">
@@ -85,15 +86,15 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
 
                 {/* Grid de notas */}
                 <div className="modalNotasGrid">
-                    {estado.cargando && !estado.notas.length ? (
+                    {cargando && !notas.length ? (
                         <div className="modalNotasVacio">
                             <Loader size={24} className="animacionGirar" />
                             <span>Cargando notas...</span>
                         </div>
-                    ) : estado.error ? (
+                    ) : error ? (
                         <div className="modalNotasError">
                             <AlertCircle size={24} />
-                            <span>{estado.error}</span>
+                            <span>{error}</span>
                         </div>
                     ) : notasMostrar.length === 0 ? (
                         <div className="modalNotasVacio">
@@ -109,7 +110,7 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
                 {/* Footer con contador */}
                 {notasMostrar.length > 0 && (
                     <div className="modalNotasFooter">
-                        <span>{resultadosBusqueda ? `${resultadosBusqueda.length} resultados` : `${estado.total} nota${estado.total !== 1 ? 's' : ''} guardada${estado.total !== 1 ? 's' : ''}`}</span>
+                        <span>{resultadosBusqueda ? `${resultadosBusqueda.length} resultados` : `${total} nota${total !== 1 ? 's' : ''} guardada${total !== 1 ? 's' : ''}`}</span>
                     </div>
                 )}
             </div>

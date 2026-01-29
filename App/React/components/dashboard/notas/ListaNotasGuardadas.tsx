@@ -1,5 +1,5 @@
 import {Clock, Trash2} from 'lucide-react';
-import type {Nota} from '../../../hooks/useNotas';
+import type {Nota} from '../../../types/notas';
 import {formatearFechaRelativa} from '../../../utils/fecha';
 
 interface ListaNotasGuardadasProps {
@@ -16,10 +16,13 @@ export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSelecci
             <div className="modalNotasGrid">
                 {notas.map(nota => (
                     <div key={nota.id} className="modalNotasItem" onClick={() => onSeleccionar(nota)}>
-                        <button className="modalNotasItemEliminar" onClick={e => {
-                            e.stopPropagation();
-                            onEliminar(nota.id);
-                        }} title="Eliminar nota">
+                        <button
+                            className="modalNotasItemEliminar"
+                            onClick={e => {
+                                e.stopPropagation();
+                                onEliminar(nota.id);
+                            }}
+                            title="Eliminar nota">
                             <Trash2 size={14} />
                         </button>
                         <div className="modalNotasItemContenido">
@@ -55,10 +58,13 @@ export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSelecci
                             <Clock size={10} />
                             <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
                         </div>
-                        <button className="listaNotasItemEliminar" onClick={e => {
-                            e.stopPropagation();
-                            onEliminar(nota.id);
-                        }} title="Eliminar nota">
+                        <button
+                            className="listaNotasItemEliminar"
+                            onClick={e => {
+                                e.stopPropagation();
+                                onEliminar(nota.id);
+                            }}
+                            title="Eliminar nota">
                             <Trash2 size={14} />
                         </button>
                     </div>

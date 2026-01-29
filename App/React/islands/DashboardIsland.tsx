@@ -5,7 +5,7 @@
  * Fase 10.8.3: Integración de opciones móvil en el header
  */
 
-import {useEffect} from 'react';
+import {useEffect, useMemo} from 'react';
 
 /* Importar store de configuración temprano para inicializar horaFinDia antes que otros módulos */
 import '../stores/configuracionUsuarioStore';
@@ -103,12 +103,15 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 version={version}
                 usuario={auth.user ? auth.user.name : usuario}
                 avatarUrl={auth.user?.avatarUrl}
-                sincronizacion={{
-                    ...dashboard.sincronizacion,
-                    onLogin: modales.abrirModalLogin,
-                    onLogout: auth.logout,
-                    estaLogueado: !!auth.user
-                }}
+                sincronizacion={useMemo(
+                    () => ({
+                        ...dashboard.sincronizacion,
+                        onLogin: modales.abrirModalLogin,
+                        onLogout: auth.logout,
+                        estaLogueado: !!auth.user
+                    }),
+                    [dashboard.sincronizacion, modales.abrirModalLogin, auth.logout, auth.user]
+                )}
                 suscripcion={suscripcion}
                 esAdmin={esAdmin}
                 equiposPendientes={equipos.pendientes}
@@ -124,6 +127,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
                 onClickTemas={modales.abrirModalTemas}
                 onClickConfigUsuario={modales.abrirModalConfigUsuario}
+                onClickBackups={modales.abrirModalBackups}
                 onClickConfigMCP={modales.abrirModalConfigMCP}
                 onExportarDatos={dashboard.exportarTodosDatos}
                 onImportarDatos={dashboard.importarTodosDatos}

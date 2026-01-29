@@ -8,7 +8,7 @@ class Schema
      * Versión actual de la base de datos
      * v1.0.10: Tablas para mapa de calor de actividad e historial de hábitos
      */
-    public const DB_VERSION = '1.0.10';
+    public const DB_VERSION = '1.0.11';
 
     /**
      * Nombre de la opción donde guardamos la versión instalada
@@ -342,6 +342,25 @@ class Schema
             UNIQUE KEY habito_fecha_unico (habito_id, fecha)
         ) $charset_collate;";
 
+        /* 
+         * Tabla de Backups (Snapshots completos del estado)
+         * Almacena copias de seguridad comprimidas (gzip + base64)
+         */
+        $table_backups = $wpdb->prefix . 'glory_backups';
+        $sql_backups = "CREATE TABLE $table_backups (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            hash varchar(64) NOT NULL,
+            size_bytes bigint(20) NOT NULL DEFAULT 0,
+            device varchar(255) DEFAULT NULL,
+            trigger_source varchar(50) DEFAULT 'sync',
+            data longtext NOT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY created_at (created_at)
+        ) $charset_collate;";
+
         dbDelta($sql_habitos);
         dbDelta($sql_equipos);
         dbDelta($sql_notificaciones);
@@ -353,6 +372,7 @@ class Schema
         dbDelta($sql_notas);
         dbDelta($sql_actividad);
         dbDelta($sql_habitos_historial);
+        dbDelta($sql_backups);
     }
 
     /**

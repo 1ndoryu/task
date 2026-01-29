@@ -81,6 +81,10 @@ class DashboardApiController
                         'required' => true,
                         'validate_callback' => fn($param) => is_numeric($param),
                     ],
+                    'generateBackup' => [
+                        'required' => false,
+                        'validate_callback' => fn($param) => is_bool($param),
+                    ],
                 ],
             ],
         ]);
@@ -116,6 +120,11 @@ class DashboardApiController
                 'required' => false,
                 'validate_callback' => fn($param) => is_array($param),
                 'default' => [],
+            ],
+            'generateBackup' => [
+                'required' => false,
+                'validate_callback' => fn($param) => is_bool($param),
+                'default' => false,
             ],
         ];
     }
@@ -176,6 +185,7 @@ class DashboardApiController
             'notas' => $request->get_param('notas') ?? '',
             'configuracion' => $request->get_param('configuracion') ?? [],
         ];
+        $generateBackup = (bool) $request->get_param('generateBackup');
 
         try {
             $repository = new DashboardRepository($userId);
@@ -216,6 +226,17 @@ class DashboardApiController
                     'message' => 'Error al guardar datos',
                     'code' => 'save_error',
                 ], 500);
+            }
+
+            /* Generar Backup Automatico (Solo Premium) */
+            if ($generateBackup) {
+                if ($suscripcionService->esPremium()) {
+                    /* En saveDashboard, $data ya tiene (casi) todo, pero es mejor cargar lo consolidado o usar lo enviado si es completo */
+                    /* loadAll asegura tener IDs generados y todo consistente */
+                    $fullData = $repository->loadAll();
+                    $backupsRepo = new \App\Repository\BackupsRepository($userId);
+                    $backupsRepo->create($fullData, 'manual_save');
+                }
             }
 
             return new \WP_REST_Response([
@@ -308,10 +329,21 @@ class DashboardApiController
         $userId = get_current_user_id();
         $changes = $request->get_param('changes');
         $clientTimestamp = (int) $request->get_param('clientTimestamp');
+        $generateBackup = (bool) $request->get_param('generateBackup');
 
         try {
             $repository = new DashboardRepository($userId);
             $result = $repository->applyChanges($changes, $clientTimestamp);
+
+            /* Generar Backup Automatico (Solo Premium) */
+            if ($generateBackup) {
+                $suscripcionService = new SuscripcionService($userId);
+                if ($suscripcionService->esPremium()) {
+                    $fullData = $repository->loadAll();
+                    $backupsRepo = new \App\Repository\BackupsRepository($userId);
+                    $backupsRepo->create($fullData, 'sync');
+                }
+            }
 
             return new \WP_REST_Response([
                 'success' => true,

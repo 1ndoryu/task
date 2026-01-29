@@ -3,32 +3,31 @@ import {Search, FileText, Loader, AlertCircle} from 'lucide-react';
 import {Modal} from '../../shared';
 import {Scratchpad} from '../Scratchpad';
 import {ListaNotasGuardadas} from './ListaNotasGuardadas';
-import type {Nota, NotaActiva} from '../../../hooks/useNotas';
+import type {Nota} from '../../../types/notas';
 import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
-
-interface EstadoNotas {
-    cargando: boolean;
-    error: string | null;
-    notas: Nota[];
-    total: number;
-    notaActiva: NotaActiva;
-}
 
 interface ModalNotasExpandidoProps {
     abierto: boolean;
     onCerrar: () => void;
-    estado: EstadoNotas;
-    cargarNotas: () => Promise<void>;
-    eliminarNota: (id: number) => Promise<boolean>;
-    buscarNotas: (termino: string) => Promise<Nota[]>;
-    seleccionarNota: (nota: Nota) => void;
-    actualizarContenido: (contenido: string) => void;
-    obtenerTituloDeContenido: (contenido: string) => string;
     tamanoFuente: TamanoFuente;
     delayGuardado: number;
 }
 
-export function ModalNotasExpandido({abierto, onCerrar, estado, cargarNotas, eliminarNota, buscarNotas, seleccionarNota, actualizarContenido, obtenerTituloDeContenido, tamanoFuente, delayGuardado}: ModalNotasExpandidoProps): JSX.Element | null {
+import {useNotasStore} from '../../../stores/notasStore';
+import {extraerTitulo} from '../../../utils/notasUtils';
+
+export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuardado}: ModalNotasExpandidoProps): JSX.Element | null {
+    /* Estado global de notas */
+    const notas = useNotasStore(s => s.notas);
+    const notaActiva = useNotasStore(s => s.notaActiva);
+    const total = useNotasStore(s => s.total);
+    const cargando = useNotasStore(s => s.cargando);
+    const error = useNotasStore(s => s.error);
+    const cargarNotas = useNotasStore(s => s.cargarNotas);
+    const eliminarNota = useNotasStore(s => s.eliminarNota);
+    const buscarNotas = useNotasStore(s => s.buscarNotas);
+    const seleccionarNota = useNotasStore(s => s.seleccionarNota);
+    const actualizarContenido = useNotasStore(s => s.actualizarContenidoNotaActiva);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const [resultadosBusqueda, setResultadosBusqueda] = useState<Nota[] | null>(null);
     const [buscando, setBuscando] = useState(false);
@@ -64,18 +63,13 @@ export function ModalNotasExpandido({abierto, onCerrar, estado, cargarNotas, eli
         [eliminarNota]
     );
 
-    const notasMostrar = resultadosBusqueda ?? estado.notas;
-    const tituloActivo = useMemo(() => obtenerTituloDeContenido(estado.notaActiva.contenido), [estado.notaActiva.contenido, obtenerTituloDeContenido]);
+    const notasMostrar = resultadosBusqueda ?? notas;
+    const tituloActivo = useMemo(() => extraerTitulo(notaActiva.contenido), [notaActiva.contenido]);
 
     if (!abierto) return null;
 
     return (
-        <Modal
-            estaAbierto={abierto}
-            titulo="Notas Guardadas"
-            onCerrar={onCerrar}
-            claseExtra="modalContenedor--expandido modalNotasExpandidoContenedor"
-        >
+        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra="modalContenedor--expandido modalNotasExpandidoContenedor">
             <div id="modal-notas-expandida" className="vistaNotasExpandida">
                 <div className="vistaNotasColumnaLista">
                     <div className="vistaNotasBusqueda">
@@ -86,15 +80,15 @@ export function ModalNotasExpandido({abierto, onCerrar, estado, cargarNotas, eli
                         </div>
                     </div>
                     <div className="vistaNotasListaContenido">
-                        {estado.cargando && !estado.notas.length ? (
+                        {cargando && !notas.length ? (
                             <div className="modalNotasVacio">
                                 <Loader size={24} className="animacionGirar" />
                                 <span>Cargando notas...</span>
                             </div>
-                        ) : estado.error ? (
+                        ) : error ? (
                             <div className="modalNotasError">
                                 <AlertCircle size={24} />
-                                <span>{estado.error}</span>
+                                <span>{error}</span>
                             </div>
                         ) : notasMostrar.length === 0 ? (
                             <div className="modalNotasVacio">
@@ -103,18 +97,18 @@ export function ModalNotasExpandido({abierto, onCerrar, estado, cargarNotas, eli
                                 {!terminoBusqueda && <p>Guarda notas desde el Scratchpad usando el botón de guardar</p>}
                             </div>
                         ) : (
-                            <ListaNotasGuardadas notas={notasMostrar} modo="lista" notaActivaId={estado.notaActiva.id} onSeleccionar={seleccionarNota} onEliminar={manejarEliminar} />
+                            <ListaNotasGuardadas notas={notasMostrar} modo="lista" notaActivaId={notaActiva.id} onSeleccionar={seleccionarNota} onEliminar={manejarEliminar} />
                         )}
                     </div>
                     {notasMostrar.length > 0 && (
                         <div className="modalNotasFooter">
-                            <span>{resultadosBusqueda ? `${resultadosBusqueda.length} resultados` : `${estado.total} nota${estado.total !== 1 ? 's' : ''} guardada${estado.total !== 1 ? 's' : ''}`}</span>
+                            <span>{resultadosBusqueda ? `${resultadosBusqueda.length} resultados` : `${total} nota${total !== 1 ? 's' : ''} guardada${total !== 1 ? 's' : ''}`}</span>
                         </div>
                     )}
                 </div>
                 <div className="vistaNotasColumnaEditor">
                     <div className="vistaNotasEditorContenido">
-                        <Scratchpad valorInicial={estado.notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={tamanoFuente} altura="100%" delayGuardado={delayGuardado} mostrarResizeHandle={false} />
+                        <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={tamanoFuente} altura="100%" delayGuardado={delayGuardado} mostrarResizeHandle={false} />
                     </div>
                 </div>
             </div>
