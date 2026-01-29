@@ -258,8 +258,16 @@ export function useEquipos() {
 
     /**
      * Carga inicial y polling para actualizar el badge en tiempo real
+     * Solo si hay usuario autenticado
      */
     useEffect(() => {
+        const nonce = obtenerNonce();
+        
+        /* No cargar datos si no hay usuario autenticado */
+        if (!nonce) {
+            return;
+        }
+
         /* Cargar equipo completo al inicio para tener los compañeros disponibles */
         cargarEquipo();
         contarPendientes();

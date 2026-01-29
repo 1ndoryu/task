@@ -42,8 +42,13 @@ export function useCompartidos(): UseCompartidosReturn {
     const fetchAutenticado = useCallback(
         async (url: string, opciones: RequestInit = {}): Promise<Response> => {
             const nonce = obtenerNonce();
+            
+            /* Si no hay nonce, lanzar error inmediatamente */
+            if (!nonce) {
+                throw new Error('No autenticado. Inicia sesión para continuar.');
+            }
 
-            return fetch(url, {
+            const response = await fetch(url, {
                 ...opciones,
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,6 +57,13 @@ export function useCompartidos(): UseCompartidosReturn {
                 },
                 credentials: 'same-origin'
             });
+
+            /* Si recibimos 401, lanzar error específico */
+            if (response.status === 401) {
+                throw new Error('No autenticado. Inicia sesión para continuar.');
+            }
+
+            return response;
         },
         [obtenerNonce]
     );
@@ -281,8 +293,16 @@ export function useCompartidos(): UseCompartidosReturn {
         [estado.misCompartidos]
     );
 
-    /* Carga inicial */
+    /* Carga inicial - solo si hay usuario autenticado */
     useEffect(() => {
+        const nonce = obtenerNonce();
+        
+        /* No cargar datos si no hay usuario autenticado */
+        if (!nonce) {
+            setEstado(prev => ({...prev, cargando: false}));
+            return;
+        }
+
         recargar();
 
         return () => {
@@ -290,7 +310,7 @@ export function useCompartidos(): UseCompartidosReturn {
                 abortControllerRef.current.abort();
             }
         };
-    }, [recargar]);
+    }, [recargar, obtenerNonce]);
 
     return {
         ...estado,

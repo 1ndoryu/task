@@ -73,6 +73,17 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         onAbrirConfigActividad: modales.abrirModalConfigActividad
     });
 
+    /* Memoizar objeto de sincronización para evitar re-renders innecesarios */
+    const sincronizacionConAuth = useMemo(
+        () => ({
+            ...dashboard.sincronizacion,
+            onLogin: modales.abrirModalLogin,
+            onLogout: auth.logout,
+            estaLogueado: !!auth.user
+        }),
+        [dashboard.sincronizacion, modales.abrirModalLogin, auth.logout, auth.user]
+    );
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
@@ -103,15 +114,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 version={version}
                 usuario={auth.user ? auth.user.name : usuario}
                 avatarUrl={auth.user?.avatarUrl}
-                sincronizacion={useMemo(
-                    () => ({
-                        ...dashboard.sincronizacion,
-                        onLogin: modales.abrirModalLogin,
-                        onLogout: auth.logout,
-                        estaLogueado: !!auth.user
-                    }),
-                    [dashboard.sincronizacion, modales.abrirModalLogin, auth.logout, auth.user]
-                )}
+                sincronizacion={sincronizacionConAuth}
                 suscripcion={suscripcion}
                 esAdmin={esAdmin}
                 equiposPendientes={equipos.pendientes}
