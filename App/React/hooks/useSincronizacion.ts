@@ -11,6 +11,7 @@
 
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {useDashboardApi, type DashboardData} from './useDashboardApi';
+import {useLocalStorage, CLAVES_LOCALSTORAGE} from './useLocalStorage';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 
 /*
@@ -40,6 +41,11 @@ interface DatosLocales {
     notas: string;
 }
 
+interface SyncMeta {
+    lastModified: number;
+    lastSync: number;
+}
+
 interface UseSincronizacionReturn {
     estado: EstadoSincronizacion;
     sincronizarAhora: () => Promise<void>;
@@ -65,7 +71,7 @@ function obtenerUserId(): number {
 }
 
 export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (datos: DashboardData) => void): UseSincronizacionReturn {
-    const {estado: estadoApi, cargar, guardar, sincronizar} = useDashboardApi();
+    const {estado: estadoApi, cargar, guardar, obtenerEstadoSync} = useDashboardApi();
 
     const [estado, setEstado] = useState<EstadoSincronizacion>({
         sincronizado: true,
@@ -75,23 +81,54 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
         cargandoServidor: false
     });
 
+    const {
+        valor: syncMeta,
+        setValor: setSyncMeta,
+        cargando: cargandoSyncMeta
+    } = useLocalStorage<SyncMeta>(CLAVES_LOCALSTORAGE.sync, {
+        valorPorDefecto: {lastModified: 0, lastSync: 0}
+    });
+
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const reintentosRef = useRef(0);
     const cargaInicialRef = useRef(false);
     const estaLogueado = estaUsuarioLogueado();
 
     /*
-     * Carga inicial desde el servidor (solo si está logueado)
+     * Carga inicial inteligente
+     * Decide si cargar del servidor o subir cambios locales basado en timestamps persistidos
      */
     useEffect(() => {
-        if (!estaLogueado || cargaInicialRef.current) return;
+        if (!estaLogueado || cargaInicialRef.current || cargandoSyncMeta) return;
 
         cargaInicialRef.current = true;
 
-        const cargarDatosServidor = async () => {
+        const iniciarSincronizacion = async () => {
             setEstado(prev => ({...prev, cargandoServidor: true}));
 
             try {
+                /* Verificar si tenemos cambios locales pendientes de subir */
+                const {lastModified, lastSync} = syncMeta;
+                const tieneCambiosLocales = lastModified > lastSync;
+
+                console.log('[Sync] Iniciando. Meta:', syncMeta, 'Cambios locales:', tieneCambiosLocales);
+
+                if (tieneCambiosLocales) {
+                    /* PREVENCIÓN DE PÉRDIDA DE DATOS:
+                     * Si hay cambios locales sin sincronizar, intentamos subirlos primero.
+                     * No descargamos ciegamente del servidor.
+                     */
+                    console.log('[Sync] Detectados cambios locales sin sincronizar. Subiendo...');
+                    await guardarEnServidor();
+
+                    /* Después de guardar, podríamos descargar para obtener actualizaciones de otros dispositivos,
+                     * pero por seguridad terminamos aquí y dejamos que futuras syncs manejen eso.
+                     */
+                    setEstado(prev => ({...prev, cargandoServidor: false}));
+                    return;
+                }
+
+                /* Flujo normal: Cargar del servidor */
                 const datosServidor = await cargar();
 
                 if (datosServidor) {
@@ -101,9 +138,9 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                      */
                     onDatosServidor(datosServidor);
 
-                    /*
-                     * Ventana de gracia para evitar parpadeo del badge.
-                     */
+                    /* Actualizar lastSync para reflejar que estamos al día */
+                    setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
+
                     setTimeout(() => {
                         setEstado(prev => ({
                             ...prev,
@@ -144,8 +181,8 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
             }
         };
 
-        cargarDatosServidor();
-    }, [estaLogueado]);
+        iniciarSincronizacion();
+    }, [estaLogueado, cargandoSyncMeta]); // Dependencia clave: cargandoSyncMeta
 
     /*
      * Guarda los datos en el servidor
@@ -179,11 +216,19 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
 
             if (exito) {
                 reintentosRef.current = 0;
+                const now = Date.now();
+
+                /* Actualizar metadatos de sincronización */
+                setSyncMeta(prev => ({
+                    ...prev,
+                    lastSync: now
+                }));
+
                 setEstado(prev => ({
                     ...prev,
                     sincronizado: true,
                     pendiente: false,
-                    ultimaSync: new Date(),
+                    ultimaSync: new Date(now),
                     error: null
                 }));
                 return true;
@@ -207,23 +252,20 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
             }));
             return false;
         }
-    }, [estaLogueado, datosLocales, guardar]);
+    }, [estaLogueado, datosLocales, guardar, setSyncMeta]);
 
     /*
-     * Sincronización con debounce para evitar exceso de peticiones
+     * Sincronización con debounce
      */
     const sincronizarConDebounce = useCallback(() => {
         if (!estaLogueado) return;
 
-        /* Marcar como pendiente inmediatamente */
         setEstado(prev => ({...prev, sincronizado: false, pendiente: true}));
 
-        /* Cancelar sincronización anterior */
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
 
-        /* Programar nueva sincronización */
         debounceRef.current = setTimeout(() => {
             guardarEnServidor();
         }, CONFIG_SYNC.debounceMs);
@@ -235,7 +277,6 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
     const sincronizarAhora = useCallback(async () => {
         if (!estaLogueado) return;
 
-        /* Cancelar debounce pendiente */
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
             debounceRef.current = null;
@@ -245,11 +286,14 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
     }, [estaLogueado, guardarEnServidor]);
 
     /*
-     * Marcar que hay cambios pendientes (llamar desde useDashboard)
+     * Marcar que hay cambios pendientes
+     * Actualiza timestamp de modificación y programa sync
      */
     const marcarCambiosPendientes = useCallback(() => {
+        /* Registrar momento de modificación local */
+        setSyncMeta(prev => ({...prev, lastModified: Date.now()}));
         sincronizarConDebounce();
-    }, [sincronizarConDebounce]);
+    }, [sincronizarConDebounce, setSyncMeta]);
 
     /*
      * Sincronizar cuando la app vuelve a estar online

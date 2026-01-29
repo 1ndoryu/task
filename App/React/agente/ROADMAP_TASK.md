@@ -61,6 +61,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] **Menú Contextual:** "Agregar subtarea" debe abrir modal rápido, no modal completo.
 - [x] **UI Compacta:** Corregir colisión de selector de subtareas con acciones SVG en panel de ejecución (modo compacto).
 
+### 14.11 Bugs Detectados 🐛
+- [x] **Persistencia Frecuencia/Nombre:** Al cambiar la frecuencia o nombre de un hábito, se cambia visualmente pero al recargar vuelve al valor anterior. (Fixed: Sync inteligente).
+- [x] **CRÍTICO: Desaparición de Tareas:** Al crear una nueva tarea, desaparecen todas las tareas de la vista al recargar. (Fixed: Sync inteligente con persistencia de metadatos).
+
 ---
 
 ## Fases Futuras 🚀

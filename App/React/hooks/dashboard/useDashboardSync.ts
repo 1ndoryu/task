@@ -72,7 +72,8 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             if (!arr) return '0';
             if (Array.isArray(arr) && arr.length === 0) return '0';
             /* Usamos JSON.stringify para capturar cambios en cualquier campo */
-            return `${Array.isArray(arr) ? arr.length : 0}_${JSON.stringify(arr).length}`;
+            /* FIX: Usar el string completo, no su length, para detectar cambios de mismo tamaño (ej: 'Lunes' -> 'Martes') */
+            return JSON.stringify(arr);
         };
 
         const nuevaVersion = {
