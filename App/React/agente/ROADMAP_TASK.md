@@ -66,6 +66,12 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] **Persistencia Frecuencia/Nombre:** Al cambiar la frecuencia o nombre de un hábito, se cambia visualmente pero al recargar vuelve al valor anterior. (Fixed: Sync inteligente).
 - [x] **CRÍTICO: Desaparición de Tareas:** Al crear una nueva tarea, desaparecen todas las tareas de la vista al recargar. (Fixed: Sync inteligente con persistencia de metadatos).
 
+### 14.12 Errores de Autenticación y UI (Enero 2026) 🔒 **COMPLETADO**
+- [x] **Errores 401 sin login:** Múltiples llamadas API fallando con 401 al cargar sin autenticación.
+- [x] **Modal de login con pantalla negra:** Error React #310 por useMemo dentro del JSX.
+- [x] **Guards de autenticación:** Verificación de nonce antes de ejecutar API calls.
+- [x] **Manejo de errores 401:** Mejorar feedback en hooks de compartidos y equipos.
+
 ---
 
 ## Fases Futuras 🚀
