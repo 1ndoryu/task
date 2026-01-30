@@ -33,9 +33,14 @@ export function useCompartidos(): UseCompartidosReturn {
 
     const abortControllerRef = useRef<AbortController | null>(null);
 
-    /* Obtiene el nonce para la autenticación */
+    /* Obtiene el nonce solo si el usuario está logueado */
     const obtenerNonce = useCallback((): string => {
-        return (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce ?? '';
+        const wpData = (window as unknown as {gloryDashboard?: {nonce?: string; isLoggedIn?: boolean}}).gloryDashboard;
+        /* Solo retornar nonce si el usuario está logueado */
+        if (!wpData?.isLoggedIn) {
+            return '';
+        }
+        return wpData.nonce ?? '';
     }, []);
 
     /* Realiza una petición fetch autenticada - NO hace fetch si no hay nonce */

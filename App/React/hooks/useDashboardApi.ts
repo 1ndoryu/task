@@ -363,14 +363,16 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
 /**
  * Obtiene el nonce de WordPress para autenticación
- * Retorna string vacío si no hay nonce válido (usuario no autenticado)
+ * Retorna string vacío si el usuario no está logueado
  */
 export function obtenerNonce(): string {
     /* El nonce debería estar disponible en una variable global */
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    const nonce = wpData?.nonce;
-    /* Verificar que exista y no sea string vacío */
-    return nonce && nonce.trim() !== '' ? nonce : '';
+    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string; isLoggedIn?: boolean}}).gloryDashboard;
+    /* Solo retornar nonce si el usuario está logueado */
+    if (!wpData?.isLoggedIn) {
+        return '';
+    }
+    return wpData.nonce || '';
 }
 
 /**

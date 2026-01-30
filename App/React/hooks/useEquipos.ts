@@ -30,13 +30,16 @@ const estadoInicial: EstadoEquipos = {
 };
 
 /*
- * Obtiene el nonce solo si es válido (no vacío)
- * Retorna string vacío si no hay usuario autenticado
+ * Verifica si el usuario está autenticado y retorna el nonce
+ * Retorna string vacío si no hay usuario logueado
  */
 const obtenerNonce = (): string => {
-    const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce;
-    /* Verificar que exista y no sea string vacío */
-    return nonce && nonce.trim() !== '' ? nonce : '';
+    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string; isLoggedIn?: boolean}}).gloryDashboard;
+    /* Solo retornar nonce si el usuario está logueado */
+    if (!wpData?.isLoggedIn) {
+        return '';
+    }
+    return wpData.nonce || '';
 };
 
 const obtenerHeaders = (): HeadersInit => ({

@@ -25,15 +25,17 @@ interface UseCifradoReturn {
  * Obtiene la configuracion de WordPress inyectada en el frontend
  * Nota: apiBase apunta a /glory/v1/dashboard, pero para seguridad
  * necesitamos /glory/v1, por eso removemos el sufijo /dashboard
+ * Retorna null si el usuario no está autenticado
  */
 function obtenerConfigWP(): {nonce: string; apiBase: string} | null {
     const wpData = (
         window as unknown as {
-            gloryDashboard?: {nonce?: string; apiBase?: string};
+            gloryDashboard?: {nonce?: string; apiBase?: string; isLoggedIn?: boolean};
         }
     ).gloryDashboard;
 
-    if (!wpData?.nonce) {
+    /* Verificar que el usuario esté logueado, no solo que exista el nonce */
+    if (!wpData?.isLoggedIn || !wpData?.nonce) {
         return null;
     }
 
