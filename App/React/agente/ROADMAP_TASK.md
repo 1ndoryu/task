@@ -11,10 +11,15 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
-- [x] **Badge Prioridad Hábitos**: Corregir "Muy alta" ausente en panel ejecución y sin color en lista.
-- [x] **UX Botón Añadir**: Expandir área clickable en botón añadir tareas (igualar a hábitos).
-- [x] **Menú Contextual Hábitos**: Agregar selectores de Importancia y Urgencia.
-- [x] **Footer**: Corregir texto a "Nakomi.studio".
+- [x] **Badge Prioridad Hábitos**: 
+  - [x] Corregir "Muy alta" ausente en panel ejecución.
+  - [x] **FIX**: Igualar estilo "Muy Alta" al de "Alta" (Solicitud de usuario).
+- [x] **UX Botón Añadir**: Botón añadir expandido correctamente.
+- [x] **Menú Contextual Hábitos**:
+  - [x] Selectores de Importancia implementados.
+  - [x] **FIX**: Corregir bug "Case duplicate" en `TablaHabitos.tsx` que rompe el build.
+  - [x] **FIX**: Investigar por qué las opciones no aparecen (posible prop `onActualizar` faltante).
+- [x] **Footer**: Corregido a "Nakomi.studio".
 
 ### Tareas Pendientes 📋
 

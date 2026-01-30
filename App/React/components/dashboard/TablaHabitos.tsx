@@ -183,9 +183,6 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                 case 'eliminar':
                     onEliminar?.(habito.id);
                     break;
-                case 'eliminar':
-                    onEliminar?.(habito.id);
-                    break;
             }
             if (opcionId.startsWith('importancia-')) {
                 const nuevaImportancia = opcionId.replace('importancia-', '');
@@ -195,7 +192,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                 });
             }
         },
-        [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar]
+        [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar, onActualizar]
     );
 
     /* Opciones del menu contextual */
@@ -221,12 +218,6 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             etiqueta: 'Editar habito',
             icono: <Edit3 size={12} />,
             separadorDespues: true
-        },
-        {
-            id: 'eliminar',
-            etiqueta: 'Eliminar',
-            icono: <AlertTriangle size={12} />,
-            peligroso: true
         }
     ];
 
@@ -245,6 +236,14 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             separadorDespues: true
         });
     }
+
+    /* Añadir eliminar al final */
+    opcionesMenu.push({
+        id: 'eliminar',
+        etiqueta: 'Eliminar',
+        icono: <AlertTriangle size={12} />,
+        peligroso: true
+    });
 
     /* Determinar clase de urgencia para la barra */
     const obtenerClaseUrgencia = (): string => {

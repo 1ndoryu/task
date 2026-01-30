@@ -108,14 +108,14 @@
  */
 
 /* Prioridad Muy Alta */
+/* Prioridad Muy Alta - Igual que Alta pero con texto diferente */
 .badgeInfo--prioridadMuyAlta {
-    color: #ffffff;
-    background-color: #ef4444;
-    border-color: #b91c1c;
-    font-weight: 700;
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+    font-weight: 600;
     text-transform: uppercase;
     padding: 2px 8px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Prioridad Alta */
