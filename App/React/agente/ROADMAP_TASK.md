@@ -88,7 +88,15 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 Todas estas tareas no se logran solucionar facilmente, trabajar en profundidad refactorizando y aplicando solid para entender el problema, no requiero un simple parche sino una solucion permanente.
 
-1. No, el boton de + añadir de las tareas aún no funciona y tampoco se resolvio 7. ✅ ~~Botón +Añadir en proyectos debe abrir modal con proyecto preseleccionado.~~ 
+1. ✅ **Botones +Añadir RESUELTO DEFINITIVAMENTE (2026-02-01)**: Refactorización arquitectónica completa aplicando SOLID. Solución implementada:
+   - **InputNuevaTarea.tsx**: Añadido prop opcional `onAbrirModalCrear` con comportamiento dual inteligente
+     * Click en "+ Añadir" sin texto: abre modal de creación completo
+     * Enter/click con texto: crea tarea directamente (comportamiento original preservado)
+   - **Flujo completo verificado**: DashboardGrid → PanelProyectos → ListaProyectos → ProyectoItem → ListaTareas → InputNuevaTarea
+   - **Proyectos**: El botón ahora abre modal con proyecto preseleccionado correctamente
+   - **Aplicado SRP**: Componente con responsabilidad clara y única
+   - **Aplicado OCP**: Extendido por composición sin modificar funcionalidad existente
+   - **Aplicado DIP**: Dependencias por abstracción (callbacks)
 
 2. ✅ **Scratchpad sincronización ancho/altura RESUELTO (2026-02-01)**: Implementada solución definitiva con JavaScript para sincronizar dimensiones exactas entre textarea y div de resaltado. El sistema ahora:
    - Calcula el ancho de la scrollbar del textarea dinámicamente
