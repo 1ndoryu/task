@@ -10,7 +10,7 @@ export const APP_TEXTS = {
     },
     footer: {
         producto: 'Tasks',
-        empresa: 'Nakomi.com',
+        empresa: 'Nakomi.studio',
         derechos: 'Todos los derechos reservados'
     }
 } as const;

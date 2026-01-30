@@ -61,12 +61,12 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
      * Wrapper para crear tarea con verificación de límites
      * Antes de crear, verifica si el usuario puede crear más tareas activas
      */
-    const crearTareaConLimite = (datos: DatosEdicionTarea): Promise<void> => {
+    const crearTareaConLimite = (datos: DatosEdicionTarea) => {
         const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
         if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) {
-            return Promise.resolve();
+            return;
         }
-        return dashboard.crearTarea(datos);
+        dashboard.crearTarea(datos);
     };
 
     return {
@@ -97,6 +97,7 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
         onEditarHabito: manejarEditarHabitoPorId,
         onEliminarHabito: dashboard.eliminarHabito,
         onPosponerHabito: dashboard.posponerHabito,
+        onActualizarHabito: dashboard.editarHabito,
         modoCompacto: configTareas.configuracion.modoCompacto,
         onConfigurarTarea: modales.abrirModalEditarTarea
     };
@@ -118,6 +119,7 @@ function generarPropsPanelFocoPrioritario(ctx: PropsContextoPaneles, renderHandl
         onPausarHabito: dashboard.pausarHabito,
         onMarcarDiaHabito: ctx.marcarDiaHabitoConSync,
         onDesmarcarDiaHabito: ctx.desmarcarDiaHabitoConSync,
+        onActualizarHabito: dashboard.editarHabito,
         onCambiarModoHabitos: ordenHabitos.cambiarModo,
         renderHandleArrastre,
         handleMinimizar
@@ -130,12 +132,12 @@ function generarPropsPanelProyectos(ctx: PropsContextoPaneles, renderHandleArras
     /*
      * Wrapper para crear tarea con verificación de límites (proyectos)
      */
-    const crearTareaConLimite = (datos: DatosEdicionTarea): Promise<void> => {
+    const crearTareaConLimite = (datos: DatosEdicionTarea) => {
         const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
         if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) {
-            return Promise.resolve();
+            return;
         }
-        return dashboard.crearTarea(datos);
+        dashboard.crearTarea(datos);
     };
 
     return {

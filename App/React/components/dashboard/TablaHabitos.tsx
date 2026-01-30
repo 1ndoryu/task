@@ -20,6 +20,7 @@ import {ConfiguracionHabitos, CONFIG_HABITOS_POR_DEFECTO} from '../../hooks/useC
 import {HistorialHabitoInline} from '../shared/HistorialHabito';
 import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaHoy} from '../../utils/fecha';
+import {Flag} from 'lucide-react';
 
 interface TablaHabitosProps {
     habitos: Habito[];
@@ -31,11 +32,14 @@ interface TablaHabitosProps {
     onPausarHabito?: (id: number) => void;
     onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
+    onActualizarHabito?: (id: number, datos: any) => void;
     configuracion?: ConfiguracionHabitos;
 }
 
 function obtenerVariantePrioridad(importancia: Habito['importancia']): VarianteBadge {
     switch (importancia) {
+        case 'Muy Alta':
+            return 'prioridadMuyAlta';
         case 'Alta':
             return 'prioridadAlta';
         case 'Media':
@@ -73,6 +77,7 @@ interface FilaHabitoProps {
     onPausar?: (id: number) => void;
     onMarcarDia?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDia?: (habitoId: number, fecha: string) => void;
+    onActualizar?: (id: number, datos: any) => void;
     configuracion: ConfiguracionHabitos;
     estiloGrid: React.CSSProperties;
 }
@@ -83,7 +88,7 @@ interface MenuContextualEstado {
     y: number;
 }
 
-function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
+function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
     /* Advertencia de racha: mostrar cuando faltan pocos dias para perderla */
     const DIAS_ADVERTENCIA_RACHA = 2;
 
@@ -178,6 +183,16 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                 case 'eliminar':
                     onEliminar?.(habito.id);
                     break;
+                case 'eliminar':
+                    onEliminar?.(habito.id);
+                    break;
+            }
+            if (opcionId.startsWith('importancia-')) {
+                const nuevaImportancia = opcionId.replace('importancia-', '');
+                onActualizar?.(habito.id, {
+                    ...habito,
+                    importancia: nuevaImportancia
+                });
             }
         },
         [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar]
@@ -214,6 +229,22 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             peligroso: true
         }
     ];
+
+    /* Añadir submenú de Importancia */
+    if (onActualizar) {
+        opcionesMenu.push({
+            id: 'importancia',
+            etiqueta: 'Importancia',
+            icono: <Flag size={12} />,
+            subOpciones: [
+                {id: 'importancia-Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="#b91c1c" />},
+                {id: 'importancia-Alta', etiqueta: 'Alta', icono: <Flag size={12} color="#ef4444" />},
+                {id: 'importancia-Media', etiqueta: 'Media', icono: <Flag size={12} color="#f59e0b" />},
+                {id: 'importancia-Baja', etiqueta: 'Baja', icono: <Flag size={12} color="#94a3b8" />}
+            ],
+            separadorDespues: true
+        });
+    }
 
     /* Determinar clase de urgencia para la barra */
     const obtenerClaseUrgencia = (): string => {
@@ -315,7 +346,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     );
 }
 
-export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onPausarHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
+export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onPausarHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onActualizarHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
     /* Filtrar habitos segun configuracion */
     const habitosVisibles = habitos.filter(habito => {
         /* Ocultar habitos pausados (se muestran en seccion separada) */
@@ -351,12 +382,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
         <DashboardPanel id="tabla-habitos">
             {/* Estado vacio cuando no hay habitos */}
             {habitos.length === 0 ? (
-                <EstadoVacio
-                    icono={<Target size={32} />}
-                    mensaje="No hay hábitos creados"
-                    textoBoton="+ Crear hábito"
-                    onAccion={onAñadirHabito}
-                />
+                <EstadoVacio icono={<Target size={32} />} mensaje="No hay hábitos creados" textoBoton="+ Crear hábito" onAccion={onAñadirHabito} />
             ) : (
                 <>
                     {/* Encabezado de tabla */}
@@ -373,7 +399,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
 
                     {/* Filas de habitos activos */}
                     {habitosVisibles.map((habito, index) => (
-                        <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
+                        <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} onActualizar={onActualizarHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
                     ))}
 
                     {/* Seccion de habitos pausados */}
@@ -383,7 +409,7 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
                                 <span className="tablaSeparadorPausados__texto">Pausados ({habitosPausados.length})</span>
                             </div>
                             {habitosPausados.map((habito, index) => (
-                                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
+                                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} onActualizar={onActualizarHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
                             ))}
                         </>
                     )}

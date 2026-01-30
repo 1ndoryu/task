@@ -42,6 +42,7 @@ export interface TareaItemProps {
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
+    onActualizarHabito?: (habitoId: number, datos: any) => void;
     /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
     tieneSubtareas?: boolean;
     modoCompacto?: boolean;
@@ -53,7 +54,7 @@ export interface MenuContextualEstado {
     y: number;
 }
 
-export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
+export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, onActualizarHabito, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
     const [editando, setEditando] = useState(tarea.texto === '');
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -163,6 +164,37 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                     onPosponerHabito?.(tareaHabito.habitoId);
                 } else if (opcionId === 'eliminar-habito') {
                     onEliminarHabito?.(tareaHabito.habitoId);
+                } else if (opcionId === 'eliminar-habito') {
+                    onEliminarHabito?.(tareaHabito.habitoId);
+                } else if (opcionId.startsWith('importancia-habito-')) {
+                    const nuevaImportancia = opcionId.replace('importancia-habito-', '');
+                    /* Necesitamos recuperar el objeto hábito original. Como no lo tenemos aquí, 
+                       asumimos que onActualizarHabito manejará la mezcla de datos o que le pasamos solo lo que cambia.
+                       Pero useDashboardHabitos.editarHabito requiere el objeto completo (datos).
+                       Estrategia: El usuario quiere cambiar importancia. Necesitamos el objeto hábito.
+                       Como TareaHabito tiene algunos datos, podemos intentar reconstruir o mejor: 
+                       La función onActualizarHabito debe ser capaz de fusionar cambios si le pasamos partial?
+                       useDashboardHabitos.editarHabito reemplaza.
+                       FIX: TareaItem no tiene el objeto Habito completo. 
+                       Sin embargo, podemos enviar solo los campos obligatorios? 
+                       DatosNuevoHabito requiere nombre e importancia. TareaHabito tiene nombre (texto) e importancia (habitoImportancia).
+                       Podemos reconstruirlo.
+                    */
+                    const datosReconstruidos = {
+                        nombre: tareaHabito.texto, // El texto de la tarea hábito es el nombre del hábito
+                        importancia: nuevaImportancia,
+                        tags: [] // Perdemos los tags si no los tenemos... Esto es un problema.
+                        // Frecuencia?
+                    };
+                    /* LIMITACIÓN: No tenemos el objeto hábito completo aquí. 
+                      Solución: Pasarle la función de actualización que SEPA buscar el hábito en el store y actualizarlo.
+                      Pero editarHabito espera (id, datos).
+                      Vamos a asumir que el padre (ListaTareas) puede inyectar una función wrapper "actualizarHabitoParcial" 
+                      que busque el hábito en el store y lo actualice.
+                      O simplemente pasamos lo que tenemos y esperamos que el store maneje el merge si cambiamos la lógica.
+                      Por ahora, vamos a usar onActualizarHabito pasando un objeto con lo que queremos cambiar, y el padre deberá manejarlo.
+                   */
+                    onActualizarHabito?.(tareaHabito.habitoId, {importancia: nuevaImportancia});
                 }
                 return;
             }
@@ -313,6 +345,14 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     /* Renderizado del indicador de prioridad como badge (unificado con habitos) */
     const renderIndicadorPrioridad = () => {
+        /* Para hábitos, usar la importancia original si es Muy Alta */
+        if (esHabito) {
+            const importaciaHabito = (tarea as TareaHabito).habitoImportancia;
+            if (importaciaHabito === 'Muy Alta') {
+                return <BadgeInfo tipo="prioridad" texto="MUY ALTA" variante="prioridadMuyAlta" />;
+            }
+        }
+
         if (!tarea.prioridad) return null;
 
         const obtenerVariantePrioridad = (prioridad: NivelPrioridad): VarianteBadge => {

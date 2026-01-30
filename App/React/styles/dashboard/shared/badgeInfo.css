@@ -107,6 +107,17 @@
  * VARIANTES DE PRIORIDAD
  */
 
+/* Prioridad Muy Alta */
+.badgeInfo--prioridadMuyAlta {
+    color: #ffffff;
+    background-color: #ef4444;
+    border-color: #b91c1c;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
 /* Prioridad Alta */
 .badgeInfo--prioridadAlta {
     color: var(--dashboard-estadoAlta);

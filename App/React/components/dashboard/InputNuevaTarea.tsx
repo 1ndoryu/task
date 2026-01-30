@@ -2,7 +2,7 @@
  * InputNuevaTarea
  * Componente para crear nuevas tareas con input siempre visible
  * Estilo unificado con "+ Añadir" de hábitos para coherencia visual
- * 
+ *
  * Comportamiento:
  * - Click en "+ Añadir" sin texto: abre modal de creación (si onAbrirModalCrear existe)
  * - Click con texto o Enter: crea tarea directamente
@@ -62,9 +62,11 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear}: InputNuevaTareaPro
     }, [onAbrirModalCrear]);
 
     return (
-        <div className={`tareaNuevoInline ${enfocado || tieneTexto ? 'tareaNuevoInlineActivo' : ''}`}>
+        <div className={`tareaNuevoInline ${enfocado || tieneTexto ? 'tareaNuevoInlineActivo' : ''}`} onClick={manejarClickAñadir}>
             {!enfocado && !tieneTexto && (
-                <span className="tareaNuevoInlineTexto" onClick={manejarClickAñadir} style={{cursor: 'pointer'}}>+ Añadir</span>
+                <span className="tareaNuevoInlineTexto" onClick={manejarClickAñadir} style={{cursor: 'pointer'}}>
+                    + Añadir
+                </span>
             )}
             <input
                 id="input-nueva-tarea-global"

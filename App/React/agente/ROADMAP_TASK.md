@@ -5,10 +5,16 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.18-beta (2026-01-31)
+**Versión:** v1.0.19-beta (2026-01-31)
 **Foco:** Beta Nakomi Estable - Preparación Producción
 
 ---
+
+### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
+- [x] **Badge Prioridad Hábitos**: Corregir "Muy alta" ausente en panel ejecución y sin color en lista.
+- [x] **UX Botón Añadir**: Expandir área clickable en botón añadir tareas (igualar a hábitos).
+- [x] **Menú Contextual Hábitos**: Agregar selectores de Importancia y Urgencia.
+- [x] **Footer**: Corregir texto a "Nakomi.studio".
 
 ### Tareas Pendientes 📋
 

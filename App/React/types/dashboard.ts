@@ -222,7 +222,7 @@ export interface TareaHabito extends Tarea {
     /* Racha actual del hábito */
     habitoRacha: number;
     /* Importancia del hábito */
-    habitoImportancia: 'Alta' | 'Media' | 'Baja';
+    habitoImportancia: NivelImportancia;
 }
 
 /*

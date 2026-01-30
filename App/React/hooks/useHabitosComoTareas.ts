@@ -24,6 +24,7 @@ const UMBRALES_DEFECTO: UmbralesUrgencia = {normal: 1, urgente: 3, bloqueante: 5
  */
 const mapearImportanciaAPrioridad = (importancia: Habito['importancia']): NivelPrioridad => {
     const mapa: Record<Habito['importancia'], NivelPrioridad> = {
+        'Muy Alta': 'alta',
         Alta: 'alta',
         Media: 'media',
         Baja: 'baja'
