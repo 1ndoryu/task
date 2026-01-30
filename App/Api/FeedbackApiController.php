@@ -108,8 +108,8 @@ class FeedbackApiController
     {
         if (!is_user_logged_in()) return false;
         
-        $suscripcion = SuscripcionService::obtenerSuscripcion(get_current_user_id());
-        return $suscripcion['plan'] === 'premium' && $suscripcion['estado'] === 'activa';
+        $servicioSuscripcion = new SuscripcionService(get_current_user_id());
+        return $servicioSuscripcion->esPremium();
     }
 
     /**
@@ -178,8 +178,8 @@ class FeedbackApiController
     public static function obtenerRestante(\WP_REST_Request $request): \WP_REST_Response
     {
         $userId = get_current_user_id();
-        $suscripcion = SuscripcionService::obtenerSuscripcion($userId);
-        $esPremium = $suscripcion['plan'] === 'premium' && $suscripcion['estado'] === 'activa';
+        $servicioSuscripcion = new SuscripcionService($userId);
+        $esPremium = $servicioSuscripcion->esPremium();
 
         return new \WP_REST_Response([
             'success' => true,

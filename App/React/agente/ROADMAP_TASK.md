@@ -100,7 +100,7 @@ Todas estas tareas no se logran solucionar facilmente, trabajar en profundidad r
 
 3. ~~La nota inicial al registrarse sigue sin cargar, tampoco cargan las tareas iniciales.~~ Esto no se arreglo, es un problema profundo que requiere revision profunda. Atender individualmente en profundidad para entender porque no aparece nada inicial a registrarse. Si se requiere refactorización profunda, pues trabajar en eso.
 
-4. ~~Feedback Premium no detecta usuario premium.~~ Esto no se arreglo.
+4. ✅ ~~Feedback Premium no detecta usuario premium.~~ **CORREGIDO** (2026-01-30): `FeedbackApiController.php` - Instanciado correctamente `SuscripcionService` en métodos `requirePremium()` y `obtenerRestante()` en lugar de llamada estática inexistente. El servicio requiere instanciación con `new SuscripcionService($userId)` y llamada al método `esPremium()` de instancia.
 
 ### Revisiones antiguas ✅ COMPLETADAS (2026-02-01)
 
