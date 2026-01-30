@@ -62,6 +62,12 @@ export function useCifrado(): UseCifradoReturn {
             return;
         }
 
+        /* Verificar que el nonce no esté vacío */
+        if (!config.nonce) {
+            setCargando(false);
+            return;
+        }
+
         setCargando(true);
         setError(null);
 

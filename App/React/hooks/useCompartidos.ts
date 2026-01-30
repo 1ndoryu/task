@@ -38,13 +38,13 @@ export function useCompartidos(): UseCompartidosReturn {
         return (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce ?? '';
     }, []);
 
-    /* Realiza una petición fetch autenticada */
+    /* Realiza una petición fetch autenticada - NO hace fetch si no hay nonce */
     const fetchAutenticado = useCallback(
         async (url: string, opciones: RequestInit = {}): Promise<Response> => {
             const nonce = obtenerNonce();
             
-            /* Si no hay nonce, lanzar error silencioso */
-            if (!nonce) {
+            /* Si no hay nonce válido, lanzar error silencioso SIN hacer fetch */
+            if (!nonce || nonce.trim() === '') {
                 const error = new Error('No autenticado');
                 (error as any).silent = true;
                 throw error;

@@ -29,8 +29,14 @@ const estadoInicial: EstadoEquipos = {
     error: null
 };
 
+/*
+ * Obtiene el nonce solo si es válido (no vacío)
+ * Retorna string vacío si no hay usuario autenticado
+ */
 const obtenerNonce = (): string => {
-    return (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
+    const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce;
+    /* Verificar que exista y no sea string vacío */
+    return nonce && nonce.trim() !== '' ? nonce : '';
 };
 
 const obtenerHeaders = (): HeadersInit => ({

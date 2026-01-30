@@ -115,6 +115,14 @@ export function useDashboardApi(): UseDashboardApiReturn {
      * Realiza una petición a la API
      */
     const fetchApi = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> => {
+        /* Guard: No ejecutar si no hay nonce válido (usuario no autenticado) */
+        const nonce = obtenerNonce();
+        if (!nonce) {
+            const error = new Error('No autenticado');
+            (error as any).silent = true;
+            throw error;
+        }
+
         /* Cancelar petición anterior si existe */
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -127,7 +135,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
+                'X-WP-Nonce': nonce
             },
             signal: abortControllerRef.current.signal
         };
@@ -355,11 +363,14 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
 /**
  * Obtiene el nonce de WordPress para autenticación
+ * Retorna string vacío si no hay nonce válido (usuario no autenticado)
  */
 export function obtenerNonce(): string {
     /* El nonce debería estar disponible en una variable global */
     const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
+    const nonce = wpData?.nonce;
+    /* Verificar que exista y no sea string vacío */
+    return nonce && nonce.trim() !== '' ? nonce : '';
 }
 
 /**
