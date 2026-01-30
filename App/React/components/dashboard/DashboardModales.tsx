@@ -18,7 +18,7 @@ import {ModalConfiguracionHabitos} from './ModalConfiguracionHabitos';
 import {ModalConfiguracionScratchpad} from './ModalConfiguracionScratchpad';
 import {ModalConfiguracionActividad} from './ModalConfiguracionActividad';
 
-import {ToastDeshacer, ModalUpgrade, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones, ModalTemas} from '../shared';
+import {ToastDeshacer, ModalUpgrade, ModalLimiteAlcanzado, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones, ModalTemas} from '../shared';
 import {PanelAdministracion} from '../admin';
 import {ModalEquipos} from '../equipos';
 import {ModalNotificaciones} from '../notificaciones';
@@ -36,7 +36,7 @@ interface DashboardModalesProps {
 }
 
 export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
-    const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, acciones, temas} = ctx;
+    const {dashboard, auth, suscripcion, esAdmin, limites, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, acciones, temas} = ctx;
 
     const accionesExperimentos: AccionExperimento[] = [
         {
@@ -76,13 +76,22 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             return undefined;
         };
 
+        /*
+         * Integración de verificación de límites (Fase 15.7)
+         * Verifica antes de crear para usuarios FREE
+         */
         if (tipo === 'tarea') {
+            const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
+            if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
+
             const configTarea: any = {
                 fechaMaxima: calcularFecha(opciones.fecha),
                 adjuntos: opciones.adjuntos || []
             };
             acciones.manejarCrearNuevaTareaGlobal(configTarea, opciones.prioridad || null, texto, undefined, opciones.urgencia || null, [], opciones.proyectoId);
         } else if (tipo === 'habito') {
+            if (!limites.verificarYMostrar('habitos', dashboard.habitos.length)) return;
+
             await dashboard.crearHabito({
                 nombre: texto,
                 importancia: opciones.importancia || 'Media',
@@ -90,6 +99,8 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                 frecuencia: {tipo: opciones.frecuencia || 'diario'}
             });
         } else if (tipo === 'proyecto') {
+            if (!limites.verificarYMostrar('proyectos', dashboard.proyectos.length)) return;
+
             acciones.manejarGuardarNuevoProyecto({
                 nombre: texto,
                 prioridad: opciones.prioridad || 'media',
@@ -97,6 +108,26 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                 fechaLimite: calcularFecha(opciones.fecha)
             });
         }
+    };
+
+    /*
+     * Wrappers con verificación de límites (Fase 15.7)
+     * Integran la verificación de límites antes de crear entidades
+     */
+    const manejarCrearHabitoConLimite = async (datos: any) => {
+        if (!limites.verificarYMostrar('habitos', dashboard.habitos.length)) return;
+        await dashboard.crearHabito(datos);
+    };
+
+    const manejarCrearProyectoConLimite = (datos: any) => {
+        if (!limites.verificarYMostrar('proyectos', dashboard.proyectos.length)) return;
+        acciones.manejarGuardarNuevoProyecto(datos);
+    };
+
+    const manejarCrearTareaConLimite = (datos: any) => {
+        const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
+        if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
+        dashboard.crearTarea(datos);
     };
 
     return (
@@ -114,6 +145,14 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                 overlayOpaco={!auth.user}
             />
             <ModalUpgrade visible={modales.modalUpgradeAbierto} onCerrar={modales.cerrarModalUpgrade} suscripcion={suscripcion} />
+            <ModalLimiteAlcanzado
+                visible={limites.modalLimite.visible}
+                onCerrar={limites.cerrarModalLimite}
+                onActualizarPlan={modales.abrirModalUpgrade}
+                tipoEntidad={limites.modalLimite.tipoEntidad}
+                limite={limites.modalLimite.limite}
+                actual={limites.modalLimite.actual}
+            />
             <PanelSeguridad visible={modales.panelSeguridadAbierto} onCerrar={modales.cerrarPanelSeguridad} />
             <ModalPerfil estaAbierto={modales.modalPerfilAbierto} onCerrar={modales.cerrarModalPerfil} />
 
@@ -122,7 +161,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             <ModalEquipos estaAbierto={modales.modalEquiposAbierto} onCerrar={modales.cerrarModalEquipos} />
 
             {/* Modales de Hábitos */}
-            <ModalHabito estaAbierto={dashboard.modalCrearHabitoAbierto} onCerrar={dashboard.cerrarModalCrearHabito} onGuardar={dashboard.crearHabito} />
+            <ModalHabito estaAbierto={dashboard.modalCrearHabitoAbierto} onCerrar={dashboard.cerrarModalCrearHabito} onGuardar={manejarCrearHabitoConLimite} />
             <ModalHabito
                 estaAbierto={dashboard.habitoEditando !== null}
                 onCerrar={dashboard.cerrarModalEditarHabito}
@@ -132,7 +171,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                 /* Props para tareas del hábito - Fase 14.8 */
                 tareas={dashboard.tareas}
                 onToggleTarea={dashboard.toggleTarea}
-                onCrearTarea={dashboard.crearTarea}
+                onCrearTarea={manejarCrearTareaConLimite}
                 onEliminarTarea={dashboard.eliminarTarea}
                 onConfigurarTarea={modales.abrirModalEditarTarea}
                 onActualizarOrdenTareasHabito={dashboard.actualizarOrdenTareasHabito}
@@ -140,7 +179,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             />
 
             {/* Modales de Proyectos */}
-            <ModalProyecto estaAbierto={modales.modalCrearProyectoAbierto} onCerrar={modales.cerrarModalCrearProyecto} onGuardar={acciones.manejarGuardarNuevoProyecto} tareas={dashboard.tareas} />
+            <ModalProyecto estaAbierto={modales.modalCrearProyectoAbierto} onCerrar={modales.cerrarModalCrearProyecto} onGuardar={manejarCrearProyectoConLimite} tareas={dashboard.tareas} />
             <ModalProyecto estaAbierto={modales.proyectoEditando !== null} onCerrar={modales.cerrarModalEditarProyecto} onGuardar={acciones.manejarGuardarEdicionProyecto} proyecto={modales.proyectoEditando ?? undefined} participantes={modales.proyectoEditando ? (compartir.cacheParticipantesProyecto.get(modales.proyectoEditando.id) ?? []) : []} companeros={equipos.companeros} onAgregarParticipante={(companeroId, rol) => modales.proyectoEditando && compartir.manejarCompartirElemento(companeroId, rol)} onRemoverParticipante={compartir.manejarDejarDeCompartir} onCambiarRolParticipante={compartir.manejarCambiarRolCompartido} tareas={dashboard.tareas} onToggleTarea={dashboard.toggleTarea} />
 
             {/* Modales de Configuración */}

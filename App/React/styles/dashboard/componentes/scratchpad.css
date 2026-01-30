@@ -314,6 +314,42 @@
     color: var(--dashboard-textoMuyApagado);
 }
 
+/* Fecha de creación debajo del título */
+.modalNotasItemFechaCreacion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: 2px;
+}
+
+/* Contenedor inferior con contador y fecha de modificación */
+.modalNotasItemMetasInferiores {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--dashboard-espacioXs);
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+}
+
+/* Contador de caracteres */
+.modalNotasItemContador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoIndice);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+/* Fecha de modificación con icono de editar */
+.modalNotasItemFechaModificacion {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
 .modalNotasItemEliminar {
     position: absolute;
     top: var(--dashboard-espacioSm);
@@ -500,6 +536,15 @@
     text-overflow: ellipsis;
 }
 
+/* Fecha de creación debajo del título (modo lista) */
+.listaNotasItemFechaCreacion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+}
+
 .listaNotasItemPreview {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
@@ -513,9 +558,33 @@
 
 .listaNotasItemMetas {
     display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--dashboard-espacioXs);
+    flex-shrink: 0;
+}
+
+/* Contenedor inferior de metas (modo lista) */
+.listaNotasItemMetasInferiores {
+    display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    flex-shrink: 0;
+}
+
+/* Contador de caracteres (modo lista) */
+.listaNotasItemContador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoIndice);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+/* Fecha de modificación con icono (modo lista) */
+.listaNotasItemFechaModificacion {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
 }
 
 .listaNotasItemFecha {

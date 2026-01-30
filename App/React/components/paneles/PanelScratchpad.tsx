@@ -7,14 +7,16 @@
  * - Siempre hay una nota activa siendo editada
  * - Los cambios se guardan automáticamente después de 2 segundos de inactividad
  * - El título se extrae de la primera línea con #
+ *
+ * Fase 15.6: Se añadió autoguardado debounced y restauración de última nota
  */
 
-import {useState} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {Eraser, Settings, FolderOpen, Plus, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, Scratchpad, ModalNotasExpandido} from '../dashboard';
 import {OverlayEnfoque} from '../shared';
 import {useNotasStore} from '../../stores/notasStore';
-import {extraerTitulo} from '../../utils/notasUtils';
+import {extraerTitulo, CONTENIDO_NOTA_NUEVA} from '../../utils/notasUtils';
 import type {ConfiguracionScratchpad} from '../../hooks/useConfiguracionScratchpad';
 import {useAlertas} from '../../hooks/useAlertas';
 
@@ -26,17 +28,76 @@ interface PanelScratchpadProps {
     handleMinimizar: JSX.Element;
 }
 
+/* Constante para delay de autoguardado (ms) */
+const DELAY_AUTOGUARDADO = 2000;
+
 export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar}: PanelScratchpadProps): JSX.Element {
     const [modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto] = useState(false);
     const [modoEnfoque, setModoEnfoque] = useState(false);
 
     /* Estado global de notas */
     const notaActiva = useNotasStore(s => s.notaActiva);
+    const notas = useNotasStore(s => s.notas);
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
     const actualizarContenido = useNotasStore(s => s.actualizarContenidoNotaActiva);
     const guardarNotaActiva = useNotasStore(s => s.guardarNotaActiva);
+    const cargarNotas = useNotasStore(s => s.cargarNotas);
+    const restaurarNotaActivaGuardada = useNotasStore(s => s.restaurarNotaActivaGuardada);
+
+    /* Refs para autoguardado debounced */
+    const timeoutGuardadoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const contenidoAnteriorRef = useRef<string>(notaActiva.contenido);
 
     const {mostrarExito} = useAlertas();
+
+    /*
+     * Efecto 1: Cargar notas al montar el componente
+     * Solo se ejecuta una vez al inicio
+     */
+    useEffect(() => {
+        cargarNotas(true);
+    }, [cargarNotas]);
+
+    /*
+     * Efecto 2: Restaurar última nota activa cuando las notas se cargan
+     * Se ejecuta cuando notas.length cambia de 0 a >0 (carga inicial completada)
+     */
+    useEffect(() => {
+        if (notas.length > 0 && notaActiva.id === null && notaActiva.contenido === CONTENIDO_NOTA_NUEVA) {
+            restaurarNotaActivaGuardada();
+        }
+    }, [notas.length, notaActiva.id, notaActiva.contenido, restaurarNotaActivaGuardada]);
+
+    /*
+     * Efecto 3: Autoguardado debounced
+     * Se activa cuando el contenido cambia y está modificada
+     * Usa debounce de 2 segundos para evitar guardar en cada keystroke
+     */
+    useEffect(() => {
+        /* Solo guardar si hay cambio real y contenido válido */
+        if (!notaActiva.modificada) return;
+        if (notaActiva.contenido === contenidoAnteriorRef.current) return;
+        if (notaActiva.contenido === CONTENIDO_NOTA_NUEVA) return;
+        if (!notaActiva.contenido.trim()) return;
+
+        /* Limpiar timeout anterior */
+        if (timeoutGuardadoRef.current) {
+            clearTimeout(timeoutGuardadoRef.current);
+        }
+
+        /* Programar nuevo guardado */
+        timeoutGuardadoRef.current = setTimeout(() => {
+            guardarNotaActiva();
+            contenidoAnteriorRef.current = notaActiva.contenido;
+        }, DELAY_AUTOGUARDADO);
+
+        /* Cleanup al desmontar o cambiar */
+        return () => {
+            if (timeoutGuardadoRef.current) {
+                clearTimeout(timeoutGuardadoRef.current);
+            }
+        };
+    }, [notaActiva.contenido, notaActiva.modificada, guardarNotaActiva]);
 
     const manejarNuevaNota = () => {
         crearNuevaNota();

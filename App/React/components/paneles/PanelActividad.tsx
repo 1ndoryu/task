@@ -5,15 +5,18 @@
  *
  * Muestra un heatmap estilo GitHub con la actividad del usuario
  * Configurable por periodo y tipo de actividad
+ *
+ * IMPORTANTE: Este panel solo está disponible para usuarios Premium
  */
 
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {Settings, Maximize2} from 'lucide-react';
+import {Settings, Maximize2, Lock} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MapaCalor, OverlayEnfoque} from '../shared';
 import {useActividad} from '../../hooks/useActividad';
 import type {ConfiguracionActividad} from '../../hooks/useConfiguracionActividad';
 import {obtenerDetalleActividadDia, type DetalleActividadItem} from '../../services/actividadService';
+import {useSuscripcionStore} from '../../stores/suscripcionStore';
 
 interface PanelActividadProps {
     configuracion: ConfiguracionActividad;
@@ -22,7 +25,51 @@ interface PanelActividadProps {
     handleMinimizar: JSX.Element;
 }
 
+/*
+ * Componente para mostrar mensaje de bloqueo para usuarios FREE
+ */
+function MensajeBloqueoFree({onAbrirUpgrade}: {onAbrirUpgrade?: () => void}): JSX.Element {
+    return (
+        <div className="panelActividadBloqueado">
+            <Lock size={24} />
+            <p className="panelActividadBloqueadoTitulo">Panel de Actividad Premium</p>
+            <p className="panelActividadBloqueadoTexto">
+                El mapa de calor de actividad está disponible exclusivamente para usuarios Premium.
+            </p>
+            {onAbrirUpgrade && (
+                <button className="panelActividadBloqueadoBoton" onClick={onAbrirUpgrade}>
+                    Ver planes Premium
+                </button>
+            )}
+        </div>
+    );
+}
+
+/*
+ * Formatea el tipo de actividad en texto legible unificado
+ * Ejemplo: "Tarea completada" + nombre = 'Tarea "Nombre de la tarea"'
+ */
+function formatearActividadUnificada(tipo: DetalleActividadItem['tipo'], nombre: string | null): string {
+    const tipoBase = {
+        tarea_completada: 'Tarea',
+        habito_cumplido: 'Hábito',
+        nota_creada: 'Nota',
+        adjunto_subido: 'Adjunto',
+        tarea_desmarcada: 'Tarea desmarcada',
+        habito_desmarcado: 'Hábito desmarcado',
+        habito_pospuesto: 'Hábito pospuesto'
+    }[tipo] || 'Actividad';
+
+    if (!nombre) return tipoBase;
+
+    /* Formato unificado: Tipo "Nombre" */
+    return `${tipoBase} "${nombre}"`;
+}
+
 export function PanelActividad({configuracion, onAbrirModalConfigActividad, renderHandleArrastre, handleMinimizar}: PanelActividadProps): JSX.Element {
+    /* Verificar si el usuario es Premium */
+    const esPremium = useSuscripcionStore(s => s.esPremium());
+
     /* Calcular filtros para pasar al hook (para cache inicial) */
     const tipoFiltro = configuracion.filtroTipo === 'todo' ? undefined : configuracion.filtroTipo;
     const filtrosIniciales = useMemo(
@@ -40,13 +87,14 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
     const [detalleCargando, setDetalleCargando] = useState(false);
     const [detalleError, setDetalleError] = useState<string | null>(null);
 
-    /* Cargar datos al montar y cuando cambie la configuracion */
+    /* Cargar datos al montar y cuando cambie la configuracion (solo si es Premium) */
     useEffect(() => {
+        if (!esPremium) return;
         cargarHeatmap({
             periodo: configuracion.periodo,
             tipo: tipoFiltro
         });
-    }, [configuracion.periodo, configuracion.filtroTipo, cargarHeatmap, tipoFiltro]);
+    }, [configuracion.periodo, configuracion.filtroTipo, cargarHeatmap, tipoFiltro, esPremium]);
 
     const cargarDetalleDia = useCallback(
         async (fecha: string) => {
@@ -117,44 +165,18 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
         });
     }, []);
 
-    const obtenerEtiquetaTipo = useCallback((tipo: DetalleActividadItem['tipo']) => {
-        switch (tipo) {
-            case 'tarea_completada':
-                return 'Tarea completada';
-            case 'habito_cumplido':
-                return 'Habito cumplido';
-            case 'nota_creada':
-                return 'Nota creada';
-            case 'adjunto_subido':
-                return 'Adjunto subido';
-            case 'tarea_desmarcada':
-                return 'Tarea desmarcada';
-            case 'habito_desmarcado':
-                return 'Habito desmarcado';
-            case 'habito_pospuesto':
-                return 'Habito pospuesto';
-            default:
-                return 'Actividad';
-        }
-    }, []);
-
     const formatearHora = useCallback((hora: string | null) => {
         if (!hora) return '--:--';
         return hora.slice(0, 5);
     }, []);
 
+    /*
+     * Obtiene el nombre del elemento para mostrar en la lista unificada
+     */
     const obtenerNombreElemento = useCallback((item: DetalleActividadItem): string | null => {
         const nombreDetalles = typeof item.detalles?.elementoNombre === 'string' ? item.detalles.elementoNombre : null;
         const nombreDirecto = item.elementoNombre || nombreDetalles;
-        if (nombreDirecto) return nombreDirecto;
-        if (item.elementoId) {
-            if (item.elementoTipo === 'habito' || item.tipo.startsWith('habito_')) return `Habito #${item.elementoId}`;
-            if (item.elementoTipo === 'tarea' || item.tipo.startsWith('tarea_') || item.tipo === 'adjunto_subido') return `Tarea #${item.elementoId}`;
-            if (item.elementoTipo === 'nota' || item.tipo === 'nota_creada') return `Nota #${item.elementoId}`;
-            if (item.elementoTipo === 'proyecto') return `Proyecto #${item.elementoId}`;
-            return `Elemento #${item.elementoId}`;
-        }
-        return null;
+        return nombreDirecto || null;
     }, []);
 
     const obtenerNombreProyecto = useCallback((item: DetalleActividadItem): string | null => {
@@ -182,20 +204,20 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                     ) : detalleItems.length === 0 ? (
                         <div className="panelActividadDetalleVacio">Sin actividad registrada</div>
                     ) : (
-                        <ul className="panelActividadDetalleLista">
+                        <ul className="panelActividadDetalleLista panelActividadDetalleLista--unificada">
                             {detalleItems.map(item => {
                                 const nombreElemento = obtenerNombreElemento(item);
                                 const nombreProyecto = obtenerNombreProyecto(item);
+                                const textoUnificado = formatearActividadUnificada(item.tipo, nombreElemento);
 
                                 return (
-                                <li key={item.id} className="panelActividadDetalleItem">
-                                    <div className="panelActividadDetalleInfo">
-                                        <span className="panelActividadDetalleTipo">{obtenerEtiquetaTipo(item.tipo)}</span>
-                                        {nombreElemento && <span className="panelActividadDetalleElemento">{nombreElemento}</span>}
-                                        {nombreProyecto && <span className="panelActividadDetalleProyecto">{nombreProyecto}</span>}
-                                    </div>
-                                    <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
-                                </li>
+                                    <li key={item.id} className="panelActividadDetalleItemUnificado">
+                                        <span className="panelActividadDetalleTexto">
+                                            {textoUnificado}
+                                            {nombreProyecto && <span className="panelActividadDetalleProyectoTag"> · {nombreProyecto}</span>}
+                                        </span>
+                                        <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
+                                    </li>
                                 );
                             })}
                         </ul>
@@ -203,7 +225,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                 </div>
             );
         },
-        [fechaDetalle, detalleCargando, detalleError, detalleItems, formatearFechaDetalle, formatearHora, obtenerEtiquetaTipo, obtenerNombreElemento, obtenerNombreProyecto]
+        [fechaDetalle, detalleCargando, detalleError, detalleItems, formatearFechaDetalle, formatearHora, obtenerNombreElemento, obtenerNombreProyecto]
     );
 
     return (
@@ -215,36 +237,49 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
                 variante="panelHeader"
                 acciones={
                     <>
-                        {/* Estadisticas compactas */}
-                        {estadisticas && (
+                        {/* Estadisticas compactas - solo si es Premium */}
+                        {esPremium && estadisticas && (
                             <span className="panelActividadStats">
                                 <span className="panelActividadStat">{diasActivos} dias</span>
                                 <span className="panelActividadStat">{totalActividades} acciones</span>
                             </span>
                         )}
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
-                            <span className="selectorBadgeIcono">
-                                <Settings size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
-                            <span className="selectorBadgeIcono">
-                                <Maximize2 size={12} />
-                            </span>
-                        </button>
+                        {esPremium && (
+                            <>
+                                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
+                                    <span className="selectorBadgeIcono">
+                                        <Settings size={12} />
+                                    </span>
+                                </button>
+                                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                                    <span className="selectorBadgeIcono">
+                                        <Maximize2 size={12} />
+                                    </span>
+                                </button>
+                            </>
+                        )}
                         {handleMinimizar}
                     </>
                 }
             />
 
-            {/* Mapa de calor - siempre muestra datos si existen, recarga en segundo plano */}
-            <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapa" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} onClickDia={manejarClickDia} />}</div>
-            <DetalleActividadDia />
+            {/* Contenido condicional según plan */}
+            {!esPremium ? (
+                <MensajeBloqueoFree />
+            ) : (
+                <>
+                    {/* Mapa de calor - siempre muestra datos si existen, recarga en segundo plano */}
+                    <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapa" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} onClickDia={manejarClickDia} />}</div>
+                    <DetalleActividadDia />
+                </>
+            )}
 
-            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Actividad">
-                <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapaEnfoque" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} onClickDia={manejarClickDia} />}</div>
-                <DetalleActividadDia />
-            </OverlayEnfoque>
+            {esPremium && (
+                <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Actividad">
+                    <div className="panelActividadCuerpo">{estado.error ? <div className="panelActividadError">{estado.error}</div> : estado.cargaInicial && Object.keys(estado.heatmap).length === 0 ? <div className="panelActividadCargando">Cargando actividad...</div> : <MapaCalor id="panelActividadMapaEnfoque" datos={estado.heatmap} periodo={configuracion.periodo} tamanoCelda={configuracion.tamanoCelda} mostrarLeyenda={configuracion.mostrarLeyenda} compacto={false} onClickDia={manejarClickDia} />}</div>
+                    <DetalleActividadDia />
+                </OverlayEnfoque>
+            )}
         </div>
     );
 }

@@ -1,0 +1,135 @@
+/*
+ * MODAL LIMITE ALCANZADO
+ * Estilos para el modal de límite excedido
+ */
+
+.modalLimiteAlcanzado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--dashboard-espacioMd);
+    max-width: 380px;
+}
+
+.modalLimiteAlcanzadoIcono {
+    color: var(--dashboard-estadoMedia);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.modalLimiteAlcanzadoTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 14px;
+    color: var(--dashboard-textoActivo);
+    margin: 0 0 var(--dashboard-espacioSm) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modalLimiteAlcanzadoDescripcion {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0 0 var(--dashboard-espacioMd) 0;
+    line-height: 1.5;
+}
+
+.modalLimiteAlcanzadoContador {
+    display: flex;
+    align-items: baseline;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioMd);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+.modalLimiteAlcanzadoActual {
+    font-size: 24px;
+    color: var(--dashboard-estadoMedia);
+    font-weight: bold;
+}
+
+.modalLimiteAlcanzadoSeparador {
+    font-size: 18px;
+    color: var(--dashboard-textoApagado);
+}
+
+.modalLimiteAlcanzadoMaximo {
+    font-size: 18px;
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalLimiteAlcanzadoBeneficios {
+    background: var(--dashboard-fondoHover);
+    border: 1px dashed var(--dashboard-bordeSutil);
+    padding: var(--dashboard-espacioMd);
+    margin-bottom: var(--dashboard-espacioMd);
+    width: 100%;
+}
+
+.modalLimiteAlcanzadoBeneficiosTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    margin: 0 0 var(--dashboard-espacioSm) 0;
+}
+
+.modalLimiteAlcanzadoLista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.modalLimiteAlcanzadoLista li {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    padding: var(--dashboard-espacioXs) 0;
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.modalLimiteAlcanzadoLista li:last-child {
+    border-bottom: none;
+}
+
+.modalLimiteAlcanzadoLista li::before {
+    content: '+ ';
+    color: var(--dashboard-estadoExito);
+}
+
+.modalLimiteAlcanzadoAcciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+}
+
+.modalLimiteAlcanzadoBoton {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    width: 100%;
+}
+
+.modalLimiteAlcanzadoBoton--primario {
+    background: var(--dashboard-botonPrimarioFondo);
+    color: var(--dashboard-botonPrimarioTexto);
+    border-color: var(--dashboard-botonPrimarioFondo);
+}
+
+.modalLimiteAlcanzadoBoton--primario:hover {
+    background: var(--dashboard-botonPrimarioHover);
+}
+
+.modalLimiteAlcanzadoBoton--secundario {
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalLimiteAlcanzadoBoton--secundario:hover {
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-textoMuyApagado);
+}

@@ -194,6 +194,92 @@
     color: var(--dashboard-textoNormal);
 }
 
+/*
+ * Lista de actividad unificada (nuevo formato)
+ * Una sola línea por actividad: Tipo "Nombre" · Proyecto
+ */
+.panelActividadDetalleLista--unificada {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.panelActividadDetalleItemUnificado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) 0;
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.panelActividadDetalleItemUnificado:last-child {
+    border-bottom: none;
+}
+
+.panelActividadDetalleTexto {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panelActividadDetalleProyectoTag {
+    color: var(--dashboard-textoSecundario);
+}
+
+/*
+ * Mensaje de bloqueo para usuarios FREE
+ */
+.panelActividadBloqueado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXl) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoSecundario);
+    min-height: 120px;
+}
+
+.panelActividadBloqueado svg {
+    color: var(--dashboard-textoApagado);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.panelActividadBloqueadoTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    margin: 0 0 var(--dashboard-espacioXs) 0;
+}
+
+.panelActividadBloqueadoTexto {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    margin: 0 0 var(--dashboard-espacioMd) 0;
+    max-width: 280px;
+}
+
+.panelActividadBloqueadoBoton {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelActividadBloqueadoBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
 /* 
  * Responsive 
  */

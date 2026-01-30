@@ -95,6 +95,9 @@
 /* Panel de Actividad */
 @import './componentes/panelActividad.css';
 
+/* Modal de Límites Alcanzados */
+@import './componentes/modalLimiteAlcanzado.css';
+
 /* Landing Page */
 @import './componentes/Landing/landing.css';
 

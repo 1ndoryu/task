@@ -25,6 +25,7 @@ import {useCompartirDashboard} from './useCompartirDashboard';
 import {useOpcionesDashboard} from './useOpcionesDashboard';
 import {useAccionesDashboard} from './useAccionesDashboard';
 import {useHabitosComoTareas} from './useHabitosComoTareas';
+import {useLimites} from './useLimites';
 import {useHabitosStore} from '../stores/habitosStore';
 import {useTema} from './useTema';
 import type {Tarea} from '../types/dashboard';
@@ -34,6 +35,7 @@ export function useDashboardCompleto() {
     const auth = useAuth();
     const {suscripcion} = useSuscripcion();
     const esAdmin = Boolean((window as unknown as {gloryDashboard?: {esAdmin?: boolean}}).gloryDashboard?.esAdmin);
+    const limites = useLimites();
 
     const modales = useModalesDashboard();
     const equipos = useEquipos();
@@ -143,6 +145,7 @@ export function useDashboardCompleto() {
         auth,
         suscripcion,
         esAdmin,
+        limites,
         modales,
         equipos,
         notificaciones,

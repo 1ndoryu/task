@@ -1,4 +1,4 @@
-import {Clock, Trash2} from 'lucide-react';
+import {Clock, Trash2, Edit2} from 'lucide-react';
 import type {Nota} from '../../../types/notas';
 import {formatearFechaRelativa} from '../../../utils/fecha';
 
@@ -27,13 +27,22 @@ export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSelecci
                         </button>
                         <div className="modalNotasItemContenido">
                             <div className="modalNotasItemTitulo">{nota.titulo}</div>
+                            {/* Fecha de creación debajo del título */}
+                            <div className="modalNotasItemFechaCreacion">
+                                <Clock size={10} />
+                                <span>{formatearFechaRelativa(nota.fechaCreacion)}</span>
+                            </div>
                             <div className="modalNotasItemPreview">
                                 {nota.contenido.slice(0, 150)}
                                 {nota.contenido.length > 150 ? '...' : ''}
                             </div>
-                            <div className="modalNotasItemFecha">
-                                <Clock size={10} />
-                                <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
+                            {/* Fecha de modificación y contador de caracteres */}
+                            <div className="modalNotasItemMetasInferiores">
+                                <div className="modalNotasItemContador">{nota.contenido.length}</div>
+                                <div className="modalNotasItemFechaModificacion">
+                                    <Edit2 size={9} />
+                                    <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -48,15 +57,24 @@ export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSelecci
                 <div key={nota.id} className={`listaNotasItem ${notaActivaId === nota.id ? 'listaNotasItem--activo' : ''}`} onClick={() => onSeleccionar(nota)}>
                     <div className="listaNotasItemPrincipal">
                         <div className="listaNotasItemTitulo">{nota.titulo}</div>
+                        {/* Fecha de creación debajo del título */}
+                        <div className="listaNotasItemFechaCreacion">
+                            <Clock size={10} />
+                            <span>{formatearFechaRelativa(nota.fechaCreacion)}</span>
+                        </div>
                         <div className="listaNotasItemPreview">
                             {nota.contenido.slice(0, 120)}
                             {nota.contenido.length > 120 ? '...' : ''}
                         </div>
                     </div>
                     <div className="listaNotasItemMetas">
-                        <div className="listaNotasItemFecha">
-                            <Clock size={10} />
-                            <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
+                        {/* Fecha de modificación y contador */}
+                        <div className="listaNotasItemMetasInferiores">
+                            <span className="listaNotasItemContador">{nota.contenido.length}</span>
+                            <div className="listaNotasItemFechaModificacion">
+                                <Edit2 size={9} />
+                                <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
+                            </div>
                         </div>
                         <button
                             className="listaNotasItemEliminar"

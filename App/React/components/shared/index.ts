@@ -17,6 +17,7 @@ export * from './CampoUrgencia';
 export * from './IndicadorSincronizacion';
 export * from './IndicadorPlan';
 export * from './ModalUpgrade';
+export * from './ModalLimiteAlcanzado';
 export * from './TooltipSystem';
 export * from './LayoutManager';
 export * from './BarraPanelesOcultos';
@@ -69,3 +70,4 @@ export * from './MenuContextualAdaptivo';
 export * from './NavegacionInferior';
 /* Fase 10.8.3 - Menu opciones panel (unificado para movil) */
 export * from './MenuOpcionesPanel';
+
