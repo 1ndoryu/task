@@ -150,6 +150,7 @@ function generarPropsPanelActividad(ctx: PropsContextoPaneles, renderHandleArras
     return {
         configuracion: configActividad.configuracion,
         onAbrirModalConfigActividad: modales.abrirModalConfigActividad,
+        onAbrirUpgrade: modales.abrirModalUpgrade,
         renderHandleArrastre,
         handleMinimizar
     };

@@ -34,8 +34,8 @@ class SuscripcionService
      */
     private const LIMITES = [
         self::PLAN_FREE => [
-            'habitos' => 10,
-            'tareasActivas' => 50,
+            'habitos' => 5,
+            'tareasActivas' => 20,
             'proyectos' => 3,
             'adjuntosPorTarea' => 0,
             'sincronizacion' => false,

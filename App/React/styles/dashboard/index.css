@@ -98,6 +98,9 @@
 /* Modal de Límites Alcanzados */
 @import './componentes/modalLimiteAlcanzado.css';
 
+/* Mensaje Bloqueo Premium (reutilizable) */
+@import './componentes/mensajeBloquePremium.css';
+
 /* Landing Page */
 @import './componentes/Landing/landing.css';
 

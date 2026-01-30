@@ -1,0 +1,55 @@
+/*
+ * MENSAJE BLOQUEO PREMIUM
+ * Estilos para el componente reutilizable de bloqueo Premium
+ * Usado en: Panel Actividad, Backups, Seguridad, Conexión IA
+ *
+ * Fase 15.9 - Estilos centralizados
+ */
+
+.mensajeBloquePremium {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXl) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoSecundario);
+    min-height: 120px;
+}
+
+.mensajeBloquePremium svg {
+    color: var(--dashboard-textoApagado);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.mensajeBloquePremiumTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    margin: 0 0 var(--dashboard-espacioXs) 0;
+}
+
+.mensajeBloquePremiumTexto {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    margin: 0 0 var(--dashboard-espacioMd) 0;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+.mensajeBloquePremiumBoton {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.mensajeBloquePremiumBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoMuyApagado);
+}

@@ -16,8 +16,8 @@ import type {InfoSuscripcion, LimitesPlan, PlanSuscripcion, EstadoSuscripcion} f
  * Nota: cifradoE2E disponible para todos los planes
  */
 const LIMITES_FREE: LimitesPlan = {
-    habitos: 10,
-    tareasActivas: 50,
+    habitos: 5,
+    tareasActivas: 20,
     proyectos: 3,
     adjuntosPorTarea: 0,
     sincronizacion: false,

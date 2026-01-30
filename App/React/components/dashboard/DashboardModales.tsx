@@ -256,13 +256,13 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             <ModalTemas estaAbierto={modales.modalTemasAbierto} onCerrar={modales.cerrarModalTemas} temaActual={temas.tema} onCambiarTema={temas.cambiarTema} />
 
             {/* Modal de Configuración MCP */}
-            <ModalConfiguracionMCP estaAbierto={modales.modalConfigMCPAbierto} onCerrar={modales.cerrarModalConfigMCP} />
+            <ModalConfiguracionMCP estaAbierto={modales.modalConfigMCPAbierto} onCerrar={modales.cerrarModalConfigMCP} onAbrirUpgrade={modales.abrirModalUpgrade} />
 
             {/* Modal Configuración Usuario */}
             <ModalConfiguracionUsuario estaAbierto={modales.modalConfigUsuarioAbierto} onCerrar={modales.cerrarModalConfigUsuario} />
 
             {/* Modal Backups */}
-            <ModalHistorialBackups estaAbierto={modales.modalBackupsAbierto} onCerrar={modales.cerrarModalBackups} />
+            <ModalHistorialBackups estaAbierto={modales.modalBackupsAbierto} onCerrar={modales.cerrarModalBackups} onAbrirUpgrade={modales.abrirModalUpgrade} />
         </>
     );
 }

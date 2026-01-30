@@ -5,11 +5,15 @@
  * - Cifrado end-to-end de datos
  * - Estado de la conexión HTTPS
  * - Información sobre protección de datos
+ *
+ * Nota: El cifrado E2E básico está disponible para FREE (solo texto)
+ * El cifrado completo de adjuntos requiere Premium
  */
 
 import {useState} from 'react';
 import {Lock, Unlock, Shield, ShieldCheck, ShieldAlert, Key, Info, CheckCircle, AlertTriangle} from 'lucide-react';
 import {useCifrado} from '../../hooks';
+import {useSuscripcionStore} from '../../stores/suscripcionStore';
 import {ToggleSwitch, Modal} from '../shared';
 
 interface PanelSeguridadProps {
@@ -23,6 +27,7 @@ export function PanelSeguridad({visible, onCerrar}: PanelSeguridadProps) {
     const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const esHttps = window.location.protocol === 'https:';
+    const esPremium = useSuscripcionStore(s => s.esPremium());
 
     const handleToggleCifrado = async (nuevoValor: boolean) => {
         setProcesando(true);
@@ -61,7 +66,10 @@ export function PanelSeguridad({visible, onCerrar}: PanelSeguridadProps) {
                         <span className={`iconoSeguridad ${estadoCifrado?.habilitado ? 'seguro' : ''}`}>{estadoCifrado?.habilitado ? <ShieldCheck size={18} /> : <Shield size={18} />}</span>
                         <div className="seccionSeguridadInfo">
                             <h3>Cifrado E2E</h3>
-                            <p className="descripcionSeguridad">Protege tus habitos, tareas y proyectos con cifrado AES-256-GCM. Los datos se almacenan cifrados en la base de datos.</p>
+                            <p className="descripcionSeguridad">
+                                Protege tus habitos, tareas y proyectos con cifrado AES-256-GCM. Los datos se almacenan cifrados en la base de datos.
+                                {!esPremium && <span className="notaFree"> (Plan FREE: solo cifrado de texto. Premium: cifrado completo incluyendo adjuntos)</span>}
+                            </p>
                         </div>
                     </div>
 

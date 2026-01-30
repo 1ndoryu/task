@@ -5,16 +5,16 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.15-beta (2026-01-29)
-**Foco:** Fase 15 - Lanzamiento Beta Nakomi
+**Versión:** v1.0.15-beta (2026-01-30)
+**Foco:** Fase 15 - Revisiones Beta Nakomi completadas
 
 ---
 
 ## Fase 15: Lanzamiento Beta Nakomi 🚀 **COMPLETADA**
 
-**Estado:** ✅ 95% Completado (7.5/8 tareas principales)
+**Estado:** ✅ 100% Completado (todas las revisiones implementadas)
 **Prioridad:** MÁXIMA - Bloquea lanzamiento
-**Última actualización:** 2026-01-29
+**Última actualización:** 2026-01-30
 
 ---
 
@@ -113,27 +113,59 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 - [ ] **15.7.4 Integración Adjuntos:** Requiere refactorización para pasar contexto de límites
 - [ ] **Versión Móvil:** Adaptar dashboard para dispositivos móviles
+- [ ] **Selector de Fecha Personalizado:** Implementar componente de calendario compacto para fechas en modales de creación rápida y configuración de tareas
 
 ---
 
-### Notas del Usuario Original 
+#### 15.9 Revisiones Beta Nakomi ✅
 
-planificación para lanzamiento beta, esto tiene prioridad sobre todo lo demás
+**Estado:** ✅ Completado
+**Fecha:** 2026-01-30
 
-1. Habito cumplido Habito #1766541773038 (nunca se registra los nombre de los habitos cumplido o tareas en el panel de activitidad, y es redudante poner "habito cumplido y luego el nombre del habito abajo" Unir en algo como Tarea "Tal cosa", habito "ejercicio", y que sea una lista sin numeracion, no hay necesidad de separar en cajas. 
+**Correcciones implementadas:**
 
-2. El panel de actividad no debe aparecer para los usuarios free, verificar que el sistema de FREE - PREMIUM cumpla con principios solid, esta fue de las primeras funcionalides hecha y el proyecto escalo sin realmente utilizarla, hay que refactorizar lo que sea necesario sin importar que lleve tiempo. 
+1. **Límites FREE ajustados:**
+   - Hábitos: 10 → 5
+   - Tareas activas: 50 → 20
+   - Archivos: `SuscripcionService.php`, `suscripcionStore.ts`
 
-2.1 Cuando el usuario llegue al limite de algo, maximas tareas, maximos habitos, lo que sea, debe de aparecer un modal para avisar que alcanzo el limite de eso y el boton de suscripcion, o sea, esto no existe ni se preparo, para todos los limites.
+2. **Modal límites centrado:**
+   - CSS corregido para centrar modal vertical y horizontalmente
+   - Ancho máximo aumentado
+   - Archivo: `modalLimiteAlcanzado.css`
 
-2.2 Falta en las caracteristicas premiun del modal de suscripcion, poner que el sistema de copias de seguridad es para usuarios premiun, y la capacidad de conectar con IA es solo para usuarios premiun, esto no se ha elaborado, 
+3. **Botón suscribirse en Panel de Actividad:**
+   - Agregado prop `onAbrirUpgrade` a `PanelActividad`
+   - Propagado desde `DashboardGrid` → `DashboardModales` → `PanelActividad`
+   - Archivos: `PanelActividad.tsx`, `DashboardGrid.tsx`, `DashboardModales.tsx`
 
-3. Detalles visuales: el selector para abrir las subtareas de un habito o una tarea no esta centrado verticalmente, el input y los de Información Personal (modales) son direntes e incoherentes visualmente, el de informacion personal se ve mejor pero se nota que le falta la variable de borde segun el tema. En las notas guardadas expandidas, dentro, se nota que no se esta usando las variables, la fecha que muestra de "hace 1 dia" es cuando se abrio la ultima vez, debe estar debajo, no al lado, y no debe ser la fecha de la ultima modificación sino de la creación, la fecha de ultima modificación aparecera debajo al lado del contador. 
+4. **Cursor desync en notas corregido:**
+   - Sincronizadas propiedades CSS entre `.scratchpadTextarea` y `.scratchpadResaltado`
+   - `line-height: 1.5`, `white-space: pre-wrap`, `word-wrap: break-word`
+   - Archivo: `scratchpad.css`
 
-4. Y al refactorizar las notas, ya no se guardan las notas, al recargar se borran, antes cargaban la nota que se estaba escribiendo pero ahora ni se guarda ni abre la ultima nota porque obviamente ya no se guarda.
+5. **Border-radius variable en inputs:**
+   - Agregada variable `var(--dashboard-radioSm)` a `.inputPerfil`
+   - Archivo: `perfil.css`
 
-esto es lo que se me ocurre, no quiero parches ni nada, todo esto incluye refactorizaciones profundas y planificación, quita todas las tareas completadas del roadmap, las tareas pendientes muevelas al final, y luego actualiza el changelog con lo completado, borra ./PLAN_BACKUPS.md que son tareas completadas y ponlo en el changelog tambien, faltara despues la version movil pero primero esto.
+6. **Componente MensajeBloquePremium creado:**
+   - Componente reutilizable para secciones Premium bloqueadas
+   - Props: `titulo`, `descripcion`, `onAbrirUpgrade`, `textoBoton`
+   - Archivos: `MensajeBloquePremium.tsx`, `mensajeBloquePremium.css`
 
+7. **Secciones Premium bloqueadas para FREE:**
+   - Modal Configuración MCP (IA)
+   - Modal Historial Backups
+   - Panel Seguridad (nota informativa sobre cifrado de archivos)
+   - Archivos: `ModalConfiguracionMCP.tsx`, `ModalHistorialBackups.tsx`, `PanelSeguridad.tsx`
+
+8. **Textos de features unificados:**
+   - ModalUpgrade actualizado con descripciones consistentes
+   - Formato: Título breve + descripción expandida
+   - Archivo: `ModalUpgrade.tsx`
+
+**Nota sobre errores 403:**
+Los errores 403 en usuarios FREE son comportamiento esperado cuando intentan sincronizar datos que exceden límites. El frontend previene la creación de nuevos items, pero datos pre-existentes que excedan límites serán rechazados por el backend.
 
 ---
 

@@ -59,6 +59,7 @@ export * from './FilaPropiedades';
 export * from './SelectorTags';
 export * from './ModalTemas';
 export * from './OverlayEnfoque';
+export * from './MensajeBloquePremium';
 export * from './BotonEnfocar';
 /* Fase 10.2 - Componente para menus movil */
 export * from './BottomSheet';

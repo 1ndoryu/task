@@ -7,13 +7,16 @@
 import {useState, useCallback, useEffect} from 'react';
 import {Plug, Sparkles, Globe, Loader2} from 'lucide-react';
 import {Modal} from '../shared/Modal';
+import {MensajeBloquePremium} from '../shared/MensajeBloquePremium';
 import {SeccionTokenMCP} from './SeccionTokenMCP';
 import {InstruccionesClienteMCP} from './InstruccionesClienteMCP';
 import {ConfiguracionMCPCopiable} from './ConfiguracionMCPCopiable';
+import {useSuscripcionStore} from '../../stores/suscripcionStore';
 
 interface ModalConfiguracionMCPProps {
     estaAbierto: boolean;
     onCerrar: () => void;
+    onAbrirUpgrade?: () => void;
 }
 
 type ClienteMCP = 'claude' | 'cursor' | 'apirest';
@@ -100,7 +103,7 @@ function obtenerNonce(): string {
     return wpData?.nonce || '';
 }
 
-export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracionMCPProps): JSX.Element {
+export function ModalConfiguracionMCP({estaAbierto, onCerrar, onAbrirUpgrade}: ModalConfiguracionMCPProps): JSX.Element {
     const [clienteActivo, setClienteActivo] = useState<ClienteMCP>('apirest');
     const [tokenExiste, setTokenExiste] = useState(false);
     const [tokenGenerado, setTokenGenerado] = useState<string | null>(null);
@@ -108,6 +111,9 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
     const [fechaCreacion, setFechaCreacion] = useState<string | null>(null);
     const [cargando, setCargando] = useState(false);
     const [verificando, setVerificando] = useState(true);
+
+    /* Verificar si el usuario es Premium */
+    const esPremium = useSuscripcionStore(s => s.esPremium());
 
     /* URL de API local para operaciones */
     const apiUrl = window.location.origin + '/wp-json/glory/v1';
@@ -233,54 +239,65 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar}: ModalConfiguracio
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Conectar con IA" claseExtra="modalMcp">
-            {/* Introducción */}
-            <div className="mcpIntroduccion">
-                <h3 className="mcpIntroduccion__titulo">
-                    <Sparkles size={16} />
-                    Conecta con tu asistente de IA
-                </h3>
-                <p className="mcpIntroduccion__descripcion">Gestiona tus tareas usando lenguaje natural desde Claude, Cursor, Antigravity o cualquier asistente de IA.</p>
-            </div>
-
-            {/* Estado de carga inicial */}
-            {verificando ? (
-                <div className="mcpCargando">
-                    <Loader2 size={24} className="iconoGirando" />
-                    <span>Verificando configuración...</span>
-                </div>
+            {/* Verificar si es Premium */}
+            {!esPremium ? (
+                <MensajeBloquePremium
+                    titulo="Conexión con IA Premium"
+                    descripcion="La integración con asistentes de IA está disponible exclusivamente para usuarios Premium. Gestiona tus tareas usando lenguaje natural."
+                    onAbrirUpgrade={onAbrirUpgrade}
+                />
             ) : (
                 <>
-                    {/* Sección Token */}
-                    <SeccionTokenMCP tokenExiste={tokenExiste} tokenGenerado={tokenGenerado} fechaCreacion={fechaCreacion} cargando={cargando} onGenerarToken={manejarGenerarToken} onRevocarToken={manejarRevocarToken} />
+                    {/* Introducción */}
+                    <div className="mcpIntroduccion">
+                        <h3 className="mcpIntroduccion__titulo">
+                            <Sparkles size={16} />
+                            Conecta con tu asistente de IA
+                        </h3>
+                        <p className="mcpIntroduccion__descripcion">Gestiona tus tareas usando lenguaje natural desde Claude, Cursor, Antigravity o cualquier asistente de IA.</p>
+                    </div>
 
-                    {/* Mostrar instrucciones solo si hay token */}
-                    {tokenExiste && (
+                    {/* Estado de carga inicial */}
+                    {verificando ? (
+                        <div className="mcpCargando">
+                            <Loader2 size={24} className="iconoGirando" />
+                            <span>Verificando configuración...</span>
+                        </div>
+                    ) : (
                         <>
-                            {/* Pestañas de clientes */}
-                            <div className="mcpPestanas">
-                                <button type="button" className={`mcpPestana ${clienteActivo === 'apirest' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('apirest')}>
-                                    <Globe size={12} />
-                                    API REST
-                                </button>
-                                <button type="button" className={`mcpPestana ${clienteActivo === 'claude' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('claude')}>
-                                    <Plug size={12} />
-                                    Claude
-                                </button>
-                                <button type="button" className={`mcpPestana ${clienteActivo === 'cursor' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('cursor')}>
-                                    <Plug size={12} />
-                                    Cursor
-                                </button>
-                            </div>
+                            {/* Sección Token */}
+                            <SeccionTokenMCP tokenExiste={tokenExiste} tokenGenerado={tokenGenerado} fechaCreacion={fechaCreacion} cargando={cargando} onGenerarToken={manejarGenerarToken} onRevocarToken={manejarRevocarToken} />
 
-                            {/* Contenido según pestaña */}
-                            {clienteActivo === 'apirest' ? (
-                                <div className="mcpApiRest">
-                                    <p className="mcpApiRest__descripcion">Copia este contexto y pásalo a tu asistente de IA (Antigravity, ChatGPT, etc.) para que sepa cómo interactuar con tus tareas:</p>
-                                    <ConfiguracionMCPCopiable codigo={obtenerConfiguracion('apirest')} titulo="Contexto para IA" />
-                                    {!tokenGenerado && <p className="mcpApiRest__nota">Nota: Regenera el token para obtener el contexto con tu autenticación incluida.</p>}
-                                </div>
-                            ) : (
-                                <InstruccionesClienteMCP cliente={clienteActivo} jsonConfiguracion={obtenerConfiguracion(clienteActivo)} token={tokenGenerado || ''} />
+                            {/* Mostrar instrucciones solo si hay token */}
+                            {tokenExiste && (
+                                <>
+                                    {/* Pestañas de clientes */}
+                                    <div className="mcpPestanas">
+                                        <button type="button" className={`mcpPestana ${clienteActivo === 'apirest' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('apirest')}>
+                                            <Globe size={12} />
+                                            API REST
+                                        </button>
+                                        <button type="button" className={`mcpPestana ${clienteActivo === 'claude' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('claude')}>
+                                            <Plug size={12} />
+                                            Claude
+                                        </button>
+                                        <button type="button" className={`mcpPestana ${clienteActivo === 'cursor' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('cursor')}>
+                                            <Plug size={12} />
+                                            Cursor
+                                        </button>
+                                    </div>
+
+                                    {/* Contenido según pestaña */}
+                                    {clienteActivo === 'apirest' ? (
+                                        <div className="mcpApiRest">
+                                            <p className="mcpApiRest__descripcion">Copia este contexto y pásalo a tu asistente de IA (Antigravity, ChatGPT, etc.) para que sepa cómo interactuar con tus tareas:</p>
+                                            <ConfiguracionMCPCopiable codigo={obtenerConfiguracion('apirest')} titulo="Contexto para IA" />
+                                            {!tokenGenerado && <p className="mcpApiRest__nota">Nota: Regenera el token para obtener el contexto con tu autenticación incluida.</p>}
+                                        </div>
+                                    ) : (
+                                        <InstruccionesClienteMCP cliente={clienteActivo} jsonConfiguracion={obtenerConfiguracion(clienteActivo)} token={tokenGenerado || ''} />
+                                    )}
+                                </>
                             )}
                         </>
                     )}

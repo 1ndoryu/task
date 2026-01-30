@@ -45,8 +45,16 @@
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
+    line-height: 1.5;
+    letter-spacing: normal;
     /* Padding en el textarea para que el scroll llegue al borde del panel */
     padding: var(--dashboard-espacioLg);
+    /* Propiedades de word-wrap para sincronizar con div resaltado */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
     /* Altura por defecto, puede ser sobreescrita por inline style */
 }
 
@@ -388,6 +396,11 @@
     height: 100%;
 }
 
+/*
+ * Estilos base compartidos entre textarea y div de resaltado
+ * IMPORTANTE: Ambos deben tener exactamente las mismas propiedades de texto
+ * para evitar desfase entre cursor y texto visible
+ */
 .scratchpadResaltado {
     position: absolute;
     inset: 0;
@@ -395,18 +408,33 @@
     overflow: hidden;
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    line-height: 1.5;
+    letter-spacing: normal;
     white-space: pre-wrap;
+    word-wrap: break-word;
     word-break: break-word;
+    overflow-wrap: break-word;
     pointer-events: none;
     z-index: 0;
     box-sizing: border-box;
 }
 
+/*
+ * Textarea con resaltado visible detrás
+ * Hereda mismas propiedades tipográficas para sincronización perfecta
+ */
 .scratchpadTextarea--resaltado {
     color: transparent;
     caret-color: var(--dashboard-textoSecundario);
     position: relative;
     z-index: 1;
+    /* Sincronizar propiedades de texto con .scratchpadResaltado */
+    line-height: 1.5;
+    letter-spacing: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .scratchpadTextoTitulo {

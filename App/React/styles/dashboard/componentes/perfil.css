@@ -50,7 +50,7 @@
     font-size: var(--dashboard-tamanoBase);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     transition: border-color var(--dashboard-transicionNormal);
-    border-radius: 0; /* Estilo terminal, sin bordes redondeados forzados */
+    border-radius: var(--dashboard-radioSm);
 }
 
 .inputPerfil:focus {

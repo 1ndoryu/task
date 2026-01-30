@@ -41,16 +41,16 @@ const PRECIOS = {
  * Incluye todas las características premium disponibles
  */
 const CARACTERISTICAS = [
-    {nombre: 'Habitos', free: '10 max', premium: 'Ilimitados'},
-    {nombre: 'Tareas activas', free: '50 max', premium: 'Ilimitadas'},
+    {nombre: 'Habitos', free: '5 max', premium: 'Ilimitados'},
+    {nombre: 'Tareas activas', free: '20 max', premium: 'Ilimitadas'},
     {nombre: 'Proyectos', free: '3 max', premium: 'Ilimitados'},
     {nombre: 'Adjuntos', free: 'No', premium: '10 por tarea'},
     {nombre: 'Panel de Actividad', free: 'No', premium: 'Mapa de calor'},
     {nombre: 'Copias de Seguridad', free: 'No', premium: 'Automaticas'},
-    {nombre: 'Conexion con IA', free: 'No', premium: 'Si'},
-    {nombre: 'Sincronizacion', free: 'No', premium: 'Si'},
-    {nombre: 'Estadisticas', free: 'No', premium: 'Si'},
-    {nombre: 'Cifrado E2E', free: 'No', premium: 'Si'}
+    {nombre: 'Conexion con IA', free: 'No', premium: 'Integrada'},
+    {nombre: 'Sincronizacion', free: 'No', premium: 'Multi-dispositivo'},
+    {nombre: 'Estadisticas', free: 'No', premium: 'Avanzadas'},
+    {nombre: 'Cifrado E2E', free: 'Basico', premium: 'Completo'}
 ];
 
 export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps) {

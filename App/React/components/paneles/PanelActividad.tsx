@@ -21,6 +21,7 @@ import {useSuscripcionStore} from '../../stores/suscripcionStore';
 interface PanelActividadProps {
     configuracion: ConfiguracionActividad;
     onAbrirModalConfigActividad: () => void;
+    onAbrirUpgrade?: () => void;
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
 }
@@ -66,7 +67,7 @@ function formatearActividadUnificada(tipo: DetalleActividadItem['tipo'], nombre:
     return `${tipoBase} "${nombre}"`;
 }
 
-export function PanelActividad({configuracion, onAbrirModalConfigActividad, renderHandleArrastre, handleMinimizar}: PanelActividadProps): JSX.Element {
+export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAbrirUpgrade, renderHandleArrastre, handleMinimizar}: PanelActividadProps): JSX.Element {
     /* Verificar si el usuario es Premium */
     const esPremium = useSuscripcionStore(s => s.esPremium());
 
@@ -265,7 +266,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, rend
 
             {/* Contenido condicional según plan */}
             {!esPremium ? (
-                <MensajeBloqueoFree />
+                <MensajeBloqueoFree onAbrirUpgrade={onAbrirUpgrade} />
             ) : (
                 <>
                     {/* Mapa de calor - siempre muestra datos si existen, recarga en segundo plano */}

@@ -100,6 +100,17 @@
     line-height: 1.6;
 }
 
+/*
+ * Nota para usuarios FREE sobre limitaciones de cifrado
+ */
+.descripcionSeguridad .notaFree {
+    display: block;
+    margin-top: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoApagado);
+    font-style: italic;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
 /* 
  * Indicadores de estado
  */
