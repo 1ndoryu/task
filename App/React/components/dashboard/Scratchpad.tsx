@@ -264,7 +264,7 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                 resaltado.scrollLeft = textarea.scrollLeft;
             }
             
-            setDimensionesSincronizadas(nuevasimensiones);
+            setDimensionesSincronizadas(nuevasdimensiones);
         };
 
         /* Sincronizar inmediatamente */

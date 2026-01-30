@@ -20,6 +20,12 @@ interface UseSyncManagerProps {
 }
 
 /*
+ * Clave para detectar si ya se inicializó con datos de bienvenida
+ * Esto evita subir datos iniciales múltiples veces o a usuarios que ya tenían datos
+ */
+const CLAVE_USUARIO_INICIALIZADO = 'glory_usuario_inicializado';
+
+/*
  * Verifica si los datos del servidor están "vacíos" (usuario nuevo sin datos)
  * Consideramos vacío si no tiene hábitos, tareas, y notas vacías
  */
@@ -34,23 +40,39 @@ function esServidorVacio(serverData: DashboardData | null): boolean {
 }
 
 /*
- * Verifica si los datos locales contienen datos iniciales de bienvenida
- * (al menos una tarea o una nota con contenido)
- * Nota: Si localData está vacío pero tenemos datos iniciales definidos, usamos esos.
+ * Verifica si el usuario ya fue inicializado previamente con datos de bienvenida.
+ * Esto evita que al borrar localStorage y recargar, se vuelvan a subir datos iniciales.
  */
-function tieneDataInicialLocal(localData: DashboardData): boolean {
-    const tieneHabitos = !!(localData.habitos && localData.habitos.length > 0);
-    const tieneTareas = !!(localData.tareas && localData.tareas.length > 0);
-    const tieneNotas = !!(localData.notas && localData.notas.trim().length > 0);
-    
-    return tieneHabitos || tieneTareas || tieneNotas;
+function usuarioYaInicializado(): boolean {
+    try {
+        return localStorage.getItem(CLAVE_USUARIO_INICIALIZADO) === 'true';
+    } catch {
+        return false;
+    }
 }
 
 /*
- * Genera datos iniciales para usuarios nuevos usando los datos de bienvenida
+ * Marca al usuario como inicializado después de subir datos de bienvenida.
+ * Esta marca persiste incluso si se borra el resto del localStorage.
  */
-function generarDatosInicialesUsuarioNuevo(): Partial<DashboardData> {
+function marcarUsuarioComoInicializado(): void {
+    try {
+        localStorage.setItem(CLAVE_USUARIO_INICIALIZADO, 'true');
+    } catch {
+        console.warn('[SyncManager] No se pudo guardar marca de inicialización');
+    }
+}
+
+/*
+ * Genera datos iniciales completos para usuarios nuevos.
+ * Combina datos base con los datos de bienvenida de datosIniciales.ts
+ * 
+ * IMPORTANTE: Esta función NO depende de currentData para evitar
+ * condiciones de carrera con stores que se hidratan vacíos.
+ */
+function generarDatosInicialesUsuarioNuevo(baseData: DashboardData): DashboardData {
     return {
+        ...baseData,
         habitos: habitosIniciales,
         tareas: tareasIniciales,
         notas: notasIniciales,
