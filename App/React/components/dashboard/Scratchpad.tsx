@@ -137,6 +137,7 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
     /* Estados para resizing */
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const resaltadoRef = useRef<HTMLDivElement>(null);
+    const editorRef = useRef<HTMLDivElement>(null);
     const [isResizing, setIsResizing] = useState(false);
     const [localHeight, setLocalHeight] = useState<string>(altura);
 
@@ -289,7 +290,8 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
         setIsResizing(true);
 
         const startY = e.clientY;
-        const startHeight = textareaRef.current?.getBoundingClientRect().height || 300;
+        /* Usar el contenedor del editor para obtener la altura actual */
+        const startHeight = editorRef.current?.getBoundingClientRect().height || 300;
 
         const handleMouseMove = (moveEvent: MouseEvent) => {
             const deltaY = moveEvent.clientY - startY;
@@ -332,9 +334,10 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                 <div className="scratchpadBarra"></div>
                 {modoVista === 'editor' ? (
                     <div 
+                        ref={editorRef}
                         className="scratchpadEditor"
                         style={{
-                            height: localHeight !== '100%' ? localHeight : undefined
+                            height: localHeight
                         }}
                     >
                         {mostrarResaltadoMarkdown && (
