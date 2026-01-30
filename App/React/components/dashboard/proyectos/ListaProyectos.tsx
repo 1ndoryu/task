@@ -221,8 +221,10 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
         if (!proyecto) return [];
 
         const opciones: OpcionMenu[] = [
-            {id: 'editar', etiqueta: 'Editar proyecto', icono: <Edit size={14} />},
+            {id: 'editar', etiqueta: 'Editar proyecto', icono: <Edit size={14} />, separadorDespues: true}
+            /* TO-DO: Habilitar cuando sistema de compartir esté listo
             {id: 'compartir', etiqueta: 'Compartir proyecto', icono: <Share2 size={14} />, separadorDespues: true}
+            */
         ];
 
         /* Opciones de estado segun el estado actual */

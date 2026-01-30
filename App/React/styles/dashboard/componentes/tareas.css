@@ -43,11 +43,7 @@
 /* 
  * CHECKBOX
  */
-/* 
- * CHECKBOX
- */
 .tareaCheckbox {
-    margin-top: 5px; /* Bajado aun mas (antes 5px) */
     width: 0.75rem;
     height: 0.75rem;
     border: 1px solid var(--dashboard-textoIndice);

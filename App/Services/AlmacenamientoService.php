@@ -16,7 +16,7 @@ class AlmacenamientoService
     /* 
      * Límites de almacenamiento en bytes
      */
-    private const LIMITE_FREE = 52428800; /* 50 MB */
+    private const LIMITE_FREE = 1073741824; /* 1 GB (Beta) */
     private const LIMITE_PREMIUM = 10737418240; /* 10 GB */
 
     /* 

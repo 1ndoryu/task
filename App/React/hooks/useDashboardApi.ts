@@ -173,7 +173,10 @@ export function useDashboardApi(): UseDashboardApiReturn {
                     throw error;
                 }
                 if (response.status === 403) {
-                    throw new Error('Sin permisos para realizar esta acción.');
+                    /* Marcar 403 como silencioso: usuarios FREE que exceden límites generan 403 esperados */
+                    const error = new Error('Sin permisos para realizar esta acción.');
+                    (error as any).silent = true;
+                    throw error;
                 }
 
                 // Try to extract error message from JSON if possible, otherwise use status

@@ -16,6 +16,7 @@ interface SelectorImportanciaPillProps {
 }
 
 const OPCIONES_IMPORTANCIA: {id: NivelImportancia; etiqueta: string; color: string}[] = [
+    {id: 'Muy Alta', etiqueta: 'Muy Alta', color: 'var(--dashboard-estadoMuyAlta)'},
     {id: 'Alta', etiqueta: 'Alta', color: 'var(--dashboard-estadoAlta)'},
     {id: 'Media', etiqueta: 'Media', color: 'var(--dashboard-estadoMedia)'},
     {id: 'Baja', etiqueta: 'Baja', color: 'var(--dashboard-textoApagado)'}
@@ -42,13 +43,13 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
     const opcionesMenu = OPCIONES_IMPORTANCIA.map(op => ({
         id: op.id,
         etiqueta: op.etiqueta,
-        icono: <Star size={12} fill={op.id === 'Alta' ? op.color : 'none'} />
+        icono: <Star size={12} fill={(op.id === 'Alta' || op.id === 'Muy Alta') ? op.color : 'none'} />
     }));
 
     return (
         <div className="propiedadesCompactas__item">
             <button ref={botonRef} type="button" className={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia" style={importancia !== 'Media' ? {color: importanciaActual.color} : undefined}>
-                <Star size={14} fill={importancia === 'Alta' ? importanciaActual.color : 'none'} />
+                <Star size={14} fill={(importancia === 'Alta' || importancia === 'Muy Alta') ? importanciaActual.color : 'none'} />
                 <span>{importanciaActual.etiqueta}</span>
             </button>
 

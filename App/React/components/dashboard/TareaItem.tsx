@@ -207,11 +207,13 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             icono: <Plus size={12} />,
             separadorDespues: true
         },
+        /* TO-DO: Habilitar cuando sistema de compartir esté listo
         {
             id: 'compartir',
             etiqueta: 'Compartir tarea',
             icono: <Share2 size={12} />
         },
+        */
         {
             id: 'mover-proyecto',
             etiqueta: 'Mover a proyecto',

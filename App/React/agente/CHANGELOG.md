@@ -4,6 +4,67 @@ Registro de cambios significativos del proyecto.
 
 ---
 
+## [1.0.16-beta] - 2026-01-30
+
+### Fase 15.9: Segunda Revisión Beta Nakomi
+
+#### ✅ Mejoras de UX para Nuevos Usuarios
+- **Datos iniciales mejorados**: 3 tareas de bienvenida genéricas en lugar de inicio vacío
+- **Nota de bienvenida**: Nota en Markdown explicando la beta y sus beneficios
+- **Orden inteligente por defecto**: Cambiado de 'manual' a 'inteligente' en tareas
+- **Hábitos en Ejecución**: Activado por defecto para mostrar hábitos que tocan hoy
+- **Vista no compacta**: Hábitos en modo expandido por defecto (mejor onboarding)
+- **Columna Actividad (5 días)**: Visible por defecto en configuración de hábitos
+- **Panel de Actividad**: Visible por defecto para nuevos usuarios
+
+**Archivos modificados:**
+- `data/datosIniciales.ts`: Tareas y nota de bienvenida
+- `hooks/useOrdenarTareas.ts`: `valorPorDefecto: 'inteligente'`
+- `hooks/useConfiguracionTareas.ts`: `mostrarHabitosEnEjecucion: true`
+- `hooks/useConfiguracionHabitos.ts`: `modoCompacto: false`, `historial: true`
+- `config/inicializarPaneles.ts`: Panel Actividad `visiblePorDefecto: true`
+
+#### ✅ Ajustes de Plan y Almacenamiento
+- **Trial extendido**: 14 días → 30 días de prueba gratuita
+- **Almacenamiento FREE**: 50MB → 1GB de almacenamiento máximo
+
+**Archivos modificados:**
+- `SuscripcionService.php`: `DIAS_TRIAL = 30`
+- `AlmacenamientoService.php`: `LIMITE_FREE = 1073741824` (1GB)
+- `hooks/useAlmacenamiento.ts`: Constantes frontend actualizadas
+
+#### ✅ Nueva Prioridad "Muy Alta"
+- Agregado nivel de importancia "Muy Alta" por encima de "Alta"
+- Implementado en tipos, componentes UI y variables CSS
+- Color distintivo: `#dc2626` (rojo intenso)
+
+**Archivos modificados:**
+- `types/dashboard.ts`: Tipo `NivelImportancia` actualizado
+- `mcp/src/types/dashboard.ts`: Tipo MCP actualizado
+- `components/shared/CampoPrioridad.tsx`: Array IMPORTANCIAS
+- `components/shared/SelectorImportanciaPill.tsx`: Opciones y colores
+- `components/habitos/FormularioHabito.tsx`: Array IMPORTANCIAS
+- `styles/variables.css`: Variables `--dashboard-estadoMuyAlta`
+
+#### ✅ Ocultamiento de Features No Listas
+- **Compartir tareas/proyectos**: Comentadas opciones en menús contextuales
+- **Botón Mi Equipo**: Oculto en header (funcionalidad pendiente)
+
+**Archivos modificados:**
+- `components/tareas/TareaItem.tsx`: Opción "Compartir tarea" comentada
+- `components/proyectos/ListaProyectos.tsx`: Opción "Compartir proyecto" comentada
+- `components/dashboard/EncabezadoAcciones.tsx`: Bloque Mi Equipo comentado
+
+#### ✅ Correcciones Visuales
+- **Errores 403 silenciados**: Flag `silent` en errores de permisos API
+- **Background .listaProyectos**: Removido color de fondo innecesario
+
+**Archivos modificados:**
+- `hooks/useDashboardApi.ts`: `error.silent = true` en 403
+- `styles/dashboard/paneles/proyectos.css`: Removido `background-color`
+
+---
+
 ## [1.0.15-beta] - 2026-01-29
 
 ### Fase 15: Lanzamiento Beta Nakomi

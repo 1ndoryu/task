@@ -56,9 +56,9 @@ class SuscripcionService
     ];
 
     /* 
-     * Días de trial 
+     * Días de trial (Beta: 30 días gratis)
      */
-    private const DIAS_TRIAL = 14;
+    private const DIAS_TRIAL = 30;
 
     private int $userId;
     private string $metaKey = 'glory_suscripcion';

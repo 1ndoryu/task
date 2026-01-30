@@ -54,114 +54,89 @@ export const habitosIniciales: Habito[] = [
 ];
 
 /*
- * Tareas de demostracion
- * 2 tareas con diferentes opciones:
- * - Una con prioridad baja
- * - Una con prioridad media y descripcion
+ * Tareas de demostracion para usuarios nuevos
+ * 3 tareas genéricas de bienvenida que guían al usuario
+ * - Una de alta prioridad (explorar la app)
+ * - Una de media prioridad (configurar preferencias)
+ * - Una de baja prioridad (opcional pero recomendada)
  */
 export const tareasIniciales: Tarea[] = [
     {
         id: 1,
-        texto: 'Revisar backlog semanal',
+        texto: '👋 ¡Bienvenido! Explora el dashboard',
         completado: false,
-        prioridad: 'baja',
-        fechaCreacion: crearFechaHaceNDias(2)
+        prioridad: 'alta',
+        urgencia: 'urgente',
+        fechaCreacion: crearFechaHaceNDias(0),
+        configuracion: {
+            descripcion: 'Haz clic en esta tarea para ver cómo funciona. Puedes agregar descripciones, fechas límite, subtareas y más. Usa el check de la izquierda para completarla.'
+        }
     },
     {
         id: 2,
-        texto: 'Preparar presentacion del proyecto',
+        texto: 'Crea tu primer hábito',
         completado: false,
         prioridad: 'media',
-        fechaCreacion: crearFechaHaceNDias(1),
+        fechaCreacion: crearFechaHaceNDias(0),
         configuracion: {
-            descripcion: 'Incluir graficos de progreso, metricas clave y proximos pasos. Revisar con el equipo antes de enviar.',
-            fechaMaxima: crearFechaEnNDias(5)
+            descripcion: 'Los hábitos son actividades recurrentes que quieres hacer regularmente. Ve al panel de Hábitos y crea uno con el botón "+".'
+        }
+    },
+    {
+        id: 3,
+        texto: 'Personaliza tu experiencia (opcional)',
+        completado: false,
+        prioridad: 'baja',
+        fechaCreacion: crearFechaHaceNDias(0),
+        configuracion: {
+            descripcion: 'Usa el menú de tu perfil (arriba a la derecha) para cambiar el tema, configurar tu zona horaria y explorar las opciones de seguridad.'
         }
     }
 ];
 
 /*
- * Notas iniciales del scratchpad
+ * Notas iniciales del scratchpad - Nota de bienvenida Beta
  */
-export const notasIniciales = `- Idea: Refactorizar el modulo de fechas
-- Recordatorio: Revisar tareas pendientes
+export const notasIniciales = `# ¡Bienvenido a la Beta de Nakomi Task! 🎉
 
-> La consistencia gana a la intensidad.`;
+Gracias por unirte a nuestra primera beta abierta. Este proyecto está hecho con mucho cariño, pensando en una gestión de tareas y hábitos **inteligente y minimalista**.
+
+## 🎁 Tu regalo de bienvenida
+
+Durante esta beta (Enero 2026), te regalamos **30 días gratis** sin necesidad de tarjeta de crédito para que pruebes todas las funciones:
+
+- ✅ Copias de seguridad cada 30 minutos
+- ✅ Cifrado de archivos  
+- ✅ 1 GB de almacenamiento (expandiremos con el tiempo)
+- ✅ Envío de comentarios y sugerencias
+
+## ⚠️ Importante
+
+Al ser una beta, podrían existir bugs o pérdida de datos. Trabajamos duro para que esto no suceda, pero te recomendamos usar las copias de seguridad.
+
+## 🚀 Próximamente
+
+- Sistema de trabajo en equipos
+- Plugins personalizados
+- Integración más profunda con IA (con opción de desactivarla si prefieres trabajo 100% humano)
+
+## 💬 Tu opinión es oro
+
+Esperamos tus sugerencias, reportes de bugs, ideas locas... ¡todo es bienvenido! Leeremos cada comentario.
+
+---
+
+*— Wandorius, Founder de Nakomi*`;
 
 /*
  * Proyectos de demostracion
- * 2 proyectos con tareas asignadas
+ * Array vacío por defecto para usuarios nuevos
+ * El usuario creará sus propios proyectos cuando esté listo
  */
-export const proyectosIniciales: Proyecto[] = [
-    {
-        id: 1,
-        nombre: 'Lanzamiento Web Personal',
-        descripcion: 'Rediseño y lanzamiento de portfolio en Next.js',
-        prioridad: 'alta',
-        estado: 'activo',
-        fechaCreacion: crearFechaHaceNDias(10),
-        progreso: 35
-    },
-    {
-        id: 2,
-        nombre: 'Aprender TypeScript',
-        descripcion: 'Curso completo y proyecto practico en TypeScript',
-        prioridad: 'media',
-        estado: 'activo',
-        fechaCreacion: crearFechaHaceNDias(20),
-        progreso: 25
-    }
-];
+export const proyectosIniciales: Proyecto[] = [];
 
 /*
  * Tareas de proyectos de demostracion
- * Tareas asociadas a los proyectos iniciales
+ * Array vacío porque no hay proyectos iniciales
  */
-export const tareasProyectosIniciales: Tarea[] = [
-    /* Tareas del proyecto 1: Lanzamiento Web Personal */
-    {
-        id: 101,
-        texto: 'Diseñar wireframes de la pagina principal',
-        completado: true,
-        proyectoId: 1,
-        prioridad: 'alta',
-        fechaCreacion: crearFechaHaceNDias(9)
-    },
-    {
-        id: 102,
-        texto: 'Implementar componente de navegacion',
-        completado: false,
-        proyectoId: 1,
-        prioridad: 'media',
-        fechaCreacion: crearFechaHaceNDias(5),
-        configuracion: {
-            descripcion: 'Incluir menu responsivo y animaciones suaves'
-        }
-    },
-    {
-        id: 103,
-        texto: 'Configurar dominio y hosting',
-        completado: false,
-        proyectoId: 1,
-        fechaCreacion: crearFechaHaceNDias(3)
-    },
-    /* Tareas del proyecto 2: Aprender TypeScript */
-    {
-        id: 201,
-        texto: 'Completar modulo de tipos basicos',
-        completado: true,
-        proyectoId: 2,
-        fechaCreacion: crearFechaHaceNDias(18)
-    },
-    {
-        id: 202,
-        texto: 'Practicar interfaces y tipos genericos',
-        completado: false,
-        proyectoId: 2,
-        prioridad: 'alta',
-        fechaCreacion: crearFechaHaceNDias(10),
-        configuracion: {
-            descripcion: 'Resolver al menos 5 ejercicios del curso'
-        }
-    }
-];
+export const tareasProyectosIniciales: Tarea[] = [];

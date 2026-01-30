@@ -9,11 +9,15 @@ export interface ConfiguracionTareas {
     modoCompacto: boolean;
 }
 
+/* 
+ * Configuración por defecto de tareas
+ * mostrarHabitosEnEjecucion: true para usuarios nuevos (Beta: mejor experiencia inicial)
+ */
 export const CONFIG_POR_DEFECTO: ConfiguracionTareas = {
     ocultarCompletadas: true,
     ocultarBadgeProyecto: true,
     eliminarCompletadasDespuesDeUnDia: false,
-    mostrarHabitosEnEjecucion: false,
+    mostrarHabitosEnEjecucion: true,
     modoCompacto: false
 };
 

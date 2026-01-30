@@ -97,12 +97,13 @@ registrarPanel({
 /*
  * Panel Actividad
  * Maneja su propia altura internamente
+ * Visible por defecto en Beta para mostrar valor de la herramienta
  */
 registrarPanel({
     id: 'actividad',
     titulo: 'Actividad',
     tituloMovil: 'Actividad',
-    visiblePorDefecto: false,
+    visiblePorDefecto: true,
     alturaDefecto: '150px',
     posicionDefecto: crearPosicionDefecto([1, 4], [2, 2], [3, 2]),
     componente: PanelActividad as any,

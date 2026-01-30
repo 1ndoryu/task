@@ -45,11 +45,12 @@ export interface ConfiguracionHabitos {
 /*
  * Configuración de columnas por defecto para desktop
  * Incluye frecuencia, tocaHoy y más opciones visuales
+ * historial: true para mostrar Actividad (5 días) por defecto en Beta
  */
 export const COLUMNAS_DESKTOP_POR_DEFECTO: ColumnasHabitos = {
     indice: true,
     nombre: true,
-    historial: false,
+    historial: true,
     racha: false,
     frecuencia: true,
     importancia: true,
@@ -80,9 +81,13 @@ export const COLUMNAS_MOVIL_POR_DEFECTO: ColumnasHabitos = {
 /* Mantener compatibilidad con código existente */
 export const COLUMNAS_POR_DEFECTO: ColumnasHabitos = COLUMNAS_DESKTOP_POR_DEFECTO;
 
+/* 
+ * Configuración por defecto de hábitos
+ * modoCompacto: false para mostrar vista detallada inicialmente (Beta feedback)
+ */
 export const CONFIG_HABITOS_DESKTOP_POR_DEFECTO: ConfiguracionHabitos = {
     ocultarCompletadosHoy: false,
-    modoCompacto: true,
+    modoCompacto: false,
     mostrarPausados: true,
     columnasVisibles: COLUMNAS_DESKTOP_POR_DEFECTO,
     toleranciaPreset: 'moderado',
@@ -91,7 +96,7 @@ export const CONFIG_HABITOS_DESKTOP_POR_DEFECTO: ConfiguracionHabitos = {
 
 export const CONFIG_HABITOS_MOVIL_POR_DEFECTO: ConfiguracionHabitos = {
     ocultarCompletadosHoy: false,
-    modoCompacto: true,
+    modoCompacto: false,
     mostrarPausados: true,
     columnasVisibles: COLUMNAS_MOVIL_POR_DEFECTO,
     toleranciaPreset: 'moderado',

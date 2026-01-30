@@ -5,167 +5,75 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.15-beta (2026-01-30)
-**Foco:** Fase 15 - Revisiones Beta Nakomi completadas
+**Versión:** v1.0.16-beta (2026-01-30)
+**Foco:** Segunda revisión Beta Nakomi completada
 
 ---
 
 ## Fase 15: Lanzamiento Beta Nakomi 🚀 **COMPLETADA**
 
-**Estado:** ✅ 100% Completado (todas las revisiones implementadas)
-**Prioridad:** MÁXIMA - Bloquea lanzamiento
+**Estado:** ✅ 100% Completado
 **Última actualización:** 2026-01-30
 
 ---
 
-### Tareas Completadas ✅
+### 15.9 Segunda Revisión Beta ✅
 
-#### ✅ 15.1 Panel de Actividad - Mejora de Registro
-- Implementado formato unificado: `Tipo "Nombre"` en línea simple
-- Eliminada redundancia "Habito cumplido" + nombre separado
-- Cambiado de lista numerada con cajas a lista simple sin numeración
-- Formato final: `Tarea "Nombre" · Proyecto` o `Hábito "Nombre"`
+**Mejoras implementadas:**
 
-**Archivos modificados:**
-- `PanelActividad.tsx`: Función `formatearActividadUnificada()`
-- `panelActividad.css`: Clase `.panelActividadDetalleLista--unificada`
-
-#### ✅ 15.2 Sistema FREE/PREMIUM - Refactorización SOLID
-- Centralizado sistema de suscripción en `suscripcionStore.ts` con Zustand
-- Implementado patrón DIP (Dependency Inversion Principle)
-- Selectores atómicos para evitar re-renders innecesarios
-- Panel de Actividad oculto para usuarios FREE con mensaje de bloqueo
-
-**Archivos creados:**
-- `stores/suscripcionStore.ts`: Store centralizado con `puedeCrear()`, `verificarLimite()`, `tieneAcceso()`
-
-**Archivos modificados:**
-- `PanelActividad.tsx`: Agregado verificación Premium y componente `MensajeBloqueoFree`
-- `panelActividad.css`: Estilos para estado bloqueado `.panelActividadBloqueado`
-
-#### ✅ 15.3 Modal de Límites Alcanzados
-- Creado componente `ModalLimiteAlcanzado` con diseño terminal estético
-- Implementado hook `useLimites` para verificación centralizada
-- Integrado en `DashboardModales.tsx` con estado global
-- Soporte para límites: habitos, tareasActivas, proyectos, adjuntos
-
-**Archivos creados:**
-- `components/shared/ModalLimiteAlcanzado.tsx`
-- `hooks/useLimites.ts`
-- `styles/dashboard/componentes/modalLimiteAlcanzado.css`
-
-**Archivos modificados:**
-- `useDashboardCompleto.ts`: Integrado hook `limites`
-- `DashboardModales.tsx`: Agregado `ModalLimiteAlcanzado`
-- `shared/index.ts`: Exportado componente
-- `styles/dashboard/index.css`: Importado CSS del modal
-
-#### ✅ 15.4 Modal Suscripción - Features Completas
-- Agregadas características faltantes en lista de beneficios premium
-- Incluido: Panel de Actividad, Sistema de Backups, Conexión con IA
-- Actualizado array `CARACTERISTICAS` con todas las features
-
-**Archivos modificados:**
-- `ModalUpgrade.tsx`: Array CARACTERISTICAS actualizado
-
----
-
-### Tareas Completadas de la Sesión Actual ✅
-
-#### 15.5 Correcciones Visuales 🎨 ✅
-
-**Resuelto:** Todas las correcciones visuales verificadas/implementadas.
-
-- [x] **15.5.1 Selector Subtareas:** Centrado con `top: 50%; transform: translateY(-50%)` en `.tareaColapsadorBoton`
-- [x] **15.5.2 Inputs Información Personal:** Verificado - `.inputPerfil` usa `var(--dashboard-bordePrincipal)`
-- [x] **15.5.3 Unificar Inputs:** Verificado - `.formularioInput` usa variables CSS correctamente
-- [x] **15.5.4 Notas Expandidas:** Verificado - Todos los estilos usan variables de tema
-- [x] **15.5.5 Fecha Notas (Layout):** Implementado en `ListaNotasGuardadas.tsx` - fecha debajo del título
-- [x] **15.5.6 Fecha Notas (Semántica):** Implementado - fechaCreacion con Clock, fechaModificacion con Edit2 + contador
-
-#### 15.6 Persistencia de Notas 🐛 ✅
-
-**Resuelto:** Implementado autoguardado y restauración en `PanelScratchpad.tsx`.
-
-- [x] **15.6.1 Diagnóstico:** Identificado - autoguardado estaba en hook deprecado `useNotas.ts`
-- [x] **15.6.2 Restaurar Guardado:** Implementado useEffect con debounce 2000ms que llama `guardarNotaActiva()`
-- [x] **15.6.3 Restaurar Carga:** Implementado useEffect que llama `cargarNotas()` y `restaurarNotaActivaGuardada()`
-- [x] **15.6.4 Tests Manuales:** Pendiente verificación por usuario
-
-#### 15.7 Integración de Límites en Flujos de Creación ✅
-
-**Resuelto:** Integrado en `DashboardModales.tsx` con wrappers de verificación.
-
-- [x] **15.7.1 Integración Hábitos:** `manejarCrearHabitoConLimite` verifica antes de crear
-- [x] **15.7.2 Integración Tareas:** `manejarCrearTareaConLimite` verifica tareas activas
-- [x] **15.7.3 Integración Proyectos:** `manejarCrearProyectoConLimite` verifica antes de crear
-- [ ] **15.7.4 Integración Adjuntos:** TO-DO - requiere prop drilling al componente de adjuntos
-
-#### 15.8 Actualización de Documentación ✅
-
-- [x] **15.8.1 Changelog:** Creado `CHANGELOG.md` con historial completo de Fase 15
-- [x] **15.8.2 Plan Backups:** Verificado - archivo ya no existe
-- [x] **15.8.3 Commit Final:** Pendiente - listo para commit
+1. ✅ **Errores 403 silenciados**: Flag `silent` en errores API para evitar alarmas en consola
+2. ✅ **Compartir oculto**: Opciones de compartir tareas/proyectos comentadas (feature pendiente)
+3. ✅ **Mi Equipo oculto**: Botón en header comentado (feature pendiente)
+4. ✅ **Trial 30 días**: Actualizado de 14 a 30 días gratuitos
+5. ✅ **Almacenamiento 1GB**: Actualizado de 50MB a 1GB límite FREE
+6. ✅ **Prioridad "Muy Alta"**: Nueva prioridad añadida a hábitos
+7. ✅ **Background proyectos**: Removido color de fondo en `.listaProyectos`
+8. ✅ **Hábitos no compactos**: Vista expandida por defecto
+9. ✅ **Columna Actividad**: Historial (5 días) visible por defecto
+10. ✅ **Panel Actividad visible**: Visible por defecto para nuevos usuarios
+11. ✅ **Datos iniciales**: 3 tareas de bienvenida genéricas
+12. ✅ **Nota de bienvenida**: Markdown explicativo de la beta
+13. ✅ **Orden inteligente**: Por defecto en lugar de manual
+14. ✅ **Hábitos en Ejecución**: Activado por defecto
 
 ---
 
 ### Tareas Pendientes para Futuras Sesiones 📋
 
-- [ ] **15.7.4 Integración Adjuntos:** Requiere refactorización para pasar contexto de límites
-- [ ] **Versión Móvil:** Adaptar dashboard para dispositivos móviles
-- [ ] **Selector de Fecha Personalizado:** Implementar componente de calendario compacto para fechas en modales de creación rápida y configuración de tareas
+#### Prioridad Alta
+- [ ] **Centralizar creación de tareas**: Varias formas de crear tareas no respetan límites (principios SOLID)
+- [ ] **Placeholders vacíos unificados**: Componente reutilizable para estados vacíos (tareas, hábitos, proyectos)
+- [ ] **Unificar botón "+ Nueva tarea"**: Coherencia visual con "+ Añadir" de otros paneles
+- [ ] **Botón check centrado**: Corrección visual en modo no compacto de tareas
+
+#### Prioridad Media
+- [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2)
+- [ ] **Botón comentarios Premium**: Solo usuarios premium pueden enviar feedback
+- [ ] **Panel Admin mensajes**: Tab para ver mensajes de usuarios en panel admin
+- [ ] **Scroll Panel Admin**: Unificar a un solo scroll (actualmente hay 3)
+- [ ] **Integración adjuntos límites**: Prop drilling para verificar límites en adjuntos (15.7.4)
+
+#### Documentación Pendiente
+- [ ] Documentar configuración de Google OAuth2 (client_id, redirect URIs, etc.)
 
 ---
 
-#### 15.9 Revisiones Beta Nakomi ✅
+### Revisiones Anteriores Completadas (Referencia)
 
-**Estado:** ✅ Completado
-**Fecha:** 2026-01-30
+<details>
+<summary>Ver revisiones anteriores (15.1 - 15.8)</summary>
 
-**Correcciones implementadas:**
+#### ✅ 15.1-15.8 Completadas
+- Panel de Actividad formato unificado
+- Sistema FREE/PREMIUM refactorizado
+- Modal de límites alcanzados
+- Modal suscripción con features completas
+- Correcciones visuales
+- Persistencia de notas
+- Integración de límites en flujos
+- Documentación actualizada
 
-1. **Límites FREE ajustados:**
-   - Hábitos: 10 → 5
-   - Tareas activas: 50 → 20
-   - Archivos: `SuscripcionService.php`, `suscripcionStore.ts`
-
-2. **Modal límites centrado:**
-   - CSS corregido para centrar modal vertical y horizontalmente
-   - Ancho máximo aumentado
-   - Archivo: `modalLimiteAlcanzado.css`
-
-3. **Botón suscribirse en Panel de Actividad:**
-   - Agregado prop `onAbrirUpgrade` a `PanelActividad`
-   - Propagado desde `DashboardGrid` → `DashboardModales` → `PanelActividad`
-   - Archivos: `PanelActividad.tsx`, `DashboardGrid.tsx`, `DashboardModales.tsx`
-
-4. **Cursor desync en notas corregido:**
-   - Sincronizadas propiedades CSS entre `.scratchpadTextarea` y `.scratchpadResaltado`
-   - `line-height: 1.5`, `white-space: pre-wrap`, `word-wrap: break-word`
-   - Archivo: `scratchpad.css`
-
-5. **Border-radius variable en inputs:**
-   - Agregada variable `var(--dashboard-radioSm)` a `.inputPerfil`
-   - Archivo: `perfil.css`
-
-6. **Componente MensajeBloquePremium creado:**
-   - Componente reutilizable para secciones Premium bloqueadas
-   - Props: `titulo`, `descripcion`, `onAbrirUpgrade`, `textoBoton`
-   - Archivos: `MensajeBloquePremium.tsx`, `mensajeBloquePremium.css`
-
-7. **Secciones Premium bloqueadas para FREE:**
-   - Modal Configuración MCP (IA)
-   - Modal Historial Backups
-   - Panel Seguridad (nota informativa sobre cifrado de archivos)
-   - Archivos: `ModalConfiguracionMCP.tsx`, `ModalHistorialBackups.tsx`, `PanelSeguridad.tsx`
-
-8. **Textos de features unificados:**
-   - ModalUpgrade actualizado con descripciones consistentes
-   - Formato: Título breve + descripción expandida
-   - Archivo: `ModalUpgrade.tsx`
-
-**Nota sobre errores 403:**
-Los errores 403 en usuarios FREE son comportamiento esperado cuando intentan sincronizar datos que exceden límites. El frontend previene la creación de nuevos items, pero datos pre-existentes que excedan límites serán rechazados por el backend.
+</details>
 
 ---
 

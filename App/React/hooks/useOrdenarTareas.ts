@@ -121,9 +121,12 @@ const calcularPesoTotal = (tarea: Tarea): number => {
 };
 
 export function useOrdenarTareas(tareas: Tarea[]) {
-    /* Persistencia del modo */
+    /* 
+     * Persistencia del modo de orden
+     * Por defecto: inteligente (Beta: facilita la adopción inicial)
+     */
     const {valor: modoActual, setValor: setModoActual} = useLocalStorage<ModoOrdenTareas>(KEY_ORDEN_TAREAS, {
-        valorPorDefecto: 'manual'
+        valorPorDefecto: 'inteligente'
     });
 
     /* Funciones de comparación */

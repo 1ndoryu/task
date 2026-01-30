@@ -34,6 +34,10 @@
     /* 
      * COLORES DE ESTADO 
      */
+    --dashboard-estadoMuyAlta: #f43f5e;
+    --dashboard-estadoMuyAltaFondo: rgba(244, 63, 94, 0.15);
+    --dashboard-estadoMuyAltaBorde: rgba(244, 63, 94, 0.4);
+
     --dashboard-estadoAlta: #ef4444;
     --dashboard-estadoAltaFondo: rgba(153, 27, 27, 0.1);
     --dashboard-estadoAltaBorde: rgba(153, 27, 27, 0.3);
@@ -269,6 +273,10 @@
     --dashboard-textoPlaceholder: #dee2e6;
 
     /* Colores de estado (más vibrantes para contraste en fondo claro) */
+    --dashboard-estadoMuyAlta: #e11d48;
+    --dashboard-estadoMuyAltaFondo: rgba(225, 29, 72, 0.12);
+    --dashboard-estadoMuyAltaBorde: rgba(225, 29, 72, 0.35);
+
     --dashboard-estadoAlta: #dc3545;
     --dashboard-estadoAltaFondo: rgba(220, 53, 69, 0.1);
     --dashboard-estadoAltaBorde: rgba(220, 53, 69, 0.3);

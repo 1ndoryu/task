@@ -10,7 +10,7 @@ export type NivelPrioridad = 'alta' | 'media' | 'baja';
 export type NivelUrgencia = 'bloqueante' | 'urgente' | 'normal' | 'chill';
 
 /* Niveles de importancia para hábitos */
-export type NivelImportancia = 'Alta' | 'Media' | 'Baja';
+export type NivelImportancia = 'Muy Alta' | 'Alta' | 'Media' | 'Baja';
 
 /* Tipos de frecuencia para hábitos */
 export type TipoFrecuencia = 'diario' | 'cadaXDias' | 'semanal' | 'diasEspecificos' | 'mensual';

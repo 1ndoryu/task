@@ -23,7 +23,7 @@ interface FormularioHabitoProps {
     modoEdicion?: boolean;
 }
 
-const IMPORTANCIAS: NivelImportancia[] = ['Alta', 'Media', 'Baja'];
+const IMPORTANCIAS: NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'];
 
 export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosIniciales, guardando = false, modoEdicion = false}: FormularioHabitoProps): JSX.Element {
     const [nombre, setNombre] = useState(datosIniciales?.nombre || '');

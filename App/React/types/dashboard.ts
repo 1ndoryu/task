@@ -5,11 +5,12 @@
 
 /*
  * Niveles de importancia para habitos
+ * Muy Alta: habitos críticos e innegociables (máxima prioridad)
  * Alta: habitos criticos para objetivos principales
  * Media: habitos importantes pero no criticos
  * Baja: habitos deseables pero opcionales
  */
-export type NivelImportancia = 'Alta' | 'Media' | 'Baja';
+export type NivelImportancia = 'Muy Alta' | 'Alta' | 'Media' | 'Baja';
 
 /*
  * Niveles de prioridad para tareas (importancia)
