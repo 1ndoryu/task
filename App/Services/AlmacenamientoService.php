@@ -4,7 +4,7 @@
  * Servicio de Almacenamiento
  *
  * Gestiona el cálculo y control de uso de espacio de almacenamiento
- * por usuario según su plan (Free: 50MB, Premium: 10GB).
+ * por usuario según su plan (Free: 50MB, Premium: 1GB).
  *
  * @package App\Services
  */
@@ -15,9 +15,11 @@ class AlmacenamientoService
 {
     /* 
      * Límites de almacenamiento en bytes
+     * FREE: 50 MB = 52428800 bytes
+     * PREMIUM: 1 GB = 1073741824 bytes
      */
-    private const LIMITE_FREE = 1073741824; /* 1 GB (Beta) */
-    private const LIMITE_PREMIUM = 10737418240; /* 10 GB */
+    private const LIMITE_FREE = 52428800; /* 50 MB */
+    private const LIMITE_PREMIUM = 1073741824; /* 1 GB */
 
     /* 
      * Umbral de alerta (90%)

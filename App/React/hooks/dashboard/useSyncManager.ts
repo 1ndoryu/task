@@ -18,6 +18,32 @@ interface UseSyncManagerProps {
     isDataReady?: boolean;
 }
 
+/*
+ * Verifica si los datos del servidor están "vacíos" (usuario nuevo sin datos)
+ * Consideramos vacío si no tiene hábitos, tareas, y notas vacías
+ */
+function esServidorVacio(serverData: DashboardData | null): boolean {
+    if (!serverData) return true;
+    
+    const sinHabitos = !serverData.habitos || serverData.habitos.length === 0;
+    const sinTareas = !serverData.tareas || serverData.tareas.length === 0;
+    const sinNotas = !serverData.notas || serverData.notas.trim() === '';
+    
+    return sinHabitos && sinTareas && sinNotas;
+}
+
+/*
+ * Verifica si los datos locales contienen datos iniciales de bienvenida
+ * (al menos una tarea o una nota con contenido)
+ */
+function tieneDataInicialLocal(localData: DashboardData): boolean {
+    const tieneHabitos = localData.habitos && localData.habitos.length > 0;
+    const tieneTareas = localData.tareas && localData.tareas.length > 0;
+    const tieneNotas = localData.notas && localData.notas.trim().length > 0;
+    
+    return tieneHabitos || tieneTareas || tieneNotas;
+}
+
 export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete, isDataReady = true}: UseSyncManagerProps) {
     const {esPremium} = useSuscripcion();
 
@@ -78,7 +104,28 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
             } else {
                 // Prioridad a servidor: Descargar
                 const serverData = await loadData();
-                if (serverData) {
+                
+                /*
+                 * Caso especial: Usuario nuevo sin datos en servidor
+                 * Si el servidor está vacío pero el frontend tiene datos iniciales
+                 * (de datosIniciales.ts), preservamos los datos locales y los subimos.
+                 * Esto asegura que nuevos usuarios vean las tareas/notas de bienvenida.
+                 */
+                if (esServidorVacio(serverData) && tieneDataInicialLocal(currentData)) {
+                    console.log('[SyncManager] Usuario nuevo detectado. Subiendo datos iniciales al servidor...');
+                    
+                    const success = await saveData({
+                        ...currentData,
+                        // @ts-ignore - Flag opcional para backend
+                        generateBackup: false
+                    });
+                    
+                    if (success) {
+                        console.log('[SyncManager] Datos iniciales sincronizados correctamente.');
+                        setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
+                        markChangesAsSynced();
+                    }
+                } else if (serverData) {
                     console.log('[SyncManager] Datos descargados del servidor.');
                     onDataReceived(serverData);
                     resetVersion(serverData); // Resetear hash base a lo nuevo

@@ -41,6 +41,7 @@ const PRECIOS = {
  * Incluye todas las características premium disponibles
  */
 const CARACTERISTICAS = [
+    {nombre: 'Almacenamiento', free: '50 MB', premium: '1 GB'},
     {nombre: 'Habitos', free: '5 max', premium: 'Ilimitados'},
     {nombre: 'Tareas activas', free: '20 max', premium: 'Ilimitadas'},
     {nombre: 'Proyectos', free: '3 max', premium: 'Ilimitados'},

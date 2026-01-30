@@ -1,0 +1,73 @@
+/*
+ * ESTADO VACIO UNIFICADO
+ * Componente reutilizable para estados vacíos en todos los paneles
+ * Diseño consistente con el estilo terminal del dashboard
+ */
+
+.estadoVacioUnificado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoApagado);
+    text-align: center;
+}
+
+.estadoVacioUnificado--compacto {
+    padding: var(--dashboard-espacioLg) var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioSm);
+}
+
+.estadoVacioUnificadoIcono {
+    color: var(--dashboard-textoMuyApagado);
+    opacity: 0.6;
+}
+
+.estadoVacioUnificadoIcono svg {
+    width: 32px;
+    height: 32px;
+}
+
+.estadoVacioUnificado--compacto .estadoVacioUnificadoIcono svg {
+    width: 24px;
+    height: 24px;
+}
+
+.estadoVacioUnificadoMensaje {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.estadoVacioUnificadoDescripcion {
+    margin: 0;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    max-width: 280px;
+    line-height: 1.4;
+}
+
+.estadoVacioUnificado--compacto .estadoVacioUnificadoDescripcion {
+    display: none;
+}
+
+.estadoVacioUnificadoBoton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.estadoVacioUnificadoBoton:hover {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoNormal);
+}

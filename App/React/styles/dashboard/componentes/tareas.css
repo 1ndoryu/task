@@ -42,15 +42,17 @@
 
 /* 
  * CHECKBOX
+ * align-self: center asegura centrado vertical incluso con contenido multilinea
  */
 .tareaCheckbox {
     width: 0.75rem;
     height: 0.75rem;
     border: 1px solid var(--dashboard-textoIndice);
-    border-radius: 0; /* Completamente cuadrado */
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: center;
     cursor: pointer;
     transition:
         border-color var(--dashboard-transicionNormal),
@@ -388,38 +390,38 @@
 
 /* 
  * INPUT INLINE NUEVA TAREA
- * Input siempre visible, estilo seamless que coincide con tareas existentes
+ * Estilo unificado con "+ Añadir" de hábitos para coherencia visual
  */
 .tareaNuevoInline {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioMd);
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
     border-top: 1px dashed var(--dashboard-bordePunteado);
     transition: all var(--dashboard-transicionNormal);
 }
 
 .tareaNuevoInline:hover,
 .tareaNuevoInlineActivo {
-    border-top-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
     background-color: var(--dashboard-fondoHover);
 }
 
-.tareaNuevoInlineIcono {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dashboard-textoApagado);
-    transition: color var(--dashboard-transicionNormal);
-    flex-shrink: 0;
-}
-
-.tareaNuevoInlineActivo .tareaNuevoInlineIcono {
-    color: var(--dashboard-textoNormal);
+/*
+ * Texto "+ Añadir" visible por defecto
+ */
+.tareaNuevoInlineTexto {
+    color: inherit;
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 /* 
- * Input invisible - hereda estilos del texto de tarea
+ * Input oculto por defecto, visible al enfocar
  */
 .tareaNuevoInlineInput {
     flex: 1;
@@ -428,19 +430,23 @@
     background-color: transparent;
     border: none;
     color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     line-height: 1.4;
     outline: none;
+    text-align: left;
+}
+
+.tareaNuevoInlineInputOculto {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
 }
 
 .tareaNuevoInlineInput::placeholder {
     color: var(--dashboard-textoApagado);
-    transition: color var(--dashboard-transicionNormal);
-}
-
-.tareaNuevoInline:hover .tareaNuevoInlineInput::placeholder {
-    color: var(--dashboard-textoIndice);
 }
 
 /* 

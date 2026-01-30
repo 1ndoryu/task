@@ -313,6 +313,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                 <div onClick={e => e.stopPropagation()}>
                     <MenuContextual
                         opciones={[
+                            {id: 'Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="var(--dashboard-estadoMuyAlta)" />},
                             {id: 'Alta', etiqueta: 'Alta', icono: <Flag size={12} color="var(--dashboard-estadoAlta)" />},
                             {id: 'Media', etiqueta: 'Media', icono: <Flag size={12} color="var(--dashboard-estadoMedia)" />},
                             {id: 'Baja', etiqueta: 'Baja', icono: <Flag size={12} color="var(--dashboard-estadoBaja)" />}

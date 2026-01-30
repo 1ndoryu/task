@@ -71,4 +71,6 @@ export * from './MenuContextualAdaptivo';
 export * from './NavegacionInferior';
 /* Fase 10.8.3 - Menu opciones panel (unificado para movil) */
 export * from './MenuOpcionesPanel';
+/* Componente reutilizable para estados vacios */
+export * from './EstadoVacio';
 

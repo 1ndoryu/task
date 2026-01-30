@@ -1,10 +1,11 @@
 /*
  * InputNuevaTarea
  * Componente para crear nuevas tareas con input siempre visible
+ * Estilo unificado con "+ Añadir" de hábitos para coherencia visual
  */
 
 import {useState, useCallback, useRef, type KeyboardEvent, type ChangeEvent} from 'react';
-import {Plus, Check} from 'lucide-react';
+import {Check} from 'lucide-react';
 import type {DatosEdicionTarea} from '../../types/dashboard';
 
 interface InputNuevaTareaProps {
@@ -46,15 +47,15 @@ export function InputNuevaTarea({onCrear}: InputNuevaTareaProps): JSX.Element {
 
     return (
         <div className={`tareaNuevoInline ${enfocado || tieneTexto ? 'tareaNuevoInlineActivo' : ''}`}>
-            <div className="tareaNuevoInlineIcono">
-                <Plus size={12} />
-            </div>
+            {!enfocado && !tieneTexto && (
+                <span className="tareaNuevoInlineTexto">+ Añadir</span>
+            )}
             <input
                 id="input-nueva-tarea-global"
                 ref={inputRef}
                 type="text"
-                className="tareaNuevoInlineInput"
-                placeholder="Nueva tarea..."
+                className={`tareaNuevoInlineInput ${enfocado || tieneTexto ? '' : 'tareaNuevoInlineInputOculto'}`}
+                placeholder="Escribe una tarea..."
                 value={texto}
                 onChange={manejarCambioTexto}
                 onKeyDown={manejarTecla}

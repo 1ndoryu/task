@@ -5,13 +5,14 @@
  */
 
 import {useState, useCallback, useMemo} from 'react';
-import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause, Play} from 'lucide-react';
+import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause, Play, Target} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {tocaHoy, describirFrecuencia, obtenerIntervaloFrecuencia, calcularUmbralInactividad} from '../../utils/frecuenciaHabitos';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
 import type {OpcionMenu} from '../shared/MenuContextual';
 import {DashboardPanel} from '../shared/DashboardPanel';
+import {EstadoVacio} from '../shared/EstadoVacio';
 import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
 import {AccionesItem} from '../shared/AccionesItem';
 import type {VarianteBadge} from '../shared/BadgeInfo';
@@ -348,39 +349,51 @@ export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditar
 
     return (
         <DashboardPanel id="tabla-habitos">
-            {/* Encabezado de tabla */}
-            <div className="tablaEncabezado" style={estiloGrid}>
-                {configuracion.columnasVisibles.indice && <div className="tablaColumnaCheckbox"></div>}
-                <div className="tablaColumnaNombre">HABITO</div>
-                {configuracion.columnasVisibles.historial && <div className="tablaColumnaHistorial">ACTIVIDAD</div>}
-                {configuracion.columnasVisibles.importancia && <div className="tablaColumnaPrioridad">PRIO</div>}
-                {configuracion.columnasVisibles.inactividad && <div className="tablaColumnaInactividad">DIAS</div>}
-                {configuracion.columnasVisibles.urgencia && <div className="tablaColumnaUrgencia">URGENCIA</div>}
-                {configuracion.columnasVisibles.racha && <div className="tablaColumnaRacha">RACHA</div>}
-                {configuracion.columnasVisibles.acciones && <div className="tablaColumnaAcciones"></div>}
-            </div>
-
-            {/* Filas de habitos activos */}
-            {habitosVisibles.map((habito, index) => (
-                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
-            ))}
-
-            {/* Seccion de habitos pausados */}
-            {configuracion.mostrarPausados && habitosPausados.length > 0 && (
+            {/* Estado vacio cuando no hay habitos */}
+            {habitos.length === 0 ? (
+                <EstadoVacio
+                    icono={<Target size={32} />}
+                    mensaje="No hay hábitos creados"
+                    textoBoton="+ Crear hábito"
+                    onAccion={onAñadirHabito}
+                />
+            ) : (
                 <>
-                    <div className="tablaSeparadorPausados">
-                        <span className="tablaSeparadorPausados__texto">Pausados ({habitosPausados.length})</span>
+                    {/* Encabezado de tabla */}
+                    <div className="tablaEncabezado" style={estiloGrid}>
+                        {configuracion.columnasVisibles.indice && <div className="tablaColumnaCheckbox"></div>}
+                        <div className="tablaColumnaNombre">HABITO</div>
+                        {configuracion.columnasVisibles.historial && <div className="tablaColumnaHistorial">ACTIVIDAD</div>}
+                        {configuracion.columnasVisibles.importancia && <div className="tablaColumnaPrioridad">PRIO</div>}
+                        {configuracion.columnasVisibles.inactividad && <div className="tablaColumnaInactividad">DIAS</div>}
+                        {configuracion.columnasVisibles.urgencia && <div className="tablaColumnaUrgencia">URGENCIA</div>}
+                        {configuracion.columnasVisibles.racha && <div className="tablaColumnaRacha">RACHA</div>}
+                        {configuracion.columnasVisibles.acciones && <div className="tablaColumnaAcciones"></div>}
                     </div>
-                    {habitosPausados.map((habito, index) => (
+
+                    {/* Filas de habitos activos */}
+                    {habitosVisibles.map((habito, index) => (
                         <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
                     ))}
+
+                    {/* Seccion de habitos pausados */}
+                    {configuracion.mostrarPausados && habitosPausados.length > 0 && (
+                        <>
+                            <div className="tablaSeparadorPausados">
+                                <span className="tablaSeparadorPausados__texto">Pausados ({habitosPausados.length})</span>
+                            </div>
+                            {habitosPausados.map((habito, index) => (
+                                <FilaHabito key={habito.id} habito={habito} indice={index} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} configuracion={configuracion} estiloGrid={estiloGrid} />
+                            ))}
+                        </>
+                    )}
+
+                    {/* Añadir habito */}
+                    <div className="añadirHabito" onClick={onAñadirHabito}>
+                        + Añadir
+                    </div>
                 </>
             )}
-
-            {/* Añadir habito */}
-            <div className="añadirHabito" onClick={onAñadirHabito}>
-                + Añadir
-            </div>
         </DashboardPanel>
     );
 }

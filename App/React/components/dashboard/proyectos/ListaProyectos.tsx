@@ -5,8 +5,9 @@
  */
 
 import {useState, useCallback} from 'react';
-import {Folder, Plus, ChevronDown, ChevronRight, Calendar, Edit, Trash2, PlayCircle, PauseCircle, CheckCircle, Share2, Users, Zap} from 'lucide-react';
+import {Folder, Plus, ChevronDown, ChevronRight, Calendar, Edit, Trash2, PlayCircle, PauseCircle, CheckCircle, Share2, Users, Zap, FolderOpen} from 'lucide-react';
 import {DashboardPanel} from '../../shared/DashboardPanel';
+import {EstadoVacio} from '../../shared/EstadoVacio';
 import {SeccionEncabezado} from '../SeccionEncabezado';
 import {ListaTareas} from '../ListaTareas';
 import {MenuContextual} from '../../shared/MenuContextual';
@@ -303,12 +304,12 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                         })}
 
                     {proyectos.length === 0 && (
-                        <div className="estadoVacio">
-                            <span>No hay proyectos activos</span>
-                            <button className="botonTexto" onClick={onCrearProyecto}>
-                                + Crear primer proyecto
-                            </button>
-                        </div>
+                        <EstadoVacio
+                            icono={<FolderOpen size={32} />}
+                            mensaje="No hay proyectos activos"
+                            textoBoton="+ Crear proyecto"
+                            onAccion={onCrearProyecto}
+                        />
                     )}
                 </div>
             </DashboardPanel>

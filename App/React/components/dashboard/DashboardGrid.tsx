@@ -5,6 +5,7 @@
  *
  * Refactor OCP - Fase 3: Ahora obtiene componentes dinámicamente del registro
  * ya no hay mapeos hardcodeados de paneles
+ * Refactor SOLID: Creación de tareas ahora verifica límites de plan
  */
 
 import {useCallback, useMemo, CSSProperties} from 'react';
@@ -13,6 +14,7 @@ import {obtenerPanel, panelManejaAlturaPropia, paginaMovilAPanelId} from '../../
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
+import type {DatosEdicionTarea} from '../../types/dashboard';
 
 /* Tipo para pages móviles - ahora dinámico desde el registro */
 type PaginaMovil = string;
@@ -45,6 +47,7 @@ interface PropsContextoPaneles {
     valorFiltroActual: DashboardCompletoRetorno['valorFiltroActual'];
     marcarDiaHabitoConSync: DashboardCompletoRetorno['marcarDiaHabitoConSync'];
     desmarcarDiaHabitoConSync: DashboardCompletoRetorno['desmarcarDiaHabitoConSync'];
+    limites: DashboardCompletoRetorno['limites'];
 }
 
 /*
@@ -52,7 +55,20 @@ interface PropsContextoPaneles {
  * Esto permite que DashboardGrid no necesite conocer los detalles de cada panel
  */
 function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element, manejarToggleTarea: (id: number) => void, manejarEditarHabitoPorId: (habitoId: number) => void) {
-    const {dashboard, modales, compartir, filtroTareas, ordenTareas, configTareas, opciones, acciones, valorFiltroActual} = ctx;
+    const {dashboard, modales, compartir, filtroTareas, ordenTareas, configTareas, opciones, acciones, valorFiltroActual, limites} = ctx;
+
+    /*
+     * Wrapper para crear tarea con verificación de límites
+     * Antes de crear, verifica si el usuario puede crear más tareas activas
+     */
+    const crearTareaConLimite = (datos: DatosEdicionTarea): Promise<void> => {
+        const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
+        if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) {
+            return Promise.resolve();
+        }
+        return dashboard.crearTarea(datos);
+    };
+
     return {
         tareas: ordenTareas.tareasOrdenadas,
         proyectos: dashboard.proyectos || [],
@@ -67,7 +83,7 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
         onAbrirModalNuevaTarea: () => modales.abrirCreacionRapida('tarea'),
         onAbrirModalConfigTareas: modales.abrirModalConfigTareas,
         onToggleTarea: manejarToggleTarea,
-        onCrearTarea: dashboard.crearTarea,
+        onCrearTarea: crearTareaConLimite,
         onEditarTarea: dashboard.editarTarea,
         onEliminarTarea: dashboard.eliminarTarea,
         onReordenarTareas: dashboard.reordenarTareas,
@@ -109,7 +125,19 @@ function generarPropsPanelFocoPrioritario(ctx: PropsContextoPaneles, renderHandl
 }
 
 function generarPropsPanelProyectos(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
-    const {dashboard, modales, compartir, configProyectos, opciones} = ctx;
+    const {dashboard, modales, compartir, configProyectos, opciones, limites} = ctx;
+
+    /*
+     * Wrapper para crear tarea con verificación de límites (proyectos)
+     */
+    const crearTareaConLimite = (datos: DatosEdicionTarea): Promise<void> => {
+        const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
+        if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) {
+            return Promise.resolve();
+        }
+        return dashboard.crearTarea(datos);
+    };
+
     return {
         proyectos: dashboard.proyectos || [],
         tareas: dashboard.tareas,
@@ -124,7 +152,7 @@ function generarPropsPanelProyectos(ctx: PropsContextoPaneles, renderHandleArras
         onCompartirProyecto: compartir.manejarCompartirProyecto,
         estaCompartido: compartir.estaCompartidoProyecto,
         onToggleTarea: dashboard.toggleTarea,
-        onCrearTarea: dashboard.crearTarea,
+        onCrearTarea: crearTareaConLimite,
         onEditarTarea: dashboard.editarTarea,
         onEliminarTarea: dashboard.eliminarTarea,
         onReordenarTareas: dashboard.reordenarTareas,
@@ -169,7 +197,7 @@ const GENERADORES_PROPS: Record<string, Function> = {
 };
 
 export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecucion'}: DashboardGridProps): JSX.Element {
-    const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, opciones, acciones, valorFiltroActual} = ctx;
+    const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, opciones, acciones, valorFiltroActual, limites} = ctx;
 
     /* Contexto de props compartido para los generadores */
     const propsContexto: PropsContextoPaneles = {
@@ -189,7 +217,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         acciones,
         valorFiltroActual,
         marcarDiaHabitoConSync: ctx.marcarDiaHabitoConSync,
-        desmarcarDiaHabitoConSync: ctx.desmarcarDiaHabitoConSync
+        desmarcarDiaHabitoConSync: ctx.desmarcarDiaHabitoConSync,
+        limites
     };
 
     /*

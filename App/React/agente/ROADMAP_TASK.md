@@ -44,7 +44,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [ ] **Centralizar creación de tareas**: Varias formas de crear tareas no respetan límites (principios SOLID)
 - [ ] **Placeholders vacíos unificados**: Componente reutilizable para estados vacíos (tareas, hábitos, proyectos)
 - [ ] **Unificar botón "+ Nueva tarea"**: Coherencia visual con "+ Añadir" de otros paneles
-- [ ] **Botón check centrado**: Corrección visual en modo no compacto de tareas
+- [x] **Botón check centrado**: Corrección visual en modo no compacto de tareas (YA ESTA CENTRADO)
 
 #### Prioridad Media
 - [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2)
@@ -57,6 +57,15 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [ ] Documentar configuración de Google OAuth2 (client_id, redirect URIs, etc.)
 
 ---
+
+### Revision nueva
+
+1. ✅ ~~hay una confuncion respecto a eso, 5. ✅ **Almacenamiento 1GB**: Actualizado de 50MB a 1GB límite FREE eran 1gb para los premiun y 50mb para los free~~ **CORREGIDO**: FREE=50MB, PREMIUM=1GB en `AlmacenamientoService.php` y `ModalUpgrade.tsx`
+
+2. ✅ ~~Cree una nueva cuenta y no aparece la nota ni las tareas ni los habitos genericos por defecto al registrarse.~~ **CORREGIDO**: Implementada detección de usuario nuevo en `useSyncManager.ts` - ahora sube datos iniciales al servidor en vez de sobrescribirlos con arrays vacíos.
+
+3. ✅ ~~La prioridad "muy alta" aparece solo en al configurar el habito pero no en el modal de creación rapida.~~ **CORREGIDO**: Añadido 'Muy Alta' al menú de importancia en `ModalCreacionRapida.tsx`
+
 
 ### Revisiones Anteriores Completadas (Referencia)
 
