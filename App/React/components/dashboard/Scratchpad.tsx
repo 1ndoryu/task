@@ -204,6 +204,31 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
         }
     };
 
+    /*
+     * Sincronizar el ancho del div de resaltado con el textarea
+     * Esto es necesario cuando hay líneas largas que causan scroll horizontal
+     */
+    useEffect(() => {
+        const textarea = textareaRef.current;
+        const resaltado = resaltadoRef.current;
+        if (!textarea || !resaltado || !mostrarResaltadoMarkdown) return;
+
+        const sincronizarAncho = () => {
+            if (textarea.scrollWidth > textarea.clientWidth) {
+                resaltado.style.width = `${textarea.scrollWidth}px`;
+            } else {
+                resaltado.style.width = '100%';
+            }
+        };
+
+        sincronizarAncho();
+        
+        const resizeObserver = new ResizeObserver(sincronizarAncho);
+        resizeObserver.observe(textarea);
+
+        return () => resizeObserver.disconnect();
+    }, [valor, mostrarResaltadoMarkdown]);
+
     const aplicarFormato = useCallback(
         (marcador: string) => {
             const textarea = textareaRef.current;

@@ -4,6 +4,7 @@ import {useSyncTransport} from './useSyncTransport';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from '../useLocalStorage';
 import {useSuscripcion} from '../useSuscripcion';
 import type {DashboardData, EstadoApi} from '../useDashboardApi';
+import {tareasIniciales, notasIniciales, habitosIniciales} from '../../data/datosIniciales';
 
 interface SyncMeta {
     lastModified: number;
@@ -35,13 +36,26 @@ function esServidorVacio(serverData: DashboardData | null): boolean {
 /*
  * Verifica si los datos locales contienen datos iniciales de bienvenida
  * (al menos una tarea o una nota con contenido)
+ * Nota: Si localData está vacío pero tenemos datos iniciales definidos, usamos esos.
  */
 function tieneDataInicialLocal(localData: DashboardData): boolean {
-    const tieneHabitos = localData.habitos && localData.habitos.length > 0;
-    const tieneTareas = localData.tareas && localData.tareas.length > 0;
-    const tieneNotas = localData.notas && localData.notas.trim().length > 0;
+    const tieneHabitos = !!(localData.habitos && localData.habitos.length > 0);
+    const tieneTareas = !!(localData.tareas && localData.tareas.length > 0);
+    const tieneNotas = !!(localData.notas && localData.notas.trim().length > 0);
     
     return tieneHabitos || tieneTareas || tieneNotas;
+}
+
+/*
+ * Genera datos iniciales para usuarios nuevos usando los datos de bienvenida
+ */
+function generarDatosInicialesUsuarioNuevo(): Partial<DashboardData> {
+    return {
+        habitos: habitosIniciales,
+        tareas: tareasIniciales,
+        notas: notasIniciales,
+        proyectos: []
+    };
 }
 
 export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete, isDataReady = true}: UseSyncManagerProps) {
@@ -107,21 +121,34 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                 
                 /*
                  * Caso especial: Usuario nuevo sin datos en servidor
-                 * Si el servidor está vacío pero el frontend tiene datos iniciales
-                 * (de datosIniciales.ts), preservamos los datos locales y los subimos.
+                 * Si el servidor está vacío, subimos los datos iniciales de bienvenida.
+                 * Usamos los datos locales si tienen contenido, o los datos iniciales como fallback.
                  * Esto asegura que nuevos usuarios vean las tareas/notas de bienvenida.
                  */
-                if (esServidorVacio(serverData) && tieneDataInicialLocal(currentData)) {
+                if (esServidorVacio(serverData)) {
+                    const datosParaSubir = tieneDataInicialLocal(currentData) 
+                        ? currentData 
+                        : {...currentData, ...generarDatosInicialesUsuarioNuevo()};
+                    
                     console.log('[SyncManager] Usuario nuevo detectado. Subiendo datos iniciales al servidor...');
                     
                     const success = await saveData({
-                        ...currentData,
+                        ...datosParaSubir,
                         // @ts-ignore - Flag opcional para backend
                         generateBackup: false
                     });
                     
                     if (success) {
                         console.log('[SyncManager] Datos iniciales sincronizados correctamente.');
+                        
+                        /*
+                         * Si usamos datos iniciales porque currentData estaba vacío,
+                         * notificar al frontend para que actualice su estado local
+                         */
+                        if (!tieneDataInicialLocal(currentData)) {
+                            onDataReceived(datosParaSubir as DashboardData);
+                        }
+                        
                         setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
                         markChangesAsSynced();
                     }

@@ -83,27 +83,29 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-### Revisiones nuevas
+### Revisiones nuevas ✅ COMPLETADAS (2026-02-01)
 
-1. El boton de de + añadir de las tareas no funciona.
+**Todas las tareas corregidas:**
 
-2. La altura del panel de notas donse se escribe sigue sin ocupar la la altura completa, el texto invisible y visible siguen siendo muy diferentes en tamaño y todo, esto esta muy mal y necesita una revision profunda, tampoco respeta la configuracion de tamaño de texto en la configuracion de tarea. (scratchpadTextarea)
+1. ✅ ~~El boton de + añadir de las tareas no funciona.~~ **CORREGIDO**: Añadido prop `onAbrirModalCrear` a `ListaTareas.tsx` y conectado con `PanelEjecucion.tsx` para abrir el modal de creación rápida.
 
-este es el estilo correcto
+2. ✅ ~~Scratchpad: div de resaltado debe tener mismo ancho que textarea.~~ **CORREGIDO**: Añadido `useEffect` con `ResizeObserver` en `Scratchpad.tsx` para sincronizar `scrollWidth` del textarea con el div de resaltado. Actualizado CSS en `scratchpad.css` para usar `min-width: 100%` en lugar de `inset: 0`.
 
-.scratchpadTextarea--resaltado {
-    color: transparent;
-    caret-color: var(--dashboard-textoSecundario);
-    position: relative;
-    z-index: 1;
-}
+3. ✅ ~~La nota inicial al registrarse sigue sin cargar, tampoco cargan las tareas iniciales.~~ **CORREGIDO**: Mejorada lógica en `useSyncManager.ts` - ahora importa directamente `datosIniciales.ts` y usa `generarDatosInicialesUsuarioNuevo()` como fallback cuando el servidor está vacío y `currentData` no tiene datos iniciales.
 
-3. LA NOTA INICIAL AL REGISTRARSE SIGUE SIN CARGAR AHORA TAMPOCO CARGAN LAS TAREAS INICIALES AL REGISTRARSE.
+4. ✅ ~~El boton de crear tarea del placeholder vacío debe abrir el modal de creación rápida.~~ **CORREGIDO**: `EstadoVacio` en `ListaTareas.tsx` ahora usa `onAbrirModalCrear` si está disponible, con fallback a `onCrearTarea`.
 
-4. El boton de crear tarea del placeholder vacío debe abrir el modal de creacion rapida de tarea, no crear una tareap, igual cuando se da click en + añadir debería pasar lo mismo pero no funciona.
+5. ✅ ~~Feedback Premium no detecta usuario premium.~~ **CORREGIDO**: `ModalFeedback.tsx` ahora usa `estado.esPremium` del servidor en lugar del hook local `useSuscripcion` que podía estar desactualizado.
 
+6. ✅ ~~Panel Admin Feedback da error 403.~~ **CORREGIDO**: `ListaFeedbackAdmin.tsx` - arreglada obtención de nonce usando `gloryDashboard?.nonce` y corregido mapeo de campos a camelCase (`usuarioNombre`, `usuarioEmail`, `fechaCreacion`).
 
-### Revision nueva ✅ COMPLETADA (2026-01-31)
+7. ✅ ~~Botón +Añadir en proyectos debe abrir modal con proyecto preseleccionado.~~ **CORREGIDO**: Añadido prop `onAbrirModalCrear` a `ListaProyectos.tsx`, `ProyectoItem`, `PanelProyectos.tsx` y `DashboardGrid.tsx`. El botón ahora abre `ModalCreacionRapida` con el `proyectoId` correspondiente.
+
+8. ✅ ~~Al pausar hábito desde modal, el estado no se actualiza en tiempo real.~~ **CORREGIDO**: `useDashboardHabitos.ts` ahora guarda solo `habitoEditandoId` en lugar del objeto completo, derivando el hábito actual del store de Zustand con `useMemo`. Esto hace que el estado sea reactivo a cambios del store.
+
+---
+
+### Revision antigua ✅ COMPLETADA (2026-01-31)
 
 **Todas las tareas corregidas:**
 

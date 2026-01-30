@@ -7,7 +7,6 @@
 import {useState, useEffect} from 'react';
 import {MessageSquare, Send, AlertCircle, CheckCircle, Loader2} from 'lucide-react';
 import {Modal} from './Modal';
-import {useSuscripcion} from '../../hooks/useSuscripcion';
 
 interface ModalFeedbackProps {
     estaAbierto: boolean;
@@ -34,7 +33,8 @@ function obtenerNonce(): string {
 }
 
 export function ModalFeedback({estaAbierto, onCerrar}: ModalFeedbackProps): JSX.Element | null {
-    const {esPremium} = useSuscripcion();
+    /* Nota: usamos el estado desde el servidor (estado.esPremium) para verificar premium, 
+       ya que el endpoint /feedback/restante lo valida con la BD actualizada */
     const [tipo, setTipo] = useState<TipoFeedback>('sugerencia');
     const [mensaje, setMensaje] = useState('');
     const [estado, setEstado] = useState<EstadoFeedback>({restante: 3, esPremium: false, cargando: true});

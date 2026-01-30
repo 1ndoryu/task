@@ -33,7 +33,18 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
     const habitos = useMemo(() => migrarYActualizarHabitos(habitosRaw, CONFIGURACION_POR_DEFECTO), [habitosRaw]);
 
     const [modalCrearHabitoAbierto, setModalCrearHabitoAbierto] = useState(false);
-    const [habitoEditando, setHabitoEditando] = useState<Habito | null>(null);
+    /*
+     * Guardamos solo el ID del hábito editando, no una copia del objeto.
+     * Esto permite que cuando el store se actualice (ej: al pausar), 
+     * el hábito derivado siempre refleje el estado actual del store.
+     */
+    const [habitoEditandoId, setHabitoEditandoId] = useState<number | null>(null);
+    
+    /* Derivar el hábito editando del array de hábitos actual (reactivo al store) */
+    const habitoEditando = useMemo(() => {
+        if (habitoEditandoId === null) return null;
+        return habitos.find(h => h.id === habitoEditandoId) ?? null;
+    }, [habitos, habitoEditandoId]);
 
     /*
      * Control del modal de crear hábito
@@ -50,11 +61,11 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
      * Control del modal de editar habito
      */
     const abrirModalEditarHabito = useCallback((habito: Habito) => {
-        setHabitoEditando(habito);
+        setHabitoEditandoId(habito.id);
     }, []);
 
     const cerrarModalEditarHabito = useCallback(() => {
-        setHabitoEditando(null);
+        setHabitoEditandoId(null);
     }, []);
 
     /*
@@ -95,12 +106,12 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
 
             /* Si no hubo cambios, solo cerrar el modal sin guardar ni registrar acción */
             if (!huboCambios) {
-                setHabitoEditando(null);
+                setHabitoEditandoId(null);
                 return;
             }
 
             storeEditarHabito(id, datos);
-            setHabitoEditando(null);
+            setHabitoEditandoId(null);
             mostrarMensaje(`Habito "${datos.nombre}" actualizado`, 'exito');
 
             registrarAccion(`"${datos.nombre}" editado`, () => {
@@ -118,7 +129,7 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
             const habitoEliminado = storeEliminarHabito(id);
             if (!habitoEliminado) return;
 
-            setHabitoEditando(null);
+            setHabitoEditandoId(null);
             mostrarMensaje(`Habito "${habitoEliminado.nombre}" eliminado`, 'exito');
 
             registrarAccion(`"${habitoEliminado.nombre}" eliminado`, () => {

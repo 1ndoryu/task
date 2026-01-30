@@ -8,14 +8,15 @@
 import {useState, useEffect, useCallback} from 'react';
 import {MessageSquare, ChevronLeft, ChevronRight, Clock, AlertCircle, Eye, EyeOff, Bug, Lightbulb, HelpCircle} from 'lucide-react';
 
+/* Interfaz con claves camelCase según respuesta del API */
 interface FeedbackItem {
     id: number;
-    usuario_nombre: string;
-    usuario_email: string;
+    usuarioNombre: string;
+    usuarioEmail: string;
     tipo: 'sugerencia' | 'bug' | 'otro';
     mensaje: string;
     leido: boolean;
-    fecha_creacion: string;
+    fechaCreacion: string;
 }
 
 interface PaginacionFeedback {
@@ -59,6 +60,12 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
     const [error, setError] = useState<string | null>(null);
     const [expandido, setExpandido] = useState<number | null>(null);
 
+    /* Obtener nonce desde gloryDashboard */
+    const obtenerNonce = (): string => {
+        const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
+        return wpData?.nonce || '';
+    };
+
     /* Cargar feedback */
     const cargarFeedback = useCallback(async (pagina = 1) => {
         setCargando(true);
@@ -66,7 +73,8 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
 
         try {
             const response = await fetch(`/wp-json/glory/v1/admin/feedback?pagina=${pagina}&porPagina=15`, {
-                headers: {'X-WP-Nonce': (window as any).wpApiSettings?.nonce || ''}
+                credentials: 'include',
+                headers: {'X-WP-Nonce': obtenerNonce()}
             });
 
             if (!response.ok) {
@@ -74,7 +82,8 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
             }
 
             const data = await response.json();
-            setFeedback(data.items || []);
+            /* El API devuelve 'feedbacks' en camelCase */
+            setFeedback(data.feedbacks || []);
             setPaginacion({
                 pagina: data.pagina || 1,
                 totalPaginas: data.totalPaginas || 1,
@@ -92,7 +101,8 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
         try {
             await fetch(`/wp-json/glory/v1/admin/feedback/${id}/leido`, {
                 method: 'PUT',
-                headers: {'X-WP-Nonce': (window as any).wpApiSettings?.nonce || ''}
+                credentials: 'include',
+                headers: {'X-WP-Nonce': obtenerNonce()}
             });
 
             setFeedback(prev => prev.map(item => (item.id === id ? {...item, leido: true} : item)));
@@ -153,10 +163,10 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
                             <div className="feedbackItemInfo">
                                 {iconoPorTipo(item.tipo)}
                                 <span className="feedbackItemTipo">{item.tipo}</span>
-                                <span className="feedbackItemUsuario">{item.usuario_nombre || item.usuario_email}</span>
+                                <span className="feedbackItemUsuario">{item.usuarioNombre || item.usuarioEmail}</span>
                             </div>
                             <div className="feedbackItemMeta">
-                                <span className="feedbackItemFecha">{formatearFecha(item.fecha_creacion)}</span>
+                                <span className="feedbackItemFecha">{formatearFecha(item.fechaCreacion)}</span>
                                 {!item.leido && <span className="feedbackItemNuevo">Nuevo</span>}
                             </div>
                         </div>
@@ -166,7 +176,7 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
                             <div className="feedbackItemContenido">
                                 <p className="feedbackItemMensaje">{item.mensaje}</p>
                                 <div className="feedbackItemAcciones">
-                                    <span className="feedbackItemEmailFull">{item.usuario_email}</span>
+                                    <span className="feedbackItemEmailFull">{item.usuarioEmail}</span>
                                     {!item.leido && (
                                         <button type="button" className="feedbackItemBotonLeido" onClick={() => marcarLeido(item.id)} title="Marcar como leído">
                                             <Eye size={14} />

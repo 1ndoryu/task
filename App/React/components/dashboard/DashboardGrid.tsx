@@ -158,7 +158,9 @@ function generarPropsPanelProyectos(ctx: PropsContextoPaneles, renderHandleArras
         onReordenarTareas: dashboard.reordenarTareas,
         renderHandleArrastre,
         handleMinimizar,
-        modoCompacto: configProyectos.configuracion.modoCompacto
+        modoCompacto: configProyectos.configuracion.modoCompacto,
+        /* Abre modal de creación rápida con el proyecto preseleccionado */
+        onAbrirModalCrearTarea: (proyectoId: number) => modales.abrirCreacionRapida('tarea', {proyectoId})
     };
 }
 
