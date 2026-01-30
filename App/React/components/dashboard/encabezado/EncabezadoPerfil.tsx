@@ -1,5 +1,5 @@
 import {useState, useRef} from 'react';
-import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut} from 'lucide-react';
+import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus} from 'lucide-react';
 import {MenuContextual} from '../../shared';
 import type {InfoSuscripcion} from '../../../types/dashboard';
 
@@ -24,18 +24,19 @@ interface EncabezadoPerfilProps {
     onClickPlan?: () => void;
     onClickTemas?: () => void;
     onClickConfigMCP?: () => void;
+    onClickFeedback?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
 }
 
-export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickPlan, onClickTemas, onClickConfigMCP, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
+export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickPlan, onClickTemas, onClickConfigMCP, onClickFeedback, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
     const [menuUsuario, setMenuUsuario] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
 
-    /* Opciones del menu contextual del usuario */
-    const opcionesMenuUsuario = [{id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />}, {id: 'configuracion', etiqueta: 'Configuración', icono: <Settings size={12} />}, {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />}, {id: 'backups', etiqueta: 'Copias de Seguridad', icono: <Database size={12} />}, {id: 'temas', etiqueta: 'Temas', icono: <Palette size={12} />}, {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={12} />}, ...(esPremiumActivo ? [{id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />}] : []), {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true}, {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />}, {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true}, {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}];
+    /* Opciones del menu contextual del usuario - Feedback solo para Premium */
+    const opcionesMenuUsuario = [{id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />}, {id: 'configuracion', etiqueta: 'Configuración', icono: <Settings size={12} />}, {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />}, {id: 'backups', etiqueta: 'Copias de Seguridad', icono: <Database size={12} />}, {id: 'temas', etiqueta: 'Temas', icono: <Palette size={12} />}, {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={12} />}, ...(esPremiumActivo ? [{id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />}, {id: 'feedback', etiqueta: 'Enviar Comentarios', icono: <MessageSquarePlus size={12} />}] : []), {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true}, {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />}, {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true}, {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}];
 
     const manejarClickUsuario = (evento: React.MouseEvent) => {
         evento.preventDefault();
@@ -72,6 +73,9 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
                 break;
             case 'mcp':
                 onClickConfigMCP?.();
+                break;
+            case 'feedback':
+                onClickFeedback?.();
                 break;
             case 'exportar':
                 onExportarDatos?.();

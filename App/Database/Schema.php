@@ -361,6 +361,27 @@ class Schema
             KEY created_at (created_at)
         ) $charset_collate;";
 
+        /* 
+         * Tabla de Feedback (Comentarios de usuarios Premium)
+         * Los usuarios Premium pueden enviar hasta 3 comentarios por día
+         */
+        $table_feedback = $wpdb->prefix . 'glory_feedback';
+        $sql_feedback = "CREATE TABLE $table_feedback (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            usuario_nombre varchar(255) NOT NULL,
+            usuario_email varchar(255) NOT NULL,
+            tipo varchar(50) NOT NULL DEFAULT 'sugerencia',
+            mensaje text NOT NULL,
+            leido tinyint(1) NOT NULL DEFAULT 0,
+            fecha_creacion datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY tipo (tipo),
+            KEY leido (leido),
+            KEY fecha_creacion (fecha_creacion)
+        ) $charset_collate;";
+
         dbDelta($sql_habitos);
         dbDelta($sql_equipos);
         dbDelta($sql_notificaciones);
@@ -373,6 +394,7 @@ class Schema
         dbDelta($sql_actividad);
         dbDelta($sql_habitos_historial);
         dbDelta($sql_backups);
+        dbDelta($sql_feedback);
     }
 
     /**
@@ -382,6 +404,18 @@ class Schema
     {
         global $wpdb;
         return $wpdb->prefix . 'glory_' . $entity;
+    }
+
+    /**
+     * Verifica si una tabla existe
+     */
+    public static function tableExists(string $entity): bool
+    {
+        global $wpdb;
+        $table = self::getTableName($entity);
+        return (bool)$wpdb->get_var(
+            $wpdb->prepare("SHOW TABLES LIKE %s", $table)
+        );
     }
 
     /**

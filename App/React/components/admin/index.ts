@@ -8,3 +8,4 @@ export {ListaUsuarios} from './ListaUsuarios';
 export {FilaUsuario} from './FilaUsuario';
 export {ResumenAdmin} from './ResumenAdmin';
 export {DetalleUsuario} from './DetalleUsuario';
+export {ListaFeedbackAdmin} from './ListaFeedbackAdmin';

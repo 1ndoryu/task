@@ -54,6 +54,7 @@ interface DashboardEncabezadoProps {
     onClickConfigUsuario?: () => void;
     onClickBackups?: () => void;
     onClickConfigMCP?: () => void;
+    onClickFeedback?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
     // Buscador
@@ -98,6 +99,7 @@ export function DashboardEncabezado({
     onClickConfigUsuario,
     onClickBackups,
     onClickConfigMCP,
+    onClickFeedback,
     onExportarDatos,
     onImportarDatos,
     // Buscador
@@ -164,7 +166,7 @@ export function DashboardEncabezado({
 
                 <EncabezadoEstado sincronizacion={sincronizacion} />
 
-                <EncabezadoPerfil usuario={usuario} version={version} avatarUrl={avatarUrl} suscripcion={suscripcion} estaConectado={estaConectado} esTablet={esTablet} sincronizacion={sincronizacion} onClickUsuario={onClickUsuario} onClickSeguridad={onClickSeguridad} onClickBackups={onClickBackups} onClickConfigUsuario={onClickConfigUsuario} onClickVersion={onClickVersion} onClickPlan={onClickPlan} onClickTemas={onClickTemas} onClickConfigMCP={onClickConfigMCP} onExportarDatos={onExportarDatos} onImportarDatos={onImportarDatos} />
+                <EncabezadoPerfil usuario={usuario} version={version} avatarUrl={avatarUrl} suscripcion={suscripcion} estaConectado={estaConectado} esTablet={esTablet} sincronizacion={sincronizacion} onClickUsuario={onClickUsuario} onClickSeguridad={onClickSeguridad} onClickBackups={onClickBackups} onClickConfigUsuario={onClickConfigUsuario} onClickVersion={onClickVersion} onClickPlan={onClickPlan} onClickTemas={onClickTemas} onClickConfigMCP={onClickConfigMCP} onClickFeedback={onClickFeedback} onExportarDatos={onExportarDatos} onImportarDatos={onImportarDatos} />
 
                 <EncabezadoOpcionesMovil opcionesMovil={opcionesMovil} menuOpcionesMovilAbierto={menuOpcionesMovilAbierto} onAbrirMenuOpcionesMovil={() => setMenuOpcionesMovilAbierto(true)} onCerrarMenuOpcionesMovil={() => setMenuOpcionesMovilAbierto(false)} estaConectado={estaConectado} onSeleccionarTarea={onSeleccionarTarea} onAbrirBuscadorMovil={() => setMostrarBuscadorMovil(true)} esTablet={esTablet} />
             </nav>

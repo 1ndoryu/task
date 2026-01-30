@@ -132,6 +132,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onClickConfigUsuario={modales.abrirModalConfigUsuario}
                 onClickBackups={modales.abrirModalBackups}
                 onClickConfigMCP={modales.abrirModalConfigMCP}
+                onClickFeedback={modales.abrirModalFeedback}
                 onExportarDatos={dashboard.exportarTodosDatos}
                 onImportarDatos={dashboard.importarTodosDatos}
                 tareas={dashboard.tareas}

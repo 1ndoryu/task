@@ -2,11 +2,12 @@
  * SeccionAdjuntos
  * Componente para gestionar archivos adjuntos en una tarea
  * Refactorizado para usar hooks y componentes atomicos (SRP)
+ * Incluye verificación de límites según plan de suscripción
  */
 
 import {useRef, useState} from 'react';
-import {Upload, Loader2, AlertTriangle, X} from 'lucide-react';
-import type {Adjunto} from '../../types/dashboard';
+import {Upload, Loader2, AlertTriangle, X, Crown} from 'lucide-react';
+import type {Adjunto, LimitesPlan} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
 
 import {useAudioPlayer} from '../../hooks/shared/useAudioPlayer';
@@ -23,15 +24,36 @@ interface SeccionAdjuntosProps {
     modoLegacy?: boolean;
     estilo?: 'clasico' | 'moderno';
     etiqueta?: string;
+    /* Props de suscripción para verificar límites */
+    limiteAdjuntos?: number;
+    onClickUpgrade?: () => void;
 }
 
-export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo = 'clasico', etiqueta = 'Adjuntos'}: SeccionAdjuntosProps): JSX.Element {
+export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo = 'clasico', etiqueta = 'Adjuntos', limiteAdjuntos = 0, onClickUpgrade}: SeccionAdjuntosProps): JSX.Element {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioPlayer = useAudioPlayer();
     const adjuntosCifrados = useAdjuntosCifrados();
     const {error, estadoSubida, handleFileSelect, eliminarAdjunto} = useGestionAdjuntos(adjuntos, onChange, modoLegacy);
 
     const [previewImage, setPreviewImage] = useState<Adjunto | null>(null);
+
+    /* Verificar si tiene permisos para subir adjuntos */
+    const puedeSubir = limiteAdjuntos > 0;
+    const alcanzadoLimite = adjuntos.length >= limiteAdjuntos;
+
+    /* Manejar click en area de subida con verificación de límites */
+    const manejarClickSubida = () => {
+        if (!puedeSubir && onClickUpgrade) {
+            onClickUpgrade();
+            return;
+        }
+        if (alcanzadoLimite) {
+            return;
+        }
+        if (!estadoSubida.subiendo) {
+            fileInputRef.current?.click();
+        }
+    };
 
     const obtenerUrlPreview = (adjunto: Adjunto): string | null => {
         if (adjunto.url.startsWith('data:')) return adjunto.url;
@@ -74,17 +96,27 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                         ))}
                     </div>
                 )}
-                {/* Area de carga */}
-                <div className={`adjuntosAreaCarga ${estadoSubida.subiendo ? 'adjuntosAreaCarga--subiendo' : ''}`} onClick={() => !estadoSubida.subiendo && fileInputRef.current?.click()}>
+                {/* Area de carga con verificación de límites */}
+                <div className={`adjuntosAreaCarga ${estadoSubida.subiendo ? 'adjuntosAreaCarga--subiendo' : ''} ${!puedeSubir ? 'adjuntosAreaCarga--bloqueado' : ''} ${alcanzadoLimite ? 'adjuntosAreaCarga--limite' : ''}`} onClick={manejarClickSubida}>
                     {estadoSubida.subiendo ? (
                         <>
                             <Loader2 size={16} className="adjuntosIconoCarga iconoGirando" />
                             <span className="adjuntosSubtextoCarga">Subiendo archivo...</span>
                         </>
+                    ) : !puedeSubir ? (
+                        <>
+                            <Crown size={16} className="adjuntosIconoCarga adjuntosIconoPremium" />
+                            <span className="adjuntosSubtextoCarga">Función Premium - Click para actualizar</span>
+                        </>
+                    ) : alcanzadoLimite ? (
+                        <>
+                            <AlertTriangle size={16} className="adjuntosIconoCarga adjuntosIconoLimite" />
+                            <span className="adjuntosSubtextoCarga">Límite alcanzado ({limiteAdjuntos} adjuntos)</span>
+                        </>
                     ) : (
                         <>
                             <Upload size={16} className="adjuntosIconoCarga" />
-                            <span className="adjuntosSubtextoCarga">Imágenes, Audios o Documentos (Max 5MB)</span>
+                            <span className="adjuntosSubtextoCarga">Imágenes, Audios o Documentos ({adjuntos.length}/{limiteAdjuntos})</span>
                         </>
                     )}
                 </div>
@@ -98,7 +130,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                         if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
                     accept="image/*,audio/*,.pdf,.doc,.docx,.txt"
-                    disabled={estadoSubida.subiendo}
+                    disabled={estadoSubida.subiendo || !puedeSubir || alcanzadoLimite}
                 />
 
                 {(error || estadoSubida.error) && (
@@ -116,12 +148,19 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
     const renderContenidoModerno = () => (
         <>
             <div className="propiedadesCompactas">
-                <span className="propiedadesCompactas__etiqueta">{etiqueta}</span>
+                <span className="propiedadesCompactas__etiqueta">{etiqueta}{puedeSubir && ` (${adjuntos.length}/${limiteAdjuntos})`}</span>
                 <div className="propiedadesCompactas__contenido">
-                    <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => fileInputRef.current?.click()} title="Agregar adjunto" disabled={estadoSubida.subiendo}>
-                        {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
-                        <span>Agregar</span>
-                    </button>
+                    {!puedeSubir ? (
+                        <button type="button" className="pillOpcion pillOpcion--premium" onClick={onClickUpgrade} title="Función Premium">
+                            <Crown size={14} />
+                            <span>Premium</span>
+                        </button>
+                    ) : (
+                        <button type="button" className="pillOpcion pillOpcion--vacio" onClick={manejarClickSubida} title={alcanzadoLimite ? 'Límite alcanzado' : 'Agregar adjunto'} disabled={estadoSubida.subiendo || alcanzadoLimite}>
+                            {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
+                            <span>{alcanzadoLimite ? 'Límite' : 'Agregar'}</span>
+                        </button>
+                    )}
                     {(error || estadoSubida.error) && (
                         <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
                             {error || estadoSubida.error}
@@ -148,7 +187,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
                 accept="image/*,audio/*,.pdf,.doc,.docx,.txt"
-                disabled={estadoSubida.subiendo}
+                disabled={estadoSubida.subiendo || !puedeSubir || alcanzadoLimite}
             />
 
             {previewImage && <AdjuntoOverlay previewImage={previewImage} url={previewImage.url} onClose={() => setPreviewImage(null)} />}

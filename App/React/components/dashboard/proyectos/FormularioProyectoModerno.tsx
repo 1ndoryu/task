@@ -46,6 +46,9 @@ interface FormularioProyectoModernoProps {
     /* Adjuntos del proyecto (Fase 9.2.5) */
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
+    /* Límites de suscripción para adjuntos */
+    limiteAdjuntos?: number;
+    onClickUpgrade?: () => void;
     /* Tareas para la lista compacta (Fase 9.2.7) - DEPRECADO POR HITOS */
     tareas?: Tarea[];
     onToggleTarea?: (id: number) => void;
@@ -54,7 +57,7 @@ interface FormularioProyectoModernoProps {
     onHitosChange?: (hitos: Hito[]) => void;
 }
 
-export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, estado = 'activo', onEstadoChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, tareas = [], onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
+export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, estado = 'activo', onEstadoChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, limiteAdjuntos = 0, onClickUpgrade, tareas = [], onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
     /* Mostrar seccion de responsables solo en modo edicion */
     const mostrarResponsables = modoEdicion;
 
@@ -87,7 +90,7 @@ export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, 
             {mostrarResponsables && <SeccionResponsables participantes={participantes} companeros={companeros} onAgregar={onAgregarParticipante} onRemover={onRemoverParticipante} onCambiarRol={onCambiarRolParticipante} puedeGestionar={puedeGestionarParticipantes} etiqueta="Miembros" />}
 
             {/* Seccion de adjuntos (Inline - Fase 9.2.5) */}
-            {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}
+            {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" limiteAdjuntos={limiteAdjuntos} onClickUpgrade={onClickUpgrade} />}
 
             {/* Lista de Hitos (Fase 9.2.7) */}
             {onHitosChange && <ListaHitos hitos={hitos} onChange={onHitosChange} />}

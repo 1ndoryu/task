@@ -111,6 +111,10 @@ interface UseModalesDashboardReturn {
     modalBackupsAbierto: boolean;
     abrirModalBackups: () => void;
     cerrarModalBackups: () => void;
+    /* Feedback */
+    modalFeedbackAbierto: boolean;
+    abrirModalFeedback: () => void;
+    cerrarModalFeedback: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -158,6 +162,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalConfigUsuarioAbierto, setModalConfigUsuarioAbierto] = useState(false);
     /* Backups */
     const [modalBackupsAbierto, setModalBackupsAbierto] = useState(false);
+    /* Feedback */
+    const [modalFeedbackAbierto, setModalFeedbackAbierto] = useState(false);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -256,6 +262,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const abrirModalBackups = useCallback(() => setModalBackupsAbierto(true), []);
     const cerrarModalBackups = useCallback(() => setModalBackupsAbierto(false), []);
 
+    /* Handlers Feedback */
+    const abrirModalFeedback = useCallback(() => setModalFeedbackAbierto(true), []);
+    const cerrarModalFeedback = useCallback(() => setModalFeedbackAbierto(false), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -330,6 +340,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalConfigUsuario,
         modalBackupsAbierto,
         abrirModalBackups,
-        cerrarModalBackups
+        cerrarModalBackups,
+        modalFeedbackAbierto,
+        abrirModalFeedback,
+        cerrarModalFeedback
     };
 }

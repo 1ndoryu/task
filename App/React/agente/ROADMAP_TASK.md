@@ -47,12 +47,61 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 #### Prioridad Media
 - [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2) (ESTO ES UNA TAREA PENDIENTE PARA EL USUARIO)
-- [ ] **Botón comentarios Premium**: Solo usuarios premium pueden enviar feedback, esta opcion ira en el menu contextual del usuario y abrira un modal para enviar comentarios (maximo 3 al días).
-- [ ] **Panel Admin mensajes**: Tab para ver mensajes de usuarios en panel admin
-- [ ] **Scroll Panel Admin**: Unificar a un solo scroll (actualmente hay 3), hacer este panel mas compacto, y mas minimalista estilo consola.
-- [ ] **Integración adjuntos límites**: Prop drilling para verificar límites en adjuntos (15.7.4)
+- [x] **Botón comentarios Premium**: Solo usuarios premium pueden enviar feedback, opción en menú contextual del usuario, modal con máximo 3 al día.
+- [x] **Panel Admin mensajes**: Tab para ver mensajes de usuarios en panel admin
+- [x] **Scroll Panel Admin**: Unificado a un solo scroll, diseño más compacto y minimalista.
+- [x] **Integración adjuntos límites**: Prop drilling para verificar límites en adjuntos (15.7.4)
 
 ---
+
+### Implementación Feedback Premium y Mejoras Admin (2026-01-31)
+
+**Tareas completadas:**
+
+1. ✅ **Sistema de Feedback Premium**:
+   - `FeedbackApiController.php`: API REST con endpoints POST/GET para enviar y listar feedback
+   - `ModalFeedback.tsx`: Modal con verificación premium, límite 3/día, tipos (sugerencia/bug/otro)
+   - `feedback.css`: Estilos del modal
+   - Schema de BD `glory_feedback` con campos: id, user_id, usuario_nombre, usuario_email, tipo, mensaje, leido, fecha_creacion
+   - Integración en `EncabezadoPerfil.tsx`, `useModalesDashboard.ts`, `DashboardModales.tsx`, `DashboardEncabezado.tsx`, `DashboardIsland.tsx`
+
+2. ✅ **Tab de Feedback en Panel Admin**:
+   - `ListaFeedbackAdmin.tsx`: Componente con lista expandible, paginación, marcar como leído
+   - `PanelAdministracion.tsx`: Tabs Usuarios/Feedback con iconos
+   - Estilos en `panelAdministracion.css`
+
+3. ✅ **Scroll y Diseño Panel Admin**:
+   - Eliminado scroll anidado en `.listaUsuariosFilas`
+   - Reducido gap y padding en tarjetas, filtros y filas
+   - Diseño más compacto con espaciados `--dashboard-espacioSm`
+
+4. ✅ **Integración Límites Adjuntos**:
+   - `SeccionAdjuntos.tsx`: Props `limiteAdjuntos` y `onClickUpgrade`
+   - Estados visuales: bloqueado (premium), límite alcanzado
+   - Propagación en `FormularioTareaModerno.tsx` y `FormularioProyectoModerno.tsx`
+   - Estilos en `adjuntos.css`: `.adjuntosAreaCarga--bloqueado`, `.adjuntosAreaCarga--limite`, `.pillOpcion--premium`
+
+---
+
+### Revisiones nuevas
+
+1. El boton de de + añadir de las tareas no funciona.
+
+2. La altura del panel de notas donse se escribe sigue sin ocupar la la altura completa, el texto invisible y visible siguen siendo muy diferentes en tamaño y todo, esto esta muy mal y necesita una revision profunda, tampoco respeta la configuracion de tamaño de texto en la configuracion de tarea. (scratchpadTextarea)
+
+este es el estilo correcto
+
+.scratchpadTextarea--resaltado {
+    color: transparent;
+    caret-color: var(--dashboard-textoSecundario);
+    position: relative;
+    z-index: 1;
+}
+
+3. LA NOTA INICIAL AL REGISTRARSE SIGUE SIN CARGAR AHORA TAMPOCO CARGAN LAS TAREAS INICIALES AL REGISTRARSE.
+
+4. El boton de crear tarea del placeholder vacío debe abrir el modal de creacion rapida de tarea, no crear una tareap, igual cuando se da click en + añadir debería pasar lo mismo pero no funciona.
+
 
 ### Revision nueva ✅ COMPLETADA (2026-01-31)
 

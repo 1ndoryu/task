@@ -111,6 +111,9 @@
 @import './componentes/modalConfiguracionMCP.css';
 @import './componentes/modalConfiguracionUsuario.css';
 
+/* Sistema de Feedback (Premium) */
+@import './componentes/feedback.css';
+
 /* Overlay de Enfoque */
 @import './componentes/overlayEnfoque.css';
 

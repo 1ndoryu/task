@@ -51,6 +51,9 @@ interface FormularioTareaModernoProps {
     /* Adjuntos */
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
+    /* Límites de suscripción para adjuntos */
+    limiteAdjuntos?: number;
+    onClickUpgrade?: () => void;
     /* Etiquetas (Fase 9.7.3) */
     tags?: string[];
     onTagsChange?: (tags: string[]) => void;
@@ -70,7 +73,7 @@ interface FormularioTareaModernoProps {
 
 import {ListaSubtareas} from './ListaSubtareas';
 
-export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, tags = [], onTagsChange, modoEdicion = false, errorTexto, tareaId, subtareas, onCrearSubtarea, onToggleSubtarea, onEliminarSubtarea, onConfigurarSubtarea, onEditarSubtarea, esSubtarea = false}: FormularioTareaModernoProps): JSX.Element {
+export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDescripcionChange, completado, onCompletadoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, proyectoId, proyectos = [], onProyectoChange, tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, participantes = [], asignadoA, asignadoANombre, asignadoAAvatar, onAsignacionChange, companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, adjuntos = [], onAdjuntosChange, limiteAdjuntos = 0, onClickUpgrade, tags = [], onTagsChange, modoEdicion = false, errorTexto, tareaId, subtareas, onCrearSubtarea, onToggleSubtarea, onEliminarSubtarea, onConfigurarSubtarea, onEditarSubtarea, esSubtarea = false}: FormularioTareaModernoProps): JSX.Element {
     /* Mostrar selector de proyecto solo si hay proyectos y callback */
     const mostrarProyecto = proyectos.length > 0 && onProyectoChange;
 
@@ -135,7 +138,7 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
             )}
 
             {/* Adjuntos */}
-            {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" />}
+            {onAdjuntosChange && <SeccionAdjuntos adjuntos={adjuntos} onChange={onAdjuntosChange} estilo="moderno" limiteAdjuntos={limiteAdjuntos} onClickUpgrade={onClickUpgrade} />}
 
             {/* Subtareas: Solo si no es ya una subtarea (evitar anidado infinito) */}
             {modoEdicion && !esSubtarea && typeof tareaId === 'number' && (

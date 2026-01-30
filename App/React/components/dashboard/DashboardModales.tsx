@@ -19,6 +19,7 @@ import {ModalConfiguracionScratchpad} from './ModalConfiguracionScratchpad';
 import {ModalConfiguracionActividad} from './ModalConfiguracionActividad';
 
 import {ToastDeshacer, ModalUpgrade, ModalLimiteAlcanzado, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones, ModalTemas} from '../shared';
+import {ModalFeedback} from '../shared/ModalFeedback';
 import {PanelAdministracion} from '../admin';
 import {ModalEquipos} from '../equipos';
 import {ModalNotificaciones} from '../notificaciones';
@@ -192,6 +193,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
 
             {/* Modales Misceláneos */}
             <ModalVersiones estaAbierto={modales.modalVersionesAbierto} onCerrar={modales.cerrarModalVersiones} />
+            <ModalFeedback estaAbierto={modales.modalFeedbackAbierto} onCerrar={modales.cerrarModalFeedback} />
             {esAdmin && <PanelAdministracion estaAbierto={modales.panelAdminAbierto} onCerrar={modales.cerrarPanelAdmin} />}
             <ModalExperimentos abierto={modales.modalExperimentosAbierto} onCerrar={modales.cerrarModalExperimentos} acciones={accionesExperimentos} />
 
