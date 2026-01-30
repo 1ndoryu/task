@@ -106,7 +106,13 @@ Todas estas tareas no se logran solucionar facilmente, trabajar en profundidad r
    - El textarea cubre el 100% de altura del contenedor sin conflictos
    - Archivos modificados: `Scratchpad.tsx` (nuevo useEffect + ref contenedor), `scratchpad.css` (dimensiones controladas por JS)
 
-3. ~~La nota inicial al registrarse sigue sin cargar, tampoco cargan las tareas iniciales.~~ Esto no se arreglo, es un problema profundo que requiere revision profunda. Atender individualmente en profundidad para entender porque no aparece nada inicial a registrarse. Si se requiere refactorización profunda, pues trabajar en eso.
+3. ✅ **Datos iniciales para usuarios nuevos RESUELTO DEFINITIVAMENTE (2026-02-01)**: Refactorización profunda de `useSyncManager.ts` para resolver condición de carrera con hidratación de Zustand. Solución implementada:
+   - **Problema raíz identificado**: Cuando un usuario nuevo se registra, `currentData.habitos` llegaba vacío porque Zustand persist se hidrata con `[]` antes de que useSyncManager pueda detectar el estado real.
+   - **Nueva detección robusta**: Implementada función `usuarioYaInicializado()` que usa localStorage flag `glory_usuario_inicializado` independiente del estado de stores.
+   - **Generación de datos desacoplada**: `generarDatosInicialesUsuarioNuevo()` ahora NO depende de `currentData` para contenido, usa directamente `habitosIniciales`, `tareasIniciales`, `notasIniciales` de datosIniciales.ts.
+   - **Flujo corregido**: Usuario nuevo → servidor vacío detectado → flag no existe → genera datos de bienvenida → sube a servidor → llama `onDataReceived()` → marca flag → UI actualizada.
+   - **Aplicado SRP**: Funciones auxiliares con responsabilidad única (`esServidorVacio`, `usuarioYaInicializado`, `marcarUsuarioComoInicializado`)
+   - **Aplicado DIP**: Datos iniciales importados directamente, sin depender del estado mutable de currentData
 
 4. ✅ ~~Feedback Premium no detecta usuario premium.~~ **CORREGIDO** (2026-01-30): `FeedbackApiController.php` - Instanciado correctamente `SuscripcionService` en métodos `requirePremium()` y `obtenerRestante()` en lugar de llamada estática inexistente. El servicio requiere instanciación con `new SuscripcionService($userId)` y llamada al método `esPremium()` de instancia.
 

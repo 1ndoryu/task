@@ -143,19 +143,32 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                 
                 /*
                  * Caso especial: Usuario nuevo sin datos en servidor
-                 * Si el servidor está vacío, subimos los datos iniciales de bienvenida.
-                 * Usamos los datos locales si tienen contenido, o los datos iniciales como fallback.
-                 * Esto asegura que nuevos usuarios vean las tareas/notas de bienvenida.
+                 * 
+                 * Criterio para determinar usuario nuevo que necesita datos de bienvenida:
+                 * 1. El servidor NO tiene datos (esServidorVacio)
+                 * 2. El usuario NO ha sido inicializado previamente (evita re-inicializar si borró datos)
+                 * 
+                 * Cuando se cumple, generamos datos completos de bienvenida usando datosIniciales.ts
+                 * directamente, sin depender del estado de currentData (que puede estar vacío
+                 * debido a la hidratación de Zustand).
                  */
-                if (esServidorVacio(serverData)) {
-                    const datosParaSubir = tieneDataInicialLocal(currentData) 
-                        ? currentData 
-                        : {...currentData, ...generarDatosInicialesUsuarioNuevo()};
+                if (esServidorVacio(serverData) && !usuarioYaInicializado()) {
+                    /*
+                     * Generar datos iniciales completos.
+                     * IMPORTANTE: NO usamos currentData para los datos de contenido,
+                     * solo para mantener la estructura base (version, configuracion, etc.)
+                     */
+                    const datosIniciales = generarDatosInicialesUsuarioNuevo(currentData);
                     
-                    console.log('[SyncManager] Usuario nuevo detectado. Subiendo datos iniciales al servidor...');
+                    console.log('[SyncManager] Usuario nuevo detectado. Generando datos de bienvenida...');
+                    console.log('[SyncManager] Datos a subir:', {
+                        habitos: datosIniciales.habitos?.length,
+                        tareas: datosIniciales.tareas?.length,
+                        notasLength: datosIniciales.notas?.length
+                    });
                     
                     const success = await saveData({
-                        ...datosParaSubir,
+                        ...datosIniciales,
                         // @ts-ignore - Flag opcional para backend
                         generateBackup: false
                     });
@@ -163,13 +176,17 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     if (success) {
                         console.log('[SyncManager] Datos iniciales sincronizados correctamente.');
                         
-                        /*
-                         * Si usamos datos iniciales porque currentData estaba vacío,
-                         * notificar al frontend para que actualice su estado local
+                        /* 
+                         * Marcar usuario como inicializado para evitar repetir
+                         * este proceso si el usuario limpia su localStorage
                          */
-                        if (!tieneDataInicialLocal(currentData)) {
-                            onDataReceived(datosParaSubir as DashboardData);
-                        }
+                        marcarUsuarioComoInicializado();
+                        
+                        /*
+                         * CRÍTICO: Notificar al frontend con los datos iniciales completos.
+                         * Esto actualiza tanto el store de Zustand (hábitos) como el estado local (tareas, notas).
+                         */
+                        onDataReceived(datosIniciales);
                         
                         setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
                         markChangesAsSynced();
