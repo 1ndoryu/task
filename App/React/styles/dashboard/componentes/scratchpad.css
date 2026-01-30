@@ -383,9 +383,18 @@
 
 .scratchpadEditor {
     position: relative;
-    flex: 1;
+    /* 
+     * flex: 1 se desactiva cuando hay height inline.
+     * El componente aplica height inline cuando no es '100%'.
+     */
+    flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
+}
+
+/* Cuando el editor tiene altura específica (no flex), respetar el height inline */
+.scratchpadEditor[style*="height"] {
+    flex: 0 0 auto;
 }
 
 /*
