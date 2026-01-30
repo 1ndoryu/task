@@ -11,6 +11,29 @@ export interface Version {
 /* changelog */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.15-beta',
+        fecha: '2026-01-29',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Sistema de Copias de Seguridad automáticas para usuarios Premium'},
+            {tipo: 'nuevo', descripcion: 'Hook useBackups con historial y restauración de versiones'},
+            {tipo: 'nuevo', descripcion: 'Modal BackupHistoryModal para gestión de copias de seguridad'},
+            {tipo: 'nuevo', descripcion: 'Refactorización SOLID del sistema de sincronización (useChangeDetector, useSyncTransport, useSyncManager)'},
+            {tipo: 'nuevo', descripcion: 'Política de retención de backups: 1 cada 30 min, máximo 30 días'},
+            {tipo: 'mejora', descripcion: 'Subtareas de hábitos: Drag & Drop mejorado con handle GripVertical'},
+            {tipo: 'mejora', descripcion: 'Badge de prioridad estilo Hito en subtareas'},
+            {tipo: 'mejora', descripcion: 'Checkbox de subtareas con grosor 1px y tamaño optimizado'},
+            {tipo: 'mejora', descripcion: 'Menú contextual "Agregar subtarea" abre modal rápido'},
+            {tipo: 'mejora', descripcion: 'Ordenamiento de subtareas por prioridad (sin Drag & Drop)'},
+            {tipo: 'arreglo', descripcion: 'Subtareas creadas en panel ejecución heredan importancia correctamente'},
+            {tipo: 'arreglo', descripcion: 'Subtareas visibles en sección "Metas" después de crearlas'},
+            {tipo: 'arreglo', descripcion: 'Persistencia de frecuencia y nombre de hábitos al recargar'},
+            {tipo: 'arreglo', descripcion: 'Desaparición de tareas al crear nueva (sync inteligente con metadatos)'},
+            {tipo: 'arreglo', descripcion: 'Errores 401 sin login: guards de autenticación en API calls'},
+            {tipo: 'arreglo', descripcion: 'Modal de login sin pantalla negra (fix useMemo en JSX)'},
+            {tipo: 'arreglo', descripcion: 'UI compacta: selector subtareas sin colisión con acciones SVG'}
+        ]
+    },
+    {
         version: 'v1.0.14-beta',
         fecha: '2026-01-27',
         cambios: [
