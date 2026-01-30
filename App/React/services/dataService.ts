@@ -2,6 +2,12 @@
  * dataService
  * Servicio para exportar e importar datos del dashboard
  * Permite transferir datos entre entornos mediante archivos JSON
+ * 
+ * IMPORTANTE: El historial de actividad (completados, pospuestos, fechas) se incluye
+ * automáticamente ya que es parte de los objetos Habito y Tarea.
+ * - Hábitos: historialCompletados[], historialPospuestos[], ultimoCompletado, fechaCreacion
+ * - Tareas: fechaCreacion, fechaCompletado, prioridad, urgencia
+ * - Proyectos: fechaCreacion, fechaCompletado, progreso
  */
 
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
@@ -15,7 +21,8 @@ export interface DatosDashboardExportados {
     notas: string;
 }
 
-const VERSION_ACTUAL = '1.0.0';
+/* Version del formato de exportacion - incrementar al añadir campos */
+const VERSION_ACTUAL = '1.1.0';
 
 /*
  * Exporta los datos del dashboard a un archivo JSON
@@ -188,13 +195,29 @@ function validarHabito(habito: unknown): ResultadoValidacion {
         return {esValido: false, mensaje: 'Tags de habito invalidos'};
     }
 
-    /* Campos opcionales del nuevo formato */
+    /* Campos opcionales del nuevo formato (historial completo) */
     if (h.historialCompletados !== undefined && !Array.isArray(h.historialCompletados)) {
         return {esValido: false, mensaje: 'Historial de completados invalido'};
     }
 
+    if (h.historialPospuestos !== undefined && !Array.isArray(h.historialPospuestos)) {
+        return {esValido: false, mensaje: 'Historial de pospuestos invalido'};
+    }
+
     if (h.ultimoCompletado !== undefined && typeof h.ultimoCompletado !== 'string') {
         return {esValido: false, mensaje: 'Ultimo completado invalido'};
+    }
+
+    if (h.fechaCreacion !== undefined && typeof h.fechaCreacion !== 'string') {
+        return {esValido: false, mensaje: 'Fecha de creacion de habito invalida'};
+    }
+
+    if (h.pausado !== undefined && typeof h.pausado !== 'boolean') {
+        return {esValido: false, mensaje: 'Estado de pausa invalido'};
+    }
+
+    if (h.fechaPausa !== undefined && typeof h.fechaPausa !== 'string') {
+        return {esValido: false, mensaje: 'Fecha de pausa invalida'};
     }
 
     /* Validar frecuencia si existe */
@@ -229,6 +252,23 @@ function validarTarea(tarea: unknown): ResultadoValidacion {
 
     if (typeof t.completado !== 'boolean') {
         return {esValido: false, mensaje: 'Estado de tarea inválido'};
+    }
+
+    /* Campos opcionales de historial para tareas */
+    if (t.fechaCreacion !== undefined && typeof t.fechaCreacion !== 'string') {
+        return {esValido: false, mensaje: 'Fecha de creación de tarea inválida'};
+    }
+
+    if (t.fechaCompletado !== undefined && typeof t.fechaCompletado !== 'string') {
+        return {esValido: false, mensaje: 'Fecha de completado de tarea inválida'};
+    }
+
+    if (t.prioridad !== undefined && !['alta', 'media', 'baja'].includes(t.prioridad as string)) {
+        return {esValido: false, mensaje: 'Prioridad de tarea inválida'};
+    }
+
+    if (t.urgencia !== undefined && !['bloqueante', 'urgente', 'normal', 'chill'].includes(t.urgencia as string)) {
+        return {esValido: false, mensaje: 'Urgencia de tarea inválida'};
     }
 
     /* Proyecto es opcional para compatibilidad con datos antiguos */

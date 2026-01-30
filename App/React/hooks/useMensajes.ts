@@ -51,6 +51,32 @@ interface UseMensajesReturn {
 /* Base URL de la API */
 const API_BASE = '/wp-json/glory/v1/mensajes';
 
+/*
+ * IDs de tareas de bienvenida (datos iniciales para nuevos usuarios)
+ * Estos mensajes de sistema de "admin" deben ocultarse porque son
+ * artefactos de sincronización inicial, no acciones reales del usuario.
+ */
+const IDS_TAREAS_BIENVENIDA = [1, 2, 3];
+
+/**
+ * Filtra mensajes de sistema generados por "admin" para tareas de bienvenida.
+ * Esto evita mostrar actividad confusa como "admin ha cambiado la prioridad"
+ * en las tareas iniciales que el usuario no creó.
+ */
+function filtrarMensajesAdmin(mensajes: MensajeTimeline[], tipoElemento: string, elementoId: number): MensajeTimeline[] {
+    /* Solo filtrar para tareas de bienvenida */
+    if (tipoElemento !== 'tarea' || !IDS_TAREAS_BIENVENIDA.includes(elementoId)) {
+        return mensajes;
+    }
+
+    /* Filtrar mensajes de sistema que contengan "admin" (case insensitive) */
+    return mensajes.filter(msg => {
+        if (msg.tipoMensaje !== 'sistema') return true;
+        const contenidoLower = msg.contenido.toLowerCase();
+        return !contenidoLower.includes('admin');
+    });
+}
+
 /**
  * Obtiene el nonce de WordPress para autenticación
  */
@@ -129,12 +155,15 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
                 throw new Error('Error al cargar mensajes');
             }
 
+            /* Filtrar mensajes de admin para tareas de bienvenida */
+            const mensajesFiltrados = filtrarMensajesAdmin(response.mensajes, tipoElemento, elementoId);
+
             setEstado(prev => ({
                 ...prev,
                 cargando: false,
-                mensajes: response.mensajes,
-                total: response.total,
-                hayMas: response.mensajes.length < response.total
+                mensajes: mensajesFiltrados,
+                total: mensajesFiltrados.length,
+                hayMas: mensajesFiltrados.length < response.total
             }));
 
             offsetRef.current = response.mensajes.length;
@@ -166,11 +195,14 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
                 throw new Error('Error al cargar más mensajes');
             }
 
+            /* Filtrar mensajes de admin para tareas de bienvenida */
+            const mensajesFiltrados = filtrarMensajesAdmin(response.mensajes, tipoElemento, elementoId);
+
             setEstado(prev => ({
                 ...prev,
                 cargando: false,
-                mensajes: [...prev.mensajes, ...response.mensajes],
-                hayMas: prev.mensajes.length + response.mensajes.length < response.total
+                mensajes: [...prev.mensajes, ...mensajesFiltrados],
+                hayMas: prev.mensajes.length + mensajesFiltrados.length < response.total
             }));
 
             offsetRef.current += response.mensajes.length;

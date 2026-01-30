@@ -4,6 +4,39 @@ Registro de cambios significativos del proyecto.
 
 ---
 
+## [1.0.17-beta] - 2026-01-31
+
+### Fase 15.10: Tercera Revisión Beta - Correcciones UX
+
+#### ✅ Mejoras en Paneles
+- **Botón +Añadir en proyectos**: Ahora puedes crear proyectos rápidamente desde el panel
+- **Estado vacío en tareas**: Mensaje amigable cuando no tienes tareas pendientes
+- **Nota de bienvenida visible**: La nota informativa ahora aparece al registrarte
+
+#### ✅ Correcciones Visuales
+- **Trial 30 días**: El modal de upgrade ahora muestra correctamente 30 días de prueba
+- **Alineación en notas**: Corregido el desface visual entre texto editable y preview
+
+#### ✅ Exportación/Importación Mejorada
+- **Historial completo**: Ahora se incluye el historial de cumplimiento de hábitos y tareas
+- **Versión 1.1.0**: Formato de exportación actualizado con más campos
+
+#### ✅ Experiencia de Usuario
+- **Changelog legible**: Descripciones en lenguaje natural, fáciles de entender
+- **Actividad limpia**: Eliminados mensajes confusos de "admin" en tareas de bienvenida
+
+**Archivos modificados:**
+- `ListaProyectos.tsx`, `proyectos.css`: Botón añadir
+- `ListaTareas.tsx`: Estado vacío
+- `notasStore.ts`: Nota inicial
+- `ModalUpgrade.tsx`: Trial 30 días
+- `scratchpad.css`: Overflow fix
+- `services/dataService.ts`: Validación historial v1.1.0
+- `data/changelog.ts`: Lenguaje natural
+- `hooks/useMensajes.ts`: Filtro mensajes admin
+
+---
+
 ## [1.0.16-beta] - 2026-01-30
 
 ### Fase 15.9: Segunda Revisión Beta Nakomi

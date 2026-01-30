@@ -258,3 +258,26 @@
 .proyectoItemWrapper--compacto {
     /* gap: 1px; ya manejado en listaProyectos */
 }
+
+/* 
+ * AÑADIR PROYECTO 
+ * Estilo unificado con añadirHabito
+ */
+.añadirProyecto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.añadirProyecto:hover {
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoHover);
+}

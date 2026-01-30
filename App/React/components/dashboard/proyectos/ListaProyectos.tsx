@@ -311,6 +311,13 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                             onAccion={onCrearProyecto}
                         />
                     )}
+
+                    {/* Botón añadir proyecto al final de la lista */}
+                    {proyectos.length > 0 && (
+                        <div className="añadirProyecto" onClick={onCrearProyecto}>
+                            + Añadir
+                        </div>
+                    )}
                 </div>
             </DashboardPanel>
 

@@ -6,6 +6,7 @@
 
 import {useMemo} from 'react';
 import {Reorder} from 'framer-motion';
+import {CheckSquare} from 'lucide-react';
 import type {Tarea, DatosEdicionTarea, Proyecto, Participante} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
@@ -13,6 +14,7 @@ import {InputNuevaTarea} from './InputNuevaTarea';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
 import {ModalMoverTarea} from './ModalMoverTarea';
 import {DashboardPanel} from '../shared/DashboardPanel';
+import {EstadoVacio} from '../shared/EstadoVacio';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
 
 // Hooks extraídos
@@ -118,6 +120,17 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     return (
         <DashboardPanel id="lista-tareas">
+            {/* Estado vacío cuando no hay tareas */}
+            {tareas.length === 0 ? (
+                <EstadoVacio
+                    icono={<CheckSquare size={32} />}
+                    mensaje="No hay tareas pendientes"
+                    descripcion="Crea tu primera tarea para empezar"
+                    textoBoton="+ Crear tarea"
+                    onAccion={() => onCrearTarea?.({texto: 'Nueva tarea'})}
+                />
+            ) : (
+            <>
             {habilitarDrag ? (
                 <>
                     <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes">
@@ -194,6 +207,8 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             {!ocultarCompletadas && completadas.map(tarea => <TareaItem key={tarea.id} tarea={tarea} esSubtarea={!!tarea.parentId} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={tarea.proyectoId ? proyectos?.find(p => p.id === tarea.proyectoId)?.nombre : undefined} soloIconoProyecto={ocultarBadgeProyecto} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} modoCompacto={modoCompacto} />)}
 
             {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} />}
+            </>
+            )}
 
             {tareaConfigurando && (
                 <PanelConfiguracionTarea

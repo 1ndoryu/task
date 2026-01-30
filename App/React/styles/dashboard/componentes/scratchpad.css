@@ -399,13 +399,20 @@
 /*
  * Estilos base compartidos entre textarea y div de resaltado
  * IMPORTANTE: Ambos deben tener exactamente las mismas propiedades de texto
- * para evitar desfase entre cursor y texto visible
+ * para evitar desfase entre cursor y texto visible.
+ * 
+ * NOTA CRITICA: No modificar los tamaños de fuente aquí si no se modifica
+ * también en .scratchpadTextarea. El desface ocurre cuando los estilos
+ * de texto difieren entre ambos elementos.
  */
 .scratchpadResaltado {
     position: absolute;
     inset: 0;
     padding: var(--dashboard-espacioLg);
-    overflow: hidden;
+    /* Usar overflow-y: scroll para que siempre reserve espacio del scrollbar
+     * igual que el textarea, evitando desfase en el ancho de texto */
+    overflow-x: hidden;
+    overflow-y: scroll;
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
@@ -437,6 +444,10 @@
     overflow-wrap: break-word;
 }
 
+/*
+ * Estilos de resaltado de markdown - Sin cambiar el tamaño de fuente
+ * Solo se modifica el color y el peso para mantener la sincronización
+ */
 .scratchpadTextoTitulo {
     color: var(--dashboard-textoActivo);
     font-weight: 600;

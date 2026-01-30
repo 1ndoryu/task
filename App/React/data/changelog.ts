@@ -8,45 +8,63 @@ export interface Version {
     fecha: string;
     cambios: Cambio[];
 }
-/* changelog */
+
+/*
+ * AVISO IMPORTANTE: Este changelog está orientado a usuarios finales.
+ * Usar lenguaje natural y claro, evitar tecnicismos como:
+ * - Nombres de componentes (ModalX, useHook, etc.)
+ * - Términos técnicos (SOLID, refactorización, sync, cache, etc.)
+ * - Detalles de implementación (px, TTL, API, etc.)
+ * 
+ * En su lugar, describir el beneficio para el usuario:
+ * - "Ahora puedes..." en vez de "Implementado sistema de..."
+ * - "Se arregló el problema de..." en vez de "Fix en componente X"
+ */
 export const HISTORIAL_VERSIONES: Version[] = [
+    {
+        version: 'v1.0.17-beta',
+        fecha: '2026-01-31',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Botón rápido para crear proyectos desde el panel de Proyectos'},
+            {tipo: 'mejora', descripcion: 'Las tareas vacías ahora muestran un mensaje amigable en lugar de estar en blanco'},
+            {tipo: 'mejora', descripcion: 'La nota de bienvenida aparece correctamente al registrarte'},
+            {tipo: 'mejora', descripcion: 'Al exportar datos ahora se incluye tu historial completo de hábitos y tareas'},
+            {tipo: 'arreglo', descripcion: 'El modal de Premium ahora muestra correctamente 30 días de prueba'},
+            {tipo: 'arreglo', descripcion: 'Corregido el desface visual en el panel de notas'},
+            {tipo: 'arreglo', descripcion: 'Las tareas de bienvenida ya no muestran actividad confusa'}
+        ]
+    },
     {
         version: 'v1.0.15-beta',
         fecha: '2026-01-29',
         cambios: [
-            {tipo: 'nuevo', descripcion: 'Sistema de Copias de Seguridad automáticas para usuarios Premium'},
-            {tipo: 'nuevo', descripcion: 'Hook useBackups con historial y restauración de versiones'},
-            {tipo: 'nuevo', descripcion: 'Modal BackupHistoryModal para gestión de copias de seguridad'},
-            {tipo: 'nuevo', descripcion: 'Refactorización SOLID del sistema de sincronización (useChangeDetector, useSyncTransport, useSyncManager)'},
-            {tipo: 'nuevo', descripcion: 'Política de retención de backups: 1 cada 30 min, máximo 30 días'},
-            {tipo: 'mejora', descripcion: 'Subtareas de hábitos: Drag & Drop mejorado con handle GripVertical'},
-            {tipo: 'mejora', descripcion: 'Badge de prioridad estilo Hito en subtareas'},
-            {tipo: 'mejora', descripcion: 'Checkbox de subtareas con grosor 1px y tamaño optimizado'},
-            {tipo: 'mejora', descripcion: 'Menú contextual "Agregar subtarea" abre modal rápido'},
-            {tipo: 'mejora', descripcion: 'Ordenamiento de subtareas por prioridad (sin Drag & Drop)'},
-            {tipo: 'arreglo', descripcion: 'Subtareas creadas en panel ejecución heredan importancia correctamente'},
-            {tipo: 'arreglo', descripcion: 'Subtareas visibles en sección "Metas" después de crearlas'},
-            {tipo: 'arreglo', descripcion: 'Persistencia de frecuencia y nombre de hábitos al recargar'},
-            {tipo: 'arreglo', descripcion: 'Desaparición de tareas al crear nueva (sync inteligente con metadatos)'},
-            {tipo: 'arreglo', descripcion: 'Errores 401 sin login: guards de autenticación en API calls'},
-            {tipo: 'arreglo', descripcion: 'Modal de login sin pantalla negra (fix useMemo en JSX)'},
-            {tipo: 'arreglo', descripcion: 'UI compacta: selector subtareas sin colisión con acciones SVG'}
+            {tipo: 'nuevo', descripcion: 'Copias de seguridad automáticas para usuarios Premium (se guardan cada 30 minutos, hasta 30 días)'},
+            {tipo: 'nuevo', descripcion: 'Puedes ver y restaurar versiones anteriores de tus datos desde el menú'},
+            {tipo: 'mejora', descripcion: 'Las subtareas ahora se pueden reorganizar arrastrándolas'},
+            {tipo: 'mejora', descripcion: 'Las subtareas muestran su nivel de prioridad con un indicador visual'},
+            {tipo: 'mejora', descripcion: 'Puedes agregar subtareas más rápido desde el menú contextual'},
+            {tipo: 'mejora', descripcion: 'Las subtareas se ordenan automáticamente por prioridad'},
+            {tipo: 'arreglo', descripcion: 'Las subtareas ahora heredan correctamente la prioridad al crearlas'},
+            {tipo: 'arreglo', descripcion: 'Las subtareas aparecen inmediatamente en la sección "Metas"'},
+            {tipo: 'arreglo', descripcion: 'La frecuencia y nombre de los hábitos ya no se pierden al recargar'},
+            {tipo: 'arreglo', descripcion: 'Las tareas ya no desaparecen al crear una nueva'},
+            {tipo: 'arreglo', descripcion: 'Se solucionaron errores cuando no estás conectado'},
+            {tipo: 'arreglo', descripcion: 'El inicio de sesión ya no muestra pantalla negra'}
         ]
     },
     {
         version: 'v1.0.14-beta',
         fecha: '2026-01-27',
         cambios: [
-            {tipo: 'nuevo', descripcion: 'Sistema de pausar hábitos: permite congelar racha sin perder progreso'},
-            {tipo: 'nuevo', descripcion: 'Configuración de "Fin del Día": ajusta la jornada para usuarios nocturnos'},
-            {tipo: 'nuevo', descripcion: 'Subtareas y metas en hábitos: gestión integrada en configuración y panel'},
-            {tipo: 'nuevo', descripcion: 'Bloqueo de paneles expandidos con botón de candado'},
-            {tipo: 'nuevo', descripcion: 'Detalle de actividad diaria al hacer clic en el mapa de calor'},
-            {tipo: 'mejora', descripcion: 'Algoritmo de prioridad 2.0: tareas retrasadas aumentan peso drásticamente'},
-            {tipo: 'mejora', descripcion: 'Columna Actividad (5 días) oculta días libres no marcados automáticamente'},
-            {tipo: 'mejora', descripcion: 'Refinamiento visual de hábitos en modo compacto'},
-            {tipo: 'mejora', descripcion: 'Cálculo de frecuencias consistente entre vistas (corrige desfase horario)'},
-            {tipo: 'arreglo', descripcion: 'Registro de actividad respeta la configuración de hora de corte'}
+            {tipo: 'nuevo', descripcion: 'Puedes pausar hábitos temporalmente sin perder tu racha'},
+            {tipo: 'nuevo', descripcion: 'Configura tu "Fin del Día" si trabajas de noche o tienes horarios irregulares'},
+            {tipo: 'nuevo', descripcion: 'Los hábitos ahora pueden tener subtareas y metas asociadas'},
+            {tipo: 'nuevo', descripcion: 'Puedes bloquear paneles expandidos con el botón de candado'},
+            {tipo: 'nuevo', descripcion: 'Al hacer clic en el mapa de calor, ves el detalle de ese día'},
+            {tipo: 'mejora', descripcion: 'Las tareas retrasadas ahora aparecen más arriba en la lista automáticamente'},
+            {tipo: 'mejora', descripcion: 'Los días libres ya no aparecen en el historial de hábitos'},
+            {tipo: 'mejora', descripcion: 'Mejor visualización de hábitos en modo compacto'},
+            {tipo: 'arreglo', descripcion: 'El registro de actividad ahora respeta tu configuración de hora'}
         ]
     },
     {

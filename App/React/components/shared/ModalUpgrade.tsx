@@ -93,7 +93,7 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
             <div className="modalUpgrade__encabezado">
                 <span className="modalUpgrade__icono">&gt;</span>
                 <h2>DESBLOQUEA TU POTENCIAL</h2>
-                <p className="modalUpgrade__subtitulo">Prueba 14 dias gratis, cancela cuando quieras</p>
+                <p className="modalUpgrade__subtitulo">Prueba 30 dias gratis, cancela cuando quieras</p>
             </div>
         );
     };
@@ -152,9 +152,9 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
         return (
             <div className="modalUpgrade__acciones">
                 <button className="modalUpgrade__boton modalUpgrade__boton--primario" onClick={handleComprar} disabled={cargando}>
-                    {cargando ? 'Procesando...' : `Probar 14 dias gratis - luego $${precioSeleccionado}`}
+                    {cargando ? 'Procesando...' : `Probar 30 dias gratis - luego $${precioSeleccionado}`}
                 </button>
-                <p className="modalUpgrade__aviso">Sin compromiso. Cancela antes del dia 14 y no se te cobrara nada.</p>
+                <p className="modalUpgrade__aviso">Sin compromiso. Cancela antes del dia 30 y no se te cobrara nada.</p>
                 <button className="modalUpgrade__boton modalUpgrade__boton--secundario" onClick={onCerrar}>
                     Quizas despues
                 </button>

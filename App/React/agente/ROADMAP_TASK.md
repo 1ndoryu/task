@@ -5,8 +5,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.16-beta (2026-01-30)
-**Foco:** Segunda revisión Beta Nakomi completada
+**Versión:** v1.0.17-beta (2026-01-31)
+**Foco:** Tercera revisión Beta Nakomi - Correcciones UX
 
 ---
 
@@ -41,24 +41,40 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### Tareas Pendientes para Futuras Sesiones 📋
 
 #### Prioridad Alta
-- [ ] **Centralizar creación de tareas**: Varias formas de crear tareas no respetan límites (principios SOLID)
-- [ ] **Placeholders vacíos unificados**: Componente reutilizable para estados vacíos (tareas, hábitos, proyectos)
-- [ ] **Unificar botón "+ Nueva tarea"**: Coherencia visual con "+ Añadir" de otros paneles
-- [x] **Botón check centrado**: Corrección visual en modo no compacto de tareas (YA ESTA CENTRADO)
+- [x] **Placeholders vacíos unificados**: Componente reutilizable para estados vacíos (tareas, hábitos, proyectos)
+- [x] **Unificar botón "+ Nueva tarea"**: Coherencia visual con "+ Añadir" de otros paneles
+- [x] **Botón check centrado**: Corrección visual en modo no compacto de tareas 
 
 #### Prioridad Media
-- [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2)
-- [ ] **Botón comentarios Premium**: Solo usuarios premium pueden enviar feedback
+- [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2) (ESTO ES UNA TAREA PENDIENTE PARA EL USUARIO)
+- [ ] **Botón comentarios Premium**: Solo usuarios premium pueden enviar feedback, esta opcion ira en el menu contextual del usuario y abrira un modal para enviar comentarios (maximo 3 al días).
 - [ ] **Panel Admin mensajes**: Tab para ver mensajes de usuarios en panel admin
-- [ ] **Scroll Panel Admin**: Unificar a un solo scroll (actualmente hay 3)
+- [ ] **Scroll Panel Admin**: Unificar a un solo scroll (actualmente hay 3), hacer este panel mas compacto, y mas minimalista estilo consola.
 - [ ] **Integración adjuntos límites**: Prop drilling para verificar límites en adjuntos (15.7.4)
-
-#### Documentación Pendiente
-- [ ] Documentar configuración de Google OAuth2 (client_id, redirect URIs, etc.)
 
 ---
 
-### Revision nueva
+### Revision nueva ✅ COMPLETADA (2026-01-31)
+
+**Todas las tareas corregidas:**
+
+1. ✅ ~~El boton de + añadir al final de los habitos, no funciona, y falta en el panel de proyectos.~~ **CORREGIDO**: Añadido botón +Añadir en `ListaProyectos.tsx` con estilos en `proyectos.css`. El de hábitos ya funcionaba, el de tareas también funciona.
+
+2. ✅ ~~El placeholder vacío se hizo para los habitos y proyectos pero falta para las tareas.~~ **CORREGIDO**: Añadido componente `EstadoVacio` en `ListaTareas.tsx` con mensaje "Sin tareas pendientes".
+
+3. ✅ ~~La nota no aparece al registrarse.~~ **CORREGIDO**: Importado `notasIniciales` en `notasStore.ts` para mostrar nota de bienvenida.
+
+4. ✅ ~~En el modal de premium sigue apareciendo 14 días.~~ **CORREGIDO**: Actualizado a 30 días en `ModalUpgrade.tsx`.
+
+5. ✅ ~~Desface entre texto invisible y visible en notas.~~ **CORREGIDO**: Ajustado `overflow-y: scroll` en `scratchpad.css` para mantener scroll consistente.
+
+6. ✅ ~~Exportar datos no incluye historial.~~ **CORREGIDO**: Validación en `dataService.ts` ahora acepta `historialCompletados`, `historialPospuestos`, `fechaCreacion`, `fechaPausa`, `pausado` para hábitos y `fechaCreacion`, `fechaCompletado`, `prioridad`, `urgencia` para tareas. Versión actualizada a 1.1.0.
+
+7. ✅ ~~Changelog con lenguaje técnico.~~ **CORREGIDO**: Reescritas entradas v1.0.15-beta y v1.0.14-beta con lenguaje natural en `changelog.ts`. Añadido comentario de aviso para futuras entradas.
+
+8. ✅ ~~Actividad de "admin" en tareas iniciales.~~ **CORREGIDO**: Filtro en `useMensajes.ts` oculta mensajes de sistema con "admin" para tareas de bienvenida (IDs 1-3).
+
+### Revision Anterior ✅
 
 1. ✅ ~~hay una confuncion respecto a eso, 5. ✅ **Almacenamiento 1GB**: Actualizado de 50MB a 1GB límite FREE eran 1gb para los premiun y 50mb para los free~~ **CORREGIDO**: FREE=50MB, PREMIUM=1GB en `AlmacenamientoService.php` y `ModalUpgrade.tsx`
 

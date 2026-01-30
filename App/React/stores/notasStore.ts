@@ -2,6 +2,7 @@ import {create} from 'zustand';
 import {Nota, NotaActiva} from '../types/notas';
 import {notasService} from '../services/notasService';
 import {persistirNotaActivaId, extraerTitulo, emitirCambioNotaActiva, CONTENIDO_NOTA_NUEVA, obtenerNotaActivaIdGuardado} from '../utils/notasUtils';
+import {notasIniciales} from '../data/datosIniciales';
 
 interface NotasState {
     notas: Nota[];
@@ -140,7 +141,7 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
     },
 
     restaurarNotaActivaGuardada: () => {
-        const {notas} = get();
+        const {notas, notaActiva} = get();
         const idGuardado = obtenerNotaActivaIdGuardado();
 
         if (idGuardado !== null) {
@@ -153,7 +154,22 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                         modificada: false
                     }
                 });
+                return;
             }
+        }
+
+        /*
+         * Si no hay nota guardada previamente y no hay notas en el servidor,
+         * mostrar la nota de bienvenida para usuarios nuevos
+         */
+        if (notas.length === 0 && notaActiva.contenido === CONTENIDO_NOTA_NUEVA) {
+            set({
+                notaActiva: {
+                    id: null,
+                    contenido: notasIniciales,
+                    modificada: true /* Marcar como modificada para que se guarde */
+                }
+            });
         }
     },
 
