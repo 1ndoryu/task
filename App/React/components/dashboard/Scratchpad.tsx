@@ -337,7 +337,8 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                         ref={editorRef}
                         className="scratchpadEditor"
                         style={{
-                            height: localHeight
+                            /* Solo aplicar height inline cuando NO es 100% (cuando hay resize manual) */
+                            height: localHeight !== '100%' ? localHeight : undefined
                         }}
                     >
                         {mostrarResaltadoMarkdown && (

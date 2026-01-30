@@ -384,15 +384,16 @@
 .scratchpadEditor {
     position: relative;
     /* 
-     * flex: 1 se desactiva cuando hay height inline.
-     * El componente aplica height inline cuando no es '100%'.
+     * Usa flex: 1 por defecto para crecer y llenar el espacio.
+     * Cuando hay height inline específico (resize manual), 
+     * el selector [style*="height"] desactiva el flex.
      */
-    flex: 1 1 auto;
+    flex: 1;
     min-height: 0;
     overflow: hidden;
 }
 
-/* Cuando el editor tiene altura específica (no flex), respetar el height inline */
+/* Cuando el editor tiene altura específica inline (no 100%), desactivar flex */
 .scratchpadEditor[style*="height"] {
     flex: 0 0 auto;
 }
