@@ -98,13 +98,13 @@ Todas estas tareas no se logran solucionar facilmente, trabajar en profundidad r
    - **Aplicado OCP**: Extendido por composición sin modificar funcionalidad existente
    - **Aplicado DIP**: Dependencias por abstracción (callbacks)
 
-2. ✅ **Scratchpad sincronización ancho/altura RESUELTO (2026-02-01)**: Implementada solución definitiva con JavaScript para sincronizar dimensiones exactas entre textarea y div de resaltado. El sistema ahora:
-   - Calcula el ancho de la scrollbar del textarea dinámicamente
-   - Aplica dimensiones exactas del contenedor a ambos elementos
-   - Compensa el ancho de la scrollbar en el div de resaltado
-   - Usa `ResizeObserver` para sincronización automática ante cambios
-   - El textarea cubre el 100% de altura del contenedor sin conflictos
-   - Archivos modificados: `Scratchpad.tsx` (nuevo useEffect + ref contenedor), `scratchpad.css` (dimensiones controladas por JS)
+2. ✅ **Scratchpad sincronización ancho/altura RESUELTO DEFINITIVAMENTE (2026-02-01)**: Solución CSS pura sin JavaScript para alineación perfecta. El problema raíz era complejo:
+   - **Problema inicial**: El textarea y div de resaltado tenían anchos diferentes por la scrollbar del textarea
+   - **Primer intento fallido**: useEffect con ResizeObserver causaba loop infinito (contenedor flex:1 + observer + dimensiones absolutas = crecimiento infinito)
+   - **Solución definitiva CSS**: `position: absolute` + `inset: 0` para ambos elementos, `padding-right: calc(var(--espacioLg) + 17px)` en div de resaltado para compensar scrollbar, `overflow-y: scroll` en textarea
+   - **Resize manual restaurado**: Añadido `editorRef`, `handleMouseDown` usa `editorRef` para altura actual, `flex: 0 0 auto` cuando hay height inline específico
+   - **Visibilidad inicial corregida**: Height inline solo se aplica cuando `localHeight !== '100%'` (resize manual), dejando que `flex: 1` maneje layout inicial naturalmente
+   - **Archivos**: `Scratchpad.tsx` (removido useEffect problemático, añadido editorRef), `scratchpad.css` (estilos CSS puros con position absolute)
 
 3. ✅ **Datos iniciales para usuarios nuevos RESUELTO DEFINITIVAMENTE (2026-02-01)**: Refactorización profunda de `useSyncManager.ts` para resolver condición de carrera con hidratación de Zustand. Solución implementada:
    - **Problema raíz identificado**: Cuando un usuario nuevo se registra, `currentData.habitos` llegaba vacío porque Zustand persist se hidrata con `[]` antes de que useSyncManager pueda detectar el estado real.
