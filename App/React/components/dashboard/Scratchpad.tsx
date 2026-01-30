@@ -220,6 +220,9 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
         const contenedorEditor = contenedorEditorRef.current;
         
         if (!textarea || !resaltado || !contenedorEditor || !mostrarResaltadoMarkdown) return;
+        
+        /* NO sincronizar durante resize manual */
+        if (isResizing) return;
 
         let rafId: number | null = null;
 
@@ -283,7 +286,7 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                 cancelAnimationFrame(rafId);
             }
         };
-    }, [mostrarResaltadoMarkdown, localHeight]);
+    }, [mostrarResaltadoMarkdown, localHeight, isResizing]);
 
     const aplicarFormato = useCallback(
         (marcador: string) => {
