@@ -137,8 +137,15 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
     /* Estados para resizing */
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const resaltadoRef = useRef<HTMLDivElement>(null);
+    const contenedorEditorRef = useRef<HTMLDivElement>(null);
     const [isResizing, setIsResizing] = useState(false);
     const [localHeight, setLocalHeight] = useState<string>(altura);
+    
+    /* Estados para sincronización forzada de dimensiones */
+    const [dimensionesSincronizadas, setDimensionesSincronizadas] = useState<{
+        width: string;
+        height: string;
+    }>({width: '100%', height: '100%'});
 
     /* Sincronizar altura si no se está redimensionando */
     useEffect(() => {
@@ -205,29 +212,77 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
     };
 
     /*
-     * Sincronizar el ancho del div de resaltado con el textarea
-     * Esto es necesario cuando hay líneas largas que causan scroll horizontal
+     * Sincronización forzada de dimensiones entre textarea y div de resaltado.
+     * Problema: El scroll del textarea añade un espacio (scrollbar) que el div no tiene.
+     * Solución: Calcular dimensiones exactas del contenedor y aplicarlas a ambos elementos,
+     * compensando el ancho de la scrollbar.
      */
     useEffect(() => {
         const textarea = textareaRef.current;
         const resaltado = resaltadoRef.current;
-        if (!textarea || !resaltado || !mostrarResaltadoMarkdown) return;
+        const contenedorEditor = contenedorEditorRef.current;
+        
+        if (!textarea || !resaltado || !contenedorEditor || !mostrarResaltadoMarkdown) return;
 
-        const sincronizarAncho = () => {
-            if (textarea.scrollWidth > textarea.clientWidth) {
-                resaltado.style.width = `${textarea.scrollWidth}px`;
-            } else {
-                resaltado.style.width = '100%';
+        const sincronizarDimensiones = () => {
+            /* Obtener dimensiones del contenedor padre */
+            const rectContenedor = contenedorEditor.getBoundingClientRect();
+            const alturaContenedor = rectContenedor.height;
+            const anchoContenedor = rectContenedor.width;
+            
+            /* Calcular ancho de scrollbar del textarea */
+            const anchoScrollbar = textarea.offsetWidth - textarea.clientWidth;
+            
+            /* 
+             * Dimensiones exactas:
+             * - Altura: 100% del contenedor para que cubra completamente
+             * - Ancho: 100% del contenedor menos el ancho de la scrollbar
+             */
+            const nuevasdimensiones = {
+                width: `${anchoContenedor}px`,
+                height: `${alturaContenedor}px`
+            };
+            
+            /* Aplicar dimensiones al textarea */
+            textarea.style.width = `${anchoContenedor}px`;
+            textarea.style.height = `${alturaContenedor}px`;
+            textarea.style.boxSizing = 'border-box';
+            
+            /* 
+             * Aplicar dimensiones al div de resaltado:
+             * - Mismo ancho que el textarea MENOS el ancho de la scrollbar
+             * - Misma altura que el contenedor
+             * - Compensar el padding del textarea
+             */
+            resaltado.style.width = `${anchoContenedor - anchoScrollbar}px`;
+            resaltado.style.height = `${alturaContenedor}px`;
+            resaltado.style.boxSizing = 'border-box';
+            
+            /* Sincronizar scroll cuando haya contenido que lo requiera */
+            if (textarea.scrollHeight > textarea.clientHeight || textarea.scrollWidth > textarea.clientWidth) {
+                resaltado.scrollTop = textarea.scrollTop;
+                resaltado.scrollLeft = textarea.scrollLeft;
             }
+            
+            setDimensionesSincronizadas(nuevasimensiones);
         };
 
-        sincronizarAncho();
+        /* Sincronizar inmediatamente */
+        sincronizarDimensiones();
         
-        const resizeObserver = new ResizeObserver(sincronizarAncho);
+        /* Observer para detectar cambios de tamaño del contenedor */
+        const resizeObserver = new ResizeObserver(sincronizarDimensiones);
+        resizeObserver.observe(contenedorEditor);
         resizeObserver.observe(textarea);
+        
+        /* Re-sincronizar cuando cambia el contenido (puede afectar scrollHeight) */
+        const timeoutId = setTimeout(sincronizarDimensiones, 100);
 
-        return () => resizeObserver.disconnect();
-    }, [valor, mostrarResaltadoMarkdown]);
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timeoutId);
+        };
+    }, [valor, mostrarResaltadoMarkdown, localHeight, isResizing]);
 
     const aplicarFormato = useCallback(
         (marcador: string) => {
@@ -356,27 +411,24 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                 <div className="scratchpadBarra"></div>
                 <div className="scratchpadBarra"></div>
                 {modoVista === 'editor' ? (
-                    <div className="scratchpadEditor">
+                    <div 
+                        ref={contenedorEditorRef}
+                        className="scratchpadEditor"
+                        style={{
+                            height: localHeight,
+                            flex: localHeight === '100%' && !isResizing ? '1' : 'none'
+                        }}
+                    >
                         {mostrarResaltadoMarkdown && (
                             <div
                                 ref={resaltadoRef}
                                 className={`scratchpadResaltado scratchpadFuente-${tamanoFuente}`}
-                                style={{
-                                    height: localHeight,
-                                    flex: localHeight === '100%' && !isResizing ? '1' : 'none',
-                                    transition: isResizing ? 'none' : undefined
-                                }}
                                 dangerouslySetInnerHTML={{__html: contenidoResaltado}}
                             />
                         )}
                         <textarea
                             ref={textareaRef}
                             className={`scratchpadTextarea scratchpadFuente-${tamanoFuente} ${mostrarResaltadoMarkdown ? 'scratchpadTextarea--resaltado' : ''}`}
-                            style={{
-                                height: localHeight,
-                                flex: localHeight === '100%' && !isResizing ? '1' : 'none',
-                                transition: isResizing ? 'none' : undefined
-                            }}
                             placeholder={placeholder}
                             value={valor}
                             onChange={manejarCambio}

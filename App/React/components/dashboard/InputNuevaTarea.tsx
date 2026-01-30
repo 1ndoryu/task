@@ -2,6 +2,10 @@
  * InputNuevaTarea
  * Componente para crear nuevas tareas con input siempre visible
  * Estilo unificado con "+ Añadir" de hábitos para coherencia visual
+ * 
+ * Comportamiento:
+ * - Click en "+ Añadir" sin texto: abre modal de creación (si onAbrirModalCrear existe)
+ * - Click con texto o Enter: crea tarea directamente
  */
 
 import {useState, useCallback, useRef, type KeyboardEvent, type ChangeEvent} from 'react';
@@ -10,9 +14,11 @@ import type {DatosEdicionTarea} from '../../types/dashboard';
 
 interface InputNuevaTareaProps {
     onCrear: (datos: DatosEdicionTarea) => void;
+    /* Callback opcional para abrir modal de creación completo */
+    onAbrirModalCrear?: () => void;
 }
 
-export function InputNuevaTarea({onCrear}: InputNuevaTareaProps): JSX.Element {
+export function InputNuevaTarea({onCrear, onAbrirModalCrear}: InputNuevaTareaProps): JSX.Element {
     const [texto, setTexto] = useState('');
     const [enfocado, setEnfocado] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -45,10 +51,20 @@ export function InputNuevaTarea({onCrear}: InputNuevaTareaProps): JSX.Element {
 
     const tieneTexto = texto.trim().length > 0;
 
+    /* Manejar click en "+ Añadir" cuando no hay texto */
+    const manejarClickAñadir = useCallback(() => {
+        if (onAbrirModalCrear) {
+            onAbrirModalCrear();
+        } else {
+            /* Fallback: enfocar el input */
+            inputRef.current?.focus();
+        }
+    }, [onAbrirModalCrear]);
+
     return (
         <div className={`tareaNuevoInline ${enfocado || tieneTexto ? 'tareaNuevoInlineActivo' : ''}`}>
             {!enfocado && !tieneTexto && (
-                <span className="tareaNuevoInlineTexto">+ Añadir</span>
+                <span className="tareaNuevoInlineTexto" onClick={manejarClickAñadir} style={{cursor: 'pointer'}}>+ Añadir</span>
             )}
             <input
                 id="input-nueva-tarea-global"

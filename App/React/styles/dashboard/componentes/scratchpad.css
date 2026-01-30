@@ -36,8 +36,10 @@
 }
 
 .scratchpadTextarea {
-    width: 100%;
-    flex: 1;
+    /* 
+     * Dimensiones controladas por JS para sincronización exacta.
+     * No establecer width/height fijos aquí.
+     */
     background-color: transparent;
     resize: none;
     border: none;
@@ -45,9 +47,13 @@
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
-    /* Padding en el textarea para que el scroll llegue al borde del panel */
     padding: var(--dashboard-espacioLg);
-    /* Altura por defecto, puede ser sobreescrita por inline style */
+    box-sizing: border-box;
+    /* 
+     * Mantener scroll nativo del textarea.
+     * El JS compensará el ancho de la scrollbar en el div de resaltado.
+     */
+    overflow: auto;
 }
 
 /*
@@ -385,14 +391,20 @@
     position: relative;
     flex: 1;
     min-height: 0;
-    height: 100%;
+    /* 
+     * El height se controla por inline style desde el componente.
+     * No establecer width aquí para evitar conflictos con sincronización JS.
+     */
 }
 
 .scratchpadResaltado {
     position: absolute;
     top: 0;
     left: 0;
-    min-width: 100%;
+    /* 
+     * Dimensiones controladas por JS para sincronización exacta.
+     * No usar inset ni width/height fijos aquí.
+     */
     padding: var(--dashboard-espacioLg);
     overflow: hidden;
     color: var(--dashboard-textoSecundario);
@@ -409,6 +421,10 @@
     caret-color: var(--dashboard-textoSecundario);
     position: relative;
     z-index: 1;
+    /* 
+     * Dimensiones controladas por JS.
+     * El textarea mantiene su scroll nativo.
+     */
 }
 
 .scratchpadTextoTitulo {

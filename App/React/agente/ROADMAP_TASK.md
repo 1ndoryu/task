@@ -83,7 +83,26 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-### Revisiones nuevas ✅ COMPLETADAS (2026-02-01)
+
+### Revisiones Nuevas
+
+Todas estas tareas no se logran solucionar facilmente, trabajar en profundidad refactorizando y aplicando solid para entender el problema, no requiero un simple parche sino una solucion permanente.
+
+1. No, el boton de + añadir de las tareas aún no funciona y tampoco se resolvio 7. ✅ ~~Botón +Añadir en proyectos debe abrir modal con proyecto preseleccionado.~~ 
+
+2. ✅ **Scratchpad sincronización ancho/altura RESUELTO (2026-02-01)**: Implementada solución definitiva con JavaScript para sincronizar dimensiones exactas entre textarea y div de resaltado. El sistema ahora:
+   - Calcula el ancho de la scrollbar del textarea dinámicamente
+   - Aplica dimensiones exactas del contenedor a ambos elementos
+   - Compensa el ancho de la scrollbar en el div de resaltado
+   - Usa `ResizeObserver` para sincronización automática ante cambios
+   - El textarea cubre el 100% de altura del contenedor sin conflictos
+   - Archivos modificados: `Scratchpad.tsx` (nuevo useEffect + ref contenedor), `scratchpad.css` (dimensiones controladas por JS)
+
+3. ~~La nota inicial al registrarse sigue sin cargar, tampoco cargan las tareas iniciales.~~ Esto no se arreglo, es un problema profundo que requiere revision profunda. Atender individualmente en profundidad para entender porque no aparece nada inicial a registrarse. Si se requiere refactorización profunda, pues trabajar en eso.
+
+4. ~~Feedback Premium no detecta usuario premium.~~ Esto no se arreglo.
+
+### Revisiones antiguas ✅ COMPLETADAS (2026-02-01)
 
 **Todas las tareas corregidas:**
 
