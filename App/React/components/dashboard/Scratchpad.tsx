@@ -137,12 +137,8 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
     /* Estados para resizing */
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const resaltadoRef = useRef<HTMLDivElement>(null);
-    const contenedorEditorRef = useRef<HTMLDivElement>(null);
     const [isResizing, setIsResizing] = useState(false);
     const [localHeight, setLocalHeight] = useState<string>(altura);
-    
-    /* Ref para evitar loops infinitos en sincronización */
-    const ultimasSincronizadasRef = useRef<{width: number; height: number}>({width: 0, height: 0});
 
     /* Sincronizar altura si no se está redimensionando */
     useEffect(() => {
@@ -207,86 +203,6 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
             resaltadoRef.current.scrollLeft = textareaRef.current.scrollLeft;
         }
     };
-
-    /*
-     * Sincronización forzada de dimensiones entre textarea y div de resaltado.
-     * Problema: El scroll del textarea añade un espacio (scrollbar) que el div no tiene.
-     * Solución: Calcular dimensiones exactas del contenedor y aplicarlas a ambos elementos,
-     * compensando el ancho de la scrollbar.
-     */
-    useEffect(() => {
-        const textarea = textareaRef.current;
-        const resaltado = resaltadoRef.current;
-        const contenedorEditor = contenedorEditorRef.current;
-        
-        if (!textarea || !resaltado || !contenedorEditor || !mostrarResaltadoMarkdown) return;
-        
-        /* NO sincronizar durante resize manual */
-        if (isResizing) return;
-
-        let rafId: number | null = null;
-
-        const sincronizarDimensiones = () => {
-            /* Cancelar animationFrame pendiente para evitar múltiples ejecuciones */
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-
-            rafId = requestAnimationFrame(() => {
-                /* Obtener dimensiones del contenedor padre */
-                const rectContenedor = contenedorEditor.getBoundingClientRect();
-                const alturaContenedor = Math.round(rectContenedor.height);
-                const anchoContenedor = Math.round(rectContenedor.width);
-                
-                /* Verificar si las dimensiones realmente cambiaron (evitar loop) */
-                const ultimasDim = ultimasSincronizadasRef.current;
-                if (ultimasDim.width === anchoContenedor && ultimasDim.height === alturaContenedor) {
-                    return;
-                }
-                
-                /* Guardar nuevas dimensiones */
-                ultimasSincronizadasRef.current = {width: anchoContenedor, height: alturaContenedor};
-                
-                /* Calcular ancho de scrollbar del textarea */
-                const anchoScrollbar = textarea.offsetWidth - textarea.clientWidth;
-                
-                /* Aplicar dimensiones al textarea */
-                textarea.style.width = `${anchoContenedor}px`;
-                textarea.style.height = `${alturaContenedor}px`;
-                textarea.style.boxSizing = 'border-box';
-                
-                /* 
-                 * Aplicar dimensiones al div de resaltado:
-                 * - Mismo ancho que el textarea MENOS el ancho de la scrollbar
-                 * - Misma altura que el contenedor
-                 */
-                resaltado.style.width = `${anchoContenedor - anchoScrollbar}px`;
-                resaltado.style.height = `${alturaContenedor}px`;
-                resaltado.style.boxSizing = 'border-box';
-                
-                /* Sincronizar scroll cuando haya contenido que lo requiera */
-                if (textarea.scrollHeight > textarea.clientHeight || textarea.scrollWidth > textarea.clientWidth) {
-                    resaltado.scrollTop = textarea.scrollTop;
-                    resaltado.scrollLeft = textarea.scrollLeft;
-                }
-            });
-        };
-
-        /* Sincronizar inmediatamente con un pequeño delay para evitar mediciones incorrectas */
-        const timeoutId = setTimeout(sincronizarDimensiones, 10);
-        
-        /* Observer solo para el contenedor (no el textarea, para evitar loop) */
-        const resizeObserver = new ResizeObserver(sincronizarDimensiones);
-        resizeObserver.observe(contenedorEditor);
-
-        return () => {
-            resizeObserver.disconnect();
-            clearTimeout(timeoutId);
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-        };
-    }, [mostrarResaltadoMarkdown, localHeight, isResizing]);
 
     const aplicarFormato = useCallback(
         (marcador: string) => {
@@ -416,11 +332,9 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                 <div className="scratchpadBarra"></div>
                 {modoVista === 'editor' ? (
                     <div 
-                        ref={contenedorEditorRef}
                         className="scratchpadEditor"
                         style={{
-                            height: localHeight,
-                            flex: localHeight === '100%' && !isResizing ? '1' : 'none'
+                            height: localHeight !== '100%' ? localHeight : undefined
                         }}
                     >
                         {mostrarResaltadoMarkdown && (

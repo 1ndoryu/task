@@ -36,10 +36,8 @@
 }
 
 .scratchpadTextarea {
-    /* 
-     * Dimensiones controladas por JS para sincronización exacta.
-     * No establecer width/height fijos aquí.
-     */
+    width: 100%;
+    height: 100%;
     background-color: transparent;
     resize: none;
     border: none;
@@ -49,10 +47,6 @@
     font-size: var(--dashboard-tamanoBase);
     padding: var(--dashboard-espacioLg);
     box-sizing: border-box;
-    /* 
-     * Mantener scroll nativo del textarea.
-     * El JS compensará el ancho de la scrollbar en el div de resaltado.
-     */
     overflow: auto;
 }
 
@@ -391,21 +385,23 @@
     position: relative;
     flex: 1;
     min-height: 0;
-    /* 
-     * El height se controla por inline style desde el componente.
-     * No establecer width aquí para evitar conflictos con sincronización JS.
-     */
+    overflow: hidden;
 }
 
+/*
+ * Textarea y div de resaltado posicionados absolutamente.
+ * Ambos usan inset:0 para ocupar todo el contenedor.
+ * El div de resaltado tiene padding-right extra para compensar la scrollbar.
+ */
 .scratchpadResaltado {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     /* 
-     * Dimensiones controladas por JS para sincronización exacta.
-     * No usar inset ni width/height fijos aquí.
+     * Compensar el ancho de la scrollbar del textarea (~17px en la mayoría de navegadores).
+     * Usamos padding-right extra para que el texto no se desalinee.
      */
     padding: var(--dashboard-espacioLg);
+    padding-right: calc(var(--dashboard-espacioLg) + 17px);
     overflow: hidden;
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -417,14 +413,13 @@
 }
 
 .scratchpadTextarea--resaltado {
+    position: absolute;
+    inset: 0;
     color: transparent;
     caret-color: var(--dashboard-textoSecundario);
-    position: relative;
     z-index: 1;
-    /* 
-     * Dimensiones controladas por JS.
-     * El textarea mantiene su scroll nativo.
-     */
+    /* Scroll vertical siempre visible para mantener consistencia con el padding del resaltado */
+    overflow-y: scroll;
 }
 
 .scratchpadTextoTitulo {
