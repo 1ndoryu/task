@@ -22,6 +22,18 @@ export interface Version {
  */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.18-beta',
+        fecha: '2026-01-31',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Sistema de comentarios Premium: envía hasta 3 sugerencias por día'},
+            {tipo: 'nuevo', descripcion: 'Panel de administración mejorado con pestaña de feedback de usuarios'},
+            {tipo: 'mejora', descripcion: 'Botones para crear tareas y proyectos ahora abren el modal completo de configuración'},
+            {tipo: 'mejora', descripcion: 'El panel de notas ahora mantiene el ancho sincronizado correctamente'},
+            {tipo: 'mejora', descripcion: 'Al registrarte, aparecen automáticamente tareas y notas de bienvenida'},
+            {tipo: 'arreglo', descripcion: 'Corregido el botón de enviar en el formulario de comentarios'}
+        ]
+    },
+    {
         version: 'v1.0.17-beta',
         fecha: '2026-01-31',
         cambios: [
