@@ -141,11 +141,8 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
     const [isResizing, setIsResizing] = useState(false);
     const [localHeight, setLocalHeight] = useState<string>(altura);
     
-    /* Estados para sincronización forzada de dimensiones */
-    const [dimensionesSincronizadas, setDimensionesSincronizadas] = useState<{
-        width: string;
-        height: string;
-    }>({width: '100%', height: '100%'});
+    /* Ref para evitar loops infinitos en sincronización */
+    const ultimasSincronizadasRef = useRef<{width: number; height: number}>({width: 0, height: 0});
 
     /* Sincronizar altura si no se está redimensionando */
     useEffect(() => {
@@ -224,65 +221,69 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
         
         if (!textarea || !resaltado || !contenedorEditor || !mostrarResaltadoMarkdown) return;
 
+        let rafId: number | null = null;
+
         const sincronizarDimensiones = () => {
-            /* Obtener dimensiones del contenedor padre */
-            const rectContenedor = contenedorEditor.getBoundingClientRect();
-            const alturaContenedor = rectContenedor.height;
-            const anchoContenedor = rectContenedor.width;
-            
-            /* Calcular ancho de scrollbar del textarea */
-            const anchoScrollbar = textarea.offsetWidth - textarea.clientWidth;
-            
-            /* 
-             * Dimensiones exactas:
-             * - Altura: 100% del contenedor para que cubra completamente
-             * - Ancho: 100% del contenedor menos el ancho de la scrollbar
-             */
-            const nuevasdimensiones = {
-                width: `${anchoContenedor}px`,
-                height: `${alturaContenedor}px`
-            };
-            
-            /* Aplicar dimensiones al textarea */
-            textarea.style.width = `${anchoContenedor}px`;
-            textarea.style.height = `${alturaContenedor}px`;
-            textarea.style.boxSizing = 'border-box';
-            
-            /* 
-             * Aplicar dimensiones al div de resaltado:
-             * - Mismo ancho que el textarea MENOS el ancho de la scrollbar
-             * - Misma altura que el contenedor
-             * - Compensar el padding del textarea
-             */
-            resaltado.style.width = `${anchoContenedor - anchoScrollbar}px`;
-            resaltado.style.height = `${alturaContenedor}px`;
-            resaltado.style.boxSizing = 'border-box';
-            
-            /* Sincronizar scroll cuando haya contenido que lo requiera */
-            if (textarea.scrollHeight > textarea.clientHeight || textarea.scrollWidth > textarea.clientWidth) {
-                resaltado.scrollTop = textarea.scrollTop;
-                resaltado.scrollLeft = textarea.scrollLeft;
+            /* Cancelar animationFrame pendiente para evitar múltiples ejecuciones */
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
             }
-            
-            setDimensionesSincronizadas(nuevasdimensiones);
+
+            rafId = requestAnimationFrame(() => {
+                /* Obtener dimensiones del contenedor padre */
+                const rectContenedor = contenedorEditor.getBoundingClientRect();
+                const alturaContenedor = Math.round(rectContenedor.height);
+                const anchoContenedor = Math.round(rectContenedor.width);
+                
+                /* Verificar si las dimensiones realmente cambiaron (evitar loop) */
+                const ultimasDim = ultimasSincronizadasRef.current;
+                if (ultimasDim.width === anchoContenedor && ultimasDim.height === alturaContenedor) {
+                    return;
+                }
+                
+                /* Guardar nuevas dimensiones */
+                ultimasSincronizadasRef.current = {width: anchoContenedor, height: alturaContenedor};
+                
+                /* Calcular ancho de scrollbar del textarea */
+                const anchoScrollbar = textarea.offsetWidth - textarea.clientWidth;
+                
+                /* Aplicar dimensiones al textarea */
+                textarea.style.width = `${anchoContenedor}px`;
+                textarea.style.height = `${alturaContenedor}px`;
+                textarea.style.boxSizing = 'border-box';
+                
+                /* 
+                 * Aplicar dimensiones al div de resaltado:
+                 * - Mismo ancho que el textarea MENOS el ancho de la scrollbar
+                 * - Misma altura que el contenedor
+                 */
+                resaltado.style.width = `${anchoContenedor - anchoScrollbar}px`;
+                resaltado.style.height = `${alturaContenedor}px`;
+                resaltado.style.boxSizing = 'border-box';
+                
+                /* Sincronizar scroll cuando haya contenido que lo requiera */
+                if (textarea.scrollHeight > textarea.clientHeight || textarea.scrollWidth > textarea.clientWidth) {
+                    resaltado.scrollTop = textarea.scrollTop;
+                    resaltado.scrollLeft = textarea.scrollLeft;
+                }
+            });
         };
 
-        /* Sincronizar inmediatamente */
-        sincronizarDimensiones();
+        /* Sincronizar inmediatamente con un pequeño delay para evitar mediciones incorrectas */
+        const timeoutId = setTimeout(sincronizarDimensiones, 10);
         
-        /* Observer para detectar cambios de tamaño del contenedor */
+        /* Observer solo para el contenedor (no el textarea, para evitar loop) */
         const resizeObserver = new ResizeObserver(sincronizarDimensiones);
         resizeObserver.observe(contenedorEditor);
-        resizeObserver.observe(textarea);
-        
-        /* Re-sincronizar cuando cambia el contenido (puede afectar scrollHeight) */
-        const timeoutId = setTimeout(sincronizarDimensiones, 100);
 
         return () => {
             resizeObserver.disconnect();
             clearTimeout(timeoutId);
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
         };
-    }, [valor, mostrarResaltadoMarkdown, localHeight, isResizing]);
+    }, [mostrarResaltadoMarkdown, localHeight]);
 
     const aplicarFormato = useCallback(
         (marcador: string) => {
