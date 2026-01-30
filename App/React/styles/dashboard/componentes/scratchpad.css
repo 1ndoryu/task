@@ -420,6 +420,7 @@
     pointer-events: none;
     z-index: 0;
     box-sizing: border-box;
+    width: 101%;
 }
 
 .scratchpadTextarea--resaltado {
