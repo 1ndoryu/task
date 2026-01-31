@@ -4,6 +4,7 @@
  */
 
 import {useState, useCallback, useMemo, useRef, useEffect, type KeyboardEvent, type ChangeEvent} from 'react';
+import {useMenuContextualConId} from '../../hooks/useMenuContextualGlobal';
 import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle, Plus} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
@@ -55,6 +56,7 @@ export interface TareaItemProps {
     modoCompacto?: boolean;
 }
 
+/* TO-DO: Eliminar esta interfaz cuando todos los componentes migren al hook global */
 export interface MenuContextualEstado {
     visible: boolean;
     x: number;
@@ -69,12 +71,8 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
     /* Detectar si es una tarea-hábito virtual */
     const esHabito = esTareaHabito(tarea);
 
-    /* Estado menu contextual */
-    const [menuContextual, setMenuContextual] = useState<MenuContextualEstado>({
-        visible: false,
-        x: 0,
-        y: 0
-    });
+    /* Menú contextual coordinado globalmente - Solo un menú abierto a la vez */
+    const menuContextual = useMenuContextualConId(`tarea-${tarea.id}`);
 
     useEffect(() => {
         if (editando && inputRef.current) {
@@ -145,20 +143,16 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
         [guardarEdicion, cancelarEdicion, onIndent, onOutdent, onCrearNueva, tarea.parentId, tarea.id]
     );
 
-    /* Manejo del menu contextual */
-    const manejarClickDerecho = useCallback((evento: React.MouseEvent) => {
-        evento.preventDefault();
-        evento.stopPropagation();
-        setMenuContextual({
-            visible: true,
-            x: evento.clientX,
-            y: evento.clientY
-        });
-    }, []);
-
-    const cerrarMenuContextual = useCallback(() => {
-        setMenuContextual(prev => ({...prev, visible: false}));
-    }, []);
+    /* Manejo del menu contextual - Usa sistema global para coordinar cierres */
+    const manejarClickDerecho = useCallback(
+        (evento: React.MouseEvent) => {
+            evento.preventDefault();
+            evento.stopPropagation();
+            /* toggle: si el menú de esta tarea ya está abierto, lo cierra; si no, lo abre (cerrando cualquier otro) */
+            menuContextual.toggle(evento.clientX, evento.clientY);
+        },
+        [menuContextual]
+    );
 
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {
@@ -501,8 +495,8 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 </div>
             </div>
 
-            {menuContextual.visible && !esHabito && <MenuContextualAdaptivo opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} titulo={tarea.texto} />}
-            {menuContextual.visible && esHabito && <MenuContextualAdaptivo opciones={opcionesMenuHabito} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} titulo={tarea.texto} />}
+            {menuContextual.visible && !esHabito && <MenuContextualAdaptivo opciones={opcionesMenu} posicionX={menuContextual.posicion.x} posicionY={menuContextual.posicion.y} onSeleccionar={manejarOpcionMenu} onCerrar={menuContextual.cerrar} titulo={tarea.texto} />}
+            {menuContextual.visible && esHabito && <MenuContextualAdaptivo opciones={opcionesMenuHabito} posicionX={menuContextual.posicion.x} posicionY={menuContextual.posicion.y} onSeleccionar={manejarOpcionMenu} onCerrar={menuContextual.cerrar} titulo={tarea.texto} />}
         </>
     );
 }

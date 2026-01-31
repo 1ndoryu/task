@@ -5,6 +5,7 @@
  */
 
 import {useState, useCallback, useMemo} from 'react';
+import {useMenuContextualConId} from '../../hooks/useMenuContextualGlobal';
 import {Clock, Flame, Target, Check, Pause, AlertTriangle} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
@@ -81,21 +82,14 @@ interface FilaHabitoProps {
     estiloGrid: React.CSSProperties;
 }
 
-interface MenuContextualEstado {
-    visible: boolean;
-    x: number;
-    y: number;
-}
+/* Interfaz MenuContextualEstado ya no es necesaria, usa hook global */
 
 function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
     /* Advertencia de racha: mostrar cuando faltan pocos dias para perderla */
     const DIAS_ADVERTENCIA_RACHA = 2;
 
-    const [menuContextual, setMenuContextual] = useState<MenuContextualEstado>({
-        visible: false,
-        x: 0,
-        y: 0
-    });
+    /* Menú contextual coordinado globalmente - Solo un menú abierto a la vez */
+    const menuContextual = useMenuContextualConId(`habito-${habito.id}`);
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
 
     /* Frecuencia del habito */
@@ -150,19 +144,16 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
         onEditar?.(habito);
     }, [onEditar, habito]);
 
-    const manejarClickDerecho = useCallback((evento: React.MouseEvent) => {
-        evento.preventDefault();
-        evento.stopPropagation();
-        setMenuContextual({
-            visible: true,
-            x: evento.clientX,
-            y: evento.clientY
-        });
-    }, []);
-
-    const cerrarMenuContextual = useCallback(() => {
-        setMenuContextual(prev => ({...prev, visible: false}));
-    }, []);
+    /* Usa sistema global para coordinar cierres entre tareas y hábitos */
+    const manejarClickDerecho = useCallback(
+        (evento: React.MouseEvent) => {
+            evento.preventDefault();
+            evento.stopPropagation();
+            /* toggle: si el menú de este hábito ya está abierto, lo cierra; si no, lo abre (cerrando cualquier otro) */
+            menuContextual.toggle(evento.clientX, evento.clientY);
+        },
+        [menuContextual]
+    );
 
     /* Usando configuración centralizada de menú para consistencia entre paneles */
     const estaPausado = habito.pausado ?? false;
@@ -302,7 +293,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             </div>
 
             {/* Menu contextual */}
-            {menuContextual.visible && <MenuContextualAdaptivo opciones={opcionesMenu} posicionX={menuContextual.x} posicionY={menuContextual.y} onSeleccionar={manejarOpcionMenu} onCerrar={cerrarMenuContextual} titulo={habito.nombre} />}
+            {menuContextual.visible && <MenuContextualAdaptivo opciones={opcionesMenu} posicionX={menuContextual.posicion.x} posicionY={menuContextual.posicion.y} onSeleccionar={manejarOpcionMenu} onCerrar={menuContextual.cerrar} titulo={habito.nombre} />}
         </>
     );
 }

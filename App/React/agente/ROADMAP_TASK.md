@@ -23,8 +23,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Al abrir un menú contextual, cerrar automáticamente cualquier otro menú abierto (solo uno visible a la vez) ✅
 - [x] Hacer clic nuevamente en el trigger de un menú abierto debe cerrarlo (toggle) ✅
   - Creado `stores/menuContextualStore.ts` como coordinador global
-  - Creado `hooks/useMenuContextualGlobal.ts` para integrar menús con el store
-  - TO-DO: Aplicar el hook en componentes que usan menús contextuales
+  - Creado `hooks/useMenuContextualGlobal.ts` con:
+    - `useMenuContextualGlobal(prefix)`: Para componentes únicos (genera ID automático)
+    - `useMenuContextualConId(id)`: Para componentes en listas (ID estable, ej: `tarea-${id}`)
+  - Integrado en `TareaItem.tsx` y `TablaHabitos.tsx` (FilaHabito)
+  - Ahora click derecho en cualquier elemento cierra automáticamente otros menús abiertos
 
 #### Menú Contextual Hábitos - Sincronización
 - [x] **Sincronizar opciones**: Las opciones del menú contextual de hábitos en el panel de Hábitos deben aparecer también en el panel de Ejecución ✅
