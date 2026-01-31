@@ -15,7 +15,7 @@ export interface Version {
  * - Nombres de componentes (ModalX, useHook, etc.)
  * - Términos técnicos (SOLID, refactorización, sync, cache, etc.)
  * - Detalles de implementación (px, TTL, API, etc.)
- * 
+ *
  * En su lugar, describir el beneficio para el usuario:
  * - "Ahora puedes..." en vez de "Implementado sistema de..."
  * - "Se arregló el problema de..." en vez de "Fix en componente X"
@@ -30,7 +30,11 @@ export const HISTORIAL_VERSIONES: Version[] = [
             {tipo: 'mejora', descripcion: 'Botones para crear tareas y proyectos ahora abren el modal completo de configuración'},
             {tipo: 'mejora', descripcion: 'El panel de notas ahora mantiene el ancho sincronizado correctamente'},
             {tipo: 'mejora', descripcion: 'Al registrarte, aparecen automáticamente tareas y notas de bienvenida'},
-            {tipo: 'arreglo', descripcion: 'Corregido el botón de enviar en el formulario de comentarios'}
+            {tipo: 'mejora', descripcion: 'Puedes cambiar la importancia de los hábitos desde el menú contextual'},
+            {tipo: 'mejora', descripcion: 'El botón "Añadir" ahora se expande correctamente en los paneles'},
+            {tipo: 'arreglo', descripcion: 'Corregido el botón de enviar en el formulario de comentarios'},
+            {tipo: 'arreglo', descripcion: 'El badge "Muy Alta" ahora se muestra correctamente en hábitos'},
+            {tipo: 'arreglo', descripcion: 'Corregido el pie de página mostrando "Nakomi.studio"'}
         ]
     },
     {

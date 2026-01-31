@@ -5,26 +5,57 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.19-beta (2026-01-31)
+**Versión:** v1.0.18-beta (2026-01-31)
 **Foco:** Beta Nakomi Estable - Preparación Producción
 
 ---
 
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
-- [x] **Badge Prioridad Hábitos**: 
-  - [x] Corregir "Muy alta" ausente en panel ejecución.
-  - [x] **FIX**: Igualar estilo "Muy Alta" al de "Alta" (Solicitud de usuario).
-- [x] **UX Botón Añadir**: Botón añadir expandido correctamente.
-- [x] **Menú Contextual Hábitos**:
-  - [x] Selectores de Importancia implementados.
-  - [x] **FIX**: Corregir bug "Case duplicate" en `TablaHabitos.tsx` que rompe el build.
-  - [x] **FIX**: Investigar por qué las opciones no aparecen (posible prop `onActualizar` faltante).
-- [x] **Footer**: Corregido a "Nakomi.studio".
+
+#### Badge de Adjunto Premium
+- [ ] El badge "Adjunto" no debe mostrarse bloqueado para nadie (ni Free ni Premium)
+- [ ] Para usuarios Free: al dar clic, mostrar modal de suscripción (comportamiento normal sin indicador visual de bloqueo)
+
+#### Menús Contextuales - Comportamiento General
+- [ ] Al abrir un menú contextual, cerrar automáticamente cualquier otro menú abierto (solo uno visible a la vez)
+- [ ] Hacer clic nuevamente en el trigger de un menú abierto debe cerrarlo (toggle)
+
+#### Menú Contextual Hábitos - Sincronización
+- [ ] **Sincronizar opciones**: Las opciones del menú contextual de hábitos en el panel de Hábitos deben aparecer también en el panel de Ejecución
+- [ ] **Refactorizar si es necesario**: Revisar si el sistema de menús contextuales requiere refactorización a SOLID para mantener mantenibilidad
+
+#### Prioridad de Tareas
+- [ ] Agregar nueva prioridad **"Muy Alta"** a las tareas
+
+---
+
+### Fase Móvil 📱 (Prioridad Alta)
+
+#### Interacción con Tareas
+- [ ] Las tareas ya no serán editables inline en móvil (un toque abre el modal de configuración)
+
+#### Nuevo Sistema "Contextual Móvil" (Bottom Sheet Unificado)
+- [ ] Crear mecanismo unificado para crear/editar: tareas, hábitos y proyectos
+- [ ] Aparece en la parte inferior de la pantalla (no cubre toda la pantalla)
+- [ ] Estructura similar al modal de creación rápida actual
+- [ ] Opciones con iconos simplificados cuando no hay valor seleccionado
+- [ ] Diseño compacto y minimalista
+
+#### Prevención de Gestos Accidentales
+- [ ] Bloquear selección de texto en toda la app móvil
+- [ ] Bloquear zoom con gestos (pinch-to-zoom)
+
+#### Refactor del Menú Hamburguesa
+- [ ] **Quitar opciones**: Mi equipo (ocultar), Configurar layout, Notificaciones, Nueva tarea, Nuevo hábito, Nuevo proyecto
+- [ ] **Mantener arriba**: Mi perfil, Copias de seguridad, y demás opciones del menú contextual de usuario en escritorio
+- [ ] **Fix z-index**: El menú debe aparecer POR ENCIMA del nav inferior (actualmente aparece debajo)
+
+---
 
 ### Tareas Pendientes 📋
 
-#### Prioridad Media
-- [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2) (ESTO ES UNA TAREA PENDIENTE PARA EL USUARIO)
+#### Prioridad Media (Usuario)
+- [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2)
 
 ---
 
