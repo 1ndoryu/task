@@ -21,8 +21,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [ ] Hacer clic nuevamente en el trigger de un menú abierto debe cerrarlo (toggle)
 
 #### Menú Contextual Hábitos - Sincronización
-- [ ] **Sincronizar opciones**: Las opciones del menú contextual de hábitos en el panel de Hábitos deben aparecer también en el panel de Ejecución
-- [ ] **Refactorizar si es necesario**: Revisar si el sistema de menús contextuales requiere refactorización a SOLID para mantener mantenibilidad
+- [x] **Sincronizar opciones**: Las opciones del menú contextual de hábitos en el panel de Hábitos deben aparecer también en el panel de Ejecución ✅
+- [x] **Refactorizar si es necesario**: Revisar si el sistema de menús contextuales requiere refactorización a SOLID para mantener mantenibilidad ✅
+  - Creado `config/opcionesMenuHabito.tsx` como fuente única de verdad
+  - Actualizado `TareaItem.tsx`, `ListaTareas.tsx`, `PanelEjecucion.tsx`, `DashboardGrid.tsx`
 
 #### Prioridad de Tareas
 - [ ] Agregar nueva prioridad **"Muy Alta"** a las tareas
