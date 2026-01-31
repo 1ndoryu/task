@@ -150,7 +150,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                                 }}
                                 aria-label={obtenerNombreProyecto() || 'Proyecto'}
                                 title={obtenerNombreProyecto() || 'Proyecto'}>
-                                <Layers size={14} />
+                                <Layers size={15} />
                             </button>
                         )}
 
@@ -165,7 +165,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                             }}
                             aria-label={obtenerTextoPrioridad() || 'Prioridad'}
                             title={obtenerTextoPrioridad() || 'Prioridad'}>
-                            <Flag size={14} />
+                            <Flag size={15} />
                         </button>
 
                         {/* Urgencia */}
@@ -179,7 +179,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                             }}
                             aria-label={obtenerTextoUrgencia() || 'Urgencia'}
                             title={obtenerTextoUrgencia() || 'Urgencia'}>
-                            <Hash size={14} />
+                            <Hash size={15} />
                         </button>
 
                         {/* Fecha límite */}
@@ -193,7 +193,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                             }}
                             aria-label={fecha || 'Fecha'}
                             title={fecha || 'Fecha'}>
-                            <Calendar size={14} />
+                            <Calendar size={15} />
                         </button>
 
                         {/* Configuración avanzada (solo edición) */}
@@ -207,14 +207,14 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                                 }}
                                 aria-label="Configuración avanzada"
                                 title="Configuración avanzada">
-                                <Settings size={14} />
+                                <Settings size={15} />
                             </button>
                         )}
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
                     <button type="button" className="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}>
-                        {esEdicion ? <Send size={14} /> : <Send size={14} />}
+                        {esEdicion ? <Send size={15} /> : <Send size={15} />}
                     </button>
                 </div>
             </div>

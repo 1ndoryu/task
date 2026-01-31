@@ -1,17 +1,20 @@
 /*
  * BottomSheetHabito
- * Bottom Sheet para crear/editar hábitos en móvil
- * Diseño compacto y minimalista específico para móvil
- * 
+ * Bottom Sheet para crear hábitos en móvil
+ * Diseño idéntico a BottomSheetTarea para consistencia visual
+ *
  * Características:
  * - Input principal con autofocus
- * - Opciones compactas con iconos (frecuencia, importancia)
- * - Botón de crear destacado
+ * - Barra de acciones con iconos (15px): Frecuencia, Importancia
+ * - Botón enviar a la derecha
  * - Cierra automáticamente al crear
+ *
+ * TO-DO: Los iconos de propiedades deben abrir un modal de selección
+ * y mostrar la selección como badge debajo del input
  */
 
 import {useState, useRef, useEffect} from 'react';
-import {Activity, Repeat, Flag, X} from 'lucide-react';
+import {Send, Repeat, Flag} from 'lucide-react';
 import {BottomSheet} from '../shared';
 
 interface BottomSheetHabitoProps {
@@ -78,92 +81,67 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             semanal: 'Semanal',
             personalizada: 'Personalizada'
         };
-        return frecuencia ? map[frecuencia] : 'Diaria';
+        return frecuencia ? map[frecuencia] : null;
     };
 
     const obtenerTextoImportancia = () => {
         const map: Record<string, string> = {
             baja: 'Baja',
             media: 'Media',
-            alta: 'Alta'
+            alta: 'Alta',
+            'Muy Alta': 'Muy Alta'
         };
-        return importancia ? map[importancia] : 'Importancia';
+        return importancia ? map[importancia] : null;
     };
+
+    if (!estaAbierto) return null;
 
     return (
         <BottomSheet estaAbierto={estaAbierto} onCerrar={onCerrar}>
             <div className="bottomSheetHabito">
-                {/* Cabecera con título y botón cerrar */}
-                <div className="bottomSheetHabito__cabecera">
-                    <div className="bottomSheetHabito__icono">
-                        <Activity size={18} />
-                    </div>
-                    <h3 className="bottomSheetHabito__titulo">Nuevo Hábito</h3>
-                    <button
-                        type="button"
-                        className="bottomSheetHabito__botonCerrar"
-                        onClick={onCerrar}
-                        aria-label="Cerrar"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-
                 {/* Input principal */}
                 <div className="bottomSheetHabito__inputWrapper">
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={texto}
-                        onChange={e => setTexto(e.target.value)}
-                        placeholder="¿Qué hábito quieres crear?"
-                        className="bottomSheetHabito__input"
-                        disabled={cargando}
-                    />
+                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué hábito quieres crear?" className="bottomSheetHabito__input" disabled={cargando} />
                 </div>
 
-                {/* Opciones compactas */}
-                <div className="bottomSheetHabito__opciones">
-                    {/* Frecuencia */}
-                    <button
-                        type="button"
-                        className={`bottomSheetHabito__opcion ${frecuencia ? 'bottomSheetHabito__opcion--activa' : ''}`}
-                        onClick={() => {
-                            /* TO-DO: Abrir selector de frecuencia
-                             * Opciones: Diaria, Semanal, Personalizada
-                             * Implementar como bottom sheet de selección simple
-                             */
-                        }}
-                    >
-                        <Repeat size={16} />
-                        <span>{obtenerTextoFrecuencia()}</span>
-                    </button>
+                {/* Barra de acciones (Opciones + Guardar) */}
+                <div className="bottomSheetHabito__acciones">
+                    {/* Grupo de opciones (Izquierda) */}
+                    <div className="bottomSheetHabito__opcionesGrupo">
+                        {/* Frecuencia */}
+                        <button
+                            type="button"
+                            className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`}
+                            onClick={() => {
+                                /* TO-DO: Abrir modal central con opciones de Frecuencia.
+                                 * Al seleccionar, mostrar badge debajo del título.
+                                 */
+                            }}
+                            aria-label={obtenerTextoFrecuencia() || 'Frecuencia'}
+                            title={obtenerTextoFrecuencia() || 'Frecuencia'}>
+                            <Repeat size={15} />
+                        </button>
 
-                    {/* Importancia */}
-                    <button
-                        type="button"
-                        className={`bottomSheetHabito__opcion ${importancia ? 'bottomSheetHabito__opcion--activa' : ''}`}
-                        onClick={() => {
-                            /* TO-DO: Abrir selector de importancia
-                             * Opciones: Baja, Media, Alta
-                             * Implementar como bottom sheet de selección simple
-                             */
-                        }}
-                    >
-                        <Flag size={16} />
-                        <span>{obtenerTextoImportancia()}</span>
+                        {/* Importancia */}
+                        <button
+                            type="button"
+                            className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`}
+                            onClick={() => {
+                                /* TO-DO: Abrir modal central con opciones de Importancia.
+                                 * Al seleccionar, mostrar badge debajo del título.
+                                 */
+                            }}
+                            aria-label={obtenerTextoImportancia() || 'Importancia'}
+                            title={obtenerTextoImportancia() || 'Importancia'}>
+                            <Flag size={15} />
+                        </button>
+                    </div>
+
+                    {/* Botón Guardar (Derecha) */}
+                    <button type="button" className="bottomSheetHabito__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label="Crear Hábito">
+                        <Send size={15} />
                     </button>
                 </div>
-
-                {/* Botón de acción */}
-                <button
-                    type="button"
-                    className="bottomSheetHabito__botonCrear"
-                    onClick={manejarGuardar}
-                    disabled={!texto.trim() || cargando}
-                >
-                    {cargando ? 'Creando...' : 'Crear Hábito'}
-                </button>
             </div>
         </BottomSheet>
     );

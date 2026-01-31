@@ -55,6 +55,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
     - Separación entre grupo de opciones (izquierda) y guardar (derecha)
     - Estilos minimalistas sin bordes
 
+12. ✅ Unificación BottomSheets (SOLID)
+    - Centralizado estilos en `bottomSheetCreacion.css` con clases base `.bottomSheetCreacion__*`
+    - BottomSheetHabito ahora usa misma estructura visual que BottomSheetTarea
+    - Creado `BottomSheetProyecto.tsx` con estructura idéntica
+    - Iconos unificados a 15px, barra de acciones horizontal
+    - TO-DO pendiente: Implementar modales de selección de propiedades
+    - TO-DO pendiente: Mostrar badges debajo del input con propiedades seleccionadas
+
 
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
 

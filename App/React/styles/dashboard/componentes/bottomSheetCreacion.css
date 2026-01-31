@@ -1,8 +1,131 @@
 /*
- * BOTTOM SHEET TAREA
- * Estilos para el bottom sheet de creación/edición de tareas en móvil
- * Diseño compacto y minimalista
+ * BOTTOM SHEET CREACIÓN - ESTILOS CENTRALIZADOS
+ * Estilos compartidos para BottomSheet de creación/edición en móvil
+ * Aplica a: Tareas, Hábitos, Proyectos
+ * 
+ * Arquitectura SOLID:
+ * - SRP: Este archivo solo maneja estilos de BottomSheet de creación
+ * - OCP: Extender con modificadores (--variante) sin modificar base
+ * - DRY: Clases base reutilizables, sin duplicación
  */
+
+/* ============================================
+   CLASES BASE COMPARTIDAS (.bottomSheetCreacion)
+   Usadas por Tarea, Hábito y Proyecto
+   ============================================ */
+
+/* Contenedor principal */
+.bottomSheetCreacion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* Input principal */
+.bottomSheetCreacion__inputWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.bottomSheetCreacion__input {
+    width: 100%;
+    padding: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoPrincipal);
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    outline: none;
+}
+
+.bottomSheetCreacion__input:focus {
+    outline: none;
+}
+
+.bottomSheetCreacion__input::placeholder {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.bottomSheetCreacion__input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Barra de acciones (iconos izq + guardar der) */
+.bottomSheetCreacion__acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetCreacion__opcionesGrupo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* Botón de acción (icono 15px) */
+.bottomSheetCreacion__accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+    padding: 0;
+}
+
+.bottomSheetCreacion__accion:hover,
+.bottomSheetCreacion__accion:active {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+}
+
+.bottomSheetCreacion__accion--activa {
+    color: var(--dashboard-acento);
+}
+
+/* Botón Guardar/Enviar (icono Send) */
+.bottomSheetCreacion__botonGuardar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    padding: 0;
+}
+
+.bottomSheetCreacion__botonGuardar:hover,
+.bottomSheetCreacion__botonGuardar:active {
+    color: var(--dashboard-textoActivo);
+    background: none;
+    transform: scale(1.1);
+}
+
+.bottomSheetCreacion__botonGuardar:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: none;
+    color: var(--dashboard-textoApagado);
+}
+
+/* ============================================
+   BOTTOM SHEET TAREA
+   Alias a clases base para retrocompatibilidad
+   ============================================ */
 
 .bottomSheetTarea {
     display: flex;
@@ -10,78 +133,6 @@
     gap: var(--dashboard-espacioSm);
 }
 
-/* Cabecera con título y botón cerrar */
-.bottomSheetTarea__cabecera {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
-}
-
-.bottomSheetTarea__icono {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dashboard-textoApagado);
-}
-
-.bottomSheetTarea__titulo {
-    flex: 1;
-    font-size: var(--dashboard-tamanoMovilPequeno);
-    font-weight: 600;
-    color: var(--dashboard-textoActivo);
-    margin: 0;
-}
-
-.bottomSheetTarea__botonCerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: none;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioSm);
-    transition:
-        background var(--dashboard-transicionRapida),
-        color var(--dashboard-transicionRapida);
-}
-
-.bottomSheetTarea__botonCerrar:hover,
-.bottomSheetTarea__botonCerrar:active {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
-}
-
-/* Botón configuración avanzada (modo edición) */
-.bottomSheetTarea__botonConfig {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: none;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioSm);
-    transition:
-        background var(--dashboard-transicionRapida),
-        color var(--dashboard-transicionRapida);
-}
-
-.bottomSheetTarea__botonConfig:hover,
-.bottomSheetTarea__botonConfig:active {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
-}
-
-/* Input principal */
 .bottomSheetTarea__inputWrapper {
     display: flex;
     flex-direction: column;
@@ -100,7 +151,6 @@
 }
 
 .bottomSheetTarea__input:focus {
-    /* Sin efectos de borde al hacer focus */
     outline: none;
 }
 
@@ -113,8 +163,6 @@
     cursor: not-allowed;
 }
 
-/* Opciones compactas */
-/* Barra de acciones (iconos + guardar) */
 .bottomSheetTarea__acciones {
     display: flex;
     align-items: center;
@@ -153,7 +201,6 @@
     color: var(--dashboard-acento);
 }
 
-/* Botón Guardar (Icono) */
 .bottomSheetTarea__botonGuardar {
     display: flex;
     align-items: center;
@@ -183,62 +230,15 @@
     color: var(--dashboard-textoApagado);
 }
 
-/*
- * BOTTOM SHEET HÁBITO
- * Estilos para el bottom sheet de creación/edición de hábitos en móvil
- * Comparte estructura similar con tareas
- */
+/* ============================================
+   BOTTOM SHEET HÁBITO
+   Usa misma estructura visual que Tarea
+   ============================================ */
 
 .bottomSheetHabito {
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioSm);
-}
-
-.bottomSheetHabito__cabecera {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
-}
-
-.bottomSheetHabito__icono {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dashboard-textoApagado);
-}
-
-.bottomSheetHabito__titulo {
-    flex: 1;
-    font-size: var(--dashboard-tamanoMovilPequeno);
-    font-weight: 600;
-    color: var(--dashboard-textoActivo);
-    margin: 0;
-}
-
-.bottomSheetHabito__botonCerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: none;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioSm);
-    transition:
-        background var(--dashboard-transicionRapida),
-        color var(--dashboard-transicionRapida);
-}
-
-.bottomSheetHabito__botonCerrar:hover,
-.bottomSheetHabito__botonCerrar:active {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
 }
 
 .bottomSheetHabito__inputWrapper {
@@ -253,14 +253,13 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoActivo);
     background: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    border: none;
     border-radius: var(--dashboard-radioSm);
     outline: none;
-    transition: border-color var(--dashboard-transicionRapida);
 }
 
 .bottomSheetHabito__input:focus {
-    border-color: var(--dashboard-textoApagado);
+    outline: none;
 }
 
 .bottomSheetHabito__input::placeholder {
@@ -272,58 +271,178 @@
     cursor: not-allowed;
 }
 
-.bottomSheetHabito__opciones {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--dashboard-espacioXs);
-}
-
-.bottomSheetHabito__opcion {
+/* Barra de acciones (misma estructura que Tarea) */
+.bottomSheetHabito__acciones {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: 4px var(--dashboard-espacioSm);
-    font-size: 11px;
-    font-family: var(--dashboard-fuenteMonoespaciada);
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetHabito__opcionesGrupo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetHabito__accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
     color: var(--dashboard-textoApagado);
-    background: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioPill);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+    padding: 0;
+}
+
+.bottomSheetHabito__accion:hover,
+.bottomSheetHabito__accion:active {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+}
+
+.bottomSheetHabito__accion--activa {
+    color: var(--dashboard-acento);
+}
+
+.bottomSheetHabito__botonGuardar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
+    padding: 0;
 }
 
-.bottomSheetHabito__opcion:active {
-    transform: scale(0.98);
-}
-
-.bottomSheetHabito__opcion--activa {
+.bottomSheetHabito__botonGuardar:hover,
+.bottomSheetHabito__botonGuardar:active {
     color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordePrincipal);
-    background: var(--dashboard-superposicionSutil);
+    background: none;
+    transform: scale(1.1);
 }
 
-.bottomSheetHabito__botonCrear {
+.bottomSheetHabito__botonGuardar:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: none;
+    color: var(--dashboard-textoApagado);
+}
+
+/* ============================================
+   BOTTOM SHEET PROYECTO
+   Usa misma estructura visual que Tarea
+   ============================================ */
+
+.bottomSheetProyecto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetProyecto__inputWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.bottomSheetProyecto__input {
     width: 100%;
     padding: var(--dashboard-espacioSm);
     font-size: var(--dashboard-tamanoMovilPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-weight: 600;
     color: var(--dashboard-textoActivo);
     background: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    outline: none;
+}
+
+.bottomSheetProyecto__input:focus {
+    outline: none;
+}
+
+.bottomSheetProyecto__input::placeholder {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.bottomSheetProyecto__input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bottomSheetProyecto__acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetProyecto__opcionesGrupo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetProyecto__accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+    padding: 0;
+}
+
+.bottomSheetProyecto__accion:hover,
+.bottomSheetProyecto__accion:active {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+}
+
+.bottomSheetProyecto__accion--activa {
+    color: var(--dashboard-acento);
+}
+
+.bottomSheetProyecto__botonGuardar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
     border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
-    margin-top: 4px;
+    padding: 0;
 }
 
-.bottomSheetHabito__botonCrear:active {
-    transform: scale(0.99);
-    background: var(--dashboard-superposicionSutil);
+.bottomSheetProyecto__botonGuardar:hover,
+.bottomSheetProyecto__botonGuardar:active {
+    color: var(--dashboard-textoActivo);
+    background: none;
+    transform: scale(1.1);
 }
 
-.bottomSheetHabito__botonCrear:disabled {
-    opacity: 0.4;
+.bottomSheetProyecto__botonGuardar:disabled {
+    opacity: 0.3;
     cursor: not-allowed;
+    background: none;
+    color: var(--dashboard-textoApagado);
 }

@@ -173,12 +173,7 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo}: BottomShe
                 {/* Indicador de arrastre - área táctil para drag-to-close */}
                 <div ref={indicadorRef} className="bottomSheetIndicador bottomSheetIndicadorArrastrable" onTouchStart={manejarTouchStart} onTouchMove={manejarTouchMove} onTouchEnd={manejarTouchEnd} onMouseDown={manejarMouseDown} />
 
-                {/* Titulo opcional */}
-                {titulo && (
-                    <div className="bottomSheetCabecera">
-                        <h3 className="bottomSheetTitulo">{titulo}</h3>
-                    </div>
-                )}
+                {/* Titulo opcional eliminado para consistencia limpia */ null}
 
                 {/* Contenido */}
                 <div className="bottomSheetContenido">{children}</div>

@@ -25,4 +25,5 @@ export {ModalNotasExpandido} from './notas/ModalNotasExpandido';
 export {BuscadorGlobal} from './BuscadorGlobal';
 export {BottomSheetTarea} from './BottomSheetTarea';
 export {BottomSheetHabito} from './BottomSheetHabito';
+export {BottomSheetProyecto} from './BottomSheetProyecto';
 export type {DatosFormulario} from './FormularioHabito';
