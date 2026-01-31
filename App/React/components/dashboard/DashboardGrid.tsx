@@ -94,9 +94,12 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
         obtenerParticipantes: compartir.obtenerParticipantesTarea,
         renderHandleArrastre,
         handleMinimizar,
+        /* Props de hábitos - Sincronizado con TablaHabitos */
         onEditarHabito: manejarEditarHabitoPorId,
         onEliminarHabito: dashboard.eliminarHabito,
+        onToggleHabito: dashboard.toggleHabito,
         onPosponerHabito: dashboard.posponerHabito,
+        onPausarHabito: dashboard.pausarHabito,
         onActualizarHabito: dashboard.editarHabito,
         modoCompacto: configTareas.configuracion.modoCompacto,
         onConfigurarTarea: modales.abrirModalEditarTarea

@@ -39,16 +39,20 @@ interface ListaTareasProps {
     onCompartirTarea?: (tarea: Tarea) => void;
     estaCompartida?: (tareaId: number) => boolean;
     obtenerParticipantes?: (tarea: Tarea) => Participante[];
+    /* Callbacks para hábitos - Sincronizado con TablaHabitos (Fase UI/UX) */
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
+    onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
+    onPausarHabito?: (habitoId: number) => void;
+    onActualizarHabito?: (habitoId: number, datos: any) => void;
     modoCompacto?: boolean;
     onConfigurarTarea?: (tarea: Tarea) => void;
     /* Callback para abrir modal de creación rápida (usado en estado vacío y botón añadir) */
     onAbrirModalCrear?: () => void;
 }
 
-export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onPosponerHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear}: ListaTareasProps): JSX.Element {
+export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear}: ListaTareasProps): JSX.Element {
     /* Filtros básicos */
     const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
     const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
@@ -113,10 +117,13 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             onConfigurar={abrirConfiguracion}
             onMoverProyecto={t => setTareaMoviendo(t)}
             onCompartir={onCompartirTarea}
-            // Habitos
+            // Hábitos - Sincronizado con TablaHabitos
             onEditarHabito={onEditarHabito}
             onEliminarHabito={onEliminarHabito}
+            onToggleHabito={onToggleHabito}
             onPosponerHabito={onPosponerHabito}
+            onPausarHabito={onPausarHabito}
+            onActualizarHabito={onActualizarHabito}
         />
     );
 
@@ -124,92 +131,86 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         <DashboardPanel id="lista-tareas">
             {/* Estado vacío cuando no hay tareas */}
             {tareas.length === 0 ? (
-                <EstadoVacio
-                    icono={<CheckSquare size={32} />}
-                    mensaje="No hay tareas pendientes"
-                    descripcion="Crea tu primera tarea para empezar"
-                    textoBoton="+ Crear tarea"
-                    onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))}
-                />
+                <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />
             ) : (
-            <>
-            {habilitarDrag ? (
                 <>
-                    <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes">
-                        {tareasPrincipalesPendientes.map(tareaPadre => {
-                            const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
+                    {habilitarDrag ? (
+                        <>
+                            <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes">
+                                {tareasPrincipalesPendientes.map(tareaPadre => {
+                                    const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
 
-                            return (
-                                <Reorder.Item
-                                    key={tareaPadre.id}
-                                    value={tareaPadre}
-                                    as="div"
-                                    style={{position: 'relative'}}
-                                    className={`tareaPadreReorder ${tareaArrastrandoId === tareaPadre.id ? 'tareaPadreReorderArrastrando' : ''} ${tareaArrastrandoId === tareaPadre.id && esGestoSubtarea ? 'tareaPadreReorderGestoSubtarea' : ''}`}
-                                    dragListener={true}
-                                    onPointerDown={e => handleDragStart(tareaPadre.id, e)}
-                                    onDragEnd={handleDragEnd}
-                                    onDrag={(_, info) => {
-                                        dragCurrentXRef.current = dragStartXRef.current + info.offset.x;
-                                        const nuevoEsGesto = info.offset.x > UMBRAL_INDENT;
-                                        if (nuevoEsGesto !== esGestoSubtarea) {
-                                            setEsGestoSubtarea(nuevoEsGesto);
-                                        }
-                                    }}>
-                                    {tareaArrastrandoId === tareaPadre.id && esGestoSubtarea && <div className="tareaDropIndicador tareaDropIndicadorSubtarea tareaDropIndicadorActivo" style={{top: 0}} />}
+                                    return (
+                                        <Reorder.Item
+                                            key={tareaPadre.id}
+                                            value={tareaPadre}
+                                            as="div"
+                                            style={{position: 'relative'}}
+                                            className={`tareaPadreReorder ${tareaArrastrandoId === tareaPadre.id ? 'tareaPadreReorderArrastrando' : ''} ${tareaArrastrandoId === tareaPadre.id && esGestoSubtarea ? 'tareaPadreReorderGestoSubtarea' : ''}`}
+                                            dragListener={true}
+                                            onPointerDown={e => handleDragStart(tareaPadre.id, e)}
+                                            onDragEnd={handleDragEnd}
+                                            onDrag={(_, info) => {
+                                                dragCurrentXRef.current = dragStartXRef.current + info.offset.x;
+                                                const nuevoEsGesto = info.offset.x > UMBRAL_INDENT;
+                                                if (nuevoEsGesto !== esGestoSubtarea) {
+                                                    setEsGestoSubtarea(nuevoEsGesto);
+                                                }
+                                            }}>
+                                            {tareaArrastrandoId === tareaPadre.id && esGestoSubtarea && <div className="tareaDropIndicador tareaDropIndicadorSubtarea tareaDropIndicadorActivo" style={{top: 0}} />}
 
-                                    {renderTareaItem(tareaPadre, false)}
+                                            {renderTareaItem(tareaPadre, false)}
 
-                                    {subtareasVisibles.map(subtarea => (
-                                        <div key={subtarea.id} className="subtareaContenedor">
-                                            {renderTareaItem(subtarea, true)}
-                                        </div>
-                                    ))}
-                                </Reorder.Item>
-                            );
-                        })}
-                    </Reorder.Group>
+                                            {subtareasVisibles.map(subtarea => (
+                                                <div key={subtarea.id} className="subtareaContenedor">
+                                                    {renderTareaItem(subtarea, true)}
+                                                </div>
+                                            ))}
+                                        </Reorder.Item>
+                                    );
+                                })}
+                            </Reorder.Group>
 
-                    {tareasHabitoPendientes.map(tareaHabito => {
-                        const subtareasVisibles = obtenerSubtareasVisibles(tareaHabito.id);
-                        return (
-                            <div key={tareaHabito.id} className="tareaHabitoContenedor">
-                                {renderTareaItem(tareaHabito, false)}
-                                {subtareasVisibles.map(subtarea => (
-                                    <div key={subtarea.id} className="subtareaContenedor">
-                                        {renderTareaItem(subtarea, true)}
+                            {tareasHabitoPendientes.map(tareaHabito => {
+                                const subtareasVisibles = obtenerSubtareasVisibles(tareaHabito.id);
+                                return (
+                                    <div key={tareaHabito.id} className="tareaHabitoContenedor">
+                                        {renderTareaItem(tareaHabito, false)}
+                                        {subtareasVisibles.map(subtarea => (
+                                            <div key={subtarea.id} className="subtareaContenedor">
+                                                {renderTareaItem(subtarea, true)}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        );
-                    })}
-                </>
-            ) : (
-                <div className="listaTareasPendientes">
-                    {pendientes
-                        .filter(t => !t.parentId)
-                        .map(tareaPadre => {
-                            const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
-                            return (
-                                <div key={tareaPadre.id} className="tareaPadreContenedor">
-                                    {renderTareaItem(tareaPadre, false)}
-                                    {subtareasVisibles.map(subtarea => (
-                                        <div key={subtarea.id} className="subtareaContenedor">
-                                            {renderTareaItem(subtarea, true)}
+                                );
+                            })}
+                        </>
+                    ) : (
+                        <div className="listaTareasPendientes">
+                            {pendientes
+                                .filter(t => !t.parentId)
+                                .map(tareaPadre => {
+                                    const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
+                                    return (
+                                        <div key={tareaPadre.id} className="tareaPadreContenedor">
+                                            {renderTareaItem(tareaPadre, false)}
+                                            {subtareasVisibles.map(subtarea => (
+                                                <div key={subtarea.id} className="subtareaContenedor">
+                                                    {renderTareaItem(subtarea, true)}
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            );
-                        })}
-                </div>
-            )}
+                                    );
+                                })}
+                        </div>
+                    )}
 
-            {pendientes.length > 0 && completadas.length > 0 && !ocultarCompletadas && <div className="listaTareasSeparador" />}
+                    {pendientes.length > 0 && completadas.length > 0 && !ocultarCompletadas && <div className="listaTareasSeparador" />}
 
-            {!ocultarCompletadas && completadas.map(tarea => <TareaItem key={tarea.id} tarea={tarea} esSubtarea={!!tarea.parentId} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={tarea.proyectoId ? proyectos?.find(p => p.id === tarea.proyectoId)?.nombre : undefined} soloIconoProyecto={ocultarBadgeProyecto} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} modoCompacto={modoCompacto} />)}
+                    {!ocultarCompletadas && completadas.map(tarea => <TareaItem key={tarea.id} tarea={tarea} esSubtarea={!!tarea.parentId} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onConfigurar={() => abrirConfiguracion(tarea.id)} nombreProyecto={tarea.proyectoId ? proyectos?.find(p => p.id === tarea.proyectoId)?.nombre : undefined} soloIconoProyecto={ocultarBadgeProyecto} onMoverProyecto={() => setTareaMoviendo(tarea)} onCompartir={() => onCompartirTarea?.(tarea)} estaCompartida={estaCompartida?.(tarea.id) ?? false} mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0} modoCompacto={modoCompacto} />)}
 
-            {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} onAbrirModalCrear={onAbrirModalCrear} />}
-            </>
+                    {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} onAbrirModalCrear={onAbrirModalCrear} />}
+                </>
             )}
 
             {tareaConfigurando && (

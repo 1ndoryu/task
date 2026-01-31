@@ -27,13 +27,16 @@ interface TareaConColapsadorProps {
     onMoverProyecto: (tarea: Tarea) => void;
     onCompartir?: (tarea: Tarea) => void;
 
-    // Habitos
+    // Hábitos - Sincronizado con TablaHabitos (Fase UI/UX)
     onEditarHabito?: (id: number) => void;
     onEliminarHabito?: (id: number) => void;
+    onToggleHabito?: (id: number) => void;
     onPosponerHabito?: (id: number) => void;
+    onPausarHabito?: (id: number) => void;
+    onActualizarHabito?: (id: number, datos: any) => void;
 }
 
-export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onPosponerHabito}) => {
+export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito}) => {
     const esColapsable = !esSubtarea && tieneSubtareas(tareas, tarea.id);
     const estaExpandida = tareasExpandidas.has(tarea.id);
     const subtareasOcultas = !estaExpandida;
@@ -51,7 +54,35 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
 
     return (
         <div className={`tareaConColapsador ${modoCompacto ? 'tareaConColapsador--compacto' : ''}`} key={`wrapper-${tarea.id}`}>
-            <TareaItem tarea={tarea} esSubtarea={esSubtarea} onToggle={() => onToggleTarea?.(tarea.id)} onEditar={datos => onEditarTarea?.(tarea.id, datos)} onEliminar={() => onEliminarTarea?.(tarea.id)} onIndent={() => onIndent(tarea.id)} onOutdent={() => onOutdent(tarea.id)} onCrearNueva={onCrearNueva} onConfigurar={() => onConfigurar(tarea.id)} nombreProyecto={nombreProyecto} soloIconoProyecto={ocultarBadgeProyecto} onMoverProyecto={() => onMoverProyecto(tarea)} onCompartir={() => onCompartir?.(tarea)} estaCompartida={estaCompartida} mensajesNoLeidos={mensajesNoLeidos} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onPosponerHabito={onPosponerHabito} tieneSubtareas={esColapsable} modoCompacto={modoCompacto} />
+            <TareaItem
+                tarea={tarea}
+                esSubtarea={esSubtarea}
+                onToggle={() => onToggleTarea?.(tarea.id)}
+                onEditar={datos => onEditarTarea?.(tarea.id, datos)}
+                onEliminar={() => onEliminarTarea?.(tarea.id)}
+                onIndent={() => onIndent(tarea.id)}
+                onOutdent={() => onOutdent(tarea.id)}
+                onCrearNueva={onCrearNueva}
+                onConfigurar={() => onConfigurar(tarea.id)}
+                nombreProyecto={nombreProyecto}
+                soloIconoProyecto={ocultarBadgeProyecto}
+                onMoverProyecto={() => onMoverProyecto(tarea)}
+                onCompartir={() => onCompartir?.(tarea)}
+                estaCompartida={estaCompartida}
+                mensajesNoLeidos={mensajesNoLeidos}
+                /* Props de hábitos - Sincronizado con TablaHabitos */
+                onEditarHabito={onEditarHabito}
+                onEliminarHabito={onEliminarHabito}
+                onToggleHabito={onToggleHabito}
+                onPosponerHabito={onPosponerHabito}
+                onPausarHabito={onPausarHabito}
+                onActualizarHabito={onActualizarHabito}
+                /* Las tareas-hábito solo aparecen si NO están completadas ni pausadas */
+                habitoCompletadoHoy={false}
+                habitoPausado={false}
+                tieneSubtareas={esColapsable}
+                modoCompacto={modoCompacto}
+            />
             {esColapsable && (
                 <button className="tareaColapsadorBoton" onClick={() => onToggleExpandir(tarea.id)} onPointerDown={e => e.stopPropagation()} title={subtareasOcultas ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>
                     {subtareasOcultas ? (

@@ -5,12 +5,11 @@
  */
 
 import {useState, useCallback, useMemo} from 'react';
-import {Clock, Check, Edit3, AlertTriangle, Flame, Calendar, Pause, Play, Target} from 'lucide-react';
+import {Clock, Flame, Target, Check, Pause, AlertTriangle} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {tocaHoy, describirFrecuencia, obtenerIntervaloFrecuencia, calcularUmbralInactividad} from '../../utils/frecuenciaHabitos';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
-import type {OpcionMenu} from '../shared/MenuContextual';
 import {DashboardPanel} from '../shared/DashboardPanel';
 import {EstadoVacio} from '../shared/EstadoVacio';
 import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
@@ -20,7 +19,7 @@ import {ConfiguracionHabitos, CONFIG_HABITOS_POR_DEFECTO} from '../../hooks/useC
 import {HistorialHabitoInline} from '../shared/HistorialHabito';
 import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaHoy} from '../../utils/fecha';
-import {Flag} from 'lucide-react';
+import {generarOpcionesMenuHabito, MENU_HABITO_IDS, extraerImportanciaDeOpcion} from '../../config/opcionesMenuHabito';
 
 interface TablaHabitosProps {
     habitos: Habito[];
@@ -165,27 +164,40 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
         setMenuContextual(prev => ({...prev, visible: false}));
     }, []);
 
+    /* Usando configuración centralizada de menú para consistencia entre paneles */
+    const estaPausado = habito.pausado ?? false;
+    const opcionesMenu = useMemo(
+        () =>
+            generarOpcionesMenuHabito({
+                completadoHoy,
+                estaPausado,
+                tieneActualizar: !!onActualizar
+            }),
+        [completadoHoy, estaPausado, onActualizar]
+    );
+
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {
             switch (opcionId) {
-                case 'editar':
+                case MENU_HABITO_IDS.EDITAR:
                     onEditar?.(habito);
                     break;
-                case 'toggle':
+                case MENU_HABITO_IDS.TOGGLE:
                     onToggle?.(habito.id);
                     break;
-                case 'posponer':
+                case MENU_HABITO_IDS.POSPONER:
                     onPosponer?.(habito.id);
                     break;
-                case 'pausar':
+                case MENU_HABITO_IDS.PAUSAR:
                     onPausar?.(habito.id);
                     break;
-                case 'eliminar':
+                case MENU_HABITO_IDS.ELIMINAR:
                     onEliminar?.(habito.id);
                     break;
             }
-            if (opcionId.startsWith('importancia-')) {
-                const nuevaImportancia = opcionId.replace('importancia-', '');
+            /* Manejar cambio de importancia */
+            const nuevaImportancia = extraerImportanciaDeOpcion(opcionId);
+            if (nuevaImportancia) {
                 onActualizar?.(habito.id, {
                     ...habito,
                     importancia: nuevaImportancia
@@ -194,56 +206,6 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
         },
         [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar, onActualizar]
     );
-
-    /* Opciones del menu contextual */
-    const estaPausado = habito.pausado ?? false;
-    const opcionesMenu: OpcionMenu[] = [
-        {
-            id: 'toggle',
-            etiqueta: completadoHoy ? 'Desmarcar' : 'Marcar completado',
-            icono: <Check size={12} />
-        },
-        {
-            id: 'posponer',
-            etiqueta: 'Posponer hoy',
-            icono: <Calendar size={12} />
-        },
-        {
-            id: 'pausar',
-            etiqueta: estaPausado ? 'Reanudar habito' : 'Pausar habito',
-            icono: estaPausado ? <Play size={12} /> : <Pause size={12} />
-        },
-        {
-            id: 'editar',
-            etiqueta: 'Editar habito',
-            icono: <Edit3 size={12} />,
-            separadorDespues: true
-        }
-    ];
-
-    /* Añadir submenú de Importancia */
-    if (onActualizar) {
-        opcionesMenu.push({
-            id: 'importancia',
-            etiqueta: 'Importancia',
-            icono: <Flag size={12} />,
-            subOpciones: [
-                {id: 'importancia-Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="#b91c1c" />},
-                {id: 'importancia-Alta', etiqueta: 'Alta', icono: <Flag size={12} color="#ef4444" />},
-                {id: 'importancia-Media', etiqueta: 'Media', icono: <Flag size={12} color="#f59e0b" />},
-                {id: 'importancia-Baja', etiqueta: 'Baja', icono: <Flag size={12} color="#94a3b8" />}
-            ],
-            separadorDespues: true
-        });
-    }
-
-    /* Añadir eliminar al final */
-    opcionesMenu.push({
-        id: 'eliminar',
-        etiqueta: 'Eliminar',
-        icono: <AlertTriangle size={12} />,
-        peligroso: true
-    });
 
     /* Determinar clase de urgencia para la barra */
     const obtenerClaseUrgencia = (): string => {

@@ -3,7 +3,7 @@
  * Componente individual de tarea
  */
 
-import {useState, useCallback, useRef, useEffect, type KeyboardEvent, type ChangeEvent} from 'react';
+import {useState, useCallback, useMemo, useRef, useEffect, type KeyboardEvent, type ChangeEvent} from 'react';
 import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle, Plus} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
@@ -13,6 +13,7 @@ import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
 import {AccionesItem} from '../shared/AccionesItem';
 import type {VarianteBadge} from '../shared/BadgeInfo';
 import {obtenerTextoFechaLimite as obtenerTextoFechaLim, obtenerVarianteFechaLimite as obtenerVarianteFecha, formatearFechaCorta as formatearFecha} from '../../utils/fecha';
+import {generarOpcionesMenuHabito, MENU_HABITO_IDS, extraerImportanciaDeOpcion} from '../../config/opcionesMenuHabito';
 
 export interface TareaItemProps {
     tarea: Tarea;
@@ -38,11 +39,17 @@ export interface TareaItemProps {
     estaCompartida?: boolean;
     /* Contador de mensajes no leídos (para badge) */
     mensajesNoLeidos?: number;
-    /* Callbacks específicos para tareas-hábito (Fase 7.6.1) */
+    /* Callbacks específicos para tareas-hábito (Fase 7.6.1) - Sincronizado con TablaHabitos */
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
+    onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
+    onPausarHabito?: (habitoId: number) => void;
     onActualizarHabito?: (habitoId: number, datos: any) => void;
+    /* Indica si la tarea hábito fue completada hoy (para menú contextual) */
+    habitoCompletadoHoy?: boolean;
+    /* Indica si el hábito está pausado (para menú contextual) */
+    habitoPausado?: boolean;
     /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
     tieneSubtareas?: boolean;
     modoCompacto?: boolean;
@@ -54,7 +61,7 @@ export interface MenuContextualEstado {
     y: number;
 }
 
-export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onPosponerHabito, onActualizarHabito, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
+export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
     const [editando, setEditando] = useState(tarea.texto === '');
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -155,45 +162,29 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {
-            /* Acciones específicas para hábitos */
+            /* Acciones específicas para hábitos - Sincronizado con TablaHabitos */
             if (esHabito) {
                 const tareaHabito = tarea as TareaHabito;
-                if (opcionId === 'editar-habito') {
-                    onEditarHabito?.(tareaHabito.habitoId);
-                } else if (opcionId === 'posponer-habito') {
-                    onPosponerHabito?.(tareaHabito.habitoId);
-                } else if (opcionId === 'eliminar-habito') {
-                    onEliminarHabito?.(tareaHabito.habitoId);
-                } else if (opcionId === 'eliminar-habito') {
-                    onEliminarHabito?.(tareaHabito.habitoId);
-                } else if (opcionId.startsWith('importancia-habito-')) {
-                    const nuevaImportancia = opcionId.replace('importancia-habito-', '');
-                    /* Necesitamos recuperar el objeto hábito original. Como no lo tenemos aquí, 
-                       asumimos que onActualizarHabito manejará la mezcla de datos o que le pasamos solo lo que cambia.
-                       Pero useDashboardHabitos.editarHabito requiere el objeto completo (datos).
-                       Estrategia: El usuario quiere cambiar importancia. Necesitamos el objeto hábito.
-                       Como TareaHabito tiene algunos datos, podemos intentar reconstruir o mejor: 
-                       La función onActualizarHabito debe ser capaz de fusionar cambios si le pasamos partial?
-                       useDashboardHabitos.editarHabito reemplaza.
-                       FIX: TareaItem no tiene el objeto Habito completo. 
-                       Sin embargo, podemos enviar solo los campos obligatorios? 
-                       DatosNuevoHabito requiere nombre e importancia. TareaHabito tiene nombre (texto) e importancia (habitoImportancia).
-                       Podemos reconstruirlo.
-                    */
-                    const datosReconstruidos = {
-                        nombre: tareaHabito.texto, // El texto de la tarea hábito es el nombre del hábito
-                        importancia: nuevaImportancia,
-                        tags: [] // Perdemos los tags si no los tenemos... Esto es un problema.
-                        // Frecuencia?
-                    };
-                    /* LIMITACIÓN: No tenemos el objeto hábito completo aquí. 
-                      Solución: Pasarle la función de actualización que SEPA buscar el hábito en el store y actualizarlo.
-                      Pero editarHabito espera (id, datos).
-                      Vamos a asumir que el padre (ListaTareas) puede inyectar una función wrapper "actualizarHabitoParcial" 
-                      que busque el hábito en el store y lo actualice.
-                      O simplemente pasamos lo que tenemos y esperamos que el store maneje el merge si cambiamos la lógica.
-                      Por ahora, vamos a usar onActualizarHabito pasando un objeto con lo que queremos cambiar, y el padre deberá manejarlo.
-                   */
+                switch (opcionId) {
+                    case MENU_HABITO_IDS.EDITAR:
+                        onEditarHabito?.(tareaHabito.habitoId);
+                        break;
+                    case MENU_HABITO_IDS.TOGGLE:
+                        onToggleHabito?.(tareaHabito.habitoId);
+                        break;
+                    case MENU_HABITO_IDS.POSPONER:
+                        onPosponerHabito?.(tareaHabito.habitoId);
+                        break;
+                    case MENU_HABITO_IDS.PAUSAR:
+                        onPausarHabito?.(tareaHabito.habitoId);
+                        break;
+                    case MENU_HABITO_IDS.ELIMINAR:
+                        onEliminarHabito?.(tareaHabito.habitoId);
+                        break;
+                }
+                /* Manejar cambio de importancia */
+                const nuevaImportancia = extraerImportanciaDeOpcion(opcionId);
+                if (nuevaImportancia) {
                     onActualizarHabito?.(tareaHabito.habitoId, {importancia: nuevaImportancia});
                 }
                 return;
@@ -222,7 +213,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 });
             }
         },
-        [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onPosponerHabito]
+        [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito]
     );
 
     /* Opciones del menu contextual */
@@ -322,26 +313,16 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
         peligroso: true
     });
 
-    /* Opciones de menú contextual específicas para hábitos */
-    const opcionesMenuHabito: OpcionMenu[] = [
-        {
-            id: 'editar-habito',
-            etiqueta: 'Editar habito',
-            icono: <Settings size={12} />
-        },
-        {
-            id: 'posponer-habito',
-            etiqueta: 'Posponer hoy',
-            icono: <Calendar size={12} />,
-            separadorDespues: true
-        },
-        {
-            id: 'eliminar-habito',
-            etiqueta: 'Eliminar habito',
-            icono: <Trash2 size={12} />,
-            peligroso: true
-        }
-    ];
+    /* Opciones de menú contextual para hábitos - Usando configuración centralizada */
+    const opcionesMenuHabito = useMemo(
+        () =>
+            generarOpcionesMenuHabito({
+                completadoHoy: habitoCompletadoHoy,
+                estaPausado: habitoPausado,
+                tieneActualizar: !!onActualizarHabito
+            }),
+        [habitoCompletadoHoy, habitoPausado, onActualizarHabito]
+    );
 
     /* Renderizado del indicador de prioridad como badge (unificado con habitos) */
     const renderIndicadorPrioridad = () => {

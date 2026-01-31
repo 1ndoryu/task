@@ -4,3 +4,4 @@
  */
 
 export * from './registroPaneles';
+export * from './opcionesMenuHabito';
