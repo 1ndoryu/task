@@ -1,0 +1,289 @@
+/*
+ * BOTTOM SHEET TAREA
+ * Estilos para el bottom sheet de creación/edición de tareas en móvil
+ * Diseño compacto y minimalista
+ */
+
+.bottomSheetTarea {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Cabecera con título y botón cerrar */
+.bottomSheetTarea__cabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding-bottom: var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.bottomSheetTarea__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-textoApagado);
+}
+
+.bottomSheetTarea__titulo {
+    flex: 1;
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+}
+
+.bottomSheetTarea__botonCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+}
+
+.bottomSheetTarea__botonCerrar:hover,
+.bottomSheetTarea__botonCerrar:active {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+/* Input principal */
+.bottomSheetTarea__inputWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.bottomSheetTarea__input {
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    outline: none;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.bottomSheetTarea__input:focus {
+    border-color: var(--dashboard-textoApagado);
+}
+
+.bottomSheetTarea__input::placeholder {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.bottomSheetTarea__input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Opciones compactas */
+.bottomSheetTarea__opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetTarea__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoApagado);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioPill);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.bottomSheetTarea__opcion:active {
+    transform: scale(0.98);
+}
+
+.bottomSheetTarea__opcion--activa {
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
+    background: var(--dashboard-superposicionSutil);
+}
+
+/* Botón de crear */
+.bottomSheetTarea__botonCrear {
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    margin-top: var(--dashboard-espacioSm);
+}
+
+.bottomSheetTarea__botonCrear:active {
+    transform: scale(0.99);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.bottomSheetTarea__botonCrear:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/*
+ * BOTTOM SHEET HÁBITO
+ * Estilos para el bottom sheet de creación/edición de hábitos en móvil
+ * Comparte estructura similar con tareas
+ */
+
+.bottomSheetHabito {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.bottomSheetHabito__cabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding-bottom: var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.bottomSheetHabito__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-textoApagado);
+}
+
+.bottomSheetHabito__titulo {
+    flex: 1;
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+}
+
+.bottomSheetHabito__botonCerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+}
+
+.bottomSheetHabito__botonCerrar:hover,
+.bottomSheetHabito__botonCerrar:active {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+.bottomSheetHabito__inputWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.bottomSheetHabito__input {
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    outline: none;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.bottomSheetHabito__input:focus {
+    border-color: var(--dashboard-textoApagado);
+}
+
+.bottomSheetHabito__input::placeholder {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.bottomSheetHabito__input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bottomSheetHabito__opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetHabito__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoApagado);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioPill);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.bottomSheetHabito__opcion:active {
+    transform: scale(0.98);
+}
+
+.bottomSheetHabito__opcion--activa {
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.bottomSheetHabito__botonCrear {
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    margin-top: var(--dashboard-espacioSm);
+}
+
+.bottomSheetHabito__botonCrear:active {
+    transform: scale(0.99);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.bottomSheetHabito__botonCrear:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

@@ -4,6 +4,7 @@
  */
 
 import {useState, useCallback, useMemo, useRef, useEffect, type KeyboardEvent, type ChangeEvent} from 'react';
+import {useEsMovil} from '../../hooks/useEsMovil';
 import {useMenuContextualConId} from '../../hooks/useMenuContextualGlobal';
 import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle, Plus} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
@@ -68,6 +69,9 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    /* Detectar viewport móvil para cambiar comportamiento de edición */
+    const {esTablet: esMovilOTablet} = useEsMovil();
+
     /* Detectar si es una tarea-hábito virtual */
     const esHabito = esTareaHabito(tarea);
 
@@ -87,9 +91,14 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
     const iniciarEdicion = useCallback(() => {
         /* No permitir edición inline en tareas-hábito */
         if (esHabito) return;
+        /* En móvil/tablet: abrir modal de configuración en vez de edición inline */
+        if (esMovilOTablet) {
+            onConfigurar?.();
+            return;
+        }
         setTextoEditado(tarea.texto);
         setEditando(true);
-    }, [tarea.texto, esHabito]);
+    }, [tarea.texto, esHabito, esMovilOTablet, onConfigurar]);
 
     const guardarEdicion = useCallback(() => {
         const textoLimpio = textoEditado.trim();

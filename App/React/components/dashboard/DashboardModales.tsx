@@ -17,6 +17,7 @@ import {ModalConfiguracionTareas} from './ModalConfiguracionTareas';
 import {ModalConfiguracionHabitos} from './ModalConfiguracionHabitos';
 import {ModalConfiguracionScratchpad} from './ModalConfiguracionScratchpad';
 import {ModalConfiguracionActividad} from './ModalConfiguracionActividad';
+import {BottomSheetTarea, BottomSheetHabito} from './index';
 
 import {ToastDeshacer, ModalUpgrade, ModalLimiteAlcanzado, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones, ModalTemas} from '../shared';
 import {ModalFeedback} from '../shared/ModalFeedback';
@@ -28,9 +29,14 @@ import {ModalExperimentos} from '../experimentos/ModalExperimentos';
 import {ModalCreacionRapida} from './ModalCreacionRapida';
 import {ModalConfiguracionMCP, ModalConfiguracionUsuario} from '../configuracion';
 import {ModalHistorialBackups} from './ModalHistorialBackups';
+import {useEsMovil} from '../../hooks/useEsMovil';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {AccionExperimento} from '../experimentos/ModalExperimentos';
+import type {DatosTarea} from './BottomSheetTarea';
+import type {DatosHabito} from './BottomSheetHabito';
+
+import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
 
 interface DashboardModalesProps {
     ctx: DashboardCompletoRetorno;
@@ -38,6 +44,7 @@ interface DashboardModalesProps {
 
 export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
     const {dashboard, auth, suscripcion, esAdmin, limites, modales, equipos, notificaciones, compartir, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, acciones, temas} = ctx;
+    const {esMovil} = useEsMovil();
 
     const accionesExperimentos: AccionExperimento[] = [
         {
@@ -129,6 +136,40 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
         const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
         if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
         dashboard.crearTarea(datos);
+    };
+
+    /*
+     * Manejadores para BottomSheets móviles (Fase 10 - Móvil)
+     * Adaptan los datos del bottom sheet al formato esperado por el sistema
+     */
+    const manejarGuardarTareaBottomSheet = async (datos: DatosTarea) => {
+        const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
+        if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
+
+        const configTarea: any = {
+            fechaMaxima: datos.fecha,
+            adjuntos: []
+        };
+        acciones.manejarCrearNuevaTareaGlobal(
+            configTarea,
+            datos.prioridad || null,
+            datos.texto,
+            undefined,
+            datos.urgencia || null,
+            [],
+            datos.proyectoId
+        );
+    };
+
+    const manejarGuardarHabitoBottomSheet = async (datos: DatosHabito) => {
+        if (!limites.verificarYMostrar('habitos', dashboard.habitos.length)) return;
+
+        await dashboard.crearHabito({
+            nombre: datos.texto,
+            importancia: (datos.importancia || 'Media') as 'Alta' | 'Media' | 'Baja',
+            tags: [],
+            frecuencia: {tipo: datos.frecuencia === 'diaria' ? 'diario' : datos.frecuencia === 'semanal' ? 'semanal' : 'diario'}
+        });
     };
 
     return (
@@ -252,7 +293,27 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             <IndicadorArrastre panelArrastrando={arrastre.panelArrastrando} posicionMouse={arrastre.posicionMouse} />
 
             {/* Modal Creación Rápida */}
-            {modales.modalCreacionRapida && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
+            {modales.modalCreacionRapida && !esMovil && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
+
+            {/* Bottom Sheets Móviles - Solo en móvil */}
+            {esMovil && modales.modalCreacionRapida === 'tarea' && (
+                <BottomSheetTarea
+                    estaAbierto={true}
+                    onCerrar={modales.cerrarCreacionRapida}
+                    onGuardar={manejarGuardarTareaBottomSheet}
+                    proyectos={dashboard.proyectos}
+                    valoresIniciales={modales.valoresCreacionRapida}
+                />
+            )}
+
+            {esMovil && modales.modalCreacionRapida === 'habito' && (
+                <BottomSheetHabito
+                    estaAbierto={true}
+                    onCerrar={modales.cerrarCreacionRapida}
+                    onGuardar={manejarGuardarHabitoBottomSheet}
+                    valoresIniciales={modales.valoresCreacionRapida}
+                />
+            )}
 
             {/* Modal de Temas */}
             <ModalTemas estaAbierto={modales.modalTemasAbierto} onCerrar={modales.cerrarModalTemas} temaActual={temas.tema} onCambiarTema={temas.cambiarTema} />

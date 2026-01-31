@@ -13,9 +13,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
 
 #### Badge de Adjunto Premium
-- [ ] El badge "Adjunto" en la configuración de tareas no debe mostrarse bloqueado para nadie (ni Free ni Premium)
-  - Actualmente en `SeccionAdjuntos.tsx` (modo moderno), usuarios Free ven un botón con icono Crown y texto "Premium"
-  - Debe cambiarse para mostrar un botón normal "Agregar" que al hacer clic muestre el modal de upgrade
+- [x] El badge "Adjunto" en la configuración de tareas ya no se muestra bloqueado ✅
+  - Modificado `SeccionAdjuntos.tsx` para siempre mostrar botón "Agregar" (sin icono Crown)
+  - Usuarios Free ven el modal de upgrade al hacer clic (comportamiento via `manejarClickSubida`)
 - [x] Para usuarios Free: al dar clic, mostrar modal de suscripción ✅
   - Ya implementado con `onClickUpgrade` callback
 
@@ -49,23 +49,42 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### Fase Móvil 📱 (Prioridad Alta)
 
 #### Interacción con Tareas
-- [ ] Las tareas ya no serán editables inline en móvil (un toque abre el modal de configuración)
+- [x] Las tareas ya no serán editables inline en móvil (un toque abre el modal de configuración) ✅
+  - Modificado `TareaItem.tsx` con detección via `useEsMovil`
+  - En móvil/tablet, `iniciarEdicion()` ahora llama `onConfigurar()` en lugar de activar modo edición
 
 #### Nuevo Sistema "Contextual Móvil" (Bottom Sheet Unificado)
-- [ ] Crear mecanismo unificado para crear/editar: tareas, hábitos y proyectos
-- [ ] Aparece en la parte inferior de la pantalla (no cubre toda la pantalla)
-- [ ] Estructura similar al modal de creación rápida actual
-- [ ] Opciones con iconos simplificados cuando no hay valor seleccionado
-- [ ] Diseño compacto y minimalista
+- [x] Crear mecanismo unificado para crear/editar: tareas, hábitos y proyectos ✅
+  - Creados componentes `BottomSheetTarea.tsx` y `BottomSheetHabito.tsx`
+  - Estilos en `bottomSheetCreacion.css`
+  - Integrados en `DashboardModales.tsx` con detección de móvil
+- [x] Aparece en la parte inferior de la pantalla (no cubre toda la pantalla) ✅
+  - Utiliza el componente base `BottomSheet` existente con z-index 1500
+- [x] Estructura similar al modal de creación rápida actual ✅
+  - Input principal con autofocus
+  - Opciones compactas con iconos
+- [x] Opciones con iconos simplificados cuando no hay valor seleccionado ✅
+  - Botones de opción con estados inactivo/activo
+- [x] Diseño compacto y minimalista ✅
+  - Usa variables CSS del sistema
+  - Tipografía monospaciada consistente
 
 #### Prevención de Gestos Accidentales
-- [ ] Bloquear selección de texto en toda la app móvil
-- [ ] Bloquear zoom con gestos (pinch-to-zoom)
+- [x] Bloquear selección de texto en toda la app móvil ✅
+- [x] Bloquear zoom con gestos (pinch-to-zoom) ✅
+  - Agregado en `movil.css` sección "PREVENCIÓN DE GESTOS ACCIDENTALES"
+  - `user-select: none` en `.dashboardContenedor` y todos sus hijos
+  - `touch-action: pan-x pan-y` en html/body para bloquear pinch-to-zoom
+  - Excepción para inputs/textareas para permitir edición
 
 #### Refactor del Menú Hamburguesa
-- [ ] **Quitar opciones**: Mi equipo (ocultar), Configurar layout, Notificaciones, Nueva tarea, Nuevo hábito, Nuevo proyecto
-- [ ] **Mantener arriba**: Mi perfil, Copias de seguridad, y demás opciones del menú contextual de usuario en escritorio
-- [ ] **Fix z-index**: El menú debe aparecer POR ENCIMA del nav inferior (actualmente aparece debajo)
+- [x] **Quitar opciones**: Mi equipo (ocultar), Configurar layout, Notificaciones, Nueva tarea, Nuevo hábito, Nuevo proyecto ✅
+  - Modificado `EncabezadoMovil.tsx` para simplificar `opcionesDrawer`
+- [x] **Mantener arriba**: Mi perfil, Copias de seguridad, y demás opciones del menú contextual de usuario en escritorio ✅
+  - Se mantienen en `opcionesSecundariasDrawer`
+- [x] **Fix z-index**: El menú debe aparecer POR ENCIMA del nav inferior ✅
+  - Actualizado `movil.css`: drawer z-index 300, overlay 299 (antes 200/199)
+  - Navegación inferior permanece en z-index 100
 
 ---
 

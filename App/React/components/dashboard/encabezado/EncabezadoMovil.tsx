@@ -1,5 +1,5 @@
 import {useMemo} from 'react';
-import {Menu, MoreVertical, Search, CheckSquare, Activity, Folder, Bell, LayoutGrid, Users, Settings, FlaskConical, User, Database, Palette, Plug, LogOut} from 'lucide-react';
+import {Menu, MoreVertical, Search, Settings, FlaskConical, User, Database, Palette, Plug, LogOut} from 'lucide-react';
 import {DrawerMovil, BottomSheet} from '../../shared';
 import type {OpcionDrawer} from '../../shared/DrawerMovil';
 import type {GrupoOpciones, OpcionMenu} from '../../shared/MenuOpcionesPanel';
@@ -97,16 +97,19 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
         }
     };
 
+    /*
+     * Opciones principales del drawer: simplificadas para móvil
+     * Removido: Nueva tarea/hábito/proyecto (redundante con FAB y nav),
+     *           Notificaciones (no implementado aún para móvil),
+     *           Configurar Layout (no aplica en móvil),
+     *           Mi Equipo (ocultar por ahora)
+     */
     const opcionesDrawer = useMemo((): OpcionDrawer[] => {
         const opciones: OpcionDrawer[] = [];
-        if (onCrearRapido) opciones.push({id: 'tarea', etiqueta: 'Nueva Tarea', icono: <CheckSquare size={18} />}, {id: 'habito', etiqueta: 'Nuevo Hábito', icono: <Activity size={18} />}, {id: 'proyecto', etiqueta: 'Nuevo Proyecto', icono: <Folder size={18} />, separadorDespues: true});
-        if (onClickNotificaciones && estaConectado) opciones.push({id: 'notificaciones', etiqueta: 'Notificaciones', icono: <Bell size={18} />, badge: notificacionesPendientes});
-        if (onClickLayout) opciones.push({id: 'layout', etiqueta: 'Configurar Layout', icono: <LayoutGrid size={18} />});
-        if (onClickEquipos && estaConectado) opciones.push({id: 'equipos', etiqueta: 'Mi Equipo', icono: <Users size={18} />, badge: equiposPendientes});
         if (esAdmin && onClickAdmin) opciones.push({id: 'admin', etiqueta: 'Administración', icono: <Settings size={18} />});
         if (onClickExperimentos) opciones.push({id: 'experimentos', etiqueta: 'Laboratorio', icono: <FlaskConical size={18} />, separadorDespues: true});
         return opciones;
-    }, [onCrearRapido, onClickNotificaciones, estaConectado, notificacionesPendientes, onClickLayout, onClickEquipos, equiposPendientes, esAdmin, onClickAdmin, onClickExperimentos]);
+    }, [esAdmin, onClickAdmin, onClickExperimentos]);
 
     const opcionesSecundariasDrawer = useMemo(
         (): OpcionDrawer[] => [

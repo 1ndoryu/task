@@ -44,6 +44,39 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
+/*
+ * PREVENCIÓN DE GESTOS ACCIDENTALES (Fase Móvil)
+ * Bloquear selección de texto y zoom por gestos en dispositivos táctiles
+ */
+@media (max-width: 768px) {
+    /* Bloquear selección de texto en toda la app móvil */
+    .dashboardContenedor,
+    .dashboardContenedor * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+
+    /* Permitir selección solo en inputs y textareas (necesario para edición) */
+    .dashboardContenedor input,
+    .dashboardContenedor textarea,
+    .dashboardContenedor [contenteditable='true'] {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    /* Bloquear zoom por gestos (pinch-to-zoom) en todo el body */
+    html,
+    body {
+        touch-action: pan-x pan-y;
+        -ms-touch-action: pan-x pan-y;
+    }
+}
+
 /* 
  * UTILIDADES MOVIL
  * Clases para ocultar/mostrar elementos según dispositivo
@@ -286,7 +319,9 @@ body {
         z-index: 999;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s ease;
     }
 
     .bottomSheet__overlay--visible {
@@ -432,7 +467,7 @@ body {
         max-width: 80vw;
         background: var(--dashboard-fondoSecundario);
         border-right: 1px solid var(--dashboard-bordePrincipal);
-        z-index: 200;
+        z-index: 300;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
@@ -448,10 +483,12 @@ body {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 199;
+        z-index: 299;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s ease;
     }
 
     .drawerMovil__overlay--visible {
@@ -711,7 +748,10 @@ body {
     .habitoItem,
     .proyectoItem,
     .drawerMovilItem {
-        transition: opacity 0.1s ease, transform 0.1s ease, background 0.1s ease;
+        transition:
+            opacity 0.1s ease,
+            transform 0.1s ease,
+            background 0.1s ease;
     }
 }
 

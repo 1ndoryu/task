@@ -23,4 +23,6 @@ export {DashboardModales} from './DashboardModales';
 export {ModalNotasGuardadas} from './ModalNotasGuardadas';
 export {ModalNotasExpandido} from './notas/ModalNotasExpandido';
 export {BuscadorGlobal} from './BuscadorGlobal';
+export {BottomSheetTarea} from './BottomSheetTarea';
+export {BottomSheetHabito} from './BottomSheetHabito';
 export type {DatosFormulario} from './FormularioHabito';

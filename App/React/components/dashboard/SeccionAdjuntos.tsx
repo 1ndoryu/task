@@ -6,8 +6,8 @@
  */
 
 import {useRef, useState} from 'react';
-import {Upload, Loader2, AlertTriangle, X, Crown} from 'lucide-react';
-import type {Adjunto, LimitesPlan} from '../../types/dashboard';
+import {Upload, Loader2, AlertTriangle} from 'lucide-react';
+import type {Adjunto} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
 
 import {useAudioPlayer} from '../../hooks/shared/useAudioPlayer';
@@ -97,16 +97,11 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     </div>
                 )}
                 {/* Area de carga con verificación de límites */}
-                <div className={`adjuntosAreaCarga ${estadoSubida.subiendo ? 'adjuntosAreaCarga--subiendo' : ''} ${!puedeSubir ? 'adjuntosAreaCarga--bloqueado' : ''} ${alcanzadoLimite ? 'adjuntosAreaCarga--limite' : ''}`} onClick={manejarClickSubida}>
+                <div className={`adjuntosAreaCarga ${estadoSubida.subiendo ? 'adjuntosAreaCarga--subiendo' : ''} ${alcanzadoLimite ? 'adjuntosAreaCarga--limite' : ''}`} onClick={manejarClickSubida}>
                     {estadoSubida.subiendo ? (
                         <>
                             <Loader2 size={16} className="adjuntosIconoCarga iconoGirando" />
                             <span className="adjuntosSubtextoCarga">Subiendo archivo...</span>
-                        </>
-                    ) : !puedeSubir ? (
-                        <>
-                            <Crown size={16} className="adjuntosIconoCarga adjuntosIconoPremium" />
-                            <span className="adjuntosSubtextoCarga">Función Premium - Click para actualizar</span>
                         </>
                     ) : alcanzadoLimite ? (
                         <>
@@ -116,7 +111,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     ) : (
                         <>
                             <Upload size={16} className="adjuntosIconoCarga" />
-                            <span className="adjuntosSubtextoCarga">Imágenes, Audios o Documentos ({adjuntos.length}/{limiteAdjuntos})</span>
+                            <span className="adjuntosSubtextoCarga">Imágenes, Audios o Documentos{puedeSubir && ` (${adjuntos.length}/${limiteAdjuntos})`}</span>
                         </>
                     )}
                 </div>
@@ -148,19 +143,15 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
     const renderContenidoModerno = () => (
         <>
             <div className="propiedadesCompactas">
-                <span className="propiedadesCompactas__etiqueta">{etiqueta}{puedeSubir && ` (${adjuntos.length}/${limiteAdjuntos})`}</span>
+                <span className="propiedadesCompactas__etiqueta">
+                    {etiqueta}
+                    {puedeSubir && ` (${adjuntos.length}/${limiteAdjuntos})`}
+                </span>
                 <div className="propiedadesCompactas__contenido">
-                    {!puedeSubir ? (
-                        <button type="button" className="pillOpcion pillOpcion--premium" onClick={onClickUpgrade} title="Función Premium">
-                            <Crown size={14} />
-                            <span>Premium</span>
-                        </button>
-                    ) : (
-                        <button type="button" className="pillOpcion pillOpcion--vacio" onClick={manejarClickSubida} title={alcanzadoLimite ? 'Límite alcanzado' : 'Agregar adjunto'} disabled={estadoSubida.subiendo || alcanzadoLimite}>
-                            {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
-                            <span>{alcanzadoLimite ? 'Límite' : 'Agregar'}</span>
-                        </button>
-                    )}
+                    <button type="button" className="pillOpcion pillOpcion--vacio" onClick={manejarClickSubida} title={alcanzadoLimite ? 'Límite alcanzado' : 'Agregar adjunto'} disabled={estadoSubida.subiendo || alcanzadoLimite}>
+                        {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
+                        <span>{alcanzadoLimite ? 'Límite' : 'Agregar'}</span>
+                    </button>
                     {(error || estadoSubida.error) && (
                         <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
                             {error || estadoSubida.error}
