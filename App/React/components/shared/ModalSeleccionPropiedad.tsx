@@ -7,6 +7,7 @@
 
 import type {ReactNode} from 'react';
 import {X} from 'lucide-react';
+import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
 
 interface OpcionPropiedad {
     id: string;
