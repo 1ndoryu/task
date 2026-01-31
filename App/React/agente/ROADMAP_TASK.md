@@ -10,6 +10,18 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+# Revisiones nuevas.
+
+1. Sobre "Crear mecanismo unificado para crear/editar: tareas, hábitos y proyectos" no esta funcionando cuando doy un toque a la tarea, cuando doy un toque a la tarea se abre el panel configuracion, no digo que este panel este mal, pero con el toque debe abrir ese mecanismo para editar, si funciona cuando creo una tarea pero no funciona cuando creo un proyecto. 
+
+2. El Bottom Sheet Verificar que use las variables y debe ser mas compacto similar al menu contextual movil
+
+3. El menu que abre al dar click al menu hamburgueza sigue apareciendo debajo del nav inferior, y los botones de mi perfil, copia de seguridad, tema etc, estan al final, tiene que estar arriba.
+
+4. La prioridad "muy alta" de las tareas si bien aparece en la configuracion, en el badge de ve asi MUY_ALTA, debe ser sin _ y no aparece en el modal de creación rapida. 
+
+5. El header de los modales en el movil se ven muy pequeño
+   
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
 
 #### Badge de Adjunto Premium
@@ -89,6 +101,18 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### Tareas Pendientes 📋
+
+#### Refactorizaciones Completadas ✅
+- [x] **Refactor movil.css**: Dividido en 8 archivos modulares (2026-01-31) ✅
+  - `movilBase.css` - Optimizaciones base WebView y prevención de gestos (286 líneas)
+  - `movilUtilidades.css` - Clases utilitarias ocultar/mostrar (59 líneas)
+  - `movilComponentes.css` - Modales, bottom sheets, drawer (198 líneas)
+  - `movilNavegacion.css` - Navegación inferior y header móvil (107 líneas)
+  - `movilSafeAreas.css` - Safe areas y optimizaciones GPU (89 líneas)
+  - `movilGrid.css` - Grid móvil, paneles fullscreen y menú opciones (227 líneas)
+  - `movilFormularios.css` - Formularios compactos y chat inline (273 líneas)
+  - `movilListas.css` - Listas compactas proyectos/hábitos/tareas (177 líneas)
+  - Total: 1226 líneas → 8 archivos organizados (cumple límite 300 líneas)
 
 #### Prioridad Media (Usuario)
 - [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2)

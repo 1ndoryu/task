@@ -1,0 +1,62 @@
+/*
+ * UTILIDADES MOVIL - movilUtilidades.css
+ * 
+ * Clases de utilidad para ocultar/mostrar elementos según dispositivo
+ * Breakpoints responsive y helpers
+ */
+
+/* 
+ * OCULTAR EN MOVIL
+ * Elementos visibles en desktop pero ocultos en móvil
+ */
+@media (max-width: 480px) {
+    .ocultarEnMovil {
+        display: none !important;
+    }
+}
+
+/* 
+ * MOSTRAR SOLO EN MOVIL
+ * Elementos ocultos en desktop pero visibles en móvil
+ */
+.mostrarSoloEnMovil {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    .mostrarSoloEnMovil {
+        display: flex !important;
+    }
+
+    .mostrarSoloEnMovil--block {
+        display: block !important;
+    }
+
+    .mostrarSoloEnMovil--inline {
+        display: inline !important;
+    }
+}
+
+/* 
+ * OCULTAR EN TABLET
+ * Elementos visibles en desktop pero ocultos en tablet y menor
+ */
+@media (max-width: 768px) {
+    .ocultarEnTablet {
+        display: none !important;
+    }
+}
+
+/* 
+ * MOSTRAR SOLO EN TABLET
+ * Elementos visibles solo en tablet y menor
+ */
+.mostrarSoloEnTablet {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .mostrarSoloEnTablet {
+        display: flex !important;
+    }
+}

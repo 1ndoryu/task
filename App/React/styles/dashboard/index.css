@@ -130,4 +130,12 @@
 @import './componentes/estadoVacio.css';
 
 /* Estilos Movil (PWA) - Siempre al final para mayor especificidad */
-@import './movil.css';
+/* Modularizado en archivos específicos por funcionalidad */
+@import './movilBase.css';
+@import './movilUtilidades.css';
+@import './movilComponentes.css';
+@import './movilNavegacion.css';
+@import './movilSafeAreas.css';
+@import './movilGrid.css';
+@import './movilFormularios.css';
+@import './movilListas.css';

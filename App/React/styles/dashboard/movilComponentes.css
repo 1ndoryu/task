@@ -1,0 +1,214 @@
+/*
+ * COMPONENTES MOVIL - movilComponentes.css
+ * 
+ * Componentes específicos para móvil:
+ * - Modales fullscreen
+ * - Bottom sheets
+ * - Drawer lateral
+ */
+
+/* 
+ * MODALES MOVIL
+ * Modales que ocupan toda la pantalla en móvil
+ */
+@media (max-width: 480px) {
+    .modalMovil {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Header del modal movil */
+    .modalMovil__cabecera {
+        display: flex;
+        align-items: center;
+        padding: var(--dashboard-espacioMd);
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        position: sticky;
+        top: 0;
+        background: var(--dashboard-fondoSecundario);
+        z-index: 10;
+    }
+
+    /* Boton volver en lugar de X */
+    .modalMovil__botonVolver {
+        display: flex;
+        align-items: center;
+        gap: var(--dashboard-espacioSm);
+        background: none;
+        border: none;
+        color: var(--dashboard-textoNormal);
+        font-size: var(--dashboard-tamanoMovilBase);
+        cursor: pointer;
+        padding: var(--dashboard-espacioSm);
+        min-height: var(--dashboard-tamanoTactilMinimo);
+    }
+
+    .modalMovil__botonVolver:hover {
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Contenido scrolleable */
+    .modalMovil__contenido {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--dashboard-espacioMd);
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* 
+ * BOTTOM SHEET
+ * Para menus contextuales en movil
+ */
+.bottomSheet {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .bottomSheet {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--dashboard-fondoSecundario);
+        border-top: 1px solid var(--dashboard-bordePrincipal);
+        border-radius: 16px 16px 0 0;
+        max-height: 70vh;
+        z-index: 1000;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .bottomSheet--visible {
+        transform: translateY(0);
+    }
+
+    .bottomSheet__indicador {
+        width: 40px;
+        height: 4px;
+        background: var(--dashboard-bordeSutil);
+        border-radius: 2px;
+        margin: 12px auto;
+    }
+
+    .bottomSheet__contenido {
+        padding: var(--dashboard-espacioMd);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .bottomSheet__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s ease;
+    }
+
+    .bottomSheet__overlay--visible {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* 
+ * DRAWER LATERAL
+ * Menu hamburguesa deslizante
+ */
+.drawerMovil {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .drawerMovil {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 80vw;
+        background: var(--dashboard-fondoSecundario);
+        border-right: 1px solid var(--dashboard-bordePrincipal);
+        z-index: 300;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .drawerMovil--visible {
+        transform: translateX(0);
+    }
+
+    .drawerMovil__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 299;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s ease;
+    }
+
+    .drawerMovil__overlay--visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .drawerMovil__cabecera {
+        padding: var(--dashboard-espacioLg);
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    }
+
+    .drawerMovil__navegacion {
+        flex: 1;
+        padding: var(--dashboard-espacioMd);
+        overflow-y: auto;
+    }
+
+    .drawerMovil__item {
+        display: flex;
+        align-items: center;
+        gap: var(--dashboard-espacioMd);
+        padding: var(--dashboard-espacioMd);
+        min-height: var(--dashboard-tamanoTactilMinimo);
+        color: var(--dashboard-textoNormal);
+        text-decoration: none;
+        border-radius: var(--dashboard-radioMd);
+        transition: background var(--dashboard-transicionRapida);
+    }
+
+    .drawerMovil__item:hover,
+    .drawerMovil__item--activo {
+        background: var(--dashboard-fondoHover);
+        color: var(--dashboard-textoActivo);
+    }
+
+    .drawerMovil__pie {
+        padding: var(--dashboard-espacioMd);
+        border-top: 1px solid var(--dashboard-bordePrincipal);
+    }
+}

@@ -1,0 +1,212 @@
+/*
+ * LISTAS MOVIL - movilListas.css
+ * 
+ * Layout compacto para listas en móvil:
+ * - Proyectos en 2 filas
+ * - Hábitos compactos
+ * - Tareas sin botones de acción
+ */
+
+@media (max-width: 480px) {
+    /* 
+     * PROYECTOS - LAYOUT 2 FILAS EN MOVIL
+     * Fila 1: Titulo completo
+     * Fila 2: Badges (prioridad, tareas, fecha, etc.)
+     */
+
+    /* Quitar fondos y bordes de proyectos en movil */
+    .listaProyectos {
+        background-color: transparent;
+    }
+
+    .proyectoItemWrapper,
+    .proyectoItemWrapperActivo,
+    .proyectoItem {
+        background-color: transparent !important;
+        border-left: none !important;
+    }
+
+    /* Padding lateral unificado - el vertical lo maneja cada item */
+    .proyectoItem,
+    .proyectoItemWrapper--compacto .proyectoItem {
+        padding-top: var(--dashboard-espacioXs);
+        padding-bottom: var(--dashboard-espacioXs);
+    }
+
+    /* El contenido del proyecto se apila en 2 filas */
+    .proyectoItemContenido,
+    .proyectoItemWrapper--compacto .proyectoItemContenido {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: var(--dashboard-espacioXs) !important;
+        width: 100%;
+    }
+
+    /* Titulo en la primera fila - sin truncar, mismo tamaño que tareas compactas */
+    .proyectoNombre,
+    .proyectoNombre--compacto {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        line-height: 1.4;
+        font-size: var(--dashboard-tamanoPequeno);
+        width: 100%;
+    }
+
+    /* Meta (badges) en la segunda fila */
+    .proyectoMeta {
+        flex-wrap: wrap;
+        gap: var(--dashboard-espacioXs);
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        width: 100%;
+    }
+
+    /* Ocultar barra de progreso separada - info ya esta en meta */
+    .proyectoProgreso {
+        display: none !important;
+    }
+
+    /* Ocultar acciones inline en movil - usar menu contextual */
+    .proyectoAcciones,
+    .proyectoItem .accionesItem {
+        display: none !important;
+    }
+
+    /* Tareas del proyecto - menos indentacion en movil */
+    .proyectoTareas {
+        border-left-width: 2px;
+        margin-left: var(--dashboard-espacioSm);
+    }
+
+    /* 
+     * HABITOS - COMPACTACION ADICIONAL EN MOVIL
+     * Reducir padding y tamaños para mejor densidad
+     */
+
+    /* Fila de habito mas compacta */
+    .tablaFilaCompacta {
+        min-height: 36px;
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm) !important;
+        gap: var(--dashboard-espacioXs);
+    }
+
+    /* Checkbox mismo tamaño que tareas compactas (0.65rem) */
+    .tablaFilaCompacta .habitoCheckbox {
+        width: 0.65rem;
+        height: 0.65rem;
+    }
+
+    /* Nombre del habito - mismo tamaño que tareas compactas */
+    .tablaFilaCompacta .filaNombre {
+        font-size: var(--dashboard-tamanoPequeno);
+        line-height: 1.4;
+    }
+
+    /* Badges mas compactos */
+    .tablaFilaCompacta .badgeInfo {
+        padding: 1px 4px;
+        font-size: 8px;
+    }
+
+    .tablaFilaCompacta .badgeInfo svg {
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Contenedor de racha mas compacto */
+    .tablaFilaCompacta .rachaContenedor {
+        padding: 2px 6px;
+        gap: 2px;
+    }
+
+    .tablaFilaCompacta .rachaIcono,
+    .tablaFilaCompacta .rachaIconoActivo {
+        width: 10px;
+        height: 10px;
+    }
+
+    .tablaFilaCompacta .rachaNumero {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* Historial inline mas compacto */
+    .tablaFilaCompacta .historialHabitoInline {
+        gap: 2px;
+    }
+
+    .tablaFilaCompacta .historialDia {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Ocultar columnas secundarias en habitos movil compacto */
+    .tablaFilaCompacta .tablaColumnaInactividad,
+    .tablaFilaCompacta .tablaColumnaUrgencia,
+    .tablaFilaCompacta .tablaColumnaAcciones {
+        display: none;
+    }
+
+    /* Ocultar encabezado de tabla en movil */
+    .tablaEncabezado {
+        display: none;
+    }
+
+    /* 
+     * OCULTAR ACCIONES DE TAREAS EN MOVIL
+     * Los botones de tuerca y papelera son redundantes - el menu contextual ya ofrece estas opciones
+     */
+    .tareaAccionesContenedor {
+        display: none !important;
+    }
+
+    /* 
+     * PADDING VERTICAL DE HABITOS EN MOVIL
+     * El padding lateral lo maneja la regla general de items (15px)
+     */
+    .tablaFila {
+        padding-top: var(--dashboard-espacioXs);
+        padding-bottom: var(--dashboard-espacioXs);
+        gap: var(--dashboard-espacioXs);
+    }
+
+    .tablaFilaCompacta {
+        padding-top: 4px;
+        padding-bottom: 4px;
+        min-height: 36px;
+    }
+
+    /* Reducir gap interno de elementos en filas de habitos */
+    .filaNombreContenedor {
+        gap: var(--dashboard-espacioXs);
+    }
+
+    .rachaContenedor {
+        padding: 1px 4px;
+        gap: 2px;
+    }
+
+    /* 
+     * OCULTAR BOTONES AÑADIR EN MOVIL
+     * El FAB central ya proporciona esta funcionalidad de manera más accesible
+     */
+    .añadirHabito,
+    .tareaNuevoInline,
+    .tareaNuevoBoton {
+        display: none !important;
+    }
+
+    /* 
+     * PADDING LATERAL UNIFICADO - REGLA FINAL
+     * Garantiza 15px laterales en todos los items de lista
+     * Esta regla debe estar al final para máxima prioridad
+     */
+    .tareaItem,
+    .tareaItem--compacto,
+    .tablaFila,
+    .tablaFilaCompacta,
+    .proyectoItem,
+    .proyectoItemWrapper--compacto .proyectoItem {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}

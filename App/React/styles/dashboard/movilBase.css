@@ -1,0 +1,325 @@
+/*
+ * ESTILOS BASE MOVIL - movilBase.css
+ * 
+ * Optimizaciones base para WebView/APK
+ * Prevención de gestos accidentales y mejoras táctiles
+ * 
+ * Breakpoints:
+ * - Movil: max-width 480px (telefonos)
+ * - Tablet: max-width 768px (tablets)
+ */
+
+/* 
+ * OPTIMIZACIONES WEBVIEW BASE
+ * Mejoras de rendimiento y UX táctil
+ */
+
+/* Eliminar delay de 300ms en toques */
+* {
+    touch-action: manipulation;
+}
+
+/* Eliminar highlight azul en elementos táctiles (Android) */
+*:focus,
+*:active {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+/* Evitar selección de texto en elementos interactivos */
+button,
+a,
+[role='button'] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Evitar efecto de rebote/overscroll */
+html,
+body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+/*
+ * PREVENCIÓN DE GESTOS ACCIDENTALES
+ * Bloquear selección de texto y zoom por gestos en dispositivos táctiles
+ */
+@media (max-width: 768px) {
+    /* Bloquear selección de texto en toda la app móvil */
+    .dashboardContenedor,
+    .dashboardContenedor * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+
+    /* Permitir selección solo en inputs y textareas (necesario para edición) */
+    .dashboardContenedor input,
+    .dashboardContenedor textarea,
+    .dashboardContenedor [contenteditable='true'] {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    /* Bloquear zoom por gestos (pinch-to-zoom) en todo el body */
+    html,
+    body {
+        touch-action: pan-x pan-y;
+        -ms-touch-action: pan-x pan-y;
+    }
+}
+
+/* 
+ * CONTENEDOR PRINCIPAL - AJUSTES MOVIL
+ */
+@media (max-width: 768px) {
+    .dashboardContenedor {
+        padding-inline: var(--dashboard-espacioMovilMd);
+        padding-bottom: var(--dashboard-espacioMovilMd);
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboardContenedor {
+        padding-inline: 0;
+        padding-bottom: var(--dashboard-espacioMovilSm);
+        font-size: var(--dashboard-tamanoMovilBase);
+    }
+
+    /* Ocultar footer en móvil - no necesario con navegación por páginas */
+    .dashboardFooter {
+        display: none !important;
+    }
+}
+
+/* 
+ * GRID - FORZAR UNA COLUMNA EN MOVIL
+ */
+@media (max-width: 768px) {
+    .dashboardGrid,
+    .dashboardGrid--2col,
+    .dashboardGrid--3col {
+        display: flex !important;
+        flex-direction: column !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .dashboardGrid .columnaHabitos,
+    .dashboardGrid .columnaTareas,
+    .dashboardGrid .columnaDashboard {
+        width: 100% !important;
+        grid-column: span 1 !important;
+    }
+}
+
+/* 
+ * ESPACIADO ENTRE ELEMENTOS TACTILES
+ * Aumentar área de toque para mejor usabilidad
+ */
+@media (max-width: 480px) {
+    /* Botones y elementos interactivos */
+    .botonAccion,
+    .botonOpcion,
+    .pillOpcion,
+    .botonOpcionCompacta {
+        min-height: var(--dashboard-tamanoTactilMinimo);
+        padding: var(--dashboard-espacioTactil);
+    }
+
+    /* Items de lista - padding lateral consistente */
+    .tareaItem,
+    .tablaFila,
+    .proyectoItem {
+        padding-left: 15px;
+        padding-right: 15px;
+        min-height: var(--dashboard-tamanoTactilMinimo);
+    }
+}
+
+/* 
+ * SCROLLBAR MOVIL
+ * Ocultar scrollbar en dispositivos tactiles (scroll nativo)
+ */
+@media (max-width: 768px) {
+    .dashboardContenedor *::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+}
+
+/* 
+ * FEEDBACK TACTIL
+ * Estados :active visibles para feedback inmediato
+ */
+@media (max-width: 480px) {
+    /* Botones con feedback al tocar */
+    .botonAccion:active,
+    .botonOpcion:active,
+    .pillOpcion:active,
+    .botonOpcionCompacta:active,
+    .botonIconoEncabezado:active {
+        opacity: 0.7;
+        transform: scale(0.97);
+    }
+
+    /* Items de lista con feedback */
+    .tareaItem:active,
+    .habitoItem:active,
+    .proyectoItem:active,
+    .drawerMovilItem:active {
+        background: var(--dashboard-fondoHover);
+        transform: scale(0.99);
+    }
+
+    /* Transición suave para el feedback */
+    .botonAccion,
+    .botonOpcion,
+    .pillOpcion,
+    .botonOpcionCompacta,
+    .botonIconoEncabezado,
+    .tareaItem,
+    .habitoItem,
+    .proyectoItem,
+    .drawerMovilItem {
+        transition:
+            opacity 0.1s ease,
+            transform 0.1s ease,
+            background 0.1s ease;
+    }
+}
+
+/* 
+ * SCROLL OPTIMIZADO
+ * Scroll nativo fluido sin scroll horizontal accidental
+ */
+@media (max-width: 480px) {
+    /* Contenedor principal - evitar scroll horizontal */
+    .dashboardContenedor {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Listas scrolleables */
+    .listaScrolleable {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
+
+/* 
+ * GESTOS TACTILES
+ * Estilos para elementos con swipe
+ */
+@media (max-width: 480px) {
+    .swipeable {
+        touch-action: pan-y;
+        user-select: none;
+    }
+
+    .swipeable__contenido {
+        transition: transform 0.2s ease;
+    }
+
+    .swipeable__accion {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .swipeable__accion--izquierda {
+        left: 0;
+        background: var(--dashboard-estadoAlta);
+    }
+
+    .swipeable__accion--derecha {
+        right: 0;
+        background: var(--dashboard-estadoExito);
+    }
+}
+
+/* 
+ * PULL TO REFRESH
+ * Indicador de recarga al tirar hacia abajo
+ */
+@media (max-width: 480px) {
+    .pullToRefresh {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--dashboard-fondoSecundario);
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+        z-index: 60;
+    }
+
+    .pullToRefresh--visible {
+        transform: translateY(0);
+    }
+
+    .pullToRefresh__spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--dashboard-bordePrincipal);
+        border-top-color: var(--dashboard-acento);
+        border-radius: 50%;
+        animation: girar 0.8s linear infinite;
+    }
+}
+
+/* 
+ * ANIMACIONES OPTIMIZADAS
+ * Usar solo transform y opacity
+ */
+@keyframes girar {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes deslizarDesdeAbajo {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes deslizarDesdeIzquierda {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}

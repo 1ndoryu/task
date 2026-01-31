@@ -1,0 +1,239 @@
+/*
+ * GRID MOVIL - movilGrid.css
+ * 
+ * Sistema de navegación por páginas en móvil
+ * Paneles fullscreen sin bordes
+ */
+
+/* 
+ * GRID MÓVIL
+ * Sistema de navegación por páginas - cada panel ocupa toda la pantalla
+ */
+@media (max-width: 480px) {
+    /* Contenedor del grid en modo móvil */
+    .dashboardGridContenedor--movil {
+        width: 100% !important;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Grid simplificado para móvil - sin altura forzada */
+    .dashboardGridMovil {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        animation: fadeInMovil 0.2s ease-out;
+    }
+
+    /* Animación de entrada suave para cambio de página */
+    @keyframes fadeInMovil {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* 
+ * PANELES FULLSCREEN SIN BORDES
+ * Los paneles ocupan el 100% del viewport sin decoraciones
+ */
+@media (max-width: 480px) {
+    /* Panel en modo móvil: fullscreen sin bordes ni padding */
+    .panelDashboard--movil {
+        width: 100%;
+        height: auto;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        padding: 0;
+    }
+
+    /* Ocultar elementos de control de panel en móvil */
+    .panelDashboard--movil .panelHandle,
+    .panelDashboard--movil .botonMinimizar,
+    .panelDashboard--movil .resizeHandle,
+    .panelDashboard--movil .handleArrastre {
+        display: none !important;
+    }
+
+    /* Ajustar cabecera de panel en móvil */
+    .panelDashboard--movil .panelHeader,
+    .panelDashboard--movil .panelCabecera {
+        padding: var(--dashboard-espacioSm) 0;
+        border-bottom: none;
+        background: transparent;
+    }
+
+    /* Contenido del panel ocupa todo el espacio */
+    .panelDashboard--movil .panelContenido,
+    .panelDashboard--movil .listaScrolleable {
+        padding: 0;
+        height: auto;
+        max-height: none;
+    }
+
+    /* Ajustes específicos para .dashboardPanel */
+    .dashboardGridMovil .dashboardPanel {
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        margin: 0;
+    }
+
+    /* Secciones dentro del panel sin bordes extra */
+    .dashboardGridMovil .dashboardPanel > section,
+    .dashboardGridMovil .panelSeccion {
+        border: none;
+        border-radius: 0;
+        padding: var(--dashboard-espacioMovilSm) 0;
+    }
+
+    /* 
+     * OCULTAR ENCABEZADO DE PANEL EN MÓVIL
+     * Como cada página es un panel, el encabezado no es necesario
+     * Las opciones se muestran en el header móvil superior
+     */
+    .dashboardGridMovil .seccionEncabezado,
+    .dashboardGridMovil .panelHeader--seccion,
+    .panelDashboard--movil > .seccionEncabezado,
+    .panelDashboard--movil .seccionEncabezado:first-child {
+        display: none !important;
+    }
+}
+
+/* 
+ * MENÚ OPCIONES PANEL
+ * Botón unificado y contenido del BottomSheet
+ */
+@media (max-width: 480px) {
+    /* Botón del menú opciones */
+    .menuOpcionesPanelBoton {
+        position: relative;
+    }
+
+    /* Badge indicador de filtros activos */
+    .menuOpcionesPanelBadge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 6px;
+        height: 6px;
+        background: var(--dashboard-acento);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* Estado activo del botón */
+    .menuOpcionesPanelBoton--activo {
+        color: var(--dashboard-acento);
+    }
+
+    /* Contenido del menú */
+    .menuOpcionesPanelContenido {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dashboard-espacioXs);
+    }
+
+    /* Grupo de opciones */
+    .menuOpcionesPanelGrupo {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Título del grupo */
+    .menuOpcionesPanelGrupoTitulo {
+        font-size: var(--dashboard-tamanoMuyPequeno);
+        color: var(--dashboard-textoApagado);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+        margin-bottom: var(--dashboard-espacioXs);
+    }
+
+    /* Separador entre grupos */
+    .menuOpcionesPanelSeparador {
+        height: 1px;
+        background: var(--dashboard-bordeSutil);
+        margin: var(--dashboard-espacioXs) 0;
+    }
+
+    /* Item del menú - Diseño compacto */
+    .menuOpcionesPanelItem {
+        display: flex;
+        align-items: center;
+        gap: var(--dashboard-espacioSm);
+        padding: var(--dashboard-espacioSm);
+        min-height: 36px;
+        background: none;
+        border: none;
+        color: var(--dashboard-textoNormal);
+        text-align: left;
+        cursor: pointer;
+        border-radius: var(--dashboard-radioSm);
+        transition: background var(--dashboard-transicionRapida);
+    }
+
+    .menuOpcionesPanelItem:active {
+        background: var(--dashboard-fondoHover);
+    }
+
+    /* Item activo */
+    .menuOpcionesPanelItem--activo {
+        background: var(--dashboard-fondoHover);
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Item de acción (refrescar, etc.) */
+    .menuOpcionesPanelItem--accion {
+        color: var(--dashboard-acento);
+    }
+
+    /* Icono del item - Más compacto */
+    .menuOpcionesPanelItemIcono {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        color: var(--dashboard-textoApagado);
+        flex-shrink: 0;
+    }
+
+    .menuOpcionesPanelItem--activo .menuOpcionesPanelItemIcono {
+        color: var(--dashboard-acento);
+    }
+
+    /* Texto del item */
+    .menuOpcionesPanelItemTexto {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        flex: 1;
+    }
+
+    .menuOpcionesPanelItemEtiqueta {
+        font-size: var(--dashboard-tamanoMovilPequeno);
+        font-weight: 500;
+    }
+
+    .menuOpcionesPanelItemDescripcion {
+        font-size: var(--dashboard-tamanoPequeno);
+        color: var(--dashboard-textoApagado);
+    }
+
+    /* Check de item activo */
+    .menuOpcionesPanelItemCheck {
+        color: var(--dashboard-acento);
+        font-size: var(--dashboard-tamanoPequeno);
+        margin-left: auto;
+    }
+}
