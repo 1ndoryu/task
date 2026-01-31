@@ -2,7 +2,7 @@
  * dataService
  * Servicio para exportar e importar datos del dashboard
  * Permite transferir datos entre entornos mediante archivos JSON
- * 
+ *
  * IMPORTANTE: El historial de actividad (completados, pospuestos, fechas) se incluye
  * automáticamente ya que es parte de los objetos Habito y Tarea.
  * - Hábitos: historialCompletados[], historialPospuestos[], ultimoCompletado, fechaCreacion
@@ -263,7 +263,7 @@ function validarTarea(tarea: unknown): ResultadoValidacion {
         return {esValido: false, mensaje: 'Fecha de completado de tarea inválida'};
     }
 
-    if (t.prioridad !== undefined && !['alta', 'media', 'baja'].includes(t.prioridad as string)) {
+    if (t.prioridad !== undefined && !['muy_alta', 'alta', 'media', 'baja'].includes(t.prioridad as string)) {
         return {esValido: false, mensaje: 'Prioridad de tarea inválida'};
     }
 

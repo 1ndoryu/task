@@ -68,7 +68,7 @@ const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrior
                 {p && p !== 'media' && (
                     <button
                         type="button"
-                        className={`badgeInfo badgeInfo--prioridad${p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
+                        className={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
                         style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}
                         title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
                         onClick={e => {
@@ -109,8 +109,8 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
     /* Sincronizar props con estado local cuando cambian externamente */
     /* Importante: Usamos JSON.stringify para comparación profunda simple y evitar loops */
     useEffect(() => {
-        /* Ordenar por prioridad: Alta > Media > Baja */
-        const peso: Record<string, number> = {alta: 3, media: 2, baja: 1};
+        /* Ordenar por prioridad: Muy Alta > Alta > Media > Baja */
+        const peso: Record<string, number> = {muy_alta: 4, alta: 3, media: 2, baja: 1};
         const tareasOrdenadas = [...tareas].sort((a, b) => {
             const pesoA = peso[a.prioridad || 'media'] || 2;
             const pesoB = peso[b.prioridad || 'media'] || 2;

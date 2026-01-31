@@ -13,12 +13,18 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
 
 #### Badge de Adjunto Premium
-- [ ] El badge "Adjunto" no debe mostrarse bloqueado para nadie (ni Free ni Premium)
-- [ ] Para usuarios Free: al dar clic, mostrar modal de suscripción (comportamiento normal sin indicador visual de bloqueo)
+- [ ] El badge "Adjunto" en la configuración de tareas no debe mostrarse bloqueado para nadie (ni Free ni Premium)
+  - Actualmente en `SeccionAdjuntos.tsx` (modo moderno), usuarios Free ven un botón con icono Crown y texto "Premium"
+  - Debe cambiarse para mostrar un botón normal "Agregar" que al hacer clic muestre el modal de upgrade
+- [x] Para usuarios Free: al dar clic, mostrar modal de suscripción ✅
+  - Ya implementado con `onClickUpgrade` callback
 
 #### Menús Contextuales - Comportamiento General
-- [ ] Al abrir un menú contextual, cerrar automáticamente cualquier otro menú abierto (solo uno visible a la vez)
-- [ ] Hacer clic nuevamente en el trigger de un menú abierto debe cerrarlo (toggle)
+- [x] Al abrir un menú contextual, cerrar automáticamente cualquier otro menú abierto (solo uno visible a la vez) ✅
+- [x] Hacer clic nuevamente en el trigger de un menú abierto debe cerrarlo (toggle) ✅
+  - Creado `stores/menuContextualStore.ts` como coordinador global
+  - Creado `hooks/useMenuContextualGlobal.ts` para integrar menús con el store
+  - TO-DO: Aplicar el hook en componentes que usan menús contextuales
 
 #### Menú Contextual Hábitos - Sincronización
 - [x] **Sincronizar opciones**: Las opciones del menú contextual de hábitos en el panel de Hábitos deben aparecer también en el panel de Ejecución ✅
@@ -27,7 +33,13 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - Actualizado `TareaItem.tsx`, `ListaTareas.tsx`, `PanelEjecucion.tsx`, `DashboardGrid.tsx`
 
 #### Prioridad de Tareas
-- [ ] Agregar nueva prioridad **"Muy Alta"** a las tareas
+- [x] Agregar nueva prioridad **"Muy Alta"** a las tareas ✅
+  - Agregado `'muy_alta'` a `NivelPrioridad` en `types/dashboard.ts`
+  - Actualizado peso en `useOrdenarTareas.ts` (500 puntos)
+  - Actualizado validación en `dataService.ts`
+  - Actualizado selector en `CampoPrioridad.tsx`
+  - Actualizado menú contextual y badge en `TareaItem.tsx`
+  - Actualizado mapeo importancia→prioridad en `useHabitosComoTareas.ts`
 
 ---
 

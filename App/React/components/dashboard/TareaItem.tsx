@@ -203,7 +203,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 onMoverProyecto?.();
             } else if (opcionId === 'compartir') {
                 onCompartir?.();
-            } else if (['alta', 'media', 'baja'].includes(opcionId)) {
+            } else if (['muy_alta', 'alta', 'media', 'baja'].includes(opcionId)) {
                 onEditar?.({
                     prioridad: opcionId as NivelPrioridad
                 });
@@ -248,6 +248,11 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             etiqueta: 'Prioridad',
             icono: <Flag size={12} />,
             subOpciones: [
+                {
+                    id: 'muy_alta',
+                    etiqueta: 'Muy Alta',
+                    icono: <Flag size={12} color="#dc2626" />
+                },
                 {
                     id: 'alta',
                     etiqueta: 'Alta',
@@ -338,6 +343,8 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
         const obtenerVariantePrioridad = (prioridad: NivelPrioridad): VarianteBadge => {
             switch (prioridad) {
+                case 'muy_alta':
+                    return 'prioridadMuyAlta';
                 case 'alta':
                     return 'prioridadAlta';
                 case 'media':

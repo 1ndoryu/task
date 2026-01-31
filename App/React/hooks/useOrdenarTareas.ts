@@ -57,11 +57,13 @@ const PESO_URGENCIA: Record<NivelUrgencia, number> = {
 
 /*
  * Pesos de prioridad (importancia)
+ * muy_alta: 500 (máxima)
  * alta: 300
  * media: 100 (default si no se especifica)
  * baja: 0
  */
 const PESO_PRIORIDAD: Record<NivelPrioridad | 'default', number> = {
+    muy_alta: 500,
     alta: 300,
     media: 100,
     baja: 0,
@@ -121,7 +123,7 @@ const calcularPesoTotal = (tarea: Tarea): number => {
 };
 
 export function useOrdenarTareas(tareas: Tarea[]) {
-    /* 
+    /*
      * Persistencia del modo de orden
      * Por defecto: inteligente (Beta: facilita la adopción inicial)
      */

@@ -14,6 +14,7 @@ import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 
 /* Mapeo de etiquetas en espanol */
 const ETIQUETAS_PRIORIDAD: Record<NivelPrioridad, string> = {
+    muy_alta: 'Muy Alta',
     alta: 'Alta',
     media: 'Media',
     baja: 'Baja'

@@ -38,3 +38,5 @@ export {usePanelChat} from './usePanelChat';
 export {useTema, TEMAS_DISPONIBLES} from './useTema';
 export type {TipoTema, InfoTema} from './useTema';
 export {useModoEnfoque} from './useModoEnfoque';
+export {useMenuContextualGlobal} from './useMenuContextualGlobal';
+export type {PosicionMenu} from './useMenuContextualGlobal';

@@ -19,7 +19,7 @@ interface CampoPrioridadProps<T extends NivelPrioridad | NivelImportancia> {
     titulo?: string;
 }
 
-const PRIORIDADES: NivelPrioridad[] = ['alta', 'media', 'baja'];
+const PRIORIDADES: NivelPrioridad[] = ['muy_alta', 'alta', 'media', 'baja'];
 const IMPORTANCIAS: NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'];
 
 export function CampoPrioridad<T extends NivelPrioridad | NivelImportancia>({tipo = 'prioridad', valor, onChange, permitirNulo = true, disabled = false, titulo}: CampoPrioridadProps<T>): JSX.Element {

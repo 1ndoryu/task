@@ -95,7 +95,7 @@ export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrear
 
                 if (esTareaHabito(tareaPadre)) {
                     idHabitoHeredado = tareaPadre.habitoId;
-                    const mapImportancia: Record<string, NivelPrioridad> = {Alta: 'alta', Media: 'media', Baja: 'baja'};
+                    const mapImportancia: Record<string, NivelPrioridad> = {'Muy Alta': 'muy_alta', Alta: 'alta', Media: 'media', Baja: 'baja'};
                     prioridadHeredada = mapImportancia[tareaPadre.habitoImportancia] || 'media';
                 } else if (tareaPadre.habitoId) {
                     idHabitoHeredado = tareaPadre.habitoId;
