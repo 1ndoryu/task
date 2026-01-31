@@ -12,7 +12,7 @@
  */
 
 import {useState, useRef, useEffect} from 'react';
-import {CheckSquare, Calendar, Flag, Hash, Layers, X, Settings} from 'lucide-react';
+import {Send, Calendar, Flag, Hash, Layers, X, Settings} from 'lucide-react';
 import {BottomSheet} from '../shared';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 
@@ -129,101 +129,94 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
     return (
         <BottomSheet estaAbierto={estaAbierto} onCerrar={onCerrar}>
             <div className="bottomSheetTarea">
-                {/* Cabecera con título y botón cerrar */}
-                <div className="bottomSheetTarea__cabecera">
-                    <div className="bottomSheetTarea__icono">
-                        <CheckSquare size={18} />
-                    </div>
-                    <h3 className="bottomSheetTarea__titulo">{esEdicion ? 'Editar Tarea' : 'Nueva Tarea'}</h3>
-                    {/* En modo edición, mostrar botón para abrir configuración completa */}
-                    {esEdicion && onAbrirConfiguracion && (
-                        <button
-                            type="button"
-                            className="bottomSheetTarea__botonConfig"
-                            onClick={() => {
-                                onAbrirConfiguracion();
-                                onCerrar();
-                            }}
-                            aria-label="Configuración avanzada"
-                            title="Configuración avanzada">
-                            <Settings size={18} />
-                        </button>
-                    )}
-                    <button type="button" className="bottomSheetTarea__botonCerrar" onClick={onCerrar} aria-label="Cerrar">
-                        <X size={18} />
-                    </button>
-                </div>
-
                 {/* Input principal */}
                 <div className="bottomSheetTarea__inputWrapper">
                     <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" className="bottomSheetTarea__input" disabled={cargando} />
                 </div>
 
-                {/* Opciones compactas - Solo mostrar cuando hay valor */}
-                <div className="bottomSheetTarea__opciones">
-                    {/* Proyecto */}
-                    {proyectos.length > 0 && (
+                {/* Barra de acciones (Opciones + Guardar) */}
+                <div className="bottomSheetTarea__acciones">
+                    {/* Grupo de opciones (Izquierda) */}
+                    <div className="bottomSheetTarea__opcionesGrupo">
+                        {/* Proyecto */}
+                        {proyectos.length > 0 && (
+                            <button
+                                type="button"
+                                className={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`}
+                                onClick={() => {
+                                    /* TO-DO: Abrir modal central con opciones de Proyecto.
+                                     * Al seleccionar, mostrar badge debajo del título.
+                                     */
+                                }}
+                                aria-label={obtenerNombreProyecto() || 'Proyecto'}
+                                title={obtenerNombreProyecto() || 'Proyecto'}>
+                                <Layers size={14} />
+                            </button>
+                        )}
+
+                        {/* Prioridad */}
                         <button
                             type="button"
-                            className={`bottomSheetTarea__opcion ${proyectoId ? 'bottomSheetTarea__opcion--activa' : ''}`}
+                            className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`}
                             onClick={() => {
-                                /* TO-DO: Abrir selector de proyecto
-                                 * Implementar BottomSheet secundario con lista de proyectos
-                                 * O menu contextual adaptativo para móvil
+                                /* TO-DO: Abrir modal central con opciones de Prioridad.
+                                 * Al seleccionar, mostrar badge debajo del título.
                                  */
-                            }}>
-                            <Layers size={16} />
-                            <span>{obtenerNombreProyecto() || 'Proyecto'}</span>
+                            }}
+                            aria-label={obtenerTextoPrioridad() || 'Prioridad'}
+                            title={obtenerTextoPrioridad() || 'Prioridad'}>
+                            <Flag size={14} />
                         </button>
-                    )}
 
-                    {/* Prioridad */}
-                    <button
-                        type="button"
-                        className={`bottomSheetTarea__opcion ${prioridad ? 'bottomSheetTarea__opcion--activa' : ''}`}
-                        onClick={() => {
-                            /* TO-DO: Abrir selector de prioridad
-                             * Opciones: Baja, Media, Alta, Muy Alta
-                             * Implementar como bottom sheet de selección simple
-                             */
-                        }}>
-                        <Flag size={16} />
-                        <span>{obtenerTextoPrioridad() || 'Prioridad'}</span>
-                    </button>
+                        {/* Urgencia */}
+                        <button
+                            type="button"
+                            className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`}
+                            onClick={() => {
+                                /* TO-DO: Abrir modal central con opciones de Urgencia.
+                                 * Al seleccionar, mostrar badge debajo del título.
+                                 */
+                            }}
+                            aria-label={obtenerTextoUrgencia() || 'Urgencia'}
+                            title={obtenerTextoUrgencia() || 'Urgencia'}>
+                            <Hash size={14} />
+                        </button>
 
-                    {/* Urgencia */}
-                    <button
-                        type="button"
-                        className={`bottomSheetTarea__opcion ${urgencia ? 'bottomSheetTarea__opcion--activa' : ''}`}
-                        onClick={() => {
-                            /* TO-DO: Abrir selector de urgencia
-                             * Opciones: Baja, Media, Alta
-                             * Implementar como bottom sheet de selección simple
-                             */
-                        }}>
-                        <Hash size={16} />
-                        <span>{obtenerTextoUrgencia() || 'Urgencia'}</span>
-                    </button>
+                        {/* Fecha límite */}
+                        <button
+                            type="button"
+                            className={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`}
+                            onClick={() => {
+                                /* TO-DO: Abrir modal central con opciones de Fecha.
+                                 * Al seleccionar, mostrar badge debajo del título.
+                                 */
+                            }}
+                            aria-label={fecha || 'Fecha'}
+                            title={fecha || 'Fecha'}>
+                            <Calendar size={14} />
+                        </button>
 
-                    {/* Fecha límite */}
-                    <button
-                        type="button"
-                        className={`bottomSheetTarea__opcion ${fecha ? 'bottomSheetTarea__opcion--activa' : ''}`}
-                        onClick={() => {
-                            /* TO-DO: Abrir selector de fecha
-                             * Opciones rápidas: Hoy, Mañana, Esta semana, Selector manual
-                             * Considerar usar input type="date" nativo en móvil
-                             */
-                        }}>
-                        <Calendar size={16} />
-                        <span>{fecha || 'Fecha'}</span>
+                        {/* Configuración avanzada (solo edición) */}
+                        {esEdicion && onAbrirConfiguracion && (
+                            <button
+                                type="button"
+                                className="bottomSheetTarea__accion"
+                                onClick={() => {
+                                    onAbrirConfiguracion();
+                                    onCerrar();
+                                }}
+                                aria-label="Configuración avanzada"
+                                title="Configuración avanzada">
+                                <Settings size={14} />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Botón Guardar (Derecha) */}
+                    <button type="button" className="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}>
+                        {esEdicion ? <Send size={14} /> : <Send size={14} />}
                     </button>
                 </div>
-
-                {/* Botón de acción */}
-                <button type="button" className="bottomSheetTarea__botonCrear" onClick={manejarGuardar} disabled={!texto.trim() || cargando}>
-                    {cargando ? (esEdicion ? 'Guardando...' : 'Creando...') : esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}
-                </button>
             </div>
         </BottomSheet>
     );

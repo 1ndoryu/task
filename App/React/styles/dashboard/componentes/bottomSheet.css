@@ -15,7 +15,9 @@
     z-index: 1500;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
 }
 
 .bottomSheetOverlay--visible {
@@ -52,7 +54,7 @@
     height: 4px;
     background: var(--dashboard-bordeSutil);
     border-radius: 2px;
-    margin: 8px auto 4px;
+    margin: 6px auto 4px;
     flex-shrink: 0;
 }
 
@@ -75,7 +77,7 @@
 
 /* Cabecera con titulo - Compacto */
 .bottomSheetCabecera {
-    padding: 0 var(--dashboard-espacioSm) var(--dashboard-espacioSm);
+    padding: 0 var(--dashboard-espacioSm) 4px;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
     flex-shrink: 0;
 }
@@ -93,7 +95,7 @@
 
 /* Contenido scrolleable */
 .bottomSheetContenido {
-    padding: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex: 1;
@@ -105,14 +107,14 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm);
-    min-height: 36px;
+    padding: 6px var(--dashboard-espacioSm);
+    min-height: 32px;
     color: var(--dashboard-textoNormal);
     background: none;
     border: none;
     width: 100%;
     text-align: left;
-    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-size: 11px;
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
     border-radius: var(--dashboard-radioSm);
@@ -142,8 +144,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
     color: var(--dashboard-textoApagado);
 }
@@ -158,7 +160,7 @@
 .bottomSheetSeparador {
     height: 1px;
     background: var(--dashboard-bordePrincipal);
-    margin: var(--dashboard-espacioSm) 0;
+    margin: 4px 0;
 }
 
 /* Cancelar / Cerrar */
@@ -166,14 +168,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--dashboard-espacioMd);
-    min-height: var(--dashboard-tamanoTactilMinimo);
+    padding: var(--dashboard-espacioSm);
+    min-height: 40px;
     color: var(--dashboard-textoApagado);
     background: none;
     border: none;
     border-top: 1px solid var(--dashboard-bordePrincipal);
     width: 100%;
-    font-size: var(--dashboard-tamanoMovilBase);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
     margin-top: auto;

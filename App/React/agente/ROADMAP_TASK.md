@@ -42,6 +42,19 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
    - useTareas.ts: maneja borrado de repeticion cuando viene undefined
    - Agregado registro de evento de cambio de repetición en historial
 
+9. ✅ BottomSheet y BottomSheetCreacion más compactos (ajuste de padding y gaps)
+   - Modificado bottomSheet.css y bottomSheetCreacion.css
+   - Reducido padding vertical, margins y gaps para optimizar espacio en móvil
+
+10. ✅ Fuente reducida en BottomSheet
+    - Reducido tamaño base de 14px a 12px en títulos, inputs y botones
+    - Reducido ítems y opciones a 11px para máxima compacidad
+
+11. ✅ Refactor Barra Acciones BottomSheet
+    - Botones solo iconos en una sola fila
+    - Separación entre grupo de opciones (izquierda) y guardar (derecha)
+    - Estilos minimalistas sin bordes
+
 
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
 

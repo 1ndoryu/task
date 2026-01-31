@@ -7,7 +7,7 @@
 .bottomSheetTarea {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioSm);
 }
 
 /* Cabecera con título y botón cerrar */
@@ -15,7 +15,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding-bottom: var(--dashboard-espacioSm);
+    padding-bottom: 4px;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
@@ -28,7 +28,7 @@
 
 .bottomSheetTarea__titulo {
     flex: 1;
-    font-size: var(--dashboard-tamanoMovilBase);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     margin: 0;
@@ -38,15 +38,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     background: none;
     border: none;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     border-radius: var(--dashboard-radioSm);
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        color var(--dashboard-transicionRapida);
 }
 
 .bottomSheetTarea__botonCerrar:hover,
@@ -60,15 +62,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     background: none;
     border: none;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     border-radius: var(--dashboard-radioSm);
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        color var(--dashboard-transicionRapida);
 }
 
 .bottomSheetTarea__botonConfig:hover,
@@ -85,19 +89,19 @@
 
 .bottomSheetTarea__input {
     width: 100%;
-    padding: var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilBase);
+    padding: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoActivo);
     background: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    border: none;
     border-radius: var(--dashboard-radioSm);
     outline: none;
-    transition: border-color var(--dashboard-transicionRapida);
 }
 
 .bottomSheetTarea__input:focus {
-    border-color: var(--dashboard-textoApagado);
+    /* Sin efectos de borde al hacer focus */
+    outline: none;
 }
 
 .bottomSheetTarea__input::placeholder {
@@ -110,61 +114,73 @@
 }
 
 /* Opciones compactas */
-.bottomSheetTarea__opciones {
+/* Barra de acciones (iconos + guardar) */
+.bottomSheetTarea__acciones {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--dashboard-espacioSm);
 }
 
-.bottomSheetTarea__opcion {
+.bottomSheetTarea__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
+    gap: var(--dashboard-espacioSm);
+}
+
+.bottomSheetTarea__accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
     color: var(--dashboard-textoApagado);
-    background: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioPill);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
+    transition: color var(--dashboard-transicionRapida);
+    padding: 0;
 }
 
-.bottomSheetTarea__opcion:active {
-    transform: scale(0.98);
+.bottomSheetTarea__accion:hover,
+.bottomSheetTarea__accion:active {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
 }
 
-.bottomSheetTarea__opcion--activa {
-    color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordePrincipal);
-    background: var(--dashboard-superposicionSutil);
+.bottomSheetTarea__accion--activa {
+    color: var(--dashboard-acento);
 }
 
-/* Botón de crear */
-.bottomSheetTarea__botonCrear {
-    width: 100%;
-    padding: var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilBase);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-weight: 600;
-    color: var(--dashboard-textoActivo);
-    background: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
+/* Botón Guardar (Icono) */
+.bottomSheetTarea__botonGuardar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
     border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
-    margin-top: var(--dashboard-espacioSm);
+    padding: 0;
 }
 
-.bottomSheetTarea__botonCrear:active {
-    transform: scale(0.99);
-    background: var(--dashboard-superposicionSutil);
+.bottomSheetTarea__botonGuardar:hover,
+.bottomSheetTarea__botonGuardar:active {
+    color: var(--dashboard-textoActivo);
+    background: none;
+    transform: scale(1.1);
 }
 
-.bottomSheetTarea__botonCrear:disabled {
-    opacity: 0.4;
+.bottomSheetTarea__botonGuardar:disabled {
+    opacity: 0.3;
     cursor: not-allowed;
+    background: none;
+    color: var(--dashboard-textoApagado);
 }
 
 /*
@@ -176,14 +192,14 @@
 .bottomSheetHabito {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioSm);
 }
 
 .bottomSheetHabito__cabecera {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding-bottom: var(--dashboard-espacioSm);
+    padding-bottom: 4px;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
@@ -196,7 +212,7 @@
 
 .bottomSheetHabito__titulo {
     flex: 1;
-    font-size: var(--dashboard-tamanoMovilBase);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     margin: 0;
@@ -206,15 +222,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     background: none;
     border: none;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     border-radius: var(--dashboard-radioSm);
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        color var(--dashboard-transicionRapida);
 }
 
 .bottomSheetHabito__botonCerrar:hover,
@@ -230,8 +248,8 @@
 
 .bottomSheetHabito__input {
     width: 100%;
-    padding: var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilBase);
+    padding: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoActivo);
     background: var(--dashboard-fondoPrincipal);
@@ -257,15 +275,15 @@
 .bottomSheetHabito__opciones {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--dashboard-espacioSm);
+    gap: var(--dashboard-espacioXs);
 }
 
 .bottomSheetHabito__opcion {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilPequeno);
+    padding: 4px var(--dashboard-espacioSm);
+    font-size: 11px;
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoApagado);
     background: var(--dashboard-fondoPrincipal);
@@ -287,8 +305,8 @@
 
 .bottomSheetHabito__botonCrear {
     width: 100%;
-    padding: var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilBase);
+    padding: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
@@ -297,7 +315,7 @@
     border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
-    margin-top: var(--dashboard-espacioSm);
+    margin-top: 4px;
 }
 
 .bottomSheetHabito__botonCrear:active {
