@@ -236,7 +236,7 @@ hooks/
 
 ---
 
-#### BottomSheet - Integración Pendiente 🔧 (Prioridad Alta)
+#### ✅ COMPLETADO: BottomSheet - Integración y Refactorización SOLID (2026-01-31)
 
 **1. Integrar BottomSheetProyecto en la App** ✅
 - [x] Conectar en `DashboardModales.tsx` (igual que BottomSheetTarea y BottomSheetHabito)
@@ -268,6 +268,33 @@ hooks/
   - `components/shared/ModalSeleccionPropiedad.tsx`
 - **Archivos modificados:**
   - `components/dashboard/BottomSheetTarea.tsx`
+
+**4. Refactorización SOLID y CSS** ✅ (2026-01-31)
+- [x] **Eliminada duplicación de código** en BottomSheets:
+  - Extraídas constantes duplicadas (`OPCIONES_PRIORIDAD`, `OPCIONES_URGENCIA`, `OPCIONES_FRECUENCIA`, `OPCIONES_IMPORTANCIA`) a `utils/constantes.ts`
+  - Centralizadas funciones de mapeo (`obtenerTextoPrioridad()`, `obtenerTextoUrgencia()`, `obtenerTextoFrecuencia()`, `obtenerTextoImportancia()`)
+  - Movida función `calcularFechaDesdeOpcion()` a `utils/fecha.ts` (lógica de fechas)
+- [x] **Corregido CSS de ModalSeleccionPropiedad** para usar variables correctas:
+  - `--dashboard-borde` → `--dashboard-bordePrincipal`
+  - `--dashboard-fondoActivo` → `--dashboard-superposicionClara`
+  - `--dashboard-peligro` → `--dashboard-estadoAlta`
+  - `--dashboard-peligroIntensificado` → `--dashboard-estadoMuyAlta`
+- **Archivos creados:**
+  - `utils/constantes.ts` (constantes centralizadas)
+- **Archivos modificados:**
+  - `utils/fecha.ts` (agregada `calcularFechaDesdeOpcion()`)
+  - `components/dashboard/BottomSheetTarea.tsx` (refactorizado)
+  - `components/dashboard/BottomSheetHabito.tsx` (refactorizado)
+  - `components/dashboard/BottomSheetProyecto.tsx` (refactorizado)
+  - `styles/dashboard/componentes/bottomSheetCreacion.css` (corregidas variables)
+- **Principios SOLID aplicados:**
+  - SRP (Single Responsibility): Cada archivo tiene una responsabilidad única
+  - DRY (Don't Repeat Yourself): Eliminada duplicación de constantes y funciones
+  - Centralización: Lógica reutilizable en archivos utils/
+
+---
+
+#### BottomSheet - Mejoras Futuras 🔜 (Backlog)
   - `components/dashboard/BottomSheetHabito.tsx`
   - `components/dashboard/BottomSheetProyecto.tsx`
 

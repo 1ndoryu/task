@@ -468,7 +468,7 @@
 
 .modalSeleccionPropiedad {
     background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-borde);
+    border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioMd);
     min-width: 260px;
     max-width: 90vw;
@@ -484,7 +484,7 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-borde);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalSeleccionPropiedad__titulo {
@@ -530,7 +530,7 @@
     color: var(--dashboard-textoNormal);
     background: none;
     border: none;
-    border-bottom: 1px solid var(--dashboard-borde);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
     cursor: pointer;
     text-align: left;
     transition: all var(--dashboard-transicionRapida);
@@ -546,16 +546,16 @@
 }
 
 .modalSeleccionPropiedad__opcion--activa {
-    background: var(--dashboard-fondoActivo);
+    background: var(--dashboard-superposicionClara);
     color: var(--dashboard-acento);
 }
 
 .modalSeleccionPropiedad__opcion--peligroso {
-    color: var(--dashboard-peligro);
+    color: var(--dashboard-estadoAlta);
 }
 
 .modalSeleccionPropiedad__opcion--peligroso:hover {
-    color: var(--dashboard-peligroIntensificado);
+    color: var(--dashboard-estadoMuyAlta);
     background: rgba(239, 68, 68, 0.1);
 }
 

@@ -15,6 +15,7 @@
 import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Repeat, Flag} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
+import {OPCIONES_FRECUENCIA, OPCIONES_IMPORTANCIA, obtenerTextoFrecuencia, obtenerTextoImportancia} from '../../utils/constantes';
 
 interface BottomSheetHabitoProps {
     estaAbierto: boolean;
@@ -34,22 +35,6 @@ export interface DatosHabito {
 
 /* Tipos de modales de selección */
 type ModalActivo = 'frecuencia' | 'importancia' | null;
-
-/* Opciones de frecuencia */
-const OPCIONES_FRECUENCIA = [
-    {id: 'diaria', etiqueta: 'Diaria', descripcion: 'Todos los días'},
-    {id: 'semanal', etiqueta: 'Semanal', descripcion: '1 vez/semana'},
-    {id: 'diasEspecificos', etiqueta: 'Días específicos', descripcion: 'Lun, Mar...'},
-    {id: 'personalizada', etiqueta: 'Personalizada', descripcion: 'Cada X días'}
-];
-
-/* Opciones de importancia */
-const OPCIONES_IMPORTANCIA = [
-    {id: 'Baja', etiqueta: 'Baja'},
-    {id: 'Media', etiqueta: 'Media'},
-    {id: 'Alta', etiqueta: 'Alta'},
-    {id: 'Muy Alta', etiqueta: 'Muy Alta'}
-];
 
 export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: BottomSheetHabitoProps): JSX.Element | null {
     const [texto, setTexto] = useState('');
@@ -95,33 +80,13 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
         }
     };
 
-    const obtenerTextoFrecuencia = () => {
-        const map: Record<string, string> = {
-            diaria: 'Diaria',
-            semanal: 'Semanal',
-            diasEspecificos: 'Días específicos',
-            personalizada: 'Personalizada'
-        };
-        return frecuencia ? map[frecuencia] : null;
-    };
-
-    const obtenerTextoImportancia = () => {
-        const map: Record<string, string> = {
-            Baja: 'Baja',
-            Media: 'Media',
-            Alta: 'Alta',
-            'Muy Alta': 'Muy Alta'
-        };
-        return importancia ? map[importancia] : null;
-    };
-
     /* Construir lista de badges activos */
     const badgesActivos = useMemo(() => {
         const badges = [];
         if (frecuencia) {
             badges.push({
                 id: 'frecuencia',
-                etiqueta: obtenerTextoFrecuencia() || frecuencia,
+                etiqueta: obtenerTextoFrecuencia(frecuencia) || frecuencia,
                 icono: <Repeat size={10} />,
                 variante: 'frecuencia' as const
             });
@@ -129,7 +94,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
         if (importancia) {
             badges.push({
                 id: 'importancia',
-                etiqueta: obtenerTextoImportancia() || importancia,
+                etiqueta: obtenerTextoImportancia(importancia) || importancia,
                 icono: <Flag size={10} />,
                 variante: 'importancia' as const
             });
@@ -167,12 +132,12 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                     {/* Grupo de opciones (Izquierda) */}
                     <div className="bottomSheetHabito__opcionesGrupo">
                         {/* Frecuencia */}
-                        <button type="button" className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('frecuencia')} aria-label={obtenerTextoFrecuencia() || 'Frecuencia'} title={obtenerTextoFrecuencia() || 'Frecuencia'}>
+                        <button type="button" className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('frecuencia')} aria-label={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'} title={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'}>
                             <Repeat size={15} />
                         </button>
 
                         {/* Importancia */}
-                        <button type="button" className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia() || 'Importancia'} title={obtenerTextoImportancia() || 'Importancia'}>
+                        <button type="button" className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia(importancia) || 'Importancia'} title={obtenerTextoImportancia(importancia) || 'Importancia'}>
                             <Flag size={15} />
                         </button>
                     </div>

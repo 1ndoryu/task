@@ -17,6 +17,8 @@ import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Calendar, Flag, Hash, Layers, Settings} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import type {Proyecto, Tarea} from '../../types/dashboard';
+import {OPCIONES_PRIORIDAD, OPCIONES_URGENCIA, OPCIONES_FECHA_TAREA, obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
+import {calcularFechaDesdeOpcion} from '../../utils/fecha';
 
 interface BottomSheetTareaProps {
     estaAbierto: boolean;
@@ -45,30 +47,6 @@ export interface DatosTarea {
 
 /* Tipos de modales de selección */
 type ModalActivo = 'proyecto' | 'prioridad' | 'urgencia' | 'fecha' | null;
-
-/* Opciones de prioridad */
-const OPCIONES_PRIORIDAD = [
-    {id: 'baja', etiqueta: 'Baja'},
-    {id: 'media', etiqueta: 'Media'},
-    {id: 'alta', etiqueta: 'Alta'},
-    {id: 'muy_alta', etiqueta: 'Muy Alta'}
-];
-
-/* Opciones de urgencia */
-const OPCIONES_URGENCIA = [
-    {id: 'chill', etiqueta: 'Chill', descripcion: 'Sin prisa'},
-    {id: 'normal', etiqueta: 'Normal'},
-    {id: 'urgente', etiqueta: 'Urgente'},
-    {id: 'bloqueante', etiqueta: 'Bloqueante', descripcion: 'ASAP'}
-];
-
-/* Opciones de fecha rápida */
-const OPCIONES_FECHA = [
-    {id: 'hoy', etiqueta: 'Hoy'},
-    {id: 'manana', etiqueta: 'Mañana'},
-    {id: 'semana', etiqueta: 'Esta semana'},
-    {id: 'mes', etiqueta: 'Este mes'}
-];
 
 export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = [], valoresIniciales = {}, tareaExistente, onAbrirConfiguracion}: BottomSheetTareaProps): JSX.Element | null {
     const esEdicion = !!tareaExistente;
@@ -135,51 +113,6 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
         return proyecto?.nombre || null;
     };
 
-    const obtenerTextoPrioridad = () => {
-        const map: Record<string, string> = {
-            baja: 'Baja',
-            media: 'Media',
-            alta: 'Alta',
-            muy_alta: 'Muy Alta'
-        };
-        return prioridad ? map[prioridad] : null;
-    };
-
-    const obtenerTextoUrgencia = () => {
-        const map: Record<string, string> = {
-            bloqueante: 'Bloqueante',
-            urgente: 'Urgente',
-            normal: 'Normal',
-            chill: 'Chill'
-        };
-        return urgencia ? map[urgencia] : null;
-    };
-
-    /* Calcular fecha real desde opción rápida */
-    const calcularFechaDesdeOpcion = (opcion: string): string => {
-        const hoy = new Date();
-        switch (opcion) {
-            case 'hoy':
-                return hoy.toISOString().split('T')[0];
-            case 'manana': {
-                const manana = new Date(hoy);
-                manana.setDate(manana.getDate() + 1);
-                return manana.toISOString().split('T')[0];
-            }
-            case 'semana': {
-                const finSemana = new Date(hoy);
-                finSemana.setDate(finSemana.getDate() + (7 - finSemana.getDay()));
-                return finSemana.toISOString().split('T')[0];
-            }
-            case 'mes': {
-                const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-                return finMes.toISOString().split('T')[0];
-            }
-            default:
-                return opcion;
-        }
-    };
-
     /* Opciones de proyectos para el modal */
     const opcionesProyecto = useMemo(
         () =>
@@ -208,7 +141,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
         if (prioridad) {
             badges.push({
                 id: 'prioridad',
-                etiqueta: obtenerTextoPrioridad() || prioridad,
+                etiqueta: obtenerTextoPrioridad(prioridad) || prioridad,
                 icono: <Flag size={10} />,
                 variante: 'prioridad' as const
             });
@@ -216,7 +149,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
         if (urgencia) {
             badges.push({
                 id: 'urgencia',
-                etiqueta: obtenerTextoUrgencia() || urgencia,
+                etiqueta: obtenerTextoUrgencia(urgencia) || urgencia,
                 icono: <Hash size={10} />,
                 variante: 'urgencia' as const
             });
@@ -275,12 +208,12 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                         )}
 
                         {/* Prioridad */}
-                        <button type="button" className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad() || 'Prioridad'} title={obtenerTextoPrioridad() || 'Prioridad'}>
+                        <button type="button" className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'}>
                             <Flag size={15} />
                         </button>
 
                         {/* Urgencia */}
-                        <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia() || 'Urgencia'} title={obtenerTextoUrgencia() || 'Urgencia'}>
+                        <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
                             <Hash size={15} />
                         </button>
 
@@ -325,7 +258,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
             <ModalSeleccionPropiedad
                 estaAbierto={modalActivo === 'fecha'}
                 titulo="Fecha Límite"
-                opciones={OPCIONES_FECHA}
+                opciones={OPCIONES_FECHA_TAREA}
                 valorActual={undefined}
                 onSeleccionar={valor => {
                     if (valor) {

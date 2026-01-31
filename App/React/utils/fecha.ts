@@ -72,6 +72,44 @@ export function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean 
 }
 
 /*
+ * Calcular fecha real desde opción rápida de fecha
+ * Usado en BottomSheets para conversión de shortcuts a fechas ISO
+ * Opciones: 'hoy', 'manana', 'semana', 'mes', 'trimestre', 'ano'
+ */
+export function calcularFechaDesdeOpcion(opcion: string): string {
+    const hoy = new Date();
+    switch (opcion) {
+        case 'hoy':
+            return hoy.toISOString().split('T')[0];
+        case 'manana': {
+            const manana = new Date(hoy);
+            manana.setDate(manana.getDate() + 1);
+            return manana.toISOString().split('T')[0];
+        }
+        case 'semana': {
+            const finSemana = new Date(hoy);
+            finSemana.setDate(finSemana.getDate() + (7 - finSemana.getDay()));
+            return finSemana.toISOString().split('T')[0];
+        }
+        case 'mes': {
+            const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+            return finMes.toISOString().split('T')[0];
+        }
+        case 'trimestre': {
+            const mesActual = hoy.getMonth();
+            const finTrimestre = new Date(hoy.getFullYear(), Math.floor(mesActual / 3 + 1) * 3, 0);
+            return finTrimestre.toISOString().split('T')[0];
+        }
+        case 'ano': {
+            const finAno = new Date(hoy.getFullYear(), 11, 31);
+            return finAno.toISOString().split('T')[0];
+        }
+        default:
+            return opcion;
+    }
+}
+
+/*
  * Crea una fecha ISO de hace N dias
  * Util para datos de demostracion y pruebas
  */
