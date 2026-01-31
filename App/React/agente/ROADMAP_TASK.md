@@ -176,6 +176,66 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+#### ✅ COMPLETADO: Refactorización Profunda de DashboardModales (2026-01-31)
+
+**Problema resuelto:** `DashboardModales.tsx` era un archivo monolítico de ~360 líneas que:
+- Renderizaba **28+ modales/componentes** diferentes en un solo archivo
+- Mezclaba modales de dominios completamente distintos
+- Contenía lógica de negocio que debería estar en hooks
+- Violaba SRP drásticamente
+
+**Resultado:** DashboardModales reducido de **361 líneas a 50 líneas**
+
+**Estructura Implementada:**
+
+```
+components/dashboard/modales/
+├── index.ts                        # Re-exporta todo
+├── ModalesAutenticacion.tsx        # Login, Perfil, Seguridad, Upgrade (~40 líneas)
+├── ModalesTareas.tsx               # PanelConfiguracionTarea, BottomSheets (~90 líneas)
+├── ModalesHabitos.tsx              # ModalHabito crear/editar (~50 líneas)
+├── ModalesProyectos.tsx            # ModalProyecto crear/editar (~50 líneas)
+├── ModalesConfiguracion.tsx        # Todos los ModalConfiguracion* (~55 líneas)
+├── ModalesCompartir.tsx            # ModalCompartir, ModalEquipos (~45 líneas)
+├── ModalesAuxiliares.tsx           # Toast, Tooltips, Admin (~60 líneas)
+└── ModalCreacionRapidaWrapper.tsx  # Wrapper desktop/móvil (~35 líneas)
+
+hooks/
+└── useCreacionEntidades.ts         # Lógica de creación centralizada (~145 líneas)
+```
+
+**Fases Completadas:**
+
+- [x] **Fase 1: Extraer hooks de lógica**
+  - Creado `hooks/useCreacionEntidades.ts` con toda la lógica de `manejarGuardar*`
+  - Incluye verificación de límites integrada
+  - DashboardModales ahora solo compone subcomponentes
+
+- [x] **Fase 2: Separar por dominio (componentes puros)**
+  - `ModalesAutenticacion.tsx`: Login, Perfil, Seguridad, Upgrade, LimiteAlcanzado
+  - `ModalesTareas.tsx`: PanelConfiguracionTarea, BottomSheetTarea (crear/editar)
+  - `ModalesHabitos.tsx`: ModalHabito crear/editar, BottomSheetHabito
+  - `ModalesProyectos.tsx`: ModalProyecto crear/editar, BottomSheetProyecto
+  - `ModalesConfiguracion.tsx`: Todos los ModalConfiguracion*, ModalVersiones, ModalTemas, etc.
+  - `ModalesCompartir.tsx`: ModalEquipos, ModalCompartir, ModalNotificaciones
+  - `ModalesAuxiliares.tsx`: Toast, Tooltips, Barra, Indicador, Admin, Experimentos
+
+- [x] **Fase 3: Props organizados por dominio**
+  - Cada componente modular recibe solo las props que necesita
+  - Se evita prop drilling excesivo pasando objetos agrupados
+
+- [x] **Fase 4: Unificar BottomSheet y Modal de creación**
+  - `ModalCreacionRapidaWrapper.tsx` maneja modal desktop
+  - BottomSheets móviles integrados en sus respectivos componentes de dominio
+
+**Beneficios logrados:**
+- Cada archivo < 100 líneas ✅
+- Fácil de testear y mantener ✅
+- Cambios en un dominio no afectan otros ✅
+- Mejor tree-shaking si algún modal no se usa ✅
+
+---
+
 #### BottomSheet - Integración Pendiente 🔧 (Prioridad Alta)
 
 **1. Integrar BottomSheetProyecto en la App** ✅

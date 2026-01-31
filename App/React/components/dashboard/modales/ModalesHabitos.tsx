@@ -1,0 +1,50 @@
+/*
+ * ModalesHabitos
+ * Agrupa modales relacionados con hábitos
+ * Incluye: ModalHabito (crear/editar), BottomSheetHabito (móvil)
+ */
+
+import {ModalHabito} from '../ModalHabito';
+import {BottomSheetHabito} from '../BottomSheetHabito';
+
+import type {DashboardCompletoRetorno} from '../../../hooks/useDashboardCompleto';
+import type {DatosNuevoHabito, DatosEdicionTarea} from '../../../types/dashboard';
+import type {DatosHabito} from '../BottomSheetHabito';
+
+interface ModalesHabitosProps {
+    dashboard: DashboardCompletoRetorno['dashboard'];
+    modales: DashboardCompletoRetorno['modales'];
+    esMovil: boolean;
+    manejarCrearHabitoConLimite: (datos: DatosNuevoHabito) => Promise<void>;
+    manejarCrearTareaConLimite: (datos: DatosEdicionTarea) => void;
+    manejarGuardarHabitoBottomSheet: (datos: DatosHabito) => Promise<void>;
+}
+
+export function ModalesHabitos({dashboard, modales, esMovil, manejarCrearHabitoConLimite, manejarCrearTareaConLimite, manejarGuardarHabitoBottomSheet}: ModalesHabitosProps): JSX.Element {
+    return (
+        <>
+            {/* Modal crear hábito */}
+            <ModalHabito estaAbierto={dashboard.modalCrearHabitoAbierto} onCerrar={dashboard.cerrarModalCrearHabito} onGuardar={manejarCrearHabitoConLimite} />
+
+            {/* Modal editar hábito */}
+            <ModalHabito
+                estaAbierto={dashboard.habitoEditando !== null}
+                onCerrar={dashboard.cerrarModalEditarHabito}
+                onGuardar={datos => dashboard.editarHabito(dashboard.habitoEditando!.id, datos)}
+                onPausarHabito={dashboard.pausarHabito}
+                habito={dashboard.habitoEditando ?? undefined}
+                /* Props para tareas del hábito - Fase 14.8 */
+                tareas={dashboard.tareas}
+                onToggleTarea={dashboard.toggleTarea}
+                onCrearTarea={manejarCrearTareaConLimite}
+                onEliminarTarea={dashboard.eliminarTarea}
+                onConfigurarTarea={modales.abrirModalEditarTarea}
+                onActualizarOrdenTareasHabito={dashboard.actualizarOrdenTareasHabito}
+                onEditarTarea={dashboard.editarTarea}
+            />
+
+            {/* BottomSheet móvil para crear hábito */}
+            {esMovil && modales.modalCreacionRapida === 'habito' && <BottomSheetHabito estaAbierto={true} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarHabitoBottomSheet} />}
+        </>
+    );
+}
