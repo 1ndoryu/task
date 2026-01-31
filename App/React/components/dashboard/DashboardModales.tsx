@@ -17,7 +17,7 @@ import {ModalConfiguracionTareas} from './ModalConfiguracionTareas';
 import {ModalConfiguracionHabitos} from './ModalConfiguracionHabitos';
 import {ModalConfiguracionScratchpad} from './ModalConfiguracionScratchpad';
 import {ModalConfiguracionActividad} from './ModalConfiguracionActividad';
-import {BottomSheetTarea, BottomSheetHabito} from './index';
+import {BottomSheetTarea, BottomSheetHabito, BottomSheetProyecto} from './index';
 
 import {ToastDeshacer, ModalUpgrade, ModalLimiteAlcanzado, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre, ModalVersiones, ModalTemas} from '../shared';
 import {ModalFeedback} from '../shared/ModalFeedback';
@@ -35,6 +35,10 @@ import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {AccionExperimento} from '../experimentos/ModalExperimentos';
 import type {DatosTarea} from './BottomSheetTarea';
 import type {DatosHabito} from './BottomSheetHabito';
+import type {DatosProyecto} from './BottomSheetProyecto';
+import type {NivelImportancia, NivelPrioridad, NivelUrgencia, TipoFrecuencia, DatosNuevoHabito, DatosEdicionTarea} from '../../types/dashboard';
+import type {DatosCreacionRapida} from '../../types/creacionRapida';
+import {calcularFechaDesdeKey} from '../../utils/fecha';
 
 import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
 
@@ -63,26 +67,8 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
         }
     ];
 
-    const manejarGuardarRapido = async (datos: any) => {
+    const manejarGuardarRapido = async (datos: DatosCreacionRapida) => {
         const {tipo, texto, ...opciones} = datos;
-
-        /* Helper para calcular fechas */
-        const calcularFecha = (fechaKey?: string) => {
-            if (!fechaKey) return undefined;
-            const hoy = new Date();
-            if (fechaKey === 'hoy') return hoy.toISOString().split('T')[0];
-            if (fechaKey === 'manana') {
-                const manana = new Date(hoy);
-                manana.setDate(manana.getDate() + 1);
-                return manana.toISOString().split('T')[0];
-            }
-            if (fechaKey === 'semana') {
-                const semana = new Date(hoy);
-                semana.setDate(semana.getDate() + 7);
-                return semana.toISOString().split('T')[0];
-            }
-            return undefined;
-        };
 
         /*
          * Integración de verificación de límites (Fase 15.7)
@@ -92,28 +78,29 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
             if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
 
-            const configTarea: any = {
-                fechaMaxima: calcularFecha(opciones.fecha),
+            const configTarea = {
+                fechaMaxima: calcularFechaDesdeKey(opciones.fecha),
                 adjuntos: opciones.adjuntos || []
             };
             acciones.manejarCrearNuevaTareaGlobal(configTarea, opciones.prioridad || null, texto, undefined, opciones.urgencia || null, [], opciones.proyectoId);
         } else if (tipo === 'habito') {
             if (!limites.verificarYMostrar('habitos', dashboard.habitos.length)) return;
 
-            await dashboard.crearHabito({
+            const datosHabito: DatosNuevoHabito = {
                 nombre: texto,
-                importancia: opciones.importancia || 'Media',
+                importancia: (opciones.importancia || 'Media') as NivelImportancia,
                 tags: [],
-                frecuencia: {tipo: opciones.frecuencia || 'diario'}
-            });
+                frecuencia: {tipo: (opciones.frecuencia || 'diario') as TipoFrecuencia}
+            };
+            await dashboard.crearHabito(datosHabito);
         } else if (tipo === 'proyecto') {
-            if (!limites.verificarYMostrar('proyectos', dashboard.proyectos.length)) return;
+            if (!limites.verificarYMostrar('proyectos', dashboard.proyectos?.length ?? 0)) return;
 
             acciones.manejarGuardarNuevoProyecto({
                 nombre: texto,
                 prioridad: opciones.prioridad || 'media',
                 urgencia: opciones.urgencia || undefined,
-                fechaLimite: calcularFecha(opciones.fecha)
+                fechaLimite: calcularFechaDesdeKey(opciones.fecha)
             });
         }
     };
@@ -122,20 +109,22 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
      * Wrappers con verificación de límites (Fase 15.7)
      * Integran la verificación de límites antes de crear entidades
      */
-    const manejarCrearHabitoConLimite = async (datos: any) => {
+    const manejarCrearHabitoConLimite = async (datos: DatosNuevoHabito) => {
         if (!limites.verificarYMostrar('habitos', dashboard.habitos.length)) return;
         await dashboard.crearHabito(datos);
     };
 
-    const manejarCrearProyectoConLimite = (datos: any) => {
-        if (!limites.verificarYMostrar('proyectos', dashboard.proyectos.length)) return;
+    const manejarCrearProyectoConLimite = (datos: {nombre: string; prioridad?: NivelPrioridad; urgencia?: NivelUrgencia; fechaLimite?: string}) => {
+        if (!limites.verificarYMostrar('proyectos', dashboard.proyectos?.length ?? 0)) return;
         acciones.manejarGuardarNuevoProyecto(datos);
     };
 
-    const manejarCrearTareaConLimite = (datos: any) => {
+    const manejarCrearTareaConLimite = (datos: DatosEdicionTarea) => {
+        /* texto es requerido para crear una tarea, pero DatosEdicionTarea lo tiene opcional */
+        if (!datos.texto) return;
         const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
         if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
-        dashboard.crearTarea(datos);
+        dashboard.crearTarea({texto: datos.texto, ...datos});
     };
 
     /*
@@ -148,9 +137,9 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             /* Modo edición: actualizar tarea existente */
             await dashboard.editarTarea(datos.id, {
                 texto: datos.texto,
-                prioridad: datos.prioridad as any,
-                urgencia: datos.urgencia as any,
-                fechaMaxima: datos.fecha,
+                prioridad: datos.prioridad as NivelPrioridad | undefined,
+                urgencia: datos.urgencia as NivelUrgencia | undefined,
+                configuracion: datos.fecha ? {fechaMaxima: datos.fecha} : undefined,
                 proyectoId: datos.proyectoId
             });
             return;
@@ -160,55 +149,63 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
         const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
         if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
 
-        const configTarea: any = {
+        const configTarea = {
             fechaMaxima: datos.fecha,
-            adjuntos: []
+            adjuntos: [] as import('../../types/dashboard').Adjunto[]
         };
-        acciones.manejarCrearNuevaTareaGlobal(
-            configTarea,
-            datos.prioridad || null,
-            datos.texto,
-            undefined,
-            datos.urgencia || null,
-            [],
-            datos.proyectoId
-        );
+        acciones.manejarCrearNuevaTareaGlobal(configTarea, (datos.prioridad as NivelPrioridad) || null, datos.texto, undefined, (datos.urgencia as NivelUrgencia) || null, [], datos.proyectoId);
     };
 
     const manejarGuardarHabitoBottomSheet = async (datos: DatosHabito) => {
         if (!limites.verificarYMostrar('habitos', dashboard.habitos.length)) return;
 
-        await dashboard.crearHabito({
+        /* Mapeo de frecuencia del BottomSheet a TipoFrecuencia */
+        const mapearFrecuencia = (frecuencia?: string): TipoFrecuencia => {
+            if (frecuencia === 'diaria') return 'diario';
+            if (frecuencia === 'semanal') return 'semanal';
+            return 'diario';
+        };
+
+        const datosHabito: DatosNuevoHabito = {
             nombre: datos.texto,
-            importancia: (datos.importancia || 'Media') as 'Alta' | 'Media' | 'Baja',
+            importancia: (datos.importancia || 'Media') as NivelImportancia,
             tags: [],
-            frecuencia: {tipo: datos.frecuencia === 'diaria' ? 'diario' : datos.frecuencia === 'semanal' ? 'semanal' : 'diario'}
+            frecuencia: {tipo: mapearFrecuencia(datos.frecuencia)}
+        };
+        await dashboard.crearHabito(datosHabito);
+    };
+
+    /*
+     * Manejador para BottomSheetProyecto (Fase 10 - Móvil)
+     * Adapta los datos del bottom sheet al formato esperado por el sistema
+     */
+    const manejarGuardarProyectoBottomSheet = async (datos: DatosProyecto) => {
+        if (!limites.verificarYMostrar('proyectos', dashboard.proyectos?.length ?? 0)) return;
+
+        acciones.manejarGuardarNuevoProyecto({
+            nombre: datos.nombre,
+            prioridad: datos.prioridad || 'media',
+            urgencia: datos.urgencia || undefined,
+            fechaLimite: datos.fechaLimite
         });
     };
 
     return (
         <>
             {/* Modales de Autenticación y Usuario */}
-            <ModalLogin 
-                estaAbierto={modales.modalLoginAbierto} 
-                onCerrar={modales.cerrarModalLogin} 
-                onLoginGoogle={auth.loginWithGoogle} 
-                onLoginCredentials={auth.loginWithCredentials} 
-                onRegister={auth.register} 
-                loading={auth.loading} 
-                error={auth.error} 
+            <ModalLogin
+                estaAbierto={modales.modalLoginAbierto}
+                onCerrar={modales.cerrarModalLogin}
+                onLoginGoogle={auth.loginWithGoogle}
+                onLoginCredentials={auth.loginWithCredentials}
+                onRegister={auth.register}
+                loading={auth.loading}
+                error={auth.error}
                 /* Overlay opaco cuando no hay usuario autenticado para ocultar la app */
                 overlayOpaco={!auth.user}
             />
             <ModalUpgrade visible={modales.modalUpgradeAbierto} onCerrar={modales.cerrarModalUpgrade} suscripcion={suscripcion} />
-            <ModalLimiteAlcanzado
-                visible={limites.modalLimite.visible}
-                onCerrar={limites.cerrarModalLimite}
-                onActualizarPlan={modales.abrirModalUpgrade}
-                tipoEntidad={limites.modalLimite.tipoEntidad}
-                limite={limites.modalLimite.limite}
-                actual={limites.modalLimite.actual}
-            />
+            <ModalLimiteAlcanzado visible={limites.modalLimite.visible} onCerrar={limites.cerrarModalLimite} onActualizarPlan={modales.abrirModalUpgrade} tipoEntidad={limites.modalLimite.tipoEntidad} limite={limites.modalLimite.limite} actual={limites.modalLimite.actual} />
             <PanelSeguridad visible={modales.panelSeguridadAbierto} onCerrar={modales.cerrarPanelSeguridad} />
             <ModalPerfil estaAbierto={modales.modalPerfilAbierto} onCerrar={modales.cerrarModalPerfil} />
 
@@ -310,22 +307,23 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             {modales.modalCreacionRapida && !esMovil && <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />}
 
             {/* Bottom Sheets Móviles - Solo en móvil */}
-            {esMovil && modales.modalCreacionRapida === 'tarea' && (
-                <BottomSheetTarea
-                    estaAbierto={true}
-                    onCerrar={modales.cerrarCreacionRapida}
-                    onGuardar={manejarGuardarTareaBottomSheet}
-                    proyectos={dashboard.proyectos}
-                    valoresIniciales={modales.valoresCreacionRapida}
-                />
-            )}
+            {esMovil && modales.modalCreacionRapida === 'tarea' && <BottomSheetTarea estaAbierto={true} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarTareaBottomSheet} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} />}
 
-            {esMovil && modales.modalCreacionRapida === 'habito' && (
-                <BottomSheetHabito
+            {/*
+             * Nota: BottomSheetHabito y BottomSheetProyecto usan tipos específicos para valoresIniciales.
+             * ValoresCreacionRapida no es compatible directamente, se adaptan los valores relevantes.
+             */}
+            {esMovil && modales.modalCreacionRapida === 'habito' && <BottomSheetHabito estaAbierto={true} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarHabitoBottomSheet} />}
+
+            {esMovil && modales.modalCreacionRapida === 'proyecto' && (
+                <BottomSheetProyecto
                     estaAbierto={true}
                     onCerrar={modales.cerrarCreacionRapida}
-                    onGuardar={manejarGuardarHabitoBottomSheet}
-                    valoresIniciales={modales.valoresCreacionRapida}
+                    onGuardar={manejarGuardarProyectoBottomSheet}
+                    valoresIniciales={{
+                        prioridad: modales.valoresCreacionRapida.prioridad as any,
+                        urgencia: modales.valoresCreacionRapida.urgencia as any
+                    }}
                 />
             )}
 

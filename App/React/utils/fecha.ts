@@ -230,3 +230,39 @@ export function formatearFechaRelativa(fechaIso: string | null | undefined): str
     const meses = Math.floor(diferenciaSeg / 2592000);
     return `hace ${meses} ${meses === 1 ? 'mes' : 'meses'}`;
 }
+
+/*
+ * Claves de fecha rápida usadas en modales de creación
+ * 'hoy' | 'manana' | 'semana'
+ */
+export type ClaveFechaRapida = 'hoy' | 'manana' | 'semana';
+
+/*
+ * Convierte una clave de fecha rápida a fecha ISO (YYYY-MM-DD)
+ * Usado por modales de creación rápida para calcular fechas desde opciones predefinidas
+ *
+ * @param clave - La clave de fecha rápida ('hoy', 'manana', 'semana')
+ * @returns Fecha en formato ISO o undefined si la clave no es válida
+ */
+export function calcularFechaDesdeKey(clave: string | undefined): string | undefined {
+    if (!clave) return undefined;
+
+    const hoy = new Date();
+
+    switch (clave) {
+        case 'hoy':
+            return obtenerFechaLocalISO(hoy);
+        case 'manana': {
+            const manana = new Date(hoy);
+            manana.setDate(manana.getDate() + 1);
+            return obtenerFechaLocalISO(manana);
+        }
+        case 'semana': {
+            const semana = new Date(hoy);
+            semana.setDate(semana.getDate() + 7);
+            return obtenerFechaLocalISO(semana);
+        }
+        default:
+            return undefined;
+    }
+}

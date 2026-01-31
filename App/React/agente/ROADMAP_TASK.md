@@ -60,8 +60,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
     - BottomSheetHabito ahora usa misma estructura visual que BottomSheetTarea
     - Creado `BottomSheetProyecto.tsx` con estructura idéntica
     - Iconos unificados a 15px, barra de acciones horizontal
-    - TO-DO pendiente: Implementar modales de selección de propiedades
-    - TO-DO pendiente: Mostrar badges debajo del input con propiedades seleccionadas
+
 
 
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
@@ -143,6 +142,72 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### Tareas Pendientes 📋
+
+#### ✅ COMPLETADO: Refactorización SOLID de DashboardModales (2026-01-31)
+
+**Contexto:** Durante la integración de BottomSheetProyecto se detectaron múltiples violaciones SOLID en `DashboardModales.tsx`. Refactorización completada.
+
+**Problemas Identificados y Resueltos:**
+
+1. ✅ **Tipo incompleto de importancia (LSP)**
+   - Corregido: ahora usa `NivelImportancia` en lugar de cast inline
+   - Afectaba: `manejarGuardarHabitoBottomSheet()`
+
+2. ✅ **Uso excesivo de `any` (ISP/DIP)**
+   - Creado `types/creacionRapida.ts` con `DatosCreacionRapida`
+   - Tipados todos los manejadores con interfaces específicas
+   - Eliminados todos los `any` del archivo
+
+3. ✅ **Lógica de mapeo duplicada (DRY)**
+   - Extraído `calcularFechaDesdeKey()` a `utils/fecha.ts`
+   - Mapeo de frecuencia encapsulado en función local
+
+4. ✅ **Optional chaining inconsistente**
+   - Corregido `dashboard.proyectos?.length ?? 0` en todas las ocurrencias
+
+5. **Manejadores con múltiples responsabilidades (SRP)** - Pendiente futuro
+   - `manejarGuardarRapido()` mantiene switch por tipo pero ahora usa tipos correctos
+   - TO-DO: Considerar separar en funciones específicas si crece la complejidad
+
+**Archivos modificados:**
+- `components/dashboard/DashboardModales.tsx` (principal)
+- `utils/fecha.ts` (agregado `calcularFechaDesdeKey`)
+- `types/creacionRapida.ts` (nuevo archivo con interfaces)
+
+---
+
+#### BottomSheet - Integración Pendiente 🔧 (Prioridad Alta)
+
+**1. Integrar BottomSheetProyecto en la App** ✅
+- [x] Conectar en `DashboardModales.tsx` (igual que BottomSheetTarea y BottomSheetHabito)
+- [x] Usar sistema existente `modalCreacionRapida === 'proyecto'` (no requiere estado adicional)
+- [x] NavegacionInferior ya usa `onCrearRapido('proyecto')` correctamente
+- **Solución:** Integrado via `modalCreacionRapida`, creado `manejarGuardarProyectoBottomSheet()`
+- **Archivos modificados:**
+  - `components/dashboard/DashboardModales.tsx`
+
+**2. Placeholders Vacíos → BottomSheet en Móvil**
+- [ ] Panel de Tareas vacío: botón "Crear tarea" → abrir BottomSheetTarea si esMovil
+- [ ] Panel de Hábitos vacío: botón "Crear hábito" → abrir BottomSheetHabito si esMovil
+- [ ] Panel de Proyectos vacío: botón "Crear proyecto" → abrir BottomSheetProyecto si esMovil
+- [ ] **Archivos a revisar:**
+  - `components/paneles/PanelEjecucion.tsx` (placeholder tareas)
+  - `components/paneles/PanelHabitos.tsx` (placeholder hábitos)
+  - `components/paneles/PanelProyectos.tsx` (placeholder proyectos)
+  - Posiblemente crear hook `useCreacionContextual` para centralizar lógica
+
+**3. Modales de Selección de Propiedades**
+- [ ] Crear componente `ModalSeleccionPropiedad.tsx` reutilizable
+- [ ] Integrar en BottomSheetTarea: Proyecto, Prioridad, Urgencia, Fecha
+- [ ] Integrar en BottomSheetHabito: Frecuencia, Importancia
+- [ ] Integrar en BottomSheetProyecto: Icono, Prioridad, Urgencia, Fecha
+- [ ] **Diseño:** Modal centrado con lista de opciones, cierra al seleccionar
+
+**4. Badges de Propiedades Seleccionadas**
+- [ ] Crear componente `BadgesPropiedad.tsx` para mostrar debajo del input
+- [ ] Mostrar badges compactos con icono + texto corto
+- [ ] Permitir eliminar propiedad tocando el badge (X)
+- [ ] **Diseño:** Fila horizontal con wrap, estilo pill similar a tags
 
 #### Refactorizaciones Completadas ✅
 - [x] **Refactor movil.css**: Dividido en 8 archivos modulares (2026-01-31) ✅
