@@ -129,6 +129,9 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             }
 
             configuracion.repeticion = repeticion;
+        } else {
+            /* Explícitamente marcar que no hay repetición para que se borre al guardar */
+            configuracion.repeticion = undefined;
         }
 
         configuracion.adjuntos = adjuntos;

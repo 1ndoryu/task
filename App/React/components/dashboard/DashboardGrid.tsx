@@ -11,10 +11,11 @@
 import {useCallback, useMemo, CSSProperties} from 'react';
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn} from '../shared';
 import {obtenerPanel, panelManejaAlturaPropia, paginaMovilAPanelId} from '../../config/registroPaneles';
+import {useEsMovil} from '../../hooks/useEsMovil';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import type {DatosEdicionTarea} from '../../types/dashboard';
+import type {DatosEdicionTarea, Tarea} from '../../types/dashboard';
 
 /* Tipo para pages móviles - ahora dinámico desde el registro */
 type PaginaMovil = string;
@@ -54,7 +55,7 @@ interface PropsContextoPaneles {
  * Factory para generar las props específicas de cada panel
  * Esto permite que DashboardGrid no necesite conocer los detalles de cada panel
  */
-function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element, manejarToggleTarea: (id: number) => void, manejarEditarHabitoPorId: (habitoId: number) => void) {
+function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element, manejarToggleTarea: (id: number) => void, manejarEditarHabitoPorId: (habitoId: number) => void, esMovilActual: boolean) {
     const {dashboard, modales, compartir, filtroTareas, ordenTareas, configTareas, opciones, acciones, valorFiltroActual, limites} = ctx;
 
     /*
@@ -67,6 +68,19 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
             return;
         }
         dashboard.crearTarea(datos);
+    };
+
+    /*
+     * Handler de configurar tarea adaptativo:
+     * - Móvil: abre BottomSheet de edición rápida
+     * - Desktop: abre panel de configuración completa
+     */
+    const manejarConfigurarTarea = (tarea: Tarea) => {
+        if (esMovilActual) {
+            modales.abrirEdicionTareaMovil(tarea);
+        } else {
+            modales.abrirModalEditarTarea(tarea);
+        }
     };
 
     return {
@@ -102,7 +116,7 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
         onPausarHabito: dashboard.pausarHabito,
         onActualizarHabito: dashboard.editarHabito,
         modoCompacto: configTareas.configuracion.modoCompacto,
-        onConfigurarTarea: modales.abrirModalEditarTarea
+        onConfigurarTarea: manejarConfigurarTarea
     };
 }
 
@@ -290,7 +304,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         /* Generar props según el tipo de panel */
         let props: any;
         if (panelId === 'ejecucion') {
-            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, manejarToggleTarea, manejarEditarHabitoPorId);
+            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, manejarToggleTarea, manejarEditarHabitoPorId, esMovil);
         } else {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement);
         }

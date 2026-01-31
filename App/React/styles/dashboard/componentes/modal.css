@@ -276,17 +276,18 @@
 
     /* 
      * TITULO COMPACTO MOVIL - Fase 10.8.6
-     * Titulo visible en móvil, tamaño reducido (14px), centrado
+     * Titulo visible en móvil, tamaño reducido, centrado
+     * Revisión: quitar uppercase, agregar padding vertical
      */
     .modalTitulo--movilCompacto {
-        font-size: var(--dashboard-tamanoMovilPequeno);
+        font-size: calc(var(--dashboard-tamanoMovilPequeno) - 1px);
         font-weight: 600;
         color: var(--dashboard-textoActivo);
         text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
+        text-transform: none;
+        letter-spacing: 0.01em;
         margin: 0;
-        padding: 0;
+        padding: 3px 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

@@ -55,6 +55,28 @@
     color: var(--dashboard-textoNormal);
 }
 
+/* Botón configuración avanzada (modo edición) */
+.bottomSheetTarea__botonConfig {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+}
+
+.bottomSheetTarea__botonConfig:hover,
+.bottomSheetTarea__botonConfig:active {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
 /* Input principal */
 .bottomSheetTarea__inputWrapper {
     display: flex;

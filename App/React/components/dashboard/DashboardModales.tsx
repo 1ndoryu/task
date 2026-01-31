@@ -143,6 +143,20 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
      * Adaptan los datos del bottom sheet al formato esperado por el sistema
      */
     const manejarGuardarTareaBottomSheet = async (datos: DatosTarea) => {
+        /* Si hay ID, es edición; si no, es creación */
+        if (datos.id) {
+            /* Modo edición: actualizar tarea existente */
+            await dashboard.editarTarea(datos.id, {
+                texto: datos.texto,
+                prioridad: datos.prioridad as any,
+                urgencia: datos.urgencia as any,
+                fechaMaxima: datos.fecha,
+                proyectoId: datos.proyectoId
+            });
+            return;
+        }
+
+        /* Modo creación */
         const tareasActivas = dashboard.tareas.filter(t => !t.completado).length;
         if (!limites.verificarYMostrar('tareasActivas', tareasActivas)) return;
 
@@ -312,6 +326,23 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
                     onCerrar={modales.cerrarCreacionRapida}
                     onGuardar={manejarGuardarHabitoBottomSheet}
                     valoresIniciales={modales.valoresCreacionRapida}
+                />
+            )}
+
+            {/* BottomSheet para edición de tareas existentes (móvil) */}
+            {esMovil && modales.tareaEditandoMovil && (
+                <BottomSheetTarea
+                    estaAbierto={true}
+                    onCerrar={modales.cerrarEdicionTareaMovil}
+                    onGuardar={manejarGuardarTareaBottomSheet}
+                    proyectos={dashboard.proyectos}
+                    tareaExistente={modales.tareaEditandoMovil}
+                    onAbrirConfiguracion={() => {
+                        /* Al abrir config avanzada, cerrar BottomSheet y abrir panel */
+                        const tarea = modales.tareaEditandoMovil;
+                        modales.cerrarEdicionTareaMovil();
+                        if (tarea) modales.abrirModalEditarTarea(tarea);
+                    }}
                 />
             )}
 

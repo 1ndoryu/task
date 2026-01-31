@@ -37,9 +37,11 @@ export interface DrawerMovilProps {
     opciones: OpcionDrawer[];
     onSeleccionar: (opcionId: string) => void;
     opcionesSecundarias?: OpcionDrawer[];
+    onClickPerfil?: () => void;
+    onClickPlan?: () => void;
 }
 
-export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opciones, onSeleccionar, opcionesSecundarias}: DrawerMovilProps): JSX.Element | null {
+export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opciones, onSeleccionar, opcionesSecundarias, onClickPerfil, onClickPlan}: DrawerMovilProps): JSX.Element | null {
     const drawerRef = useRef<HTMLDivElement>(null);
     const inicioToqueRef = useRef<number>(0);
 
@@ -53,16 +55,18 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
         [onCerrar]
     );
 
-    /* Bloquear scroll del body cuando está abierto */
+    /* Bloquear scroll del body cuando está abierto y agregar clase para ocultar nav */
     useEffect(() => {
         if (estaAbierto) {
             document.addEventListener('keydown', manejarTecla);
             document.body.style.overflow = 'hidden';
+            document.body.classList.add('drawerAbierto');
         }
 
         return () => {
             document.removeEventListener('keydown', manejarTecla);
             document.body.style.overflow = '';
+            document.body.classList.remove('drawerAbierto');
         };
     }, [estaAbierto, manejarTecla]);
 
@@ -92,9 +96,27 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
         onCerrar();
     };
 
-    /* Determinar badge del plan */
+    /* Click en foto/nombre abre perfil */
+    const manejarClickPerfil = () => {
+        if (onClickPerfil) {
+            onClickPerfil();
+            onCerrar();
+        }
+    };
+
+    /* Click en badge de plan abre modal suscripción */
+    const manejarClickPlan = () => {
+        if (onClickPlan) {
+            onClickPlan();
+            onCerrar();
+        }
+    };
+
+    /* Determinar badge del plan - ahora clickeable */
     const obtenerBadgePlan = () => {
         if (!suscripcion) return null;
+        const esClickeable = onClickPlan && suscripcion.plan !== 'premium';
+        
         if (suscripcion.plan === 'premium' && suscripcion.estado === 'activa') {
             return (
                 <span className="drawerMovilPlanBadge drawerMovilPlanBadge--premium">
@@ -104,9 +126,25 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
             );
         }
         if (suscripcion.plan === 'trial') {
-            return <span className="drawerMovilPlanBadge drawerMovilPlanBadge--trial">Trial</span>;
+            return (
+                <button 
+                    type="button" 
+                    className="drawerMovilPlanBadge drawerMovilPlanBadge--trial drawerMovilPlanBadge--clickeable" 
+                    onClick={esClickeable ? manejarClickPlan : undefined}
+                >
+                    Trial
+                </button>
+            );
         }
-        return <span className="drawerMovilPlanBadge drawerMovilPlanBadge--free">Free</span>;
+        return (
+            <button 
+                type="button" 
+                className="drawerMovilPlanBadge drawerMovilPlanBadge--free drawerMovilPlanBadge--clickeable" 
+                onClick={esClickeable ? manejarClickPlan : undefined}
+            >
+                Free
+            </button>
+        );
     };
 
     if (!estaAbierto) return null;
@@ -118,16 +156,16 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
 
             {/* Panel del drawer */}
             <div ref={drawerRef} className={`drawerMovilPanel ${estaAbierto ? 'drawerMovilPanel--visible' : ''}`} role="dialog" aria-modal="true" aria-label="Menú de navegación" onTouchStart={manejarTouchStart} onTouchEnd={manejarTouchEnd}>
-                {/* Cabecera con perfil */}
+                {/* Cabecera con perfil - foto y nombre clickeables */}
                 <div className="drawerMovilCabecera">
-                    <div className="drawerMovilPerfil">
+                    <button type="button" className="drawerMovilPerfil drawerMovilPerfil--clickeable" onClick={onClickPerfil ? manejarClickPerfil : undefined}>
                         {usuario.avatar ? <img src={usuario.avatar} alt="" className="drawerMovilAvatar" /> : <div className="drawerMovilAvatarInicial">{usuario.nombre.charAt(0).toUpperCase()}</div>}
                         <div className="drawerMovilPerfilInfo">
                             <span className="drawerMovilNombre">{usuario.nombre}</span>
                             {usuario.email && <span className="drawerMovilEmail">{usuario.email}</span>}
-                            {obtenerBadgePlan()}
                         </div>
-                    </div>
+                    </button>
+                    {obtenerBadgePlan()}
                     <button type="button" className="drawerMovilCerrar" onClick={onCerrar} aria-label="Cerrar menú">
                         <X size={20} />
                     </button>

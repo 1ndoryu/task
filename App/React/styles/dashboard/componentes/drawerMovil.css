@@ -71,6 +71,25 @@
     gap: var(--dashboard-espacioMd);
     flex: 1;
     min-width: 0;
+    background: transparent;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: default;
+}
+
+/* Estilo clickeable para foto/nombre */
+.drawerMovilPerfil--clickeable {
+    cursor: pointer;
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.drawerMovilPerfil--clickeable:hover {
+    opacity: 0.8;
+}
+
+.drawerMovilPerfil--clickeable:active {
+    opacity: 0.6;
 }
 
 .drawerMovilAvatar {
@@ -152,6 +171,21 @@
     background: var(--dashboard-fondoHover);
     color: var(--dashboard-textoApagado);
     border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* Badge clickeable (Free/Trial → upgrade) */
+.drawerMovilPlanBadge--clickeable {
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.drawerMovilPlanBadge--clickeable:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+.drawerMovilPlanBadge--clickeable:active {
+    transform: scale(0.98);
 }
 
 /* 

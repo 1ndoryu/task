@@ -90,6 +90,10 @@ interface UseModalesDashboardReturn {
     tareaEditando: Tarea | null;
     abrirModalEditarTarea: (tarea: Tarea) => void;
     cerrarModalEditarTarea: () => void;
+    /* Editar Tarea Móvil (BottomSheet) */
+    tareaEditandoMovil: Tarea | null;
+    abrirEdicionTareaMovil: (tarea: Tarea) => void;
+    cerrarEdicionTareaMovil: () => void;
     /* Creación Rápida */
     modalCreacionRapida: 'tarea' | 'habito' | 'proyecto' | null;
     valoresCreacionRapida: ValoresCreacionRapida;
@@ -151,6 +155,8 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalNuevaTareaAbierto, setModalNuevaTareaAbierto] = useState(false);
     /* Editar Tarea */
     const [tareaEditando, setTareaEditando] = useState<Tarea | null>(null);
+    /* Editar Tarea Móvil (BottomSheet) */
+    const [tareaEditandoMovil, setTareaEditandoMovil] = useState<Tarea | null>(null);
     /* Creación Rápida */
     const [modalCreacionRapida, setModalCreacionRapida] = useState<'tarea' | 'habito' | 'proyecto' | null>(null);
     const [valoresCreacionRapida, setValoresCreacionRapida] = useState<ValoresCreacionRapida>({});
@@ -235,6 +241,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     /* Handlers Editar Tarea */
     const abrirModalEditarTarea = useCallback((tarea: Tarea) => setTareaEditando(tarea), []);
     const cerrarModalEditarTarea = useCallback(() => setTareaEditando(null), []);
+
+    /* Handlers Editar Tarea Móvil (BottomSheet) */
+    const abrirEdicionTareaMovil = useCallback((tarea: Tarea) => setTareaEditandoMovil(tarea), []);
+    const cerrarEdicionTareaMovil = useCallback(() => setTareaEditandoMovil(null), []);
 
     /* Handlers Creación Rápida */
     const abrirCreacionRapida = useCallback((tipo: 'tarea' | 'habito' | 'proyecto', valores?: ValoresCreacionRapida) => {
@@ -325,6 +335,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         tareaEditando,
         abrirModalEditarTarea,
         cerrarModalEditarTarea,
+        tareaEditandoMovil,
+        abrirEdicionTareaMovil,
+        cerrarEdicionTareaMovil,
         modalCreacionRapida,
         valoresCreacionRapida,
         abrirCreacionRapida,

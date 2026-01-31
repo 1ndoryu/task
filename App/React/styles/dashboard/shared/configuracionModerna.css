@@ -126,9 +126,9 @@
 .pillOpcion {
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: 4px 10px;
-    font-size: var(--dashboard-tamanoPequeno);
+    gap: var(--dashboard-espacioSx);
+    padding: 5px 11px;
+    font-size: 11px;
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoNormal);
     background: transparent;
@@ -217,7 +217,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioMd);
-    padding: var(--dashboard-espacioXs) 0;
+    padding: var(--dashboard-espacioSm) 0;
 }
 
 .propiedadesCompactas__etiqueta {
@@ -230,7 +230,7 @@
 .propiedadesCompactas__contenido {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm);
+    gap: var(--dashboard-espacioMd);
     flex-wrap: wrap;
 }
 

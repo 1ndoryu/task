@@ -161,9 +161,10 @@
 }
 
 /* 
- * OCULTAR NAVEGACIÓN CUANDO BOTTOMSHEET ESTÁ ABIERTO
- * Evita conflictos de z-index
+ * OCULTAR NAVEGACIÓN CUANDO BOTTOMSHEET O DRAWER ESTÁ ABIERTO
+ * Evita conflictos de z-index y elementos superpuestos
  */
-body.bottomSheetAbierto .navegacionInferiorBarra {
+body.bottomSheetAbierto .navegacionInferiorBarra,
+body.drawerAbierto .navegacionInferiorBarra {
     display: none !important;
 }

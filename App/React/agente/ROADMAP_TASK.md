@@ -10,18 +10,39 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-# Revisiones nuevas.
+# Revisiones nuevas. ✅ COMPLETADAS
 
-1. Sobre "Crear mecanismo unificado para crear/editar: tareas, hábitos y proyectos" no esta funcionando cuando doy un toque a la tarea, cuando doy un toque a la tarea se abre el panel configuracion, no digo que este panel este mal, pero con el toque debe abrir ese mecanismo para editar, si funciona cuando creo una tarea pero no funciona cuando creo un proyecto. 
+1. ✅ BottomSheet para edición de tareas - Al tocar una tarea en móvil ahora abre BottomSheetTarea en modo edición
+   - Modificado: BottomSheetTarea.tsx (acepta tareaExistente), useModalesDashboard.ts (abrirEdicionTareaMovil), DashboardGrid.tsx, DashboardModales.tsx
 
-2. El Bottom Sheet Verificar que use las variables y debe ser mas compacto similar al menu contextual movil
+2. ✅ Bottom Sheet usa variables correctas y es compacto (verificado en implementación anterior)
 
-3. El menu que abre al dar click al menu hamburgueza sigue apareciendo debajo del nav inferior, y los botones de mi perfil, copia de seguridad, tema etc, estan al final, tiene que estar arriba.
+3. ✅ Drawer ahora aparece encima del nav inferior
+   - Agregada clase drawerAbierto al body cuando drawer está abierto
+   - CSS en navegacionInferior.css oculta nav cuando body.drawerAbierto
+   - Opciones de perfil ahora aparecen arriba (reordenado en EncabezadoMovil.tsx)
 
-4. La prioridad "muy alta" de las tareas si bien aparece en la configuracion, en el badge de ve asi MUY_ALTA, debe ser sin _ y no aparece en el modal de creación rapida. 
+4. ✅ Badge "MUY_ALTA" ahora muestra "MUY ALTA" (sin guion bajo)
+   - Modificado TareaItem.tsx línea 360: .toUpperCase().replace('_', ' ')
+   - Agregada opción muy_alta en ModalCreacionRapida.tsx
 
-5. El header de los modales en el movil se ven muy pequeño
-   
+5. ✅ Header de modales móvil corregido
+   - modal.css: quitado text-transform: uppercase, padding: 3px 0, font-size reducido 1px
+
+6. ✅ Drawer: click en foto/nombre abre perfil, click en "Free" abre modal suscripción
+   - DrawerMovil.tsx: nuevos props onClickPerfil y onClickPlan
+   - CSS en drawerMovil.css para elementos clickeables
+
+7. ✅ Spacing en modal configuración mejorado
+   - configuracionModerna.css: .pillOpcion padding 5px 11px, font-size 11px
+   - .propiedadesCompactas padding Sm, gap Md entre badges
+
+8. ✅ Bug de repetición corregido
+   - PanelConfiguracionTarea.tsx: configuracion.repeticion = undefined cuando tieneRepeticion es false
+   - useTareas.ts: maneja borrado de repeticion cuando viene undefined
+   - Agregado registro de evento de cambio de repetición en historial
+
+
 ### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
 
 #### Badge de Adjunto Premium

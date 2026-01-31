@@ -357,7 +357,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             }
         };
 
-        return <BadgeInfo tipo="prioridad" texto={tarea.prioridad.toUpperCase()} variante={obtenerVariantePrioridad(tarea.prioridad)} />;
+        return <BadgeInfo tipo="prioridad" texto={tarea.prioridad.toUpperCase().replace('_', ' ')} variante={obtenerVariantePrioridad(tarea.prioridad)} />;
     };
 
     /* Renderizado del indicador de urgencia (solo si no es 'normal') */

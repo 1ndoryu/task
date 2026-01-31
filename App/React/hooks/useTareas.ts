@@ -53,6 +53,28 @@ function registrarEventosCambios(tareaId: number, tareaAnterior: Tarea, datos: D
         registrarEventoSistema('tarea', tareaId, 'urgencia', `${anterior} → ${nuevo}`);
     }
 
+    /* Cambio de repetición */
+    const repeticionAnterior = tareaAnterior.configuracion?.repeticion;
+    const repeticionNueva = datos.configuracion?.repeticion;
+    /* Solo registrar si hay un cambio real (existía y se quitó, o se agregó/modificó) */
+    if (repeticionNueva !== undefined || repeticionAnterior !== undefined) {
+        const teníaRepeticion = !!repeticionAnterior;
+        const tieneRepeticion = repeticionNueva !== undefined && repeticionNueva !== null;
+        
+        if (teníaRepeticion && !tieneRepeticion) {
+            registrarEventoSistema('tarea', tareaId, 'repeticion', 'desactivada');
+        } else if (!teníaRepeticion && tieneRepeticion) {
+            registrarEventoSistema('tarea', tareaId, 'repeticion', 'activada');
+        } else if (teníaRepeticion && tieneRepeticion) {
+            /* Cambió la frecuencia */
+            const intervaloAnterior = repeticionAnterior?.intervalo || 0;
+            const intervaloNuevo = (repeticionNueva as any)?.intervalo || 0;
+            if (intervaloAnterior !== intervaloNuevo) {
+                registrarEventoSistema('tarea', tareaId, 'repeticion', `cada ${intervaloAnterior}d → cada ${intervaloNuevo}d`);
+            }
+        }
+    }
+
     /* Cambio de fecha límite */
     const fechaAnterior = tareaAnterior.configuracion?.fechaMaxima;
     const fechaNueva = datos.configuracion?.fechaMaxima;
@@ -366,6 +388,11 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                                 ...t.configuracion,
                                 ...nuevaConfiguracion
                             };
+                            
+                            /* Si repeticion viene explícitamente como undefined, borrarla */
+                            if ('repeticion' in nuevaConfiguracion && nuevaConfiguracion.repeticion === undefined) {
+                                delete tareaActualizada.configuracion.repeticion;
+                            }
                         } else {
                             /* Configuracion vacia significa quitar */
                             delete tareaActualizada.configuracion;
