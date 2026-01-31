@@ -9,11 +9,13 @@
  * - Botón de crear/guardar destacado
  * - Cierra automáticamente al guardar
  * - Soporta modo edición con tareaExistente
+ * - Modales de selección para propiedades
+ * - Badges de propiedades seleccionadas
  */
 
-import {useState, useRef, useEffect} from 'react';
-import {Send, Calendar, Flag, Hash, Layers, X, Settings} from 'lucide-react';
-import {BottomSheet} from '../shared';
+import {useState, useRef, useEffect, useMemo} from 'react';
+import {Send, Calendar, Flag, Hash, Layers, Settings} from 'lucide-react';
+import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 
 interface BottomSheetTareaProps {
@@ -41,6 +43,33 @@ export interface DatosTarea {
     id?: number;
 }
 
+/* Tipos de modales de selección */
+type ModalActivo = 'proyecto' | 'prioridad' | 'urgencia' | 'fecha' | null;
+
+/* Opciones de prioridad */
+const OPCIONES_PRIORIDAD = [
+    {id: 'baja', etiqueta: 'Baja'},
+    {id: 'media', etiqueta: 'Media'},
+    {id: 'alta', etiqueta: 'Alta'},
+    {id: 'muy_alta', etiqueta: 'Muy Alta'}
+];
+
+/* Opciones de urgencia */
+const OPCIONES_URGENCIA = [
+    {id: 'chill', etiqueta: 'Chill', descripcion: 'Sin prisa'},
+    {id: 'normal', etiqueta: 'Normal'},
+    {id: 'urgente', etiqueta: 'Urgente'},
+    {id: 'bloqueante', etiqueta: 'Bloqueante', descripcion: 'ASAP'}
+];
+
+/* Opciones de fecha rápida */
+const OPCIONES_FECHA = [
+    {id: 'hoy', etiqueta: 'Hoy'},
+    {id: 'manana', etiqueta: 'Mañana'},
+    {id: 'semana', etiqueta: 'Esta semana'},
+    {id: 'mes', etiqueta: 'Este mes'}
+];
+
 export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = [], valoresIniciales = {}, tareaExistente, onAbrirConfiguracion}: BottomSheetTareaProps): JSX.Element | null {
     const esEdicion = !!tareaExistente;
     const [texto, setTexto] = useState(tareaExistente?.texto || '');
@@ -49,6 +78,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
     const [urgencia, setUrgencia] = useState<string | undefined>(tareaExistente?.urgencia || valoresIniciales.urgencia);
     const [fecha, setFecha] = useState<string | undefined>(tareaExistente?.configuracion?.fechaMaxima);
     const [cargando, setCargando] = useState(false);
+    const [modalActivo, setModalActivo] = useState<ModalActivo>(null);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +97,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
             setPrioridad(valoresIniciales.prioridad);
             setUrgencia(valoresIniciales.urgencia);
             setFecha(undefined);
+            setModalActivo(null);
         } else if (tareaExistente) {
             /* Si hay tarea existente, cargar sus valores */
             setTexto(tareaExistente.texto);
@@ -124,6 +155,101 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
         return urgencia ? map[urgencia] : null;
     };
 
+    /* Calcular fecha real desde opción rápida */
+    const calcularFechaDesdeOpcion = (opcion: string): string => {
+        const hoy = new Date();
+        switch (opcion) {
+            case 'hoy':
+                return hoy.toISOString().split('T')[0];
+            case 'manana': {
+                const manana = new Date(hoy);
+                manana.setDate(manana.getDate() + 1);
+                return manana.toISOString().split('T')[0];
+            }
+            case 'semana': {
+                const finSemana = new Date(hoy);
+                finSemana.setDate(finSemana.getDate() + (7 - finSemana.getDay()));
+                return finSemana.toISOString().split('T')[0];
+            }
+            case 'mes': {
+                const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                return finMes.toISOString().split('T')[0];
+            }
+            default:
+                return opcion;
+        }
+    };
+
+    /* Opciones de proyectos para el modal */
+    const opcionesProyecto = useMemo(
+        () =>
+            proyectos.map(p => ({
+                id: p.id.toString(),
+                etiqueta: p.nombre,
+                icono: <Layers size={14} />
+            })),
+        [proyectos]
+    );
+
+    /* Construir lista de badges activos */
+    const badgesActivos = useMemo(() => {
+        const badges = [];
+        if (proyectoId) {
+            const nombreProyecto = obtenerNombreProyecto();
+            if (nombreProyecto) {
+                badges.push({
+                    id: 'proyecto',
+                    etiqueta: nombreProyecto,
+                    icono: <Layers size={10} />,
+                    variante: 'proyecto' as const
+                });
+            }
+        }
+        if (prioridad) {
+            badges.push({
+                id: 'prioridad',
+                etiqueta: obtenerTextoPrioridad() || prioridad,
+                icono: <Flag size={10} />,
+                variante: 'prioridad' as const
+            });
+        }
+        if (urgencia) {
+            badges.push({
+                id: 'urgencia',
+                etiqueta: obtenerTextoUrgencia() || urgencia,
+                icono: <Hash size={10} />,
+                variante: 'urgencia' as const
+            });
+        }
+        if (fecha) {
+            badges.push({
+                id: 'fecha',
+                etiqueta: fecha,
+                icono: <Calendar size={10} />,
+                variante: 'fecha' as const
+            });
+        }
+        return badges;
+    }, [proyectoId, prioridad, urgencia, fecha]);
+
+    /* Manejar eliminación de badge */
+    const manejarEliminarBadge = (id: string) => {
+        switch (id) {
+            case 'proyecto':
+                setProyectoId(undefined);
+                break;
+            case 'prioridad':
+                setPrioridad(undefined);
+                break;
+            case 'urgencia':
+                setUrgencia(undefined);
+                break;
+            case 'fecha':
+                setFecha(undefined);
+                break;
+        }
+    };
+
     if (!estaAbierto) return null;
 
     return (
@@ -134,65 +260,32 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                     <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" className="bottomSheetTarea__input" disabled={cargando} />
                 </div>
 
+                {/* Badges de propiedades seleccionadas */}
+                <BadgesPropiedad badges={badgesActivos} onEliminar={manejarEliminarBadge} />
+
                 {/* Barra de acciones (Opciones + Guardar) */}
                 <div className="bottomSheetTarea__acciones">
                     {/* Grupo de opciones (Izquierda) */}
                     <div className="bottomSheetTarea__opcionesGrupo">
                         {/* Proyecto */}
                         {proyectos.length > 0 && (
-                            <button
-                                type="button"
-                                className={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`}
-                                onClick={() => {
-                                    /* TO-DO: Abrir modal central con opciones de Proyecto.
-                                     * Al seleccionar, mostrar badge debajo del título.
-                                     */
-                                }}
-                                aria-label={obtenerNombreProyecto() || 'Proyecto'}
-                                title={obtenerNombreProyecto() || 'Proyecto'}>
+                            <button type="button" className={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('proyecto')} aria-label={obtenerNombreProyecto() || 'Proyecto'} title={obtenerNombreProyecto() || 'Proyecto'}>
                                 <Layers size={15} />
                             </button>
                         )}
 
                         {/* Prioridad */}
-                        <button
-                            type="button"
-                            className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Prioridad.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={obtenerTextoPrioridad() || 'Prioridad'}
-                            title={obtenerTextoPrioridad() || 'Prioridad'}>
+                        <button type="button" className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad() || 'Prioridad'} title={obtenerTextoPrioridad() || 'Prioridad'}>
                             <Flag size={15} />
                         </button>
 
                         {/* Urgencia */}
-                        <button
-                            type="button"
-                            className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Urgencia.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={obtenerTextoUrgencia() || 'Urgencia'}
-                            title={obtenerTextoUrgencia() || 'Urgencia'}>
+                        <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia() || 'Urgencia'} title={obtenerTextoUrgencia() || 'Urgencia'}>
                             <Hash size={15} />
                         </button>
 
                         {/* Fecha límite */}
-                        <button
-                            type="button"
-                            className={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Fecha.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={fecha || 'Fecha'}
-                            title={fecha || 'Fecha'}>
+                        <button type="button" className={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fecha || 'Fecha'} title={fecha || 'Fecha'}>
                             <Calendar size={15} />
                         </button>
 
@@ -214,10 +307,36 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
 
                     {/* Botón Guardar (Derecha) */}
                     <button type="button" className="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}>
-                        {esEdicion ? <Send size={15} /> : <Send size={15} />}
+                        <Send size={15} />
                     </button>
                 </div>
             </div>
+
+            {/* Modal de selección de Proyecto */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'proyecto'} titulo="Seleccionar Proyecto" opciones={opcionesProyecto} valorActual={proyectoId?.toString()} onSeleccionar={valor => setProyectoId(valor ? parseInt(valor) : undefined)} onCerrar={() => setModalActivo(null)} textoLimpiar="Sin proyecto" />
+
+            {/* Modal de selección de Prioridad */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'prioridad'} titulo="Seleccionar Prioridad" opciones={OPCIONES_PRIORIDAD} valorActual={prioridad} onSeleccionar={valor => setPrioridad(valor)} onCerrar={() => setModalActivo(null)} textoLimpiar="Sin prioridad" />
+
+            {/* Modal de selección de Urgencia */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'urgencia'} titulo="Seleccionar Urgencia" opciones={OPCIONES_URGENCIA} valorActual={urgencia} onSeleccionar={valor => setUrgencia(valor)} onCerrar={() => setModalActivo(null)} textoLimpiar="Sin urgencia" />
+
+            {/* Modal de selección de Fecha */}
+            <ModalSeleccionPropiedad
+                estaAbierto={modalActivo === 'fecha'}
+                titulo="Fecha Límite"
+                opciones={OPCIONES_FECHA}
+                valorActual={undefined}
+                onSeleccionar={valor => {
+                    if (valor) {
+                        setFecha(calcularFechaDesdeOpcion(valor));
+                    } else {
+                        setFecha(undefined);
+                    }
+                }}
+                onCerrar={() => setModalActivo(null)}
+                textoLimpiar="Sin fecha"
+            />
         </BottomSheet>
     );
 }

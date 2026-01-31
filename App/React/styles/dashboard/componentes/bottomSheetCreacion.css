@@ -446,3 +446,229 @@
     background: none;
     color: var(--dashboard-textoApagado);
 }
+
+/* ============================================
+   MODAL SELECCIÓN PROPIEDAD
+   Modal centrado para seleccionar propiedades
+   ============================================ */
+
+.modalSeleccionPropiedadOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1600;
+    padding: var(--dashboard-espacioLg);
+}
+
+.modalSeleccionPropiedad {
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-borde);
+    border-radius: var(--dashboard-radioMd);
+    min-width: 260px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modalSeleccionPropiedad__encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-borde);
+}
+
+.modalSeleccionPropiedad__titulo {
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+.modalSeleccionPropiedad__cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.modalSeleccionPropiedad__cerrar:hover {
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoHover);
+}
+
+.modalSeleccionPropiedad__lista {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.modalSeleccionPropiedad__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--dashboard-borde);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.modalSeleccionPropiedad__opcion:last-child {
+    border-bottom: none;
+}
+
+.modalSeleccionPropiedad__opcion:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalSeleccionPropiedad__opcion--activa {
+    background: var(--dashboard-fondoActivo);
+    color: var(--dashboard-acento);
+}
+
+.modalSeleccionPropiedad__opcion--peligroso {
+    color: var(--dashboard-peligro);
+}
+
+.modalSeleccionPropiedad__opcion--peligroso:hover {
+    color: var(--dashboard-peligroIntensificado);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.modalSeleccionPropiedad__opcionIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.modalSeleccionPropiedad__opcionTexto {
+    flex: 1;
+}
+
+.modalSeleccionPropiedad__opcionDescripcion {
+    font-size: 10px;
+    color: var(--dashboard-textoApagado);
+    margin-left: auto;
+}
+
+/* ============================================
+   BADGES PROPIEDAD
+   Badges de propiedades seleccionadas
+   ============================================ */
+
+.badgesPropiedad {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.badgesPropiedad__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoActivo);
+    border: 1px solid var(--dashboard-borde);
+    border-radius: 999px;
+}
+
+.badgesPropiedad__badgeIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badgesPropiedad__badgeTexto {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.badgesPropiedad__badgeEliminar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    margin-left: 2px;
+}
+
+.badgesPropiedad__badgeEliminar:hover {
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoHover);
+}
+
+/* Variantes de color para badges */
+.badgesPropiedad__badge--proyecto {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: rgb(167, 139, 250);
+}
+
+.badgesPropiedad__badge--prioridad {
+    background: rgba(251, 146, 60, 0.15);
+    border-color: rgba(251, 146, 60, 0.3);
+    color: rgb(251, 146, 60);
+}
+
+.badgesPropiedad__badge--urgencia {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: rgb(248, 113, 113);
+}
+
+.badgesPropiedad__badge--fecha {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: rgb(96, 165, 250);
+}
+
+.badgesPropiedad__badge--frecuencia {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: rgb(74, 222, 128);
+}
+
+.badgesPropiedad__badge--importancia {
+    background: rgba(236, 72, 153, 0.15);
+    border-color: rgba(236, 72, 153, 0.3);
+    color: rgb(244, 114, 182);
+}

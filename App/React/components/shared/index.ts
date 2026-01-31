@@ -73,4 +73,6 @@ export * from './NavegacionInferior';
 export * from './MenuOpcionesPanel';
 /* Componente reutilizable para estados vacios */
 export * from './EstadoVacio';
-
+/* Fase BottomSheet - Modales de selección de propiedades y badges */
+export * from './ModalSeleccionPropiedad';
+export * from './BadgesPropiedad';

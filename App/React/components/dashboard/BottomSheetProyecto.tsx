@@ -8,14 +8,13 @@
  * - Barra de acciones con iconos (15px): Icono, Prioridad, Urgencia, Fecha
  * - Botón enviar a la derecha
  * - Cierra automáticamente al crear
- *
- * TO-DO: Los iconos de propiedades deben abrir un modal de selección
- * y mostrar la selección como badge debajo del input
+ * - Modales de selección para propiedades
+ * - Badges de propiedades seleccionadas
  */
 
-import {useState, useRef, useEffect} from 'react';
+import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Layers, Flag, Hash, Calendar} from 'lucide-react';
-import {BottomSheet} from '../shared';
+import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 
 interface BottomSheetProyectoProps {
@@ -37,14 +36,40 @@ export interface DatosProyecto {
     fechaLimite?: string;
 }
 
+/* Tipos de modales de selección */
+type ModalActivo = 'prioridad' | 'urgencia' | 'fecha' | null;
+
+/* Opciones de prioridad */
+const OPCIONES_PRIORIDAD = [
+    {id: 'baja', etiqueta: 'Baja'},
+    {id: 'media', etiqueta: 'Media'},
+    {id: 'alta', etiqueta: 'Alta'},
+    {id: 'muy_alta', etiqueta: 'Muy Alta'}
+];
+
+/* Opciones de urgencia */
+const OPCIONES_URGENCIA = [
+    {id: 'chill', etiqueta: 'Chill', descripcion: 'Sin prisa'},
+    {id: 'normal', etiqueta: 'Normal'},
+    {id: 'urgente', etiqueta: 'Urgente'},
+    {id: 'bloqueante', etiqueta: 'Bloqueante', descripcion: 'ASAP'}
+];
+
+/* Opciones de fecha rápida */
+const OPCIONES_FECHA = [
+    {id: 'semana', etiqueta: 'Esta semana'},
+    {id: 'mes', etiqueta: 'Este mes'},
+    {id: 'trimestre', etiqueta: 'Este trimestre'},
+    {id: 'ano', etiqueta: 'Este año'}
+];
+
 export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: BottomSheetProyectoProps): JSX.Element | null {
     const [nombre, setNombre] = useState('');
-    const [icono, setIcono] = useState<string | undefined>(undefined);
-    const [colorIcono, setColorIcono] = useState<string | undefined>(undefined);
     const [prioridad, setPrioridad] = useState<NivelPrioridad | undefined>(valoresIniciales.prioridad);
     const [urgencia, setUrgencia] = useState<NivelUrgencia | undefined>(valoresIniciales.urgencia);
     const [fechaLimite, setFechaLimite] = useState<string | undefined>(undefined);
     const [cargando, setCargando] = useState(false);
+    const [modalActivo, setModalActivo] = useState<ModalActivo>(null);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,11 +84,10 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
     useEffect(() => {
         if (!estaAbierto) {
             setNombre('');
-            setIcono(undefined);
-            setColorIcono(undefined);
             setPrioridad(valoresIniciales.prioridad);
             setUrgencia(valoresIniciales.urgencia);
             setFechaLimite(undefined);
+            setModalActivo(null);
         }
     }, [estaAbierto, valoresIniciales]);
 
@@ -74,8 +98,6 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
         try {
             await onGuardar({
                 nombre,
-                icono,
-                colorIcono,
                 prioridad,
                 urgencia,
                 fechaLimite
@@ -108,6 +130,78 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
         return urgencia ? map[urgencia] : null;
     };
 
+    /* Calcular fecha real desde opción rápida */
+    const calcularFechaDesdeOpcion = (opcion: string): string => {
+        const hoy = new Date();
+        switch (opcion) {
+            case 'semana': {
+                const finSemana = new Date(hoy);
+                finSemana.setDate(finSemana.getDate() + (7 - finSemana.getDay()));
+                return finSemana.toISOString().split('T')[0];
+            }
+            case 'mes': {
+                const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                return finMes.toISOString().split('T')[0];
+            }
+            case 'trimestre': {
+                const mesActual = hoy.getMonth();
+                const finTrimestre = new Date(hoy.getFullYear(), Math.floor(mesActual / 3 + 1) * 3, 0);
+                return finTrimestre.toISOString().split('T')[0];
+            }
+            case 'ano': {
+                const finAno = new Date(hoy.getFullYear(), 11, 31);
+                return finAno.toISOString().split('T')[0];
+            }
+            default:
+                return opcion;
+        }
+    };
+
+    /* Construir lista de badges activos */
+    const badgesActivos = useMemo(() => {
+        const badges = [];
+        if (prioridad) {
+            badges.push({
+                id: 'prioridad',
+                etiqueta: obtenerTextoPrioridad() || prioridad,
+                icono: <Flag size={10} />,
+                variante: 'prioridad' as const
+            });
+        }
+        if (urgencia) {
+            badges.push({
+                id: 'urgencia',
+                etiqueta: obtenerTextoUrgencia() || urgencia,
+                icono: <Hash size={10} />,
+                variante: 'urgencia' as const
+            });
+        }
+        if (fechaLimite) {
+            badges.push({
+                id: 'fecha',
+                etiqueta: fechaLimite,
+                icono: <Calendar size={10} />,
+                variante: 'fecha' as const
+            });
+        }
+        return badges;
+    }, [prioridad, urgencia, fechaLimite]);
+
+    /* Manejar eliminación de badge */
+    const manejarEliminarBadge = (id: string) => {
+        switch (id) {
+            case 'prioridad':
+                setPrioridad(undefined);
+                break;
+            case 'urgencia':
+                setUrgencia(undefined);
+                break;
+            case 'fecha':
+                setFechaLimite(undefined);
+                break;
+        }
+    };
+
     if (!estaAbierto) return null;
 
     return (
@@ -118,63 +212,25 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
                     <input ref={inputRef} type="text" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del proyecto..." className="bottomSheetProyecto__input" disabled={cargando} />
                 </div>
 
+                {/* Badges de propiedades seleccionadas */}
+                <BadgesPropiedad badges={badgesActivos} onEliminar={manejarEliminarBadge} />
+
                 {/* Barra de acciones (Opciones + Guardar) */}
                 <div className="bottomSheetProyecto__acciones">
                     {/* Grupo de opciones (Izquierda) */}
                     <div className="bottomSheetProyecto__opcionesGrupo">
-                        {/* Icono del proyecto */}
-                        <button
-                            type="button"
-                            className={`bottomSheetProyecto__accion ${icono ? 'bottomSheetProyecto__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con selector de iconos.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label="Icono"
-                            title="Icono">
-                            <Layers size={15} />
-                        </button>
-
                         {/* Prioridad */}
-                        <button
-                            type="button"
-                            className={`bottomSheetProyecto__accion ${prioridad ? 'bottomSheetProyecto__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Prioridad.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={obtenerTextoPrioridad() || 'Prioridad'}
-                            title={obtenerTextoPrioridad() || 'Prioridad'}>
+                        <button type="button" className={`bottomSheetProyecto__accion ${prioridad ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad() || 'Prioridad'} title={obtenerTextoPrioridad() || 'Prioridad'}>
                             <Flag size={15} />
                         </button>
 
                         {/* Urgencia */}
-                        <button
-                            type="button"
-                            className={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Urgencia.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={obtenerTextoUrgencia() || 'Urgencia'}
-                            title={obtenerTextoUrgencia() || 'Urgencia'}>
+                        <button type="button" className={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia() || 'Urgencia'} title={obtenerTextoUrgencia() || 'Urgencia'}>
                             <Hash size={15} />
                         </button>
 
                         {/* Fecha límite */}
-                        <button
-                            type="button"
-                            className={`bottomSheetProyecto__accion ${fechaLimite ? 'bottomSheetProyecto__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con selector de fecha.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={fechaLimite || 'Fecha límite'}
-                            title={fechaLimite || 'Fecha límite'}>
+                        <button type="button" className={`bottomSheetProyecto__accion ${fechaLimite ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fechaLimite || 'Fecha límite'} title={fechaLimite || 'Fecha límite'}>
                             <Calendar size={15} />
                         </button>
                     </div>
@@ -185,6 +241,29 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
                     </button>
                 </div>
             </div>
+
+            {/* Modal de selección de Prioridad */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'prioridad'} titulo="Seleccionar Prioridad" opciones={OPCIONES_PRIORIDAD} valorActual={prioridad} onSeleccionar={valor => setPrioridad(valor as NivelPrioridad | undefined)} onCerrar={() => setModalActivo(null)} textoLimpiar="Sin prioridad" />
+
+            {/* Modal de selección de Urgencia */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'urgencia'} titulo="Seleccionar Urgencia" opciones={OPCIONES_URGENCIA} valorActual={urgencia} onSeleccionar={valor => setUrgencia(valor as NivelUrgencia | undefined)} onCerrar={() => setModalActivo(null)} textoLimpiar="Sin urgencia" />
+
+            {/* Modal de selección de Fecha */}
+            <ModalSeleccionPropiedad
+                estaAbierto={modalActivo === 'fecha'}
+                titulo="Fecha Límite"
+                opciones={OPCIONES_FECHA}
+                valorActual={undefined}
+                onSeleccionar={valor => {
+                    if (valor) {
+                        setFechaLimite(calcularFechaDesdeOpcion(valor));
+                    } else {
+                        setFechaLimite(undefined);
+                    }
+                }}
+                onCerrar={() => setModalActivo(null)}
+                textoLimpiar="Sin fecha"
+            />
         </BottomSheet>
     );
 }

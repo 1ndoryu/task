@@ -8,14 +8,13 @@
  * - Barra de acciones con iconos (15px): Frecuencia, Importancia
  * - Botón enviar a la derecha
  * - Cierra automáticamente al crear
- *
- * TO-DO: Los iconos de propiedades deben abrir un modal de selección
- * y mostrar la selección como badge debajo del input
+ * - Modales de selección para propiedades
+ * - Badges de propiedades seleccionadas
  */
 
-import {useState, useRef, useEffect} from 'react';
+import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Repeat, Flag} from 'lucide-react';
-import {BottomSheet} from '../shared';
+import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 
 interface BottomSheetHabitoProps {
     estaAbierto: boolean;
@@ -33,11 +32,31 @@ export interface DatosHabito {
     importancia?: string;
 }
 
+/* Tipos de modales de selección */
+type ModalActivo = 'frecuencia' | 'importancia' | null;
+
+/* Opciones de frecuencia */
+const OPCIONES_FRECUENCIA = [
+    {id: 'diaria', etiqueta: 'Diaria', descripcion: 'Todos los días'},
+    {id: 'semanal', etiqueta: 'Semanal', descripcion: '1 vez/semana'},
+    {id: 'diasEspecificos', etiqueta: 'Días específicos', descripcion: 'Lun, Mar...'},
+    {id: 'personalizada', etiqueta: 'Personalizada', descripcion: 'Cada X días'}
+];
+
+/* Opciones de importancia */
+const OPCIONES_IMPORTANCIA = [
+    {id: 'Baja', etiqueta: 'Baja'},
+    {id: 'Media', etiqueta: 'Media'},
+    {id: 'Alta', etiqueta: 'Alta'},
+    {id: 'Muy Alta', etiqueta: 'Muy Alta'}
+];
+
 export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: BottomSheetHabitoProps): JSX.Element | null {
     const [texto, setTexto] = useState('');
     const [frecuencia, setFrecuencia] = useState<string | undefined>(valoresIniciales.frecuencia || 'diaria');
     const [importancia, setImportancia] = useState<string | undefined>(valoresIniciales.importancia);
     const [cargando, setCargando] = useState(false);
+    const [modalActivo, setModalActivo] = useState<ModalActivo>(null);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -54,6 +73,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             setTexto('');
             setFrecuencia(valoresIniciales.frecuencia || 'diaria');
             setImportancia(valoresIniciales.importancia);
+            setModalActivo(null);
         }
     }, [estaAbierto, valoresIniciales]);
 
@@ -79,6 +99,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
         const map: Record<string, string> = {
             diaria: 'Diaria',
             semanal: 'Semanal',
+            diasEspecificos: 'Días específicos',
             personalizada: 'Personalizada'
         };
         return frecuencia ? map[frecuencia] : null;
@@ -86,12 +107,46 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
 
     const obtenerTextoImportancia = () => {
         const map: Record<string, string> = {
-            baja: 'Baja',
-            media: 'Media',
-            alta: 'Alta',
+            Baja: 'Baja',
+            Media: 'Media',
+            Alta: 'Alta',
             'Muy Alta': 'Muy Alta'
         };
         return importancia ? map[importancia] : null;
+    };
+
+    /* Construir lista de badges activos */
+    const badgesActivos = useMemo(() => {
+        const badges = [];
+        if (frecuencia) {
+            badges.push({
+                id: 'frecuencia',
+                etiqueta: obtenerTextoFrecuencia() || frecuencia,
+                icono: <Repeat size={10} />,
+                variante: 'frecuencia' as const
+            });
+        }
+        if (importancia) {
+            badges.push({
+                id: 'importancia',
+                etiqueta: obtenerTextoImportancia() || importancia,
+                icono: <Flag size={10} />,
+                variante: 'importancia' as const
+            });
+        }
+        return badges;
+    }, [frecuencia, importancia]);
+
+    /* Manejar eliminación de badge */
+    const manejarEliminarBadge = (id: string) => {
+        switch (id) {
+            case 'frecuencia':
+                setFrecuencia(undefined);
+                break;
+            case 'importancia':
+                setImportancia(undefined);
+                break;
+        }
     };
 
     if (!estaAbierto) return null;
@@ -104,35 +159,20 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                     <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué hábito quieres crear?" className="bottomSheetHabito__input" disabled={cargando} />
                 </div>
 
+                {/* Badges de propiedades seleccionadas */}
+                <BadgesPropiedad badges={badgesActivos} onEliminar={manejarEliminarBadge} />
+
                 {/* Barra de acciones (Opciones + Guardar) */}
                 <div className="bottomSheetHabito__acciones">
                     {/* Grupo de opciones (Izquierda) */}
                     <div className="bottomSheetHabito__opcionesGrupo">
                         {/* Frecuencia */}
-                        <button
-                            type="button"
-                            className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Frecuencia.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={obtenerTextoFrecuencia() || 'Frecuencia'}
-                            title={obtenerTextoFrecuencia() || 'Frecuencia'}>
+                        <button type="button" className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('frecuencia')} aria-label={obtenerTextoFrecuencia() || 'Frecuencia'} title={obtenerTextoFrecuencia() || 'Frecuencia'}>
                             <Repeat size={15} />
                         </button>
 
                         {/* Importancia */}
-                        <button
-                            type="button"
-                            className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`}
-                            onClick={() => {
-                                /* TO-DO: Abrir modal central con opciones de Importancia.
-                                 * Al seleccionar, mostrar badge debajo del título.
-                                 */
-                            }}
-                            aria-label={obtenerTextoImportancia() || 'Importancia'}
-                            title={obtenerTextoImportancia() || 'Importancia'}>
+                        <button type="button" className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia() || 'Importancia'} title={obtenerTextoImportancia() || 'Importancia'}>
                             <Flag size={15} />
                         </button>
                     </div>
@@ -143,6 +183,12 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                     </button>
                 </div>
             </div>
+
+            {/* Modal de selección de Frecuencia */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'frecuencia'} titulo="Seleccionar Frecuencia" opciones={OPCIONES_FRECUENCIA} valorActual={frecuencia} onSeleccionar={valor => setFrecuencia(valor || 'diaria')} onCerrar={() => setModalActivo(null)} permitirLimpiar={false} />
+
+            {/* Modal de selección de Importancia */}
+            <ModalSeleccionPropiedad estaAbierto={modalActivo === 'importancia'} titulo="Seleccionar Importancia" opciones={OPCIONES_IMPORTANCIA} valorActual={importancia} onSeleccionar={valor => setImportancia(valor)} onCerrar={() => setModalActivo(null)} textoLimpiar="Sin importancia" />
         </BottomSheet>
     );
 }

@@ -246,28 +246,41 @@ hooks/
 - **Archivos modificados:**
   - `components/dashboard/DashboardModales.tsx`
 
-**2. Placeholders Vacíos → BottomSheet en Móvil**
-- [ ] Panel de Tareas vacío: botón "Crear tarea" → abrir BottomSheetTarea si esMovil
-- [ ] Panel de Hábitos vacío: botón "Crear hábito" → abrir BottomSheetHabito si esMovil
-- [ ] Panel de Proyectos vacío: botón "Crear proyecto" → abrir BottomSheetProyecto si esMovil
-- [ ] **Archivos a revisar:**
-  - `components/paneles/PanelEjecucion.tsx` (placeholder tareas)
-  - `components/paneles/PanelHabitos.tsx` (placeholder hábitos)
-  - `components/paneles/PanelProyectos.tsx` (placeholder proyectos)
-  - Posiblemente crear hook `useCreacionContextual` para centralizar lógica
+**2. Placeholders Vacíos → BottomSheet en Móvil** ✅
+- [x] Panel de Tareas vacío: botón "Crear tarea" → abrir BottomSheetTarea si esMovil
+- [x] Panel de Hábitos vacío: botón "Crear hábito" → abrir BottomSheetHabito si esMovil
+- [x] Panel de Proyectos vacío: botón "Crear proyecto" → abrir BottomSheetProyecto si esMovil
+- **Solución:** El sistema ya estaba funcional. Los botones de estados vacíos usan `abrirCreacionRapida(tipo)` que:
+  - En desktop: muestra `ModalCreacionRapida` via `ModalCreacionRapidaWrapper`
+  - En móvil: muestra BottomSheets (Tarea/Habito/Proyecto) via componentes modulares
+- **Verificado en archivos:**
+  - `ListaTareas.tsx` (línea 134): `onAccion={onAbrirModalCrear}`
+  - `TablaHabitos.tsx` (línea 337): `onAccion={onAñadirHabito}`
+  - `ListaProyectos.tsx` (línea 315): `onAccion={onCrearProyecto}`
 
-**3. Modales de Selección de Propiedades**
-- [ ] Crear componente `ModalSeleccionPropiedad.tsx` reutilizable
-- [ ] Integrar en BottomSheetTarea: Proyecto, Prioridad, Urgencia, Fecha
-- [ ] Integrar en BottomSheetHabito: Frecuencia, Importancia
-- [ ] Integrar en BottomSheetProyecto: Icono, Prioridad, Urgencia, Fecha
-- [ ] **Diseño:** Modal centrado con lista de opciones, cierra al seleccionar
+**3. Modales de Selección de Propiedades** ✅
+- [x] Crear componente `ModalSeleccionPropiedad.tsx` reutilizable
+- [x] Integrar en BottomSheetTarea: Proyecto, Prioridad, Urgencia, Fecha
+- [x] Integrar en BottomSheetHabito: Frecuencia, Importancia
+- [x] Integrar en BottomSheetProyecto: Prioridad, Urgencia, Fecha
+- **Diseño:** Modal centrado con lista de opciones, cierra al seleccionar
+- **Archivos creados:**
+  - `components/shared/ModalSeleccionPropiedad.tsx`
+- **Archivos modificados:**
+  - `components/dashboard/BottomSheetTarea.tsx`
+  - `components/dashboard/BottomSheetHabito.tsx`
+  - `components/dashboard/BottomSheetProyecto.tsx`
 
-**4. Badges de Propiedades Seleccionadas**
-- [ ] Crear componente `BadgesPropiedad.tsx` para mostrar debajo del input
-- [ ] Mostrar badges compactos con icono + texto corto
-- [ ] Permitir eliminar propiedad tocando el badge (X)
-- [ ] **Diseño:** Fila horizontal con wrap, estilo pill similar a tags
+**4. Badges de Propiedades Seleccionadas** ✅
+- [x] Crear componente `BadgesPropiedad.tsx` para mostrar debajo del input
+- [x] Mostrar badges compactos con icono + texto corto
+- [x] Permitir eliminar propiedad tocando el badge (X)
+- **Diseño:** Fila horizontal con wrap, estilo pill con variantes de color por tipo
+- **Archivos creados:**
+  - `components/shared/BadgesPropiedad.tsx`
+- **Estilos agregados:**
+  - `styles/dashboard/componentes/bottomSheetCreacion.css` (ModalSeleccion + Badges)
+
 
 #### Refactorizaciones Completadas ✅
 - [x] **Refactor movil.css**: Dividido en 8 archivos modulares (2026-01-31) ✅
