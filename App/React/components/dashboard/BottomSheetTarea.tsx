@@ -148,7 +148,10 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                             type="button"
                             className={`bottomSheetTarea__opcion ${proyectoId ? 'bottomSheetTarea__opcion--activa' : ''}`}
                             onClick={() => {
-                                /* TO-DO: Abrir selector de proyecto */
+                                /* TO-DO: Abrir selector de proyecto
+                                 * Implementar BottomSheet secundario con lista de proyectos
+                                 * O menu contextual adaptativo para móvil
+                                 */
                             }}
                         >
                             <Layers size={16} />
@@ -161,7 +164,10 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                         type="button"
                         className={`bottomSheetTarea__opcion ${prioridad ? 'bottomSheetTarea__opcion--activa' : ''}`}
                         onClick={() => {
-                            /* TO-DO: Abrir selector de prioridad */
+                            /* TO-DO: Abrir selector de prioridad
+                             * Opciones: Baja, Media, Alta, Muy Alta
+                             * Implementar como bottom sheet de selección simple
+                             */
                         }}
                     >
                         <Flag size={16} />
@@ -173,7 +179,10 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                         type="button"
                         className={`bottomSheetTarea__opcion ${urgencia ? 'bottomSheetTarea__opcion--activa' : ''}`}
                         onClick={() => {
-                            /* TO-DO: Abrir selector de urgencia */
+                            /* TO-DO: Abrir selector de urgencia
+                             * Opciones: Baja, Media, Alta
+                             * Implementar como bottom sheet de selección simple
+                             */
                         }}
                     >
                         <Hash size={16} />
@@ -185,7 +194,10 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                         type="button"
                         className={`bottomSheetTarea__opcion ${fecha ? 'bottomSheetTarea__opcion--activa' : ''}`}
                         onClick={() => {
-                            /* TO-DO: Abrir selector de fecha */
+                            /* TO-DO: Abrir selector de fecha
+                             * Opciones rápidas: Hoy, Mañana, Esta semana, Selector manual
+                             * Considerar usar input type="date" nativo en móvil
+                             */
                         }}
                     >
                         <Calendar size={16} />

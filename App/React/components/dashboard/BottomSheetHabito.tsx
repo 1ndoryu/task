@@ -129,7 +129,10 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                         type="button"
                         className={`bottomSheetHabito__opcion ${frecuencia ? 'bottomSheetHabito__opcion--activa' : ''}`}
                         onClick={() => {
-                            /* TO-DO: Abrir selector de frecuencia */
+                            /* TO-DO: Abrir selector de frecuencia
+                             * Opciones: Diaria, Semanal, Personalizada
+                             * Implementar como bottom sheet de selección simple
+                             */
                         }}
                     >
                         <Repeat size={16} />
@@ -141,7 +144,10 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                         type="button"
                         className={`bottomSheetHabito__opcion ${importancia ? 'bottomSheetHabito__opcion--activa' : ''}`}
                         onClick={() => {
-                            /* TO-DO: Abrir selector de importancia */
+                            /* TO-DO: Abrir selector de importancia
+                             * Opciones: Baja, Media, Alta
+                             * Implementar como bottom sheet de selección simple
+                             */
                         }}
                     >
                         <Flag size={16} />
