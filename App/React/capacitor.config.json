@@ -1,0 +1,18 @@
+{
+    "appId": "com.taskNakomi.app",
+    "appName": "Tasks",
+    "webDir": "public",
+    "server": {
+        "url": "https://task.nakomi.studio/",
+        "cleartext": true,
+        "allowNavigation": ["*.google.com", "*.googleapis.com", "*.stripe.com", "task.nakomi.studio"]
+    },
+    "overrideUserAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+    "plugins": {
+        "GoogleAuth": {
+            "scopes": ["profile", "email"],
+            "serverClientId": "84327954353-dije31srumfh7qcipk67ql8i9qs1oavl.apps.googleusercontent.com",
+            "forceCodeForRefreshToken": true
+        }
+    }
+}

@@ -5,8 +5,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.19-beta (2026-02-01)
-**Foco:** Optimizaciones Móviles Completas
+**Versión:** v1.0.20-beta (2026-02-01)
+**Foco:** Optimizaciones Móviles y Versión Híbrida (APK)
 
 ---
 
@@ -23,6 +23,32 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 #### 12.2 Implementación
 - [ ] Componente `Cronometro`, Hook `useTimeTracking`
 - [ ] Reportes de tiempo invertido
+
+### Fase 13: Transformación a App Móvil Híbrida (Capacitor & Play Store) 📱
+
+**Prioridad:** Alta (En Progreso) | **Complejidad:** Alta
+
+#### 13.1 Infraestructura Híbrida (Capacitor)
+- [x] Inicializar Capacitor en el proyecto (`npx cap init`).
+- [x] Generar proyecto Android (`npx cap add android`).
+- [x] Configurar `capacitor.config.json` (server url vs bundled web assets).
+- [x] **Hito:** Generar APK Demo (sin pagos nativos) para pruebas internas.
+
+#### 13.2 Gestión de Pagos Nativos (Google Play Billing)
+- [ ] Implementar **RevenueCat** como wrapper de pagos.
+- [ ] Crear Hook `usePagos` (Factory/Strategy pattern) para alternar entre Stripe (Web) y RevenueCat (App).
+
+#### 13.3 Autenticación Nativa (UX Móvil) 🔐
+- [x] Implementar `@capacitor-community/google-auth` (usando `@codetrix-studio/capacitor-google-auth`).
+- [x] Configurar Keystore SHA-1 en Consola de Google Cloud. (Generado SHA-1, pendiente user configuration).
+- [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
+  - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
+- [ ] Sincronizar token nativo con backend WordPress (Social Login).
+
+#### 13.4 Publicación y Compliance
+- [ ] Adaptar UI para Safe Areas de móviles (Notch, Home Indicator).
+- [ ] Generar assets de tienda (iconos, screenshots).
+- [ ] Proceso de validación de Google (TWA / Native Wrapper).
 
 ### Fase 14: Mejoras Pendientes (Pre-Beta)
 

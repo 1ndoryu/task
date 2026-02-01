@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="uuid-a95716e7-8790-47e9-886e-03fd22a2eb81" data-name="Capa 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <style>
+      .uuid-fd41829c-f6f6-415e-a7b5-3a196c41b20c {
+        fill: #fff;
+      }
+
+      .uuid-859ed7ee-5f6d-46b9-b5bf-d46db3db6efe {
+        fill: #111;
+      }
+    </style>
+  </defs>
+  <rect class="uuid-859ed7ee-5f6d-46b9-b5bf-d46db3db6efe" width="1024" height="1024"/>
+  <circle class="uuid-fd41829c-f6f6-415e-a7b5-3a196c41b20c" cx="512" cy="512" r="359.38"/>
+</svg>

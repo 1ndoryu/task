@@ -1,4 +1,6 @@
 import {useState, useCallback} from 'react';
+import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
+import {Capacitor} from '@capacitor/core';
 
 interface User {
     name: string;
@@ -30,18 +32,57 @@ export function useAuth(): UseAuthReturn {
         return wpData?.currentUser || null;
     });
 
+    const handleCallback = useCallback(async (code: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch('/wp-json/glory/v1/auth/google/login', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({code})
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.reload();
+            } else {
+                throw new Error(data.message || 'Error en login con Google');
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Error desconocido';
+            setError(msg);
+            setLoading(false);
+        }
+    }, []);
+
     const loginWithGoogle = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch('/wp-json/glory/v1/auth/google/url', {
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (data.success) {
-                window.location.href = data.url;
+            // Debug para confirmar código actualizado
+            // alert('Debug: Iniciando login. Nativo? ' + Capacitor.isNativePlatform());
+
+            if (Capacitor.isNativePlatform()) {
+                await GoogleAuth.initialize();
+                const user = await GoogleAuth.signIn();
+                console.log('Google User:', user);
+
+                if (user.serverAuthCode) {
+                    await handleCallback(user.serverAuthCode);
+                } else {
+                    throw new Error('No se recibió código de autorización de Google (serverAuthCode missing)');
+                }
             } else {
-                throw new Error(data.message || 'Error obteniendo URL de login');
+                const response = await fetch('/wp-json/glory/v1/auth/google/url', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.url;
+                } else {
+                    throw new Error(data.message || 'Error obteniendo URL de login');
+                }
             }
         } catch (e) {
             const msg = e instanceof Error ? e.message : 'Error de conexión';
@@ -49,7 +90,7 @@ export function useAuth(): UseAuthReturn {
             setLoading(false);
             console.error('Login error:', e);
         }
-    }, []);
+    }, [handleCallback]);
 
     const loginWithCredentials = useCallback(async (username: string, password: string) => {
         setLoading(true);
@@ -109,30 +150,6 @@ export function useAuth(): UseAuthReturn {
             setError(msg);
             setLoading(false);
             throw e;
-        }
-    }, []);
-
-    const handleCallback = useCallback(async (code: string) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch('/wp-json/glory/v1/auth/google/login', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({code})
-            });
-            const data = await response.json();
-
-            if (data.success) {
-                window.location.href = window.location.pathname;
-            } else {
-                throw new Error(data.message || 'Error en login con Google');
-            }
-        } catch (e) {
-            const msg = e instanceof Error ? e.message : 'Error desconocido';
-            setError(msg);
-            setLoading(false);
         }
     }, []);
 
