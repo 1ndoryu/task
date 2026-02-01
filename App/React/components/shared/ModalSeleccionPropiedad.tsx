@@ -3,9 +3,13 @@
  * Modal centrado para seleccionar propiedades en BottomSheets móviles
  * Diseño: Lista de opciones, cierra al seleccionar
  * Reutilizable para: Proyecto, Prioridad, Urgencia, Fecha, Frecuencia, Importancia, etc.
+ *
+ * Nota: Usa Portal para renderizar fuera del BottomSheet y centrarse correctamente
+ * (CSS position:fixed no funciona bien dentro de elementos con transform)
  */
 
-import type {ReactNode} from 'react';
+import {type ReactNode} from 'react';
+import {createPortal} from 'react-dom';
 import {X} from 'lucide-react';
 import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
 
@@ -42,14 +46,15 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorAct
         }
     };
 
-    return (
+    /* Usar Portal para renderizar fuera del BottomSheet */
+    const contenidoModal = (
         <div className="modalSeleccionPropiedadOverlay" onClick={manejarClickOverlay}>
             <div className="modalSeleccionPropiedad">
                 {/* Encabezado */}
                 <div className="modalSeleccionPropiedad__encabezado">
                     <span className="modalSeleccionPropiedad__titulo">{titulo}</span>
                     <button type="button" className="modalSeleccionPropiedad__cerrar" onClick={onCerrar} aria-label="Cerrar">
-                        <X size={18} />
+                        <X size={16} />
                     </button>
                 </div>
 
@@ -73,4 +78,6 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorAct
             </div>
         </div>
     );
+
+    return createPortal(contenidoModal, document.body);
 }

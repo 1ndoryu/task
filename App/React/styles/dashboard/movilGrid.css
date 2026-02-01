@@ -186,9 +186,8 @@
         background: var(--dashboard-fondoHover);
     }
 
-    /* Item activo */
+    /* Item activo - solo cambia color de texto, el icono será azul */
     .menuOpcionesPanelItem--activo {
-        background: var(--dashboard-fondoHover);
         color: var(--dashboard-textoActivo);
     }
 
@@ -197,15 +196,16 @@
         color: var(--dashboard-acento);
     }
 
-    /* Icono del item - Más compacto */
+    /* Icono del item - a la derecha con color azul cuando activo */
     .menuOpcionesPanelItemIcono {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         color: var(--dashboard-textoApagado);
         flex-shrink: 0;
+        margin-left: auto;
     }
 
     .menuOpcionesPanelItem--activo .menuOpcionesPanelItemIcono {
@@ -228,12 +228,5 @@
     .menuOpcionesPanelItemDescripcion {
         font-size: var(--dashboard-tamanoPequeno);
         color: var(--dashboard-textoApagado);
-    }
-
-    /* Check de item activo */
-    .menuOpcionesPanelItemCheck {
-        color: var(--dashboard-acento);
-        font-size: var(--dashboard-tamanoPequeno);
-        margin-left: auto;
     }
 }

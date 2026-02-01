@@ -488,7 +488,7 @@
 }
 
 .modalSeleccionPropiedad__titulo {
-    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoActivo);
     font-weight: 500;
@@ -525,7 +525,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoNormal);
     background: none;

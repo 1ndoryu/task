@@ -111,16 +111,13 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
     }, []);
 
     /* Opciones secundarias: admin y experimentos (si aplica) */
-    const opcionesSecundariasDrawer = useMemo(
-        (): OpcionDrawer[] => {
-            const opciones: OpcionDrawer[] = [];
-            if (esAdmin && onClickAdmin) opciones.push({id: 'admin', etiqueta: 'Administración', icono: <Settings size={18} />});
-            if (onClickExperimentos) opciones.push({id: 'experimentos', etiqueta: 'Laboratorio', icono: <FlaskConical size={18} />});
-            opciones.push({id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={18} />, peligroso: true});
-            return opciones;
-        },
-        [esAdmin, onClickAdmin, onClickExperimentos]
-    );
+    const opcionesSecundariasDrawer = useMemo((): OpcionDrawer[] => {
+        const opciones: OpcionDrawer[] = [];
+        if (esAdmin && onClickAdmin) opciones.push({id: 'admin', etiqueta: 'Administración', icono: <Settings size={18} />});
+        if (onClickExperimentos) opciones.push({id: 'experimentos', etiqueta: 'Laboratorio', icono: <FlaskConical size={18} />});
+        opciones.push({id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={18} />, peligroso: true});
+        return opciones;
+    }, [esAdmin, onClickAdmin, onClickExperimentos]);
 
     return (
         <>
@@ -129,17 +126,7 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
                 {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
             </button>
 
-            <DrawerMovil 
-                estaAbierto={drawerAbierto} 
-                onCerrar={onCerrarDrawer} 
-                usuario={{nombre: usuario, avatar: avatarUrl}} 
-                suscripcion={suscripcion} 
-                opciones={opcionesDrawer} 
-                onSeleccionar={manejarOpcionDrawer} 
-                opcionesSecundarias={opcionesSecundariasDrawer}
-                onClickPerfil={onClickUsuario}
-                onClickPlan={onClickPlan}
-            />
+            <DrawerMovil estaAbierto={drawerAbierto} onCerrar={onCerrarDrawer} usuario={{nombre: usuario, avatar: avatarUrl}} suscripcion={suscripcion} opciones={opcionesDrawer} onSeleccionar={manejarOpcionDrawer} opcionesSecundarias={opcionesSecundariasDrawer} onClickPerfil={onClickUsuario} onClickPlan={onClickPlan} />
         </>
     );
 }
@@ -187,11 +174,11 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                                     onCerrarMenuOpcionesMovil();
                                     onAbrirBuscadorMovil();
                                 }}>
-                                <span className="menuOpcionesPanelItemIcono">
-                                    <Search size={14} />
-                                </span>
                                 <span className="menuOpcionesPanelItemTexto">
                                     <span className="menuOpcionesPanelItemEtiqueta">Buscar</span>
+                                </span>
+                                <span className="menuOpcionesPanelItemIcono">
+                                    <Search size={14} />
                                 </span>
                             </button>
                         </div>
@@ -209,12 +196,11 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                                         opcion.onClick();
                                         onCerrarMenuOpcionesMovil();
                                     }}>
-                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                     <span className="menuOpcionesPanelItemTexto">
                                         <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
-                                    {opcion.activo && <span className="menuOpcionesPanelItemCheck">✓</span>}
+                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                 </button>
                             ))}
                         </div>
@@ -232,12 +218,11 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                                         opcion.onClick();
                                         onCerrarMenuOpcionesMovil();
                                     }}>
-                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                     <span className="menuOpcionesPanelItemTexto">
                                         <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
-                                    {opcion.activo && <span className="menuOpcionesPanelItemCheck">✓</span>}
+                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                 </button>
                             ))}
                         </div>

@@ -3,5 +3,12 @@
     "files.exclude": {
         "**/.history": true
     },
-    "search.useIgnoreFiles": false
+    "search.useIgnoreFiles": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/vendor/**": true,
+        "**/.history/**": true
+    }
 }

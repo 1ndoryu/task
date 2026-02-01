@@ -5,35 +5,44 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.19-beta (2026-01-31)
-**Foco:** Mejoras de UI Móvil - Versión Estable
+**Versión:** v1.0.20-beta (2026-02-01)
+**Foco:** Mejoras de UI Móvil - Revisión Completada
 
 ---
 
+# Nueva revisión ✅
+
+1. ✅ En el modo compacto de las tareas, y habitos, agregar 1px mas de tamaño a la fuente, solo en version movil. 
+2. ✅ En menu lateral movil arreglado el bug de separadores juntos (cuando la última opción tiene separadorDespues y hay opciones secundarias).
+3. ✅ Cuando se abre el bottomS, el teclado movil ya no muestra autocompletado (desactivado con autoComplete="off", autoCorrect="off", etc).
+4. ✅ El modal de selector de propiedades del BottonS ahora usa Portal para centrarse correctamente en viewport, y las letras son más pequeñas (10px).
+5. ✅ **Refactor visual menú contextual móvil**: Ahora el MenuOpcionesPanel y EncabezadoOpcionesMovil usan el mismo patrón que bottomSheetItem (texto primero, icono azul al final, sin check).
+ 
 # Revisiones Móvil en Progreso 📱
 
-## Tareas BottomSheet (1-4)
-- [ ] **2. Iconos 16px + separación 2px**: Cambiar tamaño de iconos de acciones a 16px y gap a 2px
-- [ ] **3. Modal selector propiedades - centrado y estilos**: Verificar centrado, usar variables CSS, fuente pequeña
-- [ ] **4. Badges sin fondo**: Los badges de propiedades seleccionadas deben ser sin fondo, usar variable de bordeRadius
+## Tareas BottomSheet (1-4) ✅
+- [x] **2. Iconos 16px + separación 2px**: Cambiar tamaño de iconos de acciones a 16px y gap a 2px
+- [x] **3. Modal selector propiedades - centrado y estilos**: Verificar centrado, usar variables CSS, fuente pequeña
+- [x] **4. Badges sin fondo**: Los badges de propiedades seleccionadas deben ser sin fondo, usar variable de borderRadius
 
-## Menú Contextual Móvil (5)
-- [ ] **5. Refactor visual menú contextual móvil**: Texto primero, icono al final (al otro lado), quitar check cuando seleccionada, icono azul
+## Menú Contextual Móvil (5) ✅
+- [x] **5. Refactor visual menú contextual móvil**: Texto primero, icono al final (al otro lado), quitar check cuando seleccionada, icono azul
 
-## Botón Añadir Tareas (6)
-- [ ] **6. Mostrar "+ Añadir" en móvil**: Actualmente está oculto por CSS en movilListas.css, debe aparecer
+## Botón Añadir Tareas (6) ✅
+- [x] **6. Mostrar "+ Añadir" en móvil**: Actualmente está oculto por CSS en movilListas.css, debe aparecer
 
-## Estado Vacío (6)
-- [ ] **7. Centrar estado vacío verticalmente**: El placeholder vacío debe estar en el centro de la pantalla
+## Estado Vacío (6) ✅
+- [x] **7. Centrar estado vacío verticalmente**: El placeholder vacío debe estar en el centro de la pantalla
 
-## Bug de Altura (7)
-- [ ] **8. Bug scroll móvil con barra del navegador**: Cuando la barra del navegador cambia, las tareas se ocultan con el header
+## Bug de Altura (7) ⏳
+- [ ] **8. Bug scroll móvil con barra del navegador**: Cuando la barra del navegador cambia, las tareas se ocultan con el header, tambien el nav inferior cubre las ultimas tareas siempre.
+  > TO-DO: Investigar comportamiento de 100vh en navegadores móviles y considerar usar 100dvh o JavaScript
 
-## Menú Contextual Proyectos (8)
-- [ ] **9. Proyectos sin menú contextual móvil**: ListaProyectos usa MenuContextual tradicional, debe usar MenuContextualAdaptivo
+## Menú Contextual Proyectos (8) ✅
+- [x] **9. Proyectos sin menú contextual móvil**: ListaProyectos usa MenuContextual tradicional, debe usar MenuContextualAdaptivo
 
-## Drawer Móvil (9)
-- [ ] **10. Refactor DrawerMovil**:
+## Drawer Móvil (9) ✅
+- [x] **10. Refactor DrawerMovil**:
   - Quitar botón X (innecesario)
   - Centrar badge Free respecto al nombre
   - Imagen de usuario 2px más pequeña (42px)

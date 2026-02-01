@@ -174,7 +174,8 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
                     {/* Opciones secundarias fusionadas en navegación principal */}
                     {opcionesSecundarias && opcionesSecundarias.length > 0 && (
                         <>
-                            <div className="drawerMovilSeparador" />
+                            {/* Solo mostrar separador si la última opción principal no lo tiene */}
+                            {!(opciones.length > 0 && opciones[opciones.length - 1].separadorDespues) && <div className="drawerMovilSeparador" />}
                             {opcionesSecundarias.map(opcion => (
                                 <button key={opcion.id} type="button" className={`drawerMovilItem ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
                                     <span className="drawerMovilItemIcono">{opcion.icono}</span>

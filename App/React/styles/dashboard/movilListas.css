@@ -96,10 +96,21 @@
         height: 0.65rem;
     }
 
-    /* Nombre del habito - mismo tamaño que tareas compactas */
+    /* 
+     * Nombre del habito - 1px más grande que desktop para legibilidad móvil
+     * Desktop usa --dashboard-tamanoPequeno (10px), móvil usa 11px
+     */
     .tablaFilaCompacta .filaNombre {
-        font-size: var(--dashboard-tamanoPequeno);
+        font-size: 11px;
         line-height: 1.4;
+    }
+
+    /*
+     * Texto de tareas compactas - 1px más grande que desktop para legibilidad móvil
+     * Desktop usa --dashboard-tamanoPequeno (10px), móvil usa 11px
+     */
+    .tareaTexto--compacto {
+        font-size: 11px;
     }
 
     /* Badges mas compactos */

@@ -121,7 +121,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             <div className="bottomSheetHabito">
                 {/* Input principal */}
                 <div className="bottomSheetHabito__inputWrapper">
-                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué hábito quieres crear?" className="bottomSheetHabito__input" disabled={cargando} />
+                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué hábito quieres crear?" className="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}

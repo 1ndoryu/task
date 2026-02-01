@@ -94,12 +94,11 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                         <div className="menuOpcionesPanelGrupo">
                             {opciones.map(opcion => (
                                 <button key={opcion.id} className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`} onClick={() => manejarOpcion(opcion.onClick)}>
-                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                     <span className="menuOpcionesPanelItemTexto">
                                         <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
-                                    {opcion.activo && <span className="menuOpcionesPanelItemCheck">✓</span>}
+                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                 </button>
                             ))}
                         </div>
@@ -112,12 +111,11 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                             <div className="menuOpcionesPanelGrupoTitulo">{grupo.titulo}</div>
                             {grupo.opciones.map(opcion => (
                                 <button key={opcion.id} className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`} onClick={() => manejarOpcion(opcion.onClick)}>
-                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                     <span className="menuOpcionesPanelItemTexto">
                                         <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
-                                    {opcion.activo && <span className="menuOpcionesPanelItemCheck">✓</span>}
+                                    {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
                                 </button>
                             ))}
                         </div>

@@ -30,7 +30,7 @@ wp-config-sample.php
 # Database SQL
 *.sql
 *.sql.gz
-.env 
+.env
 .env.local
 # Nano save file
 *.swp
@@ -79,8 +79,7 @@ wp-options.php
 
 status.md
 dev-tools/
-glory_docs/ 
-glory_docs
+glory_docs/
 
 # MCP Server
 mcp/dist/
