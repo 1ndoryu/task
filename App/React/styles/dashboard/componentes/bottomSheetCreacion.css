@@ -524,7 +524,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    padding: calc(var(--dashboard-espacioSm) + 2px) var(--dashboard-espacioMd);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoNormal);
@@ -534,6 +534,7 @@
     cursor: pointer;
     text-align: left;
     transition: all var(--dashboard-transicionRapida);
+    min-height: var(--dashboard-tamanoTactilMinimo);
 }
 
 .modalSeleccionPropiedad__opcion:last-child {

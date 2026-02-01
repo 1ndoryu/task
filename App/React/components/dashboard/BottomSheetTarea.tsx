@@ -14,7 +14,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
-import {Send, Calendar, Flag, Hash, Layers, Settings} from 'lucide-react';
+import {Send, Calendar, Flag, Zap, Layers, Settings, Paperclip} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 import {OPCIONES_PRIORIDAD, OPCIONES_URGENCIA, OPCIONES_FECHA_TAREA, obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
@@ -166,7 +166,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
             badges.push({
                 id: 'urgencia',
                 etiqueta: obtenerTextoUrgencia(urgencia) || urgencia,
-                icono: <Hash size={10} />,
+                icono: <Zap size={10} />,
                 variante: 'urgencia' as const
             });
         }
@@ -230,7 +230,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
 
                         {/* Urgencia */}
                         <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
-                            <Hash size={18} />
+                            <Zap size={18} />
                         </button>
 
                         {/* Fecha límite */}

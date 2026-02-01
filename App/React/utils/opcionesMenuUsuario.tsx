@@ -7,8 +7,6 @@
  * - SRP: Solo define las opciones del menú de usuario
  * - OCP: Extensible via parámetros sin modificar base
  * - DRY: Una única fuente de verdad para ambas plataformas
- *
- * Nota: Algunas opciones no aplican en móvil (layout, notificaciones, admin, laboratorio)
  */
 
 import type {ReactNode} from 'react';
@@ -47,14 +45,12 @@ export function obtenerOpcionesMenuUsuario(config: ConfiguracionMenuUsuario): Op
         {
             id: 'configuracion',
             etiqueta: 'Configuración',
-            icono: <Settings size={tamanoIcono} />,
-            soloEscritorio: true
+            icono: <Settings size={tamanoIcono} />
         },
         {
             id: 'seguridad',
             etiqueta: 'Seguridad',
-            icono: <Shield size={tamanoIcono} />,
-            soloEscritorio: true
+            icono: <Shield size={tamanoIcono} />
         },
         {
             id: 'backups',
@@ -70,7 +66,7 @@ export function obtenerOpcionesMenuUsuario(config: ConfiguracionMenuUsuario): Op
             id: 'mcp',
             etiqueta: 'Conectar con IA',
             icono: <Plug size={tamanoIcono} />,
-            separadorDespues: esMovil
+            separadorDespues: true
         }
     ];
 
@@ -80,7 +76,8 @@ export function obtenerOpcionesMenuUsuario(config: ConfiguracionMenuUsuario): Op
             {
                 id: 'plan',
                 etiqueta: 'Plan Premium',
-                icono: <Crown size={tamanoIcono} />
+                icono: <Crown size={tamanoIcono} />,
+                separadorDespues: true
             },
             {
                 id: 'feedback',
@@ -97,8 +94,7 @@ export function obtenerOpcionesMenuUsuario(config: ConfiguracionMenuUsuario): Op
             id: 'version',
             etiqueta: `Versión ${version}`,
             icono: <ClipboardList size={tamanoIcono} />,
-            separadorDespues: true,
-            soloEscritorio: true
+            separadorDespues: true
         },
         {
             id: 'exportar',

@@ -50,9 +50,11 @@ interface ListaTareasProps {
     onConfigurarTarea?: (tarea: Tarea) => void;
     /* Callback para abrir modal de creación rápida (usado en estado vacío y botón añadir) */
     onAbrirModalCrear?: () => void;
+    /* Ocultar placeholder vacío completo (útil dentro de proyectos expandidos) */
+    ocultarPlaceholderVacio?: boolean;
 }
 
-export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear}: ListaTareasProps): JSX.Element {
+export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear, ocultarPlaceholderVacio = false}: ListaTareasProps): JSX.Element {
     /* Filtros básicos */
     const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
     const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
@@ -129,10 +131,10 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     return (
         <DashboardPanel id="lista-tareas">
-            {/* Estado vacío cuando no hay tareas */}
-            {tareas.length === 0 ? (
+            {/* Estado vacío cuando no hay tareas (ocultar en proyectos expandidos) */}
+            {tareas.length === 0 && !ocultarPlaceholderVacio ? (
                 <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />
-            ) : (
+            ) : tareas.length > 0 ? (
                 <>
                     {habilitarDrag ? (
                         <>
@@ -211,6 +213,9 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
                     {onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} onAbrirModalCrear={onAbrirModalCrear} />}
                 </>
+            ) : (
+                /* Tareas vacías dentro de proyecto: solo mostrar botón añadir */
+                onCrearTarea && <InputNuevaTarea onCrear={crearTareaConProyecto} onAbrirModalCrear={onAbrirModalCrear} />
             )}
 
             {tareaConfigurando && (

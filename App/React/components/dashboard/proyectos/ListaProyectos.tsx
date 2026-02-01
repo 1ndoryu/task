@@ -188,7 +188,7 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
             {/* Tareas del proyecto (solo cuando está activo) */}
             {activo && (
                 <div className="proyectoTareas">
-                    <ListaTareas tareas={tareasVisibles} proyectoId={proyecto.id} onToggleTarea={onToggleTarea} onCrearTarea={crearTareaConHerencia} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} modoCompacto={modoCompacto} onAbrirModalCrear={onAbrirModalCrear} />
+                    <ListaTareas tareas={tareasVisibles} proyectoId={proyecto.id} onToggleTarea={onToggleTarea} onCrearTarea={crearTareaConHerencia} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} modoCompacto={modoCompacto} onAbrirModalCrear={onAbrirModalCrear} ocultarPlaceholderVacio={true} />
                 </div>
             )}
         </div>

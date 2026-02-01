@@ -111,6 +111,11 @@
     border-left: 3px solid var(--dashboard-textoActivo);
 }
 
+/* Margen superior para botón añadir dentro de proyectos */
+.proyectoTareas .inputNuevaTarea {
+    margin-top: 2px;
+}
+
 .barraProgresoFondo {
     flex: 1;
     height: 4px;

@@ -156,6 +156,13 @@
     font-weight: normal;
 }
 
+/* Reducir tamaño de título en móvil (-2px) */
+@media (max-width: 480px) {
+    .seccionTitulo {
+        font-size: 12px;
+    }
+}
+
 .seccionSubtitulo {
     color: var(--dashboard-textoMuyApagado);
     font-size: var(--dashboard-tamanoBase);
@@ -488,6 +495,14 @@
  */
 .botonMenuMovil {
     display: none; /* Oculto por defecto en desktop */
+}
+
+/* Reducir tamaño de iconos del header en móvil (-1px) */
+@media (max-width: 480px) {
+    .botonIconoEncabezado svg {
+        width: 17px;
+        height: 17px;
+    }
 }
 
 /* 

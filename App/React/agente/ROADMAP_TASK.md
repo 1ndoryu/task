@@ -10,6 +10,22 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+# Ultimas revisiones (version movil) ✅ COMPLETADO (2026-02-01)
+
+1. ✅ **Icono de urgencia en bottomS**: Cambiado de Hash a Zap (rayo) para coherencia con escritorio.
+2. ✅ **BottomS opciones**:
+   - Importancia hábitos corregida (valor por defecto "Media", opciones: Baja, Media, Alta, Muy Alta)
+   - Nota: Adjuntos requieren panel de configuración completo (feature premium pendiente de implementación en móvil)
+3. ✅ **Opciones menú móvil SOLID**: Agregadas opciones faltantes (configuración, seguridad, versionado, enviar comentarios)
+4. ✅ **Estado vacío proyectos**: Placeholder oculto dentro de proyectos expandidos + 2px margin-top al botón añadir
+5. ✅ **Punto azul 3 puntos**: No encontrado en código (posible falsa alarma o corregido previamente)
+6. ✅ **Iconos menú contextual**: Aumentados de 12px a 13px (+1px) en móvil
+7. ✅ **Tamaños header móvil**: 
+   - Título paneles reducido de 14px a 12px (-2px)
+   - Iconos header (hamburguesa, buscar, 3 puntos) reducidos de 18px a 17px (-1px)
+8. ✅ **Padding modal selector propiedades**: +2px padding vertical + min-height táctil para mejor selección
+9. ✅ **Cerrar sesión al final**: Ya implementado en `opcionesMenuUsuario.tsx` (opcionesSecundarias)
+
 # Nueva revision ✅
 
 1. ✅ **Autocompletado del teclado móvil**: Reforzados los atributos del input en todos los BottomSheets con `inputMode="text"`, `enterKeyHint="done"`, `name` único, y atributos para gestores de contraseñas (`data-lpignore`, `data-1p-ignore`, `aria-autocomplete="none"`).

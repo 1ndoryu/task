@@ -39,7 +39,7 @@ type ModalActivo = 'frecuencia' | 'importancia' | null;
 export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: BottomSheetHabitoProps): JSX.Element | null {
     const [texto, setTexto] = useState('');
     const [frecuencia, setFrecuencia] = useState<string | undefined>(valoresIniciales.frecuencia || 'diaria');
-    const [importancia, setImportancia] = useState<string | undefined>(valoresIniciales.importancia);
+    const [importancia, setImportancia] = useState<string | undefined>(valoresIniciales.importancia || 'Media');
     const [cargando, setCargando] = useState(false);
     const [modalActivo, setModalActivo] = useState<ModalActivo>(null);
 
@@ -57,7 +57,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
         if (!estaAbierto) {
             setTexto('');
             setFrecuencia(valoresIniciales.frecuencia || 'diaria');
-            setImportancia(valoresIniciales.importancia);
+            setImportancia(valoresIniciales.importancia || 'Media');
             setModalActivo(null);
         }
     }, [estaAbierto, valoresIniciales]);

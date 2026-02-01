@@ -89,6 +89,14 @@
     opacity: 0.8;
 }
 
+/* Aumentar tamaño de iconos en móvil (+1px) */
+@media (max-width: 480px) {
+    .menuContextualIcono svg {
+        width: 13px;
+        height: 13px;
+    }
+}
+
 .menuContextualEtiqueta {
     flex: 1;
 }
