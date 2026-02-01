@@ -173,7 +173,7 @@
 .bottomSheetTarea__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 8px;
 }
 
 .bottomSheetTarea__accion {
@@ -282,7 +282,7 @@
 .bottomSheetHabito__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 8px;
 }
 
 .bottomSheetHabito__accion {
@@ -390,7 +390,7 @@
 .bottomSheetProyecto__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 8px;
 }
 
 .bottomSheetProyecto__accion {

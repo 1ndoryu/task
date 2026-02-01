@@ -10,15 +10,43 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-# Nueva revisión ✅
+# Nueva revision
+
+1. - [ ] No se resolvio "3. ✅ Cuando se abre el bottomS, el teclado movil ya no muestra autocompletado (desactivado con autoComplete="off", autoCorrect="off", etc)." sigue sucediendo y - [ ] **8. Bug scroll móvil con barra del navegador**: es prioritario.
+2. ✅ Poner el boton de cerrar sesión al final en el menu movil. 
+3. ✅ Bug propiedades BottomSheet al editar (desaparecían inmediatamente). Iconos BottomSheet ahora 18px con gap 8px.
+4. ✅ Centralizar opciones del menú de usuario (creado `utils/opcionesMenuUsuario.tsx`). Layout, notificaciones, panel de administracion, laboratorio NO van en móvil.
+5. ✅ Menu contextual: botones con +2px padding vertical, iconos subidos 2px.
+
+# Nueva revisión completada ✅
 
 1. ✅ En el modo compacto de las tareas, y habitos, agregar 1px mas de tamaño a la fuente, solo en version movil. 
 2. ✅ En menu lateral movil arreglado el bug de separadores juntos (cuando la última opción tiene separadorDespues y hay opciones secundarias).
 3. ✅ Cuando se abre el bottomS, el teclado movil ya no muestra autocompletado (desactivado con autoComplete="off", autoCorrect="off", etc).
 4. ✅ El modal de selector de propiedades del BottonS ahora usa Portal para centrarse correctamente en viewport, y las letras son más pequeñas (10px).
 5. ✅ **Refactor visual menú contextual móvil**: Ahora el MenuOpcionesPanel y EncabezadoOpcionesMovil usan el mismo patrón que bottomSheetItem (texto primero, icono azul al final, sin check).
- 
+
+---
+
+# Refactorización Completada ✅
+
+## 1. Centralizar opciones del menú de usuario (COMPLETADO - 2026-02-01)
+
+**Solución implementada:**
+- ✅ Creado `utils/opcionesMenuUsuario.tsx` con configuración centralizada
+- ✅ `EncabezadoMovil.tsx` ahora usa la configuración centralizada
+- ✅ Opciones de Layout, notificaciones, admin y laboratorio NO aparecen en móvil
+- ✅ Iconos 18px en móvil, 12px en escritorio
+- ✅ "Cerrar Sesión" siempre al final del menú
+
+**Archivos modificados:**
+- `utils/opcionesMenuUsuario.tsx` (nuevo)
+- `components/dashboard/encabezado/EncabezadoMovil.tsx`
+
+---
+
 # Revisiones Móvil en Progreso 📱
+
 
 ## Tareas BottomSheet (1-4) ✅
 - [x] **2. Iconos 16px + separación 2px**: Cambiar tamaño de iconos de acciones a 16px y gap a 2px

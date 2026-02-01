@@ -1,5 +1,6 @@
 import {useMemo} from 'react';
-import {Menu, MoreVertical, Search, Settings, FlaskConical, User, Database, Palette, Plug, LogOut} from 'lucide-react';
+import {Menu, MoreVertical, Search} from 'lucide-react';
+import {obtenerOpcionesMenuUsuario, obtenerOpcionCerrarSesion} from '../../../utils/opcionesMenuUsuario';
 import {DrawerMovil, BottomSheet} from '../../shared';
 import type {OpcionDrawer} from '../../shared/DrawerMovil';
 import type {GrupoOpciones, OpcionMenu} from '../../shared/MenuOpcionesPanel';
@@ -98,26 +99,41 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
     };
 
     /*
-     * Opciones principales del drawer: opciones de usuario arriba
-     * Reorganizado para que perfil, backups, temas estén al inicio
+     * Opciones principales del drawer usando configuración centralizada
+     * Las opciones de layout, notificaciones, admin y laboratorio no van en móvil
      */
     const opcionesDrawer = useMemo((): OpcionDrawer[] => {
+        const opcionesCentralizadas = obtenerOpcionesMenuUsuario({
+            esMovil: true,
+            esPremium: suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa',
+            version: '',
+            tamanoIcono: 18
+        });
+
+        return opcionesCentralizadas.map(opcion => ({
+            id: opcion.id,
+            etiqueta: opcion.etiqueta,
+            icono: opcion.icono,
+            separadorDespues: opcion.separadorDespues,
+            peligroso: opcion.peligroso
+        }));
+    }, [suscripcion]);
+
+    /*
+     * Opciones secundarias: solo cerrar sesión al final
+     * Admin y laboratorio NO van en móvil según ROADMAP
+     */
+    const opcionesSecundariasDrawer = useMemo((): OpcionDrawer[] => {
+        const opcionLogout = obtenerOpcionCerrarSesion(18);
         return [
-            {id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={18} />},
-            {id: 'backups', etiqueta: 'Copias de Seguridad', icono: <Database size={18} />},
-            {id: 'temas', etiqueta: 'Temas', icono: <Palette size={18} />},
-            {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={18} />, separadorDespues: true}
+            {
+                id: opcionLogout.id,
+                etiqueta: opcionLogout.etiqueta,
+                icono: opcionLogout.icono,
+                peligroso: opcionLogout.peligroso
+            }
         ];
     }, []);
-
-    /* Opciones secundarias: admin y experimentos (si aplica) */
-    const opcionesSecundariasDrawer = useMemo((): OpcionDrawer[] => {
-        const opciones: OpcionDrawer[] = [];
-        if (esAdmin && onClickAdmin) opciones.push({id: 'admin', etiqueta: 'Administración', icono: <Settings size={18} />});
-        if (onClickExperimentos) opciones.push({id: 'experimentos', etiqueta: 'Laboratorio', icono: <FlaskConical size={18} />});
-        opciones.push({id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={18} />, peligroso: true});
-        return opciones;
-    }, [esAdmin, onClickAdmin, onClickExperimentos]);
 
     return (
         <>

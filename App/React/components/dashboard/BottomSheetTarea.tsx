@@ -60,6 +60,9 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
 
     const inputRef = useRef<HTMLInputElement>(null);
 
+    /* Ref para rastrear qué tarea se ha cargado (evita recargas innecesarias) */
+    const tareaIdCargadaRef = useRef<number | undefined>(undefined);
+
     /* Autofocus al abrir */
     useEffect(() => {
         if (estaAbierto && inputRef.current) {
@@ -67,24 +70,37 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
         }
     }, [estaAbierto]);
 
-    /* Reset al cerrar o actualizar cuando cambia la tarea */
+    /*
+     * Reset al cerrar o cargar nueva tarea
+     * Bug fix: Solo resetear cuando estaAbierto pasa a false,
+     * o cuando el ID de tareaExistente cambia (nueva tarea a editar)
+     */
     useEffect(() => {
         if (!estaAbierto) {
+            /* Reset completo al cerrar */
             setTexto('');
-            setProyectoId(valoresIniciales.proyectoId);
-            setPrioridad(valoresIniciales.prioridad);
-            setUrgencia(valoresIniciales.urgencia);
+            setProyectoId(undefined);
+            setPrioridad(undefined);
+            setUrgencia(undefined);
             setFecha(undefined);
             setModalActivo(null);
-        } else if (tareaExistente) {
-            /* Si hay tarea existente, cargar sus valores */
+            tareaIdCargadaRef.current = undefined;
+        } else if (tareaExistente && tareaExistente.id !== tareaIdCargadaRef.current) {
+            /* Cargar datos solo si es una tarea diferente a la ya cargada */
             setTexto(tareaExistente.texto);
             setProyectoId(tareaExistente.proyectoId);
             setPrioridad(tareaExistente.prioridad);
             setUrgencia(tareaExistente.urgencia);
             setFecha(tareaExistente.configuracion?.fechaMaxima);
+            tareaIdCargadaRef.current = tareaExistente.id;
+        } else if (!tareaExistente && estaAbierto && tareaIdCargadaRef.current === undefined) {
+            /* Modo creación: aplicar valores iniciales solo la primera vez */
+            setProyectoId(valoresIniciales.proyectoId);
+            setPrioridad(valoresIniciales.prioridad);
+            setUrgencia(valoresIniciales.urgencia);
+            tareaIdCargadaRef.current = -1; /* Marcador para modo creación */
         }
-    }, [estaAbierto, tareaExistente, valoresIniciales]);
+    }, [estaAbierto, tareaExistente?.id]);
 
     const manejarGuardar = async () => {
         if (!texto.trim() || cargando) return;
@@ -203,23 +219,23 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                         {/* Proyecto */}
                         {proyectos.length > 0 && (
                             <button type="button" className={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('proyecto')} aria-label={obtenerNombreProyecto() || 'Proyecto'} title={obtenerNombreProyecto() || 'Proyecto'}>
-                                <Layers size={16} />
+                                <Layers size={18} />
                             </button>
                         )}
 
                         {/* Prioridad */}
                         <button type="button" className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'}>
-                            <Flag size={16} />
+                            <Flag size={18} />
                         </button>
 
                         {/* Urgencia */}
                         <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
-                            <Hash size={16} />
+                            <Hash size={18} />
                         </button>
 
                         {/* Fecha límite */}
                         <button type="button" className={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fecha || 'Fecha'} title={fecha || 'Fecha'}>
-                            <Calendar size={16} />
+                            <Calendar size={18} />
                         </button>
 
                         {/* Configuración avanzada (solo edición) */}
@@ -233,14 +249,14 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                                 }}
                                 aria-label="Configuración avanzada"
                                 title="Configuración avanzada">
-                                <Settings size={16} />
+                                <Settings size={18} />
                             </button>
                         )}
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
                     <button type="button" className="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}>
-                        <Send size={16} />
+                        <Send size={18} />
                     </button>
                 </div>
             </div>

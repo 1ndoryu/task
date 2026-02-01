@@ -133,18 +133,18 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                     <div className="bottomSheetHabito__opcionesGrupo">
                         {/* Frecuencia */}
                         <button type="button" className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('frecuencia')} aria-label={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'} title={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'}>
-                            <Repeat size={16} />
+                            <Repeat size={18} />
                         </button>
 
                         {/* Importancia */}
                         <button type="button" className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia(importancia) || 'Importancia'} title={obtenerTextoImportancia(importancia) || 'Importancia'}>
-                            <Flag size={16} />
+                            <Flag size={18} />
                         </button>
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
                     <button type="button" className="bottomSheetHabito__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label="Crear Hábito">
-                        <Send size={16} />
+                        <Send size={18} />
                     </button>
                 </div>
             </div>

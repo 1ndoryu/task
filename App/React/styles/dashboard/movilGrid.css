@@ -171,7 +171,8 @@
         display: flex;
         align-items: center;
         gap: var(--dashboard-espacioSm);
-        padding: var(--dashboard-espacioSm);
+        /* +2px arriba y abajo para mejor área táctil */
+        padding: calc(var(--dashboard-espacioSm) + 2px) var(--dashboard-espacioSm);
         min-height: 36px;
         background: none;
         border: none;
@@ -206,6 +207,9 @@
         color: var(--dashboard-textoApagado);
         flex-shrink: 0;
         margin-left: auto;
+        /* Subir icono 2px para mejor alineación visual */
+        position: relative;
+        top: -2px;
     }
 
     .menuOpcionesPanelItem--activo .menuOpcionesPanelItemIcono {

@@ -13,3 +13,6 @@ export {tocaHoy, diasHastaProximaRepeticion, calcularUmbralInactividad, describi
 
 export {obtenerSubtareas, obtenerPadre, tieneSubtareas, contarSubtareas, esDescendiente, esTareaPadre, esSubtarea, obtenerTareasPrincipales, obtenerIndiceTarea, obtenerTareaAnterior, puedeSerSubtareaDe, moverConHijos, calcularNuevoParent, ordenarConJerarquia, asignarOrden, detectarContextoDrop} from './jerarquiaTareas';
 export type {CalculoParentResult, ContextoDropResult} from './jerarquiaTareas';
+
+export {obtenerOpcionesMenuUsuario, obtenerOpcionCerrarSesion, obtenerOpcionesSecundariasMenúMovil} from './opcionesMenuUsuario';
+export type {OpcionMenuUsuario} from './opcionesMenuUsuario';
