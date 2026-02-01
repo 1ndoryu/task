@@ -43,7 +43,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud. (Generado SHA-1, pendiente user configuration).
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [ ] Sincronizar token nativo con backend WordPress (Social Login).
+- [X] Sincronizar token nativo con backend WordPress (Social Login).
 
 #### 13.4 Publicación y Compliance
 - [ ] Adaptar UI para Safe Areas de móviles (Notch, Home Indicator).

@@ -82,6 +82,17 @@ class AuthApiController
                 ],
             ],
         ]);
+
+        /* Log de errores desde cliente (Mobile/Frontend) */
+        register_rest_route(self::API_NAMESPACE, '/auth/log', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [self::class, 'logClientError'],
+            'permission_callback' => '__return_true', // Público para reportar fallos de login
+            'args' => [
+                'message' => ['required' => true],
+                'data' => ['required' => false],
+            ],
+        ]);
     }
 
     public static function loginWithCredentials(WP_REST_Request $request): WP_REST_Response
@@ -286,6 +297,22 @@ class AuthApiController
             'success' => true,
             'message' => 'Si el correo existe en nuestro sistema, recibirás instrucciones para restablecer tu contraseña.'
         ], 200);
+    }
+
+    public static function logClientError(WP_REST_Request $request): WP_REST_Response
+    {
+        $message = sanitize_text_field($request->get_param('message'));
+        $data = $request->get_param('data');
+
+        $logEntry = "[Client Log] " . $message;
+        if (!empty($data)) {
+            $logEntry .= " | Data: " . (is_string($data) ? $data : json_encode($data));
+        }
+
+        /* Escribir al debug.log de WordPress */
+        error_log($logEntry);
+
+        return new WP_REST_Response(['success' => true], 200);
     }
 }
 

@@ -84,11 +84,36 @@ export function useAuth(): UseAuthReturn {
                     throw new Error(data.message || 'Error obteniendo URL de login');
                 }
             }
-        } catch (e) {
+        } catch (e: any) {
             const msg = e instanceof Error ? e.message : 'Error de conexión';
+
+            // Log detallado para debugging nativo
+            console.error('[GoogleAuth] Catch Error:', e);
+
+            // Enviar log al servidor para verlo con -wpDebug
+            // Intentamos extraer toda la info posible del objeto de error nativo
+            const errorDetails = {
+                message: e?.message || 'No message',
+                code: e?.code || 'No code',
+                fullError: JSON.stringify(e, Object.getOwnPropertyNames(e))
+            };
+
+            await fetch('/wp-json/glory/v1/auth/log', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    message: 'Fallo en GoogleAuth.signIn()',
+                    data: errorDetails
+                })
+            }).catch(err => console.error('Fallo enviando log al servidor', err));
+
+            // Alertar en móvil para verlo inmediatamente
+            if (Capacitor.isNativePlatform()) {
+                alert(`Error Google Login check:\n${JSON.stringify(e)}`);
+            }
+
             setError(msg);
             setLoading(false);
-            console.error('Login error:', e);
         }
     }, [handleCallback]);
 
