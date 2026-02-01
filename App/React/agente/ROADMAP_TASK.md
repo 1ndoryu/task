@@ -40,10 +40,36 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 #### 13.3 Autenticación Nativa (UX Móvil) 🔐
 - [x] Implementar `@capacitor-community/google-auth` (usando `@codetrix-studio/capacitor-google-auth`).
-- [x] Configurar Keystore SHA-1 en Consola de Google Cloud. (Generado SHA-1, pendiente user configuration).
+- [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [X] Sincronizar token nativo con backend WordPress (Social Login).
+- [!] **Bloqueo Actual:** Error `Code 10` (Developer Error) persiste tras limpieza.
+  - **Estado:**
+    - [x] SHA-1 Debug coincide con consola Google.
+    - [x] Web Client ID configurado en `capacitor.config.json`.
+    - [x] Limpieza de proyecto (Clean/Rebuild/Uninstall) realizada sin éxito.
+    - [x] **NUEVO:** Signing Config explícito añadido a `build.gradle`.
+    - [x] **NUEVO:** Placeholder `google-services.json` creado (requiere completar).
+  - **Próximos Pasos (Acción Requerida Usuario):**
+    1. **Descargar google-services.json real:** Ir a Firebase Console → Crear proyecto → Añadir app Android (`com.taskNakomi.app`) con SHA-1 debug → Descargar y reemplazar el placeholder en `android/app/`.
+    2. **Verificar Web Client ID:** El `serverClientId` en `capacitor.config.json` debe ser tipo "Web application" (NO Android).
+    3. **Pantalla de Consentimiento:** Verificar en Google Cloud que esté en modo "Testing" con tu email invitado, o en "Production".
+    4. **Rebuild:** Ejecutar `npx cap sync android` y luego Build desde Android Studio.
+
+---
+
+### 🛠️ Comandos de Diagnóstico (Android/Capacitor)
+
+**1. Verificar SHA-1 Debug Keystore:**
+```powershell
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -list -v -keystore "$env:USERPROFILE\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+```
+
+**2. Sincronizar Cambios de Capacitor (Config):**
+```powershell
+npx cap sync android
+```
+
 
 #### 13.4 Publicación y Compliance
 - [ ] Adaptar UI para Safe Areas de móviles (Notch, Home Indicator).
