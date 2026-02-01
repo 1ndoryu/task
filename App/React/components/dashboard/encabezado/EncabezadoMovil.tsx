@@ -5,6 +5,7 @@ import {DrawerMovil, BottomSheet} from '../../shared';
 import type {OpcionDrawer} from '../../shared/DrawerMovil';
 import type {GrupoOpciones, OpcionMenu} from '../../shared/MenuOpcionesPanel';
 import type {InfoSuscripcion, Tarea} from '../../../types/dashboard';
+import type {PaginaMovil} from '../../../hooks/usePaginaMovil';
 
 interface SincronizacionInfo {
     onLogin?: () => void;
@@ -48,9 +49,10 @@ interface EncabezadoMenuMovilProps {
     onClickConfigMCP?: () => void;
     onExportarDatos?: () => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
+    onCambiarPagina?: (pagina: PaginaMovil) => void;
 }
 
-export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, sincronizacion, drawerAbierto, onCerrarDrawer, onAbrirDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onExportarDatos, onCrearRapido}: EncabezadoMenuMovilProps) {
+export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, sincronizacion, drawerAbierto, onCerrarDrawer, onAbrirDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onExportarDatos, onCrearRapido, onCambiarPagina}: EncabezadoMenuMovilProps) {
     /* Logic moved from DashboardEncabezado */
     const manejarOpcionDrawer = (opcionId: string) => {
         if (opcionId === 'notificaciones' && onClickNotificaciones) return onClickNotificaciones(undefined as any);
@@ -91,6 +93,10 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
                 break;
             case 'exportar':
                 onExportarDatos?.();
+                break;
+            case 'actividad':
+                onCambiarPagina?.('actividad');
+                onCerrarDrawer();
                 break;
             case 'logout':
                 sincronizacion?.onLogout?.();
@@ -176,7 +182,6 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
         <>
             <button type="button" className={`botonIconoEncabezado botonOpcionesMovil ${opcionesMovil.tieneFiltrosActivos ? 'botonOpcionesMovil--activo' : ''}`} onClick={onAbrirMenuOpcionesMovil} title={esTablet ? undefined : 'Opciones del panel'}>
                 <MoreVertical size={18} />
-                {opcionesMovil.tieneFiltrosActivos && <span className="badgeFiltrosActivos" />}
             </button>
 
             <BottomSheet estaAbierto={menuOpcionesMovilAbierto} onCerrar={onCerrarMenuOpcionesMovil}>

@@ -63,7 +63,7 @@
 .bottomSheetCreacion__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 /* Botón de acción (icono 16px) */
@@ -173,7 +173,7 @@
 .bottomSheetTarea__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .bottomSheetTarea__accion {

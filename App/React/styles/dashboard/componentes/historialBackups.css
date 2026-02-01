@@ -165,3 +165,10 @@
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoBase);
 }
+
+/* Móvil: quitar padding del contenedor principal */
+@media (max-width: 480px) {
+    .contenedorBackups {
+        padding: 0;
+    }
+}

@@ -81,6 +81,7 @@ registrarPanel({
 /*
  * Panel Scratchpad
  * Maneja su propia altura internamente
+ * Habilitado en navegación móvil como "Notas"
  */
 registrarPanel({
     id: 'scratchpad',
@@ -90,7 +91,8 @@ registrarPanel({
     alturaDefecto: '200px',
     posicionDefecto: crearPosicionDefecto([1, 3], [2, 1], [3, 1]),
     componente: PanelScratchpad as any,
-    enNavegacionMovil: false,
+    enNavegacionMovil: true,
+    idPaginaMovil: 'notas',
     manejaAlturaPropia: true
 });
 

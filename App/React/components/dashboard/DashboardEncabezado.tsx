@@ -73,6 +73,7 @@ interface DashboardEncabezadoProps {
         tieneFiltrosActivos?: boolean;
     };
     paginaMovilActiva?: string;
+    onCambiarPagina?: (pagina: string) => void;
 }
 
 export function DashboardEncabezado({
@@ -112,7 +113,8 @@ export function DashboardEncabezado({
     onCrearRapido,
     // Movil
     opcionesMovil,
-    paginaMovilActiva
+    paginaMovilActiva,
+    onCambiarPagina
 }: DashboardEncabezadoProps): JSX.Element {
     const esTablet = useEsDispositivoMovil();
     const estaConectado = sincronizacion?.estaLogueado ?? false;
@@ -152,6 +154,7 @@ export function DashboardEncabezado({
                 onClickBackups={onClickBackups}
                 onClickConfigMCP={onClickConfigMCP}
                 onExportarDatos={onExportarDatos}
+                onCambiarPagina={onCambiarPagina}
                 onCrearRapido={onCrearRapido}
             />
 

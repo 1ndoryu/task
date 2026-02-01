@@ -172,7 +172,7 @@
         align-items: center;
         gap: var(--dashboard-espacioSm);
         /* +2px arriba y abajo para mejor área táctil */
-        padding: calc(var(--dashboard-espacioSm) + 2px) var(--dashboard-espacioSm);
+        padding: calc(var(--dashboard-espacioSm) + 0px) var(--dashboard-espacioSm);
         min-height: 36px;
         background: none;
         border: none;

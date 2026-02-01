@@ -110,7 +110,7 @@
     flex-direction: row-reverse;
     justify-content: flex-end;
     gap: var(--dashboard-espacioSm);
-    padding: 6px var(--dashboard-espacioSm);
+    padding: 10px var(--dashboard-espacioSm);
     min-height: 32px;
     color: var(--dashboard-textoNormal);
     background: none;

@@ -5,12 +5,34 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.20-beta (2026-02-01)
-**Foco:** Mejoras de UI Móvil - Revisión Completada
+**Versión:** v1.0.21-beta (2026-02-01)
+**Foco:** Mejoras de UI Móvil - Nueva Revisión Completada
 
 ---
 
-# Ultimas revisiones (version movil) ✅ COMPLETADO (2026-02-01)
+# Rewision nueva version movil ✅ COMPLETADO (2026-02-01)
+
+1. ✅ agrega 2 px mas de gap a los iconos del bottomS
+2. ✅ agregar 1px mas de padding a los menu contextuales que abren al selecionar una tarea o habito, a los botones me refiero, etc. 
+3. ✅ el + añadir que se ve al abrir un proyecto, tiene un borde blanco al lado y un espacio al lado, esta bien pero reducir el borde a 1 px. 
+4. ✅ El punto azul no desaparecio. El punto azul en el icono de 3 puntos, del panel de tareas en la version movil en el header, sigue alli. (VERSION MOVIL)
+5. ✅ El modal movil, ese cuando se abre por ejemplo, copias de seguridad, configuracion, preferencias, etc, el header, le hace falta padding arriba y abajo, agrega 2px
+6. ✅ Del nav, remplazar el panel de actividad por el panel de notas, y agregar un acceso directo al panel de actividad en el menu. 
+7. ✅ Reducir opacidad del texto placeholder de los input en el modal de "mi perfil", y usar texto normal en vez de todo mayuscula para los titulos.
+8. ✅ El historial de versiones en el movil se ve entrecortado, no cubre el 100% y tiene un padding, arreglar eso.
+
+**Archivos modificados:**
+- `bottomSheetCreacion.css`: gap iconos +2px (8px→10px)
+- `menuContextual.css`: padding vertical +1px en móvil
+- `proyectos.css`: borde botón añadir reducido a 1px solid
+- `EncabezadoMovil.tsx`: badge filtros activos eliminado
+- `modal.css`: padding header móvil +2px (3px→5px)
+- `NavegacionInferior.tsx`: Actividad reemplazada por Notas en nav inferior
+- `opcionesMenuUsuario.tsx`: Actividad agregada al menú móvil (soloMovil)
+- `perfil.css`: placeholders 40% opacidad, títulos sin uppercase
+- `modalVersiones.css` + `historialBackups.css`: padding: 0 en móvil para 100% ancho
+
+---
 
 1. ✅ **Icono de urgencia en bottomS**: Cambiado de Hash a Zap (rayo) para coherencia con escritorio.
 2. ✅ **BottomS opciones**:

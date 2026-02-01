@@ -144,6 +144,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onCrearRapido={modales.abrirCreacionRapida}
                 opcionesMovil={esMovil ? opcionesMovil : undefined}
                 paginaMovilActiva={esMovil ? paginaMovil.paginaActiva : undefined}
+                onCambiarPagina={esMovil ? paginaMovil.cambiarPagina : undefined}
             />
 
             {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} esMovil={esMovil} paginaMovilActiva={paginaMovil.paginaActiva} />}

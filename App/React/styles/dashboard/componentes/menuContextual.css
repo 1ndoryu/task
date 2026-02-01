@@ -95,6 +95,12 @@
         width: 13px;
         height: 13px;
     }
+
+    /* Agregar 1px más de padding vertical a los botones del menú contextual */
+    .menuContextualOpcion {
+        padding-top: calc(var(--dashboard-espacioSm) + 1px);
+        padding-bottom: calc(var(--dashboard-espacioSm) + 1px);
+    }
 }
 
 .menuContextualEtiqueta {

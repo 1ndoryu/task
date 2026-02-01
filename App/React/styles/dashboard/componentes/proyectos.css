@@ -278,7 +278,7 @@
     color: var(--dashboard-textoApagado);
     font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
-    border-top: 1px dashed var(--dashboard-bordePunteado);
+    border-top: 1px solid var(--dashboard-bordePunteado);
     transition: all var(--dashboard-transicionNormal);
 }
 

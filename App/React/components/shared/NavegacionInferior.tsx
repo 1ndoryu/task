@@ -14,7 +14,7 @@
  */
 
 import {useState} from 'react';
-import {CheckSquare, Plus, Folder, Activity, BarChart3, X, Target} from 'lucide-react';
+import {CheckSquare, Plus, Folder, Activity, StickyNote, BarChart3, X, Target} from 'lucide-react';
 import type {PaginaMovil} from '../../hooks/usePaginaMovil';
 
 export interface NavegacionInferiorProps {
@@ -87,9 +87,9 @@ export function NavegacionInferior({paginaActiva, onCambiarPagina, onCrearRapido
                     <Target size={20} />
                 </button>
 
-                {/* Actividad */}
-                <button type="button" className={`navegacionInferiorItem ${paginaActiva === 'actividad' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarPagina('actividad')} aria-label="Actividad" aria-current={paginaActiva === 'actividad' ? 'page' : undefined}>
-                    <BarChart3 size={20} />
+                {/* Notas */}
+                <button type="button" className={`navegacionInferiorItem ${paginaActiva === 'notas' ? 'navegacionInferiorItem--activo' : ''}`} onClick={() => onCambiarPagina('notas')} aria-label="Notas" aria-current={paginaActiva === 'notas' ? 'page' : undefined}>
+                    <StickyNote size={20} />
                 </button>
             </nav>
         </>

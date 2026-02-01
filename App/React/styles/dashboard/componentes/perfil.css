@@ -20,8 +20,8 @@
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--dashboard-textoApagado);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: 0.02em;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
     padding-bottom: var(--dashboard-espacioXs);
     margin-bottom: var(--dashboard-espacioXs);
@@ -51,6 +51,10 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     transition: border-color var(--dashboard-transicionNormal);
     border-radius: var(--dashboard-radioSm);
+}
+
+.inputPerfil::placeholder {
+    opacity: 0.4;
 }
 
 .inputPerfil:focus {

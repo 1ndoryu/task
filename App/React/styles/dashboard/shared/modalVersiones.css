@@ -100,6 +100,14 @@
     color: var(--dashboard-textoActivo); /* Usamos texto activo para mejoras/info */
 }
 
+/* Móvil: 100% ancho sin padding */
+@media (max-width: 480px) {
+    .contenedorVersiones {
+        padding: 0;
+        max-height: none;
+    }
+}
+
 .tipo-arreglo .iconoCambio {
     color: var(--dashboard-estadoAlta);
 }
