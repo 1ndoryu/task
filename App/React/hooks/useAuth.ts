@@ -109,7 +109,11 @@ export function useAuth(): UseAuthReturn {
 
             // Alertar en móvil para verlo inmediatamente
             if (Capacitor.isNativePlatform()) {
-                alert(`Error Google Login check:\n${JSON.stringify(e)}`);
+                let alertMsg = `Error Google Login check:\n${JSON.stringify(e)}`;
+                if (e?.code === '10' || JSON.stringify(e).includes('"code":"10"')) {
+                    alertMsg = '⚠️ Error Code 10 (Configuración):\n\n' + '1. SHA-1 incorrecto en Google Cloud Console.\n' + '2. Package Name no coincide (com.taskNakomi.app).\n' + '3. serverClientId debe ser el "Web Client ID".\n\n' + 'Revisa tu keystore SHA-1 y la consola de Google.';
+                }
+                alert(alertMsg);
             }
 
             setError(msg);
