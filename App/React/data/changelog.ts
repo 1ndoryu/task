@@ -23,16 +23,29 @@ export interface Version {
 export const HISTORIAL_VERSIONES: Version[] = [
     {
         version: 'v1.0.19-beta',
-        fecha: '2026-01-31',
+        fecha: '2026-02-01',
         cambios: [
             {tipo: 'mejora', descripcion: 'BottomSheets más compactos con barra de acciones horizontal'},
             {tipo: 'mejora', descripcion: 'Modales de selección de propiedades para tareas, hábitos y proyectos'},
             {tipo: 'mejora', descripcion: 'Badges de propiedades seleccionadas con botón para eliminar'},
             {tipo: 'mejora', descripcion: 'Menú contextual de hábitos sincronizado entre paneles'},
             {tipo: 'mejora', descripcion: 'Solo un menú contextual visible a la vez'},
+            {tipo: 'mejora', descripcion: 'Opciones del menú de usuario centralizadas'},
+            {tipo: 'mejora', descripcion: 'Panel de notas ahora accesible desde navegación inferior móvil'},
+            {tipo: 'mejora', descripcion: 'Icono de urgencia actualizado a rayo para mejor coherencia visual'},
+            {tipo: 'mejora', descripcion: 'Fuente aumentada en modo compacto para mejor legibilidad móvil'},
+            {tipo: 'mejora', descripcion: 'Modales móviles ahora ocupan el 100% del ancho disponible'},
+            {tipo: 'mejora', descripcion: 'Placeholders de inputs con opacidad reducida para mejor contraste'},
+            {tipo: 'mejora', descripcion: 'Menús contextuales con mejor padding táctil en móvil'},
+            {tipo: 'mejora', descripcion: 'Estado vacío centrado verticalmente en la pantalla'},
             {tipo: 'mejora', descripcion: 'Refactorización de modales para mejor mantenibilidad'},
             {tipo: 'arreglo', descripcion: 'El drawer ahora aparece correctamente sobre la navegación inferior'},
-            {tipo: 'arreglo', descripcion: 'Click en foto o nombre del drawer abre el perfil'}
+            {tipo: 'arreglo', descripcion: 'Click en foto o nombre del drawer abre el perfil'},
+            {tipo: 'arreglo', descripcion: 'Scroll móvil mejorado usando viewport dinámico (dvh)'},
+            {tipo: 'arreglo', descripcion: 'Bug de propiedades que desaparecían al editar en BottomSheet'},
+            {tipo: 'arreglo', descripcion: 'Autocompletado del teclado móvil desactivado en formularios'},
+            {tipo: 'arreglo', descripcion: 'Separadores duplicados en menú lateral móvil eliminados'},
+            {tipo: 'arreglo', descripcion: 'Modal selector de propiedades centrado correctamente'}
         ]
     },
     {
