@@ -71,33 +71,7 @@
 .botonGoogle {
     text-transform: none;
     letter-spacing: normal;
-}
-
-.loginSeparador {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: var(--dashboard-espacioXl) 0;
-    position: relative;
-}
-
-.loginSeparador::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--dashboard-bordePrincipal);
-}
-
-.loginSeparadorTexto {
-    background: var(--dashboard-fondoSecundario);
-    padding: 0 10px;
-    z-index: 1;
-    color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoPequeno);
-    text-transform: uppercase;
-    font-weight: 500;
+    margin-top: var(--dashboard-espacioLg);
 }
 
 .loginError {

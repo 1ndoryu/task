@@ -116,10 +116,6 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
                             )}
                         </form>
 
-                        <div className="loginSeparador">
-                            <span className="loginSeparadorTexto">ó</span>
-                        </div>
-
                         <button type="button" className="botonSecundario botonFull botonGoogle" onClick={onLoginGoogle} disabled={loading}>
                             <Chrome size={16} style={{marginRight: 8}} />
                             Continuar con Google

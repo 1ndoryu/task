@@ -61,11 +61,22 @@ export function useAuth(): UseAuthReturn {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({username, password})
             });
-            const data = await response.json();
+            const rawText = await response.clone().text();
+            console.log('[Auth] Respuesta server:', response.status, rawText);
+
+            let data;
+            try {
+                data = JSON.parse(rawText);
+            } catch (err) {
+                console.error('[Auth] Error parseando JSON:', err);
+                throw new Error('Error del servidor: Respuesta inválida');
+            }
 
             if (data.success) {
+                console.log('[Auth] Login exitoso, recargando...');
                 window.location.reload();
             } else {
+                console.warn('[Auth] Login fallido:', data.message);
                 throw new Error(data.message || 'Error en login');
             }
         } catch (e) {
