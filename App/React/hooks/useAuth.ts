@@ -64,7 +64,7 @@ export function useAuth(): UseAuthReturn {
             // alert('Debug: Iniciando login. Nativo? ' + Capacitor.isNativePlatform());
 
             if (Capacitor.isNativePlatform()) {
-                await GoogleAuth.initialize();
+                // await GoogleAuth.initialize(); // No es necesario en nativo y puede causar conflictos
                 const user = await GoogleAuth.signIn();
                 console.log('Google User:', user);
 
