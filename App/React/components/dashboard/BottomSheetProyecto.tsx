@@ -140,7 +140,7 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
             <div className="bottomSheetProyecto">
                 {/* Input principal */}
                 <div className="bottomSheetProyecto__inputWrapper">
-                    <input ref={inputRef} type="text" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del proyecto..." className="bottomSheetProyecto__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" />
+                    <input ref={inputRef} type="text" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del proyecto..." className="bottomSheetProyecto__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-proyecto-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}

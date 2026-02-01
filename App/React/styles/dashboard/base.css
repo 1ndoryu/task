@@ -5,9 +5,11 @@
 
 /* 
  * CONTENEDOR PRINCIPAL 
+ * Usa dvh (dynamic viewport height) para móvil que se ajusta a la barra del navegador
  */
 .dashboardContenedor {
-    min-height: 100vh;
+    min-height: 100vh; /* Fallback para navegadores sin soporte dvh */
+    min-height: 100dvh; /* Altura dinámica que respeta la barra del navegador móvil */
     background-color: var(--dashboard-fondoPrincipal);
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);

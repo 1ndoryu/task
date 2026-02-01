@@ -20,8 +20,10 @@
         bottom: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        height: 100vh !important; /* Fallback */
+        height: 100dvh !important; /* Altura dinámica que respeta la barra del navegador */
+        max-height: 100vh !important; /* Fallback */
+        max-height: 100dvh !important;
         border-radius: 0 !important;
         margin: 0 !important;
     }

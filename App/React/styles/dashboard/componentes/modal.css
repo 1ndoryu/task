@@ -204,8 +204,10 @@
     .modalContenedor--expandido {
         max-width: 100% !important;
         width: 100% !important;
-        max-height: 100vh !important;
-        height: 100vh !important;
+        max-height: 100vh !important; /* Fallback */
+        max-height: 100dvh !important;
+        height: 100vh !important; /* Fallback */
+        height: 100dvh !important;
         border-radius: 0 !important;
         margin: 0 !important;
         border: none !important;
@@ -265,7 +267,9 @@
         height: 36px;
         padding: 0;
         border-radius: var(--dashboard-radioSm);
-        transition: color var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
+        transition:
+            color var(--dashboard-transicionRapida),
+            background var(--dashboard-transicionRapida);
     }
 
     .modalBotonVolver:hover,

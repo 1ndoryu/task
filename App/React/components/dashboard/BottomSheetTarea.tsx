@@ -206,7 +206,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
             <div className="bottomSheetTarea">
                 {/* Input principal */}
                 <div className="bottomSheetTarea__inputWrapper">
-                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" className="bottomSheetTarea__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" />
+                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" className="bottomSheetTarea__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}

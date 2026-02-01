@@ -75,15 +75,18 @@
 /*
  * CENTRADO VERTICAL EN MOVIL
  * El estado vacío debe ocupar toda la altura visible y centrarse
+ * Usa dvh (dynamic viewport height) para respetar la barra del navegador móvil
  */
 @media (max-width: 480px) {
     .estadoVacioUnificado {
         /* Ocupar altura restante de la pantalla (descontando header y nav) */
-        min-height: calc(100vh - 140px);
+        min-height: calc(100vh - 140px); /* Fallback */
+        min-height: calc(100dvh - 140px);
         padding: var(--dashboard-espacioLg);
     }
 
     .estadoVacioUnificado--compacto {
-        min-height: calc(100vh - 200px);
+        min-height: calc(100vh - 200px); /* Fallback */
+        min-height: calc(100dvh - 200px);
     }
 }

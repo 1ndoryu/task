@@ -190,6 +190,14 @@
     --dashboard-safeAreaBottom: env(safe-area-inset-bottom, 0px);
     --dashboard-safeAreaLeft: env(safe-area-inset-left, 0px);
     --dashboard-safeAreaRight: env(safe-area-inset-right, 0px);
+
+    /* 
+     * ALTURAS FIJAS MÓVIL
+     * Alturas de los elementos de UI fijos para calcular espacios correctamente
+     * El header móvil es ~56px y el nav inferior es 52px + safeArea
+     */
+    --dashboard-alturaHeaderMovil: 56px;
+    --dashboard-alturaNavInferior: 52px;
 }
 
 /* 1e1e1e

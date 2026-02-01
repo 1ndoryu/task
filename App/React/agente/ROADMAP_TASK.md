@@ -10,9 +10,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-# Nueva revision
+# Nueva revision ✅
 
-1. - [ ] No se resolvio "3. ✅ Cuando se abre el bottomS, el teclado movil ya no muestra autocompletado (desactivado con autoComplete="off", autoCorrect="off", etc)." sigue sucediendo y - [ ] **8. Bug scroll móvil con barra del navegador**: es prioritario.
+1. ✅ **Autocompletado del teclado móvil**: Reforzados los atributos del input en todos los BottomSheets con `inputMode="text"`, `enterKeyHint="done"`, `name` único, y atributos para gestores de contraseñas (`data-lpignore`, `data-1p-ignore`, `aria-autocomplete="none"`).
 2. ✅ Poner el boton de cerrar sesión al final en el menu movil. 
 3. ✅ Bug propiedades BottomSheet al editar (desaparecían inmediatamente). Iconos BottomSheet ahora 18px con gap 8px.
 4. ✅ Centralizar opciones del menú de usuario (creado `utils/opcionesMenuUsuario.tsx`). Layout, notificaciones, panel de administracion, laboratorio NO van en móvil.
@@ -62,9 +62,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## Estado Vacío (6) ✅
 - [x] **7. Centrar estado vacío verticalmente**: El placeholder vacío debe estar en el centro de la pantalla
 
-## Bug de Altura (7) ⏳
-- [ ] **8. Bug scroll móvil con barra del navegador**: Cuando la barra del navegador cambia, las tareas se ocultan con el header, tambien el nav inferior cubre las ultimas tareas siempre.
-  > TO-DO: Investigar comportamiento de 100vh en navegadores móviles y considerar usar 100dvh o JavaScript
+## Bug de Altura (7) ✅
+- [x] **8. Bug scroll móvil con barra del navegador**: Solucionado usando `100dvh` (dynamic viewport height) en lugar de `100vh`. El dvh se ajusta automáticamente cuando la barra del navegador aparece/desaparece. También se aumentó el padding-bottom del contenedor con navegación inferior para asegurar que las últimas tareas sean visibles. Archivos modificados:
+  - `base.css`: min-height: 100dvh con fallback
+  - `movilComponentes.css`: height/max-height: 100dvh para modales móviles
+  - `modal.css`: height/max-height: 100dvh para modales móviles
+  - `estadoVacio.css`: min-height con dvh para centrado vertical
+  - `navegacionInferior.css`: padding-bottom aumentado con variables CSS
+  - `variables.css`: nuevas variables `--dashboard-alturaHeaderMovil` y `--dashboard-alturaNavInferior`
 
 ## Menú Contextual Proyectos (8) ✅
 - [x] **9. Proyectos sin menú contextual móvil**: ListaProyectos usa MenuContextual tradicional, debe usar MenuContextualAdaptivo

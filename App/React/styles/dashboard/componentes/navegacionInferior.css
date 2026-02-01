@@ -40,7 +40,9 @@
     cursor: pointer;
     padding: var(--dashboard-espacioMd);
     min-height: var(--dashboard-tamanoTactilMinimo);
-    transition: color var(--dashboard-transicionRapida), opacity var(--dashboard-transicionRapida);
+    transition:
+        color var(--dashboard-transicionRapida),
+        opacity var(--dashboard-transicionRapida);
 }
 
 .navegacionInferiorItem:active {
@@ -88,7 +90,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        color var(--dashboard-transicionRapida),
+        border-color var(--dashboard-transicionRapida);
 }
 
 .navegacionInferiorFab:active .navegacionInferiorFabCirculo {
@@ -129,7 +134,9 @@
     font-size: var(--dashboard-tamanoBase);
     cursor: pointer;
     box-shadow: var(--dashboard-sombraMedia);
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    transition:
+        background var(--dashboard-transicionRapida),
+        color var(--dashboard-transicionRapida);
     min-width: 120px;
 }
 
@@ -153,10 +160,11 @@
 /* 
  * COMPENSAR CONTENIDO
  * Añadir padding al contenedor principal cuando la nav está visible
+ * Espacio extra para asegurar que las últimas tareas no queden ocultas
  */
 @media (max-width: 480px) {
     .dashboardContenedor--conNavegacionInferior {
-        padding-bottom: calc(52px + var(--dashboard-safeAreaBottom) + var(--dashboard-espacioLg));
+        padding-bottom: calc(var(--dashboard-alturaNavInferior) + var(--dashboard-safeAreaBottom) + var(--dashboard-espacioXl) + var(--dashboard-espacioMd));
     }
 }
 
