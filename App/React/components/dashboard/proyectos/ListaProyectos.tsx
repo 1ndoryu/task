@@ -10,7 +10,7 @@ import {DashboardPanel} from '../../shared/DashboardPanel';
 import {EstadoVacio} from '../../shared/EstadoVacio';
 import {SeccionEncabezado} from '../SeccionEncabezado';
 import {ListaTareas} from '../ListaTareas';
-import {MenuContextual} from '../../shared/MenuContextual';
+import {MenuContextualAdaptivo} from '../../shared/MenuContextualAdaptivo';
 import {BadgeInfo, BadgeGroup} from '../../shared/BadgeInfo';
 import {AccionesItem} from '../../shared/AccionesItem';
 import type {Proyecto, Tarea, DatosEdicionTarea, NivelUrgencia} from '../../../types/dashboard';
@@ -307,14 +307,7 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                             return <ProyectoItem key={proyecto.id} proyecto={proyecto} activo={proyecto.id === proyectoSeleccionadoId} tareasProyecto={tareasProyecto} estaCompartido={proyectoCompartido} onToggle={() => toggleProyecto(proyecto.id)} onEditar={() => onEditarProyecto?.(proyecto)} onEliminar={() => onEliminarProyecto?.(proyecto.id)} onContextMenu={e => manejarContextMenu(e, proyecto.id)} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={onReordenarTareas} mostrarProgreso={mostrarProgreso} ocultarTareasCompletadas={ocultarTareasCompletadas} ordenDefecto={ordenDefecto} modoCompacto={modoCompacto} onAbrirModalCrear={onAbrirModalCrear ? () => onAbrirModalCrear(proyecto.id) : undefined} />;
                         })}
 
-                    {proyectos.length === 0 && (
-                        <EstadoVacio
-                            icono={<FolderOpen size={32} />}
-                            mensaje="No hay proyectos activos"
-                            textoBoton="+ Crear proyecto"
-                            onAccion={onCrearProyecto}
-                        />
-                    )}
+                    {proyectos.length === 0 && <EstadoVacio icono={<FolderOpen size={32} />} mensaje="No hay proyectos activos" textoBoton="+ Crear proyecto" onAccion={onCrearProyecto} />}
 
                     {/* Botón añadir proyecto al final de la lista */}
                     {proyectos.length > 0 && (
@@ -325,8 +318,8 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                 </div>
             </DashboardPanel>
 
-            {/* Menu contextual */}
-            {menuContexto.visible && <MenuContextual opciones={obtenerOpcionesMenu()} posicionX={menuContexto.x} posicionY={menuContexto.y} onSeleccionar={manejarSeleccionMenu} onCerrar={cerrarMenuContexto} />}
+            {/* Menu contextual adaptivo (Desktop/Mobile) */}
+            {menuContexto.visible && <MenuContextualAdaptivo opciones={obtenerOpcionesMenu()} posicionX={menuContexto.x} posicionY={menuContexto.y} onSeleccionar={manejarSeleccionMenu} onCerrar={cerrarMenuContexto} titulo="Opciones de proyecto" />}
         </>
     );
 }

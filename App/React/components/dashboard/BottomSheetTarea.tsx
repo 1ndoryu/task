@@ -203,23 +203,23 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                         {/* Proyecto */}
                         {proyectos.length > 0 && (
                             <button type="button" className={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('proyecto')} aria-label={obtenerNombreProyecto() || 'Proyecto'} title={obtenerNombreProyecto() || 'Proyecto'}>
-                                <Layers size={15} />
+                                <Layers size={16} />
                             </button>
                         )}
 
                         {/* Prioridad */}
                         <button type="button" className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'}>
-                            <Flag size={15} />
+                            <Flag size={16} />
                         </button>
 
                         {/* Urgencia */}
                         <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
-                            <Hash size={15} />
+                            <Hash size={16} />
                         </button>
 
                         {/* Fecha límite */}
                         <button type="button" className={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fecha || 'Fecha'} title={fecha || 'Fecha'}>
-                            <Calendar size={15} />
+                            <Calendar size={16} />
                         </button>
 
                         {/* Configuración avanzada (solo edición) */}
@@ -233,14 +233,14 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                                 }}
                                 aria-label="Configuración avanzada"
                                 title="Configuración avanzada">
-                                <Settings size={15} />
+                                <Settings size={16} />
                             </button>
                         )}
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
                     <button type="button" className="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}>
-                        <Send size={15} />
+                        <Send size={16} />
                     </button>
                 </div>
             </div>

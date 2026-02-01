@@ -71,3 +71,19 @@
     border-color: var(--dashboard-bordeSutil);
     color: var(--dashboard-textoNormal);
 }
+
+/*
+ * CENTRADO VERTICAL EN MOVIL
+ * El estado vacío debe ocupar toda la altura visible y centrarse
+ */
+@media (max-width: 480px) {
+    .estadoVacioUnificado {
+        /* Ocupar altura restante de la pantalla (descontando header y nav) */
+        min-height: calc(100vh - 140px);
+        padding: var(--dashboard-espacioLg);
+    }
+
+    .estadoVacioUnificado--compacto {
+        min-height: calc(100vh - 200px);
+    }
+}

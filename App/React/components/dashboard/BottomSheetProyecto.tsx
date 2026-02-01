@@ -152,23 +152,23 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
                     <div className="bottomSheetProyecto__opcionesGrupo">
                         {/* Prioridad */}
                         <button type="button" className={`bottomSheetProyecto__accion ${prioridad ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'}>
-                            <Flag size={15} />
+                            <Flag size={16} />
                         </button>
 
                         {/* Urgencia */}
                         <button type="button" className={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
-                            <Hash size={15} />
+                            <Hash size={16} />
                         </button>
 
                         {/* Fecha límite */}
                         <button type="button" className={`bottomSheetProyecto__accion ${fechaLimite ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fechaLimite || 'Fecha límite'} title={fechaLimite || 'Fecha límite'}>
-                            <Calendar size={15} />
+                            <Calendar size={16} />
                         </button>
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
                     <button type="button" className="bottomSheetProyecto__botonGuardar" onClick={manejarGuardar} disabled={!nombre.trim() || cargando} aria-label="Crear Proyecto">
-                        <Send size={15} />
+                        <Send size={16} />
                     </button>
                 </div>
             </div>

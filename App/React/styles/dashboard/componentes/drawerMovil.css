@@ -17,7 +17,9 @@
     z-index: 998;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
     backdrop-filter: blur(2px);
 }
 
@@ -93,8 +95,8 @@
 }
 
 .drawerMovilAvatar {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--dashboard-bordePrincipal);
@@ -102,15 +104,15 @@
 }
 
 .drawerMovilAvatarInicial {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--dashboard-acento);
     color: white;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     flex-shrink: 0;
 }
@@ -125,7 +127,7 @@
 .drawerMovilNombre {
     font-weight: 600;
     color: var(--dashboard-textoActivo);
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -139,8 +141,8 @@
     text-overflow: ellipsis;
 }
 
-/* 
- * BADGE DE PLAN 
+/*
+ * BADGE DE PLAN - Ahora dentro de la info del perfil
  */
 .drawerMovilPlanBadge {
     display: inline-flex;
@@ -148,12 +150,14 @@
     gap: 4px;
     padding: 2px 8px;
     border-radius: var(--dashboard-radioSm);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-top: 4px;
+    margin-top: 2px;
     width: fit-content;
+    border: none;
+    background: transparent;
 }
 
 .drawerMovilPlanBadge--premium {
@@ -189,29 +193,6 @@
 }
 
 /* 
- * BOTON CERRAR 
- */
-.drawerMovilCerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: none;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 50%;
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.drawerMovilCerrar:hover {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoActivo);
-}
-
-/* 
  * NAVEGACION 
  */
 .drawerMovilNavegacion {
@@ -226,13 +207,13 @@
     align-items: center;
     gap: var(--dashboard-espacioMd);
     width: 100%;
-    padding: var(--dashboard-espacioMd);
-    min-height: var(--dashboard-tamanoTactilMinimo);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    min-height: 38px;
     background: none;
     border: none;
     border-radius: var(--dashboard-radioMd);
     color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     text-align: left;
     cursor: pointer;
@@ -271,7 +252,7 @@
 }
 
 .drawerMovilItem--secundario {
-    font-size: var(--dashboard-tamanoPequeno);
+    font-size: var(--dashboard-tamanoMuyPequeno);
     min-height: 40px;
     color: var(--dashboard-textoSecundario);
 }
@@ -318,16 +299,6 @@
     height: 1px;
     background: var(--dashboard-bordePrincipal);
     margin: var(--dashboard-espacioSm) 0;
-}
-
-/* 
- * PIE DEL DRAWER 
- */
-.drawerMovilPie {
-    padding: var(--dashboard-espacioMd);
-    border-top: 1px solid var(--dashboard-bordePrincipal);
-    /* Safe area para dispositivos con barra inferior */
-    padding-bottom: calc(var(--dashboard-espacioMd) + env(safe-area-inset-bottom));
 }
 
 /* 

@@ -185,12 +185,12 @@
         gap: 2px;
     }
 
-    /* 
+    /*
      * OCULTAR BOTONES AÑADIR EN MOVIL
-     * El FAB central ya proporciona esta funcionalidad de manera más accesible
+     * El FAB central proporciona funcionalidad para hábitos y proyectos
+     * pero se mantiene "+ Añadir" de tareas por ser la acción más frecuente
      */
     .añadirHabito,
-    .tareaNuevoInline,
     .tareaNuevoBoton {
         display: none !important;
     }

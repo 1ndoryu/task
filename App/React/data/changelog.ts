@@ -22,6 +22,20 @@ export interface Version {
  */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.19-beta',
+        fecha: '2026-01-31',
+        cambios: [
+            {tipo: 'mejora', descripcion: 'BottomSheets más compactos con barra de acciones horizontal'},
+            {tipo: 'mejora', descripcion: 'Modales de selección de propiedades para tareas, hábitos y proyectos'},
+            {tipo: 'mejora', descripcion: 'Badges de propiedades seleccionadas con botón para eliminar'},
+            {tipo: 'mejora', descripcion: 'Menú contextual de hábitos sincronizado entre paneles'},
+            {tipo: 'mejora', descripcion: 'Solo un menú contextual visible a la vez'},
+            {tipo: 'mejora', descripcion: 'Refactorización de modales para mejor mantenibilidad'},
+            {tipo: 'arreglo', descripcion: 'El drawer ahora aparece correctamente sobre la navegación inferior'},
+            {tipo: 'arreglo', descripcion: 'Click en foto o nombre del drawer abre el perfil'}
+        ]
+    },
+    {
         version: 'v1.0.18-beta',
         fecha: '2026-01-31',
         cambios: [

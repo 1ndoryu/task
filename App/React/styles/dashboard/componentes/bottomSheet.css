@@ -103,9 +103,12 @@
 }
 
 /* Items dentro del bottom sheet (para menus) - Diseño compacto unificado */
+/* Orden visual: Texto | Icono (texto primero, icono al lado derecho) */
 .bottomSheetItem {
     display: flex;
     align-items: center;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
     gap: var(--dashboard-espacioSm);
     padding: 6px var(--dashboard-espacioSm);
     min-height: 32px;
@@ -139,7 +142,7 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
-/* Icono del item - Compacto */
+/* Icono del item - Compacto, a la derecha */
 .bottomSheetItem__icono {
     display: flex;
     align-items: center;
@@ -148,12 +151,19 @@
     height: 16px;
     flex-shrink: 0;
     color: var(--dashboard-textoApagado);
+    order: -1;
 }
 
-/* Texto del item */
+/* Icono azul cuando el item está activo (sin check) */
+.bottomSheetItem--activo .bottomSheetItem__icono {
+    color: var(--dashboard-acento);
+}
+
+/* Texto del item - flex-grow para ocupar espacio */
 .bottomSheetItem__texto {
     flex: 1;
     font-weight: 500;
+    order: 0;
 }
 
 /* Separador entre grupos de items */

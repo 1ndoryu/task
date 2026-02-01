@@ -12,7 +12,7 @@
  */
 
 import {useEffect, useCallback, useRef} from 'react';
-import {X, Crown} from 'lucide-react';
+import {Crown} from 'lucide-react';
 import type {InfoSuscripcion} from '../../types/dashboard';
 
 export interface OpcionDrawer {
@@ -116,7 +116,7 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
     const obtenerBadgePlan = () => {
         if (!suscripcion) return null;
         const esClickeable = onClickPlan && suscripcion.plan !== 'premium';
-        
+
         if (suscripcion.plan === 'premium' && suscripcion.estado === 'activa') {
             return (
                 <span className="drawerMovilPlanBadge drawerMovilPlanBadge--premium">
@@ -127,21 +127,13 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
         }
         if (suscripcion.plan === 'trial') {
             return (
-                <button 
-                    type="button" 
-                    className="drawerMovilPlanBadge drawerMovilPlanBadge--trial drawerMovilPlanBadge--clickeable" 
-                    onClick={esClickeable ? manejarClickPlan : undefined}
-                >
+                <button type="button" className="drawerMovilPlanBadge drawerMovilPlanBadge--trial drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
                     Trial
                 </button>
             );
         }
         return (
-            <button 
-                type="button" 
-                className="drawerMovilPlanBadge drawerMovilPlanBadge--free drawerMovilPlanBadge--clickeable" 
-                onClick={esClickeable ? manejarClickPlan : undefined}
-            >
+            <button type="button" className="drawerMovilPlanBadge drawerMovilPlanBadge--free drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
                 Free
             </button>
         );
@@ -162,16 +154,12 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
                         {usuario.avatar ? <img src={usuario.avatar} alt="" className="drawerMovilAvatar" /> : <div className="drawerMovilAvatarInicial">{usuario.nombre.charAt(0).toUpperCase()}</div>}
                         <div className="drawerMovilPerfilInfo">
                             <span className="drawerMovilNombre">{usuario.nombre}</span>
-                            {usuario.email && <span className="drawerMovilEmail">{usuario.email}</span>}
+                            {obtenerBadgePlan()}
                         </div>
-                    </button>
-                    {obtenerBadgePlan()}
-                    <button type="button" className="drawerMovilCerrar" onClick={onCerrar} aria-label="Cerrar menú">
-                        <X size={20} />
                     </button>
                 </div>
 
-                {/* Navegación principal */}
+                {/* Navegación principal - Todas las opciones unificadas */}
                 <nav className="drawerMovilNavegacion">
                     {opciones.map(opcion => (
                         <div key={opcion.id}>
@@ -183,19 +171,19 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
                             {opcion.separadorDespues && <div className="drawerMovilSeparador" />}
                         </div>
                     ))}
+                    {/* Opciones secundarias fusionadas en navegación principal */}
+                    {opcionesSecundarias && opcionesSecundarias.length > 0 && (
+                        <>
+                            <div className="drawerMovilSeparador" />
+                            {opcionesSecundarias.map(opcion => (
+                                <button key={opcion.id} type="button" className={`drawerMovilItem ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
+                                    <span className="drawerMovilItemIcono">{opcion.icono}</span>
+                                    <span className="drawerMovilItemTexto">{opcion.etiqueta}</span>
+                                </button>
+                            ))}
+                        </>
+                    )}
                 </nav>
-
-                {/* Opciones secundarias (pie del drawer) */}
-                {opcionesSecundarias && opcionesSecundarias.length > 0 && (
-                    <div className="drawerMovilPie">
-                        {opcionesSecundarias.map(opcion => (
-                            <button key={opcion.id} type="button" className={`drawerMovilItem drawerMovilItem--secundario ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
-                                <span className="drawerMovilItemIcono">{opcion.icono}</span>
-                                <span className="drawerMovilItemTexto">{opcion.etiqueta}</span>
-                            </button>
-                        ))}
-                    </div>
-                )}
             </div>
         </>
     );

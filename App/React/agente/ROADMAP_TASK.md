@@ -5,324 +5,73 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.18-beta (2026-01-31)
-**Foco:** Beta Nakomi Estable - Preparación Producción
+**Versión:** v1.0.19-beta (2026-01-31)
+**Foco:** Mejoras de UI Móvil - Versión Estable
 
 ---
 
-# Revisiones nuevas. ✅ COMPLETADAS
+# Revisiones Móvil en Progreso 📱
 
-1. ✅ BottomSheet para edición de tareas - Al tocar una tarea en móvil ahora abre BottomSheetTarea en modo edición
-   - Modificado: BottomSheetTarea.tsx (acepta tareaExistente), useModalesDashboard.ts (abrirEdicionTareaMovil), DashboardGrid.tsx, DashboardModales.tsx
+## Tareas BottomSheet (1-4)
+- [ ] **2. Iconos 16px + separación 2px**: Cambiar tamaño de iconos de acciones a 16px y gap a 2px
+- [ ] **3. Modal selector propiedades - centrado y estilos**: Verificar centrado, usar variables CSS, fuente pequeña
+- [ ] **4. Badges sin fondo**: Los badges de propiedades seleccionadas deben ser sin fondo, usar variable de bordeRadius
 
-2. ✅ Bottom Sheet usa variables correctas y es compacto (verificado en implementación anterior)
+## Menú Contextual Móvil (5)
+- [ ] **5. Refactor visual menú contextual móvil**: Texto primero, icono al final (al otro lado), quitar check cuando seleccionada, icono azul
 
-3. ✅ Drawer ahora aparece encima del nav inferior
-   - Agregada clase drawerAbierto al body cuando drawer está abierto
-   - CSS en navegacionInferior.css oculta nav cuando body.drawerAbierto
-   - Opciones de perfil ahora aparecen arriba (reordenado en EncabezadoMovil.tsx)
+## Botón Añadir Tareas (6)
+- [ ] **6. Mostrar "+ Añadir" en móvil**: Actualmente está oculto por CSS en movilListas.css, debe aparecer
 
-4. ✅ Badge "MUY_ALTA" ahora muestra "MUY ALTA" (sin guion bajo)
-   - Modificado TareaItem.tsx línea 360: .toUpperCase().replace('_', ' ')
-   - Agregada opción muy_alta en ModalCreacionRapida.tsx
+## Estado Vacío (6)
+- [ ] **7. Centrar estado vacío verticalmente**: El placeholder vacío debe estar en el centro de la pantalla
 
-5. ✅ Header de modales móvil corregido
-   - modal.css: quitado text-transform: uppercase, padding: 3px 0, font-size reducido 1px
+## Bug de Altura (7)
+- [ ] **8. Bug scroll móvil con barra del navegador**: Cuando la barra del navegador cambia, las tareas se ocultan con el header
 
-6. ✅ Drawer: click en foto/nombre abre perfil, click en "Free" abre modal suscripción
-   - DrawerMovil.tsx: nuevos props onClickPerfil y onClickPlan
-   - CSS en drawerMovil.css para elementos clickeables
+## Menú Contextual Proyectos (8)
+- [ ] **9. Proyectos sin menú contextual móvil**: ListaProyectos usa MenuContextual tradicional, debe usar MenuContextualAdaptivo
 
-7. ✅ Spacing en modal configuración mejorado
-   - configuracionModerna.css: .pillOpcion padding 5px 11px, font-size 11px
-   - .propiedadesCompactas padding Sm, gap Md entre badges
-
-8. ✅ Bug de repetición corregido
-   - PanelConfiguracionTarea.tsx: configuracion.repeticion = undefined cuando tieneRepeticion es false
-   - useTareas.ts: maneja borrado de repeticion cuando viene undefined
-   - Agregado registro de evento de cambio de repetición en historial
-
-9. ✅ BottomSheet y BottomSheetCreacion más compactos (ajuste de padding y gaps)
-   - Modificado bottomSheet.css y bottomSheetCreacion.css
-   - Reducido padding vertical, margins y gaps para optimizar espacio en móvil
-
-10. ✅ Fuente reducida en BottomSheet
-    - Reducido tamaño base de 14px a 12px en títulos, inputs y botones
-    - Reducido ítems y opciones a 11px para máxima compacidad
-
-11. ✅ Refactor Barra Acciones BottomSheet
-    - Botones solo iconos en una sola fila
-    - Separación entre grupo de opciones (izquierda) y guardar (derecha)
-    - Estilos minimalistas sin bordes
-
-12. ✅ Unificación BottomSheets (SOLID)
-    - Centralizado estilos en `bottomSheetCreacion.css` con clases base `.bottomSheetCreacion__*`
-    - BottomSheetHabito ahora usa misma estructura visual que BottomSheetTarea
-    - Creado `BottomSheetProyecto.tsx` con estructura idéntica
-    - Iconos unificados a 15px, barra de acciones horizontal
-
-
-
-### Fase de Revisiones UI/UX (Prioridad Alta) 🔥
-
-#### Badge de Adjunto Premium
-- [x] El badge "Adjunto" en la configuración de tareas ya no se muestra bloqueado ✅
-  - Modificado `SeccionAdjuntos.tsx` para siempre mostrar botón "Agregar" (sin icono Crown)
-  - Usuarios Free ven el modal de upgrade al hacer clic (comportamiento via `manejarClickSubida`)
-- [x] Para usuarios Free: al dar clic, mostrar modal de suscripción ✅
-  - Ya implementado con `onClickUpgrade` callback
-
-#### Menús Contextuales - Comportamiento General
-- [x] Al abrir un menú contextual, cerrar automáticamente cualquier otro menú abierto (solo uno visible a la vez) ✅
-- [x] Hacer clic nuevamente en el trigger de un menú abierto debe cerrarlo (toggle) ✅
-  - Creado `stores/menuContextualStore.ts` como coordinador global
-  - Creado `hooks/useMenuContextualGlobal.ts` con:
-    - `useMenuContextualGlobal(prefix)`: Para componentes únicos (genera ID automático)
-    - `useMenuContextualConId(id)`: Para componentes en listas (ID estable, ej: `tarea-${id}`)
-  - Integrado en `TareaItem.tsx` y `TablaHabitos.tsx` (FilaHabito)
-  - Ahora click derecho en cualquier elemento cierra automáticamente otros menús abiertos
-
-#### Menú Contextual Hábitos - Sincronización
-- [x] **Sincronizar opciones**: Las opciones del menú contextual de hábitos en el panel de Hábitos deben aparecer también en el panel de Ejecución ✅
-- [x] **Refactorizar si es necesario**: Revisar si el sistema de menús contextuales requiere refactorización a SOLID para mantener mantenibilidad ✅
-  - Creado `config/opcionesMenuHabito.tsx` como fuente única de verdad
-  - Actualizado `TareaItem.tsx`, `ListaTareas.tsx`, `PanelEjecucion.tsx`, `DashboardGrid.tsx`
-
-#### Prioridad de Tareas
-- [x] Agregar nueva prioridad **"Muy Alta"** a las tareas ✅
-  - Agregado `'muy_alta'` a `NivelPrioridad` en `types/dashboard.ts`
-  - Actualizado peso en `useOrdenarTareas.ts` (500 puntos)
-  - Actualizado validación en `dataService.ts`
-  - Actualizado selector en `CampoPrioridad.tsx`
-  - Actualizado menú contextual y badge en `TareaItem.tsx`
-  - Actualizado mapeo importancia→prioridad en `useHabitosComoTareas.ts`
+## Drawer Móvil (9)
+- [ ] **10. Refactor DrawerMovil**:
+  - Quitar botón X (innecesario)
+  - Centrar badge Free respecto al nombre
+  - Imagen de usuario 2px más pequeña (42px)
+  - Letras de menú más pequeñas
+  - Agregar todas las opciones del menú de usuario de escritorio
+  - Eliminar drawerMovilPie, mover todo a drawerMovilNavegacion
 
 ---
 
-### Fase Móvil 📱 (Prioridad Alta)
+## Historial de Revisiones Completadas
 
-#### Interacción con Tareas
-- [x] Las tareas ya no serán editables inline en móvil (un toque abre el modal de configuración) ✅
-  - Modificado `TareaItem.tsx` con detección via `useEsMovil`
-  - En móvil/tablet, `iniciarEdicion()` ahora llama `onConfigurar()` en lugar de activar modo edición
-
-#### Nuevo Sistema "Contextual Móvil" (Bottom Sheet Unificado)
-- [x] Crear mecanismo unificado para crear/editar: tareas, hábitos y proyectos ✅
-  - Creados componentes `BottomSheetTarea.tsx` y `BottomSheetHabito.tsx`
-  - Estilos en `bottomSheetCreacion.css`
-  - Integrados en `DashboardModales.tsx` con detección de móvil
-- [x] Aparece en la parte inferior de la pantalla (no cubre toda la pantalla) ✅
-  - Utiliza el componente base `BottomSheet` existente con z-index 1500
-- [x] Estructura similar al modal de creación rápida actual ✅
-  - Input principal con autofocus
-  - Opciones compactas con iconos
-- [x] Opciones con iconos simplificados cuando no hay valor seleccionado ✅
-  - Botones de opción con estados inactivo/activo
-- [x] Diseño compacto y minimalista ✅
-  - Usa variables CSS del sistema
-  - Tipografía monospaciada consistente
-
-#### Prevención de Gestos Accidentales
-- [x] Bloquear selección de texto en toda la app móvil ✅
-- [x] Bloquear zoom con gestos (pinch-to-zoom) ✅
-  - Agregado en `movil.css` sección "PREVENCIÓN DE GESTOS ACCIDENTALES"
-  - `user-select: none` en `.dashboardContenedor` y todos sus hijos
-  - `touch-action: pan-x pan-y` en html/body para bloquear pinch-to-zoom
-  - Excepción para inputs/textareas para permitir edición
-
-#### Refactor del Menú Hamburguesa
-- [x] **Quitar opciones**: Mi equipo (ocultar), Configurar layout, Notificaciones, Nueva tarea, Nuevo hábito, Nuevo proyecto ✅
-  - Modificado `EncabezadoMovil.tsx` para simplificar `opcionesDrawer`
-- [x] **Mantener arriba**: Mi perfil, Copias de seguridad, y demás opciones del menú contextual de usuario en escritorio ✅
-  - Se mantienen en `opcionesSecundariasDrawer`
-- [x] **Fix z-index**: El menú debe aparecer POR ENCIMA del nav inferior ✅
-  - Actualizado `movil.css`: drawer z-index 300, overlay 299 (antes 200/199)
-  - Navegación inferior permanece en z-index 100
-
----
-
-### Tareas Pendientes 📋
-
-#### ✅ COMPLETADO: Refactorización SOLID de DashboardModales (2026-01-31)
-
-**Contexto:** Durante la integración de BottomSheetProyecto se detectaron múltiples violaciones SOLID en `DashboardModales.tsx`. Refactorización completada.
-
-**Problemas Identificados y Resueltos:**
-
-1. ✅ **Tipo incompleto de importancia (LSP)**
-   - Corregido: ahora usa `NivelImportancia` en lugar de cast inline
-   - Afectaba: `manejarGuardarHabitoBottomSheet()`
-
-2. ✅ **Uso excesivo de `any` (ISP/DIP)**
-   - Creado `types/creacionRapida.ts` con `DatosCreacionRapida`
-   - Tipados todos los manejadores con interfaces específicas
-   - Eliminados todos los `any` del archivo
-
-3. ✅ **Lógica de mapeo duplicada (DRY)**
-   - Extraído `calcularFechaDesdeKey()` a `utils/fecha.ts`
-   - Mapeo de frecuencia encapsulado en función local
-
-4. ✅ **Optional chaining inconsistente**
-   - Corregido `dashboard.proyectos?.length ?? 0` en todas las ocurrencias
-
-5. **Manejadores con múltiples responsabilidades (SRP)** - Pendiente futuro
-   - `manejarGuardarRapido()` mantiene switch por tipo pero ahora usa tipos correctos
-   - TO-DO: Considerar separar en funciones específicas si crece la complejidad
-
-**Archivos modificados:**
-- `components/dashboard/DashboardModales.tsx` (principal)
-- `utils/fecha.ts` (agregado `calcularFechaDesdeKey`)
-- `types/creacionRapida.ts` (nuevo archivo con interfaces)
-
----
-
-#### ✅ COMPLETADO: Refactorización Profunda de DashboardModales (2026-01-31)
-
-**Problema resuelto:** `DashboardModales.tsx` era un archivo monolítico de ~360 líneas que:
-- Renderizaba **28+ modales/componentes** diferentes en un solo archivo
-- Mezclaba modales de dominios completamente distintos
-- Contenía lógica de negocio que debería estar en hooks
-- Violaba SRP drásticamente
-
-**Resultado:** DashboardModales reducido de **361 líneas a 50 líneas**
-
-**Estructura Implementada:**
-
-```
-components/dashboard/modales/
-├── index.ts                        # Re-exporta todo
-├── ModalesAutenticacion.tsx        # Login, Perfil, Seguridad, Upgrade (~40 líneas)
-├── ModalesTareas.tsx               # PanelConfiguracionTarea, BottomSheets (~90 líneas)
-├── ModalesHabitos.tsx              # ModalHabito crear/editar (~50 líneas)
-├── ModalesProyectos.tsx            # ModalProyecto crear/editar (~50 líneas)
-├── ModalesConfiguracion.tsx        # Todos los ModalConfiguracion* (~55 líneas)
-├── ModalesCompartir.tsx            # ModalCompartir, ModalEquipos (~45 líneas)
-├── ModalesAuxiliares.tsx           # Toast, Tooltips, Admin (~60 líneas)
-└── ModalCreacionRapidaWrapper.tsx  # Wrapper desktop/móvil (~35 líneas)
-
-hooks/
-└── useCreacionEntidades.ts         # Lógica de creación centralizada (~145 líneas)
-```
-
-**Fases Completadas:**
-
-- [x] **Fase 1: Extraer hooks de lógica**
-  - Creado `hooks/useCreacionEntidades.ts` con toda la lógica de `manejarGuardar*`
-  - Incluye verificación de límites integrada
-  - DashboardModales ahora solo compone subcomponentes
-
-- [x] **Fase 2: Separar por dominio (componentes puros)**
-  - `ModalesAutenticacion.tsx`: Login, Perfil, Seguridad, Upgrade, LimiteAlcanzado
-  - `ModalesTareas.tsx`: PanelConfiguracionTarea, BottomSheetTarea (crear/editar)
-  - `ModalesHabitos.tsx`: ModalHabito crear/editar, BottomSheetHabito
-  - `ModalesProyectos.tsx`: ModalProyecto crear/editar, BottomSheetProyecto
-  - `ModalesConfiguracion.tsx`: Todos los ModalConfiguracion*, ModalVersiones, ModalTemas, etc.
-  - `ModalesCompartir.tsx`: ModalEquipos, ModalCompartir, ModalNotificaciones
-  - `ModalesAuxiliares.tsx`: Toast, Tooltips, Barra, Indicador, Admin, Experimentos
-
-- [x] **Fase 3: Props organizados por dominio**
-  - Cada componente modular recibe solo las props que necesita
-  - Se evita prop drilling excesivo pasando objetos agrupados
-
-- [x] **Fase 4: Unificar BottomSheet y Modal de creación**
-  - `ModalCreacionRapidaWrapper.tsx` maneja modal desktop
-  - BottomSheets móviles integrados en sus respectivos componentes de dominio
-
-**Beneficios logrados:**
-- Cada archivo < 100 líneas ✅
-- Fácil de testear y mantener ✅
-- Cambios en un dominio no afectan otros ✅
-- Mejor tree-shaking si algún modal no se usa ✅
-
----
-
-#### ✅ COMPLETADO: BottomSheet - Integración y Refactorización SOLID (2026-01-31)
-
-**1. Integrar BottomSheetProyecto en la App** ✅
-- [x] Conectar en `DashboardModales.tsx` (igual que BottomSheetTarea y BottomSheetHabito)
-- [x] Usar sistema existente `modalCreacionRapida === 'proyecto'` (no requiere estado adicional)
-- [x] NavegacionInferior ya usa `onCrearRapido('proyecto')` correctamente
-- **Solución:** Integrado via `modalCreacionRapida`, creado `manejarGuardarProyectoBottomSheet()`
-- **Archivos modificados:**
-  - `components/dashboard/DashboardModales.tsx`
-
-**2. Placeholders Vacíos → BottomSheet en Móvil** ✅
-- [x] Panel de Tareas vacío: botón "Crear tarea" → abrir BottomSheetTarea si esMovil
-- [x] Panel de Hábitos vacío: botón "Crear hábito" → abrir BottomSheetHabito si esMovil
-- [x] Panel de Proyectos vacío: botón "Crear proyecto" → abrir BottomSheetProyecto si esMovil
-- **Solución:** El sistema ya estaba funcional. Los botones de estados vacíos usan `abrirCreacionRapida(tipo)` que:
-  - En desktop: muestra `ModalCreacionRapida` via `ModalCreacionRapidaWrapper`
-  - En móvil: muestra BottomSheets (Tarea/Habito/Proyecto) via componentes modulares
-- **Verificado en archivos:**
-  - `ListaTareas.tsx` (línea 134): `onAccion={onAbrirModalCrear}`
-  - `TablaHabitos.tsx` (línea 337): `onAccion={onAñadirHabito}`
-  - `ListaProyectos.tsx` (línea 315): `onAccion={onCrearProyecto}`
-
-**3. Modales de Selección de Propiedades** ✅
-- [x] Crear componente `ModalSeleccionPropiedad.tsx` reutilizable
-- [x] Integrar en BottomSheetTarea: Proyecto, Prioridad, Urgencia, Fecha
-- [x] Integrar en BottomSheetHabito: Frecuencia, Importancia
-- [x] Integrar en BottomSheetProyecto: Prioridad, Urgencia, Fecha
-- **Diseño:** Modal centrado con lista de opciones, cierra al seleccionar
-- **Archivos creados:**
-  - `components/shared/ModalSeleccionPropiedad.tsx`
-- **Archivos modificados:**
-  - `components/dashboard/BottomSheetTarea.tsx`
-
-**4. Refactorización SOLID y CSS** ✅ (2026-01-31)
-- [x] **Eliminada duplicación de código** en BottomSheets:
-  - Extraídas constantes duplicadas (`OPCIONES_PRIORIDAD`, `OPCIONES_URGENCIA`, `OPCIONES_FRECUENCIA`, `OPCIONES_IMPORTANCIA`) a `utils/constantes.ts`
-  - Centralizadas funciones de mapeo (`obtenerTextoPrioridad()`, `obtenerTextoUrgencia()`, `obtenerTextoFrecuencia()`, `obtenerTextoImportancia()`)
-  - Movida función `calcularFechaDesdeOpcion()` a `utils/fecha.ts` (lógica de fechas)
-- [x] **Corregido CSS de ModalSeleccionPropiedad** para usar variables correctas:
-  - `--dashboard-borde` → `--dashboard-bordePrincipal`
-  - `--dashboard-fondoActivo` → `--dashboard-superposicionClara`
-  - `--dashboard-peligro` → `--dashboard-estadoAlta`
-  - `--dashboard-peligroIntensificado` → `--dashboard-estadoMuyAlta`
-- **Archivos creados:**
-  - `utils/constantes.ts` (constantes centralizadas)
-- **Archivos modificados:**
-  - `utils/fecha.ts` (agregada `calcularFechaDesdeOpcion()`)
-  - `components/dashboard/BottomSheetTarea.tsx` (refactorizado)
-  - `components/dashboard/BottomSheetHabito.tsx` (refactorizado)
-  - `components/dashboard/BottomSheetProyecto.tsx` (refactorizado)
-  - `styles/dashboard/componentes/bottomSheetCreacion.css` (corregidas variables)
-- **Principios SOLID aplicados:**
-  - SRP (Single Responsibility): Cada archivo tiene una responsabilidad única
-  - DRY (Don't Repeat Yourself): Eliminada duplicación de constantes y funciones
-  - Centralización: Lógica reutilizable en archivos utils/
-
----
-
-#### BottomSheet - Mejoras Futuras 🔜 (Backlog)
-  - `components/dashboard/BottomSheetHabito.tsx`
-  - `components/dashboard/BottomSheetProyecto.tsx`
-
-**4. Badges de Propiedades Seleccionadas** ✅
-- [x] Crear componente `BadgesPropiedad.tsx` para mostrar debajo del input
-- [x] Mostrar badges compactos con icono + texto corto
-- [x] Permitir eliminar propiedad tocando el badge (X)
-- **Diseño:** Fila horizontal con wrap, estilo pill con variantes de color por tipo
-- **Archivos creados:**
-  - `components/shared/BadgesPropiedad.tsx`
-- **Estilos agregados:**
-  - `styles/dashboard/componentes/bottomSheetCreacion.css` (ModalSeleccion + Badges)
-
-
-#### Refactorizaciones Completadas ✅
-- [x] **Refactor movil.css**: Dividido en 8 archivos modulares (2026-01-31) ✅
-  - `movilBase.css` - Optimizaciones base WebView y prevención de gestos (286 líneas)
-  - `movilUtilidades.css` - Clases utilitarias ocultar/mostrar (59 líneas)
-  - `movilComponentes.css` - Modales, bottom sheets, drawer (198 líneas)
-  - `movilNavegacion.css` - Navegación inferior y header móvil (107 líneas)
-  - `movilSafeAreas.css` - Safe areas y optimizaciones GPU (89 líneas)
-  - `movilGrid.css` - Grid móvil, paneles fullscreen y menú opciones (227 líneas)
-  - `movilFormularios.css` - Formularios compactos y chat inline (273 líneas)
-  - `movilListas.css` - Listas compactas proyectos/hábitos/tareas (177 líneas)
-  - Total: 1226 líneas → 8 archivos organizados (cumple límite 300 líneas)
-
-#### Prioridad Media (Usuario)
-- [ ] **Google Login**: Configurar `client_id` en consola de Google Cloud (ver documentación OAuth2)
+### Fase Móvil Completada (2026-01-31)
+- ✅ BottomSheet para edición de tareas móvil
+- ✅ Bottom Sheet compacto con variables correctas
+- ✅ Drawer encima del nav inferior
+- ✅ Badge "MUY_ALTA" muestra correctamente
+- ✅ Header de modales móvil corregido
+- ✅ Drawer: click en foto/nombre abre perfil
+- ✅ Spacing en modal configuración mejorado
+- ✅ Bug de repetición corregido
+- ✅ BottomSheet más compacto
+- ✅ Fuente reducida en BottomSheet
+- ✅ Refactor Barra Acciones BottomSheet
+- ✅ Unificación BottomSheets (SOLID)
+- ✅ Badge Adjunto Premium corregido
+- ✅ Menú contextual - solo uno visible a la vez
+- ✅ Menú contextual hábitos sincronizado
+- ✅ Prioridad "Muy Alta" agregada
+- ✅ Tareas no editables inline en móvil
+- ✅ Sistema Bottom Sheet unificado
+- ✅ Bloqueo selección texto y zoom gestos
+- ✅ Refactor menú hamburguesa
+- ✅ Refactorización SOLID de DashboardModales
+- ✅ Refactorización profunda de DashboardModales (361→50 líneas)
+- ✅ BottomSheet integración y refactorización SOLID
+- ✅ Modales de selección de propiedades
+- ✅ Badges de propiedades seleccionadas
+- ✅ Refactor movil.css en 8 archivos modulares
 
 ---
 
