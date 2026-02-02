@@ -43,17 +43,27 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [!] **CAUSA IDENTIFICADA:** Google Cloud Console indica "No se verificó la propiedad de la app Android".
-  - **Problema Real:**
-    - El Android OAuth Client existe con SHA-1 correcto
-    - **PERO** Google requiere verificación de propiedad del package name
-    - Advertencia en Console: "No se verificó la propiedad de la app de los siguientes clientes de Android: Task Nakomi"
-  - **Solución (DEFINITIVA):**
-    1. Google Cloud Console → APIs & Services → Credentials
-    2. Haz clic en la advertencia amarilla "Task Nakomi" o en el Android Client
-    3. Completar proceso de verificación de propiedad
-    4. Google confirmará que el package `com.taskNakomi.app` + SHA-1 es legítimo
-    5. Una vez verificado → Error Code 10 desaparecerá
+- [!] **Error Code 10 - Verificación de propiedad NO aplicable (app no está en Play Store).**
+  - **Nueva Información:**
+    - Google indica que verificación de propiedad solo aplica a apps publicadas en Play Store
+    - Para apps en desarrollo, la verificación NO es el problema
+  - **Causa Real del Error (Más Probable):**
+    - **OAuth Consent Screen no configurado correctamente**
+  - **Solución CRÍTICA - OAuth Consent Screen:**
+    1. Ve a: https://console.cloud.google.com/apis/credentials/consent?project=task-nakomi
+    2. Verifica la configuración:
+       - **User Type:** Debe ser "External" (permite testing)
+       - **Publishing Status:** Debe estar en "Testing" o "In production"
+       - Si está en **"Testing"** → **CRÍTICO:** Tu email debe estar en "Test users"
+         - Haz clic en "ADD USERS"
+         - Añade tu email (el que usarás para login)
+       - **Scopes:** Debe incluir `.../auth/userinfo.email` y `.../auth/userinfo.profile`
+    3. Guarda cambios
+    4. Uninstall app, reinstalar y probar
+  - **Verificación Adicional (Google Sign-In API):**
+    - Ve a: https://console.cloud.google.com/apis/library/plus.googleapis.com?project=task-nakomi
+    - O busca "Google Sign-In API" en APIs & Services
+    - Estado debe ser: **ENABLED**
 
 ---
 
