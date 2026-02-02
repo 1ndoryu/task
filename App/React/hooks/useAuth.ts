@@ -64,14 +64,17 @@ export function useAuth(): UseAuthReturn {
             // alert('Debug: Iniciando login. Nativo? ' + Capacitor.isNativePlatform());
 
             if (Capacitor.isNativePlatform()) {
-                await GoogleAuth.initialize();
-                
-                // Debug: Verificar configuración antes de signIn
                 console.log('[GoogleAuth] Config Check:', {
                     platform: Capacitor.getPlatform(),
                     isNative: Capacitor.isNativePlatform()
                 });
-                
+
+                await GoogleAuth.initialize({
+                    clientId: '90767087281-dkakjnbkbjgp2s5co7skhdlpq39epb9r.apps.googleusercontent.com',
+                    scopes: ['profile', 'email'],
+                    grantOfflineAccess: true
+                });
+
                 const user = await GoogleAuth.signIn();
                 console.log('Google User:', user);
 
@@ -117,19 +120,9 @@ export function useAuth(): UseAuthReturn {
             // Alertar en móvil para verlo inmediatamente
             if (Capacitor.isNativePlatform()) {
                 let alertMsg = `Error Google Login:\n${e?.message || 'Unknown'}\nCode: ${e?.code || 'N/A'}`;
-                
+
                 if (e?.code === '10' || e?.code === 10 || JSON.stringify(e).includes('"code":"10"') || JSON.stringify(e).includes('"code":10')) {
-                    alertMsg = '⚠️ Error Code 10 (Developer Error)\n\n' +
-                        'Pasos de Verificación:\n\n' +
-                        '1. Google Cloud Console > APIs & Services:\n' +
-                        '   - Verificar que "Google Sign-In API" esté ENABLED\n\n' +
-                        '2. Credentials > OAuth 2.0:\n' +
-                        '   - Android Client con SHA-1: 49:3D:C2:05...\n' +
-                        '   - Package: com.taskNakomi.app\n\n' +
-                        '3. OAuth Consent Screen:\n' +
-                        '   - Modo "Testing" con tu email invitado\n' +
-                        '   - O modo "Production"\n\n' +
-                        '4. Uninstall completo de la app y reinstalar';
+                    alertMsg = '⚠️ Error Code 10 (Developer Error)\n\n' + 'Pasos de Verificación:\n\n' + '1. Google Cloud Console > APIs & Services:\n' + '   - Verificar que "Google Sign-In API" esté ENABLED\n\n' + '2. Credentials > OAuth 2.0:\n' + '   - Android Client con SHA-1: 49:3D:C2:05...\n' + '   - Package: com.taskNakomi.app\n\n' + '3. OAuth Consent Screen:\n' + '   - Modo "Testing" con tu email invitado\n' + '   - O modo "Production"\n\n' + '4. Uninstall completo de la app y reinstalar';
                 }
                 alert(alertMsg);
             }

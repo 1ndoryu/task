@@ -44,6 +44,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
 - [x] Crear Android OAuth Client con SHA-1.
 - [x] Configurar `google-services.json` completo.
+- [x] **FIX Error 10:** Añadido `server_client_id` a `strings.xml` y configuración explícita en `initialize()`.
 - [!] **BLOQUEADO:** OAuth Consent Screen requiere Política de Privacidad y Términos.
   - **Causa del Bloqueo:**
     - Google Cloud Console no permite completar verificación de OAuth sin:
