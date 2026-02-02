@@ -43,22 +43,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [!] **Bloqueo Actual:** Error `Code 10` - **FALTA Android OAuth Client en google-services.json**.
-  - **Estado Actual:**
-    - [x] Nuevo proyecto Firebase creado (`task-nakomi`, project_number: 90767087281).
-    - [x] `google-services.json` actualizado con Web Client (type 3).
-    - [x] `capacitor.config.json` actualizado con nuevo Web Client ID.
-    - [!] **PROBLEMA:** Falta el Android OAuth Client (type 1) con SHA-1 en `oauth_client[]`.
-  - **Solución (5 Minutos):**
-    1. **Google Cloud Console** → [APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials?project=task-nakomi)
-    2. Clic en **"+ CREATE CREDENTIALS"** → **"OAuth client ID"**
-    3. Seleccionar **"Android"**
-    4. Ingresar:
-       - **Package name:** `com.taskNakomi.app`
-       - **SHA-1 fingerprint:** (ejecutar comando abajo para obtenerlo)
-    5. Clic "Create" → Se generará un Android Client ID
-    6. **Volver a Firebase Console** → Descargar nuevo `google-services.json`
-       - O editar manualmente el JSON añadiendo el Android client en el array `oauth_client`
+- [x] **RESUELTO:** Configuración completa de Google Auth para Android.
+  - **Estado Final:**
+    - [x] Proyecto Firebase creado (`task-nakomi`, project_number: 90767087281).
+    - [x] Android OAuth Client creado con SHA-1 en Google Cloud Console.
+    - [x] `google-services.json` actualizado con Android Client (type 1) y Web Client (type 3).
+    - [x] `capacitor.config.json` sincronizado con Web Client ID correcto.
+  - **Próximo Paso:**
+    - Ejecutar `npx cap sync android` y rebuild en Android Studio para probar.
 
 ---
 
