@@ -5,9 +5,9 @@
  */
 
 import React, {useMemo} from 'react';
-import {Trash2, Flag, Folder, AlertTriangle, ChevronDown, ChevronUp, X, Layers} from 'lucide-react';
+import {Trash2, Flag, Folder, AlertTriangle, ChevronDown, ChevronUp, X, Layers, Zap} from 'lucide-react';
 import {MenuContextual, type OpcionMenu} from '../../shared/MenuContextual';
-import type {Proyecto, NivelPrioridad} from '../../../types/dashboard';
+import type {Proyecto, NivelPrioridad, NivelUrgencia} from '../../../types/dashboard';
 import {useSeleccionMultipleStore, useCantidadSeleccionadas} from '../../../stores/seleccionMultipleStore';
 import {useSeccionesActivas} from '../../../stores/gruposTareasStore';
 
@@ -16,13 +16,15 @@ interface MenuAccionesMasivasProps {
     posicionY: number;
     onCerrar: () => void;
     onEliminarTareas: (ids: number[]) => void;
-    onCambiarPrioridad: (ids: number[], prioridad: NivelPrioridad) => void;
+
+    onCambiarPrioridad: (ids: number[], prioridad: NivelPrioridad | null) => void;
+    onCambiarUrgencia: (ids: number[], urgencia: NivelUrgencia) => void;
     onMoverProyecto: (ids: number[], proyectoId: number | undefined) => void;
     onAgrupar?: (ids: number[]) => void;
     proyectos?: Proyecto[];
 }
 
-export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarTareas, onCambiarPrioridad, onMoverProyecto, onAgrupar, proyectos = []}: MenuAccionesMasivasProps): JSX.Element {
+export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarTareas, onCambiarPrioridad, onCambiarUrgencia, onMoverProyecto, onAgrupar, proyectos = []}: MenuAccionesMasivasProps): JSX.Element {
     const {obtenerIdsSeleccionados, limpiarSeleccion, obtenerTareasSeleccionadas} = useSeleccionMultipleStore();
     const cantidadSeleccionadas = useCantidadSeleccionadas();
     const seccionesActivas = useSeccionesActivas();
@@ -53,29 +55,67 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
 
         /* Prioridades (no disponible si hay hábitos seleccionados, o si la lógica no está unificada) */
         if (!hayHabitos) {
-            ops.push(
-                {
-                    id: 'prioridad-muy_alta',
-                    etiqueta: 'Prioridad Muy Alta',
-                    icono: <AlertTriangle size={14} style={{color: 'var(--dashboard-colorMuyAlta)'}} />
-                },
-                {
-                    id: 'prioridad-alta',
-                    etiqueta: 'Prioridad Alta',
-                    icono: <ChevronUp size={14} style={{color: 'var(--dashboard-colorAlta)'}} />
-                },
-                {
-                    id: 'prioridad-media',
-                    etiqueta: 'Prioridad Media',
-                    icono: <Flag size={14} style={{color: 'var(--dashboard-colorMedia)'}} />
-                },
-                {
-                    id: 'prioridad-baja',
-                    etiqueta: 'Prioridad Baja',
-                    icono: <ChevronDown size={14} style={{color: 'var(--dashboard-colorBaja)'}} />,
-                    separadorDespues: true
-                }
-            );
+            ops.push({
+                id: 'prioridad-menu',
+                etiqueta: 'Prioridad',
+                icono: <Flag size={14} />,
+                subOpciones: [
+                    {
+                        id: 'prioridad-muy_alta',
+                        etiqueta: 'Muy Alta',
+                        icono: <Flag size={12} color="#dc2626" />
+                    },
+                    {
+                        id: 'prioridad-alta',
+                        etiqueta: 'Alta',
+                        icono: <Flag size={12} color="#ef4444" />
+                    },
+                    {
+                        id: 'prioridad-media',
+                        etiqueta: 'Media',
+                        icono: <Flag size={12} color="#f59e0b" />
+                    },
+                    {
+                        id: 'prioridad-baja',
+                        etiqueta: 'Baja',
+                        icono: <Flag size={12} color="#94a3b8" />
+                    },
+                    {
+                        id: 'prioridad-null',
+                        etiqueta: 'Sin prioridad',
+                        icono: <X size={12} />
+                    }
+                ]
+            });
+
+            ops.push({
+                id: 'urgencia-menu',
+                etiqueta: 'Urgencia',
+                icono: <Zap size={14} />,
+                separadorDespues: true,
+                subOpciones: [
+                    {
+                        id: 'urgencia-bloqueante',
+                        etiqueta: 'Bloqueante',
+                        icono: <Zap size={12} color="#ef4444" />
+                    },
+                    {
+                        id: 'urgencia-urgente',
+                        etiqueta: 'Urgente',
+                        icono: <Zap size={12} color="#f59e0b" />
+                    },
+                    {
+                        id: 'urgencia-normal',
+                        etiqueta: 'Normal',
+                        icono: <Zap size={12} color="#94a3b8" />
+                    },
+                    {
+                        id: 'urgencia-chill',
+                        etiqueta: 'Chill',
+                        icono: <Zap size={12} color="#3b82f6" />
+                    }
+                ]
+            });
         }
 
         /* Opción de mover a proyecto si hay proyectos */
@@ -119,8 +159,12 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
         if (opcionId === 'agrupar') {
             onAgrupar?.(ids);
         } else if (opcionId.startsWith('prioridad-')) {
-            const prioridad = opcionId.replace('prioridad-', '') as NivelPrioridad;
+            const prioridadStr = opcionId.replace('prioridad-', '');
+            const prioridad = prioridadStr === 'null' ? null : (prioridadStr as NivelPrioridad);
             onCambiarPrioridad(ids, prioridad);
+        } else if (opcionId.startsWith('urgencia-')) {
+            const urgenciaStr = opcionId.replace('urgencia-', '');
+            onCambiarUrgencia(ids, urgenciaStr as NivelUrgencia);
         } else if (opcionId.startsWith('mover-')) {
             const proyectoId = opcionId === 'mover-sin-proyecto' ? undefined : parseInt(opcionId.replace('mover-', ''), 10);
             onMoverProyecto(ids, proyectoId);

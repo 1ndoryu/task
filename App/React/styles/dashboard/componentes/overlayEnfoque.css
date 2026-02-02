@@ -118,9 +118,7 @@
 
 .overlayEnfoque--bloqueado .overlayEnfoqueContenedor {
     cursor: default;
-    box-shadow:
-        0 0 0 2px var(--dashboard-acento),
-        var(--dashboard-sombraFuerte);
+    box-shadow: 0 0 0 2px var(--dashboard-acento), var(--dashboard-sombraFuerte);
 }
 
 .overlayEnfoqueBotonCerrar {
@@ -155,11 +153,15 @@
     max-height: calc(90vh - 50px);
 }
 
+.overlayEnfoqueContenido .dashboardPanel.scratchpadPanel {
+    min-height: 80vh;
+}
+
 .overlayEnfoqueContenido .scratchpadContenedor {
     height: 100%;
 }
 
 .overlayEnfoqueContenido .scratchpadTextarea {
-    height: calc(90vh - 150px) !important;
+    height: 100% !important;
     min-height: 400px;
 }

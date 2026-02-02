@@ -11,6 +11,7 @@
     --dashboard-fondoPrincipal: #090909;
     --dashboard-fondoSecundario: #090909;
     --dashboard-fondoTerciario: #111111;
+    --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
     --dashboard-fondoHover: #0c0c0c;
 
     /* 
@@ -121,6 +122,7 @@
      */
     --dashboard-acento: #3b82f6;
     --dashboard-acentoHover: #2563eb;
+    --dashboard-acentoRgb: 59, 130, 246;
 
     /* 
      * SOMBRAS ADICIONALES 
@@ -214,6 +216,7 @@
     /* Color acento */
     --dashboard-acento: #60a5fa;
     --dashboard-acentoHover: #3b82f6;
+    --dashboard-acentoRgb: 96, 165, 250;
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #1a1a1a;
@@ -265,6 +268,7 @@
     /* Color acento */
     --dashboard-acento: #2563eb;
     --dashboard-acentoHover: #1d4ed8;
+    --dashboard-acentoRgb: 37, 99, 235;
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #dee2e6;

@@ -87,6 +87,20 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         [modoSeleccionActivo, tareasSeleccionadas.size, mostrarMenu]
     );
 
+    /* Handler para limpiar selección al hacer click fuera */
+    const manejarClickFondo = useCallback(
+        (evento: React.MouseEvent) => {
+            const target = evento.target as HTMLElement;
+            /* Si el click fue dentro del menú, ignorar */
+            if (target.closest('#menu-contextual')) return;
+
+            if (modoSeleccionActivo && !evento.ctrlKey && !evento.metaKey && !evento.shiftKey) {
+                limpiarSeleccion();
+            }
+        },
+        [modoSeleccionActivo, limpiarSeleccion]
+    );
+
     /* Sistema de grupos/secciones - TAREA 3 */
     const seccionesActivas = useSeccionesActivas();
     const {crearGrupo, obtenerGruposProyecto, ordenarGrupos, grupos} = useGruposTareasStore();
@@ -244,7 +258,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
     );
 
     return (
-        <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista}>
+        <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista} onClick={manejarClickFondo}>
             {/* Estado vacío cuando no hay tareas (ocultar en proyectos expandidos) */}
             {tareas.length === 0 && !ocultarPlaceholderVacio ? (
                 <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />
@@ -384,6 +398,10 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                     }}
                     onCambiarPrioridad={(ids, prioridad) => {
                         ids.forEach(id => onEditarTarea?.(id, {prioridad}));
+                        limpiarSeleccion();
+                    }}
+                    onCambiarUrgencia={(ids, urgencia) => {
+                        ids.forEach(id => onEditarTarea?.(id, {urgencia}));
                         limpiarSeleccion();
                     }}
                     onMoverProyecto={(ids, proyectoId) => {
