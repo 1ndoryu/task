@@ -167,10 +167,10 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo}: BottomShe
     const contenido = (
         <>
             {/* Overlay oscuro */}
-            <div className={`bottomSheetOverlay ${estaAbierto ? 'bottomSheetOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" style={{zIndex: 9998}} />
+            <div className={`bottomSheetOverlay ${estaAbierto ? 'bottomSheetOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" />
 
             {/* Panel inferior */}
-            <div ref={panelRef} className={`bottomSheetPanel ${estaAbierto ? 'bottomSheetPanel--visible' : ''}`} role="dialog" aria-modal="true" style={{...estiloPanel, zIndex: 9999}}>
+            <div ref={panelRef} className={`bottomSheetPanel ${estaAbierto ? 'bottomSheetPanel--visible' : ''}`} role="dialog" aria-modal="true" style={estiloPanel}>
                 {/* Indicador de arrastre - área táctil para drag-to-close */}
                 <div ref={indicadorRef} className="bottomSheetIndicador bottomSheetIndicadorArrastrable" onTouchStart={manejarTouchStart} onTouchMove={manejarTouchMove} onTouchEnd={manejarTouchEnd} onMouseDown={manejarMouseDown} />
 

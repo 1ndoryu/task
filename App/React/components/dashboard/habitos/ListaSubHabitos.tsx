@@ -94,20 +94,6 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
         setTextoNuevo('');
     }, [textoNuevo, onCrear, importanciaPadre, frecuenciaPadre]);
 
-    /* Manejar Enter para guardar, Escape para cancelar */
-    const manejarKeyDown = useCallback(
-        (e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                manejarCrear();
-            } else if (e.key === 'Escape') {
-                setMostrarInput(false);
-                setTextoNuevo('');
-            }
-        },
-        [manejarCrear]
-    );
-
     const hoy = obtenerFechaHoy();
     const completados = subhabitos.filter(sh => sh.ultimoCompletado === hoy).length;
     const total = subhabitos.length;
@@ -138,22 +124,32 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
 
             {/* Input simple - Enter para guardar */}
             {mostrarInput ? (
-                <div className="listaTareasHabito__inputContenedor">
+                <form
+                    className="listaTareasHabito__inputContenedor"
+                    onSubmit={e => {
+                        e.preventDefault();
+                        manejarCrear();
+                    }}>
                     <input
                         type="text"
                         className="listaTareasHabito__input"
                         placeholder="Nuevo subhábito..."
                         value={textoNuevo}
                         onChange={e => setTextoNuevo(e.target.value)}
-                        onKeyDown={manejarKeyDown}
+                        onKeyDown={e => {
+                            if (e.key === 'Escape') {
+                                setMostrarInput(false);
+                                setTextoNuevo('');
+                            }
+                        }}
                         onBlur={() => {
                             if (!textoNuevo.trim()) {
-                                setMostrarInput(false);
+                                setTimeout(() => setMostrarInput(false), 150);
                             }
                         }}
                         autoFocus
                     />
-                </div>
+                </form>
             ) : (
                 <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
                     <Plus size={12} />

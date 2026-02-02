@@ -25,7 +25,6 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 # Revisiones (0.3)
 
 1. Los gestos tambien deberían funcionar con los habitos pero en vez de eliminar debería ser posponer.
-2. ✅ Hay un choque, hicimos la logica de seleción multiple, en el telefono, falla porque antes mantener pulsado una tarea abria el menu contextual, y se agrego ahora que pulsar una tarea en movil activaba la seleccion multiple, no, no debe ser asi, agregaremos un boton que active la seleccion multiple (remplazarlo por el boton de busqueda y poner uno que active la selecion multiple) y dejaremos que la pulsación abra el menu contextual de la tarea como antes **CORREGIDO: Implementado modo de selección manual activado por botón (reemplaza lupa en móvil/tareas). Eliminado long-press para selección, restaurando comportamiento nativo (context menu).**
 
 
 # Nueva revision de la anterior revision (0.2)

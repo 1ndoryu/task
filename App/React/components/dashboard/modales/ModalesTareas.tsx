@@ -72,20 +72,28 @@ export function ModalesTareas({dashboard, modales, acciones, esMovil, manejarGua
             {/* BottomSheet móvil para crear tarea */}
             {esMovil && modales.modalCreacionRapida === 'tarea' && <BottomSheetTarea estaAbierto={true} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarTareaBottomSheet} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} />}
 
-            {/* BottomSheet para edición de tareas existentes (móvil) */}
+            {/* BottomSheet para edición de tareas existentes (móvil) - Reemplazado por Configuración Completa (Panel) */}
             {esMovil && modales.tareaEditandoMovil && (
-                <BottomSheetTarea
+                <PanelConfiguracionTarea
+                    key={modales.tareaEditandoMovil.id}
                     estaAbierto={true}
                     onCerrar={modales.cerrarEdicionTareaMovil}
-                    onGuardar={manejarGuardarTareaBottomSheet}
+                    onGuardar={(config, priority, text, assignment, urgency, tags) => acciones.manejarGuardarEdicionTareaGlobal(modales.tareaEditandoMovil!.id, config, priority, text, assignment, urgency, tags)}
+                    tarea={obtenerTareaConHerencia(modales.tareaEditandoMovil, dashboard.tareas, dashboard.habitos)}
+                    participantes={[]}
+                    companeros={[]}
                     proyectos={dashboard.proyectos}
-                    tareaExistente={modales.tareaEditandoMovil}
-                    onAbrirConfiguracion={() => {
-                        /* Al abrir config avanzada, cerrar BottomSheet y abrir panel */
-                        const tarea = modales.tareaEditandoMovil;
-                        modales.cerrarEdicionTareaMovil();
-                        if (tarea) modales.abrirModalEditarTarea(tarea);
+                    onCambiarProyecto={nuevoId => modales.tareaEditandoMovil && dashboard.editarTarea(modales.tareaEditandoMovil.id, {proyectoId: nuevoId})}
+                    onToggleCompletado={completado => {
+                        if (modales.tareaEditandoMovil && completado !== modales.tareaEditandoMovil.completado) dashboard.toggleTarea(modales.tareaEditandoMovil.id);
                     }}
+                    /* Subtareas */
+                    subtareas={dashboard.tareas.filter(t => t.parentId === modales.tareaEditandoMovil?.id).sort((a, b) => (a.orden || 0) - (b.orden || 0))}
+                    onCrearSubtarea={dashboard.crearTarea}
+                    onToggleSubtarea={dashboard.toggleTarea}
+                    onEliminarSubtarea={dashboard.eliminarTarea}
+                    onConfigurarSubtarea={modales.abrirModalEditarTarea}
+                    onEditarSubtarea={dashboard.editarTarea}
                 />
             )}
         </>

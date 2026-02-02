@@ -137,20 +137,6 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
         setTextoNuevaTarea('');
     }, [textoNuevaTarea, parentId, onCrearTarea, prioridadPadre]);
 
-    /* Manejar Enter */
-    const manejarKeyDown = useCallback(
-        (e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                manejarCrearTarea();
-            } else if (e.key === 'Escape') {
-                setMostrarInput(false);
-                setTextoNuevaTarea('');
-            }
-        },
-        [manejarCrearTarea]
-    );
-
     const completadas = tareas.filter(t => t.completado).length;
     const total = tareas.length;
 
@@ -200,22 +186,33 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
 
             {/* Input */}
             {mostrarInput ? (
-                <div className="listaTareasHabito__inputContenedor">
+                <form
+                    className="listaTareasHabito__inputContenedor"
+                    onSubmit={e => {
+                        e.preventDefault();
+                        manejarCrearTarea();
+                    }}>
                     <input
                         type="text"
                         className="listaTareasHabito__input"
                         placeholder="Nueva subtarea..."
                         value={textoNuevaTarea}
                         onChange={e => setTextoNuevaTarea(e.target.value)}
-                        onKeyDown={manejarKeyDown}
-                        onBlur={() => {
-                            if (!textoNuevaTarea.trim()) {
+                        onKeyDown={e => {
+                            if (e.key === 'Escape') {
                                 setMostrarInput(false);
+                                setTextoNuevaTarea('');
+                            }
+                        }}
+                        onBlur={() => {
+                            /* Timeout para permitir que el evento de submit se procese antes del blur si es por Enter/Click */
+                            if (!textoNuevaTarea.trim()) {
+                                setTimeout(() => setMostrarInput(false), 150);
                             }
                         }}
                         autoFocus
                     />
-                </div>
+                </form>
             ) : (
                 <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
                     <Plus size={12} />
