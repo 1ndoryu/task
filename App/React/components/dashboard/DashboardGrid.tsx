@@ -89,6 +89,7 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
         proyectoIdActual: filtroTareas.filtroActual.tipo === 'proyecto' ? filtroTareas.filtroActual.proyectoId : undefined,
         ocultarCompletadas: configTareas.configuracion.ocultarCompletadas,
         ocultarBadgeProyecto: configTareas.configuracion.ocultarBadgeProyecto,
+        ocultarSubtareasAutomaticamente: configTareas.configuracion.ocultarSubtareasAutomaticamente,
         modoOrden: ordenTareas.modoActual,
         valorFiltroActual: valorFiltroActual,
         opcionesFiltro: opciones.opcionesFiltro,

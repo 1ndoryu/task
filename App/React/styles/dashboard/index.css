@@ -132,6 +132,12 @@
 /* Swipeable Item (gestos deslizamiento móvil) */
 @import './componentes/swipeableItem.css';
 
+/* SubHabitos (hábitos anidados) */
+@import './componentes/subhabitos.css';
+
+/* Carpetas de Notas (organización jerárquica) */
+@import './componentes/carpetasNotas.css';
+
 /* Estilos Movil (PWA) - Siempre al final para mayor especificidad */
 /* Modularizado en archivos específicos por funcionalidad */
 @import './movilBase.css';

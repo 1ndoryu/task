@@ -7,18 +7,22 @@ export interface ConfiguracionTareas {
     /* Mostrar hábitos que "tocan hoy" como tareas en Ejecución */
     mostrarHabitosEnEjecucion: boolean;
     modoCompacto: boolean;
+    /* Ocultar subtareas automáticamente (colapsadas por defecto) */
+    ocultarSubtareasAutomaticamente: boolean;
 }
 
 /* 
  * Configuración por defecto de tareas
  * mostrarHabitosEnEjecucion: true para usuarios nuevos (Beta: mejor experiencia inicial)
+ * ocultarSubtareasAutomaticamente: false para mantener subtareas expandidas
  */
 export const CONFIG_POR_DEFECTO: ConfiguracionTareas = {
     ocultarCompletadas: true,
     ocultarBadgeProyecto: true,
     eliminarCompletadasDespuesDeUnDia: false,
     mostrarHabitosEnEjecucion: true,
-    modoCompacto: false
+    modoCompacto: false,
+    ocultarSubtareasAutomaticamente: false
 };
 
 export function useConfiguracionTareas() {
@@ -46,6 +50,10 @@ export function useConfiguracionTareas() {
         setValor(prev => ({...prev, modoCompacto: !prev.modoCompacto}));
     };
 
+    const toggleOcultarSubtareasAutomaticamente = () => {
+        setValor(prev => ({...prev, ocultarSubtareasAutomaticamente: !prev.ocultarSubtareasAutomaticamente}));
+    };
+
     return {
         configuracion: valor,
         actualizarConfiguracion: setValor,
@@ -53,6 +61,7 @@ export function useConfiguracionTareas() {
         toggleOcultarBadgeProyecto,
         toggleEliminarCompletadasDespuesDeUnDia,
         toggleMostrarHabitosEnEjecucion,
-        toggleModoCompacto
+        toggleModoCompacto,
+        toggleOcultarSubtareasAutomaticamente
     };
 }

@@ -22,6 +22,12 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+# Revisiones de las tareas anteriores (revisiones hecha por el usuario)
+
+1. El texto de la nota las ultimas palabras se cubren con el nav inferior.
+2. El css de los gestos al deslizar, el texto debe ser pequeño, el color de eliminar rojo, quita los iconos, los colores verdes y rojo tienen que difuminarse. Tambien pasa que cuando texto de la tarea es corto, el liminar no aparece al final o sea no se ocupa el 100% al ancho y no se ve al borde la pantalla como debería.
+3. El css de los subhabitos en el panel de configuracion de los habitos debe ser igual exactamente a como se vían las metas o subtarea, y sigue apareciendo las subtareas, "No hay metas o tareas para este hábito", acomodar los css (mucho mas minimalista y con la misma logica de las tareas pero ya hablamos que la diferencia esta en que los habitos si se reinician)y quitar las metas o subtareas en la configuracion de los habitos. Otro detalle es que
+
 # TAREAS PENDIENTES - SPRINT ACTUAL
 
 ## TAREA 0: Panel de Notas Versión Móvil
@@ -69,7 +75,7 @@ Implementar gestos de deslizamiento en versión móvil:
 ---
 
 ## TAREA 0.2: Subhábitos (Reemplazar Subtareas en Hábitos)
-**Estado:** ⬜ Pendiente | **Prioridad:** Media
+**Estado:** ✅ Completada | **Prioridad:** Media
 
 ### Descripción:
 Las subtareas de hábitos se reemplazan por "subhábitos":
@@ -80,11 +86,19 @@ Las subtareas de hábitos se reemplazan por "subhábitos":
 - Heredan inicialmente propiedades del hábito padre
 
 ### Subtareas:
-- [ ] Modificar modelo de datos de hábitos para soportar subhábitos
-- [ ] Crear UI para crear/editar subhábitos
-- [ ] Implementar herencia inicial de propiedades
-- [ ] Implementar lógica de frecuencia independiente
-- [ ] Adaptar panel de hábitos para mostrar subhábitos
+- [x] Modificar modelo de datos de hábitos para soportar subhábitos
+- [x] Crear UI para crear/editar subhábitos
+- [x] Implementar herencia inicial de propiedades
+- [x] Implementar lógica de frecuencia independiente
+- [x] Adaptar panel de hábitos para mostrar subhábitos
+
+### Archivos modificados:
+- `types/dashboard.ts` - Añadido interfaces SubHabito y DatosNuevoSubHabito
+- `stores/habitosStore.ts` - Añadido acciones CRUD para subhábitos
+- `components/dashboard/habitos/ListaSubHabitos.tsx` - Nuevo componente para listar/editar subhábitos
+- `components/dashboard/habitos/FormularioHabitoModerno.tsx` - Integración de ListaSubHabitos
+- `components/dashboard/ModalHabito.tsx` - Callbacks para subhábitos
+- `styles/dashboard/componentes/subhabitos.css` - Estilos para subhábitos
 
 ### DUDAS TAREA 0.2:
 > **Pregunta 1:** ¿Los subhábitos pueden tener sus propios subhábitos (anidación múltiple) o solo un nivel? 
@@ -98,7 +112,7 @@ Las subtareas de hábitos se reemplazan por "subhábitos":
 ---
 
 ## TAREA 0.3: Opción Ocultar Subtareas Automáticamente
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja
+**Estado:** ✅ Completada | **Prioridad:** Baja
 
 ### Descripción:
 Agregar configuración en panel de ejecución/tareas:
@@ -107,9 +121,17 @@ Agregar configuración en panel de ejecución/tareas:
 - Cuando está activado: subtareas colapsadas por defecto
 
 ### Subtareas:
-- [ ] Agregar opción en configuración del panel
-- [ ] Persistir preferencia en localStorage/store
-- [ ] Aplicar lógica de colapso automático
+- [x] Agregar opción en configuración del panel
+- [x] Persistir preferencia en localStorage/store
+- [x] Aplicar lógica de colapso automático
+
+### Archivos modificados:
+- `hooks/useConfiguracionTareas.ts` - Añadido ocultarSubtareasAutomaticamente
+- `hooks/dashboard/useListaTareasLogica.ts` - Lógica para expandir/colapsar según configuración
+- `components/dashboard/ListaTareas.tsx` - Prop ocultarSubtareasAutomaticamente
+- `components/paneles/PanelEjecucion.tsx` - Prop ocultarSubtareasAutomaticamente
+- `components/dashboard/DashboardGrid.tsx` - Pasar configuración al panel
+- `components/dashboard/ModalConfiguracionTareas.tsx` - Toggle para la opción
 
 ---
 
@@ -152,10 +174,27 @@ También debe funcionar en el panel de ejecución.
 ---
 
 ## TAREA 0.6: Sincronizar Configuración de Jornada
-**Estado:** ⬜ Pendiente | **Prioridad:** Media
+**Estado:** ✅ Completada (verificada) | **Prioridad:** Media
 
 ### Descripción:
 La configuración de jornada debe sincronizarse en todos los paneles/vistas.
+
+### Análisis:
+El sistema ya estaba correctamente implementado:
+- `configuracionUsuarioStore.ts`: Store con `horaFinDia` persistido en localStorage
+- `fecha.ts`: `configurarHoraFinDia()` y `obtenerFechaEfectiva()` que ajusta la fecha según la hora configurada
+- `inicializarHoraFinDiaInmediatamente()`: Lee del localStorage ANTES de que el store se rehidrate
+- `actividadService.ts`: Todos los registros usan `obtenerFechaHoy()` que respeta la configuración
+- `mapaCalorUtils.ts`: Usa `obtenerFechaEfectiva()` y `obtenerFechaHoy()` correctamente
+- `habitosStore.ts`: Los toggles de hábitos usan `obtenerFechaHoy()`
+- `ModalConfiguracionUsuario.tsx`: UI para configurar la hora (0-23)
+
+### Archivos que ya implementan correctamente:
+- `stores/configuracionUsuarioStore.ts` - Store y sincronización
+- `utils/fecha.ts` - Lógica de fecha efectiva
+- `services/actividadService.ts` - Registro de actividad
+- `utils/mapaCalorUtils.ts` - Mapa de calor
+- `components/configuracion/ModalConfiguracionUsuario.tsx` - UI de configuración
 
 ### DUDAS TAREA 0.6:
 > **Pregunta:** ¿La configuración de jornada ya existe en algún lugar? ¿Dónde se define actualmente?
@@ -205,7 +244,7 @@ Las actividades registradas ANTES de esta implementación no tendrán nombres gu
 ---
 
 ## TAREA 2.1: Sistema de Carpetas para Notas
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Complejidad:** Alta
+**Estado:** ✅ Completada | **Prioridad:** Media | **Complejidad:** Alta
 
 ### Descripción:
 Implementar sistema de carpetas:
@@ -216,11 +255,29 @@ Implementar sistema de carpetas:
 - Menú contextual en notas: ver, mover a carpeta, eliminar, renombrar
 
 ### Subtareas:
-- [ ] Crear modelo de datos para carpetas
-- [ ] Crear UI de navegación de carpetas
-- [ ] Implementar menú contextual en notas
-- [ ] Implementar "mover a carpeta"
-- [ ] Migrar notas existentes a carpeta "General"
+- [x] Crear modelo de datos para carpetas (BD y TypeScript)
+- [x] Crear repositorio PHP para CRUD de carpetas
+- [x] Crear API controller para carpetas
+- [x] Crear servicio y store de carpetas en frontend
+- [x] Crear UI de navegación de carpetas
+- [x] Implementar "mover a carpeta" en lista de notas
+- [x] Migrar notas existentes a carpeta "General" (automático - NULL = General)
+
+### Archivos creados:
+- `Database/Schema.php` - Tabla glory_carpetas_notas y campo carpeta_id en notas
+- `Repository/CarpetasNotasRepository.php` - CRUD de carpetas
+- `Api/CarpetasNotasApiController.php` - Endpoints REST para carpetas
+- `stores/carpetasNotasStore.ts` - Estado de carpetas
+- `components/dashboard/notas/NavegadorCarpetas.tsx` - UI navegación
+- `styles/dashboard/componentes/carpetasNotas.css` - Estilos
+
+### Archivos modificados:
+- `Repository/NotasRepository.php` - Filtrar por carpeta, mover nota
+- `services/notasService.ts` - Servicio carpetas y mover nota
+- `types/notas.ts` - Interface CarpetaNota y campo carpetaId
+- `components/dashboard/notas/ModalNotasExpandido.tsx` - Integración carpetas
+- `components/dashboard/notas/ListaNotasGuardadas.tsx` - Opción mover a carpeta
+- `styles/dashboard/index.css` - Import del CSS
 
 ---
 

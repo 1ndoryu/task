@@ -36,6 +36,8 @@ interface ListaTareasProps {
     proyectos?: Proyecto[];
     ocultarCompletadas?: boolean;
     ocultarBadgeProyecto?: boolean;
+    /* Ocultar subtareas automáticamente (colapsadas por defecto) */
+    ocultarSubtareasAutomaticamente?: boolean;
     onCompartirTarea?: (tarea: Tarea) => void;
     estaCompartida?: (tareaId: number) => boolean;
     obtenerParticipantes?: (tarea: Tarea) => Participante[];
@@ -54,7 +56,7 @@ interface ListaTareasProps {
     ocultarPlaceholderVacio?: boolean;
 }
 
-export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear, ocultarPlaceholderVacio = false}: ListaTareasProps): JSX.Element {
+export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, ocultarSubtareasAutomaticamente = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear, ocultarPlaceholderVacio = false}: ListaTareasProps): JSX.Element {
     /* Filtros básicos */
     const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
     const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
@@ -66,7 +68,8 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         onEditarTarea,
         onCrearTarea,
         onConfigurarTarea,
-        pendientes
+        pendientes,
+        ocultarSubtareasAutomaticamente
     });
 
     /* Lógica de Ordenamiento (Drag & Drop) */

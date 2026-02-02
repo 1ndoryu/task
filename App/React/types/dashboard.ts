@@ -64,6 +64,27 @@ export const FRECUENCIA_POR_DEFECTO: FrecuenciaHabito = {
     tipo: 'diario'
 };
 
+/*
+ * SubHabito: Hábito anidado dentro de otro hábito
+ * Solo permite un nivel de anidación (sin subhábitos recursivos)
+ * Hereda inicialmente propiedades del padre pero puede tener frecuencia e importancia independiente
+ */
+export interface SubHabito {
+    id: number;
+    nombre: string;
+    importancia: NivelImportancia;
+    frecuencia?: FrecuenciaHabito;
+    historialCompletados: string[];
+    historialPospuestos?: string[];
+    ultimoCompletado?: string;
+    fechaCreacion: string;
+    /* Campos heredados del padre al crear (pueden modificarse independientemente) */
+    diasInactividad: number;
+    racha: number;
+    pausado?: boolean;
+    fechaPausa?: string;
+}
+
 export interface Habito {
     id: number;
     nombre: string;
@@ -87,6 +108,8 @@ export interface Habito {
     fechaPausa?: string /* Fecha ISO de cuando se pauso el habito */;
     /* IDs de tareas asociadas al habito, en orden personalizado (Fase 14.8) */
     tareasIds?: number[];
+    /* SubHabitos: hábitos anidados con frecuencia e importancia independiente */
+    subhabitos?: SubHabito[];
 }
 
 /*
@@ -267,6 +290,16 @@ export interface DatosNuevoHabito {
     descripcion?: string;
     icono?: string;
     colorIcono?: string;
+}
+
+/*
+ * Datos para crear un nuevo subhabito
+ * Hereda inicialmente propiedades del habito padre
+ */
+export interface DatosNuevoSubHabito {
+    nombre: string;
+    importancia: NivelImportancia;
+    frecuencia?: FrecuenciaHabito;
 }
 
 /*

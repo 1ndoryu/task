@@ -1,0 +1,346 @@
+/*
+ * Estilos para sistema de carpetas de notas
+ * TAREA 2.1: Sistema de Carpetas para Notas
+ */
+
+/* Navegador de Carpetas */
+.navegadorCarpetas {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--espaciado-md);
+}
+
+.navegadorCarpetasHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--espaciado-md);
+    padding-bottom: var(--espaciado-sm);
+    border-bottom: 1px solid var(--borde-color);
+}
+
+.navegadorCarpetasTitulo {
+    font-size: var(--fuente-tamano-base);
+    font-weight: 500;
+    color: var(--texto-color);
+    margin: 0;
+}
+
+.navegadorCarpetasBotonNueva {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--fondo-hover);
+    color: var(--texto-color);
+    border-radius: var(--radio-md);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.navegadorCarpetasBotonNueva:hover {
+    background: var(--acento-color);
+    color: var(--fondo-color);
+}
+
+/* Formulario crear/editar */
+.navegadorCarpetasFormulario {
+    display: flex;
+    gap: var(--espaciado-xs);
+    margin-bottom: var(--espaciado-sm);
+    padding: var(--espaciado-sm);
+    background: var(--fondo-hover);
+    border-radius: var(--radio-sm);
+}
+
+.navegadorCarpetasFormulario--inline {
+    margin-bottom: 0;
+    padding: 0;
+    background: transparent;
+    flex: 1;
+}
+
+.navegadorCarpetasInput {
+    flex: 1;
+    padding: var(--espaciado-xs) var(--espaciado-sm);
+    background: var(--fondo-color);
+    border: 1px solid var(--borde-color);
+    border-radius: var(--radio-sm);
+    color: var(--texto-color);
+    font-size: var(--fuente-tamano-pequeno);
+}
+
+.navegadorCarpetasInput:focus {
+    outline: none;
+    border-color: var(--acento-color);
+}
+
+.navegadorCarpetasBotonAccion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radio-sm);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.navegadorCarpetasBotonAccion--confirmar {
+    color: var(--exito-color);
+}
+
+.navegadorCarpetasBotonAccion--confirmar:hover {
+    background: rgba(var(--exito-rgb), 0.15);
+}
+
+.navegadorCarpetasBotonAccion--cancelar {
+    color: var(--texto-secundario);
+}
+
+.navegadorCarpetasBotonAccion--cancelar:hover {
+    background: var(--fondo-hover);
+}
+
+/* Lista de carpetas */
+.navegadorCarpetasLista {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.navegadorCarpetasCargando {
+    color: var(--texto-secundario);
+    text-align: center;
+    padding: var(--espaciado-lg);
+}
+
+/* Item de carpeta */
+.navegadorCarpetaItem {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-xs);
+    border-radius: var(--radio-sm);
+    position: relative;
+}
+
+.navegadorCarpetaItem:hover {
+    background: var(--fondo-hover);
+}
+
+.navegadorCarpetaItem--virtual {
+    opacity: 0.9;
+}
+
+.navegadorCarpetaBoton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    background: transparent;
+    border: none;
+    color: var(--texto-color);
+    cursor: pointer;
+    text-align: left;
+    border-radius: var(--radio-sm);
+    transition: background-color 0.15s ease;
+}
+
+.navegadorCarpetaBoton:hover {
+    background: transparent;
+}
+
+.navegadorCarpetaIcono {
+    color: var(--texto-secundario);
+    flex-shrink: 0;
+}
+
+.navegadorCarpetaNombre {
+    flex: 1;
+    font-size: var(--fuente-tamano-pequeno);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.navegadorCarpetaContador {
+    font-size: var(--fuente-tamano-mini);
+    color: var(--texto-secundario);
+    background: var(--fondo-hover);
+    padding: 2px 6px;
+    border-radius: var(--radio-completo);
+    min-width: 20px;
+    text-align: center;
+}
+
+.navegadorCarpetaFlecha {
+    color: var(--texto-secundario);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+/* Acciones de carpeta */
+.navegadorCarpetaAcciones {
+    display: none;
+    gap: 2px;
+    padding-right: var(--espaciado-xs);
+}
+
+.navegadorCarpetaItem:hover .navegadorCarpetaAcciones {
+    display: flex;
+}
+
+.navegadorCarpetaAccionBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: transparent;
+    color: var(--texto-secundario);
+    border-radius: var(--radio-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.navegadorCarpetaAccionBoton:hover {
+    background: var(--fondo-hover);
+    color: var(--texto-color);
+}
+
+.navegadorCarpetaAccionBoton--peligro:hover {
+    background: rgba(var(--peligro-rgb), 0.15);
+    color: var(--peligro-color);
+}
+
+/* Header con botón volver */
+.notasHeaderConCarpeta {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+}
+
+.notasBotonVolver {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--fondo-hover);
+    color: var(--texto-color);
+    border-radius: var(--radio-md);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.notasBotonVolver:hover {
+    background: var(--acento-color);
+    color: var(--fondo-color);
+}
+
+.notasCarpetaActual {
+    font-size: var(--fuente-tamano-pequeno);
+    color: var(--texto-secundario);
+}
+
+/* Menu contextual mover a carpeta */
+.menuMoverACarpeta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--espaciado-xs);
+    min-width: 150px;
+}
+
+.menuMoverACarpetaTitulo {
+    font-size: var(--fuente-tamano-mini);
+    color: var(--texto-secundario);
+    padding: var(--espaciado-xs) var(--espaciado-sm);
+    border-bottom: 1px solid var(--borde-color);
+    margin-bottom: var(--espaciado-xs);
+}
+
+.menuMoverACarpetaOpcion {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+    padding: var(--espaciado-xs) var(--espaciado-sm);
+    background: transparent;
+    border: none;
+    color: var(--texto-color);
+    font-size: var(--fuente-tamano-pequeno);
+    cursor: pointer;
+    border-radius: var(--radio-sm);
+    text-align: left;
+    width: 100%;
+}
+
+.menuMoverACarpetaOpcion:hover {
+    background: var(--fondo-hover);
+}
+
+.menuMoverACarpetaOpcion--activa {
+    background: rgba(var(--acento-rgb), 0.1);
+    color: var(--acento-color);
+}
+
+/* Estilos para botones de acción en lista de notas */
+.listaNotasItemAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-xs);
+}
+
+.listaNotasItemBotonAccion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--texto-secundario);
+    border-radius: var(--radio-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.listaNotasItemBotonAccion:hover {
+    background: var(--fondo-hover);
+    color: var(--texto-color);
+}
+
+.listaNotasItemMoverContenedor {
+    position: relative;
+}
+
+.listaNotasItemMoverContenedor .menuMoverACarpeta {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 100;
+    background: var(--fondo-color);
+    border: 1px solid var(--borde-color);
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-md);
+    min-width: 160px;
+}
+
+/* Ajuste de la búsqueda para mostrar carpeta activa */
+.vistaNotasBusqueda {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaciado-sm);
+    padding: var(--espaciado-md);
+    border-bottom: 1px solid var(--borde-color);
+}

@@ -17,9 +17,10 @@ interface ModalConfiguracionTareasProps {
     onToggleEstilos?: () => void;
     onToggleMostrarHabitos: () => void;
     onToggleModoCompacto: () => void;
+    onToggleOcultarSubtareas: () => void;
 }
 
-export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto}: ModalConfiguracionTareasProps): JSX.Element {
+export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas}: ModalConfiguracionTareasProps): JSX.Element {
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Vista">
             <div className="contenedorOpcionesConfig">
@@ -44,7 +45,17 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                 </div>
                 <div className="separadorOpcionesConfig" />
 
-                {/* Opcion 3: Eliminar Completadas */}
+                {/* Opcion 3: Ocultar Subtareas Automáticamente */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Colapsar subtareas automáticamente</span>
+                        <span className="descripcionOpcionConfig">Las subtareas estarán colapsadas por defecto</span>
+                    </div>
+                    <ToggleSwitch checked={configuracion.ocultarSubtareasAutomaticamente} onChange={onToggleOcultarSubtareas} />
+                </div>
+                <div className="separadorOpcionesConfig" />
+
+                {/* Opcion 4: Eliminar Completadas */}
                 <div className="itemOpcionConfig">
                     <div className="detallesOpcionConfig">
                         <span className="tituloOpcionConfig">Limpieza automática</span>
@@ -54,7 +65,7 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                 </div>
                 <div className="separadorOpcionesConfig" />
 
-                {/* Opcion 4: Mostrar Hábitos en Ejecución */}
+                {/* Opcion 5: Mostrar Hábitos en Ejecución */}
                 <div className="itemOpcionConfig">
                     <div className="detallesOpcionConfig">
                         <span className="tituloOpcionConfig">Mostrar hábitos en Ejecución</span>
@@ -65,7 +76,7 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
 
                 <div className="separadorOpcionesConfig" />
 
-                {/* Opcion 5: Modo Compacto */}
+                {/* Opcion 6: Modo Compacto */}
                 <div className="itemOpcionConfig">
                     <div className="detallesOpcionConfig">
                         <span className="tituloOpcionConfig">Modo Compacto</span>

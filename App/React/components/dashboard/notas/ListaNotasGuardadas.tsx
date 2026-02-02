@@ -1,5 +1,6 @@
-import {Clock, Trash2, Edit2} from 'lucide-react';
-import type {Nota} from '../../../types/notas';
+import {useState, useCallback} from 'react';
+import {Clock, Trash2, Edit2, FolderInput, Folder} from 'lucide-react';
+import type {Nota, CarpetaNota} from '../../../types/notas';
 import {formatearFechaRelativa} from '../../../utils/fecha';
 
 interface ListaNotasGuardadasProps {
@@ -8,9 +9,43 @@ interface ListaNotasGuardadasProps {
     notaActivaId?: number | null;
     onSeleccionar: (nota: Nota) => void;
     onEliminar: (id: number) => void;
+    carpetas?: CarpetaNota[];
+    onMoverNota?: (notaId: number, carpetaId: number | null) => Promise<boolean>;
 }
 
-export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSeleccionar, onEliminar}: ListaNotasGuardadasProps): JSX.Element {
+/* Menu para mover nota a carpeta */
+function MenuMoverACarpeta({nota, carpetas, onMover, onCerrar}: {nota: Nota; carpetas: CarpetaNota[]; onMover: (carpetaId: number | null) => void; onCerrar: () => void}): JSX.Element {
+    return (
+        <div className="menuMoverACarpeta" onClick={e => e.stopPropagation()}>
+            <div className="menuMoverACarpetaTitulo">Mover a carpeta:</div>
+            {carpetas.map(carpeta => (
+                <button
+                    key={carpeta.id ?? 'general'}
+                    className={`menuMoverACarpetaOpcion ${nota.carpetaId === carpeta.id ? 'menuMoverACarpetaOpcion--activa' : ''}`}
+                    onClick={() => {
+                        onMover(carpeta.id);
+                        onCerrar();
+                    }}>
+                    <Folder size={12} />
+                    <span>{carpeta.nombre}</span>
+                </button>
+            ))}
+        </div>
+    );
+}
+
+export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSeleccionar, onEliminar, carpetas = [], onMoverNota}: ListaNotasGuardadasProps): JSX.Element {
+    const [menuMoverAbierto, setMenuMoverAbierto] = useState<number | null>(null);
+
+    const manejarMover = useCallback(
+        async (notaId: number, carpetaId: number | null) => {
+            if (onMoverNota) {
+                await onMoverNota(notaId, carpetaId);
+            }
+        },
+        [onMoverNota]
+    );
+
     if (modo === 'grid') {
         return (
             <div className="modalNotasGrid">
@@ -76,15 +111,32 @@ export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSelecci
                                 <span>{formatearFechaRelativa(nota.fechaModificacion)}</span>
                             </div>
                         </div>
-                        <button
-                            className="listaNotasItemEliminar"
-                            onClick={e => {
-                                e.stopPropagation();
-                                onEliminar(nota.id);
-                            }}
-                            title="Eliminar nota">
-                            <Trash2 size={14} />
-                        </button>
+                        <div className="listaNotasItemAcciones">
+                            {/* Botón mover a carpeta */}
+                            {carpetas.length > 0 && onMoverNota && (
+                                <div className="listaNotasItemMoverContenedor">
+                                    <button
+                                        className="listaNotasItemBotonAccion"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            setMenuMoverAbierto(menuMoverAbierto === nota.id ? null : nota.id);
+                                        }}
+                                        title="Mover a carpeta">
+                                        <FolderInput size={14} />
+                                    </button>
+                                    {menuMoverAbierto === nota.id && <MenuMoverACarpeta nota={nota} carpetas={carpetas} onMover={carpetaId => manejarMover(nota.id, carpetaId)} onCerrar={() => setMenuMoverAbierto(null)} />}
+                                </div>
+                            )}
+                            <button
+                                className="listaNotasItemEliminar"
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    onEliminar(nota.id);
+                                }}
+                                title="Eliminar nota">
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}

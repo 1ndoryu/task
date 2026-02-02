@@ -24,6 +24,8 @@ interface PanelEjecucionProps {
     proyectoIdActual?: number;
     ocultarCompletadas: boolean;
     ocultarBadgeProyecto: boolean;
+    /* Ocultar subtareas automáticamente (colapsadas por defecto) */
+    ocultarSubtareasAutomaticamente?: boolean;
     modoOrden: string;
     valorFiltroActual: string;
     opcionesFiltro: OpcionFiltro[];
@@ -54,7 +56,7 @@ interface PanelEjecucionProps {
     onConfigurarTarea?: (tarea: Tarea) => void;
 }
 
-export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea}: PanelEjecucionProps): JSX.Element {
+export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, ocultarSubtareasAutomaticamente = false, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea}: PanelEjecucionProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
 
     return (
@@ -86,10 +88,10 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                     </>
                 }
             />
-            <ListaTareas tareas={tareas} proyectoId={proyectoIdActual} proyectos={proyectos} ocultarCompletadas={ocultarCompletadas} ocultarBadgeProyecto={ocultarBadgeProyecto} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={esOrdenManual ? onReordenarTareas : undefined} habilitarDrag={esOrdenManual} onCompartirTarea={onCompartirTarea} estaCompartida={estaCompartida} obtenerParticipantes={obtenerParticipantes} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onToggleHabito={onToggleHabito} onPosponerHabito={onPosponerHabito} onPausarHabito={onPausarHabito} onActualizarHabito={onActualizarHabito} modoCompacto={modoCompacto} onConfigurarTarea={onConfigurarTarea} onAbrirModalCrear={onAbrirModalNuevaTarea} />
+            <ListaTareas tareas={tareas} proyectoId={proyectoIdActual} proyectos={proyectos} ocultarCompletadas={ocultarCompletadas} ocultarBadgeProyecto={ocultarBadgeProyecto} ocultarSubtareasAutomaticamente={ocultarSubtareasAutomaticamente} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={esOrdenManual ? onReordenarTareas : undefined} habilitarDrag={esOrdenManual} onCompartirTarea={onCompartirTarea} estaCompartida={estaCompartida} obtenerParticipantes={obtenerParticipantes} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onToggleHabito={onToggleHabito} onPosponerHabito={onPosponerHabito} onPausarHabito={onPausarHabito} onActualizarHabito={onActualizarHabito} modoCompacto={modoCompacto} onConfigurarTarea={onConfigurarTarea} onAbrirModalCrear={onAbrirModalNuevaTarea} />
 
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Tareas">
-                <ListaTareas tareas={tareas} proyectoId={proyectoIdActual} proyectos={proyectos} ocultarCompletadas={ocultarCompletadas} ocultarBadgeProyecto={ocultarBadgeProyecto} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={esOrdenManual ? onReordenarTareas : undefined} habilitarDrag={esOrdenManual} onCompartirTarea={onCompartirTarea} estaCompartida={estaCompartida} obtenerParticipantes={obtenerParticipantes} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onToggleHabito={onToggleHabito} onPosponerHabito={onPosponerHabito} onPausarHabito={onPausarHabito} onActualizarHabito={onActualizarHabito} modoCompacto={modoCompacto} onConfigurarTarea={onConfigurarTarea} onAbrirModalCrear={onAbrirModalNuevaTarea} />
+                <ListaTareas tareas={tareas} proyectoId={proyectoIdActual} proyectos={proyectos} ocultarCompletadas={ocultarCompletadas} ocultarBadgeProyecto={ocultarBadgeProyecto} ocultarSubtareasAutomaticamente={ocultarSubtareasAutomaticamente} onToggleTarea={onToggleTarea} onCrearTarea={onCrearTarea} onEditarTarea={onEditarTarea} onEliminarTarea={onEliminarTarea} onReordenarTareas={esOrdenManual ? onReordenarTareas : undefined} habilitarDrag={esOrdenManual} onCompartirTarea={onCompartirTarea} estaCompartida={estaCompartida} obtenerParticipantes={obtenerParticipantes} onEditarHabito={onEditarHabito} onEliminarHabito={onEliminarHabito} onToggleHabito={onToggleHabito} onPosponerHabito={onPosponerHabito} onPausarHabito={onPausarHabito} onActualizarHabito={onActualizarHabito} modoCompacto={modoCompacto} onConfigurarTarea={onConfigurarTarea} onAbrirModalCrear={onAbrirModalNuevaTarea} />
             </OverlayEnfoque>
         </>
     );

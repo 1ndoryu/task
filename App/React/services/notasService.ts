@@ -1,5 +1,5 @@
 import {obtenerNonce} from '../utils/notasUtils';
-import {Nota, RespuestaListaNotas, RespuestaOperacionNota} from '../types/notas';
+import {Nota, CarpetaNota, RespuestaListaNotas, RespuestaOperacionNota} from '../types/notas';
 
 const API_BASE = '/wp-json/glory/v1/notas';
 
@@ -104,6 +104,81 @@ export const notasService = {
 
         if (!response.success) {
             throw new Error('Error al eliminar nota');
+        }
+        return true;
+    },
+
+    /**
+     * Mueve una nota a otra carpeta
+     */
+    async moverNota(notaId: number, carpetaId: number | null): Promise<boolean> {
+        const response = await fetchApi<{success: boolean}>(`/${notaId}/mover`, {
+            method: 'PUT',
+            body: JSON.stringify({carpetaId})
+        });
+
+        if (!response.success) {
+            throw new Error('Error al mover nota');
+        }
+        return true;
+    }
+};
+
+/*
+ * Servicio para carpetas de notas
+ */
+export const carpetasNotasService = {
+    /**
+     * Obtiene todas las carpetas del usuario
+     */
+    async listar(): Promise<CarpetaNota[]> {
+        const response = await fetchApi<{success: boolean; carpetas: CarpetaNota[]}>('/carpetas');
+        if (!response.success) {
+            throw new Error('Error al cargar carpetas');
+        }
+        return response.carpetas;
+    },
+
+    /**
+     * Crea una nueva carpeta
+     */
+    async crear(nombre: string): Promise<CarpetaNota> {
+        const response = await fetchApi<{success: boolean; carpeta: CarpetaNota}>('/carpetas', {
+            method: 'POST',
+            body: JSON.stringify({nombre})
+        });
+
+        if (!response.success) {
+            throw new Error('Error al crear carpeta');
+        }
+        return response.carpeta;
+    },
+
+    /**
+     * Renombra una carpeta
+     */
+    async renombrar(id: number, nombre: string): Promise<boolean> {
+        const response = await fetchApi<{success: boolean}>(`/carpetas/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({nombre})
+        });
+
+        if (!response.success) {
+            throw new Error('Error al renombrar carpeta');
+        }
+        return true;
+    },
+
+    /**
+     * Elimina una carpeta (las notas se mueven a General)
+     */
+    async eliminar(id: number): Promise<boolean> {
+        const response = await fetchApi<{success: boolean}>(`/carpetas/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.success) {
+            throw new Error('Error al eliminar carpeta');
         }
         return true;
     }

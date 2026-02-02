@@ -4,3 +4,4 @@
 
 export {FormularioHabitoModerno} from './FormularioHabitoModerno';
 export {ListaTareasHabito} from './ListaTareasHabito';
+export {ListaSubHabitos} from './ListaSubHabitos';

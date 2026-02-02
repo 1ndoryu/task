@@ -1,6 +1,7 @@
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect, useRef} from 'react';
 import {Tarea, DatosEdicionTarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
+import {tieneSubtareas} from '../../utils/jerarquiaTareas';
 
 interface UseListaTareasLogicaProps {
     tareas: Tarea[];
@@ -9,12 +10,42 @@ interface UseListaTareasLogicaProps {
     onCrearTarea?: (datos: DatosEdicionTarea) => void;
     onConfigurarTarea?: (tarea: Tarea) => void;
     pendientes: Tarea[];
+    /* Si true, las subtareas estarán colapsadas por defecto */
+    ocultarSubtareasAutomaticamente?: boolean;
 }
 
-export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrearTarea, onConfigurarTarea, pendientes}: UseListaTareasLogicaProps) {
-    const [tareasExpandidas, setTareasExpandidas] = useState<Set<number>>(new Set());
+export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrearTarea, onConfigurarTarea, pendientes, ocultarSubtareasAutomaticamente = false}: UseListaTareasLogicaProps) {
+    /*
+     * Estado de tareas expandidas
+     * Si ocultarSubtareasAutomaticamente es false: expandir todas las tareas padre por defecto
+     * Si ocultarSubtareasAutomaticamente es true: mantener todas colapsadas (Set vacío)
+     */
+    const [tareasExpandidas, setTareasExpandidas] = useState<Set<number>>(() => {
+        if (ocultarSubtareasAutomaticamente) return new Set();
+        /* Expandir todas las tareas que tienen subtareas */
+        const padresIds = tareas.filter(t => !t.parentId && tieneSubtareas(tareas, t.id)).map(t => t.id);
+        return new Set(padresIds);
+    });
     const [tareaConfigurando, setTareaConfigurando] = useState<Tarea | null>(null);
     const [tareaMoviendo, setTareaMoviendo] = useState<Tarea | null>(null);
+
+    /* Referencia para evitar recalcular en cada render */
+    const prevOcultarRef = useRef(ocultarSubtareasAutomaticamente);
+
+    /* Efecto para actualizar cuando cambia la configuración */
+    useEffect(() => {
+        if (prevOcultarRef.current !== ocultarSubtareasAutomaticamente) {
+            prevOcultarRef.current = ocultarSubtareasAutomaticamente;
+            if (ocultarSubtareasAutomaticamente) {
+                /* Colapsar todas */
+                setTareasExpandidas(new Set());
+            } else {
+                /* Expandir todas las tareas padre */
+                const padresIds = tareas.filter(t => !t.parentId && tieneSubtareas(tareas, t.id)).map(t => t.id);
+                setTareasExpandidas(new Set(padresIds));
+            }
+        }
+    }, [ocultarSubtareasAutomaticamente, tareas]);
 
     const toggleColapsar = useCallback((tareaId: number) => {
         setTareasExpandidas(prev => {

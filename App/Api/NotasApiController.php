@@ -364,3 +364,6 @@ class NotasApiController
 }
 
 NotasApiController::register();
+
+/* Registrar también el controlador de carpetas */
+CarpetasNotasApiController::register();

@@ -6,9 +6,9 @@ class Schema
 {
     /**
      * Versión actual de la base de datos
-     * v1.0.10: Tablas para mapa de calor de actividad e historial de hábitos
+     * v1.0.12: Tabla de carpetas para notas y campo carpeta_id
      */
-    public const DB_VERSION = '1.0.11';
+    public const DB_VERSION = '1.0.12';
 
     /**
      * Nombre de la opción donde guardamos la versión instalada
@@ -37,6 +37,18 @@ class Schema
     {
         global $wpdb;
 
+        /* Reparar tabla compartidos */
+        self::repairCompartidosTable($wpdb);
+
+        /* Reparar tabla notas (añadir carpeta_id) */
+        self::repairNotasTable($wpdb);
+    }
+
+    /**
+     * Repara la tabla de compartidos
+     */
+    private static function repairCompartidosTable(\wpdb $wpdb): void
+    {
         $table_compartidos = $wpdb->prefix . 'glory_compartidos';
 
         /* Verificar si la tabla existe */
@@ -89,6 +101,38 @@ class Schema
 
         if (!$columna_rol) {
             $wpdb->query("ALTER TABLE $table_compartidos ADD COLUMN rol varchar(50) DEFAULT 'colaborador' AFTER usuario_id");
+        }
+    }
+
+    /**
+     * Repara la tabla de notas (añadir carpeta_id)
+     */
+    private static function repairNotasTable(\wpdb $wpdb): void
+    {
+        $table_notas = $wpdb->prefix . 'glory_notas';
+
+        /* Verificar si la tabla existe */
+        $tabla_existe = $wpdb->get_var(
+            $wpdb->prepare("SHOW TABLES LIKE %s", $table_notas)
+        );
+
+        if (!$tabla_existe) {
+            return;
+        }
+
+        /* Verificar y añadir columna carpeta_id si falta */
+        $columna_carpeta = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                 WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'carpeta_id'",
+                DB_NAME,
+                $table_notas
+            )
+        );
+
+        if (!$columna_carpeta) {
+            $wpdb->query("ALTER TABLE $table_notas ADD COLUMN carpeta_id bigint(20) DEFAULT NULL AFTER user_id");
+            $wpdb->query("ALTER TABLE $table_notas ADD KEY carpeta_id (carpeta_id)");
         }
     }
 
@@ -280,18 +324,37 @@ class Schema
         /* 
          * Tabla de Notas (Sistema de Guardado del Scratchpad)
          * Permite guardar notas del scratchpad con título automático
+         * carpeta_id: Referencia a la carpeta (NULL = General)
          */
         $table_notas = $wpdb->prefix . 'glory_notas';
         $sql_notas = "CREATE TABLE $table_notas (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
+            carpeta_id bigint(20) DEFAULT NULL,
             titulo varchar(255) NOT NULL,
             contenido longtext NOT NULL,
             fecha_creacion datetime DEFAULT CURRENT_TIMESTAMP,
             fecha_modificacion datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY user_id (user_id),
+            KEY carpeta_id (carpeta_id),
             KEY fecha_creacion (fecha_creacion)
+        ) $charset_collate;";
+
+        /* 
+         * Tabla de Carpetas de Notas (Organización jerárquica)
+         * Permite organizar notas en carpetas
+         */
+        $table_carpetas_notas = $wpdb->prefix . 'glory_carpetas_notas';
+        $sql_carpetas_notas = "CREATE TABLE $table_carpetas_notas (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            nombre varchar(255) NOT NULL,
+            orden int(11) DEFAULT 0,
+            fecha_creacion datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY orden (orden)
         ) $charset_collate;";
 
         /* 
@@ -390,6 +453,7 @@ class Schema
         dbDelta($sql_compartidos);
         dbDelta($sql_mensajes);
         dbDelta($sql_mensajes_leidos);
+        dbDelta($sql_carpetas_notas);
         dbDelta($sql_notas);
         dbDelta($sql_actividad);
         dbDelta($sql_habitos_historial);

@@ -6,13 +6,14 @@
  * - Lista de hábitos con historial básico
  * - Historial detallado para modal/heatmap
  * - Acciones CRUD y toggle
+ * - SubHábitos (hábitos anidados con frecuencia independiente)
  *
  * @package App/React/stores
  */
 
 import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
-import type {Habito, DatosNuevoHabito} from '../types/dashboard';
+import type {Habito, DatosNuevoHabito, SubHabito, DatosNuevoSubHabito} from '../types/dashboard';
 import type {HistorialHabito, EstadoHabito, DiaHistorial, EstadisticasHabito} from '../types/historialHabitos';
 import {obtenerFechaHoy, fueCompletadoHoy} from '../utils/fecha';
 import {registrarHabitoCumplido, registrarHabitoDesmarcado, registrarHabitoPospuesto} from '../services/actividadService';
@@ -64,6 +65,12 @@ interface HabitosActions {
 
     /* Actualizar orden de tareas del hábito - Fase 14.8 */
     actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => void;
+
+    /* SubHabitos: CRUD y toggle para hábitos anidados */
+    crearSubHabito: (habitoId: number, datos: DatosNuevoSubHabito) => SubHabito | null;
+    editarSubHabito: (habitoId: number, subHabitoId: number, datos: DatosNuevoSubHabito) => void;
+    eliminarSubHabito: (habitoId: number, subHabitoId: number) => SubHabito | null;
+    toggleSubHabito: (habitoId: number, subHabitoId: number) => {accion: 'completado' | 'desmarcado'} | null;
 }
 
 export type HabitosStore = HabitosState & HabitosActions;
@@ -447,6 +454,154 @@ export const useHabitosStore = create<HabitosStore>()(
                         false,
                         'actualizarOrdenTareasHabito'
                     );
+                },
+
+                /* SubHabitos: Crear subhábito heredando propiedades del padre */
+                crearSubHabito: (habitoId, datos) => {
+                    const habito = get().habitos.find(h => h.id === habitoId);
+                    if (!habito) return null;
+
+                    const hoy = obtenerFechaHoy();
+                    const nuevoSubHabito: SubHabito = {
+                        id: Date.now(),
+                        nombre: datos.nombre,
+                        importancia: datos.importancia,
+                        frecuencia: datos.frecuencia || habito.frecuencia,
+                        historialCompletados: [],
+                        historialPospuestos: [],
+                        ultimoCompletado: undefined,
+                        fechaCreacion: hoy,
+                        diasInactividad: 0,
+                        racha: 0,
+                        pausado: false
+                    };
+
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => {
+                                if (h.id !== habitoId) return h;
+                                return {
+                                    ...h,
+                                    subhabitos: [...(h.subhabitos || []), nuevoSubHabito]
+                                };
+                            })
+                        }),
+                        false,
+                        'crearSubHabito'
+                    );
+
+                    return nuevoSubHabito;
+                },
+
+                /* SubHabitos: Editar subhábito */
+                editarSubHabito: (habitoId, subHabitoId, datos) => {
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => {
+                                if (h.id !== habitoId) return h;
+                                return {
+                                    ...h,
+                                    subhabitos: (h.subhabitos || []).map(sh => {
+                                        if (sh.id !== subHabitoId) return sh;
+                                        return {
+                                            ...sh,
+                                            nombre: datos.nombre,
+                                            importancia: datos.importancia,
+                                            frecuencia: datos.frecuencia
+                                        };
+                                    })
+                                };
+                            })
+                        }),
+                        false,
+                        'editarSubHabito'
+                    );
+                },
+
+                /* SubHabitos: Eliminar subhábito */
+                eliminarSubHabito: (habitoId, subHabitoId) => {
+                    const habito = get().habitos.find(h => h.id === habitoId);
+                    if (!habito) return null;
+
+                    const subHabito = habito.subhabitos?.find(sh => sh.id === subHabitoId);
+                    if (!subHabito) return null;
+
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => {
+                                if (h.id !== habitoId) return h;
+                                return {
+                                    ...h,
+                                    subhabitos: (h.subhabitos || []).filter(sh => sh.id !== subHabitoId)
+                                };
+                            })
+                        }),
+                        false,
+                        'eliminarSubHabito'
+                    );
+
+                    return subHabito;
+                },
+
+                /* SubHabitos: Toggle completado para hoy */
+                toggleSubHabito: (habitoId, subHabitoId) => {
+                    const hoy = obtenerFechaHoy();
+                    const habito = get().habitos.find(h => h.id === habitoId);
+                    if (!habito) return null;
+
+                    const subHabito = habito.subhabitos?.find(sh => sh.id === subHabitoId);
+                    if (!subHabito) return null;
+
+                    const estabaCompletadoHoy = subHabito.ultimoCompletado === hoy;
+                    const accion = estabaCompletadoHoy ? 'desmarcado' : 'completado';
+
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => {
+                                if (h.id !== habitoId) return h;
+                                return {
+                                    ...h,
+                                    subhabitos: (h.subhabitos || []).map(sh => {
+                                        if (sh.id !== subHabitoId) return sh;
+
+                                        let nuevoHistorial = [...(sh.historialCompletados || [])];
+                                        let nuevoUltimoCompletado = sh.ultimoCompletado;
+                                        let nuevaRacha = sh.racha;
+                                        let nuevosDiasInactividad = sh.diasInactividad;
+
+                                        if (estabaCompletadoHoy) {
+                                            /* Desmarcar: quitar hoy del historial */
+                                            nuevoHistorial = nuevoHistorial.filter(f => f !== hoy);
+                                            /* Recalcular ultimo completado */
+                                            nuevoHistorial.sort();
+                                            nuevoUltimoCompletado = nuevoHistorial.length > 0 ? nuevoHistorial[nuevoHistorial.length - 1] : undefined;
+                                            nuevaRacha = Math.max(0, nuevaRacha - 1);
+                                        } else {
+                                            /* Marcar completado hoy */
+                                            if (!nuevoHistorial.includes(hoy)) {
+                                                nuevoHistorial = [...nuevoHistorial, hoy].slice(-365);
+                                            }
+                                            nuevoUltimoCompletado = hoy;
+                                            nuevaRacha = nuevaRacha + 1;
+                                            nuevosDiasInactividad = 0;
+                                        }
+
+                                        return {
+                                            ...sh,
+                                            historialCompletados: nuevoHistorial,
+                                            ultimoCompletado: nuevoUltimoCompletado,
+                                            racha: nuevaRacha,
+                                            diasInactividad: nuevosDiasInactividad
+                                        };
+                                    })
+                                };
+                            })
+                        }),
+                        false,
+                        `toggleSubHabito/${accion}`
+                    );
+
+                    return {accion};
                 }
             }),
             {
@@ -521,7 +676,13 @@ export const habitosActions = {
     restaurarHabito: (habito: Habito) => useHabitosStore.getState().restaurarHabito(habito),
     getHabitos: () => useHabitosStore.getState().habitos,
     getHabito: (id: number) => useHabitosStore.getState().habitos.find(h => h.id === id),
-    actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => useHabitosStore.getState().actualizarOrdenTareasHabito(habitoId, tareasIds)
+    actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => useHabitosStore.getState().actualizarOrdenTareasHabito(habitoId, tareasIds),
+
+    /* SubHabitos */
+    crearSubHabito: (habitoId: number, datos: DatosNuevoSubHabito) => useHabitosStore.getState().crearSubHabito(habitoId, datos),
+    editarSubHabito: (habitoId: number, subHabitoId: number, datos: DatosNuevoSubHabito) => useHabitosStore.getState().editarSubHabito(habitoId, subHabitoId, datos),
+    eliminarSubHabito: (habitoId: number, subHabitoId: number) => useHabitosStore.getState().eliminarSubHabito(habitoId, subHabitoId),
+    toggleSubHabito: (habitoId: number, subHabitoId: number) => useHabitosStore.getState().toggleSubHabito(habitoId, subHabitoId)
 };
 
 /* Exponer store globalmente para debugging/migración */

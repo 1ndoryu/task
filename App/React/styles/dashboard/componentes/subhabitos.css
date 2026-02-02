@@ -1,0 +1,317 @@
+/*
+ * Estilos para SubHabitos
+ * Hábitos anidados dentro de un hábito padre
+ * Con frecuencia e importancia independiente
+ */
+
+/* Contenedor principal */
+.listaSubHabitos {
+    margin-top: var(--espaciado-md);
+    border-top: 1px solid var(--borde);
+    padding-top: var(--espaciado-md);
+}
+
+/* Encabezado colapsable */
+.listaSubHabitos__encabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+    width: 100%;
+    padding: var(--espaciado-xs) 0;
+    background: transparent;
+    border: none;
+    color: var(--texto-secundario);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.listaSubHabitos__encabezado:hover {
+    color: var(--texto-primario);
+}
+
+.listaSubHabitos__titulo {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.listaSubHabitos__contador {
+    background: var(--fondo-terciario);
+    padding: 2px 6px;
+    border-radius: var(--radio-sm);
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+/* Contenido */
+.listaSubHabitos__contenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaciado-xs);
+    padding-top: var(--espaciado-sm);
+}
+
+/* Fila de subhábito */
+.subHabitoFila {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+    padding: var(--espaciado-sm);
+    background: var(--fondo-secundario);
+    border-radius: var(--radio-md);
+    border: 1px solid transparent;
+    transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.subHabitoFila:hover {
+    border-color: var(--borde);
+}
+
+.subHabitoFila--completado {
+    opacity: 0.6;
+}
+
+.subHabitoFila--completado .subHabitoFila__nombre {
+    text-decoration: line-through;
+    color: var(--texto-terciario);
+}
+
+/* Checkbox del subhábito */
+.subHabitoFila__check {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radio-sm);
+    border: 1.5px solid var(--borde-fuerte);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+    color: transparent;
+}
+
+.subHabitoFila__check:hover {
+    border-color: var(--acento);
+}
+
+.subHabitoFila__check--activo {
+    background: var(--acento);
+    border-color: var(--acento);
+    color: var(--texto-sobre-acento);
+}
+
+/* Contenido del subhábito */
+.subHabitoFila__contenido {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.subHabitoFila__nombre {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--texto-primario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subHabitoFila__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-xs);
+    flex-wrap: wrap;
+}
+
+.subHabitoFila__importancia {
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: var(--radio-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.subHabitoFila__importancia--muyalta {
+    background: var(--color-muy-alta);
+    color: var(--texto-sobre-muy-alta, #fff);
+}
+
+.subHabitoFila__importancia--alta {
+    background: var(--color-alta);
+    color: var(--texto-sobre-alta, #fff);
+}
+
+.subHabitoFila__importancia--media {
+    background: var(--color-media);
+    color: var(--texto-sobre-media, #333);
+}
+
+.subHabitoFila__importancia--baja {
+    background: var(--color-baja);
+    color: var(--texto-sobre-baja, #333);
+}
+
+.subHabitoFila__frecuencia {
+    font-size: 0.65rem;
+    color: var(--texto-terciario);
+}
+
+.subHabitoFila__racha {
+    font-size: 0.65rem;
+    color: var(--color-exito);
+}
+
+/* Acciones del subhábito */
+.subHabitoFila__acciones {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-xs);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.subHabitoFila:hover .subHabitoFila__acciones {
+    opacity: 1;
+}
+
+.subHabitoFila__boton {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radio-sm);
+    border: none;
+    background: var(--fondo-terciario);
+    color: var(--texto-secundario);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.subHabitoFila__boton:hover {
+    background: var(--fondo-hover);
+    color: var(--texto-primario);
+}
+
+.subHabitoFila__boton--eliminar:hover {
+    background: var(--color-error-fondo, rgba(239, 68, 68, 0.1));
+    color: var(--color-error, #ef4444);
+}
+
+/* Formulario de subhábito */
+.formularioSubHabito {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaciado-sm);
+    padding: var(--espaciado-sm);
+    background: var(--fondo-secundario);
+    border-radius: var(--radio-md);
+    border: 1px solid var(--acento);
+}
+
+.formularioSubHabito__campos {
+    display: flex;
+    gap: var(--espaciado-sm);
+}
+
+.formularioSubHabito__input {
+    flex: 1;
+    padding: var(--espaciado-sm);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-sm);
+    background: var(--fondo-primario);
+    color: var(--texto-primario);
+    font-size: 0.85rem;
+}
+
+.formularioSubHabito__input:focus {
+    outline: none;
+    border-color: var(--acento);
+}
+
+.formularioSubHabito__propiedades {
+    display: flex;
+    gap: var(--espaciado-sm);
+    flex-wrap: wrap;
+}
+
+.formularioSubHabito__acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--espaciado-sm);
+}
+
+.formularioSubHabito__boton {
+    padding: var(--espaciado-xs) var(--espaciado-md);
+    border-radius: var(--radio-sm);
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.formularioSubHabito__boton--cancelar {
+    background: var(--fondo-terciario);
+    color: var(--texto-secundario);
+}
+
+.formularioSubHabito__boton--cancelar:hover {
+    background: var(--fondo-hover);
+}
+
+.formularioSubHabito__boton--guardar {
+    background: var(--acento);
+    color: var(--texto-sobre-acento);
+}
+
+.formularioSubHabito__boton--guardar:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.formularioSubHabito__boton--guardar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Botón añadir */
+.listaSubHabitos__botonAnadir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaciado-xs);
+    padding: var(--espaciado-sm);
+    background: transparent;
+    border: 1px dashed var(--borde);
+    border-radius: var(--radio-md);
+    color: var(--texto-secundario);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.listaSubHabitos__botonAnadir:hover {
+    border-color: var(--acento);
+    color: var(--acento);
+}
+
+/* Responsive móvil */
+@media (max-width: 768px) {
+    .subHabitoFila__acciones {
+        opacity: 1;
+    }
+
+    .subHabitoFila__meta {
+        gap: var(--espaciado-xs);
+    }
+
+    .formularioSubHabito__propiedades {
+        flex-direction: column;
+    }
+}

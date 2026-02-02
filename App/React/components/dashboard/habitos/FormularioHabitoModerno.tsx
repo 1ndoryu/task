@@ -7,15 +7,17 @@
  * Fase 9.7.7.4: Estandarizado con FilaPropiedades
  * Fase 13: Soporte para pausar habitos
  * Fase 14.8: Soporte para tareas/metas del habito
+ * SubHabitos: Hábitos anidados con frecuencia e importancia independiente
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, etc.)
  */
 
 import {Pause, Play} from 'lucide-react';
-import type {NivelImportancia, FrecuenciaHabito, Habito, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
+import type {NivelImportancia, FrecuenciaHabito, Habito, Tarea, DatosEdicionTarea, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 import {ListaTareasHabito} from './ListaTareasHabito';
+import {ListaSubHabitos} from './ListaSubHabitos';
 
 interface FormularioHabitoModernoProps {
     /* Campos principales */
@@ -51,13 +53,21 @@ interface FormularioHabitoModernoProps {
     onConfigurarTareaHabito?: (tarea: Tarea) => void;
     onReordenarTareasHabito?: (tareasIds: number[]) => void;
     onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
+    /* SubHabitos: CRUD y toggle para hábitos anidados */
+    onCrearSubHabito?: (datos: DatosNuevoSubHabito) => void;
+    onEditarSubHabito?: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
+    onEliminarSubHabito?: (subHabitoId: number) => void;
+    onToggleSubHabito?: (subHabitoId: number) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, tareasHabito, onToggleTareaHabito, onCrearTareaHabito, onEliminarTareaHabito, onConfigurarTareaHabito, onReordenarTareasHabito, onEditarTareaHabito}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, tareasHabito, onToggleTareaHabito, onCrearTareaHabito, onEliminarTareaHabito, onConfigurarTareaHabito, onReordenarTareasHabito, onEditarTareaHabito, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
 
     /* Determinar si mostrar la sección de tareas */
     const mostrarTareasHabito = modoEdicion && habito && habito.id > 0 && onCrearTareaHabito && onToggleTareaHabito && onEliminarTareaHabito;
+
+    /* Determinar si mostrar la sección de subhábitos */
+    const mostrarSubHabitos = modoEdicion && habito && habito.id > 0 && onCrearSubHabito && onToggleSubHabito;
 
     return (
         <div id="formulario-habito-moderno" className="formularioProyectoModerno">
@@ -109,6 +119,19 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
                     </button>
                     {estaPausado && habito?.fechaPausa && <span className="botonPausaHabito__fecha">desde {new Date(habito.fechaPausa).toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})}</span>}
                 </FilaPropiedades>
+            )}
+
+            {/* SubHabitos: hábitos anidados con frecuencia e importancia independiente */}
+            {mostrarSubHabitos && habito && (
+                <ListaSubHabitos
+                    subhabitos={habito.subhabitos || []}
+                    onCrear={onCrearSubHabito!}
+                    onEditar={onEditarSubHabito!}
+                    onEliminar={onEliminarSubHabito!}
+                    onToggle={onToggleSubHabito!}
+                    importanciaPadre={importancia}
+                    frecuenciaPadre={frecuencia}
+                />
             )}
 
             {/* Tareas/Metas del habito - Fase 14.8 */}

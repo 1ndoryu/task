@@ -7,11 +7,12 @@
  * - usePanelChat para la gestión del panel de chat
  * - Fase 10.8.6: Removido PestanasModal (código muerto)
  * - Fase 14.8: Soporte para tareas/metas del habito
+ * - SubHabitos: Hábitos anidados con frecuencia e importancia independiente
  */
 
 import {useState, useCallback, useEffect, useMemo} from 'react';
 import {Activity, BarChart2} from 'lucide-react';
-import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea} from '../../types/dashboard';
+import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
 import type {EstadoHabito} from '../shared';
@@ -62,9 +63,13 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
         habilitado: modoEdicion
     });
 
-    /* Estado de cumplimiento de hoy */
+    /* Estado de cumplimiento de hoy y acciones del store */
     const toggleHabito = useHabitosStore(state => state.toggleHabito);
     const posponerHabito = useHabitosStore(state => state.posponerHabito);
+    const crearSubHabito = useHabitosStore(state => state.crearSubHabito);
+    const editarSubHabito = useHabitosStore(state => state.editarSubHabito);
+    const eliminarSubHabito = useHabitosStore(state => state.eliminarSubHabito);
+    const toggleSubHabito = useHabitosStore(state => state.toggleSubHabito);
     const hoy = obtenerFechaHoy();
 
     let estadoHoy: EstadoHabito = 'pendiente';
@@ -72,6 +77,43 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
         if (habito.historialCompletados?.includes(hoy)) estadoHoy = 'completado';
         else if (habito.historialPospuestos?.includes(hoy)) estadoHoy = 'pospuesto';
     }
+
+    /* Callbacks para subhábitos */
+    const manejarCrearSubHabito = useCallback(
+        (datos: DatosNuevoSubHabito) => {
+            if (habito) {
+                crearSubHabito(habito.id, datos);
+            }
+        },
+        [habito, crearSubHabito]
+    );
+
+    const manejarEditarSubHabito = useCallback(
+        (subHabitoId: number, datos: DatosNuevoSubHabito) => {
+            if (habito) {
+                editarSubHabito(habito.id, subHabitoId, datos);
+            }
+        },
+        [habito, editarSubHabito]
+    );
+
+    const manejarEliminarSubHabito = useCallback(
+        (subHabitoId: number) => {
+            if (habito) {
+                eliminarSubHabito(habito.id, subHabitoId);
+            }
+        },
+        [habito, eliminarSubHabito]
+    );
+
+    const manejarToggleSubHabito = useCallback(
+        (subHabitoId: number) => {
+            if (habito) {
+                toggleSubHabito(habito.id, subHabitoId);
+            }
+        },
+        [habito, toggleSubHabito]
+    );
 
     /*
      * Filtrar tareas que pertenecen a este hábito
@@ -244,6 +286,11 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onConfigurarTareaHabito={onConfigurarTarea}
                                     onReordenarTareasHabito={manejarReordenarTareas}
                                     onEditarTareaHabito={onEditarTarea}
+                                    /* Props para subhábitos */
+                                    onCrearSubHabito={manejarCrearSubHabito}
+                                    onEditarSubHabito={manejarEditarSubHabito}
+                                    onEliminarSubHabito={manejarEliminarSubHabito}
+                                    onToggleSubHabito={manejarToggleSubHabito}
                                 />
                             </div>
                             {/* Input de comentario cuando el chat esta oculto */}
