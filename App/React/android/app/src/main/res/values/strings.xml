@@ -4,5 +4,4 @@
     <string name="title_activity_main">Tasks</string>
     <string name="package_name">com.taskNakomi.app</string>
     <string name="custom_url_scheme">com.taskNakomi.app</string>
-    <string name="server_client_id">84327954353-6nrfkji91kjmhiri87920rojr19j4v14.apps.googleusercontent.com</string>
 </resources>
