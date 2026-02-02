@@ -198,6 +198,11 @@
     max-width: 400px;
 }
 
+/* Variante para el buscador centrado en el header del modal */
+.modalNotasBusqueda--headerCentrado {
+    margin: 0 auto;
+}
+
 .modalNotasBusquedaIcono {
     color: var(--dashboard-textoMuyApagado);
     flex-shrink: 0;

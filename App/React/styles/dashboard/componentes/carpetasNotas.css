@@ -378,13 +378,22 @@
 
 /*
  * Acciones del header del modal de notas
- * Revision 7: Todos los botones en el header del modal
+ * Layout de 3 secciones: izquierda, centro, derecha
  */
-.notasAccionesHeader {
+.notasAccionesHeaderIzquierda,
+.notasAccionesHeaderDerecha {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioXs);    flex: 1;
-    min-width: 0;}
+    gap: var(--dashboard-espacioSx);
+}
+
+.notasAccionesHeaderIzquierda {
+    justify-content: flex-start;
+}
+
+.notasAccionesHeaderDerecha {
+    justify-content: flex-end;
+}
 
 /* Estado activo para botones de panel */
 .vistaNotasAccionBoton--activo {

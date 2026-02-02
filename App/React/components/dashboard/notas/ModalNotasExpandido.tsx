@@ -178,31 +178,35 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const claseModal = `modalContenedor--expandido modalNotasExpandidoContenedor ${maximizado ? 'modalNotasExpandidoContenedor--maximizado' : ''} ${clasePaneles}`;
     const textoOrdenamiento = ordenamiento === 'modificacion' ? 'Modificación' : 'Creación';
 
-    /* Acciones del header del modal - todos los botones juntos */
+    /* Acciones del header del modal - botones a la izquierda, buscador al centro, controles a la derecha */
     const accionesHeader = (
-        <div className="notasAccionesHeader">
-            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
-                <Plus size={14} />
-            </button>
-            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
-                <ArrowUpDown size={14} />
-            </button>
+        <>
+            <div className="notasAccionesHeaderIzquierda">
+                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
+                    <Plus size={14} />
+                </button>
+                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
+                    <ArrowUpDown size={14} />
+                </button>
+            </div>
             {/* Buscador centrado en el header */}
-            <div className="modalNotasBusqueda">
+            <div className="modalNotasBusqueda modalNotasBusqueda--headerCentrado">
                 <Search size={14} className="modalNotasBusquedaIcono" />
                 <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
                 {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
             </div>
-            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
-                <PanelLeftClose size={14} />
-            </button>
-            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
-                <PanelRightClose size={14} />
-            </button>
-            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
-                {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            </button>
-        </div>
+            <div className="notasAccionesHeaderDerecha">
+                <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
+                    <PanelLeftClose size={14} />
+                </button>
+                <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
+                    <PanelRightClose size={14} />
+                </button>
+                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
+                    {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                </button>
+            </div>
+        </>
     );
 
     return (
