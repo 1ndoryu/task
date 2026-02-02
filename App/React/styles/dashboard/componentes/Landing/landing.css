@@ -323,6 +323,28 @@
     max-width: 1300px;
     margin: 0 auto;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.landingFooterLinks {
+    display: flex;
+    justify-content: center;
+    gap: var(--dashboard-espacioLg);
+    flex-wrap: wrap;
+}
+
+.landingFooterLink {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    text-decoration: none;
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.landingFooterLink:hover {
+    color: var(--dashboard-textoNormal);
+    text-decoration: underline;
 }
 
 .landingFooterTexto {

@@ -107,6 +107,14 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
 
             {/* FOOTER */}
             <footer id="landing-footer" className="landingFooter">
+                <div className="landingFooterLinks">
+                    <a href="/politica-privacidad" className="landingFooterLink">
+                        Política de Privacidad
+                    </a>
+                    <a href="/terminos-servicio" className="landingFooterLink">
+                        Términos de Servicio
+                    </a>
+                </div>
                 <p className="landingFooterTexto">Glory &copy; {new Date().getFullYear()}</p>
             </footer>
         </div>
