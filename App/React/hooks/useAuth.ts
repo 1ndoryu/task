@@ -69,11 +69,10 @@ export function useAuth(): UseAuthReturn {
                     isNative: Capacitor.isNativePlatform()
                 });
 
-                await GoogleAuth.initialize({
-                    clientId: '90767087281-dkakjnbkbjgp2s5co7skhdlpq39epb9r.apps.googleusercontent.com',
-                    scopes: ['profile', 'email'],
-                    grantOfflineAccess: true
-                });
+                await GoogleAuth.initialize();
+                
+                // Debug: Verificar estado tras init
+                console.log('[GoogleAuth] Initialized');
 
                 const user = await GoogleAuth.signIn();
                 console.log('Google User:', user);
@@ -121,8 +120,20 @@ export function useAuth(): UseAuthReturn {
             if (Capacitor.isNativePlatform()) {
                 let alertMsg = `Error Google Login:\n${e?.message || 'Unknown'}\nCode: ${e?.code || 'N/A'}`;
 
-                if (e?.code === '10' || e?.code === 10 || JSON.stringify(e).includes('"code":"10"') || JSON.stringify(e).includes('"code":10')) {
-                    alertMsg = '⚠️ Error Code 10 (Developer Error)\n\n' + 'Pasos de Verificación:\n\n' + '1. Google Cloud Console > APIs & Services:\n' + '   - Verificar que "Google Sign-In API" esté ENABLED\n\n' + '2. Credentials > OAuth 2.0:\n' + '   - Android Client con SHA-1: 49:3D:C2:05...\n' + '   - Package: com.taskNakomi.app\n\n' + '3. OAuth Consent Screen:\n' + '   - Modo "Testing" con tu email invitado\n' + '   - O modo "Production"\n\n' + '4. Uninstall completo de la app y reinstalar';
+                const errString = JSON.stringify(e);
+                
+                if (e?.code === '10' || e?.code === 10 || errString.includes('"code":"10"') || errString.includes('"code":10')) {
+                    alertMsg = '⚠️ Error 10: Configuración Incorrecta\n\n' +
+                        '- Revisa el SHA-1 en Google Console vs Keystore.\n' +
+                        '- Verifica que "server_client_id" esté en strings.xml.\n' +
+                        '- Asegúrate de que el package name coincida.';
+                } else if (e?.code === '12500' || e?.code === 12500 || errString.includes('12500') || e?.message?.includes('12500')) {
+                    alertMsg = '⚠️ Error 12500: Sign In Failed\n\n' +
+                        'Causas probables:\n' +
+                        '1. Email de soporte NO configurado en OAuth Consent Screen.\n' +
+                        '2. Tu email no está en "Test Users" (si la app no está publicada).\n' +
+                        '3. Falta SHA-1 del Debug Keystore en Google Console.\n' +
+                        '4. El dispositivo no tiene Google Play Services actualizado.';
                 }
                 alert(alertMsg);
             }
