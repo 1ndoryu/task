@@ -5,7 +5,7 @@
  * TAREA 4: Ventana de Oportunidad para Hábitos
  */
 
-import {useState, useCallback, useMemo} from 'react';
+import {useState, useCallback, useMemo, useEffect, useRef} from 'react';
 import {Clock, X} from 'lucide-react';
 import type {VentanaOportunidad} from '../../types/dashboard';
 
@@ -150,6 +150,34 @@ export function SelectorVentanaOportunidad({valor, onChange}: SelectorVentanaOpo
         return marcadores;
     };
 
+    /* Cerrar al hacer click fuera */
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!menuAbierto) return;
+
+        const manejarClickFuera = (evento: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(evento.target as Node)) {
+                setMenuAbierto(false);
+            }
+        };
+
+        const manejarEscape = (evento: KeyboardEvent) => {
+            if (evento.key === 'Escape') setMenuAbierto(false);
+        };
+
+        const timeout = setTimeout(() => {
+            document.addEventListener('click', manejarClickFuera);
+            document.addEventListener('keydown', manejarEscape);
+        }, 0);
+
+        return () => {
+            clearTimeout(timeout);
+            document.removeEventListener('click', manejarClickFuera);
+            document.removeEventListener('keydown', manejarEscape);
+        };
+    }, [menuAbierto]);
+
     /* Texto del botón */
     const textoBoton = valor?.habilitada ? `${formatearHora(valor.horaInicio, valor.minutoInicio)} - ${formatearHora(valor.horaFin, valor.minutoFin)}` : 'Sin definir';
 
@@ -161,56 +189,71 @@ export function SelectorVentanaOportunidad({valor, onChange}: SelectorVentanaOpo
             </button>
 
             {menuAbierto && (
-                <div className="selectorVentanaOportunidad__menu">
-                    <div className="selectorVentanaOportunidad__header">
-                        <span className="selectorVentanaOportunidad__titulo">Ventana de Oportunidad</span>
-                        <button type="button" className="selectorVentanaOportunidad__cerrar" onClick={() => setMenuAbierto(false)}>
-                            <X size={14} />
-                        </button>
-                    </div>
+                <>
+                    {/* Overlay para móvil (solo visible vía CSS @media) */}
+                    <div className="selectorVentanaOportunidad__overlay" onClick={() => setMenuAbierto(false)} />
 
-                    {/* Reloj circular minimalista */}
-                    <div className="selectorVentanaOportunidad__reloj">
-                        <svg viewBox="0 0 90 90" className="selectorVentanaOportunidad__svg">
-                            {/* Círculo base */}
-                            <circle cx="45" cy="45" r="36" fill="none" stroke="var(--dashboard-bordeSutil)" strokeWidth="8" />
-                            {/* Arco de la ventana */}
-                            {renderizarArco()}
-                            {/* Marcadores de hora */}
-                            {renderizarMarcadores()}
-                        </svg>
-                    </div>
-
-                    {/* Controles de hora */}
-                    <div className="selectorVentanaOportunidad__controles">
-                        <div className="selectorVentanaOportunidad__control">
-                            <label>Inicio</label>
-                            <input type="time" value={formatearHora(ventana.horaInicio, ventana.minutoInicio)} onChange={e => {
-                                const [h, m] = e.target.value.split(':').map(Number);
-                                cambiarHora('inicio', h, m);
-                            }} className="selectorVentanaOportunidad__inputHora" />
-                        </div>
-                        <div className="selectorVentanaOportunidad__control">
-                            <label>Fin</label>
-                            <input type="time" value={formatearHora(ventana.horaFin, ventana.minutoFin)} onChange={e => {
-                                const [h, m] = e.target.value.split(':').map(Number);
-                                cambiarHora('fin', h, m);
-                            }} className="selectorVentanaOportunidad__inputHora" />
-                        </div>
-                    </div>
-
-                    {/* Toggle y eliminar */}
-                    <div className="selectorVentanaOportunidad__acciones">
-                        <button type="button" className={`selectorVentanaOportunidad__toggle ${valor?.habilitada ? 'selectorVentanaOportunidad__toggle--activo' : ''}`} onClick={toggleHabilitado}>
-                            {valor?.habilitada ? 'Desactivar' : 'Activar'}
-                        </button>
-                        {valor && (
-                            <button type="button" className="selectorVentanaOportunidad__eliminar" onClick={eliminarVentana}>
-                                Eliminar
+                    <div className="selectorVentanaOportunidad__menu" ref={menuRef}>
+                        <div className="selectorVentanaOportunidad__header">
+                            <span className="selectorVentanaOportunidad__titulo">Ventana de Oportunidad</span>
+                            <button type="button" className="selectorVentanaOportunidad__cerrar" onClick={() => setMenuAbierto(false)}>
+                                <X size={14} />
                             </button>
-                        )}
+                        </div>
+
+                        {/* Reloj circular minimalista */}
+                        <div className="selectorVentanaOportunidad__reloj">
+                            <svg viewBox="0 0 90 90" className="selectorVentanaOportunidad__svg">
+                                {/* Círculo base */}
+                                <circle cx="45" cy="45" r="36" fill="none" stroke="var(--dashboard-bordeSutil)" strokeWidth="8" />
+                                {/* Arco de la ventana */}
+                                {renderizarArco()}
+                                {/* Marcadores de hora */}
+                                {renderizarMarcadores()}
+                            </svg>
+                        </div>
+
+                        {/* Controles de hora */}
+                        <div className="selectorVentanaOportunidad__controles">
+                            <div className="selectorVentanaOportunidad__control">
+                                <label>Inicio</label>
+                                <input
+                                    type="time"
+                                    value={formatearHora(ventana.horaInicio, ventana.minutoInicio)}
+                                    onChange={e => {
+                                        const [h, m] = e.target.value.split(':').map(Number);
+                                        cambiarHora('inicio', h, m);
+                                    }}
+                                    className="selectorVentanaOportunidad__inputHora"
+                                />
+                            </div>
+                            <div className="selectorVentanaOportunidad__control">
+                                <label>Fin</label>
+                                <input
+                                    type="time"
+                                    value={formatearHora(ventana.horaFin, ventana.minutoFin)}
+                                    onChange={e => {
+                                        const [h, m] = e.target.value.split(':').map(Number);
+                                        cambiarHora('fin', h, m);
+                                    }}
+                                    className="selectorVentanaOportunidad__inputHora"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Toggle y eliminar */}
+                        <div className="selectorVentanaOportunidad__acciones">
+                            <button type="button" className={`selectorVentanaOportunidad__toggle ${valor?.habilitada ? 'selectorVentanaOportunidad__toggle--activo' : ''}`} onClick={toggleHabilitado}>
+                                {valor?.habilitada ? 'Desactivar' : 'Activar'}
+                            </button>
+                            {valor && (
+                                <button type="button" className="selectorVentanaOportunidad__eliminar" onClick={eliminarVentana}>
+                                    Eliminar
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );

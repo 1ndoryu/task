@@ -4,7 +4,7 @@
  * Responsabilidad única: renderizar tareas con checkbox, input de creación, edición inline y acciones
  */
 
-import {useMemo, useCallback} from 'react';
+import {useMemo, useCallback, useEffect} from 'react';
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
 import type {Tarea, DatosEdicionTarea, Proyecto, Participante} from '../../types/dashboard';
@@ -87,19 +87,31 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         [modoSeleccionActivo, tareasSeleccionadas.size, mostrarMenu]
     );
 
-    /* Handler para limpiar selección al hacer click fuera */
-    const manejarClickFondo = useCallback(
-        (evento: React.MouseEvent) => {
-            const target = evento.target as HTMLElement;
-            /* Si el click fue dentro del menú, ignorar */
-            if (target.closest('#menu-contextual')) return;
+    /* Efecto para limpiar selección al hacer click fuera de las tareas */
+    useEffect(() => {
+        if (!modoSeleccionActivo) return;
 
-            if (modoSeleccionActivo && !evento.ctrlKey && !evento.metaKey && !evento.shiftKey) {
-                limpiarSeleccion();
+        const manejarClickGlobal = (evento: MouseEvent) => {
+            const target = evento.target as HTMLElement;
+
+            /*
+             * No deseleccionar si:
+             * 1. Se están usando teclas de modificación (Ctrl, Cmd, Shift)
+             * 2. Se hace click sobre una tarea
+             * 3. Se hace click sobre el menú contextual o componentes de ingreso
+             * 4. Se hace click sobre cabeceras de grupo
+             */
+            if (evento.ctrlKey || evento.metaKey || evento.shiftKey || target.closest('.tareaItem') || target.closest('#menu-contextual') || target.closest('.tareaNuevoInline') || target.closest('.grupoTareasHeader')) {
+                return;
             }
-        },
-        [modoSeleccionActivo, limpiarSeleccion]
-    );
+
+            limpiarSeleccion();
+        };
+
+        /* Usamos mousedown para capturar el click antes de que otros elementos consuman el evento */
+        document.addEventListener('mousedown', manejarClickGlobal);
+        return () => document.removeEventListener('mousedown', manejarClickGlobal);
+    }, [modoSeleccionActivo, limpiarSeleccion]);
 
     /* Sistema de grupos/secciones - TAREA 3 */
     const seccionesActivas = useSeccionesActivas();
@@ -258,7 +270,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
     );
 
     return (
-        <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista} onClick={manejarClickFondo}>
+        <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista}>
             {/* Estado vacío cuando no hay tareas (ocultar en proyectos expandidos) */}
             {tareas.length === 0 && !ocultarPlaceholderVacio ? (
                 <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />

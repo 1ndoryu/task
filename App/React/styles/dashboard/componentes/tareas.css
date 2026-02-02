@@ -26,7 +26,7 @@
  * Visual similar a la selección de archivos en un explorador
  */
 .tareaItem--seleccionada {
-    background-color: var(--dashboard-fondoHover);
+    background-color: rgba(255, 255, 255, 0.035);
 }
 
 .tareaItem--seleccionada:hover {

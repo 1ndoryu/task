@@ -41,7 +41,8 @@
 }
 
 @keyframes pulsoVentana {
-    0%, 100% {
+    0%,
+    100% {
         box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoRgb), 0.4);
     }
     50% {
@@ -53,14 +54,41 @@
 .selectorVentanaOportunidad__menu {
     position: absolute;
     top: calc(100% + 4px);
-    right: 0;
-    z-index: 100;
-    min-width: 200px;
+    left: 0;
+    z-index: 1000;
+    min-width: 220px;
     background: var(--dashboard-fondoTarjeta);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-bordeRedondeado);
-    box-shadow: var(--dashboard-sombraMedia);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraFuerte);
     padding: var(--dashboard-espacioSm);
+}
+
+/* Version movil: centrado y fijo para evitar recortes */
+@media (max-width: 480px) {
+    .selectorVentanaOportunidad__menu {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 320px;
+        min-width: 0;
+        z-index: 9999;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Overlay opcional si queremos bloquear el fondo */
+    .selectorVentanaOportunidad__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 9998;
+        backdrop-filter: blur(2px);
+    }
 }
 
 .selectorVentanaOportunidad__header {

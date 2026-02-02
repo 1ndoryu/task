@@ -377,27 +377,28 @@ La renderización visual de grupos con sus tareas agrupadas se implementará en 
 - Ctrl + Click para seleccionar múltiples tareas
 - Click derecho aplica acciones a todas las seleccionadas:
   - Borrar
-  - Cambiar importancia
+  - Cambiar importancia (Priority & Urgency via submenus)
   - Mover a proyecto
   - Agrupar
 
 ### Subtareas:
 - [x] Implementar estado de selección múltiple en store
-- [x] UI de selección (indicador visual en tareas seleccionadas)
-- [x] Menú contextual con acciones masivas
+- [x] UI de selección (indicador visual sutil, sin bordes)
+- [x] Menú contextual con acciones masivas (Submenús para Prioridad y Urgencia)
 - [x] Lógica de cada acción masiva
+- [x] Deselección automática al hacer click en el fondo
 
 ### Archivos creados:
 - `stores/seleccionMultipleStore.ts` - Store Zustand para gestionar selección
 - `components/dashboard/lista-tareas/MenuAccionesMasivas.tsx` - Menú contextual acciones masivas
 
 ### Archivos modificados:
-- `components/dashboard/TareaItem.tsx` - Props estaSeleccionada, onSeleccionMultiple, clase CSS
+- `components/dashboard/TareaItem.tsx` - Props estaSeleccionada, onSeleccionMultiple, lógica de click
 - `components/dashboard/lista-tareas/TareaConColapsador.tsx` - Pasar props de selección
-- `components/dashboard/ListaTareas.tsx` - Integración store, handlers, menú
-- `components/shared/DashboardPanel.tsx` - Prop onContextMenu
+- `components/dashboard/ListaTareas.tsx` - Integración store, handlers, menú, click en fondo
+- `components/shared/DashboardPanel.tsx` - Prop onContextMenu y onClick
 - `components/shared/MenuContextual.tsx` - Export OpcionMenu interface
-- `styles/dashboard/componentes/tareas.css` - Clase .tareaItem--seleccionada
+- `styles/dashboard/componentes/tareas.css` - Clase .tareaItem--seleccionada (refinada)
 
 ---
 
