@@ -26,7 +26,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### Fase 13: Transformación a App Móvil Híbrida (Capacitor & Play Store) 📱
 
-**Prioridad:** Alta (En Progreso) | **Complejidad:** Alta
+**Prioridad:** Alta (Pausado - Requiere Políticas Legales) | **Complejidad:** Alta
 
 #### 13.1 Infraestructura Híbrida (Capacitor)
 - [x] Inicializar Capacitor en el proyecto (`npx cap init`).
@@ -42,28 +42,33 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Implementar `@capacitor-community/google-auth` (usando `@codetrix-studio/capacitor-google-auth`).
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
-  - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [!] **Error Code 10 - Verificación de propiedad NO aplicable (app no está en Play Store).**
-  - **Nueva Información:**
-    - Google indica que verificación de propiedad solo aplica a apps publicadas en Play Store
-    - Para apps en desarrollo, la verificación NO es el problema
-  - **Causa Real del Error (Más Probable):**
-    - **OAuth Consent Screen no configurado correctamente**
-  - **Solución CRÍTICA - OAuth Consent Screen:**
-    1. Ve a: https://console.cloud.google.com/apis/credentials/consent?project=task-nakomi
-    2. Verifica la configuración:
-       - **User Type:** Debe ser "External" (permite testing)
-       - **Publishing Status:** Debe estar en "Testing" o "In production"
-       - Si está en **"Testing"** → **CRÍTICO:** Tu email debe estar en "Test users"
-         - Haz clic en "ADD USERS"
-         - Añade tu email (el que usarás para login)
-       - **Scopes:** Debe incluir `.../auth/userinfo.email` y `.../auth/userinfo.profile`
-    3. Guarda cambios
-    4. Uninstall app, reinstalar y probar
-  - **Verificación Adicional (Google Sign-In API):**
-    - Ve a: https://console.cloud.google.com/apis/library/plus.googleapis.com?project=task-nakomi
-    - O busca "Google Sign-In API" en APIs & Services
-    - Estado debe ser: **ENABLED**
+- [x] Crear Android OAuth Client con SHA-1.
+- [x] Configurar `google-services.json` completo.
+- [!] **BLOQUEADO:** OAuth Consent Screen requiere Política de Privacidad y Términos.
+  - **Causa del Bloqueo:**
+    - Google Cloud Console no permite completar verificación de OAuth sin:
+      - URL de Política de Privacidad
+      - URL de Términos de Servicio (opcional pero recomendado)
+  - **Páginas Requeridas (Pendientes):**
+    - [ ] `/politica-privacidad` - Obligatoria para OAuth
+    - [ ] `/terminos-servicio` - Recomendada
+    - [ ] `/soporte` o página de contacto
+  - **Plan de Creación Rápida (Fase 13.3.1):**
+    1. Crear templates básicos en WordPress (Custom Post Type o páginas simples)
+    2. Contenido mínimo viable:
+       - Política de Privacidad: Qué datos recopila la app (email, nombre, actividad)
+       - Cómo se almacenan (servidor propio, cifrado)
+       - Derechos del usuario (RGPD: acceso, eliminación, portabilidad)
+       - Contacto para solicitudes
+    3. Publicar en `task.nakomi.studio/politica-privacidad`
+    4. Añadir URLs al OAuth Consent Screen
+    5. Reanudar testing de Google Auth
+  - **Configuración Técnica Completada (Lista para usar cuando se desbloquee):**
+    - [x] Android Client ID: `90767087281-hodj9fcaj13rvvnam8ge11og3mkgtohq...`
+    - [x] Web Client ID: `90767087281-dkakjnbkbjgp2s5co7skhdlpq39epb9r...`
+    - [x] SHA-1: `49:3D:C2:05:E7:F3:FD:21:F7:EA:AD:E9:75:35:CB:50:B5:2F:7A:30`
+    - [x] Package: `com.taskNakomi.app`
+    - [x] Firebase BoM y Google Services integrados
 
 ---
 
@@ -79,6 +84,38 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 npx cap sync android
 ```
 
+
+#### 13.3.1 Páginas Legales (Bloqueante para OAuth) 📄
+
+**Prioridad:** Alta (Bloqueante) | **Complejidad:** Baja
+
+- [ ] **Política de Privacidad** (`/politica-privacidad`)
+  - Datos recopilados: email, nombre, ID usuario, actividad (hábitos, notas, tareas)
+  - Almacenamiento: Servidor propio con cifrado opcional E2EE
+  - Uso: Funcionalidad de la app, sincronización, autenticación
+  - Compartición: Solo con servicios esenciales (Google OAuth para login)
+  - Derechos RGPD: Acceso, rectificación, eliminación, portabilidad
+  - Retención: Hasta que usuario elimine cuenta
+  - Cookies: Session, autenticación
+  - Contacto: Email de soporte
+  
+- [ ] **Términos de Servicio** (`/terminos-servicio`) - Opcional pero recomendado
+  - Uso aceptable de la plataforma
+  - Limitaciones de responsabilidad
+  - Suscripciones y pagos (Stripe)
+  - Propiedad intelectual
+  - Terminación de cuenta
+
+- [ ] **Página de Soporte/Contacto** (`/soporte`)
+  - Email de contacto
+  - Formulario de solicitudes RGPD
+  - FAQ básico
+
+**Implementación Técnica:**
+- WordPress Custom Pages o Custom Post Type
+- Templates limpios con diseño coherente
+- URLs públicas accesibles sin login
+- Añadir links en footer de la app web/móvil
 
 #### 13.4 Publicación y Compliance
 - [ ] Adaptar UI para Safe Areas de móviles (Notch, Home Indicator).
