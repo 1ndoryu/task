@@ -42,9 +42,8 @@ if (file_exists($control_config)) {
 }
 
 /*
- * Cargar archivos de configuración e inicialización que contienen hooks.
- * Las clases de App\ (Repository, Api, Services, etc.) se cargan
- * automáticamente via PSR-4 autoload de Composer.
+ * Cargar todos los archivos de App/ para ejecutar hooks y registros.
+ * El autoload PSR-4 en composer.json sirve como respaldo.
  */
 function incluirArchivos($directorio)
 {
@@ -73,16 +72,8 @@ function incluirArchivos($directorio)
     }
 }
 
-/*
- * Solo cargar directorios con archivos de inicialización y hooks.
- * Los controladores de API necesitan cargarse para registrar rutas REST.
- * Las clases Repository/Services se cargan automáticamente via Composer PSR-4.
- */
 $directorios = [
-    'App/Config/',
-    'App/Content/',
-    'App/Templates/',
-    'App/Api/',
+    'App/',
 ];
 
 foreach ($directorios as $directorio) {
