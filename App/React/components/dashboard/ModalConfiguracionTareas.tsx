@@ -6,6 +6,7 @@
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import type {ConfiguracionTareas} from '../../hooks/useConfiguracionTareas';
+import {useGruposTareasStore} from '../../stores/gruposTareasStore';
 
 interface ModalConfiguracionTareasProps {
     estaAbierto: boolean;
@@ -21,6 +22,8 @@ interface ModalConfiguracionTareasProps {
 }
 
 export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas}: ModalConfiguracionTareasProps): JSX.Element {
+    const {seccionesActivas, toggleSecciones} = useGruposTareasStore();
+
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Vista">
             <div className="contenedorOpcionesConfig">
@@ -83,6 +86,17 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                         <span className="descripcionOpcionConfig">Reducir el tamaño de la fuente y el espaciado</span>
                     </div>
                     <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
+                </div>
+
+                <div className="separadorOpcionesConfig" />
+
+                {/* Opcion 7: Activar Secciones */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Activar secciones</span>
+                        <span className="descripcionOpcionConfig">Permite agrupar tareas en secciones con Ctrl+Click y "Agrupar"</span>
+                    </div>
+                    <ToggleSwitch checked={seccionesActivas} onChange={toggleSecciones} />
                 </div>
             </div>
         </Modal>

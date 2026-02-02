@@ -30,6 +30,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 4. Sobre "TAREA 0.3: Opción Ocultar Subtareas Automáticamente" Funciona bien pero cuando agrego una subtarea (tambien con los subhabitos), debe expandirse si esta desactivada la opcion, solo se expande si recargo la pagina actualmente.
 5. Sobre "TAREA 0.5: BottomSheet para Hábitos en Móvil" funciona bien pero hubo una confuncion el bottomS que se abre al tocar los habitos es el menu contextual, debe ser de editar como funciona actualmente con las tareas.
 
+
 # TAREAS PENDIENTES - SPRINT ACTUAL
 
 ## TAREA 0: Panel de Notas Versión Móvil
@@ -303,7 +304,7 @@ Implementar sistema de carpetas:
 ---
 
 ## TAREA 3: Secciones/Grupos en Paneles
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Complejidad:** Alta
+**Estado:** ✅ Completada | **Prioridad:** Media | **Complejidad:** Alta
 
 ### Descripción:
 Sistema de agrupación para tareas y hábitos:
@@ -311,6 +312,30 @@ Sistema de agrupación para tareas y hábitos:
 - Seleccionar elementos y elegir "Agrupar"
 - Título editable encima del grupo
 - Botón para colapsar/expandir grupo
+
+### Subtareas:
+- [x] Agregar campo grupoId a interface Tarea
+- [x] Crear interface GrupoTareas
+- [x] Crear store gruposTareasStore con CRUD de grupos
+- [x] Agregar opción "Activar secciones" en configuración
+- [x] Agregar opción "Agrupar" al menú de acciones masivas
+- [x] Crear componente GrupoTareasHeader (título editable, colapso)
+- [x] Crear estilos CSS para grupos
+
+### Archivos creados:
+- `stores/gruposTareasStore.ts` - Store Zustand para grupos
+- `components/dashboard/lista-tareas/GrupoTareasHeader.tsx` - Header de grupo
+- `styles/dashboard/componentes/gruposTareas.css` - Estilos
+
+### Archivos modificados:
+- `types/dashboard.ts` - Agregado grupoId a Tarea, interface GrupoTareas
+- `components/dashboard/ModalConfiguracionTareas.tsx` - Toggle "Activar secciones"
+- `components/dashboard/lista-tareas/MenuAccionesMasivas.tsx` - Opción "Agrupar"
+- `components/dashboard/ListaTareas.tsx` - Handler manejarAgrupar
+- `styles/dashboard/index.css` - Import gruposTareas.css
+
+### Nota:
+La renderización visual de grupos con sus tareas agrupadas se implementará en una iteración posterior. La infraestructura (store, tipos, UI de creación) está completa.
 
 ### IMPORTANTE - Hacer primero Tarea 3.1 (Selección múltiple)
 

@@ -211,6 +211,8 @@ export interface Tarea {
     proyectoId?: number;
     /* ID del habito al que pertenece la tarea - Fase 14.8 (opcional) */
     habitoId?: number;
+    /* ID del grupo/seccion al que pertenece la tarea (TAREA 3) */
+    grupoId?: number;
     /* Campos opcionales */
     prioridad?: NivelPrioridad;
     /* Urgencia: temporalidad (bloqueante, urgente, normal, chill) */
@@ -229,6 +231,23 @@ export interface Tarea {
     miRol?: RolCompartido;
     /* Tags (Fase 9.7.3) */
     tags?: string[];
+}
+
+/*
+ * GrupoTareas: Seccion/agrupacion de tareas (TAREA 3)
+ * Permite organizar tareas en grupos colapsables con titulo editable
+ */
+export interface GrupoTareas {
+    id: number;
+    nombre: string;
+    /* Orden del grupo en la lista (menor = primero) */
+    orden: number;
+    /* Estado de colapso (true = colapsado) */
+    colapsado: boolean;
+    /* Proyecto al que pertenece (opcional - si no, es grupo global) */
+    proyectoId?: number;
+    /* Fecha de creacion */
+    fechaCreacion: string;
 }
 
 /*

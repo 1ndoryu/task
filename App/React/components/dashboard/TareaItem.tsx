@@ -474,14 +474,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             </div>
         );
     }
- ${estaSeleccionada ? 'tareaItem--seleccionada' : ''}`} onContextMenu={manejarClickDerecho} onClick={e => {
-                /* Ctrl+Click para selección múltiple */
-                if ((e.ctrlKey || e.metaKey) && onSeleccionMultiple) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onSeleccionMultiple(tarea, e);
-                }
-            }
+
     return (
         <>
             <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`} onContextMenu={manejarClickDerecho}>

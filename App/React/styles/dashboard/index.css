@@ -54,6 +54,7 @@
 @import './componentes/encabezado.css';
 @import './componentes/tabla.css';
 @import './componentes/tareas.css';
+@import './componentes/gruposTareas.css';
 @import './componentes/scratchpad.css';
 @import './componentes/modal.css';
 @import './componentes/formulario.css';

@@ -5,10 +5,11 @@
  */
 
 import React, {useMemo} from 'react';
-import {Trash2, Flag, Folder, AlertTriangle, ChevronDown, ChevronUp, X} from 'lucide-react';
+import {Trash2, Flag, Folder, AlertTriangle, ChevronDown, ChevronUp, X, Layers} from 'lucide-react';
 import {MenuContextual, type OpcionMenu} from '../../shared/MenuContextual';
 import type {Proyecto, NivelPrioridad} from '../../../types/dashboard';
 import {useSeleccionMultipleStore, useCantidadSeleccionadas} from '../../../stores/seleccionMultipleStore';
+import {useSeccionesActivas} from '../../../stores/gruposTareasStore';
 
 interface MenuAccionesMasivasProps {
     posicionX: number;
@@ -17,12 +18,14 @@ interface MenuAccionesMasivasProps {
     onEliminarTareas: (ids: number[]) => void;
     onCambiarPrioridad: (ids: number[], prioridad: NivelPrioridad) => void;
     onMoverProyecto: (ids: number[], proyectoId: number | undefined) => void;
+    onAgrupar?: (ids: number[]) => void;
     proyectos?: Proyecto[];
 }
 
-export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarTareas, onCambiarPrioridad, onMoverProyecto, proyectos = []}: MenuAccionesMasivasProps): JSX.Element {
+export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarTareas, onCambiarPrioridad, onMoverProyecto, onAgrupar, proyectos = []}: MenuAccionesMasivasProps): JSX.Element {
     const {obtenerIdsSeleccionados, limpiarSeleccion} = useSeleccionMultipleStore();
     const cantidadSeleccionadas = useCantidadSeleccionadas();
+    const seccionesActivas = useSeccionesActivas();
 
     const opciones: OpcionMenu[] = useMemo(() => {
         const ops: OpcionMenu[] = [
@@ -32,8 +35,21 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
                 icono: <Flag size={14} />,
                 deshabilitado: true,
                 separadorDespues: true
-            },
-            /* Prioridades */
+            }
+        ];
+
+        /* Opción de agrupar si secciones están activas */
+        if (seccionesActivas && onAgrupar) {
+            ops.push({
+                id: 'agrupar',
+                etiqueta: 'Agrupar seleccionadas',
+                icono: <Layers size={14} />,
+                separadorDespues: true
+            });
+        }
+
+        /* Prioridades */
+        ops.push(
             {
                 id: 'prioridad-muy_alta',
                 etiqueta: 'Prioridad Muy Alta',
@@ -55,7 +71,7 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
                 icono: <ChevronDown size={14} style={{color: 'var(--dashboard-colorBaja)'}} />,
                 separadorDespues: true
             }
-        ];
+        );
 
         /* Opción de mover a proyecto si hay proyectos */
         if (proyectos.length > 0) {
@@ -90,12 +106,14 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
         });
 
         return ops;
-    }, [cantidadSeleccionadas, proyectos]);
+    }, [cantidadSeleccionadas, proyectos, seccionesActivas, onAgrupar]);
 
     const manejarSeleccion = (opcionId: string) => {
         const ids = obtenerIdsSeleccionados();
 
-        if (opcionId.startsWith('prioridad-')) {
+        if (opcionId === 'agrupar') {
+            onAgrupar?.(ids);
+        } else if (opcionId.startsWith('prioridad-')) {
             const prioridad = opcionId.replace('prioridad-', '') as NivelPrioridad;
             onCambiarPrioridad(ids, prioridad);
         } else if (opcionId.startsWith('mover-')) {

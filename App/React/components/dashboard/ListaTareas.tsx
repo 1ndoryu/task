@@ -17,6 +17,7 @@ import {DashboardPanel} from '../shared/DashboardPanel';
 import {EstadoVacio} from '../shared/EstadoVacio';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
 import {useSeleccionMultipleStore} from '../../stores/seleccionMultipleStore';
+import {useGruposTareasStore, useSeccionesActivas} from '../../stores/gruposTareasStore';
 import {MenuAccionesMasivas} from './lista-tareas/MenuAccionesMasivas';
 
 // Hooks extraídos
@@ -83,6 +84,28 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             }
         },
         [modoSeleccionActivo, tareasSeleccionadas.size, mostrarMenu]
+    );
+
+    /* Sistema de grupos/secciones - TAREA 3 */
+    const seccionesActivas = useSeccionesActivas();
+    const {crearGrupo} = useGruposTareasStore();
+
+    /* Handler para agrupar tareas seleccionadas */
+    const manejarAgrupar = useCallback(
+        (ids: number[]) => {
+            if (ids.length === 0) return;
+
+            /* Crear nuevo grupo con nombre por defecto */
+            const grupo = crearGrupo('Nuevo grupo', proyectoId);
+
+            /* Asignar el grupoId a todas las tareas seleccionadas */
+            ids.forEach(id => {
+                onEditarTarea?.(id, {grupoId: grupo.id} as any);
+            });
+
+            limpiarSeleccion();
+        },
+        [crearGrupo, proyectoId, onEditarTarea, limpiarSeleccion]
     );
 
     /* Lógica Principal y Estado */
@@ -290,6 +313,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                         ids.forEach(id => onEditarTarea?.(id, {proyectoId} as any));
                         limpiarSeleccion();
                     }}
+                    onAgrupar={seccionesActivas ? manejarAgrupar : undefined}
                     proyectos={proyectos}
                 />
             )}

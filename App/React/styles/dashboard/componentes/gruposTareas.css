@@ -1,0 +1,150 @@
+/*
+ * Estilos para grupos/secciones de tareas
+ * TAREA 3: Sistema de agrupación de tareas
+ */
+
+/* Header del grupo - línea con título y controles */
+.grupoTareasHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSutil);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    margin-top: var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioSm) var(--dashboard-radioSm) 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.grupoTareasHeader:first-child {
+    margin-top: 0;
+}
+
+.grupoTareasHeader--colapsado {
+    border-radius: var(--dashboard-radioSm);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+/* Botón toggle colapso */
+.grupoTareasToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.grupoTareasToggle:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+/* Nombre del grupo */
+.grupoTareasNombre {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    flex: 1;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+    cursor: text;
+    padding: 2px 4px;
+    border-radius: var(--dashboard-radioSm);
+    transition: background var(--dashboard-transicionRapida);
+}
+
+.grupoTareasNombre:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.grupoTareasIcono {
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+}
+
+/* Input para editar nombre */
+.grupoTareasInputNombre {
+    flex: 1;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoTarjeta);
+    border: 1px solid var(--dashboard-bordeActivo);
+    border-radius: var(--dashboard-radioSm);
+    padding: 2px 6px;
+    outline: none;
+}
+
+/* Contador de tareas */
+.grupoTareasContador {
+    font-size: var(--dashboard-tamanoXs);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTarjeta);
+    padding: 0 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Botón eliminar grupo */
+.grupoTareasEliminar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionRapida);
+    opacity: 0;
+}
+
+.grupoTareasHeader:hover .grupoTareasEliminar {
+    opacity: 1;
+}
+
+.grupoTareasEliminar:hover {
+    background: var(--dashboard-estadoErrorFondo);
+    color: var(--dashboard-estadoError);
+}
+
+/* Contenedor de tareas del grupo */
+.grupoTareasContenido {
+    border-left: 2px solid var(--dashboard-bordeSutil);
+    margin-left: var(--dashboard-espacioMd);
+    padding-left: var(--dashboard-espacioXs);
+}
+
+.grupoTareasContenido--colapsado {
+    display: none;
+}
+
+/* Tareas sin grupo (cuando secciones activas) */
+.tareasSinGrupo {
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.tareasSinGrupoHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoXs);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
