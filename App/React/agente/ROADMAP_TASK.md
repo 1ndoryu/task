@@ -44,7 +44,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
 - [x] Crear Android OAuth Client con SHA-1.
 - [x] Configurar `google-services.json` completo.
-- [x] **FIX Error 10:** Añadido `server_client_id` a `strings.xml` y configuración explícita en `initialize()`.
+- [x] **FIX Error 10:** Añadido `server_client_id` a `strings.xml`.
+- [x] **FIX Auth Failed:** Implementado `signOut` previo y `bootstrap` nativo (`grantOfflineAccess`).
+- [!] **BLOQUEADO:** Error genérico "Fallo la autenticación" persiste y deployment falla.
+  - **Estado:**
+     - Error 10 resuelto.
+     - Login sigue fallando con error genérico.
+     - Configuración nativa `capacitor.config.json` actualizada con `androidClientId`.
+     - **CRÍTICO:** `manager.ps1` falla al desplegar cambios de React, por lo que la app usa código viejo.
 - [!] **BLOQUEADO:** OAuth Consent Screen requiere Política de Privacidad y Términos.
   - **Causa del Bloqueo:**
     - Google Cloud Console no permite completar verificación de OAuth sin:
