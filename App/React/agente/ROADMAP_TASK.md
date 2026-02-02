@@ -43,14 +43,32 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [x] **RESUELTO:** Configuración completa de Google Auth para Android.
-  - **Estado Final:**
-    - [x] Proyecto Firebase creado (`task-nakomi`, project_number: 90767087281).
-    - [x] Android OAuth Client creado con SHA-1 en Google Cloud Console.
-    - [x] `google-services.json` actualizado con Android Client (type 1) y Web Client (type 3).
-    - [x] `capacitor.config.json` sincronizado con Web Client ID correcto.
-  - **Próximo Paso:**
-    - Ejecutar `npx cap sync android` y rebuild en Android Studio para probar.
+- [!] **Bloqueo Persistente:** Error `Code 10` persiste tras configuración completa.
+  - **Configuración Actual (Verificada):**
+    - [x] Android OAuth Client creado con SHA-1 correcto
+    - [x] `google-services.json` con Android Client (type 1) + Web Client (type 3)
+    - [x] `capacitor.config.json` con Web Client ID correcto
+    - [x] Firebase BoM y Google Services plugin configurados
+    - [x] Signing config explícito en build.gradle
+  - **Causas Posibles Restantes:**
+    1. **API no habilitada:** Google Sign-In API debe estar habilitada en Google Cloud Console
+    2. **OAuth Consent Screen:** Verificar modo Testing con email del usuario invitado
+    3. **Caché de app:** Necesita uninstall completo del dispositivo/emulador
+    4. **Vinculación Firebase-Google Cloud:** Proyecto Firebase debe usar el mismo proyecto GCP
+    5. **Keystore diferente:** Android Studio podría estar usando keystore distinto al debug
+  - **Diagnóstico Avanzado Requerido:**
+    ```powershell
+    # 1. Verificar SHA-1 del APK compilado (no del keystore)
+    # En Android Studio: Build > Generate Signed Bundle/APK > View SHA-1
+    
+    # 2. Verificar APIs habilitadas en Google Cloud Console
+    # https://console.cloud.google.com/apis/dashboard?project=task-nakomi
+    # Buscar: "Google Sign-In API" o "Google+ API" - Debe estar ENABLED
+    
+    # 3. OAuth Consent Screen
+    # https://console.cloud.google.com/apis/credentials/consent?project=task-nakomi
+    # Verificar: Modo "Testing" + Email del usuario en Test Users
+    ```
 
 ---
 
