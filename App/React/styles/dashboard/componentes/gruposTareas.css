@@ -133,6 +133,27 @@
     display: none;
 }
 
+/* Contenedor principal de todos los grupos */
+.listaTareasGrupos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+/* Contenedor individual de grupo */
+.grupoTareasContenedor {
+    background: var(--dashboard-fondoTarjeta);
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordeSutil);
+    overflow: hidden;
+}
+
+/* Lista de tareas dentro del grupo */
+.grupoTareasListaInterna {
+    padding: var(--dashboard-espacioXs) 0;
+}
+
 /* Tareas sin grupo (cuando secciones activas) */
 .tareasSinGrupo {
     margin-bottom: var(--dashboard-espacioMd);

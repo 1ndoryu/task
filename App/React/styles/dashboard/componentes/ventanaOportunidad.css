@@ -1,0 +1,196 @@
+/*
+ * Estilos para SelectorVentanaOportunidad
+ * TAREA 4: Ventana de Oportunidad para Hábitos
+ * Reloj circular minimalista para marcar inicio y fin
+ */
+
+.selectorVentanaOportunidad {
+    position: relative;
+}
+
+/* Botón principal */
+.selectorVentanaOportunidad__boton {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-bordeRedondeado);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorVentanaOportunidad__boton:hover {
+    border-color: var(--dashboard-bordeActivo);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorVentanaOportunidad__boton--activo {
+    background: rgba(var(--dashboard-acentoRgb), 0.1);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-acento);
+}
+
+/* Indicador cuando estamos dentro de la ventana */
+.selectorVentanaOportunidad__boton--enVentana {
+    animation: pulsoVentana 2s ease-in-out infinite;
+}
+
+@keyframes pulsoVentana {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoRgb), 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(var(--dashboard-acentoRgb), 0.1);
+    }
+}
+
+/* Menú desplegable */
+.selectorVentanaOportunidad__menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 100;
+    min-width: 200px;
+    background: var(--dashboard-fondoTarjeta);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-bordeRedondeado);
+    box-shadow: var(--dashboard-sombraMedia);
+    padding: var(--dashboard-espacioSm);
+}
+
+.selectorVentanaOportunidad__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.selectorVentanaOportunidad__titulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorVentanaOportunidad__cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: var(--dashboard-bordeRedondeado);
+}
+
+.selectorVentanaOportunidad__cerrar:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+/* Reloj circular */
+.selectorVentanaOportunidad__reloj {
+    display: flex;
+    justify-content: center;
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.selectorVentanaOportunidad__svg {
+    width: 90px;
+    height: 90px;
+}
+
+/* Marcadores de hora en el reloj */
+.relojMarcador {
+    font-size: 8px;
+    fill: var(--dashboard-textoMuyApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+/* Controles de hora */
+.selectorVentanaOportunidad__controles {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.selectorVentanaOportunidad__control {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.selectorVentanaOportunidad__control label {
+    font-size: var(--dashboard-tamanoMini);
+    color: var(--dashboard-textoApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.selectorVentanaOportunidad__inputHora {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-bordeRedondeado);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+}
+
+.selectorVentanaOportunidad__inputHora:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+/* Acciones */
+.selectorVentanaOportunidad__acciones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.selectorVentanaOportunidad__toggle,
+.selectorVentanaOportunidad__eliminar {
+    flex: 1;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMini);
+    font-family: inherit;
+    border-radius: var(--dashboard-bordeRedondeado);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorVentanaOportunidad__toggle {
+    background: var(--dashboard-acento);
+    border: none;
+    color: white;
+}
+
+.selectorVentanaOportunidad__toggle:hover {
+    opacity: 0.9;
+}
+
+.selectorVentanaOportunidad__toggle--activo {
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+}
+
+.selectorVentanaOportunidad__eliminar {
+    background: transparent;
+    border: 1px solid var(--dashboard-estadoError);
+    color: var(--dashboard-estadoError);
+}
+
+.selectorVentanaOportunidad__eliminar:hover {
+    background: var(--dashboard-estadoErrorFondo);
+}

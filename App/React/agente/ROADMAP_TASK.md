@@ -393,16 +393,31 @@ La renderización visual de grupos con sus tareas agrupadas se implementará en 
 ---
 
 ## TAREA 3.2: Ordenamiento de Grupos
-**Estado:** ⬜ Pendiente | **Prioridad:** Media (Después de 3 y 3.1)
+**Estado:** ✅ Completada | **Prioridad:** Media (Después de 3 y 3.1)
 
 ### Descripción:
 - Ordenamiento interno de grupos: aplica el mismo criterio que el ordenamiento general
 - Ordenamiento de grupos entre sí: nombre, importancia promedio (inteligente), manual
 
+### Subtareas completadas:
+- [x] Añadir tipo OrdenamientoGrupos al store (nombre, importancia, manual)
+- [x] Implementar setOrdenamientoGrupos y ordenarGrupos en el store
+- [x] Renderizar grupos en ListaTareas.tsx con GrupoTareasHeader
+- [x] Separar tareas en grupos y sin grupo cuando secciones activas
+- [x] Añadir selector de ordenamiento en ModalConfiguracionTareas
+- [x] Estilos CSS para contenedores de grupos y selector
+
+### Archivos modificados:
+- `stores/gruposTareasStore.ts` - OrdenamientoGrupos, ordenarGrupos, setOrdenamientoGrupos
+- `components/dashboard/ListaTareas.tsx` - Renderizado de grupos con headers colapsables
+- `components/dashboard/ModalConfiguracionTareas.tsx` - Selector de ordenamiento de grupos
+- `styles/dashboard/componentes/gruposTareas.css` - Estilos para contenedores
+- `styles/dashboard/componentes/configuracionTareas.css` - Estilos para selector
+
 ---
 
 ## TAREA 4: Ventana de Oportunidad para Hábitos
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja
+**Estado:** ✅ Completada | **Prioridad:** Baja
 
 ### Descripción:
 Período de tiempo óptimo para realizar un hábito.
@@ -415,15 +430,25 @@ Ejemplo: Tomar sol → mejor en la mañana con menos UV.
 - Marcar inicio y fin del período de oportunidad
 
 ### Subtareas:
-- [ ] Agregar campo `ventanaOportunidad` al modelo de hábitos
-- [ ] Crear componente de selección circular de tiempo
-- [ ] Integrar en propiedadesCompactas
-- [ ] Mostrar indicador visual cuando estamos en ventana de oportunidad
+- [x] Agregar campo `ventanaOportunidad` al modelo de hábitos
+- [x] Crear componente de selección circular de tiempo
+- [x] Integrar en propiedadesCompactas
+- [x] Mostrar indicador visual cuando estamos en ventana de oportunidad
 
 ### DUDAS TAREA 4:
 > **Pregunta:** ¿Debe haber alguna notificación/alerta cuando inicia la ventana de oportunidad?
 > 
 > **Respuesta usuario:** Si, estas notificaciones tambien apareceran en el telefono pero aun no se programa esa parte de notificaciones en la apk.
+
+### Archivos creados/modificados:
+- `types/dashboard.ts` - Interfaz VentanaOportunidad, campo en Habito y DatosNuevoHabito
+- `components/shared/SelectorVentanaOportunidad.tsx` - Componente con reloj circular SVG
+- `styles/dashboard/componentes/ventanaOportunidad.css` - Estilos del selector
+- `components/shared/index.ts` - Export del componente
+- `styles/dashboard/index.css` - Import del CSS
+- `components/dashboard/Habitos/FormularioHabitoModerno.tsx` - Integración con FilaPropiedades
+- `components/dashboard/ModalHabito.tsx` - Estado y paso de props ventanaOportunidad
+- `stores/habitosStore.ts` - Persistir ventanaOportunidad en crearHabito y editarHabito
 
 ---
 

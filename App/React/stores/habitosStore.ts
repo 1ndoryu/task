@@ -112,7 +112,9 @@ export const useHabitosStore = create<HabitosStore>()(
                         racha: 0,
                         historialCompletados: [],
                         ultimoCompletado: undefined,
-                        fechaCreacion: hoy
+                        fechaCreacion: hoy,
+                        /* TAREA 4: Incluir ventana de oportunidad si se definió */
+                        ventanaOportunidad: datos.ventanaOportunidad
                     };
 
                     set(
@@ -136,7 +138,9 @@ export const useHabitosStore = create<HabitosStore>()(
                                     nombre: datos.nombre,
                                     importancia: datos.importancia,
                                     tags: datos.tags,
-                                    frecuencia: datos.frecuencia
+                                    frecuencia: datos.frecuencia,
+                                    /* TAREA 4: Incluir ventana de oportunidad */
+                                    ventanaOportunidad: datos.ventanaOportunidad
                                 };
                             })
                         }),

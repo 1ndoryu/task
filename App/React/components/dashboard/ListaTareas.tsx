@@ -19,6 +19,7 @@ import {useMensajesNoLeidos} from '../../hooks/useMensajes';
 import {useSeleccionMultipleStore} from '../../stores/seleccionMultipleStore';
 import {useGruposTareasStore, useSeccionesActivas} from '../../stores/gruposTareasStore';
 import {MenuAccionesMasivas} from './lista-tareas/MenuAccionesMasivas';
+import {GrupoTareasHeader} from './lista-tareas/GrupoTareasHeader';
 
 // Hooks extraídos
 import {useListaTareasLogica} from '../../hooks/dashboard/useListaTareasLogica';
@@ -88,7 +89,24 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     /* Sistema de grupos/secciones - TAREA 3 */
     const seccionesActivas = useSeccionesActivas();
-    const {crearGrupo} = useGruposTareasStore();
+    const {crearGrupo, obtenerGruposProyecto, ordenarGrupos} = useGruposTareasStore();
+
+    /* Obtener grupos del proyecto actual y organizar tareas */
+    const gruposOrdenados = useMemo(() => {
+        if (!seccionesActivas) return [];
+
+        const grupos = obtenerGruposProyecto(proyectoId);
+        if (grupos.length === 0) return [];
+
+        /* Crear mapa de tareas por grupo para calcular importancia promedio */
+        const tareasPorGrupo = new Map<number, Tarea[]>();
+        grupos.forEach(g => {
+            const tareasDelGrupo = tareas.filter(t => t.grupoId === g.id && !t.completado && !t.parentId);
+            tareasPorGrupo.set(g.id, tareasDelGrupo);
+        });
+
+        return ordenarGrupos(grupos, tareasPorGrupo);
+    }, [seccionesActivas, obtenerGruposProyecto, ordenarGrupos, proyectoId, tareas]);
 
     /* Handler para agrupar tareas seleccionadas */
     const manejarAgrupar = useCallback(
@@ -132,6 +150,29 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
     /* Datos calculados */
     const tareasPrincipalesPendientes = useMemo(() => pendientes.filter(t => !t.parentId && !esTareaHabito(t)), [pendientes]);
     const tareasHabitoPendientes = useMemo(() => pendientes.filter(t => esTareaHabito(t)), [pendientes]);
+
+    /* Separar tareas en grupos y sin grupo (cuando secciones está activo) */
+    const {tareasSinGrupo, tareasPorGrupo} = useMemo(() => {
+        if (!seccionesActivas || gruposOrdenados.length === 0) {
+            return {tareasSinGrupo: tareasPrincipalesPendientes, tareasPorGrupo: new Map<number, Tarea[]>()};
+        }
+
+        const sinGrupo: Tarea[] = [];
+        const porGrupo = new Map<number, Tarea[]>();
+
+        /* Inicializar mapa con arrays vacíos para cada grupo */
+        gruposOrdenados.forEach(g => porGrupo.set(g.id, []));
+
+        tareasPrincipalesPendientes.forEach(tarea => {
+            if (tarea.grupoId && porGrupo.has(tarea.grupoId)) {
+                porGrupo.get(tarea.grupoId)!.push(tarea);
+            } else {
+                sinGrupo.push(tarea);
+            }
+        });
+
+        return {tareasSinGrupo: sinGrupo, tareasPorGrupo: porGrupo};
+    }, [seccionesActivas, gruposOrdenados, tareasPrincipalesPendientes]);
 
     // Mensajes no leídos
     const tareasIdsReales = useMemo(() => tareas.filter(t => t.id > 0).map(t => t.id), [tareas]);
@@ -182,6 +223,25 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         />
     );
 
+    /* Función auxiliar para renderizar tareas de un grupo con sus subtareas */
+    const renderTareasGrupo = (tareasDelGrupo: Tarea[]) => (
+        <>
+            {tareasDelGrupo.map(tareaPadre => {
+                const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
+                return (
+                    <div key={tareaPadre.id} className="tareaPadreContenedor">
+                        {renderTareaItem(tareaPadre, false)}
+                        {subtareasVisibles.map(subtarea => (
+                            <div key={subtarea.id} className="subtareaContenedor">
+                                {renderTareaItem(subtarea, true)}
+                            </div>
+                        ))}
+                    </div>
+                );
+            })}
+        </>
+    );
+
     return (
         <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista}>
             {/* Estado vacío cuando no hay tareas (ocultar en proyectos expandidos) */}
@@ -189,10 +249,30 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                 <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />
             ) : tareas.length > 0 ? (
                 <>
+                    {/* Renderizar grupos cuando las secciones están activas */}
+                    {seccionesActivas && gruposOrdenados.length > 0 && (
+                        <div className="listaTareasGrupos">
+                            {gruposOrdenados.map(grupo => {
+                                const tareasDelGrupo = tareasPorGrupo.get(grupo.id) || [];
+                                return (
+                                    <div key={grupo.id} className="grupoTareasContenedor">
+                                        <GrupoTareasHeader grupo={grupo} cantidadTareas={tareasDelGrupo.length} />
+                                        {!grupo.colapsado && tareasDelGrupo.length > 0 && (
+                                            <div className="grupoTareasListaInterna">
+                                                {renderTareasGrupo(tareasDelGrupo)}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Tareas sin grupo (o todas si secciones desactivadas) */}
                     {habilitarDrag ? (
                         <>
-                            <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes" onContextMenu={manejarClickDerechoLista}>
-                                {tareasPrincipalesPendientes.map(tareaPadre => {
+                            <Reorder.Group axis="y" values={seccionesActivas ? tareasSinGrupo : tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes" onContextMenu={manejarClickDerechoLista}>
+                                {(seccionesActivas ? tareasSinGrupo : tareasPrincipalesPendientes).map(tareaPadre => {
                                     const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
 
                                     return (

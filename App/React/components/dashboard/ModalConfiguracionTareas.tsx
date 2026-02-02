@@ -6,7 +6,7 @@
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import type {ConfiguracionTareas} from '../../hooks/useConfiguracionTareas';
-import {useGruposTareasStore} from '../../stores/gruposTareasStore';
+import {useGruposTareasStore, type OrdenamientoGrupos} from '../../stores/gruposTareasStore';
 
 interface ModalConfiguracionTareasProps {
     estaAbierto: boolean;
@@ -22,7 +22,14 @@ interface ModalConfiguracionTareasProps {
 }
 
 export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas}: ModalConfiguracionTareasProps): JSX.Element {
-    const {seccionesActivas, toggleSecciones} = useGruposTareasStore();
+    const {seccionesActivas, toggleSecciones, ordenamientoGrupos, setOrdenamientoGrupos} = useGruposTareasStore();
+
+    /* Opciones de ordenamiento de grupos */
+    const opcionesOrdenamiento: {valor: OrdenamientoGrupos; etiqueta: string}[] = [
+        {valor: 'manual', etiqueta: 'Manual'},
+        {valor: 'nombre', etiqueta: 'Nombre'},
+        {valor: 'importancia', etiqueta: 'Importancia'}
+    ];
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Vista">
@@ -98,6 +105,30 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                     </div>
                     <ToggleSwitch checked={seccionesActivas} onChange={toggleSecciones} />
                 </div>
+
+                {/* Opcion 8: Ordenamiento de Grupos (solo visible si secciones activas) */}
+                {seccionesActivas && (
+                    <>
+                        <div className="separadorOpcionesConfig" />
+                        <div className="itemOpcionConfig">
+                            <div className="detallesOpcionConfig">
+                                <span className="tituloOpcionConfig">Ordenar secciones por</span>
+                                <span className="descripcionOpcionConfig">Criterio para ordenar las secciones entre sí</span>
+                            </div>
+                            <select
+                                className="selectorOrdenamiento"
+                                value={ordenamientoGrupos}
+                                onChange={e => setOrdenamientoGrupos(e.target.value as OrdenamientoGrupos)}
+                            >
+                                {opcionesOrdenamiento.map(op => (
+                                    <option key={op.valor} value={op.valor}>
+                                        {op.etiqueta}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </>
+                )}
             </div>
         </Modal>
     );

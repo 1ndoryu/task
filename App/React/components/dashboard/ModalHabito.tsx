@@ -8,11 +8,12 @@
  * - Fase 10.8.6: Removido PestanasModal (código muerto)
  * - Fase 14.8: Soporte para tareas/metas del habito
  * - SubHabitos: Hábitos anidados con frecuencia e importancia independiente
+ * - TAREA 4: Ventana de oportunidad para hábitos
  */
 
 import {useState, useCallback, useEffect, useMemo} from 'react';
 import {Activity, BarChart2} from 'lucide-react';
-import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito} from '../../types/dashboard';
+import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito, VentanaOportunidad} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
 import type {EstadoHabito} from '../shared';
@@ -51,6 +52,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
     const [colorIcono, setColorIcono] = useState(habito?.colorIcono || '#888888');
     const [importancia, setImportancia] = useState<NivelImportancia>(habito?.importancia || 'Media');
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(habito?.frecuencia || FRECUENCIA_POR_DEFECTO);
+    const [ventanaOportunidad, setVentanaOportunidad] = useState<VentanaOportunidad | undefined>(habito?.ventanaOportunidad);
     const [errores, setErrores] = useState<{nombre?: string}>({});
 
     /* Removido: Estado de pestañas móvil (código muerto - Fase 10.8.6) */
@@ -146,6 +148,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
             setColorIcono(habito.colorIcono || '#888888');
             setImportancia(habito.importancia);
             setFrecuencia(habito.frecuencia || FRECUENCIA_POR_DEFECTO);
+            setVentanaOportunidad(habito.ventanaOportunidad);
         } else {
             setNombre('');
             setDescripcion('');
@@ -153,6 +156,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
             setColorIcono('#888888');
             setImportancia('Media');
             setFrecuencia(FRECUENCIA_POR_DEFECTO);
+            setVentanaOportunidad(undefined);
         }
         setErrores({});
     }, [habito?.id, estaAbierto]);
@@ -199,10 +203,11 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
             frecuencia,
             descripcion: descripcion.trim() || undefined,
             icono,
-            colorIcono
+            colorIcono,
+            ventanaOportunidad
         });
         onCerrar();
-    }, [nombre, importancia, frecuencia, validarFormulario, onGuardar, onCerrar]);
+    }, [nombre, importancia, frecuencia, ventanaOportunidad, validarFormulario, onGuardar, onCerrar]);
 
     /* Auto-guardado: al cerrar el modal, guardar si hay nombre válido */
     const manejarCerrarConGuardado = useCallback(() => {
@@ -272,6 +277,8 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onImportanciaChange={setImportancia}
                                     frecuencia={frecuencia}
                                     onFrecuenciaChange={setFrecuencia}
+                                    ventanaOportunidad={ventanaOportunidad}
+                                    onVentanaOportunidadChange={setVentanaOportunidad}
                                     estadoHoy={estadoHoy}
                                     onEstadoChange={manejarCambioEstado}
                                     onPausarHabito={habito && onPausarHabito ? () => onPausarHabito(habito.id) : undefined}
@@ -323,6 +330,8 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                             onImportanciaChange={setImportancia}
                             frecuencia={frecuencia}
                             onFrecuenciaChange={setFrecuencia}
+                            ventanaOportunidad={ventanaOportunidad}
+                            onVentanaOportunidadChange={setVentanaOportunidad}
                             modoEdicion={false}
                             errorNombre={errores.nombre}
                         />

@@ -76,3 +76,5 @@ export * from './EstadoVacio';
 /* Fase BottomSheet - Modales de selección de propiedades y badges */
 export * from './ModalSeleccionPropiedad';
 export * from './BadgesPropiedad';
+/* TAREA 4 - Selector de ventana de oportunidad para hábitos */
+export * from './SelectorVentanaOportunidad';

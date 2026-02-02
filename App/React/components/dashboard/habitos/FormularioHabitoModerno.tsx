@@ -8,12 +8,13 @@
  * Fase 13: Soporte para pausar habitos
  * Fase 14.8: Soporte para tareas/metas del habito
  * SubHabitos: Hábitos anidados con frecuencia e importancia independiente
+ * TAREA 4: Ventana de oportunidad para hábitos
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, etc.)
  */
 
 import {Pause, Play} from 'lucide-react';
-import type {NivelImportancia, FrecuenciaHabito, Habito, DatosNuevoSubHabito} from '../../../types/dashboard';
-import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
+import type {NivelImportancia, FrecuenciaHabito, Habito, DatosNuevoSubHabito, VentanaOportunidad, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
+import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades, SelectorVentanaOportunidad} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 import {ListaSubHabitos} from './ListaSubHabitos';
@@ -34,6 +35,9 @@ interface FormularioHabitoModernoProps {
     /* Frecuencia */
     frecuencia: FrecuenciaHabito;
     onFrecuenciaChange: (frecuencia: FrecuenciaHabito) => void;
+    /* Ventana de oportunidad - TAREA 4 */
+    ventanaOportunidad?: VentanaOportunidad;
+    onVentanaOportunidadChange?: (ventana: VentanaOportunidad | undefined) => void;
     /* Estado del dia (solo en modo edicion) */
     estadoHoy?: EstadoHabito;
     onEstadoChange?: (estado: EstadoHabito) => void;
@@ -48,9 +52,17 @@ interface FormularioHabitoModernoProps {
     onCrearSubHabito?: (datos: DatosNuevoSubHabito) => void;
     onEliminarSubHabito?: (subHabitoId: number) => void;
     onToggleSubHabito?: (subHabitoId: number) => void;
+    /* Tareas del hábito - Fase 14.8 (props requeridas por ModalHabito pero no usadas aquí) */
+    tareasHabito?: Tarea[];
+    onToggleTareaHabito?: (id: number) => void;
+    onCrearTareaHabito?: (datos: DatosEdicionTarea) => void;
+    onEliminarTareaHabito?: (id: number) => void;
+    onConfigurarTareaHabito?: (tarea: Tarea) => void;
+    onReordenarTareasHabito?: (tareasIds: number[]) => void;
+    onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, onCrearSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, ventanaOportunidad, onVentanaOportunidadChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, onCrearSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
 
     /* Determinar si mostrar la sección de subhábitos */
@@ -87,6 +99,13 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             <FilaPropiedades etiqueta="Frecuencia">
                 <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onFrecuenciaChange} />
             </FilaPropiedades>
+
+            {/* Ventana de oportunidad - TAREA 4 */}
+            {onVentanaOportunidadChange && (
+                <FilaPropiedades etiqueta="Ventana">
+                    <SelectorVentanaOportunidad ventana={ventanaOportunidad} onChange={onVentanaOportunidadChange} />
+                </FilaPropiedades>
+            )}
 
             {/* Pausar habito (solo modo edicion) */}
             {modoEdicion && onPausarHabito && (

@@ -110,6 +110,25 @@ export interface Habito {
     tareasIds?: number[];
     /* SubHabitos: hábitos anidados con frecuencia e importancia independiente */
     subhabitos?: SubHabito[];
+    /* Ventana de oportunidad: período de tiempo óptimo para realizar el hábito */
+    ventanaOportunidad?: VentanaOportunidad;
+}
+
+/*
+ * Ventana de oportunidad para un hábito
+ * Define el período de tiempo óptimo para realizar el hábito
+ */
+export interface VentanaOportunidad {
+    /* Hora de inicio (0-23) */
+    horaInicio: number;
+    /* Minuto de inicio (0-59) */
+    minutoInicio: number;
+    /* Hora de fin (0-23) */
+    horaFin: number;
+    /* Minuto de fin (0-59) */
+    minutoFin: number;
+    /* Si la ventana está habilitada */
+    habilitada: boolean;
 }
 
 /*
@@ -309,6 +328,8 @@ export interface DatosNuevoHabito {
     descripcion?: string;
     icono?: string;
     colorIcono?: string;
+    /* TAREA 4: Ventana de oportunidad */
+    ventanaOportunidad?: VentanaOportunidad;
 }
 
 /*

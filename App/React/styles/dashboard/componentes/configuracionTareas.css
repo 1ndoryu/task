@@ -41,3 +41,26 @@
     background-color: var(--dashboard-bordeSutil);
     width: 100%;
 }
+
+/* Selector de ordenamiento de grupos */
+.selectorOrdenamiento {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-bordeRedondeado);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+    cursor: pointer;
+    min-width: 100px;
+}
+
+.selectorOrdenamiento:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.selectorOrdenamiento option {
+    background: var(--dashboard-fondoTarjeta);
+    color: var(--dashboard-textoNormal);
+}
