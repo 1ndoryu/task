@@ -17,8 +17,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.20-beta (2026-02-02)
-**Foco:** Mejoras UI/UX Pre-Lanzamiento
+**Versión:** v1.0.21-beta (2026-02-03)
+**Foco:** Sprint Actual Completado - Mejoras UI/UX Pre-Lanzamiento
 
 ---
 

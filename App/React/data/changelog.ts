@@ -22,6 +22,20 @@ export interface Version {
  */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.21-beta',
+        fecha: '2026-02-03',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Ventana de oportunidad para hábitos: define el mejor horario para realizar cada hábito con un reloj visual'},
+            {tipo: 'nuevo', descripcion: 'Ordenamiento de grupos de tareas por nombre, importancia promedio o manual'},
+            {tipo: 'nuevo', descripcion: 'Los grupos de tareas ahora se muestran con sus tareas agrupadas visualmente'},
+            {tipo: 'mejora', descripcion: 'Gestos de deslizamiento en tareas móvil ahora cubren todo el ancho correctamente'},
+            {tipo: 'mejora', descripcion: 'Los subhábitos tienen el mismo diseño minimalista que las subtareas'},
+            {tipo: 'mejora', descripcion: 'Al tocar un hábito en móvil, se abre el editor con icono de configuración'},
+            {tipo: 'arreglo', descripcion: 'Las actividades ahora muestran correctamente el nombre de tareas y hábitos'},
+            {tipo: 'arreglo', descripcion: 'La carpeta General de notas ya no desaparece al navegar entre carpetas'}
+        ]
+    },
+    {
         version: 'v1.0.19-beta',
         fecha: '2026-02-01',
         cambios: [
