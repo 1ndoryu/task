@@ -7,7 +7,7 @@
 import {useEffect, useRef, useCallback, useState} from 'react';
 import {ChevronRight} from 'lucide-react';
 
-interface OpcionMenu {
+export interface OpcionMenu {
     id: string;
     etiqueta: string;
     icono?: React.ReactNode;

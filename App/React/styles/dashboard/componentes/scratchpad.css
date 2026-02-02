@@ -774,6 +774,43 @@
     height: calc(100vh - 60px);
 }
 
+/*
+ * Estilos para expandir/colapsar paneles en modal de notas
+ * Permite ver solo lista, solo editor o ambos
+ */
+.modalNotasExpandidoContenedor--soloLista .vistaNotasExpandida {
+    grid-template-columns: 1fr;
+}
+.modalNotasExpandidoContenedor--soloLista .vistaNotasColumnaLista {
+    border-right: none;
+}
+
+.modalNotasExpandidoContenedor--soloEditor .vistaNotasExpandida {
+    grid-template-columns: 1fr;
+}
+.modalNotasExpandidoContenedor--soloEditor .vistaNotasColumnaEditor {
+    border-left: none;
+}
+
+/* Header del editor cuando lista está oculta */
+.vistaNotasEditorHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTarjeta);
+}
+
+.vistaNotasEditorTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .vistaNotasListaContenido {
     flex: 1;
     min-height: 0;

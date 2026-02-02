@@ -13,11 +13,12 @@ interface DashboardPanelProps {
     className?: string;
     conPadding?: boolean; // Si true, agrega padding al contenido
     id?: string;
+    onContextMenu?: (e: React.MouseEvent) => void;
 }
 
-export function DashboardPanel({titulo, icono, acciones, children, className = '', conPadding = false, id}: DashboardPanelProps): JSX.Element {
+export function DashboardPanel({titulo, icono, acciones, children, className = '', conPadding = false, id, onContextMenu}: DashboardPanelProps): JSX.Element {
     return (
-        <section id={id} className={`dashboardPanel ${className}`}>
+        <section id={id} className={`dashboardPanel ${className}`} onContextMenu={onContextMenu}>
             {titulo && (
                 <div className="seccionEncabezado" style={{padding: 'var(--dashboard-espacioMd) var(--dashboard-espacioLg)', marginBottom: 0}}>
                     <h2 className="seccionTitulo">

@@ -163,80 +163,103 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
 
     if (!abierto) return null;
 
-    const claseModal = `modalContenedor--expandido modalNotasExpandidoContenedor ${maximizado ? 'modalNotasExpandidoContenedor--maximizado' : ''}`;
+    const claseModal = `modalContenedor--expandido modalNotasExpandidoContenedor ${maximizado ? 'modalNotasExpandidoContenedor--maximizado' : ''} ${vistaPaneles === 'solo-lista' ? 'modalNotasExpandidoContenedor--soloLista' : ''} ${vistaPaneles === 'solo-editor' ? 'modalNotasExpandidoContenedor--soloEditor' : ''}`;
     const textoOrdenamiento = ordenamiento === 'modificacion' ? 'Modificación' : 'Creación';
+
+    /* Icono y texto del botón de vista */
+    const iconoVista = vistaPaneles === 'ambos' ? <PanelLeftClose size={14} /> : vistaPaneles === 'solo-lista' ? <PanelRightClose size={14} /> : <PanelLeft size={14} />;
+    const tituloVista = vistaPaneles === 'ambos' ? 'Ocultar editor' : vistaPaneles === 'solo-lista' ? 'Ocultar lista' : 'Mostrar ambos';
 
     return (
         <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra={claseModal}>
             <div id="modal-notas-expandida" className="vistaNotasExpandida">
-                <div className="vistaNotasColumnaLista">
-                    {vistaActual === 'carpetas' ? (
-                        /* Vista de carpetas */
-                        <NavegadorCarpetas carpetas={carpetas} onSeleccionar={seleccionarCarpeta} onCrear={manejarCrearCarpeta} onRenombrar={manejarRenombrarCarpeta} onEliminar={manejarEliminarCarpeta} cargando={cargandoCarpetas} />
-                    ) : (
-                        /* Vista de notas */
-                        <>
-                            {/* Header con búsqueda y acciones */}
-                            <div className="vistaNotasBusqueda">
-                                <div className="notasHeaderConCarpeta">
-                                    <button className="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
-                                        <ChevronLeft size={14} />
-                                    </button>
-                                    <span className="notasCarpetaActual">{nombreCarpetaActiva}</span>
-                                </div>
-                                <div className="modalNotasBusqueda">
-                                    <Search size={14} className="modalNotasBusquedaIcono" />
-                                    <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
-                                    {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
-                                </div>
-                                {/* Barra de acciones */}
-                                <div className="vistaNotasAcciones">
-                                    <button className="vistaNotasAccionBoton" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
-                                        <Plus size={14} />
-                                    </button>
-                                    <button className="vistaNotasAccionBoton" onClick={alternarOrdenamiento} title={`Ordenar por fecha de ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
-                                        <ArrowUpDown size={14} />
-                                        <span className="vistaNotasAccionTexto">{textoOrdenamiento}</span>
-                                    </button>
-                                    <button className="vistaNotasAccionBoton" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar tamaño' : 'Maximizar'}>
-                                        {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="vistaNotasListaContenido">
-                                {cargando && !notas.length ? (
-                                    <div className="modalNotasVacio">
-                                        <Loader size={24} className="animacionGirar" />
-                                        <span>Cargando notas...</span>
+                {/* Columna Lista - solo visible si mostrarLista */}
+                {mostrarLista && (
+                    <div className="vistaNotasColumnaLista">
+                        {vistaActual === 'carpetas' ? (
+                            /* Vista de carpetas */
+                            <NavegadorCarpetas carpetas={carpetas} onSeleccionar={seleccionarCarpeta} onCrear={manejarCrearCarpeta} onRenombrar={manejarRenombrarCarpeta} onEliminar={manejarEliminarCarpeta} cargando={cargandoCarpetas} />
+                        ) : (
+                            /* Vista de notas */
+                            <>
+                                {/* Header con búsqueda y acciones */}
+                                <div className="vistaNotasBusqueda">
+                                    <div className="notasHeaderConCarpeta">
+                                        <button className="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
+                                            <ChevronLeft size={14} />
+                                        </button>
+                                        <span className="notasCarpetaActual">{nombreCarpetaActiva}</span>
                                     </div>
-                                ) : error ? (
-                                    <div className="modalNotasError">
-                                        <AlertCircle size={24} />
-                                        <span>{error}</span>
+                                    <div className="modalNotasBusqueda">
+                                        <Search size={14} className="modalNotasBusquedaIcono" />
+                                        <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
+                                        {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
                                     </div>
-                                ) : notasOrdenadas.length === 0 ? (
-                                    <div className="modalNotasVacio">
-                                        <FileText size={32} />
-                                        <span>{terminoBusqueda ? 'No se encontraron notas' : 'No hay notas en esta carpeta'}</span>
-                                        {!terminoBusqueda && <p>Crea una nueva nota o mueve notas desde otra carpeta</p>}
+                                    {/* Barra de acciones */}
+                                    <div className="vistaNotasAcciones">
+                                        <button className="vistaNotasAccionBoton" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
+                                            <Plus size={14} />
+                                        </button>
+                                        <button className="vistaNotasAccionBoton" onClick={alternarOrdenamiento} title={`Ordenar por fecha de ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
+                                            <ArrowUpDown size={14} />
+                                            <span className="vistaNotasAccionTexto">{textoOrdenamiento}</span>
+                                        </button>
+                                        <button className="vistaNotasAccionBoton" onClick={alternarVistaPaneles} title={tituloVista}>
+                                            {iconoVista}
+                                        </button>
+                                        <button className="vistaNotasAccionBoton" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar tamaño' : 'Maximizar'}>
+                                            {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                                        </button>
                                     </div>
-                                ) : (
-                                    <ListaNotasGuardadas notas={notasOrdenadas} modo="lista" notaActivaId={notaActiva.id} onSeleccionar={seleccionarNota} onEliminar={manejarEliminar} carpetas={carpetas} onMoverNota={moverNota} />
+                                </div>
+                                <div className="vistaNotasListaContenido">
+                                    {cargando && !notas.length ? (
+                                        <div className="modalNotasVacio">
+                                            <Loader size={24} className="animacionGirar" />
+                                            <span>Cargando notas...</span>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="modalNotasError">
+                                            <AlertCircle size={24} />
+                                            <span>{error}</span>
+                                        </div>
+                                    ) : notasOrdenadas.length === 0 ? (
+                                        <div className="modalNotasVacio">
+                                            <FileText size={32} />
+                                            <span>{terminoBusqueda ? 'No se encontraron notas' : 'No hay notas en esta carpeta'}</span>
+                                            {!terminoBusqueda && <p>Crea una nueva nota o mueve notas desde otra carpeta</p>}
+                                        </div>
+                                    ) : (
+                                        <ListaNotasGuardadas notas={notasOrdenadas} modo="lista" notaActivaId={notaActiva.id} onSeleccionar={seleccionarNota} onEliminar={manejarEliminar} carpetas={carpetas} onMoverNota={moverNota} />
+                                    )}
+                                </div>
+                                {notasOrdenadas.length > 0 && (
+                                    <div className="modalNotasFooter">
+                                        <span>{resultadosBusqueda ? `${resultadosBusqueda.length} resultados` : `${notasOrdenadas.length} nota${notasOrdenadas.length !== 1 ? 's' : ''}`}</span>
+                                    </div>
                                 )}
-                            </div>
-                            {notasOrdenadas.length > 0 && (
-                                <div className="modalNotasFooter">
-                                    <span>{resultadosBusqueda ? `${resultadosBusqueda.length} resultados` : `${notasOrdenadas.length} nota${notasOrdenadas.length !== 1 ? 's' : ''}`}</span>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-                <div className="vistaNotasColumnaEditor">
-                    <div className="vistaNotasEditorContenido">
-                        <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={tamanoFuente} altura="100%" delayGuardado={delayGuardado} mostrarResizeHandle={false} />
+                            </>
+                        )}
                     </div>
-                </div>
+                )}
+
+                {/* Columna Editor - solo visible si mostrarEditor */}
+                {mostrarEditor && (
+                    <div className="vistaNotasColumnaEditor">
+                        {/* Botón para mostrar lista cuando está oculta */}
+                        {!mostrarLista && (
+                            <div className="vistaNotasEditorHeader">
+                                <button className="vistaNotasAccionBoton" onClick={alternarVistaPaneles} title="Mostrar lista">
+                                    <PanelLeft size={14} />
+                                </button>
+                                <span className="vistaNotasEditorTitulo">{extraerTitulo(notaActiva.contenido)}</span>
+                            </div>
+                        )}
+                        <div className="vistaNotasEditorContenido">
+                            <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={tamanoFuente} altura="100%" delayGuardado={delayGuardado} mostrarResizeHandle={false} />
+                        </div>
+                    </div>
+                )}
             </div>
         </Modal>
     );

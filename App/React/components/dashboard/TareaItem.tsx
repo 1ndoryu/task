@@ -55,6 +55,9 @@ export interface TareaItemProps {
     /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
     tieneSubtareas?: boolean;
     modoCompacto?: boolean;
+    /* Props para selección múltiple (Ctrl+Click) */
+    estaSeleccionada?: boolean;
+    onSeleccionMultiple?: (tarea: Tarea, evento: React.MouseEvent) => void;
 }
 
 /* TO-DO: Eliminar esta interfaz cuando todos los componentes migren al hook global */
@@ -64,7 +67,7 @@ export interface MenuContextualEstado {
     y: number;
 }
 
-export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, tieneSubtareas = false, modoCompacto = false}: TareaItemProps): JSX.Element {
+export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, tieneSubtareas = false, modoCompacto = false, estaSeleccionada = false, onSeleccionMultiple}: TareaItemProps): JSX.Element {
     const [editando, setEditando] = useState(tarea.texto === '');
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -471,7 +474,14 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             </div>
         );
     }
-
+ ${estaSeleccionada ? 'tareaItem--seleccionada' : ''}`} onContextMenu={manejarClickDerecho} onClick={e => {
+                /* Ctrl+Click para selección múltiple */
+                if ((e.ctrlKey || e.metaKey) && onSeleccionMultiple) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSeleccionMultiple(tarea, e);
+                }
+            }
     return (
         <>
             <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`} onContextMenu={manejarClickDerecho}>

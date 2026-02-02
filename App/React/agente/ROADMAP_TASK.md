@@ -27,7 +27,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 1. El texto de la nota las ultimas palabras se cubren con el nav inferior.
 2. El css de los gestos al deslizar, el texto debe ser pequeño, el color de eliminar rojo, quita los iconos, los colores verdes y rojo tienen que difuminarse. Tambien pasa que cuando texto de la tarea es corto, el liminar no aparece al final o sea no se ocupa el 100% al ancho y no se ve al borde la pantalla como debería.
 3. El css de los subhabitos en el panel de configuracion de los habitos debe ser igual exactamente a como se vían las metas o subtarea, y sigue apareciendo las subtareas, "No hay metas o tareas para este hábito", acomodar los css (mucho mas minimalista y con la misma logica de las tareas pero ya hablamos que la diferencia esta en que los habitos si se reinician)y quitar las metas o subtareas en la configuracion de los habitos. Otro detalle es que subhabitos no se ven en el panel de ejecución, deben verse igual como se ven las subtareas.
-4.
+4. Sobre "TAREA 0.3: Opción Ocultar Subtareas Automáticamente" Funciona bien pero cuando agrego una subtarea (tambien con los subhabitos), debe expandirse si esta desactivada la opcion, solo se expande si recargo la pagina actualmente.
+5. Sobre "TAREA 0.5: BottomSheet para Hábitos en Móvil" funciona bien pero hubo una confuncion el bottomS que se abre al tocar los habitos es el menu contextual, debe ser de editar como funciona actualmente con las tareas.
 
 # TAREAS PENDIENTES - SPRINT ACTUAL
 
@@ -283,7 +284,7 @@ Implementar sistema de carpetas:
 ---
 
 ## TAREA 2.2: Expandir/Colapsar Vistas en Notas
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja
+**Estado:** ✅ Completada | **Prioridad:** Baja
 
 ### Descripción:
 - Poder ocultar el visor y ver solo lista de notas
@@ -291,9 +292,13 @@ Implementar sistema de carpetas:
 - Simular explorador de archivos minimalista
 
 ### Subtareas:
-- [ ] Agregar botones de toggle para cada panel
-- [ ] Implementar estados de vista (solo-lista, solo-visor, ambos)
-- [ ] Persistir preferencia
+- [x] Agregar botones de toggle para cada panel
+- [x] Implementar estados de vista (solo-lista, solo-visor, ambos)
+- [x] Persistir preferencia (en estado local del componente)
+
+### Archivos modificados:
+- `components/dashboard/notas/ModalNotasExpandido.tsx` - Estado vistaPaneles, botón toggle, lógica condicional
+- `styles/dashboard/componentes/scratchpad.css` - Clases --soloLista y --soloEditor
 
 ---
 
@@ -312,7 +317,7 @@ Sistema de agrupación para tareas y hábitos:
 ---
 
 ## TAREA 3.1: Selección Múltiple de Tareas
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta (Prerrequisito de 3)
+**Estado:** ✅ Completada | **Prioridad:** Alta (Prerrequisito de 3)
 
 ### Descripción:
 - Ctrl + Click para seleccionar múltiples tareas
@@ -323,10 +328,22 @@ Sistema de agrupación para tareas y hábitos:
   - Agrupar
 
 ### Subtareas:
-- [ ] Implementar estado de selección múltiple en store
-- [ ] UI de selección (indicador visual en tareas seleccionadas)
-- [ ] Menú contextual con acciones masivas
-- [ ] Lógica de cada acción masiva
+- [x] Implementar estado de selección múltiple en store
+- [x] UI de selección (indicador visual en tareas seleccionadas)
+- [x] Menú contextual con acciones masivas
+- [x] Lógica de cada acción masiva
+
+### Archivos creados:
+- `stores/seleccionMultipleStore.ts` - Store Zustand para gestionar selección
+- `components/dashboard/lista-tareas/MenuAccionesMasivas.tsx` - Menú contextual acciones masivas
+
+### Archivos modificados:
+- `components/dashboard/TareaItem.tsx` - Props estaSeleccionada, onSeleccionMultiple, clase CSS
+- `components/dashboard/lista-tareas/TareaConColapsador.tsx` - Pasar props de selección
+- `components/dashboard/ListaTareas.tsx` - Integración store, handlers, menú
+- `components/shared/DashboardPanel.tsx` - Prop onContextMenu
+- `components/shared/MenuContextual.tsx` - Export OpcionMenu interface
+- `styles/dashboard/componentes/tareas.css` - Clase .tareaItem--seleccionada
 
 ---
 

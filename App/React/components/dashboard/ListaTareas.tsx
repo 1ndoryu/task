@@ -4,7 +4,7 @@
  * Responsabilidad única: renderizar tareas con checkbox, input de creación, edición inline y acciones
  */
 
-import {useMemo} from 'react';
+import {useMemo, useCallback} from 'react';
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
 import type {Tarea, DatosEdicionTarea, Proyecto, Participante} from '../../types/dashboard';
@@ -16,6 +16,8 @@ import {ModalMoverTarea} from './ModalMoverTarea';
 import {DashboardPanel} from '../shared/DashboardPanel';
 import {EstadoVacio} from '../shared/EstadoVacio';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
+import {useSeleccionMultipleStore} from '../../stores/seleccionMultipleStore';
+import {MenuAccionesMasivas} from './lista-tareas/MenuAccionesMasivas';
 
 // Hooks extraídos
 import {useListaTareasLogica} from '../../hooks/dashboard/useListaTareasLogica';
@@ -60,6 +62,28 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
     /* Filtros básicos */
     const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
     const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
+
+    /* Selección múltiple de tareas - TAREA 3.1 */
+    const {tareasSeleccionadas, toggleSeleccion, estaSeleccionada, limpiarSeleccion, menuPosicion, mostrarMenu, ocultarMenu, modoSeleccionActivo} = useSeleccionMultipleStore();
+
+    /* Handler para Ctrl+Click en tareas */
+    const manejarSeleccionMultiple = useCallback(
+        (tarea: Tarea, evento: React.MouseEvent) => {
+            toggleSeleccion({id: tarea.id, texto: tarea.texto, proyectoId: tarea.proyectoId, prioridad: tarea.prioridad});
+        },
+        [toggleSeleccion]
+    );
+
+    /* Handler para click derecho cuando hay selección múltiple */
+    const manejarClickDerechoLista = useCallback(
+        (evento: React.MouseEvent) => {
+            if (modoSeleccionActivo && tareasSeleccionadas.size > 0) {
+                evento.preventDefault();
+                mostrarMenu(evento.clientX, evento.clientY);
+            }
+        },
+        [modoSeleccionActivo, tareasSeleccionadas.size, mostrarMenu]
+    );
 
     /* Lógica Principal y Estado */
     const {tareasExpandidas, setTareasExpandidas, tareaConfigurando, setTareaConfigurando, tareaMoviendo, setTareaMoviendo, toggleColapsar, abrirConfiguracion, guardarConfiguracion, handleIndent, handleOutdent, handleCrearNueva, handleMoverProyecto, obtenerSubtareasVisibles} = useListaTareasLogica({
@@ -129,11 +153,14 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             onPosponerHabito={onPosponerHabito}
             onPausarHabito={onPausarHabito}
             onActualizarHabito={onActualizarHabito}
+            // Selección múltiple - TAREA 3.1
+            estaSeleccionada={estaSeleccionada(tarea.id)}
+            onSeleccionMultiple={manejarSeleccionMultiple}
         />
     );
 
     return (
-        <DashboardPanel id="lista-tareas">
+        <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista}>
             {/* Estado vacío cuando no hay tareas (ocultar en proyectos expandidos) */}
             {tareas.length === 0 && !ocultarPlaceholderVacio ? (
                 <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />
@@ -141,7 +168,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                 <>
                     {habilitarDrag ? (
                         <>
-                            <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes">
+                            <Reorder.Group axis="y" values={tareasPrincipalesPendientes} onReorder={handleReorder} className="listaTareasPendientes" onContextMenu={manejarClickDerechoLista}>
                                 {tareasPrincipalesPendientes.map(tareaPadre => {
                                     const subtareasVisibles = obtenerSubtareasVisibles(tareaPadre.id);
 
@@ -244,6 +271,28 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             )}
 
             <ModalMoverTarea estaAbierto={!!tareaMoviendo} onCerrar={() => setTareaMoviendo(null)} onMover={handleMoverProyecto} proyectos={proyectos} proyectoActualId={tareaMoviendo?.proyectoId} />
+
+            {/* Menú de acciones masivas - TAREA 3.1 */}
+            {menuPosicion && (
+                <MenuAccionesMasivas
+                    posicionX={menuPosicion.x}
+                    posicionY={menuPosicion.y}
+                    onCerrar={ocultarMenu}
+                    onEliminarTareas={ids => {
+                        ids.forEach(id => onEliminarTarea?.(id));
+                        limpiarSeleccion();
+                    }}
+                    onCambiarPrioridad={(ids, prioridad) => {
+                        ids.forEach(id => onEditarTarea?.(id, {prioridad}));
+                        limpiarSeleccion();
+                    }}
+                    onMoverProyecto={(ids, proyectoId) => {
+                        ids.forEach(id => onEditarTarea?.(id, {proyectoId} as any));
+                        limpiarSeleccion();
+                    }}
+                    proyectos={proyectos}
+                />
+            )}
         </DashboardPanel>
     );
 }

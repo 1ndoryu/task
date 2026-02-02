@@ -21,6 +21,20 @@
     background-color: var(--dashboard-fondoHover);
 }
 
+/*
+ * Tarea seleccionada (Ctrl+Click para selección múltiple)
+ * Visual similar a la selección de archivos en un explorador
+ */
+.tareaItem--seleccionada {
+    background-color: var(--dashboard-fondoSeleccion, rgba(59, 130, 246, 0.15));
+    outline: 1px solid var(--dashboard-bordeSeleccion, rgba(59, 130, 246, 0.4));
+    outline-offset: -1px;
+}
+
+.tareaItem--seleccionada:hover {
+    background-color: var(--dashboard-fondoSeleccionHover, rgba(59, 130, 246, 0.2));
+}
+
 /* 
  * SUBTAREAS
  */
