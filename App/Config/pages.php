@@ -51,3 +51,21 @@ PageManager::reactPage('prueba-ocp', 'PaginaPruebaIsland', [
 PageManager::reactPage('arbitraje', 'ArbitrajeIsland', [
     'titulo' => 'Calculadora de Arbitraje'
 ]);
+
+/*
+ * POLÍTICA DE PRIVACIDAD
+ * Página legal obligatoria para OAuth Consent Screen de Google
+ * Cumple con RGPD y requisitos de transparencia de datos
+ */
+PageManager::reactPage('politica-privacidad', 'PoliticaPrivacidadIsland', [
+    'titulo' => 'Política de Privacidad'
+]);
+
+/*
+ * TÉRMINOS DE SERVICIO
+ * Página legal que define uso aceptable, suscripciones y protección legal
+ * Recomendada para OAuth y compliance general
+ */
+PageManager::reactPage('terminos-servicio', 'TerminosServicioIsland', [
+    'titulo' => 'Términos de Servicio'
+]);

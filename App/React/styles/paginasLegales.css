@@ -1,0 +1,156 @@
+/*
+ * Estilos para páginas legales (Política de Privacidad, Términos de Servicio).
+ * Diseño limpio y legible, optimizado para lectura de documentos extensos.
+ */
+
+.contenedorPaginaLegal {
+  min-height: 100vh;
+  background: var(--dashboard-fondoPrincipal);
+  padding: 3rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.contenidoLegal {
+  max-width: 900px;
+  width: 100%;
+  background: var(--dashboard-fondoTerciario);
+  border: 1px solid var(--dashboard-bordePrincipal);
+  border-radius: 0;
+  padding: 3rem 2.5rem;
+  box-shadow: var(--dashboard-sombraMedia);
+}
+
+.contenidoLegal h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--dashboard-textoActivo);
+  margin-bottom: 0.75rem;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.fechaActualizacion {
+  text-align: center;
+  color: var(--dashboard-textoSecundario);
+  font-size: 0.9rem;
+  margin-bottom: 3rem;
+  font-style: italic;
+}
+
+.seccionLegal {
+  margin-bottom: 3rem;
+}
+
+.seccionLegal h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--dashboard-textoActivo);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--dashboard-bordePrincipal);
+}
+
+.seccionLegal h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--dashboard-textoNormal);
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.seccionLegal p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--dashboard-textoNormal);
+  margin-bottom: 0.75rem;
+}
+
+.seccionLegal ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.seccionLegal li {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--dashboard-textoNormal);
+  margin-bottom: 0.5rem;
+}
+
+.seccionLegal li strong {
+  color: var(--dashboard-textoActivo);
+  font-weight: 600;
+}
+
+.listaContacto {
+  list-style: none !important;
+  padding-left: 0 !important;
+  background: var(--dashboard-fondoSecundario);
+  border-left: 4px solid var(--dashboard-acento);
+  padding: 0.75rem !important;
+  border-radius: 0;
+}
+
+.listaContacto li {
+  margin-bottom: 0.25rem !important;
+}
+
+.listaContacto a {
+  color: var(--dashboard-acento);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.listaContacto a:hover {
+  border-bottom-color: var(--dashboard-acento);
+}
+
+.notaFinal {
+  margin-top: 3rem;
+  padding: 1rem;
+  background: var(--dashboard-estadoInfoFondo);
+  border: 1px solid var(--dashboard-estadoInfoBorde);
+  border-radius: 0;
+}
+
+.notaFinal p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--dashboard-textoNormal);
+}
+
+/* Responsividad móvil */
+@media (max-width: 768px) {
+  .contenedorPaginaLegal {
+    padding: 0.75rem;
+  }
+
+  .contenidoLegal {
+    padding: 1rem 0.75rem;
+  }
+
+  .contenidoLegal h1 {
+    font-size: 1.75rem;
+  }
+
+  .seccionLegal h2 {
+    font-size: 1.4rem;
+  }
+
+  .seccionLegal h3 {
+    font-size: 1.1rem;
+  }
+
+  .seccionLegal p,
+  .seccionLegal li {
+    font-size: 0.95rem;
+  }
+
+  .seccionLegal ul {
+    padding-left: 1rem;
+  }
+}

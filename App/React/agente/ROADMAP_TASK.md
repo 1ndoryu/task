@@ -50,8 +50,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
       - URL de Política de Privacidad
       - URL de Términos de Servicio (opcional pero recomendado)
   - **Páginas Requeridas (Pendientes):**
-    - [ ] `/politica-privacidad` - Obligatoria para OAuth
-    - [ ] `/terminos-servicio` - Recomendada
+    - [x] `/politica-privacidad` - Obligatoria para OAuth
+    - [x] `/terminos-servicio` - Recomendada
     - [ ] `/soporte` o página de contacto
   - **Plan de Creación Rápida (Fase 13.3.1):**
     1. Crear templates básicos en WordPress (Custom Post Type o páginas simples)
@@ -87,9 +87,9 @@ npx cap sync android
 
 #### 13.3.1 Páginas Legales (Bloqueante para OAuth) 📄
 
-**Prioridad:** Alta (Bloqueante) | **Complejidad:** Baja
+**Prioridad:** Alta (Bloqueante) | **Complejidad:** Baja | **Estado:** ✅ COMPLETADO
 
-- [ ] **Política de Privacidad** (`/politica-privacidad`)
+- [x] **Política de Privacidad** (`/politica-privacidad`)
   - Datos recopilados: email, nombre, ID usuario, actividad (hábitos, notas, tareas)
   - Almacenamiento: Servidor propio con cifrado opcional E2EE
   - Uso: Funcionalidad de la app, sincronización, autenticación
@@ -99,7 +99,7 @@ npx cap sync android
   - Cookies: Session, autenticación
   - Contacto: Email de soporte
   
-- [ ] **Términos de Servicio** (`/terminos-servicio`) - Opcional pero recomendado
+- [x] **Términos de Servicio** (`/terminos-servicio`) - Opcional pero recomendado
   - Uso aceptable de la plataforma
   - Limitaciones de responsabilidad
   - Suscripciones y pagos (Stripe)
@@ -112,10 +112,12 @@ npx cap sync android
   - FAQ básico
 
 **Implementación Técnica:**
-- WordPress Custom Pages o Custom Post Type
-- Templates limpios con diseño coherente
-- URLs públicas accesibles sin login
-- Añadir links en footer de la app web/móvil
+- ✅ Islands de React creadas: `PoliticaPrivacidadIsland.tsx`, `TerminosServicioIsland.tsx`
+- ✅ Páginas registradas en `App/Config/pages.php`
+- ✅ Estilos coherentes en `styles/paginasLegales.css`
+- ✅ URLs públicas accesibles: `task.nakomi.studio/politica-privacidad`, `/terminos-servicio`
+- [ ] Añadir links en footer de la app web/móvil
+- [ ] Configurar URLs en OAuth Consent Screen de Google Cloud Console
 
 #### 13.4 Publicación y Compliance
 - [ ] Adaptar UI para Safe Areas de móviles (Notch, Home Indicator).
