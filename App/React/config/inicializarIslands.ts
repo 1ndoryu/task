@@ -24,6 +24,8 @@ import {registrarIsland, marcarIslandsInicializadas} from './registroIslands';
 import {DashboardIsland} from '../islands/DashboardIsland';
 import {PaginaPruebaIsland} from '../islands/PaginaPruebaIsland';
 import {ArbitrajeIsland} from '../islands/ArbitrajeIsland';
+import PoliticaPrivacidadIsland from '../islands/PoliticaPrivacidadIsland';
+import TerminosServicioIsland from '../islands/TerminosServicioIsland';
 
 /* Estilos específicos de islands */
 import '../styles/prueba/paginaPrueba.css';
@@ -34,6 +36,10 @@ registrarIsland('DashboardIsland', DashboardIsland, 'Panel principal de producti
 registrarIsland('PaginaPruebaIsland', PaginaPruebaIsland, 'Página de prueba para validar el sistema OCP de auto-registro');
 
 registrarIsland('ArbitrajeIsland', ArbitrajeIsland, 'Calculadora de arbitraje para compra/venta internacional con conversión de divisas');
+
+registrarIsland('PoliticaPrivacidadIsland', PoliticaPrivacidadIsland, 'Política de Privacidad - Requisito obligatorio para OAuth de Google');
+
+registrarIsland('TerminosServicioIsland', TerminosServicioIsland, 'Términos de Servicio - Condiciones de uso de la plataforma');
 
 /* ============================================
  * TO-DO: Futuras islands se agregan aquí
