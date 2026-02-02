@@ -41,6 +41,11 @@ if (file_exists($control_config)) {
     include_once $control_config;
 }
 
+/*
+ * Cargar archivos de configuración e inicialización que contienen hooks.
+ * Las clases de App\ (Repository, Api, Services, etc.) se cargan
+ * automáticamente via PSR-4 autoload de Composer.
+ */
 function incluirArchivos($directorio)
 {
     /* Evitar escanear directorios de frontend que no contienen PHP */
@@ -68,8 +73,14 @@ function incluirArchivos($directorio)
     }
 }
 
+/*
+ * Solo cargar directorios con archivos de inicialización y hooks.
+ * Las clases se cargan automáticamente via Composer PSR-4.
+ */
 $directorios = [
-    'App/',
+    'App/Config/',
+    'App/Content/',
+    'App/Templates/',
 ];
 
 foreach ($directorios as $directorio) {
