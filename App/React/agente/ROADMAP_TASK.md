@@ -43,32 +43,17 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [!] **Bloqueo Persistente:** Error `Code 10` persiste tras configuración completa.
-  - **Configuración Actual (Verificada):**
-    - [x] Android OAuth Client creado con SHA-1 correcto
-    - [x] `google-services.json` con Android Client (type 1) + Web Client (type 3)
-    - [x] `capacitor.config.json` con Web Client ID correcto
-    - [x] Firebase BoM y Google Services plugin configurados
-    - [x] Signing config explícito en build.gradle
-  - **Causas Posibles Restantes:**
-    1. **API no habilitada:** Google Sign-In API debe estar habilitada en Google Cloud Console
-    2. **OAuth Consent Screen:** Verificar modo Testing con email del usuario invitado
-    3. **Caché de app:** Necesita uninstall completo del dispositivo/emulador
-    4. **Vinculación Firebase-Google Cloud:** Proyecto Firebase debe usar el mismo proyecto GCP
-    5. **Keystore diferente:** Android Studio podría estar usando keystore distinto al debug
-  - **Diagnóstico Avanzado Requerido:**
-    ```powershell
-    # 1. Verificar SHA-1 del APK compilado (no del keystore)
-    # En Android Studio: Build > Generate Signed Bundle/APK > View SHA-1
-    
-    # 2. Verificar APIs habilitadas en Google Cloud Console
-    # https://console.cloud.google.com/apis/dashboard?project=task-nakomi
-    # Buscar: "Google Sign-In API" o "Google+ API" - Debe estar ENABLED
-    
-    # 3. OAuth Consent Screen
-    # https://console.cloud.google.com/apis/credentials/consent?project=task-nakomi
-    # Verificar: Modo "Testing" + Email del usuario en Test Users
-    ```
+- [!] **CAUSA IDENTIFICADA:** Google Cloud Console indica "No se verificó la propiedad de la app Android".
+  - **Problema Real:**
+    - El Android OAuth Client existe con SHA-1 correcto
+    - **PERO** Google requiere verificación de propiedad del package name
+    - Advertencia en Console: "No se verificó la propiedad de la app de los siguientes clientes de Android: Task Nakomi"
+  - **Solución (DEFINITIVA):**
+    1. Google Cloud Console → APIs & Services → Credentials
+    2. Haz clic en la advertencia amarilla "Task Nakomi" o en el Android Client
+    3. Completar proceso de verificación de propiedad
+    4. Google confirmará que el package `com.taskNakomi.app` + SHA-1 es legítimo
+    5. Una vez verificado → Error Code 10 desaparecerá
 
 ---
 
