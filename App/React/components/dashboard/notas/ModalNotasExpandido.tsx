@@ -181,19 +181,19 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     /* Acciones del header del modal - todos los botones juntos */
     const accionesHeader = (
         <div className="notasAccionesHeader">
-            <button className="vistaNotasAccionBoton" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
+            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
                 <Plus size={14} />
             </button>
-            <button className="vistaNotasAccionBoton" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
+            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
                 <ArrowUpDown size={14} />
             </button>
-            <button className={`vistaNotasAccionBoton ${!mostrarLista ? 'vistaNotasAccionBoton--activo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
+            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
                 <PanelLeftClose size={14} />
             </button>
-            <button className={`vistaNotasAccionBoton ${!mostrarEditor ? 'vistaNotasAccionBoton--activo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
+            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
                 <PanelRightClose size={14} />
             </button>
-            <button className="vistaNotasAccionBoton" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
+            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
                 {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
             </button>
         </div>

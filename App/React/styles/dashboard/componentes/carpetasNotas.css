@@ -382,14 +382,3 @@
     align-items: center;
     gap: var(--dashboard-espacioXs);
 }
-
-/* Estado activo para botones de panel */
-.vistaNotasAccionBoton--activo {
-    background: var(--dashboard-acento);
-    color: var(--dashboard-fondoPrincipal);
-    border-color: var(--dashboard-acento);
-}
-
-.vistaNotasAccionBoton--activo:hover {
-    background: var(--dashboard-acentoHover);
-}

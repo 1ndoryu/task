@@ -727,37 +727,6 @@
  * Barra de acciones del modal de notas
  * Tarea 2: Botones para crear nueva nota, ordenar y maximizar
  */
-.vistaNotasAcciones {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    justify-content: flex-end;
-}
-
-.vistaNotasAccionBoton {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background: transparent;
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-bordeRedondeado);
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.vistaNotasAccionBoton:hover {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
-    border-color: var(--dashboard-bordeHover);
-}
-
-.vistaNotasAccionTexto {
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
 /* Modal maximizado - ocupa toda la pantalla */
 .modalNotasExpandidoContenedor--maximizado {
     max-width: 100vw !important;
