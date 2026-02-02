@@ -22,6 +22,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+# Nueva revisión (0.3)
+
+1. lee todo sobre lo que se trato de agrupar tareas y secciones, no puedo agrupar tareas porque se supone que al selecionar varias tareas, el menu contextual se debe adaptar para que diga "agrupar", eso no sucede, el menu contextual no se adapta a las tareas selecionada, y si se seleciona un habito y una tarea tampoco se adapta porque, sigue adaptandose segun donde se haga click derecho, por ejemplo, los habitos no tienen la propiedad de urgencia pero si tengo una tarea selecionada y un habito y cambio la urgencia, se le cambiara a los dos? no tiene sentido, por eso el menu contextual debe ser igual para ambos y adaptarse segun lo que se este selecionando, tambien pasa que si tengo 2 tareas selecionadas, y cambio  cualquier propiedad con el menu contextual, no aplica, se aplica a una sola.
+
 # Nueva revision de la anterior revision (0.2)
 
 1. ✅ El css de los gestos, se mal intrepeto, imagina que la tarea tiene un ancho pero su nombre es corto, o sea, no cubre el 100% del ancho sino 40%, cuando se desliza para la accion en el fondo eliminar se ve hasta el final de la tarea al (40%) en vez del final al (100%), y no todavía no hay difuniado, el color debe empezar y e ir desvaneciendose y no hay color rojo parece. **CORREGIDO: swipeableItem.css ahora usa position absolute con inset:0 para que el fondo cubra 100% del ancho independientemente del contenido**
@@ -33,8 +37,6 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 4. ✅ Las actividades se siguen guardando en el panel de actividad sin el nombre, no debe estar cifrado y tambien debe aparecer el nombre. **CORREGIDO: ActividadApiController.php ahora lee $detalles del request - la línea que lo leía estaba faltando**
 
 5. ✅ La carpeta general (donde debería estar todas las notas sin carpeta) no aparece, las notas iniciales esas que estaban antes de la logica de carpeta no puedo regresar a ellas despues que navego por las carpetas, no se que es "navegadorCarpetasFormulario navegadorCarpetasFormulario--inline" no hace nada supongo que pretende ser un buscador pero no funciona y tiene 2 botones de check y x, es igual a nput de formulario para agregar una nueva carpeta eso si funciona. (La carpeta general me aparecio por un momento despues un rato no se cuanto y luego desaparecio al volver a la lista de carpetas) **CORREGIDO: carpetasNotasStore.ts ahora garantiza que la carpeta General virtual siempre exista: 1) cargarCarpetas verifica/agrega General si no viene del backend, 2) en error muestra General como fallback, 3) volverACarpetas recarga si carpetas vacías. NOTA: el formulario inline es para RENOMBRAR carpetas (aparece al hacer clic en el icono de editar), no es buscador**
-
-6. Por favor trabaja en las demas tareas pendientes del SPRINT ACTUAL. Cuando termines todas las revisiones y tareas, actualiza el changelog y agrega una version.
 
 
 # Revisiones (0.1) de las tareas anteriores (revisiones hecha por el usuario)
