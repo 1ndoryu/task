@@ -60,25 +60,27 @@ export function useAuth(): UseAuthReturn {
         setLoading(true);
         setError(null);
         try {
-            // Debug para confirmar código actualizado
-            // alert('Debug: Iniciando login. Nativo? ' + Capacitor.isNativePlatform());
-
             if (Capacitor.isNativePlatform()) {
                 console.log('[GoogleAuth] Config Check:', {
                     platform: Capacitor.getPlatform(),
                     isNative: Capacitor.isNativePlatform()
                 });
 
+                /*
+                 * IMPORTANTE: No pasamos clientId aquí.
+                 * GoogleAuth lee automáticamente de capacitor.config.json
+                 * Pasar clientId sobrescribe y causa Error 10
+                 */
                 await GoogleAuth.initialize();
 
-                // Debug: Verificar estado tras init
-                console.log('[GoogleAuth] Initialized');
+                console.log('[GoogleAuth] Initialized, calling signIn...');
 
-                // Asegurar estado limpio
-                await GoogleAuth.signOut();
-
+                /*
+                 * signIn() abre el selector de cuentas nativo de Android
+                 * Si devuelve Error 10 = problema de configuración (SHA-1, Package, Client ID)
+                 */
                 const user = await GoogleAuth.signIn();
-                console.log('Google User:', user);
+                console.log('[GoogleAuth] Success:', user);
 
                 if (user.serverAuthCode) {
                     await handleCallback(user.serverAuthCode);

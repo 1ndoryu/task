@@ -11,10 +11,7 @@
     "plugins": {
         "GoogleAuth": {
             "scopes": ["profile", "email"],
-            "serverClientId": "90767087281-dkakjnbkbjgp2s5co7skhdlpq39epb9r.apps.googleusercontent.com",
-            "androidClientId": "90767087281-hodj9fcaj13rvvnam8ge11og3mkgtohq.apps.googleusercontent.com",
-            "forceCodeForRefreshToken": true,
-            "grantOfflineAccess": true
+            "forceCodeForRefreshToken": true
         }
     }
 }
