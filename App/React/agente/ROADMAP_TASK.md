@@ -51,6 +51,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
      - Error 10 resuelto.
      - Login sigue fallando con error genérico.
      - Configuración nativa `capacitor.config.json` actualizada con `androidClientId`.
+     - **FIX:** `capacitor.config.json` tenía el `androidClientId` incorrecto (usaba el Web ID). Corregido a `...gtohq` (Android ID).
      - **CRÍTICO:** `manager.ps1` falla al desplegar cambios de React, por lo que la app usa código viejo.
 - [!] **BLOQUEADO:** OAuth Consent Screen requiere Política de Privacidad y Términos.
   - **Causa del Bloqueo:**
