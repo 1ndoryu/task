@@ -50,9 +50,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
   - **Estado:**
      - Error 10 resuelto.
      - Login sigue fallando con error genérico.
-     - Configuración nativa `capacitor.config.json` actualizada con `androidClientId`.
-     - **FIX:** `capacitor.config.json` tenía el `androidClientId` incorrecto (usaba el Web ID). Corregido a `...gtohq` (Android ID).
-     - **CRÍTICO:** `manager.ps1` falla al desplegar cambios de React, por lo que la app usa código viejo.
+     - **CONFIRMADO:** `androidClientId` **DEBE** ser el Android ID (`...gtohq`). Usar el Web ID causa "Error 10".
+     - **DIAGNÓSTICO FINAL:** La app está en modo "Producción", requería `assetlinks.json`.
+     - **SOLUCIÓN:** Archivo `assetlinks.json` subido a `.well-known` en el servidor.
+     - **PENDIENTE:** Usuario debe hacer clic en "Verificar" en Google Console (donde salía el aviso) y probar login.
 - [!] **BLOQUEADO:** OAuth Consent Screen requiere Política de Privacidad y Términos.
   - **Causa del Bloqueo:**
     - Google Cloud Console no permite completar verificación de OAuth sin:
