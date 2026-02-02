@@ -11,7 +11,8 @@
     "plugins": {
         "GoogleAuth": {
             "scopes": ["profile", "email"],
-            "forceCodeForRefreshToken": true
+            "androidClientId": "84327954353-6nrfkji91kjmhiri87920rojr19j4v14.apps.googleusercontent.com",
+            "forceCodeForRefreshToken": false
         }
     }
 }
