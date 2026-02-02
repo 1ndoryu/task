@@ -48,13 +48,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
     - [x] SHA-1 Debug coincide con consola Google.
     - [x] Web Client ID configurado en `capacitor.config.json`.
     - [x] Limpieza de proyecto (Clean/Rebuild/Uninstall) realizada sin éxito.
-    - [x] **NUEVO:** Signing Config explícito añadido a `build.gradle`.
-    - [x] **NUEVO:** Placeholder `google-services.json` creado (requiere completar).
+    - [x] Signing Config explícito añadido a `build.gradle`.
+    - [x] Placeholder `google-services.json` creado.
+    - [x] **Usuario descargó** `google-services.json` real de Firebase.
+    - [x] Plugin Google Services actualizado a v4.4.4.
   - **Próximos Pasos (Acción Requerida Usuario):**
-    1. **Descargar google-services.json real:** Ir a Firebase Console → Crear proyecto → Añadir app Android (`com.taskNakomi.app`) con SHA-1 debug → Descargar y reemplazar el placeholder en `android/app/`.
+    1. **Rebuild:** Ejecutar `npx cap sync android` y luego Build desde Android Studio.
     2. **Verificar Web Client ID:** El `serverClientId` en `capacitor.config.json` debe ser tipo "Web application" (NO Android).
     3. **Pantalla de Consentimiento:** Verificar en Google Cloud que esté en modo "Testing" con tu email invitado, o en "Production".
-    4. **Rebuild:** Ejecutar `npx cap sync android` y luego Build desde Android Studio.
 
 ---
 
