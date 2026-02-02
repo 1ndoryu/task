@@ -28,7 +28,7 @@ Tienes el **Web Client ID** en `strings.xml` cuando debería ser el **Android Cl
 **Editar:** `android/app/src/main/res/values/strings.xml`
 
 ```xml
-<string name="server_client_id">TU_NUEVO_ANDROID_CLIENT_ID.apps.googleusercontent.com</string>
+<string name="server_client_id">YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com</string>
 ```
 
 **Compilar:**

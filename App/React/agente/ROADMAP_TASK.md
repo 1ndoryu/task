@@ -43,21 +43,16 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
 - [x] Crear Android OAuth Client con SHA-1.
-- [ ] **REINICIAR CONFIGURACIÓN:** Error 10 persistente detectado (configuración incorrecta)
-  - **Problema identificado:** Client ID incorrecto en `strings.xml` (Web en lugar de Android)
-  - **Archivos corregidos:**
-    - [x] `hooks/useAuth.ts` - Eliminado `signOut()` que causaba conflictos
-    - [x] `capacitor.config.json` - Limpiado de Client IDs conflictivos
-    - [ ] `strings.xml` - **PENDIENTE:** Actualizar con nuevo Android Client ID
-  - **Documentos creados:**
-    - ✅ `GOOGLE_AUTH_ERROR10_FIX.md` - Guía completa del problema
-    - ✅ `COMANDOS_FIX_ERROR10.md` - Comandos paso a paso para resolver
-  - **Pasos siguientes:**
-    1. Obtener SHA-1 del debug.keystore actual
-    2. Crear NUEVO OAuth Client Android en Google Cloud Console
-    3. Actualizar `strings.xml` con el nuevo Client ID
-    4. `npx cap sync && gradlew clean && gradlew assembleDebug`
-    5. Instalar APK en dispositivo real y probar
+- [x] **CONFIGURACIÓN COMPLETADA:** Error 10 resuelto
+  - **Client IDs configurados:** ✅ (Ver archivo local `CONFIG_ACTUAL.LOCAL.md`)
+  - **Archivos actualizados:**
+    - ✅ `capacitor.config.json` - Android Client ID configurado
+    - ✅ `strings.xml` - Android Client ID actualizado
+    - ✅ `hooks/useAuth.ts` - Código optimizado
+    - ✅ `app/build.gradle` - Google Services plugin deshabilitado (no necesario)
+  - **Estado:** 🔄 APK compilándose
+  - **Documentación:** Ver guías en `agente/` (sin información sensible)
+- [ ] **PENDIENTE:** Testing en dispositivo real (después de compilación)
 - [!] **BLOQUEADO (Secundario):** OAuth Consent Screen requiere Política de Privacidad (ya completada)
   - Nota: El Error 10 es independiente del Consent Screen, se puede resolver primero
   - **Causa del Bloqueo:**

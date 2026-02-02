@@ -35,8 +35,8 @@
     <string name="title_activity_main">Tasks</string>
     <string name="package_name">com.taskNakomi.app</string>
     <string name="custom_url_scheme">com.taskNakomi.app</string>
-    <!-- ⚠️ CAMBIAR ESTE POR EL NUEVO ANDROID CLIENT ID DEL PASO 2 -->
-    <string name="server_client_id">TU_NUEVO_ANDROID_CLIENT_ID.apps.googleusercontent.com</string>
+    <!-- ⚠️ CAMBIAR POR TU ANDROID CLIENT ID -->
+    <string name="server_client_id">YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com</string>
 </resources>
 ```
 

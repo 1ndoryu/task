@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
+    // Google Services plugin deshabilitado temporalmente (no necesario para OAuth básico)
+    // Habilitar solo si usas Firebase Analytics, Crashlytics, etc.
+    // id 'com.google.gms.google-services'
 }
 
 android {

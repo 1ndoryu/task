@@ -85,7 +85,7 @@ Ejemplo: 90767087281-XXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
     "plugins": {
         "GoogleAuth": {
             "scopes": ["profile", "email"],
-            "androidClientId": "TU_NUEVO_ANDROID_CLIENT_ID_DEL_PASO_3.apps.googleusercontent.com",
+            "androidClientId": "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
             "forceCodeForRefreshToken": false
         }
     }
