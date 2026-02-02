@@ -22,7 +22,18 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-# Revisiones de las tareas anteriores (revisiones hecha por el usuario)
+# Nueva revision de la anterior revision (0.2)
+
+1. El css de los gestos, se mal intrepeto, imagina que la tarea tiene un ancho pero su nombre es corto, o sea, no cubre el 100% del ancho sino 40%, cuando se desliza para la accion en el fondo eliminar se ve hasta el final de la tarea al (40%) en vez del final al (100%), y no todavía no hay difuniado, el color debe empezar y e ir desvaneciendose y no hay color rojo parece.
+2. Sobre 3. ✅ El css de los subhabitos en el panel de configuracion de los habitos debe ser igual. Siguen habiendo muchas diferencias, prefiero que sea igual en todo a como son las subtareas en las configuraciones, las subtareas no tiene para colapsar, las letras son diferentes, y el contador esta hacia un lado tirado al final, no tienen espaciado y es compacto, cuando se añade una subtarea no tiene para elegir las opciones, las hereda, solo sale el input de texto y enter para guardar, los botones de guardar o añadir son necesarios, el input no tiene efectos de hover o activo, asi son las subtareas, y asi deben ser los subhabitos, creo que en vez de intentar emular o parecerse porque no son el mismo componente? (Sin afectar el diseño de las subtareas en los paneles de configuracion)
+3. Sobre 5. Sobre "TAREA 0.5: BottomSheet para Hábitos en Móvil", creo que no se entiendo, cuando se da un toque tiene que abrir lo que se abre cuando se da un toque a las tareas, especifico, cuando se da un toque a las tareas se abre esto para modificar una tarea, tambien se abre cuando se intenta crear un habito en el movil o sea, lo mismo con lo que se crean habitos en el movil debería funcionar para editar habitos, y cuando se edita un habito poner una tuerca para abrir el panel de configuracion asi como cuando se edita una tarea en movil
+
+<div class="bottomSheetPanel bottomSheetPanel--visible" role="dialog" aria-modal="true"><div class="bottomSheetIndicador bottomSheetIndicadorArrastrable"></div><div class="bottomSheetContenido"><div class="bottomSheetTarea"><div class="bottomSheetTarea__inputWrapper"><input type="text" placeholder="¿Qué necesitas hacer?" class="bottomSheetTarea__input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-form-type="other" inputmode="text" enterkeyhint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" value="otra tarea"></div>
+
+4. Las actividades se siguen guardando en el panel de actividad sin el nombre, no debe estar cifrado y tambien debe aparecer el nombre
+
+
+# Revisiones (0.1) de las tareas anteriores (revisiones hecha por el usuario)
 
 1. ✅ El texto de la nota las ultimas palabras se cubren con el nav inferior. **CORREGIDO: padding-bottom en scratchpad.css**
 2. ✅ El css de los gestos al deslizar, el texto debe ser pequeño, el color de eliminar rojo, quita los iconos, los colores verdes y rojo tienen que difuminarse. Tambien pasa que cuando texto de la tarea es corto, el liminar no aparece al final o sea no se ocupa el 100% al ancho y no se ve al borde la pantalla como debería. **CORREGIDO: swipeableItem.css reescrito con gradientes y 100% width**
@@ -31,6 +42,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 5. Sobre "TAREA 0.5: BottomSheet para Hábitos en Móvil" funciona bien pero hubo una confuncion el bottomS que se abre al tocar los habitos es el menu contextual, debe ser de editar como funciona actualmente con las tareas.
 6. Sobre TAREA 1: Nombres en Panel de Actividad, ahora si sale el nombre de las tareas pero apareecn asi "CIFRADO", alli en el panel de actividad se tienen que ver bien.
 7. Sobre las notas "Notas Guardadas" los botones de expandir o contraer tienen que estar separados, uno para contraer la barra lateral donde estan las notas otro para la barra lateral donde se escribe la nota, esos botones junto a los otros botones todos tienen que ir en el header alli donde esta la X para cerrar. Tambien pasa que faltan cass para las carpetas, la carpeta general donde aparecen todas las notas que no estan en una carpeta no se ve, el css de esta parte de donde estan las notas debe ser como un entorno grafico como un explorador de archivo, esto es una tarea compleja que parece que tal vez hay que dividir en varios pasos, es literalmente hacer un explorador de archivos para esas carpetas.
+8. Selecionar varias tareas con control + click no funciona, asumo que tampoco funciona en movil para selecionar varias tareas presionando, esto me impide probar la funcionalidad de agrupar.
+9. Todos los backup en el modal de copias de seguridad dicen "MANUAL_SAVE" cuando todos ellos son copias automaticas.
+10. Las tareas 8 y 7 no deberían estar pospuestas y se deberían de trabajar en ellas, la apk esta lista para testear cosas.
 
 
 # TAREAS PENDIENTES - SPRINT ACTUAL

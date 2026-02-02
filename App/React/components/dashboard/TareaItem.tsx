@@ -103,6 +103,54 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
         setEditando(true);
     }, [tarea.texto, esHabito, esMovilOTablet, onConfigurar]);
 
+    /* Handler para clicks en el contenido de la tarea */
+    const manejarClickContenido = useCallback(
+        (evento: React.MouseEvent) => {
+            /* Ctrl+Click (Windows/Linux) o Cmd+Click (Mac) = selección múltiple */
+            if ((evento.ctrlKey || evento.metaKey) && onSeleccionMultiple) {
+                evento.preventDefault();
+                evento.stopPropagation();
+                onSeleccionMultiple(tarea, evento);
+                return;
+            }
+            /* Click normal = editar */
+            iniciarEdicion();
+        },
+        [iniciarEdicion, onSeleccionMultiple, tarea]
+    );
+
+    /* Soporte para long press en móvil (selección múltiple) */
+    const longPressTimerRef = useRef<number | null>(null);
+    const LONG_PRESS_DURACION = 500; /* ms */
+
+    const manejarPointerDown = useCallback(
+        (evento: React.PointerEvent) => {
+            /* Solo activar long press en touch (móvil) */
+            if (evento.pointerType !== 'touch' || !onSeleccionMultiple) return;
+
+            longPressTimerRef.current = window.setTimeout(() => {
+                /* Vibración táctil si está disponible */
+                if (navigator.vibrate) navigator.vibrate(50);
+                onSeleccionMultiple(tarea, evento as unknown as React.MouseEvent);
+            }, LONG_PRESS_DURACION);
+        },
+        [onSeleccionMultiple, tarea]
+    );
+
+    const manejarPointerUp = useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
+    const manejarPointerCancel = useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
     const guardarEdicion = useCallback(() => {
         const textoLimpio = textoEditado.trim();
         if (textoLimpio.length === 0) {
@@ -477,11 +525,11 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
 
     return (
         <>
-            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''}`} onContextMenu={manejarClickDerecho}>
+            <div className={`tareaItem ${esSubtarea ? 'tareaItemSubtarea' : ''} ${tieneSubtareas ? 'tareaItem--conSubtareas' : ''} ${modoCompacto ? 'tareaItem--compacto' : ''} ${estaSeleccionada ? 'tareaItem--seleccionada' : ''}`} onContextMenu={manejarClickDerecho}>
                 <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`} onClick={onToggle} onPointerDown={e => e.stopPropagation()}>
                     {tarea.completado && <Check size={8} color="white" />}
                 </div>
-                <div className="tareaContenido" onClick={iniciarEdicion}>
+                <div className="tareaContenido" onClick={manejarClickContenido} onPointerDown={manejarPointerDown} onPointerUp={manejarPointerUp} onPointerCancel={manejarPointerCancel} onPointerLeave={manejarPointerCancel}>
                     <div className="tareaTextoWrapper">
                         <p className={`tareaTexto ${tarea.completado ? 'tareaTextoCompletado' : ''} ${modoCompacto ? 'tareaTexto--compacto' : ''}`}>{tarea.texto}</p>
                         <BadgeGroup>

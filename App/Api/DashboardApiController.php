@@ -235,7 +235,7 @@ class DashboardApiController
                     /* loadAll asegura tener IDs generados y todo consistente */
                     $fullData = $repository->loadAll();
                     $backupsRepo = new \App\Repository\BackupsRepository($userId);
-                    $backupsRepo->create($fullData, 'manual_save');
+                    $backupsRepo->create($fullData, 'auto_save');
                 }
             }
 

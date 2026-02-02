@@ -4,10 +4,11 @@
  * Tarea 2: Mejoras en Notas (expandir, crear nueva, ordenamiento)
  * Tarea 2.1: Sistema de Carpetas para Notas
  * Tarea 2.2: Expandir/Colapsar Vistas en Notas
+ * Revision 7: Botones separados para lista/editor, movidos al header
  */
 
 import {useState, useEffect, useCallback, useMemo} from 'react';
-import {Search, FileText, Loader, AlertCircle, Maximize2, Minimize2, Plus, ArrowDownAZ, ArrowUpDown, ChevronLeft, PanelLeftClose, PanelRightClose, PanelLeft, PanelRight} from 'lucide-react';
+import {Search, FileText, Loader, AlertCircle, Maximize2, Minimize2, Plus, ArrowUpDown, ChevronLeft, PanelLeftClose, PanelRightClose} from 'lucide-react';
 import {Modal} from '../../shared';
 import {Scratchpad} from '../Scratchpad';
 import {ListaNotasGuardadas} from './ListaNotasGuardadas';
@@ -17,9 +18,6 @@ import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
 
 /* Tipos de ordenamiento disponibles */
 type TipoOrdenamiento = 'modificacion' | 'creacion';
-
-/* Tipos de vista de paneles */
-type VistaPaneles = 'ambos' | 'solo-lista' | 'solo-editor';
 
 interface ModalNotasExpandidoProps {
     abierto: boolean;
@@ -54,20 +52,32 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const [buscando, setBuscando] = useState(false);
     const [maximizado, setMaximizado] = useState(false);
     const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('modificacion');
-    const [vistaPaneles, setVistaPaneles] = useState<VistaPaneles>('ambos');
+    
+    /* Estados separados para mostrar/ocultar lista y editor */
+    const [mostrarLista, setMostrarLista] = useState(true);
+    const [mostrarEditor, setMostrarEditor] = useState(true);
 
-    /* Ciclar entre vistas de paneles */
-    const alternarVistaPaneles = useCallback(() => {
-        setVistaPaneles(prev => {
-            if (prev === 'ambos') return 'solo-lista';
-            if (prev === 'solo-lista') return 'solo-editor';
-            return 'ambos';
+    /* Toggle para panel lista */
+    const alternarPanelLista = useCallback(() => {
+        setMostrarLista(prev => {
+            /* Si vamos a ocultar la lista, asegurar que el editor esté visible */
+            if (prev && !mostrarEditor) {
+                setMostrarEditor(true);
+            }
+            return !prev;
         });
-    }, []);
+    }, [mostrarEditor]);
 
-    /* Mostrar/ocultar lista */
-    const mostrarLista = vistaPaneles === 'ambos' || vistaPaneles === 'solo-lista';
-    const mostrarEditor = vistaPaneles === 'ambos' || vistaPaneles === 'solo-editor';
+    /* Toggle para panel editor */
+    const alternarPanelEditor = useCallback(() => {
+        setMostrarEditor(prev => {
+            /* Si vamos a ocultar el editor, asegurar que la lista esté visible */
+            if (prev && !mostrarLista) {
+                setMostrarLista(true);
+            }
+            return !prev;
+        });
+    }, [mostrarLista]);
 
     useEffect(() => {
         if (abierto) {
@@ -163,15 +173,34 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
 
     if (!abierto) return null;
 
-    const claseModal = `modalContenedor--expandido modalNotasExpandidoContenedor ${maximizado ? 'modalNotasExpandidoContenedor--maximizado' : ''} ${vistaPaneles === 'solo-lista' ? 'modalNotasExpandidoContenedor--soloLista' : ''} ${vistaPaneles === 'solo-editor' ? 'modalNotasExpandidoContenedor--soloEditor' : ''}`;
+    /* Determinar clases del modal según paneles visibles */
+    const clasePaneles = !mostrarLista ? 'modalNotasExpandidoContenedor--soloEditor' : !mostrarEditor ? 'modalNotasExpandidoContenedor--soloLista' : '';
+    const claseModal = `modalContenedor--expandido modalNotasExpandidoContenedor ${maximizado ? 'modalNotasExpandidoContenedor--maximizado' : ''} ${clasePaneles}`;
     const textoOrdenamiento = ordenamiento === 'modificacion' ? 'Modificación' : 'Creación';
 
-    /* Icono y texto del botón de vista */
-    const iconoVista = vistaPaneles === 'ambos' ? <PanelLeftClose size={14} /> : vistaPaneles === 'solo-lista' ? <PanelRightClose size={14} /> : <PanelLeft size={14} />;
-    const tituloVista = vistaPaneles === 'ambos' ? 'Ocultar editor' : vistaPaneles === 'solo-lista' ? 'Ocultar lista' : 'Mostrar ambos';
+    /* Acciones del header del modal - todos los botones juntos */
+    const accionesHeader = (
+        <div className="notasAccionesHeader">
+            <button className="vistaNotasAccionBoton" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
+                <Plus size={14} />
+            </button>
+            <button className="vistaNotasAccionBoton" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
+                <ArrowUpDown size={14} />
+            </button>
+            <button className={`vistaNotasAccionBoton ${!mostrarLista ? 'vistaNotasAccionBoton--activo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
+                <PanelLeftClose size={14} />
+            </button>
+            <button className={`vistaNotasAccionBoton ${!mostrarEditor ? 'vistaNotasAccionBoton--activo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
+                <PanelRightClose size={14} />
+            </button>
+            <button className="vistaNotasAccionBoton" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
+                {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            </button>
+        </div>
+    );
 
     return (
-        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra={claseModal}>
+        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra={claseModal} accionesEncabezado={accionesHeader}>
             <div id="modal-notas-expandida" className="vistaNotasExpandida">
                 {/* Columna Lista - solo visible si mostrarLista */}
                 {mostrarLista && (
@@ -182,7 +211,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
                         ) : (
                             /* Vista de notas */
                             <>
-                                {/* Header con búsqueda y acciones */}
+                                {/* Header con búsqueda */}
                                 <div className="vistaNotasBusqueda">
                                     <div className="notasHeaderConCarpeta">
                                         <button className="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
@@ -194,22 +223,6 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
                                         <Search size={14} className="modalNotasBusquedaIcono" />
                                         <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
                                         {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
-                                    </div>
-                                    {/* Barra de acciones */}
-                                    <div className="vistaNotasAcciones">
-                                        <button className="vistaNotasAccionBoton" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
-                                            <Plus size={14} />
-                                        </button>
-                                        <button className="vistaNotasAccionBoton" onClick={alternarOrdenamiento} title={`Ordenar por fecha de ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
-                                            <ArrowUpDown size={14} />
-                                            <span className="vistaNotasAccionTexto">{textoOrdenamiento}</span>
-                                        </button>
-                                        <button className="vistaNotasAccionBoton" onClick={alternarVistaPaneles} title={tituloVista}>
-                                            {iconoVista}
-                                        </button>
-                                        <button className="vistaNotasAccionBoton" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar tamaño' : 'Maximizar'}>
-                                            {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                                        </button>
                                     </div>
                                 </div>
                                 <div className="vistaNotasListaContenido">
@@ -246,15 +259,6 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
                 {/* Columna Editor - solo visible si mostrarEditor */}
                 {mostrarEditor && (
                     <div className="vistaNotasColumnaEditor">
-                        {/* Botón para mostrar lista cuando está oculta */}
-                        {!mostrarLista && (
-                            <div className="vistaNotasEditorHeader">
-                                <button className="vistaNotasAccionBoton" onClick={alternarVistaPaneles} title="Mostrar lista">
-                                    <PanelLeft size={14} />
-                                </button>
-                                <span className="vistaNotasEditorTitulo">{extraerTitulo(notaActiva.contenido)}</span>
-                            </div>
-                        )}
                         <div className="vistaNotasEditorContenido">
                             <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={tamanoFuente} altura="100%" delayGuardado={delayGuardado} mostrarResizeHandle={false} />
                         </div>

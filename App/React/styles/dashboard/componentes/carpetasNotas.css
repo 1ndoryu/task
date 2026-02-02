@@ -1,29 +1,33 @@
 /*
  * Estilos para sistema de carpetas de notas
  * TAREA 2.1: Sistema de Carpetas para Notas
+ * Revision 7: Estilo tipo explorador de archivos
  */
 
-/* Navegador de Carpetas */
+/* Navegador de Carpetas - Contenedor principal */
 .navegadorCarpetas {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: var(--espaciado-md);
+    background: var(--dashboard-fondoSecundario);
 }
 
+/* Header del explorador de carpetas */
 .navegadorCarpetasHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--espaciado-md);
-    padding-bottom: var(--espaciado-sm);
-    border-bottom: 1px solid var(--borde-color);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTarjeta);
 }
 
 .navegadorCarpetasTitulo {
-    font-size: var(--fuente-tamano-base);
-    font-weight: 500;
-    color: var(--texto-color);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin: 0;
 }
 
@@ -31,51 +35,52 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border: none;
-    background: var(--fondo-hover);
-    color: var(--texto-color);
-    border-radius: var(--radio-md);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-bordeRedondeado);
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .navegadorCarpetasBotonNueva:hover {
-    background: var(--acento-color);
-    color: var(--fondo-color);
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-acento);
 }
 
-/* Formulario crear/editar */
+/* Formulario crear/editar carpeta */
 .navegadorCarpetasFormulario {
     display: flex;
-    gap: var(--espaciado-xs);
-    margin-bottom: var(--espaciado-sm);
-    padding: var(--espaciado-sm);
-    background: var(--fondo-hover);
-    border-radius: var(--radio-sm);
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoTarjeta);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
 .navegadorCarpetasFormulario--inline {
-    margin-bottom: 0;
     padding: 0;
     background: transparent;
+    border-bottom: none;
     flex: 1;
 }
 
 .navegadorCarpetasInput {
     flex: 1;
-    padding: var(--espaciado-xs) var(--espaciado-sm);
-    background: var(--fondo-color);
-    border: 1px solid var(--borde-color);
-    border-radius: var(--radio-sm);
-    color: var(--texto-color);
-    font-size: var(--fuente-tamano-pequeno);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-bordeRedondeado);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
 }
 
 .navegadorCarpetasInput:focus {
     outline: none;
-    border-color: var(--acento-color);
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 2px rgba(var(--dashboard-acentoRgb), 0.15);
 }
 
 .navegadorCarpetasBotonAccion {
@@ -86,171 +91,190 @@
     height: 24px;
     border: none;
     background: transparent;
-    border-radius: var(--radio-sm);
+    border-radius: var(--dashboard-bordeRedondeado);
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .navegadorCarpetasBotonAccion--confirmar {
-    color: var(--exito-color);
+    color: var(--dashboard-exito);
 }
 
 .navegadorCarpetasBotonAccion--confirmar:hover {
-    background: rgba(var(--exito-rgb), 0.15);
+    background: rgba(var(--dashboard-exitoRgb, 76, 175, 80), 0.15);
 }
 
 .navegadorCarpetasBotonAccion--cancelar {
-    color: var(--texto-secundario);
+    color: var(--dashboard-textoSecundario);
 }
 
 .navegadorCarpetasBotonAccion--cancelar:hover {
-    background: var(--fondo-hover);
+    background: var(--dashboard-fondoHover);
 }
 
-/* Lista de carpetas */
+/* Lista de carpetas - estilo arbol de archivos */
 .navegadorCarpetasLista {
     display: flex;
     flex-direction: column;
-    gap: 2px;
     flex: 1;
     overflow-y: auto;
+    padding: var(--dashboard-espacioSm) 0;
 }
 
 .navegadorCarpetasCargando {
-    color: var(--texto-secundario);
+    color: var(--dashboard-textoMuyApagado);
     text-align: center;
-    padding: var(--espaciado-lg);
+    padding: var(--dashboard-espacioLg);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
-/* Item de carpeta */
+/* Item de carpeta - estilo explorador de archivos */
 .navegadorCarpetaItem {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-xs);
-    border-radius: var(--radio-sm);
     position: relative;
+    margin: 0 var(--dashboard-espacioXs);
+    border-radius: var(--dashboard-bordeRedondeado);
 }
 
 .navegadorCarpetaItem:hover {
-    background: var(--fondo-hover);
+    background: var(--dashboard-fondoHover);
 }
 
+/* Carpeta virtual (General) - estilo distintivo */
 .navegadorCarpetaItem--virtual {
-    opacity: 0.9;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    margin-bottom: var(--dashboard-espacioXs);
+    padding-bottom: var(--dashboard-espacioXs);
+    border-radius: 0;
 }
 
+.navegadorCarpetaItem--virtual .navegadorCarpetaIcono {
+    color: var(--dashboard-acento);
+}
+
+/* Boton principal de carpeta */
 .navegadorCarpetaBoton {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: var(--espaciado-sm);
-    padding: var(--espaciado-sm) var(--espaciado-md);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: transparent;
     border: none;
-    color: var(--texto-color);
+    color: var(--dashboard-textoNormal);
     cursor: pointer;
     text-align: left;
-    border-radius: var(--radio-sm);
-    transition: background-color 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
+    font-family: inherit;
 }
 
 .navegadorCarpetaBoton:hover {
-    background: transparent;
+    color: var(--dashboard-textoActivo);
 }
 
+/* Icono de carpeta */
 .navegadorCarpetaIcono {
-    color: var(--texto-secundario);
+    color: var(--dashboard-textoApagado);
     flex-shrink: 0;
+    width: 16px;
+    height: 16px;
 }
 
+/* Nombre de carpeta */
 .navegadorCarpetaNombre {
     flex: 1;
-    font-size: var(--fuente-tamano-pequeno);
+    font-size: var(--dashboard-tamanoPequeno);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+/* Contador de notas en carpeta */
 .navegadorCarpetaContador {
-    font-size: var(--fuente-tamano-mini);
-    color: var(--texto-secundario);
-    background: var(--fondo-hover);
+    font-size: var(--dashboard-tamanoMini);
+    color: var(--dashboard-textoMuyApagado);
+    background: var(--dashboard-fondoHover);
     padding: 2px 6px;
-    border-radius: var(--radio-completo);
-    min-width: 20px;
+    border-radius: var(--dashboard-bordeCompleto);
+    min-width: 18px;
     text-align: center;
 }
 
+/* Flecha indicadora */
 .navegadorCarpetaFlecha {
-    color: var(--texto-secundario);
-    opacity: 0.5;
+    color: var(--dashboard-textoMuyApagado);
     flex-shrink: 0;
+    width: 12px;
+    height: 12px;
 }
 
-/* Acciones de carpeta */
+/* Acciones de carpeta (editar, eliminar) */
 .navegadorCarpetaAcciones {
     display: none;
     gap: 2px;
-    padding-right: var(--espaciado-xs);
+    padding-right: var(--dashboard-espacioXs);
 }
 
 .navegadorCarpetaItem:hover .navegadorCarpetaAcciones {
     display: flex;
 }
 
+/* Botones de accion en carpetas */
 .navegadorCarpetaAccionBoton {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border: none;
     background: transparent;
-    color: var(--texto-secundario);
-    border-radius: var(--radio-sm);
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-bordeRedondeado);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .navegadorCarpetaAccionBoton:hover {
-    background: var(--fondo-hover);
-    color: var(--texto-color);
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
 }
 
 .navegadorCarpetaAccionBoton--peligro:hover {
-    background: rgba(var(--peligro-rgb), 0.15);
-    color: var(--peligro-color);
+    background: rgba(var(--dashboard-peligroRgb, 244, 67, 54), 0.15);
+    color: var(--dashboard-peligro);
 }
 
 /* Header con botón volver */
 .notasHeaderConCarpeta {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-sm);
+    gap: var(--dashboard-espacioSm);
 }
 
 .notasBotonVolver {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border: none;
-    background: var(--fondo-hover);
-    color: var(--texto-color);
-    border-radius: var(--radio-md);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-bordeRedondeado);
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .notasBotonVolver:hover {
-    background: var(--acento-color);
-    color: var(--fondo-color);
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-acento);
 }
 
 .notasCarpetaActual {
-    font-size: var(--fuente-tamano-pequeno);
-    color: var(--texto-secundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
 }
 
 /* Menu contextual mover a carpeta */
@@ -258,66 +282,69 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: var(--espaciado-xs);
+    padding: var(--dashboard-espacioXs);
     min-width: 150px;
 }
 
 .menuMoverACarpetaTitulo {
-    font-size: var(--fuente-tamano-mini);
-    color: var(--texto-secundario);
-    padding: var(--espaciado-xs) var(--espaciado-sm);
-    border-bottom: 1px solid var(--borde-color);
-    margin-bottom: var(--espaciado-xs);
+    font-size: var(--dashboard-tamanoMini);
+    color: var(--dashboard-textoMuyApagado);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    margin-bottom: var(--dashboard-espacioXs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .menuMoverACarpetaOpcion {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-sm);
-    padding: var(--espaciado-xs) var(--espaciado-sm);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: transparent;
     border: none;
-    color: var(--texto-color);
-    font-size: var(--fuente-tamano-pequeno);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
-    border-radius: var(--radio-sm);
+    border-radius: var(--dashboard-bordeRedondeado);
     text-align: left;
     width: 100%;
+    font-family: inherit;
 }
 
 .menuMoverACarpetaOpcion:hover {
-    background: var(--fondo-hover);
+    background: var(--dashboard-fondoHover);
 }
 
 .menuMoverACarpetaOpcion--activa {
-    background: rgba(var(--acento-rgb), 0.1);
-    color: var(--acento-color);
+    background: rgba(var(--dashboard-acentoRgb), 0.1);
+    color: var(--dashboard-acento);
 }
 
 /* Estilos para botones de acción en lista de notas */
 .listaNotasItemAcciones {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-xs);
+    gap: var(--dashboard-espacioXs);
 }
 
 .listaNotasItemBotonAccion {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border: none;
     background: transparent;
-    color: var(--texto-secundario);
-    border-radius: var(--radio-sm);
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-bordeRedondeado);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .listaNotasItemBotonAccion:hover {
-    background: var(--fondo-hover);
-    color: var(--texto-color);
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
 }
 
 .listaNotasItemMoverContenedor {
@@ -329,10 +356,10 @@
     right: 0;
     top: 100%;
     z-index: 100;
-    background: var(--fondo-color);
-    border: 1px solid var(--borde-color);
-    border-radius: var(--radio-md);
-    box-shadow: var(--sombra-md);
+    background: var(--dashboard-fondoTarjeta);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-bordeRedondeado);
+    box-shadow: var(--dashboard-sombraMd);
     min-width: 160px;
 }
 
@@ -340,7 +367,29 @@
 .vistaNotasBusqueda {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
-    padding: var(--espaciado-md);
-    border-bottom: 1px solid var(--borde-color);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+}
+
+/*
+ * Acciones del header del modal de notas
+ * Revision 7: Todos los botones en el header del modal
+ */
+.notasAccionesHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* Estado activo para botones de panel */
+.vistaNotasAccionBoton--activo {
+    background: var(--dashboard-acento);
+    color: var(--dashboard-fondoPrincipal);
+    border-color: var(--dashboard-acento);
+}
+
+.vistaNotasAccionBoton--activo:hover {
+    background: var(--dashboard-acentoHover);
 }

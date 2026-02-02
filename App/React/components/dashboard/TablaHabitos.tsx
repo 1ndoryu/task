@@ -146,13 +146,9 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     );
 
     const manejarEditar = useCallback(() => {
-        /* En móvil: abrir menú contextual (BottomSheet) en vez de ir directo a editar */
-        if (esMovil) {
-            menuContextual.toggle(window.innerWidth / 2, window.innerHeight / 2);
-            return;
-        }
+        /* En móvil y desktop: abrir directamente el modal de edición del hábito */
         onEditar?.(habito);
-    }, [onEditar, habito, esMovil, menuContextual]);
+    }, [onEditar, habito]);
 
     /* Usa sistema global para coordinar cierres entre tareas y hábitos */
     const manejarClickDerecho = useCallback(

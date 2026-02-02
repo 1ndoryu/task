@@ -12,10 +12,11 @@
 namespace App\Repository;
 
 use App\Database\Schema;
+use App\Services\CifradoService;
 
 class ActividadRepository
 {
-    private int $userId;
+    use CifradoTrait;
 
     public function __construct(int $userId)
     {
@@ -23,6 +24,7 @@ class ActividadRepository
             throw new \InvalidArgumentException('ID de usuario invalido');
         }
         $this->userId = $userId;
+        $this->inicializarCifrado();
     }
 
     /**
@@ -179,8 +181,19 @@ class ActividadRepository
         $detalle = [];
         foreach ($results as $row) {
             $detalles = $row['detalles'] ? json_decode($row['detalles'], true) : null;
+            
+            /* Obtener nombre del elemento (tarea, hábito o nota) y descifrar si es necesario */
             $elementoNombre = $row['tarea_texto'] ?? $row['habito_nombre'] ?? $row['nota_titulo'] ?? ($detalles['elementoNombre'] ?? null);
+            if ($elementoNombre !== null) {
+                $elementoNombre = $this->descifrarTexto($elementoNombre);
+            }
+            
+            /* Obtener nombre del proyecto y descifrar si es necesario */
             $proyectoNombre = $row['proyecto_nombre'] ?? ($detalles['proyectoNombre'] ?? null);
+            if ($proyectoNombre !== null) {
+                $proyectoNombre = $this->descifrarTexto($proyectoNombre);
+            }
+            
             $detalle[] = [
                 'id' => (int)$row['id'],
                 'tipo' => $row['tipo'],
@@ -196,6 +209,28 @@ class ActividadRepository
         }
 
         return $detalle;
+    }
+
+    /**
+     * Descifra un texto si está cifrado, o lo devuelve tal cual si no lo está
+     */
+    private function descifrarTexto(?string $texto): ?string
+    {
+        if ($texto === null || $texto === '') {
+            return $texto;
+        }
+        
+        /* Si tiene el prefijo de cifrado y el servicio está disponible, descifrar */
+        if ($this->cifradoService !== null && $this->cifradoService->estaCifrado($texto)) {
+            try {
+                return $this->cifradoService->descifrar($texto);
+            } catch (\Exception $e) {
+                error_log('[ActividadRepository] Error descifrando texto: ' . $e->getMessage());
+                return $texto;
+            }
+        }
+        
+        return $texto;
     }
 
     /**

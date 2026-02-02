@@ -52,8 +52,8 @@ export function ModalHistorialBackups({estaAbierto, onCerrar, onAbrirUpgrade}: M
     const formatTrigger = (trigger: string) => {
         if (!trigger) return '';
         if (trigger === 'sync') return 'Sincronización';
-        if (trigger === 'manual') return 'Manual';
-        if (trigger === 'auto') return 'Automática';
+        if (trigger === 'manual' || trigger === 'manual_save') return 'Manual';
+        if (trigger === 'auto' || trigger === 'auto_save') return 'Automática';
         return trigger;
     };
 
