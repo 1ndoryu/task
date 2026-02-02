@@ -43,21 +43,25 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 - [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
 - [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
   - *Beneficio:* Detecta cuentas del teléfono ("Continuar como Juan...").
-- [!] **Bloqueo Actual:** Error `Code 10` (Developer Error) persiste tras limpieza.
+- [!] **Bloqueo Actual:** Error `Code 10` - **CAUSA ENCONTRADA:** `oauth_client` vacío en `google-services.json`.
   - **Estado:**
     - [x] SHA-1 Debug coincide con consola Google.
     - [x] Web Client ID configurado en `capacitor.config.json`.
-    - [x] Limpieza de proyecto (Clean/Rebuild/Uninstall) realizada sin éxito.
     - [x] Signing Config explícito añadido a `build.gradle`.
-    - [x] Placeholder `google-services.json` creado.
-    - [x] **Usuario descargó** `google-services.json` real de Firebase.
-    - [x] Plugin Google Services actualizado a v4.4.4.
-    - [x] Plugin Google Services aplicado en `app/build.gradle` con sintaxis moderna.
-    - [x] Firebase BoM v34.8.0 y Analytics añadidos a dependencias.
-  - **Próximos Pasos (Acción Requerida Usuario):**
-    1. **Rebuild:** Ejecutar `npx cap sync android` y luego Build desde Android Studio.
-    2. **Verificar Web Client ID:** El `serverClientId` en `capacitor.config.json` debe ser tipo "Web application" (NO Android).
-    3. **Pantalla de Consentimiento:** Verificar en Google Cloud que esté en modo "Testing" con tu email invitado, o en "Production".
+    - [x] Firebase BoM y Google Services plugin configurados.
+    - [!] **PROBLEMA IDENTIFICADO:** El `google-services.json` descargado tiene `oauth_client: []` vacío.
+      - Firebase no está vinculado correctamente con Google Cloud Console OAuth clients.
+  - **Solución Requerida (CRÍTICO):**
+    1. **Google Cloud Console** → APIs & Services → Credentials:
+       - Verificar que existen 2 OAuth 2.0 Client IDs:
+         - **Android** (tipo Android) con SHA-1 registrado → Copiar Client ID
+         - **Web** (tipo Web application) → Este es el `serverClientId` actual
+    2. **Firebase Console** → Project Settings → General:
+       - Ir a tu app Android (`com.taskNakomi.app`)
+       - Eliminar y re-añadir la app, esta vez seleccionando **"Enable Google Sign-In"**
+       - O verificar que está vinculada al proyecto de Google Cloud correcto
+    3. **Descargar nuevo `google-services.json`** que contenga los oauth_client correctos
+    4. **Alternativa Manual:** Editar el JSON actual y añadir el Android Client ID y SHA-1 en el array `oauth_client`
 
 ---
 
