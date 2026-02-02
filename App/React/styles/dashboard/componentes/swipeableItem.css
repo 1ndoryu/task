@@ -31,9 +31,9 @@
     bottom: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: var(--dashboard-espaciadoChico);
-    min-width: 80px;
+    width: 100%;
     padding: 0 var(--dashboard-espaciadoMedio);
     color: white;
     opacity: 0;
@@ -44,34 +44,31 @@
 /* Acción izquierda (revelada al deslizar a la derecha = completar) */
 .swipeableItem__accion--izquierda {
     left: 0;
-    border-radius: var(--dashboard-bordeRedondeado) 0 0 var(--dashboard-bordeRedondeado);
+    justify-content: flex-start;
+    /* Degradado verde difuminado hacia la derecha */
+    background: linear-gradient(to right, var(--dashboard-estadoExito) 0%, rgba(34, 197, 94, 0) 60%);
 }
 
 /* Acción derecha (revelada al deslizar a la izquierda = eliminar) */
 .swipeableItem__accion--derecha {
     right: 0;
-    border-radius: 0 var(--dashboard-bordeRedondeado) var(--dashboard-bordeRedondeado) 0;
+    justify-content: flex-end;
+    /* Degradado rojo difuminado hacia la izquierda */
+    background: linear-gradient(to left, var(--dashboard-estadoError) 0%, rgba(239, 68, 68, 0) 60%);
 }
 
-/* Icono dentro de la acción */
+/* Ocultar icono dentro de la acción */
 .swipeableItem__accionIcono {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
+    display: none;
 }
 
-.swipeableItem__accionIcono svg {
-    width: 20px;
-    height: 20px;
-}
-
-/* Etiqueta opcional */
+/* Etiqueta de la acción - texto pequeño */
 .swipeableItem__accionEtiqueta {
-    font-size: var(--dashboard-fuentePequenia);
+    font-size: var(--dashboard-tamanoXs, 10px);
     font-weight: 500;
     white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Feedback visual cuando se supera el umbral */

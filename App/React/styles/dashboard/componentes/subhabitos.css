@@ -1,33 +1,31 @@
 /*
  * Estilos para SubHabitos
+ * Estilo minimalista similar a subtareas (.tareaItemSubtarea)
  * Hábitos anidados dentro de un hábito padre
- * Con frecuencia e importancia independiente
  */
 
-/* Contenedor principal */
+/* Contenedor principal - Sin bordes ni separadores */
 .listaSubHabitos {
-    margin-top: var(--espaciado-md);
-    border-top: 1px solid var(--borde);
-    padding-top: var(--espaciado-md);
+    margin-top: var(--dashboard-espacioMd);
 }
 
-/* Encabezado colapsable */
+/* Encabezado colapsable - Minimalista */
 .listaSubHabitos__encabezado {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-sm);
+    gap: var(--dashboard-espacioXs);
     width: 100%;
-    padding: var(--espaciado-xs) 0;
+    padding: var(--dashboard-espacioXs) 0;
     background: transparent;
     border: none;
-    color: var(--texto-secundario);
-    font-size: 0.75rem;
+    color: var(--dashboard-textoApagado);
+    font-size: 0.7rem;
     cursor: pointer;
-    transition: color 0.15s ease;
+    transition: color var(--dashboard-transicionNormal);
 }
 
 .listaSubHabitos__encabezado:hover {
-    color: var(--texto-primario);
+    color: var(--dashboard-textoSecundario);
 }
 
 .listaSubHabitos__titulo {
@@ -37,70 +35,68 @@
 }
 
 .listaSubHabitos__contador {
-    background: var(--fondo-terciario);
-    padding: 2px 6px;
-    border-radius: var(--radio-sm);
     font-size: 0.65rem;
-    font-weight: 600;
+    color: var(--dashboard-textoIndice);
 }
 
 /* Contenido */
 .listaSubHabitos__contenido {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-xs);
-    padding-top: var(--espaciado-sm);
 }
 
-/* Fila de subhábito */
+/* 
+ * Fila de subhábito - Estilo igual a .tareaItemSubtarea
+ * Minimalista con padding-left para indentación
+ */
 .subHabitoFila {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-sm);
-    padding: var(--espaciado-sm);
-    background: var(--fondo-secundario);
-    border-radius: var(--radio-md);
-    border: 1px solid transparent;
-    transition: border-color 0.15s ease, opacity 0.15s ease;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    padding-left: 30px;
+    background: transparent;
+    border: none;
+    transition: background-color var(--dashboard-transicionNormal);
 }
 
 .subHabitoFila:hover {
-    border-color: var(--borde);
-}
-
-.subHabitoFila--completado {
-    opacity: 0.6;
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .subHabitoFila--completado .subHabitoFila__nombre {
     text-decoration: line-through;
-    color: var(--texto-terciario);
+    color: var(--dashboard-textoApagado);
 }
 
-/* Checkbox del subhábito */
+/* 
+ * Checkbox del subhábito - Estilo unificado con .tareaCheckbox
+ */
 .subHabitoFila__check {
-    width: 18px;
-    height: 18px;
-    border-radius: var(--radio-sm);
-    border: 1.5px solid var(--borde-fuerte);
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1px solid var(--dashboard-textoIndice);
+    border-radius: 0;
     background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: all 0.15s ease;
+    transition:
+        border-color var(--dashboard-transicionNormal),
+        background-color var(--dashboard-transicionNormal);
     color: transparent;
 }
 
 .subHabitoFila__check:hover {
-    border-color: var(--acento);
+    border-color: var(--dashboard-textoApagado);
 }
 
 .subHabitoFila__check--activo {
-    background: var(--acento);
-    border-color: var(--acento);
-    color: var(--texto-sobre-acento);
+    background: var(--dashboard-acentoPrimario);
+    border-color: var(--dashboard-acentoPrimario);
+    color: white;
 }
 
 /* Contenido del subhábito */
@@ -108,72 +104,37 @@
     flex: 1;
     min-width: 0;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
 }
 
 .subHabitoFila__nombre {
     font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--texto-primario);
+    color: var(--dashboard-textoPrimario);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+/* Meta (importancia/frecuencia) - Ocultos por defecto para minimalismo */
 .subHabitoFila__meta {
-    display: flex;
-    align-items: center;
-    gap: var(--espaciado-xs);
-    flex-wrap: wrap;
+    display: none;
 }
 
-.subHabitoFila__importancia {
-    font-size: 0.65rem;
-    padding: 1px 5px;
-    border-radius: var(--radio-xs);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.subHabitoFila__importancia--muyalta {
-    background: var(--color-muy-alta);
-    color: var(--texto-sobre-muy-alta, #fff);
-}
-
-.subHabitoFila__importancia--alta {
-    background: var(--color-alta);
-    color: var(--texto-sobre-alta, #fff);
-}
-
-.subHabitoFila__importancia--media {
-    background: var(--color-media);
-    color: var(--texto-sobre-media, #333);
-}
-
-.subHabitoFila__importancia--baja {
-    background: var(--color-baja);
-    color: var(--texto-sobre-baja, #333);
-}
-
-.subHabitoFila__frecuencia {
-    font-size: 0.65rem;
-    color: var(--texto-terciario);
-}
-
+/* Racha - Mostrar sutilmente */
 .subHabitoFila__racha {
     font-size: 0.65rem;
-    color: var(--color-exito);
+    color: var(--dashboard-textoApagado);
+    margin-left: auto;
 }
 
-/* Acciones del subhábito */
+/* Acciones del subhábito - Ocultas hasta hover */
 .subHabitoFila__acciones {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-xs);
+    gap: 2px;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dashboard-transicionNormal);
 }
 
 .subHabitoFila:hover .subHabitoFila__acciones {
@@ -181,94 +142,92 @@
 }
 
 .subHabitoFila__boton {
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radio-sm);
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
     border: none;
-    background: var(--fondo-terciario);
-    color: var(--texto-secundario);
+    background: transparent;
+    color: var(--dashboard-textoApagado);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dashboard-transicionNormal);
 }
 
 .subHabitoFila__boton:hover {
-    background: var(--fondo-hover);
-    color: var(--texto-primario);
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoSecundario);
 }
 
 .subHabitoFila__boton--eliminar:hover {
-    background: var(--color-error-fondo, rgba(239, 68, 68, 0.1));
-    color: var(--color-error, #ef4444);
+    color: var(--dashboard-estadoError);
 }
 
-/* Formulario de subhábito */
+/* Formulario de subhábito - Compacto */
 .formularioSubHabito {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
-    padding: var(--espaciado-sm);
-    background: var(--fondo-secundario);
-    border-radius: var(--radio-md);
-    border: 1px solid var(--acento);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
+    padding-left: 30px;
+    background: transparent;
 }
 
 .formularioSubHabito__campos {
     display: flex;
-    gap: var(--espaciado-sm);
+    gap: var(--dashboard-espacioSm);
 }
 
 .formularioSubHabito__input {
     flex: 1;
-    padding: var(--espaciado-sm);
-    border: 1px solid var(--borde);
-    border-radius: var(--radio-sm);
-    background: var(--fondo-primario);
-    color: var(--texto-primario);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--dashboard-textoPrimario);
     font-size: 0.85rem;
 }
 
 .formularioSubHabito__input:focus {
     outline: none;
-    border-color: var(--acento);
+    border-color: var(--dashboard-acentoPrimario);
 }
 
 .formularioSubHabito__propiedades {
     display: flex;
-    gap: var(--espaciado-sm);
+    gap: var(--dashboard-espacioSm);
     flex-wrap: wrap;
 }
 
 .formularioSubHabito__acciones {
     display: flex;
     justify-content: flex-end;
-    gap: var(--espaciado-sm);
+    gap: var(--dashboard-espacioSm);
 }
 
 .formularioSubHabito__boton {
-    padding: var(--espaciado-xs) var(--espaciado-md);
-    border-radius: var(--radio-sm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    border-radius: 2px;
     border: none;
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dashboard-transicionNormal);
 }
 
 .formularioSubHabito__boton--cancelar {
-    background: var(--fondo-terciario);
-    color: var(--texto-secundario);
+    background: transparent;
+    color: var(--dashboard-textoApagado);
 }
 
 .formularioSubHabito__boton--cancelar:hover {
-    background: var(--fondo-hover);
+    color: var(--dashboard-textoSecundario);
 }
 
 .formularioSubHabito__boton--guardar {
-    background: var(--acento);
-    color: var(--texto-sobre-acento);
+    background: var(--dashboard-acentoPrimario);
+    color: white;
 }
 
 .formularioSubHabito__boton--guardar:hover:not(:disabled) {
@@ -280,35 +239,29 @@
     cursor: not-allowed;
 }
 
-/* Botón añadir */
+/* Botón añadir - Minimalista */
 .listaSubHabitos__botonAnadir {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--espaciado-xs);
-    padding: var(--espaciado-sm);
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    padding-left: 30px;
     background: transparent;
-    border: 1px dashed var(--borde);
-    border-radius: var(--radio-md);
-    color: var(--texto-secundario);
+    border: none;
+    color: var(--dashboard-textoApagado);
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: color var(--dashboard-transicionNormal);
 }
 
 .listaSubHabitos__botonAnadir:hover {
-    border-color: var(--acento);
-    color: var(--acento);
+    color: var(--dashboard-acentoPrimario);
 }
 
 /* Responsive móvil */
 @media (max-width: 768px) {
     .subHabitoFila__acciones {
         opacity: 1;
-    }
-
-    .subHabitoFila__meta {
-        gap: var(--espaciado-xs);
     }
 
     .formularioSubHabito__propiedades {

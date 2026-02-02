@@ -891,6 +891,8 @@
     .scratchpadTextarea,
     .scratchpadTextarea--resaltado {
         height: 100% !important;
+        /* Padding inferior para que el texto no quede cubierto por el nav */
+        padding-bottom: calc(var(--dashboard-alturaNavegacionInferior, 56px) + var(--dashboard-espacioLg)) !important;
     }
 
     /* Modal de notas expandido en móvil: fullscreen */

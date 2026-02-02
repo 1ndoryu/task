@@ -31,6 +31,7 @@ export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrear
 
     /* Referencia para evitar recalcular en cada render */
     const prevOcultarRef = useRef(ocultarSubtareasAutomaticamente);
+    const prevTareasPadreRef = useRef<Set<number>>(new Set());
 
     /* Efecto para actualizar cuando cambia la configuración */
     useEffect(() => {
@@ -46,6 +47,33 @@ export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrear
             }
         }
     }, [ocultarSubtareasAutomaticamente, tareas]);
+
+    /*
+     * Efecto para auto-expandir tareas padre cuando se agregan nuevas subtareas
+     * Solo funciona si ocultarSubtareasAutomaticamente está desactivado
+     * Detecta nuevas tareas padre y las expande automáticamente
+     */
+    useEffect(() => {
+        if (ocultarSubtareasAutomaticamente) return;
+
+        /* Obtener todas las tareas padre actuales */
+        const padresActuales = new Set(tareas.filter(t => !t.parentId && tieneSubtareas(tareas, t.id)).map(t => t.id));
+
+        /* Encontrar nuevas tareas padre (que no estaban antes) */
+        const nuevasTareasPadre = Array.from(padresActuales).filter(id => !prevTareasPadreRef.current.has(id));
+
+        if (nuevasTareasPadre.length > 0) {
+            /* Expandir automáticamente las nuevas tareas padre */
+            setTareasExpandidas(prev => {
+                const nuevo = new Set(prev);
+                nuevasTareasPadre.forEach(id => nuevo.add(id));
+                return nuevo;
+            });
+        }
+
+        /* Actualizar referencia */
+        prevTareasPadreRef.current = padresActuales;
+    }, [tareas, ocultarSubtareasAutomaticamente]);
 
     const toggleColapsar = useCallback((tareaId: number) => {
         setTareasExpandidas(prev => {

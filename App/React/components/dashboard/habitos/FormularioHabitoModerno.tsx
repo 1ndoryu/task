@@ -12,11 +12,10 @@
  */
 
 import {Pause, Play} from 'lucide-react';
-import type {NivelImportancia, FrecuenciaHabito, Habito, Tarea, DatosEdicionTarea, DatosNuevoSubHabito} from '../../../types/dashboard';
+import type {NivelImportancia, FrecuenciaHabito, Habito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
-import {ListaTareasHabito} from './ListaTareasHabito';
 import {ListaSubHabitos} from './ListaSubHabitos';
 
 interface FormularioHabitoModernoProps {
@@ -45,14 +44,6 @@ interface FormularioHabitoModernoProps {
     /* Modo */
     modoEdicion?: boolean;
     errorNombre?: string;
-    /* Tareas del habito - Fase 14.8 */
-    tareasHabito?: Tarea[];
-    onToggleTareaHabito?: (id: number) => void;
-    onCrearTareaHabito?: (datos: DatosEdicionTarea) => void;
-    onEliminarTareaHabito?: (id: number) => void;
-    onConfigurarTareaHabito?: (tarea: Tarea) => void;
-    onReordenarTareasHabito?: (tareasIds: number[]) => void;
-    onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
     /* SubHabitos: CRUD y toggle para hábitos anidados */
     onCrearSubHabito?: (datos: DatosNuevoSubHabito) => void;
     onEditarSubHabito?: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
@@ -60,11 +51,8 @@ interface FormularioHabitoModernoProps {
     onToggleSubHabito?: (subHabitoId: number) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, tareasHabito, onToggleTareaHabito, onCrearTareaHabito, onEliminarTareaHabito, onConfigurarTareaHabito, onReordenarTareasHabito, onEditarTareaHabito, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
-
-    /* Determinar si mostrar la sección de tareas */
-    const mostrarTareasHabito = modoEdicion && habito && habito.id > 0 && onCrearTareaHabito && onToggleTareaHabito && onEliminarTareaHabito;
 
     /* Determinar si mostrar la sección de subhábitos */
     const mostrarSubHabitos = modoEdicion && habito && habito.id > 0 && onCrearSubHabito && onToggleSubHabito;
@@ -133,9 +121,6 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
                     frecuenciaPadre={frecuencia}
                 />
             )}
-
-            {/* Tareas/Metas del habito - Fase 14.8 */}
-            {mostrarTareasHabito && <ListaTareasHabito tareas={tareasHabito || []} habitoId={habito.id} onToggleTarea={onToggleTareaHabito} onCrearTarea={onCrearTareaHabito} onEliminarTarea={onEliminarTareaHabito} onConfigurarTarea={onConfigurarTareaHabito} onReordenarTareas={onReordenarTareasHabito} importancia={habito.importancia} onEditarTarea={onEditarTareaHabito} />}
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (

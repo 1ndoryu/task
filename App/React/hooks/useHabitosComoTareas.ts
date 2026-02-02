@@ -4,11 +4,12 @@
  * La urgencia se calcula automáticamente basada en días de inactividad
  *
  * Fase 14.8: Ahora también incluye las tareas asociadas al hábito como subtareas
+ * SubHabitos: También incluye subhábitos como subtareas virtuales
  * Las tareas heredan prioridad del hábito y mantienen su orden definido en tareasIds
  */
 
 import {useMemo} from 'react';
-import type {Habito, Tarea, TareaHabito, NivelUrgencia, NivelPrioridad} from '../types/dashboard';
+import type {Habito, Tarea, TareaHabito, SubHabito, NivelUrgencia, NivelPrioridad} from '../types/dashboard';
 import {tocaHoy} from '../utils/frecuenciaHabitos';
 import {FRECUENCIA_POR_DEFECTO} from '../types/dashboard';
 import {obtenerFechaHoy} from '../utils/fecha';
@@ -67,6 +68,25 @@ const generarIdTareaHabito = (habitoId: number): number => {
 };
 
 /*
+ * Genera un ID único negativo para subhábitos como tareas virtuales
+ * Usa un rango diferente para evitar colisión con tareas-hábito
+ */
+const generarIdSubHabitoTarea = (habitoId: number, subhabitoId: number): number => {
+    return -(habitoId * 1000 + subhabitoId) - 100000;
+};
+
+/*
+ * Verifica si un subhábito "toca hoy"
+ */
+const subhabitoTocaHoy = (subhabito: SubHabito, frecuenciaPadre: Habito['frecuencia']): boolean => {
+    const frecuencia = subhabito.frecuencia || frecuenciaPadre || FRECUENCIA_POR_DEFECTO;
+    const hoy = obtenerFechaHoy();
+    const completadoHoy = subhabito.ultimoCompletado === hoy;
+    const pospuestoHoy = subhabito.historialPospuestos?.includes(hoy) ?? false;
+    return tocaHoy(frecuencia, subhabito.ultimoCompletado) && !completadoHoy && !pospuestoHoy;
+};
+
+/*
  * Verifica si un hábito fue pospuesto hoy
  */
 const fuePospuestoHoy = (habito: Habito, fechaHoy: string): boolean => {
@@ -78,6 +98,7 @@ interface UseHabitosComoTareasParams {
     tareas: Tarea[];
     mostrarHabitos: boolean;
     onToggleHabito: (habitoId: number) => void;
+    onToggleSubHabito?: (habitoId: number, subHabitoId: number) => void;
     umbralesUrgencia?: UmbralesUrgencia;
 }
 
@@ -88,7 +109,7 @@ interface UseHabitosComoTareasReturn {
     manejarToggleTareaHabito: (tareaId: number) => boolean;
 }
 
-export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleHabito, umbralesUrgencia}: UseHabitosComoTareasParams): UseHabitosComoTareasReturn {
+export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleHabito, onToggleSubHabito, umbralesUrgencia}: UseHabitosComoTareasParams): UseHabitosComoTareasReturn {
     const umbrales = umbralesUrgencia || UMBRALES_DEFECTO;
 
     /*
@@ -134,8 +155,9 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
     }, [habitos, mostrarHabitos, umbrales]);
 
     /*
-     * Tareas virtuales + subtareas reales del hábito
+     * Tareas virtuales + subtareas reales del hábito + subhábitos como tareas virtuales
      * Fase 14.8: Las subtareas heredan prioridad del hábito y no tienen urgencia propia
+     * SubHabitos: Los subhábitos que "tocan hoy" también aparecen como subtareas virtuales
      * Mantienen el orden definido en tareasIds del hábito
      */
     const tareasConSubtareas = useMemo<Tarea[]>(() => {
@@ -147,9 +169,32 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
             /* Agregar la tarea virtual del hábito */
             resultado.push(tareaHabito);
 
-            /* Buscar hábito original para obtener tareasIds (orden) */
+            /* Buscar hábito original para obtener tareasIds (orden) y subhábitos */
             const habito = habitos.find(h => h.id === tareaHabito.habitoId);
             if (!habito) continue;
+
+            /* Agregar subhábitos que "tocan hoy" como tareas virtuales */
+            if (habito.subhabitos && habito.subhabitos.length > 0) {
+                for (const subhabito of habito.subhabitos) {
+                    /* Solo incluir si no está pausado y "toca hoy" */
+                    if (subhabito.pausado) continue;
+                    if (!subhabitoTocaHoy(subhabito, habito.frecuencia)) continue;
+
+                    /* Crear tarea virtual para el subhábito */
+                    const tareaSubhabito: Tarea = {
+                        id: generarIdSubHabitoTarea(habito.id, subhabito.id),
+                        texto: subhabito.nombre,
+                        completado: false,
+                        fechaCreacion: subhabito.fechaCreacion,
+                        prioridad: mapearImportanciaAPrioridad(subhabito.importancia),
+                        parentId: tareaHabito.id,
+                        /* Sin urgencia propia (heredada del hábito visual) */
+                        urgencia: undefined
+                    };
+
+                    resultado.push(tareaSubhabito);
+                }
+            }
 
             /* Filtrar tareas que pertenecen a este hábito */
             const tareasDelHabito = tareas.filter(t => t.habitoId === habito.id && !t.completado);
@@ -184,20 +229,38 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
     }, [tareasHabito, tareas, habitos, mostrarHabitos]);
 
     /*
-     * Maneja el toggle de una tarea-hábito
-     * Retorna true si fue manejado (era una tarea-hábito), false si no
+     * Maneja el toggle de una tarea-hábito o subhábito
+     * Retorna true si fue manejado (era una tarea-hábito o subhábito), false si no
      */
     const manejarToggleTareaHabito = (tareaId: number): boolean => {
         /* Las tareas-hábito tienen IDs negativos */
         if (tareaId >= 0) return false;
 
-        /* Encontrar el hábito correspondiente */
+        /* Encontrar el hábito correspondiente (tarea principal de hábito) */
         const tareaHabito = tareasHabito.find(t => t.id === tareaId);
-        if (!tareaHabito) return false;
+        if (tareaHabito) {
+            /* Llamar al toggle del hábito original */
+            onToggleHabito(tareaHabito.habitoId);
+            return true;
+        }
 
-        /* Llamar al toggle del hábito original */
-        onToggleHabito(tareaHabito.habitoId);
-        return true;
+        /* Verificar si es un subhábito (IDs más negativos: -(habitoId * 1000 + subhabitoId) - 100000) */
+        /* Buscar en todos los hábitos si algún subhábito tiene este ID */
+        for (const habito of habitos) {
+            if (!habito.subhabitos) continue;
+            for (const subhabito of habito.subhabitos) {
+                const idSubhabito = generarIdSubHabitoTarea(habito.id, subhabito.id);
+                if (idSubhabito === tareaId) {
+                    /* Llamar al toggle del subhábito si está disponible */
+                    if (onToggleSubHabito) {
+                        onToggleSubHabito(habito.id, subhabito.id);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        return false;
     };
 
     return {

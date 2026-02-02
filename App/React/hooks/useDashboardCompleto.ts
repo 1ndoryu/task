@@ -53,11 +53,14 @@ export function useDashboardCompleto() {
     const temas = useTema();
 
     /* Hook para convertir hábitos en tareas virtuales + sus subtareas */
+    const toggleSubHabitoStore = useHabitosStore(state => state.toggleSubHabito);
+
     const habitosComoTareas = useHabitosComoTareas({
         habitos: dashboard.habitos,
         tareas: dashboard.tareas,
         mostrarHabitos: configTareas.configuracion.mostrarHabitosEnEjecucion,
         onToggleHabito: dashboard.toggleHabito,
+        onToggleSubHabito: toggleSubHabitoStore,
         umbralesUrgencia: configHabitos.obtenerUmbralesActuales()
     });
 
