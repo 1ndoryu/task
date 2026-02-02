@@ -288,7 +288,6 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onEditarTareaHabito={onEditarTarea}
                                     /* Props para subhábitos */
                                     onCrearSubHabito={manejarCrearSubHabito}
-                                    onEditarSubHabito={manejarEditarSubHabito}
                                     onEliminarSubHabito={manejarEliminarSubHabito}
                                     onToggleSubHabito={manejarToggleSubHabito}
                                 />

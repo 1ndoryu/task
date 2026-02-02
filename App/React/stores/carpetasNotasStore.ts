@@ -35,7 +35,7 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
     carpetaActiva: null,
     cargando: false,
     error: null,
-    vistaActual: 'notas',
+    vistaActual: 'notas', /* Iniciar mostrando notas de General (carpetaActiva = null) */
 
     /* Acciones */
     cargarCarpetas: async () => {
@@ -43,10 +43,32 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
 
         try {
             const carpetas = await carpetasNotasService.listar();
+            /* Asegurar que la carpeta General virtual siempre exista */
+            const tieneGeneral = carpetas.some(c => c.id === null && c.esVirtual);
+            if (!tieneGeneral) {
+                carpetas.unshift({
+                    id: null,
+                    nombre: 'General',
+                    orden: -1,
+                    totalNotas: 0,
+                    esVirtual: true
+                });
+            }
             set({carpetas, cargando: false});
         } catch (error) {
             const mensaje = error instanceof Error ? error.message : 'Error al cargar carpetas';
-            set({cargando: false, error: mensaje});
+            /* Incluso en error, asegurar que General exista como fallback */
+            set({
+                cargando: false,
+                error: mensaje,
+                carpetas: [{
+                    id: null,
+                    nombre: 'General',
+                    orden: -1,
+                    totalNotas: 0,
+                    esVirtual: true
+                }]
+            });
         }
     },
 
@@ -125,7 +147,12 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
     },
 
     volverACarpetas: () => {
+        const {carpetas, cargarCarpetas} = get();
         set({vistaActual: 'carpetas'});
+        /* Recargar carpetas si están vacías o solo tiene la virtual sin actualizar */
+        if (carpetas.length === 0) {
+            cargarCarpetas();
+        }
     },
 
     obtenerNombreCarpetaActiva: () => {

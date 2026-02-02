@@ -1,21 +1,24 @@
 /*
  * BottomSheetHabito
- * Bottom Sheet para crear hábitos en móvil
+ * Bottom Sheet para crear/editar hábitos en móvil
  * Diseño idéntico a BottomSheetTarea para consistencia visual
  *
  * Características:
  * - Input principal con autofocus
  * - Barra de acciones con iconos (15px): Frecuencia, Importancia
  * - Botón enviar a la derecha
- * - Cierra automáticamente al crear
+ * - Cierra automáticamente al crear/guardar
+ * - Soporta modo edición con habitoExistente
  * - Modales de selección para propiedades
  * - Badges de propiedades seleccionadas
+ * - Botón configuración (tuerca) en modo edición para abrir panel completo
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
-import {Send, Repeat, Flag} from 'lucide-react';
+import {Send, Repeat, Flag, Settings} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import {OPCIONES_FRECUENCIA, OPCIONES_IMPORTANCIA, obtenerTextoFrecuencia, obtenerTextoImportancia} from '../../utils/constantes';
+import type {Habito} from '../../types/dashboard';
 
 interface BottomSheetHabitoProps {
     estaAbierto: boolean;
@@ -25,25 +28,34 @@ interface BottomSheetHabitoProps {
         frecuencia?: string;
         importancia?: string;
     };
+    /* Modo edición: si se pasa un hábito, se edita en lugar de crear */
+    habitoExistente?: Habito;
+    onAbrirConfiguracion?: () => void;
 }
 
 export interface DatosHabito {
     texto: string;
     frecuencia?: string;
     importancia?: string;
+    /* ID de hábito existente para edición */
+    id?: number;
 }
 
 /* Tipos de modales de selección */
 type ModalActivo = 'frecuencia' | 'importancia' | null;
 
-export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: BottomSheetHabitoProps): JSX.Element | null {
-    const [texto, setTexto] = useState('');
-    const [frecuencia, setFrecuencia] = useState<string | undefined>(valoresIniciales.frecuencia || 'diaria');
-    const [importancia, setImportancia] = useState<string | undefined>(valoresIniciales.importancia || 'Media');
+export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}, habitoExistente, onAbrirConfiguracion}: BottomSheetHabitoProps): JSX.Element | null {
+    const esEdicion = !!habitoExistente;
+    const [texto, setTexto] = useState(habitoExistente?.nombre || '');
+    const [frecuencia, setFrecuencia] = useState<string | undefined>(habitoExistente?.frecuencia?.tipo || valoresIniciales.frecuencia || 'diaria');
+    const [importancia, setImportancia] = useState<string | undefined>(habitoExistente?.importancia || valoresIniciales.importancia || 'Media');
     const [cargando, setCargando] = useState(false);
     const [modalActivo, setModalActivo] = useState<ModalActivo>(null);
 
     const inputRef = useRef<HTMLInputElement>(null);
+
+    /* Ref para rastrear qué hábito se ha cargado (evita recargas innecesarias) */
+    const habitoIdCargadoRef = useRef<number | undefined>(undefined);
 
     /* Autofocus al abrir */
     useEffect(() => {
@@ -52,15 +64,32 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
         }
     }, [estaAbierto]);
 
-    /* Reset al cerrar */
+    /*
+     * Reset al cerrar o cargar nuevo hábito
+     * Bug fix: Solo resetear cuando estaAbierto pasa a false,
+     * o cuando el ID de habitoExistente cambia (nuevo hábito a editar)
+     */
     useEffect(() => {
         if (!estaAbierto) {
+            /* Reset completo al cerrar */
             setTexto('');
             setFrecuencia(valoresIniciales.frecuencia || 'diaria');
             setImportancia(valoresIniciales.importancia || 'Media');
             setModalActivo(null);
+            habitoIdCargadoRef.current = undefined;
+        } else if (habitoExistente && habitoExistente.id !== habitoIdCargadoRef.current) {
+            /* Cargar datos solo si es un hábito diferente al ya cargado */
+            setTexto(habitoExistente.nombre);
+            setFrecuencia(habitoExistente.frecuencia?.tipo || 'diaria');
+            setImportancia(habitoExistente.importancia || 'Media');
+            habitoIdCargadoRef.current = habitoExistente.id;
+        } else if (!habitoExistente && estaAbierto && habitoIdCargadoRef.current === undefined) {
+            /* Modo creación: aplicar valores iniciales solo la primera vez */
+            setFrecuencia(valoresIniciales.frecuencia || 'diaria');
+            setImportancia(valoresIniciales.importancia || 'Media');
+            habitoIdCargadoRef.current = -1; /* Marcador para modo creación */
         }
-    }, [estaAbierto, valoresIniciales]);
+    }, [estaAbierto, habitoExistente?.id]);
 
     const manejarGuardar = async () => {
         if (!texto.trim() || cargando) return;
@@ -70,7 +99,8 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             await onGuardar({
                 texto,
                 frecuencia,
-                importancia
+                importancia,
+                id: habitoExistente?.id
             });
             onCerrar();
         } catch (error) {
@@ -121,7 +151,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             <div className="bottomSheetHabito">
                 {/* Input principal */}
                 <div className="bottomSheetHabito__inputWrapper">
-                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué hábito quieres crear?" className="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-habito-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
+                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder={esEdicion ? 'Nombre del hábito' : '¿Qué hábito quieres crear?'} className="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-habito-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}
@@ -140,10 +170,25 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                         <button type="button" className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia(importancia) || 'Importancia'} title={obtenerTextoImportancia(importancia) || 'Importancia'}>
                             <Flag size={18} />
                         </button>
+
+                        {/* Configuración avanzada (solo edición) */}
+                        {esEdicion && onAbrirConfiguracion && (
+                            <button
+                                type="button"
+                                className="bottomSheetHabito__accion"
+                                onClick={() => {
+                                    onAbrirConfiguracion();
+                                    onCerrar();
+                                }}
+                                aria-label="Configuración avanzada"
+                                title="Configuración avanzada">
+                                <Settings size={18} />
+                            </button>
+                        )}
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
-                    <button type="button" className="bottomSheetHabito__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label="Crear Hábito">
+                    <button type="button" className="bottomSheetHabito__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Hábito'}>
                         <Send size={18} />
                     </button>
                 </div>

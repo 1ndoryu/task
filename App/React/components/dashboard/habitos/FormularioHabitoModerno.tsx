@@ -46,12 +46,11 @@ interface FormularioHabitoModernoProps {
     errorNombre?: string;
     /* SubHabitos: CRUD y toggle para hábitos anidados */
     onCrearSubHabito?: (datos: DatosNuevoSubHabito) => void;
-    onEditarSubHabito?: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
     onEliminarSubHabito?: (subHabitoId: number) => void;
     onToggleSubHabito?: (subHabitoId: number) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, onCrearSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
 
     /* Determinar si mostrar la sección de subhábitos */
@@ -114,7 +113,6 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
                 <ListaSubHabitos
                     subhabitos={habito.subhabitos || []}
                     onCrear={onCrearSubHabito!}
-                    onEditar={onEditarSubHabito!}
                     onEliminar={onEliminarSubHabito!}
                     onToggle={onToggleSubHabito!}
                     importanciaPadre={importancia}

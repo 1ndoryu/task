@@ -432,6 +432,7 @@ class ActividadApiController
             $elementoTipo = $request->get_param('elementoTipo');
             $proyectoId = $request->get_param('proyectoId');
             $fecha = $request->get_param('fecha');
+            $detalles = $request->get_param('detalles');
 
             /* Validar tipo - tipos principales y tipos de corrección */
             $tiposValidos = [

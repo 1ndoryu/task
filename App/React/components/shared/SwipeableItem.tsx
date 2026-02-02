@@ -172,7 +172,7 @@ export function SwipeableItem({children, onSwipeRight, onSwipeLeft, accionDerech
         <div ref={contenedorRef} className={claseContenedor} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
             {/* Acción derecha (al deslizar a la derecha, se revela a la izquierda) */}
             {accionDerecha && onSwipeRight && (
-                <div className="swipeableItem__accion swipeableItem__accion--izquierda" style={{backgroundColor: accionDerecha.color, opacity: calcularOpacidad(false)}}>
+                <div className="swipeableItem__accion swipeableItem__accion--izquierda" style={{opacity: calcularOpacidad(false)}}>
                     <span className="swipeableItem__accionIcono">{accionDerecha.icono}</span>
                     {accionDerecha.etiqueta && <span className="swipeableItem__accionEtiqueta">{accionDerecha.etiqueta}</span>}
                 </div>
@@ -180,7 +180,7 @@ export function SwipeableItem({children, onSwipeRight, onSwipeLeft, accionDerech
 
             {/* Acción izquierda (al deslizar a la izquierda, se revela a la derecha) */}
             {accionIzquierda && onSwipeLeft && (
-                <div className="swipeableItem__accion swipeableItem__accion--derecha" style={{backgroundColor: accionIzquierda.color, opacity: calcularOpacidad(true)}}>
+                <div className="swipeableItem__accion swipeableItem__accion--derecha" style={{opacity: calcularOpacidad(true)}}>
                     {accionIzquierda.etiqueta && <span className="swipeableItem__accionEtiqueta">{accionIzquierda.etiqueta}</span>}
                     <span className="swipeableItem__accionIcono">{accionIzquierda.icono}</span>
                 </div>

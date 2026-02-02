@@ -15,7 +15,7 @@ import {useEsMovil} from '../../hooks/useEsMovil';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import type {DatosEdicionTarea, Tarea} from '../../types/dashboard';
+import type {DatosEdicionTarea, Tarea, Habito} from '../../types/dashboard';
 
 /* Tipo para pages móviles - ahora dinámico desde el registro */
 type PaginaMovil = string;
@@ -121,8 +121,22 @@ function generarPropsPanelEjecucion(ctx: PropsContextoPaneles, renderHandleArras
     };
 }
 
-function generarPropsPanelFocoPrioritario(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+function generarPropsPanelFocoPrioritario(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element, esMovilActual: boolean) {
     const {dashboard, modales, ordenHabitos, configHabitos, opciones} = ctx;
+
+    /*
+     * Handler de editar hábito adaptativo:
+     * - Móvil: abre BottomSheet de edición rápida
+     * - Desktop: abre modal de configuración completa
+     */
+    const manejarEditarHabito = (habito: Habito) => {
+        if (esMovilActual) {
+            modales.abrirEdicionHabitoMovil(habito);
+        } else {
+            dashboard.abrirModalEditarHabito(habito);
+        }
+    };
+
     return {
         habitos: ordenHabitos.habitosOrdenados,
         modoOrdenHabitos: ordenHabitos.modoActual,
@@ -131,7 +145,7 @@ function generarPropsPanelFocoPrioritario(ctx: PropsContextoPaneles, renderHandl
         onAbrirModalCrearHabito: () => modales.abrirCreacionRapida('habito'),
         onAbrirModalConfigHabitos: modales.abrirModalConfigHabitos,
         onToggleHabito: dashboard.toggleHabito,
-        onEditarHabito: dashboard.abrirModalEditarHabito,
+        onEditarHabito: manejarEditarHabito,
         onEliminarHabito: dashboard.eliminarHabito,
         onPosponerHabito: dashboard.posponerHabito,
         onPausarHabito: dashboard.pausarHabito,
@@ -306,6 +320,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         let props: any;
         if (panelId === 'ejecucion') {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, manejarToggleTarea, manejarEditarHabitoPorId, esMovil);
+        } else if (panelId === 'focoPrioritario') {
+            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, esMovil);
         } else {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement);
         }

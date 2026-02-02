@@ -1,17 +1,15 @@
 /*
  * ListaSubHabitos
- * Componente para mostrar y gestionar subhábitos dentro de un hábito padre
- * Los subhábitos son hábitos anidados con frecuencia e importancia independiente
- * Solo permite un nivel de anidación (sin subhábitos recursivos)
+ * Componente para gestionar subhábitos dentro de la configuración de un Hábito padre.
+ * Usa los mismos estilos CSS que ListaSubtareas (listaTareasHabito__*) para consistencia visual.
+ * Los subhábitos heredan frecuencia e importancia del padre al crearse.
  */
 
 import {useState, useCallback} from 'react';
-import {Plus, Check, ChevronDown, ChevronRight, Trash2, Edit2} from 'lucide-react';
+import {Check, Plus, Trash2} from 'lucide-react';
 import type {SubHabito, NivelImportancia, FrecuenciaHabito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../../types/dashboard';
 import {obtenerFechaHoy} from '../../../utils/fecha';
-import {describirFrecuencia} from '../../../utils/frecuenciaHabitos';
-import {SelectorImportanciaPill, SelectorFrecuenciaPill} from '../../shared';
 
 interface ListaSubHabitosProps {
     subhabitos: SubHabito[];
@@ -23,154 +21,144 @@ interface ListaSubHabitosProps {
     frecuenciaPadre?: FrecuenciaHabito;
 }
 
-interface FormularioSubHabitoProps {
-    datosIniciales?: DatosNuevoSubHabito;
-    importanciaPadre: NivelImportancia;
-    frecuenciaPadre?: FrecuenciaHabito;
-    onGuardar: (datos: DatosNuevoSubHabito) => void;
-    onCancelar: () => void;
-    modoEdicion?: boolean;
-}
-
 /*
- * Formulario inline para crear/editar subhábitos
- */
-function FormularioSubHabito({datosIniciales, importanciaPadre, frecuenciaPadre, onGuardar, onCancelar, modoEdicion = false}: FormularioSubHabitoProps): JSX.Element {
-    const [nombre, setNombre] = useState(datosIniciales?.nombre || '');
-    const [importancia, setImportancia] = useState<NivelImportancia>(datosIniciales?.importancia || importanciaPadre);
-    const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(datosIniciales?.frecuencia || frecuenciaPadre || FRECUENCIA_POR_DEFECTO);
-
-    const manejarSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!nombre.trim()) return;
-        onGuardar({nombre: nombre.trim(), importancia, frecuencia});
-    };
-
-    return (
-        <form onSubmit={manejarSubmit} className="formularioSubHabito">
-            <div className="formularioSubHabito__campos">
-                <input type="text" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del subhábito" className="formularioSubHabito__input" autoFocus />
-            </div>
-            <div className="formularioSubHabito__propiedades">
-                <SelectorImportanciaPill importancia={importancia} onChange={setImportancia} />
-                <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={setFrecuencia} />
-            </div>
-            <div className="formularioSubHabito__acciones">
-                <button type="button" onClick={onCancelar} className="formularioSubHabito__boton formularioSubHabito__boton--cancelar">
-                    Cancelar
-                </button>
-                <button type="submit" disabled={!nombre.trim()} className="formularioSubHabito__boton formularioSubHabito__boton--guardar">
-                    {modoEdicion ? 'Guardar' : 'Añadir'}
-                </button>
-            </div>
-        </form>
-    );
-}
-
-/*
- * Fila individual de subhábito
+ * Fila individual de subhábito - Usa clases listaTareasHabito__* para consistencia con subtareas
  */
 interface FilaSubHabitoProps {
     subhabito: SubHabito;
     onToggle: () => void;
-    onEditar: () => void;
     onEliminar: () => void;
 }
 
-function FilaSubHabito({subhabito, onToggle, onEditar, onEliminar}: FilaSubHabitoProps): JSX.Element {
+function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): JSX.Element {
     const hoy = obtenerFechaHoy();
     const completadoHoy = subhabito.ultimoCompletado === hoy;
-    const frecuenciaTexto = describirFrecuencia(subhabito.frecuencia || FRECUENCIA_POR_DEFECTO);
 
     return (
-        <div className={`subHabitoFila ${completadoHoy ? 'subHabitoFila--completado' : ''}`}>
-            <button type="button" className={`subHabitoFila__check ${completadoHoy ? 'subHabitoFila__check--activo' : ''}`} onClick={onToggle} title={completadoHoy ? 'Desmarcar' : 'Completar hoy'}>
-                {completadoHoy && <Check size={12} />}
+        <div className={`listaTareasHabito__item ${completadoHoy ? 'listaTareasHabito__item--completado' : ''} listaTareasHabito__item--sinDrag`}>
+            {/* Checkbox - Estilo unificado con tareaCheckbox */}
+            <div
+                className={`tareaCheckbox ${completadoHoy ? 'tareaCheckboxCompletado' : ''}`}
+                onClick={e => {
+                    e.stopPropagation();
+                    onToggle();
+                }}
+                onPointerDown={e => e.stopPropagation()}>
+                {completadoHoy && <Check size={10} color="white" />}
+            </div>
+
+            {/* Contenido (Texto) */}
+            <div className="listaTareasHabito__contenido">
+                <span className="listaTareasHabito__texto">{subhabito.nombre}</span>
+                {/* Badge de racha si tiene */}
+                {subhabito.racha > 0 && (
+                    <span className="badgeInfo badgeInfo--racha" style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}>
+                        <span className="badgeInfoTexto">🔥 {subhabito.racha}</span>
+                    </span>
+                )}
+            </div>
+
+            {/* Botón eliminar */}
+            <button
+                type="button"
+                className="listaTareasHabito__eliminar"
+                onClick={e => {
+                    e.stopPropagation();
+                    onEliminar();
+                }}
+                onPointerDown={e => e.stopPropagation()}
+                title="Eliminar">
+                <Trash2 size={14} />
             </button>
-            <div className="subHabitoFila__contenido">
-                <span className="subHabitoFila__nombre">{subhabito.nombre}</span>
-                <div className="subHabitoFila__meta">
-                    <span className="subHabitoFila__importancia subHabitoFila__importancia--{subhabito.importancia.toLowerCase().replace(' ', '')}">{subhabito.importancia}</span>
-                    <span className="subHabitoFila__frecuencia">{frecuenciaTexto}</span>
-                    {subhabito.racha > 0 && <span className="subHabitoFila__racha">🔥 {subhabito.racha}</span>}
-                </div>
-            </div>
-            <div className="subHabitoFila__acciones">
-                <button type="button" onClick={onEditar} className="subHabitoFila__boton" title="Editar">
-                    <Edit2 size={12} />
-                </button>
-                <button type="button" onClick={onEliminar} className="subHabitoFila__boton subHabitoFila__boton--eliminar" title="Eliminar">
-                    <Trash2 size={12} />
-                </button>
-            </div>
         </div>
     );
 }
 
 /*
- * Lista principal de subhábitos
+ * Lista principal de subhábitos - Usa clases listaTareasHabito__* para consistencia con subtareas
  */
-export function ListaSubHabitos({subhabitos, onCrear, onEditar, onEliminar, onToggle, importanciaPadre, frecuenciaPadre}: ListaSubHabitosProps): JSX.Element {
-    const [expandido, setExpandido] = useState(true);
-    const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const [editandoId, setEditandoId] = useState<number | null>(null);
+export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, importanciaPadre, frecuenciaPadre}: ListaSubHabitosProps): JSX.Element {
+    const [textoNuevo, setTextoNuevo] = useState('');
+    const [mostrarInput, setMostrarInput] = useState(false);
 
-    const manejarCrear = useCallback(
-        (datos: DatosNuevoSubHabito) => {
-            onCrear(datos);
-            setMostrarFormulario(false);
+    /* Crear nuevo subhábito - hereda propiedades del padre */
+    const manejarCrear = useCallback(() => {
+        if (!textoNuevo.trim()) return;
+
+        onCrear({
+            nombre: textoNuevo.trim(),
+            importancia: importanciaPadre,
+            frecuencia: frecuenciaPadre || FRECUENCIA_POR_DEFECTO
+        });
+
+        setTextoNuevo('');
+    }, [textoNuevo, onCrear, importanciaPadre, frecuenciaPadre]);
+
+    /* Manejar Enter para guardar, Escape para cancelar */
+    const manejarKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                manejarCrear();
+            } else if (e.key === 'Escape') {
+                setMostrarInput(false);
+                setTextoNuevo('');
+            }
         },
-        [onCrear]
+        [manejarCrear]
     );
 
-    const manejarEditar = useCallback(
-        (subHabitoId: number, datos: DatosNuevoSubHabito) => {
-            onEditar(subHabitoId, datos);
-            setEditandoId(null);
-        },
-        [onEditar]
-    );
-
-    const subhabitoEditando = editandoId !== null ? subhabitos.find(sh => sh.id === editandoId) : null;
+    const hoy = obtenerFechaHoy();
+    const completados = subhabitos.filter(sh => sh.ultimoCompletado === hoy).length;
+    const total = subhabitos.length;
 
     return (
-        <div className="listaSubHabitos">
-            {/* Encabezado colapsable */}
-            <button type="button" className="listaSubHabitos__encabezado" onClick={() => setExpandido(!expandido)}>
-                {expandido ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                <span className="listaSubHabitos__titulo">Subhábitos</span>
-                <span className="listaSubHabitos__contador">{subhabitos.length}</span>
-            </button>
+        <div className="listaTareasHabito listaTareasHabito--compacto">
+            {/* Header con contador - Sin colapsar */}
+            <div className="listaTareasHabito__encabezado">
+                <span className="listaTareasHabito__titulo">Subhábitos</span>
+                {total > 0 && (
+                    <span className="listaTareasHabito__contador">
+                        {completados}/{total}
+                    </span>
+                )}
+            </div>
 
-            {expandido && (
-                <div className="listaSubHabitos__contenido">
-                    {/* Lista de subhábitos */}
-                    {subhabitos.map(sh =>
-                        editandoId === sh.id ? (
-                            <FormularioSubHabito
-                                key={sh.id}
-                                datosIniciales={{nombre: sh.nombre, importancia: sh.importancia, frecuencia: sh.frecuencia}}
-                                importanciaPadre={importanciaPadre}
-                                frecuenciaPadre={frecuenciaPadre}
-                                onGuardar={datos => manejarEditar(sh.id, datos)}
-                                onCancelar={() => setEditandoId(null)}
-                                modoEdicion
-                            />
-                        ) : (
-                            <FilaSubHabito key={sh.id} subhabito={sh} onToggle={() => onToggle(sh.id)} onEditar={() => setEditandoId(sh.id)} onEliminar={() => onEliminar(sh.id)} />
-                        )
-                    )}
-
-                    {/* Formulario de creación */}
-                    {mostrarFormulario ? (
-                        <FormularioSubHabito importanciaPadre={importanciaPadre} frecuenciaPadre={frecuenciaPadre} onGuardar={manejarCrear} onCancelar={() => setMostrarFormulario(false)} />
-                    ) : (
-                        <button type="button" className="listaSubHabitos__botonAnadir" onClick={() => setMostrarFormulario(true)}>
-                            <Plus size={14} />
-                            <span>Añadir subhábito</span>
-                        </button>
-                    )}
+            {/* Lista de subhábitos */}
+            {subhabitos.length > 0 && (
+                <div className="listaTareasHabito__lista">
+                    {subhabitos.map(sh => (
+                        <FilaSubHabito key={sh.id} subhabito={sh} onToggle={() => onToggle(sh.id)} onEliminar={() => onEliminar(sh.id)} />
+                    ))}
                 </div>
+            )}
+
+            {/* Empty State */}
+            {subhabitos.length === 0 && !mostrarInput && <div className="listaTareasHabito__vacio">No hay subhábitos</div>}
+
+            {/* Input simple - Enter para guardar */}
+            {mostrarInput ? (
+                <div className="listaTareasHabito__inputContenedor">
+                    <input
+                        type="text"
+                        className="listaTareasHabito__input"
+                        placeholder="Nuevo subhábito..."
+                        value={textoNuevo}
+                        onChange={e => setTextoNuevo(e.target.value)}
+                        onKeyDown={manejarKeyDown}
+                        onBlur={() => {
+                            if (!textoNuevo.trim()) {
+                                setMostrarInput(false);
+                            }
+                        }}
+                        autoFocus
+                    />
+                </div>
+            ) : (
+                <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
+                    <Plus size={12} />
+                    <span>Añadir subhábito</span>
+                </button>
             )}
         </div>
     );

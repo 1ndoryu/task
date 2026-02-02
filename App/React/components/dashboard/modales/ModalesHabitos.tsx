@@ -1,7 +1,7 @@
 /*
  * ModalesHabitos
  * Agrupa modales relacionados con hábitos
- * Incluye: ModalHabito (crear/editar), BottomSheetHabito (móvil)
+ * Incluye: ModalHabito (crear/editar), BottomSheetHabito (móvil crear/editar)
  */
 
 import {ModalHabito} from '../ModalHabito';
@@ -21,12 +21,27 @@ interface ModalesHabitosProps {
 }
 
 export function ModalesHabitos({dashboard, modales, esMovil, manejarCrearHabitoConLimite, manejarCrearTareaConLimite, manejarGuardarHabitoBottomSheet}: ModalesHabitosProps): JSX.Element {
+    /* Handler para guardar hábito desde BottomSheet en modo edición */
+    const manejarGuardarHabitoEdicion = async (datos: DatosHabito) => {
+        if (datos.id) {
+            /* Modo edición */
+            await dashboard.editarHabito(datos.id, {
+                nombre: datos.texto,
+                frecuencia: {tipo: datos.frecuencia || 'diaria'},
+                importancia: datos.importancia || 'Media'
+            });
+        } else {
+            /* Modo creación (fallback) */
+            await manejarGuardarHabitoBottomSheet(datos);
+        }
+    };
+
     return (
         <>
             {/* Modal crear hábito */}
             <ModalHabito estaAbierto={dashboard.modalCrearHabitoAbierto} onCerrar={dashboard.cerrarModalCrearHabito} onGuardar={manejarCrearHabitoConLimite} />
 
-            {/* Modal editar hábito */}
+            {/* Modal editar hábito (desktop) */}
             <ModalHabito
                 estaAbierto={dashboard.habitoEditando !== null}
                 onCerrar={dashboard.cerrarModalEditarHabito}
@@ -45,6 +60,24 @@ export function ModalesHabitos({dashboard, modales, esMovil, manejarCrearHabitoC
 
             {/* BottomSheet móvil para crear hábito */}
             {esMovil && modales.modalCreacionRapida === 'habito' && <BottomSheetHabito estaAbierto={true} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarHabitoBottomSheet} />}
+
+            {/* BottomSheet móvil para editar hábito */}
+            {esMovil && modales.habitoEditandoMovil && (
+                <BottomSheetHabito
+                    estaAbierto={true}
+                    onCerrar={modales.cerrarEdicionHabitoMovil}
+                    onGuardar={manejarGuardarHabitoEdicion}
+                    habitoExistente={modales.habitoEditandoMovil}
+                    onAbrirConfiguracion={() => {
+                        /* Cerrar BottomSheet y abrir modal completo de configuración */
+                        const habito = modales.habitoEditandoMovil;
+                        modales.cerrarEdicionHabitoMovil();
+                        if (habito) {
+                            dashboard.abrirModalEditarHabito(habito);
+                        }
+                    }}
+                />
+            )}
         </>
     );
 }
