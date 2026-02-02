@@ -53,7 +53,7 @@
     /* Degradado verde difuminado que ocupa todo el fondo */
     background: linear-gradient(
         to right,
-        rgba(34, 197, 94, 0.95) 0%,
+        rgba(34, 197, 94, 0.7) 0%,
         rgba(34, 197, 94, 0.7) 30%,
         rgba(34, 197, 94, 0.3) 60%,
         rgba(34, 197, 94, 0) 100%
@@ -66,7 +66,7 @@
     /* Degradado rojo difuminado que ocupa todo el fondo */
     background: linear-gradient(
         to left,
-        rgba(239, 68, 68, 0.95) 0%,
+        rgba(239, 68, 68, 0.7) 0%,
         rgba(239, 68, 68, 0.7) 30%,
         rgba(239, 68, 68, 0.3) 60%,
         rgba(239, 68, 68, 0) 100%
@@ -81,10 +81,8 @@
 /* Etiqueta de la acción - texto pequeño */
 .swipeableItem__accionEtiqueta {
     font-size: var(--dashboard-tamanoXs, 10px);
-    font-weight: 500;
     white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    padding: 0px 10px;
 }
 
 /* Feedback visual cuando se supera el umbral */

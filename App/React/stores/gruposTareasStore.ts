@@ -45,7 +45,7 @@ interface GruposTareasAcciones {
 
     /* Obtener grupos de un proyecto ordenados */
     obtenerGruposProyecto: (proyectoId?: number) => GrupoTareas[];
-    
+
     /* Ordenar grupos según criterio y tareas (para calcular importancia) */
     ordenarGrupos: (grupos: GrupoTareas[], tareasPorGrupo: Map<number, Tarea[]>) => GrupoTareas[];
 }
@@ -122,7 +122,9 @@ export const useGruposTareasStore = create<GruposTareasStore>()(
             },
 
             obtenerGruposProyecto: (proyectoId?: number) => {
-                return get().grupos.filter(g => g.proyectoId === proyectoId).sort((a, b) => a.orden - b.orden);
+                return get()
+                    .grupos.filter(g => g.proyectoId === proyectoId)
+                    .sort((a, b) => a.orden - b.orden);
             },
 
             /* Ordenar grupos según el criterio configurado */
@@ -139,8 +141,16 @@ export const useGruposTareasStore = create<GruposTareasStore>()(
                             const tareasA = tareasPorGrupo.get(a.id) || [];
                             const tareasB = tareasPorGrupo.get(b.id) || [];
 
-                            const promedioA = tareasA.length > 0 ? tareasA.reduce((sum, t) => sum + (t.prioridad || 1), 0) / tareasA.length : 0;
-                            const promedioB = tareasB.length > 0 ? tareasB.reduce((sum, t) => sum + (t.prioridad || 1), 0) / tareasB.length : 0;
+                            const valorPrioridad = (p?: string) => {
+                                if (p === 'muy_alta') return 4;
+                                if (p === 'alta') return 3;
+                                if (p === 'media') return 2;
+                                if (p === 'baja') return 1;
+                                return 1; // Default baja/media
+                            };
+
+                            const promedioA = tareasA.length > 0 ? tareasA.reduce((sum, t) => sum + valorPrioridad(t.prioridad), 0) / tareasA.length : 0;
+                            const promedioB = tareasB.length > 0 ? tareasB.reduce((sum, t) => sum + valorPrioridad(t.prioridad), 0) / tareasB.length : 0;
 
                             /* Mayor importancia primero */
                             return promedioB - promedioA;
@@ -167,7 +177,9 @@ export const useGruposTareasStore = create<GruposTareasStore>()(
  * Hook auxiliar para verificar si las secciones están activas
  */
 export function useSeccionesActivas(): boolean {
-    return useGruposTareasStore(state => state.seccionesActivas);
+    /* TO-DO: Lógica pendiente de terminar. Se desactiva temporalmente por errores detectados. */
+    return false;
+    /* return useGruposTareasStore(state => state.seccionesActivas); */
 }
 
 /*

@@ -12,7 +12,7 @@
  * - DIP: Los componentes dependen de esta abstracción, no de definiciones propias
  */
 
-import {Check, Calendar, Pause, Play, Edit3, AlertTriangle, Flag} from 'lucide-react';
+import {Check, Calendar, Pause, Play, Edit3, AlertTriangle, Flag, Settings} from 'lucide-react';
 import type {OpcionMenu} from '../components/shared/MenuContextual';
 
 /*
@@ -31,6 +31,12 @@ interface EstadoHabitoMenu {
  */
 export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[] {
     const opciones: OpcionMenu[] = [
+        {
+            id: 'configurar',
+            etiqueta: 'Configurar hábito',
+            icono: <Settings size={12} />,
+            separadorDespues: false
+        },
         {
             id: 'toggle',
             etiqueta: estado.completadoHoy ? 'Desmarcar' : 'Marcar completado',
@@ -86,6 +92,7 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
  * Usar estos IDs evita typos y facilita el mantenimiento
  */
 export const MENU_HABITO_IDS = {
+    CONFIGURAR: 'configurar',
     TOGGLE: 'toggle',
     POSPONER: 'posponer',
     PAUSAR: 'pausar',

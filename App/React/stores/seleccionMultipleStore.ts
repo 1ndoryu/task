@@ -24,6 +24,9 @@ interface SeleccionMultipleState {
 
     /* Posición del menú de acciones masivas */
     menuPosicion: {x: number; y: number} | null;
+
+    /* Modo selección manual (activado por botón) */
+    modoSeleccionManual: boolean;
 }
 
 interface SeleccionMultipleAcciones {
@@ -50,6 +53,9 @@ interface SeleccionMultipleAcciones {
 
     /* Obtener tareas seleccionadas como array */
     obtenerTareasSeleccionadas: () => TareaSeleccionada[];
+
+    /* Alternar modo selección manual */
+    toggleModoSeleccionManual: () => void;
 }
 
 type SeleccionMultipleStore = SeleccionMultipleState & SeleccionMultipleAcciones;
@@ -57,6 +63,7 @@ type SeleccionMultipleStore = SeleccionMultipleState & SeleccionMultipleAcciones
 export const useSeleccionMultipleStore = create<SeleccionMultipleStore>((set, get) => ({
     tareasSeleccionadas: new Map(),
     modoSeleccionActivo: false,
+    modoSeleccionManual: false,
     menuPosicion: null,
 
     toggleSeleccion: (tarea: TareaSeleccionada) => {
@@ -71,18 +78,18 @@ export const useSeleccionMultipleStore = create<SeleccionMultipleStore>((set, ge
 
             return {
                 tareasSeleccionadas: nuevaSeleccion,
-                modoSeleccionActivo: nuevaSeleccion.size > 0
+                modoSeleccionActivo: state.modoSeleccionManual || nuevaSeleccion.size > 0
             };
         });
     },
 
     seleccionarVarias: (tareas: TareaSeleccionada[]) => {
-        set(() => {
+        set(state => {
             const nuevaSeleccion = new Map<number, TareaSeleccionada>();
             tareas.forEach(t => nuevaSeleccion.set(t.id, t));
             return {
                 tareasSeleccionadas: nuevaSeleccion,
-                modoSeleccionActivo: nuevaSeleccion.size > 0
+                modoSeleccionActivo: state.modoSeleccionManual || nuevaSeleccion.size > 0
             };
         });
     },
@@ -92,11 +99,11 @@ export const useSeleccionMultipleStore = create<SeleccionMultipleStore>((set, ge
     },
 
     limpiarSeleccion: () => {
-        set({
+        set(state => ({
             tareasSeleccionadas: new Map(),
-            modoSeleccionActivo: false,
+            modoSeleccionActivo: state.modoSeleccionManual, // Mantener activo si está en modo manual
             menuPosicion: null
-        });
+        }));
     },
 
     mostrarMenu: (x: number, y: number) => {
@@ -113,6 +120,18 @@ export const useSeleccionMultipleStore = create<SeleccionMultipleStore>((set, ge
 
     obtenerTareasSeleccionadas: () => {
         return Array.from(get().tareasSeleccionadas.values());
+    },
+
+    toggleModoSeleccionManual: () => {
+        set(state => {
+            const nuevoModo = !state.modoSeleccionManual;
+            return {
+                modoSeleccionManual: nuevoModo,
+                modoSeleccionActivo: nuevoModo || state.tareasSeleccionadas.size > 0,
+                // Si desactivamos y no hay tareas, limpiar todo
+                ...(!nuevoModo && state.tareasSeleccionadas.size === 0 ? {modoSeleccionActivo: false} : {})
+            };
+        });
     }
 }));
 

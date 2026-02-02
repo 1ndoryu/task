@@ -12,6 +12,7 @@
  */
 
 import {useEffect, useCallback, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 
 export interface BottomSheetProps {
     estaAbierto: boolean;
@@ -163,13 +164,13 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo}: BottomShe
         transition: arrastrando ? 'none' : undefined
     };
 
-    return (
+    const contenido = (
         <>
             {/* Overlay oscuro */}
-            <div className={`bottomSheetOverlay ${estaAbierto ? 'bottomSheetOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" />
+            <div className={`bottomSheetOverlay ${estaAbierto ? 'bottomSheetOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" style={{zIndex: 9998}} />
 
             {/* Panel inferior */}
-            <div ref={panelRef} className={`bottomSheetPanel ${estaAbierto ? 'bottomSheetPanel--visible' : ''}`} role="dialog" aria-modal="true" style={estiloPanel}>
+            <div ref={panelRef} className={`bottomSheetPanel ${estaAbierto ? 'bottomSheetPanel--visible' : ''}`} role="dialog" aria-modal="true" style={{...estiloPanel, zIndex: 9999}}>
                 {/* Indicador de arrastre - área táctil para drag-to-close */}
                 <div ref={indicadorRef} className="bottomSheetIndicador bottomSheetIndicadorArrastrable" onTouchStart={manejarTouchStart} onTouchMove={manejarTouchMove} onTouchEnd={manejarTouchEnd} onMouseDown={manejarMouseDown} />
 
@@ -180,4 +181,7 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo}: BottomShe
             </div>
         </>
     );
+
+    /* Usar Portal para renderizar fuera del flujo del componente padre (evitar clipping por overflow:hidden) */
+    return createPortal(contenido, document.body);
 }

@@ -19,6 +19,7 @@ import {useEsMovil} from '../hooks/useEsMovil';
 import {usePaginaMovil} from '../hooks/usePaginaMovil';
 import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
 import {useNotasStore} from '../stores/notasStore';
+import {useSeleccionMultipleStore} from '../stores/seleccionMultipleStore';
 import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
 
 import '../styles/dashboard/componentes/experimentos.css';
@@ -49,6 +50,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones, filtroTareas, ordenTareas, ordenHabitos, opciones, configProyectos} = ctx;
     const {esMovil} = useEsMovil();
     const paginaMovil = usePaginaMovil();
+    const {modoSeleccionActivo, toggleModoSeleccionManual} = useSeleccionMultipleStore();
 
     /* Estado y acciones para notas en móvil */
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
@@ -163,6 +165,8 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 opcionesMovil={esMovil ? opcionesMovil : undefined}
                 paginaMovilActiva={esMovil ? paginaMovil.paginaActiva : undefined}
                 onCambiarPagina={esMovil ? paginaMovil.cambiarPagina : undefined}
+                modoSeleccionActivo={modoSeleccionActivo}
+                onToggleSeleccion={toggleModoSeleccionManual}
             />
 
             {dashboard.cargandoDatos ? <IndicadorCarga /> : <DashboardGrid ctx={ctx} esMovil={esMovil} paginaMovilActiva={paginaMovil.paginaActiva} />}

@@ -220,6 +220,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             // Selección múltiple - TAREA 3.1
             estaSeleccionada={estaSeleccionada(tarea.id)}
             onSeleccionMultiple={manejarSeleccionMultiple}
+            modoSeleccionActivo={modoSeleccionActivo}
         />
     );
 

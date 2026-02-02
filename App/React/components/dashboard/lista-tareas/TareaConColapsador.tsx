@@ -46,9 +46,10 @@ interface TareaConColapsadorProps {
     // Selección múltiple (Ctrl+Click) - TAREA 3.1
     estaSeleccionada?: boolean;
     onSeleccionMultiple?: (tarea: Tarea, evento: React.MouseEvent) => void;
+    modoSeleccionActivo?: boolean;
 }
 
-export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, estaSeleccionada, onSeleccionMultiple}) => {
+export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, estaSeleccionada, onSeleccionMultiple, modoSeleccionActivo}) => {
     const {esMovil} = useEsMovil();
     const esHabito = esTareaHabito(tarea);
     const esColapsable = !esSubtarea && tieneSubtareas(tareas, tarea.id);
@@ -129,6 +130,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
             /* Props de selección múltiple - TAREA 3.1 */
             estaSeleccionada={estaSeleccionada}
             onSeleccionMultiple={onSeleccionMultiple}
+            modoSeleccionActivo={modoSeleccionActivo}
         />
     );
 

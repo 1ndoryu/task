@@ -64,6 +64,10 @@ interface DashboardEncabezadoProps {
     };
     paginaMovilActiva?: string;
     onCambiarPagina?: (pagina: string) => void;
+
+    /* Selección Múltiple Móvil */
+    modoSeleccionActivo?: boolean;
+    onToggleSeleccion?: () => void;
 }
 
 export function DashboardEncabezado({
@@ -104,7 +108,10 @@ export function DashboardEncabezado({
     // Movil
     opcionesMovil,
     paginaMovilActiva,
-    onCambiarPagina
+    onCambiarPagina,
+    // Selección
+    modoSeleccionActivo,
+    onToggleSeleccion
 }: DashboardEncabezadoProps): JSX.Element {
     const esTablet = useEsDispositivoMovil();
     const estaConectado = sincronizacion?.estaLogueado ?? false;
@@ -153,7 +160,7 @@ export function DashboardEncabezado({
             <EncabezadoBuscador tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} mostrarModal={mostrarBuscadorMovil} onCerrarModal={() => setMostrarBuscadorMovil(false)} estaConectado={estaConectado} />
 
             <nav className="encabezadoNav">
-                <EncabezadoBuscadorMovilTrigger esTablet={esTablet} onClick={() => setMostrarBuscadorMovil(!mostrarBuscadorMovil)} />
+                <EncabezadoBuscadorMovilTrigger esTablet={esTablet} onClick={() => setMostrarBuscadorMovil(!mostrarBuscadorMovil)} mostrarBotonSeleccion={paginaMovilActiva === 'ejecucion'} modoSeleccionActivo={modoSeleccionActivo} onToggleSeleccion={onToggleSeleccion} />
 
                 <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} />
 

@@ -59,6 +59,7 @@ export interface TareaItemProps {
     /* Props para selección múltiple (Ctrl+Click) */
     estaSeleccionada?: boolean;
     onSeleccionMultiple?: (tarea: Tarea, evento: React.MouseEvent) => void;
+    modoSeleccionActivo?: boolean;
 }
 
 /* TO-DO: Eliminar esta interfaz cuando todos los componentes migren al hook global */
@@ -68,7 +69,7 @@ export interface MenuContextualEstado {
     y: number;
 }
 
-export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, tieneSubtareas = false, modoCompacto = false, estaSeleccionada = false, onSeleccionMultiple}: TareaItemProps): JSX.Element {
+export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, tieneSubtareas = false, modoCompacto = false, estaSeleccionada = false, onSeleccionMultiple, modoSeleccionActivo = false}: TareaItemProps): JSX.Element {
     const [editando, setEditando] = useState(tarea.texto === '');
     const [textoEditado, setTextoEditado] = useState(tarea.texto);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -107,50 +108,27 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
     /* Handler para clicks en el contenido de la tarea */
     const manejarClickContenido = useCallback(
         (evento: React.MouseEvent) => {
-            /* Ctrl+Click (Windows/Linux) o Cmd+Click (Mac) = selección múltiple */
+            /* 1. Si el modo de selección manual está activo (móvil) -> Seleccionar */
+            if (modoSeleccionActivo && onSeleccionMultiple) {
+                evento.preventDefault();
+                evento.stopPropagation();
+                onSeleccionMultiple(tarea, evento);
+                return;
+            }
+
+            /* 2. Ctrl+Click (Windows/Linux) o Cmd+Click (Mac) = selección múltiple */
             if ((evento.ctrlKey || evento.metaKey) && onSeleccionMultiple) {
                 evento.preventDefault();
                 evento.stopPropagation();
                 onSeleccionMultiple(tarea, evento);
                 return;
             }
-            /* Click normal = editar */
+
+            /* 3. Click normal = editar/configurar */
             iniciarEdicion();
         },
-        [iniciarEdicion, onSeleccionMultiple, tarea]
+        [iniciarEdicion, onSeleccionMultiple, tarea, modoSeleccionActivo]
     );
-
-    /* Soporte para long press en móvil (selección múltiple) */
-    const longPressTimerRef = useRef<number | null>(null);
-    const LONG_PRESS_DURACION = 500; /* ms */
-
-    const manejarPointerDown = useCallback(
-        (evento: React.PointerEvent) => {
-            /* Solo activar long press en touch (móvil) */
-            if (evento.pointerType !== 'touch' || !onSeleccionMultiple) return;
-
-            longPressTimerRef.current = window.setTimeout(() => {
-                /* Vibración táctil si está disponible */
-                if (navigator.vibrate) navigator.vibrate(50);
-                onSeleccionMultiple(tarea, evento as unknown as React.MouseEvent);
-            }, LONG_PRESS_DURACION);
-        },
-        [onSeleccionMultiple, tarea]
-    );
-
-    const manejarPointerUp = useCallback(() => {
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-    }, []);
-
-    const manejarPointerCancel = useCallback(() => {
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-    }, []);
 
     const guardarEdicion = useCallback(() => {
         const textoLimpio = textoEditado.trim();
@@ -228,6 +206,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
             if (esHabito) {
                 const tareaHabito = tarea as TareaHabito;
                 switch (opcionId) {
+                    case MENU_HABITO_IDS.CONFIGURAR:
                     case MENU_HABITO_IDS.EDITAR:
                         onEditarHabito?.(tareaHabito.habitoId);
                         break;
@@ -537,7 +516,7 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
                 <div className={`tareaCheckbox ${tarea.completado ? 'tareaCheckboxCompletado' : ''}`} onClick={onToggle} onPointerDown={e => e.stopPropagation()}>
                     {tarea.completado && <Check size={8} color="white" />}
                 </div>
-                <div className="tareaContenido" onClick={manejarClickContenido} onPointerDown={manejarPointerDown} onPointerUp={manejarPointerUp} onPointerCancel={manejarPointerCancel} onPointerLeave={manejarPointerCancel}>
+                <div className="tareaContenido" onClick={manejarClickContenido}>
                     <div className="tareaTextoWrapper">
                         <p className={`tareaTexto ${tarea.completado ? 'tareaTextoCompletado' : ''} ${modoCompacto ? 'tareaTexto--compacto' : ''}`}>{tarea.texto}</p>
                         <BadgeGroup>

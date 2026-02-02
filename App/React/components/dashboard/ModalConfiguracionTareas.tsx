@@ -97,7 +97,8 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
 
                 <div className="separadorOpcionesConfig" />
 
-                {/* Opcion 7: Activar Secciones */}
+                {/* Opcion 7 y 8: Secciones y Ordenamiento (DESACTIVADO TEMPORALMENTE)
+                   TO-DO: Reactivar cuando se corrija la lógica de grupos
                 <div className="itemOpcionConfig">
                     <div className="detallesOpcionConfig">
                         <span className="tituloOpcionConfig">Activar secciones</span>
@@ -106,7 +107,6 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                     <ToggleSwitch checked={seccionesActivas} onChange={toggleSecciones} />
                 </div>
 
-                {/* Opcion 8: Ordenamiento de Grupos (solo visible si secciones activas) */}
                 {seccionesActivas && (
                     <>
                         <div className="separadorOpcionesConfig" />
@@ -129,6 +129,7 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                         </div>
                     </>
                 )}
+                */}
             </div>
         </Modal>
     );
