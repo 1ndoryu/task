@@ -23,11 +23,14 @@ interface MenuAccionesMasivasProps {
 }
 
 export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarTareas, onCambiarPrioridad, onMoverProyecto, onAgrupar, proyectos = []}: MenuAccionesMasivasProps): JSX.Element {
-    const {obtenerIdsSeleccionados, limpiarSeleccion} = useSeleccionMultipleStore();
+    const {obtenerIdsSeleccionados, limpiarSeleccion, obtenerTareasSeleccionadas} = useSeleccionMultipleStore();
     const cantidadSeleccionadas = useCantidadSeleccionadas();
     const seccionesActivas = useSeccionesActivas();
 
     const opciones: OpcionMenu[] = useMemo(() => {
+        const tareasSeleccionadas = obtenerTareasSeleccionadas();
+        const hayHabitos = tareasSeleccionadas.some(t => t.esHabito);
+
         const ops: OpcionMenu[] = [
             {
                 id: 'header',
@@ -38,8 +41,8 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
             }
         ];
 
-        /* Opción de agrupar si secciones están activas */
-        if (seccionesActivas && onAgrupar) {
+        /* Opción de agrupar si secciones están activas (no disponible para hábitos) */
+        if (seccionesActivas && onAgrupar && !hayHabitos) {
             ops.push({
                 id: 'agrupar',
                 etiqueta: 'Agrupar seleccionadas',
@@ -48,30 +51,32 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
             });
         }
 
-        /* Prioridades */
-        ops.push(
-            {
-                id: 'prioridad-muy_alta',
-                etiqueta: 'Prioridad Muy Alta',
-                icono: <AlertTriangle size={14} style={{color: 'var(--dashboard-colorMuyAlta)'}} />
-            },
-            {
-                id: 'prioridad-alta',
-                etiqueta: 'Prioridad Alta',
-                icono: <ChevronUp size={14} style={{color: 'var(--dashboard-colorAlta)'}} />
-            },
-            {
-                id: 'prioridad-media',
-                etiqueta: 'Prioridad Media',
-                icono: <Flag size={14} style={{color: 'var(--dashboard-colorMedia)'}} />
-            },
-            {
-                id: 'prioridad-baja',
-                etiqueta: 'Prioridad Baja',
-                icono: <ChevronDown size={14} style={{color: 'var(--dashboard-colorBaja)'}} />,
-                separadorDespues: true
-            }
-        );
+        /* Prioridades (no disponible si hay hábitos seleccionados, o si la lógica no está unificada) */
+        if (!hayHabitos) {
+            ops.push(
+                {
+                    id: 'prioridad-muy_alta',
+                    etiqueta: 'Prioridad Muy Alta',
+                    icono: <AlertTriangle size={14} style={{color: 'var(--dashboard-colorMuyAlta)'}} />
+                },
+                {
+                    id: 'prioridad-alta',
+                    etiqueta: 'Prioridad Alta',
+                    icono: <ChevronUp size={14} style={{color: 'var(--dashboard-colorAlta)'}} />
+                },
+                {
+                    id: 'prioridad-media',
+                    etiqueta: 'Prioridad Media',
+                    icono: <Flag size={14} style={{color: 'var(--dashboard-colorMedia)'}} />
+                },
+                {
+                    id: 'prioridad-baja',
+                    etiqueta: 'Prioridad Baja',
+                    icono: <ChevronDown size={14} style={{color: 'var(--dashboard-colorBaja)'}} />,
+                    separadorDespues: true
+                }
+            );
+        }
 
         /* Opción de mover a proyecto si hay proyectos */
         if (proyectos.length > 0) {
@@ -106,7 +111,7 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
         });
 
         return ops;
-    }, [cantidadSeleccionadas, proyectos, seccionesActivas, onAgrupar]);
+    }, [cantidadSeleccionadas, proyectos, seccionesActivas, onAgrupar, obtenerTareasSeleccionadas]);
 
     const manejarSeleccion = (opcionId: string) => {
         const ids = obtenerIdsSeleccionados();

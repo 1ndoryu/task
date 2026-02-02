@@ -12,6 +12,7 @@ import {esTareaHabito} from '../../types/dashboard';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
 import type {OpcionMenu} from '../shared/MenuContextual';
 import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
+import {useCantidadSeleccionadas} from '../../stores/seleccionMultipleStore';
 import {AccionesItem} from '../shared/AccionesItem';
 import type {VarianteBadge} from '../shared/BadgeInfo';
 import {obtenerTextoFechaLimite as obtenerTextoFechaLim, obtenerVarianteFechaLimite as obtenerVarianteFecha, formatearFechaCorta as formatearFecha} from '../../utils/fecha';
@@ -204,14 +205,21 @@ export function TareaItem({tarea, onToggle, onEditar, onEliminar, esSubtarea = f
     );
 
     /* Manejo del menu contextual - Usa sistema global para coordinar cierres */
+    const cantidadSeleccionadas = useCantidadSeleccionadas();
+
     const manejarClickDerecho = useCallback(
         (evento: React.MouseEvent) => {
+            /* Si esta tarea es parte de una selección múltiple (>1), dejar que el padre maneje el evento (Menú Masivo) */
+            if (estaSeleccionada && cantidadSeleccionadas > 1) {
+                return;
+            }
+
             evento.preventDefault();
             evento.stopPropagation();
             /* toggle: si el menú de esta tarea ya está abierto, lo cierra; si no, lo abre (cerrando cualquier otro) */
             menuContextual.toggle(evento.clientX, evento.clientY);
         },
-        [menuContextual]
+        [menuContextual, estaSeleccionada, cantidadSeleccionadas]
     );
 
     const manejarOpcionMenu = useCallback(

@@ -267,6 +267,8 @@ export interface GrupoTareas {
     proyectoId?: number;
     /* Fecha de creacion */
     fechaCreacion: string;
+    /* Grupo del sistema (no editable/eliminable, ej: Libres) */
+    esSistema?: boolean;
 }
 
 /*

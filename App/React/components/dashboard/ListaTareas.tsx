@@ -71,7 +71,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
     /* Handler para Ctrl+Click en tareas */
     const manejarSeleccionMultiple = useCallback(
         (tarea: Tarea, evento: React.MouseEvent) => {
-            toggleSeleccion({id: tarea.id, texto: tarea.texto, proyectoId: tarea.proyectoId, prioridad: tarea.prioridad});
+            toggleSeleccion({id: tarea.id, texto: tarea.texto, proyectoId: tarea.proyectoId, prioridad: tarea.prioridad, esHabito: esTareaHabito(tarea), urgencia: tarea.urgencia});
         },
         [toggleSeleccion]
     );
@@ -89,24 +89,24 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     /* Sistema de grupos/secciones - TAREA 3 */
     const seccionesActivas = useSeccionesActivas();
-    const {crearGrupo, obtenerGruposProyecto, ordenarGrupos} = useGruposTareasStore();
+    const {crearGrupo, obtenerGruposProyecto, ordenarGrupos, grupos} = useGruposTareasStore();
 
     /* Obtener grupos del proyecto actual y organizar tareas */
     const gruposOrdenados = useMemo(() => {
         if (!seccionesActivas) return [];
 
-        const grupos = obtenerGruposProyecto(proyectoId);
-        if (grupos.length === 0) return [];
+        const gruposDelProyecto = obtenerGruposProyecto(proyectoId);
+        if (gruposDelProyecto.length === 0) return [];
 
         /* Crear mapa de tareas por grupo para calcular importancia promedio */
         const tareasPorGrupo = new Map<number, Tarea[]>();
-        grupos.forEach(g => {
+        gruposDelProyecto.forEach(g => {
             const tareasDelGrupo = tareas.filter(t => t.grupoId === g.id && !t.completado && !t.parentId);
             tareasPorGrupo.set(g.id, tareasDelGrupo);
         });
 
-        return ordenarGrupos(grupos, tareasPorGrupo);
-    }, [seccionesActivas, obtenerGruposProyecto, ordenarGrupos, proyectoId, tareas]);
+        return ordenarGrupos(gruposDelProyecto, tareasPorGrupo);
+    }, [seccionesActivas, obtenerGruposProyecto, ordenarGrupos, proyectoId, tareas, grupos]);
 
     /* Handler para agrupar tareas seleccionadas */
     const manejarAgrupar = useCallback(
@@ -257,11 +257,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                 return (
                                     <div key={grupo.id} className="grupoTareasContenedor">
                                         <GrupoTareasHeader grupo={grupo} cantidadTareas={tareasDelGrupo.length} />
-                                        {!grupo.colapsado && tareasDelGrupo.length > 0 && (
-                                            <div className="grupoTareasListaInterna">
-                                                {renderTareasGrupo(tareasDelGrupo)}
-                                            </div>
-                                        )}
+                                        {!grupo.colapsado && tareasDelGrupo.length > 0 && <div className="grupoTareasListaInterna">{renderTareasGrupo(tareasDelGrupo)}</div>}
                                     </div>
                                 );
                             })}

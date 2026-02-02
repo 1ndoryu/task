@@ -5,7 +5,7 @@
  */
 
 import React, {useState, useRef, useEffect, useCallback} from 'react';
-import {ChevronRight, ChevronDown, Trash2, Layers} from 'lucide-react';
+import {ChevronRight, ChevronDown, Trash2} from 'lucide-react';
 import type {GrupoTareas} from '../../../types/dashboard';
 import {useGruposTareasStore} from '../../../stores/gruposTareasStore';
 
@@ -67,17 +67,16 @@ export function GrupoTareasHeader({grupo, cantidadTareas}: GrupoTareasHeaderProp
             {editando ? (
                 <input ref={inputRef} type="text" className="grupoTareasInputNombre" value={nombreEditado} onChange={e => setNombreEditado(e.target.value)} onKeyDown={manejarTecla} onBlur={guardarEdicion} />
             ) : (
-                <span className="grupoTareasNombre" onClick={() => setEditando(true)} title="Click para editar">
-                    <Layers size={12} className="grupoTareasIcono" />
+                <span className={`grupoTareasNombre ${grupo.esSistema ? 'grupoTareasNombre--sistema' : ''}`} onClick={() => !grupo.esSistema && setEditando(true)} title={grupo.esSistema ? 'Grupo del sistema' : 'Click para editar'}>
                     {grupo.nombre}
                 </span>
             )}
 
-            <span className="grupoTareasContador">{cantidadTareas}</span>
-
-            <button className="grupoTareasEliminar" onClick={manejarEliminar} title="Eliminar grupo">
-                <Trash2 size={12} />
-            </button>
+            {!grupo.esSistema && (
+                <button className="grupoTareasEliminar" onClick={manejarEliminar} title="Eliminar grupo">
+                    <Trash2 size={12} />
+                </button>
+            )}
         </div>
     );
 }

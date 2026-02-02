@@ -84,8 +84,7 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
                         onClick={() => {
                             setCreando(false);
                             setNombreNueva('');
-                        }}
-                    >
+                        }}>
                         <X size={12} />
                     </button>
                 </div>
@@ -98,7 +97,7 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
                 ) : (
                     carpetas.map(carpeta => (
                         <div key={carpeta.id ?? 'general'} className={`navegadorCarpetaItem ${carpeta.esVirtual ? 'navegadorCarpetaItem--virtual' : ''}`}>
-                            {editandoId === carpeta.id ? (
+                            {editandoId !== null && editandoId === carpeta.id ? (
                                 /* Modo edición */
                                 <div className="navegadorCarpetasFormulario navegadorCarpetasFormulario--inline">
                                     <input type="text" className="navegadorCarpetasInput" value={nombreEditando} onChange={e => setNombreEditando(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && manejarGuardarEdicion()} />

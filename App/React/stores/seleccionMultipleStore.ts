@@ -11,6 +11,8 @@ interface TareaSeleccionada {
     texto: string;
     proyectoId?: number;
     prioridad?: string;
+    esHabito?: boolean;
+    urgencia?: string;
 }
 
 interface SeleccionMultipleState {

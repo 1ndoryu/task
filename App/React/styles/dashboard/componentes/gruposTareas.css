@@ -10,7 +10,6 @@
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSutil);
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
     margin-top: var(--dashboard-espacioMd);
     border-radius: var(--dashboard-radioSm) var(--dashboard-radioSm) 0 0;
     position: sticky;
@@ -124,7 +123,6 @@
 
 /* Contenedor de tareas del grupo */
 .grupoTareasContenido {
-    border-left: 2px solid var(--dashboard-bordeSutil);
     margin-left: var(--dashboard-espacioMd);
     padding-left: var(--dashboard-espacioXs);
 }
@@ -137,21 +135,19 @@
 .listaTareasGrupos {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm);
-    margin-bottom: var(--dashboard-espacioMd);
 }
 
 /* Contenedor individual de grupo */
 .grupoTareasContenedor {
     background: var(--dashboard-fondoTarjeta);
     border-radius: var(--dashboard-radioSm);
-    border: 1px solid var(--dashboard-bordeSutil);
+    /* border: 1px solid var(--dashboard-bordeSutil); Eliminado por petición del usuario */
     overflow: hidden;
 }
 
 /* Lista de tareas dentro del grupo */
 .grupoTareasListaInterna {
-    padding: var(--dashboard-espacioXs) 0;
+    padding: 0 0 0 15px;
 }
 
 /* Tareas sin grupo (cuando secciones activas) */
