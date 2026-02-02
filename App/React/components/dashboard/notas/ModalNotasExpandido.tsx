@@ -187,6 +187,12 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
             <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
                 <ArrowUpDown size={14} />
             </button>
+            {/* Buscador centrado en el header */}
+            <div className="modalNotasBusqueda">
+                <Search size={14} className="modalNotasBusquedaIcono" />
+                <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
+                {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
+            </div>
             <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
                 <PanelLeftClose size={14} />
             </button>
@@ -211,19 +217,12 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
                         ) : (
                             /* Vista de notas */
                             <>
-                                {/* Header con búsqueda */}
-                                <div className="vistaNotasBusqueda">
-                                    <div className="notasHeaderConCarpeta">
-                                        <button className="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
-                                            <ChevronLeft size={14} />
-                                        </button>
-                                        <span className="notasCarpetaActual">{nombreCarpetaActiva}</span>
-                                    </div>
-                                    <div className="modalNotasBusqueda">
-                                        <Search size={14} className="modalNotasBusquedaIcono" />
-                                        <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
-                                        {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
-                                    </div>
+                                {/* Header con carpeta activa */}
+                                <div className="notasHeaderConCarpeta">
+                                    <button className="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
+                                        <ChevronLeft size={14} />
+                                    </button>
+                                    <span className="notasCarpetaActual">{nombreCarpetaActiva}</span>
                                 </div>
                                 <div className="vistaNotasListaContenido">
                                     {cargando && !notas.length ? (

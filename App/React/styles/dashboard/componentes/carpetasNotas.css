@@ -250,6 +250,9 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
 }
 
 .notasBotonVolver {
@@ -367,7 +370,6 @@
 .vistaNotasBusqueda {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioMd);
     border-bottom: 1px solid var(--dashboard-bordeSutil);
@@ -381,5 +383,16 @@
 .notasAccionesHeader {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSx);
+    gap: var(--dashboard-espacioXs);    flex: 1;
+    min-width: 0;}
+
+/* Estado activo para botones de panel */
+.vistaNotasAccionBoton--activo {
+    background: var(--dashboard-acento);
+    color: var(--dashboard-fondoPrincipal);
+    border-color: var(--dashboard-acento);
+}
+
+.vistaNotasAccionBoton--activo:hover {
+    background: var(--dashboard-acentoHover);
 }
