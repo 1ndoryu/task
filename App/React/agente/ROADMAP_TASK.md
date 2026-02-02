@@ -26,53 +26,35 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### Fase 13: Transformación a App Móvil Híbrida (Capacitor & Play Store) 📱
 
-**Prioridad:** Alta (Pausado - Requiere Políticas Legales) | **Complejidad:** Alta
+**Prioridad:** Alta | **Estado:** 🔄 En Progreso | **Complejidad:** Alta
 
 #### 13.1 Infraestructura Híbrida (Capacitor)
 - [x] Inicializar Capacitor en el proyecto (`npx cap init`).
 - [x] Generar proyecto Android (`npx cap add android`).
 - [x] Configurar `capacitor.config.json` (server url vs bundled web assets).
-- [x] **Hito:** Generar APK Demo (sin pagos nativos) para pruebas internas.
+- [x] **Hito:** APK Debug funcional con autenticación Google nativa.
 
 #### 13.2 Gestión de Pagos Nativos (Google Play Billing)
 - [ ] Implementar **RevenueCat** como wrapper de pagos.
 - [ ] Crear Hook `usePagos` (Factory/Strategy pattern) para alternar entre Stripe (Web) y RevenueCat (App).
 
 #### 13.3 Autenticación Nativa (UX Móvil) 🔐
-- [x] Implementar `@capacitor-community/google-auth` (usando `@codetrix-studio/capacitor-google-auth`).
-- [x] Configurar Keystore SHA-1 en Consola de Google Cloud.
-- [x] Reemplazar redirección web por `GoogleAuth.signIn()` nativo.
-- [x] Crear Android OAuth Client con SHA-1.
-- [x] **CONFIGURACIÓN COMPLETADA:** Error 10 resuelto
-  - **Client IDs configurados:** ✅ (Ver archivo local `CONFIG_ACTUAL.LOCAL.md`)
-  - **Archivos actualizados:**
-    - ✅ `capacitor.config.json` - Android Client ID configurado
-    - ✅ `strings.xml` - Android Client ID actualizado
-    - ✅ `hooks/useAuth.ts` - Código optimizado
-    - ✅ `app/build.gradle` - Google Services plugin deshabilitado (no necesario)
-  - **Estado:** 🔄 APK compilándose
-  - **Documentación:** Ver guías en `agente/` (sin información sensible)
-- [ ] **PENDIENTE:** Testing en dispositivo real (después de compilación)
-- [!] **BLOQUEADO (Secundario):** OAuth Consent Screen requiere Política de Privacidad (ya completada)
-  - Nota: El Error 10 es independiente del Consent Screen, se puede resolver primero
-  - **Causa del Bloqueo:**
-    - Google Cloud Console no permite completar verificación de OAuth sin:
-      - URL de Política de Privacidad
-      - URL de Términos de Servicio (opcional pero recomendado)
-  - **Páginas Requeridas (Pendientes):**
-    - [x] `/politica-privacidad` - Obligatoria para OAuth
-    - [x] `/terminos-servicio` - Recomendada
-    - [ ] `/soporte` o página de contacto
-  - **Plan de Creación Rápida (Fase 13.3.1):**
-    1. Crear templates básicos en WordPress (Custom Post Type o páginas simples)
-    2. Contenido mínimo viable:
-       - Política de Privacidad: Qué datos recopila la app (email, nombre, actividad)
-       - Cómo se almacenan (servidor propio, cifrado)
-       - Derechos del usuario (RGPD: acceso, eliminación, portabilidad)
-       - Contacto para solicitudes
-    3. Publicar en `task.nakomi.studio/politica-privacidad`
-    4. Añadir URLs al OAuth Consent Screen
-    5. Reanudar testing de Google Auth
+- [x] Implementar autenticación nativa con Google Sign-In
+- [x] Configurar Keystore SHA-1 en Consola de Google Cloud
+- [x] Crear Android OAuth Client con SHA-1
+- [x] Crear plugin Capacitor personalizado `GoogleAuthNativePlugin`
+- [x] Implementar usando librería oficial `play-services-auth:21.0.0`
+- [x] Integrar con `useAuth.ts` para plataforma nativa
+- [x] **COMPLETADO:** Login con Google funciona correctamente en APK
+  - **Solución implementada:** Plugin nativo personalizado sin dependencias problemáticas
+  - **Client IDs configurados:** Android + Web (para serverAuthCode)
+  - **Archivos clave:**
+    - ✅ `GoogleAuthNativePlugin.java` - Plugin nativo Capacitor
+    - ✅ `plugins/GoogleAuthNative.ts` - Interface TypeScript
+    - ✅ `hooks/useAuth.ts` - Integración con flujo de autenticación
+    - ✅ `capacitor.config.json` - Configuración de Client IDs
+    - ✅ `app/build.gradle` - Dependencia play-services-auth
+  - **Testing:** ✅ Verificado en dispositivo real (Error 10 resuelto)
 
 ---
 
@@ -89,39 +71,17 @@ npx cap sync android
 ```
 
 
-#### 13.3.1 Páginas Legales (Bloqueante para OAuth) 📄
+#### 13.3.1 Páginas Legales (OAuth Compliance) 📄
 
-**Prioridad:** Alta (Bloqueante) | **Complejidad:** Baja | **Estado:** ✅ COMPLETADO
+**Prioridad:** Media | **Complejidad:** Baja | **Estado:** ✅ COMPLETADO
 
 - [x] **Política de Privacidad** (`/politica-privacidad`)
-  - Datos recopilados: email, nombre, ID usuario, actividad (hábitos, notas, tareas)
-  - Almacenamiento: Servidor propio con cifrado opcional E2EE
-  - Uso: Funcionalidad de la app, sincronización, autenticación
-  - Compartición: Solo con servicios esenciales (Google OAuth para login)
-  - Derechos RGPD: Acceso, rectificación, eliminación, portabilidad
-  - Retención: Hasta que usuario elimine cuenta
-  - Cookies: Session, autenticación
-  - Contacto: Email de soporte
-  
-- [x] **Términos de Servicio** (`/terminos-servicio`) - Opcional pero recomendado
-  - Uso aceptable de la plataforma
-  - Limitaciones de responsabilidad
-  - Suscripciones y pagos (Stripe)
-  - Propiedad intelectual
-  - Terminación de cuenta
-
-- [ ] **Página de Soporte/Contacto** (`/soporte`)
-  - Email de contacto
-  - Formulario de solicitudes RGPD
-  - FAQ básico
-
-**Implementación Técnica:**
-- ✅ Islands de React creadas: `PoliticaPrivacidadIsland.tsx`, `TerminosServicioIsland.tsx`
-- ✅ Páginas registradas en `App/Config/pages.php`
-- ✅ Estilos coherentes en `styles/paginasLegales.css`
-- ✅ URLs públicas accesibles: `task.nakomi.studio/politica-privacidad`, `/terminos-servicio`
-- [ ] Añadir links en footer de la app web/móvil
-- [ ] Configurar URLs en OAuth Consent Screen de Google Cloud Console
+- [x] **Términos de Servicio** (`/terminos-servicio`)
+- [x] Islands de React creadas y páginas públicas accesibles
+- [ ] **OPCIONAL:** Configurar URLs en OAuth Consent Screen (para verificación futura)
+  - Nota: No requerido para testing en modo desarrollo
+  - Necesario solo para publicación en Play Store
+- [ ] **PENDIENTE:** Página de Soporte/Contacto (`/soporte`)
 
 #### 13.4 Publicación y Compliance
 - [ ] Adaptar UI para Safe Areas de móviles (Notch, Home Indicator).
