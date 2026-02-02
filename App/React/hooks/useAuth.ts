@@ -70,9 +70,12 @@ export function useAuth(): UseAuthReturn {
                 });
 
                 await GoogleAuth.initialize();
-                
+
                 // Debug: Verificar estado tras init
                 console.log('[GoogleAuth] Initialized');
+
+                // Asegurar estado limpio
+                await GoogleAuth.signOut();
 
                 const user = await GoogleAuth.signIn();
                 console.log('Google User:', user);
@@ -121,19 +124,14 @@ export function useAuth(): UseAuthReturn {
                 let alertMsg = `Error Google Login:\n${e?.message || 'Unknown'}\nCode: ${e?.code || 'N/A'}`;
 
                 const errString = JSON.stringify(e);
-                
+
                 if (e?.code === '10' || e?.code === 10 || errString.includes('"code":"10"') || errString.includes('"code":10')) {
-                    alertMsg = '⚠️ Error 10: Configuración Incorrecta\n\n' +
-                        '- Revisa el SHA-1 en Google Console vs Keystore.\n' +
-                        '- Verifica que "server_client_id" esté en strings.xml.\n' +
-                        '- Asegúrate de que el package name coincida.';
+                    alertMsg = '⚠️ Error 10: Configuración Incorrecta\n\n' + '- Revisa el SHA-1 en Google Console vs Keystore.\n' + '- Verifica que "server_client_id" esté en strings.xml.\n' + '- Asegúrate de que el package name coincida.';
                 } else if (e?.code === '12500' || e?.code === 12500 || errString.includes('12500') || e?.message?.includes('12500')) {
-                    alertMsg = '⚠️ Error 12500: Sign In Failed\n\n' +
-                        'Causas probables:\n' +
-                        '1. Email de soporte NO configurado en OAuth Consent Screen.\n' +
-                        '2. Tu email no está en "Test Users" (si la app no está publicada).\n' +
-                        '3. Falta SHA-1 del Debug Keystore en Google Console.\n' +
-                        '4. El dispositivo no tiene Google Play Services actualizado.';
+                    alertMsg = '⚠️ Error 12500: Sign In Failed\n\n' + 'Causas probables:\n' + '1. Email de soporte NO configurado en OAuth Consent Screen.\n' + '2. Tu email no está en "Test Users" (si la app no está publicada).\n' + '3. Falta SHA-1 del Debug Keystore en Google Console.\n' + '4. El dispositivo no tiene Google Play Services actualizado.';
+                } else {
+                    // Si no es un error conocido, mostrar todo para depurar 'Authentication failed' genérico
+                    alertMsg = `Error Google Login (RAW):\n${errString}\n\nMsg: ${e.message}`;
                 }
                 alert(alertMsg);
             }
