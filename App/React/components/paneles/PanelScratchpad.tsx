@@ -123,7 +123,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
     const esNotaNueva = notaActiva.id === null;
 
     return (
-        <div className="panelDashboard internaColumna">
+        <div className="panelDashboard internaColumna internaColumna--notas">
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Notas') as any}

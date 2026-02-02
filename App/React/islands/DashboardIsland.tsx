@@ -5,7 +5,7 @@
  * Fase 10.8.3: Integración de opciones móvil en el header
  */
 
-import {useEffect, useMemo} from 'react';
+import {useEffect, useMemo, useState, useCallback} from 'react';
 
 /* Importar store de configuración temprano para inicializar horaFinDia antes que otros módulos */
 import '../stores/configuracionUsuarioStore';
@@ -18,6 +18,8 @@ import {NavegacionInferior} from '../components/shared';
 import {useEsMovil} from '../hooks/useEsMovil';
 import {usePaginaMovil} from '../hooks/usePaginaMovil';
 import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
+import {useNotasStore} from '../stores/notasStore';
+import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -48,6 +50,18 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     const {esMovil} = useEsMovil();
     const paginaMovil = usePaginaMovil();
 
+    /* Estado y acciones para notas en móvil */
+    const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
+    const [modalNotasAbierto, setModalNotasAbierto] = useState(false);
+
+    const manejarNuevaNota = useCallback(() => {
+        crearNuevaNota();
+    }, [crearNuevaNota]);
+
+    const manejarAbrirNotasGuardadas = useCallback(() => {
+        setModalNotasAbierto(true);
+    }, []);
+
     /* Construir opciones del menú móvil basadas en el panel activo */
     const opcionesMovil = useOpcionesPanelMovil({
         paginaActiva: paginaMovil.paginaActiva,
@@ -70,7 +84,11 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         onCambiarOrdenProyectos: configProyectos.cambiarOrdenDefecto,
         onAbrirConfigProyectos: modales.abrirModalConfigProyectos,
         /* Actividad */
-        onAbrirConfigActividad: modales.abrirModalConfigActividad
+        onAbrirConfigActividad: modales.abrirModalConfigActividad,
+        /* Notas */
+        onNuevaNota: manejarNuevaNota,
+        onAbrirNotasGuardadas: manejarAbrirNotasGuardadas,
+        onAbrirConfigNotas: modales.abrirModalConfigScratchpad
     });
 
     /* Memoizar objeto de sincronización para evitar re-renders innecesarios */
@@ -151,6 +169,9 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
 
             <DashboardFooter />
             <DashboardModales ctx={ctx} />
+
+            {/* Modal de notas guardadas para móvil (desde menú de 3 puntos) */}
+            <ModalNotasExpandido abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} tamanoFuente="normal" delayGuardado={2000} />
 
             {/* Navegación inferior móvil */}
             {auth.user && <NavegacionInferior paginaActiva={paginaMovil.paginaActiva} onCambiarPagina={paginaMovil.cambiarPagina} onCrearRapido={modales.abrirCreacionRapida} visible={esMovil} />}

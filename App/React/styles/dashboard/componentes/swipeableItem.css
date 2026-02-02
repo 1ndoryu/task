@@ -1,0 +1,142 @@
+/*
+ * SwipeableItem
+ * Estilos para gestos de deslizamiento en móvil
+ * Tarea 0.1: Swipe para completar/eliminar tareas
+ */
+
+.swipeableItem {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y; /* Permite scroll vertical, captura horizontal */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.swipeableItem--arrastrando {
+    cursor: grabbing;
+}
+
+/* Contenido que se desliza */
+.swipeableItem__contenido {
+    position: relative;
+    z-index: 2;
+    background-color: var(--dashboard-fondo);
+    will-change: transform;
+}
+
+/* Acciones reveladas al deslizar */
+.swipeableItem__accion {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espaciadoChico);
+    min-width: 80px;
+    padding: 0 var(--dashboard-espaciadoMedio);
+    color: white;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    z-index: 1;
+}
+
+/* Acción izquierda (revelada al deslizar a la derecha = completar) */
+.swipeableItem__accion--izquierda {
+    left: 0;
+    border-radius: var(--dashboard-bordeRedondeado) 0 0 var(--dashboard-bordeRedondeado);
+}
+
+/* Acción derecha (revelada al deslizar a la izquierda = eliminar) */
+.swipeableItem__accion--derecha {
+    right: 0;
+    border-radius: 0 var(--dashboard-bordeRedondeado) var(--dashboard-bordeRedondeado) 0;
+}
+
+/* Icono dentro de la acción */
+.swipeableItem__accionIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.swipeableItem__accionIcono svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Etiqueta opcional */
+.swipeableItem__accionEtiqueta {
+    font-size: var(--dashboard-fuentePequenia);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Feedback visual cuando se supera el umbral */
+.swipeableItem__accion[style*="opacity: 1"],
+.swipeableItem__accion[style*="opacity:1"] {
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Animación sutil al activar */
+@keyframes swipeActivado {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.swipeableItem__accionIcono--activo {
+    animation: swipeActivado 0.2s ease-out;
+}
+
+/* Solo habilitar en móvil - en desktop se ocultan las acciones */
+@media (min-width: 769px) {
+    .swipeableItem {
+        touch-action: auto;
+    }
+
+    .swipeableItem__accion {
+        display: none;
+    }
+
+    .swipeableItem__contenido {
+        transform: none !important;
+    }
+}
+
+/* Mejoras táctiles para móvil */
+@media (max-width: 768px) {
+    .swipeableItem {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Indicador visual de que es deslizable */
+    .swipeableItem::after {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 20px;
+        background: var(--dashboard-bordeColor);
+        border-radius: 2px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    /* Mostrar indicador al tocar */
+    .swipeableItem--arrastrando::after {
+        opacity: 0.5;
+    }
+}

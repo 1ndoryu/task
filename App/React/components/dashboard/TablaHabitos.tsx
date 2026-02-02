@@ -2,10 +2,12 @@
  * TablaHabitos
  * Componente para mostrar la tabla de hábitos prioritarios
  * Responsabilidad única: renderizar lista de hábitos con su estado
+ * Tarea 0.5: BottomSheet para hábitos en móvil
  */
 
 import {useState, useCallback, useMemo} from 'react';
 import {useMenuContextualConId} from '../../hooks/useMenuContextualGlobal';
+import {useEsMovil} from '../../hooks/useEsMovil';
 import {Clock, Flame, Target, Check, Pause, AlertTriangle} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
@@ -88,6 +90,9 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     /* Advertencia de racha: mostrar cuando faltan pocos dias para perderla */
     const DIAS_ADVERTENCIA_RACHA = 2;
 
+    /* Detectar viewport móvil para cambiar comportamiento de click */
+    const {esMovil} = useEsMovil();
+
     /* Menú contextual coordinado globalmente - Solo un menú abierto a la vez */
     const menuContextual = useMenuContextualConId(`habito-${habito.id}`);
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
@@ -141,8 +146,13 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     );
 
     const manejarEditar = useCallback(() => {
+        /* En móvil: abrir menú contextual (BottomSheet) en vez de ir directo a editar */
+        if (esMovil) {
+            menuContextual.toggle(window.innerWidth / 2, window.innerHeight / 2);
+            return;
+        }
         onEditar?.(habito);
-    }, [onEditar, habito]);
+    }, [onEditar, habito, esMovil, menuContextual]);
 
     /* Usa sistema global para coordinar cierres entre tareas y hábitos */
     const manejarClickDerecho = useCallback(

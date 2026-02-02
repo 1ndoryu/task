@@ -50,10 +50,11 @@ class NotasRepository
         ), 'ARRAY_A');
 
         return array_map(function ($row) {
+            /* Decodificar entidades HTML para evitar doble encoding (wp_kses_post al guardar) */
             return [
                 'id' => (int)$row['id'],
-                'titulo' => $row['titulo'],
-                'contenido' => $row['contenido'],
+                'titulo' => html_entity_decode($row['titulo'] ?? '', ENT_QUOTES, 'UTF-8'),
+                'contenido' => html_entity_decode($row['contenido'] ?? '', ENT_QUOTES, 'UTF-8'),
                 'fechaCreacion' => $row['fecha_creacion'],
                 'fechaModificacion' => $row['fecha_modificacion']
             ];
@@ -92,10 +93,11 @@ class NotasRepository
             return null;
         }
 
+        /* Decodificar entidades HTML para evitar doble encoding */
         return [
             'id' => (int)$row['id'],
-            'titulo' => $row['titulo'],
-            'contenido' => $row['contenido'],
+            'titulo' => html_entity_decode($row['titulo'] ?? '', ENT_QUOTES, 'UTF-8'),
+            'contenido' => html_entity_decode($row['contenido'] ?? '', ENT_QUOTES, 'UTF-8'),
             'fechaCreacion' => $row['fecha_creacion'],
             'fechaModificacion' => $row['fecha_modificacion']
         ];
@@ -224,10 +226,11 @@ class NotasRepository
         ), 'ARRAY_A');
 
         return array_map(function ($row) {
+            /* Decodificar entidades HTML para evitar doble encoding */
             return [
                 'id' => (int)$row['id'],
-                'titulo' => $row['titulo'],
-                'contenido' => $row['contenido'],
+                'titulo' => html_entity_decode($row['titulo'] ?? '', ENT_QUOTES, 'UTF-8'),
+                'contenido' => html_entity_decode($row['contenido'] ?? '', ENT_QUOTES, 'UTF-8'),
                 'fechaCreacion' => $row['fecha_creacion'],
                 'fechaModificacion' => $row['fecha_modificacion']
             ];

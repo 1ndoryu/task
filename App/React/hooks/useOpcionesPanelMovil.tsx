@@ -10,7 +10,7 @@
  */
 
 import {useMemo} from 'react';
-import {ArrowUpDown, Filter, Settings} from 'lucide-react';
+import {ArrowUpDown, Filter, Settings, FolderOpen, Plus} from 'lucide-react';
 import {obtenerTituloPanelMovil, paginaMovilAPanelId} from '../config/registroPaneles';
 import type {GrupoOpciones, OpcionMenu} from '../components/shared/MenuOpcionesPanel';
 import type {PaginaMovil} from './usePaginaMovil';
@@ -68,6 +68,10 @@ interface UseOpcionesPanelMovilParams {
     onAbrirConfigProyectos?: () => void;
     /* Actividad */
     onAbrirConfigActividad?: () => void;
+    /* Notas (Scratchpad) */
+    onNuevaNota?: () => void;
+    onAbrirNotasGuardadas?: () => void;
+    onAbrirConfigNotas?: () => void;
 }
 
 interface UseOpcionesPanelMovilResult {
@@ -89,7 +93,7 @@ function generarTituloPagina(pagina: PaginaMovil): string {
 }
 
 export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseOpcionesPanelMovilResult {
-    const {paginaActiva, opcionesFiltroTareas = [], valorFiltroTareas = 'todas', onCambiarFiltroTareas, opcionesOrdenTareas = [], modoOrdenTareas, onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos = [], modoOrdenHabitos, onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos = [], modoOrdenProyectos, onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad} = params;
+    const {paginaActiva, opcionesFiltroTareas = [], valorFiltroTareas = 'todas', onCambiarFiltroTareas, opcionesOrdenTareas = [], modoOrdenTareas, onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos = [], modoOrdenHabitos, onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos = [], modoOrdenProyectos, onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad, onNuevaNota, onAbrirNotasGuardadas, onAbrirConfigNotas} = params;
 
     const resultado = useMemo((): UseOpcionesPanelMovilResult => {
         const grupos: GrupoOpciones[] = [];
@@ -216,6 +220,37 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
                 }
                 break;
             }
+
+            case 'scratchpad': {
+                /* Opciones para el panel de notas en móvil */
+                if (onNuevaNota) {
+                    opciones.push({
+                        id: 'nueva-nota',
+                        etiqueta: 'Nueva nota',
+                        icono: <Plus size={14} />,
+                        onClick: onNuevaNota
+                    });
+                }
+
+                if (onAbrirNotasGuardadas) {
+                    opciones.push({
+                        id: 'notas-guardadas',
+                        etiqueta: 'Ver notas guardadas',
+                        icono: <FolderOpen size={14} />,
+                        onClick: onAbrirNotasGuardadas
+                    });
+                }
+
+                if (onAbrirConfigNotas) {
+                    opciones.push({
+                        id: 'config',
+                        etiqueta: 'Configuración',
+                        icono: <Settings size={14} />,
+                        onClick: onAbrirConfigNotas
+                    });
+                }
+                break;
+            }
         }
 
         return {
@@ -224,7 +259,7 @@ export function useOpcionesPanelMovil(params: UseOpcionesPanelMovilParams): UseO
             opciones,
             tieneFiltrosActivos
         };
-    }, [paginaActiva, opcionesFiltroTareas, valorFiltroTareas, onCambiarFiltroTareas, opcionesOrdenTareas, modoOrdenTareas, onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos, modoOrdenHabitos, onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos, modoOrdenProyectos, onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad]);
+    }, [paginaActiva, opcionesFiltroTareas, valorFiltroTareas, onCambiarFiltroTareas, opcionesOrdenTareas, modoOrdenTareas, onCambiarOrdenTareas, onAbrirConfigTareas, opcionesOrdenHabitos, modoOrdenHabitos, onCambiarOrdenHabitos, onAbrirConfigHabitos, opcionesOrdenProyectos, modoOrdenProyectos, onCambiarOrdenProyectos, onAbrirConfigProyectos, onAbrirConfigActividad, onNuevaNota, onAbrirNotasGuardadas, onAbrirConfigNotas]);
 
     return resultado;
 }

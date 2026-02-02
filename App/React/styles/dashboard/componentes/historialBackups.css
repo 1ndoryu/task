@@ -170,5 +170,88 @@
 @media (max-width: 480px) {
     .contenedorBackups {
         padding: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Panel de info más compacto en móvil */
+    .panelInfoBackup {
+        padding: var(--dashboard-espacioSm);
+        gap: var(--dashboard-espacioSm);
+        margin-bottom: var(--dashboard-espacioSm);
+    }
+
+    .panelInfoBackup .textoInfo {
+        font-size: var(--dashboard-tamanoPequeno);
+    }
+
+    /* Lista ocupa todo el espacio disponible */
+    .listaBackups {
+        flex: 1;
+        max-height: none;
+        height: 100%;
+        overflow-y: auto;
+        gap: var(--dashboard-espacioXs);
+        padding-right: 0;
+    }
+
+    /* Items de backup más compactos en móvil */
+    .itemBackup {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--dashboard-espacioSm);
+        padding: var(--dashboard-espacioSm);
+    }
+
+    .infoBackup {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .fechaBackup {
+        font-size: var(--dashboard-tamanoPequeno);
+    }
+
+    .metaBackup {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: var(--dashboard-espacioXs);
+        font-size: 10px;
+    }
+
+    /* Botones de acciones en fila compacta */
+    .accionesBackup {
+        flex-direction: row;
+        width: 100%;
+        border-top: 1px solid var(--dashboard-bordeSutil);
+        padding-top: var(--dashboard-espacioSm);
+        gap: var(--dashboard-espacioSm);
+    }
+
+    .botonRestaurar,
+    .botonEliminar {
+        flex: 1;
+        justify-content: center;
+        padding: var(--dashboard-espacioSm);
+    }
+
+    /* Ocultar texto de botones, solo iconos */
+    .botonRestaurar span,
+    .botonEliminar span {
+        display: none;
+    }
+
+    /* Icono más grande para touch */
+    .botonRestaurar svg,
+    .botonEliminar svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .estadoVacio {
+        padding: var(--dashboard-espacioLg);
     }
 }
