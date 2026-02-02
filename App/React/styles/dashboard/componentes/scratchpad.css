@@ -374,7 +374,7 @@
 }
 
 .modalNotasFooter {
-    padding-top: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordeSutil);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoMuyApagado);

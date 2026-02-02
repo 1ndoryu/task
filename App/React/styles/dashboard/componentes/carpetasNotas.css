@@ -380,5 +380,5 @@
 .notasAccionesHeader {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioXs);
+    gap: var(--dashboard-espacioSx);
 }

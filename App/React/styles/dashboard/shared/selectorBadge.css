@@ -61,14 +61,14 @@
     width: auto;
     height: auto;
     min-height: unset;
-    padding: var(--dashboard-espacioXs);
-    color: var(--dashboard-textoActivo);
+    padding: 3px;
+    color: var(--dashboard-textoSecundario);
 }
 
 .selectorBadgeBoton--soloIcono:hover {
     background: transparent;
     border: none;
-    color: var(--dashboard-textoNormal);
+    color: var(--dashboard-textoActivo);
 }
 
 /* 
