@@ -26,7 +26,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 1. El texto de la nota las ultimas palabras se cubren con el nav inferior.
 2. El css de los gestos al deslizar, el texto debe ser pequeño, el color de eliminar rojo, quita los iconos, los colores verdes y rojo tienen que difuminarse. Tambien pasa que cuando texto de la tarea es corto, el liminar no aparece al final o sea no se ocupa el 100% al ancho y no se ve al borde la pantalla como debería.
-3. El css de los subhabitos en el panel de configuracion de los habitos debe ser igual exactamente a como se vían las metas o subtarea, y sigue apareciendo las subtareas, "No hay metas o tareas para este hábito", acomodar los css (mucho mas minimalista y con la misma logica de las tareas pero ya hablamos que la diferencia esta en que los habitos si se reinician)y quitar las metas o subtareas en la configuracion de los habitos. Otro detalle es que
+3. El css de los subhabitos en el panel de configuracion de los habitos debe ser igual exactamente a como se vían las metas o subtarea, y sigue apareciendo las subtareas, "No hay metas o tareas para este hábito", acomodar los css (mucho mas minimalista y con la misma logica de las tareas pero ya hablamos que la diferencia esta en que los habitos si se reinician)y quitar las metas o subtareas en la configuracion de los habitos. Otro detalle es que subhabitos no se ven en el panel de ejecución, deben verse igual como se ven las subtareas.
+4.
 
 # TAREAS PENDIENTES - SPRINT ACTUAL
 

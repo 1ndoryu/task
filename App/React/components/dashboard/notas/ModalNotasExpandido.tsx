@@ -3,10 +3,11 @@
  * Modal para ver y editar notas guardadas en modo expandido
  * Tarea 2: Mejoras en Notas (expandir, crear nueva, ordenamiento)
  * Tarea 2.1: Sistema de Carpetas para Notas
+ * Tarea 2.2: Expandir/Colapsar Vistas en Notas
  */
 
 import {useState, useEffect, useCallback, useMemo} from 'react';
-import {Search, FileText, Loader, AlertCircle, Maximize2, Minimize2, Plus, ArrowDownAZ, ArrowUpDown, ChevronLeft} from 'lucide-react';
+import {Search, FileText, Loader, AlertCircle, Maximize2, Minimize2, Plus, ArrowDownAZ, ArrowUpDown, ChevronLeft, PanelLeftClose, PanelRightClose, PanelLeft, PanelRight} from 'lucide-react';
 import {Modal} from '../../shared';
 import {Scratchpad} from '../Scratchpad';
 import {ListaNotasGuardadas} from './ListaNotasGuardadas';
@@ -16,6 +17,9 @@ import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
 
 /* Tipos de ordenamiento disponibles */
 type TipoOrdenamiento = 'modificacion' | 'creacion';
+
+/* Tipos de vista de paneles */
+type VistaPaneles = 'ambos' | 'solo-lista' | 'solo-editor';
 
 interface ModalNotasExpandidoProps {
     abierto: boolean;
@@ -50,6 +54,20 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const [buscando, setBuscando] = useState(false);
     const [maximizado, setMaximizado] = useState(false);
     const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('modificacion');
+    const [vistaPaneles, setVistaPaneles] = useState<VistaPaneles>('ambos');
+
+    /* Ciclar entre vistas de paneles */
+    const alternarVistaPaneles = useCallback(() => {
+        setVistaPaneles(prev => {
+            if (prev === 'ambos') return 'solo-lista';
+            if (prev === 'solo-lista') return 'solo-editor';
+            return 'ambos';
+        });
+    }, []);
+
+    /* Mostrar/ocultar lista */
+    const mostrarLista = vistaPaneles === 'ambos' || vistaPaneles === 'solo-lista';
+    const mostrarEditor = vistaPaneles === 'ambos' || vistaPaneles === 'solo-editor';
 
     useEffect(() => {
         if (abierto) {
