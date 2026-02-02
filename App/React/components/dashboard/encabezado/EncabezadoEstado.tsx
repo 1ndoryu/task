@@ -1,14 +1,5 @@
 import {Wifi, WifiOff, RefreshCw, AlertTriangle} from 'lucide-react';
-
-interface SincronizacionInfo {
-    sincronizado: boolean;
-    pendiente: boolean;
-    error: string | null;
-    estaLogueado: boolean;
-    sincronizarAhora: () => Promise<void>;
-    onLogin?: () => void;
-    onLogout?: () => void;
-}
+import type {SincronizacionInfo} from '../../../types/dashboard';
 
 interface EncabezadoEstadoProps {
     sincronizacion?: SincronizacionInfo;

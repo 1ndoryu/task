@@ -8,7 +8,7 @@ import {useState} from 'react';
 import {APP_TEXTS} from '../../constants/appTexts';
 import {VERSION_ACTUAL} from '../../data/changelog';
 import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
-import type {InfoSuscripcion, Tarea, Habito, Proyecto} from '../../types/dashboard';
+import type {InfoSuscripcion, Tarea, Habito, Proyecto, SincronizacionInfo} from '../../types/dashboard';
 import type {GrupoOpciones, OpcionMenu} from '../shared/MenuOpcionesPanel';
 
 // Sub-componentes
@@ -19,16 +19,6 @@ import {EncabezadoPerfil} from './encabezado/EncabezadoPerfil';
 import {EncabezadoBuscador} from './encabezado/EncabezadoBuscador';
 import {EncabezadoMenuMovil, EncabezadoOpcionesMovil} from './encabezado/EncabezadoMovil';
 import {EncabezadoBuscadorMovilTrigger} from './encabezado/EncabezadoBuscadorMovilTrigger';
-
-interface SincronizacionInfo {
-    sincronizado: boolean;
-    pendiente: boolean;
-    error: string | null;
-    estaLogueado: boolean;
-    sincronizarAhora: () => Promise<void>;
-    onLogin?: () => void;
-    onLogout?: () => void;
-}
 
 interface DashboardEncabezadoProps {
     titulo?: string;

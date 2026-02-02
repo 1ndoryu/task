@@ -670,3 +670,18 @@ export interface DatosCompartir {
     usuarioId: number;
     rol?: RolCompartido;
 }
+
+/*
+ * Información de sincronización
+ * Estado actual de la conexión con el servidor
+ */
+export interface SincronizacionInfo {
+    sincronizado: boolean;
+    pendiente: boolean;
+    error: string | null;
+    estaLogueado: boolean;
+    sincronizarAhora: () => Promise<boolean>;
+    onLogin?: () => void;
+    onLogout?: () => void;
+    cargandoDesdeServidor?: boolean;
+}

@@ -4,15 +4,8 @@ import {obtenerOpcionesMenuUsuario, obtenerOpcionCerrarSesion} from '../../../ut
 import {DrawerMovil, BottomSheet} from '../../shared';
 import type {OpcionDrawer} from '../../shared/DrawerMovil';
 import type {GrupoOpciones, OpcionMenu} from '../../shared/MenuOpcionesPanel';
-import type {InfoSuscripcion, Tarea} from '../../../types/dashboard';
+import type {InfoSuscripcion, Tarea, SincronizacionInfo} from '../../../types/dashboard';
 import type {PaginaMovil} from '../../../hooks/usePaginaMovil';
-
-interface SincronizacionInfo {
-    onLogin?: () => void;
-    onLogout?: () => void;
-    sincronizarAhora: () => Promise<void>;
-    estaLogueado: boolean;
-}
 
 /* =========================================================================================
    COMPONENT 1: MENU MOVIL (Left - Hamburger + Drawer)
