@@ -52,6 +52,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
     - [x] Placeholder `google-services.json` creado.
     - [x] **Usuario descargó** `google-services.json` real de Firebase.
     - [x] Plugin Google Services actualizado a v4.4.4.
+    - [x] Plugin Google Services aplicado en `app/build.gradle` con sintaxis moderna.
+    - [x] Firebase BoM v34.8.0 y Analytics añadidos a dependencias.
   - **Próximos Pasos (Acción Requerida Usuario):**
     1. **Rebuild:** Ejecutar `npx cap sync android` y luego Build desde Android Studio.
     2. **Verificar Web Client ID:** El `serverClientId` en `capacitor.config.json` debe ser tipo "Web application" (NO Android).

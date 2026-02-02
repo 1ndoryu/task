@@ -1,4 +1,7 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
 
 android {
     namespace "com.taskNakomi.app"
@@ -58,19 +61,22 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 
+    /*
+     * Firebase BoM garantiza versiones compatibles de todas las librerías de Firebase.
+     * Analytics se usa para tracking básico (opcional, puede removerse si no se usa).
+     */
+    implementation platform('com.google.firebase:firebase-bom:34.8.0')
+    implementation 'com.google.firebase:firebase-analytics'
+
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22") {
             because("kotlin-stdlib-jdk7 is now part of kotlin-stdlib")
         }
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22") {
-            because("kotlin-stdlib-jdk8 is now part of kotlin-stdlib")
-        }
-    }
-}
-
-apply from: 'capacitor.build.gradle'
-
-try {
+/*
+ * El plugin google-services se aplica directamente en la sección plugins{} al inicio del archivo.
+ * Este bloque condicional ya no es necesario.
+ */ry {
     def servicesJSON = file('google-services.json')
     if (servicesJSON.text) {
         apply plugin: 'com.google.gms.google-services'
