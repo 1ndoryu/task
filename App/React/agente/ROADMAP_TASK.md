@@ -39,6 +39,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 5. ✅ La carpeta general (donde debería estar todas las notas sin carpeta) no aparece, las notas iniciales esas que estaban antes de la logica de carpeta no puedo regresar a ellas despues que navego por las carpetas, no se que es "navegadorCarpetasFormulario navegadorCarpetasFormulario--inline" no hace nada supongo que pretende ser un buscador pero no funciona y tiene 2 botones de check y x, es igual a nput de formulario para agregar una nueva carpeta eso si funciona. (La carpeta general me aparecio por un momento despues un rato no se cuanto y luego desaparecio al volver a la lista de carpetas) **CORREGIDO: carpetasNotasStore.ts ahora garantiza que la carpeta General virtual siempre exista: 1) cargarCarpetas verifica/agrega General si no viene del backend, 2) en error muestra General como fallback, 3) volverACarpetas recarga si carpetas vacías. NOTA: el formulario inline es para RENOMBRAR carpetas (aparece al hacer clic en el icono de editar), no es buscador**
 
+6. ✅ Eliminar listaNotasItemMetas y reemplazar por menú contextuales (igual que tareas) en Notas Guardadas. **CORREGIDO: Implementado NotaItem.tsx con MenuContextualAdaptivo y useMenuContextualConId, eliminando acciones inline y metadatos innecesarios**
+
 
 # Revisiones (0.1) de las tareas anteriores (revisiones hecha por el usuario)
 

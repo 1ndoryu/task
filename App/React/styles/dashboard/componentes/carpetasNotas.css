@@ -133,20 +133,11 @@
     display: flex;
     align-items: center;
     position: relative;
-    margin: 0 var(--dashboard-espacioXs);
     border-radius: var(--dashboard-bordeRedondeado);
 }
 
 .navegadorCarpetaItem:hover {
     background: var(--dashboard-fondoHover);
-}
-
-/* Carpeta virtual (General) - estilo distintivo */
-.navegadorCarpetaItem--virtual {
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
-    margin-bottom: var(--dashboard-espacioXs);
-    padding-bottom: var(--dashboard-espacioXs);
-    border-radius: 0;
 }
 
 .navegadorCarpetaItem--virtual .navegadorCarpetaIcono {
@@ -249,8 +240,8 @@
 .notasHeaderConCarpeta {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs);
     border-bottom: 1px solid var(--dashboard-bordeSutil);
     background: var(--dashboard-fondoSecundario);
 }

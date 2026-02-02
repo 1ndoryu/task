@@ -190,7 +190,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    padding: 4px;
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioBase);
@@ -572,7 +572,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioXs);
-    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoMuyApagado);
 }
 

@@ -52,7 +52,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const [buscando, setBuscando] = useState(false);
     const [maximizado, setMaximizado] = useState(false);
     const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('modificacion');
-    
+
     /* Estados separados para mostrar/ocultar lista y editor */
     const [mostrarLista, setMostrarLista] = useState(true);
     const [mostrarEditor, setMostrarEditor] = useState(true);
@@ -181,31 +181,29 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     /* Acciones del header del modal - botones a la izquierda, buscador al centro, controles a la derecha */
     const accionesHeader = (
         <>
-            <div className="notasAccionesHeaderIzquierda">
-                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
-                    <Plus size={14} />
-                </button>
-                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
-                    <ArrowUpDown size={14} />
-                </button>
-            </div>
             {/* Buscador centrado en el header */}
             <div className="modalNotasBusqueda modalNotasBusqueda--headerCentrado">
                 <Search size={14} className="modalNotasBusquedaIcono" />
                 <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
                 {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
             </div>
-            <div className="notasAccionesHeaderDerecha">
-                <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
-                    <PanelLeftClose size={14} />
-                </button>
-                <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
-                    <PanelRightClose size={14} />
-                </button>
-                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
-                    {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                </button>
-            </div>
+
+            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
+                <Plus size={14} />
+            </button>
+            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
+                <ArrowUpDown size={14} />
+            </button>
+
+            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
+                <PanelLeftClose size={14} />
+            </button>
+            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
+                <PanelRightClose size={14} />
+            </button>
+            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
+                {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            </button>
         </>
     );
 
