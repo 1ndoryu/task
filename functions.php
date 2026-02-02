@@ -75,12 +75,14 @@ function incluirArchivos($directorio)
 
 /*
  * Solo cargar directorios con archivos de inicialización y hooks.
- * Las clases se cargan automáticamente via Composer PSR-4.
+ * Los controladores de API necesitan cargarse para registrar rutas REST.
+ * Las clases Repository/Services se cargan automáticamente via Composer PSR-4.
  */
 $directorios = [
     'App/Config/',
     'App/Content/',
     'App/Templates/',
+    'App/Api/',
 ];
 
 foreach ($directorios as $directorio) {
