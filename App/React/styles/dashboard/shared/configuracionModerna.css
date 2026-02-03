@@ -378,9 +378,7 @@
     background: var(--dashboard-superposicionClara);
     border: 1px solid var(--dashboard-bordeSutil);
     cursor: pointer;
-    transition:
-        background var(--dashboard-transicionRapida),
-        border-color var(--dashboard-transicionRapida);
+    transition: background var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
 }
 
 .selectorIconoProyecto__trigger:hover {
@@ -433,9 +431,7 @@
     background: transparent;
     border: 1px solid transparent;
     cursor: pointer;
-    transition:
-        background var(--dashboard-transicionRapida),
-        border-color var(--dashboard-transicionRapida);
+    transition: background var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
 }
 
 .selectorIconoProyecto__opcion:hover {
@@ -464,9 +460,7 @@
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
-    transition:
-        border-color var(--dashboard-transicionRapida),
-        transform var(--dashboard-transicionRapida);
+    transition: border-color var(--dashboard-transicionRapida), transform var(--dashboard-transicionRapida);
 }
 
 .selectorColores__opcion:hover {
@@ -586,14 +580,14 @@
 }
 
 .botonPausaHabito--activo {
-    background: rgba(251, 191, 36, 0.1);
-    border-color: rgba(251, 191, 36, 0.3);
-    color: #fbbf24;
+    background: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+    color: var(--dashboard-estadoMediaTexto);
 }
 
 .botonPausaHabito--activo:hover {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.4);
+    background: var(--dashboard-superposicionMedia);
+    border-color: var(--dashboard-estadoMediaBorde);
 }
 
 .botonPausaHabito__fecha {
@@ -926,7 +920,7 @@
 }
 
 .seccionResponsables__menuOpcion--peligro:hover {
-    background: hsla(0, 70%, 45%, 0.1);
+    background: var(--dashboard-estadoAltaFondo);
 }
 
 .seccionResponsables__menuDivisor {
@@ -1027,7 +1021,7 @@
     background: transparent;
     border: none;
     padding: 0;
-    color: var(--dashboard-bordeFuerte);
+    color: var(--dashboard-textoApagado);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
     width: 16px;
@@ -1264,7 +1258,7 @@
 
 .adjuntosGrid__accion--peligro:hover {
     color: var(--dashboard-estadoAlta);
-    background: hsla(0, 70%, 45%, 0.1);
+    background: var(--dashboard-estadoAltaFondo);
 }
 
 /* Audio Player Minimalista para Grid */
@@ -1415,7 +1409,7 @@
     border: none;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
-    border-radius: var(--dashboard-radioXs);
+    border-radius: var(--dashboard-radioSm);
     font-size: 14px;
     transition: all var(--dashboard-transicionRapida);
 }

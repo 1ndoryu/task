@@ -242,13 +242,13 @@
  */
 .adjuntosAreaCarga--subiendo {
     cursor: wait;
-    border-color: var(--dashboard-acentoPrimario);
-    background-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.05);
+    border-color: var(--dashboard-acento);
+    background-color: rgba(var(--dashboard-acentoRgb), 0.05);
 }
 
 .adjuntosAreaCarga--subiendo:hover {
-    border-color: var(--dashboard-acentoPrimario);
-    background-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.05);
+    border-color: var(--dashboard-acento);
+    background-color: rgba(var(--dashboard-acentoRgb), 0.05);
 }
 
 /* Estado bloqueado (plan FREE) */
@@ -295,7 +295,7 @@
 }
 
 .adjuntosAreaCarga--subiendo .adjuntosIconoCarga {
-    color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acento);
 }
 
 /* Botón premium en modo moderno */
@@ -346,23 +346,23 @@
  * Muestra un candado hasta que el usuario haga clic para descifrar
  */
 .adjuntoPreviewCifrado {
-    background: linear-gradient(135deg, var(--dashboard-fondoPrincipal) 0%, rgba(var(--dashboard-acentoPrimarioRgb), 0.1) 100%);
-    border-color: var(--dashboard-acentoPrimario);
+    background: linear-gradient(135deg, var(--dashboard-fondoPrincipal) 0%, rgba(var(--dashboard-acentoRgb), 0.1) 100%);
+    border-color: var(--dashboard-acento);
     cursor: pointer;
 }
 
 .adjuntoPreviewCifrado:hover {
-    background: linear-gradient(135deg, var(--dashboard-fondoHover) 0%, rgba(var(--dashboard-acentoPrimarioRgb), 0.2) 100%);
-    border-color: var(--dashboard-acentoSecundario);
+    background: linear-gradient(135deg, var(--dashboard-fondoHover) 0%, rgba(var(--dashboard-acentoRgb), 0.2) 100%);
+    border-color: var(--dashboard-acentoHover);
 }
 
 .adjuntoIconoCifrado {
-    color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acento);
     transition: all var(--dashboard-transicionRapida);
 }
 
 .adjuntoPreviewCifrado:hover .adjuntoIconoCifrado {
-    color: var(--dashboard-acentoSecundario);
+    color: var(--dashboard-acentoHover);
     transform: scale(1.1);
 }
 
@@ -380,7 +380,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acento);
 }
 
 /* Hacer el preview posición relativa para el indicador */

@@ -101,3 +101,6 @@ App/React/android/app/src/main/res/values/strings.local.xml
 .gitignore
 .agent/docs/api-tareas.md
 .agent/docs/infeccion-vps-167.86.117.147.md
+
+# Separate Extensions
+css-vars-validator/

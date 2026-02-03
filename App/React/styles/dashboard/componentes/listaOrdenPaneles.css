@@ -52,7 +52,7 @@
 }
 
 .listaOrdenItem:hover {
-    border-color: var(--dashboard-acentoPrimario);
+    border-color: var(--dashboard-acento);
 }
 
 /* Info del panel (icono + nombre) */
@@ -74,7 +74,7 @@
 
 .listaOrdenItemNombre {
     font-size: 0.75rem;
-    color: var(--dashboard-textoPrincipal);
+    color: var(--dashboard-textoNormal);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -106,8 +106,8 @@
 
 .listaOrdenBoton:hover:not(:disabled) {
     background-color: var(--dashboard-fondoTerciario);
-    border-color: var(--dashboard-acentoPrimario);
-    color: var(--dashboard-acentoPrimario);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-acento);
 }
 
 .listaOrdenBoton:disabled {
@@ -141,12 +141,12 @@
 
 .listaOrdenColumnaBtn:hover {
     background-color: var(--dashboard-fondoTerciario);
-    border-color: var(--dashboard-acentoPrimario);
+    border-color: var(--dashboard-acento);
 }
 
 .listaOrdenColumnaBtn.activa {
-    background-color: var(--dashboard-acentoPrimario);
-    border-color: var(--dashboard-acentoPrimario);
+    background-color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
     color: var(--dashboard-fondoPrincipal);
 }
 
@@ -183,6 +183,6 @@
 }
 
 .listaOrdenPreviewItem--activo {
-    background-color: var(--dashboard-acentoPrimario);
-    border-color: var(--dashboard-acentoPrimario);
+    background-color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
 }

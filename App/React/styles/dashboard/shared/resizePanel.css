@@ -93,12 +93,12 @@
  * Línea verde indica que el panel crece con el contenido
  */
 .panelResizeLineAuto {
-    background-color: #22c55e;
+    background-color: var(--dashboard-estadoExito);
     width: 50px;
 }
 
 .panelResizeHandle:hover .panelResizeLineAuto {
-    background-color: #16a34a;
+    background-color: var(--dashboard-estadoExito);
     width: 70px;
 }
 

@@ -172,8 +172,8 @@
 
 .configLayoutBotonResetPequeno:hover {
     background: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-acentoPrimario);
-    color: var(--dashboard-acentoPrimario);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-acento);
 }
 
 /* 

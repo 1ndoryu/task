@@ -22,9 +22,9 @@
 .handleArrastre:active,
 .handleArrastre.activo {
     cursor: grabbing;
-    color: var(--dashboard-acentoPrimario);
-    background: rgba(139, 92, 246, 0.1);
-    border-color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acento);
+    background: rgba(var(--dashboard-acentoRgb), 0.1);
+    border-color: var(--dashboard-acento);
 }
 
 /* 
@@ -39,10 +39,10 @@
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-acentoPrimario);
+    border: 1px solid var(--dashboard-acento);
     border-radius: var(--dashboard-radioMd);
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(var(--dashboard-acentoRgb), 0.2);
     pointer-events: none;
     animation: aparecer 0.15s ease-out;
 }
@@ -61,7 +61,7 @@
 .indicadorArrastreIcono {
     display: flex;
     align-items: center;
-    color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acento);
 }
 
 .indicadorArrastreNombre {
@@ -81,10 +81,10 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--dashboard-acentoPrimario);
+    background: var(--dashboard-acento);
     border-radius: var(--dashboard-radioSm);
     z-index: 100;
-    box-shadow: 0 0 12px var(--dashboard-acentoPrimario), 0 0 24px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 0 12px var(--dashboard-acento), 0 0 24px rgba(var(--dashboard-acentoRgb), 0.4);
     animation: pulsoZona 1s ease-in-out infinite;
 }
 
@@ -100,11 +100,11 @@
     0%,
     100% {
         opacity: 0.8;
-        box-shadow: 0 0 12px var(--dashboard-acentoPrimario), 0 0 24px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 0 12px var(--dashboard-acento), 0 0 24px rgba(var(--dashboard-acentoRgb), 0.4);
     }
     50% {
         opacity: 0.4;
-        box-shadow: 0 0 8px var(--dashboard-acentoPrimario), 0 0 16px rgba(139, 92, 246, 0.2);
+        box-shadow: 0 0 8px var(--dashboard-acento), 0 0 16px rgba(var(--dashboard-acentoRgb), 0.2);
     }
 }
 
@@ -115,14 +115,14 @@
  */
 .indicadorPlaceholder {
     height: 60px; /* Altura minima visual */
-    background: rgba(139, 92, 246, 0.05);
-    border: 2px dashed var(--dashboard-acentoPrimario);
+    background: rgba(var(--dashboard-acentoRgb), 0.05);
+    border: 2px dashed var(--dashboard-acento);
     border-radius: var(--dashboard-radioMd);
     margin: var(--dashboard-espacioMd) 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acento);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
     transition: all var(--dashboard-transicionRapida);
@@ -215,6 +215,6 @@
  * ACCESIBILIDAD
  */
 .handleArrastre:focus-visible {
-    outline: 2px solid var(--dashboard-acentoPrimario);
+    outline: 2px solid var(--dashboard-acento);
     outline-offset: 2px;
 }

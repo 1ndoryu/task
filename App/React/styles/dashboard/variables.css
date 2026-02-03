@@ -213,10 +213,15 @@
     --dashboard-fondoTerciario: #151515;
     --dashboard-fondoHover: #1e1e1e;
 
-    /* Color acento */
-    --dashboard-acento: #60a5fa;
+    /* Colores de acento */
+    --dashboard-acentoPrimario: #a78bfa;
+    --dashboard-acentoPrimarioRgb: 167, 139, 250;
+    --dashboard-acentoSecundario: #60a5fa;
+    --dashboard-acentoSecundarioRgb: 96, 165, 250;
+
+    --dashboard-acento: var(--dashboard-acentoSecundario);
     --dashboard-acentoHover: #3b82f6;
-    --dashboard-acentoRgb: 96, 165, 250;
+    --dashboard-acentoRgb: var(--dashboard-acentoSecundarioRgb);
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #1a1a1a;
@@ -265,10 +270,15 @@
     --dashboard-fondoTerciario: #e9ecef;
     --dashboard-fondoHover: #e9ecef;
 
-    /* Color acento */
-    --dashboard-acento: #2563eb;
+    /* Colores de acento */
+    --dashboard-acentoPrimario: #7c3aed;
+    --dashboard-acentoPrimarioRgb: 124, 58, 237;
+    --dashboard-acentoSecundario: #2563eb;
+    --dashboard-acentoSecundarioRgb: 37, 99, 235;
+
+    --dashboard-acento: var(--dashboard-acentoSecundario);
     --dashboard-acentoHover: #1d4ed8;
-    --dashboard-acentoRgb: 37, 99, 235;
+    --dashboard-acentoRgb: var(--dashboard-acentoSecundarioRgb);
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #dee2e6;

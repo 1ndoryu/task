@@ -31,5 +31,5 @@
 .seccionPanelContenido {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioxs);
+    gap: var(--dashboard-espacioXs);
 }

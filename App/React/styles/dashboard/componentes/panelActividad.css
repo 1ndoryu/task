@@ -27,7 +27,7 @@
 }
 
 .panelActividadError {
-    color: var(--dashboard-colorError);
+    color: var(--dashboard-estadoAlta);
 }
 
 /* 
@@ -94,7 +94,7 @@
 }
 
 .panelActividadDetalleError {
-    color: var(--dashboard-colorError);
+    color: var(--dashboard-estadoAlta);
 }
 
 .panelActividadDetalleLista {
@@ -161,12 +161,12 @@
 }
 
 .selectorPeriodoBoton:hover {
-    background: var(--dashboard-fondoActivo);
+    background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoNormal);
 }
 
 .selectorPeriodoBoton--activo {
-    background: var(--dashboard-fondoActivo);
+    background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoNormal);
     border-color: var(--dashboard-bordePrincipal);
 }

@@ -13,16 +13,16 @@
 .mapaCalorProyectoContenedor {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
-    padding: var(--espaciado-sm);
-    background: var(--color-fondo-panel);
-    border: 1px solid var(--color-borde);
-    border-radius: var(--radio-borde);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
 }
 
 .mapaCalorProyectoContenedor--compacto {
-    padding: var(--espaciado-xs);
-    gap: var(--espaciado-xs);
+    padding: var(--dashboard-espacioXs);
+    gap: var(--dashboard-espacioXs);
 }
 
 .mapaCalorProyectoContenedor--cargando,
@@ -38,18 +38,18 @@
  * Estados de carga y error
  */
 .mapaCalorProyectoCargando {
-    color: var(--color-texto-secundario);
-    font-size: var(--fuente-sm);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .mapaCalorProyectoError {
-    color: var(--color-error);
-    font-size: var(--fuente-sm);
+    color: var(--dashboard-estadoAlta);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .mapaCalorProyectoVacio {
-    color: var(--color-texto-terciario);
-    font-size: var(--fuente-sm);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
     font-style: italic;
 }
 
@@ -60,24 +60,24 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding-bottom: var(--espaciado-xs);
-    border-bottom: 1px solid var(--color-borde-suave);
+    padding-bottom: var(--dashboard-espacioXs);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
 .mapaCalorProyectoStats {
     display: flex;
-    gap: var(--espaciado-md);
-    font-size: var(--fuente-xs);
-    color: var(--color-texto-secundario);
+    gap: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
 }
 
 .mapaCalorProyectoStat {
     display: flex;
     align-items: center;
-    gap: var(--espaciado-xs);
+    gap: var(--dashboard-espacioXs);
 }
 
 .mapaCalorProyectoStat strong {
-    color: var(--color-texto-primario);
+    color: var(--dashboard-textoActivo);
     font-weight: 600;
 }

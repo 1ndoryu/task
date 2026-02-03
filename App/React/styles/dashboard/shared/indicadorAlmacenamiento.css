@@ -14,12 +14,12 @@
 }
 
 .indicadorAlmacenamiento--advertencia {
-    border-color: var(--dashboard-estadoAdvertencia);
+    border-color: var(--dashboard-estadoMedia);
 }
 
 .indicadorAlmacenamiento--excedido {
     border-color: var(--dashboard-estadoAlta);
-    background-color: rgba(239, 68, 68, 0.05);
+    background-color: var(--dashboard-estadoAltaFondo);
 }
 
 .indicadorAlmacenamiento--cargando {
@@ -39,7 +39,7 @@
 }
 
 .indicadorAlmacenamiento--advertencia .indicadorAlmacenamientoIcono {
-    color: var(--dashboard-estadoAdvertencia);
+    color: var(--dashboard-estadoMedia);
 }
 
 .indicadorAlmacenamiento--excedido .indicadorAlmacenamientoIcono {
@@ -111,8 +111,8 @@
 }
 
 .indicadorAlmacenamientoAlerta--advertencia {
-    color: var(--dashboard-estadoAdvertencia);
-    background-color: rgba(234, 179, 8, 0.1);
+    color: var(--dashboard-estadoMedia);
+    background-color: var(--dashboard-estadoMediaFondo);
 }
 
 /* 
@@ -120,7 +120,7 @@
  */
 .indicadorAlmacenamientoUpgrade {
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
     text-align: center;
     padding-top: var(--dashboard-espacioXs);
