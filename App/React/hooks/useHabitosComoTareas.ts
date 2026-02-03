@@ -10,7 +10,7 @@
 
 import {useMemo} from 'react';
 import type {Habito, Tarea, TareaHabito, SubHabito, NivelUrgencia, NivelPrioridad} from '../types/dashboard';
-import {tocaHoy} from '../utils/frecuenciaHabitos';
+import {tocaHoy, estaEnVentanaOportunidad} from '../utils/frecuenciaHabitos';
 import {FRECUENCIA_POR_DEFECTO} from '../types/dashboard';
 import {obtenerFechaHoy} from '../utils/fecha';
 import type {UmbralesUrgencia} from './useConfiguracionHabitos';
@@ -147,7 +147,8 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
                     habitoId: habito.id,
                     habitoNombre: habito.nombre,
                     habitoRacha: habito.racha,
-                    habitoImportancia: habito.importancia
+                    habitoImportancia: habito.importancia,
+                    enVentanaOportunidad: estaEnVentanaOportunidad(habito)
                 };
 
                 return tareaHabito;

@@ -459,6 +459,8 @@ Ejemplo: Tomar sol → mejor en la mañana con menos UV.
 - `components/dashboard/Habitos/FormularioHabitoModerno.tsx` - Integración con FilaPropiedades
 - `components/dashboard/ModalHabito.tsx` - Estado y paso de props ventanaOportunidad
 - `stores/habitosStore.ts` - Persistir ventanaOportunidad en crearHabito y editarHabito
+- `hooks/useOrdenarHabitos.ts` - Implementado multiplicador x3 para ranking inteligente en ventana de oportunidad, actualizado pesos de importancia
+
 
 ---
 

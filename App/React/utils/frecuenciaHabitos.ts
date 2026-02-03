@@ -4,7 +4,7 @@
  * Determina si un habito "toca hoy" y calcula dias hasta proxima repeticion
  */
 
-import type {FrecuenciaHabito, DiaSemana} from '../types/dashboard';
+import type {FrecuenciaHabito, DiaSemana, Habito} from '../types/dashboard';
 import {obtenerFechaLocalISO, obtenerFechaEfectiva} from './fecha';
 
 /* Mapeo de dia de semana (0=domingo, 6=sabado) a DiaSemana */
@@ -404,5 +404,29 @@ export function esFechaRelevanteConHistorial(fecha: string, frecuencia: Frecuenc
 
         default:
             return true;
+    }
+}
+
+/*
+ * Comprueba si un hábito está en su ventana de oportunidad actual
+ */
+
+export function estaEnVentanaOportunidad(habito: Habito): boolean {
+    if (!habito.ventanaOportunidad || !habito.ventanaOportunidad.habilitada) return false;
+
+    const ahora = new Date();
+    const horaActual = ahora.getHours();
+    const minutoActual = ahora.getMinutes();
+    const totalActual = horaActual * 60 + minutoActual;
+
+    const {horaInicio, minutoInicio, horaFin, minutoFin} = habito.ventanaOportunidad;
+    const totalInicio = horaInicio * 60 + minutoInicio;
+    const totalFin = horaFin * 60 + minutoFin;
+
+    if (totalInicio <= totalFin) {
+        return totalActual >= totalInicio && totalActual <= totalFin;
+    } else {
+        /* Caso cruza medianoche (ej: 22:00 a 06:00) */
+        return totalActual >= totalInicio || totalActual <= totalFin;
     }
 }

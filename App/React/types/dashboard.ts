@@ -287,6 +287,8 @@ export interface TareaHabito extends Tarea {
     habitoRacha: number;
     /* Importancia del hábito */
     habitoImportancia: NivelImportancia;
+    /* Si el hábito está en su ventana de oportunidad */
+    enVentanaOportunidad?: boolean;
 }
 
 /*

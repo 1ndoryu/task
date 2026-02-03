@@ -13,7 +13,7 @@
  */
 
 import {useMemo} from 'react';
-import type {Tarea, NivelPrioridad, NivelUrgencia} from '../types/dashboard';
+import {type Tarea, type NivelPrioridad, type NivelUrgencia, esTareaHabito} from '../types/dashboard';
 import {useLocalStorage} from './useLocalStorage';
 import {obtenerFechaHoy, sumarDias} from '../utils/fecha';
 
@@ -119,7 +119,14 @@ const calcularPesoTotal = (tarea: Tarea): number => {
     const diasRetraso = calcularDiasRetraso(tarea.configuracion?.fechaMaxima);
     const pesoRetraso = diasRetraso * FACTOR_PONDERACION_RETRASO;
 
-    return pesoUrgencia + pesoPrioridad + pesoFecha + pesoRetraso;
+    let pesoTotal = pesoUrgencia + pesoPrioridad + pesoFecha + pesoRetraso;
+
+    /* Multiplicador por ventana de oportunidad (x3) para hábitos */
+    if (esTareaHabito(tarea) && tarea.enVentanaOportunidad) {
+        pesoTotal *= 3;
+    }
+
+    return pesoTotal;
 };
 
 export function useOrdenarTareas(tareas: Tarea[]) {

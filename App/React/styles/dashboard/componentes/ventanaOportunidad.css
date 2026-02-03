@@ -16,7 +16,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-bordeRedondeado);
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: inherit;
@@ -29,10 +29,11 @@
     color: var(--dashboard-textoNormal);
 }
 
+/* Botón principal (Estilo minimalista sin azul por defecto) */
 .selectorVentanaOportunidad__boton--activo {
-    background: rgba(var(--dashboard-acentoRgb), 0.1);
-    border-color: var(--dashboard-acento);
-    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
 }
 
 /* Indicador cuando estamos dentro de la ventana */
@@ -56,7 +57,7 @@
     top: calc(100% + 4px);
     left: 0;
     z-index: 1000;
-    min-width: 220px;
+    width: 260px;
     background: var(--dashboard-fondoTarjeta);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
@@ -115,7 +116,7 @@
     border: none;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
-    border-radius: var(--dashboard-bordeRedondeado);
+    border-radius: var(--dashboard-radioSm);
 }
 
 .selectorVentanaOportunidad__cerrar:hover {
@@ -142,6 +143,14 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
+/* Indicador de hora actual (punto blanco brillante) */
+.indicadorHoraActual {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
+    pointer-events: none;
+    z-index: 10;
+}
+
 /* Controles de hora */
 .selectorVentanaOportunidad__controles {
     display: flex;
@@ -157,7 +166,7 @@
 }
 
 .selectorVentanaOportunidad__control label {
-    font-size: var(--dashboard-tamanoMini);
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -167,10 +176,11 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-bordeRedondeado);
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoNormal);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: inherit;
+    width: 100%;
 }
 
 .selectorVentanaOportunidad__inputHora:focus {
@@ -190,27 +200,27 @@
 .selectorVentanaOportunidad__eliminar {
     flex: 1;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    font-size: var(--dashboard-tamanoMini);
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-family: inherit;
-    border-radius: var(--dashboard-bordeRedondeado);
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
 }
 
 .selectorVentanaOportunidad__toggle {
-    background: var(--dashboard-acento);
-    border: none;
-    color: white;
-}
-
-.selectorVentanaOportunidad__toggle:hover {
-    opacity: 0.9;
+    background: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
 }
 
 .selectorVentanaOportunidad__toggle--activo {
-    background: var(--dashboard-fondoSecundario);
+    background: transparent;
     border: 1px solid var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoSecundario);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorVentanaOportunidad__toggle--activo:hover {
+    background: var(--dashboard-acentoFondo);
 }
 
 .selectorVentanaOportunidad__eliminar {

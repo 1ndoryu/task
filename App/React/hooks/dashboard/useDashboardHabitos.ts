@@ -35,11 +35,11 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
     const [modalCrearHabitoAbierto, setModalCrearHabitoAbierto] = useState(false);
     /*
      * Guardamos solo el ID del hábito editando, no una copia del objeto.
-     * Esto permite que cuando el store se actualice (ej: al pausar), 
+     * Esto permite que cuando el store se actualice (ej: al pausar),
      * el hábito derivado siempre refleje el estado actual del store.
      */
     const [habitoEditandoId, setHabitoEditandoId] = useState<number | null>(null);
-    
+
     /* Derivar el hábito editando del array de hábitos actual (reactivo al store) */
     const habitoEditando = useMemo(() => {
         if (habitoEditandoId === null) return null;
@@ -102,7 +102,11 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
             const frecuenciaAnterior = habitoAnterior.frecuencia || {tipo: 'diario'};
             const frecuenciaNueva = datos.frecuencia || {tipo: 'diario'};
 
-            const huboCambios = habitoAnterior.nombre !== datos.nombre || habitoAnterior.importancia !== datos.importancia || descripcionAnterior !== descripcionNueva || iconoAnterior !== iconoNuevo || colorAnterior !== colorNuevo || JSON.stringify(frecuenciaAnterior) !== JSON.stringify(frecuenciaNueva);
+            /* TAREA 4: Comparar ventana de oportunidad */
+            const ventanaAnterior = habitoAnterior.ventanaOportunidad;
+            const ventanaNueva = datos.ventanaOportunidad;
+
+            const huboCambios = habitoAnterior.nombre !== datos.nombre || habitoAnterior.importancia !== datos.importancia || descripcionAnterior !== descripcionNueva || iconoAnterior !== iconoNuevo || colorAnterior !== colorNuevo || JSON.stringify(frecuenciaAnterior) !== JSON.stringify(frecuenciaNueva) || JSON.stringify(ventanaAnterior) !== JSON.stringify(ventanaNueva);
 
             /* Si no hubo cambios, solo cerrar el modal sin guardar ni registrar acción */
             if (!huboCambios) {

@@ -7,6 +7,7 @@
 import {useMemo, useCallback} from 'react';
 import type {Habito} from '../types/dashboard';
 import {useLocalStorage} from './useLocalStorage';
+import {estaEnVentanaOportunidad} from '../utils/frecuenciaHabitos';
 
 /* Clave para persistencia en localStorage */
 const KEY_ORDEN_HABITOS = 'glory_orden_habitos';
@@ -28,6 +29,7 @@ export const MODOS_ORDEN: ModoOrdenInfo[] = [
 ];
 
 const PESO_IMPORTANCIA: Record<Habito['importancia'], number> = {
+    'Muy Alta': 4,
     Alta: 3,
     Media: 2,
     Baja: 1
@@ -59,9 +61,13 @@ function ordenarPorNombre(a: Habito, b: Habito): number {
 }
 
 function ordenarPorUrgenciaPonderada(a: Habito, b: Habito): number {
-    /* Formula: (importancia * 2) + (diasInactividad * 1.5) - (racha > 0 ? 1 : 0) */
-    const scoreA = PESO_IMPORTANCIA[a.importancia] * 2 + a.diasInactividad * 1.5 - (a.racha > 0 ? 1 : 0);
-    const scoreB = PESO_IMPORTANCIA[b.importancia] * 2 + b.diasInactividad * 1.5 - (b.racha > 0 ? 1 : 0);
+    /* Formula base: (importancia * 2) + (diasInactividad * 1.5) - (racha > 0 ? 1 : 0) */
+    let scoreA = PESO_IMPORTANCIA[a.importancia] * 2 + a.diasInactividad * 1.5 - (a.racha > 0 ? 1 : 0);
+    let scoreB = PESO_IMPORTANCIA[b.importancia] * 2 + b.diasInactividad * 1.5 - (b.racha > 0 ? 1 : 0);
+
+    /* Multiplicador por ventana de oportunidad (x3) */
+    if (estaEnVentanaOportunidad(a)) scoreA *= 3;
+    if (estaEnVentanaOportunidad(b)) scoreB *= 3;
 
     return scoreB - scoreA;
 }
