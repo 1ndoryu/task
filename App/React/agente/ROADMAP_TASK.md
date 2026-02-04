@@ -31,6 +31,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Solución implementada:** Creado hook `useBackButtonCapacitor.ts` que intercepta el evento `backButton` de Capacitor. Revisa en orden: menús contextuales, BottomSheets, drawer, modales. Solo minimiza la app si no hay nada abierto.
 
+**Fix dependencias (2026-02-04):** Resuelto error de build en producción. Se agregó `@capacitor/app@^6.0.3` al `package.json` de `Glory/assets/react` y se configuró alias en `vite.config.ts` para resolver correctamente el import desde `App/React/hooks/useBackButtonCapacitor.ts`.
+
 ---
 
 ### TAREA 2: Hora incorrecta en panel de actividades
