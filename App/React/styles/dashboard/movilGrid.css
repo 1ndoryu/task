@@ -227,6 +227,7 @@
     .menuOpcionesPanelItemEtiqueta {
         font-size: var(--dashboard-tamanoMovilPequeno);
         font-weight: 500;
+        font-family: var(--dashboard-fuenteMonoespaciada);
     }
 
     .menuOpcionesPanelItemDescripcion {
