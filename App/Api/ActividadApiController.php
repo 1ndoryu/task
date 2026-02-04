@@ -155,6 +155,13 @@ class ActividadApiController
                     'type' => 'string',
                     'sanitize_callback' => 'sanitize_text_field'
                 ],
+                /* TAREA 2: Agregar hora local del cliente para evitar problemas de timezone */
+                'horaLocal' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'description' => 'Hora local del cliente (HH:MM:SS) para evitar problemas de zona horaria'
+                ],
                 'detalles' => [
                     'required' => false,
                     'type' => 'array',
@@ -503,7 +510,8 @@ class ActividadApiController
                 $elementoTipo ?: null,
                 $proyectoId ?: null,
                 $fecha ?: null,
-                is_array($detalles) ? $detalles : []
+                is_array($detalles) ? $detalles : [],
+                $request->get_param('horaLocal') ?: null
             );
 
             if (!$resultado) {

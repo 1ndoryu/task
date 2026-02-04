@@ -22,6 +22,18 @@ function obtenerNonce(): string {
     return wpData?.nonce || '';
 }
 
+/**
+ * TAREA 2: Obtiene la hora local del cliente en formato HH:MM:SS
+ * para enviar al backend y evitar problemas de zona horaria
+ */
+function obtenerHoraLocal(): string {
+    const ahora = new Date();
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+    return `${horas}:${minutos}:${segundos}`;
+}
+
 export type TipoActividad = 'tarea_completada' | 'habito_cumplido' | 'nota_creada' | 'adjunto_subido' | 'tarea_desmarcada' | 'habito_desmarcado' | 'habito_pospuesto';
 
 export interface RegistroActividadParams {
@@ -31,6 +43,8 @@ export interface RegistroActividadParams {
     proyectoId?: number;
     fecha?: string;
     detalles?: Record<string, unknown>;
+    /* TAREA 2: Hora local del cliente para evitar problemas de timezone */
+    horaLocal?: string;
 }
 
 export interface DetalleActividadItem {
@@ -61,9 +75,17 @@ export interface ObtenerDetalleActividadParams {
  * NOTA: La sincronización del estado de hábitos se maneja en habitosStore.ts
  * usando Zustand. Este servicio solo registra la actividad y invalida el cache
  * del panel de actividad.
+ * 
+ * TAREA 2: Se incluye la hora local del cliente para evitar problemas de timezone
  */
 export async function registrarActividad(params: RegistroActividadParams): Promise<boolean> {
     try {
+        /* TAREA 2: Agregar hora local si no viene en params */
+        const paramsConHora = {
+            ...params,
+            horaLocal: params.horaLocal || obtenerHoraLocal()
+        };
+
         const response = await fetch(API_BASE, {
             method: 'POST',
             credentials: 'include',
@@ -71,7 +93,7 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
                 'Content-Type': 'application/json',
                 'X-WP-Nonce': obtenerNonce()
             },
-            body: JSON.stringify(params)
+            body: JSON.stringify(paramsConHora)
         });
 
         if (!response.ok) {

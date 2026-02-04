@@ -13,6 +13,8 @@ const DIAS_JS_A_DIASEMANA: DiaSemana[] = ['domingo', 'lunes', 'martes', 'miercol
 /*
  * Determina si un habito debe realizarse hoy basado en su frecuencia
  * y la fecha del ultimo completado
+ * 
+ * TAREA 3: Corregido bug off-by-one al normalizar ambas fechas a medianoche
  */
 export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string): boolean {
     /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
@@ -25,8 +27,11 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'cadaXDias': {
             if (!ultimoCompletado) return true;
 
-            /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
-            const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
+            /* 
+             * TAREA 3: Normalizar fecha del último completado a medianoche
+             * para evitar errores off-by-one al comparar con hoy (que ya está a 00:00:00)
+             */
+            const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
 
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -36,8 +41,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'semanal': {
             if (!ultimoCompletado) return true;
 
-            /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
-            const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
+            /* TAREA 3: Normalizar a medianoche */
+            const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
 
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -52,8 +57,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'mensual': {
             if (!ultimoCompletado) return true;
 
-            /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
-            const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
+            /* TAREA 3: Normalizar a medianoche */
+            const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
             const diasEnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
             const vecesAlMes = frecuencia.vecesAlMes || 4;
 
@@ -73,6 +78,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
 /*
  * Calcula los dias restantes hasta la proxima repeticion
  * Retorna 0 si toca hoy, numero positivo si falta tiempo
+ * 
+ * TAREA 3: Corregido bug off-by-one normalizando fechas a medianoche
  */
 export function diasHastaProximaRepeticion(frecuencia: FrecuenciaHabito, ultimoCompletado?: string): number {
     if (tocaHoy(frecuencia, ultimoCompletado)) {
@@ -83,8 +90,8 @@ export function diasHastaProximaRepeticion(frecuencia: FrecuenciaHabito, ultimoC
 
     if (!ultimoCompletado) return 0;
 
-    /* Usar T12:00:00 para evitar problemas de zona horaria (UTC vs local) */
-    const ultimaFecha = new Date(ultimoCompletado + 'T12:00:00');
+    /* TAREA 3: Normalizar a medianoche para consistencia con tocaHoy */
+    const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
 
     const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 

@@ -166,8 +166,15 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
         });
     }, []);
 
+    /*
+     * Formatea la hora recibida del backend
+     * TAREA 2: La hora se almacena en la zona horaria del servidor (WordPress)
+     * que puede diferir de la zona del cliente. El backend ya guarda la hora
+     * local del servidor con current_time(), así que la mostramos directamente.
+     */
     const formatearHora = useCallback((hora: string | null) => {
         if (!hora) return '--:--';
+        /* Mostrar solo HH:MM de la hora guardada */
         return hora.slice(0, 5);
     }, []);
 

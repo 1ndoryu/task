@@ -71,10 +71,20 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
                 return;
             }
 
-            /* 3. Click normal = editar/configurar */
+            /* 
+             * TAREA 5: Hábitos en panel de ejecución abren BottomSheet 
+             * Comportamiento idéntico a TablaHabitos - onClick abre edición
+             */
+            if (esHabito && onEditarHabito) {
+                evento.stopPropagation();
+                onEditarHabito((tarea as any).habitoId);
+                return;
+            }
+
+            /* 3. Click normal en tarea = editar/configurar */
             iniciarEdicion();
         },
-        [iniciarEdicion, onSeleccionMultiple, tarea, modoSeleccionActivo]
+        [iniciarEdicion, onSeleccionMultiple, tarea, modoSeleccionActivo, esHabito, onEditarHabito]
     );
 
     if (editando) {

@@ -3,6 +3,7 @@
  * Componente principal del Dashboard
  * Refactorizado: Lógica dividida en subcomponentes y hook de composición
  * Fase 10.8.3: Integración de opciones móvil en el header
+ * TAREA 1: Integración de useBackButtonCapacitor para manejo de botón back en APK
  */
 
 import {useEffect, useMemo, useState, useCallback} from 'react';
@@ -21,6 +22,7 @@ import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
 import {useNotasStore} from '../stores/notasStore';
 import {useSeleccionMultipleStore} from '../stores/seleccionMultipleStore';
 import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
+import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -91,6 +93,68 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         onNuevaNota: manejarNuevaNota,
         onAbrirNotasGuardadas: manejarAbrirNotasGuardadas,
         onAbrirConfigNotas: modales.abrirModalConfigScratchpad
+    });
+
+    /* TAREA 1: Interceptar botón back en APK para cerrar modales/menus antes de salir */
+    useBackButtonCapacitor({
+        elementos: {
+            modalLoginAbierto: modales.modalLoginAbierto,
+            modalUpgradeAbierto: modales.modalUpgradeAbierto,
+            modalPerfilAbierto: modales.modalPerfilAbierto,
+            modalEquiposAbierto: modales.modalEquiposAbierto,
+            modalNotificacionesAbierto: modales.modalNotificacionesAbierto,
+            modalExperimentosAbierto: modales.modalExperimentosAbierto,
+            modalCrearProyectoAbierto: modales.modalCrearProyectoAbierto,
+            proyectoEditando: modales.proyectoEditando,
+            modalConfigTareasAbierto: modales.modalConfigTareasAbierto,
+            modalConfigHabitosAbierto: modales.modalConfigHabitosAbierto,
+            modalConfigProyectosAbierto: modales.modalConfigProyectosAbierto,
+            modalConfigScratchpadAbierto: modales.modalConfigScratchpadAbierto,
+            modalConfigActividadAbierto: modales.modalConfigActividadAbierto,
+            modalConfigLayoutAbierto: modales.modalConfigLayoutAbierto,
+            modalVersionesAbierto: modales.modalVersionesAbierto,
+            modalNuevaTareaAbierto: modales.modalNuevaTareaAbierto,
+            tareaEditando: modales.tareaEditando,
+            tareaEditandoMovil: modales.tareaEditandoMovil,
+            habitoEditandoMovil: modales.habitoEditandoMovil,
+            modalCreacionRapida: modales.modalCreacionRapida,
+            modalTemasAbierto: modales.modalTemasAbierto,
+            modalConfigMCPAbierto: modales.modalConfigMCPAbierto,
+            modalConfigUsuarioAbierto: modales.modalConfigUsuarioAbierto,
+            modalBackupsAbierto: modales.modalBackupsAbierto,
+            modalFeedbackAbierto: modales.modalFeedbackAbierto,
+            panelSeguridadAbierto: modales.panelSeguridadAbierto,
+            panelAdminAbierto: modales.panelAdminAbierto
+        },
+        acciones: {
+            cerrarModalLogin: modales.cerrarModalLogin,
+            cerrarModalUpgrade: modales.cerrarModalUpgrade,
+            cerrarModalPerfil: modales.cerrarModalPerfil,
+            cerrarModalEquipos: modales.cerrarModalEquipos,
+            cerrarModalNotificaciones: modales.cerrarModalNotificaciones,
+            cerrarModalExperimentos: modales.cerrarModalExperimentos,
+            cerrarModalCrearProyecto: modales.cerrarModalCrearProyecto,
+            cerrarModalEditarProyecto: modales.cerrarModalEditarProyecto,
+            cerrarModalConfigTareas: modales.cerrarModalConfigTareas,
+            cerrarModalConfigHabitos: modales.cerrarModalConfigHabitos,
+            cerrarModalConfigProyectos: modales.cerrarModalConfigProyectos,
+            cerrarModalConfigScratchpad: modales.cerrarModalConfigScratchpad,
+            cerrarModalConfigActividad: modales.cerrarModalConfigActividad,
+            cerrarModalConfigLayout: modales.cerrarModalConfigLayout,
+            cerrarModalVersiones: modales.cerrarModalVersiones,
+            cerrarModalNuevaTarea: modales.cerrarModalNuevaTarea,
+            cerrarModalEditarTarea: modales.cerrarModalEditarTarea,
+            cerrarEdicionTareaMovil: modales.cerrarEdicionTareaMovil,
+            cerrarEdicionHabitoMovil: modales.cerrarEdicionHabitoMovil,
+            cerrarCreacionRapida: modales.cerrarCreacionRapida,
+            cerrarModalTemas: modales.cerrarModalTemas,
+            cerrarModalConfigMCP: modales.cerrarModalConfigMCP,
+            cerrarModalConfigUsuario: modales.cerrarModalConfigUsuario,
+            cerrarModalBackups: modales.cerrarModalBackups,
+            cerrarModalFeedback: modales.cerrarModalFeedback,
+            cerrarPanelSeguridad: modales.cerrarPanelSeguridad,
+            cerrarPanelAdmin: modales.cerrarPanelAdmin
+        }
     });
 
     /* Memoizar objeto de sincronización para evitar re-renders innecesarios */

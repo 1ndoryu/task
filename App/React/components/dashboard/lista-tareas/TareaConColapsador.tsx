@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import {ChevronRight, Check, Trash2} from 'lucide-react';
+import {ChevronRight, Check, Trash2, Clock} from 'lucide-react';
 import {Tarea, Proyecto, DatosEdicionTarea, esTareaHabito} from '../../../types/dashboard';
 import {TareaItem} from '../TareaItem';
 import {tieneSubtareas, contarSubtareas} from '../../../utils/jerarquiaTareas';
@@ -67,7 +67,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
         }
     }
 
-    /* Callbacks para swipe - Solo tareas normales, no hábitos */
+    /* Callbacks para swipe - Diferenciado para hábitos y tareas */
     const manejarSwipeCompletar = () => {
         if (esHabito && onToggleHabito) {
             onToggleHabito((tarea as any).habitoId);
@@ -76,9 +76,14 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
         }
     };
 
-    const manejarSwipeEliminar = () => {
-        if (esHabito && onEliminarHabito) {
-            onEliminarHabito((tarea as any).habitoId);
+    /*
+     * TAREA 6: Swipe izquierda diferenciado
+     * - Hábitos: Posponer (más útil que eliminar)
+     * - Tareas normales: Eliminar
+     */
+    const manejarSwipeIzquierda = () => {
+        if (esHabito && onPosponerHabito) {
+            onPosponerHabito((tarea as any).habitoId);
         } else {
             onEliminarTarea?.(tarea.id);
         }
@@ -91,11 +96,18 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
         etiqueta: tarea.completado ? 'Reactivar' : 'Completar'
     };
 
-    const accionEliminar = {
-        color: 'var(--dashboard-estadoError)',
-        icono: <Trash2 size={20} />,
-        etiqueta: 'Eliminar'
-    };
+    /* TAREA 6: Acción izquierda diferenciada para hábitos (posponer) vs tareas (eliminar) */
+    const accionIzquierda = esHabito
+        ? {
+              color: 'var(--dashboard-estadoAdvertencia)',
+              icono: <Clock size={20} />,
+              etiqueta: 'Posponer'
+          }
+        : {
+              color: 'var(--dashboard-estadoError)',
+              icono: <Trash2 size={20} />,
+              etiqueta: 'Eliminar'
+          };
 
     /* TareaItem con todas las props */
     const tareaItemElement = (
@@ -138,7 +150,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
         <div className={`tareaConColapsador ${modoCompacto ? 'tareaConColapsador--compacto' : ''}`} key={`wrapper-${tarea.id}`}>
             {/* En móvil: envolver con SwipeableItem para gestos */}
             {esMovil ? (
-                <SwipeableItem onSwipeRight={manejarSwipeCompletar} onSwipeLeft={manejarSwipeEliminar} accionDerecha={accionCompletar} accionIzquierda={accionEliminar}>
+                <SwipeableItem onSwipeRight={manejarSwipeCompletar} onSwipeLeft={manejarSwipeIzquierda} accionDerecha={accionCompletar} accionIzquierda={accionIzquierda}>
                     {tareaItemElement}
                 </SwipeableItem>
             ) : (

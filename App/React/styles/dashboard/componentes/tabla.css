@@ -569,12 +569,14 @@
 
 /* 
  * MODO COMPACTO 
+ * TAREA 6: Aumentado gap entre filas de habitos (+2px margin-bottom)
  */
 .tablaFilaCompacta {
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     min-height: 32px;
     gap: var(--dashboard-espacioMd);
     align-items: center;
+    margin-bottom: 2px;
 }
 
 .tablaFilaCompacta .habitoCheckbox {

@@ -36,6 +36,7 @@ class ActividadRepository
      * @param int|null $proyectoId ID del proyecto relacionado (opcional)
      * @param string|null $fecha Fecha de la actividad (Y-m-d), usa hoy si no se especifica
      * @param array $detalles Detalles adicionales de la actividad
+     * @param string|null $horaLocal Hora local del cliente (HH:MM:SS) - TAREA 2: Fix timezone
      */
     public function registrar(
         string $tipo,
@@ -43,13 +44,16 @@ class ActividadRepository
         ?string $elementoTipo = null,
         ?int $proyectoId = null,
         ?string $fecha = null,
-        array $detalles = []
+        array $detalles = [],
+        ?string $horaLocal = null
     ): bool {
         global $wpdb;
         $table = Schema::getTableName('actividad');
 
         $fechaRegistro = $fecha ?? current_time('Y-m-d');
-        $horaRegistro = current_time('H:i:s');
+        
+        /* TAREA 2: Usar hora del cliente si se proporciona, de lo contrario hora del servidor */
+        $horaRegistro = $horaLocal ?? current_time('H:i:s');
 
         $result = $wpdb->insert(
             $table,

@@ -220,4 +220,14 @@
         padding-left: 15px;
         padding-right: 15px;
     }
+
+    /*
+     * TAREA 4: SUBTAREAS EN MOVIL - INDENTACION VISUAL
+     * Las subtareas necesitan mas padding para diferenciarse
+     * 30px (15px base + 15px extra indentacion)
+     */
+    .tareaItemSubtarea,
+    .tareaItem--compacto.tareaItemSubtarea {
+        padding-left: 30px;
+    }
 }

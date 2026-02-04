@@ -40,3 +40,4 @@ export type {TipoTema, InfoTema} from './useTema';
 export {useModoEnfoque} from './useModoEnfoque';
 export {useMenuContextualGlobal} from './useMenuContextualGlobal';
 export type {PosicionMenu} from './useMenuContextualGlobal';
+export {useBackButtonCapacitor} from './useBackButtonCapacitor';
