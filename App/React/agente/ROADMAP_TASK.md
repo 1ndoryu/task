@@ -133,7 +133,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 
 ### TAREA 11: Modo Offline para App
-**Estado:** ⬜ Pospuesta | **Prioridad:** Alta (Post-lanzamiento)
+**Estado:** ⬜ Pendiente| **Prioridad:** Alta (Post-lanzamiento)
 
 Si no hay internet, la app debe funcionar offline y sincronizar cuando vuelva la conexión.
 
