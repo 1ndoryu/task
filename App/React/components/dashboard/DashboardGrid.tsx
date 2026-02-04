@@ -275,15 +275,21 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
     /*
      * Handler para editar hábito por ID (para tareas-hábito en Ejecución)
      * Busca el hábito completo para pasarlo al modal
+     * TAREA 5 FIX: Adaptativo móvil/desktop igual que TablaHabitos
      */
     const manejarEditarHabitoPorId = useCallback(
         (habitoId: number) => {
             const habito = dashboard.habitos.find(h => h.id === habitoId);
             if (habito) {
-                dashboard.abrirModalEditarHabito(habito);
+                /* Móvil: BottomSheet de edición rápida, Desktop: modal completo */
+                if (esMovil) {
+                    modales.abrirEdicionHabitoMovil(habito);
+                } else {
+                    dashboard.abrirModalEditarHabito(habito);
+                }
             }
         },
-        [dashboard]
+        [dashboard, modales, esMovil]
     );
 
     /* Handler genérico para cambiar altura de paneles */

@@ -22,9 +22,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 # Revisiones
 
-1. ✅ **RESUELTO** - El back ahora debería funcionar. Debes regenerar la APK y reinstalar.
+1. ✅ **RESUELTO** - El back ahora debería funcionar. Debes regenerar la APK y reinstalar. (INCORRECTO SIGUE SIN FUNCIONAR; YA REGENERE LA APK Y SUBI LOS CMBIOS AL SERVIDOR Y SIGUE FUNCIONAR)
 
-2. ✅ **RESUELTO** - TAREA 5 corregida: ahora al tocar tareas/hábitos en panel de ejecución abre BottomSheetTarea
+2. ✅ **RESUELTO** - TAREA 5 corregida: ahora al tocar tareas/hábitos en panel de ejecución abre BottomSheetTarea (CON LAS TAREAS YA SE ARREGLO PERO CON LOS HABITOS EN EL PANEL DE EJECUCION AUN NO)
 
 ---
 
