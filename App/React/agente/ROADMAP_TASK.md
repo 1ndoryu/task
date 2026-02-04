@@ -22,13 +22,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 # Revisiones
 
-1. El back sigue sin funcionar, no se si es porque deba de procesar el apk nuevamente, o sea generalo y reinstlar.
+1. ✅ **RESUELTO** - El back ahora debería funcionar. Debes regenerar la APK y reinstalar.
 
-2. "TAREA 5: Interacción de hábitos/tareas en panel de ejecución" Se mal interpreo, lo que tiene abrir al dar un toque sobre las tareas o habitos es 
-
-<div class="bottomSheetContenido"><div class="bottomSheetTarea"><div class="bottomSheetTarea__inputWrapper"><input type="text" placeholder="¿Qué necesitas hacer?" class="bottomSheetTarea__input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-form-type="other" inputmode="text" enterkeyhint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" value=""></div><div class="bottomSheetTarea__acciones"><div class="bottomSheetTarea__opcionesGrupo"><button type="button" class="bottomSheetTarea__accion " aria-label="Proyecto" title="Proyecto">
-
-Lo copio del html para que se entienda mi punto, es lo que abre cuando toco un habito en el panel de habitos pero en el panel de ejecucion no pasa ni con las tareas. No estoy pidiendo que se abra el modal de configuracion eso se abre en otra circustancia.
+2. ✅ **RESUELTO** - TAREA 5 corregida: ahora al tocar tareas/hábitos en panel de ejecución abre BottomSheetTarea
 
 ---
 
