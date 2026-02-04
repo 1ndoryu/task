@@ -232,5 +232,6 @@
     .menuOpcionesPanelItemDescripcion {
         font-size: var(--dashboard-tamanoPequeno);
         color: var(--dashboard-textoApagado);
+        font-family: var(--dashboard-fuenteMonoespaciada);
     }
 }
