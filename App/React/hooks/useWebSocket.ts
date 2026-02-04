@@ -19,8 +19,10 @@ import {Capacitor} from '@capacitor/core';
 
 /* Configuración del WebSocket */
 const CONFIG_WS = {
-    /* URL base del servidor WebSocket (modificar según entorno) */
-    url: 'wss://task.nakomi.studio:8080',
+    /* URL base del servidor WebSocket
+     * TODO: Configurar wss:// a través del proxy de Coolify para producción
+     */
+    url: 'ws://66.94.100.241:8082',
     /* Intervalo de heartbeat en ms (mantener conexión viva) */
     heartbeatMs: 30000,
     /* Timeout para considerar conexión muerta si no hay pong */
@@ -68,11 +70,7 @@ interface UseWebSocketReturn {
 /* Callback para manejar mensajes entrantes */
 type MensajeHandler = (mensaje: MensajeWS) => void;
 
-export function useWebSocket(
-    userId: number | null,
-    onMensaje?: MensajeHandler,
-    habilitado: boolean = true
-): UseWebSocketReturn {
+export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, habilitado: boolean = true): UseWebSocketReturn {
     const [estado, setEstado] = useState<EstadoConexion>('desconectado');
     const [ultimaActividad, setUltimaActividad] = useState<Date | null>(null);
 
@@ -158,18 +156,20 @@ export function useWebSocket(
                 intentosReconexionRef.current = 0;
 
                 /* Registrar usuario */
-                ws.send(JSON.stringify({
-                    accion: 'registrar',
-                    idUsuario: userId,
-                    timestamp: Date.now()
-                }));
+                ws.send(
+                    JSON.stringify({
+                        accion: 'registrar',
+                        idUsuario: userId,
+                        timestamp: Date.now()
+                    })
+                );
 
                 /* Iniciar heartbeat */
                 iniciarHeartbeat();
                 setUltimaActividad(new Date());
             };
 
-            ws.onmessage = (evento) => {
+            ws.onmessage = evento => {
                 if (!montadoRef.current) return;
 
                 try {
@@ -192,12 +192,12 @@ export function useWebSocket(
                 }
             };
 
-            ws.onerror = (error) => {
+            ws.onerror = error => {
                 console.error('[WebSocket] Error:', error);
                 setEstado('error');
             };
 
-            ws.onclose = (evento) => {
+            ws.onclose = evento => {
                 if (!montadoRef.current) return;
 
                 console.log('[WebSocket] Desconectado. Código:', evento.code);
@@ -233,10 +233,7 @@ export function useWebSocket(
         }
 
         /* Backoff exponencial: 1s, 2s, 4s, 8s... hasta 30s */
-        const delay = Math.min(
-            CONFIG_WS.reconexionBaseMs * Math.pow(2, intentosReconexionRef.current - 1),
-            CONFIG_WS.reconexionMaxMs
-        );
+        const delay = Math.min(CONFIG_WS.reconexionBaseMs * Math.pow(2, intentosReconexionRef.current - 1), CONFIG_WS.reconexionMaxMs);
 
         console.log(`[WebSocket] Reconectando en ${delay}ms (intento ${intentosReconexionRef.current})`);
 

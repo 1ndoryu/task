@@ -126,30 +126,85 @@ npx cap sync
 ---
 
 ### TAREA 9: Sincronización en Tiempo Real (WebSockets)
-**Estado:** ✅ Completado | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
+**Estado:** 🔄 En progreso (70%) | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
 
 **Descripción:** Implementar actualización en tiempo real entre dispositivos usando WebSockets.
 
-**Solución implementada (2026-02-04):**
+**Progreso (2026-02-04):**
 
-1. **useWebSocket.ts** - Cliente WebSocket con:
+#### ✅ COMPLETADO:
+
+1. **Servidor WebSocket Node.js** - VPS (`/opt/websocket-sync/`):
+   - `server.js` - Servidor escuchando en puerto 8082
+   - Reenvía mensajes de sync entre dispositivos del mismo usuario
+   - Heartbeat/pong para mantener conexiones vivas
+   - Servicio systemd: `websocket-sync.service` (activo y habilitado)
+   - Puerto 8082 abierto en firewall UFW
+
+2. **useWebSocket.ts** - Cliente WebSocket React:
+   - URL configurada: `ws://66.94.100.241:8082`
    - Reconexión automática con backoff exponencial
-   - Heartbeat para mantener conexión viva
+   - Heartbeat para detectar conexiones muertas
    - Detección de visibilidad de página (reconecta al volver)
-   - Reconexión al volver online
-   - Soporte para Capacitor (reconecta al volver a la app)
+   - Soporte Capacitor (reconecta al reactivar app)
 
-2. **useSincronizacionTiempoReal.ts** - Integración con sync existente:
-   - Cola de cambios locales
+3. **useSincronizacionTiempoReal.ts** - Hook de integración:
+   - Cola de cambios locales con debounce
    - Envío de cambios a otros dispositivos
-   - Recepción de cambios remotos
+   - Recepción y procesamiento de cambios remotos
 
-3. **PullToRefresh.tsx** - Componente para móvil:
-   - Gesto de tirar hacia abajo para recargar
-   - Indicador visual de progreso
-   - Animación al refrescar
+4. **useDashboardSync.ts** - Integración con sync HTTP existente:
+   - `callbacksWebSocket` - Handlers para tareas/hábitos/proyectos/notas remotas
+   - Actualiza estado local cuando llegan cambios de otro dispositivo
+   - Expone `tiempoReal.notificarCambio` para notificar cambios locales
 
-**Nota:** Se requiere configurar la URL del WebSocket en `CONFIG_WS.url` del hook.
+5. **useDashboard.ts** - Tipos actualizados:
+   - Interfaz `UseDashboardReturn` incluye `tiempoReal`
+   - Propagación de estado WebSocket
+
+#### ⚠️ PROBLEMA ACTUAL:
+- **Mixed Content**: Los navegadores bloquean `ws://` desde páginas `https://`
+- La APK (Capacitor) **SÍ debería funcionar** porque no tiene esa restricción
+- La versión web necesita `wss://` (WebSocket con SSL)
+
+#### ❌ PENDIENTE:
+
+1. **Configurar SSL para WebSocket** (Prioridad Alta para web):
+   - Opción A: Crear servicio en Coolify para el WebSocket con subdominio `ws.nakomi.studio`
+   - Opción B: Configurar Traefik de Coolify para proxy WSS en path `/ws`
+   - Opción C: Usar Caddy standalone en puerto diferente (8443) con cert Let's Encrypt
+   - **Nota**: Coolify usa Traefik v3.6 como proxy, ya instalé Caddy pero está deshabilitado
+
+2. **Llamar a `notificarCambio`** desde las acciones:
+   - `useTareas.ts` - al crear/editar/eliminar tareas
+   - `useProyectos.ts` - al crear/editar/eliminar proyectos
+   - `useHabitosStore.ts` - al crear/editar/eliminar/toggle hábitos
+
+3. **Probar la conexión en producción**:
+   - Verificar logs del servidor: `journalctl -u websocket-sync -f`
+   - Verificar conexión desde APK
+   - Verificar sincronización entre dispositivos
+
+**Archivos modificados:**
+- `App/React/hooks/useWebSocket.ts` - URL actualizada a puerto 8082
+- `App/React/hooks/dashboard/useDashboardSync.ts` - Integración WebSocket
+- `App/React/hooks/useDashboard.ts` - Tipos + propagación tiempoReal
+- `.agent/coolify-manager/temp/websocket-server.js` - Servidor (subido al VPS)
+
+**Comandos útiles del servidor:**
+```bash
+# Ver estado del servidor WebSocket
+systemctl status websocket-sync
+
+# Ver logs en tiempo real
+journalctl -u websocket-sync -f
+
+# Reiniciar servidor
+systemctl restart websocket-sync
+
+# Probar conexión
+curl -I http://66.94.100.241:8082  # Debe responder 426 Upgrade Required
+```
 
 ---
 

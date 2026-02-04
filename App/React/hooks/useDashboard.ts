@@ -18,6 +18,8 @@ import {useHabitosStore} from '../stores/habitosStore'; // Necesario para import
 import {useDashboardData} from './dashboard/useDashboardData';
 import {useDashboardSync} from './dashboard/useDashboardSync';
 import {useDashboardHabitos} from './dashboard/useDashboardHabitos';
+import type {CambioLocal, EntidadSincronizable, AccionSincronizacion} from './useSincronizacionTiempoReal';
+import type {EstadoConexion} from './useWebSocket';
 
 interface UseDashboardReturn {
     habitos: Habito[];
@@ -68,6 +70,11 @@ interface UseDashboardReturn {
         sincronizarAhora: () => Promise<boolean>;
         cargandoDesdeServidor: boolean;
     };
+    tiempoReal: {
+        estadoConexion: EstadoConexion;
+        conectado: boolean;
+        notificarCambio: (cambio: Omit<CambioLocal, 'timestamp'>) => void;
+    };
 }
 
 // Fix for importando type in interface
@@ -111,7 +118,7 @@ export function useDashboard(): UseDashboardReturn {
     const cargandoDatos = cargandoHabitos || cargandoDatosLocales;
 
     // 4. Sincronización
-    const {sincronizacion} = useDashboardSync({
+    const {sincronizacion, tiempoReal} = useDashboardSync({
         habitos,
         tareas,
         proyectos,
@@ -221,6 +228,7 @@ export function useDashboard(): UseDashboardReturn {
         ejecutarDeshacer,
         descartarDeshacer,
         reordenarTareas,
-        sincronizacion
+        sincronizacion,
+        tiempoReal
     };
 }
