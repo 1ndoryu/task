@@ -39,6 +39,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Implementación:** Usar el plugin `@capacitor/app` para interceptar el evento `backButton` y manejar la navegación.
 
+**Archivos clave:**
+- `hooks/useModalesDashboard.ts` (gestión de estados de modales)
+- `stores/drawersStore.ts` (gestión de drawer lateral)
+- Agregar listener en archivo principal (App.tsx o index.tsx)
+
 ---
 
 ### TAREA 2: Hora incorrecta en panel de actividades
@@ -46,9 +51,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Problema:** Las actividades muestran hora incorrecta. Ejemplo: si se completa algo a las 05:00, aparece que se completó a las 10:00 (diferencia de 5 horas, posible problema de timezone UTC vs local).
 
-**Archivos clave:** `actividadService.ts`, `PanelActividad.tsx`
-
-**Solución probable:** Verificar que las fechas se guarden y se muestren en timezone local, no UTC.
+**Archivos clave:**
+- `services/actividadService.ts` (funciones: `registrarHabitoCumplido`, `obtenerDetalleActividadDia`)
+- `components/paneles/PanelActividad.tsx` (visualización de timestamps)
+- `utils/fecha.ts` (funciones de conversión de fechas)
 
 ---
 
@@ -58,7 +64,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Problema:** Caso real - Hábito "Leer" realizado el 31 de enero con frecuencia de 3 días. Debería aparecer el 3 de febrero pero aparece el 4 de febrero. No tiene badge de "hoy" ni aparece en panel de ejecución.
 
 **Causa probable:** El cálculo de `proximaFecha` suma días desde el día siguiente en lugar del mismo día, o hay un error de off-by-one.
-
+Archivos clave:**
+- `utils/habitosLogica.ts` (funciones: `calcularToggleHabito`, `calcularPosponerHabito`)
+- `stores/habitosStore.ts` (lógica de actualización de hábitos)
+- `types/dashboard.ts` (interface `FrecuenciaHabito`)
+- `utils/fecha.ts` (funciones: `calcularDiasDesde`, `obtenerFechaLocalISO`)
 **Verificar:** Lógica en el store de hábitos para el cálculo de fechas según frecuencia.
 
 ---
@@ -66,7 +76,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## 🟡 PRIORIDAD MEDIA - Mejoras UI/UX Móvil
 
 ### TAREA 4: Subtareas en móvil no parecen subtareas (modo normal)
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** UI
+**Archivos clave:**
+- `components/dashboard/TareaItem.tsx` (renderizado de tareas)
+- `utils/jerarquiaTareas.ts` (funciones: `esSubtarea`, `obtenerPadre`, `obtenerSubtareas`)
+- CSS de TareaItem con media queries para móvil
+- Buscar clase/estilos para modo compacto como referencia
 
 **Problema:** En la versión móvil, las subtareas no tienen indentación visual en modo normal. En modo compacto sí funcionan correctamente.
 
@@ -74,12 +88,25 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+
+**Archivos clave:**
+- `components/paneles/PanelEjecucion.tsx` (handlers de click)
+- `components/dashboard/BottomSheetHabito.tsx` (edición de hábitos)
+- `components/dashboard/BottomSheetTarea.tsx` (edición de tareas)
+- `hooks/useModalesDashboard.ts` (funciones: abrir/cerrar BottomSheets)
+- `hooks/useCreacionEntidades.ts` (handlers: `manejarGuardarHabitoBottomSheet`, `manejarGuardarTareaBottomSheet`)
 ### TAREA 5: Interacción de hábitos/tareas en panel de ejecución
 **Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** UX
 
 **Problemas:**
 1. **Hábitos:** Al tocar un hábito en panel de ejecución, debería abrir el BottomSheet (igual que en panel de hábitos). Actualmente no lo hace.
-2. **Tareas:** Al tocar una tarea, abre el panel de configuración en vez del BottomSheet de edición (el mismo que aparece al crear tarea).
+2. **Tareas:** Al tocar una tarea, abre el panel de configu
+
+**Archivos clave:**
+- `components/shared/SwipeableItem.tsx` (componente reutilizable para swipe)
+- `components/dashboard/HabitoItem.tsx` (item de hábito, wrap con SwipeableItem)
+- `stores/habitosStore.ts` (funciones: `toggleHabito`, `posponerHabito`)
+- CSS del componente de hábitos (ajustar gap)ración en vez del BottomSheet de edición (el mismo que aparece al crear tarea).
 
 **Comportamiento esperado:** Un toque = BottomSheet para edición rápida (tanto hábitos como tareas).
 
@@ -87,6 +114,12 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 6: Modo compacto - Mejoras en hábitos
 **Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** UX
+
+**Archivos clave:**
+- `components/paneles/PanelEjecucion.tsx` (lógica de ordenamiento/ranking)
+- `hooks/useOrdenarTareas.ts` (funciones de ordenamiento)
+- `hooks/dashboard/useTareaOrdenamiento.ts` (gestión de orden)
+- `utils/fecha.ts` (funciones para calcular días transcurridos)
 
 **Mejoras:**
 1. Aumentar gap entre hábitos en 2px
@@ -105,6 +138,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Lógica sugerida:** `puntos += diasVencidos * factorUrgencia`
 
+
+**Archivos a crear:**
+- `services/notificacionesService.ts` (lógica de programación)
+- `hooks/useNotificaciones.ts` (gestión en React)
+- Integrar con `stores/habitosStore.ts` y `stores/tareasStore.ts`
 ---
 
 ## 🟠 PRIORIDAD BAJA - Funcionalidades Post-Lanzamiento
@@ -121,7 +159,13 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Opciones técnicas:**
 - **Opción 1 (sin terceros):** Usar `@capacitor/local-notifications` para notificaciones locales programadas. No requiere servidor externo.
-- **Opción 2 (con terceros):** Firebase Cloud Messaging (FCM) - gratuito, pero requiere cuenta Google.
+- **Opción 2 (con terceros):** Firebase Cloud Messaging (FCM
+
+**Archivos a crear/modificar:**
+- Backend: implementar WebSocket server (posible librería: `ws` o `socket.io`)
+- `services/websocketService.ts` (cliente WebSocket)
+- `hooks/useSincronizacion.ts` (hook para escuchar eventos)
+- Modificar todos los stores (tareas, hábitos, notas) para emitir eventos de cambios) - gratuito, pero requiere cuenta Google.
 
 **Recomendación:** Comenzar con notificaciones locales (`@capacitor/local-notifications`) ya que no requiere backend adicional y cubre el caso de ventanas de oportunidad.
 
@@ -138,12 +182,25 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 3. Cuando un dispositivo hace un cambio, emite evento al servidor
 4. Servidor propaga a todos los dispositivos conectados del mismo usuario
 
+
+**Archivos relacionados actuales:**
+- `components/dashboard/ModalConfiguracionTareas.tsx`
+- `components/paneles/ModalConfigActividad.tsx` (y otros modales de config)
+- `stores/panelConfigStore.ts` (posible store nuevo centralizado)
+- Crear: `components/dashboard/ModalConfiguracionGlobal.tsx`
 **Alternativa:** Si usas Supabase, tiene Realtime integrado.
 
 ---
 
 ### TAREA 10: Modal central de configuración
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja (NO prioritario) | **Tipo:** Refactor/Feature
+**Descripción:** Si no hay internet, la app debe funcionar offline y sincronizar cuando vuelva la conexión.
+
+**Archivos clave:**
+- `services/offlineService.ts` (detección de estado de red, cola de sincronización)
+- `hooks/useOffline.ts` (hook para estado online/offline)
+- Modificar todos los servicios API (tareas, hábitos, notas) para queue requests
+- `stores/sincronizacionStore.ts` (gestionar cola de cambios pendientes)
+- Usar `@capacitor/network` para detección de conectividade
 
 **Descripción:** Centralizar todas las configuraciones de paneles en un modal único.
 
@@ -153,6 +210,13 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 3. Incluir opciones de perfil
 4. Diseño SOLID para evitar duplicación de configuraciones
 5. Coherencia visual con el resto de la app
+
+**Archivos posibles:**
+- `components/notas/ListaNotasGuardadas.tsx`
+- `components/notas/ModalNotasExpandido.tsx`
+- `components/notas/EditorNota.tsx`
+- `stores/notasStore.ts`
+- CSS relacionados con notas
 
 **Nota del usuario:** Esto NO es prioritario.
 
