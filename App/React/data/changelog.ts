@@ -25,14 +25,25 @@ export const HISTORIAL_VERSIONES: Version[] = [
         version: 'v1.0.21-beta',
         fecha: '2026-02-03',
         cambios: [
-            {tipo: 'nuevo', descripcion: 'Ventana de oportunidad para hábitos: define el mejor horario para realizar cada hábito con un reloj visual'},
-            {tipo: 'nuevo', descripcion: 'Ordenamiento de grupos de tareas por nombre, importancia promedio o manual'},
-            {tipo: 'nuevo', descripcion: 'Los grupos de tareas ahora se muestran con sus tareas agrupadas visualmente'},
-            {tipo: 'mejora', descripcion: 'Gestos de deslizamiento en tareas móvil ahora cubren todo el ancho correctamente'},
-            {tipo: 'mejora', descripcion: 'Los subhábitos tienen el mismo diseño minimalista que las subtareas'},
-            {tipo: 'mejora', descripcion: 'Al tocar un hábito en móvil, se abre el editor con icono de configuración'},
-            {tipo: 'arreglo', descripcion: 'Las actividades ahora muestran correctamente el nombre de tareas y hábitos'},
-            {tipo: 'arreglo', descripcion: 'La carpeta General de notas ya no desaparece al navegar entre carpetas'}
+            {tipo: 'nuevo', descripcion: 'Panel de notas adaptado para móvil con mejor uso del espacio'},
+            {tipo: 'nuevo', descripcion: 'Desliza tareas para completarlas o eliminarlas rápidamente en móvil'},
+            {tipo: 'nuevo', descripcion: 'Subhábitos: hábitos dentro de hábitos con frecuencia e importancia independiente'},
+            {tipo: 'nuevo', descripcion: 'Configura el mejor horario para cada hábito con ventana de oportunidad visual'},
+            {tipo: 'nuevo', descripcion: 'Organiza tus notas en carpetas y navega como en un explorador de archivos'},
+            {tipo: 'nuevo', descripcion: 'Ocultar o mostrar lista de notas y editor de forma independiente'},
+            {tipo: 'nuevo', descripcion: 'Selecciona múltiples tareas con Ctrl+Click o mantén presionado en móvil'},
+            {tipo: 'nuevo', descripcion: 'Ordena grupos de tareas por nombre o importancia promedio'},
+            {tipo: 'mejora', descripcion: 'Los gestos de deslizamiento ahora funcionan correctamente sin importar el largo del texto'},
+            {tipo: 'mejora', descripcion: 'Ahora puedes editar hábitos tocándolos una vez en móvil'},
+            {tipo: 'mejora', descripcion: 'Las subtareas se expanden automáticamente al agregar una nueva si la opción está desactivada'},
+            {tipo: 'mejora', descripcion: 'Menú contextual en notas con opciones para ver, mover, eliminar o renombrar'},
+            {tipo: 'mejora', descripcion: 'Modal de copias de seguridad ahora se adapta mejor a pantallas móviles'},
+            {tipo: 'mejora', descripcion: 'Opción para ocultar subtareas automáticamente al inicio'},
+            {tipo: 'mejora', descripcion: 'Ordenar notas por fecha de modificación o creación'},
+            {tipo: 'arreglo', descripcion: 'Las actividades del día ahora muestran correctamente el nombre de tareas y hábitos'},
+            {tipo: 'arreglo', descripcion: 'Los acentos y caracteres especiales ya no se muestran con símbolos raros en las notas'},
+            {tipo: 'arreglo', descripcion: 'La carpeta General siempre aparece y no desaparece al navegar'},
+            {tipo: 'arreglo', descripcion: 'Las copias de seguridad automáticas ya no aparecen marcadas como manuales'}
         ]
     },
     {
