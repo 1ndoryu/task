@@ -1,8 +1,8 @@
 /*
  * useBackButtonCapacitor
  * Hook para interceptar el botón back en aplicaciones Capacitor (APK)
- * Cierra modales, BottomSheets y menús antes de permitir la salida
- * TAREA 1: Fix botón back en APK
+ * Cierra modales, BottomSheets, menús y navegación antes de permitir la salida
+ * TAREA 1: Fix botón back en APK - Versión mejorada
  */
 
 import {useEffect, useCallback, useRef} from 'react';
@@ -38,6 +38,8 @@ interface ElementosCerrables {
     modalFeedbackAbierto?: boolean;
     panelSeguridadAbierto?: boolean;
     panelAdminAbierto?: boolean;
+    /* Modal de notas */
+    modalNotasAbierto?: boolean;
 }
 
 interface AccionesCierre {
@@ -68,6 +70,7 @@ interface AccionesCierre {
     cerrarModalFeedback?: () => void;
     cerrarPanelSeguridad?: () => void;
     cerrarPanelAdmin?: () => void;
+    cerrarModalNotas?: () => void;
 }
 
 interface UseBackButtonCapacitorParams {
@@ -92,24 +95,37 @@ function hayDrawerAbierto(): boolean {
 }
 
 /*
- * Cierra BottomSheets abiertos simulando click en overlay
+ * Cierra BottomSheets abiertos simulando click en overlay visible
  */
 function cerrarBottomSheets(): boolean {
-    const overlay = document.querySelector('.bottomSheetOverlay');
+    /* Buscar overlay visible específicamente */
+    const overlay = document.querySelector('.bottomSheetOverlay--visible');
     if (overlay) {
         (overlay as HTMLElement).click();
+        return true;
+    }
+    /* Fallback: buscar cualquier overlay de BottomSheet y simular Escape */
+    if (hayBottomSheetAbierto()) {
+        const evento = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true});
+        document.dispatchEvent(evento);
         return true;
     }
     return false;
 }
 
 /*
- * Cierra el drawer lateral simulando click en overlay
+ * Cierra el drawer lateral simulando click en overlay visible
  */
 function cerrarDrawerGlobal(): boolean {
-    const overlay = document.querySelector('.drawerMovilOverlay');
+    const overlay = document.querySelector('.drawerMovilOverlay--visible');
     if (overlay) {
         (overlay as HTMLElement).click();
+        return true;
+    }
+    /* Fallback con Escape */
+    if (hayDrawerAbierto()) {
+        const evento = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true});
+        document.dispatchEvent(evento);
         return true;
     }
     return false;
@@ -119,9 +135,29 @@ function cerrarDrawerGlobal(): boolean {
  * Cierra menús contextuales abiertos
  */
 function cerrarMenusContextuales(): boolean {
-    const menu = document.querySelector('.menuContextual, .menuContextualAdaptivo');
+    const menu = document.querySelector('.menuContextual, .menuContextualAdaptivo, .menuContextualAdaptivo--visible');
     if (menu) {
-        /* Simular tecla Escape para cerrar */
+        const evento = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true});
+        document.dispatchEvent(evento);
+        return true;
+    }
+    return false;
+}
+
+/*
+ * Detecta si hay un modal genérico abierto (overlay de modal visible)
+ * Busca modales que no están siendo manejados explícitamente
+ */
+function hayModalGenericoAbierto(): boolean {
+    const modal = document.querySelector('.modalOverlay--visible, .modal--visible, [role="dialog"][aria-modal="true"]');
+    return modal !== null;
+}
+
+/*
+ * Cierra modal genérico via Escape
+ */
+function cerrarModalGenerico(): boolean {
+    if (hayModalGenericoAbierto()) {
         const evento = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true});
         document.dispatchEvent(evento);
         return true;
@@ -290,6 +326,20 @@ export function useBackButtonCapacitor({elementos, acciones, drawerAbierto, cerr
             return;
         }
 
+        /* Modal de notas */
+        if (elementos.modalNotasAbierto && acciones.cerrarModalNotas) {
+            acciones.cerrarModalNotas();
+            return;
+        }
+
+        /* 
+         * Fallback: Intentar cerrar cualquier modal genérico via Escape
+         * Esto cubre modales que no están explícitamente listados
+         */
+        if (cerrarModalGenerico()) {
+            return;
+        }
+
         /* Si no hay nada que cerrar, permitir comportamiento nativo (minimizar app) */
         App.minimizeApp();
     }, [elementos, acciones, drawerAbierto, cerrarDrawer]);
@@ -300,7 +350,11 @@ export function useBackButtonCapacitor({elementos, acciones, drawerAbierto, cerr
             return;
         }
 
-        const listener = App.addListener('backButton', manejarBackButton);
+        /* Registrar listener con prioridad alta para interceptar antes del comportamiento nativo */
+        const listener = App.addListener('backButton', ({canGoBack}) => {
+            /* Siempre manejamos el back button nosotros mismos */
+            manejarBackButton();
+        });
 
         return () => {
             listener.then((handle: {remove: () => void}) => handle.remove());

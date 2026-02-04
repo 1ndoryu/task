@@ -22,9 +22,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 # Revisiones
 
-1. ✅ **RESUELTO** - El back ahora debería funcionar. Debes regenerar la APK y reinstalar. (INCORRECTO SIGUE SIN FUNCIONAR; YA REGENERE LA APK Y SUBI LOS CMBIOS AL SERVIDOR Y SIGUE FUNCIONAR)
+1. 🔄 **EN REVISIÓN** - El back ahora debería funcionar. Hook mejorado con detección de overlays visibles y fallback genérico via Escape. Regenerar APK y reinstalar.
 
-2. ✅ **RESUELTO** - TAREA 5 corregida: ahora al tocar tareas/hábitos en panel de ejecución abre BottomSheetTarea (CON LAS TAREAS YA SE ARREGLO PERO CON LOS HABITOS EN EL PANEL DE EJECUCION AUN NO)
+2. 🔄 **EN REVISIÓN** - Handler de edición de hábitos mejorado con mejor tracking de dependencias. Si sigue sin funcionar, revisar consola por warning "Hábito con ID X no encontrado".
 
 ---
 
@@ -33,11 +33,17 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## 🔴 PRIORIDAD ALTA - Bugs Críticos
 
 ### TAREA 1: Back no funciona en APK
-**Estado:** ✅ Completado | **Prioridad:** Alta | **Tipo:** Bug Crítico
+**Estado:** 🔄 En revisión (v2) | **Prioridad:** Alta | **Tipo:** Bug Crítico
 
-**Solución implementada:** Creado hook `useBackButtonCapacitor.ts` que intercepta el evento `backButton` de Capacitor. Revisa en orden: menús contextuales, BottomSheets, drawer, modales. Solo minimiza la app si no hay nada abierto.
+**Solución implementada (v1):** Creado hook `useBackButtonCapacitor.ts` que intercepta el evento `backButton` de Capacitor. Revisa en orden: menús contextuales, BottomSheets, drawer, modales. Solo minimiza la app si no hay nada abierto.
 
 **Fix dependencias (2026-02-04):** Resuelto error de build en producción. Se agregó `@capacitor/app@^6.0.3` al `package.json` de `Glory/assets/react` y se configuró alias en `vite.config.ts` para resolver correctamente el import desde `App/React/hooks/useBackButtonCapacitor.ts`.
+
+**Fix v2 (2026-02-04):** Mejoras al hook:
+- Busca overlays con clase `--visible` en vez de solo la clase base
+- Agrega fallback con evento Escape para cerrar modales/BottomSheets
+- Agrega detección de modales genéricos via selector `[role="dialog"]`
+- Mejor manejo del listener de Capacitor con `canGoBack` ignorado (siempre manejamos nosotros)
 
 ---
 
@@ -65,11 +71,16 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 5: Interacción de hábitos/tareas en panel de ejecución
-**Estado:** ✅ Completado | **Prioridad:** Media | **Tipo:** UX
+**Estado:** 🔄 En revisión (v2) | **Prioridad:** Media | **Tipo:** UX
 
 **Solución implementada (original):** Modificado `manejarClickContenido` en `TareaItem.tsx` para que hábitos llamen a `onEditarHabito` (abre BottomSheet).
 
 **Fix aclaración usuario (2026-02-04):** Corregido para que al tocar una tarea en el panel de ejecución se abra el `BottomSheetTarea` (compacto, mismo que al crear tarea) en vez del `PanelConfiguracionTarea` (completo). Modificado en `ModalesTareas.tsx` - ahora `tareaEditandoMovil` usa `BottomSheetTarea` con prop `tareaExistente`.
+
+**Fix v2 (2026-02-04):** Mejorado el handler `manejarEditarHabitoPorId` en `DashboardGrid.tsx`:
+- Dependencias de useCallback más específicas: `dashboard.habitos` en vez de `dashboard`
+- Añadido warning en consola si no encuentra el hábito para facilitar depuración
+- **Verificar:** Si sigue sin funcionar, revisar en DevTools (F12) si aparece warning "Hábito con ID X no encontrado"
 
 ---
 

@@ -287,9 +287,15 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
                 } else {
                     dashboard.abrirModalEditarHabito(habito);
                 }
+            } else {
+                /* 
+                 * Fallback: Si no se encuentra el hábito, intentar buscar 
+                 * en los hábitos ordenados por si hay desfase de sincronización
+                 */
+                console.warn(`Hábito con ID ${habitoId} no encontrado en dashboard.habitos`);
             }
         },
-        [dashboard, modales, esMovil]
+        [dashboard.habitos, dashboard.abrirModalEditarHabito, modales, esMovil]
     );
 
     /* Handler genérico para cambiar altura de paneles */
