@@ -72,28 +72,24 @@ export function ModalesTareas({dashboard, modales, acciones, esMovil, manejarGua
             {/* BottomSheet móvil para crear tarea */}
             {esMovil && modales.modalCreacionRapida === 'tarea' && <BottomSheetTarea estaAbierto={true} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarTareaBottomSheet} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} />}
 
-            {/* BottomSheet para edición de tareas existentes (móvil) - Reemplazado por Configuración Completa (Panel) */}
+            {/*
+             * BottomSheet para edición de tareas existentes (móvil)
+             * TAREA 5: Al tocar tarea en panel ejecución, abre BottomSheet compacto
+             * (igual que al crear tarea), no el panel de configuración completo
+             */}
             {esMovil && modales.tareaEditandoMovil && (
-                <PanelConfiguracionTarea
+                <BottomSheetTarea
                     key={modales.tareaEditandoMovil.id}
                     estaAbierto={true}
                     onCerrar={modales.cerrarEdicionTareaMovil}
-                    onGuardar={(config, priority, text, assignment, urgency, tags) => acciones.manejarGuardarEdicionTareaGlobal(modales.tareaEditandoMovil!.id, config, priority, text, assignment, urgency, tags)}
-                    tarea={obtenerTareaConHerencia(modales.tareaEditandoMovil, dashboard.tareas, dashboard.habitos)}
-                    participantes={[]}
-                    companeros={[]}
+                    onGuardar={manejarGuardarTareaBottomSheet}
                     proyectos={dashboard.proyectos}
-                    onCambiarProyecto={nuevoId => modales.tareaEditandoMovil && dashboard.editarTarea(modales.tareaEditandoMovil.id, {proyectoId: nuevoId})}
-                    onToggleCompletado={completado => {
-                        if (modales.tareaEditandoMovil && completado !== modales.tareaEditandoMovil.completado) dashboard.toggleTarea(modales.tareaEditandoMovil.id);
+                    tareaExistente={modales.tareaEditandoMovil}
+                    onAbrirConfiguracion={() => {
+                        /* Abrir panel de configuración completa desde el BottomSheet */
+                        modales.cerrarEdicionTareaMovil();
+                        modales.abrirModalEditarTarea(modales.tareaEditandoMovil!);
                     }}
-                    /* Subtareas */
-                    subtareas={dashboard.tareas.filter(t => t.parentId === modales.tareaEditandoMovil?.id).sort((a, b) => (a.orden || 0) - (b.orden || 0))}
-                    onCrearSubtarea={dashboard.crearTarea}
-                    onToggleSubtarea={dashboard.toggleTarea}
-                    onEliminarSubtarea={dashboard.eliminarTarea}
-                    onConfigurarSubtarea={modales.abrirModalEditarTarea}
-                    onEditarSubtarea={dashboard.editarTarea}
                 />
             )}
         </>

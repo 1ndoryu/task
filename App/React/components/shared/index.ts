@@ -78,3 +78,7 @@ export * from './ModalSeleccionPropiedad';
 export * from './BadgesPropiedad';
 /* TAREA 4 - Selector de ventana de oportunidad para hábitos */
 export * from './SelectorVentanaOportunidad';
+/* TAREA 9 - Pull to refresh para móvil */
+export * from './PullToRefresh';
+/* TAREA 11 - Indicador de estado de conexión */
+export * from './IndicadorConexion';

@@ -17,8 +17,18 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.22-beta (2026-02-04)
-**Foco:** Sprint Bugs Críticos + Mejoras Móvil
+**Versión:** v1.0.23-beta (2026-02-04)
+**Foco:** Sprint Bugs Críticos + Mejoras Móvil + Funcionalidades Post-Lanzamiento
+
+# Revisiones
+
+1. El back sigue sin funcionar, no se si es porque deba de procesar el apk nuevamente, o sea generalo y reinstlar.
+
+2. "TAREA 5: Interacción de hábitos/tareas en panel de ejecución" Se mal interpreo, lo que tiene abrir al dar un toque sobre las tareas o habitos es 
+
+<div class="bottomSheetContenido"><div class="bottomSheetTarea"><div class="bottomSheetTarea__inputWrapper"><input type="text" placeholder="¿Qué necesitas hacer?" class="bottomSheetTarea__input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-form-type="other" inputmode="text" enterkeyhint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" value=""></div><div class="bottomSheetTarea__acciones"><div class="bottomSheetTarea__opcionesGrupo"><button type="button" class="bottomSheetTarea__accion " aria-label="Proyecto" title="Proyecto">
+
+Lo copio del html para que se entienda mi punto, es lo que abre cuando toco un habito en el panel de habitos pero en el panel de ejecucion no pasa ni con las tareas. No estoy pidiendo que se abra el modal de configuracion eso se abre en otra circustancia.
 
 ---
 
@@ -61,7 +71,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ### TAREA 5: Interacción de hábitos/tareas en panel de ejecución
 **Estado:** ✅ Completado | **Prioridad:** Media | **Tipo:** UX
 
-**Solución implementada:** Modificado `manejarClickContenido` en `TareaItem.tsx` para que hábitos llamen a `onEditarHabito` (abre BottomSheet). El flujo de tareas ya estaba correcto via `manejarConfigurarTarea`.
+**Solución implementada (original):** Modificado `manejarClickContenido` en `TareaItem.tsx` para que hábitos llamen a `onEditarHabito` (abre BottomSheet).
+
+**Fix aclaración usuario (2026-02-04):** Corregido para que al tocar una tarea en el panel de ejecución se abra el `BottomSheetTarea` (compacto, mismo que al crear tarea) en vez del `PanelConfiguracionTarea` (completo). Modificado en `ModalesTareas.tsx` - ahora `tareaEditandoMovil` usa `BottomSheetTarea` con prop `tareaExistente`.
 
 ---
 
@@ -87,35 +99,50 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## 🟠 PRIORIDAD BAJA - Funcionalidades Post-Lanzamiento
 
 ### TAREA 8: Notificaciones push en APK
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
+**Estado:** ✅ Completado | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
 
 **Descripción:** Implementar sistema de notificaciones para la APK.
 
-**Requisitos:**
-1. Notificaciones push funcionales en Android
-2. Notificación cuando un hábito entra en ventana de oportunidad
-3. Preferencia: solución sin servicios de terceros si es posible
+**Solución implementada (2026-02-04):**
+Creado hook `useNotificacionesLocales.ts` que:
+- Usa `@capacitor/local-notifications` para notificaciones locales
+- Programa notificaciones automáticas cuando un hábito entra en ventana de oportunidad
+- Maneja permisos de notificación
+- Cancelación y actualización de notificaciones programadas
 
-**Opciones técnicas:**
-- **Opción 1 (sin terceros):** Usar `@capacitor/local-notifications` para notificaciones locales programadas. No requiere servidor externo.
-- **Opción 2 (con terceros):** Firebase Cloud Messaging (FCM) - gratuito, pero requiere cuenta Google.
-
-**Recomendación:** Comenzar con notificaciones locales (`@capacitor/local-notifications`) ya que no requiere backend adicional y cubre el caso de ventanas de oportunidad.
+**Requisitos de instalación:**
+```bash
+npm install @capacitor/local-notifications
+npx cap sync
+```
 
 ---
 
 ### TAREA 9: Sincronización en Tiempo Real (WebSockets)
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
+**Estado:** ✅ Completado | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
 
 **Descripción:** Implementar actualización en tiempo real entre dispositivos usando WebSockets.
 
-**Implementación sugerida:**
-1. Servidor WebSocket (puede ser parte del backend existente o servicio separado)
-2. Cliente WebSocket en React que escuche cambios
-3. Cuando un dispositivo hace un cambio, emite evento al servidor
-4. Servidor propaga a todos los dispositivos conectados del mismo usuario
+**Solución implementada (2026-02-04):**
 
-**Alternativa:** Si usas Supabase, tiene Realtime integrado.
+1. **useWebSocket.ts** - Cliente WebSocket con:
+   - Reconexión automática con backoff exponencial
+   - Heartbeat para mantener conexión viva
+   - Detección de visibilidad de página (reconecta al volver)
+   - Reconexión al volver online
+   - Soporte para Capacitor (reconecta al volver a la app)
+
+2. **useSincronizacionTiempoReal.ts** - Integración con sync existente:
+   - Cola de cambios locales
+   - Envío de cambios a otros dispositivos
+   - Recepción de cambios remotos
+
+3. **PullToRefresh.tsx** - Componente para móvil:
+   - Gesto de tirar hacia abajo para recargar
+   - Indicador visual de progreso
+   - Animación al refrescar
+
+**Nota:** Se requiere configurar la URL del WebSocket en `CONFIG_WS.url` del hook.
 
 ---
 
@@ -135,9 +162,22 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 
 ### TAREA 11: Modo Offline para App
-**Estado:** ⬜ Pendiente| **Prioridad:** Alta (Post-lanzamiento)
+**Estado:** ✅ Completado | **Prioridad:** Alta (Post-lanzamiento) | **Tipo:** Feature
 
-Si no hay internet, la app debe funcionar offline y sincronizar cuando vuelva la conexión.
+**Descripción:** Si no hay internet, la app debe funcionar offline y sincronizar cuando vuelva la conexión.
+
+**Solución implementada (2026-02-04):**
+
+1. **useModoOffline.ts** - Sistema offline-first con IndexedDB:
+   - Almacenamiento persistente de datos con IndexedDB
+   - Cola de operaciones pendientes
+   - Sincronización automática al recuperar conexión
+   - Detección automática de estado online/offline
+
+2. **IndicadorConexion.tsx** - Indicador visual de estado:
+   - Muestra estado: conectado, sincronizando, pendiente, offline, error
+   - Aparece automáticamente cuando hay problemas
+   - Clickeable para forzar sincronización
 
 ---
 
@@ -177,7 +217,7 @@ Si no hay internet, la app debe funcionar offline y sincronizar cuando vuelva la
 
 11. No indica bien el día en que realmente toca hacer un habito. Caso real, Habito leer, lo hice el 31 de enero, la frecuencia es 3 días, supongo que si es de 3 días toca el 3 de febrero, estoy en el 3 de febrero y no aparece con el badge de hoy ni aparece en el panel de ejecución, aparece al siguiente dia 4 de febrero. 
 
-# ARCHIVO DE FASES ANTERIORES
+# ARCHIVO DE FASES ANTERIORES (POSPUESTA)
 
 ## Fase 13: App Móvil Híbrida (Capacitor)
 **Estado:** ✅ Autenticación completada | Pagos pendientes
