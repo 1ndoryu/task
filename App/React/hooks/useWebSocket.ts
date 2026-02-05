@@ -99,6 +99,18 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
     const [estado, setEstado] = useState<EstadoConexion>('desconectado');
     const [ultimaActividad, setUltimaActividad] = useState<Date | null>(null);
 
+    /* Log inicial de configuración para depuración */
+    useEffect(() => {
+        console.log('[WebSocket] Config inicial:', {
+            url: CONFIG_WS.url,
+            userId,
+            habilitado,
+            esPlataformaNativa,
+            esHttps,
+            deshabilitadoPorMixedContent: CONFIG_WS.deshabilitadoPorMixedContent
+        });
+    }, [userId, habilitado]);
+
     /* Referencias para persistir entre renders */
     const wsRef = useRef<WebSocket | null>(null);
     const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -162,7 +174,16 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
     /* Conectar al WebSocket */
     const conectar = useCallback(() => {
-        if (!habilitado || !userId || wsRef.current?.readyState === WebSocket.OPEN) {
+        if (!habilitado) {
+            console.log('[WebSocket] No conecta: habilitado=false');
+            return;
+        }
+        if (!userId) {
+            console.log('[WebSocket] No conecta: userId es null/undefined');
+            return;
+        }
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            console.log('[WebSocket] No conecta: ya hay conexión abierta');
             return;
         }
 
