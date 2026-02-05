@@ -203,22 +203,25 @@ npx cap sync
 4. Servidor reenvía a otros dispositivos del usuario
 5. Otros dispositivos reciben y aplican cambios via `callbacksWebSocket`
 
-#### ✅ SSL CONFIGURADO (2026-02-05):
+#### ✅ SSL CONFIGURADO Y FUNCIONANDO (2026-02-05):
 
 **WebSocket con SSL via Coolify/Traefik:**
-- Servidor WebSocket ahora corre como contenedor Docker
-- Integrado con Traefik para SSL automático via Let's Encrypt
-- URL web HTTPS: `wss://ws.nakomi.studio`
-- URL APK/localhost: `ws://66.94.100.241:8082`
+- ✅ Servidor WebSocket como contenedor Docker en red `coolify`
+- ✅ SSL automático via Let's Encrypt (certificado emitido)
+- ✅ DNS configurado: `ws.nakomi.studio → 66.94.100.241`
+- ✅ URL web HTTPS: `wss://ws.nakomi.studio`
+- ✅ URL APK/localhost: `ws://66.94.100.241:8082`
 
-**Archivos Docker creados en `/opt/websocket-sync/`:**
-- `Dockerfile` - Imagen Node.js Alpine
-- `docker-compose.yml` - Configuración con labels Traefik
+**Configuración Docker en `/opt/websocket-sync/`:**
+- `Dockerfile` - Imagen Node.js Alpine, expone 8082
+- `docker-compose.yml` - Labels Traefik:
+  - Entrypoints: `http` (para ACME challenge) + `https` (para SSL)
+  - Certresolver: `letsencrypt`
+  - Servicio: Puerto 8082
 
-**Acción requerida:** Añadir registro DNS tipo A:
-```
-ws.nakomi.studio → 66.94.100.241
-```
+**Nota importante sobre Coolify/Traefik:**
+- Coolify usa entrypoints `http` y `https` (NO `websecure`)
+- El router HTTP es necesario para que Let's Encrypt valide el dominio
 
 **Comandos útiles:**
 ```bash
@@ -231,8 +234,11 @@ docker logs websocket-sync -f
 # Reiniciar contenedor
 cd /opt/websocket-sync && docker compose restart
 
-# Probar conexión
-curl -I http://localhost:8082  # Debe responder 426 Upgrade Required
+# Verificar certificado SSL
+curl -vk https://ws.nakomi.studio 2>&1 | grep "subject:"
+
+# Probar conexión WebSocket (debe retornar 426)
+curl -H "Connection: Upgrade" -H "Upgrade: websocket" https://ws.nakomi.studio
 ```
 
 ---
