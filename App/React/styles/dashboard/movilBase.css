@@ -65,6 +65,12 @@ body {
         -moz-user-select: text;
         -ms-user-select: text;
         user-select: text;
+        padding-right: 10px !important;
+    }
+
+
+    .dashboardContenedor textarea {
+        padding-right: 10px !important;
     }
 
     /* Bloquear zoom por gestos (pinch-to-zoom) en todo el body */
@@ -187,10 +193,7 @@ body {
     .habitoItem,
     .proyectoItem,
     .drawerMovilItem {
-        transition:
-            opacity 0.1s ease,
-            transform 0.1s ease,
-            background 0.1s ease;
+        transition: opacity 0.1s ease, transform 0.1s ease, background 0.1s ease;
     }
 }
 
