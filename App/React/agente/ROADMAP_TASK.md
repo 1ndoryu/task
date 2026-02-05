@@ -203,6 +203,19 @@ npx cap sync
 4. Servidor reenvía a otros dispositivos del usuario
 5. Otros dispositivos reciben y aplican cambios via `callbacksWebSocket`
 
+#### ✅ FIX STALE CLOSURES (2026-02-05):
+
+**Problema:** Los callbacks capturaban valores viejos de tareas/hábitos/proyectos en closures.
+Cuando llegaba un mensaje WebSocket, los callbacks usaban datos desactualizados.
+
+**Solución implementada (3 niveles de refs):**
+1. `useWebSocket.ts`: `onMensajeRef` para handler de mensajes
+2. `useSincronizacionTiempoReal.ts`: `callbacksRef` para objeto de callbacks
+3. `useDashboardSync.ts`: `tareasRef`, `habitosRef`, `proyectosRef` para datos actuales
+
+Los callbacks ya no dependen de los arrays en el dependency array del useMemo,
+usan refs que se actualizan en cada render para acceder siempre a la versión actual.
+
 #### ✅ SSL CONFIGURADO Y FUNCIONANDO (2026-02-05):
 
 **WebSocket con SSL via Coolify/Traefik:**
