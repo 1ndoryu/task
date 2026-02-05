@@ -84,12 +84,6 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
      */
     const userId = obtenerUserId();
 
-    /* Debug: Log userId para diagnosticar problema de APK no conectando a WebSocket */
-    useEffect(() => {
-        console.log('[useDashboardSync] userId para WebSocket:', userId, 'habilitado:', userId > 0);
-        console.log('[useDashboardSync] gloryDashboard:', (window as {gloryDashboard?: unknown}).gloryDashboard);
-    }, [userId]);
-
     /*
      * 2.6. Callbacks para sincronización en tiempo real (WebSocket)
      * Cuando recibimos cambios de otro dispositivo, actualizamos el estado local

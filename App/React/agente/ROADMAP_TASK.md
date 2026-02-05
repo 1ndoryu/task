@@ -22,9 +22,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 # Revisiones
 
-1. 🔄 **EN REVISIÓN** - El back ahora debería funcionar. Hook mejorado con detección de overlays visibles y fallback genérico via Escape. Regenerar APK y reinstalar.
-
-2. 🔄 **EN REVISIÓN** - Handler de edición de hábitos mejorado con mejor tracking de dependencias. Si sigue sin funcionar, revisar consola por warning "Hábito con ID X no encontrado".
+**Todas las revisiones completadas - WebSocket sincronizando correctamente entre web y APK** ✅
 
 ---
 
@@ -132,7 +130,16 @@ npx cap sync
 
 **Solución implementada (2026-02-05):**
 
-#### ✅ COMPLETADO:
+#### ✅ COMPLETADO - FUNCIONA EN WEB Y APK:
+
+**Problema crítico resuelto:** La APK no se conectaba al WebSocket por dos razones:
+1. **Mixed content:** La APK carga desde `https://` pero intentaba conectar a `ws://` (sin SSL)
+2. **Android cleartext:** Android bloquea HTTP por defecto desde API 28
+
+**Solución final:**
+- APK y web HTTPS usan `wss://ws.nakomi.studio` (con SSL)
+- Solo localhost HTTP usa `ws://66.94.100.241:8082`
+- Añadido `android:usesCleartextTraffic="true"` al AndroidManifest (backup para HTTP directo)
 
 1. **Servidor WebSocket Node.js** - VPS (`/opt/websocket-sync/`):
    - `server.js` - Servidor escuchando en puerto 8082
