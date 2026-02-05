@@ -20,25 +20,32 @@ import {Capacitor} from '@capacitor/core';
 /*
  * Detección de entorno para WebSocket
  *
- * El problema: los navegadores bloquean ws:// desde páginas https:// (mixed content)
- * Solución pragmática:
- * - APK (Capacitor nativo): usa ws:// directamente, no tiene restricción
- * - Web en HTTPS: deshabilitado temporalmente hasta configurar wss://
+ * Estrategia de conexión:
+ * - APK (Capacitor nativo): usa ws:// directamente (más rápido, sin overhead SSL)
+ * - Web en HTTPS: usa wss://ws.nakomi.studio (con SSL via Traefik/Coolify)
  * - Web en HTTP (localhost): usa ws:// sin problemas
  */
 const esPlataformaNativa = Capacitor.isNativePlatform();
 const esHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 
-/* Si estamos en web HTTPS, el WebSocket no puede conectar a ws:// */
-const webSocketBloqueadoPorMixedContent = !esPlataformaNativa && esHttps;
+/* URL del WebSocket según el entorno */
+const obtenerUrlWebSocket = (): string => {
+    if (esPlataformaNativa) {
+        /* APK: conexión directa sin SSL (más eficiente) */
+        return 'ws://66.94.100.241:8082';
+    }
+    if (esHttps) {
+        /* Web HTTPS: usar wss:// con SSL via Traefik */
+        return 'wss://ws.nakomi.studio';
+    }
+    /* Localhost/HTTP: conexión sin SSL */
+    return 'ws://66.94.100.241:8082';
+};
 
 /* Configuración del WebSocket */
 const CONFIG_WS = {
-    /* URL base del servidor WebSocket
-     * TODO: Cuando tengamos wss:// configurado, usar:
-     * url: esHttps ? 'wss://ws.nakomi.studio' : 'ws://66.94.100.241:8082'
-     */
-    url: 'ws://66.94.100.241:8082',
+    /* URL del servidor WebSocket (determinada según entorno) */
+    url: obtenerUrlWebSocket(),
     /* Intervalo de heartbeat en ms (mantener conexión viva) */
     heartbeatMs: 30000,
     /* Timeout para considerar conexión muerta si no hay pong */
@@ -51,8 +58,8 @@ const CONFIG_WS = {
     maxIntentosReconexion: 10,
     /* Tiempo de inactividad antes de considerar pestaña inactiva */
     inactividadMs: 60000,
-    /* WebSocket deshabilitado en web HTTPS hasta tener SSL configurado */
-    deshabilitadoPorMixedContent: webSocketBloqueadoPorMixedContent
+    /* WebSocket ya no está bloqueado, wss:// configurado */
+    deshabilitadoPorMixedContent: false
 };
 
 /* Estados posibles de la conexión */
@@ -155,15 +162,11 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
     /* Conectar al WebSocket */
     const conectar = useCallback(() => {
-        /* Bloquear conexión en web HTTPS (mixed content) */
-        if (CONFIG_WS.deshabilitadoPorMixedContent) {
-            console.log('[WebSocket] Deshabilitado en web HTTPS (mixed content). La APK sí puede conectar.');
-            return;
-        }
-
         if (!habilitado || !userId || wsRef.current?.readyState === WebSocket.OPEN) {
             return;
         }
+
+        console.log('[WebSocket] Conectando a:', CONFIG_WS.url);
 
         /* Cerrar conexión existente si hay */
         cerrarConexion();
