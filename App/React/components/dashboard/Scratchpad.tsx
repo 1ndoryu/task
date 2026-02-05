@@ -8,9 +8,11 @@
 import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 import {useDebounceCallback} from '../../hooks/useDebounce';
 import type {TamanoFuente, AlturaScratchpad} from '../../hooks/useConfiguracionScratchpad';
+import {useSuscripcionStore} from '../../stores/suscripcionStore';
 
-/* Límite de caracteres para el scratchpad */
-const LIMITE_CARACTERES = 20000;
+/* Límites de caracteres para el scratchpad según plan */
+const LIMITE_CARACTERES_FREE = 20000;
+const LIMITE_CARACTERES_PREMIUM = 1000000;
 const UMBRAL_ADVERTENCIA = 0.9; /* 90% del límite */
 
 interface ScratchpadProps {
@@ -27,6 +29,12 @@ interface ScratchpadProps {
 }
 
 type EstadoGuardado = 'guardado' | 'guardando' | 'inactivo';
+
+/* Hook auxiliar para obtener límite según suscripción */
+const useLimiteCaracteres = () => {
+    const esPremium = useSuscripcionStore(s => s.esPremium());
+    return esPremium ? LIMITE_CARACTERES_PREMIUM : LIMITE_CARACTERES_FREE;
+};
 
 const escaparHtml = (texto: string): string => {
     return texto.replace(/[&<>"]/g, caracter => {
@@ -131,6 +139,7 @@ const renderizarMarkdownVistaPrevia = (texto: string): string => {
 };
 
 export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus notas rapidas aqui...', onChange, delayGuardado = 1500, tamanoFuente = 'normal', altura = '100%', onCambiarAltura, modoVista = 'editor', mostrarResaltadoMarkdown = true, mostrarResizeHandle = true}: ScratchpadProps): JSX.Element {
+    const limiteCaracteres = useLimiteCaracteres();
     const [valor, setValor] = useState(valorInicial);
     const [estadoGuardado, setEstadoGuardado] = useState<EstadoGuardado>('inactivo');
 
@@ -191,8 +200,8 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
         let nuevoValor = e.target.value;
 
         /* Truncar si excede el límite */
-        if (nuevoValor.length > LIMITE_CARACTERES) {
-            nuevoValor = nuevoValor.slice(0, LIMITE_CARACTERES);
+        if (nuevoValor.length > limiteCaracteres) {
+            nuevoValor = nuevoValor.slice(0, limiteCaracteres);
         }
 
         actualizarValor(nuevoValor);
@@ -320,9 +329,9 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
 
     /* Calcular estado del contador */
     const caracteresUsados = valor.length;
-    const porcentajeUso = caracteresUsados / LIMITE_CARACTERES;
+    const porcentajeUso = caracteresUsados / limiteCaracteres;
     const cercaDelLimite = porcentajeUso >= UMBRAL_ADVERTENCIA;
-    const enLimite = caracteresUsados >= LIMITE_CARACTERES;
+    const enLimite = caracteresUsados >= limiteCaracteres;
 
     const contenidoResaltado = useMemo(() => (mostrarResaltadoMarkdown ? resaltarMarkdownEnEditor(valor) : ''), [mostrarResaltadoMarkdown, valor]);
     const contenidoPreview = useMemo(() => renderizarMarkdownVistaPrevia(valor), [valor]);
@@ -356,7 +365,7 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                             onChange={manejarCambio}
                             onScroll={manejarScroll}
                             onKeyDown={manejarTecla}
-                            maxLength={LIMITE_CARACTERES}
+                            maxLength={limiteCaracteres}
                         />
                     </div>
                 ) : (
@@ -383,7 +392,7 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                         </div>
 
                         <span className={`scratchpadContador ${cercaDelLimite ? 'scratchpadContadorAdvertencia' : ''} ${enLimite ? 'scratchpadContadorLimite' : ''}`}>
-                            {caracteresUsados.toLocaleString()}/{LIMITE_CARACTERES.toLocaleString()}
+                            {caracteresUsados.toLocaleString()}/{limiteCaracteres.toLocaleString()}
                         </span>
                     </div>
                 )}
