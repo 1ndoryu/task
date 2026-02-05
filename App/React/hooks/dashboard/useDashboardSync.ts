@@ -25,6 +25,20 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
     const {esPremium} = useSuscripcion();
 
     /*
+     * Refs para evitar stale closures en callbacks WebSocket
+     * Los callbacks se pasan a useWebSocket pero los datos (tareas, habitos, proyectos)
+     * cambian frecuentemente. Usando refs, los callbacks siempre acceden a la versión actual.
+     */
+    const tareasRef = useRef(tareas);
+    const habitosRef = useRef(habitos);
+    const proyectosRef = useRef(proyectos);
+
+    /* Actualizar refs en cada render */
+    tareasRef.current = tareas;
+    habitosRef.current = habitos;
+    proyectosRef.current = proyectos;
+
+    /*
      * 1. Preparar datos actuales unificados
      */
     const datosActuales: DashboardData = useMemo(
@@ -73,20 +87,23 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
     /*
      * 2.6. Callbacks para sincronización en tiempo real (WebSocket)
      * Cuando recibimos cambios de otro dispositivo, actualizamos el estado local
+     * IMPORTANTE: Usamos refs para evitar stale closures - los callbacks siempre
+     * acceden a la versión más actual de los datos via tareasRef.current, etc.
      */
     const callbacksWebSocket = useMemo(
         () => ({
             onTareaRemota: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Tarea>) => {
                 console.log('[SyncRT] Tarea remota recibida:', accion, datos);
+                const tareasActuales = tareasRef.current;
                 if (accion === 'eliminar' && datos.id) {
-                    setTareas(tareas.filter(t => t.id !== datos.id));
+                    setTareas(tareasActuales.filter(t => t.id !== datos.id));
                 } else if (accion === 'crear' && datos.id) {
                     /* Verificar que no exista ya */
-                    if (!tareas.find(t => t.id === datos.id)) {
-                        setTareas([...tareas, datos as Tarea]);
+                    if (!tareasActuales.find(t => t.id === datos.id)) {
+                        setTareas([...tareasActuales, datos as Tarea]);
                     }
                 } else if ((accion === 'editar' || accion === 'toggle') && datos.id) {
-                    setTareas(tareas.map(t => (t.id === datos.id ? {...t, ...datos} : t)));
+                    setTareas(tareasActuales.map(t => (t.id === datos.id ? {...t, ...datos} : t)));
                 }
             },
             onHabitoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Habito>) => {
@@ -104,14 +121,15 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             },
             onProyectoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Proyecto>) => {
                 console.log('[SyncRT] Proyecto remoto recibido:', accion, datos);
+                const proyectosActuales = proyectosRef.current;
                 if (accion === 'eliminar' && datos.id) {
-                    setProyectos(proyectos.filter(p => p.id !== datos.id));
+                    setProyectos(proyectosActuales.filter(p => p.id !== datos.id));
                 } else if (accion === 'crear' && datos.id) {
-                    if (!proyectos.find(p => p.id === datos.id)) {
-                        setProyectos([...proyectos, datos as Proyecto]);
+                    if (!proyectosActuales.find(p => p.id === datos.id)) {
+                        setProyectos([...proyectosActuales, datos as Proyecto]);
                     }
                 } else if ((accion === 'editar' || accion === 'toggle') && datos.id) {
-                    setProyectos(proyectos.map(p => (p.id === datos.id ? {...p, ...datos} : p)));
+                    setProyectos(proyectosActuales.map(p => (p.id === datos.id ? {...p, ...datos} : p)));
                 }
             },
             onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string}) => {
@@ -124,7 +142,8 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 console.log('[SyncRT] Sincronización WebSocket completa');
             }
         }),
-        [tareas, habitos, proyectos, setTareas, setProyectos, setNotas, storeSetHabitos]
+        /* Solo dependemos de los setters, no de los datos - usamos refs para acceder a datos actuales */
+        [setTareas, setProyectos, setNotas, storeSetHabitos]
     );
 
     /*

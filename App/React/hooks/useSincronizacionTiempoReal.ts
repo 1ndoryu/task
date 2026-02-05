@@ -73,6 +73,14 @@ export function useSincronizacionTiempoReal(
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const ultimaSincRef = useRef<number>(Date.now());
 
+    /*
+     * Ref para callbacks - evita stale closures.
+     * Los callbacks pueden cambiar frecuentemente pero el manejarMensaje
+     * siempre accederá a la versión más actual via callbacksRef.current
+     */
+    const callbacksRef = useRef(callbacks);
+    callbacksRef.current = callbacks;
+
     /* Handler de mensajes WebSocket */
     const manejarMensaje = useCallback(
         (mensaje: MensajeWS) => {
@@ -83,18 +91,21 @@ export function useSincronizacionTiempoReal(
 
                 console.log('[SyncRT] Cambio remoto recibido:', entidad, accion);
 
+                /* Usar callbacksRef.current para siempre tener la versión más actual */
+                const currentCallbacks = callbacksRef.current;
+
                 switch (entidad) {
                     case 'tarea':
-                        callbacks.onTareaRemota?.(accion, datos as Partial<Tarea>);
+                        currentCallbacks.onTareaRemota?.(accion, datos as Partial<Tarea>);
                         break;
                     case 'habito':
-                        callbacks.onHabitoRemoto?.(accion, datos as Partial<Habito>);
+                        currentCallbacks.onHabitoRemoto?.(accion, datos as Partial<Habito>);
                         break;
                     case 'proyecto':
-                        callbacks.onProyectoRemoto?.(accion, datos as Partial<Proyecto>);
+                        currentCallbacks.onProyectoRemoto?.(accion, datos as Partial<Proyecto>);
                         break;
                     case 'nota':
-                        callbacks.onNotaRemota?.(accion, datos as {contenido: string});
+                        currentCallbacks.onNotaRemota?.(accion, datos as {contenido: string});
                         break;
                 }
 
@@ -104,10 +115,10 @@ export function useSincronizacionTiempoReal(
             /* Manejar confirmación de sincronización completa */
             if (mensaje.tipo === 'syncCompleta') {
                 console.log('[SyncRT] Sincronización completa confirmada');
-                callbacks.onSincronizacionCompleta?.();
+                callbacksRef.current.onSincronizacionCompleta?.();
             }
         },
-        [callbacks]
+        [] /* Sin dependencias - usamos refs para acceder a valores actuales */
     );
 
     /* Conexión WebSocket */
