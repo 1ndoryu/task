@@ -119,6 +119,9 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
     const intentosReconexionRef = useRef(0);
     const montadoRef = useRef(true);
     const ultimaActividadRef = useRef<number>(Date.now());
+    /* Ref para mantener el handler actualizado sin reconectar */
+    const onMensajeRef = useRef(onMensaje);
+    onMensajeRef.current = onMensaje;
 
     /* Limpiar heartbeat */
     const limpiarHeartbeat = useCallback(() => {
@@ -222,6 +225,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
                 try {
                     const mensaje = JSON.parse(evento.data) as MensajeWS;
+                    console.log('[WebSocket] Mensaje recibido:', mensaje.tipo);
                     setUltimaActividad(new Date());
 
                     /* Manejar pong (respuesta a heartbeat) */
@@ -233,8 +237,9 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
                         return;
                     }
 
-                    /* Pasar mensaje al handler */
-                    onMensaje?.(mensaje);
+                    /* Pasar mensaje al handler (usar ref para tener siempre la versión actualizada) */
+                    console.log('[WebSocket] Pasando a handler:', JSON.stringify(mensaje).substring(0, 100));
+                    onMensajeRef.current?.(mensaje);
                 } catch (error) {
                     console.error('[WebSocket] Error parseando mensaje:', error);
                 }
@@ -265,7 +270,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
             setEstado('error');
             programarReconexion();
         }
-    }, [habilitado, userId, cerrarConexion, iniciarHeartbeat, limpiarHeartbeat, onMensaje]);
+    }, [habilitado, userId, cerrarConexion, iniciarHeartbeat, limpiarHeartbeat]);
 
     /* Programar reconexión con backoff exponencial */
     const programarReconexion = useCallback(() => {
