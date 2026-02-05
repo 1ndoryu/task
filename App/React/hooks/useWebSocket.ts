@@ -21,24 +21,22 @@ import {Capacitor} from '@capacitor/core';
  * Detección de entorno para WebSocket
  *
  * Estrategia de conexión:
- * - APK (Capacitor nativo): usa ws:// directamente (más rápido, sin overhead SSL)
- * - Web en HTTPS: usa wss://ws.nakomi.studio (con SSL via Traefik/Coolify)
- * - Web en HTTP (localhost): usa ws:// sin problemas
+ * - Todo HTTPS (web y APK): usa wss://ws.nakomi.studio (con SSL via Traefik/Coolify)
+ * - Localhost HTTP: usa ws:// sin problemas
+ *
+ * Nota: La APK carga desde https://task.nakomi.studio/, por lo que la WebView
+ * bloquea conexiones ws:// por mixed content. Usamos wss:// para todo HTTPS.
  */
 const esPlataformaNativa = Capacitor.isNativePlatform();
 const esHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 
 /* URL del WebSocket según el entorno */
 const obtenerUrlWebSocket = (): string => {
-    if (esPlataformaNativa) {
-        /* APK: conexión directa sin SSL (más eficiente) */
-        return 'ws://66.94.100.241:8082';
-    }
+    /* Si estamos en HTTPS (web o APK), usar wss:// para evitar mixed content */
     if (esHttps) {
-        /* Web HTTPS: usar wss:// con SSL via Traefik */
         return 'wss://ws.nakomi.studio';
     }
-    /* Localhost/HTTP: conexión sin SSL */
+    /* Solo localhost/HTTP usa ws:// sin SSL */
     return 'ws://66.94.100.241:8082';
 };
 
