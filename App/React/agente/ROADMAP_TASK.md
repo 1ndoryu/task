@@ -126,11 +126,11 @@ npx cap sync
 ---
 
 ### TAREA 9: Sincronización en Tiempo Real (WebSockets)
-**Estado:** 🔄 En progreso (80%) | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
+**Estado:** ✅ Completado | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
 
 **Descripción:** Implementar actualización en tiempo real entre dispositivos usando WebSockets.
 
-**Progreso (2026-02-04):**
+**Solución implementada (2026-02-05):**
 
 #### ✅ COMPLETADO:
 
@@ -147,10 +147,10 @@ npx cap sync
    - Heartbeat para detectar conexiones muertas
    - Detección de visibilidad de página (reconecta al volver)
    - Soporte Capacitor (reconecta al reactivar app)
-   - **[NUEVO] Detección de entorno para evitar mixed content:**
+   - Detección de entorno para evitar mixed content:
      - APK (Capacitor nativo): usa `ws://` directamente ✅
      - Web en HTTP (localhost): usa `ws://` ✅
-     - Web en HTTPS: **deshabilitado temporalmente** hasta configurar `wss://`
+     - Web en HTTPS: deshabilitado temporalmente hasta configurar `wss://`
 
 3. **useSincronizacionTiempoReal.ts** - Hook de integración:
    - Cola de cambios locales con debounce
@@ -166,41 +166,49 @@ npx cap sync
    - Interfaz `UseDashboardReturn` incluye `tiempoReal`
    - Propagación de estado WebSocket
 
-#### ✅ SOLUCIÓN PRAGMÁTICA IMPLEMENTADA (2026-02-04):
+6. **useNotificadorCambiosWebSocket.ts** - ✅ NUEVO (2026-02-05):
+   - Detecta automáticamente cambios en tareas/hábitos/proyectos/notas
+   - Compara estado anterior vs actual para inferir acciones (crear/editar/eliminar/toggle)
+   - Debounce para notas (evita spam al escribir)
+   - No notifica durante carga inicial (evita falsos positivos)
+   - Integrado en `useDashboardSync.ts`
 
-**Problema**: Los navegadores bloquean `ws://` desde páginas `https://` (mixed content)
+**Arquitectura final:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     useDashboard.ts                         │
+│  (Orquestador principal)                                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   useDashboardSync.ts                       │
+│  - Sync HTTP con servidor                                   │
+│  - Integra WebSocket via useSincronizacionTiempoReal        │
+│  - Detecta cambios via useNotificadorCambiosWebSocket       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          ▼                   ▼                   ▼
+┌─────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│ useWebSocket.ts │ │useSincronizacion... │ │useNotificadorCam... │
+│ (Conexión WS)   │ │(Cola de cambios)    │ │(Detección cambios)  │
+└─────────────────┘ └─────────────────────┘ └─────────────────────┘
+```
 
-**Solución**: Detección automática de entorno en `useWebSocket.ts`:
-- Si `Capacitor.isNativePlatform()` → Conecta a `ws://` sin problemas
-- Si es web HTTP (localhost) → Conecta a `ws://` sin problemas  
-- Si es web HTTPS → No intenta conectar (evita errores en consola)
-- Log informativo: `[WebSocket] Deshabilitado en web HTTPS (mixed content). La APK sí puede conectar.`
+**Flujo de sincronización:**
+1. Usuario modifica tarea/hábito/proyecto/nota
+2. `useNotificadorCambiosWebSocket` detecta el cambio automáticamente
+3. `useSincronizacionTiempoReal` encola y envía via WebSocket
+4. Servidor reenvía a otros dispositivos del usuario
+5. Otros dispositivos reciben y aplican cambios via `callbacksWebSocket`
 
-**Resultado**: La APK puede usar WebSocket para sincronización en tiempo real. La web mantiene la sincronización HTTP existente.
+#### 📋 PENDIENTE OPCIONAL (solo para web HTTPS):
 
-#### ❌ PENDIENTE (Para funcionalidad completa en web):
-
-1. **Configurar SSL para WebSocket** (Opcional, solo para web HTTPS):
-   - Opción A: Crear servicio en Coolify para el WebSocket con subdominio `ws.nakomi.studio`
-   - Opción B: Configurar Traefik de Coolify para proxy WSS en path `/ws`
-   - **Nota**: Una vez configurado, actualizar `useWebSocket.ts` línea 43:
-     ```typescript
-     url: esHttps ? 'wss://ws.nakomi.studio' : 'ws://66.94.100.241:8082'
-     ```
-
-2. **Llamar a `notificarCambio`** desde las acciones (Mejora futura):
-   - `useTareas.ts` - al crear/editar/eliminar tareas
-   - `useProyectos.ts` - al crear/editar/eliminar proyectos
-   - `useHabitosStore.ts` - al crear/editar/eliminar/toggle hábitos
-   - **Alternativa**: Crear suscriptor a cambios en Zustand que notifique automáticamente
-
-3. **Probar la conexión desde APK**:
-   - Regenerar APK con los cambios
-   - Verificar en logs: `journalctl -u websocket-sync -f`
-   - Verificar que aparece `[WebSocket] Conectado` en consola de Android
-
-**Archivos modificados (sesión actual):**
-- `App/React/hooks/useWebSocket.ts` - Detección de entorno y bloqueo mixed content
+1. **Configurar SSL para WebSocket**:
+   - Opción A: Crear servicio en Coolify con subdominio `ws.nakomi.studio`
+   - Opción B: Configurar Traefik para proxy WSS
+   - Una vez configurado, actualizar `useWebSocket.ts` línea 43
 
 **Comandos útiles del servidor:**
 ```bash

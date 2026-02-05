@@ -104,3 +104,5 @@ App/React/android/app/src/main/res/values/strings.local.xml
 
 # Separate Extensions
 css-vars-validator/
+.idea/
+.idea

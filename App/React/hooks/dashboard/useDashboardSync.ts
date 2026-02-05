@@ -5,6 +5,7 @@ import {useHabitosStore} from '../../stores/habitosStore';
 import {useSyncManager} from './useSyncManager';
 import {useSuscripcion} from '../useSuscripcion';
 import {useSincronizacionTiempoReal} from '../useSincronizacionTiempoReal';
+import {useNotificadorCambiosWebSocket} from '../useNotificadorCambiosWebSocket';
 import {obtenerUserId} from '../useSincronizacion';
 
 interface UseDashboardSyncProps {
@@ -130,6 +131,21 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
      * 2.7. Hook de sincronización en tiempo real (WebSocket)
      */
     const {estadoConexion, conectado: wsConectado, notificarCambio} = useSincronizacionTiempoReal(userId || null, callbacksWebSocket, userId > 0 /* Solo habilitar si hay usuario */);
+
+    /*
+     * 2.8. Hook notificador automático de cambios
+     * Detecta cambios en tareas/hábitos/proyectos/notas y notifica via WebSocket
+     * para sincronización en tiempo real entre dispositivos
+     */
+    useNotificadorCambiosWebSocket({
+        tareas,
+        habitos,
+        proyectos,
+        notas,
+        notificarCambio,
+        habilitado: wsConectado && userId > 0,
+        cargando: cargandoDatos || cargandoDatosLocales
+    });
 
     /*
      * 3. Invocar al nuevo Manager
