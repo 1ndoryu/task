@@ -31,7 +31,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## 🔴 PRIORIDAD ALTA - Bugs Críticos
 
 ### TAREA 1: Back no funciona en APK
-**Estado:** 🔄 En revisión (v2) | **Prioridad:** Alta | **Tipo:** Bug Crítico
+**Estado:** ✅ Completado  | **Prioridad:** Alta | **Tipo:** Bug Crítico
 
 **Solución implementada (v1):** Creado hook `useBackButtonCapacitor.ts` que intercepta el evento `backButton` de Capacitor. Revisa en orden: menús contextuales, BottomSheets, drawer, modales. Solo minimiza la app si no hay nada abierto.
 
@@ -69,7 +69,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 5: Interacción de hábitos/tareas en panel de ejecución
-**Estado:** 🔄 En revisión (v2) | **Prioridad:** Media | **Tipo:** UX
+**Estado:** ✅ Completado  | **Prioridad:** Media | **Tipo:** UX
 
 **Solución implementada (original):** Modificado `manejarClickContenido` en `TareaItem.tsx` para que hábitos llamen a `onEditarHabito` (abre BottomSheet).
 
@@ -298,41 +298,7 @@ curl -H "Connection: Upgrade" -H "Upgrade: websocket" https://ws.nakomi.studio
 
 ---
 
-## 🔵 PENDIENTE DE ACLARAR
 
-### TAREA 12: Problema visual de las notas
-**Estado:** ⏸️ Pendiente de aclarar | **Prioridad:** Por definir | **Tipo:** Bug/UI
-
-**Descripción:** El usuario menciona un problema visual difícil de explicar.
-
-**Esperando:** Descripción detallada del problema (posicionamiento, móvil/desktop, editor/lista/carpetas, etc.)
-
----
-
-
-# Comentarios exactos del usuario. 
-
-1. Centralizarlar todas las configuraciones de los paneles en un modal central de configuración, esto tiene que ser solid para no duplicar configuraciones, tiene que ser un modal que divida en panel lateral las configuraciones, los paneles mantendran sus acceso a sus configuraciones, tambien se centrara las opciones de perfil y nos aseguraremos que todo encaje visualmente. (Esto no es prioritario)
-
-2. Las subtareas en la version movil no parecen subtareas, no se desplazan un poco a la izquierda para verse como subtareas, en el modo compacto si parece estar bien pero no en el modo normal.
-
-3. En el panel de ejecución o tareas, cuando doy un toque a un habito, debería abrirse el bottomS como se abre al dar un toque en el panel de habitos, y las tareas en el panel de ejecución tienen el problema que al dar un toque abren el panel de configuracion en vez del bottomS (ese que se abre al dar a crear tarea, deberia servir para editar)
-
-4. El back no funciona en la apk, el back debería cerrar modales, cerrar el menu, cerrar bottomS abiertos, etc, en cambio al dar back se sale de la app. 
-
-5. En el modo compacto, los habitos en el panel de habito necesitan un poco mas de gap (2px mas) y que funcione desplazar con el dedo pero que en vez de eliminar sea posponer, seran 2 opciones completar y posponer para los hábitos.
-
-6. Preparar para que las notificaciones lleguen a la apk, también tienen que generarse notificaciones cuando un habito entra en ventana de oportunidad.
-
-7. Problema de sincronía entre dispositivos: esto es dificil de explicar pero hay que hacer las bases para que la actualización entre dispositivos sea en tiempo real.
-
-8. Problema visual de las notas: esto es dificil de explicar, dejar en el roadmap como pendiente de aclarar.
-
-9. Hora incorrecta en el panel de actividades, las actividades al dar click en un dia si completo algo a las 05:00, aparece que se completo a las 10:00
-
-10. Las tareas por cada dia de vencimiento deben aumentar sus puntos en el ramking de ordenamiento en el panel de ejecución/tareas.
-
-11. No indica bien el día en que realmente toca hacer un habito. Caso real, Habito leer, lo hice el 31 de enero, la frecuencia es 3 días, supongo que si es de 3 días toca el 3 de febrero, estoy en el 3 de febrero y no aparece con el badge de hoy ni aparece en el panel de ejecución, aparece al siguiente dia 4 de febrero. 
 
 # ARCHIVO DE FASES ANTERIORES (POSPUESTA)
 
