@@ -17,10 +17,26 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
 
+/*
+ * Detección de entorno para WebSocket
+ *
+ * El problema: los navegadores bloquean ws:// desde páginas https:// (mixed content)
+ * Solución pragmática:
+ * - APK (Capacitor nativo): usa ws:// directamente, no tiene restricción
+ * - Web en HTTPS: deshabilitado temporalmente hasta configurar wss://
+ * - Web en HTTP (localhost): usa ws:// sin problemas
+ */
+const esPlataformaNativa = Capacitor.isNativePlatform();
+const esHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
+
+/* Si estamos en web HTTPS, el WebSocket no puede conectar a ws:// */
+const webSocketBloqueadoPorMixedContent = !esPlataformaNativa && esHttps;
+
 /* Configuración del WebSocket */
 const CONFIG_WS = {
     /* URL base del servidor WebSocket
-     * TODO: Configurar wss:// a través del proxy de Coolify para producción
+     * TODO: Cuando tengamos wss:// configurado, usar:
+     * url: esHttps ? 'wss://ws.nakomi.studio' : 'ws://66.94.100.241:8082'
      */
     url: 'ws://66.94.100.241:8082',
     /* Intervalo de heartbeat en ms (mantener conexión viva) */
@@ -34,7 +50,9 @@ const CONFIG_WS = {
     /* Máximo de intentos de reconexión antes de pausar */
     maxIntentosReconexion: 10,
     /* Tiempo de inactividad antes de considerar pestaña inactiva */
-    inactividadMs: 60000
+    inactividadMs: 60000,
+    /* WebSocket deshabilitado en web HTTPS hasta tener SSL configurado */
+    deshabilitadoPorMixedContent: webSocketBloqueadoPorMixedContent
 };
 
 /* Estados posibles de la conexión */
@@ -137,6 +155,12 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
     /* Conectar al WebSocket */
     const conectar = useCallback(() => {
+        /* Bloquear conexión en web HTTPS (mixed content) */
+        if (CONFIG_WS.deshabilitadoPorMixedContent) {
+            console.log('[WebSocket] Deshabilitado en web HTTPS (mixed content). La APK sí puede conectar.');
+            return;
+        }
+
         if (!habilitado || !userId || wsRef.current?.readyState === WebSocket.OPEN) {
             return;
         }
