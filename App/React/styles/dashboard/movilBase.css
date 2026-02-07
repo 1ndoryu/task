@@ -95,6 +95,17 @@ body {
         padding-inline: 0;
         padding-bottom: var(--dashboard-espacioMovilSm);
         font-size: var(--dashboard-tamanoMovilBase);
+        /* Flexbox para que el contenido llene el espacio disponible */
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        height: 100vh; /* Fallback */
+    }
+
+    /* El PullToRefresh debe ocupar todo el espacio restante */
+    .dashboardContenedor > .pullToRefresh {
+        flex: 1;
+        min-height: 0; /* Importante para que flex funcione con overflow */
     }
 
     /* Ocultar footer en móvil - no necesario con navegación por páginas */
