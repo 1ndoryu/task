@@ -7,8 +7,8 @@
  * Revision 7: Botones separados para lista/editor, movidos al header
  */
 
-import {useState, useEffect, useCallback, useMemo} from 'react';
-import {Search, FileText, Loader, AlertCircle, Maximize2, Minimize2, Plus, ArrowUpDown, ChevronLeft, PanelLeftClose, PanelRightClose} from 'lucide-react';
+import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
+import {Search, FileText, Loader, AlertCircle, Maximize2, Minimize2, Plus, ArrowUpDown, ChevronLeft, PanelLeftClose, PanelRightClose, Save} from 'lucide-react';
 import {Modal} from '../../shared';
 import {Scratchpad} from '../Scratchpad';
 import {ListaNotasGuardadas} from './ListaNotasGuardadas';
@@ -36,6 +36,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const notaActiva = useNotasStore(s => s.notaActiva);
     const total = useNotasStore(s => s.total);
     const cargando = useNotasStore(s => s.cargando);
+    const guardando = useNotasStore(s => s.guardando);
     const error = useNotasStore(s => s.error);
     const cargarNotas = useNotasStore(s => s.cargarNotas);
     const eliminarNota = useNotasStore(s => s.eliminarNota);
@@ -43,6 +44,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const seleccionarNota = useNotasStore(s => s.seleccionarNota);
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
     const actualizarContenido = useNotasStore(s => s.actualizarContenidoNotaActiva);
+    const guardarNotaActiva = useNotasStore(s => s.guardarNotaActiva);
 
     /* Estado de carpetas */
     const {carpetas, carpetaActiva, vistaActual, cargando: cargandoCarpetas, cargarCarpetas, crearCarpeta, renombrarCarpeta, eliminarCarpeta, seleccionarCarpeta, moverNota, setVistaActual, volverACarpetas, obtenerNombreCarpetaActiva} = useCarpetasNotas();
@@ -56,6 +58,24 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     /* Estados separados para mostrar/ocultar lista y editor */
     const [mostrarLista, setMostrarLista] = useState(true);
     const [mostrarEditor, setMostrarEditor] = useState(true);
+
+    /*
+     * Cierre seguro: si hay cambios sin guardar, guardar antes de cerrar.
+     * Evita pérdida de datos al cerrar rápidamente el modal.
+     */
+    const cerrando = useRef(false);
+    const manejarCerrarSeguro = useCallback(async () => {
+        if (cerrando.current) return;
+        cerrando.current = true;
+
+        const estado = useNotasStore.getState();
+        if (estado.notaActiva.modificada && estado.notaActiva.contenido.trim()) {
+            await estado.guardarNotaActiva();
+        }
+
+        cerrando.current = false;
+        onCerrar();
+    }, [onCerrar]);
 
     /* Toggle para panel lista */
     const alternarPanelLista = useCallback(() => {
@@ -111,10 +131,10 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
         [eliminarNota]
     );
 
-    /* Crear nueva nota y seleccionarla */
+    /* Crear nueva nota y seleccionarla - en la carpeta activa actual */
     const manejarCrearNuevaNota = useCallback(() => {
-        crearNuevaNota();
-    }, [crearNuevaNota]);
+        crearNuevaNota(carpetaActiva);
+    }, [crearNuevaNota, carpetaActiva]);
 
     /* Cambiar ordenamiento */
     const alternarOrdenamiento = useCallback(() => {
@@ -181,6 +201,19 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     /* Acciones del header del modal - botones a la izquierda, buscador al centro, controles a la derecha */
     const accionesHeader = (
         <>
+            {/* Indicador de guardado */}
+            {guardando && (
+                <span className="modalNotasGuardando" style={{display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--dashboard-textoSecundario, #888)'}}>
+                    <Save size={12} className="animacionGirar" />
+                    Guardando...
+                </span>
+            )}
+            {notaActiva.modificada && !guardando && (
+                <span className="modalNotasModificada" style={{fontSize: '11px', color: 'var(--dashboard-estadoAdvertencia, #fbbf24)'}}>
+                    Sin guardar
+                </span>
+            )}
+
             {/* Buscador centrado en el header */}
             <div className="modalNotasBusqueda modalNotasBusqueda--headerCentrado">
                 <Search size={14} className="modalNotasBusquedaIcono" />
@@ -208,7 +241,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     );
 
     return (
-        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={onCerrar} claseExtra={claseModal} accionesEncabezado={accionesHeader}>
+        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={manejarCerrarSeguro} claseExtra={claseModal} accionesEncabezado={accionesHeader}>
             <div id="modal-notas-expandida" className="vistaNotasExpandida">
                 {/* Columna Lista - solo visible si mostrarLista */}
                 {mostrarLista && (

@@ -9,7 +9,7 @@
  */
 
 import {useCallback, useMemo, CSSProperties} from 'react';
-import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn} from '../shared';
+import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn, PullToRefresh} from '../shared';
 import {obtenerPanel, panelManejaAlturaPropia, paginaMovilAPanelId} from '../../config/registroPaneles';
 import {useEsMovil} from '../../hooks/useEsMovil';
 
@@ -384,17 +384,28 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
     }, [layout.anchos]);
 
     /*
+     * Callback de pull-to-refresh: sincroniza datos desde el servidor.
+     * Recarga hábitos, tareas y notas del panel activo.
+     */
+    const manejarRefreshMovil = useCallback(async () => {
+        await dashboard.sincronizacion.sincronizarAhora();
+    }, [dashboard.sincronizacion]);
+
+    /*
      * MODO MÓVIL: Renderizamos solo el panel correspondiente a la página activa
      * Layout simplificado sin columnas, handles ni arrastre
+     * Envuelto en PullToRefresh para gesto nativo de recarga
      */
     if (esMovil) {
         /* Obtener el panelId desde la página móvil usando el registro */
         const panelActivo = paginaMovilAPanelId(paginaMovilActiva) || 'ejecucion';
 
         return (
-            <div className="dashboardGridContenedor dashboardGridContenedor--movil">
-                <div className="dashboardGridMovil">{renderizarContenidoPanel(panelActivo)}</div>
-            </div>
+            <PullToRefresh onRefresh={manejarRefreshMovil}>
+                <div className="dashboardGridContenedor dashboardGridContenedor--movil">
+                    <div className="dashboardGridMovil">{renderizarContenidoPanel(panelActivo)}</div>
+                </div>
+            </PullToRefresh>
         );
     }
 

@@ -637,33 +637,33 @@
     background: var(--dashboard-fondoHover);
 }
 
-/* Variantes de color para badges - Solo color de texto, sin fondo */
+/* Variantes de color para badges - Usan variables CSS para respetar tema activo */
 .badgesPropiedad__badge--proyecto {
-    color: rgb(167, 139, 250);
-    border-color: rgba(139, 92, 246, 0.4);
+    color: var(--dashboard-badgeProyectoTexto);
+    border-color: var(--dashboard-badgeProyectoBorde);
 }
 
 .badgesPropiedad__badge--prioridad {
-    color: rgb(251, 146, 60);
-    border-color: rgba(251, 146, 60, 0.4);
+    color: var(--dashboard-badgePrioridadTexto);
+    border-color: var(--dashboard-badgePrioridadBorde);
 }
 
 .badgesPropiedad__badge--urgencia {
-    color: rgb(248, 113, 113);
-    border-color: rgba(239, 68, 68, 0.4);
+    color: var(--dashboard-badgeUrgenciaTexto);
+    border-color: var(--dashboard-badgeUrgenciaBorde);
 }
 
 .badgesPropiedad__badge--fecha {
-    color: rgb(96, 165, 250);
-    border-color: rgba(59, 130, 246, 0.4);
+    color: var(--dashboard-badgeFechaTexto);
+    border-color: var(--dashboard-badgeFechaBorde);
 }
 
 .badgesPropiedad__badge--frecuencia {
-    color: rgb(74, 222, 128);
-    border-color: rgba(34, 197, 94, 0.4);
+    color: var(--dashboard-badgeFrecuenciaTexto);
+    border-color: var(--dashboard-badgeFrecuenciaBorde);
 }
 
 .badgesPropiedad__badge--importancia {
-    color: rgb(244, 114, 182);
-    border-color: rgba(236, 72, 153, 0.4);
+    color: var(--dashboard-badgeImportanciaTexto);
+    border-color: var(--dashboard-badgeImportanciaBorde);
 }

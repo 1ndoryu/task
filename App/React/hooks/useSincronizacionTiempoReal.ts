@@ -87,9 +87,18 @@ export function useSincronizacionTiempoReal(
             /* Manejar mensaje de sincronización */
             if (mensaje.tipo === 'sync') {
                 const syncMsg = mensaje as MensajeSincronizacion;
-                const {entidad, accion, datos} = syncMsg.payload;
+                const {entidad, accion, datos, timestamp: tsRemoto} = syncMsg.payload;
 
-                console.log('[SyncRT] Cambio remoto recibido:', entidad, accion);
+                /*
+                 * Last-Write-Wins: solo aplicar si el timestamp remoto es más reciente
+                 * que la última sincronización local. Esto evita bucles de eco.
+                 */
+                if (tsRemoto && tsRemoto <= ultimaSincRef.current) {
+                    console.log('[SyncRT] Cambio remoto ignorado (LWW): ts remoto', tsRemoto, '<= local', ultimaSincRef.current);
+                    return;
+                }
+
+                console.log('[SyncRT] Cambio remoto recibido:', entidad, accion, 'ts:', tsRemoto);
 
                 /* Usar callbacksRef.current para siempre tener la versión más actual */
                 const currentCallbacks = callbacksRef.current;
@@ -109,7 +118,8 @@ export function useSincronizacionTiempoReal(
                         break;
                 }
 
-                ultimaSincRef.current = Date.now();
+                /* Actualizar timestamp de última sync al recibir un cambio remoto válido */
+                ultimaSincRef.current = tsRemoto || Date.now();
             }
 
             /* Manejar confirmación de sincronización completa */
@@ -164,12 +174,20 @@ export function useSincronizacionTiempoReal(
         (cambio: Omit<CambioLocal, 'timestamp'>) => {
             if (!habilitado) return;
 
+            const ahora = Date.now();
+
             /* Agregar a la cola */
             colaCambiosRef.current.push({
                 ...cambio,
-                timestamp: Date.now()
+                timestamp: ahora
             });
             setCambiosPendientes(true);
+
+            /*
+             * Actualizar timestamp de última sync al crear un cambio local.
+             * Esto evita que el eco WebSocket de nuestro propio cambio se reaplique.
+             */
+            ultimaSincRef.current = ahora;
 
             /* Debounce para enviar */
             if (debounceRef.current) {

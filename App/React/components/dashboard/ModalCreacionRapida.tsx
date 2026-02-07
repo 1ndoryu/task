@@ -9,6 +9,7 @@ import {X, CheckSquare, Activity, Folder, Calendar, Flag, Hash, ArrowRight, Laye
 import {MenuContextual} from '../shared';
 import type {Proyecto, Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../../hooks/useAdjuntos';
+import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
 import '../../styles/dashboard/componentes/modalCreacionRapida.css';
 
 interface ModalCreacionRapidaProps {
@@ -377,7 +378,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                             setMenuPrioridad({visible: true, x: rect.left, y: rect.bottom + 4});
                         }}>
                         <Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />
-                        <span>{opciones.prioridad ? `Prioridad ${opciones.prioridad}` : 'Prioridad'}</span>
+                        <span>{opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}</span>
                     </button>
 
                     {/* Selector de Urgencia */}
@@ -391,7 +392,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                             setMenuUrgencia({visible: true, x: rect.left, y: rect.bottom + 4});
                         }}>
                         <Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />
-                        <span>{opciones.urgencia ? opciones.urgencia.charAt(0).toUpperCase() + opciones.urgencia.slice(1) : 'Urgencia'}</span>
+                        <span>{opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}</span>
                     </button>
 
                     {/* Botón Adjuntar */}
@@ -456,7 +457,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                             setMenuPrioridad({visible: true, x: rect.left, y: rect.bottom + 4});
                         }}>
                         <Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />
-                        <span>{opciones.prioridad ? `Prioridad ${opciones.prioridad}` : 'Prioridad'}</span>
+                        <span>{opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}</span>
                     </button>
 
                     {/* Selector de Urgencia (Proyecto) */}
@@ -470,7 +471,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                             setMenuUrgencia({visible: true, x: rect.left, y: rect.bottom + 4});
                         }}>
                         <Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />
-                        <span>{opciones.urgencia ? opciones.urgencia.charAt(0).toUpperCase() + opciones.urgencia.slice(1) : 'Urgencia'}</span>
+                        <span>{opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}</span>
                     </button>
 
                     {/* Selector de Fecha Limite (Proyecto) */}

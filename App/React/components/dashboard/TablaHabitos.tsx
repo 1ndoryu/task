@@ -176,6 +176,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {
             switch (opcionId) {
+                case MENU_HABITO_IDS.CONFIGURAR:
                 case MENU_HABITO_IDS.EDITAR:
                     onEditar?.(habito);
                     break;

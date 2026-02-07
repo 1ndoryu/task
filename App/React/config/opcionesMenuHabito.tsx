@@ -50,12 +50,7 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
         {
             id: 'pausar',
             etiqueta: estado.estaPausado ? 'Reanudar hábito' : 'Pausar hábito',
-            icono: estado.estaPausado ? <Play size={12} /> : <Pause size={12} />
-        },
-        {
-            id: 'editar',
-            etiqueta: 'Editar hábito',
-            icono: <Edit3 size={12} />,
+            icono: estado.estaPausado ? <Play size={12} /> : <Pause size={12} />,
             separadorDespues: true
         }
     ];
@@ -67,10 +62,10 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
             etiqueta: 'Importancia',
             icono: <Flag size={12} />,
             subOpciones: [
-                {id: 'importancia-Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="#b91c1c" />},
-                {id: 'importancia-Alta', etiqueta: 'Alta', icono: <Flag size={12} color="#ef4444" />},
-                {id: 'importancia-Media', etiqueta: 'Media', icono: <Flag size={12} color="#f59e0b" />},
-                {id: 'importancia-Baja', etiqueta: 'Baja', icono: <Flag size={12} color="#94a3b8" />}
+                {id: 'importancia-Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="var(--dashboard-estadoMuyAlta)" />},
+                {id: 'importancia-Alta', etiqueta: 'Alta', icono: <Flag size={12} color="var(--dashboard-estadoAlta)" />},
+                {id: 'importancia-Media', etiqueta: 'Media', icono: <Flag size={12} color="var(--dashboard-estadoMedia)" />},
+                {id: 'importancia-Baja', etiqueta: 'Baja', icono: <Flag size={12} color="var(--dashboard-estadoBaja)" />}
             ],
             separadorDespues: true
         });

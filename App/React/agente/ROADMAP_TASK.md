@@ -27,7 +27,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## 🔴 PRIORIDAD ALTA - Bugs Críticos de Sincronización
 
 ### TAREA 1: Conflictos de sincronización en hábitos (Last-Write-Wins)
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug Crítico
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug Crítico
+
+**Solución aplicada:** Implementado LWW con timestamps en `useSincronizacionTiempoReal.ts`. Cada cambio local actualiza `ultimaSincRef` y los cambios remotos con timestamp <= al local se ignoran.
 
 **Descripción:** La sincronización entre dispositivos tiene conflictos graves:
 - Al marcar/desmarcar un hábito, el estado entra en bucle (se marca y desmarca en tiempo real)
@@ -49,7 +51,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 2: Hábitos duplicados en panel de ejecución
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug
+
+**Solución aplicada:** Deduplicación en `onHabitoRemoto` de `useDashboardSync.ts` - compara JSON del `historialCompletados` para detectar eco de toggle.
 
 **Descripción:** Al marcar un hábito desde el panel de ejecución:
 - El hábito vuelve a aparecer en la lista
@@ -61,27 +65,43 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
-### TAREA 3: Editar tarea no guarda cambios (Bug 4 usuario)
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug
+### TAREA 3: Editar tarea no guarda cambios + Fecha muestra expirada
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug
 
-**Descripción:** En el popup de edición de tarea existente:
-- Al cambiar propiedades (ej: fecha límite), no se guardan
-- Cerrar el popup descarta los cambios
-- Posible problema de zona horaria con fechas límite
+**Solución aplicada:** (A) Reemplazado `toISOString()` por `obtenerFechaLocalISO()` en `fecha.ts` y `PropiedadesCompactas.tsx`. (B) Fix en `useTareas.ts`: config vacía `{}` ya no borra configuración existente, solo `null` explícito la elimina.
 
-**Reportado:** Tarea creada con fecha "mismo día" muestra expirada desde el día anterior.
+**Descripción:** Dos sub-bugs confirmados tras investigación:
 
-**Archivos a revisar:**
-- Modal/BottomSheet de edición de tareas
-- Servicio de guardado de tareas
-- Manejo de timezones en fechas
+**BUG 3A — Fecha "mismo día" muestra expirada (CRÍTICO - Timezone):**
+- `calcularFechaDesdeOpcion()` y `PropiedadesCompactas.tsx` usan `toISOString().split('T')[0]` que convierte a UTC.
+- `calcularUrgenciaFechaLimite()` y `calcularDiasDesde()` parsean con `new Date(fechaIso)` (UTC) y luego `setHours(0,0,0,0)` (local), desplazando el día hacia atrás en zonas UTC-negativas.
+- Resultado: una tarea con deadline "hoy" se muestra como "Vencida (1d)" en UTC-5.
+- **Fix:** Usar `obtenerFechaLocalISO()` en lugar de `toISOString()`, y parsear con `new Date(fecha + 'T00:00:00')`.
+
+**BUG 3B — Limpiar fecha borra toda la configuración:**
+- `manejarGuardar` no incluye `fechaMaxima` en `configuracion` si es string vacío.
+- `editarTarea` en `useTareas.ts` recibe `configuracion = {}` y ejecuta `delete tareaActualizada.configuracion`, borrando descripción, adjuntos, etc.
+- **Fix:** Incluir siempre `fechaMaxima` en la config (puede ser `undefined`), y en `editarTarea` hacer delete selectivo por campo.
+
+**BUG 3C — Doble cierre de modal (menor):**
+- `manejarGuardarEdicionTareaGlobal` cierra el modal, y `manejarGuardar` lo cierra de nuevo.
+- Inofensivo con React 18 batching, pero debe limpiarse.
+
+**Archivos afectados:**
+- `utils/fecha.ts` (líneas 82, 86, 91, 95, 99, 103, 179, 64)
+- `components/shared/PropiedadesCompactas.tsx` (líneas 152, 156, 160)
+- `components/dashboard/PanelConfiguracionTarea.tsx` (líneas 96-98, 131)
+- `hooks/useTareas.ts` (líneas 392-396)
+- `hooks/useAccionesDashboard.ts` (línea 108)
 
 ---
 
 ## 🟡 PRIORIDAD MEDIA - Notas y UI
 
 ### TAREA 4: Sincronización de notas en tiempo real (estilo Google Docs)
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Feature
+
+**Solución aplicada:** (1) `onNotaRemota` en `useDashboardSync.ts` ahora maneja notas individuales con ID (actualiza `notasStore`) además del scratchpad. (2) Subscription a `useNotasStore` que detecta cambios en `notaActiva.contenido` y los envía via WS con debounce de 1.5s.
 
 **Descripción:** Las notas no se sincronizan en tiempo real entre dispositivos.
 
@@ -98,7 +118,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 5: Notas no se mueven de carpeta en tiempo real
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Bug
+
+**Solución aplicada:** (1) `moverNota` en `carpetasNotasStore.ts` ahora actualiza `carpetaId` en `notasStore` inmediatamente. (2) `crearNuevaNota` acepta `carpetaId` opcional. (3) `guardarNotaActiva` llama a `moverNota` tras crear si hay `carpetaId`. (4) `ModalNotasExpandido` pasa `carpetaActiva` al crear nota.
 
 **Descripción:**
 1. Mover una nota de carpeta requiere recargar para ver el cambio
@@ -111,7 +133,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 6: Pérdida de cambios al cerrar modal de notas rápidamente
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Bug
+
+**Solución aplicada:** Handler `manejarCerrarSeguro` en `ModalNotasExpandido.tsx` que auto-guarda (`guardarNotaActiva`) si `notaActiva.modificada` antes de cerrar. Indicador visual "Sin guardar" / "Guardando..." añadido al header del modal.
 
 **Descripción:** Al editar una nota desde el modal de notas guardadas y cerrar rápidamente, los cambios se pierden.
 
@@ -123,7 +147,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 7: Menú contextual panel de hábitos - Eliminar opción duplicada
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** UI
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** UI
+
+**Solución aplicada:** Eliminada opción 'editar' de `opcionesMenuHabito.tsx`, manteniendo solo 'configurar'. Añadido case `CONFIGURAR` en switch de `TablaHabitos.tsx`.
 
 **Descripción:** En el menú contextual del panel de hábitos aparecen:
 - "Configurar hábito"
@@ -134,7 +160,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 8: Popup tareas - Paleta de colores en modo claro (Bug 2 usuario)
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug UI
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Bug UI
+
+**Solución aplicada:** 12 nuevas CSS variables de badge en `variables.css` (dark + light). Reemplazados RGB hardcodeados en `bottomSheetCreacion.css` y `opcionesMenuHabito.tsx` con variables CSS.
 
 **Descripción:** El popup para añadir tarea mantiene paleta de colores de modo oscuro aunque se use modo claro.
 
@@ -143,7 +171,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 9: Texto "Prioridad muy_alta" en dropdown (Bug 3 usuario)
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug UI
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Bug UI
+
+**Solución aplicada:** Usado `obtenerTextoPrioridad()` y `obtenerTextoUrgencia()` en `ModalCreacionRapida.tsx` para formatear correctamente los valores.
 
 **Descripción:** Al seleccionar "Muy Alta" en el dropdown de prioridad, el botón muestra "Prioridad muy_alta" en vez de "Prioridad Muy Alta".
 
@@ -154,7 +184,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ## 🟠 PRIORIDAD BAJA - Mejoras UX Móvil
 
 ### TAREA 10: Pull-to-refresh en versión móvil
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja | **Tipo:** Feature UX
+**Estado:** ✅ Completada | **Prioridad:** Baja | **Tipo:** Feature UX
+
+**Solución aplicada:** Componente `PullToRefresh` ya existente integrado en `DashboardGrid.tsx`. El grid móvil ahora está envuelto en PullToRefresh, ejecutando `sincronizarAhora()` al hacer pull-down.
 
 **Descripción:** Implementar gesto de tirar hacia arriba para recargar.
 
@@ -167,7 +199,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 11: Indicador de estado de conexión en móvil
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja | **Tipo:** Feature UX
+**Estado:** ✅ Completada | **Prioridad:** Baja | **Tipo:** Feature UX
+
+**Solución aplicada:** `IndicadorConexion` importado e integrado en `DashboardIsland.tsx`, visible solo en móvil. Muestra estado WebSocket, offline y sincronización pendiente. Click fuerza sync.
 
 **Descripción:** Mostrar estado de conexión visible en la versión móvil.
 
@@ -179,7 +213,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ### TAREA 12: Notificaciones Push en APK (Firebase/OneSignal)
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja | **Tipo:** Feature
+**Estado:** ✅ Completada (Local recurrente) | **Prioridad:** Baja | **Tipo:** Feature
+
+**Solución aplicada:** Cambiado `schedule.at` (una vez) a `schedule.every: 'day'` + `schedule.on: {hour, minute}` en `useNotificacionesLocales.ts` para notificaciones recurrentes diarias. Eliminada función `calcularProximaNotificacion` innecesaria.
+**TO-DO futuro:** Integrar Firebase Cloud Messaging (FCM) para push desde servidor con la app cerrada.
 
 **Descripción:** Las notificaciones no funcionan en la APK:
 - Las notificaciones locales (`useNotificacionesLocales.ts`) no se disparan

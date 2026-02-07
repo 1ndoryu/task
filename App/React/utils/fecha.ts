@@ -80,29 +80,29 @@ export function calcularFechaDesdeOpcion(opcion: string): string {
     const hoy = new Date();
     switch (opcion) {
         case 'hoy':
-            return hoy.toISOString().split('T')[0];
+            return obtenerFechaLocalISO(hoy);
         case 'manana': {
             const manana = new Date(hoy);
             manana.setDate(manana.getDate() + 1);
-            return manana.toISOString().split('T')[0];
+            return obtenerFechaLocalISO(manana);
         }
         case 'semana': {
             const finSemana = new Date(hoy);
             finSemana.setDate(finSemana.getDate() + (7 - finSemana.getDay()));
-            return finSemana.toISOString().split('T')[0];
+            return obtenerFechaLocalISO(finSemana);
         }
         case 'mes': {
             const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-            return finMes.toISOString().split('T')[0];
+            return obtenerFechaLocalISO(finMes);
         }
         case 'trimestre': {
             const mesActual = hoy.getMonth();
             const finTrimestre = new Date(hoy.getFullYear(), Math.floor(mesActual / 3 + 1) * 3, 0);
-            return finTrimestre.toISOString().split('T')[0];
+            return obtenerFechaLocalISO(finTrimestre);
         }
         case 'ano': {
             const finAno = new Date(hoy.getFullYear(), 11, 31);
-            return finAno.toISOString().split('T')[0];
+            return obtenerFechaLocalISO(finAno);
         }
         default:
             return opcion;

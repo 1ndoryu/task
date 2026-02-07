@@ -14,7 +14,7 @@
 
 import {useCallback, useEffect, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
-import type {Habito, VentanaOportunidad} from '../types/dashboard';
+import type {Habito} from '../types/dashboard';
 
 /*
  * Interfaz para el plugin de notificaciones locales
@@ -86,22 +86,10 @@ async function obtenerPluginNotificaciones(): Promise<NotificacionLocalPlugin | 
 }
 
 /*
- * Calcula la próxima hora de notificación basada en la ventana de oportunidad
+ * Ya no se necesita calcularProximaNotificacion porque usamos
+ * schedule.every='day' + schedule.on={hour, minute} para recurrencia diaria.
+ * El sistema operativo se encarga de repetir la notificación cada día.
  */
-function calcularProximaNotificacion(ventana: VentanaOportunidad): Date {
-    const ahora = new Date();
-    const notificacion = new Date();
-
-    /* Configurar hora de inicio de la ventana */
-    notificacion.setHours(ventana.horaInicio, ventana.minutoInicio, 0, 0);
-
-    /* Si ya pasó la hora de hoy, programar para mañana */
-    if (notificacion <= ahora) {
-        notificacion.setDate(notificacion.getDate() + 1);
-    }
-
-    return notificacion;
-}
 
 export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotificacionesLocales & AccionesNotificacionesLocales {
     const pluginRef = useRef<NotificacionLocalPlugin | null>(null);
@@ -145,7 +133,7 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
         }
     }, [esNativo]);
 
-    /* Programar notificación para un hábito con ventana de oportunidad */
+    /* Programar notificación recurrente diaria para un hábito con ventana de oportunidad */
     const programarNotificacionHabito = useCallback(
         async (habito: Habito): Promise<void> => {
             if (!esNativo || !pluginRef.current || !permisoRef.current) return;
@@ -161,10 +149,13 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
                 /* Ignorar error si no existe */
             }
 
-            /* Calcular próxima notificación */
-            const proximaFecha = calcularProximaNotificacion(habito.ventanaOportunidad);
+            /*
+             * Programar notificación RECURRENTE diaria usando schedule.every + schedule.on.
+             * Antes usábamos schedule.at que solo se dispara una vez; ahora
+             * se repite cada día a la hora de inicio de la ventana de oportunidad.
+             */
+            const {horaInicio, minutoInicio} = habito.ventanaOportunidad;
 
-            /* Programar nueva notificación */
             try {
                 await plugin.schedule({
                     notifications: [
@@ -173,7 +164,8 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
                             title: '⏰ Ventana de oportunidad',
                             body: `Es hora de: ${habito.nombre}`,
                             schedule: {
-                                at: proximaFecha,
+                                on: {hour: horaInicio, minute: minutoInicio},
+                                every: 'day',
                                 allowWhileIdle: true
                             },
                             sound: 'default',

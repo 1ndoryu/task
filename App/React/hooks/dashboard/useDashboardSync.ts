@@ -7,6 +7,7 @@ import {useSuscripcion} from '../useSuscripcion';
 import {useSincronizacionTiempoReal} from '../useSincronizacionTiempoReal';
 import {useNotificadorCambiosWebSocket} from '../useNotificadorCambiosWebSocket';
 import {obtenerUserId} from '../useSincronizacion';
+import {useNotasStore} from '../../stores/notasStore';
 
 interface UseDashboardSyncProps {
     habitos: Habito[];
@@ -85,6 +86,12 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
     const userId = obtenerUserId();
 
     /*
+     * Ref para timestamps LWW (Last-Write-Wins) por entidad+id.
+     * Evita aplicar cambios remotos obsoletos o ecos de nuestros propios cambios.
+     */
+    const lwwTimestampsRef = useRef<Record<string, number>>({});
+
+    /*
      * 2.6. Callbacks para sincronización en tiempo real (WebSocket)
      * Cuando recibimos cambios de otro dispositivo, actualizamos el estado local
      * IMPORTANTE: Usamos refs para evitar stale closures - los callbacks siempre
@@ -109,6 +116,23 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             onHabitoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Habito>) => {
                 console.log('[SyncRT] Hábito remoto recibido:', accion, datos);
                 const habitosActuales = useHabitosStore.getState().habitos;
+
+                /*
+                 * Deduplicación para toggle: verificar que el estado remoto difiere del local.
+                 * Si el historial ya es idéntico, ignorar (probable eco de nuestro propio cambio).
+                 */
+                if (accion === 'toggle' && datos.id) {
+                    const habitoLocal = habitosActuales.find(h => h.id === datos.id);
+                    if (habitoLocal && datos.historialCompletados) {
+                        const historialLocalStr = JSON.stringify(habitoLocal.historialCompletados);
+                        const historialRemotoStr = JSON.stringify(datos.historialCompletados);
+                        if (historialLocalStr === historialRemotoStr) {
+                            console.log('[SyncRT] Toggle hábito ignorado (historial idéntico, probable eco)');
+                            return;
+                        }
+                    }
+                }
+
                 if (accion === 'eliminar' && datos.id) {
                     storeSetHabitos(habitosActuales.filter(h => h.id !== datos.id));
                 } else if (accion === 'crear' && datos.id) {
@@ -132,10 +156,32 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                     setProyectos(proyectosActuales.map(p => (p.id === datos.id ? {...p, ...datos} : p)));
                 }
             },
-            onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string}) => {
+            onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string; id?: number; titulo?: string}) => {
                 console.log('[SyncRT] Nota remota recibida');
                 if (datos.contenido !== undefined) {
-                    setNotas(datos.contenido);
+                    /*
+                     * Si la nota tiene id, es una nota guardada del notasStore.
+                     * Actualizar tanto el scratchpad como la nota guardada.
+                     */
+                    if (datos.id) {
+                        const notasState = useNotasStore.getState();
+                        const notaExistente = notasState.notas.find(n => n.id === datos.id);
+                        if (notaExistente) {
+                            /* Actualizar nota en la lista */
+                            useNotasStore.setState(state => ({
+                                notas: state.notas.map(n =>
+                                    n.id === datos.id ? {...n, contenido: datos.contenido, fechaModificacion: new Date().toISOString()} : n
+                                ),
+                                /* Si es la nota activa, actualizar también su contenido */
+                                notaActiva: state.notaActiva.id === datos.id
+                                    ? {...state.notaActiva, contenido: datos.contenido, modificada: false}
+                                    : state.notaActiva
+                            }));
+                        }
+                    } else {
+                        /* Scratchpad (nota sin id) */
+                        setNotas(datos.contenido);
+                    }
                 }
             },
             onSincronizacionCompleta: () => {
@@ -165,6 +211,48 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         habilitado: wsConectado && userId > 0,
         cargando: cargandoDatos || cargandoDatosLocales
     });
+
+    /*
+     * 2.9. Sincronización de notas guardadas (notasStore) via WebSocket
+     * Detecta cambios en la nota activa y los envía para sync en tiempo real.
+     * Usa debounce de 1.5s para no saturar con cada tecla.
+     */
+    const debounceNotaGuardadaRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const ultimoContenidoNotaRef = useRef<string>('');
+
+    useEffect(() => {
+        if (!wsConectado || userId <= 0) return;
+
+        const unsub = useNotasStore.subscribe((state) => {
+            const {notaActiva} = state;
+            if (!notaActiva.id || !notaActiva.modificada) return;
+
+            /* Evitar enviar el mismo contenido */
+            if (notaActiva.contenido === ultimoContenidoNotaRef.current) return;
+            ultimoContenidoNotaRef.current = notaActiva.contenido;
+
+            /* Debounce para no enviar en cada keystroke */
+            if (debounceNotaGuardadaRef.current) {
+                clearTimeout(debounceNotaGuardadaRef.current);
+            }
+
+            debounceNotaGuardadaRef.current = setTimeout(() => {
+                notificarCambio({
+                    entidad: 'nota',
+                    accion: 'editar',
+                    id: notaActiva.id!,
+                    datos: {id: notaActiva.id, contenido: notaActiva.contenido}
+                });
+            }, 1500);
+        });
+
+        return () => {
+            unsub();
+            if (debounceNotaGuardadaRef.current) {
+                clearTimeout(debounceNotaGuardadaRef.current);
+            }
+        };
+    }, [wsConectado, userId, notificarCambio]);
 
     /*
      * 3. Invocar al nuevo Manager

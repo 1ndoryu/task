@@ -382,8 +382,14 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
 
                     /* Manejar configuracion: fusionar con existente o reemplazar */
                     if (nuevaConfiguracion !== undefined) {
-                        /* Si hay campos en la configuracion, fusionar; de lo contrario mantener existente */
-                        if (Object.keys(nuevaConfiguracion).length > 0) {
+                        /*
+                         * Fusionar configuracion nueva con existente.
+                         * Un objeto vacío {} se interpreta como "sin cambios en config",
+                         * no como "borrar toda la config". Para borrar config, enviar null.
+                         */
+                        if (nuevaConfiguracion === null) {
+                            delete tareaActualizada.configuracion;
+                        } else if (Object.keys(nuevaConfiguracion).length > 0) {
                             tareaActualizada.configuracion = {
                                 ...t.configuracion,
                                 ...nuevaConfiguracion
@@ -393,10 +399,8 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                             if ('repeticion' in nuevaConfiguracion && nuevaConfiguracion.repeticion === undefined) {
                                 delete tareaActualizada.configuracion.repeticion;
                             }
-                        } else {
-                            /* Configuracion vacia significa quitar */
-                            delete tareaActualizada.configuracion;
                         }
+                        /* Si es {} vacío, mantener la configuración existente sin cambios */
                     }
 
                     return tareaActualizada;

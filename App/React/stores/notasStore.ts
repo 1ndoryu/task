@@ -22,7 +22,7 @@ interface NotasActions {
     cargarMas: () => Promise<void>;
     buscarNotas: (termino: string) => Promise<Nota[]>;
     seleccionarNota: (nota: Nota) => void;
-    crearNuevaNota: () => void;
+    crearNuevaNota: (carpetaId?: number | null) => void;
     actualizarContenidoNotaActiva: (contenido: string) => void;
     guardarNotaActiva: () => Promise<Nota | null>;
     eliminarNota: (id: number) => Promise<boolean>;
@@ -96,13 +96,14 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
         });
     },
 
-    crearNuevaNota: () => {
+    crearNuevaNota: (carpetaId?: number | null) => {
         persistirNotaActivaId(null);
         set({
             notaActiva: {
                 id: null,
                 contenido: CONTENIDO_NOTA_NUEVA,
-                modificada: false
+                modificada: false,
+                carpetaId: carpetaId ?? null
             }
         });
     },
@@ -198,6 +199,20 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                 // Crear
                 notaGuardada = await notasService.crearNota(titulo, contenido);
 
+                /*
+                 * Si la nota se creó desde una carpeta activa, moverla ahí.
+                 * La API de crearNota no acepta carpetaId, así que hacemos un
+                 * segundo paso: mover la nota recién creada a su carpeta destino.
+                 */
+                if (notaActiva.carpetaId) {
+                    try {
+                        await notasService.moverNota(notaGuardada.id, notaActiva.carpetaId);
+                        notaGuardada = {...notaGuardada, carpetaId: notaActiva.carpetaId};
+                    } catch {
+                        /* Si falla el mover, la nota queda en General - no es crítico */
+                    }
+                }
+
                 persistirNotaActivaId(notaGuardada.id);
                 set(state => ({
                     guardando: false,
@@ -206,7 +221,8 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                     notaActiva: {
                         id: notaGuardada.id,
                         contenido: notaGuardada.contenido,
-                        modificada: false
+                        modificada: false,
+                        carpetaId: notaGuardada.carpetaId
                     }
                 }));
             }

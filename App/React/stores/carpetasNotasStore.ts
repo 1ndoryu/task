@@ -6,6 +6,7 @@
 import {create} from 'zustand';
 import {CarpetaNota} from '../types/notas';
 import {carpetasNotasService, notasService} from '../services/notasService';
+import {useNotasStore} from './notasStore';
 
 interface CarpetasNotasState {
     carpetas: CarpetaNota[];
@@ -132,6 +133,18 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
     moverNota: async (notaId: number, carpetaId: number | null) => {
         try {
             await notasService.moverNota(notaId, carpetaId);
+
+            /*
+             * Actualizar carpetaId de la nota en notasStore para reflejo inmediato.
+             * Sin esto la nota no desaparece de la carpeta vieja ni aparece en la nueva
+             * hasta recargar la página.
+             */
+            useNotasStore.setState(state => ({
+                notas: state.notas.map(n =>
+                    n.id === notaId ? {...n, carpetaId} : n
+                )
+            }));
+
             /* Recargar carpetas para actualizar contadores */
             get().cargarCarpetas();
             return true;
