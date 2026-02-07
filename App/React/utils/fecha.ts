@@ -55,7 +55,8 @@ export function obtenerFechaHoy(): string {
  */
 export function calcularDiasDesde(fechaIso: string | undefined): number {
     if (!fechaIso) return 999;
-    const fecha = new Date(fechaIso);
+    /* Parseo local para evitar desfase UTC en fechas de vencimiento */
+    const fecha = new Date(fechaIso + 'T00:00:00');
     fecha.setHours(0, 0, 0, 0);
     const hoy = obtenerFechaEfectiva();
     const diferencia = hoy.getTime() - fecha.getTime();
@@ -176,7 +177,7 @@ export function calcularUrgenciaFechaLimite(fechaLimite: string | undefined): In
     if (!fechaLimite) return null;
 
     const hoy = obtenerFechaEfectiva();
-    const fecha = new Date(fechaLimite);
+    const fecha = new Date(fechaLimite + 'T00:00:00');
     fecha.setHours(0, 0, 0, 0);
 
     const diferencia = fecha.getTime() - hoy.getTime();
@@ -195,7 +196,7 @@ export function calcularUrgenciaFechaLimite(fechaLimite: string | undefined): In
  * Formatea una fecha en formato corto (ej: "20 dic")
  */
 export function formatearFechaCorta(fechaIso: string): string {
-    const fecha = new Date(fechaIso);
+    const fecha = new Date(fechaIso + 'T12:00:00');
     const dia = fecha.getDate();
     const mes = fecha.toLocaleDateString('es-ES', {month: 'short'});
     return `${dia} ${mes}`;

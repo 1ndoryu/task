@@ -21,7 +21,7 @@
 .creacionRapidaContenedor {
     width: 600px;
     max-width: 90%;
-    background-color: var(--dashboard-superposicioMedioOscuro);
+    background-color: var(--dashboard-fondoCristal);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: var(--dashboard-sombraFuerte);

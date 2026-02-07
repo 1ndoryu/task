@@ -13,6 +13,7 @@
     --dashboard-fondoTerciario: #111111;
     --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
     --dashboard-fondoHover: #0c0c0c;
+    --dashboard-fondoCristal: rgba(20, 20, 20, 0.8);
 
     /* 
      * COLORES DE BORDE 
@@ -212,6 +213,7 @@
     --dashboard-fondoSecundario: #0c0c0c;
     --dashboard-fondoTerciario: #151515;
     --dashboard-fondoHover: #1e1e1e;
+    --dashboard-fondoCristal: rgba(20, 20, 20, 0.8);
 
     /* Colores de acento */
     --dashboard-acentoPrimario: #a78bfa;
@@ -269,6 +271,7 @@
     --dashboard-fondoSecundario: #ffffff;
     --dashboard-fondoTerciario: #e9ecef;
     --dashboard-fondoHover: #e9ecef;
+    --dashboard-fondoCristal: rgba(255, 255, 255, 0.85);
 
     /* Colores de acento */
     --dashboard-acentoPrimario: #7c3aed;

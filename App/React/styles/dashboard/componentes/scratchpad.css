@@ -536,11 +536,13 @@
     align-items: center;
     gap: var(--dashboard-espacioMd);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    padding-right: calc(var(--dashboard-espacioMd) + 28px);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
+    position: relative;
 }
 
 .listaNotasItem:hover {
@@ -551,6 +553,28 @@
 .listaNotasItem--activo {
     border-color: var(--dashboard-acento);
     background: var(--dashboard-fondoHover);
+}
+
+.listaNotasItemBotonMenu {
+    position: absolute;
+    top: var(--dashboard-espacioXs);
+    right: var(--dashboard-espacioXs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.listaNotasItemBotonMenu:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
 }
 
 .listaNotasItemPrincipal {

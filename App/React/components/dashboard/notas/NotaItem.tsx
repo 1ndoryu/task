@@ -1,5 +1,5 @@
 import {useCallback, useMemo} from 'react';
-import {Clock, Trash2, Folder} from 'lucide-react';
+import {Clock, Trash2, Folder, MoreVertical} from 'lucide-react';
 import type {Nota, CarpetaNota} from '../../../types/notas';
 import {formatearFechaRelativa} from '../../../utils/fecha';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
@@ -27,6 +27,15 @@ export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onM
         [toggle]
     );
 
+    const manejarClickMenu = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle(e.clientX, e.clientY);
+        },
+        [toggle]
+    );
+
     const manejarOpcion = useCallback(
         (opcionId: string) => {
             if (opcionId === 'eliminar') {
@@ -44,6 +53,7 @@ export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onM
         const opciones: OpcionMenu[] = [];
 
         if (onMoverNota) {
+            const carpetasSinGeneral = carpetas.filter(carpeta => carpeta.id !== null);
             const subOpcionesCarpetas: OpcionMenu[] = [
                 /* Opción para mover a "Todas las notas" (General) */
                 {
@@ -52,7 +62,7 @@ export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onM
                     icono: <Folder size={12} />,
                     deshabilitado: !nota.carpetaId /* Deshabilitar si ya está en general (carpetaId null/undefined) */
                 },
-                ...carpetas.map(c => ({
+                ...carpetasSinGeneral.map(c => ({
                     id: `mover-${c.id}`,
                     etiqueta: c.nombre,
                     icono: <Folder size={12} />,
@@ -81,6 +91,9 @@ export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onM
     return (
         <>
             <div className={`listaNotasItem ${activa ? 'listaNotasItem--activo' : ''}`} onClick={() => onSeleccionar(nota)} onContextMenu={manejarClickDerecho}>
+                <button className="listaNotasItemBotonMenu" onClick={manejarClickMenu} title="Opciones" aria-label="Opciones de nota">
+                    <MoreVertical size={14} />
+                </button>
                 <div className="listaNotasItemPrincipal">
                     <div className="listaNotasItemTitulo">{nota.titulo}</div>
 

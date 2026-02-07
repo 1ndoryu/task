@@ -58,6 +58,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     /* Estados separados para mostrar/ocultar lista y editor */
     const [mostrarLista, setMostrarLista] = useState(true);
     const [mostrarEditor, setMostrarEditor] = useState(true);
+    const totalAnteriorRef = useRef<number | null>(null);
 
     /*
      * Cierre seguro: si hay cambios sin guardar, guardar antes de cerrar.
@@ -123,6 +124,19 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
 
         return () => clearTimeout(timeout);
     }, [terminoBusqueda, buscarNotas]);
+
+    useEffect(() => {
+        if (!abierto) {
+            totalAnteriorRef.current = null;
+            return;
+        }
+
+        if (totalAnteriorRef.current !== null && totalAnteriorRef.current !== total) {
+            cargarCarpetas();
+        }
+
+        totalAnteriorRef.current = total;
+    }, [abierto, total, cargarCarpetas]);
 
     const manejarEliminar = useCallback(
         (notaId: number) => {
