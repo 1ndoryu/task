@@ -17,288 +17,214 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 ---
 
 ## Estado Actual
-**Versión:** v1.0.23-beta (2026-02-04)
-**Foco:** Sprint Bugs Críticos + Mejoras Móvil + Funcionalidades Post-Lanzamiento
-
-# Revisiones
-
-**Todas las revisiones completadas - WebSocket sincronizando correctamente entre web y APK** ✅
+**Versión:** v1.0.24-beta (2026-02-07)
+**Foco:** Sprint Sincronización + Notas + UX Móvil + Notificaciones Push
 
 ---
 
 # TAREAS PENDIENTES - SPRINT ACTUAL
 
-## 🔴 PRIORIDAD ALTA - Bugs Críticos
+## 🔴 PRIORIDAD ALTA - Bugs Críticos de Sincronización
 
-### TAREA 1: Back no funciona en APK
-**Estado:** ✅ Completado  | **Prioridad:** Alta | **Tipo:** Bug Crítico
+### TAREA 1: Conflictos de sincronización en hábitos (Last-Write-Wins)
+**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug Crítico
 
-**Solución implementada (v1):** Creado hook `useBackButtonCapacitor.ts` que intercepta el evento `backButton` de Capacitor. Revisa en orden: menús contextuales, BottomSheets, drawer, modales. Solo minimiza la app si no hay nada abierto.
-
-**Fix dependencias (2026-02-04):** Resuelto error de build en producción. Se agregó `@capacitor/app@^6.0.3` al `package.json` de `Glory/assets/react` y se configuró alias en `vite.config.ts` para resolver correctamente el import desde `App/React/hooks/useBackButtonCapacitor.ts`.
-
-**Fix v2 (2026-02-04):** Mejoras al hook:
-- Busca overlays con clase `--visible` en vez de solo la clase base
-- Agrega fallback con evento Escape para cerrar modales/BottomSheets
-- Agrega detección de modales genéricos via selector `[role="dialog"]`
-- Mejor manejo del listener de Capacitor con `canGoBack` ignorado (siempre manejamos nosotros)
-
----
-
-### TAREA 2: Hora incorrecta en panel de actividades
-**Estado:** ✅ Completado | **Prioridad:** Alta | **Tipo:** Bug
-
-**Solución implementada:** Añadido parámetro `horaLocal` al servicio de actividad. El frontend envía la hora local del cliente (`HH:MM:SS`) y el backend la usa directamente en lugar de depender del timezone del servidor.
-
----
-
-### TAREA 3: Hábito no aparece el día correcto según frecuencia
-**Estado:** ✅ Completado | **Prioridad:** Alta | **Tipo:** Bug
-
-**Solución implementada:** Corregido bug off-by-one en `frecuenciaHabitos.ts`. El problema era que `ultimaFecha` usaba `T12:00:00` mientras `hoy` usaba medianoche, causando diferencia de 0.5 días. Normalizado ambas a `T00:00:00`.
-
----
-
-## 🟡 PRIORIDAD MEDIA - Mejoras UI/UX Móvil
-
-### TAREA 4: Subtareas en móvil no parecen subtareas (modo normal)
-**Estado:** ✅ Completado | **Prioridad:** Media | **Tipo:** UI
-
-**Solución implementada:** Añadido en `movilListas.css` regla específica `.tareaItemSubtarea` con `padding-left: 30px` para móvil.
-
----
-
-### TAREA 5: Interacción de hábitos/tareas en panel de ejecución
-**Estado:** ✅ Completado  | **Prioridad:** Media | **Tipo:** UX
-
-**Solución implementada (original):** Modificado `manejarClickContenido` en `TareaItem.tsx` para que hábitos llamen a `onEditarHabito` (abre BottomSheet).
-
-**Fix aclaración usuario (2026-02-04):** Corregido para que al tocar una tarea en el panel de ejecución se abra el `BottomSheetTarea` (compacto, mismo que al crear tarea) en vez del `PanelConfiguracionTarea` (completo). Modificado en `ModalesTareas.tsx` - ahora `tareaEditandoMovil` usa `BottomSheetTarea` con prop `tareaExistente`.
-
-**Fix v2 (2026-02-04):** Mejorado el handler `manejarEditarHabitoPorId` en `DashboardGrid.tsx`:
-- Dependencias de useCallback más específicas: `dashboard.habitos` en vez de `dashboard`
-- Añadido warning en consola si no encuentra el hábito para facilitar depuración
-- **Verificar:** Si sigue sin funcionar, revisar en DevTools (F12) si aparece warning "Hábito con ID X no encontrado"
-
----
-
-### TAREA 6: Modo compacto - Mejoras en hábitos
-**Estado:** ✅ Completado | **Prioridad:** Media | **Tipo:** UX
-
-**Solución implementada:**
-1. Añadido `margin-bottom: 2px` a `.tablaFilaCompacta` en `tabla.css`
-2. Swipe izquierda ahora es "posponer" para hábitos (icono Clock, color advertencia) y "eliminar" para tareas normales en `TareaConColapsador.tsx`
-
----
-
-### TAREA 7: Ranking de tareas por días de vencimiento
-**Estado:** ✅ YA IMPLEMENTADO | **Prioridad:** Media | **Tipo:** Feature
-
-**Verificación:** El hook `useOrdenarTareas.ts` ya incluye esta lógica:
-- `FACTOR_PONDERACION_RETRASO = 50` (puntos por día vencido)
-- `calcularDiasRetraso()` calcula días desde vencimiento
-- `calcularPesoTotal()` suma `diasRetraso * FACTOR_PONDERACION_RETRASO`
-
----
-
-## 🟠 PRIORIDAD BAJA - Funcionalidades Post-Lanzamiento
-
-### TAREA 8: Notificaciones push en APK
-**Estado:** ✅ Completado | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
-
-**Descripción:** Implementar sistema de notificaciones para la APK.
-
-**Solución implementada (2026-02-04):**
-Creado hook `useNotificacionesLocales.ts` que:
-- Usa `@capacitor/local-notifications` para notificaciones locales
-- Programa notificaciones automáticas cuando un hábito entra en ventana de oportunidad
-- Maneja permisos de notificación
-- Cancelación y actualización de notificaciones programadas
-
-**Requisitos de instalación:**
-```bash
-npm install @capacitor/local-notifications
-npx cap sync
-```
-
----
-
-### TAREA 9: Sincronización en Tiempo Real (WebSockets)
-**Estado:** ✅ Completado | **Prioridad:** Baja (Post-lanzamiento) | **Tipo:** Feature
-
-**Descripción:** Implementar actualización en tiempo real entre dispositivos usando WebSockets.
-
-**Solución implementada (2026-02-05):**
-
-#### ✅ COMPLETADO - FUNCIONA EN WEB Y APK:
-
-**Problema crítico resuelto:** La APK no se conectaba al WebSocket por dos razones:
-1. **Mixed content:** La APK carga desde `https://` pero intentaba conectar a `ws://` (sin SSL)
-2. **Android cleartext:** Android bloquea HTTP por defecto desde API 28
-
-**Solución final:**
-- APK y web HTTPS usan `wss://ws.nakomi.studio` (con SSL)
-- Solo localhost HTTP usa `ws://66.94.100.241:8082`
-- Añadido `android:usesCleartextTraffic="true"` al AndroidManifest (backup para HTTP directo)
-
-1. **Servidor WebSocket Node.js** - VPS (`/opt/websocket-sync/`):
-   - `server.js` - Servidor escuchando en puerto 8082
-   - Reenvía mensajes de sync entre dispositivos del mismo usuario
-   - Heartbeat/pong para mantener conexiones vivas
-   - Servicio systemd: `websocket-sync.service` (activo y habilitado)
-   - Puerto 8082 abierto en firewall UFW
-
-2. **useWebSocket.ts** - Cliente WebSocket React:
-   - URL configurada: `ws://66.94.100.241:8082`
-   - Reconexión automática con backoff exponencial
-   - Heartbeat para detectar conexiones muertas
-   - Detección de visibilidad de página (reconecta al volver)
-   - Soporte Capacitor (reconecta al reactivar app)
-   - Detección de entorno para evitar mixed content:
-     - APK (Capacitor nativo): usa `ws://` directamente ✅
-     - Web en HTTP (localhost): usa `ws://` ✅
-     - Web en HTTPS: deshabilitado temporalmente hasta configurar `wss://`
-
-3. **useSincronizacionTiempoReal.ts** - Hook de integración:
-   - Cola de cambios locales con debounce
-   - Envío de cambios a otros dispositivos
-   - Recepción y procesamiento de cambios remotos
-
-4. **useDashboardSync.ts** - Integración con sync HTTP existente:
-   - `callbacksWebSocket` - Handlers para tareas/hábitos/proyectos/notas remotas
-   - Actualiza estado local cuando llegan cambios de otro dispositivo
-   - Expone `tiempoReal.notificarCambio` para notificar cambios locales
-
-5. **useDashboard.ts** - Tipos actualizados:
-   - Interfaz `UseDashboardReturn` incluye `tiempoReal`
-   - Propagación de estado WebSocket
-
-6. **useNotificadorCambiosWebSocket.ts** - ✅ NUEVO (2026-02-05):
-   - Detecta automáticamente cambios en tareas/hábitos/proyectos/notas
-   - Compara estado anterior vs actual para inferir acciones (crear/editar/eliminar/toggle)
-   - Debounce para notas (evita spam al escribir)
-   - No notifica durante carga inicial (evita falsos positivos)
-   - Integrado en `useDashboardSync.ts`
-
-**Arquitectura final:**
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     useDashboard.ts                         │
-│  (Orquestador principal)                                    │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   useDashboardSync.ts                       │
-│  - Sync HTTP con servidor                                   │
-│  - Integra WebSocket via useSincronizacionTiempoReal        │
-│  - Detecta cambios via useNotificadorCambiosWebSocket       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-          ┌───────────────────┼───────────────────┐
-          ▼                   ▼                   ▼
-┌─────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
-│ useWebSocket.ts │ │useSincronizacion... │ │useNotificadorCam... │
-│ (Conexión WS)   │ │(Cola de cambios)    │ │(Detección cambios)  │
-└─────────────────┘ └─────────────────────┘ └─────────────────────┘
-```
-
-**Flujo de sincronización:**
-1. Usuario modifica tarea/hábito/proyecto/nota
-2. `useNotificadorCambiosWebSocket` detecta el cambio automáticamente
-3. `useSincronizacionTiempoReal` encola y envía via WebSocket
-4. Servidor reenvía a otros dispositivos del usuario
-5. Otros dispositivos reciben y aplican cambios via `callbacksWebSocket`
-
-#### ✅ FIX STALE CLOSURES (2026-02-05):
-
-**Problema:** Los callbacks capturaban valores viejos de tareas/hábitos/proyectos en closures.
-Cuando llegaba un mensaje WebSocket, los callbacks usaban datos desactualizados.
-
-**Solución implementada (3 niveles de refs):**
-1. `useWebSocket.ts`: `onMensajeRef` para handler de mensajes
-2. `useSincronizacionTiempoReal.ts`: `callbacksRef` para objeto de callbacks
-3. `useDashboardSync.ts`: `tareasRef`, `habitosRef`, `proyectosRef` para datos actuales
-
-Los callbacks ya no dependen de los arrays en el dependency array del useMemo,
-usan refs que se actualizan en cada render para acceder siempre a la versión actual.
-
-#### ✅ SSL CONFIGURADO Y FUNCIONANDO (2026-02-05):
-
-**WebSocket con SSL via Coolify/Traefik:**
-- ✅ Servidor WebSocket como contenedor Docker en red `coolify`
-- ✅ SSL automático via Let's Encrypt (certificado emitido)
-- ✅ DNS configurado: `ws.nakomi.studio → 66.94.100.241`
-- ✅ URL web HTTPS: `wss://ws.nakomi.studio`
-- ✅ URL APK/localhost: `ws://66.94.100.241:8082`
-
-**Configuración Docker en `/opt/websocket-sync/`:**
-- `Dockerfile` - Imagen Node.js Alpine, expone 8082
-- `docker-compose.yml` - Labels Traefik:
-  - Entrypoints: `http` (para ACME challenge) + `https` (para SSL)
-  - Certresolver: `letsencrypt`
-  - Servicio: Puerto 8082
-
-**Nota importante sobre Coolify/Traefik:**
-- Coolify usa entrypoints `http` y `https` (NO `websecure`)
-- El router HTTP es necesario para que Let's Encrypt valide el dominio
-
-**Comandos útiles:**
-```bash
-# Ver estado del contenedor
-docker ps | grep websocket
-
-# Ver logs del WebSocket
-docker logs websocket-sync -f
-
-# Reiniciar contenedor
-cd /opt/websocket-sync && docker compose restart
-
-# Verificar certificado SSL
-curl -vk https://ws.nakomi.studio 2>&1 | grep "subject:"
-
-# Probar conexión WebSocket (debe retornar 426)
-curl -H "Connection: Upgrade" -H "Upgrade: websocket" https://ws.nakomi.studio
-```
-
----
-
-### TAREA 10: Modal central de configuración
-**Estado:** ⬜ Pendiente | **Prioridad:** Baja (NO prioritario) | **Tipo:** Refactor/Feature
-
-**Descripción:** Centralizar todas las configuraciones de paneles en un modal único.
+**Descripción:** La sincronización entre dispositivos tiene conflictos graves:
+- Al marcar/desmarcar un hábito, el estado entra en bucle (se marca y desmarca en tiempo real)
+- Cambios en un dispositivo no se reflejan en otro
+- Posible race condition en el WebSocket
 
 **Requisitos:**
-1. Modal con panel lateral para navegación entre secciones
-2. Cada panel mantiene acceso directo a su configuración (atajo)
-3. Incluir opciones de perfil
-4. Diseño SOLID para evitar duplicación de configuraciones
-5. Coherencia visual con el resto de la app
+1. Implementar estrategia **Last-Write-Wins** con timestamps precisos
+2. Cada cambio debe incluir `timestamp` del momento exacto de la acción
+3. Al recibir un cambio remoto, solo aplicar si `timestamp > timestampLocal`
+4. Revisar si hay conflictos en `useDashboardSync.ts` y `useNotificadorCambiosWebSocket.ts`
 
-**Nota del usuario:** Esto NO es prioritario.
-
-
-### TAREA 11: Modo Offline para App
-**Estado:** ✅ Completado | **Prioridad:** Alta (Post-lanzamiento) | **Tipo:** Feature
-
-**Descripción:** Si no hay internet, la app debe funcionar offline y sincronizar cuando vuelva la conexión.
-
-**Solución implementada (2026-02-04):**
-
-1. **useModoOffline.ts** - Sistema offline-first con IndexedDB:
-   - Almacenamiento persistente de datos con IndexedDB
-   - Cola de operaciones pendientes
-   - Sincronización automática al recuperar conexión
-   - Detección automática de estado online/offline
-
-2. **IndicadorConexion.tsx** - Indicador visual de estado:
-   - Muestra estado: conectado, sincronizando, pendiente, offline, error
-   - Aparece automáticamente cuando hay problemas
-   - Clickeable para forzar sincronización
+**Archivos a revisar:**
+- `useWebSocket.ts`
+- `useSincronizacionTiempoReal.ts`
+- `useDashboardSync.ts`
+- `useNotificadorCambiosWebSocket.ts`
 
 ---
 
+### TAREA 2: Hábitos duplicados en panel de ejecución
+**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug
 
+**Descripción:** Al marcar un hábito desde el panel de ejecución:
+- El hábito vuelve a aparecer en la lista
+- Se puede marcar 2 veces
+- Aparece marcado 2 veces en panel de actividad
+- Al desmarcar, se eliminan ambas actividades
+
+**Nota:** Probablemente relacionado con TAREA 1 (conflictos de sync). Resolver primero TAREA 1 y verificar si persiste.
+
+---
+
+### TAREA 3: Editar tarea no guarda cambios (Bug 4 usuario)
+**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug
+
+**Descripción:** En el popup de edición de tarea existente:
+- Al cambiar propiedades (ej: fecha límite), no se guardan
+- Cerrar el popup descarta los cambios
+- Posible problema de zona horaria con fechas límite
+
+**Reportado:** Tarea creada con fecha "mismo día" muestra expirada desde el día anterior.
+
+**Archivos a revisar:**
+- Modal/BottomSheet de edición de tareas
+- Servicio de guardado de tareas
+- Manejo de timezones en fechas
+
+---
+
+## 🟡 PRIORIDAD MEDIA - Notas y UI
+
+### TAREA 4: Sincronización de notas en tiempo real (estilo Google Docs)
+**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature
+
+**Descripción:** Las notas no se sincronizan en tiempo real entre dispositivos.
+
+**Requisitos:**
+1. Sincronizar contenido mientras se escribe (no solo al guardar)
+2. Usar WebSocket para enviar cambios incrementales (no el documento completo)
+3. Implementar debounce inteligente para no saturar la conexión
+4. Manejar conflictos con Last-Write-Wins por sección/párrafo si es posible
+
+**Consideraciones técnicas:**
+- Evaluar si usar OT (Operational Transformation) o CRDT para resolución de conflictos
+- O simplificar con Last-Write-Wins a nivel de nota completa
+
+---
+
+### TAREA 5: Notas no se mueven de carpeta en tiempo real
+**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug
+
+**Descripción:**
+1. Mover una nota de carpeta requiere recargar para ver el cambio
+2. Al crear nota con botón "+", no se crea en la carpeta actual abierta
+
+**Requisitos:**
+1. Mover nota debe reflejarse inmediatamente en el árbol de carpetas
+2. Crear nota debe usar la carpeta actualmente seleccionada como destino
+
+---
+
+### TAREA 6: Pérdida de cambios al cerrar modal de notas rápidamente
+**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug
+
+**Descripción:** Al editar una nota desde el modal de notas guardadas y cerrar rápidamente, los cambios se pierden.
+
+**Solución propuesta:**
+1. Añadir indicador visual "Guardando..." mientras hay cambios pendientes
+2. Bloquear cierre del modal hasta que se complete el guardado
+3. O mostrar confirmación "Tienes cambios sin guardar, ¿descartar?"
+
+---
+
+### TAREA 7: Menú contextual panel de hábitos - Eliminar opción duplicada
+**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** UI
+
+**Descripción:** En el menú contextual del panel de hábitos aparecen:
+- "Configurar hábito"
+- "Editar hábito"
+
+**Requisito:** Dejar solo "Configurar hábito" (eliminar "Editar hábito").
+
+---
+
+### TAREA 8: Popup tareas - Paleta de colores en modo claro (Bug 2 usuario)
+**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug UI
+
+**Descripción:** El popup para añadir tarea mantiene paleta de colores de modo oscuro aunque se use modo claro.
+
+**Requisito:** Usar variables CSS para que respete el tema actual.
+
+---
+
+### TAREA 9: Texto "Prioridad muy_alta" en dropdown (Bug 3 usuario)
+**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Bug UI
+
+**Descripción:** Al seleccionar "Muy Alta" en el dropdown de prioridad, el botón muestra "Prioridad muy_alta" en vez de "Prioridad Muy Alta".
+
+**Requisito:** Formatear correctamente el texto de prioridad.
+
+---
+
+## 🟠 PRIORIDAD BAJA - Mejoras UX Móvil
+
+### TAREA 10: Pull-to-refresh en versión móvil
+**Estado:** ⬜ Pendiente | **Prioridad:** Baja | **Tipo:** Feature UX
+
+**Descripción:** Implementar gesto de tirar hacia arriba para recargar.
+
+**Requisitos:**
+1. Detectar gesto de pull-down en cualquier panel
+2. Recargar solo el panel actual (no toda la app)
+3. Mostrar indicador visual de recarga
+4. Usar librería de gestos o implementar manualmente para Capacitor
+
+---
+
+### TAREA 11: Indicador de estado de conexión en móvil
+**Estado:** ⬜ Pendiente | **Prioridad:** Baja | **Tipo:** Feature UX
+
+**Descripción:** Mostrar estado de conexión visible en la versión móvil.
+
+**Requisitos:**
+1. Icono/badge en header o área visible
+2. Estados: conectado, desconectado, sincronizando
+3. Aprovechar el `IndicadorConexion.tsx` existente o adaptarlo para móvil
+
+---
+
+### TAREA 12: Notificaciones Push en APK (Firebase/OneSignal)
+**Estado:** ⬜ Pendiente | **Prioridad:** Baja | **Tipo:** Feature
+
+**Descripción:** Las notificaciones no funcionan en la APK:
+- Las notificaciones locales (`useNotificacionesLocales.ts`) no se disparan
+- Hábitos en ventana de oportunidad no generan notificaciones
+- El botón `modalExperimentos__accionDescripcion` no funciona
+- Se necesitan notificaciones **push** (desde servidor a Android)
+
+**Requisitos:**
+1. Depurar por qué las notificaciones locales no funcionan
+2. Implementar Firebase Cloud Messaging (FCM) o OneSignal para push
+3. Servidor debe enviar push cuando un hábito entra en ventana de oportunidad
+4. La notificación debe aparecer en Android aunque la app esté cerrada
+
+**Archivos a revisar:**
+- `useNotificacionesLocales.ts`
+- Verificar permisos de notificación en Android
+- Configuración de Capacitor para notificaciones
+
+---
+
+## ⬜ BACKLOG - No Prioritario
+
+### Modal central de configuración
+**Estado:** ⬜ Pendiente | **Prioridad:** Muy Baja | **Tipo:** Refactor/Feature
+
+**Descripción:** Centralizar todas las configuraciones de paneles en un modal único.
+**Nota del usuario:** Esto NO es prioritario.
+
+---
+
+# HISTORIAL DE TAREAS COMPLETADAS
+
+## Sprint Anterior (v1.0.23-beta)
+- ✅ Back no funciona en APK (hook `useBackButtonCapacitor.ts`)
+- ✅ Hora incorrecta en panel de actividades (parámetro `horaLocal`)
+- ✅ Hábito no aparece el día correcto según frecuencia (bug off-by-one)
+- ✅ Subtareas en móvil no parecen subtareas (padding-left móvil)
+- ✅ Interacción de hábitos/tareas en panel de ejecución (BottomSheet)
+- ✅ Modo compacto - Mejoras en hábitos (margin, swipe posponer)
+- ✅ Ranking de tareas por días de vencimiento (ya implementado)
+- ✅ Notificaciones locales en APK (hook `useNotificacionesLocales.ts`)
+- ✅ Sincronización WebSocket entre dispositivos (SSL configurado)
+- ✅ Modo Offline con IndexedDB (useModoOffline.ts, IndicadorConexion.tsx)
+
+---
 
 # ARCHIVO DE FASES ANTERIORES (POSPUESTA)
 
@@ -322,6 +248,7 @@ curl -H "Connection: Upgrade" -H "Upgrade: websocket" https://ws.nakomi.studio
 - **Notas:** `useNotas.ts`, `notasStore.ts`, `ModalNotasExpandido.tsx`, `ListaNotasGuardadas.tsx`
 - **Tareas/Hábitos:** Stores en `/stores`, componentes en `/components`
 - **Panel Actividad:** `actividadService.ts`, `PanelActividad.tsx`
+- **WebSocket:** `useWebSocket.ts`, `useSincronizacionTiempoReal.ts`, `useDashboardSync.ts`
 - **Estilos móvil:** Buscar media queries en archivos CSS
 
 ### Principios:

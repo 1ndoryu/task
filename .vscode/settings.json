@@ -1,4 +1,20 @@
 {
+    // Configuración para varsense (CSS Variables Validator)
+    "cssVarsValidator.enable": true,
+    "cssVarsValidator.variableFiles": [
+        "**/variables.css",
+        "**/vars.css",
+        "**/_variables.scss",
+        "**/global.css",
+        "**/styles.css"
+    ],
+    "cssVarsValidator.hardcodedDetection.enabled": true,
+    "cssVarsValidator.hardcodedDetection.severity": "warning",
+    "cssVarsValidator.hardcodedDetection.properties": {
+        "color": true,
+        "background-color": true
+    },
+    
     "postman.settings.dotenv-detection-notification-visibility": false,
     "files.exclude": {
         "**/.history": true

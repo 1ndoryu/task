@@ -22,6 +22,22 @@ export interface Version {
  */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.23-beta',
+        fecha: '2026-02-05',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Sincronización en tiempo real entre dispositivos (tus cambios aparecen automáticamente en otros dispositivos)'},
+            {tipo: 'nuevo', descripcion: 'Modo offline: la app funciona sin internet y sincroniza cuando vuelves a conectarte'},
+            {tipo: 'nuevo', descripcion: 'Indicador de conexión que muestra cuando la app está sincronizando o sin conexión'},
+            {tipo: 'mejora', descripcion: 'El botón atrás del teléfono ahora cierra modales y menús correctamente en Android'},
+            {tipo: 'mejora', descripcion: 'Las subtareas en móvil ahora se ven claramente diferenciadas con sangría'},
+            {tipo: 'mejora', descripcion: 'Al tocar un hábito en la lista de ejecución, se abre el panel de configuración'},
+            {tipo: 'mejora', descripcion: 'Deslizar izquierda en hábitos ahora pospone en vez de eliminar'},
+            {tipo: 'mejora', descripcion: 'Mejor espaciado entre hábitos en modo compacto'},
+            {tipo: 'arreglo', descripcion: 'La hora de las actividades ahora se muestra correctamente según tu zona horaria'},
+            {tipo: 'arreglo', descripcion: 'Los hábitos ahora aparecen el día correcto según su frecuencia configurada'}
+        ]
+    },
+    {
         version: 'v1.0.21-beta',
         fecha: '2026-02-03',
         cambios: [
