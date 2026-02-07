@@ -44,10 +44,6 @@
     transform: rotate(var(--ptr-rotacion, 0deg)) scale(var(--ptr-escala, 0.5));
 }
 
-.pullToRefresh__icono--listo {
-    color: var(--dashboard-estadoExito);
-}
-
 .pullToRefresh__icono--girando {
     animation: pullToRefreshSpin 0.8s linear infinite;
 }
