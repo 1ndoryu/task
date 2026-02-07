@@ -1,0 +1,76 @@
+/*
+ * PULL TO REFRESH - ESTILOS
+ * Componente para gesto de recarga tirando hacia abajo en móvil
+ */
+
+.pullToRefresh {
+    position: relative;
+    overflow: auto;
+    height: 100%;
+}
+
+.pullToRefresh--arrastrando {
+    touch-action: none;
+}
+
+/* Indicador circular que aparece al tirar */
+.pullToRefresh__indicador {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    box-shadow: var(--dashboard-sombraMedia);
+    /* Transform dinámico via custom property */
+    transform: translateX(-50%) translateY(var(--ptr-translateY, 0));
+}
+
+.pullToRefresh__indicador--animando {
+    transition: transform 0.1s ease-out;
+}
+
+/* Icono de refresh */
+.pullToRefresh__icono {
+    color: var(--dashboard-textoSecundario);
+    transition: color 0.2s;
+    /* Transform dinámico via custom properties */
+    transform: rotate(var(--ptr-rotacion, 0deg)) scale(var(--ptr-escala, 0.5));
+}
+
+.pullToRefresh__icono--listo {
+    color: var(--dashboard-estadoExito);
+}
+
+.pullToRefresh__icono--girando {
+    animation: pullToRefreshSpin 0.8s linear infinite;
+}
+
+/* Contenido que se desplaza al arrastrar */
+.pullToRefresh__contenido {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    /* Transform dinámico via custom property */
+    transform: translateY(var(--ptr-contenido-translateY, 0));
+}
+
+.pullToRefresh__contenido--animando {
+    transition: transform 0.3s ease-out;
+}
+
+/* Animación de giro */
+@keyframes pullToRefreshSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

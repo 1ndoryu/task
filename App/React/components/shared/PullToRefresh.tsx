@@ -12,8 +12,9 @@
  * </PullToRefresh>
  */
 
-import React, {useState, useRef, useCallback, useEffect, type ReactNode} from 'react';
+import {useState, useRef, useCallback, useEffect, type ReactNode} from 'react';
 import {RefreshCw} from 'lucide-react';
+import '../../styles/dashboard/componentes/pullToRefresh.css';
 
 interface PullToRefreshProps {
     children: ReactNode;
@@ -101,6 +102,7 @@ export function PullToRefresh({
     const progreso = Math.min(arrastre / umbralRefresh, 1);
     const rotacion = progreso * 360;
     const escala = 0.5 + progreso * 0.5;
+    const iconoListo = arrastre >= umbralRefresh;
 
     /* Registrar evento touchmove con passive: false para permitir preventDefault */
     useEffect(() => {
@@ -137,71 +139,43 @@ export function PullToRefresh({
         };
     }, [maxArrastre]);
 
+    /* Clases dinámicas */
+    const clasesContenedor = `pullToRefresh ${arrastre > 0 ? 'pullToRefresh--arrastrando' : ''} ${className}`.trim();
+    const clasesIndicador = `pullToRefresh__indicador ${refrescando ? '' : 'pullToRefresh__indicador--animando'}`.trim();
+    const clasesIcono = `pullToRefresh__icono ${iconoListo ? 'pullToRefresh__icono--listo' : ''} ${refrescando ? 'pullToRefresh__icono--girando' : ''}`.trim();
+    const clasesContenido = `pullToRefresh__contenido ${!arrastrableRef.current ? 'pullToRefresh__contenido--animando' : ''}`.trim();
+
+    /* CSS custom properties para valores dinámicos (transforms) */
+    const estiloIndicador = {
+        '--ptr-translateY': `${arrastre - 40}px`
+    } as React.CSSProperties;
+
+    const estiloIcono = {
+        '--ptr-rotacion': `${rotacion}deg`,
+        '--ptr-escala': escala
+    } as React.CSSProperties;
+
+    const estiloContenido = {
+        '--ptr-contenido-translateY': `${arrastre}px`
+    } as React.CSSProperties;
+
     return (
         <div
             ref={contenedorRef}
-            className={`pullToRefresh ${className}`}
+            className={clasesContenedor}
             onTouchStart={manejarTouchStart}
-            onTouchEnd={manejarTouchEnd}
-            style={{
-                position: 'relative',
-                overflow: 'auto',
-                height: '100%',
-                touchAction: arrastre > 0 ? 'none' : 'auto'
-            }}>
+            onTouchEnd={manejarTouchEnd}>
             {/* Indicador de refresh */}
             {mostrarIndicador && (
-                <div
-                    className="pullToRefresh__indicador"
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: '50%',
-                        transform: `translateX(-50%) translateY(${arrastre - 40}px)`,
-                        zIndex: 100,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--dashboard-fondoSecundario, #1a1a2e)',
-                        border: '2px solid var(--dashboard-bordePanel, #2a2a4a)',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-                        transition: refrescando ? 'none' : 'transform 0.1s ease-out'
-                    }}>
-                    <RefreshCw
-                        size={20}
-                        style={{
-                            color: arrastre >= umbralRefresh ? 'var(--dashboard-estadoExito, #4ade80)' : 'var(--dashboard-textoSecundario, #888)',
-                            transform: `rotate(${rotacion}deg) scale(${escala})`,
-                            transition: 'color 0.2s',
-                            animation: refrescando ? 'pullToRefreshSpin 0.8s linear infinite' : 'none'
-                        }}
-                    />
+                <div className={clasesIndicador} style={estiloIndicador}>
+                    <RefreshCw size={20} className={clasesIcono} style={estiloIcono} />
                 </div>
             )}
 
             {/* Contenido con desplazamiento */}
-            <div
-                className="pullToRefresh__contenido"
-                style={{
-                    transform: `translateY(${arrastre}px)`,
-                    transition: arrastrableRef.current ? 'none' : 'transform 0.3s ease-out',
-                    width: '100%',
-                    height: '100%',
-                    minHeight: '100%'
-                }}>
+            <div className={clasesContenido} style={estiloContenido}>
                 {children}
             </div>
-
-            {/* Estilos de animación */}
-            <style>{`
-                @keyframes pullToRefreshSpin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
         </div>
     );
 }

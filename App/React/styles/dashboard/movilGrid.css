@@ -10,18 +10,20 @@
  * Sistema de navegación por páginas - cada panel ocupa toda la pantalla
  */
 @media (max-width: 480px) {
-    /* Contenedor del grid en modo móvil */
+    /* Contenedor del grid en modo móvil - ocupa todo el espacio disponible */
     .dashboardGridContenedor--movil {
         width: 100% !important;
+        height: 100%;
         padding: 0;
         margin: 0;
     }
 
-    /* Grid simplificado para móvil - sin altura forzada */
+    /* Grid simplificado para móvil - ocupa todo el alto */
     .dashboardGridMovil {
         display: flex;
         flex-direction: column;
         width: 100%;
+        height: 100%;
         animation: fadeInMovil 0.2s ease-out;
     }
 
