@@ -14,7 +14,7 @@ import {useState, useCallback, useRef, useEffect} from 'react';
 /* Tipos para el sistema de mensajes */
 export type TipoMensaje = 'enviado' | 'recibido' | 'sistema';
 
-export type AccionSistema = 'creado' | 'editado' | 'completado' | 'reabierto' | 'asignado' | 'desasignado' | 'adjunto_agregado' | 'adjunto_eliminado' | 'prioridad' | 'urgencia' | 'fecha_limite' | 'participante_agregado' | 'participante_removido' | 'compartido' | 'descripcion' | 'nombre';
+export type AccionSistema = 'creado' | 'editado' | 'completado' | 'reabierto' | 'asignado' | 'desasignado' | 'adjunto_agregado' | 'adjunto_eliminado' | 'prioridad' | 'urgencia' | 'fecha_limite' | 'participante_agregado' | 'participante_removido' | 'compartido' | 'descripcion' | 'nombre' | 'repeticion';
 
 export interface MensajeTimeline {
     id: number;
@@ -360,7 +360,8 @@ export function obtenerIconoAccion(accion: AccionSistema | null): string {
         participante_removido: 'UserMinus',
         compartido: 'Share2',
         descripcion: 'FileText',
-        nombre: 'Type'
+        nombre: 'Type',
+        repeticion: 'Repeat'
     };
 
     return accion ? iconos[accion] || 'History' : 'History';
