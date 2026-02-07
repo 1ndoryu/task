@@ -637,33 +637,33 @@
     background: var(--dashboard-fondoHover);
 }
 
-/* Variantes de color para badges - Usan variables CSS para respetar tema activo */
+/* Variantes de color para badges - Usan variables de estado existentes */
 .badgesPropiedad__badge--proyecto {
-    color: var(--dashboard-badgeProyectoTexto);
-    border-color: var(--dashboard-badgeProyectoBorde);
+    color: var(--dashboard-acentoPrimario, #a78bfa);
+    border-color: rgba(var(--dashboard-acentoPrimarioRgb, 167, 139, 250), 0.4);
 }
 
 .badgesPropiedad__badge--prioridad {
-    color: var(--dashboard-badgePrioridadTexto);
-    border-color: var(--dashboard-badgePrioridadBorde);
+    color: var(--dashboard-estadoMedia, #ca8a04);
+    border-color: var(--dashboard-estadoMediaBorde);
 }
 
 .badgesPropiedad__badge--urgencia {
-    color: var(--dashboard-badgeUrgenciaTexto);
-    border-color: var(--dashboard-badgeUrgenciaBorde);
+    color: var(--dashboard-estadoAlta, #ef4444);
+    border-color: var(--dashboard-estadoAltaBorde);
 }
 
 .badgesPropiedad__badge--fecha {
-    color: var(--dashboard-badgeFechaTexto);
-    border-color: var(--dashboard-badgeFechaBorde);
+    color: var(--dashboard-estadoInfo, #3b82f6);
+    border-color: var(--dashboard-estadoInfoBorde);
 }
 
 .badgesPropiedad__badge--frecuencia {
-    color: var(--dashboard-badgeFrecuenciaTexto);
-    border-color: var(--dashboard-badgeFrecuenciaBorde);
+    color: var(--dashboard-estadoExito, #22c55e);
+    border-color: var(--dashboard-estadoExitoBorde);
 }
 
 .badgesPropiedad__badge--importancia {
-    color: var(--dashboard-badgeImportanciaTexto);
-    border-color: var(--dashboard-badgeImportanciaBorde);
+    color: var(--dashboard-estadoMuyAlta, #f43f5e);
+    border-color: var(--dashboard-estadoMuyAltaBorde);
 }

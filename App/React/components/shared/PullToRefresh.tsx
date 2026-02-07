@@ -12,7 +12,7 @@
  * </PullToRefresh>
  */
 
-import React, {useState, useRef, useCallback, type ReactNode} from 'react';
+import React, {useState, useRef, useCallback, useEffect, type ReactNode} from 'react';
 import {RefreshCw} from 'lucide-react';
 
 interface PullToRefreshProps {
@@ -69,33 +69,6 @@ export function PullToRefresh({
         [puedeArrastrar]
     );
 
-    /* Movimiento del toque */
-    const manejarTouchMove = useCallback(
-        (evento: React.TouchEvent) => {
-            if (!arrastrableRef.current || inicioYRef.current === null) return;
-
-            const deltaY = evento.touches[0].clientY - inicioYRef.current;
-
-            /* Solo arrastrar hacia abajo */
-            if (deltaY < 0) {
-                setArrastre(0);
-                setMostrarIndicador(false);
-                return;
-            }
-
-            /* Limitar el arrastre máximo */
-            const arrastreCalculado = Math.min(deltaY * 0.5, maxArrastre);
-            setArrastre(arrastreCalculado);
-            setMostrarIndicador(arrastreCalculado > 10);
-
-            /* Prevenir scroll mientras arrastramos */
-            if (arrastreCalculado > 10) {
-                evento.preventDefault();
-            }
-        },
-        [maxArrastre]
-    );
-
     /* Fin del toque */
     const manejarTouchEnd = useCallback(async () => {
         if (!arrastrableRef.current) return;
@@ -129,12 +102,46 @@ export function PullToRefresh({
     const rotacion = progreso * 360;
     const escala = 0.5 + progreso * 0.5;
 
+    /* Registrar evento touchmove con passive: false para permitir preventDefault */
+    useEffect(() => {
+        const contenedor = contenedorRef.current;
+        if (!contenedor) return;
+
+        const manejadorNativo = (evento: TouchEvent) => {
+            if (!arrastrableRef.current || inicioYRef.current === null) return;
+
+            const deltaY = evento.touches[0].clientY - inicioYRef.current;
+
+            /* Solo arrastrar hacia abajo */
+            if (deltaY < 0) {
+                setArrastre(0);
+                setMostrarIndicador(false);
+                return;
+            }
+
+            /* Limitar el arrastre máximo */
+            const arrastreCalculado = Math.min(deltaY * 0.5, maxArrastre);
+            setArrastre(arrastreCalculado);
+            setMostrarIndicador(arrastreCalculado > 10);
+
+            /* Prevenir scroll mientras arrastramos - ahora funciona sin warning */
+            if (arrastreCalculado > 10) {
+                evento.preventDefault();
+            }
+        };
+
+        contenedor.addEventListener('touchmove', manejadorNativo, {passive: false});
+
+        return () => {
+            contenedor.removeEventListener('touchmove', manejadorNativo);
+        };
+    }, [maxArrastre]);
+
     return (
         <div
             ref={contenedorRef}
             className={`pullToRefresh ${className}`}
             onTouchStart={manejarTouchStart}
-            onTouchMove={manejarTouchMove}
             onTouchEnd={manejarTouchEnd}
             style={{
                 position: 'relative',
@@ -181,6 +188,8 @@ export function PullToRefresh({
                 style={{
                     transform: `translateY(${arrastre}px)`,
                     transition: arrastrableRef.current ? 'none' : 'transform 0.3s ease-out',
+                    width: '100%',
+                    height: '100%',
                     minHeight: '100%'
                 }}>
                 {children}

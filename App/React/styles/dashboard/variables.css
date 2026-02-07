@@ -62,22 +62,6 @@
     --dashboard-estadoMediaTexto: #fcd34d;
 
     /* 
-     * COLORES PARA BADGES DE PROPIEDADES 
-     */
-    --dashboard-badgeProyectoTexto: rgb(167, 139, 250);
-    --dashboard-badgeProyectoBorde: rgba(139, 92, 246, 0.4);
-    --dashboard-badgePrioridadTexto: rgb(251, 146, 60);
-    --dashboard-badgePrioridadBorde: rgba(251, 146, 60, 0.4);
-    --dashboard-badgeUrgenciaTexto: rgb(248, 113, 113);
-    --dashboard-badgeUrgenciaBorde: rgba(239, 68, 68, 0.4);
-    --dashboard-badgeFechaTexto: rgb(96, 165, 250);
-    --dashboard-badgeFechaBorde: rgba(59, 130, 246, 0.4);
-    --dashboard-badgeFrecuenciaTexto: rgb(74, 222, 128);
-    --dashboard-badgeFrecuenciaBorde: rgba(34, 197, 94, 0.4);
-    --dashboard-badgeImportanciaTexto: rgb(244, 114, 182);
-    --dashboard-badgeImportanciaBorde: rgba(236, 72, 153, 0.4);
-
-    /* 
      * EFECTOS DE SUPERPOSICION 
      */
     --dashboard-superposicionClara: rgba(125, 125, 125, 0.05);
@@ -336,20 +320,6 @@
 
     --dashboard-estadoAltaTexto: #dc3545;
     --dashboard-estadoMediaTexto: #fd7e14;
-
-    /* Colores para badges de propiedades (ajustados para fondo claro) */
-    --dashboard-badgeProyectoTexto: #7c3aed;
-    --dashboard-badgeProyectoBorde: rgba(124, 58, 237, 0.35);
-    --dashboard-badgePrioridadTexto: #ea580c;
-    --dashboard-badgePrioridadBorde: rgba(234, 88, 12, 0.35);
-    --dashboard-badgeUrgenciaTexto: #dc2626;
-    --dashboard-badgeUrgenciaBorde: rgba(220, 38, 38, 0.35);
-    --dashboard-badgeFechaTexto: #2563eb;
-    --dashboard-badgeFechaBorde: rgba(37, 99, 235, 0.35);
-    --dashboard-badgeFrecuenciaTexto: #16a34a;
-    --dashboard-badgeFrecuenciaBorde: rgba(22, 163, 74, 0.35);
-    --dashboard-badgeImportanciaTexto: #db2777;
-    --dashboard-badgeImportanciaBorde: rgba(219, 39, 119, 0.35);
 
     /* Barra de progreso */
     --dashboard-barraFondo: #e9ecef;

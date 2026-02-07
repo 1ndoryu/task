@@ -16,7 +16,7 @@ import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
 import {NavegacionInferior} from '../components/shared';
-import {IndicadorConexion} from '../components/shared/IndicadorConexion';
+
 import {useEsMovil} from '../hooks/useEsMovil';
 import {usePaginaMovil} from '../hooks/usePaginaMovil';
 import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
@@ -239,16 +239,6 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
             <DashboardFooter />
             <DashboardModales ctx={ctx} />
 
-            {/* Indicador de conexión WebSocket para móvil */}
-            {esMovil && (
-                <IndicadorConexion
-                    estadoWebSocket={dashboard.tiempoReal.estadoConexion}
-                    sincronizando={dashboard.sincronizacion.pendiente}
-                    offline={!navigator.onLine}
-                    onClick={() => dashboard.sincronizacion.sincronizarAhora()}
-                    posicion="top"
-                />
-            )}
 
             {/* Modal de notas guardadas para móvil (desde menú de 3 puntos) */}
             <ModalNotasExpandido abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} tamanoFuente="normal" delayGuardado={2000} />

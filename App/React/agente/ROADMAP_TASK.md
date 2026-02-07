@@ -22,6 +22,21 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ---
 
+# Revisiones
+
+1. Poner la fecha de tarea de vencimiento sigue mostrando "Vencido (1)", cuando debería decir hoy.
+2. ✅ **RESUELTO** - Las notas ya aparecen en móvil. El problema era que `.pullToRefresh__contenido` no tenía width y height al 100%. Corregido en `PullToRefresh.tsx` añadiendo estos estilos inline.
+3. ✅ **RESUELTO** - Múltiples fixes aplicados:
+   - Error "passive event listener": Ahora se usa `addEventListener` con `{passive: false}` en lugar del handler React para permitir `preventDefault()`.
+   - Panel de actividad estirado: El contenido de pullToRefresh ahora tiene `width: 100%` y `height: 100%`.
+   - Indicador azul de sincronización: **Eliminado** el `IndicadorConexion` del móvil en `DashboardIsland.tsx`.
+   - Variables de badge eliminadas: Se borraron las 12 variables redundantes (`badgeProyectoTexto`, etc.) de `variables.css` y se reemplazaron por las variables de estado existentes en `bottomSheetCreacion.css`.
+4. Las notas ya se mueven en tiempo real, pero la carpeta general aparece 2 veces en el menu contextual de las notas (lista de notas en las notas guardadas), agregar un boton de 3 puntos para abrir el menu contextual, ponerlo arriba en esquina derecha. 
+5. El contador de notas en las carpetas no se actualiza al borrar notas, no se si se actualiza al agregar o crear notas pero asumo que no.
+
+
+
+
 # TAREAS PENDIENTES - SPRINT ACTUAL
 
 ## 🔴 PRIORIDAD ALTA - Bugs Críticos de Sincronización
