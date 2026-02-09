@@ -22,6 +22,27 @@ export interface Version {
  */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.24-beta',
+        fecha: '2026-02-07',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Sincronización de notas en tiempo real entre dispositivos mientras escribes'},
+            {tipo: 'nuevo', descripcion: 'Desliza hacia abajo en móvil para actualizar los datos del panel'},
+            {tipo: 'nuevo', descripcion: 'Notificaciones diarias recurrentes para tus hábitos en Android'},
+            {tipo: 'mejora', descripcion: 'Las notas se mueven de carpeta inmediatamente sin necesidad de recargar'},
+            {tipo: 'mejora', descripcion: 'Al crear una nota, se guarda automáticamente en la carpeta que tengas abierta'},
+            {tipo: 'mejora', descripcion: 'Si cierras el editor de notas con cambios sin guardar, se guardan automáticamente'},
+            {tipo: 'mejora', descripcion: 'Indicador visual que muestra cuando hay cambios sin guardar en una nota'},
+            {tipo: 'arreglo', descripcion: 'Los cambios entre dispositivos ya no causan bucles al marcar o desmarcar hábitos'},
+            {tipo: 'arreglo', descripcion: 'Los hábitos ya no aparecen duplicados en el panel de ejecución al sincronizar'},
+            {tipo: 'arreglo', descripcion: 'Las fechas ya no se muestran como vencidas el mismo día en zonas horarias negativas'},
+            {tipo: 'arreglo', descripcion: 'Editar una tarea ya no borra su descripción ni archivos adjuntos'},
+            {tipo: 'arreglo', descripcion: 'El menú de hábitos ya solo muestra \"Configurar\" sin opciones duplicadas'},
+            {tipo: 'arreglo', descripcion: 'Los colores del popup de tareas ahora se adaptan correctamente al modo claro'},
+            {tipo: 'arreglo', descripcion: 'La prioridad \"Muy Alta\" ya se muestra correctamente formateada en el selector'},
+            {tipo: 'arreglo', descripcion: 'El panel de creación rápida ya se ve correctamente en modo claro'}
+        ]
+    },
+    {
         version: 'v1.0.23-beta',
         fecha: '2026-02-05',
         cambios: [
