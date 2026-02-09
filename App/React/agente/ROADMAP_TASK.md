@@ -260,9 +260,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Requisitos:**
 
 1. Debe ser responsivo (se adapta a móvil y escritorio)
-2. No debe tapar contenido importante (agregar padding-bottom al dashboard cuando esté activo)
-3. El timer debe seguir corriendo aunque se navegue entre paneles
-4. Persistir el estado del timer en caso de recarga accidental (localStorage)
+2. **En móvil:** debe convivir con `NavegacionInferior` sin superponerse (posicionar encima de la barra de navegación)
+3. No debe tapar contenido importante (agregar padding-bottom al dashboard cuando esté activo)
+4. El timer debe seguir corriendo aunque se navegue entre paneles
+5. Persistir el estado del timer en caso de recarga accidental (localStorage)
 
 ---
 
@@ -334,6 +335,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
     - "Tiempo transcurrido: Xh Xm" (durante un ayuno activo)
     - "Próximo ayuno en: Xh Xm" (según frecuencia configurada)
 - Botones: "Comenzar ayuno", "Terminar ayuno", "Reiniciar ayuno" (para cuando un ayuno se dejó activo por error/días)
+- **Reiniciar ayuno:** descarta el ayuno sin registrarlo en el historial, simplemente pone el contador en 0
 - Diseño minimalista, coherente con el estilo terminal del dashboard
 
 **Integración como hábito:**
@@ -361,8 +363,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Funcionamiento:**
 
 - El usuario registra comidas mediante:
-    - Foto de la comida (la IA analiza y estima calorías)
-    - Descripción en texto (la IA calcula calorías aproximadas)
+    - **Foto directa** desde cámara o galería (la IA analiza y estima calorías). Usar `<input type="file" accept="image/*" capture>` para máxima facilidad
+    - Descripción en texto como alternativa (la IA calcula calorías aproximadas)
 - Se calcula la TMB (Tasa Metabólica Basal) con los datos del usuario
 - Se muestra: Calorías consumidas hoy vs TMB estimada = Déficit/Superávit
 
