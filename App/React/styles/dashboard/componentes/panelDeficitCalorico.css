@@ -1,0 +1,316 @@
+/*
+ * panelDeficitCalorico.css
+ * Estilos del panel de déficit calórico
+ * Diseño minimalista con indicador visual de balance calórico
+ */
+
+.panelDeficitCalorico {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.deficitContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaciado-sm, 12px);
+    padding: var(--espaciado-sm, 12px);
+}
+
+/* Resumen diario */
+.deficitResumen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.deficitResumenNumeros {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.deficitResumenConsumo,
+.deficitResumenTDEE {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.deficitResumenValor {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dashboard-textoPrimario, #e0e0e0);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitResumenEtiqueta {
+    font-size: 0.65rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.deficitResumenSeparador {
+    font-size: 1.1rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.3));
+    margin: 0 2px;
+}
+
+/* Barra de progreso */
+.deficitBarra {
+    width: 100%;
+    height: 4px;
+    background: var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.deficitBarraProgreso {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.deficitBarraProgreso--deficit {
+    background: var(--color-exito, #51cf66);
+}
+
+.deficitBarraProgreso--superavit {
+    background: var(--color-peligro, #ff6b6b);
+}
+
+/* Balance */
+.deficitResumenBalance {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.deficitResumenBalance--deficit {
+    color: var(--color-exito, #51cf66);
+}
+
+.deficitResumenBalance--superavit {
+    color: var(--color-peligro, #ff6b6b);
+}
+
+/* Entrada de comida */
+.deficitEntrada {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.deficitEntradaInputContenedor {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.deficitEntradaInput {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    background: var(--dashboard-fondoInput, rgba(255, 255, 255, 0.03));
+    color: var(--dashboard-textoPrimario, #e0e0e0);
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.deficitEntradaInput:focus {
+    border-color: var(--color-acento, #4dabf7);
+}
+
+.deficitEntradaInput::placeholder {
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.3));
+}
+
+.deficitEntradaBotonFoto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    background: transparent;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.6));
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.deficitEntradaBotonFoto:hover {
+    color: var(--color-acento, #4dabf7);
+    border-color: var(--color-acento, #4dabf7);
+}
+
+.deficitEntradaInputOculto {
+    display: none;
+}
+
+.deficitEntradaCargando {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--color-acento, #4dabf7);
+}
+
+.deficitSpinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Avisos y errores */
+.deficitAviso,
+.deficitError {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+}
+
+.deficitAviso {
+    background: rgba(77, 171, 247, 0.08);
+    color: var(--color-acento, #4dabf7);
+    border: 1px solid rgba(77, 171, 247, 0.15);
+}
+
+.deficitError {
+    background: rgba(255, 107, 107, 0.08);
+    color: var(--color-peligro, #ff6b6b);
+    border: 1px solid rgba(255, 107, 107, 0.15);
+}
+
+/* Lista de comidas */
+.deficitListaComidas {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.deficitComidaItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.04));
+}
+
+.deficitComidaItem:last-child {
+    border-bottom: none;
+}
+
+.deficitComidaInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.deficitComidaDesc {
+    font-size: 0.78rem;
+    color: var(--dashboard-textoPrimario, #e0e0e0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deficitComidaHora {
+    font-size: 0.65rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.35));
+}
+
+.deficitComidaAcciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.deficitComidaCalorias {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--dashboard-textoPrimario, #e0e0e0);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitComidaEliminar {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.3));
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+
+.deficitComidaEliminar:hover {
+    color: var(--color-peligro, #ff6b6b);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+/* Historial semanal */
+.deficitHistorial {
+    padding-top: var(--espaciado-sm, 8px);
+    border-top: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+}
+
+.deficitHistorialTitulo {
+    font-size: 0.7rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.deficitHistorialLista {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.deficitHistorialItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    font-size: 0.72rem;
+}
+
+.deficitHistorialFecha {
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+    min-width: 60px;
+}
+
+.deficitHistorialCalorias {
+    color: var(--dashboard-textoPrimario, #e0e0e0);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitHistorialBalance {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    min-width: 50px;
+    text-align: right;
+}
+
+.deficitHistorialBalance--deficit {
+    color: var(--color-exito, #51cf66);
+}
+
+.deficitHistorialBalance--superavit {
+    color: var(--color-peligro, #ff6b6b);
+}

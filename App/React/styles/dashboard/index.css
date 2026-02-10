@@ -40,6 +40,7 @@
 @import './shared/panelArrastrable.css';
 @import './shared/alertas.css';
 @import './shared/indicadorAlmacenamiento.css';
+@import './shared/dockTracking.css';
 @import './shared/resizePanel.css';
 @import './shared/resizeHandleColumna.css';
 @import './shared/mapaCalor.css';
@@ -96,8 +97,15 @@
 /* Panel de Actividad */
 @import './componentes/panelActividad.css';
 
+/* Panel Ayuno (Plugin) */
+@import './componentes/panelAyuno.css';
+
+/* Panel Déficit Calórico (Plugin) */
+@import './componentes/panelDeficitCalorico.css';
+
 /* Modal de Límites Alcanzados */
 @import './componentes/modalLimiteAlcanzado.css';
+@import './componentes/modalPlugins.css';
 
 /* Mensaje Bloqueo Premium (reutilizable) */
 @import './componentes/mensajeBloquePremium.css';

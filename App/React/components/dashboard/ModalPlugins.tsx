@@ -1,0 +1,117 @@
+/*
+ * ModalPlugins.tsx
+ * Modal para activar/desactivar plugins del dashboard
+ * Muestra todos los plugins registrados con toggle de activación
+ * Al activar un plugin, muestra sus paneles; al desactivar, los oculta
+ * Plugins con requiereConfiguracion muestran botón de ajustes
+ */
+
+import {useCallback, useState} from 'react';
+import {X, Settings} from 'lucide-react';
+import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
+import {usePluginsStore} from '../../stores/pluginsStore';
+import {ConfigDeficitCalorico} from './ConfigDeficitCalorico';
+import type {DefinicionPlugin} from '../../types/plugins';
+
+interface ModalPluginsProps {
+    abierto: boolean;
+    onCerrar: () => void;
+    onMostrarPanel?: (panelId: string) => void;
+    onOcultarPanel?: (panelId: string) => void;
+}
+
+/*
+ * Mapa de componentes de configuración por pluginId
+ * Cada plugin con requiereConfiguracion debe tener su componente aquí
+ */
+const COMPONENTES_CONFIG: Record<string, React.ComponentType<{onCerrar: () => void}>> = {
+    'deficit-calorico': ConfigDeficitCalorico
+};
+
+function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin; onToggle: (pluginId: string) => void; onAbrirConfig?: (pluginId: string) => void}): JSX.Element {
+    const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+    const estaActivo = pluginsActivos.includes(plugin.id);
+
+    return (
+        <div className={`modalPluginsFila ${estaActivo ? 'modalPluginsFila--activo' : ''}`}>
+            <div className="modalPluginsInfo">
+                <div className="modalPluginsIcono">{plugin.icono}</div>
+                <div className="modalPluginsTexto">
+                    <span className="modalPluginsNombre">{plugin.nombre}</span>
+                    <span className="modalPluginsDescripcion">{plugin.descripcion}</span>
+                    <span className="modalPluginsVersion">v{plugin.version}</span>
+                </div>
+            </div>
+            <div className="modalPluginsAcciones">
+                {plugin.requiereConfiguracion && estaActivo && onAbrirConfig && (
+                    <button type="button" className="modalPluginsBotonConfig" onClick={() => onAbrirConfig(plugin.id)} title="Configurar plugin">
+                        <Settings size={14} />
+                    </button>
+                )}
+                <button type="button" className={`modalPluginsToggle ${estaActivo ? 'modalPluginsToggle--activo' : ''}`} onClick={() => onToggle(plugin.id)} aria-label={estaActivo ? 'Desactivar plugin' : 'Activar plugin'}>
+                    <span className="modalPluginsToggleIndicador" />
+                </button>
+            </div>
+        </div>
+    );
+}
+
+export function ModalPlugins({abierto, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
+    if (!abierto) return null;
+
+    const plugins = obtenerTodosPlugins();
+    const {pluginsActivos, togglePlugin} = usePluginsStore();
+    const [configAbierta, setConfigAbierta] = useState<string | null>(null);
+
+    const manejarToggle = useCallback((pluginId: string) => {
+        const estabaActivo = pluginsActivos.includes(pluginId);
+        togglePlugin(pluginId);
+
+        const panelesIds = obtenerPanelesDePlugin(pluginId);
+        panelesIds.forEach(panelId => {
+            if (estabaActivo) {
+                onOcultarPanel?.(panelId);
+            } else {
+                onMostrarPanel?.(panelId);
+            }
+        });
+    }, [pluginsActivos, togglePlugin, onMostrarPanel, onOcultarPanel]);
+
+    const manejarAbrirConfig = useCallback((pluginId: string) => {
+        setConfigAbierta(pluginId);
+    }, []);
+
+    const manejarCerrarConfig = useCallback(() => {
+        setConfigAbierta(null);
+    }, []);
+
+    /* Renderizar componente de configuración si está abierto */
+    const ComponenteConfig = configAbierta ? COMPONENTES_CONFIG[configAbierta] : null;
+
+    return (
+        <div className="modalOverlay modalOverlayActivo" onClick={onCerrar}>
+            <div className="modalContenido modalPlugins" onClick={e => e.stopPropagation()}>
+                <div className="modalCabecera">
+                    <h3 className="modalTitulo">
+                        {configAbierta ? `Configurar ${plugins.find(p => p.id === configAbierta)?.nombre ?? 'Plugin'}` : 'Plugins'}
+                    </h3>
+                    <button type="button" className="modalCerrar" onClick={configAbierta ? manejarCerrarConfig : onCerrar} aria-label="Cerrar">
+                        <X size={16} />
+                    </button>
+                </div>
+
+                <div className="modalPluginsCuerpo">
+                    {ComponenteConfig ? (
+                        <ComponenteConfig onCerrar={manejarCerrarConfig} />
+                    ) : plugins.length === 0 ? (
+                        <p className="modalPluginsVacio">No hay plugins disponibles.</p>
+                    ) : (
+                        plugins.map(plugin => (
+                            <FilaPlugin key={plugin.id} plugin={plugin} onToggle={manejarToggle} onAbrirConfig={manejarAbrirConfig} />
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -13,7 +13,7 @@ import {useCantidadSeleccionadas} from '../../stores/seleccionMultipleStore';
 import type {TareaItemProps} from './tarea-item/types';
 
 export function TareaItem(props: TareaItemProps): JSX.Element {
-    const {tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, tieneSubtareas = false, modoCompacto = false, estaSeleccionada = false, onSeleccionMultiple, modoSeleccionActivo = false} = props;
+    const {tarea, onToggle, onEditar, onEliminar, esSubtarea = false, onIndent, onOutdent, onCrearNueva, onConfigurar, nombreProyecto, soloIconoProyecto = false, onMoverProyecto, onCompartir, estaCompartida = false, mensajesNoLeidos = 0, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy = false, habitoPausado = false, habitoPospuestoHoy = false, tieneSubtareas = false, modoCompacto = false, estaSeleccionada = false, onSeleccionMultiple, modoSeleccionActivo = false} = props;
 
     /* Detectar si es una tarea-hábito virtual */
     const esHabito = esTareaHabito(tarea);
@@ -48,6 +48,7 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
         onActualizarHabito,
         habitoCompletadoHoy,
         habitoPausado,
+        habitoPospuestoHoy,
         estaSeleccionada,
         cantidadSeleccionadas
     });

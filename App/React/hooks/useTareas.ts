@@ -399,6 +399,14 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                             if ('repeticion' in nuevaConfiguracion && nuevaConfiguracion.repeticion === undefined) {
                                 delete tareaActualizada.configuracion.repeticion;
                             }
+                            /* Si fechaMaxima viene como null o vacío, eliminar el campo */
+                            if ('fechaMaxima' in nuevaConfiguracion && (nuevaConfiguracion.fechaMaxima === null || nuevaConfiguracion.fechaMaxima === '')) {
+                                delete tareaActualizada.configuracion.fechaMaxima;
+                            }
+                            /* Si descripcion viene como null o vacío, eliminar el campo */
+                            if ('descripcion' in nuevaConfiguracion && (nuevaConfiguracion.descripcion === null || nuevaConfiguracion.descripcion === '')) {
+                                delete tareaActualizada.configuracion.descripcion;
+                            }
                         }
                         /* Si es {} vacío, mantener la configuración existente sin cambios */
                     }

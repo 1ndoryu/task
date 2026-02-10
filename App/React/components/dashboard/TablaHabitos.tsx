@@ -8,7 +8,7 @@
 import {useState, useCallback, useMemo} from 'react';
 import {useMenuContextualConId} from '../../hooks/useMenuContextualGlobal';
 import {useEsMovil} from '../../hooks/useEsMovil';
-import {Clock, Flame, Target, Check, Pause, AlertTriangle} from 'lucide-react';
+import {Clock, Flame, Target, Check, Pause, AlertTriangle, Play, Square} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {tocaHoy, describirFrecuencia, obtenerIntervaloFrecuencia, calcularUmbralInactividad} from '../../utils/frecuenciaHabitos';
@@ -23,6 +23,7 @@ import {HistorialHabitoInline} from '../shared/HistorialHabito';
 import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaHoy} from '../../utils/fecha';
 import {generarOpcionesMenuHabito, MENU_HABITO_IDS, extraerImportanciaDeOpcion} from '../../config/opcionesMenuHabito';
+import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
 
 interface TablaHabitosProps {
     habitos: Habito[];
@@ -95,6 +96,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
     /* Menú contextual coordinado globalmente - Solo un menú abierto a la vez */
     const menuContextual = useMenuContextualConId(`habito-${habito.id}`);
+    const tracker = useTimeTrackerStore();
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
 
     /* Frecuencia del habito */
@@ -163,18 +165,44 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
     /* Usando configuración centralizada de menú para consistencia entre paneles */
     const estaPausado = habito.pausado ?? false;
-    const opcionesMenu = useMemo(
-        () =>
-            generarOpcionesMenuHabito({
-                completadoHoy,
-                estaPausado,
-                tieneActualizar: !!onActualizar
-            }),
-        [completadoHoy, estaPausado, onActualizar]
-    );
+    const opcionesMenu = useMemo(() => {
+        const base = generarOpcionesMenuHabito({
+            completadoHoy,
+            estaPausado,
+            tieneActualizar: !!onActualizar,
+            pospuestoHoy
+        });
+
+        /* Insertar opción de tracking antes de eliminar */
+        const indiceEliminar = base.findIndex(o => o.id === 'eliminar');
+        const opcionTracking = estaEnTracking
+            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
+            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
+
+        if (indiceEliminar >= 0) {
+            base.splice(indiceEliminar, 0, opcionTracking);
+        } else {
+            base.push(opcionTracking);
+        }
+
+        return base;
+    }, [completadoHoy, estaPausado, onActualizar, pospuestoHoy, estaEnTracking]);
+
+    /* Detectar si este hábito está siendo trackeado */
+    const estaEnTracking = tracker.sesionActiva?.entidadId === habito.id && tracker.sesionActiva?.tipoEntidad === 'habito' && tracker.estado !== 'inactivo';
 
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {
+            /* Tracking de tiempo */
+            if (opcionId === 'iniciar-tracking') {
+                tracker.iniciarTracking(habito.id, 'habito', habito.nombre);
+                return;
+            }
+            if (opcionId === 'detener-tracking') {
+                tracker.completarTracking();
+                return;
+            }
+
             switch (opcionId) {
                 case MENU_HABITO_IDS.CONFIGURAR:
                 case MENU_HABITO_IDS.EDITAR:
@@ -202,7 +230,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                 });
             }
         },
-        [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar, onActualizar]
+        [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar, onActualizar, tracker]
     );
 
     /* Determinar clase de urgencia para la barra */

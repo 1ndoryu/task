@@ -10,7 +10,7 @@
  */
 
 import type {ReactNode} from 'react';
-import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, BarChart3} from 'lucide-react';
+import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, BarChart3, Puzzle} from 'lucide-react';
 
 export interface OpcionMenuUsuario {
     id: string;
@@ -66,7 +66,12 @@ export function obtenerOpcionesMenuUsuario(config: ConfiguracionMenuUsuario): Op
         {
             id: 'mcp',
             etiqueta: 'Conectar con IA',
-            icono: <Plug size={tamanoIcono} />,
+            icono: <Plug size={tamanoIcono} />
+        },
+        {
+            id: 'plugins',
+            etiqueta: 'Plugins',
+            icono: <Puzzle size={tamanoIcono} />,
             separadorDespues: true
         },
         {

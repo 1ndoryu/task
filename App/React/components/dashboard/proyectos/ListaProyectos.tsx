@@ -16,6 +16,21 @@ import {AccionesItem} from '../../shared/AccionesItem';
 import type {Proyecto, Tarea, DatosEdicionTarea, NivelUrgencia} from '../../../types/dashboard';
 import type {OpcionMenu} from '../../shared/MenuContextual';
 import {obtenerTextoFechaLimite, obtenerVarianteFechaLimite, formatearFechaCorta} from '../../../utils/fecha';
+import {obtenerTextoPrioridad} from '../../../utils/constantes';
+
+/* Mapa de prioridad a valor numérico para ordenamiento (menor = más prioritario) */
+const MAPA_VALOR_PRIORIDAD: Record<string, number> = {muy_alta: 0, alta: 1, media: 2, baja: 3};
+
+/* Obtener variante CSS para badge de prioridad de proyecto */
+function obtenerClasePrioridad(prioridad: string): string {
+    switch (prioridad) {
+        case 'muy_alta': return 'etiquetaMuyAlta';
+        case 'alta': return 'etiquetaAlta';
+        case 'media': return 'etiquetaMedia';
+        case 'baja': return 'etiquetaBaja';
+        default: return 'etiquetaMedia';
+    }
+}
 
 interface MenuContextoProyecto {
     visible: boolean;
@@ -79,9 +94,8 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
     // Ordenar tareas segun el ordenDefecto
     const tareasOrdenadas = [...tareasProyecto].sort((a, b) => {
         if (ordenDefecto === 'prioridad') {
-            const map: Record<string, number> = {alta: 1, media: 2, baja: 3};
-            const pA = map[a.prioridad || ''] || 4;
-            const pB = map[b.prioridad || ''] || 4;
+            const pA = MAPA_VALOR_PRIORIDAD[a.prioridad || ''] ?? 4;
+            const pB = MAPA_VALOR_PRIORIDAD[b.prioridad || ''] ?? 4;
             if (pA !== pB) return pA - pB;
         } else if (ordenDefecto === 'fecha') {
             // Si tiene fecha, va antes que si no tiene
@@ -135,7 +149,7 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
                 <div className="proyectoItemContenido">
                     <span className={`proyectoNombre ${modoCompacto ? 'proyectoNombre--compacto' : ''}`}>{proyecto.nombre}</span>
                     <div className="proyectoMeta">
-                        <span className={`etiquetaPrioridad etiqueta${proyecto.prioridad.charAt(0).toUpperCase() + proyecto.prioridad.slice(1)}`}>{proyecto.prioridad.toUpperCase()}</span>
+                        <span className={`etiquetaPrioridad ${obtenerClasePrioridad(proyecto.prioridad)}`}>{obtenerTextoPrioridad(proyecto.prioridad)?.toUpperCase() || proyecto.prioridad.toUpperCase()}</span>
                         {/* Badge de urgencia (si no es normal) */}
                         {proyecto.urgencia && proyecto.urgencia !== 'normal' && <BadgeInfo tipo="personalizado" icono={<Zap size={10} />} texto={proyecto.urgencia.toUpperCase()} variante={obtenerVarianteUrgencia(proyecto.urgencia)} titulo={`Urgencia: ${proyecto.urgencia}`} />}
                         <span>•</span>
@@ -296,8 +310,7 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                                 return new Date(a.fechaLimite).getTime() - new Date(b.fechaLimite).getTime();
                             }
                             if (ordenDefecto === 'prioridad') {
-                                const map: Record<string, number> = {alta: 1, media: 2, baja: 3};
-                                return (map[a.prioridad] || 99) - (map[b.prioridad] || 99);
+                                return (MAPA_VALOR_PRIORIDAD[a.prioridad] ?? 99) - (MAPA_VALOR_PRIORIDAD[b.prioridad] ?? 99);
                             }
                             return 0;
                         })

@@ -18,6 +18,7 @@
 
 /* Inicializar registros ANTES de cualquier otra importación */
 import './config/inicializarPaneles';
+import './config/inicializarPlugins';
 import './config/inicializarIslands';
 
 /* Obtener islands del registro */

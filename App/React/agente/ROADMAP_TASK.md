@@ -29,7 +29,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 1: Bug de sesión - Datos cruzados al cambiar de cuenta
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Crítica | **Tipo:** Bug Grave
+**Estado:** ✅ Completada | **Prioridad:** Crítica | **Tipo:** Bug Grave
 
 **Descripción:** Al cambiar de sesión (logout + login con otra cuenta) y luego volver a la sesión anterior, se cargan los datos de la cuenta a la que se accedió primero. Los datos se cruzan entre sesiones.
 
@@ -56,7 +56,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 2: Sincronización pierde conexión silenciosamente
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Crítica | **Tipo:** Bug
+**Estado:** ✅ Completada | **Prioridad:** Crítica | **Tipo:** Bug
 
 **Descripción:** Dos problemas relacionados con la sincronización en tiempo real:
 
@@ -91,7 +91,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 3: Badge "muy_alta" en proyectos + Ordenamiento incorrecto
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug UI
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug UI
 
 **Descripción:** Dos sub-bugs en el panel de proyectos:
 
@@ -122,7 +122,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 4: Eliminar fecha de tarea no se refleja al cerrar modal
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug
 
 **Descripción:** Al abrir el modal de configuración moderna de una tarea, eliminar su fecha límite y cerrar el modal, la fecha no se elimina realmente. Al volver a abrir, la fecha sigue estando.
 
@@ -147,7 +147,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 5: Cálculo de prioridad dinámica - Días libres se cuentan incorrectamente
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug Algoritmo
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug Algoritmo
 
 **Descripción:** El algoritmo que incrementa la prioridad de un hábito por cada día sin cumplirse cuenta los días libres (días donde el hábito no debía realizarse) como si fueran días incumplidos.
 
@@ -175,7 +175,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### TAREA 6: Posponer hábito permite registros dobles
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Bug
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Bug
 
 **Descripción:** Al hacer clic derecho en un hábito y seleccionar "Posponer hoy", el menú contextual no se actualiza después de la acción. Si se vuelve a dar clic derecho, sigue mostrando "Posponer hoy" y permite posponer múltiples veces, generando registros dobles en el historial.
 
@@ -215,7 +215,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### A.1: Preparación SOLID - Evaluar arquitectura para Time Tracker
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Análisis/Refactor
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Análisis/Refactor
 
 **Descripción:** Antes de implementar el time tracker, evaluar:
 
@@ -230,7 +230,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### A.2: Botón Play en ítems del panel de ejecución
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Feature
 **Depende de:** A.1
 
 **Descripción:** En el panel de ejecución, junto a los botones de acción de cada hábito/tarea, agregar un botón de "Play" (triangulo). Al presionarlo, la tarea/hábito inicia su tracking de tiempo.
@@ -246,7 +246,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### A.3: Dock de Tracking (barra inferior)
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Feature
 **Depende de:** A.2
 
 **Descripción:** Un componente tipo "dock" fijo en la parte inferior de la pantalla (no es un modal, es una barra compacta de poca altura y ancho completo). Muestra:
@@ -269,7 +269,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### A.4: Registros de tiempo en tareas y hábitos
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Feature
 **Depende de:** A.3
 
 **Descripción:** Extender los tipos de tarea y hábito para soportar:
@@ -290,7 +290,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### B.1: Preparación SOLID - Arquitectura de Plugins
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Alta | **Tipo:** Análisis/Refactor
+**Estado:** ✅ Completada | **Prioridad:** Alta | **Tipo:** Análisis/Refactor
 
 **Descripción:** Diseñar e implementar la infraestructura de plugins que permita:
 
@@ -322,7 +322,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### B.2: Plugin de Ayuno
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature/Plugin
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Feature/Plugin
 **Depende de:** B.1
 
 **Descripción:** Plugin que introduce un panel especializado de ayuno intermitente. El ayuno es esencialmente un hábito con un panel visual dedicado. Está desactivado por defecto.
@@ -355,7 +355,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### B.3: Plugin de Déficit Calórico
 
-**Estado:** ⬜ Pendiente | **Prioridad:** Media | **Tipo:** Feature/Plugin
+**Estado:** ✅ Completada | **Prioridad:** Media | **Tipo:** Feature/Plugin
 **Depende de:** B.1
 
 **Descripción:** Plugin que introduce un panel para registro y cálculo de déficit calórico usando IA de Google (Gemini). Estilo minimalista. Es un hábito con panel especializado.
@@ -498,3 +498,10 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 ### Respuestas del Agente:
 
 > Roadmap actualizado con nuevas tareas v2. Changelog v1.0.24-beta agregado.
+>
+> **Sprint completo finalizado:**
+> - Tareas 1-6 (bugs críticos): todas resueltas
+> - Feature A (Time Tracker): tipos, store, hook, DockTracking, integración en menús de tareas/hábitos
+> - Feature B.1 (Arquitectura de Plugins): registroPlugins, pluginsStore, ModalPlugins con toggle + config, wiring completo en encabezados
+> - Feature B.2 (Plugin Ayuno): tipos, ayunoStore, useAyuno hook, PanelAyuno con temporizador circular, selector de duración, historial compacto
+> - Feature B.3 (Plugin Déficit Calórico): tipos, deficitCaloricoStore, useDeficitCalorico hook, geminiCaloriasService (cadena fallback modelos), calculoTMB (Mifflin-St Jeor + alternativa), PanelDeficitCalorico con input texto/foto, ConfigDeficitCalorico con formulario de datos personales y API Key

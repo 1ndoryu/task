@@ -44,6 +44,7 @@ interface DashboardEncabezadoProps {
     onClickConfigUsuario?: () => void;
     onClickBackups?: () => void;
     onClickConfigMCP?: () => void;
+    onClickPlugins?: () => void;
     onClickFeedback?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
@@ -94,6 +95,7 @@ export function DashboardEncabezado({
     onClickConfigUsuario,
     onClickBackups,
     onClickConfigMCP,
+    onClickPlugins,
     onClickFeedback,
     onExportarDatos,
     onImportarDatos,
@@ -150,6 +152,7 @@ export function DashboardEncabezado({
                 onClickConfigUsuario={onClickConfigUsuario}
                 onClickBackups={onClickBackups}
                 onClickConfigMCP={onClickConfigMCP}
+                onClickPlugins={onClickPlugins}
                 onExportarDatos={onExportarDatos}
                 onCambiarPagina={onCambiarPagina}
                 onCrearRapido={onCrearRapido}
@@ -166,7 +169,7 @@ export function DashboardEncabezado({
 
                 <EncabezadoEstado sincronizacion={sincronizacion} />
 
-                <EncabezadoPerfil usuario={usuario} version={version} avatarUrl={avatarUrl} suscripcion={suscripcion} estaConectado={estaConectado} esTablet={esTablet} sincronizacion={sincronizacion} onClickUsuario={onClickUsuario} onClickSeguridad={onClickSeguridad} onClickBackups={onClickBackups} onClickConfigUsuario={onClickConfigUsuario} onClickVersion={onClickVersion} onClickPlan={onClickPlan} onClickTemas={onClickTemas} onClickConfigMCP={onClickConfigMCP} onClickFeedback={onClickFeedback} onExportarDatos={onExportarDatos} onImportarDatos={onImportarDatos} />
+                <EncabezadoPerfil usuario={usuario} version={version} avatarUrl={avatarUrl} suscripcion={suscripcion} estaConectado={estaConectado} esTablet={esTablet} sincronizacion={sincronizacion} onClickUsuario={onClickUsuario} onClickSeguridad={onClickSeguridad} onClickBackups={onClickBackups} onClickConfigUsuario={onClickConfigUsuario} onClickVersion={onClickVersion} onClickPlan={onClickPlan} onClickTemas={onClickTemas} onClickConfigMCP={onClickConfigMCP} onClickPlugins={onClickPlugins} onClickFeedback={onClickFeedback} onExportarDatos={onExportarDatos} onImportarDatos={onImportarDatos} />
 
                 <EncabezadoOpcionesMovil opcionesMovil={opcionesMovil} menuOpcionesMovilAbierto={menuOpcionesMovilAbierto} onAbrirMenuOpcionesMovil={() => setMenuOpcionesMovilAbierto(true)} onCerrarMenuOpcionesMovil={() => setMenuOpcionesMovilAbierto(false)} estaConectado={estaConectado} onSeleccionarTarea={onSeleccionarTarea} onAbrirBuscadorMovil={() => setMostrarBuscadorMovil(true)} esTablet={esTablet} />
             </nav>

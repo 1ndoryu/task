@@ -6,6 +6,7 @@
 
 import {useMemo, useCallback} from 'react';
 import type {Habito} from '../types/dashboard';
+import {FRECUENCIA_POR_DEFECTO} from '../types/dashboard';
 import {useLocalStorage} from './useLocalStorage';
 import {estaEnVentanaOportunidad} from '../utils/frecuenciaHabitos';
 
@@ -36,6 +37,42 @@ const PESO_IMPORTANCIA: Record<Habito['importancia'], number> = {
 };
 
 /*
+ * Calcula los ciclos de inactividad efectivos de un hábito.
+ * Para hábitos no diarios, los días intermedios (libres) no cuentan como incumplidos.
+ * Ejemplo: frecuencia "cada 7 días" y 7 días de inactividad = 1 ciclo incumplido.
+ * Esto evita que hábitos semanales se inflen artificialmente en urgencia.
+ */
+function calcularInactividadEfectiva(habito: Habito): number {
+    const frecuencia = habito.frecuencia || FRECUENCIA_POR_DEFECTO;
+    const diasBrutos = habito.diasInactividad;
+
+    switch (frecuencia.tipo) {
+        case 'diario':
+            return diasBrutos;
+        case 'cadaXDias': {
+            const intervalo = frecuencia.cadaDias || 2;
+            return Math.floor(diasBrutos / intervalo);
+        }
+        case 'semanal':
+            return Math.floor(diasBrutos / 7);
+        case 'diasEspecificos': {
+            /* Contar solo los días de la semana configurados dentro del rango de inactividad */
+            const diasSemana = frecuencia.diasSemana || [];
+            if (diasSemana.length === 0 || diasSemana.length === 7) return diasBrutos;
+            /* Aproximar: proporción de días configurados por semana */
+            return Math.floor(diasBrutos * (diasSemana.length / 7));
+        }
+        case 'mensual': {
+            const vecesAlMes = frecuencia.vecesAlMes || 4;
+            const intervaloIdeal = Math.floor(30 / vecesAlMes);
+            return Math.floor(diasBrutos / intervaloIdeal);
+        }
+        default:
+            return diasBrutos;
+    }
+}
+
+/*
  * Funciones de ordenamiento por modo
  */
 function ordenarPorImportancia(a: Habito, b: Habito): number {
@@ -44,12 +81,12 @@ function ordenarPorImportancia(a: Habito, b: Habito): number {
 
     if (pesoA !== pesoB) return pesoB - pesoA;
 
-    /* Si misma importancia, ordenar por inactividad (mas dias primero) */
-    return b.diasInactividad - a.diasInactividad;
+    /* Si misma importancia, ordenar por inactividad efectiva (más ciclos primero) */
+    return calcularInactividadEfectiva(b) - calcularInactividadEfectiva(a);
 }
 
 function ordenarPorInactividad(a: Habito, b: Habito): number {
-    return b.diasInactividad - a.diasInactividad;
+    return calcularInactividadEfectiva(b) - calcularInactividadEfectiva(a);
 }
 
 function ordenarPorRacha(a: Habito, b: Habito): number {
@@ -61,9 +98,14 @@ function ordenarPorNombre(a: Habito, b: Habito): number {
 }
 
 function ordenarPorUrgenciaPonderada(a: Habito, b: Habito): number {
-    /* Formula base: (importancia * 2) + (diasInactividad * 1.5) - (racha > 0 ? 1 : 0) */
-    let scoreA = PESO_IMPORTANCIA[a.importancia] * 2 + a.diasInactividad * 1.5 - (a.racha > 0 ? 1 : 0);
-    let scoreB = PESO_IMPORTANCIA[b.importancia] * 2 + b.diasInactividad * 1.5 - (b.racha > 0 ? 1 : 0);
+    /*
+     * Formula: (importancia * 2) + (inactividadEfectiva * 1.5) - (racha > 0 ? 1 : 0)
+     * Usar inactividad efectiva para que días libres no inflen la urgencia.
+     */
+    const inactividadA = calcularInactividadEfectiva(a);
+    const inactividadB = calcularInactividadEfectiva(b);
+    let scoreA = PESO_IMPORTANCIA[a.importancia] * 2 + inactividadA * 1.5 - (a.racha > 0 ? 1 : 0);
+    let scoreB = PESO_IMPORTANCIA[b.importancia] * 2 + inactividadB * 1.5 - (b.racha > 0 ? 1 : 0);
 
     /* Multiplicador por ventana de oportunidad (x3) */
     if (estaEnVentanaOportunidad(a)) scoreA *= 3;

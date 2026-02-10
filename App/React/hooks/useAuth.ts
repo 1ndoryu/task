@@ -2,6 +2,7 @@ import {useState, useCallback} from 'react';
 import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import GoogleAuthNative from '../plugins/GoogleAuthNative';
 import {Capacitor} from '@capacitor/core';
+import {limpiarTodosLosDatosUsuario} from '../utils/limpiezaSesion';
 
 interface User {
     name: string;
@@ -196,6 +197,9 @@ export function useAuth(): UseAuthReturn {
     const logout = useCallback(async () => {
         setLoading(true);
         try {
+            /* Limpiar todos los datos del usuario antes de recargar para evitar cruce de sesiones */
+            limpiarTodosLosDatosUsuario();
+
             /* Obtener el nonce de WordPress */
             const wpData = (window as any).gloryDashboard;
             const nonce = wpData?.nonce || '';

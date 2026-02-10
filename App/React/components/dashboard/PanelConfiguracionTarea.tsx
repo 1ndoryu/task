@@ -95,12 +95,20 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
     const manejarGuardar = useCallback(() => {
         const configuracion: TareaConfiguracion = {};
 
+        /*
+         * Enviar fechaMaxima explícitamente: valor si hay fecha, null si se limpió.
+         * Esto permite que editarTarea elimine el campo al recibir null.
+         */
         if (fechaMaxima) {
             configuracion.fechaMaxima = fechaMaxima;
+        } else {
+            configuracion.fechaMaxima = null as unknown as string;
         }
 
         if (descripcion.trim()) {
             configuracion.descripcion = descripcion.trim();
+        } else {
+            configuracion.descripcion = null as unknown as string;
         }
 
         if (tieneRepeticion) {

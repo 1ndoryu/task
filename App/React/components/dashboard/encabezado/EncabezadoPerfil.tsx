@@ -1,5 +1,5 @@
 import {useState, useRef} from 'react';
-import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus} from 'lucide-react';
+import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, Puzzle} from 'lucide-react';
 import {MenuContextual} from '../../shared';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../../types/dashboard';
 
@@ -20,12 +20,13 @@ interface EncabezadoPerfilProps {
     onClickPlan?: () => void;
     onClickTemas?: () => void;
     onClickConfigMCP?: () => void;
+    onClickPlugins?: () => void;
     onClickFeedback?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
 }
 
-export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickPlan, onClickTemas, onClickConfigMCP, onClickFeedback, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
+export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickPlan, onClickTemas, onClickConfigMCP, onClickPlugins, onClickFeedback, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
     const [menuUsuario, setMenuUsuario] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +40,7 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
         {id: 'backups', etiqueta: 'Copias de Seguridad', icono: <Database size={12} />},
         {id: 'temas', etiqueta: 'Temas', icono: <Palette size={12} />},
         {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={12} />},
+        {id: 'plugins', etiqueta: 'Plugins', icono: <Puzzle size={12} />, separadorDespues: true},
         ...(esPremiumActivo
             ? [
                   {id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />},
@@ -86,6 +88,9 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
                 break;
             case 'mcp':
                 onClickConfigMCP?.();
+                break;
+            case 'plugins':
+                onClickPlugins?.();
                 break;
             case 'feedback':
                 onClickFeedback?.();

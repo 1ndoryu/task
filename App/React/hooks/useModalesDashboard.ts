@@ -123,6 +123,10 @@ interface UseModalesDashboardReturn {
     modalFeedbackAbierto: boolean;
     abrirModalFeedback: () => void;
     cerrarModalFeedback: () => void;
+    /* Plugins */
+    modalPluginsAbierto: boolean;
+    abrirModalPlugins: () => void;
+    cerrarModalPlugins: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -286,6 +290,11 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const abrirModalFeedback = useCallback(() => setModalFeedbackAbierto(true), []);
     const cerrarModalFeedback = useCallback(() => setModalFeedbackAbierto(false), []);
 
+    /* Handlers Plugins */
+    const [modalPluginsAbierto, setModalPluginsAbierto] = useState(false);
+    const abrirModalPlugins = useCallback(() => setModalPluginsAbierto(true), []);
+    const cerrarModalPlugins = useCallback(() => setModalPluginsAbierto(false), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -369,6 +378,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalBackups,
         modalFeedbackAbierto,
         abrirModalFeedback,
-        cerrarModalFeedback
+        cerrarModalFeedback,
+        modalPluginsAbierto,
+        abrirModalPlugins,
+        cerrarModalPlugins
     };
 }

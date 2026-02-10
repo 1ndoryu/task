@@ -12,7 +12,7 @@
  * - DIP: Los componentes dependen de esta abstracción, no de definiciones propias
  */
 
-import {Check, Calendar, Pause, Play, Edit3, AlertTriangle, Flag, Settings} from 'lucide-react';
+import {Check, Calendar, Pause, Play, Edit3, AlertTriangle, Flag, Settings, Undo2} from 'lucide-react';
 import type {OpcionMenu} from '../components/shared/MenuContextual';
 
 /*
@@ -22,6 +22,7 @@ interface EstadoHabitoMenu {
     completadoHoy: boolean;
     estaPausado: boolean;
     tieneActualizar: boolean;
+    pospuestoHoy?: boolean;
 }
 
 /*
@@ -44,8 +45,8 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
         },
         {
             id: 'posponer',
-            etiqueta: 'Posponer hoy',
-            icono: <Calendar size={12} />
+            etiqueta: estado.pospuestoHoy ? 'Deshacer posposición' : 'Posponer hoy',
+            icono: estado.pospuestoHoy ? <Undo2 size={12} /> : <Calendar size={12} />
         },
         {
             id: 'pausar',

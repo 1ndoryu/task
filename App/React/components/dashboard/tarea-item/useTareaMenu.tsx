@@ -1,9 +1,10 @@
 import React, {useCallback, useMemo} from 'react';
-import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Share2} from 'lucide-react';
+import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Share2, Play, Square} from 'lucide-react';
 import type {Tarea, TareaHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea} from '../../../types/dashboard';
 import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion} from '../../../config/opcionesMenuHabito';
 import type {OpcionMenu} from '../../shared/MenuContextual';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
+import {useTimeTrackerStore} from '../../../stores/timeTrackerStore';
 
 interface UseTareaMenuProps {
     tarea: Tarea;
@@ -24,15 +25,17 @@ interface UseTareaMenuProps {
     onActualizarHabito?: (habitoId: number, datos: any) => void;
     habitoCompletadoHoy?: boolean;
     habitoPausado?: boolean;
+    habitoPospuestoHoy?: boolean;
 
     /* Props para selección múltiple */
     estaSeleccionada?: boolean;
     cantidadSeleccionadas?: number;
 }
 
-export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigurar, onCrearNueva, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy, habitoPausado, estaSeleccionada = false, cantidadSeleccionadas = 0}: UseTareaMenuProps) {
+export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigurar, onCrearNueva, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy, habitoPausado, habitoPospuestoHoy, estaSeleccionada = false, cantidadSeleccionadas = 0}: UseTareaMenuProps) {
     /* Menú contextual coordinado globalmente */
     const menuContextual = useMenuContextualConId(`tarea-${tarea.id}`);
+    const tracker = useTimeTrackerStore();
 
     const manejarClickDerecho = useCallback(
         (evento: React.MouseEvent) => {
@@ -53,6 +56,17 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
             /* Acciones específicas para hábitos */
             if (esHabito) {
                 const tareaHabito = tarea as TareaHabito;
+
+                /* Tracking de tiempo para hábitos */
+                if (opcionId === 'iniciar-tracking') {
+                    tracker.iniciarTracking(tareaHabito.habitoId, 'habito', tareaHabito.texto);
+                    return;
+                }
+                if (opcionId === 'detener-tracking') {
+                    tracker.completarTracking();
+                    return;
+                }
+
                 switch (opcionId) {
                     case MENU_HABITO_IDS.CONFIGURAR:
                     case MENU_HABITO_IDS.EDITAR:
@@ -80,6 +94,15 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
             }
 
             /* Acciones para tareas normales */
+            if (opcionId === 'iniciar-tracking') {
+                tracker.iniciarTracking(tarea.id, 'tarea', tarea.texto);
+                return;
+            }
+            if (opcionId === 'detener-tracking') {
+                tracker.completarTracking();
+                return;
+            }
+
             if (opcionId === 'eliminar') {
                 onEliminar?.();
             } else if (opcionId === 'configurar') {
@@ -102,12 +125,20 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 });
             }
         },
-        [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito]
+        [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, tracker]
     );
+
+    /* Detectar si esta tarea está siendo trackeada */
+    const estaEnTracking = tracker.sesionActiva?.entidadId === tarea.id && tracker.estado !== 'inactivo';
 
     /* Opciones del menu contextual */
     const opcionesMenu: OpcionMenu[] = useMemo(() => {
         if (esHabito) return []; // Se generan por separado para hábitos
+
+        /* Opción de tracking dinámica */
+        const opcionTracking: OpcionMenu = estaEnTracking
+            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
+            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
 
         const opciones: OpcionMenu[] = [
             {
@@ -119,9 +150,9 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
             {
                 id: 'agregar-subtarea',
                 etiqueta: 'Agregar subtarea',
-                icono: <Plus size={12} />,
-                separadorDespues: true
+                icono: <Plus size={12} />
             },
+            opcionTracking,
             /* TO-DO: Habilitar cuando sistema de compartir esté listo
             {
                 id: 'compartir',
@@ -208,7 +239,7 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
             }
         ];
         return opciones;
-    }, [tarea.prioridad, esHabito]);
+    }, [tarea.prioridad, esHabito, estaEnTracking]);
 
     /* Opciones para hábitos */
     const opcionesMenuHabito: OpcionMenu[] = useMemo(
@@ -217,10 +248,11 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 ? generarOpcionesMenuHabito({
                       completadoHoy: habitoCompletadoHoy ?? false,
                       estaPausado: habitoPausado ?? false,
-                      tieneActualizar: !!onActualizarHabito
+                      tieneActualizar: !!onActualizarHabito,
+                      pospuestoHoy: habitoPospuestoHoy ?? false
                   })
                 : [],
-        [habitoCompletadoHoy, habitoPausado, onActualizarHabito, esHabito]
+        [habitoCompletadoHoy, habitoPausado, onActualizarHabito, esHabito, habitoPospuestoHoy]
     );
 
     return {

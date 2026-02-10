@@ -40,12 +40,13 @@ interface EncabezadoMenuMovilProps {
     onClickConfigUsuario?: () => void;
     onClickBackups?: () => void;
     onClickConfigMCP?: () => void;
+    onClickPlugins?: () => void;
     onExportarDatos?: () => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
     onCambiarPagina?: (pagina: PaginaMovil) => void;
 }
 
-export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, sincronizacion, drawerAbierto, onCerrarDrawer, onAbrirDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onExportarDatos, onCrearRapido, onCambiarPagina}: EncabezadoMenuMovilProps) {
+export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, sincronizacion, drawerAbierto, onCerrarDrawer, onAbrirDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onClickPlugins, onExportarDatos, onCrearRapido, onCambiarPagina}: EncabezadoMenuMovilProps) {
     /* Logic moved from DashboardEncabezado */
     const manejarOpcionDrawer = (opcionId: string) => {
         if (opcionId === 'notificaciones' && onClickNotificaciones) return onClickNotificaciones(undefined as any);
@@ -83,6 +84,9 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
                 break;
             case 'mcp':
                 onClickConfigMCP?.();
+                break;
+            case 'plugins':
+                onClickPlugins?.();
                 break;
             case 'exportar':
                 onExportarDatos?.();

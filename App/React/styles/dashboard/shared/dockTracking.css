@@ -1,0 +1,148 @@
+/*
+ * dockTracking.css
+ * Estilos para la barra inferior de tracking de tiempo
+ * Diseño minimalista estilo terminal
+ */
+
+.dockTracking {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--dashboard-fondoTerciario);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    transition: opacity 0.2s ease;
+}
+
+/* En móvil, posicionar encima de NavegacionInferior */
+.dockTracking--movil {
+    bottom: 56px; /* Altura de la barra de navegación inferior */
+}
+
+.dockTracking--pausado {
+    opacity: 0.85;
+}
+
+/* Barra de progreso hacia tiempo mínimo */
+.dockTrackingProgreso {
+    height: 2px;
+    background: var(--dashboard-bordeSutil);
+    width: 100%;
+    overflow: hidden;
+}
+
+.dockTrackingProgresoRelleno {
+    height: 100%;
+    background: var(--dashboard-estadoExito);
+    transition: width 1s linear;
+}
+
+/* Contenido principal del dock */
+.dockTrackingContenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    gap: 12px;
+    min-height: 36px;
+}
+
+/* Info de la entidad */
+.dockTrackingInfo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.dockTrackingIcono {
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+}
+
+.dockTrackingNombre {
+    font-size: 12px;
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Timer */
+.dockTrackingTimer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.dockTrackingTiempo {
+    font-size: 13px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: var(--dashboard-textoActivo);
+    letter-spacing: 0.5px;
+}
+
+.dockTrackingTiempo--completado {
+    color: var(--dashboard-estadoExito);
+}
+
+.dockTrackingCheckMinimo {
+    color: var(--dashboard-estadoExito);
+}
+
+/* Botones de acción */
+.dockTrackingAcciones {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.dockTrackingBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dockTrackingBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.dockTrackingBoton--reanudar:hover {
+    color: var(--dashboard-estadoExito);
+}
+
+.dockTrackingBoton--completar:hover {
+    color: var(--dashboard-estadoInfo);
+}
+
+.dockTrackingBoton--cancelar {
+    width: 24px;
+    height: 24px;
+}
+
+.dockTrackingBoton--cancelar:hover {
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Padding adicional al body cuando el dock está visible */
+.conDockTracking {
+    padding-bottom: 44px !important;
+}
+
+.conDockTracking.conDockTrackingMovil {
+    padding-bottom: 100px !important;
+}

@@ -16,6 +16,7 @@ import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
 import {NavegacionInferior} from '../components/shared';
+import {DockTracking} from '../components/shared/DockTracking';
 
 import {useEsMovil} from '../hooks/useEsMovil';
 import {usePaginaMovil} from '../hooks/usePaginaMovil';
@@ -24,6 +25,7 @@ import {useNotasStore} from '../stores/notasStore';
 import {useSeleccionMultipleStore} from '../stores/seleccionMultipleStore';
 import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
 import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
+import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -54,6 +56,24 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     const {esMovil} = useEsMovil();
     const paginaMovil = usePaginaMovil();
     const {modoSeleccionActivo, toggleModoSeleccionManual} = useSeleccionMultipleStore();
+
+    /*
+     * Detección de cambio de día y retorno tras inactividad.
+     * Al cambiar de día o volver tras 5+ minutos, forzar sincronización HTTP
+     * para recalcular hábitos/tareas del nuevo día.
+     */
+    useDeteccionCambioDia({
+        onCambioDia: () => {
+            console.log('[Dashboard] Cambio de día detectado, forzando sincronización');
+            dashboard.sincronizacion.sincronizarAhora();
+        },
+        onRetornoInactividad: () => {
+            console.log('[Dashboard] Retorno tras inactividad, verificando datos');
+            dashboard.sincronizacion.sincronizarAhora();
+        },
+        minutosInactividad: 5,
+        habilitado: !!auth.user
+    });
 
     /* Estado y acciones para notas en móvil */
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
@@ -217,6 +237,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onClickConfigUsuario={modales.abrirModalConfigUsuario}
                 onClickBackups={modales.abrirModalBackups}
                 onClickConfigMCP={modales.abrirModalConfigMCP}
+                onClickPlugins={modales.abrirModalPlugins}
                 onClickFeedback={modales.abrirModalFeedback}
                 onExportarDatos={dashboard.exportarTodosDatos}
                 onImportarDatos={dashboard.importarTodosDatos}
@@ -242,6 +263,9 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
 
             {/* Modal de notas guardadas para móvil (desde menú de 3 puntos) */}
             <ModalNotasExpandido abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} tamanoFuente="normal" delayGuardado={2000} />
+
+            {/* Dock de tracking de tiempo */}
+            {auth.user && <DockTracking esMovil={esMovil} />}
 
             {/* Navegación inferior móvil */}
             {auth.user && <NavegacionInferior paginaActiva={paginaMovil.paginaActiva} onCambiarPagina={paginaMovil.cambiarPagina} onCrearRapido={modales.abrirCreacionRapida} visible={esMovil} />}

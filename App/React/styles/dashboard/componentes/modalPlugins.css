@@ -1,0 +1,304 @@
+/*
+ * modalPlugins.css
+ * Estilos para el modal de gestión de plugins
+ */
+
+.modalPlugins {
+    max-width: 420px;
+    width: 90%;
+}
+
+.modalPluginsCuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.modalPluginsFila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoSecundario);
+    transition: border-color 0.15s ease;
+}
+
+.modalPluginsFila--activo {
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+.modalPluginsInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.modalPluginsIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+}
+
+.modalPluginsFila--activo .modalPluginsIcono {
+    color: var(--dashboard-estadoExito);
+    background: var(--dashboard-estadoExitoFondo);
+}
+
+.modalPluginsTexto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.modalPluginsNombre {
+    font-size: 13px;
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+.modalPluginsDescripcion {
+    font-size: 11px;
+    color: var(--dashboard-textoSecundario);
+    line-height: 1.3;
+}
+
+.modalPluginsVersion {
+    font-size: 10px;
+    color: var(--dashboard-textoApagado);
+}
+
+/* Toggle switch estilo iOS */
+.modalPluginsToggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    border: none;
+    background: var(--dashboard-bordeSutil);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.modalPluginsToggle--activo {
+    background: var(--dashboard-estadoExito);
+}
+
+.modalPluginsToggleIndicador {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+}
+
+.modalPluginsToggle--activo .modalPluginsToggleIndicador {
+    transform: translateX(16px);
+}
+
+.modalPluginsVacio {
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    font-size: 13px;
+    padding: 20px 0;
+}
+
+/* Acciones de la fila (config + toggle) */
+.modalPluginsAcciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.modalPluginsBotonConfig {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+
+.modalPluginsBotonConfig:hover {
+    color: var(--color-acento, #4dabf7);
+    background: rgba(77, 171, 247, 0.1);
+}
+
+/* Formulario de configuración de plugin */
+.configDeficitContenido {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.configDeficitSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.configDeficitSeccionTitulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--dashboard-textoActivo, #e0e0e0);
+    margin: 0;
+}
+
+.configDeficitSeccionNota {
+    font-size: 0.7rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    margin: 0;
+}
+
+.configDeficitCampos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.configDeficitCampo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.configDeficitLabel {
+    font-size: 0.68rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+}
+
+.configDeficitInput {
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    background: var(--dashboard-fondoInput, rgba(255, 255, 255, 0.03));
+    color: var(--dashboard-textoPrimario, #e0e0e0);
+    font-size: 0.78rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.configDeficitInput:focus {
+    border-color: var(--color-acento, #4dabf7);
+}
+
+.configDeficitInput::placeholder {
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.25));
+}
+
+.configDeficitApiKey {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.configDeficitInputApiKey {
+    flex: 1;
+}
+
+.configDeficitBotonOjo {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    border-radius: 4px;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.configDeficitBotonOjo:hover {
+    color: var(--color-acento, #4dabf7);
+}
+
+.configDeficitPreview {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: rgba(77, 171, 247, 0.06);
+    border: 1px solid rgba(77, 171, 247, 0.12);
+    font-size: 0.75rem;
+}
+
+.configDeficitPreviewLabel {
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+}
+
+.configDeficitPreviewValor {
+    font-weight: 600;
+    color: var(--color-acento, #4dabf7);
+}
+
+.configDeficitPreviewMetodo {
+    font-size: 0.65rem;
+    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.35));
+}
+
+.configDeficitAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+}
+
+.configDeficitBotonCancelar {
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.1));
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.configDeficitBotonCancelar:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.configDeficitBotonGuardar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: none;
+    background: var(--color-acento, #4dabf7);
+    color: #fff;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.configDeficitBotonGuardar:hover {
+    opacity: 0.9;
+}
+
