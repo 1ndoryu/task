@@ -80,9 +80,10 @@ class CifradoApiController
                 ],
             ], 200);
         } catch (\Exception $e) {
+            error_log('[CifradoAPI] ERROR getEstadoCifrado: ' . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al obtener estado de cifrado: ' . $e->getMessage(),
+                'message' => 'Error al obtener estado de cifrado.',
             ], 500);
         }
     }
@@ -96,6 +97,18 @@ class CifradoApiController
         $habilitar = $request->get_param('habilitar');
 
         try {
+            /* Verificar que el usuario es Premium antes de habilitar cifrado */
+            if ($habilitar) {
+                $suscripcion = new \App\Services\SuscripcionService($userId);
+                if (!$suscripcion->esPremium()) {
+                    return new \WP_REST_Response([
+                        'success' => false,
+                        'message' => 'El cifrado de datos es una función Premium.',
+                        'code' => 'premium_required',
+                    ], 403);
+                }
+            }
+
             $repository = new DashboardRepository($userId);
 
             if ($habilitar) {
@@ -118,9 +131,10 @@ class CifradoApiController
                 ],
             ], $resultado ? 200 : 500);
         } catch (\Exception $e) {
+            error_log('[CifradoAPI] ERROR toggleCifrado: ' . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al cambiar cifrado: ' . $e->getMessage(),
+                'message' => 'Error al cambiar configuración de cifrado.',
             ], 500);
         }
     }

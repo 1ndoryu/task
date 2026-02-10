@@ -202,7 +202,10 @@ class AdjuntosApiController
             return SECURE_AUTH_KEY . '_adjuntos_token';
         }
 
-        return hash('sha256', ABSPATH . 'glory_adjuntos_token_fallback');
+        /* No degradar seguridad con clave predecible.
+         * AUTH_KEY es obligatoria para generar tokens seguros. */
+        error_log('[AdjuntosApiController] CRITICO: AUTH_KEY no configurada. Tokens de descarga imposibles.');
+        throw new \RuntimeException('Configuración de seguridad incompleta para tokens de descarga');
     }
 
     /**

@@ -192,9 +192,12 @@ class CifradoService
             return SECURE_AUTH_KEY;
         }
 
-        /* Fallback: Usar una clave derivada del path absoluto (única por instalación) */
-        error_log('[CifradoService] ADVERTENCIA: Usando clave de fallback, configura AUTH_KEY en wp-config.php');
-        return hash('sha256', ABSPATH . 'glory_fallback_key', true);
+        /* Lanzar excepción en lugar de degradar silenciosamente la seguridad.
+         * Una clave derivada de ABSPATH es predecible y daría falsa sensación de seguridad. */
+        error_log('[CifradoService] CRITICO: AUTH_KEY no configurada. Cifrado imposible.');
+        throw new \RuntimeException(
+            'Configuración de seguridad incompleta: AUTH_KEY debe estar definida en wp-config.php con al menos 32 caracteres'
+        );
     }
 
     /**

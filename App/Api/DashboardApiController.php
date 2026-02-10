@@ -158,14 +158,14 @@ class DashboardApiController
             error_log("[DashboardAPI] ERROR loadDashboard: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al cargar datos: ' . $e->getMessage(),
+                'message' => 'Error al cargar datos. Contacta soporte si persiste.',
                 'code' => 'load_error',
             ], 500);
         } catch (\Error $e) {
             error_log("[DashboardAPI] FATAL loadDashboard: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error fatal: ' . $e->getMessage(),
+                'message' => 'Error inesperado. Contacta soporte.',
                 'code' => 'fatal_error',
             ], 500);
         }
@@ -257,14 +257,14 @@ class DashboardApiController
             error_log("[DashboardAPI] ERROR saveDashboard: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error interno: ' . $e->getMessage(),
+                'message' => 'Error al guardar datos. Intenta de nuevo.',
                 'code' => 'internal_error',
             ], 500);
         } catch (\Error $e) {
             error_log("[DashboardAPI] FATAL saveDashboard: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error fatal: ' . $e->getMessage(),
+                'message' => 'Error inesperado. Contacta soporte.',
                 'code' => 'fatal_error',
             ], 500);
         }
@@ -286,9 +286,10 @@ class DashboardApiController
                 'data' => $status,
             ], 200);
         } catch (\Exception $e) {
+            error_log("[DashboardAPI] ERROR getSyncStatus: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al obtener estado: ' . $e->getMessage(),
+                'message' => 'Error al obtener estado de sincronización.',
             ], 500);
         }
     }
@@ -314,9 +315,10 @@ class DashboardApiController
                 ],
             ], 200);
         } catch (\Exception $e) {
+            error_log("[DashboardAPI] ERROR getChangesSince: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al obtener cambios: ' . $e->getMessage(),
+                'message' => 'Error al obtener cambios.',
             ], 500);
         }
     }
@@ -354,9 +356,10 @@ class DashboardApiController
                 ],
             ], 200);
         } catch (\Exception $e) {
+            error_log("[DashboardAPI] ERROR pushChanges: " . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al aplicar cambios: ' . $e->getMessage(),
+                'message' => 'Error al aplicar cambios.',
             ], 500);
         }
     }

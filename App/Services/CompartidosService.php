@@ -245,7 +245,7 @@ class CompartidosService
                 'elementoId' => (int) $c->elemento_id,
                 'propietarioId' => (int) $c->propietario_id,
                 'propietarioNombre' => $c->propietario_nombre,
-                'propietarioEmail' => $c->propietario_email,
+                'propietarioEmail' => $this->ofuscarEmail($c->propietario_email),
                 'propietarioAvatar' => get_avatar_url($c->propietario_id, ['size' => 32]),
                 'rol' => $c->rol,
                 'fechaCompartido' => $c->fecha_compartido
@@ -287,7 +287,7 @@ class CompartidosService
                 'elementoId' => (int) $c->elemento_id,
                 'usuarioId' => (int) $c->usuario_id,
                 'usuarioNombre' => $c->usuario_nombre,
-                'usuarioEmail' => $c->usuario_email,
+                'usuarioEmail' => $this->ofuscarEmail($c->usuario_email),
                 'usuarioAvatar' => get_avatar_url($c->usuario_id, ['size' => 32]),
                 'rol' => $c->rol,
                 'fechaCompartido' => $c->fecha_compartido
@@ -322,7 +322,7 @@ class CompartidosService
             'id' => 0, /* Sin ID de compartido, es el propietario */
             'usuarioId' => $propietarioId,
             'nombre' => $propietario->display_name,
-            'email' => $propietario->user_email,
+            'email' => $this->ofuscarEmail($propietario->user_email),
             'avatar' => get_avatar_url($propietarioId, ['size' => 32]),
             'rol' => 'propietario',
             'esPropietario' => true
@@ -333,7 +333,7 @@ class CompartidosService
                 'id' => (int) $c->id,
                 'usuarioId' => (int) $c->usuario_id,
                 'nombre' => $c->nombre,
-                'email' => $c->email,
+                'email' => $this->ofuscarEmail($c->email),
                 'avatar' => get_avatar_url($c->usuario_id, ['size' => 32]),
                 'rol' => $c->rol,
                 'esPropietario' => false
@@ -430,6 +430,30 @@ class CompartidosService
     }
 
     /**
+     * Ofusca un email para no exponer PII completa en respuestas API.
+     * Ejemplo: "usuario@dominio.com" -> "u***@d***.com"
+     * Se mantiene la primera letra del local y dominio para reconocimiento mínimo.
+     */
+    private function ofuscarEmail(string $email): string
+    {
+        if (empty($email) || !str_contains($email, '@')) {
+            return '***@***.***';
+        }
+
+        $partes = explode('@', $email);
+        $local = $partes[0];
+        $dominio = $partes[1];
+
+        $localOfuscado = substr($local, 0, 1) . '***';
+
+        $parteDominio = explode('.', $dominio);
+        $dominioOfuscado = substr($parteDominio[0], 0, 1) . '***';
+        $extension = end($parteDominio);
+
+        return $localOfuscado . '@' . $dominioOfuscado . '.' . $extension;
+    }
+
+    /**
      * Formatea un registro de compartido para la respuesta
      */
     private function formatearCompartido(
@@ -448,7 +472,7 @@ class CompartidosService
             'elementoId' => $elementoId,
             'usuarioId' => $usuarioId,
             'usuarioNombre' => $usuario->display_name,
-            'usuarioEmail' => $usuario->user_email,
+            'usuarioEmail' => $this->ofuscarEmail($usuario->user_email),
             'usuarioAvatar' => get_avatar_url($usuarioId, ['size' => 32]),
             'rol' => $rol,
             'fechaCompartido' => current_time('mysql')
@@ -610,28 +634,12 @@ class CompartidosService
         ));
 
         if (!empty($tareasInvalidas)) {
-            foreach ($tareasInvalidas as $tarea) {
-                $dataPreview = is_null($tarea->data)
-                    ? 'NULL'
-                    : (empty($tarea->data)
-                        ? 'VACIO'
-                        : substr($tarea->data, 0, 100) . '...');
-
-                $dataLength = is_null($tarea->data) ? 0 : strlen($tarea->data);
-
-                error_log(sprintf(
-                    "[CompartidosService] JSON INVALIDO detectado en tarea - id_local: %d, user_id: %d, longitud_data: %d, updated_at: %s, preview_data: %s",
-                    $tarea->id_local,
-                    $tarea->user_id,
-                    $dataLength,
-                    $tarea->updated_at ?? 'N/A',
-                    $dataPreview
-                ));
-            }
-
+            /* Log reducido: solo IDs y conteo, sin preview de datos para evitar fuga */
+            $idsInvalidos = array_map(fn($t) => $t->id_local, $tareasInvalidas);
             error_log(sprintf(
-                "[CompartidosService] Total de tareas con JSON invalido: %d",
-                count($tareasInvalidas)
+                "[CompartidosService] %d tareas con JSON invalido detectadas. IDs: %s",
+                count($tareasInvalidas),
+                implode(', ', $idsInvalidos)
             ));
         }
 

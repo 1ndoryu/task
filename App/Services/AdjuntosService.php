@@ -136,13 +136,21 @@ class AdjuntosService
             }
         }
 
+        /* Caso especial: el directorio de thumbnails permite acceso a imágenes
+         * para que se puedan previsualizar sin pasar por la API */
+        $thumbsHtaccess = trailingslashit($this->getRutaThumbnails()) . '.htaccess';
+        if (!file_exists($thumbsHtaccess)) {
+            $reglasThumb = "Order Deny,Allow\nDeny from all\n<FilesMatch \"\\.(jpg|jpeg|png|gif|webp)$\">\n    Allow from all\n</FilesMatch>\n";
+            file_put_contents($thumbsHtaccess, $reglasThumb);
+        }
+
         return true;
     }
 
     /**
-     * Protege un directorio con index.php (sin bloquear acceso directo)
-     * Los archivos tienen nombres UUID imposibles de adivinar, lo que proporciona seguridad.
-     * Solo los archivos cifrados (.enc) requieren pasar por la API.
+     * Protege un directorio con .htaccess y index.php
+     * Bloquea acceso directo HTTP a todos los archivos del directorio.
+     * Solo la API puede servir archivos, garantizando que se verifique autenticación.
      */
     private function protegerDirectorio(string $directorio): void
     {
@@ -150,6 +158,13 @@ class AdjuntosService
         $index = trailingslashit($directorio) . 'index.php';
         if (!file_exists($index)) {
             file_put_contents($index, '<?php // Silence is golden');
+        }
+
+        /* .htaccess para bloquear acceso directo a TODOS los archivos */
+        $htaccess = trailingslashit($directorio) . '.htaccess';
+        if (!file_exists($htaccess)) {
+            $reglas = "Order Deny,Allow\nDeny from all\n";
+            file_put_contents($htaccess, $reglas);
         }
     }
 
@@ -423,8 +438,15 @@ class AdjuntosService
     {
         $rutaArchivo = trailingslashit($this->getRutaUsuario()) . $nombreArchivo;
 
+        /* Protección contra path traversal: verificar que la ruta resuelta
+         * permanece dentro del directorio del usuario */
+        if (!$this->validarRutaSegura($rutaArchivo)) {
+            error_log('[AdjuntosService] Path traversal detectado: ' . $nombreArchivo);
+            return null;
+        }
+
         if (!file_exists($rutaArchivo)) {
-            error_log("[AdjuntosService] Archivo no encontrado: {$rutaArchivo}");
+            error_log("[AdjuntosService] Archivo no encontrado");
             return null;
         }
 
@@ -532,7 +554,20 @@ class AdjuntosService
             return null;
         }
 
-        return file_get_contents($rutaCache);
+        $contenido = file_get_contents($rutaCache);
+
+        /* Descifrar cache si está cifrado */
+        if ($this->cifradoService !== null && $this->cifradoService->estaCifrado($contenido)) {
+            try {
+                $contenido = $this->cifradoService->descifrar($contenido);
+            } catch (\Exception $e) {
+                error_log('[AdjuntosService] Error descifrando cache, se invalida');
+                unlink($rutaCache);
+                return null;
+            }
+        }
+
+        return $contenido;
     }
 
     /**
@@ -547,8 +582,20 @@ class AdjuntosService
             $this->protegerDirectorio($rutaCache);
         }
 
+        /* Cifrar el contenido del cache para evitar que datos descifrados
+         * queden en texto plano en disco durante el TTL */
+        $contenidoCache = $contenido;
+        if ($this->cifradoService !== null) {
+            try {
+                $contenidoCache = $this->cifradoService->cifrar($contenido);
+            } catch (\Exception $e) {
+                error_log('[AdjuntosService] Error cifrando cache, se omite cache');
+                return;
+            }
+        }
+
         $rutaArchivo = trailingslashit($rutaCache) . md5($nombreArchivo);
-        file_put_contents($rutaArchivo, $contenido);
+        file_put_contents($rutaArchivo, $contenidoCache);
     }
 
     /**
@@ -594,6 +641,11 @@ class AdjuntosService
     {
         $rutaArchivo = trailingslashit($this->getRutaUsuario()) . $nombreArchivo;
 
+        /* Protección contra path traversal */
+        if (!$this->validarRutaSegura($rutaArchivo)) {
+            return null;
+        }
+
         if (!file_exists($rutaArchivo)) {
             return null;
         }
@@ -617,6 +669,13 @@ class AdjuntosService
     public function eliminarArchivo(string $nombreArchivo): bool
     {
         $rutaArchivo = trailingslashit($this->getRutaUsuario()) . $nombreArchivo;
+
+        /* Protección contra path traversal */
+        if (!$this->validarRutaSegura($rutaArchivo)) {
+            error_log('[AdjuntosService] Path traversal detectado en eliminación: ' . $nombreArchivo);
+            return false;
+        }
+
         $eliminado = false;
 
         /* Eliminar archivo principal */
@@ -702,8 +761,8 @@ class AdjuntosService
 
     /**
      * Genera URL para descargar archivo
-     * - Archivos cifrados: URL con token temporal firmado (1 hora)
-     * - Archivos no cifrados: URL directa al archivo físico
+     * Todos los archivos pasan por la API para garantizar autenticación,
+     * ya que .htaccess bloquea acceso directo al directorio.
      */
     private function generarUrlDescarga(int $adjuntoId, string $nombreArchivo, bool $cifrado): string
     {
@@ -716,12 +775,15 @@ class AdjuntosService
             );
         }
 
-        /* Archivos no cifrados: acceso directo */
-        return trailingslashit($this->urlBase) . $this->userId . '/' . $nombreArchivo;
+        /* Archivos no cifrados también pasan por la API para verificar autenticación */
+        return rest_url("glory/v1/adjuntos/{$adjuntoId}") . '?file=' . urlencode($nombreArchivo);
     }
 
     /**
-     * Genera URL para thumbnail (acceso directo, no cifrado)
+     * Genera URL para thumbnail.
+     * TO-DO: Con .htaccess activo en el directorio principal, considerar
+     * un endpoint dedicado o excluir thumbs/ del deny si se necesita acceso directo.
+     * Por ahora se mantiene ruta directa (thumbs/ puede tener su propio .htaccess permisivo).
      */
     private function generarUrlThumbnail(string $nombreBase): string
     {
@@ -755,5 +817,39 @@ class AdjuntosService
     {
         return $this->suscripcion->esPremium() &&
             CifradoService::estaHabilitado($this->userId);
+    }
+
+    /**
+     * Valida que una ruta de archivo resuelta permanezca dentro
+     * del directorio del usuario. Previene ataques de path traversal
+     * donde un nombreArchivo como "../../wp-config.php" podría
+     * escapar del directorio seguro.
+     */
+    private function validarRutaSegura(string $rutaArchivo): bool
+    {
+        $directorioUsuario = $this->getRutaUsuario();
+
+        /* Si el archivo aún no existe (ej: crear), verificar el directorio padre */
+        if (file_exists($rutaArchivo)) {
+            $rutaReal = realpath($rutaArchivo);
+        } else {
+            /* Para archivos nuevos, verificar que el directorio padre sea válido */
+            $directorioPadre = dirname($rutaArchivo);
+            $rutaReal = realpath($directorioPadre);
+            if ($rutaReal !== false) {
+                $rutaReal .= DIRECTORY_SEPARATOR . basename($rutaArchivo);
+            }
+        }
+
+        if ($rutaReal === false) {
+            return false;
+        }
+
+        /* Normalizar separadores para comparación en Windows */
+        $rutaReal = str_replace('\\', '/', $rutaReal);
+        $directorioUsuario = str_replace('\\', '/', $directorioUsuario);
+
+        /* La ruta resuelta debe empezar con el directorio del usuario */
+        return str_starts_with($rutaReal, $directorioUsuario);
     }
 }

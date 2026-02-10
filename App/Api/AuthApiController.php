@@ -139,6 +139,14 @@ class AuthApiController
         $email    = sanitize_email($request->get_param('email'));
         $password = $request->get_param('password');
 
+        /* Validación de complejidad mínima del password */
+        if (strlen($password) < 8) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'La contraseña debe tener al menos 8 caracteres.'
+            ], 400);
+        }
+
         if (username_exists($username)) {
             return new WP_REST_Response(['success' => false, 'message' => 'El nombre de usuario ya está registrado.'], 400);
         }
@@ -301,16 +309,24 @@ class AuthApiController
 
     public static function logClientError(WP_REST_Request $request): WP_REST_Response
     {
-        $message = sanitize_text_field($request->get_param('message'));
-        $data = $request->get_param('data');
+        /* Throttle: máx 10 entradas de log por minuto por IP para evitar spam */
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $transientKey = 'glory_log_throttle_' . md5($ip);
+        $count = (int) get_transient($transientKey);
 
-        $logEntry = "[Client Log] " . $message;
-        if (!empty($data)) {
-            $logEntry .= " | Data: " . (is_string($data) ? $data : json_encode($data));
+        if ($count >= 10) {
+            return new WP_REST_Response(['success' => false, 'message' => 'Rate limit'], 429);
         }
 
-        /* Escribir al debug.log de WordPress */
-        error_log($logEntry);
+        set_transient($transientKey, $count + 1, 60);
+
+        $message = sanitize_text_field($request->get_param('message'));
+
+        /* Limitar longitud del mensaje para evitar llenar disco */
+        $message = substr($message, 0, 500);
+
+        /* Escribir al debug.log de WordPress (sin datos adicionales para evitar inyección de logs) */
+        error_log("[Client Log] " . $message);
 
         return new WP_REST_Response(['success' => true], 200);
     }
