@@ -163,6 +163,9 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
         [menuContextual]
     );
 
+    /* Detectar si este hábito está siendo trackeado */
+    const estaEnTracking = tracker.sesionActiva?.entidadId === habito.id && tracker.sesionActiva?.tipoEntidad === 'habito' && tracker.estado !== 'inactivo';
+
     /* Usando configuración centralizada de menú para consistencia entre paneles */
     const estaPausado = habito.pausado ?? false;
     const opcionesMenu = useMemo(() => {
@@ -175,9 +178,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
         /* Insertar opción de tracking antes de eliminar */
         const indiceEliminar = base.findIndex(o => o.id === 'eliminar');
-        const opcionTracking = estaEnTracking
-            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
-            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
+        const opcionTracking = estaEnTracking ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true} : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
 
         if (indiceEliminar >= 0) {
             base.splice(indiceEliminar, 0, opcionTracking);
@@ -187,9 +188,6 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
         return base;
     }, [completadoHoy, estaPausado, onActualizar, pospuestoHoy, estaEnTracking]);
-
-    /* Detectar si este hábito está siendo trackeado */
-    const estaEnTracking = tracker.sesionActiva?.entidadId === habito.id && tracker.sesionActiva?.tipoEntidad === 'habito' && tracker.estado !== 'inactivo';
 
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {

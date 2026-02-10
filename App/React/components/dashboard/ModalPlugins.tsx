@@ -7,7 +7,8 @@
  */
 
 import {useCallback, useState} from 'react';
-import {X, Settings} from 'lucide-react';
+import {Settings} from 'lucide-react';
+import {Modal} from '../shared/Modal';
 import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {ConfigDeficitCalorico} from './ConfigDeficitCalorico';
@@ -63,19 +64,22 @@ export function ModalPlugins({abierto, onCerrar, onMostrarPanel, onOcultarPanel}
     const {pluginsActivos, togglePlugin} = usePluginsStore();
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
 
-    const manejarToggle = useCallback((pluginId: string) => {
-        const estabaActivo = pluginsActivos.includes(pluginId);
-        togglePlugin(pluginId);
+    const manejarToggle = useCallback(
+        (pluginId: string) => {
+            const estabaActivo = pluginsActivos.includes(pluginId);
+            togglePlugin(pluginId);
 
-        const panelesIds = obtenerPanelesDePlugin(pluginId);
-        panelesIds.forEach(panelId => {
-            if (estabaActivo) {
-                onOcultarPanel?.(panelId);
-            } else {
-                onMostrarPanel?.(panelId);
-            }
-        });
-    }, [pluginsActivos, togglePlugin, onMostrarPanel, onOcultarPanel]);
+            const panelesIds = obtenerPanelesDePlugin(pluginId);
+            panelesIds.forEach(panelId => {
+                if (estabaActivo) {
+                    onOcultarPanel?.(panelId);
+                } else {
+                    onMostrarPanel?.(panelId);
+                }
+            });
+        },
+        [pluginsActivos, togglePlugin, onMostrarPanel, onOcultarPanel]
+    );
 
     const manejarAbrirConfig = useCallback((pluginId: string) => {
         setConfigAbierta(pluginId);
@@ -88,30 +92,24 @@ export function ModalPlugins({abierto, onCerrar, onMostrarPanel, onOcultarPanel}
     /* Renderizar componente de configuración si está abierto */
     const ComponenteConfig = configAbierta ? COMPONENTES_CONFIG[configAbierta] : null;
 
-    return (
-        <div className="modalOverlay modalOverlayActivo" onClick={onCerrar}>
-            <div className="modalContenido modalPlugins" onClick={e => e.stopPropagation()}>
-                <div className="modalCabecera">
-                    <h3 className="modalTitulo">
-                        {configAbierta ? `Configurar ${plugins.find(p => p.id === configAbierta)?.nombre ?? 'Plugin'}` : 'Plugins'}
-                    </h3>
-                    <button type="button" className="modalCerrar" onClick={configAbierta ? manejarCerrarConfig : onCerrar} aria-label="Cerrar">
-                        <X size={16} />
-                    </button>
-                </div>
+    /*
+     * Lógica de cierre unificada:
+     * Si hay config abierta, volver a la lista.
+     * Si no, cerrar el modal.
+     */
+    const manejarCierreUnificado = useCallback(() => {
+        if (configAbierta) {
+            manejarCerrarConfig();
+        } else {
+            onCerrar();
+        }
+    }, [configAbierta, manejarCerrarConfig, onCerrar]);
 
-                <div className="modalPluginsCuerpo">
-                    {ComponenteConfig ? (
-                        <ComponenteConfig onCerrar={manejarCerrarConfig} />
-                    ) : plugins.length === 0 ? (
-                        <p className="modalPluginsVacio">No hay plugins disponibles.</p>
-                    ) : (
-                        plugins.map(plugin => (
-                            <FilaPlugin key={plugin.id} plugin={plugin} onToggle={manejarToggle} onAbrirConfig={manejarAbrirConfig} />
-                        ))
-                    )}
-                </div>
-            </div>
-        </div>
+    const tituloModal = configAbierta ? `Configurar ${plugins.find(p => p.id === configAbierta)?.nombre ?? 'Plugin'}` : 'Plugins';
+
+    return (
+        <Modal estaAbierto={abierto} onCerrar={manejarCierreUnificado} titulo={tituloModal} claseExtra="modalPlugins">
+            <div className="modalPluginsCuerpo">{ComponenteConfig ? <ComponenteConfig onCerrar={manejarCerrarConfig} /> : plugins.length === 0 ? <p className="modalPluginsVacio">No hay plugins disponibles.</p> : plugins.map(plugin => <FilaPlugin key={plugin.id} plugin={plugin} onToggle={manejarToggle} onAbrirConfig={manejarAbrirConfig} />)}</div>
+        </Modal>
     );
 }

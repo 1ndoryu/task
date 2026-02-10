@@ -13,7 +13,7 @@ import {BottomSheet} from './BottomSheet';
 import {useEsMovil} from '../../hooks/useEsMovil';
 
 /* Opción genérica del menú */
-export interface OpcionMenu {
+export interface OpcionMenuPanel {
     id: string;
     etiqueta: string;
     icono?: React.ReactNode;
@@ -25,7 +25,7 @@ export interface OpcionMenu {
 /* Grupo de opciones (para separadores visuales) */
 export interface GrupoOpciones {
     titulo: string;
-    opciones: OpcionMenu[];
+    opciones: OpcionMenuPanel[];
 }
 
 export interface MenuOpcionesPanelProps {
@@ -36,7 +36,7 @@ export interface MenuOpcionesPanelProps {
     grupos?: GrupoOpciones[];
 
     /* Opciones sueltas (sin agrupar) */
-    opciones?: OpcionMenu[];
+    opciones?: OpcionMenuPanel[];
 
     /* Children a mostrar en desktop */
     children: React.ReactNode;
@@ -145,7 +145,7 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
  * Helpers para crear opciones comunes
  * Facilita la creación de opciones de ordenamiento y filtro
  */
-export function crearOpcionesOrdenamiento(opciones: Array<{id: string; etiqueta: string; descripcion?: string}>, valorActual: string, onChange: (id: string) => void): OpcionMenu[] {
+export function crearOpcionesOrdenamiento(opciones: Array<{id: string; etiqueta: string; descripcion?: string}>, valorActual: string, onChange: (id: string) => void): OpcionMenuPanel[] {
     return opciones.map(op => ({
         id: op.id,
         etiqueta: op.etiqueta,
@@ -156,7 +156,7 @@ export function crearOpcionesOrdenamiento(opciones: Array<{id: string; etiqueta:
     }));
 }
 
-export function crearOpcionesFiltro(opciones: Array<{id: string; etiqueta: string; descripcion?: string}>, valorActual: string, onChange: (id: string) => void): OpcionMenu[] {
+export function crearOpcionesFiltro(opciones: Array<{id: string; etiqueta: string; descripcion?: string}>, valorActual: string, onChange: (id: string) => void): OpcionMenuPanel[] {
     return opciones.map(op => ({
         id: op.id,
         etiqueta: op.etiqueta,
@@ -167,7 +167,7 @@ export function crearOpcionesFiltro(opciones: Array<{id: string; etiqueta: strin
     }));
 }
 
-export function crearOpcionConfiguracion(onClick: () => void): OpcionMenu {
+export function crearOpcionConfiguracion(onClick: () => void): OpcionMenuPanel {
     return {
         id: 'configuracion',
         etiqueta: 'Configuración',

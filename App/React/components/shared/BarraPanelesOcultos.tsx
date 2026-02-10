@@ -44,6 +44,8 @@ export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanel
             <div className="barraPanelesOcultosContenido">
                 {panelesOcultos.map(panelId => {
                     const info = PANELES_INFO[panelId];
+                    if (!info) return null;
+
                     return (
                         <button key={panelId} className="botonPanelOculto" onClick={() => onMostrarPanel(panelId)} title={`Mostrar ${info.nombre}`}>
                             {info.icono}

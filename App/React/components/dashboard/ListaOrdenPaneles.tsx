@@ -4,8 +4,9 @@
  * Permite mover paneles arriba/abajo y cambiar de columna
  */
 
-import {ChevronUp, ChevronDown, Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
+import {ChevronUp, ChevronDown, Target, Folder, Terminal, FileText, Activity, Settings} from 'lucide-react';
 import type {PanelId, OrdenPanel, ModoColumnas} from '../../hooks/useConfiguracionLayout';
+import {obtenerPanel} from '../../config/registroPaneles';
 
 interface ListaOrdenPanelesProps {
     ordenPaneles: OrdenPanel[];
@@ -15,7 +16,7 @@ interface ListaOrdenPanelesProps {
     onCambiarColumna: (panelId: PanelId, columna: 1 | 2 | 3) => void;
 }
 
-/* Configuración de paneles con iconos y nombres */
+/* Configuración de paneles con iconos y nombres estáticos (legacy) */
 const INFO_PANELES: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
     focoPrioritario: {
         nombre: 'Foco Prioritario',
@@ -48,13 +49,18 @@ export function ListaOrdenPaneles({ordenPaneles, modoColumnas, onMoverArriba, on
     const panelesColumna3 = ordenPaneles.filter(p => p.columna === 3).sort((a, b) => a.posicion - b.posicion);
 
     const renderizarPanel = (panel: OrdenPanel, esPrimero: boolean, esUltimo: boolean) => {
-        const info = INFO_PANELES[panel.id];
+        /* Intentar obtener info estática, luego dinámica, ultimo fallback */
+        const infoEstatica = INFO_PANELES[panel.id];
+        const defPanel = obtenerPanel(panel.id);
+
+        const nombre = infoEstatica?.nombre || defPanel?.titulo || panel.id;
+        const icono = infoEstatica?.icono || defPanel?.icono || <Settings size={14} />;
 
         return (
             <div key={panel.id} className="listaOrdenItem">
                 <div className="listaOrdenItemInfo">
-                    <span className="listaOrdenItemIcono">{info.icono}</span>
-                    <span className="listaOrdenItemNombre">{info.nombre}</span>
+                    <span className="listaOrdenItemIcono">{icono}</span>
+                    <span className="listaOrdenItemNombre">{nombre}</span>
                 </div>
 
                 <div className="listaOrdenItemAcciones">

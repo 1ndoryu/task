@@ -4,6 +4,7 @@
  */
 
 .modalPlugins {
+    /* Sobrescribe ancho del Modal compartido sutilmente si es necesario */
     max-width: 420px;
     width: 90%;
 }
@@ -12,7 +13,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 12px 0;
+    padding: 0; /* Padding ya manejado por modalContenido en shared */
     max-height: 400px;
     overflow-y: auto;
 }
@@ -22,10 +23,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 12px;
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioSm);
     border: 1px solid var(--dashboard-bordePrincipal);
     background: var(--dashboard-fondoSecundario);
-    transition: border-color 0.15s ease;
+    transition: border-color var(--dashboard-transicionRapida);
 }
 
 .modalPluginsFila--activo {
@@ -46,7 +47,7 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoSecundario);
     flex-shrink: 0;
@@ -106,7 +107,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--dashboard-textoActivo);
     transition: transform 0.2s ease;
 }
 
@@ -143,8 +144,8 @@
 }
 
 .modalPluginsBotonConfig:hover {
-    color: var(--color-acento, #4dabf7);
-    background: rgba(77, 171, 247, 0.1);
+    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
 }
 
 /* Formulario de configuración de plugin */
@@ -164,13 +165,13 @@
 .configDeficitSeccionTitulo {
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--dashboard-textoActivo, #e0e0e0);
+    color: var(--dashboard-textoActivo);
     margin: 0;
 }
 
 .configDeficitSeccionNota {
     font-size: 0.7rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    color: var(--dashboard-textoSecundario);
     margin: 0;
 }
 
@@ -188,26 +189,26 @@
 
 .configDeficitLabel {
     font-size: 0.68rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+    color: var(--dashboard-textoSecundario);
 }
 
 .configDeficitInput {
     padding: 6px 8px;
-    border-radius: 4px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
-    background: var(--dashboard-fondoInput, rgba(255, 255, 255, 0.03));
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoTerciario);
+    color: var(--dashboard-textoNormal);
     font-size: 0.78rem;
     outline: none;
     transition: border-color 0.15s;
 }
 
 .configDeficitInput:focus {
-    border-color: var(--color-acento, #4dabf7);
+    border-color: var(--dashboard-acento);
 }
 
 .configDeficitInput::placeholder {
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.25));
+    color: var(--dashboard-textoApagado);
 }
 
 .configDeficitApiKey {
@@ -224,8 +225,8 @@
     display: flex;
     align-items: center;
     padding: 6px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
-    border-radius: 4px;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
     background: transparent;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
@@ -233,7 +234,7 @@
 }
 
 .configDeficitBotonOjo:hover {
-    color: var(--color-acento, #4dabf7);
+    color: var(--dashboard-acento);
 }
 
 .configDeficitPreview {
@@ -241,24 +242,24 @@
     align-items: center;
     gap: 6px;
     padding: 8px 10px;
-    border-radius: 6px;
-    background: rgba(77, 171, 247, 0.06);
-    border: 1px solid rgba(77, 171, 247, 0.12);
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-superposicionSutil);
+    border: 1px solid var(--dashboard-bordePrincipal);
     font-size: 0.75rem;
 }
 
 .configDeficitPreviewLabel {
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+    color: var(--dashboard-textoSecundario);
 }
 
 .configDeficitPreviewValor {
     font-weight: 600;
-    color: var(--color-acento, #4dabf7);
+    color: var(--dashboard-acento);
 }
 
 .configDeficitPreviewMetodo {
     font-size: 0.65rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.35));
+    color: var(--dashboard-textoApagado);
 }
 
 .configDeficitAcciones {
@@ -266,13 +267,13 @@
     justify-content: flex-end;
     gap: 8px;
     padding-top: 8px;
-    border-top: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+    border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .configDeficitBotonCancelar {
     padding: 6px 14px;
-    border-radius: 4px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.1));
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
     color: var(--dashboard-textoSecundario);
     font-size: 0.78rem;
@@ -281,7 +282,7 @@
 }
 
 .configDeficitBotonCancelar:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--dashboard-fondoHover);
 }
 
 .configDeficitBotonGuardar {
@@ -289,10 +290,10 @@
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     border: none;
-    background: var(--color-acento, #4dabf7);
-    color: #fff;
+    background: var(--dashboard-acento);
+    color: #fff; /* Usamos blanco fijo para texto sobre acento */
     font-size: 0.78rem;
     cursor: pointer;
     transition: opacity 0.15s;
@@ -301,4 +302,3 @@
 .configDeficitBotonGuardar:hover {
     opacity: 0.9;
 }
-
