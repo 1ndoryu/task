@@ -38,7 +38,7 @@ export function DashboardModales({ctx}: DashboardModalesProps): JSX.Element {
             <ModalesCompartir modales={modales} equipos={equipos} compartir={compartir} notificaciones={notificaciones} acciones={acciones} />
             <ModalesAuxiliares dashboard={dashboard} auth={auth} modales={modales} layout={layout} arrastre={arrastre} acciones={acciones} esAdmin={esAdmin} />
             <ModalCreacionRapidaWrapper dashboard={dashboard} modales={modales} esMovil={esMovil} manejarGuardarRapido={creacion.manejarGuardarRapido} />
-            <ModalPlugins abierto={modales.modalPluginsAbierto} onCerrar={modales.cerrarModalPlugins} onMostrarPanel={layout.mostrarPanel} onOcultarPanel={layout.ocultarPanel} />
+            <ModalPlugins abierto={modales.modalPluginsAbierto} pluginConfigInicial={modales.pluginConfigInicial} onCerrar={modales.cerrarModalPlugins} onMostrarPanel={layout.mostrarPanel} onOcultarPanel={layout.ocultarPanel} />
         </>
     );
 }

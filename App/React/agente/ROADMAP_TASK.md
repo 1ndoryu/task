@@ -35,9 +35,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Hipótesis de causa:**
 
-- Cache en `localStorage` no se limpia al cerrar sesión
-- Los stores de Zustand mantienen datos en memoria del usuario anterior
-- `useSincronizacion.ts` puede estar usando datos cacheados del usuario anterior
+-   Cache en `localStorage` no se limpia al cerrar sesión
+-   Los stores de Zustand mantienen datos en memoria del usuario anterior
+-   `useSincronizacion.ts` puede estar usando datos cacheados del usuario anterior
 
 **Requisitos:**
 
@@ -47,10 +47,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos a revisar:**
 
-- `hooks/useSincronizacion.ts` (cache localStorage con `SyncMeta`)
-- `stores/` (todos los stores - verificar si se resetean al logout)
-- Componente de autenticación (función de logout)
-- `hooks/useSincronizacionTiempoReal.ts` (userId en WebSocket)
+-   `hooks/useSincronizacion.ts` (cache localStorage con `SyncMeta`)
+-   `stores/` (todos los stores - verificar si se resetean al logout)
+-   Componente de autenticación (función de logout)
+-   `hooks/useSincronizacionTiempoReal.ts` (userId en WebSocket)
 
 ---
 
@@ -62,16 +62,16 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Problema 2A - WebSocket se desconecta silenciosamente:**
 
-- Si la app (móvil o escritorio) permanece abierta sin interacción, la sincronización deja de funcionar
-- Al volver a interactuar con la app, los datos no se reconectan automáticamente
-- Solo funciona de nuevo al recargar la página o cerrar/abrir la app
-- Hipótesis: el WebSocket se desconecta por inactividad y no se reconecta
+-   Si la app (móvil o escritorio) permanece abierta sin interacción, la sincronización deja de funcionar
+-   Al volver a interactuar con la app, los datos no se reconectan automáticamente
+-   Solo funciona de nuevo al recargar la página o cerrar/abrir la app
+-   Hipótesis: el WebSocket se desconecta por inactividad y no se reconecta
 
 **Problema 2B - Datos no se actualizan por cambio de día:**
 
-- Si un día pasa (ej: se deja la app abierta de noche a mañana), la lista de tareas/hábitos no refleja los cambios del nuevo día
-- Hábitos que tocan hoy no aparecen hasta recargar
-- Los hábitos diarios que cambian por frecuencia no se recalculan
+-   Si un día pasa (ej: se deja la app abierta de noche a mañana), la lista de tareas/hábitos no refleja los cambios del nuevo día
+-   Hábitos que tocan hoy no aparecen hasta recargar
+-   Los hábitos diarios que cambian por frecuencia no se recalculan
 
 **Requisitos:**
 
@@ -83,9 +83,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos a revisar:**
 
-- `hooks/useSincronizacionTiempoReal.ts` (reconexión WS, `CONFIG_SYNC_RT.maxInactividadMs`)
-- `hooks/useSincronizacion.ts` (sync HTTP de respaldo)
-- `DashboardIsland.tsx` o equivalente (detección de foco/visibilidad)
+-   `hooks/useSincronizacionTiempoReal.ts` (reconexión WS, `CONFIG_SYNC_RT.maxInactividadMs`)
+-   `hooks/useSincronizacion.ts` (sync HTTP de respaldo)
+-   `DashboardIsland.tsx` o equivalente (detección de foco/visibilidad)
 
 ---
 
@@ -97,14 +97,14 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Bug 3A - Texto sin formatear:**
 
-- Los badges de prioridad en los proyectos muestran "muy_alta" en vez de "MUY ALTA" con color rojo
-- Probablemente no se usa `obtenerTextoPrioridad()` al renderizar badges en el panel de proyectos
+-   Los badges de prioridad en los proyectos muestran "muy_alta" en vez de "MUY ALTA" con color rojo
+-   Probablemente no se usa `obtenerTextoPrioridad()` al renderizar badges en el panel de proyectos
 
 **Bug 3B - Ordenamiento ignora "Muy Alta":**
 
-- Al ordenar proyectos por prioridad, "Alta" aparece por encima de "Muy Alta"
-- El algoritmo de ordenamiento no reconoce "muy_alta" como nivel superior a "alta"
-- Posiblemente el mapeo de prioridades a valores numéricos no incluye "muy_alta"
+-   Al ordenar proyectos por prioridad, "Alta" aparece por encima de "Muy Alta"
+-   El algoritmo de ordenamiento no reconoce "muy_alta" como nivel superior a "alta"
+-   Posiblemente el mapeo de prioridades a valores numéricos no incluye "muy_alta"
 
 **Requisitos:**
 
@@ -114,9 +114,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos a revisar:**
 
-- `components/paneles/PanelProyectos.tsx` (renderizado de badges)
-- Función/utilidad que ordena proyectos por prioridad
-- `utils/` (función `obtenerTextoPrioridad` y mapeo de prioridades a valores numéricos)
+-   `components/paneles/PanelProyectos.tsx` (renderizado de badges)
+-   Función/utilidad que ordena proyectos por prioridad
+-   `utils/` (función `obtenerTextoPrioridad` y mapeo de prioridades a valores numéricos)
 
 ---
 
@@ -128,9 +128,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Hipótesis de causa:**
 
-- El handler `manejarGuardar` no envía `fechaMaxima: null` cuando se limpia la fecha
-- `editarTarea` en `useTareas.ts` no procesa la eliminación de `fechaMaxima` correctamente
-- Posible bug relacionado con el Bug 3B resuelto anteriormente (delete selectivo incompleto)
+-   El handler `manejarGuardar` no envía `fechaMaxima: null` cuando se limpia la fecha
+-   `editarTarea` en `useTareas.ts` no procesa la eliminación de `fechaMaxima` correctamente
+-   Posible bug relacionado con el Bug 3B resuelto anteriormente (delete selectivo incompleto)
 
 **Requisitos:**
 
@@ -140,8 +140,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos a revisar:**
 
-- `components/dashboard/PanelConfiguracionTarea.tsx` (handler de guardar)
-- `hooks/useTareas.ts` (función `editarTarea`)
+-   `components/dashboard/PanelConfiguracionTarea.tsx` (handler de guardar)
+-   `hooks/useTareas.ts` (función `editarTarea`)
 
 ---
 
@@ -153,11 +153,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Ejemplo concreto:**
 
-- Hábito A: frecuencia cada 3 días, prioridad Media, toca hoy
-- Hábito B: frecuencia cada 7 días, prioridad Baja, toca hoy
-- Resultado actual: B aparece arriba de A (incorrecto)
-- Resultado esperado: A debería estar arriba (Media > Baja)
-- Causa: B tiene 7 días desde último cumplimiento (incluyendo 6 días libres), lo que infla su urgencia
+-   Hábito A: frecuencia cada 3 días, prioridad Media, toca hoy
+-   Hábito B: frecuencia cada 7 días, prioridad Baja, toca hoy
+-   Resultado actual: B aparece arriba de A (incorrecto)
+-   Resultado esperado: A debería estar arriba (Media > Baja)
+-   Causa: B tiene 7 días desde último cumplimiento (incluyendo 6 días libres), lo que infla su urgencia
 
 **Requisitos:**
 
@@ -167,9 +167,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos a revisar:**
 
-- `utils/fecha.ts` (funciones `calcularDiasDesde`, `calcularUrgenciaFechaLimite` o similar)
-- Función que calcula el score dinámico de prioridad de un hábito
-- Lógica que determina qué días son "relevantes" vs "libres" según frecuencia
+-   `utils/fecha.ts` (funciones `calcularDiasDesde`, `calcularUrgenciaFechaLimite` o similar)
+-   Función que calcula el score dinámico de prioridad de un hábito
+-   Lógica que determina qué días son "relevantes" vs "libres" según frecuencia
 
 ---
 
@@ -189,10 +189,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos a revisar:**
 
-- `config/opcionesMenuHabito.tsx` (opciones dinámicas del menú)
-- `stores/menuContextualStore.ts` (estado del menú)
-- `components/dashboard/TablaHabitos.tsx` (handler de menú contextual)
-- `components/paneles/PanelEjecucion.tsx` (mismo menú en ejecución)
+-   `config/opcionesMenuHabito.tsx` (opciones dinámicas del menú)
+-   `stores/menuContextualStore.ts` (estado del menú)
+-   `components/dashboard/TablaHabitos.tsx` (handler de menú contextual)
+-   `components/paneles/PanelEjecucion.tsx` (mismo menú en ejecución)
 
 ---
 
@@ -219,10 +219,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Descripción:** Antes de implementar el time tracker, evaluar:
 
-- ¿`PanelEjecucion.tsx` puede recibir un callback `onIniciarTarea` sin romper ISP?
-- ¿Los tipos `Tarea` y `Habito` permiten extenderse con `tiempoMinimo` y registros de tiempo sin modificar contratos existentes?
-- ¿Se necesita un nuevo store para el estado del tracker o puede vivir en un hook independiente?
-- ¿El componente de barra inferior (dock/tracker) es compatible con el layout actual (móvil y escritorio)?
+-   ¿`PanelEjecucion.tsx` puede recibir un callback `onIniciarTarea` sin romper ISP?
+-   ¿Los tipos `Tarea` y `Habito` permiten extenderse con `tiempoMinimo` y registros de tiempo sin modificar contratos existentes?
+-   ¿Se necesita un nuevo store para el estado del tracker o puede vivir en un hook independiente?
+-   ¿El componente de barra inferior (dock/tracker) es compatible con el layout actual (móvil y escritorio)?
 
 **Salida:** Documento de decisiones técnicas o TO-DOs en código.
 
@@ -251,11 +251,11 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Descripción:** Un componente tipo "dock" fijo en la parte inferior de la pantalla (no es un modal, es una barra compacta de poca altura y ancho completo). Muestra:
 
-- Nombre de la tarea/hábito en tracking
-- Tiempo transcurrido (formato `MM:SS` o `HH:MM:SS`)
-- Si la tarea tiene `tiempoMinimo`, mostrar progreso: `01:00/20:00`
-- Estado: "En progreso" / "Completado" (cuando alcanza el tiempo mínimo)
-- Botones: Pausar, Reanudar, Cancelar, Completar
+-   Nombre de la tarea/hábito en tracking
+-   Tiempo transcurrido (formato `MM:SS` o `HH:MM:SS`)
+-   Si la tarea tiene `tiempoMinimo`, mostrar progreso: `01:00/20:00`
+-   Estado: "En progreso" / "Completado" (cuando alcanza el tiempo mínimo)
+-   Botones: Pausar, Reanudar, Cancelar, Completar
 
 **Requisitos:**
 
@@ -274,9 +274,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Descripción:** Extender los tipos de tarea y hábito para soportar:
 
-- `tiempoMinimo` (opcional): tiempo mínimo esperado para completar (en minutos)
-- Historial de sesiones de tracking: `{inicio: Date, fin: Date, pausas: Date[]}`
-- Las tareas pueden completarse sin necesidad de trackear (el tracking es opcional)
+-   `tiempoMinimo` (opcional): tiempo mínimo esperado para completar (en minutos)
+-   Historial de sesiones de tracking: `{inicio: Date, fin: Date, pausas: Date[]}`
+-   Las tareas pueden completarse sin necesidad de trackear (el tracking es opcional)
 
 **Requisitos:**
 
@@ -294,10 +294,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Descripción:** Diseñar e implementar la infraestructura de plugins que permita:
 
-- Activar/desactivar paneles opcionales desde un modal de "Plugins"
-- Los plugins registran nuevos paneles usando `registrarPanel()` del `registroPaneles.ts` existente
-- Los paneles de plugins se gestionan igual que los actuales: se mueven, se configuran en "Configuración de Layout", se minimizan, etc.
-- La activación/desactivación se persiste en la configuración del usuario
+-   Activar/desactivar paneles opcionales desde un modal de "Plugins"
+-   Los plugins registran nuevos paneles usando `registrarPanel()` del `registroPaneles.ts` existente
+-   Los paneles de plugins se gestionan igual que los actuales: se mueven, se configuran en "Configuración de Layout", se minimizan, etc.
+-   La activación/desactivación se persiste en la configuración del usuario
 
 **Requisitos técnicos:**
 
@@ -313,10 +313,10 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Archivos clave:**
 
-- `config/registroPaneles.ts` (ya soporta registro dinámico, base para plugins)
-- `config/inicializarPaneles.ts` (diferenciar paneles core vs plugins)
-- `stores/configuracionUsuarioStore.ts` (persistir plugins activos)
-- `utils/opcionesMenuUsuario.tsx` (agregar entrada "Plugins")
+-   `config/registroPaneles.ts` (ya soporta registro dinámico, base para plugins)
+-   `config/inicializarPaneles.ts` (diferenciar paneles core vs plugins)
+-   `stores/configuracionUsuarioStore.ts` (persistir plugins activos)
+-   `utils/opcionesMenuUsuario.tsx` (agregar entrada "Plugins")
 
 ---
 
@@ -329,27 +329,27 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Panel visual:**
 
-- Círculo central con temporizador
-- El centro del círculo alterna entre 3 estados:
-    - "Último ayuno: Xh Xm" (cuando no hay ayuno activo)
-    - "Tiempo transcurrido: Xh Xm" (durante un ayuno activo)
-    - "Próximo ayuno en: Xh Xm" (según frecuencia configurada)
-- Botones: "Comenzar ayuno", "Terminar ayuno", "Reiniciar ayuno" (para cuando un ayuno se dejó activo por error/días)
-- **Reiniciar ayuno:** descarta el ayuno sin registrarlo en el historial, simplemente pone el contador en 0
-- Diseño minimalista, coherente con el estilo terminal del dashboard
+-   Círculo central con temporizador
+-   El centro del círculo alterna entre 3 estados:
+    -   "Último ayuno: Xh Xm" (cuando no hay ayuno activo)
+    -   "Tiempo transcurrido: Xh Xm" (durante un ayuno activo)
+    -   "Próximo ayuno en: Xh Xm" (según frecuencia configurada)
+-   Botones: "Comenzar ayuno", "Terminar ayuno", "Reiniciar ayuno" (para cuando un ayuno se dejó activo por error/días)
+-   **Reiniciar ayuno:** descarta el ayuno sin registrarlo en el historial, simplemente pone el contador en 0
+-   Diseño minimalista, coherente con el estilo terminal del dashboard
 
 **Integración como hábito:**
 
-- Al activar el plugin, se crea un hábito de tipo "ayuno" automáticamente
-- Aparece en el panel de hábitos y en el panel de ejecución
-- Se puede posponer, pausar, etc. como cualquier hábito
-- El historial del hábito alimenta el panel visual
+-   Al activar el plugin, se crea un hábito de tipo "ayuno" automáticamente
+-   Aparece en el panel de hábitos y en el panel de ejecución
+-   Se puede posponer, pausar, etc. como cualquier hábito
+-   El historial del hábito alimenta el panel visual
 
 **Configuración del panel:**
 
-- Tiempo de ayuno: 14h, 16h, 18h, 20h, Personalizado
-- Frecuencia: Diaria, Semanal, Ciertos días (misma UI que configuración de hábitos)
-- Importancia del hábito generado (Baja, Media, Alta, Muy Alta)
+-   Tiempo de ayuno: 14h, 16h, 18h, 20h, Personalizado
+-   Frecuencia: Diaria, Semanal, Ciertos días (misma UI que configuración de hábitos)
+-   Importancia del hábito generado (Baja, Media, Alta, Muy Alta)
 
 ---
 
@@ -362,30 +362,30 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Funcionamiento:**
 
-- El usuario registra comidas mediante:
-    - **Foto directa** desde cámara o galería (la IA analiza y estima calorías). Usar `<input type="file" accept="image/*" capture>` para máxima facilidad
-    - Descripción en texto como alternativa (la IA calcula calorías aproximadas)
-- Se calcula la TMB (Tasa Metabólica Basal) con los datos del usuario
-- Se muestra: Calorías consumidas hoy vs TMB estimada = Déficit/Superávit
+-   El usuario registra comidas mediante:
+    -   **Foto directa** desde cámara o galería (la IA analiza y estima calorías). Usar `<input type="file" accept="image/*" capture>` para máxima facilidad
+    -   Descripción en texto como alternativa (la IA calcula calorías aproximadas)
+-   Se calcula la TMB (Tasa Metabólica Basal) con los datos del usuario
+-   Se muestra: Calorías consumidas hoy vs TMB estimada = Déficit/Superávit
 
 **Panel visual:**
 
-- Resumen del día: calorías consumidas / TMB estimada
-- Indicador visual de déficit/superávit
-- Lista de comidas registradas hoy con calorías estimadas
-- Histórico simple (últimos 7 días)
+-   Resumen del día: calorías consumidas / TMB estimada
+-   Indicador visual de déficit/superávit
+-   Lista de comidas registradas hoy con calorías estimadas
+-   Histórico simple (últimos 7 días)
 
 **Configuración del panel (datos del usuario para TMB):**
 
-- El usuario introduce los datos que tenga disponibles (mínimo 2-3):
-    - Altura (cm)
-    - Peso (kg)
-    - Medida de cintura (cm)
-    - Edad
-    - Sexo
-    - Ejercicio semanal promedio (sesiones + minutos)
-- Usar fórmulas adaptativas: Mifflin-St Jeor si hay peso+altura+edad+sexo, o estimaciones alternativas con cintura+altura
-- API Key de Google (Gemini) configurada por el usuario
+-   El usuario introduce los datos que tenga disponibles (mínimo 2-3):
+    -   Altura (cm)
+    -   Peso (kg)
+    -   Medida de cintura (cm)
+    -   Edad
+    -   Sexo
+    -   Ejercicio semanal promedio (sesiones + minutos)
+-   Usar fórmulas adaptativas: Mifflin-St Jeor si hay peso+altura+edad+sexo, o estimaciones alternativas con cintura+altura
+-   API Key de Google (Gemini) configurada por el usuario
 
 **Requisitos técnicos IA:**
 
@@ -398,9 +398,9 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Integración como hábito:**
 
-- Al activar, se crea un hábito "Registrar alimentación"
-- Frecuencia configurable (diaria por defecto)
-- Se completa automáticamente cuando se registran X comidas del día
+-   Al activar, se crea un hábito "Registrar alimentación"
+-   Frecuencia configurable (diaria por defecto)
+-   Se completa automáticamente cuando se registran X comidas del día
 
 ---
 
@@ -410,42 +410,42 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### Revisiones resueltas:
 
-- ✅ Fecha de vencimiento "hoy" ya no muestra "Vencido (1)" (fix timezone local)
-- ✅ Notas aparecen en móvil (width/height 100% en PullToRefresh)
-- ✅ Error "passive event listener" en pull-to-refresh
-- ✅ Indicador azul de sincronización eliminado del móvil
-- ✅ Variables de badge redundantes eliminadas
-- ✅ Duplicación de "General" en menú contextual de notas + botón 3 puntos
-- ✅ Contador de notas en carpetas se refresca correctamente
-- ✅ Panel de creación rápida en tema claro (variable `--dashboard-fondoCristal`)
+-   ✅ Fecha de vencimiento "hoy" ya no muestra "Vencido (1)" (fix timezone local)
+-   ✅ Notas aparecen en móvil (width/height 100% en PullToRefresh)
+-   ✅ Error "passive event listener" en pull-to-refresh
+-   ✅ Indicador azul de sincronización eliminado del móvil
+-   ✅ Variables de badge redundantes eliminadas
+-   ✅ Duplicación de "General" en menú contextual de notas + botón 3 puntos
+-   ✅ Contador de notas en carpetas se refresca correctamente
+-   ✅ Panel de creación rápida en tema claro (variable `--dashboard-fondoCristal`)
 
 ### Tareas completadas:
 
-- ✅ **T1** Conflictos de sincronización LWW con timestamps
-- ✅ **T2** Hábitos duplicados en panel de ejecución (deduplicación)
-- ✅ **T3** Editar tarea no guarda cambios + Fecha muestra expirada (timezone + delete selectivo)
-- ✅ **T4** Sincronización de notas en tiempo real
-- ✅ **T5** Notas no se mueven de carpeta en tiempo real
-- ✅ **T6** Pérdida de cambios al cerrar modal de notas (auto-guardado)
-- ✅ **T7** Menú contextual hábitos - opción duplicada eliminada
-- ✅ **T8** Paleta de colores modo claro en popup tareas
-- ✅ **T9** Texto "Prioridad muy_alta" formateado
-- ✅ **T10** Pull-to-refresh en versión móvil
-- ✅ **T11** Indicador de estado de conexión en móvil
-- ✅ **T12** Notificaciones Push locales recurrentes
+-   ✅ **T1** Conflictos de sincronización LWW con timestamps
+-   ✅ **T2** Hábitos duplicados en panel de ejecución (deduplicación)
+-   ✅ **T3** Editar tarea no guarda cambios + Fecha muestra expirada (timezone + delete selectivo)
+-   ✅ **T4** Sincronización de notas en tiempo real
+-   ✅ **T5** Notas no se mueven de carpeta en tiempo real
+-   ✅ **T6** Pérdida de cambios al cerrar modal de notas (auto-guardado)
+-   ✅ **T7** Menú contextual hábitos - opción duplicada eliminada
+-   ✅ **T8** Paleta de colores modo claro en popup tareas
+-   ✅ **T9** Texto "Prioridad muy_alta" formateado
+-   ✅ **T10** Pull-to-refresh en versión móvil
+-   ✅ **T11** Indicador de estado de conexión en móvil
+-   ✅ **T12** Notificaciones Push locales recurrentes
 
 ## Sprint Anterior (v1.0.23-beta)
 
-- ✅ Back no funciona en APK (hook `useBackButtonCapacitor.ts`)
-- ✅ Hora incorrecta en panel de actividades (parámetro `horaLocal`)
-- ✅ Hábito no aparece el día correcto según frecuencia (bug off-by-one)
-- ✅ Subtareas en móvil no parecen subtareas (padding-left móvil)
-- ✅ Interacción de hábitos/tareas en panel de ejecución (BottomSheet)
-- ✅ Modo compacto - Mejoras en hábitos (margin, swipe posponer)
-- ✅ Ranking de tareas por días de vencimiento (ya implementado)
-- ✅ Notificaciones locales en APK (hook `useNotificacionesLocales.ts`)
-- ✅ Sincronización WebSocket entre dispositivos (SSL configurado)
-- ✅ Modo Offline con IndexedDB (useModoOffline.ts, IndicadorConexion.tsx)
+-   ✅ Back no funciona en APK (hook `useBackButtonCapacitor.ts`)
+-   ✅ Hora incorrecta en panel de actividades (parámetro `horaLocal`)
+-   ✅ Hábito no aparece el día correcto según frecuencia (bug off-by-one)
+-   ✅ Subtareas en móvil no parecen subtareas (padding-left móvil)
+-   ✅ Interacción de hábitos/tareas en panel de ejecución (BottomSheet)
+-   ✅ Modo compacto - Mejoras en hábitos (margin, swipe posponer)
+-   ✅ Ranking de tareas por días de vencimiento (ya implementado)
+-   ✅ Notificaciones locales en APK (hook `useNotificacionesLocales.ts`)
+-   ✅ Sincronización WebSocket entre dispositivos (SSL configurado)
+-   ✅ Modo Offline con IndexedDB (useModoOffline.ts, IndicadorConexion.tsx)
 
 ---
 
@@ -455,15 +455,15 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 **Estado:** ✅ Autenticación completada | Pagos pendientes
 
-- [x] Inicializar Capacitor
-- [x] Generar proyecto Android
-- [x] Autenticación Google nativa funcionando
-- [ ] RevenueCat para pagos (pospuesto)
+-   [x] Inicializar Capacitor
+-   [x] Generar proyecto Android
+-   [x] Autenticación Google nativa funcionando
+-   [ ] RevenueCat para pagos (pospuesto)
 
 ## Fase 14: Mejoras Pre-Beta
 
-- [ ] Análisis de navegación lateral (sidebar)
-- [ ] Auditar modales para usar variables CSS
+-   [ ] Análisis de navegación lateral (sidebar)
+-   [ ] Auditar modales para usar variables CSS
 
 ---
 
@@ -471,12 +471,12 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ### Archivos Clave:
 
-- **Notas:** `useNotas.ts`, `notasStore.ts`, `ModalNotasExpandido.tsx`, `ListaNotasGuardadas.tsx`
-- **Tareas/Hábitos:** Stores en `/stores`, componentes en `/components`
-- **Panel Actividad:** `actividadService.ts`, `PanelActividad.tsx`
-- **WebSocket:** `useSincronizacionTiempoReal.ts`, `useSincronizacion.ts`
-- **Paneles:** `config/registroPaneles.ts`, `config/inicializarPaneles.ts`
-- **Estilos móvil:** Buscar media queries en archivos CSS
+-   **Notas:** `useNotas.ts`, `notasStore.ts`, `ModalNotasExpandido.tsx`, `ListaNotasGuardadas.tsx`
+-   **Tareas/Hábitos:** Stores en `/stores`, componentes en `/components`
+-   **Panel Actividad:** `actividadService.ts`, `PanelActividad.tsx`
+-   **WebSocket:** `useSincronizacionTiempoReal.ts`, `useSincronizacion.ts`
+-   **Paneles:** `config/registroPaneles.ts`, `config/inicializarPaneles.ts`
+-   **Estilos móvil:** Buscar media queries en archivos CSS
 
 ### Principios:
 
@@ -500,11 +500,14 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > Roadmap actualizado con nuevas tareas v2. Changelog v1.0.24-beta agregado.
 >
 > **Sprint completo finalizado:**
-> - Tareas 1-6 (bugs críticos): todas resueltas
-> - Feature A (Time Tracker): tipos, store, hook, DockTracking, integración en menús de tareas/hábitos
-> - Feature B.1 (Arquitectura de Plugins): registroPlugins, pluginsStore, ModalPlugins con toggle + config, wiring completo en encabezados
-> - Feature B.2 (Plugin Ayuno): tipos, ayunoStore, useAyuno hook, PanelAyuno con temporizador circular, selector de duración, historial compacto
-> - Feature B.3 (Plugin Déficit Calórico): tipos, deficitCaloricoStore, useDeficitCalorico hook, geminiCaloriasService (cadena fallback modelos), calculoTMB (Mifflin-St Jeor + alternativa), PanelDeficitCalorico con input texto/foto, ConfigDeficitCalorico con formulario de datos personales y API Key
-> - Fix: paneles de plugins ahora renderizan al activar (generadores de props en DashboardGrid)
-> - Fix: loop de renders en PanelAyuno (useAyuno con dependencias estables)
-> - Fix: snapshot inestable en PanelAyuno al leer config de plugins
+>
+> -   Tareas 1-6 (bugs críticos): todas resueltas
+> -   Feature A (Time Tracker): tipos, store, hook, DockTracking, integración en menús de tareas/hábitos
+> -   Feature B.1 (Arquitectura de Plugins): registroPlugins, pluginsStore, ModalPlugins con toggle + config, wiring completo en encabezados
+> -   Feature B.2 (Plugin Ayuno): tipos, ayunoStore, useAyuno hook, PanelAyuno con temporizador circular, selector de duración, historial compacto
+> -   Feature B.3 (Plugin Déficit Calórico): tipos, deficitCaloricoStore, useDeficitCalorico hook, geminiCaloriasService (cadena fallback modelos), calculoTMB (Mifflin-St Jeor + alternativa), PanelDeficitCalorico con input texto/foto, ConfigDeficitCalorico con formulario de datos personales y API Key
+> -   Fix: paneles de plugins ahora renderizan al activar (generadores de props en DashboardGrid)
+> -   Fix: loop de renders en PanelAyuno (useAyuno con dependencias estables)
+> -   Fix: snapshot inestable en PanelAyuno al leer config de plugins
+> -   Fix: snapshot inestable en useDeficitCalorico al leer config de plugins (mismo patrón que PanelAyuno: `obtenerConfiguracion` creaba objeto nuevo en cada snapshot)
+> -   Fix: PanelAyuno y PanelDeficitCalorico ahora tienen botón de Configuración y Modo enfoque (OverlayEnfoque)

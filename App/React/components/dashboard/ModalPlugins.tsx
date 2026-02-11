@@ -6,7 +6,7 @@
  * Plugins con requiereConfiguracion muestran botón de ajustes
  */
 
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Settings} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
@@ -16,6 +16,7 @@ import type {DefinicionPlugin} from '../../types/plugins';
 
 interface ModalPluginsProps {
     abierto: boolean;
+    pluginConfigInicial?: string | null;
     onCerrar: () => void;
     onMostrarPanel?: (panelId: string) => void;
     onOcultarPanel?: (panelId: string) => void;
@@ -57,12 +58,23 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
     );
 }
 
-export function ModalPlugins({abierto, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
+export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
     if (!abierto) return null;
 
     const plugins = obtenerTodosPlugins();
     const {pluginsActivos, togglePlugin} = usePluginsStore();
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
+
+    /* Si se abre el modal desde un panel (botón configuración), entrar directo a la config del plugin */
+    useEffect(() => {
+        if (!abierto) return;
+        if (!pluginConfigInicial) return;
+
+        /* Solo abrir si existe componente de config para este plugin */
+        if (COMPONENTES_CONFIG[pluginConfigInicial]) {
+            setConfigAbierta(pluginConfigInicial);
+        }
+    }, [abierto, pluginConfigInicial]);
 
     const manejarToggle = useCallback(
         (pluginId: string) => {

@@ -8,7 +8,7 @@
  * Refactor SOLID: Creación de tareas ahora verifica límites de plan
  */
 
-import {useCallback, useMemo, CSSProperties} from 'react';
+import {useCallback, useMemo, useRef, CSSProperties} from 'react';
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn, PullToRefresh} from '../shared';
 import {obtenerPanel, panelManejaAlturaPropia, paginaMovilAPanelId} from '../../config/registroPaneles';
 import {useEsMovil} from '../../hooks/useEsMovil';
@@ -221,17 +221,21 @@ function generarPropsPanelActividad(ctx: PropsContextoPaneles, renderHandleArras
 }
 
 /* Fix: paneles de plugins requieren props mínimas para renderizar */
-function generarPropsPanelAyuno(_ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+function generarPropsPanelAyuno(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    const {modales} = ctx;
     return {
         renderHandleArrastre,
-        handleMinimizar
+        handleMinimizar,
+        onAbrirConfiguracion: modales.abrirModalPlugins
     };
 }
 
-function generarPropsPanelDeficitCalorico(_ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+function generarPropsPanelDeficitCalorico(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    const {modales} = ctx;
     return {
         renderHandleArrastre,
-        handleMinimizar
+        handleMinimizar,
+        onAbrirConfiguracion: () => modales.abrirModalPluginsConConfig('deficit-calorico')
     };
 }
 
@@ -251,6 +255,9 @@ const GENERADORES_PROPS: Record<string, Function> = {
 
 export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecucion'}: DashboardGridProps): JSX.Element {
     const {dashboard, modales, compartir, ordenHabitos, filtroTareas, ordenTareas, habitosComoTareas, configTareas, configHabitos, configProyectos, configScratchpad, configActividad, layout, arrastre, opciones, acciones, valorFiltroActual, limites} = ctx;
+
+    /* Ref nula para el path móvil donde contenedorRef no se usa realmente */
+    const refMovilNula = useRef<HTMLDivElement>(null);
 
     /* Contexto de props compartido para los generadores */
     const propsContexto: PropsContextoPaneles = {
@@ -361,7 +368,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         const alturaPanel = layout.obtenerAlturaPanel(panelId);
 
         /* Función de renderizado para ResizeHandlePanel */
-        const renderConContenedor = ({altura, contenedorRef, esAuto}: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => (
+        const renderConContenedor = ({altura, contenedorRef, esAuto}: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement | null>; esAuto: boolean}) => (
             <div ref={contenedorRef} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
                 <Componente {...props} />
             </div>
@@ -369,7 +376,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
 
         /* En móvil no usamos ResizeHandlePanel */
         if (esMovil) {
-            return renderConContenedor({altura: 'auto', isResizing: false, contenedorRef: {current: null} as React.RefObject<HTMLDivElement>, esAuto: true});
+            return renderConContenedor({altura: 'auto', isResizing: false, contenedorRef: refMovilNula, esAuto: true});
         }
 
         return (

@@ -11,13 +11,15 @@
  */
 
 import {useState, useRef} from 'react';
-import {Camera, Loader2, Trash2, AlertCircle, Settings} from 'lucide-react';
+import {Camera, Loader2, Trash2, AlertCircle, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
+import {OverlayEnfoque} from '../shared';
 
 interface PanelDeficitCaloricoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
+    onAbrirConfiguracion: () => void;
 }
 
 /* Indicador visual de déficit/superávit */
@@ -172,7 +174,9 @@ function HistorialSemanal({historial}: {historial: Array<{fecha: string; totalCa
     );
 }
 
-export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar}: PanelDeficitCaloricoProps): JSX.Element {
+export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelDeficitCaloricoProps): JSX.Element {
+    const [modoEnfoque, setModoEnfoque] = useState(false);
+
     const {
         comidasHoy,
         caloriasHoy,
@@ -190,36 +194,60 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar}: Pa
     /* Mensaje si no hay API Key configurada */
     const sinApiKey = !apiKey;
 
-    return (
-        <div id="panelDeficitCalorico" className="panelDeficitCalorico panelDashboard internaColumna">
-            <SeccionEncabezado
-                icono={null}
-                titulo={renderHandleArrastre('Calorías') as any}
-                variante="panelHeader"
-                acciones={handleMinimizar}
-            />
+    const contenidoPanel = (
+        <div className="deficitContenido">
+            {sinApiKey && (
+                <div className="deficitAviso">
+                    <AlertCircle size={14} />
+                    <span>Configura tu API Key de Gemini en Plugins → Déficit Calórico</span>
+                </div>
+            )}
 
-            <div className="deficitContenido">
-                {sinApiKey && (
-                    <div className="deficitAviso">
-                        <AlertCircle size={14} />
-                        <span>Configura tu API Key de Gemini en Plugins → Déficit Calórico</span>
-                    </div>
-                )}
+            <ResumenDiario calorias={caloriasHoy} tdee={tdee} deficit={deficit} />
+            <EntradaComida onEnviarTexto={registrarPorTexto} onTomarFoto={registrarPorFoto} cargando={cargandoIA} />
 
-                <ResumenDiario calorias={caloriasHoy} tdee={tdee} deficit={deficit} />
-                <EntradaComida onEnviarTexto={registrarPorTexto} onTomarFoto={registrarPorFoto} cargando={cargandoIA} />
+            {errorIA && (
+                <div className="deficitError">
+                    <AlertCircle size={12} />
+                    <span>{errorIA}</span>
+                </div>
+            )}
 
-                {errorIA && (
-                    <div className="deficitError">
-                        <AlertCircle size={12} />
-                        <span>{errorIA}</span>
-                    </div>
-                )}
-
-                <ListaComidas comidas={comidasHoy} onEliminar={eliminarComida} />
-                <HistorialSemanal historial={historial} />
-            </div>
+            <ListaComidas comidas={comidasHoy} onEliminar={eliminarComida} />
+            <HistorialSemanal historial={historial} />
         </div>
+    );
+
+    return (
+        <>
+            <div id="panelDeficitCalorico" className="panelDeficitCalorico panelDashboard internaColumna">
+                <SeccionEncabezado
+                    icono={null}
+                    titulo={renderHandleArrastre('Calorías') as any}
+                    variante="panelHeader"
+                    acciones={
+                        <>
+                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
+                                <span className="selectorBadgeIcono">
+                                    <Settings size={12} />
+                                </span>
+                            </button>
+                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
+                                <span className="selectorBadgeIcono">
+                                    <Maximize2 size={12} />
+                                </span>
+                            </button>
+                            {handleMinimizar}
+                        </>
+                    }
+                />
+
+                {contenidoPanel}
+            </div>
+
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Calorías">
+                <div className="panelDeficitCalorico panelDashboard internaColumna">{contenidoPanel}</div>
+            </OverlayEnfoque>
+        </>
     );
 }

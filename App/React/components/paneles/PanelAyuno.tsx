@@ -9,16 +9,18 @@
  * - Inactivo sin historial: mensaje de bienvenida
  */
 
-import {useMemo} from 'react';
-import {Play, Square, RotateCcw, Settings} from 'lucide-react';
+import {useMemo, useState} from 'react';
+import {Play, Square, RotateCcw, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useAyuno} from '../../hooks/useAyuno';
 import {usePluginsStore} from '../../stores/pluginsStore';
+import {OverlayEnfoque} from '../shared';
 import type {ConfiguracionAyuno} from '../../types/ayuno';
 
 interface PanelAyunoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
+    onAbrirConfiguracion: () => void;
 }
 
 const PLUGIN_ID = 'ayuno';
@@ -113,7 +115,9 @@ function HistorialCompacto({historial}: {historial: Array<{tiempoEfectivoMs: num
     );
 }
 
-export function PanelAyuno({renderHandleArrastre, handleMinimizar}: PanelAyunoProps): JSX.Element {
+export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelAyunoProps): JSX.Element {
+    const [modoEnfoque, setModoEnfoque] = useState(false);
+
     const {
         estaActivo,
         estadoVisual,
@@ -179,67 +183,91 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar}: PanelAyunoPr
         );
     }, [estaActivo, estadoVisual, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, ultimoAyunoFormateado, tiempoDesdeUltimoFormateado, duracionHoras]);
 
-    return (
-        <div id="panelAyuno" className="panelAyuno panelDashboard internaColumna">
-            <SeccionEncabezado
-                icono={null}
-                titulo={renderHandleArrastre('Ayuno') as any}
-                variante="panelHeader"
-                acciones={handleMinimizar}
-            />
+    const contenidoPanel = (
+        <div className="panelAyunoContenido">
+            {/* Círculo con progreso y contenido central */}
+            <div className="panelAyunoCirculoContenedor">
+                <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} />
+                {contenidoCentral}
+            </div>
 
-            <div className="panelAyunoContenido">
-                {/* Círculo con progreso y contenido central */}
-                <div className="panelAyunoCirculoContenedor">
-                    <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} />
-                    {contenidoCentral}
-                </div>
+            {/* Selector de duración (solo cuando no hay ayuno activo) */}
+            {!estaActivo && (
+                <SelectorDuracion
+                    duracionActual={duracionHoras}
+                    onCambiar={manejarCambiarDuracion}
+                />
+            )}
 
-                {/* Selector de duración (solo cuando no hay ayuno activo) */}
-                {!estaActivo && (
-                    <SelectorDuracion
-                        duracionActual={duracionHoras}
-                        onCambiar={manejarCambiarDuracion}
-                    />
-                )}
-
-                {/* Botones de acción */}
-                <div className="panelAyunoBotones">
-                    {!estaActivo ? (
+            {/* Botones de acción */}
+            <div className="panelAyunoBotones">
+                {!estaActivo ? (
+                    <button
+                        className="panelAyunoBoton panelAyunoBoton--iniciar"
+                        onClick={iniciar}
+                        type="button"
+                    >
+                        <Play size={16} />
+                        <span>Comenzar ayuno</span>
+                    </button>
+                ) : (
+                    <>
                         <button
-                            className="panelAyunoBoton panelAyunoBoton--iniciar"
-                            onClick={iniciar}
+                            className="panelAyunoBoton panelAyunoBoton--terminar"
+                            onClick={terminar}
                             type="button"
                         >
-                            <Play size={16} />
-                            <span>Comenzar ayuno</span>
+                            <Square size={16} />
+                            <span>Terminar</span>
                         </button>
-                    ) : (
-                        <>
-                            <button
-                                className="panelAyunoBoton panelAyunoBoton--terminar"
-                                onClick={terminar}
-                                type="button"
-                            >
-                                <Square size={16} />
-                                <span>Terminar</span>
-                            </button>
-                            <button
-                                className="panelAyunoBoton panelAyunoBoton--reiniciar"
-                                onClick={reiniciar}
-                                type="button"
-                                title="Descarta el ayuno sin registrarlo"
-                            >
-                                <RotateCcw size={16} />
-                                <span>Reiniciar</span>
-                            </button>
-                        </>
-                    )}
-                </div>
-
-                {/* Historial compacto de últimas sesiones */}
-                <HistorialCompacto historial={historial} />
+                        <button
+                            className="panelAyunoBoton panelAyunoBoton--reiniciar"
+                            onClick={reiniciar}
+                            type="button"
+                            title="Descarta el ayuno sin registrarlo"
+                        >
+                            <RotateCcw size={16} />
+                            <span>Reiniciar</span>
+                        </button>
+                    </>
+                )}
             </div>
+
+            {/* Historial compacto de últimas sesiones */}
+            <HistorialCompacto historial={historial} />
         </div>
+    );
+
+    return (
+        <>
+            <div id="panelAyuno" className="panelAyuno panelDashboard internaColumna">
+                <SeccionEncabezado
+                    icono={null}
+                    titulo={renderHandleArrastre('Ayuno') as any}
+                    variante="panelHeader"
+                    acciones={
+                        <>
+                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
+                                <span className="selectorBadgeIcono">
+                                    <Settings size={12} />
+                                </span>
+                            </button>
+                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
+                                <span className="selectorBadgeIcono">
+                                    <Maximize2 size={12} />
+                                </span>
+                            </button>
+                            {handleMinimizar}
+                        </>
+                    }
+                />
+
+                {contenidoPanel}
+            </div>
+
+            <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Ayuno">
+                <div className="panelAyuno panelDashboard internaColumna">{contenidoPanel}</div>
+            </OverlayEnfoque>
+        </>
     );
 }

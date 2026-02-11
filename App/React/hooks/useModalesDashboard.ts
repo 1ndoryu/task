@@ -125,7 +125,9 @@ interface UseModalesDashboardReturn {
     cerrarModalFeedback: () => void;
     /* Plugins */
     modalPluginsAbierto: boolean;
+    pluginConfigInicial: string | null;
     abrirModalPlugins: () => void;
+    abrirModalPluginsConConfig: (pluginId: string) => void;
     cerrarModalPlugins: () => void;
 }
 
@@ -180,6 +182,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const [modalBackupsAbierto, setModalBackupsAbierto] = useState(false);
     /* Feedback */
     const [modalFeedbackAbierto, setModalFeedbackAbierto] = useState(false);
+
+    /* Plugins */
+    const [modalPluginsAbierto, setModalPluginsAbierto] = useState(false);
+    const [pluginConfigInicial, setPluginConfigInicial] = useState<string | null>(null);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -291,9 +297,20 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const cerrarModalFeedback = useCallback(() => setModalFeedbackAbierto(false), []);
 
     /* Handlers Plugins */
-    const [modalPluginsAbierto, setModalPluginsAbierto] = useState(false);
-    const abrirModalPlugins = useCallback(() => setModalPluginsAbierto(true), []);
-    const cerrarModalPlugins = useCallback(() => setModalPluginsAbierto(false), []);
+    const abrirModalPlugins = useCallback(() => {
+        setPluginConfigInicial(null);
+        setModalPluginsAbierto(true);
+    }, []);
+
+    const abrirModalPluginsConConfig = useCallback((pluginId: string) => {
+        setPluginConfigInicial(pluginId);
+        setModalPluginsAbierto(true);
+    }, []);
+
+    const cerrarModalPlugins = useCallback(() => {
+        setModalPluginsAbierto(false);
+        setPluginConfigInicial(null);
+    }, []);
 
     return {
         modalLoginAbierto,
@@ -380,7 +397,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         abrirModalFeedback,
         cerrarModalFeedback,
         modalPluginsAbierto,
+        pluginConfigInicial,
         abrirModalPlugins,
+        abrirModalPluginsConConfig,
         cerrarModalPlugins
     };
 }
