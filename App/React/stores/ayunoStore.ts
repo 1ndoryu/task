@@ -24,13 +24,14 @@ export const useAyunoStore = create<AyunoStore>()(
             historial: [],
             ultimoAyunoCompletado: null,
 
-            iniciarAyuno: (duracionHoras: number) => {
+            iniciarAyuno: (duracionHoras: number, horaUltimaComidaMs?: number) => {
                 const ahora = Date.now();
                 set({
                     estado: 'activo',
                     sesionActiva: {
                         id: generarIdSesion(),
                         inicio: ahora,
+                        horaUltimaComidaMs,
                         duracionObjetivoMs: duracionHoras * 60 * 60 * 1000
                     }
                 });
@@ -48,6 +49,7 @@ export const useAyunoStore = create<AyunoStore>()(
                     id: sesionActiva.id,
                     inicio: sesionActiva.inicio,
                     fin: ahora,
+                    horaUltimaComidaMs: sesionActiva.horaUltimaComidaMs,
                     duracionObjetivoMs: sesionActiva.duracionObjetivoMs,
                     completada,
                     cancelada: false,
@@ -71,6 +73,15 @@ export const useAyunoStore = create<AyunoStore>()(
                 set({
                     estado: 'inactivo',
                     sesionActiva: null
+                });
+            },
+
+            eliminarSesion: (sesionId: string) => {
+                const {historial, ultimoAyunoCompletado} = get();
+                const nuevoHistorial = historial.filter(s => s.id !== sesionId);
+                set({
+                    historial: nuevoHistorial,
+                    ultimoAyunoCompletado: ultimoAyunoCompletado?.id === sesionId ? null : ultimoAyunoCompletado
                 });
             },
 

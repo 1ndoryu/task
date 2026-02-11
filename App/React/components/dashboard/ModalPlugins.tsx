@@ -11,6 +11,7 @@ import {Settings} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
+import {useHabitosStore} from '../../stores/habitosStore';
 import {ConfigDeficitCalorico} from './ConfigDeficitCalorico';
 import type {DefinicionPlugin} from '../../types/plugins';
 
@@ -60,6 +61,8 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
 
 export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
     const {pluginsActivos, togglePlugin} = usePluginsStore();
+    const guardarConfiguracion = usePluginsStore(s => s.guardarConfiguracion);
+    const habitos = useHabitosStore(s => s.habitos);
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
 
     const plugins = useMemo(() => {
@@ -89,6 +92,25 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
             const estabaActivo = pluginsActivos.includes(pluginId);
             togglePlugin(pluginId);
 
+            /* Plugin Ayuno: asegurar hábito especial y guardar su id para abrir configuración desde el panel */
+            if (!estabaActivo && pluginId === 'ayuno') {
+                const configActual = usePluginsStore.getState().configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined;
+                const habitoId = configActual?.habitoId;
+                const existePorId = !!(habitoId && habitos.some(h => h.id === habitoId));
+
+                if (!existePorId) {
+                    const existente = habitos.find(h => h.nombre.trim().toLowerCase() === 'ayuno');
+                    const habito = existente ?? useHabitosStore.getState().crearHabito({
+                        nombre: 'Ayuno',
+                        importancia: 'Media',
+                        tags: [],
+                        frecuencia: {tipo: 'diario'},
+                        descripcion: 'Hábito especial generado por el plugin de ayuno'
+                    });
+                    guardarConfiguracion('ayuno', {habitoId: habito.id});
+                }
+            }
+
             const panelesIds = obtenerPanelesDePlugin(pluginId);
             panelesIds.forEach(panelId => {
                 if (estabaActivo) {
@@ -98,7 +120,7 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
                 }
             });
         },
-        [pluginsActivos, togglePlugin, onMostrarPanel, onOcultarPanel]
+        [pluginsActivos, togglePlugin, onMostrarPanel, onOcultarPanel, guardarConfiguracion, habitos]
     );
 
     const manejarAbrirConfig = useCallback((pluginId: string) => {

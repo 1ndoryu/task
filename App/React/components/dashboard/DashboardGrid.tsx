@@ -15,6 +15,7 @@ import {useEsMovil} from '../../hooks/useEsMovil';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
+import {usePluginsStore} from '../../stores/pluginsStore';
 import type {DatosEdicionTarea, Tarea, Habito} from '../../types/dashboard';
 
 /* Tipo para pages móviles - ahora dinámico desde el registro */
@@ -221,12 +222,23 @@ function generarPropsPanelActividad(ctx: PropsContextoPaneles, renderHandleArras
 }
 
 /* Fix: paneles de plugins requieren props mínimas para renderizar */
-function generarPropsPanelAyuno(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
-    const {modales} = ctx;
+function generarPropsPanelAyuno(ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element, esMovilActual = false) {
+    const {dashboard, modales} = ctx;
+
+    const configAyuno = usePluginsStore.getState().configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined;
+    const habitoAyuno = configAyuno?.habitoId ? dashboard.habitos.find(h => h.id === configAyuno.habitoId) : undefined;
+
     return {
         renderHandleArrastre,
         handleMinimizar,
-        onAbrirConfiguracion: modales.abrirModalPlugins
+        onAbrirConfiguracion: () => {
+            if (!habitoAyuno) return;
+            if (esMovilActual) {
+                modales.abrirEdicionHabitoMovil(habitoAyuno);
+            } else {
+                dashboard.abrirModalEditarHabito(habitoAyuno);
+            }
+        }
     };
 }
 
@@ -353,7 +365,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         } else if (panelId === 'focoPrioritario') {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, esMovil);
         } else {
-            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement);
+            props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, esMovil);
         }
 
         const Componente = definicionPanel.componente;

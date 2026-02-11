@@ -27,8 +27,9 @@ export function useAyuno() {
     const iniciarAyuno = useAyunoStore(s => s.iniciarAyuno);
     const terminarAyuno = useAyunoStore(s => s.terminarAyuno);
     const reiniciarAyuno = useAyunoStore(s => s.reiniciarAyuno);
+    const eliminarSesion = useAyunoStore(s => s.eliminarSesion);
     /* Fix: evitar snapshot inestable al leer configuracion inexistente */
-    const configuracion = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as ConfiguracionAyuno | undefined;
+    const configuracion = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as unknown as ConfiguracionAyuno | undefined;
     const duracionHoras = configuracion?.duracionHoras ?? 16;
 
     const [tiempoMs, setTiempoMs] = useState(0);
@@ -62,21 +63,18 @@ export function useAyuno() {
 
     /* Último ayuno completado para mostrar cuando inactivo */
     const ultimoAyuno = historial[0] ?? null;
-    const ultimoAyunoFormateado = ultimoAyuno
-        ? formatearTiempoAyuno(ultimoAyuno.tiempoEfectivoMs)
-        : null;
+    const ultimoAyunoFormateado = ultimoAyuno ? formatearTiempoAyuno(ultimoAyuno.tiempoEfectivoMs) : null;
 
     /* Próximo ayuno estimado: basado en frecuencia del hábito (simplificado) */
-    const tiempoDesdeUltimoFin = ultimoAyuno?.fin
-        ? Date.now() - ultimoAyuno.fin
-        : null;
-    const tiempoDesdeUltimoFormateado = tiempoDesdeUltimoFin !== null
-        ? formatearTiempoAyuno(tiempoDesdeUltimoFin)
-        : null;
+    const tiempoDesdeUltimoFin = ultimoAyuno?.fin ? Date.now() - ultimoAyuno.fin : null;
+    const tiempoDesdeUltimoFormateado = tiempoDesdeUltimoFin !== null ? formatearTiempoAyuno(tiempoDesdeUltimoFin) : null;
 
-    const iniciar = useCallback(() => {
-        iniciarAyuno(duracionHoras);
-    }, [iniciarAyuno, duracionHoras]);
+    const iniciar = useCallback(
+        (horaUltimaComidaMs?: number) => {
+            iniciarAyuno(duracionHoras, horaUltimaComidaMs);
+        },
+        [iniciarAyuno, duracionHoras]
+    );
 
     const terminar = useCallback(() => {
         return terminarAyuno();
@@ -109,6 +107,7 @@ export function useAyuno() {
         historial,
         iniciar,
         terminar,
-        reiniciar
+        reiniciar,
+        eliminarSesion
     };
 }

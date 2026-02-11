@@ -21,6 +21,7 @@ import {FormularioHabitoModerno} from './habitos/FormularioHabitoModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {usePanelChat} from '../../hooks/usePanelChat';
 import {useHabitosStore} from '../../stores/habitosStore';
+import {usePluginsStore} from '../../stores/pluginsStore';
 import {obtenerFechaHoy} from '../../utils/fecha';
 
 type DatosFormulario = DatosNuevoHabito;
@@ -44,6 +45,9 @@ interface ModalHabitoProps {
 
 export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = [], tareas = [], onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito, onEditarTarea}: ModalHabitoProps): JSX.Element | null {
     const modoEdicion = !!habito;
+
+    const habitoAyunoId = usePluginsStore(s => (s.configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined)?.habitoId);
+    const esHabitoEspecialAyuno = !!(habito && habitoAyunoId && habito.id === habitoAyunoId);
 
     /* Estado local para edicion */
     const [nombre, setNombre] = useState(habito?.nombre || '');
@@ -196,8 +200,10 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
     const manejarGuardar = useCallback(() => {
         if (!validarFormulario()) return;
 
+        const nombreSeguro = esHabitoEspecialAyuno ? 'Ayuno' : nombre.trim();
+
         onGuardar({
-            nombre: nombre.trim(),
+            nombre: nombreSeguro,
             importancia,
             tags: [] /* Tags deprecados por ahora */,
             frecuencia,
@@ -207,7 +213,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
             ventanaOportunidad
         });
         onCerrar();
-    }, [nombre, importancia, frecuencia, ventanaOportunidad, validarFormulario, onGuardar, onCerrar]);
+    }, [nombre, importancia, frecuencia, ventanaOportunidad, validarFormulario, onGuardar, onCerrar, esHabitoEspecialAyuno]);
 
     /* Auto-guardado: al cerrar el modal, guardar si hay nombre válido */
     const manejarCerrarConGuardado = useCallback(() => {
@@ -285,6 +291,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     habito={habito}
                                     modoEdicion={true}
                                     errorNombre={errores.nombre}
+                                    nombreBloqueado={esHabitoEspecialAyuno}
                                     /* Props para tareas del hábito - Fase 14.8 */
                                     tareasHabito={tareasDelHabito}
                                     onToggleTareaHabito={onToggleTarea}
@@ -332,6 +339,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                             onFrecuenciaChange={setFrecuencia}
                             ventanaOportunidad={ventanaOportunidad}
                             onVentanaOportunidadChange={setVentanaOportunidad}
+                            nombreBloqueado={false}
                             modoEdicion={false}
                             errorNombre={errores.nombre}
                         />

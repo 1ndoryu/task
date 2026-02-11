@@ -513,3 +513,4 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   Fix: PanelAyuno y PanelDeficitCalorico ahora tienen botón de Configuración y Modo enfoque (OverlayEnfoque)
 > -   Fix: minimización de paneles de plugins ahora es reversible (BarraPanelesOcultos soporta paneles dinámicos + iconos en registro)
 > -   Fix: arrastre de paneles de plugins sin crash (IndicadorArrastre soporta paneles dinámicos + ModalPlugins sin return temprano antes de hooks)
+> -   Mejora: Ayuno ahora pregunta hora de última comida al iniciar, historial colapsable/paginado (6) con borrado, y botón Configuración abre el hábito especial (creado/vinculado al activar el plugin, nombre bloqueado)

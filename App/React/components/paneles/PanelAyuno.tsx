@@ -9,12 +9,15 @@
  * - Inactivo sin historial: mensaje de bienvenida
  */
 
-import {useMemo, useState} from 'react';
-import {Play, Square, RotateCcw, Settings, Maximize2} from 'lucide-react';
+import {useEffect, useMemo, useState} from 'react';
+import {Square, RotateCcw, Settings, Maximize2, AlertCircle} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useAyuno} from '../../hooks/useAyuno';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {OverlayEnfoque} from '../shared';
+import {useHabitosStore} from '../../stores/habitosStore';
+import {InicioAyuno} from './ayuno/InicioAyuno';
+import {HistorialAyuno} from './ayuno/HistorialAyuno';
 import type {ConfiguracionAyuno} from '../../types/ayuno';
 
 interface PanelAyunoProps {
@@ -86,35 +89,6 @@ function SelectorDuracion({duracionActual, onCambiar}: {duracionActual: number; 
     );
 }
 
-/*
- * Historial compacto de las últimas sesiones
- */
-function HistorialCompacto({historial}: {historial: Array<{tiempoEfectivoMs: number; completada: boolean; inicio: number}>}): JSX.Element | null {
-    const ultimas = historial.slice(0, 5);
-    if (ultimas.length === 0) return null;
-
-    return (
-        <div className="panelAyunoHistorial">
-            <span className="panelAyunoHistorialTitulo">Recientes</span>
-            <div className="panelAyunoHistorialLista">
-                {ultimas.map((s, i) => {
-                    const horas = Math.floor(s.tiempoEfectivoMs / 3600000);
-                    const minutos = Math.floor((s.tiempoEfectivoMs % 3600000) / 60000);
-                    const fecha = new Date(s.inicio);
-                    const dia = fecha.toLocaleDateString('es', {day: 'numeric', month: 'short'});
-
-                    return (
-                        <div key={i} className={`panelAyunoHistorialItem ${s.completada ? 'panelAyunoHistorialItem--completado' : ''}`}>
-                            <span className="panelAyunoHistorialItemFecha">{dia}</span>
-                            <span className="panelAyunoHistorialItemTiempo">{horas}h {minutos}m</span>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
-
 export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelAyunoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
 
@@ -131,10 +105,39 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
         historial,
         iniciar,
         terminar,
-        reiniciar
+        reiniciar,
+        eliminarSesion
     } = useAyuno();
 
     const guardarConfig = usePluginsStore(s => s.guardarConfiguracion);
+    const configAyuno = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as unknown as {habitoId?: number} | undefined;
+
+    const habitos = useHabitosStore(s => s.habitos);
+    const habitoAyunoExiste = !!(configAyuno?.habitoId && habitos.some(h => h.id === configAyuno.habitoId));
+
+    /* Si el plugin está activo pero falta habitoId (instalaciones viejas), intentar vincular/crear automáticamente */
+    useEffect(() => {
+        const pluginsActivos = usePluginsStore.getState().pluginsActivos;
+        if (!pluginsActivos.includes(PLUGIN_ID)) return;
+
+        const configActual = usePluginsStore.getState().configuracionPlugins[PLUGIN_ID] as unknown as {habitoId?: number} | undefined;
+        if (configActual?.habitoId) return;
+
+        const existente = useHabitosStore.getState().habitos.find(h => h.nombre.trim().toLowerCase() === 'ayuno');
+        if (existente) {
+            usePluginsStore.getState().guardarConfiguracion(PLUGIN_ID, {habitoId: existente.id});
+            return;
+        }
+
+        const nuevo = useHabitosStore.getState().crearHabito({
+            nombre: 'Ayuno',
+            importancia: 'Media',
+            tags: [],
+            frecuencia: {tipo: 'diario'},
+            descripcion: 'Hábito especial generado por el plugin de ayuno'
+        });
+        usePluginsStore.getState().guardarConfiguracion(PLUGIN_ID, {habitoId: nuevo.id});
+    }, []);
 
     const manejarCambiarDuracion = (horas: number) => {
         guardarConfig(PLUGIN_ID, {duracionHoras: horas} satisfies ConfiguracionAyuno);
@@ -185,6 +188,13 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
     const contenidoPanel = (
         <div className="panelAyunoContenido">
+            {!habitoAyunoExiste && (
+                <div className="panelAyunoAviso">
+                    <AlertCircle size={14} />
+                    <span>El hábito especial "Ayuno" no existe. Activa el plugin de Ayuno para recrearlo.</span>
+                </div>
+            )}
+
             {/* Círculo con progreso y contenido central */}
             <div className="panelAyunoCirculoContenedor">
                 <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} />
@@ -202,14 +212,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             {/* Botones de acción */}
             <div className="panelAyunoBotones">
                 {!estaActivo ? (
-                    <button
-                        className="panelAyunoBoton panelAyunoBoton--iniciar"
-                        onClick={iniciar}
-                        type="button"
-                    >
-                        <Play size={16} />
-                        <span>Comenzar ayuno</span>
-                    </button>
+                    <InicioAyuno deshabilitado={!habitoAyunoExiste} onIniciar={horaUltimaComidaMs => iniciar(horaUltimaComidaMs)} />
                 ) : (
                     <>
                         <button
@@ -233,8 +236,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                 )}
             </div>
 
-            {/* Historial compacto de últimas sesiones */}
-            <HistorialCompacto historial={historial} />
+            <HistorialAyuno sesiones={historial} maxPorPagina={6} onEliminarSesion={eliminarSesion} />
         </div>
     );
 

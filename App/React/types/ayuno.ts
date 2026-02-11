@@ -15,6 +15,8 @@ export interface SesionAyuno {
     id: string;
     inicio: number;
     fin: number | null;
+    /* Timestamp (ms) de la última comida declarada al iniciar el ayuno */
+    horaUltimaComidaMs?: number;
     duracionObjetivoMs: number;
     completada: boolean;
     cancelada: boolean;
@@ -33,6 +35,7 @@ export interface AyunoState {
     sesionActiva: {
         id: string;
         inicio: number;
+        horaUltimaComidaMs?: number;
         duracionObjetivoMs: number;
     } | null;
     historial: SesionAyuno[];
@@ -41,9 +44,10 @@ export interface AyunoState {
 
 /* Acciones del store de ayuno */
 export interface AyunoActions {
-    iniciarAyuno: (duracionHoras: number) => void;
+    iniciarAyuno: (duracionHoras: number, horaUltimaComidaMs?: number) => void;
     terminarAyuno: () => SesionAyuno | null;
     reiniciarAyuno: () => void;
+    eliminarSesion: (sesionId: string) => void;
     obtenerTiempoTranscurridoMs: () => number;
     obtenerUltimoAyuno: () => SesionAyuno | null;
 }

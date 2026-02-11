@@ -14,8 +14,64 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--espaciado-md, 16px);
-    padding: var(--espaciado-md, 16px) var(--espaciado-sm, 12px);
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioSm);
+}
+
+/* Aviso cuando falta el hábito especial */
+.panelAyunoAviso {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+/* Formulario inline para iniciar (hora última comida) */
+.panelAyunoInicio {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.panelAyunoInicioFila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.panelAyunoInicioLabel {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.panelAyunoInicioInput {
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    padding: 6px 8px;
+}
+
+.panelAyunoInicioAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.panelAyunoBoton--secundario {
+    color: var(--dashboard-textoSecundario);
 }
 
 /* Contenedor del círculo con contenido superpuesto */
@@ -35,11 +91,11 @@
 }
 
 .panelAyunoCirculoFondo {
-    stroke: var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+    stroke: var(--dashboard-bordeSutil);
 }
 
 .panelAyunoCirculoProgreso {
-    stroke: var(--color-acento, #4dabf7);
+    stroke: var(--dashboard-acento);
     transition: stroke-dashoffset 0.5s ease;
 }
 
@@ -54,26 +110,27 @@
 }
 
 .panelAyunoCentroEtiqueta {
-    font-size: 0.7rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .panelAyunoCentroTiempo {
-    font-size: 1.4rem;
+    font-size: var(--dashboard-tamanoHero); /* Mantener tamaño grande específico para el timer */
     font-weight: 600;
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    color: var(--dashboard-textoActivo);
     font-variant-numeric: tabular-nums;
 }
 
 .panelAyunoCentroTiempo--completado {
-    color: var(--color-exito, #51cf66);
+    color: var(--dashboard-estadoExito);
 }
 
 .panelAyunoCentroRestante {
-    font-size: 0.65rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
 }
 
 /* Selector de duración */
@@ -85,24 +142,24 @@
 
 .panelAyunoDuracionOpcion {
     padding: 4px 12px;
-    border-radius: 4px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordeSutil);
     background: transparent;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.6));
-    font-size: 0.75rem;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .panelAyunoDuracionOpcion:hover {
-    border-color: var(--color-acento, #4dabf7);
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoActivo);
 }
 
 .panelAyunoDuracionOpcion--activa {
-    background: var(--color-acento, #4dabf7);
-    color: #fff;
-    border-color: var(--color-acento, #4dabf7);
+    background: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+    border-color: var(--dashboard-acento);
 }
 
 /* Botones de acción */
@@ -118,58 +175,135 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
     background: transparent;
-    color: var(--dashboard-textoPrimario, #e0e0e0);
-    font-size: 0.8rem;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .panelAyunoBoton:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--dashboard-superposicionSutil);
 }
 
 .panelAyunoBoton--iniciar {
-    background: var(--color-acento, #4dabf7);
-    color: #fff;
-    border-color: var(--color-acento, #4dabf7);
+    color: var(--dashboard-textoSobreAcento);
+    border-color: var(--dashboard-acento);
 }
 
 .panelAyunoBoton--iniciar:hover {
     opacity: 0.9;
-    background: var(--color-acento, #4dabf7);
+    background: var(--dashboard-acentoHover);
 }
 
 .panelAyunoBoton--terminar {
-    border-color: var(--color-exito, #51cf66);
-    color: var(--color-exito, #51cf66);
+    border-color: var(--dashboard-estadoExito);
+    color: var(--dashboard-estadoExito);
 }
 
 .panelAyunoBoton--terminar:hover {
-    background: rgba(81, 207, 102, 0.1);
+    background: var(--dashboard-estadoExitoFondo);
 }
 
 .panelAyunoBoton--reiniciar {
-    border-color: var(--color-peligro, #ff6b6b);
-    color: var(--color-peligro, #ff6b6b);
+    border-color: var(--dashboard-estadoAlta);
+    color: var(--dashboard-estadoAlta);
 }
 
 .panelAyunoBoton--reiniciar:hover {
-    background: rgba(255, 107, 107, 0.1);
+    background: var(--dashboard-estadoAltaFondo);
 }
 
 /* Historial compacto */
 .panelAyunoHistorial {
     width: 100%;
-    padding-top: var(--espaciado-sm, 12px);
-    border-top: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelAyunoHistorialToggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.panelAyunoHistorialContador {
+    margin-left: auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+}
+
+.panelAyunoHistorialInfo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.panelAyunoHistorialItemMeta {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    opacity: 0.85;
+}
+
+.panelAyunoHistorialEliminar {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelAyunoHistorialEliminar:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.panelAyunoHistorialPaginacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-top: 8px;
+}
+
+.panelAyunoHistorialPaginacionBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelAyunoHistorialPaginacionBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.panelAyunoHistorialPaginacionBoton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.panelAyunoHistorialPaginacionTexto {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
 }
 
 .panelAyunoHistorialTitulo {
-    font-size: 0.7rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 8px;
@@ -187,12 +321,12 @@
     justify-content: space-between;
     align-items: center;
     padding: 4px 0;
-    font-size: 0.75rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
 }
 
 .panelAyunoHistorialItem--completado .panelAyunoHistorialItemTiempo {
-    color: var(--color-exito, #51cf66);
+    color: var(--dashboard-estadoExito);
 }
 
 .panelAyunoHistorialItemFecha {

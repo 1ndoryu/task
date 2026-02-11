@@ -48,6 +48,8 @@ interface FormularioHabitoModernoProps {
     /* Modo */
     modoEdicion?: boolean;
     errorNombre?: string;
+    /* Si es true, el nombre no se puede modificar (hábito especial generado por plugin) */
+    nombreBloqueado?: boolean;
     /* SubHabitos: CRUD y toggle para hábitos anidados */
     onCrearSubHabito?: (datos: DatosNuevoSubHabito) => void;
     onEliminarSubHabito?: (subHabitoId: number) => void;
@@ -62,7 +64,7 @@ interface FormularioHabitoModernoProps {
     onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, ventanaOportunidad, onVentanaOportunidadChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, onCrearSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, ventanaOportunidad, onVentanaOportunidadChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, nombreBloqueado = false, onCrearSubHabito, onEliminarSubHabito, onToggleSubHabito}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
 
     /* Determinar si mostrar la sección de subhábitos */
@@ -78,7 +80,7 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             )}
 
             {/* Nombre del habito */}
-            <CampoTituloLimpio id="habito-nombre" valor={nombre} onChange={onNombreChange} placeholder="Ej: Leer 30 minutos" error={errorNombre} autoFocus={!modoEdicion} />
+            <CampoTituloLimpio id="habito-nombre" valor={nombre} onChange={onNombreChange} placeholder="Ej: Leer 30 minutos" error={errorNombre} autoFocus={!modoEdicion} disabled={nombreBloqueado} />
 
             {/* Descripcion (Subtitulo) */}
             {onDescripcionChange && <CampoSubtituloLimpio id="habito-descripcion" valor={descripcion || ''} onChange={onDescripcionChange} placeholder="Añade una descripción..." />}
