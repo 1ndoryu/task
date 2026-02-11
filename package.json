@@ -8,6 +8,7 @@
         "build": "npm run build --prefix Glory/assets/react",
         "build:fast": "npm run build:fast --prefix Glory/assets/react",
         "prerender": "npm run prerender --prefix Glory/assets/react",
+        "postinstall": "npm install --prefix App/React",
         "install:all": "npm install --prefix Glory/assets/react && npm install --prefix App/React",
         "types:add": "npm install --save-dev --prefix App/React"
     },

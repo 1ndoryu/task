@@ -33,7 +33,8 @@ GloryFeatures::disable('menu');
 /* 
  * Plugins del proyecto 
  */
-GloryFeatures::enable('amazonProduct');
+GloryFeatures::disable('queryProfiler');
+GloryFeatures::disable('amazonProduct');
 
 /* 
  * Handlers AJAX del proyecto (App) 

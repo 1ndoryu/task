@@ -76,6 +76,24 @@ $directorios = [
     'App/',
 ];
 
+/* 
+ * PRE-CARGA CRITICA:
+ * Cargar dependencias de cifrado manualmente para evitar 
+ * errores de "Trait not found" o "Class not found" si el autoloader falla
+ * o el orden alfabético de carga causa conflictos (App/Repository/Actividad carga antes que CifradoTrait).
+ */
+$preCarga = [
+    'App/Services/CifradoService.php',
+    'App/Repository/CifradoTrait.php'
+];
+
+foreach ($preCarga as $archivoPre) {
+    $rutaPre = get_template_directory() . '/' . $archivoPre;
+    if (file_exists($rutaPre)) {
+        include_once $rutaPre;
+    }
+}
+
 foreach ($directorios as $directorio) {
     incluirArchivos($directorio);
 }
