@@ -58,14 +58,18 @@ export function HistorialAyuno({sesiones, maxPorPagina = 6, onEliminarSesion}: H
 
                             return (
                                 <div key={s.id} className={`panelAyunoHistorialItem ${s.completada ? 'panelAyunoHistorialItem--completado' : ''}`}>
-                                    <div className="panelAyunoHistorialInfo">
-                                        <span className="panelAyunoHistorialItemFecha">{dia}</span>
-                                        <span className="panelAyunoHistorialItemTiempo">{formatearDuracion(s.tiempoEfectivoMs)}</span>
-                                        {horaUltimaComida && <span className="panelAyunoHistorialItemMeta">Última comida: {horaUltimaComida}</span>}
+                                    <div className="panelAyunoHistorialFila">
+                                        <div className="panelAyunoHistorialInfo">
+                                            <span className="panelAyunoHistorialItemFecha">{dia}</span>
+                                            {horaUltimaComida && <span className="panelAyunoHistorialItemMeta">Última comida: {horaUltimaComida}</span>}
+                                        </div>
+                                        <div className="panelAyunoHistorialAcciones">
+                                            <span className="panelAyunoHistorialItemTiempo">{formatearDuracion(s.tiempoEfectivoMs)}</span>
+                                            <button type="button" className="panelAyunoHistorialEliminar" onClick={() => onEliminarSesion(s.id)} title="Borrar registro" aria-label="Borrar registro">
+                                                <Trash2 size={12} />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button type="button" className="panelAyunoHistorialEliminar" onClick={() => onEliminarSesion(s.id)} title="Borrar registro">
-                                        <Trash2 size={12} />
-                                    </button>
                                 </div>
                             );
                         })}

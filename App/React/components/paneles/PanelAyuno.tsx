@@ -116,6 +116,18 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
     const habitos = useHabitosStore(s => s.habitos);
     const habitoAyunoExiste = !!(configAyuno?.habitoId && habitos.some(h => h.id === configAyuno.habitoId));
 
+    const crearHabitoEspecialAhora = () => {
+        const existente = useHabitosStore.getState().habitos.find(h => h.nombre.trim().toLowerCase() === 'ayuno');
+        const habito = existente ?? useHabitosStore.getState().crearHabito({
+            nombre: 'Ayuno',
+            importancia: 'Media',
+            tags: [],
+            frecuencia: {tipo: 'diario'},
+            descripcion: 'Hábito especial generado por el plugin de ayuno'
+        });
+        usePluginsStore.getState().guardarConfiguracion(PLUGIN_ID, {habitoId: habito.id});
+    };
+
     /* Si el plugin está activo pero falta habitoId (instalaciones viejas), intentar vincular/crear automáticamente */
     useEffect(() => {
         const pluginsActivos = usePluginsStore.getState().pluginsActivos;
@@ -192,7 +204,13 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             {!habitoAyunoExiste && (
                 <div className="panelAyunoAviso">
                     <AlertCircle size={14} />
-                    <span>El hábito especial "Ayuno" no existe. Activa el plugin de Ayuno para recrearlo.</span>
+                    <div className="panelAyunoAvisoTexto">
+                        <span className="panelAyunoAvisoTitulo">Falta el hábito Ayuno</span>
+                        <span className="panelAyunoAvisoDescripcion">Puedes recrearlo ahora para reactivar el panel.</span>
+                    </div>
+                    <button type="button" className="panelAyunoAvisoBoton" onClick={crearHabitoEspecialAhora} title="Crear hábito Ayuno ahora">
+                        Crear ahora
+                    </button>
                 </div>
             )}
 

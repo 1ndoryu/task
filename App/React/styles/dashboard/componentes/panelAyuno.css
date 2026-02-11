@@ -32,47 +32,45 @@
     font-size: var(--dashboard-tamanoPequeno);
 }
 
-/* Formulario inline para iniciar (hora última comida) */
-.panelAyunoInicio {
-    width: 100%;
+.panelAyunoAvisoTexto {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    border-radius: var(--dashboard-radioMd);
-    border: 1px solid var(--dashboard-bordeSutil);
-    background: var(--dashboard-superposicionSutil);
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
 }
 
-.panelAyunoInicioFila {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.panelAyunoInicioLabel {
+.panelAyunoAvisoTitulo {
+    color: var(--dashboard-textoActivo);
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
+    font-weight: 600;
 }
 
-.panelAyunoInicioInput {
+.panelAyunoAvisoDescripcion {
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    opacity: 0.9;
+}
+
+.panelAyunoAvisoBoton {
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioSm);
     background: transparent;
-    color: var(--dashboard-textoNormal);
-    padding: 6px 8px;
-}
-
-.panelAyunoInicioAcciones {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-.panelAyunoBoton--secundario {
     color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioMd);
+    padding: 6px 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    white-space: nowrap;
 }
+
+.panelAyunoAvisoBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-acento);
+}
+
+/* Nota: estilos del inicio inline removidos; ahora se usa modal */
 
 /* Contenedor del círculo con contenido superpuesto */
 .panelAyunoCirculoContenedor {
@@ -334,20 +332,35 @@
     display: inline-flex;
 }
 
-.modalAyunoUltimaComidaInput {
+/* Selector custom de hora (reemplaza input type=time) */
+.selectorHoraAyuno {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     width: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--dashboard-textoActivo);
-    font-size: var(--dashboard-tamanoBase);
-    font-variant-numeric: tabular-nums;
 }
 
-/* Mejorar icono nativo del selector de hora (WebKit) en tema oscuro */
-.modalAyunoUltimaComidaInput::-webkit-calendar-picker-indicator {
-    opacity: 0.9;
-    filter: invert(1);
+.selectorHoraAyunoSelect {
+    appearance: none;
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoActivo);
+    border-radius: var(--dashboard-radioSm);
+    padding: 8px 10px;
+    font-size: var(--dashboard-tamanoBase);
+    font-variant-numeric: tabular-nums;
+    width: 100%;
+}
+
+.selectorHoraAyunoSelect:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.selectorHoraAyunoSeparador {
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+    font-variant-numeric: tabular-nums;
 }
 
 .modalAyunoUltimaComidaAcciones {
@@ -396,20 +409,35 @@
 .panelAyunoHistorialLista {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .panelAyunoHistorialItem {
+    padding: 6px 0;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelAyunoHistorialItem:last-child {
+    border-bottom: none;
+}
+
+.panelAyunoHistorialFila {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
+    gap: 10px;
 }
 
 .panelAyunoHistorialItem--completado .panelAyunoHistorialItemTiempo {
     color: var(--dashboard-estadoExito);
+}
+
+.panelAyunoHistorialAcciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .panelAyunoHistorialItemFecha {
@@ -419,4 +447,12 @@
 .panelAyunoHistorialItemTiempo {
     font-variant-numeric: tabular-nums;
     font-weight: 500;
+}
+
+.panelAyunoHistorialEliminar {
+    opacity: 0.75;
+}
+
+.panelAyunoHistorialEliminar:hover {
+    opacity: 1;
 }

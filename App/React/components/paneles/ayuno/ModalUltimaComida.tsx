@@ -6,6 +6,7 @@
 import {useMemo, useState} from 'react';
 import {Clock, Play} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
+import {SelectorHoraAyuno} from './SelectorHoraAyuno';
 
 interface ModalUltimaComidaProps {
     estaAbierto: boolean;
@@ -52,12 +53,7 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
                     <span className="modalAyunoUltimaComidaIcono" aria-hidden="true">
                         <Clock size={14} />
                     </span>
-                    <input
-                        className="modalAyunoUltimaComidaInput"
-                        type="time"
-                        value={hora}
-                        onChange={e => setHora(e.target.value)}
-                    />
+                    <SelectorHoraAyuno valor={hora} onChange={setHora} intervaloMinutos={5} />
                 </div>
 
                 <div className="modalAyunoUltimaComidaAcciones">
