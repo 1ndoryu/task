@@ -247,7 +247,7 @@ function generarPropsPanelDeficitCalorico(ctx: PropsContextoPaneles, renderHandl
     return {
         renderHandleArrastre,
         handleMinimizar,
-        onAbrirConfiguracion: () => modales.abrirModalPluginsConConfig('deficit-calorico')
+        onAbrirConfiguracion: modales.abrirModalConfigDeficitCalorico
     };
 }
 

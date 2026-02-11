@@ -16,8 +16,8 @@ import {useAyuno} from '../../hooks/useAyuno';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {OverlayEnfoque} from '../shared';
 import {useHabitosStore} from '../../stores/habitosStore';
-import {InicioAyuno} from './ayuno/InicioAyuno';
 import {HistorialAyuno} from './ayuno/HistorialAyuno';
+import {ModalUltimaComida} from './ayuno/ModalUltimaComida';
 import type {ConfiguracionAyuno} from '../../types/ayuno';
 
 interface PanelAyunoProps {
@@ -91,6 +91,7 @@ function SelectorDuracion({duracionActual, onCambiar}: {duracionActual: number; 
 
 export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelAyunoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
+    const [modalUltimaComidaAbierto, setModalUltimaComidaAbierto] = useState(false);
 
     const {
         estaActivo,
@@ -212,7 +213,15 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             {/* Botones de acción */}
             <div className="panelAyunoBotones">
                 {!estaActivo ? (
-                    <InicioAyuno deshabilitado={!habitoAyunoExiste} onIniciar={horaUltimaComidaMs => iniciar(horaUltimaComidaMs)} />
+                    <button
+                        className="panelAyunoBoton panelAyunoBoton--iniciar"
+                        onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)}
+                        type="button"
+                        disabled={!habitoAyunoExiste}
+                        title="Comenzar ayuno"
+                    >
+                        <span>Comenzar</span>
+                    </button>
                 ) : (
                     <>
                         <button
@@ -270,6 +279,12 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Ayuno">
                 <div className="panelAyuno panelDashboard internaColumna">{contenidoPanel}</div>
             </OverlayEnfoque>
+
+            <ModalUltimaComida
+                estaAbierto={modalUltimaComidaAbierto}
+                onCerrar={() => setModalUltimaComidaAbierto(false)}
+                onConfirmar={horaUltimaComidaMs => iniciar(horaUltimaComidaMs)}
+            />
         </>
     );
 }

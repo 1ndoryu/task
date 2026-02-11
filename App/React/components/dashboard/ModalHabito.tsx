@@ -283,10 +283,10 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onImportanciaChange={setImportancia}
                                     frecuencia={frecuencia}
                                     onFrecuenciaChange={setFrecuencia}
-                                    ventanaOportunidad={ventanaOportunidad}
-                                    onVentanaOportunidadChange={setVentanaOportunidad}
+                                    ventanaOportunidad={esHabitoEspecialAyuno ? undefined : ventanaOportunidad}
+                                    onVentanaOportunidadChange={esHabitoEspecialAyuno ? undefined : setVentanaOportunidad}
                                     estadoHoy={estadoHoy}
-                                    onEstadoChange={manejarCambioEstado}
+                                    onEstadoChange={esHabitoEspecialAyuno ? undefined : manejarCambioEstado}
                                     onPausarHabito={habito && onPausarHabito ? () => onPausarHabito(habito.id) : undefined}
                                     habito={habito}
                                     modoEdicion={true}
@@ -301,9 +301,9 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onReordenarTareasHabito={manejarReordenarTareas}
                                     onEditarTareaHabito={onEditarTarea}
                                     /* Props para subhábitos */
-                                    onCrearSubHabito={manejarCrearSubHabito}
-                                    onEliminarSubHabito={manejarEliminarSubHabito}
-                                    onToggleSubHabito={manejarToggleSubHabito}
+                                    onCrearSubHabito={esHabitoEspecialAyuno ? undefined : manejarCrearSubHabito}
+                                    onEliminarSubHabito={esHabitoEspecialAyuno ? undefined : manejarEliminarSubHabito}
+                                    onToggleSubHabito={esHabitoEspecialAyuno ? undefined : manejarToggleSubHabito}
                                 />
                             </div>
                             {/* Input de comentario cuando el chat esta oculto */}

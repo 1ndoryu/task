@@ -179,7 +179,7 @@
     border: 1px solid var(--dashboard-bordeSutil);
     background: transparent;
     color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
 }
@@ -191,6 +191,11 @@
 .panelAyunoBoton--iniciar {
     color: var(--dashboard-textoSobreAcento);
     border-color: var(--dashboard-acento);
+}
+
+.panelAyunoBoton:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
 
 .panelAyunoBoton--iniciar:hover {
@@ -299,6 +304,84 @@
 .panelAyunoHistorialPaginacionTexto {
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
+}
+
+/* Modal: Última comida */
+.modalAyunoUltimaComidaContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalAyunoUltimaComidaTexto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0;
+}
+
+.modalAyunoUltimaComidaCampo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.modalAyunoUltimaComidaIcono {
+    color: var(--dashboard-textoSecundario);
+    display: inline-flex;
+}
+
+.modalAyunoUltimaComidaInput {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoBase);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Mejorar icono nativo del selector de hora (WebKit) en tema oscuro */
+.modalAyunoUltimaComidaInput::-webkit-calendar-picker-indicator {
+    opacity: 0.9;
+    filter: invert(1);
+}
+
+.modalAyunoUltimaComidaAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modalAyunoUltimaComidaBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioMd);
+    padding: 8px 12px;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modalAyunoUltimaComidaBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoUltimaComidaBoton--primario {
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+}
+
+.modalAyunoUltimaComidaBoton--primario:hover {
+    background: var(--dashboard-acentoHover);
 }
 
 .panelAyunoHistorialTitulo {

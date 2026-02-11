@@ -7,8 +7,11 @@
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 import type {AyunoState, AyunoActions, SesionAyuno} from '../types/ayuno';
+import {habitosActions} from './habitosStore';
+import {usePluginsStore} from './pluginsStore';
 
 const MAX_HISTORIAL = 60;
+const DURACION_MINIMA_COMPLETAR_MS = 12 * 60 * 60 * 1000;
 
 function generarIdSesion(): string {
     return `ayuno_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -64,6 +67,14 @@ export const useAyunoStore = create<AyunoStore>()(
                     historial: nuevoHistorial,
                     ultimoAyunoCompletado: sesionFinalizada
                 });
+
+                /* Hábito especial: si el ayuno duró >= 12h, completar el hábito del plugin (si existe) */
+                if (tiempoEfectivoMs >= DURACION_MINIMA_COMPLETAR_MS) {
+                    const config = usePluginsStore.getState().configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined;
+                    if (config?.habitoId) {
+                        habitosActions.completarHabitoHoy(config.habitoId);
+                    }
+                }
 
                 return sesionFinalizada;
             },

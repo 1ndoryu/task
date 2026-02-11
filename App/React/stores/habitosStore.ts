@@ -49,6 +49,8 @@ interface HabitosActions {
 
     /* Toggle, posponer y pausar (día actual) */
     toggleHabito: (id: number) => {accion: 'completado' | 'desmarcado'; estadoAnterior: Habito} | null;
+    /* Completar hoy sin permitir desmarcar (uso: hábitos especiales controlados por plugins) */
+    completarHabitoHoy: (id: number) => boolean;
     posponerHabito: (id: number) => {accion: 'pospuesto' | 'despospuesto'; estadoAnterior: Habito} | null;
     pausarHabito: (id: number) => {accion: 'pausado' | 'reanudado'; estadoAnterior: Habito} | null;
 
@@ -198,6 +200,32 @@ export const useHabitosStore = create<HabitosStore>()(
                     }
 
                     return {accion, estadoAnterior};
+                },
+
+                /* Completar hoy (solo marca completado si aún no lo está) */
+                completarHabitoHoy: id => {
+                    const hoy = obtenerFechaHoy();
+                    const habito = get().habitos.find(h => h.id === id);
+                    if (!habito) return false;
+
+                    const yaCompletado = fueCompletadoHoy(habito.ultimoCompletado) || habito.historialCompletados?.includes(hoy);
+                    if (yaCompletado) return false;
+
+                    const {accion, nuevoHabito} = calcularToggleHabito(habito, hoy, false);
+                    if (accion !== 'completado') return false;
+
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => (h.id === id ? nuevoHabito : h))
+                        }),
+                        false,
+                        'completarHabitoHoy'
+                    );
+
+                    get().actualizarHistorialHabito(id, hoy, 'completado');
+                    registrarHabitoCumplido(id, habito.nombre);
+
+                    return true;
                 },
 
                 /* Posponer hábito */
@@ -671,6 +699,7 @@ export const habitosActions = {
     editarHabito: (id: number, datos: DatosNuevoHabito) => useHabitosStore.getState().editarHabito(id, datos),
     eliminarHabito: (id: number) => useHabitosStore.getState().eliminarHabito(id),
     toggleHabito: (id: number) => useHabitosStore.getState().toggleHabito(id),
+    completarHabitoHoy: (id: number) => useHabitosStore.getState().completarHabitoHoy(id),
     posponerHabito: (id: number) => useHabitosStore.getState().posponerHabito(id),
     pausarHabito: (id: number) => useHabitosStore.getState().pausarHabito(id),
     marcarDia: (habitoId: number, fecha: string, estado: EstadoHabito) => useHabitosStore.getState().marcarDia(habitoId, fecha, estado),

@@ -129,6 +129,11 @@ interface UseModalesDashboardReturn {
     abrirModalPlugins: () => void;
     abrirModalPluginsConConfig: (pluginId: string) => void;
     cerrarModalPlugins: () => void;
+
+    /* Config Plugins (modales dedicados) */
+    modalConfigDeficitCaloricoAbierto: boolean;
+    abrirModalConfigDeficitCalorico: () => void;
+    cerrarModalConfigDeficitCalorico: () => void;
 }
 
 export function useModalesDashboard(): UseModalesDashboardReturn {
@@ -186,6 +191,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     /* Plugins */
     const [modalPluginsAbierto, setModalPluginsAbierto] = useState(false);
     const [pluginConfigInicial, setPluginConfigInicial] = useState<string | null>(null);
+
+    /* Config Plugins (modales dedicados) */
+    const [modalConfigDeficitCaloricoAbierto, setModalConfigDeficitCaloricoAbierto] = useState(false);
 
     /* Handlers Auth */
     const abrirModalLogin = useCallback(() => setModalLoginAbierto(true), []);
@@ -312,6 +320,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         setPluginConfigInicial(null);
     }, []);
 
+    const abrirModalConfigDeficitCalorico = useCallback(() => setModalConfigDeficitCaloricoAbierto(true), []);
+    const cerrarModalConfigDeficitCalorico = useCallback(() => setModalConfigDeficitCaloricoAbierto(false), []);
+
     return {
         modalLoginAbierto,
         abrirModalLogin,
@@ -400,6 +411,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         pluginConfigInicial,
         abrirModalPlugins,
         abrirModalPluginsConConfig,
-        cerrarModalPlugins
+        cerrarModalPlugins,
+        modalConfigDeficitCaloricoAbierto,
+        abrirModalConfigDeficitCalorico,
+        cerrarModalConfigDeficitCalorico
     };
 }

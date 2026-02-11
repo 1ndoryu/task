@@ -514,3 +514,4 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   Fix: minimización de paneles de plugins ahora es reversible (BarraPanelesOcultos soporta paneles dinámicos + iconos en registro)
 > -   Fix: arrastre de paneles de plugins sin crash (IndicadorArrastre soporta paneles dinámicos + ModalPlugins sin return temprano antes de hooks)
 > -   Mejora: Ayuno ahora pregunta hora de última comida al iniciar, historial colapsable/paginado (6) con borrado, y botón Configuración abre el hábito especial (creado/vinculado al activar el plugin, nombre bloqueado)
+> -   Mejora: "Última comida" ahora es modal con estilo minimalista; hábito Ayuno se completa automáticamente al registrar ayuno >= 12h (Estado/Ventana/Subhábitos ocultos); Calorías abre solo su modal de configuración dedicado (sin ModalPlugins)
