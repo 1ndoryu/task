@@ -220,6 +220,21 @@ function generarPropsPanelActividad(ctx: PropsContextoPaneles, renderHandleArras
     };
 }
 
+/* Fix: paneles de plugins requieren props mínimas para renderizar */
+function generarPropsPanelAyuno(_ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    return {
+        renderHandleArrastre,
+        handleMinimizar
+    };
+}
+
+function generarPropsPanelDeficitCalorico(_ctx: PropsContextoPaneles, renderHandleArrastre: (titulo?: string) => JSX.Element, handleMinimizar: JSX.Element) {
+    return {
+        renderHandleArrastre,
+        handleMinimizar
+    };
+}
+
 /*
  * Mapeo de panelId a función generadora de props
  * TO-DO: En el futuro, cada panel podría registrar su propia función generadora
@@ -229,7 +244,9 @@ const GENERADORES_PROPS: Record<string, Function> = {
     focoPrioritario: generarPropsPanelFocoPrioritario,
     proyectos: generarPropsPanelProyectos,
     scratchpad: generarPropsPanelScratchpad,
-    actividad: generarPropsPanelActividad
+    actividad: generarPropsPanelActividad,
+    ayuno: generarPropsPanelAyuno,
+    'deficit-calorico': generarPropsPanelDeficitCalorico
 };
 
 export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecucion'}: DashboardGridProps): JSX.Element {
