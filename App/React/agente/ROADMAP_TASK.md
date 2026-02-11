@@ -507,3 +507,4 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > - Feature B.3 (Plugin Déficit Calórico): tipos, deficitCaloricoStore, useDeficitCalorico hook, geminiCaloriasService (cadena fallback modelos), calculoTMB (Mifflin-St Jeor + alternativa), PanelDeficitCalorico con input texto/foto, ConfigDeficitCalorico con formulario de datos personales y API Key
 > - Fix: paneles de plugins ahora renderizan al activar (generadores de props en DashboardGrid)
 > - Fix: loop de renders en PanelAyuno (useAyuno con dependencias estables)
+> - Fix: snapshot inestable en PanelAyuno al leer config de plugins

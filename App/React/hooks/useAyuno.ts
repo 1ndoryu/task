@@ -27,8 +27,9 @@ export function useAyuno() {
     const iniciarAyuno = useAyunoStore(s => s.iniciarAyuno);
     const terminarAyuno = useAyunoStore(s => s.terminarAyuno);
     const reiniciarAyuno = useAyunoStore(s => s.reiniciarAyuno);
-    const config = usePluginsStore(s => s.obtenerConfiguracion<ConfiguracionAyuno>(PLUGIN_ID));
-    const duracionHoras = config.duracionHoras ?? 16;
+    /* Fix: evitar snapshot inestable al leer configuracion inexistente */
+    const configuracion = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as ConfiguracionAyuno | undefined;
+    const duracionHoras = configuracion?.duracionHoras ?? 16;
 
     const [tiempoMs, setTiempoMs] = useState(0);
 
