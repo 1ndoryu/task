@@ -7,10 +7,11 @@
  */
 
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import {Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
+import {Target, Folder, Terminal, FileText, Activity, LayoutGrid} from 'lucide-react';
+import {obtenerPanel} from '../../config/registroPaneles';
 
-/* Nombres e iconos de los paneles */
-const INFO_PANELES: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
+/* Fallback de nombres e iconos para paneles core */
+const INFO_PANELES_FALLBACK: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
     focoPrioritario: {
         nombre: 'Foco Prioritario',
         icono: <Target size={14} />
@@ -33,6 +34,16 @@ const INFO_PANELES: Record<PanelId, {nombre: string; icono: JSX.Element}> = {
     }
 };
 
+function obtenerInfoPanel(panelId: PanelId): {nombre: string; icono: JSX.Element} {
+    const definicion = obtenerPanel(panelId);
+    const nombre = definicion?.titulo || INFO_PANELES_FALLBACK[panelId]?.nombre || panelId;
+
+    const iconoRegistro = definicion?.icono;
+    const icono = (iconoRegistro && typeof iconoRegistro === 'object' ? (iconoRegistro as JSX.Element) : null) || INFO_PANELES_FALLBACK[panelId]?.icono || <LayoutGrid size={14} />;
+
+    return {nombre, icono};
+}
+
 interface IndicadorArrastreProps {
     panelArrastrando: PanelId | null;
     posicionMouse: {x: number; y: number} | null;
@@ -41,7 +52,7 @@ interface IndicadorArrastreProps {
 export function IndicadorArrastre({panelArrastrando, posicionMouse}: IndicadorArrastreProps): JSX.Element | null {
     if (!panelArrastrando || !posicionMouse) return null;
 
-    const info = INFO_PANELES[panelArrastrando];
+    const info = obtenerInfoPanel(panelArrastrando);
 
     return (
         <div

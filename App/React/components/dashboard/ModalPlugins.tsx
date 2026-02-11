@@ -6,7 +6,7 @@
  * Plugins con requiereConfiguracion muestran botón de ajustes
  */
 
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Settings} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
@@ -59,11 +59,19 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
 }
 
 export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
-    if (!abierto) return null;
-
-    const plugins = obtenerTodosPlugins();
     const {pluginsActivos, togglePlugin} = usePluginsStore();
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
+
+    const plugins = useMemo(() => {
+        return abierto ? obtenerTodosPlugins() : [];
+    }, [abierto]);
+
+    /* Resetear la vista de config al cerrar el modal */
+    useEffect(() => {
+        if (!abierto) {
+            setConfigAbierta(null);
+        }
+    }, [abierto]);
 
     /* Si se abre el modal desde un panel (botón configuración), entrar directo a la config del plugin */
     useEffect(() => {
@@ -118,6 +126,8 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
     }, [configAbierta, manejarCerrarConfig, onCerrar]);
 
     const tituloModal = configAbierta ? `Configurar ${plugins.find(p => p.id === configAbierta)?.nombre ?? 'Plugin'}` : 'Plugins';
+
+    if (!abierto) return null;
 
     return (
         <Modal estaAbierto={abierto} onCerrar={manejarCierreUnificado} titulo={tituloModal} claseExtra="modalPlugins">
