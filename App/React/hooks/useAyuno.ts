@@ -21,30 +21,35 @@ function formatearTiempoAyuno(ms: number): string {
 }
 
 export function useAyuno() {
-    const store = useAyunoStore();
+    const estado = useAyunoStore(s => s.estado);
+    const sesionActiva = useAyunoStore(s => s.sesionActiva);
+    const historial = useAyunoStore(s => s.historial);
+    const iniciarAyuno = useAyunoStore(s => s.iniciarAyuno);
+    const terminarAyuno = useAyunoStore(s => s.terminarAyuno);
+    const reiniciarAyuno = useAyunoStore(s => s.reiniciarAyuno);
     const config = usePluginsStore(s => s.obtenerConfiguracion<ConfiguracionAyuno>(PLUGIN_ID));
     const duracionHoras = config.duracionHoras ?? 16;
 
     const [tiempoMs, setTiempoMs] = useState(0);
 
-    /* Timer que actualiza cada segundo durante ayuno activo */
+    /* Fix: dependencias estables para evitar renders infinitos en el timer */
     useEffect(() => {
-        if (store.estado !== 'activo' || !store.sesionActiva) {
-            setTiempoMs(0);
+        if (estado !== 'activo' || !sesionActiva) {
+            setTiempoMs(prev => (prev === 0 ? prev : 0));
             return;
         }
 
         const actualizar = () => {
-            const transcurrido = Date.now() - store.sesionActiva!.inicio;
+            const transcurrido = Date.now() - sesionActiva.inicio;
             setTiempoMs(transcurrido);
         };
 
         actualizar();
         const intervalo = setInterval(actualizar, 1000);
         return () => clearInterval(intervalo);
-    }, [store.estado, store.sesionActiva]);
+    }, [estado, sesionActiva?.inicio, sesionActiva?.duracionObjetivoMs]);
 
-    const duracionObjetivoMs = store.sesionActiva?.duracionObjetivoMs ?? duracionHoras * 3600000;
+    const duracionObjetivoMs = sesionActiva?.duracionObjetivoMs ?? duracionHoras * 3600000;
     const porcentaje = Math.min((tiempoMs / duracionObjetivoMs) * 100, 100);
     const alcanzoObjetivo = tiempoMs >= duracionObjetivoMs;
 
@@ -55,7 +60,7 @@ export function useAyuno() {
     const tiempoRestanteFormateado = formatearTiempoAyuno(tiempoRestanteMs);
 
     /* Último ayuno completado para mostrar cuando inactivo */
-    const ultimoAyuno = store.historial[0] ?? null;
+    const ultimoAyuno = historial[0] ?? null;
     const ultimoAyunoFormateado = ultimoAyuno
         ? formatearTiempoAyuno(ultimoAyuno.tiempoEfectivoMs)
         : null;
@@ -69,26 +74,26 @@ export function useAyuno() {
         : null;
 
     const iniciar = useCallback(() => {
-        store.iniciarAyuno(duracionHoras);
-    }, [store, duracionHoras]);
+        iniciarAyuno(duracionHoras);
+    }, [iniciarAyuno, duracionHoras]);
 
     const terminar = useCallback(() => {
-        return store.terminarAyuno();
-    }, [store]);
+        return terminarAyuno();
+    }, [terminarAyuno]);
 
     const reiniciar = useCallback(() => {
-        store.reiniciarAyuno();
-    }, [store]);
+        reiniciarAyuno();
+    }, [reiniciarAyuno]);
 
     /* Estado descriptivo para la UI */
     const estadoVisual = useMemo(() => {
-        if (store.estado === 'activo') return 'en-progreso' as const;
+        if (estado === 'activo') return 'en-progreso' as const;
         if (ultimoAyuno) return 'con-historial' as const;
         return 'sin-historial' as const;
-    }, [store.estado, ultimoAyuno]);
+    }, [estado, ultimoAyuno]);
 
     return {
-        estaActivo: store.estado === 'activo',
+        estaActivo: estado === 'activo',
         estadoVisual,
         tiempoMs,
         tiempoFormateado,
@@ -100,7 +105,7 @@ export function useAyuno() {
         ultimoAyuno,
         ultimoAyunoFormateado,
         tiempoDesdeUltimoFormateado,
-        historial: store.historial,
+        historial,
         iniciar,
         terminar,
         reiniciar
