@@ -511,3 +511,4 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   Fix: snapshot inestable en PanelAyuno al leer config de plugins
 > -   Fix: snapshot inestable en useDeficitCalorico al leer config de plugins (mismo patrón que PanelAyuno: `obtenerConfiguracion` creaba objeto nuevo en cada snapshot)
 > -   Fix: PanelAyuno y PanelDeficitCalorico ahora tienen botón de Configuración y Modo enfoque (OverlayEnfoque)
+> -   Fix: minimización de paneles de plugins ahora es reversible (BarraPanelesOcultos soporta paneles dinámicos + iconos en registro)

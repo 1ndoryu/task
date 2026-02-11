@@ -4,16 +4,17 @@
  * Click en un icono vuelve a mostrar el panel
  */
 
-import {Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
+import {Target, Folder, Terminal, FileText, Activity, LayoutGrid} from 'lucide-react';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
+import {obtenerPanel} from '../../config/registroPaneles';
 
 interface BarraPanelesOcultosProps {
     panelesOcultos: PanelId[];
     onMostrarPanel: (panel: PanelId) => void;
 }
 
-/* Mapeo de paneles a iconos y nombres */
-const PANELES_INFO: Record<PanelId, {icono: JSX.Element; nombre: string}> = {
+/* Fallback de iconos/nombres para paneles core (si el registro no trae icono) */
+const PANELES_INFO_FALLBACK: Record<PanelId, {icono: JSX.Element; nombre: string}> = {
     focoPrioritario: {
         icono: <Target size={14} />,
         nombre: 'Foco Prioritario'
@@ -36,6 +37,17 @@ const PANELES_INFO: Record<PanelId, {icono: JSX.Element; nombre: string}> = {
     }
 };
 
+function obtenerInfoPanel(panelId: PanelId): {icono: JSX.Element; nombre: string} {
+    const definicion = obtenerPanel(panelId);
+
+    const nombre = definicion?.titulo || PANELES_INFO_FALLBACK[panelId]?.nombre || panelId;
+
+    const iconoRegistro = definicion?.icono;
+    const icono = (iconoRegistro && typeof iconoRegistro === 'object' ? (iconoRegistro as JSX.Element) : null) || PANELES_INFO_FALLBACK[panelId]?.icono || <LayoutGrid size={14} />;
+
+    return {icono, nombre};
+}
+
 export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanelesOcultosProps): JSX.Element | null {
     if (panelesOcultos.length === 0) return null;
 
@@ -43,8 +55,7 @@ export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanel
         <div className="barraPanelesOcultos">
             <div className="barraPanelesOcultosContenido">
                 {panelesOcultos.map(panelId => {
-                    const info = PANELES_INFO[panelId];
-                    if (!info) return null;
+                    const info = obtenerInfoPanel(panelId);
 
                     return (
                         <button key={panelId} className="botonPanelOculto" onClick={() => onMostrarPanel(panelId)} title={`Mostrar ${info.nombre}`}>
