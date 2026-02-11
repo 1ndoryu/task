@@ -32,6 +32,7 @@
     --dashboard-textoMuyApagado: #555;
     --dashboard-textoIndice: #333;
     --dashboard-textoPlaceholder: #222;
+    --dashboard-textoSobreAcento: #ffffff;
 
     /* 
      * COLORES DE ESTADO 
@@ -92,6 +93,9 @@
     --dashboard-tamanoBase: 12px;
     --dashboard-tamanoPequeno: 10px;
     --dashboard-tamanoMuyPequeno: 9px;
+    --dashboard-tamanoGrande: 1.1rem;
+    --dashboard-tamanoTitulo: 1.3rem;
+    --dashboard-tamanoHero: 1.4rem;
 
     /* 
      * ESPACIADO 
@@ -121,8 +125,8 @@
     /* 
      * COLOR ACENTO (ACCIONES PRINCIPALES) 
      */
-    --dashboard-acento: #3b82f6;
-    --dashboard-acentoHover: #2563eb;
+    --dashboard-acento: #222;
+    --dashboard-acentoHover: #1a1a1a;
     --dashboard-acentoRgb: 59, 130, 246;
 
     /* 

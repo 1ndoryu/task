@@ -21,10 +21,11 @@ function obtenerFechaHoy(): string {
 
 export function useDeficitCalorico() {
     const store = useDeficitCaloricoStore();
-    const config = usePluginsStore(s => s.obtenerConfiguracion<{apiKey?: string}>('deficit-calorico'));
+    /* Seleccionar directamente del state para referencia estable (evita loop infinito por objeto nuevo en cada snapshot) */
+    const config = usePluginsStore(s => s.configuracionPlugins['deficit-calorico']) as unknown as {apiKey?: string} | undefined;
     const inputFotoRef = useRef<HTMLInputElement | null>(null);
 
-    const apiKey = store.apiKeyGemini || config.apiKey || '';
+    const apiKey = store.apiKeyGemini || config?.apiKey || '';
 
     /* TMB calculada */
     const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);
@@ -36,74 +37,77 @@ export function useDeficitCalorico() {
         return store.comidas.filter(c => c.fecha === hoy);
     }, [store.comidas]);
 
-    const caloriasHoy = useMemo(
-        () => comidasHoy.reduce((sum, c) => sum + c.calorias, 0),
-        [comidasHoy]
-    );
+    const caloriasHoy = useMemo(() => comidasHoy.reduce((sum, c) => sum + c.calorias, 0), [comidasHoy]);
 
     const deficit = tdee !== null ? tdee - caloriasHoy : null;
 
     /* Registrar comida por texto usando IA */
-    const registrarPorTexto = useCallback(async (descripcion: string) => {
-        if (!apiKey) {
-            store.setErrorIA('Configura tu API Key de Gemini primero');
-            return;
-        }
+    const registrarPorTexto = useCallback(
+        async (descripcion: string) => {
+            if (!apiKey) {
+                store.setErrorIA('Configura tu API Key de Gemini primero');
+                return;
+            }
 
-        store.setCargandoIA(true);
-        store.setErrorIA(null);
+            store.setCargandoIA(true);
+            store.setErrorIA(null);
 
-        try {
-            const resultado = await estimarCaloriasTexto(descripcion, apiKey);
-            const comida: ComidaRegistrada = {
-                id: generarIdComida(),
-                descripcion: resultado.descripcion || descripcion,
-                calorias: resultado.calorias,
-                proteinas: resultado.proteinas,
-                carbohidratos: resultado.carbohidratos,
-                grasas: resultado.grasas,
-                horaRegistro: Date.now(),
-                fecha: obtenerFechaHoy(),
-                fuenteEstimacion: 'ia'
-            };
-            store.agregarComida(comida);
-        } catch (error) {
-            store.setErrorIA(error instanceof Error ? error.message : 'Error al analizar');
-        } finally {
-            store.setCargandoIA(false);
-        }
-    }, [apiKey, store]);
+            try {
+                const resultado = await estimarCaloriasTexto(descripcion, apiKey);
+                const comida: ComidaRegistrada = {
+                    id: generarIdComida(),
+                    descripcion: resultado.descripcion || descripcion,
+                    calorias: resultado.calorias,
+                    proteinas: resultado.proteinas,
+                    carbohidratos: resultado.carbohidratos,
+                    grasas: resultado.grasas,
+                    horaRegistro: Date.now(),
+                    fecha: obtenerFechaHoy(),
+                    fuenteEstimacion: 'ia'
+                };
+                store.agregarComida(comida);
+            } catch (error) {
+                store.setErrorIA(error instanceof Error ? error.message : 'Error al analizar');
+            } finally {
+                store.setCargandoIA(false);
+            }
+        },
+        [apiKey, store]
+    );
 
     /* Registrar comida por foto usando IA */
-    const registrarPorFoto = useCallback(async (archivo: File) => {
-        if (!apiKey) {
-            store.setErrorIA('Configura tu API Key de Gemini primero');
-            return;
-        }
+    const registrarPorFoto = useCallback(
+        async (archivo: File) => {
+            if (!apiKey) {
+                store.setErrorIA('Configura tu API Key de Gemini primero');
+                return;
+            }
 
-        store.setCargandoIA(true);
-        store.setErrorIA(null);
+            store.setCargandoIA(true);
+            store.setErrorIA(null);
 
-        try {
-            const resultado = await estimarCaloriasFoto(archivo, apiKey);
-            const comida: ComidaRegistrada = {
-                id: generarIdComida(),
-                descripcion: resultado.descripcion,
-                calorias: resultado.calorias,
-                proteinas: resultado.proteinas,
-                carbohidratos: resultado.carbohidratos,
-                grasas: resultado.grasas,
-                horaRegistro: Date.now(),
-                fecha: obtenerFechaHoy(),
-                fuenteEstimacion: 'ia'
-            };
-            store.agregarComida(comida);
-        } catch (error) {
-            store.setErrorIA(error instanceof Error ? error.message : 'Error al analizar imagen');
-        } finally {
-            store.setCargandoIA(false);
-        }
-    }, [apiKey, store]);
+            try {
+                const resultado = await estimarCaloriasFoto(archivo, apiKey);
+                const comida: ComidaRegistrada = {
+                    id: generarIdComida(),
+                    descripcion: resultado.descripcion,
+                    calorias: resultado.calorias,
+                    proteinas: resultado.proteinas,
+                    carbohidratos: resultado.carbohidratos,
+                    grasas: resultado.grasas,
+                    horaRegistro: Date.now(),
+                    fecha: obtenerFechaHoy(),
+                    fuenteEstimacion: 'ia'
+                };
+                store.agregarComida(comida);
+            } catch (error) {
+                store.setErrorIA(error instanceof Error ? error.message : 'Error al analizar imagen');
+            } finally {
+                store.setCargandoIA(false);
+            }
+        },
+        [apiKey, store]
+    );
 
     return {
         comidasHoy,

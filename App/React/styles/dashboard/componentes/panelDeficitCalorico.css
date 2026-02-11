@@ -13,8 +13,8 @@
 .deficitContenido {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm, 12px);
-    padding: var(--espaciado-sm, 12px);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
 }
 
 /* Resumen diario */
@@ -39,30 +39,31 @@
 }
 
 .deficitResumenValor {
-    font-size: 1.3rem;
+    font-size: var(--dashboard-tamanoTitulo); /* Específico */
     font-weight: 600;
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    color: var(--dashboard-textoActivo);
     font-variant-numeric: tabular-nums;
 }
 
 .deficitResumenEtiqueta {
-    font-size: 0.65rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .deficitResumenSeparador {
-    font-size: 1.1rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.3));
+    font-size: var(--dashboard-tamanoGrande);
+    color: var(--dashboard-textoSecundario);
     margin: 0 2px;
+    opacity: 0.5;
 }
 
 /* Barra de progreso */
 .deficitBarra {
     width: 100%;
     height: 4px;
-    background: var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+    background: var(--dashboard-bordeSutil);
     border-radius: 2px;
     overflow: hidden;
 }
@@ -74,25 +75,25 @@
 }
 
 .deficitBarraProgreso--deficit {
-    background: var(--color-exito, #51cf66);
+    background: var(--dashboard-estadoExito);
 }
 
 .deficitBarraProgreso--superavit {
-    background: var(--color-peligro, #ff6b6b);
+    background: var(--dashboard-estadoAlta);
 }
 
 /* Balance */
 .deficitResumenBalance {
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
 }
 
 .deficitResumenBalance--deficit {
-    color: var(--color-exito, #51cf66);
+    color: var(--dashboard-estadoExito);
 }
 
 .deficitResumenBalance--superavit {
-    color: var(--color-peligro, #ff6b6b);
+    color: var(--dashboard-estadoAlta);
 }
 
 /* Entrada de comida */
@@ -111,21 +112,22 @@
 .deficitEntradaInput {
     flex: 1;
     padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
-    background: var(--dashboard-fondoInput, rgba(255, 255, 255, 0.03));
-    color: var(--dashboard-textoPrimario, #e0e0e0);
-    font-size: 0.8rem;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTerciario);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color var(--dashboard-transicionRapida);
 }
 
 .deficitEntradaInput:focus {
-    border-color: var(--color-acento, #4dabf7);
+    border-color: var(--dashboard-acento);
 }
 
 .deficitEntradaInput::placeholder {
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.3));
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.5;
 }
 
 .deficitEntradaBotonFoto {
@@ -133,17 +135,17 @@
     align-items: center;
     justify-content: center;
     padding: 8px;
-    border-radius: 6px;
-    border: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.08));
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
     background: transparent;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.6));
+    color: var(--dashboard-textoSecundario);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .deficitEntradaBotonFoto:hover {
-    color: var(--color-acento, #4dabf7);
-    border-color: var(--color-acento, #4dabf7);
+    color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
 }
 
 .deficitEntradaInputOculto {
@@ -154,8 +156,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.7rem;
-    color: var(--color-acento, #4dabf7);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-acento);
 }
 
 .deficitSpinner {
@@ -163,8 +165,12 @@
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Avisos y errores */
@@ -174,20 +180,20 @@
     align-items: center;
     gap: 6px;
     padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 0.7rem;
+    border-radius: var(--dashboard-radioMd);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .deficitAviso {
-    background: rgba(77, 171, 247, 0.08);
-    color: var(--color-acento, #4dabf7);
-    border: 1px solid rgba(77, 171, 247, 0.15);
+    background: var(--dashboard-estadoInfoFondo);
+    color: var(--dashboard-estadoInfo);
+    border: 1px solid var(--dashboard-estadoInfoBorde);
 }
 
 .deficitError {
-    background: rgba(255, 107, 107, 0.08);
-    color: var(--color-peligro, #ff6b6b);
-    border: 1px solid rgba(255, 107, 107, 0.15);
+    background: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
 }
 
 /* Lista de comidas */
@@ -202,7 +208,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 6px 0;
-    border-bottom: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.04));
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
 .deficitComidaItem:last-child {
@@ -218,16 +224,16 @@
 }
 
 .deficitComidaDesc {
-    font-size: 0.78rem;
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .deficitComidaHora {
-    font-size: 0.65rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.35));
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
 }
 
 .deficitComidaAcciones {
@@ -238,9 +244,9 @@
 }
 
 .deficitComidaCalorias {
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    color: var(--dashboard-textoNormal);
     font-variant-numeric: tabular-nums;
 }
 
@@ -250,26 +256,26 @@
     padding: 4px;
     border: none;
     background: transparent;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.3));
+    color: var(--dashboard-textoSecundario);
     cursor: pointer;
     border-radius: 4px;
-    transition: all 0.15s;
+    transition: all var(--dashboard-transicionRapida);
 }
 
 .deficitComidaEliminar:hover {
-    color: var(--color-peligro, #ff6b6b);
-    background: rgba(255, 107, 107, 0.1);
+    color: var(--dashboard-estadoAlta);
+    background: var(--dashboard-estadoAltaFondo);
 }
 
 /* Historial semanal */
 .deficitHistorial {
-    padding-top: var(--espaciado-sm, 8px);
-    border-top: 1px solid var(--dashboard-bordePanel, rgba(255, 255, 255, 0.06));
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
 }
 
 .deficitHistorialTitulo {
-    font-size: 0.7rem;
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.4));
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 6px;
@@ -287,16 +293,16 @@
     justify-content: space-between;
     align-items: center;
     padding: 3px 0;
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .deficitHistorialFecha {
-    color: var(--dashboard-textoSecundario, rgba(255, 255, 255, 0.5));
+    color: var(--dashboard-textoSecundario);
     min-width: 60px;
 }
 
 .deficitHistorialCalorias {
-    color: var(--dashboard-textoPrimario, #e0e0e0);
+    color: var(--dashboard-textoNormal);
     font-variant-numeric: tabular-nums;
 }
 
@@ -308,9 +314,9 @@
 }
 
 .deficitHistorialBalance--deficit {
-    color: var(--color-exito, #51cf66);
+    color: var(--dashboard-estadoExito);
 }
 
 .deficitHistorialBalance--superavit {
-    color: var(--color-peligro, #ff6b6b);
+    color: var(--dashboard-estadoAlta);
 }

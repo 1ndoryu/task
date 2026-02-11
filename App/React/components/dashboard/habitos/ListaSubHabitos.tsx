@@ -14,7 +14,7 @@ import {obtenerFechaHoy} from '../../../utils/fecha';
 interface ListaSubHabitosProps {
     subhabitos: SubHabito[];
     onCrear: (datos: DatosNuevoSubHabito) => void;
-    onEditar: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
+
     onEliminar: (subHabitoId: number) => void;
     onToggle: (subHabitoId: number) => void;
     importanciaPadre: NivelImportancia;
