@@ -4,7 +4,7 @@
  */
 
 import {useMemo, useState} from 'react';
-import {ChevronDown, ChevronRight, Trash2} from 'lucide-react';
+import {ChevronDown, ChevronRight, Trash2, Utensils, Clock, Flag, Target} from 'lucide-react';
 import type {SesionAyuno} from '../../../types/ayuno';
 
 interface HistorialAyunoProps {
@@ -53,15 +53,35 @@ export function HistorialAyuno({sesiones, maxPorPagina = 6, onEliminarSesion}: H
                     <div className="panelAyunoHistorialLista">
                         {sesionesPagina.map(s => {
                             const fecha = new Date(s.inicio);
-                            const dia = fecha.toLocaleDateString('es', {day: 'numeric', month: 'short'});
+                            const dia = fecha.toLocaleDateString('es', {weekday: 'short', day: 'numeric', month: 'short'});
+                            const horaInicio = new Date(s.inicio).toLocaleTimeString('es', {hour: '2-digit', minute: '2-digit'});
+                            const horaFin = s.fin ? new Date(s.fin).toLocaleTimeString('es', {hour: '2-digit', minute: '2-digit'}) : null;
                             const horaUltimaComida = formatearHora(s.horaUltimaComidaMs);
+                            const duracionObjetivo = formatearDuracion(s.duracionObjetivoMs);
 
                             return (
                                 <div key={s.id} className={`panelAyunoHistorialItem ${s.completada ? 'panelAyunoHistorialItem--completado' : ''}`}>
                                     <div className="panelAyunoHistorialFila">
                                         <div className="panelAyunoHistorialInfo">
                                             <span className="panelAyunoHistorialItemFecha">{dia}</span>
-                                            {horaUltimaComida && <span className="panelAyunoHistorialItemMeta">Última comida: {horaUltimaComida}</span>}
+                                            <div className="panelAyunoHistorialItemDetalles">
+                                                {horaUltimaComida && (
+                                                    <span className="panelAyunoHistorialItemMeta">
+                                                        <Utensils size={10} /> {horaUltimaComida}
+                                                    </span>
+                                                )}
+                                                <span className="panelAyunoHistorialItemMeta">
+                                                    <Clock size={10} /> {horaInicio}
+                                                </span>
+                                                {horaFin && (
+                                                    <span className="panelAyunoHistorialItemMeta">
+                                                        <Flag size={10} /> {horaFin}
+                                                    </span>
+                                                )}
+                                                <span className="panelAyunoHistorialItemMeta">
+                                                    <Target size={10} /> {duracionObjetivo}
+                                                </span>
+                                            </div>
                                         </div>
                                         <div className="panelAyunoHistorialAcciones">
                                             <span className="panelAyunoHistorialItemTiempo">{formatearDuracion(s.tiempoEfectivoMs)}</span>

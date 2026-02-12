@@ -18,6 +18,7 @@ interface RespuestaCaloriasIA {
     grasas: number;
     azucar: number;
     descripcion: string;
+    logProceso?: string[] /* Log detallado del proceso para inspección */;
 }
 
 /* Interfaz para respuesta de CalorieNinjas */
@@ -155,15 +156,27 @@ async function consultarCalorieNinjas(query: string, apiKeyNinjas: string): Prom
  * Retorna RespuestaCaloriasIA compatible con el resto de la app
  */
 export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: string, apiKeyNinjas: string): Promise<RespuestaCaloriasIA> {
+    const log: string[] = [];
+    log.push(`[1] Input original: "${descripcion}"`);
+
     /* Paso 1: Obtener query en inglés desde Groq (intentando varios modelos si falla) */
     let queryIngles = '';
     let errorGroq = null;
+    let modeloUsado = '';
 
     for (const modelo of MODELOS_GROQ) {
         try {
+            log.push(`[2] Intentando traducción con modelo: ${modelo}`);
             queryIngles = await traducirAQueryIngles(modelo, apiKeyGroq, descripcion);
-            if (queryIngles) break;
+            if (queryIngles) {
+                modeloUsado = modelo;
+                log.push(`[3] ✓ Traducción exitosa con ${modelo}`);
+                log.push(`[4] Query generada: "${queryIngles}"`);
+                break;
+            }
         } catch (e) {
+            const errorMsg = e instanceof Error ? e.message : String(e);
+            log.push(`[!] Error con ${modelo}: ${errorMsg}`);
             console.warn(`[Groq] Fallo traducción con ${modelo}:`, e);
             errorGroq = e;
         }
@@ -171,6 +184,7 @@ export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: stri
 
     if (!queryIngles) {
         const mensajeError = errorGroq instanceof Error ? errorGroq.message : 'Ningún modelo respondió';
+        log.push(`[X] FALLO: No se pudo traducir. ${mensajeError}`);
         throw new Error(`Error traduciendo con IA: ${mensajeError}`);
     }
 
@@ -178,14 +192,21 @@ export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: stri
 
     /* Paso 2: Consultar CalorieNinjas */
     try {
+        log.push(`[5] Consultando CalorieNinjas con query: "${queryIngles}"`);
         const resultado = await consultarCalorieNinjas(queryIngles, apiKeyNinjas);
+        log.push(`[6] ✓ CalorieNinjas respondió exitosamente`);
+        log.push(`[7] Calorías totales: ${resultado.calorias} kcal`);
+        log.push(`[8] Macros - P:${resultado.proteinas}g C:${resultado.carbohidratos}g G:${resultado.grasas}g A:${resultado.azucar}g`);
 
         /* USAMOS LA DESCRIPCIÓN ORIGINAL DEL USUARIO EN ESPAÑOL */
         return {
             ...resultado,
-            descripcion: descripcion.charAt(0).toUpperCase() + descripcion.slice(1)
+            descripcion: descripcion.charAt(0).toUpperCase() + descripcion.slice(1),
+            logProceso: log
         };
     } catch (e) {
+        const errorMsg = e instanceof Error ? e.message : String(e);
+        log.push(`[X] Error en CalorieNinjas: ${errorMsg}`);
         console.error('[CalorieNinjas] Error:', e);
         throw new Error(`Error en CalorieNinjas: ${e instanceof Error ? e.message : 'Desconocido'}`);
     }

@@ -68,7 +68,9 @@ export function useDeficitCalorico() {
                     azucar: resultado.azucar,
                     horaRegistro: Date.now(),
                     fecha: obtenerFechaHoy(),
-                    fuenteEstimacion: 'ia'
+                    fuenteEstimacion: 'ia',
+                    promptOriginal: descripcion /* Guardar input original para reintentar */,
+                    logProceso: resultado.logProceso /* Guardar log de debugging */
                 };
                 store.agregarComida(comida);
             } catch (error) {

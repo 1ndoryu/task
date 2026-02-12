@@ -253,15 +253,21 @@
 }
 
 .deficitComidaHora {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
 }
 
 .deficitComidaMacro {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     background: var(--dashboard-fondoTerciario);
-    padding: 1px 3px;
+    padding: 2px 4px;
     border-radius: 3px;
 }
 
@@ -296,10 +302,25 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
-/* Historial semanal */
+/* =========================================
+   Historial agrupado por días
+   ========================================= */
 .deficitHistorial {
     padding-top: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordeSutil);
+    width: 100%;
+}
+
+.deficitHistorialToggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-bottom: 8px;
 }
 
 .deficitHistorialTitulo {
@@ -307,16 +328,167 @@
     color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 6px;
-    display: block;
+}
+
+.deficitHistorialContador {
+    margin-left: auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
 }
 
 .deficitHistorialLista {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 12px;
+    margin-top: 8px;
 }
 
+/* Grupo de comidas por día */
+.deficitHistorialDiaGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.deficitHistorialDiaGrupo:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.deficitHistorialDiaHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.deficitHistorialDiaFecha {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.deficitHistorialDiaTotalCalorias {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitHistorialDiaComidas {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Botones de acción adicionales (reintentar, inspeccionar) */
+.deficitComidaBotonAccion {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.deficitComidaBotonAccion--reintentar:hover {
+    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.deficitComidaBotonAccion--inspeccionar:hover {
+    color: var(--dashboard-estadoInfo);
+    background: var(--dashboard-estadoInfoFondo);
+}
+
+/* Paginación */
+.deficitHistorialPaginacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.deficitHistorialPaginacionBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.deficitHistorialPaginacionBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.deficitHistorialPaginacionBoton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.deficitHistorialPaginacionBoton:disabled:hover {
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+}
+
+.deficitHistorialPaginacionTexto {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================
+   Modal de Inspección de IA
+   ========================================= */
+.modalInspeccionLog {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    padding: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+.modalInspeccionLogLinea {
+    padding: 2px 0;
+    color: var(--dashboard-textoNormal);
+    line-height: 1.4;
+}
+
+.modalInspeccionLogLinea--input {
+    color: var(--dashboard-acento);
+    font-weight: 600;
+}
+
+.modalInspeccionLogLinea--exito {
+    color: var(--dashboard-estadoExito);
+}
+
+.modalInspeccionLogLinea--error {
+    color: var(--dashboard-estadoAlta);
+    font-weight: 600;
+}
+
+/* Ajustes para mantener retrocompatibilidad */
 .deficitHistorialItem {
     display: flex;
     justify-content: space-between;

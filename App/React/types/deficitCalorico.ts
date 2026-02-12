@@ -29,6 +29,8 @@ export interface ComidaRegistrada {
     horaRegistro: number;
     fecha: string;
     fuenteEstimacion: 'ia' | 'manual';
+    promptOriginal?: string /* Input original del usuario para reintentar */;
+    logProceso?: string[] /* Log del proceso de IA para inspección */;
 }
 
 /* Registro diario de alimentación */

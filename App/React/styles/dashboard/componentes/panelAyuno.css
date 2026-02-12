@@ -15,7 +15,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--dashboard-espacioMd);
-    padding: var(--dashboard-espacioMd) var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioLg);
 }
 
 /* Aviso cuando falta el hábito especial */
@@ -316,13 +316,27 @@
 
 .panelAyunoHistorialInfo {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.panelAyunoHistorialItemDetalles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .panelAyunoHistorialItemMeta {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 5px;
+    border-radius: 3px;
 }
 
 .panelAyunoHistorialEliminar {
@@ -511,7 +525,7 @@
 }
 
 .modalAyunoHeroTiempo {
-    font-size: 2.8rem;
+    font-size: var(--dashboard-tamanoHero);
     font-weight: 700;
     color: var(--dashboard-textoActivo);
     line-height: 1;

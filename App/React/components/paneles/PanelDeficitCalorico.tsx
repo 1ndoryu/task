@@ -11,11 +11,13 @@
  */
 
 import {useState, useMemo} from 'react';
-import {Loader2, Trash2, AlertCircle, Settings, Maximize2} from 'lucide-react';
+import {Loader2, Trash2, AlertCircle, Settings, Maximize2, RotateCcw, Eye} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
 import {OverlayEnfoque} from '../shared';
 import {calcularObjetivosMacro} from '../../utils/calculoTMB';
+import {HistorialCalorias} from './deficitCalorico/HistorialCalorias';
+import {ModalInspeccionIA} from './deficitCalorico/ModalInspeccionIA';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
 
 interface PanelDeficitCaloricoProps {
@@ -124,67 +126,13 @@ function EntradaComida({onEnviarTexto, cargando}: {onEnviarTexto: (texto: string
     );
 }
 
-/* Lista de comidas registradas hoy */
-function ListaComidas({comidas, onEliminar}: {comidas: Array<{id: string; descripcion: string; calorias: number; proteinas?: number; carbohidratos?: number; grasas?: number; horaRegistro: number}>; onEliminar: (id: string) => void}): JSX.Element | null {
-    if (comidas.length === 0) return null;
+/* Componente eliminado - ahora HistorialCalorias muestra todas las comidas agrupadas por día */
 
-    return (
-        <div className="deficitListaComidas">
-            {comidas.map(comida => {
-                const hora = new Date(comida.horaRegistro).toLocaleTimeString('es', {hour: '2-digit', minute: '2-digit'});
-                return (
-                    <div key={comida.id} className="deficitComidaItem">
-                        <div className="deficitComidaInfo">
-                            <span className="deficitComidaDesc">{comida.descripcion}</span>
-                            <div className="deficitComidaDetalles">
-                                <span className="deficitComidaHora">{hora}</span>
-                                {comida.proteinas !== undefined && <span className="deficitComidaMacro">P:{comida.proteinas}</span>}
-                                {comida.carbohidratos !== undefined && <span className="deficitComidaMacro">C:{comida.carbohidratos}</span>}
-                                {comida.grasas !== undefined && <span className="deficitComidaMacro">G:{comida.grasas}</span>}
-                            </div>
-                        </div>
-                        <div className="deficitComidaAcciones">
-                            <span className="deficitComidaCalorias">{comida.calorias} kcal</span>
-                            <button type="button" className="deficitComidaEliminar" onClick={() => onEliminar(comida.id)} title="Eliminar">
-                                <Trash2 size={12} />
-                            </button>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-    );
-}
-
-/* Historial de los últimos 7 días */
-function HistorialSemanal({historial}: {historial: Array<{fecha: string; totalCalorias: number; deficit: number}>}): JSX.Element | null {
-    const ultimos7 = historial.slice(0, 7);
-    if (ultimos7.length === 0) return null;
-
-    return (
-        <div className="deficitHistorial">
-            <span className="deficitHistorialTitulo">Últimos días</span>
-            <div className="deficitHistorialLista">
-                {ultimos7.map(dia => {
-                    const fecha = new Date(dia.fecha + 'T12:00:00');
-                    const diaTexto = fecha.toLocaleDateString('es', {weekday: 'short', day: 'numeric'});
-                    const enDeficit = dia.deficit > 0;
-
-                    return (
-                        <div key={dia.fecha} className="deficitHistorialItem">
-                            <span className="deficitHistorialFecha">{diaTexto}</span>
-                            <span className="deficitHistorialCalorias">{dia.totalCalorias} kcal</span>
-                            <span className={`deficitHistorialBalance ${enDeficit ? 'deficitHistorialBalance--deficit' : 'deficitHistorialBalance--superavit'}`}>{enDeficit ? `-${dia.deficit}` : `+${Math.abs(dia.deficit)}`}</span>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
+/* Componente eliminado - ahora se usa HistorialCalorias */
 
 export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelDeficitCaloricoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
+    const [logInspeccion, setLogInspeccion] = useState<string[] | null>(null);
 
     const {comidasHoy, caloriasHoy, tdee, deficit, apiKey, cargandoIA, errorIA, historial, registrarPorTexto, eliminarComida, datosUsuario} = useDeficitCalorico();
 
@@ -223,8 +171,7 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
                 </div>
             )}
 
-            <ListaComidas comidas={comidasHoy} onEliminar={eliminarComida} />
-            <HistorialSemanal historial={historial} />
+            <HistorialCalorias comidas={[...comidasHoy, ...historial.flatMap(d => d.comidas)]} maxPorPagina={3} onEliminar={eliminarComida} onReintentar={registrarPorTexto} onInspeccionar={(log: string[]) => setLogInspeccion(log)} />
         </div>
     );
 
@@ -258,6 +205,8 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Calorías">
                 <div className="panelDeficitCalorico internaColumna">{contenidoPanel}</div>
             </OverlayEnfoque>
+
+            <ModalInspeccionIA estaAbierto={!!logInspeccion} onCerrar={() => setLogInspeccion(null)} log={logInspeccion || []} />
         </>
     );
 }
