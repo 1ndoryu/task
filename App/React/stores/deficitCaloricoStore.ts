@@ -23,19 +23,23 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
         (set, get) => ({
             datosUsuario: {},
             apiKeyGemini: '',
+            apiKeyCalorieNinjas: '',
             comidas: [],
             historial: [],
             cargandoIA: false,
             errorIA: null,
 
-            guardarDatosUsuario: (datos) => {
+            guardarDatosUsuario: datos => {
                 set(prev => ({
                     datosUsuario: {...prev.datosUsuario, ...datos}
                 }));
             },
 
-            guardarApiKey: (key) => {
-                set({apiKeyGemini: key});
+            guardarApiKey: (keyGroq, keyNinjas) => {
+                set({
+                    apiKeyGemini: keyGroq,
+                    apiKeyCalorieNinjas: keyNinjas
+                });
             },
 
             agregarComida: (comida: ComidaRegistrada) => {
@@ -66,8 +70,8 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
 
             obtenerCaloriasHoy: (): number => {
                 const hoy = obtenerFechaHoy();
-                return get().comidas
-                    .filter(c => c.fecha === hoy)
+                return get()
+                    .comidas.filter(c => c.fecha === hoy)
                     .reduce((sum, c) => sum + c.calorias, 0);
             },
 

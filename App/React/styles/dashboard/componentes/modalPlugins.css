@@ -14,8 +14,6 @@
     flex-direction: column;
     gap: 6px;
     padding: 0; /* Padding ya manejado por modalContenido en shared */
-    max-height: 400px;
-    overflow-y: auto;
 }
 
 .modalPluginsFila {
@@ -66,19 +64,19 @@
 }
 
 .modalPluginsNombre {
-    font-size: 13px;
+    font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoActivo);
     font-weight: 500;
 }
 
 .modalPluginsDescripcion {
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     line-height: 1.3;
 }
 
 .modalPluginsVersion {
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
 }
 
@@ -118,7 +116,7 @@
 .modalPluginsVacio {
     text-align: center;
     color: var(--dashboard-textoApagado);
-    font-size: 13px;
+    font-size: var(--dashboard-tamanoBase);
     padding: 20px 0;
 }
 
@@ -163,14 +161,14 @@
 }
 
 .configDeficitSeccionTitulo {
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     margin: 0;
 }
 
 .configDeficitSeccionNota {
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     margin: 0;
 }
@@ -188,17 +186,20 @@
 }
 
 .configDeficitLabel {
-    font-size: 0.68rem;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
 
 .configDeficitInput {
-    padding: 6px 8px;
+    height: 32px;
+    width: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
     border-radius: var(--dashboard-radioSm);
     border: 1px solid var(--dashboard-bordePrincipal);
     background: var(--dashboard-fondoTerciario);
     color: var(--dashboard-textoNormal);
-    font-size: 0.78rem;
+    font-size: var(--dashboard-tamanoBase);
     outline: none;
     transition: border-color 0.15s;
 }
@@ -245,7 +246,7 @@
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
     border: 1px solid var(--dashboard-bordePrincipal);
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .configDeficitPreviewLabel {
@@ -254,11 +255,11 @@
 
 .configDeficitPreviewValor {
     font-weight: 600;
-    color: var(--dashboard-acento);
+    color: var(--dashboard-estadoAlta);
 }
 
 .configDeficitPreviewMetodo {
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
 }
 
@@ -276,7 +277,7 @@
     border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
     color: var(--dashboard-textoSecundario);
-    font-size: 0.78rem;
+    font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
     transition: all 0.15s;
 }
@@ -291,14 +292,16 @@
     gap: 6px;
     padding: 6px 14px;
     border-radius: var(--dashboard-radioSm);
-    border: none;
-    background: var(--dashboard-acento);
-    color: #fff; /* Usamos blanco fijo para texto sobre acento */
-    font-size: 0.78rem;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: transparent;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: all 0.15s;
 }
 
 .configDeficitBotonGuardar:hover {
-    opacity: 0.9;
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
 }

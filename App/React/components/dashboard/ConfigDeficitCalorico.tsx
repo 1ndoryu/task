@@ -1,7 +1,7 @@
 /*
  * ConfigDeficitCalorico.tsx
  * Formulario de configuración del plugin de déficit calórico
- * Permite configurar datos del usuario para TMB y API Key de Gemini
+ * Permite configurar datos del usuario para TMB y API Keys
  */
 
 import {useState} from 'react';
@@ -15,24 +15,30 @@ interface ConfigDeficitCaloricoProps {
 }
 
 export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): JSX.Element {
-    const {datosUsuario, apiKeyGemini, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore();
+    const {datosUsuario, apiKeyGemini, apiKeyCalorieNinjas, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore();
 
     const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
-    const [apiKey, setApiKey] = useState(apiKeyGemini);
-    const [mostrarKey, setMostrarKey] = useState(false);
+    const [keyGroq, setKeyGroq] = useState(apiKeyGemini);
+    const [keyNinjas, setKeyNinjas] = useState(apiKeyCalorieNinjas || '');
+    const [mostrarKeyGroq, setMostrarKeyGroq] = useState(false);
+    const [mostrarKeyNinjas, setMostrarKeyNinjas] = useState(false);
 
     const tdeePreview = calcularTDEE(datos);
     const metodo = obtenerMetodoCalculo(datos);
 
     const manejarGuardar = () => {
         guardarDatosUsuario(datos);
-        guardarApiKey(apiKey);
+        guardarApiKey(keyGroq, keyNinjas);
         onCerrar();
     };
 
     const actualizarCampo = (campo: keyof DatosUsuarioTMB, valor: string) => {
         if (campo === 'sexo') {
             setDatos(prev => ({...prev, sexo: valor as 'masculino' | 'femenino'}));
+            return;
+        }
+        if (campo === 'objetivoDeficit') {
+            setDatos(prev => ({...prev, objetivoDeficit: valor as DatosUsuarioTMB['objetivoDeficit']}));
             return;
         }
         const numerico = valor === '' ? undefined : Number(valor);
@@ -78,6 +84,17 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                         <label className="configDeficitLabel">Minutos por sesión</label>
                         <input type="number" className="configDeficitInput" placeholder="45" value={datos.ejercicioMinutos ?? ''} onChange={e => actualizarCampo('ejercicioMinutos', e.target.value)} />
                     </div>
+
+                    <div className="configDeficitCampo configDeficitCampo--full">
+                        <label className="configDeficitLabel">Objetivo de Déficit</label>
+                        <select className="configDeficitInput" value={datos.objetivoDeficit ?? 'moderado'} onChange={e => actualizarCampo('objetivoDeficit', e.target.value)}>
+                            <option value="bajo">Bajo (-250 kcal/día)</option>
+                            <option value="moderado">Moderado (-500 kcal/día)</option>
+                            <option value="alto">Alto (-750 kcal/día)</option>
+                            <option value="peligroso">Peligroso / Extremo (-1000 kcal/día)</option>
+                        </select>
+                        <p className="configDeficitAyuda">Define qué tan agresiva será la reducción calórica.</p>
+                    </div>
                 </div>
 
                 {tdeePreview && (
@@ -90,19 +107,25 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
             </div>
 
             <div className="configDeficitSeccion">
-                <h4 className="configDeficitSeccionTitulo">API Key de Gemini</h4>
-                <p className="configDeficitSeccionNota">Necesaria para estimar calorías con IA desde fotos o texto</p>
+                <h4 className="configDeficitSeccionTitulo">API Key de Groq / OpenAI (IA)</h4>
+                <p className="configDeficitSeccionNota">Necesaria para traducir tus comidas a inglés (motor de búsqueda).</p>
 
                 <div className="configDeficitApiKey">
-                    <input
-                        type={mostrarKey ? 'text' : 'password'}
-                        className="configDeficitInput configDeficitInputApiKey"
-                        placeholder="AIzaSy..."
-                        value={apiKey}
-                        onChange={e => setApiKey(e.target.value)}
-                    />
-                    <button type="button" className="configDeficitBotonOjo" onClick={() => setMostrarKey(!mostrarKey)} title={mostrarKey ? 'Ocultar' : 'Mostrar'}>
-                        {mostrarKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                    <input type={mostrarKeyGroq ? 'text' : 'password'} className="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq(e.target.value)} />
+                    <button type="button" className="configDeficitBotonOjo" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
+                        {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                </div>
+            </div>
+
+            <div className="configDeficitSeccion">
+                <h4 className="configDeficitSeccionTitulo">API Key de CalorieNinjas (Datos)</h4>
+                <p className="configDeficitSeccionNota">Necesaria para obtener la información nutricional precisa.</p>
+
+                <div className="configDeficitApiKey">
+                    <input type={mostrarKeyNinjas ? 'text' : 'password'} className="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas(e.target.value)} />
+                    <button type="button" className="configDeficitBotonOjo" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
+                        {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
                 </div>
             </div>

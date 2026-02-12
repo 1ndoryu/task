@@ -13,6 +13,7 @@ export interface DatosUsuarioTMB {
     sexo?: 'masculino' | 'femenino';
     ejercicioSesiones?: number;
     ejercicioMinutos?: number;
+    objetivoDeficit?: 'bajo' | 'moderado' | 'alto' | 'peligroso' /* Nivel de déficit */;
 }
 
 /* Comida registrada con estimación calórica */
@@ -20,9 +21,10 @@ export interface ComidaRegistrada {
     id: string;
     descripcion: string;
     calorias: number;
-    proteinas?: number;
-    carbohidratos?: number;
-    grasas?: number;
+    proteinas: number;
+    carbohidratos: number;
+    grasas: number;
+    azucar?: number /* Nuevo campo para azúcar */;
     fotoUrl?: string;
     horaRegistro: number;
     fecha: string;
@@ -41,7 +43,8 @@ export interface RegistroDiario {
 /* Estado persistido del store */
 export interface DeficitCaloricoState {
     datosUsuario: DatosUsuarioTMB;
-    apiKeyGemini: string;
+    apiKeyGemini: string /* API Key para Groq/Gemini (Traducción) */;
+    apiKeyCalorieNinjas: string /* API Key para CalorieNinjas (Datos) */;
     comidas: ComidaRegistrada[];
     historial: RegistroDiario[];
     cargandoIA: boolean;
@@ -51,7 +54,7 @@ export interface DeficitCaloricoState {
 /* Acciones del store */
 export interface DeficitCaloricoActions {
     guardarDatosUsuario: (datos: Partial<DatosUsuarioTMB>) => void;
-    guardarApiKey: (key: string) => void;
+    guardarApiKey: (keyGroq: string, keyNinjas: string) => void;
     agregarComida: (comida: ComidaRegistrada) => void;
     eliminarComida: (comidaId: string) => void;
     setCargandoIA: (cargando: boolean) => void;

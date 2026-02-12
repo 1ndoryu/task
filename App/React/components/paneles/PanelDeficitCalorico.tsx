@@ -10,11 +10,13 @@
  * - HistorialSemanal: últimos 7 días
  */
 
-import {useState, useRef} from 'react';
-import {Camera, Loader2, Trash2, AlertCircle, Settings, Maximize2} from 'lucide-react';
+import {useState, useMemo} from 'react';
+import {Loader2, Trash2, AlertCircle, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
 import {OverlayEnfoque} from '../shared';
+import {calcularObjetivosMacro} from '../../utils/calculoTMB';
+import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
 
 interface PanelDeficitCaloricoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
@@ -22,52 +24,76 @@ interface PanelDeficitCaloricoProps {
     onAbrirConfiguracion: () => void;
 }
 
-/* Indicador visual de déficit/superávit */
-function ResumenDiario({calorias, tdee, deficit}: {calorias: number; tdee: number | null; deficit: number | null}): JSX.Element {
-    const porcentaje = tdee ? Math.min((calorias / tdee) * 100, 150) : 0;
-    const enDeficit = deficit !== null && deficit > 0;
+/* Indicador visual de macros y objetivos */
+function ResumenNutricional({calorias, proteinas, carbohidratos, grasas, azucar, tdee, datosUsuario}: {calorias: number; proteinas: number; carbohidratos: number; grasas: number; azucar: number; tdee: number | null; datosUsuario: DatosUsuarioTMB}): JSX.Element {
+    const objetivos = useMemo(() => {
+        if (!tdee) return null;
+        return calcularObjetivosMacro(tdee, datosUsuario.objetivoDeficit ?? 'moderado');
+    }, [tdee, datosUsuario.objetivoDeficit]);
+
+    if (!objetivos) {
+        return (
+            <div className="deficitResumenSimple">
+                <span className="deficitResumenValor">{calorias}</span>
+                <span className="deficitResumenEtiqueta">kcal consumidas</span>
+            </div>
+        );
+    }
+
+    const MetaBarra = ({label, actual, meta, color}: {label: string; actual: number; meta: number; color: string}) => {
+        const porcentaje = Math.min((actual / meta) * 100, 100);
+        return (
+            <div className="deficitMacroItem">
+                <div className="deficitMacroHeader">
+                    <span className="deficitMacroLabel">{label}</span>
+                    <span className="deficitMacroValor">
+                        {actual} / {meta}g
+                    </span>
+                </div>
+                <div className="deficitMacroBarraFondo">
+                    <div className="deficitMacroBarraProgreso" style={{width: `${porcentaje}%`, backgroundColor: color}} />
+                </div>
+            </div>
+        );
+    };
+
+    const porcentajeCal = Math.min((calorias / objetivos.calorias) * 100, 100);
+    const caloriasRestantes = objetivos.calorias - calorias;
+    const estadoCalorias = caloriasRestantes >= 0 ? `${caloriasRestantes} restantes` : `${Math.abs(caloriasRestantes)} exceso`;
+
+    /* Usar variables estándar o locales definidas en CSS */
+    const colorCalorias = calorias > objetivos.calorias ? 'var(--dashboard-estadoAlta)' : 'var(--dashboard-estadoExito)';
 
     return (
-        <div className="deficitResumen">
-            <div className="deficitResumenNumeros">
-                <div className="deficitResumenConsumo">
-                    <span className="deficitResumenValor">{calorias}</span>
-                    <span className="deficitResumenEtiqueta">consumidas</span>
+        <div className="deficitResumenNutricional">
+            {/* Calorías Principal */}
+            <div className="deficitCaloriasPrincipal">
+                <div className="deficitCaloriasInfo">
+                    <span className="deficitCaloriasValor">{calorias}</span>
+                    <span className="deficitCaloriasMeta">/ {objetivos.calorias} kcal</span>
                 </div>
-                {tdee && (
-                    <>
-                        <span className="deficitResumenSeparador">/</span>
-                        <div className="deficitResumenTDEE">
-                            <span className="deficitResumenValor">{tdee}</span>
-                            <span className="deficitResumenEtiqueta">TDEE</span>
-                        </div>
-                    </>
-                )}
+                <span className="deficitCaloriasEstado" style={{color: caloriasRestantes < 0 ? 'var(--dashboard-estadoAlta)' : 'var(--dashboard-textoSecundario)'}}>
+                    {estadoCalorias} (Meta: {datosUsuario.objetivoDeficit || 'moderado'})
+                </span>
+                <div className="deficitBarraGrandeFondo">
+                    <div className="deficitBarraGrandeProgreso" style={{width: `${porcentajeCal}%`, backgroundColor: colorCalorias}} />
+                </div>
             </div>
 
-            {/* Barra de progreso */}
-            {tdee && (
-                <div className="deficitBarra">
-                    <div
-                        className={`deficitBarraProgreso ${enDeficit ? 'deficitBarraProgreso--deficit' : 'deficitBarraProgreso--superavit'}`}
-                        style={{width: `${Math.min(porcentaje, 100)}%`}}
-                    />
-                </div>
-            )}
-
-            {deficit !== null && (
-                <span className={`deficitResumenBalance ${enDeficit ? 'deficitResumenBalance--deficit' : 'deficitResumenBalance--superavit'}`}>
-                    {enDeficit ? `Déficit: ${deficit} kcal` : `Superávit: ${Math.abs(deficit)} kcal`}
-                </span>
-            )}
+            {/* Grilla de Macros con colores locales del CSS */}
+            <div className="deficitMacrosGrid">
+                <MetaBarra label="Proteínas" actual={proteinas} meta={objetivos.proteinas} color="var(--color-proteina)" />
+                <MetaBarra label="Carbohidratos" actual={carbohidratos} meta={objetivos.carbohidratos} color="var(--color-carbo)" />
+                <MetaBarra label="Grasas" actual={grasas} meta={objetivos.grasas} color="var(--color-grasa)" />
+                <MetaBarra label="Azúcar" actual={azucar} meta={objetivos.azucar} color="var(--color-azucar)" />
+            </div>
         </div>
     );
 }
 
-/* Input de texto y foto para registrar comidas */
-function EntradaComida({onEnviarTexto, onTomarFoto, cargando}: {onEnviarTexto: (texto: string) => void; onTomarFoto: (archivo: File) => void; cargando: boolean}): JSX.Element {
+/* Input de texto para registrar comidas */
+function EntradaComida({onEnviarTexto, cargando}: {onEnviarTexto: (texto: string) => void; cargando: boolean}): JSX.Element {
     const [texto, setTexto] = useState('');
-    const inputFotoRef = useRef<HTMLInputElement>(null);
 
     const manejarEnviar = () => {
         const descripcion = texto.trim();
@@ -83,35 +109,15 @@ function EntradaComida({onEnviarTexto, onTomarFoto, cargando}: {onEnviarTexto: (
         }
     };
 
-    const manejarFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const archivo = e.target.files?.[0];
-        if (archivo) {
-            onTomarFoto(archivo);
-            e.target.value = '';
-        }
-    };
-
     return (
         <div className="deficitEntrada">
             <div className="deficitEntradaInputContenedor">
-                <input
-                    type="text"
-                    className="deficitEntradaInput"
-                    placeholder="Describe tu comida..."
-                    value={texto}
-                    onChange={e => setTexto(e.target.value)}
-                    onKeyDown={manejarTecla}
-                    disabled={cargando}
-                />
-                <button type="button" className="deficitEntradaBotonFoto" onClick={() => inputFotoRef.current?.click()} disabled={cargando} title="Tomar foto o seleccionar imagen">
-                    <Camera size={16} />
-                </button>
-                <input ref={inputFotoRef} type="file" accept="image/*" capture="environment" className="deficitEntradaInputOculto" onChange={manejarFoto} />
+                <input type="text" className="deficitEntradaInput" placeholder="Describe tu comida (ej: 2 huevos y pan)..." value={texto} onChange={e => setTexto(e.target.value)} onKeyDown={manejarTecla} disabled={cargando} />
             </div>
             {cargando && (
                 <div className="deficitEntradaCargando">
                     <Loader2 size={14} className="deficitSpinner" />
-                    <span>Analizando con IA...</span>
+                    <span>Analizando...</span>
                 </div>
             )}
         </div>
@@ -119,7 +125,7 @@ function EntradaComida({onEnviarTexto, onTomarFoto, cargando}: {onEnviarTexto: (
 }
 
 /* Lista de comidas registradas hoy */
-function ListaComidas({comidas, onEliminar}: {comidas: Array<{id: string; descripcion: string; calorias: number; horaRegistro: number}>; onEliminar: (id: string) => void}): JSX.Element | null {
+function ListaComidas({comidas, onEliminar}: {comidas: Array<{id: string; descripcion: string; calorias: number; proteinas?: number; carbohidratos?: number; grasas?: number; horaRegistro: number}>; onEliminar: (id: string) => void}): JSX.Element | null {
     if (comidas.length === 0) return null;
 
     return (
@@ -130,7 +136,12 @@ function ListaComidas({comidas, onEliminar}: {comidas: Array<{id: string; descri
                     <div key={comida.id} className="deficitComidaItem">
                         <div className="deficitComidaInfo">
                             <span className="deficitComidaDesc">{comida.descripcion}</span>
-                            <span className="deficitComidaHora">{hora}</span>
+                            <div className="deficitComidaDetalles">
+                                <span className="deficitComidaHora">{hora}</span>
+                                {comida.proteinas !== undefined && <span className="deficitComidaMacro">P:{comida.proteinas}</span>}
+                                {comida.carbohidratos !== undefined && <span className="deficitComidaMacro">C:{comida.carbohidratos}</span>}
+                                {comida.grasas !== undefined && <span className="deficitComidaMacro">G:{comida.grasas}</span>}
+                            </div>
                         </div>
                         <div className="deficitComidaAcciones">
                             <span className="deficitComidaCalorias">{comida.calorias} kcal</span>
@@ -163,9 +174,7 @@ function HistorialSemanal({historial}: {historial: Array<{fecha: string; totalCa
                         <div key={dia.fecha} className="deficitHistorialItem">
                             <span className="deficitHistorialFecha">{diaTexto}</span>
                             <span className="deficitHistorialCalorias">{dia.totalCalorias} kcal</span>
-                            <span className={`deficitHistorialBalance ${enDeficit ? 'deficitHistorialBalance--deficit' : 'deficitHistorialBalance--superavit'}`}>
-                                {enDeficit ? `-${dia.deficit}` : `+${Math.abs(dia.deficit)}`}
-                            </span>
+                            <span className={`deficitHistorialBalance ${enDeficit ? 'deficitHistorialBalance--deficit' : 'deficitHistorialBalance--superavit'}`}>{enDeficit ? `-${dia.deficit}` : `+${Math.abs(dia.deficit)}`}</span>
                         </div>
                     );
                 })}
@@ -177,19 +186,20 @@ function HistorialSemanal({historial}: {historial: Array<{fecha: string; totalCa
 export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelDeficitCaloricoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
 
-    const {
-        comidasHoy,
-        caloriasHoy,
-        tdee,
-        deficit,
-        apiKey,
-        cargandoIA,
-        errorIA,
-        historial,
-        registrarPorTexto,
-        registrarPorFoto,
-        eliminarComida
-    } = useDeficitCalorico();
+    const {comidasHoy, caloriasHoy, tdee, deficit, apiKey, cargandoIA, errorIA, historial, registrarPorTexto, eliminarComida, datosUsuario} = useDeficitCalorico();
+
+    /* Calcular totales de macros */
+    const macros = useMemo(() => {
+        return comidasHoy.reduce(
+            (acc, c) => ({
+                proteinas: acc.proteinas + (c.proteinas || 0),
+                carbohidratos: acc.carbohidratos + (c.carbohidratos || 0),
+                grasas: acc.grasas + (c.grasas || 0),
+                azucar: acc.azucar + (c.azucar || 0)
+            }),
+            {proteinas: 0, carbohidratos: 0, grasas: 0, azucar: 0}
+        );
+    }, [comidasHoy]);
 
     /* Mensaje si no hay API Key configurada */
     const sinApiKey = !apiKey;
@@ -203,8 +213,8 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
                 </div>
             )}
 
-            <ResumenDiario calorias={caloriasHoy} tdee={tdee} deficit={deficit} />
-            <EntradaComida onEnviarTexto={registrarPorTexto} onTomarFoto={registrarPorFoto} cargando={cargandoIA} />
+            <ResumenNutricional calorias={caloriasHoy} tdee={tdee} proteinas={macros.proteinas} carbohidratos={macros.carbohidratos} grasas={macros.grasas} azucar={macros.azucar} datosUsuario={datosUsuario} />
+            <EntradaComida onEnviarTexto={registrarPorTexto} cargando={cargandoIA} />
 
             {errorIA && (
                 <div className="deficitError">

@@ -1,102 +1,135 @@
 /*
  * panelDeficitCalorico.css
  * Estilos del panel de déficit calórico
- * Diseño minimalista con indicador visual de balance calórico
+ * Diseño minimalista con indicador visual de balance calórico y macros
  */
 
 .panelDeficitCalorico {
     display: flex;
     flex-direction: column;
     gap: 0;
+    /* Variables locales para gráficas */
+    --color-proteina: #3b82f6;
+    --color-carbo: #f97316;
+    --color-grasa: #eab308;
+    --color-azucar: #ec4899;
 }
 
 .deficitContenido {
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioLg);
 }
 
-/* Resumen diario */
-.deficitResumen {
+/* =========================================
+   Resumen Nutricional (Nuevo)
+   ========================================= */
+.deficitResumenNutricional {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
-.deficitResumenNumeros {
+/* Sección Calorías Principal */
+.deficitCaloriasPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.deficitCaloriasInfo {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    justify-content: space-between;
 }
 
-.deficitResumenConsumo,
-.deficitResumenTDEE {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.deficitResumenValor {
-    font-size: var(--dashboard-tamanoTitulo); /* Específico */
-    font-weight: 600;
+.deficitCaloriasValor {
+    font-size: var(--dashboard-tamanoTitulo);
+    font-weight: 700;
     color: var(--dashboard-textoActivo);
-    font-variant-numeric: tabular-nums;
+    line-height: 1;
 }
 
-.deficitResumenEtiqueta {
-    font-size: var(--dashboard-tamanoMuyPequeno);
+.deficitCaloriasMeta {
+    font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoSecundario);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.deficitResumenSeparador {
-    font-size: var(--dashboard-tamanoGrande);
-    color: var(--dashboard-textoSecundario);
-    margin: 0 2px;
-    opacity: 0.5;
-}
-
-/* Barra de progreso */
-.deficitBarra {
-    width: 100%;
-    height: 4px;
-    background: var(--dashboard-bordeSutil);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.deficitBarraProgreso {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.3s ease;
-}
-
-.deficitBarraProgreso--deficit {
-    background: var(--dashboard-estadoExito);
-}
-
-.deficitBarraProgreso--superavit {
-    background: var(--dashboard-estadoAlta);
-}
-
-/* Balance */
-.deficitResumenBalance {
-    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
 }
 
-.deficitResumenBalance--deficit {
-    color: var(--dashboard-estadoExito);
+.deficitCaloriasEstado {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
-.deficitResumenBalance--superavit {
-    color: var(--dashboard-estadoAlta);
+.deficitBarraGrandeFondo {
+    width: 100%;
+    height: 6px;
+    background: var(--dashboard-bordeSutil);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 2px;
 }
 
-/* Entrada de comida */
+.deficitBarraGrandeProgreso {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Grilla de Macros */
+.deficitMacrosGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+.deficitMacroItem {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.deficitMacroHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.deficitMacroLabel {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.deficitMacroValor {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoNormal);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitMacroBarraFondo {
+    width: 100%;
+    height: 6px;
+    background: var(--dashboard-fondoTerciario);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.deficitMacroBarraProgreso {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+/* =========================================
+   Entrada de comida
+   ========================================= */
 .deficitEntrada {
     display: flex;
     flex-direction: column;
@@ -128,28 +161,6 @@
 .deficitEntradaInput::placeholder {
     color: var(--dashboard-textoSecundario);
     opacity: 0.5;
-}
-
-.deficitEntradaBotonFoto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-radius: var(--dashboard-radioMd);
-    border: 1px solid var(--dashboard-bordeSutil);
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.deficitEntradaBotonFoto:hover {
-    color: var(--dashboard-acento);
-    border-color: var(--dashboard-acento);
-}
-
-.deficitEntradaInputOculto {
-    display: none;
 }
 
 .deficitEntradaCargando {
@@ -200,14 +211,16 @@
 .deficitListaComidas {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .deficitComidaItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
+    padding: 8px 4px;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
@@ -221,6 +234,7 @@
     gap: 2px;
     flex: 1;
     min-width: 0;
+    padding-right: 8px;
 }
 
 .deficitComidaDesc {
@@ -229,11 +243,26 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.deficitComidaDetalles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .deficitComidaHora {
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
+}
+
+.deficitComidaMacro {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTerciario);
+    padding: 1px 3px;
+    border-radius: 3px;
 }
 
 .deficitComidaAcciones {
@@ -245,8 +274,8 @@
 
 .deficitComidaCalorias {
     font-size: var(--dashboard-tamanoPequeno);
-    font-weight: 500;
-    color: var(--dashboard-textoNormal);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
     font-variant-numeric: tabular-nums;
 }
 
