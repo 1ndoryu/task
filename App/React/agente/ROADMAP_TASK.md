@@ -18,7 +18,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ## Estado Actual
 
-**Versión:** v1.0.27-beta (2026-02-11)
+**Versión:** v1.0.32-beta (2026-02-12)
 **Foco:** Sprint Correcciones Críticas + Time Tracker + Sistema de Plugins
 
 ---
@@ -521,3 +521,4 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   **Mejora Ayuno (v1.0.29):** Durante un ayuno activo ahora se muestra arriba del tiempo el objetivo seleccionado (texto pequeño) y se puede cambiar (14/16/18/20) en caliente; el progreso y el tiempo restante se recalculan al instante.
 > -   ✅ **Optimización Estimación Calorías (v1.0.30):** Implementada integración híbrida Groq + CalorieNinjas. Groq traduce el lenguaje natural a query en inglés y CalorieNinjas devuelve datos precisos. Reducción masiva de tokens y latencia. Configuración de ambas API keys en el panel de Déficit.
 > -   **Mejora UI Déficit (v1.0.31):** Agregada visualización detallada de Macros (Proteínas, Carbohidratos, Grasas, Azúcar) con barras de progreso y metas personalizadas según el objetivo de déficit seleccionado (Bajo/Moderado/Alto). Input de comidas prioriza descripción original en español.
+> -   **Fix TypeScript (v1.0.32-beta):** Solucionados errores de tipo en componente `Boton` (prop `titulo` reemplazada por `title`) y configuración inválida en `tsconfig.json`.

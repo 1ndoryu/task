@@ -45,27 +45,9 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
                 acciones={
                     <>
                         <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar hábitos" soloIcono={true} />
-                        <Boton
-                            variante="icono"
-                            onClick={onAbrirModalCrearHabito}
-                            icono={<Plus size={12} />}
-                            titulo="Nuevo Hábito"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
-                        />
-                        <Boton
-                            variante="icono"
-                            onClick={onAbrirModalConfigHabitos}
-                            icono={<Settings size={12} />}
-                            titulo="Configuración"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
-                        />
-                        <Boton
-                            variante="icono"
-                            onClick={() => setModoEnfoque(true)}
-                            icono={<Maximize2 size={12} />}
-                            titulo="Modo enfoque"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
-                        />
+                        <Boton variante="icono" onClick={onAbrirModalCrearHabito} icono={<Plus size={12} />} title="Nuevo Hábito" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
+                        <Boton variante="icono" onClick={onAbrirModalConfigHabitos} icono={<Settings size={12} />} title="Configuración" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
+                        <Boton variante="icono" onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
                         {handleMinimizar}
                     </>
                 }

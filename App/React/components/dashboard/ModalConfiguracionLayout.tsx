@@ -6,6 +6,7 @@
 
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
+import {Boton} from '../ui';
 import {Columns2, Columns3, Square, Target, Folder, Terminal, FileText, RotateCcw, ArrowUpDown, Activity} from 'lucide-react';
 import {ListaOrdenPaneles} from './ListaOrdenPaneles';
 import type {ModoColumnas, VisibilidadPaneles, PanelId, OrdenPanel} from '../../hooks/useConfiguracionLayout';
@@ -69,20 +70,35 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                     <p className="configLayoutSeccionDescripcion">Selecciona cuántas columnas quieres en el dashboard</p>
 
                     <div className="configLayoutColumnasOpciones">
-                        <button className={`configLayoutColumnaOpcion ${modoColumnas === 1 ? 'activo' : ''}`} onClick={() => onCambiarModo(1)} title="1 columna">
-                            <Square size={20} />
-                            <span>1 Columna</span>
-                        </button>
+                        <Boton
+                            variante={modoColumnas === 1 ? 'primario' : 'ghost'}
+                            onClick={() => onCambiarModo(1)}
+                            titulo="1 columna"
+                            claseAdicional={`configLayoutColumnaOpcion ${modoColumnas === 1 ? 'activo' : ''}`}
+                            icono={<Square size={20} />}
+                        >
+                            1 Columna
+                        </Boton>
 
-                        <button className={`configLayoutColumnaOpcion ${modoColumnas === 2 ? 'activo' : ''}`} onClick={() => onCambiarModo(2)} title="2 columnas">
-                            <Columns2 size={20} />
-                            <span>2 Columnas</span>
-                        </button>
+                        <Boton
+                            variante={modoColumnas === 2 ? 'primario' : 'ghost'}
+                            onClick={() => onCambiarModo(2)}
+                            titulo="2 columnas"
+                            claseAdicional={`configLayoutColumnaOpcion ${modoColumnas === 2 ? 'activo' : ''}`}
+                            icono={<Columns2 size={20} />}
+                        >
+                            2 Columnas
+                        </Boton>
 
-                        <button className={`configLayoutColumnaOpcion ${modoColumnas === 3 ? 'activo' : ''}`} onClick={() => onCambiarModo(3)} title="3 columnas">
-                            <Columns3 size={20} />
-                            <span>3 Columnas</span>
-                        </button>
+                        <Boton
+                            variante={modoColumnas === 3 ? 'primario' : 'ghost'}
+                            onClick={() => onCambiarModo(3)}
+                            titulo="3 columnas"
+                            claseAdicional={`configLayoutColumnaOpcion ${modoColumnas === 3 ? 'activo' : ''}`}
+                            icono={<Columns3 size={20} />}
+                        >
+                            3 Columnas
+                        </Boton>
                     </div>
                 </div>
 
@@ -96,9 +112,13 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                             </h4>
                             <p className="configLayoutSeccionDescripcion">Reordena los paneles usando los botones o cambia su columna</p>
                         </div>
-                        <button className="configLayoutBotonResetPequeno" onClick={onResetearOrden} title="Restaurar orden por defecto">
-                            <RotateCcw size={12} />
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={onResetearOrden}
+                            titulo="Restaurar orden por defecto"
+                            icono={<RotateCcw size={12} />}
+                            claseAdicional="configLayoutBotonResetPequeno"
+                        />
                     </div>
 
                     <ListaOrdenPaneles ordenPaneles={ordenPaneles} modoColumnas={modoColumnas} onMoverArriba={onMoverPanelArriba} onMoverAbajo={onMoverPanelAbajo} onCambiarColumna={onMoverPanelAColumna} />
@@ -127,10 +147,15 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
 
                 {/* Botón de reset */}
                 <div className="configLayoutAcciones">
-                    <button className="configLayoutBotonReset" onClick={onResetear} title="Restaurar configuración por defecto">
-                        <RotateCcw size={12} />
-                        <span>Restaurar todo por defecto</span>
-                    </button>
+                    <Boton
+                        variante="secundario"
+                        onClick={onResetear}
+                        titulo="Restaurar configuración por defecto"
+                        icono={<RotateCcw size={12} />}
+                        claseAdicional="configLayoutBotonReset"
+                    >
+                        Restaurar todo por defecto
+                    </Boton>
                 </div>
             </div>
         </Modal>

@@ -70,27 +70,9 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                     <>
                         <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" soloIcono={true} />
                         <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />
-                        <Boton
-                            variante="icono"
-                            onClick={onAbrirModalNuevaTarea}
-                            icono={<Plus size={12} />}
-                            titulo="Nueva Tarea"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
-                        />
-                        <Boton
-                            variante="icono"
-                            onClick={onAbrirModalConfigTareas}
-                            icono={<Settings size={12} />}
-                            titulo="Configuración"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
-                        />
-                        <Boton
-                            variante="icono"
-                            onClick={() => setModoEnfoque(true)}
-                            icono={<Maximize2 size={12} />}
-                            titulo="Modo enfoque"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
-                        />
+                        <Boton variante="icono" onClick={onAbrirModalNuevaTarea} icono={<Plus size={12} />} title="Nueva Tarea" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
+                        <Boton variante="icono" onClick={onAbrirModalConfigTareas} icono={<Settings size={12} />} title="Configuración" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
+                        <Boton variante="icono" onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
                         {handleMinimizar}
                     </>
                 }

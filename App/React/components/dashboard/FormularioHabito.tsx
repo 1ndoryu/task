@@ -10,6 +10,7 @@ import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito} from '../../t
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
 import {AccionesFormulario, SeccionPanel, SelectorNivel} from '../shared';
+import {Boton} from '../ui';
 
 /* Alias para compatibilidad con el componente */
 type DatosFormulario = DatosNuevoHabito;

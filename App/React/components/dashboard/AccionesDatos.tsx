@@ -35,24 +35,12 @@ export function AccionesDatos({onExportar, onImportar, importando, mensajeEstado
     return (
         <div id="acciones-datos-contenedor" className="accionesDatosContenedor">
             <div className="accionesDatosBotones">
-                <Boton
-                    variante="primario"
-                    onClick={onExportar}
-                    titulo="Descargar copia de seguridad"
-                    claseAdicional="botonAccionDatos botonExportar"
-                >
+                <Boton variante="primario" onClick={onExportar} title="Descargar copia de seguridad" claseAdicional="botonAccionDatos botonExportar">
                     <span className="botonAccionIcono">↓</span>
                     Exportar
                 </Boton>
 
-                <Boton
-                    variante="secundario"
-                    onClick={manejarClickImportar}
-                    disabled={importando}
-                    cargando={importando}
-                    titulo="Restaurar desde archivo"
-                    claseAdicional="botonAccionDatos botonImportar"
-                >
+                <Boton variante="secundario" onClick={manejarClickImportar} disabled={importando} cargando={importando} title="Restaurar desde archivo" claseAdicional="botonAccionDatos botonImportar">
                     <span className="botonAccionIcono">↑</span>
                     Importar
                 </Boton>

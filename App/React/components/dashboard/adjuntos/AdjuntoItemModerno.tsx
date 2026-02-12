@@ -1,4 +1,5 @@
 import {Trash2, Play, Pause, File, Lock, Download} from 'lucide-react';
+import {Boton} from '../../ui';
 import type {Adjunto} from '../../../types/dashboard';
 
 interface AdjuntoItemModernoProps {
@@ -24,15 +25,15 @@ export function AdjuntoItemModerno({adjunto, onDelete, urlPreview, esCifrado, on
                     <img src={urlPreview} alt={adjunto.nombre} />
                 ) : adjunto.tipo === 'audio' ? (
                     <div className="adjuntosGrid__audio">
-                        <button
-                            type="button"
-                            className="adjuntosGrid__audioBtn"
+                        <Boton
+                            variante="icono"
                             onClick={e => {
                                 e.stopPropagation();
                                 onToggleAudio(adjunto.id);
-                            }}>
-                            {isPlaying ? <Pause size={14} /> : <Play size={14} style={{marginLeft: '2px'}} />}
-                        </button>
+                            }}
+                            icono={isPlaying ? <Pause size={14} /> : <Play size={14} style={{marginLeft: '2px'}} />}
+                            claseAdicional="adjuntosGrid__audioBtn"
+                        />
                         <audio ref={audioRef} src={adjunto.url} onTimeUpdate={() => onTimeUpdate(adjunto.id)} onEnded={() => onAudioEnded(adjunto.id)} style={{display: 'none'}} />
                     </div>
                 ) : (
@@ -52,16 +53,16 @@ export function AdjuntoItemModerno({adjunto, onDelete, urlPreview, esCifrado, on
                         <Download size={12} />
                     </a>
                     {/* Delete */}
-                    <button
-                        type="button"
-                        className="adjuntosGrid__accion adjuntosGrid__accion--peligro"
-                        title="Eliminar"
+                    <Boton
+                        variante="icono"
                         onClick={e => {
                             e.stopPropagation();
                             onDelete(adjunto.id);
-                        }}>
-                        <Trash2 size={12} />
-                    </button>
+                        }}
+                        icono={<Trash2 size={12} />}
+                        titulo="Eliminar"
+                        claseAdicional="adjuntosGrid__accion adjuntosGrid__accion--peligro"
+                    />
                 </div>
             </div>
         </div>
