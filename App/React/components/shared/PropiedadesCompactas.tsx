@@ -12,6 +12,7 @@ import {Calendar, Flag, Zap} from 'lucide-react';
 import {MenuContextual} from './MenuContextual';
 import {obtenerFechaLocalISO} from '../../utils/fecha';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
+import {Boton} from './Boton';
 
 /* Mapeo de etiquetas en espanol */
 const ETIQUETAS_PRIORIDAD: Record<NivelPrioridad, string> = {
@@ -90,26 +91,26 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
             <div className="propiedadesCompactas__contenido">
                 {/* Prioridad */}
                 <div className="propiedadesCompactas__item">
-                    <button ref={prioridadRef} type="button" className={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'var(--dashboard-textoNormal)'} : undefined}>
+                    <Boton ref={prioridadRef} type="button" claseAdicional={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'var(--dashboard-textoNormal)'} : undefined}>
                         <Flag size={14} fill={prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'none'} />
                         <span>{ETIQUETAS_PRIORIDAD[prioridad]}</span>
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Urgencia */}
                 <div className="propiedadesCompactas__item">
-                    <button ref={urgenciaRef} type="button" className={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: 'var(--dashboard-estadoMedia)'} : undefined}>
+                    <Boton ref={urgenciaRef} type="button" claseAdicional={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: 'var(--dashboard-estadoMedia)'} : undefined}>
                         <Zap size={14} fill={urgencia ? 'var(--dashboard-estadoMedia)' : 'none'} />
                         <span>{urgencia ? ETIQUETAS_URGENCIA[urgencia] : 'Urgencia'}</span>
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Fecha Limite */}
                 <div className="propiedadesCompactas__item">
-                    <button ref={fechaRef} type="button" className={`pillOpcion${!fechaLimite ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('fecha', fechaRef)} title="Fecha Limite">
+                    <Boton ref={fechaRef} type="button" claseAdicional={`pillOpcion${!fechaLimite ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('fecha', fechaRef)} title="Fecha Limite">
                         <Calendar size={14} />
                         <span>{fechaLimite ? formatearFecha(fechaLimite) : 'Fecha'}</span>
-                    </button>
+                    </Boton>
                 </div>
             </div>
 

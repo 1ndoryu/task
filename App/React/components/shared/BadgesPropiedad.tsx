@@ -7,6 +7,7 @@
 
 import type {ReactNode} from 'react';
 import {X} from 'lucide-react';
+import {Boton} from './Boton';
 
 interface BadgePropiedad {
     id: string;
@@ -29,9 +30,9 @@ export function BadgesPropiedad({badges, onEliminar}: BadgesPropiedadProps): JSX
                 <div key={badge.id} className={`badgesPropiedad__badge badgesPropiedad__badge--${badge.variante || 'normal'}`}>
                     {badge.icono && <span className="badgesPropiedad__badgeIcono">{badge.icono}</span>}
                     <span className="badgesPropiedad__badgeTexto">{badge.etiqueta}</span>
-                    <button type="button" className="badgesPropiedad__badgeEliminar" onClick={() => onEliminar(badge.id)} aria-label={`Quitar ${badge.etiqueta}`}>
+                    <Boton type="button" claseAdicional="badgesPropiedad__badgeEliminar" onClick={() => onEliminar(badge.id)} aria-label={`Quitar ${badge.etiqueta}`}>
                         <X size={10} />
-                    </button>
+                    </Boton>
                 </div>
             ))}
         </div>

@@ -13,6 +13,7 @@
 
 import {useState, useRef, type ReactNode} from 'react';
 import {MenuContextual} from './MenuContextual';
+import {Boton} from './Boton';
 
 export interface OpcionCompacta {
     id: string;
@@ -64,10 +65,10 @@ export function BotonOpcionCompacta({icono, texto, opciones, onSeleccionar, vaci
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={clasesPill} onClick={manejarClick} title={titulo}>
+            <Boton ref={botonRef} type="button" claseAdicional={clasesPill} onClick={manejarClick} title={titulo}>
                 {icono}
                 <span>{texto}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <MenuContextual

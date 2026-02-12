@@ -98,15 +98,15 @@ export function HistorialAyuno({sesiones, maxPorPagina = 6, onEliminarSesion}: H
 
                     {totalPaginas > 1 && (
                         <div className="panelAyunoHistorialPaginacion">
-                            <button type="button" className="panelAyunoHistorialPaginacionBoton" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={pagina <= 0}>
+                            <Boton type="button" claseAdicional="panelAyunoHistorialPaginacionBoton" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={pagina <= 0}>
                                 Anterior
-                            </button>
+                            </Boton>
                             <span className="panelAyunoHistorialPaginacionTexto">
                                 {pagina + 1}/{totalPaginas}
                             </span>
-                            <button type="button" className="panelAyunoHistorialPaginacionBoton" onClick={() => setPagina(p => Math.min(totalPaginas - 1, p + 1))} disabled={pagina >= totalPaginas - 1}>
+                            <Boton type="button" claseAdicional="panelAyunoHistorialPaginacionBoton" onClick={() => setPagina(p => Math.min(totalPaginas - 1, p + 1))} disabled={pagina >= totalPaginas - 1}>
                                 Siguiente
-                            </button>
+                            </Boton>
                         </div>
                     )}
                 </>

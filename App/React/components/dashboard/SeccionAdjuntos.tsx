@@ -9,6 +9,7 @@ import {useRef, useState} from 'react';
 import {Upload, Loader2, AlertTriangle} from 'lucide-react';
 import type {Adjunto} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
+import {Boton} from '../shared/Boton';
 
 import {useAudioPlayer} from '../../hooks/shared/useAudioPlayer';
 import {useAdjuntosCifrados} from '../../hooks/adjuntos/useAdjuntosCifrados';
@@ -148,10 +149,10 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     {puedeSubir && ` (${adjuntos.length}/${limiteAdjuntos})`}
                 </span>
                 <div className="propiedadesCompactas__contenido">
-                    <button type="button" className="pillOpcion pillOpcion--vacio" onClick={manejarClickSubida} title={alcanzadoLimite ? 'Límite alcanzado' : 'Agregar adjunto'} disabled={estadoSubida.subiendo || alcanzadoLimite}>
+                    <Boton type="button" claseAdicional="pillOpcion pillOpcion--vacio" onClick={manejarClickSubida} title={alcanzadoLimite ? 'Límite alcanzado' : 'Agregar adjunto'} disabled={estadoSubida.subiendo || alcanzadoLimite}>
                         {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Upload size={14} />}
                         <span>{alcanzadoLimite ? 'Límite' : 'Agregar'}</span>
-                    </button>
+                    </Boton>
                     {(error || estadoSubida.error) && (
                         <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
                             {error || estadoSubida.error}

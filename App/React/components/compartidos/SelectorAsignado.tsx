@@ -59,7 +59,7 @@ export function SelectorAsignado({participantes, asignadoActual, onAsignar, disa
 
     return (
         <div className="selectorAsignadoContenedor" ref={contenedorRef}>
-            <button type="button" className={`selectorAsignadoBoton ${asignado ? 'selectorAsignadoBotonActivo' : ''}`} onClick={() => setAbierto(!abierto)} disabled={disabled}>
+            <Boton type="button" claseAdicional={`selectorAsignadoBoton ${asignado ? 'selectorAsignadoBotonActivo' : ''}`} onClick={() => setAbierto(!abierto)} disabled={disabled}>
                 {asignado ? (
                     <>
                         <img src={asignado.avatar} alt={asignado.nombre} className="selectorAsignadoAvatar" />
@@ -72,28 +72,28 @@ export function SelectorAsignado({participantes, asignadoActual, onAsignar, disa
                     </>
                 )}
                 <ChevronDown size={12} className={`selectorAsignadoFlecha ${abierto ? 'selectorAsignadoFlechaAbierto' : ''}`} />
-            </button>
+            </Boton>
 
             {abierto && (
                 <div className="selectorAsignadoMenu">
                     {/* Opción para quitar asignación */}
                     {asignado && (
-                        <button type="button" className="selectorAsignadoOpcion selectorAsignadoOpcionQuitar" onClick={() => manejarSeleccion(null)}>
+                        <Boton type="button" claseAdicional="selectorAsignadoOpcion selectorAsignadoOpcionQuitar" onClick={() => manejarSeleccion(null)}>
                             <X size={14} />
                             <span>Quitar asignación</span>
-                        </button>
+                        </Boton>
                     )}
 
                     {/* Lista de participantes */}
                     {participantes.map(participante => (
-                        <button key={participante.usuarioId} type="button" className={`selectorAsignadoOpcion ${asignadoActual === participante.usuarioId ? 'selectorAsignadoOpcionActiva' : ''}`} onClick={() => manejarSeleccion(participante)}>
+                        <Boton key={participante.usuarioId} type="button" claseAdicional={`selectorAsignadoOpcion ${asignadoActual === participante.usuarioId ? 'selectorAsignadoOpcionActiva' : ''}`} onClick={() => manejarSeleccion(participante)}>
                             <img src={participante.avatar} alt={participante.nombre} className="selectorAsignadoAvatarOpcion" />
                             <div className="selectorAsignadoOpcionInfo">
                                 <span className="selectorAsignadoOpcionNombre">{participante.nombre}</span>
                                 {participante.esPropietario && <span className="selectorAsignadoOpcionRol">Propietario</span>}
                             </div>
                             {asignadoActual === participante.usuarioId && <Check size={14} className="selectorAsignadoCheck" />}
-                        </button>
+                        </Boton>
                     ))}
                 </div>
             )}

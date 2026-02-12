@@ -5,6 +5,7 @@
  */
 
 import type {ReactNode} from 'react';
+import {Boton} from './Boton';
 
 export type TipoBadge = 'adjunto' | 'descripcion' | 'repeticion' | 'fecha' | 'prioridad' | 'frecuencia' | 'racha' | 'destacado' | 'personalizado';
 
@@ -38,9 +39,9 @@ export function BadgeInfo({tipo, icono, texto, titulo, variante = 'normal', onCl
 
     if (onClick) {
         return (
-            <button type="button" className={clases} title={titulo} onClick={onClick}>
+            <Boton type="button" claseAdicional={clases} title={titulo} onClick={onClick}>
                 {contenido}
-            </button>
+            </Boton>
         );
     }
 

@@ -10,6 +10,7 @@ import {useState, useRef, useEffect, useCallback} from 'react';
 import {User, UserPlus, X, Crown, Edit3, Eye} from 'lucide-react';
 import {MenuFlotante} from './MenuFlotante';
 import type {Participante, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
+import {Boton} from './Boton';
 
 interface SeccionResponsablesProps {
     /* Participantes actuales del elemento */
@@ -145,9 +146,9 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                         )}
                     </div>
                     {puedeGestionar && companeroDisponibles.length > 0 && (
-                        <button type="button" className="seccionResponsables__botonAgregarCompacto" onClick={toggleMenuAgregar} title="Agregar responsable">
+                        <Boton type="button" claseAdicional="seccionResponsables__botonAgregarCompacto" onClick={toggleMenuAgregar} title="Agregar responsable">
                             <UserPlus size={14} />
-                        </button>
+                        </Boton>
                     )}
                 </div>
                 {/* Menu agregar para modo compacto */}
@@ -158,26 +159,26 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
 
                             {/* Selector de rol */}
                             <div className="seccionResponsables__selectorRol">
-                                <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
+                                <Boton type="button" claseAdicional={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
                                     <Edit3 size={12} />
                                     <span>Colaborador</span>
-                                </button>
-                                <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
+                                </Boton>
+                                <Boton type="button" claseAdicional={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
                                     <Eye size={12} />
                                     <span>Observador</span>
-                                </button>
+                                </Boton>
                             </div>
 
                             {/* Lista de companeros disponibles */}
                             <div className="seccionResponsables__listaCompaneros">
                                 {companeroDisponibles.map(companero => (
-                                    <button key={companero.companeroId} type="button" className="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
+                                    <Boton key={companero.companeroId} type="button" claseAdicional="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
                                         <img src={companero.avatar} alt={companero.nombre} className="seccionResponsables__companeroAvatar" />
                                         <div className="seccionResponsables__companeroInfo">
                                             <span className="seccionResponsables__companeroNombre">{companero.nombre}</span>
                                             <span className="seccionResponsables__companeroEmail">{companero.email}</span>
                                         </div>
-                                    </button>
+                                    </Boton>
                                 ))}
                             </div>
                         </div>
@@ -197,10 +198,10 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                     /* Sin participantes: mostrar pill "Ninguno" con boton agregar */
                     puedeGestionar && companeroDisponibles.length > 0 ? (
                         <div className="seccionResponsables__agregarContenedor">
-                            <button type="button" className="pillOpcion pillOpcion--vacio" onClick={toggleMenuAgregar}>
+                            <Boton type="button" claseAdicional="pillOpcion pillOpcion--vacio" onClick={toggleMenuAgregar}>
                                 <User size={14} />
                                 <span>Agregar</span>
-                            </button>
+                            </Boton>
                         </div>
                     ) : (
                         <span className="pillOpcion pillOpcion--vacio pillOpcion--disabled">
@@ -213,22 +214,22 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                     <>
                         {participantes.map(participante => (
                             <div key={participante.id} className="seccionResponsables__participante">
-                                <button type="button" className="pillOpcion" onClick={e => puedeGestionar && !participante.esPropietario && toggleMenuParticipante(e, participante.id)} disabled={!puedeGestionar || participante.esPropietario}>
+                                <Boton type="button" claseAdicional="pillOpcion" onClick={e => puedeGestionar && !participante.esPropietario && toggleMenuParticipante(e, participante.id)} disabled={!puedeGestionar || participante.esPropietario}>
                                     <img src={participante.avatar} alt={participante.nombre} className="seccionResponsables__participanteAvatar" />
                                     <span>{participante.nombre}</span>
                                     <span className="seccionResponsables__participanteRol" title={obtenerEtiquetaRol(participante.rol)}>
                                         {obtenerIconoRol(participante.rol)}
                                     </span>
-                                </button>
+                                </Boton>
                             </div>
                         ))}
 
                         {/* Boton agregar mas */}
                         {puedeGestionar && companeroDisponibles.length > 0 && (
                             <div className="seccionResponsables__agregarContenedor">
-                                <button type="button" className="seccionResponsables__botonAgregarSmall" onClick={toggleMenuAgregar} title="Agregar participante">
+                                <Boton type="button" claseAdicional="seccionResponsables__botonAgregarSmall" onClick={toggleMenuAgregar} title="Agregar participante">
                                     <UserPlus size={14} />
-                                </button>
+                                </Boton>
                             </div>
                         )}
                     </>
@@ -243,26 +244,26 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
 
                         {/* Selector de rol */}
                         <div className="seccionResponsables__selectorRol">
-                            <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
+                            <Boton type="button" claseAdicional={`seccionResponsables__opcionRol ${rolSeleccionado === 'colaborador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('colaborador')}>
                                 <Edit3 size={12} />
                                 <span>Colaborador</span>
-                            </button>
-                            <button type="button" className={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
+                            </Boton>
+                            <Boton type="button" claseAdicional={`seccionResponsables__opcionRol ${rolSeleccionado === 'observador' ? 'seccionResponsables__opcionRol--activo' : ''}`} onClick={() => setRolSeleccionado('observador')}>
                                 <Eye size={12} />
                                 <span>Observador</span>
-                            </button>
+                            </Boton>
                         </div>
 
                         {/* Lista de companeros disponibles */}
                         <div className="seccionResponsables__listaCompaneros">
                             {companeroDisponibles.map(companero => (
-                                <button key={companero.companeroId} type="button" className="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
+                                <Boton key={companero.companeroId} type="button" claseAdicional="seccionResponsables__companeroItem" onClick={() => manejarAgregarParticipante(companero.companeroId)}>
                                     <img src={companero.avatar} alt={companero.nombre} className="seccionResponsables__companeroAvatar" />
                                     <div className="seccionResponsables__companeroInfo">
                                         <span className="seccionResponsables__companeroNombre">{companero.nombre}</span>
                                         <span className="seccionResponsables__companeroEmail">{companero.email}</span>
                                     </div>
-                                </button>
+                                </Boton>
                             ))}
                         </div>
                     </div>
@@ -280,20 +281,20 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                             <div className="seccionResponsables__menuParticipante" style={{position: 'static', marginTop: 0}}>
                                 <div className="seccionResponsables__menuSeccion">
                                     <span className="seccionResponsables__menuEtiqueta">Cambiar rol</span>
-                                    <button type="button" className={`seccionResponsables__menuOpcion ${participante.rol === 'colaborador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'colaborador')}>
+                                    <Boton type="button" claseAdicional={`seccionResponsables__menuOpcion ${participante.rol === 'colaborador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'colaborador')}>
                                         <Edit3 size={12} />
                                         <span>Colaborador</span>
-                                    </button>
-                                    <button type="button" className={`seccionResponsables__menuOpcion ${participante.rol === 'observador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'observador')}>
+                                    </Boton>
+                                    <Boton type="button" claseAdicional={`seccionResponsables__menuOpcion ${participante.rol === 'observador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'observador')}>
                                         <Eye size={12} />
                                         <span>Observador</span>
-                                    </button>
+                                    </Boton>
                                 </div>
                                 <div className="seccionResponsables__menuDivisor" />
-                                <button type="button" className="seccionResponsables__menuOpcion seccionResponsables__menuOpcion--peligro" onClick={() => manejarRemoverParticipante(participante.id)}>
+                                <Boton type="button" claseAdicional="seccionResponsables__menuOpcion seccionResponsables__menuOpcion--peligro" onClick={() => manejarRemoverParticipante(participante.id)}>
                                     <X size={12} />
                                     <span>Remover</span>
-                                </button>
+                                </Boton>
                             </div>
                         );
                     })()}

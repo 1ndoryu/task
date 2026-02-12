@@ -7,6 +7,7 @@
 import {useState, useCallback} from 'react';
 import {UserPlus, Check, Users, Eye, Edit3} from 'lucide-react';
 import type {CompaneroEquipo, RolCompartido} from '../../types/dashboard';
+import {Boton} from '../shared/Boton';
 
 interface SelectorCompanerosProps {
     companeros: CompaneroEquipo[];
@@ -47,14 +48,14 @@ export function SelectorCompaneros({companeros, companeroSeleccionado, rolSelecc
                 <div className="selectorRolContainer">
                     <span className="selectorRolTitulo">Rol:</span>
                     <div className="selectorRolOpciones">
-                        <button type="button" className={`selectorRolOpcion ${rolSeleccionado === 'colaborador' ? 'selectorRolOpcionActiva' : ''}`} onClick={() => onCambiarRol('colaborador')} disabled={disabled} title="Puede ver y editar">
+                        <Boton type="button" claseAdicional={`selectorRolOpcion ${rolSeleccionado === 'colaborador' ? 'selectorRolOpcionActiva' : ''}`} onClick={() => onCambiarRol('colaborador')} disabled={disabled} title="Puede ver y editar">
                             <Edit3 size={12} />
                             <span>Colaborador</span>
-                        </button>
-                        <button type="button" className={`selectorRolOpcion ${rolSeleccionado === 'observador' ? 'selectorRolOpcionActiva' : ''}`} onClick={() => onCambiarRol('observador')} disabled={disabled} title="Solo puede ver">
+                        </Boton>
+                        <Boton type="button" claseAdicional={`selectorRolOpcion ${rolSeleccionado === 'observador' ? 'selectorRolOpcionActiva' : ''}`} onClick={() => onCambiarRol('observador')} disabled={disabled} title="Solo puede ver">
                             <Eye size={12} />
                             <span>Observador</span>
-                        </button>
+                        </Boton>
                     </div>
                 </div>
             )}

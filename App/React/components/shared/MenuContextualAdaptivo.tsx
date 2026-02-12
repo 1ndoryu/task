@@ -11,6 +11,7 @@ import {useEsMovil} from '../../hooks/useEsMovil';
 import {MenuContextual} from './MenuContextual';
 import {BottomSheet} from './BottomSheet';
 import type {OpcionMenu} from './MenuContextual';
+import {Boton} from './Boton';
 
 interface MenuContextualAdaptivoProps {
     opciones: OpcionMenu[];
@@ -35,10 +36,10 @@ export function MenuContextualAdaptivo({opciones, posicionX, posicionY, onSelecc
             <BottomSheet estaAbierto={true} onCerrar={onCerrar} titulo={titulo}>
                 {opciones.map(opcion => (
                     <div key={opcion.id}>
-                        <button type="button" className={`bottomSheetItem ${opcion.peligroso ? 'bottomSheetItem--peligro' : ''}`} onClick={() => !opcion.deshabilitado && manejarSeleccion(opcion.id)} disabled={opcion.deshabilitado}>
+                        <Boton type="button" claseAdicional={`bottomSheetItem ${opcion.peligroso ? 'bottomSheetItem--peligro' : ''}`} onClick={() => !opcion.deshabilitado && manejarSeleccion(opcion.id)} disabled={opcion.deshabilitado}>
                             {opcion.icono && <span className="bottomSheetItem__icono">{opcion.icono}</span>}
                             <span className="bottomSheetItem__texto">{opcion.etiqueta}</span>
-                        </button>
+                        </Boton>
                         {opcion.separadorDespues && <div className="bottomSheetSeparador" />}
                     </div>
                 ))}

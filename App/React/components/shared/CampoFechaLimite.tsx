@@ -7,6 +7,7 @@
 import {X, AlertCircle} from 'lucide-react';
 import {SeccionPanel} from './SeccionPanel';
 import {obtenerFechaEfectiva} from '../../utils/fecha';
+import {Boton} from './Boton';
 
 type EstadoFecha = 'vencida' | 'urgente' | 'proxima' | 'normal' | null;
 
@@ -59,9 +60,9 @@ export function CampoFechaLimite({titulo = 'Fecha Limite', valor, onChange, most
                 {estadoFecha === 'proxima' && <span className="campoFechaLimiteAlerta campoFechaLimiteAlertaProxima">Pronto</span>}
 
                 {mostrarBotonLimpiar && valor && (
-                    <button type="button" className="campoFechaLimiteBotonLimpiar" onClick={() => onChange('')} title="Quitar fecha" disabled={disabled}>
+                    <Boton type="button" claseAdicional="campoFechaLimiteBotonLimpiar" onClick={() => onChange('')} title="Quitar fecha" disabled={disabled}>
                         <X size={12} />
-                    </button>
+                    </Boton>
                 )}
             </div>
         </SeccionPanel>
