@@ -4,7 +4,7 @@
 **Objetivo:** Convertir todos los botones e inputs del proyecto en componentes reutilizables sin romper funcionalidad.
 
 ## Estado General
-- 🔄 **En Progreso** - Fase 3: Migración de botones (28 componentes migrados + corrección de errores TypeScript)
+- 🔄 **En Progreso** - Fase 3: Migración de botones (30 componentes migrados, 16 botones totales)
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
@@ -79,8 +79,36 @@
 - [ ] 5.2 - Actualizar documentación
 - [ ] 5.3 - Commit final
 
+## Fase 6: Centralización de Estilos (NUEVO)
+**Ver archivo:** [PLAN_CENTRALIZACION_ESTILOS.md](./PLAN_CENTRALIZACION_ESTILOS.md)
+
+### Objetivos
+- Eliminar 100+ usos de `claseAdicional` en componentes migrados
+- Centralizar todos los estilos en ui.css con sistema de variantes
+- Limpiar ~110 archivos CSS con reglas obsoletas/duplicadas
+- Reducir tamaño CSS en 30-40% (estimado)
+
+### Estado
+- [x] 6.1 - Análisis completo de clases duplicadas (100+ usos identificados)
+- [x] 6.2 - Creación de plan detallado de centralización
+- [ ] 6.3 - Extensión del sistema de variantes (nuevas variantes: pestaña, navegacion, badge, opcion)
+- [ ] 6.4 - Migración de componentes por categoría (10 categorías identificadas)
+- [ ] 6.5 - Limpieza de CSS obsoleto
+- [ ] 6.6 - Consolidación de archivos CSS (120 → ~15 archivos)
+- [ ] 6.7 - Validación visual y funcional
+- [ ] 6.8 - Testing de temas y performance
+
+**Estimado:** 5-7 días de trabajo completo
+
 ---
 
-## Notas de Progreso
-_Se actualizará conforme avance el trabajo_
+## Notas de Progreso Finales
+- ✅ 30 componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos, modales)
+- ✅ Componentes base de UI creados y funcionando
+- ✅ Corrección masiva de errores TypeScript: prop "titulo" → "title" (español → estándar HTML)
+- ✅ **NUEVO:** Plan completo de centralización de estilos documentado (PLAN_CENTRALIZACION_ESTILOS.md)
+- 🔄 Continuando con migración masiva de componentes complejos (modales, listas, formularios)
+- 📝 Patrón de migración establecido: import Boton, reemplazar <button> preservando clases con claseAdicional
+- ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
+- 📋 **PRÓXIMO:** Decidir si continuar con migración de botones O iniciar centralización de estilos
 

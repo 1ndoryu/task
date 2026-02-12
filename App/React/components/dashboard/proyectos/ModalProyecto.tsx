@@ -17,6 +17,7 @@ import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEqu
 import type {EstadoProyecto} from '../../shared';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
 import {AccionesFormulario, Modal, SeccionPanel} from '../../shared';
+import {Boton} from '../../ui';
 import {MapaCalorProyecto} from '../../shared/MapaCalorProyecto';
 import {PanelChatHistorial} from '../PanelChatHistorial';
 import {useMensajesNoLeidos} from '../../../hooks/useMensajes';
@@ -245,28 +246,35 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
     const accionesHeader = (
         <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
             {/* Estadisticas (Placeholder) */}
-            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
-                <BarChart2 size={16} className="textoApagado" />
-            </button>
+            <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" icono={<BarChart2 size={16} className="textoApagado" />} disabled claseAdicional="botonIcono botonIcono--sutil" style={{cursor: 'default', opacity: 0.5}} />
 
             {/* Actividad / Chat */}
-            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChatVisible} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
-                {tieneMensajesSinLeer ? (
-                    <div style={{position: 'relative'}}>
+            <Boton
+                type="button"
+                variante="icono"
+                onClick={toggleChatVisible}
+                title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'}
+                icono={
+                    tieneMensajesSinLeer ? (
+                        <div style={{position: 'relative'}}>
+                            <Activity size={16} />
+                            <span className="indicadorBadge" />
+                        </div>
+                    ) : (
                         <Activity size={16} />
-                        <span className="indicadorBadge" />
-                    </div>
-                ) : (
-                    <Activity size={16} />
-                )}
-            </button>
+                    )
+                }
+                claseAdicional={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`}
+                style={{cursor: 'pointer'}}
+            />
         </div>
     );
 
     /* Boton del encabezado (Chat/Historial) */
     const botonChat = modoEdicion ? (
-        <button
+        <Boton
             type="button"
+            variante="ghost"
             style={{
                 background: 'transparent',
                 border: 'none',
@@ -294,7 +302,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                     }}
                 />
             )}
-        </button>
+        </Boton>
     ) : null;
 
     return (
@@ -303,12 +311,12 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                 <>
                     {/* Pestañas para móvil */}
                     <div className="panelConfiguracionPestanas">
-                        <button type="button" className={`panelConfiguracionPestana ${pestanaActiva === 'configuracion' ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => setPestanaActiva('configuracion')}>
+                        <Boton type="button" variante="ghost" onClick={() => setPestanaActiva('configuracion')} claseAdicional={`panelConfiguracionPestana ${pestanaActiva === 'configuracion' ? 'panelConfiguracionPestana--activa' : ''}`}>
                             Configuracion
-                        </button>
-                        <button type="button" className={`panelConfiguracionPestana ${pestanaActiva === 'chat' ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => setPestanaActiva('chat')}>
+                        </Boton>
+                        <Boton type="button" variante="ghost" onClick={() => setPestanaActiva('chat')} claseAdicional={`panelConfiguracionPestana ${pestanaActiva === 'chat' ? 'panelConfiguracionPestana--activa' : ''}`}>
                             Chat / Historial
-                        </button>
+                        </Boton>
                     </div>
 
                     {/* Layout de 2 columnas */}

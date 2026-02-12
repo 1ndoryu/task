@@ -7,6 +7,7 @@
 import {useState, useEffect, useRef} from 'react';
 import {X, CheckSquare, Activity, Folder, Calendar, Flag, Hash, ArrowRight, Layers, AlertCircle, Clock, Repeat, ChevronDown, Paperclip, Loader2, Plus} from 'lucide-react';
 import {MenuContextual} from '../shared';
+import {Boton} from '../ui';
 import type {Proyecto, Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../../hooks/useAdjuntos';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
@@ -175,9 +176,13 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                 <form onSubmit={manejarSubmit}>
                     <div className="creacionRapidaInputWrapper">
                         <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} onKeyDown={manejarKeyDown} placeholder={obtenerPlaceholder()} className="creacionRapidaInput" autoFocus />
-                        <button type="submit" className="creacionRapidaBotonEnviar" disabled={!texto.trim() || cargando}>
-                            <ArrowRight size={20} />
-                        </button>
+                        <Boton
+                            type="submit"
+                            variante="primario"
+                            disabled={!texto.trim() || cargando}
+                            icono={<ArrowRight size={20} />}
+                            claseAdicional="creacionRapidaBotonEnviar"
+                        />
                     </div>
 
                     {renderOpcionesValores()}
@@ -340,153 +345,173 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
             return (
                 <div className="creacionRapidaOpciones">
                     {/* Selector de Proyecto */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuProyecto({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Layers size={14} />
-                        <span>{proyectoSeleccionado?.nombre || 'Sin Proyecto'}</span>
-                    </button>
+                        }}
+                        icono={<Layers size={14} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {proyectoSeleccionado?.nombre || 'Sin Proyecto'}
+                    </Boton>
 
                     {/* Selector de Fecha */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuFecha({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Calendar size={14} className={opciones.fecha === 'hoy' ? 'textoAdvertencia' : ''} />
-                        <span>{obtenerEtiquetaFecha(opciones.fecha)}</span>
-                    </button>
+                        }}
+                        icono={<Calendar size={14} className={opciones.fecha === 'hoy' ? 'textoAdvertencia' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {obtenerEtiquetaFecha(opciones.fecha)}
+                    </Boton>
 
                     {/* Selector de Prioridad */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuPrioridad({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />
-                        <span>{opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}</span>
-                    </button>
+                        }}
+                        icono={<Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}
+                    </Boton>
 
                     {/* Selector de Urgencia */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuUrgencia({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />
-                        <span>{opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}</span>
-                    </button>
+                        }}
+                        icono={<Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}
+                    </Boton>
 
                     {/* Botón Adjuntar */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             if (fileInputRef.current && !estadoSubida.subiendo) {
                                 fileInputRef.current.click();
                             }
                         }}
-                        disabled={estadoSubida.subiendo}>
-                        {estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Paperclip size={14} className={adjuntos.length > 0 ? 'textoExito' : ''} />}
-                        <span>{adjuntos.length > 0 ? `${adjuntos.length} Adjunto${adjuntos.length !== 1 ? 's' : ''}` : 'Adjuntar'}</span>
-                    </button>
+                        disabled={estadoSubida.subiendo}
+                        icono={estadoSubida.subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Paperclip size={14} className={adjuntos.length > 0 ? 'textoExito' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {adjuntos.length > 0 ? `${adjuntos.length} Adjunto${adjuntos.length !== 1 ? 's' : ''}` : 'Adjuntar'}
+                    </Boton>
                 </div>
             );
         } else if (tipo === 'habito') {
             return (
                 <div className="creacionRapidaOpciones">
                     {/* Selector de Frecuencia */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuFrecuencia({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Repeat size={14} />
-                        <span>{opciones.frecuencia ? opciones.frecuencia.charAt(0).toUpperCase() + opciones.frecuencia.slice(1) : 'Diario'}</span>
-                    </button>
+                        }}
+                        icono={<Repeat size={14} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {opciones.frecuencia ? opciones.frecuencia.charAt(0).toUpperCase() + opciones.frecuencia.slice(1) : 'Diario'}
+                    </Boton>
 
                     {/* Selector de Importancia */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuImportancia({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Flag size={14} className={opciones.importancia === 'Alta' ? 'textoRojo' : opciones.importancia === 'Media' ? 'textoAmarillo' : ''} />
-                        <span>{opciones.importancia ? `Importancia ${opciones.importancia}` : 'Importancia Media'}</span>
-                    </button>
+                        }}
+                        icono={<Flag size={14} className={opciones.importancia === 'Alta' ? 'textoRojo' : opciones.importancia === 'Media' ? 'textoAmarillo' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {opciones.importancia ? `Importancia ${opciones.importancia}` : 'Importancia Media'}
+                    </Boton>
                 </div>
             );
         } else if (tipo === 'proyecto') {
             return (
                 <div className="creacionRapidaOpciones">
                     {/* Selector de Prioridad (Proyecto) */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuPrioridad({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />
-                        <span>{opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}</span>
-                    </button>
+                        }}
+                        icono={<Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}
+                    </Boton>
 
                     {/* Selector de Urgencia (Proyecto) */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuUrgencia({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />
-                        <span>{opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}</span>
-                    </button>
+                        }}
+                        icono={<Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}
+                    </Boton>
 
                     {/* Selector de Fecha Limite (Proyecto) */}
-                    <button
+                    <Boton
                         type="button"
-                        className="creacionRapidaBotonOpcion"
+                        variante="ghost"
                         onClick={e => {
                             e.preventDefault();
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             cerrarOtrosMenus();
                             setMenuFecha({visible: true, x: rect.left, y: rect.bottom + 4});
-                        }}>
-                        <Calendar size={14} className={opciones.fecha === 'hoy' ? 'textoAdvertencia' : ''} />
-                        <span>{obtenerEtiquetaFecha(opciones.fecha) || 'Fecha Limite'}</span>
-                    </button>
+                        }}
+                        icono={<Calendar size={14} className={opciones.fecha === 'hoy' ? 'textoAdvertencia' : ''} />}
+                        claseAdicional="creacionRapidaBotonOpcion"
+                    >
+                        {obtenerEtiquetaFecha(opciones.fecha) || 'Fecha Limite'}
+                    </Boton>
                 </div>
             );
         }
