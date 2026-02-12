@@ -99,6 +99,18 @@
     filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4)); /* Glow verde sutil */
 }
 
+/* Ventana de comida (modo reloj) */
+.panelAyunoCirculoVentana {
+    stroke: var(--dashboard-estadoExito);
+    opacity: 0.9;
+}
+
+.panelAyunoCirculoMarcador {
+    fill: var(--dashboard-textoActivo);
+    stroke: var(--dashboard-bordeSutil);
+    stroke-width: 1;
+}
+
 /* Centro del círculo */
 .panelAyunoCentro {
     display: flex;

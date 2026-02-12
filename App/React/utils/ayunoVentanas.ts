@@ -46,6 +46,17 @@ function obtenerDiasIntervaloFrecuencia(frecuencia: FrecuenciaHabito | undefined
     }
 }
 
+export function calcularPeriodoAyunoMs(frecuencia: FrecuenciaHabito | undefined, referenciaMs?: number): number {
+    if (frecuencia?.tipo === 'diasEspecificos') {
+        const ref = referenciaMs ?? Date.now();
+        const diasHasta = calcularDiasHastaProximoDiaEspecifico(ref, frecuencia.diasSemana ?? []);
+        return Math.max(1, diasHasta) * MS_DIA;
+    }
+
+    const diasIntervalo = obtenerDiasIntervaloFrecuencia(frecuencia);
+    return Math.max(1, diasIntervalo) * MS_DIA;
+}
+
 function calcularDiasHastaProximoDiaEspecifico(inicioAyunoMs: number, diasSemana: DiaSemana[]): number {
     if (!diasSemana || diasSemana.length === 0) return 1;
 
@@ -67,31 +78,30 @@ function calcularDiasHastaProximoDiaEspecifico(inicioAyunoMs: number, diasSemana
  * Calcula cuándo debería empezar el próximo ayuno según la frecuencia del hábito.
  * Se ancla al inicio del ayuno actual/último (misma hora del día).
  */
-export function calcularInicioProximoAyunoMs(inicioAyunoMs: number, frecuencia: FrecuenciaHabito | undefined): number {
-    if (frecuencia?.tipo === 'diasEspecificos') {
-        const diasHasta = calcularDiasHastaProximoDiaEspecifico(inicioAyunoMs, frecuencia.diasSemana ?? []);
-        return inicioAyunoMs + diasHasta * MS_DIA;
-    }
-
-    const diasIntervalo = obtenerDiasIntervaloFrecuencia(frecuencia);
-    return inicioAyunoMs + diasIntervalo * MS_DIA;
+export function calcularInicioProximoAyunoMsDesdeFin(finAyunoMs: number, duracionObjetivoMs: number, frecuencia: FrecuenciaHabito | undefined): number {
+    const periodoMs = calcularPeriodoAyunoMs(frecuencia, finAyunoMs);
+    const ventanaComidaMs = Math.max(0, periodoMs - Math.max(0, duracionObjetivoMs));
+    return finAyunoMs + ventanaComidaMs;
 }
 
-export function calcularVentanaComidaMs(params: {inicioAyunoMs: number; finAyunoMs: number; frecuencia: FrecuenciaHabito | undefined}): {
+export function calcularVentanaComidaMs(params: {finAyunoMs: number; duracionObjetivoMs: number; frecuencia: FrecuenciaHabito | undefined}): {
     inicioVentanaComidaMs: number;
     finVentanaComidaMs: number;
     duracionVentanaComidaMs: number;
     inicioProximoAyunoMs: number;
+    periodoMs: number;
 } {
-    const inicioVentanaComidaMs = Math.max(params.finAyunoMs, params.inicioAyunoMs);
-    const inicioProximoAyunoMs = calcularInicioProximoAyunoMs(params.inicioAyunoMs, params.frecuencia);
-    const finVentanaComidaMs = inicioProximoAyunoMs;
-    const duracionVentanaComidaMs = Math.max(0, finVentanaComidaMs - inicioVentanaComidaMs);
+    const inicioVentanaComidaMs = params.finAyunoMs;
+    const periodoMs = calcularPeriodoAyunoMs(params.frecuencia, params.finAyunoMs);
+    const duracionVentanaComidaMs = Math.max(0, periodoMs - Math.max(0, params.duracionObjetivoMs));
+    const finVentanaComidaMs = inicioVentanaComidaMs + duracionVentanaComidaMs;
+    const inicioProximoAyunoMs = finVentanaComidaMs;
 
     return {
         inicioVentanaComidaMs,
         finVentanaComidaMs,
         duracionVentanaComidaMs,
-        inicioProximoAyunoMs
+        inicioProximoAyunoMs,
+        periodoMs
     };
 }

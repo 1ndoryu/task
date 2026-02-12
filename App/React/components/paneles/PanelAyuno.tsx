@@ -21,7 +21,7 @@ import {ModalUltimaComida} from './ayuno/ModalUltimaComida';
 import {ModalFinalizarAyuno} from './ayuno/ModalFinalizarAyuno';
 import type {ConfiguracionAyuno} from '../../types/ayuno';
 import type {FrecuenciaHabito} from '../../types/dashboard';
-import {calcularInicioProximoAyunoMs, formatearDuracionAyuno} from '../../utils/ayunoVentanas';
+import {calcularInicioProximoAyunoMsDesdeFin, calcularVentanaComidaMs, formatearDuracionAyuno} from '../../utils/ayunoVentanas';
 
 interface PanelAyunoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
@@ -48,6 +48,65 @@ function CirculoProgreso({porcentaje, estaActivo}: {porcentaje: number; estaActi
             <circle className="panelAyunoCirculoFondo" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" />
             {/* Progreso */}
             {estaActivo && <circle className="panelAyunoCirculoProgreso" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" strokeDasharray={CIRCUNFERENCIA} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 110 110)" />}
+        </svg>
+    );
+}
+
+function obtenerFraccionDia(ms: number): number {
+    const fecha = new Date(ms);
+    const totalSegundos = fecha.getHours() * 3600 + fecha.getMinutes() * 60 + fecha.getSeconds();
+    return totalSegundos / (24 * 3600);
+}
+
+function obtenerPuntoEnCirculo(fraccionDia: number, radio: number): {x: number; y: number} {
+    const angulo = fraccionDia * 2 * Math.PI - Math.PI / 2;
+    const x = 110 + Math.cos(angulo) * radio;
+    const y = 110 + Math.sin(angulo) * radio;
+    return {x, y};
+}
+
+function CirculoVentanaComida({inicioVentanaMs, finVentanaMs}: {inicioVentanaMs: number; finVentanaMs: number}): JSX.Element {
+    const inicioFraccion = obtenerFraccionDia(inicioVentanaMs);
+    const finFraccion = obtenerFraccionDia(finVentanaMs);
+    const marcador = obtenerPuntoEnCirculo(finFraccion, RADIO);
+
+    const renderSegmento = (segmentoInicio: number, segmentoFin: number, key: string) => {
+        const inicio = Math.max(0, Math.min(1, segmentoInicio));
+        const fin = Math.max(0, Math.min(1, segmentoFin));
+        const longitud = Math.max(0, (fin - inicio) * CIRCUNFERENCIA);
+        if (longitud <= 0) return null;
+
+        const dasharray = `${longitud} ${CIRCUNFERENCIA}`;
+        const dashoffset = CIRCUNFERENCIA - inicio * CIRCUNFERENCIA;
+
+        return (
+            <circle
+                key={key}
+                className="panelAyunoCirculoVentana"
+                cx="110"
+                cy="110"
+                r={RADIO}
+                fill="none"
+                strokeWidth="8"
+                strokeDasharray={dasharray}
+                strokeDashoffset={dashoffset}
+                strokeLinecap="round"
+                transform="rotate(-90 110 110)"
+            />
+        );
+    };
+
+    const segmentos = inicioFraccion <= finFraccion ? [renderSegmento(inicioFraccion, finFraccion, 'segmento')]
+        : [
+              renderSegmento(inicioFraccion, 1, 'segmentoA'),
+              renderSegmento(0, finFraccion, 'segmentoB')
+          ];
+
+    return (
+        <svg className="panelAyunoCirculo" viewBox="0 0 220 220" width="220" height="220">
+            <circle className="panelAyunoCirculoFondo" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" />
+            {segmentos}
+            <circle className="panelAyunoCirculoMarcador" cx={marcador.x} cy={marcador.y} r={4} />
         </svg>
     );
 }
@@ -88,9 +147,16 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
     const frecuenciaAyuno: FrecuenciaHabito | undefined = habitoAyuno?.frecuencia;
 
+    const duracionObjetivoUltimoMs = ultimoAyuno?.duracionObjetivoMs ?? duracionHoras * 60 * 60 * 1000;
+
+    const ventanaUltima = useMemo(() => {
+        if (!ultimoAyuno?.fin) return null;
+        return calcularVentanaComidaMs({finAyunoMs: ultimoAyuno.fin, duracionObjetivoMs: duracionObjetivoUltimoMs, frecuencia: frecuenciaAyuno});
+    }, [ultimoAyuno?.fin, duracionObjetivoUltimoMs, frecuenciaAyuno]);
+
     const textoProximoAyuno = useMemo(() => {
-        if (!ultimoAyuno) return null;
-        const inicioProximoMs = calcularInicioProximoAyunoMs(ultimoAyuno.inicio, frecuenciaAyuno);
+        if (!ultimoAyuno?.fin) return null;
+        const inicioProximoMs = calcularInicioProximoAyunoMsDesdeFin(ultimoAyuno.fin, duracionObjetivoUltimoMs, frecuenciaAyuno);
         const deltaMs = inicioProximoMs - Date.now();
 
         if (deltaMs <= 0) {
@@ -98,7 +164,13 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
         }
 
         return `Próximo ayuno: en ${formatearDuracionAyuno(deltaMs)}`;
-    }, [ultimoAyuno?.inicio, frecuenciaAyuno, tiempoDesdeUltimoFormateado]);
+    }, [ultimoAyuno?.fin, duracionObjetivoUltimoMs, frecuenciaAyuno, tiempoDesdeUltimoFormateado]);
+
+    const textoVentanaComida = useMemo(() => {
+        if (!ventanaUltima) return null;
+        if (ventanaUltima.periodoMs !== 24 * 60 * 60 * 1000) return null;
+        return `Ventana comida: ${formatearDuracionAyuno(ventanaUltima.duracionVentanaComidaMs)}`;
+    }, [ventanaUltima?.duracionVentanaComidaMs, ventanaUltima?.periodoMs]);
 
     const crearHabitoEspecialAhora = () => {
         const existente = useHabitosStore.getState().habitos.find(h => h.nombre.trim().toLowerCase() === 'ayuno');
@@ -168,13 +240,14 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             <div className="panelAyunoCentro">
                 <span className="panelAyunoCentroEtiqueta">{tiempoDesdeUltimoFormateado ? 'Desde el último ayuno' : 'Objetivo'}</span>
                 <span className="panelAyunoCentroTiempo">{tiempoDesdeUltimoFormateado ? tiempoDesdeUltimoFormateado : `${duracionHoras}h`}</span>
+                {!!textoVentanaComida && <span className="panelAyunoCentroRestante">{textoVentanaComida}</span>}
                 {!!textoProximoAyuno && <span className="panelAyunoCentroRestante">{textoProximoAyuno}</span>}
                 <button className="panelAyunoBotonCircular panelAyunoBotonCircular--iniciar" onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)} type="button" disabled={!habitoAyunoExiste} title="Comenzar ayuno">
                     <Play size={14} fill="currentColor" className="iconoPlayAjustado" />
                 </button>
             </div>
         );
-    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, tiempoDesdeUltimoFormateado, textoProximoAyuno, duracionHoras, habitoAyunoExiste]);
+    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, tiempoDesdeUltimoFormateado, textoVentanaComida, textoProximoAyuno, duracionHoras, habitoAyunoExiste]);
 
     const contenidoPanel = (
         <div className="panelAyunoContenido">
@@ -193,7 +266,13 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
             {/* Círculo con progreso y contenido central */}
             <div className="panelAyunoCirculoContenedor">
-                <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} />
+                {estaActivo ? (
+                    <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} />
+                ) : ventanaUltima && ventanaUltima.periodoMs === 24 * 60 * 60 * 1000 ? (
+                    <CirculoVentanaComida inicioVentanaMs={ventanaUltima.inicioVentanaComidaMs} finVentanaMs={ventanaUltima.finVentanaComidaMs} />
+                ) : (
+                    <CirculoProgreso porcentaje={0} estaActivo={false} />
+                )}
                 {contenidoCentral}
             </div>
 

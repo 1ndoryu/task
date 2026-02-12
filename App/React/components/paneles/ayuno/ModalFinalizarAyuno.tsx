@@ -39,8 +39,8 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
     const completado = tiempoEfectivoMs >= duracionObjetivoMs;
 
     const ventana = useMemo(() => {
-        return calcularVentanaComidaMs({inicioAyunoMs, finAyunoMs, frecuencia});
-    }, [inicioAyunoMs, finAyunoMs, frecuencia]);
+        return calcularVentanaComidaMs({finAyunoMs, duracionObjetivoMs, frecuencia});
+    }, [finAyunoMs, duracionObjetivoMs, frecuencia]);
 
     const textoVentana = useMemo(() => {
         if (ventana.duracionVentanaComidaMs <= 0) return 'Sin ventana de comida (según tu frecuencia)';
