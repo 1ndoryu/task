@@ -8,6 +8,7 @@ import {useState, useRef, useEffect} from 'react';
 import {Repeat, X} from 'lucide-react';
 import type {FrecuenciaHabito, TipoFrecuencia, DiaSemana} from '../../types/dashboard';
 import {SelectorDias} from './SelectorDias';
+import {Boton} from '../ui';
 
 interface SelectorRepeticionPillProps {
     tieneRepeticion: boolean;
@@ -136,15 +137,15 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición" style={tieneRepeticion ? {color: 'var(--dashboard-textoNormal)'} : undefined}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición" style={tieneRepeticion ? {color: 'var(--dashboard-textoNormal)'} : undefined}>
                 <Repeat size={14} />
                 <span>{obtenerDescripcion()}</span>
                 {tieneRepeticion && (
-                    <button type="button" className="pillOpcion__quitar" onClick={desactivarRepeticion} title="Quitar repetición">
+                    <Boton type="button" variante="ghost" claseAdicional="pillOpcion__quitar" onClick={desactivarRepeticion} title="Quitar repetición">
                         <X size={10} />
-                    </button>
+                    </Boton>
                 )}
-            </button>
+            </Boton>
 
             {panelAbierto && (
                 <div
@@ -161,9 +162,9 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
                     {/* Selector de tipo */}
                     <div className="selectorRepeticionPanel__tipos">
                         {TIPOS_FRECUENCIA.map(({tipo, etiqueta}) => (
-                            <button key={tipo} type="button" className={`selectorRepeticionPanel__tipo ${frecuencia.tipo === tipo ? 'selectorRepeticionPanel__tipo--activo' : ''}`} onClick={() => manejarCambioTipo(tipo)}>
+                            <Boton key={tipo} type="button" variante="ghost" claseAdicional={`selectorRepeticionPanel__tipo ${frecuencia.tipo === tipo ? 'selectorRepeticionPanel__tipo--activo' : ''}`} onClick={() => manejarCambioTipo(tipo)}>
                                 {etiqueta}
-                            </button>
+                            </Boton>
                         ))}
                     </div>
 
@@ -172,13 +173,13 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
                         <div className="selectorRepeticionPanel__config">
                             <span className="selectorRepeticionPanel__label">Cada</span>
                             <div className="selectorRepeticionPanel__numero">
-                                <button type="button" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) - 1)} disabled={(frecuencia.cadaDias || 2) <= 2}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) - 1)} disabled={(frecuencia.cadaDias || 2) <= 2}>
                                     −
-                                </button>
+                                </Boton>
                                 <span>{frecuencia.cadaDias || 2}</span>
-                                <button type="button" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) + 1)} disabled={(frecuencia.cadaDias || 2) >= 30}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) + 1)} disabled={(frecuencia.cadaDias || 2) >= 30}>
                                     +
-                                </button>
+                                </Boton>
                             </div>
                             <span className="selectorRepeticionPanel__label">días</span>
                         </div>
@@ -193,13 +194,13 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
                     {frecuencia.tipo === 'mensual' && (
                         <div className="selectorRepeticionPanel__config">
                             <div className="selectorRepeticionPanel__numero">
-                                <button type="button" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) - 1)} disabled={(frecuencia.vecesAlMes || 4) <= 1}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) - 1)} disabled={(frecuencia.vecesAlMes || 4) <= 1}>
                                     −
-                                </button>
+                                </Boton>
                                 <span>{frecuencia.vecesAlMes || 4}</span>
-                                <button type="button" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) + 1)} disabled={(frecuencia.vecesAlMes || 4) >= 30}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) + 1)} disabled={(frecuencia.vecesAlMes || 4) >= 30}>
                                     +
-                                </button>
+                                </Boton>
                             </div>
                             <span className="selectorRepeticionPanel__label">veces al mes</span>
                         </div>

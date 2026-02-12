@@ -8,6 +8,7 @@ import {Camera, Save, X} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {useAuth} from '../../hooks/useAuth';
 import {IndicadorAlmacenamiento} from '../shared/IndicadorAlmacenamiento';
+import {Input} from '../ui';
 // Importamos los estilos registrandolos en index.css, pero definimos clases aqui
 // Se asume que perfil.css ya esta importado globalmente
 
@@ -178,7 +179,7 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
 
                     <div className="grupoInputPerfil">
                         <label className="labelPerfil">Nombre de Usuario</label>
-                        <input type="text" className="inputPerfil" value={datos.nombre} onChange={e => handleChange('nombre', e.target.value)} placeholder="Tu nombre visible" />
+                        <Input tipo="text" claseAdicional="inputPerfil" value={datos.nombre} onChange={e => handleChange('nombre', e.target.value)} placeholder="Tu nombre visible" />
                     </div>
 
                     <div className="grupoInputPerfil">
@@ -192,17 +193,17 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
 
                     <div className="grupoInputPerfil">
                         <label className="labelPerfil">Contraseña Actual</label>
-                        <input type="password" className="inputPerfil" value={datos.passwordActual} onChange={e => handleChange('passwordActual', e.target.value)} placeholder="Necesaria para cambios sensibles" />
+                        <Input tipo="password" claseAdicional="inputPerfil" value={datos.passwordActual} onChange={e => handleChange('passwordActual', e.target.value)} placeholder="Necesaria para cambios sensibles" />
                     </div>
 
                     <div className="grupoInputPerfil">
                         <label className="labelPerfil">Nueva Contraseña</label>
-                        <input type="password" className="inputPerfil" value={datos.passwordNueva} onChange={e => handleChange('passwordNueva', e.target.value)} placeholder="Dejar en blanco para mantener" />
+                        <Input tipo="password" claseAdicional="inputPerfil" value={datos.passwordNueva} onChange={e => handleChange('passwordNueva', e.target.value)} placeholder="Dejar en blanco para mantener" />
                     </div>
 
                     <div className="grupoInputPerfil">
                         <label className="labelPerfil">Confirmar Nueva Contraseña</label>
-                        <input type="password" className="inputPerfil" value={datos.passwordConfirmar} onChange={e => handleChange('passwordConfirmar', e.target.value)} placeholder="Repite la nueva contraseña" />
+                        <Input tipo="password" claseAdicional="inputPerfil" value={datos.passwordConfirmar} onChange={e => handleChange('passwordConfirmar', e.target.value)} placeholder="Repite la nueva contraseña" />
                     </div>
                 </div>
 

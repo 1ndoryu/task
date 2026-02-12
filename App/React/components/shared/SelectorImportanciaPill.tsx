@@ -8,6 +8,7 @@ import {useState, useRef} from 'react';
 import {Star} from 'lucide-react';
 import type {NivelImportancia} from '../../types/dashboard';
 import {MenuContextual} from './MenuContextual';
+import {Boton} from '../ui';
 
 interface SelectorImportanciaPillProps {
     importancia: NivelImportancia;
@@ -48,10 +49,10 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia" style={importancia !== 'Media' ? {color: importanciaActual.color} : undefined}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia" style={importancia !== 'Media' ? {color: importanciaActual.color} : undefined}>
                 <Star size={14} fill={(importancia === 'Alta' || importancia === 'Muy Alta') ? importanciaActual.color : 'none'} />
                 <span>{importanciaActual.etiqueta}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <MenuContextual

@@ -11,6 +11,7 @@ import {Play, Trash2, Save, Flag, CalendarClock, CheckCircle2} from 'lucide-reac
 import {Modal} from '../../shared/Modal';
 import type {FrecuenciaHabito} from '../../../types/dashboard';
 import {calcularVentanaComidaMs, formatearDuracionAyuno} from '../../../utils/ayunoVentanas';
+import {Boton} from '../../ui';
 
 interface ModalFinalizarAyunoProps {
     estaAbierto: boolean;
@@ -112,9 +113,10 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
 
                 {/* Acciones */}
                 <div className="modalAyunoFinalizarAcciones">
-                    <button
+                    <Boton
                         type="button"
-                        className="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--secundario"
+                        variante="secundario"
+                        claseAdicional="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--secundario"
                         onClick={() => {
                             onContinuar();
                             onCerrar();
@@ -122,11 +124,12 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                         title="Continuar ayuno (cancelar finalización)">
                         <Play size={14} />
                         <span>Continuar</span>
-                    </button>
+                    </Boton>
 
-                    <button
+                    <Boton
                         type="button"
-                        className="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--peligro"
+                        variante="peligro"
+                        claseAdicional="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--peligro"
                         onClick={() => {
                             onEliminar();
                             onCerrar();
@@ -134,11 +137,12 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                         title="Eliminar registro">
                         <Trash2 size={14} />
                         <span>Eliminar</span>
-                    </button>
+                    </Boton>
 
-                    <button
+                    <Boton
                         type="button"
-                        className="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--primario"
+                        variante="primario"
+                        claseAdicional="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--primario"
                         onClick={() => {
                             onGuardar();
                             onCerrar();
@@ -146,7 +150,7 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                         title="Guardar registro">
                         <Save size={14} />
                         <span>Guardar</span>
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </Modal>

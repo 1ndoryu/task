@@ -7,6 +7,7 @@
 import {useState, useRef} from 'react';
 import {Play, Pause, CheckCircle2} from 'lucide-react';
 import {MenuContextual} from './MenuContextual';
+import {Boton} from '../ui';
 
 type EstadoProyecto = 'activo' | 'pausado' | 'completado';
 
@@ -59,10 +60,10 @@ export function SelectorEstadoProyectoPill({estado, onChange, deshabilitado = fa
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado del proyecto" style={{color: estadoActual.color}}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado del proyecto" style={{color: estadoActual.color}}>
                 {obtenerIcono(estado, 14)}
                 <span>{estadoActual.etiqueta}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <MenuContextual

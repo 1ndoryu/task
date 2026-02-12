@@ -6,6 +6,7 @@
 
 import {useState, useRef, useEffect, useCallback} from 'react';
 import type {ReactNode} from 'react';
+import {Boton} from '../ui';
 
 export interface OpcionBadge<T extends string = string> {
     id: T;
@@ -109,7 +110,7 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
 
     return (
         <div id="selector-badge-contenedor" ref={contenedorRef} className={`selectorBadgeContenedor ${className}`.trim()}>
-            <button type="button" className={`selectorBadgeBoton ${soloIcono ? 'selectorBadgeBoton--soloIcono' : 'selectorBadgeBotonCompacto'} ${menuAbierto ? 'selectorBadgeBotonActivo' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
+            <Boton type="button" variante="ghost" claseAdicional={`selectorBadgeBoton ${soloIcono ? 'selectorBadgeBoton--soloIcono' : 'selectorBadgeBotonCompacto'} ${menuAbierto ? 'selectorBadgeBotonActivo' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
                 {soloIcono ? (
                     /* En modo soloIcono, mostrar solo un icono: el de la opción activa o el principal como fallback */
                     <span className="selectorBadgeIcono">{opcionActual?.icono || icono}</span>
@@ -120,16 +121,16 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
                         {opcionActual?.icono && <span className="selectorBadgeOpcionIcono">{opcionActual.icono}</span>}
                     </>
                 )}
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <div ref={menuRef} className="selectorBadgeMenu" role="menu">
                     {opciones.map(opcion => (
-                        <button key={opcion.id} type="button" className={`selectorBadgeOpcion ${opcion.id === valorActual ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion(opcion)} role="menuitem">
+                        <Boton key={opcion.id} type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${opcion.id === valorActual ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion(opcion)} role="menuitem">
                             {opcion.icono && <span className="selectorBadgeOpcionIcono">{opcion.icono}</span>}
                             <span className="selectorBadgeOpcionTexto">{opcion.etiqueta}</span>
                             {opcion.descripcion && <span className="selectorBadgeOpcionDesc">{opcion.descripcion}</span>}
-                        </button>
+                        </Boton>
                     ))}
                 </div>
             )}

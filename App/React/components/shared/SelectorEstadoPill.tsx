@@ -7,6 +7,7 @@
 import {useState, useRef} from 'react';
 import {Circle, CheckCircle2} from 'lucide-react';
 import {MenuContextual} from './MenuContextual';
+import {Boton} from '../ui';
 
 interface SelectorEstadoPillProps {
     completada: boolean;
@@ -43,10 +44,10 @@ export function SelectorEstadoPill({completada, onChange, deshabilitado = false}
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${completada ? '' : 'pillOpcion--vacio'} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado" style={completada ? {color: 'var(--dashboard-estadoExito)'} : undefined}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${completada ? '' : 'pillOpcion--vacio'} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado" style={completada ? {color: 'var(--dashboard-estadoExito)'} : undefined}>
                 {completada ? <CheckCircle2 size={14} /> : <Circle size={14} />}
                 <span>{completada ? 'Completada' : 'Pendiente'}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <MenuContextual

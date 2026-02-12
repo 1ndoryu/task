@@ -6,7 +6,7 @@
 
 import {useState, useEffect, useRef, useMemo} from 'react';
 import {Search, CheckCircle2, Repeat, Folder, X, FileText} from 'lucide-react';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 import type {Tarea, Habito, Proyecto} from '../../types/dashboard';
 import {useNotasStore} from '../../stores/notasStore';
 import type {Nota} from '../../types/notas';
@@ -158,9 +158,9 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
         <div className="buscadorGlobal" ref={contenedorRef}>
             <div className={`buscadorInputWrapper ${mostrarResultados && resultados.length > 0 ? 'activo' : ''}`}>
                 <Search size={14} className="buscadorIcono" />
-                <input
-                    type="text"
-                    className="buscadorInput"
+                <Input
+                    tipo="text"
+                    claseAdicional="buscadorInput"
                     placeholder="Buscar..."
                     value={busqueda}
                     onChange={e => {

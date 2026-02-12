@@ -17,6 +17,7 @@
 import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Repeat, Flag, Settings} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
+import {Input, Boton} from '../ui';
 import {OPCIONES_FRECUENCIA, OPCIONES_IMPORTANCIA, obtenerTextoFrecuencia, obtenerTextoImportancia} from '../../utils/constantes';
 import type {Habito} from '../../types/dashboard';
 
@@ -151,7 +152,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             <div className="bottomSheetHabito">
                 {/* Input principal */}
                 <div className="bottomSheetHabito__inputWrapper">
-                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder={esEdicion ? 'Nombre del hábito' : '¿Qué hábito quieres crear?'} className="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-habito-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
+                    <Input ref={inputRef} tipo="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder={esEdicion ? 'Nombre del hábito' : '¿Qué hábito quieres crear?'} claseAdicional="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-habito-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}
@@ -162,35 +163,30 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
                     {/* Grupo de opciones (Izquierda) */}
                     <div className="bottomSheetHabito__opcionesGrupo">
                         {/* Frecuencia */}
-                        <button type="button" className={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('frecuencia')} aria-label={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'} title={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'}>
-                            <Repeat size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetHabito__accion ${frecuencia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('frecuencia')} aria-label={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'} title={obtenerTextoFrecuencia(frecuencia) || 'Frecuencia'} icono={<Repeat size={18} />} />
 
                         {/* Importancia */}
-                        <button type="button" className={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia(importancia) || 'Importancia'} title={obtenerTextoImportancia(importancia) || 'Importancia'}>
-                            <Flag size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetHabito__accion ${importancia ? 'bottomSheetHabito__accion--activa' : ''}`} onClick={() => setModalActivo('importancia')} aria-label={obtenerTextoImportancia(importancia) || 'Importancia'} title={obtenerTextoImportancia(importancia) || 'Importancia'} icono={<Flag size={18} />} />
 
                         {/* Configuración avanzada (solo edición) */}
                         {esEdicion && onAbrirConfiguracion && (
-                            <button
+                            <Boton
                                 type="button"
-                                className="bottomSheetHabito__accion"
+                                variante="ghost"
+                                claseAdicional="bottomSheetHabito__accion"
                                 onClick={() => {
                                     onAbrirConfiguracion();
                                     onCerrar();
                                 }}
                                 aria-label="Configuración avanzada"
-                                title="Configuración avanzada">
-                                <Settings size={18} />
-                            </button>
+                                title="Configuración avanzada"
+                                icono={<Settings size={18} />}
+                            />
                         )}
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
-                    <button type="button" className="bottomSheetHabito__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Hábito'}>
-                        <Send size={18} />
-                    </button>
+                    <Boton type="button" variante="primario" claseAdicional="bottomSheetHabito__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Hábito'} icono={<Send size={18} />} />
                 </div>
             </div>
 

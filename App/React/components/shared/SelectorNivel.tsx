@@ -3,6 +3,8 @@
  * Componente reutilizable para seleccionar niveles (prioridad, importancia, etc.)
  */
 
+import {Boton} from '../ui';
+
 interface SelectorNivelProps<T extends string> {
     niveles: T[];
     seleccionado: T | null;
@@ -16,9 +18,9 @@ export function SelectorNivel<T extends string>({niveles, seleccionado, onSelecc
             {niveles.map(nivel => {
                 const claseSufijo = nivel.charAt(0).toUpperCase() + nivel.slice(1).toLowerCase();
                 return (
-                    <button key={nivel} type="button" className={`selectorNivelBoton ${seleccionado === nivel ? `selectorNivelBotonActivo selectorNivelBoton${claseSufijo}` : ''}`} onClick={() => onSeleccionar(nivel)} disabled={disabled} style={{textTransform: 'capitalize'}}>
+                    <Boton key={nivel} type="button" variante="ghost" claseAdicional={`selectorNivelBoton ${seleccionado === nivel ? `selectorNivelBotonActivo selectorNivelBoton${claseSufijo}` : ''}`} onClick={() => onSeleccionar(nivel)} disabled={disabled} style={{textTransform: 'capitalize'}}>
                         {nivel}
-                    </button>
+                    </Boton>
                 );
             })}
         </div>

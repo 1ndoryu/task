@@ -8,6 +8,7 @@
 import {useState, useCallback, useMemo, useEffect, useRef} from 'react';
 import {X} from 'lucide-react';
 import type {VentanaOportunidad} from '../../types/dashboard';
+import {Boton} from '../ui';
 
 interface SelectorVentanaOportunidadProps {
     ventana: VentanaOportunidad | undefined;
@@ -329,9 +330,9 @@ export function SelectorVentanaOportunidad({ventana: propVentana, onChange}: Sel
 
     return (
         <div className="selectorVentanaOportunidad">
-            <button type="button" className={`selectorVentanaOportunidad__boton ${estaEnVentana ? 'selectorVentanaOportunidad__boton--enVentana' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)}>
+            <Boton type="button" variante="ghost" claseAdicional={`selectorVentanaOportunidad__boton ${estaEnVentana ? 'selectorVentanaOportunidad__boton--enVentana' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)}>
                 <span>{textoBoton}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <>
@@ -341,9 +342,9 @@ export function SelectorVentanaOportunidad({ventana: propVentana, onChange}: Sel
                     <div className="selectorVentanaOportunidad__menu" ref={menuRef}>
                         <div className="selectorVentanaOportunidad__header">
                             <span className="selectorVentanaOportunidad__titulo">Ventana de Oportunidad</span>
-                            <button type="button" className="selectorVentanaOportunidad__cerrar" onClick={() => setMenuAbierto(false)}>
+                            <Boton type="button" variante="ghost" claseAdicional="selectorVentanaOportunidad__cerrar" onClick={() => setMenuAbierto(false)}>
                                 <X size={14} />
-                            </button>
+                            </Boton>
                         </div>
 
                         {/* Reloj circular minimalista */}
@@ -374,9 +375,9 @@ export function SelectorVentanaOportunidad({ventana: propVentana, onChange}: Sel
 
                         {/* Toggle y eliminar */}
                         <div className="selectorVentanaOportunidad__acciones">
-                            <button type="button" className={`selectorVentanaOportunidad__toggle ${ventanaActual.habilitada ? 'selectorVentanaOportunidad__toggle--activo' : ''}`} onClick={toggleHabilitado}>
+                            <Boton type="button" variante="ghost" claseAdicional={`selectorVentanaOportunidad__toggle ${ventanaActual.habilitada ? 'selectorVentanaOportunidad__toggle--activo' : ''}`} onClick={toggleHabilitado}>
                                 {ventanaActual.habilitada ? 'Desactivar' : 'Activar'}
-                            </button>
+                            </Boton>
                         </div>
                     </div>
                 </>

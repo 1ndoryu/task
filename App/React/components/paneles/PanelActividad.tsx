@@ -17,6 +17,7 @@ import {useActividad} from '../../hooks/useActividad';
 import type {ConfiguracionActividad} from '../../hooks/useConfiguracionActividad';
 import {obtenerDetalleActividadDia, type DetalleActividadItem} from '../../services/actividadService';
 import {useSuscripcionStore} from '../../stores/suscripcionStore';
+import {Boton} from '../ui';
 
 interface PanelActividadProps {
     configuracion: ConfiguracionActividad;
@@ -38,9 +39,9 @@ function MensajeBloqueoFree({onAbrirUpgrade}: {onAbrirUpgrade?: () => void}): JS
                 El mapa de calor de actividad está disponible exclusivamente para usuarios Premium.
             </p>
             {onAbrirUpgrade && (
-                <button className="panelActividadBloqueadoBoton" onClick={onAbrirUpgrade}>
+                <Boton variante="primario" claseAdicional="panelActividadBloqueadoBoton" onClick={onAbrirUpgrade}>
                     Ver planes Premium
-                </button>
+                </Boton>
             )}
         </div>
     );
@@ -200,9 +201,9 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                 <div className="panelActividadDetalle">
                     <div className="panelActividadDetalleEncabezado">
                         <span className="panelActividadDetalleTitulo">Detalle del {formatearFechaDetalle(fechaDetalle)}</span>
-                        <button className="panelActividadDetalleBoton" onClick={() => setFechaDetalle(null)}>
+                        <Boton variante="ghost" claseAdicional="panelActividadDetalleBoton" onClick={() => setFechaDetalle(null)}>
                             Ocultar
-                        </button>
+                        </Boton>
                     </div>
 
                     {detalleCargando ? (
@@ -254,16 +255,16 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                         )}
                         {esPremium && (
                             <>
-                                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
+                                <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
                                     <span className="selectorBadgeIcono">
                                         <Settings size={12} />
                                     </span>
-                                </button>
-                                <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
+                                </Boton>
+                                <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
                                     <span className="selectorBadgeIcono">
                                         <Maximize2 size={12} />
                                     </span>
-                                </button>
+                                </Boton>
                             </>
                         )}
                         {handleMinimizar}

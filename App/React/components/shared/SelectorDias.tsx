@@ -4,6 +4,7 @@
  */
 
 import type {DiaSemana} from '../../types/dashboard';
+import {Boton} from '../ui';
 
 interface SelectorDiasProps {
     seleccionados: DiaSemana[];
@@ -40,9 +41,9 @@ export function SelectorDias({seleccionados, onChange, deshabilitado = false}: S
     return (
         <div className="selectorDias">
             {DIAS_SEMANA.map(({dia, corto, etiqueta}) => (
-                <button key={dia} type="button" className={`selectorDiaBoton ${seleccionados.includes(dia) ? 'selectorDiaBotonActivo' : ''}`} onClick={() => manejarToggle(dia)} disabled={deshabilitado} title={etiqueta}>
+                <Boton key={dia} type="button" variante="ghost" claseAdicional={`selectorDiaBoton ${seleccionados.includes(dia) ? 'selectorDiaBotonActivo' : ''}`} onClick={() => manejarToggle(dia)} disabled={deshabilitado} title={etiqueta}>
                     {corto}
-                </button>
+                </Boton>
             ))}
         </div>
     );

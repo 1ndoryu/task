@@ -10,6 +10,7 @@
 import {useState, useCallback} from 'react';
 import {MoreVertical, ArrowUpDown, Filter, Settings, RefreshCw} from 'lucide-react';
 import {BottomSheet} from './BottomSheet';
+import {Boton} from '../ui';
 import {useEsMovil} from '../../hooks/useEsMovil';
 
 /* Opción genérica del menú */
@@ -80,12 +81,9 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
     /* En móvil, mostrar botón único que abre el menú */
     return (
         <>
-            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono menuOpcionesPanelBoton ${tieneFiltrosActivos ? 'menuOpcionesPanelBoton--activo' : ''} ${claseBoton}`} onClick={abrirMenu} title="Opciones" aria-label="Abrir menú de opciones">
-                <span className="selectorBadgeIcono">
-                    <MoreVertical size={14} />
-                </span>
+            <Boton variante="icono" claseAdicional={`selectorBadgeBoton selectorBadgeBoton--soloIcono menuOpcionesPanelBoton ${tieneFiltrosActivos ? 'menuOpcionesPanelBoton--activo' : ''} ${claseBoton}`} onClick={abrirMenu} title="Opciones" aria-label="Abrir menú de opciones" icono={<MoreVertical size={14} />}>
                 {tieneFiltrosActivos && <span className="menuOpcionesPanelBadge" aria-label="Filtros activos" />}
-            </button>
+            </Boton>
 
             <BottomSheet estaAbierto={menuAbierto} onCerrar={cerrarMenu}>
                 <div className="menuOpcionesPanelContenido">
@@ -93,13 +91,13 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                     {opciones.length > 0 && (
                         <div className="menuOpcionesPanelGrupo">
                             {opciones.map(opcion => (
-                                <button key={opcion.id} className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`} onClick={() => manejarOpcion(opcion.onClick)}>
+                                <Boton key={opcion.id} variante="ghost" claseAdicional={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`} onClick={() => manejarOpcion(opcion.onClick)}>
                                     <span className="menuOpcionesPanelItemTexto">
                                         <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
                                     {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
-                                </button>
+                                </Boton>
                             ))}
                         </div>
                     )}
@@ -110,13 +108,13 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                             {idx > 0 || opciones.length > 0 ? <div className="menuOpcionesPanelSeparador" /> : null}
                             <div className="menuOpcionesPanelGrupoTitulo">{grupo.titulo}</div>
                             {grupo.opciones.map(opcion => (
-                                <button key={opcion.id} className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`} onClick={() => manejarOpcion(opcion.onClick)}>
+                                <Boton key={opcion.id} variante="ghost" claseAdicional={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`} onClick={() => manejarOpcion(opcion.onClick)}>
                                     <span className="menuOpcionesPanelItemTexto">
                                         <span className="menuOpcionesPanelItemEtiqueta">{opcion.etiqueta}</span>
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
                                     {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
-                                </button>
+                                </Boton>
                             ))}
                         </div>
                     ))}
@@ -125,14 +123,14 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
                     {onRefrescar && (
                         <>
                             <div className="menuOpcionesPanelSeparador" />
-                            <button className="menuOpcionesPanelItem menuOpcionesPanelItem--accion" onClick={() => manejarOpcion(onRefrescar)}>
+                            <Boton variante="ghost" claseAdicional="menuOpcionesPanelItem menuOpcionesPanelItem--accion" onClick={() => manejarOpcion(onRefrescar)}>
                                 <span className="menuOpcionesPanelItemIcono">
                                     <RefreshCw size={14} />
                                 </span>
                                 <span className="menuOpcionesPanelItemTexto">
                                     <span className="menuOpcionesPanelItemEtiqueta">Actualizar</span>
                                 </span>
-                            </button>
+                            </Boton>
                         </>
                     )}
                 </div>

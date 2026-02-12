@@ -15,6 +15,7 @@
 import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Layers, Flag, Hash, Calendar} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
+import {Input, Boton} from '../ui';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {OPCIONES_PRIORIDAD, OPCIONES_URGENCIA, OPCIONES_FECHA_PROYECTO, obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
 import {calcularFechaDesdeOpcion} from '../../utils/fecha';
@@ -140,7 +141,7 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
             <div className="bottomSheetProyecto">
                 {/* Input principal */}
                 <div className="bottomSheetProyecto__inputWrapper">
-                    <input ref={inputRef} type="text" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del proyecto..." className="bottomSheetProyecto__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-proyecto-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
+                    <Input ref={inputRef} tipo="text" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del proyecto..." claseAdicional="bottomSheetProyecto__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-proyecto-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}
@@ -151,25 +152,17 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
                     {/* Grupo de opciones (Izquierda) */}
                     <div className="bottomSheetProyecto__opcionesGrupo">
                         {/* Prioridad */}
-                        <button type="button" className={`bottomSheetProyecto__accion ${prioridad ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'}>
-                            <Flag size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${prioridad ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'} icono={<Flag size={18} />} />
 
                         {/* Urgencia */}
-                        <button type="button" className={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
-                            <Hash size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'} icono={<Hash size={18} />} />
 
                         {/* Fecha límite */}
-                        <button type="button" className={`bottomSheetProyecto__accion ${fechaLimite ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fechaLimite || 'Fecha límite'} title={fechaLimite || 'Fecha límite'}>
-                            <Calendar size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${fechaLimite ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fechaLimite || 'Fecha límite'} title={fechaLimite || 'Fecha límite'} icono={<Calendar size={18} />} />
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
-                    <button type="button" className="bottomSheetProyecto__botonGuardar" onClick={manejarGuardar} disabled={!nombre.trim() || cargando} aria-label="Crear Proyecto">
-                        <Send size={18} />
-                    </button>
+                    <Boton type="button" variante="primario" claseAdicional="bottomSheetProyecto__botonGuardar" onClick={manejarGuardar} disabled={!nombre.trim() || cargando} aria-label="Crear Proyecto" icono={<Send size={18} />} />
                 </div>
             </div>
 

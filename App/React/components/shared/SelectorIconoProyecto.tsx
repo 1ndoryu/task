@@ -7,8 +7,7 @@
  */
 
 import {useState, useRef, useEffect} from 'react';
-import {Folder, FolderOpen, Briefcase, Code, Palette, BookOpen, Heart, Star, Zap, Target, Trophy, Flag, Home, Building, Plane, Car, ShoppingCart, DollarSign, Users, MessageSquare, Mail, Phone, Calendar, Clock, Camera, Music, Film, Gamepad2, Dumbbell, Coffee} from 'lucide-react';
-
+import {Folder, FolderOpen, Briefcase, Code, Palette, BookOpen, Heart, Star, Zap, Target, Trophy, Flag, Home, Building, Plane, Car, ShoppingCart, DollarSign, Users, MessageSquare, Mail, Phone, Calendar, Clock, Camera, Music, Film, Gamepad2, Dumbbell, Coffee} from 'lucide-react';import {Boton} from '../ui';
 /* Categorias de iconos disponibles */
 const CATEGORIAS_ICONOS = {
     trabajo: [
@@ -123,9 +122,9 @@ export function SelectorIconoProyecto({iconoId, colorIcono, onCambio}: SelectorI
 
     return (
         <div ref={contenedorRef} className="selectorIconoProyecto">
-            <button type="button" className="selectorIconoProyecto__trigger" style={{width: '32px', height: '32px'}} onClick={() => setAbierto(!abierto)} title="Cambiar icono">
+            <Boton type="button" variante="ghost" claseAdicional="selectorIconoProyecto__trigger" style={{width: '32px', height: '32px'}} onClick={() => setAbierto(!abierto)} title="Cambiar icono">
                 <IconoActual size={16} style={{color: colorIcono}} />
-            </button>
+            </Boton>
 
             {abierto && (
                 <div className="selectorIconoProyecto__dropdown" style={{minWidth: '220px', padding: '12px'}}>
@@ -134,9 +133,9 @@ export function SelectorIconoProyecto({iconoId, colorIcono, onCambio}: SelectorI
                             <div className="selectorIconoProyecto__categoriaTitulo">{NOMBRES_CATEGORIAS[categoria]}</div>
                             <div className="selectorIconoProyecto__grid" style={{gap: '4px'}}>
                                 {iconos.map(({id, Icono}) => (
-                                    <button key={id} type="button" className={`selectorIconoProyecto__opcion${id === iconoId ? ' selectorIconoProyecto__opcion--seleccionado' : ''}`} style={{width: '28px', height: '28px'}} onClick={() => manejarSeleccionIcono(id)} title={id}>
+                                    <Boton key={id} type="button" variante="ghost" claseAdicional={`selectorIconoProyecto__opcion${id === iconoId ? ' selectorIconoProyecto__opcion--seleccionado' : ''}`} style={{width: '28px', height: '28px'}} onClick={() => manejarSeleccionIcono(id)} title={id}>
                                         <Icono size={14} style={{color: colorIcono}} />
-                                    </button>
+                                    </Boton>
                                 ))}
                             </div>
                         </div>
@@ -144,7 +143,7 @@ export function SelectorIconoProyecto({iconoId, colorIcono, onCambio}: SelectorI
 
                     <div className="selectorColores" style={{paddingTop: '8px', gap: '6px'}}>
                         {COLORES_DISPONIBLES.map(({id, valor}) => (
-                            <button key={id} type="button" className={`selectorColores__opcion${valor === colorIcono ? ' selectorColores__opcion--seleccionado' : ''}`} style={{backgroundColor: valor, width: '20px', height: '20px'}} onClick={() => manejarSeleccionColor(valor)} title={id} />
+                            <Boton key={id} type="button" variante="ghost" claseAdicional={`selectorColores__opcion${valor === colorIcono ? ' selectorColores__opcion--seleccionado' : ''}`} style={{backgroundColor: valor, width: '20px', height: '20px'}} onClick={() => manejarSeleccionColor(valor)} title={id} />
                         ))}
                     </div>
                 </div>

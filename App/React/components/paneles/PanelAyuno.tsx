@@ -22,6 +22,7 @@ import {ModalFinalizarAyuno} from './ayuno/ModalFinalizarAyuno';
 import type {ConfiguracionAyuno} from '../../types/ayuno';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 import {calcularInicioProximoAyunoMsDesdeFin, calcularVentanaComidaMs, formatearDuracionAyuno} from '../../utils/ayunoVentanas';
+import {Boton} from '../ui';
 
 interface PanelAyunoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
@@ -100,9 +101,9 @@ function SelectorDuracion({duracionActual, onCambiar}: {duracionActual: number; 
     return (
         <div className="panelAyunoSelectorDuracion">
             {DURACIONES_PRESET.map(h => (
-                <button key={h} className={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`} onClick={() => onCambiar(h)} type="button">
+                <Boton key={h} type="button" variante="ghost" claseAdicional={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`} onClick={() => onCambiar(h)}>
                     {h}h
-                </button>
+                </Boton>
             ))}
         </div>
     );
@@ -112,9 +113,9 @@ function SelectorDuracionCompacto({duracionActual, onCambiar}: {duracionActual: 
     return (
         <div className="panelAyunoSelectorDuracion panelAyunoSelectorDuracion--compacto">
             {DURACIONES_PRESET.map(h => (
-                <button key={h} className={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`} onClick={() => onCambiar(h)} type="button">
+                <Boton key={h} type="button" variante="ghost" claseAdicional={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`} onClick={() => onCambiar(h)}>
                     {h}h
-                </button>
+                </Boton>
             ))}
         </div>
     );
@@ -221,8 +222,9 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                     <SelectorDuracionCompacto duracionActual={duracionHoras} onCambiar={manejarCambiarDuracion} />
                     <span className={`panelAyunoCentroTiempo ${alcanzoObjetivo ? 'panelAyunoCentroTiempo--completado' : ''}`}>{tiempoFormateado}</span>
                     {!alcanzoObjetivo && <span className="panelAyunoCentroRestante">-{tiempoRestanteFormateado}</span>}
-                    <button
-                        className="panelAyunoBotonCircular panelAyunoBotonCircular--terminar"
+                    <Boton
+                        variante="ghost"
+                        claseAdicional="panelAyunoBotonCircular panelAyunoBotonCircular--terminar"
                         onClick={() => {
                             setFinAyunoMs(Date.now());
                             setModalFinalizarAyunoAbierto(true);
@@ -230,7 +232,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                         type="button"
                         title="Terminar ayuno">
                         <Square size={14} fill="currentColor" />
-                    </button>
+                    </Boton>
                 </div>
             );
         }
@@ -242,9 +244,9 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                 <span className="panelAyunoCentroTiempo">{tiempoDesdeUltimoFormateado ? tiempoDesdeUltimoFormateado : `${duracionHoras}h`}</span>
                 {!!textoVentanaComida && <span className="panelAyunoCentroRestante">{textoVentanaComida}</span>}
                 {!!textoProximoAyuno && <span className="panelAyunoCentroRestante">{textoProximoAyuno}</span>}
-                <button className="panelAyunoBotonCircular panelAyunoBotonCircular--iniciar" onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)} type="button" disabled={!habitoAyunoExiste} title="Comenzar ayuno">
+                <Boton variante="ghost" claseAdicional="panelAyunoBotonCircular panelAyunoBotonCircular--iniciar" onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)} type="button" disabled={!habitoAyunoExiste} title="Comenzar ayuno">
                     <Play size={14} fill="currentColor" className="iconoPlayAjustado" />
-                </button>
+                </Boton>
             </div>
         );
     }, [estaActivo, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, tiempoDesdeUltimoFormateado, textoVentanaComida, textoProximoAyuno, duracionHoras, habitoAyunoExiste, manejarCambiarDuracion]);
@@ -258,9 +260,9 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                         <span className="panelAyunoAvisoTitulo">Falta el hábito Ayuno</span>
                         <span className="panelAyunoAvisoDescripcion">Puedes recrearlo ahora para reactivar el panel.</span>
                     </div>
-                    <button type="button" className="panelAyunoAvisoBoton" onClick={crearHabitoEspecialAhora} title="Crear hábito Ayuno ahora">
+                    <Boton type="button" variante="ghost" claseAdicional="panelAyunoAvisoBoton" onClick={crearHabitoEspecialAhora} title="Crear hábito Ayuno ahora">
                         Crear ahora
-                    </button>
+                    </Boton>
                 </div>
             )}
 
@@ -288,16 +290,16 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                     variante="panelHeader"
                     acciones={
                         <>
-                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
+                            <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
                                 <span className="selectorBadgeIcono">
                                     <Settings size={12} />
                                 </span>
-                            </button>
-                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
+                            </Boton>
+                            <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
                                 <span className="selectorBadgeIcono">
                                     <Maximize2 size={12} />
                                 </span>
-                            </button>
+                            </Boton>
                             {handleMinimizar}
                         </>
                     }

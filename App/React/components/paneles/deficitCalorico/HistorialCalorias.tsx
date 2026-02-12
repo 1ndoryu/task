@@ -63,11 +63,11 @@ export function HistorialCalorias({comidas, maxPorPagina = 3, onEliminar, onRein
 
     return (
         <div className="deficitHistorial">
-            <button type="button" className="deficitHistorialToggle" onClick={() => setColapsado(p => !p)} title={colapsado ? 'Mostrar historial' : 'Ocultar historial'}>
+            <Boton type="button" variante="ghost" claseAdicional="deficitHistorialToggle" onClick={() => setColapsado(p => !p)} title={colapsado ? 'Mostrar historial' : 'Ocultar historial'}>
                 {colapsado ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                 <span className="deficitHistorialTitulo">Historial</span>
                 <span className="deficitHistorialContador">({comidas.length})</span>
-            </button>
+            </Boton>
 
             {!colapsado && (
                 <>

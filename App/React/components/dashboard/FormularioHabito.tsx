@@ -10,7 +10,7 @@ import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito} from '../../t
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
 import {AccionesFormulario, SeccionPanel, SelectorNivel} from '../shared';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 
 /* Alias para compatibilidad con el componente */
 type DatosFormulario = DatosNuevoHabito;
@@ -87,7 +87,7 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
         <form id="formulario-habito" className="formularioHabito" onSubmit={manejarSubmit}>
             {/* Campo Nombre */}
             <SeccionPanel titulo="Nombre del habito">
-                <input id="habito-nombre" type="text" className={`formularioInput ${errores.nombre ? 'formularioInputError' : ''}`} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej: Leer 30 minutos" autoFocus disabled={guardando} />
+                <Input id="habito-nombre" tipo="text" claseAdicional={`formularioInput ${errores.nombre ? 'formularioInputError' : ''}`} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej: Leer 30 minutos" autoFocus disabled={guardando} />
                 {errores.nombre && <span className="formularioMensajeError">{errores.nombre}</span>}
             </SeccionPanel>
 
@@ -108,7 +108,7 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
                 </label>
                 <div className="formularioTagsInput">
                     <Tag size={12} className="formularioTagsIcono" />
-                    <input id="habito-tags" type="text" className="formularioInputTag" value={nuevoTag} onChange={e => setNuevoTag(e.target.value)} onKeyDown={manejarTeclaTag} placeholder="Escribe y presiona Enter" disabled={guardando || tags.length >= 5} />
+                    <Input id="habito-tags" tipo="text" claseAdicional="formularioInputTag" value={nuevoTag} onChange={e => setNuevoTag(e.target.value)} onKeyDown={manejarTeclaTag} placeholder="Escribe y presiona Enter" disabled={guardando || tags.length >= 5} />
                     <Boton
                         variante="icono"
                         onClick={agregarTag}

@@ -7,6 +7,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {Play} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
 import {SelectorRelojCircular} from './SelectorRelojCircular';
+import {Boton} from '../../ui';
 
 interface ModalUltimaComidaProps {
     estaAbierto: boolean;
@@ -78,13 +79,14 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
                 </div>
 
                 <div className="modalAyunoUltimaComidaAcciones">
-                    <button type="button" className="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--secundario" onClick={onCerrar}>
+                    <Boton type="button" variante="secundario" claseAdicional="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--secundario" onClick={onCerrar}>
                         Cancelar
-                    </button>
+                    </Boton>
 
-                    <button
+                    <Boton
                         type="button"
-                        className="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--primario"
+                        variante="primario"
+                        claseAdicional="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--primario"
                         onClick={() => {
                             const ahora = new Date();
                             const ts = hora ? convertirHoraInputATimestamp(hora, ahora) : undefined;
@@ -94,7 +96,7 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
                         title="Iniciar ayuno">
                         <Play size={14} />
                         <span>Iniciar</span>
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </Modal>

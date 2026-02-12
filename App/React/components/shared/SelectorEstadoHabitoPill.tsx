@@ -8,6 +8,7 @@ import {useState, useRef} from 'react';
 import {Check, Clock, Circle} from 'lucide-react';
 import {MenuContextual} from './MenuContextual';
 import type {EstadoHabito} from './SelectorEstadoHabito';
+import {Boton} from '../ui';
 
 interface SelectorEstadoHabitoPillProps {
     estado: EstadoHabito;
@@ -58,10 +59,10 @@ export function SelectorEstadoHabitoPill({estado, onChange, deshabilitado = fals
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${estado === 'pendiente' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado de hoy" style={{color: estadoActual.color}}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${estado === 'pendiente' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado de hoy" style={{color: estadoActual.color}}>
                 {obtenerIcono(estado, 14)}
                 <span>{estadoActual.etiqueta}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <MenuContextual

@@ -6,6 +6,7 @@
 
 import {useState, useCallback} from 'react';
 import {UserPlus} from 'lucide-react';
+import {Input} from '../ui';
 
 interface FormularioSolicitudProps {
     onEnviar: (email: string) => Promise<void>;
@@ -43,7 +44,7 @@ export function FormularioSolicitud({onEnviar, enviando}: FormularioSolicitudPro
                     Invitar compañero por correo
                 </label>
                 <div className="formularioSolicitudInputGrupo">
-                    <input id="email-solicitud" type="email" className={`formularioSolicitudInput ${!emailValido ? 'invalido' : ''}`} placeholder="correo@ejemplo.com" value={email} onChange={e => setEmail(e.target.value)} disabled={enviando} autoComplete="email" />
+                    <Input id="email-solicitud" tipo="email" claseAdicional={`formularioSolicitudInput ${!emailValido ? 'invalido' : ''}`} placeholder="correo@ejemplo.com" value={email} onChange={e => setEmail(e.target.value)} disabled={enviando} autoComplete="email" />
                     <button type="submit" className="formularioSolicitudBoton" disabled={enviando || !email.trim() || !emailValido} title="Enviar solicitud">
                         {enviando ? <span className="equiposSpinner pequeno" /> : <UserPlus size={16} />}
                         <span>Invitar</span>

@@ -6,6 +6,7 @@
 
 import {useState} from 'react';
 import {Crown, Edit3, Eye, X, ChevronDown} from 'lucide-react';
+import {Boton} from '../ui';
 import type {Participante, RolCompartido} from '../../types/dashboard';
 
 interface ListaParticipantesProps {
@@ -73,22 +74,22 @@ export function ListaParticipantes({participantes, esPropietario, onCambiarRol, 
                             </span>
                         ) : esPropietario ? (
                             <div className="participanteRolSelector">
-                                <button type="button" className="participanteRolBoton" onClick={() => setMenuRolAbierto(menuRolAbierto === participante.id ? null : participante.id)} disabled={cargando}>
+                                <Boton type="button" variante="ghost" claseAdicional="participanteRolBoton" onClick={() => setMenuRolAbierto(menuRolAbierto === participante.id ? null : participante.id)} disabled={cargando}>
                                     {obtenerIconoRol(participante.rol)}
                                     <span>{obtenerTextoRol(participante.rol)}</span>
                                     <ChevronDown size={12} />
-                                </button>
+                                </Boton>
 
                                 {menuRolAbierto === participante.id && (
                                     <div className="participanteRolMenu">
-                                        <button type="button" className={`participanteRolOpcion ${participante.rol === 'colaborador' ? 'participanteRolOpcionActiva' : ''}`} onClick={() => manejarCambioRol(participante.id, 'colaborador')}>
+                                        <Boton type="button" variante="ghost" claseAdicional={`participanteRolOpcion ${participante.rol === 'colaborador' ? 'participanteRolOpcionActiva' : ''}`} onClick={() => manejarCambioRol(participante.id, 'colaborador')}>
                                             <Edit3 size={12} />
                                             <span>Colaborador</span>
-                                        </button>
-                                        <button type="button" className={`participanteRolOpcion ${participante.rol === 'observador' ? 'participanteRolOpcionActiva' : ''}`} onClick={() => manejarCambioRol(participante.id, 'observador')}>
+                                        </Boton>
+                                        <Boton type="button" variante="ghost" claseAdicional={`participanteRolOpcion ${participante.rol === 'observador' ? 'participanteRolOpcionActiva' : ''}`} onClick={() => manejarCambioRol(participante.id, 'observador')}>
                                             <Eye size={12} />
                                             <span>Observador</span>
-                                        </button>
+                                        </Boton>
                                     </div>
                                 )}
                             </div>
@@ -101,9 +102,7 @@ export function ListaParticipantes({participantes, esPropietario, onCambiarRol, 
                     </div>
 
                     {esPropietario && !participante.esPropietario && (
-                        <button type="button" className="participanteEliminar" onClick={() => onEliminar?.(participante.id)} disabled={cargando} title="Dejar de compartir">
-                            <X size={14} />
-                        </button>
+                        <Boton type="button" variante="icono" claseAdicional="participanteEliminar" onClick={() => onEliminar?.(participante.id)} disabled={cargando} title="Dejar de compartir" icono={<X size={14} />} />
                     )}
                 </div>
             ))}

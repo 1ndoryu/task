@@ -8,6 +8,7 @@ import {useState, useRef} from 'react';
 import {Folder, Ban} from 'lucide-react';
 import type {Proyecto} from '../../types/dashboard';
 import {MenuContextual} from './MenuContextual';
+import {Boton} from '../ui';
 
 interface SelectorProyectoPillProps {
     proyectos: Proyecto[];
@@ -50,10 +51,10 @@ export function SelectorProyectoPill({proyectos, proyectoActualId, onChange, des
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${!proyectoActual ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Proyecto">
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${!proyectoActual ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Proyecto">
                 {proyectoActual ? <Folder size={14} /> : <Ban size={14} />}
                 <span>{obtenerNombreProyecto()}</span>
-            </button>
+            </Boton>
 
             {menuAbierto && (
                 <MenuContextual

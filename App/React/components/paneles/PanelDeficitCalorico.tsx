@@ -19,6 +19,7 @@ import {calcularObjetivosMacro} from '../../utils/calculoTMB';
 import {HistorialCalorias} from './deficitCalorico/HistorialCalorias';
 import {ModalInspeccionIA} from './deficitCalorico/ModalInspeccionIA';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
+import {Boton} from '../ui';
 
 interface PanelDeficitCaloricoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
@@ -184,16 +185,16 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
                     variante="panelHeader"
                     acciones={
                         <>
-                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
+                            <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
                                 <span className="selectorBadgeIcono">
                                     <Settings size={12} />
                                 </span>
-                            </button>
-                            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
+                            </Boton>
+                            <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
                                 <span className="selectorBadgeIcono">
                                     <Maximize2 size={12} />
                                 </span>
-                            </button>
+                            </Boton>
                             {handleMinimizar}
                         </>
                     }

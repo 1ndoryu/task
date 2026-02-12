@@ -13,6 +13,7 @@
 
 import {useEffect, useCallback, useRef} from 'react';
 import {Crown} from 'lucide-react';
+import {Boton} from '../ui';
 import type {InfoSuscripcion} from '../../types/dashboard';
 
 export interface OpcionDrawer {
@@ -127,15 +128,15 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
         }
         if (suscripcion.plan === 'trial') {
             return (
-                <button type="button" className="drawerMovilPlanBadge drawerMovilPlanBadge--trial drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
+                <Boton type="button" variante="ghost" claseAdicional="drawerMovilPlanBadge drawerMovilPlanBadge--trial drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
                     Trial
-                </button>
+                </Boton>
             );
         }
         return (
-            <button type="button" className="drawerMovilPlanBadge drawerMovilPlanBadge--free drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
+            <Boton type="button" variante="ghost" claseAdicional="drawerMovilPlanBadge drawerMovilPlanBadge--free drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
                 Free
-            </button>
+            </Boton>
         );
     };
 
@@ -150,24 +151,24 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
             <div ref={drawerRef} className={`drawerMovilPanel ${estaAbierto ? 'drawerMovilPanel--visible' : ''}`} role="dialog" aria-modal="true" aria-label="Menú de navegación" onTouchStart={manejarTouchStart} onTouchEnd={manejarTouchEnd}>
                 {/* Cabecera con perfil - foto y nombre clickeables */}
                 <div className="drawerMovilCabecera">
-                    <button type="button" className="drawerMovilPerfil drawerMovilPerfil--clickeable" onClick={onClickPerfil ? manejarClickPerfil : undefined}>
+                    <Boton type="button" variante="ghost" claseAdicional="drawerMovilPerfil drawerMovilPerfil--clickeable" onClick={onClickPerfil ? manejarClickPerfil : undefined}>
                         {usuario.avatar ? <img src={usuario.avatar} alt="" className="drawerMovilAvatar" /> : <div className="drawerMovilAvatarInicial">{usuario.nombre.charAt(0).toUpperCase()}</div>}
                         <div className="drawerMovilPerfilInfo">
                             <span className="drawerMovilNombre">{usuario.nombre}</span>
                             {obtenerBadgePlan()}
                         </div>
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Navegación principal - Todas las opciones unificadas */}
                 <nav className="drawerMovilNavegacion">
                     {opciones.map(opcion => (
                         <div key={opcion.id}>
-                            <button type="button" className={`drawerMovilItem ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''} ${opcion.activo ? 'drawerMovilItem--activo' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
+                            <Boton type="button" variante="ghost" claseAdicional={`drawerMovilItem ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''} ${opcion.activo ? 'drawerMovilItem--activo' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
                                 <span className="drawerMovilItemIcono">{opcion.icono}</span>
                                 <span className="drawerMovilItemTexto">{opcion.etiqueta}</span>
                                 {opcion.badge !== undefined && opcion.badge > 0 && <span className="drawerMovilItemBadge">{opcion.badge}</span>}
-                            </button>
+                            </Boton>
                             {opcion.separadorDespues && <div className="drawerMovilSeparador" />}
                         </div>
                     ))}
@@ -177,10 +178,10 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
                             {/* Solo mostrar separador si la última opción principal no lo tiene */}
                             {!(opciones.length > 0 && opciones[opciones.length - 1].separadorDespues) && <div className="drawerMovilSeparador" />}
                             {opcionesSecundarias.map(opcion => (
-                                <button key={opcion.id} type="button" className={`drawerMovilItem ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
+                                <Boton key={opcion.id} type="button" variante="ghost" claseAdicional={`drawerMovilItem ${opcion.peligroso ? 'drawerMovilItem--peligro' : ''}`} onClick={() => manejarClickOpcion(opcion.id)}>
                                     <span className="drawerMovilItemIcono">{opcion.icono}</span>
                                     <span className="drawerMovilItemTexto">{opcion.etiqueta}</span>
-                                </button>
+                                </Boton>
                             ))}
                         </>
                     )}

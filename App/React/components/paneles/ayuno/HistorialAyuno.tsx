@@ -6,6 +6,7 @@
 import {useMemo, useState} from 'react';
 import {ChevronDown, ChevronRight, Trash2, Utensils, Clock, Flag, Target} from 'lucide-react';
 import type {SesionAyuno} from '../../../types/ayuno';
+import {Boton} from '../../ui';
 
 interface HistorialAyunoProps {
     sesiones: SesionAyuno[];
@@ -42,11 +43,11 @@ export function HistorialAyuno({sesiones, maxPorPagina = 6, onEliminarSesion}: H
 
     return (
         <div className="panelAyunoHistorial">
-            <button type="button" className="panelAyunoHistorialToggle" onClick={() => setColapsado(p => !p)} title={colapsado ? 'Mostrar historial' : 'Ocultar historial'}>
+            <Boton type="button" variante="ghost" claseAdicional="panelAyunoHistorialToggle" onClick={() => setColapsado(p => !p)} title={colapsado ? 'Mostrar historial' : 'Ocultar historial'}>
                 {colapsado ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                 <span className="panelAyunoHistorialTitulo">Historial</span>
                 <span className="panelAyunoHistorialContador">({sesiones.length})</span>
-            </button>
+            </Boton>
 
             {!colapsado && (
                 <>
@@ -85,9 +86,9 @@ export function HistorialAyuno({sesiones, maxPorPagina = 6, onEliminarSesion}: H
                                         </div>
                                         <div className="panelAyunoHistorialAcciones">
                                             <span className="panelAyunoHistorialItemTiempo">{formatearDuracion(s.tiempoEfectivoMs)}</span>
-                                            <button type="button" className="panelAyunoHistorialEliminar" onClick={() => onEliminarSesion(s.id)} title="Borrar registro" aria-label="Borrar registro">
+                                            <Boton type="button" variante="ghost" claseAdicional="panelAyunoHistorialEliminar" onClick={() => onEliminarSesion(s.id)} title="Borrar registro" aria-label="Borrar registro">
                                                 <Trash2 size={12} />
-                                            </button>
+                                            </Boton>
                                         </div>
                                     </div>
                                 </div>

@@ -6,6 +6,7 @@
 
 import {useState, useCallback} from 'react';
 import {Check, Clock, X} from 'lucide-react';
+import {Boton} from '../ui';
 
 type EstadoHabito = 'completado' | 'pospuesto' | 'omitido' | 'pendiente';
 
@@ -50,14 +51,14 @@ export function SelectorEstadoHabito({estado, onChange, deshabilitado = false}: 
     return (
         <div className="selectorEstadoHabito">
             {/* Cabecera colapsable */}
-            <button type="button" className="selectorEstadoHabitoCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
+            <Boton type="button" variante="ghost" claseAdicional="selectorEstadoHabitoCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
                 <span className="selectorEstadoHabitoEtiqueta">Estado de hoy</span>
                 <span className={`selectorEstadoHabitoValor selectorEstadoHabitoValor--${estado}`}>
                     {obtenerIcono(estadoConfig.icono, 12)}
                     {estadoConfig.etiqueta}
                 </span>
                 <span className="selectorEstadoHabitoFlecha">{expandido ? '▲' : '▼'}</span>
-            </button>
+            </Boton>
 
             {/* Panel expandido */}
             {expandido && (
@@ -65,10 +66,10 @@ export function SelectorEstadoHabito({estado, onChange, deshabilitado = false}: 
                     {ESTADOS.map(({estado: estadoOpcion, etiqueta, icono}) => {
                         const esActual = estado === estadoOpcion;
                         return (
-                            <button key={estadoOpcion} type="button" className={`selectorEstadoHabitoOpcion ${esActual ? 'selectorEstadoHabitoOpcionActivo' : ''} selectorEstadoHabitoOpcion--${estadoOpcion}`} onClick={() => manejarSeleccion(estadoOpcion)} disabled={deshabilitado}>
+                            <Boton key={estadoOpcion} type="button" variante="ghost" claseAdicional={`selectorEstadoHabitoOpcion ${esActual ? 'selectorEstadoHabitoOpcionActivo' : ''} selectorEstadoHabitoOpcion--${estadoOpcion}`} onClick={() => manejarSeleccion(estadoOpcion)} disabled={deshabilitado}>
                                 {obtenerIcono(icono, 14)}
                                 <span>{etiqueta}</span>
-                            </button>
+                            </Boton>
                         );
                     })}
                 </div>

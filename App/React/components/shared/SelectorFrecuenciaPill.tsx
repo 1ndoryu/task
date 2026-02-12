@@ -8,6 +8,7 @@ import {useState, useRef, useEffect} from 'react';
 import {Calendar} from 'lucide-react';
 import type {FrecuenciaHabito, TipoFrecuencia, DiaSemana} from '../../types/dashboard';
 import {SelectorDias} from './SelectorDias';
+import {Boton} from '../ui';
 
 interface SelectorFrecuenciaPillProps {
     frecuencia: FrecuenciaHabito;
@@ -119,10 +120,10 @@ export function SelectorFrecuenciaPill({frecuencia, onChange, deshabilitado = fa
 
     return (
         <div className="propiedadesCompactas__item">
-            <button ref={botonRef} type="button" className={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirPanel} title="Frecuencia">
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirPanel} title="Frecuencia">
                 <Calendar size={14} />
                 <span>{obtenerDescripcion()}</span>
-            </button>
+            </Boton>
 
             {panelAbierto && (
                 <div
@@ -139,9 +140,9 @@ export function SelectorFrecuenciaPill({frecuencia, onChange, deshabilitado = fa
                     {/* Selector de tipo */}
                     <div className="selectorRepeticionPanel__tipos">
                         {TIPOS_FRECUENCIA.map(({tipo, etiqueta}) => (
-                            <button key={tipo} type="button" className={`selectorRepeticionPanel__tipo ${frecuencia.tipo === tipo ? 'selectorRepeticionPanel__tipo--activo' : ''}`} onClick={() => manejarCambioTipo(tipo)}>
+                            <Boton key={tipo} type="button" variante="ghost" claseAdicional={`selectorRepeticionPanel__tipo ${frecuencia.tipo === tipo ? 'selectorRepeticionPanel__tipo--activo' : ''}`} onClick={() => manejarCambioTipo(tipo)}>
                                 {etiqueta}
-                            </button>
+                            </Boton>
                         ))}
                     </div>
 
@@ -150,13 +151,13 @@ export function SelectorFrecuenciaPill({frecuencia, onChange, deshabilitado = fa
                         <div className="selectorRepeticionPanel__config">
                             <span className="selectorRepeticionPanel__label">Cada</span>
                             <div className="selectorRepeticionPanel__numero">
-                                <button type="button" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) - 1)} disabled={(frecuencia.cadaDias || 2) <= 2}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) - 1)} disabled={(frecuencia.cadaDias || 2) <= 2}>
                                     −
-                                </button>
+                                </Boton>
                                 <span>{frecuencia.cadaDias || 2}</span>
-                                <button type="button" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) + 1)} disabled={(frecuencia.cadaDias || 2) >= 30}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) + 1)} disabled={(frecuencia.cadaDias || 2) >= 30}>
                                     +
-                                </button>
+                                </Boton>
                             </div>
                             <span className="selectorRepeticionPanel__label">días</span>
                         </div>
@@ -171,13 +172,13 @@ export function SelectorFrecuenciaPill({frecuencia, onChange, deshabilitado = fa
                     {frecuencia.tipo === 'mensual' && (
                         <div className="selectorRepeticionPanel__config">
                             <div className="selectorRepeticionPanel__numero">
-                                <button type="button" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) - 1)} disabled={(frecuencia.vecesAlMes || 4) <= 1}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) - 1)} disabled={(frecuencia.vecesAlMes || 4) <= 1}>
                                     −
-                                </button>
+                                </Boton>
                                 <span>{frecuencia.vecesAlMes || 4}</span>
-                                <button type="button" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) + 1)} disabled={(frecuencia.vecesAlMes || 4) >= 30}>
+                                <Boton type="button" variante="ghost" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) + 1)} disabled={(frecuencia.vecesAlMes || 4) >= 30}>
                                     +
-                                </button>
+                                </Boton>
                             </div>
                             <span className="selectorRepeticionPanel__label">veces al mes</span>
                         </div>

@@ -8,6 +8,7 @@
 
 import {useState, useRef, useEffect} from 'react';
 import {Tag, Plus, X} from 'lucide-react';
+import {Boton} from '../ui';
 
 interface SelectorTagsProps {
     tags: string[];
@@ -79,13 +80,13 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
             {/* Lista de tags existentes - Estilo Pill consistente */}
             {tagsNormalizados.map(tag => (
                 <div key={tag} className="propiedadesCompactas__item">
-                    <button type="button" className="pillOpcion" onClick={() => removerTag(tag)} title={`Remover: ${tag}`}>
+                    <Boton type="button" variante="ghost" claseAdicional="pillOpcion" onClick={() => removerTag(tag)} title={`Remover: ${tag}`}>
                         <Tag size={14} />
                         <span>{tag}</span>
                         <div className="pillOpcion__hoverIcon">
                             <X size={12} />
                         </div>
-                    </button>
+                    </Boton>
                 </div>
             ))}
 
@@ -108,10 +109,10 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
                         />
                     </div>
                 ) : (
-                    <button type="button" className="pillOpcion pillOpcion--vacio" onClick={() => setMostrandoInput(true)} title="Agregar etiqueta">
+                    <Boton type="button" variante="ghost" claseAdicional="pillOpcion pillOpcion--vacio" onClick={() => setMostrandoInput(true)} title="Agregar etiqueta">
                         <Plus size={14} />
                         <span>Etiqueta</span>
-                    </button>
+                    </Boton>
                 )}
             </div>
         </div>

@@ -16,6 +16,7 @@
 import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Calendar, Flag, Zap, Layers, Settings, Paperclip} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
+import {Input, Boton} from '../ui';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 import {OPCIONES_PRIORIDAD, OPCIONES_URGENCIA, OPCIONES_FECHA_TAREA, obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
 import {calcularFechaDesdeOpcion} from '../../utils/fecha';
@@ -206,7 +207,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
             <div className="bottomSheetTarea">
                 {/* Input principal */}
                 <div className="bottomSheetTarea__inputWrapper">
-                    <input ref={inputRef} type="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" className="bottomSheetTarea__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
+                    <Input ref={inputRef} tipo="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" claseAdicional="bottomSheetTarea__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}
@@ -218,46 +219,37 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
                     <div className="bottomSheetTarea__opcionesGrupo">
                         {/* Proyecto */}
                         {proyectos.length > 0 && (
-                            <button type="button" className={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('proyecto')} aria-label={obtenerNombreProyecto() || 'Proyecto'} title={obtenerNombreProyecto() || 'Proyecto'}>
-                                <Layers size={18} />
-                            </button>
+                            <Boton type="button" variante="ghost" claseAdicional={`bottomSheetTarea__accion ${proyectoId ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('proyecto')} aria-label={obtenerNombreProyecto() || 'Proyecto'} title={obtenerNombreProyecto() || 'Proyecto'} icono={<Layers size={18} />} />
                         )}
 
                         {/* Prioridad */}
-                        <button type="button" className={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'}>
-                            <Flag size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetTarea__accion ${prioridad ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'} icono={<Flag size={18} />} />
 
                         {/* Urgencia */}
-                        <button type="button" className={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'}>
-                            <Zap size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetTarea__accion ${urgencia ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'} icono={<Zap size={18} />} />
 
                         {/* Fecha límite */}
-                        <button type="button" className={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fecha || 'Fecha'} title={fecha || 'Fecha'}>
-                            <Calendar size={18} />
-                        </button>
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetTarea__accion ${fecha ? 'bottomSheetTarea__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fecha || 'Fecha'} title={fecha || 'Fecha'} icono={<Calendar size={18} />} />
 
                         {/* Configuración avanzada (solo edición) */}
                         {esEdicion && onAbrirConfiguracion && (
-                            <button
+                            <Boton
                                 type="button"
-                                className="bottomSheetTarea__accion"
+                                variante="ghost"
+                                claseAdicional="bottomSheetTarea__accion"
                                 onClick={() => {
                                     onAbrirConfiguracion();
                                     onCerrar();
                                 }}
                                 aria-label="Configuración avanzada"
-                                title="Configuración avanzada">
-                                <Settings size={18} />
-                            </button>
+                                title="Configuración avanzada"
+                                icono={<Settings size={18} />}
+                            />
                         )}
                     </div>
 
                     {/* Botón Guardar (Derecha) */}
-                    <button type="button" className="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'}>
-                        <Send size={18} />
-                    </button>
+                    <Boton type="button" variante="primario" claseAdicional="bottomSheetTarea__botonGuardar" onClick={manejarGuardar} disabled={!texto.trim() || cargando} aria-label={esEdicion ? 'Guardar Cambios' : 'Crear Tarea'} icono={<Send size={18} />} />
                 </div>
             </div>
 

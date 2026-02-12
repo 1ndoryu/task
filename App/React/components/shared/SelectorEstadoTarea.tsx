@@ -6,6 +6,7 @@
 
 import {useState, useCallback} from 'react';
 import {Circle, CheckCircle2} from 'lucide-react';
+import {Boton} from '../ui';
 
 type EstadoTarea = 'pendiente' | 'completada';
 
@@ -36,14 +37,14 @@ export function SelectorEstadoTarea({completada, onChange, deshabilitado = false
     return (
         <div className="selectorEstadoTarea">
             {/* Cabecera colapsable */}
-            <button type="button" className="selectorEstadoTareaCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
+            <Boton type="button" variante="ghost" claseAdicional="selectorEstadoTareaCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
                 <span className="selectorEstadoTareaEtiqueta">Estado</span>
                 <span className={`selectorEstadoTareaValor ${completada ? 'selectorEstadoTareaValor--completada' : ''}`}>
                     {completada ? <CheckCircle2 size={12} className="selectorEstadoTareaIcono" /> : <Circle size={12} className="selectorEstadoTareaIcono" />}
                     {estadoActual}
                 </span>
                 <span className="selectorEstadoTareaFlecha">{expandido ? '▲' : '▼'}</span>
-            </button>
+            </Boton>
 
             {/* Panel expandido */}
             {expandido && (
@@ -51,10 +52,10 @@ export function SelectorEstadoTarea({completada, onChange, deshabilitado = false
                     {ESTADOS.map(({estado, etiqueta, completada: esCompletada}) => {
                         const esActual = completada === esCompletada;
                         return (
-                            <button key={estado} type="button" className={`selectorEstadoTareaOpcion ${esActual ? 'selectorEstadoTareaOpcionActivo' : ''} ${esCompletada ? 'selectorEstadoTareaOpcion--completada' : ''}`} onClick={() => manejarSeleccion(esCompletada)} disabled={deshabilitado}>
+                            <Boton key={estado} type="button" variante="ghost" claseAdicional={`selectorEstadoTareaOpcion ${esActual ? 'selectorEstadoTareaOpcionActivo' : ''} ${esCompletada ? 'selectorEstadoTareaOpcion--completada' : ''}`} onClick={() => manejarSeleccion(esCompletada)} disabled={deshabilitado}>
                                 {esCompletada ? <CheckCircle2 size={14} /> : <Circle size={14} />}
                                 <span>{etiqueta}</span>
-                            </button>
+                            </Boton>
                         );
                     })}
                 </div>

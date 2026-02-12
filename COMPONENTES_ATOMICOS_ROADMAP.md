@@ -4,7 +4,8 @@
 **Objetivo:** Convertir todos los botones e inputs del proyecto en componentes reutilizables sin romper funcionalidad.
 
 ## Estado General
-- 🔄 **En Progreso** - Fase 3: Migración de botones (30 componentes migrados, 16 botones totales)
+- 🔄 **En Progreso** - Fase 3: Migración de botones (56+ componentes migrados, ~60+ botones restantes)
+- ✅ **Completado** - BottomSheets, Drawer, Menus, todos los Selectores, Paneles migrados
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
@@ -55,9 +56,31 @@
 - [x] 3.23 - Reemplazar botones en componentes de listas (ListaTareasCompacta, ListaTareasHabito, ListaSubtareas)
 - [x] 3.24 - Reemplazar botones en adjuntos (AdjuntoItemModerno, AdjuntoOverlay)
 - [x] 3.25 - Reemplazar botones en modales complejos (ModalConfiguracionLayout)
-- [ ] 3.26 - Reemplazar botones en ModalCreacionRapida (10+ botones)
-- [ ] 3.27 - Reemplazar botones en proyectos/ModalProyecto
-- [ ] 3.28 - Reemplazar botones restantes (50+ componentes pendientes)
+- [x] 3.26 - Reemplazar botones en ModalCreacionRapida (ya migrado)
+- [x] 3.27 - Reemplazar botones en proyectos/ModalProyecto (ya migrado)
+- [x] 3.28 - Reemplazar botones en BottomSheets (Tarea, Habito, Proyecto)
+- [x] 3.29 - Reemplazar botones en DrawerMovil
+- [x] 3.30 - Reemplazar botones en MenuOpcionesPanel
+- [x] 3.31 - Reemplazar botones en ListaParticipantes
+- [x] 3.32 - Reemplazar botones en todos los Selectores (~18 componentes, ~80 botones):
+  - [x] SelectorBadge (2 botones)
+  - [x] SelectorDias (7 botones)
+  - [x] SelectorNivel (botones dinámicos)
+  - [x] SelectorEstadoTarea, SelectorEstadoHabito, SelectorProyecto (6 botones)
+  - [x] SelectorIconoProyecto, SelectorTags (4 botones)
+  - [x] Todos los Selectores Pills (EstadoHabitoPill, EstadoPill, EstadoProyectoPill, ImportanciaPill, ProyectoPill, FrecuenciaPill, RepeticionPill) (~25 botones)
+  - [x] SelectorVentanaOportunidad (3 botones)
+- [x] 3.33 - Reemplazar botones en Paneles (~7 componentes, ~40 botones):
+  - [x] PanelAyuno (7 botones)
+  - [x] PanelDeficitCalorico (2 botones)
+  - [x] PanelActividad (4 botones)
+  - [x] HistorialAyuno (3 botones)
+  - [x] ModalUltimaComida (2 botones)
+  - [x] ModalFinalizarAyuno (3 botones)
+  - [x] HistorialCalorias (1 botón)
+- [ ] 3.34 - Reemplazar botones en Encabezados y Modales (~15 componentes, ~30 botones)
+- [ ] 3.35 - Reemplazar botones en Admin y Equipos (~10 componentes, ~20 botones)
+- [ ] 3.36 - Reemplazar botones restantes (~10 componentes, ~10 botones)
 
 ## Notas de Progreso
 - ✅ 28 componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos)

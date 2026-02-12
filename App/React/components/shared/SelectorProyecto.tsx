@@ -7,6 +7,7 @@
 import {useState, useCallback} from 'react';
 import {Folder, Ban} from 'lucide-react';
 import type {Proyecto} from '../../types/dashboard';
+import {Boton} from '../ui';
 
 interface SelectorProyectoProps {
     proyectos: Proyecto[];
@@ -36,23 +37,23 @@ export function SelectorProyecto({proyectos, proyectoActualId, onChange, deshabi
     return (
         <div className="selectorProyecto">
             {/* Cabecera colapsable */}
-            <button type="button" className="selectorProyectoCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
+            <Boton type="button" variante="ghost" claseAdicional="selectorProyectoCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
                 <span className="selectorProyectoEtiqueta">Proyecto</span>
                 <span className="selectorProyectoValor">
                     {proyectoActual ? <Folder size={12} className="selectorProyectoIcono" /> : <Ban size={12} className="selectorProyectoIcono" />}
                     {obtenerNombreProyecto()}
                 </span>
                 <span className="selectorProyectoFlecha">{expandido ? '▲' : '▼'}</span>
-            </button>
+            </Boton>
 
             {/* Panel expandido */}
             {expandido && (
                 <div className="selectorProyectoPanel">
                     {/* Opcion: Sin proyecto */}
-                    <button type="button" className={`selectorProyectoOpcion ${!proyectoActualId ? 'selectorProyectoOpcionActivo' : ''}`} onClick={() => manejarSeleccion(undefined)} disabled={deshabilitado}>
+                    <Boton type="button" variante="ghost" claseAdicional={`selectorProyectoOpcion ${!proyectoActualId ? 'selectorProyectoOpcionActivo' : ''}`} onClick={() => manejarSeleccion(undefined)} disabled={deshabilitado}>
                         <Ban size={14} className="selectorProyectoOpcionIcono" />
                         <span>Sin proyecto</span>
-                    </button>
+                    </Boton>
 
                     {proyectos.length > 0 && <div className="selectorProyectoSeparador" />}
 
@@ -60,10 +61,10 @@ export function SelectorProyecto({proyectos, proyectoActualId, onChange, deshabi
                     {proyectos.map(proyecto => {
                         const esActual = proyecto.id === proyectoActualId;
                         return (
-                            <button key={proyecto.id} type="button" className={`selectorProyectoOpcion ${esActual ? 'selectorProyectoOpcionActivo' : ''}`} onClick={() => manejarSeleccion(proyecto.id)} disabled={deshabilitado}>
+                            <Boton key={proyecto.id} type="button" variante="ghost" claseAdicional={`selectorProyectoOpcion ${esActual ? 'selectorProyectoOpcionActivo' : ''}`} onClick={() => manejarSeleccion(proyecto.id)} disabled={deshabilitado}>
                                 <Folder size={14} className="selectorProyectoOpcionIcono" />
                                 <span>{proyecto.nombre}</span>
-                            </button>
+                            </Boton>
                         );
                     })}
                 </div>
