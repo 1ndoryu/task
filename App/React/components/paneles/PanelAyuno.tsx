@@ -327,8 +327,8 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                 onEliminar={() => {
                     reiniciar();
                 }}
-                onGuardar={() => {
-                    terminar(finAyunoMs ?? Date.now());
+                onGuardar={horaFinComidaMs => {
+                    terminar(horaFinComidaMs);
                 }}
             />
         </>

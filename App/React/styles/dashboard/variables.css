@@ -55,6 +55,7 @@
     --dashboard-estadoExito: #22c55e;
     --dashboard-estadoExitoFondo: rgba(34, 197, 94, 0.1);
     --dashboard-estadoExitoBorde: rgba(34, 197, 94, 0.3);
+    --dashboard-exitoRgb: 34, 197, 94;
 
     --dashboard-estadoInfo: #3b82f6;
     --dashboard-estadoInfoFondo: rgba(59, 130, 246, 0.1);
@@ -62,6 +63,17 @@
 
     --dashboard-estadoAltaTexto: #fca5a5;
     --dashboard-estadoMediaTexto: #fcd34d;
+
+    /*
+     * ALIASES LEGACY DE COMPATIBILIDAD
+     * Mantienen estilos históricos sin romper hojas antiguas
+     */
+    --dashboard-primario: var(--dashboard-acento);
+    --dashboard-exito: var(--dashboard-estadoExito);
+    --dashboard-error: var(--dashboard-estadoAlta);
+    --dashboard-estadoError: var(--dashboard-estadoAlta);
+    --dashboard-estadoErrorFondo: var(--dashboard-estadoAltaFondo);
+    --dashboard-estadoErrorBorde: var(--dashboard-estadoAltaBorde);
 
     /* 
      * EFECTOS DE SUPERPOSICION 
@@ -134,6 +146,7 @@
      */
     --dashboard-sombraElevada: 0 10px 30px rgba(0, 0, 0, 0.2);
     --dashboard-sombraSutil: 0 20px 50px rgba(0, 0, 0, 0.2);
+    --dashboard-sombraFlotante: var(--dashboard-sombraElevada);
 
     /* 
      * TRANSICIONES 
@@ -228,6 +241,7 @@
     --dashboard-acento: var(--dashboard-acentoSecundario);
     --dashboard-acentoHover: #3b82f6;
     --dashboard-acentoRgb: var(--dashboard-acentoSecundarioRgb);
+    --dashboard-primario: var(--dashboard-acento);
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #1a1a1a;
@@ -286,6 +300,7 @@
     --dashboard-acento: var(--dashboard-acentoSecundario);
     --dashboard-acentoHover: #1d4ed8;
     --dashboard-acentoRgb: var(--dashboard-acentoSecundarioRgb);
+    --dashboard-primario: var(--dashboard-acento);
 
     /* Colores de borde */
     --dashboard-bordePrincipal: #dee2e6;
@@ -320,6 +335,7 @@
     --dashboard-estadoExito: #198754;
     --dashboard-estadoExitoFondo: rgba(25, 135, 84, 0.1);
     --dashboard-estadoExitoBorde: rgba(25, 135, 84, 0.3);
+    --dashboard-exitoRgb: 25, 135, 84;
 
     --dashboard-estadoInfo: #0d6efd;
     --dashboard-estadoInfoFondo: rgba(13, 110, 253, 0.1);

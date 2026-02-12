@@ -662,6 +662,32 @@
     font-style: italic;
 }
 
+.modalAyunoTimelineHoraEditable {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modalAyunoTimelineHoraInput {
+    width: 88px !important;
+    min-width: 88px;
+    max-width: 88px;
+    flex: 0 0 88px;
+    display: inline-block;
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
+.modalAyunoTimelineDia {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .modalAyunoFinalizarAcciones {
     display: flex;
     justify-content: flex-end;

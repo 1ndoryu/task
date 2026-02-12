@@ -35,7 +35,7 @@
 }
 
 .etiquetaColumna {
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 600;
     color: var(--dashboard-textoNormal);
     letter-spacing: 0.02em;
@@ -43,7 +43,7 @@
 }
 
 .descripcionColumna {
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     line-height: 1.2;
 }
@@ -55,7 +55,7 @@
 
 .tituloSeccionConfig {
     margin: 0 0 var(--dashboard-espacioMd) 0;
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
     color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
@@ -71,7 +71,7 @@
  */
 .descripcionSeccionConfig {
     display: block;
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
     margin-bottom: var(--dashboard-espacioMd);
     line-height: 1.4;
@@ -112,26 +112,26 @@
 
 .botonPresetTolerancia--activo {
     background-color: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-primario);
-    box-shadow: 0 0 0 1px var(--dashboard-primario);
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 1px var(--dashboard-acento);
 }
 
 .botonPresetTolerancia--activo:hover {
-    border-color: var(--dashboard-primario);
+    border-color: var(--dashboard-acento);
 }
 
 .etiquetaPreset {
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 600;
     color: var(--dashboard-textoNormal);
 }
 
 .botonPresetTolerancia--activo .etiquetaPreset {
-    color: var(--dashboard-primario);
+    color: var(--dashboard-acento);
 }
 
 .descripcionPreset {
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     line-height: 1.3;
 }
@@ -167,7 +167,7 @@
 }
 
 .listaTareasHabito__titulo {
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 600;
     color: var(--dashboard-textoApagado);
     text-transform: uppercase;
@@ -175,7 +175,7 @@
 }
 
 .listaTareasHabito__contador {
-    font-size: 0.6rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     background: var(--dashboard-fondoSecundario);
     padding: 1px 6px;
@@ -250,17 +250,17 @@
 }
 
 .listaTareasHabito__checkbox:hover {
-    color: var(--dashboard-primario);
+    color: var(--dashboard-acento);
 }
 
 .listaTareasHabito__checkbox .iconoCheck {
-    color: var(--dashboard-exito);
+    color: var(--dashboard-estadoExito);
 }
 
 /* Override para el checkbox dentro de lista subtasks/habitos para igualar modo compacto */
 .listaTareasHabito__item .tareaCheckbox {
-    width: 0.65rem;
-    height: 0.65rem;
+    width: var(--dashboard-tamanoMuyPequeno);
+    height: var(--dashboard-tamanoMuyPequeno);
     margin-top: 1px;
 }
 
@@ -284,7 +284,7 @@
 }
 
 .listaTareasHabito__texto:hover {
-    color: var(--dashboard-primario);
+    color: var(--dashboard-acento);
 }
 
 /* Estilos para el pill de prioridad - Eliminados (ahora se usa BadgeInfo global) */
@@ -309,11 +309,11 @@
 }
 
 .listaTareasHabito__eliminar:hover {
-    color: var(--dashboard-error);
+    color: var(--dashboard-estadoAlta);
 }
 
 .listaTareasHabito__vacio {
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     text-align: center;
     padding: var(--dashboard-espacioSm);
@@ -327,7 +327,7 @@
 .listaTareasHabito__input {
     width: 100%;
     padding: 5px 8px;
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: 4px;
@@ -357,7 +357,7 @@
     width: auto;
     margin-left: auto;
     margin-right: auto;
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     background: transparent;
     border: 1px dashed var(--dashboard-bordeSutil);
@@ -367,7 +367,7 @@
 }
 
 .listaTareasHabito__botonAgregar:hover {
-    color: var(--dashboard-primario);
-    border-color: var(--dashboard-primario);
+    color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
     background: var(--dashboard-fondoSecundario);
 }

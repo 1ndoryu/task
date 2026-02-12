@@ -11,7 +11,10 @@ import type {DeficitCaloricoState, DeficitCaloricoActions, ComidaRegistrada, Reg
 /* Obtener fecha local en formato YYYY-MM-DD */
 function obtenerFechaHoy(): string {
     const ahora = new Date();
-    return ahora.toISOString().split('T')[0];
+    const anio = ahora.getFullYear();
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
 }
 
 const MAX_HISTORIAL = 30;

@@ -165,11 +165,11 @@
 }
 
 .botonPeligro {
-    color: var(--dashboard-estadoError);
+    color: var(--dashboard-estadoAlta);
 }
 
 .botonPeligro:hover {
-    color: var(--dashboard-estadoError);
+    color: var(--dashboard-estadoAlta);
     opacity: 0.8;
 }
 
@@ -247,11 +247,6 @@
 .proyectoNombre--compacto {
     font-size: var(--dashboard-tamanoBase);
     /* margin-bottom o padding reset si hubiera */
-}
-
-/* Ajustes para la lista de proyectos en modo compacto */
-.proyectoItemWrapper--compacto {
-    /* gap: 1px; ya manejado en listaProyectos */
 }
 
 /* 

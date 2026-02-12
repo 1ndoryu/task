@@ -16,10 +16,34 @@ function generarIdComida(): string {
 }
 
 function obtenerFechaHoy(): string {
-    return new Date().toISOString().split('T')[0];
+    const ahora = new Date();
+    const anio = ahora.getFullYear();
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
 }
 
-export function useDeficitCalorico() {
+function normalizarFecha(fecha: string | undefined): string {
+    if (!fecha) return obtenerFechaHoy();
+    return /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : obtenerFechaHoy();
+}
+
+function construirMarcaTiempoParaFecha(fecha: string): number {
+    const ahora = new Date();
+    const [anio, mes, dia] = fecha.split('-').map(Number);
+    const marca = new Date(anio, (mes ?? 1) - 1, dia ?? 1, ahora.getHours(), ahora.getMinutes(), ahora.getSeconds(), ahora.getMilliseconds());
+    return Number.isNaN(marca.getTime()) ? ahora.getTime() : marca.getTime();
+}
+
+function deduplicarComidas(comidas: ComidaRegistrada[]): ComidaRegistrada[] {
+    const mapa = new Map<string, ComidaRegistrada>();
+    for (const comida of comidas) {
+        mapa.set(comida.id, comida);
+    }
+    return Array.from(mapa.values());
+}
+
+export function useDeficitCalorico(fechaActiva?: string) {
     const store = useDeficitCaloricoStore();
     /* Seleccionar directamente del state para referencia estable (evita loop infinito por objeto nuevo en cada snapshot) */
     const config = usePluginsStore(s => s.configuracionPlugins['deficit-calorico']) as unknown as {apiKey?: string} | undefined;
@@ -31,19 +55,22 @@ export function useDeficitCalorico() {
     const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);
     const metodoCalculo = useMemo(() => obtenerMetodoCalculo(store.datosUsuario), [store.datosUsuario]);
 
-    /* Comidas de hoy */
-    const comidasHoy = useMemo(() => {
-        const hoy = obtenerFechaHoy();
-        return store.comidas.filter(c => c.fecha === hoy);
-    }, [store.comidas]);
+    const fechaSeleccionada = useMemo(() => normalizarFecha(fechaActiva), [fechaActiva]);
 
-    const caloriasHoy = useMemo(() => comidasHoy.reduce((sum, c) => sum + c.calorias, 0), [comidasHoy]);
+    const comidasTotales = useMemo(() => {
+        const historialComidas = store.historial.flatMap(registro => registro.comidas);
+        return deduplicarComidas([...store.comidas, ...historialComidas]);
+    }, [store.comidas, store.historial]);
 
-    const deficit = tdee !== null ? tdee - caloriasHoy : null;
+    const comidasDelDia = useMemo(() => comidasTotales.filter(c => c.fecha === fechaSeleccionada), [comidasTotales, fechaSeleccionada]);
+
+    const caloriasDelDia = useMemo(() => comidasDelDia.reduce((sum, c) => sum + c.calorias, 0), [comidasDelDia]);
+
+    const deficit = tdee !== null ? tdee - caloriasDelDia : null;
 
     /* Registrar comida por texto usando IA */
     const registrarPorTexto = useCallback(
-        async (descripcion: string) => {
+        async (descripcion: string, fechaObjetivo?: string) => {
             if (!apiKey) {
                 store.setErrorIA('Configura tu API Key de Groq (IA) primero');
                 return;
@@ -57,6 +84,7 @@ export function useDeficitCalorico() {
             store.setErrorIA(null);
 
             try {
+                const fechaRegistro = normalizarFecha(fechaObjetivo ?? fechaSeleccionada);
                 const resultado = await estimarCaloriasTexto(descripcion, apiKey, apiKeyNinjas);
                 const comida: ComidaRegistrada = {
                     id: generarIdComida(),
@@ -66,8 +94,8 @@ export function useDeficitCalorico() {
                     carbohidratos: resultado.carbohidratos,
                     grasas: resultado.grasas,
                     azucar: resultado.azucar,
-                    horaRegistro: Date.now(),
-                    fecha: obtenerFechaHoy(),
+                    horaRegistro: construirMarcaTiempoParaFecha(fechaRegistro),
+                    fecha: fechaRegistro,
                     fuenteEstimacion: 'ia',
                     promptOriginal: descripcion /* Guardar input original para reintentar */,
                     logProceso: resultado.logProceso /* Guardar log de debugging */
@@ -79,12 +107,17 @@ export function useDeficitCalorico() {
                 store.setCargandoIA(false);
             }
         },
-        [apiKey, apiKeyNinjas, store]
+        [apiKey, apiKeyNinjas, store, fechaSeleccionada]
     );
 
     return {
-        comidasHoy,
-        caloriasHoy,
+        fechaSeleccionada,
+        comidasDelDia,
+        caloriasDelDia,
+        comidasTotales,
+        /* Compatibilidad retro con consumers existentes */
+        comidasHoy: comidasDelDia,
+        caloriasHoy: caloriasDelDia,
         tdee,
         deficit,
         metodoCalculo,

@@ -24,7 +24,7 @@
 .buscadorInputWrapper.activo {
     background: var(--dashboard-fondoPrincipal);
     border-color: var(--dashboard-acento);
-    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1); /* Violeta acento alpha */
+    box-shadow: 0 0 0 2px rgba(var(--dashboard-acentoRgb), 0.1);
     color: var(--dashboard-textoActivo);
 }
 
@@ -90,7 +90,7 @@
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
-    box-shadow: var(--dashboard-sombraFlotante);
+    box-shadow: var(--dashboard-sombraElevada);
     z-index: 1000;
     padding: var(--dashboard-espacioXs) 0;
 }
@@ -119,7 +119,7 @@
 }
 
 .buscadorItemTipo {
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     text-transform: uppercase;
     color: var(--dashboard-textoMuyApagado);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -133,16 +133,16 @@
 }
 
 .iconoResultado--tarea {
-    color: #3b82f6;
+    color: var(--dashboard-estadoInfo);
 } /* Azul */
 .iconoResultado--habito {
-    color: #8b5cf6;
+    color: var(--dashboard-acento);
 } /* Violeta */
 .iconoResultado--proyecto {
-    color: #10b981;
+    color: var(--dashboard-estadoExito);
 } /* Verde */
 .iconoResultado--nota {
-    color: #f59e0b;
+    color: var(--dashboard-estadoMedia);
 }
 
 .buscadorSinResultados {

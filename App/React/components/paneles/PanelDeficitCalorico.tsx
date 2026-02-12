@@ -11,7 +11,7 @@
  */
 
 import {useState, useMemo} from 'react';
-import {Loader2, Trash2, AlertCircle, Settings, Maximize2, RotateCcw, Eye} from 'lucide-react';
+import {Loader2, Trash2, AlertCircle, Settings, Maximize2, RotateCcw, Eye, ChevronLeft, ChevronRight} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
 import {OverlayEnfoque} from '../shared';
@@ -28,8 +28,52 @@ interface PanelDeficitCaloricoProps {
     onAbrirConfiguracion: () => void;
 }
 
+function obtenerFechaHoyLocal(): string {
+    const ahora = new Date();
+    const anio = ahora.getFullYear();
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+}
+
+function desplazarFecha(fechaIso: string, dias: number): string {
+    const [anio, mes, dia] = fechaIso.split('-').map(Number);
+    const fecha = new Date(anio, (mes ?? 1) - 1, dia ?? 1);
+    fecha.setDate(fecha.getDate() + dias);
+    const nuevoAnio = fecha.getFullYear();
+    const nuevoMes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const nuevoDia = String(fecha.getDate()).padStart(2, '0');
+    return `${nuevoAnio}-${nuevoMes}-${nuevoDia}`;
+}
+
+function formatearFechaVisible(fechaIso: string): string {
+    const [anio, mes, dia] = fechaIso.split('-').map(Number);
+    const fecha = new Date(anio, (mes ?? 1) - 1, dia ?? 1, 12, 0, 0);
+    return fecha.toLocaleDateString('es-ES', {weekday: 'short', day: '2-digit', month: 'short'});
+}
+
 /* Indicador visual de macros y objetivos */
-function ResumenNutricional({calorias, proteinas, carbohidratos, grasas, azucar, tdee, datosUsuario}: {calorias: number; proteinas: number; carbohidratos: number; grasas: number; azucar: number; tdee: number | null; datosUsuario: DatosUsuarioTMB}): JSX.Element {
+function ResumenNutricional({
+    calorias,
+    proteinas,
+    carbohidratos,
+    grasas,
+    azucar,
+    tdee,
+    datosUsuario,
+    fechaActiva,
+    onCambiarDia
+}: {
+    calorias: number;
+    proteinas: number;
+    carbohidratos: number;
+    grasas: number;
+    azucar: number;
+    tdee: number | null;
+    datosUsuario: DatosUsuarioTMB;
+    fechaActiva: string;
+    onCambiarDia: (delta: number) => void;
+}): JSX.Element {
     const objetivos = useMemo(() => {
         if (!tdee) return null;
         return calcularObjetivosMacro(tdee, datosUsuario.objetivoDeficit ?? 'moderado');
@@ -72,6 +116,11 @@ function ResumenNutricional({calorias, proteinas, carbohidratos, grasas, azucar,
         <div className="deficitResumenNutricional">
             {/* Calorías Principal */}
             <div className="deficitCaloriasPrincipal">
+                <div className="deficitNavegacionFecha" role="group" aria-label="Cambiar día del resumen calórico">
+                    <Boton variante="icono" claseAdicional="deficitNavegacionFechaBoton" onClick={() => onCambiarDia(-1)} title="Día anterior" type="button" icono={<ChevronLeft size={12} />} />
+                    <span className="deficitNavegacionFechaTexto">{formatearFechaVisible(fechaActiva)}</span>
+                    <Boton variante="icono" claseAdicional="deficitNavegacionFechaBoton" onClick={() => onCambiarDia(1)} title="Día siguiente" type="button" icono={<ChevronRight size={12} />} />
+                </div>
                 <div className="deficitCaloriasInfo">
                     <span className="deficitCaloriasValor">{calorias}</span>
                     <span className="deficitCaloriasMeta">/ {objetivos.calorias} kcal</span>
@@ -96,13 +145,13 @@ function ResumenNutricional({calorias, proteinas, carbohidratos, grasas, azucar,
 }
 
 /* Input de texto para registrar comidas */
-function EntradaComida({onEnviarTexto, cargando}: {onEnviarTexto: (texto: string) => void; cargando: boolean}): JSX.Element {
+function EntradaComida({onEnviarTexto, cargando, fechaActiva}: {onEnviarTexto: (texto: string, fecha: string) => void; cargando: boolean; fechaActiva: string}): JSX.Element {
     const [texto, setTexto] = useState('');
 
     const manejarEnviar = () => {
         const descripcion = texto.trim();
         if (!descripcion || cargando) return;
-        onEnviarTexto(descripcion);
+        onEnviarTexto(descripcion, fechaActiva);
         setTexto('');
     };
 
@@ -135,12 +184,13 @@ function EntradaComida({onEnviarTexto, cargando}: {onEnviarTexto: (texto: string
 export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelDeficitCaloricoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
     const [logInspeccion, setLogInspeccion] = useState<string[] | null>(null);
+    const [fechaActiva, setFechaActiva] = useState(obtenerFechaHoyLocal);
 
-    const {comidasHoy, caloriasHoy, tdee, deficit, apiKey, cargandoIA, errorIA, historial, registrarPorTexto, eliminarComida, datosUsuario} = useDeficitCalorico();
+    const {comidasDelDia, caloriasDelDia, comidasTotales, tdee, apiKey, cargandoIA, errorIA, registrarPorTexto, eliminarComida, datosUsuario} = useDeficitCalorico(fechaActiva);
 
     /* Calcular totales de macros */
     const macros = useMemo(() => {
-        return comidasHoy.reduce(
+        return comidasDelDia.reduce(
             (acc, c) => ({
                 proteinas: acc.proteinas + (c.proteinas || 0),
                 carbohidratos: acc.carbohidratos + (c.carbohidratos || 0),
@@ -149,10 +199,14 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
             }),
             {proteinas: 0, carbohidratos: 0, grasas: 0, azucar: 0}
         );
-    }, [comidasHoy]);
+    }, [comidasDelDia]);
 
     /* Mensaje si no hay API Key configurada */
     const sinApiKey = !apiKey;
+
+    const manejarCambiarDia = (delta: number) => {
+        setFechaActiva(prev => desplazarFecha(prev, delta));
+    };
 
     const contenidoPanel = (
         <div className="deficitContenido">
@@ -163,8 +217,8 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
                 </div>
             )}
 
-            <ResumenNutricional calorias={caloriasHoy} tdee={tdee} proteinas={macros.proteinas} carbohidratos={macros.carbohidratos} grasas={macros.grasas} azucar={macros.azucar} datosUsuario={datosUsuario} />
-            <EntradaComida onEnviarTexto={registrarPorTexto} cargando={cargandoIA} />
+            <ResumenNutricional calorias={caloriasDelDia} tdee={tdee} proteinas={macros.proteinas} carbohidratos={macros.carbohidratos} grasas={macros.grasas} azucar={macros.azucar} datosUsuario={datosUsuario} fechaActiva={fechaActiva} onCambiarDia={manejarCambiarDia} />
+            <EntradaComida onEnviarTexto={registrarPorTexto} cargando={cargandoIA} fechaActiva={fechaActiva} />
 
             {errorIA && (
                 <div className="deficitError">
@@ -173,7 +227,7 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
                 </div>
             )}
 
-            <HistorialCalorias comidas={[...comidasHoy, ...historial.flatMap(d => d.comidas)]} maxPorPagina={3} onEliminar={eliminarComida} onReintentar={registrarPorTexto} onInspeccionar={(log: string[]) => setLogInspeccion(log)} />
+            <HistorialCalorias comidas={comidasTotales} maxPorPagina={3} onEliminar={eliminarComida} onReintentar={prompt => registrarPorTexto(prompt, fechaActiva)} onInspeccionar={(log: string[]) => setLogInspeccion(log)} />
         </div>
     );
 

@@ -40,6 +40,31 @@
     gap: 4px;
 }
 
+.deficitNavegacionFecha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.deficitNavegacionFechaBoton {
+    color: var(--dashboard-textoSecundario);
+}
+
+.deficitNavegacionFechaBoton:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+.deficitNavegacionFechaTexto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: capitalize;
+    letter-spacing: 0.03em;
+    min-width: 120px;
+    text-align: center;
+}
+
 .deficitCaloriasInfo {
     display: flex;
     align-items: baseline;
