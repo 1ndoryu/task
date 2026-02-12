@@ -15,6 +15,7 @@
 import {Pause, Play} from 'lucide-react';
 import type {NivelImportancia, FrecuenciaHabito, Habito, DatosNuevoSubHabito, VentanaOportunidad, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades, SelectorVentanaOportunidad} from '../../shared';
+import {Boton} from '../../shared/Boton';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 import {ListaSubHabitos} from './ListaSubHabitos';
@@ -112,7 +113,7 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             {/* Pausar habito (solo modo edicion) */}
             {modoEdicion && onPausarHabito && (
                 <FilaPropiedades etiqueta="Pausar">
-                    <button type="button" className={`botonPausaHabito ${estaPausado ? 'botonPausaHabito--activo' : ''}`} onClick={onPausarHabito} title={estaPausado ? 'Reanudar habito' : 'Pausar habito'}>
+                    <Boton type="button" claseAdicional={`botonPausaHabito ${estaPausado ? 'botonPausaHabito--activo' : ''}`} onClick={onPausarHabito} title={estaPausado ? 'Reanudar habito' : 'Pausar habito'}>
                         {estaPausado ? (
                             <>
                                 <Play size={14} />
@@ -124,7 +125,7 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
                                 <span>Pausar</span>
                             </>
                         )}
-                    </button>
+                    </Boton>
                     {estaPausado && habito?.fechaPausa && <span className="botonPausaHabito__fecha">desde {new Date(habito.fechaPausa).toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})}</span>}
                 </FilaPropiedades>
             )}

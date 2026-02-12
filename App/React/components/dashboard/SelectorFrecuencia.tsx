@@ -7,6 +7,7 @@
 import {useState, useCallback} from 'react';
 import type {FrecuenciaHabito, TipoFrecuencia, DiaSemana} from '../../types/dashboard';
 import {SelectorDias} from '../shared';
+import {Boton} from '../shared/Boton';
 
 interface SelectorFrecuenciaProps {
     frecuencia: FrecuenciaHabito;
@@ -95,11 +96,11 @@ export function SelectorFrecuencia({frecuencia, onChange, deshabilitado = false}
     return (
         <div className="selectorFrecuencia">
             {/* Cabecera colapsable */}
-            <button type="button" className="selectorFrecuenciaCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
+            <Boton type="button" claseAdicional="selectorFrecuenciaCabecera" onClick={() => setExpandido(!expandido)} disabled={deshabilitado}>
                 <span className="selectorFrecuenciaEtiqueta">Frecuencia</span>
                 <span className="selectorFrecuenciaValor">{obtenerDescripcion()}</span>
                 <span className="selectorFrecuenciaFlecha">{expandido ? '▲' : '▼'}</span>
-            </button>
+            </Boton>
 
             {/* Panel expandido */}
             {expandido && (
@@ -107,9 +108,9 @@ export function SelectorFrecuencia({frecuencia, onChange, deshabilitado = false}
                     {/* Selector de tipo */}
                     <div className="selectorFrecuenciaTipos">
                         {TIPOS_FRECUENCIA.map(({tipo, etiqueta}) => (
-                            <button key={tipo} type="button" className={`selectorFrecuenciaTipo ${frecuencia.tipo === tipo ? 'selectorFrecuenciaTipoActivo' : ''}`} onClick={() => manejarCambioTipo(tipo)} disabled={deshabilitado}>
+                            <Boton key={tipo} type="button" claseAdicional={`selectorFrecuenciaTipo ${frecuencia.tipo === tipo ? 'selectorFrecuenciaTipoActivo' : ''}`} onClick={() => manejarCambioTipo(tipo)} disabled={deshabilitado}>
                                 {etiqueta}
-                            </button>
+                            </Boton>
                         ))}
                     </div>
 
@@ -118,13 +119,13 @@ export function SelectorFrecuencia({frecuencia, onChange, deshabilitado = false}
                         <div className="selectorFrecuenciaConfig">
                             <label className="selectorFrecuenciaConfigLabel">Repetir cada</label>
                             <div className="selectorFrecuenciaNumero">
-                                <button type="button" className="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) - 1)} disabled={deshabilitado || (frecuencia.cadaDias || 2) <= 2}>
+                                <Boton type="button" claseAdicional="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) - 1)} disabled={deshabilitado || (frecuencia.cadaDias || 2) <= 2}>
                                     −
-                                </button>
+                                </Boton>
                                 <span className="selectorFrecuenciaNumeroValor">{frecuencia.cadaDias || 2}</span>
-                                <button type="button" className="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) + 1)} disabled={deshabilitado || (frecuencia.cadaDias || 2) >= 30}>
+                                <Boton type="button" claseAdicional="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioDias((frecuencia.cadaDias || 2) + 1)} disabled={deshabilitado || (frecuencia.cadaDias || 2) >= 30}>
                                     +
-                                </button>
+                                </Boton>
                                 <span className="selectorFrecuenciaNumeroUnidad">dias</span>
                             </div>
                         </div>
@@ -141,13 +142,13 @@ export function SelectorFrecuencia({frecuencia, onChange, deshabilitado = false}
                         <div className="selectorFrecuenciaConfig">
                             <label className="selectorFrecuenciaConfigLabel">Veces por mes</label>
                             <div className="selectorFrecuenciaNumero">
-                                <button type="button" className="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) - 1)} disabled={deshabilitado || (frecuencia.vecesAlMes || 4) <= 1}>
+                                <Boton type="button" claseAdicional="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) - 1)} disabled={deshabilitado || (frecuencia.vecesAlMes || 4) <= 1}>
                                     −
-                                </button>
+                                </Boton>
                                 <span className="selectorFrecuenciaNumeroValor">{frecuencia.vecesAlMes || 4}</span>
-                                <button type="button" className="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) + 1)} disabled={deshabilitado || (frecuencia.vecesAlMes || 4) >= 30}>
+                                <Boton type="button" claseAdicional="selectorFrecuenciaBotonNumero" onClick={() => manejarCambioVecesMes((frecuencia.vecesAlMes || 4) + 1)} disabled={deshabilitado || (frecuencia.vecesAlMes || 4) >= 30}>
                                     +
-                                </button>
+                                </Boton>
                                 <span className="selectorFrecuenciaNumeroUnidad">veces</span>
                             </div>
                         </div>

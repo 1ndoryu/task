@@ -5,6 +5,7 @@
 
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
+import {Boton} from '../shared/Boton';
 import type {ConfiguracionHabitos, ColumnasHabitos, ToleranciaPreset} from '../../hooks/useConfiguracionHabitos';
 
 interface ModalConfiguracionHabitosProps {
@@ -146,10 +147,10 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
                                     const estaActivo = configuracion.toleranciaPreset === preset;
 
                                     return (
-                                        <button key={preset} type="button" className={`botonPresetTolerancia ${estaActivo ? 'botonPresetTolerancia--activo' : ''}`} onClick={() => onCambiarTolerancia(preset)}>
+                                        <Boton key={preset} type="button" claseAdicional={`botonPresetTolerancia ${estaActivo ? 'botonPresetTolerancia--activo' : ''}`} onClick={() => onCambiarTolerancia(preset)}>
                                             <span className="etiquetaPreset">{info.etiqueta}</span>
                                             <span className="descripcionPreset">{info.descripcion}</span>
-                                        </button>
+                                        </Boton>
                                     );
                                 })}
                             </div>

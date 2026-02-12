@@ -16,6 +16,7 @@ import {Activity, BarChart2} from 'lucide-react';
 import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito, VentanaOportunidad} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
+import {Boton} from '../shared/Boton';
 import type {EstadoHabito} from '../shared';
 import {FormularioHabitoModerno} from './habitos/FormularioHabitoModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
@@ -238,12 +239,12 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
     const accionesHeader = modoEdicion ? (
         <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
             {/* Estadisticas (Placeholder) */}
-            <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+            <Boton type="button" claseAdicional="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
                 <BarChart2 size={16} className="textoApagado" />
-            </button>
+            </Boton>
 
             {/* Actividad / Chat */}
-            <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+            <Boton type="button" claseAdicional={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
                 {tieneMensajesSinLeer ? (
                     <div style={{position: 'relative'}}>
                         <Activity size={16} />
@@ -252,7 +253,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                 ) : (
                     <Activity size={16} />
                 )}
-            </button>
+            </Boton>
         </div>
     ) : undefined;
 

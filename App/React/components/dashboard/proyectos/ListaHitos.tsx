@@ -13,6 +13,7 @@
 import {useState, useMemo} from 'react';
 import {CheckCircle2, Circle, Plus, Flag, Trash2} from 'lucide-react';
 import {MenuContextual} from '../../shared/MenuContextual';
+import {Boton} from '../../shared/Boton';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Hito, NivelPrioridad} from '../../../types/dashboard';
 
@@ -115,9 +116,9 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                         <div key={hito.id} className="tareaItemCompactoContenedor">
                             <div className={`tareaItemCompacto ${hito.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: 0, minHeight: '32px'}}>
                                 {/* Checkbox - Iconos reducidos */}
-                                <button type="button" className={`tareaItemCompacto__checkbox ${hito.completado ? 'tareaItemCompacto__checkbox--checked' : ''}`} onClick={() => manejarToggle(hito.id)}>
+                                <Boton type="button" claseAdicional={`tareaItemCompacto__checkbox ${hito.completado ? 'tareaItemCompacto__checkbox--checked' : ''}`} onClick={() => manejarToggle(hito.id)}>
                                     {hito.completado ? <CheckCircle2 size={14} /> : <Circle size={14} />}
-                                </button>
+                                </Boton>
 
                                 {/* Titulo */}
                                 <span className="tareaItemCompacto__texto" style={{flex: 1, display: 'flex', alignItems: 'center', gap: '16px', overflow: 'hidden'}}>
@@ -143,9 +144,9 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
 
                                 {/* Controles: Solo eliminar, apareces on hover */}
                                 <div className="controlesHito" style={{display: 'flex', gap: '4px', opacity: 0}}>
-                                    <button type="button" className="botonIcono botonIcono--pequeno botonIcono--peligro" title="Eliminar hito" onClick={() => manejarEliminar(hito.id)} style={{padding: '4px'}}>
+                                    <Boton type="button" claseAdicional="botonIcono botonIcono--pequeno botonIcono--peligro" title="Eliminar hito" onClick={() => manejarEliminar(hito.id)} style={{padding: '4px'}}>
                                         <Trash2 size={12} />
-                                    </button>
+                                    </Boton>
                                 </div>
                             </div>
                         </div>

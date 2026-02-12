@@ -4,6 +4,7 @@
  */
 
 import {Modal, SeccionPanel, SelectorNivel, ToggleSwitch} from '../shared';
+import {Boton} from '../shared/Boton';
 import type {ConfiguracionActividad, PeriodoActividad, FiltroTipoActividad, TamanoCeldaActividad} from '../../hooks/useConfiguracionActividad';
 
 interface ModalConfiguracionActividadProps {
@@ -40,9 +41,9 @@ export function ModalConfiguracionActividad({estaAbierto, onCerrar, configuracio
                 <SeccionPanel titulo="Periodo de visualizacion">
                     <div className="selectorPeriodoActividad">
                         {PERIODOS.map(({valor, etiqueta}) => (
-                            <button key={valor} type="button" className={`selectorPeriodoBoton ${configuracion.periodo === valor ? 'selectorPeriodoBoton--activo' : ''}`} onClick={() => onCambiarPeriodo(valor)}>
+                            <Boton key={valor} type="button" claseAdicional={`selectorPeriodoBoton ${configuracion.periodo === valor ? 'selectorPeriodoBoton--activo' : ''}`} onClick={() => onCambiarPeriodo(valor)}>
                                 {etiqueta}
-                            </button>
+                            </Boton>
                         ))}
                     </div>
                 </SeccionPanel>
@@ -51,9 +52,9 @@ export function ModalConfiguracionActividad({estaAbierto, onCerrar, configuracio
                 <SeccionPanel titulo="Tipo de actividad">
                     <div className="selectorPeriodoActividad">
                         {FILTROS_TIPO.map(({valor, etiqueta}) => (
-                            <button key={valor} type="button" className={`selectorPeriodoBoton ${configuracion.filtroTipo === valor ? 'selectorPeriodoBoton--activo' : ''}`} onClick={() => onCambiarFiltroTipo(valor)}>
+                            <Boton key={valor} type="button" claseAdicional={`selectorPeriodoBoton ${configuracion.filtroTipo === valor ? 'selectorPeriodoBoton--activo' : ''}`} onClick={() => onCambiarFiltroTipo(valor)}>
                                 {etiqueta}
-                            </button>
+                            </Boton>
                         ))}
                     </div>
                 </SeccionPanel>

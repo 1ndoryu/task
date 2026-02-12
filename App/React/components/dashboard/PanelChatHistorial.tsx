@@ -13,6 +13,7 @@
 import {useState, useRef, useEffect} from 'react';
 import {MessageCircle, Users, Send, History, Plus, Edit, Trash2, UserCheck, Paperclip, CheckCircle, Clock, Tag, Zap, Calendar, FileText, Type, Share2, UserPlus, UserMinus, Loader} from 'lucide-react';
 import {useMensajes, type MensajeTimeline, type AccionSistema, obtenerTipoVisual} from '../../hooks/useMensajes';
+import {Boton} from '../shared/Boton';
 
 export interface PanelChatHistorialProps {
     elementoId: number;
@@ -216,9 +217,9 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
             <div className="timelineInput timelineInput--flotante">
                 <div className="timelineInputAvatar">{avatarFinal ? <img src={avatarFinal} alt={nombreFinal} /> : <span>{nombreFinal.charAt(0).toUpperCase()}</span>}</div>
                 <input type="text" value={mensajeNuevo} onChange={e => setMensajeNuevo(e.target.value)} onKeyDown={manejarTecla} placeholder="Dejar un comentario..." className="timelineInputTexto" disabled={estado.enviando} />
-                <button type="button" onClick={manejarEnviarMensaje} className="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Comentar">
+                <Boton type="button" onClick={manejarEnviarMensaje} claseAdicional="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Comentar">
                     {estado.enviando ? <Loader size={14} className="animacionGirar" /> : <Send size={14} />}
-                </button>
+                </Boton>
             </div>
         );
     }
@@ -232,10 +233,10 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
                         <MessageCircle size={14} />
                         <span>Timeline</span>
                     </div>
-                    <button type="button" className={`panelChatHistorialBotonParticipantes ${mostrandoParticipantes ? 'panelChatHistorialBotonParticipantes--activo' : ''}`} onClick={() => setMostrandoParticipantes(!mostrandoParticipantes)}>
+                    <Boton type="button" claseAdicional={`panelChatHistorialBotonParticipantes ${mostrandoParticipantes ? 'panelChatHistorialBotonParticipantes--activo' : ''}`} onClick={() => setMostrandoParticipantes(!mostrandoParticipantes)}>
                         <Users size={12} />
                         <span>{participantes.length}</span>
-                    </button>
+                    </Boton>
                 </div>
             )}
 
@@ -252,9 +253,9 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
                         <div className="timelineInput">
                             <div className="timelineInputAvatar">{avatarFinal ? <img src={avatarFinal} alt={nombreFinal} /> : <span>{nombreFinal.charAt(0).toUpperCase()}</span>}</div>
                             <input type="text" value={mensajeNuevo} onChange={e => setMensajeNuevo(e.target.value)} onKeyDown={manejarTecla} placeholder="Dejar un comentario..." className="timelineInputTexto" disabled={estado.enviando} />
-                            <button type="button" onClick={manejarEnviarMensaje} className="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Comentar">
+                            <Boton type="button" onClick={manejarEnviarMensaje} claseAdicional="timelineBotonEnviar" disabled={estado.enviando || !mensajeNuevo.trim()} title="Comentar">
                                 {estado.enviando ? <Loader size={14} className="animacionGirar" /> : <Send size={14} />}
-                            </button>
+                            </Boton>
                         </div>
                     </div>
                 )}

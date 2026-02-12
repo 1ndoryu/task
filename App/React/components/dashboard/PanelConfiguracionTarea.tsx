@@ -11,6 +11,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto, CompaneroEquipo, RolCompartido, DatosEdicionTarea} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
+import {Boton} from '../shared/Boton';
 import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {usePanelChat} from '../../hooks/usePanelChat';
@@ -275,12 +276,12 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         modoEdicion && !esMovil ? (
             <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
                 {/* Estadisticas (Placeholder) */}
-                <button type="button" className="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                <Boton type="button" claseAdicional="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
                     <BarChart2 size={16} className="textoApagado" />
-                </button>
+                </Boton>
 
                 {/* Actividad / Chat */}
-                <button type="button" className={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+                <Boton type="button" claseAdicional={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
                     {tieneMensajesSinLeer ? (
                         <div style={{position: 'relative'}}>
                             <Activity size={16} />
@@ -289,7 +290,7 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                     ) : (
                         <Activity size={16} />
                     )}
-                </button>
+                </Boton>
             </div>
         ) : undefined;
 

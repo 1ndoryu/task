@@ -10,6 +10,7 @@ import {Check, Plus, Trash2} from 'lucide-react';
 import type {SubHabito, NivelImportancia, FrecuenciaHabito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../../types/dashboard';
 import {obtenerFechaHoy} from '../../../utils/fecha';
+import {Boton} from '../../shared/Boton';
 
 interface ListaSubHabitosProps {
     subhabitos: SubHabito[];
@@ -151,10 +152,10 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
                     />
                 </form>
             ) : (
-                <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
+                <Boton type="button" claseAdicional="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
                     <Plus size={12} />
                     <span>Añadir subhábito</span>
-                </button>
+                </Boton>
             )}
         </div>
     );
