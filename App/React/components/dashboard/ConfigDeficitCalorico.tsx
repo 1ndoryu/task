@@ -7,6 +7,7 @@
 import {useState} from 'react';
 import {Save, Eye, EyeOff} from 'lucide-react';
 import {Boton} from '../ui/Boton';
+import {Input} from '../ui/Input';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
 import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
@@ -54,20 +55,16 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitCampos">
                     <div className="configDeficitCampo">
-                        <label className="configDeficitLabel">Altura (cm)</label>
-                        <input type="number" className="configDeficitInput" placeholder="170" value={datos.altura ?? ''} onChange={e => actualizarCampo('altura', e.target.value)} />
+                        <Input tipo="number" etiqueta="Altura (cm)" claseAdicional="configDeficitInput" placeholder="170" value={datos.altura ?? ''} onChange={e => actualizarCampo('altura', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <label className="configDeficitLabel">Peso (kg)</label>
-                        <input type="number" className="configDeficitInput" placeholder="70" value={datos.peso ?? ''} onChange={e => actualizarCampo('peso', e.target.value)} />
+                        <Input tipo="number" etiqueta="Peso (kg)" claseAdicional="configDeficitInput" placeholder="70" value={datos.peso ?? ''} onChange={e => actualizarCampo('peso', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <label className="configDeficitLabel">Cintura (cm)</label>
-                        <input type="number" className="configDeficitInput" placeholder="80" value={datos.cintura ?? ''} onChange={e => actualizarCampo('cintura', e.target.value)} />
+                        <Input tipo="number" etiqueta="Cintura (cm)" claseAdicional="configDeficitInput" placeholder="80" value={datos.cintura ?? ''} onChange={e => actualizarCampo('cintura', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <label className="configDeficitLabel">Edad</label>
-                        <input type="number" className="configDeficitInput" placeholder="30" value={datos.edad ?? ''} onChange={e => actualizarCampo('edad', e.target.value)} />
+                        <Input tipo="number" etiqueta="Edad" claseAdicional="configDeficitInput" placeholder="30" value={datos.edad ?? ''} onChange={e => actualizarCampo('edad', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
                         <label className="configDeficitLabel">Sexo</label>
@@ -78,12 +75,10 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                         </select>
                     </div>
                     <div className="configDeficitCampo">
-                        <label className="configDeficitLabel">Ejercicio (sesiones/semana)</label>
-                        <input type="number" className="configDeficitInput" placeholder="3" value={datos.ejercicioSesiones ?? ''} onChange={e => actualizarCampo('ejercicioSesiones', e.target.value)} />
+                        <Input tipo="number" etiqueta="Ejercicio (sesiones/semana)" claseAdicional="configDeficitInput" placeholder="3" value={datos.ejercicioSesiones ?? ''} onChange={e => actualizarCampo('ejercicioSesiones', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <label className="configDeficitLabel">Minutos por sesión</label>
-                        <input type="number" className="configDeficitInput" placeholder="45" value={datos.ejercicioMinutos ?? ''} onChange={e => actualizarCampo('ejercicioMinutos', e.target.value)} />
+                        <Input tipo="number" etiqueta="Minutos por sesión" claseAdicional="configDeficitInput" placeholder="45" value={datos.ejercicioMinutos ?? ''} onChange={e => actualizarCampo('ejercicioMinutos', (e.target as HTMLInputElement).value)} />
                     </div>
 
                     <div className="configDeficitCampo configDeficitCampo--full">
@@ -112,7 +107,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                 <p className="configDeficitSeccionNota">Necesaria para traducir tus comidas a inglés (motor de búsqueda).</p>
 
                 <div className="configDeficitApiKey">
-                    <input type={mostrarKeyGroq ? 'text' : 'password'} className="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq(e.target.value)} />
+                    <Input tipo={mostrarKeyGroq ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq((e.target as HTMLInputElement).value)} />
                     <Boton type="button" claseAdicional="configDeficitBotonOjo" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>
@@ -124,7 +119,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                 <p className="configDeficitSeccionNota">Necesaria para obtener la información nutricional precisa.</p>
 
                 <div className="configDeficitApiKey">
-                    <input type={mostrarKeyNinjas ? 'text' : 'password'} className="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas(e.target.value)} />
+                    <Input tipo={mostrarKeyNinjas ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas((e.target as HTMLInputElement).value)} />
                     <Boton type="button" claseAdicional="configDeficitBotonOjo" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>

@@ -15,6 +15,7 @@ import {Loader2, Trash2, AlertCircle, Settings, Maximize2, RotateCcw, Eye} from 
 import {SeccionEncabezado} from '../dashboard';
 import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
 import {OverlayEnfoque} from '../shared';
+import {Input} from '../ui/Input';
 import {calcularObjetivosMacro} from '../../utils/calculoTMB';
 import {HistorialCalorias} from './deficitCalorico/HistorialCalorias';
 import {ModalInspeccionIA} from './deficitCalorico/ModalInspeccionIA';
@@ -115,7 +116,7 @@ function EntradaComida({onEnviarTexto, cargando}: {onEnviarTexto: (texto: string
     return (
         <div className="deficitEntrada">
             <div className="deficitEntradaInputContenedor">
-                <input type="text" className="deficitEntradaInput" placeholder="Describe tu comida (ej: 2 huevos y pan)..." value={texto} onChange={e => setTexto(e.target.value)} onKeyDown={manejarTecla} disabled={cargando} />
+                <Input tipo="text" claseAdicional="deficitEntradaInput" placeholder="Describe tu comida (ej: 2 huevos y pan)..." value={texto} onChange={e => setTexto((e.target as HTMLInputElement).value)} onKeyDown={manejarTecla} disabled={cargando} />
             </div>
             {cargando && (
                 <div className="deficitEntradaCargando">

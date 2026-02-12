@@ -9,6 +9,7 @@ import {useState, useCallback, useMemo, useEffect, useRef} from 'react';
 import {X} from 'lucide-react';
 import type {VentanaOportunidad} from '../../types/dashboard';
 import {Boton} from '../ui';
+import {Input} from '../ui/Input';
 
 interface SelectorVentanaOportunidadProps {
     ventana: VentanaOportunidad | undefined;
@@ -365,11 +366,11 @@ export function SelectorVentanaOportunidad({ventana: propVentana, onChange}: Sel
                         <div className="selectorVentanaOportunidad__controles">
                             <div className="selectorVentanaOportunidad__control">
                                 <label>Inicio</label>
-                                <input type="text" placeholder="08:00" value={tempInicio} onChange={e => manejarCambioTexto('inicio', e.target.value)} onBlur={e => manejarBlur('inicio', e.target.value)} onKeyDown={e => manejarKeyDown(e, 'inicio')} className="selectorVentanaOportunidad__inputHora" />
+                                <Input tipo="text" placeholder="08:00" value={tempInicio} onChange={e => manejarCambioTexto('inicio', (e.target as HTMLInputElement).value)} onBlur={e => manejarBlur('inicio', (e.target as HTMLInputElement).value)} onKeyDown={e => manejarKeyDown(e, 'inicio')} claseAdicional="selectorVentanaOportunidad__inputHora" />
                             </div>
                             <div className="selectorVentanaOportunidad__control">
                                 <label>Fin</label>
-                                <input type="text" placeholder="12:00" value={tempFin} onChange={e => manejarCambioTexto('fin', e.target.value)} onBlur={e => manejarBlur('fin', e.target.value)} onKeyDown={e => manejarKeyDown(e, 'fin')} className="selectorVentanaOportunidad__inputHora" />
+                                <Input tipo="text" placeholder="12:00" value={tempFin} onChange={e => manejarCambioTexto('fin', (e.target as HTMLInputElement).value)} onBlur={e => manejarBlur('fin', (e.target as HTMLInputElement).value)} onKeyDown={e => manejarKeyDown(e, 'fin')} claseAdicional="selectorVentanaOportunidad__inputHora" />
                             </div>
                         </div>
 

@@ -15,6 +15,7 @@ import {ListaNotasGuardadas} from './ListaNotasGuardadas';
 import {NavegadorCarpetas} from './NavegadorCarpetas';
 import type {Nota} from '../../../types/notas';
 import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
+import {Input} from '../../ui/Input';
 
 /* Tipos de ordenamiento disponibles */
 type TipoOrdenamiento = 'modificacion' | 'creacion';
@@ -231,7 +232,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
             {/* Buscador centrado en el header */}
             <div className="modalNotasBusqueda modalNotasBusqueda--headerCentrado">
                 <Search size={14} className="modalNotasBusquedaIcono" />
-                <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} />
+                <Input tipo="text" claseAdicional="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda((e.target as HTMLInputElement).value)} />
                 {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
             </div>
 

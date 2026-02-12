@@ -3,6 +3,7 @@
  */
 
 import type {RangoValor} from '../types/arbitraje.types';
+import {Input} from '../../ui/Input';
 
 interface SeccionVentaProps {
     precioVenta: RangoValor;
@@ -20,9 +21,9 @@ export function SeccionVenta({precioVenta, onPrecioVentaChange}: SeccionVentaPro
             <div className="grupoInputRango">
                 <label className="etiquetaInput">Precio Venta Local (USD)</label>
                 <div className="contenedorRango">
-                    <input type="number" className="inputNumerico" value={precioVenta.min} onChange={e => onPrecioVentaChange('min', e.target.value)} placeholder="Min" />
+                    <Input tipo="number" claseAdicional="inputNumerico" value={precioVenta.min} onChange={e => onPrecioVentaChange('min', (e.target as HTMLInputElement).value)} placeholder="Min" />
                     <span className="separadorRango">a</span>
-                    <input type="number" className="inputNumerico" value={precioVenta.max} onChange={e => onPrecioVentaChange('max', e.target.value)} placeholder="Max" />
+                    <Input tipo="number" claseAdicional="inputNumerico" value={precioVenta.max} onChange={e => onPrecioVentaChange('max', (e.target as HTMLInputElement).value)} placeholder="Max" />
                 </div>
             </div>
         </section>

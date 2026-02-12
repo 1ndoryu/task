@@ -5,6 +5,7 @@
 
 import type {SimuladorCiclosProps} from './types/arbitraje.types';
 import {formatearMoneda} from './utils/arbitraje.utils';
+import {Input} from '../ui/Input';
 
 export function SimuladorCiclos({numeroCiclos, modoSimulacion, simulacionCiclos, costoTotalRealista, onNumeroCiclosChange, onModoSimulacionChange}: SimuladorCiclosProps): JSX.Element {
     const handleCiclosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +18,7 @@ export function SimuladorCiclos({numeroCiclos, modoSimulacion, simulacionCiclos,
                 <h2 className="tituloSimulador">Simulador de Ciclos</h2>
                 <div className="controlesSimulador">
                     <div className="controlCiclos">
-                        <input type="number" className="inputCiclos" value={numeroCiclos} onChange={handleCiclosChange} min="1" max="100" />
+                        <Input tipo="number" claseAdicional="inputCiclos" value={numeroCiclos.toString()} onChange={handleCiclosChange} min={1} max={100} />
                         <span className="etiquetaCiclos">ciclos</span>
                     </div>
                     <div className="toggleModoSimulacion">

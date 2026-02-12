@@ -8,6 +8,7 @@
 import {useState} from 'react';
 import {X, Crown, Calendar, Mail, Shield, CheckCircle, Target, FolderKanban, CreditCard, Clock, Loader2} from 'lucide-react';
 import {Boton} from '../ui/Boton';
+import {Input} from '../ui/Input';
 import type {UsuarioAdmin} from '../../types/dashboard';
 
 interface DetalleUsuarioProps {
@@ -200,7 +201,7 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                             <div className="accionGrupo">
                                 <div className="accionInputGrupo">
                                     <Clock size={14} />
-                                    <input type="number" min="1" max="365" value={diasExtension} onChange={e => setDiasExtension(Number(e.target.value))} className="accionInput" />
+                                    <Input tipo="number" min={1} max={365} value={diasExtension.toString()} onChange={e => setDiasExtension(Number((e.target as HTMLInputElement).value))} claseAdicional="accionInput" />
                                     <span>días</span>
                                 </div>
                                 <Boton type="button" claseAdicional="accionAdminBoton accionExtender" onClick={() => onExtenderTrial(diasExtension)}>

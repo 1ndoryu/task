@@ -7,6 +7,7 @@
 import {useState, useCallback} from 'react';
 import {Folder, FolderPlus, ChevronRight, Trash2, Edit3, Check, X} from 'lucide-react';
 import type {CarpetaNota} from '../../../types/notas';
+import {Input} from '../../ui/Input';
 
 interface NavegadorCarpetasProps {
     carpetas: CarpetaNota[];
@@ -75,7 +76,7 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
             {/* Formulario crear nueva carpeta */}
             {creando && (
                 <div className="navegadorCarpetasFormulario">
-                    <input type="text" className="navegadorCarpetasInput" value={nombreNueva} onChange={e => setNombreNueva(e.target.value)} placeholder="Nombre de carpeta" autoFocus onKeyDown={e => e.key === 'Enter' && manejarCrear()} />
+                    <Input tipo="text" claseAdicional="navegadorCarpetasInput" value={nombreNueva} onChange={e => setNombreNueva((e.target as HTMLInputElement).value)} placeholder="Nombre de carpeta" autoFocus onKeyDown={e => e.key === 'Enter' && manejarCrear()} />
                     <button className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--confirmar" onClick={manejarCrear} disabled={!nombreNueva.trim()}>
                         <Check size={12} />
                     </button>
@@ -100,7 +101,7 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
                             {editandoId !== null && editandoId === carpeta.id ? (
                                 /* Modo edición */
                                 <div className="navegadorCarpetasFormulario navegadorCarpetasFormulario--inline">
-                                    <input type="text" className="navegadorCarpetasInput" value={nombreEditando} onChange={e => setNombreEditando(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && manejarGuardarEdicion()} />
+                                    <Input tipo="text" claseAdicional="navegadorCarpetasInput" value={nombreEditando} onChange={e => setNombreEditando((e.target as HTMLInputElement).value)} autoFocus onKeyDown={e => e.key === 'Enter' && manejarGuardarEdicion()} />
                                     <button className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--confirmar" onClick={manejarGuardarEdicion}>
                                         <Check size={12} />
                                     </button>

@@ -10,6 +10,7 @@ import {Modal} from '../shared';
 import {useNotasStore} from '../../stores/notasStore';
 import type {Nota} from '../../types/notas';
 import {ListaNotasGuardadas} from './notas/ListaNotasGuardadas';
+import {Input} from '../ui/Input';
 
 interface ModalNotasGuardadasProps {
     abierto: boolean;
@@ -80,7 +81,7 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
                 {/* Barra de búsqueda */}
                 <div className="modalNotasBusqueda">
                     <Search size={14} className="modalNotasBusquedaIcono" />
-                    <input type="text" className="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda(e.target.value)} autoFocus />
+                    <Input tipo="text" claseAdicional="modalNotasBusquedaInput" placeholder="Buscar notas..." value={terminoBusqueda} onChange={e => setTerminoBusqueda((e.target as HTMLInputElement).value)} autoFocus />
                     {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
                 </div>
 

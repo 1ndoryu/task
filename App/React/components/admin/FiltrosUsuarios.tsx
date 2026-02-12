@@ -8,6 +8,7 @@
 import {useState, useCallback} from 'react';
 import {Search, Filter, RefreshCw} from 'lucide-react';
 import {Boton} from '../ui/Boton';
+import {Input} from '../ui/Input';
 import type {FiltrosAdmin} from '../../types/dashboard';
 
 interface FiltrosUsuariosProps {
@@ -65,7 +66,7 @@ export function FiltrosUsuarios({filtros, onFiltrarPlan, onBuscar, onReiniciar}:
             <div className="filtrosUsuariosBusqueda">
                 <div className="busquedaInputContenedor">
                     <Search size={14} className="busquedaIcono" />
-                    <input type="text" className="busquedaInput" placeholder="Buscar por nombre o email..." value={busquedaLocal} onChange={e => manejarCambioBusqueda(e.target.value)} onKeyDown={manejarTeclaBusqueda} />
+                    <Input tipo="text" claseAdicional="busquedaInput" placeholder="Buscar por nombre o email..." value={busquedaLocal} onChange={e => manejarCambioBusqueda((e.target as HTMLInputElement).value)} onKeyDown={manejarTeclaBusqueda} />
                     <Boton type="button" claseAdicional="busquedaBoton" onClick={manejarClickBuscar} title="Buscar">
                         Buscar
                     </Boton>

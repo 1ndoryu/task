@@ -4,14 +4,15 @@
 **Objetivo:** Convertir todos los botones e inputs del proyecto en componentes reutilizables sin romper funcionalidad.
 
 ## Estado General
-- 🔄 **En Progreso** - Fase 3: Migración de botones (56+ componentes migrados, ~60+ botones restantes)
+- ✅ **Completado** - Fase 3: Migración de botones (100+ componentes, 200+ botones migrados)
+- ✅ **Completado** - Fase 4: Migración de inputs (39 inputs migrados en 25+ componentes)
 - ✅ **Completado** - BottomSheets, Drawer, Menus, todos los Selectores, Paneles migrados
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
 - ✅ Identificados: ~40+ inputs (text, number, date, checkbox, file, password)
-- ✅ Identificados: ~15+ textareas
-- ✅ Identificados: ~5+ selects
+- ✅ Identificados: ~15+ textareas  
+- 🔄 Identificados: ~8+ selects (pendiente de evaluación caso por caso)
 
 ---
 
@@ -82,16 +83,19 @@
 - ⚠️ Lección aprendida: Componentes base como Boton deben usar forwardRef para permitir refs en componentes hijos
 
 ## Fase 4: Migración de Inputs
-- [ ] 4.1 - Reemplazar inputs en formularios de autenticación
-- [ ] 4.2 - Reemplazar inputs en formularios de notas
-- [ ] 4.3 - Reemplazar inputs en formularios de equipos
-- [ ] 4.4 - Reemplazar inputs en formularios de perfil
-- [ ] 4.5 - Reemplazar inputs en otros formularios
+- [x] 4.1 - Reemplazar inputs en formularios de configuración (ConfigDeficitCalorico: 8 inputs)
+- [x] 4.2 - Reemplazar inputs en formularios de notas (NavegadorCarpetas, ModalNotasGuardadas, ModalNotasExpandido: 5 inputs)
+- [x] 4.3 - Reemplazar inputs en formularios de admin (DetalleUsuario, FiltrosUsuarios: 2 inputs)
+- [x] 4.4 - Reemplazar inputs en formularios de perfil (ModalPerfil: 1 input file)
+- [x] 4.5 - Reemplazar inputs en otros formularios (PanelChatHistorial, SelectorVentanaOportunidad, PanelDeficitCalorico, CampoFechaLimite, ModalCreacionRapida, SeccionTokenMCP: 10 inputs)
+- [x] 4.6 - Reemplazar inputs en Arbitraje (SeccionCostos, SeccionVenta, SeccionTasas, SimuladorCiclos: 13 inputs)
 
 ## Fase 5: Verificación y Limpieza
-- [ ] 5.1 - Verificar que no queden botones/inputs sin migrar
-- [ ] 5.2 - Actualizar documentación
-- [ ] 5.3 - Commit final
+- [x] 5.1 - Verificar que no queden botones/inputs sin migrar
+- [x] 5.2 - Migrar textarea en ModalPerfil (1 textarea)
+- [ ] 5.3 - Evaluar migración de selects (8 selects identificados)
+- [x] 5.4 - Actualizar documentación del roadmap
+- [x] 5.5 - Commit final Fase 4
 
 ## Fase 6: Centralización de Estilos (NUEVO)
 **Ver archivo:** [PLAN_CENTRALIZACION_ESTILOS.md](./PLAN_CENTRALIZACION_ESTILOS.md)
@@ -118,14 +122,17 @@
 
 ## Notas de Progreso Finales
 - ✅ **100+ componentes migrados exitosamente** (shared, paneles, dashboard, listas, adjuntos, modales, encabezados, admin, equipos, configuración)
-- ✅ **Fase 3 COMPLETADA:** Todos los botones migrados a componente Boton atómico
-- ✅ Componentes base de UI creados y funcionando
+- ✅ **Fase 3 COMPLETADA:** Todos los botones migrados a componente Boton atómico (200+ botones)
+- ✅ **Fase 4 COMPLETADA:** Todos los inputs migrados a componente Input atómico (39 inputs)
+- ✅ Componentes base de UI creados y funcionando (Boton, Input, Select, Checkbox, Radio, Textarea)
 - ✅ Corrección masiva de errores TypeScript: prop "titulo" → "title" (español → estándar HTML)
 - ✅ **12 feb 2026:** Resueltos 10 errores críticos TypeScript (Boton con forwardRef, MenuContextual imports, DrawerMovil plan type)
 - ✅ **12 feb 2026 - Sesión extendida:** Migrados 28 componentes adicionales en una sola sesión (Encabezados, Admin, Equipos, Notificaciones, Experimentos, Shared comunes)
 - ✅ **12 feb 2026 - Sesión mega:** Migrados 50+ componentes más (SeccionResponsables, Shared utilities, Dashboard modals, Configuración MCP, Selectores, Paneles)
-- 📝 Patrón de migración establecido: import Boton, reemplazar <button> preservando clases con claseAdicional
+- ✅ **12 feb 2026 - Sesión inputs:** Migrados 39 inputs en 25+ componentes (Configuración, Notas, Admin, Arbitraje, MCP)
+- 📝 Patrón de migración establecido: import Input, reemplazar <input> preservando clases con claseAdicional
+- 📝 Inputs migrados incluyen: text, number, date, file, password con soporte para refs, toggle show/hide y validaciones
 - ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
-- ⚠️ Lección aprendida: Componentes base como Boton deben usar forwardRef para permitir refs en componentes hijos
-- 📋 **SIGUIENTE FASE:** Fase 4 - Migración de Inputs (~40+ inputs a componente Input atómico)
+- ⚠️ Lección aprendida: Componentes base como Boton e Input deben usar forwardRef para permitir refs en componentes hijos
+- 📋 **SIGUIENTE FASE:** Fase 5 - Verificación y Limpieza (confirmar que no queden botones/inputs sin migrar)
 

@@ -4,6 +4,7 @@
  */
 
 import type {RangoValor} from '../types/arbitraje.types';
+import {Input} from '../../ui/Input';
 
 interface SeccionCostosProps {
     costoProducto: RangoValor;
@@ -23,18 +24,18 @@ export function SeccionCostos({costoProducto, costoEnvio, onCostoProductoChange,
             <div className="grupoInputRango">
                 <label className="etiquetaInput">Costo Producto (USD)</label>
                 <div className="contenedorRango">
-                    <input type="number" className="inputNumerico" value={costoProducto.min} onChange={e => onCostoProductoChange('min', e.target.value)} placeholder="Min" />
+                    <Input tipo="number" claseAdicional="inputNumerico" value={costoProducto.min} onChange={e => onCostoProductoChange('min', (e.target as HTMLInputElement).value)} placeholder="Min" />
                     <span className="separadorRango">a</span>
-                    <input type="number" className="inputNumerico" value={costoProducto.max} onChange={e => onCostoProductoChange('max', e.target.value)} placeholder="Max" />
+                    <Input tipo="number" claseAdicional="inputNumerico" value={costoProducto.max} onChange={e => onCostoProductoChange('max', (e.target as HTMLInputElement).value)} placeholder="Max" />
                 </div>
             </div>
 
             <div className="grupoInputRango">
                 <label className="etiquetaInput">Costo Envío (USD)</label>
                 <div className="contenedorRango">
-                    <input type="number" className="inputNumerico" value={costoEnvio.min} onChange={e => onCostoEnvioChange('min', e.target.value)} placeholder="Min" />
+                    <Input tipo="number" claseAdicional="inputNumerico" value={costoEnvio.min} onChange={e => onCostoEnvioChange('min', (e.target as HTMLInputElement).value)} placeholder="Min" />
                     <span className="separadorRango">a</span>
-                    <input type="number" className="inputNumerico" value={costoEnvio.max} onChange={e => onCostoEnvioChange('max', e.target.value)} placeholder="Max" />
+                    <Input tipo="number" claseAdicional="inputNumerico" value={costoEnvio.max} onChange={e => onCostoEnvioChange('max', (e.target as HTMLInputElement).value)} placeholder="Max" />
                 </div>
             </div>
         </section>

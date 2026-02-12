@@ -8,7 +8,7 @@ import {Camera, Save, X} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {useAuth} from '../../hooks/useAuth';
 import {IndicadorAlmacenamiento} from '../shared/IndicadorAlmacenamiento';
-import {Input} from '../ui';
+import {Input, Textarea} from '../ui';
 // Importamos los estilos registrandolos en index.css, pero definimos clases aqui
 // Se asume que perfil.css ya esta importado globalmente
 
@@ -171,7 +171,7 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
                         <Camera size={14} />
                         Cambiar Foto
                     </button>
-                    <input type="file" ref={fileInputRef} className="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
+                    <Input tipo="file" ref={fileInputRef} claseAdicional="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
                 </div>
 
                 <div className="seccionPerfil">
@@ -184,7 +184,7 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
 
                     <div className="grupoInputPerfil">
                         <label className="labelPerfil">Breve Descripción</label>
-                        <textarea className="inputPerfil inputPerfil--descripcion" value={datos.descripcion} onChange={e => handleChange('descripcion', e.target.value)} placeholder="Developer, Designer, etc." rows={2} />
+                        <Textarea claseAdicional="inputPerfil inputPerfil--descripcion" value={datos.descripcion} onChange={e => handleChange('descripcion', (e.target as HTMLTextAreaElement).value)} placeholder="Developer, Designer, etc." filas={2} />
                     </div>
                 </div>
 

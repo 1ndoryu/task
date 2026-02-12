@@ -7,6 +7,7 @@
 import {useState} from 'react';
 import {Key, Eye, EyeOff, Copy, Check, Trash2, RefreshCw, AlertTriangle} from 'lucide-react';
 import {Boton} from '../shared/Boton';
+import {Input} from '../ui/Input';
 
 interface SeccionTokenMCPProps {
     tokenExiste: boolean;
@@ -61,7 +62,7 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
                     </div>
 
                     <div className="mcpCampoToken">
-                        <input type={mostrarToken ? 'text' : 'password'} value={tokenGenerado} readOnly className="mcpCampoToken__input" />
+                        <Input tipo={mostrarToken ? 'text' : 'password'} value={tokenGenerado} readOnly claseAdicional="mcpCampoToken__input" />
                         <Boton type="button" claseAdicional="mcpCampoToken__boton" onClick={() => setMostrarToken(!mostrarToken)} title={mostrarToken ? 'Ocultar token' : 'Mostrar token'}>
                             {mostrarToken ? <EyeOff size={14} /> : <Eye size={14} />}
                         </Boton>

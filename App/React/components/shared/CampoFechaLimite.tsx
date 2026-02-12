@@ -8,6 +8,7 @@ import {X, AlertCircle} from 'lucide-react';
 import {SeccionPanel} from './SeccionPanel';
 import {obtenerFechaEfectiva} from '../../utils/fecha';
 import {Boton} from './Boton';
+import {Input} from '../ui/Input';
 
 type EstadoFecha = 'vencida' | 'urgente' | 'proxima' | 'normal' | null;
 
@@ -41,7 +42,7 @@ export function CampoFechaLimite({titulo = 'Fecha Limite', valor, onChange, most
     return (
         <SeccionPanel titulo={titulo}>
             <div className={`campoFechaLimiteContenedor ${claseEstado}`}>
-                <input type="date" className="campoFechaLimiteInput" value={valor} onChange={e => onChange(e.target.value)} disabled={disabled} />
+                <Input tipo="date" claseAdicional="campoFechaLimiteInput" value={valor} onChange={e => onChange((e.target as HTMLInputElement).value)} disabled={disabled} />
 
                 {estadoFecha === 'vencida' && (
                     <span className="campoFechaLimiteAlerta campoFechaLimiteAlertaVencida">

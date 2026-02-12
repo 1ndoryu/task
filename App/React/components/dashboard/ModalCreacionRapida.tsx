@@ -8,6 +8,7 @@ import {useState, useEffect, useRef} from 'react';
 import {X, CheckSquare, Activity, Folder, Calendar, Flag, Hash, ArrowRight, Layers, AlertCircle, Clock, Repeat, ChevronDown, Paperclip, Loader2, Plus} from 'lucide-react';
 import {MenuContextual} from '../shared';
 import {Boton} from '../ui';
+import {Input} from '../ui/Input';
 import type {Proyecto, Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../../hooks/useAdjuntos';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
@@ -188,7 +189,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                     {renderOpcionesValores()}
 
                     {/* Input de archivo oculto */}
-                    <input type="file" ref={fileInputRef} style={{display: 'none'}} onChange={manejarArchivoSeleccionado} />
+                    <Input tipo="file" ref={fileInputRef} style={{display: 'none'}} onChange={manejarArchivoSeleccionado} />
                 </form>
             </div>
 
