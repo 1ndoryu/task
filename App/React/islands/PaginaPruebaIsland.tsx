@@ -7,6 +7,7 @@
  */
 
 import {useState, useEffect} from 'react';
+import {Boton} from '../components/ui';
 
 interface PaginaPruebaIslandProps {
     titulo?: string;
@@ -41,13 +42,13 @@ export function PaginaPruebaIsland({titulo = 'Página de Prueba', mensaje = 'El 
                     <div className="seccionContador">
                         <span className="etiquetaContador">Contador interactivo:</span>
                         <div className="controlesContador">
-                            <button className="botonContador botonDecrementar" onClick={() => setContador(c => c - 1)} aria-label="Decrementar">
+                            <Boton variante="secundario" onClick={() => setContador(c => c - 1)} aria-label="Decrementar" claseAdicional="botonDecrementar">
                                 −
-                            </button>
+                            </Boton>
                             <span className="valorContador">{contador}</span>
-                            <button className="botonContador botonIncrementar" onClick={() => setContador(c => c + 1)} aria-label="Incrementar">
+                            <Boton variante="primario" onClick={() => setContador(c => c + 1)} aria-label="Incrementar" claseAdicional="botonIncrementar">
                                 +
-                            </button>
+                            </Boton>
                         </div>
                     </div>
 

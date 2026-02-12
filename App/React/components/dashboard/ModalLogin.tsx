@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {Modal} from '../shared/Modal';
 import {CampoTexto} from '../shared/CampoTexto';
+import {Boton} from '../ui';
 import {Chrome, LogIn} from 'lucide-react';
 import '../../styles/dashboard/componentes/modalLogin.css';
 
@@ -68,12 +69,20 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
                 {modo !== 'recuperar' ? (
                     <>
                         <div className="loginTabs">
-                            <button className={`loginTab ${modo === 'login' ? 'activo' : ''}`} onClick={() => setModo('login')}>
+                            <Boton
+                                variante={modo === 'login' ? 'primario' : 'ghost'}
+                                onClick={() => setModo('login')}
+                                claseAdicional={`loginTab ${modo === 'login' ? 'activo' : ''}`}
+                            >
                                 Iniciar Sesión
-                            </button>
-                            <button className={`loginTab ${modo === 'registro' ? 'activo' : ''}`} onClick={() => setModo('registro')}>
+                            </Boton>
+                            <Boton
+                                variante={modo === 'registro' ? 'primario' : 'ghost'}
+                                onClick={() => setModo('registro')}
+                                claseAdicional={`loginTab ${modo === 'registro' ? 'activo' : ''}`}
+                            >
                                 Registrarse
-                            </button>
+                            </Boton>
                         </div>
 
                         {error && (
@@ -92,34 +101,44 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
 
                             <div style={{marginTop: 8}}></div>
 
-                            <button type="submit" className="botonPrimario botonFull" disabled={loading}>
-                                {loading ? (
-                                    'Procesando...'
-                                ) : (
+                            <Boton
+                                type="submit"
+                                variante="primario"
+                                disabled={loading}
+                                cargando={loading}
+                                claseAdicional="botonPrimario botonFull"
+                            >
+                                {!loading && (
                                     <>
                                         <LogIn size={16} style={{marginRight: 8}} />
                                         {modo === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
                                     </>
                                 )}
-                            </button>
+                            </Boton>
 
                             {modo === 'login' && (
-                                <button
-                                    type="button"
-                                    className="enlaceRecuperar"
+                                <Boton
+                                    variante="link"
                                     onClick={() => {
                                         setModo('recuperar');
                                         setRecuperarMensaje(null);
-                                    }}>
+                                    }}
+                                    claseAdicional="enlaceRecuperar"
+                                >
                                     ¿Olvidaste tu contraseña?
-                                </button>
+                                </Boton>
                             )}
                         </form>
 
-                        <button type="button" className="botonSecundario botonFull botonGoogle" onClick={onLoginGoogle} disabled={loading}>
-                            <Chrome size={16} style={{marginRight: 8}} />
+                        <Boton
+                            variante="secundario"
+                            onClick={onLoginGoogle}
+                            disabled={loading}
+                            claseAdicional="botonSecundario botonFull botonGoogle"
+                            icono={<Chrome size={16} />}
+                        >
                             Continuar con Google
-                        </button>
+                        </Boton>
                     </>
                 ) : (
                     <div className="recuperarContenido">
@@ -130,14 +149,24 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
                         <form onSubmit={handleRecuperar} className="loginForm">
                             <CampoTexto titulo="Correo Electrónico" valor={emailRecuperar} onChange={setEmailRecuperar} tipo="email" autoFocus disabled={recuperarLoading} />
 
-                            <button type="submit" className="botonPrimario botonFull" disabled={recuperarLoading}>
-                                {recuperarLoading ? 'Enviando...' : 'Enviar Instrucciones'}
-                            </button>
+                            <Boton
+                                type="submit"
+                                variante="primario"
+                                disabled={recuperarLoading}
+                                cargando={recuperarLoading}
+                                claseAdicional="botonPrimario botonFull"
+                            >
+                                Enviar Instrucciones
+                            </Boton>
                         </form>
 
-                        <button type="button" className="enlaceRecuperar" onClick={() => setModo('login')}>
+                        <Boton
+                            variante="link"
+                            onClick={() => setModo('login')}
+                            claseAdicional="enlaceRecuperar"
+                        >
                             ← Volver al inicio de sesión
-                        </button>
+                        </Boton>
                     </div>
                 )}
             </div>

@@ -15,6 +15,7 @@ import {useState, useEffect, useRef} from 'react';
 import {Eraser, Settings, FolderOpen, Plus, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, Scratchpad, ModalNotasExpandido} from '../dashboard';
 import {OverlayEnfoque} from '../shared';
+import {Boton} from '../ui';
 import {useNotasStore} from '../../stores/notasStore';
 import {extraerTitulo, CONTENIDO_NOTA_NUEVA} from '../../utils/notasUtils';
 import type {ConfiguracionScratchpad} from '../../hooks/useConfiguracionScratchpad';
@@ -132,35 +133,45 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                 acciones={
                     <>
                         {/* Botón nueva nota */}
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarNuevaNota} title="Nueva nota">
-                            <span className="selectorBadgeIcono">
-                                <Plus size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={manejarNuevaNota}
+                            icono={<Plus size={12} />}
+                            titulo="Nueva nota"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {/* Botón abrir notas guardadas */}
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarAbrirCarpeta} title="Ver notas guardadas">
-                            <span className="selectorBadgeIcono">
-                                <FolderOpen size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={manejarAbrirCarpeta}
+                            icono={<FolderOpen size={12} />}
+                            titulo="Ver notas guardadas"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {/* Botón limpiar */}
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarLimpiar} title="Limpiar / Nueva nota">
-                            <span className="selectorBadgeIcono">
-                                <Eraser size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={manejarLimpiar}
+                            icono={<Eraser size={12} />}
+                            titulo="Limpiar / Nueva nota"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {/* Botón configuración */}
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigScratchpad} title="Configuración">
-                            <span className="selectorBadgeIcono">
-                                <Settings size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalConfigScratchpad}
+                            icono={<Settings size={12} />}
+                            titulo="Configuración"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {/* Botón modo enfoque */}
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
-                            <span className="selectorBadgeIcono">
-                                <Maximize2 size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={() => setModoEnfoque(true)}
+                            icono={<Maximize2 size={12} />}
+                            titulo="Modo enfoque"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {handleMinimizar}
                     </>
                 }

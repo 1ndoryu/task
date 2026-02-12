@@ -9,6 +9,7 @@
 
 import {useEffect, useCallback, useState} from 'react';
 import {X, ArrowLeft} from 'lucide-react';
+import {Boton} from '../ui';
 
 export interface ModalProps {
     estaAbierto: boolean;
@@ -82,9 +83,9 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                 <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
                     {/* Boton Volver en movil - solo icono, sin texto */}
                     {esMovil && (
-                        <button className="modalBotonVolver" onClick={onCerrar} aria-label="Volver" type="button">
+                        <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Volver" claseAdicional="modalBotonVolver">
                             <ArrowLeft size={18} />
-                        </button>
+                        </Boton>
                     )}
                     {/* Titulo: siempre visible, con clase especial en movil */}
                     <h2 id="modal-titulo" className={`modalTitulo ${esMovil ? 'modalTitulo--movilCompacto' : ''}`}>
@@ -94,9 +95,9 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                         {accionesEncabezado}
                         {/* En movil, mostrar X solo si no hay boton volver visible */}
                         {!ocultarBotonCerrar && !esMovil && (
-                            <button className="modalBotonCerrar" onClick={onCerrar} aria-label="Cerrar modal" type="button">
+                            <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Cerrar modal" claseAdicional="modalBotonCerrar">
                                 <X size={14} />
-                            </button>
+                            </Boton>
                         )}
                     </div>
                 </div>

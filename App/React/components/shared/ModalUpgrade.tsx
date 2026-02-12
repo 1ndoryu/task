@@ -10,6 +10,7 @@
 
 import {useState} from 'react';
 import {Modal} from './Modal';
+import {Boton} from '../ui';
 import {useStripe} from '../../hooks/useStripe';
 import type {InfoSuscripcion} from '../../types/dashboard';
 
@@ -105,18 +106,18 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
 
         return (
             <div className="modalUpgrade__planes">
-                <button type="button" className={`modalUpgrade__planOpcion ${planSeleccionado === 'monthly' ? 'modalUpgrade__planOpcion--activo' : ''}`} onClick={() => setPlanSeleccionado('monthly')}>
+                <Boton variante={planSeleccionado === 'monthly' ? 'primario' : 'ghost'} onClick={() => setPlanSeleccionado('monthly')} claseAdicional={`modalUpgrade__planOpcion ${planSeleccionado === 'monthly' ? 'modalUpgrade__planOpcion--activo' : ''}`}>
                     <span className="modalUpgrade__planNombre">Mensual</span>
                     <span className="modalUpgrade__planPrecio">${PRECIOS.monthly.precio}</span>
                     <span className="modalUpgrade__planDescripcion">{PRECIOS.monthly.descripcion}</span>
-                </button>
+                </Boton>
 
-                <button type="button" className={`modalUpgrade__planOpcion ${planSeleccionado === 'yearly' ? 'modalUpgrade__planOpcion--activo' : ''}`} onClick={() => setPlanSeleccionado('yearly')}>
+                <Boton variante={planSeleccionado === 'yearly' ? 'primario' : 'ghost'} onClick={() => setPlanSeleccionado('yearly')} claseAdicional={`modalUpgrade__planOpcion ${planSeleccionado === 'yearly' ? 'modalUpgrade__planOpcion--activo' : ''}`}>
                     <span className="modalUpgrade__planBadge">-{PRECIOS.yearly.ahorro}</span>
                     <span className="modalUpgrade__planNombre">Anual</span>
                     <span className="modalUpgrade__planPrecio">${PRECIOS.yearly.precio}</span>
                     <span className="modalUpgrade__planDescripcion">{PRECIOS.yearly.descripcion}</span>
-                </button>
+                </Boton>
             </div>
         );
     };
@@ -128,36 +129,36 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
             if (estado === 'trial') {
                 return (
                     <div className="modalUpgrade__acciones">
-                        <button className="modalUpgrade__boton modalUpgrade__boton--primario" onClick={handleComprar} disabled={cargando}>
-                            {cargando ? 'Procesando...' : 'Continuar con Premium'}
-                        </button>
-                        <button className="modalUpgrade__boton modalUpgrade__boton--secundario" onClick={onCerrar}>
+                        <Boton variante="primario" onClick={handleComprar} cargando={cargando} claseAdicional="modalUpgrade__boton--primario">
+                            Continuar con Premium
+                        </Boton>
+                        <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalUpgrade__boton--secundario">
                             Seguir probando
-                        </button>
+                        </Boton>
                     </div>
                 );
             }
             return (
                 <div className="modalUpgrade__acciones">
-                    <button className="modalUpgrade__boton modalUpgrade__boton--primario" onClick={handleGestionarSuscripcion} disabled={cargando}>
-                        {cargando ? 'Abriendo...' : 'Gestionar suscripcion'}
-                    </button>
-                    <button className="modalUpgrade__boton modalUpgrade__boton--secundario" onClick={onCerrar}>
+                    <Boton variante="primario" onClick={handleGestionarSuscripcion} cargando={cargando} claseAdicional="modalUpgrade__boton--primario">
+                        Gestionar suscripción
+                    </Boton>
+                    <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalUpgrade__boton--secundario">
                         Cerrar
-                    </button>
+                    </Boton>
                 </div>
             );
         }
 
         return (
             <div className="modalUpgrade__acciones">
-                <button className="modalUpgrade__boton modalUpgrade__boton--primario" onClick={handleComprar} disabled={cargando}>
-                    {cargando ? 'Procesando...' : `Probar 30 dias gratis - luego $${precioSeleccionado}`}
-                </button>
-                <p className="modalUpgrade__aviso">Sin compromiso. Cancela antes del dia 30 y no se te cobrara nada.</p>
-                <button className="modalUpgrade__boton modalUpgrade__boton--secundario" onClick={onCerrar}>
-                    Quizas despues
-                </button>
+                <Boton variante="primario" onClick={handleComprar} cargando={cargando} claseAdicional="modalUpgrade__boton--primario">
+                    Probar 30 días gratis - luego ${precioSeleccionado}
+                </Boton>
+                <p className="modalUpgrade__aviso">Sin compromiso. Cancela antes del día 30 y no se te cobrará nada.</p>
+                <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalUpgrade__boton--secundario">
+                    Quizás después
+                </Boton>
             </div>
         );
     };

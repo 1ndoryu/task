@@ -5,6 +5,7 @@
  */
 
 import {X} from 'lucide-react';
+import {Boton} from '../../ui';
 
 interface ModalInspeccionIAProps {
     estaAbierto: boolean;
@@ -20,9 +21,7 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
             <div className="modalContenedor modalContenedor--mediana" onClick={e => e.stopPropagation()}>
                 <div className="modalEncabezado">
                     <h2 className="modalTitulo">Proceso de IA - Inspección</h2>
-                    <button type="button" className="modalCerrar" onClick={onCerrar} aria-label="Cerrar">
-                        <X size={18} />
-                    </button>
+                    <Boton variante="icono" onClick={onCerrar} icono={<X size={18} />} claseAdicional="modalCerrar" titulo="Cerrar" />
                 </div>
 
                 <div className="modalCuerpo">
@@ -44,9 +43,9 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
                 </div>
 
                 <div className="modalFooter">
-                    <button type="button" className="botonModal botonModal--secundario" onClick={onCerrar}>
+                    <Boton variante="secundario" onClick={onCerrar} claseAdicional="botonModal botonModal--secundario">
                         Cerrar
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </div>

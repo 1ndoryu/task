@@ -5,6 +5,7 @@
  */
 
 import {useRef} from 'react';
+import {Boton} from '../ui';
 
 interface AccionesDatosProps {
     onExportar: () => void;
@@ -34,15 +35,27 @@ export function AccionesDatos({onExportar, onImportar, importando, mensajeEstado
     return (
         <div id="acciones-datos-contenedor" className="accionesDatosContenedor">
             <div className="accionesDatosBotones">
-                <button type="button" className="botonAccionDatos botonExportar" onClick={onExportar} title="Descargar copia de seguridad">
+                <Boton
+                    variante="primario"
+                    onClick={onExportar}
+                    titulo="Descargar copia de seguridad"
+                    claseAdicional="botonAccionDatos botonExportar"
+                >
                     <span className="botonAccionIcono">↓</span>
                     Exportar
-                </button>
+                </Boton>
 
-                <button type="button" className="botonAccionDatos botonImportar" onClick={manejarClickImportar} disabled={importando} title="Restaurar desde archivo">
+                <Boton
+                    variante="secundario"
+                    onClick={manejarClickImportar}
+                    disabled={importando}
+                    cargando={importando}
+                    titulo="Restaurar desde archivo"
+                    claseAdicional="botonAccionDatos botonImportar"
+                >
                     <span className="botonAccionIcono">↑</span>
-                    {importando ? 'Importando...' : 'Importar'}
-                </button>
+                    Importar
+                </Boton>
 
                 <input ref={inputArchivoRef} type="file" accept=".json" onChange={manejarCambioArchivo} className="inputArchivoOculto" />
             </div>

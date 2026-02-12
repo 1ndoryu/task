@@ -9,6 +9,7 @@ import {useState} from 'react';
 import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, TablaHabitos} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque} from '../shared';
+import {Boton} from '../ui';
 import type {Habito} from '../../types/dashboard';
 import type {ConfiguracionHabitos} from '../../hooks/useConfiguracionHabitos';
 
@@ -44,21 +45,27 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
                 acciones={
                     <>
                         <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar hábitos" soloIcono={true} />
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalCrearHabito} title="Nuevo Hábito">
-                            <span className="selectorBadgeIcono">
-                                <Plus size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigHabitos} title="Configuración">
-                            <span className="selectorBadgeIcono">
-                                <Settings size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
-                            <span className="selectorBadgeIcono">
-                                <Maximize2 size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalCrearHabito}
+                            icono={<Plus size={12} />}
+                            titulo="Nuevo Hábito"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalConfigHabitos}
+                            icono={<Settings size={12} />}
+                            titulo="Configuración"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
+                        <Boton
+                            variante="icono"
+                            onClick={() => setModoEnfoque(true)}
+                            icono={<Maximize2 size={12} />}
+                            titulo="Modo enfoque"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {handleMinimizar}
                     </>
                 }

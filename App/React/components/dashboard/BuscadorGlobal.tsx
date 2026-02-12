@@ -6,6 +6,7 @@
 
 import {useState, useEffect, useRef, useMemo} from 'react';
 import {Search, CheckCircle2, Repeat, Folder, X, FileText} from 'lucide-react';
+import {Boton} from '../ui';
 import type {Tarea, Habito, Proyecto} from '../../types/dashboard';
 import {useNotasStore} from '../../stores/notasStore';
 import type {Nota} from '../../types/notas';
@@ -169,9 +170,12 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
                     onFocus={() => setMostrarResultados(true)}
                 />
                 {busqueda && (
-                    <button className="buscadorLimpiar" onClick={() => setBusqueda('')}>
-                        <X size={12} />
-                    </button>
+                    <Boton
+                        variante="icono"
+                        onClick={() => setBusqueda('')}
+                        icono={<X size={12} />}
+                        claseAdicional="buscadorLimpiar"
+                    />
                 )}
             </div>
 

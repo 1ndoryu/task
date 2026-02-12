@@ -6,6 +6,7 @@
 
 import {useState} from 'react';
 import {Trash2} from 'lucide-react';
+import {Boton} from '../ui';
 
 interface AccionesFormularioProps {
     onCancelar: () => void;
@@ -29,20 +30,19 @@ export function AccionesFormulario({onCancelar, onGuardar, textoGuardar = 'Guard
             {onEliminar && (
                 <div className="accionesFormularioZonaPeligro">
                     {!confirmandoEliminar ? (
-                        <button type="button" className="accionesFormularioBotonEliminar" onClick={() => setConfirmandoEliminar(true)} disabled={guardando}>
-                            <Trash2 size={12} />
-                            <span>{textoEliminar}</span>
-                        </button>
+                        <Boton variante="peligro" onClick={() => setConfirmandoEliminar(true)} disabled={guardando} icono={<Trash2 size={12} />} claseAdicional="accionesFormularioBotonEliminar">
+                            {textoEliminar}
+                        </Boton>
                     ) : (
                         <div className="accionesFormularioConfirmacion">
                             <span className="accionesFormularioConfirmacionTexto">Confirmar eliminacion?</span>
                             <div className="accionesFormularioConfirmacionBotones">
-                                <button type="button" className="accionesFormularioBotonConfirmar" onClick={onEliminar} disabled={guardando}>
+                                <Boton variante="peligro" onClick={onEliminar} disabled={guardando} claseAdicional="accionesFormularioBotonConfirmar">
                                     Si, eliminar
-                                </button>
-                                <button type="button" className="accionesFormularioBotonCancelarEliminar" onClick={() => setConfirmandoEliminar(false)} disabled={guardando}>
+                                </Boton>
+                                <Boton variante="secundario" onClick={() => setConfirmandoEliminar(false)} disabled={guardando} claseAdicional="accionesFormularioBotonCancelarEliminar">
                                     No
-                                </button>
+                                </Boton>
                             </div>
                         </div>
                     )}
@@ -53,12 +53,12 @@ export function AccionesFormulario({onCancelar, onGuardar, textoGuardar = 'Guard
             <div className="accionesFormularioContenedor">
                 {/* Elementos adicionales a la izquierda */}
                 {children && <div className="accionesFormularioExtra">{children}</div>}
-                <button type="button" className="accionesFormularioBotonCancelar" onClick={onCancelar} disabled={guardando}>
+                <Boton variante="secundario" onClick={onCancelar} disabled={guardando} claseAdicional="accionesFormularioBotonCancelar">
                     Cancelar
-                </button>
-                <button type={onGuardar ? 'button' : 'submit'} className="accionesFormularioBotonGuardar" disabled={guardando} onClick={onGuardar}>
-                    {guardando ? 'Guardando...' : textoGuardar}
-                </button>
+                </Boton>
+                <Boton type={onGuardar ? 'button' : 'submit'} variante="primario" disabled={guardando} onClick={onGuardar} cargando={guardando} claseAdicional="accionesFormularioBotonGuardar">
+                    {textoGuardar}
+                </Boton>
             </div>
         </>
     );

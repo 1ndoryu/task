@@ -9,6 +9,7 @@ import {useState} from 'react';
 import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, ListaProyectos} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque} from '../shared';
+import {Boton} from '../ui';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 import type {ConfiguracionProyectos} from '../../hooks/useConfiguracionProyectos';
 
@@ -51,21 +52,27 @@ export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenP
                 acciones={
                     <>
                         <SelectorBadge opciones={opcionesOrdenProyectos} valorActual={configuracion.ordenDefecto} onChange={valor => onCambiarOrdenProyectos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar proyectos" soloIcono={true} />
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalCrearProyecto} title="Nuevo Proyecto">
-                            <span className="selectorBadgeIcono">
-                                <Plus size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigProyectos} title="Configuración">
-                            <span className="selectorBadgeIcono">
-                                <Settings size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
-                            <span className="selectorBadgeIcono">
-                                <Maximize2 size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalCrearProyecto}
+                            icono={<Plus size={12} />}
+                            titulo="Nuevo Proyecto"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalConfigProyectos}
+                            icono={<Settings size={12} />}
+                            titulo="Configuración"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
+                        <Boton
+                            variante="icono"
+                            onClick={() => setModoEnfoque(true)}
+                            icono={<Maximize2 size={12} />}
+                            titulo="Modo enfoque"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {handleMinimizar}
                     </>
                 }

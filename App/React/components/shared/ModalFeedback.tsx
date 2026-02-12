@@ -7,6 +7,7 @@
 import {useState, useEffect} from 'react';
 import {MessageSquare, Send, AlertCircle, CheckCircle, Loader2} from 'lucide-react';
 import {Modal} from './Modal';
+import {Boton, Textarea} from '../ui';
 
 interface ModalFeedbackProps {
     estaAbierto: boolean;
@@ -146,26 +147,24 @@ export function ModalFeedback({estaAbierto, onCerrar}: ModalFeedbackProps): JSX.
 
                         <div className="modalFeedbackTipos">
                             {TIPOS_FEEDBACK.map(t => (
-                                <button key={t.valor} type="button" className={`modalFeedbackTipo ${tipo === t.valor ? 'modalFeedbackTipoActivo' : ''}`} onClick={() => setTipo(t.valor)}>
+                                <Boton key={t.valor} variante={tipo === t.valor ? 'primario' : 'ghost'} onClick={() => setTipo(t.valor)} claseAdicional={`modalFeedbackTipo ${tipo === t.valor ? 'modalFeedbackTipoActivo' : ''}`}>
                                     <span>{t.icono}</span>
                                     <span>{t.etiqueta}</span>
-                                </button>
+                                </Boton>
                             ))}
                         </div>
 
-                        <textarea
-                            className="modalFeedbackTextarea"
+                        <Textarea
                             placeholder="Escribe tu comentario aquí... (mínimo 10 caracteres)"
                             value={mensaje}
                             onChange={e => setMensaje(e.target.value)}
                             onKeyDown={manejarTecla}
                             maxLength={2000}
                             disabled={enviando}
+                            mostrarContador
+                            claseAdicional="modalFeedbackTextarea"
+                            filas={6}
                         />
-
-                        <div className="modalFeedbackContador">
-                            {mensaje.length}/2000 caracteres
-                        </div>
 
                         {resultado && (
                             <div className={`modalFeedbackResultado ${resultado.exito ? 'modalFeedbackExito' : 'modalFeedbackError'}`}>
@@ -175,13 +174,12 @@ export function ModalFeedback({estaAbierto, onCerrar}: ModalFeedbackProps): JSX.
                         )}
 
                         <div className="modalFeedbackAcciones">
-                            <button type="button" className="botonSecundario" onClick={onCerrar} disabled={enviando}>
+                            <Boton variante="secundario" onClick={onCerrar} disabled={enviando}>
                                 Cancelar
-                            </button>
-                            <button type="button" className="botonPrimario" onClick={enviarFeedback} disabled={enviando || mensaje.length < 10}>
-                                {enviando ? <Loader2 size={16} className="animacionGirar" /> : <Send size={16} />}
-                                <span>{enviando ? 'Enviando...' : 'Enviar'}</span>
-                            </button>
+                            </Boton>
+                            <Boton variante="primario" onClick={enviarFeedback} disabled={enviando || mensaje.length < 10} cargando={enviando} icono={<Send size={16} />}>
+                                Enviar
+                            </Boton>
                         </div>
 
                         <p className="modalFeedbackNota">

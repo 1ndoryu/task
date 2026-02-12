@@ -4,6 +4,7 @@
  */
 
 import '../../styles/dashboard/componentes/Landing/landing.css';
+import {Boton} from '../ui';
 import dashboardPreview from '../../../Assets/svg/test.svg';
 import LandingHabitAnimation from './LandingHabitAnimation';
 import LandingProjectsAnimation from './LandingProjectsAnimation';
@@ -35,9 +36,9 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
                     </a>
                 </div>
 
-                <button className="landingNavBoton" onClick={onLogin}>
-                    Iniciar sesion
-                </button>
+                <Boton variante="primario" onClick={onLogin} claseAdicional="landingNavBoton">
+                    Iniciar sesión
+                </Boton>
             </nav>
 
             {/* HERO */}

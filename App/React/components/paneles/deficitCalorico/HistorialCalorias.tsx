@@ -6,6 +6,7 @@
 
 import {useState, useMemo} from 'react';
 import {ChevronDown, ChevronRight, Trash2, RotateCcw, Eye, Clock, Beef, Wheat, Droplet} from 'lucide-react';
+import {Boton} from '../../ui';
 import type {ComidaRegistrada} from '../../../types/deficitCalorico';
 
 interface HistorialCaloriasProps {
@@ -109,19 +110,9 @@ export function HistorialCalorias({comidas, maxPorPagina = 3, onEliminar, onRein
                                                     </div>
                                                     <div className="deficitComidaAcciones">
                                                         <span className="deficitComidaCalorias">{comida.calorias} kcal</span>
-                                                        {comida.promptOriginal && onReintentar && (
-                                                            <button type="button" className="deficitComidaBotonAccion deficitComidaBotonAccion--reintentar" onClick={() => onReintentar(comida.promptOriginal!)} title="Reintentar con el mismo prompt">
-                                                                <RotateCcw size={12} />
-                                                            </button>
-                                                        )}
-                                                        {comida.logProceso && onInspeccionar && (
-                                                            <button type="button" className="deficitComidaBotonAccion deficitComidaBotonAccion--inspeccionar" onClick={() => onInspeccionar(comida.logProceso!)} title="Ver proceso de IA">
-                                                                <Eye size={12} />
-                                                            </button>
-                                                        )}
-                                                        <button type="button" className="deficitComidaEliminar" onClick={() => onEliminar(comida.id)} title="Eliminar">
-                                                            <Trash2 size={12} />
-                                                        </button>
+                                                        {comida.promptOriginal && onReintentar && <Boton variante="icono" onClick={() => onReintentar(comida.promptOriginal!)} icono={<RotateCcw size={12} />} title="Reintentar con el mismo prompt" claseAdicional="deficitComidaBotonAccion deficitComidaBotonAccion--reintentar" />}
+                                                        {comida.logProceso && onInspeccionar && <Boton variante="icono" onClick={() => onInspeccionar(comida.logProceso!)} icono={<Eye size={12} />} title="Ver proceso de IA" claseAdicional="deficitComidaBotonAccion deficitComidaBotonAccion--inspeccionar" />}
+                                                        <Boton variante="icono" onClick={() => onEliminar(comida.id)} icono={<Trash2 size={12} />} title="Eliminar" claseAdicional="deficitComidaEliminar" />
                                                     </div>
                                                 </div>
                                             );
@@ -134,15 +125,15 @@ export function HistorialCalorias({comidas, maxPorPagina = 3, onEliminar, onRein
 
                     {totalPaginas > 1 && (
                         <div className="deficitHistorialPaginacion">
-                            <button type="button" className="deficitHistorialPaginacionBoton" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={pagina <= 0}>
+                            <Boton variante="secundario" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={pagina <= 0} claseAdicional="deficitHistorialPaginacionBoton">
                                 Anterior
-                            </button>
+                            </Boton>
                             <span className="deficitHistorialPaginacionTexto">
                                 {pagina + 1}/{totalPaginas}
                             </span>
-                            <button type="button" className="deficitHistorialPaginacionBoton" onClick={() => setPagina(p => Math.min(totalPaginas - 1, p + 1))} disabled={pagina >= totalPaginas - 1}>
+                            <Boton variante="secundario" onClick={() => setPagina(p => Math.min(totalPaginas - 1, p + 1))} disabled={pagina >= totalPaginas - 1} claseAdicional="deficitHistorialPaginacionBoton">
                                 Siguiente
-                            </button>
+                            </Boton>
                         </div>
                     )}
                 </>

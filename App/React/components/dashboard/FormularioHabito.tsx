@@ -108,18 +108,27 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
                 <div className="formularioTagsInput">
                     <Tag size={12} className="formularioTagsIcono" />
                     <input id="habito-tags" type="text" className="formularioInputTag" value={nuevoTag} onChange={e => setNuevoTag(e.target.value)} onKeyDown={manejarTeclaTag} placeholder="Escribe y presiona Enter" disabled={guardando || tags.length >= 5} />
-                    <button type="button" className="formularioBotonAgregarTag" onClick={agregarTag} disabled={guardando || !nuevoTag.trim() || tags.length >= 5}>
-                        <Plus size={12} />
-                    </button>
+                    <Boton
+                        variante="icono"
+                        onClick={agregarTag}
+                        disabled={guardando || !nuevoTag.trim() || tags.length >= 5}
+                        icono={<Plus size={12} />}
+                        claseAdicional="formularioBotonAgregarTag"
+                    />
                 </div>
                 {tags.length > 0 && (
                     <div className="formularioTagsLista">
                         {tags.map(tag => (
                             <span key={tag} className="formularioTag">
                                 #{tag}
-                                <button type="button" className="formularioTagEliminar" onClick={() => eliminarTag(tag)} disabled={guardando}>
+                                <Boton
+                                    variante="icono"
+                                    onClick={() => eliminarTag(tag)}
+                                    disabled={guardando}
+                                    claseAdicional="formularioTagEliminar"
+                                >
                                     x
-                                </button>
+                                </Boton>
                             </span>
                         ))}
                     </div>

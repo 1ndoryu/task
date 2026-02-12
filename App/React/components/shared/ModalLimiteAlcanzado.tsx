@@ -8,6 +8,7 @@
  */
 
 import {Modal} from './Modal';
+import {Boton} from '../ui';
 import {AlertTriangle} from 'lucide-react';
 import type {TipoEntidadLimite} from '../../stores/suscripcionStore';
 
@@ -86,12 +87,12 @@ export function ModalLimiteAlcanzado({visible, onCerrar, onActualizarPlan, tipoE
                 </div>
 
                 <div className="modalLimiteAlcanzadoAcciones">
-                    <button className="modalLimiteAlcanzadoBoton modalLimiteAlcanzadoBoton--primario" onClick={manejarActualizar}>
+                    <Boton variante="primario" onClick={manejarActualizar} claseAdicional="modalLimiteAlcanzadoBoton--primario">
                         Actualizar a Premium
-                    </button>
-                    <button className="modalLimiteAlcanzadoBoton modalLimiteAlcanzadoBoton--secundario" onClick={onCerrar}>
+                    </Boton>
+                    <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalLimiteAlcanzadoBoton--secundario">
                         Quizás después
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </Modal>

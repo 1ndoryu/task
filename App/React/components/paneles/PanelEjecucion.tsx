@@ -9,6 +9,7 @@ import {useState} from 'react';
 import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, ListaTareas} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque} from '../shared';
+import {Boton} from '../ui';
 import type {Tarea, Proyecto, Participante} from '../../types/dashboard';
 
 interface OpcionFiltro {
@@ -69,21 +70,27 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                     <>
                         <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" soloIcono={true} />
                         <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalNuevaTarea} title="Nueva Tarea">
-                            <span className="selectorBadgeIcono">
-                                <Plus size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigTareas} title="Configuración">
-                            <span className="selectorBadgeIcono">
-                                <Settings size={12} />
-                            </span>
-                        </button>
-                        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
-                            <span className="selectorBadgeIcono">
-                                <Maximize2 size={12} />
-                            </span>
-                        </button>
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalNuevaTarea}
+                            icono={<Plus size={12} />}
+                            titulo="Nueva Tarea"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
+                        <Boton
+                            variante="icono"
+                            onClick={onAbrirModalConfigTareas}
+                            icono={<Settings size={12} />}
+                            titulo="Configuración"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
+                        <Boton
+                            variante="icono"
+                            onClick={() => setModoEnfoque(true)}
+                            icono={<Maximize2 size={12} />}
+                            titulo="Modo enfoque"
+                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
+                        />
                         {handleMinimizar}
                     </>
                 }

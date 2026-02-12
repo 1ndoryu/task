@@ -5,6 +5,7 @@
  */
 
 import type {ReactNode} from 'react';
+import {Boton} from '../ui';
 
 interface EstadoVacioProps {
     /** Icono opcional a mostrar (componente React) */
@@ -35,9 +36,9 @@ export function EstadoVacio({
             <span className="estadoVacioUnificadoMensaje">{mensaje}</span>
             {descripcion && <p className="estadoVacioUnificadoDescripcion">{descripcion}</p>}
             {textoBoton && onAccion && (
-                <button className="estadoVacioUnificadoBoton" onClick={onAccion}>
+                <Boton variante="primario" onClick={onAccion} claseAdicional="estadoVacioUnificadoBoton">
                     {textoBoton}
-                </button>
+                </Boton>
             )}
         </div>
     );

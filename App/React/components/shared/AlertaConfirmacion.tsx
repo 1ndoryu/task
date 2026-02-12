@@ -6,6 +6,7 @@
 
 import {useEffect, useCallback} from 'react';
 import {AlertTriangle, HelpCircle} from 'lucide-react';
+import {Boton} from '../ui';
 import type {AlertaConfirmacion as TipoAlertaConfirmacion} from '../../hooks/useAlertas';
 
 interface AlertaConfirmacionProps {
@@ -76,12 +77,12 @@ export function AlertaConfirmacion({alerta, onResponder}: AlertaConfirmacionProp
                 </p>
 
                 <div className="alertaConfirmacionAcciones">
-                    <button className="alertaConfirmacionBoton alertaConfirmacionBoton--cancelar" onClick={() => onResponder(false)} type="button">
+                    <Boton variante="secundario" onClick={() => onResponder(false)} claseAdicional="alertaConfirmacionBoton--cancelar">
                         {textoCancelar}
-                    </button>
-                    <button className={`alertaConfirmacionBoton alertaConfirmacionBoton--aceptar alertaConfirmacionBoton--${tipo ?? 'normal'}`} onClick={() => onResponder(true)} type="button" autoFocus>
+                    </Boton>
+                    <Boton variante={tipo === 'peligro' ? 'peligro' : 'primario'} onClick={() => onResponder(true)} autoFocus claseAdicional={`alertaConfirmacionBoton--aceptar alertaConfirmacionBoton--${tipo ?? 'normal'}`}>
                         {textoAceptar}
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </div>

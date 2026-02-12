@@ -7,6 +7,7 @@
 import {useState, useCallback, useEffect} from 'react';
 import {Share2, AlertTriangle, UserPlus, Users, Loader2} from 'lucide-react';
 import {Modal} from '../shared/Modal';
+import {Boton} from '../ui';
 import {SelectorCompaneros} from './SelectorCompaneros';
 import {ListaParticipantes} from './ListaParticipantes';
 import type {TipoElementoCompartido, RolCompartido, CompaneroEquipo, Participante} from '../../types/dashboard';
@@ -149,22 +150,13 @@ export function ModalCompartir({visible, onCerrar, tipo, elementoId, elementoNom
 
                 {/* Acciones */}
                 <div className="modalCompartirAcciones">
-                    <button type="button" className="botonSecundario" onClick={onCerrar} disabled={compartiendo}>
+                    <Boton variante="secundario" onClick={onCerrar} disabled={compartiendo}>
                         Cerrar
-                    </button>
+                    </Boton>
                     {companeroSeleccionado && (
-                        <button type="button" className="botonPrimario" onClick={manejarCompartir} disabled={compartiendo}>
-                            {compartiendo ? (
-                                <>
-                                    <Loader2 size={14} className="girando" />
-                                    <span>Compartiendo...</span>
-                                </>
-                            ) : mostroAdvertencia && cifradoActivo ? (
-                                'Confirmar y compartir'
-                            ) : (
-                                'Compartir'
-                            )}
-                        </button>
+                        <Boton variante="primario" onClick={manejarCompartir} cargando={compartiendo}>
+                            {mostroAdvertencia && cifradoActivo ? 'Confirmar y compartir' : 'Compartir'}
+                        </Boton>
                     )}
                 </div>
             </div>
