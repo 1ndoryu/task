@@ -1,5 +1,6 @@
 import {useCallback, useMemo} from 'react';
 import {Clock, Trash2, Folder, MoreVertical} from 'lucide-react';
+import {Boton} from '../../ui';
 import type {Nota, CarpetaNota} from '../../../types/notas';
 import {formatearFechaRelativa} from '../../../utils/fecha';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
@@ -91,9 +92,13 @@ export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onM
     return (
         <>
             <div className={`listaNotasItem ${activa ? 'listaNotasItem--activo' : ''}`} onClick={() => onSeleccionar(nota)} onContextMenu={manejarClickDerecho}>
-                <button className="listaNotasItemBotonMenu" onClick={manejarClickMenu} title="Opciones" aria-label="Opciones de nota">
-                    <MoreVertical size={14} />
-                </button>
+                <Boton
+                    variante="icono"
+                    onClick={manejarClickMenu}
+                    icono={<MoreVertical size={14} />}
+                    title="Opciones"
+                    claseAdicional="listaNotasItemBotonMenu"
+                />
                 <div className="listaNotasItemPrincipal">
                     <div className="listaNotasItemTitulo">{nota.titulo}</div>
 

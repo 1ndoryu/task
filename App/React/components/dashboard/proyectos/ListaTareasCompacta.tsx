@@ -6,6 +6,7 @@
 
 import {useState} from 'react';
 import {CheckCircle2, Circle, ChevronRight, ChevronDown} from 'lucide-react';
+import {Boton} from '../../ui';
 import type {Tarea} from '../../../types/dashboard';
 
 interface ListaTareasCompactaProps {
@@ -28,20 +29,23 @@ function TareaItemCompacto({tarea, subtareas, onToggle, nivel = 0}: TareaItemCom
         <div className="tareaItemCompactoContenedor">
             <div className={`tareaItemCompacto ${tarea.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: `${nivel * 16}px`}}>
                 {/* Botón expandir/colapsar si tiene subtareas */}
-                <button type="button" className={`tareaItemCompacto__toggle ${!tieneSubtareas ? 'tareaItemCompacto__toggle--invisible' : ''}`} onClick={() => setExpandido(!expandido)}>
-                    {expandido ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                </button>
+                <Boton
+                    variante="icono"
+                    onClick={() => setExpandido(!expandido)}
+                    icono={expandido ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                    claseAdicional={`tareaItemCompacto__toggle ${!tieneSubtareas ? 'tareaItemCompacto__toggle--invisible' : ''}`}
+                />
 
                 {/* Checkbox */}
-                <button
-                    type="button"
-                    className={`tareaItemCompacto__checkbox ${tarea.completado ? 'tareaItemCompacto__checkbox--checked' : ''}`}
+                <Boton
+                    variante="icono"
                     onClick={e => {
                         e.stopPropagation();
                         onToggle(tarea.id);
-                    }}>
-                    {tarea.completado ? <CheckCircle2 size={16} className="icono-check" /> : <Circle size={16} className="icono-uncheck" />}
-                </button>
+                    }}
+                    icono={tarea.completado ? <CheckCircle2 size={16} className="icono-check" /> : <Circle size={16} className="icono-uncheck" />}
+                    claseAdicional={`tareaItemCompacto__checkbox ${tarea.completado ? 'tareaItemCompacto__checkbox--checked' : ''}`}
+                />
 
                 {/* Texto de la tarea */}
                 <span className="tareaItemCompacto__texto">{tarea.texto}</span>
@@ -90,9 +94,12 @@ export function ListaTareasCompacta({tareas, onToggleTarea}: ListaTareasCompacta
         return (
             <div className="tareaItemCompactoContenedor">
                 <div className={`tareaItemCompacto ${tarea.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: `${nivel * 12}px`}}>
-                    <button type="button" className={`tareaItemCompacto__checkbox ${tarea.prioridad ? `tareaItemCompacto__checkbox--${tarea.prioridad}` : ''}`} onClick={() => onToggleTarea(tarea.id)}>
-                        {tarea.completado ? <CheckCircle2 size={15} /> : <Circle size={15} />}
-                    </button>
+                    <Boton
+                        variante="icono"
+                        onClick={() => onToggleTarea(tarea.id)}
+                        icono={tarea.completado ? <CheckCircle2 size={15} /> : <Circle size={15} />}
+                        claseAdicional={`tareaItemCompacto__checkbox ${tarea.prioridad ? `tareaItemCompacto__checkbox--${tarea.prioridad}` : ''}`}
+                    />
 
                     <span className="tareaItemCompacto__texto" title={tarea.texto}>
                         {tarea.texto}

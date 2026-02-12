@@ -56,21 +56,21 @@ export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenP
                             variante="icono"
                             onClick={onAbrirModalCrearProyecto}
                             icono={<Plus size={12} />}
-                            titulo="Nuevo Proyecto"
+                            title="Nuevo Proyecto"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         <Boton
                             variante="icono"
                             onClick={onAbrirModalConfigProyectos}
                             icono={<Settings size={12} />}
-                            titulo="Configuración"
+                            title="Configuración"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         <Boton
                             variante="icono"
                             onClick={() => setModoEnfoque(true)}
                             icono={<Maximize2 size={12} />}
-                            titulo="Modo enfoque"
+                            title="Modo enfoque"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {handleMinimizar}

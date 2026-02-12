@@ -137,7 +137,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                             variante="icono"
                             onClick={manejarNuevaNota}
                             icono={<Plus size={12} />}
-                            titulo="Nueva nota"
+                            title="Nueva nota"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón abrir notas guardadas */}
@@ -145,7 +145,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                             variante="icono"
                             onClick={manejarAbrirCarpeta}
                             icono={<FolderOpen size={12} />}
-                            titulo="Ver notas guardadas"
+                            title="Ver notas guardadas"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón limpiar */}
@@ -153,7 +153,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                             variante="icono"
                             onClick={manejarLimpiar}
                             icono={<Eraser size={12} />}
-                            titulo="Limpiar / Nueva nota"
+                            title="Limpiar / Nueva nota"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón configuración */}
@@ -161,7 +161,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                             variante="icono"
                             onClick={onAbrirModalConfigScratchpad}
                             icono={<Settings size={12} />}
-                            titulo="Configuración"
+                            title="Configuración"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón modo enfoque */}
@@ -169,7 +169,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                             variante="icono"
                             onClick={() => setModoEnfoque(true)}
                             icono={<Maximize2 size={12} />}
-                            titulo="Modo enfoque"
+                            title="Modo enfoque"
                             claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {handleMinimizar}

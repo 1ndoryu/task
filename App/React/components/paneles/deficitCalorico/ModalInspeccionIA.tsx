@@ -21,7 +21,7 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
             <div className="modalContenedor modalContenedor--mediana" onClick={e => e.stopPropagation()}>
                 <div className="modalEncabezado">
                     <h2 className="modalTitulo">Proceso de IA - Inspección</h2>
-                    <Boton variante="icono" onClick={onCerrar} icono={<X size={18} />} claseAdicional="modalCerrar" titulo="Cerrar" />
+                    <Boton variante="icono" onClick={onCerrar} icono={<X size={18} />} claseAdicional="modalCerrar" title="Cerrar" />
                 </div>
 
                 <div className="modalCuerpo">

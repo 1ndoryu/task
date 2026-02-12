@@ -60,7 +60,7 @@ export function AdjuntoItemModerno({adjunto, onDelete, urlPreview, esCifrado, on
                             onDelete(adjunto.id);
                         }}
                         icono={<Trash2 size={12} />}
-                        titulo="Eliminar"
+                        title="Eliminar"
                         claseAdicional="adjuntosGrid__accion adjuntosGrid__accion--peligro"
                     />
                 </div>

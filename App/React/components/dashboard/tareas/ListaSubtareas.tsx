@@ -6,6 +6,7 @@
 
 import {useState, useCallback, useEffect} from 'react';
 import {Check, Plus, Trash2, Flag} from 'lucide-react';
+import {Boton} from '../../ui';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Tarea, DatosEdicionTarea, NivelPrioridad} from '../../../types/dashboard';
@@ -77,17 +78,16 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
             </div>
 
             {/* Botón eliminar */}
-            <button
-                type="button"
-                className="listaTareasHabito__eliminar"
+            <Boton
+                variante="icono"
                 onClick={e => {
                     e.stopPropagation();
                     onEliminar(tarea.id);
                 }}
-                onPointerDown={e => e.stopPropagation()}
-                title="Eliminar">
-                <Trash2 size={14} />
-            </button>
+                icono={<Trash2 size={14} />}
+                title="Eliminar"
+                claseAdicional="listaTareasHabito__eliminar"
+            />
         </div>
     );
 };
@@ -214,10 +214,14 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
                     />
                 </form>
             ) : (
-                <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
-                    <Plus size={12} />
-                    <span>Añadir subtarea</span>
-                </button>
+                <Boton
+                    variante="secundario"
+                    onClick={() => setMostrarInput(true)}
+                    icono={<Plus size={12} />}
+                    claseAdicional="listaTareasHabito__botonAgregar"
+                >
+                    Añadir subtarea
+                </Boton>
             )}
         </div>
     );

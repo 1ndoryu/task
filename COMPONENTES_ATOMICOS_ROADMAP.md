@@ -4,7 +4,7 @@
 **Objetivo:** Convertir todos los botones e inputs del proyecto en componentes reutilizables sin romper funcionalidad.
 
 ## Estado General
-- 🔄 **En Progreso** - Fase 3: Migración de botones (8 componentes migrados)
+- 🔄 **En Progreso** - Fase 3: Migración de botones (28 componentes migrados + corrección de errores TypeScript)
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
@@ -51,17 +51,21 @@
 - [x] 3.19 - Reemplazar botones en BuscadorGlobal
 - [x] 3.20 - Reemplazar botones en ModalLogin
 - [x] 3.21 - Reemplazar botones en FormularioHabito
-- [ ] 3.22 - Reemplazar botones en ModalCreacionRapida (10+ botones)
-- [ ] 3.23 - Reemplazar botones en componentes de listas (ListaTareasCompacta, ListaSubtareas, etc.)
-- [ ] 3.24 - Reemplazar botones en adjuntos (AdjuntoItemModerno, AdjuntoOverlay)
-- [ ] 3.25 - Reemplazar botones en modales complejos (ModalConfiguracionLayout, ModalProyecto, etc.)
-- [ ] 3.26 - Reemplazar botones restantes (50+ componentes pendientes)
+- [x] 3.22 - Reemplazar botones en NotaItem
+- [x] 3.23 - Reemplazar botones en componentes de listas (ListaTareasCompacta, ListaTareasHabito, ListaSubtareas)
+- [x] 3.24 - Reemplazar botones en adjuntos (AdjuntoItemModerno, AdjuntoOverlay)
+- [x] 3.25 - Reemplazar botones en modales complejos (ModalConfiguracionLayout)
+- [ ] 3.26 - Reemplazar botones en ModalCreacionRapida (10+ botones)
+- [ ] 3.27 - Reemplazar botones en proyectos/ModalProyecto
+- [ ] 3.28 - Reemplazar botones restantes (50+ componentes pendientes)
 
 ## Notas de Progreso
-- ✅ 21 componentes migrados exitosamente (shared, paneles, dashboard)
+- ✅ 28 componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos)
 - ✅ Componentes base de UI creados y funcionando
+- ✅ Corrección masiva de errores TypeScript: prop "titulo" → "title" (español → estándar HTML)
 - 🔄 Continuando con migración masiva de componentes complejos (modales, listas, formularios)
 - 📝 Patrón de migración establecido: import Boton, reemplazar <button> preservando clases con claseAdicional
+- ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
 
 ## Fase 4: Migración de Inputs
 - [ ] 4.1 - Reemplazar inputs en formularios de autenticación

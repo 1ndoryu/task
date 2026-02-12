@@ -73,7 +73,7 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                         <Boton
                             variante={modoColumnas === 1 ? 'primario' : 'ghost'}
                             onClick={() => onCambiarModo(1)}
-                            titulo="1 columna"
+                            title="1 columna"
                             claseAdicional={`configLayoutColumnaOpcion ${modoColumnas === 1 ? 'activo' : ''}`}
                             icono={<Square size={20} />}
                         >
@@ -83,7 +83,7 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                         <Boton
                             variante={modoColumnas === 2 ? 'primario' : 'ghost'}
                             onClick={() => onCambiarModo(2)}
-                            titulo="2 columnas"
+                            title="2 columnas"
                             claseAdicional={`configLayoutColumnaOpcion ${modoColumnas === 2 ? 'activo' : ''}`}
                             icono={<Columns2 size={20} />}
                         >
@@ -93,7 +93,7 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                         <Boton
                             variante={modoColumnas === 3 ? 'primario' : 'ghost'}
                             onClick={() => onCambiarModo(3)}
-                            titulo="3 columnas"
+                            title="3 columnas"
                             claseAdicional={`configLayoutColumnaOpcion ${modoColumnas === 3 ? 'activo' : ''}`}
                             icono={<Columns3 size={20} />}
                         >
@@ -115,7 +115,7 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                         <Boton
                             variante="icono"
                             onClick={onResetearOrden}
-                            titulo="Restaurar orden por defecto"
+                            title="Restaurar orden por defecto"
                             icono={<RotateCcw size={12} />}
                             claseAdicional="configLayoutBotonResetPequeno"
                         />
@@ -150,7 +150,7 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, modoColumnas, v
                     <Boton
                         variante="secundario"
                         onClick={onResetear}
-                        titulo="Restaurar configuración por defecto"
+                        title="Restaurar configuración por defecto"
                         icono={<RotateCcw size={12} />}
                         claseAdicional="configLayoutBotonReset"
                     >

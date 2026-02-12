@@ -11,6 +11,7 @@
 
 import {useState, useCallback, useEffect} from 'react';
 import {Check, Plus, Trash2, Flag} from 'lucide-react';
+import {Boton} from '../../ui';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Tarea, DatosEdicionTarea, NivelImportancia, NivelPrioridad} from '../../../types/dashboard';
@@ -66,32 +67,31 @@ const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrior
 
                 {/* Badge de Prioridad - Estilo Panel Ejecucion (Texto) */}
                 {p && p !== 'media' && (
-                    <button
-                        type="button"
-                        className={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
-                        style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}
-                        title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
+                    <Boton
+                        variante="icono"
                         onClick={e => {
                             e.stopPropagation();
                             onMenuPrioridad(e, tarea.id);
-                        }}>
+                        }}
+                        title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
+                        claseAdicional={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
+                    >
                         <span className="badgeInfoTexto">{ETIQUETAS_PRIORIDAD[p].toUpperCase()}</span>
-                    </button>
+                    </Boton>
                 )}
             </div>
 
             {/* Botón eliminar */}
-            <button
-                type="button"
-                className="listaTareasHabito__eliminar"
+            <Boton
+                variante="icono"
                 onClick={e => {
                     e.stopPropagation();
                     onEliminar(tarea.id);
                 }}
-                onPointerDown={e => e.stopPropagation()}
-                title="Eliminar">
-                <Trash2 size={14} />
-            </button>
+                icono={<Trash2 size={14} />}
+                title="Eliminar"
+                claseAdicional="listaTareasHabito__eliminar"
+            />
         </div>
     );
 };
@@ -227,10 +227,14 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
                     />
                 </form>
             ) : (
-                <button type="button" className="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
-                    <Plus size={12} />
-                    <span>Añadir</span>
-                </button>
+                <Boton
+                    variante="secundario"
+                    onClick={() => setMostrarInput(true)}
+                    icono={<Plus size={12} />}
+                    claseAdicional="listaTareasHabito__botonAgregar"
+                >
+                    Añadir
+                </Boton>
             )}
         </div>
     );
