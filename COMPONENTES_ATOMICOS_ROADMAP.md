@@ -131,6 +131,7 @@
 - ✅ **12 feb 2026 - Sesión extendida:** Migrados 28 componentes adicionales en una sola sesión (Encabezados, Admin, Equipos, Notificaciones, Experimentos, Shared comunes)
 - ✅ **12 feb 2026 - Sesión mega:** Migrados 50+ componentes más (SeccionResponsables, Shared utilities, Dashboard modals, Configuración MCP, Selectores, Paneles)
 - ✅ **12 feb 2026 - Sesión inputs:** Migrados 39 inputs en 25+ componentes (Configuración, Notas, Admin, Arbitraje, MCP)
+- ✅ **12 feb 2026 - Hotfix visual:** Unificada coherencia de iconos en `selectorBadgeBoton--soloIcono` (ghost vs icono) normalizando color heredado, centrado y tamaño SVG (12px) para evitar brillo/tamaño inconsistente en paneles
 - 📝 Patrón de migración establecido: import Input, reemplazar <input> preservando clases con claseAdicional
 - 📝 Inputs migrados incluyen: text, number, date, file, password con soporte para refs, toggle show/hide y validaciones
 - ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
