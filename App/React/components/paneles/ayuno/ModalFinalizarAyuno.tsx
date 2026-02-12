@@ -7,7 +7,7 @@
  */
 
 import {useMemo} from 'react';
-import {Play, Trash2, Save} from 'lucide-react';
+import {Play, Trash2, Save, Flag, CalendarClock, CheckCircle2} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
 import type {FrecuenciaHabito} from '../../../types/dashboard';
 import {calcularVentanaComidaMs, formatearDuracionAyuno} from '../../../utils/ayunoVentanas';
@@ -26,6 +26,16 @@ interface ModalFinalizarAyunoProps {
 
 function formatearFechaHoraCorta(ms: number): string {
     const fecha = new Date(ms);
+    const ahora = new Date();
+    const esHoy = fecha.getDate() === ahora.getDate() && fecha.getMonth() === ahora.getMonth() && fecha.getFullYear() === ahora.getFullYear();
+
+    const hora = fecha.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    if (esHoy) return `Hoy, ${hora}`;
+
     return fecha.toLocaleString('es-ES', {
         day: '2-digit',
         month: 'short',
@@ -42,56 +52,65 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
         return calcularVentanaComidaMs({finAyunoMs, duracionObjetivoMs, frecuencia});
     }, [finAyunoMs, duracionObjetivoMs, frecuencia]);
 
-    const textoVentana = useMemo(() => {
-        if (ventana.duracionVentanaComidaMs <= 0) return 'Sin ventana de comida (según tu frecuencia)';
-        return `${formatearFechaHoraCorta(ventana.inicioVentanaComidaMs)} → ${formatearFechaHoraCorta(ventana.finVentanaComidaMs)} (${formatearDuracionAyuno(ventana.duracionVentanaComidaMs)})`;
-    }, [ventana]);
-
-    const textoProximoAyuno = useMemo(() => {
-        const deltaMs = ventana.inicioProximoAyunoMs - finAyunoMs;
-        if (deltaMs <= 0) return `${formatearFechaHoraCorta(ventana.inicioProximoAyunoMs)} (ya debería haber empezado)`;
-        return `${formatearFechaHoraCorta(ventana.inicioProximoAyunoMs)} (en ${formatearDuracionAyuno(deltaMs)})`;
-    }, [ventana.inicioProximoAyunoMs, finAyunoMs]);
+    const tiempoHastaProximo = useMemo(() => {
+        const delta = ventana.inicioProximoAyunoMs - Date.now();
+        if (delta <= 0) return 'Ya disponible';
+        return `En ${formatearDuracionAyuno(delta)}`;
+    }, [ventana.inicioProximoAyunoMs]);
 
     if (!estaAbierto) return null;
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Finalizar ayuno" claseExtra="modalAyunoFinalizar">
             <div className="modalAyunoFinalizarContenido">
-                <p className="modalAyunoFinalizarTexto">¿Qué deseas hacer con este registro?</p>
-
-                <div className="modalAyunoFinalizarResumen">
-                    <div className="modalAyunoFinalizarFila">
-                        <span className="modalAyunoFinalizarEtiqueta">Duración</span>
-                        <span className={`modalAyunoFinalizarValor ${completado ? 'modalAyunoFinalizarValor--completado' : ''}`}>{formatearDuracionAyuno(tiempoEfectivoMs)}</span>
-                    </div>
-
-                    <div className="modalAyunoFinalizarFila">
-                        <span className="modalAyunoFinalizarEtiqueta">Objetivo</span>
-                        <span className="modalAyunoFinalizarValor">{formatearDuracionAyuno(duracionObjetivoMs)}</span>
-                    </div>
-
-                    <div className="modalAyunoFinalizarFila">
-                        <span className="modalAyunoFinalizarEtiqueta">Inicio</span>
-                        <span className="modalAyunoFinalizarValor">{formatearFechaHoraCorta(inicioAyunoMs)}</span>
-                    </div>
-
-                    <div className="modalAyunoFinalizarFila">
-                        <span className="modalAyunoFinalizarEtiqueta">Fin</span>
-                        <span className="modalAyunoFinalizarValor">{formatearFechaHoraCorta(finAyunoMs)}</span>
-                    </div>
-
-                    <div className="modalAyunoFinalizarFila">
-                        <span className="modalAyunoFinalizarEtiqueta">Ventana de comida</span>
-                        <span className="modalAyunoFinalizarValor">{textoVentana}</span>
-                    </div>
-
-                    <div className="modalAyunoFinalizarFila">
-                        <span className="modalAyunoFinalizarEtiqueta">Próximo ayuno</span>
-                        <span className="modalAyunoFinalizarValor">{textoProximoAyuno}</span>
+                {/* Hero: Duración Principal */}
+                <div className="modalAyunoHero">
+                    <span className={`modalAyunoHeroTiempo ${completado ? 'modalAyunoHeroTiempo--completado' : ''}`}>{formatearDuracionAyuno(tiempoEfectivoMs)}</span>
+                    <div className="modalAyunoHeroObjetivo">
+                        {completado && <CheckCircle2 size={14} color="var(--dashboard-estadoExito)" />}
+                        <span>Objetivo: {formatearDuracionAyuno(duracionObjetivoMs)}</span>
                     </div>
                 </div>
 
+                {/* Timeline Visual */}
+                <div className="modalAyunoTimeline">
+                    {/* Inicio */}
+                    <div className="modalAyunoTimelineItem">
+                        <div className="modalAyunoTimelineIcono modalAyunoTimelineIcono--inicio">
+                            <Play size={10} fill="currentColor" />
+                        </div>
+                        <div className="modalAyunoTimelineContenido">
+                            <span className="modalAyunoTimelineTitulo">Inicio</span>
+                            <span className="modalAyunoTimelineHora">{formatearFechaHoraCorta(inicioAyunoMs)}</span>
+                        </div>
+                    </div>
+
+                    {/* Fin (Actual) */}
+                    <div className="modalAyunoTimelineItem modalAyunoTimelineItem--faseComida">
+                        <div className="modalAyunoTimelineIcono modalAyunoTimelineIcono--fin">
+                            <Flag size={12} fill="currentColor" />
+                        </div>
+                        <div className="modalAyunoTimelineContenido">
+                            <span className="modalAyunoTimelineTitulo">Fin (Ahora)</span>
+                            <span className="modalAyunoTimelineHora">{formatearFechaHoraCorta(finAyunoMs)}</span>
+                            {ventana.duracionVentanaComidaMs > 0 && <span className="modalAyunoTimelineExtra">Comienza ventana de comida ({formatearDuracionAyuno(ventana.duracionVentanaComidaMs)})</span>}
+                        </div>
+                    </div>
+
+                    {/* Próximo Ayuno */}
+                    <div className="modalAyunoTimelineItem">
+                        <div className="modalAyunoTimelineIcono modalAyunoTimelineIcono--proximo">
+                            <CalendarClock size={14} />
+                        </div>
+                        <div className="modalAyunoTimelineContenido">
+                            <span className="modalAyunoTimelineTitulo">Próximo Ayuno</span>
+                            <span className="modalAyunoTimelineHora">{formatearFechaHoraCorta(ventana.inicioProximoAyunoMs)}</span>
+                            <span className="modalAyunoTimelineExtra">{tiempoHastaProximo}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Acciones */}
                 <div className="modalAyunoFinalizarAcciones">
                     <button
                         type="button"
@@ -100,7 +119,7 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                             onContinuar();
                             onCerrar();
                         }}
-                        title="Continuar ayuno">
+                        title="Continuar ayuno (cancelar finalización)">
                         <Play size={14} />
                         <span>Continuar</span>
                     </button>

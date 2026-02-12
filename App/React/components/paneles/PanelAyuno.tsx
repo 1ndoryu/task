@@ -30,7 +30,7 @@ interface PanelAyunoProps {
 }
 
 const PLUGIN_ID = 'ayuno';
-const RADIO = 100;
+const RADIO = 120;
 const CIRCUNFERENCIA = 2 * Math.PI * RADIO;
 
 /* Opciones de duración preconfiguradas */
@@ -43,11 +43,11 @@ function CirculoProgreso({porcentaje, estaActivo}: {porcentaje: number; estaActi
     const offset = CIRCUNFERENCIA - (porcentaje / 100) * CIRCUNFERENCIA;
 
     return (
-        <svg className="panelAyunoCirculo" viewBox="0 0 220 220" width="220" height="220">
+        <svg className="panelAyunoCirculo" viewBox="0 0 260 260" width="260" height="260">
             {/* Fondo del círculo */}
-            <circle className="panelAyunoCirculoFondo" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" />
+            <circle className="panelAyunoCirculoFondo" cx="130" cy="130" r={RADIO} fill="none" strokeWidth="8" />
             {/* Progreso */}
-            {estaActivo && <circle className="panelAyunoCirculoProgreso" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" strokeDasharray={CIRCUNFERENCIA} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 110 110)" />}
+            {estaActivo && <circle className="panelAyunoCirculoProgreso" cx="130" cy="130" r={RADIO} fill="none" strokeWidth="8" strokeDasharray={CIRCUNFERENCIA} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 130 130)" />}
         </svg>
     );
 }
@@ -60,8 +60,8 @@ function obtenerFraccionDia(ms: number): number {
 
 function obtenerPuntoEnCirculo(fraccionDia: number, radio: number): {x: number; y: number} {
     const angulo = fraccionDia * 2 * Math.PI - Math.PI / 2;
-    const x = 110 + Math.cos(angulo) * radio;
-    const y = 110 + Math.sin(angulo) * radio;
+    const x = 130 + Math.cos(angulo) * radio;
+    const y = 130 + Math.sin(angulo) * radio;
     return {x, y};
 }
 
@@ -79,32 +79,14 @@ function CirculoVentanaComida({inicioVentanaMs, finVentanaMs}: {inicioVentanaMs:
         const dasharray = `${longitud} ${CIRCUNFERENCIA}`;
         const dashoffset = CIRCUNFERENCIA - inicio * CIRCUNFERENCIA;
 
-        return (
-            <circle
-                key={key}
-                className="panelAyunoCirculoVentana"
-                cx="110"
-                cy="110"
-                r={RADIO}
-                fill="none"
-                strokeWidth="8"
-                strokeDasharray={dasharray}
-                strokeDashoffset={dashoffset}
-                strokeLinecap="round"
-                transform="rotate(-90 110 110)"
-            />
-        );
+        return <circle key={key} className="panelAyunoCirculoVentana" cx="130" cy="130" r={RADIO} fill="none" strokeWidth="8" strokeDasharray={dasharray} strokeDashoffset={dashoffset} strokeLinecap="round" transform="rotate(-90 130 130)" />;
     };
 
-    const segmentos = inicioFraccion <= finFraccion ? [renderSegmento(inicioFraccion, finFraccion, 'segmento')]
-        : [
-              renderSegmento(inicioFraccion, 1, 'segmentoA'),
-              renderSegmento(0, finFraccion, 'segmentoB')
-          ];
+    const segmentos = inicioFraccion <= finFraccion ? [renderSegmento(inicioFraccion, finFraccion, 'segmento')] : [renderSegmento(inicioFraccion, 1, 'segmentoA'), renderSegmento(0, finFraccion, 'segmentoB')];
 
     return (
-        <svg className="panelAyunoCirculo" viewBox="0 0 220 220" width="220" height="220">
-            <circle className="panelAyunoCirculoFondo" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" />
+        <svg className="panelAyunoCirculo" viewBox="0 0 260 260" width="260" height="260">
+            <circle className="panelAyunoCirculoFondo" cx="130" cy="130" r={RADIO} fill="none" strokeWidth="8" />
             {segmentos}
             <circle className="panelAyunoCirculoMarcador" cx={marcador.x} cy={marcador.y} r={4} />
         </svg>
@@ -266,13 +248,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
             {/* Círculo con progreso y contenido central */}
             <div className="panelAyunoCirculoContenedor">
-                {estaActivo ? (
-                    <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} />
-                ) : ventanaUltima && ventanaUltima.periodoMs === 24 * 60 * 60 * 1000 ? (
-                    <CirculoVentanaComida inicioVentanaMs={ventanaUltima.inicioVentanaComidaMs} finVentanaMs={ventanaUltima.finVentanaComidaMs} />
-                ) : (
-                    <CirculoProgreso porcentaje={0} estaActivo={false} />
-                )}
+                {estaActivo ? <CirculoProgreso porcentaje={porcentaje} estaActivo={estaActivo} /> : ventanaUltima && ventanaUltima.periodoMs === 24 * 60 * 60 * 1000 ? <CirculoVentanaComida inicioVentanaMs={ventanaUltima.inicioVentanaComidaMs} finVentanaMs={ventanaUltima.finVentanaComidaMs} /> : <CirculoProgreso porcentaje={0} estaActivo={false} />}
                 {contenidoCentral}
             </div>
 
