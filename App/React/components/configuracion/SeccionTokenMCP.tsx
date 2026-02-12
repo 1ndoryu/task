@@ -6,6 +6,7 @@
 
 import {useState} from 'react';
 import {Key, Eye, EyeOff, Copy, Check, Trash2, RefreshCw, AlertTriangle} from 'lucide-react';
+import {Boton} from '../shared/Boton';
 
 interface SeccionTokenMCPProps {
     tokenExiste: boolean;
@@ -61,12 +62,12 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
 
                     <div className="mcpCampoToken">
                         <input type={mostrarToken ? 'text' : 'password'} value={tokenGenerado} readOnly className="mcpCampoToken__input" />
-                        <button type="button" className="mcpCampoToken__boton" onClick={() => setMostrarToken(!mostrarToken)} title={mostrarToken ? 'Ocultar token' : 'Mostrar token'}>
+                        <Boton type="button" claseAdicional="mcpCampoToken__boton" onClick={() => setMostrarToken(!mostrarToken)} title={mostrarToken ? 'Ocultar token' : 'Mostrar token'}>
                             {mostrarToken ? <EyeOff size={14} /> : <Eye size={14} />}
-                        </button>
-                        <button type="button" className="mcpCampoToken__boton" onClick={manejarCopiarToken} title="Copiar token">
+                        </Boton>
+                        <Boton type="button" claseAdicional="mcpCampoToken__boton" onClick={manejarCopiarToken} title="Copiar token">
                             {copiado ? <Check size={14} /> : <Copy size={14} />}
-                        </button>
+                        </Boton>
                     </div>
                 </>
             )}
@@ -74,7 +75,7 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
             {/* Acciones */}
             <div className="mcpAccionesToken">
                 {!tokenExiste ? (
-                    <button type="button" className="mcpBotonGenerar" onClick={onGenerarToken} disabled={cargando}>
+                    <Boton type="button" claseAdicional="mcpBotonGenerar" onClick={onGenerarToken} disabled={cargando}>
                         {cargando ? (
                             <>
                                 <RefreshCw size={14} className="iconoGirando" />
@@ -86,12 +87,12 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
                                 <span>Generar Token de Acceso</span>
                             </>
                         )}
-                    </button>
+                    </Boton>
                 ) : (
-                    <button type="button" className="mcpBotonRevocar" onClick={onRevocarToken} disabled={cargando}>
+                    <Boton type="button" claseAdicional="mcpBotonRevocar" onClick={onRevocarToken} disabled={cargando}>
                         <Trash2 size={14} />
                         <span>Revocar Token</span>
-                    </button>
+                    </Boton>
                 )}
             </div>
         </div>

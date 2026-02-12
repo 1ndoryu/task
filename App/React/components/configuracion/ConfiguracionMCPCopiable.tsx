@@ -52,7 +52,7 @@ export function ConfiguracionMCPCopiable({titulo, codigo}: ConfiguracionMCPCopia
         <div className="mcpCodigo">
             <div className="mcpCodigo__encabezado">
                 <span className="mcpCodigo__titulo">{titulo}</span>
-                <button type="button" className={`mcpCodigo__botonCopiar ${copiado ? 'mcpCodigo__botonCopiar--copiado' : ''}`} onClick={manejarCopiar}>
+                <Boton type="button" claseAdicional={`mcpCodigo__botonCopiar ${copiado ? 'mcpCodigo__botonCopiar--copiado' : ''}`} onClick={manejarCopiar}>
                     {copiado ? (
                         <>
                             <Check size={12} />
@@ -64,7 +64,7 @@ export function ConfiguracionMCPCopiable({titulo, codigo}: ConfiguracionMCPCopia
                             <span>Copiar</span>
                         </>
                     )}
-                </button>
+                </Boton>
             </div>
             <div className="mcpCodigo__contenido">
                 <pre className="mcpCodigo__pre">{codigo}</pre>

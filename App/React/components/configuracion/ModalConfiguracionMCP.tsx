@@ -273,18 +273,18 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar, onAbrirUpgrade}: M
                                 <>
                                     {/* Pestañas de clientes */}
                                     <div className="mcpPestanas">
-                                        <button type="button" className={`mcpPestana ${clienteActivo === 'apirest' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('apirest')}>
+                                        <Boton type="button" claseAdicional={`mcpPestana ${clienteActivo === 'apirest' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('apirest')}>
                                             <Globe size={12} />
                                             API REST
-                                        </button>
-                                        <button type="button" className={`mcpPestana ${clienteActivo === 'claude' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('claude')}>
+                                        </Boton>
+                                        <Boton type="button" claseAdicional={`mcpPestana ${clienteActivo === 'claude' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('claude')}>
                                             <Plug size={12} />
                                             Claude
-                                        </button>
-                                        <button type="button" className={`mcpPestana ${clienteActivo === 'cursor' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('cursor')}>
+                                        </Boton>
+                                        <Boton type="button" claseAdicional={`mcpPestana ${clienteActivo === 'cursor' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('cursor')}>
                                             <Plug size={12} />
                                             Cursor
-                                        </button>
+                                        </Boton>
                                     </div>
 
                                     {/* Contenido según pestaña */}
