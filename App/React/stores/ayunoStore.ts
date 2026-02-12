@@ -41,12 +41,12 @@ export const useAyunoStore = create<AyunoStore>()(
                 });
             },
 
-            terminarAyuno: (): SesionAyuno | null => {
+            terminarAyuno: (finMs?: number): SesionAyuno | null => {
                 const {sesionActiva, historial} = get();
                 if (!sesionActiva) return null;
 
-                const ahora = Date.now();
-                const tiempoEfectivoMs = ahora - sesionActiva.inicio;
+                const ahora = finMs ?? Date.now();
+                const tiempoEfectivoMs = Math.max(0, ahora - sesionActiva.inicio);
                 const completada = tiempoEfectivoMs >= sesionActiva.duracionObjetivoMs;
 
                 const sesionFinalizada: SesionAyuno = {

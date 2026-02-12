@@ -465,6 +465,100 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
+/* Modal: Finalizar ayuno */
+.modalAyunoFinalizarContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalAyunoFinalizarTexto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0;
+}
+
+.modalAyunoFinalizarResumen {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.modalAyunoFinalizarFila {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modalAyunoFinalizarEtiqueta {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.modalAyunoFinalizarValor {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoActivo);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.modalAyunoFinalizarValor--completado {
+    color: var(--dashboard-estadoExito);
+}
+
+.modalAyunoFinalizarAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.modalAyunoFinalizarBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioMd);
+    padding: 8px 12px;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modalAyunoFinalizarBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoFinalizarBoton--primario {
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+}
+
+.modalAyunoFinalizarBoton--primario:hover {
+    background: var(--dashboard-acentoHover);
+}
+
+.modalAyunoFinalizarBoton--peligro {
+    border-color: var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAltaTexto);
+}
+
+.modalAyunoFinalizarBoton--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+}
+
 .panelAyunoHistorialTitulo {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);

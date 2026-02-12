@@ -8,20 +8,9 @@ import {useState, useEffect, useCallback, useMemo} from 'react';
 import {useAyunoStore} from '../stores/ayunoStore';
 import {usePluginsStore} from '../stores/pluginsStore';
 import type {ConfiguracionAyuno} from '../types/ayuno';
+import {formatearDuracionAyuno} from '../utils/ayunoVentanas';
 
 const PLUGIN_ID = 'ayuno';
-
-function formatearTiempoAyuno(ms: number): string {
-    const totalSegundos = Math.floor(ms / 1000);
-    const horas = Math.floor(totalSegundos / 3600);
-    const minutos = Math.floor((totalSegundos % 3600) / 60);
-    const segundos = totalSegundos % 60;
-
-    if (horas > 0) {
-        return `${horas}h ${minutos.toString().padStart(2, '0')}m ${segundos.toString().padStart(2, '0')}s`;
-    }
-    return `${minutos}m ${segundos.toString().padStart(2, '0')}s`;
-}
 
 export function useAyuno() {
     const estado = useAyunoStore(s => s.estado);
@@ -35,42 +24,42 @@ export function useAyuno() {
     const configuracion = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as unknown as ConfiguracionAyuno | undefined;
     const duracionHoras = configuracion?.duracionHoras ?? 16;
 
-    const [tiempoMs, setTiempoMs] = useState(0);
+    /* Último ayuno (para UI cuando inactivo) */
+    const ultimoAyuno = historial[0] ?? null;
 
-    /* Fix: dependencias estables para evitar renders infinitos en el timer */
+    /* Tick de reloj: actualiza cuando hay ayuno activo o cuando necesitamos mostrar "desde el último" */
+    const [relojMs, setRelojMs] = useState(() => Date.now());
+
     useEffect(() => {
-        if (estado !== 'activo' || !sesionActiva) {
-            setTiempoMs(prev => (prev === 0 ? prev : 0));
-            return;
-        }
+        const debeActualizar = estado === 'activo' || !!ultimoAyuno?.fin;
+        if (!debeActualizar) return;
 
-        const actualizar = () => {
-            const transcurrido = Date.now() - sesionActiva.inicio;
-            setTiempoMs(transcurrido);
-        };
+        const intervalo = setInterval(() => {
+            setRelojMs(Date.now());
+        }, 1000);
 
-        actualizar();
-        const intervalo = setInterval(actualizar, 1000);
         return () => clearInterval(intervalo);
-    }, [estado, sesionActiva?.inicio, sesionActiva?.duracionObjetivoMs]);
+    }, [estado, ultimoAyuno?.fin]);
+
+    const tiempoMs = useMemo(() => {
+        if (estado !== 'activo' || !sesionActiva) return 0;
+        return Math.max(0, relojMs - sesionActiva.inicio);
+    }, [estado, sesionActiva?.inicio, relojMs]);
 
     const duracionObjetivoMs = sesionActiva?.duracionObjetivoMs ?? duracionHoras * 3600000;
     const porcentaje = Math.min((tiempoMs / duracionObjetivoMs) * 100, 100);
     const alcanzoObjetivo = tiempoMs >= duracionObjetivoMs;
 
-    const tiempoFormateado = formatearTiempoAyuno(tiempoMs);
+    const tiempoFormateado = formatearDuracionAyuno(tiempoMs);
 
     /* Tiempo restante para completar objetivo */
     const tiempoRestanteMs = Math.max(duracionObjetivoMs - tiempoMs, 0);
-    const tiempoRestanteFormateado = formatearTiempoAyuno(tiempoRestanteMs);
+    const tiempoRestanteFormateado = formatearDuracionAyuno(tiempoRestanteMs);
 
-    /* Último ayuno completado para mostrar cuando inactivo */
-    const ultimoAyuno = historial[0] ?? null;
-    const ultimoAyunoFormateado = ultimoAyuno ? formatearTiempoAyuno(ultimoAyuno.tiempoEfectivoMs) : null;
-
-    /* Próximo ayuno estimado: basado en frecuencia del hábito (simplificado) */
-    const tiempoDesdeUltimoFin = ultimoAyuno?.fin ? Date.now() - ultimoAyuno.fin : null;
-    const tiempoDesdeUltimoFormateado = tiempoDesdeUltimoFin !== null ? formatearTiempoAyuno(tiempoDesdeUltimoFin) : null;
+    /* Duración del último ayuno + tiempo transcurrido desde su fin */
+    const ultimoAyunoFormateado = ultimoAyuno ? formatearDuracionAyuno(ultimoAyuno.tiempoEfectivoMs) : null;
+    const tiempoDesdeUltimoFin = ultimoAyuno?.fin ? Math.max(0, relojMs - ultimoAyuno.fin) : null;
+    const tiempoDesdeUltimoFormateado = tiempoDesdeUltimoFin !== null ? formatearDuracionAyuno(tiempoDesdeUltimoFin) : null;
 
     const iniciar = useCallback(
         (horaUltimaComidaMs?: number) => {
@@ -79,9 +68,13 @@ export function useAyuno() {
         [iniciarAyuno, duracionHoras]
     );
 
-    const terminar = useCallback(() => {
-        return terminarAyuno();
-    }, [terminarAyuno]);
+    const terminar = useCallback(
+        (finMs?: number) => {
+            return terminarAyuno(finMs);
+        },
+        [terminarAyuno]
+    );
+
 
     const reiniciar = useCallback(() => {
         reiniciarAyuno();
@@ -97,6 +90,7 @@ export function useAyuno() {
     return {
         estaActivo: estado === 'activo',
         estadoVisual,
+        sesionActiva,
         tiempoMs,
         tiempoFormateado,
         tiempoRestanteFormateado,

@@ -18,7 +18,10 @@ import {OverlayEnfoque} from '../shared';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {HistorialAyuno} from './ayuno/HistorialAyuno';
 import {ModalUltimaComida} from './ayuno/ModalUltimaComida';
+import {ModalFinalizarAyuno} from './ayuno/ModalFinalizarAyuno';
 import type {ConfiguracionAyuno} from '../../types/ayuno';
+import type {FrecuenciaHabito} from '../../types/dashboard';
+import {calcularInicioProximoAyunoMs, formatearDuracionAyuno} from '../../utils/ayunoVentanas';
 
 interface PanelAyunoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
@@ -67,14 +70,35 @@ function SelectorDuracion({duracionActual, onCambiar}: {duracionActual: number; 
 export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelAyunoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
     const [modalUltimaComidaAbierto, setModalUltimaComidaAbierto] = useState(false);
+    const [modalFinalizarAyunoAbierto, setModalFinalizarAyunoAbierto] = useState(false);
+    const [finAyunoMs, setFinAyunoMs] = useState<number | null>(null);
 
-    const {estaActivo, estadoVisual, tiempoFormateado, tiempoRestanteFormateado, porcentaje, alcanzoObjetivo, duracionHoras, ultimoAyunoFormateado, tiempoDesdeUltimoFormateado, historial, iniciar, terminar, reiniciar, eliminarSesion} = useAyuno();
+    const {estaActivo, sesionActiva, tiempoFormateado, tiempoRestanteFormateado, porcentaje, alcanzoObjetivo, duracionHoras, ultimoAyuno, tiempoDesdeUltimoFormateado, historial, iniciar, terminar, reiniciar, eliminarSesion} = useAyuno();
 
     const guardarConfig = usePluginsStore(s => s.guardarConfiguracion);
     const configAyuno = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as unknown as {habitoId?: number} | undefined;
 
     const habitos = useHabitosStore(s => s.habitos);
     const habitoAyunoExiste = !!(configAyuno?.habitoId && habitos.some(h => h.id === configAyuno.habitoId));
+
+    const habitoAyuno = useMemo(() => {
+        if (!configAyuno?.habitoId) return undefined;
+        return habitos.find(h => h.id === configAyuno.habitoId);
+    }, [habitos, configAyuno?.habitoId]);
+
+    const frecuenciaAyuno: FrecuenciaHabito | undefined = habitoAyuno?.frecuencia;
+
+    const textoProximoAyuno = useMemo(() => {
+        if (!ultimoAyuno) return null;
+        const inicioProximoMs = calcularInicioProximoAyunoMs(ultimoAyuno.inicio, frecuenciaAyuno);
+        const deltaMs = inicioProximoMs - Date.now();
+
+        if (deltaMs <= 0) {
+            return `Próximo ayuno: hace ${formatearDuracionAyuno(Math.abs(deltaMs))}`;
+        }
+
+        return `Próximo ayuno: en ${formatearDuracionAyuno(deltaMs)}`;
+    }, [ultimoAyuno?.inicio, frecuenciaAyuno, tiempoDesdeUltimoFormateado]);
 
     const crearHabitoEspecialAhora = () => {
         const existente = useHabitosStore.getState().habitos.find(h => h.nombre.trim().toLowerCase() === 'ayuno');
@@ -125,7 +149,14 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                 <div className="panelAyunoCentro">
                     <span className={`panelAyunoCentroTiempo ${alcanzoObjetivo ? 'panelAyunoCentroTiempo--completado' : ''}`}>{tiempoFormateado}</span>
                     {!alcanzoObjetivo && <span className="panelAyunoCentroRestante">-{tiempoRestanteFormateado}</span>}
-                    <button className="panelAyunoBotonCircular panelAyunoBotonCircular--terminar" onClick={terminar} type="button" title="Terminar ayuno">
+                    <button
+                        className="panelAyunoBotonCircular panelAyunoBotonCircular--terminar"
+                        onClick={() => {
+                            setFinAyunoMs(Date.now());
+                            setModalFinalizarAyunoAbierto(true);
+                        }}
+                        type="button"
+                        title="Terminar ayuno">
                         <Square size={14} fill="currentColor" />
                     </button>
                 </div>
@@ -135,13 +166,15 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
         /* Estado inactivo (con o sin historial): Mostrar objetivo y botón iniciar */
         return (
             <div className="panelAyunoCentro">
-                <span className="panelAyunoCentroTiempo">{duracionHoras}h</span>
+                <span className="panelAyunoCentroEtiqueta">{tiempoDesdeUltimoFormateado ? 'Desde el último ayuno' : 'Objetivo'}</span>
+                <span className="panelAyunoCentroTiempo">{tiempoDesdeUltimoFormateado ? tiempoDesdeUltimoFormateado : `${duracionHoras}h`}</span>
+                {!!textoProximoAyuno && <span className="panelAyunoCentroRestante">{textoProximoAyuno}</span>}
                 <button className="panelAyunoBotonCircular panelAyunoBotonCircular--iniciar" onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)} type="button" disabled={!habitoAyunoExiste} title="Comenzar ayuno">
                     <Play size={14} fill="currentColor" className="iconoPlayAjustado" />
                 </button>
             </div>
         );
-    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, duracionHoras, habitoAyunoExiste, terminar]);
+    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, tiempoDesdeUltimoFormateado, textoProximoAyuno, duracionHoras, habitoAyunoExiste]);
 
     const contenidoPanel = (
         <div className="panelAyunoContenido">
@@ -205,6 +238,24 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             </OverlayEnfoque>
 
             <ModalUltimaComida estaAbierto={modalUltimaComidaAbierto} onCerrar={() => setModalUltimaComidaAbierto(false)} onConfirmar={horaUltimaComidaMs => iniciar(horaUltimaComidaMs)} />
+
+            <ModalFinalizarAyuno
+                estaAbierto={modalFinalizarAyunoAbierto}
+                onCerrar={() => setModalFinalizarAyunoAbierto(false)}
+                inicioAyunoMs={sesionActiva?.inicio ?? Date.now()}
+                finAyunoMs={finAyunoMs ?? Date.now()}
+                duracionObjetivoMs={sesionActiva?.duracionObjetivoMs ?? duracionHoras * 60 * 60 * 1000}
+                frecuencia={frecuenciaAyuno}
+                onContinuar={() => {
+                    /* Continuar ayuno = no modificar store */
+                }}
+                onEliminar={() => {
+                    reiniciar();
+                }}
+                onGuardar={() => {
+                    terminar(finAyunoMs ?? Date.now());
+                }}
+            />
         </>
     );
 }

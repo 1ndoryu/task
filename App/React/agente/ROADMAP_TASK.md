@@ -18,7 +18,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ## Estado Actual
 
-**Versión:** v1.0.25-beta (2026-02-09)
+**Versión:** v1.0.27-beta (2026-02-11)
 **Foco:** Sprint Correcciones Críticas + Time Tracker + Sistema de Plugins
 
 ---
@@ -517,3 +517,4 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   Mejora: "Última comida" ahora es modal con estilo minimalista; hábito Ayuno se completa automáticamente al registrar ayuno >= 12h (Estado/Ventana/Subhábitos ocultos); Calorías abre solo su modal de configuración dedicado (sin ModalPlugins)
 > -   **Mejora UI Ayuno (v1.0.26):** Rediseño minimalista del Panel de Ayuno. Eliminados botones externos, acciones integradas en el círculo (Play/Stop). Nuevo selector de hora circular interactivo (`SelectorRelojCircular`) con lógica "Ayer/Hoy". Temporizador ahora muestra segundos.
 > -   **Fix UI:** Solucionado bug de doble margen en paneles de plugins (Ayuno y Déficit) eliminando clase CSS duplicada `panelDashboard`.
+> -   **Mejora Ayuno (v1.0.27):** Al terminar el ayuno ahora aparece un modal con detalles (duración/objetivo/inicio/fin) y opciones: Guardar registro, Eliminar (descartar) o Continuar ayuno. En estado inactivo el círculo muestra el tiempo transcurrido desde el último ayuno y se calcula la ventana de comida + el próximo inicio de ayuno según la frecuencia del hábito asociado.
