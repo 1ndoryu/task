@@ -84,10 +84,8 @@
 }
 
 .botonPresetTolerancia {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    /* El botón usa componente Boton que wrapa contenido en .botonTexto con flex-row */
+    /* Sobrescribimos .botonTexto abajo */
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
@@ -95,6 +93,16 @@
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);
     text-align: left;
+    height: auto; /* Asegurar altura automática */
+}
+
+/* Fix para que el contenido del botón se apile verticalmente */
+.botonPresetTolerancia .botonTexto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
 }
 
 .botonPresetTolerancia:hover {

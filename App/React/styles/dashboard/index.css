@@ -21,6 +21,9 @@
 /* Base y layout */
 @import './base.css';
 
+/* UI Kit Global (Botones, Inputs, etc) */
+@import '../../../Assets/css/ui.css';
+
 /* Componentes compartidos */
 @import './shared/accionesFormulario.css';
 @import './shared/selectorNivel.css';

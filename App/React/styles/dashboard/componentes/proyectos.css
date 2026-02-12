@@ -223,16 +223,6 @@
     font-size: var(--dashboard-tamanoPequeno);
 }
 
-.botonTexto {
-    background: transparent;
-    border: none;
-    color: var(--dashboard-textoActivo);
-    cursor: pointer;
-    font-size: var(--dashboard-tamanoPequeno);
-    text-decoration: underline;
-    padding: 0;
-}
-
 .botonTexto:hover {
     opacity: 0.8;
 }

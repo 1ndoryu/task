@@ -138,10 +138,17 @@
 }
 
 .botonTexto {
-    display: inline-flex;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoActivo);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-decoration: underline;
+    padding: 0;
+    display: flex;
+    gap: 10px;
     align-items: center;
-    gap: var(--dashboard-espacioXs);
-    text-decoration: none;
+    text-decoration: unset;
 }
 
 /* ===== INPUT ===== */
@@ -149,6 +156,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioXs);
+    width: 100%;
 }
 
 .inputEtiqueta {

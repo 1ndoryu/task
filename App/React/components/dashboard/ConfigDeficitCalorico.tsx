@@ -55,16 +55,20 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitCampos">
                     <div className="configDeficitCampo">
-                        <Input tipo="number" etiqueta="Altura (cm)" claseAdicional="configDeficitInput" placeholder="170" value={datos.altura ?? ''} onChange={e => actualizarCampo('altura', (e.target as HTMLInputElement).value)} />
+                        <label className="configDeficitLabel">Altura (cm)</label>
+                        <Input tipo="number" claseAdicional="configDeficitInput" placeholder="170" value={datos.altura ?? ''} onChange={e => actualizarCampo('altura', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <Input tipo="number" etiqueta="Peso (kg)" claseAdicional="configDeficitInput" placeholder="70" value={datos.peso ?? ''} onChange={e => actualizarCampo('peso', (e.target as HTMLInputElement).value)} />
+                        <label className="configDeficitLabel">Peso (kg)</label>
+                        <Input tipo="number" claseAdicional="configDeficitInput" placeholder="70" value={datos.peso ?? ''} onChange={e => actualizarCampo('peso', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <Input tipo="number" etiqueta="Cintura (cm)" claseAdicional="configDeficitInput" placeholder="80" value={datos.cintura ?? ''} onChange={e => actualizarCampo('cintura', (e.target as HTMLInputElement).value)} />
+                        <label className="configDeficitLabel">Cintura (cm)</label>
+                        <Input tipo="number" claseAdicional="configDeficitInput" placeholder="80" value={datos.cintura ?? ''} onChange={e => actualizarCampo('cintura', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <Input tipo="number" etiqueta="Edad" claseAdicional="configDeficitInput" placeholder="30" value={datos.edad ?? ''} onChange={e => actualizarCampo('edad', (e.target as HTMLInputElement).value)} />
+                        <label className="configDeficitLabel">Edad</label>
+                        <Input tipo="number" claseAdicional="configDeficitInput" placeholder="30" value={datos.edad ?? ''} onChange={e => actualizarCampo('edad', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
                         <label className="configDeficitLabel">Sexo</label>
@@ -75,10 +79,12 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                         </select>
                     </div>
                     <div className="configDeficitCampo">
-                        <Input tipo="number" etiqueta="Ejercicio (sesiones/semana)" claseAdicional="configDeficitInput" placeholder="3" value={datos.ejercicioSesiones ?? ''} onChange={e => actualizarCampo('ejercicioSesiones', (e.target as HTMLInputElement).value)} />
+                        <label className="configDeficitLabel">Ejercicio a la semana</label>
+                        <Input tipo="number" claseAdicional="configDeficitInput" placeholder="3" value={datos.ejercicioSesiones ?? ''} onChange={e => actualizarCampo('ejercicioSesiones', (e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="configDeficitCampo">
-                        <Input tipo="number" etiqueta="Minutos por sesión" claseAdicional="configDeficitInput" placeholder="45" value={datos.ejercicioMinutos ?? ''} onChange={e => actualizarCampo('ejercicioMinutos', (e.target as HTMLInputElement).value)} />
+                        <label className="configDeficitLabel">Minutos por sesión</label>
+                        <Input tipo="number" claseAdicional="configDeficitInput" placeholder="45" value={datos.ejercicioMinutos ?? ''} onChange={e => actualizarCampo('ejercicioMinutos', (e.target as HTMLInputElement).value)} />
                     </div>
 
                     <div className="configDeficitCampo configDeficitCampo--full">
@@ -89,7 +95,6 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                             <option value="alto">Alto (-750 kcal/día)</option>
                             <option value="peligroso">Peligroso / Extremo (-1000 kcal/día)</option>
                         </select>
-                        <p className="configDeficitAyuda">Define qué tan agresiva será la reducción calórica.</p>
                     </div>
                 </div>
 
