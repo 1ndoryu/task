@@ -46,6 +46,7 @@ export interface AyunoState {
 export interface AyunoActions {
     iniciarAyuno: (duracionHoras: number, horaUltimaComidaMs?: number) => void;
     terminarAyuno: (finMs?: number) => SesionAyuno | null;
+    actualizarDuracionObjetivo: (duracionHoras: number) => void;
     reiniciarAyuno: () => void;
     eliminarSesion: (sesionId: string) => void;
     obtenerTiempoTranscurridoMs: () => number;

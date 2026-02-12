@@ -18,6 +18,7 @@ export function useAyuno() {
     const historial = useAyunoStore(s => s.historial);
     const iniciarAyuno = useAyunoStore(s => s.iniciarAyuno);
     const terminarAyuno = useAyunoStore(s => s.terminarAyuno);
+    const actualizarDuracionObjetivo = useAyunoStore(s => s.actualizarDuracionObjetivo);
     const reiniciarAyuno = useAyunoStore(s => s.reiniciarAyuno);
     const eliminarSesion = useAyunoStore(s => s.eliminarSesion);
     /* Fix: evitar snapshot inestable al leer configuracion inexistente */
@@ -75,6 +76,13 @@ export function useAyuno() {
         [terminarAyuno]
     );
 
+    const cambiarObjetivo = useCallback(
+        (duracionHorasNueva: number) => {
+            actualizarDuracionObjetivo(duracionHorasNueva);
+        },
+        [actualizarDuracionObjetivo]
+    );
+
 
     const reiniciar = useCallback(() => {
         reiniciarAyuno();
@@ -104,6 +112,7 @@ export function useAyuno() {
         historial,
         iniciar,
         terminar,
+        cambiarObjetivo,
         reiniciar,
         eliminarSesion
     };

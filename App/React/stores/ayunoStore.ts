@@ -80,6 +80,19 @@ export const useAyunoStore = create<AyunoStore>()(
                 return sesionFinalizada;
             },
 
+            actualizarDuracionObjetivo: (duracionHoras: number) => {
+                const {sesionActiva, estado} = get();
+                if (!sesionActiva || estado !== 'activo') return;
+
+                const duracionObjetivoMs = Math.max(1, duracionHoras) * 60 * 60 * 1000;
+                set({
+                    sesionActiva: {
+                        ...sesionActiva,
+                        duracionObjetivoMs
+                    }
+                });
+            },
+
             /* Reiniciar descarta el ayuno sin registrarlo en historial */
             reiniciarAyuno: () => {
                 set({

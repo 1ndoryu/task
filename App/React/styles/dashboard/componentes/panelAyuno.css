@@ -197,6 +197,17 @@
     justify-content: center;
 }
 
+.panelAyunoSelectorDuracion--compacto {
+    gap: 4px;
+    margin-top: -2px;
+    margin-bottom: 2px;
+}
+
+.panelAyunoSelectorDuracion--compacto .panelAyunoDuracionOpcion {
+    padding: 3px 8px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
 .panelAyunoDuracionOpcion {
     padding: 4px 12px;
     border-radius: var(--dashboard-radioSm);

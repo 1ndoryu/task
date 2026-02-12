@@ -108,13 +108,25 @@ function SelectorDuracion({duracionActual, onCambiar}: {duracionActual: number; 
     );
 }
 
+function SelectorDuracionCompacto({duracionActual, onCambiar}: {duracionActual: number; onCambiar: (horas: number) => void}): JSX.Element {
+    return (
+        <div className="panelAyunoSelectorDuracion panelAyunoSelectorDuracion--compacto">
+            {DURACIONES_PRESET.map(h => (
+                <button key={h} className={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`} onClick={() => onCambiar(h)} type="button">
+                    {h}h
+                </button>
+            ))}
+        </div>
+    );
+}
+
 export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelAyunoProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
     const [modalUltimaComidaAbierto, setModalUltimaComidaAbierto] = useState(false);
     const [modalFinalizarAyunoAbierto, setModalFinalizarAyunoAbierto] = useState(false);
     const [finAyunoMs, setFinAyunoMs] = useState<number | null>(null);
 
-    const {estaActivo, sesionActiva, tiempoFormateado, tiempoRestanteFormateado, porcentaje, alcanzoObjetivo, duracionHoras, ultimoAyuno, tiempoDesdeUltimoFormateado, historial, iniciar, terminar, reiniciar, eliminarSesion} = useAyuno();
+    const {estaActivo, sesionActiva, tiempoFormateado, tiempoRestanteFormateado, porcentaje, alcanzoObjetivo, duracionHoras, ultimoAyuno, tiempoDesdeUltimoFormateado, historial, iniciar, terminar, cambiarObjetivo, reiniciar, eliminarSesion} = useAyuno();
 
     const guardarConfig = usePluginsStore(s => s.guardarConfiguracion);
     const configAyuno = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as unknown as {habitoId?: number} | undefined;
@@ -194,6 +206,10 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
     const manejarCambiarDuracion = (horas: number) => {
         guardarConfig(PLUGIN_ID, {duracionHoras: horas} satisfies ConfiguracionAyuno);
+
+        if (estaActivo) {
+            cambiarObjetivo(horas);
+        }
     };
 
     /* Contenido central minimalista: Solo tiempo y acción */
@@ -201,6 +217,8 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
         if (estaActivo) {
             return (
                 <div className="panelAyunoCentro">
+                    <span className="panelAyunoCentroEtiqueta">Objetivo: {duracionHoras}h</span>
+                    <SelectorDuracionCompacto duracionActual={duracionHoras} onCambiar={manejarCambiarDuracion} />
                     <span className={`panelAyunoCentroTiempo ${alcanzoObjetivo ? 'panelAyunoCentroTiempo--completado' : ''}`}>{tiempoFormateado}</span>
                     {!alcanzoObjetivo && <span className="panelAyunoCentroRestante">-{tiempoRestanteFormateado}</span>}
                     <button
@@ -229,7 +247,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
                 </button>
             </div>
         );
-    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, tiempoDesdeUltimoFormateado, textoVentanaComida, textoProximoAyuno, duracionHoras, habitoAyunoExiste]);
+    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, tiempoDesdeUltimoFormateado, textoVentanaComida, textoProximoAyuno, duracionHoras, habitoAyunoExiste, manejarCambiarDuracion]);
 
     const contenidoPanel = (
         <div className="panelAyunoContenido">
