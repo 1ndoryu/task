@@ -25,7 +25,7 @@ interface UseDashboardReturn {
     habitos: Habito[];
     tareas: Tarea[];
     notas: string;
-    toggleTarea: (id: number) => void;
+    toggleTarea: (id: number, opciones?: {detallesActividad?: Record<string, unknown>}) => void;
     crearTarea: (datos: DatosEdicionTarea) => void;
     editarTarea: (id: number, datos: DatosEdicionTarea) => void;
     eliminarTarea: (id: number) => void;

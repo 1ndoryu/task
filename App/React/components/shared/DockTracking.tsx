@@ -5,26 +5,51 @@
  * Diseño minimalista estilo terminal
  */
 
-import {Play, Pause, Square, CheckCircle2, X, Timer} from 'lucide-react';
+import {Play, Pause, CheckCircle2, X, Timer} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import {useTimeTracker} from '../../hooks/useTimeTracker';
+import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
+import type {SesionTracking} from '../../types/timeTracker';
 
 interface DockTrackingProps {
     esMovil?: boolean;
-    onCompletarEntidad?: (entidadId: number, tipoEntidad: 'tarea' | 'habito') => void;
+    onCompletarEntidad?: (entidadId: number, tipoEntidad: 'tarea' | 'habito', detallesActividad?: Record<string, unknown>) => void;
+}
+
+function formatearHoraLocal(timestamp: number): string {
+    const fecha = new Date(timestamp);
+    const horas = String(fecha.getHours()).padStart(2, '0');
+    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+    const segundos = String(fecha.getSeconds()).padStart(2, '0');
+    return `${horas}:${minutos}:${segundos}`;
+}
+
+function construirDetallesTracking(sesion: SesionTracking): Record<string, unknown> {
+    const fin = sesion.fin ?? Date.now();
+    return {
+        origen: 'time_tracker',
+        trackingId: sesion.id,
+        horaInicio: formatearHoraLocal(sesion.inicio),
+        horaFin: formatearHoraLocal(fin),
+        tiempoTrackingMs: sesion.tiempoEfectivoMs,
+        tiempoTrackingMinutos: Math.round(sesion.tiempoEfectivoMs / 60000),
+        tiempoTrackingFormateado: `${Math.floor(sesion.tiempoEfectivoMs / 60000)}m`
+    };
 }
 
 export function DockTracking({esMovil = false, onCompletarEntidad}: DockTrackingProps): JSX.Element | null {
     const tracker = useTimeTracker();
+    const completarTracking = useTimeTrackerStore(state => state.completarTracking);
 
     /* Solo mostrar si hay tracking activo o pausado */
     if (!tracker.estaActivo && !tracker.estaPausado) return null;
 
     const manejarCompletar = () => {
-        if (tracker.entidadId && tracker.tipoEntidad && onCompletarEntidad) {
-            onCompletarEntidad(tracker.entidadId, tracker.tipoEntidad);
+        const sesionFinal = completarTracking();
+        if (sesionFinal && onCompletarEntidad) {
+            const detallesActividad = construirDetallesTracking(sesionFinal);
+            onCompletarEntidad(sesionFinal.entidadId, sesionFinal.tipoEntidad, detallesActividad);
         }
-        tracker.completar();
     };
 
     return (
@@ -68,7 +93,7 @@ export function DockTracking({esMovil = false, onCompletarEntidad}: DockTracking
                     )}
 
                     <Boton type="button" claseAdicional="dockTrackingBoton dockTrackingBoton--completar" onClick={manejarCompletar} title="Completar" aria-label="Completar tracking">
-                        <Square size={14} />
+                        <CheckCircle2 size={14} />
                     </Boton>
 
                     <Boton type="button" claseAdicional="dockTrackingBoton dockTrackingBoton--cancelar" onClick={tracker.cancelar} title="Cancelar" aria-label="Cancelar tracking">

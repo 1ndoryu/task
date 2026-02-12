@@ -11,8 +11,11 @@
     right: 0;
     z-index: 1000;
     background: var(--dashboard-fondoTerciario);
-    border-top: 1px solid var(--dashboard-bordePrincipal);
+    /* border-top: 1px solid var(--dashboard-bordePrincipal); */
     transition: opacity 0.2s ease;
+    margin: 40px auto;
+    max-width: 600px;
+    zoom: 1.1;
 }
 
 /* En móvil, posicionar encima de NavegacionInferior */

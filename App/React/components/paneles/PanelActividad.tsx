@@ -68,6 +68,36 @@ function formatearActividadUnificada(tipo: DetalleActividadItem['tipo'], nombre:
     return `${tipoBase} "${nombre}"`;
 }
 
+function formatearDuracionTracking(item: DetalleActividadItem): string | null {
+    const minutosDetalle = item.detalles?.tiempoTrackingMinutos;
+    if (typeof minutosDetalle === 'number' && Number.isFinite(minutosDetalle) && minutosDetalle >= 0) {
+        const horas = Math.floor(minutosDetalle / 60);
+        const minutosRestantes = minutosDetalle % 60;
+        if (horas > 0) {
+            return `${horas}h ${String(minutosRestantes).padStart(2, '0')}m`;
+        }
+        return `${minutosDetalle}m`;
+    }
+
+    const msDetalle = item.detalles?.tiempoTrackingMs;
+    if (typeof msDetalle === 'number' && Number.isFinite(msDetalle) && msDetalle >= 0) {
+        const minutosTotales = Math.round(msDetalle / 60000);
+        const horas = Math.floor(minutosTotales / 60);
+        const minutosRestantes = minutosTotales % 60;
+        if (horas > 0) {
+            return `${horas}h ${String(minutosRestantes).padStart(2, '0')}m`;
+        }
+        return `${minutosTotales}m`;
+    }
+
+    const textoDetalle = item.detalles?.tiempoTrackingFormateado;
+    if (typeof textoDetalle === 'string' && textoDetalle.trim().length > 0) {
+        return textoDetalle.trim();
+    }
+
+    return null;
+}
+
 export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAbrirUpgrade, renderHandleArrastre, handleMinimizar}: PanelActividadProps): JSX.Element {
     /* Verificar si el usuario es Premium */
     const esPremium = useSuscripcionStore(s => s.esPremium());
@@ -218,12 +248,14 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                                 const nombreElemento = obtenerNombreElemento(item);
                                 const nombreProyecto = obtenerNombreProyecto(item);
                                 const textoUnificado = formatearActividadUnificada(item.tipo, nombreElemento);
+                                const duracionTracking = formatearDuracionTracking(item);
 
                                 return (
                                     <li key={item.id} className="panelActividadDetalleItemUnificado">
                                         <span className="panelActividadDetalleTexto">
                                             {textoUnificado}
                                             {nombreProyecto && <span className="panelActividadDetalleProyectoTag"> · {nombreProyecto}</span>}
+                                            {duracionTracking && <span className="panelActividadDetalleTrackingTag"> · {duracionTracking}</span>}
                                         </span>
                                         <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
                                     </li>

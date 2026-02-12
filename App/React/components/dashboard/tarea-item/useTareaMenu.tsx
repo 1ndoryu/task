@@ -128,8 +128,9 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
         [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, tracker]
     );
 
-    /* Detectar si esta tarea está siendo trackeada */
-    const estaEnTracking = tracker.sesionActiva?.entidadId === tarea.id && tracker.estado !== 'inactivo';
+    /* Detectar si esta tarea/hábito está siendo trackeada */
+    const entidadTrackingId = esHabito ? (tarea as TareaHabito).habitoId : tarea.id;
+    const estaEnTracking = tracker.sesionActiva?.entidadId === entidadTrackingId && tracker.estado !== 'inactivo';
 
     /* Opciones del menu contextual */
     const opcionesMenu: OpcionMenu[] = useMemo(() => {
@@ -242,18 +243,29 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
     }, [tarea.prioridad, esHabito, estaEnTracking]);
 
     /* Opciones para hábitos */
-    const opcionesMenuHabito: OpcionMenu[] = useMemo(
-        () =>
-            esHabito
-                ? generarOpcionesMenuHabito({
-                      completadoHoy: habitoCompletadoHoy ?? false,
-                      estaPausado: habitoPausado ?? false,
-                      tieneActualizar: !!onActualizarHabito,
-                      pospuestoHoy: habitoPospuestoHoy ?? false
-                  })
-                : [],
-        [habitoCompletadoHoy, habitoPausado, onActualizarHabito, esHabito, habitoPospuestoHoy]
-    );
+    const opcionesMenuHabito: OpcionMenu[] = useMemo(() => {
+        if (!esHabito) {
+            return [];
+        }
+
+        const opcionesBase = generarOpcionesMenuHabito({
+            completadoHoy: habitoCompletadoHoy ?? false,
+            estaPausado: habitoPausado ?? false,
+            tieneActualizar: !!onActualizarHabito,
+            pospuestoHoy: habitoPospuestoHoy ?? false
+        });
+
+        const opcionTracking: OpcionMenu = estaEnTracking
+            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
+            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
+
+        const indiceInsercion = Math.max(
+            0,
+            opcionesBase.findIndex(opcion => opcion.id === MENU_HABITO_IDS.ELIMINAR)
+        );
+
+        return [...opcionesBase.slice(0, indiceInsercion), opcionTracking, ...opcionesBase.slice(indiceInsercion)];
+    }, [habitoCompletadoHoy, habitoPausado, onActualizarHabito, esHabito, habitoPospuestoHoy, estaEnTracking]);
 
     return {
         menuContextual,

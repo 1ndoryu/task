@@ -23,6 +23,7 @@ import {usePaginaMovil} from '../hooks/usePaginaMovil';
 import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
 import {useNotasStore} from '../stores/notasStore';
 import {useSeleccionMultipleStore} from '../stores/seleccionMultipleStore';
+import {habitosActions} from '../stores/habitosStore';
 import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
 import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
 import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
@@ -265,7 +266,18 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
             <ModalNotasExpandido abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} tamanoFuente="normal" delayGuardado={2000} />
 
             {/* Dock de tracking de tiempo */}
-            {auth.user && <DockTracking esMovil={esMovil} />}
+            {auth.user && (
+                <DockTracking
+                    esMovil={esMovil}
+                    onCompletarEntidad={(entidadId, tipoEntidad, detallesActividad) => {
+                        if (tipoEntidad === 'tarea') {
+                            dashboard.toggleTarea(entidadId, {detallesActividad});
+                            return;
+                        }
+                        habitosActions.completarHabitoHoy(entidadId, detallesActividad);
+                    }}
+                />
+            )}
 
             {/* Navegación inferior móvil */}
             {auth.user && <NavegacionInferior paginaActiva={paginaMovil.paginaActiva} onCambiarPagina={paginaMovil.cambiarPagina} onCrearRapido={modales.abrirCreacionRapida} visible={esMovil} />}

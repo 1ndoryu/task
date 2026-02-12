@@ -18,7 +18,7 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 
 ## Estado Actual
 
-**Versión:** v1.0.32-beta (2026-02-12)
+**Versión:** v1.0.39-beta (2026-02-12)
 **Foco:** Sprint Correcciones Críticas + Time Tracker + Sistema de Plugins
 
 ---
@@ -526,3 +526,6 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   **Mejora Déficit + Ayuno (v1.0.34-beta):** Panel de déficit ahora permite seleccionar fecha activa y recalcula calorías/macros por ese día; el input registra comidas en la fecha seleccionada (incluye días pasados) y el historial usa dataset combinado sin duplicados (`useDeficitCalorico.ts`, `PanelDeficitCalorico.tsx`, `panelDeficitCalorico.css`). En ayuno, el modal de finalizar ahora pide hora exacta de fin de comida con selector `datetime-local`, recalcula la timeline con ese valor y guarda la sesión con ese timestamp (`ModalFinalizarAyuno.tsx`, `PanelAyuno.tsx`, `panelAyuno.css`).
 > -   **Ajuste UX Déficit + Ayuno (v1.0.35-beta):** Reemplazado selector de fecha por navegación intuitiva con flechas (día anterior/siguiente) sobre el contador de calorías en `PanelDeficitCalorico.tsx` + `panelDeficitCalorico.css`. En `ModalFinalizarAyuno.tsx` se eliminó la pregunta redundante de hora y ahora la edición se hace inline en la línea "Fin de comida" con input estilo `input input--text selectorVentanaOportunidad__inputHora`, recalculando al instante la timeline y el guardado.
 > -   **Fix UX Hora Fin de Comida (v1.0.36-beta):** Eliminada duplicidad de hora en la línea "Fin de comida" (ya no se repite `Hoy, HH:MM` junto al input; se muestra solo indicador de día). El input quedó compacto y no expansible (`width/min/max + flex fijo`) y ahora soporta ajuste minuto a minuto con teclado (`ArrowUp` +1 min, `ArrowDown` -1 min) en `ModalFinalizarAyuno.tsx` + `panelAyuno.css`.
+> -   **Fix Time Tracker Panel de Ejecución (v1.0.37-beta):** Corregido `useTareaMenu.tsx` para incluir opción de tracking en menú contextual de hábitos y detectar sesión activa por `habitoId` (no por `tarea.id`); añadido botón Play/Stop en `tareaAccionesContenedor` de `TareaItem.tsx` tanto para tareas como para hábitos.
+> -   **Fix Completar Tracker + Actividad (v1.0.38-beta):** `DockTracking.tsx` ahora completa la sesión y marca realmente la entidad (tarea/hábito) vía callback conectado desde `DashboardIsland.tsx`; para hábitos usa `completarHabitoHoy` (evita toggle inverso) y para tareas `toggleTarea` con detalles opcionales. Se agregó persistencia de metadatos de tiempo (`horaInicio`, `horaFin`, `tiempoTrackingMs`, `tiempoTrackingMinutos`) en actividad mediante `actividadService.ts`, `useTareas.ts` y `habitosStore.ts`. Además, el botón de completar del dock cambió de ícono de stop a check (`CheckCircle2`).
+> -   **Mejora Panel Actividad (v1.0.39-beta):** En la lista "Todas las actividades" de `PanelActividad.tsx` ahora se muestra la duración de Time Tracker cuando existe en `detalles` (`tiempoTrackingMinutos`/`tiempoTrackingMs`/`tiempoTrackingFormateado`), renderizada como etiqueta junto al nombre del proyecto. Ajuste de estilo en `panelActividad.css`.

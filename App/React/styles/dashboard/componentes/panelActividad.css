@@ -231,6 +231,10 @@
     color: var(--dashboard-textoSecundario);
 }
 
+.panelActividadDetalleTrackingTag {
+    color: var(--dashboard-textoSecundario);
+}
+
 /*
  * Mensaje de bloqueo para usuarios FREE
  */

@@ -158,24 +158,30 @@ export async function obtenerDetalleActividadDia(params: ObtenerDetalleActividad
  * Atajos para registrar tipos comunes de actividad
  * Todos envían la fecha local del cliente para evitar problemas de zona horaria
  */
-export function registrarTareaCompletada(tareaId: number, proyectoId?: number, tareaNombre?: string): Promise<boolean> {
+export function registrarTareaCompletada(tareaId: number, proyectoId?: number, tareaNombre?: string, detallesExtra?: Record<string, unknown>): Promise<boolean> {
     return registrarActividad({
         tipo: 'tarea_completada',
         elementoId: tareaId,
         elementoTipo: 'tarea',
         proyectoId,
         fecha: obtenerFechaHoy(),
-        detalles: tareaNombre ? {elementoNombre: tareaNombre} : undefined
+        detalles: {
+            ...(tareaNombre ? {elementoNombre: tareaNombre} : {}),
+            ...(detallesExtra || {})
+        }
     });
 }
 
-export function registrarHabitoCumplido(habitoId: number, habitoNombre?: string): Promise<boolean> {
+export function registrarHabitoCumplido(habitoId: number, habitoNombre?: string, detallesExtra?: Record<string, unknown>): Promise<boolean> {
     return registrarActividad({
         tipo: 'habito_cumplido',
         elementoId: habitoId,
         elementoTipo: 'habito',
         fecha: obtenerFechaHoy(),
-        detalles: habitoNombre ? {elementoNombre: habitoNombre} : undefined
+        detalles: {
+            ...(habitoNombre ? {elementoNombre: habitoNombre} : {}),
+            ...(detallesExtra || {})
+        }
     });
 }
 

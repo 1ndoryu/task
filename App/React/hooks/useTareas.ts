@@ -19,7 +19,7 @@ export interface UseTareasParams {
 }
 
 export interface UseTareasReturn {
-    toggleTarea: (id: number) => void;
+    toggleTarea: (id: number, opciones?: {detallesActividad?: Record<string, unknown>}) => void;
     crearTarea: (datos: DatosEdicionTarea) => void;
     editarTarea: (id: number, datos: DatosEdicionTarea) => void;
     eliminarTarea: (id: number) => void;
@@ -115,7 +115,7 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
      * Maneja la logica de repeticion autogenerando nuevas tareas
      */
     const toggleTarea = useCallback(
-        (id: number) => {
+        (id: number, opciones?: {detallesActividad?: Record<string, unknown>}) => {
             const tarea = tareas.find(t => t.id === id);
             if (!tarea) return;
 
@@ -195,7 +195,7 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
 
             /* Registrar actividad para el mapa de calor (silencioso) */
             if (!estadoAnterior) {
-                registrarTareaCompletada(tarea.id, tarea.proyectoId, tarea.texto);
+                registrarTareaCompletada(tarea.id, tarea.proyectoId, tarea.texto, opciones?.detallesActividad);
             } else {
                 /* Desmarcar tarea - tambien registrar en actividad */
                 registrarTareaDesmarcada(tarea.id, tarea.proyectoId, tarea.texto);
