@@ -15,9 +15,12 @@ function formatearTiempoAyuno(ms: number): string {
     const totalSegundos = Math.floor(ms / 1000);
     const horas = Math.floor(totalSegundos / 3600);
     const minutos = Math.floor((totalSegundos % 3600) / 60);
+    const segundos = totalSegundos % 60;
 
-    if (horas > 0) return `${horas}h ${minutos.toString().padStart(2, '0')}m`;
-    return `${minutos}m`;
+    if (horas > 0) {
+        return `${horas}h ${minutos.toString().padStart(2, '0')}m ${segundos.toString().padStart(2, '0')}s`;
+    }
+    return `${minutos}m ${segundos.toString().padStart(2, '0')}s`;
 }
 
 export function useAyuno() {

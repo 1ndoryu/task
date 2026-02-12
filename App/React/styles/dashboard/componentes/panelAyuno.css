@@ -78,8 +78,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 160px;
-    height: 160px;
+    width: 220px;
+    height: 220px;
 }
 
 .panelAyunoCirculo {
@@ -90,11 +90,13 @@
 
 .panelAyunoCirculoFondo {
     stroke: var(--dashboard-bordeSutil);
+    opacity: 0.3;
 }
 
 .panelAyunoCirculoProgreso {
-    stroke: var(--dashboard-acento);
-    transition: stroke-dashoffset 0.5s ease;
+    stroke: var(--dashboard-estadoExito); /* Color verde explícito para mejor visibilidad */
+    transition: stroke-dashoffset 0.5s linear; /* Linear para movimiento más fluido con segundos */
+    filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4)); /* Glow verde sutil */
 }
 
 /* Centro del círculo */
@@ -105,6 +107,7 @@
     gap: 4px;
     z-index: 1;
     text-align: center;
+    margin-top: 15px;
 }
 
 .panelAyunoCentroEtiqueta {
@@ -129,6 +132,50 @@
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     opacity: 0.8;
+}
+
+/* Botón circular central */
+.panelAyunoBotonCircular {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+    background: transparent;
+    margin-top: 6px;
+}
+
+.panelAyunoBotonCircular:hover {
+    transform: scale(1.1);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.iconoPlayAjustado {
+    margin-left: 2px; /* Ajuste visual óptico para el icono de Play */
+}
+
+/* Iniciar: Verde */
+.panelAyunoBotonCircular--iniciar {
+    color: var(--dashboard-estadoExito);
+}
+
+.panelAyunoBotonCircular--iniciar:hover {
+    color: var(--dashboard-estadoExito);
+    background: var(--dashboard-estadoExitoFondo);
+}
+
+/* Terminar: Rojo/Acento */
+.panelAyunoBotonCircular--terminar {
+    color: var(--dashboard-estadoAlta);
+}
+
+.panelAyunoBotonCircular--terminar:hover {
+    color: var(--dashboard-estadoAlta);
+    background: var(--dashboard-estadoAltaFondo);
 }
 
 /* Selector de duración */
@@ -252,22 +299,21 @@
 }
 
 .panelAyunoHistorialItemMeta {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    opacity: 0.85;
+    display: none;
+
 }
 
 .panelAyunoHistorialEliminar {
-    border: 1px solid var(--dashboard-bordeSutil);
     background: transparent;
     color: var(--dashboard-textoSecundario);
     border-radius: var(--dashboard-radioSm);
     padding: 4px 6px;
+    padding-left: 0;
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
 }
 
 .panelAyunoHistorialEliminar:hover {
-    background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoActivo);
 }
 
@@ -397,12 +443,33 @@
     background: var(--dashboard-acentoHover);
 }
 
+.modalAyunoUltimaComidaInfo {
+    display: flex;
+    justify-content: center;
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
+.modalAyunoUltimaComidaDia {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.modalAyunoUltimaComidaDia--ayer {
+    color: var(--dashboard-estadoAltaTexto);
+    border-color: var(--dashboard-estadoAltaBorde);
+    background: var(--dashboard-estadoAltaFondo);
+}
+
 .panelAyunoHistorialTitulo {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 8px;
     display: block;
 }
 
@@ -455,4 +522,75 @@
 
 .panelAyunoHistorialEliminar:hover {
     opacity: 1;
+}
+
+/* =========================================
+   Selector Reloj Circular Interactivo
+   ========================================= */
+
+.selectorRelojCircular {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    user-select: none;
+}
+
+.selectorRelojCircular__display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoHero);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    line-height: 1;
+    background: var(--dashboard-fondoSecundario);
+    padding: 8px 16px;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    box-shadow: var(--dashboard-sombraMedia);
+}
+
+.selectorRelojCircular__separador {
+    margin: 0 2px;
+    opacity: 0.6;
+    animation: parpadeoReloj 1s infinite steps(2, start);
+}
+
+@keyframes parpadeoReloj {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.selectorRelojCircular__svg {
+    touch-action: none; /* Importante para prevenir scroll en móviles */
+    transition: transform var(--dashboard-transicionNormal);
+}
+
+.selectorRelojCircular__svg--arrastrando {
+    cursor: grabbing !important;
+    transform: scale(1.02);
+}
+
+.selectorRelojCircular__knob {
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+    transition: r 0.2s ease;
+}
+
+.selectorRelojCircular__svg--arrastrando .selectorRelojCircular__knob {
+    r: 10; /* Hacer más grande al arrastrar */
+}
+
+.selectorRelojCircular__instruccion {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.7;
+    margin: 0;
 }

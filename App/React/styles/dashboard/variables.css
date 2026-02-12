@@ -90,9 +90,9 @@
      * TIPOGRAFIA 
      */
     --dashboard-fuenteMonoespaciada: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
-    --dashboard-tamanoBase: 12px;
-    --dashboard-tamanoPequeno: 10px;
-    --dashboard-tamanoMuyPequeno: 9px;
+    --dashboard-tamanoBase: 13px;
+    --dashboard-tamanoPequeno: 11px;
+    --dashboard-tamanoMuyPequeno: 10px;
     --dashboard-tamanoGrande: 1.1rem;
     --dashboard-tamanoTitulo: 1.3rem;
     --dashboard-tamanoHero: 1.4rem;

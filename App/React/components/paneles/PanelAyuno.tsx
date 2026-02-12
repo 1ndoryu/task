@@ -10,7 +10,7 @@
  */
 
 import {useEffect, useMemo, useState} from 'react';
-import {Square, RotateCcw, Settings, Maximize2, AlertCircle} from 'lucide-react';
+import {Square, Settings, Maximize2, AlertCircle, Play} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useAyuno} from '../../hooks/useAyuno';
 import {usePluginsStore} from '../../stores/pluginsStore';
@@ -27,7 +27,7 @@ interface PanelAyunoProps {
 }
 
 const PLUGIN_ID = 'ayuno';
-const RADIO = 70;
+const RADIO = 100;
 const CIRCUNFERENCIA = 2 * Math.PI * RADIO;
 
 /* Opciones de duración preconfiguradas */
@@ -40,31 +40,11 @@ function CirculoProgreso({porcentaje, estaActivo}: {porcentaje: number; estaActi
     const offset = CIRCUNFERENCIA - (porcentaje / 100) * CIRCUNFERENCIA;
 
     return (
-        <svg className="panelAyunoCirculo" viewBox="0 0 160 160" width="160" height="160">
+        <svg className="panelAyunoCirculo" viewBox="0 0 220 220" width="220" height="220">
             {/* Fondo del círculo */}
-            <circle
-                className="panelAyunoCirculoFondo"
-                cx="80"
-                cy="80"
-                r={RADIO}
-                fill="none"
-                strokeWidth="4"
-            />
+            <circle className="panelAyunoCirculoFondo" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" />
             {/* Progreso */}
-            {estaActivo && (
-                <circle
-                    className="panelAyunoCirculoProgreso"
-                    cx="80"
-                    cy="80"
-                    r={RADIO}
-                    fill="none"
-                    strokeWidth="4"
-                    strokeDasharray={CIRCUNFERENCIA}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    transform="rotate(-90 80 80)"
-                />
-            )}
+            {estaActivo && <circle className="panelAyunoCirculoProgreso" cx="110" cy="110" r={RADIO} fill="none" strokeWidth="8" strokeDasharray={CIRCUNFERENCIA} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 110 110)" />}
         </svg>
     );
 }
@@ -76,12 +56,7 @@ function SelectorDuracion({duracionActual, onCambiar}: {duracionActual: number; 
     return (
         <div className="panelAyunoSelectorDuracion">
             {DURACIONES_PRESET.map(h => (
-                <button
-                    key={h}
-                    className={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`}
-                    onClick={() => onCambiar(h)}
-                    type="button"
-                >
+                <button key={h} className={`panelAyunoDuracionOpcion ${duracionActual === h ? 'panelAyunoDuracionOpcion--activa' : ''}`} onClick={() => onCambiar(h)} type="button">
                     {h}h
                 </button>
             ))}
@@ -93,22 +68,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
     const [modoEnfoque, setModoEnfoque] = useState(false);
     const [modalUltimaComidaAbierto, setModalUltimaComidaAbierto] = useState(false);
 
-    const {
-        estaActivo,
-        estadoVisual,
-        tiempoFormateado,
-        tiempoRestanteFormateado,
-        porcentaje,
-        alcanzoObjetivo,
-        duracionHoras,
-        ultimoAyunoFormateado,
-        tiempoDesdeUltimoFormateado,
-        historial,
-        iniciar,
-        terminar,
-        reiniciar,
-        eliminarSesion
-    } = useAyuno();
+    const {estaActivo, estadoVisual, tiempoFormateado, tiempoRestanteFormateado, porcentaje, alcanzoObjetivo, duracionHoras, ultimoAyunoFormateado, tiempoDesdeUltimoFormateado, historial, iniciar, terminar, reiniciar, eliminarSesion} = useAyuno();
 
     const guardarConfig = usePluginsStore(s => s.guardarConfiguracion);
     const configAyuno = usePluginsStore(s => s.configuracionPlugins[PLUGIN_ID]) as unknown as {habitoId?: number} | undefined;
@@ -118,13 +78,15 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
     const crearHabitoEspecialAhora = () => {
         const existente = useHabitosStore.getState().habitos.find(h => h.nombre.trim().toLowerCase() === 'ayuno');
-        const habito = existente ?? useHabitosStore.getState().crearHabito({
-            nombre: 'Ayuno',
-            importancia: 'Media',
-            tags: [],
-            frecuencia: {tipo: 'diario'},
-            descripcion: 'Hábito especial generado por el plugin de ayuno'
-        });
+        const habito =
+            existente ??
+            useHabitosStore.getState().crearHabito({
+                nombre: 'Ayuno',
+                importancia: 'Media',
+                tags: [],
+                frecuencia: {tipo: 'diario'},
+                descripcion: 'Hábito especial generado por el plugin de ayuno'
+            });
         usePluginsStore.getState().guardarConfiguracion(PLUGIN_ID, {habitoId: habito.id});
     };
 
@@ -156,48 +118,30 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
         guardarConfig(PLUGIN_ID, {duracionHoras: horas} satisfies ConfiguracionAyuno);
     };
 
-    /* Contenido central del círculo según estado */
+    /* Contenido central minimalista: Solo tiempo y acción */
     const contenidoCentral = useMemo(() => {
         if (estaActivo) {
             return (
                 <div className="panelAyunoCentro">
-                    <span className="panelAyunoCentroEtiqueta">
-                        {alcanzoObjetivo ? 'Objetivo alcanzado' : 'Transcurrido'}
-                    </span>
-                    <span className={`panelAyunoCentroTiempo ${alcanzoObjetivo ? 'panelAyunoCentroTiempo--completado' : ''}`}>
-                        {tiempoFormateado}
-                    </span>
-                    {!alcanzoObjetivo && (
-                        <span className="panelAyunoCentroRestante">
-                            Faltan {tiempoRestanteFormateado}
-                        </span>
-                    )}
+                    <span className={`panelAyunoCentroTiempo ${alcanzoObjetivo ? 'panelAyunoCentroTiempo--completado' : ''}`}>{tiempoFormateado}</span>
+                    {!alcanzoObjetivo && <span className="panelAyunoCentroRestante">-{tiempoRestanteFormateado}</span>}
+                    <button className="panelAyunoBotonCircular panelAyunoBotonCircular--terminar" onClick={terminar} type="button" title="Terminar ayuno">
+                        <Square size={14} fill="currentColor" />
+                    </button>
                 </div>
             );
         }
 
-        if (estadoVisual === 'con-historial') {
-            return (
-                <div className="panelAyunoCentro">
-                    <span className="panelAyunoCentroEtiqueta">Último ayuno</span>
-                    <span className="panelAyunoCentroTiempo">{ultimoAyunoFormateado}</span>
-                    {tiempoDesdeUltimoFormateado && (
-                        <span className="panelAyunoCentroRestante">
-                            Hace {tiempoDesdeUltimoFormateado}
-                        </span>
-                    )}
-                </div>
-            );
-        }
-
+        /* Estado inactivo (con o sin historial): Mostrar objetivo y botón iniciar */
         return (
             <div className="panelAyunoCentro">
-                <span className="panelAyunoCentroEtiqueta">Ayuno</span>
                 <span className="panelAyunoCentroTiempo">{duracionHoras}h</span>
-                <span className="panelAyunoCentroRestante">Listo para comenzar</span>
+                <button className="panelAyunoBotonCircular panelAyunoBotonCircular--iniciar" onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)} type="button" disabled={!habitoAyunoExiste} title="Comenzar ayuno">
+                    <Play size={14} fill="currentColor" className="iconoPlayAjustado" />
+                </button>
             </div>
         );
-    }, [estaActivo, estadoVisual, alcanzoObjetivo, tiempoFormateado, tiempoRestanteFormateado, ultimoAyunoFormateado, tiempoDesdeUltimoFormateado, duracionHoras]);
+    }, [estaActivo, alcanzoObjetivo, tiempoFormateado, duracionHoras, habitoAyunoExiste, terminar]);
 
     const contenidoPanel = (
         <div className="panelAyunoContenido">
@@ -221,47 +165,9 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             </div>
 
             {/* Selector de duración (solo cuando no hay ayuno activo) */}
-            {!estaActivo && (
-                <SelectorDuracion
-                    duracionActual={duracionHoras}
-                    onCambiar={manejarCambiarDuracion}
-                />
-            )}
+            {!estaActivo && <SelectorDuracion duracionActual={duracionHoras} onCambiar={manejarCambiarDuracion} />}
 
-            {/* Botones de acción */}
-            <div className="panelAyunoBotones">
-                {!estaActivo ? (
-                    <button
-                        className="panelAyunoBoton panelAyunoBoton--iniciar"
-                        onClick={() => habitoAyunoExiste && setModalUltimaComidaAbierto(true)}
-                        type="button"
-                        disabled={!habitoAyunoExiste}
-                        title="Comenzar ayuno"
-                    >
-                        <span>Comenzar</span>
-                    </button>
-                ) : (
-                    <>
-                        <button
-                            className="panelAyunoBoton panelAyunoBoton--terminar"
-                            onClick={terminar}
-                            type="button"
-                        >
-                            <Square size={16} />
-                            <span>Terminar</span>
-                        </button>
-                        <button
-                            className="panelAyunoBoton panelAyunoBoton--reiniciar"
-                            onClick={reiniciar}
-                            type="button"
-                            title="Descarta el ayuno sin registrarlo"
-                        >
-                            <RotateCcw size={16} />
-                            <span>Reiniciar</span>
-                        </button>
-                    </>
-                )}
-            </div>
+            {/* Botones de acción eliminados - movidos al interior del círculo */}
 
             <HistorialAyuno sesiones={historial} maxPorPagina={6} onEliminarSesion={eliminarSesion} />
         </div>
@@ -269,7 +175,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
 
     return (
         <>
-            <div id="panelAyuno" className="panelAyuno panelDashboard internaColumna">
+            <div id="panelAyuno" className="panelAyuno internaColumna">
                 <SeccionEncabezado
                     icono={null}
                     titulo={renderHandleArrastre('Ayuno') as any}
@@ -295,14 +201,10 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             </div>
 
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Ayuno">
-                <div className="panelAyuno panelDashboard internaColumna">{contenidoPanel}</div>
+                <div className="panelAyuno internaColumna">{contenidoPanel}</div>
             </OverlayEnfoque>
 
-            <ModalUltimaComida
-                estaAbierto={modalUltimaComidaAbierto}
-                onCerrar={() => setModalUltimaComidaAbierto(false)}
-                onConfirmar={horaUltimaComidaMs => iniciar(horaUltimaComidaMs)}
-            />
+            <ModalUltimaComida estaAbierto={modalUltimaComidaAbierto} onCerrar={() => setModalUltimaComidaAbierto(false)} onConfirmar={horaUltimaComidaMs => iniciar(horaUltimaComidaMs)} />
         </>
     );
 }

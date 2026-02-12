@@ -4,9 +4,9 @@
  */
 
 import {useMemo, useState} from 'react';
-import {Clock, Play} from 'lucide-react';
+import {Play} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
-import {SelectorHoraAyuno} from './SelectorHoraAyuno';
+import {SelectorRelojCircular} from './SelectorRelojCircular';
 
 interface ModalUltimaComidaProps {
     estaAbierto: boolean;
@@ -42,6 +42,21 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
     const valorPorDefecto = useMemo(() => formatearHoraParaInput(new Date()), []);
     const [hora, setHora] = useState(valorPorDefecto);
 
+    /* Calcular si la hora seleccionada se interpreta como hoy o ayer */
+    const fechaInterpretada = useMemo(() => {
+        if (!hora) return null;
+        const ahora = new Date();
+        const ts = convertirHoraInputATimestamp(hora, ahora);
+        return new Date(ts);
+    }, [hora]);
+
+    const etiquetaDia = useMemo(() => {
+        if (!fechaInterpretada) return '';
+        const ahora = new Date();
+        const esHoy = fechaInterpretada.getDate() === ahora.getDate();
+        return esHoy ? 'Hoy' : 'Ayer';
+    }, [fechaInterpretada]);
+
     if (!estaAbierto) return null;
 
     return (
@@ -49,17 +64,19 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
             <div className="modalAyunoUltimaComidaContenido">
                 <p className="modalAyunoUltimaComidaTexto">¿A qué hora fue tu última comida?</p>
 
-                <div className="modalAyunoUltimaComidaCampo">
-                    <span className="modalAyunoUltimaComidaIcono" aria-hidden="true">
-                        <Clock size={14} />
-                    </span>
-                    <SelectorHoraAyuno valor={hora} onChange={setHora} intervaloMinutos={5} />
+                <div className="selectorRelojWrapper">
+                    <SelectorRelojCircular valor={hora} onChange={setHora} intervaloMinutos={5} radio={110} />
+                </div>
+
+                <div className="modalAyunoUltimaComidaInfo">
+                    <span className={`modalAyunoUltimaComidaDia ${etiquetaDia === 'Ayer' ? 'modalAyunoUltimaComidaDia--ayer' : ''}`}>{etiquetaDia}</span>
                 </div>
 
                 <div className="modalAyunoUltimaComidaAcciones">
                     <button type="button" className="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--secundario" onClick={onCerrar}>
                         Cancelar
                     </button>
+
                     <button
                         type="button"
                         className="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--primario"
@@ -69,8 +86,7 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
                             onConfirmar(ts);
                             onCerrar();
                         }}
-                        title="Iniciar ayuno"
-                    >
+                        title="Iniciar ayuno">
                         <Play size={14} />
                         <span>Iniciar</span>
                     </button>

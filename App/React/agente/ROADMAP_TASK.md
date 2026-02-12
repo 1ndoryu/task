@@ -515,3 +515,5 @@ _Espacio para que el usuario deje comentarios durante la ejecución:_
 > -   Fix: arrastre de paneles de plugins sin crash (IndicadorArrastre soporta paneles dinámicos + ModalPlugins sin return temprano antes de hooks)
 > -   Mejora: Ayuno ahora pregunta hora de última comida al iniciar, historial colapsable/paginado (6) con borrado, y botón Configuración abre el hábito especial (creado/vinculado al activar el plugin, nombre bloqueado)
 > -   Mejora: "Última comida" ahora es modal con estilo minimalista; hábito Ayuno se completa automáticamente al registrar ayuno >= 12h (Estado/Ventana/Subhábitos ocultos); Calorías abre solo su modal de configuración dedicado (sin ModalPlugins)
+> -   **Mejora UI Ayuno (v1.0.26):** Rediseño minimalista del Panel de Ayuno. Eliminados botones externos, acciones integradas en el círculo (Play/Stop). Nuevo selector de hora circular interactivo (`SelectorRelojCircular`) con lógica "Ayer/Hoy". Temporizador ahora muestra segundos.
+> -   **Fix UI:** Solucionado bug de doble margen en paneles de plugins (Ayuno y Déficit) eliminando clase CSS duplicada `panelDashboard`.

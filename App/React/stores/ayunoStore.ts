@@ -29,11 +29,12 @@ export const useAyunoStore = create<AyunoStore>()(
 
             iniciarAyuno: (duracionHoras: number, horaUltimaComidaMs?: number) => {
                 const ahora = Date.now();
+                const inicioReal = horaUltimaComidaMs ?? ahora;
                 set({
                     estado: 'activo',
                     sesionActiva: {
                         id: generarIdSesion(),
-                        inicio: ahora,
+                        inicio: inicioReal,
                         horaUltimaComidaMs,
                         duracionObjetivoMs: duracionHoras * 60 * 60 * 1000
                     }

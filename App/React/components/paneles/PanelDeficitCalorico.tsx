@@ -220,7 +220,7 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
 
     return (
         <>
-            <div id="panelDeficitCalorico" className="panelDeficitCalorico panelDashboard internaColumna">
+            <div id="panelDeficitCalorico" className="panelDeficitCalorico internaColumna">
                 <SeccionEncabezado
                     icono={null}
                     titulo={renderHandleArrastre('Calorías') as any}
@@ -246,7 +246,7 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
             </div>
 
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Calorías">
-                <div className="panelDeficitCalorico panelDashboard internaColumna">{contenidoPanel}</div>
+                <div className="panelDeficitCalorico internaColumna">{contenidoPanel}</div>
             </OverlayEnfoque>
         </>
     );
