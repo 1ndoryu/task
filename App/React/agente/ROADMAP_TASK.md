@@ -21,6 +21,8 @@ Sistema de seguimiento de hábitos, tareas y notas rápidas con diseño estilo t
 **Versión:** v1.0.39-beta (2026-02-12)
 **Foco:** Sprint Correcciones Críticas + Time Tracker + Sistema de Plugins
 
+-   ✅ **Hotfix 12-02-2026:** `BarraPanelesOcultos` ahora filtra paneles de plugins desactivados (ej: Ayuno y Calorías) para que solo aparezcan si el plugin está activo en `ModalPlugins`.
+
 ---
 
 # TAREAS PENDIENTES - SPRINT ACTUAL

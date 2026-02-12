@@ -7,6 +7,8 @@
 import {Target, Folder, Terminal, FileText, Activity, LayoutGrid} from 'lucide-react';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 import {obtenerPanel} from '../../config/registroPaneles';
+import {obtenerTodosPlugins} from '../../config/registroPlugins';
+import {usePluginsStore} from '../../stores/pluginsStore';
 
 interface BarraPanelesOcultosProps {
     panelesOcultos: PanelId[];
@@ -49,12 +51,30 @@ function obtenerInfoPanel(panelId: PanelId): {icono: JSX.Element; nombre: string
 }
 
 export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanelesOcultosProps): JSX.Element | null {
-    if (panelesOcultos.length === 0) return null;
+    const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+
+    const panelesPluginActivos = new Set(
+        obtenerTodosPlugins()
+            .filter(plugin => pluginsActivos.includes(plugin.id))
+            .flatMap(plugin => plugin.panelesIds)
+    );
+
+    const panelesPluginRegistrados = new Set(obtenerTodosPlugins().flatMap(plugin => plugin.panelesIds));
+
+    const panelesOcultosVisibles = panelesOcultos.filter(panelId => {
+        if (!panelesPluginRegistrados.has(panelId)) {
+            return true;
+        }
+
+        return panelesPluginActivos.has(panelId);
+    });
+
+    if (panelesOcultosVisibles.length === 0) return null;
 
     return (
         <div className="barraPanelesOcultos">
             <div className="barraPanelesOcultosContenido">
-                {panelesOcultos.map(panelId => {
+                {panelesOcultosVisibles.map(panelId => {
                     const info = obtenerInfoPanel(panelId);
 
                     return (
