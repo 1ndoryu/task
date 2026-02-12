@@ -3,7 +3,7 @@
  * Modal minimalista para preguntar la hora de la última comida antes de iniciar un ayuno.
  */
 
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {Play} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
 import {SelectorRelojCircular} from './SelectorRelojCircular';
@@ -41,6 +41,11 @@ function convertirHoraInputATimestamp(hora: string, ahora: Date): number {
 export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUltimaComidaProps): JSX.Element | null {
     const valorPorDefecto = useMemo(() => formatearHoraParaInput(new Date()), []);
     const [hora, setHora] = useState(valorPorDefecto);
+
+    useEffect(() => {
+        if (!estaAbierto) return;
+        setHora(formatearHoraParaInput(new Date()));
+    }, [estaAbierto]);
 
     /* Calcular si la hora seleccionada se interpreta como hoy o ayer */
     const fechaInterpretada = useMemo(() => {
