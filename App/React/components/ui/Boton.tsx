@@ -4,6 +4,7 @@ import React, {type ButtonHTMLAttributes, type ReactNode} from 'react';
  * Componente Boton - Botón reutilizable con variantes de estilo
  * Variantes: primario, secundario, peligro, icono, ghost
  * Tamaños: pequeño, mediano, grande
+ * Soporta refs con React.forwardRef
  */
 
 export type VarianteBoton = 'primario' | 'secundario' | 'peligro' | 'icono' | 'ghost' | 'link';
@@ -20,19 +21,22 @@ export interface PropsBoton extends Omit<ButtonHTMLAttributes<HTMLButtonElement>
     claseAdicional?: string;
 }
 
-export const Boton: React.FC<PropsBoton> = ({
-    variante = 'primario',
-    tamano = 'mediano',
-    cargando = false,
-    icono,
-    iconoDerecha = false,
-    soloIcono = false,
-    children,
-    disabled,
-    type = 'button',
-    claseAdicional = '',
-    ...props
-}) => {
+export const Boton = React.forwardRef<HTMLButtonElement, PropsBoton>((
+    {
+        variante = 'primario',
+        tamano = 'mediano',
+        cargando = false,
+        icono,
+        iconoDerecha = false,
+        soloIcono = false,
+        children,
+        disabled,
+        type = 'button',
+        claseAdicional = '',
+        ...props
+    },
+    ref
+) => {
     const clases = [
         'boton',
         `boton--${variante}`,
@@ -46,7 +50,7 @@ export const Boton: React.FC<PropsBoton> = ({
         .join(' ');
 
     return (
-        <button type={type} className={clases} disabled={disabled || cargando} {...props}>
+        <button ref={ref} type={type} className={clases} disabled={disabled || cargando} {...props}>
             {cargando ? (
                 <span className="botonCargando">⏳</span>
             ) : (
@@ -58,4 +62,6 @@ export const Boton: React.FC<PropsBoton> = ({
             )}
         </button>
     );
-};
+});
+
+Boton.displayName = 'Boton';

@@ -126,13 +126,7 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
                 </span>
             );
         }
-        if (suscripcion.plan === 'trial') {
-            return (
-                <Boton type="button" variante="ghost" claseAdicional="drawerMovilPlanBadge drawerMovilPlanBadge--trial drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
-                    Trial
-                </Boton>
-            );
-        }
+        /* Plan free es clickeable para upgrade */
         return (
             <Boton type="button" variante="ghost" claseAdicional="drawerMovilPlanBadge drawerMovilPlanBadge--free drawerMovilPlanBadge--clickeable" onClick={esClickeable ? manejarClickPlan : undefined}>
                 Free

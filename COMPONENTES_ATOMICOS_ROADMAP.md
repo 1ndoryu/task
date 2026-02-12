@@ -86,9 +86,13 @@
 - ✅ 28 componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos)
 - ✅ Componentes base de UI creados y funcionando
 - ✅ Corrección masiva de errores TypeScript: prop "titulo" → "title" (español → estándar HTML)
+- ✅ **NUEVO:** Componente Boton refactorizado con React.forwardRef para soportar refs (soluciona 7 errores en Selectores Pills)
+- ✅ **NUEVO:** MenuContextual - agregado import de Boton y limpiada exportación duplicada de OpcionMenu
+- ✅ **NUEVO:** DrawerMovil - eliminada referencia a plan 'trial' (PlanSuscripcion solo permite 'free' | 'premium')
 - 🔄 Continuando con migración masiva de componentes complejos (modales, listas, formularios)
 - 📝 Patrón de migración establecido: import Boton, reemplazar <button> preservando clases con claseAdicional
 - ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
+- ⚠️ Lección aprendida: Componentes base como Boton deben usar forwardRef para permitir refs en componentes hijos
 
 ## Fase 4: Migración de Inputs
 - [ ] 4.1 - Reemplazar inputs en formularios de autenticación
@@ -130,8 +134,10 @@
 - ✅ Componentes base de UI creados y funcionando
 - ✅ Corrección masiva de errores TypeScript: prop "titulo" → "title" (español → estándar HTML)
 - ✅ **NUEVO:** Plan completo de centralización de estilos documentado (PLAN_CENTRALIZACION_ESTILOS.md)
+- ✅ **12 feb 2026:** Resueltos 10 errores críticos TypeScript (Boton con forwardRef, MenuContextual imports, DrawerMovil plan type)
 - 🔄 Continuando con migración masiva de componentes complejos (modales, listas, formularios)
 - 📝 Patrón de migración establecido: import Boton, reemplazar <button> preservando clases con claseAdicional
 - ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
-- 📋 **PRÓXIMO:** Decidir si continuar con migración de botones O iniciar centralización de estilos
+- ⚠️ Lección aprendida: Componentes base como Boton deben usar forwardRef para permitir refs en componentes hijos
+- 📋 **PRÓXIMO:** Continuar con Fase 3.34 (Encabezados y Modales) O iniciar centralización de estilos
 

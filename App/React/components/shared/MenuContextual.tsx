@@ -6,6 +6,7 @@
 
 import {useEffect, useRef, useCallback, useState} from 'react';
 import {ChevronRight} from 'lucide-react';
+import {Boton} from '../ui';
 
 export interface OpcionMenu {
     id: string;
@@ -177,4 +178,4 @@ export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, o
     );
 }
 
-export type {OpcionMenu, MenuContextualProps};
+export type {MenuContextualProps};
