@@ -16,7 +16,7 @@ import {Activity, BarChart2} from 'lucide-react';
 import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito, VentanaOportunidad} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 import type {EstadoHabito} from '../shared';
 import {FormularioHabitoModerno} from './habitos/FormularioHabitoModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';

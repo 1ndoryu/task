@@ -13,7 +13,7 @@
 import {useState, useMemo} from 'react';
 import {CheckCircle2, Circle, Plus, Flag, Trash2} from 'lucide-react';
 import {MenuContextual} from '../../shared/MenuContextual';
-import {Boton} from '../../shared/Boton';
+import {Boton} from '../../ui';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Hito, NivelPrioridad} from '../../../types/dashboard';
 
@@ -32,7 +32,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
 
     // Ordenar hitos por prioridad y luego por estado (completados al final)
     const hitosOrdenados = useMemo(() => {
-        const prioridadValor = {alta: 3, media: 2, baja: 1};
+        const prioridadValor: Record<NivelPrioridad, number> = {muy_alta: 4, alta: 3, media: 2, baja: 1};
 
         return [...hitos].sort((a, b) => {
             // Primero por estado (no completados primero)

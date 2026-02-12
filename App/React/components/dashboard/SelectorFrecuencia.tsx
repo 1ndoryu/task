@@ -7,7 +7,7 @@
 import {useState, useCallback} from 'react';
 import type {FrecuenciaHabito, TipoFrecuencia, DiaSemana} from '../../types/dashboard';
 import {SelectorDias} from '../shared';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 
 interface SelectorFrecuenciaProps {
     frecuencia: FrecuenciaHabito;

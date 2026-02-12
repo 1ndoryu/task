@@ -15,7 +15,7 @@
 import {Pause, Play} from 'lucide-react';
 import type {NivelImportancia, FrecuenciaHabito, Habito, DatosNuevoSubHabito, VentanaOportunidad, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades, SelectorVentanaOportunidad} from '../../shared';
-import {Boton} from '../../shared/Boton';
+import {Boton} from '../../ui';
 import type {EstadoHabito} from '../../shared';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 import {ListaSubHabitos} from './ListaSubHabitos';
@@ -131,16 +131,7 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             )}
 
             {/* SubHabitos: hábitos anidados con frecuencia e importancia independiente */}
-            {mostrarSubHabitos && habito && (
-                <ListaSubHabitos
-                    subhabitos={habito.subhabitos || []}
-                    onCrear={onCrearSubHabito!}
-                    onEliminar={onEliminarSubHabito!}
-                    onToggle={onToggleSubHabito!}
-                    importanciaPadre={importancia}
-                    frecuenciaPadre={frecuencia}
-                />
-            )}
+            {mostrarSubHabitos && habito && <ListaSubHabitos subhabitos={habito.subhabitos || []} onCrear={onCrearSubHabito!} onEliminar={onEliminarSubHabito!} onToggle={onToggleSubHabito!} importanciaPadre={importancia} frecuenciaPadre={frecuencia} />}
 
             {/* Mapa de calor - solo en modo edicion */}
             {modoEdicion && habito && habito.id > 0 && (

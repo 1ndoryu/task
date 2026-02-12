@@ -7,7 +7,7 @@
 import {X, AlertCircle} from 'lucide-react';
 import {SeccionPanel} from './SeccionPanel';
 import {obtenerFechaEfectiva} from '../../utils/fecha';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 import {Input} from '../ui/Input';
 
 type EstadoFecha = 'vencida' | 'urgente' | 'proxima' | 'normal' | null;

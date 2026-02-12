@@ -10,7 +10,7 @@ import {Check, Plus, Trash2} from 'lucide-react';
 import type {SubHabito, NivelImportancia, FrecuenciaHabito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../../types/dashboard';
 import {obtenerFechaHoy} from '../../../utils/fecha';
-import {Boton} from '../../shared/Boton';
+import {Boton} from '../../ui';
 
 interface ListaSubHabitosProps {
     subhabitos: SubHabito[];

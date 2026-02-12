@@ -12,7 +12,7 @@ import {Calendar, Flag, Zap} from 'lucide-react';
 import {MenuContextual} from './MenuContextual';
 import {obtenerFechaLocalISO} from '../../utils/fecha';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 
 /* Mapeo de etiquetas en espanol */
 const ETIQUETAS_PRIORIDAD: Record<NivelPrioridad, string> = {
@@ -54,7 +54,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
         return fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'});
     };
 
-    const abrirMenu = (tipo: MenuActivo, ref: React.RefObject<HTMLButtonElement>) => {
+    const abrirMenu = (tipo: MenuActivo, ref: React.RefObject<HTMLButtonElement | null>) => {
         if (menuActivo === tipo) {
             setMenuActivo(null);
             return;

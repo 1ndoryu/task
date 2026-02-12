@@ -11,7 +11,7 @@ import {useEsMovil} from '../../hooks/useEsMovil';
 import {MenuContextual} from './MenuContextual';
 import {BottomSheet} from './BottomSheet';
 import type {OpcionMenu} from './MenuContextual';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 
 interface MenuContextualAdaptivoProps {
     opciones: OpcionMenu[];

@@ -9,7 +9,7 @@ import {useRef, useState} from 'react';
 import {Upload, Loader2, AlertTriangle} from 'lucide-react';
 import type {Adjunto} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 
 import {useAudioPlayer} from '../../hooks/shared/useAudioPlayer';
 import {useAdjuntosCifrados} from '../../hooks/adjuntos/useAdjuntosCifrados';

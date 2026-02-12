@@ -5,7 +5,7 @@
 
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 import type {ConfiguracionHabitos, ColumnasHabitos, ToleranciaPreset} from '../../hooks/useConfiguracionHabitos';
 
 interface ModalConfiguracionHabitosProps {

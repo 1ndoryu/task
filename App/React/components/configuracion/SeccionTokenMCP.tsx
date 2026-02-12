@@ -6,7 +6,7 @@
 
 import {useState} from 'react';
 import {Key, Eye, EyeOff, Copy, Check, Trash2, RefreshCw, AlertTriangle} from 'lucide-react';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 import {Input} from '../ui/Input';
 
 interface SeccionTokenMCPProps {

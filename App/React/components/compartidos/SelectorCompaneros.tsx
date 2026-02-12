@@ -7,7 +7,7 @@
 import {useState, useCallback} from 'react';
 import {UserPlus, Check, Users, Eye, Edit3} from 'lucide-react';
 import type {CompaneroEquipo, RolCompartido} from '../../types/dashboard';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 
 interface SelectorCompanerosProps {
     companeros: CompaneroEquipo[];

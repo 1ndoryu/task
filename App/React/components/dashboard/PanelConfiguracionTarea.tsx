@@ -11,7 +11,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participante, Proyecto, CompaneroEquipo, RolCompartido, DatosEdicionTarea} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 import {FormularioTareaModerno} from './tareas/FormularioTareaModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
 import {usePanelChat} from '../../hooks/usePanelChat';

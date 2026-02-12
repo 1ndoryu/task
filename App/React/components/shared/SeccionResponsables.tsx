@@ -10,7 +10,7 @@ import {useState, useRef, useEffect, useCallback} from 'react';
 import {User, UserPlus, X, Crown, Edit3, Eye} from 'lucide-react';
 import {MenuFlotante} from './MenuFlotante';
 import type {Participante, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 
 interface SeccionResponsablesProps {
     /* Participantes actuales del elemento */

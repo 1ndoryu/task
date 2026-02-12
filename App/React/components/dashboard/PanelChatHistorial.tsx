@@ -11,9 +11,9 @@
  */
 
 import {useState, useRef, useEffect} from 'react';
-import {MessageCircle, Users, Send, History, Plus, Edit, Trash2, UserCheck, Paperclip, CheckCircle, Clock, Tag, Zap, Calendar, FileText, Type, Share2, UserPlus, UserMinus, Loader} from 'lucide-react';
+import {MessageCircle, Users, Send, History, Plus, Edit, Trash2, UserCheck, Paperclip, CheckCircle, Clock, Tag, Zap, Calendar, FileText, Type, Share2, UserPlus, UserMinus, Loader, Repeat} from 'lucide-react';
 import {useMensajes, type MensajeTimeline, type AccionSistema, obtenerTipoVisual} from '../../hooks/useMensajes';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 import {Input} from '../ui/Input';
 
 export interface PanelChatHistorialProps {
@@ -53,7 +53,8 @@ function obtenerIconoSistema(accion?: AccionSistema | null) {
         participante_removido: <UserMinus size={10} />,
         compartido: <Share2 size={10} />,
         descripcion: <FileText size={10} />,
-        nombre: <Type size={10} />
+        nombre: <Type size={10} />,
+        repeticion: <Repeat size={10} />
     };
 
     return accion ? iconos[accion] || <History size={10} /> : <History size={10} />;

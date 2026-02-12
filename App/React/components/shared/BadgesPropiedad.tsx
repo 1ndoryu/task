@@ -7,7 +7,7 @@
 
 import type {ReactNode} from 'react';
 import {X} from 'lucide-react';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 
 interface BadgePropiedad {
     id: string;

@@ -13,7 +13,7 @@
 
 import {useState, useRef, type ReactNode} from 'react';
 import {MenuContextual} from './MenuContextual';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 
 export interface OpcionCompacta {
     id: string;

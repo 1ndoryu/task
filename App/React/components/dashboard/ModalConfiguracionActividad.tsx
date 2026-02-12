@@ -4,7 +4,7 @@
  */
 
 import {Modal, SeccionPanel, SelectorNivel, ToggleSwitch} from '../shared';
-import {Boton} from '../shared/Boton';
+import {Boton} from '../ui';
 import type {ConfiguracionActividad, PeriodoActividad, FiltroTipoActividad, TamanoCeldaActividad} from '../../hooks/useConfiguracionActividad';
 
 interface ModalConfiguracionActividadProps {

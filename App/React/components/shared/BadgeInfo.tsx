@@ -5,7 +5,7 @@
  */
 
 import type {ReactNode} from 'react';
-import {Boton} from './Boton';
+import {Boton} from '../ui';
 
 export type TipoBadge = 'adjunto' | 'descripcion' | 'repeticion' | 'fecha' | 'prioridad' | 'frecuencia' | 'racha' | 'destacado' | 'personalizado';
 
