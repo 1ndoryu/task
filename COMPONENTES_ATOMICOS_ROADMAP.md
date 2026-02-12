@@ -5,8 +5,9 @@
 
 ## Estado General
 - ✅ **Completado** - Fase 3: Migración de botones (100+ componentes, 200+ botones migrados)
-- ✅ **Completado** - Fase 4: Migración de inputs (39 inputs migrados en 25+ componentes)
+- ✅ **Completado** - Fase 4: Migración de inputs (40 inputs + 1 textarea migrados en 26 componentes)
 - ✅ **Completado** - BottomSheets, Drawer, Menus, todos los Selectores, Paneles migrados
+- 🔄 **Pendiente** - Fase 6: Centralización de estilos (eliminar 100+ usos de claseAdicional)
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
