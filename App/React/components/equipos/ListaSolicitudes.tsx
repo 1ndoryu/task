@@ -6,6 +6,7 @@
  */
 
 import {Check, X, Clock, UserX} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {SolicitudEquipo} from '../../types/dashboard';
 import {formatearFechaRelativa} from '../../utils/fecha';
 
@@ -63,20 +64,20 @@ export function ListaSolicitudes({solicitudes, tipo, onAceptar, onRechazar, onCa
                     <div className="solicitudAcciones">
                         {tipo === 'recibidas' && onAceptar && onRechazar && (
                             <>
-                                <button type="button" className="solicitudBoton aceptar" onClick={() => onAceptar(solicitud.id)} disabled={cargando} title="Aceptar solicitud">
+                                <Boton type="button" claseAdicional="solicitudBoton aceptar" onClick={() => onAceptar(solicitud.id)} disabled={cargando} title="Aceptar solicitud">
                                     <Check size={16} />
-                                </button>
-                                <button type="button" className="solicitudBoton rechazar" onClick={() => onRechazar(solicitud.id)} disabled={cargando} title="Rechazar solicitud">
+                                </Boton>
+                                <Boton type="button" claseAdicional="solicitudBoton rechazar" onClick={() => onRechazar(solicitud.id)} disabled={cargando} title="Rechazar solicitud">
                                     <X size={16} />
-                                </button>
+                                </Boton>
                             </>
                         )}
 
                         {tipo === 'enviadas' && onCancelar && (
-                            <button type="button" className="solicitudBoton cancelar" onClick={() => onCancelar(solicitud.id)} disabled={cargando} title="Cancelar solicitud">
+                            <Boton type="button" claseAdicional="solicitudBoton cancelar" onClick={() => onCancelar(solicitud.id)} disabled={cargando} title="Cancelar solicitud">
                                 <X size={16} />
                                 <span>Cancelar</span>
-                            </button>
+                            </Boton>
                         )}
                     </div>
                 </li>

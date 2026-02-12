@@ -8,6 +8,7 @@
  */
 
 import {Crown, Sparkles, CircleDot} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {InfoSuscripcion} from '../../types/dashboard';
 import type {ReactNode} from 'react';
 
@@ -50,9 +51,9 @@ export function IndicadorPlan({suscripcion, onClick}: IndicadorPlanProps) {
     };
 
     return (
-        <button id="indicador-plan" className={obtenerClase()} onClick={onClick} title={plan === 'free' ? 'Actualizar a Premium' : 'Ver detalles del plan'}>
+        <Boton id="indicador-plan" claseAdicional={obtenerClase()} onClick={onClick} title={plan === 'free' ? 'Actualizar a Premium' : 'Ver detalles del plan'}>
             <span className="indicadorPlan__icono">{obtenerIcono()}</span>
             <span className="indicadorPlan__texto">{obtenerTexto()}</span>
-        </button>
+        </Boton>
     );
 }

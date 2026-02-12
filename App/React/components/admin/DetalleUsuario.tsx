@@ -7,6 +7,7 @@
 
 import {useState} from 'react';
 import {X, Crown, Calendar, Mail, Shield, CheckCircle, Target, FolderKanban, CreditCard, Clock, Loader2} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {UsuarioAdmin} from '../../types/dashboard';
 
 interface DetalleUsuarioProps {
@@ -58,9 +59,9 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                             </span>
                         </div>
                     </div>
-                    <button type="button" className="detalleCerrarBoton" onClick={onCerrar} title="Cerrar">
+                    <Boton type="button" claseAdicional="detalleCerrarBoton" onClick={onCerrar} title="Cerrar">
                         <X size={18} />
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Información de suscripción */}
@@ -176,9 +177,9 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                         <div className="accionesContenedor">
                             {esPremium ? (
                                 /* Usuario premium: opción de cancelar */
-                                <button type="button" className="accionAdminBoton accionCancelar" onClick={onCancelarPremium}>
+                                <Boton type="button" claseAdicional="accionAdminBoton accionCancelar" onClick={onCancelarPremium}>
                                     Cancelar Premium
-                                </button>
+                                </Boton>
                             ) : (
                                 /* Usuario free: opción de activar */
                                 <div className="accionGrupo">
@@ -189,9 +190,9 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                                         <option value="180">180 días</option>
                                         <option value="365">1 año</option>
                                     </select>
-                                    <button type="button" className="accionAdminBoton accionActivar" onClick={() => onActivarPremium(duracionPremium)}>
+                                    <Boton type="button" claseAdicional="accionAdminBoton accionActivar" onClick={() => onActivarPremium(duracionPremium)}>
                                         Activar Premium
-                                    </button>
+                                    </Boton>
                                 </div>
                             )}
 
@@ -202,9 +203,9 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                                     <input type="number" min="1" max="365" value={diasExtension} onChange={e => setDiasExtension(Number(e.target.value))} className="accionInput" />
                                     <span>días</span>
                                 </div>
-                                <button type="button" className="accionAdminBoton accionExtender" onClick={() => onExtenderTrial(diasExtension)}>
+                                <Boton type="button" claseAdicional="accionAdminBoton accionExtender" onClick={() => onExtenderTrial(diasExtension)}>
                                     Extender Trial
-                                </button>
+                                </Boton>
                             </div>
                         </div>
                     )}

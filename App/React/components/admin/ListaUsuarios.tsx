@@ -6,6 +6,7 @@
  */
 
 import {ChevronLeft, ChevronRight, User, Crown, Clock, AlertCircle} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {UsuarioAdmin, PaginacionAdmin} from '../../types/dashboard';
 import {FilaUsuario} from './FilaUsuario';
 
@@ -76,17 +77,17 @@ export function ListaUsuarios({usuarios, cargando, error, paginacion, onCambiarP
             {/* Paginación */}
             {paginacion.totalPaginas > 1 && (
                 <div className="listaUsuariosPaginacion">
-                    <button type="button" className="paginacionBoton" onClick={() => onCambiarPagina(paginacion.pagina - 1)} disabled={paginacion.pagina <= 1} title="Página anterior">
+                    <Boton type="button" claseAdicional="paginacionBoton" onClick={() => onCambiarPagina(paginacion.pagina - 1)} disabled={paginacion.pagina <= 1} title="Página anterior">
                         <ChevronLeft size={16} />
-                    </button>
+                    </Boton>
 
                     <span className="paginacionInfo">
                         Página {paginacion.pagina} de {paginacion.totalPaginas}
                     </span>
 
-                    <button type="button" className="paginacionBoton" onClick={() => onCambiarPagina(paginacion.pagina + 1)} disabled={paginacion.pagina >= paginacion.totalPaginas} title="Página siguiente">
+                    <Boton type="button" claseAdicional="paginacionBoton" onClick={() => onCambiarPagina(paginacion.pagina + 1)} disabled={paginacion.pagina >= paginacion.totalPaginas} title="Página siguiente">
                         <ChevronRight size={16} />
-                    </button>
+                    </Boton>
                 </div>
             )}
         </div>

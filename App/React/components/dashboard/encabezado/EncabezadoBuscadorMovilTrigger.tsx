@@ -1,4 +1,5 @@
 import {ListChecks, Search} from 'lucide-react';
+import {Boton} from '../../ui/Boton';
 
 interface EncabezadoBuscadorMovilTriggerProps {
     onClick: () => void;
@@ -26,8 +27,8 @@ export function EncabezadoBuscadorMovilTrigger({onClick, esTablet, mostrarBotonS
    
     /* Versión normal (buscador) */
     return (
-        <button type="button" className="botonIconoEncabezado botonBuscadorMovil" onClick={onClick} title="Buscar">
+        <Boton type="button" claseAdicional="botonIconoEncabezado botonBuscadorMovil" onClick={onClick} title="Buscar">
             <Search size={18} />
-        </button>
+        </Boton>
     );
 }

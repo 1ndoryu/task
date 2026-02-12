@@ -7,6 +7,7 @@
  */
 
 import {CheckCircle2, Circle, ArrowRight} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 
 interface ResumenTareasProyectoProps {
     /* Numero de tareas completadas */
@@ -48,10 +49,10 @@ export function ResumenTareasProyecto({completadas, pendientes, mostrarBarra = t
 
             {/* Link para ver todas */}
             {onVerTodas && (
-                <button type="button" className="resumenTareasProyecto__link" onClick={onVerTodas}>
+                <Boton type="button" claseAdicional="resumenTareasProyecto__link" onClick={onVerTodas}>
                     <span>Ver todas</span>
                     <ArrowRight size={12} />
-                </button>
+                </Boton>
             )}
         </div>
     );

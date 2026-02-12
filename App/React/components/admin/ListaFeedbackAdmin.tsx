@@ -7,6 +7,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 import {MessageSquare, ChevronLeft, ChevronRight, Clock, AlertCircle, Eye, EyeOff, Bug, Lightbulb, HelpCircle} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 
 /* Interfaz con claves camelCase según respuesta del API */
 interface FeedbackItem {
@@ -178,10 +179,10 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
                                 <div className="feedbackItemAcciones">
                                     <span className="feedbackItemEmailFull">{item.usuarioEmail}</span>
                                     {!item.leido && (
-                                        <button type="button" className="feedbackItemBotonLeido" onClick={() => marcarLeido(item.id)} title="Marcar como leído">
+                                        <Boton type="button" claseAdicional="feedbackItemBotonLeido" onClick={() => marcarLeido(item.id)} title="Marcar como leído">
                                             <Eye size={14} />
                                             Marcar leído
-                                        </button>
+                                        </Boton>
                                     )}
                                     {item.leido && (
                                         <span className="feedbackItemLeidoIndicador">
@@ -199,15 +200,15 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
             {/* Paginación */}
             {paginacion.totalPaginas > 1 && (
                 <div className="listaFeedbackPaginacion">
-                    <button type="button" className="paginacionBoton" onClick={() => cargarFeedback(paginacion.pagina - 1)} disabled={paginacion.pagina <= 1} title="Página anterior">
+                    <Boton type="button" claseAdicional="paginacionBoton" onClick={() => cargarFeedback(paginacion.pagina - 1)} disabled={paginacion.pagina <= 1} title="Página anterior">
                         <ChevronLeft size={16} />
-                    </button>
+                    </Boton>
                     <span className="paginacionInfo">
                         Pág. {paginacion.pagina} de {paginacion.totalPaginas}
                     </span>
-                    <button type="button" className="paginacionBoton" onClick={() => cargarFeedback(paginacion.pagina + 1)} disabled={paginacion.pagina >= paginacion.totalPaginas} title="Página siguiente">
+                    <Boton type="button" claseAdicional="paginacionBoton" onClick={() => cargarFeedback(paginacion.pagina + 1)} disabled={paginacion.pagina >= paginacion.totalPaginas} title="Página siguiente">
                         <ChevronRight size={16} />
-                    </button>
+                    </Boton>
                 </div>
             )}
 

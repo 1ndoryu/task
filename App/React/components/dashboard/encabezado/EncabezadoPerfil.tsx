@@ -1,6 +1,7 @@
 import {useState, useRef} from 'react';
 import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, Puzzle} from 'lucide-react';
 import {MenuContextual} from '../../shared';
+import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../../types/dashboard';
 
 interface EncabezadoPerfilProps {
@@ -122,10 +123,10 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
 
     return (
         <>
-            <button type="button" className="badgeEncabezado badgeEncabezado--usuario" onClick={manejarClickUsuario} title={esTablet ? undefined : 'Opciones de usuario'}>
+            <Boton type="button" claseAdicional="badgeEncabezado badgeEncabezado--usuario" onClick={manejarClickUsuario} title={esTablet ? undefined : 'Opciones de usuario'}>
                 {avatarUrl ? <img src={avatarUrl} alt="" className="avatarEncabezado" /> : <span className="avatarEncabezadoInicial">{usuario.charAt(0).toUpperCase()}</span>}
                 <span className="nombreUsuarioEncabezado">{usuario}</span>
-            </button>
+            </Boton>
 
             {menuUsuario.visible && <MenuContextual opciones={opcionesMenuUsuario} posicionX={menuUsuario.x} posicionY={menuUsuario.y} onSeleccionar={manejarOpcionMenu} onCerrar={() => setMenuUsuario({...menuUsuario, visible: false})} />}
 

@@ -6,6 +6,7 @@
  */
 
 import {Play, Pause, Square, CheckCircle2, X, Timer} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import {useTimeTracker} from '../../hooks/useTimeTracker';
 
 interface DockTrackingProps {
@@ -57,22 +58,22 @@ export function DockTracking({esMovil = false, onCompletarEntidad}: DockTracking
                 {/* Acciones */}
                 <div className="dockTrackingAcciones">
                     {tracker.estaActivo ? (
-                        <button type="button" className="dockTrackingBoton" onClick={tracker.pausar} title="Pausar" aria-label="Pausar tracking">
+                        <Boton type="button" claseAdicional="dockTrackingBoton" onClick={tracker.pausar} title="Pausar" aria-label="Pausar tracking">
                             <Pause size={14} />
-                        </button>
+                        </Boton>
                     ) : (
-                        <button type="button" className="dockTrackingBoton dockTrackingBoton--reanudar" onClick={tracker.reanudar} title="Reanudar" aria-label="Reanudar tracking">
+                        <Boton type="button" claseAdicional="dockTrackingBoton dockTrackingBoton--reanudar" onClick={tracker.reanudar} title="Reanudar" aria-label="Reanudar tracking">
                             <Play size={14} />
-                        </button>
+                        </Boton>
                     )}
 
-                    <button type="button" className="dockTrackingBoton dockTrackingBoton--completar" onClick={manejarCompletar} title="Completar" aria-label="Completar tracking">
+                    <Boton type="button" claseAdicional="dockTrackingBoton dockTrackingBoton--completar" onClick={manejarCompletar} title="Completar" aria-label="Completar tracking">
                         <Square size={14} />
-                    </button>
+                    </Boton>
 
-                    <button type="button" className="dockTrackingBoton dockTrackingBoton--cancelar" onClick={tracker.cancelar} title="Cancelar" aria-label="Cancelar tracking">
+                    <Boton type="button" claseAdicional="dockTrackingBoton dockTrackingBoton--cancelar" onClick={tracker.cancelar} title="Cancelar" aria-label="Cancelar tracking">
                         <X size={12} />
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </div>

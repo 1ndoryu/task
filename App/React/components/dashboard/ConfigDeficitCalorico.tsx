@@ -6,6 +6,7 @@
 
 import {useState} from 'react';
 import {Save, Eye, EyeOff} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
 import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
@@ -112,9 +113,9 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitApiKey">
                     <input type={mostrarKeyGroq ? 'text' : 'password'} className="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq(e.target.value)} />
-                    <button type="button" className="configDeficitBotonOjo" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
+                    <Boton type="button" claseAdicional="configDeficitBotonOjo" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                    </Boton>
                 </div>
             </div>
 
@@ -124,20 +125,20 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitApiKey">
                     <input type={mostrarKeyNinjas ? 'text' : 'password'} className="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas(e.target.value)} />
-                    <button type="button" className="configDeficitBotonOjo" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
+                    <Boton type="button" claseAdicional="configDeficitBotonOjo" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                    </Boton>
                 </div>
             </div>
 
             <div className="configDeficitAcciones">
-                <button type="button" className="configDeficitBotonCancelar" onClick={onCerrar}>
+                <Boton type="button" claseAdicional="configDeficitBotonCancelar" onClick={onCerrar}>
                     Cancelar
-                </button>
-                <button type="button" className="configDeficitBotonGuardar" onClick={manejarGuardar}>
+                </Boton>
+                <Boton type="button" claseAdicional="configDeficitBotonGuardar" onClick={manejarGuardar}>
                     <Save size={14} />
                     <span>Guardar</span>
-                </button>
+                </Boton>
             </div>
         </div>
     );

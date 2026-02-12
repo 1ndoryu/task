@@ -6,6 +6,7 @@
  */
 
 import {Users, UserCheck, Calendar, UserPlus, UserMinus, Paperclip, MessageCircle, Target, Check, Trash2} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {Notificacion, TipoNotificacion} from '../../types/dashboard';
 import {formatearFechaRelativa} from '../../utils/fecha';
 
@@ -89,13 +90,13 @@ export function ItemNotificacion({notificacion, onClick, onMarcarLeida, onElimin
             {/* Acciones */}
             <div className="itemNotificacion__acciones">
                 {!notificacion.leida && (
-                    <button type="button" className="itemNotificacion__boton" onClick={manejarMarcarLeida} title="Marcar como leída">
+                    <Boton type="button" claseAdicional="itemNotificacion__boton" onClick={manejarMarcarLeida} title="Marcar como leída">
                         <Check size={12} />
-                    </button>
+                    </Boton>
                 )}
-                <button type="button" className="itemNotificacion__boton itemNotificacion__boton--eliminar" onClick={manejarEliminar} title="Eliminar">
+                <Boton type="button" claseAdicional="itemNotificacion__boton itemNotificacion__boton--eliminar" onClick={manejarEliminar} title="Eliminar">
                     <Trash2 size={12} />
-                </button>
+                </Boton>
             </div>
         </div>
     );

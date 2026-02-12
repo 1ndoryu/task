@@ -2,6 +2,7 @@ import {useMemo} from 'react';
 import {Menu, MoreVertical, Search} from 'lucide-react';
 import {obtenerOpcionesMenuUsuario, obtenerOpcionCerrarSesion} from '../../../utils/opcionesMenuUsuario';
 import {DrawerMovil, BottomSheet} from '../../shared';
+import {Boton} from '../../ui/Boton';
 import type {OpcionDrawer} from '../../shared/DrawerMovil';
 import type {GrupoOpciones, OpcionMenu} from '../../shared/MenuOpcionesPanel';
 import type {InfoSuscripcion, Tarea, SincronizacionInfo} from '../../../types/dashboard';
@@ -140,10 +141,10 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
 
     return (
         <>
-            <button type="button" className="botonIconoEncabezado botonMenuMovil" onClick={onAbrirDrawer} title={esTablet ? undefined : 'Menú'} aria-label="Abrir menú de navegación">
+            <Boton type="button" claseAdicional="botonIconoEncabezado botonMenuMovil" onClick={onAbrirDrawer} title={esTablet ? undefined : 'Menú'} aria-label="Abrir menú de navegación">
                 <Menu size={18} />
                 {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
-            </button>
+            </Boton>
 
             <DrawerMovil estaAbierto={drawerAbierto} onCerrar={onCerrarDrawer} usuario={{nombre: usuario, avatar: avatarUrl}} suscripcion={suscripcion} opciones={opcionesDrawer} onSeleccionar={manejarOpcionDrawer} opcionesSecundarias={opcionesSecundariasDrawer} onClickPerfil={onClickUsuario} onClickPlan={onClickPlan} />
         </>
@@ -177,17 +178,17 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
 
     return (
         <>
-            <button type="button" className={`botonIconoEncabezado botonOpcionesMovil ${opcionesMovil.tieneFiltrosActivos ? 'botonOpcionesMovil--activo' : ''}`} onClick={onAbrirMenuOpcionesMovil} title={esTablet ? undefined : 'Opciones del panel'}>
+            <Boton type="button" claseAdicional={`botonIconoEncabezado botonOpcionesMovil ${opcionesMovil.tieneFiltrosActivos ? 'botonOpcionesMovil--activo' : ''}`} onClick={onAbrirMenuOpcionesMovil} title={esTablet ? undefined : 'Opciones del panel'}>
                 <MoreVertical size={18} />
-            </button>
+            </Boton>
 
             <BottomSheet estaAbierto={menuOpcionesMovilAbierto} onCerrar={onCerrarMenuOpcionesMovil}>
                 <div className="menuOpcionesPanelContenido">
                     {/* Opcion de busqueda primero */}
                     {estaConectado && onSeleccionarTarea && (
                         <div className="menuOpcionesPanelGrupo">
-                            <button
-                                className="menuOpcionesPanelItem"
+                            <Boton
+                                claseAdicional="menuOpcionesPanelItem"
                                 onClick={() => {
                                     onCerrarMenuOpcionesMovil();
                                     onAbrirBuscadorMovil();
@@ -198,7 +199,7 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                                 <span className="menuOpcionesPanelItemIcono">
                                     <Search size={14} />
                                 </span>
-                            </button>
+                            </Boton>
                         </div>
                     )}
 
@@ -207,9 +208,9 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                         <div className="menuOpcionesPanelGrupo">
                             {estaConectado && onSeleccionarTarea && <div className="menuOpcionesPanelSeparador" />}
                             {opcionesMovil.opciones.map(opcion => (
-                                <button
+                                <Boton
                                     key={opcion.id}
-                                    className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`}
+                                    claseAdicional={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`}
                                     onClick={() => {
                                         opcion.onClick();
                                         onCerrarMenuOpcionesMovil();
@@ -219,7 +220,7 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
                                     {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
-                                </button>
+                                </Boton>
                             ))}
                         </div>
                     )}
@@ -229,9 +230,9 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                         <div key={grupo.titulo} className="menuOpcionesPanelGrupo">
                             {(idx > 0 || (opcionesMovil.opciones && opcionesMovil.opciones.length > 0)) && <div className="menuOpcionesPanelSeparador" />}
                             {grupo.opciones.map(opcion => (
-                                <button
+                                <Boton
                                     key={opcion.id}
-                                    className={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`}
+                                    claseAdicional={`menuOpcionesPanelItem ${opcion.activo ? 'menuOpcionesPanelItem--activo' : ''}`}
                                     onClick={() => {
                                         opcion.onClick();
                                         onCerrarMenuOpcionesMovil();
@@ -241,7 +242,7 @@ export function EncabezadoOpcionesMovil({opcionesMovil, menuOpcionesMovilAbierto
                                         {opcion.descripcion && <span className="menuOpcionesPanelItemDescripcion">{opcion.descripcion}</span>}
                                     </span>
                                     {opcion.icono && <span className="menuOpcionesPanelItemIcono">{opcion.icono}</span>}
-                                </button>
+                                </Boton>
                             ))}
                         </div>
                     ))}

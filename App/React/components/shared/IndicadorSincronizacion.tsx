@@ -12,6 +12,7 @@
  */
 
 import {LogOut, CloudOff, AlertTriangle, Loader2, CheckCircle} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 
 interface IndicadorSincronizacionProps {
     sincronizado: boolean;
@@ -27,24 +28,24 @@ export function IndicadorSincronizacion({sincronizado, pendiente, error, estaLog
     /* No mostrar si el usuario no está logueado */
     if (!estaLogueado) {
         return (
-            <button type="button" id="indicador-sync-offline" className="indicadorSync indicadorSync--offline" title="Modo local - Click para iniciar sesión" onClick={onLogin}>
+            <Boton type="button" id="indicador-sync-offline" claseAdicional="indicadorSync indicadorSync--offline" title="Modo local - Click para iniciar sesión" onClick={onLogin}>
                 <span className="indicadorSync__icono">
                     <CloudOff size={12} />
                 </span>
                 <span className="indicadorSync__texto">Iniciar Sesión</span>
-            </button>
+            </Boton>
         );
     }
 
     /* Estado de error */
     if (error) {
         return (
-            <button type="button" id="indicador-sync-error" className="indicadorSync indicadorSync--error" onClick={onSincronizar} title={`Error: ${error}. Click para reintentar.`}>
+            <Boton type="button" id="indicador-sync-error" claseAdicional="indicadorSync indicadorSync--error" onClick={onSincronizar} title={`Error: ${error}. Click para reintentar.`}>
                 <span className="indicadorSync__icono">
                     <AlertTriangle size={12} />
                 </span>
                 <span className="indicadorSync__texto">Error</span>
-            </button>
+            </Boton>
         );
     }
 
@@ -62,11 +63,11 @@ export function IndicadorSincronizacion({sincronizado, pendiente, error, estaLog
 
     /* Estado sincronizado */
     return (
-        <button type="button" id="indicador-sync-ok" className="indicadorSync indicadorSync--ok" title="Datos sincronizados - Click para cerrar sesión" onClick={onLogout}>
+        <Boton type="button" id="indicador-sync-ok" claseAdicional="indicadorSync indicadorSync--ok" title="Datos sincronizados - Click para cerrar sesión" onClick={onLogout}>
             <span className="indicadorSync__icono">
                 <LogOut size={12} />
             </span>
             <span className="indicadorSync__texto">Logout</span>
-        </button>
+        </Boton>
     );
 }

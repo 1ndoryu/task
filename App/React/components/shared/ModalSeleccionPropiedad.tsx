@@ -11,6 +11,7 @@
 import {type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {X} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
 
 interface OpcionPropiedad {
@@ -53,26 +54,26 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorAct
                 {/* Encabezado */}
                 <div className="modalSeleccionPropiedad__encabezado">
                     <span className="modalSeleccionPropiedad__titulo">{titulo}</span>
-                    <button type="button" className="modalSeleccionPropiedad__cerrar" onClick={onCerrar} aria-label="Cerrar">
+                    <Boton type="button" claseAdicional="modalSeleccionPropiedad__cerrar" onClick={onCerrar} aria-label="Cerrar">
                         <X size={16} />
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Lista de opciones */}
                 <div className="modalSeleccionPropiedad__lista">
                     {/* Opción para limpiar/quitar selección */}
                     {permitirLimpiar && (
-                        <button type="button" className={`modalSeleccionPropiedad__opcion ${valorActual === undefined ? 'modalSeleccionPropiedad__opcion--activa' : ''}`} onClick={() => manejarSeleccion(undefined)}>
+                        <Boton type="button" claseAdicional={`modalSeleccionPropiedad__opcion ${valorActual === undefined ? 'modalSeleccionPropiedad__opcion--activa' : ''}`} onClick={() => manejarSeleccion(undefined)}>
                             <span className="modalSeleccionPropiedad__opcionTexto">{textoLimpiar}</span>
-                        </button>
+                        </Boton>
                     )}
 
                     {opciones.map(opcion => (
-                        <button key={opcion.id} type="button" className={`modalSeleccionPropiedad__opcion ${valorActual === opcion.id ? 'modalSeleccionPropiedad__opcion--activa' : ''} ${opcion.variante === 'peligroso' ? 'modalSeleccionPropiedad__opcion--peligroso' : ''}`} onClick={() => manejarSeleccion(opcion.id)}>
+                        <Boton key={opcion.id} type="button" claseAdicional={`modalSeleccionPropiedad__opcion ${valorActual === opcion.id ? 'modalSeleccionPropiedad__opcion--activa' : ''} ${opcion.variante === 'peligroso' ? 'modalSeleccionPropiedad__opcion--peligroso' : ''}`} onClick={() => manejarSeleccion(opcion.id)}>
                             {opcion.icono && <span className="modalSeleccionPropiedad__opcionIcono">{opcion.icono}</span>}
                             <span className="modalSeleccionPropiedad__opcionTexto">{opcion.etiqueta}</span>
                             {opcion.descripcion && <span className="modalSeleccionPropiedad__opcionDescripcion">{opcion.descripcion}</span>}
-                        </button>
+                        </Boton>
                     ))}
                 </div>
             </div>

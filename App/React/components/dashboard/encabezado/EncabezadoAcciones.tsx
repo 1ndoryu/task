@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {LayoutGrid, Bell, FlaskConical, Settings, Users, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../../shared';
+import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
 
 interface EncabezadoAccionesProps {
@@ -57,40 +58,40 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes = 0,
             {/* Crear Nuevo (Tarea/Hábito/Proyecto) */}
             {onCrearRapido && (
                 <>
-                    <button type="button" className="botonIconoEncabezado" onClick={manejarClickCrear} title={esTablet ? undefined : 'Crear nuevo...'}>
+                    <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={manejarClickCrear} title={esTablet ? undefined : 'Crear nuevo...'}>
                         <Plus size={14} />
-                    </button>
+                    </Boton>
                     {menuCrear.visible && <MenuContextual opciones={opcionesMenuCrear} posicionX={menuCrear.x} posicionY={menuCrear.y} onSeleccionar={manejarSeleccionCrear} onCerrar={() => setMenuCrear({...menuCrear, visible: false})} />}
                 </>
             )}
 
             {/* Configurar Layout */}
             {onClickLayout && (
-                <button type="button" className="botonIconoEncabezado" onClick={onClickLayout} title={esTablet ? undefined : 'Configurar Layout'}>
+                <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={onClickLayout} title={esTablet ? undefined : 'Configurar Layout'}>
                     <LayoutGrid size={14} />
-                </button>
+                </Boton>
             )}
 
             {/* Notificaciones */}
             {onClickNotificaciones && estaConectado && (
-                <button type="button" className={`botonIconoEncabezado botonIconoEncabezado--notificaciones ${notificacionesPendientes > 0 ? 'tieneNuevas' : ''}`} onClick={onClickNotificaciones} title={esTablet ? undefined : 'Notificaciones'}>
+                <Boton type="button" claseAdicional={`botonIconoEncabezado botonIconoEncabezado--notificaciones ${notificacionesPendientes > 0 ? 'tieneNuevas' : ''}`} onClick={onClickNotificaciones} title={esTablet ? undefined : 'Notificaciones'}>
                     <Bell size={14} />
                     {notificacionesPendientes > 0 && <span className="botonIconoEncabezado__contadorNotificaciones">{notificacionesPendientes}</span>}
-                </button>
+                </Boton>
             )}
 
             {/* Laboratorio de Pruebas (solo admins) */}
             {onClickExperimentos && (
-                <button type="button" className="botonIconoEncabezado" onClick={onClickExperimentos} title={esTablet ? undefined : 'Laboratorio de Pruebas'}>
+                <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={onClickExperimentos} title={esTablet ? undefined : 'Laboratorio de Pruebas'}>
                     <FlaskConical size={14} />
-                </button>
+                </Boton>
             )}
 
             {/* Panel de Administración (solo admins) */}
             {esAdmin && onClickAdmin && (
-                <button type="button" className="botonIconoEncabezado" onClick={onClickAdmin} title={esTablet ? undefined : 'Panel de Administración'}>
+                <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={onClickAdmin} title={esTablet ? undefined : 'Panel de Administración'}>
                     <Settings size={14} />
-                </button>
+                </Boton>
             )}
 
             {/* TO-DO: Mi Equipo (Social) - Habilitar cuando feature esté lista

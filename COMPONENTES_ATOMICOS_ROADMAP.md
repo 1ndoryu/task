@@ -62,25 +62,12 @@
 - [x] 3.29 - Reemplazar botones en DrawerMovil
 - [x] 3.30 - Reemplazar botones en MenuOpcionesPanel
 - [x] 3.31 - Reemplazar botones en ListaParticipantes
-- [x] 3.32 - Reemplazar botones en todos los Selectores (~18 componentes, ~80 botones):
-  - [x] SelectorBadge (2 botones)
-  - [x] SelectorDias (7 botones)
-  - [x] SelectorNivel (botones dinámicos)
-  - [x] SelectorEstadoTarea, SelectorEstadoHabito, SelectorProyecto (6 botones)
-  - [x] SelectorIconoProyecto, SelectorTags (4 botones)
-  - [x] Todos los Selectores Pills (EstadoHabitoPill, EstadoPill, EstadoProyectoPill, ImportanciaPill, ProyectoPill, FrecuenciaPill, RepeticionPill) (~25 botones)
-  - [x] SelectorVentanaOportunidad (3 botones)
-- [x] 3.33 - Reemplazar botones en Paneles (~7 componentes, ~40 botones):
-  - [x] PanelAyuno (7 botones)
-  - [x] PanelDeficitCalorico (2 botones)
-  - [x] PanelActividad (4 botones)
-  - [x] HistorialAyuno (3 botones)
-  - [x] ModalUltimaComida (2 botones)
-  - [x] ModalFinalizarAyuno (3 botones)
-  - [x] HistorialCalorias (1 botón)
-- [ ] 3.34 - Reemplazar botones en Encabezados y Modales (~15 componentes, ~30 botones)
-- [ ] 3.35 - Reemplazar botones en Admin y Equipos (~10 componentes, ~20 botones)
-- [ ] 3.36 - Reemplazar botones restantes (~10 componentes, ~10 botones)
+- [x] 3.32 - Reemplazar botones en todos los Selectores (~18 componentes, ~80 botones)
+- [x] 3.33 - Reemplazar botones en Paneles (~7 componentes, ~40 botones)
+- [x] 3.34 - Reemplazar botones en Encabezados y Modales (6 componentes migrados: EncabezadoAcciones, EncabezadoPerfil, EncabezadoEstado, EncabezadoBuscadorMovilTrigger, EncabezadoMovil, EncabezadoBuscador)
+- [x] 3.35 - Reemplazar botones en Admin y Equipos (10 componentes migrados: FilaUsuario, PanelAdministracion, ListaUsuarios, ListaFeedbackAdmin, FiltrosUsuarios, DetalleUsuario, ModalEquipos, ListaSolicitudes, FormularioSolicitud, ListaCompaneros)
+- [x] 3.36 - Reemplazar botones en Shared comunes (12 componentes migrados: ItemNotificacion, ModalExperimentos, IndicadorPlan, IndicadorSincronizacion, MensajeBloquePremium, ModalTemas, DockTracking, ModalSeleccionPropiedad, PestanasModal, ResumenTareasProyecto, ModalPlugins, ConfigDeficitCalorico)
+- [ ] 3.37 - Reemplazar botones restantes (~60 botones en ~30 componentes)
 
 ## Notas de Progreso
 - ✅ 28 componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos)
@@ -130,14 +117,14 @@
 ---
 
 ## Notas de Progreso Finales
-- ✅ 30 componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos, modales)
+- ✅ 56+ componentes migrados exitosamente (shared, paneles, dashboard, listas, adjuntos, modales, encabezados, admin, equipos)
 - ✅ Componentes base de UI creados y funcionando
 - ✅ Corrección masiva de errores TypeScript: prop "titulo" → "title" (español → estándar HTML)
-- ✅ **NUEVO:** Plan completo de centralización de estilos documentado (PLAN_CENTRALIZACION_ESTILOS.md)
 - ✅ **12 feb 2026:** Resueltos 10 errores críticos TypeScript (Boton con forwardRef, MenuContextual imports, DrawerMovil plan type)
-- 🔄 Continuando con migración masiva de componentes complejos (modales, listas, formularios)
+- ✅ **12 feb 2026 - Sesión extendida:** Migrados 28 componentes adicionales en una sola sesión (Encabezados, Admin, Equipos, Notificaciones, Experimentos, Shared comunes)
+- 🔄 Continuando con migración de componentes restantes (~60 botones en ~30 componentes)
 - 📝 Patrón de migración establecido: import Boton, reemplazar <button> preservando clases con claseAdicional
 - ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
 - ⚠️ Lección aprendida: Componentes base como Boton deben usar forwardRef para permitir refs en componentes hijos
-- 📋 **PRÓXIMO:** Continuar con Fase 3.34 (Encabezados y Modales) O iniciar centralización de estilos
+- 📋 **PRÓXIMO:** Continuar con componentes restantes (SeccionResponsables, PropiedadesCompactas, SelectorFrecuencia, PanelChatHistorial, etc.)
 

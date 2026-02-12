@@ -6,6 +6,7 @@
  */
 
 import {Crown, Eye, CreditCard, XCircle, Loader2} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {UsuarioAdmin} from '../../types/dashboard';
 
 interface FilaUsuarioProps {
@@ -96,18 +97,18 @@ export function FilaUsuario({usuario, onVerDetalle, onActivarPremium, onCancelar
                     <Loader2 size={16} className="animacionRotar" />
                 ) : (
                     <>
-                        <button type="button" className="accionBoton accionVer" onClick={onVerDetalle} title="Ver detalle">
+                        <Boton type="button" claseAdicional="accionBoton accionVer" onClick={onVerDetalle} title="Ver detalle">
                             <Eye size={14} />
-                        </button>
+                        </Boton>
 
                         {esPremium ? (
-                            <button type="button" className="accionBoton accionCancelar" onClick={onCancelarPremium} title="Cancelar premium">
+                            <Boton type="button" claseAdicional="accionBoton accionCancelar" onClick={onCancelarPremium} title="Cancelar premium">
                                 <XCircle size={14} />
-                            </button>
+                            </Boton>
                         ) : (
-                            <button type="button" className="accionBoton accionActivar" onClick={onActivarPremium} title="Activar premium">
+                            <Boton type="button" claseAdicional="accionBoton accionActivar" onClick={onActivarPremium} title="Activar premium">
                                 <CreditCard size={14} />
-                            </button>
+                            </Boton>
                         )}
                     </>
                 )}

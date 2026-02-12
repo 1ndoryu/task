@@ -7,6 +7,7 @@
 
 import {useEffect, useState} from 'react';
 import {Modal} from '../shared/Modal';
+import {Boton} from '../ui/Boton';
 import {FormularioSolicitud} from './FormularioSolicitud';
 import {ListaSolicitudes} from './ListaSolicitudes';
 import {ListaCompaneros} from './ListaCompaneros';
@@ -91,9 +92,9 @@ export function ModalEquipos({estaAbierto, onCerrar}: ModalEquiposProps): JSX.El
             return (
                 <div className="equiposError">
                     <p>{equipos.error}</p>
-                    <button type="button" className="botonReintentar" onClick={() => equipos.cargarEquipo()}>
+                    <Boton type="button" claseAdicional="botonReintentar" onClick={() => equipos.cargarEquipo()}>
                         Reintentar
-                    </button>
+                    </Boton>
                 </div>
             );
         }
@@ -118,18 +119,18 @@ export function ModalEquipos({estaAbierto, onCerrar}: ModalEquiposProps): JSX.El
 
                 {/* Pestañas */}
                 <div className="equiposPestanas">
-                    <button type="button" className={`equiposPestana ${pestanaActiva === 'companeros' ? 'activa' : ''}`} onClick={() => setPestanaActiva('companeros')}>
+                    <Boton type="button" claseAdicional={`equiposPestana ${pestanaActiva === 'companeros' ? 'activa' : ''}`} onClick={() => setPestanaActiva('companeros')}>
                         Compañeros
                         {equipos.contadores.companeros > 0 && <span className="equiposContador">{equipos.contadores.companeros}</span>}
-                    </button>
-                    <button type="button" className={`equiposPestana ${pestanaActiva === 'recibidas' ? 'activa' : ''}`} onClick={() => setPestanaActiva('recibidas')}>
+                    </Boton>
+                    <Boton type="button" claseAdicional={`equiposPestana ${pestanaActiva === 'recibidas' ? 'activa' : ''}`} onClick={() => setPestanaActiva('recibidas')}>
                         Recibidas
                         {equipos.contadores.recibidas > 0 && <span className="equiposContador alerta">{equipos.contadores.recibidas}</span>}
-                    </button>
-                    <button type="button" className={`equiposPestana ${pestanaActiva === 'enviadas' ? 'activa' : ''}`} onClick={() => setPestanaActiva('enviadas')}>
+                    </Boton>
+                    <Boton type="button" claseAdicional={`equiposPestana ${pestanaActiva === 'enviadas' ? 'activa' : ''}`} onClick={() => setPestanaActiva('enviadas')}>
                         Enviadas
                         {equipos.contadores.enviadas > 0 && <span className="equiposContador">{equipos.contadores.enviadas}</span>}
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Contenido de la pestaña activa */}

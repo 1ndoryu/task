@@ -6,6 +6,7 @@
 
 import {Check} from 'lucide-react';
 import {Modal} from './Modal';
+import {Boton} from '../ui/Boton';
 import {TEMAS_DISPONIBLES, type TipoTema} from '../../hooks/useTema';
 
 interface ModalTemasProps {
@@ -23,17 +24,17 @@ export function ModalTemas({estaAbierto, onCerrar, temaActual, onCambiarTema}: M
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Tema" claseExtra="modalContenedor--temas">
             <div id="selector-temas" className="selectorTemas">
                 {TEMAS_DISPONIBLES.map(tema => (
-                    <button
+                    <Boton
                         key={tema.id}
                         type="button"
-                        className={`selectorTemas__opcion ${temaActual === tema.id ? 'selectorTemas__opcion--activa' : ''}`}
+                        claseAdicional={`selectorTemas__opcion ${temaActual === tema.id ? 'selectorTemas__opcion--activa' : ''}`}
                         onClick={() => onCambiarTema(tema.id)}
                     >
                         <span className="selectorTemas__nombre">{tema.nombre}</span>
                         {temaActual === tema.id && (
                             <Check size={14} className="selectorTemas__check" />
                         )}
-                    </button>
+                    </Boton>
                 ))}
             </div>
         </Modal>

@@ -9,6 +9,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Settings} from 'lucide-react';
 import {Modal} from '../shared/Modal';
+import {Boton} from '../ui/Boton';
 import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {useHabitosStore} from '../../stores/habitosStore';
@@ -47,13 +48,13 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
             </div>
             <div className="modalPluginsAcciones">
                 {plugin.requiereConfiguracion && estaActivo && onAbrirConfig && (
-                    <button type="button" className="modalPluginsBotonConfig" onClick={() => onAbrirConfig(plugin.id)} title="Configurar plugin">
+                    <Boton type="button" claseAdicional="modalPluginsBotonConfig" onClick={() => onAbrirConfig(plugin.id)} title="Configurar plugin">
                         <Settings size={14} />
-                    </button>
+                    </Boton>
                 )}
-                <button type="button" className={`modalPluginsToggle ${estaActivo ? 'modalPluginsToggle--activo' : ''}`} onClick={() => onToggle(plugin.id)} aria-label={estaActivo ? 'Desactivar plugin' : 'Activar plugin'}>
+                <Boton type="button" claseAdicional={`modalPluginsToggle ${estaActivo ? 'modalPluginsToggle--activo' : ''}`} onClick={() => onToggle(plugin.id)} aria-label={estaActivo ? 'Desactivar plugin' : 'Activar plugin'}>
                     <span className="modalPluginsToggleIndicador" />
-                </button>
+                </Boton>
             </div>
         </div>
     );

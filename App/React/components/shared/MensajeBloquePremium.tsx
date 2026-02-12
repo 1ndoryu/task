@@ -8,6 +8,7 @@
  */
 
 import {Lock} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 
 interface MensajeBloquePremiumProps {
     titulo: string;
@@ -28,9 +29,9 @@ export function MensajeBloquePremium({
             <p className="mensajeBloquePremiumTitulo">{titulo}</p>
             <p className="mensajeBloquePremiumTexto">{descripcion}</p>
             {onAbrirUpgrade && (
-                <button className="mensajeBloquePremiumBoton" onClick={onAbrirUpgrade}>
+                <Boton claseAdicional="mensajeBloquePremiumBoton" onClick={onAbrirUpgrade}>
                     {textoBoton}
-                </button>
+                </Boton>
             )}
         </div>
     );

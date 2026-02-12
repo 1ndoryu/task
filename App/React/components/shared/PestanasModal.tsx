@@ -14,6 +14,7 @@
  */
 
 import {useMemo} from 'react';
+import {Boton} from '../ui/Boton';
 
 type PestanaId = 'configuracion' | 'chat';
 
@@ -55,10 +56,10 @@ export function PestanasModal({pestanaActiva, onCambiar, etiquetas, tieneNotific
     return (
         <div className="panelConfiguracionPestanas">
             {pestanas.map(pestana => (
-                <button key={pestana.id} type="button" className={`panelConfiguracionPestana ${pestanaActiva === pestana.id ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => onCambiar(pestana.id)}>
+                <Boton key={pestana.id} type="button" claseAdicional={`panelConfiguracionPestana ${pestanaActiva === pestana.id ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => onCambiar(pestana.id)}>
                     {pestana.etiqueta}
                     {pestana.id === 'chat' && tieneNotificaciones && <span className="pestanaIndicador" />}
-                </button>
+                </Boton>
             ))}
         </div>
     );

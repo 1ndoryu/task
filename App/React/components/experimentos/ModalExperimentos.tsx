@@ -7,6 +7,7 @@
 
 import {FlaskConical, Bell, X, CheckCircle, AlertCircle} from 'lucide-react';
 import {useState} from 'react';
+import {Boton} from '../ui/Boton';
 
 interface AccionExperimento {
     id: string;
@@ -48,9 +49,9 @@ export function ModalExperimentos({abierto, onCerrar, acciones}: ModalExperiment
                         <FlaskConical size={18} />
                         <span>Laboratorio de Pruebas</span>
                     </div>
-                    <button type="button" className="modalExperimentos__cerrar" onClick={onCerrar}>
+                    <Boton type="button" claseAdicional="modalExperimentos__cerrar" onClick={onCerrar}>
                         <X size={16} />
-                    </button>
+                    </Boton>
                 </header>
 
                 <div className="modalExperimentos__contenido">
@@ -58,14 +59,14 @@ export function ModalExperimentos({abierto, onCerrar, acciones}: ModalExperiment
 
                     <div className="modalExperimentos__acciones">
                         {acciones.map(accion => (
-                            <button key={accion.id} type="button" className={`modalExperimentos__accion ${resultados[accion.id] ? `modalExperimentos__accion--${resultados[accion.id]}` : ''}`} onClick={() => ejecutarAccion(accion)} disabled={ejecutando !== null}>
+                            <Boton key={accion.id} type="button" claseAdicional={`modalExperimentos__accion ${resultados[accion.id] ? `modalExperimentos__accion--${resultados[accion.id]}` : ''}`} onClick={() => ejecutarAccion(accion)} disabled={ejecutando !== null}>
                                 <div className="modalExperimentos__accionIcono">{resultados[accion.id] === 'exito' ? <CheckCircle size={20} /> : resultados[accion.id] === 'error' ? <AlertCircle size={20} /> : accion.icono}</div>
                                 <div className="modalExperimentos__accionInfo">
                                     <span className="modalExperimentos__accionNombre">{accion.nombre}</span>
                                     <span className="modalExperimentos__accionDescripcion">{accion.descripcion}</span>
                                 </div>
                                 {ejecutando === accion.id && <div className="modalExperimentos__spinner" />}
-                            </button>
+                            </Boton>
                         ))}
                     </div>
                 </div>

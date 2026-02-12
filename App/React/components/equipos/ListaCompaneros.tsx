@@ -5,6 +5,7 @@
  */
 
 import {Users, UserMinus} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {CompaneroEquipo} from '../../types/dashboard';
 import {formatearFechaRelativa} from '../../utils/fecha';
 
@@ -42,9 +43,9 @@ export function ListaCompaneros({companeros, onEliminar, cargando}: ListaCompane
                     </div>
 
                     <div className="companeroAcciones">
-                        <button type="button" className="companeroBoton eliminar" onClick={() => onEliminar(companero.id)} disabled={cargando} title="Eliminar conexión">
+                        <Boton type="button" claseAdicional="companeroBoton eliminar" onClick={() => onEliminar(companero.id)} disabled={cargando} title="Eliminar conexión">
                             <UserMinus size={16} />
-                        </button>
+                        </Boton>
                     </div>
                 </li>
             ))}

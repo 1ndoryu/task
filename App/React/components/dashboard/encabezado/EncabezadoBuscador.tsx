@@ -1,5 +1,6 @@
 import {Search, X} from 'lucide-react';
 import {BuscadorGlobal} from '../BuscadorGlobal';
+import {Boton} from '../../ui/Boton';
 import type {Tarea, Habito, Proyecto} from '../../../types/dashboard';
 
 interface EncabezadoBuscadorProps {
@@ -30,9 +31,9 @@ export function EncabezadoBuscador({tareas, habitos, proyectos, onSeleccionarTar
                     <div className="buscadorModalContenido" onClick={e => e.stopPropagation()}>
                         <div className="buscadorModalHeader">
                             <h3 className="buscadorModalTitulo">Buscar</h3>
-                            <button className="buscadorModalCerrar" onClick={onCerrarModal}>
+                            <Boton claseAdicional="buscadorModalCerrar" onClick={onCerrarModal}>
                                 <X size={16} />
-                            </button>
+                            </Boton>
                         </div>
                         <BuscadorGlobal
                             tareas={tareas}

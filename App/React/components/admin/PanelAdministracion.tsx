@@ -9,6 +9,7 @@
 import {useEffect, useState} from 'react';
 import {Users, MessageSquare} from 'lucide-react';
 import {Modal} from '../shared/Modal';
+import {Boton} from '../ui/Boton';
 import {FiltrosUsuarios} from './FiltrosUsuarios';
 import {ListaUsuarios} from './ListaUsuarios';
 import {ResumenAdmin} from './ResumenAdmin';
@@ -98,14 +99,14 @@ export function PanelAdministracion({estaAbierto, onCerrar}: PanelAdministracion
             <div id="panel-administracion" className="panelAdministracion">
                 {/* Tabs de navegación */}
                 <div className="adminTabs">
-                    <button type="button" className={`adminTab ${tabActiva === 'usuarios' ? 'adminTabActiva' : ''}`} onClick={() => setTabActiva('usuarios')}>
+                    <Boton type="button" claseAdicional={`adminTab ${tabActiva === 'usuarios' ? 'adminTabActiva' : ''}`} onClick={() => setTabActiva('usuarios')}>
                         <Users size={16} />
                         Usuarios
-                    </button>
-                    <button type="button" className={`adminTab ${tabActiva === 'feedback' ? 'adminTabActiva' : ''}`} onClick={() => setTabActiva('feedback')}>
+                    </Boton>
+                    <Boton type="button" claseAdicional={`adminTab ${tabActiva === 'feedback' ? 'adminTabActiva' : ''}`} onClick={() => setTabActiva('feedback')}>
                         <MessageSquare size={16} />
                         Feedback
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Contenido según tab */}

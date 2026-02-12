@@ -1,4 +1,5 @@
 import {Wifi, WifiOff, RefreshCw, AlertTriangle} from 'lucide-react';
+import {Boton} from '../../ui/Boton';
 import type {SincronizacionInfo} from '../../../types/dashboard';
 
 interface EncabezadoEstadoProps {
@@ -49,10 +50,10 @@ export function EncabezadoEstado({sincronizacion}: EncabezadoEstadoProps) {
 
     if (estadoConexion.onClick) {
         return (
-            <button type="button" className={`estadoConexionIcono ${estadoConexion.clase}`} title={estadoConexion.titulo} onClick={estadoConexion.onClick}>
+            <Boton type="button" claseAdicional={`estadoConexionIcono ${estadoConexion.clase}`} title={estadoConexion.titulo} onClick={estadoConexion.onClick}>
                 {estadoConexion.icono}
                 {'texto' in estadoConexion && estadoConexion.texto && <span className="estadoConexionIcono__texto">{estadoConexion.texto}</span>}
-            </button>
+            </Boton>
         );
     }
 

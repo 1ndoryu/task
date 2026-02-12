@@ -7,6 +7,7 @@
 
 import {useState, useCallback} from 'react';
 import {Search, Filter, RefreshCw} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import type {FiltrosAdmin} from '../../types/dashboard';
 
 interface FiltrosUsuariosProps {
@@ -53,9 +54,9 @@ export function FiltrosUsuarios({filtros, onFiltrarPlan, onBuscar, onReiniciar}:
                 <Filter size={14} className="filtrosIcono" />
                 <div className="filtrosBotones">
                     {OPCIONES_PLAN.map(({valor, etiqueta}) => (
-                        <button key={valor} type="button" className={`filtroPlanBoton ${filtros.plan === valor ? 'filtroPlanBotonActivo' : ''}`} onClick={() => onFiltrarPlan(valor)}>
+                        <Boton key={valor} type="button" claseAdicional={`filtroPlanBoton ${filtros.plan === valor ? 'filtroPlanBotonActivo' : ''}`} onClick={() => onFiltrarPlan(valor)}>
                             {etiqueta}
-                        </button>
+                        </Boton>
                     ))}
                 </div>
             </div>
@@ -65,15 +66,15 @@ export function FiltrosUsuarios({filtros, onFiltrarPlan, onBuscar, onReiniciar}:
                 <div className="busquedaInputContenedor">
                     <Search size={14} className="busquedaIcono" />
                     <input type="text" className="busquedaInput" placeholder="Buscar por nombre o email..." value={busquedaLocal} onChange={e => manejarCambioBusqueda(e.target.value)} onKeyDown={manejarTeclaBusqueda} />
-                    <button type="button" className="busquedaBoton" onClick={manejarClickBuscar} title="Buscar">
+                    <Boton type="button" claseAdicional="busquedaBoton" onClick={manejarClickBuscar} title="Buscar">
                         Buscar
-                    </button>
+                    </Boton>
                 </div>
 
                 {/* Botón reiniciar */}
-                <button type="button" className="filtrosReiniciarBoton" onClick={onReiniciar} title="Reiniciar filtros">
+                <Boton type="button" claseAdicional="filtrosReiniciarBoton" onClick={onReiniciar} title="Reiniciar filtros">
                     <RefreshCw size={14} />
-                </button>
+                </Boton>
             </div>
         </div>
     );
