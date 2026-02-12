@@ -19,6 +19,7 @@
     transition: all 0.2s ease;
     white-space: nowrap;
     user-select: none;
+    text-decoration: none;
 }
 
 .boton:focus-visible {
@@ -137,7 +138,10 @@
 }
 
 .botonTexto {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    text-decoration: none;
 }
 
 /* ===== INPUT ===== */
@@ -573,4 +577,64 @@
 .radioError {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-estadoAlta);
+}
+
+/* ===== PANELES ESPECÍFICOS - DÉFICIT CALÓRICO ===== */
+.deficitEntrada {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.deficitEntradaInputContenedor {
+    display: flex;
+    width: 100%;
+}
+
+.deficitEntradaInput {
+    flex: 1;
+    width: 100%;
+}
+
+.deficitEntradaCargando {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.deficitSpinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.deficitHistorial {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.deficitHistorialToggle {
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.deficitHistorialTitulo {
+    font-weight: 500;
+}
+
+.deficitHistorialContador {
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.deficitHistorialLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
 }
