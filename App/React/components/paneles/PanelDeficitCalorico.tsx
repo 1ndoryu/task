@@ -88,8 +88,9 @@ function ResumenNutricional({
         );
     }
 
-    const MetaBarra = ({label, actual, meta, color}: {label: string; actual: number; meta: number; color: string}) => {
+    const MetaBarra = ({label, actual, meta}: {label: string; actual: number; meta: number}) => {
         const porcentaje = Math.min((actual / meta) * 100, 100);
+        const excedido = actual > meta;
         return (
             <div className="deficitMacroItem">
                 <div className="deficitMacroHeader">
@@ -99,7 +100,7 @@ function ResumenNutricional({
                     </span>
                 </div>
                 <div className="deficitMacroBarraFondo">
-                    <div className="deficitMacroBarraProgreso" style={{width: `${porcentaje}%`, backgroundColor: color}} />
+                    <div className={`deficitMacroBarraProgreso ${excedido ? 'deficitMacroBarraProgreso--excedido' : ''}`} style={{width: `${porcentaje}%`}} />
                 </div>
             </div>
         );
@@ -135,10 +136,10 @@ function ResumenNutricional({
 
             {/* Grilla de Macros con colores locales del CSS */}
             <div className="deficitMacrosGrid">
-                <MetaBarra label="Proteínas" actual={proteinas} meta={objetivos.proteinas} color="var(--color-proteina)" />
-                <MetaBarra label="Carbohidratos" actual={carbohidratos} meta={objetivos.carbohidratos} color="var(--color-carbo)" />
-                <MetaBarra label="Grasas" actual={grasas} meta={objetivos.grasas} color="var(--color-grasa)" />
-                <MetaBarra label="Azúcar" actual={azucar} meta={objetivos.azucar} color="var(--color-azucar)" />
+                <MetaBarra label="Proteínas" actual={proteinas} meta={objetivos.proteinas} />
+                <MetaBarra label="Carbohidratos" actual={carbohidratos} meta={objetivos.carbohidratos} />
+                <MetaBarra label="Grasas" actual={grasas} meta={objetivos.grasas} />
+                <MetaBarra label="Azúcar" actual={azucar} meta={objetivos.azucar} />
             </div>
         </div>
     );

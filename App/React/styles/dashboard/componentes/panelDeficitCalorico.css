@@ -8,11 +8,6 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    /* Variables locales para gráficas */
-    --color-proteina: #3b82f6;
-    --color-carbo: #f97316;
-    --color-grasa: #eab308;
-    --color-azucar: #ec4899;
 }
 
 .deficitContenido {
@@ -93,7 +88,7 @@
 
 .deficitBarraGrandeFondo {
     width: 100%;
-    height: 6px;
+    height: 5px;
     background: var(--dashboard-bordeSutil);
     border-radius: 3px;
     overflow: hidden;
@@ -140,7 +135,7 @@
 
 .deficitMacroBarraFondo {
     width: 100%;
-    height: 6px;
+    height: 5px;
     background: var(--dashboard-fondoTerciario);
     border-radius: 3px;
     overflow: hidden;
@@ -148,8 +143,13 @@
 
 .deficitMacroBarraProgreso {
     height: 100%;
+    background: var(--dashboard-estadoExito);
     border-radius: 3px;
     transition: width 0.5s ease;
+}
+
+.deficitMacroBarraProgreso--excedido {
+    background: var(--dashboard-estadoAlta);
 }
 
 /* =========================================
