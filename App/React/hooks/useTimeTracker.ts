@@ -26,6 +26,7 @@ interface UseTimeTrackerReturn {
     reanudar: () => void;
     completar: () => void;
     cancelar: () => void;
+    ajustarTiempo: (deltaMs: number) => void;
 }
 
 /*
@@ -83,6 +84,11 @@ export function useTimeTracker(): UseTimeTrackerReturn {
         };
     }, [store.estado]);
 
+    useEffect(() => {
+        if (store.estado === 'inactivo') return;
+        setTiempoMs(store.obtenerTiempoEfectivoActual());
+    }, [store.estado, store.sesionActiva]);
+
     const tiempoMinimoMs = (store.sesionActiva?.tiempoMinimoMinutos ?? 0) * 60 * 1000;
     const alcanzoMinimo = tiempoMinimoMs > 0 && tiempoMs >= tiempoMinimoMs;
     const porcentajeProgreso = tiempoMinimoMs > 0 ? Math.min(100, (tiempoMs / tiempoMinimoMs) * 100) : 0;
@@ -101,6 +107,7 @@ export function useTimeTracker(): UseTimeTrackerReturn {
     const reanudar = useCallback(() => store.reanudarTracking(), [store.reanudarTracking]);
     const completar = useCallback(() => store.completarTracking(), [store.completarTracking]);
     const cancelar = useCallback(() => store.cancelarTracking(), [store.cancelarTracking]);
+    const ajustarTiempo = useCallback((deltaMs: number) => store.ajustarTiempoTracking(deltaMs), [store.ajustarTiempoTracking]);
 
     return {
         estaActivo: store.estado === 'activo',
@@ -117,6 +124,7 @@ export function useTimeTracker(): UseTimeTrackerReturn {
         pausar,
         reanudar,
         completar,
-        cancelar
+        cancelar,
+        ajustarTiempo
     };
 }

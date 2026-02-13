@@ -141,6 +141,17 @@
     color: var(--dashboard-estadoAlta);
 }
 
+.dockTrackingBoton--ajusteTiempo {
+    width: 22px;
+    height: 22px;
+    cursor: ew-resize;
+    touch-action: none;
+}
+
+.dockTrackingBoton--ajusteTiempo:hover {
+    color: var(--dashboard-estadoInfo);
+}
+
 /* Padding adicional al body cuando el dock está visible */
 .conDockTracking {
     padding-bottom: 44px !important;

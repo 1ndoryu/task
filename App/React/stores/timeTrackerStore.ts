@@ -23,7 +23,10 @@ function calcularTiempoEfectivo(sesion: SesionTracking, ahora: number): number {
         return acum + (finPausa - pausa.inicio);
     }, 0);
 
-    return Math.max(0, totalBruto - totalPausas);
+    const tiempoBase = totalBruto - totalPausas;
+    const ajusteManualMs = sesion.ajusteManualMs ?? 0;
+
+    return Math.max(0, tiempoBase + ajusteManualMs);
 }
 
 /*
@@ -58,6 +61,7 @@ export const useTimeTrackerStore = create<TimeTrackerStore>()(
                     inicio: Date.now(),
                     pausas: [],
                     tiempoEfectivoMs: 0,
+                    ajusteManualMs: 0,
                     tiempoMinimoMinutos,
                     completada: false
                 };
@@ -146,6 +150,32 @@ export const useTimeTrackerStore = create<TimeTrackerStore>()(
                     sesionActiva: null,
                     estado: 'inactivo',
                     historialSesiones: historialActualizado
+                });
+            },
+
+            ajustarTiempoTracking: (deltaMs: number) => {
+                const {sesionActiva} = get();
+                if (!sesionActiva || deltaMs === 0) return;
+
+                const ahora = Date.now();
+                const tiempoActual = calcularTiempoEfectivo(sesionActiva, ahora);
+                const tiempoObjetivo = Math.max(0, tiempoActual + deltaMs);
+
+                const finReal = sesionActiva.fin ?? ahora;
+                const totalBruto = finReal - sesionActiva.inicio;
+                const totalPausas = sesionActiva.pausas.reduce((acum, pausa) => {
+                    const finPausa = pausa.fin ?? ahora;
+                    return acum + (finPausa - pausa.inicio);
+                }, 0);
+
+                const tiempoBase = totalBruto - totalPausas;
+                const nuevoAjusteMs = tiempoObjetivo - tiempoBase;
+
+                set({
+                    sesionActiva: {
+                        ...sesionActiva,
+                        ajusteManualMs: nuevoAjusteMs
+                    }
                 });
             },
 

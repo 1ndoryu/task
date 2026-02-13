@@ -5,7 +5,8 @@
  * Diseño minimalista estilo terminal
  */
 
-import {Play, Pause, CheckCircle2, X, Timer} from 'lucide-react';
+import {useEffect, useRef, type PointerEvent} from 'react';
+import {Clock3, Play, Pause, CheckCircle2, X, Timer} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import {useTimeTracker} from '../../hooks/useTimeTracker';
 import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
@@ -40,6 +41,31 @@ function construirDetallesTracking(sesion: SesionTracking): Record<string, unkno
 export function DockTracking({esMovil = false, onCompletarEntidad}: DockTrackingProps): JSX.Element | null {
     const tracker = useTimeTracker();
     const completarTracking = useTimeTrackerStore(state => state.completarTracking);
+    const tituloOriginalRef = useRef<string>('');
+    const ajusteArrastreRef = useRef({
+        activo: false,
+        xInicial: 0,
+        deltaAplicadoSegundos: 0,
+        estabaActivoAntesDeArrastre: false
+    });
+
+    useEffect(() => {
+        tituloOriginalRef.current = document.title;
+
+        return () => {
+            document.title = tituloOriginalRef.current;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (tracker.estaActivo || tracker.estaPausado) {
+            const nombreEntidad = tracker.nombreEntidad?.trim() || 'Tracking';
+            document.title = `${tracker.tiempoFormateado} • ${nombreEntidad}`;
+            return;
+        }
+
+        document.title = tituloOriginalRef.current;
+    }, [tracker.estaActivo, tracker.estaPausado, tracker.tiempoFormateado, tracker.nombreEntidad]);
 
     /* Solo mostrar si hay tracking activo o pausado */
     if (!tracker.estaActivo && !tracker.estaPausado) return null;
@@ -49,6 +75,56 @@ export function DockTracking({esMovil = false, onCompletarEntidad}: DockTracking
         if (sesionFinal && onCompletarEntidad) {
             const detallesActividad = construirDetallesTracking(sesionFinal);
             onCompletarEntidad(sesionFinal.entidadId, sesionFinal.tipoEntidad, detallesActividad);
+        }
+    };
+
+    const manejarInicioAjuste = (evento: PointerEvent<HTMLButtonElement>) => {
+        if (!tracker.estaActivo && !tracker.estaPausado) return;
+
+        evento.preventDefault();
+        evento.currentTarget.setPointerCapture(evento.pointerId);
+
+        const estabaActivo = tracker.estaActivo;
+        if (estabaActivo) {
+            tracker.pausar();
+        }
+
+        ajusteArrastreRef.current = {
+            activo: true,
+            xInicial: evento.clientX,
+            deltaAplicadoSegundos: 0,
+            estabaActivoAntesDeArrastre: estabaActivo
+        };
+    };
+
+    const manejarMovimientoAjuste = (evento: PointerEvent<HTMLButtonElement>) => {
+        if (!ajusteArrastreRef.current.activo) return;
+
+        const PIXELES_POR_SEGUNDO = 6;
+        const deltaX = evento.clientX - ajusteArrastreRef.current.xInicial;
+        const deltaObjetivoSegundos = Math.trunc(deltaX / PIXELES_POR_SEGUNDO);
+        const deltaIncrementalSegundos = deltaObjetivoSegundos - ajusteArrastreRef.current.deltaAplicadoSegundos;
+
+        if (deltaIncrementalSegundos !== 0) {
+            tracker.ajustarTiempo(deltaIncrementalSegundos * 1000);
+            ajusteArrastreRef.current.deltaAplicadoSegundos = deltaObjetivoSegundos;
+        }
+    };
+
+    const manejarFinAjuste = (evento: PointerEvent<HTMLButtonElement>) => {
+        if (!ajusteArrastreRef.current.activo) return;
+
+        const {estabaActivoAntesDeArrastre} = ajusteArrastreRef.current;
+        evento.currentTarget.releasePointerCapture(evento.pointerId);
+        ajusteArrastreRef.current = {
+            activo: false,
+            xInicial: 0,
+            deltaAplicadoSegundos: 0,
+            estabaActivoAntesDeArrastre: false
+        };
+
+        if (estabaActivoAntesDeArrastre) {
+            tracker.reanudar();
         }
     };
 
@@ -77,6 +153,18 @@ export function DockTracking({esMovil = false, onCompletarEntidad}: DockTracking
                     ) : (
                         <span className="dockTrackingTiempo">{tracker.tiempoFormateado}</span>
                     )}
+                    <Boton
+                        type="button"
+                        claseAdicional="dockTrackingBoton dockTrackingBoton--ajusteTiempo"
+                        title="Arrastra a derecha para sumar tiempo y a izquierda para restar"
+                        aria-label="Ajustar tiempo del tracking arrastrando"
+                        onPointerDown={manejarInicioAjuste}
+                        onPointerMove={manejarMovimientoAjuste}
+                        onPointerUp={manejarFinAjuste}
+                        onPointerCancel={manejarFinAjuste}
+                    >
+                        <Clock3 size={12} />
+                    </Boton>
                     {tracker.alcanzoMinimo && <CheckCircle2 size={12} className="dockTrackingCheckMinimo" />}
                 </div>
 

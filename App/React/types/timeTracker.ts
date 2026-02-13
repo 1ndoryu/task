@@ -38,6 +38,8 @@ export interface SesionTracking {
     pausas: PausaTracker[];
     /* Tiempo efectivo en ms (excluyendo pausas) */
     tiempoEfectivoMs: number;
+    /* Ajuste manual en ms aplicado por el usuario (+/-) */
+    ajusteManualMs?: number;
     /* Tiempo mínimo objetivo en minutos (opcional) */
     tiempoMinimoMinutos?: number;
     completada: boolean;
@@ -63,6 +65,7 @@ export interface TimeTrackerActions {
     reanudarTracking: () => void;
     completarTracking: () => SesionTracking | null;
     cancelarTracking: () => void;
+    ajustarTiempoTracking: (deltaMs: number) => void;
     /* Calcula el tiempo efectivo actual en ms (sin pausas) */
     obtenerTiempoEfectivoActual: () => number;
     /* Limpia historial */
