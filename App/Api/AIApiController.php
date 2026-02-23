@@ -27,6 +27,7 @@ namespace App\Api;
 use App\Repository\TareasRepository;
 use App\Repository\ProyectosRepository;
 use App\Repository\HabitosRepository;
+use App\Repository\ActividadRepository;
 
 class AIApiController
 {
@@ -395,7 +396,7 @@ class AIApiController
 
         try {
             $repository = new TareasRepository($userId);
-            $actividadRepo = new \App\Repository\ActividadRepository($userId);
+            $actividadRepo = new ActividadRepository($userId);
             $tareas = $repository->getAll();
 
             $indice = null;

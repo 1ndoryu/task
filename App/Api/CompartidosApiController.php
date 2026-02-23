@@ -143,125 +143,160 @@ class CompartidosApiController
     /* POST /compartidos - Compartir un elemento */
     public static function compartir(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
-        $tipo = sanitize_text_field($request->get_param('tipo'));
-        $elementoId = (int) $request->get_param('elementoId');
-        $usuarioDestinoId = (int) $request->get_param('usuarioId');
-        $rol = sanitize_text_field($request->get_param('rol') ?? 'colaborador');
+        try {
+            $usuarioId = get_current_user_id();
+            $tipo = sanitize_text_field($request->get_param('tipo'));
+            $elementoId = (int) $request->get_param('elementoId');
+            $usuarioDestinoId = (int) $request->get_param('usuarioId');
+            $rol = sanitize_text_field($request->get_param('rol') ?? 'colaborador');
 
-        $servicio = new CompartidosService();
-        $resultado = $servicio->compartir($usuarioId, $tipo, $elementoId, $usuarioDestinoId, $rol);
+            $servicio = new CompartidosService();
+            $resultado = $servicio->compartir($usuarioId, $tipo, $elementoId, $usuarioDestinoId, $rol);
 
-        if (!$resultado['exito']) {
+            if (!$resultado['exito']) {
+                return new \WP_REST_Response([
+                    'exito' => false,
+                    'error' => $resultado['error']
+                ], 400);
+            }
+
             return new \WP_REST_Response([
-                'exito' => false,
-                'error' => $resultado['error']
-            ], 400);
+                'exito' => true,
+                'compartido' => $resultado['compartido']
+            ], 201);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en compartir: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
         }
-
-        return new \WP_REST_Response([
-            'exito' => true,
-            'compartido' => $resultado['compartido']
-        ], 201);
     }
 
     /* GET /compartidos - Obtener elementos compartidos conmigo */
     public static function obtenerCompartidosConmigo(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
-        $tipo = $request->get_param('tipo');
+        try {
+            $usuarioId = get_current_user_id();
+            $tipo = $request->get_param('tipo');
 
-        $servicio = new CompartidosService();
-        $compartidos = $servicio->obtenerCompartidosConmigo($usuarioId, $tipo);
+            $servicio = new CompartidosService();
+            $compartidos = $servicio->obtenerCompartidosConmigo($usuarioId, $tipo);
 
-        return new \WP_REST_Response([
-            'exito' => true,
-            'compartidos' => $compartidos
-        ], 200);
+            return new \WP_REST_Response([
+                'exito' => true,
+                'compartidos' => $compartidos
+            ], 200);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en obtenerCompartidosConmigo: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 
     /* GET /compartidos/mis - Obtener lo que yo he compartido */
     public static function obtenerMisCompartidos(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
-        $tipo = $request->get_param('tipo');
+        try {
+            $usuarioId = get_current_user_id();
+            $tipo = $request->get_param('tipo');
 
-        $servicio = new CompartidosService();
-        $compartidos = $servicio->obtenerMisCompartidos($usuarioId, $tipo);
+            $servicio = new CompartidosService();
+            $compartidos = $servicio->obtenerMisCompartidos($usuarioId, $tipo);
 
-        return new \WP_REST_Response([
-            'exito' => true,
-            'compartidos' => $compartidos
-        ], 200);
+            return new \WP_REST_Response([
+                'exito' => true,
+                'compartidos' => $compartidos
+            ], 200);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en obtenerMisCompartidos: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 
     /* GET /compartidos/participantes/{tipo}/{elementoId} */
     public static function obtenerParticipantes(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
-        $tipo = sanitize_text_field($request->get_param('tipo'));
-        $elementoId = (int) $request->get_param('elementoId');
+        try {
+            $usuarioId = get_current_user_id();
+            $tipo = sanitize_text_field($request->get_param('tipo'));
+            $elementoId = (int) $request->get_param('elementoId');
 
-        $servicio = new CompartidosService();
-        $participantes = $servicio->obtenerParticipantes($tipo, $elementoId, $usuarioId);
+            $servicio = new CompartidosService();
+            $participantes = $servicio->obtenerParticipantes($tipo, $elementoId, $usuarioId);
 
-        return new \WP_REST_Response([
-            'exito' => true,
-            'participantes' => $participantes
-        ], 200);
+            return new \WP_REST_Response([
+                'exito' => true,
+                'participantes' => $participantes
+            ], 200);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en obtenerParticipantes: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 
     /* PUT /compartidos/{id}/rol - Actualizar rol de un participante */
     public static function actualizarRol(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
-        $compartidoId = (int) $request->get_param('id');
-        $nuevoRol = sanitize_text_field($request->get_param('rol'));
+        try {
+            $usuarioId = get_current_user_id();
+            $compartidoId = (int) $request->get_param('id');
+            $nuevoRol = sanitize_text_field($request->get_param('rol'));
 
-        $servicio = new CompartidosService();
-        $resultado = $servicio->actualizarRol($compartidoId, $usuarioId, $nuevoRol);
+            $servicio = new CompartidosService();
+            $resultado = $servicio->actualizarRol($compartidoId, $usuarioId, $nuevoRol);
 
-        if (!$resultado['exito']) {
-            return new \WP_REST_Response([
-                'exito' => false,
-                'error' => $resultado['error']
-            ], 400);
+            if (!$resultado['exito']) {
+                return new \WP_REST_Response([
+                    'exito' => false,
+                    'error' => $resultado['error']
+                ], 400);
+            }
+
+            return new \WP_REST_Response(['exito' => true], 200);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en actualizarRol: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
         }
-
-        return new \WP_REST_Response(['exito' => true], 200);
     }
 
     /* DELETE /compartidos/{id} - Eliminar un compartido */
     public static function eliminar(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
-        $compartidoId = (int) $request->get_param('id');
+        try {
+            $usuarioId = get_current_user_id();
+            $compartidoId = (int) $request->get_param('id');
 
-        $servicio = new CompartidosService();
-        $resultado = $servicio->dejarDeCompartir($compartidoId, $usuarioId);
+            $servicio = new CompartidosService();
+            $resultado = $servicio->dejarDeCompartir($compartidoId, $usuarioId);
 
-        if (!$resultado['exito']) {
-            return new \WP_REST_Response([
-                'exito' => false,
-                'error' => $resultado['error']
-            ], 400);
+            if (!$resultado['exito']) {
+                return new \WP_REST_Response([
+                    'exito' => false,
+                    'error' => $resultado['error']
+                ], 400);
+            }
+
+            return new \WP_REST_Response(['exito' => true], 200);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en eliminar: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
         }
-
-        return new \WP_REST_Response(['exito' => true], 200);
     }
 
     /* GET /compartidos/contadores */
     public static function obtenerContadores(\WP_REST_Request $request): \WP_REST_Response
     {
-        $usuarioId = get_current_user_id();
+        try {
+            $usuarioId = get_current_user_id();
 
-        $servicio = new CompartidosService();
-        $contadores = $servicio->contarCompartidosConmigo($usuarioId);
+            $servicio = new CompartidosService();
+            $contadores = $servicio->contarCompartidosConmigo($usuarioId);
 
-        return new \WP_REST_Response([
-            'exito' => true,
-            'contadores' => $contadores
-        ], 200);
+            return new \WP_REST_Response([
+                'exito' => true,
+                'contadores' => $contadores
+            ], 200);
+        } catch (\Throwable $e) {
+            error_log('[CompartidosApiController] Error en obtenerContadores: ' . $e->getMessage());
+            return new \WP_REST_Response(['exito' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 
     /* GET /compartidos/acceso/{tipo}/{elementoId}/{propietarioId} */

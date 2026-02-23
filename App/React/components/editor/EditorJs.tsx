@@ -60,6 +60,8 @@ export function EditorJs({id = 'editorjs-container', data, onChange, onReady, pl
             return;
         }
 
+        const abortController = new AbortController();
+
         const editor = new EditorJS({
             holder: holderRef.current,
             placeholder,
@@ -97,13 +99,16 @@ export function EditorJs({id = 'editorjs-container', data, onChange, onReady, pl
                 delimiter: Delimiter
             },
             onChange: async (api: API) => {
+                if (abortController.signal.aborted) return;
                 // Usar ref para obtener la version mas reciente del callback
                 if (onChangeRef.current) {
                     const outputData = await api.saver.save();
+                    if (abortController.signal.aborted) return;
                     onChangeRef.current(outputData);
                 }
             },
             onReady: () => {
+                if (abortController.signal.aborted) return;
                 if (onReadyRef.current && editorRef.current) {
                     onReadyRef.current(editorRef.current);
                 }
@@ -112,8 +117,9 @@ export function EditorJs({id = 'editorjs-container', data, onChange, onReady, pl
 
         editorRef.current = editor;
 
-        // Cleanup: destruir editor cuando el componente se desmonte
+        // Cleanup: abortar operaciones async y destruir editor al desmontar
         return () => {
+            abortController.abort();
             if (editorRef.current && typeof editorRef.current.destroy === 'function') {
                 editorRef.current.destroy();
                 editorRef.current = null;

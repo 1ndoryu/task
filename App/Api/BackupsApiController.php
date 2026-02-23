@@ -68,13 +68,21 @@ class BackupsApiController
 
     public static function getBackups(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
-        $repo = new BackupsRepository($userId);
+        try {
+            $userId = get_current_user_id();
+            $repo = new BackupsRepository($userId);
 
-        return new \WP_REST_Response([
-            'success' => true,
-            'data' => $repo->getAll()
-        ]);
+            return new \WP_REST_Response([
+                'success' => true,
+                'data' => $repo->getAll()
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[BackupsApiController] Error en getBackups: ' . $e->getMessage());
+            return new \WP_REST_Response([
+                'success' => false,
+                'message' => 'Error interno del servidor'
+            ], 500);
+        }
     }
 
     public static function restoreBackup(\WP_REST_Request $request): \WP_REST_Response
@@ -144,23 +152,31 @@ class BackupsApiController
 
     public static function deleteBackup(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
-        $backupId = (int)$request->get_param('backup_id');
+        try {
+            $userId = get_current_user_id();
+            $backupId = (int)$request->get_param('backup_id');
 
-        $backupsRepo = new BackupsRepository($userId);
-        $deleted = $backupsRepo->deleteById($backupId);
+            $backupsRepo = new BackupsRepository($userId);
+            $deleted = $backupsRepo->deleteById($backupId);
 
-        if ($deleted) {
+            if ($deleted) {
+                return new \WP_REST_Response([
+                    'success' => true,
+                    'message' => 'Backup eliminado'
+                ]);
+            }
+
             return new \WP_REST_Response([
-                'success' => true,
-                'message' => 'Backup eliminado'
-            ]);
+                'success' => false,
+                'message' => 'No se pudo eliminar el backup'
+            ], 400);
+        } catch (\Throwable $e) {
+            error_log('[BackupsApiController] Error en deleteBackup: ' . $e->getMessage());
+            return new \WP_REST_Response([
+                'success' => false,
+                'message' => 'Error interno del servidor'
+            ], 500);
         }
-
-        return new \WP_REST_Response([
-            'success' => false,
-            'message' => 'No se pudo eliminar el backup'
-        ], 400);
     }
 }
 

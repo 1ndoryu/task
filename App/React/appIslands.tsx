@@ -22,7 +22,7 @@ import './config/inicializarPlugins';
 import './config/inicializarIslands';
 
 /* Obtener islands del registro */
-import {obtenerMapaComponentes, fusionarConIslandsManuales} from './config/registroIslands';
+import {fusionarConIslandsManuales} from './config/registroIslands';
 
 /* Provider global de la app */
 import {ProveedorAlertas} from './context/AlertasContext';

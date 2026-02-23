@@ -797,9 +797,7 @@
     opacity: 1;
 }
 
-/* =========================================
-   Selector Reloj Circular Interactivo
-   ========================================= */
+/* Selector Reloj Circular Interactivo */
 
 .selectorRelojCircular {
     display: flex;

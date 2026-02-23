@@ -5,7 +5,7 @@
  */
 
 import React, {useMemo} from 'react';
-import {Trash2, Flag, Folder, AlertTriangle, ChevronDown, ChevronUp, X, Layers, Zap} from 'lucide-react';
+import {Trash2, Flag, Folder, X, Layers, Zap} from 'lucide-react';
 import {MenuContextual, type OpcionMenu} from '../../shared/MenuContextual';
 import type {Proyecto, NivelPrioridad, NivelUrgencia} from '../../../types/dashboard';
 import {useSeleccionMultipleStore, useCantidadSeleccionadas} from '../../../stores/seleccionMultipleStore';
@@ -25,7 +25,9 @@ interface MenuAccionesMasivasProps {
 }
 
 export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarTareas, onCambiarPrioridad, onCambiarUrgencia, onMoverProyecto, onAgrupar, proyectos = []}: MenuAccionesMasivasProps): JSX.Element {
-    const {obtenerIdsSeleccionados, limpiarSeleccion, obtenerTareasSeleccionadas} = useSeleccionMultipleStore();
+    const obtenerIdsSeleccionados = useSeleccionMultipleStore(s => s.obtenerIdsSeleccionados);
+    const limpiarSeleccion = useSeleccionMultipleStore(s => s.limpiarSeleccion);
+    const obtenerTareasSeleccionadas = useSeleccionMultipleStore(s => s.obtenerTareasSeleccionadas);
     const cantidadSeleccionadas = useCantidadSeleccionadas();
     const seccionesActivas = useSeccionesActivas();
 

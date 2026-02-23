@@ -15,7 +15,9 @@ interface GrupoTareasHeaderProps {
 }
 
 export function GrupoTareasHeader({grupo, cantidadTareas}: GrupoTareasHeaderProps): JSX.Element {
-    const {editarGrupo, toggleColapsarGrupo, eliminarGrupo} = useGruposTareasStore();
+    const editarGrupo = useGruposTareasStore(s => s.editarGrupo);
+    const toggleColapsarGrupo = useGruposTareasStore(s => s.toggleColapsarGrupo);
+    const eliminarGrupo = useGruposTareasStore(s => s.eliminarGrupo);
     const [editando, setEditando] = useState(false);
     const [nombreEditado, setNombreEditado] = useState(grupo.nombre);
     const inputRef = useRef<HTMLInputElement>(null);

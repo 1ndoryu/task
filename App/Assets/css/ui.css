@@ -1,8 +1,6 @@
-/* ============================================
-   COMPONENTES UI ATÓMICOS - ESTILOS BASE
-   ============================================ */
+/* COMPONENTES UI ATÓMICOS - ESTILOS BASE */
 
-/* ===== BOTON ===== */
+/* Boton */
 .boton {
     display: inline-flex;
     align-items: center;
@@ -151,7 +149,7 @@
     text-decoration: unset;
 }
 
-/* ===== INPUT ===== */
+/* Input */
 .inputContenedor {
     display: flex;
     flex-direction: column;
@@ -249,7 +247,7 @@
     color: var(--dashboard-estadoAlta);
 }
 
-/* ===== TEXTAREA ===== */
+/* Textarea */
 .textareaContenedor {
     display: flex;
     flex-direction: column;
@@ -321,7 +319,7 @@
     color: var(--dashboard-estadoAlta);
 }
 
-/* ===== SELECT ===== */
+/* Select */
 .selectContenedor {
     display: flex;
     flex-direction: column;
@@ -395,7 +393,7 @@
     color: var(--dashboard-estadoAlta);
 }
 
-/* ===== CHECKBOX ===== */
+/* Checkbox */
 .checkboxContenedor {
     display: flex;
     flex-direction: column;
@@ -480,7 +478,7 @@
     margin-left: 1.625rem;
 }
 
-/* ===== RADIO ===== */
+/* Radio */
 .radioContenedor {
     display: flex;
     flex-direction: column;
@@ -587,7 +585,7 @@
     color: var(--dashboard-estadoAlta);
 }
 
-/* ===== PANELES ESPECÍFICOS - DÉFICIT CALÓRICO ===== */
+/* Paneles específicos - Déficit Calórico */
 .deficitEntrada {
     display: flex;
     flex-direction: column;

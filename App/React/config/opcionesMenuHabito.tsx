@@ -12,7 +12,7 @@
  * - DIP: Los componentes dependen de esta abstracción, no de definiciones propias
  */
 
-import {Check, Calendar, Pause, Play, Edit3, AlertTriangle, Flag, Settings, Undo2} from 'lucide-react';
+import {Check, Calendar, Pause, Play, AlertTriangle, Flag, Settings, Undo2} from 'lucide-react';
 import type {OpcionMenu} from '../components/shared/MenuContextual';
 
 /*

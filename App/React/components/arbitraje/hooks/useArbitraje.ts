@@ -3,7 +3,7 @@
  * Extrae toda la lógica de cálculos del componente principal
  */
 
-import {useState, useMemo} from 'react';
+import {useMemo} from 'react';
 import {useLocalStorage} from '../../../hooks/useLocalStorage';
 import type {RangoValor, TasasConversion, ResultadoEscenario, DetalleRuta, ModoSimulacion, EstadoViabilidad, SimulacionCiclos, ResultadoSimulacionEscenario} from '../types/arbitraje.types';
 

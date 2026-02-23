@@ -17,9 +17,7 @@
     padding: var(--dashboard-espacioLg);
 }
 
-/* =========================================
-   Resumen Nutricional (Nuevo)
-   ========================================= */
+/* Resumen Nutricional (Nuevo) */
 .deficitResumenNutricional {
     display: flex;
     flex-direction: column;
@@ -152,9 +150,7 @@
     background: var(--dashboard-estadoAlta);
 }
 
-/* =========================================
-   Entrada de comida
-   ========================================= */
+/* Entrada de comida */
 .deficitEntrada {
     display: flex;
     flex-direction: column;
@@ -327,9 +323,7 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
-/* =========================================
-   Historial agrupado por días
-   ========================================= */
+/* Historial agrupado por días */
 .deficitHistorial {
     padding-top: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordeSutil);
@@ -476,9 +470,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* =========================================
-   Modal de Inspección de IA
-   ========================================= */
+/* Modal de Inspección de IA */
 .modalInspeccionLog {
     display: flex;
     flex-direction: column;

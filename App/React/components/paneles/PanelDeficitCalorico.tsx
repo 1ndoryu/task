@@ -11,7 +11,7 @@
  */
 
 import {useState, useMemo} from 'react';
-import {Loader2, Trash2, AlertCircle, Settings, Maximize2, RotateCcw, Eye, ChevronLeft, ChevronRight} from 'lucide-react';
+import {Loader2, AlertCircle, Settings, Maximize2, ChevronLeft, ChevronRight} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
 import {OverlayEnfoque} from '../shared';

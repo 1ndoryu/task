@@ -159,8 +159,16 @@ class StripeApiController
      */
     public static function handleStripeWebhook(\WP_REST_Request $request): \WP_REST_Response
     {
-        $handler = new StripeWebhookHandler();
-        return $handler->handle($request);
+        try {
+            $handler = new StripeWebhookHandler();
+            return $handler->handle($request);
+        } catch (\Throwable $e) {
+            error_log('[StripeApiController] Error en handleStripeWebhook: ' . $e->getMessage());
+            return new \WP_REST_Response([
+                'success' => false,
+                'message' => 'Error interno del servidor'
+            ], 500);
+        }
     }
 
     /**

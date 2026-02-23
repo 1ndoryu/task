@@ -16,10 +16,7 @@
 
 import {registrarIsland, marcarIslandsInicializadas} from './registroIslands';
 
-/* ============================================
- * ISLANDS EXISTENTES
- * Importar y registrar cada island del proyecto
- * ============================================ */
+/* Islands existentes - Importar y registrar cada island del proyecto */
 
 import {DashboardIsland} from '../islands/DashboardIsland';
 import {PaginaPruebaIsland} from '../islands/PaginaPruebaIsland';
@@ -41,13 +38,12 @@ registrarIsland('PoliticaPrivacidadIsland', PoliticaPrivacidadIsland, 'Política
 
 registrarIsland('TerminosServicioIsland', TerminosServicioIsland, 'Términos de Servicio - Condiciones de uso de la plataforma');
 
-/* ============================================
- * TO-DO: Futuras islands se agregan aquí
+/* TO-DO: Futuras islands se agregan aquí
  * Ejemplo:
  *
  * import {MiNuevaIsland} from '../islands/MiNuevaIsland';
  * registrarIsland('MiNuevaIsland', MiNuevaIsland, 'Descripción');
- * ============================================ */
+ */
 
 /* Marcar como inicializado */
 marcarIslandsInicializadas();

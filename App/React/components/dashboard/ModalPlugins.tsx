@@ -61,7 +61,8 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
 }
 
 export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
-    const {pluginsActivos, togglePlugin} = usePluginsStore();
+    const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+    const togglePlugin = usePluginsStore(s => s.togglePlugin);
     const guardarConfiguracion = usePluginsStore(s => s.guardarConfiguracion);
     const habitos = useHabitosStore(s => s.habitos);
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);

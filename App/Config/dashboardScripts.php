@@ -11,6 +11,8 @@
 
 namespace App\Config;
 
+use App\Services\SuscripcionService;
+
 class DashboardScripts
 {
     /**
@@ -76,7 +78,7 @@ class DashboardScripts
             ];
 
             /* Obtener info de suscripción */
-            $suscripcionService = new \App\Services\SuscripcionService(get_current_user_id());
+            $suscripcionService = new SuscripcionService(get_current_user_id());
             $suscripcion = $suscripcionService->getInfoCompleta();
         }
 

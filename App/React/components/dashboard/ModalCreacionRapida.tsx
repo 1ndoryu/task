@@ -5,7 +5,7 @@
  */
 
 import {useState, useEffect, useRef} from 'react';
-import {X, CheckSquare, Activity, Folder, Calendar, Flag, Hash, ArrowRight, Layers, AlertCircle, Clock, Repeat, ChevronDown, Paperclip, Loader2, Plus} from 'lucide-react';
+import {CheckSquare, Activity, Folder, Calendar, Flag, ArrowRight, Layers, AlertCircle, Clock, Repeat, Paperclip, Loader2} from 'lucide-react';
 import {MenuContextual} from '../shared';
 import {Boton} from '../ui';
 import {Input} from '../ui/Input';

@@ -162,7 +162,7 @@ class ConfiguracionRepository
         ];
     }
 
-    public function updateSyncStatus(int $timestamp): void
+    public function updateSyncStatus(int $timestamp): bool
     {
         $sync = [
             'lastSync' => $timestamp,
@@ -170,7 +170,8 @@ class ConfiguracionRepository
             'version' => self::SCHEMA_VERSION,
         ];
         $encoded = $this->encodeData($sync);
-        update_user_meta($this->userId, self::META_SYNC, $encoded);
+        $result = update_user_meta($this->userId, self::META_SYNC, $encoded);
+        return $result !== false;
     }
 
     public function getLastUpdate(): ?string
@@ -201,7 +202,7 @@ class ConfiguracionRepository
         ];
     }
 
-    public function addToChangelog(array $changes, int $timestamp): void
+    public function addToChangelog(array $changes, int $timestamp): bool
     {
         $data = get_user_meta($this->userId, self::META_CHANGELOG, true);
         $changelog = $this->decodeData($data, []);
@@ -209,7 +210,8 @@ class ConfiguracionRepository
             $changelog[] = ['timestamp' => $timestamp, 'change' => $change];
         }
         if (count($changelog) > 500) $changelog = array_slice($changelog, -500);
-        update_user_meta($this->userId, self::META_CHANGELOG, $this->encodeData($changelog));
+        $result = update_user_meta($this->userId, self::META_CHANGELOG, $this->encodeData($changelog));
+        return $result !== false;
     }
 
     /* 

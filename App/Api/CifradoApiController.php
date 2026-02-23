@@ -15,6 +15,7 @@
 namespace App\Api;
 
 use App\Repository\DashboardRepository;
+use App\Services\SuscripcionService;
 
 class CifradoApiController
 {
@@ -99,7 +100,7 @@ class CifradoApiController
         try {
             /* Verificar que el usuario es Premium antes de habilitar cifrado */
             if ($habilitar) {
-                $suscripcion = new \App\Services\SuscripcionService($userId);
+                $suscripcion = new SuscripcionService($userId);
                 if (!$suscripcion->esPremium()) {
                     return new \WP_REST_Response([
                         'success' => false,

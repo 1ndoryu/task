@@ -5,10 +5,9 @@
  */
 
 import {useState, useCallback} from 'react';
-import {Folder, Plus, ChevronDown, ChevronRight, Calendar, Edit, Trash2, PlayCircle, PauseCircle, CheckCircle, Share2, Users, Zap, FolderOpen} from 'lucide-react';
+import {ChevronDown, ChevronRight, Calendar, Edit, Trash2, PlayCircle, PauseCircle, CheckCircle, Share2, Users, Zap, FolderOpen} from 'lucide-react';
 import {DashboardPanel} from '../../shared/DashboardPanel';
 import {EstadoVacio} from '../../shared/EstadoVacio';
-import {SeccionEncabezado} from '../SeccionEncabezado';
 import {ListaTareas} from '../ListaTareas';
 import {MenuContextualAdaptivo} from '../../shared/MenuContextualAdaptivo';
 import {BadgeInfo, BadgeGroup} from '../../shared/BadgeInfo';

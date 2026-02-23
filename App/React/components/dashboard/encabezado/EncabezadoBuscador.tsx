@@ -1,4 +1,4 @@
-import {Search, X} from 'lucide-react';
+import {X} from 'lucide-react';
 import {BuscadorGlobal} from '../BuscadorGlobal';
 import {Boton} from '../../ui/Boton';
 import type {Tarea, Habito, Proyecto} from '../../../types/dashboard';

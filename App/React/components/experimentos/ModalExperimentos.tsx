@@ -5,7 +5,7 @@
  * Permite ejecutar funciones de testing sin usar consola.
  */
 
-import {FlaskConical, Bell, X, CheckCircle, AlertCircle} from 'lucide-react';
+import {FlaskConical, X, CheckCircle, AlertCircle} from 'lucide-react';
 import {useState} from 'react';
 import {Boton} from '../ui/Boton';
 

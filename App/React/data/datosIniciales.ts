@@ -5,7 +5,7 @@
  */
 
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
-import {crearFechaHaceNDias, crearFechaEnNDias} from '../utils/fecha';
+import {crearFechaHaceNDias} from '../utils/fecha';
 
 /*
  * Habitos de demostracion

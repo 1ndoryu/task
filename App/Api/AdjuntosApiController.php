@@ -166,10 +166,15 @@ class AdjuntosApiController
      */
     public static function generarToken(int $userId, string $file, int $exp): string
     {
-        $clave = self::obtenerClaveToken();
-        $datos = "{$userId}:{$file}:{$exp}";
+        try {
+            $clave = self::obtenerClaveToken();
+            $datos = "{$userId}:{$file}:{$exp}";
 
-        return hash_hmac('sha256', $datos, $clave);
+            return hash_hmac('sha256', $datos, $clave);
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en generarToken: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -177,16 +182,21 @@ class AdjuntosApiController
      */
     public static function generarUrlConToken(int $adjuntoId, int $userId, string $nombreArchivo): string
     {
-        $exp = time() + self::TOKEN_EXPIRACION;
-        $token = self::generarToken($userId, $nombreArchivo, $exp);
+        try {
+            $exp = time() + self::TOKEN_EXPIRACION;
+            $token = self::generarToken($userId, $nombreArchivo, $exp);
 
-        $url = rest_url("glory/v1/adjuntos/{$adjuntoId}");
-        $url .= "?file=" . urlencode($nombreArchivo);
-        $url .= "&uid=" . $userId;
-        $url .= "&exp=" . $exp;
-        $url .= "&token=" . $token;
+            $url = rest_url("glory/v1/adjuntos/{$adjuntoId}");
+            $url .= "?file=" . urlencode($nombreArchivo);
+            $url .= "&uid=" . $userId;
+            $url .= "&exp=" . $exp;
+            $url .= "&token=" . $token;
 
-        return $url;
+            return $url;
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en generarUrlConToken: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -213,7 +223,8 @@ class AdjuntosApiController
      */
     public function subirArchivo(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
+        try {
+            $userId = get_current_user_id();
 
         /* Verificar que haya archivos */
         $files = $request->get_file_params();
@@ -269,17 +280,21 @@ class AdjuntosApiController
             'adjunto' => $resultado,
             'almacenamiento' => $almacenamientoActualizado
         ], 201);
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en subirArchivo: ' . $e->getMessage());
+            return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
-
     /**
      * Descargar un archivo
      */
     public function descargarArchivo(\WP_REST_Request $request): \WP_REST_Response
     {
-        /* Obtener userId de la sesión o del parámetro (si usa token) */
-        $userId = is_user_logged_in()
-            ? get_current_user_id()
-            : $request->get_param('uid');
+        try {
+            /* Obtener userId de la sesion o del parametro (si usa token) */
+            $userId = is_user_logged_in()
+                ? get_current_user_id()
+                : $request->get_param('uid');
 
         $nombreArchivo = $request->get_param('file');
 
@@ -321,6 +336,10 @@ class AdjuntosApiController
 
         echo $contenido;
         exit;
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en descargarArchivo: ' . $e->getMessage());
+            return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 
     /**
@@ -328,8 +347,9 @@ class AdjuntosApiController
      */
     public function eliminarArchivo(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
-        $nombreArchivo = $request->get_param('file');
+        try {
+            $userId = get_current_user_id();
+            $nombreArchivo = $request->get_param('file');
 
         if (empty($nombreArchivo)) {
             return new \WP_REST_Response([
@@ -358,23 +378,31 @@ class AdjuntosApiController
             'message' => 'Archivo eliminado correctamente',
             'almacenamiento' => $almacenamiento->getInfoCompleta()
         ]);
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en eliminarArchivo: ' . $e->getMessage());
+            return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
-
     /**
      * Listar archivos del usuario
      */
     public function listarArchivos(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
+        try {
+            $userId = get_current_user_id();
 
-        $adjuntosService = new AdjuntosService($userId);
-        $archivos = $adjuntosService->listarArchivos();
+            $adjuntosService = new AdjuntosService($userId);
+            $archivos = $adjuntosService->listarArchivos();
 
-        return new \WP_REST_Response([
-            'success' => true,
-            'archivos' => $archivos,
-            'total' => count($archivos)
-        ]);
+            return new \WP_REST_Response([
+                'success' => true,
+                'archivos' => $archivos,
+                'total' => count($archivos)
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en listarArchivos: ' . $e->getMessage());
+            return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 
     /**

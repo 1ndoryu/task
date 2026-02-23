@@ -8,9 +8,7 @@ import type {GrupoOpciones, OpcionMenu} from '../../shared/MenuOpcionesPanel';
 import type {InfoSuscripcion, Tarea, SincronizacionInfo} from '../../../types/dashboard';
 import type {PaginaMovil} from '../../../hooks/usePaginaMovil';
 
-/* =========================================================================================
-   COMPONENT 1: MENU MOVIL (Left - Hamburger + Drawer)
-   ========================================================================================= */
+/* COMPONENT 1: MENU MOVIL (Left - Hamburger + Drawer) */
 
 interface EncabezadoMenuMovilProps {
     usuario: string;
@@ -151,9 +149,7 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin, e
     );
 }
 
-/* =========================================================================================
-   COMPONENT 2: OPCIONES MOVIL (Right - 3 Dots + BottomSheet)
-   ========================================================================================= */
+/* COMPONENT 2: OPCIONES MOVIL (Right - 3 Dots + BottomSheet) */
 
 interface EncabezadoOpcionesMovilProps {
     opcionesMovil?: {

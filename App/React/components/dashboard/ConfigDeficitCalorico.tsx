@@ -9,6 +9,7 @@ import {Save, Eye, EyeOff} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import {Input} from '../ui/Input';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
+import {useShallow} from 'zustand/react/shallow';
 import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
 
@@ -17,7 +18,7 @@ interface ConfigDeficitCaloricoProps {
 }
 
 export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): JSX.Element {
-    const {datosUsuario, apiKeyGemini, apiKeyCalorieNinjas, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore();
+    const {datosUsuario, apiKeyGemini, apiKeyCalorieNinjas, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore(useShallow(s => ({datosUsuario: s.datosUsuario, apiKeyGemini: s.apiKeyGemini, apiKeyCalorieNinjas: s.apiKeyCalorieNinjas, guardarDatosUsuario: s.guardarDatosUsuario, guardarApiKey: s.guardarApiKey})));
 
     const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
     const [keyGroq, setKeyGroq] = useState(apiKeyGemini);

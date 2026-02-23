@@ -18,6 +18,7 @@ import {EstadoVacio} from '../shared/EstadoVacio';
 import {useMensajesNoLeidos} from '../../hooks/useMensajes';
 import {useSeleccionMultipleStore} from '../../stores/seleccionMultipleStore';
 import {useGruposTareasStore, useSeccionesActivas} from '../../stores/gruposTareasStore';
+import {useShallow} from 'zustand/react/shallow';
 import {MenuAccionesMasivas} from './lista-tareas/MenuAccionesMasivas';
 import {GrupoTareasHeader} from './lista-tareas/GrupoTareasHeader';
 
@@ -66,7 +67,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
     const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
 
     /* Selección múltiple de tareas - TAREA 3.1 */
-    const {tareasSeleccionadas, toggleSeleccion, estaSeleccionada, limpiarSeleccion, menuPosicion, mostrarMenu, ocultarMenu, modoSeleccionActivo} = useSeleccionMultipleStore();
+    const {tareasSeleccionadas, toggleSeleccion, estaSeleccionada, limpiarSeleccion, menuPosicion, mostrarMenu, ocultarMenu, modoSeleccionActivo} = useSeleccionMultipleStore(useShallow(s => ({tareasSeleccionadas: s.tareasSeleccionadas, toggleSeleccion: s.toggleSeleccion, estaSeleccionada: s.estaSeleccionada, limpiarSeleccion: s.limpiarSeleccion, menuPosicion: s.menuPosicion, mostrarMenu: s.mostrarMenu, ocultarMenu: s.ocultarMenu, modoSeleccionActivo: s.modoSeleccionActivo})));
 
     /* Handler para Ctrl+Click en tareas */
     const manejarSeleccionMultiple = useCallback(
@@ -115,7 +116,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
     /* Sistema de grupos/secciones - TAREA 3 */
     const seccionesActivas = useSeccionesActivas();
-    const {crearGrupo, obtenerGruposProyecto, ordenarGrupos, grupos} = useGruposTareasStore();
+    const {crearGrupo, obtenerGruposProyecto, ordenarGrupos, grupos} = useGruposTareasStore(useShallow(s => ({crearGrupo: s.crearGrupo, obtenerGruposProyecto: s.obtenerGruposProyecto, ordenarGrupos: s.ordenarGrupos, grupos: s.grupos})));
 
     /* Obtener grupos del proyecto actual y organizar tareas */
     const gruposOrdenados = useMemo(() => {

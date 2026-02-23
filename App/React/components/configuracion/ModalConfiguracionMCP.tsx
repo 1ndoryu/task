@@ -122,16 +122,21 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar, onAbrirUpgrade}: M
     useEffect(() => {
         if (!estaAbierto) return;
 
+        const abortController = new AbortController();
+
         const verificarToken = async () => {
             setVerificando(true);
             try {
                 const respuesta = await fetch(`${apiUrl}/mcp/token`, {
                     credentials: 'include',
+                    signal: abortController.signal,
                     headers: {
                         'X-WP-Nonce': obtenerNonce()
                     }
                 });
+                if (abortController.signal.aborted) return;
                 const datos = await respuesta.json();
+                if (abortController.signal.aborted) return;
 
                 if (datos.success && datos.existe) {
                     setTokenExiste(true);
@@ -149,13 +154,18 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar, onAbrirUpgrade}: M
                     localStorage.removeItem('glory_mcp_token_base64');
                 }
             } catch (error) {
+                if (abortController.signal.aborted) return;
                 console.error('Error al verificar token:', error);
             } finally {
-                setVerificando(false);
+                if (!abortController.signal.aborted) {
+                    setVerificando(false);
+                }
             }
         };
 
         verificarToken();
+
+        return () => { abortController.abort(); };
     }, [estaAbierto, apiUrl]);
 
     /* Generar nuevo token vía API */

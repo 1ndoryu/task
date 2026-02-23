@@ -5,7 +5,7 @@
  * Muestra información básica y acciones rápidas por usuario.
  */
 
-import {ChevronLeft, ChevronRight, User, Crown, Clock, AlertCircle} from 'lucide-react';
+import {ChevronLeft, ChevronRight, User, Clock, AlertCircle} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import type {UsuarioAdmin, PaginacionAdmin} from '../../types/dashboard';
 import {FilaUsuario} from './FilaUsuario';

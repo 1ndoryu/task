@@ -9,10 +9,7 @@
  * - DRY: Clases base reutilizables, sin duplicación
  */
 
-/* ============================================
-   CLASES BASE COMPARTIDAS (.bottomSheetCreacion)
-   Usadas por Tarea, Hábito y Proyecto
-   ============================================ */
+/* Clases base compartidas (.bottomSheetCreacion) - Usadas por Tarea, Hábito y Proyecto */
 
 /* Contenedor principal */
 .bottomSheetCreacion {
@@ -122,10 +119,7 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* ============================================
-   BOTTOM SHEET TAREA
-   Alias a clases base para retrocompatibilidad
-   ============================================ */
+/* Bottom Sheet Tarea - Alias a clases base para retrocompatibilidad */
 
 .bottomSheetTarea {
     display: flex;
@@ -230,10 +224,7 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* ============================================
-   BOTTOM SHEET HÁBITO
-   Usa misma estructura visual que Tarea
-   ============================================ */
+/* Bottom Sheet Hábito - Usa misma estructura visual que Tarea */
 
 .bottomSheetHabito {
     display: flex;
@@ -339,10 +330,7 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* ============================================
-   BOTTOM SHEET PROYECTO
-   Usa misma estructura visual que Tarea
-   ============================================ */
+/* Bottom Sheet Proyecto - Usa misma estructura visual que Tarea */
 
 .bottomSheetProyecto {
     display: flex;
@@ -447,10 +435,7 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* ============================================
-   MODAL SELECCIÓN PROPIEDAD
-   Modal centrado para seleccionar propiedades
-   ============================================ */
+/* Modal Selección Propiedad - Modal centrado para seleccionar propiedades */
 
 .modalSeleccionPropiedadOverlay {
     position: fixed;
@@ -578,10 +563,7 @@
     margin-left: auto;
 }
 
-/* ============================================
-   BADGES PROPIEDAD
-   Badges de propiedades seleccionadas
-   ============================================ */
+/* Badges Propiedad - Badges de propiedades seleccionadas */
 
 .badgesPropiedad {
     display: flex;

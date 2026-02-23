@@ -3,7 +3,6 @@
  * Modal para ajustar preferencias de visualización de proyectos
  */
 
-import {Settings} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
 import {ToggleSwitch} from '../../shared/ToggleSwitch';
 import type {ConfiguracionProyectos, OrdenamientoProyectos} from '../../../hooks/useConfiguracionProyectos';

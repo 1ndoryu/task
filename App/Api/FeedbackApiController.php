@@ -106,10 +106,15 @@ class FeedbackApiController
      */
     public static function requirePremium(): bool
     {
-        if (!is_user_logged_in()) return false;
-        
-        $servicioSuscripcion = new SuscripcionService(get_current_user_id());
-        return $servicioSuscripcion->esPremium();
+        try {
+            if (!is_user_logged_in()) return false;
+            
+            $servicioSuscripcion = new SuscripcionService(get_current_user_id());
+            return $servicioSuscripcion->esPremium();
+        } catch (\Throwable $e) {
+            error_log('[FeedbackApiController] Error en requirePremium: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -125,51 +130,59 @@ class FeedbackApiController
      */
     public static function enviar(\WP_REST_Request $request): \WP_REST_Response
     {
-        global $wpdb;
-        $userId = get_current_user_id();
-        
-        /* Verificar límite diario */
-        $restante = self::obtenerComentariosRestantes($userId);
-        if ($restante <= 0) {
+        try {
+            global $wpdb;
+            $userId = get_current_user_id();
+            
+            /* Verificar limite diario */
+            $restante = self::obtenerComentariosRestantes($userId);
+            if ($restante <= 0) {
+                return new \WP_REST_Response([
+                    'success' => false,
+                    'error' => 'Has alcanzado el limite de 3 comentarios por dia. Intenta manana.'
+                ], 429);
+            }
+
+            Schema::ensureTableExists('feedback');
+
+            $tipo = $request->get_param('tipo');
+            $mensaje = $request->get_param('mensaje');
+            $table = Schema::getTableName('feedback');
+            $usuario = get_userdata($userId);
+
+            $resultado = $wpdb->insert(
+                $table,
+                [
+                    'user_id' => $userId,
+                    'usuario_nombre' => $usuario ? $usuario->display_name : 'Usuario',
+                    'usuario_email' => $usuario ? $usuario->user_email : '',
+                    'tipo' => $tipo,
+                    'mensaje' => $mensaje,
+                    'leido' => 0,
+                    'fecha_creacion' => current_time('mysql')
+                ],
+                ['%d', '%s', '%s', '%s', '%s', '%d', '%s']
+            );
+
+            if (!$resultado) {
+                return new \WP_REST_Response([
+                    'success' => false,
+                    'error' => 'Error al enviar el comentario'
+                ], 500);
+            }
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'restante' => $restante - 1,
+                'mensaje' => 'Gracias por tu feedback! Lo leeremos pronto.'
+            ], 201);
+        } catch (\Throwable $e) {
+            error_log('[FeedbackApiController] Error en enviar: ' . $e->getMessage());
             return new \WP_REST_Response([
                 'success' => false,
-                'error' => 'Has alcanzado el límite de 3 comentarios por día. Intenta mañana.'
-            ], 429);
-        }
-
-        Schema::ensureTableExists('feedback');
-
-        $tipo = $request->get_param('tipo');
-        $mensaje = $request->get_param('mensaje');
-        $table = Schema::getTableName('feedback');
-        $usuario = get_userdata($userId);
-
-        $resultado = $wpdb->insert(
-            $table,
-            [
-                'user_id' => $userId,
-                'usuario_nombre' => $usuario ? $usuario->display_name : 'Usuario',
-                'usuario_email' => $usuario ? $usuario->user_email : '',
-                'tipo' => $tipo,
-                'mensaje' => $mensaje,
-                'leido' => 0,
-                'fecha_creacion' => current_time('mysql')
-            ],
-            ['%d', '%s', '%s', '%s', '%s', '%d', '%s']
-        );
-
-        if (!$resultado) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'Error al enviar el comentario'
+                'error' => 'Error interno del servidor'
             ], 500);
         }
-
-        return new \WP_REST_Response([
-            'success' => true,
-            'restante' => $restante - 1,
-            'mensaje' => '¡Gracias por tu feedback! Lo leeremos pronto.'
-        ], 201);
     }
 
     /**
@@ -177,16 +190,24 @@ class FeedbackApiController
      */
     public static function obtenerRestante(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
-        $servicioSuscripcion = new SuscripcionService($userId);
-        $esPremium = $servicioSuscripcion->esPremium();
+        try {
+            $userId = get_current_user_id();
+            $servicioSuscripcion = new SuscripcionService($userId);
+            $esPremium = $servicioSuscripcion->esPremium();
 
-        return new \WP_REST_Response([
-            'success' => true,
-            'esPremium' => $esPremium,
-            'restante' => $esPremium ? self::obtenerComentariosRestantes($userId) : 0,
-            'limite' => self::LIMITE_DIARIO
-        ]);
+            return new \WP_REST_Response([
+                'success' => true,
+                'esPremium' => $esPremium,
+                'restante' => $esPremium ? self::obtenerComentariosRestantes($userId) : 0,
+                'limite' => self::LIMITE_DIARIO
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[FeedbackApiController] Error en obtenerRestante: ' . $e->getMessage());
+            return new \WP_REST_Response([
+                'success' => false,
+                'error' => 'Error interno del servidor'
+            ], 500);
+        }
     }
 
     /**
@@ -194,8 +215,9 @@ class FeedbackApiController
      */
     public static function listar(\WP_REST_Request $request): \WP_REST_Response
     {
-        global $wpdb;
-        Schema::ensureTableExists('feedback');
+        try {
+            global $wpdb;
+            Schema::ensureTableExists('feedback');
 
         $table = Schema::getTableName('feedback');
         $pagina = max(1, (int)$request->get_param('pagina'));
@@ -203,17 +225,36 @@ class FeedbackApiController
         $soloNoLeidos = $request->get_param('soloNoLeidos');
         $offset = ($pagina - 1) * $porPagina;
 
-        $whereClause = $soloNoLeidos ? 'WHERE leido = 0' : '';
+        /* Consultas con prepare obligatorio */
+        if ($soloNoLeidos) {
+            $total = (int)$wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$table} WHERE leido = %d",
+                0
+            ));
+            $feedbacks = $wpdb->get_results($wpdb->prepare(
+                "SELECT id, user_id, usuario_nombre, usuario_email, tipo, mensaje, leido, fecha_creacion
+                 FROM {$table} WHERE leido = %d ORDER BY fecha_creacion DESC LIMIT %d OFFSET %d",
+                0,
+                $porPagina,
+                $offset
+            ), ARRAY_A);
+        } else {
+            $total = (int)$wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$table} WHERE %d = %d",
+                1, 1
+            ));
+            $feedbacks = $wpdb->get_results($wpdb->prepare(
+                "SELECT id, user_id, usuario_nombre, usuario_email, tipo, mensaje, leido, fecha_creacion
+                 FROM {$table} ORDER BY fecha_creacion DESC LIMIT %d OFFSET %d",
+                $porPagina,
+                $offset
+            ), ARRAY_A);
+        }
 
-        $total = (int)$wpdb->get_var("SELECT COUNT(*) FROM $table $whereClause");
-
-        $feedbacks = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table $whereClause ORDER BY fecha_creacion DESC LIMIT %d OFFSET %d",
-            $porPagina,
-            $offset
-        ), ARRAY_A);
-
-        $noLeidos = (int)$wpdb->get_var("SELECT COUNT(*) FROM $table WHERE leido = 0");
+        $noLeidos = (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE leido = %d",
+            0
+        ));
 
         return new \WP_REST_Response([
             'success' => true,
@@ -231,7 +272,14 @@ class FeedbackApiController
             'noLeidos' => $noLeidos,
             'pagina' => $pagina,
             'totalPaginas' => ceil($total / $porPagina)
-        ]);
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[FeedbackApiController] Error en listar: ' . $e->getMessage());
+            return new \WP_REST_Response([
+                'success' => false,
+                'error' => 'Error interno del servidor'
+            ], 500);
+        }
     }
 
     /**
@@ -239,13 +287,21 @@ class FeedbackApiController
      */
     public static function marcarLeido(\WP_REST_Request $request): \WP_REST_Response
     {
-        global $wpdb;
-        $id = (int)$request->get_param('id');
-        $table = Schema::getTableName('feedback');
+        try {
+            global $wpdb;
+            $id = (int)$request->get_param('id');
+            $table = Schema::getTableName('feedback');
 
-        $wpdb->update($table, ['leido' => 1], ['id' => $id], ['%d'], ['%d']);
+            $wpdb->update($table, ['leido' => 1], ['id' => $id], ['%d'], ['%d']);
 
-        return new \WP_REST_Response(['success' => true]);
+            return new \WP_REST_Response(['success' => true]);
+        } catch (\Throwable $e) {
+            error_log('[FeedbackApiController] Error en marcarLeido: ' . $e->getMessage());
+            return new \WP_REST_Response([
+                'success' => false,
+                'error' => 'Error interno del servidor'
+            ], 500);
+        }
     }
 
     /**

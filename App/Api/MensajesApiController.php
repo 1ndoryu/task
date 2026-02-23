@@ -19,6 +19,8 @@ namespace App\Api;
 
 use App\Database\Schema;
 use App\Repository\MensajesRepository;
+use App\Services\MensajesService;
+use App\Services\NotificacionesService;
 
 class MensajesApiController
 {
@@ -487,7 +489,7 @@ class MensajesApiController
         try {
             Schema::ensureTableExists('mensajes');
 
-            $resultado = \App\Services\MensajesService::registrarEvento(
+            $resultado = MensajesService::registrarEvento(
                 $tipoElemento,
                 $elementoId,
                 $userId,
@@ -623,7 +625,7 @@ class MensajesApiController
         }
 
         /* Crear notificacion para cada participante */
-        $notificacionesService = new \App\Services\NotificacionesService();
+        $notificacionesService = new NotificacionesService();
 
         foreach ($participantes as $participanteId) {
             $notificacionesService->notificarMensajeChat(

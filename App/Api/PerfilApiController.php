@@ -28,8 +28,9 @@ class PerfilApiController
 
     public static function updateProfile(WP_REST_Request $request): WP_REST_Response
     {
-        $user_id = get_current_user_id();
-        $params = $request->get_json_params();
+        try {
+            $user_id = get_current_user_id();
+            $params = $request->get_json_params();
 
         // 1. Actualizar datos básicos
         if (isset($params['nombre'])) {
@@ -130,6 +131,13 @@ class PerfilApiController
                 'avatarUrl' => $avatar_url
             ]
         ], 200);
+        } catch (\Throwable $e) {
+            error_log('[PerfilApiController] Error en updateProfile: ' . $e->getMessage());
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error interno del servidor'
+            ], 500);
+        }
     }
 }
 

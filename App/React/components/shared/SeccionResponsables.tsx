@@ -6,7 +6,7 @@
  * Fase 9.2.4: Seccion de responsables para proyectos/tareas
  */
 
-import {useState, useRef, useEffect, useCallback} from 'react';
+import {useState, useCallback} from 'react';
 import {User, UserPlus, X, Crown, Edit3, Eye} from 'lucide-react';
 import {MenuFlotante} from './MenuFlotante';
 import type {Participante, CompaneroEquipo, RolCompartido} from '../../types/dashboard';

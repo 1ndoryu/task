@@ -5,6 +5,7 @@ import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion} 
 import type {OpcionMenu} from '../../shared/MenuContextual';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
 import {useTimeTrackerStore} from '../../../stores/timeTrackerStore';
+import {useShallow} from 'zustand/react/shallow';
 
 interface UseTareaMenuProps {
     tarea: Tarea;
@@ -35,7 +36,7 @@ interface UseTareaMenuProps {
 export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigurar, onCrearNueva, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, habitoCompletadoHoy, habitoPausado, habitoPospuestoHoy, estaSeleccionada = false, cantidadSeleccionadas = 0}: UseTareaMenuProps) {
     /* Menú contextual coordinado globalmente */
     const menuContextual = useMenuContextualConId(`tarea-${tarea.id}`);
-    const tracker = useTimeTrackerStore();
+    const tracker = useTimeTrackerStore(useShallow(s => ({sesionActiva: s.sesionActiva, estado: s.estado, iniciarTracking: s.iniciarTracking, completarTracking: s.completarTracking})));
 
     const manejarClickDerecho = useCallback(
         (evento: React.MouseEvent) => {

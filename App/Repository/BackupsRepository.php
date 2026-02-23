@@ -48,7 +48,7 @@ class BackupsRepository
 
         $result = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->table} WHERE id = %d AND user_id = %d",
+                "SELECT id, user_id, hash, size_bytes, device, trigger_source, data, created_at FROM {$this->table} WHERE id = %d AND user_id = %d",
                 $id,
                 $this->userId
             ),
@@ -132,8 +132,11 @@ class BackupsRepository
         );
 
         if (!empty($ids)) {
-            $idsList = implode(',', array_map('intval', $ids));
-            $wpdb->query("DELETE FROM {$this->table} WHERE id IN ($idsList)");
+            $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+            $wpdb->query($wpdb->prepare(
+                "DELETE FROM {$this->table} WHERE id IN ($placeholders)",
+                ...$ids
+            ));
         }
     }
 

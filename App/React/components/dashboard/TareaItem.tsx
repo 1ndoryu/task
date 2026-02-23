@@ -10,6 +10,7 @@ import {useTareaEdicion} from './tarea-item/useTareaEdicion';
 import {useTareaMenu} from './tarea-item/useTareaMenu';
 import {useCantidadSeleccionadas} from '../../stores/seleccionMultipleStore';
 import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
+import {useShallow} from 'zustand/react/shallow';
 
 import type {TareaItemProps} from './tarea-item/types';
 
@@ -18,7 +19,7 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
 
     /* Detectar si es una tarea-hábito virtual */
     const esHabito = esTareaHabito(tarea);
-    const tracker = useTimeTrackerStore();
+    const tracker = useTimeTrackerStore(useShallow(s => ({sesionActiva: s.sesionActiva, estado: s.estado, iniciarTracking: s.iniciarTracking, completarTracking: s.completarTracking})));
     const entidadTrackingId = esHabito ? (tarea as any).habitoId : tarea.id;
     const estaEnTracking = tracker.sesionActiva?.entidadId === entidadTrackingId && tracker.estado !== 'inactivo';
 

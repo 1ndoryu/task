@@ -14,7 +14,6 @@ import {useMemo, useCallback, useEffect, useRef, useState} from 'react';
 import {useHabitosStore, useHabito} from '../../stores/habitosStore';
 import {useHabitosHistorialStore, useHistorialDetallado} from '../../stores/habitosHistorialStore';
 import type {EstadoHabito} from '../../types/historialHabitos';
-import {obtenerFechaLocalISO, obtenerFechaEfectiva, obtenerFechaHoy} from '../../utils/fecha';
 import {generarFechasPeriodo, agruparPorSemanas, formatearFechaTooltip, esHoy, esEditable, calcularRelevanciaDia, DIAS_SEMANA_CORTO, MESES} from '../../utils/mapaCalorUtils';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 

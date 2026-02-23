@@ -13,7 +13,6 @@
  * - Pendiente: naranja (hay cambios sin sincronizar)
  */
 
-import React from 'react';
 import {Wifi, WifiOff, Cloud, CloudOff, RefreshCw, AlertCircle} from 'lucide-react';
 import type {EstadoConexion} from '../../hooks/useWebSocket';
 

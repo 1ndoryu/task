@@ -13,7 +13,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
-import {Send, Layers, Flag, Hash, Calendar} from 'lucide-react';
+import {Send, Flag, Hash, Calendar} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import {Input, Boton} from '../ui';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';

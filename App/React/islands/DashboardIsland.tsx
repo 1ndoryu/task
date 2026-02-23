@@ -56,7 +56,8 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     const {dashboard, auth, suscripcion, esAdmin, modales, equipos, notificaciones, acciones, filtroTareas, ordenTareas, ordenHabitos, opciones, configProyectos} = ctx;
     const {esMovil} = useEsMovil();
     const paginaMovil = usePaginaMovil();
-    const {modoSeleccionActivo, toggleModoSeleccionManual} = useSeleccionMultipleStore();
+    const modoSeleccionActivo = useSeleccionMultipleStore(s => s.modoSeleccionActivo);
+    const toggleModoSeleccionManual = useSeleccionMultipleStore(s => s.toggleModoSeleccionManual);
 
     /*
      * Detección de cambio de día y retorno tras inactividad.

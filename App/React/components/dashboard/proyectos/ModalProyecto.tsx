@@ -16,9 +16,8 @@ import {MessageSquare, MessageSquareOff, Activity, BarChart2} from 'lucide-react
 import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, CompaneroEquipo, RolCompartido, Adjunto, Tarea, Hito} from '../../../types/dashboard';
 import type {EstadoProyecto} from '../../shared';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
-import {AccionesFormulario, Modal, SeccionPanel} from '../../shared';
+import {AccionesFormulario, Modal} from '../../shared';
 import {Boton} from '../../ui';
-import {MapaCalorProyecto} from '../../shared/MapaCalorProyecto';
 import {PanelChatHistorial} from '../PanelChatHistorial';
 import {useMensajesNoLeidos} from '../../../hooks/useMensajes';
 import {FormularioProyectoModerno} from './FormularioProyectoModerno';

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Check, X, Flag, Trash2, Settings, Calendar, Paperclip, FileText, Repeat, Folder, Share2, Users, Zap, Repeat2, MessageCircle, Sparkles} from 'lucide-react';
+import {Calendar, Paperclip, FileText, Repeat, Folder, Users, Zap, Repeat2, MessageCircle, Sparkles} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, TareaHabito} from '../../../types/dashboard';
 import {esTareaHabito} from '../../../types/dashboard';
 import {BadgeInfo, type VarianteBadge} from '../../shared/BadgeInfo';

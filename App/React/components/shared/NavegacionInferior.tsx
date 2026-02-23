@@ -14,7 +14,7 @@
  */
 
 import {useState} from 'react';
-import {CheckSquare, Plus, Folder, Activity, StickyNote, BarChart3, X, Target} from 'lucide-react';
+import {CheckSquare, Plus, Folder, Activity, StickyNote, X, Target} from 'lucide-react';
 import {Boton} from '../ui';
 import type {PaginaMovil} from '../../hooks/usePaginaMovil';
 

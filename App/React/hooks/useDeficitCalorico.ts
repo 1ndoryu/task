@@ -4,7 +4,7 @@
  * Orquesta la estimación por IA, cálculo de TMB y gestión de comidas
  */
 
-import {useCallback, useMemo, useRef} from 'react';
+import {useCallback, useMemo} from 'react';
 import {useDeficitCaloricoStore} from '../stores/deficitCaloricoStore';
 import {usePluginsStore} from '../stores/pluginsStore';
 import {calcularTDEE, obtenerMetodoCalculo} from '../utils/calculoTMB';

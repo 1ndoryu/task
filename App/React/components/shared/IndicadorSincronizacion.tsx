@@ -11,7 +11,7 @@
  * - Offline: Icono de nube tachada
  */
 
-import {LogOut, CloudOff, AlertTriangle, Loader2, CheckCircle} from 'lucide-react';
+import {LogOut, CloudOff, AlertTriangle, Loader2} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 
 interface IndicadorSincronizacionProps {

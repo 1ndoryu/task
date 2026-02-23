@@ -6,7 +6,7 @@
  */
 
 import {RevealElement} from '../components/shared/RevealElement';
-import {Check, CheckCircle, Zap, Server, Image, LifeBuoy} from 'lucide-react';
+import {Check, CheckCircle} from 'lucide-react';
 import type {BlockComponentProps, BlockDefinition} from '@/pageBuilder';
 
 /*

@@ -19,6 +19,7 @@
 namespace App\Api;
 
 use App\Repository\DashboardRepository;
+use App\Repository\BackupsRepository;
 use App\Services\SuscripcionService;
 
 class DashboardApiController
@@ -234,7 +235,7 @@ class DashboardApiController
                     /* En saveDashboard, $data ya tiene (casi) todo, pero es mejor cargar lo consolidado o usar lo enviado si es completo */
                     /* loadAll asegura tener IDs generados y todo consistente */
                     $fullData = $repository->loadAll();
-                    $backupsRepo = new \App\Repository\BackupsRepository($userId);
+                    $backupsRepo = new BackupsRepository($userId);
                     $backupsRepo->create($fullData, 'auto_save');
                 }
             }
@@ -342,7 +343,7 @@ class DashboardApiController
                 $suscripcionService = new SuscripcionService($userId);
                 if ($suscripcionService->esPremium()) {
                     $fullData = $repository->loadAll();
-                    $backupsRepo = new \App\Repository\BackupsRepository($userId);
+                    $backupsRepo = new BackupsRepository($userId);
                     $backupsRepo->create($fullData, 'sync');
                 }
             }

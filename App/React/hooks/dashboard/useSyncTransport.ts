@@ -1,5 +1,5 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
-import {useDashboardApi, DashboardData, EstadoApi} from '../useDashboardApi';
+import {useDashboardApi, DashboardData} from '../useDashboardApi';
 
 interface SyncTransportConfig {
     maxRetries?: number;

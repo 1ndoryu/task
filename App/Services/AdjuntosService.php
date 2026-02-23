@@ -17,6 +17,8 @@
 
 namespace App\Services;
 
+use App\Api\AdjuntosApiController;
+
 class AdjuntosService
 {
     /* 
@@ -768,7 +770,7 @@ class AdjuntosService
     {
         if ($cifrado) {
             /* Archivos cifrados usan URL con token temporal */
-            return \App\Api\AdjuntosApiController::generarUrlConToken(
+            return AdjuntosApiController::generarUrlConToken(
                 $adjuntoId,
                 $this->userId,
                 $nombreArchivo

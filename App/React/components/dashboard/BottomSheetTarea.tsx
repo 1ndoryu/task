@@ -14,7 +14,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
-import {Send, Calendar, Flag, Zap, Layers, Settings, Paperclip} from 'lucide-react';
+import {Send, Calendar, Flag, Zap, Layers, Settings} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import {Input, Boton} from '../ui';
 import type {Proyecto, Tarea} from '../../types/dashboard';

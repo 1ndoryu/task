@@ -24,6 +24,7 @@ import type {EstadoHabito} from '../../types/historialHabitos';
 import {obtenerFechaHoy} from '../../utils/fecha';
 import {generarOpcionesMenuHabito, MENU_HABITO_IDS, extraerImportanciaDeOpcion} from '../../config/opcionesMenuHabito';
 import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
+import {useShallow} from 'zustand/react/shallow';
 
 interface TablaHabitosProps {
     habitos: Habito[];
@@ -96,7 +97,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
     /* Menú contextual coordinado globalmente - Solo un menú abierto a la vez */
     const menuContextual = useMenuContextualConId(`habito-${habito.id}`);
-    const tracker = useTimeTrackerStore();
+    const tracker = useTimeTrackerStore(useShallow(s => ({sesionActiva: s.sesionActiva, estado: s.estado, iniciarTracking: s.iniciarTracking, completarTracking: s.completarTracking})));
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
 
     /* Frecuencia del habito */

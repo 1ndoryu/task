@@ -7,6 +7,7 @@ import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import type {ConfiguracionTareas} from '../../hooks/useConfiguracionTareas';
 import {useGruposTareasStore, type OrdenamientoGrupos} from '../../stores/gruposTareasStore';
+import {useShallow} from 'zustand/react/shallow';
 
 interface ModalConfiguracionTareasProps {
     estaAbierto: boolean;
@@ -22,7 +23,7 @@ interface ModalConfiguracionTareasProps {
 }
 
 export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas}: ModalConfiguracionTareasProps): JSX.Element {
-    const {seccionesActivas, toggleSecciones, ordenamientoGrupos, setOrdenamientoGrupos} = useGruposTareasStore();
+    const {seccionesActivas, toggleSecciones, ordenamientoGrupos, setOrdenamientoGrupos} = useGruposTareasStore(useShallow(s => ({seccionesActivas: s.seccionesActivas, toggleSecciones: s.toggleSecciones, ordenamientoGrupos: s.ordenamientoGrupos, setOrdenamientoGrupos: s.setOrdenamientoGrupos})));
 
     /* Opciones de ordenamiento de grupos */
     const opcionesOrdenamiento: {valor: OrdenamientoGrupos; etiqueta: string}[] = [
