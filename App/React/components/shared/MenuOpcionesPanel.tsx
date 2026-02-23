@@ -81,7 +81,7 @@ export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children,
     /* En móvil, mostrar botón único que abre el menú */
     return (
         <>
-            <Boton variante="icono" claseAdicional={`selectorBadgeBoton selectorBadgeBoton--soloIcono menuOpcionesPanelBoton ${tieneFiltrosActivos ? 'menuOpcionesPanelBoton--activo' : ''} ${claseBoton}`} onClick={abrirMenu} title="Opciones" aria-label="Abrir menú de opciones" icono={<MoreVertical size={14} />}>
+            <Boton variante="badge" soloIcono claseAdicional={`menuOpcionesPanelBoton ${tieneFiltrosActivos ? 'menuOpcionesPanelBoton--activo' : ''} ${claseBoton}`} onClick={abrirMenu} title="Opciones" aria-label="Abrir menú de opciones" icono={<MoreVertical size={14} />}>
                 {tieneFiltrosActivos && <span className="menuOpcionesPanelBadge" aria-label="Filtros activos" />}
             </Boton>
 

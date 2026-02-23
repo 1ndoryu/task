@@ -36,7 +36,7 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
                     </a>
                 </div>
 
-                <Boton variante="primario" onClick={onLogin} claseAdicional="landingNavBoton">
+                <Boton variante="primario" onClick={onLogin}>
                     Iniciar sesión
                 </Boton>
             </nav>

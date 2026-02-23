@@ -110,7 +110,7 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
 
     return (
         <div id="selector-badge-contenedor" ref={contenedorRef} className={`selectorBadgeContenedor ${className}`.trim()}>
-            <Boton type="button" variante="ghost" claseAdicional={`selectorBadgeBoton ${soloIcono ? 'selectorBadgeBoton--soloIcono' : 'selectorBadgeBotonCompacto'} ${menuAbierto ? 'selectorBadgeBotonActivo' : ''}`} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
+            <Boton type="button" variante="badge" soloIcono={soloIcono} activo={menuAbierto} claseAdicional={!soloIcono ? 'selectorBadgeBotonCompacto' : ''} onClick={() => setMenuAbierto(!menuAbierto)} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
                 {soloIcono ? (
                     /* En modo soloIcono, mostrar solo un icono: el de la opción activa o el principal como fallback */
                     <span className="selectorBadgeIcono">{opcionActual?.icono || icono}</span>

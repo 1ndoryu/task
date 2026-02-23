@@ -189,7 +189,6 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                     <Boton
                         type="button"
                         variante="secundario"
-                        claseAdicional="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--secundario"
                         onClick={() => {
                             onContinuar();
                             onCerrar();
@@ -202,7 +201,6 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                     <Boton
                         type="button"
                         variante="peligro"
-                        claseAdicional="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--peligro"
                         onClick={() => {
                             onEliminar();
                             onCerrar();
@@ -215,7 +213,6 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                     <Boton
                         type="button"
                         variante="primario"
-                        claseAdicional="modalAyunoFinalizarBoton modalAyunoFinalizarBoton--primario"
                         onClick={() => {
                             onGuardar(finComidaMs);
                             onCerrar();

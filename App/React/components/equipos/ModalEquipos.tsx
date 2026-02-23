@@ -92,7 +92,7 @@ export function ModalEquipos({estaAbierto, onCerrar}: ModalEquiposProps): JSX.El
             return (
                 <div className="equiposError">
                     <p>{equipos.error}</p>
-                    <Boton type="button" claseAdicional="botonReintentar" onClick={() => equipos.cargarEquipo()}>
+                    <Boton type="button" variante="primario" onClick={() => equipos.cargarEquipo()}>
                         Reintentar
                     </Boton>
                 </div>
@@ -119,15 +119,15 @@ export function ModalEquipos({estaAbierto, onCerrar}: ModalEquiposProps): JSX.El
 
                 {/* Pestañas */}
                 <div className="equiposPestanas">
-                    <Boton type="button" claseAdicional={`equiposPestana ${pestanaActiva === 'companeros' ? 'activa' : ''}`} onClick={() => setPestanaActiva('companeros')}>
+                    <Boton type="button" variante="pestaña" activo={pestanaActiva === 'companeros'} onClick={() => setPestanaActiva('companeros')}>
                         Compañeros
                         {equipos.contadores.companeros > 0 && <span className="equiposContador">{equipos.contadores.companeros}</span>}
                     </Boton>
-                    <Boton type="button" claseAdicional={`equiposPestana ${pestanaActiva === 'recibidas' ? 'activa' : ''}`} onClick={() => setPestanaActiva('recibidas')}>
+                    <Boton type="button" variante="pestaña" activo={pestanaActiva === 'recibidas'} onClick={() => setPestanaActiva('recibidas')}>
                         Recibidas
                         {equipos.contadores.recibidas > 0 && <span className="equiposContador alerta">{equipos.contadores.recibidas}</span>}
                     </Boton>
-                    <Boton type="button" claseAdicional={`equiposPestana ${pestanaActiva === 'enviadas' ? 'activa' : ''}`} onClick={() => setPestanaActiva('enviadas')}>
+                    <Boton type="button" variante="pestaña" activo={pestanaActiva === 'enviadas'} onClick={() => setPestanaActiva('enviadas')}>
                         Enviadas
                         {equipos.contadores.enviadas > 0 && <span className="equiposContador">{equipos.contadores.enviadas}</span>}
                     </Boton>

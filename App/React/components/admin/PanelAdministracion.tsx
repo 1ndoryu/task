@@ -99,11 +99,11 @@ export function PanelAdministracion({estaAbierto, onCerrar}: PanelAdministracion
             <div id="panel-administracion" className="panelAdministracion">
                 {/* Tabs de navegación */}
                 <div className="adminTabs">
-                    <Boton type="button" claseAdicional={`adminTab ${tabActiva === 'usuarios' ? 'adminTabActiva' : ''}`} onClick={() => setTabActiva('usuarios')}>
+                    <Boton type="button" variante="pestaña" activo={tabActiva === 'usuarios'} onClick={() => setTabActiva('usuarios')}>
                         <Users size={16} />
                         Usuarios
                     </Boton>
-                    <Boton type="button" claseAdicional={`adminTab ${tabActiva === 'feedback' ? 'adminTabActiva' : ''}`} onClick={() => setTabActiva('feedback')}>
+                    <Boton type="button" variante="pestaña" activo={tabActiva === 'feedback'} onClick={() => setTabActiva('feedback')}>
                         <MessageSquare size={16} />
                         Feedback
                     </Boton>

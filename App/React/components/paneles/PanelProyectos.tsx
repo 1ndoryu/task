@@ -10,7 +10,7 @@ import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, ListaProyectos} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque} from '../shared';
 import {Boton} from '../ui';
-import type {Proyecto, Tarea} from '../../types/dashboard';
+import type {Proyecto, Tarea, DatosEdicionTarea} from '../../types/dashboard';
 import type {ConfiguracionProyectos} from '../../hooks/useConfiguracionProyectos';
 
 interface PanelProyectosProps {
@@ -23,12 +23,12 @@ interface PanelProyectosProps {
     onAbrirModalConfigProyectos: () => void;
     onEliminarProyecto: (id: number) => void;
     onCambiarEstadoProyecto: (id: number, estado: 'activo' | 'completado' | 'pausado') => void;
-    onCambiarOrdenProyectos: (orden: any) => void;
+    onCambiarOrdenProyectos: (orden: string) => void;
     onCompartirProyecto: (proyecto: Proyecto) => void;
     estaCompartido: (id: number) => boolean;
     onToggleTarea: (id: number) => void;
-    onCrearTarea: (datos: any) => void;
-    onEditarTarea: (id: number, datos: any) => void;
+    onCrearTarea: (datos: DatosEdicionTarea) => void;
+    onEditarTarea: (id: number, datos: DatosEdicionTarea) => void;
     onEliminarTarea: (id: number) => void;
     onReordenarTareas: (tareas: Tarea[]) => void;
     renderHandleArrastre: (titulo?: string) => JSX.Element;
@@ -47,31 +47,31 @@ export function PanelProyectos({proyectos, tareas, configuracion, opcionesOrdenP
         <>
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Proyectos') as any}
+                titulo={renderHandleArrastre('Proyectos')}
                 variante="panelHeader"
                 acciones={
                     <>
-                        <SelectorBadge opciones={opcionesOrdenProyectos} valorActual={configuracion.ordenDefecto} onChange={valor => onCambiarOrdenProyectos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar proyectos" soloIcono={true} />
+                        <SelectorBadge opciones={opcionesOrdenProyectos} valorActual={configuracion.ordenDefecto} onChange={valor => onCambiarOrdenProyectos(valor)} icono={<ArrowUpDown size={12} />} titulo="Ordenar proyectos" soloIcono={true} />
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={onAbrirModalCrearProyecto}
                             icono={<Plus size={12} />}
                             title="Nuevo Proyecto"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={onAbrirModalConfigProyectos}
                             icono={<Settings size={12} />}
                             title="Configuración"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={() => setModoEnfoque(true)}
                             icono={<Maximize2 size={12} />}
                             title="Modo enfoque"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {handleMinimizar}
                     </>

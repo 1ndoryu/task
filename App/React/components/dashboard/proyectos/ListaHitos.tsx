@@ -144,7 +144,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
 
                                 {/* Controles: Solo eliminar, apareces on hover */}
                                 <div className="controlesHito" style={{display: 'flex', gap: '4px', opacity: 0}}>
-                                    <Boton type="button" claseAdicional="botonIcono botonIcono--pequeno botonIcono--peligro" title="Eliminar hito" onClick={() => manejarEliminar(hito.id)} style={{padding: '4px'}}>
+                                    <Boton type="button" variante="icono" title="Eliminar hito" onClick={() => manejarEliminar(hito.id)} style={{padding: '4px'}}>
                                         <Trash2 size={12} />
                                     </Boton>
                                 </div>

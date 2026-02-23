@@ -21,7 +21,7 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
             <div className="modalContenedor modalContenedor--mediana" onClick={e => e.stopPropagation()}>
                 <div className="modalEncabezado">
                     <h2 className="modalTitulo">Proceso de IA - Inspección</h2>
-                    <Boton variante="icono" onClick={onCerrar} icono={<X size={18} />} claseAdicional="modalCerrar" title="Cerrar" />
+                    <Boton variante="icono" onClick={onCerrar} icono={<X size={18} />} title="Cerrar" />
                 </div>
 
                 <div className="modalCuerpo">
@@ -34,7 +34,7 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
                             const esInput = linea.startsWith('[1]');
 
                             return (
-                                <div key={index} className={`modalInspeccionLogLinea ${esError ? 'modalInspeccionLogLinea--error' : ''} ${esExito ? 'modalInspeccionLogLinea--exito' : ''} ${esInput ? 'modalInspeccionLogLinea--input' : ''}`}>
+                                <div key={`log-${index}`} className={`modalInspeccionLogLinea ${esError ? 'modalInspeccionLogLinea--error' : ''} ${esExito ? 'modalInspeccionLogLinea--exito' : ''} ${esInput ? 'modalInspeccionLogLinea--input' : ''}`}>
                                     {linea}
                                 </div>
                             );
@@ -43,7 +43,7 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
                 </div>
 
                 <div className="modalFooter">
-                    <Boton variante="secundario" onClick={onCerrar} claseAdicional="botonModal botonModal--secundario">
+                    <Boton variante="secundario" onClick={onCerrar}>
                         Cerrar
                     </Boton>
                 </div>

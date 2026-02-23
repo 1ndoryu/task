@@ -30,7 +30,7 @@ export function BadgesPropiedad({badges, onEliminar}: BadgesPropiedadProps): JSX
                 <div key={badge.id} className={`badgesPropiedad__badge badgesPropiedad__badge--${badge.variante || 'normal'}`}>
                     {badge.icono && <span className="badgesPropiedad__badgeIcono">{badge.icono}</span>}
                     <span className="badgesPropiedad__badgeTexto">{badge.etiqueta}</span>
-                    <Boton type="button" claseAdicional="badgesPropiedad__badgeEliminar" onClick={() => onEliminar(badge.id)} aria-label={`Quitar ${badge.etiqueta}`}>
+                    <Boton type="button" variante="icono" onClick={() => onEliminar(badge.id)} aria-label={`Quitar ${badge.etiqueta}`}>
                         <X size={10} />
                     </Boton>
                 </div>

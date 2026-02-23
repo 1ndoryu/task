@@ -60,7 +60,7 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                             </span>
                         </div>
                     </div>
-                    <Boton type="button" claseAdicional="detalleCerrarBoton" onClick={onCerrar} title="Cerrar">
+                    <Boton type="button" variante="icono" onClick={onCerrar} title="Cerrar">
                         <X size={18} />
                     </Boton>
                 </div>

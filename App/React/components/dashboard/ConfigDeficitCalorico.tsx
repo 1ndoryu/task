@@ -114,7 +114,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitApiKey">
                     <Input tipo={mostrarKeyGroq ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq((e.target as HTMLInputElement).value)} />
-                    <Boton type="button" claseAdicional="configDeficitBotonOjo" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
+                    <Boton type="button" variante="icono" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>
                 </div>
@@ -126,17 +126,17 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitApiKey">
                     <Input tipo={mostrarKeyNinjas ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas((e.target as HTMLInputElement).value)} />
-                    <Boton type="button" claseAdicional="configDeficitBotonOjo" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
+                <Boton type="button" variante="icono" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>
                 </div>
             </div>
 
             <div className="configDeficitAcciones">
-                <Boton type="button" claseAdicional="configDeficitBotonCancelar" onClick={onCerrar}>
+                <Boton type="button" variante="secundario" onClick={onCerrar}>
                     Cancelar
                 </Boton>
-                <Boton type="button" claseAdicional="configDeficitBotonGuardar" onClick={manejarGuardar}>
+                <Boton type="button" variante="primario" onClick={manejarGuardar}>
                     <Save size={14} />
                     <span>Guardar</span>
                 </Boton>

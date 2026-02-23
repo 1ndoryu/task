@@ -90,7 +90,6 @@ const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrior
                 }}
                 icono={<Trash2 size={14} />}
                 title="Eliminar"
-                claseAdicional="listaTareasHabito__eliminar"
             />
         </div>
     );
@@ -231,7 +230,6 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
                     variante="secundario"
                     onClick={() => setMostrarInput(true)}
                     icono={<Plus size={12} />}
-                    claseAdicional="listaTareasHabito__botonAgregar"
                 >
                     Añadir
                 </Boton>

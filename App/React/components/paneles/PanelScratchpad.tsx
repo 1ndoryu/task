@@ -127,50 +127,50 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
         <div className="panelDashboard internaColumna internaColumna--notas">
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Notas') as any}
+                titulo={renderHandleArrastre('Notas')}
                 subtitulo={esNotaNueva ? 'Nueva nota' : tituloActivo}
                 variante="panelHeader"
                 acciones={
                     <>
                         {/* Botón nueva nota */}
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={manejarNuevaNota}
                             icono={<Plus size={12} />}
                             title="Nueva nota"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón abrir notas guardadas */}
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={manejarAbrirCarpeta}
                             icono={<FolderOpen size={12} />}
                             title="Ver notas guardadas"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón limpiar */}
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={manejarLimpiar}
                             icono={<Eraser size={12} />}
                             title="Limpiar / Nueva nota"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón configuración */}
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={onAbrirModalConfigScratchpad}
                             icono={<Settings size={12} />}
                             title="Configuración"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {/* Botón modo enfoque */}
                         <Boton
-                            variante="icono"
+                            variante="badge"
+                            soloIcono
                             onClick={() => setModoEnfoque(true)}
                             icono={<Maximize2 size={12} />}
                             title="Modo enfoque"
-                            claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono"
                         />
                         {handleMinimizar}
                     </>

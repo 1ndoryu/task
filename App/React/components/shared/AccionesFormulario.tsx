@@ -30,17 +30,17 @@ export function AccionesFormulario({onCancelar, onGuardar, textoGuardar = 'Guard
             {onEliminar && (
                 <div className="accionesFormularioZonaPeligro">
                     {!confirmandoEliminar ? (
-                        <Boton variante="peligro" onClick={() => setConfirmandoEliminar(true)} disabled={guardando} icono={<Trash2 size={12} />} claseAdicional="accionesFormularioBotonEliminar">
+                        <Boton variante="peligro" onClick={() => setConfirmandoEliminar(true)} disabled={guardando} icono={<Trash2 size={12} />}>
                             {textoEliminar}
                         </Boton>
                     ) : (
                         <div className="accionesFormularioConfirmacion">
                             <span className="accionesFormularioConfirmacionTexto">Confirmar eliminacion?</span>
                             <div className="accionesFormularioConfirmacionBotones">
-                                <Boton variante="peligro" onClick={onEliminar} disabled={guardando} claseAdicional="accionesFormularioBotonConfirmar">
+                                <Boton variante="peligro" onClick={onEliminar} disabled={guardando}>
                                     Si, eliminar
                                 </Boton>
-                                <Boton variante="secundario" onClick={() => setConfirmandoEliminar(false)} disabled={guardando} claseAdicional="accionesFormularioBotonCancelarEliminar">
+                                <Boton variante="secundario" onClick={() => setConfirmandoEliminar(false)} disabled={guardando}>
                                     No
                                 </Boton>
                             </div>
@@ -53,10 +53,10 @@ export function AccionesFormulario({onCancelar, onGuardar, textoGuardar = 'Guard
             <div className="accionesFormularioContenedor">
                 {/* Elementos adicionales a la izquierda */}
                 {children && <div className="accionesFormularioExtra">{children}</div>}
-                <Boton variante="secundario" onClick={onCancelar} disabled={guardando} claseAdicional="accionesFormularioBotonCancelar">
+                <Boton variante="secundario" onClick={onCancelar} disabled={guardando}>
                     Cancelar
                 </Boton>
-                <Boton type={onGuardar ? 'button' : 'submit'} variante="primario" disabled={guardando} onClick={onGuardar} cargando={guardando} claseAdicional="accionesFormularioBotonGuardar">
+                <Boton type={onGuardar ? 'button' : 'submit'} variante="primario" disabled={guardando} onClick={onGuardar} cargando={guardando}>
                     {textoGuardar}
                 </Boton>
             </div>

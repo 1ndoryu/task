@@ -70,16 +70,16 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
                     <>
                         <div className="loginTabs">
                             <Boton
-                                variante={modo === 'login' ? 'primario' : 'ghost'}
+                                variante="pestaña"
+                                activo={modo === 'login'}
                                 onClick={() => setModo('login')}
-                                claseAdicional={`loginTab ${modo === 'login' ? 'activo' : ''}`}
                             >
                                 Iniciar Sesión
                             </Boton>
                             <Boton
-                                variante={modo === 'registro' ? 'primario' : 'ghost'}
+                                variante="pestaña"
+                                activo={modo === 'registro'}
                                 onClick={() => setModo('registro')}
-                                claseAdicional={`loginTab ${modo === 'registro' ? 'activo' : ''}`}
                             >
                                 Registrarse
                             </Boton>

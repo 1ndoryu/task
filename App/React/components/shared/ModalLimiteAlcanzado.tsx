@@ -87,10 +87,10 @@ export function ModalLimiteAlcanzado({visible, onCerrar, onActualizarPlan, tipoE
                 </div>
 
                 <div className="modalLimiteAlcanzadoAcciones">
-                    <Boton variante="primario" onClick={manejarActualizar} claseAdicional="modalLimiteAlcanzadoBoton--primario">
+                    <Boton variante="primario" onClick={manejarActualizar}>
                         Actualizar a Premium
                     </Boton>
-                    <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalLimiteAlcanzadoBoton--secundario">
+                    <Boton variante="secundario" onClick={onCerrar}>
                         Quizás después
                     </Boton>
                 </div>

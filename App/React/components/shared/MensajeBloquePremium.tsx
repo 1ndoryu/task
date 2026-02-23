@@ -29,7 +29,7 @@ export function MensajeBloquePremium({
             <p className="mensajeBloquePremiumTitulo">{titulo}</p>
             <p className="mensajeBloquePremiumTexto">{descripcion}</p>
             {onAbrirUpgrade && (
-                <Boton claseAdicional="mensajeBloquePremiumBoton" onClick={onAbrirUpgrade}>
+                <Boton variante="primario" onClick={onAbrirUpgrade}>
                     {textoBoton}
                 </Boton>
             )}

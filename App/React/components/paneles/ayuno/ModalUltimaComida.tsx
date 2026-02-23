@@ -79,14 +79,13 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
                 </div>
 
                 <div className="modalAyunoUltimaComidaAcciones">
-                    <Boton type="button" variante="secundario" claseAdicional="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--secundario" onClick={onCerrar}>
+                    <Boton type="button" variante="secundario" onClick={onCerrar}>
                         Cancelar
                     </Boton>
 
                     <Boton
                         type="button"
                         variante="primario"
-                        claseAdicional="modalAyunoUltimaComidaBoton modalAyunoUltimaComidaBoton--primario"
                         onClick={() => {
                             const ahora = new Date();
                             const ts = hora ? convertirHoraInputATimestamp(hora, ahora) : undefined;

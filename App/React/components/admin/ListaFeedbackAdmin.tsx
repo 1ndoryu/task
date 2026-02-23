@@ -179,7 +179,7 @@ export function ListaFeedbackAdmin({visible}: ListaFeedbackAdminProps): JSX.Elem
                                 <div className="feedbackItemAcciones">
                                     <span className="feedbackItemEmailFull">{item.usuarioEmail}</span>
                                     {!item.leido && (
-                                        <Boton type="button" claseAdicional="feedbackItemBotonLeido" onClick={() => marcarLeido(item.id)} title="Marcar como leído">
+                                        <Boton type="button" variante="ghost" onClick={() => marcarLeido(item.id)} title="Marcar como leído">
                                             <Eye size={14} />
                                             Marcar leído
                                         </Boton>

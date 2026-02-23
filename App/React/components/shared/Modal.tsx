@@ -83,7 +83,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                 <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
                     {/* Boton Volver en movil - solo icono, sin texto */}
                     {esMovil && (
-                        <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Volver" claseAdicional="modalBotonVolver">
+                        <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Volver">
                             <ArrowLeft size={18} />
                         </Boton>
                     )}
@@ -95,7 +95,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                         {accionesEncabezado}
                         {/* En movil, mostrar X solo si no hay boton volver visible */}
                         {!ocultarBotonCerrar && !esMovil && (
-                            <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Cerrar modal" claseAdicional="modalBotonCerrar">
+                            <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Cerrar modal">
                                 <X size={14} />
                             </Boton>
                         )}

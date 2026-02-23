@@ -114,7 +114,6 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
                         onClick={agregarTag}
                         disabled={guardando || !nuevoTag.trim() || tags.length >= 5}
                         icono={<Plus size={12} />}
-                        claseAdicional="formularioBotonAgregarTag"
                     />
                 </div>
                 {tags.length > 0 && (
@@ -126,7 +125,6 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
                                     variante="icono"
                                     onClick={() => eliminarTag(tag)}
                                     disabled={guardando}
-                                    claseAdicional="formularioTagEliminar"
                                 >
                                     x
                                 </Boton>

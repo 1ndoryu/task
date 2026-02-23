@@ -27,8 +27,8 @@ interface PanelFocoPrioritarioProps {
     onPausarHabito: (id: number) => void;
     onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
-    onActualizarHabito?: (id: number, datos: any) => void;
-    onCambiarModoHabitos: (modo: any) => void;
+    onActualizarHabito?: (id: number, datos: Partial<Habito>) => void;
+    onCambiarModoHabitos: (modo: string) => void;
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
 }
@@ -40,14 +40,14 @@ export function PanelFocoPrioritario({habitos, modoOrdenHabitos, opcionesOrdenHa
         <>
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Habitos') as any}
+                titulo={renderHandleArrastre('Habitos')}
                 variante="panelHeader"
                 acciones={
                     <>
-                        <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar hábitos" soloIcono={true} />
-                        <Boton variante="icono" onClick={onAbrirModalCrearHabito} icono={<Plus size={12} />} title="Nuevo Hábito" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
-                        <Boton variante="icono" onClick={onAbrirModalConfigHabitos} icono={<Settings size={12} />} title="Configuración" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
-                        <Boton variante="icono" onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
+                        <SelectorBadge opciones={opcionesOrdenHabitos} valorActual={modoOrdenHabitos} onChange={valor => onCambiarModoHabitos(valor)} icono={<ArrowUpDown size={12} />} titulo="Ordenar hábitos" soloIcono={true} />
+                        <Boton variante="badge" soloIcono onClick={onAbrirModalCrearHabito} icono={<Plus size={12} />} title="Nuevo Hábito" />
+                        <Boton variante="badge" soloIcono onClick={onAbrirModalConfigHabitos} icono={<Settings size={12} />} title="Configuración" />
+                        <Boton variante="badge" soloIcono onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" />
                         {handleMinimizar}
                     </>
                 }

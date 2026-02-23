@@ -49,7 +49,7 @@ export function ModalExperimentos({abierto, onCerrar, acciones}: ModalExperiment
                         <FlaskConical size={18} />
                         <span>Laboratorio de Pruebas</span>
                     </div>
-                    <Boton type="button" claseAdicional="modalExperimentos__cerrar" onClick={onCerrar}>
+                    <Boton type="button" variante="icono" onClick={onCerrar}>
                         <X size={16} />
                     </Boton>
                 </header>

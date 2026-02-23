@@ -64,17 +64,17 @@ export function ListaSolicitudes({solicitudes, tipo, onAceptar, onRechazar, onCa
                     <div className="solicitudAcciones">
                         {tipo === 'recibidas' && onAceptar && onRechazar && (
                             <>
-                                <Boton type="button" claseAdicional="solicitudBoton aceptar" onClick={() => onAceptar(solicitud.id)} disabled={cargando} title="Aceptar solicitud">
+                                <Boton type="button" variante="primario" onClick={() => onAceptar(solicitud.id)} disabled={cargando} title="Aceptar solicitud">
                                     <Check size={16} />
                                 </Boton>
-                                <Boton type="button" claseAdicional="solicitudBoton rechazar" onClick={() => onRechazar(solicitud.id)} disabled={cargando} title="Rechazar solicitud">
+                                <Boton type="button" variante="peligro" onClick={() => onRechazar(solicitud.id)} disabled={cargando} title="Rechazar solicitud">
                                     <X size={16} />
                                 </Boton>
                             </>
                         )}
 
                         {tipo === 'enviadas' && onCancelar && (
-                            <Boton type="button" claseAdicional="solicitudBoton cancelar" onClick={() => onCancelar(solicitud.id)} disabled={cargando} title="Cancelar solicitud">
+                            <Boton type="button" variante="secundario" onClick={() => onCancelar(solicitud.id)} disabled={cargando} title="Cancelar solicitud">
                                 <X size={16} />
                                 <span>Cancelar</span>
                             </Boton>

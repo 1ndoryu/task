@@ -273,7 +273,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
         <div className="panelDashboard internaColumna">
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Actividad') as any}
+                titulo={renderHandleArrastre('Actividad')}
                 subtitulo={obtenerSubtitulo()}
                 variante="panelHeader"
                 acciones={
@@ -287,16 +287,8 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                         )}
                         {esPremium && (
                             <>
-                                <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirModalConfigActividad} title="Configuracion">
-                                    <span className="selectorBadgeIcono">
-                                        <Settings size={12} />
-                                    </span>
-                                </Boton>
-                                <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque">
-                                    <span className="selectorBadgeIcono">
-                                        <Maximize2 size={12} />
-                                    </span>
-                                </Boton>
+                                <Boton variante="badge" soloIcono onClick={onAbrirModalConfigActividad} title="Configuracion" icono={<Settings size={12} />} />
+                                <Boton variante="badge" soloIcono onClick={() => setModoEnfoque(true)} title="Modo enfoque" icono={<Maximize2 size={12} />} />
                             </>
                         )}
                         {handleMinimizar}

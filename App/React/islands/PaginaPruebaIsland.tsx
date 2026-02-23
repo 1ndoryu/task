@@ -42,11 +42,11 @@ export function PaginaPruebaIsland({titulo = 'Página de Prueba', mensaje = 'El 
                     <div className="seccionContador">
                         <span className="etiquetaContador">Contador interactivo:</span>
                         <div className="controlesContador">
-                            <Boton variante="secundario" onClick={() => setContador(c => c - 1)} aria-label="Decrementar" claseAdicional="botonDecrementar">
+                            <Boton variante="secundario" onClick={() => setContador(c => c - 1)} aria-label="Decrementar">
                                 −
                             </Boton>
                             <span className="valorContador">{contador}</span>
-                            <Boton variante="primario" onClick={() => setContador(c => c + 1)} aria-label="Incrementar" claseAdicional="botonIncrementar">
+                            <Boton variante="primario" onClick={() => setContador(c => c + 1)} aria-label="Incrementar">
                                 +
                             </Boton>
                         </div>

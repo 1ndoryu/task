@@ -286,20 +286,12 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
             <div id="panelAyuno" className="panelAyuno internaColumna">
                 <SeccionEncabezado
                     icono={null}
-                    titulo={renderHandleArrastre('Ayuno') as any}
+                    titulo={renderHandleArrastre('Ayuno')}
                     variante="panelHeader"
                     acciones={
                         <>
-                            <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onAbrirConfiguracion} title="Configuración" type="button">
-                                <span className="selectorBadgeIcono">
-                                    <Settings size={12} />
-                                </span>
-                            </Boton>
-                            <Boton variante="ghost" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button">
-                                <span className="selectorBadgeIcono">
-                                    <Maximize2 size={12} />
-                                </span>
-                            </Boton>
+                            <Boton variante="badge" soloIcono onClick={onAbrirConfiguracion} title="Configuración" type="button" icono={<Settings size={12} />} />
+                            <Boton variante="badge" soloIcono onClick={() => setModoEnfoque(true)} title="Modo enfoque" type="button" icono={<Maximize2 size={12} />} />
                             {handleMinimizar}
                         </>
                     }

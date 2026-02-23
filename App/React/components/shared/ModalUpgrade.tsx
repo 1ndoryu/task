@@ -129,10 +129,10 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
             if (estado === 'trial') {
                 return (
                     <div className="modalUpgrade__acciones">
-                        <Boton variante="primario" onClick={handleComprar} cargando={cargando} claseAdicional="modalUpgrade__boton--primario">
+                        <Boton variante="primario" onClick={handleComprar} cargando={cargando}>
                             Continuar con Premium
                         </Boton>
-                        <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalUpgrade__boton--secundario">
+                        <Boton variante="secundario" onClick={onCerrar}>
                             Seguir probando
                         </Boton>
                     </div>
@@ -140,10 +140,10 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
             }
             return (
                 <div className="modalUpgrade__acciones">
-                    <Boton variante="primario" onClick={handleGestionarSuscripcion} cargando={cargando} claseAdicional="modalUpgrade__boton--primario">
+                    <Boton variante="primario" onClick={handleGestionarSuscripcion} cargando={cargando}>
                         Gestionar suscripción
                     </Boton>
-                    <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalUpgrade__boton--secundario">
+                    <Boton variante="secundario" onClick={onCerrar}>
                         Cerrar
                     </Boton>
                 </div>
@@ -152,11 +152,11 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
 
         return (
             <div className="modalUpgrade__acciones">
-                <Boton variante="primario" onClick={handleComprar} cargando={cargando} claseAdicional="modalUpgrade__boton--primario">
+                <Boton variante="primario" onClick={handleComprar} cargando={cargando}>
                     Probar 30 días gratis - luego ${precioSeleccionado}
                 </Boton>
                 <p className="modalUpgrade__aviso">Sin compromiso. Cancela antes del día 30 y no se te cobrará nada.</p>
-                <Boton variante="secundario" onClick={onCerrar} claseAdicional="modalUpgrade__boton--secundario">
+                <Boton variante="secundario" onClick={onCerrar}>
                     Quizás después
                 </Boton>
             </div>
@@ -177,8 +177,8 @@ export function ModalUpgrade({visible, onCerrar, suscripcion}: ModalUpgradeProps
                         <div className="modalUpgrade__columna modalUpgrade__columna--premium">PREMIUM</div>
                     </div>
 
-                    {CARACTERISTICAS.map((caract, index) => (
-                        <div key={index} className="modalUpgrade__fila">
+                    {CARACTERISTICAS.map((caract) => (
+                        <div key={caract.nombre} className="modalUpgrade__fila">
                             <div className="modalUpgrade__caracteristica">{caract.nombre}</div>
                             <div className="modalUpgrade__valor modalUpgrade__valor--free">{caract.free}</div>
                             <div className="modalUpgrade__valor modalUpgrade__valor--premium">{caract.premium}</div>

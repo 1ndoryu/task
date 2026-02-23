@@ -45,7 +45,7 @@ export function FormularioSolicitud({onEnviar, enviando}: FormularioSolicitudPro
                 </label>
                 <div className="formularioSolicitudInputGrupo">
                     <Input id="email-solicitud" tipo="email" claseAdicional={`formularioSolicitudInput ${!emailValido ? 'invalido' : ''}`} placeholder="correo@ejemplo.com" value={email} onChange={e => setEmail(e.target.value)} disabled={enviando} autoComplete="email" />
-                    <Boton type="submit" claseAdicional="formularioSolicitudBoton" disabled={enviando || !email.trim() || !emailValido} title="Enviar solicitud">
+                    <Boton type="submit" variante="primario" disabled={enviando || !email.trim() || !emailValido} title="Enviar solicitud">
                         {enviando ? <span className="equiposSpinner pequeno" /> : <UserPlus size={16} />}
                         <span>Invitar</span>
                     </Boton>

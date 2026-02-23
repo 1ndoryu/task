@@ -43,7 +43,7 @@ export function ListaCompaneros({companeros, onEliminar, cargando}: ListaCompane
                     </div>
 
                     <div className="companeroAcciones">
-                        <Boton type="button" claseAdicional="companeroBoton eliminar" onClick={() => onEliminar(companero.id)} disabled={cargando} title="Eliminar conexión">
+                        <Boton type="button" variante="peligro" onClick={() => onEliminar(companero.id)} disabled={cargando} title="Eliminar conexión">
                             <UserMinus size={16} />
                         </Boton>
                     </div>

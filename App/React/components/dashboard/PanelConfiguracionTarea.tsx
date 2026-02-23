@@ -276,12 +276,12 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
         modoEdicion && !esMovil ? (
             <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
                 {/* Estadisticas (Placeholder) */}
-                <Boton type="button" claseAdicional="botonIcono botonIcono--sutil" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
-                    <BarChart2 size={16} className="textoApagado" />
+                <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                    <BarChart2 size={16} />
                 </Boton>
 
                 {/* Actividad / Chat */}
-                <Boton type="button" claseAdicional={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`} onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+                <Boton type="button" variante="icono" onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
                     {tieneMensajesSinLeer ? (
                         <div style={{position: 'relative'}}>
                             <Activity size={16} />

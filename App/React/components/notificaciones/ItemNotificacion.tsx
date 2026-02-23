@@ -90,11 +90,11 @@ export function ItemNotificacion({notificacion, onClick, onMarcarLeida, onElimin
             {/* Acciones */}
             <div className="itemNotificacion__acciones">
                 {!notificacion.leida && (
-                    <Boton type="button" claseAdicional="itemNotificacion__boton" onClick={manejarMarcarLeida} title="Marcar como leída">
+                    <Boton type="button" variante="icono" onClick={manejarMarcarLeida} title="Marcar como leída">
                         <Check size={12} />
                     </Boton>
                 )}
-                <Boton type="button" claseAdicional="itemNotificacion__boton itemNotificacion__boton--eliminar" onClick={manejarEliminar} title="Eliminar">
+                <Boton type="button" variante="peligro" onClick={manejarEliminar} title="Eliminar">
                     <Trash2 size={12} />
                 </Boton>
             </div>

@@ -54,7 +54,7 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorAct
                 {/* Encabezado */}
                 <div className="modalSeleccionPropiedad__encabezado">
                     <span className="modalSeleccionPropiedad__titulo">{titulo}</span>
-                    <Boton type="button" claseAdicional="modalSeleccionPropiedad__cerrar" onClick={onCerrar} aria-label="Cerrar">
+                    <Boton type="button" variante="icono" onClick={onCerrar} aria-label="Cerrar">
                         <X size={16} />
                     </Boton>
                 </div>

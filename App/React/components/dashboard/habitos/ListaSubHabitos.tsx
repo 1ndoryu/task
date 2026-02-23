@@ -152,7 +152,7 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
                     />
                 </form>
             ) : (
-                <Boton type="button" claseAdicional="listaTareasHabito__botonAgregar" onClick={() => setMostrarInput(true)}>
+                <Boton type="button" variante="secundario" onClick={() => setMostrarInput(true)}>
                     <Plus size={12} />
                     <span>Añadir subhábito</span>
                 </Boton>

@@ -283,15 +283,15 @@ export function ModalConfiguracionMCP({estaAbierto, onCerrar, onAbrirUpgrade}: M
                                 <>
                                     {/* Pestañas de clientes */}
                                     <div className="mcpPestanas">
-                                        <Boton type="button" claseAdicional={`mcpPestana ${clienteActivo === 'apirest' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('apirest')}>
+                                        <Boton type="button" variante="pestaña" activo={clienteActivo === 'apirest'} onClick={() => setClienteActivo('apirest')}>
                                             <Globe size={12} />
                                             API REST
                                         </Boton>
-                                        <Boton type="button" claseAdicional={`mcpPestana ${clienteActivo === 'claude' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('claude')}>
+                                        <Boton type="button" variante="pestaña" activo={clienteActivo === 'claude'} onClick={() => setClienteActivo('claude')}>
                                             <Plug size={12} />
                                             Claude
                                         </Boton>
-                                        <Boton type="button" claseAdicional={`mcpPestana ${clienteActivo === 'cursor' ? 'mcpPestana--activa' : ''}`} onClick={() => setClienteActivo('cursor')}>
+                                        <Boton type="button" variante="pestaña" activo={clienteActivo === 'cursor'} onClick={() => setClienteActivo('cursor')}>
                                             <Plug size={12} />
                                             Cursor
                                         </Boton>

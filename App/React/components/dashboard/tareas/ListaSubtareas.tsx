@@ -86,7 +86,6 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
                 }}
                 icono={<Trash2 size={14} />}
                 title="Eliminar"
-                claseAdicional="listaTareasHabito__eliminar"
             />
         </div>
     );
@@ -218,7 +217,6 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
                     variante="secundario"
                     onClick={() => setMostrarInput(true)}
                     icono={<Plus size={12} />}
-                    claseAdicional="listaTareasHabito__botonAgregar"
                 >
                     Añadir subtarea
                 </Boton>

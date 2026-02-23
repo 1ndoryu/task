@@ -56,7 +56,7 @@ export function PestanasModal({pestanaActiva, onCambiar, etiquetas, tieneNotific
     return (
         <div className="panelConfiguracionPestanas">
             {pestanas.map(pestana => (
-                <Boton key={pestana.id} type="button" claseAdicional={`panelConfiguracionPestana ${pestanaActiva === pestana.id ? 'panelConfiguracionPestana--activa' : ''}`} onClick={() => onCambiar(pestana.id)}>
+                <Boton key={pestana.id} type="button" variante="pestaña" activo={pestanaActiva === pestana.id} onClick={() => onCambiar(pestana.id)}>
                     {pestana.etiqueta}
                     {pestana.id === 'chat' && tieneNotificaciones && <span className="pestanaIndicador" />}
                 </Boton>

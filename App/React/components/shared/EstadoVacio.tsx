@@ -36,7 +36,7 @@ export function EstadoVacio({
             <span className="estadoVacioUnificadoMensaje">{mensaje}</span>
             {descripcion && <p className="estadoVacioUnificadoDescripcion">{descripcion}</p>}
             {textoBoton && onAccion && (
-                <Boton variante="primario" onClick={onAccion} claseAdicional="estadoVacioUnificadoBoton">
+                <Boton variante="primario" onClick={onAccion}>
                     {textoBoton}
                 </Boton>
             )}

@@ -77,10 +77,10 @@ export function AlertaConfirmacion({alerta, onResponder}: AlertaConfirmacionProp
                 </p>
 
                 <div className="alertaConfirmacionAcciones">
-                    <Boton variante="secundario" onClick={() => onResponder(false)} claseAdicional="alertaConfirmacionBoton--cancelar">
+                    <Boton variante="secundario" onClick={() => onResponder(false)}>
                         {textoCancelar}
                     </Boton>
-                    <Boton variante={tipo === 'peligro' ? 'peligro' : 'primario'} onClick={() => onResponder(true)} autoFocus claseAdicional={`alertaConfirmacionBoton--aceptar alertaConfirmacionBoton--${tipo ?? 'normal'}`}>
+                    <Boton variante={tipo === 'peligro' ? 'peligro' : 'primario'} onClick={() => onResponder(true)} autoFocus>
                         {textoAceptar}
                     </Boton>
                 </div>

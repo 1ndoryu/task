@@ -310,10 +310,10 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                 <>
                     {/* Pestañas para móvil */}
                     <div className="panelConfiguracionPestanas">
-                        <Boton type="button" variante="ghost" onClick={() => setPestanaActiva('configuracion')} claseAdicional={`panelConfiguracionPestana ${pestanaActiva === 'configuracion' ? 'panelConfiguracionPestana--activa' : ''}`}>
+                        <Boton type="button" variante="pestaña" activo={pestanaActiva === 'configuracion'} onClick={() => setPestanaActiva('configuracion')}>
                             Configuracion
                         </Boton>
-                        <Boton type="button" variante="ghost" onClick={() => setPestanaActiva('chat')} claseAdicional={`panelConfiguracionPestana ${pestanaActiva === 'chat' ? 'panelConfiguracionPestana--activa' : ''}`}>
+                        <Boton type="button" variante="pestaña" activo={pestanaActiva === 'chat'} onClick={() => setPestanaActiva('chat')}>
                             Chat / Historial
                         </Boton>
                     </div>

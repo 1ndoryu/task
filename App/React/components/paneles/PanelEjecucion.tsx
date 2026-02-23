@@ -10,7 +10,7 @@ import {ArrowUpDown, Plus, Settings, Maximize2} from 'lucide-react';
 import {SeccionEncabezado, ListaTareas} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque} from '../shared';
 import {Boton} from '../ui';
-import type {Tarea, Proyecto, Participante} from '../../types/dashboard';
+import type {Tarea, Proyecto, Participante, DatosEdicionTarea, Habito} from '../../types/dashboard';
 
 interface OpcionFiltro {
     id: string;
@@ -35,12 +35,12 @@ interface PanelEjecucionProps {
     onAbrirModalNuevaTarea: () => void;
     onAbrirModalConfigTareas: () => void;
     onToggleTarea: (id: number) => void;
-    onCrearTarea: (datos: any) => void;
-    onEditarTarea: (id: number, datos: any) => void;
+    onCrearTarea: (datos: DatosEdicionTarea) => void;
+    onEditarTarea: (id: number, datos: DatosEdicionTarea) => void;
     onEliminarTarea: (id: number) => void;
     onReordenarTareas?: (tareas: Tarea[]) => void;
     onCambiarFiltro: (valor: string) => void;
-    onCambiarModoOrden: (modo: any) => void;
+    onCambiarModoOrden: (modo: string) => void;
     onCompartirTarea: (tarea: Tarea) => void;
     estaCompartida: (id: number) => boolean;
     obtenerParticipantes: (tarea: Tarea) => Participante[];
@@ -52,7 +52,7 @@ interface PanelEjecucionProps {
     onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
     onPausarHabito?: (habitoId: number) => void;
-    onActualizarHabito?: (habitoId: number, datos: any) => void;
+    onActualizarHabito?: (habitoId: number, datos: Partial<Habito>) => void;
     modoCompacto?: boolean;
     onConfigurarTarea?: (tarea: Tarea) => void;
 }
@@ -64,15 +64,15 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
         <>
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Tareas') as any}
+                titulo={renderHandleArrastre('Tareas')}
                 variante="panelHeader"
                 acciones={
                     <>
                         <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" soloIcono={true} />
-                        <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor as any)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />
-                        <Boton variante="icono" onClick={onAbrirModalNuevaTarea} icono={<Plus size={12} />} title="Nueva Tarea" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
-                        <Boton variante="icono" onClick={onAbrirModalConfigTareas} icono={<Settings size={12} />} title="Configuración" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
-                        <Boton variante="icono" onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" />
+                        <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />
+                        <Boton variante="badge" soloIcono onClick={onAbrirModalNuevaTarea} icono={<Plus size={12} />} title="Nueva Tarea" />
+                        <Boton variante="badge" soloIcono onClick={onAbrirModalConfigTareas} icono={<Settings size={12} />} title="Configuración" />
+                        <Boton variante="badge" soloIcono onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" />
                         {handleMinimizar}
                     </>
                 }
