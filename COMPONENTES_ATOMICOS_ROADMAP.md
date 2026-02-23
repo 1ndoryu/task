@@ -7,7 +7,8 @@
 - ✅ **Completado** - Fase 3: Migración de botones (100+ componentes, 200+ botones migrados)
 - ✅ **Completado** - Fase 4: Migración de inputs (40 inputs + 1 textarea migrados en 26 componentes)
 - ✅ **Completado** - BottomSheets, Drawer, Menus, todos los Selectores, Paneles migrados
-- 🔄 **Pendiente** - Fase 6: Centralización de estilos (eliminar 100+ usos de claseAdicional)
+- ✅ **Completado** - Fase 6.3-6.4: Centralización de estilos (101+ usos de claseAdicional eliminados)
+- 🔄 **Pendiente** - Fase 6.5-6.8: Limpieza CSS, consolidación, validación visual y testing
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
@@ -110,8 +111,8 @@
 ### Estado
 - [x] 6.1 - Análisis completo de clases duplicadas (100+ usos identificados)
 - [x] 6.2 - Creación de plan detallado de centralización
-- [ ] 6.3 - Extensión del sistema de variantes (nuevas variantes: pestaña, navegacion, badge, opcion)
-- [ ] 6.4 - Migración de componentes por categoría (10 categorías identificadas)
+- [x] 6.3 - Extensión del sistema de variantes (nuevas variantes: pestaña, navegacion, badge, opcion + props: activo, anchoCompleto, compacto, destacado)
+- [x] 6.4 - Migración de componentes por categoría (101+ claseAdicional eliminados en ~45 archivos)
 - [ ] 6.5 - Limpieza de CSS obsoleto
 - [ ] 6.6 - Consolidación de archivos CSS (120 → ~15 archivos)
 - [ ] 6.7 - Validación visual y funcional
@@ -137,5 +138,7 @@
 - 📝 Inputs migrados incluyen: text, number, date, file, password con soporte para refs, toggle show/hide y validaciones
 - ⚠️ Lección aprendida: Usar props HTML estándar (title, disabled, etc.) en lugar de traducciones al español
 - ⚠️ Lección aprendida: Componentes base como Boton e Input deben usar forwardRef para permitir refs en componentes hijos
-- 📋 **SIGUIENTE FASE:** Fase 5 - Verificación y Limpieza (confirmar que no queden botones/inputs sin migrar)
+- 📋 **SIGUIENTE FASE:** Fase 6.5-6.8 - Limpieza CSS obsoleto, consolidación, validación visual y testing
+- ✅ **13 feb 2026 - Fase 6.3-6.4:** 101+ claseAdicional eliminados en ~45 archivos. Nuevas variantes Boton (pestaña, navegacion, badge, opcion) + props (activo, anchoCompleto, compacto, destacado). Migradas categorías: badges, tabs, nav, modales close/back, CTA, acciones formulario, notificaciones, solicitudes, phantom classes.
+- 📝 [Fase 6]: ~200+ claseAdicional restantes son genuinamente context-specific (pills, bottomsheets, headers, toggles, selectores con CSS único). No se eliminan — son uso legítimo.
 

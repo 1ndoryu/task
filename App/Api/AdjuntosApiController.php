@@ -4,13 +4,14 @@
  * API Controller para Adjuntos
  *
  * Maneja los endpoints REST para subida, descarga y gestión de archivos adjuntos.
- * Trabaja en conjunto con AdjuntosService para el almacenamiento físico.
+ * Delega toda la lógica de negocio a AdjuntosService.
  *
  * Endpoints:
- * - POST   /glory/v1/adjuntos         - Subir archivo
- * - GET    /glory/v1/adjuntos/{id}    - Descargar archivo (con token para cifrados)
- * - DELETE /glory/v1/adjuntos/{id}    - Eliminar archivo
- * - GET    /glory/v1/adjuntos         - Listar archivos del usuario
+ * - POST   /glory/v1/adjuntos            - Subir archivo
+ * - GET    /glory/v1/adjuntos/{id}       - Descargar archivo (con token para cifrados)
+ * - DELETE /glory/v1/adjuntos/{id}       - Eliminar archivo
+ * - GET    /glory/v1/adjuntos            - Listar archivos del usuario
+ * - POST   /glory/v1/adjuntos/verificar  - Verificar espacio
  *
  * @package App\Api
  */
@@ -22,9 +23,6 @@ use App\Services\AlmacenamientoService;
 
 class AdjuntosApiController
 {
-    /* Tiempo de expiración del token en segundos (1 hora) */
-    private const TOKEN_EXPIRACION = 3600;
-
     /**
      * Registra el controlador
      */
@@ -38,93 +36,60 @@ class AdjuntosApiController
      */
     public function registrarRutas(): void
     {
-        $namespace = 'glory/v1';
+        $ns = 'glory/v1';
 
-        /* Subir archivo */
-        register_rest_route($namespace, '/adjuntos', [
+        register_rest_route($ns, '/adjuntos', [
             'methods' => 'POST',
             'callback' => [$this, 'subirArchivo'],
             'permission_callback' => [$this, 'verificarAutenticacion']
         ]);
 
-        /* Listar archivos */
-        register_rest_route($namespace, '/adjuntos', [
+        register_rest_route($ns, '/adjuntos', [
             'methods' => 'GET',
             'callback' => [$this, 'listarArchivos'],
             'permission_callback' => [$this, 'verificarAutenticacion']
         ]);
 
-        /* Descargar archivo - permite token O autenticación */
-        register_rest_route($namespace, '/adjuntos/(?P<id>\d+)', [
+        register_rest_route($ns, '/adjuntos/(?P<id>\d+)', [
             'methods' => 'GET',
             'callback' => [$this, 'descargarArchivo'],
             'permission_callback' => [$this, 'verificarAccesoArchivo'],
-            'args' => [
-                'id' => [
-                    'required' => true,
-                    'type' => 'integer',
-                    'sanitize_callback' => 'absint'
-                ],
-                'file' => [
-                    'required' => true,
-                    'type' => 'string',
-                    'sanitize_callback' => 'sanitize_file_name'
-                ],
-                'token' => [
-                    'required' => false,
-                    'type' => 'string',
-                    'sanitize_callback' => 'sanitize_text_field'
-                ],
-                'exp' => [
-                    'required' => false,
-                    'type' => 'integer',
-                    'sanitize_callback' => 'absint'
-                ],
-                'uid' => [
-                    'required' => false,
-                    'type' => 'integer',
-                    'sanitize_callback' => 'absint'
-                ]
-            ]
+            'args' => self::argsDescarga()
         ]);
 
-        /* Eliminar archivo */
-        register_rest_route($namespace, '/adjuntos/(?P<id>\d+)', [
+        register_rest_route($ns, '/adjuntos/(?P<id>\d+)', [
             'methods' => 'DELETE',
             'callback' => [$this, 'eliminarArchivo'],
             'permission_callback' => [$this, 'verificarAutenticacion'],
             'args' => [
-                'id' => [
-                    'required' => true,
-                    'type' => 'integer',
-                    'sanitize_callback' => 'absint'
-                ],
-                'file' => [
-                    'required' => true,
-                    'type' => 'string',
-                    'sanitize_callback' => 'sanitize_file_name'
-                ]
+                'id'   => ['required' => true, 'type' => 'integer', 'sanitize_callback' => 'absint'],
+                'file' => ['required' => true, 'type' => 'string', 'sanitize_callback' => 'sanitize_file_name']
             ]
         ]);
 
-        /* Verificar espacio antes de subir */
-        register_rest_route($namespace, '/adjuntos/verificar', [
+        register_rest_route($ns, '/adjuntos/verificar', [
             'methods' => 'POST',
             'callback' => [$this, 'verificarEspacio'],
             'permission_callback' => [$this, 'verificarAutenticacion'],
-            'args' => [
-                'tamano' => [
-                    'required' => true,
-                    'type' => 'integer',
-                    'sanitize_callback' => 'absint'
-                ]
-            ]
+            'args' => ['tamano' => ['required' => true, 'type' => 'integer', 'sanitize_callback' => 'absint']]
         ]);
     }
 
-    /**
-     * Verifica que el usuario esté autenticado
-     */
+    private static function argsDescarga(): array
+    {
+        return [
+            'id'    => ['required' => true, 'type' => 'integer', 'sanitize_callback' => 'absint'],
+            'file'  => ['required' => true, 'type' => 'string', 'sanitize_callback' => 'sanitize_file_name'],
+            'token' => ['required' => false, 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field'],
+            'exp'   => ['required' => false, 'type' => 'integer', 'sanitize_callback' => 'absint'],
+            'uid'   => ['required' => false, 'type' => 'integer', 'sanitize_callback' => 'absint']
+        ];
+    }
+
+    /* ---------------------------------------------------------------
+     * Permisos
+     * --------------------------------------------------------------- */
+
     public function verificarAutenticacion(): bool
     {
         return is_user_logged_in();
@@ -135,12 +100,10 @@ class AdjuntosApiController
      */
     public function verificarAccesoArchivo(\WP_REST_Request $request): bool
     {
-        /* Si está autenticado normalmente, permitir */
         if (is_user_logged_in()) {
             return true;
         }
 
-        /* Si no está autenticado, verificar token */
         $token = $request->get_param('token');
         $exp = $request->get_param('exp');
         $userId = $request->get_param('uid');
@@ -150,295 +113,143 @@ class AdjuntosApiController
             return false;
         }
 
-        /* Verificar que no haya expirado */
         if (time() > $exp) {
             return false;
         }
 
-        /* Verificar firma del token */
-        $tokenEsperado = $this->generarToken($userId, $file, $exp);
+        $tokenEsperado = AdjuntosService::generarToken($userId, $file, $exp);
 
         return hash_equals($tokenEsperado, $token);
     }
 
-    /**
-     * Genera un token firmado para acceso a archivo
-     */
-    public static function generarToken(int $userId, string $file, int $exp): string
-    {
-        try {
-            $clave = self::obtenerClaveToken();
-            $datos = "{$userId}:{$file}:{$exp}";
+    /* ---------------------------------------------------------------
+     * Callbacks — delegan a AdjuntosService
+     * --------------------------------------------------------------- */
 
-            return hash_hmac('sha256', $datos, $clave);
-        } catch (\Throwable $e) {
-            error_log('[AdjuntosApiController] Error en generarToken: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Genera URL con token para archivo cifrado
-     */
-    public static function generarUrlConToken(int $adjuntoId, int $userId, string $nombreArchivo): string
-    {
-        try {
-            $exp = time() + self::TOKEN_EXPIRACION;
-            $token = self::generarToken($userId, $nombreArchivo, $exp);
-
-            $url = rest_url("glory/v1/adjuntos/{$adjuntoId}");
-            $url .= "?file=" . urlencode($nombreArchivo);
-            $url .= "&uid=" . $userId;
-            $url .= "&exp=" . $exp;
-            $url .= "&token=" . $token;
-
-            return $url;
-        } catch (\Throwable $e) {
-            error_log('[AdjuntosApiController] Error en generarUrlConToken: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Obtiene la clave para firmar tokens
-     */
-    private static function obtenerClaveToken(): string
-    {
-        if (defined('AUTH_KEY') && strlen(AUTH_KEY) >= 32) {
-            return AUTH_KEY . '_adjuntos_token';
-        }
-
-        if (defined('SECURE_AUTH_KEY') && strlen(SECURE_AUTH_KEY) >= 32) {
-            return SECURE_AUTH_KEY . '_adjuntos_token';
-        }
-
-        /* No degradar seguridad con clave predecible.
-         * AUTH_KEY es obligatoria para generar tokens seguros. */
-        error_log('[AdjuntosApiController] CRITICO: AUTH_KEY no configurada. Tokens de descarga imposibles.');
-        throw new \RuntimeException('Configuración de seguridad incompleta para tokens de descarga');
-    }
-
-    /**
-     * Subir un archivo
-     */
     public function subirArchivo(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
             $userId = get_current_user_id();
+            $files = $request->get_file_params();
 
-        /* Verificar que haya archivos */
-        $files = $request->get_file_params();
+            if (empty($files) || !isset($files['archivo'])) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'No se recibió ningún archivo', 'code' => 'no_file'], 400);
+            }
 
-        if (empty($files) || !isset($files['archivo'])) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'No se recibió ningún archivo',
-                'code' => 'no_file'
-            ], 400);
-        }
+            $archivo = $files['archivo'];
 
-        $archivo = $files['archivo'];
+            if ($archivo['error'] !== UPLOAD_ERR_OK) {
+                $mensaje = AdjuntosService::traducirErrorSubida($archivo['error']);
+                return new \WP_REST_Response(['success' => false, 'error' => $mensaje, 'code' => 'upload_error'], 400);
+            }
 
-        /* Verificar errores de subida */
-        if ($archivo['error'] !== UPLOAD_ERR_OK) {
-            $mensajeError = $this->traducirErrorSubida($archivo['error']);
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => $mensajeError,
-                'code' => 'upload_error'
-            ], 400);
-        }
+            $almacenamiento = new AlmacenamientoService($userId);
+            if (!$almacenamiento->puedeSubir($archivo['size'])) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Límite de almacenamiento excedido', 'code' => 'storage_limit', 'almacenamiento' => $almacenamiento->getInfoCompleta()], 403);
+            }
 
-        /* Verificar espacio disponible primero */
-        $almacenamiento = new AlmacenamientoService($userId);
-        if (!$almacenamiento->puedeSubir($archivo['size'])) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'Límite de almacenamiento excedido',
-                'code' => 'storage_limit',
-                'almacenamiento' => $almacenamiento->getInfoCompleta()
-            ], 403);
-        }
+            $adjuntosService = new AdjuntosService($userId);
+            $resultado = $adjuntosService->subirArchivo($archivo);
 
-        /* Procesar subida */
-        $adjuntosService = new AdjuntosService($userId);
-        $resultado = $adjuntosService->subirArchivo($archivo);
+            if ($resultado === null) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Error al procesar el archivo', 'code' => 'processing_error'], 500);
+            }
 
-        if ($resultado === null) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'Error al procesar el archivo',
-                'code' => 'processing_error'
-            ], 500);
-        }
-
-        /* Actualizar información de almacenamiento */
-        $almacenamientoActualizado = $almacenamiento->getInfoCompleta();
-
-        return new \WP_REST_Response([
-            'success' => true,
-            'adjunto' => $resultado,
-            'almacenamiento' => $almacenamientoActualizado
-        ], 201);
+            return new \WP_REST_Response(['success' => true, 'adjunto' => $resultado, 'almacenamiento' => $almacenamiento->getInfoCompleta()], 201);
         } catch (\Throwable $e) {
             error_log('[AdjuntosApiController] Error en subirArchivo: ' . $e->getMessage());
             return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
         }
     }
-    /**
-     * Descargar un archivo
-     */
+
     public function descargarArchivo(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
-            /* Obtener userId de la sesion o del parametro (si usa token) */
-            $userId = is_user_logged_in()
-                ? get_current_user_id()
-                : $request->get_param('uid');
+            $userId = is_user_logged_in() ? get_current_user_id() : $request->get_param('uid');
+            $nombreArchivo = $request->get_param('file');
 
-        $nombreArchivo = $request->get_param('file');
+            if (empty($nombreArchivo) || empty($userId)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Parámetros requeridos faltantes', 'code' => 'missing_params'], 400);
+            }
 
-        if (empty($nombreArchivo) || empty($userId)) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'Parámetros requeridos faltantes',
-                'code' => 'missing_params'
-            ], 400);
-        }
+            $adjuntosService = new AdjuntosService($userId);
+            $contenido = $adjuntosService->obtenerArchivo($nombreArchivo);
 
-        $adjuntosService = new AdjuntosService($userId);
-        $contenido = $adjuntosService->obtenerArchivo($nombreArchivo);
+            if ($contenido === null) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Archivo no encontrado', 'code' => 'not_found'], 404);
+            }
 
-        if ($contenido === null) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'Archivo no encontrado',
-                'code' => 'not_found'
-            ], 404);
-        }
+            $info = $adjuntosService->obtenerInfoArchivo($nombreArchivo);
+            $mimeType = $info['mimeType'] ?? 'application/octet-stream';
 
-        /* Obtener información del archivo */
-        $info = $adjuntosService->obtenerInfoArchivo($nombreArchivo);
+            if ($info['cifrado']) {
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $mimeType = $finfo->buffer($contenido) ?: 'application/octet-stream';
+            }
 
-        /* Determinar tipo MIME real */
-        $mimeType = $info['mimeType'] ?? 'application/octet-stream';
-
-        /* Si está cifrado, intentar detectar el tipo real del contenido */
-        if ($info['cifrado']) {
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->buffer($contenido) ?: 'application/octet-stream';
-        }
-
-        /* Enviar archivo con headers apropiados */
-        header('Content-Type: ' . $mimeType);
-        header('Content-Length: ' . strlen($contenido));
-        header('Cache-Control: private, max-age=3600');
-
-        echo $contenido;
-        exit;
+            header('Content-Type: ' . $mimeType);
+            header('Content-Length: ' . strlen($contenido));
+            header('Cache-Control: private, max-age=3600');
+            echo $contenido;
+            exit;
         } catch (\Throwable $e) {
             error_log('[AdjuntosApiController] Error en descargarArchivo: ' . $e->getMessage());
             return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
         }
     }
 
-    /**
-     * Eliminar un archivo
-     */
     public function eliminarArchivo(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
             $userId = get_current_user_id();
             $nombreArchivo = $request->get_param('file');
 
-        if (empty($nombreArchivo)) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'Nombre de archivo requerido',
-                'code' => 'missing_filename'
-            ], 400);
-        }
+            if (empty($nombreArchivo)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Nombre de archivo requerido', 'code' => 'missing_filename'], 400);
+            }
 
-        $adjuntosService = new AdjuntosService($userId);
-        $eliminado = $adjuntosService->eliminarArchivo($nombreArchivo);
+            $adjuntosService = new AdjuntosService($userId);
+            $eliminado = $adjuntosService->eliminarArchivo($nombreArchivo);
 
-        if (!$eliminado) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'No se pudo eliminar el archivo',
-                'code' => 'delete_failed'
-            ], 500);
-        }
+            if (!$eliminado) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'No se pudo eliminar el archivo', 'code' => 'delete_failed'], 500);
+            }
 
-        /* Obtener almacenamiento actualizado */
-        $almacenamiento = new AlmacenamientoService($userId);
+            $almacenamiento = new AlmacenamientoService($userId);
 
-        return new \WP_REST_Response([
-            'success' => true,
-            'message' => 'Archivo eliminado correctamente',
-            'almacenamiento' => $almacenamiento->getInfoCompleta()
-        ]);
+            return new \WP_REST_Response(['success' => true, 'message' => 'Archivo eliminado correctamente', 'almacenamiento' => $almacenamiento->getInfoCompleta()]);
         } catch (\Throwable $e) {
             error_log('[AdjuntosApiController] Error en eliminarArchivo: ' . $e->getMessage());
             return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
         }
     }
-    /**
-     * Listar archivos del usuario
-     */
+
     public function listarArchivos(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
             $userId = get_current_user_id();
-
             $adjuntosService = new AdjuntosService($userId);
             $archivos = $adjuntosService->listarArchivos();
 
-            return new \WP_REST_Response([
-                'success' => true,
-                'archivos' => $archivos,
-                'total' => count($archivos)
-            ]);
+            return new \WP_REST_Response(['success' => true, 'archivos' => $archivos, 'total' => count($archivos)]);
         } catch (\Throwable $e) {
             error_log('[AdjuntosApiController] Error en listarArchivos: ' . $e->getMessage());
             return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
         }
     }
 
-    /**
-     * Verificar espacio disponible antes de subir
-     */
     public function verificarEspacio(\WP_REST_Request $request): \WP_REST_Response
     {
-        $userId = get_current_user_id();
-        $tamano = $request->get_param('tamano');
+        try {
+            $userId = get_current_user_id();
+            $tamano = $request->get_param('tamano');
+            $almacenamiento = new AlmacenamientoService($userId);
 
-        $almacenamiento = new AlmacenamientoService($userId);
-        $puedeSubir = $almacenamiento->puedeSubir($tamano);
-
-        return new \WP_REST_Response([
-            'success' => true,
-            'puedeSubir' => $puedeSubir,
-            'almacenamiento' => $almacenamiento->getInfoCompleta()
-        ]);
-    }
-
-    /**
-     * Traduce códigos de error de subida a mensajes legibles
-     */
-    private function traducirErrorSubida(int $codigo): string
-    {
-        $errores = [
-            UPLOAD_ERR_INI_SIZE => 'El archivo excede el límite del servidor',
-            UPLOAD_ERR_FORM_SIZE => 'El archivo excede el límite del formulario',
-            UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente',
-            UPLOAD_ERR_NO_FILE => 'No se recibió ningún archivo',
-            UPLOAD_ERR_NO_TMP_DIR => 'Falta directorio temporal del servidor',
-            UPLOAD_ERR_CANT_WRITE => 'Error al escribir archivo en disco',
-            UPLOAD_ERR_EXTENSION => 'Subida bloqueada por extensión'
-        ];
-
-        return $errores[$codigo] ?? 'Error desconocido en la subida';
+            return new \WP_REST_Response(['success' => true, 'puedeSubir' => $almacenamiento->puedeSubir($tamano), 'almacenamiento' => $almacenamiento->getInfoCompleta()]);
+        } catch (\Throwable $e) {
+            error_log('[AdjuntosApiController] Error en verificarEspacio: ' . $e->getMessage());
+            return new \WP_REST_Response(['success' => false, 'error' => 'Error interno del servidor'], 500);
+        }
     }
 }
 

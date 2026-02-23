@@ -85,6 +85,176 @@
     text-decoration: underline;
 }
 
+/* Variante pestaña - para tabs */
+.boton--pestaña {
+    flex: 1;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.boton--pestaña:hover:not(:disabled) {
+    color: var(--dashboard-textoActivo);
+    background-color: var(--dashboard-fondoHover);
+}
+
+.boton--pestaña.boton--activo {
+    color: var(--dashboard-textoActivo);
+    border-bottom-color: var(--dashboard-textoActivo);
+}
+
+/* Variante navegacion - para barra inferior móvil */
+.boton--navegacion {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    padding: var(--dashboard-espacioMd);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+    transition: color var(--dashboard-transicionRapida), opacity var(--dashboard-transicionRapida);
+}
+
+.boton--navegacion:active {
+    opacity: 0.7;
+}
+
+.boton--navegacion.boton--activo {
+    color: var(--dashboard-textoActivo);
+}
+
+/* Variante badge - para badges compactos en paneles */
+.boton--badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    width: 26px;
+    height: 26px;
+    font-size: 0.65rem;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 500;
+    color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 0;
+    transition: all var(--dashboard-transicionRapida);
+    white-space: nowrap;
+    min-height: 0;
+}
+
+.boton--badge:hover:not(:disabled) {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.boton--badge.boton--activo {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.boton--badge.boton--soloIcono {
+    background: transparent;
+    border: none;
+    width: auto;
+    height: auto;
+    min-height: unset;
+    padding: 3px;
+    color: var(--dashboard-textoSecundario);
+}
+
+.boton--badge.boton--soloIcono .botonTexto {
+    color: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    gap: 0;
+}
+
+.boton--badge.boton--soloIcono .botonIcono,
+.boton--badge.boton--soloIcono .botonTexto {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.boton--badge.boton--soloIcono .botonIcono svg {
+    width: 12px;
+    height: 12px;
+    color: inherit;
+    filter: none;
+}
+
+.boton--badge.boton--soloIcono:hover:not(:disabled) {
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoActivo);
+}
+
+/* Variante opcion - para opciones seleccionables */
+.boton--opcion {
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    padding: 2px 8px;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--dashboard-transicionRapida);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    height: 22px;
+}
+
+.boton--opcion:hover:not(:disabled) {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.boton--opcion.boton--activo {
+    background: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+    border-color: var(--dashboard-acento);
+}
+
+.boton--opcion .botonTexto {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+/* Props adicionales */
+.boton--anchoCompleto {
+    width: 100%;
+}
+
+.boton--compacto {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.boton--destacado {
+    position: relative;
+    animation: botonPulse 2s infinite;
+}
+
+@keyframes botonPulse {
+    0% { box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoRgb, 0, 123, 255), 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(var(--dashboard-acentoRgb, 0, 123, 255), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoRgb, 0, 123, 255), 0); }
+}
+
 /* Tamaños */
 .boton--pequeño {
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);

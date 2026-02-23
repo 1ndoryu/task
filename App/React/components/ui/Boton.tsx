@@ -2,12 +2,13 @@ import React, {type ButtonHTMLAttributes, type ReactNode} from 'react';
 
 /*
  * Componente Boton - Botón reutilizable con variantes de estilo
- * Variantes: primario, secundario, peligro, icono, ghost
+ * Variantes: primario, secundario, peligro, icono, ghost, link, pestaña, navegacion, badge, opcion
  * Tamaños: pequeño, mediano, grande
+ * Props adicionales: activo, anchoCompleto, compacto, destacado
  * Soporta refs con React.forwardRef
  */
 
-export type VarianteBoton = 'primario' | 'secundario' | 'peligro' | 'icono' | 'ghost' | 'link';
+export type VarianteBoton = 'primario' | 'secundario' | 'peligro' | 'icono' | 'ghost' | 'link' | 'pestaña' | 'navegacion' | 'badge' | 'opcion';
 export type TamanoBoton = 'pequeño' | 'mediano' | 'grande';
 
 export interface PropsBoton extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
@@ -17,6 +18,10 @@ export interface PropsBoton extends Omit<ButtonHTMLAttributes<HTMLButtonElement>
     icono?: ReactNode;
     iconoDerecha?: boolean;
     soloIcono?: boolean;
+    activo?: boolean;
+    anchoCompleto?: boolean;
+    compacto?: boolean;
+    destacado?: boolean;
     children?: ReactNode;
     claseAdicional?: string;
 }
@@ -29,6 +34,10 @@ export const Boton = React.forwardRef<HTMLButtonElement, PropsBoton>((
         icono,
         iconoDerecha = false,
         soloIcono = false,
+        activo = false,
+        anchoCompleto = false,
+        compacto = false,
+        destacado = false,
         children,
         disabled,
         type = 'button',
@@ -44,6 +53,10 @@ export const Boton = React.forwardRef<HTMLButtonElement, PropsBoton>((
         soloIcono && 'boton--soloIcono',
         cargando && 'boton--cargando',
         disabled && 'boton--deshabilitado',
+        activo && 'boton--activo',
+        anchoCompleto && 'boton--anchoCompleto',
+        compacto && 'boton--compacto',
+        destacado && 'boton--destacado',
         claseAdicional
     ]
         .filter(Boolean)
