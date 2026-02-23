@@ -13,7 +13,7 @@
 import {useState, useMemo} from 'react';
 import {Loader2, AlertCircle, Settings, Maximize2, ChevronLeft, ChevronRight} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
-import {useDeficitCalorico} from '../../hooks/useDeficitCalorico';
+import {usePanelDeficitCalorico} from '../../hooks/dashboard/usePanelDeficitCalorico';
 import {OverlayEnfoque} from '../shared';
 import {Input} from '../ui/Input';
 import {calcularObjetivosMacro} from '../../utils/calculoTMB';
@@ -26,24 +26,6 @@ interface PanelDeficitCaloricoProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
     onAbrirConfiguracion: () => void;
-}
-
-function obtenerFechaHoyLocal(): string {
-    const ahora = new Date();
-    const anio = ahora.getFullYear();
-    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-    const dia = String(ahora.getDate()).padStart(2, '0');
-    return `${anio}-${mes}-${dia}`;
-}
-
-function desplazarFecha(fechaIso: string, dias: number): string {
-    const [anio, mes, dia] = fechaIso.split('-').map(Number);
-    const fecha = new Date(anio, (mes ?? 1) - 1, dia ?? 1);
-    fecha.setDate(fecha.getDate() + dias);
-    const nuevoAnio = fecha.getFullYear();
-    const nuevoMes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const nuevoDia = String(fecha.getDate()).padStart(2, '0');
-    return `${nuevoAnio}-${nuevoMes}-${nuevoDia}`;
 }
 
 function formatearFechaVisible(fechaIso: string): string {
@@ -183,31 +165,16 @@ function EntradaComida({onEnviarTexto, cargando, fechaActiva}: {onEnviarTexto: (
 /* Componente eliminado - ahora se usa HistorialCalorias */
 
 export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onAbrirConfiguracion}: PanelDeficitCaloricoProps): JSX.Element {
-    const [modoEnfoque, setModoEnfoque] = useState(false);
-    const [logInspeccion, setLogInspeccion] = useState<string[] | null>(null);
-    const [fechaActiva, setFechaActiva] = useState(obtenerFechaHoyLocal);
-
-    const {comidasDelDia, caloriasDelDia, comidasTotales, tdee, apiKey, cargandoIA, errorIA, registrarPorTexto, eliminarComida, datosUsuario} = useDeficitCalorico(fechaActiva);
-
-    /* Calcular totales de macros */
-    const macros = useMemo(() => {
-        return comidasDelDia.reduce(
-            (acc, c) => ({
-                proteinas: acc.proteinas + (c.proteinas || 0),
-                carbohidratos: acc.carbohidratos + (c.carbohidratos || 0),
-                grasas: acc.grasas + (c.grasas || 0),
-                azucar: acc.azucar + (c.azucar || 0)
-            }),
-            {proteinas: 0, carbohidratos: 0, grasas: 0, azucar: 0}
-        );
-    }, [comidasDelDia]);
-
-    /* Mensaje si no hay API Key configurada */
-    const sinApiKey = !apiKey;
-
-    const manejarCambiarDia = (delta: number) => {
-        setFechaActiva(prev => desplazarFecha(prev, delta));
-    };
+    const {
+        modoEnfoque, setModoEnfoque,
+        logInspeccion, setLogInspeccion,
+        fechaActiva,
+        caloriasDelDia, comidasTotales,
+        tdee, cargandoIA, errorIA,
+        registrarPorTexto, eliminarComida, datosUsuario,
+        macros, sinApiKey,
+        manejarCambiarDia
+    } = usePanelDeficitCalorico();
 
     const contenidoPanel = (
         <div className="deficitContenido">

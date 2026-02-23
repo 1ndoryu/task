@@ -10,11 +10,11 @@
  * - Cambiar prioridad (lo que reordena la lista automáticamente)
  */
 
-import {useState, useMemo} from 'react';
 import {CheckCircle2, Circle, Plus, Flag, Trash2} from 'lucide-react';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {Boton} from '../../ui';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
+import {useListaHitos} from '../../../hooks/dashboard/useListaHitos';
 import type {Hito, NivelPrioridad} from '../../../types/dashboard';
 
 interface ListaHitosProps {
@@ -23,82 +23,20 @@ interface ListaHitosProps {
 }
 
 export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
-    const [nuevoHitoTexto, setNuevoHitoTexto] = useState('');
-    const [mostrandoInput, setMostrandoInput] = useState(false);
-
-    // Estado para el menú contextual de prioridad
-    const [menuAbiertoId, setMenuAbiertoId] = useState<number | null>(null);
-    const [posicionMenu, setPosicionMenu] = useState({x: 0, y: 0});
-
-    // Ordenar hitos por prioridad y luego por estado (completados al final)
-    const hitosOrdenados = useMemo(() => {
-        const prioridadValor: Record<NivelPrioridad, number> = {muy_alta: 4, alta: 3, media: 2, baja: 1};
-
-        return [...hitos].sort((a, b) => {
-            // Primero por estado (no completados primero)
-            if (a.completado !== b.completado) return a.completado ? 1 : -1;
-
-            // Luego por prioridad
-            const valA = prioridadValor[a.prioridad];
-            const valB = prioridadValor[b.prioridad];
-            if (valA !== valB) return valB - valA; // Mayor prioridad primero
-
-            // Finalmente por id (creación)
-            return a.id - b.id;
-        });
-    }, [hitos]);
-
-    const manejarToggle = (id: number) => {
-        const nuevosHitos = hitos.map(h => (h.id === id ? {...h, completado: !h.completado} : h));
-        onChange(nuevosHitos);
-    };
-
-    const manejarCambiarPrioridad = (id: number, nuevaPrioridad: NivelPrioridad) => {
-        const nuevosHitos = hitos.map(h => (h.id === id ? {...h, prioridad: nuevaPrioridad} : h));
-        onChange(nuevosHitos);
-    };
-
-    const manejarEliminar = (id: number) => {
-        const nuevosHitos = hitos.filter(h => h.id !== id);
-        onChange(nuevosHitos);
-    };
-
-    const manejarAgregar = () => {
-        if (!nuevoHitoTexto.trim()) {
-            setMostrandoInput(false);
-            return;
-        }
-
-        const nuevoHito: Hito = {
-            id: Date.now(),
-            titulo: nuevoHitoTexto.trim(),
-            completado: false,
-            prioridad: 'media'
-        };
-
-        onChange([...hitos, nuevoHito]);
-        setNuevoHitoTexto('');
-        // Mantener input abierto para agregar más
-    };
-
-    const manejarKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            manejarAgregar();
-        } else if (e.key === 'Escape') {
-            setMostrandoInput(false);
-            setNuevoHitoTexto('');
-        }
-    };
-
-    const abrirMenuPrioridad = (e: React.MouseEvent, id: number) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setPosicionMenu({x: rect.left, y: rect.bottom + 4});
-        setMenuAbiertoId(id);
-    };
-
-    const cerrarMenu = () => setMenuAbiertoId(null);
+    const {
+        nuevoHitoTexto, setNuevoHitoTexto,
+        mostrandoInput, setMostrandoInput,
+        menuAbiertoId,
+        posicionMenu,
+        hitosOrdenados,
+        manejarToggle,
+        manejarCambiarPrioridad,
+        manejarEliminar,
+        manejarAgregar,
+        manejarKeyDown,
+        abrirMenuPrioridad,
+        cerrarMenu
+    } = useListaHitos({hitos, onChange});
 
     return (
         <div className="listaTareasCompacta">

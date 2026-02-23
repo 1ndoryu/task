@@ -6,9 +6,9 @@
  * Usa campos compartidos: CampoTexto, CampoPrioridad, CampoFechaLimite
  */
 
-import {useState, useCallback} from 'react';
-import type {NivelPrioridad, NivelUrgencia} from '../../../types/dashboard';
+import type {NivelPrioridad} from '../../../types/dashboard';
 import type {DatosNuevoProyecto} from '../../../hooks/useProyectos';
+import {useFormularioProyecto} from '../../../hooks/dashboard/useFormularioProyecto';
 import {AccionesFormulario, CampoTexto, CampoPrioridad, CampoUrgencia, CampoFechaLimite} from '../../shared';
 
 interface FormularioProyectoProps {
@@ -21,39 +21,15 @@ interface FormularioProyectoProps {
 }
 
 export function FormularioProyecto({onGuardar, onCancelar, onEliminar, datosIniciales, guardando = false, modoEdicion = false}: FormularioProyectoProps): JSX.Element {
-    const [nombre, setNombre] = useState(datosIniciales?.nombre || '');
-    const [descripcion, setDescripcion] = useState(datosIniciales?.descripcion || '');
-    const [prioridad, setPrioridad] = useState<NivelPrioridad>(datosIniciales?.prioridad || 'media');
-    const [urgencia, setUrgencia] = useState<NivelUrgencia | null>(datosIniciales?.urgencia || null);
-    const [fechaLimite, setFechaLimite] = useState(datosIniciales?.fechaLimite || '');
-    const [errores, setErrores] = useState<{nombre?: string}>({});
-
-    const validarFormulario = useCallback((): boolean => {
-        const nuevosErrores: {nombre?: string} = {};
-
-        if (!nombre.trim()) {
-            nuevosErrores.nombre = 'El nombre es obligatorio';
-        } else if (nombre.trim().length < 3) {
-            nuevosErrores.nombre = 'El nombre debe tener al menos 3 caracteres';
-        }
-
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
-    }, [nombre]);
-
-    const manejarSubmit = (evento: React.FormEvent) => {
-        evento.preventDefault();
-
-        if (!validarFormulario()) return;
-
-        onGuardar({
-            nombre: nombre.trim(),
-            descripcion: descripcion.trim() || undefined,
-            prioridad,
-            urgencia: urgencia || undefined,
-            fechaLimite: fechaLimite || undefined
-        });
-    };
+    const {
+        nombre, setNombre,
+        descripcion, setDescripcion,
+        prioridad, setPrioridad,
+        urgencia, setUrgencia,
+        fechaLimite, setFechaLimite,
+        errores,
+        manejarSubmit
+    } = useFormularioProyecto({datosIniciales, onGuardar});
 
     return (
         <form id="formulario-proyecto" className="formularioHabito" onSubmit={manejarSubmit}>
