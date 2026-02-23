@@ -527,3 +527,24 @@ find App/React/styles App/Assets/css -name "*.css" -exec du -ch {} + | grep tota
 - Análisis completo de 100+ usos de claseAdicional
 - Plan de 6 sprints definido
 - Métricas y riesgos documentados
+
+**13 feb 2026 - Fase 6.5 COMPLETADA**
+- ~485 lineas de CSS huerfano eliminadas de 14 archivos
+- Archivos limpiados: accionesFormulario.css (~136 lineas), suscripcion.css (~60), modal.css (~40), modalCreacionRapida.css (~28), navegacionInferior.css (~25), panelConfiguracion.css (~24), landing.css (~24), equipos.css (~26), formulario.css (~35), modalLogin.css (~21), bottomSheetCreacion.css (~21), panelAdministracion.css (~18), mensajeBloquePremium.css (~16), paginaPrueba.css (~9)
+- Cada clase verificada con 0 referencias en TSX antes de eliminar
+- 7 clases confirmadas aun en uso (no eliminadas): selectorBadgeBoton, panelActividadBloqueadoBoton, panelActividadDetalleBoton, modalUpgrade__planOpcion, deficitHistorialToggle
+
+**13 feb 2026 - Fase 6.6 DESCARTADA (por arquitectura)**
+- Investigacion completa de como se carga CSS:
+  - CSS se importa via JS: `appIslands.tsx` importa `index.css` que importa ~80 archivos via `@import`
+  - Componentes individuales tambien importan CSS directamente en TSX
+  - Vite bundlea todo en un solo archivo CSS de produccion
+  - AssetManager (PHP) solo carga CSS del framework Glory, no del proyecto React
+- Conclusion: consolidar 110 archivos en 15 no aporta beneficio real
+  - En produccion todo ya es 1 archivo (bundle Vite)
+  - La organizacion actual por dominio/modulo es correcta y mantenible
+  - Riesgo de romper cascada en `@import` order > beneficio marginal de DX
+
+**Fases 6.7 y 6.8 — Requieren revision manual**
+- 6.7: Validacion visual (comparar antes/despues en navegador, verificar temas oscuro/claro)
+- 6.8: Testing de performance (medir tamaño bundle CSS, verificar no regresiones visuales)

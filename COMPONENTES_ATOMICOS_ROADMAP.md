@@ -8,7 +8,9 @@
 - ✅ **Completado** - Fase 4: Migración de inputs (40 inputs + 1 textarea migrados en 26 componentes)
 - ✅ **Completado** - BottomSheets, Drawer, Menus, todos los Selectores, Paneles migrados
 - ✅ **Completado** - Fase 6.3-6.4: Centralización de estilos (101+ usos de claseAdicional eliminados)
-- 🔄 **Pendiente** - Fase 6.5-6.8: Limpieza CSS, consolidación, validación visual y testing
+- ✅ **Completado** - Fase 6.5: Limpieza de ~485 lineas CSS huerfano en 14 archivos
+- ✅ **Completado** - Fase 6.6: Evaluacion de consolidacion CSS (descartada — Vite ya bundlea todo)
+- 🔄 **Pendiente** - Fase 6.7-6.8: Validacion visual y testing (requiere revision manual)
 
 ## Análisis Inicial
 - ✅ Identificados: ~200+ botones
@@ -113,10 +115,10 @@
 - [x] 6.2 - Creación de plan detallado de centralización
 - [x] 6.3 - Extensión del sistema de variantes (nuevas variantes: pestaña, navegacion, badge, opcion + props: activo, anchoCompleto, compacto, destacado)
 - [x] 6.4 - Migración de componentes por categoría (101+ claseAdicional eliminados en ~45 archivos)
-- [ ] 6.5 - Limpieza de CSS obsoleto
-- [ ] 6.6 - Consolidación de archivos CSS (120 → ~15 archivos)
-- [ ] 6.7 - Validación visual y funcional
-- [ ] 6.8 - Testing de temas y performance
+- [x] 6.5 - Limpieza de CSS obsoleto (~485 lineas eliminadas en 14 archivos)
+- [x] 6.6 - Consolidacion de archivos CSS — DESCARTADA (Vite bundlea todo via JS imports; 110 archivos en disco no afectan performance; organizacion por dominio es correcta)
+- [ ] 6.7 - Validación visual y funcional (requiere revision manual en navegador)
+- [ ] 6.8 - Testing de temas y performance (requiere revision manual)
 
 **Estimado:** 5-7 días de trabajo completo
 
@@ -141,4 +143,7 @@
 - 📋 **SIGUIENTE FASE:** Fase 6.5-6.8 - Limpieza CSS obsoleto, consolidación, validación visual y testing
 - ✅ **13 feb 2026 - Fase 6.3-6.4:** 101+ claseAdicional eliminados en ~45 archivos. Nuevas variantes Boton (pestaña, navegacion, badge, opcion) + props (activo, anchoCompleto, compacto, destacado). Migradas categorías: badges, tabs, nav, modales close/back, CTA, acciones formulario, notificaciones, solicitudes, phantom classes.
 - 📝 [Fase 6]: ~200+ claseAdicional restantes son genuinamente context-specific (pills, bottomsheets, headers, toggles, selectores con CSS único). No se eliminan — son uso legítimo.
-
+- ✅ **13 feb 2026 - Fase 6.5:** ~485 lineas CSS huerfano eliminadas de 14 archivos (accionesFormulario, suscripcion, modal, modalCreacionRapida, navegacionInferior, panelConfiguracion, landing, equipos, formulario, modalLogin, bottomSheetCreacion, panelAdministracion, mensajeBloquePremium, paginaPrueba). Todas las clases verificadas con 0 referencias en TSX antes de eliminar.
+- ✅ **13 feb 2026 - Fase 6.6:** Investigacion completa de arquitectura CSS — CSS se importa via JS (index.css + imports directos en TSX), Vite lo bundlea en un solo archivo de produccion. Consolidar 110 archivos en 15 no aporta beneficio real; la organizacion por dominio/modulo actual es correcta. Fase descartada.
+- 📝 [Arquitectura CSS]: index.css importa ~80 archivos via @import. Cada isla tambien importa CSS directamente. Todo va al bundle Vite. AssetManager solo carga CSS del framework Glory, no del proyecto React.
+- 📋 **PENDIENTE:** 6.7 (validacion visual manual) y 6.8 (testing temas/performance) requieren revision humana en navegador.
