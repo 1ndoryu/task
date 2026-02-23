@@ -27,7 +27,7 @@ interface NotificacionLocalPlugin {
     cancel(options: {notifications: {id: number}[]}): Promise<void>;
     getPending(): Promise<{notifications: {id: number}[]}>;
     removeAllListeners(): Promise<void>;
-    addListener(evento: string, callback: (notificacion: any) => void): Promise<{remove: () => void}>;
+    addListener(evento: string, callback: (notificacion: Record<string, unknown>) => void): Promise<{remove: () => void}>;
 }
 
 interface NotificacionLocal {
@@ -46,7 +46,7 @@ interface NotificacionLocal {
     iconColor?: string;
     ongoing?: boolean;
     autoCancel?: boolean;
-    extra?: Record<string, any>;
+    extra?: Record<string, unknown>;
 }
 
 interface EstadoNotificacionesLocales {

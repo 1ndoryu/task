@@ -77,12 +77,10 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
 
         if (indiceEliminar >= 0) {
-            base.splice(indiceEliminar, 0, opcionTracking);
-        } else {
-            base.push(opcionTracking);
+            return [...base.slice(0, indiceEliminar), opcionTracking, ...base.slice(indiceEliminar)];
         }
 
-        return base;
+        return [...base, opcionTracking];
     }, [completadoHoy, estaPausado, onActualizar, pospuestoHoy, estaEnTracking]);
 
     return (

@@ -20,7 +20,6 @@ namespace App\Api;
 use App\Database\Schema;
 use App\Repository\MensajesRepository;
 use App\Services\MensajesService;
-use App\Services\NotificacionesService;
 
 class MensajesApiController
 {
@@ -217,7 +216,7 @@ class MensajesApiController
         $offset = (int)$request->get_param('offset');
 
         /* Verificar acceso al elemento */
-        if (!self::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
+        if (!MensajesService::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
             return new \WP_REST_Response([
                 'success' => false,
                 'error' => 'No tienes acceso a este elemento'
@@ -267,7 +266,7 @@ class MensajesApiController
         $contenido = $request->get_param('contenido');
 
         /* Verificar acceso al elemento */
-        if (!self::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
+        if (!MensajesService::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
             return new \WP_REST_Response([
                 'success' => false,
                 'error' => 'No tienes acceso a este elemento'
@@ -300,7 +299,7 @@ class MensajesApiController
             $mensaje['avatar'] = get_avatar_url($userId, ['size' => 40]);
 
             /* Notificar a los otros participantes del elemento */
-            self::notificarParticipantes($userId, $tipoElemento, $elementoId, $contenido);
+            MensajesService::notificarParticipantesMensaje($userId, $tipoElemento, $elementoId, $contenido);
 
             return new \WP_REST_Response([
                 'success' => true,
@@ -323,7 +322,7 @@ class MensajesApiController
         $tipo = $request->get_param('tipo');
         $elementoId = (int)$request->get_param('id');
 
-        if (!self::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
+        if (!MensajesService::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
             return new \WP_REST_Response([
                 'success' => false,
                 'error' => 'No tienes acceso a este elemento'
@@ -357,7 +356,7 @@ class MensajesApiController
         $tipoElemento = $request->get_param('tipoElemento');
         $elementoId = (int)$request->get_param('elementoId');
 
-        if (!self::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
+        if (!MensajesService::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
             return new \WP_REST_Response([
                 'success' => false,
                 'error' => 'No tienes acceso a este elemento'
@@ -390,7 +389,7 @@ class MensajesApiController
         $tipo = $request->get_param('tipo');
         $elementoId = (int)$request->get_param('id');
 
-        if (!self::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
+        if (!MensajesService::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
             return new \WP_REST_Response([
                 'success' => false,
                 'error' => 'No tienes acceso a este elemento'
@@ -433,7 +432,7 @@ class MensajesApiController
 
         /* Filtrar solo IDs a los que tiene acceso */
         $idsConAcceso = array_filter($elementoIds, function ($id) use ($userId, $tipoElemento) {
-            return self::tieneAccesoAElemento($userId, $tipoElemento, (int)$id);
+            return MensajesService::tieneAccesoAElemento($userId, $tipoElemento, (int)$id);
         });
 
         if (empty($idsConAcceso)) {
@@ -478,7 +477,7 @@ class MensajesApiController
          * registrar un evento antes de que la tarea se haya guardado en la BD.
          * En ese caso, simplemente retornamos success: false sin error HTTP.
          */
-        if (!self::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
+        if (!MensajesService::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
             return new \WP_REST_Response([
                 'success' => false,
                 'skipped' => true,
@@ -515,129 +514,6 @@ class MensajesApiController
         }
     }
 
-    /**
-     * Verifica si el usuario tiene acceso a un elemento
-     * (es propietario o tiene el elemento compartido con el)
-     */
-    private static function tieneAccesoAElemento(int $userId, string $tipo, int $elementoId): bool
-    {
-        global $wpdb;
-
-        /* Mapear tipo a tabla */
-        $tablas = [
-            'tarea' => 'glory_tareas',
-            'proyecto' => 'glory_proyectos',
-            'habito' => 'glory_habitos'
-        ];
-
-        if (!isset($tablas[$tipo])) {
-            return false;
-        }
-
-        $tableName = $wpdb->prefix . $tablas[$tipo];
-        $campoId = 'id_local';
-
-        /* Verificar si es propietario */
-        $esPropietario = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $tableName WHERE user_id = %d AND $campoId = %d AND deleted_at IS NULL",
-            $userId,
-            $elementoId
-        ));
-
-        if ($esPropietario) {
-            return true;
-        }
-
-        /* Verificar si esta compartido con el usuario */
-        $tablaCompartidos = $wpdb->prefix . 'glory_compartidos';
-        $estaCompartido = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $tablaCompartidos WHERE tipo = %s AND elemento_id = %d AND usuario_id = %d",
-            $tipo,
-            $elementoId,
-            $userId
-        ));
-
-        return (bool)$estaCompartido;
-    }
-
-    /**
-     * Notifica a los participantes de un elemento cuando se envia un mensaje
-     * Excluye al usuario que envia el mensaje
-     */
-    private static function notificarParticipantes(
-        int $usuarioOrigenId,
-        string $tipoElemento,
-        int $elementoId,
-        string $contenido
-    ): void {
-        global $wpdb;
-
-        /* Obtener nombre del elemento */
-        $tablas = [
-            'tarea' => 'glory_tareas',
-            'proyecto' => 'glory_proyectos',
-            'habito' => 'glory_habitos'
-        ];
-        $camposNombre = [
-            'tarea' => 'texto',
-            'proyecto' => 'nombre',
-            'habito' => 'nombre'
-        ];
-
-        if (!isset($tablas[$tipoElemento])) {
-            return;
-        }
-
-        $tableName = $wpdb->prefix . $tablas[$tipoElemento];
-        $campoNombre = $camposNombre[$tipoElemento];
-
-        /* Obtener el propietario y nombre del elemento */
-        $elemento = $wpdb->get_row($wpdb->prepare(
-            "SELECT user_id, $campoNombre as nombre FROM $tableName WHERE id_local = %d AND deleted_at IS NULL",
-            $elementoId
-        ));
-
-        if (!$elemento) {
-            return;
-        }
-
-        $propietarioId = (int)$elemento->user_id;
-        $elementoNombre = $elemento->nombre;
-
-        /* Obtener participantes del elemento compartido */
-        $tablaCompartidos = $wpdb->prefix . 'glory_compartidos';
-        $participantes = $wpdb->get_col($wpdb->prepare(
-            "SELECT usuario_id FROM $tablaCompartidos WHERE tipo = %s AND elemento_id = %d",
-            $tipoElemento,
-            $elementoId
-        ));
-
-        /* Agregar propietario a la lista si no esta */
-        if (!in_array($propietarioId, $participantes)) {
-            $participantes[] = $propietarioId;
-        }
-
-        /* Si no hay participantes ademas del que envia, salir */
-        $participantes = array_filter($participantes, fn($id) => (int)$id !== $usuarioOrigenId);
-
-        if (empty($participantes)) {
-            return;
-        }
-
-        /* Crear notificacion para cada participante */
-        $notificacionesService = new NotificacionesService();
-
-        foreach ($participantes as $participanteId) {
-            $notificacionesService->notificarMensajeChat(
-                (int)$participanteId,
-                $usuarioOrigenId,
-                $tipoElemento,
-                $elementoId,
-                $elementoNombre,
-                $contenido
-            );
-        }
-    }
 }
 
 MensajesApiController::register();

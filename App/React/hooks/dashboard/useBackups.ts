@@ -26,7 +26,7 @@ export function useBackups(): UseBackupsReturn {
 
     const apiBase = '/wp-json/glory/v1/backups';
 
-    const normalizarBackups = (data: any[]): BackupMetadata[] => {
+    const normalizarBackups = (data: Record<string, unknown>[]): BackupMetadata[] => {
         /* Ajuste: normalizamos fechas y nombres para evitar Invalid Date. */
         return data.map(item => {
             const fechaCreacion = typeof item.created_at === 'string' ? Date.parse(item.created_at) : NaN;

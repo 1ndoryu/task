@@ -11,9 +11,10 @@
 
 import {Timer, Utensils} from 'lucide-react';
 import {createElement} from 'react';
+import type {ComponentType} from 'react';
 import {registrarPlugin} from './registroPlugins';
 import {registrarPanel} from './registroPaneles';
-import type {ModoColumnas, PosicionDefectoPanel} from '../types/paneles';
+import type {ModoColumnas, PanelBaseProps, PosicionDefectoPanel} from '../types/paneles';
 
 /* Lazy imports de componentes de panel */
 import {PanelAyuno} from '../components/paneles/PanelAyuno';
@@ -46,8 +47,8 @@ registrarPlugin({
     habitos: [
         {
             nombre: 'Ayuno intermitente',
-            importancia: 'Media' as any,
-            frecuencia: 'diaria' as any,
+            importancia: 'Media',
+            frecuencia: {tipo: 'diario'},
             descripcion: 'Cumplir ventana de ayuno configurada',
             completadoAutomatico: true
         }
@@ -64,7 +65,7 @@ registrarPanel({
     visiblePorDefecto: false,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 5], [2, 3], [3, 3]),
-    componente: PanelAyuno as any,
+    componente: PanelAyuno as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
     manejaAlturaPropia: false
 });
@@ -83,8 +84,8 @@ registrarPlugin({
     habitos: [
         {
             nombre: 'Registrar alimentación',
-            importancia: 'Media' as any,
-            frecuencia: 'diaria' as any,
+            importancia: 'Media',
+            frecuencia: {tipo: 'diario'},
             descripcion: 'Registrar comidas del día para calcular balance calórico',
             completadoAutomatico: false
         }
@@ -101,7 +102,7 @@ registrarPanel({
     visiblePorDefecto: false,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 6], [2, 4], [3, 4]),
-    componente: PanelDeficitCalorico as any,
+    componente: PanelDeficitCalorico as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
     manejaAlturaPropia: false
 });

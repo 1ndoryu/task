@@ -9,8 +9,9 @@
  * para evitar dependencias circulares (componente -> registro -> componente).
  */
 
+import type {ComponentType} from 'react';
 import {registrarPanel, marcarRegistroInicializado} from './registroPaneles';
-import type {ModoColumnas, PosicionDefectoPanel} from '../types/paneles';
+import type {ModoColumnas, PanelBaseProps, PosicionDefectoPanel} from '../types/paneles';
 
 /* Lazy imports para evitar dependencias circulares */
 import {PanelFocoPrioritario} from '../components/paneles/PanelFocoPrioritario';
@@ -39,7 +40,7 @@ registrarPanel({
     visiblePorDefecto: true,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 0], [1, 0], [1, 0]),
-    componente: PanelEjecucion as any,
+    componente: PanelEjecucion as ComponentType<PanelBaseProps>,
     enNavegacionMovil: true,
     idPaginaMovil: 'ejecucion',
     manejaAlturaPropia: false
@@ -56,7 +57,7 @@ registrarPanel({
     visiblePorDefecto: true,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 1], [1, 1], [2, 0]),
-    componente: PanelFocoPrioritario as any,
+    componente: PanelFocoPrioritario as ComponentType<PanelBaseProps>,
     enNavegacionMovil: true,
     idPaginaMovil: 'habitos',
     manejaAlturaPropia: false
@@ -72,7 +73,7 @@ registrarPanel({
     visiblePorDefecto: true,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 2], [2, 0], [3, 0]),
-    componente: PanelProyectos as any,
+    componente: PanelProyectos as ComponentType<PanelBaseProps>,
     enNavegacionMovil: true,
     idPaginaMovil: 'proyectos',
     manejaAlturaPropia: false
@@ -90,7 +91,7 @@ registrarPanel({
     visiblePorDefecto: true,
     alturaDefecto: '200px',
     posicionDefecto: crearPosicionDefecto([1, 3], [2, 1], [3, 1]),
-    componente: PanelScratchpad as any,
+    componente: PanelScratchpad as ComponentType<PanelBaseProps>,
     enNavegacionMovil: true,
     idPaginaMovil: 'notas',
     manejaAlturaPropia: true
@@ -108,7 +109,7 @@ registrarPanel({
     visiblePorDefecto: true,
     alturaDefecto: '150px',
     posicionDefecto: crearPosicionDefecto([1, 4], [2, 2], [3, 2]),
-    componente: PanelActividad as any,
+    componente: PanelActividad as ComponentType<PanelBaseProps>,
     enNavegacionMovil: true,
     idPaginaMovil: 'actividad',
     manejaAlturaPropia: true

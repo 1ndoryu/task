@@ -42,8 +42,8 @@ const GrupoVersion = ({version}: {version: Version}) => (
             </div>
         </div>
         <ul className="listaCambios">
-            {version.cambios.map((cambio, index) => (
-                <ItemCambio key={index} cambio={cambio} />
+            {version.cambios.map((cambio) => (
+                <ItemCambio key={cambio.descripcion} cambio={cambio} />
             ))}
         </ul>
     </div>
@@ -53,8 +53,8 @@ export const ModalVersiones: React.FC<ModalVersionesProps> = ({estaAbierto, onCe
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Historial de Versiones">
             <div className="contenedorVersiones">
-                {HISTORIAL_VERSIONES.map((version, index) => (
-                    <GrupoVersion key={index} version={version} />
+                {HISTORIAL_VERSIONES.map((version) => (
+                    <GrupoVersion key={version.version} version={version} />
                 ))}
             </div>
         </Modal>

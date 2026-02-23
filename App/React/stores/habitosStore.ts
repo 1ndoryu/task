@@ -721,5 +721,5 @@ export const habitosActions = {
 /* Exponer store globalmente para debugging/migración */
 if (typeof window !== 'undefined') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).useHabitosStore = useHabitosStore;
+    window.useHabitosStore = useHabitosStore;
 }

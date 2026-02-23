@@ -8,7 +8,7 @@ import type {ReactNode} from 'react';
 
 interface SeccionEncabezadoProps {
     icono: ReactNode;
-    titulo: string;
+    titulo: ReactNode;
     subtitulo?: string;
     acciones?: ReactNode;
     variante?: 'default' | 'panelHeader';

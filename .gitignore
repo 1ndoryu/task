@@ -106,3 +106,7 @@ App/React/android/app/src/main/res/values/strings.local.xml
 css-vars-validator/
 .idea/
 .idea
+.vitepress/
+colors/
+desktop/dist/
+desktop/src-tauri/

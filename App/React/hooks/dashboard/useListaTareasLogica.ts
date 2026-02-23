@@ -139,7 +139,7 @@ export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrear
     const handleOutdent = (tareaId: number) => {
         const tarea = pendientes.find(t => t.id === tareaId);
         if (!tarea || !tarea.parentId) return;
-        onEditarTarea?.(tareaId, {parentId: undefined} as any);
+        onEditarTarea?.(tareaId, {parentId: undefined});
     };
 
     const handleCrearNueva = (parentId: number | undefined, tareaActualId: number) => {
@@ -185,7 +185,7 @@ export function useListaTareasLogica({tareas, proyectoId, onEditarTarea, onCrear
                 onEditarTarea(tareaMoviendo.id, {
                     proyectoId: nuevoProyectoId,
                     parentId: undefined
-                } as any);
+                });
             }
             setTareaMoviendo(null);
         },

@@ -53,7 +53,7 @@ class NotasRepository
         }
 
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table 
+            "SELECT id, user_id, carpeta_id, titulo, contenido, fecha_creacion, fecha_modificacion FROM $table 
              WHERE user_id = %d $carpetaCondicion
              ORDER BY fecha_modificacion DESC
              LIMIT %d OFFSET %d",
@@ -109,7 +109,7 @@ class NotasRepository
         $table = Schema::getTableName('notas');
 
         $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table WHERE id = %d AND user_id = %d",
+            "SELECT id, user_id, carpeta_id, titulo, contenido, fecha_creacion, fecha_modificacion FROM $table WHERE id = %d AND user_id = %d",
             $notaId,
             $this->userId
         ), 'ARRAY_A');
@@ -273,7 +273,7 @@ class NotasRepository
         $terminoLike = '%' . $wpdb->esc_like($termino) . '%';
 
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table 
+            "SELECT id, user_id, carpeta_id, titulo, contenido, fecha_creacion, fecha_modificacion FROM $table 
              WHERE user_id = %d AND (titulo LIKE %s OR contenido LIKE %s)
              ORDER BY fecha_modificacion DESC
              LIMIT %d",

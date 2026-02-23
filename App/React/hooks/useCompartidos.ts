@@ -1,5 +1,6 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
 import type {TipoElementoCompartido, RolCompartido, ElementoCompartidoConmigo, ElementoCompartidoPorMi, Participante, PermisosAcceso, ContadoresCompartidos, CompaneroEquipo} from '../types/dashboard';
+import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 
 interface EstadoCompartidos {
     compartidosConmigo: ElementoCompartidoConmigo[];
@@ -50,9 +51,7 @@ export function useCompartidos(): UseCompartidosReturn {
             
             /* Si no hay nonce válido, lanzar error silencioso SIN hacer fetch */
             if (!nonce || nonce.trim() === '') {
-                const error = new Error('No autenticado');
-                (error as any).silent = true;
-                throw error;
+                throw new ErrorSilencioso('No autenticado');
             }
 
             const response = await fetch(url, {
@@ -67,9 +66,7 @@ export function useCompartidos(): UseCompartidosReturn {
 
             /* Si recibimos 401, lanzar error silencioso para evitar ruido en consola */
             if (response.status === 401) {
-                const error = new Error('No autenticado');
-                (error as any).silent = true;
-                throw error;
+                throw new ErrorSilencioso('No autenticado');
             }
 
             return response;
@@ -132,7 +129,7 @@ export function useCompartidos(): UseCompartidosReturn {
         } catch (error) {
             if (error instanceof Error && error.name !== 'AbortError') {
                 /* No mostrar error si es de tipo silent (401 sin auth) */
-                if ((error as any).silent) {
+                if (esErrorSilencioso(error)) {
                     setEstado(prev => ({...prev, cargando: false}));
                     return;
                 }

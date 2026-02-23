@@ -1,6 +1,6 @@
 import {useCallback, type ChangeEvent} from 'react';
 import {Check, Play, Square} from 'lucide-react';
-import type {Tarea, DatosEdicionTarea} from '../../types/dashboard';
+import type {Tarea, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
 import {BadgeGroup} from '../shared/BadgeInfo';
@@ -20,7 +20,7 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
     /* Detectar si es una tarea-hábito virtual */
     const esHabito = esTareaHabito(tarea);
     const tracker = useTimeTrackerStore(useShallow(s => ({sesionActiva: s.sesionActiva, estado: s.estado, iniciarTracking: s.iniciarTracking, completarTracking: s.completarTracking})));
-    const entidadTrackingId = esHabito ? (tarea as any).habitoId : tarea.id;
+    const entidadTrackingId = esHabito ? (tarea as TareaHabito).habitoId : tarea.id;
     const estaEnTracking = tracker.sesionActiva?.entidadId === entidadTrackingId && tracker.estado !== 'inactivo';
 
     const manejarTracking = useCallback(() => {
@@ -30,7 +30,7 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
         }
 
         if (esHabito) {
-            tracker.iniciarTracking((tarea as any).habitoId, 'habito', tarea.texto);
+            tracker.iniciarTracking((tarea as TareaHabito).habitoId, 'habito', tarea.texto);
             return;
         }
 
@@ -97,7 +97,7 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
              */
             if (esHabito && onEditarHabito) {
                 evento.stopPropagation();
-                onEditarHabito((tarea as any).habitoId);
+                onEditarHabito((tarea as TareaHabito).habitoId);
                 return;
             }
 
@@ -148,8 +148,8 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
                             acciones={[{id: estaEnTracking ? 'detener-tracking' : 'iniciar-tracking', icono: estaEnTracking ? <Square size={12} /> : <Play size={12} />, titulo: estaEnTracking ? 'Detener tracking' : 'Iniciar tracking', onClick: manejarTracking}]}
                             mostrarConfigurar={!!onEditarHabito}
                             mostrarEliminar={!!onEliminarHabito}
-                            onConfigurar={onEditarHabito ? () => onEditarHabito((tarea as any).habitoId) : undefined}
-                            onEliminar={onEliminarHabito ? () => onEliminarHabito((tarea as any).habitoId) : undefined}
+                            onConfigurar={onEditarHabito ? () => onEditarHabito((tarea as TareaHabito).habitoId) : undefined}
+                            onEliminar={onEliminarHabito ? () => onEliminarHabito((tarea as TareaHabito).habitoId) : undefined}
                         />
                     )}
                 </div>

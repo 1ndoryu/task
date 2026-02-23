@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {ChevronRight, Check, Trash2, Clock} from 'lucide-react';
-import {Tarea, Proyecto, DatosEdicionTarea, esTareaHabito} from '../../../types/dashboard';
+import {Tarea, Proyecto, DatosEdicionTarea, DatosNuevoHabito, TareaHabito, esTareaHabito} from '../../../types/dashboard';
 import {TareaItem} from '../TareaItem';
 import {tieneSubtareas, contarSubtareas} from '../../../utils/jerarquiaTareas';
 import {SwipeableItem} from '../../shared/SwipeableItem';
@@ -41,7 +41,7 @@ interface TareaConColapsadorProps {
     onToggleHabito?: (id: number) => void;
     onPosponerHabito?: (id: number) => void;
     onPausarHabito?: (id: number) => void;
-    onActualizarHabito?: (id: number, datos: any) => void;
+    onActualizarHabito?: (id: number, datos: Partial<DatosNuevoHabito>) => void;
 
     // Selección múltiple (Ctrl+Click) - TAREA 3.1
     estaSeleccionada?: boolean;
@@ -70,7 +70,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
     /* Callbacks para swipe - Diferenciado para hábitos y tareas */
     const manejarSwipeCompletar = () => {
         if (esHabito && onToggleHabito) {
-            onToggleHabito((tarea as any).habitoId);
+            onToggleHabito((tarea as TareaHabito).habitoId);
         } else {
             onToggleTarea?.(tarea.id);
         }
@@ -83,7 +83,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
      */
     const manejarSwipeIzquierda = () => {
         if (esHabito && onPosponerHabito) {
-            onPosponerHabito((tarea as any).habitoId);
+            onPosponerHabito((tarea as TareaHabito).habitoId);
         } else {
             onEliminarTarea?.(tarea.id);
         }

@@ -88,7 +88,19 @@ class ProyectosRepository
             ));
         }
 
+        /* Pre-fetch mapa id_local => id para evitar N+1 queries dentro del loop */
+        $existingRows = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, id_local FROM $table WHERE user_id = %d",
+            $this->userId
+        ), ARRAY_A);
+        $existingMap = [];
+        foreach ($existingRows as $row) {
+            $existingMap[(int)$row['id_local']] = (int)$row['id'];
+        }
+
         $incomingIds = [];
+        $toUpdate = [];
+        $toInsert = [];
 
         foreach ($proyectos as $proyecto) {
             if (!isset($proyecto['id'])) continue;
@@ -109,45 +121,66 @@ class ProyectosRepository
                 $urgencia = 'normal';
             }
 
-            $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT id FROM $table WHERE user_id = %d AND id_local = %d",
-                $this->userId,
-                $idLocal
-            ));
-
+            $exists = $existingMap[$idLocal] ?? null;
             $dataJson = $this->encodeData($proyecto);
 
             if ($exists) {
-                $wpdb->update(
-                    $table,
-                    [
-                        'nombre' => $nombre,
-                        'estado' => $estado,
-                        'prioridad' => $prioridad,
-                        'urgencia' => $urgencia,
-                        'data' => $dataJson,
-                        'deleted_at' => null,
-                        'updated_at' => $now
-                    ],
-                    ['id' => $exists],
-                    ['%s', '%s', '%s', '%s', '%s', '%s', '%s'],
-                    ['%d']
-                );
+                $toUpdate[] = [
+                    'id' => $exists,
+                    'nombre' => $nombre,
+                    'estado' => $estado,
+                    'prioridad' => $prioridad,
+                    'urgencia' => $urgencia,
+                    'data' => $dataJson
+                ];
             } else {
-                $wpdb->insert(
-                    $table,
-                    [
-                        'user_id' => $this->userId,
-                        'id_local' => $idLocal,
-                        'nombre' => $nombre,
-                        'estado' => $estado,
-                        'prioridad' => $prioridad,
-                        'urgencia' => $urgencia,
-                        'data' => $dataJson
-                    ],
-                    ['%d', '%d', '%s', '%s', '%s', '%s', '%s']
-                );
+                $toInsert[] = [
+                    'user_id' => $this->userId,
+                    'id_local' => $idLocal,
+                    'nombre' => $nombre,
+                    'estado' => $estado,
+                    'prioridad' => $prioridad,
+                    'urgencia' => $urgencia,
+                    'data' => $dataJson
+                ];
             }
+        }
+
+        /* Batch UPDATE con CASE para evitar N+1 */
+        if (!empty($toUpdate)) {
+            $ids = array_column($toUpdate, 'id');
+            $caseNombre = '';
+            $caseEstado = '';
+            $casePrioridad = '';
+            $caseUrgencia = '';
+            $caseData = '';
+
+            foreach ($toUpdate as $item) {
+                $caseNombre .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['nombre']);
+                $caseEstado .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['estado']);
+                $casePrioridad .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['prioridad'] ?? '');
+                $caseUrgencia .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['urgencia']);
+                $caseData .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['data']);
+            }
+
+            $idsPlaceholders = implode(',', array_fill(0, count($ids), '%d'));
+            $wpdb->query($wpdb->prepare(
+                "UPDATE $table SET
+                    nombre = CASE $caseNombre END,
+                    estado = CASE $caseEstado END,
+                    prioridad = CASE $casePrioridad END,
+                    urgencia = CASE $caseUrgencia END,
+                    data = CASE $caseData END,
+                    deleted_at = NULL,
+                    updated_at = %s
+                WHERE id IN ($idsPlaceholders)",
+                array_merge([$now], $ids)
+            ));
+        }
+
+        /* Batch INSERT */
+        foreach ($toInsert as $row) {
+            $wpdb->insert($table, $row, ['%d', '%d', '%s', '%s', '%s', '%s', '%s']);
         }
 
         /* Soft Delete (Solo si NO es actualización parcial) */

@@ -57,7 +57,7 @@ export function HeroBlock({data}: BlockComponentProps<HeroBlockProps>): JSX.Elem
                             backgroundClip: 'text'
                         }}>
                         {titleLines.map((line, i) => (
-                            <span key={i}>
+                            <span key={`titleLine-${i}`}>
                                 {line}
                                 {i < titleLines.length - 1 && <br />}
                             </span>

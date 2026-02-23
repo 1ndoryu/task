@@ -91,7 +91,7 @@ class CarpetasNotasRepository
         $table = Schema::getTableName('carpetas_notas');
 
         $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table WHERE id = %d AND user_id = %d",
+            "SELECT id, user_id, nombre, orden, fecha_creacion FROM $table WHERE id = %d AND user_id = %d",
             $carpetaId,
             $this->userId
         ), 'ARRAY_A');
@@ -231,14 +231,21 @@ class CarpetasNotasRepository
         global $wpdb;
         $table = Schema::getTableName('carpetas_notas');
 
-        foreach ($ordenes as $id => $orden) {
-            $wpdb->update(
-                $table,
-                ['orden' => (int)$orden],
-                ['id' => (int)$id, 'user_id' => $this->userId],
-                ['%d'],
-                ['%d', '%d']
-            );
+        /* Batch: actualizar orden de todas las carpetas en una sola query con CASE */
+        if (!empty($ordenes)) {
+            $cases = '';
+            $ids = [];
+            foreach ($ordenes as $id => $orden) {
+                $idInt = (int)$id;
+                $ordenInt = (int)$orden;
+                $cases .= sprintf("WHEN %d THEN %d ", $idInt, $ordenInt);
+                $ids[] = $idInt;
+            }
+            $idsStr = implode(',', $ids);
+            $wpdb->query($wpdb->prepare(
+                "UPDATE $table SET orden = CASE id {$cases}END WHERE id IN ($idsStr) AND user_id = %d",
+                $this->userId
+            ));
         }
 
         return true;

@@ -375,6 +375,8 @@ export interface DatosEdicionTarea {
     proyectoId?: number;
     /* ID del habito al que pertenece la tarea - Fase 14.8 */
     habitoId?: number;
+    /* ID del grupo/seccion al que pertenece la tarea (TAREA 3) */
+    grupoId?: number;
     /* Asignación de tarea */
     asignadoA?: number | null;
     asignadoANombre?: string;

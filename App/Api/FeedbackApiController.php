@@ -5,6 +5,7 @@
  *
  * Maneja los endpoints REST para el sistema de comentarios/feedback de usuarios Premium.
  * Los usuarios Premium pueden enviar hasta 3 comentarios por día.
+ * Delega toda la lógica de datos a FeedbackService.
  *
  * Endpoints:
  * - POST  /wp-json/glory/v1/feedback          → Enviar feedback (solo Premium)
@@ -17,13 +18,12 @@
 
 namespace App\Api;
 
-use App\Database\Schema;
+use App\Services\FeedbackService;
 use App\Services\SuscripcionService;
 
 class FeedbackApiController
 {
     private const API_NAMESPACE = 'glory/v1';
-    private const LIMITE_DIARIO = 3;
 
     /**
      * Registra los endpoints REST
@@ -131,11 +131,11 @@ class FeedbackApiController
     public static function enviar(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
-            global $wpdb;
             $userId = get_current_user_id();
-            
+            $servicio = new FeedbackService();
+
             /* Verificar limite diario */
-            $restante = self::obtenerComentariosRestantes($userId);
+            $restante = $servicio->obtenerComentariosRestantes($userId);
             if ($restante <= 0) {
                 return new \WP_REST_Response([
                     'success' => false,
@@ -143,28 +143,12 @@ class FeedbackApiController
                 ], 429);
             }
 
-            Schema::ensureTableExists('feedback');
-
             $tipo = $request->get_param('tipo');
             $mensaje = $request->get_param('mensaje');
-            $table = Schema::getTableName('feedback');
-            $usuario = get_userdata($userId);
 
-            $resultado = $wpdb->insert(
-                $table,
-                [
-                    'user_id' => $userId,
-                    'usuario_nombre' => $usuario ? $usuario->display_name : 'Usuario',
-                    'usuario_email' => $usuario ? $usuario->user_email : '',
-                    'tipo' => $tipo,
-                    'mensaje' => $mensaje,
-                    'leido' => 0,
-                    'fecha_creacion' => current_time('mysql')
-                ],
-                ['%d', '%s', '%s', '%s', '%s', '%d', '%s']
-            );
+            $resultado = $servicio->crear($userId, $tipo, $mensaje);
 
-            if (!$resultado) {
+            if ($resultado === false) {
                 return new \WP_REST_Response([
                     'success' => false,
                     'error' => 'Error al enviar el comentario'
@@ -194,12 +178,13 @@ class FeedbackApiController
             $userId = get_current_user_id();
             $servicioSuscripcion = new SuscripcionService($userId);
             $esPremium = $servicioSuscripcion->esPremium();
+            $servicio = new FeedbackService();
 
             return new \WP_REST_Response([
                 'success' => true,
                 'esPremium' => $esPremium,
-                'restante' => $esPremium ? self::obtenerComentariosRestantes($userId) : 0,
-                'limite' => self::LIMITE_DIARIO
+                'restante' => $esPremium ? $servicio->obtenerComentariosRestantes($userId) : 0,
+                'limite' => $servicio->getLimiteDiario()
             ]);
         } catch (\Throwable $e) {
             error_log('[FeedbackApiController] Error en obtenerRestante: ' . $e->getMessage());
@@ -216,62 +201,29 @@ class FeedbackApiController
     public static function listar(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
-            global $wpdb;
-            Schema::ensureTableExists('feedback');
+            $pagina = max(1, (int) $request->get_param('pagina'));
+            $porPagina = min(50, max(1, (int) $request->get_param('porPagina')));
+            $soloNoLeidos = $request->get_param('soloNoLeidos');
 
-        $table = Schema::getTableName('feedback');
-        $pagina = max(1, (int)$request->get_param('pagina'));
-        $porPagina = min(50, max(1, (int)$request->get_param('porPagina')));
-        $soloNoLeidos = $request->get_param('soloNoLeidos');
-        $offset = ($pagina - 1) * $porPagina;
+            $servicio = new FeedbackService();
+            $resultado = $servicio->listar($pagina, $porPagina, (bool) $soloNoLeidos);
 
-        /* Consultas con prepare obligatorio */
-        if ($soloNoLeidos) {
-            $total = (int)$wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE leido = %d",
-                0
-            ));
-            $feedbacks = $wpdb->get_results($wpdb->prepare(
-                "SELECT id, user_id, usuario_nombre, usuario_email, tipo, mensaje, leido, fecha_creacion
-                 FROM {$table} WHERE leido = %d ORDER BY fecha_creacion DESC LIMIT %d OFFSET %d",
-                0,
-                $porPagina,
-                $offset
-            ), ARRAY_A);
-        } else {
-            $total = (int)$wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE %d = %d",
-                1, 1
-            ));
-            $feedbacks = $wpdb->get_results($wpdb->prepare(
-                "SELECT id, user_id, usuario_nombre, usuario_email, tipo, mensaje, leido, fecha_creacion
-                 FROM {$table} ORDER BY fecha_creacion DESC LIMIT %d OFFSET %d",
-                $porPagina,
-                $offset
-            ), ARRAY_A);
-        }
-
-        $noLeidos = (int)$wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table} WHERE leido = %d",
-            0
-        ));
-
-        return new \WP_REST_Response([
-            'success' => true,
-            'feedbacks' => array_map(fn($f) => [
-                'id' => (int)$f['id'],
-                'userId' => (int)$f['user_id'],
-                'usuarioNombre' => $f['usuario_nombre'],
-                'usuarioEmail' => $f['usuario_email'],
-                'tipo' => $f['tipo'],
-                'mensaje' => $f['mensaje'],
-                'leido' => (bool)$f['leido'],
-                'fechaCreacion' => $f['fecha_creacion']
-            ], $feedbacks ?: []),
-            'total' => $total,
-            'noLeidos' => $noLeidos,
-            'pagina' => $pagina,
-            'totalPaginas' => ceil($total / $porPagina)
+            return new \WP_REST_Response([
+                'success' => true,
+                'feedbacks' => array_map(fn($f) => [
+                    'id' => (int) $f['id'],
+                    'userId' => (int) $f['user_id'],
+                    'usuarioNombre' => $f['usuario_nombre'],
+                    'usuarioEmail' => $f['usuario_email'],
+                    'tipo' => $f['tipo'],
+                    'mensaje' => $f['mensaje'],
+                    'leido' => (bool) $f['leido'],
+                    'fechaCreacion' => $f['fecha_creacion']
+                ], $resultado['feedbacks']),
+                'total' => $resultado['total'],
+                'noLeidos' => $resultado['noLeidos'],
+                'pagina' => $pagina,
+                'totalPaginas' => ceil($resultado['total'] / $porPagina)
             ]);
         } catch (\Throwable $e) {
             error_log('[FeedbackApiController] Error en listar: ' . $e->getMessage());
@@ -288,11 +240,9 @@ class FeedbackApiController
     public static function marcarLeido(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
-            global $wpdb;
-            $id = (int)$request->get_param('id');
-            $table = Schema::getTableName('feedback');
-
-            $wpdb->update($table, ['leido' => 1], ['id' => $id], ['%d'], ['%d']);
+            $id = (int) $request->get_param('id');
+            $servicio = new FeedbackService();
+            $servicio->marcarLeido($id);
 
             return new \WP_REST_Response(['success' => true]);
         } catch (\Throwable $e) {
@@ -302,29 +252,6 @@ class FeedbackApiController
                 'error' => 'Error interno del servidor'
             ], 500);
         }
-    }
-
-    /**
-     * Cuenta comentarios enviados hoy por el usuario
-     */
-    private static function obtenerComentariosRestantes(int $userId): int
-    {
-        global $wpdb;
-        
-        if (!Schema::tableExists('feedback')) {
-            return self::LIMITE_DIARIO;
-        }
-
-        $table = Schema::getTableName('feedback');
-        $hoy = current_time('Y-m-d');
-
-        $enviados = (int)$wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table WHERE user_id = %d AND DATE(fecha_creacion) = %s",
-            $userId,
-            $hoy
-        ));
-
-        return max(0, self::LIMITE_DIARIO - $enviados);
     }
 }
 

@@ -8,17 +8,18 @@ import {useCallback} from 'react';
 import {useAlertasContext} from '../context/AlertasContext';
 import {invalidarCache} from '../services/actividadStore';
 import {habitosActions} from '../stores/habitosStore';
-import type {Proyecto, NivelPrioridad, NivelUrgencia, TareaConfiguracion} from '../types/dashboard';
+import type {Proyecto, NivelPrioridad, NivelUrgencia, TareaConfiguracion, DatosEdicionTarea, Notificacion} from '../types/dashboard';
+import type {DatosNuevoProyecto} from './useProyectos';
 import type {EstadoFiltro} from './useFiltroTareas';
 
 interface UseAccionesDashboardProps {
     filtroActual: EstadoFiltro;
     notas: string;
     crearTarea: (datos: {texto: string; prioridad: NivelPrioridad | null; urgencia?: NivelUrgencia | null; configuracion: TareaConfiguracion; proyectoId?: number; completado: boolean; tags?: string[]}) => void;
-    editarTarea: (id: number, datos: any) => void;
+    editarTarea: (id: number, datos: DatosEdicionTarea) => void;
     actualizarNotas: (notas: string) => void;
-    crearProyecto: (datos: any) => void;
-    editarProyecto: (id: number, datos: any) => void;
+    crearProyecto: (datos: DatosNuevoProyecto) => void;
+    editarProyecto: (id: number, datos: Partial<Proyecto>) => void;
     proyectoEditando: Proyecto | null;
     cambiarFiltro: (filtro: EstadoFiltro) => void;
     cerrarModalNuevaTarea: () => void;
@@ -37,11 +38,11 @@ interface UseAccionesDashboardReturn {
     manejarCambioFiltro: (valor: string) => void;
     manejarLimpiarScratchpad: () => Promise<void>;
     manejarCrearNuevaTareaGlobal: (configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[], proyectoIdOverride?: number) => void;
-    manejarGuardarNuevoProyecto: (datos: any) => void;
-    manejarGuardarEdicionProyecto: (datos: any) => void;
+    manejarGuardarNuevoProyecto: (datos: DatosNuevoProyecto) => void;
+    manejarGuardarEdicionProyecto: (datos: Partial<Proyecto>) => void;
     manejarGuardarEdicionTareaGlobal: (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => void;
     manejarClickNotificaciones: (evento: React.MouseEvent) => void;
-    manejarClickNotificacionIndividual: (notificacion: any) => void;
+    manejarClickNotificacionIndividual: (notificacion: Notificacion) => void;
     crearNotificacionPrueba: () => Promise<boolean>;
     limpiarActividadCompleta: () => Promise<boolean>;
 }
@@ -90,7 +91,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
         (tareaId: number, configuracion: TareaConfiguracion, prioridad: NivelPrioridad | null, texto?: string, asignacion?: {asignadoA: number | null; asignadoANombre: string; asignadoAAvatar: string}, urgencia?: NivelUrgencia | null, tags?: string[]) => {
             if (texto !== undefined && !texto) return; /* Si se pasa texto vacio */
 
-            const datosEdicion: any = {
+            const datosEdicion: DatosEdicionTarea = {
                 configuracion
             };
 
@@ -111,7 +112,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
     );
 
     const manejarGuardarNuevoProyecto = useCallback(
-        (datos: any) => {
+        (datos: DatosNuevoProyecto) => {
             crearProyecto(datos);
             cerrarModalCrearProyecto();
         },
@@ -119,7 +120,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
     );
 
     const manejarGuardarEdicionProyecto = useCallback(
-        (datos: any) => {
+        (datos: Partial<Proyecto>) => {
             if (proyectoEditando) {
                 editarProyecto(proyectoEditando.id, datos);
                 cerrarModalEditarProyecto();
@@ -139,7 +140,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
     );
 
     const manejarClickNotificacionIndividual = useCallback(
-        (notificacion: any) => {
+        (notificacion: Notificacion) => {
             if (notificacion.tipo === 'solicitud_equipo') {
                 abrirModalEquipos();
                 cerrarModalNotificaciones();

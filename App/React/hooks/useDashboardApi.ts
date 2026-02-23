@@ -12,6 +12,7 @@
 
 import {useState, useCallback, useRef, useEffect} from 'react';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
+import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 
 /*
  * Tipos para la API
@@ -118,9 +119,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
         /* Guard: No ejecutar si no hay nonce válido (usuario no autenticado) */
         const nonce = obtenerNonce();
         if (!nonce) {
-            const error = new Error('No autenticado');
-            (error as any).silent = true;
-            throw error;
+            throw new ErrorSilencioso('No autenticado');
         }
 
         /* Cancelar petición anterior si existe */
@@ -168,15 +167,11 @@ export function useDashboardApi(): UseDashboardApiReturn {
             if (!response.ok) {
                 if (response.status === 401) {
                     /* Marcar error como silencioso para evitar logs innecesarios */
-                    const error = new Error('No autenticado. Inicia sesión para continuar.');
-                    (error as any).silent = true;
-                    throw error;
+                    throw new ErrorSilencioso('No autenticado. Inicia sesión para continuar.');
                 }
                 if (response.status === 403) {
                     /* Marcar 403 como silencioso: usuarios FREE que exceden límites generan 403 esperados */
-                    const error = new Error('Sin permisos para realizar esta acción.');
-                    (error as any).silent = true;
-                    throw error;
+                    throw new ErrorSilencioso('Sin permisos para realizar esta acción.');
                 }
 
                 // Try to extract error message from JSON if possible, otherwise use status
@@ -190,9 +185,9 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
             const data = await response.json();
             return data as ApiResponse<T>;
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Ignorar errores de cancelación (AbortError / DOMException)
-            if (error?.name === 'AbortError') {
+            if (error instanceof Error && error.name === 'AbortError') {
                 if (abortControllerRef.current !== controller) {
                     // Fue cancelado por una nueva petición
                     console.debug('[DashboardApi] Petición silenciada (reemplazada).');
@@ -207,7 +202,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
             }
 
             /* Silenciar errores 401 esperados (sin autenticación) */
-            if (error?.silent || error?.message?.includes('No autenticado')) {
+            if (esErrorSilencioso(error) || (error instanceof Error && error.message.includes('No autenticado'))) {
                 throw error;
             }
 

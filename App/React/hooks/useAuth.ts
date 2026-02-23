@@ -30,7 +30,7 @@ export function useAuth(): UseAuthReturn {
     /* Inicializar usuario desde datos inyectados por WP */
     const [user, setUser] = useState<User | null>(() => {
         if (typeof window === 'undefined') return null;
-        const wpData = (window as any).gloryDashboard;
+        const wpData = window.gloryDashboard;
         return wpData?.currentUser || null;
     });
 
@@ -88,7 +88,7 @@ export function useAuth(): UseAuthReturn {
                     throw new Error(data.message || 'Error obteniendo URL de login');
                 }
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : 'Error de conexión';
 
             // Log detallado para debugging nativo
@@ -96,10 +96,14 @@ export function useAuth(): UseAuthReturn {
 
             // Enviar log al servidor para verlo con -wpDebug
             // Intentamos extraer toda la info posible del objeto de error nativo
+            /* Extraer propiedades del error nativo (Capacitor puede lanzar objetos con .code/.message) */
+            const errorProps = e instanceof Object ? (e as Record<string, unknown>) : {};
+            const errorMessage = String(errorProps.message ?? 'No message');
+            const errorCode = errorProps.code != null ? String(errorProps.code) : 'No code';
             const errorDetails = {
-                message: e?.message || 'No message',
-                code: e?.code || 'No code',
-                fullError: JSON.stringify(e, Object.getOwnPropertyNames(e))
+                message: errorMessage,
+                code: errorCode,
+                fullError: JSON.stringify(e, e instanceof Object ? Object.getOwnPropertyNames(e) : undefined)
             };
 
             await fetch('/wp-json/glory/v1/auth/log', {
@@ -113,17 +117,17 @@ export function useAuth(): UseAuthReturn {
 
             // Alertar en móvil para verlo inmediatamente
             if (Capacitor.isNativePlatform()) {
-                let alertMsg = `Error Google Login:\n${e?.message || 'Unknown'}\nCode: ${e?.code || 'N/A'}`;
+                let alertMsg = `Error Google Login:\n${errorMessage}\nCode: ${errorCode}`;
 
                 const errString = JSON.stringify(e);
 
-                if (e?.code === '10' || e?.code === 10 || errString.includes('"code":"10"') || errString.includes('"code":10')) {
+                if (errorCode === '10' || errString.includes('"code":"10"') || errString.includes('"code":10')) {
                     alertMsg = '⚠️ Error 10: Configuración Incorrecta\n\n' + '- Revisa el SHA-1 en Google Console vs Keystore.\n' + '- Verifica que "server_client_id" esté en strings.xml.\n' + '- Asegúrate de que el package name coincida.';
-                } else if (e?.code === '12500' || e?.code === 12500 || errString.includes('12500') || e?.message?.includes('12500')) {
+                } else if (errorCode === '12500' || errString.includes('12500') || errorMessage.includes('12500')) {
                     alertMsg = '⚠️ Error 12500: Sign In Failed\n\n' + 'Causas probables:\n' + '1. Email de soporte NO configurado en OAuth Consent Screen.\n' + '2. Tu email no está en "Test Users" (si la app no está publicada).\n' + '3. Falta SHA-1 del Debug Keystore en Google Console.\n' + '4. El dispositivo no tiene Google Play Services actualizado.';
                 } else {
                     // Si no es un error conocido, mostrar todo para depurar 'Authentication failed' genérico
-                    alertMsg = `Error Google Login (RAW):\n${errString}\n\nMsg: ${e.message}`;
+                    alertMsg = `Error Google Login (RAW):\n${errString}\n\nMsg: ${errorMessage}`;
                 }
                 alert(alertMsg);
             }
@@ -201,7 +205,7 @@ export function useAuth(): UseAuthReturn {
             limpiarTodosLosDatosUsuario();
 
             /* Obtener el nonce de WordPress */
-            const wpData = (window as any).gloryDashboard;
+            const wpData = window.gloryDashboard;
             const nonce = wpData?.nonce || '';
 
             const response = await fetch('/wp-json/glory/v1/auth/logout', {

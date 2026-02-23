@@ -7,7 +7,7 @@
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, PropiedadesCompactas, etc.)
  */
 
-import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito, CompaneroEquipo, RolCompartido} from '../../../types/dashboard';
+import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito, CompaneroEquipo, RolCompartido, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
 import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades, SelectorTags, SeccionResponsables} from '../../shared';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {SelectorAsignado} from '../../compartidos/SelectorAsignado';
@@ -59,12 +59,12 @@ interface FormularioTareaModernoProps {
     onTagsChange?: (tags: string[]) => void;
     /* Subtareas */
     tareaId?: number;
-    subtareas?: any[]; /* Usamos any temporalmente para evitar problemas de importación circular de tipos, pero en realidad es Tarea[] */
-    onCrearSubtarea?: (datos: any) => void;
+    subtareas?: Tarea[];
+    onCrearSubtarea?: (datos: DatosEdicionTarea) => void;
     onToggleSubtarea?: (id: number) => void;
     onEliminarSubtarea?: (id: number) => void;
-    onConfigurarSubtarea?: (tarea: any) => void;
-    onEditarSubtarea?: (id: number, datos: any) => void;
+    onConfigurarSubtarea?: (tarea: Tarea) => void;
+    onEditarSubtarea?: (id: number, datos: DatosEdicionTarea) => void;
     /* Modo */
     modoEdicion?: boolean;
     errorTexto?: string;

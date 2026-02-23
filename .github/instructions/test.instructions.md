@@ -2,94 +2,113 @@
 applyTo: '**'
 ---
 
-# Protocolo de Desarrollo y Conducta (v3.2)
+# Protocolo de Desarrollo y Conducta (v4.0)
 
-## 0. INSTRUCCIÓN CRÍTICA DE FLUJO (VSCODE)
+> Se aplica SIEMPRE, en CADA archivo que toques. No depende de invocación del usuario.
 
-- **LO MAS IMPORTANTE: Maximización de Créditos y Autonomía:** Al recibir instrucciones, trabaja de forma prolongada y continua hasta completar la totalidad de la solicitud. **PROHIBIDO** detenerse para realizar consultas triviales, pedir confirmación paso a paso o dividir la tarea artificialmente. Cada interrupción innecesaria consume créditos del usuario; tu objetivo es la máxima eficiencia por interacción, esto significa que debes continuar prolongadamente todo lo posible sin detener la ejecución, y mantener el progreso actualizado con cada tarea cumplida.
-- **Ejecución en Lote (Batching):** Si la solicitud implica múltiples pasos, metas o tareas, ejecútalas **todas** sin detenerte. Realiza tus propias validaciones internas, autotests y revisiones exhaustivas para garantizar que todo funcione correctamente antes de devolver el control.
-- **Gestión del Roadmap:** El archivo de control de progreso (ej. `roadmap.md`) es el eje central de la comunicación asíncrona:
-- Al completar una tarea, actualiza inmediatamente el estado en el archivo. Esto es obligatorio, una tarea realizada --> actualizacion.
-- Lee activamente el archivo en busca de nuevos comentarios o directrices que el usuario haya añadido durante tu ejecución.
-- Si resuelves una duda o completas un punto, actualiza los comentarios correspondientes dentro del archivo.
+## -4. GLORY SENTINEL (`.agent/code-sentinel`) — MEJORA CONTINUA
 
-- **Refactorización Oportunista:** Aprovecha la extensión de la iteración para aplicar mejoras arquitectónicas, limpiezas de código o refactorizaciones de bajo riesgo (sin romper funcionalidad) sin necesidad de pedir permiso explícito. El objetivo es entregar el máximo valor técnico y limpieza posible en cada respuesta.
+Glory Sentinel es la extensión interna de VS Code para auditoría automática de calidad de código. Su objetivo es detectar problemas reales de **arquitectura, seguridad, mantenibilidad** y **uso correcto de Glory** en tiempo real.
 
-## 1. Principios Generales y Comunicación
+**Regla de mejora continua:**
+- Si detectas un **falso positivo** emitido por Sentinel (diagnóstico incorrecto sobre código válido), **DEBES** corregir la regla o el analizador correspondiente en `.agent/code-sentinel/` para eliminarlo. No basta con ignorarlo.
+- Si detectas una **violación real que Sentinel NO detecta** (patrón peligroso no cubierto por las reglas actuales), **DEBES** agregar la detección: nueva regla en `rules.md`, nuevo patrón en `regexPatterns.ts`, o lógica en el analizador adecuado (`phpAnalyzer.ts`, `reactAnalyzer.ts`, `staticAnalyzer.ts`, `gloryAnalyzer.ts`).
+- Sentinel se mejora **en cada iteración** donde se encuentre una oportunidad. No se deja para "después".
+- Focos de detección: SQL inseguro, fallos silenciosos, SRP, separación lógica-vista, Schema System, manejo de errores, patrones React peligrosos, uso correcto del framework Glory.
+- Tras modificar Sentinel, verificar que compila sin errores y que las reglas nuevas no generan falsos positivos en el código existente.
 
-- **Idioma:** Español obligatorio en toda comunicación y nombres de clases CSS.
-- **Ambigüedad:** Ante la duda, **PREGUNTA** antes de escribir código. (No es relevante en VSCODE si rompe el flujo del punto 0, priorizar sentido común).
-- **Prohibiciones:** Cero emojis en código/comentarios.
+## -3. AUTOAPLICACIÓN DE REGLAS
+
+- Al tocar un archivo por cualquier motivo, corregir toda violación visible de este protocolo. Si es compleja, dejar TO-DO explícito.
+- No racionalizar inacción: "no es mi tarea" no es excusa. Si lo ves y puedes arreglarlo sin riesgo, lo arreglas.
+- Excepción: secciones marcadas `[EN CURSO — AG-XXXX]` por otro agente.
+
+## -2. EMPIEZA SIEMPRE CON LA TAREA MAS DIFICIL.
+
+## -1. CONCURRENCIA Y PROPIEDAD DE TAREAS
+
+> Violar esta regla invalida todo el trabajo.
+
+- **Identificador:** Elegir `AG-XXXX` al iniciar sesión (ej: `AG-DAW`, `AG-FIX`).
+- **Secuencia obligatoria:** Leer roadmap completo -> verificar tareas libres -> marcar `[EN CURSO — AG-XXXX]` -> commitear roadmap -> trabajar -> releer roadmap antes de cerrar.
+- **Formato roadmap:** Libre: `213. Descripción...` | Tomada: `213. [EN CURSO — AG-DAW] Desc... **Estado:** progreso` | Completada: `213. [AG-DAW] Resultado...`
+- **Commits:** Siempre `git add` selectivo (prohibido `git add .`). Verificar `git diff --stat HEAD` antes. Mensaje: `[AG-XXXX] C213: descripción`. No incluir archivos de otros agentes.
+- **Prohibido:** Tocar tareas/archivos de otro agente en curso, marcar completadas tareas ajenas, revertir cambios ajenos sin orden del usuario. Conflictos = notificar al usuario.
+
+## 0. FLUJO DE TRABAJO (VSCODE)
+
+- **Autonomía total:** Trabajar de forma prolongada y continua. Prohibido detenerse para consultas triviales o confirmaciones paso a paso. Máxima eficiencia por interacción.
+- **Batching:** Ejecutar todos los pasos/tareas sin detenerse. Validar internamente antes de devolver control.
+- **Roadmap como eje central:** Actualizar inmediatamente al completar tareas. Releer tras cada tarea completada. Buscar comentarios nuevos del usuario.
+- **Refactorización oportunista:** Aplicar mejoras de bajo riesgo sin pedir permiso.
+
+## 1. PRINCIPIOS GENERALES
+
+- **Idioma:** Español en comunicación y clases CSS.
 - **Integridad:** Prohibido omitir código (`// ...resto`). Ediciones atómicas y completas.
-- **Mentalidad:** Entender antes de modificar. Si ves una mejora arquitectónica posible, **hazla** (si es rápida) o deja un **TO-DO** comentado.
+- Cero emojis en código/comentarios.
+- Entender antes de modificar. Mejora arquitectónica posible = hacerla o dejar TO-DO.
 
-## 2. Estándares de Código y Comentarios
+## 2. ESTÁNDARES DE CÓDIGO
 
-- **Nomenclatura JS/TS:** `camelCase` (vars/funcs), `PascalCase` (componentes/clases).
-- **Nomenclatura CSS:** **Español** y `camelCase` (ej: `.contenedorPrincipal`, `.botonActivo`).
-- **Limpieza:** Priorizar legibilidad. Evitar namespaces completos en imports.
-- **Formato de Comentarios:**
-- **Prohibido:** Barras decorativas (`====`).
-- **Obligatorio:** Bloques limpios `/* ... */` o breves líneas explicativas del "por qué".
-- **Registro:** Dejar comentarios cortos sobre lo aprendido o arreglado en cada iteración.
+- **JS/TS:** `camelCase` (vars/funcs), `PascalCase` (componentes/clases).
+- **CSS:** Español + `camelCase` (`.contenedorPrincipal`, `.botonActivo`).
+- **Verificación de referencias (CRITICO):** Antes de usar variable CSS, import o componente, verificar que existe. Si no existe, crearlo primero. Nunca referenciar algo inexistente. Secuencia: crear -> importar -> usar -> verificar compilación.
+- **Comentarios:** Bloques `/* ... */` explicando el "por qué". Prohibidas barras decorativas. Dejar notas de lo aprendido/arreglado.
 
-## 3. Arquitectura y SOLID (CRÍTICO)
+## 3. ARQUITECTURA Y SOLID
 
-- **Límites de Archivo:**
-- Componentes/Estilos: máx **300 líneas**.
-- Hooks: máx **120 líneas**.
-- Utils: máx **150 líneas**.
-- _Acción:_ Si excede, dividir obligatoriamente.
+- **Limites:** Componentes/Estilos max 300 lineas | Hooks max 120 | Utils max 150. Si excede, dividir.
+- **Directorios:** Organizar por dominio/modulo (`components/ui/`, `features/auth/`). Prohibido carpetas planas.
+- **SRP:** 1 componente = 1 responsabilidad. Max 3 `useState`.
+- **Separación logica-vista:** >5 lineas de logica = extraer a hook dedicado (`useMiComponente.ts`). Componente solo contiene imports, destructuring y JSX.
+- **SOLID:** OCP (extender por props/composición), LSP (hijos sustituibles), ISP (props minimas), DIP (depender de abstracciones).
 
-- **Organización Escalable (Directorios):**
-- **PROHIBIDO** acumular todos los componentes en una sola carpeta plana.
-- **OBLIGATORIO** organizar jerárquicamente por dominio, módulo o tipo (ej: `components/ui/`, `features/auth/`, `layouts/`). Estructurar pensando siempre que el proyecto va a crecer.
+## 4. REACT Y ESTADO
 
-- **SRP (Single Responsibility):** 1 Componente = 1 Responsabilidad. (Máx 3 `useState`, separar lógica de vista).
-- **Principios:**
-- **OCP:** Extender por props/composición, no modificar fuente.
-- **LSP:** Hijos sustituibles por padres.
-- **ISP:** Props mínimas y específicas.
-- **DIP:** Depender de abstracciones/interfaces.
+- Todo elemento UI reutilizable = componente propio. No duplicar JSX.
+- Estado global con **Zustand** (selectores obligatorios: `useStore(s => s.campo)`, nunca `useStore()` sin selector).
+- Contenedores principales con `id` unico.
 
-## 4. React y Estado
+## 5. CSS
 
-- **Atomicidad (Todo es un Componente):** Cualquier elemento de UI reutilizable o distinguible (botones, badges, inputs, tarjetas) **DEBE** abstraerse en su propio componente. No duplicar JSX ni crear componentes monolíticos.
-- **Gestión de Estado:** Usar **Zustand** (o herramientas simples) para evitar complejidad.
-- **Identificadores:** Todo contenedor principal debe tener `id` único (ej: `id="seccionHero"`).
-- **Estructura:** Componentes pequeños y enfocados.
+- Todo en archivos `.css` separados. Prohibido CSS inline.
+- Variables obligatorias para colores, espaciados, tipografia. Buscar clases existentes antes de crear nuevas.
 
-## 5. Estilos CSS (Centralizados)
+## 6. ENTREGA
 
-- **Ubicación:** Todo en archivos `.css` separados (ej: `init.css`, `variables.css`). **Prohibido CSS inline** o hardcodeado.
-- **Variables:** Uso obligatorio para colores, espaciados y tipografía.
-- **Reutilización:** Buscar clases existentes antes de crear nuevas y jamas olvides revisar las variables y usarlas.
+1. **Post-edición:** Siempre ejecutar `get_errors` tras editar. Prohibido dar tarea por terminada con errores.
+2. **Commit automático** al finalizar tarea (sin pedir permiso).
+3. **MD de trabajo:** Actualizar estado + registrar lecciones aprendidas (1-2 lineas, formato `- [contexto]: hallazgo`). Si >10 tareas completadas, compactarlas en resumen.
+4. **Cierre:** Releer md completo antes de cerrar. Si hay instrucciones nuevas, ejecutarlas. Dejar resumen corto de cambios y TO-DOs pendientes.
 
-## 6. Flujo de Trabajo y Entrega
+## 7. PROHIBICIONES TÉCNICAS
 
-1. **Ejecución:**
+### SQL y Base de Datos
+- **Prepared statements obligatorios.** Prohibido concatenar variables en SQL. WordPress: siempre `$wpdb->prepare()`.
+- **Schema System obligatorio:** Toda referencia a tablas, columnas, valores de CHECK constraints debe usar constantes del schema (`*Cols`, `*Enums`, `*Schema`). Si no existe, crearla. Prohibido strings literales en queries.
+- **Gotcha INTERVAL:** `INTERVAL '$var'` no es parametro PDO. Validar con whitelist en el receptor.
+- **FQN:** Usar `use` statements, no FQN inline en queries.
+- **N+1 / roundtrips:** Combinar queries redundantes con `CASE/FILTER`, CTEs, JOINs. Loop con query = batch o cache.
 
-- **NO** ejecutar comandos de terminal para verificar errores (linter/build).
-- **NO** ejecutar el navegador.
-- _Nota:_ El usuario es el responsable de probar y verificar errores.
+### Manejo de Errores
+- **Todo I/O, red, BD, parsing, API externa en try-catch** con logging util. Catches vacios = prohibido. Supresor `@` = prohibido.
+- **PHP critico:** `exec/shell_exec` (try-catch + validar retorno), `curl_exec` (verificar `curl_error()`), `json_decode` (verificar `json_last_error()`), file ops (try-catch), `glob` (validar `false`), `ZipArchive` (try-catch completo), `$wpdb->*` (verificar retorno + try-catch).
+- **Controllers REST:** try-catch global con `\Throwable`, logging + respuesta 500.
+- **Operaciones criticas no deben retornar void:** INSERT/UPDATE/DELETE/API externa debe retornar bool o tipo verificable.
+- **Archivos temporales:** `unlink` en bloque `finally`.
+- **Race conditions:** Patron buscar-crear usar upsert atomico o constraints UNIQUE.
+- **React/TS:** Error en catch = `ok: false` (nunca `ok: true`). Fallos = feedback visible al usuario (toast). Updates optimistas con rollback en fallo. `useEffect` async con `AbortController` cleanup. Tipos consistentes (`null` vs `undefined`).
 
-2. **Commit:** Al finalizar una tarea, realizar **commit** de los cambios automáticamente (sin pedir permiso).
-3. **Documentación:** Actualizar siempre los `.md` de documentación y contexto al terminar.
-4. **Cierre de Interacción:**
+### Seguridad
+- Sanitizar toda entrada de usuario. Prohibido `eval()`, `innerHTML` sin sanitizar.
+- `exec/shell_exec`: siempre `escapeshellarg()` por argumento.
+- Prohibido hardcodear secrets en codigo. Usar env vars.
+- WordPress REST: `permission_callback` lo mas restrictivo posible.
+- IDs en URLs externas: validar formato antes de concatenar.
+- SSL explicito en APIs de pago (`CURLOPT_SSL_VERIFYPEER = true`).
 
-- Dejar un resumen **muy corto** de qué debe comprobar el usuario.
-- Listar brevemente los cambios/arreglos realizados.
-- Realizar (o anotar) TO-DOs de mejora arquitectónica aunque no sean el foco principal, estos TO-DOs siempre tienen que ir en los comentarios del codigo o en el md de trabajo.
-
----
-
-### Ejemplo de Estilo de Comentario Aceptado
-
-```javascript
-/*
- * Función para calcular totales.
- * Se extrajo la lógica de impuestos para cumplir SRP.
- */
-const calcularTotal = () => { ... }
-
-```
+### Orden y Mantenibilidad
+- **Archivos monolito:** Si excede limites o mezcla dominios, dividir.
+- **Refactorizacion oportuna:** Codigo duplicado, imports muertos, nombres confusos = corregir inmediatamente.
+- **Guardian de entropia:** Cada cambio debe dejar el codigo igual o mas ordenado. Elegir ubicacion correcta, mantener patrones, no romper convenciones. La entropia se combate decision a decision.

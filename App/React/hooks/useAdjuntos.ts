@@ -45,7 +45,7 @@ export function useAdjuntos(): UseAdjuntosReturn {
      * Obtiene las credenciales necesarias para la API
      */
     const obtenerCredenciales = useCallback((): {apiUrl: string; nonce: string} | null => {
-        const gloryData = (window as any).gloryDashboard;
+        const gloryData = window.gloryDashboard;
 
         if (!gloryData?.apiUrl || !gloryData?.nonce) {
             return null;

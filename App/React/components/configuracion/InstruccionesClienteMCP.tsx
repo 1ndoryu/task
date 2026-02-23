@@ -52,8 +52,8 @@ export function InstruccionesClienteMCP({cliente, jsonConfiguracion, token}: Ins
             </h4>
 
             <ol className="mcpInstrucciones__lista">
-                {instrucciones.pasos.map((paso, index) => (
-                    <li key={index}>{paso}</li>
+                {instrucciones.pasos.map((paso) => (
+                    <li key={paso}>{paso}</li>
                 ))}
             </ol>
 

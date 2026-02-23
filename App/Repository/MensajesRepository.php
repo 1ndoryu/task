@@ -309,23 +309,27 @@ class MensajesRepository
             $mapaLeidos[(int)$row['elemento_id']] = (int)$row['ultimo_mensaje_leido'];
         }
 
-        /* Contar mensajes por elemento (excluyendo propios) */
-        $resultado = [];
+        /* Batch: contar mensajes no leidos por elemento en una sola query */
+        $conditions = [];
         foreach ($elementoIds as $elementoId) {
-            $ultimoLeido = $mapaLeidos[$elementoId] ?? 0;
+            $eid = (int)$elementoId;
+            $ultimoLeido = (int)($mapaLeidos[$eid] ?? 0);
+            $conditions[] = "(elemento_id = $eid AND id > $ultimoLeido)";
+        }
 
-            $count = (int)$wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $tableMensajes 
-                 WHERE tipo_elemento = %s AND elemento_id = %d 
-                 AND id > %d AND usuario_id != %d",
+        $resultado = [];
+        if (!empty($conditions)) {
+            $whereConditions = implode(' OR ', $conditions);
+            $counts = $wpdb->get_results($wpdb->prepare(
+                "SELECT elemento_id, COUNT(*) as cnt FROM $tableMensajes 
+                 WHERE tipo_elemento = %s AND usuario_id != %d AND ($whereConditions)
+                 GROUP BY elemento_id",
                 $tipoElemento,
-                $elementoId,
-                $ultimoLeido,
                 $this->userId
-            ));
+            ), ARRAY_A);
 
-            if ($count > 0) {
-                $resultado[$elementoId] = $count;
+            foreach ($counts as $row) {
+                $resultado[(int)$row['elemento_id']] = (int)$row['cnt'];
             }
         }
 

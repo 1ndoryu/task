@@ -1,5 +1,5 @@
 import {useState, useRef, useCallback} from 'react';
-import {Tarea} from '../../types/dashboard';
+import {Tarea, DatosEdicionTarea} from '../../types/dashboard';
 import {obtenerSubtareas, puedeSerSubtareaDe} from '../../utils/jerarquiaTareas';
 
 interface UseTareaOrdenamientoProps {
@@ -7,7 +7,7 @@ interface UseTareaOrdenamientoProps {
     pendientes: Tarea[];
     completadas: Tarea[];
     onReordenarTareas?: (tareas: Tarea[]) => void;
-    onEditarTarea?: (id: number, datos: any) => void;
+    onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
     setTareasExpandidas: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 

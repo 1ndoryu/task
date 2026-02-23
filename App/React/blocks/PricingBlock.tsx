@@ -78,8 +78,8 @@ export function PricingBlock({data}: BlockComponentProps<PricingBlockProps>): JS
                                 </a>
 
                                 <ul className="space-y-4">
-                                    {plan.features.map((feature, i) => (
-                                        <li key={i} className={`flex items-start gap-3 text-sm ${feature.isHighlight ? 'text-white font-medium' : 'text-gray-300'}`}>
+                                    {plan.features.map((feature) => (
+                                        <li key={feature.text} className={`flex items-start gap-3 text-sm ${feature.isHighlight ? 'text-white font-medium' : 'text-gray-300'}`}>
                                             {feature.isHighlight ? <CheckCircle className="text-white mt-0.5 flex-shrink-0" size={16} /> : <Check className="text-white mt-0.5 flex-shrink-0" size={16} />}
                                             <span>
                                                 {feature.text}

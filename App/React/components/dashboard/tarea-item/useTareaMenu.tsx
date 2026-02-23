@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo} from 'react';
 import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Share2, Play, Square} from 'lucide-react';
-import type {Tarea, TareaHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea} from '../../../types/dashboard';
+import type {Tarea, TareaHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
 import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion} from '../../../config/opcionesMenuHabito';
 import type {OpcionMenu} from '../../shared/MenuContextual';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
@@ -23,7 +23,7 @@ interface UseTareaMenuProps {
     onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
     onPausarHabito?: (habitoId: number) => void;
-    onActualizarHabito?: (habitoId: number, datos: any) => void;
+    onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     habitoCompletadoHoy?: boolean;
     habitoPausado?: boolean;
     habitoPospuestoHoy?: boolean;

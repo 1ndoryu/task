@@ -1,4 +1,4 @@
-import type {Tarea, DatosEdicionTarea} from '../../../types/dashboard';
+import type {Tarea, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
 
 export interface TareaItemProps {
     tarea: Tarea;
@@ -30,7 +30,7 @@ export interface TareaItemProps {
     onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
     onPausarHabito?: (habitoId: number) => void;
-    onActualizarHabito?: (habitoId: number, datos: any) => void;
+    onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     /* Indica si la tarea hábito fue completada hoy (para menú contextual) */
     habitoCompletadoHoy?: boolean;
     /* Indica si el hábito está pausado (para menú contextual) */

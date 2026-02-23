@@ -47,7 +47,7 @@ export function useAdjuntosCifrados() {
 
             try {
                 /* Obtener nonce para autenticación */
-                const gloryData = (window as any).gloryDashboard;
+                const gloryData = window.gloryDashboard;
                 const nonce = gloryData?.nonce || '';
 
                 const response = await fetch(adjunto.url, {

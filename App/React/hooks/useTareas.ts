@@ -68,7 +68,7 @@ function registrarEventosCambios(tareaId: number, tareaAnterior: Tarea, datos: D
         } else if (teníaRepeticion && tieneRepeticion) {
             /* Cambió la frecuencia */
             const intervaloAnterior = repeticionAnterior?.intervalo || 0;
-            const intervaloNuevo = (repeticionNueva as any)?.intervalo || 0;
+            const intervaloNuevo = repeticionNueva?.intervalo || 0;
             if (intervaloAnterior !== intervaloNuevo) {
                 registrarEventoSistema('tarea', tareaId, 'repeticion', `cada ${intervaloAnterior}d → cada ${intervaloNuevo}d`);
             }

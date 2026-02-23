@@ -49,7 +49,7 @@ export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDet
                                 const tienePerdida = paso.comision !== undefined && paso.comision > 0;
 
                                 return (
-                                    <div key={index} className="pasoConversion">
+                                    <div key={paso.descripcion} className="pasoConversion">
                                         <div className="numeroPaso">{index + 1}</div>
                                         <div className="contenidoPaso">
                                             <span className="descripcionPaso">{paso.descripcion}</span>
