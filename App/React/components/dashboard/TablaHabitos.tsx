@@ -2,29 +2,22 @@
  * TablaHabitos
  * Componente para mostrar la tabla de hábitos prioritarios
  * Responsabilidad única: renderizar lista de hábitos con su estado
- * Tarea 0.5: BottomSheet para hábitos en móvil
+ * Lógica extraída a useTablaHabitos y useFilaHabito hooks
  */
 
-import {useState, useCallback, useMemo} from 'react';
-import {useMenuContextualConId} from '../../hooks/useMenuContextualGlobal';
-import {useEsMovil} from '../../hooks/useEsMovil';
+import {useMemo} from 'react';
 import {Clock, Flame, Target, Check, Pause, AlertTriangle, Play, Square} from 'lucide-react';
 import type {Habito} from '../../types/dashboard';
-import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
-import {tocaHoy, describirFrecuencia, obtenerIntervaloFrecuencia, calcularUmbralInactividad} from '../../utils/frecuenciaHabitos';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
 import {DashboardPanel} from '../shared/DashboardPanel';
 import {EstadoVacio} from '../shared/EstadoVacio';
 import {BadgeInfo, BadgeGroup} from '../shared/BadgeInfo';
 import {AccionesItem} from '../shared/AccionesItem';
-import type {VarianteBadge} from '../shared/BadgeInfo';
-import {ConfiguracionHabitos, CONFIG_HABITOS_POR_DEFECTO} from '../../hooks/useConfiguracionHabitos';
+import type {ConfiguracionHabitos} from '../../hooks/useConfiguracionHabitos';
+import {CONFIG_HABITOS_POR_DEFECTO} from '../../hooks/useConfiguracionHabitos';
 import {HistorialHabitoInline} from '../shared/HistorialHabito';
-import type {EstadoHabito} from '../../types/historialHabitos';
-import {obtenerFechaHoy} from '../../utils/fecha';
-import {generarOpcionesMenuHabito, MENU_HABITO_IDS, extraerImportanciaDeOpcion} from '../../config/opcionesMenuHabito';
-import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
-import {useShallow} from 'zustand/react/shallow';
+import {generarOpcionesMenuHabito} from '../../config/opcionesMenuHabito';
+import {useTablaHabitos, useFilaHabito} from '../../hooks/dashboard/useTablaHabitos';
 
 interface TablaHabitosProps {
     habitos: Habito[];
@@ -36,39 +29,8 @@ interface TablaHabitosProps {
     onPausarHabito?: (id: number) => void;
     onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
-    onActualizarHabito?: (id: number, datos: any) => void;
+    onActualizarHabito?: (id: number, datos: Partial<Habito>) => void;
     configuracion?: ConfiguracionHabitos;
-}
-
-function obtenerVariantePrioridad(importancia: Habito['importancia']): VarianteBadge {
-    switch (importancia) {
-        case 'Muy Alta':
-            return 'prioridadMuyAlta';
-        case 'Alta':
-            return 'prioridadAlta';
-        case 'Media':
-            return 'prioridadMedia';
-        case 'Baja':
-            return 'prioridadBaja';
-    }
-}
-
-/*
- * Determina si el habito fue completado hoy
- */
-function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean {
-    if (!ultimoCompletado) return false;
-    const hoy = obtenerFechaHoy();
-    return ultimoCompletado === hoy;
-}
-
-/*
- * Determina si el habito fue pospuesto hoy
- */
-function fuePospuestoHoy(historialPospuestos: string[] | undefined): boolean {
-    if (!historialPospuestos || historialPospuestos.length === 0) return false;
-    const hoy = obtenerFechaHoy();
-    return historialPospuestos.includes(hoy);
 }
 
 interface FilaHabitoProps {
@@ -81,94 +43,26 @@ interface FilaHabitoProps {
     onPausar?: (id: number) => void;
     onMarcarDia?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDia?: (habitoId: number, fecha: string) => void;
-    onActualizar?: (id: number, datos: any) => void;
+    onActualizar?: (id: number, datos: Partial<Habito>) => void;
     configuracion: ConfiguracionHabitos;
     estiloGrid: React.CSSProperties;
 }
 
-/* Interfaz MenuContextualEstado ya no es necesaria, usa hook global */
-
 function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
-    /* Advertencia de racha: mostrar cuando faltan pocos dias para perderla */
-    const DIAS_ADVERTENCIA_RACHA = 2;
+    const {
+        mostrarAcciones, setMostrarAcciones,
+        menuContextual,
+        frecuencia, esUrgente, porcentajeUrgencia,
+        completadoHoy, habitoTocaHoy, pospuestoHoy,
+        textoFrecuencia, intervaloFrecuencia,
+        rachaEnPeligro, rachaPerdida, diasAntesDePerder,
+        estaPausado, estaEnTracking,
+        historialParaComponente,
+        variantePrioridad, claseUrgencia,
+        manejarToggle, manejarEditar, manejarClickDerecho, manejarOpcionMenu
+    } = useFilaHabito({habito, onToggle, onEditar, onEliminar, onPosponer, onPausar, onActualizar});
 
-    /* Detectar viewport móvil para cambiar comportamiento de click */
-    const {esMovil} = useEsMovil();
-
-    /* Menú contextual coordinado globalmente - Solo un menú abierto a la vez */
-    const menuContextual = useMenuContextualConId(`habito-${habito.id}`);
-    const tracker = useTimeTrackerStore(useShallow(s => ({sesionActiva: s.sesionActiva, estado: s.estado, iniciarTracking: s.iniciarTracking, completarTracking: s.completarTracking})));
-    const [mostrarAcciones, setMostrarAcciones] = useState(false);
-
-    /* Frecuencia del habito */
-    const frecuencia = habito.frecuencia || FRECUENCIA_POR_DEFECTO;
-    const umbralInactividad = calcularUmbralInactividad(frecuencia);
-
-    /* Calculos basados en el umbral de la frecuencia */
-    const esUrgente = habito.diasInactividad > Math.floor(umbralInactividad * 0.4);
-    const porcentajeUrgencia = Math.min((habito.diasInactividad / umbralInactividad) * 100, 100);
-    const completadoHoy = fueCompletadoHoy(habito.ultimoCompletado);
-
-    const habitoTocaHoy = tocaHoy(frecuencia, habito.ultimoCompletado);
-    const pospuestoHoy = fuePospuestoHoy(habito.historialPospuestos);
-    const textoFrecuencia = describirFrecuencia(frecuencia);
-    const intervaloFrecuencia = obtenerIntervaloFrecuencia(frecuencia);
-
-    /* Logica de advertencia de racha */
-    const diasAntesDePerder = umbralInactividad - habito.diasInactividad;
-    const rachaEnPeligro = habito.racha > 0 && diasAntesDePerder <= DIAS_ADVERTENCIA_RACHA && diasAntesDePerder > 0;
-    const rachaPerdida = habito.diasInactividad > umbralInactividad;
-
-    /* Construir historial directamente desde los arrays del hábito */
-    const historialParaComponente = useMemo((): {[fecha: string]: EstadoHabito} => {
-        const resultado: {[fecha: string]: EstadoHabito} = {};
-
-        /* Marcar dias completados */
-        if (habito.historialCompletados) {
-            for (const fecha of habito.historialCompletados) {
-                resultado[fecha] = 'completado';
-            }
-        }
-
-        /* Marcar dias pospuestos (sobrescribe completados si hay conflicto) */
-        if (habito.historialPospuestos) {
-            for (const fecha of habito.historialPospuestos) {
-                resultado[fecha] = 'pospuesto';
-            }
-        }
-
-        return resultado;
-    }, [habito.historialCompletados, habito.historialPospuestos]);
-
-    const manejarToggle = useCallback(
-        (evento: React.MouseEvent) => {
-            evento.stopPropagation();
-            onToggle?.(habito.id);
-        },
-        [onToggle, habito.id]
-    );
-
-    const manejarEditar = useCallback(() => {
-        /* En móvil y desktop: abrir directamente el modal de edición del hábito */
-        onEditar?.(habito);
-    }, [onEditar, habito]);
-
-    /* Usa sistema global para coordinar cierres entre tareas y hábitos */
-    const manejarClickDerecho = useCallback(
-        (evento: React.MouseEvent) => {
-            evento.preventDefault();
-            evento.stopPropagation();
-            /* toggle: si el menú de este hábito ya está abierto, lo cierra; si no, lo abre (cerrando cualquier otro) */
-            menuContextual.toggle(evento.clientX, evento.clientY);
-        },
-        [menuContextual]
-    );
-
-    /* Detectar si este hábito está siendo trackeado */
-    const estaEnTracking = tracker.sesionActiva?.entidadId === habito.id && tracker.sesionActiva?.tipoEntidad === 'habito' && tracker.estado !== 'inactivo';
-
-    /* Usando configuración centralizada de menú para consistencia entre paneles */
-    const estaPausado = habito.pausado ?? false;
+    /* Opciones del menú contextual (requiere JSX, se mantiene en el componente) */
     const opcionesMenu = useMemo(() => {
         const base = generarOpcionesMenuHabito({
             completadoHoy,
@@ -177,9 +71,10 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
             pospuestoHoy
         });
 
-        /* Insertar opción de tracking antes de eliminar */
         const indiceEliminar = base.findIndex(o => o.id === 'eliminar');
-        const opcionTracking = estaEnTracking ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true} : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
+        const opcionTracking = estaEnTracking
+            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
+            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
 
         if (indiceEliminar >= 0) {
             base.splice(indiceEliminar, 0, opcionTracking);
@@ -189,57 +84,6 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 
         return base;
     }, [completadoHoy, estaPausado, onActualizar, pospuestoHoy, estaEnTracking]);
-
-    const manejarOpcionMenu = useCallback(
-        (opcionId: string) => {
-            /* Tracking de tiempo */
-            if (opcionId === 'iniciar-tracking') {
-                tracker.iniciarTracking(habito.id, 'habito', habito.nombre);
-                return;
-            }
-            if (opcionId === 'detener-tracking') {
-                tracker.completarTracking();
-                return;
-            }
-
-            switch (opcionId) {
-                case MENU_HABITO_IDS.CONFIGURAR:
-                case MENU_HABITO_IDS.EDITAR:
-                    onEditar?.(habito);
-                    break;
-                case MENU_HABITO_IDS.TOGGLE:
-                    onToggle?.(habito.id);
-                    break;
-                case MENU_HABITO_IDS.POSPONER:
-                    onPosponer?.(habito.id);
-                    break;
-                case MENU_HABITO_IDS.PAUSAR:
-                    onPausar?.(habito.id);
-                    break;
-                case MENU_HABITO_IDS.ELIMINAR:
-                    onEliminar?.(habito.id);
-                    break;
-            }
-            /* Manejar cambio de importancia */
-            const nuevaImportancia = extraerImportanciaDeOpcion(opcionId);
-            if (nuevaImportancia) {
-                onActualizar?.(habito.id, {
-                    ...habito,
-                    importancia: nuevaImportancia
-                });
-            }
-        },
-        [habito, onEditar, onToggle, onPosponer, onPausar, onEliminar, onActualizar, tracker]
-    );
-
-    /* Determinar clase de urgencia para la barra */
-    const obtenerClaseUrgencia = (): string => {
-        if (completadoHoy) return 'barraRellenoCompletado';
-        if (porcentajeUrgencia >= 80) return 'barraRellenoUrgenteCritico';
-        if (esUrgente) return 'barraRellenoUrgente';
-        if (porcentajeUrgencia >= 40) return 'barraRellenoAdvertencia';
-        return '';
-    };
 
     return (
         <>
@@ -284,7 +128,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                 {/* Prioridad */}
                 {configuracion.columnasVisibles.importancia && (
                     <div className="tablaColumnaPrioridad">
-                        <BadgeInfo tipo="prioridad" texto={habito.importancia.toUpperCase()} variante={obtenerVariantePrioridad(habito.importancia)} />
+                        <BadgeInfo tipo="prioridad" texto={habito.importancia.toUpperCase()} variante={variantePrioridad} />
                     </div>
                 )}
 
@@ -303,7 +147,7 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
                     <div className="tablaColumnaUrgencia">
                         <div className="urgenciaContenedor">
                             <div className="barraUrgenciaNueva">
-                                <div className={`barraRellenoNueva ${obtenerClaseUrgencia()}`} style={{width: `${porcentajeUrgencia}%`}}></div>
+                                <div className={`barraRellenoNueva ${claseUrgencia}`} style={{width: `${porcentajeUrgencia}%`}}></div>
                             </div>
                             <span className={`urgenciaPorcentaje ${esUrgente ? 'urgenciaPorcentajeAlto' : ''}`}>{Math.round(porcentajeUrgencia)}%</span>
                         </div>
@@ -333,40 +177,10 @@ function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer,
 }
 
 export function TablaHabitos({habitos, onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onPausarHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onActualizarHabito, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
-    /* Filtrar habitos segun configuracion */
-    const habitosVisibles = habitos.filter(habito => {
-        /* Ocultar habitos pausados (se muestran en seccion separada) */
-        if (habito.pausado) {
-            return false;
-        }
-        if (configuracion.ocultarCompletadosHoy && fueCompletadoHoy(habito.ultimoCompletado)) {
-            return false;
-        }
-        return true;
-    });
-
-    /* Habitos pausados para mostrar en seccion separada */
-    const habitosPausados = habitos.filter(habito => habito.pausado);
-
-    const obtenerGridTemplate = () => {
-        const widths = [];
-        if (configuracion.columnasVisibles.indice) widths.push('2rem');
-        /* Nombre siempre visible */
-        widths.push('3fr');
-        if (configuracion.columnasVisibles.historial) widths.push('auto');
-        if (configuracion.columnasVisibles.importancia) widths.push('1fr');
-        if (configuracion.columnasVisibles.inactividad) widths.push('1fr');
-        if (configuracion.columnasVisibles.urgencia) widths.push('2fr');
-        if (configuracion.columnasVisibles.racha) widths.push('1.5fr');
-        if (configuracion.columnasVisibles.acciones) widths.push('auto');
-        return widths.join(' ');
-    };
-
-    const estiloGrid = {gridTemplateColumns: obtenerGridTemplate()};
+    const {habitosVisibles, habitosPausados, estiloGrid} = useTablaHabitos(habitos, configuracion);
 
     return (
         <DashboardPanel id="tabla-habitos">
-            {/* Estado vacio cuando no hay habitos */}
             {habitos.length === 0 ? (
                 <EstadoVacio icono={<Target size={32} />} mensaje="No hay hábitos creados" textoBoton="+ Crear hábito" onAccion={onAñadirHabito} />
             ) : (

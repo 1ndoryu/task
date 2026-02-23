@@ -2,32 +2,22 @@
  * ListaTareas
  * Componente para mostrar la lista de tareas pendientes
  * Responsabilidad única: renderizar tareas con checkbox, input de creación, edición inline y acciones
+ * Lógica extraída a useListaTareas hook wrapper
  */
 
-import {useMemo, useCallback, useEffect} from 'react';
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
-import type {Tarea, DatosEdicionTarea, Proyecto, Participante} from '../../types/dashboard';
-import {esTareaHabito} from '../../types/dashboard';
+import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Proyecto, Participante} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
 import {InputNuevaTarea} from './InputNuevaTarea';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
 import {ModalMoverTarea} from './ModalMoverTarea';
 import {DashboardPanel} from '../shared/DashboardPanel';
 import {EstadoVacio} from '../shared/EstadoVacio';
-import {useMensajesNoLeidos} from '../../hooks/useMensajes';
-import {useSeleccionMultipleStore} from '../../stores/seleccionMultipleStore';
-import {useGruposTareasStore, useSeccionesActivas} from '../../stores/gruposTareasStore';
-import {useShallow} from 'zustand/react/shallow';
 import {MenuAccionesMasivas} from './lista-tareas/MenuAccionesMasivas';
 import {GrupoTareasHeader} from './lista-tareas/GrupoTareasHeader';
-
-// Hooks extraídos
-import {useListaTareasLogica} from '../../hooks/dashboard/useListaTareasLogica';
-import {useTareaOrdenamiento} from '../../hooks/dashboard/useTareaOrdenamiento';
-
-// Componentes extraídos
 import {TareaConColapsador} from './lista-tareas/TareaConColapsador';
+import {useListaTareas} from '../../hooks/dashboard/useListaTareas';
 
 interface ListaTareasProps {
     tareas: Tarea[];
@@ -52,7 +42,7 @@ interface ListaTareasProps {
     onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
     onPausarHabito?: (habitoId: number) => void;
-    onActualizarHabito?: (habitoId: number, datos: any) => void;
+    onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     modoCompacto?: boolean;
     onConfigurarTarea?: (tarea: Tarea) => void;
     /* Callback para abrir modal de creación rápida (usado en estado vacío y botón añadir) */
@@ -62,156 +52,29 @@ interface ListaTareasProps {
 }
 
 export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, ocultarSubtareasAutomaticamente = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear, ocultarPlaceholderVacio = false}: ListaTareasProps): JSX.Element {
-    /* Filtros básicos */
-    const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
-    const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
-
-    /* Selección múltiple de tareas - TAREA 3.1 */
-    const {tareasSeleccionadas, toggleSeleccion, estaSeleccionada, limpiarSeleccion, menuPosicion, mostrarMenu, ocultarMenu, modoSeleccionActivo} = useSeleccionMultipleStore(useShallow(s => ({tareasSeleccionadas: s.tareasSeleccionadas, toggleSeleccion: s.toggleSeleccion, estaSeleccionada: s.estaSeleccionada, limpiarSeleccion: s.limpiarSeleccion, menuPosicion: s.menuPosicion, mostrarMenu: s.mostrarMenu, ocultarMenu: s.ocultarMenu, modoSeleccionActivo: s.modoSeleccionActivo})));
-
-    /* Handler para Ctrl+Click en tareas */
-    const manejarSeleccionMultiple = useCallback(
-        (tarea: Tarea, evento: React.MouseEvent) => {
-            toggleSeleccion({id: tarea.id, texto: tarea.texto, proyectoId: tarea.proyectoId, prioridad: tarea.prioridad, esHabito: esTareaHabito(tarea), urgencia: tarea.urgencia});
-        },
-        [toggleSeleccion]
-    );
-
-    /* Handler para click derecho cuando hay selección múltiple */
-    const manejarClickDerechoLista = useCallback(
-        (evento: React.MouseEvent) => {
-            if (modoSeleccionActivo && tareasSeleccionadas.size > 0) {
-                evento.preventDefault();
-                mostrarMenu(evento.clientX, evento.clientY);
-            }
-        },
-        [modoSeleccionActivo, tareasSeleccionadas.size, mostrarMenu]
-    );
-
-    /* Efecto para limpiar selección al hacer click fuera de las tareas */
-    useEffect(() => {
-        if (!modoSeleccionActivo) return;
-
-        const manejarClickGlobal = (evento: MouseEvent) => {
-            const target = evento.target as HTMLElement;
-
-            /*
-             * No deseleccionar si:
-             * 1. Se están usando teclas de modificación (Ctrl, Cmd, Shift)
-             * 2. Se hace click sobre una tarea
-             * 3. Se hace click sobre el menú contextual o componentes de ingreso
-             * 4. Se hace click sobre cabeceras de grupo
-             */
-            if (evento.ctrlKey || evento.metaKey || evento.shiftKey || target.closest('.tareaItem') || target.closest('#menu-contextual') || target.closest('.tareaNuevoInline') || target.closest('.grupoTareasHeader')) {
-                return;
-            }
-
-            limpiarSeleccion();
-        };
-
-        /* Usamos mousedown para capturar el click antes de que otros elementos consuman el evento */
-        document.addEventListener('mousedown', manejarClickGlobal);
-        return () => document.removeEventListener('mousedown', manejarClickGlobal);
-    }, [modoSeleccionActivo, limpiarSeleccion]);
-
-    /* Sistema de grupos/secciones - TAREA 3 */
-    const seccionesActivas = useSeccionesActivas();
-    const {crearGrupo, obtenerGruposProyecto, ordenarGrupos, grupos} = useGruposTareasStore(useShallow(s => ({crearGrupo: s.crearGrupo, obtenerGruposProyecto: s.obtenerGruposProyecto, ordenarGrupos: s.ordenarGrupos, grupos: s.grupos})));
-
-    /* Obtener grupos del proyecto actual y organizar tareas */
-    const gruposOrdenados = useMemo(() => {
-        if (!seccionesActivas) return [];
-
-        const gruposDelProyecto = obtenerGruposProyecto(proyectoId);
-        if (gruposDelProyecto.length === 0) return [];
-
-        /* Crear mapa de tareas por grupo para calcular importancia promedio */
-        const tareasPorGrupo = new Map<number, Tarea[]>();
-        gruposDelProyecto.forEach(g => {
-            const tareasDelGrupo = tareas.filter(t => t.grupoId === g.id && !t.completado && !t.parentId);
-            tareasPorGrupo.set(g.id, tareasDelGrupo);
-        });
-
-        return ordenarGrupos(gruposDelProyecto, tareasPorGrupo);
-    }, [seccionesActivas, obtenerGruposProyecto, ordenarGrupos, proyectoId, tareas, grupos]);
-
-    /* Handler para agrupar tareas seleccionadas */
-    const manejarAgrupar = useCallback(
-        (ids: number[]) => {
-            if (ids.length === 0) return;
-
-            /* Crear nuevo grupo con nombre por defecto */
-            const grupo = crearGrupo('Nuevo grupo', proyectoId);
-
-            /* Asignar el grupoId a todas las tareas seleccionadas */
-            ids.forEach(id => {
-                onEditarTarea?.(id, {grupoId: grupo.id} as any);
-            });
-
-            limpiarSeleccion();
-        },
-        [crearGrupo, proyectoId, onEditarTarea, limpiarSeleccion]
-    );
-
-    /* Lógica Principal y Estado */
-    const {tareasExpandidas, setTareasExpandidas, tareaConfigurando, setTareaConfigurando, tareaMoviendo, setTareaMoviendo, toggleColapsar, abrirConfiguracion, guardarConfiguracion, handleIndent, handleOutdent, handleCrearNueva, handleMoverProyecto, obtenerSubtareasVisibles} = useListaTareasLogica({
-        tareas,
-        proyectoId,
-        onEditarTarea,
-        onCrearTarea,
-        onConfigurarTarea,
-        pendientes,
+    const {
+        pendientes, completadas,
+        estaSeleccionada, manejarSeleccionMultiple, manejarClickDerechoLista,
+        modoSeleccionActivo, menuPosicion, ocultarMenu, limpiarSeleccion,
+        seccionesActivas, gruposOrdenados, manejarAgrupar,
+        tareaConfigurando, setTareaConfigurando,
+        tareaMoviendo, setTareaMoviendo,
+        toggleColapsar, abrirConfiguracion, guardarConfiguracion,
+        handleIndent, handleOutdent, handleCrearNueva,
+        handleMoverProyecto, obtenerSubtareasVisibles,
+        tareaArrastrandoId, esGestoSubtarea, setEsGestoSubtarea,
+        dragStartXRef, dragCurrentXRef,
+        handleDragStart, handleDragEnd, handleReorder,
+        UMBRAL_INDENT,
+        tareasPrincipalesPendientes, tareasHabitoPendientes,
+        tareasSinGrupo, tareasPorGrupo,
+        mensajesNoLeidosPorTarea,
+        crearTareaConProyecto
+    } = useListaTareas({
+        tareas, proyectoId, onEditarTarea, onCrearTarea, onEliminarTarea,
+        onReordenarTareas, onConfigurarTarea, onToggleTarea,
         ocultarSubtareasAutomaticamente
     });
-
-    /* Lógica de Ordenamiento (Drag & Drop) */
-    const {tareaArrastrandoId, esGestoSubtarea, setEsGestoSubtarea, dragStartXRef, dragCurrentXRef, handleDragStart, handleDragEnd, handleReorder, UMBRAL_INDENT} = useTareaOrdenamiento({
-        tareas,
-        pendientes,
-        completadas,
-        onReordenarTareas,
-        onEditarTarea,
-        setTareasExpandidas
-    });
-
-    /* Datos calculados */
-    const tareasPrincipalesPendientes = useMemo(() => pendientes.filter(t => !t.parentId && !esTareaHabito(t)), [pendientes]);
-    const tareasHabitoPendientes = useMemo(() => pendientes.filter(t => esTareaHabito(t)), [pendientes]);
-
-    /* Separar tareas en grupos y sin grupo (cuando secciones está activo) */
-    const {tareasSinGrupo, tareasPorGrupo} = useMemo(() => {
-        if (!seccionesActivas || gruposOrdenados.length === 0) {
-            return {tareasSinGrupo: tareasPrincipalesPendientes, tareasPorGrupo: new Map<number, Tarea[]>()};
-        }
-
-        const sinGrupo: Tarea[] = [];
-        const porGrupo = new Map<number, Tarea[]>();
-
-        /* Inicializar mapa con arrays vacíos para cada grupo */
-        gruposOrdenados.forEach(g => porGrupo.set(g.id, []));
-
-        tareasPrincipalesPendientes.forEach(tarea => {
-            if (tarea.grupoId && porGrupo.has(tarea.grupoId)) {
-                porGrupo.get(tarea.grupoId)!.push(tarea);
-            } else {
-                sinGrupo.push(tarea);
-            }
-        });
-
-        return {tareasSinGrupo: sinGrupo, tareasPorGrupo: porGrupo};
-    }, [seccionesActivas, gruposOrdenados, tareasPrincipalesPendientes]);
-
-    // Mensajes no leídos
-    const tareasIdsReales = useMemo(() => tareas.filter(t => t.id > 0).map(t => t.id), [tareas]);
-    const {noLeidos: mensajesNoLeidosPorTarea} = useMensajesNoLeidos('tarea', tareasIdsReales);
-
-    /* Wrapper para crear tarea con proyecto */
-    const crearTareaConProyecto = (datos: DatosEdicionTarea) => {
-        onCrearTarea?.({
-            ...datos,
-            proyectoId: proyectoId
-        });
-    };
 
     /* Renderizado de Tarea Individual (Wrapper común) */
     const renderTareaItem = (tarea: Tarea, esSubtarea: boolean) => (
@@ -385,7 +248,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                     proyectos={proyectos}
                     onCambiarProyecto={nuevoProyectoId => {
                         if (onEditarTarea) {
-                            onEditarTarea(tareaConfigurando.id, {proyectoId: nuevoProyectoId, parentId: undefined} as any);
+                            onEditarTarea(tareaConfigurando.id, {proyectoId: nuevoProyectoId, parentId: undefined});
                         }
                     }}
                     onToggleCompletado={completado => {
@@ -418,7 +281,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                         limpiarSeleccion();
                     }}
                     onMoverProyecto={(ids, proyectoId) => {
-                        ids.forEach(id => onEditarTarea?.(id, {proyectoId} as any));
+                        ids.forEach(id => onEditarTarea?.(id, {proyectoId}));
                         limpiarSeleccion();
                     }}
                     onAgrupar={seccionesActivas ? manejarAgrupar : undefined}
