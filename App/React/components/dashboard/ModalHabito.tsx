@@ -9,21 +9,16 @@
  * - Fase 14.8: Soporte para tareas/metas del habito
  * - SubHabitos: Hábitos anidados con frecuencia e importancia independiente
  * - TAREA 4: Ventana de oportunidad para hábitos
+ * - Lógica extraída a useModalHabito hook
  */
 
-import {useState, useCallback, useEffect, useMemo} from 'react';
 import {Activity, BarChart2} from 'lucide-react';
-import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito, VentanaOportunidad} from '../../types/dashboard';
-import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
+import type {DatosNuevoHabito, Habito, Participante, Tarea, DatosEdicionTarea} from '../../types/dashboard';
 import {AccionesFormulario, Modal} from '../shared';
 import {Boton} from '../ui';
-import type {EstadoHabito} from '../shared';
 import {FormularioHabitoModerno} from './habitos/FormularioHabitoModerno';
 import {PanelChatHistorial} from './PanelChatHistorial';
-import {usePanelChat} from '../../hooks/usePanelChat';
-import {useHabitosStore} from '../../stores/habitosStore';
-import {usePluginsStore} from '../../stores/pluginsStore';
-import {obtenerFechaHoy} from '../../utils/fecha';
+import {useModalHabito} from '../../hooks/dashboard/useModalHabito';
 
 type DatosFormulario = DatosNuevoHabito;
 
@@ -45,195 +40,17 @@ interface ModalHabitoProps {
 }
 
 export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = [], tareas = [], onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito, onEditarTarea}: ModalHabitoProps): JSX.Element | null {
-    const modoEdicion = !!habito;
-
-    const habitoAyunoId = usePluginsStore(s => (s.configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined)?.habitoId);
-    const esHabitoEspecialAyuno = !!(habito && habitoAyunoId && habito.id === habitoAyunoId);
-
-    /* Estado local para edicion */
-    const [nombre, setNombre] = useState(habito?.nombre || '');
-    const [descripcion, setDescripcion] = useState(habito?.descripcion || '');
-    const [icono, setIcono] = useState(habito?.icono || 'check-circle');
-    const [colorIcono, setColorIcono] = useState(habito?.colorIcono || '#888888');
-    const [importancia, setImportancia] = useState<NivelImportancia>(habito?.importancia || 'Media');
-    const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(habito?.frecuencia || FRECUENCIA_POR_DEFECTO);
-    const [ventanaOportunidad, setVentanaOportunidad] = useState<VentanaOportunidad | undefined>(habito?.ventanaOportunidad);
-    const [errores, setErrores] = useState<{nombre?: string}>({});
-
-    /* Removido: Estado de pestañas móvil (código muerto - Fase 10.8.6) */
-
-    /* Hook para panel de chat */
-    const {chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna} = usePanelChat({
-        elementoId: habito?.id,
-        elementoTipo: 'habito',
-        participantes,
-        habilitado: modoEdicion
-    });
-
-    /* Estado de cumplimiento de hoy y acciones del store */
-    const toggleHabito = useHabitosStore(state => state.toggleHabito);
-    const posponerHabito = useHabitosStore(state => state.posponerHabito);
-    const crearSubHabito = useHabitosStore(state => state.crearSubHabito);
-    const editarSubHabito = useHabitosStore(state => state.editarSubHabito);
-    const eliminarSubHabito = useHabitosStore(state => state.eliminarSubHabito);
-    const toggleSubHabito = useHabitosStore(state => state.toggleSubHabito);
-    const hoy = obtenerFechaHoy();
-
-    let estadoHoy: EstadoHabito = 'pendiente';
-    if (habito) {
-        if (habito.historialCompletados?.includes(hoy)) estadoHoy = 'completado';
-        else if (habito.historialPospuestos?.includes(hoy)) estadoHoy = 'pospuesto';
-    }
-
-    /* Callbacks para subhábitos */
-    const manejarCrearSubHabito = useCallback(
-        (datos: DatosNuevoSubHabito) => {
-            if (habito) {
-                crearSubHabito(habito.id, datos);
-            }
-        },
-        [habito, crearSubHabito]
-    );
-
-    const manejarEditarSubHabito = useCallback(
-        (subHabitoId: number, datos: DatosNuevoSubHabito) => {
-            if (habito) {
-                editarSubHabito(habito.id, subHabitoId, datos);
-            }
-        },
-        [habito, editarSubHabito]
-    );
-
-    const manejarEliminarSubHabito = useCallback(
-        (subHabitoId: number) => {
-            if (habito) {
-                eliminarSubHabito(habito.id, subHabitoId);
-            }
-        },
-        [habito, eliminarSubHabito]
-    );
-
-    const manejarToggleSubHabito = useCallback(
-        (subHabitoId: number) => {
-            if (habito) {
-                toggleSubHabito(habito.id, subHabitoId);
-            }
-        },
-        [habito, toggleSubHabito]
-    );
-
-    /*
-     * Filtrar tareas que pertenecen a este hábito
-     * Las tareas se ordenan según tareasIds del hábito, o por orden de creación si no hay orden definido
-     */
-    const tareasDelHabito = useMemo(() => {
-        if (!habito) return [];
-        const tareasHabito = tareas.filter(t => t.habitoId === habito.id);
-
-        /* Si el hábito tiene orden definido, usarlo */
-        if (habito.tareasIds && habito.tareasIds.length > 0) {
-            const ordenMap = new Map(habito.tareasIds.map((id, index) => [id, index]));
-            return [...tareasHabito].sort((a, b) => {
-                const ordenA = ordenMap.get(a.id) ?? 999;
-                const ordenB = ordenMap.get(b.id) ?? 999;
-                return ordenA - ordenB;
-            });
-        }
-
-        /* Si no hay orden, ordenar por fecha de creación */
-        return tareasHabito;
-    }, [habito, tareas]);
-
-    /* Sincronizar estado cuando cambia el habito */
-    useEffect(() => {
-        if (habito) {
-            setNombre(habito.nombre);
-            setDescripcion(habito.descripcion || '');
-            setIcono(habito.icono || 'check-circle');
-            setColorIcono(habito.colorIcono || '#888888');
-            setImportancia(habito.importancia);
-            setFrecuencia(habito.frecuencia || FRECUENCIA_POR_DEFECTO);
-            setVentanaOportunidad(habito.ventanaOportunidad);
-        } else {
-            setNombre('');
-            setDescripcion('');
-            setIcono('check-circle');
-            setColorIcono('#888888');
-            setImportancia('Media');
-            setFrecuencia(FRECUENCIA_POR_DEFECTO);
-            setVentanaOportunidad(undefined);
-        }
-        setErrores({});
-    }, [habito?.id, estaAbierto]);
-
-    /* Manejador de cambio de estado del habito */
-    const manejarCambioEstado = useCallback(
-        (nuevoEstado: EstadoHabito) => {
-            if (!habito) return;
-
-            if (nuevoEstado === 'completado') {
-                toggleHabito(habito.id);
-            } else if (nuevoEstado === 'pospuesto') {
-                posponerHabito(habito.id);
-            } else if (nuevoEstado === 'pendiente') {
-                if (estadoHoy === 'completado') toggleHabito(habito.id);
-                else if (estadoHoy === 'pospuesto') posponerHabito(habito.id);
-            }
-        },
-        [habito, estadoHoy, toggleHabito, posponerHabito]
-    );
-
-    /* Validar formulario */
-    const validarFormulario = useCallback((): boolean => {
-        const nuevosErrores: {nombre?: string} = {};
-
-        if (!nombre.trim()) {
-            nuevosErrores.nombre = 'El nombre es obligatorio';
-        } else if (nombre.trim().length < 3) {
-            nuevosErrores.nombre = 'El nombre debe tener al menos 3 caracteres';
-        }
-
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
-    }, [nombre]);
-
-    /* Guardar habito */
-    const manejarGuardar = useCallback(() => {
-        if (!validarFormulario()) return;
-
-        const nombreSeguro = esHabitoEspecialAyuno ? 'Ayuno' : nombre.trim();
-
-        onGuardar({
-            nombre: nombreSeguro,
-            importancia,
-            tags: [] /* Tags deprecados por ahora */,
-            frecuencia,
-            descripcion: descripcion.trim() || undefined,
-            icono,
-            colorIcono,
-            ventanaOportunidad
-        });
-        onCerrar();
-    }, [nombre, importancia, frecuencia, ventanaOportunidad, validarFormulario, onGuardar, onCerrar, esHabitoEspecialAyuno]);
-
-    /* Auto-guardado: al cerrar el modal, guardar si hay nombre válido */
-    const manejarCerrarConGuardado = useCallback(() => {
-        if (nombre.trim().length >= 3) {
-            manejarGuardar();
-        } else {
-            onCerrar();
-        }
-    }, [nombre, manejarGuardar, onCerrar]);
-
-    /* Callback para reordenar tareas del hábito */
-    const manejarReordenarTareas = useCallback(
-        (tareasIds: number[]) => {
-            if (habito && onActualizarOrdenTareasHabito) {
-                onActualizarOrdenTareasHabito(habito.id, tareasIds);
-            }
-        },
-        [habito, onActualizarOrdenTareasHabito]
-    );
+    const {
+        modoEdicion, nombre, setNombre, descripcion, setDescripcion,
+        icono, setIcono, colorIcono, setColorIcono,
+        importancia, setImportancia, frecuencia, setFrecuencia,
+        ventanaOportunidad, setVentanaOportunidad, errores, esHabitoEspecialAyuno,
+        estadoHoy, manejarCambioEstado,
+        chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna,
+        tareasDelHabito, manejarReordenarTareas,
+        manejarCrearSubHabito, manejarEliminarSubHabito, manejarToggleSubHabito,
+        manejarGuardar, manejarCerrarConGuardado, manejarPausarHabito
+    } = useModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes, tareas, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito, onEditarTarea});
 
     /* Header Icons (similar a ModalProyecto) */
     const accionesHeader = modoEdicion ? (
@@ -288,7 +105,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onVentanaOportunidadChange={esHabitoEspecialAyuno ? undefined : setVentanaOportunidad}
                                     estadoHoy={estadoHoy}
                                     onEstadoChange={esHabitoEspecialAyuno ? undefined : manejarCambioEstado}
-                                    onPausarHabito={habito && onPausarHabito ? () => onPausarHabito(habito.id) : undefined}
+                                    onPausarHabito={manejarPausarHabito}
                                     habito={habito}
                                     modoEdicion={true}
                                     errorNombre={errores.nombre}

@@ -2,12 +2,13 @@
  * ModalFeedback
  * Modal para que usuarios Premium envíen comentarios/sugerencias
  * Límite: 3 comentarios por día
+ * Lógica extraída a useModalFeedback hook
  */
 
-import {useState, useEffect} from 'react';
 import {MessageSquare, Send, AlertCircle, CheckCircle, Loader2} from 'lucide-react';
 import {Modal} from './Modal';
 import {Boton, Textarea} from '../ui';
+import {useModalFeedback} from '../../hooks/dashboard/useModalFeedback';
 
 interface ModalFeedbackProps {
     estaAbierto: boolean;
@@ -16,105 +17,14 @@ interface ModalFeedbackProps {
 
 type TipoFeedback = 'sugerencia' | 'bug' | 'otro';
 
-interface EstadoFeedback {
-    restante: number;
-    esPremium: boolean;
-    cargando: boolean;
-}
-
 const TIPOS_FEEDBACK: {valor: TipoFeedback; etiqueta: string; icono: string}[] = [
     {valor: 'sugerencia', etiqueta: 'Sugerencia', icono: '💡'},
     {valor: 'bug', etiqueta: 'Reportar problema', icono: '🐛'},
     {valor: 'otro', etiqueta: 'Otro', icono: '💬'}
 ];
 
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
-}
-
 export function ModalFeedback({estaAbierto, onCerrar}: ModalFeedbackProps): JSX.Element | null {
-    /* Nota: usamos el estado desde el servidor (estado.esPremium) para verificar premium, 
-       ya que el endpoint /feedback/restante lo valida con la BD actualizada */
-    const [tipo, setTipo] = useState<TipoFeedback>('sugerencia');
-    const [mensaje, setMensaje] = useState('');
-    const [estado, setEstado] = useState<EstadoFeedback>({restante: 3, esPremium: false, cargando: true});
-    const [enviando, setEnviando] = useState(false);
-    const [resultado, setResultado] = useState<{exito: boolean; mensaje: string} | null>(null);
-
-    /* Cargar estado de comentarios restantes */
-    useEffect(() => {
-        if (estaAbierto) {
-            cargarEstado();
-        }
-    }, [estaAbierto]);
-
-    const cargarEstado = async () => {
-        setEstado(prev => ({...prev, cargando: true}));
-        try {
-            const response = await fetch('/wp-json/glory/v1/feedback/restante', {
-                credentials: 'include',
-                headers: {'X-WP-Nonce': obtenerNonce()}
-            });
-            const data = await response.json();
-            if (data.success) {
-                setEstado({
-                    restante: data.restante,
-                    esPremium: data.esPremium,
-                    cargando: false
-                });
-            }
-        } catch {
-            setEstado(prev => ({...prev, cargando: false}));
-        }
-    };
-
-    const enviarFeedback = async () => {
-        if (!mensaje.trim() || mensaje.length < 10) {
-            setResultado({exito: false, mensaje: 'El mensaje debe tener al menos 10 caracteres'});
-            return;
-        }
-
-        setEnviando(true);
-        setResultado(null);
-
-        try {
-            const response = await fetch('/wp-json/glory/v1/feedback', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': obtenerNonce()
-                },
-                body: JSON.stringify({tipo, mensaje})
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setResultado({exito: true, mensaje: data.mensaje});
-                setMensaje('');
-                setEstado(prev => ({...prev, restante: data.restante}));
-                /* Cerrar automáticamente después de éxito */
-                setTimeout(() => {
-                    onCerrar();
-                    setResultado(null);
-                }, 2000);
-            } else {
-                setResultado({exito: false, mensaje: data.error || 'Error al enviar'});
-            }
-        } catch {
-            setResultado({exito: false, mensaje: 'Error de conexión'});
-        } finally {
-            setEnviando(false);
-        }
-    };
-
-    const manejarTecla = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && e.ctrlKey && !enviando && estado.restante > 0) {
-            enviarFeedback();
-        }
-    };
+    const {tipo, setTipo, mensaje, setMensaje, estado, enviando, resultado, enviarFeedback, manejarTecla} = useModalFeedback({estaAbierto, onCerrar});
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Enviar Comentarios" claseExtra="modalFeedback">

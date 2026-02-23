@@ -1,165 +1,22 @@
 /*
  * ModalPerfil.tsx
  * Modal para editar el perfil del usuario
+ * Lógica extraída a useModalPerfil hook
  */
 
-import {useState, useEffect, useRef} from 'react';
-import {Camera, Save, X} from 'lucide-react';
+import {Camera, Save} from 'lucide-react';
 import {Modal} from '../shared/Modal';
-import {useAuth} from '../../hooks/useAuth';
 import {IndicadorAlmacenamiento} from '../shared/IndicadorAlmacenamiento';
 import {Input, Textarea} from '../ui';
-// Importamos los estilos registrandolos en index.css, pero definimos clases aqui
-// Se asume que perfil.css ya esta importado globalmente
+import {useModalPerfil} from '../../hooks/dashboard/useModalPerfil';
 
 interface ModalPerfilProps {
     estaAbierto: boolean;
     onCerrar: () => void;
 }
 
-interface DatosPerfil {
-    nombre: string;
-    descripcion: string;
-    avatarUrl: string;
-    passwordActual: string;
-    passwordNueva: string;
-    passwordConfirmar: string;
-}
-
 export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Element {
-    const {user} = useAuth();
-    const [cargando, setCargando] = useState(false);
-    const [mensaje, setMensaje] = useState<{tipo: 'exito' | 'error'; texto: string} | null>(null);
-
-    // Estado del formulario
-    const [datos, setDatos] = useState<DatosPerfil>({
-        nombre: user?.name || '',
-        descripcion: 'Usuario del Dashboard', // TODO: Traer de backend
-        avatarUrl: '', // TODO: Traer de backend
-        passwordActual: '',
-        passwordNueva: '',
-        passwordConfirmar: ''
-    });
-
-    // Referencia para input de archivo
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    /* Actualizar datos cuando cambia el user */
-    useEffect(() => {
-        if (user && estaAbierto) {
-            setDatos(prev => ({
-                ...prev,
-                nombre: user.name,
-                descripcion: user.description || '',
-                avatarUrl: user.avatarUrl || ''
-            }));
-        }
-    }, [user, estaAbierto]);
-
-    const handleChange = (campo: keyof DatosPerfil, valor: string) => {
-        setDatos(prev => ({...prev, [campo]: valor}));
-        // Limpiar mensajes al editar
-        if (mensaje) setMensaje(null);
-    };
-
-    const handleAvatarClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            // Validar tamano (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                setMensaje({tipo: 'error', texto: 'La imagen no debe superar los 2MB'});
-                // Limpiar input
-                if (fileInputRef.current) fileInputRef.current.value = '';
-                return;
-            }
-
-            // Preview local
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setDatos(prev => ({...prev, avatarUrl: reader.result as string}));
-                setMensaje(null); // Limpiar mensaje de error si hubo
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSubmit = async () => {
-        // Validaciones basicas
-        if (!datos.nombre.trim()) {
-            setMensaje({tipo: 'error', texto: 'El nombre es obligatorio'});
-            return;
-        }
-
-        if (datos.passwordNueva) {
-            if (datos.passwordNueva !== datos.passwordConfirmar) {
-                setMensaje({tipo: 'error', texto: 'Las contraseñas nuevas no coinciden'});
-                return;
-            }
-            if (!datos.passwordActual) {
-                setMensaje({tipo: 'error', texto: 'Debes ingresar tu contraseña actual para cambiarla'});
-                return;
-            }
-        }
-
-        setCargando(true);
-        setMensaje(null);
-
-        try {
-            // Obtener nonce global de WP
-            const nonce = (window as any).gloryDashboard?.nonce;
-            if (!nonce) {
-                throw new Error('Error de autenticación: No se encontró nonce');
-            }
-
-            const payload = {
-                nombre: datos.nombre,
-                descripcion: datos.descripcion,
-                passwordActual: datos.passwordActual,
-                passwordNueva: datos.passwordNueva,
-                avatar: datos.avatarUrl // Envia data:image base64
-            };
-
-            const response = await fetch('/wp-json/glory/v1/perfil', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': nonce
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al actualizar perfil');
-            }
-
-            setMensaje({tipo: 'exito', texto: data.message || 'Perfil actualizado correctamente'});
-
-            /* Recargar la página para actualizar los datos del usuario en WP */
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-
-            // Limpiar passwords
-            setDatos(prev => ({
-                ...prev,
-                passwordActual: '',
-                passwordNueva: '',
-                passwordConfirmar: ''
-            }));
-        } catch (error) {
-            console.error(error);
-            const msg = error instanceof Error ? error.message : 'Error desconocido al actualizar perfil';
-            setMensaje({tipo: 'error', texto: msg});
-        } finally {
-            setCargando(false);
-        }
-    };
+    const {datos, cargando, mensaje, fileInputRef, handleChange, handleAvatarClick, handleFileChange, handleSubmit} = useModalPerfil({estaAbierto, onCerrar});
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Mi Perfil">

@@ -3,16 +3,15 @@
  *
  * Modal principal para el sistema de equipos.
  * Contiene pestañas para: Solicitudes recibidas, Enviadas y Compañeros.
+ * Lógica extraída a useModalEquipos hook
  */
 
-import {useEffect, useState} from 'react';
 import {Modal} from '../shared/Modal';
 import {Boton} from '../ui/Boton';
 import {FormularioSolicitud} from './FormularioSolicitud';
 import {ListaSolicitudes} from './ListaSolicitudes';
 import {ListaCompaneros} from './ListaCompaneros';
-import {useEquipos} from '../../hooks/useEquipos';
-import {useAlertas} from '../../hooks/useAlertas';
+import {useModalEquipos} from '../../hooks/dashboard/useModalEquipos';
 import '../../styles/dashboard/componentes/equipos.css';
 
 interface ModalEquiposProps {
@@ -20,63 +19,8 @@ interface ModalEquiposProps {
     onCerrar: () => void;
 }
 
-type PestanaEquipos = 'recibidas' | 'enviadas' | 'companeros';
-
 export function ModalEquipos({estaAbierto, onCerrar}: ModalEquiposProps): JSX.Element | null {
-    const equipos = useEquipos();
-    const {mostrarExito, mostrarError} = useAlertas();
-    const [pestanaActiva, setPestanaActiva] = useState<PestanaEquipos>('companeros');
-
-    /* Cargar datos al abrir el modal */
-    useEffect(() => {
-        if (estaAbierto) {
-            equipos.cargarEquipo();
-        }
-    }, [estaAbierto]);
-
-    /* Si hay solicitudes pendientes, mostrar esa pestaña */
-    useEffect(() => {
-        if (estaAbierto && equipos.contadores.recibidas > 0) {
-            setPestanaActiva('recibidas');
-        }
-    }, [estaAbierto, equipos.contadores.recibidas]);
-
-    const manejarEnviarSolicitud = async (email: string) => {
-        const resultado = await equipos.enviarSolicitud(email);
-        if (resultado.exito) {
-            mostrarExito(resultado.mensaje);
-            setPestanaActiva('enviadas');
-        } else {
-            mostrarError(resultado.mensaje);
-        }
-    };
-
-    const manejarAceptar = async (id: number) => {
-        const resultado = await equipos.aceptarSolicitud(id);
-        if (resultado.exito) {
-            mostrarExito(resultado.mensaje);
-        } else {
-            mostrarError(resultado.mensaje);
-        }
-    };
-
-    const manejarRechazar = async (id: number) => {
-        const resultado = await equipos.rechazarSolicitud(id);
-        if (resultado.exito) {
-            mostrarExito(resultado.mensaje);
-        } else {
-            mostrarError(resultado.mensaje);
-        }
-    };
-
-    const manejarEliminar = async (id: number) => {
-        const resultado = await equipos.eliminarConexion(id);
-        if (resultado.exito) {
-            mostrarExito(resultado.mensaje);
-        } else {
-            mostrarError(resultado.mensaje);
-        }
-    };
+    const {equipos, pestanaActiva, setPestanaActiva, manejarEnviarSolicitud, manejarAceptar, manejarRechazar, manejarEliminar} = useModalEquipos({estaAbierto});
 
     const renderizarContenido = () => {
         if (equipos.cargando) {

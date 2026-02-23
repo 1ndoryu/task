@@ -2,15 +2,16 @@
  * ModalCompartir
  * Modal para compartir un elemento (tarea, proyecto o hábito)
  * con miembros del equipo
+ * Lógica extraída a useModalCompartir hook
  */
 
-import {useState, useCallback, useEffect} from 'react';
 import {Share2, AlertTriangle, UserPlus, Users, Loader2} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {Boton} from '../ui';
 import {SelectorCompaneros} from './SelectorCompaneros';
 import {ListaParticipantes} from './ListaParticipantes';
 import type {TipoElementoCompartido, RolCompartido, CompaneroEquipo, Participante} from '../../types/dashboard';
+import {useModalCompartir} from '../../hooks/dashboard/useModalCompartir';
 
 interface ModalCompartirProps {
     visible: boolean;
@@ -28,73 +29,13 @@ interface ModalCompartirProps {
 }
 
 export function ModalCompartir({visible, onCerrar, tipo, elementoId, elementoNombre, companeros, participantes, cifradoActivo = false, onCompartir, onCambiarRol, onDejarDeCompartir, cargandoParticipantes = false}: ModalCompartirProps): JSX.Element | null {
-    const [companeroSeleccionado, setCompaneroSeleccionado] = useState<number | null>(null);
-    const [rolSeleccionado, setRolSeleccionado] = useState<RolCompartido>('colaborador');
-    const [compartiendo, setCompartiendo] = useState(false);
-    const [mostroAdvertencia, setMostroAdvertencia] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    /* Obtener texto del tipo */
-    const tipoTexto = tipo === 'tarea' ? 'tarea' : tipo === 'proyecto' ? 'proyecto' : 'hábito';
-    const tipoTextoMayus = tipo === 'tarea' ? 'Tarea' : tipo === 'proyecto' ? 'Proyecto' : 'Hábito';
-
-    /* Filtrar compañeros que ya tienen acceso */
-    const companerosDisponibles = companeros.filter(c => !participantes.some(p => p.usuarioId === c.companeroId));
-
-    /* Determinar si soy el propietario */
-    const esPropietario = participantes.some(p => p.esPropietario && p.usuarioId === participantes[0]?.usuarioId);
-
-    /* Limpiar estado al cerrar */
-    useEffect(() => {
-        if (!visible) {
-            setCompaneroSeleccionado(null);
-            setRolSeleccionado('colaborador');
-            setMostroAdvertencia(false);
-            setError(null);
-        }
-    }, [visible]);
-
-    /* Manejar compartir */
-    const manejarCompartir = useCallback(async () => {
-        if (!companeroSeleccionado) return;
-
-        /* Si hay cifrado activo y no se ha mostrado advertencia */
-        if (cifradoActivo && !mostroAdvertencia) {
-            setMostroAdvertencia(true);
-            return;
-        }
-
-        setError(null);
-        setCompartiendo(true);
-
-        const exito = await onCompartir(companeroSeleccionado, rolSeleccionado);
-
-        setCompartiendo(false);
-
-        if (exito) {
-            setCompaneroSeleccionado(null);
-            setRolSeleccionado('colaborador');
-            setMostroAdvertencia(false);
-        } else {
-            setError('Error al compartir. Por favor, intenta de nuevo.');
-        }
-    }, [companeroSeleccionado, rolSeleccionado, cifradoActivo, mostroAdvertencia, onCompartir]);
-
-    /* Manejar cambio de rol */
-    const manejarCambioRol = useCallback(
-        async (compartidoId: number, nuevoRol: RolCompartido) => {
-            await onCambiarRol(compartidoId, nuevoRol);
-        },
-        [onCambiarRol]
-    );
-
-    /* Manejar eliminar participante */
-    const manejarEliminar = useCallback(
-        async (compartidoId: number) => {
-            await onDejarDeCompartir(compartidoId);
-        },
-        [onDejarDeCompartir]
-    );
+    const {
+        companeroSeleccionado, setCompaneroSeleccionado,
+        rolSeleccionado, setRolSeleccionado,
+        compartiendo, error, mostroAdvertencia,
+        tipoTexto, tipoTextoMayus, companerosDisponibles, esPropietario,
+        manejarCompartir, manejarCambioRol, manejarEliminar
+    } = useModalCompartir({visible, tipo, companeros, participantes, cifradoActivo, onCompartir, onCambiarRol, onDejarDeCompartir});
 
     if (!visible) return null;
 

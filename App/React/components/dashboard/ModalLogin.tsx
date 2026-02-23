@@ -1,9 +1,16 @@
-import React, {useState} from 'react';
+/*
+ * ModalLogin
+ * Modal de inicio de sesión / registro / recuperación de contraseña
+ * Lógica extraída a useModalLogin hook
+ */
+
+
 import {Modal} from '../shared/Modal';
 import {CampoTexto} from '../shared/CampoTexto';
 import {Boton} from '../ui';
 import {Chrome, LogIn} from 'lucide-react';
 import '../../styles/dashboard/componentes/modalLogin.css';
+import {useModalLogin} from '../../hooks/dashboard/useModalLogin';
 
 interface ModalLoginProps {
     estaAbierto: boolean;
@@ -18,50 +25,13 @@ interface ModalLoginProps {
 }
 
 export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredentials, onRegister, loading, error, overlayOpaco = false}: ModalLoginProps): JSX.Element {
-    const [modo, setModo] = useState<'login' | 'registro' | 'recuperar'>('login');
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [emailRecuperar, setEmailRecuperar] = useState('');
-    const [recuperarLoading, setRecuperarLoading] = useState(false);
-    const [recuperarMensaje, setRecuperarMensaje] = useState<{tipo: 'exito' | 'error'; texto: string} | null>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!username || !password) return;
-
-        if (modo === 'registro') {
-            if (!email) return;
-            await onRegister(username, email, password);
-        } else {
-            await onLoginCredentials(username, password);
-        }
-    };
-
-    const handleRecuperar = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!emailRecuperar) return;
-
-        setRecuperarLoading(true);
-        setRecuperarMensaje(null);
-
-        try {
-            const response = await fetch('/wp-json/glory/v1/auth/recuperar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: emailRecuperar})
-            });
-            const data = await response.json();
-            setRecuperarMensaje({tipo: 'exito', texto: data.message});
-            setEmailRecuperar('');
-        } catch {
-            setRecuperarMensaje({tipo: 'error', texto: 'Error al procesar la solicitud'});
-        } finally {
-            setRecuperarLoading(false);
-        }
-    };
-
-    const tituloModal = modo === 'login' ? 'Acceso a Glory Dashboard' : modo === 'registro' ? 'Registro de Usuario' : 'Recuperar Contraseña';
+    const {
+        modo, setModo, username, setUsername, email, setEmail,
+        password, setPassword, emailRecuperar, setEmailRecuperar,
+        recuperarLoading, recuperarMensaje,
+        handleSubmit, handleRecuperar, irARecuperarContrasena, volverALogin,
+        tituloModal
+    } = useModalLogin({onLoginCredentials, onRegister, loading});
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo={tituloModal} claseOverlay={overlayOpaco ? 'modalLoginOverlay' : ''}>
@@ -119,10 +89,7 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
                             {modo === 'login' && (
                                 <Boton
                                     variante="link"
-                                    onClick={() => {
-                                        setModo('recuperar');
-                                        setRecuperarMensaje(null);
-                                    }}
+                                    onClick={irARecuperarContrasena}
                                     claseAdicional="enlaceRecuperar"
                                 >
                                     ¿Olvidaste tu contraseña?
@@ -162,7 +129,7 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
 
                         <Boton
                             variante="link"
-                            onClick={() => setModo('login')}
+                            onClick={volverALogin}
                             claseAdicional="enlaceRecuperar"
                         >
                             ← Volver al inicio de sesión

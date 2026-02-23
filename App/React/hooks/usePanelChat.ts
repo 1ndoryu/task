@@ -31,6 +31,8 @@ interface UsePanelChatParams {
     habilitado?: boolean;
 }
 
+export type ParticipanteChat = {id: number; nombre: string; avatar: string};
+
 interface UsePanelChatReturn {
     /* Si el panel de chat está visible */
     chatVisible: boolean;
@@ -39,7 +41,7 @@ interface UsePanelChatReturn {
     /* Si hay mensajes sin leer */
     tieneMensajesSinLeer: boolean;
     /* Participantes formateados para PanelChatHistorial */
-    participantesChat: {id: number; nombre: string; avatar: string}[];
+    participantesChat: ParticipanteChat[];
     /* Si se debe mostrar la columna de chat (visible + habilitado) */
     mostrarChatColumna: boolean;
 }
