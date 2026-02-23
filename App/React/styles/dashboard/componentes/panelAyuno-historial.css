@@ -1,0 +1,217 @@
+﻿/* Historial compacto */
+.panelAyunoHistorial {
+    width: 100%;
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelAyunoHistorialToggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.panelAyunoHistorialContador {
+    margin-left: auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+}
+
+.panelAyunoHistorialInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.panelAyunoHistorialItemDetalles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.panelAyunoHistorialItemMeta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.panelAyunoHistorialEliminar {
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 6px;
+    padding-left: 0;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelAyunoHistorialEliminar:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+.panelAyunoHistorialPaginacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-top: 8px;
+}
+
+.panelAyunoHistorialPaginacionBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelAyunoHistorialPaginacionBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.panelAyunoHistorialPaginacionBoton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.panelAyunoHistorialPaginacionTexto {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+/* Modal: Ãšltima comida */
+.modalAyunoUltimaComidaContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalAyunoUltimaComidaTexto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0;
+}
+
+.modalAyunoUltimaComidaCampo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.modalAyunoUltimaComidaIcono {
+    color: var(--dashboard-textoSecundario);
+    display: inline-flex;
+}
+
+/* Selector custom de hora (reemplaza input type=time) */
+.selectorHoraAyuno {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.selectorHoraAyunoSelect {
+    appearance: none;
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoActivo);
+    border-radius: var(--dashboard-radioSm);
+    padding: 8px 10px;
+    font-size: var(--dashboard-tamanoBase);
+    font-variant-numeric: tabular-nums;
+    width: 100%;
+}
+
+.selectorHoraAyunoSelect:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.selectorHoraAyunoSeparador {
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+    font-variant-numeric: tabular-nums;
+}
+
+.modalAyunoUltimaComidaAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modalAyunoUltimaComidaBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioMd);
+    padding: 8px 12px;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modalAyunoUltimaComidaBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoUltimaComidaBoton--primario {
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+}
+
+.modalAyunoUltimaComidaBoton--primario:hover {
+    background: var(--dashboard-acentoHover);
+}
+
+.modalAyunoFinalizarBoton--primario:hover {
+    background: var(--dashboard-acentoHover);
+    color: var(--dashboard-textoActivo);
+    opacity: 1;
+}
+.modalAyunoUltimaComidaInfo {
+    display: flex;
+    justify-content: center;
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
+.modalAyunoUltimaComidaDia {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.modalAyunoUltimaComidaDia--ayer {
+    color: var(--dashboard-estadoAltaTexto);
+    border-color: var(--dashboard-estadoAltaBorde);
+    background: var(--dashboard-estadoAltaFondo);
+}
+

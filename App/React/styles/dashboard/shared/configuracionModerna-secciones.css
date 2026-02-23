@@ -1,0 +1,151 @@
+﻿/* 
+ * PROPIEDADES COMPACTAS
+ * Layout inline: etiqueta + pills en la misma fila
+ */
+.propiedadesCompactas {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+}
+
+.propiedadesCompactas__etiqueta {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.propiedadesCompactas__contenido {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    flex-wrap: wrap;
+}
+
+.propiedadesCompactas__item {
+    position: relative;
+}
+
+/* 
+ * SECCION GENERICA
+ * Contenedor para secciones como Responsables, Adjuntos
+ * SIN separadores, con titulo pequeÃ±o a la izquierda
+ */
+.seccionModerna {
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.seccionModerna__titulo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    margin-bottom: 0;
+}
+
+.seccionModerna__tituloTexto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.seccionModerna__botonAgregar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 2px 8px;
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.seccionModerna__botonAgregar:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.seccionModerna__contenido {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioSm);
+}
+
+.seccionModerna__vacio {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 2px 8px;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-style: normal;
+    border: 1px solid transparent;
+}
+
+/* 
+ * RESUMEN TAREAS PROYECTO
+ * Contador compacto de progreso
+ */
+.resumenTareasProyecto {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd) 0;
+}
+
+.resumenTareasProyecto__contador {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.resumenTareasProyecto__contador--completadas {
+    color: var(--dashboard-estadoExito);
+}
+
+.resumenTareasProyecto__contador--pendientes {
+    color: var(--dashboard-textoSecundario);
+}
+
+.resumenTareasProyecto__separador {
+    color: var(--dashboard-bordePrincipal);
+}
+
+.resumenTareasProyecto__link {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.resumenTareasProyecto__link:hover {
+    color: var(--dashboard-textoNormal);
+}
+
+/* 
+ * BARRA PROGRESO MINI
+ */
+.barraProgresoMini {
+    flex: 1;
+    max-width: 100px;
+    height: 4px;
+    background: var(--dashboard-barraFondo);
+    border-radius: var(--dashboard-radioSm);
+    overflow: hidden;
+}
+
+.barraProgresoMini__relleno {
+    height: 100%;
+    background: var(--dashboard-estadoExito);
+    transition: width var(--dashboard-transicionNormal);
+}
+

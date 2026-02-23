@@ -1,0 +1,282 @@
+﻿/*
+ * ENCABEZADO DEL DASHBOARD
+ * Header, navegacion y secciones
+ */
+
+/* 
+ * HEADER PRINCIPAL 
+ */
+/* 
+ * HEADER PRINCIPAL 
+ */
+.dashboardEncabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 100;
+}
+
+.encabezadoTitulo {
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    letter-spacing: -0.025em;
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.encabezadoNav {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+.encabezadoIzquierda {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioLg);
+}
+
+.encabezadoBuscador {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    top: 0;
+}
+
+.encabezadoEnlace {
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionNormal);
+}
+
+.encabezadoEnlace:hover {
+    color: white;
+}
+
+/* 
+ * BADGES UNIFICADOS DEL ENCABEZADO
+ * Sistema de badges consistente para todos los elementos del header
+ */
+.badgeEncabezado {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSm);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoSecundario);
+    color: var(--dashboard-textoSecundario);
+    transition: all var(--dashboard-transicionNormal);
+    cursor: default;
+    box-sizing: border-box;
+    line-height: 1.4;
+}
+
+.badgeEncabezado:hover {
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+/* Variante clickable */
+.badgeEncabezado--clickable {
+    cursor: pointer;
+}
+
+.badgeEncabezado--clickable:hover {
+    transform: translateY(-1px);
+}
+
+/* Variante usuario */
+.badgeEncabezado--usuario {
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+}
+
+.badgeEncabezado--usuario:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * AVATAR EN ENCABEZADO
+ */
+.avatarEncabezado {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.avatarEncabezadoInicial {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoSecundario);
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.nombreUsuarioEncabezado {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 
+ * ENCABEZADO DE SECCION 
+ */
+.seccionEncabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--dashboard-espacioSm);
+    min-height: 24px;
+}
+
+.seccionTitulo {
+    color: var(--dashboard-textoActivo);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: normal;
+}
+
+/* Reducir tamaÃ±o de tÃ­tulo en mÃ³vil (-2px) */
+@media (max-width: 480px) {
+    .seccionTitulo {
+        font-size: 12px;
+    }
+}
+
+.seccionSubtitulo {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.seccionAcciones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* 
+ * VARIANTE PANEL HEADER
+ * Simula barra de titulo de ventana de programa
+ * Altura fija de 42px, borde inferior para separar del contenido
+ */
+.seccionEncabezado--panelHeader {
+    height: var(--dashboard-panelHeaderAltura);
+    min-height: var(--dashboard-panelHeaderAltura);
+    padding: 0 var(--dashboard-espacioLg);
+    margin-bottom: 0;
+    background: var(--dashboard-panelHeaderFondo);
+    border-bottom: 1px solid var(--dashboard-panelHeaderBorde);
+}
+
+.seccionBoton {
+    background: none;
+    border: none;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs);
+    transition: color var(--dashboard-transicionNormal);
+}
+
+.seccionBoton:hover {
+    color: white;
+}
+
+/* 
+ * Variantes de Opacidad (8.11)
+ * Reducir opacidad cuando no esta en hover, para reducir ruido visual
+ */
+.seccionEncabezado--panelHeader .seccionTitulo,
+.seccionEncabezado--panelHeader .seccionAcciones {
+    opacity: 0.4;
+    transition: opacity var(--dashboard-transicionNormal);
+}
+
+.seccionEncabezado--panelHeader:hover .seccionTitulo,
+.seccionEncabezado--panelHeader:hover .seccionAcciones {
+    opacity: 1;
+}
+
+/* 
+ * FOOTER 
+ */
+.dashboardFooter {
+    margin-top: 2rem;
+    text-align: center;
+    color: var(--dashboard-textoPlaceholder);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    padding-top: var(--dashboard-espacioLg);
+}
+
+/* 
+ * ESTADO DE CONEXION 
+ */
+.estadoConexion {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: 2px;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.estadoConexion__punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: parpadeo 2s ease-in-out infinite;
+}
+
+.estadoConexion--conectado {
+    background-color: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.estadoConexion--conectado .estadoConexion__punto {
+    background-color: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+.estadoConexion--local {
+    background-color: rgba(156, 163, 175, 0.15);
+    color: #9ca3af;
+    border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.estadoConexion--local .estadoConexion__punto {
+    background-color: #9ca3af;
+}
+
+@keyframes parpadeo {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+

@@ -1,0 +1,211 @@
+﻿/*
+ * CONFIGURACION MODERNA
+ * Estilos para el nuevo layout de configuracion al estilo Linear
+ * 
+ * Componentes:
+ * - CampoTituloLimpio: Input sin borde, font grande
+ * - CampoSubtituloLimpio: Input menor, color apagado
+ * - PropiedadesCompactas: Grid de propiedades inline
+ * - SeccionResponsables: Lista de avatares
+ * - SeccionAdjuntos: Grid de archivos
+ * - ResumenTareasProyecto: Contador compacto
+ */
+
+/* 
+ * CAMPO TITULO LIMPIO
+ * Input sin borde visible para titulos principales
+ */
+.campoTituloLimpio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+}
+
+.campoTituloLimpio__icono {
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs);
+    border-radius: var(--dashboard-radioSm);
+    transition: background var(--dashboard-transicionRapida);
+}
+
+.campoTituloLimpio__icono:hover {
+    background: var(--dashboard-superposicionClara);
+}
+
+.campoTituloLimpio__contenedor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.campoTituloLimpio__input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    transition: color var(--dashboard-transicionRapida);
+    /* Propiedades para textarea con auto-resize */
+    resize: none;
+    overflow: hidden;
+    line-height: 1.3;
+    min-height: 1.95rem;
+}
+
+.campoTituloLimpio__input::placeholder {
+    color: var(--dashboard-textoApagado);
+    font-weight: 400;
+}
+
+.campoTituloLimpio__input:hover {
+    background: transparent;
+}
+
+.campoTituloLimpio__input:focus {
+    border: none;
+    background: transparent;
+}
+
+.campoTituloLimpio__input--error {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.campoTituloLimpio__error {
+    color: var(--dashboard-estadoAlta);
+    font-size: var(--dashboard-tamanoPequeno);
+    padding-left: var(--dashboard-espacioXs);
+}
+
+/* 
+ * CAMPO SUBTITULO LIMPIO
+ * Similar pero mas pequeno y apagado
+ */
+.campoSubtituloLimpio__input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: 0;
+    margin: 0;
+    outline: none;
+    resize: none;
+    min-height: 40px;
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.campoSubtituloLimpio__input::placeholder {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.campoSubtituloLimpio__input:hover {
+    background: transparent;
+}
+
+.campoSubtituloLimpio__input:focus {
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+}
+
+/* 
+ * PILL OPCION - Clase base unificada
+ * Usado para todos los selectores compactos: propiedades, responsables, adjuntos, etc.
+ */
+.pillOpcion {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSx);
+    padding: 5px 11px;
+    font-size: 11px;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    white-space: nowrap;
+}
+
+.pillOpcion:hover:not(.pillOpcion--input) {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.pillOpcion--vacio {
+    color: var(--dashboard-textoApagado);
+}
+
+.pillOpcion--vacio:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.pillOpcion--disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.pillOpcion--disabled:hover {
+    background: transparent;
+    border-color: var(--dashboard-bordeSutil);
+}
+
+/* Icono que solo aparece al hover (para quitar) */
+.pillOpcion__hoverIcon {
+    display: none;
+    margin-left: 2px;
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.pillOpcion:hover .pillOpcion__hoverIcon {
+    display: flex;
+}
+
+.pillOpcion:hover .pillOpcion__hoverIcon:hover {
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Pill que actÃºa como input */
+.pillOpcion.pillOpcion--input {
+    cursor: text;
+    padding: 4px 10px;
+    /* Remove min-height to avoid forcing height increase */
+    /* Height will be determined by content (icon + input), same as button */
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.pillOpcion.pillOpcion--input:hover {
+    background: transparent;
+    cursor: text;
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.pillOpcion.pillOpcion--input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    /* Enforce line-height to match text */
+    line-height: inherit;
+    padding: 0;
+    margin: 0;
+    /* Reduce width to minimize jump (approx length of 'Etiqueta') */
+    width: 70px;
+}
+

@@ -1,0 +1,216 @@
+﻿/* 
+ * MODAL NOTAS GUARDADAS
+ * Grid de notas con bÃºsqueda
+ * Nota: El ancho del contenedor estÃ¡ en modal.css (.modalNotasContenedor)
+ */
+
+.modalNotasGuardadas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    min-height: 400px;
+    max-height: 70vh;
+}
+
+.modalNotasBusqueda {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: 4px;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    flex: 1;
+    max-width: 400px;
+}
+
+/* Variante para el buscador centrado en el header del modal */
+.modalNotasBusqueda--headerCentrado {
+    margin: 0 auto;
+}
+
+.modalNotasBusquedaIcono {
+    color: var(--dashboard-textoMuyApagado);
+    flex-shrink: 0;
+}
+
+.modalNotasBusquedaInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.modalNotasBusquedaInput::placeholder {
+    color: var(--dashboard-textoPlaceholder);
+}
+
+.modalNotasBusquedaLoader {
+    color: var(--dashboard-textoMuyApagado);
+    flex-shrink: 0;
+}
+
+/* Grid de notas - 3 columnas flexibles */
+.modalNotasGrid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--dashboard-espacioMd);
+    align-content: start;
+}
+
+.modalNotasVacio,
+.modalNotasError {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioSm);
+    color: var(--dashboard-textoMuyApagado);
+    text-align: center;
+    padding: var(--dashboard-espacioXl);
+    /* Ocupar todo el ancho del grid para centrar correctamente */
+    grid-column: 1 / -1;
+    min-height: 300px;
+}
+
+.modalNotasVacio p {
+    font-size: var(--dashboard-tamanoPequeno);
+    margin: 0;
+}
+
+.modalNotasError {
+    color: var(--dashboard-estadoAlta);
+}
+
+.modalNotasItem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    min-height: 120px;
+    position: relative;
+}
+
+.modalNotasItem:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoHover);
+}
+
+.modalNotasItemEliminando {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.modalNotasItemContenido {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.modalNotasItemTitulo {
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modalNotasItemPreview {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    flex: 1;
+}
+
+.modalNotasItemFecha {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+}
+
+/* Fecha de creaciÃ³n debajo del tÃ­tulo */
+.modalNotasItemFechaCreacion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: 2px;
+}
+
+/* Contenedor inferior con contador y fecha de modificaciÃ³n */
+.modalNotasItemMetasInferiores {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--dashboard-espacioXs);
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+}
+
+/* Contador de caracteres */
+.modalNotasItemContador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoIndice);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+/* Fecha de modificaciÃ³n con icono de editar */
+.modalNotasItemFechaModificacion {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.modalNotasItemEliminar {
+    position: absolute;
+    top: var(--dashboard-espacioSm);
+    right: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoMuyApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioMd);
+    transition: all var(--dashboard-transicionRapida);
+    opacity: 0;
+}
+
+.modalNotasItem:hover .modalNotasItemEliminar {
+    opacity: 1;
+}
+
+.modalNotasItemEliminar:hover {
+    color: var(--dashboard-estadoAlta);
+    background: var(--dashboard-estadoAltaFondo);
+}
+
+.modalNotasFooter {
+    padding: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-align: center;
+}
+

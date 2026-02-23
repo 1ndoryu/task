@@ -1,0 +1,322 @@
+﻿/*
+ * ADJUNTOS GRID (Fase 9.2.10)
+ * VisualizaciÃ³n grid minimalista para adjuntos
+ */
+.adjuntosContenedorGrid {
+    padding-top: var(--dashboard-espacioMd);
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+    margin-top: var(--dashboard-espacioMd);
+}
+
+.adjuntosGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
+}
+
+.adjuntosGrid__item {
+    position: relative;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-fondoPrincipal);
+    overflow: hidden;
+    transition: all var(--dashboard-transicionRapida);
+    display: flex;
+    flex-direction: column;
+}
+
+.adjuntosGrid__item:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    transform: translateY(-1px);
+    box-shadow: var(--dashboard-sombraSutil);
+}
+
+.adjuntosGrid__preview {
+    height: 80px;
+    background: var(--dashboard-superposicionClara);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+}
+
+.adjuntosGrid__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dashboard-transicionNormal);
+}
+
+.adjuntosGrid__item:hover .adjuntosGrid__preview img {
+    transform: scale(1.05);
+}
+
+.adjuntosGrid__icono {
+    color: var(--dashboard-textoApagado);
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.adjuntosGrid__item:hover .adjuntosGrid__icono {
+    color: var(--dashboard-textoNormal);
+}
+
+.adjuntosGrid__info {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    min-height: 32px;
+}
+
+.adjuntosGrid__nombre {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: var(--dashboard-espacioXs);
+    flex: 1;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.adjuntosGrid__iconoCifrado {
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+}
+
+.adjuntosGrid__acciones {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.adjuntosGrid__item:hover .adjuntosGrid__acciones {
+    opacity: 1;
+}
+
+.adjuntosGrid__accion {
+    padding: 4px;
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.adjuntosGrid__accion:hover {
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-superposicionClara);
+}
+
+.adjuntosGrid__accion--peligro:hover {
+    color: var(--dashboard-estadoAlta);
+    background: var(--dashboard-estadoAltaFondo);
+}
+
+/* Audio Player Minimalista para Grid */
+.adjuntosGrid__audio {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-superposicionClara);
+    position: relative;
+}
+
+.adjuntosGrid__audioBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--dashboard-textoNormal);
+    transition: all var(--dashboard-transicionRapida);
+    z-index: 2;
+}
+
+.adjuntosGrid__audioBtn:hover {
+    transform: scale(1.1);
+    border-color: var(--dashboard-textoActivo);
+}
+
+@media (max-width: 500px) {
+    .adjuntosGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 
+ * PILL OPCION - Boton quitar interno
+ * Para pills que pueden ser removidos (ej: repeticion)
+ */
+.pillOpcion__quitar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.pillOpcion__quitar:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* 
+ * SELECTOR REPETICION/FRECUENCIA PANEL
+ * Panel expandible para configurar repeticion o frecuencia
+ */
+.selectorRepeticionPanel {
+    min-width: 220px;
+    max-width: 280px;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraFuerte);
+    padding: var(--dashboard-espacioMd);
+}
+
+.selectorRepeticionPanel__titulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.selectorRepeticionPanel__tipos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.selectorRepeticionPanel__tipo {
+    padding: 4px 10px;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorRepeticionPanel__tipo:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorRepeticionPanel__tipo--activo {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoApagado);
+    color: var(--dashboard-textoActivo);
+}
+
+.selectorRepeticionPanel__config {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.selectorRepeticionPanel__label {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.selectorRepeticionPanel__numero {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    background: var(--dashboard-superposicionClara);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    padding: 2px;
+}
+
+.selectorRepeticionPanel__numero button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    font-size: 14px;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorRepeticionPanel__numero button:hover:not(:disabled) {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorRepeticionPanel__numero button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.selectorRepeticionPanel__numero span {
+    min-width: 24px;
+    text-align: center;
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * PROPIEDADES COMPACTAS EXTENDIDAS
+ * Fila de propiedades para tareas/habitos estilo Linear
+ */
+.propiedadesCompactasExtendidas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.propiedadesCompactasExtendidas__grupo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.propiedadesCompactasExtendidas__separador {
+    width: 1px;
+    height: 20px;
+    background: var(--dashboard-bordeSutil);
+    margin: 0 var(--dashboard-espacioXs);
+}

@@ -1,0 +1,333 @@
+﻿/* 
+ * SECCION RESPONSABLES
+ * Lista de participantes con avatares y menus de gestion
+ * Layout inline: etiqueta a la izquierda, contenido a la derecha
+ */
+.seccionResponsables {
+    position: relative;
+}
+
+.seccionResponsables--inline {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.seccionResponsables__etiqueta {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.seccionResponsables__contenidoInline {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex-wrap: wrap;
+}
+
+.seccionResponsables__botonAgregarSmall {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px dashed var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.seccionResponsables__botonAgregarSmall:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+}
+
+.seccionResponsables__agregarContenedor {
+    position: relative;
+}
+
+/* Avatar stack (modo compacto) */
+.seccionResponsables--compacto {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.seccionResponsables__avatares {
+    display: flex;
+    align-items: center;
+}
+
+.seccionResponsables__avatarCompacto {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--dashboard-fondoPrincipal);
+    margin-left: -8px;
+    object-fit: cover;
+    transition: transform var(--dashboard-transicionRapida);
+}
+
+.seccionResponsables__avatarCompacto:first-child {
+    margin-left: 0;
+}
+
+.seccionResponsables__avatarCompacto:hover {
+    transform: scale(1.1);
+    z-index: 1;
+}
+
+.seccionResponsables__avatarMas {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--dashboard-superposicionSutil);
+    border: 2px solid var(--dashboard-fondoPrincipal);
+    margin-left: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.seccionResponsables__botonAgregarCompacto {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px dashed var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.seccionResponsables__botonAgregarCompacto:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-textoApagado);
+    color: var(--dashboard-textoNormal);
+}
+
+/* Estado vacio */
+.seccionResponsables__vacio {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoBase);
+    font-style: italic;
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.seccionResponsables__vacio--compacto {
+    padding: 0;
+    font-style: normal;
+}
+
+/* Participante individual */
+.seccionResponsables__participante {
+    position: relative;
+}
+
+.seccionResponsables__participanteAvatar {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.seccionResponsables__participanteRol {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-textoApagado);
+}
+
+/* Menu agregar participante */
+.seccionResponsables__menuAgregar {
+    position: absolute;
+    top: calc(100% + var(--dashboard-espacioXs));
+    right: 0;
+    z-index: 100;
+    min-width: 220px;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraFuerte);
+    padding: var(--dashboard-espacioSm);
+}
+
+.seccionResponsables__menuTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
+/* Selector de rol */
+.seccionResponsables__selectorRol {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.seccionResponsables__opcionRol {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.seccionResponsables__opcionRol:hover {
+    background: var(--dashboard-superposicionClara);
+    color: var(--dashboard-textoNormal);
+}
+
+.seccionResponsables__opcionRol--activo {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoApagado);
+    color: var(--dashboard-textoActivo);
+}
+
+/* Lista de companeros */
+.seccionResponsables__listaCompaneros {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.seccionResponsables__companeroItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: var(--dashboard-espacioSm);
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: background var(--dashboard-transicionRapida);
+    text-align: left;
+}
+
+.seccionResponsables__companeroItem:hover {
+    background: var(--dashboard-superposicionClara);
+}
+
+.seccionResponsables__companeroAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.seccionResponsables__companeroInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.seccionResponsables__companeroNombre {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.seccionResponsables__companeroEmail {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Menu de opciones del participante */
+.seccionResponsables__menuParticipante {
+    position: absolute;
+    top: calc(100% + var(--dashboard-espacioXs));
+    left: 0;
+    z-index: 100;
+    min-width: 160px;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraFuerte);
+    padding: var(--dashboard-espacioXs);
+}
+
+.seccionResponsables__menuSeccion {
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.seccionResponsables__menuEtiqueta {
+    display: block;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.seccionResponsables__menuOpcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: var(--dashboard-espacioSm);
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    cursor: pointer;
+    transition: background var(--dashboard-transicionRapida);
+    text-align: left;
+}
+
+.seccionResponsables__menuOpcion:hover {
+    background: var(--dashboard-superposicionClara);
+}
+
+.seccionResponsables__menuOpcion--activo {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.seccionResponsables__menuOpcion--peligro {
+    color: var(--dashboard-estadoAlta);
+}
+
+.seccionResponsables__menuOpcion--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+}
+
+.seccionResponsables__menuDivisor {
+    height: 1px;
+    background: var(--dashboard-bordePrincipal);
+    margin: var(--dashboard-espacioXs) 0;
+}
+

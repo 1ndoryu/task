@@ -52,14 +52,24 @@
 @import './shared/mapaCalorProyecto.css';
 @import './shared/selectorProyecto.css';
 @import './shared/selectorEstado.css';
-@import './shared/configuracionModerna.css';
+@import './shared/configuracionModerna-campos.css';
+@import './shared/configuracionModerna-secciones.css';
+@import './shared/configuracionModerna-formularios.css';
+@import './shared/configuracionModerna-responsables.css';
+@import './shared/configuracionModerna-tareasCompactas.css';
+@import './shared/configuracionModerna-adjuntos.css';
 
 /* Componentes */
-@import './componentes/encabezado.css';
+@import './componentes/encabezado-base.css';
+@import './componentes/encabezado-botones.css';
+@import './componentes/encabezado-movil.css';
 @import './componentes/tabla.css';
 @import './componentes/tareas.css';
 @import './componentes/gruposTareas.css';
-@import './componentes/scratchpad.css';
+@import './componentes/scratchpad-editor.css';
+@import './componentes/scratchpad-modalNotas.css';
+@import './componentes/scratchpad-vistaPrevia.css';
+@import './componentes/scratchpad-vistaExpandida.css';
 @import './componentes/modal.css';
 @import './componentes/formulario.css';
 @import './componentes/toast.css';
@@ -101,7 +111,9 @@
 @import './componentes/panelActividad.css';
 
 /* Panel Ayuno (Plugin) */
-@import './componentes/panelAyuno.css';
+@import './componentes/panelAyuno-base.css';
+@import './componentes/panelAyuno-historial.css';
+@import './componentes/panelAyuno-modales.css';
 
 /* Panel Déficit Calórico (Plugin) */
 @import './componentes/panelDeficitCalorico.css';

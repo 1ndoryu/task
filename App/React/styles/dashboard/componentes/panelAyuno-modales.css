@@ -1,0 +1,359 @@
+﻿/* Modal: Finalizar ayuno */
+.modalAyunoFinalizarContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* Estilos para el Modal RediseÃ±ado de Finalizar Ayuno */
+.modalAyunoHero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 20px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    margin-bottom: 15px;
+}
+
+.modalAyunoHeroTiempo {
+    font-size: var(--dashboard-tamanoHero);
+    font-weight: 700;
+    color: var(--dashboard-textoActivo);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.modalAyunoHeroTiempo--completado {
+    color: var(--dashboard-estadoExito);
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+}
+
+.modalAyunoHeroObjetivo {
+    margin-top: 6px;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modalAyunoTimeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 14px; /* Espacio para la lÃ­nea */
+}
+
+.modalAyunoTimelineItem {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 24px;
+    position: relative;
+    min-height: 48px;
+}
+
+.modalAyunoTimelineItem:last-child {
+    padding-bottom: 0;
+}
+
+/* LÃ­nea vertical conectora */
+.modalAyunoTimelineItem::before {
+    content: '';
+    position: absolute;
+    left: 12px; /* Centro del icono de 24px (+ borde) */
+    top: 24px;
+    bottom: -4px;
+    width: 2px;
+    background: var(--dashboard-bordeSutil);
+    transform: translateX(-50%);
+    z-index: 0;
+    opacity: 0.5;
+}
+
+.modalAyunoTimelineItem:last-child::before {
+    display: none;
+}
+
+.modalAyunoTimelineItem--faseComida::before {
+    border-left: 2px dashed var(--dashboard-bordeSutil);
+    background: transparent;
+    opacity: 0.8;
+}
+
+.modalAyunoTimelineIcono {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--dashboard-fondoSecundario);
+    border: 2px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.modalAyunoTimelineIcono--inicio {
+    color: var(--dashboard-textoSobreAcento);
+    background: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+}
+
+.modalAyunoTimelineIcono--fin {
+    color: var(--dashboard-estadoExito);
+    border-color: var(--dashboard-estadoExito);
+    background: var(--dashboard-estadoExitoFondo);
+}
+
+.modalAyunoTimelineIcono--comida {
+    color: var(--dashboard-textoSecundario);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.modalAyunoTimelineIcono--proximo {
+    color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-fondoSecundario);
+}
+
+.modalAyunoTimelineContenido {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 2px;
+    flex: 1;
+}
+
+.modalAyunoTimelineTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.modalAyunoTimelineHora {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.modalAyunoTimelineExtra {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+    margin-top: 2px;
+    font-style: italic;
+}
+
+.modalAyunoTimelineHoraEditable {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modalAyunoTimelineHoraInput {
+    width: 88px !important;
+    min-width: 88px;
+    max-width: 88px;
+    flex: 0 0 88px;
+    display: inline-block;
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
+.modalAyunoTimelineDia {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.modalAyunoFinalizarAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    padding-top: 15px;
+}
+
+.modalAyunoFinalizarBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioMd);
+    padding: 8px 16px;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modalAyunoFinalizarBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoFinalizarBoton--primario {
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+    background: transparent;
+}
+
+.modalAyunoFinalizarBoton--primario:hover {
+    background: var(--dashboard-acentoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoFinalizarBoton--peligro {
+    border-color: var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAltaTexto);
+}
+
+.modalAyunoFinalizarBoton--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+.panelAyunoHistorialTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.panelAyunoHistorialLista {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.panelAyunoHistorialItem {
+    padding: 6px 0;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelAyunoHistorialItem:last-child {
+    border-bottom: none;
+}
+
+.panelAyunoHistorialFila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.panelAyunoHistorialItem--completado .panelAyunoHistorialItemTiempo {
+    color: var(--dashboard-estadoExito);
+}
+
+.panelAyunoHistorialAcciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panelAyunoHistorialItemFecha {
+    opacity: 0.7;
+}
+
+.panelAyunoHistorialItemTiempo {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.panelAyunoHistorialEliminar {
+    opacity: 0.75;
+}
+
+.panelAyunoHistorialEliminar:hover {
+    opacity: 1;
+}
+
+/* Selector Reloj Circular Interactivo */
+
+.selectorRelojCircular {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    user-select: none;
+}
+
+.selectorRelojCircular__display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoHero);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    line-height: 1;
+    background: var(--dashboard-fondoSecundario);
+    padding: 8px 16px;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    box-shadow: var(--dashboard-sombraMedia);
+}
+
+.selectorRelojCircular__separador {
+    margin: 0 2px;
+    opacity: 0.6;
+    animation: parpadeoReloj 1s infinite steps(2, start);
+}
+
+@keyframes parpadeoReloj {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.selectorRelojCircular__svg {
+    touch-action: none; /* Importante para prevenir scroll en mÃ³viles */
+    transition: transform var(--dashboard-transicionNormal);
+}
+
+.selectorRelojCircular__svg--arrastrando {
+    cursor: grabbing !important;
+    transform: scale(1.02);
+}
+
+.selectorRelojCircular__knob {
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+    transition: r 0.2s ease;
+}
+
+.selectorRelojCircular__svg--arrastrando .selectorRelojCircular__knob {
+    r: 10; /* Hacer mÃ¡s grande al arrastrar */
+}
+
+.selectorRelojCircular__instruccion {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.7;
+    margin: 0;
+}

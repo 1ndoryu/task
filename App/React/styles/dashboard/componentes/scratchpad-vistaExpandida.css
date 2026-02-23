@@ -1,0 +1,230 @@
+﻿.vistaNotasExpandida {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) 1fr;
+    height: 70vh;
+    min-height: 520px;
+}
+
+.vistaNotasColumnaLista {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--dashboard-bordeSutil);
+    min-width: 0;
+    min-height: 0;
+}
+
+.vistaNotasColumnaEditor {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.vistaNotasEncabezadoLista,
+.vistaNotasEncabezadoEditor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+}
+
+.vistaNotasEncabezadoTitulo {
+    color: var(--dashboard-textoActivo);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
+}
+
+.vistaNotasEncabezadoMeta {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.vistaNotasBusqueda {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+/*
+ * Barra de acciones del modal de notas
+ * Tarea 2: Botones para crear nueva nota, ordenar y maximizar
+ */
+/* Modal maximizado - ocupa toda la pantalla */
+.modalNotasExpandidoContenedor--maximizado {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+}
+
+.modalNotasExpandidoContenedor--maximizado .vistaNotasExpandida {
+    height: calc(100vh - 60px);
+}
+
+/*
+ * Estilos para expandir/colapsar paneles en modal de notas
+ * Permite ver solo lista, solo editor o ambos
+ */
+.modalNotasExpandidoContenedor--soloLista .vistaNotasExpandida {
+    grid-template-columns: 1fr;
+}
+.modalNotasExpandidoContenedor--soloLista .vistaNotasColumnaLista {
+    border-right: none;
+}
+
+.modalNotasExpandidoContenedor--soloEditor .vistaNotasExpandida {
+    grid-template-columns: 1fr;
+}
+.modalNotasExpandidoContenedor--soloEditor .vistaNotasColumnaEditor {
+    border-left: none;
+}
+
+/* Header del editor cuando lista estÃ¡ oculta */
+.vistaNotasEditorHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTarjeta);
+}
+
+.vistaNotasEditorTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vistaNotasListaContenido {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: var(--dashboard-espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.vistaNotasEditorContenido {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+}
+
+@media (max-width: 960px) {
+    .vistaNotasExpandida {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 0;
+    }
+
+    .vistaNotasColumnaLista {
+        border-right: none;
+        border-bottom: 1px solid var(--dashboard-bordeSutil);
+    }
+
+    .vistaNotasListaContenido {
+        max-height: 40vh;
+    }
+}
+
+/*
+ * ESTILOS MOVIL PARA PANEL DE NOTAS
+ * Tarea 0: Optimizaciones para versiÃ³n mÃ³vil del scratchpad
+ * - Sin bordes
+ * - Sin resize handle
+ * - Sin barra degradada superior
+ * - Altura 100% del viewport
+ */
+@media (max-width: 480px) {
+    /* Panel de notas en mÃ³vil: sin bordes ni decoraciones */
+    .panelDashboard.internaColumna--notas {
+        border: none !important;
+        background: transparent !important;
+        height: calc(100dvh - var(--dashboard-alturaHeaderMovil, 56px) - var(--dashboard-alturaNavInferior, 56px)) !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Ocultar barra degradada superior en mÃ³vil */
+    .scratchpadBarra {
+        display: none !important;
+    }
+
+    /* Ocultar resize handle en mÃ³vil */
+    .scratchpadResizeHandle {
+        display: none !important;
+    }
+
+    /* Textarea ocupa toda la altura disponible */
+    .scratchpadContenedor {
+        flex: 1;
+        height: 100% !important;
+    }
+
+    .scratchpadPanel {
+        height: 100% !important;
+    }
+
+    .scratchpadEditor {
+        height: 100% !important;
+        flex: 1;
+    }
+
+    .scratchpadTextarea,
+    .scratchpadTextarea--resaltado {
+        height: 100% !important;
+        /* Padding inferior para que el texto no quede cubierto por el nav */
+        padding-bottom: calc(var(--dashboard-alturaNavInferior, 56px) + var(--dashboard-espacioLg)) !important;
+    }
+
+    /* Modal de notas expandido en mÃ³vil: fullscreen */
+    .modalNotasExpandidoContenedor {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+    }
+
+    .vistaNotasExpandida {
+        grid-template-columns: 1fr !important;
+        height: calc(100dvh - 60px) !important;
+        min-height: auto;
+    }
+
+    .vistaNotasColumnaLista {
+        height: 100%;
+        max-height: none;
+        border-bottom: none;
+    }
+
+    /* Ocultar columna de editor en mÃ³vil - solo mostrar lista */
+    .vistaNotasColumnaEditor {
+        display: none;
+    }
+
+    .vistaNotasListaContenido {
+        max-height: none;
+        height: 100%;
+        flex: 1;
+    }
+}

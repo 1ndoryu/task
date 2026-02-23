@@ -1,0 +1,304 @@
+﻿/* 
+ * MEDIA QUERIES MOVIL 
+ * Cuando es mÃ³vil (< 768px), ocultamos los botones individuales y mostramos el menÃº hamburguesa
+ */
+/* 
+ * ESTILOS MENU MOVIL GRID (Pantalla Completa)
+ */
+.menuMovilOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.menuMovilContenido {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--dashboard-espacioLg);
+    overflow-y: auto;
+}
+
+.menuMovilHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--dashboard-espacioXl);
+}
+
+.menuMovilTitulo {
+    font-size: var(--dashboard-tamanoGrande);
+    font-weight: 700;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+}
+
+.menuMovilCerrar {
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.menuMovilGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--dashboard-espacioMd);
+    align-content: start;
+}
+
+.menuMovilBoton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioLg);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+    text-align: center;
+}
+
+.menuMovilBoton:active {
+    transform: scale(0.96);
+    background: var(--dashboard-fondoHover);
+}
+
+.menuMovilBoton span {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+}
+
+.menuMovilSeparador {
+    grid-column: span 2;
+    height: 1px;
+    background: var(--dashboard-bordePrincipal);
+    margin: var(--dashboard-espacioSm) 0;
+}
+
+.menuMovilBoton--peligroso {
+    color: var(--dashboard-estadoAlta);
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 
+ * HEADER MOVIL - Layout reorganizado
+ * â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ * â”‚  â˜°  â”‚       TÃ­tulo         â”‚  â‹®   â”‚
+ * â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+ * 
+ * Estructura HTML:
+ * header.dashboardEncabezado
+ *   > button.botonMenuMovil (hamburguesa - izquierda)
+ *   > div.encabezadoIzquierda > span.encabezadoTitulo (titulo - centro)
+ *   > nav.encabezadoNav > button.botonOpcionesMovil (opciones - derecha)
+ */
+@media (max-width: 768px) {
+    /* 
+     * Reorganizar el header como grid de 3 columnas 
+     * Usar position fixed para que quede completamente fijo al hacer scroll
+     */
+    .dashboardEncabezado {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: var(--dashboard-espacioXs);
+        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--dashboard-fondoSecundario);
+        z-index: 100;
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        margin: 0;
+    }
+
+    /* Evitar scroll horizontal en movil */
+    html,
+    body,
+    .dashboardContenedor {
+        overflow-x: hidden;
+    }
+
+    /* Compensar altura del header fijo en el contenido */
+    .dashboardContenedor {
+        padding-top: 72px;
+    }
+
+    /* Columna 1: Boton hamburguesa (hijo directo del header) */
+    .dashboardEncabezado > .botonMenuMovil {
+        display: inline-flex !important;
+        grid-column: 1;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: none;
+        border: none;
+        color: var(--dashboard-textoNormal);
+        cursor: pointer;
+        padding: 0;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Unificar tamano de iconos SVG en botones movil */
+    .dashboardEncabezado > .botonMenuMovil svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dashboardEncabezado > .botonMenuMovil:hover,
+    .dashboardEncabezado > .botonMenuMovil:active {
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Columna 2: Titulo centrado */
+    .encabezadoIzquierda {
+        grid-column: 2;
+        justify-content: center;
+        display: flex;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .encabezadoTitulo {
+        font-size: var(--dashboard-tamanoMovilBase);
+    }
+
+    /* Columna 3: Nav con solo busqueda */
+    .encabezadoNav {
+        grid-column: 3;
+        gap: 0;
+    }
+
+    /* Ocultar elementos de navegacion excepto opciones, drawer y bottomsheet */
+    .encabezadoNav > *:not(.botonOpcionesMovil):not(.botonBuscadorMovil):not(.drawerMovilOverlay):not(.drawerMovilPanel):not(.bottomSheetOverlay):not(.bottomSheetPanel) {
+        display: none !important;
+    }
+
+    /* Asegurar que el drawer sea visible cuando esta abierto */
+    .encabezadoNav .drawerMovilOverlay,
+    .encabezadoNav .drawerMovilPanel {
+        display: flex;
+    }
+
+    /* Asegurar que el BottomSheet sea visible cuando esta abierto */
+    .encabezadoNav .bottomSheetOverlay,
+    .encabezadoNav .bottomSheetPanel {
+        display: flex;
+    }
+
+    /* Ocultamos el buscador de escritorio */
+    .encabezadoBuscador {
+        display: none;
+    }
+}
+
+/* Ocultar hamburguesa en desktop */
+.dashboardEncabezado > .botonMenuMovil {
+    display: none;
+}
+
+/* 
+ * MOVIL PEQUENO (< 480px) - Ajustes adicionales
+ */
+@media (max-width: 480px) {
+    .dashboardEncabezado {
+        padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+        gap: var(--dashboard-espacioXs);
+    }
+
+    /* Compensar altura del header fijo (ajuste para movil pequeÃ±o) */
+    .dashboardContenedor {
+        padding-top: 64px;
+    }
+
+    .encabezadoTitulo {
+        font-size: 13px;
+    }
+}
+
+/* 
+ * BOTON OPCIONES MOVIL (3 puntos) - Fase 10.8.3
+ * Solo visible en mÃ³vil, al lado de la lupa
+ */
+.botonOpcionesMovil {
+    display: none; /* Oculto por defecto en desktop */
+}
+
+@media (max-width: 768px) {
+    /* Mostrar botÃ³n de opciones mÃ³vil */
+    .botonOpcionesMovil,
+    .botonBuscadorMovil {
+        display: inline-flex;
+        width: 44px;
+        height: 44px;
+        background: none !important;
+        border: none !important;
+        padding: 0;
+        align-items: center;
+        justify-content: center;
+        color: var(--dashboard-textoNormal);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .botonOpcionesMovil svg,
+    .botonBuscadorMovil svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Estado activo: solo cambia el color, sin badge rojo */
+    .botonOpcionesMovil--activo {
+        color: var(--dashboard-textoActivo);
+    }
+
+    /* Badge de filtros activos - sutil, no rojo */
+    .botonOpcionesMovil .badgeFiltrosActivos {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 6px;
+        height: 6px;
+        background: var(--dashboard-acento);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* Nav con botones de bÃºsqueda y opciones */
+    .encabezadoNav {
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+}

@@ -1,0 +1,205 @@
+﻿/* 
+ * LISTA TAREAS COMPACTA
+ * Lista minimalista de tareas dentro del panel de proyecto
+ */
+.listaTareasCompacta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    padding-top: var(--dashboard-espacioMd);
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+    margin-top: var(--dashboard-espacioMd);
+}
+
+.listaTareasCompacta__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--dashboard-espacioXs);
+}
+
+.listaTareasCompacta__titulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 80px;
+    flex-shrink: 0;
+    font-weight: normal;
+}
+
+.listaTareasCompacta__contador {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.listaTareasCompacta__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.tareaItemCompactoContenedor {
+    display: flex;
+    flex-direction: column;
+}
+
+.tareaItemCompacto {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 2px 0;
+    min-height: 24px;
+    border-radius: 0;
+    transition: none;
+    border: 1px solid transparent;
+}
+
+.tareaItemCompacto:hover {
+    background: transparent;
+    border-color: transparent;
+}
+
+.tareaItemCompacto__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: 0;
+    padding: 0;
+}
+
+.tareaItemCompacto__toggle:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoNormal);
+}
+
+.tareaItemCompacto__toggle--invisible {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tareaItemCompacto__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    width: 16px;
+    height: 16px;
+}
+
+.tareaItemCompacto__checkbox:hover {
+    color: var(--dashboard-textoApagado);
+    transform: scale(1.1);
+}
+
+.tareaItemCompacto__checkbox--checked {
+    color: var(--dashboard-estadoExito);
+}
+
+.tareaItemCompacto__checkbox--PrioridadAlta {
+    color: var(--dashboard-estadoAlta);
+}
+
+.tareaItemCompacto__texto {
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: var(--dashboard-espacioXs);
+}
+
+.tareaItemCompacto--completada .tareaItemCompacto__texto {
+    color: var(--dashboard-textoApagado);
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.tareaItemCompacto__subtareas {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: var(--dashboard-espacioXs);
+    padding-top: var(--dashboard-espacioXs);
+}
+
+.tareaItemCompacto__subtareas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 1px;
+    background: var(--dashboard-bordeSutil);
+    display: none;
+}
+
+.listaTareasCompacta--vacia {
+    padding: var(--dashboard-espacioSm) 0;
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-style: normal;
+    text-align: left;
+    opacity: 0.5;
+}
+
+/* 
+ * AUDIO PLAYER
+ */
+.adjuntoAudioControl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--dashboard-superposicionClara);
+    padding: 2px 6px;
+    border-radius: 12px;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.adjuntoBotonPlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoNormal);
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.adjuntoBotonPlay:hover {
+    border-color: var(--dashboard-textoActivo);
+}
+
+.adjuntoAudioBarra {
+    width: 40px;
+    height: 3px;
+    background: var(--dashboard-bordeSutil);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.adjuntoAudioProgreso {
+    height: 100%;
+    background: var(--dashboard-textoActivo);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+

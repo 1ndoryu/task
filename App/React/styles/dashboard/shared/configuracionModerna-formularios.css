@@ -1,0 +1,236 @@
+﻿/* 
+ * SELECTOR ICONO PROYECTO
+ * Grid de iconos con colores
+ */
+.selectorIconoProyecto {
+    position: relative;
+}
+
+.selectorIconoProyecto__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-superposicionClara);
+    border: 1px solid var(--dashboard-bordeSutil);
+    cursor: pointer;
+    transition: background var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+}
+
+.selectorIconoProyecto__trigger:hover {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoApagado);
+}
+
+.selectorIconoProyecto__dropdown {
+    position: absolute;
+    top: calc(100% + var(--dashboard-espacioSm));
+    left: 0;
+    z-index: 100;
+    min-width: 240px;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraFuerte);
+    padding: var(--dashboard-espacioMd);
+}
+
+.selectorIconoProyecto__categoria {
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+.selectorIconoProyecto__categoria:last-child {
+    margin-bottom: 0;
+}
+
+.selectorIconoProyecto__categoriaTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.selectorIconoProyecto__grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--dashboard-espacioXs);
+}
+
+.selectorIconoProyecto__opcion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dashboard-radioSm);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+}
+
+.selectorIconoProyecto__opcion:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.selectorIconoProyecto__opcion--seleccionado {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoApagado);
+}
+
+/* 
+ * SELECTOR COLORES
+ */
+.selectorColores {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.selectorColores__opcion {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color var(--dashboard-transicionRapida), transform var(--dashboard-transicionRapida);
+}
+
+.selectorColores__opcion:hover {
+    transform: scale(1.1);
+}
+
+.selectorColores__opcion--seleccionado {
+    border-color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * MODAL MODERNA EXPANDIDA
+ */
+.modalModerna {
+    max-width: 600px;
+}
+
+.modalModerna__header {
+    padding: var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.modalModerna__cuerpo {
+    padding: var(--dashboard-espacioLg);
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modalModerna__footer {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* 
+ * FORMULARIO PROYECTO MODERNO
+ * Layout del formulario con el nuevo diseno
+ */
+.formularioProyectoModerno {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    position: relative;
+}
+
+.formularioProyectoModerno__icono {
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
+.formularioProyectoModerno__menuOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--dashboard-superposicionOscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: var(--dashboard-espacioLg);
+}
+
+.formularioProyectoModerno__menuOverlay > * {
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    padding: var(--dashboard-espacioMd);
+    min-width: 200px;
+}
+
+/* 
+ * FORMULARIO HABITO MODERNO
+ * Estilos adicionales para el formulario de habitos (Fase 9.7.7.4)
+ */
+.formularioHabitoModerno__separador {
+    border-top: 1px dashed var(--dashboard-bordeSutil);
+    margin: var(--dashboard-espacioMd) 0 var(--dashboard-espacioXs) 0;
+}
+
+.formularioHabitoModerno__historial {
+    margin-top: 0;
+}
+
+.formularioHabitoModerno__historialEtiqueta {
+    margin-bottom: 10px;
+    display: block;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: normal;
+}
+
+/* 
+ * BOTON PAUSA HABITO
+ * Estilo para el boton de pausar/reanudar habito (Fase 13)
+ */
+.botonPausaHabito {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 4px 10px;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonPausaHabito:hover {
+    background: var(--dashboard-superposicionClara);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.botonPausaHabito--activo {
+    background: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+    color: var(--dashboard-estadoMediaTexto);
+}
+
+.botonPausaHabito--activo:hover {
+    background: var(--dashboard-superposicionMedia);
+    border-color: var(--dashboard-estadoMediaBorde);
+}
+
+.botonPausaHabito__fecha {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-left: var(--dashboard-espacioSm);
+}
+
