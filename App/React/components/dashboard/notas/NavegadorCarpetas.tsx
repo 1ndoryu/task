@@ -4,10 +4,10 @@
  * TAREA 2.1: Sistema de Carpetas para Notas
  */
 
-import {useState, useCallback} from 'react';
 import {Folder, FolderPlus, ChevronRight, Trash2, Edit3, Check, X} from 'lucide-react';
 import type {CarpetaNota} from '../../../types/notas';
 import {Input} from '../../ui/Input';
+import {useNavegadorCarpetas} from '../../../hooks/dashboard/useNavegadorCarpetas';
 
 interface NavegadorCarpetasProps {
     carpetas: CarpetaNota[];
@@ -19,50 +19,7 @@ interface NavegadorCarpetasProps {
 }
 
 export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar, onEliminar, cargando}: NavegadorCarpetasProps): JSX.Element {
-    const [creando, setCreando] = useState(false);
-    const [nombreNueva, setNombreNueva] = useState('');
-    const [editandoId, setEditandoId] = useState<number | null>(null);
-    const [nombreEditando, setNombreEditando] = useState('');
-
-    /* Crear nueva carpeta */
-    const manejarCrear = useCallback(async () => {
-        if (!nombreNueva.trim()) return;
-
-        await onCrear(nombreNueva.trim());
-        setNombreNueva('');
-        setCreando(false);
-    }, [nombreNueva, onCrear]);
-
-    /* Iniciar edición */
-    const iniciarEdicion = useCallback((carpeta: CarpetaNota) => {
-        if (carpeta.esVirtual || carpeta.id === null) return;
-        setEditandoId(carpeta.id);
-        setNombreEditando(carpeta.nombre);
-    }, []);
-
-    /* Guardar edición */
-    const manejarGuardarEdicion = useCallback(async () => {
-        if (!editandoId || !nombreEditando.trim()) return;
-
-        await onRenombrar(editandoId, nombreEditando.trim());
-        setEditandoId(null);
-        setNombreEditando('');
-    }, [editandoId, nombreEditando, onRenombrar]);
-
-    /* Cancelar edición */
-    const cancelarEdicion = useCallback(() => {
-        setEditandoId(null);
-        setNombreEditando('');
-    }, []);
-
-    /* Eliminar carpeta */
-    const manejarEliminar = useCallback(
-        async (id: number) => {
-            if (!confirm('¿Eliminar carpeta? Las notas se moverán a General.')) return;
-            await onEliminar(id);
-        },
-        [onEliminar]
-    );
+    const {creando, setCreando, nombreNueva, setNombreNueva, editandoId, nombreEditando, setNombreEditando, manejarCrear, iniciarEdicion, manejarGuardarEdicion, cancelarEdicion, manejarEliminar, cancelarCreacion} = useNavegadorCarpetas({onCrear, onRenombrar, onEliminar});
 
     return (
         <div className="navegadorCarpetas">
@@ -82,10 +39,7 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
                     </button>
                     <button
                         className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--cancelar"
-                        onClick={() => {
-                            setCreando(false);
-                            setNombreNueva('');
-                        }}>
+                        onClick={cancelarCreacion}>
                         <X size={12} />
                     </button>
                 </div>

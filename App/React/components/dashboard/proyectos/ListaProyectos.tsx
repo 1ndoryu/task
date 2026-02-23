@@ -4,8 +4,8 @@
  * Cuando un proyecto está seleccionado, muestra sus tareas debajo
  */
 
-import {useState, useCallback} from 'react';
-import {ChevronDown, ChevronRight, Calendar, Edit, Trash2, PlayCircle, PauseCircle, CheckCircle, Share2, Users, Zap, FolderOpen} from 'lucide-react';
+import {useState} from 'react';
+import {ChevronDown, ChevronRight, Calendar, Zap, FolderOpen, Users} from 'lucide-react';
 import {DashboardPanel} from '../../shared/DashboardPanel';
 import {EstadoVacio} from '../../shared/EstadoVacio';
 import {ListaTareas} from '../ListaTareas';
@@ -13,9 +13,9 @@ import {MenuContextualAdaptivo} from '../../shared/MenuContextualAdaptivo';
 import {BadgeInfo, BadgeGroup} from '../../shared/BadgeInfo';
 import {AccionesItem} from '../../shared/AccionesItem';
 import type {Proyecto, Tarea, DatosEdicionTarea, NivelUrgencia} from '../../../types/dashboard';
-import type {OpcionMenu} from '../../shared/MenuContextual';
 import {obtenerTextoFechaLimite, obtenerVarianteFechaLimite, formatearFechaCorta} from '../../../utils/fecha';
 import {obtenerTextoPrioridad} from '../../../utils/constantes';
+import {useListaProyectos} from '../../../hooks/dashboard/useListaProyectos';
 
 /* Mapa de prioridad a valor numérico para ordenamiento (menor = más prioritario) */
 const MAPA_VALOR_PRIORIDAD: Record<string, number> = {muy_alta: 0, alta: 1, media: 2, baja: 3};
@@ -29,13 +29,6 @@ function obtenerClasePrioridad(prioridad: string): string {
         case 'baja': return 'etiquetaBaja';
         default: return 'etiquetaMedia';
     }
-}
-
-interface MenuContextoProyecto {
-    visible: boolean;
-    x: number;
-    y: number;
-    proyectoId: number | null;
 }
 
 interface ListaProyectosProps {
@@ -209,91 +202,7 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
 }
 
 export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSeleccionarProyecto, proyectoSeleccionadoId, onEditarProyecto, onEliminarProyecto, onCambiarEstadoProyecto, onCompartirProyecto, estaCompartido, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, ocultarCompletados = false, ocultarTareasCompletadas = false, ordenDefecto = 'fecha', mostrarProgreso = true, modoCompacto = false, onAbrirModalCrear}: ListaProyectosProps): JSX.Element {
-    const [menuContexto, setMenuContexto] = useState<MenuContextoProyecto>({visible: false, x: 0, y: 0, proyectoId: null});
-
-    /* Toggle: si ya está seleccionado, deseleccionar */
-    const toggleProyecto = (id: number) => {
-        if (proyectoSeleccionadoId === id) {
-            onSeleccionarProyecto?.(null);
-        } else {
-            onSeleccionarProyecto?.(id);
-        }
-    };
-
-    /* Manejar click derecho en proyecto */
-    const manejarContextMenu = useCallback((e: React.MouseEvent, proyectoId: number) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setMenuContexto({visible: true, x: e.clientX, y: e.clientY, proyectoId});
-    }, []);
-
-    /* Cerrar menu contextual */
-    const cerrarMenuContexto = useCallback(() => {
-        setMenuContexto(prev => ({...prev, visible: false, proyectoId: null}));
-    }, []);
-
-    /* Construir opciones del menu contextual */
-    const obtenerOpcionesMenu = useCallback((): OpcionMenu[] => {
-        if (!menuContexto.proyectoId) return [];
-        const proyecto = proyectos.find(p => p.id === menuContexto.proyectoId);
-        if (!proyecto) return [];
-
-        const opciones: OpcionMenu[] = [
-            {id: 'editar', etiqueta: 'Editar proyecto', icono: <Edit size={14} />, separadorDespues: true}
-            /* TO-DO: Habilitar cuando sistema de compartir esté listo
-            {id: 'compartir', etiqueta: 'Compartir proyecto', icono: <Share2 size={14} />, separadorDespues: true}
-            */
-        ];
-
-        /* Opciones de estado segun el estado actual */
-        if (proyecto.estado !== 'activo') {
-            opciones.push({id: 'estado-activo', etiqueta: 'Marcar como activo', icono: <PlayCircle size={14} />});
-        }
-        if (proyecto.estado !== 'pausado') {
-            opciones.push({id: 'estado-pausado', etiqueta: 'Pausar proyecto', icono: <PauseCircle size={14} />});
-        }
-        if (proyecto.estado !== 'completado') {
-            opciones.push({id: 'estado-completado', etiqueta: 'Marcar como completado', icono: <CheckCircle size={14} />, separadorDespues: true});
-        } else {
-            opciones[opciones.length - 1].separadorDespues = true;
-        }
-
-        opciones.push({id: 'eliminar', etiqueta: 'Eliminar proyecto', icono: <Trash2 size={14} />, peligroso: true});
-
-        return opciones;
-    }, [menuContexto.proyectoId, proyectos]);
-
-    /* Manejar seleccion del menu contextual */
-    const manejarSeleccionMenu = useCallback(
-        (opcionId: string) => {
-            if (!menuContexto.proyectoId) return;
-            const proyecto = proyectos.find(p => p.id === menuContexto.proyectoId);
-            if (!proyecto) return;
-
-            switch (opcionId) {
-                case 'editar':
-                    onEditarProyecto?.(proyecto);
-                    break;
-                case 'compartir':
-                    onCompartirProyecto?.(proyecto);
-                    break;
-                case 'eliminar':
-                    onEliminarProyecto?.(proyecto.id);
-                    break;
-                case 'estado-activo':
-                    onCambiarEstadoProyecto?.(proyecto.id, 'activo');
-                    break;
-                case 'estado-pausado':
-                    onCambiarEstadoProyecto?.(proyecto.id, 'pausado');
-                    break;
-                case 'estado-completado':
-                    onCambiarEstadoProyecto?.(proyecto.id, 'completado');
-                    break;
-            }
-            cerrarMenuContexto();
-        },
-        [menuContexto.proyectoId, proyectos, onEditarProyecto, onEliminarProyecto, onCambiarEstadoProyecto, onCompartirProyecto, cerrarMenuContexto]
-    );
+    const {menuContexto, toggleProyecto, manejarContextMenu, cerrarMenuContexto, obtenerOpcionesMenu, manejarSeleccionMenu} = useListaProyectos({proyectos, proyectoSeleccionadoId, onSeleccionarProyecto, onEditarProyecto, onEliminarProyecto, onCambiarEstadoProyecto, onCompartirProyecto});
 
     return (
         <>

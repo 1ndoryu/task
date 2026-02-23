@@ -6,11 +6,11 @@
  * Fase 9.2.4: Seccion de responsables para proyectos/tareas
  */
 
-import {useState, useCallback} from 'react';
 import {User, UserPlus, X, Crown, Edit3, Eye} from 'lucide-react';
 import {MenuFlotante} from './MenuFlotante';
 import type {Participante, CompaneroEquipo, RolCompartido} from '../../types/dashboard';
 import {Boton} from '../ui';
+import {useSeccionResponsables} from '../../hooks/dashboard/useSeccionResponsables';
 
 interface SeccionResponsablesProps {
     /* Participantes actuales del elemento */
@@ -32,73 +32,7 @@ interface SeccionResponsablesProps {
 }
 
 export function SeccionResponsables({participantes, companeros = [], onAgregar, onRemover, onCambiarRol, puedeGestionar = false, etiqueta = 'Responsables', modoCompacto = false}: SeccionResponsablesProps): JSX.Element {
-    const [menuAgregarAbierto, setMenuAgregarAbierto] = useState(false);
-    const [menuParticipanteAbierto, setMenuParticipanteAbierto] = useState<number | null>(null);
-    const [rolSeleccionado, setRolSeleccionado] = useState<RolCompartido>('colaborador');
-    const [menuAgregarPos, setMenuAgregarPos] = useState({x: 0, y: 0});
-    const [menuParticipantePos, setMenuParticipantePos] = useState({x: 0, y: 0});
-
-    /* Filtrar companeros que ya son participantes */
-    const companeroDisponibles = companeros.filter(comp => !participantes.some(p => p.usuarioId === comp.companeroId));
-
-    /* Cerrar menus al hacer clic fuera */
-    /* Handlers para abrir menus calculando posicion */
-    const toggleMenuAgregar = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!menuAgregarAbierto) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            setMenuAgregarPos({x: rect.left, y: rect.bottom + 4});
-        }
-        setMenuAgregarAbierto(!menuAgregarAbierto);
-        setMenuParticipanteAbierto(null); // Cerrar otros
-    };
-
-    const toggleMenuParticipante = (e: React.MouseEvent, participanteId: number) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (menuParticipanteAbierto !== participanteId) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            setMenuParticipantePos({x: rect.left, y: rect.bottom + 4});
-            setMenuParticipanteAbierto(participanteId);
-        } else {
-            setMenuParticipanteAbierto(null);
-        }
-        setMenuAgregarAbierto(false); // Cerrar otros
-    };
-
-    const manejarAgregarParticipante = useCallback(
-        (companeroId: number) => {
-            if (onAgregar) {
-                onAgregar(companeroId, rolSeleccionado);
-            }
-            setMenuAgregarAbierto(false);
-            setRolSeleccionado('colaborador');
-        },
-        [onAgregar, rolSeleccionado]
-    );
-
-    const manejarRemoverParticipante = useCallback(
-        (participanteId: number) => {
-            if (onRemover) {
-                onRemover(participanteId);
-            }
-            setMenuParticipanteAbierto(null);
-        },
-        [onRemover]
-    );
-
-    const manejarCambiarRol = useCallback(
-        (participanteId: number, nuevoRol: RolCompartido) => {
-            if (onCambiarRol) {
-                onCambiarRol(participanteId, nuevoRol);
-            }
-            setMenuParticipanteAbierto(null);
-        },
-        [onCambiarRol]
-    );
+    const {menuAgregarAbierto, setMenuAgregarAbierto, menuParticipanteAbierto, setMenuParticipanteAbierto, rolSeleccionado, setRolSeleccionado, menuAgregarPos, menuParticipantePos, companeroDisponibles, toggleMenuAgregar, toggleMenuParticipante, manejarAgregarParticipante, manejarRemoverParticipante, manejarCambiarRol} = useSeccionResponsables({participantes, companeros, onAgregar, onRemover, onCambiarRol});
 
     const obtenerIconoRol = (rol: RolCompartido) => {
         switch (rol) {
