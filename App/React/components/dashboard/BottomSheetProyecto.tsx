@@ -12,13 +12,12 @@
  * - Badges de propiedades seleccionadas
  */
 
-import {useState, useRef, useEffect, useMemo} from 'react';
 import {Send, Flag, Hash, Calendar} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import {Input, Boton} from '../ui';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {OPCIONES_PRIORIDAD, OPCIONES_URGENCIA, OPCIONES_FECHA_PROYECTO, obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
-import {calcularFechaDesdeOpcion} from '../../utils/fecha';
+import {useBottomSheetProyecto} from '../../hooks/dashboard/useBottomSheetProyecto';
 
 interface BottomSheetProyectoProps {
     estaAbierto: boolean;
@@ -39,100 +38,8 @@ export interface DatosProyecto {
     fechaLimite?: string;
 }
 
-/* Tipos de modales de selección */
-type ModalActivo = 'prioridad' | 'urgencia' | 'fecha' | null;
-
 export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: BottomSheetProyectoProps): JSX.Element | null {
-    const [nombre, setNombre] = useState('');
-    const [prioridad, setPrioridad] = useState<NivelPrioridad | undefined>(valoresIniciales.prioridad);
-    const [urgencia, setUrgencia] = useState<NivelUrgencia | undefined>(valoresIniciales.urgencia);
-    const [fechaLimite, setFechaLimite] = useState<string | undefined>(undefined);
-    const [cargando, setCargando] = useState(false);
-    const [modalActivo, setModalActivo] = useState<ModalActivo>(null);
-
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    /* Autofocus al abrir */
-    useEffect(() => {
-        if (estaAbierto && inputRef.current) {
-            setTimeout(() => inputRef.current?.focus(), 100);
-        }
-    }, [estaAbierto]);
-
-    /* Reset al cerrar */
-    useEffect(() => {
-        if (!estaAbierto) {
-            setNombre('');
-            setPrioridad(valoresIniciales.prioridad);
-            setUrgencia(valoresIniciales.urgencia);
-            setFechaLimite(undefined);
-            setModalActivo(null);
-        }
-    }, [estaAbierto, valoresIniciales]);
-
-    const manejarGuardar = async () => {
-        if (!nombre.trim() || cargando) return;
-
-        setCargando(true);
-        try {
-            await onGuardar({
-                nombre,
-                prioridad,
-                urgencia,
-                fechaLimite
-            });
-            onCerrar();
-        } catch (error) {
-            console.error('Error al crear proyecto:', error);
-        } finally {
-            setCargando(false);
-        }
-    };
-
-    /* Construir lista de badges activos */
-    const badgesActivos = useMemo(() => {
-        const badges = [];
-        if (prioridad) {
-            badges.push({
-                id: 'prioridad',
-                etiqueta: obtenerTextoPrioridad(prioridad) || prioridad,
-                icono: <Flag size={10} />,
-                variante: 'prioridad' as const
-            });
-        }
-        if (urgencia) {
-            badges.push({
-                id: 'urgencia',
-                etiqueta: obtenerTextoUrgencia(urgencia) || urgencia,
-                icono: <Hash size={10} />,
-                variante: 'urgencia' as const
-            });
-        }
-        if (fechaLimite) {
-            badges.push({
-                id: 'fecha',
-                etiqueta: fechaLimite,
-                icono: <Calendar size={10} />,
-                variante: 'fecha' as const
-            });
-        }
-        return badges;
-    }, [prioridad, urgencia, fechaLimite]);
-
-    /* Manejar eliminación de badge */
-    const manejarEliminarBadge = (id: string) => {
-        switch (id) {
-            case 'prioridad':
-                setPrioridad(undefined);
-                break;
-            case 'urgencia':
-                setUrgencia(undefined);
-                break;
-            case 'fecha':
-                setFechaLimite(undefined);
-                break;
-        }
-    };
+    const {nombre, setNombre, prioridad, urgencia, fechaLimite, cargando, modalActivo, setModalActivo, inputRef, badgesActivos, manejarGuardar, manejarEliminarBadge, manejarSeleccionFecha, setPrioridad, setUrgencia} = useBottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIniciales});
 
     if (!estaAbierto) return null;
 
@@ -178,13 +85,7 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
                 titulo="Fecha Límite"
                 opciones={OPCIONES_FECHA_PROYECTO}
                 valorActual={undefined}
-                onSeleccionar={valor => {
-                    if (valor) {
-                        setFechaLimite(calcularFechaDesdeOpcion(valor));
-                    } else {
-                        setFechaLimite(undefined);
-                    }
-                }}
+                onSeleccionar={manejarSeleccionFecha}
                 onCerrar={() => setModalActivo(null)}
                 textoLimpiar="Sin fecha"
             />

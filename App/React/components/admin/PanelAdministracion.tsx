@@ -6,7 +6,6 @@
  * Incluye tab de feedback de usuarios premium.
  */
 
-import {useEffect, useState} from 'react';
 import {Users, MessageSquare} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {Boton} from '../ui/Boton';
@@ -15,10 +14,7 @@ import {ListaUsuarios} from './ListaUsuarios';
 import {ResumenAdmin} from './ResumenAdmin';
 import {DetalleUsuario} from './DetalleUsuario';
 import {ListaFeedbackAdmin} from './ListaFeedbackAdmin';
-import {useAdministracion} from '../../hooks/useAdministracion';
-import type {UsuarioAdmin} from '../../types/dashboard';
-
-type TabAdmin = 'usuarios' | 'feedback';
+import {usePanelAdministracion} from '../../hooks/dashboard/usePanelAdministracion';
 
 interface PanelAdministracionProps {
     estaAbierto: boolean;
@@ -26,73 +22,7 @@ interface PanelAdministracionProps {
 }
 
 export function PanelAdministracion({estaAbierto, onCerrar}: PanelAdministracionProps): JSX.Element | null {
-    const admin = useAdministracion();
-    const [usuarioDetalle, setUsuarioDetalle] = useState<UsuarioAdmin | null>(null);
-    const [cargandoAccion, setCargandoAccion] = useState<number | null>(null);
-    const [tabActiva, setTabActiva] = useState<TabAdmin>('usuarios');
-
-    /* Cargar datos al abrir el panel */
-    useEffect(() => {
-        if (estaAbierto) {
-            admin.cargarUsuarios();
-            admin.cargarResumen();
-        }
-    }, [estaAbierto]);
-
-    /* Manejar activar premium */
-    const manejarActivarPremium = async (userId: number, duracion?: number) => {
-        setCargandoAccion(userId);
-        const resultado = await admin.activarPremium(userId, duracion);
-        setCargandoAccion(null);
-
-        if (resultado.exito && usuarioDetalle?.id === userId) {
-            const actualizado = await admin.obtenerDetalleUsuario(userId);
-            if (actualizado) {
-                setUsuarioDetalle(actualizado);
-            }
-        }
-    };
-
-    /* Manejar cancelar premium */
-    const manejarCancelarPremium = async (userId: number) => {
-        setCargandoAccion(userId);
-        const resultado = await admin.cancelarPremium(userId);
-        setCargandoAccion(null);
-
-        if (resultado.exito && usuarioDetalle?.id === userId) {
-            const actualizado = await admin.obtenerDetalleUsuario(userId);
-            if (actualizado) {
-                setUsuarioDetalle(actualizado);
-            }
-        }
-    };
-
-    /* Manejar extender trial */
-    const manejarExtenderTrial = async (userId: number, dias: number) => {
-        setCargandoAccion(userId);
-        const resultado = await admin.extenderTrial(userId, dias);
-        setCargandoAccion(null);
-
-        if (resultado.exito && usuarioDetalle?.id === userId) {
-            const actualizado = await admin.obtenerDetalleUsuario(userId);
-            if (actualizado) {
-                setUsuarioDetalle(actualizado);
-            }
-        }
-    };
-
-    /* Manejar ver detalle */
-    const manejarVerDetalle = async (usuario: UsuarioAdmin) => {
-        const detalle = await admin.obtenerDetalleUsuario(usuario.id);
-        if (detalle) {
-            setUsuarioDetalle(detalle);
-        }
-    };
-
-    /* Cerrar detalle */
-    const cerrarDetalle = () => {
-        setUsuarioDetalle(null);
-    };
+    const {admin, usuarioDetalle, cargandoAccion, tabActiva, setTabActiva, manejarActivarPremium, manejarCancelarPremium, manejarExtenderTrial, manejarVerDetalle, cerrarDetalle} = usePanelAdministracion({estaAbierto});
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Panel de Administración" claseExtra="panelAdministracionModal">

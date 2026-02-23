@@ -11,9 +11,9 @@
  * - Contiene navegación y perfil de usuario
  */
 
-import {useEffect, useCallback, useRef} from 'react';
 import {Crown} from 'lucide-react';
 import {Boton} from '../ui';
+import {useDrawerMovil} from '../../hooks/dashboard/useDrawerMovil';
 import type {InfoSuscripcion} from '../../types/dashboard';
 
 export interface OpcionDrawer {
@@ -43,75 +43,7 @@ export interface DrawerMovilProps {
 }
 
 export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opciones, onSeleccionar, opcionesSecundarias, onClickPerfil, onClickPlan}: DrawerMovilProps): JSX.Element | null {
-    const drawerRef = useRef<HTMLDivElement>(null);
-    const inicioToqueRef = useRef<number>(0);
-
-    /* Cerrar con Escape */
-    const manejarTecla = useCallback(
-        (evento: KeyboardEvent) => {
-            if (evento.key === 'Escape') {
-                onCerrar();
-            }
-        },
-        [onCerrar]
-    );
-
-    /* Bloquear scroll del body cuando está abierto y agregar clase para ocultar nav */
-    useEffect(() => {
-        if (estaAbierto) {
-            document.addEventListener('keydown', manejarTecla);
-            document.body.style.overflow = 'hidden';
-            document.body.classList.add('drawerAbierto');
-        }
-
-        return () => {
-            document.removeEventListener('keydown', manejarTecla);
-            document.body.style.overflow = '';
-            document.body.classList.remove('drawerAbierto');
-        };
-    }, [estaAbierto, manejarTecla]);
-
-    /* Swipe para cerrar */
-    const manejarTouchStart = (evento: React.TouchEvent) => {
-        inicioToqueRef.current = evento.touches[0].clientX;
-    };
-
-    const manejarTouchEnd = (evento: React.TouchEvent) => {
-        const finToque = evento.changedTouches[0].clientX;
-        const diferencia = inicioToqueRef.current - finToque;
-
-        /* Si deslizó más de 100px hacia la izquierda, cerrar */
-        if (diferencia > 100) {
-            onCerrar();
-        }
-    };
-
-    const manejarClickOverlay = (evento: React.MouseEvent<HTMLDivElement>) => {
-        if (evento.target === evento.currentTarget) {
-            onCerrar();
-        }
-    };
-
-    const manejarClickOpcion = (opcionId: string) => {
-        onSeleccionar(opcionId);
-        onCerrar();
-    };
-
-    /* Click en foto/nombre abre perfil */
-    const manejarClickPerfil = () => {
-        if (onClickPerfil) {
-            onClickPerfil();
-            onCerrar();
-        }
-    };
-
-    /* Click en badge de plan abre modal suscripción */
-    const manejarClickPlan = () => {
-        if (onClickPlan) {
-            onClickPlan();
-            onCerrar();
-        }
-    };
+    const {drawerRef, manejarTouchStart, manejarTouchEnd, manejarClickOverlay, manejarClickOpcion, manejarClickPerfil, manejarClickPlan} = useDrawerMovil({estaAbierto, onCerrar, onSeleccionar, onClickPerfil, onClickPlan});
 
     /* Determinar badge del plan - ahora clickeable */
     const obtenerBadgePlan = () => {
