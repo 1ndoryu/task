@@ -2,13 +2,14 @@
  * SelectorTags
  * Selector para gestionar etiquetas (tags)
  * Estilo Linear: pills removibles + input para agregar
+ * Lógica extraída a useSelectorTags
  *
  * Fase 9.7.3: Organización de Propiedades en Tareas
  */
 
-import {useState, useRef, useEffect} from 'react';
 import {Tag, Plus, X} from 'lucide-react';
 import {Boton} from '../ui';
+import {useSelectorTags} from '../../hooks/shared/useSelectorTags';
 
 interface SelectorTagsProps {
     tags: string[];
@@ -17,63 +18,7 @@ interface SelectorTagsProps {
 }
 
 export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta...'}: SelectorTagsProps): JSX.Element {
-    /* Normalizar tags - validación defensiva */
-    const tagsNormalizados = Array.isArray(tags) ? tags : [];
-    const [mostrandoInput, setMostrandoInput] = useState(false);
-    const [nuevoTag, setNuevoTag] = useState('');
-    const inputRef = useRef<HTMLInputElement>(null);
-    const contenedorRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (mostrandoInput && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [mostrandoInput]);
-
-    useEffect(() => {
-        const manejarClickFuera = (e: MouseEvent) => {
-            if (contenedorRef.current && !contenedorRef.current.contains(e.target as Node)) {
-                setMostrandoInput(false);
-                setNuevoTag('');
-            }
-        };
-
-        if (mostrandoInput) {
-            document.addEventListener('mousedown', manejarClickFuera);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', manejarClickFuera);
-        };
-    }, [mostrandoInput]);
-
-    const agregarTag = () => {
-        if (nuevoTag.trim()) {
-            const tagLimpio = nuevoTag.trim();
-            if (!tagsNormalizados.includes(tagLimpio)) {
-                onTagsChange([...tagsNormalizados, tagLimpio]);
-            }
-
-            setNuevoTag('');
-            /* Mantener input abierto para agregar mas tags */
-            /* setMostrandoInput(false); */
-            if (inputRef.current) inputRef.current.focus();
-        }
-    };
-
-    const removerTag = (tagARemover: string) => {
-        onTagsChange(tagsNormalizados.filter(t => t !== tagARemover));
-    };
-
-    const manejarKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            agregarTag();
-        } else if (e.key === 'Escape') {
-            setMostrandoInput(false);
-            setNuevoTag('');
-        }
-    };
+    const {tagsNormalizados, mostrandoInput, nuevoTag, setNuevoTag, inputRef, contenedorRef, agregarTag, removerTag, manejarKeyDown, abrirInput, manejarBlur} = useSelectorTags({tags, onTagsChange});
 
     return (
         <div className="propiedadesCompactas__contenido" ref={contenedorRef} style={{flexWrap: 'wrap'}}>
@@ -103,13 +48,11 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
                             onChange={e => setNuevoTag(e.target.value)}
                             onKeyDown={manejarKeyDown}
                             placeholder="Etiqueta"
-                            onBlur={() => {
-                                if (!nuevoTag) setMostrandoInput(false);
-                            }}
+                            onBlur={manejarBlur}
                         />
                     </div>
                 ) : (
-                    <Boton type="button" variante="ghost" claseAdicional="pillOpcion pillOpcion--vacio" onClick={() => setMostrandoInput(true)} title="Agregar etiqueta">
+                    <Boton type="button" variante="ghost" claseAdicional="pillOpcion pillOpcion--vacio" onClick={abrirInput} title="Agregar etiqueta">
                         <Plus size={14} />
                         <span>Etiqueta</span>
                     </Boton>
