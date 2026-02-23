@@ -102,15 +102,7 @@
     transform: scale(1.05);
 }
 
-.botonDecrementar:hover {
-    border-color: #fc8181;
-    color: #fc8181;
-}
-
-.botonIncrementar:hover {
-    border-color: #68d391;
-    color: #68d391;
-}
+/* Hover botones migados a variantes atomicas (Fase 6.5) */
 
 .valorContador {
     font-size: 2.5rem;

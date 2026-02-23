@@ -137,34 +137,7 @@
     /* Fondo transparente para mantener efecto glass */
 }
 
-.creacionRapidaBotonOpcion {
-    background: transparent;
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioSm);
-    padding: 2px 8px; /* Más compacto */
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno); /* Texto más pequeño */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all var(--dashboard-transicionRapida);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    height: 22px;
-}
-
-.creacionRapidaBotonOpcion:hover:not(:disabled) {
-    background: var(--dashboard-superposicionSutil);
-    color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordePrincipal);
-}
-
-.creacionRapidaBotonOpcion span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-}
+/* Botones opcion migrados a Boton variante="opcion" (Fase 6.5) */
 
 .creacionRapidaInfo {
     color: var(--dashboard-textoApagado);

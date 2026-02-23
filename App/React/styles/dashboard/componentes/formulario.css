@@ -156,27 +156,7 @@
     color: var(--dashboard-textoIndice);
 }
 
-.formularioBotonAgregarTag {
-    background: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoMuyApagado);
-    cursor: pointer;
-    padding: var(--dashboard-espacioXs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--dashboard-transicionNormal);
-}
-
-.formularioBotonAgregarTag:hover:not(:disabled) {
-    border-color: var(--dashboard-textoMuyApagado);
-    color: var(--dashboard-textoSecundario);
-}
-
-.formularioBotonAgregarTag:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
+/* Botones tag migrados a variantes atomicas (Fase 6.5) */
 
 .formularioTagsLista {
     display: flex;
@@ -197,21 +177,7 @@
     background-color: var(--dashboard-fondoPrincipal);
 }
 
-.formularioTagEliminar {
-    background: transparent;
-    border: none;
-    color: var(--dashboard-textoMuyApagado);
-    cursor: pointer;
-    padding: 0;
-    margin-left: var(--dashboard-espacioXs);
-    font-size: 10px;
-    line-height: 1;
-    transition: color var(--dashboard-transicionNormal);
-}
-
-.formularioTagEliminar:hover {
-    color: var(--dashboard-estadoAlta);
-}
+/* Boton eliminar tag migrado a Boton variante="icono" (Fase 6.5) */
 
 /* 
  * BOTONES DE ACCION 

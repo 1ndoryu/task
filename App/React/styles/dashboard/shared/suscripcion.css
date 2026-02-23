@@ -292,65 +292,7 @@
     padding-top: var(--dashboard-espacioMd);
 }
 
-.modalUpgrade__boton {
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
-    border-radius: var(--dashboard-radioSm);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoBase);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-    border: 1px solid transparent;
-    text-align: center;
-    text-transform: uppercase;
-}
-
-.modalUpgrade__boton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Botón primario (Obtener Premium) - Dorado */
-.modalUpgrade__boton--primario {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: #000;
-    border-color: #fbbf24;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.modalUpgrade__boton--primario:hover:not(:disabled) {
-    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
-}
-
-/* Botón trial - Azul */
-.modalUpgrade__boton--trial {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.modalUpgrade__boton--trial:hover:not(:disabled) {
-    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
-}
-
-/* Botón secundario - Ghost */
-.modalUpgrade__boton--secundario {
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    border-color: var(--dashboard-bordePrincipal);
-}
-
-.modalUpgrade__boton--secundario:hover:not(:disabled) {
-    color: var(--dashboard-textoNormal);
-    border-color: var(--dashboard-textoSecundario);
-    background: var(--dashboard-fondoSecundario);
-}
+/* Botones de accion migrados a variantes atomicas de Boton (Fase 6.5) */
 
 /* 
  * Selector de planes (mensual/anual)

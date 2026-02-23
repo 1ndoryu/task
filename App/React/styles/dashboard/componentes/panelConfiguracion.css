@@ -290,30 +290,7 @@
     display: none !important;
 }
 
-.panelConfiguracionPestana {
-    flex: 1;
-    padding: var(--dashboard-espacioMd);
-    background: transparent;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoBase);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-    border-bottom: 2px solid transparent;
-}
-
-.panelConfiguracionPestana:hover {
-    color: var(--dashboard-textoNormal);
-    background-color: var(--dashboard-fondoHover);
-}
-
-.panelConfiguracionPestana--activa {
-    color: var(--dashboard-textoActivo);
-    border-bottom-color: var(--dashboard-textoActivo);
-}
+/* Pestanas migradas a Boton variante="pestaña" (Fase 6.5) */
 
 /* 
  * SUBTAREAS

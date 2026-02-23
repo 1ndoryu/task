@@ -663,24 +663,7 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
-.feedbackItemBotonLeido {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border: 1px solid var(--dashboard-estadoExito);
-    background: transparent;
-    color: var(--dashboard-estadoExito);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    border-radius: 3px;
-    cursor: pointer;
-    transition: var(--dashboard-transicionRapida);
-}
-
-.feedbackItemBotonLeido:hover {
-    background: var(--dashboard-estadoExitoFondo);
-}
+/* Boton leido migrado a Boton variante="ghost" (Fase 6.5) */
 
 .feedbackItemLeidoIndicador {
     display: flex;

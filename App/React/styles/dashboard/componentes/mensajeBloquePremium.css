@@ -37,19 +37,4 @@
     line-height: 1.5;
 }
 
-.mensajeBloquePremiumBoton {
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoNormal);
-    background: var(--dashboard-fondoHover);
-    border: 1px solid var(--dashboard-bordeSutil);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-    border-radius: var(--dashboard-radioSm);
-}
-
-.mensajeBloquePremiumBoton:hover {
-    background: var(--dashboard-superposicionSutil);
-    border-color: var(--dashboard-textoMuyApagado);
-}
+/* Boton migrado a Boton variante="primario" (Fase 6.5) */

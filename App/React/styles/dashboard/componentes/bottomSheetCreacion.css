@@ -598,26 +598,7 @@
     white-space: nowrap;
 }
 
-.badgesPropiedad__badgeEliminar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 14px;
-    height: 14px;
-    padding: 0;
-    color: var(--dashboard-textoApagado);
-    background: none;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-    margin-left: 2px;
-}
-
-.badgesPropiedad__badgeEliminar:hover {
-    color: var(--dashboard-textoActivo);
-    background: var(--dashboard-fondoHover);
-}
+/* Boton eliminar badge migrado a Boton variante="icono" (Fase 6.5) */
 
 /* Variantes de color para badges - Usan variables de estado existentes */
 .badgesPropiedad__badge--proyecto {

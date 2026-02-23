@@ -77,29 +77,7 @@
     letter-spacing: -0.02em;
 }
 
-.landingNavBoton {
-    padding: 0 var(--dashboard-espacioMd);
-    height: 30px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    font-family: inherit;
-    color: var(--dashboard-botonPrimarioTexto);
-    background: var(--dashboard-botonPrimarioFondo);
-    border: 1px solid var(--dashboard-botonPrimarioFondo);
-    border-radius: var(--dashboard-radioSm);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.landingNavBoton:hover {
-    background: var(--dashboard-botonPrimarioHover);
-    border-color: var(--dashboard-botonPrimarioHover);
-    transform: translateY(-1px);
-    box-shadow: var(--dashboard-botonPrimarioSombra);
-}
+/* Boton landing migrado a Boton variante="primario" (Fase 6.5) */
 
 /* 
  * HERO SECTION 

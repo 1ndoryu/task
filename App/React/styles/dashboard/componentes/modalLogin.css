@@ -93,27 +93,7 @@
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
-.loginTab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: var(--dashboard-espacioMd);
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    font-size: var(--dashboard-tamanoBase);
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border-bottom: 2px solid transparent;
-}
-
-.loginTab.activo {
-    color: var(--dashboard-textoActivo);
-    border-bottom-color: var(--dashboard-textoActivo);
-}
-
-.loginTab:hover:not(.activo) {
-    color: var(--dashboard-textoActivo);
-}
+/* Tabs migrados a Boton variante="pestaña" (Fase 6.5) */
 
 /* 
  * Enlace Recuperar Contrasena

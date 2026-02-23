@@ -28,30 +28,7 @@
     }
 }
 
-/* Item de navegación */
-.navegacionInferiorItem {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    padding: var(--dashboard-espacioMd);
-    min-height: var(--dashboard-tamanoTactilMinimo);
-    transition:
-        color var(--dashboard-transicionRapida),
-        opacity var(--dashboard-transicionRapida);
-}
-
-.navegacionInferiorItem:active {
-    opacity: 0.7;
-}
-
-.navegacionInferiorItem--activo {
-    color: var(--dashboard-textoActivo);
-}
+/* Items de navegacion migrados a Boton variante="navegacion" (Fase 6.5) */
 
 /* Contenedor de icono con badge */
 .navegacionInferiorIconoConBadge {

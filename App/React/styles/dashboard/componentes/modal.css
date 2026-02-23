@@ -57,21 +57,7 @@
     flex: 1;
 }
 
-.modalBotonCerrar {
-    background: none;
-    border: none;
-    color: var(--dashboard-textoMuyApagado);
-    cursor: pointer;
-    padding: var(--dashboard-espacioXs);
-    transition: color var(--dashboard-transicionNormal);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modalBotonCerrar:hover {
-    color: var(--dashboard-textoActivo);
-}
+/* Botones cerrar/volver migrados a Boton variante="icono" (Fase 6.5) */
 
 .modalAccionesEncabezado {
     display: flex;
@@ -234,11 +220,6 @@
         gap: var(--dashboard-espacioXs);
     }
 
-    /* Ocultar boton X en movil, usar boton Volver del header */
-    .modalBotonCerrar {
-        display: none;
-    }
-
     .modalContenido {
         flex: 1;
         overflow-y: auto;
@@ -249,33 +230,6 @@
     /* Evitar scroll del body cuando modal esta abierto */
     body:has(.modalOverlay) {
         overflow: hidden;
-    }
-
-    /* 
-     * BOTON VOLVER COMPACTO - Fase 10.8.6
-     * Solo icono, sin texto, tamaño reducido
-     */
-    .modalBotonVolver {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        color: var(--dashboard-textoNormal);
-        cursor: pointer;
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        border-radius: var(--dashboard-radioSm);
-        transition:
-            color var(--dashboard-transicionRapida),
-            background var(--dashboard-transicionRapida);
-    }
-
-    .modalBotonVolver:hover,
-    .modalBotonVolver:active {
-        color: var(--dashboard-textoActivo);
-        background: var(--dashboard-superposicionClara);
     }
 
     /* 
