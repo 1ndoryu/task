@@ -3,41 +3,28 @@
 /**
  * Servicio de Adjuntos
  *
- * Gestiona archivos adjuntos físicos en el sistema de archivos.
- * Reemplaza el almacenamiento Base64 en BD por archivos en disco.
+ * Fachada que coordina la gestión de archivos adjuntos:
+ * - Subida y validación de archivos
+ * - Descarga y descifrado
+ * - Eliminación y listado
  *
- * Estructura de archivos:
- * /wp-content/uploads/glory-adjuntos/{user_id}/
- *   - {hash}.enc     ← Archivo cifrado (Premium)
- *   - {hash}.raw     ← Archivo sin cifrar (Free)
- *   - thumbs/{hash}.jpg  ← Thumbnails sin cifrar
+ * Delega operaciones específicas a sub-servicios:
+ * - AdjuntosTokenService: tokens HMAC de acceso
+ * - AdjuntosFileSystemService: operaciones de disco
+ * - AdjuntosCifradoFileService: cifrado/descifrado y cache
  *
  * @package App\Services
  */
 
 namespace App\Services;
 
-/* Tokens movidos desde AdjuntosApiController para eliminar dependencia circular */
-
 class AdjuntosService
 {
-    /* 
-     * Constantes de configuración
-     */
-    private const DIRECTORIO_BASE = 'glory-adjuntos';
-    private const DIRECTORIO_THUMBS = 'thumbs';
-    private const DIRECTORIO_CACHE = 'cache';
-    private const TAMAÑO_THUMBNAIL = 200;
     private const EXTENSION_CIFRADO = '.enc';
     private const EXTENSION_PLANO = '.raw';
-    private const CHUNK_SIZE = 8192; /* 8KB para stream cipher */
-    private const UMBRAL_STREAM = 1048576; /* 1MB - usar stream cipher para archivos mayores */
-    private const CACHE_TTL = 300; /* 5 minutos de vida del cache */
-    private const TOKEN_EXPIRACION = 3600; /* 1 hora de expiración del token */
+    private const DIRECTORIO_BASE = 'glory-adjuntos';
 
-    /* 
-     * Tipos MIME permitidos por categoría
-     */
+    /* Tipos MIME permitidos por categoría */
     private const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     private const TIPOS_AUDIO = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'];
     private const TIPOS_DOCUMENTO = [
@@ -50,141 +37,39 @@ class AdjuntosService
     private int $userId;
     private SuscripcionService $suscripcion;
     private ?CifradoService $cifradoService = null;
-    private string $rutaBase;
     private string $urlBase;
+    private AdjuntosFileSystemService $fileSystem;
+    private AdjuntosCifradoFileService $cifradoFile;
 
     public function __construct(int $userId)
     {
         $this->userId = $userId;
         $this->suscripcion = new SuscripcionService($userId);
-        $this->inicializarRutas();
-        $this->inicializarCifrado();
-    }
 
-    /**
-     * Inicializa las rutas del sistema de archivos
-     */
-    private function inicializarRutas(): void
-    {
+        /* Inicializar rutas */
         $uploadDir = wp_upload_dir();
-        $this->rutaBase = trailingslashit($uploadDir['basedir']) . self::DIRECTORIO_BASE;
+        $rutaBase = trailingslashit($uploadDir['basedir']) . self::DIRECTORIO_BASE;
         $this->urlBase = trailingslashit($uploadDir['baseurl']) . self::DIRECTORIO_BASE;
-    }
 
-    /**
-     * Inicializa el servicio de cifrado si está habilitado y es premium
-     */
-    private function inicializarCifrado(): void
-    {
-        /* Solo usuarios Premium pueden cifrar archivos */
-        if (!$this->suscripcion->esPremium()) {
-            return;
-        }
-
-        if (CifradoService::estaHabilitado($this->userId)) {
+        /* Inicializar cifrado si es premium y está habilitado */
+        if ($this->suscripcion->esPremium() && CifradoService::estaHabilitado($userId)) {
             try {
-                $this->cifradoService = new CifradoService($this->userId);
+                $this->cifradoService = new CifradoService($userId);
             } catch (\Exception $e) {
                 error_log('[AdjuntosService] Error inicializando cifrado: ' . $e->getMessage());
             }
         }
+
+        /* Crear sub-servicios */
+        $this->fileSystem = new AdjuntosFileSystemService($userId, $rutaBase);
+        $this->cifradoFile = new AdjuntosCifradoFileService(
+            $this->cifradoService,
+            $this->fileSystem->getRutaUsuario(),
+            $this->fileSystem->getRutaCache()
+        );
     }
 
-    /**
-     * Obtiene la ruta del directorio del usuario
-     */
-    private function getRutaUsuario(): string
-    {
-        return trailingslashit($this->rutaBase) . $this->userId;
-    }
-
-    /**
-     * Obtiene la ruta del directorio de thumbnails del usuario
-     */
-    private function getRutaThumbnails(): string
-    {
-        return trailingslashit($this->getRutaUsuario()) . self::DIRECTORIO_THUMBS;
-    }
-
-    /**
-     * Obtiene la ruta del directorio de cache del usuario
-     * Los archivos en cache se eliminan automáticamente después de TTL
-     */
-    private function getRutaCache(): string
-    {
-        return trailingslashit($this->getRutaUsuario()) . self::DIRECTORIO_CACHE;
-    }
-
-    /**
-     * Crea los directorios necesarios si no existen
-     */
-    private function asegurarDirectorios(): bool
-    {
-        $directorios = [
-            $this->rutaBase,
-            $this->getRutaUsuario(),
-            $this->getRutaThumbnails(),
-            $this->getRutaCache()
-        ];
-
-        foreach ($directorios as $dir) {
-            if (!file_exists($dir)) {
-                if (!wp_mkdir_p($dir)) {
-                    error_log("[AdjuntosService] No se pudo crear directorio: {$dir}");
-                    return false;
-                }
-
-                /* Proteger directorios con .htaccess */
-                $this->protegerDirectorio($dir);
-            }
-        }
-
-        /* Caso especial: el directorio de thumbnails permite acceso a imágenes
-         * para que se puedan previsualizar sin pasar por la API */
-        $thumbsHtaccess = trailingslashit($this->getRutaThumbnails()) . '.htaccess';
-        if (!file_exists($thumbsHtaccess)) {
-            $reglasThumb = "Order Deny,Allow\nDeny from all\n<FilesMatch \"\\.(jpg|jpeg|png|gif|webp)$\">\n    Allow from all\n</FilesMatch>\n";
-            file_put_contents($thumbsHtaccess, $reglasThumb);
-        }
-
-        return true;
-    }
-
-    /**
-     * Protege un directorio con .htaccess y index.php
-     * Bloquea acceso directo HTTP a todos los archivos del directorio.
-     * Solo la API puede servir archivos, garantizando que se verifique autenticación.
-     */
-    private function protegerDirectorio(string $directorio): void
-    {
-        /* Archivo index.php vacío para evitar listado de directorio */
-        $index = trailingslashit($directorio) . 'index.php';
-        if (!file_exists($index)) {
-            file_put_contents($index, '<?php // Silence is golden');
-        }
-
-        /* .htaccess para bloquear acceso directo a TODOS los archivos */
-        $htaccess = trailingslashit($directorio) . '.htaccess';
-        if (!file_exists($htaccess)) {
-            $reglas = "Order Deny,Allow\nDeny from all\n";
-            file_put_contents($htaccess, $reglas);
-        }
-    }
-
-    /**
-     * Genera un nombre único para el archivo basado en hash
-     */
-    private function generarNombreArchivo(string $nombreOriginal): string
-    {
-        $extension = pathinfo($nombreOriginal, PATHINFO_EXTENSION);
-        $hash = wp_generate_uuid4();
-
-        return $hash . ($extension ? ".{$extension}" : '');
-    }
-
-    /**
-     * Determina el tipo de adjunto basado en MIME
-     */
+    /** Determina el tipo de adjunto basado en MIME */
     public function determinarTipo(string $mimeType): string
     {
         if (in_array($mimeType, self::TIPOS_IMAGEN)) {
@@ -193,150 +78,55 @@ class AdjuntosService
         if (in_array($mimeType, self::TIPOS_AUDIO)) {
             return 'audio';
         }
-        if (in_array($mimeType, self::TIPOS_DOCUMENTO)) {
-            return 'archivo';
-        }
-
         return 'archivo';
     }
 
-    /**
-     * Valida el tipo MIME del archivo
-     */
+    /** Valida el tipo MIME del archivo */
     public function validarTipoMime(string $mimeType): bool
     {
-        $permitidos = array_merge(
-            self::TIPOS_IMAGEN,
-            self::TIPOS_AUDIO,
-            self::TIPOS_DOCUMENTO
-        );
-
+        $permitidos = array_merge(self::TIPOS_IMAGEN, self::TIPOS_AUDIO, self::TIPOS_DOCUMENTO);
         return in_array($mimeType, $permitidos);
-    }
-
-    /* ---------------------------------------------------------------
-     * Token de acceso a archivos (movido desde AdjuntosApiController)
-     * --------------------------------------------------------------- */
-
-    /**
-     * Genera un token HMAC firmado para acceso a archivo
-     */
-    public static function generarToken(int $userId, string $file, int $exp): string
-    {
-        try {
-            $clave = self::obtenerClaveToken();
-            $datos = "{$userId}:{$file}:{$exp}";
-
-            return hash_hmac('sha256', $datos, $clave);
-        } catch (\Throwable $e) {
-            error_log('[AdjuntosService] Error en generarToken: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Genera URL con token temporal para descarga de archivo cifrado
-     */
-    public static function generarUrlConToken(int $adjuntoId, int $userId, string $nombreArchivo): string
-    {
-        try {
-            $exp = time() + self::TOKEN_EXPIRACION;
-            $token = self::generarToken($userId, $nombreArchivo, $exp);
-
-            $url = rest_url("glory/v1/adjuntos/{$adjuntoId}");
-            $url .= "?file=" . urlencode($nombreArchivo);
-            $url .= "&uid=" . $userId;
-            $url .= "&exp=" . $exp;
-            $url .= "&token=" . $token;
-
-            return $url;
-        } catch (\Throwable $e) {
-            error_log('[AdjuntosService] Error en generarUrlConToken: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Obtiene la clave para firmar tokens de descarga
-     */
-    private static function obtenerClaveToken(): string
-    {
-        if (defined('AUTH_KEY') && strlen(AUTH_KEY) >= 32) {
-            return AUTH_KEY . '_adjuntos_token';
-        }
-
-        if (defined('SECURE_AUTH_KEY') && strlen(SECURE_AUTH_KEY) >= 32) {
-            return SECURE_AUTH_KEY . '_adjuntos_token';
-        }
-
-        error_log('[AdjuntosService] CRITICO: AUTH_KEY no configurada. Tokens de descarga imposibles.');
-        throw new \RuntimeException('Configuración de seguridad incompleta para tokens de descarga');
-    }
-
-    /**
-     * Traduce códigos de error de subida a mensajes legibles
-     */
-    public static function traducirErrorSubida(int $codigo): string
-    {
-        $errores = [
-            UPLOAD_ERR_INI_SIZE => 'El archivo excede el límite del servidor',
-            UPLOAD_ERR_FORM_SIZE => 'El archivo excede el límite del formulario',
-            UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente',
-            UPLOAD_ERR_NO_FILE => 'No se recibió ningún archivo',
-            UPLOAD_ERR_NO_TMP_DIR => 'Falta directorio temporal del servidor',
-            UPLOAD_ERR_CANT_WRITE => 'Error al escribir archivo en disco',
-            UPLOAD_ERR_EXTENSION => 'Subida bloqueada por extensión'
-        ];
-
-        return $errores[$codigo] ?? 'Error desconocido en la subida';
     }
 
     /**
      * Sube un archivo al sistema
-     * 
+     *
      * @param array $archivo Array $_FILES del archivo
      * @return array|null Datos del adjunto o null si falla
      */
     public function subirArchivo(array $archivo): ?array
     {
-        /* Validar archivo */
         if (!isset($archivo['tmp_name']) || !is_uploaded_file($archivo['tmp_name'])) {
             error_log('[AdjuntosService] Archivo no válido para subida');
             return null;
         }
 
-        /* Validar tipo MIME */
         $mimeType = mime_content_type($archivo['tmp_name']);
         if (!$this->validarTipoMime($mimeType)) {
             error_log("[AdjuntosService] Tipo MIME no permitido: {$mimeType}");
             return null;
         }
 
-        /* Verificar espacio disponible */
         $almacenamiento = new AlmacenamientoService($this->userId);
         if (!$almacenamiento->puedeSubir($archivo['size'])) {
             error_log('[AdjuntosService] Límite de almacenamiento excedido');
             return null;
         }
 
-        /* Asegurar directorios */
-        if (!$this->asegurarDirectorios()) {
+        if (!$this->fileSystem->asegurarDirectorios()) {
             return null;
         }
 
-        /* Generar nombre único */
-        $nombreBase = $this->generarNombreArchivo($archivo['name']);
+        $nombreBase = $this->fileSystem->generarNombreArchivo($archivo['name']);
         $tipo = $this->determinarTipo($mimeType);
         $debeCifrar = $this->cifradoService !== null && $this->suscripcion->esPremium();
 
-        /* Determinar extensión y ruta final */
         $extension = $debeCifrar ? self::EXTENSION_CIFRADO : self::EXTENSION_PLANO;
         $nombreFinal = $nombreBase . $extension;
-        $rutaCompleta = trailingslashit($this->getRutaUsuario()) . $nombreFinal;
+        $rutaCompleta = trailingslashit($this->fileSystem->getRutaUsuario()) . $nombreFinal;
 
-        /* Procesar archivo */
         $exito = $debeCifrar
-            ? $this->guardarArchivoCifrado($archivo['tmp_name'], $rutaCompleta)
+            ? $this->cifradoFile->guardarArchivoCifrado($archivo['tmp_name'], $rutaCompleta)
             : move_uploaded_file($archivo['tmp_name'], $rutaCompleta);
 
         if (!$exito) {
@@ -344,13 +134,11 @@ class AdjuntosService
             return null;
         }
 
-        /* Generar thumbnail si es imagen */
         $rutaThumb = null;
         if ($tipo === 'imagen') {
-            $rutaThumb = $this->generarThumbnail($archivo['tmp_name'], $nombreBase);
+            $rutaThumb = $this->fileSystem->generarThumbnail($archivo['tmp_name'], $nombreBase);
         }
 
-        /* Construir respuesta */
         $adjuntoId = $this->generarIdAdjunto();
 
         return [
@@ -368,159 +156,13 @@ class AdjuntosService
     }
 
     /**
-     * Guarda un archivo cifrado
-     * 
-     * Para archivos pequeños (<1MB): cifra en memoria
-     * Para archivos grandes (>1MB): usa stream cipher en chunks de 8KB
-     * 
-     * El formato para stream cipher es:
-     * [num_chunks:4bytes][chunk1_data][chunk2_data]...
-     * Cada chunk se cifra independientemente
-     */
-    private function guardarArchivoCifrado(string $rutaOrigen, string $rutaDestino): bool
-    {
-        if ($this->cifradoService === null) {
-            return false;
-        }
-
-        try {
-            $tamanoArchivo = filesize($rutaOrigen);
-
-            /* Archivos pequeños: cifrar en memoria (más eficiente) */
-            if ($tamanoArchivo <= self::UMBRAL_STREAM) {
-                return $this->cifrarEnMemoria($rutaOrigen, $rutaDestino);
-            }
-
-            /* Archivos grandes: stream cipher en chunks */
-            return $this->cifrarEnStream($rutaOrigen, $rutaDestino);
-        } catch (\Exception $e) {
-            error_log('[AdjuntosService] Error cifrando archivo: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Cifra un archivo pequeño en memoria
-     */
-    private function cifrarEnMemoria(string $rutaOrigen, string $rutaDestino): bool
-    {
-        $contenido = file_get_contents($rutaOrigen);
-        if ($contenido === false) {
-            return false;
-        }
-
-        $cifrado = $this->cifradoService->cifrar($contenido);
-
-        /* Guardar con marcador de tipo (M = memoria, S = stream) */
-        $resultado = file_put_contents($rutaDestino, 'M:' . $cifrado);
-
-        return $resultado !== false;
-    }
-
-    /**
-     * Cifra un archivo grande usando stream cipher (chunks de 8KB)
-     * Cada chunk se cifra independientemente para permitir descifrado parcial
-     */
-    private function cifrarEnStream(string $rutaOrigen, string $rutaDestino): bool
-    {
-        $origen = fopen($rutaOrigen, 'rb');
-        $destino = fopen($rutaDestino, 'wb');
-
-        if (!$origen || !$destino) {
-            return false;
-        }
-
-        /* Escribir marcador de tipo stream y número de chunks */
-        fwrite($destino, 'S:');
-
-        $numChunks = 0;
-
-        /* Primera pasada: contar chunks para el header */
-        while (!feof($origen)) {
-            $chunk = fread($origen, self::CHUNK_SIZE);
-            if ($chunk !== false && strlen($chunk) > 0) {
-                $numChunks++;
-            }
-        }
-
-        /* Escribir número de chunks (4 bytes, big-endian) */
-        fwrite($destino, pack('N', $numChunks));
-
-        /* Volver al inicio */
-        rewind($origen);
-
-        /* Segunda pasada: cifrar cada chunk */
-        while (!feof($origen)) {
-            $chunk = fread($origen, self::CHUNK_SIZE);
-            if ($chunk === false || strlen($chunk) === 0) {
-                break;
-            }
-
-            $chunkCifrado = $this->cifradoService->cifrar($chunk);
-            $longitudChunk = strlen($chunkCifrado);
-
-            /* Escribir longitud del chunk cifrado (4 bytes) + datos */
-            fwrite($destino, pack('N', $longitudChunk));
-            fwrite($destino, $chunkCifrado);
-        }
-
-        fclose($origen);
-        fclose($destino);
-
-        return true;
-    }
-
-    /**
-     * Genera un thumbnail para imágenes
-     * Si falla (ej. servidor sin GD/Imagick), retorna null pero NO detiene el proceso
-     */
-    private function generarThumbnail(string $rutaImagen, string $nombreBase): ?string
-    {
-        /* Intentar cargar el editor de imagen */
-        $editor = wp_get_image_editor($rutaImagen);
-
-        /* Si falla (común en ciertos hostings), retornar null silenciosamente */
-        if (is_wp_error($editor)) {
-            /* Loguear solo como advertencia para depuración, no como error crítico */
-            error_log('[AdjuntosService] Warning: No se pudo generar thumbnail (posible falta de GD/Imagick): ' . $editor->get_error_message());
-            return null;
-        }
-
-        /* Redimensionar */
-        $resultadoResize = $editor->resize(self::TAMAÑO_THUMBNAIL, self::TAMAÑO_THUMBNAIL, true);
-        if (is_wp_error($resultadoResize)) {
-            return null;
-        }
-
-        $rutaThumb = trailingslashit($this->getRutaThumbnails()) . $nombreBase . '.jpg';
-        $resultado = $editor->save($rutaThumb, 'image/jpeg');
-
-        if (is_wp_error($resultado)) {
-            error_log('[AdjuntosService] Warning: Error guardando archivo thumbnail: ' . $resultado->get_error_message());
-            return null;
-        }
-
-        return $rutaThumb;
-    }
-
-    /**
-     * Descarga/obtiene el contenido de un archivo
-     * 
-     * Para archivos cifrados:
-     * 1. Verifica si existe en cache (descifrado)
-     * 2. Si existe y no ha expirado, retorna del cache
-     * 3. Si no existe, descifra y guarda en cache
-     * 
-     * @param string $nombreArchivo Nombre del archivo almacenado
-     * @return string|null Contenido del archivo o null si no existe
+     * Obtiene el contenido de un archivo (descifrado si es necesario)
      */
     public function obtenerArchivo(string $nombreArchivo): ?string
     {
-        $rutaArchivo = trailingslashit($this->getRutaUsuario()) . $nombreArchivo;
+        $rutaArchivo = trailingslashit($this->fileSystem->getRutaUsuario()) . $nombreArchivo;
 
-        /* Protección contra path traversal: verificar que la ruta resuelta
-         * permanece dentro del directorio del usuario */
-        if (!$this->validarRutaSegura($rutaArchivo)) {
+        if (!$this->fileSystem->validarRutaSegura($rutaArchivo)) {
             error_log('[AdjuntosService] Path traversal detectado: ' . $nombreArchivo);
             return null;
         }
@@ -535,305 +177,41 @@ class AdjuntosService
             return file_get_contents($rutaArchivo);
         }
 
-        /* Archivo cifrado: verificar cache primero */
-        $contenidoCache = $this->obtenerDeCache($nombreArchivo);
-        if ($contenidoCache !== null) {
-            return $contenidoCache;
-        }
-
-        /* Descifrar archivo */
-        if ($this->cifradoService === null) {
-            error_log('[AdjuntosService] Archivo cifrado sin servicio de cifrado disponible');
-            return null;
-        }
-
-        try {
-            $contenidoCifrado = file_get_contents($rutaArchivo);
-            $contenido = $this->descifrarArchivo($contenidoCifrado);
-
-            /* Guardar en cache para futuras peticiones */
-            $this->guardarEnCache($nombreArchivo, $contenido);
-
-            return $contenido;
-        } catch (\Exception $e) {
-            error_log('[AdjuntosService] Error descifrando archivo: ' . $e->getMessage());
-            return null;
-        }
+        /* Archivo cifrado: delegar a servicio de cifrado */
+        return $this->cifradoFile->obtenerArchivoCifrado($rutaArchivo, $nombreArchivo);
     }
 
-    /**
-     * Descifra contenido de archivo según su formato
-     * Soporta formato M: (memoria) y S: (stream)
-     */
-    private function descifrarArchivo(string $contenidoCifrado): string
-    {
-        /* Detectar formato por el marcador */
-        $tipo = substr($contenidoCifrado, 0, 2);
-        $datos = substr($contenidoCifrado, 2);
-
-        if ($tipo === 'M:') {
-            /* Formato memoria: descifrar directamente */
-            return $this->cifradoService->descifrar($datos);
-        }
-
-        if ($tipo === 'S:') {
-            /* Formato stream: descifrar cada chunk */
-            return $this->descifrarStream($datos);
-        }
-
-        /* Formato legacy (sin marcador): intentar descifrar directamente */
-        return $this->cifradoService->descifrar($contenidoCifrado);
-    }
-
-    /**
-     * Descifra un archivo en formato stream
-     */
-    private function descifrarStream(string $datos): string
-    {
-        $offset = 0;
-
-        /* Leer número de chunks (4 bytes) */
-        $numChunks = unpack('N', substr($datos, $offset, 4))[1];
-        $offset += 4;
-
-        $resultado = '';
-
-        /* Descifrar cada chunk */
-        for ($i = 0; $i < $numChunks; $i++) {
-            /* Leer longitud del chunk (4 bytes) */
-            $longitudChunk = unpack('N', substr($datos, $offset, 4))[1];
-            $offset += 4;
-
-            /* Leer datos del chunk */
-            $chunkCifrado = substr($datos, $offset, $longitudChunk);
-            $offset += $longitudChunk;
-
-            /* Descifrar chunk */
-            $resultado .= $this->cifradoService->descifrar($chunkCifrado);
-        }
-
-        return $resultado;
-    }
-
-    /**
-     * Obtiene archivo del cache si existe y no ha expirado
-     */
-    private function obtenerDeCache(string $nombreArchivo): ?string
-    {
-        $rutaCache = trailingslashit($this->getRutaCache()) . md5($nombreArchivo);
-
-        if (!file_exists($rutaCache)) {
-            return null;
-        }
-
-        /* Verificar TTL */
-        $tiempoModificacion = filemtime($rutaCache);
-        if (time() - $tiempoModificacion > self::CACHE_TTL) {
-            /* Cache expirado, eliminar */
-            unlink($rutaCache);
-            return null;
-        }
-
-        $contenido = file_get_contents($rutaCache);
-
-        /* Descifrar cache si está cifrado */
-        if ($this->cifradoService !== null && $this->cifradoService->estaCifrado($contenido)) {
-            try {
-                $contenido = $this->cifradoService->descifrar($contenido);
-            } catch (\Exception $e) {
-                error_log('[AdjuntosService] Error descifrando cache, se invalida');
-                unlink($rutaCache);
-                return null;
-            }
-        }
-
-        return $contenido;
-    }
-
-    /**
-     * Guarda contenido descifrado en cache
-     */
-    private function guardarEnCache(string $nombreArchivo, string $contenido): void
-    {
-        /* Asegurar que el directorio de cache existe */
-        $rutaCache = $this->getRutaCache();
-        if (!is_dir($rutaCache)) {
-            wp_mkdir_p($rutaCache);
-            $this->protegerDirectorio($rutaCache);
-        }
-
-        /* Cifrar el contenido del cache para evitar que datos descifrados
-         * queden en texto plano en disco durante el TTL */
-        $contenidoCache = $contenido;
-        if ($this->cifradoService !== null) {
-            try {
-                $contenidoCache = $this->cifradoService->cifrar($contenido);
-            } catch (\Exception $e) {
-                error_log('[AdjuntosService] Error cifrando cache, se omite cache');
-                return;
-            }
-        }
-
-        $rutaArchivo = trailingslashit($rutaCache) . md5($nombreArchivo);
-        file_put_contents($rutaArchivo, $contenidoCache);
-    }
-
-    /**
-     * Limpia archivos expirados del cache
-     * Diseñado para ejecutarse como cron job cada 5 minutos
-     */
-    public function limpiarCache(): int
-    {
-        $rutaCache = $this->getRutaCache();
-
-        if (!is_dir($rutaCache)) {
-            return 0;
-        }
-
-        $eliminados = 0;
-        $archivos = scandir($rutaCache);
-
-        foreach ($archivos as $archivo) {
-            if ($archivo === '.' || $archivo === '..' || $archivo === 'index.php') {
-                continue;
-            }
-
-            $rutaCompleta = trailingslashit($rutaCache) . $archivo;
-
-            if (!is_file($rutaCompleta)) {
-                continue;
-            }
-
-            /* Verificar si ha expirado */
-            if (time() - filemtime($rutaCompleta) > self::CACHE_TTL) {
-                unlink($rutaCompleta);
-                $eliminados++;
-            }
-        }
-
-        return $eliminados;
-    }
-
-    /**
-     * Obtiene información de un archivo sin descargarlo
-     */
-    public function obtenerInfoArchivo(string $nombreArchivo): ?array
-    {
-        $rutaArchivo = trailingslashit($this->getRutaUsuario()) . $nombreArchivo;
-
-        /* Protección contra path traversal */
-        if (!$this->validarRutaSegura($rutaArchivo)) {
-            return null;
-        }
-
-        if (!file_exists($rutaArchivo)) {
-            return null;
-        }
-
-        $tamano = filesize($rutaArchivo);
-        $mimeType = mime_content_type($rutaArchivo);
-        $esCifrado = str_ends_with($nombreArchivo, self::EXTENSION_CIFRADO);
-
-        return [
-            'nombreArchivo' => $nombreArchivo,
-            'tamano' => $tamano,
-            'mimeType' => $mimeType,
-            'cifrado' => $esCifrado,
-            'fechaModificacion' => date('Y-m-d H:i:s', filemtime($rutaArchivo))
-        ];
-    }
-
-    /**
-     * Elimina un archivo y su thumbnail si existe
-     */
+    /** Elimina un archivo y su thumbnail */
     public function eliminarArchivo(string $nombreArchivo): bool
     {
-        $rutaArchivo = trailingslashit($this->getRutaUsuario()) . $nombreArchivo;
-
-        /* Protección contra path traversal */
-        if (!$this->validarRutaSegura($rutaArchivo)) {
-            error_log('[AdjuntosService] Path traversal detectado en eliminación: ' . $nombreArchivo);
-            return false;
-        }
-
-        $eliminado = false;
-
-        /* Eliminar archivo principal */
-        if (file_exists($rutaArchivo)) {
-            $eliminado = unlink($rutaArchivo);
-        }
-
-        /* Eliminar thumbnail si existe */
-        $nombreBase = pathinfo($nombreArchivo, PATHINFO_FILENAME);
-        /* Remover extensión .enc o .raw */
-        $nombreBase = preg_replace('/\.(enc|raw)$/', '', $nombreBase);
-
-        $rutaThumb = trailingslashit($this->getRutaThumbnails()) . $nombreBase . '.jpg';
-
-        if (file_exists($rutaThumb)) {
-            unlink($rutaThumb);
-        }
-
-        return $eliminado;
+        return $this->fileSystem->eliminarArchivo($nombreArchivo);
     }
 
-    /**
-     * Lista todos los archivos del usuario
-     */
+    /** Lista todos los archivos del usuario */
     public function listarArchivos(): array
     {
-        $directorio = $this->getRutaUsuario();
-
-        if (!is_dir($directorio)) {
-            return [];
-        }
-
-        $archivos = [];
-        $items = scandir($directorio);
-
-        foreach ($items as $item) {
-            if ($item === '.' || $item === '..' || $item === self::DIRECTORIO_THUMBS) {
-                continue;
-            }
-
-            $rutaCompleta = trailingslashit($directorio) . $item;
-
-            if (is_file($rutaCompleta)) {
-                $archivos[] = $this->obtenerInfoArchivo($item);
-            }
-        }
-
-        return array_filter($archivos);
+        return $this->fileSystem->listarArchivos();
     }
 
-    /**
-     * Calcula el espacio usado por el usuario en archivos físicos
-     */
+    /** Obtiene información de un archivo sin descargarlo */
+    public function obtenerInfoArchivo(string $nombreArchivo): ?array
+    {
+        return $this->fileSystem->obtenerInfoArchivo($nombreArchivo);
+    }
+
+    /** Calcula el espacio usado por el usuario */
     public function calcularEspacioUsado(): int
     {
-        $directorio = $this->getRutaUsuario();
-
-        if (!is_dir($directorio)) {
-            return 0;
-        }
-
-        $total = 0;
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directorio, \RecursiveDirectoryIterator::SKIP_DOTS)
-        );
-
-        foreach ($iterator as $archivo) {
-            if ($archivo->isFile()) {
-                $total += $archivo->getSize();
-            }
-        }
-
-        return $total;
+        return $this->fileSystem->calcularEspacioUsado();
     }
 
-    /**
-     * Genera un ID único para el adjunto
-     */
+    /** Limpia archivos expirados del cache */
+    public function limpiarCache(): int
+    {
+        return $this->cifradoFile->limpiarCache();
+    }
+
+    /** Genera un ID único para el adjunto */
     private function generarIdAdjunto(): int
     {
         return (int) (microtime(true) * 1000);
@@ -841,95 +219,60 @@ class AdjuntosService
 
     /**
      * Genera URL para descargar archivo
-     * Todos los archivos pasan por la API para garantizar autenticación,
-     * ya que .htaccess bloquea acceso directo al directorio.
+     * Todos los archivos pasan por la API para garantizar autenticación
      */
     private function generarUrlDescarga(int $adjuntoId, string $nombreArchivo, bool $cifrado): string
     {
         if ($cifrado) {
-            /* Archivos cifrados usan URL con token temporal */
-            return self::generarUrlConToken(
+            return AdjuntosTokenService::generarUrlConToken(
                 $adjuntoId,
                 $this->userId,
                 $nombreArchivo
             );
         }
 
-        /* Archivos no cifrados también pasan por la API para verificar autenticación */
         return rest_url("glory/v1/adjuntos/{$adjuntoId}") . '?file=' . urlencode($nombreArchivo);
     }
 
-    /**
-     * Genera URL para thumbnail.
-     * TO-DO: Con .htaccess activo en el directorio principal, considerar
-     * un endpoint dedicado o excluir thumbs/ del deny si se necesita acceso directo.
-     * Por ahora se mantiene ruta directa (thumbs/ puede tener su propio .htaccess permisivo).
-     */
+    /** Genera URL para thumbnail */
     private function generarUrlThumbnail(string $nombreBase): string
     {
-        return trailingslashit($this->urlBase) . $this->userId . '/' . self::DIRECTORIO_THUMBS . '/' . $nombreBase . '.jpg';
+        return trailingslashit($this->urlBase) . $this->userId . '/thumbs/' . $nombreBase . '.jpg';
     }
 
-    /**
-     * Limpia archivos huérfanos (no referenciados en ninguna tarea)
-     * Diseñado para ejecutarse como cron job semanal
-     */
+    /** Limpia archivos huérfanos (placeholder para cron futuro) */
     public function limpiarHuerfanos(): int
     {
-        /* Esta función requiere acceso a las tareas del usuario */
-        /* Se implementará cuando se integre con el sistema de tareas */
-
         return 0;
     }
 
-    /**
-     * Obtiene la URL base del directorio de adjuntos
-     */
+    /** Obtiene la URL base del directorio de adjuntos */
     public function getUrlBase(): string
     {
         return $this->urlBase;
     }
 
-    /**
-     * Verifica si el usuario tiene permisos para cifrar archivos
-     */
+    /** Verifica si el usuario puede cifrar archivos */
     public function puedeCifrarArchivos(): bool
     {
         return $this->suscripcion->esPremium() &&
             CifradoService::estaHabilitado($this->userId);
     }
 
-    /**
-     * Valida que una ruta de archivo resuelta permanezca dentro
-     * del directorio del usuario. Previene ataques de path traversal
-     * donde un nombreArchivo como "../../wp-config.php" podría
-     * escapar del directorio seguro.
-     */
-    private function validarRutaSegura(string $rutaArchivo): bool
+    /* Compatibilidad retroactiva: delegan a AdjuntosTokenService */
+
+    public static function generarToken(int $userId, string $file, int $exp): string
     {
-        $directorioUsuario = $this->getRutaUsuario();
+        return AdjuntosTokenService::generarToken($userId, $file, $exp);
+    }
 
-        /* Si el archivo aún no existe (ej: crear), verificar el directorio padre */
-        if (file_exists($rutaArchivo)) {
-            $rutaReal = realpath($rutaArchivo);
-        } else {
-            /* Para archivos nuevos, verificar que el directorio padre sea válido */
-            $directorioPadre = dirname($rutaArchivo);
-            $rutaReal = realpath($directorioPadre);
-            if ($rutaReal !== false) {
-                $rutaReal .= DIRECTORY_SEPARATOR . basename($rutaArchivo);
-            }
-        }
+    public static function generarUrlConToken(int $adjuntoId, int $userId, string $nombreArchivo): string
+    {
+        return AdjuntosTokenService::generarUrlConToken($adjuntoId, $userId, $nombreArchivo);
+    }
 
-        if ($rutaReal === false) {
-            return false;
-        }
-
-        /* Normalizar separadores para comparación en Windows */
-        $rutaReal = str_replace('\\', '/', $rutaReal);
-        $directorioUsuario = str_replace('\\', '/', $directorioUsuario);
-
-        /* La ruta resuelta debe empezar con el directorio del usuario */
-        return str_starts_with($rutaReal, $directorioUsuario);
+    public static function traducirErrorSubida(int $codigo): string
+    {
+        return AdjuntosTokenService::traducirErrorSubida($codigo);
     }
 }

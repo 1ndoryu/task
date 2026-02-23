@@ -1,23 +1,9 @@
 <?php
 
 /**
- * Servicio de Notificaciones
+ * Servicio de Notificaciones - CRUD y consultas base
  *
- * Gestiona la lógica para el sistema de notificaciones in-app:
- * - Crear notificaciones de diferentes tipos
- * - Listar notificaciones con paginación
- * - Marcar como leídas (individual o todas)
- * - Eliminar notificaciones
- * - Contar no leídas para badge del header
- *
- * Tipos de notificación:
- * - solicitud_equipo: Nueva solicitud de compañero
- * - tarea_vence_hoy: Tarea con fecha límite hoy
- * - tarea_asignada: Te asignaron una tarea (futuro)
- * - tarea_removida: Te quitaron de una tarea (futuro)
- * - adjunto_agregado: Nuevo adjunto en tarea compartida (futuro)
- * - mensaje_chat: Nuevo mensaje en tarea/proyecto (futuro)
- * - habito_companero: Compañero cumplió hábito compartido (futuro)
+ * Los creadores de notificaciones por dominio estan en NotificacionesDomainService.
  *
  * @package App\Services
  */
@@ -49,16 +35,7 @@ class NotificacionesService
         $this->tabla = Schema::getTableName('notificaciones');
     }
 
-    /**
-     * Crea una nueva notificación para un usuario
-     *
-     * @param int $usuarioId ID del usuario destinatario
-     * @param string $tipo Tipo de notificación
-     * @param string $titulo Título corto de la notificación
-     * @param string|null $contenido Contenido detallado (opcional)
-     * @param array|null $datosExtra Datos adicionales en formato array
-     * @return array Resultado con exito y datos de la notificación
-     */
+    /** Crea una nueva notificación para un usuario */
     public function crear(
         int $usuarioId,
         string $tipo,
@@ -123,15 +100,7 @@ class NotificacionesService
         ];
     }
 
-    /**
-     * Obtiene las notificaciones de un usuario con paginación
-     *
-     * @param int $usuarioId ID del usuario
-     * @param int $pagina Número de página (1-indexed)
-     * @param int $porPagina Cantidad por página
-     * @param bool|null $soloNoLeidas Filtrar solo no leídas
-     * @return array Lista de notificaciones con paginación
-     */
+    /** Obtiene las notificaciones de un usuario con paginación */
     public function listar(
         int $usuarioId,
         int $pagina = 1,
@@ -156,7 +125,7 @@ class NotificacionesService
 
         $resultados = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla}
+                "SELECT id, usuario_id, tipo, titulo, contenido, leida, datos_extra, fecha_creacion, fecha_lectura FROM {$this->tabla}
                 WHERE usuario_id = %d {$whereExtra}
                 ORDER BY fecha_creacion DESC
                 LIMIT %d OFFSET %d",
@@ -182,20 +151,14 @@ class NotificacionesService
         ];
     }
 
-    /**
-     * Marca una notificación como leída
-     *
-     * @param int $notificacionId ID de la notificación
-     * @param int $usuarioId ID del usuario (para verificar permisos)
-     * @return array Resultado de la operación
-     */
+    /** Marca una notificación como leída */
     public function marcarLeida(int $notificacionId, int $usuarioId): array
     {
         global $wpdb;
 
         $notificacion = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} WHERE id = %d",
+                "SELECT id, usuario_id, tipo, titulo, contenido, leida, datos_extra, fecha_creacion, fecha_lectura FROM {$this->tabla} WHERE id = %d",
                 $notificacionId
             )
         );
@@ -238,12 +201,7 @@ class NotificacionesService
         ];
     }
 
-    /**
-     * Marca todas las notificaciones del usuario como leídas
-     *
-     * @param int $usuarioId ID del usuario
-     * @return array Resultado con cantidad de notificaciones marcadas
-     */
+    /** Marca todas las notificaciones del usuario como leídas */
     public function marcarTodasLeidas(int $usuarioId): array
     {
         global $wpdb;
@@ -265,20 +223,14 @@ class NotificacionesService
         ];
     }
 
-    /**
-     * Elimina una notificación
-     *
-     * @param int $notificacionId ID de la notificación
-     * @param int $usuarioId ID del usuario (para verificar permisos)
-     * @return array Resultado de la operación
-     */
+    /** Elimina una notificación */
     public function eliminar(int $notificacionId, int $usuarioId): array
     {
         global $wpdb;
 
         $notificacion = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} WHERE id = %d",
+                "SELECT id, usuario_id, tipo, titulo, contenido, leida, datos_extra, fecha_creacion, fecha_lectura FROM {$this->tabla} WHERE id = %d",
                 $notificacionId
             )
         );
@@ -307,12 +259,7 @@ class NotificacionesService
         ];
     }
 
-    /**
-     * Cuenta las notificaciones no leídas para el badge del header
-     *
-     * @param int $usuarioId ID del usuario
-     * @return int Cantidad de notificaciones no leídas
-     */
+    /** Cuenta las notificaciones no leídas para el badge del header */
     public function contarNoLeidas(int $usuarioId): int
     {
         global $wpdb;
@@ -325,226 +272,6 @@ class NotificacionesService
             )
         );
     }
-
-    /**
-     * Crea notificación de solicitud de equipo recibida
-     * Llamar desde EquiposService al recibir una solicitud
-     *
-     * @param int $usuarioDestinoId Usuario que recibe la solicitud
-     * @param int $usuarioOrigenId Usuario que envía la solicitud
-     * @param int $solicitudId ID de la solicitud
-     * @return array Resultado de la operación
-     */
-    public function notificarSolicitudEquipo(
-        int $usuarioDestinoId,
-        int $usuarioOrigenId,
-        int $solicitudId
-    ): array {
-        $usuarioOrigen = get_user_by('ID', $usuarioOrigenId);
-        $nombreOrigen = $usuarioOrigen ? $usuarioOrigen->display_name : 'Usuario';
-
-        return $this->crear(
-            $usuarioDestinoId,
-            self::TIPO_SOLICITUD_EQUIPO,
-            "{$nombreOrigen} quiere unirse a tu equipo",
-            "Has recibido una solicitud de conexión de {$nombreOrigen}.",
-            [
-                'solicitudId' => $solicitudId,
-                'usuarioId' => $usuarioOrigenId,
-                'usuarioNombre' => $nombreOrigen,
-                'usuarioEmail' => $usuarioOrigen ? $usuarioOrigen->user_email : '',
-                'usuarioAvatar' => $usuarioOrigen ? get_avatar_url($usuarioOrigenId, ['size' => 48]) : '',
-            ]
-        );
-    }
-
-    /**
-     * Crea notificaciones de tareas que vencen hoy
-     * Llamar desde un cron job diario
-     *
-     * @param int $usuarioId ID del usuario
-     * @param array $tareas Lista de tareas que vencen hoy
-     * @return int Cantidad de notificaciones creadas
-     */
-    public function notificarTareasVencenHoy(int $usuarioId, array $tareas): int
-    {
-        $creadas = 0;
-
-        foreach ($tareas as $tarea) {
-            $resultado = $this->crear(
-                $usuarioId,
-                self::TIPO_TAREA_VENCE_HOY,
-                "Tarea vence hoy: {$tarea['texto']}",
-                "La tarea \"{$tarea['texto']}\" tiene fecha límite hoy.",
-                [
-                    'tareaId' => $tarea['id'],
-                    'tareaTexto' => $tarea['texto'],
-                    'proyectoId' => $tarea['proyectoId'] ?? null,
-                ]
-            );
-
-            if ($resultado['exito']) {
-                $creadas++;
-            }
-        }
-
-        return $creadas;
-    }
-
-    /**
-     * Crea notificación cuando una solicitud de equipo es aceptada
-     * Notifica al usuario que envió la solicitud original
-     *
-     * @param int $usuarioDestinoId Usuario que envió la solicitud (recibirá la notificación)
-     * @param int $usuarioAceptoId Usuario que aceptó la solicitud
-     * @return array Resultado de la operación
-     */
-    public function notificarSolicitudAceptada(
-        int $usuarioDestinoId,
-        int $usuarioAceptoId
-    ): array {
-        $usuarioAcepto = get_user_by('ID', $usuarioAceptoId);
-        $nombreAcepto = $usuarioAcepto ? $usuarioAcepto->display_name : 'Usuario';
-
-        return $this->crear(
-            $usuarioDestinoId,
-            self::TIPO_SOLICITUD_ACEPTADA,
-            "{$nombreAcepto} aceptó tu solicitud",
-            "¡Ahora {$nombreAcepto} es parte de tu equipo!",
-            [
-                'usuarioId' => $usuarioAceptoId,
-                'usuarioNombre' => $nombreAcepto,
-                'usuarioAvatar' => $usuarioAcepto ? get_avatar_url($usuarioAceptoId, ['size' => 48]) : '',
-            ]
-        );
-    }
-
-    /**
-     * Crea notificación cuando se asigna una tarea a un usuario
-     *
-     * @param int $usuarioDestinoId Usuario al que se le asigna la tarea
-     * @param int $usuarioOrigenId Usuario que hizo la asignación
-     * @param int $tareaId ID de la tarea
-     * @param string $tareaTexto Texto de la tarea
-     * @return array Resultado de la operación
-     */
-    public function notificarTareaAsignada(
-        int $usuarioDestinoId,
-        int $usuarioOrigenId,
-        int $tareaId,
-        string $tareaTexto
-    ): array {
-        $usuarioOrigen = get_user_by('ID', $usuarioOrigenId);
-        $nombreOrigen = $usuarioOrigen ? $usuarioOrigen->display_name : 'Alguien';
-
-        $textoCorto = strlen($tareaTexto) > 50
-            ? substr($tareaTexto, 0, 50) . '...'
-            : $tareaTexto;
-
-        return $this->crear(
-            $usuarioDestinoId,
-            self::TIPO_TAREA_ASIGNADA,
-            "Nueva tarea asignada",
-            "{$nombreOrigen} te asignó la tarea: \"{$textoCorto}\"",
-            [
-                'tareaId' => $tareaId,
-                'tareaTexto' => $tareaTexto,
-                'asignadoPor' => $usuarioOrigenId,
-                'asignadoPorNombre' => $nombreOrigen,
-            ]
-        );
-    }
-
-    /**
-     * Crea notificación cuando se quita la asignación de una tarea
-     *
-     * @param int $usuarioDestinoId Usuario al que se le quitó la asignación
-     * @param int $usuarioOrigenId Usuario que quitó la asignación
-     * @param int $tareaId ID de la tarea
-     * @param string $tareaTexto Texto de la tarea
-     * @return array Resultado de la operación
-     */
-    public function notificarTareaDesasignada(
-        int $usuarioDestinoId,
-        int $usuarioOrigenId,
-        int $tareaId,
-        string $tareaTexto
-    ): array {
-        $usuarioOrigen = get_user_by('ID', $usuarioOrigenId);
-        $nombreOrigen = $usuarioOrigen ? $usuarioOrigen->display_name : 'Alguien';
-
-        $textoCorto = strlen($tareaTexto) > 50
-            ? substr($tareaTexto, 0, 50) . '...'
-            : $tareaTexto;
-
-        return $this->crear(
-            $usuarioDestinoId,
-            self::TIPO_TAREA_REMOVIDA,
-            "Tarea desasignada",
-            "Ya no estas asignado a la tarea: \"{$textoCorto}\"",
-            [
-                'tareaId' => $tareaId,
-                'tareaTexto' => $tareaTexto,
-                'removidoPor' => $usuarioOrigenId,
-                'removidoPorNombre' => $nombreOrigen,
-            ]
-        );
-    }
-
-    /**
-     * Crea notificacion cuando se recibe un mensaje en un elemento compartido
-     *
-     * @param int $usuarioDestinoId Usuario que recibe la notificacion
-     * @param int $usuarioOrigenId Usuario que envio el mensaje
-     * @param string $tipoElemento Tipo de elemento (tarea, proyecto, habito)
-     * @param int $elementoId ID del elemento
-     * @param string $elementoNombre Nombre/texto del elemento
-     * @param string $mensajePreview Preview del mensaje (primeros caracteres)
-     * @return array Resultado de la operacion
-     */
-    public function notificarMensajeChat(
-        int $usuarioDestinoId,
-        int $usuarioOrigenId,
-        string $tipoElemento,
-        int $elementoId,
-        string $elementoNombre,
-        string $mensajePreview
-    ): array {
-        $usuarioOrigen = get_user_by('ID', $usuarioOrigenId);
-        $nombreOrigen = $usuarioOrigen ? $usuarioOrigen->display_name : 'Alguien';
-
-        $tiposLegibles = [
-            'tarea' => 'tarea',
-            'proyecto' => 'proyecto',
-            'habito' => 'habito'
-        ];
-        $tipoLegible = $tiposLegibles[$tipoElemento] ?? $tipoElemento;
-
-        $elementoCorto = strlen($elementoNombre) > 30
-            ? substr($elementoNombre, 0, 30) . '...'
-            : $elementoNombre;
-
-        $mensajeCorto = strlen($mensajePreview) > 50
-            ? substr($mensajePreview, 0, 50) . '...'
-            : $mensajePreview;
-
-        return $this->crear(
-            $usuarioDestinoId,
-            self::TIPO_MENSAJE_CHAT,
-            "Nuevo mensaje de {$nombreOrigen}",
-            "En {$tipoLegible} \"{$elementoCorto}\": \"{$mensajeCorto}\"",
-            [
-                'tipoElemento' => $tipoElemento,
-                'elementoId' => $elementoId,
-                'elementoNombre' => $elementoNombre,
-                'mensajePreview' => $mensajePreview,
-                'enviadoPor' => $usuarioOrigenId,
-                'enviadoPorNombre' => $nombreOrigen,
-                'enviadoPorAvatar' => $usuarioOrigen ? get_avatar_url($usuarioOrigenId, ['size' => 48]) : '',
-            ]
-        );
-    }
-
 
     /**
      * Formatea una notificación para la respuesta de API

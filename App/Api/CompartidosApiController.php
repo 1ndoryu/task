@@ -21,6 +21,7 @@
 namespace App\Api;
 
 use App\Services\CompartidosService;
+use App\Services\CompartidosQueryService;
 
 class CompartidosApiController
 {
@@ -177,7 +178,7 @@ class CompartidosApiController
             $usuarioId = get_current_user_id();
             $tipo = $request->get_param('tipo');
 
-            $servicio = new CompartidosService();
+            $servicio = new CompartidosQueryService();
             $compartidos = $servicio->obtenerCompartidosConmigo($usuarioId, $tipo);
 
             return new \WP_REST_Response([
@@ -197,7 +198,7 @@ class CompartidosApiController
             $usuarioId = get_current_user_id();
             $tipo = $request->get_param('tipo');
 
-            $servicio = new CompartidosService();
+            $servicio = new CompartidosQueryService();
             $compartidos = $servicio->obtenerMisCompartidos($usuarioId, $tipo);
 
             return new \WP_REST_Response([
@@ -218,7 +219,7 @@ class CompartidosApiController
             $tipo = sanitize_text_field($request->get_param('tipo'));
             $elementoId = (int) $request->get_param('elementoId');
 
-            $servicio = new CompartidosService();
+            $servicio = new CompartidosQueryService();
             $participantes = $servicio->obtenerParticipantes($tipo, $elementoId, $usuarioId);
 
             return new \WP_REST_Response([
@@ -286,7 +287,7 @@ class CompartidosApiController
         try {
             $usuarioId = get_current_user_id();
 
-            $servicio = new CompartidosService();
+            $servicio = new CompartidosQueryService();
             $contadores = $servicio->contarCompartidosConmigo($usuarioId);
 
             return new \WP_REST_Response([
@@ -307,7 +308,7 @@ class CompartidosApiController
         $elementoId = (int) $request->get_param('elementoId');
         $propietarioId = (int) $request->get_param('propietarioId');
 
-        $servicio = new CompartidosService();
+        $servicio = new CompartidosQueryService();
         $acceso = $servicio->verificarAcceso($usuarioId, $tipo, $elementoId, $propietarioId);
 
         if ($acceso === false) {

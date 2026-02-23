@@ -11,10 +11,25 @@
 
 namespace App\Services;
 
+use App\Database\Schema;
 use App\Repository\MensajesRepository;
+use App\Services\NotificacionesDomainService;
 
 class MensajesService
 {
+    /* Mapeo de tipo de elemento a entidad de Schema */
+    private const TIPOS_A_TABLAS = [
+        'tarea' => 'tareas',
+        'proyecto' => 'proyectos',
+        'habito' => 'habitos'
+    ];
+
+    /* Mapeo de tipo de elemento al campo que contiene su nombre */
+    private const CAMPOS_NOMBRE = [
+        'tarea' => 'texto',
+        'proyecto' => 'nombre',
+        'habito' => 'nombre'
+    ];
     /**
      * Descripciones legibles para acciones del sistema
      */
@@ -279,5 +294,109 @@ class MensajesService
             'participante_removido',
             $nombreParticipante
         );
+    }
+
+    /**
+     * Verifica si un usuario tiene acceso a un elemento
+     * (es propietario o tiene el elemento compartido con el)
+     */
+    public static function tieneAccesoAElemento(int $userId, string $tipo, int $elementoId): bool
+    {
+        global $wpdb;
+
+        if (!isset(self::TIPOS_A_TABLAS[$tipo])) {
+            return false;
+        }
+
+        $tableName = Schema::getTableName(self::TIPOS_A_TABLAS[$tipo]);
+
+        /* Verificar si es propietario */
+        $esPropietario = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM {$tableName} WHERE user_id = %d AND id_local = %d AND deleted_at IS NULL",
+            $userId,
+            $elementoId
+        ));
+
+        if ($esPropietario) {
+            return true;
+        }
+
+        /* Verificar si esta compartido con el usuario */
+        $tablaCompartidos = Schema::getTableName('compartidos');
+        $estaCompartido = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM {$tablaCompartidos} WHERE tipo = %s AND elemento_id = %d AND usuario_id = %d",
+            $tipo,
+            $elementoId,
+            $userId
+        ));
+
+        return (bool)$estaCompartido;
+    }
+
+    /**
+     * Notifica a los participantes de un elemento cuando se envia un mensaje
+     * Excluye al usuario que envia el mensaje
+     */
+    public static function notificarParticipantesMensaje(
+        int $usuarioOrigenId,
+        string $tipoElemento,
+        int $elementoId,
+        string $contenido
+    ): void {
+        global $wpdb;
+
+        if (!isset(self::TIPOS_A_TABLAS[$tipoElemento])) {
+            return;
+        }
+
+        $tableName = Schema::getTableName(self::TIPOS_A_TABLAS[$tipoElemento]);
+        $campoNombre = self::CAMPOS_NOMBRE[$tipoElemento];
+
+        /* Obtener el propietario y nombre del elemento */
+        $elemento = $wpdb->get_row($wpdb->prepare(
+            "SELECT user_id, {$campoNombre} as nombre FROM {$tableName} WHERE id_local = %d AND deleted_at IS NULL",
+            $elementoId
+        ));
+
+        if (!$elemento) {
+            return;
+        }
+
+        $propietarioId = (int)$elemento->user_id;
+        $elementoNombre = $elemento->nombre;
+
+        /* Obtener participantes del elemento compartido */
+        $tablaCompartidos = Schema::getTableName('compartidos');
+        $participantes = $wpdb->get_col($wpdb->prepare(
+            "SELECT usuario_id FROM {$tablaCompartidos} WHERE tipo = %s AND elemento_id = %d",
+            $tipoElemento,
+            $elementoId
+        ));
+
+        /* Agregar propietario a la lista si no esta */
+        if (!in_array($propietarioId, $participantes)) {
+            $participantes[] = $propietarioId;
+        }
+
+        /* Si no hay participantes ademas del que envia, salir */
+        $participantes = array_filter($participantes, fn($id) => (int)$id !== $usuarioOrigenId);
+
+        if (empty($participantes)) {
+            return;
+        }
+
+        /* Crear notificacion para cada participante */
+        $notificacionesService = new NotificacionesDomainService();
+
+        foreach ($participantes as $participanteId) {
+            $notificacionesService->notificarMensajeChat(
+                (int)$participanteId,
+                $usuarioOrigenId,
+                $tipoElemento,
+                $elementoId,
+                $elementoNombre,
+                $contenido
+            );
+        }
     }
 }

@@ -11,7 +11,7 @@
 
 namespace App\Repository;
 
-use App\Services\CompartidosService;
+use App\Services\CompartidosProyectosService;
 
 class CompartidosRepository
 {
@@ -32,7 +32,7 @@ class CompartidosRepository
      */
     public function getAll(): array
     {
-        $compartidosService = new CompartidosService();
+        $compartidosService = new CompartidosProyectosService();
 
         return [
             'tareas' => $this->getTareasCompartidas($compartidosService),
@@ -43,7 +43,7 @@ class CompartidosRepository
     /**
      * Obtiene proyectos compartidos conmigo
      */
-    private function getProyectosCompartidos(CompartidosService $service): array
+    private function getProyectosCompartidos(CompartidosProyectosService $service): array
     {
         $proyectos = [];
         $proyectosData = $service->obtenerDatosProyectosCompartidos($this->userId);
@@ -61,7 +61,7 @@ class CompartidosRepository
     /**
      * Obtiene tareas compartidas conmigo (de proyectos + asignadas directamente)
      */
-    private function getTareasCompartidas(CompartidosService $service): array
+    private function getTareasCompartidas(CompartidosProyectosService $service): array
     {
         $tareas = [];
 

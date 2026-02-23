@@ -19,12 +19,12 @@ use App\Database\Schema;
 class EquiposService
 {
     private string $tabla;
-    private NotificacionesService $notificaciones;
+    private NotificacionesDomainService $notificaciones;
 
     public function __construct()
     {
         $this->tabla = Schema::getTableName('equipos');
-        $this->notificaciones = new NotificacionesService();
+        $this->notificaciones = new NotificacionesDomainService();
     }
 
     /**
@@ -107,7 +107,7 @@ class EquiposService
 
         $pendiente = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} 
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} 
                 WHERE usuario_id = %d AND companero_email = %s AND estado = 'pendiente_registro'",
                 $usuarioId,
                 $email
@@ -157,7 +157,7 @@ class EquiposService
 
         $recibidas = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} 
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} 
                 WHERE companero_id = %d AND estado = 'pendiente'
                 ORDER BY fecha_solicitud DESC",
                 $usuarioId
@@ -166,7 +166,7 @@ class EquiposService
 
         $enviadas = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} 
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} 
                 WHERE usuario_id = %d AND estado IN ('pendiente', 'pendiente_registro')
                 ORDER BY fecha_solicitud DESC",
                 $usuarioId
@@ -175,7 +175,7 @@ class EquiposService
 
         $companeros = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} 
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} 
                 WHERE (usuario_id = %d OR companero_id = %d) AND estado = 'aceptada'
                 ORDER BY fecha_respuesta DESC",
                 $usuarioId,
@@ -209,7 +209,7 @@ class EquiposService
 
         $solicitud = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} WHERE id = %d",
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} WHERE id = %d",
                 $solicitudId
             )
         );
@@ -281,7 +281,7 @@ class EquiposService
 
         $solicitud = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} WHERE id = %d",
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} WHERE id = %d",
                 $solicitudId
             )
         );
@@ -327,21 +327,21 @@ class EquiposService
 
         $pendientes = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} 
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} 
                 WHERE companero_email = %s AND estado = 'pendiente_registro'",
                 $email
             )
         );
 
-        foreach ($pendientes as $solicitud) {
-            $wpdb->update(
-                $this->tabla,
-                [
-                    'companero_id' => $nuevoUsuarioId,
-                    'estado' => 'pendiente'
-                ],
-                ['id' => $solicitud->id]
-            );
+        /* Batch: actualizar todas las solicitudes pendientes en una sola query */
+        if (!empty($pendientes)) {
+            $ids = implode(',', array_map(function ($s) {
+                return (int)$s->id;
+            }, $pendientes));
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$this->tabla} SET companero_id = %d, estado = 'pendiente' WHERE id IN ($ids)",
+                $nuevoUsuarioId
+            ));
         }
 
         return count($pendientes);
@@ -356,7 +356,7 @@ class EquiposService
 
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} 
+                "SELECT id, usuario_id, companero_id, companero_email, estado, fecha_solicitud, fecha_respuesta FROM {$this->tabla} 
                 WHERE (usuario_id = %d AND companero_id = %d)
                    OR (usuario_id = %d AND companero_id = %d)",
                 $userId1,
