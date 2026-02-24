@@ -146,6 +146,7 @@
 .selectorBadgeOpcion {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--dashboard-espacioSm);
     width: 100%;
     padding: 8px 12px;

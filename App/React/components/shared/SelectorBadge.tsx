@@ -30,10 +30,17 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
 
     return (
         <div id="selector-badge-contenedor" ref={contenedorRef} className={`selectorBadgeContenedor ${className}`.trim()}>
-            <Boton type="button" variante="badge" soloIcono={soloIcono} activo={menuAbierto} claseAdicional={!soloIcono ? 'selectorBadgeBotonCompacto' : ''} onClick={toggleMenu} title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}>
-                {soloIcono ? (
-                    <span className="selectorBadgeIcono">{opcionActual?.icono || icono}</span>
-                ) : (
+            <Boton
+                type="button"
+                variante="badge"
+                soloIcono={soloIcono}
+                activo={menuAbierto}
+                icono={soloIcono ? (opcionActual?.icono || icono) : undefined}
+                claseAdicional={!soloIcono ? 'selectorBadgeBotonCompacto' : ''}
+                onClick={toggleMenu}
+                title={titulo ? `${titulo}: ${opcionActual?.etiqueta}` : opcionActual?.etiqueta}
+            >
+                {!soloIcono && (
                     <>
                         {icono && <span className="selectorBadgeIcono">{icono}</span>}
                         {opcionActual?.icono && <span className="selectorBadgeOpcionIcono">{opcionActual.icono}</span>}

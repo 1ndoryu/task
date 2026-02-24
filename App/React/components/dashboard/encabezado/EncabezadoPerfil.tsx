@@ -131,7 +131,9 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
 
             {menuUsuario.visible && <MenuContextual opciones={opcionesMenuUsuario} posicionX={menuUsuario.x} posicionY={menuUsuario.y} onSeleccionar={manejarOpcionMenu} onCerrar={() => setMenuUsuario({...menuUsuario, visible: false})} />}
 
-            <Input ref={inputArchivoRef} tipo="file" accept=".json" onChange={manejarCambioArchivo} style={{display: 'none'}} />
+            <div style={{display: 'none'}}>
+                <Input ref={inputArchivoRef} tipo="file" accept=".json" onChange={manejarCambioArchivo} />
+            </div>
         </>
     );
 }
