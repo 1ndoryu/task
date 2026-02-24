@@ -35,20 +35,20 @@
     display: flex;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioMd);
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: rgba(var(--dashboard-estadoPendienteRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-estadoPendienteRgb), 0.3);
     border-radius: var(--dashboard-radioXs);
 }
 
 .modalCompartirAdvertencia svg {
-    color: #ffc107;
+    color: var(--dashboard-estadoPendiente);
     flex-shrink: 0;
     margin-top: var(--dashboard-espacioXxs);
 }
 
 .modalCompartirAdvertencia strong {
     display: block;
-    color: #ffc107;
+    color: var(--dashboard-estadoPendiente);
     margin-bottom: var(--dashboard-espacioXs);
 }
 
@@ -384,8 +384,8 @@
 }
 
 .participanteRolPropietario {
-    background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
+    background: rgba(var(--dashboard-estadoPendienteRgb), 0.15);
+    color: var(--dashboard-estadoPendiente);
 }
 
 .participanteRolSelector {

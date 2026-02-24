@@ -51,7 +51,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .dashboardContenedor::selection {
-    background-color: #333;
+    background-color: var(--dashboard-barraNormal);
     color: var(--dashboard-textoSobreAcento);
 }
 

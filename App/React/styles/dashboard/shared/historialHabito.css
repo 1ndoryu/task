@@ -74,9 +74,9 @@
 }
 
 .historialHabitoDia--pospuesto .historialHabitoDiaIndicador {
-    background: rgba(234, 179, 8, 0.2);
-    border: 1px solid rgba(234, 179, 8, 0.4);
-    color: #eab308;
+    background: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.2);
+    border: 1px solid rgba(var(--dashboard-estadoAdvertenciaRgb), 0.4);
+    color: var(--dashboard-estadoAdvertencia);
 }
 
 .historialHabitoDia--omitido .historialHabitoDiaIndicador {
@@ -162,9 +162,9 @@
  * Dias no relevantes POSPUESTOS - amarillo con opacidad 
  */
 .historialHabitoDia--noRelevante.historialHabitoDia--pospuesto .historialHabitoDiaIndicador {
-    background: rgba(234, 179, 8, 0.15);
-    border: 1px solid rgba(234, 179, 8, 0.3);
-    color: rgba(234, 179, 8, 0.7);
+    background: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoAdvertenciaRgb), 0.3);
+    color: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.7);
 }
 
 /* 

@@ -41,7 +41,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--dashboard-superposicionMuyClara);
     border-radius: var(--dashboard-radioMd);
     border: 1px solid var(--dashboard-bordeSutil);
 }

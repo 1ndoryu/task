@@ -17,7 +17,7 @@
 .botonSeguridad:hover {
     color: var(--dashboard-textoActivo);
     border-color: var(--dashboard-acento);
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(var(--dashboard-violetaRgb), 0.1);
 }
 
 .botonSeguridad:active {
@@ -29,14 +29,14 @@
  */
 .badgeEncabezado--admin {
     cursor: pointer;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(var(--dashboard-violetaRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-violetaRgb), 0.3);
     color: var(--dashboard-acentoPrimario);
 }
 
 .badgeEncabezado--admin:hover {
-    background: rgba(139, 92, 246, 0.2);
-    border-color: rgba(139, 92, 246, 0.5);
+    background: rgba(var(--dashboard-violetaRgb), 0.2);
+    border-color: rgba(var(--dashboard-violetaRgb), 0.5);
     color: #c4b5fd;
     transform: translateY(-1px);
 }
@@ -124,16 +124,16 @@
 }
 
 .estadoConexionIcono--desconectado {
-    background-color: rgba(156, 163, 175, 0.15);
-    color: #9ca3af;
-    border-color: rgba(156, 163, 175, 0.3);
+    background-color: rgba(var(--dashboard-grisNeutroRgb), 0.15);
+    color: var(--dashboard-grisNeutro);
+    border-color: rgba(var(--dashboard-grisNeutroRgb), 0.3);
     cursor: pointer;
     gap: var(--dashboard-espacioXs);
 }
 
 .estadoConexionIcono--desconectado:hover {
-    background-color: rgba(156, 163, 175, 0.25);
-    border-color: rgba(156, 163, 175, 0.5);
+    background-color: rgba(var(--dashboard-grisNeutroRgb), 0.25);
+    border-color: rgba(var(--dashboard-grisNeutroRgb), 0.5);
 }
 
 .estadoConexionIcono__texto {

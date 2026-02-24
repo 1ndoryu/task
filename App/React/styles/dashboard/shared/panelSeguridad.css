@@ -44,7 +44,7 @@
 }
 
 .seccionSeguridad:hover::before {
-    background: #8b5cf6;
+    background: var(--dashboard-violeta);
 }
 
 .seccionSeguridadEncabezado {
@@ -212,7 +212,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-left: 3px solid #8b5cf6;
+    border-left: 3px solid var(--dashboard-violeta);
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioXs);
@@ -237,10 +237,10 @@
 }
 
 .detalleCifradoItem .valor {
-    color: #8b5cf6;
+    color: var(--dashboard-violeta);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-weight: 500;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(var(--dashboard-violetaRgb), 0.1);
     padding: 2px 6px;
     border-radius: var(--dashboard-radioMini);
 }

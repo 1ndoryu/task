@@ -9,7 +9,7 @@
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background: rgba(0, 0, 0, 0.9);
+    background: var(--dashboard-superposicionProfunda);
     backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;

@@ -89,28 +89,28 @@
 
 /* Variante TRIAL - Azul sutil con pulso */
 .indicadorPlan--trial {
-    color: #60a5fa;
-    border-color: rgba(96, 165, 250, 0.4);
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.08) 0%, rgba(96, 165, 250, 0.02) 100%);
+    color: var(--dashboard-acentoSecundario);
+    border-color: rgba(var(--dashboard-acentoSecundarioRgb), 0.4);
+    background: linear-gradient(135deg, rgba(var(--dashboard-acentoSecundarioRgb), 0.08) 0%, rgba(var(--dashboard-acentoSecundarioRgb), 0.02) 100%);
     animation: trialPulso 3s ease-in-out infinite;
 }
 
 .indicadorPlan--trial::before {
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, transparent 100%);
+    background: linear-gradient(135deg, rgba(var(--dashboard-acentoSecundarioRgb), 0.15) 0%, transparent 100%);
 }
 
 .indicadorPlan--trial:hover {
-    border-color: rgba(96, 165, 250, 0.6);
+    border-color: rgba(var(--dashboard-acentoSecundarioRgb), 0.6);
     animation: none;
 }
 
 @keyframes trialPulso {
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.2);
+        box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoSecundarioRgb), 0.2);
     }
     50% {
-        box-shadow: 0 0 8px 2px rgba(96, 165, 250, 0.15);
+        box-shadow: 0 0 8px 2px rgba(var(--dashboard-acentoSecundarioRgb), 0.15);
     }
 }
 
@@ -177,9 +177,9 @@
 
 /* Encabezado variantes */
 .modalUpgrade__encabezado--trial .modalUpgrade__icono {
-    color: #60a5fa;
-    border-color: rgba(96, 165, 250, 0.3);
-    background: rgba(96, 165, 250, 0.08);
+    color: var(--dashboard-acentoSecundario);
+    border-color: rgba(var(--dashboard-acentoSecundarioRgb), 0.3);
+    background: rgba(var(--dashboard-acentoSecundarioRgb), 0.08);
 }
 
 .modalUpgrade__encabezado--premium .modalUpgrade__icono {

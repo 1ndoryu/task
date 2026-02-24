@@ -113,14 +113,14 @@
     justify-content: center;
     gap: var(--dashboard-espacioXs);
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: var(--dashboard-superposicionMuyClara);
     transition: all var(--dashboard-transicionNormal);
     text-align: center;
 }
 
 .adjuntosAreaCarga:hover {
     border-color: var(--dashboard-textoSecundario);
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--dashboard-superposicionClara);
 }
 
 .adjuntosSubtextoCarga {
@@ -189,7 +189,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: var(--dashboard-superposicionProfunda);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -256,7 +256,7 @@
     cursor: pointer;
     border-color: var(--dashboard-estadoAdvertencia);
     border-style: dashed;
-    background-color: rgba(245, 158, 11, 0.05);
+    background-color: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.05);
 }
 
 .adjuntosAreaCarga--bloqueado:hover {
@@ -306,7 +306,7 @@
 }
 
 .pillOpcion--premium:hover {
-    background-color: rgba(245, 158, 11, 0.2) !important;
+    background-color: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.2) !important;
 }
 
 /* 
@@ -374,7 +374,7 @@
     position: absolute;
     bottom: 2px;
     right: 2px;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--dashboard-superposicionOscuro);
     border-radius: var(--dashboard-radioMini);
     padding: 2px 3px;
     display: flex;
