@@ -115,11 +115,16 @@
  * Ejemplo: 58% y 42% se convierten a 58fr y 42fr
  */
 .dashboardGridColumnas--2col {
-    grid-template-columns: var(--col1-fr, 58fr) var(--col2-fr, 42fr);
+    --col1-fr: 58fr;
+    --col2-fr: 42fr;
+    grid-template-columns: var(--col1-fr) var(--col2-fr);
 }
 
 .dashboardGridColumnas--3col {
-    grid-template-columns: var(--col1-fr, 35fr) var(--col2-fr, 35fr) var(--col3-fr, 30fr);
+    --col1-fr: 35fr;
+    --col2-fr: 35fr;
+    --col3-fr: 30fr;
+    grid-template-columns: var(--col1-fr) var(--col2-fr) var(--col3-fr);
 }
 
 /* 

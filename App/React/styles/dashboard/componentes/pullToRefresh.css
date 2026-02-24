@@ -1,9 +1,14 @@
 /*
  * PULL TO REFRESH - ESTILOS
  * Componente para gesto de recarga tirando hacia abajo en móvil
+ * Variables --ptr-* son dinámicas, asignadas por JS
  */
 
 .pullToRefresh {
+    --ptr-translateY: 0;
+    --ptr-rotacion: 0deg;
+    --ptr-escala: 0.5;
+    --ptr-contenido-translateY: 0;
     position: relative;
     overflow: auto;
     height: 100%;
@@ -41,7 +46,7 @@
     color: var(--dashboard-textoSecundario);
     transition: color 0.2s;
     /* Transform dinámico via custom properties */
-    transform: rotate(var(--ptr-rotacion, 0deg)) scale(var(--ptr-escala, 0.5));
+    transform: rotate(var(--ptr-rotacion)) scale(var(--ptr-escala));
 }
 
 .pullToRefresh__icono--girando {
@@ -54,7 +59,7 @@
     height: 100%;
     min-height: 100%;
     /* Transform dinámico via custom property */
-    transform: translateY(var(--ptr-contenido-translateY, 0));
+    transform: translateY(var(--ptr-contenido-translateY));
 }
 
 .pullToRefresh__contenido--animando {
