@@ -47,7 +47,7 @@ export function BottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresInic
             <div className="bottomSheetHabito">
                 {/* Input principal */}
                 <div className="bottomSheetHabito__inputWrapper">
-                    <Input ref={inputRef} tipo="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder={esEdicion ? 'Nombre del hábito' : '¿Qué hábito quieres crear?'} claseAdicional="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-habito-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
+                    <Input ref={inputRef as React.RefObject<HTMLInputElement>} tipo="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder={esEdicion ? 'Nombre del hábito' : '¿Qué hábito quieres crear?'} claseAdicional="bottomSheetHabito__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-habito-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}

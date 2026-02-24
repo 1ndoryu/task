@@ -32,10 +32,10 @@ export function useListaTareas({
     proyectoId,
     onEditarTarea,
     onCrearTarea,
-    onEliminarTarea,
+    onEliminarTarea: _onEliminarTarea,
     onReordenarTareas,
     onConfigurarTarea,
-    onToggleTarea,
+    onToggleTarea: _onToggleTarea,
     ocultarSubtareasAutomaticamente = false
 }: UseListaTareasParams) {
     /* Filtros básicos */

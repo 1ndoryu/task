@@ -9,17 +9,6 @@
 
 import {useState, useCallback} from 'react';
 
-declare global {
-    interface Window {
-        gloryDashboard?: {
-            nonce: string;
-            apiBase: string;
-            isLoggedIn: boolean;
-            userId: number;
-        };
-    }
-}
-
 interface CheckoutResult {
     success: boolean;
     sessionId?: string;
@@ -58,7 +47,7 @@ export function useStripe(): UseStripeReturn {
         }
 
         /* apiBase apunta a /glory/v1/dashboard, necesitamos /glory/v1/ */
-        const baseUrl = wpData.apiBase.replace(/\/dashboard\/?$/, '/');
+        const baseUrl = (wpData.apiBase || wpData.apiUrl || '').replace(/\/dashboard\/?$/, '/');
 
         return {
             baseUrl,

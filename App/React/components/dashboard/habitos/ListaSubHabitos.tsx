@@ -151,7 +151,8 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
                     />
                 </form>
             ) : (
-                <Boton type="button" variante="secundario" onClick={() => setMostrarInput(true)}>
+                /* Estilo unificado con añadirHabito — claseAdicional sobreescribe variante via selector .añadirHabito.boton */
+                <Boton type="button" variante="ghost" claseAdicional="añadirHabito" onClick={() => setMostrarInput(true)}>
                     <Plus size={12} />
                     <span>Añadir subhábito</span>
                 </Boton>

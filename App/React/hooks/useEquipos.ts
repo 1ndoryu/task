@@ -6,7 +6,7 @@
  */
 
 import {useState, useCallback, useEffect, useRef} from 'react';
-import type {EquipoCompleto, SolicitudEquipo, CompaneroEquipo} from '../types/dashboard';
+import type {EquipoCompleto} from '../types/dashboard';
 
 interface EstadoEquipos {
     equipo: EquipoCompleto | null;

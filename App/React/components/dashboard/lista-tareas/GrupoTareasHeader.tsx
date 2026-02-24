@@ -15,7 +15,7 @@ interface GrupoTareasHeaderProps {
     cantidadTareas: number;
 }
 
-export function GrupoTareasHeader({grupo, cantidadTareas}: GrupoTareasHeaderProps): JSX.Element {
+export function GrupoTareasHeader({grupo, cantidadTareas: _cantidadTareas}: GrupoTareasHeaderProps): JSX.Element {
     const editarGrupo = useGruposTareasStore(s => s.editarGrupo);
     const toggleColapsarGrupo = useGruposTareasStore(s => s.toggleColapsarGrupo);
     const eliminarGrupo = useGruposTareasStore(s => s.eliminarGrupo);

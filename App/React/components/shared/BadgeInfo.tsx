@@ -27,7 +27,7 @@ export interface BadgeInfoProps {
     className?: string;
 }
 
-export function BadgeInfo({tipo, icono, texto, titulo, variante = 'normal', onClick, className = ''}: BadgeInfoProps): JSX.Element {
+export function BadgeInfo({tipo: _tipo, icono, texto, titulo, variante = 'normal', onClick, className = ''}: BadgeInfoProps): JSX.Element {
     const clases = `badgeInfo badgeInfo--${variante}${onClick ? ' badgeInfoClickable' : ''} ${className}`.trim();
 
     const contenido = (

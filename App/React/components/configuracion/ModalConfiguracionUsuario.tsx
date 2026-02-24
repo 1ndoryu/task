@@ -16,8 +16,6 @@ interface ModalConfiguracionUsuarioProps {
 export function ModalConfiguracionUsuario({estaAbierto, onCerrar}: ModalConfiguracionUsuarioProps): JSX.Element {
     const {horaFinDia, setHoraFinDia} = useConfiguracionUsuario();
 
-    const horasDisponibles = Array.from({length: 24}, (_, i) => i);
-
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Preferencias de Usuario">
             <div id="modal-config-usuario" className="formularioConfiguracion">

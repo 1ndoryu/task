@@ -26,7 +26,7 @@ const blockDefinitions = [heroBlockDefinition, featuresBlockDefinition, pricingB
  * Registrar todos los bloques en Glory
  */
 export function registerAppBlocks(): void {
-    BlockRegistry.registerAll(blockDefinitions);
+    BlockRegistry.registerAll(blockDefinitions as unknown as import('@/pageBuilder').BlockDefinition<Record<string, unknown>>[]);
     console.log(`[App Blocks] ${blockDefinitions.length} bloques registrados`);
 }
 

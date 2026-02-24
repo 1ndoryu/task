@@ -24,7 +24,7 @@ export interface BottomSheetProps {
 const UMBRAL_CIERRE = 0.3; /* 30% del alto del panel para cerrar */
 const VELOCIDAD_MINIMA = 0.5; /* px/ms para cierre rápido */
 
-export function BottomSheet({estaAbierto, onCerrar, children, titulo}: BottomSheetProps): JSX.Element | null {
+export function BottomSheet({estaAbierto, onCerrar, children, titulo: _titulo}: BottomSheetProps): JSX.Element | null {
     const panelRef = useRef<HTMLDivElement>(null);
     const indicadorRef = useRef<HTMLDivElement>(null);
     const [arrastrando, setArrastrando] = useState(false);

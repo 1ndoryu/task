@@ -94,7 +94,7 @@ export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandi
         cargando: cargandoCarpetas,
         cargarCarpetas, crearCarpeta, renombrarCarpeta,
         eliminarCarpeta, seleccionarCarpeta, moverNota,
-        setVistaActual, volverACarpetas, obtenerNombreCarpetaActiva
+        setVistaActual: _setVistaActual, volverACarpetas, obtenerNombreCarpetaActiva
     } = useCarpetasNotas();
 
     const [terminoBusqueda, setTerminoBusqueda] = useState('');

@@ -1,5 +1,5 @@
 import React, {useCallback, useMemo} from 'react';
-import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Share2, Play, Square} from 'lucide-react';
+import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Play, Square} from 'lucide-react';
 import type {Tarea, TareaHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
 import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion} from '../../../config/opcionesMenuHabito';
 import type {OpcionMenu} from '../../shared/MenuContextual';
@@ -87,7 +87,7 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                         break;
                 }
                 /* Manejar cambio de importancia */
-                const nuevaImportancia = extraerImportanciaDeOpcion(opcionId);
+                const nuevaImportancia = extraerImportanciaDeOpcion(opcionId) as import('../../../types/dashboard').NivelImportancia | null;
                 if (nuevaImportancia) {
                     onActualizarHabito?.(tareaHabito.habitoId, {importancia: nuevaImportancia});
                 }

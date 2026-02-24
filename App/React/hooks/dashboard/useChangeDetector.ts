@@ -1,8 +1,5 @@
 import {useCallback, useRef} from 'react';
 
-// Tipos genéricos para flexibilidad
-type ChangeableData = Record<string, unknown>;
-
 export interface ChangeDetectorResult {
     hasChanges: boolean;
     updateVersion: () => void;

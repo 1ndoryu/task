@@ -56,6 +56,7 @@ export interface UseBottomSheetTareaReturn {
     manejarGuardar: () => Promise<void>;
     manejarEliminarBadge: (id: string) => void;
     manejarSeleccionFecha: (valor: string | undefined) => void;
+    obtenerNombreProyecto: () => string | null;
 }
 
 export function useBottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = [], valoresIniciales = {}, tareaExistente}: UseBottomSheetTareaParams): UseBottomSheetTareaReturn {
@@ -238,6 +239,7 @@ export function useBottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos
         badgesActivos,
         manejarGuardar,
         manejarEliminarBadge,
-        manejarSeleccionFecha
+        manejarSeleccionFecha,
+        obtenerNombreProyecto
     };
 }

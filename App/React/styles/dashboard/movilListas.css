@@ -228,6 +228,6 @@
      */
     .tareaItemSubtarea,
     .tareaItem--compacto.tareaItemSubtarea {
-        padding-left: 30px;
+        padding-left: var(--dashboard-espacio2xl);
     }
 }

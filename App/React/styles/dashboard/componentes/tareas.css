@@ -37,11 +37,11 @@
  * SUBTAREAS
  */
 .tareaItem--conSubtareas {
-    padding-right: 45px;
+    padding-right: var(--dashboard-espacio3xl);
 }
 
 .tareaItemSubtarea {
-    padding-left: 30px;
+    padding-left: var(--dashboard-espacio2xl);
     width: calc(100% - var(--dashboard-espacioLg));
     /* border-left: 2px solid var(--dashboard-bordeSutil); */
     /* background-color: #0000; */
@@ -400,27 +400,11 @@
 
 /* 
  * INPUT INLINE NUEVA TAREA
- * Estilo unificado con "+ Añadir" de hábitos para coherencia visual
+ * El estilo BASE de .areaNuevoInline está centralizado en tabla.css
+ * junto a .añadirHabito para mantener coherencia visual entre ambos.
+ *
+ * Clases modificadoras específicas de InputNuevaTarea (internas):
  */
-.tareaNuevoInline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    text-align: center;
-    color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    border-top: 1px dashed var(--dashboard-bordePunteado);
-    transition: all var(--dashboard-transicionNormal);
-}
-
-.tareaNuevoInline:hover,
-.tareaNuevoInlineActivo {
-    color: var(--dashboard-textoNormal);
-    background-color: var(--dashboard-fondoHover);
-}
 
 /*
  * Texto "+ Añadir" visible por defecto
@@ -428,6 +412,7 @@
 .tareaNuevoInlineTexto {
     color: inherit;
     font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
 }
 
 /* 
@@ -707,7 +692,7 @@
 }
 
 .tareaItem--compacto.tareaItem--conSubtareas {
-    padding-right: 40px; /* Mantener espacio para el colapsador */
+    padding-right: var(--dashboard-espacioXxl); /* Mantener espacio para el colapsador */
 }
 
 .tareaTexto--compacto {
@@ -716,7 +701,7 @@
 }
 
 .tareaItem--compacto.tareaItemSubtarea {
-    padding-left: 30px; /* Mantener indentacion */
+    padding-left: var(--dashboard-espacio2xl); /* Mantener indentacion */
 }
 
 /* Modo compacto: ajustar tamaño del colapsador pero mantener centrado */

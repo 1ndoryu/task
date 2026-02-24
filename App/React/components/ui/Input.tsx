@@ -1,4 +1,4 @@
-import React, {type InputHTMLAttributes, type ReactNode, forwardRef} from 'react';
+import {type InputHTMLAttributes, type ReactNode, forwardRef} from 'react';
 
 /*
  * Componente Input - Campo de entrada reutilizable

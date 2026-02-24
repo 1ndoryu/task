@@ -76,7 +76,7 @@ interface IndicadorZonaDropProps {
     posicion: 'antes' | 'despues';
 }
 
-export function IndicadorZonaDrop({activo, posicion}: IndicadorZonaDropProps): JSX.Element | null {
+export function IndicadorZonaDrop({activo, posicion: _posicion}: IndicadorZonaDropProps): JSX.Element | null {
     if (!activo) return null;
 
     /* Ahora usamos un placeholder (caja fantasma) en lugar de una linea */

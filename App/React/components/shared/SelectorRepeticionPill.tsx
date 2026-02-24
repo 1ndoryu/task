@@ -27,7 +27,7 @@ const TIPOS_FRECUENCIA: {tipo: import('../../types/dashboard').TipoFrecuencia; e
 ];
 
 export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, deshabilitado = false}: SelectorRepeticionPillProps): JSX.Element {
-    const {panelAbierto, posicionPanel, botonRef, panelRef, descripcion, activarRepeticion, cerrarPanel, desactivarRepeticion, manejarCambioTipo, manejarCambioDias, manejarCambioVecesMes} = useSelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, deshabilitado});
+    const {panelAbierto, posicionPanel, botonRef, panelRef, descripcion, activarRepeticion, cerrarPanel: _cerrarPanel, desactivarRepeticion, manejarCambioTipo, manejarCambioDias, manejarCambioVecesMes} = useSelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange, frecuencia, onFrecuenciaChange, deshabilitado});
 
     return (
         <div className="propiedadesCompactas__item">

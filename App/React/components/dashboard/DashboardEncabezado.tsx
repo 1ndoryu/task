@@ -38,7 +38,7 @@ interface DashboardEncabezadoProps {
     onClickVersion?: () => void;
     onClickUsuario?: () => void;
     onClickEquipos?: () => void;
-    onClickNotificaciones?: (evento: React.MouseEvent) => void;
+    onClickNotificaciones?: (evento?: React.MouseEvent) => void;
     onClickExperimentos?: () => void;
     onClickTemas?: () => void;
     onClickConfigUsuario?: () => void;

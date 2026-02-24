@@ -125,7 +125,7 @@ export function PanelAyuno({renderHandleArrastre, handleMinimizar, onAbrirConfig
         porcentaje, alcanzoObjetivo, duracionHoras,
         tiempoDesdeUltimoFormateado,
         historial, iniciar, reiniciar, eliminarSesion,
-        habitoAyunoExiste, frecuenciaAyuno, duracionObjetivoUltimoMs,
+        habitoAyunoExiste, frecuenciaAyuno, duracionObjetivoUltimoMs: _duracionObjetivoUltimoMs,
         ventanaUltima, textoProximoAyuno, textoVentanaComida,
         crearHabitoEspecialAhora, manejarCambiarDuracion,
         abrirModalFinalizar, manejarTerminar

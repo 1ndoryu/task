@@ -10,8 +10,8 @@
  * Conectado a la API real de mensajes
  */
 
-import {MessageCircle, Users, Send, History, Plus, Edit, Trash2, UserCheck, Paperclip, CheckCircle, Clock, Tag, Zap, Calendar, FileText, Type, Share2, UserPlus, UserMinus, Loader, Repeat} from 'lucide-react';
-import {type MensajeTimeline, type AccionSistema, obtenerTipoVisual} from '../../utils/mensajes';
+import {MessageCircle, Users, Send, Loader} from 'lucide-react';
+import {type MensajeTimeline, obtenerTipoVisual} from '../../utils/mensajes';
 import {usePanelChatHistorial} from '../../hooks/dashboard/usePanelChatHistorial';
 import {Boton} from '../ui';
 import {Input} from '../ui/Input';
@@ -33,31 +33,6 @@ export interface PanelChatHistorialProps {
     soloInput?: boolean;
     /* Modo compacto para movil inline (Fase 10.8.11) */
     compacto?: boolean;
-}
-
-/* Mapeo de iconos para mensajes del sistema */
-function obtenerIconoSistema(accion?: AccionSistema | null) {
-    const iconos: Record<AccionSistema, JSX.Element> = {
-        creado: <Plus size={10} />,
-        editado: <Edit size={10} />,
-        completado: <CheckCircle size={10} />,
-        reabierto: <Clock size={10} />,
-        asignado: <UserCheck size={10} />,
-        desasignado: <UserMinus size={10} />,
-        adjunto_agregado: <Paperclip size={10} />,
-        adjunto_eliminado: <Trash2 size={10} />,
-        prioridad: <Tag size={10} />,
-        urgencia: <Zap size={10} />,
-        fecha_limite: <Calendar size={10} />,
-        participante_agregado: <UserPlus size={10} />,
-        participante_removido: <UserMinus size={10} />,
-        compartido: <Share2 size={10} />,
-        descripcion: <FileText size={10} />,
-        nombre: <Type size={10} />,
-        repeticion: <Repeat size={10} />
-    };
-
-    return accion ? iconos[accion] || <History size={10} /> : <History size={10} />;
 }
 
 /* Formatear hora para mensajes (sin fecha, solo hora) */
@@ -207,7 +182,7 @@ export function PanelChatHistorial({elementoId, elementoTipo, participantes = []
                 {/* Timeline Unificado */}
                 {!mostrandoParticipantes && (
                     <div className="panelChatHistorialTimeline">
-                        <div ref={refContenedor} className="timelineContenedor">
+                        <div ref={refContenedor as React.RefObject<HTMLDivElement>} className="timelineContenedor">
                             {renderizarEstadoTimeline()}
                         </div>
 

@@ -63,7 +63,7 @@ function formatearFecha(fecha: string): string {
  * Componente principal del Mapa de Calor
  */
 export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titulo, onClickDia, mostrarLeyenda = true, tamanoCelda = 'normal', compacto = false, id = 'mapaCalor'}: MapaCalorProps): JSX.Element {
-    const {contenedorRef, fechas, semanas, mesesVisibles, estadisticas} = useMapaCalor({datos, periodo, fechaInicio, fechaFin, tamanoCelda});
+    const {contenedorRef, fechas: _fechas, semanas, mesesVisibles, estadisticas} = useMapaCalor({datos, periodo, fechaInicio, fechaFin, tamanoCelda});
 
     /* Clase del contenedor según tamaño */
     const clasesTamano = {

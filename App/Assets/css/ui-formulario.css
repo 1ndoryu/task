@@ -8,6 +8,16 @@
     width: 100%;
 }
 
+/* Colapsa el inputContenedor fuera del flujo — usado por InputNuevaTarea cuando el input está oculto */
+.inputContenedorInvisible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
 .inputEtiqueta {
     font-size: var(--dashboard-tamanoBase);
     font-weight: 500;
@@ -310,7 +320,7 @@
 .checkboxTexto {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--dashboard-espacioMovilXs);
 }
 
 .checkboxEtiqueta {
@@ -326,7 +336,7 @@
 .checkboxError {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-estadoAlta);
-    margin-left: 1.625rem;
+    margin-left: var(--dashboard-espacioXl);
 }
 
 /* Radio */
@@ -418,7 +428,7 @@
 .radioTexto {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--dashboard-espacioMovilXs);
 }
 
 .radioEtiqueta {

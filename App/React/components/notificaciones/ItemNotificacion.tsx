@@ -5,7 +5,7 @@
  * Muestra icono según tipo, título, contenido, fecha y acciones.
  */
 
-import {Users, UserCheck, Calendar, UserPlus, UserMinus, Paperclip, MessageCircle, Target, Check, Trash2} from 'lucide-react';
+import {Users, UserCheck, Calendar, UserPlus, UserMinus, Paperclip, MessageCircle, Target, Check, Trash2, Share2} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import type {Notificacion, TipoNotificacion} from '../../types/dashboard';
 import {formatearFechaRelativa} from '../../utils/fechaUI';
@@ -50,11 +50,15 @@ const ICONO_POR_TIPO: Record<TipoNotificacion, {icono: JSX.Element; clase: strin
     habito_companero: {
         icono: <Target size={16} />,
         clase: 'itemNotificacion__icono--habito'
+    },
+    elemento_compartido: {
+        icono: <Share2 size={16} />,
+        clase: 'itemNotificacion__icono--compartido'
     }
 };
 
 export function ItemNotificacion({notificacion, onClick, onMarcarLeida, onEliminar}: ItemNotificacionProps): JSX.Element {
-    const {icono, clase} = ICONO_POR_TIPO[notificacion.tipo] || {
+    const {icono} = ICONO_POR_TIPO[notificacion.tipo] || {
         icono: <Users size={16} />,
         clase: ''
     };

@@ -74,7 +74,7 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
             <div className={`drawerMovilOverlay ${estaAbierto ? 'drawerMovilOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" />
 
             {/* Panel del drawer */}
-            <div ref={drawerRef} className={`drawerMovilPanel ${estaAbierto ? 'drawerMovilPanel--visible' : ''}`} role="dialog" aria-modal="true" aria-label="Menú de navegación" onTouchStart={manejarTouchStart} onTouchEnd={manejarTouchEnd}>
+            <div ref={drawerRef as React.RefObject<HTMLDivElement>} className={`drawerMovilPanel ${estaAbierto ? 'drawerMovilPanel--visible' : ''}`} role="dialog" aria-modal="true" aria-label="Menú de navegación" onTouchStart={manejarTouchStart} onTouchEnd={manejarTouchEnd}>
                 {/* Cabecera con perfil - foto y nombre clickeables */}
                 <div className="drawerMovilCabecera">
                     <Boton type="button" variante="ghost" claseAdicional="drawerMovilPerfil drawerMovilPerfil--clickeable" onClick={onClickPerfil ? manejarClickPerfil : undefined}>

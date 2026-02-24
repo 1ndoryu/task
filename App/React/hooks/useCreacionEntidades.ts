@@ -89,7 +89,7 @@ export function useCreacionEntidades({dashboard, limites, acciones}: UseCreacion
      */
     const manejarCrearProyectoConLimite = (datos: {nombre: string; prioridad?: NivelPrioridad; urgencia?: NivelUrgencia; fechaLimite?: string}): void => {
         if (!limites.verificarYMostrar('proyectos', dashboard.proyectos?.length ?? 0)) return;
-        acciones.manejarGuardarNuevoProyecto(datos);
+        acciones.manejarGuardarNuevoProyecto({...datos, prioridad: datos.prioridad ?? 'Media'} as import('./useProyectos').DatosNuevoProyecto);
     };
 
     /*

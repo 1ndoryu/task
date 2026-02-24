@@ -35,7 +35,7 @@ export function BuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, 
     };
 
     return (
-        <div className="buscadorGlobal" ref={contenedorRef}>
+        <div className="buscadorGlobal" ref={contenedorRef as React.RefObject<HTMLDivElement>}>
             <div className={`buscadorInputWrapper ${mostrarResultados && resultados.length > 0 ? 'activo' : ''}`}>
                 <Search size={14} className="buscadorIcono" />
                 <Input

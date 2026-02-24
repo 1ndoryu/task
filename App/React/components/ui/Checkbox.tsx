@@ -1,4 +1,4 @@
-import React, {type InputHTMLAttributes, forwardRef} from 'react';
+import {type InputHTMLAttributes, forwardRef} from 'react';
 
 /*
  * Componente Checkbox - Casilla de verificación reutilizable

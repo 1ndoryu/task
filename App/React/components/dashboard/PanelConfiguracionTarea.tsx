@@ -85,9 +85,6 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
             </div>
         ) : undefined;
 
-    /* Clase del modal */
-    const claseModal = modoEdicion ? 'panelConfiguracionContenedor modalContenedor--expandido' : 'modalContenedor--moderno';
-
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={manejarCerrarConGuardado} titulo={modoEdicion ? 'Modificar tarea' : 'Nueva tarea'} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar={modoEdicion}>
             {modoEdicion ? (
@@ -132,14 +129,14 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
                                     onTagsChange={setTags}
                                     modoEdicion={true}
                                     /* Subtareas */
-                                    tareaId={tarea.id}
+                                    tareaId={tarea?.id}
                                     subtareas={subtareas}
                                     onCrearSubtarea={onCrearSubtarea}
                                     onToggleSubtarea={onToggleSubtarea}
                                     onEliminarSubtarea={onEliminarSubtarea}
                                     onConfigurarSubtarea={onConfigurarSubtarea}
                                     onEditarSubtarea={onEditarSubtarea}
-                                    esSubtarea={!!tarea.parentId}
+                                    esSubtarea={!!tarea?.parentId}
                                 />
 
                                 {/* Fase 10.8.11: Chat inline en móvil */}

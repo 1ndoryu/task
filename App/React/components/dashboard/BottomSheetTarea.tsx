@@ -13,6 +13,7 @@
  * - Badges de propiedades seleccionadas
  */
 
+import React from 'react';
 import {Send, Calendar, Flag, Zap, Layers, Settings} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import {Input, Boton} from '../ui';
@@ -46,7 +47,7 @@ export interface DatosTarea {
 }
 
 export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = [], valoresIniciales = {}, tareaExistente, onAbrirConfiguracion}: BottomSheetTareaProps): JSX.Element | null {
-    const {esEdicion, texto, setTexto, proyectoId, prioridad, urgencia, fecha, cargando, modalActivo, setModalActivo, inputRef, opcionesProyecto, badgesActivos, manejarGuardar, manejarEliminarBadge, manejarSeleccionFecha, setPrioridad, setUrgencia, setProyectoId} = useBottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos, valoresIniciales, tareaExistente});
+    const {esEdicion, texto, setTexto, proyectoId, prioridad, urgencia, fecha, cargando, modalActivo, setModalActivo, inputRef, opcionesProyecto, badgesActivos, manejarGuardar, manejarEliminarBadge, manejarSeleccionFecha, setPrioridad, setUrgencia, setProyectoId, obtenerNombreProyecto} = useBottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos, valoresIniciales, tareaExistente});
 
     if (!estaAbierto) return null;
 
@@ -55,7 +56,7 @@ export function BottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = 
             <div className="bottomSheetTarea">
                 {/* Input principal */}
                 <div className="bottomSheetTarea__inputWrapper">
-                    <Input ref={inputRef} tipo="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" claseAdicional="bottomSheetTarea__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
+                    <Input ref={inputRef as React.RefObject<HTMLInputElement>} tipo="text" value={texto} onChange={e => setTexto(e.target.value)} placeholder="¿Qué necesitas hacer?" claseAdicional="bottomSheetTarea__input" disabled={cargando} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck="false" data-form-type="other" inputMode="text" enterKeyHint="done" name="bottomsheet-tarea-input" data-lpignore="true" data-1p-ignore="true" aria-autocomplete="none" />
                 </div>
 
                 {/* Badges de propiedades seleccionadas */}

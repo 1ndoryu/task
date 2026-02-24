@@ -32,7 +32,7 @@ interface MapaCalorHabitoProps {
  */
 export function MapaCalorHabito({habitoId, periodo = 'mes', compacto = false, enModal = false, frecuencia, fechaCreacion}: MapaCalorHabitoProps): JSX.Element {
     const {
-        contenedorRef, fechas, semanas,
+        contenedorRef, fechas: _fechas, semanas,
         estadoGuardado, errorGuardado,
         obtenerEstadoDia, manejarClick, obtenerClaseEstado,
         estadisticasCalculadas, esRelevanteDia,

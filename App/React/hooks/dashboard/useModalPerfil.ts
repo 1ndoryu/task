@@ -35,7 +35,7 @@ export interface UseModalPerfilReturn {
     handleSubmit: () => Promise<void>;
 }
 
-export function useModalPerfil({estaAbierto, onCerrar}: UseModalPerfilProps): UseModalPerfilReturn {
+export function useModalPerfil({estaAbierto, onCerrar: _onCerrar}: UseModalPerfilProps): UseModalPerfilReturn {
     const {user} = useAuth();
     const [cargando, setCargando] = useState(false);
     const [mensaje, setMensaje] = useState<{tipo: 'exito' | 'error'; texto: string} | null>(null);

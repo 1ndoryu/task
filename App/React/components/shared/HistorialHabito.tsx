@@ -87,7 +87,7 @@ const iconos = {
  * @param fechaCreacion - Fecha de creación del hábito (no usado actualmente)
  * @param cantidadDias - Número de días a mostrar (por defecto 5)
  */
-function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, frecuencia?: FrecuenciaHabito, fechaCreacion?: string, cantidadDias: number = 5): DiaResumen[] {
+function generarResumenDeHistorial(historial: {[fecha: string]: EstadoHabito}, frecuencia?: FrecuenciaHabito, _fechaCreacion?: string, cantidadDias: number = 5): DiaResumen[] {
     const diasSemana = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
     /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
     const hoy = obtenerFechaEfectiva();
@@ -184,7 +184,7 @@ function formatearFechaTooltip(fecha: string, estado: EstadoHabito | null, esRel
 /**
  * Componente principal de historial de hábito
  */
-export function HistorialHabito({resumen, historial, frecuencia, fechaCreacion, onClickDia, mostrarEtiquetas = false, compacto = true, habitoId, ocultarNoRelevantes = false, cantidadDias = 5}: HistorialHabitoProps): JSX.Element {
+export function HistorialHabito({resumen, historial, frecuencia, fechaCreacion, onClickDia, mostrarEtiquetas = false, compacto = true, habitoId, ocultarNoRelevantes: _ocultarNoRelevantes = false, cantidadDias = 5}: HistorialHabitoProps): JSX.Element {
     /*
      * Usar resumen proporcionado o generarlo desde el historial
      * generarResumenDeHistorial ya omite días libres sin marcar internamente

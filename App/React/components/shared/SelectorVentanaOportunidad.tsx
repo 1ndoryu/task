@@ -17,7 +17,7 @@ interface SelectorVentanaOportunidadProps {
 }
 
 export function SelectorVentanaOportunidad({ventana, onChange}: SelectorVentanaOportunidadProps): JSX.Element {
-    const {menuAbierto, setMenuAbierto, menuRef, ventanaActual, tempInicio, tempFin, estaEnVentana, textoBoton, toggleHabilitado, eliminarVentana, manejarKeyDown, manejarCambioTexto, manejarBlur} = useSelectorVentanaOportunidad({ventana, onChange});
+    const {menuAbierto, setMenuAbierto, menuRef, ventanaActual, tempInicio, tempFin, estaEnVentana, textoBoton, toggleHabilitado, eliminarVentana: _eliminarVentana, manejarKeyDown, manejarCambioTexto, manejarBlur} = useSelectorVentanaOportunidad({ventana, onChange});
 
     /* Renderizar arco SVG para la ventana */
     const renderizarArco = () => {

@@ -29,14 +29,14 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     const {
         notas, notaActiva, cargando, guardando, error,
         seleccionarNota, actualizarContenido,
-        carpetas, carpetaActiva, vistaActual, cargandoCarpetas,
+        carpetas, carpetaActiva: _carpetaActiva, vistaActual, cargandoCarpetas,
         seleccionarCarpeta, volverACarpetas, nombreCarpetaActiva,
         manejarCrearCarpeta, manejarRenombrarCarpeta, manejarEliminarCarpeta, moverNota,
         terminoBusqueda, setTerminoBusqueda, resultadosBusqueda, buscando,
         maximizado, setMaximizado, mostrarLista, mostrarEditor,
         alternarPanelLista, alternarPanelEditor,
-        ordenamiento, alternarOrdenamiento, textoOrdenamiento,
-        notasOrdenadas, tituloActivo,
+        ordenamiento, alternarOrdenamiento, textoOrdenamiento: _textoOrdenamiento,
+        notasOrdenadas, tituloActivo: _tituloActivo,
         manejarEliminar, manejarCrearNuevaNota, manejarCerrarSeguro,
         claseModal
     } = useModalNotasExpandido({abierto, onCerrar});

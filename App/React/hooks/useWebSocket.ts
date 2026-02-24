@@ -380,10 +380,11 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
         (async () => {
             try {
+                /* @ts-ignore - Modulo solo disponible en plataforma nativa Capacitor */
                 const modulo = await import('@capacitor/app');
                 const {App} = modulo;
 
-                const listener = await App.addListener('appStateChange', ({isActive}) => {
+                const listener = await App.addListener('appStateChange', ({isActive}: {isActive: boolean}) => {
                     if (isActive && montadoRef.current) {
                         console.log('[WebSocket] App activa, verificando conexión...');
                         if (wsRef.current?.readyState !== WebSocket.OPEN) {

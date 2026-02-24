@@ -23,8 +23,8 @@ interface ModalConfiguracionMCPProps {
 export function ModalConfiguracionMCP({estaAbierto, onCerrar, onAbrirUpgrade}: ModalConfiguracionMCPProps): JSX.Element {
     const {
         clienteActivo, setClienteActivo,
-        tokenExiste, tokenGenerado, tokenBase64, fechaCreacion,
-        cargando, verificando, esPremium, apiUrl,
+        tokenExiste, tokenGenerado, tokenBase64: _tokenBase64, fechaCreacion,
+        cargando, verificando, esPremium, apiUrl: _apiUrl,
         manejarGenerarToken, manejarRevocarToken, obtenerConfiguracion
     } = useModalConfiguracionMCP({estaAbierto});
 

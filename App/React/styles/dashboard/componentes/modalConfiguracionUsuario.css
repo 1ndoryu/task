@@ -22,8 +22,8 @@
 
 .configuracionUsuarioInput {
     width: 100%;
-    padding-left: 32px; /* Espacio para el icono */
-    padding-right: 42px; /* Espacio para el sufijo :00 */
+    padding-left: var(--dashboard-espacio2xl); /* Espacio para el icono */
+    padding-right: var(--dashboard-espacioXxl); /* Espacio para el sufijo :00 */
     background-color: var(--dashboard-fondoTerciario);
     border: 1px solid var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoNormal);

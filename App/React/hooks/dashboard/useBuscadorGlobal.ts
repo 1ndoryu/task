@@ -40,11 +40,10 @@ export type {ResultadoBusqueda};
 
 export function useBuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto}: UseBuscadorGlobalParams): UseBuscadorGlobalReturn {
     const [busqueda, setBusqueda] = useState('');
-    const [resultadosNotas, setResultadosNotas] = useState<ResultadoBusqueda[]>([]);
+    const [resultadosNotas, _setResultadosNotas] = useState<ResultadoBusqueda[]>([]);
     const [mostrarResultados, setMostrarResultados] = useState(false);
 
     const contenedorRef = useRef<HTMLDivElement>(null);
-    const requestIdRef = useRef(0);
 
     /* 1. Filtrado de datos locales (Tareas, Habitos, Proyectos) - SIN EFFECT */
     const resultadosLocales = useMemo(() => {

@@ -19,7 +19,8 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["../../Glory/assets/react/src/*"],
-            "@app/*": ["./*"]
+            "@app/*": ["./*"],
+            "framer-motion": ["../../Glory/assets/react/node_modules/framer-motion"]
         }
     },
     "include": ["./**/*.ts", "./**/*.tsx"]

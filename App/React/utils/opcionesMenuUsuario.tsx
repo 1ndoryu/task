@@ -154,7 +154,7 @@ export function obtenerOpcionCerrarSesion(tamanoIcono: number = 18): OpcionMenuU
  * Estas van en la sección secundaria del drawer
  */
 export function obtenerOpcionesSecundariasMenúMovil(config: {esAdmin: boolean; mostrarExperimentos: boolean; tamanoIcono?: number}): OpcionMenuUsuario[] {
-    const {esAdmin, mostrarExperimentos, tamanoIcono = 18} = config;
+    const {esAdmin: _esAdmin, mostrarExperimentos: _mostrarExperimentos, tamanoIcono = 18} = config;
     const opciones: OpcionMenuUsuario[] = [];
 
     /*

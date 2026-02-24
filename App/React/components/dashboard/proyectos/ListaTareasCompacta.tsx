@@ -21,7 +21,7 @@ interface TareaItemCompactoProps {
     nivel?: number;
 }
 
-function TareaItemCompacto({tarea, subtareas, onToggle, nivel = 0}: TareaItemCompactoProps): JSX.Element {
+export function TareaItemCompacto({tarea, subtareas, onToggle, nivel = 0}: TareaItemCompactoProps): JSX.Element {
     const [expandido, setExpandido] = useState(true);
     const tieneSubtareas = subtareas.length > 0;
 

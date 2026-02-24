@@ -26,7 +26,7 @@ interface ModalNotificacionesProps {
     onCerrar: () => void;
 }
 
-export function ModalNotificaciones({notificaciones, noLeidas, total, cargando, cargandoPrimeraVez, posicionX, posicionY, onMarcarLeida, onMarcarTodasLeidas, onEliminar, onClickNotificacion, onCerrar}: ModalNotificacionesProps): JSX.Element {
+export function ModalNotificaciones({notificaciones, noLeidas, total: _total, cargando: _cargando, cargandoPrimeraVez, posicionX, posicionY, onMarcarLeida, onMarcarTodasLeidas, onEliminar, onClickNotificacion, onCerrar}: ModalNotificacionesProps): JSX.Element {
     const {modalRef, calcularEstilo, manejarClickNotificacion, mostrarCargando} = useModalNotificaciones({noLeidas, posicionX, posicionY, notificaciones, cargandoPrimeraVez, onMarcarLeida, onMarcarTodasLeidas, onClickNotificacion, onCerrar});
 
     return (

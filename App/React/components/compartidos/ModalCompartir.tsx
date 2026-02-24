@@ -28,7 +28,7 @@ interface ModalCompartirProps {
     cargandoParticipantes?: boolean;
 }
 
-export function ModalCompartir({visible, onCerrar, tipo, elementoId, elementoNombre, companeros, participantes, cifradoActivo = false, onCompartir, onCambiarRol, onDejarDeCompartir, cargandoParticipantes = false}: ModalCompartirProps): JSX.Element | null {
+export function ModalCompartir({visible, onCerrar, tipo, elementoId: _elementoId, elementoNombre, companeros, participantes, cifradoActivo = false, onCompartir, onCambiarRol, onDejarDeCompartir, cargandoParticipantes = false}: ModalCompartirProps): JSX.Element | null {
     const {
         companeroSeleccionado, setCompaneroSeleccionado,
         rolSeleccionado, setRolSeleccionado,

@@ -14,7 +14,7 @@
 import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
 import type {Habito, DatosNuevoHabito, SubHabito, DatosNuevoSubHabito} from '../types/dashboard';
-import type {HistorialHabito, EstadoHabito, DiaHistorial, EstadisticasHabito} from '../types/historialHabitos';
+import type {EstadoHabito, DiaHistorial} from '../types/historialHabitos';
 import {obtenerFechaHoy, fueCompletadoHoy} from '../utils/fecha';
 import {registrarHabitoCumplido, registrarHabitoDesmarcado, registrarHabitoPospuesto} from '../services/actividadService';
 import {invalidarCache} from '../services/actividadStore';

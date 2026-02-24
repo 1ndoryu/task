@@ -13,7 +13,10 @@ interface GloryDashboardData {
     };
     nonce: string;
     apiUrl: string;
+    apiBase?: string;
     isLoggedIn?: boolean;
+    userId?: number;
+    suscripcion?: import('./dashboard').InfoSuscripcion;
 }
 
 interface Window {

@@ -233,7 +233,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 onClickVersion={modales.abrirModalVersiones}
                 onClickUsuario={modales.abrirModalPerfil}
                 onClickEquipos={modales.abrirModalEquipos}
-                onClickNotificaciones={acciones.manejarClickNotificaciones}
+                onClickNotificaciones={(evento?: React.MouseEvent) => { if (evento) acciones.manejarClickNotificaciones(evento); }}
                 onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
                 onClickTemas={modales.abrirModalTemas}
                 onClickConfigUsuario={modales.abrirModalConfigUsuario}

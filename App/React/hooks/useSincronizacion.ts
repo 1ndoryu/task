@@ -71,7 +71,7 @@ function obtenerUserId(): number {
 }
 
 export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (datos: DashboardData) => void): UseSincronizacionReturn {
-    const {estado: estadoApi, cargar, guardar, obtenerEstadoSync} = useDashboardApi();
+    const {estado: estadoApi, cargar, guardar, obtenerEstadoSync: _obtenerEstadoSync} = useDashboardApi();
 
     const [estado, setEstado] = useState<EstadoSincronizacion>({
         sincronizado: true,

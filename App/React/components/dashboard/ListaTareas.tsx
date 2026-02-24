@@ -57,7 +57,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         estaSeleccionada, manejarSeleccionMultiple, manejarClickDerechoLista,
         modoSeleccionActivo, menuPosicion, ocultarMenu, limpiarSeleccion,
         seccionesActivas, gruposOrdenados, manejarAgrupar,
-        tareaConfigurando, setTareaConfigurando,
+        tareasExpandidas, tareaConfigurando, setTareaConfigurando,
         tareaMoviendo, setTareaMoviendo,
         toggleColapsar, abrirConfiguracion, guardarConfiguracion,
         handleIndent, handleOutdent, handleCrearNueva,
@@ -170,9 +170,9 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                             style={{position: 'relative'}}
                                             className={`tareaPadreReorder ${tareaArrastrandoId === tareaPadre.id ? 'tareaPadreReorderArrastrando' : ''} ${tareaArrastrandoId === tareaPadre.id && esGestoSubtarea ? 'tareaPadreReorderGestoSubtarea' : ''}`}
                                             dragListener={true}
-                                            onPointerDown={e => handleDragStart(tareaPadre.id, e)}
+                                            onPointerDown={(e: React.PointerEvent) => handleDragStart(tareaPadre.id, e)}
                                             onDragEnd={handleDragEnd}
-                                            onDrag={(_, info) => {
+                                            onDrag={(_: unknown, info: {offset: {x: number; y: number}}) => {
                                                 dragCurrentXRef.current = dragStartXRef.current + info.offset.x;
                                                 const nuevoEsGesto = info.offset.x > UMBRAL_INDENT;
                                                 if (nuevoEsGesto !== esGestoSubtarea) {

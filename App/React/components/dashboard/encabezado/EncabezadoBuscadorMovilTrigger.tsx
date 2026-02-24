@@ -1,4 +1,4 @@
-import {ListChecks, Search} from 'lucide-react';
+import {Search} from 'lucide-react';
 import {Boton} from '../../ui/Boton';
 
 interface EncabezadoBuscadorMovilTriggerProps {
@@ -10,7 +10,7 @@ interface EncabezadoBuscadorMovilTriggerProps {
     onToggleSeleccion?: () => void;
 }
 
-export function EncabezadoBuscadorMovilTrigger({onClick, esTablet, mostrarBotonSeleccion, modoSeleccionActivo, onToggleSeleccion}: EncabezadoBuscadorMovilTriggerProps) {
+export function EncabezadoBuscadorMovilTrigger({onClick, esTablet, mostrarBotonSeleccion: _mostrarBotonSeleccion, modoSeleccionActivo: _modoSeleccionActivo, onToggleSeleccion: _onToggleSeleccion}: EncabezadoBuscadorMovilTriggerProps) {
     if (!esTablet) return null;
 
     /* Si estamos en modo selección (tareas), mostrar botón de toggle en vez de buscar 

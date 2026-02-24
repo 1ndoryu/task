@@ -6,6 +6,7 @@
  */
 
 import {useEffect, useCallback, useRef} from 'react';
+/* @ts-ignore - Modulo solo disponible en plataforma nativa Capacitor */
 import {App} from '@capacitor/app';
 import {Capacitor} from '@capacitor/core';
 
@@ -351,7 +352,7 @@ export function useBackButtonCapacitor({elementos, acciones, drawerAbierto, cerr
         }
 
         /* Registrar listener con prioridad alta para interceptar antes del comportamiento nativo */
-        const listener = App.addListener('backButton', ({canGoBack}) => {
+        const listener = App.addListener('backButton', (_event: {canGoBack: boolean}) => {
             /* Siempre manejamos el back button nosotros mismos */
             manejarBackButton();
         });

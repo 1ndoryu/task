@@ -37,7 +37,7 @@ export interface UseModalLoginReturn {
     tituloModal: string;
 }
 
-export function useModalLogin({onLoginCredentials, onRegister, loading}: UseModalLoginProps): UseModalLoginReturn {
+export function useModalLogin({onLoginCredentials, onRegister, loading: _loading}: UseModalLoginProps): UseModalLoginReturn {
     const [modo, setModo] = useState<'login' | 'registro' | 'recuperar'>('login');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');

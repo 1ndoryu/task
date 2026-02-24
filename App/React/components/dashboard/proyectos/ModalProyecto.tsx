@@ -33,7 +33,7 @@ interface ModalProyectoProps {
     onToggleTarea?: (id: number) => void;
 }
 
-export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, tareas = [], onToggleTarea}: ModalProyectoProps): JSX.Element | null {
+export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, tareas = [], onToggleTarea: _onToggleTarea}: ModalProyectoProps): JSX.Element | null {
     const {
         modoEdicion, nombre, setNombre, descripcion, setDescripcion,
         icono, setIcono, colorIcono, setColorIcono,

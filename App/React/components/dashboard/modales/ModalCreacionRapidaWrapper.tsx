@@ -12,6 +12,7 @@ import {ModalCreacionRapida} from '../ModalCreacionRapida';
 
 import type {DashboardCompletoRetorno} from '../../../hooks/useDashboardCompleto';
 import type {DatosCreacionRapida} from '../../../types/creacionRapida';
+import type {DatosCreacion} from '../../../hooks/dashboard/useModalCreacionRapida';
 
 interface ModalCreacionRapidaWrapperProps {
     dashboard: DashboardCompletoRetorno['dashboard'];
@@ -25,5 +26,5 @@ export function ModalCreacionRapidaWrapper({dashboard, modales, esMovil, manejar
     if (esMovil) return null;
     if (!modales.modalCreacionRapida) return null;
 
-    return <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido} onCambiarTipo={modales.abrirCreacionRapida} />;
+    return <ModalCreacionRapida tipo={modales.modalCreacionRapida} proyectos={dashboard.proyectos} valoresIniciales={modales.valoresCreacionRapida} onCerrar={modales.cerrarCreacionRapida} onGuardar={manejarGuardarRapido as unknown as (datos: DatosCreacion) => Promise<void>} onCambiarTipo={modales.abrirCreacionRapida} />;
 }

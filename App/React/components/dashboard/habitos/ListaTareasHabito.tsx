@@ -95,7 +95,7 @@ const TareaHabitoItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPrior
     );
 };
 
-export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas, importancia, onEditarTarea}: ListaTareasHabitoProps): JSX.Element {
+export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas: _onReordenarTareas, importancia, onEditarTarea}: ListaTareasHabitoProps): JSX.Element {
     const [textoNuevaTarea, setTextoNuevaTarea] = useState('');
     const [mostrarInput, setMostrarInput] = useState(false);
 

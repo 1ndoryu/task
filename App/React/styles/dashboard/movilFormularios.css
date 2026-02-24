@@ -237,7 +237,7 @@
     .panelChatHistorial--compacto {
         border: none;
         background: transparent;
-        padding-bottom: 60px;
+        padding-bottom: var(--dashboard-espacio4xl);
     }
 
     .panelChatHistorial--compacto .panelChatHistorialContenido {

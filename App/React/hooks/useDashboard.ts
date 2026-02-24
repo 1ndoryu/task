@@ -6,19 +6,18 @@
  */
 
 import {useState, useCallback, useEffect, useRef} from 'react';
-import type {Habito, Tarea, Proyecto, ConfiguracionDashboard, DatosNuevoHabito, DatosEdicionTarea} from '../types/dashboard';
+import type {Habito, Tarea, Proyecto, DatosNuevoHabito, DatosEdicionTarea} from '../types/dashboard';
 import {exportarDatos, importarDatos} from '../services/dataService';
 import {useDeshacer} from './useDeshacer';
 import {useTareas} from './useTareas';
 import {useProyectos, DatosNuevoProyecto} from './useProyectos';
-import type {DashboardData} from './useDashboardApi';
 import {useHabitosStore} from '../stores/habitosStore'; // Necesario para importación masiva
 
 /* Hooks segregados */
 import {useDashboardData} from './dashboard/useDashboardData';
 import {useDashboardSync} from './dashboard/useDashboardSync';
 import {useDashboardHabitos} from './dashboard/useDashboardHabitos';
-import type {CambioLocal, EntidadSincronizable, AccionSincronizacion} from './useSincronizacionTiempoReal';
+import type {CambioLocal} from './useSincronizacionTiempoReal';
 import type {EstadoConexion} from './useWebSocket';
 
 interface UseDashboardReturn {

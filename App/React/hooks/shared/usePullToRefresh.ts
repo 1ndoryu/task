@@ -106,6 +106,7 @@ export function usePullToRefresh({onRefresh, umbralRefresh = 80, maxArrastre = 1
     }, [maxArrastre]);
 
     /* Clases y estilos dinámicos */
+    const clasesContenedor = `pullToRefresh ${refrescando ? 'pullToRefresh--refrescando' : ''} ${arrastre > 0 ? 'pullToRefresh--arrastrando' : ''}`.trim();
     const clasesIndicador = `pullToRefresh__indicador ${refrescando ? '' : 'pullToRefresh__indicador--animando'}`.trim();
     const clasesIcono = `pullToRefresh__icono ${iconoListo ? 'pullToRefresh__icono--listo' : ''} ${refrescando ? 'pullToRefresh__icono--girando' : ''}`.trim();
     const clasesContenido = `pullToRefresh__contenido ${!arrastrableRef.current ? 'pullToRefresh__contenido--animando' : ''}`.trim();
@@ -123,6 +124,7 @@ export function usePullToRefresh({onRefresh, umbralRefresh = 80, maxArrastre = 1
         manejarTouchEnd,
         progreso,
         iconoListo,
+        clasesContenedor,
         clasesIndicador,
         clasesIcono,
         clasesContenido,

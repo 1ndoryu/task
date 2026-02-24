@@ -90,7 +90,7 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
     );
 };
 
-export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas, onEditarTarea}: ListaSubtareasProps): JSX.Element {
+export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onReordenarTareas: _onReordenarTareas, onEditarTarea}: ListaSubtareasProps): JSX.Element {
     const [textoNuevaTarea, setTextoNuevaTarea] = useState('');
     const [mostrarInput, setMostrarInput] = useState(false);
 

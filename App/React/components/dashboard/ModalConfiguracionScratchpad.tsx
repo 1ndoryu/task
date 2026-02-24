@@ -16,7 +16,7 @@ interface ModalConfiguracionScratchpadProps {
     onCambiarIntervalo: (i: number) => void;
 }
 
-export function ModalConfiguracionScratchpad({estaAbierto, onCerrar, configuracion, onCambiarFuente, onCambiarAltura, onCambiarIntervalo}: ModalConfiguracionScratchpadProps): JSX.Element {
+export function ModalConfiguracionScratchpad({estaAbierto, onCerrar, configuracion, onCambiarFuente, onCambiarAltura: _onCambiarAltura, onCambiarIntervalo}: ModalConfiguracionScratchpadProps): JSX.Element {
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuración Scratchpad">
             <div className="contenedorOpcionesConfig">

@@ -76,9 +76,8 @@ async function obtenerPluginNotificaciones(): Promise<NotificacionLocalPlugin | 
     if (!Capacitor.isNativePlatform()) return null;
 
     try {
-        /* @ts-expect-error - El módulo puede no estar instalado */
         const modulo = await import('@capacitor/local-notifications');
-        return modulo.LocalNotifications as NotificacionLocalPlugin;
+        return modulo.LocalNotifications as unknown as NotificacionLocalPlugin;
     } catch {
         console.warn('[Notificaciones] Plugin @capacitor/local-notifications no instalado');
         return null;

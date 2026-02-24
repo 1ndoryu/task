@@ -162,14 +162,12 @@ export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: stri
     /* Paso 1: Obtener query en inglés desde Groq (intentando varios modelos si falla) */
     let queryIngles = '';
     let errorGroq = null;
-    let modeloUsado = '';
 
     for (const modelo of MODELOS_GROQ) {
         try {
             log.push(`[2] Intentando traducción con modelo: ${modelo}`);
             queryIngles = await traducirAQueryIngles(modelo, apiKeyGroq, descripcion);
             if (queryIngles) {
-                modeloUsado = modelo;
                 log.push(`[3] ✓ Traducción exitosa con ${modelo}`);
                 log.push(`[4] Query generada: "${queryIngles}"`);
                 break;

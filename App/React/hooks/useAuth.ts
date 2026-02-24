@@ -1,4 +1,5 @@
 import {useState, useCallback} from 'react';
+/* @ts-ignore - Módulo solo disponible en plataforma nativa Capacitor */
 import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import GoogleAuthNative from '../plugins/GoogleAuthNative';
 import {Capacitor} from '@capacitor/core';
@@ -6,8 +7,8 @@ import {limpiarTodosLosDatosUsuario} from '../utils/limpiezaSesion';
 
 interface User {
     name: string;
-    email: string;
-    login: string;
+    email?: string;
+    login?: string;
     description?: string;
     avatarUrl?: string;
 }
@@ -28,7 +29,7 @@ export function useAuth(): UseAuthReturn {
     const [error, setError] = useState<string | null>(null);
 
     /* Inicializar usuario desde datos inyectados por WP */
-    const [user, setUser] = useState<User | null>(() => {
+    const [user, _setUser] = useState<User | null>(() => {
         if (typeof window === 'undefined') return null;
         const wpData = window.gloryDashboard;
         return wpData?.currentUser || null;

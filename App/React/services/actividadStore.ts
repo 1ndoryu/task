@@ -148,7 +148,7 @@ export function invalidarCache(): void {
 export function invalidarCacheParcial(filtros: Partial<FiltrosActividad>): void {
     const keysAEliminar: string[] = [];
 
-    cache.forEach((entry, key) => {
+    cache.forEach((_entry, key) => {
         /* Si no hay filtros especificos, eliminar todo */
         if (Object.keys(filtros).length === 0) {
             keysAEliminar.push(key);

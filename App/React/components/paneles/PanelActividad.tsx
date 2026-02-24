@@ -169,7 +169,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                 acciones={
                     <>
                         {/* Estadisticas compactas - solo si es Premium */}
-                        {esPremium && estadisticas && (
+                        {esPremium && (
                             <span className="panelActividadStats">
                                 <span className="panelActividadStat">{diasActivos} dias</span>
                                 <span className="panelActividadStat">{totalActividades} acciones</span>

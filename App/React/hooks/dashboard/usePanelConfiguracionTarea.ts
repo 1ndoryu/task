@@ -75,7 +75,7 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         }
 
         if (tieneRepeticion) {
-            const repeticion: {tipo: string; intervalo: number; diasSemana?: number[]} = {tipo: 'despuesCompletar', intervalo: 1};
+            const repeticion: import('../../types/dashboard').RepeticionTarea = {tipo: 'despuesCompletar', intervalo: 1};
 
             switch (frecuencia.tipo) {
                 case 'diario':

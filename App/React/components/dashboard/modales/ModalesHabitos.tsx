@@ -27,8 +27,9 @@ export function ModalesHabitos({dashboard, modales, esMovil, manejarCrearHabitoC
             /* Modo edición */
             await dashboard.editarHabito(datos.id, {
                 nombre: datos.texto,
-                frecuencia: {tipo: datos.frecuencia || 'diaria'},
-                importancia: datos.importancia || 'Media'
+                frecuencia: {tipo: (datos.frecuencia || 'diaria') as import('../../../types/dashboard').TipoFrecuencia},
+                importancia: (datos.importancia || 'Media') as import('../../../types/dashboard').NivelImportancia,
+                tags: []
             });
         } else {
             /* Modo creación (fallback) */

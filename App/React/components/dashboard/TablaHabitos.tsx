@@ -48,7 +48,7 @@ interface FilaHabitoProps {
     estiloGrid: React.CSSProperties;
 }
 
-function FilaHabito({habito, indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
+function FilaHabito({habito, indice: _indice, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid}: FilaHabitoProps): JSX.Element {
     const {
         mostrarAcciones, setMostrarAcciones,
         menuContextual,

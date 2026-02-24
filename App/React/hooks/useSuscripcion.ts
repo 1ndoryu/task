@@ -9,7 +9,7 @@
  */
 
 import {useState, useCallback, useMemo} from 'react';
-import type {InfoSuscripcion, LimitesPlan, ErrorLimite, PlanSuscripcion} from '../types/dashboard';
+import type {InfoSuscripcion, LimitesPlan, ErrorLimite} from '../types/dashboard';
 
 /*
  * Límites por defecto para plan FREE (fallback)

@@ -57,7 +57,7 @@ interface FormularioProyectoModernoProps {
     onHitosChange?: (hitos: Hito[]) => void;
 }
 
-export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, estado = 'activo', onEstadoChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, limiteAdjuntos = 0, onClickUpgrade, tareas = [], onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
+export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, estado = 'activo', onEstadoChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, limiteAdjuntos = 0, onClickUpgrade, tareas: _tareas = [], onToggleTarea: _onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
     /* Mostrar seccion de responsables solo en modo edicion */
     const mostrarResponsables = modoEdicion;
 

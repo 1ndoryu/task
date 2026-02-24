@@ -42,7 +42,7 @@
     width: 2px;
     height: 40px;
     background: var(--dashboard-bordePrincipal);
-    border-radius: 1px;
+    border-radius: var(--dashboard-radioMinimo);
     transition: background var(--dashboard-transicionRapida), height var(--dashboard-transicionRapida), box-shadow var(--dashboard-transicionRapida);
 }
 

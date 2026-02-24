@@ -150,7 +150,7 @@
 
     /* Compensar altura del header fijo en el contenido */
     .dashboardContenedor {
-        padding-top: 72px;
+        padding-top: var(--dashboard-espacio5xl);
     }
 
     /* Columna 1: Boton hamburguesa (hijo directo del header) */
@@ -239,7 +239,7 @@
 
     /* Compensar altura del header fijo (ajuste para movil pequeÃ±o) */
     .dashboardContenedor {
-        padding-top: 64px;
+        padding-top: var(--dashboard-espacio4xl);
     }
 
     .encabezadoTitulo {

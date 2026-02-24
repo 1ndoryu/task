@@ -8,8 +8,6 @@ import type {TarjetaEscenarioProps} from './types/arbitraje.types';
 import {formatearMoneda} from './utils/arbitraje.utils';
 
 export function TarjetaEscenario({escenario}: TarjetaEscenarioProps): JSX.Element {
-    const mejorGanancia = Math.max(escenario.gananciaRutaA, escenario.gananciaRutaB);
-
     return (
         <article className={`tarjetaEscenario escenario${escenario.nombre}`}>
             <header className="cabeceraEscenario">

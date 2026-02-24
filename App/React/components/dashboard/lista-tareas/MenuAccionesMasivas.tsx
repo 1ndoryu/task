@@ -4,7 +4,7 @@
  * Aparece al hacer click derecho cuando hay tareas seleccionadas con Ctrl+Click
  */
 
-import React, {useMemo} from 'react';
+import {useMemo} from 'react';
 import {Trash2, Flag, Folder, X, Layers, Zap} from 'lucide-react';
 import {MenuContextual, type OpcionMenu} from '../../shared/MenuContextual';
 import type {Proyecto, NivelPrioridad, NivelUrgencia} from '../../../types/dashboard';

@@ -1,4 +1,4 @@
-import React, {type SelectHTMLAttributes, type ReactNode, forwardRef} from 'react';
+import {type SelectHTMLAttributes, type ReactNode, forwardRef} from 'react';
 
 /*
  * Componente Select - Selector dropdown reutilizable

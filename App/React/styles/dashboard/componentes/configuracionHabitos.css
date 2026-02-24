@@ -113,7 +113,6 @@
 .botonPresetTolerancia--activo {
     background-color: var(--dashboard-fondoHover);
     border-color: var(--dashboard-acento);
-    box-shadow: 0 0 0 1px var(--dashboard-acento);
 }
 
 .botonPresetTolerancia--activo:hover {
@@ -126,14 +125,11 @@
     color: var(--dashboard-textoNormal);
 }
 
-.botonPresetTolerancia--activo .etiquetaPreset {
-    color: var(--dashboard-acento);
-}
-
 .descripcionPreset {
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     line-height: 1.3;
+    white-space: break-spaces;
 }
 
 @media (max-width: 480px) {

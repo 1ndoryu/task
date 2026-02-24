@@ -545,10 +545,15 @@
 }
 
 /* 
- * AÑADIR HABITO 
- * Estilo compacto unificado - Fase 10.8.15
+ * AÑADIR HABITO / AREA NUEVO INLINE
+ * Estilo compartido entre:
+ *   .añadirHabito     — TablaHabitos y ListaSubHabitos
+ *   .areaNuevoInline  — InputNuevaTarea (tareas)
+ * Centralizado aqui (tabla.css) para mantener coherencia visual.
+ * En móvil, .añadirHabito se oculta pero .areaNuevoInline permanece visible.
  */
-.añadirHabito {
+.añadirHabito,
+.areaNuevoInline {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -560,9 +565,44 @@
     cursor: pointer;
     border-top: 1px dashed var(--dashboard-bordePunteado);
     transition: all var(--dashboard-transicionNormal);
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.añadirHabito:hover {
+/* Reset para cuando se usa en elemento <button> nativo */
+button.añadirHabito {
+    background: none;
+    border: none;
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoPequeno);
+    outline: none;
+}
+
+/* Override alta especificidad: Boton con clase añadirHabito — elimina fondo y borde del Boton base */
+.añadirHabito.boton {
+    background: none;
+    border: none;
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    border-radius: 0;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-weight: normal;
+    width: 100%;
+    justify-content: center;
+    color: var(--dashboard-textoApagado);
+    box-sizing: border-box;
+}
+
+.añadirHabito.boton:hover {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+    filter: none;
+}
+
+.añadirHabito:hover,
+.añadirHabitoActivo,
+.areaNuevoInline:hover,
+.areaNuevoInlineActivo {
     color: var(--dashboard-textoNormal);
     background-color: var(--dashboard-fondoHover);
 }

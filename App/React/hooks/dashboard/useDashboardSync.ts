@@ -23,7 +23,7 @@ interface UseDashboardSyncProps {
 
 export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, setProyectos, setNotas, cargandoDatos, cargandoDatosLocales}: UseDashboardSyncProps) {
     const storeSetHabitos = useHabitosStore(state => state.setHabitos);
-    const {esPremium} = useSuscripcion();
+    const {esPremium: _esPremium} = useSuscripcion();
 
     /*
      * Refs para evitar stale closures en callbacks WebSocket
@@ -84,12 +84,6 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
      * 2.5. Obtener userId para WebSocket
      */
     const userId = obtenerUserId();
-
-    /*
-     * Ref para timestamps LWW (Last-Write-Wins) por entidad+id.
-     * Evita aplicar cambios remotos obsoletos o ecos de nuestros propios cambios.
-     */
-    const lwwTimestampsRef = useRef<Record<string, number>>({});
 
     /*
      * 2.6. Callbacks para sincronización en tiempo real (WebSocket)

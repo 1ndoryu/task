@@ -17,8 +17,8 @@ interface SelectorTagsProps {
     placeholder?: string;
 }
 
-export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta...'}: SelectorTagsProps): JSX.Element {
-    const {tagsNormalizados, mostrandoInput, nuevoTag, setNuevoTag, inputRef, contenedorRef, agregarTag, removerTag, manejarKeyDown, abrirInput, manejarBlur} = useSelectorTags({tags, onTagsChange});
+export function SelectorTags({tags, onTagsChange, placeholder: _placeholder = 'Nueva etiqueta...'}: SelectorTagsProps): JSX.Element {
+    const {tagsNormalizados, mostrandoInput, nuevoTag, setNuevoTag, inputRef, contenedorRef, agregarTag: _agregarTag, removerTag, manejarKeyDown, abrirInput, manejarBlur} = useSelectorTags({tags, onTagsChange});
 
     return (
         <div className="propiedadesCompactas__contenido" ref={contenedorRef} style={{flexWrap: 'wrap'}}>

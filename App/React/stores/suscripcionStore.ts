@@ -9,7 +9,7 @@
  */
 
 import {create} from 'zustand';
-import type {InfoSuscripcion, LimitesPlan, PlanSuscripcion, EstadoSuscripcion} from '../types/dashboard';
+import type {InfoSuscripcion, LimitesPlan} from '../types/dashboard';
 
 /*
  * Límites por defecto para plan FREE
@@ -29,7 +29,7 @@ const LIMITES_FREE: LimitesPlan = {
 /*
  * Límites para plan PREMIUM
  */
-const LIMITES_PREMIUM: LimitesPlan = {
+export const LIMITES_PREMIUM: LimitesPlan = {
     habitos: -1,
     tareasActivas: -1,
     proyectos: -1,
@@ -81,6 +81,14 @@ function obtenerSuscripcionInicial(): InfoSuscripcion {
  */
 export type TipoEntidadLimite = 'habitos' | 'tareasActivas' | 'proyectos' | 'adjuntos';
 
+/* Mapeo de entidad conceptual a clave real en LimitesPlan */
+const MAPA_LIMITE: Record<TipoEntidadLimite, keyof LimitesPlan> = {
+    habitos: 'habitos',
+    tareasActivas: 'tareasActivas',
+    proyectos: 'proyectos',
+    adjuntos: 'adjuntosPorTarea'
+};
+
 /*
  * Resultado de verificación de límite
  */
@@ -131,7 +139,7 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
      */
     puedeCrear: (entidad, cantidadActual) => {
         const limites = get().suscripcion.limites;
-        const limite = limites[entidad];
+        const limite = limites[MAPA_LIMITE[entidad]] as number;
 
         /* -1 significa ilimitado */
         if (limite === -1) return true;
@@ -144,7 +152,7 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
      */
     verificarLimite: (entidad, cantidadActual) => {
         const limites = get().suscripcion.limites;
-        const limite = limites[entidad];
+        const limite = limites[MAPA_LIMITE[entidad]] as number;
 
         /* -1 significa ilimitado */
         if (limite === -1) {

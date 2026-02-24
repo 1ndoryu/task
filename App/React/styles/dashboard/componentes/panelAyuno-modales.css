@@ -44,7 +44,7 @@
     flex-direction: column;
     gap: 0;
     position: relative;
-    padding-left: 14px; /* Espacio para la lÃ­nea */
+    padding-left: var(--dashboard-tamanoMovilBase); /* Espacio para la linea */
 }
 
 .modalAyunoTimelineItem {

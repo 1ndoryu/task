@@ -52,7 +52,7 @@ export interface MenuOpcionesPanelProps {
     claseBoton?: string;
 }
 
-export function MenuOpcionesPanel({titulo, grupos = [], opciones = [], children, tieneFiltrosActivos = false, onRefrescar, claseBoton = ''}: MenuOpcionesPanelProps): JSX.Element {
+export function MenuOpcionesPanel({titulo: _titulo, grupos = [], opciones = [], children, tieneFiltrosActivos = false, onRefrescar, claseBoton = ''}: MenuOpcionesPanelProps): JSX.Element {
     const {esMovil} = useEsMovil();
     const [menuAbierto, setMenuAbierto] = useState(false);
 

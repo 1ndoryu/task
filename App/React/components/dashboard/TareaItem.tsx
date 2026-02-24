@@ -1,7 +1,7 @@
 import {useCallback, type ChangeEvent} from 'react';
 import {Check, Play, Square} from 'lucide-react';
 import {Input} from '../ui';
-import type {Tarea, DatosEdicionTarea, TareaHabito} from '../../types/dashboard';
+import type {TareaHabito} from '../../types/dashboard';
 import {esTareaHabito} from '../../types/dashboard';
 import {MenuContextualAdaptivo} from '../shared/MenuContextualAdaptivo';
 import {BadgeGroup} from '../shared/BadgeInfo';

@@ -5,7 +5,7 @@
 
 import {Modal} from '../../shared/Modal';
 import {ToggleSwitch} from '../../shared/ToggleSwitch';
-import type {ConfiguracionProyectos, OrdenamientoProyectos} from '../../../hooks/useConfiguracionProyectos';
+import type {ConfiguracionProyectos} from '../../../hooks/useConfiguracionProyectos';
 
 interface ModalConfiguracionProyectosProps {
     estaAbierto: boolean;

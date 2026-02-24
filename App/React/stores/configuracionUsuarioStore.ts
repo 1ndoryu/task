@@ -42,7 +42,7 @@ export type ConfiguracionUsuarioStore = ConfiguracionUsuarioState & Configuracio
 
 export const useConfiguracionUsuarioStore = create<ConfiguracionUsuarioStore>()(
     persist(
-        (set, get) => ({
+        (set, _get) => ({
             horaFinDia: 0, // Por defecto: medianoche
 
             setHoraFinDia: hora => {

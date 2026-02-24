@@ -63,9 +63,9 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear}: InputNuevaTareaPro
     }, [onAbrirModalCrear]);
 
     return (
-        <div className={`tareaNuevoInline ${enfocado || tieneTexto ? 'tareaNuevoInlineActivo' : ''}`} onClick={manejarClickAñadir}>
+        <div className={`areaNuevoInline ${enfocado || tieneTexto ? 'areaNuevoInlineActivo' : ''}`} onClick={manejarClickAñadir}>
             {!enfocado && !tieneTexto && (
-                <span className="tareaNuevoInlineTexto" onClick={manejarClickAñadir} style={{cursor: 'pointer'}}>
+                <span className="tareaNuevoInlineTexto" onClick={manejarClickAñadir}>
                     + Añadir
                 </span>
             )}
@@ -73,7 +73,8 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear}: InputNuevaTareaPro
                 id="input-nueva-tarea-global"
                 ref={inputRef}
                 tipo="text"
-                claseAdicional={`tareaNuevoInlineInput ${enfocado || tieneTexto ? '' : 'tareaNuevoInlineInputOculto'}`}
+                claseAdicional={`areaNuevoInlineInput ${enfocado || tieneTexto ? '' : 'areaNuevoInlineInputOculto'}`}
+                claseContenedor={enfocado || tieneTexto ? '' : 'inputContenedorInvisible'}
                 placeholder="Escribe una tarea..."
                 value={texto}
                 onChange={manejarCambioTexto}

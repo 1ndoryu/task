@@ -709,10 +709,10 @@
     align-items: center;
     gap: var(--dashboard-espacioXs);
     padding: 1px 6px;
-    background: rgba(100, 140, 180, 0.2);
+    background: var(--dashboard-azulClaroFondo);
     border-radius: var(--dashboard-radioXs);
     font-size: var(--dashboard-tamanoPequeno);
-    color: #7eb8da;
+    color: var(--dashboard-azulClaro);
 }
 
 .badgePropietarioAvatar {

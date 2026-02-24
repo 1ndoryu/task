@@ -158,5 +158,5 @@
 }
 
 .conDockTracking.conDockTrackingMovil {
-    padding-bottom: 100px !important;
+    padding-bottom: var(--dashboard-espacio6xl) !important;
 }

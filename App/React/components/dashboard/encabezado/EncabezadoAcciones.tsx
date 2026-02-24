@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {LayoutGrid, Bell, FlaskConical, Settings, Users, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
+import {LayoutGrid, Bell, FlaskConical, Settings, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
@@ -21,7 +21,7 @@ interface EncabezadoAccionesProps {
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
 }
 
-export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickNotificaciones, onClickExperimentos, onClickAdmin, onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
+export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickNotificaciones, onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
     const [menuCrear, setMenuCrear] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';

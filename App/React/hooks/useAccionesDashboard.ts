@@ -7,7 +7,7 @@
 import {useCallback} from 'react';
 import {useAlertasContext} from '../context/AlertasContext';
 import {invalidarCache} from '../services/actividadStore';
-import {habitosActions} from '../stores/habitosStore';
+import {useHabitosHistorialStore} from '../stores/habitosHistorialStore';
 import type {Proyecto, NivelPrioridad, NivelUrgencia, TareaConfiguracion, DatosEdicionTarea, Notificacion} from '../types/dashboard';
 import type {DatosNuevoProyecto} from './useProyectos';
 import type {EstadoFiltro} from './useFiltroTareas';
@@ -179,7 +179,7 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
             if (data.success) {
                 /* Limpiar cache local de actividad y historial */
                 invalidarCache();
-                habitosActions.limpiarTodoHistorialDetallado();
+                useHabitosHistorialStore.getState().limpiarTodoHistorialDetallado();
                 return true;
             }
             return false;

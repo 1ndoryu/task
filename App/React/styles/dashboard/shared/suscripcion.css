@@ -349,7 +349,7 @@
     font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 700;
     letter-spacing: 0.05em;
-    border-radius: 1px;
+    border-radius: var(--dashboard-radioMinimo);
 }
 
 .modalUpgrade__planNombre {

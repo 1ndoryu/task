@@ -5,7 +5,7 @@
  */
 
 import {useState, useEffect, useRef, useCallback} from 'react';
-import type {Proyecto, Adjunto} from '../../types/dashboard';
+import type {Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../useAdjuntos';
 
 interface EstadoOpciones {
@@ -158,7 +158,7 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         return val;
     }, []);
 
-    const manejarClickOverlay = useCallback((e: React.MouseEvent) => {
+    const manejarClickOverlay = useCallback((_e: React.MouseEvent) => {
         if (hayMenuAbierto) {
             cerrarOtrosMenus();
             return;

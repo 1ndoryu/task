@@ -124,7 +124,7 @@ export function useNotificadorCambiosWebSocket({
             });
 
             /* Detectar tareas eliminadas */
-            anterior.forEach((tarea, id) => {
+            anterior.forEach((_tarea, id) => {
                 if (!actual.has(id)) {
                     console.log('[NotificadorWS] Tarea eliminada:', id);
                     notificar('tarea', 'eliminar', id, {id});
@@ -164,7 +164,7 @@ export function useNotificadorCambiosWebSocket({
             });
 
             /* Detectar hábitos eliminados */
-            anterior.forEach((habito, id) => {
+            anterior.forEach((_habito, id) => {
                 if (!actual.has(id)) {
                     console.log('[NotificadorWS] Hábito eliminado:', id);
                     notificar('habito', 'eliminar', id, {id});
@@ -213,7 +213,7 @@ export function useNotificadorCambiosWebSocket({
             });
 
             /* Detectar proyectos eliminados */
-            anterior.forEach((proyecto, id) => {
+            anterior.forEach((_proyecto, id) => {
                 if (!actual.has(id)) {
                     console.log('[NotificadorWS] Proyecto eliminado:', id);
                     notificar('proyecto', 'eliminar', id, {id});

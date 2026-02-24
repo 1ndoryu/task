@@ -31,7 +31,7 @@ export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, o
     const {menuRef, opcionActivaId, estiloSubmenu, manejarClick, manejarMouseEnterOpcion} = useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu});
 
     return (
-        <div id={esSubmenu ? undefined : 'menu-contextual'} ref={menuRef} className={`menuContextual ${esSubmenu ? 'menuContextualSubmenu' : ''}`} role="menu" aria-orientation="vertical" style={esSubmenu ? estiloSubmenu : undefined}>
+        <div id={esSubmenu ? undefined : 'menu-contextual'} ref={menuRef as React.RefObject<HTMLDivElement>} className={`menuContextual ${esSubmenu ? 'menuContextualSubmenu' : ''}`} role="menu" aria-orientation="vertical" style={esSubmenu ? estiloSubmenu : undefined}>
             {opciones.map(opcion => (
                 <div key={opcion.id} className="menuContextualItemWrapper" onMouseEnter={() => manejarMouseEnterOpcion(opcion.id)} style={{position: 'relative'}}>
                     <Boton type="button" variante="ghost" claseAdicional={`menuContextualOpcion ${opcion.peligroso ? 'menuContextualOpcionPeligrosa' : ''} ${opcion.deshabilitado ? 'menuContextualOpcionDeshabilitada' : ''} ${opcionActivaId === opcion.id && opcion.subOpciones ? 'menuContextualOpcionActiva' : ''}`} onClick={() => manejarClick(opcion)} disabled={opcion.deshabilitado} role="menuitem">

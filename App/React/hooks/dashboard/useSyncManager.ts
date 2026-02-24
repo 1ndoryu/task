@@ -3,7 +3,7 @@ import {useChangeDetector} from './useChangeDetector';
 import {useSyncTransport} from './useSyncTransport';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from '../useLocalStorage';
 import {useSuscripcion} from '../useSuscripcion';
-import type {DashboardData, EstadoApi} from '../useDashboardApi';
+import type {DashboardData} from '../useDashboardApi';
 import {tareasIniciales, notasIniciales, habitosIniciales} from '../../data/datosIniciales';
 
 interface SyncMeta {

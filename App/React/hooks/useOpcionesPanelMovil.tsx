@@ -12,7 +12,7 @@
 import {useMemo} from 'react';
 import {ArrowUpDown, Filter, Settings, FolderOpen, Plus} from 'lucide-react';
 import {obtenerTituloPanelMovil, paginaMovilAPanelId} from '../config/registroPaneles';
-import type {GrupoOpciones, OpcionMenu} from '../components/shared/MenuOpcionesPanel';
+import type {GrupoOpciones, OpcionMenuPanel as OpcionMenu} from '../components/shared/MenuOpcionesPanel';
 import type {PaginaMovil} from './usePaginaMovil';
 import type {ModoOrdenTareas} from './useOrdenarTareas';
 import type {ModoOrdenHabitos} from './useOrdenarHabitos';
