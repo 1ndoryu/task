@@ -1,0 +1,437 @@
+/* COMPONENTES UI - FORMULARIOS (Input, Textarea, Select, Checkbox, Radio) */
+
+/* Input */
+.inputContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    width: 100%;
+}
+
+.inputEtiqueta {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+}
+
+.inputRequerido {
+    color: var(--dashboard-estadoAlta);
+    margin-left: var(--dashboard-espacioXs);
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoSecundario);
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.input::placeholder {
+    color: var(--dashboard-textoSecundario);
+}
+
+.input--conIcono {
+    padding-left: 2.5rem;
+}
+
+.input--conIconoDerecha {
+    padding-right: 2.5rem;
+}
+
+.input--error {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.input--error:focus {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+.input:disabled,
+.input--deshabilitado {
+    background: var(--dashboard-fondoPrincipal);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.inputIcono {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-textoSecundario);
+    pointer-events: none;
+}
+
+.inputIcono--izquierda {
+    left: var(--dashboard-espacioMd);
+}
+
+.inputIcono--derecha {
+    right: var(--dashboard-espacioMd);
+}
+
+.inputContador {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-align: right;
+}
+
+.inputError {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Textarea */
+.textareaContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.textareaEtiqueta {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+}
+
+.textareaRequerido {
+    color: var(--dashboard-estadoAlta);
+    margin-left: var(--dashboard-espacioXs);
+}
+
+.textarea {
+    width: 100%;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoSecundario);
+    resize: vertical;
+    transition: all 0.2s ease;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.textarea::placeholder {
+    color: var(--dashboard-textoSecundario);
+}
+
+.textarea--error {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.textarea--error:focus {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+.textarea:disabled,
+.textarea--deshabilitado {
+    background: var(--dashboard-fondoPrincipal);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.textarea--autoAjustar {
+    resize: none;
+    overflow: hidden;
+}
+
+.textareaContador {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-align: right;
+}
+
+.textareaError {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Select */
+.selectContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.selectEtiqueta {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+}
+
+.selectRequerido {
+    color: var(--dashboard-estadoAlta);
+    margin-left: var(--dashboard-espacioXs);
+}
+
+.selectWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    padding-right: var(--dashboard-espacio2xl);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoSecundario);
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.select--conIcono {
+    padding-left: 2.5rem;
+}
+
+.select--error {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.select:disabled,
+.select--deshabilitado {
+    background: var(--dashboard-fondoPrincipal);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.selectIcono {
+    position: absolute;
+    left: var(--dashboard-espacioMd);
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-textoSecundario);
+    pointer-events: none;
+}
+
+.selectError {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Checkbox */
+.checkboxContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioSm);
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.checkboxMarca {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    min-width: 1.125rem;
+    border: 2px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-fondoSecundario);
+    transition: all 0.2s ease;
+}
+
+.checkbox:checked + .checkboxMarca {
+    background: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+}
+
+.checkbox:checked + .checkboxMarca::after {
+    content: '✓';
+    color: var(--dashboard-textoSobreAcento);
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: bold;
+}
+
+.checkbox:focus-visible + .checkboxMarca {
+    outline: 2px solid var(--dashboard-acento);
+    outline-offset: 2px;
+}
+
+.checkbox--error + .checkboxMarca {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.checkbox:disabled + .checkboxMarca,
+.checkbox--deshabilitado + .checkboxMarca {
+    background: var(--dashboard-fondoPrincipal);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.checkboxTexto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.checkboxEtiqueta {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+}
+
+.checkboxDescripcion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.checkboxError {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+    margin-left: 1.625rem;
+}
+
+/* Radio */
+.radioContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.radioEtiquetaGrupo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+}
+
+.radioGrupo {
+    display: flex;
+    gap: var(--dashboard-espacioLg);
+}
+
+.radioGrupo--vertical {
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.radioGrupo--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.radioLabel {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioSm);
+    cursor: pointer;
+    user-select: none;
+}
+
+.radioLabel--deshabilitado {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.radioLabel--seleccionado .radioEtiqueta {
+    font-weight: 500;
+}
+
+.radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.radioMarca {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    min-width: 1.125rem;
+    border: 2px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioCirculo);
+    background: var(--dashboard-fondoSecundario);
+    transition: all 0.2s ease;
+}
+
+.radio:checked + .radioMarca {
+    border-color: var(--dashboard-acento);
+}
+
+.radio:checked + .radioMarca::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--dashboard-radioCirculo);
+    background: var(--dashboard-acento);
+}
+
+.radio:focus-visible + .radioMarca {
+    outline: 2px solid var(--dashboard-acento);
+    outline-offset: 2px;
+}
+
+.radio--error + .radioMarca {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.radioTexto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.radioEtiqueta {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+}
+
+.radioDescripcion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.radioError {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+}

@@ -8,9 +8,8 @@
  * Endpoints:
  * - GET /wp-json/glory/v1/mensajes/{tipo}/{id} -> Obtener timeline (marca como leído)
  * - POST /wp-json/glory/v1/mensajes -> Enviar mensaje
- * - POST /wp-json/glory/v1/mensajes/marcar-leido -> Marcar mensajes como leídos
- * - GET /wp-json/glory/v1/mensajes/no-leidos/{tipo}/{id} -> Contar no leídos de un elemento
- * - POST /wp-json/glory/v1/mensajes/no-leidos-masivo -> Contar no leídos de múltiples elementos
+ *
+ * Endpoints de leidos/no-leidos -> ver MensajesLeidosApiController
  *
  * @package App\Api
  */
@@ -105,61 +104,6 @@ class MensajesApiController
                 'id' => [
                     'required' => true,
                     'type' => 'integer'
-                ]
-            ]
-        ]);
-
-        /* Marcar mensajes como leídos */
-        register_rest_route($namespace, '/mensajes/marcar-leido', [
-            'methods' => 'POST',
-            'callback' => [self::class, 'marcarComoLeido'],
-            'permission_callback' => [self::class, 'verificarPermisos'],
-            'args' => [
-                'tipoElemento' => [
-                    'required' => true,
-                    'type' => 'string',
-                    'enum' => ['tarea', 'proyecto', 'habito']
-                ],
-                'elementoId' => [
-                    'required' => true,
-                    'type' => 'integer'
-                ]
-            ]
-        ]);
-
-        /* Contar mensajes no leídos de un elemento */
-        register_rest_route($namespace, '/mensajes/no-leidos/(?P<tipo>[a-z]+)/(?P<id>\d+)', [
-            'methods' => 'GET',
-            'callback' => [self::class, 'contarNoLeidos'],
-            'permission_callback' => [self::class, 'verificarPermisos'],
-            'args' => [
-                'tipo' => [
-                    'required' => true,
-                    'type' => 'string',
-                    'enum' => ['tarea', 'proyecto', 'habito']
-                ],
-                'id' => [
-                    'required' => true,
-                    'type' => 'integer'
-                ]
-            ]
-        ]);
-
-        /* Contar no leídos de múltiples elementos (para badges en lista) */
-        register_rest_route($namespace, '/mensajes/no-leidos-masivo', [
-            'methods' => 'POST',
-            'callback' => [self::class, 'contarNoLeidosMasivo'],
-            'permission_callback' => [self::class, 'verificarPermisos'],
-            'args' => [
-                'tipoElemento' => [
-                    'required' => true,
-                    'type' => 'string',
-                    'enum' => ['tarea', 'proyecto', 'habito']
-                ],
-                'elementoIds' => [
-                    'required' => true,
-                    'type' => 'array',
-                    'items' => ['type' => 'integer']
                 ]
             ]
         ]);
@@ -338,119 +282,6 @@ class MensajesApiController
             return new \WP_REST_Response([
                 'success' => true,
                 'total' => $total
-            ], 200);
-        } catch (\Exception $e) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Marca los mensajes de un elemento como leídos
-     */
-    public static function marcarComoLeido(\WP_REST_Request $request): \WP_REST_Response
-    {
-        $userId = get_current_user_id();
-        $tipoElemento = $request->get_param('tipoElemento');
-        $elementoId = (int)$request->get_param('elementoId');
-
-        if (!MensajesService::tieneAccesoAElemento($userId, $tipoElemento, $elementoId)) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'No tienes acceso a este elemento'
-            ], 403);
-        }
-
-        try {
-            Schema::ensureTableExists('mensajes_leidos');
-
-            $repo = new MensajesRepository($userId);
-            $repo->marcarComoLeido($tipoElemento, $elementoId);
-
-            return new \WP_REST_Response([
-                'success' => true
-            ], 200);
-        } catch (\Exception $e) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Cuenta los mensajes no leídos de un elemento
-     */
-    public static function contarNoLeidos(\WP_REST_Request $request): \WP_REST_Response
-    {
-        $userId = get_current_user_id();
-        $tipo = $request->get_param('tipo');
-        $elementoId = (int)$request->get_param('id');
-
-        if (!MensajesService::tieneAccesoAElemento($userId, $tipo, $elementoId)) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => 'No tienes acceso a este elemento'
-            ], 403);
-        }
-
-        try {
-            Schema::ensureTableExists('mensajes_leidos');
-
-            $repo = new MensajesRepository($userId);
-            $noLeidos = $repo->contarNoLeidos($tipo, $elementoId);
-
-            return new \WP_REST_Response([
-                'success' => true,
-                'noLeidos' => $noLeidos
-            ], 200);
-        } catch (\Exception $e) {
-            return new \WP_REST_Response([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Cuenta mensajes no leídos de múltiples elementos (para badges en lista)
-     */
-    public static function contarNoLeidosMasivo(\WP_REST_Request $request): \WP_REST_Response
-    {
-        $userId = get_current_user_id();
-        $tipoElemento = $request->get_param('tipoElemento');
-        $elementoIds = $request->get_param('elementoIds');
-
-        if (!is_array($elementoIds) || empty($elementoIds)) {
-            return new \WP_REST_Response([
-                'success' => true,
-                'noLeidos' => []
-            ], 200);
-        }
-
-        /* Filtrar solo IDs a los que tiene acceso */
-        $idsConAcceso = array_filter($elementoIds, function ($id) use ($userId, $tipoElemento) {
-            return MensajesService::tieneAccesoAElemento($userId, $tipoElemento, (int)$id);
-        });
-
-        if (empty($idsConAcceso)) {
-            return new \WP_REST_Response([
-                'success' => true,
-                'noLeidos' => []
-            ], 200);
-        }
-
-        try {
-            Schema::ensureTableExists('mensajes_leidos');
-
-            $repo = new MensajesRepository($userId);
-            $noLeidos = $repo->contarNoLeidosMasivo($tipoElemento, array_map('intval', $idsConAcceso));
-
-            return new \WP_REST_Response([
-                'success' => true,
-                'noLeidos' => $noLeidos
             ], 200);
         } catch (\Exception $e) {
             return new \WP_REST_Response([
