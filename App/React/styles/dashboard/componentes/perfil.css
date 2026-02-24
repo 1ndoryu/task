@@ -17,7 +17,7 @@
 }
 
 .tituloSeccionPerfil {
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
     color: var(--dashboard-textoApagado);
     text-transform: none;
@@ -146,7 +146,7 @@
 .avatarPreview {
     width: 60px; /* Un poco mas grande para ver bien */
     height: 60px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background-color: var(--dashboard-fondoSecundario);
     display: flex;
     align-items: center;

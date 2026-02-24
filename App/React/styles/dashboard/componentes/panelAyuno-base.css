@@ -23,7 +23,7 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     padding: 8px 10px;
     border-radius: var(--dashboard-radioMd);
     border: 1px solid var(--dashboard-bordeSutil);
@@ -35,7 +35,7 @@
 .panelAyunoAvisoTexto {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     flex: 1;
     min-width: 0;
 }
@@ -96,7 +96,7 @@
 .panelAyunoCirculoProgreso {
     stroke: var(--dashboard-estadoExito); /* Color verde explÃ­cito para mejor visibilidad */
     transition: stroke-dashoffset 0.5s linear; /* Linear para movimiento mÃ¡s fluido con segundos */
-    filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4)); /* Glow verde sutil */
+    filter: drop-shadow(0 0 4px rgba(var(--dashboard-estadoExitoRgb), 0.4)); /* Glow verde sutil */
 }
 
 /* Ventana de comida (modo reloj) */
@@ -116,7 +116,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     z-index: 1;
     text-align: center;
     margin-top: 15px;
@@ -153,7 +153,7 @@
     justify-content: center;
     width: 25px;
     height: 25px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: none;
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);
@@ -198,9 +198,9 @@
 }
 
 .panelAyunoSelectorDuracion--compacto {
-    gap: 4px;
-    margin-top: -2px;
-    margin-bottom: 2px;
+    gap: var(--dashboard-espacioXs);
+    margin-top: calc(-1 * var(--dashboard-espacioXxs));
+    margin-bottom: var(--dashboard-espacioXxs);
 }
 
 .panelAyunoSelectorDuracion--compacto .panelAyunoDuracionOpcion {
@@ -233,7 +233,7 @@
 /* Botones de acciÃ³n */
 .panelAyunoBotones {
     display: flex;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     justify-content: center;
     width: 100%;
 }

@@ -24,7 +24,7 @@
 }
 
 .listaOrdenColumnaLabel {
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -47,7 +47,7 @@
     padding: var(--dashboard-espacioSm);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     gap: var(--dashboard-espacioSm);
 }
 
@@ -73,7 +73,7 @@
 }
 
 .listaOrdenItemNombre {
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     color: var(--dashboard-textoNormal);
     white-space: nowrap;
     overflow: hidden;
@@ -98,7 +98,7 @@
     padding: 0;
     background-color: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: all 0.15s ease;
@@ -118,7 +118,7 @@
 /* Selector de columnas */
 .listaOrdenColumnas {
     display: flex;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     margin-left: var(--dashboard-espacioXs);
 }
 
@@ -129,11 +129,11 @@
     width: 20px;
     height: 20px;
     padding: 0;
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 600;
     background-color: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: all 0.15s ease;
@@ -153,11 +153,11 @@
 /* Vista previa compacta del layout */
 .listaOrdenPreview {
     display: grid;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: var(--dashboard-espacioMd);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     margin-top: var(--dashboard-espacioMd);
 }
 
@@ -172,13 +172,13 @@
 .listaOrdenPreviewColumna {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .listaOrdenPreviewItem {
     height: 12px;
     background-color: var(--dashboard-fondoTerciario);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     border: 1px solid var(--dashboard-bordePrincipal);
 }
 

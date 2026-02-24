@@ -21,7 +21,7 @@
 
 .modalLimiteAlcanzadoTitulo {
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     color: var(--dashboard-textoActivo);
     margin: 0 0 var(--dashboard-espacioSm) 0;
     text-transform: uppercase;
@@ -45,18 +45,18 @@
 }
 
 .modalLimiteAlcanzadoActual {
-    font-size: 24px;
+    font-size: var(--dashboard-tamanoSubtitulo);
     color: var(--dashboard-estadoMedia);
     font-weight: bold;
 }
 
 .modalLimiteAlcanzadoSeparador {
-    font-size: 18px;
+    font-size: var(--dashboard-tamanoMediano);
     color: var(--dashboard-textoApagado);
 }
 
 .modalLimiteAlcanzadoMaximo {
-    font-size: 18px;
+    font-size: var(--dashboard-tamanoMediano);
     color: var(--dashboard-textoSecundario);
 }
 

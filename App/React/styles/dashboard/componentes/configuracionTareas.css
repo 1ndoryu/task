@@ -21,17 +21,17 @@
 .detallesOpcionConfig {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
 }
 
 .tituloOpcionConfig {
-    font-size: 0.75rem; /* Mas pequeño */
+    font-size: var(--dashboard-tamanoMovilPequeno); /* Mas pequeño */
     font-weight: 500;
     color: var(--dashboard-textoNormal);
 }
 
 .descripcionOpcionConfig {
-    font-size: 0.65rem; /* Mas pequeño */
+    font-size: var(--dashboard-tamanoMuyPequeno); /* Mas pequeño */
     color: var(--dashboard-textoApagado);
     line-height: 1.2;
 }
@@ -47,7 +47,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-bordeRedondeado);
+    border-radius: var(--dashboard-radioMd);
     color: var(--dashboard-textoNormal);
     font-size: var(--dashboard-tamanoPequeno);
     font-family: inherit;

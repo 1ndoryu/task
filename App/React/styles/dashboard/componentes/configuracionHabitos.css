@@ -31,7 +31,7 @@
 .infoColumnaConfig {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .etiquetaColumna {
@@ -89,7 +89,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioMd);
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);
     text-align: left;
@@ -101,7 +101,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     width: 100%;
 }
 
@@ -156,7 +156,7 @@
 
 /* Modo compacto (aplicado por defecto) */
 .listaTareasHabito--compacto .listaTareasHabito__encabezado {
-    margin-bottom: 4px;
+    margin-bottom: var(--dashboard-espacioXs);
 }
 
 .listaTareasHabito__encabezado {
@@ -179,13 +179,13 @@
     color: var(--dashboard-textoApagado);
     background: var(--dashboard-fondoSecundario);
     padding: 1px 6px;
-    border-radius: 8px;
+    border-radius: var(--dashboard-radioLg);
 }
 
 .listaTareasHabito__lista {
     display: flex;
     flex-direction: column;
-    gap: 2px; /* Gap externo entre subtareas */
+    gap: var(--dashboard-espacioXxs); /* Gap externo entre subtareas */
     list-style: none;
     padding: 0;
     margin: 0;
@@ -197,10 +197,10 @@
     gap: 6px;
     padding: 6px 0px;
     background: var(--dashboard-fondoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     padding: 6px 0px;
     background: var(--dashboard-fondoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     cursor: default;
     transition: all var(--dashboard-transicionRapida);
     /* Match exacto con tareaItem--compacto, pero sin padding lateral */
@@ -232,7 +232,7 @@
     cursor: grab;
     display: flex;
     align-items: center;
-    padding-right: 4px;
+    padding-right: var(--dashboard-espacioXs);
     color: var(--dashboard-textoApagado);
 }
 
@@ -268,7 +268,7 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     min-width: 0; /* Para que el text-overflow funcione */
 }
 
@@ -293,14 +293,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px;
+    padding: var(--dashboard-espacioXxs);
     background: none;
     border: none;
     cursor: pointer;
     color: var(--dashboard-textoApagado);
     opacity: 0;
     transition: all var(--dashboard-transicionRapida);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     flex-shrink: 0;
 }
 
@@ -321,7 +321,7 @@
 }
 
 .listaTareasHabito__inputContenedor {
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
 }
 
 .listaTareasHabito__input {
@@ -330,7 +330,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoNormal);
     outline: none;
     transition: border-color var(--dashboard-transicionRapida);
@@ -351,7 +351,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     margin-top: var(--dashboard-espacioXs);
     padding: 4px 10px;
     width: auto;
@@ -361,7 +361,7 @@
     color: var(--dashboard-textoApagado);
     background: transparent;
     border: 1px dashed var(--dashboard-bordeSutil);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
 }

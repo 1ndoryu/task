@@ -15,7 +15,7 @@
      * Elimina gap entre elementos - cada fila gestiona su propio espaciado
      */
     .formularioProyectoModerno {
-        gap: 8px;
+        gap: var(--dashboard-espacioSm);
     }
 
     /* 
@@ -60,7 +60,7 @@
     .pillOpcion {
         padding: 2px 6px;
         font-size: var(--dashboard-tamanoMuyPequeno);
-        gap: 2px;
+        gap: var(--dashboard-espacioXxs);
         min-height: 24px;
     }
 

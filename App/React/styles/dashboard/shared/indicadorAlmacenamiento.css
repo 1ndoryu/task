@@ -10,7 +10,7 @@
     padding: var(--dashboard-espacioMd);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .indicadorAlmacenamiento--advertencia {
@@ -66,13 +66,13 @@
 .barraAlmacenamientoContenedor {
     height: 6px;
     background-color: var(--dashboard-barraFondo);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     overflow: hidden;
 }
 
 .barraAlmacenamientoProgreso {
     height: 100%;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: width var(--dashboard-transicionNormal), background-color var(--dashboard-transicionNormal);
 }
 
@@ -106,7 +106,7 @@
     color: var(--dashboard-estadoAlta);
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background-color: var(--dashboard-estadoAltaFondo);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     text-align: center;
 }
 

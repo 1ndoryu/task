@@ -103,11 +103,11 @@
 /* Estado activo del bloqueo */
 .overlayEnfoqueBotonBloqueo--activo {
     color: var(--dashboard-acento);
-    background: var(--dashboard-acentoFondo);
+    background: var(--dashboard-estadoInfoFondo);
 }
 
 .overlayEnfoqueBotonBloqueo--activo:hover {
-    background: var(--dashboard-acentoFondo);
+    background: var(--dashboard-estadoInfoFondo);
     color: var(--dashboard-acento);
 }
 

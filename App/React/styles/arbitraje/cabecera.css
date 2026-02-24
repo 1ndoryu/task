@@ -13,7 +13,7 @@
 }
 
 .tituloArbitraje {
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     font-weight: 500;
     color: var(--dashboard-textoActivo);
     margin: 0;
@@ -53,5 +53,5 @@
 }
 
 .iconoViabilidad {
-    font-size: 12px;
+    font-size: var(--dashboard-tamanoMovilPequeno);
 }

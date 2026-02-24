@@ -21,7 +21,7 @@
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoPrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-weight: 500;
     color: var(--dashboard-textoActivo);
 }
@@ -37,13 +37,13 @@
     padding: var(--dashboard-espacioMd);
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.3);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
 }
 
 .modalCompartirAdvertencia svg {
     color: #ffc107;
     flex-shrink: 0;
-    margin-top: 2px;
+    margin-top: var(--dashboard-espacioXxs);
 }
 
 .modalCompartirAdvertencia strong {
@@ -69,7 +69,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioXs);
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -93,7 +93,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-estadoAltaFondo);
     border: 1px solid var(--dashboard-estadoAltaBorde);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     color: var(--dashboard-estadoAlta);
     font-size: var(--dashboard-tamanoBase);
 }
@@ -115,7 +115,7 @@
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-weight: 500;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);
 }
@@ -138,7 +138,7 @@
 }
 
 .modalCompartirAcciones .botonPrimario:hover:not(:disabled) {
-    background: #fff;
+    background: var(--dashboard-textoSobreAcento);
 }
 
 .modalCompartirAcciones .botonPrimario:disabled,
@@ -167,7 +167,7 @@
     padding: var(--dashboard-espacioXl) var(--dashboard-espacioLg);
     text-align: center;
     background: var(--dashboard-fondoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     border: 1px dashed var(--dashboard-bordeSutil);
 }
 
@@ -203,7 +203,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     cursor: pointer;
     transition: background-color var(--dashboard-transicionNormal);
     border: 1px solid transparent;
@@ -221,7 +221,7 @@
 .selectorCompaneroAvatar {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     flex-shrink: 0;
 }
@@ -260,7 +260,7 @@
     gap: var(--dashboard-espacioMd);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoPrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
 }
 
 .selectorRolTitulo {
@@ -281,7 +281,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
@@ -296,7 +296,7 @@
 .selectorRolOpcionActiva {
     background: var(--dashboard-textoApagado);
     border-color: var(--dashboard-textoApagado);
-    color: white;
+    color: var(--dashboard-textoSobreAcento);
 }
 
 /* 
@@ -324,7 +324,7 @@
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoPrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     transition: background-color var(--dashboard-transicionNormal);
 }
 
@@ -339,7 +339,7 @@
 .participanteAvatar {
     width: 28px;
     height: 28px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     flex-shrink: 0;
 }
@@ -378,7 +378,7 @@
     gap: var(--dashboard-espacioXs);
     padding: 2px var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
@@ -399,7 +399,7 @@
     padding: 2px var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
@@ -415,10 +415,10 @@
     position: absolute;
     top: 100%;
     right: 0;
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 100;
     min-width: 120px;
@@ -458,7 +458,7 @@
     border: none;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     transition: all var(--dashboard-transicionNormal);
     opacity: 0;
 }
@@ -481,10 +481,10 @@
 .badgeCompartido {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 2px 6px;
     background: rgba(100, 100, 100, 0.2);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
@@ -539,7 +539,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoBase);
     cursor: pointer;
@@ -565,7 +565,7 @@
 .selectorAsignadoAvatar {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     flex-shrink: 0;
 }
@@ -592,10 +592,10 @@
     top: 100%;
     left: 0;
     right: 0;
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 100;
     max-height: 200px;
@@ -638,7 +638,7 @@
 .selectorAsignadoAvatarOpcion {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     flex-shrink: 0;
 }
@@ -676,10 +676,10 @@
 .badgeAsignado {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 1px 6px;
     background: rgba(100, 100, 100, 0.15);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
@@ -687,7 +687,7 @@
 .badgeAsignado img {
     width: 14px;
     height: 14px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
 }
 
@@ -707,10 +707,10 @@
 .badgePropietario {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 1px 6px;
     background: rgba(100, 140, 180, 0.2);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-size: var(--dashboard-tamanoPequeno);
     color: #7eb8da;
 }
@@ -718,7 +718,7 @@
 .badgePropietarioAvatar {
     width: 14px;
     height: 14px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
 }
 

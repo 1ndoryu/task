@@ -23,9 +23,9 @@
     align-items: center;
     gap: var(--dashboard-espacioXs);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: var(--dashboard-estadoPeligroFondo);
-    color: var(--dashboard-estadoPeligro);
-    border: 1px solid var(--dashboard-estadoPeligro);
+    background: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border: 1px solid var(--dashboard-estadoAlta);
     border-radius: var(--dashboard-radioSm);
     font-size: var(--dashboard-tamanoPequeno);
 }
@@ -45,7 +45,7 @@
     gap: var(--dashboard-espacioSm);
     max-height: 400px;
     overflow-y: auto;
-    padding-right: var(--dashboard-espacioXS);
+    padding-right: var(--dashboard-espacioXs);
 }
 
 /* Scrollbar personalizada para la lista */
@@ -55,7 +55,7 @@
 
 .listaBackups::-webkit-scrollbar-thumb {
     background-color: var(--dashboard-scrollbarThumb);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .itemBackup {
@@ -97,8 +97,8 @@
     text-transform: uppercase;
     background: var(--dashboard-fondoTerciario);
     padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.7rem;
+    border-radius: var(--dashboard-radioMini);
+    font-size: var(--dashboard-tamanoPequeno);
     letter-spacing: 0.5px;
     border: 1px solid var(--dashboard-bordeSutil);
 }
@@ -144,9 +144,9 @@
 }
 
 .botonEliminar:hover {
-    background: var(--dashboard-estadoPeligroFondo);
-    border-color: var(--dashboard-estadoPeligro);
-    color: var(--dashboard-estadoPeligro);
+    background: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAlta);
+    color: var(--dashboard-estadoAlta);
 }
 
 .estadoVacio {
@@ -219,7 +219,7 @@
         width: 100%;
         flex-wrap: wrap;
         gap: var(--dashboard-espacioXs);
-        font-size: 10px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
     }
 
     /* Botones de acciones en fila compacta */

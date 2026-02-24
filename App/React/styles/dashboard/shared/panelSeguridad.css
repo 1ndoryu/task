@@ -20,7 +20,7 @@
 .seccionSeguridad {
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     padding: var(--dashboard-espacioLg);
     transition: all var(--dashboard-transicionNormal);
     position: relative;
@@ -34,7 +34,7 @@
     width: 3px;
     height: 100%;
     background: var(--dashboard-bordePrincipal);
-    border-radius: 4px 0 0 4px;
+    border-radius: var(--dashboard-radioSm) 0 0 var(--dashboard-radioSm);
     transition: background var(--dashboard-transicionNormal);
 }
 
@@ -64,7 +64,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioMd);
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
 }
@@ -118,7 +118,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 600;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     flex-shrink: 0;
@@ -201,7 +201,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
 }
 
 /* 
@@ -242,7 +242,7 @@
     font-weight: 500;
     background: rgba(139, 92, 246, 0.1);
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
 }
 
 /* 

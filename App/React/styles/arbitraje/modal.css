@@ -40,7 +40,7 @@
 }
 
 .tituloModal {
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     font-weight: 500;
     color: var(--dashboard-textoActivo);
     margin: 0;
@@ -59,7 +59,7 @@
     background: none;
     border: none;
     color: var(--dashboard-textoApagado);
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     cursor: pointer;
     padding: var(--dashboard-espacioXs);
     line-height: 1;
@@ -213,7 +213,7 @@
 
 /* Sección de pérdidas en conversión */
 .seccionModal.seccionPerdidas {
-    background-color: var(--dashboard-estadoAltaFondoSutil, rgba(239, 68, 68, 0.05));
+    background-color: var(--dashboard-estadoAltaFondo);
     padding: var(--dashboard-espacioMd);
     border-left: 2px solid var(--dashboard-estadoAlta);
 }

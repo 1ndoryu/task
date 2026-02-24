@@ -68,9 +68,9 @@
 .seccionResponsables__avatarCompacto {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 2px solid var(--dashboard-fondoPrincipal);
-    margin-left: -8px;
+    margin-left: calc(-1 * var(--dashboard-espacioSm));
     object-fit: cover;
     transition: transform var(--dashboard-transicionRapida);
 }
@@ -87,10 +87,10 @@
 .seccionResponsables__avatarMas {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-superposicionSutil);
     border: 2px solid var(--dashboard-fondoPrincipal);
-    margin-left: -8px;
+    margin-left: calc(-1 * var(--dashboard-espacioSm));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,7 +101,7 @@
 .seccionResponsables__botonAgregarCompacto {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: transparent;
     border: 1px dashed var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoApagado);
@@ -142,7 +142,7 @@
 .seccionResponsables__participanteAvatar {
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
 }
 
@@ -238,7 +238,7 @@
 .seccionResponsables__companeroAvatar {
     width: 28px;
     height: 28px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     flex-shrink: 0;
 }

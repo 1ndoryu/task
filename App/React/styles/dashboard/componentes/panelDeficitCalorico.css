@@ -21,8 +21,8 @@
 .deficitResumenNutricional {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding-bottom: 8px;
+    gap: var(--dashboard-espacioMd);
+    padding-bottom: var(--dashboard-espacioSm);
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
@@ -30,15 +30,15 @@
 .deficitCaloriasPrincipal {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
 }
 
 .deficitNavegacionFecha {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 2px;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioXxs);
 }
 
 .deficitNavegacionFechaBoton {
@@ -88,14 +88,14 @@
     width: 100%;
     height: 5px;
     background: var(--dashboard-bordeSutil);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     overflow: hidden;
-    margin-top: 2px;
+    margin-top: var(--dashboard-espacioXxs);
 }
 
 .deficitBarraGrandeProgreso {
     height: 100%;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -109,7 +109,7 @@
 .deficitMacroItem {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
 }
 
 .deficitMacroHeader {
@@ -135,14 +135,14 @@
     width: 100%;
     height: 5px;
     background: var(--dashboard-fondoTerciario);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     overflow: hidden;
 }
 
 .deficitMacroBarraProgreso {
     height: 100%;
     background: var(--dashboard-estadoExito);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: width 0.5s ease;
 }
 
@@ -159,7 +159,7 @@
 
 .deficitEntradaInputContenedor {
     display: flex;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     align-items: center;
 }
 
@@ -252,10 +252,10 @@
 .deficitComidaInfo {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     flex: 1;
     min-width: 0;
-    padding-right: 8px;
+    padding-right: var(--dashboard-espacioSm);
 }
 
 .deficitComidaDesc {
@@ -276,7 +276,7 @@
 .deficitComidaHora {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
 }
@@ -284,18 +284,18 @@
 .deficitComidaMacro {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     background: var(--dashboard-fondoTerciario);
     padding: 2px 4px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
 }
 
 .deficitComidaAcciones {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     flex-shrink: 0;
 }
 
@@ -309,12 +309,12 @@
 .deficitComidaEliminar {
     display: flex;
     align-items: center;
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
     border: none;
     background: transparent;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     transition: all var(--dashboard-transicionRapida);
 }
 
@@ -339,7 +339,7 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    margin-bottom: 8px;
+    margin-bottom: var(--dashboard-espacioSm);
 }
 
 .deficitHistorialTitulo {
@@ -359,8 +359,8 @@
 .deficitHistorialLista {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
+    gap: var(--dashboard-espacioMd);
+    margin-top: var(--dashboard-espacioSm);
 }
 
 /* Grupo de comidas por día */
@@ -368,7 +368,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding-bottom: 12px;
+    padding-bottom: var(--dashboard-espacioMd);
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
@@ -408,12 +408,12 @@
 .deficitComidaBotonAccion {
     display: flex;
     align-items: center;
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
     border: none;
     background: transparent;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     transition: all var(--dashboard-transicionRapida);
 }
 
@@ -433,8 +433,8 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding-top: 8px;
-    margin-top: 8px;
+    padding-top: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordeSutil);
 }
 
@@ -474,11 +474,11 @@
 .modalInspeccionLog {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     background: var(--dashboard-fondoTerciario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
-    padding: 12px;
+    padding: var(--dashboard-espacioMd);
     max-height: 400px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;

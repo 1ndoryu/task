@@ -56,13 +56,39 @@
     --dashboard-estadoExitoFondo: rgba(34, 197, 94, 0.1);
     --dashboard-estadoExitoBorde: rgba(34, 197, 94, 0.3);
     --dashboard-exitoRgb: 34, 197, 94;
+    --dashboard-estadoExitoRgb: 34, 197, 94;
 
     --dashboard-estadoInfo: #3b82f6;
     --dashboard-estadoInfoFondo: rgba(59, 130, 246, 0.1);
     --dashboard-estadoInfoBorde: rgba(59, 130, 246, 0.3);
+    --dashboard-estadoInfoRgb: 59, 130, 246;
+
+    --dashboard-estadoErrorRgb: 239, 68, 68;
 
     --dashboard-estadoAltaTexto: #fca5a5;
     --dashboard-estadoMediaTexto: #fcd34d;
+
+    --dashboard-estadoAdvertencia: #f59e0b;
+    --dashboard-estadoAdvertenciaFondo: rgba(245, 158, 11, 0.1);
+    --dashboard-estadoAdvertenciaBorde: rgba(245, 158, 11, 0.3);
+    --dashboard-estadoAdvertenciaRgb: 245, 158, 11;
+
+    /* 
+     * COLOR DESTACADO (Amber-400, badges y alertas doradas)
+     */
+    --dashboard-estadoDestacado: #fbbf24;
+    --dashboard-estadoDestacadoRgb: 251, 191, 36;
+
+    /* 
+     * RGB para estados (uso con rgba())
+     */
+    --dashboard-estadoMediaRgb: 202, 138, 4;
+
+    /* 
+     * ACENTO PRIMARIO (visible por defecto, oscuro lo hereda)
+     */
+    --dashboard-acentoPrimario: #a78bfa;
+    --dashboard-acentoPrimarioRgb: 167, 139, 250;
 
     /*
      * ALIASES LEGACY DE COMPATIBILIDAD
@@ -105,26 +131,37 @@
     --dashboard-tamanoBase: 13px;
     --dashboard-tamanoPequeno: 11px;
     --dashboard-tamanoMuyPequeno: 10px;
+    --dashboard-tamanoMicro: 9px;
     --dashboard-tamanoGrande: 1.1rem;
+    --dashboard-tamanoNormal: 1rem;
+    --dashboard-tamanoMediano: 1.125rem;
     --dashboard-tamanoTitulo: 1.3rem;
+    --dashboard-tamanoSubtitulo: 1.5rem;
     --dashboard-tamanoHero: 1.4rem;
 
     /* 
      * ESPACIADO 
      */
+    --dashboard-espacioXxs: 2px;
+    --dashboard-espacioMini: 3px;
     --dashboard-espacioXs: 0.25rem;
     --dashboard-espacioSx: 0.35rem;
     --dashboard-espacioSm: 0.5rem;
     --dashboard-espacioMd: 0.75rem;
     --dashboard-espacioLg: 1rem;
     --dashboard-espacioXl: 1.5rem;
+    --dashboard-espacio2xl: 2rem;
 
     /* 
      * RADIOS DE BORDE 
      */
+    --dashboard-radioXs: 2px;
+    --dashboard-radioMini: 3px;
     --dashboard-radioSm: 0;
     --dashboard-radioMd: 0;
     --dashboard-radioLg: 0;
+    --dashboard-radioCirculo: 50%;
+    --dashboard-radioPildora: 9999px;
 
     /* 
      * BOTON PRIMARIO (CLARO) 
@@ -336,10 +373,14 @@
     --dashboard-estadoExitoFondo: rgba(25, 135, 84, 0.1);
     --dashboard-estadoExitoBorde: rgba(25, 135, 84, 0.3);
     --dashboard-exitoRgb: 25, 135, 84;
+    --dashboard-estadoExitoRgb: 25, 135, 84;
 
     --dashboard-estadoInfo: #0d6efd;
     --dashboard-estadoInfoFondo: rgba(13, 110, 253, 0.1);
     --dashboard-estadoInfoBorde: rgba(13, 110, 253, 0.3);
+    --dashboard-estadoInfoRgb: 13, 110, 253;
+
+    --dashboard-estadoErrorRgb: 220, 53, 69;
 
     --dashboard-estadoAltaTexto: #dc3545;
     --dashboard-estadoMediaTexto: #fd7e14;

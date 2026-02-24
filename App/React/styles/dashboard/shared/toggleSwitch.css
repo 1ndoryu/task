@@ -38,7 +38,7 @@
     bottom: 3px;
     background-color: var(--dashboard-textoApagado);
     transition: var(--dashboard-transicionNormal);
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
 }
 
 .toggleSwitch input:checked + .toggleSlider {

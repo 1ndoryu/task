@@ -38,7 +38,7 @@
     z-index: 0;
     box-sizing: border-box;
     width: 100%;
-    padding-right: 10px;
+    padding-right: var(--dashboard-espacioMd);
 }
 
 .scratchpadTextarea--resaltado {
@@ -94,21 +94,21 @@
 }
 
 .scratchpadVistaPreviaTitulo--h1 {
-    font-size: 1.1rem;
+    font-size: var(--dashboard-tamanoGrande);
 }
 
 .scratchpadVistaPreviaTitulo--h2 {
-    font-size: 1rem;
+    font-size: var(--dashboard-tamanoNormal);
 }
 
 .scratchpadVistaPreviaTitulo--h3 {
-    font-size: 0.95rem;
+    font-size: var(--dashboard-tamanoNormal);
 }
 
 .scratchpadVistaPreviaTitulo--h4,
 .scratchpadVistaPreviaTitulo--h5,
 .scratchpadVistaPreviaTitulo--h6 {
-    font-size: 0.9rem;
+    font-size: var(--dashboard-tamanoMovilBase);
 }
 
 .scratchpadVistaPreviaLista {
@@ -248,7 +248,7 @@
 .listaNotasItemFechaModificacion {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
 }

@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
@@ -154,7 +154,7 @@
     gap: var(--dashboard-espacioXs);
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoMuyApagado);
-    margin-top: 2px;
+    margin-top: var(--dashboard-espacioXxs);
 }
 
 /* Contenedor inferior con contador y fecha de modificaciÃ³n */
@@ -178,7 +178,7 @@
 .modalNotasItemFechaModificacion {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
 }

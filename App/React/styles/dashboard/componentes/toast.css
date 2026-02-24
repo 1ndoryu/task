@@ -56,9 +56,9 @@
 }
 
 .toastDeshacerBotonUndo:hover {
-    background-color: rgba(34, 197, 94, 0.15);
-    border-color: rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
 }
 
 .toastDeshacerBotonCerrar {

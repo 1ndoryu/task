@@ -14,7 +14,7 @@
 }
 
 .historialHabitoContenedor--compacto {
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
 }
 
 /* 
@@ -22,7 +22,7 @@
  */
 .historialHabitoVacio {
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoMuyApagado);
 }
 
@@ -33,7 +33,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 /* 
@@ -52,7 +52,7 @@
 .historialHabitoDiaIndicador {
     width: 14px;
     height: 14px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -68,9 +68,9 @@
 }
 
 .historialHabitoDia--completado .historialHabitoDiaIndicador {
-    background: rgba(34, 197, 94, 0.2);
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    background: rgba(var(--dashboard-exitoRgb), 0.2);
+    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
 }
 
 .historialHabitoDia--pospuesto .historialHabitoDiaIndicador {
@@ -80,9 +80,9 @@
 }
 
 .historialHabitoDia--omitido .historialHabitoDiaIndicador {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #ef4444;
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.2);
+    border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.4);
+    color: var(--dashboard-estadoAlta);
 }
 
 .historialHabitoDia--hoy .historialHabitoDiaLabel {
@@ -144,8 +144,8 @@
  * Dias no relevantes VACIOS - verde con opacidad baja para indicar que no aplica 
  */
 .historialHabitoDia--noRelevante.historialHabitoDia--vacio .historialHabitoDiaIndicador {
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.25);
+    background: rgba(var(--dashboard-exitoRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.25);
 }
 
 /* 
@@ -153,9 +153,9 @@
  * Muestra que se cumplio aunque no tocaba ese dia
  */
 .historialHabitoDia--noRelevante.historialHabitoDia--completado .historialHabitoDiaIndicador {
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: rgba(34, 197, 94, 0.7);
+    background: rgba(var(--dashboard-exitoRgb), 0.15);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
+    color: rgba(var(--dashboard-exitoRgb), 0.7);
 }
 
 /* 
@@ -171,7 +171,7 @@
  * Dias no relevantes OMITIDOS - rojo con opacidad 
  */
 .historialHabitoDia--noRelevante.historialHabitoDia--omitido .historialHabitoDiaIndicador {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: rgba(239, 68, 68, 0.7);
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.3);
+    color: rgba(var(--dashboard-estadoErrorRgb), 0.7);
 }

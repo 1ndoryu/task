@@ -57,7 +57,7 @@
 
 .configuracionUsuarioSufijo {
     position: absolute;
-    right: 12px;
+    right: var(--dashboard-espacioMd);
     top: 50%;
     transform: translateY(-50%);
     color: var(--dashboard-textoSecundario);

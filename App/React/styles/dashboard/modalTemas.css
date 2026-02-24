@@ -16,7 +16,7 @@
 .selectorTemas {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 /* 

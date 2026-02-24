@@ -23,7 +23,7 @@
     padding: 0; /* Sin padding */
     width: 26px; /* Aumentado de 22px para más espacio */
     height: 26px; /* Alto fijo igual al ancho */
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-weight: 500;
     color: var(--dashboard-textoApagado);
@@ -61,7 +61,7 @@
     width: auto;
     height: auto;
     min-height: unset;
-    padding: 3px;
+    padding: var(--dashboard-espacioMini);
     color: var(--dashboard-textoSecundario);
 }
 
@@ -146,10 +146,10 @@
 .selectorBadgeOpcion {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     width: 100%;
     padding: 8px 12px;
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoSecundario);
     background-color: transparent;
@@ -198,11 +198,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
-    margin-right: 8px;
+    margin-right: var(--dashboard-espacioSm);
 }
 
 .selectorBadgeOpcionDesc {
-    font-size: 0.6rem;
+    font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoApagado);
     margin-left: auto;
     max-width: 100px;

@@ -9,7 +9,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: var(--dashboard-fondoSutil);
+    background: var(--dashboard-fondoTerciario);
     margin-top: var(--dashboard-espacioMd);
     border-radius: var(--dashboard-radioSm) var(--dashboard-radioSm) 0 0;
     position: sticky;
@@ -78,7 +78,7 @@
     font-weight: 500;
     color: var(--dashboard-textoNormal);
     background: var(--dashboard-fondoTarjeta);
-    border: 1px solid var(--dashboard-bordeActivo);
+    border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
     padding: 2px 6px;
     outline: none;
@@ -86,11 +86,11 @@
 
 /* Contador de tareas */
 .grupoTareasContador {
-    font-size: var(--dashboard-tamanoXs);
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     background: var(--dashboard-fondoTarjeta);
     padding: 0 6px;
-    border-radius: 10px;
+    border-radius: var(--dashboard-radioLg);
     min-width: 18px;
     text-align: center;
 }
@@ -160,7 +160,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoXs);
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     text-transform: uppercase;
     letter-spacing: 0.5px;

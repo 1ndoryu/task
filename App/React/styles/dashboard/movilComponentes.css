@@ -100,7 +100,7 @@
         width: 40px;
         height: 4px;
         background: var(--dashboard-bordeSutil);
-        border-radius: 2px;
+        border-radius: var(--dashboard-radioXs);
         margin: 12px auto;
     }
 

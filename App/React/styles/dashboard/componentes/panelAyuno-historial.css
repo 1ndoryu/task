@@ -26,7 +26,7 @@
 .panelAyunoHistorialInfo {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     flex: 1;
 }
 
@@ -40,12 +40,12 @@
 .panelAyunoHistorialItemMeta {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     background: var(--dashboard-fondoTerciario);
     padding: 2px 5px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
 }
 
 .panelAyunoHistorialEliminar {
@@ -67,7 +67,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding-top: 8px;
+    padding-top: var(--dashboard-espacioSm);
 }
 
 .panelAyunoHistorialPaginacionBoton {
@@ -111,7 +111,7 @@
 .modalAyunoUltimaComidaCampo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     padding: 10px 12px;
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
@@ -196,8 +196,8 @@
 .modalAyunoUltimaComidaInfo {
     display: flex;
     justify-content: center;
-    margin-top: -8px;
-    margin-bottom: 8px;
+    margin-top: calc(-1 * var(--dashboard-espacioSm));
+    margin-bottom: var(--dashboard-espacioSm);
 }
 
 .modalAyunoUltimaComidaDia {
@@ -205,7 +205,7 @@
     color: var(--dashboard-textoSecundario);
     background: var(--dashboard-fondoTerciario);
     padding: 2px 8px;
-    border-radius: 12px;
+    border-radius: var(--dashboard-radioLg);
     border: 1px solid var(--dashboard-bordeSutil);
 }
 

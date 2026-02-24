@@ -30,7 +30,7 @@
 
 .contenedorListaProyectos::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
 }
 
 .contenedorListaProyectos::-webkit-scrollbar-thumb:hover {

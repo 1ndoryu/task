@@ -95,7 +95,7 @@
 .selectorColores__opcion {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 2px solid transparent;
     cursor: pointer;
     transition: border-color var(--dashboard-transicionRapida), transform var(--dashboard-transicionRapida);

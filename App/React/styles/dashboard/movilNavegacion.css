@@ -32,10 +32,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: var(--dashboard-espacioXs);
         color: var(--dashboard-textoApagado);
         text-decoration: none;
-        font-size: 10px;
+        font-size: var(--dashboard-tamanoMuyPequeno);
         transition: color var(--dashboard-transicionRapida);
     }
 
@@ -48,7 +48,7 @@
     }
 
     .navegacionInferior__icono {
-        font-size: 20px;
+        font-size: var(--dashboard-tamanoTitulo);
     }
 
     /* FAB central destacado */
@@ -57,13 +57,13 @@
         top: -12px;
         width: 56px;
         height: 56px;
-        border-radius: 50%;
+        border-radius: var(--dashboard-radioCirculo);
         background: var(--dashboard-acento);
-        color: white;
+        color: var(--dashboard-textoSobreAcento);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: var(--dashboard-tamanoSubtitulo);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 

@@ -48,7 +48,7 @@
     border-radius: 0;
     color: var(--dashboard-textoActivo);
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: 1.5rem;
+    font-size: var(--dashboard-tamanoSubtitulo);
     font-weight: 600;
     padding: 0;
     margin: 0;
@@ -128,7 +128,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSx);
     padding: 5px 11px;
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoNormal);
     background: transparent;
@@ -166,7 +166,7 @@
 /* Icono que solo aparece al hover (para quitar) */
 .pillOpcion__hoverIcon {
     display: none;
-    margin-left: 2px;
+    margin-left: var(--dashboard-espacioXxs);
     color: var(--dashboard-textoMuyApagado);
 }
 

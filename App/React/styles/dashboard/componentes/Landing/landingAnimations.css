@@ -9,7 +9,7 @@
 .landingHabitRow {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--dashboard-espacioLg);
     padding: 14px 16px;
     background: linear-gradient(135deg, var(--dashboard-superposicionClara), var(--dashboard-superposicionMuyClara));
     backdrop-filter: blur(10px);
@@ -45,7 +45,7 @@
 }
 
 .landingHabitLabel {
-    font-size: 0.9rem;
+    font-size: var(--dashboard-tamanoMovilBase);
     color: var(--dashboard-textoActivo);
     font-weight: 500;
     white-space: nowrap;
@@ -150,15 +150,15 @@
 .landingProjectIcon {
     width: 28px;
     height: 28px;
-    border-radius: 8px;
-    margin-right: 12px;
+    border-radius: var(--dashboard-radioLg);
+    margin-right: var(--dashboard-espacioMd);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .landingProjectTitle {
-    font-size: 0.9rem;
+    font-size: var(--dashboard-tamanoMovilBase);
     color: var(--dashboard-textoActivo);
     font-weight: 500;
 }
@@ -207,7 +207,7 @@
 .landingSortingWidget {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Reduced specific gap */
+    gap: var(--dashboard-espacioSm); /* Reduced specific gap */
     width: 260px; /* Reduced width */
     position: relative;
     padding: 0; /* Removed padding */
@@ -216,7 +216,7 @@
 .landingSortItem {
     display: flex;
     align-items: center;
-    gap: 10px; /* Reduced gap */
+    gap: var(--dashboard-espacioMd); /* Reduced gap */
     padding: 8px 10px; /* Reduced padding */
     background: linear-gradient(135deg, var(--dashboard-superposicionClara), var(--dashboard-superposicionMuyClara));
     backdrop-filter: blur(10px);
@@ -254,7 +254,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px; /* Reduced gap */
+    gap: var(--dashboard-espacioXs); /* Reduced gap */
 }
 
 .landingLine {
@@ -272,7 +272,7 @@
 }
 
 .landingSortTag {
-    font-size: 0.6rem;
+    font-size: var(--dashboard-tamanoMicro);
     font-weight: 600;
     padding: 2px 5px; /* Compact padding */
     border-radius: 0; /* Removed border radius */

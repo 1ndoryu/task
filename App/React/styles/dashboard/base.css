@@ -52,7 +52,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .dashboardContenedor::selection {
     background-color: #333;
-    color: white;
+    color: var(--dashboard-textoSobreAcento);
 }
 
 /* 

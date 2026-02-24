@@ -85,7 +85,7 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioXs);
 }
 
 .adjuntosGrid__iconoCifrado {
@@ -95,7 +95,7 @@
 
 .adjuntosGrid__acciones {
     display: flex;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     opacity: 0;
     transition: opacity var(--dashboard-transicionRapida);
 }
@@ -105,7 +105,7 @@
 }
 
 .adjuntosGrid__accion {
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
     color: var(--dashboard-textoApagado);
     background: transparent;
     border: none;
@@ -139,7 +139,7 @@
 .adjuntosGrid__audioBtn {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordeSutil);
     display: flex;
@@ -172,11 +172,11 @@
     justify-content: center;
     width: 14px;
     height: 14px;
-    margin-left: 2px;
+    margin-left: var(--dashboard-espacioXxs);
     padding: 0;
     background: transparent;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
@@ -260,7 +260,7 @@
     background: var(--dashboard-superposicionClara);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
-    padding: 2px;
+    padding: var(--dashboard-espacioXxs);
 }
 
 .selectorRepeticionPanel__numero button {
@@ -274,7 +274,7 @@
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     border-radius: var(--dashboard-radioSm);
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     transition: all var(--dashboard-transicionRapida);
 }
 

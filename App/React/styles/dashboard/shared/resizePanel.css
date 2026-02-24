@@ -65,7 +65,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -2px;
+    margin-top: calc(-1 * var(--dashboard-espacioXxs));
     opacity: 0;
     transition: opacity 0.2s;
 }
@@ -79,7 +79,7 @@
     width: 40px;
     height: 3px;
     background-color: var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     transition: background-color 0.2s, width 0.2s;
 }
 

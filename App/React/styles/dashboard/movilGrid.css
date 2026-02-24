@@ -124,12 +124,12 @@
     /* Badge indicador de filtros activos */
     .menuOpcionesPanelBadge {
         position: absolute;
-        top: 4px;
-        right: 4px;
+        top: var(--dashboard-espacioXs);
+        right: var(--dashboard-espacioXs);
         width: 6px;
         height: 6px;
         background: var(--dashboard-acento);
-        border-radius: 50%;
+        border-radius: var(--dashboard-radioCirculo);
         pointer-events: none;
     }
 

@@ -53,7 +53,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     color: var(--dashboard-textoApagado);
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -113,9 +113,9 @@
 .panelConfiguracionAlerta {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 2px 6px;
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     border-radius: var(--dashboard-radioSm);
@@ -128,9 +128,9 @@
 }
 
 .panelConfiguracionAlertaUrgente {
-    background-color: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background-color: var(--dashboard-estadoAdvertenciaFondo);
+    color: var(--dashboard-estadoAdvertencia);
+    border: 1px solid var(--dashboard-estadoAdvertenciaBorde);
 }
 
 .panelConfiguracionAlertaProxima {

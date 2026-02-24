@@ -40,7 +40,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .tarjetaIcono {
@@ -49,7 +49,7 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-fondoHover);
     color: var(--dashboard-textoSecundario);
 }
@@ -58,10 +58,10 @@
     color: var(--dashboard-textoActivo);
 }
 .tarjetaPremium .tarjetaIcono {
-    color: #f59e0b;
+    color: var(--dashboard-estadoAdvertencia);
 }
 .tarjetaTrial .tarjetaIcono {
-    color: #3b82f6;
+    color: var(--dashboard-estadoInfo);
 }
 .tarjetaFree .tarjetaIcono {
     color: var(--dashboard-textoSecundario);
@@ -70,11 +70,11 @@
 .tarjetaContenido {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .tarjetaValor {
-    font-size: 1.1rem;
+    font-size: var(--dashboard-tamanoGrande);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -99,7 +99,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .filtrosUsuariosPlan {
@@ -114,10 +114,10 @@
 
 .filtrosBotones {
     display: flex;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     background: var(--dashboard-fondoHover);
-    border-radius: 4px;
-    padding: 2px;
+    border-radius: var(--dashboard-radioSm);
+    padding: var(--dashboard-espacioXxs);
 }
 
 .filtroPlanBoton {
@@ -128,7 +128,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: var(--dashboard-transicionRapida);
 }
 
@@ -158,7 +158,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoHover);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .busquedaIcono {
@@ -188,7 +188,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: var(--dashboard-transicionRapida);
 }
 
@@ -205,7 +205,7 @@
     border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
     color: var(--dashboard-textoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: var(--dashboard-transicionRapida);
 }
@@ -244,7 +244,7 @@
 
 .listaUsuariosTabla {
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     overflow: hidden;
 }
 
@@ -295,7 +295,7 @@
 .usuarioAvatar {
     width: 28px;
     height: 28px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     flex-shrink: 0;
 }
 
@@ -335,24 +335,24 @@
 .planBadge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
     text-transform: uppercase;
 }
 
 .badgePremium {
-    background: rgba(251, 191, 36, 0.1);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(var(--dashboard-estadoDestacadoRgb), 0.1);
+    color: var(--dashboard-estadoDestacado);
+    border: 1px solid rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
 }
 
 .badgeTrial {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: var(--dashboard-estadoInfoFondo);
+    color: var(--dashboard-estadoInfo);
+    border: 1px solid var(--dashboard-estadoInfoBorde);
 }
 
 .badgeFree {
@@ -364,7 +364,7 @@
 /* Badges de estado */
 .estadoBadge {
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-size: var(--dashboard-tamanoPequeno);
 }
 
@@ -373,7 +373,7 @@
 }
 
 .estadoTrial {
-    color: #3b82f6;
+    color: var(--dashboard-estadoInfo);
 }
 
 .estadoExpirada {
@@ -400,7 +400,7 @@
     height: 28px;
     border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: var(--dashboard-transicionRapida);
 }
@@ -451,7 +451,7 @@
     border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
     color: var(--dashboard-textoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: var(--dashboard-transicionRapida);
 }
@@ -477,10 +477,10 @@
  */
 .adminTabs {
     display: flex;
-    gap: 2px;
-    padding: 2px;
+    gap: var(--dashboard-espacioXxs);
+    padding: var(--dashboard-espacioXxs);
     background: var(--dashboard-fondoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     margin-bottom: var(--dashboard-espacioMd);
 }
 
@@ -495,7 +495,7 @@
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: var(--dashboard-transicionRapida);
 }
 
@@ -545,7 +545,7 @@
 
 .feedbackItemAdmin {
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-fondoSecundario);
     overflow: hidden;
     transition: var(--dashboard-transicionRapida);
@@ -556,7 +556,7 @@
 }
 
 .feedbackItemNoLeido {
-    border-left: 3px solid var(--dashboard-colorPrimario);
+    border-left: 3px solid var(--dashboard-acento);
 }
 
 .feedbackItemExpandido {
@@ -584,11 +584,11 @@
 }
 
 .feedbackTipoSugerencia {
-    color: #f59e0b;
+    color: var(--dashboard-estadoAdvertencia);
 }
 
 .feedbackTipoBug {
-    color: #ef4444;
+    color: var(--dashboard-estadoAlta);
 }
 
 .feedbackTipoOtro {
@@ -601,7 +601,7 @@
     text-transform: capitalize;
     padding: 2px 6px;
     background: var(--dashboard-fondoHover);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
@@ -627,11 +627,11 @@
 }
 
 .feedbackItemNuevo {
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     padding: 2px 4px;
-    background: var(--dashboard-colorPrimario);
+    background: var(--dashboard-acento);
     color: var(--dashboard-textoActivo);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-weight: 600;
     text-transform: uppercase;
 }

@@ -46,7 +46,7 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--dashboard-espacioMd) var(--dashboard-espacioXl);
-    background: rgba(9, 9, 9, 0.8);
+    background: var(--dashboard-fondoCristal);
     backdrop-filter: blur(12px);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
@@ -60,7 +60,7 @@
 }
 
 .landingNavLink {
-    font-size: 0.875rem;
+    font-size: var(--dashboard-tamanoMovilBase);
     color: var(--dashboard-textoSecundario);
     text-decoration: none;
     transition: color var(--dashboard-transicionRapida);
@@ -71,7 +71,7 @@
 }
 
 .landingLogo {
-    font-size: 1rem;
+    font-size: var(--dashboard-tamanoNormal);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     letter-spacing: -0.02em;
@@ -114,7 +114,7 @@
 }
 
 .landingHeroSubtituloRight {
-    font-size: 0.875rem;
+    font-size: var(--dashboard-tamanoMovilBase);
     color: var(--dashboard-textoSecundario);
     line-height: 1.6;
     flex: 1;
@@ -181,7 +181,7 @@
 }
 
 .landingSeccionTitulo {
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 500;
     color: var(--dashboard-textoApagado);
     text-transform: uppercase;
@@ -270,7 +270,7 @@
     font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoNormal);
     line-height: 1.6;
-    padding-top: 2px;
+    padding-top: var(--dashboard-espacioXxs);
 }
 
 /* 
@@ -286,7 +286,7 @@
 }
 
 .landingCtaTexto {
-    font-size: 1rem;
+    font-size: var(--dashboard-tamanoNormal);
     color: var(--dashboard-textoSecundario);
     margin: 0 0 var(--dashboard-espacioXl) 0;
 }
@@ -355,7 +355,7 @@
 }
 
 .landingSectionSubtituloRight {
-    font-size: 1rem;
+    font-size: var(--dashboard-tamanoNormal);
     color: var(--dashboard-textoSecundario);
     line-height: 1.6;
     flex: 0 1 400px;
@@ -418,11 +418,11 @@
     font-size: 1.125rem;
     font-weight: 500;
     color: var(--dashboard-textoActivo);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--dashboard-espacioSm);
 }
 
 .landingFeatureText {
-    font-size: 0.875rem;
+    font-size: var(--dashboard-tamanoMovilBase);
     line-height: 1.6;
     color: var(--dashboard-textoSecundario);
     max-width: 260px;

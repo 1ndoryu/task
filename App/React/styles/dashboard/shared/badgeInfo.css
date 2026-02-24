@@ -14,7 +14,7 @@
 
 .badgeGroup > * {
     margin-right: var(--dashboard-espacioSx);
-    margin-bottom: 2px;
+    margin-bottom: var(--dashboard-espacioXxs);
     vertical-align: middle;
 }
 
@@ -28,9 +28,9 @@
 .badgeInfo {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
     padding: 1px 5px;
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoApagado);
     background-color: var(--dashboard-fondoHover);
@@ -98,9 +98,9 @@
 
 /* Advertencia (amarillo/naranja) */
 .badgeInfo--advertencia {
-    color: #f59e0b;
-    background-color: rgba(245, 158, 11, 0.1);
-    border-color: rgba(245, 158, 11, 0.3);
+    color: var(--dashboard-estadoAdvertencia);
+    background-color: var(--dashboard-estadoAdvertenciaFondo);
+    border-color: var(--dashboard-estadoAdvertenciaBorde);
 }
 
 /* 
@@ -187,9 +187,9 @@
  * BADGE DESTACADO (Toca hoy, activo)
  */
 .badgeInfo--destacado {
-    color: #fbbf24;
-    background-color: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.3);
+    color: var(--dashboard-estadoDestacado);
+    background-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.15);
+    border-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -217,8 +217,8 @@
 
 .badgeInfo--rachaPeligro {
     color: var(--dashboard-estadoMedia);
-    background-color: rgba(202, 138, 4, 0.1);
-    border-color: rgba(202, 138, 4, 0.3);
+    background-color: rgba(var(--dashboard-estadoMediaRgb), 0.1);
+    border-color: rgba(var(--dashboard-estadoMediaRgb), 0.3);
 }
 
 .badgeInfo--rachaActiva {
@@ -228,9 +228,9 @@
 }
 
 .badgeInfo--rachaCompletada {
-    color: #22c55e;
-    background-color: rgba(34, 197, 94, 0.1);
-    border-color: rgba(34, 197, 94, 0.2);
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.2);
 }
 
 /* 
@@ -238,8 +238,8 @@
  */
 .badgeInfo--frecuencia {
     padding: 0;
-    margin-left: 4px;
-    font-size: 11px;
+    margin-left: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 400;
     color: var(--dashboard-textoApagado);
     background-color: transparent;
@@ -262,9 +262,9 @@
  * Color azul distintivo con animación de pulsación
  */
 .badgeInfo--mensajeNoLeido {
-    color: #3b82f6;
-    background-color: rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.4);
+    color: var(--dashboard-estadoInfo);
+    background-color: rgba(var(--dashboard-acentoRgb), 0.15);
+    border-color: rgba(var(--dashboard-acentoRgb), 0.4);
     font-weight: 600;
     padding: 2px 6px;
     animation: pulsarMensaje 2s ease-in-out infinite;
@@ -302,9 +302,9 @@
  * Color gris/morado que indica estado inactivo pero perdonado
  */
 .badgeInfo--pospuesto {
-    color: #a78bfa;
-    background-color: rgba(167, 139, 250, 0.12);
-    border-color: rgba(167, 139, 250, 0.3);
+    color: var(--dashboard-acentoPrimario);
+    background-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.12);
+    border-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.3);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;

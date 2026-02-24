@@ -8,5 +8,5 @@
 .badgeInfo--racha {
     background: transparent;
     color: var(--dashboard-textoApagado);
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
 }

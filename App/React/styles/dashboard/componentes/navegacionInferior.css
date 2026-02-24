@@ -46,7 +46,7 @@
     width: 6px;
     height: 6px;
     background: var(--dashboard-textoActivo);
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
 }
 
 /* 
@@ -60,7 +60,7 @@
 .navegacionInferiorFabCirculo {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 1px solid var(--dashboard-bordePrincipal);
     background: var(--dashboard-fondoSecundario);
     color: var(--dashboard-textoNormal);

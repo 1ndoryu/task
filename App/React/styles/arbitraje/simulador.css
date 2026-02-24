@@ -113,7 +113,7 @@
 .resultadoCiclo {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     padding: var(--dashboard-espacioSm);
     background-color: var(--dashboard-superposicionMuyClara);
 }
@@ -153,7 +153,7 @@
 .detalleAlternativo {
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
     opacity: 0.7;
     display: block;
 }

@@ -22,7 +22,7 @@
     padding: var(--dashboard-espacioSm);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     transition: all var(--dashboard-transicionNormal);
 }
 
@@ -34,7 +34,7 @@
 .adjuntoPreview {
     width: 40px;
     height: 40px;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     object-fit: cover;
     background-color: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -60,7 +60,7 @@
     min-width: 0; /* Para que el text-overflow funcione */
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .adjuntoNombre {
@@ -76,7 +76,7 @@
 
 .adjuntoNombre:hover {
     text-decoration: underline;
-    color: #fff;
+    color: var(--dashboard-textoSobreAcento);
 }
 
 .adjuntoMeta {
@@ -91,7 +91,7 @@
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     padding: var(--dashboard-espacioXs);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -105,7 +105,7 @@
 
 .adjuntosAreaCarga {
     border: 1px dashed var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     padding: var(--dashboard-espacioMd);
     display: flex;
     flex-direction: column;
@@ -149,7 +149,7 @@
 .adjuntoBotonPlay {
     background: none;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     width: 24px;
     height: 24px;
     display: flex;
@@ -170,7 +170,7 @@
     flex: 1;
     height: 4px;
     background-color: var(--dashboard-barraFondo);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     position: relative;
     overflow: hidden;
 }
@@ -206,7 +206,7 @@
 .adjuntoImagenFull {
     max-width: 100%;
     max-height: 90vh;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--dashboard-bordePrincipal);
 }
@@ -219,8 +219,8 @@
     border: none;
     color: var(--dashboard-textoActivo);
     cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
+    padding: var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioCirculo);
     transition: background-color var(--dashboard-transicionNormal);
 }
 
@@ -254,14 +254,14 @@
 /* Estado bloqueado (plan FREE) */
 .adjuntosAreaCarga--bloqueado {
     cursor: pointer;
-    border-color: #f59e0b;
+    border-color: var(--dashboard-estadoAdvertencia);
     border-style: dashed;
     background-color: rgba(245, 158, 11, 0.05);
 }
 
 .adjuntosAreaCarga--bloqueado:hover {
-    border-color: #f59e0b;
-    background-color: rgba(245, 158, 11, 0.1);
+    border-color: var(--dashboard-estadoAdvertencia);
+    background-color: var(--dashboard-estadoAdvertenciaFondo);
 }
 
 /* Estado límite alcanzado */
@@ -283,7 +283,7 @@
 }
 
 .adjuntosIconoPremium {
-    color: #f59e0b !important;
+    color: var(--dashboard-estadoAdvertencia) !important;
 }
 
 .adjuntosIconoLimite {
@@ -300,9 +300,9 @@
 
 /* Botón premium en modo moderno */
 .pillOpcion--premium {
-    border-color: #f59e0b !important;
-    color: #f59e0b !important;
-    background-color: rgba(245, 158, 11, 0.1) !important;
+    border-color: var(--dashboard-estadoAdvertencia) !important;
+    color: var(--dashboard-estadoAdvertencia) !important;
+    background-color: var(--dashboard-estadoAdvertenciaFondo) !important;
 }
 
 .pillOpcion--premium:hover {
@@ -322,7 +322,7 @@
     padding: var(--dashboard-espacioSm);
     background-color: var(--dashboard-estadoAltaFondo);
     border: 1px solid var(--dashboard-estadoAlta);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 /* 
@@ -375,7 +375,7 @@
     bottom: 2px;
     right: 2px;
     background: rgba(0, 0, 0, 0.7);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     padding: 2px 3px;
     display: flex;
     align-items: center;

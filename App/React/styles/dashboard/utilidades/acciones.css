@@ -43,7 +43,7 @@
 }
 
 .botonAccionIcono {
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     line-height: 1;
 }
 
@@ -52,7 +52,7 @@
 }
 
 .botonImportar:hover {
-    border-color: #22c55e;
+    border-color: var(--dashboard-estadoExito);
 }
 
 .inputArchivoOculto {
@@ -70,9 +70,9 @@
 }
 
 .mensajeExito {
-    color: #22c55e;
-    background-color: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
 }
 
 .mensajeError {

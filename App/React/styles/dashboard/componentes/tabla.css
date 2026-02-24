@@ -43,13 +43,13 @@
 }
 
 .habitoCheckboxCompletado {
-    background-color: rgba(34, 197, 94, 0.15);
-    border-color: rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
 }
 
 .habitoCheckboxCompletado:hover {
-    background-color: rgba(34, 197, 94, 0.25);
+    background-color: rgba(var(--dashboard-exitoRgb), 0.25);
 }
 
 .tablaColumnaId {
@@ -138,7 +138,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     border: 1px solid var(--dashboard-bordeSutil);
     padding: 0 var(--dashboard-espacioXs);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
 }
 
 /* 
@@ -148,9 +148,9 @@
 .filaNombreIndicadorFrecuencia {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    margin-left: 4px;
-    font-size: 11px;
+    gap: var(--dashboard-espacioXxs);
+    margin-left: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 400;
     color: var(--dashboard-textoApagado);
     opacity: 0.8;
@@ -178,14 +178,14 @@
     display: inline-flex;
     align-items: center;
     padding: 1px 6px;
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #fbbf24;
-    background-color: rgba(251, 191, 36, 0.15);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 2px;
+    color: var(--dashboard-estadoDestacado);
+    background-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
+    border-radius: var(--dashboard-radioXs);
     animation: pulsarBadgeTocaHoy 2s ease-in-out infinite;
 }
 
@@ -292,14 +292,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .barraUrgenciaNueva {
     width: 100%;
     height: 8px;
     background-color: var(--dashboard-barraFondo);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     overflow: hidden;
     position: relative;
 }
@@ -307,7 +307,7 @@
 .barraRellenoNueva {
     height: 100%;
     background-color: var(--dashboard-barraNormal);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     transition:
         width 0.3s ease,
         background-color 0.3s ease;
@@ -323,11 +323,11 @@
 }
 
 .barraRellenoCompletado {
-    background-color: rgba(34, 197, 94, 0.4);
+    background-color: rgba(var(--dashboard-exitoRgb), 0.4);
 }
 
 .urgenciaPorcentaje {
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoMuyApagado);
     line-height: 1;
 }
@@ -344,20 +344,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     transition: all var(--dashboard-transicionNormal);
 }
 
 .rachaContenedorPeligro {
-    background-color: rgba(202, 138, 4, 0.1);
-    border: 1px solid rgba(202, 138, 4, 0.3);
+    background-color: rgba(var(--dashboard-estadoMediaRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-estadoMediaRgb), 0.3);
 }
 
 .rachaContenedorCompletado {
-    background-color: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.2);
 }
 
 .rachaIcono {
@@ -389,11 +389,11 @@
 }
 
 .rachaContenedorCompletado .rachaNumero {
-    color: #22c55e;
+    color: var(--dashboard-estadoExito);
 }
 
 .rachaTiempoRestante {
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-estadoMedia);
     opacity: 0.8;
 }
@@ -504,8 +504,8 @@
 
 .botonCompletarHabito:hover:not(:disabled) {
     background-color: var(--dashboard-fondoHover);
-    border-color: #22c55e;
-    color: #22c55e;
+    border-color: var(--dashboard-estadoExito);
+    color: var(--dashboard-estadoExito);
 }
 
 .botonCompletarHabito:disabled {
@@ -513,9 +513,9 @@
 }
 
 .botonCompletarHabitoActivo {
-    background-color: rgba(34, 197, 94, 0.15);
-    border-color: rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
 }
 
 /* 
@@ -576,7 +576,7 @@
     min-height: 32px;
     gap: var(--dashboard-espacioMd);
     align-items: center;
-    margin-bottom: 2px;
+    margin-bottom: var(--dashboard-espacioXxs);
 }
 
 .tablaFilaCompacta .habitoCheckbox {

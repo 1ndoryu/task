@@ -72,19 +72,19 @@
 
 /* Variante PREMIUM - Dorado elegante */
 .indicadorPlan--premium {
-    color: #fbbf24;
-    border-color: rgba(251, 191, 36, 0.4);
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%);
-    box-shadow: 0 0 8px rgba(251, 191, 36, 0.1), inset 0 1px 0 rgba(251, 191, 36, 0.1);
+    color: var(--dashboard-estadoDestacado);
+    border-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.4);
+    background: linear-gradient(135deg, rgba(var(--dashboard-estadoDestacadoRgb), 0.08) 0%, rgba(var(--dashboard-estadoDestacadoRgb), 0.02) 100%);
+    box-shadow: 0 0 8px rgba(var(--dashboard-estadoDestacadoRgb), 0.1), inset 0 1px 0 rgba(var(--dashboard-estadoDestacadoRgb), 0.1);
 }
 
 .indicadorPlan--premium::before {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, transparent 100%);
+    background: linear-gradient(135deg, rgba(var(--dashboard-estadoDestacadoRgb), 0.15) 0%, transparent 100%);
 }
 
 .indicadorPlan--premium:hover {
-    border-color: rgba(251, 191, 36, 0.6);
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.2), inset 0 1px 0 rgba(251, 191, 36, 0.15);
+    border-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.6);
+    box-shadow: 0 0 12px rgba(var(--dashboard-estadoDestacadoRgb), 0.2), inset 0 1px 0 rgba(var(--dashboard-estadoDestacadoRgb), 0.15);
 }
 
 /* Variante TRIAL - Azul sutil con pulso */
@@ -149,8 +149,8 @@
     width: 48px;
     height: 48px;
     margin: 0 auto var(--dashboard-espacioMd);
-    font-size: 1.5rem;
-    border-radius: 50%;
+    font-size: var(--dashboard-tamanoSubtitulo);
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
 }
@@ -158,7 +158,7 @@
 .modalUpgrade__encabezado h2 {
     margin: 0 0 var(--dashboard-espacioXs);
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: 1rem;
+    font-size: var(--dashboard-tamanoNormal);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     letter-spacing: -0.01em;
@@ -183,9 +183,9 @@
 }
 
 .modalUpgrade__encabezado--premium .modalUpgrade__icono {
-    color: #fbbf24;
-    border-color: rgba(251, 191, 36, 0.3);
-    background: rgba(251, 191, 36, 0.08);
+    color: var(--dashboard-estadoDestacado);
+    border-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
+    background: rgba(var(--dashboard-estadoDestacadoRgb), 0.08);
 }
 
 /* 
@@ -226,8 +226,8 @@
 }
 
 .modalUpgrade__columna--premium {
-    color: #fbbf24;
-    background: rgba(251, 191, 36, 0.03);
+    color: var(--dashboard-estadoDestacado);
+    background: rgba(var(--dashboard-estadoDestacadoRgb), 0.03);
     position: relative;
 }
 
@@ -238,7 +238,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(var(--dashboard-estadoDestacadoRgb), 0.5), transparent);
 }
 
 .modalUpgrade__fila {
@@ -279,7 +279,7 @@
 
 .modalUpgrade__valor--premium {
     color: var(--dashboard-estadoExito);
-    background: rgba(251, 191, 36, 0.02);
+    background: rgba(var(--dashboard-estadoDestacadoRgb), 0.02);
 }
 
 /* 
@@ -325,9 +325,9 @@
 }
 
 .modalUpgrade__planOpcion--activo {
-    border-color: #fbbf24;
-    background: rgba(251, 191, 36, 0.05);
-    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.3);
+    border-color: var(--dashboard-estadoDestacado);
+    background: rgba(var(--dashboard-estadoDestacadoRgb), 0.05);
+    box-shadow: 0 0 0 1px rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
 }
 
 .modalUpgrade__planOpcion--activo::before {
@@ -335,7 +335,7 @@
     position: absolute;
     top: var(--dashboard-espacioSm);
     right: var(--dashboard-espacioSm);
-    color: #fbbf24;
+    color: var(--dashboard-estadoDestacado);
     font-size: var(--dashboard-tamanoPequeno);
 }
 
@@ -346,7 +346,7 @@
     padding: 2px var(--dashboard-espacioXs);
     background: var(--dashboard-estadoExito);
     color: var(--dashboard-fondoPrincipal);
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 700;
     letter-spacing: 0.05em;
     border-radius: 1px;
@@ -376,8 +376,8 @@
 .modalUpgrade__error {
     margin-bottom: var(--dashboard-espacioMd);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.3);
     border-radius: var(--dashboard-radioSm);
     color: #f87171;
     font-family: var(--dashboard-fuenteMonoespaciada);

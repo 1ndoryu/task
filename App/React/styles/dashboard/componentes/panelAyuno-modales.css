@@ -27,7 +27,7 @@
 
 .modalAyunoHeroTiempo--completado {
     color: var(--dashboard-estadoExito);
-    text-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    text-shadow: 0 0 20px rgba(var(--dashboard-estadoExitoRgb), 0.2);
 }
 
 .modalAyunoHeroObjetivo {
@@ -49,8 +49,8 @@
 
 .modalAyunoTimelineItem {
     display: flex;
-    gap: 16px;
-    padding-bottom: 24px;
+    gap: var(--dashboard-espacioLg);
+    padding-bottom: var(--dashboard-espacioXl);
     position: relative;
     min-height: 48px;
 }
@@ -64,7 +64,7 @@
     content: '';
     position: absolute;
     left: 12px; /* Centro del icono de 24px (+ borde) */
-    top: 24px;
+    top: var(--dashboard-espacioXl);
     bottom: -4px;
     width: 2px;
     background: var(--dashboard-bordeSutil);
@@ -91,7 +91,7 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-fondoSecundario);
     border: 2px solid var(--dashboard-bordeSutil);
     color: var(--dashboard-textoSecundario);
@@ -125,8 +125,8 @@
 .modalAyunoTimelineContenido {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding-top: 2px;
+    gap: var(--dashboard-espacioXxs);
+    padding-top: var(--dashboard-espacioXxs);
     flex: 1;
 }
 
@@ -150,14 +150,14 @@
     font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoSecundario);
     opacity: 0.8;
-    margin-top: 2px;
+    margin-top: var(--dashboard-espacioXxs);
     font-style: italic;
 }
 
 .modalAyunoTimelineHoraEditable {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .modalAyunoTimelineHoraInput {
@@ -201,7 +201,7 @@
     transition: all var(--dashboard-transicionRapida);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .modalAyunoFinalizarBoton:hover {
@@ -241,7 +241,7 @@
 .panelAyunoHistorialLista {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .panelAyunoHistorialItem {
@@ -269,7 +269,7 @@
 .panelAyunoHistorialAcciones {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .panelAyunoHistorialItemFecha {
@@ -295,7 +295,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: var(--dashboard-espacioLg);
     padding: 10px 0;
     user-select: none;
 }

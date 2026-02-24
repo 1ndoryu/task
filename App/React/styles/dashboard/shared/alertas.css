@@ -93,11 +93,11 @@
 }
 
 .alertaToast--info {
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid var(--dashboard-estadoInfo);
 }
 
 .alertaToast--info .alertaToastIcono {
-    color: #3b82f6;
+    color: var(--dashboard-estadoInfo);
 }
 
 /* 
@@ -106,7 +106,7 @@
 .alertaConfirmacionOverlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--dashboard-superposicionOscuro);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -144,13 +144,13 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     flex-shrink: 0;
 }
 
 .alertaConfirmacionIcono--normal {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background-color: rgba(var(--dashboard-acentoRgb), 0.15);
+    color: var(--dashboard-estadoInfo);
 }
 
 .alertaConfirmacionIcono--advertencia {
@@ -164,7 +164,7 @@
 }
 
 .alertaConfirmacionTitulo {
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     margin: 0;
@@ -218,9 +218,9 @@
  * VARIANTES DE BOTON ACEPTAR 
  */
 .alertaConfirmacionBoton--normal:hover {
-    background-color: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.4);
-    color: #3b82f6;
+    background-color: rgba(var(--dashboard-acentoRgb), 0.2);
+    border-color: rgba(var(--dashboard-acentoRgb), 0.4);
+    color: var(--dashboard-estadoInfo);
 }
 
 .alertaConfirmacionBoton--advertencia:hover {
@@ -236,6 +236,6 @@
 }
 
 .alertaConfirmacionBoton--peligro:hover {
-    background-color: rgba(239, 68, 68, 0.25);
-    border-color: rgba(239, 68, 68, 0.5);
+    background-color: rgba(var(--dashboard-estadoErrorRgb), 0.25);
+    border-color: rgba(var(--dashboard-estadoErrorRgb), 0.5);
 }

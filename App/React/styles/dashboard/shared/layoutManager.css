@@ -79,7 +79,7 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-left: none;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 var(--dashboard-radioSm) var(--dashboard-radioSm) 0;
     padding: var(--dashboard-espacioXs);
 }
 
@@ -97,7 +97,7 @@
     height: 28px;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
@@ -163,7 +163,7 @@
     padding: 0;
     background: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     flex-shrink: 0;
@@ -193,7 +193,7 @@
     padding: var(--dashboard-espacioMd) var(--dashboard-espacioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
@@ -231,7 +231,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .configLayoutPanelInfo {
@@ -252,7 +252,7 @@
 .configLayoutPanelTexto {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .configLayoutPanelNombre {
@@ -282,7 +282,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
@@ -305,7 +305,7 @@
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     background: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;

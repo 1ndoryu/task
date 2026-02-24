@@ -69,8 +69,8 @@
     color: var(--dashboard-textoMuyApagado);
     cursor: pointer;
     display: flex;
-    padding: 2px;
-    border-radius: 50%;
+    padding: var(--dashboard-espacioXxs);
+    border-radius: var(--dashboard-radioCirculo);
 }
 
 .buscadorLimpiar:hover {

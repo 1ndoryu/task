@@ -138,7 +138,7 @@
     padding: 0;
     width: 26px;
     height: 26px;
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-weight: 500;
     color: var(--dashboard-textoApagado);
@@ -168,7 +168,7 @@
     width: auto;
     height: auto;
     min-height: unset;
-    padding: 3px;
+    padding: var(--dashboard-espacioMini);
     color: var(--dashboard-textoSecundario);
 }
 
@@ -241,7 +241,7 @@
 
 .boton--compacto {
     padding: 4px 8px;
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .boton--destacado {
@@ -516,7 +516,7 @@
 .select {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    padding-right: 2rem;
+    padding-right: var(--dashboard-espacio2xl);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
     font-family: inherit;
@@ -708,7 +708,7 @@
     height: 1.125rem;
     min-width: 1.125rem;
     border: 2px solid var(--dashboard-bordePrincipal);
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-fondoSecundario);
     transition: all 0.2s ease;
 }
@@ -721,7 +721,7 @@
     content: '';
     width: 0.5rem;
     height: 0.5rem;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-acento);
 }
 

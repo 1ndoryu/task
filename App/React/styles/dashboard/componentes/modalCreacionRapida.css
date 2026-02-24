@@ -55,7 +55,7 @@
 .creacionRapidaIconoSelector {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     margin-right: var(--dashboard-espacioMd);
     cursor: pointer;
     color: var(--dashboard-textoSecundario);

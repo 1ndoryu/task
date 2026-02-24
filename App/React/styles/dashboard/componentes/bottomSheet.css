@@ -53,7 +53,7 @@
     width: 36px;
     height: 4px;
     background: var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     margin: 6px auto 4px;
     flex-shrink: 0;
 }
@@ -117,7 +117,7 @@
     border: none;
     width: 100%;
     text-align: left;
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
     border-radius: var(--dashboard-radioSm);

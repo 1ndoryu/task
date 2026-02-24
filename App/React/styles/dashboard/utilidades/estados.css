@@ -27,7 +27,7 @@
     height: 16px;
     border: 2px solid var(--dashboard-bordePrincipal);
     border-top-color: var(--dashboard-textoSecundario);
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     animation: rotarSpinner 0.8s linear infinite;
 }
 
@@ -58,7 +58,7 @@
     background: linear-gradient(90deg, var(--dashboard-bordePrincipal) 25%, var(--dashboard-fondoHover) 50%, var(--dashboard-bordePrincipal) 75%);
     background-size: 200% 100%;
     animation: brilloSkeleton 1.5s ease-in-out infinite;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
 }
 
 .skeletonCorto {

@@ -59,7 +59,7 @@
 .modalPluginsTexto {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     min-width: 0;
 }
 
@@ -104,7 +104,7 @@
     left: 2px;
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     background: var(--dashboard-textoActivo);
     transition: transform 0.2s ease;
 }
@@ -124,7 +124,7 @@
 .modalPluginsAcciones {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     flex-shrink: 0;
 }
 
@@ -132,12 +132,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
     border: none;
     background: transparent;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     transition: all 0.15s;
 }
 
@@ -150,14 +150,14 @@
 .configDeficitContenido {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--dashboard-espacioLg);
     padding: 4px 0;
 }
 
 .configDeficitSeccion {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .configDeficitSeccionTitulo {
@@ -176,13 +176,13 @@
 .configDeficitCampos {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .configDeficitCampo {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
 }
 
 .configDeficitLabel {
@@ -214,7 +214,7 @@
 
 .configDeficitApiKey {
     display: flex;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     align-items: center;
 }
 
@@ -266,8 +266,8 @@
 .configDeficitAcciones {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    padding-top: 8px;
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 

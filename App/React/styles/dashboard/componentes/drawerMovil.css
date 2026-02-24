@@ -13,7 +13,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dashboard-superposicionOscuro);
     z-index: 998;
     opacity: 0;
     visibility: hidden;
@@ -97,7 +97,7 @@
 .drawerMovilAvatar {
     width: 42px;
     height: 42px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     border: 2px solid var(--dashboard-bordePrincipal);
     flex-shrink: 0;
@@ -106,12 +106,12 @@
 .drawerMovilAvatarInicial {
     width: 42px;
     height: 42px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--dashboard-acento);
-    color: white;
+    color: var(--dashboard-textoSobreAcento);
     font-size: 17px;
     font-weight: 600;
     flex-shrink: 0;
@@ -120,7 +120,7 @@
 .drawerMovilPerfilInfo {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     min-width: 0;
 }
 
@@ -147,14 +147,14 @@
 .drawerMovilPlanBadge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 2px 8px;
     border-radius: var(--dashboard-radioSm);
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-top: 2px;
+    margin-top: var(--dashboard-espacioXxs);
     width: fit-content;
     border: none;
     background: transparent;
@@ -162,13 +162,13 @@
 
 .drawerMovilPlanBadge--premium {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
+    color: var(--dashboard-textoSobreAcento);
 }
 
 .drawerMovilPlanBadge--trial {
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(var(--dashboard-acentoRgb), 0.2);
+    color: var(--dashboard-estadoInfo);
+    border: 1px solid var(--dashboard-estadoInfoBorde);
 }
 
 .drawerMovilPlanBadge--free {
@@ -240,7 +240,7 @@
     width: 3px;
     height: 24px;
     background: var(--dashboard-acento);
-    border-radius: 0 2px 2px 0;
+    border-radius: 0 var(--dashboard-radioXs) var(--dashboard-radioXs) 0;
 }
 
 .drawerMovilItem--peligro {
@@ -286,8 +286,8 @@
     height: 20px;
     padding: 0 6px;
     background: var(--dashboard-estadoAlta);
-    color: white;
-    font-size: 11px;
+    color: var(--dashboard-textoSobreAcento);
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 600;
     border-radius: 10px;
 }

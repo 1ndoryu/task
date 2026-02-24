@@ -13,7 +13,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1rem;
+    margin-bottom: var(--dashboard-espacioLg);
     position: relative;
     z-index: 100;
 }
@@ -51,7 +51,7 @@
 }
 
 .encabezadoEnlace:hover {
-    color: white;
+    color: var(--dashboard-textoSobreAcento);
 }
 
 /* 
@@ -108,7 +108,7 @@
 .avatarEncabezado {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     object-fit: cover;
     border: 1px solid var(--dashboard-bordePrincipal);
 }
@@ -116,13 +116,13 @@
 .avatarEncabezadoInicial {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: var(--dashboard-fondoHover);
     color: var(--dashboard-textoSecundario);
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 600;
     border: 1px solid var(--dashboard-bordePrincipal);
 }
@@ -159,7 +159,7 @@
 /* Reducir tamaÃ±o de tÃ­tulo en mÃ³vil (-2px) */
 @media (max-width: 480px) {
     .seccionTitulo {
-        font-size: 12px;
+        font-size: var(--dashboard-tamanoMovilPequeno);
     }
 }
 
@@ -197,7 +197,7 @@
 }
 
 .seccionBoton:hover {
-    color: white;
+    color: var(--dashboard-textoSobreAcento);
 }
 
 /* 
@@ -219,7 +219,7 @@
  * FOOTER 
  */
 .dashboardFooter {
-    margin-top: 2rem;
+    margin-top: var(--dashboard-espacio2xl);
     text-align: center;
     color: var(--dashboard-textoPlaceholder);
     border-top: 1px solid var(--dashboard-bordePrincipal);
@@ -234,7 +234,7 @@
     align-items: center;
     gap: var(--dashboard-espacioXs);
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
@@ -245,19 +245,19 @@
 .estadoConexion__punto {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     animation: parpadeo 2s ease-in-out infinite;
 }
 
 .estadoConexion--conectado {
-    background-color: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    color: var(--dashboard-estadoExito);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
 }
 
 .estadoConexion--conectado .estadoConexion__punto {
-    background-color: #22c55e;
-    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+    background-color: var(--dashboard-estadoExito);
+    box-shadow: 0 0 6px rgba(var(--dashboard-estadoExitoRgb), 0.6);
 }
 
 .estadoConexion--local {

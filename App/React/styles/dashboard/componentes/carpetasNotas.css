@@ -187,7 +187,7 @@
     color: var(--dashboard-textoMuyApagado);
     background: var(--dashboard-fondoHover);
     padding: 2px 6px;
-    border-radius: 99px;
+    border-radius: var(--dashboard-radioPildora);
     min-width: 18px;
     text-align: center;
 }
@@ -203,7 +203,7 @@
 /* Acciones de carpeta (editar, eliminar) */
 .navegadorCarpetaAcciones {
     display: none;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     padding-right: var(--dashboard-espacioXs);
 }
 
@@ -275,7 +275,7 @@
 .menuMoverACarpeta {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     padding: var(--dashboard-espacioXs);
     min-width: 150px;
 }

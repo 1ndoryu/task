@@ -71,20 +71,20 @@
 .detalleAvatar {
     width: 48px;
     height: 48px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 2px solid var(--dashboard-bordePrincipal);
 }
 
 .detalleNombre {
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--dashboard-tamanoNormal);
     color: var(--dashboard-textoActivo);
 }
 
 .detalleEmail {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
 }
@@ -98,7 +98,7 @@
     border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
     color: var(--dashboard-textoSecundario);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
     transition: var(--dashboard-transicionRapida);
 }
@@ -155,7 +155,7 @@
 .detalleValor {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     color: var(--dashboard-textoNormal);
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -163,15 +163,15 @@
 
 .detallePlan {
     padding: 2px 8px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 500;
 }
 
 .detallePlan.premium {
-    background: rgba(251, 191, 36, 0.1);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(var(--dashboard-estadoDestacadoRgb), 0.1);
+    color: var(--dashboard-estadoDestacado);
+    border: 1px solid rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
 }
 
 .detallePlan.free {
@@ -182,7 +182,7 @@
 
 .detalleEstado {
     padding: 2px 8px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-size: var(--dashboard-tamanoPequeno);
 }
 
@@ -191,7 +191,7 @@
 }
 
 .detalleEstado.trial {
-    color: #3b82f6;
+    color: var(--dashboard-estadoInfo);
 }
 
 .detalleEstado.expirada {
@@ -221,7 +221,7 @@
     padding: var(--dashboard-espacioMd);
     background: var(--dashboard-fondoHover);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
 }
 
 .estadisticaTarjeta svg {
@@ -245,7 +245,7 @@
  */
 .detalleCifrado {
     padding: 2px 8px;
-    border-radius: 3px;
+    border-radius: var(--dashboard-radioMini);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
 }
@@ -287,7 +287,7 @@
     padding: var(--dashboard-espacioSm);
     background: var(--dashboard-fondoHover);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoNormal);
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -301,7 +301,7 @@
     padding: var(--dashboard-espacioSm);
     background: var(--dashboard-fondoHover);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoBase);
 }
@@ -327,7 +327,7 @@
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
@@ -337,7 +337,7 @@
 
 .accionActivar {
     color: var(--dashboard-estadoExito);
-    border-color: rgba(34, 197, 94, 0.3);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.3);
 }
 
 .accionActivar:hover {
@@ -347,7 +347,7 @@
 
 .accionCancelar {
     color: var(--dashboard-estadoAlta);
-    border-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(var(--dashboard-estadoErrorRgb), 0.3);
 }
 
 .accionCancelar:hover {
@@ -356,13 +356,13 @@
 }
 
 .accionExtender {
-    color: #3b82f6;
-    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--dashboard-estadoInfo);
+    border-color: rgba(var(--dashboard-acentoRgb), 0.3);
 }
 
 .accionExtender:hover {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: #3b82f6;
+    background: var(--dashboard-estadoInfoFondo);
+    border-color: var(--dashboard-estadoInfo);
 }
 
 /* 

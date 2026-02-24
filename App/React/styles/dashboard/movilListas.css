@@ -101,7 +101,7 @@
      * Desktop usa --dashboard-tamanoPequeno (10px), móvil usa 11px
      */
     .tablaFilaCompacta .filaNombre {
-        font-size: 11px;
+        font-size: var(--dashboard-tamanoPequeno);
         line-height: 1.4;
     }
 
@@ -110,7 +110,7 @@
      * Desktop usa --dashboard-tamanoPequeno (10px), móvil usa 11px
      */
     .tareaTexto--compacto {
-        font-size: 11px;
+        font-size: var(--dashboard-tamanoPequeno);
     }
 
     /* Badges mas compactos */
@@ -127,7 +127,7 @@
     /* Contenedor de racha mas compacto */
     .tablaFilaCompacta .rachaContenedor {
         padding: 2px 6px;
-        gap: 2px;
+        gap: var(--dashboard-espacioXxs);
     }
 
     .tablaFilaCompacta .rachaIcono,
@@ -142,7 +142,7 @@
 
     /* Historial inline mas compacto */
     .tablaFilaCompacta .historialHabitoInline {
-        gap: 2px;
+        gap: var(--dashboard-espacioXxs);
     }
 
     .tablaFilaCompacta .historialDia {
@@ -181,8 +181,8 @@
     }
 
     .tablaFilaCompacta {
-        padding-top: 4px;
-        padding-bottom: 4px;
+        padding-top: var(--dashboard-espacioXs);
+        padding-bottom: var(--dashboard-espacioXs);
         min-height: 36px;
     }
 
@@ -193,7 +193,7 @@
 
     .rachaContenedor {
         padding: 1px 4px;
-        gap: 2px;
+        gap: var(--dashboard-espacioXxs);
     }
 
     /*

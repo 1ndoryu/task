@@ -173,7 +173,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     border: 1px solid var(--dashboard-bordeSutil);
     padding: 2px var(--dashboard-espacioSm);
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     background-color: var(--dashboard-fondoPrincipal);
 }
 
@@ -210,9 +210,9 @@
 .formularioBotonGuardar {
     flex: 1;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    color: #22c55e;
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     cursor: pointer;
@@ -220,8 +220,8 @@
 }
 
 .formularioBotonGuardar:hover:not(:disabled) {
-    background-color: rgba(34, 197, 94, 0.25);
-    border-color: rgba(34, 197, 94, 0.6);
+    background-color: rgba(var(--dashboard-exitoRgb), 0.25);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.6);
 }
 
 .formularioBotonGuardar:disabled,

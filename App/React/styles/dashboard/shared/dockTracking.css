@@ -47,7 +47,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 6px 12px;
-    gap: 12px;
+    gap: var(--dashboard-espacioMd);
     min-height: 36px;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .dockTrackingNombre {
-    font-size: 12px;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     color: var(--dashboard-textoNormal);
     white-space: nowrap;
     overflow: hidden;
@@ -78,12 +78,12 @@
 .dockTrackingTimer {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     flex-shrink: 0;
 }
 
 .dockTrackingTiempo {
-    font-size: 13px;
+    font-size: var(--dashboard-tamanoBase);
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
     color: var(--dashboard-textoActivo);
     letter-spacing: 0.5px;
@@ -101,7 +101,7 @@
 .dockTrackingAcciones {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     flex-shrink: 0;
 }
 
@@ -112,7 +112,7 @@
     width: 28px;
     height: 28px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--dashboard-radioSm);
     background: transparent;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;

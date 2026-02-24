@@ -6,13 +6,13 @@
 .accionesItem {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     flex-shrink: 0;
     margin-left: var(--dashboard-espacioSm);
 }
 
 .accionesItem .botonIcono {
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
     background: transparent;
     border: none;
     color: var(--dashboard-textoApagado);
@@ -34,5 +34,5 @@
 }
 
 .accionesItem .botonIcono.botonPeligro:hover {
-    background-color: rgba(239, 68, 68, 0.1);
+    background-color: rgba(var(--dashboard-estadoErrorRgb), 0.1);
 }

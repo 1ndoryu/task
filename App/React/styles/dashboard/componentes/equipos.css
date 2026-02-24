@@ -124,7 +124,7 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     font-weight: 600;
 }
 
@@ -171,7 +171,7 @@
     height: 24px;
     border: 2px solid var(--dashboard-bordePrincipal);
     border-top-color: var(--dashboard-textoSecundario);
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     animation: equiposGiro 0.8s linear infinite;
 }
 
@@ -298,7 +298,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .solicitudNombre,
@@ -331,7 +331,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     flex-shrink: 0;
 }
 
@@ -342,7 +342,7 @@
 }
 
 .solicitudEstado {
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     padding: 2px 4px;
     border-radius: var(--dashboard-radioSm);
     font-weight: 500;
@@ -370,7 +370,7 @@
 .companeroBoton {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: var(--dashboard-espacioXs);
     background: transparent;
     border: 1px solid var(--dashboard-bordePrincipal);

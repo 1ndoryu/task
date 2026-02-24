@@ -14,10 +14,10 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     color: var(--dashboard-textoApagado);
-    font-size: 0.6rem;
+    font-size: var(--dashboard-tamanoMicro);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding-bottom: 0px;
+    padding-bottom: 0;
 }
 
 .seccionPanelIcono {

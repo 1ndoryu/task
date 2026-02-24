@@ -60,7 +60,7 @@
 .bottomSheetCreacion__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 /* Botón de acción (icono 16px) */
@@ -273,7 +273,7 @@
 .bottomSheetHabito__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .bottomSheetHabito__accion {
@@ -378,7 +378,7 @@
 .bottomSheetProyecto__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 .bottomSheetProyecto__accion {
@@ -443,7 +443,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dashboard-superposicionOscuro);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -542,7 +542,7 @@
 
 .modalSeleccionPropiedad__opcion--peligroso:hover {
     color: var(--dashboard-estadoMuyAlta);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
 }
 
 .modalSeleccionPropiedad__opcionIcono {
@@ -558,7 +558,7 @@
 }
 
 .modalSeleccionPropiedad__opcionDescripcion {
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     color: var(--dashboard-textoApagado);
     margin-left: auto;
 }
@@ -575,9 +575,9 @@
 .badgesPropiedad__badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     padding: 3px 8px;
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoNormal);
     background: transparent;

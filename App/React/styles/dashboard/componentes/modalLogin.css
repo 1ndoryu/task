@@ -25,7 +25,7 @@
     padding: var(--dashboard-espacioMd);
     font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
-    border-radius: var(--dashboard-radioBorde);
+    border-radius: var(--dashboard-radioMd);
     cursor: pointer;
     transition: all 0.2s ease;
     text-transform: uppercase;
@@ -40,7 +40,7 @@
 }
 
 .botonPrimario:hover:not(:disabled) {
-    background-color: #fff;
+    background-color: var(--dashboard-textoSobreAcento);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
     transform: translateY(-1px);
 }
@@ -65,7 +65,7 @@
 .botonSecundario:hover:not(:disabled) {
     border-color: var(--dashboard-textoActivo);
     color: var(--dashboard-textoActivo);
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--dashboard-superposicionMuyClara);
 }
 
 .botonGoogle {
@@ -75,11 +75,11 @@
 }
 
 .loginError {
-    background: rgba(220, 38, 38, 0.1);
-    border: 1px solid rgba(220, 38, 38, 0.3);
-    color: #ef4444;
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.3);
+    color: var(--dashboard-estadoAlta);
     padding: var(--dashboard-espacioMd);
-    border-radius: var(--dashboard-radioBorde);
+    border-radius: var(--dashboard-radioMd);
     margin-bottom: var(--dashboard-espacioLg);
     display: flex;
     align-items: center;
@@ -137,7 +137,7 @@
 .mensajeRecuperar {
     padding: var(--dashboard-espacioMd);
     font-size: var(--dashboard-tamanoPequeno);
-    border-radius: var(--dashboard-radioBorde);
+    border-radius: var(--dashboard-radioMd);
 }
 
 .mensajeRecuperar--exito {
