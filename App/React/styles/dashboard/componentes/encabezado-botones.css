@@ -37,7 +37,7 @@
 .badgeEncabezado--admin:hover {
     background: rgba(var(--dashboard-violetaRgb), 0.2);
     border-color: rgba(var(--dashboard-violetaRgb), 0.5);
-    color: #c4b5fd;
+    color: var(--dashboard-violetaPalido);
     transform: translateY(-1px);
 }
 
@@ -230,7 +230,7 @@
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--dashboard-superposicionFuerte);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: flex-start;

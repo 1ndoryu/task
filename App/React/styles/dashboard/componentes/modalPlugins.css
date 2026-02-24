@@ -225,7 +225,7 @@
 .configDeficitBotonOjo {
     display: flex;
     align-items: center;
-    padding: 6px;
+    padding: var(--dashboard-espacioS);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
     background: transparent;

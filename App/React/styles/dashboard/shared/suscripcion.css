@@ -360,7 +360,7 @@
 }
 
 .modalUpgrade__planPrecio {
-    font-size: 1.25rem;
+    font-size: var(--dashboard-tamanoEncabezado);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
 }
@@ -379,7 +379,7 @@
     background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
     border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.3);
     border-radius: var(--dashboard-radioSm);
-    color: #f87171;
+    color: var(--dashboard-peligroClaro);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
 }

@@ -48,11 +48,11 @@
 }
 
 .input--conIcono {
-    padding-left: 2.5rem;
+    padding-left: var(--dashboard-espacioXxl);
 }
 
 .input--conIconoDerecha {
-    padding-right: 2.5rem;
+    padding-right: var(--dashboard-espacioXxl);
 }
 
 .input--error {
@@ -216,7 +216,7 @@
 }
 
 .select--conIcono {
-    padding-left: 2.5rem;
+    padding-left: var(--dashboard-espacioXxl);
 }
 
 .select--error {
