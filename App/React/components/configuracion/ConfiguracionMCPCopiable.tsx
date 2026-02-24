@@ -6,6 +6,7 @@
 
 import {useState, useCallback} from 'react';
 import {Copy, Check} from 'lucide-react';
+import {Boton} from '../ui';
 
 interface ConfiguracionMCPCopiableProps {
     titulo: string;

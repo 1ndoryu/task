@@ -6,6 +6,7 @@
 
 import {Folder, FolderPlus, ChevronRight, Trash2, Edit3, Check, X} from 'lucide-react';
 import type {CarpetaNota} from '../../../types/notas';
+import {Boton} from '../../ui/Boton';
 import {Input} from '../../ui/Input';
 import {useNavegadorCarpetas} from '../../../hooks/dashboard/useNavegadorCarpetas';
 
@@ -25,23 +26,24 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
         <div className="navegadorCarpetas">
             <div className="navegadorCarpetasHeader">
                 <h3 className="navegadorCarpetasTitulo">Carpetas</h3>
-                <button className="navegadorCarpetasBotonNueva" onClick={() => setCreando(true)} title="Nueva carpeta" disabled={creando}>
+                <Boton variante="icono" claseAdicional="navegadorCarpetasBotonNueva" onClick={() => setCreando(true)} title="Nueva carpeta" disabled={creando}>
                     <FolderPlus size={14} />
-                </button>
+                </Boton>
             </div>
 
             {/* Formulario crear nueva carpeta */}
             {creando && (
                 <div className="navegadorCarpetasFormulario">
                     <Input tipo="text" claseAdicional="navegadorCarpetasInput" value={nombreNueva} onChange={e => setNombreNueva((e.target as HTMLInputElement).value)} placeholder="Nombre de carpeta" autoFocus onKeyDown={e => e.key === 'Enter' && manejarCrear()} />
-                    <button className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--confirmar" onClick={manejarCrear} disabled={!nombreNueva.trim()}>
+                    <Boton variante="icono" claseAdicional="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--confirmar" onClick={manejarCrear} disabled={!nombreNueva.trim()}>
                         <Check size={12} />
-                    </button>
-                    <button
-                        className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--cancelar"
+                    </Boton>
+                    <Boton
+                        variante="icono"
+                        claseAdicional="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--cancelar"
                         onClick={cancelarCreacion}>
                         <X size={12} />
-                    </button>
+                    </Boton>
                 </div>
             )}
 
@@ -56,32 +58,32 @@ export function NavegadorCarpetas({carpetas, onSeleccionar, onCrear, onRenombrar
                                 /* Modo edición */
                                 <div className="navegadorCarpetasFormulario navegadorCarpetasFormulario--inline">
                                     <Input tipo="text" claseAdicional="navegadorCarpetasInput" value={nombreEditando} onChange={e => setNombreEditando((e.target as HTMLInputElement).value)} autoFocus onKeyDown={e => e.key === 'Enter' && manejarGuardarEdicion()} />
-                                    <button className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--confirmar" onClick={manejarGuardarEdicion}>
+                                    <Boton variante="icono" claseAdicional="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--confirmar" onClick={manejarGuardarEdicion}>
                                         <Check size={12} />
-                                    </button>
-                                    <button className="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--cancelar" onClick={cancelarEdicion}>
+                                    </Boton>
+                                    <Boton variante="icono" claseAdicional="navegadorCarpetasBotonAccion navegadorCarpetasBotonAccion--cancelar" onClick={cancelarEdicion}>
                                         <X size={12} />
-                                    </button>
+                                    </Boton>
                                 </div>
                             ) : (
                                 /* Modo normal */
                                 <>
-                                    <button className="navegadorCarpetaBoton" onClick={() => onSeleccionar(carpeta.id)}>
+                                    <Boton variante="ghost" claseAdicional="navegadorCarpetaBoton" onClick={() => onSeleccionar(carpeta.id)}>
                                         <Folder size={14} className="navegadorCarpetaIcono" />
                                         <span className="navegadorCarpetaNombre">{carpeta.nombre}</span>
                                         <span className="navegadorCarpetaContador">{carpeta.totalNotas}</span>
                                         <ChevronRight size={12} className="navegadorCarpetaFlecha" />
-                                    </button>
+                                    </Boton>
 
                                     {/* Acciones (solo para carpetas no virtuales) */}
                                     {!carpeta.esVirtual && carpeta.id !== null && (
                                         <div className="navegadorCarpetaAcciones">
-                                            <button className="navegadorCarpetaAccionBoton" onClick={() => iniciarEdicion(carpeta)} title="Renombrar">
+                                            <Boton variante="icono" claseAdicional="navegadorCarpetaAccionBoton" onClick={() => iniciarEdicion(carpeta)} title="Renombrar">
                                                 <Edit3 size={12} />
-                                            </button>
-                                            <button className="navegadorCarpetaAccionBoton navegadorCarpetaAccionBoton--peligro" onClick={() => manejarEliminar(carpeta.id!)} title="Eliminar">
+                                            </Boton>
+                                            <Boton variante="icono" claseAdicional="navegadorCarpetaAccionBoton navegadorCarpetaAccionBoton--peligro" onClick={() => manejarEliminar(carpeta.id!)} title="Eliminar">
                                                 <Trash2 size={12} />
-                                            </button>
+                                            </Boton>
                                         </div>
                                     )}
                                 </>

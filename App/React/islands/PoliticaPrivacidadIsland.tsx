@@ -1,4 +1,5 @@
 import '../styles/paginasLegales.css';
+import {GloryLink} from '../../../Glory/assets/react/src/core/router/GloryLink';
 
 interface PoliticaPrivacidadProps {
   titulo?: string;
@@ -189,7 +190,7 @@ export default function PoliticaPrivacidadIsland({ titulo = 'Política de Privac
           <ul className="listaContacto">
             <li><strong>Email:</strong> soporte@nakomi.studio</li>
             <li><strong>Delegado de Protección de Datos:</strong> dpo@nakomi.studio</li>
-            <li><strong>Formulario de solicitudes RGPD:</strong> <a href="/soporte">task.nakomi.studio/soporte</a></li>
+            <li><strong>Formulario de solicitudes RGPD:</strong> <GloryLink href="/soporte">task.nakomi.studio/soporte</GloryLink></li>
           </ul>
         </section>
 

@@ -12,9 +12,10 @@
  * </PullToRefresh>
  */
 
-import {useState, useRef, useCallback, useEffect, type ReactNode} from 'react';
+import type {ReactNode} from 'react';
 import {RefreshCw} from 'lucide-react';
 import '../../styles/dashboard/componentes/pullToRefresh.css';
+import {usePullToRefresh} from '../../hooks/shared/usePullToRefresh';
 
 interface PullToRefreshProps {
     children: ReactNode;
@@ -37,132 +38,24 @@ export function PullToRefresh({
     deshabilitado = false,
     className = ''
 }: PullToRefreshProps): JSX.Element {
-    const [arrastre, setArrastre] = useState(0);
-    const [refrescando, setRefrescando] = useState(false);
-    const [mostrarIndicador, setMostrarIndicador] = useState(false);
-
-    const contenedorRef = useRef<HTMLDivElement>(null);
-    const inicioYRef = useRef<number | null>(null);
-    const arrastrableRef = useRef(false);
-
-    /* Verificar si podemos iniciar el arrastre (solo si estamos en top) */
-    const puedeArrastrar = useCallback((): boolean => {
-        if (deshabilitado || refrescando) return false;
-
-        const contenedor = contenedorRef.current;
-        if (!contenedor) return false;
-
-        /* Solo permitir si el scroll está en la parte superior */
-        return contenedor.scrollTop <= 0;
-    }, [deshabilitado, refrescando]);
-
-    /* Inicio del toque */
-    const manejarTouchStart = useCallback(
-        (evento: React.TouchEvent) => {
-            if (!puedeArrastrar()) {
-                arrastrableRef.current = false;
-                return;
-            }
-
-            inicioYRef.current = evento.touches[0].clientY;
-            arrastrableRef.current = true;
-        },
-        [puedeArrastrar]
-    );
-
-    /* Fin del toque */
-    const manejarTouchEnd = useCallback(async () => {
-        if (!arrastrableRef.current) return;
-
-        arrastrableRef.current = false;
-        inicioYRef.current = null;
-
-        /* Si superamos el umbral, ejecutar refresh */
-        if (arrastre >= umbralRefresh) {
-            setRefrescando(true);
-            setArrastre(umbralRefresh); /* Mantener indicador visible */
-
-            try {
-                await onRefresh();
-            } catch (error) {
-                console.error('[PullToRefresh] Error:', error);
-            } finally {
-                setRefrescando(false);
-                setArrastre(0);
-                setMostrarIndicador(false);
-            }
-        } else {
-            /* Animar vuelta a posición inicial */
-            setArrastre(0);
-            setTimeout(() => setMostrarIndicador(false), 200);
-        }
-    }, [arrastre, umbralRefresh, onRefresh]);
-
-    /* Calcular progreso del arrastre (0-1) */
-    const progreso = Math.min(arrastre / umbralRefresh, 1);
-    const rotacion = progreso * 360;
-    const escala = 0.5 + progreso * 0.5;
-    const iconoListo = arrastre >= umbralRefresh;
-
-    /* Registrar evento touchmove con passive: false para permitir preventDefault */
-    useEffect(() => {
-        const contenedor = contenedorRef.current;
-        if (!contenedor) return;
-
-        const manejadorNativo = (evento: TouchEvent) => {
-            if (!arrastrableRef.current || inicioYRef.current === null) return;
-
-            const deltaY = evento.touches[0].clientY - inicioYRef.current;
-
-            /* Solo arrastrar hacia abajo */
-            if (deltaY < 0) {
-                setArrastre(0);
-                setMostrarIndicador(false);
-                return;
-            }
-
-            /* Limitar el arrastre máximo */
-            const arrastreCalculado = Math.min(deltaY * 0.5, maxArrastre);
-            setArrastre(arrastreCalculado);
-            setMostrarIndicador(arrastreCalculado > 10);
-
-            /* Prevenir scroll mientras arrastramos - ahora funciona sin warning */
-            if (arrastreCalculado > 10) {
-                evento.preventDefault();
-            }
-        };
-
-        contenedor.addEventListener('touchmove', manejadorNativo, {passive: false});
-
-        return () => {
-            contenedor.removeEventListener('touchmove', manejadorNativo);
-        };
-    }, [maxArrastre]);
-
-    /* Clases dinámicas */
-    const clasesContenedor = `pullToRefresh ${arrastre > 0 ? 'pullToRefresh--arrastrando' : ''} ${className}`.trim();
-    const clasesIndicador = `pullToRefresh__indicador ${refrescando ? '' : 'pullToRefresh__indicador--animando'}`.trim();
-    const clasesIcono = `pullToRefresh__icono ${iconoListo ? 'pullToRefresh__icono--listo' : ''} ${refrescando ? 'pullToRefresh__icono--girando' : ''}`.trim();
-    const clasesContenido = `pullToRefresh__contenido ${!arrastrableRef.current ? 'pullToRefresh__contenido--animando' : ''}`.trim();
-
-    /* CSS custom properties para valores dinámicos (transforms) */
-    const estiloIndicador = {
-        '--ptr-translateY': `${arrastre - 40}px`
-    } as React.CSSProperties;
-
-    const estiloIcono = {
-        '--ptr-rotacion': `${rotacion}deg`,
-        '--ptr-escala': escala
-    } as React.CSSProperties;
-
-    const estiloContenido = {
-        '--ptr-contenido-translateY': `${arrastre}px`
-    } as React.CSSProperties;
+    const {
+        mostrarIndicador,
+        contenedorRef,
+        clasesContenedor,
+        clasesIndicador,
+        clasesIcono,
+        clasesContenido,
+        estiloIndicador,
+        estiloIcono,
+        estiloContenido,
+        manejarTouchStart,
+        manejarTouchEnd
+    } = usePullToRefresh({onRefresh, umbralRefresh, maxArrastre, deshabilitado});
 
     return (
         <div
             ref={contenedorRef}
-            className={clasesContenedor}
+            className={`${clasesContenedor} ${className}`.trim()}
             onTouchStart={manejarTouchStart}
             onTouchEnd={manejarTouchEnd}>
             {/* Indicador de refresh */}

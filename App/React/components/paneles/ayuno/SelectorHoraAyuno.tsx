@@ -4,6 +4,7 @@
  */
 
 import {useMemo} from 'react';
+import {Select} from '../../ui';
 
 interface SelectorHoraAyunoProps {
     valor: string;
@@ -46,21 +47,9 @@ export function SelectorHoraAyuno({valor, onChange, intervaloMinutos = 5}: Selec
 
     return (
         <div className="selectorHoraAyuno" aria-label="Selector de hora">
-            <select className="selectorHoraAyunoSelect" value={hh} onChange={e => manejarCambiarHora(e.target.value)} aria-label="Hora">
-                {horas.map(h => (
-                    <option key={h} value={h}>
-                        {h}
-                    </option>
-                ))}
-            </select>
+            <Select claseAdicional="selectorHoraAyunoSelect" value={hh} onChange={e => manejarCambiarHora(e.target.value)} aria-label="Hora" opciones={horas.map(h => ({valor: h, etiqueta: h}))} />
             <span className="selectorHoraAyunoSeparador" aria-hidden="true">:</span>
-            <select className="selectorHoraAyunoSelect" value={mm} onChange={e => manejarCambiarMinuto(e.target.value)} aria-label="Minutos">
-                {minutos.map(m => (
-                    <option key={m} value={m}>
-                        {m}
-                    </option>
-                ))}
-            </select>
+            <Select claseAdicional="selectorHoraAyunoSelect" value={mm} onChange={e => manejarCambiarMinuto(e.target.value)} aria-label="Minutos" opciones={minutos.map(m => ({valor: m, etiqueta: m}))} />
         </div>
     );
 }

@@ -96,10 +96,10 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes = 0,
 
             {/* TO-DO: Mi Equipo (Social) - Habilitar cuando feature esté lista
             {onClickEquipos && estaConectado && (
-                <button type="button" className="botonIconoEncabezado botonIconoEncabezado--equipo" onClick={onClickEquipos} title={esTablet ? undefined : 'Mi Equipo'}>
+                <Boton type="button" claseAdicional="botonIconoEncabezado botonIconoEncabezado--equipo" onClick={onClickEquipos} title={esTablet ? undefined : 'Mi Equipo'}>
                     <Users size={14} />
                     {equiposPendientes > 0 && <span className="botonIconoEncabezado__contador">{equiposPendientes}</span>}
-                </button>
+                </Boton>
             )}
             */}
         </>

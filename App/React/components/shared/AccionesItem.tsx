@@ -5,6 +5,7 @@
  */
 
 import {Settings, Trash2} from 'lucide-react';
+import {Boton} from '../ui';
 import type {ReactNode} from 'react';
 
 interface AccionItemConfig {
@@ -63,9 +64,9 @@ export function AccionesItem({acciones, mostrarConfigurar = false, mostrarElimin
     return (
         <div className={`accionesItem ${className}`.trim()} onClick={e => e.stopPropagation()}>
             {accionesFinales.map(accion => (
-                <button key={accion.id} className={`botonIcono ${accion.peligroso ? 'botonPeligro' : ''}`} onClick={accion.onClick} title={accion.titulo} type="button">
+                <Boton key={accion.id} claseAdicional={`botonIcono ${accion.peligroso ? 'botonPeligro' : ''}`} onClick={accion.onClick} title={accion.titulo} type="button">
                     {accion.icono}
-                </button>
+                </Boton>
             ))}
         </div>
     );

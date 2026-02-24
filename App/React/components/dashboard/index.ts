@@ -26,4 +26,4 @@ export {BuscadorGlobal} from './BuscadorGlobal';
 export {BottomSheetTarea} from './BottomSheetTarea';
 export {BottomSheetHabito} from './BottomSheetHabito';
 export {BottomSheetProyecto} from './BottomSheetProyecto';
-export type {DatosFormulario} from './FormularioHabito';
+export type {DatosFormulario} from '../../hooks/dashboard/useFormularioHabito';

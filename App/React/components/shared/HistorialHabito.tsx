@@ -16,7 +16,7 @@
 
 import type {EstadoHabito} from '../../types/historialHabitos';
 import type {FrecuenciaHabito} from '../../types/dashboard';
-import {esFechaRelevante, esFechaRelevanteConHistorial} from '../../utils/frecuenciaHabitos';
+import {esFechaRelevante, esFechaRelevanteConHistorial} from '../../utils/frecuenciaRelevancia';
 import {obtenerFechaLocalISO, obtenerFechaEfectiva} from '../../utils/fecha';
 
 /* Tipos */

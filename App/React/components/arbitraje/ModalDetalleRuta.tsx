@@ -6,6 +6,7 @@
 
 import type {ModalDetalleRutaProps} from './types/arbitraje.types';
 import {formatearMoneda, formatearNumero} from './utils/arbitraje.utils';
+import {Boton} from '../ui';
 
 export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDetalleRutaProps): JSX.Element {
     /* Calcular pérdidas totales en el proceso de conversión */
@@ -25,9 +26,9 @@ export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDet
                         Desglose Ruta {ruta}
                         <span className="subtituloModal">{ruta === 'A' ? 'USD → Bs → USDT → PayPal' : 'USD → Bs → PayPal directo'}</span>
                     </h3>
-                    <button className="botonCerrarModal" onClick={onCerrar} aria-label="Cerrar">
+                    <Boton claseAdicional="botonCerrarModal" onClick={onCerrar} aria-label="Cerrar">
                         ✕
-                    </button>
+                    </Boton>
                 </header>
 
                 <div className="cuerpoModal">

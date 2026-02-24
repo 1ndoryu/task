@@ -1,9 +1,8 @@
-import {useEffect} from 'react';
 import {Modal} from '../shared/Modal';
 import {MensajeBloquePremium} from '../shared/MensajeBloquePremium';
-import {useBackups} from '../../hooks/dashboard/useBackups';
-import {useSuscripcionStore} from '../../stores/suscripcionStore';
+import {useModalHistorialBackups} from '../../hooks/dashboard/useModalHistorialBackups';
 import {RotateCcw, ShieldCheck, AlertTriangle, Database, Trash2} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 
 interface ModalHistorialBackupsProps {
     estaAbierto: boolean;
@@ -12,50 +11,7 @@ interface ModalHistorialBackupsProps {
 }
 
 export function ModalHistorialBackups({estaAbierto, onCerrar, onAbrirUpgrade}: ModalHistorialBackupsProps) {
-    const {backups, cargando, error, obtenerBackups, restaurarBackup, eliminarBackup} = useBackups();
-    const esPremium = useSuscripcionStore(s => s.esPremium());
-
-    useEffect(() => {
-        if (estaAbierto && esPremium) {
-            obtenerBackups();
-        }
-    }, [estaAbierto, obtenerBackups, esPremium]);
-
-    const handleRestaurar = async (id: string) => {
-        if (window.confirm('¿ESTÁS SEGURO? Esto restaurará tus datos al estado de esta copia. Cualquier cambio no guardado se perderá.')) {
-            await restaurarBackup(id);
-        }
-    };
-
-    const handleEliminar = async (id: string) => {
-        if (window.confirm('¿Eliminar esta copia? Esta acción no se puede deshacer.')) {
-            await eliminarBackup(id);
-        }
-    };
-
-    const formatBytes = (bytes: number) => {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-
-    const formatDate = (timestamp: number) => {
-        if (!timestamp) return 'Fecha desconocida';
-        return new Date(timestamp).toLocaleString('es-ES', {
-            dateStyle: 'medium',
-            timeStyle: 'medium'
-        });
-    };
-
-    const formatTrigger = (trigger: string) => {
-        if (!trigger) return '';
-        if (trigger === 'sync') return 'Sincronización';
-        if (trigger === 'manual' || trigger === 'manual_save') return 'Manual';
-        if (trigger === 'auto' || trigger === 'auto_save') return 'Automática';
-        return trigger;
-    };
+    const {backups, cargando, error, esPremium, handleRestaurar, handleEliminar, formatBytes, formatDate, formatTrigger} = useModalHistorialBackups({estaAbierto});
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Copias de Seguridad">
@@ -104,14 +60,14 @@ export function ModalHistorialBackups({estaAbierto, onCerrar, onAbrirUpgrade}: M
                                             </div>
                                         </div>
                                         <div className="accionesBackup">
-                                            <button className="botonRestaurar" onClick={() => handleRestaurar(backup.id)} title="Restaurar esta versión">
+                                            <Boton claseAdicional="botonRestaurar" onClick={() => handleRestaurar(backup.id)} title="Restaurar esta versión">
                                                 <RotateCcw size={14} />
                                                 <span>Restaurar</span>
-                                            </button>
-                                            <button className="botonEliminar" onClick={() => handleEliminar(backup.id)} title="Eliminar esta copia">
+                                            </Boton>
+                                            <Boton claseAdicional="botonEliminar" onClick={() => handleEliminar(backup.id)} title="Eliminar esta copia">
                                                 <Trash2 size={14} />
                                                 <span>Eliminar</span>
-                                            </button>
+                                            </Boton>
                                         </div>
                                     </div>
                                 ))}

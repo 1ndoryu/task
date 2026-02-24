@@ -3,11 +3,11 @@
  * Modal minimalista para preguntar la hora de la última comida antes de iniciar un ayuno.
  */
 
-import {useEffect, useMemo, useState} from 'react';
 import {Play} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
 import {SelectorRelojCircular} from './SelectorRelojCircular';
 import {Boton} from '../../ui';
+import {useModalUltimaComida} from '../../../hooks/paneles/useModalUltimaComida';
 
 interface ModalUltimaComidaProps {
     estaAbierto: boolean;
@@ -15,53 +15,8 @@ interface ModalUltimaComidaProps {
     onConfirmar: (horaUltimaComidaMs: number | undefined) => void;
 }
 
-function formatearHoraParaInput(fecha: Date): string {
-    const h = fecha.getHours().toString().padStart(2, '0');
-    const m = fecha.getMinutes().toString().padStart(2, '0');
-    return `${h}:${m}`;
-}
-
-function convertirHoraInputATimestamp(hora: string, ahora: Date): number {
-    const [hhStr, mmStr] = hora.split(':');
-    const hh = Number(hhStr);
-    const mm = Number(mmStr);
-
-    const candidato = new Date(ahora);
-    candidato.setSeconds(0);
-    candidato.setMilliseconds(0);
-    candidato.setHours(hh, mm, 0, 0);
-
-    /* Si la hora cae en el futuro, asumir que fue el día anterior */
-    if (candidato.getTime() > ahora.getTime()) {
-        candidato.setDate(candidato.getDate() - 1);
-    }
-
-    return candidato.getTime();
-}
-
 export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUltimaComidaProps): JSX.Element | null {
-    const valorPorDefecto = useMemo(() => formatearHoraParaInput(new Date()), []);
-    const [hora, setHora] = useState(valorPorDefecto);
-
-    useEffect(() => {
-        if (!estaAbierto) return;
-        setHora(formatearHoraParaInput(new Date()));
-    }, [estaAbierto]);
-
-    /* Calcular si la hora seleccionada se interpreta como hoy o ayer */
-    const fechaInterpretada = useMemo(() => {
-        if (!hora) return null;
-        const ahora = new Date();
-        const ts = convertirHoraInputATimestamp(hora, ahora);
-        return new Date(ts);
-    }, [hora]);
-
-    const etiquetaDia = useMemo(() => {
-        if (!fechaInterpretada) return '';
-        const ahora = new Date();
-        const esHoy = fechaInterpretada.getDate() === ahora.getDate();
-        return esHoy ? 'Hoy' : 'Ayer';
-    }, [fechaInterpretada]);
+    const {hora, setHora, etiquetaDia, manejarConfirmar} = useModalUltimaComida({estaAbierto, onConfirmar, onCerrar});
 
     if (!estaAbierto) return null;
 
@@ -86,12 +41,7 @@ export function ModalUltimaComida({estaAbierto, onCerrar, onConfirmar}: ModalUlt
                     <Boton
                         type="button"
                         variante="primario"
-                        onClick={() => {
-                            const ahora = new Date();
-                            const ts = hora ? convertirHoraInputATimestamp(hora, ahora) : undefined;
-                            onConfirmar(ts);
-                            onCerrar();
-                        }}
+                        onClick={manejarConfirmar}
                         title="Iniciar ayuno">
                         <Play size={14} />
                         <span>Iniciar</span>

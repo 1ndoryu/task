@@ -11,7 +11,7 @@
 
 import {useState, useCallback, useEffect} from 'react';
 import {Check, Plus, Trash2, Flag} from 'lucide-react';
-import {Boton} from '../../ui';
+import {Boton, Input} from '../../ui';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Tarea, DatosEdicionTarea, NivelImportancia, NivelPrioridad} from '../../../types/dashboard';
@@ -205,9 +205,9 @@ export function ListaTareasHabito({tareas, habitoId, onToggleTarea, onCrearTarea
                         e.preventDefault();
                         manejarCrearTarea();
                     }}>
-                    <input
-                        type="text"
-                        className="listaTareasHabito__input"
+                    <Input
+                        tipo="text"
+                        claseAdicional="listaTareasHabito__input"
                         placeholder="Leer un libro..."
                         value={textoNuevaTarea}
                         onChange={e => setTextoNuevaTarea(e.target.value)}

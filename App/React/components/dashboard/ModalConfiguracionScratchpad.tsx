@@ -4,6 +4,7 @@
  */
 
 import {Modal} from '../shared/Modal';
+import {Select} from '../ui';
 import type {ConfiguracionScratchpad, TamanoFuente, AlturaScratchpad} from '../../hooks/useConfiguracionScratchpad';
 
 interface ModalConfiguracionScratchpadProps {
@@ -26,11 +27,7 @@ export function ModalConfiguracionScratchpad({estaAbierto, onCerrar, configuraci
                         <span className="descripcionOpcionConfig">Ajustar legibilidad del texto</span>
                     </div>
                     {/* Reutilizamos selectOpcionConfig si existe, o definimos inline si es critico */}
-                    <select className="selectOpcionConfig" value={configuracion.tamanoFuente} onChange={e => onCambiarFuente(e.target.value as TamanoFuente)}>
-                        <option value="pequeno">Pequeño</option>
-                        <option value="normal">Normal</option>
-                        <option value="grande">Grande</option>
-                    </select>
+                    <Select claseAdicional="selectOpcionConfig" value={configuracion.tamanoFuente} onChange={e => onCambiarFuente(e.target.value as TamanoFuente)} opciones={[{valor: 'pequeno', etiqueta: 'Pequeño'}, {valor: 'normal', etiqueta: 'Normal'}, {valor: 'grande', etiqueta: 'Grande'}]} />
                 </div>
 
                 <div className="separadorOpcionesConfig" />
@@ -41,11 +38,7 @@ export function ModalConfiguracionScratchpad({estaAbierto, onCerrar, configuraci
                         <span className="tituloOpcionConfig">Auto-guardado</span>
                         <span className="descripcionOpcionConfig">Tiempo de espera antes de guardar</span>
                     </div>
-                    <select className="selectOpcionConfig" value={configuracion.autoGuardadoIntervalo} onChange={e => onCambiarIntervalo(Number(e.target.value))}>
-                        <option value={500}>Rápido (0.5s)</option>
-                        <option value={1500}>Normal (1.5s)</option>
-                        <option value={3000}>Relax (3s)</option>
-                    </select>
+                    <Select claseAdicional="selectOpcionConfig" value={configuracion.autoGuardadoIntervalo} onChange={e => onCambiarIntervalo(Number(e.target.value))} opciones={[{valor: 500, etiqueta: 'Rápido (0.5s)'}, {valor: 1500, etiqueta: 'Normal (1.5s)'}, {valor: 3000, etiqueta: 'Relax (3s)'}]} />
                 </div>
             </div>
         </Modal>

@@ -6,7 +6,7 @@
 
 import {useState, useCallback, useEffect} from 'react';
 import {Check, Plus, Trash2, Flag} from 'lucide-react';
-import {Boton} from '../../ui';
+import {Boton, Input} from '../../ui';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import type {Tarea, DatosEdicionTarea, NivelPrioridad} from '../../../types/dashboard';
@@ -62,9 +62,8 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
                 {
                     /* Badge de Prioridad - Estilo Panel Ejecucion (Texto) */
                     p && p !== 'media' && (
-                        <button
-                            type="button"
-                            className={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
+                        <Boton
+                            claseAdicional={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
                             style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}
                             title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
                             onClick={e => {
@@ -72,7 +71,7 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
                                 onMenuPrioridad(e, tarea.id);
                             }}>
                             <span className="badgeInfoTexto">{ETIQUETAS_PRIORIDAD[p].toUpperCase()}</span>
-                        </button>
+                        </Boton>
                     )
                 }
             </div>
@@ -191,9 +190,9 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
                         e.preventDefault();
                         manejarCrearTarea();
                     }}>
-                    <input
-                        type="text"
-                        className="listaTareasHabito__input"
+                    <Input
+                        tipo="text"
+                        claseAdicional="listaTareasHabito__input"
                         placeholder="Nueva subtarea..."
                         value={textoNuevaTarea}
                         onChange={e => setTextoNuevaTarea(e.target.value)}

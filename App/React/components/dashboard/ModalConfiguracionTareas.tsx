@@ -4,6 +4,7 @@
  */
 
 import {Modal} from '../shared/Modal';
+import {Select} from '../ui';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import type {ConfiguracionTareas} from '../../hooks/useConfiguracionTareas';
 import {useGruposTareasStore, type OrdenamientoGrupos} from '../../stores/gruposTareasStore';
@@ -116,17 +117,12 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                                 <span className="tituloOpcionConfig">Ordenar secciones por</span>
                                 <span className="descripcionOpcionConfig">Criterio para ordenar las secciones entre sí</span>
                             </div>
-                            <select
-                                className="selectorOrdenamiento"
+                            <Select
+                                claseAdicional="selectorOrdenamiento"
                                 value={ordenamientoGrupos}
                                 onChange={e => setOrdenamientoGrupos(e.target.value as OrdenamientoGrupos)}
-                            >
-                                {opcionesOrdenamiento.map(op => (
-                                    <option key={op.valor} value={op.valor}>
-                                        {op.etiqueta}
-                                    </option>
-                                ))}
-                            </select>
+                                opciones={opcionesOrdenamiento}
+                            />
                         </div>
                     </>
                 )}

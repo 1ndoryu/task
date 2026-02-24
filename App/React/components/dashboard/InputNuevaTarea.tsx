@@ -11,6 +11,7 @@
 import {useState, useCallback, useRef, type KeyboardEvent, type ChangeEvent} from 'react';
 import {Check} from 'lucide-react';
 import type {DatosEdicionTarea} from '../../types/dashboard';
+import {Input, Boton} from '../ui';
 
 interface InputNuevaTareaProps {
     onCrear: (datos: DatosEdicionTarea) => void;
@@ -68,11 +69,11 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear}: InputNuevaTareaPro
                     + Añadir
                 </span>
             )}
-            <input
+            <Input
                 id="input-nueva-tarea-global"
                 ref={inputRef}
-                type="text"
-                className={`tareaNuevoInlineInput ${enfocado || tieneTexto ? '' : 'tareaNuevoInlineInputOculto'}`}
+                tipo="text"
+                claseAdicional={`tareaNuevoInlineInput ${enfocado || tieneTexto ? '' : 'tareaNuevoInlineInputOculto'}`}
                 placeholder="Escribe una tarea..."
                 value={texto}
                 onChange={manejarCambioTexto}
@@ -87,9 +88,9 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear}: InputNuevaTareaPro
                 }}
             />
             {tieneTexto && (
-                <button className="tareaNuevoInlineConfirmar" onClick={manejarEnvio} title="Crear tarea (Enter)">
+                <Boton claseAdicional="tareaNuevoInlineConfirmar" onClick={manejarEnvio} title="Crear tarea (Enter)">
                     <Check size={12} />
-                </button>
+                </Boton>
             )}
         </div>
     );

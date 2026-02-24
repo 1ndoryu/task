@@ -9,7 +9,7 @@ import {useRef, useState} from 'react';
 import {Upload, Loader2, AlertTriangle} from 'lucide-react';
 import type {Adjunto} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 
 import {useAudioPlayer} from '../../hooks/shared/useAudioPlayer';
 import {useAdjuntosCifrados} from '../../hooks/adjuntos/useAdjuntosCifrados';
@@ -119,8 +119,8 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     )}
                 </div>
 
-                <input
-                    type="file"
+                <Input
+                    tipo="file"
                     ref={fileInputRef}
                     style={{display: 'none'}}
                     onChange={e => {
@@ -172,8 +172,8 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                     </div>
                 </div>
             )}
-            <input
-                type="file"
+            <Input
+                tipo="file"
                 ref={fileInputRef}
                 style={{display: 'none'}}
                 onChange={e => {

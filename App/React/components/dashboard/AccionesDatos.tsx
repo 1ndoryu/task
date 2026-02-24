@@ -5,7 +5,7 @@
  */
 
 import {useRef} from 'react';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 
 interface AccionesDatosProps {
     onExportar: () => void;
@@ -45,7 +45,7 @@ export function AccionesDatos({onExportar, onImportar, importando, mensajeEstado
                     Importar
                 </Boton>
 
-                <input ref={inputArchivoRef} type="file" accept=".json" onChange={manejarCambioArchivo} className="inputArchivoOculto" />
+                <Input ref={inputArchivoRef} tipo="file" accept=".json" onChange={manejarCambioArchivo} claseAdicional="inputArchivoOculto" />
             </div>
 
             {mensajeEstado && <div className={`mensajeEstadoDatos mensaje${tipoMensaje === 'exito' ? 'Exito' : 'Error'}`}>{mensajeEstado}</div>}

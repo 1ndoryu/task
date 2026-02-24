@@ -2,24 +2,21 @@
  * FormularioHabito
  * Formulario para crear/editar un habito
  * Responsabilidad unica: capturar datos del habito con validacion
+ * Lógica delegada a useFormularioHabito.
  */
 
-import {useState, useCallback} from 'react';
 import {Plus, Tag} from 'lucide-react';
-import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito} from '../../types/dashboard';
-import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
+import type {NivelImportancia, DatosNuevoHabito} from '../../types/dashboard';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
 import {AccionesFormulario, SeccionPanel, SelectorNivel} from '../shared';
 import {Boton, Input} from '../ui';
-
-/* Alias para compatibilidad con el componente */
-type DatosFormulario = DatosNuevoHabito;
+import {useFormularioHabito} from '../../hooks/dashboard/useFormularioHabito';
 
 interface FormularioHabitoProps {
-    onGuardar: (datos: DatosFormulario) => void;
+    onGuardar: (datos: DatosNuevoHabito) => void;
     onCancelar: () => void;
     onEliminar?: () => void;
-    datosIniciales?: DatosFormulario;
+    datosIniciales?: DatosNuevoHabito;
     guardando?: boolean;
     modoEdicion?: boolean;
 }
@@ -27,61 +24,19 @@ interface FormularioHabitoProps {
 const IMPORTANCIAS: NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'];
 
 export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosIniciales, guardando = false, modoEdicion = false}: FormularioHabitoProps): JSX.Element {
-    const [nombre, setNombre] = useState(datosIniciales?.nombre || '');
-    const [importancia, setImportancia] = useState<NivelImportancia>(datosIniciales?.importancia || 'Media');
-    const [tags, setTags] = useState<string[]>(datosIniciales?.tags || []);
-    const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>(datosIniciales?.frecuencia || FRECUENCIA_POR_DEFECTO);
-    const [nuevoTag, setNuevoTag] = useState('');
-    const [errores, setErrores] = useState<{nombre?: string}>({});
-
-    const validarFormulario = useCallback((): boolean => {
-        const nuevosErrores: {nombre?: string} = {};
-
-        if (!nombre.trim()) {
-            nuevosErrores.nombre = 'El nombre es obligatorio';
-        } else if (nombre.trim().length < 3) {
-            nuevosErrores.nombre = 'El nombre debe tener al menos 3 caracteres';
-        }
-
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
-    }, [nombre]);
-
-    const manejarSubmit = (evento: React.FormEvent) => {
-        evento.preventDefault();
-
-        if (!validarFormulario()) return;
-
-        onGuardar({
-            nombre: nombre.trim(),
-            importancia,
-            tags,
-            frecuencia
-        });
-    };
-
-    const agregarTag = () => {
-        const tagLimpio = nuevoTag
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '');
-
-        if (tagLimpio && !tags.includes(tagLimpio) && tags.length < 5) {
-            setTags([...tags, tagLimpio]);
-            setNuevoTag('');
-        }
-    };
-
-    const manejarTeclaTag = (evento: React.KeyboardEvent) => {
-        if (evento.key === 'Enter') {
-            evento.preventDefault();
-            agregarTag();
-        }
-    };
-
-    const eliminarTag = (tagAEliminar: string) => {
-        setTags(tags.filter(t => t !== tagAEliminar));
-    };
+    /* Toda la lógica delegada al hook dedicado */
+    const {
+        nombre, setNombre,
+        importancia, setImportancia,
+        tags,
+        frecuencia, setFrecuencia,
+        nuevoTag, setNuevoTag,
+        errores,
+        manejarSubmit,
+        agregarTag,
+        manejarTeclaTag,
+        eliminarTag
+    } = useFormularioHabito({onGuardar, datosIniciales, guardando});
 
     return (
         <form id="formulario-habito" className="formularioHabito" onSubmit={manejarSubmit}>
@@ -139,5 +94,3 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
         </form>
     );
 }
-
-export type {DatosFormulario};

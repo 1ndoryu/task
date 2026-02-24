@@ -4,6 +4,7 @@
  */
 
 import {Modal, SeccionPanel} from '../shared';
+import {Input} from '../ui';
 import {useConfiguracionUsuario} from '../../stores/configuracionUsuarioStore';
 import {Moon, Sun} from 'lucide-react';
 
@@ -28,9 +29,9 @@ export function ModalConfiguracionUsuario({estaAbierto, onCerrar}: ModalConfigur
 
                     <div className="configuracionUsuarioControles">
                         <div className="configuracionUsuarioInputContenedor">
-                            <input
-                                type="number"
-                                className="configuracionUsuarioInput"
+                            <Input
+                                tipo="number"
+                                claseAdicional="configuracionUsuarioInput"
                                 value={horaFinDia}
                                 onChange={e => {
                                     const val = parseInt(e.target.value);

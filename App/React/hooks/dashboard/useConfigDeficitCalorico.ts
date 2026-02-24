@@ -4,11 +4,26 @@
  * del plugin de déficit calórico (datos TMB + API keys).
  */
 
-import {useState} from 'react';
+import {useState, useCallback} from 'react';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
 import {useShallow} from 'zustand/react/shallow';
 import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
+import type {OpcionSelect} from '../../components/ui/Select';
+
+/* Opciones para el selector de sexo */
+export const opcionesSexo: OpcionSelect[] = [
+    {valor: 'masculino', etiqueta: 'Masculino'},
+    {valor: 'femenino', etiqueta: 'Femenino'},
+];
+
+/* Opciones para el selector de objetivo de déficit */
+export const opcionesObjetivoDeficit: OpcionSelect[] = [
+    {valor: 'bajo', etiqueta: 'Bajo (-250 kcal/día)'},
+    {valor: 'moderado', etiqueta: 'Moderado (-500 kcal/día)'},
+    {valor: 'alto', etiqueta: 'Alto (-750 kcal/día)'},
+    {valor: 'peligroso', etiqueta: 'Peligroso / Extremo (-1000 kcal/día)'},
+];
 
 interface UseConfigDeficitCaloricoParams {
     onCerrar: () => void;
@@ -21,7 +36,7 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
             apiKeyGemini: s.apiKeyGemini,
             apiKeyCalorieNinjas: s.apiKeyCalorieNinjas,
             guardarDatosUsuario: s.guardarDatosUsuario,
-            guardarApiKey: s.guardarApiKey
+            guardarApiKey: s.guardarApiKey,
         }))
     );
 
@@ -34,13 +49,13 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
     const tdeePreview = calcularTDEE(datos);
     const metodo = obtenerMetodoCalculo(datos);
 
-    const manejarGuardar = () => {
+    const manejarGuardar = useCallback(() => {
         guardarDatosUsuario(datos);
         guardarApiKey(keyGroq, keyNinjas);
         onCerrar();
-    };
+    }, [datos, keyGroq, keyNinjas, guardarDatosUsuario, guardarApiKey, onCerrar]);
 
-    const actualizarCampo = (campo: keyof DatosUsuarioTMB, valor: string) => {
+    const actualizarCampo = useCallback((campo: keyof DatosUsuarioTMB, valor: string) => {
         if (campo === 'sexo') {
             setDatos(prev => ({...prev, sexo: valor as 'masculino' | 'femenino'}));
             return;
@@ -51,17 +66,27 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
         }
         const numerico = valor === '' ? undefined : Number(valor);
         setDatos(prev => ({...prev, [campo]: numerico}));
-    };
+    }, []);
+
+    const alternarKeyGroq = useCallback(() => {
+        setMostrarKeyGroq(prev => !prev);
+    }, []);
+
+    const alternarKeyNinjas = useCallback(() => {
+        setMostrarKeyNinjas(prev => !prev);
+    }, []);
 
     return {
         datos,
         keyGroq, setKeyGroq,
         keyNinjas, setKeyNinjas,
-        mostrarKeyGroq, setMostrarKeyGroq,
-        mostrarKeyNinjas, setMostrarKeyNinjas,
+        mostrarKeyGroq,
+        mostrarKeyNinjas,
         tdeePreview,
         metodo,
         manejarGuardar,
-        actualizarCampo
+        actualizarCampo,
+        alternarKeyGroq,
+        alternarKeyNinjas,
     };
 }

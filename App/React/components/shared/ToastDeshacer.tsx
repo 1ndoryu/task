@@ -5,6 +5,7 @@
  */
 
 import {Undo2, X} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 
 interface ToastDeshacerProps {
     mensaje: string;
@@ -22,13 +23,13 @@ export function ToastDeshacer({mensaje, tiempoRestante, tiempoTotal, onDeshacer,
             <div className="toastDeshacerContenido">
                 <span className="toastDeshacerMensaje">{mensaje}</span>
                 <div className="toastDeshacerAcciones">
-                    <button className="toastDeshacerBoton toastDeshacerBotonUndo" onClick={onDeshacer} type="button">
+                    <Boton claseAdicional="toastDeshacerBoton toastDeshacerBotonUndo" onClick={onDeshacer} type="button">
                         <Undo2 size={12} />
                         <span>Deshacer</span>
-                    </button>
-                    <button className="toastDeshacerBoton toastDeshacerBotonCerrar" onClick={onDescartar} type="button" aria-label="Cerrar">
+                    </Boton>
+                    <Boton claseAdicional="toastDeshacerBoton toastDeshacerBotonCerrar" onClick={onDescartar} type="button" aria-label="Cerrar">
                         <X size={12} />
-                    </button>
+                    </Boton>
                 </div>
             </div>
             <div className="toastDeshacerBarra">

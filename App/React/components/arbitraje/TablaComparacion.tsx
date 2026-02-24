@@ -5,6 +5,7 @@
 
 import type {TablaComparacionProps} from './types/arbitraje.types';
 import {formatearMoneda} from './utils/arbitraje.utils';
+import {Boton} from '../ui/Boton';
 
 export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaComparacionProps): JSX.Element {
     return (
@@ -25,9 +26,9 @@ export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaCompara
                         <td>USD → Bs → USDT → PayPal</td>
                         <td>{formatearMoneda(escenarioRealista.gananciaRutaA)}</td>
                         <td>
-                            <button className="botonDetalle" onClick={() => onVerDetalle('A')}>
+                            <Boton claseAdicional="botonDetalle" onClick={() => onVerDetalle('A')}>
                                 Ver desglose
-                            </button>
+                            </Boton>
                         </td>
                     </tr>
                     <tr className={escenarioRealista.mejorRuta === 'B' ? 'rutaGanadora' : 'rutaPerdedora'}>
@@ -35,9 +36,9 @@ export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaCompara
                         <td>USD → Bs → PayPal directo</td>
                         <td>{formatearMoneda(escenarioRealista.gananciaRutaB)}</td>
                         <td>
-                            <button className="botonDetalle" onClick={() => onVerDetalle('B')}>
+                            <Boton claseAdicional="botonDetalle" onClick={() => onVerDetalle('B')}>
                                 Ver desglose
-                            </button>
+                            </Boton>
                         </td>
                     </tr>
                 </tbody>

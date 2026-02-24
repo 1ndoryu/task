@@ -5,6 +5,7 @@
  */
 
 import {GripVertical} from 'lucide-react';
+import {Boton} from '../ui';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 
 interface HandleArrastreProps {
@@ -33,11 +34,11 @@ export function HandleArrastre({panelId, onMouseDown, estaArrastrando, titulo}: 
         : {};
 
     return (
-        <button className={`selectorBadgeBoton handleArrastre ${estaArrastrando ? 'activo' : ''}`} onMouseDown={manejarMouseDown} title="Arrastrar para mover panel" type="button" style={estiloConTitulo}>
+        <Boton claseAdicional={`selectorBadgeBoton handleArrastre ${estaArrastrando ? 'activo' : ''}`} onMouseDown={manejarMouseDown} title="Arrastrar para mover panel" type="button" style={estiloConTitulo}>
             <span className="selectorBadgeIcono">
                 <GripVertical size={10} />
             </span>
             {titulo && <span style={{fontSize: '0.75rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--dashboard-textoNormal)'}}>{titulo}</span>}
-        </button>
+        </Boton>
     );
 }

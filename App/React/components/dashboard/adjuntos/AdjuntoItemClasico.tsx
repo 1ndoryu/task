@@ -1,6 +1,7 @@
 import {Trash2, Music, Play, Pause, File, Lock, Loader2} from 'lucide-react';
 import type {Adjunto} from '../../../types/dashboard';
 import {formatBytes} from '../../../utils/formato';
+import {Boton} from '../../ui';
 
 interface AdjuntoItemClasicoProps {
     adjunto: Adjunto;
@@ -52,9 +53,9 @@ export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, ya
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     {adjunto.tipo === 'audio' ? (
                         <div className="adjuntoAudioControl">
-                            <button className="adjuntoBotonPlay" onClick={() => onToggleAudio(adjunto.id)} type="button">
+                            <Boton claseAdicional="adjuntoBotonPlay" onClick={() => onToggleAudio(adjunto.id)}>
                                 {isPlaying ? <Pause size={12} /> : <Play size={12} />}
-                            </button>
+                            </Boton>
                             <div className="adjuntoAudioBarra">
                                 <div className="adjuntoAudioProgreso" style={{width: `${progress}%`}} />
                             </div>
@@ -77,9 +78,9 @@ export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, ya
                 )}
             </div>
 
-            <button className="adjuntoAccionEliminar" onClick={() => onDelete(adjunto.id)} title="Eliminar adjunto">
+            <Boton claseAdicional="adjuntoAccionEliminar" onClick={() => onDelete(adjunto.id)} title="Eliminar adjunto">
                 <Trash2 size={14} />
-            </button>
+            </Boton>
         </div>
     );
 }

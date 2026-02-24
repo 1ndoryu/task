@@ -7,6 +7,7 @@
 import {ChevronUp, ChevronDown, Target, Folder, Terminal, FileText, Activity, Settings} from 'lucide-react';
 import type {PanelId, OrdenPanel, ModoColumnas} from '../../hooks/useConfiguracionLayout';
 import {obtenerPanel} from '../../config/registroPaneles';
+import {Boton} from '../ui/Boton';
 
 interface ListaOrdenPanelesProps {
     ordenPaneles: OrdenPanel[];
@@ -65,26 +66,26 @@ export function ListaOrdenPaneles({ordenPaneles, modoColumnas, onMoverArriba, on
 
                 <div className="listaOrdenItemAcciones">
                     {/* Botones de mover arriba/abajo */}
-                    <button className="listaOrdenBoton" onClick={() => onMoverArriba(panel.id)} disabled={esPrimero} title="Mover arriba">
+                    <Boton variante="icono" claseAdicional="listaOrdenBoton" onClick={() => onMoverArriba(panel.id)} disabled={esPrimero} title="Mover arriba">
                         <ChevronUp size={14} />
-                    </button>
-                    <button className="listaOrdenBoton" onClick={() => onMoverAbajo(panel.id)} disabled={esUltimo} title="Mover abajo">
+                    </Boton>
+                    <Boton variante="icono" claseAdicional="listaOrdenBoton" onClick={() => onMoverAbajo(panel.id)} disabled={esUltimo} title="Mover abajo">
                         <ChevronDown size={14} />
-                    </button>
+                    </Boton>
 
                     {/* Selector de columna (solo si hay más de 1 columna) */}
                     {modoColumnas > 1 && (
                         <div className="listaOrdenColumnas">
-                            <button className={`listaOrdenColumnaBtn ${panel.columna === 1 ? 'activa' : ''}`} onClick={() => onCambiarColumna(panel.id, 1)} title="Mover a columna 1">
+                            <Boton variante="opcion" claseAdicional={`listaOrdenColumnaBtn ${panel.columna === 1 ? 'activa' : ''}`} onClick={() => onCambiarColumna(panel.id, 1)} title="Mover a columna 1">
                                 1
-                            </button>
-                            <button className={`listaOrdenColumnaBtn ${panel.columna === 2 ? 'activa' : ''}`} onClick={() => onCambiarColumna(panel.id, 2)} title="Mover a columna 2">
+                            </Boton>
+                            <Boton variante="opcion" claseAdicional={`listaOrdenColumnaBtn ${panel.columna === 2 ? 'activa' : ''}`} onClick={() => onCambiarColumna(panel.id, 2)} title="Mover a columna 2">
                                 2
-                            </button>
+                            </Boton>
                             {modoColumnas === 3 && (
-                                <button className={`listaOrdenColumnaBtn ${panel.columna === 3 ? 'activa' : ''}`} onClick={() => onCambiarColumna(panel.id, 3)} title="Mover a columna 3">
+                                <Boton variante="opcion" claseAdicional={`listaOrdenColumnaBtn ${panel.columna === 3 ? 'activa' : ''}`} onClick={() => onCambiarColumna(panel.id, 3)} title="Mover a columna 3">
                                     3
-                                </button>
+                                </Boton>
                             )}
                         </div>
                     )}

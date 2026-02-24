@@ -37,7 +37,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
             <div className="creacionRapidaContenedor" onClick={hook.manejarClickContenedor}>
                 <form onSubmit={hook.manejarSubmit}>
                     <div className="creacionRapidaInputWrapper">
-                        <input ref={hook.inputRef} type="text" value={hook.texto} onChange={e => hook.setTexto(e.target.value)} onKeyDown={hook.manejarKeyDown} placeholder={hook.obtenerPlaceholder()} className="creacionRapidaInput" autoFocus />
+                        <Input ref={hook.inputRef} tipo="text" value={hook.texto} onChange={e => hook.setTexto(e.target.value)} onKeyDown={hook.manejarKeyDown} placeholder={hook.obtenerPlaceholder()} claseAdicional="creacionRapidaInput" autoFocus />
                         <Boton type="submit" variante="primario" disabled={!hook.texto.trim() || hook.cargando} icono={<ArrowRight size={20} />} claseAdicional="creacionRapidaBotonEnviar" />
                     </div>
 

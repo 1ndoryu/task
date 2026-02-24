@@ -7,9 +7,9 @@
  * Fase 10.8.6: Header compacto movil - solo icono, titulo visible, layout <- | Titulo | X
  */
 
-import {useEffect, useCallback, useState} from 'react';
 import {X, ArrowLeft} from 'lucide-react';
 import {Boton} from '../ui';
+import {useModal} from '../../hooks/shared/useModal';
 
 export interface ModalProps {
     estaAbierto: boolean;
@@ -25,55 +25,8 @@ export interface ModalProps {
     ocultarBotonCerrar?: boolean;
 }
 
-/* Hook para detectar si estamos en movil */
-function useEsMovil(breakpoint: number = 480): boolean {
-    const [esMovil, setEsMovil] = useState(false);
-
-    useEffect(() => {
-        const verificar = () => {
-            setEsMovil(window.innerWidth <= breakpoint);
-        };
-
-        verificar();
-        window.addEventListener('resize', verificar);
-        return () => window.removeEventListener('resize', verificar);
-    }, [breakpoint]);
-
-    return esMovil;
-}
-
 export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false}: ModalProps): JSX.Element | null {
-    const esMovil = useEsMovil();
-
-    /*
-     * Cierra el modal al presionar Escape
-     */
-    const manejarTecla = useCallback(
-        (evento: KeyboardEvent) => {
-            if (evento.key === 'Escape') {
-                onCerrar();
-            }
-        },
-        [onCerrar]
-    );
-
-    useEffect(() => {
-        if (estaAbierto) {
-            document.addEventListener('keydown', manejarTecla);
-            document.body.style.overflow = 'hidden';
-        }
-
-        return () => {
-            document.removeEventListener('keydown', manejarTecla);
-            document.body.style.overflow = '';
-        };
-    }, [estaAbierto, manejarTecla]);
-
-    const manejarClickOverlay = (evento: React.MouseEvent<HTMLDivElement>) => {
-        if (evento.target === evento.currentTarget) {
-            onCerrar();
-        }
-    };
+    const {esMovil, manejarClickOverlay} = useModal({estaAbierto, onCerrar});
 
     if (!estaAbierto) return null;
 

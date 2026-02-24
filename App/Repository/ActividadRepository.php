@@ -1,14 +1,5 @@
 <?php
-
-/**
- * Repositorio de Actividad
- *
- * Maneja el registro y consulta de actividad del usuario para el mapa de calor.
- * Tipos soportados: tarea_completada, habito_cumplido, nota_creada, adjunto_subido
- *
- * @package App\Repository
- */
-
+/** Repositorio de Actividad: registro y consulta para mapa de calor */
 namespace App\Repository;
 
 use App\Database\Schema;
@@ -27,17 +18,7 @@ class ActividadRepository
         $this->inicializarCifrado();
     }
 
-    /**
-     * Registra una actividad
-     * 
-     * @param string $tipo Tipo de actividad (tarea_completada, habito_cumplido, etc)
-     * @param int|null $elementoId ID del elemento relacionado
-     * @param string|null $elementoTipo Tipo del elemento (tarea, habito, nota)
-     * @param int|null $proyectoId ID del proyecto relacionado (opcional)
-     * @param string|null $fecha Fecha de la actividad (Y-m-d), usa hoy si no se especifica
-     * @param array $detalles Detalles adicionales de la actividad
-     * @param string|null $horaLocal Hora local del cliente (HH:MM:SS) - TAREA 2: Fix timezone
-     */
+    /** Registra una actividad. Usa fecha de hoy y hora del servidor si no se especifican */
     public function registrar(
         string $tipo,
         ?int $elementoId = null,
@@ -51,8 +32,6 @@ class ActividadRepository
         $table = Schema::getTableName('actividad');
 
         $fechaRegistro = $fecha ?? current_time('Y-m-d');
-        
-        /* TAREA 2: Usar hora del cliente si se proporciona, de lo contrario hora del servidor */
         $horaRegistro = $horaLocal ?? current_time('H:i:s');
 
         $result = $wpdb->insert(
@@ -73,15 +52,7 @@ class ActividadRepository
         return $result !== false;
     }
 
-    /**
-     * Obtiene actividad agrupada por día para un rango de fechas
-     * 
-     * @param string $fechaInicio Fecha inicio (Y-m-d)
-     * @param string $fechaFin Fecha fin (Y-m-d)
-     * @param string|null $tipo Filtrar por tipo de actividad
-     * @param int|null $proyectoId Filtrar por proyecto
-     * @param int|null $habitoId Filtrar por hábito específico
-     */
+    /** Obtiene actividad agrupada por día para un rango de fechas */
     public function obtenerPorRango(
         string $fechaInicio,
         string $fechaFin,
@@ -99,26 +70,13 @@ class ActividadRepository
 
         $params = [$this->userId, $fechaInicio, $fechaFin];
 
-        if ($tipo) {
-            $sql .= " AND tipo = %s";
-            $params[] = $tipo;
-        }
-
-        if ($proyectoId) {
-            $sql .= " AND proyecto_id = %d";
-            $params[] = $proyectoId;
-        }
-
-        if ($habitoId) {
-            $sql .= " AND elemento_tipo = 'habito' AND elemento_id = %d";
-            $params[] = $habitoId;
-        }
+        if ($tipo) { $sql .= " AND tipo = %s"; $params[] = $tipo; }
+        if ($proyectoId) { $sql .= " AND proyecto_id = %d"; $params[] = $proyectoId; }
+        if ($habitoId) { $sql .= " AND elemento_tipo = 'habito' AND elemento_id = %d"; $params[] = $habitoId; }
 
         $sql .= " GROUP BY fecha, tipo ORDER BY fecha ASC";
 
         $results = $wpdb->get_results($wpdb->prepare($sql, $params), 'ARRAY_A');
-
-        /* Agrupar por fecha */
         $actividad = [];
         foreach ($results as $row) {
             $fecha = $row['fecha'];
@@ -163,20 +121,9 @@ class ActividadRepository
 
         $params = [$this->userId, $fecha];
 
-        if ($tipo) {
-            $sql .= " AND a.tipo = %s";
-            $params[] = $tipo;
-        }
-
-        if ($proyectoId) {
-            $sql .= " AND a.proyecto_id = %d";
-            $params[] = $proyectoId;
-        }
-
-        if ($habitoId) {
-            $sql .= " AND a.elemento_tipo = 'habito' AND a.elemento_id = %d";
-            $params[] = $habitoId;
-        }
+        if ($tipo) { $sql .= " AND a.tipo = %s"; $params[] = $tipo; }
+        if ($proyectoId) { $sql .= " AND a.proyecto_id = %d"; $params[] = $proyectoId; }
+        if ($habitoId) { $sql .= " AND a.elemento_tipo = 'habito' AND a.elemento_id = %d"; $params[] = $habitoId; }
 
         $sql .= " ORDER BY a.hora DESC, a.id DESC";
 
@@ -185,18 +132,12 @@ class ActividadRepository
         $detalle = [];
         foreach ($results as $row) {
             $detalles = $row['detalles'] ? json_decode($row['detalles'], true) : null;
-            
-            /* Obtener nombre del elemento (tarea, hábito o nota) y descifrar si es necesario */
+            /* Obtener y descifrar nombre del elemento */
             $elementoNombre = $row['tarea_texto'] ?? $row['habito_nombre'] ?? $row['nota_titulo'] ?? ($detalles['elementoNombre'] ?? null);
-            if ($elementoNombre !== null) {
-                $elementoNombre = $this->descifrarTexto($elementoNombre);
-            }
-            
-            /* Obtener nombre del proyecto y descifrar si es necesario */
+            if ($elementoNombre !== null) $elementoNombre = $this->descifrarTexto($elementoNombre);
+            /* Obtener y descifrar nombre del proyecto */
             $proyectoNombre = $row['proyecto_nombre'] ?? ($detalles['proyectoNombre'] ?? null);
-            if ($proyectoNombre !== null) {
-                $proyectoNombre = $this->descifrarTexto($proyectoNombre);
-            }
+            if ($proyectoNombre !== null) $proyectoNombre = $this->descifrarTexto($proyectoNombre);
             
             $detalle[] = [
                 'id' => (int)$row['id'],
@@ -215,16 +156,10 @@ class ActividadRepository
         return $detalle;
     }
 
-    /**
-     * Descifra un texto si está cifrado, o lo devuelve tal cual si no lo está
-     */
+    /** Descifra un texto si está cifrado, o lo devuelve tal cual */
     private function descifrarTexto(?string $texto): ?string
     {
-        if ($texto === null || $texto === '') {
-            return $texto;
-        }
-        
-        /* Si tiene el prefijo de cifrado y el servicio está disponible, descifrar */
+        if ($texto === null || $texto === '') return $texto;
         if ($this->cifradoService !== null && $this->cifradoService->estaCifrado($texto)) {
             try {
                 return $this->cifradoService->descifrar($texto);
@@ -237,10 +172,7 @@ class ActividadRepository
         return $texto;
     }
 
-    /**
-     * Obtiene el resumen de actividad para el mapa de calor
-     * Devuelve un array asociativo fecha => nivel (0-4)
-     */
+    /** Obtiene resumen de actividad para el mapa de calor (fecha => nivel 0-4) */
     public function obtenerResumenHeatmap(
         string $fechaInicio,
         string $fechaFin,
@@ -248,24 +180,13 @@ class ActividadRepository
         ?int $proyectoId = null,
         ?int $habitoId = null
     ): array {
-        $actividad = $this->obtenerPorRango(
-            $fechaInicio,
-            $fechaFin,
-            $tipo,
-            $proyectoId,
-            $habitoId
-        );
+        $actividad = $this->obtenerPorRango($fechaInicio, $fechaFin, $tipo, $proyectoId, $habitoId);
 
-        if (empty($actividad)) {
-            return [];
-        }
-
-        /* Encontrar el máximo para escalar */
+        if (empty($actividad)) return [];
         $maxActividad = max(array_column($actividad, 'total'));
 
         $heatmap = [];
         foreach ($actividad as $dia) {
-            /* Escalar a nivel 0-4 */
             $nivel = $this->calcularNivel($dia['total'], $maxActividad);
             $heatmap[$dia['fecha']] = [
                 'nivel' => $nivel,
@@ -277,26 +198,18 @@ class ActividadRepository
         return $heatmap;
     }
 
-    /**
-     * Calcula el nivel de actividad (0-4) basado en el conteo y máximo
-     */
+    /** Calcula el nivel de actividad (0-4) basado en el conteo y máximo */
     private function calcularNivel(int $cantidad, int $maximo): int
     {
-        if ($cantidad === 0 || $maximo === 0) {
-            return 0;
-        }
-
+        if ($cantidad === 0 || $maximo === 0) return 0;
         $porcentaje = ($cantidad / $maximo) * 100;
-
         if ($porcentaje <= 25) return 1;
         if ($porcentaje <= 50) return 2;
         if ($porcentaje <= 75) return 3;
         return 4;
     }
 
-    /**
-     * Obtiene estadísticas generales de actividad
-     */
+    /** Obtiene estadísticas generales de actividad */
     public function obtenerEstadisticas(string $fechaInicio, string $fechaFin): array
     {
         global $wpdb;
@@ -333,9 +246,7 @@ class ActividadRepository
         ];
     }
 
-    /**
-     * Calcula la racha actual de días consecutivos con actividad
-     */
+    /** Calcula la racha actual de días consecutivos con actividad */
     private function calcularRachaActual(): int
     {
         global $wpdb;
@@ -350,10 +261,7 @@ class ActividadRepository
             $this->userId
         ));
 
-        if (empty($fechas)) {
-            return 0;
-        }
-
+        if (empty($fechas)) return 0;
         $hoy = current_time('Y-m-d');
         $racha = 0;
         $fechaEsperada = $hoy;
@@ -376,69 +284,35 @@ class ActividadRepository
         return $racha;
     }
 
-    /**
-     * Elimina registros de actividad de un hábito para una fecha específica
-     * Se usa cuando se desmarca un día del historial del hábito
-     * 
-     * @param int $habitoId ID del hábito
-     * @param string $fecha Fecha a eliminar (Y-m-d)
-     * @return int Número de registros eliminados
-     */
+    /** Elimina registros de actividad de un hábito para una fecha */
     public function eliminarPorHabito(int $habitoId, string $fecha): int
     {
-        global $wpdb;
-        $table = Schema::getTableName('actividad');
-
-        $eliminados = $wpdb->delete(
-            $table,
-            [
-                'user_id' => $this->userId,
-                'elemento_tipo' => 'habito',
-                'elemento_id' => $habitoId,
-                'fecha' => $fecha
-            ],
-            ['%d', '%s', '%d', '%s']
-        );
-
-        return $eliminados !== false ? $eliminados : 0;
+        return $this->eliminarPorElemento('habito', $habitoId, $fecha);
     }
 
-    /**
-     * Elimina registros de actividad de una tarea para una fecha específica
-     * Se usa cuando se desmarca una tarea completada
-     * 
-     * @param int $tareaId ID de la tarea
-     * @param string $fecha Fecha a eliminar (Y-m-d)
-     * @return int Número de registros eliminados
-     */
+    /** Elimina registros de actividad de una tarea para una fecha */
     public function eliminarPorTarea(int $tareaId, string $fecha): int
+    {
+        return $this->eliminarPorElemento('tarea', $tareaId, $fecha);
+    }
+
+    private function eliminarPorElemento(string $elementoTipo, int $elementoId, string $fecha): int
     {
         global $wpdb;
         $table = Schema::getTableName('actividad');
-
         $eliminados = $wpdb->delete(
             $table,
-            [
-                'user_id' => $this->userId,
-                'elemento_tipo' => 'tarea',
-                'elemento_id' => $tareaId,
-                'fecha' => $fecha
-            ],
+            ['user_id' => $this->userId, 'elemento_tipo' => $elementoTipo, 'elemento_id' => $elementoId, 'fecha' => $fecha],
             ['%d', '%s', '%d', '%s']
         );
-
         return $eliminados !== false ? $eliminados : 0;
     }
 
-    /**
-     * Elimina toda la actividad del usuario (herramienta de desarrollo)
-     * @return int Número de registros eliminados
-     */
+    /** Elimina toda la actividad del usuario (herramienta de desarrollo) */
     public function limpiarTodo(): int
     {
         global $wpdb;
         $table = Schema::getTableName('actividad');
-
         $eliminados = $wpdb->delete(
             $table,
             ['user_id' => $this->userId],

@@ -5,6 +5,7 @@
  */
 
 import {X, CheckCircle, XCircle, AlertTriangle, Info} from 'lucide-react';
+import {Boton} from '../ui';
 import type {TipoAlerta} from '../../hooks/useAlertas';
 
 interface AlertaToastProps {
@@ -30,9 +31,9 @@ export function AlertaToast({id, tipo, mensaje, onCerrar}: AlertaToastProps): JS
                 <Icono size={16} />
             </div>
             <span className="alertaToastMensaje">{mensaje}</span>
-            <button className="alertaToastCerrar" onClick={() => onCerrar(id)} type="button" aria-label="Cerrar alerta">
+            <Boton claseAdicional="alertaToastCerrar" onClick={() => onCerrar(id)} type="button" aria-label="Cerrar alerta">
                 <X size={14} />
-            </button>
+            </Boton>
         </div>
     );
 }

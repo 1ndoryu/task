@@ -5,6 +5,7 @@
  */
 
 import {Minus} from 'lucide-react';
+import {Boton} from '../ui';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 
 interface BotonMinimizarPanelProps {
@@ -14,10 +15,10 @@ interface BotonMinimizarPanelProps {
 
 export function BotonMinimizarPanel({panelId, onMinimizar}: BotonMinimizarPanelProps): JSX.Element {
     return (
-        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono botonMinimizarPanel" onClick={() => onMinimizar(panelId)} title="Minimizar panel">
+        <Boton claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono botonMinimizarPanel" onClick={() => onMinimizar(panelId)} title="Minimizar panel">
             <span className="selectorBadgeIcono">
                 <Minus size={12} />
             </span>
-        </button>
+        </Boton>
     );
 }

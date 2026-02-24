@@ -15,6 +15,7 @@ import {ListaNotasGuardadas} from './ListaNotasGuardadas';
 import {NavegadorCarpetas} from './NavegadorCarpetas';
 import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
 import {Input} from '../../ui/Input';
+import {Boton} from '../../ui/Boton';
 import {useModalNotasExpandido} from '../../../hooks/dashboard/useModalNotasExpandido';
 
 interface ModalNotasExpandidoProps {
@@ -65,22 +66,22 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
                 {buscando && <Loader size={14} className="modalNotasBusquedaLoader animacionGirar" />}
             </div>
 
-            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
+            <Boton variante="icono" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={manejarCrearNuevaNota} title="Crear nueva nota">
                 <Plus size={14} />
-            </button>
-            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
+            </Boton>
+            <Boton variante="icono" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={alternarOrdenamiento} title={`Ordenar por ${ordenamiento === 'modificacion' ? 'creación' : 'modificación'}`}>
                 <ArrowUpDown size={14} />
-            </button>
+            </Boton>
 
-            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
+            <Boton variante="icono" claseAdicional={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarLista ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelLista} title={mostrarLista ? 'Ocultar lista' : 'Mostrar lista'}>
                 <PanelLeftClose size={14} />
-            </button>
-            <button className={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
+            </Boton>
+            <Boton variante="icono" claseAdicional={`selectorBadgeBoton selectorBadgeBoton--soloIcono ${!mostrarEditor ? 'selectorBadgeBotonActivo' : ''}`} onClick={alternarPanelEditor} title={mostrarEditor ? 'Ocultar editor' : 'Mostrar editor'}>
                 <PanelRightClose size={14} />
-            </button>
-            <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
+            </Boton>
+            <Boton variante="icono" claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={() => setMaximizado(!maximizado)} title={maximizado ? 'Restaurar' : 'Maximizar'}>
                 {maximizado ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            </button>
+            </Boton>
         </>
     );
 
@@ -98,9 +99,9 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
                             <>
                                 {/* Header con carpeta activa */}
                                 <div className="notasHeaderConCarpeta">
-                                    <button className="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
+                                    <Boton variante="icono" claseAdicional="notasBotonVolver" onClick={volverACarpetas} title="Ver carpetas">
                                         <ChevronLeft size={14} />
-                                    </button>
+                                    </Boton>
                                     <span className="notasCarpetaActual">{nombreCarpetaActiva}</span>
                                 </div>
                                 <div className="vistaNotasListaContenido">

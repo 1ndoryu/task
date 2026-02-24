@@ -5,6 +5,7 @@
 
 import type {SimuladorCiclosProps} from './types/arbitraje.types';
 import {formatearMoneda} from './utils/arbitraje.utils';
+import {Boton} from '../ui/Boton';
 import {Input} from '../ui/Input';
 
 export function SimuladorCiclos({numeroCiclos, modoSimulacion, simulacionCiclos, costoTotalRealista, onNumeroCiclosChange, onModoSimulacionChange}: SimuladorCiclosProps): JSX.Element {
@@ -22,12 +23,12 @@ export function SimuladorCiclos({numeroCiclos, modoSimulacion, simulacionCiclos,
                         <span className="etiquetaCiclos">ciclos</span>
                     </div>
                     <div className="toggleModoSimulacion">
-                        <button className={`botonModo ${modoSimulacion === 'fijo' ? 'activo' : ''}`} onClick={() => onModoSimulacionChange('fijo')}>
+                        <Boton claseAdicional={`botonModo ${modoSimulacion === 'fijo' ? 'activo' : ''}`} onClick={() => onModoSimulacionChange('fijo')}>
                             Inversión Fija
-                        </button>
-                        <button className={`botonModo ${modoSimulacion === 'reinversion' ? 'activo' : ''}`} onClick={() => onModoSimulacionChange('reinversion')}>
+                        </Boton>
+                        <Boton claseAdicional={`botonModo ${modoSimulacion === 'reinversion' ? 'activo' : ''}`} onClick={() => onModoSimulacionChange('reinversion')}>
                             Reinversión
-                        </button>
+                        </Boton>
                     </div>
                 </div>
             </header>

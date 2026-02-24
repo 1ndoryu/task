@@ -4,6 +4,7 @@
  */
 
 import {Maximize2} from 'lucide-react';
+import {Boton} from '../ui';
 
 interface BotonEnfocarProps {
     onClick: () => void;
@@ -12,10 +13,10 @@ interface BotonEnfocarProps {
 
 export function BotonEnfocar({onClick, titulo = 'Modo enfoque'}: BotonEnfocarProps): JSX.Element {
     return (
-        <button className="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onClick} title={titulo}>
+        <Boton claseAdicional="selectorBadgeBoton selectorBadgeBoton--soloIcono" onClick={onClick} title={titulo}>
             <span className="selectorBadgeIcono">
                 <Maximize2 size={12} />
             </span>
-        </button>
+        </Boton>
     );
 }

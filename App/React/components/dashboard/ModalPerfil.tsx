@@ -7,7 +7,7 @@
 import {Camera, Save} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {IndicadorAlmacenamiento} from '../shared/IndicadorAlmacenamiento';
-import {Input, Textarea} from '../ui';
+import {Boton, Input, Textarea} from '../ui';
 import {useModalPerfil} from '../../hooks/dashboard/useModalPerfil';
 
 interface ModalPerfilProps {
@@ -24,10 +24,10 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
                 {/* Avatar y Datos Basicos */}
                 <div className="avatarContainer">
                     <div className="avatarPreview">{datos.avatarUrl ? <img src={datos.avatarUrl} alt="Avatar" /> : <span className="avatarInicial">{datos.nombre.charAt(0).toUpperCase()}</span>}</div>
-                    <button className="botonPerfil botonCambiarFoto" onClick={handleAvatarClick}>
+                    <Boton claseAdicional="botonPerfil botonCambiarFoto" onClick={handleAvatarClick}>
                         <Camera size={14} />
                         Cambiar Foto
-                    </button>
+                    </Boton>
                     <Input tipo="file" ref={fileInputRef} claseAdicional="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
                 </div>
 
@@ -72,15 +72,15 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
                 {mensaje && <div className={`mensajePerfil mensajePerfil--${mensaje.tipo}`}>{mensaje.texto}</div>}
 
                 <div className="accionesPerfil">
-                    <button className="botonPerfil botonCancelar" onClick={onCerrar} disabled={cargando}>
+                    <Boton claseAdicional="botonPerfil botonCancelar" onClick={onCerrar} disabled={cargando}>
                         Cancelar
-                    </button>
-                    <button className="botonPerfil botonGuardar" onClick={handleSubmit} disabled={cargando}>
+                    </Boton>
+                    <Boton claseAdicional="botonPerfil botonGuardar" onClick={handleSubmit} disabled={cargando}>
                         <div className="botonPerfilContenido">
                             {cargando ? <span className="cargandoSpinner cargandoSpinner--pequeno"></span> : <Save size={14} />}
                             Guardar Cambios
                         </div>
-                    </button>
+                    </Boton>
                 </div>
             </div>
         </Modal>

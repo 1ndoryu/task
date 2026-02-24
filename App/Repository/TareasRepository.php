@@ -153,7 +153,7 @@ class TareasRepository
             }
         }
 
-        /* Batch UPDATE con CASE para evitar N+1 */
+        /* Batch UPDATE con CASE — single prepare para evitar N+1 */
         if (!empty($toUpdate)) {
             $ids = array_column($toUpdate, 'id');
             $caseTexto = '';
@@ -163,20 +163,68 @@ class TareasRepository
             $casePrioridad = '';
             $caseUrgencia = '';
             $caseData = '';
+            $textoParams = [];
+            $completadaParams = [];
+            $proyectoParams = [];
+            $padreParams = [];
+            $prioridadParams = [];
+            $urgenciaParams = [];
+            $dataParams = [];
 
             foreach ($toUpdate as $item) {
-                $caseTexto .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['texto']);
-                $caseCompletada .= $wpdb->prepare(" WHEN id = %d THEN %d", $item['id'], $item['completada']);
-                $pid = $item['proyecto_id'] === null ? 'NULL' : $wpdb->prepare("%d", $item['proyecto_id']);
-                $caseProyecto .= " WHEN id = {$item['id']} THEN $pid";
-                $ppid = $item['padre_id'] === null ? 'NULL' : $wpdb->prepare("%d", $item['padre_id']);
-                $casePadre .= " WHEN id = {$item['id']} THEN $ppid";
-                $casePrioridad .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['prioridad'] ?? '');
-                $caseUrgencia .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['urgencia']);
-                $caseData .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['data']);
+                $caseTexto .= ' WHEN id = %d THEN %s';
+                $textoParams[] = $item['id'];
+                $textoParams[] = $item['texto'];
+
+                $caseCompletada .= ' WHEN id = %d THEN %d';
+                $completadaParams[] = $item['id'];
+                $completadaParams[] = $item['completada'];
+
+                /* proyecto_id — nullable */
+                if ($item['proyecto_id'] === null) {
+                    $caseProyecto .= ' WHEN id = %d THEN NULL';
+                    $proyectoParams[] = $item['id'];
+                } else {
+                    $caseProyecto .= ' WHEN id = %d THEN %d';
+                    $proyectoParams[] = $item['id'];
+                    $proyectoParams[] = $item['proyecto_id'];
+                }
+
+                /* padre_id — nullable */
+                if ($item['padre_id'] === null) {
+                    $casePadre .= ' WHEN id = %d THEN NULL';
+                    $padreParams[] = $item['id'];
+                } else {
+                    $casePadre .= ' WHEN id = %d THEN %d';
+                    $padreParams[] = $item['id'];
+                    $padreParams[] = $item['padre_id'];
+                }
+
+                $casePrioridad .= ' WHEN id = %d THEN %s';
+                $prioridadParams[] = $item['id'];
+                $prioridadParams[] = $item['prioridad'] ?? '';
+
+                $caseUrgencia .= ' WHEN id = %d THEN %s';
+                $urgenciaParams[] = $item['id'];
+                $urgenciaParams[] = $item['urgencia'];
+
+                $caseData .= ' WHEN id = %d THEN %s';
+                $dataParams[] = $item['id'];
+                $dataParams[] = $item['data'];
             }
 
             $idsPlaceholders = implode(',', array_fill(0, count($ids), '%d'));
+            $allParams = array_merge(
+                $textoParams,
+                $completadaParams,
+                $proyectoParams,
+                $padreParams,
+                $prioridadParams,
+                $urgenciaParams,
+                $dataParams,
+                [$now],
+                $ids
+            );
             $wpdb->query($wpdb->prepare(
                 "UPDATE $table SET
                     texto = CASE $caseTexto END,
@@ -189,24 +237,70 @@ class TareasRepository
                     deleted_at = NULL,
                     updated_at = %s
                 WHERE id IN ($idsPlaceholders)",
-                array_merge([$now], $ids)
+                ...$allParams
             ));
         }
 
-        /* Batch INSERT */
-        foreach ($toInsert as $row) {
-            $wpdb->insert($table, $row, ['%d', '%d', '%s', '%d', '%d', '%d', '%s', '%s', '%s']);
+        /* Batch INSERT — single query para evitar N+1 */
+        if (!empty($toInsert)) {
+            $valuePlaceholders = [];
+            $insertParams = [];
+            foreach ($toInsert as $row) {
+                $rowParts = ['%d', '%d', '%s', '%d'];
+                $insertParams[] = $row['user_id'];
+                $insertParams[] = $row['id_local'];
+                $insertParams[] = $row['texto'];
+                $insertParams[] = $row['completada'];
+
+                /* proyecto_id — nullable */
+                if ($row['proyecto_id'] === null) {
+                    $rowParts[] = 'NULL';
+                } else {
+                    $rowParts[] = '%d';
+                    $insertParams[] = $row['proyecto_id'];
+                }
+
+                /* padre_id — nullable */
+                if ($row['padre_id'] === null) {
+                    $rowParts[] = 'NULL';
+                } else {
+                    $rowParts[] = '%d';
+                    $insertParams[] = $row['padre_id'];
+                }
+
+                /* prioridad — nullable */
+                if ($row['prioridad'] === null) {
+                    $rowParts[] = 'NULL';
+                } else {
+                    $rowParts[] = '%s';
+                    $insertParams[] = $row['prioridad'];
+                }
+
+                $rowParts[] = '%s'; /* urgencia */
+                $rowParts[] = '%s'; /* data */
+                $insertParams[] = $row['urgencia'];
+                $insertParams[] = $row['data'];
+
+                $valuePlaceholders[] = '(' . implode(', ', $rowParts) . ')';
+            }
+            $valuesSQL = implode(', ', $valuePlaceholders);
+            $wpdb->query($wpdb->prepare(
+                "INSERT INTO $table (user_id, id_local, texto, completada, proyecto_id, padre_id, prioridad, urgencia, data) VALUES $valuesSQL",
+                ...$insertParams
+            ));
         }
 
-        /* Soft Delete (Solo si NO es actualización parcial) */
+        /* Soft Delete (Solo si NO es actualizacion parcial) */
         if (!$partialUpdate) {
             $toDelete = array_diff($existingIds, $incomingIds);
             if (!empty($toDelete)) {
-                $idsList = implode(',', array_map('intval', $toDelete));
+                $deleteIds = array_values(array_map('intval', $toDelete));
+                $deletePlaceholders = implode(',', array_fill(0, count($deleteIds), '%d'));
                 $wpdb->query($wpdb->prepare(
-                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
+                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($deletePlaceholders)",
                     $now,
-                    $this->userId
+                    $this->userId,
+                    ...$deleteIds
                 ));
             }
         }

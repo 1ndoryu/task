@@ -12,7 +12,7 @@
 
 import {CheckCircle2, Circle, Plus, Flag, Trash2} from 'lucide-react';
 import {MenuContextual} from '../../shared/MenuContextual';
-import {Boton} from '../../ui';
+import {Boton, Input} from '../../ui';
 import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
 import {useListaHitos} from '../../../hooks/dashboard/useListaHitos';
 import type {Hito, NivelPrioridad} from '../../../types/dashboard';
@@ -63,9 +63,9 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                                     <span style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>{hito.titulo}</span>
 
                                     {/* Badge de Prioridad junto al texto - Estilo PropiedadesCompactas */}
-                                    <button
+                                    <Boton
                                         type="button"
-                                        className={`pillOpcion ${hito.prioridad === 'media' ? 'pillOpcion--vacio' : ''}`}
+                                        claseAdicional={`pillOpcion ${hito.prioridad === 'media' ? 'pillOpcion--vacio' : ''}`}
                                         title={`Prioridad: ${ETIQUETAS_PRIORIDAD[hito.prioridad]}`}
                                         onClick={e => abrirMenuPrioridad(e, hito.id)}
                                         style={{
@@ -77,7 +77,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                                         }}>
                                         <Flag size={12} fill={hito.prioridad === 'alta' ? 'currentColor' : 'none'} />
                                         <span>{ETIQUETAS_PRIORIDAD[hito.prioridad]}</span>
-                                    </button>
+                                    </Boton>
                                 </span>
 
                                 {/* Controles: Solo eliminar, apareces on hover */}
@@ -117,10 +117,10 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                     <div className="tareaItemCompactoContenedor">
                         <div className="tareaItemCompacto" style={{paddingLeft: 0}}>
                             <Circle size={14} className="textoApagado" />
-                            <input
+                            <Input
                                 autoFocus
-                                type="text"
-                                className="inputSinBorde"
+                                tipo="text"
+                                claseAdicional="inputSinBorde"
                                 placeholder="Nuevo hito..."
                                 value={nuevoHitoTexto}
                                 onChange={e => setNuevoHitoTexto(e.target.value)}
@@ -142,9 +142,9 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                         </div>
                     </div>
                 ) : (
-                    <button
+                    <Boton
                         type="button"
-                        className="seccionModerna__botonAgregar"
+                        claseAdicional="seccionModerna__botonAgregar"
                         onClick={() => setMostrandoInput(true)}
                         style={{
                             marginTop: '8px',
@@ -155,7 +155,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                         }}>
                         <Plus size={14} />
                         <span>Agregar hito</span>
-                    </button>
+                    </Boton>
                 )}
             </div>
         </div>

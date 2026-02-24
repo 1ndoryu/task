@@ -2,51 +2,33 @@
  * ConfigDeficitCalorico.tsx
  * Formulario de configuración del plugin de déficit calórico
  * Permite configurar datos del usuario para TMB y API Keys
+ * Lógica extraída a useConfigDeficitCalorico (SRP)
  */
 
-import {useState} from 'react';
 import {Save, Eye, EyeOff} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import {Input} from '../ui/Input';
-import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
-import {useShallow} from 'zustand/react/shallow';
-import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
-import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
+import {Select} from '../ui/Select';
+import {useConfigDeficitCalorico, opcionesSexo, opcionesObjetivoDeficit} from '../../hooks/dashboard/useConfigDeficitCalorico';
 
 interface ConfigDeficitCaloricoProps {
     onCerrar: () => void;
 }
 
 export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): JSX.Element {
-    const {datosUsuario, apiKeyGemini, apiKeyCalorieNinjas, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore(useShallow(s => ({datosUsuario: s.datosUsuario, apiKeyGemini: s.apiKeyGemini, apiKeyCalorieNinjas: s.apiKeyCalorieNinjas, guardarDatosUsuario: s.guardarDatosUsuario, guardarApiKey: s.guardarApiKey})));
-
-    const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
-    const [keyGroq, setKeyGroq] = useState(apiKeyGemini);
-    const [keyNinjas, setKeyNinjas] = useState(apiKeyCalorieNinjas || '');
-    const [mostrarKeyGroq, setMostrarKeyGroq] = useState(false);
-    const [mostrarKeyNinjas, setMostrarKeyNinjas] = useState(false);
-
-    const tdeePreview = calcularTDEE(datos);
-    const metodo = obtenerMetodoCalculo(datos);
-
-    const manejarGuardar = () => {
-        guardarDatosUsuario(datos);
-        guardarApiKey(keyGroq, keyNinjas);
-        onCerrar();
-    };
-
-    const actualizarCampo = (campo: keyof DatosUsuarioTMB, valor: string) => {
-        if (campo === 'sexo') {
-            setDatos(prev => ({...prev, sexo: valor as 'masculino' | 'femenino'}));
-            return;
-        }
-        if (campo === 'objetivoDeficit') {
-            setDatos(prev => ({...prev, objetivoDeficit: valor as DatosUsuarioTMB['objetivoDeficit']}));
-            return;
-        }
-        const numerico = valor === '' ? undefined : Number(valor);
-        setDatos(prev => ({...prev, [campo]: numerico}));
-    };
+    const {
+        datos,
+        keyGroq, setKeyGroq,
+        keyNinjas, setKeyNinjas,
+        mostrarKeyGroq,
+        mostrarKeyNinjas,
+        tdeePreview,
+        metodo,
+        manejarGuardar,
+        actualizarCampo,
+        alternarKeyGroq,
+        alternarKeyNinjas,
+    } = useConfigDeficitCalorico({onCerrar});
 
     return (
         <div className="configDeficitContenido">
@@ -73,11 +55,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                     </div>
                     <div className="configDeficitCampo">
                         <label className="configDeficitLabel">Sexo</label>
-                        <select className="configDeficitInput" value={datos.sexo ?? ''} onChange={e => actualizarCampo('sexo', e.target.value)}>
-                            <option value="">Seleccionar</option>
-                            <option value="masculino">Masculino</option>
-                            <option value="femenino">Femenino</option>
-                        </select>
+                        <Select claseAdicional="configDeficitInput" placeholder="Seleccionar" opciones={opcionesSexo} value={datos.sexo ?? ''} onChange={e => actualizarCampo('sexo', e.target.value)} />
                     </div>
                     <div className="configDeficitCampo">
                         <label className="configDeficitLabel">Ejercicio a la semana</label>
@@ -90,12 +68,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                     <div className="configDeficitCampo configDeficitCampo--full">
                         <label className="configDeficitLabel">Objetivo de Déficit</label>
-                        <select className="configDeficitInput" value={datos.objetivoDeficit ?? 'moderado'} onChange={e => actualizarCampo('objetivoDeficit', e.target.value)}>
-                            <option value="bajo">Bajo (-250 kcal/día)</option>
-                            <option value="moderado">Moderado (-500 kcal/día)</option>
-                            <option value="alto">Alto (-750 kcal/día)</option>
-                            <option value="peligroso">Peligroso / Extremo (-1000 kcal/día)</option>
-                        </select>
+                        <Select claseAdicional="configDeficitInput" opciones={opcionesObjetivoDeficit} value={datos.objetivoDeficit ?? 'moderado'} onChange={e => actualizarCampo('objetivoDeficit', e.target.value)} />
                     </div>
                 </div>
 
@@ -114,7 +87,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitApiKey">
                     <Input tipo={mostrarKeyGroq ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq((e.target as HTMLInputElement).value)} />
-                    <Boton type="button" variante="icono" onClick={() => setMostrarKeyGroq(!mostrarKeyGroq)} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
+                    <Boton type="button" variante="icono" onClick={alternarKeyGroq} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>
                 </div>
@@ -126,7 +99,7 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
 
                 <div className="configDeficitApiKey">
                     <Input tipo={mostrarKeyNinjas ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas((e.target as HTMLInputElement).value)} />
-                <Boton type="button" variante="icono" onClick={() => setMostrarKeyNinjas(!mostrarKeyNinjas)} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
+                    <Boton type="button" variante="icono" onClick={alternarKeyNinjas} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>
                 </div>

@@ -4,18 +4,13 @@
  * Determina si un habito "toca hoy" y calcula dias hasta proxima repeticion
  */
 
-import type {FrecuenciaHabito, DiaSemana, Habito} from '../types/dashboard';
-import {obtenerFechaLocalISO, obtenerFechaEfectiva} from './fecha';
+import type {FrecuenciaHabito, DiaSemana} from '../types/dashboard';
+import {obtenerFechaEfectiva} from './fecha';
 
 /* Mapeo de dia de semana (0=domingo, 6=sabado) a DiaSemana */
-const DIAS_JS_A_DIASEMANA: DiaSemana[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+export const DIAS_JS_A_DIASEMANA: DiaSemana[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
 
-/*
- * Determina si un habito debe realizarse hoy basado en su frecuencia
- * y la fecha del ultimo completado
- * 
- * TAREA 3: Corregido bug off-by-one al normalizar ambas fechas a medianoche
- */
+/* Determina si un habito debe realizarse hoy basado en su frecuencia (TAREA 3: fix off-by-one) */
 export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string): boolean {
     /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
     const hoy = obtenerFechaEfectiva();
@@ -27,12 +22,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
         case 'cadaXDias': {
             if (!ultimoCompletado) return true;
 
-            /* 
-             * TAREA 3: Normalizar fecha del último completado a medianoche
-             * para evitar errores off-by-one al comparar con hoy (que ya está a 00:00:00)
-             */
+            /* Normalizar a medianoche para evitar off-by-one */
             const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
-
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
             return diasTranscurridos >= (frecuencia.cadaDias || 2);
@@ -40,12 +31,8 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
 
         case 'semanal': {
             if (!ultimoCompletado) return true;
-
-            /* TAREA 3: Normalizar a medianoche */
             const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
-
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
-
             return diasTranscurridos >= 7;
         }
 
@@ -56,17 +43,11 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
 
         case 'mensual': {
             if (!ultimoCompletado) return true;
-
-            /* TAREA 3: Normalizar a medianoche */
             const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
             const diasEnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
             const vecesAlMes = frecuencia.vecesAlMes || 4;
-
-            /* Intervalo aproximado entre completados */
             const intervaloIdeal = Math.floor(diasEnMes / vecesAlMes);
-
             const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
-
             return diasTranscurridos >= intervaloIdeal;
         }
 
@@ -75,24 +56,12 @@ export function tocaHoy(frecuencia: FrecuenciaHabito, ultimoCompletado?: string)
     }
 }
 
-/*
- * Calcula los dias restantes hasta la proxima repeticion
- * Retorna 0 si toca hoy, numero positivo si falta tiempo
- * 
- * TAREA 3: Corregido bug off-by-one normalizando fechas a medianoche
- */
+/* Dias restantes hasta proxima repeticion (0 si toca hoy, TAREA 3: fix off-by-one) */
 export function diasHastaProximaRepeticion(frecuencia: FrecuenciaHabito, ultimoCompletado?: string): number {
-    if (tocaHoy(frecuencia, ultimoCompletado)) {
-        return 0;
-    }
-
+    if (tocaHoy(frecuencia, ultimoCompletado)) return 0;
     const hoy = obtenerFechaEfectiva();
-
     if (!ultimoCompletado) return 0;
-
-    /* TAREA 3: Normalizar a medianoche para consistencia con tocaHoy */
     const ultimaFecha = new Date(ultimoCompletado + 'T00:00:00');
-
     const diasTranscurridos = Math.floor((hoy.getTime() - ultimaFecha.getTime()) / (1000 * 60 * 60 * 24));
 
     switch (frecuencia.tipo) {
@@ -131,10 +100,7 @@ export function diasHastaProximaRepeticion(frecuencia: FrecuenciaHabito, ultimoC
     }
 }
 
-/*
- * Calcula el umbral de dias de inactividad para resetear racha
- * basado en la frecuencia del habito
- */
+/* Umbral de dias de inactividad para resetear racha */
 export function calcularUmbralInactividad(frecuencia: FrecuenciaHabito): number {
     switch (frecuencia.tipo) {
         case 'diario':
@@ -169,271 +135,6 @@ export function calcularUmbralInactividad(frecuencia: FrecuenciaHabito): number 
     }
 }
 
-/*
- * Genera texto descriptivo de la frecuencia
- */
-export function describirFrecuencia(frecuencia: FrecuenciaHabito): string {
-    switch (frecuencia.tipo) {
-        case 'diario':
-            return 'Diario';
-
-        case 'cadaXDias':
-            return `Cada ${frecuencia.cadaDias || 2} dias`;
-
-        case 'semanal':
-            return 'Semanal';
-
-        case 'diasEspecificos': {
-            const dias = frecuencia.diasSemana || [];
-            if (dias.length === 7) return 'Todos los dias';
-            if (dias.length === 0) return 'Sin dias';
-
-            const abreviaturas: Record<DiaSemana, string> = {
-                lunes: 'L',
-                martes: 'M',
-                miercoles: 'X',
-                jueves: 'J',
-                viernes: 'V',
-                sabado: 'S',
-                domingo: 'D'
-            };
-
-            return dias.map(d => abreviaturas[d]).join(', ');
-        }
-
-        case 'mensual':
-            return `${frecuencia.vecesAlMes || 4}x/mes`;
-
-        default:
-            return '';
-    }
-}
-
-/*
- * Obtiene el intervalo numerico de la frecuencia para mostrar en UI compacta
- * Retorna null para frecuencias diarias (no necesitan indicador)
- */
-export function obtenerIntervaloFrecuencia(frecuencia: FrecuenciaHabito): number | null {
-    switch (frecuencia.tipo) {
-        case 'diario':
-            return null;
-
-        case 'cadaXDias':
-            return frecuencia.cadaDias || 2;
-
-        case 'semanal':
-            return 7;
-
-        case 'diasEspecificos': {
-            const dias = frecuencia.diasSemana || [];
-            if (dias.length === 0 || dias.length === 7) return null;
-            return dias.length;
-        }
-
-        case 'mensual':
-            return frecuencia.vecesAlMes || 4;
-
-        default:
-            return null;
-    }
-}
-
-/*
- * Determina si una fecha específica es relevante para un hábito según su frecuencia
- * Usado para filtrar el historial y mostrar solo días que "tocaban"
- *
- * @param fecha - Fecha a evaluar (YYYY-MM-DD)
- * @param frecuencia - Configuración de frecuencia del hábito
- * @param fechaReferencia - Fecha de referencia para calcular ciclos (creación o primer completado)
- */
-export function esFechaRelevante(fecha: string, frecuencia: FrecuenciaHabito, fechaReferencia?: string): boolean {
-    const fechaDate = new Date(fecha + 'T12:00:00');
-
-    switch (frecuencia.tipo) {
-        case 'diario':
-            /* Todos los días son relevantes */
-            return true;
-
-        case 'cadaXDias': {
-            /* Si no hay fecha de referencia, no podemos calcular */
-            if (!fechaReferencia) return true;
-
-            const intervalo = frecuencia.cadaDias || 2;
-            const refDate = new Date(fechaReferencia + 'T12:00:00');
-            const diffDias = Math.floor((fechaDate.getTime() - refDate.getTime()) / (1000 * 60 * 60 * 24));
-
-            /* Es relevante si la diferencia es múltiplo del intervalo */
-            return diffDias >= 0 && diffDias % intervalo === 0;
-        }
-
-        case 'semanal': {
-            /* Si no hay fecha de referencia, no podemos calcular */
-            if (!fechaReferencia) return true;
-
-            const refDate = new Date(fechaReferencia + 'T12:00:00');
-            const diffDias = Math.floor((fechaDate.getTime() - refDate.getTime()) / (1000 * 60 * 60 * 24));
-
-            /* Es relevante si la diferencia es múltiplo de 7 */
-            return diffDias >= 0 && diffDias % 7 === 0;
-        }
-
-        case 'diasEspecificos': {
-            const diaSemana = DIAS_JS_A_DIASEMANA[fechaDate.getDay()];
-            return (frecuencia.diasSemana || []).includes(diaSemana);
-        }
-
-        case 'mensual': {
-            /* Si no hay fecha de referencia, no podemos calcular */
-            if (!fechaReferencia) return true;
-
-            const vecesAlMes = frecuencia.vecesAlMes || 4;
-            const intervaloIdeal = Math.floor(30 / vecesAlMes);
-            const refDate = new Date(fechaReferencia + 'T12:00:00');
-            const diffDias = Math.floor((fechaDate.getTime() - refDate.getTime()) / (1000 * 60 * 60 * 24));
-
-            /* Es relevante si la diferencia es múltiplo del intervalo ideal */
-            return diffDias >= 0 && diffDias % intervaloIdeal === 0;
-        }
-
-        default:
-            return true;
-    }
-}
-
-/*
- * Genera un array de fechas relevantes para un hábito en los últimos N días
- * Solo incluye fechas que aplican según la frecuencia
- *
- * @param frecuencia - Configuración de frecuencia del hábito
- * @param cantidadDias - Cantidad de días a evaluar (default 7)
- * @param fechaReferencia - Fecha de referencia para calcular ciclos
- */
-export function generarFechasRelevantes(frecuencia: FrecuenciaHabito, cantidadDias: number = 7, fechaReferencia?: string): string[] {
-    const fechas: string[] = [];
-    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
-    const hoy = obtenerFechaEfectiva();
-
-    for (let i = cantidadDias - 1; i >= 0; i--) {
-        const fecha = new Date(hoy);
-        fecha.setDate(fecha.getDate() - i);
-        const fechaStr = obtenerFechaLocalISO(fecha);
-
-        if (esFechaRelevante(fechaStr, frecuencia, fechaReferencia)) {
-            fechas.push(fechaStr);
-        }
-    }
-
-    return fechas;
-}
-
-/*
- * Determina si una fecha específica es relevante para un hábito,
- * basándose en el historial de completados en lugar de la fecha de creación.
- *
- * Para frecuencias 'cadaXDias', 'semanal', 'mensual':
- * - Busca el día completado más cercano ANTES o IGUAL a la fecha evaluada
- * - Si la diferencia de días es 0 (es el día marcado) o >= intervalo, es relevante
- * - Los días entre marcados son "libres" y no son relevantes
- *
- * Para 'diasEspecificos': Solo días de la semana seleccionados son relevantes
- * Para 'diario': Todos los días son relevantes
- *
- * @param fecha - Fecha a evaluar (YYYY-MM-DD)
- * @param frecuencia - Configuración de frecuencia del hábito
- * @param historialCompletados - Array de fechas completadas (YYYY-MM-DD) ordenadas
- */
-export function esFechaRelevanteConHistorial(fecha: string, frecuencia: FrecuenciaHabito, historialCompletados: string[]): boolean {
-    const fechaDate = new Date(fecha + 'T12:00:00');
-
-    switch (frecuencia.tipo) {
-        case 'diario':
-            /* Todos los días son relevantes */
-            return true;
-
-        case 'diasEspecificos': {
-            /* Solo días de la semana seleccionados son relevantes */
-            const diaSemana = DIAS_JS_A_DIASEMANA[fechaDate.getDay()];
-            return (frecuencia.diasSemana || []).includes(diaSemana);
-        }
-
-        case 'cadaXDias':
-        case 'semanal':
-        case 'mensual': {
-            /* Calcular intervalo según el tipo de frecuencia */
-            let intervalo: number;
-            if (frecuencia.tipo === 'semanal') {
-                intervalo = 7;
-            } else if (frecuencia.tipo === 'cadaXDias') {
-                intervalo = frecuencia.cadaDias || 2;
-            } else {
-                /* mensual: dividir 30 días entre las veces al mes */
-                intervalo = Math.floor(30 / (frecuencia.vecesAlMes || 4));
-            }
-
-            /* Si no hay historial de completados, todos los días son relevantes */
-            if (!historialCompletados || historialCompletados.length === 0) {
-                return true;
-            }
-
-            /* Ordenar el historial (por si no viene ordenado) */
-            const fechasOrdenadas = [...historialCompletados].sort();
-
-            /*
-             * Encontrar la fecha completada más cercana ANTES o IGUAL a esta fecha
-             * Esto nos da el punto de referencia para calcular si "toca" hoy
-             */
-            let fechaReferenciaStr: string | null = null;
-            for (const fc of fechasOrdenadas) {
-                const fcDate = new Date(fc + 'T12:00:00');
-                if (fcDate <= fechaDate) {
-                    fechaReferenciaStr = fc;
-                } else {
-                    break;
-                }
-            }
-
-            if (fechaReferenciaStr) {
-                const refDate = new Date(fechaReferenciaStr + 'T12:00:00');
-                const diffDias = Math.floor((fechaDate.getTime() - refDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                /*
-                 * Es relevante si:
-                 * - diffDias === 0: Es el día marcado como completado
-                 * - diffDias >= intervalo: Ya pasó el intervalo, "toca" hacerlo
-                 * Los días con 0 < diffDias < intervalo son "libres"
-                 */
-                return diffDias === 0 || diffDias >= intervalo;
-            }
-
-            /* Si no hay fecha de referencia anterior, es relevante */
-            return true;
-        }
-
-        default:
-            return true;
-    }
-}
-
-/*
- * Comprueba si un hábito está en su ventana de oportunidad actual
- */
-
-export function estaEnVentanaOportunidad(habito: Habito): boolean {
-    if (!habito.ventanaOportunidad || !habito.ventanaOportunidad.habilitada) return false;
-
-    const ahora = new Date();
-    const horaActual = ahora.getHours();
-    const minutoActual = ahora.getMinutes();
-    const totalActual = horaActual * 60 + minutoActual;
-
-    const {horaInicio, minutoInicio, horaFin, minutoFin} = habito.ventanaOportunidad;
-    const totalInicio = horaInicio * 60 + minutoInicio;
-    const totalFin = horaFin * 60 + minutoFin;
-
-    if (totalInicio <= totalFin) {
-        return totalActual >= totalInicio && totalActual <= totalFin;
-    } else {
-        /* Caso cruza medianoche (ej: 22:00 a 06:00) */
-        return totalActual >= totalInicio || totalActual <= totalFin;
-    }
-}
+/* Re-exports para compatibilidad */
+export {esFechaRelevante, generarFechasRelevantes, esFechaRelevanteConHistorial} from './frecuenciaRelevancia';
+export {describirFrecuencia, obtenerIntervaloFrecuencia, estaEnVentanaOportunidad} from './frecuenciaUI';

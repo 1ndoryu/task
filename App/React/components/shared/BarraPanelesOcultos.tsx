@@ -5,6 +5,7 @@
  */
 
 import {Target, Folder, Terminal, FileText, Activity, LayoutGrid} from 'lucide-react';
+import {Boton} from '../ui';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 import {obtenerPanel} from '../../config/registroPaneles';
 import {obtenerTodosPlugins} from '../../config/registroPlugins';
@@ -78,9 +79,9 @@ export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanel
                     const info = obtenerInfoPanel(panelId);
 
                     return (
-                        <button key={panelId} className="botonPanelOculto" onClick={() => onMostrarPanel(panelId)} title={`Mostrar ${info.nombre}`}>
+                        <Boton key={panelId} claseAdicional="botonPanelOculto" onClick={() => onMostrarPanel(panelId)} title={`Mostrar ${info.nombre}`}>
                             {info.icono}
-                        </button>
+                        </Boton>
                     );
                 })}
             </div>

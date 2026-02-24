@@ -2,6 +2,7 @@ import {useState, useRef} from 'react';
 import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, Puzzle} from 'lucide-react';
 import {MenuContextual} from '../../shared';
 import {Boton} from '../../ui/Boton';
+import {Input} from '../../ui/Input';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../../types/dashboard';
 
 interface EncabezadoPerfilProps {
@@ -130,7 +131,7 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
 
             {menuUsuario.visible && <MenuContextual opciones={opcionesMenuUsuario} posicionX={menuUsuario.x} posicionY={menuUsuario.y} onSeleccionar={manejarOpcionMenu} onCerrar={() => setMenuUsuario({...menuUsuario, visible: false})} />}
 
-            <input ref={inputArchivoRef} type="file" accept=".json" onChange={manejarCambioArchivo} style={{display: 'none'}} />
+            <Input ref={inputArchivoRef} tipo="file" accept=".json" onChange={manejarCambioArchivo} style={{display: 'none'}} />
         </>
     );
 }

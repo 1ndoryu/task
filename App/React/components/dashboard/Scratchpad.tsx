@@ -7,6 +7,7 @@
 
 import type {TamanoFuente, AlturaScratchpad} from '../../hooks/useConfiguracionScratchpad';
 import {useScratchpad} from '../../hooks/dashboard/useScratchpad';
+import {Textarea} from '../ui';
 
 interface ScratchpadProps {
     valorInicial?: string;
@@ -50,9 +51,9 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                                 dangerouslySetInnerHTML={{__html: contenidoResaltado}}
                             />
                         )}
-                        <textarea
+                        <Textarea
                             ref={textareaRef}
-                            className={`scratchpadTextarea scratchpadFuente-${tamanoFuente} ${mostrarResaltadoMarkdown ? 'scratchpadTextarea--resaltado' : ''}`}
+                            claseAdicional={`scratchpadTextarea scratchpadFuente-${tamanoFuente} ${mostrarResaltadoMarkdown ? 'scratchpadTextarea--resaltado' : ''}`}
                             placeholder={placeholder}
                             value={valor}
                             onChange={manejarCambio}

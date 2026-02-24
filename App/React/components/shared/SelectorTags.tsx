@@ -8,7 +8,7 @@
  */
 
 import {Tag, Plus, X} from 'lucide-react';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 import {useSelectorTags} from '../../hooks/shared/useSelectorTags';
 
 interface SelectorTagsProps {
@@ -40,10 +40,10 @@ export function SelectorTags({tags, onTagsChange, placeholder = 'Nueva etiqueta.
                 {mostrandoInput ? (
                     <div className="pillOpcion pillOpcion--input">
                         <Plus size={14} />
-                        <input
+                        <Input
                             ref={inputRef}
-                            type="text"
-                            className="selectorTags__input"
+                            tipo="text"
+                            claseAdicional="selectorTags__input"
                             value={nuevoTag}
                             onChange={e => setNuevoTag(e.target.value)}
                             onKeyDown={manejarKeyDown}

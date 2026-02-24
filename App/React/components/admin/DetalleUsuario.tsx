@@ -9,6 +9,7 @@ import {useState} from 'react';
 import {X, Crown, Calendar, Mail, Shield, CheckCircle, Target, FolderKanban, CreditCard, Clock, Loader2} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import {Input} from '../ui/Input';
+import {Select} from '../ui/Select';
 import type {UsuarioAdmin} from '../../types/dashboard';
 
 interface DetalleUsuarioProps {
@@ -184,13 +185,7 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                             ) : (
                                 /* Usuario free: opción de activar */
                                 <div className="accionGrupo">
-                                    <select value={duracionPremium ?? ''} onChange={e => setDuracionPremium(e.target.value ? Number(e.target.value) : undefined)} className="accionSelect">
-                                        <option value="">Ilimitado</option>
-                                        <option value="30">30 días</option>
-                                        <option value="90">90 días</option>
-                                        <option value="180">180 días</option>
-                                        <option value="365">1 año</option>
-                                    </select>
+                                    <Select value={duracionPremium ?? ''} onChange={e => setDuracionPremium(e.target.value ? Number(e.target.value) : undefined)} claseAdicional="accionSelect" opciones={[{valor: '', etiqueta: 'Ilimitado'}, {valor: '30', etiqueta: '30 días'}, {valor: '90', etiqueta: '90 días'}, {valor: '180', etiqueta: '180 días'}, {valor: '365', etiqueta: '1 año'}]} />
                                     <Boton type="button" claseAdicional="accionAdminBoton accionActivar" onClick={() => onActivarPremium(duracionPremium)}>
                                         Activar Premium
                                     </Boton>

@@ -10,7 +10,7 @@ import {Check, Plus, Trash2} from 'lucide-react';
 import type {SubHabito, NivelImportancia, FrecuenciaHabito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../../types/dashboard';
 import {obtenerFechaHoy} from '../../../utils/fecha';
-import {Boton} from '../../ui';
+import {Boton, Input} from '../../ui';
 
 interface ListaSubHabitosProps {
     subhabitos: SubHabito[];
@@ -60,9 +60,8 @@ function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): J
             </div>
 
             {/* Botón eliminar */}
-            <button
-                type="button"
-                className="listaTareasHabito__eliminar"
+            <Boton
+                claseAdicional="listaTareasHabito__eliminar"
                 onClick={e => {
                     e.stopPropagation();
                     onEliminar();
@@ -70,7 +69,7 @@ function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): J
                 onPointerDown={e => e.stopPropagation()}
                 title="Eliminar">
                 <Trash2 size={14} />
-            </button>
+            </Boton>
         </div>
     );
 }
@@ -131,9 +130,9 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
                         e.preventDefault();
                         manejarCrear();
                     }}>
-                    <input
-                        type="text"
-                        className="listaTareasHabito__input"
+                    <Input
+                        tipo="text"
+                        claseAdicional="listaTareasHabito__input"
                         placeholder="Nuevo subhábito..."
                         value={textoNuevo}
                         onChange={e => setTextoNuevo(e.target.value)}

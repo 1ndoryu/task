@@ -6,6 +6,7 @@
 
 import React from 'react';
 import {ChevronRight, Check, Trash2, Clock} from 'lucide-react';
+import {Boton} from '../../ui';
 import {Tarea, Proyecto, DatosEdicionTarea, DatosNuevoHabito, TareaHabito, esTareaHabito} from '../../../types/dashboard';
 import {TareaItem} from '../TareaItem';
 import {tieneSubtareas, contarSubtareas} from '../../../utils/jerarquiaTareas';
@@ -157,7 +158,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
                 tareaItemElement
             )}
             {esColapsable && (
-                <button className="tareaColapsadorBoton" onClick={() => onToggleExpandir(tarea.id)} onPointerDown={e => e.stopPropagation()} title={subtareasOcultas ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>
+                <Boton claseAdicional="tareaColapsadorBoton" onClick={() => onToggleExpandir(tarea.id)} onPointerDown={e => e.stopPropagation()} title={subtareasOcultas ? `Expandir ${numSubtareas.total} subtareas` : `Colapsar ${numSubtareas.total} subtareas`}>
                     {subtareasOcultas ? (
                         <>
                             <ChevronRight size={12} />
@@ -170,7 +171,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
                             {numSubtareas.completadas}/{numSubtareas.total}
                         </span>
                     )}
-                </button>
+                </Boton>
             )}
         </div>
     );

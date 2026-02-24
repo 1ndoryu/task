@@ -139,22 +139,45 @@ class HabitosRepository
             }
         }
 
-        /* Batch UPDATE con CASE para evitar N+1 */
+        /* Batch UPDATE con CASE — single prepare para evitar N+1 */
         if (!empty($toUpdate)) {
             $ids = array_column($toUpdate, 'id');
             $caseNombre = '';
             $caseFrecuencia = '';
             $caseCompletado = '';
             $caseData = '';
+            $nombreParams = [];
+            $frecuenciaParams = [];
+            $completadoParams = [];
+            $dataParams = [];
 
             foreach ($toUpdate as $item) {
-                $caseNombre .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['nombre']);
-                $caseFrecuencia .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['frecuencia_tipo']);
-                $caseCompletado .= $wpdb->prepare(" WHEN id = %d THEN %d", $item['id'], $item['completado_hoy']);
-                $caseData .= $wpdb->prepare(" WHEN id = %d THEN %s", $item['id'], $item['data']);
+                $caseNombre .= ' WHEN id = %d THEN %s';
+                $nombreParams[] = $item['id'];
+                $nombreParams[] = $item['nombre'];
+
+                $caseFrecuencia .= ' WHEN id = %d THEN %s';
+                $frecuenciaParams[] = $item['id'];
+                $frecuenciaParams[] = $item['frecuencia_tipo'];
+
+                $caseCompletado .= ' WHEN id = %d THEN %d';
+                $completadoParams[] = $item['id'];
+                $completadoParams[] = $item['completado_hoy'];
+
+                $caseData .= ' WHEN id = %d THEN %s';
+                $dataParams[] = $item['id'];
+                $dataParams[] = $item['data'];
             }
 
             $idsPlaceholders = implode(',', array_fill(0, count($ids), '%d'));
+            $allParams = array_merge(
+                $nombreParams,
+                $frecuenciaParams,
+                $completadoParams,
+                $dataParams,
+                [$now],
+                $ids
+            );
             $wpdb->query($wpdb->prepare(
                 "UPDATE $table SET
                     nombre = CASE $caseNombre END,
@@ -164,24 +187,42 @@ class HabitosRepository
                     deleted_at = NULL,
                     updated_at = %s
                 WHERE id IN ($idsPlaceholders)",
-                array_merge([$now], $ids)
+                ...$allParams
             ));
         }
 
-        /* Batch INSERT */
-        foreach ($toInsert as $row) {
-            $wpdb->insert($table, $row, ['%d', '%d', '%s', '%s', '%d', '%s', '%s']);
+        /* Batch INSERT — single query para evitar N+1 */
+        if (!empty($toInsert)) {
+            $valuePlaceholders = [];
+            $insertParams = [];
+            foreach ($toInsert as $row) {
+                $valuePlaceholders[] = '(%d, %d, %s, %s, %d, %s, %s)';
+                $insertParams[] = $row['user_id'];
+                $insertParams[] = $row['id_local'];
+                $insertParams[] = $row['nombre'];
+                $insertParams[] = $row['frecuencia_tipo'];
+                $insertParams[] = $row['completado_hoy'];
+                $insertParams[] = $row['fecha_creacion'];
+                $insertParams[] = $row['data'];
+            }
+            $valuesSQL = implode(', ', $valuePlaceholders);
+            $wpdb->query($wpdb->prepare(
+                "INSERT INTO $table (user_id, id_local, nombre, frecuencia_tipo, completado_hoy, fecha_creacion, data) VALUES $valuesSQL",
+                ...$insertParams
+            ));
         }
 
-        /* Soft Delete para los que ya no vienen (Solo si NO es actualización parcial) */
+        /* Soft Delete para los que ya no vienen (Solo si NO es actualizacion parcial) */
         if (!$partialUpdate) {
             $toDelete = array_diff($existingIds, $incomingIds);
             if (!empty($toDelete)) {
-                $idsList = implode(',', array_map('intval', $toDelete));
+                $deleteIds = array_values(array_map('intval', $toDelete));
+                $deletePlaceholders = implode(',', array_fill(0, count($deleteIds), '%d'));
                 $wpdb->query($wpdb->prepare(
-                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($idsList)",
+                    "UPDATE $table SET deleted_at = %s WHERE user_id = %d AND id_local IN ($deletePlaceholders)",
                     $now,
-                    $this->userId
+                    $this->userId,
+                    ...$deleteIds
                 ));
             }
         }

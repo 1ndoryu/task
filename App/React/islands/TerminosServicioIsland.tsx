@@ -1,4 +1,5 @@
 import '../styles/paginasLegales.css';
+import {GloryLink} from '../../../Glory/assets/react/src/core/router/GloryLink';
 
 interface TerminosServicioProps {
     titulo?: string;
@@ -218,7 +219,7 @@ export default function TerminosServicioIsland({titulo = 'Términos de Servicio'
                             <strong>Soporte general:</strong> soporte@nakomi.studio
                         </li>
                         <li>
-                            <strong>Formulario de contacto:</strong> <a href="/soporte">task.nakomi.studio/soporte</a>
+                            <strong>Formulario de contacto:</strong> <GloryLink href="/soporte">task.nakomi.studio/soporte</GloryLink>
                         </li>
                     </ul>
                 </section>

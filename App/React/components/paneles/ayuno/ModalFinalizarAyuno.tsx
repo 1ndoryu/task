@@ -6,12 +6,12 @@
  * - Continuar el ayuno
  */
 
-import {useEffect, useMemo, useState} from 'react';
 import {Play, Trash2, Save, Flag, CalendarClock, CheckCircle2} from 'lucide-react';
 import {Modal} from '../../shared/Modal';
 import type {FrecuenciaHabito} from '../../../types/dashboard';
-import {calcularVentanaComidaMs, formatearDuracionAyuno} from '../../../utils/ayunoVentanas';
-import {Boton} from '../../ui';
+import {formatearDuracionAyuno} from '../../../utils/ayunoVentanas';
+import {Boton, Input} from '../../ui';
+import {useModalFinalizarAyuno, ajustarHoraPorMinutos} from '../../../hooks/paneles/useModalFinalizarAyuno';
 
 interface ModalFinalizarAyunoProps {
     estaAbierto: boolean;
@@ -23,39 +23,6 @@ interface ModalFinalizarAyunoProps {
     onGuardar: (horaFinComidaMs: number) => void;
     onEliminar: () => void;
     onContinuar: () => void;
-}
-
-function formatearHoraHHMM(ms: number): string {
-    const fecha = new Date(ms);
-    const hora = String(fecha.getHours()).padStart(2, '0');
-    const minuto = String(fecha.getMinutes()).padStart(2, '0');
-    return `${hora}:${minuto}`;
-}
-
-function parsearHoraHHMM(valor: string): {hora: number; minuto: number} | null {
-    const coincide = /^(\d{1,2}):(\d{2})$/.exec(valor.trim());
-    if (!coincide) return null;
-    const hora = Number(coincide[1]);
-    const minuto = Number(coincide[2]);
-    if (!Number.isFinite(hora) || !Number.isFinite(minuto)) return null;
-    if (hora < 0 || hora > 23 || minuto < 0 || minuto > 59) return null;
-    return {hora, minuto};
-}
-
-function construirFinComidaMs(baseMs: number, horaTexto: string): number {
-    const horaParseada = parsearHoraHHMM(horaTexto);
-    if (!horaParseada) return baseMs;
-    const base = new Date(baseMs);
-    base.setHours(horaParseada.hora, horaParseada.minuto, 0, 0);
-    return base.getTime();
-}
-
-function ajustarHoraPorMinutos(horaTexto: string, deltaMinutos: number): string {
-    const parsed = parsearHoraHHMM(horaTexto) ?? {hora: 0, minuto: 0};
-    const base = new Date();
-    base.setHours(parsed.hora, parsed.minuto, 0, 0);
-    base.setMinutes(base.getMinutes() + deltaMinutos);
-    return `${String(base.getHours()).padStart(2, '0')}:${String(base.getMinutes()).padStart(2, '0')}`;
 }
 
 function formatearDiaCorto(ms: number): string {
@@ -87,29 +54,7 @@ function formatearFechaHoraCorta(ms: number): string {
 }
 
 export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAyunoMs, duracionObjetivoMs, frecuencia, onGuardar, onEliminar, onContinuar}: ModalFinalizarAyunoProps): JSX.Element | null {
-    const [horaFinComida, setHoraFinComida] = useState(() => formatearHoraHHMM(finAyunoMs));
-
-    useEffect(() => {
-        if (!estaAbierto) return;
-        setHoraFinComida(formatearHoraHHMM(finAyunoMs));
-    }, [estaAbierto, finAyunoMs]);
-
-    const finComidaMs = useMemo(() => {
-        return construirFinComidaMs(finAyunoMs, horaFinComida);
-    }, [finAyunoMs, horaFinComida]);
-
-    const tiempoEfectivoMs = Math.max(0, finComidaMs - inicioAyunoMs);
-    const completado = tiempoEfectivoMs >= duracionObjetivoMs;
-
-    const ventana = useMemo(() => {
-        return calcularVentanaComidaMs({finAyunoMs: finComidaMs, duracionObjetivoMs, frecuencia});
-    }, [finComidaMs, duracionObjetivoMs, frecuencia]);
-
-    const tiempoHastaProximo = useMemo(() => {
-        const delta = ventana.inicioProximoAyunoMs - Date.now();
-        if (delta <= 0) return 'Ya disponible';
-        return `En ${formatearDuracionAyuno(delta)}`;
-    }, [ventana.inicioProximoAyunoMs]);
+    const {horaFinComida, setHoraFinComida, finComidaMs, tiempoEfectivoMs, completado, ventana, tiempoHastaProximo} = useModalFinalizarAyuno({estaAbierto, inicioAyunoMs, finAyunoMs, duracionObjetivoMs, frecuencia});
 
     if (!estaAbierto) return null;
 
@@ -146,10 +91,10 @@ export function ModalFinalizarAyuno({estaAbierto, onCerrar, inicioAyunoMs, finAy
                         <div className="modalAyunoTimelineContenido">
                             <span className="modalAyunoTimelineTitulo">Fin de comida</span>
                             <div className="modalAyunoTimelineHoraEditable">
-                                <input
-                                    type="text"
+                                <Input
+                                    tipo="text"
                                     inputMode="numeric"
-                                    className="input input--text selectorVentanaOportunidad__inputHora modalAyunoTimelineHoraInput"
+                                    claseAdicional="selectorVentanaOportunidad__inputHora modalAyunoTimelineHoraInput"
                                     value={horaFinComida}
                                     onChange={e => setHoraFinComida((e.target as HTMLInputElement).value)}
                                     onKeyDown={e => {

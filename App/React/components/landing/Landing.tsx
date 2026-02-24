@@ -5,6 +5,7 @@
 
 import '../../styles/dashboard/componentes/Landing/landing.css';
 import {Boton} from '../ui';
+import {GloryLink} from '../../../../Glory/assets/react/src/core/router/GloryLink';
 import dashboardPreview from '../../../Assets/svg/test.svg';
 import LandingHabitAnimation from './LandingHabitAnimation';
 import LandingProjectsAnimation from './LandingProjectsAnimation';
@@ -109,12 +110,12 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
             {/* FOOTER */}
             <footer id="landing-footer" className="landingFooter">
                 <div className="landingFooterLinks">
-                    <a href="/politica-privacidad" className="landingFooterLink">
+                    <GloryLink href="/politica-privacidad" className="landingFooterLink">
                         Política de Privacidad
-                    </a>
-                    <a href="/terminos-servicio" className="landingFooterLink">
+                    </GloryLink>
+                    <GloryLink href="/terminos-servicio" className="landingFooterLink">
                         Términos de Servicio
-                    </a>
+                    </GloryLink>
                 </div>
                 <p className="landingFooterTexto">Glory &copy; {new Date().getFullYear()}</p>
             </footer>

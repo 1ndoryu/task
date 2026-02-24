@@ -7,6 +7,7 @@
 import {useState, useRef, useEffect} from 'react';
 import {User, ChevronDown, X, Check} from 'lucide-react';
 import type {Participante} from '../../types/dashboard';
+import {Boton} from '../ui';
 
 interface SelectorAsignadoProps {
     participantes: Participante[];

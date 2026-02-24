@@ -17,9 +17,9 @@ export function EncabezadoBuscadorMovilTrigger({onClick, esTablet, mostrarBotonS
     if (mostrarBotonSeleccion && onToggleSeleccion) {
         return (
            
-            <button type="button" className={`botonIconoEncabezado botonBuscadorMovil ${modoSeleccionActivo ? 'botonIconoEncabezado--activo' : ''}`} onClick={onToggleSeleccion} title={modoSeleccionActivo ? 'Desactivar selección múltiple' : 'Activar selección múltiple'} style={modoSeleccionActivo ? {color: 'var(--color-primario)'} : {}}>
+            <Boton type="button" claseAdicional={`botonIconoEncabezado botonBuscadorMovil ${modoSeleccionActivo ? 'botonIconoEncabezado--activo' : ''}`} onClick={onToggleSeleccion} title={modoSeleccionActivo ? 'Desactivar selección múltiple' : 'Activar selección múltiple'} style={modoSeleccionActivo ? {color: 'var(--color-primario)'} : {}}>
                 <ListChecks size={18} />
-            </button>
+            </Boton>
           
         );
     }

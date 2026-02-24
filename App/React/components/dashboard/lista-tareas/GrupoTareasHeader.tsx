@@ -8,6 +8,7 @@ import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {ChevronRight, ChevronDown, Trash2} from 'lucide-react';
 import type {GrupoTareas} from '../../../types/dashboard';
 import {useGruposTareasStore} from '../../../stores/gruposTareasStore';
+import {Boton, Input} from '../../ui';
 
 interface GrupoTareasHeaderProps {
     grupo: GrupoTareas;
@@ -62,12 +63,12 @@ export function GrupoTareasHeader({grupo, cantidadTareas}: GrupoTareasHeaderProp
 
     return (
         <div className={`grupoTareasHeader ${grupo.colapsado ? 'grupoTareasHeader--colapsado' : ''}`}>
-            <button className="grupoTareasToggle" onClick={() => toggleColapsarGrupo(grupo.id)} title={grupo.colapsado ? 'Expandir grupo' : 'Colapsar grupo'}>
+            <Boton claseAdicional="grupoTareasToggle" onClick={() => toggleColapsarGrupo(grupo.id)} title={grupo.colapsado ? 'Expandir grupo' : 'Colapsar grupo'}>
                 {grupo.colapsado ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-            </button>
+            </Boton>
 
             {editando ? (
-                <input ref={inputRef} type="text" className="grupoTareasInputNombre" value={nombreEditado} onChange={e => setNombreEditado(e.target.value)} onKeyDown={manejarTecla} onBlur={guardarEdicion} />
+                <Input ref={inputRef} tipo="text" claseAdicional="grupoTareasInputNombre" value={nombreEditado} onChange={e => setNombreEditado(e.target.value)} onKeyDown={manejarTecla} onBlur={guardarEdicion} />
             ) : (
                 <span className={`grupoTareasNombre ${grupo.esSistema ? 'grupoTareasNombre--sistema' : ''}`} onClick={() => !grupo.esSistema && setEditando(true)} title={grupo.esSistema ? 'Grupo del sistema' : 'Click para editar'}>
                     {grupo.nombre}
@@ -75,9 +76,9 @@ export function GrupoTareasHeader({grupo, cantidadTareas}: GrupoTareasHeaderProp
             )}
 
             {!grupo.esSistema && (
-                <button className="grupoTareasEliminar" onClick={manejarEliminar} title="Eliminar grupo">
+                <Boton claseAdicional="grupoTareasEliminar" onClick={manejarEliminar} title="Eliminar grupo">
                     <Trash2 size={12} />
-                </button>
+                </Boton>
             )}
         </div>
     );

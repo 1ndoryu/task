@@ -5,7 +5,7 @@
 
 import {obtenerFechaLocalISO, obtenerFechaEfectiva, obtenerFechaHoy} from './fecha';
 import {FrecuenciaHabito} from '../types/dashboard';
-import {esFechaRelevante} from './frecuenciaHabitos';
+import {esFechaRelevante} from './frecuenciaRelevancia';
 
 /* Nombres de días de la semana abreviados */
 export const DIAS_SEMANA_COMPLETO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];

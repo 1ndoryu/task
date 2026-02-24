@@ -9,7 +9,7 @@ import {APP_TEXTS} from '../../constants/appTexts';
 import {VERSION_ACTUAL} from '../../data/changelog';
 import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
 import type {InfoSuscripcion, Tarea, Habito, Proyecto, SincronizacionInfo} from '../../types/dashboard';
-import type {GrupoOpciones, OpcionMenu} from '../shared/MenuOpcionesPanel';
+import type {GrupoOpciones, OpcionMenuPanel} from '../shared/MenuOpcionesPanel';
 
 // Sub-componentes
 import {EncabezadoTitulo} from './encabezado/EncabezadoTitulo';
@@ -60,7 +60,7 @@ interface DashboardEncabezadoProps {
     opcionesMovil?: {
         titulo: string;
         grupos?: GrupoOpciones[];
-        opciones?: OpcionMenu[];
+        opciones?: OpcionMenuPanel[];
         tieneFiltrosActivos?: boolean;
     };
     paginaMovilActiva?: string;
