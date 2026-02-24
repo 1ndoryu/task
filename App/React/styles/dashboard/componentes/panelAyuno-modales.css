@@ -10,10 +10,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 0 20px 0;
+    padding: var(--dashboard-espacioSmMd) 0 20px 0;
     text-align: center;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
-    margin-bottom: 15px;
+    margin-bottom: var(--dashboard-espacioMdLg);
 }
 
 .modalAyunoHeroTiempo {
@@ -31,12 +31,12 @@
 }
 
 .modalAyunoHeroObjetivo {
-    margin-top: 6px;
+    margin-top: var(--dashboard-espacioS);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
 }
 
 .modalAyunoTimeline {
@@ -183,11 +183,11 @@
 .modalAyunoFinalizarAcciones {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
     flex-wrap: wrap;
-    margin-top: 10px;
+    margin-top: var(--dashboard-espacioSmMd);
     border-top: 1px solid var(--dashboard-bordeSutil);
-    padding-top: 15px;
+    padding-top: var(--dashboard-espacioMdLg);
 }
 
 .modalAyunoFinalizarBoton {
@@ -245,7 +245,7 @@
 }
 
 .panelAyunoHistorialItem {
-    padding: 6px 0;
+    padding: var(--dashboard-espacioS) 0;
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     border-bottom: 1px solid var(--dashboard-bordeSutil);
@@ -259,7 +259,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
 }
 
 .panelAyunoHistorialItem--completado .panelAyunoHistorialItemTiempo {
@@ -296,7 +296,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--dashboard-espacioLg);
-    padding: 10px 0;
+    padding: var(--dashboard-espacioSmMd) 0;
     user-select: none;
 }
 

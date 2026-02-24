@@ -54,7 +54,7 @@
 .indicadorMejor {
     display: inline-block;
     margin-left: var(--dashboard-espacioXs);
-    font-size: 8px;
+    font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-estadoExito);
 }
 

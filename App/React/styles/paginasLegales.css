@@ -22,7 +22,7 @@
 }
 
 .contenidoLegal h1 {
-  font-size: 2.5rem;
+  font-size: var(--dashboard-tamanoDisplay);
   font-weight: 700;
   color: var(--dashboard-textoActivo);
   margin-bottom: var(--dashboard-espacioMd);
@@ -34,16 +34,16 @@
   text-align: center;
   color: var(--dashboard-textoSecundario);
   font-size: var(--dashboard-tamanoMovilBase);
-  margin-bottom: 3rem;
+  margin-bottom: var(--dashboard-espacio3xl);
   font-style: italic;
 }
 
 .seccionLegal {
-  margin-bottom: 3rem;
+  margin-bottom: var(--dashboard-espacio3xl);
 }
 
 .seccionLegal h2 {
-  font-size: 1.75rem;
+  font-size: var(--dashboard-tamanoH2);
   font-weight: 600;
   color: var(--dashboard-textoActivo);
   margin-bottom: var(--dashboard-espacioLg);
@@ -109,7 +109,7 @@
 }
 
 .notaFinal {
-  margin-top: 3rem;
+  margin-top: var(--dashboard-espacio3xl);
   padding: var(--dashboard-espacioLg);
   background: var(--dashboard-estadoInfoFondo);
   border: 1px solid var(--dashboard-estadoInfoBorde);
@@ -134,7 +134,7 @@
   }
 
   .contenidoLegal h1 {
-    font-size: 1.75rem;
+    font-size: var(--dashboard-tamanoH2);
   }
 
   .seccionLegal h2 {

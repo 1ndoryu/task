@@ -222,7 +222,7 @@
     .menuOpcionesPanelItemTexto {
         display: flex;
         flex-direction: column;
-        gap: 1px;
+        gap: var(--dashboard-espacioXxs);
         flex: 1;
     }
 

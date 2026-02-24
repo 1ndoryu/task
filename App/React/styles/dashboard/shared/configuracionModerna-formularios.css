@@ -186,7 +186,7 @@
 }
 
 .formularioHabitoModerno__historialEtiqueta {
-    margin-bottom: 10px;
+    margin-bottom: var(--dashboard-espacioSmMd);
     display: block;
     color: var(--dashboard-textoApagado);
     font-size: var(--dashboard-tamanoPequeno);

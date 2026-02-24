@@ -105,7 +105,7 @@
 /* Hover botones migados a variantes atomicas (Fase 6.5) */
 
 .valorContador {
-    font-size: 2.5rem;
+    font-size: var(--dashboard-tamanoDisplay);
     font-weight: 700;
     color: var(--dashboard-textoSobreAcento);
     min-width: 80px;

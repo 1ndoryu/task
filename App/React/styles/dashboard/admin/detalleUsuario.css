@@ -229,7 +229,7 @@
 }
 
 .estadisticaValor {
-    font-size: 1.25rem;
+    font-size: var(--dashboard-tamanoEncabezado);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     font-family: var(--dashboard-fuenteMonoespaciada);

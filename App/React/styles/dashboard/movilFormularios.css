@@ -22,7 +22,7 @@
      * CAMPO TÍTULO - Más compacto
      */
     .campoTituloLimpio__input {
-        font-size: 1.25rem;
+        font-size: var(--dashboard-tamanoEncabezado);
         min-height: 1.6rem;
     }
 
@@ -115,13 +115,13 @@
     .seccionResponsables__avatarCompacto {
         width: 20px;
         height: 20px;
-        margin-left: -6px;
+        margin-left: calc(var(--dashboard-espacioS) * -1);
     }
 
     .seccionResponsables__avatarMas {
         width: 20px;
         height: 20px;
-        margin-left: -6px;
+        margin-left: calc(var(--dashboard-espacioS) * -1);
         font-size: var(--dashboard-tamanoMuyPequeno);
     }
 
@@ -161,7 +161,7 @@
 
     .formularioHabitoModerno__historialEtiqueta {
         font-size: var(--dashboard-tamanoMuyPequeno);
-        margin-bottom: 6px;
+        margin-bottom: var(--dashboard-espacioS);
     }
 
     /* 
@@ -277,7 +277,7 @@
     }
 
     .panelChatHistorial--compacto .timelineMensajeFecha {
-        font-size: 8px;
+        font-size: var(--dashboard-tamanoMicro);
     }
 
     .panelChatHistorial--compacto .timelineMensajeAvatar {
@@ -317,7 +317,7 @@
     /* Mensajes del sistema más compactos */
     .panelChatHistorial--compacto .timelineMensajeSistema {
         padding: 2px 0;
-        font-size: 8px;
+        font-size: var(--dashboard-tamanoMicro);
     }
 
     /* Separador de día más compacto */
@@ -326,7 +326,7 @@
     }
 
     .panelChatHistorial--compacto .timelineSeparadorDiaTexto {
-        font-size: 8px;
+        font-size: var(--dashboard-tamanoMicro);
     }
 
     /* Estado vacío más compacto */

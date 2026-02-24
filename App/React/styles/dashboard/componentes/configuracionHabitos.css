@@ -194,7 +194,7 @@
 .listaTareasHabito__item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: 6px 0px;
     background: var(--dashboard-fondoSecundario);
     border-radius: var(--dashboard-radioSm);
@@ -261,7 +261,7 @@
 .listaTareasHabito__item .tareaCheckbox {
     width: var(--dashboard-tamanoMuyPequeno);
     height: var(--dashboard-tamanoMuyPequeno);
-    margin-top: 1px;
+    margin-top: var(--dashboard-espacioXxs);
 }
 
 .listaTareasHabito__contenido {

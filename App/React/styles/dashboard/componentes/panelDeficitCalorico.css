@@ -103,7 +103,7 @@
 .deficitMacrosGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
+    gap: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
 }
 
 .deficitMacroItem {
@@ -154,7 +154,7 @@
 .deficitEntrada {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
 }
 
 .deficitEntradaInputContenedor {
@@ -187,7 +187,7 @@
 .deficitEntradaCargando {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-acento);
 }
@@ -210,7 +210,7 @@
 .deficitError {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: 8px 10px;
     border-radius: var(--dashboard-radioMd);
     font-size: var(--dashboard-tamanoPequeno);
@@ -270,7 +270,7 @@
 .deficitComidaDetalles {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
 }
 
 .deficitComidaHora {
@@ -334,7 +334,7 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     background: transparent;
     border: none;
     padding: 0;
@@ -367,7 +367,7 @@
 .deficitHistorialDiaGrupo {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding-bottom: var(--dashboard-espacioMd);
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
@@ -432,7 +432,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
     padding-top: var(--dashboard-espacioSm);
     margin-top: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordeSutil);

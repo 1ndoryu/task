@@ -9,7 +9,7 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     background: transparent;
     border: none;
     padding: 0;
@@ -33,7 +33,7 @@
 .panelAyunoHistorialItemDetalles {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     flex-wrap: wrap;
 }
 
@@ -66,7 +66,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
     padding-top: var(--dashboard-espacioSm);
 }
 
@@ -112,7 +112,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: 10px 12px;
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioMd);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
     background: var(--dashboard-superposicionSutil);
@@ -127,7 +127,7 @@
 .selectorHoraAyuno {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     width: 100%;
 }
 
@@ -157,7 +157,7 @@
 .modalAyunoUltimaComidaAcciones {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
 }
 
 .modalAyunoUltimaComidaBoton {
@@ -171,7 +171,7 @@
     transition: all var(--dashboard-transicionRapida);
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
 }
 
 .modalAyunoUltimaComidaBoton:hover {

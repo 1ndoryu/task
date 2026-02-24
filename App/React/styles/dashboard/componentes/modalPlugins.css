@@ -12,7 +12,7 @@
 .modalPluginsCuerpo {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: 0; /* Padding ya manejado por modalContenido en shared */
 }
 
@@ -34,7 +34,7 @@
 .modalPluginsInfo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
     flex: 1;
     min-width: 0;
 }
@@ -85,7 +85,7 @@
     position: relative;
     width: 36px;
     height: 20px;
-    border-radius: 10px;
+    border-radius: var(--dashboard-espacioSmMd);
     border: none;
     background: var(--dashboard-bordeSutil);
     cursor: pointer;
@@ -241,7 +241,7 @@
 .configDeficitPreview {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: 8px 10px;
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
@@ -289,7 +289,7 @@
 .configDeficitBotonGuardar {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: 6px 14px;
     border-radius: var(--dashboard-radioSm);
     border: 1px solid var(--dashboard-bordePrincipal);

@@ -120,7 +120,7 @@
     flex: 1;
     min-width: 280px;
     text-align: right;
-    padding-bottom: 6px; /* Visual alignment with larger text baseline */
+    padding-bottom: var(--dashboard-espacioS); /* Visual alignment with larger text baseline */
 }
 
 .landingHeroGrid {
@@ -211,7 +211,7 @@
 }
 
 .landingFeatureIcono {
-    font-size: 2.5rem;
+    font-size: var(--dashboard-tamanoDisplay);
     color: var(--dashboard-textoActivo);
     margin-bottom: var(--dashboard-espacioLg);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -361,7 +361,7 @@
     flex: 0 1 400px;
     min-width: 280px;
     text-align: right;
-    padding-bottom: 6px;
+    padding-bottom: var(--dashboard-espacioS);
 }
 
 .landingSectionGrid {
@@ -415,7 +415,7 @@
 }
 
 .landingFeatureTitle {
-    font-size: 1.125rem;
+    font-size: var(--dashboard-tamanoMediano);
     font-weight: 500;
     color: var(--dashboard-textoActivo);
     margin-bottom: var(--dashboard-espacioSm);

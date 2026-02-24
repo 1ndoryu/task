@@ -63,7 +63,7 @@
 
 .selectorEstadoTareaFlecha {
     color: var(--dashboard-textoMuyApagado);
-    font-size: 8px;
+    font-size: var(--dashboard-tamanoMicro);
 }
 
 .selectorEstadoTareaPanel {
@@ -184,7 +184,7 @@
 
 .selectorEstadoHabitoFlecha {
     color: var(--dashboard-textoMuyApagado);
-    font-size: 8px;
+    font-size: var(--dashboard-tamanoMicro);
 }
 
 .selectorEstadoHabitoPanel {

@@ -3,7 +3,7 @@
  */
 
 .configuracionUsuarioDescripcion {
-    font-size: 13px; /* Valor aproximado para mejor lectura, ligeramente mayor que base (12px) */
+    font-size: var(--dashboard-tamanoBase); /* Valor aproximado para mejor lectura, ligeramente mayor que base (12px) */
     color: var(--dashboard-textoSecundario);
     margin-bottom: var(--dashboard-espacioLg); /* 12px */
     line-height: 1.5;

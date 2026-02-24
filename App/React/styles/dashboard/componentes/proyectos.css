@@ -6,7 +6,7 @@
 .listaProyectos {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 /* 
@@ -84,7 +84,7 @@
 .proyectoProgreso {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     width: 50px;
     flex-shrink: 0;
 }

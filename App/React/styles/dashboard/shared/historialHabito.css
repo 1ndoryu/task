@@ -9,7 +9,7 @@
  */
 .historialHabitoContenedor {
     display: flex;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     align-items: center;
 }
 
@@ -41,7 +41,7 @@
  */
 .historialHabitoDiaLabel {
     font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: 8px;
+    font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoSecundario);
     line-height: 1;
 }

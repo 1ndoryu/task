@@ -65,11 +65,11 @@ body {
         -moz-user-select: text;
         -ms-user-select: text;
         user-select: text;
-        padding-right: 10px !important;
+        padding-right: var(--dashboard-espacioSmMd) !important;
     }
 
     .dashboardContenedor textarea {
-        padding-right: 10px !important;
+        padding-right: var(--dashboard-espacioSmMd) !important;
     }
 
     /* Bloquear zoom por gestos (pinch-to-zoom) en todo el body */
@@ -152,8 +152,8 @@ body {
     .tareaItem,
     .tablaFila,
     .proyectoItem {
-        padding-left: 15px;
-        padding-right: 15px;
+        padding-left: var(--dashboard-espacioMdLg);
+        padding-right: var(--dashboard-espacioMdLg);
         min-height: var(--dashboard-tamanoTactilMinimo);
     }
 }

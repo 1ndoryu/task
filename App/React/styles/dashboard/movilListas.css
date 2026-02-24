@@ -116,7 +116,7 @@
     /* Badges mas compactos */
     .tablaFilaCompacta .badgeInfo {
         padding: 1px 4px;
-        font-size: 8px;
+        font-size: var(--dashboard-tamanoMicro);
     }
 
     .tablaFilaCompacta .badgeInfo svg {
@@ -217,8 +217,8 @@
     .tablaFilaCompacta,
     .proyectoItem,
     .proyectoItemWrapper--compacto .proyectoItem {
-        padding-left: 15px;
-        padding-right: 15px;
+        padding-left: var(--dashboard-espacioMdLg);
+        padding-right: var(--dashboard-espacioMdLg);
     }
 
     /*

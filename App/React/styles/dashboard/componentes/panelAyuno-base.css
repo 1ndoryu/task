@@ -119,7 +119,7 @@
     gap: var(--dashboard-espacioXs);
     z-index: 1;
     text-align: center;
-    margin-top: 15px;
+    margin-top: var(--dashboard-espacioMdLg);
 }
 
 .panelAyunoCentroEtiqueta {
@@ -158,7 +158,7 @@
     cursor: pointer;
     transition: all var(--dashboard-transicionNormal);
     background: transparent;
-    margin-top: 6px;
+    margin-top: var(--dashboard-espacioS);
 }
 
 .panelAyunoBotonCircular:hover {
@@ -167,7 +167,7 @@
 }
 
 .iconoPlayAjustado {
-    margin-left: 2px; /* Ajuste visual Ã³ptico para el icono de Play */
+    margin-left: var(--dashboard-espacioXxs); /* Ajuste visual optico para el icono de Play */
 }
 
 /* Iniciar: Verde */
@@ -193,7 +193,7 @@
 /* Selector de duraciÃ³n */
 .panelAyunoSelectorDuracion {
     display: flex;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     justify-content: center;
 }
 
@@ -241,7 +241,7 @@
 .panelAyunoBoton {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: 8px 16px;
     border-radius: var(--dashboard-radioMd);
     border: 1px solid var(--dashboard-bordeSutil);

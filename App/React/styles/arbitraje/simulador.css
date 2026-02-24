@@ -119,7 +119,7 @@
 }
 
 .valorCiclo {
-    font-size: 16px;
+    font-size: var(--dashboard-tamanoNormal);
     font-weight: 500;
     color: var(--dashboard-textoActivo);
 }

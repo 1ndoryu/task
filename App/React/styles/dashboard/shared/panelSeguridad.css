@@ -57,7 +57,7 @@
  * Iconos de seguridad
  */
 .iconoSeguridad {
-    font-size: 1.25rem;
+    font-size: var(--dashboard-tamanoEncabezado);
     flex-shrink: 0;
     width: 36px;
     height: 36px;

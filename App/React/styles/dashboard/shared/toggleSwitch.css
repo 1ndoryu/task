@@ -26,7 +26,7 @@
     bottom: 0;
     background-color: var(--dashboard-bordePrincipal);
     transition: var(--dashboard-transicionNormal);
-    border-radius: 9px;
+    border-radius: var(--dashboard-radioPildora);
 }
 
 .toggleSlider::before {

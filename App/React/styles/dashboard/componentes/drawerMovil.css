@@ -112,7 +112,7 @@
     justify-content: center;
     background: var(--dashboard-acento);
     color: var(--dashboard-textoSobreAcento);
-    font-size: 17px;
+    font-size: var(--dashboard-tamanoNormal);
     font-weight: 600;
     flex-shrink: 0;
 }
@@ -289,7 +289,7 @@
     color: var(--dashboard-textoSobreAcento);
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 600;
-    border-radius: 10px;
+    border-radius: var(--dashboard-espacioSmMd);
 }
 
 /* 
