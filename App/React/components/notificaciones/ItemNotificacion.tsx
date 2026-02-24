@@ -8,7 +8,7 @@
 import {Users, UserCheck, Calendar, UserPlus, UserMinus, Paperclip, MessageCircle, Target, Check, Trash2} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import type {Notificacion, TipoNotificacion} from '../../types/dashboard';
-import {formatearFechaRelativa} from '../../utils/fecha';
+import {formatearFechaRelativa} from '../../utils/fechaUI';
 
 interface ItemNotificacionProps {
     notificacion: Notificacion;

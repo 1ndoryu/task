@@ -8,7 +8,7 @@
 import {Check, X, Clock, UserX} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import type {SolicitudEquipo} from '../../types/dashboard';
-import {formatearFechaRelativa} from '../../utils/fecha';
+import {formatearFechaRelativa} from '../../utils/fechaUI';
 
 interface ListaSolicitudesProps {
     solicitudes: SolicitudEquipo[];

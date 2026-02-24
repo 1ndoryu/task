@@ -13,7 +13,7 @@ import {MenuContextualAdaptivo} from '../../shared/MenuContextualAdaptivo';
 import {BadgeInfo, BadgeGroup} from '../../shared/BadgeInfo';
 import {AccionesItem} from '../../shared/AccionesItem';
 import type {Proyecto, Tarea, DatosEdicionTarea, NivelUrgencia} from '../../../types/dashboard';
-import {obtenerTextoFechaLimite, obtenerVarianteFechaLimite, formatearFechaCorta} from '../../../utils/fecha';
+import {obtenerTextoFechaLimite, obtenerVarianteFechaLimite, formatearFechaCorta} from '../../../utils/fechaUI';
 import {obtenerTextoPrioridad} from '../../../utils/constantes';
 import {useListaProyectos} from '../../../hooks/dashboard/useListaProyectos';
 

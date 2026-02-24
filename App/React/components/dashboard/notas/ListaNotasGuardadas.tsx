@@ -1,6 +1,7 @@
 import {Clock, Trash2, Edit2} from 'lucide-react';
+import {Boton} from '../../ui';
 import type {Nota, CarpetaNota} from '../../../types/notas';
-import {formatearFechaRelativa} from '../../../utils/fecha';
+import {formatearFechaRelativa} from '../../../utils/fechaUI';
 import {NotaItem} from './NotaItem';
 
 interface ListaNotasGuardadasProps {
@@ -19,15 +20,15 @@ export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSelecci
             <div className="modalNotasGrid">
                 {notas.map(nota => (
                     <div key={nota.id} className="modalNotasItem" onClick={() => onSeleccionar(nota)}>
-                        <button
-                            className="modalNotasItemEliminar"
+                        <Boton
+                            claseAdicional="modalNotasItemEliminar"
                             onClick={e => {
                                 e.stopPropagation();
                                 onEliminar(nota.id);
                             }}
                             title="Eliminar nota">
                             <Trash2 size={14} />
-                        </button>
+                        </Boton>
                         <div className="modalNotasItemContenido">
                             <div className="modalNotasItemTitulo">{nota.titulo}</div>
                             {/* Fecha de creación debajo del título */}

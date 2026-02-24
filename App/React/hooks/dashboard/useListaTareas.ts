@@ -11,7 +11,7 @@ import {esTareaHabito} from '../../types/dashboard';
 import {useSeleccionMultipleStore} from '../../stores/seleccionMultipleStore';
 import {useGruposTareasStore, useSeccionesActivas} from '../../stores/gruposTareasStore';
 import {useShallow} from 'zustand/react/shallow';
-import {useMensajesNoLeidos} from '../useMensajes';
+import {useMensajesNoLeidos} from '../useMensajesNoLeidos';
 import {useListaTareasLogica} from './useListaTareasLogica';
 import {useTareaOrdenamiento} from './useTareaOrdenamiento';
 

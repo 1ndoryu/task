@@ -3,7 +3,7 @@ import {Calendar, Paperclip, FileText, Repeat, Folder, Users, Zap, Repeat2, Mess
 import type {Tarea, NivelPrioridad, NivelUrgencia, TareaHabito} from '../../../types/dashboard';
 import {esTareaHabito} from '../../../types/dashboard';
 import {BadgeInfo, type VarianteBadge} from '../../shared/BadgeInfo';
-import {obtenerTextoFechaLimite as obtenerTextoFechaLim, obtenerVarianteFechaLimite as obtenerVarianteFecha, formatearFechaCorta as formatearFecha} from '../../../utils/fecha';
+import {obtenerTextoFechaLimite as obtenerTextoFechaLim, obtenerVarianteFechaLimite as obtenerVarianteFecha, formatearFechaCorta as formatearFecha} from '../../../utils/fechaUI';
 
 interface TareaBadgesProps {
     tarea: Tarea;

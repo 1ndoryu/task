@@ -7,7 +7,7 @@
 import {Users, UserMinus} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import type {CompaneroEquipo} from '../../types/dashboard';
-import {formatearFechaRelativa} from '../../utils/fecha';
+import {formatearFechaRelativa} from '../../utils/fechaUI';
 
 interface ListaCompanerosProps {
     companeros: CompaneroEquipo[];

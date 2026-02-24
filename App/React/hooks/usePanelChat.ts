@@ -13,7 +13,7 @@
  */
 
 import {useState, useCallback, useMemo} from 'react';
-import {useMensajesNoLeidos} from './useMensajes';
+import {useMensajesNoLeidos} from './useMensajesNoLeidos';
 import type {Participante} from '../types/dashboard';
 
 const STORAGE_KEY = 'glory_chat_panel_visible';

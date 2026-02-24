@@ -8,7 +8,7 @@ import {useCallback} from 'react';
 import type {Tarea, DatosEdicionTarea} from '../types/dashboard';
 import {obtenerFechaHoy, sumarDias} from '../utils/fecha';
 import {obtenerSubtareas} from '../utils/jerarquiaTareas';
-import {registrarEventoSistema, type AccionSistema} from './useMensajes';
+import {registrarEventoSistema, type AccionSistema} from '../utils/mensajes';
 import {registrarTareaCompletada, registrarTareaDesmarcada} from '../services/actividadService';
 
 export interface UseTareasParams {

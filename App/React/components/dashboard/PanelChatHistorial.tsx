@@ -11,7 +11,7 @@
  */
 
 import {MessageCircle, Users, Send, History, Plus, Edit, Trash2, UserCheck, Paperclip, CheckCircle, Clock, Tag, Zap, Calendar, FileText, Type, Share2, UserPlus, UserMinus, Loader, Repeat} from 'lucide-react';
-import {type MensajeTimeline, type AccionSistema, obtenerTipoVisual} from '../../hooks/useMensajes';
+import {type MensajeTimeline, type AccionSistema, obtenerTipoVisual} from '../../utils/mensajes';
 import {usePanelChatHistorial} from '../../hooks/dashboard/usePanelChatHistorial';
 import {Boton} from '../ui';
 import {Input} from '../ui/Input';

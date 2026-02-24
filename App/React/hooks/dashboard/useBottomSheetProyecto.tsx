@@ -9,7 +9,7 @@ import {useState, useRef, useEffect, useMemo} from 'react';
 import {Flag, Hash, Calendar} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
-import {calcularFechaDesdeOpcion} from '../../utils/fecha';
+import {calcularFechaDesdeOpcion} from '../../utils/fechaUI';
 import type {DatosProyecto} from '../../components/dashboard/BottomSheetProyecto';
 
 /* Tipos de modales de selección */

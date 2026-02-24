@@ -10,7 +10,7 @@ import type {DatosCreacionRapida} from '../types/creacionRapida';
 import type {DatosTarea} from '../components/dashboard/BottomSheetTarea';
 import type {DatosHabito} from '../components/dashboard/BottomSheetHabito';
 import type {DatosProyecto} from '../components/dashboard/BottomSheetProyecto';
-import {calcularFechaDesdeKey} from '../utils/fecha';
+import {calcularFechaDesdeKey} from '../utils/fechaUI';
 
 interface UseCreacionEntidadesParams {
     dashboard: DashboardCompletoRetorno['dashboard'];

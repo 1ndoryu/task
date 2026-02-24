@@ -2,7 +2,7 @@ import {useCallback, useMemo} from 'react';
 import {Clock, Trash2, Folder, MoreVertical} from 'lucide-react';
 import {Boton} from '../../ui';
 import type {Nota, CarpetaNota} from '../../../types/notas';
-import {formatearFechaRelativa} from '../../../utils/fecha';
+import {formatearFechaRelativa} from '../../../utils/fechaUI';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
 import {MenuContextualAdaptivo} from '../../shared/MenuContextualAdaptivo';
 import type {OpcionMenu} from '../../shared/MenuContextual';

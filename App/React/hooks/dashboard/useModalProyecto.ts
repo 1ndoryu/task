@@ -8,7 +8,7 @@
 import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
 import type {NivelPrioridad, NivelUrgencia, Proyecto, Participante, Adjunto, Tarea, Hito} from '../../types/dashboard';
 import type {DatosNuevoProyecto} from '../useProyectos';
-import {useMensajesNoLeidos} from '../useMensajes';
+import {useMensajesNoLeidos} from '../useMensajesNoLeidos';
 
 /* Tipo local para evitar dependencia circular con componentes */
 type EstadoProyecto = 'activo' | 'pausado' | 'completado';
