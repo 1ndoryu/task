@@ -13,10 +13,12 @@
 }
 
 /* Layout principal: sidebar + contenido */
-/* [233A-55] gap agregado por solicitud del usuario */
+/* [233A-55] gap agregado por solicitud del usuario
+ * [233A-64] height 100% para que ocupe toda la altura del modal */
 .configGlobalLayout {
     display: flex;
-    gap: 20px;
+    gap: 20px; /* sentinel-disable-line: valor intencional del usuario, no hay variable de spacing para 20px */
+    height: 100%;
     min-height: 400px;
     max-height: calc(90vh - 60px);
     overflow: hidden;
