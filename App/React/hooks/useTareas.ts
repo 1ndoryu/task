@@ -10,6 +10,7 @@ import {obtenerFechaHoy, sumarDias} from '../utils/fecha';
 import {obtenerSubtareas} from '../utils/jerarquiaTareas';
 import {registrarEventoSistema, type AccionSistema} from '../utils/mensajes';
 import {registrarTareaCompletada, registrarTareaDesmarcada} from '../services/actividadService';
+import {useTimeTrackerStore} from '../stores/timeTrackerStore';
 
 export interface UseTareasParams {
     tareas: Tarea[];
@@ -109,9 +110,6 @@ function registrarEventosCambios(tareaId: number, tareaAnterior: Tarea, datos: D
 export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: UseTareasParams): UseTareasReturn {
     /*
      * Toggle de tarea: completa o desmarca con soporte de deshacer
-     */
-    /*
-     * Toggle de tarea: completa o desmarca con soporte de deshacer
      * Maneja la logica de repeticion autogenerando nuevas tareas
      */
     const toggleTarea = useCallback(
@@ -178,6 +176,12 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
             /* Registrar evento en el sistema de historial */
             const accionSistema: AccionSistema = estadoAnterior ? 'reabierto' : 'completado';
             registrarEventoSistema('tarea', id, accionSistema);
+
+            /* [233A-10] Auto-completar tracking si la tarea completada estaba siendo trackeada */
+            if (!estadoAnterior) {
+                const ts = useTimeTrackerStore.getState();
+                if (ts.sesionActiva?.entidadId === id && ts.sesionActiva.tipoEntidad === 'tarea') ts.completarTracking();
+            }
 
             registrarAccion(`Tarea "${tarea.texto.substring(0, 30)}..." ${accion}`, () => {
                 setTareas(prev => {

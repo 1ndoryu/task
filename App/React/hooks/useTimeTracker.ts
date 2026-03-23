@@ -6,6 +6,7 @@
 
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {useTimeTrackerStore} from '../stores/timeTrackerStore';
+import {useAlertasOpcional} from '../context/AlertasContext';
 import type {TipoEntidadTracker} from '../types/timeTracker';
 
 interface UseTimeTrackerReturn {
@@ -48,6 +49,7 @@ function formatearTiempo(ms: number): string {
 
 export function useTimeTracker(): UseTimeTrackerReturn {
     const store = useTimeTrackerStore();
+    const alertas = useAlertasOpcional();
     const [tiempoMs, setTiempoMs] = useState(0);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -96,11 +98,22 @@ export function useTimeTracker(): UseTimeTrackerReturn {
     /* Formato de progreso: 01:00/20:00 */
     const progresoFormateado = tiempoMinimoMs > 0 ? `${formatearTiempo(tiempoMs)}/${formatearTiempo(tiempoMinimoMs)}` : null;
 
+    /* [233A-10] Confirmacion antes de reemplazar tracking activo */
     const iniciar = useCallback(
-        (entidadId: number, tipo: TipoEntidadTracker, nombre: string, tiempoMinimo?: number) => {
+        async (entidadId: number, tipo: TipoEntidadTracker, nombre: string, tiempoMinimo?: number) => {
+            const sesionActiva = store.sesionActiva;
+            if (sesionActiva && alertas?.confirmar) {
+                const confirmado = await alertas.confirmar({
+                    titulo: 'Tracking activo',
+                    mensaje: `Hay un tracking activo para "${sesionActiva.nombreEntidad}". ¿Detener y comenzar nuevo tracking?`,
+                    textoAceptar: 'Sí, cambiar',
+                    textoCancelar: 'Cancelar'
+                });
+                if (!confirmado) return;
+            }
             store.iniciarTracking(entidadId, tipo, nombre, tiempoMinimo);
         },
-        [store.iniciarTracking]
+        [store.iniciarTracking, store.sesionActiva, alertas]
     );
 
     const pausar = useCallback(() => store.pausarTracking(), [store.pausarTracking]);

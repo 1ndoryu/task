@@ -40,3 +40,9 @@ export function useAlertasContext(): UseAlertasReturn {
 
     return contexto;
 }
+
+/* [233A-10] Version segura que retorna null fuera del proveedor en vez de lanzar error.
+ * Util para hooks que pueden usarse tanto dentro como fuera del dashboard. */
+export function useAlertasOpcional(): UseAlertasReturn | null {
+    return useContext(AlertasContext);
+}

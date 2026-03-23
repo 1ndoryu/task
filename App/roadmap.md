@@ -16,7 +16,6 @@
 ## Tareas pendientes
 
 - 233A-8: Agregar modo sidebar activable en configuración de layout
-- 233A-10: Bug tracking: no se detiene al completar tarea + alerta toast al cambiar tracking activo
 - 233A-27: Centralizar todas las configuraciones en un modal grande con sidebar
 - 233A-30: Corregir todas las violaciones del sentinel report
 - 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
