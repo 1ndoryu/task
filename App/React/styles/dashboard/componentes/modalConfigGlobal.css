@@ -10,8 +10,10 @@
 }
 
 /* Layout principal: sidebar + contenido */
+/* [233A-55] gap agregado por solicitud del usuario */
 .configGlobalLayout {
     display: flex;
+    gap: 20px;
     min-height: 400px;
     max-height: calc(90vh - 60px);
     overflow: hidden;
