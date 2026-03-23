@@ -498,6 +498,13 @@
     background: var(--dashboard-fondoHover);
 }
 
+/* [233A-37] Botones sin background dentro de la lista — override variante por defecto del Boton */
+.modalSeleccionPropiedad__lista .boton {
+    background: none;
+    border: none;
+    color: var(--dashboard-textoNormal);
+}
+
 .modalSeleccionPropiedad__lista {
     display: flex;
     flex-direction: column;

@@ -124,9 +124,22 @@
     transition: background var(--dashboard-transicionRapida);
 }
 
-/* [233A-29] Forzar alineación izquierda para los botones dentro del bottomSheet */
+/* [233A-29] Estilo de botones dentro del bottomSheet
+ * [233A-36] Icono al lado derecho con order + margin-left auto
+ * [233A-37] Sin bordes, centrados respecto a su contenido */
 .bottomSheetContenido .boton {
-    justify-content: flex-start;
+    width: 100%;
+    border: none;
+}
+
+.bottomSheetContenido .boton .botonIcono {
+    order: 1;
+    margin-left: auto;
+}
+
+/* [233A-37] Input sin borde dentro del bottom sheet */
+.bottomSheetContenido .input {
+    border: none;
 }
 
 .bottomSheetItem:hover,

@@ -33,7 +33,7 @@
 }
 
 .boton--primario:hover:not(:disabled) {
-    background: var(--dashboard-acentoHover);
+    filter: brightness(1.15);
 }
 
 .boton--secundario {
@@ -42,8 +42,7 @@
 }
 
 .boton--secundario:hover:not(:disabled) {
-    background: var(--dashboard-estadoBaja);
-    filter: brightness(0.9);
+    filter: brightness(1.15);
 }
 
 .boton--peligro {
@@ -52,8 +51,7 @@
 }
 
 .boton--peligro:hover:not(:disabled) {
-    background: var(--dashboard-estadoAlta);
-    filter: brightness(0.9);
+    filter: brightness(1.15);
 }
 
 .boton--icono {
@@ -63,7 +61,7 @@
 }
 
 .boton--icono:hover:not(:disabled) {
-    background: var(--dashboard-fondoHover);
+    filter: brightness(1.15);
 }
 
 .boton--ghost {
@@ -73,7 +71,7 @@
 }
 
 .boton--ghost:hover:not(:disabled) {
-    background: var(--dashboard-fondoHover);
+    filter: brightness(1.15);
 }
 
 .boton--link {
@@ -100,7 +98,7 @@
 
 .boton--pestaña:hover:not(:disabled) {
     color: var(--dashboard-textoActivo);
-    background-color: var(--dashboard-fondoHover);
+    filter: brightness(1.15);
 }
 
 .boton--pestaña.boton--activo {
@@ -154,7 +152,7 @@
 .boton--badge:hover:not(:disabled) {
     border-color: var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoSecundario);
-    background-color: var(--dashboard-fondoSecundario);
+    filter: brightness(1.15);
 }
 
 .boton--badge.boton--activo {

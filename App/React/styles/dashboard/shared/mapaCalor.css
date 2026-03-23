@@ -116,17 +116,20 @@
  * Grid de celdas 
  * [233A-12] flex:1 en grid y semana para que las celdas llenen el ancho disponible.
  * Las celdas usan min-width + aspect-ratio:1 para mantener proporcion cuadrada.
+ * [233A-38] max-width en semana para evitar que celdas crezcan excesivamente y desborden el panel.
  */
 .mapaCalorGrid {
     display: flex;
     flex: 1;
     gap: var(--dashboard-espacioMini);
+    overflow: hidden;
 }
 
 .mapaCalorSemana {
     display: flex;
     flex-direction: column;
     flex: 1;
+    max-width: 22px;
     gap: var(--dashboard-espacioMini);
 }
 

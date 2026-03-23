@@ -146,20 +146,22 @@
 
 .listaTareasHabito {
     margin-top: var(--dashboard-espacioSm);
-    padding-top: var(--dashboard-espacioSm);
 }
 
-/* [233A-21] Modo compacto: sin fondo, sin borde, centrado */
+/* [233A-21] Modo compacto: sin fondo, sin borde
+ * [233A-39] encabezado no centrado (align-self: stretch), boton centrado, mas gap, sin padding-top */
 .listaTareasHabito--compacto {
     background: transparent;
     border: none;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: var(--dashboard-espacioSm);
 }
 
 .listaTareasHabito--compacto .listaTareasHabito__encabezado {
-    margin-bottom: var(--dashboard-espacioXs);
+    margin-bottom: 0;
+    align-self: stretch;
 }
 
 .listaTareasHabito__encabezado {
