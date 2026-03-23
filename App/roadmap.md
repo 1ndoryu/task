@@ -2,10 +2,9 @@
 
 > **Descripcion:** Dashboard personal con tareas, habitos, proyectos, notas, actividad y mas. Tema WordPress con React islands.
 > **Stack:** WordPress + PHP (backend REST), React + TypeScript (frontend islands), Zustand (estado), CSS modular
-> **URL produccion:** pendiente de configurar
-> **Servidor:** pendiente de configurar
-> **Deploy:** Coolify (.agent/coolify-manager-rs)
-> **Coolify IDs:** pendiente
+> **URL produccion:** https://task.nakomi.studio
+> **Servidor:** nakomi (Coolify)  stack UUID: u00gc8ss4csc4cckkg4g00ks
+> **Deploy:** Coolify (.agent/coolify-manager-rs)  sitio: nakomi
 > **Repositorio:** glorytemplate: rama glory-react-logic
 
 ## Herramientas del agente
@@ -15,7 +14,6 @@
 
 ## Tareas pendientes
 
-- 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 - 233A-65: (sin descripcion  pendiente aclaracion del usuario)
 
 
