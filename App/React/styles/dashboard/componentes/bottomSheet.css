@@ -104,13 +104,12 @@
 
 /* Items dentro del bottom sheet (para menus) - Diseño compacto unificado */
 /* Orden visual: Texto | Icono (texto primero, icono al lado derecho) */
+/* [233A-51] Eliminados flex-direction:row-reverse y justify-content:flex-end — icono ahora va a la derecha via order:1 */
 .bottomSheetItem {
     display: flex;
     align-items: center;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
     gap: var(--dashboard-espacioSm);
-    padding: 10px var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioSm);
     min-height: 32px;
     color: var(--dashboard-textoNormal);
     background: none;
@@ -162,7 +161,7 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
-/* Icono del item - Compacto, a la derecha */
+/* [233A-51] Icono a la derecha: order:1 + margin-left:auto empuja el icono al extremo derecho */
 .bottomSheetItem__icono {
     display: flex;
     align-items: center;
@@ -171,7 +170,8 @@
     height: 16px;
     flex-shrink: 0;
     color: var(--dashboard-textoApagado);
-    order: -1;
+    order: 1;
+    margin-left: auto;
 }
 
 /* Icono azul cuando el item está activo (sin check) */
@@ -179,18 +179,16 @@
     color: var(--dashboard-acento);
 }
 
-/* Texto del item - flex-grow para ocupar espacio */
+/* Texto del item - a la izquierda */
 .bottomSheetItem__texto {
-    flex: 1;
     font-weight: 500;
-    order: 0;
 }
 
 /* Separador entre grupos de items */
 .bottomSheetSeparador {
     height: 1px;
     background: var(--dashboard-bordePrincipal);
-    margin: 4px 0;
+    margin: var(--dashboard-espacioXs) 0;
 }
 
 /* Cancelar / Cerrar */
