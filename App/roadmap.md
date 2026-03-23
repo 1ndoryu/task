@@ -20,10 +20,6 @@
 - 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 
 
-# 233A-48
-
-En bottomSheetContenido - menuOpcionesPanelContenido LOS BOTONES SE VOLVIERON A PONER CENTRADOS!! EL TEXTO debe estar a la ziquierda y el boton a la derecha
-
 ## 233A-49
 
 En badgeGroup todo debe tener la misma altura y algunos botoenes no tiene la misma altura, algunos no tienen background y otros tienen background gris, haz que los que son gris no tengan background y el mismo color de borde del badge que esta sin fondo. 

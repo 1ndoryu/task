@@ -126,10 +126,12 @@
 
 /* [233A-29] Estilo de botones dentro del bottomSheet
  * [233A-36] Icono al lado derecho con order + margin-left auto
- * [233A-37] Sin bordes, centrados respecto a su contenido */
+ * [233A-37] Sin bordes, centrados respecto a su contenido
+ * [233A-48] justify-content: flex-start → texto a la izquierda */
 .bottomSheetContenido .boton {
     width: 100%;
     border: none;
+    justify-content: flex-start;
 }
 
 .bottomSheetContenido .boton .botonIcono {
