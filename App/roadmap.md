@@ -20,10 +20,6 @@
 - 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 
 
-## 233A-46
-
-<span class="badgeInfo badgeInfo--prioridadMedia"><span class="badgeInfoTexto">MEDIA</span></span> vs <span class="badgeInfo badgeInfo--destacado"><span class="badgeInfoTexto">Hoy</span></span> son diferentes cuando deberían de ser iguales
-
 ## 233A-47
 
 Por defecto el chat en los modales debe estar cerrado. 

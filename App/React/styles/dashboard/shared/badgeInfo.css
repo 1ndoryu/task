@@ -186,24 +186,14 @@
 /* 
  * BADGE DESTACADO (Toca hoy, activo)
  */
+/* [233A-46] Estructura igualada a las variantes de prioridad (padding, font-weight, text-transform) */
 .badgeInfo--destacado {
     color: var(--dashboard-estadoDestacado);
     background-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.15);
     border-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    animation: pulsarBadge 2s ease-in-out infinite;
-}
-
-@keyframes pulsarBadge {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
+    padding: 2px 8px;
 }
 
 /* 
