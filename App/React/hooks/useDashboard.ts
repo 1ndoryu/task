@@ -31,6 +31,7 @@ interface UseDashboardReturn {
     actualizarNotas: (valor: string) => void;
     toggleHabito: (id: number) => void;
     posponerHabito: (id: number) => void;
+    posponerHabitoConTiempo: (id: number, hasta: string | null) => void;
     pausarHabito: (id: number) => void;
     actualizarHistorialHabito: (id: number, fecha: string, estado: 'completado' | 'pospuesto' | null) => void;
     actualizarOrdenTareasHabito: (habitoId: number, tareasIds: number[]) => void;
@@ -112,7 +113,7 @@ export function useDashboard(): UseDashboardReturn {
     }, []);
 
     // 3. Gestión de Hábitos
-    const {habitos, cargandoHabitos, toggleHabito, posponerHabito, pausarHabito, actualizarHistorialHabito, actualizarOrdenTareasHabito, crearHabito, editarHabito, eliminarHabito, modalCrearHabitoAbierto, abrirModalCrearHabito, cerrarModalCrearHabito, habitoEditando, abrirModalEditarHabito, cerrarModalEditarHabito} = useDashboardHabitos({registrarAccion, mostrarMensaje});
+    const {habitos, cargandoHabitos, toggleHabito, posponerHabito, posponerHabitoConTiempo, pausarHabito, actualizarHistorialHabito, actualizarOrdenTareasHabito, crearHabito, editarHabito, eliminarHabito, modalCrearHabitoAbierto, abrirModalCrearHabito, cerrarModalCrearHabito, habitoEditando, abrirModalEditarHabito, cerrarModalEditarHabito} = useDashboardHabitos({registrarAccion, mostrarMensaje});
 
     const cargandoDatos = cargandoHabitos || cargandoDatosLocales;
 
@@ -200,6 +201,7 @@ export function useDashboard(): UseDashboardReturn {
         actualizarNotas,
         toggleHabito,
         posponerHabito,
+        posponerHabitoConTiempo,
         pausarHabito,
         actualizarHistorialHabito,
         actualizarOrdenTareasHabito,

@@ -41,6 +41,7 @@ interface TareaConColapsadorProps {
     onEliminarHabito?: (id: number) => void;
     onToggleHabito?: (id: number) => void;
     onPosponerHabito?: (id: number) => void;
+    onPosponerHabitoConTiempo?: (id: number, hasta: string | null) => void;
     onPausarHabito?: (id: number) => void;
     onActualizarHabito?: (id: number, datos: Partial<DatosNuevoHabito>) => void;
 
@@ -50,7 +51,7 @@ interface TareaConColapsadorProps {
     modoSeleccionActivo?: boolean;
 }
 
-export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, estaSeleccionada, onSeleccionMultiple, modoSeleccionActivo}) => {
+export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, estaSeleccionada, onSeleccionMultiple, modoSeleccionActivo}) => {
     const {esMovil} = useEsMovil();
     const esHabito = esTareaHabito(tarea);
     const esColapsable = !esSubtarea && tieneSubtareas(tareas, tarea.id);
@@ -133,6 +134,7 @@ export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, es
             onEliminarHabito={onEliminarHabito}
             onToggleHabito={onToggleHabito}
             onPosponerHabito={onPosponerHabito}
+            onPosponerHabitoConTiempo={onPosponerHabitoConTiempo}
             onPausarHabito={onPausarHabito}
             onActualizarHabito={onActualizarHabito}
             /* Las tareas-hábito solo aparecen si NO están completadas ni pausadas */

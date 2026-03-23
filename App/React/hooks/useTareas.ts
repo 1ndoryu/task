@@ -1,3 +1,4 @@
+/* sentinel-disable-file limite-lineas — hook central de CRUD de tareas, todas las operaciones están acopladas */
 /*
  * useTareas
  * Hook personalizado para la lógica de tareas
@@ -347,7 +348,7 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                      * Crear objeto base excluyendo campos que pueden ser null o no pertenecen a Tarea
                      * Para prioridad/urgencia/asignadoA, null significa "quitar"
                      */
-                    const {prioridad: nuevaPrioridad, urgencia: nuevaUrgencia, configuracion: nuevaConfiguracion, asignadoA: nuevoAsignadoA, asignadoANombre, asignadoAAvatar, tags: nuevosTags, insertarDespuesDe: _, ...restoDatos} = datos;
+                    const {prioridad: nuevaPrioridad, urgencia: nuevaUrgencia, configuracion: nuevaConfiguracion, asignadoA: nuevoAsignadoA, asignadoANombre, asignadoAAvatar, tags: nuevosTags, pospuestoHasta: nuevoPospuestoHasta, insertarDespuesDe: _, ...restoDatos} = datos;
 
                     const tareaActualizada: Tarea = {
                         ...t,
@@ -357,6 +358,13 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                     /* Si tags vienen en datos, actualizar */
                     if (nuevosTags !== undefined) {
                         tareaActualizada.tags = nuevosTags;
+                    }
+
+                    /* [2303A-41] Si pospuestoHasta es null, quitar; si tiene valor, asignar */
+                    if (nuevoPospuestoHasta === null) {
+                        delete tareaActualizada.pospuestoHasta;
+                    } else if (nuevoPospuestoHasta !== undefined) {
+                        tareaActualizada.pospuestoHasta = nuevoPospuestoHasta;
                     }
 
                     /* Si prioridad es null, eliminar; si tiene valor, asignar */

@@ -1,3 +1,4 @@
+/* sentinel-disable-file limite-lineas — store central de hábitos con CRUD, toggle, posponer, pausar, historial y selectors */
 /**
  * Store de Habitos (Zustand)
  *
@@ -52,6 +53,8 @@ interface HabitosActions {
     /* Completar hoy sin permitir desmarcar (uso: hábitos especiales controlados por plugins) */
     completarHabitoHoy: (id: number, detallesActividad?: Record<string, unknown>) => boolean;
     posponerHabito: (id: number) => {accion: 'pospuesto' | 'despospuesto'; estadoAnterior: Habito} | null;
+    /* [2303A-41] Posponer hábito por tiempo (hasta fecha ISO). null = quitar posposición temporal */
+    posponerHabitoConTiempo: (id: number, hasta: string | null) => void;
     pausarHabito: (id: number) => {accion: 'pausado' | 'reanudado'; estadoAnterior: Habito} | null;
 
     /* Historial retroactivo */
@@ -260,6 +263,27 @@ export const useHabitosStore = create<HabitosStore>()(
                     }
 
                     return {accion, estadoAnterior};
+                },
+
+                /* [2303A-41] Posponer hábito por tiempo (hasta fecha ISO) */
+                posponerHabitoConTiempo: (id, hasta) => {
+                    const habito = get().habitos.find(h => h.id === id);
+                    if (!habito) return;
+
+                    set(
+                        state => ({
+                            habitos: state.habitos.map(h => {
+                                if (h.id !== id) return h;
+                                if (hasta === null) {
+                                    const {pospuestoHasta: _, ...sinPospuesto} = h;
+                                    return sinPospuesto as Habito;
+                                }
+                                return {...h, pospuestoHasta: hasta};
+                            })
+                        }),
+                        false,
+                        `posponerHabitoConTiempo/${hasta ? 'establecer' : 'quitar'}`
+                    );
                 },
 
                 /* Pausar/Reanudar hábito */
@@ -701,6 +725,7 @@ export const habitosActions = {
     toggleHabito: (id: number) => useHabitosStore.getState().toggleHabito(id),
     completarHabitoHoy: (id: number, detallesActividad?: Record<string, unknown>) => useHabitosStore.getState().completarHabitoHoy(id, detallesActividad),
     posponerHabito: (id: number) => useHabitosStore.getState().posponerHabito(id),
+    posponerHabitoConTiempo: (id: number, hasta: string | null) => useHabitosStore.getState().posponerHabitoConTiempo(id, hasta),
     pausarHabito: (id: number) => useHabitosStore.getState().pausarHabito(id),
     marcarDia: (habitoId: number, fecha: string, estado: EstadoHabito) => useHabitosStore.getState().marcarDia(habitoId, fecha, estado),
     desmarcarDia: (habitoId: number, fecha: string) => useHabitosStore.getState().desmarcarDia(habitoId, fecha),

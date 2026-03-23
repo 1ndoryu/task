@@ -130,7 +130,9 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
                 const tocaHoyResult = tocaHoy(frecuencia, habito.ultimoCompletado);
                 const completadoHoy = habito.ultimoCompletado === hoy;
                 const pospuestoHoy = fuePospuestoHoy(habito, hoy);
-                return tocaHoyResult && !completadoHoy && !pospuestoHoy;
+                /* [2303A-41] Filtrar hábitos pospuestos por tiempo (pospuestoHasta futuro) */
+                const pospuestoTemporal = habito.pospuestoHasta && new Date(habito.pospuestoHasta) > new Date();
+                return tocaHoyResult && !completadoHoy && !pospuestoHoy && !pospuestoTemporal;
             })
             .map(habito => {
                 const urgenciaAutomatica = calcularUrgenciaAutomatica(habito.diasInactividad, habito.racha, umbrales);

@@ -39,7 +39,12 @@ export function useListaTareas({
     ocultarSubtareasAutomaticamente = false
 }: UseListaTareasParams) {
     /* Filtros básicos */
-    const pendientes = useMemo(() => tareas.filter(t => !t.completado), [tareas]);
+    /* [2303A-41] Excluir tareas pospuestas cuyo pospuestoHasta aún no llegó */
+    const pendientes = useMemo(() => tareas.filter(t => {
+        if (t.completado) return false;
+        if (t.pospuestoHasta && new Date(t.pospuestoHasta) > new Date()) return false;
+        return true;
+    }), [tareas]);
     const completadas = useMemo(() => tareas.filter(t => t.completado), [tareas]);
 
     /* Selección múltiple de tareas */

@@ -29,6 +29,7 @@ export interface TareaItemProps {
     onEliminarHabito?: (habitoId: number) => void;
     onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
+    onPosponerHabitoConTiempo?: (habitoId: number, hasta: string | null) => void;
     onPausarHabito?: (habitoId: number) => void;
     onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     /* Indica si la tarea hábito fue completada hoy (para menú contextual) */

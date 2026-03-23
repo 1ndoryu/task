@@ -17,6 +17,7 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
     const habitosRaw = useHabitosStore(state => state.habitos);
     const storeToggleHabito = useHabitosStore(state => state.toggleHabito);
     const storePosponerHabito = useHabitosStore(state => state.posponerHabito);
+    const storePosponerHabitoConTiempo = useHabitosStore(state => state.posponerHabitoConTiempo);
     const storePausarHabito = useHabitosStore(state => state.pausarHabito);
     const storeCrearHabito = useHabitosStore(state => state.crearHabito);
     const storeEditarHabito = useHabitosStore(state => state.editarHabito);
@@ -184,6 +185,21 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
         [storePosponerHabito, storeRestaurarHabito, registrarAccion, mostrarMensaje]
     );
 
+    /* [2303A-41] Posponer hábito por tiempo (con fecha ISO) */
+    const posponerHabitoConTiempo = useCallback(
+        (id: number, hasta: string | null) => {
+            const habito = habitos.find(h => h.id === id);
+            if (!habito) return;
+            storePosponerHabitoConTiempo(id, hasta);
+            if (hasta) {
+                mostrarMensaje(`"${habito.nombre}" pospuesto`, 'exito');
+            } else {
+                mostrarMensaje(`"${habito.nombre}" ya no está pospuesto`, 'exito');
+            }
+        },
+        [habitos, storePosponerHabitoConTiempo, mostrarMensaje]
+    );
+
     /*
      * Pausar/Reanudar hábito usando el store de Zustand
      */
@@ -236,6 +252,7 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
         /* Acciones */
         toggleHabito,
         posponerHabito,
+        posponerHabitoConTiempo,
         pausarHabito,
         actualizarHistorialHabito,
         actualizarOrdenTareasHabito,

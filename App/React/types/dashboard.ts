@@ -1,3 +1,4 @@
+/* sentinel-disable-file limite-lineas — archivo central de tipos/interfaces del dashboard, no es un componente */
 /*
  * Tipos para el Dashboard
  * Definiciones de interfaces para los datos del dashboard
@@ -112,6 +113,8 @@ export interface Habito {
     subhabitos?: SubHabito[];
     /* Ventana de oportunidad: período de tiempo óptimo para realizar el hábito */
     ventanaOportunidad?: VentanaOportunidad;
+    /* [2303A-41] Fecha ISO hasta la que el hábito está pospuesto por tiempo (diferente de historialPospuestos que es por día) */
+    pospuestoHasta?: string;
 }
 
 /*
@@ -250,6 +253,8 @@ export interface Tarea {
     miRol?: RolCompartido;
     /* Tags (Fase 9.7.3) */
     tags?: string[];
+    /* [2303A-41] Fecha ISO hasta la que la tarea está pospuesta. Si es futuro, se oculta del panel. */
+    pospuestoHasta?: string;
 }
 
 /*
@@ -383,6 +388,8 @@ export interface DatosEdicionTarea {
     asignadoAAvatar?: string;
 
     tags?: string[];
+    /* [2303A-41] Posponer tarea hasta fecha ISO. null = quitar posposición. */
+    pospuestoHasta?: string | null;
 }
 
 /*

@@ -7,7 +7,7 @@
 
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
-import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Proyecto, Participante} from '../../types/dashboard';
+import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Proyecto, Participante, GrupoTareas} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
 import {InputNuevaTarea} from './InputNuevaTarea';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
@@ -41,6 +41,7 @@ interface ListaTareasProps {
     onEliminarHabito?: (habitoId: number) => void;
     onToggleHabito?: (habitoId: number) => void;
     onPosponerHabito?: (habitoId: number) => void;
+    onPosponerHabitoConTiempo?: (habitoId: number, hasta: string | null) => void;
     onPausarHabito?: (habitoId: number) => void;
     onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     modoCompacto?: boolean;
@@ -51,7 +52,7 @@ interface ListaTareasProps {
     ocultarPlaceholderVacio?: boolean;
 }
 
-export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, ocultarSubtareasAutomaticamente = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear, ocultarPlaceholderVacio = false}: ListaTareasProps): JSX.Element {
+export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, ocultarSubtareasAutomaticamente = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, modoCompacto = false, onConfigurarTarea, onAbrirModalCrear, ocultarPlaceholderVacio = false}: ListaTareasProps): JSX.Element {
     const {
         pendientes, completadas,
         estaSeleccionada, manejarSeleccionMultiple, manejarClickDerechoLista,
@@ -105,6 +106,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
             onEliminarHabito={onEliminarHabito}
             onToggleHabito={onToggleHabito}
             onPosponerHabito={onPosponerHabito}
+            onPosponerHabitoConTiempo={onPosponerHabitoConTiempo}
             onPausarHabito={onPausarHabito}
             onActualizarHabito={onActualizarHabito}
             // Selección múltiple - TAREA 3.1
@@ -143,7 +145,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                     {/* Renderizar grupos cuando las secciones están activas */}
                     {seccionesActivas && gruposOrdenados.length > 0 && (
                         <div className="listaTareasGrupos">
-                            {gruposOrdenados.map(grupo => {
+                            {gruposOrdenados.map((grupo: GrupoTareas) => {
                                 const tareasDelGrupo = tareasPorGrupo.get(grupo.id) || [];
                                 return (
                                     <div key={grupo.id} className="grupoTareasContenedor">

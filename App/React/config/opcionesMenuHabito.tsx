@@ -12,9 +12,61 @@
  * - DIP: Los componentes dependen de esta abstracción, no de definiciones propias
  */
 
-import {Check, Calendar, Pause, Play, AlertTriangle, Star, Settings, Undo2} from 'lucide-react';
+import {Check, Calendar, Pause, Play, AlertTriangle, Star, Settings, Undo2, Clock, Timer} from 'lucide-react';
 import type {OpcionMenu} from '../components/shared/MenuContextual';
 import {opcionesMenuImportancia} from '../utils/nivelesConfig';
+
+/* [2303A-41] Opciones de tiempo para posponer con duración.
+ * Compartidas entre menú de tareas y hábitos. */
+export const POSPONER_IDS = {
+    HOY: 'posponer',
+    UNA_HORA: 'posponer-1h',
+    CUATRO_HORAS: 'posponer-4h',
+    MANANA: 'posponer-manana',
+    DOS_DIAS: 'posponer-2d',
+    UNA_SEMANA: 'posponer-1sem',
+    QUITAR: 'posponer-quitar'
+} as const;
+
+/* Calcula la fecha ISO hasta la que se pospone según la opción seleccionada */
+export function calcularFechaPosponer(opcionId: string): string | null {
+    const ahora = new Date();
+    switch (opcionId) {
+        case POSPONER_IDS.UNA_HORA:
+            return new Date(ahora.getTime() + 60 * 60 * 1000).toISOString();
+        case POSPONER_IDS.CUATRO_HORAS:
+            return new Date(ahora.getTime() + 4 * 60 * 60 * 1000).toISOString();
+        case POSPONER_IDS.MANANA: {
+            const manana = new Date(ahora);
+            manana.setDate(manana.getDate() + 1);
+            manana.setHours(8, 0, 0, 0);
+            return manana.toISOString();
+        }
+        case POSPONER_IDS.DOS_DIAS:
+            return new Date(ahora.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString();
+        case POSPONER_IDS.UNA_SEMANA:
+            return new Date(ahora.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        case POSPONER_IDS.QUITAR:
+            return null;
+        default:
+            return null;
+    }
+}
+
+/* Genera las subOpciones de tiempo para el menú de posponer */
+export function opcionesMenuPosponerTiempo(tienePospuesto: boolean): OpcionMenu[] {
+    const opciones: OpcionMenu[] = [
+        {id: POSPONER_IDS.UNA_HORA, etiqueta: '1 hora', icono: <Timer size={12} />},
+        {id: POSPONER_IDS.CUATRO_HORAS, etiqueta: '4 horas', icono: <Timer size={12} />},
+        {id: POSPONER_IDS.MANANA, etiqueta: 'Mañana', icono: <Calendar size={12} />},
+        {id: POSPONER_IDS.DOS_DIAS, etiqueta: '2 días', icono: <Calendar size={12} />},
+        {id: POSPONER_IDS.UNA_SEMANA, etiqueta: '1 semana', icono: <Calendar size={12} />}
+    ];
+    if (tienePospuesto) {
+        opciones.push({id: POSPONER_IDS.QUITAR, etiqueta: 'Quitar posposición', icono: <Undo2 size={12} />, separadorDespues: false});
+    }
+    return opciones;
+}
 
 /*
  * Tipo para el estado actual del hábito que determina texto/iconos dinámicos
@@ -46,8 +98,16 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
         },
         {
             id: 'posponer',
-            etiqueta: estado.pospuestoHoy ? 'Deshacer posposición' : 'Posponer hoy',
-            icono: estado.pospuestoHoy ? <Undo2 size={12} /> : <Calendar size={12} />
+            etiqueta: 'Posponer',
+            icono: <Clock size={12} />,
+            subOpciones: [
+                {
+                    id: POSPONER_IDS.HOY,
+                    etiqueta: estado.pospuestoHoy ? 'Deshacer hoy' : 'Posponer hoy',
+                    icono: estado.pospuestoHoy ? <Undo2 size={12} /> : <Calendar size={12} />
+                },
+                ...opcionesMenuPosponerTiempo(false)
+            ]
         },
         {
             id: 'pausar',
