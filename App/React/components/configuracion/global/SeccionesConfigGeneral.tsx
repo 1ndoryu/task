@@ -3,7 +3,7 @@
  * SeccionConfigPerfil, SeccionConfigSeguridad, SeccionConfigMCP, SeccionConfigBackups
  * Cada sección usa sus hooks directamente */
 
-import {useState} from 'react';
+import {useState, type Ref} from 'react';
 import {Square, Columns2, Columns3, ArrowUpDown, RotateCcw, Target, Folder, Terminal, FileText, Activity} from 'lucide-react';
 import {Lock, Unlock, Shield, ShieldCheck, Camera, Save, Moon, Sun, Check, Sparkles, Globe, Plug as PlugIcon, Loader2} from 'lucide-react';
 import {RotateCcw as RotateCcwBackup, ShieldCheck as ShieldCheckBackup, AlertTriangle, Database, Trash2} from 'lucide-react';
@@ -134,7 +134,7 @@ export function SeccionConfigPerfil({onCerrar}: {onCerrar: () => void}): JSX.Ele
             <div className="avatarContainer">
                 <div className="avatarPreview">{datos.avatarUrl ? <img src={datos.avatarUrl} alt="Avatar" /> : <span className="avatarInicial">{datos.nombre.charAt(0).toUpperCase()}</span>}</div>
                 <Boton claseAdicional="botonPerfil botonCambiarFoto" onClick={handleAvatarClick}><Camera size={14} /> Cambiar Foto</Boton>
-                <Input tipo="file" ref={fileInputRef} claseAdicional="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
+                <Input tipo="file" ref={fileInputRef as Ref<HTMLInputElement>} claseAdicional="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
             </div>
             <div className="seccionPerfil">
                 <div className="tituloSeccionPerfil">Información Personal</div>

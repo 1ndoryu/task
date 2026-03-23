@@ -4,6 +4,7 @@
  * Fase 9.4: Version moderna del selector de repeticion para tareas
  */
 
+import type React from 'react';
 import {Repeat, X} from 'lucide-react';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 import {SelectorDias} from './SelectorDias';
@@ -31,7 +32,7 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición" style={tieneRepeticion ? {color: 'var(--dashboard-textoNormal)'} : undefined}>
+            <Boton ref={botonRef as React.Ref<HTMLButtonElement>} type="button" variante="ghost" claseAdicional={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición" style={tieneRepeticion ? {color: 'var(--dashboard-textoNormal)'} : undefined}>
                 <Repeat size={14} />
                 <span>{descripcion}</span>
                 {tieneRepeticion && (
@@ -43,7 +44,7 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
 
             {panelAbierto && (
                 <div
-                    ref={panelRef}
+                    ref={panelRef as React.Ref<HTMLDivElement>}
                     className="selectorRepeticionPanel"
                     style={{
                         position: 'fixed',

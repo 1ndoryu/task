@@ -4,7 +4,7 @@
  * Reemplaza selects nativos por una interfaz más elegante tipo badge
  */
 
-import type {ReactNode} from 'react';
+import type {ReactNode, Ref} from 'react';
 import {createPortal} from 'react-dom';
 import {Boton} from '../ui';
 import {useSelectorBadge} from '../../hooks/shared/useSelectorBadge';
@@ -30,7 +30,7 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
     const {menuAbierto, contenedorRef, menuRef, opcionActual, toggleMenu, seleccionarOpcion} = useSelectorBadge({opciones, valorActual, onChange});
 
     return (
-        <div id="selector-badge-contenedor" ref={contenedorRef} className={`selectorBadgeContenedor ${className}`.trim()}>
+        <div id="selector-badge-contenedor" ref={contenedorRef as Ref<HTMLDivElement>} className={`selectorBadgeContenedor ${className}`.trim()}>
             <Boton
                 type="button"
                 variante="badge"
@@ -52,7 +52,7 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
             {/* [233A-23] Portal: saca el menú del DOM del panel para evitar que opacity en .seccionAcciones
              * cree un stacking context que atrape el z-index y herede transparencia al menú */}
             {menuAbierto && createPortal(
-                <div ref={menuRef} className="selectorBadgeMenu" role="menu">
+                <div ref={menuRef as Ref<HTMLDivElement>} className="selectorBadgeMenu" role="menu">
                     {opciones.map(opcion => (
                         <Boton key={opcion.id} type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${opcion.id === valorActual ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion(opcion)} role="menuitem">
                             {opcion.icono && <span className="selectorBadgeOpcionIcono">{opcion.icono}</span>}

@@ -4,6 +4,7 @@
  * Lógica extraída a useModalPerfil hook
  */
 
+import type {Ref} from 'react';
 import {Camera, Save} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {IndicadorAlmacenamiento} from '../shared/IndicadorAlmacenamiento';
@@ -28,7 +29,7 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
                         <Camera size={14} />
                         Cambiar Foto
                     </Boton>
-                    <Input tipo="file" ref={fileInputRef} claseAdicional="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
+                    <Input tipo="file" ref={fileInputRef as Ref<HTMLInputElement>} claseAdicional="inputArchivoPerfil" accept="image/*" onChange={handleFileChange} />
                 </div>
 
                 <div className="seccionPerfil">

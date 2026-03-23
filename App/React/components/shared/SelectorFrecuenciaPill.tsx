@@ -4,6 +4,7 @@
  * Fase 9.5: Version moderna del selector de frecuencia para habitos
  */
 
+import type React from 'react';
 import {Calendar} from 'lucide-react';
 import type {FrecuenciaHabito} from '../../types/dashboard';
 import {SelectorDias} from './SelectorDias';
@@ -29,14 +30,14 @@ export function SelectorFrecuenciaPill({frecuencia, onChange, deshabilitado = fa
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirPanel} title="Frecuencia">
+            <Boton ref={botonRef as React.Ref<HTMLButtonElement>} type="button" variante="ghost" claseAdicional={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirPanel} title="Frecuencia">
                 <Calendar size={14} />
                 <span>{descripcion}</span>
             </Boton>
 
             {panelAbierto && (
                 <div
-                    ref={panelRef}
+                    ref={panelRef as React.Ref<HTMLDivElement>}
                     className="selectorRepeticionPanel"
                     style={{
                         position: 'fixed',

@@ -6,6 +6,7 @@
  * se inicializa una vez y luego maneja su propio estado interno.
  */
 
+import type {Ref} from 'react';
 import type EditorJS from '@editorjs/editorjs';
 import type {OutputData} from '@editorjs/editorjs';
 import {useEditorJs} from '../../hooks/useEditorJs';
@@ -25,7 +26,7 @@ export function EditorJs({id = 'editorjs-container', data, onChange, onReady, pl
 
     return (
         <div id="editorjs-wrapper" className="editorjs-contenedor">
-            <div id={id} ref={holderRef} />
+            <div id={id} ref={holderRef as Ref<HTMLDivElement>} />
         </div>
     );
 }
