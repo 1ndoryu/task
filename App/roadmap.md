@@ -15,17 +15,14 @@
 
 ## Tareas pendientes
 
-- 233A-7: Estado por defecto al registrarse = 1 columna
 - 233A-8: Agregar modo sidebar activable en configuración de layout
 - 233A-10: Bug tracking: no se detiene al completar tarea + alerta toast al cambiar tracking activo
-- 233A-26: resizeHandleColumna — tooltip muy arriba + ancho mínimo adaptable a 1 columna
 - 233A-27: Centralizar todas las configuraciones en un modal grande con sidebar
 - 233A-30: Corregir todas las violaciones del sentinel report
-- 233A-32: El modal de inicio de sesión sin fuentes + botones principales blancos con texto negro
 - 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 
 
-## 233A-40 (En planificacion)
+## 233A-40 
 
 hay algo que no esta centralizado, los valores de alta, media, baja, etc sus iconos son diferentes en varios contextos, tienen diferentes colores, en algunos lugares tienen bordes y en otros no
 
@@ -38,6 +35,10 @@ tambie al abrir
 <button type="button" class="boton boton--opcion boton--mediano boton--soloIcono" data-tooltip-content="Prioridad"><span class="botonIcono"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag" aria-hidden="true"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></svg></span></button>,  
 
 y probablemente en otros lugares que no identifico aún o con otros valores, centralizar 
+
+## 2303A-41
+
+Agrega un boton de accion para posponer una tarea o habito en el panel de ejecucion, lo que haria esto es que oculta la tarea por 24 horas, o el tiempo que se eliga en el menu contextual que abre, veo que ya hay esa opcion pero falta revisar que funcione bien y el otro submenu para elegir el tiempo
 
 ## Ultima tarea: 
 

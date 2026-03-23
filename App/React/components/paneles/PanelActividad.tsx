@@ -108,7 +108,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
         fechaDetalle, setFechaDetalle,
         detalleItems, detalleCargando, detalleError,
         manejarClickDia,
-        obtenerSubtitulo, diasActivos, totalActividades,
+        obtenerSubtitulo: _obtenerSubtitulo, diasActivos: _diasActivos, totalActividades: _totalActividades,
         formatearFechaDetalle, formatearHora,
         obtenerNombreElemento, obtenerNombreProyecto
     } = usePanelActividad({configuracion});

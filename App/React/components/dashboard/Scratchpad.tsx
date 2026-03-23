@@ -24,10 +24,10 @@ interface ScratchpadProps {
 
 export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus notas rapidas aqui...', onChange, delayGuardado = 1500, tamanoFuente = 'normal', altura = '100%', onCambiarAltura, modoVista = 'editor', mostrarResaltadoMarkdown = true, mostrarResizeHandle = true}: ScratchpadProps): JSX.Element {
     const {
-        textareaRef, resaltadoRef, editorRef,
+        textareaRef, resaltadoRef: _resaltadoRef, editorRef,
         valor, estadoGuardado, isResizing, localHeight, limiteCaracteres,
         caracteresUsados, cercaDelLimite, enLimite,
-        contenidoResaltado, contenidoPreview,
+        contenidoResaltado: _contenidoResaltado, contenidoPreview,
         manejarCambio, manejarScroll, manejarTecla, handleMouseDown
     } = useScratchpad({valorInicial, onChange, delayGuardado, altura, onCambiarAltura, mostrarResaltadoMarkdown});
 

@@ -34,17 +34,19 @@ export function generarOrdenPanelesDefecto(): Record<ModoColumnas, OrdenPanel[]>
 /*
  * Generar configuración por defecto desde el registro
  */
+/* [233A-7] Default cambiado de 2 columnas a 1 columna para nuevos registros.
+ * Los anchos usan el preset de 1 columna (100/0/0). */
 export function generarConfigLayoutDefecto(): ConfiguracionLayout {
     return {
-        modoColumnas: 2,
+        modoColumnas: 1,
         anchos: {
-            columna1: 58,
-            columna2: 42,
+            columna1: 100,
+            columna2: 0,
             columna3: 0
         },
         anchoTotal: 100,
         visibilidad: generarVisibilidadDefecto(),
-        ordenPaneles: generarOrdenDefecto(2),
+        ordenPaneles: generarOrdenDefecto(1),
         alturas: generarAlturasDefecto()
     };
 }

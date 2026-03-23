@@ -21,7 +21,7 @@ interface EncabezadoAccionesProps {
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
 }
 
-export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickNotificaciones, onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
+export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
     const [menuCrear, setMenuCrear] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
