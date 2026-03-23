@@ -12,8 +12,9 @@
  * - DIP: Los componentes dependen de esta abstracción, no de definiciones propias
  */
 
-import {Check, Calendar, Pause, Play, AlertTriangle, Flag, Settings, Undo2} from 'lucide-react';
+import {Check, Calendar, Pause, Play, AlertTriangle, Star, Settings, Undo2} from 'lucide-react';
 import type {OpcionMenu} from '../components/shared/MenuContextual';
+import {opcionesMenuImportancia} from '../utils/nivelesConfig';
 
 /*
  * Tipo para el estado actual del hábito que determina texto/iconos dinámicos
@@ -61,13 +62,8 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
         opciones.push({
             id: 'importancia',
             etiqueta: 'Importancia',
-            icono: <Flag size={12} />,
-            subOpciones: [
-                {id: 'importancia-Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="var(--dashboard-estadoMuyAlta)" />},
-                {id: 'importancia-Alta', etiqueta: 'Alta', icono: <Flag size={12} color="var(--dashboard-estadoAlta)" />},
-                {id: 'importancia-Media', etiqueta: 'Media', icono: <Flag size={12} color="var(--dashboard-estadoMedia)" />},
-                {id: 'importancia-Baja', etiqueta: 'Baja', icono: <Flag size={12} color="var(--dashboard-estadoBaja)" />}
-            ],
+            icono: <Star size={12} />,
+            subOpciones: opcionesMenuImportancia(12).map(op => ({...op, id: `importancia-${op.id}`})),
             separadorDespues: true
         });
     }

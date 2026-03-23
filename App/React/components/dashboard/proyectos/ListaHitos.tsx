@@ -13,7 +13,7 @@
 import {CheckCircle2, Circle, Plus, Flag, Trash2} from 'lucide-react';
 import {MenuContextual} from '../../shared/MenuContextual';
 import {Boton, Input} from '../../ui';
-import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
+import {ETIQUETAS_PRIORIDAD, COLORES_PRIORIDAD, opcionesMenuPrioridad} from '../../../utils/nivelesConfig';
 import {useListaHitos} from '../../../hooks/dashboard/useListaHitos';
 import type {Hito, NivelPrioridad} from '../../../types/dashboard';
 
@@ -72,10 +72,10 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                                             padding: '2px 8px',
                                             height: '24px',
                                             fontSize: '11px',
-                                            color: hito.prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : hito.prioridad === 'baja' ? 'var(--dashboard-estadoBaja)' : undefined,
-                                            borderColor: hito.prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : undefined
+                                            color: COLORES_PRIORIDAD[hito.prioridad],
+                                            borderColor: hito.prioridad === 'alta' || hito.prioridad === 'muy_alta' ? COLORES_PRIORIDAD[hito.prioridad] : undefined
                                         }}>
-                                        <Flag size={12} fill={hito.prioridad === 'alta' ? 'currentColor' : 'none'} />
+                                        <Flag size={12} fill={hito.prioridad === 'alta' || hito.prioridad === 'muy_alta' ? 'currentColor' : 'none'} />
                                         <span>{ETIQUETAS_PRIORIDAD[hito.prioridad]}</span>
                                     </Boton>
                                 </span>
@@ -97,11 +97,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                 {/* Menu Contextual de Prioridad */}
                 {menuAbiertoId && (
                     <MenuContextual
-                        opciones={Object.entries(ETIQUETAS_PRIORIDAD).map(([key, label]) => ({
-                            id: key,
-                            etiqueta: label,
-                            icono: <Flag size={12} />
-                        }))}
+                        opciones={opcionesMenuPrioridad(12)}
                         posicionX={posicionMenu.x}
                         posicionY={posicionMenu.y}
                         onSeleccionar={id => {

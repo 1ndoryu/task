@@ -8,6 +8,7 @@ import {useMemo} from 'react';
 import {Trash2, Flag, Folder, X, Layers, Zap} from 'lucide-react';
 import {MenuContextual, type OpcionMenu} from '../../shared/MenuContextual';
 import type {Proyecto, NivelPrioridad, NivelUrgencia} from '../../../types/dashboard';
+import {opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../../utils/nivelesConfig';
 import {useSeleccionMultipleStore, useCantidadSeleccionadas} from '../../../stores/seleccionMultipleStore';
 import {useSeccionesActivas} from '../../../stores/gruposTareasStore';
 
@@ -62,26 +63,7 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
                 etiqueta: 'Prioridad',
                 icono: <Flag size={14} />,
                 subOpciones: [
-                    {
-                        id: 'prioridad-muy_alta',
-                        etiqueta: 'Muy Alta',
-                        icono: <Flag size={12} color="#dc2626" />
-                    },
-                    {
-                        id: 'prioridad-alta',
-                        etiqueta: 'Alta',
-                        icono: <Flag size={12} color="#ef4444" />
-                    },
-                    {
-                        id: 'prioridad-media',
-                        etiqueta: 'Media',
-                        icono: <Flag size={12} color="#f59e0b" />
-                    },
-                    {
-                        id: 'prioridad-baja',
-                        etiqueta: 'Baja',
-                        icono: <Flag size={12} color="#94a3b8" />
-                    },
+                    ...opcionesMenuPrioridad(12).map(op => ({...op, id: `prioridad-${op.id}`})),
                     {
                         id: 'prioridad-null',
                         etiqueta: 'Sin prioridad',
@@ -95,28 +77,7 @@ export function MenuAccionesMasivas({posicionX, posicionY, onCerrar, onEliminarT
                 etiqueta: 'Urgencia',
                 icono: <Zap size={14} />,
                 separadorDespues: true,
-                subOpciones: [
-                    {
-                        id: 'urgencia-bloqueante',
-                        etiqueta: 'Bloqueante',
-                        icono: <Zap size={12} color="#ef4444" />
-                    },
-                    {
-                        id: 'urgencia-urgente',
-                        etiqueta: 'Urgente',
-                        icono: <Zap size={12} color="#f59e0b" />
-                    },
-                    {
-                        id: 'urgencia-normal',
-                        etiqueta: 'Normal',
-                        icono: <Zap size={12} color="#94a3b8" />
-                    },
-                    {
-                        id: 'urgencia-chill',
-                        etiqueta: 'Chill',
-                        icono: <Zap size={12} color="#3b82f6" />
-                    }
-                ]
+                subOpciones: opcionesMenuUrgencia(12).map(op => ({...op, id: `urgencia-${op.id}`}))
             });
         }
 

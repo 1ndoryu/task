@@ -4,10 +4,11 @@
  * Separado para mantener ModalCreacionRapida dentro del límite de líneas.
  */
 
-import {CheckSquare, Activity, Folder, Calendar, Flag, AlertCircle, Clock, Repeat} from 'lucide-react';
+import {CheckSquare, Activity, Folder, Calendar, Repeat} from 'lucide-react';
 import {MenuContextual} from '../../shared';
 import type {Proyecto} from '../../../types/dashboard';
 import type {EstadoMenu} from '../../../hooks/dashboard/useModalCreacionRapida';
+import {opcionesMenuPrioridad, opcionesMenuUrgencia, opcionesMenuImportancia} from '../../../utils/nivelesConfig';
 
 interface MenusCreacionRapidaProps {
     proyectos: Proyecto[];
@@ -85,12 +86,7 @@ export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Elemen
             {menuPrioridad.visible && (
                 <div onClick={e => e.stopPropagation()}>
                     <MenuContextual
-                        opciones={[
-                            {id: 'muy_alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="var(--dashboard-estadoMuyAlta)" />},
-                            {id: 'alta', etiqueta: 'Alta', icono: <Flag size={12} color="var(--dashboard-estadoAlta)" />},
-                            {id: 'media', etiqueta: 'Media', icono: <Flag size={12} color="var(--dashboard-estadoMedia)" />},
-                            {id: 'baja', etiqueta: 'Baja', icono: <Flag size={12} color="var(--dashboard-estadoBaja)" />}
-                        ]}
+                        opciones={opcionesMenuPrioridad(12)}
                         posicionX={menuPrioridad.x}
                         posicionY={menuPrioridad.y}
                         onSeleccionar={seleccionarPrioridad}
@@ -102,12 +98,7 @@ export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Elemen
             {menuUrgencia.visible && (
                 <div onClick={e => e.stopPropagation()}>
                     <MenuContextual
-                        opciones={[
-                            {id: 'bloqueante', etiqueta: 'Bloqueante', icono: <AlertCircle size={12} color="var(--dashboard-estadoAlta)" />},
-                            {id: 'urgente', etiqueta: 'Urgente', icono: <Clock size={12} color="var(--dashboard-estadoAlta)" />},
-                            {id: 'normal', etiqueta: 'Normal', icono: <Clock size={12} color="var(--dashboard-textoSecundario)" />},
-                            {id: 'chill', etiqueta: 'Chill', icono: <Clock size={12} color="var(--dashboard-estadoExito)" />}
-                        ]}
+                        opciones={opcionesMenuUrgencia(12)}
                         posicionX={menuUrgencia.x}
                         posicionY={menuUrgencia.y}
                         onSeleccionar={seleccionarUrgencia}
@@ -151,12 +142,7 @@ export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Elemen
             {menuImportancia.visible && (
                 <div onClick={e => e.stopPropagation()}>
                     <MenuContextual
-                        opciones={[
-                            {id: 'Muy Alta', etiqueta: 'Muy Alta', icono: <Flag size={12} color="var(--dashboard-estadoMuyAlta)" />},
-                            {id: 'Alta', etiqueta: 'Alta', icono: <Flag size={12} color="var(--dashboard-estadoAlta)" />},
-                            {id: 'Media', etiqueta: 'Media', icono: <Flag size={12} color="var(--dashboard-estadoMedia)" />},
-                            {id: 'Baja', etiqueta: 'Baja', icono: <Flag size={12} color="var(--dashboard-estadoBaja)" />}
-                        ]}
+                        opciones={opcionesMenuImportancia(12)}
                         posicionX={menuImportancia.x}
                         posicionY={menuImportancia.y}
                         onSeleccionar={seleccionarImportancia}

@@ -13,21 +13,7 @@ import {MenuContextual} from './MenuContextual';
 import {obtenerFechaLocalISO} from '../../utils/fecha';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {Boton} from '../ui';
-
-/* Mapeo de etiquetas en espanol */
-const ETIQUETAS_PRIORIDAD: Record<NivelPrioridad, string> = {
-    muy_alta: 'Muy Alta',
-    alta: 'Alta',
-    media: 'Media',
-    baja: 'Baja'
-};
-
-const ETIQUETAS_URGENCIA: Record<NivelUrgencia, string> = {
-    bloqueante: 'Bloqueante',
-    urgente: 'Urgente',
-    normal: 'Normal',
-    chill: 'Chill'
-};
+import {ETIQUETAS_PRIORIDAD, ETIQUETAS_URGENCIA, COLORES_PRIORIDAD, COLORES_URGENCIA, opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../utils/nivelesConfig';
 
 interface PropiedadesCompactasProps {
     prioridad: NivelPrioridad;
@@ -69,38 +55,22 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
 
     const cerrarMenu = () => setMenuActivo(null);
 
-    /* Opciones para cada menu */
-    const opcionesPrioridad = Object.entries(ETIQUETAS_PRIORIDAD).map(([key, label]) => ({
-        id: key,
-        etiqueta: label,
-        icono: <Flag size={12} />
-    }));
-
-    const opcionesUrgencia = [
-        {id: 'ninguna', etiqueta: 'Sin urgencia', icono: <Zap size={12} />},
-        ...Object.entries(ETIQUETAS_URGENCIA).map(([key, label]) => ({
-            id: key,
-            etiqueta: label,
-            icono: <Zap size={12} />
-        }))
-    ];
-
     return (
         <div className="propiedadesCompactas">
             {mostrarEtiqueta && <span className="propiedadesCompactas__etiqueta">Propiedades</span>}
             <div className="propiedadesCompactas__contenido">
                 {/* Prioridad */}
                 <div className="propiedadesCompactas__item">
-                    <Boton ref={prioridadRef} type="button" claseAdicional={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'var(--dashboard-textoNormal)'} : undefined}>
-                        <Flag size={14} fill={prioridad === 'alta' ? 'var(--dashboard-estadoAlta)' : 'none'} />
+                    <Boton ref={prioridadRef} type="button" claseAdicional={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: COLORES_PRIORIDAD[prioridad]} : undefined}>
+                        <Flag size={14} fill={prioridad === 'alta' || prioridad === 'muy_alta' ? COLORES_PRIORIDAD[prioridad] : 'none'} />
                         <span>{ETIQUETAS_PRIORIDAD[prioridad]}</span>
                     </Boton>
                 </div>
 
                 {/* Urgencia */}
                 <div className="propiedadesCompactas__item">
-                    <Boton ref={urgenciaRef} type="button" claseAdicional={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: 'var(--dashboard-estadoMedia)'} : undefined}>
-                        <Zap size={14} fill={urgencia ? 'var(--dashboard-estadoMedia)' : 'none'} />
+                    <Boton ref={urgenciaRef} type="button" claseAdicional={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: COLORES_URGENCIA[urgencia]} : undefined}>
+                        <Zap size={14} fill={urgencia ? COLORES_URGENCIA[urgencia] : 'none'} />
                         <span>{urgencia ? ETIQUETAS_URGENCIA[urgencia] : 'Urgencia'}</span>
                     </Boton>
                 </div>
@@ -117,7 +87,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
             {/* Menu Prioridad */}
             {menuActivo === 'prioridad' && (
                 <MenuContextual
-                    opciones={opcionesPrioridad}
+                    opciones={opcionesMenuPrioridad(12)}
                     posicionX={posicionMenu.x}
                     posicionY={posicionMenu.y}
                     onSeleccionar={id => {
@@ -131,7 +101,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
             {/* Menu Urgencia */}
             {menuActivo === 'urgencia' && (
                 <MenuContextual
-                    opciones={opcionesUrgencia}
+                    opciones={opcionesMenuUrgencia(12, true)}
                     posicionX={posicionMenu.x}
                     posicionY={posicionMenu.y}
                     onSeleccionar={id => {

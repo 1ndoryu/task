@@ -3,6 +3,7 @@ import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Play, Square} from 'lucide
 import type {Tarea, TareaHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
 import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion} from '../../../config/opcionesMenuHabito';
 import type {OpcionMenu} from '../../shared/MenuContextual';
+import {opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../../utils/nivelesConfig';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
 import {useTimeTrackerStore} from '../../../stores/timeTrackerStore';
 import {useShallow} from 'zustand/react/shallow';
@@ -173,26 +174,7 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 etiqueta: 'Prioridad',
                 icono: <Flag size={12} />,
                 subOpciones: [
-                    {
-                        id: 'muy_alta',
-                        etiqueta: 'Muy Alta',
-                        icono: <Flag size={12} color="#dc2626" />
-                    },
-                    {
-                        id: 'alta',
-                        etiqueta: 'Alta',
-                        icono: <Flag size={12} color="#ef4444" />
-                    },
-                    {
-                        id: 'media',
-                        etiqueta: 'Media',
-                        icono: <Flag size={12} color="#f59e0b" />
-                    },
-                    {
-                        id: 'baja',
-                        etiqueta: 'Baja',
-                        icono: <Flag size={12} color="#94a3b8" />
-                    },
+                    ...opcionesMenuPrioridad(12),
                     ...(tarea.prioridad
                         ? [
                               {
@@ -210,28 +192,7 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 etiqueta: 'Urgencia',
                 icono: <Zap size={12} />,
                 separadorDespues: true,
-                subOpciones: [
-                    {
-                        id: 'bloqueante',
-                        etiqueta: 'Bloqueante',
-                        icono: <Zap size={12} color="#ef4444" />
-                    },
-                    {
-                        id: 'urgente',
-                        etiqueta: 'Urgente',
-                        icono: <Zap size={12} color="#f59e0b" />
-                    },
-                    {
-                        id: 'normal',
-                        etiqueta: 'Normal',
-                        icono: <Zap size={12} color="#94a3b8" />
-                    },
-                    {
-                        id: 'chill',
-                        etiqueta: 'Chill',
-                        icono: <Zap size={12} color="#3b82f6" />
-                    }
-                ]
+                subOpciones: opcionesMenuUrgencia(12)
             },
             {
                 id: 'eliminar',

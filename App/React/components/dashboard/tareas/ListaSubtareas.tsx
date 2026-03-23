@@ -5,10 +5,10 @@
  */
 
 import {useState, useCallback, useEffect} from 'react';
-import {Check, Plus, Trash2, Flag} from 'lucide-react';
+import {Check, Plus, Trash2} from 'lucide-react';
 import {Boton, Input} from '../../ui';
 import {MenuContextual} from '../../shared/MenuContextual';
-import {ETIQUETAS_PRIORIDAD} from '../../shared/PropiedadesCompactas';
+import {ETIQUETAS_PRIORIDAD, opcionesMenuPrioridad} from '../../../utils/nivelesConfig';
 import type {Tarea, DatosEdicionTarea, NivelPrioridad} from '../../../types/dashboard';
 
 interface ListaSubtareasProps {
@@ -165,11 +165,7 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
             {/* Menu Contextual Prioridad */}
             {menuAbiertoId && (
                 <MenuContextual
-                    opciones={Object.entries(ETIQUETAS_PRIORIDAD).map(([key, label]) => ({
-                        id: key,
-                        etiqueta: label,
-                        icono: <Flag size={12} />
-                    }))}
+                    opciones={opcionesMenuPrioridad(12)}
                     posicionX={posicionMenu.x}
                     posicionY={posicionMenu.y}
                     onSeleccionar={id => {
