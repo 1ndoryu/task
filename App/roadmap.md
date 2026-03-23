@@ -22,15 +22,7 @@
 - 233A-27: Centralizar todas las configuraciones en un modal grande con sidebar
 - 233A-30: Corregir todas las violaciones del sentinel report
 - 233A-32: El modal de inicio de sesión sin fuentes + botones principales blancos con texto negro
-- 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rsy arregla cualquier issue que surja.
-- 233A-34: Quitar el efecto hover de bacground de todos los botones, haz que simplemente aumente el brillo con hover en los botoenes con hover, es todo.
-- 233A-35: drawerMovilCabecera aparece centrado, deberia estar alineado a la izquierda como el resto de cosas.
-- 233A-36: veo que bottomSheetContenido ya no aparece centrado pero el texto esta bien a la izquierda pero el icono tiene que estar a la derecha
-- 233A-37: bottomSheetPanel bottomSheetPanel--visible los botones tiene borde, no deberían, y veo que el .bottomSheetContenido .boton {
-    justify-content: flex-start;
-} hace que no esten centrados respecto a su contenido lo que hace que se vean mal. tambien el input tiene borde y no debería, y modalSeleccionPropiedad__lista los botones tienen background no deberian. 
-- 233A-38: los cuadros de ideas en panelActividadCuerpo se debordan despues e tu cambio. 
-- 233A-39: en listaTareasHabito listaTareasHabito--compacto dije que el boton debe estar centrado, el de añadir habito, pero listaTareasHabito__encabezado no debe centrarse, falta un poquito mas gap de listaTareasHabito listaTareasHabito--compacto, y el padding top alli no es necesario. 
+- 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 
 
 ## 233A-40 (En planificacion)
