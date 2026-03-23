@@ -133,6 +133,9 @@
 
 /* Configuración MCP */
 @import './componentes/modalConfiguracionMCP.css';
+
+/* [233A-27] Modal de Configuración Global */
+@import './componentes/modalConfigGlobal.css';
 @import './componentes/modalConfiguracionUsuario.css';
 
 /* Sistema de Feedback (Premium) */

@@ -1,0 +1,131 @@
+/*
+ * [233A-27] MODAL DE CONFIGURACIÓN GLOBAL
+ * Layout con sidebar de navegación + área de contenido
+ * Reusa clases existentes: .contenedorOpcionesConfig, .itemOpcionConfig, etc.
+ */
+
+/* Override del modalContenedor para hacerlo más ancho */
+.modalConfigGlobal {
+    max-width: 720px;
+}
+
+/* Layout principal: sidebar + contenido */
+.configGlobalLayout {
+    display: flex;
+    min-height: 400px;
+    max-height: calc(90vh - 60px);
+    overflow: hidden;
+}
+
+/* Sidebar de navegación */
+.configGlobalSidebar {
+    width: 180px;
+    min-width: 180px;
+    border-right: 1px solid var(--dashboard-bordePrincipal);
+    overflow-y: auto;
+    padding: var(--dashboard-espacioXs) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Grupo de secciones en sidebar */
+.configGlobalNavGrupo {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--dashboard-textoTerciario);
+    letter-spacing: 0.5px;
+}
+
+.configGlobalNavGrupo:not(:first-child) {
+    margin-top: var(--dashboard-espacioXs);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    padding-top: var(--dashboard-espacioSm);
+}
+
+/* Item de navegación en sidebar */
+.configGlobalNavItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 6px var(--dashboard-espacioSm);
+    margin: 0 var(--dashboard-espacioXs);
+    border-radius: var(--dashboard-radioSm);
+    font-size: var(--dashboard-tamanoSm);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border: none;
+    background: none;
+    text-align: left;
+    width: calc(100% - var(--dashboard-espacioSm));
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.configGlobalNavItem:hover {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.configGlobalNavItem.activo {
+    background-color: var(--dashboard-fondoActivo);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+/* Área de contenido */
+.configGlobalContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--dashboard-espacioMd);
+    min-width: 0;
+}
+
+/* Título de sección en el contenido */
+.configGlobalTituloSeccion {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+/* Responsive: en móvil, sidebar se convierte en horizontal */
+@media (max-width: 600px) {
+    .modalConfigGlobal {
+        max-width: 100%;
+    }
+
+    .configGlobalLayout {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .configGlobalSidebar {
+        width: 100%;
+        min-width: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: var(--dashboard-espacioXs);
+        gap: 4px;
+        max-height: none;
+    }
+
+    .configGlobalNavGrupo {
+        display: none;
+    }
+
+    .configGlobalNavItem {
+        white-space: nowrap;
+        width: auto;
+        margin: 0;
+        padding: 6px var(--dashboard-espacioSm);
+    }
+
+    .configGlobalContenido {
+        max-height: 60vh;
+    }
+}

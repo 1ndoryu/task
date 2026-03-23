@@ -1,7 +1,7 @@
 /*
  * ModalesConfiguracion
  * Agrupa todos los modales de configuración de paneles
- * Incluye: Tareas, Hábitos, Proyectos, Scratchpad, Actividad, Layout
+ * [233A-27] Incluye el modal de configuración global centralizado
  */
 
 import {ModalConfiguracionLayout} from '../ModalConfiguracionLayout';
@@ -12,7 +12,7 @@ import {ModalConfiguracionActividad} from '../ModalConfiguracionActividad';
 import {ModalConfiguracionProyectos} from '../proyectos/ModalConfiguracionProyectos';
 import {ModalVersiones, ModalTemas} from '../../shared';
 import {ModalFeedback} from '../../shared/ModalFeedback';
-import {ModalConfiguracionMCP, ModalConfiguracionUsuario} from '../../configuracion';
+import {ModalConfiguracionMCP, ModalConfiguracionUsuario, ModalConfiguracionGlobal} from '../../configuracion';
 import {ModalHistorialBackups} from '../ModalHistorialBackups';
 
 import type {DashboardCompletoRetorno} from '../../../hooks/useDashboardCompleto';
@@ -46,6 +46,9 @@ export function ModalesConfiguracion({modales, configTareas, configHabitos, conf
             <ModalConfiguracionMCP estaAbierto={modales.modalConfigMCPAbierto} onCerrar={modales.cerrarModalConfigMCP} onAbrirUpgrade={modales.abrirModalUpgrade} />
             <ModalConfiguracionUsuario estaAbierto={modales.modalConfigUsuarioAbierto} onCerrar={modales.cerrarModalConfigUsuario} />
             <ModalHistorialBackups estaAbierto={modales.modalBackupsAbierto} onCerrar={modales.cerrarModalBackups} onAbrirUpgrade={modales.abrirModalUpgrade} />
+
+            {/* [233A-27] Modal de configuración global centralizado */}
+            <ModalConfiguracionGlobal estaAbierto={modales.modalConfigGlobalAbierto} onCerrar={modales.cerrarModalConfigGlobal} seccionInicial={modales.seccionConfigGlobal} onAbrirUpgrade={modales.abrirModalUpgrade} />
         </>
     );
 }

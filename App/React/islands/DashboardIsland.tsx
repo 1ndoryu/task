@@ -99,23 +99,23 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         opcionesOrdenTareas: opciones.opcionesOrdenTareas,
         modoOrdenTareas: ordenTareas.modoActual,
         onCambiarOrdenTareas: ordenTareas.cambiarModo,
-        onAbrirConfigTareas: modales.abrirModalConfigTareas,
+        onAbrirConfigTareas: () => modales.abrirModalConfigGlobal('tareas'),
         /* Hábitos */
         opcionesOrdenHabitos: opciones.opcionesOrdenHabitos,
         modoOrdenHabitos: ordenHabitos.modoActual,
         onCambiarOrdenHabitos: ordenHabitos.cambiarModo,
-        onAbrirConfigHabitos: modales.abrirModalConfigHabitos,
+        onAbrirConfigHabitos: () => modales.abrirModalConfigGlobal('habitos'),
         /* Proyectos */
         opcionesOrdenProyectos: opciones.opcionesOrdenProyectos,
         modoOrdenProyectos: configProyectos.configuracion.ordenDefecto,
         onCambiarOrdenProyectos: configProyectos.cambiarOrdenDefecto,
-        onAbrirConfigProyectos: modales.abrirModalConfigProyectos,
+        onAbrirConfigProyectos: () => modales.abrirModalConfigGlobal('proyectos'),
         /* Actividad */
-        onAbrirConfigActividad: modales.abrirModalConfigActividad,
+        onAbrirConfigActividad: () => modales.abrirModalConfigGlobal('actividad'),
         /* Notas */
         onNuevaNota: manejarNuevaNota,
         onAbrirNotasGuardadas: manejarAbrirNotasGuardadas,
-        onAbrirConfigNotas: modales.abrirModalConfigScratchpad
+        onAbrirConfigNotas: () => modales.abrirModalConfigGlobal('notas')
     });
 
     /* TAREA 1: Interceptar botón back en APK para cerrar modales/menus antes de salir */
@@ -227,18 +227,18 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 equiposPendientes={equipos.pendientes}
                 notificacionesPendientes={notificaciones.noLeidas}
                 onClickPlan={modales.abrirModalUpgrade}
-                onClickSeguridad={modales.abrirPanelSeguridad}
+                onClickSeguridad={() => modales.abrirModalConfigGlobal('seguridad')}
                 onClickAdmin={modales.abrirPanelAdmin}
-                onClickLayout={modales.abrirModalConfigLayout}
+                onClickLayout={() => modales.abrirModalConfigGlobal('layout')}
                 onClickVersion={modales.abrirModalVersiones}
-                onClickUsuario={modales.abrirModalPerfil}
+                onClickUsuario={() => modales.abrirModalConfigGlobal('perfil')}
                 onClickEquipos={modales.abrirModalEquipos}
                 onClickNotificaciones={(evento?: React.MouseEvent) => { if (evento) acciones.manejarClickNotificaciones(evento); }}
                 onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
-                onClickTemas={modales.abrirModalTemas}
-                onClickConfigUsuario={modales.abrirModalConfigUsuario}
-                onClickBackups={modales.abrirModalBackups}
-                onClickConfigMCP={modales.abrirModalConfigMCP}
+                onClickTemas={() => modales.abrirModalConfigGlobal('temas')}
+                onClickConfigUsuario={() => modales.abrirModalConfigGlobal('preferencias')}
+                onClickBackups={() => modales.abrirModalConfigGlobal('backups')}
+                onClickConfigMCP={() => modales.abrirModalConfigGlobal('ia')}
                 onClickPlugins={modales.abrirModalPlugins}
                 onClickFeedback={modales.abrirModalFeedback}
                 onExportarDatos={dashboard.exportarTodosDatos}

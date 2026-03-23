@@ -82,7 +82,7 @@ export function generarPropsPanelEjecucion(
         opcionesOrdenTareas: opciones.opcionesOrdenTareas,
         esOrdenManual: ordenTareas.esOrdenManual,
         onAbrirModalNuevaTarea: () => modales.abrirCreacionRapida('tarea'),
-        onAbrirModalConfigTareas: modales.abrirModalConfigTareas,
+        onAbrirModalConfigTareas: () => modales.abrirModalConfigGlobal('tareas'),
         onToggleTarea: manejarToggleTarea,
         onCrearTarea: crearTareaConLimite,
         onEditarTarea: dashboard.editarTarea,
@@ -128,7 +128,7 @@ export function generarPropsPanelFocoPrioritario(
         opcionesOrdenHabitos: opciones.opcionesOrdenHabitos,
         configuracion: configHabitos.configuracion,
         onAbrirModalCrearHabito: () => modales.abrirCreacionRapida('habito'),
-        onAbrirModalConfigHabitos: modales.abrirModalConfigHabitos,
+        onAbrirModalConfigHabitos: () => modales.abrirModalConfigGlobal('habitos'),
         onToggleHabito: dashboard.toggleHabito,
         onEditarHabito: manejarEditarHabito,
         onEliminarHabito: dashboard.eliminarHabito,
@@ -163,7 +163,7 @@ export function generarPropsPanelProyectos(
         opcionesOrdenProyectos: opciones.opcionesOrdenProyectos,
         onAbrirModalCrearProyecto: () => modales.abrirCreacionRapida('proyecto'),
         onAbrirModalEditarProyecto: modales.abrirModalEditarProyecto,
-        onAbrirModalConfigProyectos: modales.abrirModalConfigProyectos,
+        onAbrirModalConfigProyectos: () => modales.abrirModalConfigGlobal('proyectos'),
         onEliminarProyecto: dashboard.eliminarProyecto,
         onCambiarEstadoProyecto: dashboard.cambiarEstadoProyecto,
         onCambiarOrdenProyectos: configProyectos.cambiarOrdenDefecto,
@@ -189,7 +189,7 @@ export function generarPropsPanelScratchpad(
     const {modales, configScratchpad} = ctx;
     return {
         configuracion: configScratchpad.configuracion,
-        onAbrirModalConfigScratchpad: modales.abrirModalConfigScratchpad,
+        onAbrirModalConfigScratchpad: () => modales.abrirModalConfigGlobal('notas'),
         onCambiarAltura: configScratchpad.cambiarAltura,
         renderHandleArrastre,
         handleMinimizar
@@ -204,7 +204,7 @@ export function generarPropsPanelActividad(
     const {modales, configActividad} = ctx;
     return {
         configuracion: configActividad.configuracion,
-        onAbrirModalConfigActividad: modales.abrirModalConfigActividad,
+        onAbrirModalConfigActividad: () => modales.abrirModalConfigGlobal('actividad'),
         onAbrirUpgrade: modales.abrirModalUpgrade,
         renderHandleArrastre,
         handleMinimizar

@@ -7,6 +7,9 @@
 import {useState, useCallback} from 'react';
 import type {Proyecto, Habito, Tarea} from '../types/dashboard';
 
+/* [233A-27] Secciones disponibles en el modal de configuración global */
+export type SeccionConfigGlobal = 'tareas' | 'habitos' | 'proyectos' | 'notas' | 'actividad' | 'layout' | 'perfil' | 'preferencias' | 'temas' | 'seguridad' | 'ia' | 'backups';
+
 interface PosicionModal {
     x: number;
     y: number;
@@ -110,6 +113,11 @@ interface UseModalesDashboardReturn {
     modalConfigDeficitCaloricoAbierto: boolean;
     abrirModalConfigDeficitCalorico: () => void;
     cerrarModalConfigDeficitCalorico: () => void;
+    /* [233A-27] Modal de configuración global */
+    modalConfigGlobalAbierto: boolean;
+    seccionConfigGlobal: SeccionConfigGlobal;
+    abrirModalConfigGlobal: (seccion?: SeccionConfigGlobal) => void;
+    cerrarModalConfigGlobal: () => void;
 }
 
 /* Helper: encapsula useState + useCallback para modales booleanos simples */
@@ -144,6 +152,14 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const backups = useModalSimple();
     const feedback = useModalSimple();
     const configDeficitCalorico = useModalSimple();
+
+    /* [233A-27] Modal de configuración global con sidebar */
+    const configGlobal = useModalSimple();
+    const [seccionConfigGlobal, setSeccionConfigGlobal] = useState<SeccionConfigGlobal>('tareas');
+    const abrirModalConfigGlobal = useCallback((seccion: SeccionConfigGlobal = 'tareas') => {
+        setSeccionConfigGlobal(seccion);
+        configGlobal.abrir();
+    }, [configGlobal.abrir]);
 
     /* Notificaciones (posición custom) */
     const [modalNotificacionesAbierto, setModalNotificacionesAbierto] = useState(false);
@@ -292,6 +308,11 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalPlugins,
         modalConfigDeficitCaloricoAbierto: configDeficitCalorico.abierto,
         abrirModalConfigDeficitCalorico: configDeficitCalorico.abrir,
-        cerrarModalConfigDeficitCalorico: configDeficitCalorico.cerrar
+        cerrarModalConfigDeficitCalorico: configDeficitCalorico.cerrar,
+        /* [233A-27] Modal de configuración global */
+        modalConfigGlobalAbierto: configGlobal.abierto,
+        seccionConfigGlobal,
+        abrirModalConfigGlobal,
+        cerrarModalConfigGlobal: configGlobal.cerrar
     };
 }
