@@ -25,15 +25,16 @@
 /* 
  * BADGE BASE 
  */
+/* [233A-49] Fondo transparente y padding consistente (2px 8px) para igualar altura con variantes */
 .badgeInfo {
     display: inline-flex;
     align-items: center;
     gap: var(--dashboard-espacioMini);
-    padding: 1px 5px;
+    padding: 2px 8px;
     font-size: var(--dashboard-tamanoMuyPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     color: var(--dashboard-textoApagado);
-    background-color: var(--dashboard-fondoHover);
+    background-color: transparent;
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
     white-space: nowrap;
@@ -75,10 +76,10 @@
  * VARIANTES DE ESTADO
  */
 
-/* Normal (por defecto) */
+/* Normal (por defecto) — [233A-49] fondo transparente, borde consistente */
 .badgeInfo--normal {
     color: var(--dashboard-textoApagado);
-    background-color: var(--dashboard-fondoHover);
+    background-color: transparent;
     border-color: var(--dashboard-bordeSutil);
 }
 
