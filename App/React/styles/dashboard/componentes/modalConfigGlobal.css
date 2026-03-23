@@ -131,3 +131,99 @@
         max-height: 60vh;
     }
 }
+
+/*
+ * [233A-54] VERSIÓN MÓVIL: Config como BottomSheet
+ * Fase 1: tabs como botones (BottomSheet compacto)
+ * Fase 2: al seleccionar, expande a 80vh mostrando contenido
+ */
+
+/* Expandir el BottomSheet cuando hay sección seleccionada */
+.bottomSheetPanel:has(.configMovilContenedor--expandido) {
+    max-height: 80vh;
+}
+
+/* Contenedor principal dentro del BottomSheet */
+.configMovilContenedor {
+    display: flex;
+    flex-direction: column;
+}
+
+.configMovilContenedor--expandido {
+    height: 75vh;
+}
+
+/* Encabezado con botón volver + título */
+.configMovilEncabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    flex-shrink: 0;
+}
+
+.configMovilTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+}
+
+/* Contenido scrollable de la sección */
+.configMovilContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--dashboard-espacioMd);
+    min-height: 0;
+}
+
+/* Lista de secciones (fase 1) */
+.configMovilSecciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+/* Grupo de secciones */
+.configMovilGrupo {
+    display: flex;
+    flex-direction: column;
+}
+
+.configMovilGrupoTitulo {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--dashboard-textoMuyApagado);
+    letter-spacing: 0.5px;
+}
+
+/* Item de sección individual */
+.configMovilItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioSm);
+    width: 100%;
+    text-align: left;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.configMovilItem:hover,
+.configMovilItem:active {
+    background: var(--dashboard-fondoHover);
+}
+
+.configMovilItemIcono {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-textoApagado);
+}
+
+.configMovilItemTexto {
+    font-weight: 500;
+}
