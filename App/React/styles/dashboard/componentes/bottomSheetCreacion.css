@@ -167,7 +167,7 @@
 .bottomSheetTarea__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
 }
 
 .bottomSheetTarea__accion {
@@ -575,7 +575,7 @@
 .badgesPropiedad {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     padding: var(--dashboard-espacioXs) 0;
 }
 
@@ -609,31 +609,31 @@
 
 /* Variantes de color para badges - Usan variables de estado existentes */
 .badgesPropiedad__badge--proyecto {
-    color: var(--dashboard-acentoPrimario, #a78bfa);
-    border-color: rgba(var(--dashboard-acentoPrimarioRgb, 167, 139, 250), 0.4);
+    color: var(--dashboard-acentoPrimario);
+    border-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.4);
 }
 
 .badgesPropiedad__badge--prioridad {
-    color: var(--dashboard-estadoMedia, #ca8a04);
+    color: var(--dashboard-estadoMedia);
     border-color: var(--dashboard-estadoMediaBorde);
 }
 
 .badgesPropiedad__badge--urgencia {
-    color: var(--dashboard-estadoAlta, #ef4444);
+    color: var(--dashboard-estadoAlta);
     border-color: var(--dashboard-estadoAltaBorde);
 }
 
 .badgesPropiedad__badge--fecha {
-    color: var(--dashboard-estadoInfo, #3b82f6);
+    color: var(--dashboard-estadoInfo);
     border-color: var(--dashboard-estadoInfoBorde);
 }
 
 .badgesPropiedad__badge--frecuencia {
-    color: var(--dashboard-estadoExito, #22c55e);
+    color: var(--dashboard-estadoExito);
     border-color: var(--dashboard-estadoExitoBorde);
 }
 
 .badgesPropiedad__badge--importancia {
-    color: var(--dashboard-estadoMuyAlta, #f43f5e);
+    color: var(--dashboard-estadoMuyAlta);
     border-color: var(--dashboard-estadoMuyAltaBorde);
 }
