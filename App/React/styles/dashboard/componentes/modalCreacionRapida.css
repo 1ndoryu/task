@@ -41,13 +41,14 @@
     transition: border-color var(--dashboard-transicionRapida);
 }
 
-/* Anula estilos base del componente Input — el modal ya tiene su propia caja visual */
+/* [233A-34] Anula estilos base del componente Input — el modal ya tiene su propia caja visual */
 .creacionRapidaInputWrapper .input,
 .creacionRapidaInputWrapper .input:focus {
     background: transparent;
     border: none;
     box-shadow: none;
     outline: none;
+    padding: 0;
 }
 
 .creacionRapidaIcono {

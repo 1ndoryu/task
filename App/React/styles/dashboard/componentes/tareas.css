@@ -186,10 +186,11 @@
     transition: all var(--dashboard-transicionRapida);
 }
 
+/* [233A-31] Sin background hover — solo cambio de color */
 .tareaBotonEliminar:hover {
     color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAltaBorde);
-    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: transparent;
+    background-color: transparent;
 }
 
 .tareaBotonEditar {

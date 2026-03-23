@@ -107,10 +107,13 @@
 }
 
 /* Textarea */
+/* [233A-35] flex:1 para que llene al padre, height:100% como fallback */
 .textareaContenedor {
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioXs);
+    flex: 1;
+    height: 100%;
 }
 
 .textareaEtiqueta {
@@ -126,6 +129,7 @@
 
 .textarea {
     width: 100%;
+    flex: 1;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
@@ -137,10 +141,9 @@
     transition: all 0.2s ease;
 }
 
+/* [233A-35] Sin borde de color ni sombra al focus */
 .textarea:focus {
     outline: none;
-    border-color: var(--dashboard-acento);
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
 .textarea::placeholder {
