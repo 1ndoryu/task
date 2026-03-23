@@ -105,7 +105,8 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoSecundario);
-    height: 12px;
+    min-height: 12px;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -113,23 +114,19 @@
 
 /* 
  * Grid de celdas 
+ * [233A-12] flex:1 en grid y semana para que las celdas llenen el ancho disponible.
+ * Las celdas usan min-width + aspect-ratio:1 para mantener proporcion cuadrada.
  */
 .mapaCalorGrid {
     display: flex;
-    gap: var(--dashboard-espacioMini);
-}
-
-/* 
- * Modo auto: grid se expande para llenar el contenedor 
- */
-.mapaCalorContenedor--auto .mapaCalorGrid {
     flex: 1;
-    justify-content: flex-start;
+    gap: var(--dashboard-espacioMini);
 }
 
 .mapaCalorSemana {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: var(--dashboard-espacioMini);
 }
 
@@ -137,20 +134,18 @@
  * Celdas individuales 
  */
 .mapaCalorCelda {
-    width: 12px;
-    height: 12px;
+    min-width: 12px;
+    aspect-ratio: 1;
     border-radius: var(--dashboard-radioXs);
     transition: transform var(--dashboard-transicionRapida);
 }
 
 .mapaCalorCelda--pequeno {
-    width: 10px;
-    height: 10px;
+    min-width: 10px;
 }
 
 .mapaCalorCelda--grande {
-    width: 14px;
-    height: 14px;
+    min-width: 14px;
 }
 
 .mapaCalorCelda--vacio {
