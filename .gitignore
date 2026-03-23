@@ -110,3 +110,6 @@ css-vars-validator/
 colors/
 desktop/dist/
 desktop/src-tauri/
+
+temp/
+kamples-scraper/

@@ -44,4 +44,4 @@ Agrega un boton de accion para posponer una tarea o habito en el panel de ejecuc
 
 ## 233A-43
 
-configGlobalSidebar
+configGlobalSidebar los botones estan centrados en vez de estar a la derecha, falta quitar del menu contextual de usuario todo lo que ya esta en el modal de configuracion

@@ -3,3 +3,11 @@
  * Archivo placeholder para compatibilidad
  * Las variables CSS ahora se definen en otro lugar
  */
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    width: 100%;
+    padding: 0;
+}
