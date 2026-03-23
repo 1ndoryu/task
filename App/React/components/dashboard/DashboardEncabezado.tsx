@@ -18,7 +18,6 @@ import {EncabezadoAcciones} from './encabezado/EncabezadoAcciones';
 import {EncabezadoPerfil} from './encabezado/EncabezadoPerfil';
 import {EncabezadoBuscador} from './encabezado/EncabezadoBuscador';
 import {EncabezadoMenuMovil, EncabezadoOpcionesMovil} from './encabezado/EncabezadoMovil';
-import {EncabezadoBuscadorMovilTrigger} from './encabezado/EncabezadoBuscadorMovilTrigger';
 
 interface DashboardEncabezadoProps {
     titulo?: string;
@@ -112,8 +111,8 @@ export function DashboardEncabezado({
     paginaMovilActiva,
     onCambiarPagina,
     // Selección
-    modoSeleccionActivo,
-    onToggleSeleccion
+    modoSeleccionActivo: _modoSeleccionActivo,
+    onToggleSeleccion: _onToggleSeleccion
 }: DashboardEncabezadoProps): JSX.Element {
     const esTablet = useEsDispositivoMovil();
     const estaConectado = sincronizacion?.estaLogueado ?? false;
@@ -163,7 +162,7 @@ export function DashboardEncabezado({
             <EncabezadoBuscador tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} mostrarModal={mostrarBuscadorMovil} onCerrarModal={() => setMostrarBuscadorMovil(false)} estaConectado={estaConectado} />
 
             <nav className="encabezadoNav">
-                <EncabezadoBuscadorMovilTrigger esTablet={esTablet} onClick={() => setMostrarBuscadorMovil(!mostrarBuscadorMovil)} mostrarBotonSeleccion={paginaMovilActiva === 'ejecucion'} modoSeleccionActivo={modoSeleccionActivo} onToggleSeleccion={onToggleSeleccion} />
+                {/* [233A-56] Botón de búsqueda quitado del encabezado móvil — accesible desde el menú contextual (BottomSheet) */}
 
                 <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} />
 
