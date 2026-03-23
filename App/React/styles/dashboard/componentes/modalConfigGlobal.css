@@ -4,9 +4,12 @@
  * Reusa clases existentes: .contenedorOpcionesConfig, .itemOpcionConfig, etc.
  */
 
-/* Override del modalContenedor para hacerlo más ancho */
+/* Override del modalContenedor para hacerlo más ancho y con altura fija */
+/* [233A-58] Altura fija de 750px solicitada por el usuario */
 .modalConfigGlobal {
     max-width: 720px;
+    height: 750px;
+    max-height: 90vh;
 }
 
 /* Layout principal: sidebar + contenido */
