@@ -37,9 +37,11 @@
     filter: brightness(1.15);
 }
 
+/* [233A-50] Sin background, con borde */
 .boton--secundario {
-    background: var(--dashboard-estadoBaja);
-    color: var(--dashboard-textoSobreAcento);
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    border: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .boton--secundario:hover:not(:disabled) {

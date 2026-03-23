@@ -44,6 +44,3 @@ En bottomSheetContenido - menuOpcionesPanelContenido LOS BOTONES SE VOLVIERON A 
 
 En badgeGroup todo debe tener la misma altura y algunos botoenes no tiene la misma altura, algunos no tienen background y otros tienen background gris, haz que los que son gris no tengan background y el mismo color de borde del badge que esta sin fondo. 
 
-## 233A-50
-
-.boton--secundario no debe tener background, pero si debe tener borde. 
