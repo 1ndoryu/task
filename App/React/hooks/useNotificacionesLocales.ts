@@ -76,7 +76,6 @@ async function obtenerPluginNotificaciones(): Promise<NotificacionLocalPlugin | 
     if (!Capacitor.isNativePlatform()) return null;
 
     try {
-        /* @ts-expect-error — módulo opcional, solo disponible en plataformas nativas Capacitor */
         const modulo = await import('@capacitor/local-notifications');
         return modulo.LocalNotifications as unknown as NotificacionLocalPlugin;
     } catch {

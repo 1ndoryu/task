@@ -15,8 +15,8 @@ interface UseSelectorBadgeParams<T extends string = string> {
 
 interface UseSelectorBadgeReturn<T extends string = string> {
     menuAbierto: boolean;
-    contenedorRef: React.RefObject<HTMLDivElement>;
-    menuRef: React.RefObject<HTMLDivElement>;
+    contenedorRef: React.RefObject<HTMLDivElement | null>;
+    menuRef: React.RefObject<HTMLDivElement | null>;
     opcionActual: OpcionBadge<T> | undefined;
     toggleMenu: () => void;
     seleccionarOpcion: (opcion: OpcionBadge<T>) => void;

@@ -26,7 +26,7 @@ export interface UseModalPerfilReturn {
     datos: DatosPerfil;
     cargando: boolean;
     mensaje: {tipo: 'exito' | 'error'; texto: string} | null;
-    fileInputRef: React.RefObject<HTMLInputElement>;
+    fileInputRef: React.RefObject<HTMLInputElement | null>;
 
     /* Acciones */
     handleChange: (campo: keyof DatosPerfil, valor: string) => void;

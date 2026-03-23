@@ -11,7 +11,7 @@ interface ResizeHandlePanelProps {
     panelId: PanelId;
     alturaInicial: string;
     onCambiarAltura: (panelId: PanelId, altura: string) => void;
-    children: (props: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement>; esAuto: boolean}) => JSX.Element;
+    children: (props: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement | null>; esAuto: boolean}) => JSX.Element;
 }
 
 export function ResizeHandlePanel({panelId, alturaInicial, onCambiarAltura, children}: ResizeHandlePanelProps): JSX.Element {

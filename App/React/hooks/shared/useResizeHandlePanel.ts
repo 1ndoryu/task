@@ -23,7 +23,7 @@ interface UseResizeHandlePanelParams {
 }
 
 interface UseResizeHandlePanelReturn {
-    contenedorRef: React.RefObject<HTMLDivElement>;
+    contenedorRef: React.RefObject<HTMLDivElement | null>;
     isResizing: boolean;
     alturaLocal: string;
     esAuto: boolean;

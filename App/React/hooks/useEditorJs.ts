@@ -25,7 +25,7 @@ interface UseEditorJsParams {
 }
 
 interface UseEditorJsReturn {
-    holderRef: React.RefObject<HTMLDivElement>;
+    holderRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function useEditorJs({data, onChange, onReady, placeholder, readOnly, minHeight}: UseEditorJsParams): UseEditorJsReturn {

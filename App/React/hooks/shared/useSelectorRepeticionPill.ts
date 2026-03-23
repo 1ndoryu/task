@@ -28,8 +28,8 @@ interface UseSelectorRepeticionPillParams {
 interface UseSelectorRepeticionPillReturn {
     panelAbierto: boolean;
     posicionPanel: {x: number; y: number};
-    botonRef: React.RefObject<HTMLButtonElement>;
-    panelRef: React.RefObject<HTMLDivElement>;
+    botonRef: React.RefObject<HTMLButtonElement | null>;
+    panelRef: React.RefObject<HTMLDivElement | null>;
     descripcion: string;
     activarRepeticion: () => void;
     cerrarPanel: () => void;
