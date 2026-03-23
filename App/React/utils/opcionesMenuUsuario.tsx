@@ -10,7 +10,7 @@
  */
 
 import type {ReactNode} from 'react';
-import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, BarChart3, Puzzle} from 'lucide-react';
+import {Settings, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, BarChart3} from 'lucide-react';
 
 export interface OpcionMenuUsuario {
     id: string;
@@ -30,48 +30,16 @@ interface ConfiguracionMenuUsuario {
     tamanoIcono?: number;
 }
 
-/*
- * Genera las opciones del menú de usuario según la configuración
- * Filtra automáticamente opciones que no aplican en móvil
- */
+/* [233A-43] Opciones reducidas: perfil, seguridad, backups, temas, mcp, plugins
+ * ahora viven en el modal de configuración global */
 export function obtenerOpcionesMenuUsuario(config: ConfiguracionMenuUsuario): OpcionMenuUsuario[] {
     const {esMovil, esPremium, version, tamanoIcono = esMovil ? 18 : 12} = config;
 
     const opcionesBase: OpcionMenuUsuario[] = [
         {
-            id: 'perfil',
-            etiqueta: 'Mi Perfil',
-            icono: <User size={tamanoIcono} />
-        },
-        {
             id: 'configuracion',
             etiqueta: 'Configuración',
-            icono: <Settings size={tamanoIcono} />
-        },
-        {
-            id: 'seguridad',
-            etiqueta: 'Seguridad',
-            icono: <Shield size={tamanoIcono} />
-        },
-        {
-            id: 'backups',
-            etiqueta: 'Copias de Seguridad',
-            icono: <Database size={tamanoIcono} />
-        },
-        {
-            id: 'temas',
-            etiqueta: 'Temas',
-            icono: <Palette size={tamanoIcono} />
-        },
-        {
-            id: 'mcp',
-            etiqueta: 'Conectar con IA',
-            icono: <Plug size={tamanoIcono} />
-        },
-        {
-            id: 'plugins',
-            etiqueta: 'Plugins',
-            icono: <Puzzle size={tamanoIcono} />,
+            icono: <Settings size={tamanoIcono} />,
             separadorDespues: true
         },
         {

@@ -46,9 +46,11 @@
 }
 
 /* Item de navegación en sidebar */
+/* [233A-43] justify-content para que botones no queden centrados */
 .configGlobalNavItem {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--dashboard-espacioXs);
     padding: 6px var(--dashboard-espacioSm);
     margin: 0 var(--dashboard-espacioXs);

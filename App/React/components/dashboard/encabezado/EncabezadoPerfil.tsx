@@ -1,10 +1,12 @@
 import {useState, useRef} from 'react';
-import {User, Settings, Shield, Database, Palette, Plug, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, Puzzle} from 'lucide-react';
+import {Settings, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus} from 'lucide-react';
 import {MenuContextual} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import {Input} from '../../ui/Input';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../../types/dashboard';
 
+/* [233A-43] Props simplificadas: perfil, seguridad, backups, temas, mcp, plugins
+ * ahora están en el modal de configuración global, no en el menú contextual */
 interface EncabezadoPerfilProps {
     usuario: string;
     version: string;
@@ -14,35 +16,23 @@ interface EncabezadoPerfilProps {
     esTablet: boolean;
     sincronizacion?: SincronizacionInfo;
 
-    onClickUsuario?: () => void;
-    onClickSeguridad?: () => void;
-    onClickBackups?: () => void;
     onClickConfigUsuario?: () => void;
     onClickVersion?: () => void;
     onClickPlan?: () => void;
-    onClickTemas?: () => void;
-    onClickConfigMCP?: () => void;
-    onClickPlugins?: () => void;
     onClickFeedback?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
 }
 
-export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickPlan, onClickTemas, onClickConfigMCP, onClickPlugins, onClickFeedback, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
+export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickConfigUsuario, onClickVersion, onClickPlan, onClickFeedback, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
     const [menuUsuario, setMenuUsuario] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
     const inputArchivoRef = useRef<HTMLInputElement>(null);
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
 
-    /* Opciones del menu contextual del usuario - Feedback solo para Premium */
+    /* [233A-43] Solo opciones que NO están en el modal de configuración global */
     const opcionesMenuUsuario = [
-        {id: 'perfil', etiqueta: 'Mi Perfil', icono: <User size={12} />},
-        {id: 'configuracion', etiqueta: 'Configuración', icono: <Settings size={12} />},
-        {id: 'seguridad', etiqueta: 'Seguridad', icono: <Shield size={12} />},
-        {id: 'backups', etiqueta: 'Copias de Seguridad', icono: <Database size={12} />},
-        {id: 'temas', etiqueta: 'Temas', icono: <Palette size={12} />},
-        {id: 'mcp', etiqueta: 'Conectar con IA', icono: <Plug size={12} />},
-        {id: 'plugins', etiqueta: 'Plugins', icono: <Puzzle size={12} />, separadorDespues: true},
+        {id: 'configuracion', etiqueta: 'Configuración', icono: <Settings size={12} />, separadorDespues: true},
         ...(esPremiumActivo
             ? [
                   {id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />},
@@ -67,15 +57,6 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
 
     const manejarOpcionMenu = (opcionId: string) => {
         switch (opcionId) {
-            case 'perfil':
-                onClickUsuario?.();
-                break;
-            case 'seguridad':
-                onClickSeguridad?.();
-                break;
-            case 'backups':
-                onClickBackups?.();
-                break;
             case 'configuracion':
                 onClickConfigUsuario?.();
                 break;
@@ -84,15 +65,6 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
                 break;
             case 'plan':
                 onClickPlan?.();
-                break;
-            case 'temas':
-                onClickTemas?.();
-                break;
-            case 'mcp':
-                onClickConfigMCP?.();
-                break;
-            case 'plugins':
-                onClickPlugins?.();
                 break;
             case 'feedback':
                 onClickFeedback?.();

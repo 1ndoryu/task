@@ -20,10 +20,6 @@
 - 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 
 
-## 233A-43
-
-configGlobalSidebar los botones estan centrados en vez de estar a la derecha, falta quitar del menu contextual de usuario todo lo que ya esta en el modal de configuracion
-
 ## 233A-44
 
 en panelActividadMapa sigue debordandose los cuadros de dias. 
