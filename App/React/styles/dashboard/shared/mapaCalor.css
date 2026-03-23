@@ -11,6 +11,7 @@
     background: var(--dashboard-fondoSecundario);
     /* border removido - lo maneja el contenedor padre panelDashboard */
     padding: var(--dashboard-espacioLg);
+    overflow: hidden;
 }
 
 .mapaCalorContenedor--compacto {
@@ -84,9 +85,12 @@
 /* 
  * Contenido con dias y grid 
  */
+/* [233A-44] overflow:hidden + min-width:0 evita que el grid desborde el panel */
 .mapaCalorContenido {
     display: flex;
     gap: var(--dashboard-espacioXs);
+    overflow: hidden;
+    min-width: 0;
 }
 
 /* 
@@ -123,6 +127,7 @@
     flex: 1;
     gap: var(--dashboard-espacioMini);
     overflow: hidden;
+    min-width: 0;
 }
 
 .mapaCalorSemana {
