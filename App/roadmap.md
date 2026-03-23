@@ -20,4 +20,4 @@
 - 233A-59: Los botones en los bottomsheet el icono no se pone a la derecha completamente porque botonTexto necesita width: 100%%; pero si agrega globalmente 100%% dana muchas cosas, agregalo especificamente a los botones dentro del bottomsheet, no a todos los botones.
 - 233A-56: Quita el boton de buscar en movil, dejalo dentro del menucontextual nada mas
 - 233A-57: La fuente no carga en bottomSheetTarea (input y opciones), en modalSeleccionPropiedad, ni en configMovilContenedor. Los botones en esas areas no necesitan padding.
-- 233A-60: Corregir 393 errores TS pre-existentes (implicit any types en 44 archivos  stores, hooks, components)
+- 233A-61: los elementos en badgeGroup siguen con alturas diferentes
