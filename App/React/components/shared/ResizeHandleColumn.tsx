@@ -23,8 +23,9 @@ export function ResizeHandleColumn({tipo, posicion = 1, modoColumnas, anchos, an
     if (!visible) return null;
 
     return (
-        <div className={`resizeHandleColumna ${claseBase} ${clasePosicion} ${claseArrastrando}`} onMouseDown={handleMouseDown} onDoubleClick={handleDoubleClick} title={titulo}>
-            <div className="resizeHandleColumnaLinea" />
+        <div className={`resizeHandleColumna ${claseBase} ${clasePosicion} ${claseArrastrando}`} onMouseDown={handleMouseDown} onDoubleClick={handleDoubleClick}>
+            {/* [233A-26] title en el elemento visual interior para que el tooltip aparezca a la altura correcta */}
+            <div className="resizeHandleColumnaLinea" title={titulo} />
         </div>
     );
 }

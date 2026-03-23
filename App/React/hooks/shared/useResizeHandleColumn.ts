@@ -10,7 +10,9 @@ import type {ModoColumnas, AnchoColumnas} from '../useConfiguracionLayout';
 /* Constantes de límites */
 const ANCHO_MINIMO_COLUMNA = 25;
 const ANCHO_MAXIMO_COLUMNA = 70;
-const ANCHO_TOTAL_MINIMO = 60;
+/* [233A-26] Min-width adaptable: 1 columna permite reducir más el ancho */
+const ANCHO_TOTAL_MINIMO_1COL = 35;
+const ANCHO_TOTAL_MINIMO_MULTI = 60;
 const ANCHO_TOTAL_MAXIMO = 100;
 
 interface UseResizeHandleColumnParams {
@@ -53,6 +55,9 @@ export function useResizeHandleColumn({tipo, posicion, modoColumnas, anchos, anc
             const rect = gridElement.getBoundingClientRect();
             const anchoGrid = rect.width;
 
+            /* [233A-26] Min-width adaptable al modo de columnas */
+            const anchoTotalMinimo = modoColumnas === 1 ? ANCHO_TOTAL_MINIMO_1COL : ANCHO_TOTAL_MINIMO_MULTI;
+
             /* Capturar valores iniciales */
             const anchosIniciales = {...anchos};
             const anchoTotalInicial = anchoTotal;
@@ -63,7 +68,7 @@ export function useResizeHandleColumn({tipo, posicion, modoColumnas, anchos, anc
 
                 if (tipo === 'externo') {
                     /* Handle externo: cambiar ancho total */
-                    const nuevoAnchoTotal = Math.min(ANCHO_TOTAL_MAXIMO, Math.max(ANCHO_TOTAL_MINIMO, anchoTotalInicial + deltaPorcentaje));
+                    const nuevoAnchoTotal = Math.min(ANCHO_TOTAL_MAXIMO, Math.max(anchoTotalMinimo, anchoTotalInicial + deltaPorcentaje));
                     onCambiarAnchoTotal(nuevoAnchoTotal);
                 } else {
                     /* Handle interno: redistribuir anchos entre columnas */
