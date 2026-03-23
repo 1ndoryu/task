@@ -7,8 +7,10 @@
     background-color: var(--dashboard-fondoPrincipal);
 }
 
+/* [233A-32] font-family explícito para que el modal herede la fuente del dashboard */
 .modalLoginContenido {
     padding: 0 0.5rem;
+    font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
 .loginForm {
@@ -32,17 +34,15 @@
     letter-spacing: 0.5px;
 }
 
-/* Botón Primario: Estilo "High Contrast" (Blanco sobre oscuro) */
-.botonPrimario {
-    background-color: var(--dashboard-textoActivo); /* Blanco/Gris claro */
-    color: var(--dashboard-fondoPrincipal); /* Fondo oscuro */
+/* [233A-32] Botón Primario: blanco con texto negro — override variante primario del Boton */
+.modalLoginContenido .botonPrimario {
+    background-color: var(--dashboard-textoActivo);
+    color: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-textoActivo);
 }
 
-.botonPrimario:hover:not(:disabled) {
-    background-color: var(--dashboard-textoSobreAcento);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-    transform: translateY(-1px);
+.modalLoginContenido .botonPrimario:hover:not(:disabled) {
+    filter: brightness(0.9);
 }
 
 .botonPrimario:active:not(:disabled) {
