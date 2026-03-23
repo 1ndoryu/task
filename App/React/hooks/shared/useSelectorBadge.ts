@@ -38,7 +38,10 @@ export function useSelectorBadge<T extends string = string>({opciones, valorActu
         if (!menuAbierto) return;
 
         const manejarClickFuera = (evento: MouseEvent) => {
-            if (contenedorRef.current && !contenedorRef.current.contains(evento.target as Node)) {
+            const target = evento.target as Node;
+            /* [233A-23] Verificar tanto el contenedor como el menú portal */
+            if (contenedorRef.current && !contenedorRef.current.contains(target) &&
+                menuRef.current && !menuRef.current.contains(target)) {
                 cerrarMenu();
             }
         };

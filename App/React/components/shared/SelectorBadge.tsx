@@ -5,6 +5,7 @@
  */
 
 import type {ReactNode} from 'react';
+import {createPortal} from 'react-dom';
 import {Boton} from '../ui';
 import {useSelectorBadge} from '../../hooks/shared/useSelectorBadge';
 
@@ -48,7 +49,9 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
                 )}
             </Boton>
 
-            {menuAbierto && (
+            {/* [233A-23] Portal: saca el menú del DOM del panel para evitar que opacity en .seccionAcciones
+             * cree un stacking context que atrape el z-index y herede transparencia al menú */}
+            {menuAbierto && createPortal(
                 <div ref={menuRef} className="selectorBadgeMenu" role="menu">
                     {opciones.map(opcion => (
                         <Boton key={opcion.id} type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${opcion.id === valorActual ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion(opcion)} role="menuitem">
@@ -57,7 +60,8 @@ export function SelectorBadge<T extends string = string>({opciones, valorActual,
                             {opcion.descripcion && <span className="selectorBadgeOpcionDesc">{opcion.descripcion}</span>}
                         </Boton>
                     ))}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
