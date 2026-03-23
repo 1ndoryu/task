@@ -27,7 +27,6 @@
     background-color: var(--dashboard-fondoTerciario);
     border: 1px solid var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoNormal);
-    height: 36px;
     border-radius: var(--dashboard-radioSm);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
