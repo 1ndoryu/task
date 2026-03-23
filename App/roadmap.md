@@ -20,10 +20,6 @@
 - 233A-33: prueba actualizar el proyecto task (ya esta desplegado), sube los cambios con coolify manager-rs y arregla cualquier issue que surja.
 
 
-## 233A-47
-
-Por defecto el chat en los modales debe estar cerrado. 
-
 # 233A-48
 
 En bottomSheetContenido - menuOpcionesPanelContenido LOS BOTONES SE VOLVIERON A PONER CENTRADOS!! EL TEXTO debe estar a la ziquierda y el boton a la derecha

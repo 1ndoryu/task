@@ -47,10 +47,10 @@ interface UsePanelChatReturn {
 }
 
 export function usePanelChat({elementoId, elementoTipo, participantes = [], habilitado = true}: UsePanelChatParams): UsePanelChatReturn {
-    /* Estado de visibilidad persistido en localStorage */
+    /* [233A-47] Estado de visibilidad persistido en localStorage. Cerrado por defecto */
     const [chatVisible, setChatVisible] = useState<boolean>(() => {
         const guardado = localStorage.getItem(STORAGE_KEY);
-        return guardado !== 'false';
+        return guardado === 'true';
     });
 
     /* Toggle visibilidad con persistencia */
