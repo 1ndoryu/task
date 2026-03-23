@@ -27,9 +27,10 @@
 }
 
 /* Variantes de botón */
+/* [233A-42] Fondo transparente, sin acento */
 .boton--primario {
-    background: var(--dashboard-acento);
-    color: var(--dashboard-textoSobreAcento);
+    background: transparent;
+    color: var(--dashboard-textoNormal);
 }
 
 .boton--primario:hover:not(:disabled) {
