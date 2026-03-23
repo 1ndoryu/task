@@ -40,6 +40,10 @@
     flex-direction: column;
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* [233A-57] Portal renderiza en body, fuera de .dashboardContenedor — herencia perdida */
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
     /* Safe area para dispositivos con notch */
     padding-bottom: env(safe-area-inset-bottom);
 }
@@ -100,6 +104,12 @@
     -webkit-overflow-scrolling: touch;
     flex: 1;
     min-height: 0;
+}
+
+/* [233A-57] Reset padding de .boton dentro del BottomSheet — portal pierde herencia,
+ * cada componente hijo (.bottomSheetItem, .configMovilItem, etc.) define su propio padding */
+.bottomSheetContenido .boton {
+    padding: 0;
 }
 
 /* Items dentro del bottom sheet (para menus) - Diseño compacto unificado */
