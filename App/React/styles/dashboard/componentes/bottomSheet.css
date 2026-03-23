@@ -106,11 +106,6 @@
     min-height: 0;
 }
 
-/* [233A-57] Reset padding de .boton dentro del BottomSheet — portal pierde herencia,
- * cada componente hijo (.bottomSheetItem, .configMovilItem, etc.) define su propio padding */
-.bottomSheetContenido .boton {
-    padding: 0;
-}
 
 /* Items dentro del bottom sheet (para menus) - Diseño compacto unificado */
 /* Orden visual: Texto | Icono (texto primero, icono al lado derecho) */
@@ -136,11 +131,18 @@
 /* [233A-29] Estilo de botones dentro del bottomSheet
  * [233A-36] Icono al lado derecho con order + margin-left auto
  * [233A-37] Sin bordes, centrados respecto a su contenido
- * [233A-48] justify-content: flex-start → texto a la izquierda */
+ * [233A-48] justify-content: flex-start → texto a la izquierda
+ * [233A-57] Reset padding — portal pierde herencia de .dashboardContenedor
+ * [233A-59] botonTexto width:100% para que el icono quede a la derecha */
 .bottomSheetContenido .boton {
     width: 100%;
+    padding: 0;
     border: none;
     justify-content: flex-start;
+}
+
+.bottomSheetContenido .boton .botonTexto {
+    width: 100%;
 }
 
 .bottomSheetContenido .boton .botonIcono {
