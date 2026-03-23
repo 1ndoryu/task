@@ -59,11 +59,21 @@
 
 /* Botones cerrar/volver migrados a Boton variante="icono" (Fase 6.5) */
 
+/* [233A-11] Botones del encabezado sin padding ni fondo al hover */
 .modalAccionesEncabezado {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
     flex-shrink: 0;
+}
+
+.modalAccionesEncabezado .boton {
+    padding: 0;
+    background: transparent;
+}
+
+.modalAccionesEncabezado .boton:hover {
+    background: transparent;
 }
 
 .modalContenido {

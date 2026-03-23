@@ -113,7 +113,7 @@
 
 .creacionRapidaBotonEnviar {
     background: transparent;
-    border: 1px solid var(--dashboard-bordeSutil);
+    border: none;
     border-radius: var(--dashboard-radioSm);
     width: 28px;
     height: 28px;
@@ -128,14 +128,11 @@
 }
 
 .creacionRapidaBotonEnviar:hover:not(:disabled) {
-    background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordePrincipal);
 }
 
 .creacionRapidaBotonEnviar:disabled {
     opacity: 0.3;
-    border-color: transparent;
     cursor: not-allowed;
 }
 

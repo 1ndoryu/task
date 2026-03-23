@@ -124,6 +124,11 @@
     transition: background var(--dashboard-transicionRapida);
 }
 
+/* [233A-29] Forzar alineación izquierda para los botones dentro del bottomSheet */
+.bottomSheetContenido .boton {
+    justify-content: flex-start;
+}
+
 .bottomSheetItem:hover,
 .bottomSheetItem:active {
     background: var(--dashboard-fondoHover);

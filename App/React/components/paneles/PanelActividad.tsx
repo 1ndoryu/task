@@ -164,17 +164,10 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Actividad')}
-                subtitulo={obtenerSubtitulo()}
+                subtitulo={undefined}
                 variante="panelHeader"
                 acciones={
                     <>
-                        {/* Estadisticas compactas - solo si es Premium */}
-                        {esPremium && (
-                            <span className="panelActividadStats">
-                                <span className="panelActividadStat">{diasActivos} dias</span>
-                                <span className="panelActividadStat">{totalActividades} acciones</span>
-                            </span>
-                        )}
                         {esPremium && (
                             <>
                                 <Boton variante="badge" soloIcono onClick={onAbrirModalConfigActividad} title="Configuracion" icono={<Settings size={12} />} />

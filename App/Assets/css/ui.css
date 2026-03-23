@@ -200,10 +200,10 @@
     color: var(--dashboard-textoActivo);
 }
 
-/* Variante opcion - para opciones seleccionables */
+/* [233A-17] Variante opcion - sin borde, verde cuando activo */
 .boton--opcion {
     background: transparent;
-    border: 1px solid var(--dashboard-bordeSutil);
+    border: none;
     border-radius: var(--dashboard-radioSm);
     padding: 2px 8px;
     color: var(--dashboard-textoSecundario);
@@ -217,15 +217,12 @@
 }
 
 .boton--opcion:hover:not(:disabled) {
-    background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordePrincipal);
 }
 
 .boton--opcion.boton--activo {
-    background: var(--dashboard-acento);
-    color: var(--dashboard-textoSobreAcento);
-    border-color: var(--dashboard-acento);
+    background: var(--dashboard-estadoExitoFondo);
+    color: var(--dashboard-estadoExito);
 }
 
 .boton--opcion .botonTexto {
@@ -265,6 +262,7 @@
 .boton--mediano {
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
     font-size: var(--dashboard-tamanoBase);
+    height: 30px;
 }
 
 .boton--grande {
@@ -309,7 +307,7 @@
 .botonTexto {
     background: transparent;
     border: none;
-    color: var(--dashboard-textoActivo);
+    color: var(--dashboard-textoSecundario);
     cursor: pointer;
     font-size: var(--dashboard-tamanoPequeno);
     text-decoration: underline;

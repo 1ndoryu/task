@@ -34,7 +34,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Notas')}
-                subtitulo={esNotaNueva ? 'Nueva nota' : tituloActivo}
+                subtitulo={undefined}
                 variante="panelHeader"
                 acciones={
                     <>

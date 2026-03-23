@@ -16,12 +16,7 @@
 }
 
 .panelAdministracion {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioMd);
-    overflow-y: auto;
-    max-height: calc(90vh - 60px);
-    padding-right: var(--dashboard-espacioXs);
+    /* [233A-22] Estilos eliminados por solicitud, clase preservada */
 }
 
 /* 

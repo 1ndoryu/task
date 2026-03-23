@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioXs);
+    padding: 0;
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
@@ -41,6 +41,7 @@
     outline: none;
     color: var(--dashboard-textoActivo);
     font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
 }
 
 .modalNotasBusquedaInput::placeholder {

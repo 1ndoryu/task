@@ -173,11 +173,12 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    border: 1px solid var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoSecundario);
+    border: none;
+    background: transparent;
     color: var(--dashboard-textoApagado);
     border-radius: var(--dashboard-radioSm);
     cursor: pointer;
+    padding: 0;
     transition: all var(--dashboard-transicionRapida);
 }
 

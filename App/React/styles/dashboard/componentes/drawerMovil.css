@@ -205,6 +205,7 @@
 .drawerMovilItem {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--dashboard-espacioMd);
     width: 100%;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
@@ -218,6 +219,11 @@
     text-align: left;
     cursor: pointer;
     transition: all var(--dashboard-transicionRapida);
+}
+
+/* [233A-28] Forzar alineación izquierda para botones dentro del drawer */
+.drawerMovilNavegacion .boton {
+    justify-content: flex-start;
 }
 
 .drawerMovilItem:hover,

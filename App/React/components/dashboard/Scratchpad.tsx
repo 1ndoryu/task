@@ -44,16 +44,10 @@ export function Scratchpad({valorInicial = '', placeholder = '// Escribe tus not
                             height: localHeight !== '100%' ? localHeight : undefined
                         }}
                     >
-                        {mostrarResaltadoMarkdown && (
-                            <div
-                                ref={resaltadoRef}
-                                className={`scratchpadResaltado scratchpadFuente-${tamanoFuente}`}
-                                dangerouslySetInnerHTML={{__html: contenidoResaltado}}
-                            />
-                        )}
+                        {/* [233A-3] Resaltado deshabilitado — el editor usa textarea normal */}
                         <Textarea
                             ref={textareaRef}
-                            claseAdicional={`scratchpadTextarea scratchpadFuente-${tamanoFuente} ${mostrarResaltadoMarkdown ? 'scratchpadTextarea--resaltado' : ''}`}
+                            claseAdicional={`scratchpadTextarea scratchpadFuente-${tamanoFuente}`}
                             placeholder={placeholder}
                             value={valor}
                             onChange={manejarCambio}

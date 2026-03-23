@@ -80,8 +80,8 @@
     --dashboard-superposicionOscuro: rgb(2 2 2 / 60%);
     --dashboard-superposicionDensa: rgba(0, 0, 0, 0.85);
     --dashboard-superposicionProfunda: rgba(0, 0, 0, 0.9);
-    --dashboard-sombraFuerte: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --dashboard-sombraMedia: 0 4px 6px rgba(0, 0, 0, 0.2);
+    --dashboard-sombraFuerte: none;
+    --dashboard-sombraMedia: none;
     --dashboard-barraFondo: #111;
     --dashboard-barraNormal: #333;
     --dashboard-barraUrgente: #dc2626;
@@ -127,12 +127,12 @@
     --dashboard-botonPrimarioFondo: #ffffff;
     --dashboard-botonPrimarioTexto: #000000;
     --dashboard-botonPrimarioHover: rgba(255, 255, 255, 0.9);
-    --dashboard-botonPrimarioSombra: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --dashboard-acento: #222;
-    --dashboard-acentoHover: #1a1a1a;
+    --dashboard-botonPrimarioSombra: none;
+    --dashboard-acento: #4a665b;
+    --dashboard-acentoHover: #3d5a4e;
     --dashboard-acentoRgb: 59, 130, 246;
-    --dashboard-sombraElevada: 0 10px 30px rgba(0, 0, 0, 0.2);
-    --dashboard-sombraSutil: 0 20px 50px rgba(0, 0, 0, 0.2);
+    --dashboard-sombraElevada: none;
+    --dashboard-sombraSutil: none;
     --dashboard-sombraFlotante: var(--dashboard-sombraElevada);
     --dashboard-transicionRapida: 0.15s ease;
     --dashboard-transicionNormal: 0.2s ease;

@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {LayoutGrid, Bell, FlaskConical, Settings, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
+import {LayoutGrid, Bell, Settings, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
@@ -77,13 +77,6 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
                 <Boton type="button" claseAdicional={`botonIconoEncabezado botonIconoEncabezado--notificaciones ${notificacionesPendientes > 0 ? 'tieneNuevas' : ''}`} onClick={onClickNotificaciones} title={esTablet ? undefined : 'Notificaciones'}>
                     <Bell size={14} />
                     {notificacionesPendientes > 0 && <span className="botonIconoEncabezado__contadorNotificaciones">{notificacionesPendientes}</span>}
-                </Boton>
-            )}
-
-            {/* Laboratorio de Pruebas (solo admins) */}
-            {onClickExperimentos && (
-                <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={onClickExperimentos} title={esTablet ? undefined : 'Laboratorio de Pruebas'}>
-                    <FlaskConical size={14} />
                 </Boton>
             )}
 

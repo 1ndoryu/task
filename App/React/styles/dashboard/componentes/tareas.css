@@ -614,9 +614,6 @@
 /* 
  * Resaltar cuando hay subtareas completadas
  */
-.tareaColapsadorContador:not(:empty)::before {
-    content: '';
-}
 
 /* 
  * INDICADORES DE ZONA DE DROP

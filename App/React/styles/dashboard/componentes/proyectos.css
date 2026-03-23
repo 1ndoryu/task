@@ -41,7 +41,6 @@
 
 .proyectoItemActivo {
     background-color: var(--dashboard-fondoHover);
-    border-left-color: var(--dashboard-textoActivo);
 }
 
 /* Chevron de toggle */

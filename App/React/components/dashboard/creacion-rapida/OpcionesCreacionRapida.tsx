@@ -37,21 +37,11 @@ export function OpcionesCreacionRapida({
 
         return (
             <div className="creacionRapidaOpciones">
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuProyecto, e)} icono={<Layers size={14} />}>
-                    {proyectoSeleccionado?.nombre || 'Sin Proyecto'}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuFecha, e)} icono={<Calendar size={14} className={opciones.fecha === 'hoy' ? 'textoAdvertencia' : ''} />}>
-                    {obtenerEtiquetaFecha(opciones.fecha)}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuPrioridad, e)} icono={<Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />}>
-                    {opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuUrgencia, e)} icono={<Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />}>
-                    {opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={abrirSelectorArchivo} disabled={subiendo} icono={subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Paperclip size={14} className={adjuntosCount > 0 ? 'textoExito' : ''} />}>
-                    {adjuntosCount > 0 ? `${adjuntosCount} Adjunto${adjuntosCount !== 1 ? 's' : ''}` : 'Adjuntar'}
-                </Boton>
+                <Boton type="button" variante="opcion" soloIcono activo={!!proyectoSeleccionado} onClick={e => abrirMenu(setMenuProyecto, e)} icono={<Layers size={14} />} title={proyectoSeleccionado?.nombre || 'Sin Proyecto'} />
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.fecha} onClick={e => abrirMenu(setMenuFecha, e)} icono={<Calendar size={14} />} title={obtenerEtiquetaFecha(opciones.fecha)} />
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.prioridad} onClick={e => abrirMenu(setMenuPrioridad, e)} icono={<Flag size={14} />} title={opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'} />
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.urgencia} onClick={e => abrirMenu(setMenuUrgencia, e)} icono={<Clock size={14} />} title={opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'} />
+                <Boton type="button" variante="opcion" soloIcono activo={adjuntosCount > 0} onClick={abrirSelectorArchivo} disabled={subiendo} icono={subiendo ? <Loader2 size={14} className="iconoGirando" /> : <Paperclip size={14} />} title={adjuntosCount > 0 ? `${adjuntosCount} Adjunto${adjuntosCount !== 1 ? 's' : ''}` : 'Adjuntar'} />
             </div>
         );
     }
@@ -59,12 +49,8 @@ export function OpcionesCreacionRapida({
     if (tipo === 'habito') {
         return (
             <div className="creacionRapidaOpciones">
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuFrecuencia, e)} icono={<Repeat size={14} />}>
-                    {opciones.frecuencia ? opciones.frecuencia.charAt(0).toUpperCase() + opciones.frecuencia.slice(1) : 'Diario'}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuImportancia, e)} icono={<Flag size={14} className={opciones.importancia === 'Alta' ? 'textoRojo' : opciones.importancia === 'Media' ? 'textoAmarillo' : ''} />}>
-                    {opciones.importancia ? `Importancia ${opciones.importancia}` : 'Importancia Media'}
-                </Boton>
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.frecuencia} onClick={e => abrirMenu(setMenuFrecuencia, e)} icono={<Repeat size={14} />} title={opciones.frecuencia ? opciones.frecuencia.charAt(0).toUpperCase() + opciones.frecuencia.slice(1) : 'Diario'} />
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.importancia} onClick={e => abrirMenu(setMenuImportancia, e)} icono={<Flag size={14} />} title={opciones.importancia ? `Importancia ${opciones.importancia}` : 'Importancia Media'} />
             </div>
         );
     }
@@ -72,15 +58,9 @@ export function OpcionesCreacionRapida({
     if (tipo === 'proyecto') {
         return (
             <div className="creacionRapidaOpciones">
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuPrioridad, e)} icono={<Flag size={14} className={opciones.prioridad === 'alta' ? 'textoRojo' : opciones.prioridad === 'media' ? 'textoAmarillo' : ''} />}>
-                    {opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuUrgencia, e)} icono={<Clock size={14} className={opciones.urgencia === 'bloqueante' || opciones.urgencia === 'urgente' ? 'textoRojo' : ''} />}>
-                    {opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'}
-                </Boton>
-                <Boton type="button" variante="opcion" onClick={e => abrirMenu(setMenuFecha, e)} icono={<Calendar size={14} className={opciones.fecha === 'hoy' ? 'textoAdvertencia' : ''} />}>
-                    {obtenerEtiquetaFecha(opciones.fecha) || 'Fecha Limite'}
-                </Boton>
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.prioridad} onClick={e => abrirMenu(setMenuPrioridad, e)} icono={<Flag size={14} />} title={opciones.prioridad ? `Prioridad ${obtenerTextoPrioridad(opciones.prioridad) || opciones.prioridad}` : 'Prioridad'} />
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.urgencia} onClick={e => abrirMenu(setMenuUrgencia, e)} icono={<Clock size={14} />} title={opciones.urgencia ? obtenerTextoUrgencia(opciones.urgencia) || opciones.urgencia : 'Urgencia'} />
+                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.fecha} onClick={e => abrirMenu(setMenuFecha, e)} icono={<Calendar size={14} />} title={obtenerEtiquetaFecha(opciones.fecha) || 'Fecha Limite'} />
             </div>
         );
     }

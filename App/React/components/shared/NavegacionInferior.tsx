@@ -65,30 +65,17 @@ export function NavegacionInferior({paginaActiva, onCambiarPagina, onCrearRapido
 
             {/* Barra de navegación */}
             <nav className="navegacionInferiorBarra" role="navigation" aria-label="Navegación principal">
-                {/* Tareas/Ejecución */}
-                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'ejecucion'} onClick={() => onCambiarPagina('ejecucion')} aria-label="Tareas" aria-current={paginaActiva === 'ejecucion' ? 'page' : undefined}>
-                    <CheckSquare size={20} />
-                </Boton>
+                {/* [233A-6] Iconos como prop icono, no como children, para que soloIcono los muestre */}
+                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'ejecucion'} onClick={() => onCambiarPagina('ejecucion')} aria-label="Tareas" aria-current={paginaActiva === 'ejecucion' ? 'page' : undefined} icono={<CheckSquare size={20} />} />
 
-                {/* Proyectos */}
-                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'proyectos'} onClick={() => onCambiarPagina('proyectos')} aria-label="Proyectos" aria-current={paginaActiva === 'proyectos' ? 'page' : undefined}>
-                    <Folder size={20} />
-                </Boton>
+                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'proyectos'} onClick={() => onCambiarPagina('proyectos')} aria-label="Proyectos" aria-current={paginaActiva === 'proyectos' ? 'page' : undefined} icono={<Folder size={20} />} />
 
                 {/* FAB Central */}
-                <Boton variante="navegacion" soloIcono onClick={manejarClickFab} aria-label={menuFabAbierto ? 'Cerrar menú' : 'Crear nuevo'} aria-expanded={menuFabAbierto} claseAdicional={`navegacionInferiorFab ${menuFabAbierto ? 'navegacionInferiorFab--abierto' : ''}`}>
-                    <div className="navegacionInferiorFabCirculo">{menuFabAbierto ? <X size={18} /> : <Plus size={18} />}</div>
-                </Boton>
+                <Boton variante="navegacion" soloIcono onClick={manejarClickFab} aria-label={menuFabAbierto ? 'Cerrar menú' : 'Crear nuevo'} aria-expanded={menuFabAbierto} claseAdicional={`navegacionInferiorFab ${menuFabAbierto ? 'navegacionInferiorFab--abierto' : ''}`} icono={<div className="navegacionInferiorFabCirculo">{menuFabAbierto ? <X size={18} /> : <Plus size={18} />}</div>} />
 
-                {/* Hábitos */}
-                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'habitos'} onClick={() => onCambiarPagina('habitos')} aria-label="Hábitos" aria-current={paginaActiva === 'habitos' ? 'page' : undefined}>
-                    <Target size={20} />
-                </Boton>
+                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'habitos'} onClick={() => onCambiarPagina('habitos')} aria-label="Hábitos" aria-current={paginaActiva === 'habitos' ? 'page' : undefined} icono={<Target size={20} />} />
 
-                {/* Notas */}
-                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'notas'} onClick={() => onCambiarPagina('notas')} aria-label="Notas" aria-current={paginaActiva === 'notas' ? 'page' : undefined}>
-                    <StickyNote size={20} />
-                </Boton>
+                <Boton variante="navegacion" soloIcono activo={paginaActiva === 'notas'} onClick={() => onCambiarPagina('notas')} aria-label="Notas" aria-current={paginaActiva === 'notas' ? 'page' : undefined} icono={<StickyNote size={20} />} />
             </nav>
         </>
     );
