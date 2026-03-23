@@ -7,14 +7,12 @@
 /* 
  * CONTENEDOR DE BADGES 
  */
+/* [233A-61] inline-flex + align-items:center para que todos los badges tengan la misma altura visual */
 .badgeGroup {
-    display: inline;
-    vertical-align: middle;
-}
-
-.badgeGroup > * {
-    margin-right: var(--dashboard-espacioSx);
-    margin-bottom: var(--dashboard-espacioXxs);
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioXxs);
     vertical-align: middle;
 }
 
