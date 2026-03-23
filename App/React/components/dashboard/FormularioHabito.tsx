@@ -7,6 +7,7 @@
 
 import {Plus, Tag} from 'lucide-react';
 import type {NivelImportancia, DatosNuevoHabito} from '../../types/dashboard';
+import {NIVELES_IMPORTANCIA, decoracionSelectorImportancia} from '../../utils/nivelesConfig';
 import {SelectorFrecuencia} from './SelectorFrecuencia';
 import {AccionesFormulario, SeccionPanel, SelectorNivel} from '../shared';
 import {Boton, Input} from '../ui';
@@ -21,7 +22,7 @@ interface FormularioHabitoProps {
     modoEdicion?: boolean;
 }
 
-const IMPORTANCIAS: NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'];
+/* [233A-45] Importancias y decoracion centralizados en nivelesConfig */
 
 export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosIniciales, guardando = false, modoEdicion = false}: FormularioHabitoProps): JSX.Element {
     /* Toda la lógica delegada al hook dedicado */
@@ -48,7 +49,7 @@ export function FormularioHabito({onGuardar, onCancelar, onEliminar, datosInicia
 
             {/* Campo Importancia */}
             <SeccionPanel titulo="Importancia">
-                <SelectorNivel<NivelImportancia> niveles={IMPORTANCIAS} seleccionado={importancia} onSeleccionar={setImportancia} disabled={guardando} />
+                <SelectorNivel<NivelImportancia> niveles={NIVELES_IMPORTANCIA} seleccionado={importancia} onSeleccionar={setImportancia} disabled={guardando} decoracion={decoracionSelectorImportancia()} />
             </SeccionPanel>
 
             {/* Campo Frecuencia */}

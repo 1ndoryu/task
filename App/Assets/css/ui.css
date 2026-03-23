@@ -218,8 +218,8 @@
     color: var(--dashboard-textoActivo);
 }
 
+/* [233A-45] Sin background cuando activo, solo cambio de color */
 .boton--opcion.boton--activo {
-    background: var(--dashboard-estadoExitoFondo);
     color: var(--dashboard-estadoExito);
 }
 

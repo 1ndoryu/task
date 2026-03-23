@@ -112,7 +112,8 @@
     font-style: italic;
 }
 
-.creacionRapidaBotonEnviar {
+/* [233A-45] Usa .boton.creacionRapidaBotonEnviar para superar especificidad de .boton--primario */
+.boton.creacionRapidaBotonEnviar {
     background: transparent;
     border: none;
     border-radius: var(--dashboard-radioSm);
@@ -128,11 +129,11 @@
     padding: 0;
 }
 
-.creacionRapidaBotonEnviar:hover:not(:disabled) {
+.boton.creacionRapidaBotonEnviar:hover:not(:disabled) {
     color: var(--dashboard-textoActivo);
 }
 
-.creacionRapidaBotonEnviar:disabled {
+.boton.creacionRapidaBotonEnviar:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }

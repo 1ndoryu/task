@@ -35,9 +35,24 @@
 
 /* 
  * VARIANTES POR NIVEL
- * Se asume que los niveles estandar son Alta, Media, Baja
- * Pero las clases se construyen dinamicamente o se usan estas bases
+ * Se asume que los niveles estandar son MuyAlta, Alta, Media, Baja
+ * claseSufijo unifica: 'muy_alta' y 'Muy Alta' → 'MuyAlta' (ver SelectorNivel.tsx)
  */
+
+/* [233A-45] Icono dentro del boton */
+.selectorNivelIcono {
+    display: inline-flex;
+    align-items: center;
+    color: var(--dashboard-textoMuyApagado);
+    transition: color var(--dashboard-transicionRapida);
+}
+
+/* MUY ALTA */
+.selectorNivelBotonMuyAlta.selectorNivelBotonActivo {
+    color: var(--dashboard-estadoMuyAlta);
+    background-color: var(--dashboard-estadoMuyAltaFondo);
+    border-color: var(--dashboard-estadoMuyAltaBorde);
+}
 
 /* ALTA */
 .selectorNivelBotonAlta.selectorNivelBotonActivo,

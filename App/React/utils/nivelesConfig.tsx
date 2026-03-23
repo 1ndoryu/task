@@ -100,3 +100,35 @@ export function opcionesMenuUrgencia(size = 12, conSinUrgencia = false): OpcionM
     );
     return opciones;
 }
+
+/* ===== ARRAYS ORDENADOS (para SelectorNivel y formularios) ===== */
+
+export const NIVELES_PRIORIDAD: NivelPrioridad[] = ['muy_alta', 'alta', 'media', 'baja'];
+export const NIVELES_IMPORTANCIA: NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'];
+
+/* ===== DECORACION PARA SELECTOR NIVEL =====
+ * [233A-45] Centraliza iconos y colores para que SelectorNivel
+ * muestre los mismos que el menu contextual */
+
+interface DecoracionNivelItem {
+    icono: JSX.Element;
+    color: string;
+}
+
+export function decoracionSelectorPrioridad(size = 14): Record<string, DecoracionNivelItem> {
+    return {
+        muy_alta: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.muy_alta},
+        alta: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.alta},
+        media: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.media},
+        baja: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.baja}
+    };
+}
+
+export function decoracionSelectorImportancia(size = 14): Record<string, DecoracionNivelItem> {
+    return {
+        'Muy Alta': {icono: <Star size={size} fill="currentColor" />, color: COLORES_IMPORTANCIA['Muy Alta']},
+        'Alta': {icono: <Star size={size} fill="currentColor" />, color: COLORES_IMPORTANCIA.Alta},
+        'Media': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Media},
+        'Baja': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Baja}
+    };
+}

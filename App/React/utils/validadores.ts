@@ -18,7 +18,7 @@ export function validarHabitos(valor: unknown): valor is Habito[] {
 
         const habito = h as Record<string, unknown>;
 
-        return typeof habito.id === 'number' && typeof habito.nombre === 'string' && ['Alta', 'Media', 'Baja'].includes(habito.importancia as string) && typeof habito.diasInactividad === 'number' && typeof habito.racha === 'number' && Array.isArray(habito.tags);
+        return typeof habito.id === 'number' && typeof habito.nombre === 'string' && ['Muy Alta', 'Alta', 'Media', 'Baja'].includes(habito.importancia as string) && typeof habito.diasInactividad === 'number' && typeof habito.racha === 'number' && Array.isArray(habito.tags);
     });
 }
 
