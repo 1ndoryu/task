@@ -38,8 +38,10 @@ export function BadgeInfo({tipo: _tipo, icono, texto, titulo, variante = 'normal
     );
 
     if (onClick) {
+        /* [243A-12] variante="icono" para que Boton no aplique boton--primario/mediano
+         * que sobreescribia el padding/height del badge y lo hacia mas alto que los span badge */
         return (
-            <Boton type="button" claseAdicional={clases} title={titulo} onClick={onClick}>
+            <Boton type="button" variante="icono" claseAdicional={clases} title={titulo} onClick={onClick}>
                 {contenido}
             </Boton>
         );
