@@ -1,6 +1,6 @@
 # Plan: Panel de IA para Planificación — 233A-69
 **Fecha inicio:** 2026-03-23
-**Estado:** Fase 1+2+3 completadas, Fase 4 pendiente
+**Estado:** Todas las fases completadas
 
 ## Objetivo
 Panel de chat con IA integrado en el dashboard que permite planificación de tareas/hábitos por texto natural. El usuario escribe instrucciones y la IA ejecuta acciones (crear tareas, hábitos, completar, archivar, eliminar, etc.).
@@ -64,9 +64,7 @@ Panel de chat con IA integrado en el dashboard que permite planificación de tar
 - Registro de paneles — agregar panel IA como plugin o panel nativo
 
 ## Próximo paso
-Fase 4: Preferencias del usuario (configuración editable que se inyecta al prompt).
-Fase 5: Selector de modelo, API key en config modal.
-Fase 6: Pulido UX (confirmación limpiar chat, modelo selector inline).
+Completado. Ver tareas-2026-03-23.md en completados/.
 
 ## Avance
 ### Fase 1 — Completada (commit d090b35a3)
@@ -92,3 +90,10 @@ Fase 6: Pulido UX (confirmación limpiar chat, modelo selector inline).
 - `generadoresPropsPanel.ts`: Pasa ctx.dashboard.crearTarea/toggleTarea/etc al panel IA
 - `panelIA.css`: Estilos de badges de acciones (exito verde, error rojo)
 - Gotcha: NivelPrioridad es lowercase ('muy_alta'|'alta'|'media'|'baja'), NivelImportancia es PascalCase ('Muy Alta'|'Alta'|'Media'|'Baja')
+
+### Fase 4-5 — Completada
+- Config inline en PanelIA: Settings icon en header, sección colapsable
+- API Key: Input password para Groq API key
+- Modelo: Select con MODELOS_IA (6 modelos Groq)
+- Preferencias: Textarea para instrucciones personales que se inyectan al system prompt
+- Todo se persiste en iaStore (partialize: apiKey, modelo, preferenciasUsuario)
