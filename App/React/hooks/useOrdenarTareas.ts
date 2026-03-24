@@ -121,9 +121,12 @@ const calcularPesoTotal = (tarea: Tarea): number => {
 
     let pesoTotal = pesoUrgencia + pesoPrioridad + pesoFecha + pesoRetraso;
 
-    /* Multiplicador por ventana de oportunidad (x3) para hábitos */
+    /* Bono por ventana de oportunidad para hábitos.
+     * Bug corregido: antes se usaba *= 3, lo que empeoraba hábitos con peso base negativo
+     * (ej: chill=-200 + media=100 = -100, y -100*3=-300 los mandaba al final).
+     * Solución: bono fijo +2000 desde 0, garantiza que suban al tope sin importar urgencia base. */
     if (esTareaHabito(tarea) && tarea.enVentanaOportunidad) {
-        pesoTotal *= 3;
+        pesoTotal = Math.max(0, pesoTotal) + 2000;
     }
 
     return pesoTotal;
