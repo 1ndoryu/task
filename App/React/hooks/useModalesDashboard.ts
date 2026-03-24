@@ -8,7 +8,7 @@ import {useState, useCallback} from 'react';
 import type {Proyecto, Habito, Tarea} from '../types/dashboard';
 
 /* [233A-27] Secciones disponibles en el modal de configuración global */
-export type SeccionConfigGlobal = 'tareas' | 'habitos' | 'proyectos' | 'notas' | 'actividad' | 'layout' | 'perfil' | 'preferencias' | 'temas' | 'seguridad' | 'ia' | 'backups';
+export type SeccionConfigGlobal = 'tareas' | 'habitos' | 'proyectos' | 'notas' | 'actividad' | 'layout' | 'perfil' | 'preferencias' | 'temas' | 'seguridad' | 'ia' | 'backups' | 'plugins';
 
 interface PosicionModal {
     x: number;

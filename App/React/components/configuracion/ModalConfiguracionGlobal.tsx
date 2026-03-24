@@ -6,7 +6,7 @@
  *   2. Al seleccionar sección, expande a 80% mostrando el contenido con botón volver */
 
 import {useState, useEffect} from 'react';
-import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft} from 'lucide-react';
+import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {BottomSheet} from '../shared/BottomSheet';
 import {Boton} from '../ui';
@@ -17,6 +17,7 @@ import type {SeccionConfigGlobal} from '../../hooks/useModalesDashboard';
 import {SeccionConfigTareas, SeccionConfigHabitos, SeccionConfigProyectos, SeccionConfigScratchpad, SeccionConfigActividad} from './global/SeccionesConfigPaneles';
 /* Secciones generales */
 import {SeccionConfigLayout, SeccionConfigPreferencias, SeccionConfigTemas, SeccionConfigPerfil, SeccionConfigSeguridad, SeccionConfigMCP, SeccionConfigBackups} from './global/SeccionesConfigGeneral';
+import {SeccionConfigPlugins} from './global/SeccionConfigPlugins';
 
 /* Definición de secciones para sidebar */
 interface ItemSidebar {
@@ -42,6 +43,7 @@ const SECCIONES_SIDEBAR: ItemSidebar[] = [
     /* Grupo: Avanzado */
     {id: 'seguridad', nombre: 'Seguridad', icono: <Shield size={14} />, grupo: 'Avanzado'},
     {id: 'ia', nombre: 'Conectar IA', icono: <Plug size={14} />, grupo: 'Avanzado'},
+    {id: 'plugins', nombre: 'Plugins', icono: <Puzzle size={14} />, grupo: 'Avanzado'},
     {id: 'backups', nombre: 'Copias', icono: <Database size={14} />, grupo: 'Avanzado'}
 ];
 
@@ -61,7 +63,8 @@ const TITULOS_SECCION: Record<SeccionConfigGlobal, string> = {
     temas: 'Tema Visual',
     seguridad: 'Seguridad y Privacidad',
     ia: 'Conectar con IA',
-    backups: 'Copias de Seguridad'
+    backups: 'Copias de Seguridad',
+    plugins: 'Plugins'
 };
 
 interface ModalConfiguracionGlobalProps {
@@ -86,6 +89,7 @@ function ContenidoSeccion({seccion, onCerrar, onAbrirUpgrade}: {seccion: Seccion
             {seccion === 'temas' && <SeccionConfigTemas />}
             {seccion === 'seguridad' && <SeccionConfigSeguridad />}
             {seccion === 'ia' && <SeccionConfigMCP onAbrirUpgrade={onAbrirUpgrade} />}
+            {seccion === 'plugins' && <SeccionConfigPlugins />}
             {seccion === 'backups' && <SeccionConfigBackups onAbrirUpgrade={onAbrirUpgrade} />}
         </>
     );
