@@ -83,6 +83,7 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                         break;
                     case POSPONER_IDS.UNA_HORA:
                     case POSPONER_IDS.CUATRO_HORAS:
+                    case POSPONER_IDS.OCHO_HORAS:
                     case POSPONER_IDS.MANANA:
                     case POSPONER_IDS.DOS_DIAS:
                     case POSPONER_IDS.UNA_SEMANA:

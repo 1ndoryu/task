@@ -22,6 +22,7 @@ export const POSPONER_IDS = {
     HOY: 'posponer',
     UNA_HORA: 'posponer-1h',
     CUATRO_HORAS: 'posponer-4h',
+    OCHO_HORAS: 'posponer-8h',
     MANANA: 'posponer-manana',
     DOS_DIAS: 'posponer-2d',
     UNA_SEMANA: 'posponer-1sem',
@@ -36,6 +37,8 @@ export function calcularFechaPosponer(opcionId: string): string | null {
             return new Date(ahora.getTime() + 60 * 60 * 1000).toISOString();
         case POSPONER_IDS.CUATRO_HORAS:
             return new Date(ahora.getTime() + 4 * 60 * 60 * 1000).toISOString();
+        case POSPONER_IDS.OCHO_HORAS:
+            return new Date(ahora.getTime() + 8 * 60 * 60 * 1000).toISOString();
         case POSPONER_IDS.MANANA: {
             const manana = new Date(ahora);
             manana.setDate(manana.getDate() + 1);
@@ -58,6 +61,7 @@ export function opcionesMenuPosponerTiempo(tienePospuesto: boolean): OpcionMenu[
     const opciones: OpcionMenu[] = [
         {id: POSPONER_IDS.UNA_HORA, etiqueta: '1 hora', icono: <Timer size={12} />},
         {id: POSPONER_IDS.CUATRO_HORAS, etiqueta: '4 horas', icono: <Timer size={12} />},
+        {id: POSPONER_IDS.OCHO_HORAS, etiqueta: '8 horas', icono: <Timer size={12} />},
         {id: POSPONER_IDS.MANANA, etiqueta: 'Mañana', icono: <Calendar size={12} />},
         {id: POSPONER_IDS.DOS_DIAS, etiqueta: '2 días', icono: <Calendar size={12} />},
         {id: POSPONER_IDS.UNA_SEMANA, etiqueta: '1 semana', icono: <Calendar size={12} />}
