@@ -8,11 +8,12 @@
  * CONTENEDOR DE BADGES 
  */
 /* [233A-61] inline-flex + align-items:center para que todos los badges tengan la misma altura visual */
+/* [243A-5] Gap aumentado a espacioXs (4px) para separación visible entre badges */
 .badgeGroup {
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--dashboard-espacioXxs);
+    gap: var(--dashboard-espacioXs);
     vertical-align: middle;
 }
 
@@ -240,9 +241,10 @@
  * HABITO (tarea virtual de habito)
  * Usa estilos base sin color especial
  */
+/* [243A-5] Padding igualado al estándar (2px 8px) para altura consistente con otros badges */
 .badgeInfo--habito {
     font-weight: 600;
-    padding: 2px 6px;
+    padding: 2px 8px;
 }
 
 /* 
@@ -298,4 +300,20 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 2px 6px;
+}
+
+/*
+ * NORMALIZACIÓN DE ALTURA PARA BOTONES-BADGE
+ * [243A-5] Los badges con onClick se renderizan via <Boton>, que agrega boton--primario
+ * boton--mediano con altura fija. Esta regla fuerza las mismas dimensiones que un span.badgeInfo.
+ */
+button.badgeInfo {
+    height: auto;
+    min-height: 20px;
+    padding: 2px 8px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    line-height: 1.3;
+    font-weight: normal;
+    border-radius: var(--dashboard-radioSm);
 }

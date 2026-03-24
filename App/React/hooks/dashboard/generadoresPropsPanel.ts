@@ -243,7 +243,8 @@ export function generarPropsPanelDeficitCalorico(
 }
 
 /* [233A-69] Panel IA: props base + ejecutores de tareas para acciones del LLM.
- * Hábitos se leen directamente del store Zustand (habitosStore). */
+ * Hábitos se leen directamente del store Zustand (habitosStore).
+ * [243A-1] onAbrirConfigIA abre el modal global en sección 'panelIA'. */
 export function generarPropsPanelIA(
     ctx: PropsContextoPaneles,
     renderHandleArrastre: (titulo?: string) => JSX.Element,
@@ -256,7 +257,8 @@ export function generarPropsPanelIA(
         toggleTarea: ctx.dashboard.toggleTarea,
         editarTarea: ctx.dashboard.editarTarea,
         eliminarTarea: ctx.dashboard.eliminarTarea,
-        tareas: ctx.dashboard.tareas
+        tareas: ctx.dashboard.tareas,
+        onAbrirConfigIA: () => ctx.modales.abrirModalConfigGlobal('panelIA')
     };
 }
 

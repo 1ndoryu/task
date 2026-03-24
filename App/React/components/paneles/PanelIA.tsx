@@ -6,15 +6,15 @@
  * [233A-69] Fase 1: Componente con chat básico funcional.
  * Fase 2+3: System prompt con acciones estructuradas.
  * Fase 4-5: Config inline (API key, modelo, preferencias).
+ * [243A-1] Config movida al modal global (sección 'panelIA'). Settings abre modal.
+ * [243A-2] Icono Bot en el encabezado del panel.
+ * [243A-3] Botón enviar más grande y con separación del borde.
  */
 
-import {useState} from 'react';
 import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
-import {Boton, Input, Textarea, Select} from '../ui';
+import {Boton, Textarea} from '../ui';
 import {usePanelIA} from '../../hooks/paneles/usePanelIA';
-import {useIAStore} from '../../stores/iaStore';
-import {MODELOS_IA} from '../../services/iaService';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {PanelBaseProps} from '../../types/paneles';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
@@ -22,11 +22,12 @@ import type {EjecutoresTareasIA} from '../../config/accionesIA';
 import '../../styles/dashboard/componentes/panelIA.css';
 
 /* [233A-69] Props extendidas: incluye ejecutores de tareas del dashboard */
-export interface PanelIAProps extends PanelBaseProps, EjecutoresTareasIA {}
+/* [243A-1] Agrega onAbrirConfigIA para abrir modal de configuración */
+export interface PanelIAProps extends PanelBaseProps, EjecutoresTareasIA {
+    onAbrirConfigIA: () => void;
+}
 
-export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas}: PanelIAProps): JSX.Element {
-    const [configAbierta, setConfigAbierta] = useState(false);
-
+export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas, onAbrirConfigIA}: PanelIAProps): JSX.Element {
     const {
         inputTexto, setInputTexto,
         refScroll,
@@ -34,13 +35,6 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
         limpiarChat,
         manejarEnviar, manejarTecla
     } = usePanelIA({crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas});
-
-    /* Config del store — solo se leen cuando config está abierta */
-    const modelo = useIAStore(s => s.modelo);
-    const preferencias = useIAStore(s => s.preferenciasUsuario);
-    const setApiKey = useIAStore(s => s.setApiKey);
-    const setModelo = useIAStore(s => s.setModelo);
-    const setPreferencias = useIAStore(s => s.setPreferencias);
 
     /* Renderizado de un mensaje individual */
     const renderizarMensaje = (mensaje: MensajeIA) => {
@@ -76,7 +70,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
     return (
         <div className="panelDashboard internaColumna panelIA">
             <SeccionEncabezado
-                icono={null}
+                icono={<Bot size={14} />}
                 titulo={renderHandleArrastre('IA')}
                 subtitulo={tokensUsados > 0 ? `~${tokensUsados} tokens` : undefined}
                 variante="panelHeader"
@@ -85,7 +79,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                         <Boton
                             variante="badge"
                             soloIcono
-                            onClick={() => setConfigAbierta(prev => !prev)}
+                            onClick={onAbrirConfigIA}
                             icono={<Settings size={12} />}
                             title="Configuración"
                         />
@@ -102,41 +96,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                 }
             />
 
-            {/* [233A-69] Fase 4-5: Configuración inline */}
-            {configAbierta && (
-                <div className="panelIAConfig">
-                    <div className="panelIAConfigCampo">
-                        <label className="panelIAConfigLabel">API Key Groq</label>
-                        <Input
-                            tipo="password"
-                            claseAdicional="panelIAConfigInput"
-                            value={apiKey}
-                            onChange={e => setApiKey(e.target.value)}
-                            placeholder="gsk_..."
-                        />
-                    </div>
-                    <div className="panelIAConfigCampo">
-                        <label className="panelIAConfigLabel">Modelo</label>
-                        <Select
-                            claseAdicional="panelIAConfigInput"
-                            value={modelo}
-                            onChange={e => setModelo(e.target.value)}
-                            opciones={MODELOS_IA.map(m => ({valor: m.id, etiqueta: m.nombre}))}
-                        />
-                    </div>
-                    <div className="panelIAConfigCampo">
-                        <label className="panelIAConfigLabel">Preferencias</label>
-                        <Textarea
-                            claseAdicional="panelIAConfigInput"
-                            value={preferencias}
-                            onChange={e => setPreferencias(e.target.value)}
-                            placeholder="Ej: Prefiero tareas cortas, mis horas productivas son de 9 a 14..."
-                            filas={2}
-                            autoAjustar
-                        />
-                    </div>
-                </div>
-            )}
+            {/* [233A-69] Fase 4-5: Config ahora vive en modal global ('panelIA') */}
 
             {/* Área de mensajes */}
             <div ref={refScroll} className="panelIAMensajes">
@@ -185,11 +145,12 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                 />
                 <Boton
                     type="button"
-                    variante="badge"
+                    variante="primario"
                     soloIcono
+                    claseAdicional="panelIABotonEnviar"
                     onClick={manejarEnviar}
                     disabled={enviando || !inputTexto.trim() || !apiKey}
-                    icono={enviando ? <Loader2 size={14} className="animacionGirar" /> : <Send size={14} />}
+                    icono={enviando ? <Loader2 size={16} className="animacionGirar" /> : <Send size={16} />}
                     title="Enviar"
                 />
             </div>

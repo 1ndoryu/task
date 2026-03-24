@@ -1,17 +1,19 @@
 /* [233A-27] Secciones de configuración de paneles para el modal global
  * Componentes: SeccionConfigTareas, SeccionConfigHabitos, SeccionConfigProyectos,
- * SeccionConfigScratchpad, SeccionConfigActividad
- * Cada sección usa su hook directamente — no depende de props del padre */
+ * SeccionConfigScratchpad, SeccionConfigActividad, SeccionConfigIAPanelChat
+ * Cada sección usa su hook directamente — no depende de props del padre
+ * [243A-1] Agrega SeccionConfigIAPanelChat (API Key Groq, modelo, preferencias) */
 
 import {ToggleSwitch} from '../../shared/ToggleSwitch';
-import {Boton} from '../../ui';
-import {Select} from '../../ui';
+import {Boton, Input, Select, Textarea} from '../../ui';
 import {useConfiguracionTareas} from '../../../hooks/useConfiguracionTareas';
 import {useConfiguracionHabitos} from '../../../hooks/useConfiguracionHabitos';
 import {useConfiguracionProyectos} from '../../../hooks/useConfiguracionProyectos';
 import {useConfiguracionScratchpad} from '../../../hooks/useConfiguracionScratchpad';
 import {useConfiguracionActividad} from '../../../hooks/useConfiguracionActividad';
 import {useEsDispositivoMovil} from '../../../hooks/useEsMovil';
+import {useIAStore} from '../../../stores/iaStore';
+import {MODELOS_IA} from '../../../services/iaService';
 import type {ColumnasHabitos, ToleranciaPreset} from '../../../hooks/useConfiguracionHabitos';
 import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
 import type {PeriodoActividad, FiltroTipoActividad, TamanoCeldaActividad} from '../../../hooks/useConfiguracionActividad';
@@ -198,6 +200,61 @@ export function SeccionConfigActividad(): JSX.Element {
             <SeccionPanel titulo="Opciones visuales">
                 <ItemToggle titulo="Mostrar Leyenda" descripcion="Muestra la leyenda de colores del mapa" checked={configuracion.mostrarLeyenda} onChange={toggleLeyenda} />
             </SeccionPanel>
+        </div>
+    );
+}
+
+/* ── ASISTENTE IA ──────────────────────────────────────── */
+/* [243A-1] Config del chat IA: API Key Groq, modelo y preferencias personales
+ * Lee/escribe directamente en iaStore (persiste en localStorage). */
+export function SeccionConfigIAPanelChat(): JSX.Element {
+    const apiKey = useIAStore(s => s.apiKey);
+    const modelo = useIAStore(s => s.modelo);
+    const preferencias = useIAStore(s => s.preferenciasUsuario);
+    const setApiKey = useIAStore(s => s.setApiKey);
+    const setModelo = useIAStore(s => s.setModelo);
+    const setPreferencias = useIAStore(s => s.setPreferencias);
+
+    return (
+        <div className="contenedorOpcionesConfig">
+            <div className="itemOpcionConfig">
+                <div className="detallesOpcionConfig">
+                    <span className="tituloOpcionConfig">API Key de Groq</span>
+                    <span className="descripcionOpcionConfig">Obtén tu clave en console.groq.com → API Keys</span>
+                </div>
+            </div>
+            <div className="separadorOpcionesConfig" />
+            <Input
+                tipo="password"
+                value={apiKey}
+                onChange={e => setApiKey(e.target.value)}
+                placeholder="gsk_..."
+            />
+            <div className="separadorOpcionesConfig" />
+            <div className="itemOpcionConfig">
+                <div className="detallesOpcionConfig">
+                    <span className="tituloOpcionConfig">Modelo de IA</span>
+                    <span className="descripcionOpcionConfig">Modelo de lenguaje a usar en el chat</span>
+                </div>
+            </div>
+            <Select
+                value={modelo}
+                onChange={e => setModelo(e.target.value)}
+                opciones={MODELOS_IA.map(m => ({valor: m.id, etiqueta: m.nombre}))}
+            />
+            <div className="separadorOpcionesConfig" />
+            <div className="itemOpcionConfig">
+                <div className="detallesOpcionConfig">
+                    <span className="tituloOpcionConfig">Preferencias personales</span>
+                    <span className="descripcionOpcionConfig">Contexto extra que la IA tendrá en cuenta (horarios, estilo de trabajo, etc.)</span>
+                </div>
+            </div>
+            <Textarea
+                value={preferencias}
+                onChange={e => setPreferencias(e.target.value)}
+                placeholder="Ej: Prefiero tareas cortas. Trabajo mejor de 9 a 14. Evitar notificaciones tarde..."
+                filas={3}
+            />
         </div>
     );
 }

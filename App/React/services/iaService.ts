@@ -12,14 +12,15 @@ import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAccio
 
 const URL_BASE_GROQ = 'https://api.groq.com/openai/v1/chat/completions';
 
-/* Modelos disponibles en Groq */
+/* [243A-4] Modelos más inteligentes disponibles en Groq (actualizado marzo 2026)
+ * Orden: más capaz primero. Fuente: console.groq.com/docs/models */
 export const MODELOS_IA = [
-    {id: 'meta-llama/llama-4-scout-17b-16e-instruct', nombre: 'Llama 4 Scout'},
-    {id: 'meta-llama/llama-4-maverick-17b-128e-instruct', nombre: 'Llama 4 Maverick'},
-    {id: 'qwen/qwen3-32b', nombre: 'Qwen3 32B'},
-    {id: 'deepseek-r1-distill-llama-70b', nombre: 'DeepSeek R1 70B'},
-    {id: 'llama-3.3-70b-versatile', nombre: 'Llama 3.3 70B'},
-    {id: 'gemma2-9b-it', nombre: 'Gemma 2 9B'}
+    {id: 'openai/gpt-oss-120b', nombre: 'GPT-OSS 120B — más inteligente (producción)'},
+    {id: 'moonshotai/kimi-k2-instruct-0905', nombre: 'Kimi K2 — 262K contexto (preview)'},
+    {id: 'meta-llama/llama-4-maverick-17b-128e-instruct', nombre: 'Llama 4 Maverick (preview)'},
+    {id: 'qwen/qwen3-32b', nombre: 'Qwen3 32B (preview)'},
+    {id: 'llama-3.3-70b-versatile', nombre: 'Llama 3.3 70B — rápido (producción)'},
+    {id: 'meta-llama/llama-4-scout-17b-16e-instruct', nombre: 'Llama 4 Scout — ultrarrápido (preview)'}
 ] as const;
 
 /* Mensaje para la API (formato OpenAI-compatible) */
