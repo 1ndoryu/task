@@ -5,7 +5,7 @@
  * TAREA 4: Ventana de Oportunidad para Hábitos
  */
 
-import {X} from 'lucide-react';
+import {X, Sun, Moon} from 'lucide-react';
 import type {VentanaOportunidad} from '../../types/dashboard';
 import {Boton} from '../ui';
 import {Input} from '../ui/Input';
@@ -17,7 +17,7 @@ interface SelectorVentanaOportunidadProps {
 }
 
 export function SelectorVentanaOportunidad({ventana, onChange}: SelectorVentanaOportunidadProps): JSX.Element {
-    const {menuAbierto, setMenuAbierto, menuRef, ventanaActual, tempInicio, tempFin, estaEnVentana, textoBoton, toggleHabilitado, eliminarVentana: _eliminarVentana, manejarKeyDown, manejarCambioTexto, manejarBlur} = useSelectorVentanaOportunidad({ventana, onChange});
+    const {menuAbierto, setMenuAbierto, menuRef, ventanaActual, tempInicio, tempFin, estaEnVentana, textoBoton, toggleHabilitado, eliminarVentana: _eliminarVentana, preseleccionarDia, preseleccionarNoche, manejarKeyDown, manejarCambioTexto, manejarBlur} = useSelectorVentanaOportunidad({ventana, onChange});
 
     /* Renderizar arco SVG para la ventana */
     const renderizarArco = () => {
@@ -112,8 +112,11 @@ export function SelectorVentanaOportunidad({ventana, onChange}: SelectorVentanaO
                             </Boton>
                         </div>
 
-                        {/* Reloj circular minimalista */}
+                        {/* Reloj circular minimalista con presets de sol/luna a los lados [243A-15] */}
                         <div className="selectorVentanaOportunidad__reloj">
+                            <Boton type="button" variante="icono" claseAdicional="selectorVentanaOportunidad__presetBtn" onClick={preseleccionarDia} title="Día (06:00 - 18:00)">
+                                <Sun size={15} />
+                            </Boton>
                             <svg viewBox="0 0 90 90" className="selectorVentanaOportunidad__svg">
                                 {/* Círculo base */}
                                 <circle cx="45" cy="45" r="36" fill="none" stroke="var(--dashboard-bordeSutil)" strokeWidth="8" />
@@ -124,6 +127,9 @@ export function SelectorVentanaOportunidad({ventana, onChange}: SelectorVentanaO
                                 {/* Indicador hora actual */}
                                 {renderizarHoraActual()}
                             </svg>
+                            <Boton type="button" variante="icono" claseAdicional="selectorVentanaOportunidad__presetBtn" onClick={preseleccionarNoche} title="Noche (18:00 - 06:00)">
+                                <Moon size={15} />
+                            </Boton>
                         </div>
 
                         {/* Controles de hora (Inputs manuales) */}

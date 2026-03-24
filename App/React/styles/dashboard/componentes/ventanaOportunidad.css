@@ -124,11 +124,26 @@
     color: var(--dashboard-textoNormal);
 }
 
-/* Reloj circular */
+/* Reloj circular — [243A-15] layout flex con iconos sol/luna a los costados */
 .selectorVentanaOportunidad__reloj {
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: var(--dashboard-espacioSm) 0;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+/* Botones de preselección sol/luna */
+.selectorVentanaOportunidad__presetBtn {
+    color: var(--dashboard-textoApagado);
+    padding: var(--dashboard-espacioXs);
+    border-radius: var(--dashboard-radioSm);
+    flex-shrink: 0;
+    transition: color var(--dashboard-transicionRapida);
+}
+
+.selectorVentanaOportunidad__presetBtn:hover {
+    color: var(--dashboard-textoNormal);
 }
 
 .selectorVentanaOportunidad__svg {

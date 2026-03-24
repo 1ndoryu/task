@@ -76,7 +76,7 @@ export function useDeficitCalorico(fechaActiva?: string) {
                 return;
             }
             if (!apiKeyNinjas) {
-                store.setErrorIA('Configura tu API Key de CalorieNinjas primero');
+                store.setErrorIA('Configura tu API Key de API Ninjas primero');
                 return;
             }
 

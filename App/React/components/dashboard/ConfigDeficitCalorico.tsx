@@ -94,11 +94,11 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
             </div>
 
             <div className="configDeficitSeccion">
-                <h4 className="configDeficitSeccionTitulo">API Key de CalorieNinjas (Datos)</h4>
+                <h4 className="configDeficitSeccionTitulo">API Key de API Ninjas (Datos)</h4>
                 <p className="configDeficitSeccionNota">Necesaria para obtener la información nutricional precisa.</p>
 
                 <div className="configDeficitApiKey">
-                    <Input tipo={mostrarKeyNinjas ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de CalorieNinjas..." value={keyNinjas} onChange={e => setKeyNinjas((e.target as HTMLInputElement).value)} />
+                    <Input tipo={mostrarKeyNinjas ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de API Ninjas..." value={keyNinjas} onChange={e => setKeyNinjas((e.target as HTMLInputElement).value)} />
                     <Boton type="button" variante="icono" onClick={alternarKeyNinjas} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>

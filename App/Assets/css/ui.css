@@ -27,14 +27,15 @@
 }
 
 /* Variantes de botón */
-/* [233A-42] Fondo transparente, sin acento */
+/* [243A-14] Fondo blanco letras negras según variables del tema */
 .boton--primario {
-    background: transparent;
-    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-botonPrimarioFondo);
+    color: var(--dashboard-botonPrimarioTexto);
 }
 
 .boton--primario:hover:not(:disabled) {
-    filter: brightness(1.15);
+    background: var(--dashboard-botonPrimarioHover);
+    filter: none;
 }
 
 /* [233A-50] Sin background, con borde */

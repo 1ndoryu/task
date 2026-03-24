@@ -148,6 +148,20 @@ export function useSelectorVentanaOportunidad({ventana: propVentana, onChange}: 
         setMenuAbierto(false);
     }, [onChange]);
 
+    /* [243A-15] Preselección rápida Día: 06:00 - 18:00 (hora militar) */
+    const preseleccionarDia = useCallback(() => {
+        setTempInicio('06:00');
+        setTempFin('18:00');
+        onChange({horaInicio: 6, minutoInicio: 0, horaFin: 18, minutoFin: 0, habilitada: true});
+    }, [onChange]);
+
+    /* [243A-15] Preselección rápida Noche: 18:00 - 06:00 (cruza medianoche) */
+    const preseleccionarNoche = useCallback(() => {
+        setTempInicio('18:00');
+        setTempFin('06:00');
+        onChange({horaInicio: 18, minutoInicio: 0, horaFin: 6, minutoFin: 0, habilitada: true});
+    }, [onChange]);
+
     /* Procesar cambio de texto y teclas especiales */
     const manejarKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>, tipo: 'inicio' | 'fin') => {
@@ -275,6 +289,8 @@ export function useSelectorVentanaOportunidad({ventana: propVentana, onChange}: 
         textoBoton,
         toggleHabilitado,
         eliminarVentana,
+        preseleccionarDia,
+        preseleccionarNoche,
         manejarKeyDown,
         manejarCambioTexto,
         manejarBlur

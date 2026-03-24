@@ -1,15 +1,16 @@
 /*
  * services/geminiCaloriasService.ts
- * (Ahora usando Groq API como traductor + CalorieNinjas para datos)
+ * (Ahora usando Groq API como traductor + API Ninjas para datos)
  * Servicio optimizado para estimar calorías.
- * Flujo: Input Usuario -> Groq (Traduce a Query en Inglés) -> CalorieNinjas API (Datos Reales)
+ * Flujo: Input Usuario -> Groq (Traduce a Query en Inglés) -> API Ninjas (Datos Reales)
  */
 
 /* Modelos Groq definidos por el usuario */
 const MODELOS_GROQ = ['moonshotai/kimi-k2-instruct', 'moonshotai/kimi-k2-instruct-0905', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
 
 const URL_BASE_GROQ = 'https://api.groq.com/openai/v1/chat/completions';
-const URL_BASE_NINJAS = 'https://api.calorieninjas.com/v1/nutrition';
+/* [243A-13] URL actualizada de api.calorieninjas.com a api.api-ninjas.com (rebrand de CalorieNinjas a API Ninjas) */
+const URL_BASE_NINJAS = 'https://api.api-ninjas.com/v1/nutrition';
 
 interface RespuestaCaloriasIA {
     calorias: number;
@@ -21,7 +22,7 @@ interface RespuestaCaloriasIA {
     logProceso?: string[] /* Log detallado del proceso para inspección */;
 }
 
-/* Interfaz para respuesta de CalorieNinjas */
+/* Interfaz para respuesta de API Ninjas */
 interface RespuestaCalorieNinjas {
     items: {
         name: string;
@@ -41,7 +42,7 @@ interface RespuestaCalorieNinjas {
 
 /*
  * Prompt del sistema para traducción
- * Misión: Convertir lenguaje natural (cualquier idioma) a Query optimizada para CalorieNinjas (Inglés)
+ * Misión: Convertir lenguaje natural (cualquier idioma) a Query optimizada para API Ninjas (Inglés)
  */
 const PROMPT_TRADUCTOR = `Eres un asistente nutricional experto en procesar lenguaje natural.
 Tu ÚNICA tarea es traducir lo que el usuario comió en una "query string" simple en INGLÉS, ideal para una API de nutrición.
@@ -101,11 +102,11 @@ async function traducirAQueryIngles(modelo: string, apiKey: string, mensajeUsuar
 }
 
 /*
- * 2. Consulta CalorieNinjas con la query en inglés
+ * 2. Consulta API Ninjas con la query en inglés
  */
 async function consultarCalorieNinjas(query: string, apiKeyNinjas: string): Promise<RespuestaCaloriasIA> {
     /* Si no hay key, fallamos grácilmente o lanzamos error específico */
-    if (!apiKeyNinjas) throw new Error('Falta API Key de CalorieNinjas');
+    if (!apiKeyNinjas) throw new Error('Falta API Key de API Ninjas');
 
     const url = `${URL_BASE_NINJAS}?query=${encodeURIComponent(query)}`;
     const respuesta = await fetch(url, {
@@ -114,13 +115,13 @@ async function consultarCalorieNinjas(query: string, apiKeyNinjas: string): Prom
     });
 
     if (!respuesta.ok) {
-        throw new Error(`CalorieNinjas API Error: ${respuesta.status}`);
+        throw new Error(`API Ninjas Error: ${respuesta.status}`);
     }
 
     const datos: RespuestaCalorieNinjas = await respuesta.json();
 
     if (!datos.items || datos.items.length === 0) {
-        throw new Error('CalorieNinjas no encontró alimentos para esta búsqueda.');
+        throw new Error('API Ninjas no encontró alimentos para esta búsqueda.');
     }
 
     /* Sumarizar resultados */
