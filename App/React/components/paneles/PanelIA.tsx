@@ -5,13 +5,16 @@
  *
  * [233A-69] Fase 1: Componente con chat básico funcional.
  * Fase 2+3: System prompt con acciones estructuradas.
- * El LLM responde JSON con texto + acciones a ejecutar sobre tareas/hábitos.
+ * Fase 4-5: Config inline (API key, modelo, preferencias).
  */
 
-import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle} from 'lucide-react';
+import {useState} from 'react';
+import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
-import {Boton, Textarea} from '../ui';
+import {Boton, Input, Textarea, Select} from '../ui';
 import {usePanelIA} from '../../hooks/paneles/usePanelIA';
+import {useIAStore} from '../../stores/iaStore';
+import {MODELOS_IA} from '../../services/iaService';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {PanelBaseProps} from '../../types/paneles';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
@@ -22,6 +25,8 @@ import '../../styles/dashboard/componentes/panelIA.css';
 export interface PanelIAProps extends PanelBaseProps, EjecutoresTareasIA {}
 
 export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas}: PanelIAProps): JSX.Element {
+    const [configAbierta, setConfigAbierta] = useState(false);
+
     const {
         inputTexto, setInputTexto,
         refScroll,
@@ -29,6 +34,13 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
         limpiarChat,
         manejarEnviar, manejarTecla
     } = usePanelIA({crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas});
+
+    /* Config del store — solo se leen cuando config está abierta */
+    const modelo = useIAStore(s => s.modelo);
+    const preferencias = useIAStore(s => s.preferenciasUsuario);
+    const setApiKey = useIAStore(s => s.setApiKey);
+    const setModelo = useIAStore(s => s.setModelo);
+    const setPreferencias = useIAStore(s => s.setPreferencias);
 
     /* Renderizado de un mensaje individual */
     const renderizarMensaje = (mensaje: MensajeIA) => {
@@ -73,6 +85,13 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                         <Boton
                             variante="badge"
                             soloIcono
+                            onClick={() => setConfigAbierta(prev => !prev)}
+                            icono={<Settings size={12} />}
+                            title="Configuración"
+                        />
+                        <Boton
+                            variante="badge"
+                            soloIcono
                             onClick={limpiarChat}
                             icono={<Trash2 size={12} />}
                             title="Limpiar chat"
@@ -82,6 +101,42 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                     </>
                 }
             />
+
+            {/* [233A-69] Fase 4-5: Configuración inline */}
+            {configAbierta && (
+                <div className="panelIAConfig">
+                    <div className="panelIAConfigCampo">
+                        <label className="panelIAConfigLabel">API Key Groq</label>
+                        <Input
+                            tipo="password"
+                            claseAdicional="panelIAConfigInput"
+                            value={apiKey}
+                            onChange={e => setApiKey(e.target.value)}
+                            placeholder="gsk_..."
+                        />
+                    </div>
+                    <div className="panelIAConfigCampo">
+                        <label className="panelIAConfigLabel">Modelo</label>
+                        <Select
+                            claseAdicional="panelIAConfigInput"
+                            value={modelo}
+                            onChange={e => setModelo(e.target.value)}
+                            opciones={MODELOS_IA.map(m => ({valor: m.id, etiqueta: m.nombre}))}
+                        />
+                    </div>
+                    <div className="panelIAConfigCampo">
+                        <label className="panelIAConfigLabel">Preferencias</label>
+                        <Textarea
+                            claseAdicional="panelIAConfigInput"
+                            value={preferencias}
+                            onChange={e => setPreferencias(e.target.value)}
+                            placeholder="Ej: Prefiero tareas cortas, mis horas productivas son de 9 a 14..."
+                            filas={2}
+                            autoAjustar
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Área de mensajes */}
             <div ref={refScroll} className="panelIAMensajes">

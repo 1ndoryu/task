@@ -184,3 +184,29 @@
     background: var(--fondo-error, rgba(255, 0, 0, 0.08));
     color: var(--color-error, #e53935);
 }
+
+/* [233A-69] Fase 4-5: Configuración inline */
+.panelIAConfig {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--borde-suave);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--fondo-secundario);
+}
+
+.panelIAConfigCampo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.panelIAConfigLabel {
+    font-size: 11px;
+    color: var(--texto-terciario);
+    font-weight: 500;
+}
+
+.panelIAConfigInput {
+    font-size: 12px;
+}
