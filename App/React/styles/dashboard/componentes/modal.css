@@ -76,11 +76,16 @@
     background: transparent;
 }
 
+/* [233A-67] Padding movido al hijo directo para que cada modal controle
+ * su propio espaciado. .modalContenido es solo el scroll container. */
 .modalContenido {
-    padding: var(--dashboard-espacioLg);
     overflow-y: auto;
     flex: 1;
     min-height: 0;
+}
+
+.modalContenido > * {
+    padding: 20px; /* sentinel-disable-line: valor pedido por el usuario, padding base de modal */
 }
 
 /* 
@@ -122,6 +127,11 @@
     padding: 0;
 }
 
+/* [233A-67] En modal expandido, el hijo tampoco lleva padding (ej: panel doble columna) */
+.modalContenedor--expandido .modalContenido > * {
+    padding: 0;
+}
+
 /* 
  * Responsive: en pantallas pequeñas, el modal expandido ocupa todo el ancho
  */
@@ -146,8 +156,12 @@
  * El scroll lo maneja .panelConfiguracionColumnaScroll
  */
 .panelConfiguracionContenedor:not(.modalContenedor--expandido) .modalContenido {
-    padding: 0;
     overflow: visible;
+}
+
+/* [233A-67] El scroll lo maneja .panelConfiguracionColumnaScroll, sin padding en el hijo */
+.panelConfiguracionContenedor:not(.modalContenedor--expandido) .modalContenido > * {
+    padding: 0;
 }
 
 /* 
@@ -234,6 +248,10 @@
         flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+    }
+
+    /* [233A-67] Padding móvil al hijo directo */
+    .modalContenido > * {
         padding: var(--dashboard-espacioMovilMd);
     }
 

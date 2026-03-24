@@ -14,23 +14,30 @@
 
 /* Layout principal: sidebar + contenido */
 /* [233A-55] gap agregado por solicitud del usuario
- * [233A-64] height 100% para que ocupe toda la altura del modal */
+ * [233A-64] height 100% para que ocupe toda la altura del modal
+ * [233A-67] gap quitado — padding 20px en sidebar y contenido reemplaza el espaciado */
 .configGlobalLayout {
     display: flex;
-    gap: 20px; /* sentinel-disable-line: valor intencional del usuario, no hay variable de spacing para 20px */
     height: 100%;
     min-height: 400px;
     max-height: calc(90vh - 60px);
     overflow: hidden;
 }
 
+/* [233A-67] Excepcion: configGlobalLayout es hijo directo de modalContenido pero
+ * NO recibe el padding generico — el padding va a sidebar y contenido por separado */
+.modalContenido > .configGlobalLayout {
+    padding: 0;
+}
+
 /* Sidebar de navegación */
+/* [233A-67] padding cambiado a 20px — reemplaza el gap quitado de configGlobalLayout */
 .configGlobalSidebar {
     width: 180px;
     min-width: 180px;
     border-right: 1px solid var(--dashboard-bordePrincipal);
     overflow-y: auto;
-    padding: var(--dashboard-espacioXs) 0;
+    padding: 20px; /* sentinel-disable-line */
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioXxs);
@@ -84,9 +91,12 @@
 }
 
 /* Área de contenido */
-/* [233A-52] Eliminados overflow-y, padding y min-width — innecesarios */
+/* [233A-52] Eliminados overflow-y, padding y min-width — innecesarios
+ * [233A-67] padding 20px y overflow auto agregados — desplazamiento de contenido largo */
 .configGlobalContenido {
     flex: 1;
+    padding: 20px; /* sentinel-disable-line */
+    overflow: auto;
 }
 
 /* Título de sección en el contenido */
