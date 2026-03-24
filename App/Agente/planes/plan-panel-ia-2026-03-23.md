@@ -1,6 +1,6 @@
 # Plan: Panel de IA para Planificación — 233A-69
 **Fecha inicio:** 2026-03-23
-**Estado:** Planificación
+**Estado:** Fase 1+2+3 completadas, Fase 4 pendiente
 
 ## Objetivo
 Panel de chat con IA integrado en el dashboard que permite planificación de tareas/hábitos por texto natural. El usuario escribe instrucciones y la IA ejecuta acciones (crear tareas, hábitos, completar, archivar, eliminar, etc.).
@@ -64,4 +64,31 @@ Panel de chat con IA integrado en el dashboard que permite planificación de tar
 - Registro de paneles — agregar panel IA como plugin o panel nativo
 
 ## Próximo paso
-Investigar `AIApiController.php` para ver qué endpoints hay. Verificar si ya hay integración con algún provider de IA.
+Fase 4: Preferencias del usuario (configuración editable que se inyecta al prompt).
+Fase 5: Selector de modelo, API key en config modal.
+Fase 6: Pulido UX (confirmación limpiar chat, modelo selector inline).
+
+## Avance
+### Fase 1 — Completada (commit d090b35a3)
+- `iaStore.ts`: Store Zustand con persist (apiKey, modelo, preferencias persistente; mensajes, enviando, error en memoria)
+- `iaService.ts`: Servicio para comunicación con Groq API (OpenAI-compatible)
+- `usePanelIA.ts`: Hook con lógica del chat extraída del componente
+- `PanelIA.tsx`: Componente con chat funcional básico (burbujas, input, scroll auto)
+- `panelIA.css`: Estilos del panel
+- Registrado en `inicializarPaneles.ts` con id 'ia', visible por defecto: false
+- Generador de props en `generadoresPropsPanel.ts` (extraído de useDashboardGrid.ts para respetar límite de líneas)
+- TS 6.0: actualizado ignoreDeprecations en tsconfig.json
+
+### Fase 2+3 — Completada
+- `accionesIA.ts`: Definiciones de acciones, system prompt, parsing JSON, ejecución
+  - EjecutoresTareasIA: interface para CRUD de tareas (recibido via props del dashboard)
+  - Hábitos: acceso directo via useHabitosStore.getState() (no requiere props)
+  - System prompt: roles, acciones disponibles con parámetros, reglas, contexto dinámico
+  - Parser: JSON directo → code block → fallback texto plano. Limpia <think> blocks.
+  - Ejecutor: valida IDs, valida enums, try-catch por acción, retorna ResultadoAccion[]
+- `iaService.ts`: procesarMensajeIA() — flujo completo en una sola llamada
+- `usePanelIA.ts`: Simplificado, delega a procesarMensajeIA (100 líneas, bajo límite 120)
+- `PanelIA.tsx`: Recibe EjecutoresTareasIA como props, muestra badges de acciones ejecutadas
+- `generadoresPropsPanel.ts`: Pasa ctx.dashboard.crearTarea/toggleTarea/etc al panel IA
+- `panelIA.css`: Estilos de badges de acciones (exito verde, error rojo)
+- Gotcha: NivelPrioridad es lowercase ('muy_alta'|'alta'|'media'|'baja'), NivelImportancia es PascalCase ('Muy Alta'|'Alta'|'Media'|'Baja')

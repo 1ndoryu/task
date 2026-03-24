@@ -242,15 +242,21 @@ export function generarPropsPanelDeficitCalorico(
     };
 }
 
-/* [233A-69] Panel IA: solo necesita las props base (PanelBaseProps) */
+/* [233A-69] Panel IA: props base + ejecutores de tareas para acciones del LLM.
+ * Hábitos se leen directamente del store Zustand (habitosStore). */
 export function generarPropsPanelIA(
-    _ctx: PropsContextoPaneles,
+    ctx: PropsContextoPaneles,
     renderHandleArrastre: (titulo?: string) => JSX.Element,
     handleMinimizar: JSX.Element
 ) {
     return {
         renderHandleArrastre,
-        handleMinimizar
+        handleMinimizar,
+        crearTarea: ctx.dashboard.crearTarea,
+        toggleTarea: ctx.dashboard.toggleTarea,
+        editarTarea: ctx.dashboard.editarTarea,
+        eliminarTarea: ctx.dashboard.eliminarTarea,
+        tareas: ctx.dashboard.tareas
     };
 }
 

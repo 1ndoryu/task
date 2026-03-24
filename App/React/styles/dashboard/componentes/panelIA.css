@@ -154,3 +154,33 @@
 .panelIAInputTexto:disabled {
     opacity: 0.5;
 }
+
+/* [233A-69] Fase 2+3: Badges de acciones ejecutadas por el LLM */
+.panelIAAcciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--borde-suave);
+}
+
+.panelIAAccionBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.panelIAAccionBadge--exito {
+    background: var(--fondo-exito, rgba(76, 175, 80, 0.12));
+    color: var(--color-exito, #4caf50);
+}
+
+.panelIAAccionBadge--error {
+    background: var(--fondo-error, rgba(255, 0, 0, 0.08));
+    color: var(--color-error, #e53935);
+}

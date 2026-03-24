@@ -4,27 +4,31 @@
  * Permite planificar tareas/hábitos por texto natural
  *
  * [233A-69] Fase 1: Componente con chat básico funcional.
- * El usuario escribe, se envía a Groq API, se muestra la respuesta.
- * Fase 2 agregará system prompt y acciones estructuradas.
+ * Fase 2+3: System prompt con acciones estructuradas.
+ * El LLM responde JSON con texto + acciones a ejecutar sobre tareas/hábitos.
  */
 
-import {Send, Trash2, Loader2, Bot} from 'lucide-react';
+import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {Boton, Textarea} from '../ui';
 import {usePanelIA} from '../../hooks/paneles/usePanelIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {PanelBaseProps} from '../../types/paneles';
+import type {EjecutoresTareasIA} from '../../config/accionesIA';
 
 import '../../styles/dashboard/componentes/panelIA.css';
 
-export function PanelIA({renderHandleArrastre, handleMinimizar}: PanelBaseProps): JSX.Element {
+/* [233A-69] Props extendidas: incluye ejecutores de tareas del dashboard */
+export interface PanelIAProps extends PanelBaseProps, EjecutoresTareasIA {}
+
+export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas}: PanelIAProps): JSX.Element {
     const {
         inputTexto, setInputTexto,
         refScroll,
         mensajes, enviando, error, apiKey, tokensUsados,
         limpiarChat,
         manejarEnviar, manejarTecla
-    } = usePanelIA();
+    } = usePanelIA({crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas});
 
     /* Renderizado de un mensaje individual */
     const renderizarMensaje = (mensaje: MensajeIA) => {
@@ -38,6 +42,20 @@ export function PanelIA({renderHandleArrastre, handleMinimizar}: PanelBaseProps)
                 )}
                 <div className="panelIAMensajeBurbuja">
                     <span className="panelIAMensajeTexto">{mensaje.contenido}</span>
+                    {/* [233A-69] Fase 2+3: Mostrar acciones ejecutadas */}
+                    {mensaje.acciones && mensaje.acciones.length > 0 && (
+                        <div className="panelIAAcciones">
+                            {mensaje.acciones.map((accion, i) => (
+                                <div
+                                    key={i}
+                                    className={`panelIAAccionBadge ${accion.ejecutada ? 'panelIAAccionBadge--exito' : 'panelIAAccionBadge--error'}`}
+                                >
+                                    {accion.ejecutada ? <CheckCircle size={10} /> : <XCircle size={10} />}
+                                    <span>{accion.resultado || accion.tipo}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         );

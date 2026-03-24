@@ -3,15 +3,16 @@
  * Hook que encapsula la lógica del panel de IA
  *
  * [233A-69] Fase 1: Lógica de chat extraída del componente.
- * Maneja envío de mensajes, scroll automático y cleanup.
+ * Fase 2+3: Recibe ejecutores de tareas, delega el flujo completo a iaService.
  */
 
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
-import {enviarMensajeLLM} from '../../services/iaService';
+import {procesarMensajeIA} from '../../services/iaService';
 import type {MensajeIA} from '../../stores/iaStore';
+import type {EjecutoresTareasIA} from '../../config/accionesIA';
 
-export function usePanelIA() {
+export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const [inputTexto, setInputTexto] = useState('');
     const refScroll = useRef<HTMLDivElement>(null);
     const refAbort = useRef<AbortController | null>(null);
@@ -48,7 +49,6 @@ export function usePanelIA() {
         setInputTexto('');
         setError(null);
 
-        /* Agregar mensaje del usuario */
         const mensajeUsuario: MensajeIA = {
             id: generarIdMensaje(),
             rol: 'usuario',
@@ -56,43 +56,32 @@ export function usePanelIA() {
             timestamp: Date.now()
         };
         agregarMensaje(mensajeUsuario);
-
-        /* Enviar al LLM */
         setEnviando(true);
         refAbort.current = new AbortController();
 
         try {
-            /* Construir historial para la API (últimos 20 mensajes máx) */
-            const historial = [...useIAStore.getState().mensajes].slice(-20).map(m => ({
-                role: m.rol === 'usuario' ? 'user' as const : m.rol === 'asistente' ? 'assistant' as const : 'system' as const,
-                content: m.contenido
-            }));
-
-            const respuesta = await enviarMensajeLLM(
-                historial,
-                apiKey,
-                modelo,
-                refAbort.current.signal
+            const preferencias = useIAStore.getState().preferenciasUsuario;
+            const mensajesActuales = useIAStore.getState().mensajes;
+            const resultado = await procesarMensajeIA(
+                mensajesActuales, apiKey, modelo, preferencias, ejecutoresTareas, refAbort.current.signal
             );
 
-            /* Agregar respuesta del asistente */
-            const mensajeAsistente: MensajeIA = {
+            agregarMensaje({
                 id: generarIdMensaje(),
                 rol: 'asistente',
-                contenido: respuesta.contenido,
+                contenido: resultado.contenido,
+                acciones: resultado.acciones.length > 0 ? resultado.acciones : undefined,
                 timestamp: Date.now()
-            };
-            agregarMensaje(mensajeAsistente);
-            incrementarTokens(respuesta.tokensPrompt + respuesta.tokensComplecion);
+            });
+            incrementarTokens(resultado.tokensUsados);
         } catch (err) {
             if (err instanceof Error && err.name === 'AbortError') return;
-            const mensaje = err instanceof Error ? err.message : 'Error desconocido';
-            setError(mensaje);
+            setError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
             setEnviando(false);
             refAbort.current = null;
         }
-    }, [inputTexto, enviando, apiKey, modelo, agregarMensaje, setEnviando, setError, incrementarTokens]);
+    }, [inputTexto, enviando, apiKey, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens]);
 
     const manejarTecla = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {

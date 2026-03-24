@@ -3,9 +3,12 @@
  * Servicio para comunicación con LLM (Groq API / OpenAI-compatible)
  *
  * [233A-69] Fase 1: Estructura base del servicio.
- * Envía mensajes al LLM y retorna la respuesta con métricas de tokens.
- * La lógica de acciones se agrega en Fase 3.
+ * Fase 2+3: Flujo completo con system prompt, acciones y parsing.
  */
+
+import type {MensajeIA, AccionIA} from '../stores/iaStore';
+import type {EjecutoresTareasIA} from '../config/accionesIA';
+import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAcciones} from '../config/accionesIA';
 
 const URL_BASE_GROQ = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -88,5 +91,64 @@ export async function enviarMensajeLLM(
         contenido: eleccion.message.content,
         tokensPrompt: datos.usage?.prompt_tokens ?? 0,
         tokensComplecion: datos.usage?.completion_tokens ?? 0
+    };
+}
+
+/*
+ * [233A-69] Fase 2+3: Resultado completo del flujo IA
+ */
+export interface ResultadoMensajeIA {
+    contenido: string;
+    acciones: AccionIA[];
+    tokensUsados: number;
+}
+
+/*
+ * Flujo completo: system prompt → historial → API → parseo → ejecución
+ * Extraído del hook para mantener usePanelIA bajo el límite de 120 líneas.
+ */
+export async function procesarMensajeIA(
+    mensajes: MensajeIA[],
+    apiKey: string,
+    modelo: string,
+    preferencias: string,
+    ejecutoresTareas: EjecutoresTareasIA,
+    signal?: AbortSignal
+): Promise<ResultadoMensajeIA> {
+    /* Generar system prompt con contexto actual de tareas/hábitos */
+    const contexto = generarContexto(ejecutoresTareas.tareas);
+    const systemPrompt = generarSystemPrompt(contexto, preferencias);
+
+    /* Construir historial para la API (últimos 20 mensajes) */
+    const historial: MensajeAPI[] = [
+        {role: 'system', content: systemPrompt},
+        ...mensajes.slice(-20).map(m => ({
+            role: m.rol === 'usuario' ? 'user' as const : m.rol === 'asistente' ? 'assistant' as const : 'system' as const,
+            content: m.contenido
+        }))
+    ];
+
+    /* Llamar al LLM */
+    const respuesta = await enviarMensajeLLM(historial, apiKey, modelo, signal);
+
+    /* Parsear respuesta JSON con acciones */
+    const parsed = parsearRespuestaLLM(respuesta.contenido);
+
+    /* Ejecutar acciones si hay */
+    let accionesResultado: AccionIA[] = [];
+    if (parsed.acciones.length > 0) {
+        const resultados = ejecutarAcciones(parsed.acciones, ejecutoresTareas);
+        accionesResultado = resultados.map((r, i) => ({
+            tipo: parsed.acciones[i].tipo,
+            parametros: parsed.acciones[i].parametros,
+            ejecutada: r.exito,
+            resultado: r.descripcion
+        }));
+    }
+
+    return {
+        contenido: parsed.respuesta,
+        acciones: accionesResultado,
+        tokensUsados: respuesta.tokensPrompt + respuesta.tokensComplecion
     };
 }
