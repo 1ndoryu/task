@@ -86,7 +86,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
     );
 
     return (
-        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={manejarCerrarSeguro} claseExtra={claseModal} accionesEncabezado={accionesHeader}>
+        <Modal estaAbierto={abierto} titulo="Notas Guardadas" onCerrar={manejarCerrarSeguro} claseExtra={claseModal} accionesEncabezado={accionesHeader} ocultarBotonCerrar>
             <div id="modal-notas-expandida" className="vistaNotasExpandida">
                 {/* Columna Lista - solo visible si mostrarLista */}
                 {mostrarLista && (
