@@ -135,6 +135,8 @@
 .mapaCalorHabitoCuerpo {
     display: flex;
     gap: var(--dashboard-espacioXs);
+    overflow: hidden;
+    min-width: 0;
 }
 
 /* 
@@ -168,6 +170,8 @@
     flex-direction: column;
     flex: 1;
     gap: var(--dashboard-espacioXxs);
+    overflow: hidden;
+    min-width: 0;
 }
 
 /* 
@@ -175,43 +179,48 @@
  */
 .mapaCalorHabitoMeses {
     display: flex;
+    flex-wrap: nowrap;
     gap: var(--dashboard-espacioMini);
     height: 12px;
+    overflow: hidden;
 }
 
 .mapaCalorHabitoMes {
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoSecundario);
-    width: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
     white-space: nowrap;
-    overflow: visible;
+    flex-shrink: 0;
 }
 
 /* 
  * Grid de celdas 
+ * [243A-20] overflow:hidden + min-width:0 evita desbordamiento del grid (misma solucion que mapaCalor.css)
  */
 .mapaCalorHabitoGrid {
     display: flex;
     gap: var(--dashboard-espacioMini);
     flex: 1;
+    overflow: hidden;
+    min-width: 0;
 }
 
+/* [243A-20] flex:1 + max-width evita que las semanas crezcan sin control */
 .mapaCalorHabitoSemana {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    max-width: 22px;
     gap: var(--dashboard-espacioMini);
 }
 
 /* 
  * Celdas individuales (12px como el panel de actividad)
  */
+/* [243A-20] aspect-ratio:1 + min-width en vez de width/height fijo para adaptarse al contenedor */
 .mapaCalorHabitoCelda {
-    width: 12px;
-    height: 12px;
+    min-width: 12px;
+    aspect-ratio: 1;
     border-radius: var(--dashboard-radioXs);
     transition: transform var(--dashboard-transicionRapida), box-shadow var(--dashboard-transicionRapida);
 }
