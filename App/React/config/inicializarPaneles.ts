@@ -19,6 +19,7 @@ import {PanelProyectos} from '../components/paneles/PanelProyectos';
 import {PanelEjecucion} from '../components/paneles/PanelEjecucion';
 import {PanelScratchpad} from '../components/paneles/PanelScratchpad';
 import {PanelActividad} from '../components/paneles/PanelActividad';
+import {PanelIA} from '../components/paneles/PanelIA';
 
 /* Helper para definir posiciones por defecto de forma compacta */
 function crearPosicionDefecto(pos1col: [1 | 2 | 3, number], pos2col: [1 | 2 | 3, number], pos3col: [1 | 2 | 3, number]): Record<ModoColumnas, PosicionDefectoPanel> {
@@ -112,6 +113,25 @@ registrarPanel({
     componente: PanelActividad as ComponentType<PanelBaseProps>,
     enNavegacionMovil: true,
     idPaginaMovil: 'actividad',
+    manejaAlturaPropia: true
+});
+
+/*
+ * Panel IA
+ * Asistente de IA para planificación de tareas/hábitos
+ * Maneja su propia altura (chat flexible)
+ * [233A-69] Fase 1: Registro del panel
+ */
+registrarPanel({
+    id: 'ia',
+    titulo: 'IA',
+    tituloMovil: 'IA',
+    visiblePorDefecto: false,
+    alturaDefecto: '300px',
+    posicionDefecto: crearPosicionDefecto([1, 5], [2, 3], [3, 3]),
+    componente: PanelIA as ComponentType<PanelBaseProps>,
+    enNavegacionMovil: false,
+    idPaginaMovil: 'ia',
     manejaAlturaPropia: true
 });
 

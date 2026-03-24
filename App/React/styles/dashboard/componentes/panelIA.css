@@ -1,0 +1,156 @@
+/*
+ * panelIA.css
+ * Estilos del panel de asistente IA
+ *
+ * [233A-69] Fase 1: Estilos base del chat.
+ * Burbuja usuario: color primario. Burbuja asistente: fondo secundario.
+ * Input fijo en la parte inferior con borde superior.
+ */
+
+/* Panel IA como contenedor flex */
+.panelIA {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contenedor de mensajes */
+.panelIAMensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 120px;
+}
+
+/* Estado vacío */
+.panelIAVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--texto-terciario);
+    flex: 1;
+}
+
+.panelIAVacio p {
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.panelIAVacioAviso {
+    color: var(--color-advertencia, #e6a700);
+    font-size: 12px;
+}
+
+/* Mensaje individual */
+.panelIAMensaje {
+    display: flex;
+    gap: 8px;
+    max-width: 85%;
+}
+
+.panelIAMensaje--usuario {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.panelIAMensaje--asistente {
+    align-self: flex-start;
+}
+
+/* Avatar del bot */
+.panelIAMensajeAvatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--fondo-terciario);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--texto-secundario);
+}
+
+/* Burbuja */
+.panelIAMensajeBurbuja {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.panelIAMensaje--usuario .panelIAMensajeBurbuja {
+    background: var(--color-primario);
+    color: var(--texto-sobre-primario, #fff);
+    border-bottom-right-radius: 4px;
+}
+
+.panelIAMensaje--asistente .panelIAMensajeBurbuja {
+    background: var(--fondo-secundario);
+    color: var(--texto-principal);
+    border-bottom-left-radius: 4px;
+}
+
+.panelIAMensajeBurbuja--cargando {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--texto-terciario);
+}
+
+.panelIAMensajeTexto {
+    white-space: pre-wrap;
+}
+
+/* Error */
+.panelIAError {
+    padding: 8px 12px;
+    background: var(--fondo-error, rgba(255, 0, 0, 0.08));
+    border-radius: 8px;
+    color: var(--color-error, #e53935);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Input */
+.panelIAInput {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--borde-suave);
+}
+
+/* Textarea UI component wrapper — quitar padding/márgenes extra */
+.panelIAInput .textareaContenedor {
+    flex: 1;
+}
+
+.panelIAInputTexto {
+    border: none;
+    background: transparent;
+    color: var(--texto-principal);
+    font-size: 13px;
+    line-height: 1.4;
+    resize: none;
+    outline: none;
+    min-height: 20px;
+    max-height: 80px;
+    padding: 4px 0;
+    font-family: inherit;
+}
+
+.panelIAInputTexto::placeholder {
+    color: var(--texto-terciario);
+}
+
+.panelIAInputTexto:disabled {
+    opacity: 0.5;
+}
