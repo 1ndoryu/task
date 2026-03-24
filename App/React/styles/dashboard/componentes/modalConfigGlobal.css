@@ -24,7 +24,10 @@
     overflow: hidden;
 }
 
-/* [243A-16] Excepci\u00f3n: configGlobal maneja su propio padding interno (sidebar + contenido por separado) */\n.modalConfigGlobal .modalContenido {\n    padding: 0;\n}
+/* [243A-16] Excepción: configGlobal maneja su propio padding interno (sidebar + contenido por separado) */
+.modalConfigGlobal .modalContenido {
+    padding: 0;
+}
 
 /* Sidebar de navegación */
 /* [233A-67] padding cambiado a 20px — reemplaza el gap quitado de configGlobalLayout */
