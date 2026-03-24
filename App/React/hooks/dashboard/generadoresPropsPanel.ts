@@ -53,13 +53,18 @@ export function generarPropsPanelEjecucion(
     };
 
     const manejarConfigurarTarea = (tarea: Tarea) => {
-        /* [243A-19] Sub-hábitos virtuales tienen IDs < -100000 (generarIdSubHabitoTarea).
-         * Abrirlos como modal de tarea causa fallos silenciosos: dashboard.toggleTarea no los
-         * encuentra en la BD y no hace nada. La solución correcta es abrir el modal del hábito
-         * padre, donde el usuario puede configurar el subhábito normalmente.
-         * Decodificación: encoded = -(id + 100000) = habitoId * 1000 + subhabitoId */
+        /* [243A-19] Tareas virtuales de hábito (IDs negativos) no existen en BD.
+         * Abrirlas como modal de tarea causa fallos silenciosos.
+         * - Hábito principal: generarIdTareaHabito = -habitoId - 10000 → ID ∈ (-100000, -10000]
+         * - Sub-hábito:       generarIdSubHabitoTarea = -(habitoId*1000+subId) - 100000 → ID < -100000
+         * En ambos casos abrimos el modal del hábito padre. */
         if (tarea.id < -100000) {
             const habitoId = Math.floor(-(tarea.id + 100000) / 1000);
+            manejarEditarHabitoPorId(habitoId);
+            return;
+        }
+        if (tarea.id <= -10000 && tarea.id >= -100000) {
+            const habitoId = -(tarea.id + 10000);
             manejarEditarHabitoPorId(habitoId);
             return;
         }
