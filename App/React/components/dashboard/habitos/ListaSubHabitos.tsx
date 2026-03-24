@@ -60,7 +60,9 @@ function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): J
             </div>
 
             {/* Botón eliminar */}
+            {/* [243A-11] variante=icono para no heredar estilos de boton--primario que tapan el opacity:0 base */}
             <Boton
+                variante="icono"
                 claseAdicional="listaTareasHabito__eliminar"
                 onClick={e => {
                     e.stopPropagation();

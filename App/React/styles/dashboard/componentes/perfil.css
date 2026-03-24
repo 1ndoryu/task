@@ -146,6 +146,7 @@
 .avatarPreview {
     width: 60px; /* Un poco mas grande para ver bien */
     height: 60px;
+    aspect-ratio: 1 / 1;
     border-radius: var(--dashboard-radioCirculo);
     background-color: var(--dashboard-fondoSecundario);
     display: flex;

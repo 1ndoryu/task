@@ -290,6 +290,8 @@
 
 .selectorRepeticionPanel__numero span {
     min-width: 24px;
+    display: flex;
+    place-content: center;
     text-align: center;
     font-size: var(--dashboard-tamanoBase);
     font-family: var(--dashboard-fuenteMonoespaciada);

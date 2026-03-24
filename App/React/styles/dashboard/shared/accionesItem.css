@@ -33,6 +33,7 @@
     color: var(--dashboard-estadoError);
 }
 
+/* [243A-10] Sin background hover en botonPeligro */
 .accionesItem .botonIcono.botonPeligro:hover {
-    background-color: rgba(var(--dashboard-estadoErrorRgb), 0.1);
+    background-color: transparent;
 }

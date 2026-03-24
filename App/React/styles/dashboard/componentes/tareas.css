@@ -590,8 +590,6 @@
 
 .tareaColapsadorBoton:hover {
     color: var(--dashboard-textoNormal);
-    border-color: var(--dashboard-bordePrincipal);
-    background-color: var(--dashboard-fondoHover);
 }
 
 /* 

@@ -149,13 +149,14 @@
 }
 
 /* [233A-21] Modo compacto: sin fondo, sin borde
- * [233A-39] encabezado no centrado (align-self: stretch), boton centrado, mas gap, sin padding-top */
+ * [233A-39] encabezado no centrado (align-self: stretch), boton centrado, mas gap, sin padding-top
+ * [243A-8] Items alineados a la izquierda (stretch), solo el boton centrado */
 .listaTareasHabito--compacto {
     background: transparent;
     border: none;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: var(--dashboard-espacioSm);
 }
 
@@ -313,6 +314,11 @@
     opacity: 1;
 }
 
+/* [243A-11] En items sinDrag (modal configuración), el botón de eliminar siempre visible */
+.listaTareasHabito__item--sinDrag .listaTareasHabito__eliminar {
+    opacity: 1;
+}
+
 .listaTareasHabito__eliminar:hover {
     color: var(--dashboard-estadoAlta);
 }
@@ -327,6 +333,7 @@
 
 .listaTareasHabito__inputContenedor {
     margin-top: var(--dashboard-espacioXs);
+    width: 100%;
 }
 
 .listaTareasHabito__input {
@@ -349,6 +356,11 @@
 
 .listaTareasHabito__input::placeholder {
     color: var(--dashboard-textoApagado);
+}
+
+/* [243A-8] El boton de añadir debe estar centrado dentro del contenedor stretch */
+.listaTareasHabito--compacto > .boton {
+    align-self: center;
 }
 
 /* Boton agregar - compacto y centrado */
