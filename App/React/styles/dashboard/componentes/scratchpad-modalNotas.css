@@ -24,9 +24,10 @@
     max-width: 400px;
 }
 
-/* Variante para el buscador centrado en el header del modal */
+/* [243A-20] Variante para el buscador centrado en el header del modal */
 .modalNotasBusqueda--headerCentrado {
     margin: 0 auto;
+    padding: 0 var(--dashboard-espacioSm);
 }
 
 .modalNotasBusquedaIcono {
