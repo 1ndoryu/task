@@ -175,9 +175,10 @@
     color: var(--dashboard-estadoExito);
 }
 
+/* [243A-20] Sin background en hover */
 .panelAyunoBotonCircular--iniciar:hover {
     color: var(--dashboard-estadoExito);
-    background: var(--dashboard-estadoExitoFondo);
+    background: transparent;
 }
 
 /* Terminar: Rojo/Acento */
@@ -224,8 +225,9 @@
     color: var(--dashboard-textoActivo);
 }
 
+/* [243A-20] Sin background en opción activa */
 .panelAyunoDuracionOpcion--activa {
-    background: var(--dashboard-acento);
+    background: transparent;
     color: var(--dashboard-textoSobreAcento);
     border-color: var(--dashboard-acento);
 }
