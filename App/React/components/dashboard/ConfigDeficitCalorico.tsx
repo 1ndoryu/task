@@ -19,15 +19,12 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
     const {
         datos,
         keyGroq, setKeyGroq,
-        keyNinjas, setKeyNinjas,
         mostrarKeyGroq,
-        mostrarKeyNinjas,
         tdeePreview,
         metodo,
         manejarGuardar,
         actualizarCampo,
         alternarKeyGroq,
-        alternarKeyNinjas,
     } = useConfigDeficitCalorico({onCerrar});
 
     return (
@@ -82,25 +79,13 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
             </div>
 
             <div className="configDeficitSeccion">
-                <h4 className="configDeficitSeccionTitulo">API Key de Groq / OpenAI (IA)</h4>
-                <p className="configDeficitSeccionNota">Necesaria para traducir tus comidas a inglés (motor de búsqueda).</p>
+                <h4 className="configDeficitSeccionTitulo">API Key de Groq (IA)</h4>
+                <p className="configDeficitSeccionNota">Necesaria para calcular los macronutrientes con inteligencia artificial.</p>
 
                 <div className="configDeficitApiKey">
                     <Input tipo={mostrarKeyGroq ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq((e.target as HTMLInputElement).value)} />
                     <Boton type="button" variante="icono" onClick={alternarKeyGroq} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
                         {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </Boton>
-                </div>
-            </div>
-
-            <div className="configDeficitSeccion">
-                <h4 className="configDeficitSeccionTitulo">API Key de API Ninjas (Datos)</h4>
-                <p className="configDeficitSeccionNota">Necesaria para obtener la información nutricional precisa.</p>
-
-                <div className="configDeficitApiKey">
-                    <Input tipo={mostrarKeyNinjas ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="Tu API Key de API Ninjas..." value={keyNinjas} onChange={e => setKeyNinjas((e.target as HTMLInputElement).value)} />
-                    <Boton type="button" variante="icono" onClick={alternarKeyNinjas} title={mostrarKeyNinjas ? 'Ocultar' : 'Mostrar'}>
-                        {mostrarKeyNinjas ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Boton>
                 </div>
             </div>

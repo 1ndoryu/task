@@ -26,7 +26,6 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
         (set, get) => ({
             datosUsuario: {},
             apiKeyGemini: '',
-            apiKeyCalorieNinjas: '',
             comidas: [],
             historial: [],
             cargandoIA: false,
@@ -38,10 +37,9 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                 }));
             },
 
-            guardarApiKey: (keyGroq, keyNinjas) => {
+            guardarApiKey: (keyGroq) => {
                 set({
-                    apiKeyGemini: keyGroq,
-                    apiKeyCalorieNinjas: keyNinjas
+                    apiKeyGemini: keyGroq
                 });
             },
 

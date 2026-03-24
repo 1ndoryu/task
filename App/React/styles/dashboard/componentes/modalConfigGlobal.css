@@ -24,11 +24,7 @@
     overflow: hidden;
 }
 
-/* [233A-67] Excepcion: configGlobalLayout es hijo directo de modalContenido pero
- * NO recibe el padding generico — el padding va a sidebar y contenido por separado */
-.modalContenido > .configGlobalLayout {
-    padding: 0;
-}
+/* [243A-16] Excepci\u00f3n: configGlobal maneja su propio padding interno (sidebar + contenido por separado) */\n.modalConfigGlobal .modalContenido {\n    padding: 0;\n}
 
 /* Sidebar de navegación */
 /* [233A-67] padding cambiado a 20px — reemplaza el gap quitado de configGlobalLayout */

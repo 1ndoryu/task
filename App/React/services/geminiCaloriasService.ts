@@ -1,16 +1,15 @@
 /*
  * services/geminiCaloriasService.ts
- * (Ahora usando Groq API como traductor + API Ninjas para datos)
- * Servicio optimizado para estimar calorías.
- * Flujo: Input Usuario -> Groq (Traduce a Query en Inglés) -> API Ninjas (Datos Reales)
+ * [243A-17] API Ninjas pasó a freemium: calories y protein_g son premium.
+ * Solución: una sola llamada a Groq que entiende el input directamente y devuelve macros.
+ * El modelo ya tiene el USDA FoodData Central en su entrenamiento — no hay que pasarle una tabla.
+ * Flujo: Texto usuario -> Groq (comprende + calcula macros) -> JSON macros
  */
 
-/* Modelos Groq definidos por el usuario */
+/* Modelos Groq en orden de preferencia */
 const MODELOS_GROQ = ['moonshotai/kimi-k2-instruct', 'moonshotai/kimi-k2-instruct-0905', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
 
 const URL_BASE_GROQ = 'https://api.groq.com/openai/v1/chat/completions';
-/* [243A-13] URL actualizada de api.calorieninjas.com a api.api-ninjas.com (rebrand de CalorieNinjas a API Ninjas) */
-const URL_BASE_NINJAS = 'https://api.api-ninjas.com/v1/nutrition';
 
 interface RespuestaCaloriasIA {
     calorias: number;
@@ -19,77 +18,43 @@ interface RespuestaCaloriasIA {
     grasas: number;
     azucar: number;
     descripcion: string;
-    logProceso?: string[] /* Log detallado del proceso para inspección */;
-}
-
-/* Interfaz para respuesta de API Ninjas */
-interface RespuestaCalorieNinjas {
-    items: {
-        name: string;
-        calories: number;
-        serving_size_g: number;
-        fat_total_g: number;
-        fat_saturated_g: number;
-        protein_g: number;
-        sodium_mg: number;
-        potassium_mg: number;
-        cholesterol_mg: number;
-        carbohydrates_total_g: number;
-        fiber_g: number;
-        sugar_g: number;
-    }[];
+    logProceso?: string[];
 }
 
 /*
- * Prompt del sistema para traducción
- * Misión: Convertir lenguaje natural (cualquier idioma) a Query optimizada para API Ninjas (Inglés)
+ * Prompt compacto de nutrición.
+ * [243A-17] Sin tabla embebida — el modelo usa su conocimiento del USDA.
+ * Gotcha: "Venezuelan diet" en el prompt activa el conocimiento regional del modelo
+ * sin necesidad de listar cada alimento. Más corto = menos alucinaciones por distracción.
  */
-const PROMPT_TRADUCTOR = `Eres un asistente nutricional experto en procesar lenguaje natural.
-Tu ÚNICA tarea es traducir lo que el usuario comió en una "query string" simple en INGLÉS, ideal para una API de nutrición.
-- Detecta alimentos y cantidades.
-- Si no hay cantidad explícita, estima una porción estándar lógica.
-- CONSERVA nombres propios de comidas locales (ej: Arepa, Tacos, Paella, Empanada) sin traducir si son conocidos internacionalmente.
-- Salida formato: "cantidad unidad alimento, cantidad unidad alimento" (todo en INGLÉS salvo nombres culturales).
-- NO expliques, NO saludes, NO des formato JSON. SOLO devuelve el string de texto plano.
+const PROMPT_NUTRICION = `You are a certified nutritionist. Calculate the total macros for the food the user describes.
+Rules:
+- Use USDA FoodData Central values. For Venezuelan foods (arepa, caraotas, yuca, auyama, etc.) use accurate regional data.
+- If no quantity is specified, use a standard single serving.
+- If fried (frito), account for absorbed oil. If with skin (con cuero), include it.
+- Never fabricate values. Use the closest known food if exact data is unavailable.
+- Respond ONLY with valid JSON, no markdown, no explanation.
 
-Ejemplos:
-User: "Un plato de arroz con pollo y una coca"
-Assistant: "200g rice, 150g chicken breast, 1 can coca cola"
-
-User: "Una arepa con queso"
-Assistant: "1 arepa, 1 slice cheese"
-
-User: "3 huevos y pan"
-Assistant: "3 large eggs, 2 slices bread"`;
+JSON format:
+{"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>,"azucar":<g>}`;
 
 /*
- * 1. Usa Groq para traducir el input del usuario a una query en inglés
+ * Llama a Groq con el input del usuario directo (acepta español).
+ * Gotcha: el JSON puede venir envuelto en backticks de markdown — se sanitiza.
  */
-async function traducirAQueryIngles(modelo: string, apiKey: string, mensajeUsuario: string): Promise<string> {
-    const cuerpo = {
-        model: modelo,
-        messages: [
-            {
-                role: 'system',
-                content: PROMPT_TRADUCTOR
-            },
-            {
-                role: 'user',
-                content: mensajeUsuario
-            }
-        ],
-        temperature: 0.1,
-        max_completion_tokens: 100
-        /* Sin tools, sin JSON mode complejo, solo texto plano rápido */
-    };
-
+async function calcularMacrosGroq(modelo: string, apiKey: string, descripcion: string): Promise<RespuestaCaloriasIA> {
     const respuesta = await fetch(URL_BASE_GROQ, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(cuerpo)
+        headers: {'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}`},
+        body: JSON.stringify({
+            model: modelo,
+            messages: [
+                {role: 'system', content: PROMPT_NUTRICION},
+                {role: 'user', content: descripcion}
+            ],
+            temperature: 0.1,
+            max_completion_tokens: 150
+        })
     });
 
     if (!respuesta.ok) {
@@ -98,115 +63,56 @@ async function traducirAQueryIngles(modelo: string, apiKey: string, mensajeUsuar
     }
 
     const datos = await respuesta.json();
-    return datos.choices?.[0]?.message?.content?.trim() || '';
-}
+    const contenido: string = datos.choices?.[0]?.message?.content?.trim() ?? '';
 
-/*
- * 2. Consulta API Ninjas con la query en inglés
- */
-async function consultarCalorieNinjas(query: string, apiKeyNinjas: string): Promise<RespuestaCaloriasIA> {
-    /* Si no hay key, fallamos grácilmente o lanzamos error específico */
-    if (!apiKeyNinjas) throw new Error('Falta API Key de API Ninjas');
+    /* Quitar posibles backticks de markdown */
+    const jsonLimpio = contenido.replace(/^```[a-z]*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
 
-    const url = `${URL_BASE_NINJAS}?query=${encodeURIComponent(query)}`;
-    const respuesta = await fetch(url, {
-        method: 'GET',
-        headers: {'X-Api-Key': apiKeyNinjas}
-    });
-
-    if (!respuesta.ok) {
-        throw new Error(`API Ninjas Error: ${respuesta.status}`);
+    let macros: {calorias: number; proteinas: number; carbohidratos: number; grasas: number; azucar: number};
+    try {
+        macros = JSON.parse(jsonLimpio) as typeof macros;
+    } catch {
+        throw new Error(`JSON no parseable: "${jsonLimpio.slice(0, 120)}"`);
     }
 
-    const datos: RespuestaCalorieNinjas = await respuesta.json();
-
-    if (!datos.items || datos.items.length === 0) {
-        throw new Error('API Ninjas no encontró alimentos para esta búsqueda.');
-    }
-
-    /* Sumarizar resultados */
-    let totalCalorias = 0;
-    let totalProt = 0;
-    let totalCarbs = 0;
-    let totalGrasas = 0;
-    let totalAzucar = 0;
-
-    /* Nota: No forzamos la traducción de nombres aquí para mantener la experiencia simple.
-       Se usará la descripción que el usuario ingresó originalmente. */
-
-    for (const item of datos.items) {
-        totalCalorias += item.calories;
-        totalProt += item.protein_g;
-        totalCarbs += item.carbohydrates_total_g;
-        totalGrasas += item.fat_total_g;
-        totalAzucar += item.sugar_g;
+    if (typeof macros.calorias !== 'number') {
+        throw new Error(`JSON sin campo calorias: "${jsonLimpio.slice(0, 120)}"`);
     }
 
     return {
-        calorias: Math.round(totalCalorias),
-        proteinas: Math.round(totalProt),
-        carbohidratos: Math.round(totalCarbs),
-        grasas: Math.round(totalGrasas),
-        azucar: Math.round(totalAzucar),
-        descripcion: '' /* Se llenará con el input original del usuario */
+        calorias: Math.round(macros.calorias ?? 0),
+        proteinas: Math.round(macros.proteinas ?? 0),
+        carbohidratos: Math.round(macros.carbohidratos ?? 0),
+        grasas: Math.round(macros.grasas ?? 0),
+        azucar: Math.round(macros.azucar ?? 0),
+        descripcion: ''
     };
 }
 
 /*
- * Orquestador Principal: Texto -> Groq -> CalorieNinjas
- * Retorna RespuestaCaloriasIA compatible con el resto de la app
+ * Orquestador: intenta cada modelo en orden hasta que uno responda bien.
  */
-export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: string, apiKeyNinjas: string): Promise<RespuestaCaloriasIA> {
-    const log: string[] = [];
-    log.push(`[1] Input original: "${descripcion}"`);
-
-    /* Paso 1: Obtener query en inglés desde Groq (intentando varios modelos si falla) */
-    let queryIngles = '';
-    let errorGroq = null;
+export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: string): Promise<RespuestaCaloriasIA> {
+    const log: string[] = [`[1] Input: "${descripcion}"`];
+    let ultimoError: unknown = null;
 
     for (const modelo of MODELOS_GROQ) {
         try {
-            log.push(`[2] Intentando traducción con modelo: ${modelo}`);
-            queryIngles = await traducirAQueryIngles(modelo, apiKeyGroq, descripcion);
-            if (queryIngles) {
-                log.push(`[3] ✓ Traducción exitosa con ${modelo}`);
-                log.push(`[4] Query generada: "${queryIngles}"`);
-                break;
-            }
+            log.push(`[2] Modelo: ${modelo}`);
+            const resultado = await calcularMacrosGroq(modelo, apiKeyGroq, descripcion);
+            log.push(`[3] ✓ ${modelo} — ${resultado.calorias}kcal P:${resultado.proteinas}g C:${resultado.carbohidratos}g G:${resultado.grasas}g A:${resultado.azucar}g`);
+            return {
+                ...resultado,
+                descripcion: descripcion.charAt(0).toUpperCase() + descripcion.slice(1),
+                logProceso: log
+            };
         } catch (e) {
-            const errorMsg = e instanceof Error ? e.message : String(e);
-            log.push(`[!] Error con ${modelo}: ${errorMsg}`);
-            console.warn(`[Groq] Fallo traducción con ${modelo}:`, e);
-            errorGroq = e;
+            ultimoError = e;
+            log.push(`[!] ${modelo}: ${e instanceof Error ? e.message : String(e)}`);
+            console.warn(`[Nutrición] Fallo ${modelo}:`, e);
         }
     }
 
-    if (!queryIngles) {
-        const mensajeError = errorGroq instanceof Error ? errorGroq.message : 'Ningún modelo respondió';
-        log.push(`[X] FALLO: No se pudo traducir. ${mensajeError}`);
-        throw new Error(`Error traduciendo con IA: ${mensajeError}`);
-    }
-
-    // console.log(`[Estimador] User: "${descripcion}" -> Query: "${queryIngles}"`);
-
-    /* Paso 2: Consultar CalorieNinjas */
-    try {
-        log.push(`[5] Consultando CalorieNinjas con query: "${queryIngles}"`);
-        const resultado = await consultarCalorieNinjas(queryIngles, apiKeyNinjas);
-        log.push(`[6] ✓ CalorieNinjas respondió exitosamente`);
-        log.push(`[7] Calorías totales: ${resultado.calorias} kcal`);
-        log.push(`[8] Macros - P:${resultado.proteinas}g C:${resultado.carbohidratos}g G:${resultado.grasas}g A:${resultado.azucar}g`);
-
-        /* USAMOS LA DESCRIPCIÓN ORIGINAL DEL USUARIO EN ESPAÑOL */
-        return {
-            ...resultado,
-            descripcion: descripcion.charAt(0).toUpperCase() + descripcion.slice(1),
-            logProceso: log
-        };
-    } catch (e) {
-        const errorMsg = e instanceof Error ? e.message : String(e);
-        log.push(`[X] Error en CalorieNinjas: ${errorMsg}`);
-        console.error('[CalorieNinjas] Error:', e);
-        throw new Error(`Error en CalorieNinjas: ${e instanceof Error ? e.message : 'Desconocido'}`);
-    }
+    const msg = ultimoError instanceof Error ? ultimoError.message : 'Ningún modelo respondió';
+    throw new Error(`Error calculando macros: ${msg}`);
 }

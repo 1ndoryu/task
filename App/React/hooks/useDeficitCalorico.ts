@@ -49,7 +49,6 @@ export function useDeficitCalorico(fechaActiva?: string) {
     const config = usePluginsStore(s => s.configuracionPlugins['deficit-calorico']) as unknown as {apiKey?: string} | undefined;
 
     const apiKey = store.apiKeyGemini || config?.apiKey || '';
-    const apiKeyNinjas = store.apiKeyCalorieNinjas || '';
 
     /* TMB calculada */
     const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);
@@ -75,17 +74,13 @@ export function useDeficitCalorico(fechaActiva?: string) {
                 store.setErrorIA('Configura tu API Key de Groq (IA) primero');
                 return;
             }
-            if (!apiKeyNinjas) {
-                store.setErrorIA('Configura tu API Key de API Ninjas primero');
-                return;
-            }
 
             store.setCargandoIA(true);
             store.setErrorIA(null);
 
             try {
                 const fechaRegistro = normalizarFecha(fechaObjetivo ?? fechaSeleccionada);
-                const resultado = await estimarCaloriasTexto(descripcion, apiKey, apiKeyNinjas);
+                const resultado = await estimarCaloriasTexto(descripcion, apiKey);
                 const comida: ComidaRegistrada = {
                     id: generarIdComida(),
                     descripcion: resultado.descripcion || descripcion,
@@ -107,7 +102,7 @@ export function useDeficitCalorico(fechaActiva?: string) {
                 store.setCargandoIA(false);
             }
         },
-        [apiKey, apiKeyNinjas, store, fechaSeleccionada]
+        [apiKey, store, fechaSeleccionada]
     );
 
     return {

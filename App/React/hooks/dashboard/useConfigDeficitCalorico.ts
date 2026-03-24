@@ -30,11 +30,10 @@ interface UseConfigDeficitCaloricoParams {
 }
 
 export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoParams) {
-    const {datosUsuario, apiKeyGemini, apiKeyCalorieNinjas, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore(
+    const {datosUsuario, apiKeyGemini, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore(
         useShallow(s => ({
             datosUsuario: s.datosUsuario,
             apiKeyGemini: s.apiKeyGemini,
-            apiKeyCalorieNinjas: s.apiKeyCalorieNinjas,
             guardarDatosUsuario: s.guardarDatosUsuario,
             guardarApiKey: s.guardarApiKey,
         }))
@@ -42,18 +41,16 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
 
     const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
     const [keyGroq, setKeyGroq] = useState(apiKeyGemini);
-    const [keyNinjas, setKeyNinjas] = useState(apiKeyCalorieNinjas || '');
     const [mostrarKeyGroq, setMostrarKeyGroq] = useState(false);
-    const [mostrarKeyNinjas, setMostrarKeyNinjas] = useState(false);
 
     const tdeePreview = calcularTDEE(datos);
     const metodo = obtenerMetodoCalculo(datos);
 
     const manejarGuardar = useCallback(() => {
         guardarDatosUsuario(datos);
-        guardarApiKey(keyGroq, keyNinjas);
+        guardarApiKey(keyGroq);
         onCerrar();
-    }, [datos, keyGroq, keyNinjas, guardarDatosUsuario, guardarApiKey, onCerrar]);
+    }, [datos, keyGroq, guardarDatosUsuario, guardarApiKey, onCerrar]);
 
     const actualizarCampo = useCallback((campo: keyof DatosUsuarioTMB, valor: string) => {
         if (campo === 'sexo') {
@@ -72,21 +69,14 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
         setMostrarKeyGroq(prev => !prev);
     }, []);
 
-    const alternarKeyNinjas = useCallback(() => {
-        setMostrarKeyNinjas(prev => !prev);
-    }, []);
-
     return {
         datos,
         keyGroq, setKeyGroq,
-        keyNinjas, setKeyNinjas,
         mostrarKeyGroq,
-        mostrarKeyNinjas,
         tdeePreview,
         metodo,
         manejarGuardar,
         actualizarCampo,
         alternarKeyGroq,
-        alternarKeyNinjas,
     };
 }

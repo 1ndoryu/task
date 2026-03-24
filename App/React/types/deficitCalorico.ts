@@ -45,8 +45,7 @@ export interface RegistroDiario {
 /* Estado persistido del store */
 export interface DeficitCaloricoState {
     datosUsuario: DatosUsuarioTMB;
-    apiKeyGemini: string /* API Key para Groq/Gemini (Traducción) */;
-    apiKeyCalorieNinjas: string /* API Key para CalorieNinjas (Datos) */;
+    apiKeyGemini: string /* API Key para Groq (IA nutricional) */;
     comidas: ComidaRegistrada[];
     historial: RegistroDiario[];
     cargandoIA: boolean;
@@ -56,7 +55,7 @@ export interface DeficitCaloricoState {
 /* Acciones del store */
 export interface DeficitCaloricoActions {
     guardarDatosUsuario: (datos: Partial<DatosUsuarioTMB>) => void;
-    guardarApiKey: (keyGroq: string, keyNinjas: string) => void;
+    guardarApiKey: (keyGroq: string) => void;
     agregarComida: (comida: ComidaRegistrada) => void;
     eliminarComida: (comidaId: string) => void;
     setCargandoIA: (cargando: boolean) => void;
