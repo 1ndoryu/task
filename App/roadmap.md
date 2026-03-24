@@ -14,8 +14,5 @@
 
 ## Tareas pendientes
 
-- 233A-65: (sin descripcion  pendiente aclaracion del usuario)
+(sin tareas pendientes)
 
-
-
-# Nota: no olvides quitar las tareas completadas del roadmap y subir los cambios.
