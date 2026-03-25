@@ -21,6 +21,7 @@ import {registrarHabitoCumplido, registrarHabitoDesmarcado, registrarHabitoPospu
 import {invalidarCache} from '../services/actividadStore';
 import {habitosService} from '../services/habitosService';
 import {calcularToggleHabito, calcularPosponerHabito, calcularPausarHabito, generarResumen7Dias} from '../utils/habitosLogica';
+import {useTimeTrackerStore} from './timeTrackerStore';
 
 /*
  * Tipos del Store
@@ -197,6 +198,11 @@ export const useHabitosStore = create<HabitosStore>()(
 
                     /* Registrar actividad (invalida cache internamente al confirmar éxito) */
                     if (accion === 'completado') {
+                        /* [253A-2] Auto-completar tracking si el hábito estaba siendo trackeado */
+                        const ts = useTimeTrackerStore.getState();
+                        if (ts.sesionActiva?.entidadId === id && ts.sesionActiva.tipoEntidad === 'habito') {
+                            ts.completarTracking();
+                        }
                         registrarHabitoCumplido(id, habito.nombre);
                     } else {
                         registrarHabitoDesmarcado(id, habito.nombre);
@@ -226,6 +232,13 @@ export const useHabitosStore = create<HabitosStore>()(
                     );
 
                     get().actualizarHistorialHabito(id, hoy, 'completado');
+
+                    /* [253A-2] Auto-completar tracking si el hábito estaba siendo trackeado */
+                    const ts = useTimeTrackerStore.getState();
+                    if (ts.sesionActiva?.entidadId === id && ts.sesionActiva.tipoEntidad === 'habito') {
+                        ts.completarTracking();
+                    }
+
                     registrarHabitoCumplido(id, habito.nombre, detallesActividad);
 
                     return true;

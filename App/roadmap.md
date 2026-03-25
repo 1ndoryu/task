@@ -14,7 +14,7 @@
 
 ## Tareas pendientes
 
-1. Cuando se completa una tarea o un habito y el tracked estaba activo, este se queda activo!!
+1. [COMPLETADA 253A-2] Tracked se queda activo al completar habito
 
 2. HABIA COMENTADO QUITAR EL EFECTO HOVER DE COLOR BACKGROUND CUANDO SE PONE EL MOUSE SOBRE 
 <button type="button" class="boton boton--ghost boton--mediano panelAyunoBotonCircular panelAyunoBotonCircular--terminar" data-tooltip-content="Terminar ayuno"><span class="botonTexto"></span></button>
