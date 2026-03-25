@@ -42,7 +42,7 @@
 
 9.1 Por cierto tampoco en las fechas de las tareas se puede especificar una fecha, debería con un calendario con el estilo del sitio.
 
-10. En el modal de creacion rapida se puede elegir la fecha pero no se puede quitar una vez que se elige una. Y tambien debería poder selecionarse una fecha.
+10. [COMPLETADA 253A-6] En el modal de creacion rapida se puede elegir la fecha pero no se puede quitar una vez que se elige una. Y tambien debería poder selecionarse una fecha.
 
 11. [COMPLETADA 253A-5] El icono de IA sigue sin ser un icono de IA cuando se minimiza el panel de chat con IA. No me refería a ponerlo sobre seccionTitulo, de hecho hay que quitarlo de ahi. 
 

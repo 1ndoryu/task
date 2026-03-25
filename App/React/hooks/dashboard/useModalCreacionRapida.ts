@@ -206,7 +206,7 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
     }, []);
 
     const seleccionarFecha = useCallback((id: string) => {
-        setOpciones(prev => ({...prev, fecha: id}));
+        setOpciones(prev => ({...prev, fecha: id === 'ninguna' ? undefined : id}));
         setMenuFecha(prev => ({...prev, visible: false}));
     }, []);
 

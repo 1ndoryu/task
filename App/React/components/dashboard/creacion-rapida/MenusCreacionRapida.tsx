@@ -127,6 +127,7 @@ export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Elemen
                 <div onClick={e => e.stopPropagation()}>
                     <MenuContextual
                         opciones={[
+                            {id: 'ninguna', etiqueta: 'Sin fecha', icono: <Calendar size={12} className="textoApagado" />},
                             {id: 'hoy', etiqueta: 'Hoy', icono: <Calendar size={12} className="textoAdvertencia" />},
                             {id: 'manana', etiqueta: 'Mañana', icono: <Calendar size={12} />},
                             {id: 'semana', etiqueta: 'Esta Semana', icono: <Calendar size={12} />}
