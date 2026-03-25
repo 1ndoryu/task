@@ -38,7 +38,7 @@
 
 8.4 No estoy segura de esto pero la extension parece ocultar comentarios de facebook 
 
-9. Lo de posponer tareas funciona falta primero porque es incruente, veo posponer hoy y posponer mañana, no se cual es la diferencia y que sentido tiene tener 2 opciones asi, y tampoco hay para elegir cuanto tiempo cuando se quiere especificar. 
+9. [COMPLETADA 253A-7] Lo de posponer tareas funciona falta primero porque es incruente, veo posponer hoy y posponer mañana, no se cual es la diferencia y que sentido tiene tener 2 opciones asi, y tampoco hay para elegir cuanto tiempo cuando se quiere especificar. 
 
 9.1 Por cierto tampoco en las fechas de las tareas se puede especificar una fecha, debería con un calendario con el estilo del sitio.
 

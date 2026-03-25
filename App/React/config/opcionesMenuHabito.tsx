@@ -107,8 +107,9 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
             subOpciones: [
                 {
                     id: POSPONER_IDS.HOY,
-                    etiqueta: estado.pospuestoHoy ? 'Deshacer hoy' : 'Posponer hoy',
-                    icono: estado.pospuestoHoy ? <Undo2 size={12} /> : <Calendar size={12} />
+                    etiqueta: estado.pospuestoHoy ? 'Deshacer omisión' : 'Omitir hoy',
+                    icono: estado.pospuestoHoy ? <Undo2 size={12} /> : <Calendar size={12} />,
+                    separadorDespues: true
                 },
                 ...opcionesMenuPosponerTiempo(false)
             ]
