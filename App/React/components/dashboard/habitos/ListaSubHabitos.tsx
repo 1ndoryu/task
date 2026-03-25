@@ -3,10 +3,13 @@
  * Componente para gestionar subhábitos dentro de la configuración de un Hábito padre.
  * Usa los mismos estilos CSS que ListaSubtareas (listaTareasHabito__*) para consistencia visual.
  * Los subhábitos heredan frecuencia e importancia del padre al crearse.
+ *
+ * [253A-1] Edición inline de nombre: doble clic o Enter para editar.
+ *   Filtrado de subhábitos fantasma (sin nombre válido).
  */
 
-import {useState, useCallback} from 'react';
-import {Check, Plus, Trash2} from 'lucide-react';
+import {useState, useCallback, useRef, useEffect} from 'react';
+import {Check, Plus, Trash2, Pencil} from 'lucide-react';
 import type {SubHabito, NivelImportancia, FrecuenciaHabito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../../types/dashboard';
 import {obtenerFechaHoy} from '../../../utils/fecha';
@@ -15,7 +18,7 @@ import {Boton, Input} from '../../ui';
 interface ListaSubHabitosProps {
     subhabitos: SubHabito[];
     onCrear: (datos: DatosNuevoSubHabito) => void;
-
+    onEditar?: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
     onEliminar: (subHabitoId: number) => void;
     onToggle: (subHabitoId: number) => void;
     importanciaPadre: NivelImportancia;
@@ -24,16 +27,41 @@ interface ListaSubHabitosProps {
 
 /*
  * Fila individual de subhábito - Usa clases listaTareasHabito__* para consistencia con subtareas
+ * [253A-1] Soporta edición inline de nombre: doble clic para activar.
  */
 interface FilaSubHabitoProps {
     subhabito: SubHabito;
     onToggle: () => void;
     onEliminar: () => void;
+    onEditar?: (nombre: string) => void;
 }
 
-function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): JSX.Element {
+function FilaSubHabito({subhabito, onToggle, onEliminar, onEditar}: FilaSubHabitoProps): JSX.Element {
     const hoy = obtenerFechaHoy();
     const completadoHoy = subhabito.ultimoCompletado === hoy;
+    const [editando, setEditando] = useState(false);
+    const [textoEdicion, setTextoEdicion] = useState(subhabito.nombre);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (editando && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [editando]);
+
+    const confirmarEdicion = useCallback(() => {
+        const nuevoNombre = textoEdicion.trim();
+        if (nuevoNombre && nuevoNombre !== subhabito.nombre && onEditar) {
+            onEditar(nuevoNombre);
+        }
+        setEditando(false);
+    }, [textoEdicion, subhabito.nombre, onEditar]);
+
+    const cancelarEdicion = useCallback(() => {
+        setTextoEdicion(subhabito.nombre);
+        setEditando(false);
+    }, [subhabito.nombre]);
 
     return (
         <div className={`listaTareasHabito__item ${completadoHoy ? 'listaTareasHabito__item--completado' : ''} listaTareasHabito__item--sinDrag`}>
@@ -48,16 +76,58 @@ function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): J
                 {completadoHoy && <Check size={10} color="white" />}
             </div>
 
-            {/* Contenido (Texto) */}
+            {/* Contenido (Texto) - doble clic para editar */}
             <div className="listaTareasHabito__contenido">
-                <span className="listaTareasHabito__texto">{subhabito.nombre}</span>
+                {editando ? (
+                    <Input
+                        ref={inputRef}
+                        tipo="text"
+                        claseAdicional="listaTareasHabito__inputEdicion"
+                        value={textoEdicion}
+                        onChange={e => setTextoEdicion(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter') confirmarEdicion();
+                            if (e.key === 'Escape') cancelarEdicion();
+                        }}
+                        onBlur={confirmarEdicion}
+                        onClick={e => e.stopPropagation()}
+                        onPointerDown={e => e.stopPropagation()}
+                    />
+                ) : (
+                    <span
+                        className="listaTareasHabito__texto"
+                        onDoubleClick={() => {
+                            if (onEditar) {
+                                setTextoEdicion(subhabito.nombre);
+                                setEditando(true);
+                            }
+                        }}>
+                        {subhabito.nombre}
+                    </span>
+                )}
                 {/* Badge de racha si tiene */}
-                {subhabito.racha > 0 && (
+                {!editando && subhabito.racha > 0 && (
                     <span className="badgeInfo badgeInfo--racha" style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}>
                         <span className="badgeInfoTexto">🔥 {subhabito.racha}</span>
                     </span>
                 )}
             </div>
+
+            {/* Botón editar (solo si hay callback) */}
+            {onEditar && !editando && (
+                <Boton
+                    variante="icono"
+                    claseAdicional="listaTareasHabito__eliminar"
+                    onClick={e => {
+                        e.stopPropagation();
+                        setTextoEdicion(subhabito.nombre);
+                        setEditando(true);
+                    }}
+                    onPointerDown={e => e.stopPropagation()}
+                    title="Editar nombre">
+                    <Pencil size={14} />
+                </Boton>
+            )}
 
             {/* Botón eliminar */}
             {/* [243A-11] variante=icono para no heredar estilos de boton--primario que tapan el opacity:0 base */}
@@ -79,7 +149,7 @@ function FilaSubHabito({subhabito, onToggle, onEliminar}: FilaSubHabitoProps): J
 /*
  * Lista principal de subhábitos - Usa clases listaTareasHabito__* para consistencia con subtareas
  */
-export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, importanciaPadre, frecuenciaPadre}: ListaSubHabitosProps): JSX.Element {
+export function ListaSubHabitos({subhabitos, onCrear, onEditar, onEliminar, onToggle, importanciaPadre, frecuenciaPadre}: ListaSubHabitosProps): JSX.Element {
     const [textoNuevo, setTextoNuevo] = useState('');
     const [mostrarInput, setMostrarInput] = useState(false);
 
@@ -97,8 +167,10 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
     }, [textoNuevo, onCrear, importanciaPadre, frecuenciaPadre]);
 
     const hoy = obtenerFechaHoy();
-    const completados = subhabitos.filter(sh => sh.ultimoCompletado === hoy).length;
-    const total = subhabitos.length;
+    /* [253A-1] Filtrar subhábitos fantasma (sin nombre válido) para evitar items irremovibles */
+    const subhabitosValidos = subhabitos.filter(sh => sh.nombre && sh.nombre.trim());
+    const completados = subhabitosValidos.filter(sh => sh.ultimoCompletado === hoy).length;
+    const total = subhabitosValidos.length;
 
     return (
         <div className="listaTareasHabito listaTareasHabito--compacto">
@@ -113,16 +185,31 @@ export function ListaSubHabitos({subhabitos, onCrear, onEliminar, onToggle, impo
             </div>
 
             {/* Lista de subhábitos */}
-            {subhabitos.length > 0 && (
+            {subhabitosValidos.length > 0 && (
                 <div className="listaTareasHabito__lista">
-                    {subhabitos.map(sh => (
-                        <FilaSubHabito key={sh.id} subhabito={sh} onToggle={() => onToggle(sh.id)} onEliminar={() => onEliminar(sh.id)} />
+                    {subhabitosValidos.map(sh => (
+                        <FilaSubHabito
+                            key={sh.id}
+                            subhabito={sh}
+                            onToggle={() => onToggle(sh.id)}
+                            onEliminar={() => onEliminar(sh.id)}
+                            onEditar={
+                                onEditar
+                                    ? nombre =>
+                                          onEditar(sh.id, {
+                                              nombre,
+                                              importancia: sh.importancia,
+                                              frecuencia: sh.frecuencia
+                                          })
+                                    : undefined
+                            }
+                        />
                     ))}
                 </div>
             )}
 
             {/* Empty State */}
-            {subhabitos.length === 0 && !mostrarInput && <div className="listaTareasHabito__vacio">No hay subhábitos</div>}
+            {subhabitosValidos.length === 0 && !mostrarInput && <div className="listaTareasHabito__vacio">No hay subhábitos</div>}
 
             {/* Input simple - Enter para guardar */}
             {mostrarInput ? (

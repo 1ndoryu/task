@@ -179,17 +179,20 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
             /* Agregar subhábitos que "tocan hoy" como tareas virtuales */
             if (habito.subhabitos && habito.subhabitos.length > 0) {
                 for (const subhabito of habito.subhabitos) {
+                    /* [253A-1] Filtrar subhábitos fantasma (sin nombre válido) */
+                    if (!subhabito.nombre || !subhabito.nombre.trim()) continue;
                     /* Solo incluir si no está pausado y "toca hoy" */
                     if (subhabito.pausado) continue;
                     if (!subhabitoTocaHoy(subhabito, habito.frecuencia)) continue;
 
-                    /* Crear tarea virtual para el subhábito */
+                    /* [253A-1] Crear tarea virtual para el subhábito.
+                     * Prioridad hereda siempre del padre para consistencia visual en ejecución. */
                     const tareaSubhabito: Tarea = {
                         id: generarIdSubHabitoTarea(habito.id, subhabito.id),
                         texto: subhabito.nombre,
                         completado: false,
                         fechaCreacion: subhabito.fechaCreacion,
-                        prioridad: mapearImportanciaAPrioridad(subhabito.importancia),
+                        prioridad: mapearImportanciaAPrioridad(habito.importancia),
                         parentId: tareaHabito.id,
                         /* Sin urgencia propia (heredada del hábito visual) */
                         urgencia: undefined

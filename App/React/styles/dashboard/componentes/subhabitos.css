@@ -1,7 +1,7 @@
 /*
  * Estilos para SubHabitos
  * NOTA: Los subhábitos ahora usan las clases listaTareasHabito__* de configuracionHabitos.css
- * Este archivo solo contiene estilos adicionales específicos para subhábitos (badge racha)
+ * Este archivo solo contiene estilos adicionales específicos para subhábitos (badge racha, edición inline)
  */
 
 /* Badge de racha para subhábitos */
@@ -9,4 +9,21 @@
     background: transparent;
     color: var(--dashboard-textoApagado);
     font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+/* [253A-1] Input de edición inline para nombres de subhábitos */
+.listaTareasHabito__inputEdicion {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dashboard-borde);
+    color: var(--dashboard-texto);
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0 2px;
+    width: 100%;
+    outline: none;
+}
+
+.listaTareasHabito__inputEdicion:focus {
+    border-bottom-color: var(--dashboard-acento);
 }

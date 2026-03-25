@@ -514,6 +514,8 @@ export const useHabitosStore = create<HabitosStore>()(
 
                 /* SubHabitos: Crear subhábito heredando propiedades del padre */
                 crearSubHabito: (habitoId, datos) => {
+                    /* [253A-1] Validar nombre no vacío para evitar subhábitos fantasma */
+                    if (!datos.nombre || !datos.nombre.trim()) return null;
                     const habito = get().habitos.find(h => h.id === habitoId);
                     if (!habito) return null;
 

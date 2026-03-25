@@ -48,7 +48,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
         estadoHoy, manejarCambioEstado,
         chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna,
         tareasDelHabito, manejarReordenarTareas,
-        manejarCrearSubHabito, manejarEliminarSubHabito, manejarToggleSubHabito,
+        manejarCrearSubHabito, manejarEditarSubHabito, manejarEliminarSubHabito, manejarToggleSubHabito,
         manejarGuardar, manejarCerrarConGuardado, manejarPausarHabito
     } = useModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes, tareas, onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito, onEditarTarea});
 
@@ -120,6 +120,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     onEditarTareaHabito={onEditarTarea}
                                     /* Props para subhábitos */
                                     onCrearSubHabito={esHabitoEspecialAyuno ? undefined : manejarCrearSubHabito}
+                                    onEditarSubHabito={esHabitoEspecialAyuno ? undefined : manejarEditarSubHabito}
                                     onEliminarSubHabito={esHabitoEspecialAyuno ? undefined : manejarEliminarSubHabito}
                                     onToggleSubHabito={esHabitoEspecialAyuno ? undefined : manejarToggleSubHabito}
                                 />
