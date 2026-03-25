@@ -302,7 +302,7 @@ export function useScratchpad({
 
             const handleMouseMove = (moveEvent: MouseEvent) => {
                 const deltaY = moveEvent.clientY - startY;
-                const newHeight = Math.min(600, Math.max(100, startHeight + deltaY));
+                const newHeight = Math.min(1000, Math.max(100, startHeight + deltaY));
                 setLocalHeight(`${newHeight}px`);
             };
 
@@ -312,7 +312,7 @@ export function useScratchpad({
                 setIsResizing(false);
 
                 const deltaY = upEvent.clientY - startY;
-                const finalHeight = Math.min(600, Math.max(100, startHeight + deltaY));
+                const finalHeight = Math.min(1000, Math.max(100, startHeight + deltaY));
 
                 if (onCambiarAltura) {
                     onCambiarAltura(`${finalHeight}px`);

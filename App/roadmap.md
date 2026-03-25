@@ -24,7 +24,7 @@
 
 5. [COMPLETADA 253A-1] Los subhabitos — edición nombre, prioridad hereda padre, filtro fantasmas
 
-6. Permitir más altura maxima para el panel de nota. 
+6. [COMPLETADA 253A-4] Permitir más altura maxima para el panel de nota. 
  
 7. Permitir tener varios paneles de notas, se agrega un submenu el boton de + en la nota para permitir crear en una nueva ventana o en la misma. 
 
