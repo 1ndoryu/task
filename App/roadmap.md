@@ -28,15 +28,15 @@
  
 7. [COMPLETADA 253A-10] Permitir tener varios paneles de notas, se agrega un submenu el boton de + en la nota para permitir crear en una nueva ventana o en la misma. 
 
-8. Nuevo plugin: gestor de grupos, esto es algo complicado, he creado una extensión que analiza grupos de facebook, esta extension tambien tiene varios problemas a resolver, 
+8. [COMPLETADA 253A-11+253A-12] Nuevo plugin: gestor de grupos, esto es algo complicado, he creado una extensión que analiza grupos de facebook, esta extension tambien tiene varios problemas a resolver, 
 
-8.1 el primero es que acabo de un tiempo deja de funcionar
+8.1 [COMPLETADA 253A-12] el primero es que acabo de un tiempo deja de funcionar
 
-8.2 la extension (fb-group-manager) se tiene que conectar a task, de alguna forma tal vez con api key o algo, de la mejor manera, lo que hara es que se controlara la lista grupos en un panel dedicado en el proyecto task, sera una tabla como la tabla de habitos, tendra un check para marcar que se publico en se grupo, menu contextuales para ocultar ese grupo, tiene que poder cambiar de entorno, boton para ir el grupo, cambiar categoría, prioridad, analizar con ia para quitar los relevantes, etc, tiene que sincronizarse en tiempo real, si es necesario ajustar la extension ok, pero lo importante es que detecte siempre nuevos grupos, que se puedan organizar por entorno por ia.
+8.2 [COMPLETADA 253A-11+253A-12] la extension (fb-group-manager) se tiene que conectar a task, de alguna forma tal vez con api key o algo, de la mejor manera, lo que hara es que se controlara la lista grupos en un panel dedicado en el proyecto task, sera una tabla como la tabla de habitos, tendra un check para marcar que se publico en se grupo, menu contextuales para ocultar ese grupo, tiene que poder cambiar de entorno, boton para ir el grupo, cambiar categoría, prioridad, analizar con ia para quitar los relevantes, etc, tiene que sincronizarse en tiempo real, si es necesario ajustar la extension ok, pero lo importante es que detecte siempre nuevos grupos, que se puedan organizar por entorno por ia.
 
-8.3 la extension no muestra bien el tooltip para modificar los grupos dentro de la pagina de facebook, necesito que en en la pagina de facebook muestre un tooltip con las acciones para poder marcar acciones como modifcar, marcar como publicado ocultar, los grupos ocultados tienen que tener tener un icono de ocultado cuando aparecen el feed ocuando se abren directamente.
+8.3 [COMPLETADA 253A-12] la extension no muestra bien el tooltip para modificar los grupos dentro de la pagina de facebook, necesito que en en la pagina de facebook muestre un tooltip con las acciones para poder marcar acciones como modifcar, marcar como publicado ocultar, los grupos ocultados tienen que tener tener un icono de ocultado cuando aparecen el feed ocuando se abren directamente.
 
-8.4 No estoy segura de esto pero la extension parece ocultar comentarios de facebook 
+8.4 [COMPLETADA 253A-12] No estoy segura de esto pero la extension parece ocultar comentarios de facebook 
 
 9. [COMPLETADA 253A-7] Lo de posponer tareas funciona falta primero porque es incruente, veo posponer hoy y posponer mañana, no se cual es la diferencia y que sentido tiene tener 2 opciones asi, y tampoco hay para elegir cuanto tiempo cuando se quiere especificar. 
 
