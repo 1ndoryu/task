@@ -20,6 +20,7 @@ import {PanelEjecucion} from '../components/paneles/PanelEjecucion';
 import {PanelScratchpad} from '../components/paneles/PanelScratchpad';
 import {PanelActividad} from '../components/paneles/PanelActividad';
 import {PanelIA} from '../components/paneles/PanelIA';
+import {PanelGruposFb} from '../components/paneles/PanelGruposFb';
 
 /* Helper para definir posiciones por defecto de forma compacta */
 function crearPosicionDefecto(pos1col: [1 | 2 | 3, number], pos2col: [1 | 2 | 3, number], pos3col: [1 | 2 | 3, number]): Record<ModoColumnas, PosicionDefectoPanel> {
@@ -133,6 +134,24 @@ registrarPanel({
     enNavegacionMovil: false,
     idPaginaMovil: 'ia',
     manejaAlturaPropia: true
+});
+
+/*
+ * [253A-11] Panel Grupos FB
+ * Gestor de grupos de Facebook detectados por extensión
+ * Oculto por defecto, se activa manualmente
+ */
+registrarPanel({
+    id: 'gruposFb',
+    titulo: 'Grupos FB',
+    tituloMovil: 'Grupos FB',
+    visiblePorDefecto: false,
+    alturaDefecto: 'auto',
+    posicionDefecto: crearPosicionDefecto([1, 6], [2, 4], [3, 4]),
+    componente: PanelGruposFb as ComponentType<PanelBaseProps>,
+    enNavegacionMovil: false,
+    idPaginaMovil: 'gruposFb',
+    manejaAlturaPropia: false
 });
 
 /* Marcar como inicializado */

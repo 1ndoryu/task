@@ -1,0 +1,537 @@
+<?php
+
+/**
+ * [253A-11] API Controller para Grupos de Facebook
+ *
+ * Endpoints REST para gestión de grupos detectados por la extensión fb-group-manager.
+ * Soporta autenticación dual: cookie WordPress (dashboard) + Bearer token (extensión).
+ *
+ * @package App\Api
+ */
+
+namespace App\Api;
+
+use App\Repository\GruposFbRepository;
+use App\Database\Schema;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+
+class GruposFbApiController
+{
+    private const API_NAMESPACE = 'glory/v1';
+    private const META_TOKEN = '_glory_ext_api_token';
+
+    public static function register(): void
+    {
+        add_action('rest_api_init', [self::class, 'registerRoutes']);
+    }
+
+    public static function registerRoutes(): void
+    {
+        /* Listar grupos */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [self::class, 'listar'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+        ]);
+
+        /* Sync bulk desde extensión */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/sync', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [self::class, 'sync'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+        ]);
+
+        /* Actualizar grupo */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/(?P<id>\d+)', [
+            'methods' => 'PUT',
+            'callback' => [self::class, 'actualizar'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+            'args' => [
+                'id' => ['validate_callback' => fn($p) => is_numeric($p) && $p > 0],
+            ],
+        ]);
+
+        /* Eliminar grupo (soft delete) */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/(?P<id>\d+)', [
+            'methods' => WP_REST_Server::DELETABLE,
+            'callback' => [self::class, 'eliminar'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+            'args' => [
+                'id' => ['validate_callback' => fn($p) => is_numeric($p) && $p > 0],
+            ],
+        ]);
+
+        /* Marcar como publicado */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/(?P<id>\d+)/publicar', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [self::class, 'marcarPublicado'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+            'args' => [
+                'id' => ['validate_callback' => fn($p) => is_numeric($p) && $p > 0],
+            ],
+        ]);
+
+        /* Estadísticas */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/stats', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [self::class, 'estadisticas'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+        ]);
+
+        /* Categorías: listar y guardar */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/categorias', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [self::class, 'listarCategorias'],
+                'permission_callback' => [self::class, 'verificarAutenticacion'],
+            ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [self::class, 'guardarCategorias'],
+                'permission_callback' => [self::class, 'verificarAutenticacion'],
+            ],
+        ]);
+
+        /* Token API: obtener (solo cookie auth) */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/token', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [self::class, 'obtenerToken'],
+            'permission_callback' => [self::class, 'requiereCookieAuth'],
+        ]);
+
+        /* Token API: regenerar (solo cookie auth) */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/token/regenerar', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => [self::class, 'regenerarToken'],
+            'permission_callback' => [self::class, 'requiereCookieAuth'],
+        ]);
+    }
+
+    /* ────────────────────────────── Autenticación ────────────────────────────── */
+
+    /**
+     * Autenticación dual: cookie WordPress O Bearer token.
+     * Si es Bearer token, inyecta el user_id en el request para usarlo en callbacks.
+     */
+    public static function verificarAutenticacion(WP_REST_Request $request): bool
+    {
+        /* 1. Cookie auth (dashboard) */
+        if (is_user_logged_in()) {
+            return true;
+        }
+
+        /* 2. Bearer token (extensión) */
+        return self::verificarBearerToken($request);
+    }
+
+    /**
+     * Solo permite autenticación por cookie (para gestión de tokens)
+     */
+    public static function requiereCookieAuth(): bool
+    {
+        return is_user_logged_in();
+    }
+
+    /**
+     * Verifica el Bearer token y extrae el user_id
+     */
+    private static function verificarBearerToken(WP_REST_Request $request): bool
+    {
+        $authHeader = $request->get_header('Authorization');
+        if (empty($authHeader)) {
+            return false;
+        }
+
+        if (!preg_match('/^Bearer\s+(\S+)$/i', $authHeader, $matches)) {
+            return false;
+        }
+
+        $token = $matches[1];
+        if (strlen($token) < 32) {
+            return false;
+        }
+
+        /* Buscar el usuario que tiene este token.
+         * Usamos hash del token en meta para no almacenar tokens en texto plano. */
+        $tokenHash = hash('sha256', $token);
+
+        global $wpdb;
+        $userId = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value = %s LIMIT 1",
+                self::META_TOKEN,
+                $tokenHash
+            )
+        );
+
+        if (!$userId) {
+            return false;
+        }
+
+        /* Inyectar user_id para que los callbacks lo usen */
+        $request->set_param('_ext_user_id', (int)$userId);
+        return true;
+    }
+
+    /**
+     * Obtiene el user_id del request (cookie o token)
+     */
+    private static function getUserId(WP_REST_Request $request): int
+    {
+        $extUserId = $request->get_param('_ext_user_id');
+        if ($extUserId) {
+            return (int)$extUserId;
+        }
+        return get_current_user_id();
+    }
+
+    /* ────────────────────────────── Endpoints ────────────────────────────── */
+
+    /**
+     * GET /grupos-fb — Lista todos los grupos del usuario
+     */
+    public static function listar(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+
+            $filtros = [];
+            if ($request->get_param('oculto') !== null) {
+                $filtros['oculto'] = (int)$request->get_param('oculto');
+            }
+            if ($request->get_param('categoria')) {
+                $filtros['categoria'] = $request->get_param('categoria');
+            }
+            if ($request->get_param('importancia') !== null && $request->get_param('importancia') !== '') {
+                $filtros['importancia'] = $request->get_param('importancia');
+            }
+            if ($request->get_param('busqueda')) {
+                $filtros['busqueda'] = $request->get_param('busqueda');
+            }
+
+            $grupos = $repo->listar($filtros);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => $grupos,
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al listar grupos: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /grupos-fb/sync — Bulk upsert desde extensión
+     */
+    public static function sync(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+
+            $grupos = $request->get_json_params()['grupos'] ?? $request->get_param('grupos');
+            if (!is_array($grupos) || empty($grupos)) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Se requiere un array de grupos',
+                ], 400);
+            }
+
+            /* Limitar a 500 grupos por request para evitar timeouts */
+            if (count($grupos) > 500) {
+                $grupos = array_slice($grupos, 0, 500);
+            }
+
+            $resultado = $repo->syncDesdeExtension($grupos);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => $resultado,
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error en sync: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * PUT /grupos-fb/{id} — Actualizar grupo
+     */
+    public static function actualizar(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+            $id = (int)$request->get_param('id');
+
+            $datos = [];
+            $camposEditables = ['categoria', 'importancia', 'oculto', 'notas', 'ultimaPublicacion'];
+            foreach ($camposEditables as $campo) {
+                if ($request->has_param($campo)) {
+                    $datos[$campo] = $request->get_param($campo);
+                }
+            }
+
+            if (empty($datos)) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'No hay campos para actualizar',
+                ], 400);
+            }
+
+            $ok = $repo->actualizar($id, $datos);
+
+            if (!$ok) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Grupo no encontrado o sin cambios',
+                ], 404);
+            }
+
+            $grupo = $repo->obtenerPorId($id);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => $grupo,
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al actualizar: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * DELETE /grupos-fb/{id} — Soft delete
+     */
+    public static function eliminar(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+            $id = (int)$request->get_param('id');
+
+            $ok = $repo->eliminar($id);
+
+            if (!$ok) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Grupo no encontrado',
+                ], 404);
+            }
+
+            return new WP_REST_Response([
+                'success' => true,
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al eliminar: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /grupos-fb/{id}/publicar — Marcar como publicado
+     */
+    public static function marcarPublicado(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+            $id = (int)$request->get_param('id');
+
+            $ok = $repo->marcarPublicado($id);
+
+            if (!$ok) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Grupo no encontrado',
+                ], 404);
+            }
+
+            return new WP_REST_Response([
+                'success' => true,
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al marcar publicado: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /grupos-fb/stats — Estadísticas
+     */
+    public static function estadisticas(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => $repo->contarEstadisticas(),
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al obtener estadísticas: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /* ────────────────────────────── Categorías ────────────────────────────── */
+
+    /**
+     * GET /grupos-fb/categorias — Lista categorías del usuario
+     */
+    public static function listarCategorias(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            global $wpdb;
+            $table = Schema::getTableName('categorias_grupos_fb');
+
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT id, nombre, icono, color, orden FROM $table WHERE user_id = %d ORDER BY orden ASC, nombre ASC",
+                    $userId
+                ),
+                'ARRAY_A'
+            );
+
+            $categorias = array_map(fn($r) => [
+                'id' => (int)$r['id'],
+                'nombre' => $r['nombre'],
+                'icono' => $r['icono'],
+                'color' => $r['color'],
+                'orden' => (int)$r['orden'],
+            ], $rows ?: []);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => $categorias,
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al listar categorías: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /grupos-fb/categorias — Guardar categorías (replace all)
+     */
+    public static function guardarCategorias(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $categorias = $request->get_json_params()['categorias'] ?? $request->get_param('categorias');
+
+            if (!is_array($categorias)) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Se requiere un array de categorías',
+                ], 400);
+            }
+
+            global $wpdb;
+            $table = Schema::getTableName('categorias_grupos_fb');
+
+            /* Eliminar existentes y reinsertar (replace strategy) */
+            $wpdb->delete($table, ['user_id' => $userId], ['%d']);
+
+            foreach ($categorias as $i => $cat) {
+                $wpdb->insert($table, [
+                    'user_id' => $userId,
+                    'nombre' => sanitize_text_field(mb_substr($cat['nombre'] ?? '', 0, 100)),
+                    'icono' => sanitize_text_field(mb_substr($cat['icono'] ?? '📁', 0, 10)),
+                    'color' => sanitize_hex_color($cat['color'] ?? '#6366f1') ?: '#6366f1',
+                    'orden' => $i,
+                ], ['%d', '%s', '%s', '%s', '%d']);
+            }
+
+            return self::listarCategorias($request);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al guardar categorías: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /* ────────────────────────────── Token API ────────────────────────────── */
+
+    /**
+     * GET /grupos-fb/token — Obtener o generar token
+     */
+    public static function obtenerToken(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = get_current_user_id();
+            $tokenHash = get_user_meta($userId, self::META_TOKEN, true);
+
+            /* Si no tiene token, generar uno */
+            if (empty($tokenHash)) {
+                return self::regenerarToken($request);
+            }
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => [
+                    'tieneToken' => true,
+                    'mensaje' => 'Ya tienes un token configurado. Usa "regenerar" para obtener uno nuevo.',
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al obtener token: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /grupos-fb/token/regenerar — Genera un nuevo token (invalida el anterior)
+     */
+    public static function regenerarToken(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = get_current_user_id();
+
+            /* Generar token criptográficamente seguro */
+            $token = bin2hex(random_bytes(32));
+            $tokenHash = hash('sha256', $token);
+
+            /* Guardar solo el hash */
+            update_user_meta($userId, self::META_TOKEN, $tokenHash);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => [
+                    'token' => $token,
+                    'mensaje' => 'Token generado. Cópialo ahora, no se mostrará de nuevo.',
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error al regenerar token: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+}
+
+GruposFbApiController::register();

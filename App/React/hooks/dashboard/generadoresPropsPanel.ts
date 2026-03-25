@@ -277,6 +277,18 @@ export function generarPropsPanelIA(
     };
 }
 
+/* [253A-11] Props para PanelGruposFb — panel autónomo, solo necesita props base */
+export function generarPropsPanelGruposFb(
+    _ctx: PropsContextoPaneles,
+    renderHandleArrastre: (titulo?: string) => JSX.Element,
+    handleMinimizar: JSX.Element
+) {
+    return {
+        renderHandleArrastre,
+        handleMinimizar
+    };
+}
+
 /*
  * Mapeo de panelId a función generadora de props
  * TO-DO: En el futuro, cada panel podría registrar su propia función generadora
@@ -289,5 +301,7 @@ export const GENERADORES_PROPS: Record<string, Function> = {
     actividad: generarPropsPanelActividad,
     ayuno: generarPropsPanelAyuno,
     'deficit-calorico': generarPropsPanelDeficitCalorico,
-    ia: generarPropsPanelIA
+    ia: generarPropsPanelIA,
+    /* [253A-11] Panel Grupos FB — solo necesita props base */
+    gruposFb: generarPropsPanelGruposFb
 };

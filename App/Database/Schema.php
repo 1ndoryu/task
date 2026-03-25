@@ -6,9 +6,9 @@ class Schema
 {
     /**
      * Versión actual de la base de datos
-     * v1.0.12: Tabla de carpetas para notas y campo carpeta_id
+     * v1.0.13: Tabla de grupos de Facebook para extensión fb-group-manager
      */
-    public const DB_VERSION = '1.0.12';
+    public const DB_VERSION = '1.0.13';
 
     /**
      * Nombre de la opción donde guardamos la versión instalada
@@ -459,6 +459,59 @@ class Schema
         dbDelta($sql_habitos_historial);
         dbDelta($sql_backups);
         dbDelta($sql_feedback);
+
+        /* [253A-11] Tabla de Grupos de Facebook (extensión fb-group-manager)
+         * Almacena grupos detectados por la extensión Chrome.
+         * fb_group_id: ID del grupo en Facebook (string, puede ser numérico o slug).
+         * fuente: cómo se detectó (group-page, group-list, discover, link-scan, hover-popup).
+         * datos_extra: JSON con campos opcionales (friendsInGroup, postsPerDay, tags, etc.).
+         */
+        $table_grupos_fb = $wpdb->prefix . 'glory_grupos_fb';
+        $sql_grupos_fb = "CREATE TABLE $table_grupos_fb (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            fb_group_id varchar(100) NOT NULL,
+            nombre varchar(500) NOT NULL,
+            url varchar(500) NOT NULL,
+            tipo varchar(20) DEFAULT 'unknown',
+            cantidad_miembros varchar(100) DEFAULT '',
+            imagen_url varchar(1000) DEFAULT '',
+            fuente varchar(50) DEFAULT 'link-scan',
+            categoria varchar(100) DEFAULT NULL,
+            importancia tinyint DEFAULT 0,
+            notas text,
+            oculto tinyint(1) DEFAULT 0,
+            ultima_publicacion datetime DEFAULT NULL,
+            datos_extra longtext DEFAULT NULL,
+            fecha_deteccion datetime DEFAULT CURRENT_TIMESTAMP,
+            ultima_deteccion datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            deleted_at datetime DEFAULT NULL,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY categoria (categoria),
+            KEY oculto (oculto),
+            UNIQUE KEY user_fb_group (user_id, fb_group_id)
+        ) $charset_collate;";
+
+        /* [253A-11] Tabla de Categorías de Grupos FB
+         * Permite personalizar categorías con icono y color.
+         */
+        $table_categorias_fb = $wpdb->prefix . 'glory_categorias_grupos_fb';
+        $sql_categorias_fb = "CREATE TABLE $table_categorias_fb (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            nombre varchar(100) NOT NULL,
+            icono varchar(10) DEFAULT '📁',
+            color varchar(20) DEFAULT '#6366f1',
+            orden int(11) DEFAULT 0,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            UNIQUE KEY user_nombre (user_id, nombre)
+        ) $charset_collate;";
+
+        dbDelta($sql_grupos_fb);
+        dbDelta($sql_categorias_fb);
     }
 
     /**

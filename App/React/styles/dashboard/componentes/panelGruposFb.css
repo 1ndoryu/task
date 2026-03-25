@@ -1,0 +1,287 @@
+/* [253A-11] Estilos del panel Grupos de Facebook
+ * Tabla de grupos con acciones inline, filtros, badges de categoría.
+ * Tema oscuro consistente con el dashboard. */
+
+.panelGruposFb {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 8px 8px;
+}
+
+/* ── Barra de filtros ── */
+.panelGruposFb__filtros {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.panelGruposFb__inputBusqueda {
+    flex: 1;
+    min-width: 120px;
+    padding: 4px 8px;
+    background: var(--dashboard-fondoInput, #1a1a2e);
+    border: 1px solid var(--dashboard-bordePrincipal, #2a2a3e);
+    border-radius: 4px;
+    color: var(--dashboard-textoSecundario, #a0a0b0);
+    font-size: 0.75rem;
+}
+
+.panelGruposFb__inputBusqueda::placeholder {
+    color: var(--dashboard-textoTerciario, #606070);
+}
+
+.panelGruposFb__selectFiltro {
+    padding: 4px 6px;
+    background: var(--dashboard-fondoInput, #1a1a2e);
+    border: 1px solid var(--dashboard-bordePrincipal, #2a2a3e);
+    border-radius: 4px;
+    color: var(--dashboard-textoSecundario, #a0a0b0);
+    font-size: 0.75rem;
+    max-width: 140px;
+}
+
+/* ── Estadísticas compactas ── */
+.panelGruposFb__stats {
+    display: flex;
+    gap: 12px;
+    font-size: 0.7rem;
+    color: var(--dashboard-textoTerciario, #606070);
+    padding: 2px 0;
+}
+
+.panelGruposFb__stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.panelGruposFb__statValor {
+    color: var(--dashboard-textoSecundario, #a0a0b0);
+    font-weight: 600;
+}
+
+/* ── Tabla de grupos ── */
+.panelGruposFb__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+
+.panelGruposFb__tabla th {
+    text-align: left;
+    padding: 4px 6px;
+    color: var(--dashboard-textoTerciario, #606070);
+    font-weight: 500;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--dashboard-bordePrincipal, #2a2a3e);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.panelGruposFb__tabla th:hover {
+    color: var(--dashboard-textoSecundario, #a0a0b0);
+}
+
+.panelGruposFb__tabla td {
+    padding: 5px 6px;
+    color: var(--dashboard-textoPrincipal, #e0e0e8);
+    border-bottom: 1px solid var(--dashboard-bordeSutil, #1a1a2e);
+    vertical-align: middle;
+}
+
+.panelGruposFb__tabla tr:hover td {
+    background: var(--dashboard-fondoHover, rgba(99, 102, 241, 0.05));
+}
+
+/* ── Celda nombre con avatar ── */
+.panelGruposFb__celdaNombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.panelGruposFb__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--dashboard-fondoInput, #1a1a2e);
+}
+
+.panelGruposFb__avatarPlaceholder {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--dashboard-fondoInput, #1a1a2e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--dashboard-textoTerciario, #606070);
+    font-size: 0.65rem;
+}
+
+.panelGruposFb__nombreTexto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.panelGruposFb__nombreTexto a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.panelGruposFb__nombreTexto a:hover {
+    color: var(--dashboard-acento, #6366f1);
+    text-decoration: underline;
+}
+
+/* ── Badge categoría ── */
+.panelGruposFb__badgeCategoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    background: var(--dashboard-fondoInput, #1a1a2e);
+    color: var(--dashboard-textoSecundario, #a0a0b0);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.panelGruposFb__badgeCategoria:hover {
+    background: var(--dashboard-fondoHover, rgba(99, 102, 241, 0.1));
+}
+
+/* ── Estrellas importancia ── */
+.panelGruposFb__estrellas {
+    display: flex;
+    gap: 1px;
+}
+
+.panelGruposFb__estrella {
+    cursor: pointer;
+    color: var(--dashboard-bordePrincipal, #2a2a3e);
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: color 0.1s;
+}
+
+.panelGruposFb__estrella--activa {
+    color: #f59e0b;
+}
+
+.panelGruposFb__estrella:hover {
+    color: #fbbf24;
+}
+
+/* ── Check publicado ── */
+.panelGruposFb__checkPublicado {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--dashboard-bordePrincipal, #2a2a3e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    padding: 0;
+}
+
+.panelGruposFb__checkPublicado:hover {
+    border-color: var(--dashboard-acento, #6366f1);
+}
+
+.panelGruposFb__checkPublicado--activo {
+    background: var(--dashboard-acento, #6366f1);
+    border-color: var(--dashboard-acento, #6366f1);
+}
+
+/* ── Acciones por fila ── */
+.panelGruposFb__acciones {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.panelGruposFb__tabla tr:hover .panelGruposFb__acciones {
+    opacity: 1;
+}
+
+/* ── Estado vacío ── */
+.panelGruposFb__vacio {
+    text-align: center;
+    padding: 24px 12px;
+    color: var(--dashboard-textoTerciario, #606070);
+    font-size: 0.8rem;
+}
+
+.panelGruposFb__vacio p {
+    margin: 4px 0;
+}
+
+/* ── Estado cargando ── */
+.panelGruposFb__cargando {
+    text-align: center;
+    padding: 24px;
+    color: var(--dashboard-textoTerciario, #606070);
+    font-size: 0.8rem;
+}
+
+/* ── Contenedor scroll ── */
+.panelGruposFb__tablaContenedor {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+/* ── Toggle ocultos ── */
+.panelGruposFb__toggleOcultos {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: var(--dashboard-textoTerciario, #606070);
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ── Columnas fijas ── */
+.panelGruposFb__colCheck {
+    width: 32px;
+    text-align: center;
+}
+
+.panelGruposFb__colImportancia {
+    width: 80px;
+}
+
+.panelGruposFb__colCategoria {
+    width: 110px;
+}
+
+.panelGruposFb__colAcciones {
+    width: 80px;
+}
+
+/* ── Fila oculta ── */
+.panelGruposFb__filaOculta td {
+    opacity: 0.4;
+}
+
+.panelGruposFb__filaOculta:hover td {
+    opacity: 0.7;
+}
