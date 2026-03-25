@@ -20,7 +20,7 @@
 
 3. [COMPLETADA 253A-3] Cuadros dias desbordando + hover en deficitComidaAcciones
 
-4. mal calculo de la ia de calorías, puse  Media arepa, huevo y 2 tajadas de platano y dice 500 calorías pero en realidad esa comida tiene en promedio 300 calorías. Revisar esto y hacer los calculos mas inteligentes 
+4. [COMPLETADA 253A-8] mal calculo de la ia de calorías, puse  Media arepa, huevo y 2 tajadas de platano y dice 500 calorías pero en realidad esa comida tiene en promedio 300 calorías. Revisar esto y hacer los calculos mas inteligentes 
 
 5. [COMPLETADA 253A-1] Los subhabitos — edición nombre, prioridad hereda padre, filtro fantasmas
 
@@ -50,4 +50,4 @@
 
 13. [COMPLETADA 253A-3] Hover background en boton terminar ayuno (duplicado de 2)
 
-14. Puse 4 puños de arroz y salio 1100 calorías en vez 300-400g, mejorar tambien este sistema para que entienda sobre promedios y que los valores que se piden por dia lo reflejen tambien, no suelo usar cantidades exactas, sino medir por puños, 
+14. [COMPLETADA 253A-8] Puse 4 puños de arroz y salio 1100 calorías en vez 300-400g, mejorar tambien este sistema para que entienda sobre promedios y que los valores que se piden por dia lo reflejen tambien, no suelo usar cantidades exactas, sino medir por puños, 

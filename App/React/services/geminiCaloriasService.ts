@@ -24,17 +24,36 @@ interface RespuestaCaloriasIA {
 /*
  * Prompt compacto de nutrición.
  * [243A-17] Sin tabla embebida — el modelo usa su conocimiento del USDA.
- * Gotcha: "Venezuelan diet" en el prompt activa el conocimiento regional del modelo
- * sin necesidad de listar cada alimento. Más corto = menos alucinaciones por distracción.
+ * [253A-8] Mejorado para medidas informales latinas (puños, tajadas, media),
+ * porciones conservadoras estilo hogar y calibración regional venezolana.
+ * Gotcha: "Venezuelan diet" en el prompt activa el conocimiento regional del modelo.
+ * Las referencias de calibración evitan sobreestimaciones comunes del modelo.
  */
-const PROMPT_NUTRICION = `You are a certified nutritionist. Calculate the total macros for the food the user describes.
+const PROMPT_NUTRICION = `You are a certified nutritionist estimating macros for a home-cooked Latin American diet.
 Rules:
-- Use USDA FoodData Central values. For Venezuelan foods (arepa, caraotas, yuca, auyama, etc.) use accurate regional data.
-- If no quantity is specified, use a standard single serving.
+- Use USDA FoodData Central values. For Venezuelan/Latin foods use accurate regional data.
+- Assume food is COOKED unless explicitly stated raw. This is critical for rice, pasta, grains (cooked rice ≈ 130 kcal/100g, NOT 360 kcal/100g raw).
 - If fried (frito), account for absorbed oil. If with skin (con cuero), include it.
+- Be conservative: use home-portion sizes, not restaurant. When uncertain, pick the lower reasonable estimate.
 - Never fabricate values. Use the closest known food if exact data is unavailable.
-- Respond ONLY with valid JSON, no markdown, no explanation.
 
+Informal measurements (common in casual Spanish input):
+- "puño" (handful) ≈ 75-85g of cooked grains/rice/pasta
+- "tajada" (slice of fried ripe plantain) ≈ 35-45g per slice (~50-60 kcal each)
+- "media arepa" = half an arepa. A standard homemade arepa (corn, no filling) ≈ 120-150 kcal, so half ≈ 60-75 kcal.
+- "cucharada" (tablespoon) ≈ 15ml/15g. "Cucharadita" (teaspoon) ≈ 5ml.
+- "pedazo"/"trozo" (piece) = a modest single portion unless context says otherwise.
+- "plato" (plate) = a normal home serving, not heaped.
+- If no quantity is specified, use ONE standard home serving.
+
+Calibration references (use these as anchors):
+- 1 arepa de maíz sin relleno: ~130 kcal
+- 1 huevo entero: ~72 kcal
+- 1 tajada de plátano maduro frito: ~55 kcal
+- 100g arroz blanco cocido: ~130 kcal
+- 1 puño arroz cocido (~80g): ~104 kcal
+
+Respond ONLY with valid JSON, no markdown, no explanation.
 JSON format:
 {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>,"azucar":<g>}`;
 
