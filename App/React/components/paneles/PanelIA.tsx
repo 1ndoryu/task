@@ -8,6 +8,7 @@
  * Fase 4-5: Config inline (API key, modelo, preferencias).
  * [243A-1] Config movida al modal global (sección 'panelIA'). Settings abre modal.
  * [243A-2] Icono Bot en el encabezado del panel.
+ * [253A-5] Icono Bot quitado del encabezado — el icono de IA se muestra en la barra de paneles ocultos (BarraPanelesOcultos).
  * [243A-3] Botón enviar más grande y con separación del borde.
  */
 
@@ -70,7 +71,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
     return (
         <div className="panelDashboard internaColumna panelIA">
             <SeccionEncabezado
-                icono={<Bot size={14} />}
+                icono={null}
                 titulo={renderHandleArrastre('IA')}
                 subtitulo={tokensUsados > 0 ? `~${tokensUsados} tokens` : undefined}
                 variante="panelHeader"

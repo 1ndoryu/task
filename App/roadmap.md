@@ -44,7 +44,7 @@
 
 10. En el modal de creacion rapida se puede elegir la fecha pero no se puede quitar una vez que se elige una. Y tambien debería poder selecionarse una fecha.
 
-11. El icono de IA sigue sin ser un icono de IA cuando se minimiza el panel de chat con IA. No me refería a ponerlo sobre seccionTitulo, de hecho hay que quitarlo de ahi. 
+11. [COMPLETADA 253A-5] El icono de IA sigue sin ser un icono de IA cuando se minimiza el panel de chat con IA. No me refería a ponerlo sobre seccionTitulo, de hecho hay que quitarlo de ahi. 
 
 12. [COMPLETADA 253A-3] Hover blanco en boton enviar creacion rapida
 
