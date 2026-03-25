@@ -26,7 +26,7 @@
 
 6. [COMPLETADA 253A-4] Permitir más altura maxima para el panel de nota. 
  
-7. Permitir tener varios paneles de notas, se agrega un submenu el boton de + en la nota para permitir crear en una nueva ventana o en la misma. 
+7. [COMPLETADA 253A-10] Permitir tener varios paneles de notas, se agrega un submenu el boton de + en la nota para permitir crear en una nueva ventana o en la misma. 
 
 8. Nuevo plugin: gestor de grupos, esto es algo complicado, he creado una extensión que analiza grupos de facebook, esta extension tambien tiene varios problemas a resolver, 
 
