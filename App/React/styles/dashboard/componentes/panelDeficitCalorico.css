@@ -320,7 +320,8 @@
 
 .deficitComidaEliminar:hover {
     color: var(--dashboard-estadoAlta);
-    background: var(--dashboard-estadoAltaFondo);
+    /* [253A-3] Sin background en hover — botones de acción en listas no deben tener fondo */
+    background: transparent;
 }
 
 /* Historial agrupado por días */

@@ -131,6 +131,8 @@
 
 .boton.creacionRapidaBotonEnviar:hover:not(:disabled) {
     color: var(--dashboard-textoActivo);
+    /* [253A-3] Forzar background transparent para que .boton--primario:hover no aplique blanco */
+    background: transparent;
 }
 
 .boton.creacionRapidaBotonEnviar:disabled {

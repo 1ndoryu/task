@@ -16,10 +16,9 @@
 
 1. [COMPLETADA 253A-2] Tracked se queda activo al completar habito
 
-2. HABIA COMENTADO QUITAR EL EFECTO HOVER DE COLOR BACKGROUND CUANDO SE PONE EL MOUSE SOBRE 
-<button type="button" class="boton boton--ghost boton--mediano panelAyunoBotonCircular panelAyunoBotonCircular--terminar" data-tooltip-content="Terminar ayuno"><span class="botonTexto"></span></button>
+2. [COMPLETADA 253A-3] Hover background en boton terminar ayuno
 
-3. LOS CUADROS DE LOS DIAS SIGUEN DESBORDANDONSEEEEEE EN Historial de cumplimiento y en ACTIVIDAD; YA ES LA CUARTA VEZ QUE LO DIGO! Tambien hay efectos de background hover en deficitComidaAcciones que no deberian de estar
+3. [COMPLETADA 253A-3] Cuadros dias desbordando + hover en deficitComidaAcciones
 
 4. mal calculo de la ia de calorías, puse  Media arepa, huevo y 2 tajadas de platano y dice 500 calorías pero en realidad esa comida tiene en promedio 300 calorías. Revisar esto y hacer los calculos mas inteligentes 
 
@@ -47,8 +46,8 @@
 
 11. El icono de IA sigue sin ser un icono de IA cuando se minimiza el panel de chat con IA. No me refería a ponerlo sobre seccionTitulo, de hecho hay que quitarlo de ahi. 
 
-12. Cuando hago hover en <button type="submit" class="boton boton--primario boton--mediano creacionRapidaBotonEnviar"><span class="botonIcono"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></span></button> el fondo se pone blanco y como el icono es blanco tambien se pierde. 
+12. [COMPLETADA 253A-3] Hover blanco en boton enviar creacion rapida
 
-13. ya lo habia comentando antes, hay un hover backround en <button type="button" class="boton boton--ghost boton--mediano panelAyunoBotonCircular panelAyunoBotonCircular--terminar" data-tooltip-content="Terminar ayuno"><span class="botonTexto"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg></span></button> que no debería!!
+13. [COMPLETADA 253A-3] Hover background en boton terminar ayuno (duplicado de 2)
 
 14. Puse 4 puños de arroz y salio 1100 calorías en vez 300-400g, mejorar tambien este sistema para que entienda sobre promedios y que los valores que se piden por dia lo reflejen tambien, no suelo usar cantidades exactas, sino medir por puños, 

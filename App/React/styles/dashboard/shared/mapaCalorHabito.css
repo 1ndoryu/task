@@ -205,21 +205,24 @@
     min-width: 0;
 }
 
-/* [243A-20] flex:1 + max-width evita que las semanas crezcan sin control */
+/* [253A-3] min-width:0 permite que las semanas se encojan en contenedores angostos */
 .mapaCalorHabitoSemana {
     display: flex;
     flex-direction: column;
     flex: 1;
     max-width: 22px;
+    min-width: 0;
     gap: var(--dashboard-espacioMini);
 }
 
 /* 
  * Celdas individuales (12px como el panel de actividad)
  */
-/* [243A-20] aspect-ratio:1 + min-width en vez de width/height fijo para adaptarse al contenedor */
+/* [253A-3] Cambiado min-width:12px a width:100% + max-width para permitir shrink.
+ * min-width impedia que las celdas se encogieran, causando overflow recurrente (4ta vez reportado). */
 .mapaCalorHabitoCelda {
-    min-width: 12px;
+    width: 100%;
+    max-width: 14px;
     aspect-ratio: 1;
     border-radius: var(--dashboard-radioXs);
     transition: transform var(--dashboard-transicionRapida), box-shadow var(--dashboard-transicionRapida);

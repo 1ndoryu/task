@@ -163,7 +163,8 @@
 
 .panelAyunoBotonCircular:hover {
     transform: scale(1.1);
-    background: var(--dashboard-superposicionSutil);
+    /* [253A-3] Sin background en hover — solo transformar */
+    background: transparent;
 }
 
 .iconoPlayAjustado {
@@ -188,7 +189,8 @@
 
 .panelAyunoBotonCircular--terminar:hover {
     color: var(--dashboard-estadoAlta);
-    background: var(--dashboard-estadoAltaFondo);
+    /* [253A-3] Sin background en hover (consistente con --iniciar) */
+    background: transparent;
 }
 
 /* Selector de duraciÃ³n */

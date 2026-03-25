@@ -130,30 +130,36 @@
     min-width: 0;
 }
 
+/* [253A-3] min-width:0 permite que las semanas se encojan cuando el contenedor es estrecho.
+ * Antes usaba solo max-width:22px sin permitir shrink, causando overflow en paneles angostos. */
 .mapaCalorSemana {
     display: flex;
     flex-direction: column;
     flex: 1;
     max-width: 22px;
+    min-width: 0;
     gap: var(--dashboard-espacioMini);
 }
 
 /* 
  * Celdas individuales 
  */
+/* [253A-3] Cambiado min-width:12px a width completo con flex-shrink.
+ * min-width impedia que las celdas se encogieran, causando overflow recurrente. */
 .mapaCalorCelda {
-    min-width: 12px;
+    width: 100%;
+    max-width: 14px;
     aspect-ratio: 1;
     border-radius: var(--dashboard-radioXs);
     transition: transform var(--dashboard-transicionRapida);
 }
 
 .mapaCalorCelda--pequeno {
-    min-width: 10px;
+    max-width: 10px;
 }
 
 .mapaCalorCelda--grande {
-    min-width: 14px;
+    max-width: 16px;
 }
 
 .mapaCalorCelda--vacio {
