@@ -64,6 +64,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
 
             <MenusCreacionRapida
                 proyectos={proyectos}
+                fechaActual={hook.opciones.fecha}
                 menuTipo={hook.menuTipo}
                 menuProyecto={hook.menuProyecto}
                 menuPrioridad={hook.menuPrioridad}

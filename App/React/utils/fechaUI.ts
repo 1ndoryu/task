@@ -151,6 +151,8 @@ export function calcularFechaDesdeKey(clave: string | undefined): string | undef
             return obtenerFechaLocalISO(semana);
         }
         default:
+            /* [253A-9] Si es una fecha ISO (YYYY-MM-DD), pasarla directamente */
+            if (/^\d{4}-\d{2}-\d{2}$/.test(clave)) return clave;
             return undefined;
     }
 }

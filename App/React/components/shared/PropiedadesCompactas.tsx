@@ -10,7 +10,7 @@
 import {useState, useRef} from 'react';
 import {Calendar, Flag, Zap} from 'lucide-react';
 import {MenuContextual} from './MenuContextual';
-import {obtenerFechaLocalISO} from '../../utils/fecha';
+import {SelectorFechaCalendario} from './SelectorFechaCalendario';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {Boton} from '../ui';
 import {ETIQUETAS_PRIORIDAD, ETIQUETAS_URGENCIA, COLORES_PRIORIDAD, COLORES_URGENCIA, opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../utils/nivelesConfig';
@@ -112,27 +112,19 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
                 />
             )}
 
-            {/* Menu Fecha - usa opciones rapidas */}
+            {/* Menu Fecha - Calendario [253A-9] */}
             {menuActivo === 'fecha' && (
-                <MenuContextual
-                    opciones={[{id: 'hoy', etiqueta: 'Hoy', icono: <Calendar size={12} />}, {id: 'manana', etiqueta: 'Mañana', icono: <Calendar size={12} />}, {id: 'semana', etiqueta: 'En 7 días', icono: <Calendar size={12} />}, ...(fechaLimite ? [{id: 'quitar', etiqueta: 'Quitar fecha', peligroso: true}] : [])]}
+                <SelectorFechaCalendario
                     posicionX={posicionMenu.x}
                     posicionY={posicionMenu.y}
-                    onSeleccionar={id => {
-                        const hoy = new Date();
-                        if (id === 'hoy') {
-                            onFechaLimiteChange(obtenerFechaLocalISO(hoy));
-                        } else if (id === 'manana') {
-                            const manana = new Date(hoy);
-                            manana.setDate(manana.getDate() + 1);
-                            onFechaLimiteChange(obtenerFechaLocalISO(manana));
-                        } else if (id === 'semana') {
-                            const semana = new Date(hoy);
-                            semana.setDate(semana.getDate() + 7);
-                            onFechaLimiteChange(obtenerFechaLocalISO(semana));
-                        } else if (id === 'quitar') {
-                            onFechaLimiteChange('');
-                        }
+                    fechaActual={fechaLimite}
+                    mostrarLimpiar={!!fechaLimite}
+                    onSeleccionar={fechaISO => {
+                        onFechaLimiteChange(fechaISO);
+                        cerrarMenu();
+                    }}
+                    onLimpiar={() => {
+                        onFechaLimiteChange('');
                         cerrarMenu();
                     }}
                     onCerrar={cerrarMenu}

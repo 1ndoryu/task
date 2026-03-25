@@ -4,14 +4,16 @@
  * Separado para mantener ModalCreacionRapida dentro del límite de líneas.
  */
 
-import {CheckSquare, Activity, Folder, Calendar, Repeat} from 'lucide-react';
+import {CheckSquare, Activity, Folder, Repeat} from 'lucide-react';
 import {MenuContextual} from '../../shared';
+import {SelectorFechaCalendario} from '../../shared/SelectorFechaCalendario';
 import type {Proyecto} from '../../../types/dashboard';
 import type {EstadoMenu} from '../../../hooks/dashboard/useModalCreacionRapida';
 import {opcionesMenuPrioridad, opcionesMenuUrgencia, opcionesMenuImportancia} from '../../../utils/nivelesConfig';
 
 interface MenusCreacionRapidaProps {
     proyectos: Proyecto[];
+    fechaActual?: string;
 
     menuTipo: EstadoMenu;
     menuProyecto: EstadoMenu;
@@ -40,7 +42,7 @@ interface MenusCreacionRapidaProps {
 
 export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Element {
     const {
-        proyectos,
+        proyectos, fechaActual,
         menuTipo, menuProyecto, menuPrioridad, menuUrgencia, menuFrecuencia, menuFecha, menuImportancia,
         seleccionarTipo, seleccionarProyecto, seleccionarPrioridad, seleccionarUrgencia, seleccionarFrecuencia, seleccionarFecha, seleccionarImportancia,
         cerrarMenuTipo, cerrarMenuProyecto, cerrarMenuPrioridad, cerrarMenuUrgencia, cerrarMenuFrecuencia, cerrarMenuFecha, cerrarMenuImportancia,
@@ -125,16 +127,15 @@ export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Elemen
 
             {menuFecha.visible && (
                 <div onClick={e => e.stopPropagation()}>
-                    <MenuContextual
-                        opciones={[
-                            {id: 'ninguna', etiqueta: 'Sin fecha', icono: <Calendar size={12} className="textoApagado" />},
-                            {id: 'hoy', etiqueta: 'Hoy', icono: <Calendar size={12} className="textoAdvertencia" />},
-                            {id: 'manana', etiqueta: 'Mañana', icono: <Calendar size={12} />},
-                            {id: 'semana', etiqueta: 'Esta Semana', icono: <Calendar size={12} />}
-                        ]}
+                    <SelectorFechaCalendario
                         posicionX={menuFecha.x}
                         posicionY={menuFecha.y}
-                        onSeleccionar={seleccionarFecha}
+                        fechaActual={fechaActual}
+                        mostrarLimpiar={!!fechaActual}
+                        onSeleccionar={fechaISO => {
+                            seleccionarFecha(fechaISO);
+                        }}
+                        onLimpiar={() => seleccionarFecha('ninguna')}
                         onCerrar={cerrarMenuFecha}
                     />
                 </div>

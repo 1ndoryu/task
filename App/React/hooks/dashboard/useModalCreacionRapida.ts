@@ -155,6 +155,11 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         if (val === 'hoy') return 'Hoy';
         if (val === 'manana') return 'Mañana';
         if (val === 'semana') return 'Esta Semana';
+        /* [253A-9] Formatear fechas ISO (YYYY-MM-DD) de forma legible */
+        if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+            const fecha = new Date(val + 'T12:00:00');
+            return fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'});
+        }
         return val;
     }, []);
 

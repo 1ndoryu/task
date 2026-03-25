@@ -1,0 +1,157 @@
+/*
+ * SELECTOR FECHA CALENDARIO
+ * [253A-9] Componente calendario custom para selección de fecha.
+ * Estilo dark terminal consistente con menuContextual.
+ */
+
+.selectorFechaCalendario {
+    position: fixed;
+    z-index: 10000;
+    width: 240px;
+    padding: var(--dashboard-espacioXs) 0;
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: menuContextualAparecer 0.12s ease-out;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+/* Opciones rapidas superiores */
+.selectorFechaCalendario__rapidas {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--dashboard-espacioXs);
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
+/* [253A-9] Override Boton ghost defaults para opciones rápidas */
+.selectorFechaCalendario__opcionRapida.boton {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--dashboard-transicionRapida);
+}
+
+.selectorFechaCalendario__opcionRapida.boton:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+    filter: none;
+}
+
+.selectorFechaCalendario__opcionRapida--peligroso.boton {
+    color: var(--dashboard-estadoAlta);
+}
+
+.selectorFechaCalendario__opcionRapida--peligroso.boton:hover:not(:disabled) {
+    background-color: var(--dashboard-estadoAltaFondo);
+}
+
+.selectorFechaCalendario__separador {
+    height: 1px;
+    margin: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    background-color: var(--dashboard-bordePrincipal);
+}
+
+/* Encabezado del calendario (mes/año + navegacion) */
+.selectorFechaCalendario__encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+}
+
+.selectorFechaCalendario__mesAnio {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* [253A-9] Override Boton ghost defaults para navegación mes */
+.selectorFechaCalendario__btnNav.boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+    padding: 0;
+}
+
+.selectorFechaCalendario__btnNav.boton:hover:not(:disabled) {
+    color: var(--dashboard-textoNormal);
+    filter: none;
+}
+
+/* Grid del calendario */
+.selectorFechaCalendario__diasSemana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 0 var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioXxs);
+}
+
+.selectorFechaCalendario__diaSemana {
+    font-size: var(--dashboard-tamanoMicro);
+    color: var(--dashboard-textoMuyApagado);
+    text-align: center;
+    padding: var(--dashboard-espacioXxs) 0;
+}
+
+.selectorFechaCalendario__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    padding: 0 var(--dashboard-espacioSm) var(--dashboard-espacioSm);
+}
+
+.selectorFechaCalendario__dia {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 24px;
+    margin: 0 auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    padding: 0;
+}
+
+.selectorFechaCalendario__dia:hover {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorFechaCalendario__dia--otroMes {
+    color: var(--dashboard-textoMuyApagado);
+    opacity: 0.4;
+}
+
+.selectorFechaCalendario__dia--hoy {
+    color: var(--dashboard-textoActivo);
+    border-bottom: 1px solid var(--dashboard-textoApagado);
+}
+
+.selectorFechaCalendario__dia--seleccionado {
+    background-color: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+    font-weight: 600;
+}
