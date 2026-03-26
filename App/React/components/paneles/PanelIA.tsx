@@ -146,7 +146,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                 />
                 <Boton
                     type="button"
-                    variante="primario"
+                    variante="ghost"
                     soloIcono
                     claseAdicional="panelIABotonEnviar"
                     onClick={manejarEnviar}

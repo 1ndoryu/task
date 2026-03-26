@@ -33,6 +33,6 @@
 
 9. ~~(263A-9 COMPLETADA) Duplicar panel scratchpad crea nota nueva~~
 
-10. En panelIAInput el boton de enviar debe ser blanco y sin fondo. 
+10. ~~(263A-10 COMPLETADA) Botón enviar panelIA blanco sin fondo~~ 
 
 11. El panel de grupos de facebook sigue sin ser un plugin cuando debería de serlo, desactivable y actvable, desactivado por defecto,
