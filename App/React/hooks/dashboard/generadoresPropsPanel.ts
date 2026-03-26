@@ -282,15 +282,17 @@ export function generarPropsPanelIA(
     };
 }
 
-/* [253A-11] Props para PanelGruposFb — panel autónomo, solo necesita props base */
+/* [253A-11] Props para PanelGruposFb
+ * [263A-5] Agrega callback para abrir config (token, API URL) */
 export function generarPropsPanelGruposFb(
-    _ctx: PropsContextoPaneles,
+    ctx: PropsContextoPaneles,
     renderHandleArrastre: (titulo?: string) => JSX.Element,
     handleMinimizar: JSX.Element
 ) {
     return {
         renderHandleArrastre,
-        handleMinimizar
+        handleMinimizar,
+        onAbrirConfigGruposFb: () => ctx.modales.abrirModalConfigGlobal('gruposFb')
     };
 }
 

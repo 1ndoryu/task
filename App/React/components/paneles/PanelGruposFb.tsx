@@ -4,7 +4,7 @@
  * [263A-4] Rediseño: filtros en header como SelectorBadge, búsqueda estilo modalNotasBusqueda. */
 
 import {useState, useCallback, useRef} from 'react';
-import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen} from 'lucide-react';
+import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge} from '../shared';
 import {Boton, Input} from '../ui';
@@ -15,9 +15,10 @@ import '../../styles/dashboard/componentes/panelGruposFb.css';
 interface PanelGruposFbProps {
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
+    onAbrirConfigGruposFb?: () => void;
 }
 
-export function PanelGruposFb({renderHandleArrastre, handleMinimizar}: PanelGruposFbProps): JSX.Element {
+export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirConfigGruposFb}: PanelGruposFbProps): JSX.Element {
     const {
         grupos, categorias, estadisticas, cargando, inicializado, error,
         filtros, setFiltro, toggleOculto, cambiarCategoria,
@@ -84,7 +85,6 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar}: PanelGrup
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Grupos FB')}
-                subtitulo={estadisticas ? `${estadisticas.total} grupos` : undefined}
                 variante="panelHeader"
                 acciones={
                     <>
@@ -110,6 +110,8 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar}: PanelGrup
                         <SelectorBadge opciones={opcionesImportancia} valorActual={filtros.importancia} onChange={valor => setFiltro('importancia', valor)} icono={<Star size={12} />} titulo="Importancia" soloIcono />
                         <Boton variante="badge" soloIcono onClick={() => setFiltro('mostrarOcultos', !filtros.mostrarOcultos)} icono={filtros.mostrarOcultos ? <Eye size={12} /> : <EyeOff size={12} />} title={filtros.mostrarOcultos ? 'Mostrando ocultos' : 'Ocultos ocultos'} claseAdicional={filtros.mostrarOcultos ? 'selectorBadgeBoton--activo' : ''} />
                         <Boton variante="badge" soloIcono onClick={recargar} icono={<RefreshCw size={12} />} title="Recargar" />
+                        {/* [263A-5] Botón configuración (token, API URL) */}
+                        {onAbrirConfigGruposFb && <Boton variante="badge" soloIcono onClick={onAbrirConfigGruposFb} icono={<Settings size={12} />} title="Configuración" />}
                         {handleMinimizar}
                     </>
                 }

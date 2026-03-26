@@ -6,7 +6,7 @@
  *   2. Al seleccionar sección, expande a 80% mostrando el contenido con botón volver */
 
 import {useState, useEffect} from 'react';
-import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle, Bot} from 'lucide-react';
+import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle, Bot, Users} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {BottomSheet} from '../shared/BottomSheet';
 import {Boton} from '../ui';
@@ -15,6 +15,7 @@ import type {SeccionConfigGlobal} from '../../hooks/useModalesDashboard';
 
 /* Secciones de paneles */
 import {SeccionConfigTareas, SeccionConfigHabitos, SeccionConfigProyectos, SeccionConfigScratchpad, SeccionConfigActividad, SeccionConfigIAPanelChat} from './global/SeccionesConfigPaneles';
+import {SeccionConfigGruposFb} from './global/SeccionConfigGruposFb';
 /* Secciones generales */
 import {SeccionConfigLayout, SeccionConfigPreferencias, SeccionConfigTemas, SeccionConfigPerfil, SeccionConfigSeguridad, SeccionConfigMCP, SeccionConfigBackups} from './global/SeccionesConfigGeneral';
 import {SeccionConfigPlugins} from './global/SeccionConfigPlugins';
@@ -35,6 +36,7 @@ const SECCIONES_SIDEBAR: ItemSidebar[] = [
     {id: 'notas', nombre: 'Notas', icono: <FileText size={14} />, grupo: 'Paneles'},
     {id: 'actividad', nombre: 'Actividad', icono: <Activity size={14} />, grupo: 'Paneles'},
     {id: 'panelIA', nombre: 'Asistente IA', icono: <Bot size={14} />, grupo: 'Paneles'},
+    {id: 'gruposFb', nombre: 'Grupos FB', icono: <Users size={14} />, grupo: 'Paneles'},
     /* Grupo: Apariencia */
     {id: 'layout', nombre: 'Layout', icono: <Layout size={14} />, grupo: 'Apariencia'},
     {id: 'temas', nombre: 'Temas', icono: <Palette size={14} />, grupo: 'Apariencia'},
@@ -59,6 +61,7 @@ const TITULOS_SECCION: Record<SeccionConfigGlobal, string> = {
     notas: 'Configuración de Notas',
     actividad: 'Configuración de Actividad',
     panelIA: 'Configuración del Asistente IA',
+    gruposFb: 'Configuración de Grupos FB',
     layout: 'Configuración de Layout',
     perfil: 'Mi Perfil',
     preferencias: 'Preferencias de Usuario',
@@ -86,6 +89,7 @@ function ContenidoSeccion({seccion, onCerrar, onAbrirUpgrade}: {seccion: Seccion
             {seccion === 'notas' && <SeccionConfigScratchpad />}
             {seccion === 'actividad' && <SeccionConfigActividad />}
             {seccion === 'panelIA' && <SeccionConfigIAPanelChat />}
+            {seccion === 'gruposFb' && <SeccionConfigGruposFb />}
             {seccion === 'layout' && <SeccionConfigLayout />}
             {seccion === 'perfil' && <SeccionConfigPerfil onCerrar={onCerrar} />}
             {seccion === 'preferencias' && <SeccionConfigPreferencias />}
