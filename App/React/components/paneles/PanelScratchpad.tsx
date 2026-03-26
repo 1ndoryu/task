@@ -12,7 +12,7 @@
  */
 
 import {useState, useRef} from 'react';
-import {Eraser, Settings, FolderOpen, Plus, Maximize2, ExternalLink, FileText} from 'lucide-react';
+import {Eraser, Settings, FolderOpen, Plus, Maximize2, X, Copy, FileText} from 'lucide-react';
 import {SeccionEncabezado, Scratchpad, ModalNotasExpandido} from '../dashboard';
 import {OverlayEnfoque, MenuContextual} from '../shared';
 import {Boton} from '../ui';
@@ -25,9 +25,13 @@ interface PanelScratchpadProps {
     onCambiarAltura: (altura: string) => void;
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
+    /* [263A-3] Props para duplicación de panel */
+    panelId?: string;
+    onDuplicarPanel?: () => void;
+    onCerrarPanel?: () => void;
 }
 
-export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar}: PanelScratchpadProps): JSX.Element {
+export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar, onDuplicarPanel, onCerrarPanel}: PanelScratchpadProps): JSX.Element {
     const {modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto, modoEnfoque, setModoEnfoque, notaActiva, actualizarContenido, tituloActivo, esNotaNueva, manejarNuevaNota, manejarLimpiar, manejarAbrirCarpeta} = usePanelScratchpad();
 
     /* [253A-10] Submenú del botón + para crear nota en panel o ventana */
@@ -41,6 +45,9 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
         }
     };
 
+    /* [263A-3] Determinar si es un panel duplicado (tiene sufijo numérico) */
+    const esDuplicado = !!onCerrarPanel;
+
     return (
         <div className="panelDashboard internaColumna internaColumna--notas">
             <SeccionEncabezado
@@ -50,7 +57,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                 variante="panelHeader"
                 acciones={
                     <>
-                        {/* [253A-10] Botón nueva nota con submenú */}
+                        {/* [263A-3] Botón nueva nota con submenú (duplicar panel) */}
                         <Boton
                             ref={btnNuevaNotaRef}
                             variante="badge"
@@ -91,7 +98,18 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                             icono={<Maximize2 size={12} />}
                             title="Modo enfoque"
                         />
-                        {handleMinimizar}
+                        {/* [263A-3] Botón cerrar para paneles duplicados */}
+                        {esDuplicado ? (
+                            <Boton
+                                variante="badge"
+                                soloIcono
+                                onClick={onCerrarPanel}
+                                icono={<X size={12} />}
+                                title="Cerrar panel duplicado"
+                            />
+                        ) : (
+                            handleMinimizar
+                        )}
                     </>
                 }
             />
@@ -99,12 +117,12 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
 
             <ModalNotasExpandido abierto={modalNotasExpandidoAbierto} onCerrar={() => setModalNotasExpandidoAbierto(false)} tamanoFuente={configuracion.tamanoFuente} delayGuardado={configuracion.autoGuardadoIntervalo} />
 
-            {/* [253A-10] Submenú nueva nota: aquí o en ventana */}
+            {/* [263A-3] Submenú nueva nota: aquí o duplicar panel */}
             {menuNuevaNota.visible && (
                 <MenuContextual
                     opciones={[
                         {id: 'aqui', etiqueta: 'Nueva nota', icono: <FileText size={12} />},
-                        {id: 'ventana', etiqueta: 'Abrir en ventana', icono: <ExternalLink size={12} />}
+                        ...(onDuplicarPanel ? [{id: 'duplicar', etiqueta: 'Duplicar panel', icono: <Copy size={12} />}] : [])
                     ]}
                     posicionX={menuNuevaNota.x}
                     posicionY={menuNuevaNota.y}
@@ -112,9 +130,8 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                         setMenuNuevaNota(prev => ({...prev, visible: false}));
                         if (id === 'aqui') {
                             manejarNuevaNota();
-                        } else if (id === 'ventana') {
-                            manejarNuevaNota();
-                            setModalNotasExpandidoAbierto(true);
+                        } else if (id === 'duplicar' && onDuplicarPanel) {
+                            onDuplicarPanel();
                         }
                     }}
                     onCerrar={() => setMenuNuevaNota(prev => ({...prev, visible: false}))}

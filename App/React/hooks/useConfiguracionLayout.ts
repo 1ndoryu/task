@@ -11,7 +11,7 @@ import {useCallback, useMemo} from 'react';
 import {obtenerIdsPaneles} from '../config/registroPaneles';
 import type {ModoColumnas, OrdenPanel, AnchoColumnas, ConfiguracionLayout} from '../types/paneles';
 import {generarConfigLayoutDefecto, generarOrdenPanelesDefecto, PRESETS_ANCHOS, ANCHO_MINIMO_COLUMNA, ANCHO_MAXIMO_COLUMNA} from '../utils/layoutFactory';
-import {migrarConfiguracion, normalizarPosiciones} from '../utils/layoutLogica';
+import {migrarConfiguracion, normalizarPosiciones, crearDuplicadoPanel, eliminarPanelDuplicado} from '../utils/layoutLogica';
 
 /* Re-exportar tipos para compatibilidad hacia atrás */
 export type {ModoColumnas, OrdenPanel, AnchoColumnas, ConfiguracionLayout} from '../types/paneles';
@@ -333,6 +333,22 @@ export function useConfiguracionLayout() {
         setValor(configDefecto);
     }, [setValor, configDefecto]);
 
+    /* [263A-3] Duplicar un panel: crea una instancia con ID sufijo (e.g., scratchpad-1) */
+    const duplicarPanel = useCallback(
+        (baseId: string) => {
+            setValor(prev => crearDuplicadoPanel(prev, baseId, ordenDefecto));
+        },
+        [setValor, ordenDefecto]
+    );
+
+    /* [263A-3] Cerrar (eliminar) un panel duplicado del layout */
+    const cerrarPanelDuplicado = useCallback(
+        (instanceId: string) => {
+            setValor(prev => eliminarPanelDuplicado(prev, instanceId));
+        },
+        [setValor]
+    );
+
     /* Cambiar altura de un panel específico */
     const cambiarAlturaPanel = useCallback(
         (panel: PanelId, altura: string) => {
@@ -400,6 +416,8 @@ export function useConfiguracionLayout() {
         obtenerOrdenPanel,
         resetearOrdenPaneles,
         resetearLayout,
+        duplicarPanel,
+        cerrarPanelDuplicado,
         cambiarAlturaPanel,
         obtenerAlturaPanel,
         actualizarConfiguracion: setValor

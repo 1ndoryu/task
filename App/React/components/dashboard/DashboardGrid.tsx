@@ -8,7 +8,7 @@
  */
 
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn, PullToRefresh} from '../shared';
-import {obtenerPanel, panelManejaAlturaPropia, paginaMovilAPanelId} from '../../config/registroPaneles';
+import {obtenerPanelOBase, panelManejaAlturaPropia, paginaMovilAPanelId, obtenerIdBase} from '../../config/registroPaneles';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
@@ -29,10 +29,11 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
 
     /*
      * Renderiza el contenido de un panel usando el registro
-     * Obtiene el componente y genera las props dinámicamente
+     * [263A-3] Resuelve instancias duplicadas (e.g., scratchpad-1 → scratchpad) al componente base
      */
     const renderizarContenidoPanel = (panelId: PanelId): JSX.Element | null => {
-        const definicionPanel = obtenerPanel(panelId);
+        const baseId = obtenerIdBase(panelId);
+        const definicionPanel = obtenerPanelOBase(panelId);
         if (!definicionPanel) {
             console.warn(`Panel "${panelId}" no encontrado en el registro`);
             return null;
@@ -42,8 +43,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         const renderHandleArrastre = (titulo?: string) => (esMovil ? <></> : <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />);
         const handleMinimizarElement = esMovil ? <></> : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
-        /* Obtener el generador de props para este panel */
-        const generadorProps = GENERADORES_PROPS[panelId];
+        /* [263A-3] Buscar generador por ID exacto primero, luego por base */
+        const generadorProps = GENERADORES_PROPS[panelId] || GENERADORES_PROPS[baseId];
         if (!generadorProps) {
             console.warn(`No hay generador de props para panel "${panelId}"`);
             return null;
@@ -51,12 +52,19 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
 
         /* Generar props según el tipo de panel - any necesario: dispatch dinámico por registro de paneles */
         let props: any;
-        if (panelId === 'ejecucion') {
+        if (baseId === 'ejecucion') {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, manejarToggleTarea, manejarEditarHabitoPorId, esMovil);
-        } else if (panelId === 'focoPrioritario') {
+        } else if (baseId === 'focoPrioritario') {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, esMovil);
         } else {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, esMovil);
+        }
+
+        /* [263A-3] Inyectar props de duplicación a paneles scratchpad */
+        if (baseId === 'scratchpad') {
+            props.panelId = panelId;
+            props.onDuplicarPanel = () => layout.duplicarPanel(baseId);
+            props.onCerrarPanel = panelId !== baseId ? () => layout.cerrarPanelDuplicado(panelId) : undefined;
         }
 
         const Componente = definicionPanel.componente;

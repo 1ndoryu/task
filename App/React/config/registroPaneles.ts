@@ -48,6 +48,19 @@ export function obtenerPanel(id: string): DefinicionPanel | undefined {
     return _registro.get(id);
 }
 
+/* [263A-3] Extraer el ID base de un panel duplicado (e.g., scratchpad-1 → scratchpad).
+ * Si el ID no tiene sufijo numérico o el base no está registrado, retorna el ID original. */
+export function obtenerIdBase(panelId: string): string {
+    const match = panelId.match(/^(.+)-(\d+)$/);
+    if (match && _registro.has(match[1])) return match[1];
+    return panelId;
+}
+
+/* [263A-3] Obtener definición de un panel, resolviendo instancias duplicadas al panel base */
+export function obtenerPanelOBase(id: string): DefinicionPanel | undefined {
+    return _registro.get(id) || _registro.get(obtenerIdBase(id));
+}
+
 /* Obtener todas las definiciones de paneles */
 export function obtenerTodosPaneles(): DefinicionPanel[] {
     return Array.from(_registro.values());
@@ -133,8 +146,8 @@ export function obtenerPaginasMovilValidas(): string[] {
     return paginas;
 }
 
-/* Verificar si un panel maneja su propia altura */
+/* Verificar si un panel maneja su propia altura — resuelve duplicados */
 export function panelManejaAlturaPropia(panelId: string): boolean {
-    const panel = _registro.get(panelId);
+    const panel = _registro.get(panelId) || _registro.get(obtenerIdBase(panelId));
     return panel?.manejaAlturaPropia ?? false;
 }

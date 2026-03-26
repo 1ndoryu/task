@@ -9,7 +9,7 @@
 
 import {generarVisibilidadDefecto, generarAlturasDefecto} from '../config/registroPaneles';
 import {generarOrdenPanelesDefecto, generarConfigLayoutDefecto} from './layoutFactory';
-import type {ConfiguracionLayout, OrdenPanel} from '../types/paneles';
+import type {ConfiguracionLayout, ModoColumnas, OrdenPanel} from '../types/paneles';
 
 /*
  * Normalizar posiciones dentro de una columna
@@ -105,4 +105,58 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
     }
 
     return config;
+}
+
+/* [263A-3] Crear un panel duplicado con ID sufijo (e.g., scratchpad-1).
+ * Se ubica en la misma columna que el original, justo después.
+ * Retorna nueva configuración sin mutar la original. */
+export function crearDuplicadoPanel(
+    prev: ConfiguracionLayout,
+    baseId: string,
+    ordenDefecto: Record<ModoColumnas, OrdenPanel[]>
+): ConfiguracionLayout {
+    const paneles = [...(prev.ordenPaneles || ordenDefecto[prev.modoColumnas])];
+    const panelOriginal = paneles.find(p => p.id === baseId);
+    if (!panelOriginal) return prev;
+
+    /* Siguiente sufijo disponible */
+    const existentes = paneles
+        .filter(p => p.id.startsWith(baseId + '-'))
+        .map(p => {
+            const m = p.id.match(/-(\d+)$/);
+            return m ? parseInt(m[1], 10) : 0;
+        });
+    const siguienteNum = existentes.length > 0 ? Math.max(...existentes) + 1 : 1;
+    const nuevoId = `${baseId}-${siguienteNum}`;
+
+    /* Insertar justo después del original */
+    const nuevaPosicion = panelOriginal.posicion + 1;
+    const panelesActualizados = paneles.map(p => {
+        if (p.columna === panelOriginal.columna && p.posicion >= nuevaPosicion) {
+            return {...p, posicion: p.posicion + 1};
+        }
+        return p;
+    });
+    panelesActualizados.push({id: nuevoId, columna: panelOriginal.columna, posicion: nuevaPosicion});
+
+    return {
+        ...prev,
+        ordenPaneles: normalizarPosiciones(panelesActualizados),
+        visibilidad: {...(prev.visibilidad || {}), [nuevoId]: true},
+        alturas: {...(prev.alturas || {}), [nuevoId]: prev.alturas?.[baseId] || 'auto'}
+    };
+}
+
+/* [263A-3] Eliminar un panel duplicado del layout */
+export function eliminarPanelDuplicado(prev: ConfiguracionLayout, instanceId: string): ConfiguracionLayout {
+    const paneles = (prev.ordenPaneles || []).filter(p => p.id !== instanceId);
+    const {[instanceId]: _vis, ...restoVisibilidad} = prev.visibilidad || {};
+    const {[instanceId]: _alt, ...restoAlturas} = prev.alturas || {};
+
+    return {
+        ...prev,
+        ordenPaneles: normalizarPosiciones(paneles),
+        visibilidad: restoVisibilidad,
+        alturas: restoAlturas
+    };
 }

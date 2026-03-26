@@ -23,7 +23,7 @@
 
 4. el diseño de panelGruposFb se ve fatal, no sigue el estilo de los demas panales, los select no deben ser select normales sino que abran menu contextuales, tampoco deben estar dentro del panel sino en seccionAcciones como los filtros de los demás paneles, y la busqueda similar a como modalNotasBusqueda modalNotasBusqueda--headerCentrado.
 
-5. No crear notas en una nueva ventana esta mal, lo interpretaste mal, no se trata de abrir la ventana de notas se trata de duplicar el panel para que exista el 2 notas al mismo tiempo, esto implica que ahora los paneles de notas con son duplicados es decir un segundo y tercer etc panel, tienen una x para cerrarse.
+5. ~~(263A-3 COMPLETADA) No crear notas en una nueva ventana — duplicar panel notas~~
 
 6. lo de abrir notas en el telefono funciona falta, al dar click a una nota en vistaNotasListaContenido debería cerrar el modal y abrir esa nota cuando se esta en movil.
 
