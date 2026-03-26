@@ -9,6 +9,7 @@
 
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn, PullToRefresh} from '../shared';
 import {obtenerPanelOBase, panelManejaAlturaPropia, paginaMovilAPanelId, obtenerIdBase} from '../../config/registroPaneles';
+import {useNotasStore} from '../../stores/notasStore';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
@@ -60,10 +61,14 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, esMovil);
         }
 
-        /* [263A-3] Inyectar props de duplicación a paneles scratchpad */
+        /* [263A-3][263A-9] Inyectar props de duplicación a paneles scratchpad.
+         * Al duplicar: crear panel nuevo + nota nueva, así no comparten la misma nota activa. */
         if (baseId === 'scratchpad') {
             props.panelId = panelId;
-            props.onDuplicarPanel = () => layout.duplicarPanel(baseId);
+            props.onDuplicarPanel = () => {
+                layout.duplicarPanel(baseId);
+                useNotasStore.getState().crearNuevaNota();
+            };
             props.onCerrarPanel = panelId !== baseId ? () => layout.cerrarPanelDuplicado(panelId) : undefined;
         }
 

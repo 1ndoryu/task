@@ -122,7 +122,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                 <MenuContextual
                     opciones={[
                         {id: 'aqui', etiqueta: 'Nueva nota', icono: <FileText size={12} />},
-                        ...(onDuplicarPanel ? [{id: 'duplicar', etiqueta: 'Duplicar panel', icono: <Copy size={12} />}] : [])
+                        ...(onDuplicarPanel ? [{id: 'duplicar', etiqueta: 'Nota en nuevo panel', icono: <Copy size={12} />}] : [])
                     ]}
                     posicionX={menuNuevaNota.x}
                     posicionY={menuNuevaNota.y}

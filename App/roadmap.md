@@ -31,6 +31,8 @@
 
 8. ~~(263A-2 COMPLETADA) Fix subhábitos fantasma~~
 
-9. Cuando se duplica un panel, la misma nota no peude estar abierta en ambos! asi que la accion debería ser duplicar panel sino nueva nota en otro panel, o algo asi mas breve.
+9. ~~(263A-9 COMPLETADA) Duplicar panel scratchpad crea nota nueva~~
 
 10. En panelIAInput el boton de enviar debe ser blanco y sin fondo. 
+
+11. El panel de grupos de facebook sigue sin ser un plugin cuando debería de serlo, desactivable y actvable, desactivado por defecto,
