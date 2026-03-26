@@ -35,4 +35,4 @@
 
 10. ~~(263A-10 COMPLETADA) Botón enviar panelIA blanco sin fondo~~ 
 
-11. El panel de grupos de facebook sigue sin ser un plugin cuando debería de serlo, desactivable y actvable, desactivado por defecto,
+11. ~~(263A-11 COMPLETADA) Panel GruposFb convertido a plugin desactivable~~

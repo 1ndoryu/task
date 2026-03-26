@@ -9,7 +9,7 @@
  * La activación real se hace desde el ModalPlugins cuando el usuario lo activa.
  */
 
-import {Timer, Utensils} from 'lucide-react';
+import {Timer, Utensils, Users} from 'lucide-react';
 import {createElement} from 'react';
 import type {ComponentType} from 'react';
 import {registrarPlugin} from './registroPlugins';
@@ -19,6 +19,7 @@ import type {ModoColumnas, PanelBaseProps, PosicionDefectoPanel} from '../types/
 /* Lazy imports de componentes de panel */
 import {PanelAyuno} from '../components/paneles/PanelAyuno';
 import {PanelDeficitCalorico} from '../components/paneles/PanelDeficitCalorico';
+import {PanelGruposFb} from '../components/paneles/PanelGruposFb';
 
 /* Helper para posiciones (reutilizado de inicializarPaneles) */
 function crearPosicionDefecto(
@@ -103,6 +104,35 @@ registrarPanel({
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 6], [2, 4], [3, 4]),
     componente: PanelDeficitCalorico as ComponentType<PanelBaseProps>,
+    enNavegacionMovil: false,
+    manejaAlturaPropia: false
+});
+
+/*
+ * [263A-11] Plugin Grupos de Facebook
+ * Gestor de grupos detectados por la extensión del navegador
+ * Desactivado por defecto — se activa desde la sección Plugins
+ */
+registrarPlugin({
+    id: 'gruposFb',
+    nombre: 'Grupos de Facebook',
+    descripcion: 'Gestión de grupos de Facebook detectados por la extensión del navegador',
+    icono: createElement(Users, {size: 18}),
+    version: '1.0.0',
+    panelesIds: ['gruposFb'],
+    requiereConfiguracion: true
+});
+
+/* Registrar panel del plugin de Grupos FB */
+registrarPanel({
+    id: 'gruposFb',
+    titulo: 'Grupos FB',
+    tituloMovil: 'Grupos FB',
+    icono: createElement(Users, {size: 14}),
+    visiblePorDefecto: false,
+    alturaDefecto: 'auto',
+    posicionDefecto: crearPosicionDefecto([1, 7], [2, 5], [3, 5]),
+    componente: PanelGruposFb as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
     manejaAlturaPropia: false
 });
