@@ -15,11 +15,11 @@
 
 ## Tareas pendientes
 
-1. El panel grupos no parece ser un plugin, no lo es, le falta modal de configuracion como los otros plugin, no veo donde se genera un token!! Quita lo de seccionSubtitulo
+1. ~~(263A-5 COMPLETADA) Modal configuración GruposFb con token y API URL~~
 
 2. ~~(263A-1 COMPLETADA) EN panelActividadMapa LOS CUADROS SIGUIEN SALIENDOSESE~~
 
-3. avatarPreview sigue siendo estirado en vez de ser un circulo 1:1!
+3. ~~(263A-6 COMPLETADA) Fix avatarPreview círculo 1:1~~
 
 4. ~~(263A-4 COMPLETADA) Rediseño PanelGruposFb — filtros en header, SelectorBadge, búsqueda estilo notas~~
 
@@ -30,3 +30,7 @@
 7. Mejor quita lo de posponer mañana y remplazalo por 1 día, no se entiende lo de "mañana" (234A-7)
 
 8. ~~(263A-2 COMPLETADA) Fix subhábitos fantasma~~
+
+9. Cuando se duplica un panel, la misma nota no peude estar abierta en ambos! asi que la accion debería ser duplicar panel sino nueva nota en otro panel, o algo asi mas breve.
+
+10. En panelIAInput el boton de enviar debe ser blanco y sin fondo. 
