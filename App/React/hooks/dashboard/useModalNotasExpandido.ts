@@ -9,6 +9,7 @@ import type {Nota, CarpetaNota} from '../../types/notas';
 import {useNotasStore} from '../../stores/notasStore';
 import {useCarpetasNotas} from '../../stores/carpetasNotasStore';
 import {extraerTitulo} from '../../utils/notasUtils';
+import {useEsMovil} from '../useEsMovil';
 
 /* Tipos de ordenamiento disponibles */
 type TipoOrdenamiento = 'modificacion' | 'creacion';
@@ -74,6 +75,8 @@ export interface UseModalNotasExpandidoReturn {
 }
 
 export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandidoProps): UseModalNotasExpandidoReturn {
+    const {esMovil} = useEsMovil();
+
     /* Estado global de notas */
     const notas = useNotasStore(s => s.notas);
     const notaActiva = useNotasStore(s => s.notaActiva);
@@ -84,9 +87,15 @@ export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandi
     const cargarNotas = useNotasStore(s => s.cargarNotas);
     const eliminarNota = useNotasStore(s => s.eliminarNota);
     const buscarNotas = useNotasStore(s => s.buscarNotas);
-    const seleccionarNota = useNotasStore(s => s.seleccionarNota);
+    const seleccionarNotaStore = useNotasStore(s => s.seleccionarNota);
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
     const actualizarContenido = useNotasStore(s => s.actualizarContenidoNotaActiva);
+
+    /* [263A-7] En móvil, seleccionar una nota cierra el modal para que se abra en el panel scratchpad */
+    const seleccionarNota = useCallback((nota: Nota) => {
+        seleccionarNotaStore(nota);
+        if (esMovil) onCerrar();
+    }, [seleccionarNotaStore, esMovil, onCerrar]);
 
     /* Estado de carpetas */
     const {

@@ -25,7 +25,7 @@
 
 5. ~~(263A-3 COMPLETADA) No crear notas en una nueva ventana — duplicar panel notas~~
 
-6. lo de abrir notas en el telefono funciona falta, al dar click a una nota en vistaNotasListaContenido debería cerrar el modal y abrir esa nota cuando se esta en movil.
+6. ~~(263A-7 COMPLETADA) Click en nota en móvil cierra modal y abre en panel~~
 
 7. Mejor quita lo de posponer mañana y remplazalo por 1 día, no se entiende lo de "mañana" (234A-7)
 
