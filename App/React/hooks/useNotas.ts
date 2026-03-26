@@ -9,12 +9,15 @@
  */
 
 import {useEffect, useRef, useCallback} from 'react';
-import {useNotasStore} from '../stores/notasStore';
+import {useNotasStore, PANEL_SCRATCHPAD} from '../stores/notasStore';
 import {EVENTO_NOTA_ACTIVA, extraerTitulo, obtenerNotaActivaIdGuardado, CONTENIDO_NOTA_NUEVA} from '../utils/notasUtils';
 import {Nota, NotaActiva} from '../types/notas';
 
 /* Re-exportamos tipos para compatibilidad */
 export type {Nota, NotaActiva};
+
+/* [263A-12] Nota vacía para el selector */
+const NOTA_VACIA: NotaActiva = {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false};
 
 export interface EstadoNotas {
     cargando: boolean;
@@ -51,8 +54,34 @@ export function useNotas(): UseNotasReturn {
         console.warn('useNotas is deprecated. Use useNotasStore instead to prevent performance issues.');
     }, []);
 
-    /* Consumir el store */
-    const {notas, notaActiva, total, hayMas, cargando, guardando, eliminando, error, cargarNotas: cargarNotasStore, cargarMas: cargarMasStore, buscarNotas: buscarNotasStore, seleccionarNota, crearNuevaNota, actualizarContenidoNotaActiva, guardarNotaActiva, eliminarNota, limpiarError, establecerNotaActivaDesdeId, restaurarNotaActivaGuardada} = useNotasStore();
+    /* Consumir el store — [263A-12] acciones ahora requieren panelId, usamos PANEL_SCRATCHPAD por defecto */
+    const notas = useNotasStore(s => s.notas);
+    const notaActiva = useNotasStore(s => s.notasActivaPorPanel[PANEL_SCRATCHPAD]) ?? NOTA_VACIA;
+    const total = useNotasStore(s => s.total);
+    const hayMas = useNotasStore(s => s.hayMas);
+    const cargando = useNotasStore(s => s.cargando);
+    const guardando = useNotasStore(s => s.guardando);
+    const eliminando = useNotasStore(s => s.eliminando);
+    const error = useNotasStore(s => s.error);
+    const cargarNotasStore = useNotasStore(s => s.cargarNotas);
+    const cargarMasStore = useNotasStore(s => s.cargarMas);
+    const buscarNotasStore = useNotasStore(s => s.buscarNotas);
+    const seleccionarNotaStore = useNotasStore(s => s.seleccionarNota);
+    const crearNuevaNotaStore = useNotasStore(s => s.crearNuevaNota);
+    const actualizarContenidoNotaActivaStore = useNotasStore(s => s.actualizarContenidoNotaActiva);
+    const guardarNotaActivaStore = useNotasStore(s => s.guardarNotaActiva);
+    const eliminarNota = useNotasStore(s => s.eliminarNota);
+    const limpiarError = useNotasStore(s => s.limpiarError);
+    const establecerNotaActivaDesdeIdStore = useNotasStore(s => s.establecerNotaActivaDesdeId);
+    const restaurarNotaActivaGuardadaStore = useNotasStore(s => s.restaurarNotaActivaGuardada);
+
+    /* Wrappers para añadir panelId por defecto */
+    const seleccionarNota = useCallback((nota: Nota) => seleccionarNotaStore(PANEL_SCRATCHPAD, nota), [seleccionarNotaStore]);
+    const crearNuevaNota = useCallback(() => crearNuevaNotaStore(PANEL_SCRATCHPAD), [crearNuevaNotaStore]);
+    const actualizarContenidoNotaActiva = useCallback((c: string) => actualizarContenidoNotaActivaStore(PANEL_SCRATCHPAD, c), [actualizarContenidoNotaActivaStore]);
+    const guardarNotaActiva = useCallback(() => guardarNotaActivaStore(PANEL_SCRATCHPAD), [guardarNotaActivaStore]);
+    const establecerNotaActivaDesdeId = useCallback((id: number | null) => establecerNotaActivaDesdeIdStore(PANEL_SCRATCHPAD, id), [establecerNotaActivaDesdeIdStore]);
+    const restaurarNotaActivaGuardada = useCallback(() => restaurarNotaActivaGuardadaStore(PANEL_SCRATCHPAD), [restaurarNotaActivaGuardadaStore]);
 
     /* Refs para control de efectos (migrados del hook original) */
     const yaRestauradoRef = useRef(false);

@@ -31,8 +31,10 @@ interface PanelScratchpadProps {
     onCerrarPanel?: () => void;
 }
 
-export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar, onDuplicarPanel, onCerrarPanel}: PanelScratchpadProps): JSX.Element {
-    const {modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto, modoEnfoque, setModoEnfoque, notaActiva, actualizarContenido, tituloActivo, esNotaNueva, manejarNuevaNota, manejarLimpiar, manejarAbrirCarpeta} = usePanelScratchpad();
+export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar, onDuplicarPanel, onCerrarPanel, panelId}: PanelScratchpadProps): JSX.Element {
+    /* [263A-12] Cada panel usa su propio panelId para notas independientes */
+    const panelIdResuelto = panelId ?? 'scratchpad';
+    const {modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto, modoEnfoque, setModoEnfoque, notaActiva, actualizarContenido, tituloActivo, esNotaNueva, manejarNuevaNota, manejarLimpiar, manejarAbrirCarpeta} = usePanelScratchpad(panelIdResuelto);
 
     /* [253A-10] Submenú del botón + para crear nota en panel o ventana */
     const [menuNuevaNota, setMenuNuevaNota] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
@@ -115,7 +117,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
             />
             <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={configuracion.tamanoFuente} altura={configuracion.altura} delayGuardado={configuracion.autoGuardadoIntervalo} onCambiarAltura={onCambiarAltura} />
 
-            <ModalNotasExpandido abierto={modalNotasExpandidoAbierto} onCerrar={() => setModalNotasExpandidoAbierto(false)} tamanoFuente={configuracion.tamanoFuente} delayGuardado={configuracion.autoGuardadoIntervalo} />
+            <ModalNotasExpandido abierto={modalNotasExpandidoAbierto} onCerrar={() => setModalNotasExpandidoAbierto(false)} tamanoFuente={configuracion.tamanoFuente} delayGuardado={configuracion.autoGuardadoIntervalo} panelId={panelIdResuelto} />
 
             {/* [263A-3] Submenú nueva nota: aquí o duplicar panel */}
             {menuNuevaNota.visible && (

@@ -21,7 +21,7 @@ import {DockTracking} from '../components/shared/DockTracking';
 import {useEsMovil} from '../hooks/useEsMovil';
 import {usePaginaMovil} from '../hooks/usePaginaMovil';
 import {useOpcionesPanelMovil} from '../hooks/useOpcionesPanelMovil';
-import {useNotasStore} from '../stores/notasStore';
+import {useNotasStore, PANEL_SCRATCHPAD} from '../stores/notasStore';
 import {useSeleccionMultipleStore} from '../stores/seleccionMultipleStore';
 import {habitosActions} from '../stores/habitosStore';
 import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
@@ -82,7 +82,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     const [modalNotasAbierto, setModalNotasAbierto] = useState(false);
 
     const manejarNuevaNota = useCallback(() => {
-        crearNuevaNota();
+        crearNuevaNota(PANEL_SCRATCHPAD);
     }, [crearNuevaNota]);
 
     const manejarAbrirNotasGuardadas = useCallback(() => {
@@ -264,7 +264,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
 
 
             {/* Modal de notas guardadas para móvil (desde menú de 3 puntos) */}
-            <ModalNotasExpandido abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} tamanoFuente="normal" delayGuardado={2000} />
+            <ModalNotasExpandido abierto={modalNotasAbierto} onCerrar={() => setModalNotasAbierto(false)} tamanoFuente="normal" delayGuardado={2000} panelId={PANEL_SCRATCHPAD} />
 
             {/* Dock de tracking de tiempo */}
             {auth.user && (

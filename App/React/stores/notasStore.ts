@@ -4,9 +4,16 @@ import {notasService} from '../services/notasService';
 import {persistirNotaActivaId, extraerTitulo, emitirCambioNotaActiva, CONTENIDO_NOTA_NUEVA, obtenerNotaActivaIdGuardado} from '../utils/notasUtils';
 import {notasIniciales} from '../data/datosIniciales';
 
+/* [263A-12] ID del panel scratchpad base. Solo este panel persiste su nota en localStorage y emite eventos de tab sync. */
+export const PANEL_SCRATCHPAD = 'scratchpad';
+
+/* [263A-12] Nota vacía para paneles sin estado previo */
+const NOTA_VACIA: NotaActiva = {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false};
+
 interface NotasState {
     notas: Nota[];
-    notaActiva: NotaActiva;
+    /* [263A-12] Cada panel scratchpad tiene su propia nota activa independiente */
+    notasActivaPorPanel: Record<string, NotaActiva>;
     total: number;
     hayMas: boolean;
     cargando: boolean;
@@ -21,25 +28,34 @@ interface NotasActions {
     cargarNotas: (reiniciar?: boolean) => Promise<void>;
     cargarMas: () => Promise<void>;
     buscarNotas: (termino: string) => Promise<Nota[]>;
-    seleccionarNota: (nota: Nota) => void;
-    crearNuevaNota: (carpetaId?: number | null) => void;
-    actualizarContenidoNotaActiva: (contenido: string) => void;
-    guardarNotaActiva: () => Promise<Nota | null>;
+    /* [263A-12] Acciones de nota activa parametrizadas por panelId */
+    seleccionarNota: (panelId: string, nota: Nota) => void;
+    crearNuevaNota: (panelId: string, carpetaId?: number | null) => void;
+    actualizarContenidoNotaActiva: (panelId: string, contenido: string) => void;
+    guardarNotaActiva: (panelId: string) => Promise<Nota | null>;
     eliminarNota: (id: number) => Promise<boolean>;
     limpiarError: () => void;
-    establecerNotaActivaDesdeId: (id: number | null) => void;
-    restaurarNotaActivaGuardada: () => void;
+    establecerNotaActivaDesdeId: (panelId: string, id: number | null) => void;
+    restaurarNotaActivaGuardada: (panelId: string) => void;
 }
 
 const LIMITE_POR_PAGINA = 50;
 
+/* [263A-12] Helper: obtiene la nota activa de un panel o la nota vacía por defecto */
+export function obtenerNotaPanel(state: NotasState, panelId: string): NotaActiva {
+    return state.notasActivaPorPanel[panelId] ?? NOTA_VACIA;
+}
+
 export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
     // Estado Inicial
     notas: [],
-    notaActiva: {
-        id: null,
-        contenido: CONTENIDO_NOTA_NUEVA,
-        modificada: false
+    /* [263A-12] Cada panel tiene su propia nota activa */
+    notasActivaPorPanel: {
+        [PANEL_SCRATCHPAD]: {
+            id: null,
+            contenido: CONTENIDO_NOTA_NUEVA,
+            modificada: false
+        }
     },
     total: 0,
     hayMas: false,
@@ -84,77 +100,102 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
         return await notasService.buscarNotas(termino);
     },
 
-    seleccionarNota: nota => {
-        persistirNotaActivaId(nota.id);
-        emitirCambioNotaActiva(nota.id);
-        set({
-            notaActiva: {
-                id: nota.id,
-                contenido: nota.contenido,
-                modificada: false
-            }
-        });
-    },
-
-    crearNuevaNota: (carpetaId?: number | null) => {
-        persistirNotaActivaId(null);
-        set({
-            notaActiva: {
-                id: null,
-                contenido: CONTENIDO_NOTA_NUEVA,
-                modificada: false,
-                carpetaId: carpetaId ?? null
-            }
-        });
-    },
-
-    actualizarContenidoNotaActiva: contenido => {
+    /* [263A-12] Cada acción recibe panelId. Solo el panel base persiste en localStorage y emite eventos. */
+    seleccionarNota: (panelId, nota) => {
+        if (panelId === PANEL_SCRATCHPAD) {
+            persistirNotaActivaId(nota.id);
+            emitirCambioNotaActiva(nota.id);
+        }
         set(state => ({
-            notaActiva: {
-                ...state.notaActiva,
-                contenido,
-                modificada: true
+            notasActivaPorPanel: {
+                ...state.notasActivaPorPanel,
+                [panelId]: {
+                    id: nota.id,
+                    contenido: nota.contenido,
+                    modificada: false
+                }
             }
         }));
     },
 
-    establecerNotaActivaDesdeId: id => {
-        const {notas, notaActiva} = get();
+    crearNuevaNota: (panelId, carpetaId?) => {
+        if (panelId === PANEL_SCRATCHPAD) {
+            persistirNotaActivaId(null);
+        }
+        set(state => ({
+            notasActivaPorPanel: {
+                ...state.notasActivaPorPanel,
+                [panelId]: {
+                    id: null,
+                    contenido: CONTENIDO_NOTA_NUEVA,
+                    modificada: false,
+                    carpetaId: carpetaId ?? null
+                }
+            }
+        }));
+    },
 
-        // Si ya es la misma, no hacer nada
-        if (notaActiva.id === id) return;
+    actualizarContenidoNotaActiva: (panelId, contenido) => {
+        set(state => {
+            const notaActual = state.notasActivaPorPanel[panelId];
+            if (!notaActual) return state;
+            return {
+                notasActivaPorPanel: {
+                    ...state.notasActivaPorPanel,
+                    [panelId]: {
+                        ...notaActual,
+                        contenido,
+                        modificada: true
+                    }
+                }
+            };
+        });
+    },
+
+    establecerNotaActivaDesdeId: (panelId, id) => {
+        const {notas, notasActivaPorPanel} = get();
+        const notaActual = notasActivaPorPanel[panelId];
+
+        if (notaActual?.id === id) return;
 
         if (id === null) {
-            get().crearNuevaNota();
+            get().crearNuevaNota(panelId);
             return;
         }
 
         const nota = notas.find(n => n.id === id);
         if (nota) {
-            set({
-                notaActiva: {
-                    id: nota.id,
-                    contenido: nota.contenido,
-                    modificada: false
+            set(state => ({
+                notasActivaPorPanel: {
+                    ...state.notasActivaPorPanel,
+                    [panelId]: {
+                        id: nota.id,
+                        contenido: nota.contenido,
+                        modificada: false
+                    }
                 }
-            });
+            }));
         }
     },
 
-    restaurarNotaActivaGuardada: () => {
-        const {notas, notaActiva} = get();
+    restaurarNotaActivaGuardada: (panelId) => {
+        const {notas, notasActivaPorPanel} = get();
+        const notaActual = notasActivaPorPanel[panelId] ?? NOTA_VACIA;
         const idGuardado = obtenerNotaActivaIdGuardado();
 
         if (idGuardado !== null) {
             const nota = notas.find(n => n.id === idGuardado);
             if (nota) {
-                set({
-                    notaActiva: {
-                        id: nota.id,
-                        contenido: nota.contenido,
-                        modificada: false
+                set(state => ({
+                    notasActivaPorPanel: {
+                        ...state.notasActivaPorPanel,
+                        [panelId]: {
+                            id: nota.id,
+                            contenido: nota.contenido,
+                            modificada: false
+                        }
                     }
-                });
+                }));
                 return;
             }
         }
@@ -163,19 +204,23 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
          * Si no hay nota guardada previamente y no hay notas en el servidor,
          * mostrar la nota de bienvenida para usuarios nuevos
          */
-        if (notas.length === 0 && notaActiva.contenido === CONTENIDO_NOTA_NUEVA) {
-            set({
-                notaActiva: {
-                    id: null,
-                    contenido: notasIniciales,
-                    modificada: true /* Marcar como modificada para que se guarde */
+        if (notas.length === 0 && notaActual.contenido === CONTENIDO_NOTA_NUEVA) {
+            set(state => ({
+                notasActivaPorPanel: {
+                    ...state.notasActivaPorPanel,
+                    [panelId]: {
+                        id: null,
+                        contenido: notasIniciales,
+                        modificada: true
+                    }
                 }
-            });
+            }));
         }
     },
 
-    guardarNotaActiva: async () => {
-        const {notaActiva} = get();
+    guardarNotaActiva: async (panelId) => {
+        const notaActiva = get().notasActivaPorPanel[panelId];
+        if (!notaActiva) return null;
         const contenido = notaActiva.contenido;
 
         if (!contenido.trim()) return null;
@@ -193,7 +238,10 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                 set(state => ({
                     guardando: false,
                     notas: state.notas.map(n => (n.id === notaGuardada.id ? notaGuardada : n)),
-                    notaActiva: {...state.notaActiva, modificada: false}
+                    notasActivaPorPanel: {
+                        ...state.notasActivaPorPanel,
+                        [panelId]: {...(state.notasActivaPorPanel[panelId] ?? NOTA_VACIA), modificada: false}
+                    }
                 }));
             } else {
                 // Crear
@@ -213,16 +261,21 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                     }
                 }
 
-                persistirNotaActivaId(notaGuardada.id);
+                if (panelId === PANEL_SCRATCHPAD) {
+                    persistirNotaActivaId(notaGuardada.id);
+                }
                 set(state => ({
                     guardando: false,
                     notas: [notaGuardada, ...state.notas],
                     total: state.total + 1,
-                    notaActiva: {
-                        id: notaGuardada.id,
-                        contenido: notaGuardada.contenido,
-                        modificada: false,
-                        carpetaId: notaGuardada.carpetaId
+                    notasActivaPorPanel: {
+                        ...state.notasActivaPorPanel,
+                        [panelId]: {
+                            id: notaGuardada.id,
+                            contenido: notaGuardada.contenido,
+                            modificada: false,
+                            carpetaId: notaGuardada.carpetaId
+                        }
                     }
                 }));
             }
@@ -234,21 +287,27 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
         }
     },
 
+    /* [263A-12] Al eliminar, resetear TODOS los paneles que tengan esa nota abierta */
     eliminarNota: async id => {
-        const {notas, notaActiva, total} = get();
+        const {notas, notasActivaPorPanel, total} = get();
         const notaAEliminar = notas.find(n => n.id === id);
-        const notaActivaAnterior = {...notaActiva};
+        const notasPorPanelAnterior = {...notasActivaPorPanel};
 
         // Optimistic Update
         const nuevasNotas = notas.filter(n => n.id !== id);
-        const nuevaActiva = notaActiva.id === id ? {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false} : notaActiva;
+        const nuevasNotasPorPanel: Record<string, NotaActiva> = {};
+        for (const [pid, nota] of Object.entries(notasActivaPorPanel)) {
+            nuevasNotasPorPanel[pid] = nota.id === id
+                ? {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false}
+                : nota;
+        }
 
         set({
             eliminando: true,
             error: null,
             notas: nuevasNotas,
             total: total > 0 ? total - 1 : 0,
-            notaActiva: nuevaActiva
+            notasActivaPorPanel: nuevasNotasPorPanel
         });
 
         try {
@@ -266,7 +325,7 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                 error: mensaje,
                 notas: notasRestauradas,
                 total: total,
-                notaActiva: notaActivaAnterior
+                notasActivaPorPanel: notasPorPanelAnterior
             });
             return false;
         }

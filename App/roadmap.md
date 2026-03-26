@@ -36,3 +36,31 @@
 10. ~~(263A-10 COMPLETADA) Botón enviar panelIA blanco sin fondo~~ 
 
 11. ~~(263A-11 COMPLETADA) Panel GruposFb convertido a plugin desactivable~~
+
+12. ~~(263A-12 COMPLETADA) Notas independientes por panel scratchpad — refactorización notaActiva → notasActivaPorPanel~~
+
+12. Nunca aparecen los grupos de facebook en el panel, a de entender que ya tenia grupos guardados, ya recargue la extension, puse la api que genere en la extension, le di a sincronizar, y sigue sin aparecern ningun grupo. Tal vez tenga que ver este error que veo
+
+Executing inline event handler violates the following Content Security Policy directive 'script-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.
+Contexto
+dashboard/dashboard.html
+Seguimiento de la pila
+dashboard/dashboard.html:1 (función anónima)
+1
+muestra una lista de numeros de 1 a 493 que omiti por brevedad.
+493
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FB Group Manager — Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+13. Cuando desactivo el plugin de grupos, no se quita del panel hasta que lo minimizo, debe quitarse.
+
+14. Actualiza el changelog del proyecto con todas las tareas completadas de App\Agente\completados, como son muchas cosas puedes dividir las versiones. haz que el modal de Historial de Versiones tenga carga difererida, carga por scroll. No se porque modalContenido agrega 20px padding ahi pero quitalo especificamente de ese modal, y agrega padding: 20px; en contenedorVersiones 
+
+15. reduce el padding de 20 a 10 en .configGlobalSidebar

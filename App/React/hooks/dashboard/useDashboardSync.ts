@@ -7,7 +7,7 @@ import {useSuscripcion} from '../useSuscripcion';
 import {useSincronizacionTiempoReal} from '../useSincronizacionTiempoReal';
 import {useNotificadorCambiosWebSocket} from '../useNotificadorCambiosWebSocket';
 import {obtenerUserId} from '../useSincronizacion';
-import {useNotasStore} from '../../stores/notasStore';
+import {useNotasStore, PANEL_SCRATCHPAD} from '../../stores/notasStore';
 
 interface UseDashboardSyncProps {
     habitos: Habito[];
@@ -162,15 +162,21 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                         const notaExistente = notasState.notas.find(n => n.id === datos.id);
                         if (notaExistente) {
                             /* Actualizar nota en la lista */
-                            useNotasStore.setState(state => ({
-                                notas: state.notas.map(n =>
-                                    n.id === datos.id ? {...n, contenido: datos.contenido, fechaModificacion: new Date().toISOString()} : n
-                                ),
-                                /* Si es la nota activa, actualizar también su contenido */
-                                notaActiva: state.notaActiva.id === datos.id
-                                    ? {...state.notaActiva, contenido: datos.contenido, modificada: false}
-                                    : state.notaActiva
-                            }));
+                            useNotasStore.setState(state => {
+                                /* [263A-12] Actualizar todos los paneles que tengan esta nota abierta */
+                                const nuevasNotasPorPanel: Record<string, import('../../types/notas').NotaActiva> = {};
+                                for (const [pid, nota] of Object.entries(state.notasActivaPorPanel)) {
+                                    nuevasNotasPorPanel[pid] = nota.id === datos.id
+                                        ? {...nota, contenido: datos.contenido, modificada: false}
+                                        : nota;
+                                }
+                                return {
+                                    notas: state.notas.map(n =>
+                                        n.id === datos.id ? {...n, contenido: datos.contenido, fechaModificacion: new Date().toISOString()} : n
+                                    ),
+                                    notasActivaPorPanel: nuevasNotasPorPanel
+                                };
+                            });
                         }
                     } else {
                         /* Scratchpad (nota sin id) */
@@ -218,8 +224,9 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         if (!wsConectado || userId <= 0) return;
 
         const unsub = useNotasStore.subscribe((state) => {
-            const {notaActiva} = state;
-            if (!notaActiva.id || !notaActiva.modificada) return;
+            /* [263A-12] Sincronizar la nota del panel principal */
+            const notaActiva = state.notasActivaPorPanel[PANEL_SCRATCHPAD];
+            if (!notaActiva?.id || !notaActiva.modificada) return;
 
             /* Evitar enviar el mismo contenido */
             if (notaActiva.contenido === ultimoContenidoNotaRef.current) return;

@@ -4,14 +4,17 @@
  * Gestiona estado de notas con autoguardado debounced y modo enfoque
  */
 
-import {useState, useEffect, useRef} from 'react';
-import {useNotasStore} from '../../stores/notasStore';
+import {useState, useEffect, useRef, useCallback} from 'react';
+import {useNotasStore, PANEL_SCRATCHPAD} from '../../stores/notasStore';
 import {extraerTitulo, CONTENIDO_NOTA_NUEVA} from '../../utils/notasUtils';
 import {useAlertas} from '../useAlertas';
 import type {NotaActiva} from '../../types/notas';
 
 /* Constante para delay de autoguardado (ms) */
 const DELAY_AUTOGUARDADO = 2000;
+
+/* [263A-12] Nota vacía por defecto para el selector de Zustand */
+const NOTA_VACIA: NotaActiva = {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false};
 
 interface UsePanelScratchpadReturn {
     modalNotasExpandidoAbierto: boolean;
@@ -27,24 +30,41 @@ interface UsePanelScratchpadReturn {
     manejarAbrirCarpeta: () => Promise<void>;
 }
 
-export function usePanelScratchpad(): UsePanelScratchpadReturn {
+/* [263A-12] El hook recibe panelId para que cada instancia gestione su propia nota independiente */
+export function usePanelScratchpad(panelId: string = PANEL_SCRATCHPAD): UsePanelScratchpadReturn {
     const [modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto] = useState(false);
     const [modoEnfoque, setModoEnfoque] = useState(false);
 
-    /* Estado global de notas */
-    const notaActiva = useNotasStore(s => s.notaActiva);
+    /* [263A-12] Estado per-panel: cada panel lee su propia nota del mapa */
+    const notaActiva = useNotasStore(s => s.notasActivaPorPanel[panelId]) ?? NOTA_VACIA;
     const notas = useNotasStore(s => s.notas);
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
-    const actualizarContenido = useNotasStore(s => s.actualizarContenidoNotaActiva);
+    const actualizarContenidoStore = useNotasStore(s => s.actualizarContenidoNotaActiva);
     const guardarNotaActiva = useNotasStore(s => s.guardarNotaActiva);
     const cargarNotas = useNotasStore(s => s.cargarNotas);
     const restaurarNotaActivaGuardada = useNotasStore(s => s.restaurarNotaActivaGuardada);
+
+    /* [263A-12] Wrapper: las acciones del store ahora reciben panelId */
+    const actualizarContenido = useCallback((contenido: string) => {
+        actualizarContenidoStore(panelId, contenido);
+    }, [panelId, actualizarContenidoStore]);
 
     /* Refs para autoguardado debounced */
     const timeoutGuardadoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const contenidoAnteriorRef = useRef<string>(notaActiva.contenido);
 
     const {mostrarExito} = useAlertas();
+
+    /*
+     * Efecto 0: Inicializar panel si no tiene entrada en el store.
+     * Paneles duplicados se crean con nota vacía.
+     */
+    useEffect(() => {
+        const estado = useNotasStore.getState();
+        if (!estado.notasActivaPorPanel[panelId]) {
+            estado.crearNuevaNota(panelId);
+        }
+    }, [panelId]);
 
     /*
      * Efecto 1: Cargar notas al montar el componente
@@ -56,13 +76,14 @@ export function usePanelScratchpad(): UsePanelScratchpadReturn {
 
     /*
      * Efecto 2: Restaurar última nota activa cuando las notas se cargan
-     * Se ejecuta cuando notas.length cambia de 0 a >0 (carga inicial completada)
+     * Solo para el panel base — los duplicados arrancan con nota nueva.
      */
     useEffect(() => {
+        if (panelId !== PANEL_SCRATCHPAD) return;
         if (notas.length > 0 && notaActiva.id === null && notaActiva.contenido === CONTENIDO_NOTA_NUEVA) {
-            restaurarNotaActivaGuardada();
+            restaurarNotaActivaGuardada(panelId);
         }
-    }, [notas.length, notaActiva.id, notaActiva.contenido, restaurarNotaActivaGuardada]);
+    }, [panelId, notas.length, notaActiva.id, notaActiva.contenido, restaurarNotaActivaGuardada]);
 
     /*
      * Efecto 3: Autoguardado debounced
@@ -80,7 +101,7 @@ export function usePanelScratchpad(): UsePanelScratchpadReturn {
         }
 
         timeoutGuardadoRef.current = setTimeout(() => {
-            guardarNotaActiva();
+            guardarNotaActiva(panelId);
             contenidoAnteriorRef.current = notaActiva.contenido;
         }, DELAY_AUTOGUARDADO);
 
@@ -89,21 +110,21 @@ export function usePanelScratchpad(): UsePanelScratchpadReturn {
                 clearTimeout(timeoutGuardadoRef.current);
             }
         };
-    }, [notaActiva.contenido, notaActiva.modificada, guardarNotaActiva]);
+    }, [notaActiva.contenido, notaActiva.modificada, guardarNotaActiva, panelId]);
 
     const manejarNuevaNota = () => {
-        crearNuevaNota();
+        crearNuevaNota(panelId);
         mostrarExito('Nueva nota creada');
     };
 
     const manejarLimpiar = () => {
-        crearNuevaNota();
+        crearNuevaNota(panelId);
     };
 
     /* Guardar la nota activa antes de abrir el modal de notas guardadas */
     const manejarAbrirCarpeta = async () => {
         if (notaActiva.modificada && notaActiva.contenido.trim()) {
-            await guardarNotaActiva();
+            await guardarNotaActiva(panelId);
         }
         setModalNotasExpandidoAbierto(true);
     };

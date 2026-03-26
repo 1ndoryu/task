@@ -23,9 +23,11 @@ interface ModalNotasExpandidoProps {
     onCerrar: () => void;
     tamanoFuente: TamanoFuente;
     delayGuardado: number;
+    /* [263A-12] panelId para que el modal opere sobre la nota del panel que lo abrió */
+    panelId: string;
 }
 
-export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuardado}: ModalNotasExpandidoProps): JSX.Element | null {
+export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuardado, panelId}: ModalNotasExpandidoProps): JSX.Element | null {
     const {
         notas, notaActiva, cargando, guardando, error,
         seleccionarNota, actualizarContenido,
@@ -39,7 +41,7 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
         notasOrdenadas, tituloActivo: _tituloActivo,
         manejarEliminar, manejarCrearNuevaNota, manejarCerrarSeguro,
         claseModal
-    } = useModalNotasExpandido({abierto, onCerrar});
+    } = useModalNotasExpandido({abierto, onCerrar, panelId});
 
     if (!abierto) return null;
 

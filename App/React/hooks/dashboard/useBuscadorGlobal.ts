@@ -6,7 +6,7 @@
  */
 
 import {useState, useEffect, useRef, useMemo} from 'react';
-import {useNotasStore} from '../../stores/notasStore';
+import {useNotasStore, PANEL_SCRATCHPAD} from '../../stores/notasStore';
 import type {Tarea, Habito, Proyecto} from '../../types/dashboard';
 import type {Nota} from '../../types/notas';
 
@@ -115,7 +115,7 @@ export function useBuscadorGlobal({tareas, habitos, proyectos, onSeleccionarTare
         } else if (resultado.tipo === 'proyecto') {
             onSeleccionarProyecto(resultado.original as Proyecto);
         } else if (resultado.tipo === 'nota') {
-            useNotasStore.getState().seleccionarNota(resultado.original as Nota);
+            useNotasStore.getState().seleccionarNota(PANEL_SCRATCHPAD, resultado.original as Nota);
         }
         setBusqueda('');
         setMostrarResultados(false);

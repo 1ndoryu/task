@@ -5,11 +5,14 @@
  */
 
 import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
-import type {Nota, CarpetaNota} from '../../types/notas';
+import type {Nota, CarpetaNota, NotaActiva} from '../../types/notas';
 import {useNotasStore} from '../../stores/notasStore';
 import {useCarpetasNotas} from '../../stores/carpetasNotasStore';
-import {extraerTitulo} from '../../utils/notasUtils';
+import {extraerTitulo, CONTENIDO_NOTA_NUEVA} from '../../utils/notasUtils';
 import {useEsMovil} from '../useEsMovil';
+
+/* [263A-12] Nota vacía por defecto para el selector de Zustand */
+const NOTA_VACIA: NotaActiva = {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false};
 
 /* Tipos de ordenamiento disponibles */
 type TipoOrdenamiento = 'modificacion' | 'creacion';
@@ -17,6 +20,8 @@ type TipoOrdenamiento = 'modificacion' | 'creacion';
 export interface UseModalNotasExpandidoProps {
     abierto: boolean;
     onCerrar: () => void;
+    /* [263A-12] panelId para operar sobre la nota del panel correcto */
+    panelId: string;
 }
 
 export interface UseModalNotasExpandidoReturn {
@@ -74,12 +79,12 @@ export interface UseModalNotasExpandidoReturn {
     claseModal: string;
 }
 
-export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandidoProps): UseModalNotasExpandidoReturn {
+export function useModalNotasExpandido({abierto, onCerrar, panelId}: UseModalNotasExpandidoProps): UseModalNotasExpandidoReturn {
     const {esMovil} = useEsMovil();
 
-    /* Estado global de notas */
+    /* [263A-12] Estado per-panel: cada modal lee la nota del panel que lo abrió */
     const notas = useNotasStore(s => s.notas);
-    const notaActiva = useNotasStore(s => s.notaActiva);
+    const notaActiva = useNotasStore(s => s.notasActivaPorPanel[panelId]) ?? NOTA_VACIA;
     const total = useNotasStore(s => s.total);
     const cargando = useNotasStore(s => s.cargando);
     const guardando = useNotasStore(s => s.guardando);
@@ -88,14 +93,19 @@ export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandi
     const eliminarNota = useNotasStore(s => s.eliminarNota);
     const buscarNotas = useNotasStore(s => s.buscarNotas);
     const seleccionarNotaStore = useNotasStore(s => s.seleccionarNota);
-    const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
-    const actualizarContenido = useNotasStore(s => s.actualizarContenidoNotaActiva);
+    const crearNuevaNotaStore = useNotasStore(s => s.crearNuevaNota);
+    const actualizarContenidoStore = useNotasStore(s => s.actualizarContenidoNotaActiva);
+
+    /* [263A-12] Wrappers: las acciones del store ahora reciben panelId */
+    const actualizarContenido = useCallback((contenido: string) => {
+        actualizarContenidoStore(panelId, contenido);
+    }, [panelId, actualizarContenidoStore]);
 
     /* [263A-7] En móvil, seleccionar una nota cierra el modal para que se abra en el panel scratchpad */
     const seleccionarNota = useCallback((nota: Nota) => {
-        seleccionarNotaStore(nota);
+        seleccionarNotaStore(panelId, nota);
         if (esMovil) onCerrar();
-    }, [seleccionarNotaStore, esMovil, onCerrar]);
+    }, [seleccionarNotaStore, panelId, esMovil, onCerrar]);
 
     /* Estado de carpetas */
     const {
@@ -123,14 +133,16 @@ export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandi
         if (cerrando.current) return;
         cerrando.current = true;
 
+        /* [263A-12] Guardar la nota del panel específico */
         const estado = useNotasStore.getState();
-        if (estado.notaActiva.modificada && estado.notaActiva.contenido.trim()) {
-            await estado.guardarNotaActiva();
+        const notaPanel = estado.notasActivaPorPanel[panelId];
+        if (notaPanel?.modificada && notaPanel.contenido.trim()) {
+            await estado.guardarNotaActiva(panelId);
         }
 
         cerrando.current = false;
         onCerrar();
-    }, [onCerrar]);
+    }, [onCerrar, panelId]);
 
     /* Toggle para panel lista */
     const alternarPanelLista = useCallback(() => {
@@ -199,8 +211,8 @@ export function useModalNotasExpandido({abierto, onCerrar}: UseModalNotasExpandi
 
     /* Crear nueva nota en la carpeta activa actual */
     const manejarCrearNuevaNota = useCallback(() => {
-        crearNuevaNota(carpetaActiva);
-    }, [crearNuevaNota, carpetaActiva]);
+        crearNuevaNotaStore(panelId, carpetaActiva);
+    }, [crearNuevaNotaStore, panelId, carpetaActiva]);
 
     /* Cambiar ordenamiento */
     const alternarOrdenamiento = useCallback(() => {
