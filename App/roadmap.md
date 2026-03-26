@@ -27,7 +27,7 @@
 
 6. ~~(263A-7 COMPLETADA) Click en nota en móvil cierra modal y abre en panel~~
 
-7. Mejor quita lo de posponer mañana y remplazalo por 1 día, no se entiende lo de "mañana" (234A-7)
+7. ~~(263A-8 COMPLETADA) Renombrar "posponer mañana" a "1 día"~~
 
 8. ~~(263A-2 COMPLETADA) Fix subhábitos fantasma~~
 

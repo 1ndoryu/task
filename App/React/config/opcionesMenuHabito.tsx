@@ -62,7 +62,7 @@ export function opcionesMenuPosponerTiempo(tienePospuesto: boolean): OpcionMenu[
         {id: POSPONER_IDS.UNA_HORA, etiqueta: '1 hora', icono: <Timer size={12} />},
         {id: POSPONER_IDS.CUATRO_HORAS, etiqueta: '4 horas', icono: <Timer size={12} />},
         {id: POSPONER_IDS.OCHO_HORAS, etiqueta: '8 horas', icono: <Timer size={12} />},
-        {id: POSPONER_IDS.MANANA, etiqueta: 'Mañana', icono: <Calendar size={12} />},
+        {id: POSPONER_IDS.MANANA, etiqueta: '1 día', icono: <Calendar size={12} />},
         {id: POSPONER_IDS.DOS_DIAS, etiqueta: '2 días', icono: <Calendar size={12} />},
         {id: POSPONER_IDS.UNA_SEMANA, etiqueta: '1 semana', icono: <Calendar size={12} />}
     ];
