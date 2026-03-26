@@ -1,53 +1,32 @@
-﻿# GloryTemplate  Roadmap
+﻿# GloryTemplate Roadmap
 
 > **Descripcion:** Dashboard personal con tareas, habitos, proyectos, notas, actividad y mas. Tema WordPress con React islands.
 > **Stack:** WordPress + PHP (backend REST), React + TypeScript (frontend islands), Zustand (estado), CSS modular
 > **URL produccion:** https://task.nakomi.studio
-> **Servidor:** nakomi (Coolify)  stack UUID: u00gc8ss4csc4cckkg4g00ks
-> **Deploy:** Coolify (.agent/coolify-manager-rs)  sitio: nakomi
+> **Servidor:** nakomi (Coolify) stack UUID: u00gc8ss4csc4cckkg4g00ks
+> **Deploy:** Coolify (.agent/coolify-manager-rs) sitio: nakomi
 > **Repositorio:** glorytemplate: rama glory-react-logic
 
 ## Herramientas del agente
+
 - Code Sentinel: `.agent/code-sentinel`
 - VarSense: `.agent/varsense`
 - Coolify Manager: `.agent/coolify-manager-rs`
 
 ## Tareas pendientes
 
-1. [COMPLETADA 253A-2] Tracked se queda activo al completar habito
+1. El panel grupos no parece ser un plugin, no lo es, le falta modal de configuracion como los otros plugin, no veo donde se genera un token!! Quita lo de seccionSubtitulo
 
-2. [COMPLETADA 253A-3] Hover background en boton terminar ayuno
+2. ~~(263A-1 COMPLETADA) EN panelActividadMapa LOS CUADROS SIGUIEN SALIENDOSESE~~
 
-3. [COMPLETADA 253A-3] Cuadros dias desbordando + hover en deficitComidaAcciones
+3. avatarPreview sigue siendo estirado en vez de ser un circulo 1:1!
 
-4. [COMPLETADA 253A-8] mal calculo de la ia de calorías, puse  Media arepa, huevo y 2 tajadas de platano y dice 500 calorías pero en realidad esa comida tiene en promedio 300 calorías. Revisar esto y hacer los calculos mas inteligentes 
+4. el diseño de panelGruposFb se ve fatal, no sigue el estilo de los demas panales, los select no deben ser select normales sino que abran menu contextuales, tampoco deben estar dentro del panel sino en seccionAcciones como los filtros de los demás paneles, y la busqueda similar a como modalNotasBusqueda modalNotasBusqueda--headerCentrado.
 
-5. [COMPLETADA 253A-1] Los subhabitos — edición nombre, prioridad hereda padre, filtro fantasmas
+5. No crear notas en una nueva ventana esta mal, lo interpretaste mal, no se trata de abrir la ventana de notas se trata de duplicar el panel para que exista el 2 notas al mismo tiempo, esto implica que ahora los paneles de notas con son duplicados es decir un segundo y tercer etc panel, tienen una x para cerrarse.
 
-6. [COMPLETADA 253A-4] Permitir más altura maxima para el panel de nota. 
- 
-7. [COMPLETADA 253A-10] Permitir tener varios paneles de notas, se agrega un submenu el boton de + en la nota para permitir crear en una nueva ventana o en la misma. 
+6. lo de abrir notas en el telefono funciona falta, al dar click a una nota en vistaNotasListaContenido debería cerrar el modal y abrir esa nota cuando se esta en movil.
 
-8. [COMPLETADA 253A-11+253A-12] Nuevo plugin: gestor de grupos, esto es algo complicado, he creado una extensión que analiza grupos de facebook, esta extension tambien tiene varios problemas a resolver, 
+7. Mejor quita lo de posponer mañana y remplazalo por 1 día, no se entiende lo de "mañana" (234A-7)
 
-8.1 [COMPLETADA 253A-12] el primero es que acabo de un tiempo deja de funcionar
-
-8.2 [COMPLETADA 253A-11+253A-12] la extension (fb-group-manager) se tiene que conectar a task, de alguna forma tal vez con api key o algo, de la mejor manera, lo que hara es que se controlara la lista grupos en un panel dedicado en el proyecto task, sera una tabla como la tabla de habitos, tendra un check para marcar que se publico en se grupo, menu contextuales para ocultar ese grupo, tiene que poder cambiar de entorno, boton para ir el grupo, cambiar categoría, prioridad, analizar con ia para quitar los relevantes, etc, tiene que sincronizarse en tiempo real, si es necesario ajustar la extension ok, pero lo importante es que detecte siempre nuevos grupos, que se puedan organizar por entorno por ia.
-
-8.3 [COMPLETADA 253A-12] la extension no muestra bien el tooltip para modificar los grupos dentro de la pagina de facebook, necesito que en en la pagina de facebook muestre un tooltip con las acciones para poder marcar acciones como modifcar, marcar como publicado ocultar, los grupos ocultados tienen que tener tener un icono de ocultado cuando aparecen el feed ocuando se abren directamente.
-
-8.4 [COMPLETADA 253A-12] No estoy segura de esto pero la extension parece ocultar comentarios de facebook 
-
-9. [COMPLETADA 253A-7] Lo de posponer tareas funciona falta primero porque es incruente, veo posponer hoy y posponer mañana, no se cual es la diferencia y que sentido tiene tener 2 opciones asi, y tampoco hay para elegir cuanto tiempo cuando se quiere especificar. 
-
-9.1 [COMPLETADA 253A-9] Por cierto tampoco en las fechas de las tareas se puede especificar una fecha, debería con un calendario con el estilo del sitio.
-
-10. [COMPLETADA 253A-6] En el modal de creacion rapida se puede elegir la fecha pero no se puede quitar una vez que se elige una. Y tambien debería poder selecionarse una fecha.
-
-11. [COMPLETADA 253A-5] El icono de IA sigue sin ser un icono de IA cuando se minimiza el panel de chat con IA. No me refería a ponerlo sobre seccionTitulo, de hecho hay que quitarlo de ahi. 
-
-12. [COMPLETADA 253A-3] Hover blanco en boton enviar creacion rapida
-
-13. [COMPLETADA 253A-3] Hover background en boton terminar ayuno (duplicado de 2)
-
-14. [COMPLETADA 253A-8] Puse 4 puños de arroz y salio 1100 calorías en vez 300-400g, mejorar tambien este sistema para que entienda sobre promedios y que los valores que se piden por dia lo reflejen tambien, no suelo usar cantidades exactas, sino medir por puños, 
+8. ~~(263A-2 COMPLETADA) Fix subhábitos fantasma~~

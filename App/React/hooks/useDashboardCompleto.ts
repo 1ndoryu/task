@@ -54,6 +54,8 @@ export function useDashboardCompleto() {
 
     /* Hook para convertir hábitos en tareas virtuales + sus subtareas */
     const toggleSubHabitoStore = useHabitosStore(state => state.toggleSubHabito);
+    /* [263A-2] Necesario para interceptar eliminación de subhábitos virtuales en panel ejecución */
+    const eliminarSubHabitoStore = useHabitosStore(state => state.eliminarSubHabito);
 
     const habitosComoTareas = useHabitosComoTareas({
         habitos: dashboard.habitos,
@@ -61,6 +63,7 @@ export function useDashboardCompleto() {
         mostrarHabitos: configTareas.configuracion.mostrarHabitosEnEjecucion,
         onToggleHabito: dashboard.toggleHabito,
         onToggleSubHabito: toggleSubHabitoStore,
+        onEliminarSubHabito: eliminarSubHabitoStore,
         umbralesUrgencia: configHabitos.obtenerUmbralesActuales()
     });
 

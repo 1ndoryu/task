@@ -44,7 +44,7 @@ export function generarPropsPanelEjecucion(
     manejarEditarHabitoPorId: (habitoId: number) => void,
     esMovilActual: boolean
 ) {
-    const {dashboard, modales, compartir, filtroTareas, ordenTareas, configTareas, opciones, acciones, valorFiltroActual, limites} = ctx;
+    const {dashboard, modales, compartir, filtroTareas, ordenTareas, configTareas, opciones, acciones, valorFiltroActual, limites, habitosComoTareas} = ctx;
 
     const crearTareaConLimite = (datos: DatosEdicionTarea) => {
         const tareasActivas = dashboard.tareas.filter((t: Tarea) => !t.completado).length;
@@ -92,7 +92,12 @@ export function generarPropsPanelEjecucion(
         onToggleTarea: manejarToggleTarea,
         onCrearTarea: crearTareaConLimite,
         onEditarTarea: dashboard.editarTarea,
-        onEliminarTarea: dashboard.eliminarTarea,
+        /* [263A-2] Interceptar eliminación de subhábitos virtuales (IDs negativos).
+         * Antes llamaba directo a eliminarTarea del store que no los encuentra → falla silenciosa. */
+        onEliminarTarea: (id: number) => {
+            const fueSubhabito = habitosComoTareas.manejarEliminarTareaHabito(id);
+            if (!fueSubhabito) dashboard.eliminarTarea(id);
+        },
         onReordenarTareas: dashboard.reordenarTareas,
         onCambiarFiltro: acciones.manejarCambioFiltro,
         onCambiarModoOrden: ordenTareas.cambiarModo,

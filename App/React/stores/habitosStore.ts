@@ -681,7 +681,19 @@ export const useHabitosStore = create<HabitosStore>()(
                     /* Solo persistir hábitos, no historial detallado ni estado temporal */
                     habitos: state.habitos
                 }),
-                version: 1
+                version: 1,
+                /* [263A-2] Limpiar subhábitos fantasma (sin nombre) al rehidratar.
+                 * Surgieron de estados corruptos en localStorage; sin esto reaparecen eternamente. */
+                onRehydrateStorage: () => (state) => {
+                    if (!state) return;
+                    for (const habito of state.habitos) {
+                        if (habito.subhabitos) {
+                            habito.subhabitos = habito.subhabitos.filter(
+                                (sh: SubHabito) => sh.nombre && sh.nombre.trim()
+                            );
+                        }
+                    }
+                }
             }
         ),
         {name: 'HabitosStore', enabled: typeof window !== 'undefined' && window.location.hostname === 'localhost'}

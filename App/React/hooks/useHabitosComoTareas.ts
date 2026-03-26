@@ -99,6 +99,7 @@ interface UseHabitosComoTareasParams {
     mostrarHabitos: boolean;
     onToggleHabito: (habitoId: number) => void;
     onToggleSubHabito?: (habitoId: number, subHabitoId: number) => void;
+    onEliminarSubHabito?: (habitoId: number, subHabitoId: number) => void;
     umbralesUrgencia?: UmbralesUrgencia;
 }
 
@@ -107,9 +108,11 @@ interface UseHabitosComoTareasReturn {
     /* Incluye tanto tareas virtuales de hábito como las subtareas reales del hábito */
     tareasConSubtareas: Tarea[];
     manejarToggleTareaHabito: (tareaId: number) => boolean;
+    /* [263A-2] Intercepta eliminación de subhábitos virtuales (IDs negativos) */
+    manejarEliminarTareaHabito: (tareaId: number) => boolean;
 }
 
-export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleHabito, onToggleSubHabito, umbralesUrgencia}: UseHabitosComoTareasParams): UseHabitosComoTareasReturn {
+export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleHabito, onToggleSubHabito, onEliminarSubHabito, umbralesUrgencia}: UseHabitosComoTareasParams): UseHabitosComoTareasReturn {
     const umbrales = umbralesUrgencia || UMBRALES_DEFECTO;
 
     /*
@@ -269,9 +272,32 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
         return false;
     };
 
+    /* [263A-2] Intercepta eliminación de tareas virtuales de subhábitos.
+     * Sin esto, el delete llama a eliminarTarea del tareasStore que no encuentra
+     * el ID virtual negativo → falla silenciosa → el subhábito "reaparece". */
+    const manejarEliminarTareaHabito = (tareaId: number): boolean => {
+        if (tareaId >= 0) return false;
+
+        for (const habito of habitos) {
+            if (!habito.subhabitos) continue;
+            for (const subhabito of habito.subhabitos) {
+                const idSubhabito = generarIdSubHabitoTarea(habito.id, subhabito.id);
+                if (idSubhabito === tareaId) {
+                    if (onEliminarSubHabito) {
+                        onEliminarSubHabito(habito.id, subhabito.id);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
     return {
         tareasHabito,
         tareasConSubtareas,
-        manejarToggleTareaHabito
+        manejarToggleTareaHabito,
+        manejarEliminarTareaHabito
     };
 }
