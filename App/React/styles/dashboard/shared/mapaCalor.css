@@ -130,15 +130,24 @@
     min-width: 0;
 }
 
-/* [253A-3] min-width:0 permite que las semanas se encojan cuando el contenedor es estrecho.
- * Antes usaba solo max-width:22px sin permitir shrink, causando overflow en paneles angostos. */
+/* [263A-1] max-width por tamaño de celda, no hardcodeado a 22px.
+ * 22px hardcodeado causaba overflow cuando JS calculaba más semanas de las que cabían
+ * porque el JS subestimaba el ancho real. Ahora max-width = celda max-width del tamaño activo. */
 .mapaCalorSemana {
     display: flex;
     flex-direction: column;
     flex: 1;
-    max-width: 22px;
+    max-width: 14px;
     min-width: 0;
     gap: var(--dashboard-espacioMini);
+}
+
+.mapaCalorContenedor--celdaPequeno .mapaCalorSemana {
+    max-width: 10px;
+}
+
+.mapaCalorContenedor--celdaGrande .mapaCalorSemana {
+    max-width: 16px;
 }
 
 /* 

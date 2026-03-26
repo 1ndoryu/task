@@ -72,6 +72,13 @@ export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titul
         grande: 'mapaCalorCelda--grande'
     };
 
+    /* [263A-1] Clase en el contenedor raíz para que CSS ajuste max-width de semana por tamaño */
+    const claseTamanoContenedor: Record<string, string> = {
+        pequeno: 'mapaCalorContenedor--celdaPequeno',
+        normal: '',
+        grande: 'mapaCalorContenedor--celdaGrande'
+    };
+
     /* Renderizar celda de día */
     const renderCelda = (fecha: string, index: number) => {
         if (!fecha) {
@@ -110,7 +117,7 @@ export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titul
     };
 
     return (
-        <div ref={contenedorRef} id={id} className={`mapaCalorContenedor ${compacto ? 'mapaCalorContenedor--compacto' : ''} ${periodo === 'auto' ? 'mapaCalorContenedor--auto' : ''}`}>
+        <div ref={contenedorRef} id={id} className={`mapaCalorContenedor ${compacto ? 'mapaCalorContenedor--compacto' : ''} ${periodo === 'auto' ? 'mapaCalorContenedor--auto' : ''} ${claseTamanoContenedor[tamanoCelda] || ''}`}>
             {/* Encabezado */}
             {!compacto && titulo && (
                 <div className="mapaCalorEncabezado">

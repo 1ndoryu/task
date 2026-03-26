@@ -12,11 +12,13 @@ import type {DatosHeatmapProps, MapaCalorProps} from '../../components/shared/Ma
 /* Nombres de meses abreviados */
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-/* Constantes para cálculos de tamaño */
+/* [263A-1] Constantes deben coincidir con max-width del CSS (mapaCalor.css).
+ * Antes: {10,12,14} — no coincidía con CSS {10px,14px,16px}, causando que
+ * el cálculo auto creara más semanas de las que cabían → overflow (reportado 5 veces). */
 const TAMANO_CELDA = {
     pequeno: 10,
-    normal: 12,
-    grande: 14
+    normal: 14,
+    grande: 16
 };
 const GAP_CELDAS = 3;
 const ANCHO_DIAS_SEMANA = 20;

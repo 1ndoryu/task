@@ -7,7 +7,6 @@ import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users} from 'lucide
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual} from '../shared';
 import {Boton, Input, Select, Checkbox} from '../ui';
-import type {OpcionSelect} from '../ui/Select';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import '../../styles/dashboard/componentes/panelGruposFb.css';

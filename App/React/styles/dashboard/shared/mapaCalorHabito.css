@@ -205,12 +205,12 @@
     min-width: 0;
 }
 
-/* [253A-3] min-width:0 permite que las semanas se encojan en contenedores angostos */
+/* [263A-1] max-width alineado con celda (14px) en vez de 22px hardcodeado */
 .mapaCalorHabitoSemana {
     display: flex;
     flex-direction: column;
     flex: 1;
-    max-width: 22px;
+    max-width: 14px;
     min-width: 0;
     gap: var(--dashboard-espacioMini);
 }
