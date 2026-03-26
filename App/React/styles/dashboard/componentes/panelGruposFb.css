@@ -1,6 +1,5 @@
 /* [253A-11] Estilos del panel Grupos de Facebook
- * Tabla de grupos con acciones inline, filtros, badges de categoría.
- * Tema oscuro consistente con el dashboard. */
+ * [263A-4] Rediseño: filtros movidos al header, búsqueda estilo modalNotasBusqueda. */
 
 .panelGruposFb {
     display: flex;
@@ -9,37 +8,34 @@
     padding: 0 8px 8px;
 }
 
-/* ── Barra de filtros ── */
-.panelGruposFb__filtros {
+/* [263A-4] Búsqueda en el header — estilo modalNotasBusqueda--headerCentrado */
+.panelGruposFb__busquedaHeader {
     display: flex;
-    gap: 6px;
     align-items: center;
-    flex-wrap: wrap;
-}
-
-.panelGruposFb__inputBusqueda {
+    gap: var(--dashboard-espacioXs);
+    padding: 0 var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
     flex: 1;
-    min-width: 120px;
-    padding: 4px 8px;
-    background: var(--dashboard-fondoInput, #1a1a2e);
-    border: 1px solid var(--dashboard-bordePrincipal, #2a2a3e);
-    border-radius: 4px;
-    color: var(--dashboard-textoSecundario, #a0a0b0);
-    font-size: 0.75rem;
+    max-width: 180px;
+    height: 22px;
 }
 
-.panelGruposFb__inputBusqueda::placeholder {
-    color: var(--dashboard-textoTerciario, #606070);
+.panelGruposFb__busquedaIcono {
+    color: var(--dashboard-textoMuyApagado);
+    flex-shrink: 0;
 }
 
-.panelGruposFb__selectFiltro {
-    padding: 4px 6px;
-    background: var(--dashboard-fondoInput, #1a1a2e);
-    border: 1px solid var(--dashboard-bordePrincipal, #2a2a3e);
-    border-radius: 4px;
-    color: var(--dashboard-textoSecundario, #a0a0b0);
-    font-size: 0.75rem;
-    max-width: 140px;
+.panelGruposFb__busquedaInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--dashboard-textoSecundario);
+    font-size: 0.7rem;
+    padding: 0;
+    min-width: 0;
 }
 
 /* ── Estadísticas compactas ── */

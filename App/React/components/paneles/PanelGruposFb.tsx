@@ -1,12 +1,13 @@
 /* [253A-11] PanelGruposFb
  * Panel de dashboard para gestionar grupos de Facebook detectados por la extensión.
- * Muestra tabla sortable con filtros, categorías, importancia, acciones. */
+ * Muestra tabla sortable con filtros, categorías, importancia, acciones.
+ * [263A-4] Rediseño: filtros en header como SelectorBadge, búsqueda estilo modalNotasBusqueda. */
 
-import {useState, useCallback} from 'react';
-import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users} from 'lucide-react';
+import {useState, useCallback, useRef} from 'react';
+import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
-import {MenuContextual} from '../shared';
-import {Boton, Input, Select, Checkbox} from '../ui';
+import {MenuContextual, SelectorBadge} from '../shared';
+import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import '../../styles/dashboard/componentes/panelGruposFb.css';
@@ -53,6 +54,31 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar}: PanelGrup
         {id: 'eliminar', etiqueta: 'Eliminar', icono: <Trash2 size={12} />, peligroso: true, separadorDespues: false}
     ], []);
 
+    /* [263A-4] Opciones para SelectorBadge de categoría */
+    const opcionesCategoria = [
+        {id: '', etiqueta: 'Todas', icono: <FolderOpen size={12} />, descripcion: 'Sin filtro'},
+        ...categorias.map(c => ({id: c.nombre, etiqueta: c.nombre, icono: <span>{c.icono}</span>, descripcion: ''}))
+    ];
+
+    /* [263A-4] Opciones para SelectorBadge de importancia */
+    const opcionesImportancia = [
+        {id: '', etiqueta: 'Todas', icono: <Star size={12} />, descripcion: 'Sin filtro'},
+        ...[5, 4, 3, 2, 1].map(n => ({id: String(n), etiqueta: '★'.repeat(n), icono: <Star size={12} />, descripcion: ''}))
+    ];
+
+    /* [263A-4] Estado del input de búsqueda expandible */
+    const [busquedaAbierta, setBusquedaAbierta] = useState(!!filtros.busqueda);
+    const inputBusquedaRef = useRef<HTMLInputElement>(null);
+
+    const toggleBusqueda = useCallback(() => {
+        if (busquedaAbierta && !filtros.busqueda) {
+            setBusquedaAbierta(false);
+        } else {
+            setBusquedaAbierta(true);
+            setTimeout(() => inputBusquedaRef.current?.focus(), 50);
+        }
+    }, [busquedaAbierta, filtros.busqueda]);
+
     return (
         <div className="panelDashboard internaColumna">
             <SeccionEncabezado
@@ -62,6 +88,27 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar}: PanelGrup
                 variante="panelHeader"
                 acciones={
                     <>
+                        {/* [263A-4] Búsqueda estilo modalNotasBusqueda--headerCentrado */}
+                        {busquedaAbierta ? (
+                            <div className="panelGruposFb__busquedaHeader">
+                                <Search size={12} className="panelGruposFb__busquedaIcono" />
+                                <Input
+                                    ref={inputBusquedaRef}
+                                    tipo="text"
+                                    claseAdicional="panelGruposFb__busquedaInput"
+                                    placeholder="Buscar grupo..."
+                                    value={filtros.busqueda}
+                                    onChange={e => setFiltro('busqueda', e.target.value)}
+                                    onBlur={() => { if (!filtros.busqueda) setBusquedaAbierta(false); }}
+                                />
+                            </div>
+                        ) : (
+                            <Boton variante="badge" soloIcono onClick={toggleBusqueda} icono={<Search size={12} />} title="Buscar grupo" />
+                        )}
+                        {/* [263A-4] Filtros como SelectorBadge */}
+                        <SelectorBadge opciones={opcionesCategoria} valorActual={filtros.categoria} onChange={valor => setFiltro('categoria', valor)} icono={<FolderOpen size={12} />} titulo="Categoría" soloIcono />
+                        <SelectorBadge opciones={opcionesImportancia} valorActual={filtros.importancia} onChange={valor => setFiltro('importancia', valor)} icono={<Star size={12} />} titulo="Importancia" soloIcono />
+                        <Boton variante="badge" soloIcono onClick={() => setFiltro('mostrarOcultos', !filtros.mostrarOcultos)} icono={filtros.mostrarOcultos ? <Eye size={12} /> : <EyeOff size={12} />} title={filtros.mostrarOcultos ? 'Mostrando ocultos' : 'Ocultos ocultos'} claseAdicional={filtros.mostrarOcultos ? 'selectorBadgeBoton--activo' : ''} />
                         <Boton variante="badge" soloIcono onClick={recargar} icono={<RefreshCw size={12} />} title="Recargar" />
                         {handleMinimizar}
                     </>
@@ -83,37 +130,6 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar}: PanelGrup
                         </span>
                     </div>
                 )}
-
-                {/* Filtros */}
-                <div className="panelGruposFb__filtros">
-                    <Input
-                        tipo="search"
-                        claseAdicional="panelGruposFb__inputBusqueda"
-                        placeholder="Buscar grupo..."
-                        value={filtros.busqueda}
-                        onChange={e => setFiltro('busqueda', e.target.value)}
-                    />
-                    <Select
-                        claseAdicional="panelGruposFb__selectFiltro"
-                        value={filtros.categoria}
-                        onChange={e => setFiltro('categoria', e.target.value)}
-                        placeholder="Todas las categorías"
-                        opciones={categorias.map(c => ({valor: c.nombre, etiqueta: `${c.icono} ${c.nombre}`}))}
-                    />
-                    <Select
-                        claseAdicional="panelGruposFb__selectFiltro"
-                        value={filtros.importancia}
-                        onChange={e => setFiltro('importancia', e.target.value)}
-                        placeholder="Importancia"
-                        opciones={[5, 4, 3, 2, 1].map(n => ({valor: String(n), etiqueta: '★'.repeat(n)}))}
-                    />
-                    <Checkbox
-                        etiqueta="Ocultos"
-                        claseContenedor="panelGruposFb__toggleOcultos"
-                        checked={filtros.mostrarOcultos}
-                        onChange={e => setFiltro('mostrarOcultos', e.target.checked)}
-                    />
-                </div>
 
                 {/* Contenido */}
                 {cargando && !inicializado && (

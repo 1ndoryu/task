@@ -21,7 +21,7 @@
 
 3. avatarPreview sigue siendo estirado en vez de ser un circulo 1:1!
 
-4. el diseño de panelGruposFb se ve fatal, no sigue el estilo de los demas panales, los select no deben ser select normales sino que abran menu contextuales, tampoco deben estar dentro del panel sino en seccionAcciones como los filtros de los demás paneles, y la busqueda similar a como modalNotasBusqueda modalNotasBusqueda--headerCentrado.
+4. ~~(263A-4 COMPLETADA) Rediseño PanelGruposFb — filtros en header, SelectorBadge, búsqueda estilo notas~~
 
 5. ~~(263A-3 COMPLETADA) No crear notas en una nueva ventana — duplicar panel notas~~
 
