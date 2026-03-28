@@ -185,14 +185,17 @@ export function useMapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, ta
         return numSemanas * 7;
     }, [periodo, calcularSemanasAuto]);
 
-    /* Tamaño de semana para cálculos */
-    const tamanoSemana = TAMANO_CELDA[tamanoCelda] + GAP_CELDAS;
-
     /* Fecha de hoy efectiva para dependencia del useMemo */
     const fechaHoy = obtenerFechaHoy();
 
-    /* Rango de fechas, semanas y meses */
-    const {fechas, semanas, mesesVisibles} = useMemo(() => {
+    /* [283A-1] Rango de fechas, semanas, meses y tamaño real de celda.
+     * tamanoCeldaReal calcula el px exacto para que el grid llene 100% del contenedor,
+     * eliminando el espacio vacío que causaba max-width fijo cuando el contenedor
+     * era más ancho que numSemanas × TAMANO_CELDA (reportado 5 veces como bug). */
+    const MAX_CELDA_PX = 30;
+    const MIN_CELDA_PX = 6;
+
+    const {fechas, semanas, mesesVisibles, tamanoCeldaReal} = useMemo(() => {
         let inicio: Date;
         let fin: Date;
 
@@ -207,14 +210,27 @@ export function useMapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, ta
 
         const rangoFechas = generarRangoFechas(inicio, fin);
         const semanasAgrupadas = agruparPorSemanas(rangoFechas);
-        const meses = obtenerMesesVisibles(semanasAgrupadas, tamanoSemana);
+
+        /* Calcular tamaño de celda que llena el contenedor */
+        const numSemanas = semanasAgrupadas.length;
+        const tamanoBase = TAMANO_CELDA[tamanoCelda];
+        const anchoDisponible = anchoContenedor - ANCHO_DIAS_SEMANA - 40;
+
+        let celdaReal = tamanoBase;
+        if (anchoDisponible > 0 && numSemanas > 0) {
+            const calculado = (anchoDisponible - (numSemanas - 1) * GAP_CELDAS) / numSemanas;
+            celdaReal = Math.min(Math.max(calculado, MIN_CELDA_PX), MAX_CELDA_PX);
+        }
+
+        const meses = obtenerMesesVisibles(semanasAgrupadas, celdaReal + GAP_CELDAS);
 
         return {
             fechas: rangoFechas,
             semanas: semanasAgrupadas,
-            mesesVisibles: meses
+            mesesVisibles: meses,
+            tamanoCeldaReal: celdaReal
         };
-    }, [periodo, fechaInicio, fechaFin, diasAuto, tamanoSemana, fechaHoy]);
+    }, [periodo, fechaInicio, fechaFin, diasAuto, tamanoCelda, fechaHoy, anchoContenedor]);
 
     /* Estadísticas */
     const estadisticas = useMemo(() => {
@@ -238,6 +254,7 @@ export function useMapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, ta
     return {
         contenedorRef,
         fechas, semanas, mesesVisibles,
-        estadisticas
+        estadisticas,
+        tamanoCeldaReal
     };
 }

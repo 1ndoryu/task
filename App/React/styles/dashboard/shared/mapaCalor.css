@@ -130,45 +130,30 @@
     min-width: 0;
 }
 
-/* [263A-1] max-width por tamaño de celda, no hardcodeado a 22px.
- * 22px hardcodeado causaba overflow cuando JS calculaba más semanas de las que cabían
- * porque el JS subestimaba el ancho real. Ahora max-width = celda max-width del tamaño activo. */
+/* [283A-1] max-width dinámico via CSS variable --mapa-calor-tamano-celda.
+ * El hook useMapaCalor calcula el tamaño exacto de celda para que el grid
+ * llene 100% del contenedor, eliminando el espacio vacío a la derecha.
+ * Antes: max-width fijo (14/10/16px) dejaba espacio muerto en contenedores anchos. */
 .mapaCalorSemana {
     display: flex;
     flex-direction: column;
     flex: 1;
-    max-width: 14px;
+    max-width: var(--mapa-calor-tamano-celda, 14px);
     min-width: 0;
     gap: var(--dashboard-espacioMini);
-}
-
-.mapaCalorContenedor--celdaPequeno .mapaCalorSemana {
-    max-width: 10px;
-}
-
-.mapaCalorContenedor--celdaGrande .mapaCalorSemana {
-    max-width: 16px;
 }
 
 /* 
  * Celdas individuales 
  */
-/* [253A-3] Cambiado min-width:12px a width completo con flex-shrink.
- * min-width impedia que las celdas se encogieran, causando overflow recurrente. */
+/* [283A-1] max-width dinámico via variable CSS del contenedor.
+ * El tamaño se calcula en useMapaCalor para llenar 100% del ancho disponible. */
 .mapaCalorCelda {
     width: 100%;
-    max-width: 14px;
+    max-width: var(--mapa-calor-tamano-celda, 14px);
     aspect-ratio: 1;
     border-radius: var(--dashboard-radioXs);
     transition: transform var(--dashboard-transicionRapida);
-}
-
-.mapaCalorCelda--pequeno {
-    max-width: 10px;
-}
-
-.mapaCalorCelda--grande {
-    max-width: 16px;
 }
 
 .mapaCalorCelda--vacio {

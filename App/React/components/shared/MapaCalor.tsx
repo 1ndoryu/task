@@ -63,21 +63,10 @@ function formatearFecha(fecha: string): string {
  * Componente principal del Mapa de Calor
  */
 export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titulo, onClickDia, mostrarLeyenda = true, tamanoCelda = 'normal', compacto = false, id = 'mapaCalor'}: MapaCalorProps): JSX.Element {
-    const {contenedorRef, fechas: _fechas, semanas, mesesVisibles, estadisticas} = useMapaCalor({datos, periodo, fechaInicio, fechaFin, tamanoCelda});
+    const {contenedorRef, fechas: _fechas, semanas, mesesVisibles, estadisticas, tamanoCeldaReal} = useMapaCalor({datos, periodo, fechaInicio, fechaFin, tamanoCelda});
 
-    /* Clase del contenedor según tamaño */
-    const clasesTamano = {
-        pequeno: 'mapaCalorCelda--pequeno',
-        normal: '',
-        grande: 'mapaCalorCelda--grande'
-    };
-
-    /* [263A-1] Clase en el contenedor raíz para que CSS ajuste max-width de semana por tamaño */
-    const claseTamanoContenedor: Record<string, string> = {
-        pequeno: 'mapaCalorContenedor--celdaPequeno',
-        normal: '',
-        grande: 'mapaCalorContenedor--celdaGrande'
-    };
+    /* [283A-1] Clases de tamaño por celda ya no se usan para max-width.
+     * El tamaño real se calcula dinámicamente via CSS variable --mapa-calor-tamano-celda. */
 
     /* Renderizar celda de día */
     const renderCelda = (fecha: string, index: number) => {
@@ -100,7 +89,7 @@ export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titul
         return (
             <div
                 key={fecha}
-                className={`mapaCalorCelda mapaCalorCelda--nivel${nivel} ${clasesTamano[tamanoCelda]} ${esClickeable ? 'mapaCalorCelda--clickeable' : ''}`}
+                className={`mapaCalorCelda mapaCalorCelda--nivel${nivel} ${esClickeable ? 'mapaCalorCelda--clickeable' : ''}`}
                 title={tooltip}
                 onClick={esClickeable ? handleClick : undefined}
                 role={esClickeable ? 'button' : undefined}
@@ -117,7 +106,7 @@ export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titul
     };
 
     return (
-        <div ref={contenedorRef} id={id} className={`mapaCalorContenedor ${compacto ? 'mapaCalorContenedor--compacto' : ''} ${periodo === 'auto' ? 'mapaCalorContenedor--auto' : ''} ${claseTamanoContenedor[tamanoCelda] || ''}`}>
+        <div ref={contenedorRef} id={id} className={`mapaCalorContenedor ${compacto ? 'mapaCalorContenedor--compacto' : ''} ${periodo === 'auto' ? 'mapaCalorContenedor--auto' : ''}`} style={{'--mapa-calor-tamano-celda': `${tamanoCeldaReal}px`} as React.CSSProperties}>
             {/* Encabezado */}
             {!compacto && titulo && (
                 <div className="mapaCalorEncabezado">
