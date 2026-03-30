@@ -15,4 +15,4 @@
 
 ## Tareas pendientes
 
-17. Auditoría prunfunda y detalla del chatbot, revisar que no borre tareas sin confirmación del usuario, revisar que cumpla con su objetivo y testearlo.
+(Sin tareas pendientes)
