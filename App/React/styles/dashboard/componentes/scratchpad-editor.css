@@ -48,7 +48,8 @@
     padding: var(--dashboard-espacioLg);
     box-sizing: border-box;
     overflow: auto;
-    padding-right: 0 !important;
+    /* [303A-3] padding-right restaurado — antes era 0 !important y el texto
+     * pegaba contra el borde derecho sin espacio visual */
 }
 
 /*
