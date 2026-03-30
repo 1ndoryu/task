@@ -197,24 +197,5 @@
     border: 1px solid #16a34a;
 }
 
-/* 
- * Leyenda 
- */
-.mapaCalorLeyenda {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--dashboard-espacioSm);
-    margin-top: var(--dashboard-espacioMd);
-}
-
-.mapaCalorLeyendaTexto {
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoMicro);
-    color: var(--dashboard-textoSecundario);
-}
-
-.mapaCalorLeyendaCeldas {
-    display: flex;
-    gap: var(--dashboard-espacioMini);
-}
+/* [303A-1] mapaCalorLeyenda eliminada del componente React.
+ * CSS mantenido como referencia muerta — se puede eliminar en limpieza futura. */

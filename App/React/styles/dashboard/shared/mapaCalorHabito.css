@@ -30,11 +30,13 @@
  * Modo modal: se extiende al 100% del ancho
  * Sin leyenda ni estadisticas (controlado por JS)
  */
+/* [303A-1] Padding horizontal de 3px para evitar que las celdas del primer
+ * y último cuadro se recorten contra el borde del modal. */
 .mapaCalorHabitoContenedor--modal {
     width: 100%;
     background: transparent;
     border: none;
-    padding: var(--dashboard-espacioSm) 0;
+    padding: var(--dashboard-espacioSm) 3px;
 }
 
 .mapaCalorHabitoContenedor--modal .mapaCalorHabitoCuerpo {
@@ -176,21 +178,27 @@
 
 /* 
  * Indicadores de mes 
+ * [303A-1] gap eliminado: cada label de mes debe compartir el flujo flex
+ * con las semanas. Los labels vacíos (sin mes) mantienen el espacio.
  */
 .mapaCalorHabitoMeses {
     display: flex;
     flex-wrap: nowrap;
-    gap: var(--dashboard-espacioMini);
+    gap: 0;
     height: 12px;
     overflow: hidden;
 }
 
+/* [303A-1] flex:1 para que cada label (vacío o con texto) ocupe el mismo ancho
+ * que su columna de semana, alineando correctamente los nombres de mes. */
 .mapaCalorHabitoMes {
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoMicro);
     color: var(--dashboard-textoSecundario);
     white-space: nowrap;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 /* 

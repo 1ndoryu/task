@@ -158,20 +158,7 @@ export function MapaCalor({datos, periodo = 'auto', fechaInicio, fechaFin, titul
                 </div>
             </div>
 
-            {/* Leyenda */}
-            {mostrarLeyenda && !compacto && (
-                <div className="mapaCalorLeyenda">
-                    <span className="mapaCalorLeyendaTexto">Menos</span>
-                    <div className="mapaCalorLeyendaCeldas">
-                        <div className="mapaCalorCelda mapaCalorCelda--nivel0" title="Sin actividad" />
-                        <div className="mapaCalorCelda mapaCalorCelda--nivel1" title="Poca actividad" />
-                        <div className="mapaCalorCelda mapaCalorCelda--nivel2" title="Actividad moderada" />
-                        <div className="mapaCalorCelda mapaCalorCelda--nivel3" title="Buena actividad" />
-                        <div className="mapaCalorCelda mapaCalorCelda--nivel4" title="Mucha actividad" />
-                    </div>
-                    <span className="mapaCalorLeyendaTexto">Mas</span>
-                </div>
-            )}
+            {/* [303A-1] Leyenda eliminada por solicitud del usuario (tarea 18) */}
         </div>
     );
 }
