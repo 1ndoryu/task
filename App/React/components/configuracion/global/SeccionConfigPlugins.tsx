@@ -9,6 +9,7 @@ import {Boton} from '../../ui/Boton';
 import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../../config/registroPlugins';
 import {usePluginsStore} from '../../../stores/pluginsStore';
 import {useHabitosStore} from '../../../stores/habitosStore';
+import {useConfiguracionLayout} from '../../../hooks/useConfiguracionLayout';
 import {ConfigDeficitCalorico} from '../../dashboard/ConfigDeficitCalorico';
 import type {DefinicionPlugin} from '../../../types/plugins';
 
@@ -50,6 +51,7 @@ export function SeccionConfigPlugins(): JSX.Element {
     const togglePlugin = usePluginsStore(s => s.togglePlugin);
     const guardarConfiguracion = usePluginsStore(s => s.guardarConfiguracion);
     const habitos = useHabitosStore(s => s.habitos);
+    const {mostrarPanel, ocultarPanel} = useConfiguracionLayout();
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
 
     const plugins = useMemo(() => obtenerTodosPlugins(), []);
@@ -77,10 +79,18 @@ export function SeccionConfigPlugins(): JSX.Element {
                 }
             }
 
-            /* Mostrar/ocultar paneles se maneja fuera del modal config global */
-            obtenerPanelesDePlugin(pluginId);
+            /* [303A-8] Mostrar/ocultar paneles al activar/desactivar plugin desde config global.
+             * Antes solo se cambiaba el estado del store pero el panel seguía visible. */
+            const panelesIds = obtenerPanelesDePlugin(pluginId);
+            panelesIds.forEach(panelId => {
+                if (estabaActivo) {
+                    ocultarPanel(panelId);
+                } else {
+                    mostrarPanel(panelId);
+                }
+            });
         },
-        [pluginsActivos, togglePlugin, guardarConfiguracion, habitos]
+        [pluginsActivos, togglePlugin, guardarConfiguracion, habitos, mostrarPanel, ocultarPanel]
     );
 
     const ComponenteConfig = configAbierta ? COMPONENTES_CONFIG[configAbierta] : null;

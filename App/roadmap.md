@@ -35,8 +35,6 @@ muestra una lista de numeros de 1 a 493 que omiti por brevedad.
 </head>
 <body>
 
-13. Cuando desactivo el plugin de grupos, no se quita del panel hasta que lo minimizo, debe quitarse.
-
 16. La estension de grupo deja de funcionar despues de cerrar y abrir la pestaña de facebook.
 
 17. Auditoría prunfunda y detalla del chatbot, revisar que no borre tareas sin confirmación del usuario, revisar que cumpla con su objetivo y testearlo.
