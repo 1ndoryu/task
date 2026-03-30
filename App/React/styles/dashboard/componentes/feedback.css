@@ -100,6 +100,7 @@
 }
 
 /* Textarea */
+/* [303A-5] box-sizing: border-box para que width:100% + padding no desborde el modal */
 .modalFeedbackTextarea {
     width: 100%;
     min-height: 120px;
@@ -112,6 +113,7 @@
     font-size: var(--dashboard-tamanoBase);
     resize: vertical;
     transition: var(--dashboard-transicionRapida);
+    box-sizing: border-box;
 }
 
 .modalFeedbackTextarea:focus {

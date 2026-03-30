@@ -5,7 +5,7 @@
  * Lógica extraída a useModalFeedback hook
  */
 
-import {MessageSquare, Send, AlertCircle, CheckCircle, Loader2} from 'lucide-react';
+import {MessageSquare, Send, AlertCircle, CheckCircle, Loader2, Lightbulb, Bug, MessageCircle} from 'lucide-react';
 import {Modal} from './Modal';
 import {Boton, Textarea} from '../ui';
 import {useModalFeedback} from '../../hooks/dashboard/useModalFeedback';
@@ -17,10 +17,11 @@ interface ModalFeedbackProps {
 
 type TipoFeedback = 'sugerencia' | 'bug' | 'otro';
 
-const TIPOS_FEEDBACK: {valor: TipoFeedback; etiqueta: string; icono: string}[] = [
-    {valor: 'sugerencia', etiqueta: 'Sugerencia', icono: '💡'},
-    {valor: 'bug', etiqueta: 'Reportar problema', icono: '🐛'},
-    {valor: 'otro', etiqueta: 'Otro', icono: '💬'}
+/* [303A-5] Emojis reemplazados por iconos SVG (lucide-react) */
+const TIPOS_FEEDBACK: {valor: TipoFeedback; etiqueta: string; icono: JSX.Element}[] = [
+    {valor: 'sugerencia', etiqueta: 'Sugerencia', icono: <Lightbulb size={14} />},
+    {valor: 'bug', etiqueta: 'Reportar problema', icono: <Bug size={14} />},
+    {valor: 'otro', etiqueta: 'Otro', icono: <MessageCircle size={14} />}
 ];
 
 export function ModalFeedback({estaAbierto, onCerrar}: ModalFeedbackProps): JSX.Element | null {

@@ -139,6 +139,8 @@
     background: var(--dashboard-fondoSecundario);
     resize: vertical;
     transition: all 0.2s ease;
+    /* [303A-5] Prevenir overflow por width:100% + padding */
+    box-sizing: border-box;
 }
 
 /* [233A-35] Sin borde de color ni sombra al focus */
