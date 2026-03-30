@@ -1,8 +1,13 @@
+/* [303A-7] Override: quitar padding de modalContenido para este modal */
+.modalContenidoVersiones {
+    padding: 0;
+}
+
 .contenedorVersiones {
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacio2xl);
-    padding: var(--dashboard-espacioSm);
+    padding: 20px;
     max-height: 60vh;
     overflow-y: auto;
     /* Scrollbar */
@@ -114,4 +119,12 @@
 
 .textoCambio {
     opacity: 0.9;
+}
+
+/* [303A-7] Indicador de carga diferida */
+.contenedorVersionesCargando {
+    text-align: center;
+    padding: var(--dashboard-espacioLg) 0;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
 }

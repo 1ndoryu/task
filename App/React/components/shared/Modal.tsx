@@ -23,9 +23,11 @@ export interface ModalProps {
     accionesEncabezado?: React.ReactNode;
     /* Si true, no muestra la X de cerrar */
     ocultarBotonCerrar?: boolean;
+    /* [303A-7] Clase CSS adicional para el div .modalContenido (permite overrides de padding por modal) */
+    claseContenido?: string;
 }
 
-export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false}: ModalProps): JSX.Element | null {
+export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false, claseContenido = ''}: ModalProps): JSX.Element | null {
     const {esMovil, manejarClickOverlay} = useModal({estaAbierto, onCerrar});
 
     if (!estaAbierto) return null;
@@ -54,7 +56,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                         )}
                     </div>
                 </div>
-                <div className="modalContenido">{children}</div>
+                <div className={`modalContenido ${claseContenido}`}>{children}</div>
             </div>
         </div>
     );

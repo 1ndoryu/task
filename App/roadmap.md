@@ -37,6 +37,6 @@ muestra una lista de numeros de 1 a 493 que omiti por brevedad.
 
 13. Cuando desactivo el plugin de grupos, no se quita del panel hasta que lo minimizo, debe quitarse.
 
-14. Actualiza el changelog del proyecto con todas las tareas completadas de App\Agente\completados, como son muchas cosas puedes dividir las versiones. haz que el modal de Historial de Versiones tenga carga difererida, carga por scroll. No se porque modalContenido agrega 20px padding ahi pero quitalo especificamente de ese modal, y agrega padding: 20px; en contenedorVersiones 
-
 16. La estension de grupo deja de funcionar despues de cerrar y abrir la pestaña de facebook.
+
+17. Auditoría prunfunda y detalla del chatbot, revisar que no borre tareas sin confirmación del usuario, revisar que cumpla con su objetivo y testearlo.

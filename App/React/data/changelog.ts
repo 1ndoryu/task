@@ -22,6 +22,84 @@ export interface Version {
  */
 export const HISTORIAL_VERSIONES: Version[] = [
     {
+        version: 'v1.0.28-beta',
+        fecha: '2026-03-28',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Iconos de Sol y Luna para seleccionar rápidamente horarios de día o noche en los hábitos'},
+            {tipo: 'mejora', descripcion: 'El historial de meses en el mapa de hábitos ahora separa cada mes correctamente'},
+            {tipo: 'mejora', descripcion: 'Los nuevos usuarios ahora ven dos columnas por defecto para aprovechar mejor el espacio'},
+            {tipo: 'mejora', descripcion: 'Menos espacio en la barra lateral de configuración para una vista más compacta'},
+            {tipo: 'mejora', descripcion: 'Los botones principales ahora tienen mejor contraste con fondo blanco y texto oscuro'},
+            {tipo: 'mejora', descripcion: 'El botón de enviar del chat IA ya no tiene borde visible'},
+            {tipo: 'mejora', descripcion: 'El campo de texto del chat IA ahora ocupa todo el ancho disponible'},
+            {tipo: 'mejora', descripcion: 'Ya no necesitas configurar la misma API Key de IA en dos lugares diferentes'},
+            {tipo: 'arreglo', descripcion: 'El mapa de actividad ahora se adapta correctamente al ancho del panel sin dejar espacios vacíos'},
+            {tipo: 'arreglo', descripcion: 'Se eliminó la leyenda innecesaria del panel de actividad'},
+            {tipo: 'arreglo', descripcion: 'Los emojis en el modal de comentarios fueron reemplazados por iconos que se ven bien en todos los dispositivos'},
+            {tipo: 'arreglo', descripcion: 'El área de texto en las notas rápidas ya no pega el texto contra el borde derecho'},
+            {tipo: 'arreglo', descripcion: 'El campo de texto del modal de comentarios ya no se desborda fuera de su contenedor'},
+            {tipo: 'arreglo', descripcion: 'Proporciones del avatar, selector de repetición y vista compacta corregidas'},
+            {tipo: 'arreglo', descripcion: 'Botones sin efectos visuales extraños al pasar el cursor'}
+        ]
+    },
+    {
+        version: 'v1.0.27-beta',
+        fecha: '2026-03-26',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Calendario interactivo para seleccionar fechas en lugar de un menú desplegable'},
+            {tipo: 'nuevo', descripcion: 'Al crear notas, puedes elegir entre crearla aquí o en una ventana flotante'},
+            {tipo: 'nuevo', descripcion: 'Panel de Grupos de Facebook que sincroniza tus grupos con filtros por categoría e importancia'},
+            {tipo: 'nuevo', descripcion: 'Configuración del panel de grupos con tu token de API'},
+            {tipo: 'nuevo', descripcion: 'Cada panel de notas duplicado mantiene su propio contenido independiente'},
+            {tipo: 'mejora', descripcion: 'El panel de grupos sigue el diseño visual del resto de la aplicación'},
+            {tipo: 'mejora', descripcion: 'Puedes duplicar el panel de notas para tener varias notas abiertas al mismo tiempo'},
+            {tipo: 'mejora', descripcion: 'Al duplicar el panel de notas, se abre automáticamente un espacio limpio'},
+            {tipo: 'mejora', descripcion: '"Omitir hoy" ahora es más claro que "Posponer hoy" en los hábitos'},
+            {tipo: 'mejora', descripcion: 'Posponer ahora dice "1 día" en lugar de "Mañana" para mayor claridad'},
+            {tipo: 'mejora', descripcion: 'El icono de IA se ve directamente en la barra de paneles cerrados'},
+            {tipo: 'mejora', descripcion: 'Estimación de calorías mejorada para comidas latinoamericanas con medidas informales'},
+            {tipo: 'arreglo', descripcion: 'Los subhábitos fantasma que no se podían borrar ni reaparecían ya están corregidos'},
+            {tipo: 'arreglo', descripcion: 'El avatar del perfil ahora mantiene su proporción circular correctamente'},
+            {tipo: 'arreglo', descripcion: 'Problemas de edición de subhábitos y seguimiento automático resueltos'},
+            {tipo: 'arreglo', descripcion: 'Comportamiento de hover corregido en varios elementos'}
+        ]
+    },
+    {
+        version: 'v1.0.26-beta',
+        fecha: '2026-03-24',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Cálculo de calorías con inteligencia artificial propia que no requiere servicios de pago'},
+            {tipo: 'mejora', descripcion: 'Modelos de IA más inteligentes disponibles para el chat (GPT-OSS 120B, Llama 4, Kimi K2)'},
+            {tipo: 'mejora', descripcion: 'El botón de envío del chat IA ahora es más grande y visible'},
+            {tipo: 'mejora', descripcion: 'Icono de robot en el panel del asistente IA para identificarlo fácilmente'},
+            {tipo: 'mejora', descripcion: 'La configuración de IA se accede desde el modal de configuración centralizado'},
+            {tipo: 'mejora', descripcion: 'Más espacio en la barra del buscador de notas'},
+            {tipo: 'mejora', descripcion: 'El botón cerrar invisible en modales ahora está completamente oculto'},
+            {tipo: 'arreglo', descripcion: 'La ventana de oportunidad de los hábitos ahora aparece en la posición correcta desde el inicio'},
+            {tipo: 'arreglo', descripcion: 'Los subhábitos ya no abren el modal equivocado al hacer clic'},
+            {tipo: 'arreglo', descripcion: 'El historial de hábitos ya no se desborda fuera de su panel'},
+            {tipo: 'arreglo', descripcion: 'El padding del modal de configuración ahora es consistente'},
+            {tipo: 'arreglo', descripcion: 'Las alturas de los badges ahora son uniformes'}
+        ]
+    },
+    {
+        version: 'v1.0.25-beta',
+        fecha: '2026-03-23',
+        cambios: [
+            {tipo: 'nuevo', descripcion: 'Asistente IA integrado en el panel para crear tareas y hábitos por chat'},
+            {tipo: 'nuevo', descripcion: 'Todas las configuraciones ahora están en un único modal organizado por categorías'},
+            {tipo: 'nuevo', descripcion: 'Puedes posponer tareas y hábitos eligiendo el tiempo exacto: 1h, 4h, 8h, 1 día, 2 días o 1 semana'},
+            {tipo: 'mejora', descripcion: 'Los plugins ahora se acceden desde la configuración centralizada'},
+            {tipo: 'mejora', descripcion: 'El modal de configuración se convierte en panel deslizable en el móvil'},
+            {tipo: 'mejora', descripcion: 'Iconos y colores unificados para todas las prioridades'},
+            {tipo: 'mejora', descripcion: 'Selector de importancia con iconos más claros y consistentes'},
+            {tipo: 'mejora', descripcion: 'Más de 40 ajustes de espaciado, bordes y estilo visual en todo el panel'},
+            {tipo: 'arreglo', descripcion: 'Errores de tipos pre-existentes corregidos para mayor estabilidad'},
+            {tipo: 'arreglo', descripcion: 'El panel deslizable en móvil ahora carga las fuentes correctamente'},
+            {tipo: 'arreglo', descripcion: 'Alineación de iconos y espaciado corregidos en varios paneles'}
+        ]
+    },
+    {
         version: 'v1.0.24-beta',
         fecha: '2026-02-07',
         cambios: [
