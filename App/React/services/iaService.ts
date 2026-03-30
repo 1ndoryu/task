@@ -143,7 +143,8 @@ export async function procesarMensajeIA(
             tipo: parsed.acciones[i].tipo,
             parametros: parsed.acciones[i].parametros,
             ejecutada: r.exito,
-            resultado: r.descripcion
+            resultado: r.descripcion,
+            pendienteConfirmacion: r.pendienteConfirmacion
         }));
     }
 

@@ -15,26 +15,4 @@
 
 ## Tareas pendientes
 
-12. Nunca aparecen los grupos de facebook en el panel, a de entender que ya tenia grupos guardados, ya recargue la extension, puse la api que genere en la extension, le di a sincronizar, y sigue sin aparecern ningun grupo. Tal vez tenga que ver este error que veo
-
-Executing inline event handler violates the following Content Security Policy directive 'script-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.
-Contexto
-dashboard/dashboard.html
-Seguimiento de la pila
-dashboard/dashboard.html:1 (función anónima)
-1
-muestra una lista de numeros de 1 a 493 que omiti por brevedad.
-493
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FB Group Manager — Dashboard</title>
-  <link rel="stylesheet" href="dashboard.css">
-</head>
-<body>
-
-16. La estension de grupo deja de funcionar despues de cerrar y abrir la pestaña de facebook.
-
 17. Auditoría prunfunda y detalla del chatbot, revisar que no borre tareas sin confirmación del usuario, revisar que cumpla con su objetivo y testearlo.

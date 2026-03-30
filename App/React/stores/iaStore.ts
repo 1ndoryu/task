@@ -14,12 +14,14 @@ import {persist} from 'zustand/middleware';
 /* Roles del chat */
 export type RolMensaje = 'usuario' | 'asistente' | 'sistema';
 
-/* Acción estructurada que la IA puede ejecutar (Fase 3) */
+/* Acción estructurada que la IA puede ejecutar (Fase 3)
+ * [303A-11] pendienteConfirmacion: acciones destructivas requieren confirmación del usuario */
 export interface AccionIA {
     tipo: string;
     parametros: Record<string, unknown>;
     ejecutada?: boolean;
     resultado?: string;
+    pendienteConfirmacion?: boolean;
 }
 
 /* Mensaje individual del chat */
@@ -52,6 +54,8 @@ interface IAAcciones {
     setModelo: (modelo: string) => void;
     setPreferencias: (preferencias: string) => void;
     agregarMensaje: (mensaje: MensajeIA) => void;
+    /* [303A-11] Actualizar un mensaje existente (para confirmar/rechazar acciones pendientes) */
+    actualizarMensaje: (id: string, cambios: Partial<MensajeIA>) => void;
     setEnviando: (enviando: boolean) => void;
     setError: (error: string | null) => void;
     incrementarTokens: (cantidad: number) => void;
@@ -87,6 +91,9 @@ export const useIAStore = create<IAStore>()(
             /* Acciones de chat */
             agregarMensaje: (mensaje) => set(state => ({
                 mensajes: [...state.mensajes, mensaje]
+            })),
+            actualizarMensaje: (id, cambios) => set(state => ({
+                mensajes: state.mensajes.map(m => m.id === id ? {...m, ...cambios} : m)
             })),
             setEnviando: (enviando) => set({enviando}),
             setError: (error) => set({error}),

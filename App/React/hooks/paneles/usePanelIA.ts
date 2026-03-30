@@ -9,6 +9,7 @@
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
 import {procesarMensajeIA} from '../../services/iaService';
+import {ejecutarAccionDestructiva} from '../../config/accionesIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
 
@@ -25,6 +26,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const modelo = useIAStore(s => s.modelo);
     const tokensUsados = useIAStore(s => s.tokensUsados);
     const agregarMensaje = useIAStore(s => s.agregarMensaje);
+    const actualizarMensaje = useIAStore(s => s.actualizarMensaje);
     const setEnviando = useIAStore(s => s.setEnviando);
     const setError = useIAStore(s => s.setError);
     const incrementarTokens = useIAStore(s => s.incrementarTokens);
@@ -90,11 +92,50 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
         }
     }, [manejarEnviar]);
 
+    /* [303A-11] Confirmar acción destructiva pendiente (eliminar tarea/hábito).
+     * Ejecuta la eliminación real y actualiza el mensaje en el chat. */
+    const confirmarAccion = useCallback((mensajeId: string, indiceAccion: number) => {
+        const mensaje = useIAStore.getState().mensajes.find(m => m.id === mensajeId);
+        if (!mensaje?.acciones?.[indiceAccion]) return;
+        const accion = mensaje.acciones[indiceAccion];
+        if (!accion.pendienteConfirmacion) return;
+
+        const resultado = ejecutarAccionDestructiva(
+            {tipo: accion.tipo, parametros: accion.parametros},
+            ejecutoresTareas
+        );
+
+        const nuevasAcciones = [...mensaje.acciones];
+        nuevasAcciones[indiceAccion] = {
+            ...accion,
+            ejecutada: resultado.exito,
+            resultado: resultado.descripcion,
+            pendienteConfirmacion: false
+        };
+        actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+    }, [ejecutoresTareas, actualizarMensaje]);
+
+    /* [303A-11] Rechazar acción destructiva pendiente */
+    const rechazarAccion = useCallback((mensajeId: string, indiceAccion: number) => {
+        const mensaje = useIAStore.getState().mensajes.find(m => m.id === mensajeId);
+        if (!mensaje?.acciones?.[indiceAccion]) return;
+
+        const nuevasAcciones = [...mensaje.acciones];
+        nuevasAcciones[indiceAccion] = {
+            ...mensaje.acciones[indiceAccion],
+            ejecutada: false,
+            resultado: 'Cancelado por el usuario',
+            pendienteConfirmacion: false
+        };
+        actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+    }, [actualizarMensaje]);
+
     return {
         inputTexto, setInputTexto,
         refScroll,
         mensajes, enviando, error, apiKey, tokensUsados,
         limpiarChat,
-        manejarEnviar, manejarTecla
+        manejarEnviar, manejarTecla,
+        confirmarAccion, rechazarAccion
     };
 }

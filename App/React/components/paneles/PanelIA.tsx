@@ -12,7 +12,7 @@
  * [243A-3] Botón enviar más grande y con separación del borde.
  */
 
-import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle, Settings} from 'lucide-react';
+import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle, Settings, AlertTriangle} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {Boton, Textarea} from '../ui';
 import {usePanelIA} from '../../hooks/paneles/usePanelIA';
@@ -34,7 +34,8 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
         refScroll,
         mensajes, enviando, error, apiKey, tokensUsados,
         limpiarChat,
-        manejarEnviar, manejarTecla
+        manejarEnviar, manejarTecla,
+        confirmarAccion, rechazarAccion
     } = usePanelIA({crearTarea, toggleTarea, editarTarea, eliminarTarea, tareas});
 
     /* Renderizado de un mensaje individual */
@@ -50,16 +51,32 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                 <div className="panelIAMensajeBurbuja">
                     <span className="panelIAMensajeTexto">{mensaje.contenido}</span>
                     {/* [233A-69] Fase 2+3: Mostrar acciones ejecutadas */}
+                    {/* [303A-11] Acciones pendientes de confirmación muestran botones */}
                     {mensaje.acciones && mensaje.acciones.length > 0 && (
                         <div className="panelIAAcciones">
                             {mensaje.acciones.map((accion, i) => (
-                                <div
-                                    key={i}
-                                    className={`panelIAAccionBadge ${accion.ejecutada ? 'panelIAAccionBadge--exito' : 'panelIAAccionBadge--error'}`}
-                                >
-                                    {accion.ejecutada ? <CheckCircle size={10} /> : <XCircle size={10} />}
-                                    <span>{accion.resultado || accion.tipo}</span>
-                                </div>
+                                accion.pendienteConfirmacion ? (
+                                    <div key={i} className="panelIAAccionBadge panelIAAccionBadge--pendiente">
+                                        <AlertTriangle size={10} />
+                                        <span>{accion.resultado || accion.tipo}</span>
+                                        <button
+                                            className="panelIAAccionBtn panelIAAccionBtn--confirmar"
+                                            onClick={() => confirmarAccion(mensaje.id, i)}
+                                        >Confirmar</button>
+                                        <button
+                                            className="panelIAAccionBtn panelIAAccionBtn--cancelar"
+                                            onClick={() => rechazarAccion(mensaje.id, i)}
+                                        >Cancelar</button>
+                                    </div>
+                                ) : (
+                                    <div
+                                        key={i}
+                                        className={`panelIAAccionBadge ${accion.ejecutada ? 'panelIAAccionBadge--exito' : 'panelIAAccionBadge--error'}`}
+                                    >
+                                        {accion.ejecutada ? <CheckCircle size={10} /> : <XCircle size={10} />}
+                                        <span>{accion.resultado || accion.tipo}</span>
+                                    </div>
+                                )
                             ))}
                         </div>
                     )}

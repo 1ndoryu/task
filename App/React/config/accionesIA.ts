@@ -36,6 +36,7 @@ export interface ResultadoAccion {
     tipo: string;
     exito: boolean;
     descripcion: string;
+    pendienteConfirmacion?: boolean;
 }
 
 /*
@@ -119,6 +120,8 @@ REGLAS:
 - No inventes IDs. Solo usa IDs que aparezcan en el contexto.
 - Sé conciso. Confirma las acciones que ejecutas.
 - Responde siempre en español.
+- NUNCA uses eliminar_tarea o eliminar_habito a menos que el usuario haya pedido EXPLÍCITAMENTE borrar o eliminar algo. Si el usuario dice "limpiar", "organizar" o "arreglar", NO elimines — pregunta primero qué quiere hacer con cada elemento.
+- Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
 ${preferencias ? `\nPREFERENCIAS DEL USUARIO:\n${preferencias}` : ''}
 ${contexto}`;
 }
@@ -215,8 +218,10 @@ export function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: Ejecut
                         resultados.push({tipo: accion.tipo, exito: false, descripcion: `Tarea #${id} no encontrada`});
                         break;
                     }
-                    ejecutoresTareas.eliminarTarea(id);
-                    resultados.push({tipo: accion.tipo, exito: true, descripcion: `Tarea #${id} eliminada`});
+                    /* [303A-11] Las eliminaciones requieren confirmación explícita del usuario.
+                     * No se ejecutan inmediatamente — se marcan como pendientes. */
+                    const tarea = ejecutoresTareas.tareas.find(t => t.id === id);
+                    resultados.push({tipo: accion.tipo, exito: false, descripcion: `Eliminar "${tarea?.texto || `#${id}`}" — pendiente de confirmación`, pendienteConfirmacion: true});
                     break;
                 }
                 case 'crear_habito': {
@@ -249,8 +254,9 @@ export function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: Ejecut
                         resultados.push({tipo: accion.tipo, exito: false, descripcion: `Hábito #${id} no encontrado`});
                         break;
                     }
-                    storeHabitos.eliminarHabito(id);
-                    resultados.push({tipo: accion.tipo, exito: true, descripcion: `Hábito #${id} eliminado`});
+                    /* [303A-11] Las eliminaciones requieren confirmación — no se ejecutan directamente */
+                    const habito = storeHabitos.habitos.find(h => h.id === id);
+                    resultados.push({tipo: accion.tipo, exito: false, descripcion: `Eliminar "${habito?.nombre || `#${id}`}" — pendiente de confirmación`, pendienteConfirmacion: true});
                     break;
                 }
                 default:
@@ -266,6 +272,35 @@ export function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: Ejecut
 }
 
 /* Validadores de enums */
+
+/* [303A-11] Ejecutar una acción destructiva previamente pendiente de confirmación.
+ * Se usa cuando el usuario hace click en "Confirmar" en el UI del chat. */
+export function ejecutarAccionDestructiva(accion: AccionLLM, ejecutoresTareas: EjecutoresTareasIA): ResultadoAccion {
+    const storeHabitos = useHabitosStore.getState();
+    try {
+        if (accion.tipo === 'eliminar_tarea') {
+            const id = Number(accion.parametros.id);
+            if (!id || !ejecutoresTareas.tareas.some(t => t.id === id)) {
+                return {tipo: accion.tipo, exito: false, descripcion: `Tarea #${id} no encontrada`};
+            }
+            ejecutoresTareas.eliminarTarea(id);
+            return {tipo: accion.tipo, exito: true, descripcion: `Tarea #${id} eliminada`};
+        }
+        if (accion.tipo === 'eliminar_habito') {
+            const id = Number(accion.parametros.id);
+            if (!id || !storeHabitos.habitos.some(h => h.id === id)) {
+                return {tipo: accion.tipo, exito: false, descripcion: `Hábito #${id} no encontrado`};
+            }
+            storeHabitos.eliminarHabito(id);
+            return {tipo: accion.tipo, exito: true, descripcion: `Hábito #${id} eliminado`};
+        }
+        return {tipo: accion.tipo, exito: false, descripcion: 'Acción no es destructiva'};
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido';
+        return {tipo: accion.tipo, exito: false, descripcion: msg};
+    }
+}
+
 function validarPrioridad(val: unknown): 'muy_alta' | 'alta' | 'media' | 'baja' | undefined {
     if (val === 'muy_alta' || val === 'alta' || val === 'media' || val === 'baja') return val;
     return undefined;
