@@ -6,6 +6,7 @@
 
 import {useCallback, useMemo} from 'react';
 import {useDeficitCaloricoStore} from '../stores/deficitCaloricoStore';
+import {useIAStore} from '../stores/iaStore';
 import {usePluginsStore} from '../stores/pluginsStore';
 import {calcularTDEE, obtenerMetodoCalculo} from '../utils/calculoTMB';
 import {estimarCaloriasTexto} from '../services/geminiCaloriasService';
@@ -48,7 +49,10 @@ export function useDeficitCalorico(fechaActiva?: string) {
     /* Seleccionar directamente del state para referencia estable (evita loop infinito por objeto nuevo en cada snapshot) */
     const config = usePluginsStore(s => s.configuracionPlugins['deficit-calorico']) as unknown as {apiKey?: string} | undefined;
 
-    const apiKey = store.apiKeyGemini || config?.apiKey || '';
+    /* [303A-6] Centralización API Groq: prioridad local > iaStore > pluginsStore.
+     * Si el usuario configuró la key en el panel IA, no necesita repetirla aquí. */
+    const apiKeyIA = useIAStore(s => s.apiKey);
+    const apiKey = store.apiKeyGemini || apiKeyIA || config?.apiKey || '';
 
     /* TMB calculada */
     const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);

@@ -133,7 +133,9 @@
     flex: 1;
 }
 
+/* [303A-6] width: 100% para que el textarea ocupe todo el ancho del contenedor */
 .panelIAInputTexto {
+    width: 100%;
     border: none;
     background: transparent;
     color: var(--texto-principal);
@@ -145,6 +147,7 @@
     max-height: 80px;
     padding: 4px 0;
     font-family: inherit;
+    box-sizing: border-box;
 }
 
 .panelIAInputTexto::placeholder {
@@ -187,12 +190,15 @@
 
 /* [243A-1] Config inline eliminada — ahora vive en el modal global (sección 'panelIA') */
 
-/* [263A-10] Botón de envío blanco sin fondo, ghost con color blanco */
+/* [263A-10] Botón de envío blanco sin fondo, ghost con color blanco
+ * [303A-6] border: none para eliminar borde por defecto del botón */
 .panelIABotonEnviar {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
+    border: none;
     border-radius: 8px;
     margin-bottom: 2px;
     color: var(--blanco);
+    cursor: pointer;
 }

@@ -5,7 +5,7 @@
  * Lógica extraída a useConfigDeficitCalorico (SRP)
  */
 
-import {Save, Eye, EyeOff} from 'lucide-react';
+import {Save} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import {Input} from '../ui/Input';
 import {Select} from '../ui/Select';
@@ -18,13 +18,11 @@ interface ConfigDeficitCaloricoProps {
 export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): JSX.Element {
     const {
         datos,
-        keyGroq, setKeyGroq,
-        mostrarKeyGroq,
+        tieneApiKey,
         tdeePreview,
         metodo,
         manejarGuardar,
         actualizarCampo,
-        alternarKeyGroq,
     } = useConfigDeficitCalorico({onCerrar});
 
     return (
@@ -78,16 +76,14 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                 )}
             </div>
 
+            {/* [303A-6] API key centralizada — se configura desde Configuración → Panel IA */}
             <div className="configDeficitSeccion">
                 <h4 className="configDeficitSeccionTitulo">API Key de Groq (IA)</h4>
-                <p className="configDeficitSeccionNota">Necesaria para calcular los macronutrientes con inteligencia artificial.</p>
-
-                <div className="configDeficitApiKey">
-                    <Input tipo={mostrarKeyGroq ? 'text' : 'password'} claseAdicional="configDeficitInput configDeficitInputApiKey" placeholder="gsk_..." value={keyGroq} onChange={e => setKeyGroq((e.target as HTMLInputElement).value)} />
-                    <Boton type="button" variante="icono" onClick={alternarKeyGroq} title={mostrarKeyGroq ? 'Ocultar' : 'Mostrar'}>
-                        {mostrarKeyGroq ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </Boton>
-                </div>
+                <p className="configDeficitSeccionNota">
+                    {tieneApiKey
+                        ? 'API Key configurada correctamente desde Configuración → Asistente IA.'
+                        : 'Configura tu API Key de Groq en Configuración → Asistente IA para usar el cálculo por IA.'}
+                </p>
             </div>
 
             <div className="configDeficitAcciones">

@@ -6,6 +6,7 @@
 
 import {useState, useCallback} from 'react';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
+import {useIAStore} from '../../stores/iaStore';
 import {useShallow} from 'zustand/react/shallow';
 import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
@@ -30,27 +31,28 @@ interface UseConfigDeficitCaloricoParams {
 }
 
 export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoParams) {
-    const {datosUsuario, apiKeyGemini, guardarDatosUsuario, guardarApiKey} = useDeficitCaloricoStore(
+    const {datosUsuario, guardarDatosUsuario} = useDeficitCaloricoStore(
         useShallow(s => ({
             datosUsuario: s.datosUsuario,
-            apiKeyGemini: s.apiKeyGemini,
             guardarDatosUsuario: s.guardarDatosUsuario,
-            guardarApiKey: s.guardarApiKey,
         }))
     );
 
+    /* [303A-6] API key centralizada: lee de iaStore (fuente principal) o deficitStore (legacy).
+     * El usuario configura la key en Configuración → Asistente IA. */
+    const apiKeyIA = useIAStore(s => s.apiKey);
+    const apiKeyLegacy = useDeficitCaloricoStore(s => s.apiKeyGemini);
+    const tieneApiKey = !!(apiKeyIA || apiKeyLegacy);
+
     const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
-    const [keyGroq, setKeyGroq] = useState(apiKeyGemini);
-    const [mostrarKeyGroq, setMostrarKeyGroq] = useState(false);
 
     const tdeePreview = calcularTDEE(datos);
     const metodo = obtenerMetodoCalculo(datos);
 
     const manejarGuardar = useCallback(() => {
         guardarDatosUsuario(datos);
-        guardarApiKey(keyGroq);
         onCerrar();
-    }, [datos, keyGroq, guardarDatosUsuario, guardarApiKey, onCerrar]);
+    }, [datos, guardarDatosUsuario, onCerrar]);
 
     const actualizarCampo = useCallback((campo: keyof DatosUsuarioTMB, valor: string) => {
         if (campo === 'sexo') {
@@ -65,18 +67,12 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
         setDatos(prev => ({...prev, [campo]: numerico}));
     }, []);
 
-    const alternarKeyGroq = useCallback(() => {
-        setMostrarKeyGroq(prev => !prev);
-    }, []);
-
     return {
         datos,
-        keyGroq, setKeyGroq,
-        mostrarKeyGroq,
+        tieneApiKey,
         tdeePreview,
         metodo,
         manejarGuardar,
         actualizarCampo,
-        alternarKeyGroq,
     };
 }

@@ -15,30 +15,6 @@
 
 ## Tareas pendientes
 
-1. ~~(263A-5 COMPLETADA) Modal configuración GruposFb con token y API URL~~
-
-2. ~~(263A-1 COMPLETADA) EN panelActividadMapa LOS CUADROS SIGUIEN SALIENDOSESE~~
-
-3. ~~(263A-6 COMPLETADA) Fix avatarPreview círculo 1:1~~
-
-4. ~~(263A-4 COMPLETADA) Rediseño PanelGruposFb — filtros en header, SelectorBadge, búsqueda estilo notas~~
-
-5. ~~(263A-3 COMPLETADA) No crear notas en una nueva ventana — duplicar panel notas~~
-
-6. ~~(263A-7 COMPLETADA) Click en nota en móvil cierra modal y abre en panel~~
-
-7. ~~(263A-8 COMPLETADA) Renombrar "posponer mañana" a "1 día"~~
-
-8. ~~(263A-2 COMPLETADA) Fix subhábitos fantasma~~
-
-9. ~~(263A-9 COMPLETADA) Duplicar panel scratchpad crea nota nueva~~
-
-10. ~~(263A-10 COMPLETADA) Botón enviar panelIA blanco sin fondo~~ 
-
-11. ~~(263A-11 COMPLETADA) Panel GruposFb convertido a plugin desactivable~~
-
-12. ~~(263A-12 COMPLETADA) Notas independientes por panel scratchpad — refactorización notaActiva → notasActivaPorPanel~~
-
 12. Nunca aparecen los grupos de facebook en el panel, a de entender que ya tenia grupos guardados, ya recargue la extension, puse la api que genere en la extension, le di a sincronizar, y sigue sin aparecern ningun grupo. Tal vez tenga que ver este error que veo
 
 Executing inline event handler violates the following Content Security Policy directive 'script-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.
@@ -63,4 +39,4 @@ muestra una lista de numeros de 1 a 493 que omiti por brevedad.
 
 14. Actualiza el changelog del proyecto con todas las tareas completadas de App\Agente\completados, como son muchas cosas puedes dividir las versiones. haz que el modal de Historial de Versiones tenga carga difererida, carga por scroll. No se porque modalContenido agrega 20px padding ahi pero quitalo especificamente de ese modal, y agrega padding: 20px; en contenedorVersiones 
 
-15. reduce el padding de 20 a 10 en .configGlobalSidebar
+16. La estension de grupo deja de funcionar despues de cerrar y abrir la pestaña de facebook.
