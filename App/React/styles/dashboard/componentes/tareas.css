@@ -677,6 +677,13 @@
     background-color: var(--dashboard-estadoExito);
 }
 
+/* [014A-21] Padding en lista pendientes solo desktop para respiro visual */
+@media (min-width: 481px) {
+    .listaTareasPendientes {
+        padding: 6px;
+    }
+}
+
 /* 
  * MODO COMPACTO
  * Reducción de espaciado y fuente
