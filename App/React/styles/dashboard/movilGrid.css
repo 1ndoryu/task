@@ -163,7 +163,7 @@
 
     /* Separador entre grupos */
     .menuOpcionesPanelSeparador {
-        height: 1px;
+        height: 0.8px;
         background: var(--dashboard-bordeSutil);
         margin: var(--dashboard-espacioXs) 0;
     }

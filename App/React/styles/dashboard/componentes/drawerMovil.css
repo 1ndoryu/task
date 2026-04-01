@@ -303,7 +303,7 @@
  * SEPARADOR 
  */
 .drawerMovilSeparador {
-    height: 1px;
+    height: 0.8px;
     background: var(--dashboard-bordePrincipal);
     margin: var(--dashboard-espacioSm) 0;
 }

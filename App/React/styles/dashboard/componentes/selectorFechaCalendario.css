@@ -57,7 +57,7 @@
 }
 
 .selectorFechaCalendario__separador {
-    height: 1px;
+    height: 0.8px;
     margin: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
     background-color: var(--dashboard-bordePrincipal);
 }

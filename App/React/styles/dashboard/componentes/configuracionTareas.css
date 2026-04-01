@@ -37,7 +37,7 @@
 }
 
 .separadorOpcionesConfig {
-    height: 1px;
+    height: 0.8px;
     background-color: var(--dashboard-bordeSutil);
     width: 100%;
 }
