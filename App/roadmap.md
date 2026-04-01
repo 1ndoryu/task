@@ -19,21 +19,11 @@
 
 6. EL PANEL DE IA TE COMENTE QUE DEBíA DE SER UN PLUGIN; NO UN PANEL; SE TIENE QUE DESACTIVAR Y ACTIVAR COMO LOS DEMAS PLUGIN Y POR DEFECTO TIENE QUE ESTAR DESACTIVADO
 
-9. menuOpcionesPanelGrupo en movil necesita 14 px de gap y bottomSheetContenido un poco mas de padding (espacioLg)
-
-10. .configMovilGrupo necesita 10 de gap, configMovilGrupoTitulo no necesita tener padding a los lados, configMovilSecciones necesita estar en 16px de gap, .configMovilItemTexto en 13 px de tamaño de letra y en configMovilSecciones, los iconos tienen que estar a la derecha y el titulo a la izquierda como los demas bottomshet. 
-
-11. Las tareas en movil tienen un min-height: var(--dashboard-tamanoTactilMinimo); que no deberían tener. 
-
 12. Los botones en navegacionInferiorBarra deberían poder elegirse con una configuración directa en drawerMovilNavegacion para elegir que debe aparecer abajo como acceso directo, todos los paneles deben ser accesible desde movil. 
 
 13. En movil que el modo compacto de los habitos siempre este activado, y que la opcion no aparezca para desactivar. 
 
 14. El boton de 3 puntos de cada panel en movil, cuando se da click en configuracion, no debe abrir el bottomsh de todas las configuraciones sino especificamente la de la pagina o panel en la que se esta. 
-
-15. ESPECIFICAMENTE EN el modal de historial de versiones no hace falta el padding de 20px en .modalContenido 
-
-17. Hay inconsistencias visuales entre los botones en dockTrackingContenido, y no deberían tener efecto hover de color background. 
 
 18. el boton de dockTrackingTimer debe aumentar mas tiempo al arrastrarse permitir el arrastre infinito haciendo que el cursor si llega al final de la pantalla aparezca del otro lado para seguir arrastrando. 
 

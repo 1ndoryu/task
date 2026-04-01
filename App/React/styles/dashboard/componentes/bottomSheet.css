@@ -97,9 +97,9 @@
     text-overflow: ellipsis;
 }
 
-/* Contenido scrolleable */
+/* [014A-9] Contenido scrolleable — padding espacioLg para más respiro */
 .bottomSheetContenido {
-    padding: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioLg);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex: 1;

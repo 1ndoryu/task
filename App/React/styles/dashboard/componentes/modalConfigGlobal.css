@@ -191,22 +191,24 @@
     min-height: 0;
 }
 
-/* Lista de secciones (fase 1) */
+/* [014A-10] Lista de secciones — gap 16px */
 .configMovilSecciones {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioXs);
+    gap: 16px;
     padding: var(--dashboard-espacioXs) 0;
 }
 
-/* Grupo de secciones */
+/* [014A-10] Grupo — gap 10px */
 .configMovilGrupo {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
+/* [014A-10] Título sin padding lateral */
 .configMovilGrupoTitulo {
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) 0;
     font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 600;
     text-transform: uppercase;
@@ -232,12 +234,17 @@
     background: var(--dashboard-fondoHover);
 }
 
+/* [014A-10] Icono a la derecha como los demás bottomsheet */
 .configMovilItemIcono {
     display: flex;
     align-items: center;
     color: var(--dashboard-textoApagado);
+    order: 1;
+    margin-left: auto;
 }
 
+/* [014A-10] font-size 13px */
 .configMovilItemTexto {
     font-weight: 500;
+    font-size: 13px;
 }

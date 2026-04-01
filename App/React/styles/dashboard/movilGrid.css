@@ -146,9 +146,11 @@
     }
 
     /* Grupo de opciones */
+    /* [014A-9] gap 14px para separar opciones dentro del grupo */
     .menuOpcionesPanelGrupo {
         display: flex;
         flex-direction: column;
+        gap: 14px;
     }
 
     /* Título del grupo */

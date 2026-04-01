@@ -1,5 +1,7 @@
-/* [303A-7] Override: quitar padding de modalContenido para este modal */
-.modalContenidoVersiones {
+/* [014A-15] Override: quitar padding de modalContenido para este modal.
+ * Selector compuesto para ganar en especificidad a .modalContenido { padding: 20px }
+ * que se carga después en el bundle. */
+.modalContenido.modalContenidoVersiones {
     padding: 0;
 }
 

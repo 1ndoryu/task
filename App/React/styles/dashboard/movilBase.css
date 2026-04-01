@@ -148,12 +148,18 @@ body {
         padding: var(--dashboard-espacioTactil);
     }
 
-    /* Items de lista - padding lateral consistente */
+    /* [014A-11] Items de lista - padding lateral consistente.
+     * min-height removido de tareaItem: las tareas no necesitan
+     * tamanoTactilMinimo, el contenido determina su altura. */
     .tareaItem,
     .tablaFila,
     .proyectoItem {
         padding-left: var(--dashboard-espacioMdLg);
         padding-right: var(--dashboard-espacioMdLg);
+    }
+
+    .tablaFila,
+    .proyectoItem {
         min-height: var(--dashboard-tamanoTactilMinimo);
     }
 }

@@ -105,6 +105,9 @@
     flex-shrink: 0;
 }
 
+/* [014A-17] Todos los botones usan <Boton> (default primario) que hereda hover
+ * con background color. Override con !important para anular .boton--primario:hover.
+ * Tamaños unificados a 28px — las variantes ya no reducen width/height. */
 .dockTrackingBoton {
     display: flex;
     align-items: center;
@@ -113,14 +116,14 @@
     height: 28px;
     border: none;
     border-radius: var(--dashboard-radioSm);
-    background: transparent;
+    background: transparent !important;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: color 0.15s ease;
 }
 
 .dockTrackingBoton:hover {
-    background: var(--dashboard-superposicionSutil);
+    background: transparent !important;
     color: var(--dashboard-textoActivo);
 }
 
@@ -132,18 +135,11 @@
     color: var(--dashboard-estadoInfo);
 }
 
-.dockTrackingBoton--cancelar {
-    width: 24px;
-    height: 24px;
-}
-
 .dockTrackingBoton--cancelar:hover {
     color: var(--dashboard-estadoAlta);
 }
 
 .dockTrackingBoton--ajusteTiempo {
-    width: 22px;
-    height: 22px;
     cursor: ew-resize;
     touch-action: none;
 }
