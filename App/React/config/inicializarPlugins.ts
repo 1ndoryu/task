@@ -9,7 +9,7 @@
  * La activación real se hace desde el ModalPlugins cuando el usuario lo activa.
  */
 
-import {Timer, Utensils, Users} from 'lucide-react';
+import {Timer, Utensils, Users, Bot} from 'lucide-react';
 import {createElement} from 'react';
 import type {ComponentType} from 'react';
 import {registrarPlugin} from './registroPlugins';
@@ -20,6 +20,7 @@ import type {ModoColumnas, PanelBaseProps, PosicionDefectoPanel} from '../types/
 import {PanelAyuno} from '../components/paneles/PanelAyuno';
 import {PanelDeficitCalorico} from '../components/paneles/PanelDeficitCalorico';
 import {PanelGruposFb} from '../components/paneles/PanelGruposFb';
+import {PanelIA} from '../components/paneles/PanelIA';
 
 /* Helper para posiciones (reutilizado de inicializarPaneles) */
 function crearPosicionDefecto(
@@ -135,6 +136,38 @@ registrarPanel({
     componente: PanelGruposFb as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
     manejaAlturaPropia: false
+});
+
+/*
+ * [014A-6] Plugin Asistente IA
+ * Asistente de IA para planificación de tareas/hábitos por lenguaje natural.
+ * Desactivado por defecto — se activa desde la sección Plugins.
+ * Requiere configuración (API key de Groq).
+ */
+registrarPlugin({
+    id: 'ia-asistente',
+    nombre: 'Asistente IA',
+    descripcion: 'Planificación de tareas y hábitos por lenguaje natural con IA',
+    icono: createElement(Bot, {size: 18}),
+    version: '1.0.0',
+    panelesIds: ['ia'],
+    habitos: [],
+    requiereConfiguracion: true
+});
+
+/* Registrar panel del plugin de IA */
+registrarPanel({
+    id: 'ia',
+    titulo: 'IA',
+    tituloMovil: 'IA',
+    icono: createElement(Bot, {size: 14}),
+    visiblePorDefecto: false,
+    alturaDefecto: '300px',
+    posicionDefecto: crearPosicionDefecto([1, 5], [2, 3], [3, 3]),
+    componente: PanelIA as ComponentType<PanelBaseProps>,
+    enNavegacionMovil: false,
+    idPaginaMovil: 'ia',
+    manejaAlturaPropia: true
 });
 
 /* Export vacío para side-effect */
