@@ -9,7 +9,9 @@
  * para evitar dependencias circulares (componente -> registro -> componente).
  */
 
+import {createElement} from 'react';
 import type {ComponentType} from 'react';
+import {CheckSquare, Target, Folder, StickyNote, Activity} from 'lucide-react';
 import {registrarPanel, marcarRegistroInicializado} from './registroPaneles';
 import type {ModoColumnas, PanelBaseProps, PosicionDefectoPanel} from '../types/paneles';
 
@@ -37,6 +39,7 @@ registrarPanel({
     id: 'ejecucion',
     titulo: 'Tareas',
     tituloMovil: 'Tareas',
+    icono: createElement(CheckSquare, {size: 14}),
     visiblePorDefecto: true,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 0], [1, 0], [1, 0]),
@@ -54,6 +57,7 @@ registrarPanel({
     id: 'focoPrioritario',
     titulo: 'Hábitos',
     tituloMovil: 'Hábitos',
+    icono: createElement(Target, {size: 14}),
     visiblePorDefecto: true,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 1], [1, 1], [2, 0]),
@@ -70,6 +74,7 @@ registrarPanel({
     id: 'proyectos',
     titulo: 'Proyectos',
     tituloMovil: 'Proyectos',
+    icono: createElement(Folder, {size: 14}),
     visiblePorDefecto: true,
     alturaDefecto: 'auto',
     posicionDefecto: crearPosicionDefecto([1, 2], [2, 0], [3, 0]),
@@ -88,6 +93,7 @@ registrarPanel({
     id: 'scratchpad',
     titulo: 'Notas Rápidas',
     tituloMovil: 'Notas',
+    icono: createElement(StickyNote, {size: 14}),
     visiblePorDefecto: true,
     alturaDefecto: '200px',
     posicionDefecto: crearPosicionDefecto([1, 3], [2, 1], [3, 1]),
@@ -106,6 +112,7 @@ registrarPanel({
     id: 'actividad',
     titulo: 'Actividad',
     tituloMovil: 'Actividad',
+    icono: createElement(Activity, {size: 14}),
     visiblePorDefecto: true,
     alturaDefecto: '150px',
     posicionDefecto: crearPosicionDefecto([1, 4], [2, 2], [3, 2]),

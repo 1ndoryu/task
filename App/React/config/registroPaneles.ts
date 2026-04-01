@@ -7,6 +7,7 @@
  * Cada panel se auto-registra al ser importado.
  */
 
+import type {ReactNode} from 'react';
 import type {DefinicionPanel, ModoColumnas, OrdenPanel} from '../types/paneles';
 
 /* Mapa interno del registro */
@@ -122,26 +123,24 @@ export function obtenerTituloPanelMovil(panelId: string): string {
     return panel?.tituloMovil || panel?.titulo || panelId;
 }
 
-/* Mapear una página móvil a su panelId correspondiente */
+/* Mapear una página móvil a su panelId correspondiente.
+ * [014A-12] Ahora busca en TODOS los paneles, no solo enNavegacionMovil,
+ * para que cualquier panel sea navegable desde móvil (drawer, config barra). */
 export function paginaMovilAPanelId(idPagina: string): string | undefined {
     for (const [panelId, def] of _registro) {
-        if (def.enNavegacionMovil) {
-            const idPaginaPanel = def.idPaginaMovil || panelId;
-            if (idPaginaPanel === idPagina) {
-                return panelId;
-            }
+        const idPaginaPanel = def.idPaginaMovil || panelId;
+        if (idPaginaPanel === idPagina) {
+            return panelId;
         }
     }
     return undefined;
 }
 
-/* Obtener todas las páginas móvil válidas */
+/* [014A-12] Obtener todas las páginas móvil válidas — ahora incluye todos los paneles */
 export function obtenerPaginasMovilValidas(): string[] {
     const paginas: string[] = [];
     _registro.forEach((def, panelId) => {
-        if (def.enNavegacionMovil) {
-            paginas.push(def.idPaginaMovil || panelId);
-        }
+        paginas.push(def.idPaginaMovil || panelId);
     });
     return paginas;
 }
@@ -150,4 +149,22 @@ export function obtenerPaginasMovilValidas(): string[] {
 export function panelManejaAlturaPropia(panelId: string): boolean {
     const panel = _registro.get(panelId) || _registro.get(obtenerIdBase(panelId));
     return panel?.manejaAlturaPropia ?? false;
+}
+
+/* [014A-12] Obtener todos los paneles navegables en móvil (para config barra inferior + drawer).
+ * Incluye todos los paneles registrados, no solo los que tienen enNavegacionMovil.
+ * Retorna info necesaria para UI: id, titulo, idPagina, icono. */
+export function obtenerTodosPanelesNavegables(): Array<{id: string; titulo: string; idPagina: string; icono: ReactNode | undefined}> {
+    const paneles: Array<{id: string; titulo: string; idPagina: string; icono: ReactNode | undefined}> = [];
+
+    _registro.forEach((def, id) => {
+        paneles.push({
+            id,
+            titulo: def.tituloMovil || def.titulo,
+            idPagina: def.idPaginaMovil || id,
+            icono: def.icono
+        });
+    });
+
+    return paneles;
 }

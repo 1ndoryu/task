@@ -69,6 +69,7 @@ registrarPanel({
     posicionDefecto: crearPosicionDefecto([1, 5], [2, 3], [3, 3]),
     componente: PanelAyuno as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
+    idPaginaMovil: 'ayuno',
     manejaAlturaPropia: false
 });
 
@@ -106,6 +107,7 @@ registrarPanel({
     posicionDefecto: crearPosicionDefecto([1, 6], [2, 4], [3, 4]),
     componente: PanelDeficitCalorico as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
+    idPaginaMovil: 'deficit-calorico',
     manejaAlturaPropia: false
 });
 
@@ -135,6 +137,7 @@ registrarPanel({
     posicionDefecto: crearPosicionDefecto([1, 7], [2, 5], [3, 5]),
     componente: PanelGruposFb as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
+    idPaginaMovil: 'gruposFb',
     manejaAlturaPropia: false
 });
 

@@ -138,6 +138,9 @@
 @import './componentes/modalConfigGlobal.css';
 @import './componentes/modalConfiguracionUsuario.css';
 
+/* [014A-12] Configuración de barra inferior móvil */
+@import './componentes/configBarraInferior.css';
+
 /* Sistema de Feedback (Premium) */
 @import './componentes/feedback.css';
 

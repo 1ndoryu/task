@@ -1,6 +1,8 @@
+import {useState} from 'react';
 import {Menu, MoreVertical, Search} from 'lucide-react';
 import {useEncabezadoMovil} from '../../../hooks/dashboard/useEncabezadoMovil';
 import {DrawerMovil, BottomSheet} from '../../shared';
+import {ConfigBarraInferior} from '../../configuracion/ConfigBarraInferior';
 import {Boton} from '../../ui/Boton';
 import type {GrupoOpciones, OpcionMenuPanel} from '../../shared/MenuOpcionesPanel';
 import type {InfoSuscripcion, Tarea, SincronizacionInfo} from '../../../types/dashboard';
@@ -44,7 +46,10 @@ interface EncabezadoMenuMovilProps {
 }
 
 export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin: _esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado: _estaConectado, esTablet, sincronizacion, drawerAbierto, onCerrarDrawer, onAbrirDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onClickPlugins, onExportarDatos, onCrearRapido, onCambiarPagina}: EncabezadoMenuMovilProps) {
-    const {manejarOpcionDrawer, opcionesDrawer, opcionesSecundariasDrawer} = useEncabezadoMovil({suscripcion, sincronizacion, onCerrarDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onClickPlugins, onExportarDatos, onCrearRapido, onCambiarPagina});
+    /* [014A-12] Estado para el bottom sheet de personalización de barra inferior */
+    const [configBarraAbierta, setConfigBarraAbierta] = useState(false);
+
+    const {manejarOpcionDrawer, opcionesDrawer, opcionesSecundariasDrawer} = useEncabezadoMovil({suscripcion, sincronizacion, onCerrarDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onClickPlugins, onExportarDatos, onCrearRapido, onCambiarPagina, onPersonalizarBarra: () => setConfigBarraAbierta(true)});
 
     return (
         <>
@@ -54,6 +59,11 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin: _
             </Boton>
 
             <DrawerMovil estaAbierto={drawerAbierto} onCerrar={onCerrarDrawer} usuario={{nombre: usuario, avatar: avatarUrl}} suscripcion={suscripcion} opciones={opcionesDrawer} onSeleccionar={manejarOpcionDrawer} opcionesSecundarias={opcionesSecundariasDrawer} onClickPerfil={onClickUsuario} onClickPlan={onClickPlan} />
+
+            {/* [014A-12] Bottom sheet para personalizar la barra de navegación inferior */}
+            <BottomSheet estaAbierto={configBarraAbierta} onCerrar={() => setConfigBarraAbierta(false)} titulo="Personalizar barra">
+                <ConfigBarraInferior onCerrar={() => setConfigBarraAbierta(false)} />
+            </BottomSheet>
         </>
     );
 }

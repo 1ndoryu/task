@@ -17,6 +17,4 @@
 
 5. Coolify deploy kamples fallando silenciosamente sin actualizar el servidor.
 
-12. Los botones en navegacionInferiorBarra deberían poder elegirse con una configuración directa en drawerMovilNavegacion para elegir que debe aparecer abajo como acceso directo, todos los paneles deben ser accesible desde movil. 
-
 20. Hay problema con .agent\coolify-manager-rs, esta guardando copias locales automaticamente no se porque o como en .agent\coolify-manager-rs\config\backups, cuando realidad había pedido que las copias se guardaran en google drive, veo archivos ocmo 20260320_031505.tar.gz pero claramente eso fue hace 10 dias, o sea no esta haciendo copias de seguridad diaria (maximo 2 copias diarias) y una 1 semanal en google drive, de todos los sitios de forma ordenada. Tiene que ser automatico, y no me refiero a que sea local. 

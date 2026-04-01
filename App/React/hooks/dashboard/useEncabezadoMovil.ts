@@ -4,8 +4,10 @@
  * Maneja opciones del drawer, navegación y acciones del menú.
  */
 
-import {useMemo, useCallback} from 'react';
+import {useMemo, useCallback, createElement} from 'react';
+import {SlidersHorizontal} from 'lucide-react';
 import {obtenerOpcionesMenuUsuario, obtenerOpcionCerrarSesion} from '../../utils/opcionesMenuUsuario';
+import {obtenerTodosPanelesNavegables} from '../../config/registroPaneles';
 import type {OpcionDrawer} from '../../components/shared/DrawerMovil';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../types/dashboard';
 import type {PaginaMovil} from '../usePaginaMovil';
@@ -31,6 +33,7 @@ export interface UseEncabezadoMovilParams {
     onExportarDatos?: () => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
     onCambiarPagina?: (pagina: PaginaMovil) => void;
+    onPersonalizarBarra?: () => void;
 }
 
 export interface UseEncabezadoMovilReturn {
@@ -59,7 +62,8 @@ export function useEncabezadoMovil({
     onClickPlugins,
     onExportarDatos,
     onCrearRapido,
-    onCambiarPagina
+    onCambiarPagina,
+    onPersonalizarBarra
 }: UseEncabezadoMovilParams): UseEncabezadoMovilReturn {
     /* Manejar selección de opción en el drawer */
     const manejarOpcionDrawer = useCallback(
@@ -73,6 +77,21 @@ export function useEncabezadoMovil({
             if (opcionId === 'login') return sincronizacion?.onLogin?.();
             if (opcionId === 'sync') return sincronizacion?.sincronizarAhora();
             if (['tarea', 'habito', 'proyecto'].includes(opcionId)) return onCrearRapido?.(opcionId as 'tarea' | 'habito' | 'proyecto');
+
+            /* [014A-12] Personalizar barra inferior */
+            if (opcionId === 'personalizar-barra') {
+                onPersonalizarBarra?.();
+                onCerrarDrawer();
+                return;
+            }
+
+            /* [014A-12] Navegación directa a panel desde el drawer */
+            if (opcionId.startsWith('panel:')) {
+                const idPagina = opcionId.replace('panel:', '');
+                onCambiarPagina?.(idPagina);
+                onCerrarDrawer();
+                return;
+            }
 
             switch (opcionId) {
                 case 'perfil':
@@ -111,14 +130,33 @@ export function useEncabezadoMovil({
                     break;
             }
         },
-        [onClickNotificaciones, onClickLayout, onClickPlan, onClickAdmin, onClickExperimentos, onClickEquipos, sincronizacion, onCrearRapido, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickTemas, onClickConfigMCP, onClickPlugins, onExportarDatos, onCambiarPagina, onCerrarDrawer]
+        [onClickNotificaciones, onClickLayout, onClickPlan, onClickAdmin, onClickExperimentos, onClickEquipos, sincronizacion, onCrearRapido, onClickUsuario, onClickSeguridad, onClickBackups, onClickConfigUsuario, onClickVersion, onClickTemas, onClickConfigMCP, onClickPlugins, onExportarDatos, onCambiarPagina, onCerrarDrawer, onPersonalizarBarra]
     );
 
     /*
      * Opciones principales del drawer usando configuración centralizada
-     * Las opciones de layout, notificaciones, admin y laboratorio no van en móvil
+     * [014A-12] Ahora incluye todos los paneles como opciones de navegación
+     * + opción "Personalizar barra" para configurar la barra inferior.
      */
     const opcionesDrawer = useMemo((): OpcionDrawer[] => {
+        /* Paneles navegables como primera sección del drawer */
+        const paneles = obtenerTodosPanelesNavegables();
+        const opcionesPaneles: OpcionDrawer[] = paneles.map((panel, idx) => ({
+            id: `panel:${panel.idPagina}`,
+            etiqueta: panel.titulo,
+            icono: panel.icono,
+            separadorDespues: idx === paneles.length - 1
+        }));
+
+        /* Personalizar barra como última opción de la sección de paneles */
+        opcionesPaneles.push({
+            id: 'personalizar-barra',
+            etiqueta: 'Personalizar barra',
+            icono: createElement(SlidersHorizontal, {size: 18}),
+            separadorDespues: true
+        });
+
+        /* Opciones centralizadas (configuración, actividad, plan, etc.) */
         const opcionesCentralizadas = obtenerOpcionesMenuUsuario({
             esMovil: true,
             esPremium: suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa',
@@ -126,13 +164,18 @@ export function useEncabezadoMovil({
             tamanoIcono: 18
         });
 
-        return opcionesCentralizadas.map(opcion => ({
-            id: opcion.id,
-            etiqueta: opcion.etiqueta,
-            icono: opcion.icono,
-            separadorDespues: opcion.separadorDespues,
-            peligroso: opcion.peligroso
-        }));
+        const opcionesConfig = opcionesCentralizadas
+            /* [014A-12] Quitar 'actividad' de opciones centralizadas (ahora está en sección paneles) */
+            .filter(opcion => opcion.id !== 'actividad')
+            .map(opcion => ({
+                id: opcion.id,
+                etiqueta: opcion.etiqueta,
+                icono: opcion.icono,
+                separadorDespues: opcion.separadorDespues,
+                peligroso: opcion.peligroso
+            }));
+
+        return [...opcionesPaneles, ...opcionesConfig];
     }, [suscripcion]);
 
     /*
