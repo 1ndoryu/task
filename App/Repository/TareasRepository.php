@@ -91,12 +91,17 @@ class TareasRepository
 
         /* Pre-fetch mapa id_local => id para evitar N+1 queries dentro del loop */
         $existingRows = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, id_local FROM $table WHERE user_id = %d",
+            "SELECT id, id_local, data FROM $table WHERE user_id = %d",
             $this->userId
         ), ARRAY_A);
         $existingMap = [];
+        /* [014A-4] Mapa de datos existentes para merge defensivo.
+         * Si llegan datos parciales (ej: solo prioridad via WS), los campos
+         * existentes (texto, configuracion, etc.) no se pierden. */
+        $existingDataMap = [];
         foreach ($existingRows as $row) {
             $existingMap[(int)$row['id_local']] = (int)$row['id'];
+            $existingDataMap[(int)$row['id_local']] = $this->decodeData($row['data'], []);
         }
 
         $incomingIds = [];
@@ -108,6 +113,14 @@ class TareasRepository
 
             $idLocal = (int)$tarea['id'];
             $incomingIds[] = $idLocal;
+
+            /* [014A-4] Merge defensivo: si la tarea ya existe en BD, fusionar
+             * datos existentes con los entrantes. Esto previene pérdida de campos
+             * (ej: texto) cuando llegan actualizaciones parciales via WebSocket. */
+            $exists = $existingMap[$idLocal] ?? null;
+            if ($exists && isset($existingDataMap[$idLocal]) && is_array($existingDataMap[$idLocal])) {
+                $tarea = array_merge($existingDataMap[$idLocal], $tarea);
+            }
 
             $textoOriginal = sanitize_text_field($tarea['texto'] ?? '');
             $texto = $this->cifradoHabilitado ? '[CIFRADO]' : $textoOriginal;
@@ -124,7 +137,6 @@ class TareasRepository
                 $urgencia = 'normal';
             }
 
-            $exists = $existingMap[$idLocal] ?? null;
             $dataJson = $this->encodeData($tarea);
 
             if ($exists) {
