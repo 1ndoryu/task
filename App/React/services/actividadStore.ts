@@ -15,7 +15,9 @@
 import type {DatosHeatmap, FiltrosActividad, PeriodoActividad, EstadisticasActividad} from '../hooks/useActividad';
 
 /* Configuracion del cache */
-const CACHE_TTL_MS = 5 * 60 * 1000; /* 5 minutos */
+/* [014A-8] TTL reducido de 5min a 60s. Con WebSocket invalidando el cache
+ * en tiempo real, el TTL es solo un safety net para reconexiones lentas. */
+const CACHE_TTL_MS = 60 * 1000; /* 60 segundos */
 const CACHE_KEY_PREFIX = 'actividad_cache_';
 const SESSION_STORAGE_KEY = 'glory_actividad_cache';
 

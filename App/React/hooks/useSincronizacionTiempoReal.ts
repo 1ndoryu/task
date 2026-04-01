@@ -59,6 +59,9 @@ interface CallbacksSincronizacion {
     onProyectoRemoto?: (accion: AccionSincronizacion, datos: Partial<Proyecto>) => void;
     onNotaRemota?: (accion: AccionSincronizacion, datos: {contenido: string}) => void;
     onSincronizacionCompleta?: () => void;
+    /* [014A-8] Se dispara tras aplicar cualquier cambio remoto válido.
+     * Permite invalidar caches derivados (actividad, heatmap) sin acoplar stores. */
+    onCambioRemotoAplicado?: () => void;
 }
 
 export function useSincronizacionTiempoReal(
@@ -117,6 +120,10 @@ export function useSincronizacionTiempoReal(
                         currentCallbacks.onNotaRemota?.(accion, datos as {contenido: string});
                         break;
                 }
+
+                /* [014A-8] Notificar que se aplicó un cambio remoto para que
+                 * capas superiores (actividad, heatmap) invaliden sus caches */
+                currentCallbacks.onCambioRemotoAplicado?.();
 
                 /* Actualizar timestamp de última sync al recibir un cambio remoto válido */
                 ultimaSincRef.current = tsRemoto || Date.now();

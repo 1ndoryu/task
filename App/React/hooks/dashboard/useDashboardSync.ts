@@ -8,6 +8,7 @@ import {useSincronizacionTiempoReal} from '../useSincronizacionTiempoReal';
 import {useNotificadorCambiosWebSocket} from '../useNotificadorCambiosWebSocket';
 import {obtenerUserId} from '../useSincronizacion';
 import {useNotasStore, PANEL_SCRATCHPAD} from '../../stores/notasStore';
+import {invalidarCache as invalidarCacheActividad} from '../../services/actividadStore';
 
 interface UseDashboardSyncProps {
     habitos: Habito[];
@@ -186,6 +187,12 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             },
             onSincronizacionCompleta: () => {
                 console.log('[SyncRT] Sincronización WebSocket completa');
+            },
+            /* [014A-8] Invalidar cache de actividad al recibir cualquier cambio remoto.
+             * Esto fuerza recarga del heatmap y panel de actividad en <200ms
+             * en vez de esperar TTL del cache (antes 5min, ahora 60s). */
+            onCambioRemotoAplicado: () => {
+                invalidarCacheActividad();
             }
         }),
         /* Solo dependemos de los setters, no de los datos - usamos refs para acceder a datos actuales */
