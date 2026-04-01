@@ -4,8 +4,7 @@
  * Usado en tareas, habitos y proyectos para indicar metadatos
  */
 
-import type {ReactNode} from 'react';
-import {Boton} from '../ui';
+import type {ReactNode, KeyboardEvent} from 'react';
 
 export type TipoBadge = 'adjunto' | 'descripcion' | 'repeticion' | 'fecha' | 'prioridad' | 'frecuencia' | 'racha' | 'destacado' | 'personalizado';
 
@@ -27,6 +26,10 @@ export interface BadgeInfoProps {
     className?: string;
 }
 
+/* [014A-3] Todos los badges se renderizan como <span>, independientemente de si son clickables.
+ * Antes, los clickables usaban <Boton> que inyectaba clases boton/boton--icono/boton--mediano
+ * y causaba inconsistencia visual (alturas, padding, bordes diferentes).
+ * Ahora: span + role="button" + tabIndex + onKeyDown para accesibilidad. */
 export function BadgeInfo({tipo: _tipo, icono, texto, titulo, variante = 'normal', onClick, className = ''}: BadgeInfoProps): JSX.Element {
     const clases = `badgeInfo badgeInfo--${variante}${onClick ? ' badgeInfoClickable' : ''} ${className}`.trim();
 
@@ -37,18 +40,24 @@ export function BadgeInfo({tipo: _tipo, icono, texto, titulo, variante = 'normal
         </>
     );
 
-    if (onClick) {
-        /* [243A-12] variante="icono" para que Boton no aplique boton--primario/mediano
-         * que sobreescribia el padding/height del badge y lo hacia mas alto que los span badge */
-        return (
-            <Boton type="button" variante="icono" claseAdicional={clases} title={titulo} onClick={onClick}>
-                {contenido}
-            </Boton>
-        );
-    }
+    const handleKeyDown = onClick
+        ? (e: KeyboardEvent<HTMLSpanElement>) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+            }
+        }
+        : undefined;
 
     return (
-        <span className={clases} title={titulo}>
+        <span
+            className={clases}
+            title={titulo}
+            onClick={onClick}
+            role={onClick ? 'button' : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            onKeyDown={handleKeyDown}
+        >
             {contenido}
         </span>
     );
