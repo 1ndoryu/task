@@ -90,12 +90,15 @@ class HabitosRepository
 
         /* Pre-fetch mapa id_local => id para evitar N+1 queries dentro del loop */
         $existingRows = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, id_local FROM $table WHERE user_id = %d",
+            "SELECT id, id_local, data FROM $table WHERE user_id = %d",
             $this->userId
         ), ARRAY_A);
         $existingMap = [];
+        /* [014A-19] Mapa de datos existentes para protección per-entity con updatedAt */
+        $existingDataMap = [];
         foreach ($existingRows as $row) {
             $existingMap[(int)$row['id_local']] = (int)$row['id'];
+            $existingDataMap[(int)$row['id_local']] = $this->decodeData($row['data'], []);
         }
 
         $incomingIds = [];
@@ -116,6 +119,18 @@ class HabitosRepository
             $completadoHoy = isset($habito['ultimoCompletado']) && $habito['ultimoCompletado'] === date('Y-m-d') ? 1 : 0;
 
             $exists = $existingMap[$idLocal] ?? null;
+
+            /* [014A-19] Protección per-entity contra writes stale.
+             * Si el hábito entrante tiene updatedAt menor al existente en BD,
+             * el dato es antiguo y se descarta para no sobrescribir cambios más recientes. */
+            if ($exists && isset($existingDataMap[$idLocal]) && is_array($existingDataMap[$idLocal])) {
+                $incomingUpdatedAt = $habito['updatedAt'] ?? 0;
+                $existingUpdatedAt = $existingDataMap[$idLocal]['updatedAt'] ?? 0;
+                if ($incomingUpdatedAt > 0 && $existingUpdatedAt > 0 && $incomingUpdatedAt < $existingUpdatedAt) {
+                    continue;
+                }
+            }
+
             $dataJson = $this->encodeData($habito);
 
             if ($exists) {

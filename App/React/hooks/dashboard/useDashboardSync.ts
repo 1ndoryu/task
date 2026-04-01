@@ -40,6 +40,18 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
     habitosRef.current = habitos;
     proyectosRef.current = proyectos;
 
+    /* [014A-19] Tracking de cambios remotos WebSocket para prevención de eco y absorción HTTP.
+     * cambiosRemotosRecientesRef: IDs de entidades que llegaron vía WS remoto. El notificador
+     *   los consume para NO reenviarlos (corta el ciclo de eco WS→local→WS→servidor→WS...).
+     * contadorCambiosRemotosRef: Contador que useSyncManager lee para saber que el cambio
+     *   en el hash fue causado por WS (no requiere HTTP auto-save). */
+    const cambiosRemotosRecientesRef = useRef<{
+        tareas: Set<number>;
+        habitos: Set<number>;
+        proyectos: Set<number>;
+    }>({tareas: new Set(), habitos: new Set(), proyectos: new Set()});
+    const contadorCambiosRemotosRef = useRef(0);
+
     /*
      * 1. Preparar datos actuales unificados
      */
@@ -96,6 +108,11 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         () => ({
             onTareaRemota: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Tarea>) => {
                 console.log('[SyncRT] Tarea remota recibida:', accion, datos);
+                /* [014A-19] Registrar ID como remoto para prevenir eco WS y auto-save HTTP */
+                if (datos.id) {
+                    cambiosRemotosRecientesRef.current.tareas.add(datos.id);
+                    contadorCambiosRemotosRef.current++;
+                }
                 const tareasActuales = tareasRef.current;
                 if (accion === 'eliminar' && datos.id) {
                     setTareas(tareasActuales.filter(t => t.id !== datos.id));
@@ -110,6 +127,11 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             },
             onHabitoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Habito>) => {
                 console.log('[SyncRT] Hábito remoto recibido:', accion, datos);
+                /* [014A-19] Registrar como remoto */
+                if (datos.id) {
+                    cambiosRemotosRecientesRef.current.habitos.add(datos.id);
+                    contadorCambiosRemotosRef.current++;
+                }
                 const habitosActuales = useHabitosStore.getState().habitos;
 
                 /*
@@ -140,6 +162,11 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             },
             onProyectoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Proyecto>) => {
                 console.log('[SyncRT] Proyecto remoto recibido:', accion, datos);
+                /* [014A-19] Registrar como remoto */
+                if (datos.id) {
+                    cambiosRemotosRecientesRef.current.proyectos.add(datos.id);
+                    contadorCambiosRemotosRef.current++;
+                }
                 const proyectosActuales = proyectosRef.current;
                 if (accion === 'eliminar' && datos.id) {
                     setProyectos(proyectosActuales.filter(p => p.id !== datos.id));
@@ -153,6 +180,8 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             },
             onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string; id?: number; titulo?: string}) => {
                 console.log('[SyncRT] Nota remota recibida');
+                /* [014A-19] Registrar como remoto para absorción HTTP */
+                contadorCambiosRemotosRef.current++;
                 if (datos.contenido !== undefined) {
                     /*
                      * Si la nota tiene id, es una nota guardada del notasStore.
@@ -216,7 +245,9 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         notas,
         notificarCambio,
         habilitado: wsConectado && userId > 0,
-        cargando: cargandoDatos || cargandoDatosLocales
+        cargando: cargandoDatos || cargandoDatosLocales,
+        /* [014A-19] Ref de IDs remotos para prevención de eco */
+        cambiosRemotosRecientes: cambiosRemotosRecientesRef
     });
 
     /*
@@ -275,6 +306,8 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         onDataReceived: handleDatosServidor,
         debounceMs: 2000,
         isDataReady: !cargandoDatosLocales,
+        /* [014A-19] Contador de cambios remotos WS para absorción HTTP */
+        contadorCambiosRemotosRef,
         onInitComplete: () => {
             /*
              * Safety fallback: Si la sync termina (éxito, error o skip por breaker),

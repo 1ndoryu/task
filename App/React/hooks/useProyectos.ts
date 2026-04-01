@@ -58,7 +58,9 @@ export function useProyectos({proyectos, setProyectos, registrarAccion, mostrarM
                 fechaCreacion: hoy,
                 progreso: 0,
                 adjuntos: datos.adjuntos,
-                hitos: datos.hitos || []
+                hitos: datos.hitos || [],
+                /* [014A-19] Timestamp per-entity para resolución de conflictos */
+                updatedAt: Date.now()
             };
 
             setProyectos(prev => [nuevoProyecto, ...prev]);
@@ -82,7 +84,7 @@ export function useProyectos({proyectos, setProyectos, registrarAccion, mostrarM
             setProyectos(prev =>
                 prev.map(p => {
                     if (p.id !== id) return p;
-                    return {...p, ...datos};
+                    return {...p, ...datos, updatedAt: Date.now()};
                 })
             );
 

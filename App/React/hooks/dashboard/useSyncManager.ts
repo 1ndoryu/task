@@ -1,4 +1,5 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
+import type React from 'react';
 import {useChangeDetector} from './useChangeDetector';
 import {useSyncTransport} from './useSyncTransport';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from '../useLocalStorage';
@@ -17,6 +18,10 @@ interface UseSyncManagerProps {
     debounceMs?: number;
     onInitComplete?: () => void;
     isDataReady?: boolean;
+    /* [014A-19] Contador de cambios recibidos vía WebSocket remoto.
+     * Cuando > 0, el auto-save HTTP se inhibe y el hash se actualiza
+     * sin enviar datos al servidor (los cambios ya están allí). */
+    contadorCambiosRemotosRef?: React.MutableRefObject<number>;
 }
 
 /*
@@ -80,7 +85,7 @@ function generarDatosInicialesUsuarioNuevo(baseData: DashboardData): DashboardDa
     };
 }
 
-export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete, isDataReady = true}: UseSyncManagerProps) {
+export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete, isDataReady = true, contadorCambiosRemotosRef}: UseSyncManagerProps) {
     const {esPremium} = useSuscripcion();
 
     // 1. Detector de Cambios
@@ -226,6 +231,19 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
         if (!isInitialized) return; // Esperar a que termine la carga inicial
 
         if (hasChanges) {
+            /* [014A-19] Si el cambio fue originado por WebSocket remoto, actualizar
+             * hash baseline sin disparar HTTP auto-save. El dato ya está en servidor
+             * (vino de ahí) así que reenviarlo sería redundante.
+             * Tradeoff: si un cambio local coincide exactamente con uno remoto en el
+             * mismo ciclo de render, el save se retrasa hasta la siguiente interacción.
+             * Esto es aceptable dado lo estrecho de la ventana temporal. */
+            if (contadorCambiosRemotosRef?.current && contadorCambiosRemotosRef.current > 0) {
+                contadorCambiosRemotosRef.current = 0;
+                markChangesAsSynced();
+                console.log('[SyncManager] Cambio remoto WS absorbido — hash actualizado sin HTTP auto-save');
+                return;
+            }
+
             // Check Safety Breaker for Auto-Save too
             const retries = parseInt(sessionStorage.getItem('glory_sync_init_retries') || '0');
             if (retries >= 3) {

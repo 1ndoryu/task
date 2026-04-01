@@ -115,6 +115,9 @@ export interface Habito {
     ventanaOportunidad?: VentanaOportunidad;
     /* [2303A-41] Fecha ISO hasta la que el hábito está pospuesto por tiempo (diferente de historialPospuestos que es por día) */
     pospuestoHasta?: string;
+    /* [014A-19] Timestamp de última modificación local (ms). Usado para resolución de
+     * conflictos per-entity: el backend rechaza writes con updatedAt menor al existente. */
+    updatedAt?: number;
 }
 
 /*
@@ -209,6 +212,8 @@ export interface Proyecto {
     adjuntos?: Adjunto[];
     /* Hitos del proyecto (Fase 9) */
     hitos?: Hito[];
+    /* [014A-19] Timestamp de última modificación local (ms) para resolución de conflictos. */
+    updatedAt?: number;
 }
 
 export interface Hito {
@@ -255,6 +260,8 @@ export interface Tarea {
     tags?: string[];
     /* [2303A-41] Fecha ISO hasta la que la tarea está pospuesta. Si es futuro, se oculta del panel. */
     pospuestoHasta?: string;
+    /* [014A-19] Timestamp de última modificación local (ms) para resolución de conflictos. */
+    updatedAt?: number;
 }
 
 /*

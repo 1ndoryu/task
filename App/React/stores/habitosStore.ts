@@ -120,7 +120,9 @@ export const useHabitosStore = create<HabitosStore>()(
                         ultimoCompletado: undefined,
                         fechaCreacion: hoy,
                         /* TAREA 4: Incluir ventana de oportunidad si se definió */
-                        ventanaOportunidad: datos.ventanaOportunidad
+                        ventanaOportunidad: datos.ventanaOportunidad,
+                        /* [014A-19] Timestamp per-entity para resolución de conflictos */
+                        updatedAt: Date.now()
                     };
 
                     set(
@@ -146,7 +148,9 @@ export const useHabitosStore = create<HabitosStore>()(
                                     tags: datos.tags,
                                     frecuencia: datos.frecuencia,
                                     /* TAREA 4: Incluir ventana de oportunidad */
-                                    ventanaOportunidad: datos.ventanaOportunidad
+                                    ventanaOportunidad: datos.ventanaOportunidad,
+                                    /* [014A-19] Timestamp per-entity */
+                                    updatedAt: Date.now()
                                 };
                             })
                         }),
@@ -184,6 +188,9 @@ export const useHabitosStore = create<HabitosStore>()(
                     const estabaCompletadoHoy = fueCompletadoHoy(habito.ultimoCompletado);
 
                     const {accion, nuevoHabito} = calcularToggleHabito(habito, hoy, estabaCompletadoHoy);
+
+                    /* [014A-19] Timestamp per-entity */
+                    nuevoHabito.updatedAt = Date.now();
 
                     set(
                         state => ({

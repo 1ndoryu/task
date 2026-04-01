@@ -163,7 +163,7 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
             }
 
             setTareas(prev => {
-                const actualizadas = prev.map(t => (t.id === id ? {...t, completado: !t.completado} : t));
+                const actualizadas = prev.map(t => (t.id === id ? {...t, completado: !t.completado, updatedAt: Date.now()} : t));
 
                 if (nuevaTareaRepetida) {
                     /* Insertar al inicio y recalcular ordenes */
@@ -256,7 +256,9 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                     asignadoA: datos.asignadoA ?? undefined,
                     asignadoANombre: datos.asignadoANombre,
                     asignadoAAvatar: datos.asignadoAAvatar,
-                    tags: datos.tags
+                    tags: datos.tags,
+                    /* [014A-19] Timestamp per-entity para resolución de conflictos */
+                    updatedAt: Date.now()
                 };
 
                 /* Insertar y recalcular orden de todas las tareas */
@@ -352,7 +354,9 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
 
                     const tareaActualizada: Tarea = {
                         ...t,
-                        ...restoDatos
+                        ...restoDatos,
+                        /* [014A-19] Timestamp per-entity para resolución de conflictos */
+                        updatedAt: Date.now()
                     };
 
                     /* Si tags vienen en datos, actualizar */

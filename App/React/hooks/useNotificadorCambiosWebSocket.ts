@@ -15,8 +15,17 @@
  */
 
 import {useRef, useEffect, useCallback} from 'react';
+import type React from 'react';
 import type {Tarea, Habito, Proyecto} from '../types/dashboard';
 import type {CambioLocal, AccionSincronizacion, EntidadSincronizable} from './useSincronizacionTiempoReal';
+
+/* [014A-19] Ref compartido con useDashboardSync para trackear IDs que llegaron
+ * vía WebSocket remoto. Evita eco: si un cambio vino del servidor, no lo reenviamos. */
+interface CambiosRemotosRecientes {
+    tareas: Set<number>;
+    habitos: Set<number>;
+    proyectos: Set<number>;
+}
 
 interface UseNotificadorCambiosProps {
     tareas: Tarea[];
@@ -26,6 +35,8 @@ interface UseNotificadorCambiosProps {
     notificarCambio: (cambio: Omit<CambioLocal, 'timestamp'>) => void;
     habilitado: boolean;
     cargando: boolean;
+    /* [014A-19] IDs de entidades recién aplicadas desde WS remoto — se omiten de notificación */
+    cambiosRemotosRecientes?: React.MutableRefObject<CambiosRemotosRecientes>;
 }
 
 interface EstadoAnterior {
@@ -73,7 +84,8 @@ export function useNotificadorCambiosWebSocket({
     notas,
     notificarCambio,
     habilitado,
-    cargando
+    cargando,
+    cambiosRemotosRecientes
 }: UseNotificadorCambiosProps): void {
     /* Estado anterior para comparación */
     const estadoAnteriorRef = useRef<EstadoAnterior>({
@@ -86,6 +98,19 @@ export function useNotificadorCambiosWebSocket({
 
     /* Debounce para notas (cambian muy frecuentemente al escribir) */
     const debounceNotasRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    /* [014A-19] Verifica si un ID de entidad proviene de un cambio remoto WS reciente.
+     * Si lo encuentra, lo consume (elimina del set) y retorna true → el notificador
+     * NO envía este cambio de vuelta al servidor, cortando el ciclo de eco. */
+    const esOrigenRemoto = useCallback(
+        (tipo: 'tareas' | 'habitos' | 'proyectos', id: number): boolean => {
+            const set = cambiosRemotosRecientes?.current?.[tipo];
+            if (!set || !set.has(id)) return false;
+            set.delete(id);
+            return true;
+        },
+        [cambiosRemotosRecientes]
+    );
 
     /*
      * Notificar cambio genérico
@@ -118,6 +143,7 @@ export function useNotificadorCambiosWebSocket({
             /* Detectar tareas nuevas */
             actual.forEach((tarea, id) => {
                 if (!anterior.has(id)) {
+                    if (esOrigenRemoto('tareas', id)) return;
                     console.log('[NotificadorWS] Tarea creada:', id);
                     notificar('tarea', 'crear', id, tarea);
                 }
@@ -126,6 +152,7 @@ export function useNotificadorCambiosWebSocket({
             /* Detectar tareas eliminadas */
             anterior.forEach((_tarea, id) => {
                 if (!actual.has(id)) {
+                    if (esOrigenRemoto('tareas', id)) return;
                     console.log('[NotificadorWS] Tarea eliminada:', id);
                     notificar('tarea', 'eliminar', id, {id});
                 }
@@ -135,6 +162,7 @@ export function useNotificadorCambiosWebSocket({
             actual.forEach((tareaActual, id) => {
                 const tareaAnterior = anterior.get(id);
                 if (tareaAnterior && hayCambiosRelevantes(tareaAnterior, tareaActual, ['orden'])) {
+                    if (esOrigenRemoto('tareas', id)) return;
                     console.log('[NotificadorWS] Tarea editada:', id);
                     notificar('tarea', 'editar', id, tareaActual);
                 }
@@ -143,7 +171,7 @@ export function useNotificadorCambiosWebSocket({
 
         /* Actualizar estado anterior */
         estadoAnteriorRef.current.tareas = actual;
-    }, [tareas, habilitado, cargando, notificar]);
+    }, [tareas, habilitado, cargando, notificar, esOrigenRemoto]);
 
     /*
      * Detectar cambios en hábitos
@@ -158,6 +186,7 @@ export function useNotificadorCambiosWebSocket({
             /* Detectar hábitos nuevos */
             actual.forEach((habito, id) => {
                 if (!anterior.has(id)) {
+                    if (esOrigenRemoto('habitos', id)) return;
                     console.log('[NotificadorWS] Hábito creado:', id);
                     notificar('habito', 'crear', id, habito);
                 }
@@ -166,6 +195,7 @@ export function useNotificadorCambiosWebSocket({
             /* Detectar hábitos eliminados */
             anterior.forEach((_habito, id) => {
                 if (!actual.has(id)) {
+                    if (esOrigenRemoto('habitos', id)) return;
                     console.log('[NotificadorWS] Hábito eliminado:', id);
                     notificar('habito', 'eliminar', id, {id});
                 }
@@ -181,9 +211,11 @@ export function useNotificadorCambiosWebSocket({
                         JSON.stringify(habitoAnterior.historialPospuestos) !== JSON.stringify(habitoActual.historialPospuestos);
 
                     if (cambioHistorial) {
+                        if (esOrigenRemoto('habitos', id)) return;
                         console.log('[NotificadorWS] Hábito toggle/pospuesto:', id);
                         notificar('habito', 'toggle', id, habitoActual);
                     } else if (hayCambiosRelevantes(habitoAnterior, habitoActual, ['historialCompletados', 'historialPospuestos', 'diasInactividad', 'racha'])) {
+                        if (esOrigenRemoto('habitos', id)) return;
                         console.log('[NotificadorWS] Hábito editado:', id);
                         notificar('habito', 'editar', id, habitoActual);
                     }
@@ -192,7 +224,7 @@ export function useNotificadorCambiosWebSocket({
         }
 
         estadoAnteriorRef.current.habitos = actual;
-    }, [habitos, habilitado, cargando, notificar]);
+    }, [habitos, habilitado, cargando, notificar, esOrigenRemoto]);
 
     /*
      * Detectar cambios en proyectos
@@ -207,6 +239,7 @@ export function useNotificadorCambiosWebSocket({
             /* Detectar proyectos nuevos */
             actual.forEach((proyecto, id) => {
                 if (!anterior.has(id)) {
+                    if (esOrigenRemoto('proyectos', id)) return;
                     console.log('[NotificadorWS] Proyecto creado:', id);
                     notificar('proyecto', 'crear', id, proyecto);
                 }
@@ -215,6 +248,7 @@ export function useNotificadorCambiosWebSocket({
             /* Detectar proyectos eliminados */
             anterior.forEach((_proyecto, id) => {
                 if (!actual.has(id)) {
+                    if (esOrigenRemoto('proyectos', id)) return;
                     console.log('[NotificadorWS] Proyecto eliminado:', id);
                     notificar('proyecto', 'eliminar', id, {id});
                 }
@@ -224,6 +258,7 @@ export function useNotificadorCambiosWebSocket({
             actual.forEach((proyectoActual, id) => {
                 const proyectoAnterior = anterior.get(id);
                 if (proyectoAnterior && hayCambiosRelevantes(proyectoAnterior, proyectoActual, ['progreso'])) {
+                    if (esOrigenRemoto('proyectos', id)) return;
                     console.log('[NotificadorWS] Proyecto editado:', id);
                     notificar('proyecto', 'editar', id, proyectoActual);
                 }
@@ -231,7 +266,7 @@ export function useNotificadorCambiosWebSocket({
         }
 
         estadoAnteriorRef.current.proyectos = actual;
-    }, [proyectos, habilitado, cargando, notificar]);
+    }, [proyectos, habilitado, cargando, notificar, esOrigenRemoto]);
 
     /*
      * Detectar cambios en notas (con debounce)

@@ -59,8 +59,10 @@ class TareasRepository
         if (!empty($metaData)) {
             $tareas = $this->decodeData($metaData, []);
             if (!empty($tareas)) {
-                $this->saveAll($tareas);
-                delete_user_meta($this->userId, self::META_TAREAS);
+                $resultado = $this->saveAll($tareas);
+                if ($resultado) {
+                    delete_user_meta($this->userId, self::META_TAREAS);
+                }
                 return $tareas;
             }
         }
@@ -119,6 +121,18 @@ class TareasRepository
              * (ej: texto) cuando llegan actualizaciones parciales via WebSocket. */
             $exists = $existingMap[$idLocal] ?? null;
             if ($exists && isset($existingDataMap[$idLocal]) && is_array($existingDataMap[$idLocal])) {
+                /* [014A-19] Protección per-entity contra writes stale.
+                 * Si la tarea entrante tiene updatedAt y es ANTERIOR al existente en BD,
+                 * significa que otro dispositivo ya escribió datos más recientes.
+                 * En ese caso, descartamos la tarea entrante (datos stale). */
+                $incomingUpdatedAt = $tarea['updatedAt'] ?? 0;
+                $existingUpdatedAt = $existingDataMap[$idLocal]['updatedAt'] ?? 0;
+                if ($incomingUpdatedAt > 0 && $existingUpdatedAt > 0 && $incomingUpdatedAt < $existingUpdatedAt) {
+                    /* Skip: incoming data is older than what's in DB */
+                    $incomingIds[] = $idLocal;
+                    continue;
+                }
+
                 $tarea = array_merge($existingDataMap[$idLocal], $tarea);
             }
 
@@ -326,7 +340,7 @@ class TareasRepository
     public function deleteAll(): bool
     {
         global $wpdb;
-        $wpdb->delete(Schema::getTableName('tareas'), ['user_id' => $this->userId]);
-        return true;
+        $resultado = $wpdb->delete(Schema::getTableName('tareas'), ['user_id' => $this->userId]);
+        return $resultado !== false;
     }
 }
