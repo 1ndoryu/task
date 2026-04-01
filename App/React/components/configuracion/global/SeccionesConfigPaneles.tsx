@@ -81,7 +81,8 @@ export function SeccionConfigHabitos(): JSX.Element {
     return (
         <div className="contenedorOpcionesConfig">
             <ItemToggle titulo="Ocultar hábitos completados hoy" descripcion="Los hábitos realizados desaparecerán hasta mañana" checked={configuracion.ocultarCompletadosHoy} onChange={toggleOcultarCompletadosHoy} />
-            <ItemToggle titulo="Modo Compacto" descripcion="Reducir el espaciado vertical de las filas" checked={configuracion.modoCompacto} onChange={toggleModoCompacto} />
+            {/* [014A-13] Modo compacto siempre activo en móvil — ocultar toggle */}
+            {!esMovil && <ItemToggle titulo="Modo Compacto" descripcion="Reducir el espaciado vertical de las filas" checked={configuracion.modoCompacto} onChange={toggleModoCompacto} />}
             <ItemToggle titulo="Mostrar hábitos pausados" descripcion="Incluye sección separada con hábitos en pausa" checked={configuracion.mostrarPausados} onChange={toggleMostrarPausados} />
 
             {!esMovil && (

@@ -21,8 +21,6 @@
 
 12. Los botones en navegacionInferiorBarra deberían poder elegirse con una configuración directa en drawerMovilNavegacion para elegir que debe aparecer abajo como acceso directo, todos los paneles deben ser accesible desde movil. 
 
-13. En movil que el modo compacto de los habitos siempre este activado, y que la opcion no aparezca para desactivar. 
-
 14. El boton de 3 puntos de cada panel en movil, cuando se da click en configuracion, no debe abrir el bottomsh de todas las configuraciones sino especificamente la de la pagina o panel en la que se esta. 
 
 18. el boton de dockTrackingTimer debe aumentar mas tiempo al arrastrarse permitir el arrastre infinito haciendo que el cursor si llega al final de la pantalla aparezca del otro lado para seguir arrastrando. 

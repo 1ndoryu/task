@@ -125,10 +125,12 @@ export function useConfiguracionHabitos() {
     /*
      * Merge de columnas: asegurar que nuevas columnas se agreguen
      * aunque el usuario tenga configuración antigua
+     * [014A-13] En móvil, modoCompacto siempre activo — no es configurable
      */
     const valor: ConfiguracionHabitos = {
         ...configPorDefecto,
         ...valorGuardado,
+        ...(esMovil ? {modoCompacto: true} : {}),
         columnasVisibles: {
             ...columnasPorDefecto,
             ...valorGuardado.columnasVisibles

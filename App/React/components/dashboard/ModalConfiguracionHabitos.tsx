@@ -113,16 +113,20 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
 
                 <div className="separadorOpcionesConfig" />
 
-                {/* Opcion 2: Modo Compacto */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Modo Compacto</span>
-                        <span className="descripcionOpcionConfig">Reducir el espaciado vertical de las filas</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
-                </div>
+                {/* [014A-13] Modo compacto siempre activo en móvil — ocultar toggle */}
+                {!esMovil && (
+                    <>
+                        <div className="itemOpcionConfig">
+                            <div className="detallesOpcionConfig">
+                                <span className="tituloOpcionConfig">Modo Compacto</span>
+                                <span className="descripcionOpcionConfig">Reducir el espaciado vertical de las filas</span>
+                            </div>
+                            <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
+                        </div>
 
-                <div className="separadorOpcionesConfig" />
+                        <div className="separadorOpcionesConfig" />
+                    </>
+                )}
 
                 {/* Opcion 3: Mostrar Pausados */}
                 <div className="itemOpcionConfig">
