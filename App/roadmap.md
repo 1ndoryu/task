@@ -15,4 +15,28 @@
 
 ## Tareas pendientes
 
-(Sin tareas pendientes)
+5. Coolify deploy kamples fallando silenciosamente sin actualizar el servidor.
+
+6. EL PANEL DE IA TE COMENTE QUE DEBíA DE SER UN PLUGIN; NO UN PANEL; SE TIENE QUE DESACTIVAR Y ACTIVAR COMO LOS DEMAS PLUGIN Y POR DEFECTO TIENE QUE ESTAR DESACTIVADO
+
+9. menuOpcionesPanelGrupo en movil necesita 14 px de gap y bottomSheetContenido un poco mas de padding (espacioLg)
+
+10. .configMovilGrupo necesita 10 de gap, configMovilGrupoTitulo no necesita tener padding a los lados, configMovilSecciones necesita estar en 16px de gap, .configMovilItemTexto en 13 px de tamaño de letra y en configMovilSecciones, los iconos tienen que estar a la derecha y el titulo a la izquierda como los demas bottomshet. 
+
+11. Las tareas en movil tienen un min-height: var(--dashboard-tamanoTactilMinimo); que no deberían tener. 
+
+12. Los botones en navegacionInferiorBarra deberían poder elegirse con una configuración directa en drawerMovilNavegacion para elegir que debe aparecer abajo como acceso directo, todos los paneles deben ser accesible desde movil. 
+
+13. En movil que el modo compacto de los habitos siempre este activado, y que la opcion no aparezca para desactivar. 
+
+14. El boton de 3 puntos de cada panel en movil, cuando se da click en configuracion, no debe abrir el bottomsh de todas las configuraciones sino especificamente la de la pagina o panel en la que se esta. 
+
+15. ESPECIFICAMENTE EN el modal de historial de versiones no hace falta el padding de 20px en .modalContenido 
+
+17. Hay inconsistencias visuales entre los botones en dockTrackingContenido, y no deberían tener efecto hover de color background. 
+
+18. el boton de dockTrackingTimer debe aumentar mas tiempo al arrastrarse permitir el arrastre infinito haciendo que el cursor si llega al final de la pantalla aparezca del otro lado para seguir arrastrando. 
+
+19. No parece que tu solución aplicada para el problema de la sincornización reamente se una solución definitiva, no una solución arquitectonica. 
+
+20. Hay problema con .agent\coolify-manager-rs, esta guardando copias locales automaticamente no se porque o como en .agent\coolify-manager-rs\config\backups, cuando realidad había pedido que las copias se guardaran en google drive, veo archivos ocmo 20260320_031505.tar.gz pero claramente eso fue hace 10 dias, o sea no esta haciendo copias de seguridad diaria (maximo 2 copias diarias) y una 1 semanal en google drive, de todos los sitios de forma ordenada. Tiene que ser automatico, y no me refiero a que sea local. 

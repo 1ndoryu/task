@@ -129,8 +129,11 @@
 }
 
 /* Textarea UI component wrapper — quitar padding/márgenes extra */
+/* [014A-1] min-width: 0 para que flex: 1 funcione correctamente y el textarea
+ * ocupe el 100% del espacio disponible sin desbordarse */
 .panelIAInput .textareaContenedor {
     flex: 1;
+    min-width: 0;
 }
 
 /* [303A-6] width: 100% para que el textarea ocupe todo el ancho del contenedor */
@@ -225,13 +228,13 @@
 
 /* [243A-1] Config inline eliminada — ahora vive en el modal global (sección 'panelIA') */
 
-/* [263A-10] Botón de envío blanco sin fondo, ghost con color blanco
- * [303A-6] border: none para eliminar borde por defecto del botón */
+/* [014A-1] Override con alta especificidad: .boton--ghost aplica border: 1px solid
+ * y ganaba en cascada. !important necesario porque el botón hereda de .boton--ghost */
 .panelIABotonEnviar {
     flex-shrink: 0;
     width: 32px;
     height: 32px;
-    border: none;
+    border: none !important;
     border-radius: 8px;
     margin-bottom: 2px;
     color: var(--blanco);

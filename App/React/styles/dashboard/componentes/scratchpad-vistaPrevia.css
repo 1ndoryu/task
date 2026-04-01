@@ -2,9 +2,14 @@
     position: relative;
     /* 
      * Usa flex: 1 por defecto para crecer y llenar el espacio.
-     * Cuando hay height inline especÃ­fico (resize manual), 
+     * Cuando hay height inline específico (resize manual), 
      * el selector [style*="height"] desactiva el flex.
+     * [014A-2] display: flex + column para que .textareaContenedor herede
+     * el alto vía flex:1 — sin esto, height:100% del textarea no resolvía
+     * porque scratchpadEditor no era flex container.
      */
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
     overflow: hidden;
