@@ -108,13 +108,16 @@ export function ModalConfiguracionGlobal({estaAbierto, onCerrar, seccionInicial,
     /* En móvil: null = mostrar tabs, string = mostrar contenido expandido */
     const [seccionMovil, setSeccionMovil] = useState<SeccionConfigGlobal | null>(null);
 
-    /* Sincronizar sección cuando se abre con una diferente */
+    /* Sincronizar sección cuando se abre con una diferente
+     * [014A-14] En móvil, si se abre con sección específica, ir directo
+     * a esa sección sin mostrar la lista completa. El botón back (<ChevronLeft>)
+     * permite navegar a otras secciones si se necesita. */
     useEffect(() => {
         if (estaAbierto) {
             setSeccion(seccionInicial);
-            setSeccionMovil(null);
+            setSeccionMovil(esMovil ? seccionInicial : null);
         }
-    }, [estaAbierto, seccionInicial]);
+    }, [estaAbierto, seccionInicial, esMovil]);
 
     if (!estaAbierto) return null;
 
