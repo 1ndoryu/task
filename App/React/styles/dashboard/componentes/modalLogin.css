@@ -7,10 +7,9 @@
     background-color: var(--dashboard-fondoPrincipal);
 }
 
-/* [233A-32] font-family explícito para que el modal herede la fuente del dashboard */
+/* [024A-12] font-family movido a .modalContenedor (modal.css) para cubrir header + contenido */
 .modalLoginContenido {
     padding: 0 0.5rem;
-    font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
 .loginForm {

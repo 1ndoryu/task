@@ -19,6 +19,10 @@
     animation: aparecerModal 0.15s ease-out;
 }
 
+/* [024A-12] font-family, font-size y color explícitos en el contenedor del modal
+ * para que todo el modal (header, contenido, botones) herede la fuente del dashboard.
+ * Sin esto, cuando el modal se monta en contexto de landing o body de WordPress,
+ * hereda la fuente del body en lugar del dashboard. */
 .modalContenedor {
     width: 100%;
     max-height: calc(100vh - -10rem);
@@ -31,6 +35,9 @@
     max-height: 90vh;
     max-width: 480px;
     overflow: hidden;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
 }
 .modalEncabezado {
     display: flex;
