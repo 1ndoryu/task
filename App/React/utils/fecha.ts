@@ -64,12 +64,17 @@ export function calcularDiasDesde(fechaIso: string | undefined): number {
 }
 
 /*
- * Verifica si una fecha corresponde al dia de hoy
- * Usado para determinar si un habito fue completado hoy
+ * Verifica si un hábito fue completado hoy.
+ * [024A-35] Revisa tanto ultimoCompletado como historialCompletados.
+ * ultimoCompletado puede apuntar a una fecha futura (por cambio de horaFinDia)
+ * y actualizarHistorialHabito lo sobreescribe con la última fecha ordenada.
+ * Revisar el historial es la red de seguridad para estos casos.
  */
-export function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean {
-    if (!ultimoCompletado) return false;
-    return ultimoCompletado === obtenerFechaHoy();
+export function fueCompletadoHoy(ultimoCompletado: string | undefined, historialCompletados?: string[]): boolean {
+    const hoy = obtenerFechaHoy();
+    if (ultimoCompletado === hoy) return true;
+    if (historialCompletados && historialCompletados.includes(hoy)) return true;
+    return false;
 }
 
 /*

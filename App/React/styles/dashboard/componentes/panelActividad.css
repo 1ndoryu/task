@@ -123,14 +123,22 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* [024A-34] Boton eliminar actividad — sutil, aparece al hover del item */
+/* [024A-34] Boton eliminar actividad — sutil, aparece al hover del item.
+ * [024A-35] Resetear todos los estilos del .boton base y .boton--ghost
+ * para que sea solo un icono minúsculo sin bordes ni altura extra. */
 .panelActividadDetalleEliminar {
     flex-shrink: 0;
     opacity: 0;
     transition: opacity var(--dashboard-transicionRapida);
-    padding: var(--dashboard-espacioXxs);
-    min-width: auto;
-    min-height: auto;
+    padding: 0;
+    min-width: unset;
+    min-height: unset;
+    width: auto;
+    height: auto;
+    border: none;
+    background: transparent;
+    line-height: 1;
+    font-size: inherit;
 }
 
 .panelActividadDetalleItemUnificado:hover .panelActividadDetalleEliminar {

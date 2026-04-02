@@ -17,15 +17,11 @@ import type {VarianteBadge} from '../../components/shared/BadgeInfo';
 import type {ConfiguracionHabitos} from '../useConfiguracionHabitos';
 import {CONFIG_HABITOS_POR_DEFECTO} from '../useConfiguracionHabitos';
 import type {EstadoHabito} from '../../types/historialHabitos';
-import {obtenerFechaHoy} from '../../utils/fecha';
+import {obtenerFechaHoy, fueCompletadoHoy} from '../../utils/fecha';
 import {MENU_HABITO_IDS, extraerImportanciaDeOpcion} from '../../config/opcionesMenuHabito';
 
-/* Determina si el hábito fue completado hoy */
-export function fueCompletadoHoy(ultimoCompletado: string | undefined): boolean {
-    if (!ultimoCompletado) return false;
-    const hoy = obtenerFechaHoy();
-    return ultimoCompletado === hoy;
-}
+/* Re-exportar para consumidores que importaban desde aquí */
+export {fueCompletadoHoy};
 
 /* Determina si el hábito fue pospuesto hoy */
 export function fuePospuestoHoy(historialPospuestos: string[] | undefined): boolean {
@@ -51,7 +47,7 @@ export function obtenerVariantePrioridad(importancia: Habito['importancia']): Va
 export function useTablaHabitos(habitos: Habito[], configuracion: ConfiguracionHabitos = CONFIG_HABITOS_POR_DEFECTO) {
     const habitosVisibles = useMemo(() => habitos.filter(habito => {
         if (habito.pausado) return false;
-        if (configuracion.ocultarCompletadosHoy && fueCompletadoHoy(habito.ultimoCompletado)) return false;
+        if (configuracion.ocultarCompletadosHoy && fueCompletadoHoy(habito.ultimoCompletado, habito.historialCompletados)) return false;
         return true;
     }), [habitos, configuracion.ocultarCompletadosHoy]);
 
@@ -116,7 +112,7 @@ export function useFilaHabito({
     /* Cálculos basados en el umbral de la frecuencia */
     const esUrgente = habito.diasInactividad > Math.floor(umbralInactividad * 0.4);
     const porcentajeUrgencia = Math.min((habito.diasInactividad / umbralInactividad) * 100, 100);
-    const completadoHoy = fueCompletadoHoy(habito.ultimoCompletado);
+    const completadoHoy = fueCompletadoHoy(habito.ultimoCompletado, habito.historialCompletados);
 
     const habitoTocaHoy = tocaHoy(frecuencia, habito.ultimoCompletado);
     const pospuestoHoy = fuePospuestoHoy(habito.historialPospuestos);

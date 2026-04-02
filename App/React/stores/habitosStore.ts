@@ -196,7 +196,7 @@ export const useHabitosStore = create<HabitosStore>()(
                     }
 
                     const estadoAnterior = {...habito, historialCompletados: [...(habito.historialCompletados || [])]};
-                    const estabaCompletadoHoy = fueCompletadoHoy(habito.ultimoCompletado);
+                    const estabaCompletadoHoy = fueCompletadoHoy(habito.ultimoCompletado, habito.historialCompletados);
 
                     const {accion, nuevoHabito} = calcularToggleHabito(habito, hoy, estabaCompletadoHoy);
 
@@ -484,9 +484,14 @@ export const useHabitosStore = create<HabitosStore>()(
                                     historialCompletados = historialCompletados.filter(f => f !== fecha);
                                 }
 
-                                /* Recalcular ultimoCompletado basándose en el historial */
+                                /* [024A-35] Recalcular ultimoCompletado respetando horaFinDia.
+                                 * Si el "hoy" lógico está en el historial, usarlo como ultimoCompletado
+                                 * aunque existan fechas cronológicamente posteriores (posibles
+                                 * por cambios en horaFinDia). Esto evita que fueCompletadoHoy falle. */
+                                const hoy = obtenerFechaHoy();
                                 const fechasOrdenadas = [...historialCompletados].sort();
-                                const ultimoCompletado = fechasOrdenadas.length > 0 ? fechasOrdenadas[fechasOrdenadas.length - 1] : undefined;
+                                const ultimoCompletadoBase = fechasOrdenadas.length > 0 ? fechasOrdenadas[fechasOrdenadas.length - 1] : undefined;
+                                const ultimoCompletado = historialCompletados.includes(hoy) ? hoy : ultimoCompletadoBase;
 
                                 return {
                                     ...h,
