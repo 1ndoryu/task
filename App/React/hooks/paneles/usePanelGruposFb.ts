@@ -1,10 +1,17 @@
 /* [253A-11] Hook para PanelGruposFb
  * Gestiona la lógica del panel de grupos de Facebook:
- * carga inicial, filtrado local, acciones sobre grupos. */
+ * carga inicial, filtrado local, acciones sobre grupos.
+ * [024A-19] Polling inteligente: cada 30s consulta /stats (1 query ligera),
+ * y solo recarga la lista completa si el total cambió. */
 
-import {useEffect, useMemo, useCallback} from 'react';
+import {useEffect, useMemo, useCallback, useRef} from 'react';
 import {useGruposFbStore} from '../../stores/gruposFbStore';
+import {gruposFbService} from '../../services/gruposFbService';
 import type {GrupoFb} from '../../stores/gruposFbStore';
+
+/* Intervalo de polling (ms). 30s es un buen balance: no satura el servidor,
+ * pero detecta cambios de la extensión en menos de un minuto. */
+const INTERVALO_POLLING = 30_000;
 
 export function usePanelGruposFb() {
     const grupos = useGruposFbStore(s => s.grupos);
@@ -21,6 +28,9 @@ export function usePanelGruposFb() {
     const marcarPublicado = useGruposFbStore(s => s.marcarPublicado);
     const setFiltro = useGruposFbStore(s => s.setFiltro);
 
+    /* Ref para el último total conocido (evita re-crear el efecto en cada render) */
+    const ultimoTotalRef = useRef<number | null>(null);
+
     /* Carga inicial */
     useEffect(() => {
         if (!inicializado) {
@@ -28,6 +38,40 @@ export function usePanelGruposFb() {
             cargarCategorias();
         }
     }, [inicializado, cargar, cargarCategorias]);
+
+    /* [024A-19] Polling inteligente: solo recarga si los stats cambiaron */
+    useEffect(() => {
+        if (!inicializado) return;
+        let activo = true;
+
+        const poll = async () => {
+            try {
+                const stats = await gruposFbService.estadisticas();
+                if (!activo) return;
+
+                /* Si el total cambió respecto al último conocido, recargar todo */
+                if (ultimoTotalRef.current !== null && stats.total !== ultimoTotalRef.current) {
+                    cargar();
+                }
+                ultimoTotalRef.current = stats.total;
+            } catch {
+                /* Error de red silencioso en polling — no bloquear la UI */
+            }
+        };
+
+        const id = setInterval(poll, INTERVALO_POLLING);
+        return () => {
+            activo = false;
+            clearInterval(id);
+        };
+    }, [inicializado, cargar]);
+
+    /* Sincronizar el ref con el total real del store */
+    useEffect(() => {
+        if (estadisticas) {
+            ultimoTotalRef.current = estadisticas.total;
+        }
+    }, [estadisticas]);
 
     /* Filtrado local (los datos ya están en memoria) */
     const gruposFiltrados = useMemo(() => {
