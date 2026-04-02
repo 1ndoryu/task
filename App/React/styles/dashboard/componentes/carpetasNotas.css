@@ -145,10 +145,13 @@
 }
 
 /* Boton principal de carpeta */
+/* [024A-10] justify-content explícito para que texto quede a la izquierda
+ * y la flecha (ChevronRight) al final via flex. width:100% para ocupar toda la fila. */
 .navegadorCarpetaBoton {
     flex: 1;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: transparent;
@@ -158,6 +161,7 @@
     text-align: left;
     transition: all var(--dashboard-transicionRapida);
     font-family: inherit;
+    width: 100%;
 }
 
 .navegadorCarpetaBoton:hover {

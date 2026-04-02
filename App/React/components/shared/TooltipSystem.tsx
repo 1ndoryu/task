@@ -134,13 +134,24 @@ export function TooltipSystem(): JSX.Element | null {
             }
         };
 
+        /* [024A-10] Ocultar tooltip al hacer click (evita que quede colgado
+         * cuando el click cambia el DOM y mouseout nunca dispara) */
+        const handleClick = () => {
+            if (tooltip.visible) {
+                setTooltip(prev => ({...prev, visible: false}));
+                targetRef.current = null;
+            }
+        };
+
         document.addEventListener('mouseover', handleMouseOver);
         document.addEventListener('mouseout', handleMouseOut);
+        document.addEventListener('click', handleClick, {capture: true});
         window.addEventListener('scroll', handleScroll, {capture: true});
 
         return () => {
             document.removeEventListener('mouseover', handleMouseOver);
             document.removeEventListener('mouseout', handleMouseOut);
+            document.removeEventListener('click', handleClick, {capture: true});
             window.removeEventListener('scroll', handleScroll, {capture: true});
         };
     }, [tooltip.visible, calcularPosicion]);
