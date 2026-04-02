@@ -67,9 +67,9 @@ export function SeccionConfigGruposFb(): JSX.Element {
             {/* URL de la API */}
             <div className="itemOpcionConfig">
                 <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">URL de la API</span>
+                    <span className="tituloOpcionConfig">URL base de la API</span>
                     <span className="descripcionOpcionConfig">
-                        Configura esta URL en la extensión para conectarla con este dashboard.
+                        Copia esta URL en el campo &quot;API URL&quot; de la extensión. No añadas rutas adicionales.
                     </span>
                     <div style={{display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px'}}>
                         <Input

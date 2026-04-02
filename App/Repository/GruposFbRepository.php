@@ -109,25 +109,34 @@ class GruposFbRepository
         $now = current_time('mysql');
 
         foreach ($grupos as $grupo) {
-            $fbGroupId = sanitize_text_field($grupo['id'] ?? '');
+            /* [024A-16] Acepta ambos formatos: inglés/camelCase (original) y español/snake_case (extensión v2).
+             * La extensión envía fb_group_id/nombre/tipo/cantidad_miembros/imagen_url/fuente,
+             * pero el repo originalmente esperaba id/name/type/memberCount/imageUrl/source.
+             * Ahora acepta ambos con fallback para retrocompatibilidad. */
+            $fbGroupId = sanitize_text_field($grupo['id'] ?? $grupo['fb_group_id'] ?? '');
             if (empty($fbGroupId)) {
                 $errores++;
                 continue;
             }
 
             $datosExtra = [];
-            foreach (['friendsInGroup', 'postsPerDay', 'tags', 'lastVisit', 'addedAt'] as $campo) {
-                if (isset($grupo[$campo])) {
-                    $datosExtra[$campo] = $grupo[$campo];
+            if (isset($grupo['datos_extra']) && is_array($grupo['datos_extra'])) {
+                $datosExtra = $grupo['datos_extra'];
+            } else {
+                foreach (['friendsInGroup', 'postsPerDay', 'tags', 'lastVisit', 'addedAt'] as $campo) {
+                    if (isset($grupo[$campo])) {
+                        $datosExtra[$campo] = $grupo[$campo];
+                    }
                 }
             }
 
-            $nombre = sanitize_text_field(mb_substr($grupo['name'] ?? '', 0, 500));
+            $nombre = sanitize_text_field(mb_substr($grupo['name'] ?? $grupo['nombre'] ?? '', 0, 500));
             $url = esc_url_raw($grupo['url'] ?? '');
-            $tipo = in_array($grupo['type'] ?? '', ['public', 'private', 'unknown']) ? $grupo['type'] : 'unknown';
-            $cantidadMiembros = sanitize_text_field(mb_substr($grupo['memberCount'] ?? '', 0, 100));
-            $imagenUrl = esc_url_raw(mb_substr($grupo['imageUrl'] ?? '', 0, 1000));
-            $fuente = sanitize_text_field($grupo['source'] ?? 'link-scan');
+            $tipoRaw = $grupo['type'] ?? $grupo['tipo'] ?? 'unknown';
+            $tipo = in_array($tipoRaw, ['public', 'private', 'unknown']) ? $tipoRaw : 'unknown';
+            $cantidadMiembros = sanitize_text_field(mb_substr($grupo['memberCount'] ?? $grupo['cantidad_miembros'] ?? '', 0, 100));
+            $imagenUrl = esc_url_raw(mb_substr($grupo['imageUrl'] ?? $grupo['imagen_url'] ?? '', 0, 1000));
+            $fuente = sanitize_text_field($grupo['source'] ?? $grupo['fuente'] ?? 'link-scan');
             $categoria = !empty($grupo['category']) ? sanitize_text_field($grupo['category']) : null;
             $importancia = max(0, min(5, (int)($grupo['importance'] ?? 0)));
             $notas = sanitize_textarea_field($grupo['notes'] ?? '');

@@ -50,7 +50,10 @@ export function useSeccionConfigGruposFb() {
         }
     }, [token]);
 
-    const apiUrl = `${window.location.origin}/wp-json/glory/v1/grupos-fb`;
+    /* [024A-16] La extensión concatena /grupos-fb/sync a la URL base.
+     * Si mostramos la URL completa con /grupos-fb, el usuario la copia y
+     * la extensión genera /grupos-fb/grupos-fb/sync → 404. Mostrar solo la base. */
+    const apiUrl = `${window.location.origin}/wp-json/glory/v1`;
 
     return {token, tieneToken, cargando, copiado, error, apiUrl, verificarToken, generarToken, copiarToken};
 }

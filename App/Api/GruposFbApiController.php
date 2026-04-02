@@ -107,6 +107,13 @@ class GruposFbApiController
             'callback' => [self::class, 'regenerarToken'],
             'permission_callback' => [self::class, 'requiereCookieAuth'],
         ]);
+
+        /* [024A-16] Ping: verificar conexión y token desde extensión o dashboard */
+        register_rest_route(self::API_NAMESPACE, '/grupos-fb/ping', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [self::class, 'ping'],
+            'permission_callback' => [self::class, 'verificarAutenticacion'],
+        ]);
     }
 
     /* ────────────────────────────── Autenticación ────────────────────────────── */
@@ -529,6 +536,33 @@ class GruposFbApiController
             return new WP_REST_Response([
                 'success' => false,
                 'message' => 'Error al regenerar token: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /* [024A-16] Ping: verifica conexión, token válido, y devuelve info del usuario + conteo de grupos.
+     * Usado por la extensión para confirmar que URL+token funcionan antes de sincronizar. */
+    public static function ping(WP_REST_Request $request): WP_REST_Response
+    {
+        try {
+            $userId = self::getUserId($request);
+            $repo = new GruposFbRepository($userId);
+            $stats = $repo->contarEstadisticas();
+            $user = get_userdata($userId);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => [
+                    'usuario' => $user ? $user->display_name : "user#$userId",
+                    'gruposTotales' => $stats['total'] ?? 0,
+                    'servidor' => home_url(),
+                    'timestamp' => current_time('c'),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error en ping: ' . $e->getMessage(),
             ], 500);
         }
     }
