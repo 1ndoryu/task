@@ -6,10 +6,7 @@
 import '../../styles/dashboard/componentes/Landing/landing.css';
 import {Boton} from '../ui';
 import {GloryLink} from '../../../../Glory/assets/react/src/core/router/GloryLink';
-import dashboardPreview from '../../../Assets/svg/test.svg';
-import LandingHabitAnimation from './LandingHabitAnimation';
-import LandingProjectsAnimation from './LandingProjectsAnimation';
-import LandingSortingAnimation from './LandingSortingAnimation';
+import dashboardPreview from '../../../Assets/svg/Task.svg';
 
 interface LandingProps {
     onLogin: () => void;
@@ -66,44 +63,6 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
                     <div className="landingHeroGridItem">Item 2</div>
                     <div className="landingHeroGridItem">Item 3</div>
                     <div className="landingHeroGridItem">Item 4</div>
-                </div>
-            </section>
-
-            {/* FEATURES SECTION */}
-            <section id="landing-features" className="landingSeccion">
-                <div className="landingSectionHeader">
-                    <div className="landingSectionSubtituloLeft">
-                        Diseñado para ti.
-                        <br />
-                        Escalado para tu equipo.
-                    </div>
-                    <div className="landingSectionSubtituloRight">Un flujo de trabajo unificado que conecta tu productividad individual con la colaboración sin fricción.</div>
-                </div>
-                <div className="landingSectionGrid">
-                    <div className="landingSectionGridItem">
-                        <div className="landingFeatureVisual">
-                            <LandingHabitAnimation />
-                        </div>
-                        <div className="landingFeatureContent">
-                            <h3 className="landingFeatureTitle">Construye consistencia visualizando y marcando tu progreso diario.</h3>
-                        </div>
-                    </div>
-                    <div className="landingSectionGridItem">
-                        <div className="landingFeatureVisual">
-                            <LandingProjectsAnimation />
-                        </div>
-                        <div className="landingFeatureContent">
-                            <h3 className="landingFeatureTitle">Define flujos de trabajo claros para cada uno de tus proyectos.</h3>
-                        </div>
-                    </div>
-                    <div className="landingSectionGridItem">
-                        <div className="landingFeatureVisual">
-                            <LandingSortingAnimation />
-                        </div>
-                        <div className="landingFeatureContent">
-                            <h3 className="landingFeatureTitle">Prioriza automáticamente las tareas que requieren tu atención.</h3>
-                        </div>
-                    </div>
                 </div>
             </section>
 
