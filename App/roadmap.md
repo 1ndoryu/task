@@ -15,4 +15,6 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
+12. En el modal de iniciar sesion tambien no carga la fuente de la pagina.
+
+13. En el inicio pon este svg App\Assets\svg\Task.svg debajo de landingHeroHeader y quita el anterior que no carga. Elimina landing-features ya no va.
