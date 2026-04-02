@@ -137,10 +137,12 @@ class GruposFbRepository
             $cantidadMiembros = sanitize_text_field(mb_substr($grupo['memberCount'] ?? $grupo['cantidad_miembros'] ?? '', 0, 100));
             $imagenUrl = esc_url_raw(mb_substr($grupo['imageUrl'] ?? $grupo['imagen_url'] ?? '', 0, 1000));
             $fuente = sanitize_text_field($grupo['source'] ?? $grupo['fuente'] ?? 'link-scan');
-            $categoria = !empty($grupo['category']) ? sanitize_text_field($grupo['category']) : null;
-            $importancia = max(0, min(5, (int)($grupo['importance'] ?? 0)));
-            $notas = sanitize_textarea_field($grupo['notes'] ?? '');
-            $oculto = !empty($grupo['hidden']) ? 1 : 0;
+            /* [024A-20] Acepta campos de entorno en inglés o español (extensión envía español desde v2) */
+            $categoriaRaw = $grupo['category'] ?? $grupo['categoria'] ?? null;
+            $categoria = !empty($categoriaRaw) ? sanitize_text_field($categoriaRaw) : null;
+            $importancia = max(0, min(5, (int)($grupo['importance'] ?? $grupo['importancia'] ?? 0)));
+            $notas = sanitize_textarea_field($grupo['notes'] ?? $grupo['notas'] ?? '');
+            $oculto = !empty($grupo['hidden']) || !empty($grupo['oculto']) ? 1 : 0;
 
             /* Upsert atómico: INSERT si no existe, UPDATE si ya existe */
             $resultado = $wpdb->query(
@@ -155,6 +157,9 @@ class GruposFbRepository
                         cantidad_miembros = VALUES(cantidad_miembros),
                         imagen_url = CASE WHEN VALUES(imagen_url) != '' THEN VALUES(imagen_url) ELSE imagen_url END,
                         fuente = VALUES(fuente),
+                        categoria = COALESCE(VALUES(categoria), categoria),
+                        importancia = CASE WHEN VALUES(importancia) > 0 THEN VALUES(importancia) ELSE importancia END,
+                        oculto = VALUES(oculto),
                         ultima_deteccion = VALUES(ultima_deteccion),
                         datos_extra = VALUES(datos_extra),
                         deleted_at = NULL",
@@ -332,7 +337,12 @@ class GruposFbRepository
      */
     private function formatearGrupo(array $row): array
     {
-        $datosExtra = json_decode($row['datos_extra'] ?? '{}', true) ?: [];
+        $datosExtraRaw = json_decode($row['datos_extra'] ?? '{}', true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("[GruposFb] JSON corrupto en datos_extra del grupo {$row['id']}: " . json_last_error_msg());
+            $datosExtraRaw = [];
+        }
+        $datosExtra = $datosExtraRaw ?: [];
 
         return [
             'id' => (int)$row['id'],
