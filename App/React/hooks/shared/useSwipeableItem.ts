@@ -84,9 +84,21 @@ export function useSwipeableItem({
         [deshabilitado, onSwipeRight, onSwipeLeft, accionDerecha, accionIzquierda]
     );
 
+    /* [024A-1] Fix: solo disparar acción si el gesto fue detectado como horizontal.
+     * Antes no se verificaba esGestoHorizontalRef, causando que un scroll vertical
+     * con componente horizontal mínimo activara completar/omitir tareas. */
     const finalizarArrastre = useCallback(
         (clientX: number) => {
             if (!inicioRef.current || !contenedorRef.current || deshabilitado) {
+                setArrastrando(false);
+                setDesplazamiento(0);
+                inicioRef.current = null;
+                esGestoHorizontalRef.current = null;
+                return;
+            }
+
+            /* Si el gesto no fue horizontal, no evaluar acciones */
+            if (!esGestoHorizontalRef.current) {
                 setArrastrando(false);
                 setDesplazamiento(0);
                 inicioRef.current = null;
