@@ -9,6 +9,7 @@ import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge} from '../shared';
 import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
+import {FilaGrupo} from './FilaGrupo';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import '../../styles/dashboard/componentes/panelGruposFb.css';
 
@@ -20,7 +21,7 @@ interface PanelGruposFbProps {
 
 export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirConfigGruposFb}: PanelGruposFbProps): JSX.Element {
     const {
-        grupos, categorias, estadisticas, cargando, inicializado, error,
+        grupos, todosLosGrupos, categorias, estadisticas, cargando, inicializado, error,
         filtros, setFiltro, toggleOculto, cambiarCategoria,
         cambiarImportancia, publicar, eliminar, recargar
     } = usePanelGruposFb();
@@ -64,7 +65,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
     /* [263A-4] Opciones para SelectorBadge de importancia */
     const opcionesImportancia = [
         {id: '', etiqueta: 'Todas', icono: <Star size={12} />, descripcion: 'Sin filtro'},
-        ...[5, 4, 3, 2, 1].map(n => ({id: String(n), etiqueta: '★'.repeat(n), icono: <Star size={12} />, descripcion: ''}))
+        ...[5, 4, 3, 2, 1].map(n => ({id: String(n), etiqueta: String(n), icono: <Star size={12} />, descripcion: ''}))
     ];
 
     /* [263A-4] Estado del input de búsqueda expandible */
@@ -132,11 +133,54 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                     </div>
                 )}
 
+                {/* [263A-6] Empty state diagnóstico: distingue DB vacía vs filtros ocultan grupos */}
                 {inicializado && !error && grupos.length === 0 && (
                     <div className="panelGruposFb__vacio">
                         <Users size={24} />
-                        <p>No hay grupos detectados</p>
-                        <p>Instala la extensión FB Group Manager y navega por Facebook para detectar grupos.</p>
+                        {todosLosGrupos.length > 0 ? (
+                            /* Grupos existen pero los filtros activos los ocultan */
+                            <>
+                                <p className="panelGruposFb__vacioPrincipal">
+                                    {todosLosGrupos.length} grupos cargados — ninguno visible con los filtros actuales
+                                </p>
+                                {!filtros.mostrarOcultos && todosLosGrupos.some(g => g.oculto) && (
+                                    <p className="panelGruposFb__vacioDetalle">
+                                        {todosLosGrupos.filter(g => g.oculto).length} grupos están ocultos.
+                                        Activa el filtro <EyeOff size={11} className="panelGruposFb__vacioIconoInline" /> para verlos.
+                                    </p>
+                                )}
+                                {(filtros.categoria || filtros.importancia || filtros.busqueda) && (
+                                    <p className="panelGruposFb__vacioDetalle">
+                                        Hay filtros activos (categoría, importancia o búsqueda). Límpialos para ver más.
+                                    </p>
+                                )}
+                            </>
+                        ) : estadisticas && estadisticas.total > 0 ? (
+                            /* La estadística dice que hay grupos pero todos están marcados ocultos en el store */
+                            <>
+                                <p className="panelGruposFb__vacioPrincipal">
+                                    {estadisticas.total} grupos en el servidor — todos ocultos
+                                </p>
+                                <p className="panelGruposFb__vacioDetalle">
+                                    Activa <EyeOff size={11} className="panelGruposFb__vacioIconoInline" /> para mostrar grupos ocultos.
+                                </p>
+                            </>
+                        ) : (
+                            /* DB genuinamente vacía — la extensión nunca sincronizó o falló */
+                            <>
+                                <p className="panelGruposFb__vacioPrincipal">
+                                    El servidor no tiene grupos (total en BD: {estadisticas?.total ?? 0})
+                                </p>
+                                <p className="panelGruposFb__vacioDetalle">
+                                    La extensión tiene los grupos localmente pero aún no los sincronizó.
+                                    Abre la extensión → Config → &quot;Sincronizar ahora&quot;, o navega por Facebook para activar la detección automática.
+                                </p>
+                                <p className="panelGruposFb__vacioAyuda">
+                                    Verifica también que el token API y la URL estén configurados correctamente en <Settings size={11} className="panelGruposFb__vacioIconoInline" />.
+                                </p>
+                            </>
+                        )}
+                        <Boton variante="ghost" onClick={recargar}>Recargar</Boton>
                     </div>
                 )}
 
@@ -145,7 +189,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                         <table className="panelGruposFb__tabla">
                             <thead>
                                 <tr>
-                                    <th className="panelGruposFb__colCheck">✓</th>
+                                    <th className="panelGruposFb__colCheck"><Check size={11} /></th>
                                     <th>Grupo</th>
                                     <th className="panelGruposFb__colCategoria">Categoría</th>
                                     <th className="panelGruposFb__colImportancia">Importancia</th>
@@ -183,121 +227,4 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
             )}
         </div>
     );
-}
-
-/* ── Componente fila de grupo (separado para evitar re-renders innecesarios) ── */
-
-interface FilaGrupoProps {
-    grupo: GrupoFb;
-    categorias: {nombre: string; icono: string; color: string}[];
-    onPublicar: () => void;
-    onCambiarCategoria: (cat: string | null) => void;
-    onCambiarImportancia: (imp: number) => void;
-    onMenuContextual: (e: React.MouseEvent) => void;
-}
-
-function FilaGrupo({grupo, categorias, onPublicar, onCambiarCategoria, onCambiarImportancia, onMenuContextual}: FilaGrupoProps): JSX.Element {
-    const [menuCat, setMenuCat] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
-    const hoyPublicado = grupo.ultimaPublicacion && esFechaHoy(grupo.ultimaPublicacion);
-
-    return (
-        <tr className={grupo.oculto ? 'panelGruposFb__filaOculta' : ''} onContextMenu={onMenuContextual}>
-            {/* Check publicado */}
-            <td className="panelGruposFb__colCheck">
-                <Boton
-                    variante="badge"
-                    soloIcono
-                    claseAdicional={`panelGruposFb__checkPublicado ${hoyPublicado ? 'panelGruposFb__checkPublicado--activo' : ''}`}
-                    onClick={onPublicar}
-                    title={hoyPublicado ? 'Publicado hoy' : 'Marcar como publicado'}
-                    icono={hoyPublicado ? <Check size={10} color="#fff" /> : undefined}
-                />
-            </td>
-
-            {/* Nombre + avatar */}
-            <td>
-                <div className="panelGruposFb__celdaNombre">
-                    {grupo.imagenUrl ? (
-                        <img className="panelGruposFb__avatar" src={grupo.imagenUrl} alt="" loading="lazy" />
-                    ) : (
-                        <div className="panelGruposFb__avatarPlaceholder">
-                            <Users size={14} />
-                        </div>
-                    )}
-                    <span className="panelGruposFb__nombreTexto">
-                        <a href={grupo.url} target="_blank" rel="noopener noreferrer">{grupo.nombre}</a>
-                    </span>
-                </div>
-            </td>
-
-            {/* Categoría */}
-            <td className="panelGruposFb__colCategoria">
-                <span
-                    className="panelGruposFb__badgeCategoria"
-                    onClick={(e) => {
-                        const rect = (e.target as HTMLElement).getBoundingClientRect();
-                        setMenuCat({visible: true, x: rect.left, y: rect.bottom + 2});
-                    }}
-                >
-                    {grupo.categoria ? (
-                        <>
-                            {categorias.find(c => c.nombre === grupo.categoria)?.icono || '📁'}
-                            {' '}{grupo.categoria}
-                        </>
-                    ) : (
-                        'Sin categoría'
-                    )}
-                </span>
-                {menuCat.visible && (
-                    <MenuContextual
-                        opciones={[
-                            {id: '__ninguna', etiqueta: 'Sin categoría'},
-                            ...categorias.map(c => ({id: c.nombre, etiqueta: `${c.icono} ${c.nombre}`}))
-                        ]}
-                        posicionX={menuCat.x}
-                        posicionY={menuCat.y}
-                        onSeleccionar={(id) => {
-                            setMenuCat(prev => ({...prev, visible: false}));
-                            onCambiarCategoria(id === '__ninguna' ? null : id);
-                        }}
-                        onCerrar={() => setMenuCat(prev => ({...prev, visible: false}))}
-                    />
-                )}
-            </td>
-
-            {/* Importancia (estrellas clickables) */}
-            <td className="panelGruposFb__colImportancia">
-                <div className="panelGruposFb__estrellas">
-                    {[1, 2, 3, 4, 5].map(n => (
-                        <span
-                            key={n}
-                            className={`panelGruposFb__estrella ${n <= grupo.importancia ? 'panelGruposFb__estrella--activa' : ''}`}
-                            onClick={() => onCambiarImportancia(n === grupo.importancia ? 0 : n)}
-                        >
-                            ★
-                        </span>
-                    ))}
-                </div>
-            </td>
-
-            {/* Miembros */}
-            <td>{grupo.cantidadMiembros || '—'}</td>
-
-            {/* Acciones hover */}
-            <td className="panelGruposFb__colAcciones">
-                <div className="panelGruposFb__acciones">
-                    <Boton variante="badge" soloIcono onClick={() => window.open(grupo.url, '_blank', 'noopener')} icono={<ExternalLink size={11} />} title="Ir al grupo" />
-                    <Boton variante="badge" soloIcono onClick={onMenuContextual as unknown as () => void} icono={<EyeOff size={11} />} title="Más acciones" />
-                </div>
-            </td>
-        </tr>
-    );
-}
-
-/* Utilidad: verificar si una fecha es hoy */
-function esFechaHoy(fecha: string): boolean {
-    if (!fecha) return false;
-    const hoy = new Date();
-    const d = new Date(fecha);
-    return d.getFullYear() === hoy.getFullYear() && d.getMonth() === hoy.getMonth() && d.getDate() === hoy.getDate();
 }

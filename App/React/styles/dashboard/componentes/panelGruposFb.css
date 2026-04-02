@@ -203,16 +203,42 @@
     opacity: 1;
 }
 
-/* ── Estado vacío ── */
+/* ── Estado vacío (diagnóstico específico por escenario) ── */
 .panelGruposFb__vacio {
     text-align: center;
     padding: 24px 12px;
     color: var(--dashboard-textoApagado);
     font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
 }
 
-.panelGruposFb__vacio p {
-    margin: 4px 0;
+.panelGruposFb__vacioPrincipal {
+    margin: 4px 0 2px;
+    color: var(--dashboard-texto);
+    font-weight: 500;
+}
+
+.panelGruposFb__vacioDetalle {
+    margin: 0;
+    color: var(--dashboard-textoApagado);
+    line-height: 1.4;
+    max-width: 280px;
+}
+
+.panelGruposFb__vacioAyuda {
+    margin: 0;
+    color: var(--dashboard-textoMuyApagado, var(--dashboard-textoApagado));
+    font-size: 0.72rem;
+    max-width: 280px;
+}
+
+.panelGruposFb__vacioIconoInline {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2px;
 }
 
 /* ── Estado cargando ── */
