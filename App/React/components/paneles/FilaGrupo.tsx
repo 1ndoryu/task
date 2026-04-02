@@ -47,7 +47,9 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
             {v.imagen && (
                 <td className="panelGruposFb__colImagen">
                     {grupo.imagenUrl ? (
-                        <img className="panelGruposFb__avatar" src={grupo.imagenUrl} alt="" loading="lazy" />
+                        /* [024A-22] referrerPolicy="no-referrer" evita que Facebook CDN
+                         * rechace la petición con 403 por hotlinking (Referer != facebook.com) */
+                        <img className="panelGruposFb__avatar" src={grupo.imagenUrl} alt="" loading="lazy" referrerPolicy="no-referrer" />
                     ) : (
                         <div className="panelGruposFb__avatarPlaceholder">
                             <Users size={14} />
