@@ -39,6 +39,7 @@
 
 .configBarraInferiorItem--fijado {
     background: var(--dashboard-superposicionSutil);
+}
 
 .configBarraInferiorItem--deshabilitado {
     opacity: 0.4;
