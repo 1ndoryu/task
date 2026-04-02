@@ -680,7 +680,7 @@
 /* [014A-21] Padding en lista pendientes solo desktop para respiro visual */
 @media (min-width: 481px) {
     .listaTareasPendientes {
-        padding: 6px;
+        padding: var(--dashboard-espacioS);
     }
 }
 

@@ -13,7 +13,7 @@
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     vertical-align: middle;
 }
 

@@ -94,14 +94,12 @@
     border-radius: 6px;
     object-fit: cover;
     flex-shrink: 0;
-    background: var(--dashboard-fondoInput);
+    background: var(--dashboard-fondoTerciario);
 }
-
-.panelGruposFb__avatarPlaceholder {
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: var(--dashboard-fondoInput);
+    background: var(--dashboard-fondoTerciario);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -135,7 +133,7 @@
     padding: 1px 6px;
     border-radius: 3px;
     font-size: 0.68rem;
-    background: var(--dashboard-fondoInput);
+    background: var(--dashboard-fondoTerciario);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     white-space: nowrap;
@@ -160,11 +158,11 @@
 }
 
 .panelGruposFb__estrella--activa {
-    color: #f59e0b;
+    color: var(--dashboard-estadoAdvertencia);
 }
 
 .panelGruposFb__estrella:hover {
-    color: #fbbf24;
+    color: var(--dashboard-estadoDestacado);
 }
 
 /* ── Check publicado ── */
@@ -217,7 +215,7 @@
 
 .panelGruposFb__vacioPrincipal {
     margin: 4px 0 2px;
-    color: var(--dashboard-texto);
+    color: var(--dashboard-textoNormal);
     font-weight: 500;
 }
 

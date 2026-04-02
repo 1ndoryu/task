@@ -31,15 +31,14 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border-radius: var(--dashboard-radioBase);
+    border-radius: var(--dashboard-radioSm);
     width: 100%;
     justify-content: flex-start;
     min-height: 40px;
 }
 
 .configBarraInferiorItem--fijado {
-    background: var(--dashboard-fondoItemActivo, rgba(255, 255, 255, 0.08));
-}
+    background: var(--dashboard-superposicionSutil);
 
 .configBarraInferiorItem--deshabilitado {
     opacity: 0.4;
