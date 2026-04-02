@@ -4,7 +4,7 @@
  * [263A-4] Rediseño: filtros en header como SelectorBadge, búsqueda estilo modalNotasBusqueda.
  * [024A-17] Columnas configurables: el usuario elige qué columnas ver. */
 
-import {useState, useCallback, useRef, useEffect} from 'react';
+import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
 import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge} from '../shared';
@@ -29,24 +29,44 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
         cambiarImportancia, publicar, eliminar, recargar
     } = usePanelGruposFb();
 
-    /* [024A-17] Columnas configurables */
-    const {columnas, visibilidad, columnasActivas, toggleColumna} = useColumnasGruposFb();
-    const [menuColumnasAbierto, setMenuColumnasAbierto] = useState(false);
-    const refMenuColumnas = useRef<HTMLDivElement>(null);
+    /* [024A-17] Columnas configurables (estado del dropdown vive en el hook) */
+    const {columnas, visibilidad, columnasActivas, toggleColumna, menuAbierto: menuColumnasAbierto, toggleMenu: toggleMenuColumnas, refMenu: refMenuColumnas} = useColumnasGruposFb();
 
-    /* [024A-17] Click outside cierra el dropdown de columnas.
-     * sentinel-disable-line: MenuContextual no sirve aquí porque cierra al hacer click
-     * y necesitamos multi-select (toggle varias columnas sin cerrar). */
+    /* [024A-18] Renderizado progresivo: solo muestra LOTE_SIZE filas inicialmente,
+     * carga más cuando el usuario hace scroll cerca del final (IntersectionObserver).
+     * Evita renderizar 600+ filas de golpe que congelan el navegador. */
+    const LOTE_SIZE = 80;
+    const [limiteVisible, setLimiteVisible] = useState(LOTE_SIZE);
+    const refCentinela = useRef<HTMLTableRowElement>(null);
+
+    /* Reset del límite cuando cambian los filtros */
     useEffect(() => {
-        if (!menuColumnasAbierto) return;
-        const handler = (e: MouseEvent) => {
-            if (refMenuColumnas.current && !refMenuColumnas.current.contains(e.target as Node)) {
-                setMenuColumnasAbierto(false);
-            }
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [menuColumnasAbierto]);
+        setLimiteVisible(LOTE_SIZE);
+    }, [filtros]);
+
+    /* Observer: cuando el centinela entra en viewport, cargar más filas */
+    useEffect(() => {
+        const centinela = refCentinela.current;
+        if (!centinela) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setLimiteVisible(prev => prev + LOTE_SIZE);
+                }
+            },
+            {rootMargin: '200px'}
+        );
+
+        observer.observe(centinela);
+        return () => observer.disconnect();
+    }, [grupos.length, limiteVisible]);
+
+    const gruposVisibles = useMemo(
+        () => grupos.slice(0, limiteVisible),
+        [grupos, limiteVisible]
+    );
+    const hayMasGrupos = grupos.length > limiteVisible;
 
     const [menuContextual, setMenuContextual] = useState<{visible: boolean; x: number; y: number; grupoId: number | null}>({visible: false, x: 0, y: 0, grupoId: null});
 
@@ -135,7 +155,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                         <Boton variante="badge" soloIcono onClick={recargar} icono={<RefreshCw size={12} />} title="Recargar" />
                         {/* [024A-17] Toggle de columnas visibles */}
                         <div className="panelGruposFb__columnasContenedor" ref={refMenuColumnas}>
-                            <Boton variante="badge" soloIcono onClick={() => setMenuColumnasAbierto(p => !p)} icono={<SlidersHorizontal size={12} />} title="Columnas visibles" />
+                            <Boton variante="badge" soloIcono onClick={toggleMenuColumnas} icono={<SlidersHorizontal size={12} />} title="Columnas visibles" />
                             {menuColumnasAbierto && (
                                 <div className="panelGruposFb__menuColumnas">
                                     {columnas.map(col => (
@@ -243,7 +263,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                                 </tr>
                             </thead>
                             <tbody>
-                                {grupos.map(grupo => (
+                                {gruposVisibles.map(grupo => (
                                     <FilaGrupo
                                         key={grupo.id}
                                         grupo={grupo}
@@ -255,6 +275,14 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                                         onMenuContextual={(e) => abrirMenuGrupo(e, grupo.id)}
                                     />
                                 ))}
+                                {/* [024A-18] Centinela invisible: el IntersectionObserver lo detecta para cargar más */}
+                                {hayMasGrupos && (
+                                    <tr ref={refCentinela} className="panelGruposFb__centinela">
+                                        <td colSpan={columnasActivas.length}>
+                                            Cargando más ({limiteVisible} de {grupos.length})...
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

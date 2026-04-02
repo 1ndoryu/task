@@ -1,8 +1,9 @@
 /* [024A-17] Hook para configuración de columnas visibles en PanelGruposFb.
  * Persiste en localStorage para que la preferencia sobreviva recargas.
- * Cada columna puede activarse/desactivarse excepto 'nombre' (siempre visible). */
+ * Cada columna puede activarse/desactivarse excepto 'nombre' (siempre visible).
+ * [024A-18] Incluye estado del dropdown para no sumar useState al componente. */
 
-import {useCallback, useMemo} from 'react';
+import {useState, useCallback, useMemo, useRef, useEffect} from 'react';
 import {useLocalStorage} from '../useLocalStorage';
 
 export type ColumnId = 'check' | 'imagen' | 'nombre' | 'tipo' | 'miembros' | 'publicaciones' | 'categoria' | 'importancia' | 'acciones';
@@ -48,6 +49,26 @@ export function useColumnasGruposFb() {
         validarValor: (v) => typeof v === 'object' && v !== null && 'nombre' in (v as Record<string, unknown>),
     });
 
+    /* Estado del dropdown de columnas (aquí para no añadir useState al componente) */
+    const [menuAbierto, setMenuAbierto] = useState(false);
+    const refMenu = useRef<HTMLDivElement>(null);
+
+    const toggleMenu = useCallback(() => setMenuAbierto(p => !p), []);
+
+    /* Click outside cierra el dropdown.
+     * sentinel-disable-line: MenuContextual no sirve aquí porque cierra al hacer click
+     * y necesitamos multi-select (toggle varias columnas sin cerrar). */
+    useEffect(() => {
+        if (!menuAbierto) return;
+        const handler = (e: MouseEvent) => {
+            if (refMenu.current && !refMenu.current.contains(e.target as Node)) {
+                setMenuAbierto(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [menuAbierto]);
+
     const toggleColumna = useCallback((id: ColumnId) => {
         if (id === 'nombre') return;
         setVisibilidad(prev => ({...prev, [id]: !prev[id]}));
@@ -63,5 +84,8 @@ export function useColumnasGruposFb() {
         visibilidad,
         columnasActivas,
         toggleColumna,
+        menuAbierto,
+        toggleMenu,
+        refMenu,
     };
 }
