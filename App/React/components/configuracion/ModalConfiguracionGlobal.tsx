@@ -75,7 +75,7 @@ const TITULOS_SECCION: Record<SeccionConfigGlobal, string> = {
 interface ModalConfiguracionGlobalProps {
     estaAbierto: boolean;
     onCerrar: () => void;
-    seccionInicial: SeccionConfigGlobal;
+    seccionInicial: SeccionConfigGlobal | null;
     onAbrirUpgrade?: () => void;
 }
 
@@ -103,19 +103,19 @@ function ContenidoSeccion({seccion, onCerrar, onAbrirUpgrade}: {seccion: Seccion
 }
 
 export function ModalConfiguracionGlobal({estaAbierto, onCerrar, seccionInicial, onAbrirUpgrade}: ModalConfiguracionGlobalProps): JSX.Element | null {
-    const [seccion, setSeccion] = useState<SeccionConfigGlobal>(seccionInicial);
+    const [seccion, setSeccion] = useState<SeccionConfigGlobal>(seccionInicial ?? 'tareas');
     const {esMovil} = useEsMovil();
     /* En móvil: null = mostrar tabs, string = mostrar contenido expandido */
     const [seccionMovil, setSeccionMovil] = useState<SeccionConfigGlobal | null>(null);
 
     /* Sincronizar sección cuando se abre con una diferente
      * [014A-14] En móvil, si se abre con sección específica, ir directo
-     * a esa sección sin mostrar la lista completa. El botón back (<ChevronLeft>)
-     * permite navegar a otras secciones si se necesita. */
+     * a esa sección sin mostrar la lista completa.
+     * [024A-3] Si seccionInicial es null (ej: desde drawer), mostrar lista de secciones. */
     useEffect(() => {
         if (estaAbierto) {
-            setSeccion(seccionInicial);
-            setSeccionMovil(esMovil ? seccionInicial : null);
+            setSeccion(seccionInicial ?? 'tareas');
+            setSeccionMovil(esMovil && seccionInicial ? seccionInicial : null);
         }
     }, [estaAbierto, seccionInicial, esMovil]);
 

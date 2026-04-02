@@ -117,8 +117,8 @@ interface UseModalesDashboardReturn {
     cerrarModalConfigDeficitCalorico: () => void;
     /* [233A-27] Modal de configuración global */
     modalConfigGlobalAbierto: boolean;
-    seccionConfigGlobal: SeccionConfigGlobal;
-    abrirModalConfigGlobal: (seccion?: SeccionConfigGlobal) => void;
+    seccionConfigGlobal: SeccionConfigGlobal | null;
+    abrirModalConfigGlobal: (seccion?: SeccionConfigGlobal | null) => void;
     cerrarModalConfigGlobal: () => void;
 }
 
@@ -157,9 +157,10 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
 
     /* [233A-27] Modal de configuración global con sidebar */
     const configGlobal = useModalSimple();
-    const [seccionConfigGlobal, setSeccionConfigGlobal] = useState<SeccionConfigGlobal>('tareas');
-    const abrirModalConfigGlobal = useCallback((seccion: SeccionConfigGlobal = 'tareas') => {
-        setSeccionConfigGlobal(seccion);
+    const [seccionConfigGlobal, setSeccionConfigGlobal] = useState<SeccionConfigGlobal | null>('tareas');
+    /* [024A-3] Acepta null para abrir el modal mostrando la lista de secciones en móvil */
+    const abrirModalConfigGlobal = useCallback((seccion?: SeccionConfigGlobal | null) => {
+        setSeccionConfigGlobal(seccion ?? null);
         configGlobal.abrir();
     }, [configGlobal.abrir]);
 
