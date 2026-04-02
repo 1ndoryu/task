@@ -8,14 +8,14 @@
 }
 
 .configBarraInferiorTitulo {
-    font-size: var(--dashboard-fuenteBase);
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
-    color: var(--dashboard-textoPrincipal);
+    color: var(--dashboard-textoNormal);
     margin: 0;
 }
 
 .configBarraInferiorDescripcion {
-    font-size: var(--dashboard-fuentePequena);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     margin: 0;
 }
@@ -61,8 +61,8 @@
 .configBarraInferiorItemTexto {
     flex: 1;
     text-align: left;
-    font-size: var(--dashboard-fuentePequena);
-    color: var(--dashboard-textoPrincipal);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
 }
 
 .configBarraInferiorItemPin {

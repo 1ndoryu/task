@@ -15,8 +15,8 @@
 .listaTareasHabito__inputEdicion {
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--dashboard-borde);
-    color: var(--dashboard-texto);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
     font-size: inherit;
     font-family: inherit;
     padding: 0 2px;
