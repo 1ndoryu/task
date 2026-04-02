@@ -137,14 +137,26 @@ class GruposFbRepository
             $cantidadMiembros = sanitize_text_field(mb_substr($grupo['memberCount'] ?? $grupo['cantidad_miembros'] ?? '', 0, 100));
             $imagenUrl = esc_url_raw(mb_substr($grupo['imageUrl'] ?? $grupo['imagen_url'] ?? '', 0, 1000));
             $fuente = sanitize_text_field($grupo['source'] ?? $grupo['fuente'] ?? 'link-scan');
-            /* [024A-20] Acepta campos de entorno en inglés o español (extensión envía español desde v2) */
+            /* [024A-20] Acepta campos de entorno en inglés o español (extensión envía español desde v2)
+             * [024A-23] Sentinel -1: la extensión envía -1 para importancia/oculto cuando no hay
+             * override explícito. El UPSERT usa CASE WHEN >= 0 para solo sobrescribir con valores reales. */
             $categoriaRaw = $grupo['category'] ?? $grupo['categoria'] ?? null;
             $categoria = !empty($categoriaRaw) ? sanitize_text_field($categoriaRaw) : null;
-            $importancia = max(0, min(5, (int)($grupo['importance'] ?? $grupo['importancia'] ?? 0)));
+            $importanciaRaw = $grupo['importance'] ?? $grupo['importancia'] ?? -1;
+            $importancia = (int)$importanciaRaw;
+            if ($importancia >= 0) {
+                $importancia = max(0, min(5, $importancia));
+            }
             $notas = sanitize_textarea_field($grupo['notes'] ?? $grupo['notas'] ?? '');
-            $oculto = !empty($grupo['hidden']) || !empty($grupo['oculto']) ? 1 : 0;
+            $ocultoRaw = $grupo['oculto'] ?? $grupo['hidden'] ?? -1;
+            $oculto = (int)$ocultoRaw;
 
-            /* Upsert atómico: INSERT si no existe, UPDATE si ya existe */
+            /* [024A-23] Upsert atómico: INSERT si no existe, UPDATE si ya existe.
+             * categoria: wpdb->prepare convierte null en '' para %s, por eso se usa
+             * VALUES(categoria) != '' en vez de COALESCE (COALESCE('', x) retorna '').
+             * oculto: la extensión envía -1 cuando no hay override explícito para ese grupo,
+             * así se evita sobrescribir un oculto=1 del panel con oculto=0 espurio.
+             * importancia: -1 = no cambiar, 0 = resetear, 1-5 = valor explícito. */
             $resultado = $wpdb->query(
                 $wpdb->prepare(
                     "INSERT INTO $table
@@ -157,9 +169,9 @@ class GruposFbRepository
                         cantidad_miembros = VALUES(cantidad_miembros),
                         imagen_url = CASE WHEN VALUES(imagen_url) != '' THEN VALUES(imagen_url) ELSE imagen_url END,
                         fuente = VALUES(fuente),
-                        categoria = COALESCE(VALUES(categoria), categoria),
-                        importancia = CASE WHEN VALUES(importancia) > 0 THEN VALUES(importancia) ELSE importancia END,
-                        oculto = VALUES(oculto),
+                        categoria = CASE WHEN VALUES(categoria) != '' THEN VALUES(categoria) ELSE categoria END,
+                        importancia = CASE WHEN VALUES(importancia) >= 0 THEN VALUES(importancia) ELSE importancia END,
+                        oculto = CASE WHEN VALUES(oculto) >= 0 THEN VALUES(oculto) ELSE oculto END,
                         ultima_deteccion = VALUES(ultima_deteccion),
                         datos_extra = VALUES(datos_extra),
                         deleted_at = NULL",

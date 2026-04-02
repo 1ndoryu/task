@@ -4,10 +4,19 @@
  * [024A-19] Polling inteligente: cada 30s consulta /stats (1 query ligera),
  * y solo recarga la lista completa si el total cambió. */
 
-import {useEffect, useMemo, useCallback, useRef} from 'react';
+import {useEffect, useMemo, useCallback, useRef, useState} from 'react';
 import {useGruposFbStore} from '../../stores/gruposFbStore';
 import {gruposFbService} from '../../services/gruposFbService';
 import type {GrupoFb} from '../../stores/gruposFbStore';
+
+/* [024A-27] Campos por los que se puede ordenar la tabla */
+export type CampoOrden = 'nombre' | 'tipo' | 'miembros' | 'categoria' | 'importancia' | 'ultimaPublicacion';
+export type DireccionOrden = 'asc' | 'desc';
+
+export interface EstadoOrden {
+    campo: CampoOrden;
+    direccion: DireccionOrden;
+}
 
 /* Intervalo de polling (ms). 30s es un buen balance: no satura el servidor,
  * pero detecta cambios de la extensión en menos de un minuto. */
@@ -28,8 +37,15 @@ export function usePanelGruposFb() {
     const marcarPublicado = useGruposFbStore(s => s.marcarPublicado);
     const setFiltro = useGruposFbStore(s => s.setFiltro);
 
+    /* [024A-27] Ordenamiento por columna: default por importancia desc */
+    const [orden, setOrden] = useState<EstadoOrden>({campo: 'importancia', direccion: 'desc'});
+
     /* Ref para el último total conocido (evita re-crear el efecto en cada render) */
     const ultimoTotalRef = useRef<number | null>(null);
+    /* [024A-23] Contador de polls: fuerza recarga completa cada N ciclos para detectar
+     * cambios de contenido (cat/imp/oculto) que no alteran el total de grupos. */
+    const pollCountRef = useRef(0);
+    const FORZAR_RECARGA_CADA = 4; /* cada 4 polls = ~2 min */
 
     /* Carga inicial */
     useEffect(() => {
@@ -49,8 +65,14 @@ export function usePanelGruposFb() {
                 const stats = await gruposFbService.estadisticas();
                 if (!activo) return;
 
-                /* Si el total cambió respecto al último conocido, recargar todo */
-                if (ultimoTotalRef.current !== null && stats.total !== ultimoTotalRef.current) {
+                pollCountRef.current++;
+
+                /* [024A-23] Recargar si el total cambió O cada N polls para capturar
+                 * cambios de contenido (cat/imp/oculto) que no alteran el total. */
+                const totalCambio = ultimoTotalRef.current !== null && stats.total !== ultimoTotalRef.current;
+                const forzarRecarga = pollCountRef.current % FORZAR_RECARGA_CADA === 0;
+
+                if (totalCambio || forzarRecarga) {
                     cargar();
                 }
                 ultimoTotalRef.current = stats.total;
@@ -100,6 +122,48 @@ export function usePanelGruposFb() {
 
         return resultado;
     }, [grupos, filtros]);
+
+    /* [024A-27] Ordenar los grupos filtrados según el estado de orden */
+    const gruposOrdenados = useMemo(() => {
+        const {campo, direccion} = orden;
+        const mult = direccion === 'asc' ? 1 : -1;
+
+        return [...gruposFiltrados].sort((a, b) => {
+            let cmp = 0;
+            switch (campo) {
+                case 'nombre':
+                    cmp = a.nombre.localeCompare(b.nombre);
+                    break;
+                case 'tipo':
+                    cmp = (a.tipo || '').localeCompare(b.tipo || '');
+                    break;
+                case 'miembros':
+                    cmp = parsearNumMiembros(a.cantidadMiembros) - parsearNumMiembros(b.cantidadMiembros);
+                    break;
+                case 'categoria':
+                    cmp = (a.categoria || '').localeCompare(b.categoria || '');
+                    break;
+                case 'importancia':
+                    cmp = a.importancia - b.importancia;
+                    break;
+                case 'ultimaPublicacion':
+                    cmp = (a.ultimaPublicacion || '').localeCompare(b.ultimaPublicacion || '');
+                    break;
+            }
+            return cmp * mult;
+        });
+    }, [gruposFiltrados, orden]);
+
+    /* [024A-27] Toggle de ordenamiento: si se clickea el mismo campo, alterna dirección.
+     * Si es un campo nuevo, ordena ascendente (excepto importancia que empieza desc). */
+    const cambiarOrden = useCallback((campo: CampoOrden) => {
+        setOrden(prev => {
+            if (prev.campo === campo) {
+                return {campo, direccion: prev.direccion === 'asc' ? 'desc' : 'asc'};
+            }
+            return {campo, direccion: campo === 'importancia' ? 'desc' : 'asc'};
+        });
+    }, []);
 
     /* Agrupar por categoría para estadísticas rápidas */
     const conteosPorCategoria = useMemo(() => {
@@ -153,7 +217,7 @@ export function usePanelGruposFb() {
     }, [eliminarGrupo]);
 
     return {
-        grupos: gruposFiltrados,
+        grupos: gruposOrdenados,
         todosLosGrupos: grupos,
         categorias,
         estadisticas,
@@ -162,6 +226,8 @@ export function usePanelGruposFb() {
         error,
         filtros,
         conteosPorCategoria,
+        orden,
+        cambiarOrden,
         setFiltro,
         toggleOculto,
         cambiarCategoria,
@@ -170,4 +236,17 @@ export function usePanelGruposFb() {
         eliminar,
         recargar: cargar
     };
+}
+
+/* [024A-27] Parsear "1,5 mil miembros" → 1500, "2 mill. miembros" → 2000000.
+ * Para ordenar numéricamente la columna miembros. */
+function parsearNumMiembros(raw: string): number {
+    if (!raw) return 0;
+    const match = raw.match(/([\d.,]+)\s*(mil|mill\.?|K|M)?/i);
+    if (!match) return 0;
+    const num = parseFloat(match[1].replace(/\./g, '').replace(',', '.')) || 0;
+    const suffix = (match[2] || '').toLowerCase();
+    if (suffix === 'mil' || suffix === 'k') return num * 1000;
+    if (suffix.startsWith('mill') || suffix === 'm') return num * 1000000;
+    return num;
 }

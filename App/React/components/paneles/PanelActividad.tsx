@@ -160,7 +160,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
     );
 
     return (
-        <div className="panelDashboard internaColumna">
+        <div className="internaColumna">
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Actividad')}

@@ -51,7 +51,7 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
     const esDuplicado = !!onCerrarPanel;
 
     return (
-        <div className="panelDashboard internaColumna internaColumna--notas">
+        <div className="internaColumna internaColumna--notas">
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Notas')}

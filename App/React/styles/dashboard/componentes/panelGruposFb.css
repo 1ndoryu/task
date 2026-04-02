@@ -77,6 +77,23 @@
     color: var(--dashboard-textoSecundario);
 }
 
+/* [024A-27] Header clickable para ordenar */
+.panelGruposFb__thOrdenable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.panelGruposFb__thContenido {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.panelGruposFb__thFlecha {
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
 /* [024A-17] Sin border-bottom por petición del usuario
  * [024A-21] overflow:hidden + text-overflow para que las celdas no expandan la tabla */
 .panelGruposFb__tabla td {

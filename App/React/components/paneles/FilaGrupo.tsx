@@ -61,7 +61,7 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
             {/* Nombre */}
             {v.nombre && (
                 <td>
-                    <span className="panelGruposFb__nombreTexto">
+                    <span className="panelGruposFb__nombreTexto" title={grupo.nombre}>
                         <a href={grupo.url} target="_blank" rel="noopener noreferrer">{grupo.nombre}</a>
                     </span>
                 </td>
@@ -69,14 +69,16 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
 
             {/* Tipo */}
             {v.tipo && (
-                <td className="panelGruposFb__colTipo">
+                <td className="panelGruposFb__colTipo" title={grupo.tipo === 'public' ? 'Grupo público' : grupo.tipo === 'private' ? 'Grupo privado' : 'Tipo desconocido'}>
                     {grupo.tipo === 'public' ? 'Público' : grupo.tipo === 'private' ? 'Privado' : '—'}
                 </td>
             )}
 
-            {/* Miembros */}
+            {/* Miembros
+              * [024A-24] Limpiar "Público"/"Privado" que a veces queda en cantidadMiembros
+              * por el scraping de la extensión (discover page con separador · en vez de •). */}
             {v.miembros && (
-                <td>{grupo.cantidadMiembros || '—'}</td>
+                <td title={grupo.cantidadMiembros || undefined}>{limpiarMiembros(grupo.cantidadMiembros) || '—'}</td>
             )}
 
             {/* Publicaciones/día — viene de datos_extra.postsPerDay */}
@@ -91,6 +93,7 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
                 <td className="panelGruposFb__colCategoria">
                     <span
                         className="panelGruposFb__badgeCategoria"
+                        title={grupo.categoria ? `Categoría: ${grupo.categoria} (click para cambiar)` : 'Click para asignar categoría'}
                         onClick={(e) => {
                             const rect = (e.target as HTMLElement).getBoundingClientRect();
                             setMenuCat({visible: true, x: rect.left, y: rect.bottom + 2});
@@ -125,7 +128,7 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
 
             {/* Importancia (estrellas clickables) */}
             {v.importancia && (
-                <td className="panelGruposFb__colImportancia">
+                <td className="panelGruposFb__colImportancia" title={`Importancia: ${grupo.importancia}/5`}>
                     <div className="panelGruposFb__estrellas">
                         {[1, 2, 3, 4, 5].map(n => (
                             <Star
@@ -159,4 +162,17 @@ function esFechaHoy(fecha: string): boolean {
     const hoy = new Date();
     const d = new Date(fecha);
     return d.getFullYear() === hoy.getFullYear() && d.getMonth() === hoy.getMonth() && d.getDate() === hoy.getDate();
+}
+
+/* [024A-24] Limpiar texto de "Público"/"Privado" que a veces queda pegado en cantidadMiembros.
+ * Solo mantiene la parte que contiene dígitos + "miembros"/"members". */
+function limpiarMiembros(raw: string): string {
+    if (!raw) return '';
+    if (/^\d/.test(raw.trim())) return raw.trim();
+    const partes = raw.split(/[•·,]/);
+    for (const parte of partes) {
+        const t = parte.trim();
+        if (/\d/.test(t) && (/miembro/i.test(t) || /member/i.test(t))) return t;
+    }
+    return raw.replace(/^(Público|Privado|Public|Private)\s*[·•]?\s*/i, '').trim();
 }

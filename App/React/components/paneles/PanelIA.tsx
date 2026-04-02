@@ -86,7 +86,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
     };
 
     return (
-        <div className="panelDashboard internaColumna panelIA">
+        <div className="internaColumna panelIA">
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('IA')}

@@ -5,11 +5,12 @@
  * [024A-17] Columnas configurables: el usuario elige qué columnas ver. */
 
 import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
-import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal} from 'lucide-react';
+import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, ArrowUp, ArrowDown} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge} from '../shared';
 import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
+import type {CampoOrden} from '../../hooks/paneles/usePanelGruposFb';
 import {useColumnasGruposFb} from '../../hooks/paneles/useColumnasGruposFb';
 import type {ColumnId} from '../../hooks/paneles/useColumnasGruposFb';
 import {FilaGrupo} from './FilaGrupo';
@@ -26,7 +27,8 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
     const {
         grupos, todosLosGrupos, categorias, estadisticas, cargando, inicializado, error,
         filtros, setFiltro, toggleOculto, cambiarCategoria,
-        cambiarImportancia, publicar, eliminar, recargar
+        cambiarImportancia, publicar, eliminar, recargar,
+        orden, cambiarOrden
     } = usePanelGruposFb();
 
     /* [024A-17] Columnas configurables (estado del dropdown vive en el hook) */
@@ -69,6 +71,21 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
     const hayMasGrupos = grupos.length > limiteVisible;
 
     const [menuContextual, setMenuContextual] = useState<{visible: boolean; x: number; y: number; grupoId: number | null}>({visible: false, x: 0, y: 0, grupoId: null});
+
+    /* [024A-25] onCerrar estabilizado con useCallback para no re-crear el effect
+     * de click-outside en cada render (antes era inline arrow function). */
+    const cerrarMenuContextual = useCallback(() => {
+        setMenuContextual(prev => ({...prev, visible: false}));
+    }, []);
+
+    /* [024A-25] Cerrar menú cuando la ventana pierde foco (ej: window.open abre nueva pestaña,
+     * el click no propaga al document y el menú quedaba abierto). */
+    useEffect(() => {
+        if (!menuContextual.visible) return;
+        const onBlur = () => cerrarMenuContextual();
+        window.addEventListener('blur', onBlur);
+        return () => window.removeEventListener('blur', onBlur);
+    }, [menuContextual.visible, cerrarMenuContextual]);
 
     const abrirMenuGrupo = useCallback((e: React.MouseEvent, grupoId: number) => {
         e.preventDefault();
@@ -124,7 +141,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
     }, [busquedaAbierta, filtros.busqueda]);
 
     return (
-        <div className="panelDashboard internaColumna">
+        <div className="internaColumna">
             <SeccionEncabezado
                 icono={null}
                 titulo={renderHandleArrastre('Grupos FB')}
@@ -253,12 +270,12 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                                 <tr>
                                     {visibilidad.check && <th className="panelGruposFb__colCheck"><Check size={11} /></th>}
                                     {visibilidad.imagen && <th className="panelGruposFb__colImagen" />}
-                                    {visibilidad.nombre && <th>Grupo</th>}
-                                    {visibilidad.tipo && <th className="panelGruposFb__colTipo">Tipo</th>}
-                                    {visibilidad.miembros && <th className="panelGruposFb__colMiembros">Miembros</th>}
+                                    {visibilidad.nombre && <ThOrdenable campo="nombre" etiqueta="Grupo" orden={orden} onClick={cambiarOrden} />}
+                                    {visibilidad.tipo && <ThOrdenable campo="tipo" etiqueta="Tipo" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colTipo" />}
+                                    {visibilidad.miembros && <ThOrdenable campo="miembros" etiqueta="Miembros" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colMiembros" />}
                                     {visibilidad.publicaciones && <th className="panelGruposFb__colPub">Pub/día</th>}
-                                    {visibilidad.categoria && <th className="panelGruposFb__colCategoria">Categoría</th>}
-                                    {visibilidad.importancia && <th className="panelGruposFb__colImportancia">Importancia</th>}
+                                    {visibilidad.categoria && <ThOrdenable campo="categoria" etiqueta="Categoría" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colCategoria" />}
+                                    {visibilidad.importancia && <ThOrdenable campo="importancia" etiqueta="Importancia" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colImportancia" />}
                                     {visibilidad.acciones && <th className="panelGruposFb__colAcciones" />}
                                 </tr>
                             </thead>
@@ -296,9 +313,30 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                     posicionX={menuContextual.x}
                     posicionY={menuContextual.y}
                     onSeleccionar={manejarSeleccionMenu}
-                    onCerrar={() => setMenuContextual(prev => ({...prev, visible: false}))}
+                    onCerrar={cerrarMenuContextual}
                 />
             )}
         </div>
+    );
+}
+
+/* [024A-27] Header de tabla clickable para ordenar. Muestra flecha si es la columna activa. */
+function ThOrdenable({campo, etiqueta, orden, onClick, className}: {
+    campo: CampoOrden; etiqueta: string;
+    orden: {campo: CampoOrden; direccion: 'asc' | 'desc'};
+    onClick: (campo: CampoOrden) => void;
+    className?: string;
+}): JSX.Element {
+    const activo = orden.campo === campo;
+    return (
+        <th className={`${className || ''} panelGruposFb__thOrdenable`} onClick={() => onClick(campo)}>
+            <span className="panelGruposFb__thContenido">
+                {etiqueta}
+                {activo && (orden.direccion === 'asc'
+                    ? <ArrowUp size={10} className="panelGruposFb__thFlecha" />
+                    : <ArrowDown size={10} className="panelGruposFb__thFlecha" />
+                )}
+            </span>
+        </th>
     );
 }
