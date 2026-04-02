@@ -29,6 +29,7 @@ interface GruposFbState {
 interface GruposFbActions {
     cargar: () => Promise<void>;
     cargarCategorias: () => Promise<void>;
+    guardarCategorias: (categorias: Omit<CategoriaGrupoFb, 'id' | 'orden'>[]) => Promise<void>;
     actualizarGrupo: (id: number, datos: Partial<Pick<GrupoFb, 'categoria' | 'importancia' | 'oculto' | 'notas'>>) => Promise<void>;
     eliminarGrupo: (id: number) => Promise<void>;
     marcarPublicado: (id: number) => Promise<void>;
@@ -93,6 +94,18 @@ export const useGruposFbStore = create<GruposFbStore>()(
                 } catch (e) {
                     const msg = e instanceof Error ? e.message : 'Error cargando categorías';
                     set({error: msg}, false, 'cargarCategorias/error');
+                }
+            },
+
+            /* [024A-30] Guardar categorías (replace-all) y recargar */
+            guardarCategorias: async (nuevas) => {
+                try {
+                    const categorias = await gruposFbService.guardarCategorias(nuevas);
+                    set({categorias}, false, 'guardarCategorias');
+                } catch (e) {
+                    const msg = e instanceof Error ? e.message : 'Error guardando categorías';
+                    set({error: msg}, false, 'guardarCategorias/error');
+                    throw e;
                 }
             },
 

@@ -403,3 +403,222 @@
     color: var(--dashboard-textoApagado);
     font-size: 0.72rem;
 }
+
+/* ── [024A-30] Editor de categorías ── */
+.editorCategorias {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.editorCategorias__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editorCategorias__titulo {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+}
+
+.editorCategorias__lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.editorCategorias__fila {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.editorCategorias__fila:hover {
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.editorCategorias__ordenar {
+    cursor: grab;
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+}
+
+.editorCategorias__grip {
+    opacity: 0.5;
+    transition: opacity 0.15s;
+}
+
+.editorCategorias__grip:hover {
+    opacity: 1;
+}
+
+.editorCategorias__iconoContenedor,
+.editorCategorias__colorContenedor {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.editorCategorias__iconoBtn {
+    background: none;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+}
+
+.editorCategorias__iconoBtn:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoHover);
+}
+
+.editorCategorias__colorBtn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--dashboard-bordeSutil);
+    cursor: pointer;
+    padding: 0;
+}
+
+.editorCategorias__colorBtn:hover {
+    border-color: var(--dashboard-textoSecundario);
+}
+
+/* Pickers (posicionados relativos al botón) */
+.editorCategorias__picker {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 60;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    padding: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: grid;
+    gap: 4px;
+}
+
+.editorCategorias__pickerIconos {
+    grid-template-columns: repeat(6, 1fr);
+    width: 180px;
+}
+
+.editorCategorias__pickerColores {
+    grid-template-columns: repeat(6, 1fr);
+    width: 160px;
+}
+
+.editorCategorias__pickerItem {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--dashboard-radioSm);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+}
+
+.editorCategorias__pickerItem:hover {
+    background: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.editorCategorias__pickerItem--activo {
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-fondoHover);
+}
+
+.editorCategorias__colorMuestra {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s;
+}
+
+.editorCategorias__colorMuestra:hover {
+    transform: scale(1.2);
+}
+
+.editorCategorias__colorMuestra--activo {
+    border-color: var(--dashboard-textoNormal);
+}
+
+.editorCategorias__nombre {
+    flex: 1;
+    min-width: 0;
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    color: var(--dashboard-textoNormal);
+    font-family: inherit;
+    outline: none;
+}
+
+.editorCategorias__nombre:focus {
+    border-color: var(--dashboard-acento);
+}
+
+.editorCategorias__nombre::placeholder {
+    color: var(--dashboard-textoApagado);
+}
+
+.editorCategorias__eliminar {
+    flex-shrink: 0;
+    color: var(--dashboard-estadoError);
+    opacity: 0.5;
+}
+
+.editorCategorias__eliminar:hover {
+    opacity: 1;
+}
+
+.editorCategorias__vacio {
+    text-align: center;
+    padding: 16px;
+    color: var(--dashboard-textoApagado);
+    font-size: 0.72rem;
+}
+
+.editorCategorias__error {
+    padding: 4px 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-estadoError);
+    font-size: 0.72rem;
+}
+
+.editorCategorias__acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}

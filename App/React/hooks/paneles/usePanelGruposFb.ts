@@ -40,6 +40,9 @@ export function usePanelGruposFb() {
     /* [024A-27] Ordenamiento por columna: default por importancia desc */
     const [orden, setOrden] = useState<EstadoOrden>({campo: 'importancia', direccion: 'desc'});
 
+    /* [024A-30] Estado del editor de categorías */
+    const [editorCategoriasAbierto, setEditorCategoriasAbierto] = useState(false);
+
     /* Ref para el último total conocido (evita re-crear el efecto en cada render) */
     const ultimoTotalRef = useRef<number | null>(null);
     /* [024A-23] Contador de polls: fuerza recarga completa cada N ciclos para detectar
@@ -228,6 +231,9 @@ export function usePanelGruposFb() {
         conteosPorCategoria,
         orden,
         cambiarOrden,
+        editorCategoriasAbierto,
+        toggleEditorCategorias: () => setEditorCategoriasAbierto(prev => !prev),
+        cerrarEditorCategorias: () => setEditorCategoriasAbierto(false),
         setFiltro,
         toggleOculto,
         cambiarCategoria,

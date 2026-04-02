@@ -5,7 +5,7 @@
  * [024A-17] Columnas configurables: el usuario elige qué columnas ver. */
 
 import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
-import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, ArrowUp, ArrowDown} from 'lucide-react';
+import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, Tag} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge} from '../shared';
 import {Boton, Input} from '../ui';
@@ -14,7 +14,10 @@ import type {CampoOrden} from '../../hooks/paneles/usePanelGruposFb';
 import {useColumnasGruposFb} from '../../hooks/paneles/useColumnasGruposFb';
 import type {ColumnId} from '../../hooks/paneles/useColumnasGruposFb';
 import {FilaGrupo} from './FilaGrupo';
+import {EditorCategorias} from './EditorCategorias';
+import {ThOrdenable} from './ThOrdenable';
 import type {GrupoFb} from '../../stores/gruposFbStore';
+import {useGruposFbStore} from '../../stores/gruposFbStore';
 import '../../styles/dashboard/componentes/panelGruposFb.css';
 
 interface PanelGruposFbProps {
@@ -28,11 +31,14 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
         grupos, todosLosGrupos, categorias, estadisticas, cargando, inicializado, error,
         filtros, setFiltro, toggleOculto, cambiarCategoria,
         cambiarImportancia, publicar, eliminar, recargar,
-        orden, cambiarOrden
+        orden, cambiarOrden,
+        editorCategoriasAbierto, toggleEditorCategorias, cerrarEditorCategorias
     } = usePanelGruposFb();
 
     /* [024A-17] Columnas configurables (estado del dropdown vive en el hook) */
     const {columnas, visibilidad, columnasActivas, toggleColumna, menuAbierto: menuColumnasAbierto, toggleMenu: toggleMenuColumnas, refMenu: refMenuColumnas} = useColumnasGruposFb();
+
+    const guardarCategorias = useGruposFbStore(s => s.guardarCategorias);
 
     /* [024A-18] Renderizado progresivo: solo muestra LOTE_SIZE filas inicialmente,
      * carga más cuando el usuario hace scroll cerca del final (IntersectionObserver).
@@ -170,6 +176,8 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                         <SelectorBadge opciones={opcionesImportancia} valorActual={filtros.importancia} onChange={valor => setFiltro('importancia', valor)} icono={<Star size={12} />} titulo="Importancia" soloIcono />
                         <Boton variante="badge" soloIcono onClick={() => setFiltro('mostrarOcultos', !filtros.mostrarOcultos)} icono={filtros.mostrarOcultos ? <Eye size={12} /> : <EyeOff size={12} />} title={filtros.mostrarOcultos ? 'Mostrando ocultos' : 'Ocultos ocultos'} claseAdicional={filtros.mostrarOcultos ? 'selectorBadgeBoton--activo' : ''} />
                         <Boton variante="badge" soloIcono onClick={recargar} icono={<RefreshCw size={12} />} title="Recargar" />
+                        {/* [024A-30] Botón para abrir editor de categorías */}
+                        <Boton variante="badge" soloIcono onClick={toggleEditorCategorias} icono={<Tag size={12} />} title="Gestionar categorías" claseAdicional={editorCategoriasAbierto ? 'selectorBadgeBoton--activo' : ''} />
                         {/* [024A-17] Toggle de columnas visibles */}
                         <div className="panelGruposFb__columnasContenedor" ref={refMenuColumnas}>
                             <Boton variante="badge" soloIcono onClick={toggleMenuColumnas} icono={<SlidersHorizontal size={12} />} title="Columnas visibles" />
@@ -199,6 +207,15 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
 
             <div className="panelGruposFb">
                 {/* [024A-9] Stats eliminadas por innecesarias */}
+
+                {/* [024A-30] Editor de categorías inline */}
+                {editorCategoriasAbierto && (
+                    <EditorCategorias
+                        categorias={categorias}
+                        onGuardar={guardarCategorias}
+                        onCerrar={() => cerrarEditorCategorias()}
+                    />
+                )}
 
                 {/* Contenido */}
                 {cargando && !inicializado && (
@@ -317,26 +334,5 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                 />
             )}
         </div>
-    );
-}
-
-/* [024A-27] Header de tabla clickable para ordenar. Muestra flecha si es la columna activa. */
-function ThOrdenable({campo, etiqueta, orden, onClick, className}: {
-    campo: CampoOrden; etiqueta: string;
-    orden: {campo: CampoOrden; direccion: 'asc' | 'desc'};
-    onClick: (campo: CampoOrden) => void;
-    className?: string;
-}): JSX.Element {
-    const activo = orden.campo === campo;
-    return (
-        <th className={`${className || ''} panelGruposFb__thOrdenable`} onClick={() => onClick(campo)}>
-            <span className="panelGruposFb__thContenido">
-                {etiqueta}
-                {activo && (orden.direccion === 'asc'
-                    ? <ArrowUp size={10} className="panelGruposFb__thFlecha" />
-                    : <ArrowDown size={10} className="panelGruposFb__thFlecha" />
-                )}
-            </span>
-        </th>
     );
 }
