@@ -153,10 +153,8 @@
     display: flex;
     justify-content: center;
     overflow: hidden;
-    padding: calc(var(--dashboard-espacioXl) * 2);
-    background-image: url('../../../../../../Glory/assets/images/colors/ea78d06a9fce9a2a10d3f7e3f6eb9314.png');
-    background-size: cover;
-    background-position: center;
+    /* [024A-31] Eliminado background-image de PNG inexistente (ea78d06a.png 404).
+     * Eliminado padding excesivo que ocultaba el SVG. */
     border-radius: var(--dashboard-radioLg);
 }
 

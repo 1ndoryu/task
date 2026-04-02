@@ -6,7 +6,10 @@
 import '../../styles/dashboard/componentes/Landing/landing.css';
 import {Boton} from '../ui';
 import {GloryLink} from '../../../../Glory/assets/react/src/core/router/GloryLink';
-import dashboardPreview from '../../../Assets/svg/Task.svg';
+
+/* [024A-31] URL estática del SVG preview — no usar import de Vite porque genera
+ * un archivo hasheado que da 404 en producción (el hash cambia entre builds). */
+const PREVIEW_SVG_URL = '/wp-content/themes/glorytemplate/App/Assets/svg/Task.svg';
 
 interface LandingProps {
     onLogin: () => void;
@@ -55,7 +58,7 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
                 </div>
 
                 <div className="landingHeroPreview">
-                    <img src={dashboardPreview} alt="Dashboard Preview" width="1474" height="714" />
+                    <img src={PREVIEW_SVG_URL} alt="Dashboard Preview" width="1474" height="714" />
                 </div>
 
                 <div className="landingHeroGrid">
