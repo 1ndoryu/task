@@ -51,7 +51,7 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorAct
     const contenidoModal = (
         <div className="modalSeleccionPropiedadOverlay" onClick={manejarClickOverlay}>
             <div className="modalSeleccionPropiedad">
-                {/* Lista de opciones */
+                {/* Lista de opciones */}
                 <div className="modalSeleccionPropiedad__lista">
                     {/* Opción para limpiar/quitar selección */}
                     {permitirLimpiar && (
