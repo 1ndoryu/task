@@ -167,14 +167,22 @@
     height: 75vh;
 }
 
-/* Encabezado con botón volver + título */
+/* Encabezado con botón volver + título
+ * [024A-5] Quitado padding lateral: lo hereda de bottomSheetContenido.
+ * El botón de solo icono dentro del encabezado no debe tener width:100% ni aspect-ratio. */
 .configMovilEncabezado {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) 0;
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
     flex-shrink: 0;
+}
+
+/* [024A-5] Botón de solo icono (back) en encabezado: no heredar width:100% del bottomSheet */
+.configMovilEncabezado .boton {
+    width: auto;
+    aspect-ratio: unset;
 }
 
 .configMovilTitulo {
