@@ -228,8 +228,9 @@
         flex: 1;
     }
 
+    /* [024A-8] +1px de font-size para mejor legibilidad */
     .menuOpcionesPanelItemEtiqueta {
-        font-size: var(--dashboard-tamanoMovilPequeno);
+        font-size: calc(var(--dashboard-tamanoMovilPequeno) + 1px);
         font-weight: 500;
         font-family: var(--dashboard-fuenteMonoespaciada);
     }

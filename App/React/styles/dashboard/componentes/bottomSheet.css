@@ -133,21 +133,27 @@
  * [233A-37] Sin bordes, centrados respecto a su contenido
  * [233A-48] justify-content: flex-start → texto a la izquierda
  * [233A-57] Reset padding — portal pierde herencia de .dashboardContenedor
- * [233A-59] botonTexto width:100% para que el icono quede a la derecha */
-.bottomSheetContenido .boton {
+ * [024A-8] width:100% solo para botones de menú (hijos directos), no para badges/acciones */
+.bottomSheetContenido > .boton {
     width: 100%;
     padding: 0;
     border: none;
     justify-content: flex-start;
 }
 
-.bottomSheetContenido .boton .botonTexto {
+.bottomSheetContenido > .boton .botonTexto {
     width: 100%;
 }
 
-.bottomSheetContenido .boton .botonIcono {
+.bottomSheetContenido > .boton .botonIcono {
     order: 1;
     margin-left: auto;
+}
+
+/* Botones anidados (dentro de badges, acciones, etc): sans width:100% */
+.bottomSheetContenido .boton {
+    padding: 0;
+    border: none;
 }
 
 /* [233A-37] Input sin borde dentro del bottom sheet */
