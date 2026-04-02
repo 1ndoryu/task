@@ -118,20 +118,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
             />
 
             <div className="panelGruposFb">
-                {/* Estadísticas compactas */}
-                {estadisticas && (
-                    <div className="panelGruposFb__stats">
-                        <span className="panelGruposFb__stat">
-                            <span className="panelGruposFb__statValor">{estadisticas.visibles}</span> visibles
-                        </span>
-                        <span className="panelGruposFb__stat">
-                            <span className="panelGruposFb__statValor">{estadisticas.ocultos}</span> ocultos
-                        </span>
-                        <span className="panelGruposFb__stat">
-                            <span className="panelGruposFb__statValor">{estadisticas.publicadosHoy}</span> publicados hoy
-                        </span>
-                    </div>
-                )}
+                {/* [024A-9] Stats eliminadas por innecesarias */}
 
                 {/* Contenido */}
                 {cargando && !inicializado && (

@@ -57,16 +57,20 @@ export const useGruposFbStore = create<GruposFbStore>()(
             inicializado: false,
             filtros: {...FILTROS_INICIALES},
 
-            /* Cargar grupos desde API */
+            /* Cargar grupos desde API
+             * [024A-9] Logs para diagnosticar por qué no se detectan grupos */
             cargar: async () => {
                 if (get().cargando) return;
                 set({cargando: true, error: null}, false, 'cargar/inicio');
+                console.log('[GruposFb] Iniciando carga de grupos...');
 
                 try {
                     const [grupos, estadisticas] = await Promise.all([
                         gruposFbService.listar(),
                         gruposFbService.estadisticas()
                     ]);
+
+                    console.log('[GruposFb] Carga exitosa:', {total: grupos.length, estadisticas});
 
                     set({
                         grupos,
@@ -76,6 +80,7 @@ export const useGruposFbStore = create<GruposFbStore>()(
                     }, false, 'cargar/exito');
                 } catch (e) {
                     const msg = e instanceof Error ? e.message : 'Error desconocido';
+                    console.error('[GruposFb] Error al cargar:', msg, e);
                     set({cargando: false, error: msg, inicializado: true}, false, 'cargar/error');
                 }
             },

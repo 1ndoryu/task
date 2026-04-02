@@ -1,11 +1,15 @@
 /* [253A-11] Estilos del panel Grupos de Facebook
- * [263A-4] Rediseño: filtros movidos al header, búsqueda estilo modalNotasBusqueda. */
+ * [263A-4] Rediseño: filtros movidos al header, búsqueda estilo modalNotasBusqueda.
+ * [024A-9] font-family/color explícitos: herencia se pierde en algunos contextos. */
 
 .panelGruposFb {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 0 8px 8px;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
 }
 
 /* [263A-4] Búsqueda en el header — estilo modalNotasBusqueda--headerCentrado */
@@ -38,25 +42,7 @@
     min-width: 0;
 }
 
-/* ── Estadísticas compactas ── */
-.panelGruposFb__stats {
-    display: flex;
-    gap: 12px;
-    font-size: 0.7rem;
-    color: var(--dashboard-textoTerciario, #606070);
-    padding: 2px 0;
-}
-
-.panelGruposFb__stat {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.panelGruposFb__statValor {
-    color: var(--dashboard-textoSecundario, #a0a0b0);
-    font-weight: 600;
-}
+/* [024A-9] panelGruposFb__stats eliminado */
 
 /* ── Tabla de grupos ── */
 .panelGruposFb__tabla {
@@ -68,30 +54,30 @@
 .panelGruposFb__tabla th {
     text-align: left;
     padding: 4px 6px;
-    color: var(--dashboard-textoTerciario, #606070);
+    color: var(--dashboard-textoApagado);
     font-weight: 500;
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--dashboard-bordePrincipal, #2a2a3e);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
 }
 
 .panelGruposFb__tabla th:hover {
-    color: var(--dashboard-textoSecundario, #a0a0b0);
+    color: var(--dashboard-textoSecundario);
 }
 
 .panelGruposFb__tabla td {
     padding: 5px 6px;
-    color: var(--dashboard-textoPrincipal, #e0e0e8);
-    border-bottom: 1px solid var(--dashboard-bordeSutil, #1a1a2e);
+    color: var(--dashboard-textoNormal);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
     vertical-align: middle;
 }
 
 .panelGruposFb__tabla tr:hover td {
-    background: var(--dashboard-fondoHover, rgba(99, 102, 241, 0.05));
+    background: var(--dashboard-fondoHover);
 }
 
 /* ── Celda nombre con avatar ── */
@@ -108,19 +94,19 @@
     border-radius: 6px;
     object-fit: cover;
     flex-shrink: 0;
-    background: var(--dashboard-fondoInput, #1a1a2e);
+    background: var(--dashboard-fondoInput);
 }
 
 .panelGruposFb__avatarPlaceholder {
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: var(--dashboard-fondoInput, #1a1a2e);
+    background: var(--dashboard-fondoInput);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--dashboard-textoTerciario, #606070);
+    color: var(--dashboard-textoApagado);
     font-size: 0.65rem;
 }
 
@@ -137,7 +123,7 @@
 }
 
 .panelGruposFb__nombreTexto a:hover {
-    color: var(--dashboard-acento, #6366f1);
+    color: var(--dashboard-acento);
     text-decoration: underline;
 }
 
@@ -149,14 +135,14 @@
     padding: 1px 6px;
     border-radius: 3px;
     font-size: 0.68rem;
-    background: var(--dashboard-fondoInput, #1a1a2e);
-    color: var(--dashboard-textoSecundario, #a0a0b0);
+    background: var(--dashboard-fondoInput);
+    color: var(--dashboard-textoSecundario);
     cursor: pointer;
     white-space: nowrap;
 }
 
 .panelGruposFb__badgeCategoria:hover {
-    background: var(--dashboard-fondoHover, rgba(99, 102, 241, 0.1));
+    background: var(--dashboard-fondoHover);
 }
 
 /* ── Estrellas importancia ── */
@@ -167,7 +153,7 @@
 
 .panelGruposFb__estrella {
     cursor: pointer;
-    color: var(--dashboard-bordePrincipal, #2a2a3e);
+    color: var(--dashboard-bordePrincipal);
     font-size: 0.8rem;
     line-height: 1;
     transition: color 0.1s;
@@ -186,7 +172,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 1.5px solid var(--dashboard-bordePrincipal, #2a2a3e);
+    border: 1.5px solid var(--dashboard-bordePrincipal);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,12 +183,12 @@
 }
 
 .panelGruposFb__checkPublicado:hover {
-    border-color: var(--dashboard-acento, #6366f1);
+    border-color: var(--dashboard-acento);
 }
 
 .panelGruposFb__checkPublicado--activo {
-    background: var(--dashboard-acento, #6366f1);
-    border-color: var(--dashboard-acento, #6366f1);
+    background: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
 }
 
 /* ── Acciones por fila ── */
@@ -221,7 +207,7 @@
 .panelGruposFb__vacio {
     text-align: center;
     padding: 24px 12px;
-    color: var(--dashboard-textoTerciario, #606070);
+    color: var(--dashboard-textoApagado);
     font-size: 0.8rem;
 }
 
@@ -233,7 +219,7 @@
 .panelGruposFb__cargando {
     text-align: center;
     padding: 24px;
-    color: var(--dashboard-textoTerciario, #606070);
+    color: var(--dashboard-textoApagado);
     font-size: 0.8rem;
 }
 
@@ -250,7 +236,7 @@
     align-items: center;
     gap: 4px;
     font-size: 0.7rem;
-    color: var(--dashboard-textoTerciario, #606070);
+    color: var(--dashboard-textoApagado);
     cursor: pointer;
     user-select: none;
 }
