@@ -10,7 +10,6 @@
 
 import {type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
-import {X} from 'lucide-react';
 import {Boton} from '../ui/Boton';
 import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
 
@@ -47,19 +46,12 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorAct
         }
     };
 
+    /* [024A-7] Removida cabecera innecesaria. Cerrar via overlay click o seleccion. */
     /* Usar Portal para renderizar fuera del BottomSheet */
     const contenidoModal = (
         <div className="modalSeleccionPropiedadOverlay" onClick={manejarClickOverlay}>
             <div className="modalSeleccionPropiedad">
-                {/* Encabezado */}
-                <div className="modalSeleccionPropiedad__encabezado">
-                    <span className="modalSeleccionPropiedad__titulo">{titulo}</span>
-                    <Boton type="button" variante="icono" onClick={onCerrar} aria-label="Cerrar">
-                        <X size={16} />
-                    </Boton>
-                </div>
-
-                {/* Lista de opciones */}
+                {/* Lista de opciones */
                 <div className="modalSeleccionPropiedad__lista">
                     {/* Opción para limpiar/quitar selección */}
                     {permitirLimpiar && (

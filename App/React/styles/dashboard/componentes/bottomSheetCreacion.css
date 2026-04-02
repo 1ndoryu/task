@@ -439,6 +439,7 @@
 
 /* Modal Selección Propiedad - Modal centrado para seleccionar propiedades */
 
+/* [024A-7] font-family explícito: el portal renderiza en body, fuera de .dashboardContenedor */
 .modalSeleccionPropiedadOverlay {
     position: fixed;
     top: 0;
@@ -451,6 +452,9 @@
     justify-content: center;
     z-index: 1600;
     padding: var(--dashboard-espacioLg);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
 }
 
 .modalSeleccionPropiedad {
