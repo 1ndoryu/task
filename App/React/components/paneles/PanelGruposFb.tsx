@@ -1,14 +1,17 @@
-/* [253A-11] PanelGruposFb
+/* [024A-17] PanelGruposFb
  * Panel de dashboard para gestionar grupos de Facebook detectados por la extensión.
  * Muestra tabla sortable con filtros, categorías, importancia, acciones.
- * [263A-4] Rediseño: filtros en header como SelectorBadge, búsqueda estilo modalNotasBusqueda. */
+ * [263A-4] Rediseño: filtros en header como SelectorBadge, búsqueda estilo modalNotasBusqueda.
+ * [024A-17] Columnas configurables: el usuario elige qué columnas ver. */
 
-import {useState, useCallback, useRef} from 'react';
-import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings} from 'lucide-react';
+import {useState, useCallback, useRef, useEffect} from 'react';
+import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge} from '../shared';
 import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
+import {useColumnasGruposFb} from '../../hooks/paneles/useColumnasGruposFb';
+import type {ColumnId} from '../../hooks/paneles/useColumnasGruposFb';
 import {FilaGrupo} from './FilaGrupo';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import '../../styles/dashboard/componentes/panelGruposFb.css';
@@ -25,6 +28,25 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
         filtros, setFiltro, toggleOculto, cambiarCategoria,
         cambiarImportancia, publicar, eliminar, recargar
     } = usePanelGruposFb();
+
+    /* [024A-17] Columnas configurables */
+    const {columnas, visibilidad, columnasActivas, toggleColumna} = useColumnasGruposFb();
+    const [menuColumnasAbierto, setMenuColumnasAbierto] = useState(false);
+    const refMenuColumnas = useRef<HTMLDivElement>(null);
+
+    /* [024A-17] Click outside cierra el dropdown de columnas.
+     * sentinel-disable-line: MenuContextual no sirve aquí porque cierra al hacer click
+     * y necesitamos multi-select (toggle varias columnas sin cerrar). */
+    useEffect(() => {
+        if (!menuColumnasAbierto) return;
+        const handler = (e: MouseEvent) => {
+            if (refMenuColumnas.current && !refMenuColumnas.current.contains(e.target as Node)) {
+                setMenuColumnasAbierto(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [menuColumnasAbierto]);
 
     const [menuContextual, setMenuContextual] = useState<{visible: boolean; x: number; y: number; grupoId: number | null}>({visible: false, x: 0, y: 0, grupoId: null});
 
@@ -111,6 +133,26 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                         <SelectorBadge opciones={opcionesImportancia} valorActual={filtros.importancia} onChange={valor => setFiltro('importancia', valor)} icono={<Star size={12} />} titulo="Importancia" soloIcono />
                         <Boton variante="badge" soloIcono onClick={() => setFiltro('mostrarOcultos', !filtros.mostrarOcultos)} icono={filtros.mostrarOcultos ? <Eye size={12} /> : <EyeOff size={12} />} title={filtros.mostrarOcultos ? 'Mostrando ocultos' : 'Ocultos ocultos'} claseAdicional={filtros.mostrarOcultos ? 'selectorBadgeBoton--activo' : ''} />
                         <Boton variante="badge" soloIcono onClick={recargar} icono={<RefreshCw size={12} />} title="Recargar" />
+                        {/* [024A-17] Toggle de columnas visibles */}
+                        <div className="panelGruposFb__columnasContenedor" ref={refMenuColumnas}>
+                            <Boton variante="badge" soloIcono onClick={() => setMenuColumnasAbierto(p => !p)} icono={<SlidersHorizontal size={12} />} title="Columnas visibles" />
+                            {menuColumnasAbierto && (
+                                <div className="panelGruposFb__menuColumnas">
+                                    {columnas.map(col => (
+                                        <div
+                                            key={col.id}
+                                            className="panelGruposFb__menuColumnasItem"
+                                            onClick={() => !col.fija && toggleColumna(col.id)}
+                                        >
+                                            <span className={`panelGruposFb__menuColumnasCheck ${visibilidad[col.id] ? 'panelGruposFb__menuColumnasCheck--activo' : ''}`}>
+                                                {visibilidad[col.id] && <Check size={8} color="#fff" />}
+                                            </span>
+                                            {col.etiqueta}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         {/* [263A-5] Botón configuración (token, API URL) */}
                         {onAbrirConfigGruposFb && <Boton variante="badge" soloIcono onClick={onAbrirConfigGruposFb} icono={<Settings size={12} />} title="Configuración" />}
                         {handleMinimizar}
@@ -189,12 +231,15 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                         <table className="panelGruposFb__tabla">
                             <thead>
                                 <tr>
-                                    <th className="panelGruposFb__colCheck"><Check size={11} /></th>
-                                    <th>Grupo</th>
-                                    <th className="panelGruposFb__colCategoria">Categoría</th>
-                                    <th className="panelGruposFb__colImportancia">Importancia</th>
-                                    <th>Miembros</th>
-                                    <th className="panelGruposFb__colAcciones" />
+                                    {visibilidad.check && <th className="panelGruposFb__colCheck"><Check size={11} /></th>}
+                                    {visibilidad.imagen && <th className="panelGruposFb__colImagen" />}
+                                    {visibilidad.nombre && <th>Grupo</th>}
+                                    {visibilidad.tipo && <th className="panelGruposFb__colTipo">Tipo</th>}
+                                    {visibilidad.miembros && <th>Miembros</th>}
+                                    {visibilidad.publicaciones && <th className="panelGruposFb__colPub">Pub/día</th>}
+                                    {visibilidad.categoria && <th className="panelGruposFb__colCategoria">Categoría</th>}
+                                    {visibilidad.importancia && <th className="panelGruposFb__colImportancia">Importancia</th>}
+                                    {visibilidad.acciones && <th className="panelGruposFb__colAcciones" />}
                                 </tr>
                             </thead>
                             <tbody>
@@ -203,6 +248,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                                         key={grupo.id}
                                         grupo={grupo}
                                         categorias={categorias}
+                                        columnasVisibles={visibilidad}
                                         onPublicar={() => publicar(grupo.id)}
                                         onCambiarCategoria={(cat) => cambiarCategoria(grupo.id, cat)}
                                         onCambiarImportancia={(imp) => cambiarImportancia(grupo.id, imp)}

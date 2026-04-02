@@ -2,11 +2,12 @@
  * [263A-4] Rediseño: filtros movidos al header, búsqueda estilo modalNotasBusqueda.
  * [024A-9] font-family/color explícitos: herencia se pierde en algunos contextos. */
 
+/* [024A-17] Sin padding — el panel ocupa todo el espacio disponible */
 .panelGruposFb {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 0 8px 8px;
+    gap: 0;
+    padding: 0;
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoSecundario);
@@ -69,10 +70,10 @@
     color: var(--dashboard-textoSecundario);
 }
 
+/* [024A-17] Sin border-bottom por petición del usuario */
 .panelGruposFb__tabla td {
     padding: 5px 6px;
     color: var(--dashboard-textoNormal);
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
     vertical-align: middle;
 }
 
@@ -96,6 +97,9 @@
     flex-shrink: 0;
     background: var(--dashboard-fondoTerciario);
 }
+
+/* [024A-17] Fix: selector estaba roto (faltaba el nombre de clase) */
+.panelGruposFb__avatarPlaceholder {
     width: 28px;
     height: 28px;
     border-radius: 6px;
@@ -251,7 +255,73 @@
 .panelGruposFb__tablaContenedor {
     overflow-x: auto;
     overflow-y: auto;
-    max-height: 500px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* [024A-17] Contenedor del botón + dropdown de columnas */
+.panelGruposFb__columnasContenedor {
+    position: relative;
+}
+
+/* [024A-17] Dropdown de columnas visibles */
+.panelGruposFb__menuColumnas {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 50;
+    min-width: 150px;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    padding: 4px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.panelGruposFb__menuColumnasItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    user-select: none;
+}
+
+.panelGruposFb__menuColumnasItem:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.panelGruposFb__menuColumnasCheck {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1.5px solid var(--dashboard-bordePrincipal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.panelGruposFb__menuColumnasCheck--activo {
+    background: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+}
+
+/* [024A-17] Columna tipo */
+.panelGruposFb__colTipo {
+    width: 70px;
+}
+
+/* [024A-17] Columna publicaciones */
+.panelGruposFb__colPub {
+    width: 80px;
+}
+
+/* [024A-17] Columna imagen */
+.panelGruposFb__colImagen {
+    width: 40px;
 }
 
 /* ── Toggle ocultos ── */
