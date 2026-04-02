@@ -15,4 +15,3 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
