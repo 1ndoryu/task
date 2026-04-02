@@ -296,6 +296,19 @@ class ActividadRepository
         return $this->eliminarPorElemento('tarea', $tareaId, $fecha);
     }
 
+    /** [024A-34] Elimina una actividad individual por ID, verificando que pertenezca al usuario */
+    public function eliminarPorId(int $actividadId): bool
+    {
+        global $wpdb;
+        $table = Schema::getTableName('actividad');
+        $eliminados = $wpdb->delete(
+            $table,
+            ['id' => $actividadId, 'user_id' => $this->userId],
+            ['%d', '%d']
+        );
+        return $eliminados !== false && $eliminados > 0;
+    }
+
     private function eliminarPorElemento(string $elementoTipo, int $elementoId, string $fecha): int
     {
         global $wpdb;

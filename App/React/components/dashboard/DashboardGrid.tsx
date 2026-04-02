@@ -73,9 +73,15 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         const Componente = definicionPanel.componente;
         const manejaAltura = panelManejaAlturaPropia(panelId);
 
-        /* Paneles que manejan su propia altura (scratchpad, actividad) */
+        /* [024A-32] Paneles que manejan su propia altura (scratchpad, actividad)
+         * siguen recibiendo el wrapper panelDashboard para mantener borde/fondo/radio,
+         * pero no se envuelven en ResizeHandlePanel. */
         if (manejaAltura) {
-            return <Componente {...props} />;
+            return (
+                <div className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`}>
+                    <Componente {...props} />
+                </div>
+            );
         }
 
         /* Obtener altura del panel desde configuración */

@@ -32,7 +32,7 @@ interface ModalSeleccionPropiedadProps {
     textoLimpiar?: string;
 }
 
-export function ModalSeleccionPropiedad({estaAbierto, titulo, opciones, valorActual, onSeleccionar, onCerrar, permitirLimpiar = true, textoLimpiar = 'Sin asignar'}: ModalSeleccionPropiedadProps): JSX.Element | null {
+export function ModalSeleccionPropiedad({estaAbierto, titulo: _titulo, opciones, valorActual, onSeleccionar, onCerrar, permitirLimpiar = true, textoLimpiar = 'Sin asignar'}: ModalSeleccionPropiedadProps): JSX.Element | null {
     if (!estaAbierto) return null;
 
     const manejarSeleccion = (valor: string | undefined) => {

@@ -7,7 +7,7 @@
 import {useState, useCallback, useEffect, useMemo} from 'react';
 import type {ConfiguracionActividad} from '../useConfiguracionActividad';
 import {useActividad} from '../useActividad';
-import {obtenerDetalleActividadDia, type DetalleActividadItem} from '../../services/actividadService';
+import {obtenerDetalleActividadDia, eliminarActividad, type DetalleActividadItem} from '../../services/actividadService';
 import {useSuscripcionStore} from '../../stores/suscripcionStore';
 
 interface UsePanelActividadParams {
@@ -110,6 +110,18 @@ export function usePanelActividad({configuracion}: UsePanelActividadParams) {
         return item.proyectoNombre || nombreDetalles || null;
     }, []);
 
+    /* [024A-34] Eliminar una actividad individual. Optimista: quita del array y recarga. */
+    const eliminarItem = useCallback(
+        async (actividadId: number) => {
+            setDetalleItems(prev => prev.filter(i => i.id !== actividadId));
+            const exito = await eliminarActividad(actividadId);
+            if (!exito && fechaDetalle) {
+                cargarDetalleDia(fechaDetalle);
+            }
+        },
+        [fechaDetalle, cargarDetalleDia]
+    );
+
     return {
         esPremium, estado,
         modoEnfoque, setModoEnfoque,
@@ -118,7 +130,8 @@ export function usePanelActividad({configuracion}: UsePanelActividadParams) {
         tipoFiltro, manejarClickDia,
         obtenerSubtitulo, diasActivos, totalActividades,
         formatearFechaDetalle, formatearHora,
-        obtenerNombreElemento, obtenerNombreProyecto
+        obtenerNombreElemento, obtenerNombreProyecto,
+        eliminarItem
     };
 }
 

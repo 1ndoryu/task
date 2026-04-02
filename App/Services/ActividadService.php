@@ -119,6 +119,21 @@ class ActividadService
     }
 
     /**
+     * [024A-33] Verifica si ya existe una actividad de hábito para user+habitoId+fecha+tipo.
+     * Previene duplicados cuando el toggle se dispara múltiples veces en rápida sucesión.
+     */
+    private function existeActividadHabito(int $userId, int $elementoId, string $fecha, string $tipo): bool
+    {
+        global $wpdb;
+        $table = \App\Database\Schema::getTableName('actividad');
+        $existe = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table WHERE user_id = %d AND elemento_tipo = 'habito' AND elemento_id = %d AND fecha = %s AND tipo = %s",
+            $userId, $elementoId, $fecha, $tipo
+        ));
+        return (int)$existe > 0;
+    }
+
+    /**
      * Registra actividad con lógica de negocio (desmarcar, sincronizar historial, etc.)
      *
      * @return array{success: bool, accion?: string, error?: string}
@@ -157,6 +172,11 @@ class ActividadService
 
         /* Hábito cumplido: sincronizar con historial */
         if ($tipo === 'habito_cumplido' && $elementoId && $elementoTipo === 'habito') {
+            /* [024A-33] Dedup: si ya existe un habito_cumplido para este ID+fecha, ignorar.
+             * Previene entradas duplicadas cuando el toggle se dispara múltiples veces. */
+            if ($this->existeActividadHabito($userId, $elementoId, $fechaActividad, 'habito_cumplido')) {
+                return ['success' => true, 'accion' => 'duplicado_ignorado'];
+            }
             $historialRepo->marcarDia($elementoId, $fechaActividad, 'completado', null);
         }
 
@@ -279,5 +299,21 @@ class ActividadService
         $repo = new ActividadRepository($userId);
 
         return $repo->limpiarTodo();
+    }
+
+    /**
+     * [024A-34] Elimina una actividad individual por su ID.
+     * @return array{success: bool, error?: string}
+     */
+    public function eliminarActividad(int $userId, int $actividadId): array
+    {
+        $repo = new ActividadRepository($userId);
+        $eliminado = $repo->eliminarPorId($actividadId);
+
+        if (!$eliminado) {
+            return ['success' => false, 'error' => 'Actividad no encontrada o no pertenece al usuario'];
+        }
+
+        return ['success' => true];
     }
 }

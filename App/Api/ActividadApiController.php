@@ -88,6 +88,12 @@ class ActividadApiController
             'methods' => 'DELETE', 'callback' => [self::class, 'limpiarActividad'],
             'permission_callback' => [self::class, 'verificarPermisosAdmin']
         ]);
+
+        /* [024A-34] Eliminar actividad individual por ID */
+        register_rest_route($ns, '/actividad/(?P<id>\d+)', [
+            'methods' => 'DELETE', 'callback' => [self::class, 'eliminarActividad'], 'permission_callback' => $perm,
+            'args' => ['id' => ['required' => true] + $int]
+        ]);
     }
 
     public static function verificarPermisos(): bool
@@ -224,6 +230,24 @@ class ActividadApiController
         try {
             $eliminados = (new ActividadService())->limpiarActividad(get_current_user_id());
             return new \WP_REST_Response(['success' => true, 'eliminados' => $eliminados], 200);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage());
+        }
+    }
+
+    /** [024A-34] Elimina una actividad individual por su ID */
+    public static function eliminarActividad(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $actividadId = (int) $request->get_param('id');
+            if ($actividadId <= 0) {
+                return self::error('ID de actividad inválido', 400);
+            }
+            $resultado = (new ActividadService())->eliminarActividad(get_current_user_id(), $actividadId);
+            if (!$resultado['success']) {
+                return self::error($resultado['error'], 404);
+            }
+            return new \WP_REST_Response($resultado, 200);
         } catch (\Throwable $e) {
             return self::error($e->getMessage());
         }

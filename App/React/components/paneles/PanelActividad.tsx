@@ -10,7 +10,7 @@
  */
 
 import {useCallback} from 'react';
-import {Settings, Maximize2, Lock} from 'lucide-react';
+import {Settings, Maximize2, Lock, X} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MapaCalor, OverlayEnfoque} from '../shared';
 import {usePanelActividad} from '../../hooks/dashboard/usePanelActividad';
@@ -110,7 +110,8 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
         manejarClickDia,
         obtenerSubtitulo: _obtenerSubtitulo, diasActivos: _diasActivos, totalActividades: _totalActividades,
         formatearFechaDetalle, formatearHora,
-        obtenerNombreElemento, obtenerNombreProyecto
+        obtenerNombreElemento, obtenerNombreProyecto,
+        eliminarItem
     } = usePanelActividad({configuracion});
 
     const DetalleActividadDia = useCallback(
@@ -148,6 +149,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                                             {duracionTracking && <span className="panelActividadDetalleTrackingTag"> · {duracionTracking}</span>}
                                         </span>
                                         <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
+                                        <Boton variante="ghost" soloIcono claseAdicional="panelActividadDetalleEliminar" onClick={() => eliminarItem(item.id)} title="Eliminar actividad" icono={<X size={12} />} />
                                     </li>
                                 );
                             })}
@@ -156,7 +158,7 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                 </div>
             );
         },
-        [fechaDetalle, detalleCargando, detalleError, detalleItems, formatearFechaDetalle, formatearHora, obtenerNombreElemento, obtenerNombreProyecto]
+        [fechaDetalle, detalleCargando, detalleError, detalleItems, eliminarItem, formatearFechaDetalle, formatearHora, obtenerNombreElemento, obtenerNombreProyecto]
     );
 
     return (

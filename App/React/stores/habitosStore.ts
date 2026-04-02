@@ -83,6 +83,10 @@ export type HabitosStore = HabitosState & HabitosActions;
 
 import {useHabitosHistorialStore} from './habitosHistorialStore';
 
+/* [024A-33] Guard contra double-toggle: evita que dos llamadas rápidas al mismo
+ * hábito generen duplicados en actividad o reviertan el estado por timing. */
+const habitosEnProceso = new Set<number>();
+
 /*
  * Store principal
  */
@@ -179,10 +183,17 @@ export const useHabitosStore = create<HabitosStore>()(
 
                 /* Toggle (día actual) */
                 toggleHabito: id => {
+                    /* [024A-33] Guard: si ya se está procesando este hábito, ignorar */
+                    if (habitosEnProceso.has(id)) return null;
+                    habitosEnProceso.add(id);
+
                     const hoy = obtenerFechaHoy();
                     const habito = get().habitos.find(h => h.id === id);
 
-                    if (!habito) return null;
+                    if (!habito) {
+                        habitosEnProceso.delete(id);
+                        return null;
+                    }
 
                     const estadoAnterior = {...habito, historialCompletados: [...(habito.historialCompletados || [])]};
                     const estabaCompletadoHoy = fueCompletadoHoy(habito.ultimoCompletado);
@@ -210,9 +221,9 @@ export const useHabitosStore = create<HabitosStore>()(
                         if (ts.sesionActiva?.entidadId === id && ts.sesionActiva.tipoEntidad === 'habito') {
                             ts.completarTracking();
                         }
-                        registrarHabitoCumplido(id, habito.nombre);
+                        registrarHabitoCumplido(id, habito.nombre).finally(() => habitosEnProceso.delete(id));
                     } else {
-                        registrarHabitoDesmarcado(id, habito.nombre);
+                        registrarHabitoDesmarcado(id, habito.nombre).finally(() => habitosEnProceso.delete(id));
                     }
 
                     return {accion, estadoAnterior};
@@ -220,15 +231,19 @@ export const useHabitosStore = create<HabitosStore>()(
 
                 /* Completar hoy (solo marca completado si aún no lo está) */
                 completarHabitoHoy: (id, detallesActividad) => {
+                    /* [024A-33] Guard contra double-toggle */
+                    if (habitosEnProceso.has(id)) return false;
+                    habitosEnProceso.add(id);
+
                     const hoy = obtenerFechaHoy();
                     const habito = get().habitos.find(h => h.id === id);
-                    if (!habito) return false;
+                    if (!habito) { habitosEnProceso.delete(id); return false; }
 
                     const yaCompletado = fueCompletadoHoy(habito.ultimoCompletado) || habito.historialCompletados?.includes(hoy);
-                    if (yaCompletado) return false;
+                    if (yaCompletado) { habitosEnProceso.delete(id); return false; }
 
                     const {accion, nuevoHabito} = calcularToggleHabito(habito, hoy, false);
-                    if (accion !== 'completado') return false;
+                    if (accion !== 'completado') { habitosEnProceso.delete(id); return false; }
 
                     set(
                         state => ({
@@ -246,7 +261,7 @@ export const useHabitosStore = create<HabitosStore>()(
                         ts.completarTracking();
                     }
 
-                    registrarHabitoCumplido(id, habito.nombre, detallesActividad);
+                    registrarHabitoCumplido(id, habito.nombre, detallesActividad).finally(() => habitosEnProceso.delete(id));
 
                     return true;
                 },

@@ -154,6 +154,34 @@ export async function obtenerDetalleActividadDia(params: ObtenerDetalleActividad
     return data.detalle || [];
 }
 
+/** [024A-34] Elimina una actividad individual por su ID */
+export async function eliminarActividad(actividadId: number): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE}/${actividadId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': obtenerNonce()
+            }
+        });
+
+        if (!response.ok) {
+            console.warn('[Actividad] Error al eliminar:', response.status);
+            return false;
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            invalidarCache();
+        }
+        return data.success ?? false;
+    } catch (error) {
+        console.warn('[Actividad] Error de red al eliminar:', error);
+        return false;
+    }
+}
+
 /**
  * Atajos para registrar tipos comunes de actividad
  * Todos envían la fecha local del cliente para evitar problemas de zona horaria

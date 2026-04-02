@@ -123,6 +123,25 @@
     color: var(--dashboard-textoApagado);
 }
 
+/* [024A-34] Boton eliminar actividad — sutil, aparece al hover del item */
+.panelActividadDetalleEliminar {
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida);
+    padding: var(--dashboard-espacioXxs);
+    min-width: auto;
+    min-height: auto;
+}
+
+.panelActividadDetalleItemUnificado:hover .panelActividadDetalleEliminar {
+    opacity: 0.6;
+}
+
+.panelActividadDetalleEliminar:hover {
+    opacity: 1 !important;
+    color: var(--dashboard-peligroClaro);
+}
+
 /* 
  * Modal de configuracion - Selector de periodo 
  */
