@@ -2,7 +2,8 @@
  * [263A-4] Rediseño: filtros movidos al header, búsqueda estilo modalNotasBusqueda.
  * [024A-9] font-family/color explícitos: herencia se pierde en algunos contextos. */
 
-/* [024A-17] Sin padding — el panel ocupa todo el espacio disponible */
+/* [024A-17] Sin padding — el panel ocupa todo el espacio disponible
+ * [024A-21] overflow:hidden evita que la tabla expanda el panel más allá del contenedor */
 .panelGruposFb {
     display: flex;
     flex-direction: column;
@@ -11,6 +12,7 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoSecundario);
+    overflow: hidden;
 }
 
 /* [263A-4] Búsqueda en el header — estilo modalNotasBusqueda--headerCentrado */
@@ -46,10 +48,13 @@
 /* [024A-9] panelGruposFb__stats eliminado */
 
 /* ── Tabla de grupos ── */
+/* [024A-21] table-layout:fixed + width:100% fuerza la tabla a respetar el ancho del contenedor.
+ * Las columnas se distribuyen según los anchos definidos en colgroup o th. */
 .panelGruposFb__tabla {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.75rem;
+    table-layout: fixed;
 }
 
 .panelGruposFb__tabla th {
@@ -64,17 +69,23 @@
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .panelGruposFb__tabla th:hover {
     color: var(--dashboard-textoSecundario);
 }
 
-/* [024A-17] Sin border-bottom por petición del usuario */
+/* [024A-17] Sin border-bottom por petición del usuario
+ * [024A-21] overflow:hidden + text-overflow para que las celdas no expandan la tabla */
 .panelGruposFb__tabla td {
     padding: 5px 6px;
     color: var(--dashboard-textoNormal);
     vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .panelGruposFb__tabla tr:hover td {
@@ -82,6 +93,7 @@
 }
 
 /* ── Celda nombre con avatar ── */
+/* [024A-21] min-width:0 permite al flex container respetar el ancho de la celda td */
 .panelGruposFb__celdaNombre {
     display: flex;
     align-items: center;
@@ -116,7 +128,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 200px;
 }
 
 .panelGruposFb__nombreTexto a {
@@ -251,11 +262,12 @@
     font-size: 0.8rem;
 }
 
-/* ── Contenedor scroll ── */
+/* [024A-21] Contenedor scroll: max-height limita la tabla cuando el panel es alturaAuto.
+ * overflow-x: auto maneja columnas que excedan el ancho del panel. */
 .panelGruposFb__tablaContenedor {
     overflow-x: auto;
     overflow-y: auto;
-    flex: 1;
+    max-height: 500px;
     min-height: 0;
 }
 
@@ -317,6 +329,11 @@
 /* [024A-17] Columna publicaciones */
 .panelGruposFb__colPub {
     width: 80px;
+}
+
+/* [024A-21] Columna miembros */
+.panelGruposFb__colMiembros {
+    width: 90px;
 }
 
 /* [024A-17] Columna imagen */

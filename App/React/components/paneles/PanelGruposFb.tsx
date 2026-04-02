@@ -255,7 +255,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                                     {visibilidad.imagen && <th className="panelGruposFb__colImagen" />}
                                     {visibilidad.nombre && <th>Grupo</th>}
                                     {visibilidad.tipo && <th className="panelGruposFb__colTipo">Tipo</th>}
-                                    {visibilidad.miembros && <th>Miembros</th>}
+                                    {visibilidad.miembros && <th className="panelGruposFb__colMiembros">Miembros</th>}
                                     {visibilidad.publicaciones && <th className="panelGruposFb__colPub">Pub/día</th>}
                                     {visibilidad.categoria && <th className="panelGruposFb__colCategoria">Categoría</th>}
                                     {visibilidad.importancia && <th className="panelGruposFb__colImportancia">Importancia</th>}
