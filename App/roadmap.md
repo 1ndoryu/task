@@ -15,11 +15,15 @@
 
 ## Tareas pendientes
 
-1. 024A-30: Gestión de categorías en dashboard — debería poder agregar y modificar categorias a un grupo directamente desde el panel de la app
+3. 024A-32: Despues de tus cambios anteriores, el panel de notas no tiene borde ni el panel de actividad.
 
-2. haz estas tareas sin preguntar si tienes que hacerlas:
+4. 024A-33: Hay un bug, hay un habito que marco y nunca desaparece del panel de actividad no pasa con todos los habitos, tampoco si marco directamente en el panel de habitos, nunca se marca como completo a pesar que en el panel de actividad si se marca. 
 
-ea78d06a9fce9a2a10d3f7e3f6eb9314.png:1  Failed to load resource: the server responded with a status of 404 ()Comprende este error
-Task-C5qXupK7.svg:1  Failed to load resource: the server responded with a status of 404 ()
+4.1 024A-34: esto hizo la actividad se marcara varias veces a pesar de nunca se como completado
 
-elimina la imagen, y haz que cargue el svg, quita el padding del svg, en local carga pero en produccion no carga el svg
+Hábito "Samplear"
+17:29
+Hábito "Samplear"
+17:28
+
+necesita una forma de borrar actividades, agrega una x al lado de tiempo para eliminar una actividad panelActividadDetalleItemUnificado
