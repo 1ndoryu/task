@@ -270,10 +270,12 @@
     gap: var(--dashboard-espacioSm);
 }
 
+/* [024A-6] Centrado correcto y gap incrementado para mejor espaciado */
 .bottomSheetHabito__opcionesGrupo {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm);
+    justify-content: center;
+    gap: var(--dashboard-espacioMd);
 }
 
 .bottomSheetHabito__accion {
