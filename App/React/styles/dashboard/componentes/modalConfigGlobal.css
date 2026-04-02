@@ -183,11 +183,13 @@
     color: var(--dashboard-textoActivo);
 }
 
-/* Contenido scrollable de la sección */
+/* Contenido scrollable de la sección
+ * [024A-4] Sin padding propio: bottomSheetContenido ya aporta padding,
+ * evitando duplicación de espacio cuando configMovil está dentro del BottomSheet. */
 .configMovilContenido {
     flex: 1;
     overflow-y: auto;
-    padding: var(--dashboard-espacioMd);
+    padding: 0;
     min-height: 0;
 }
 
