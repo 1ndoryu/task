@@ -13,7 +13,7 @@ interface DecoracionItem {
 }
 
 interface SelectorNivelProps<T extends string> {
-    niveles: T[];
+    niveles: readonly T[];
     seleccionado: T | null;
     onSeleccionar: (nivel: T) => void;
     disabled?: boolean;

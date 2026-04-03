@@ -19,7 +19,7 @@ class AdjuntosFileSystemService
 {
     private const DIRECTORIO_THUMBS = 'thumbs';
     private const DIRECTORIO_CACHE = 'cache';
-    private const TAMAÑO_THUMBNAIL = 200;
+    private const THUMBNAIL_SIZE = 200;
 
     private int $userId;
     private string $rutaBase;
@@ -121,7 +121,7 @@ class AdjuntosFileSystemService
             return null;
         }
 
-        $resultadoResize = $editor->resize(self::TAMAÑO_THUMBNAIL, self::TAMAÑO_THUMBNAIL, true);
+        $resultadoResize = $editor->resize(self::THUMBNAIL_SIZE, self::THUMBNAIL_SIZE, true);
         if (is_wp_error($resultadoResize)) {
             return null;
         }

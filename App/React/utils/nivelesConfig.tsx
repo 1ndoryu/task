@@ -10,53 +10,53 @@
 import {Flag, Star, Zap, X} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia, NivelImportancia} from '../types/dashboard';
 
-/* ===== COLORES (CSS variables) ===== */
+/* Colores (CSS variables) */
 
-export const COLORES_PRIORIDAD: Record<NivelPrioridad, string> = {
+export const COLORES_PRIORIDAD = {
     muy_alta: 'var(--dashboard-estadoMuyAlta)',
     alta: 'var(--dashboard-estadoAlta)',
     media: 'var(--dashboard-estadoMedia)',
     baja: 'var(--dashboard-estadoBaja)'
-};
+} as const satisfies Record<NivelPrioridad, string>;
 
 export const COLORES_IMPORTANCIA: Record<NivelImportancia, string> = {
     'Muy Alta': 'var(--dashboard-estadoMuyAlta)',
     'Alta': 'var(--dashboard-estadoAlta)',
     'Media': 'var(--dashboard-estadoMedia)',
     'Baja': 'var(--dashboard-textoApagado)'
-};
+} as const satisfies Record<NivelImportancia, string>;
 
-export const COLORES_URGENCIA: Record<NivelUrgencia, string> = {
+export const COLORES_URGENCIA = {
     bloqueante: 'var(--dashboard-estadoAlta)',
     urgente: 'var(--dashboard-estadoMedia)',
     normal: 'var(--dashboard-textoSecundario)',
     chill: 'var(--dashboard-estadoExito)'
-};
+} as const satisfies Record<NivelUrgencia, string>;
 
-/* ===== ETIQUETAS ===== */
+/* Etiquetas */
 
-export const ETIQUETAS_PRIORIDAD: Record<NivelPrioridad, string> = {
+export const ETIQUETAS_PRIORIDAD = {
     muy_alta: 'Muy Alta',
     alta: 'Alta',
     media: 'Media',
     baja: 'Baja'
-};
+} as const satisfies Record<NivelPrioridad, string>;
 
-export const ETIQUETAS_IMPORTANCIA: Record<NivelImportancia, string> = {
+export const ETIQUETAS_IMPORTANCIA = {
     'Muy Alta': 'Muy Alta',
     'Alta': 'Alta',
     'Media': 'Media',
     'Baja': 'Baja'
-};
+} as const satisfies Record<NivelImportancia, string>;
 
-export const ETIQUETAS_URGENCIA: Record<NivelUrgencia, string> = {
+export const ETIQUETAS_URGENCIA = {
     bloqueante: 'Bloqueante',
     urgente: 'Urgente',
     normal: 'Normal',
     chill: 'Chill'
-};
+} as const satisfies Record<NivelUrgencia, string>;
 
-/* ===== GENERADORES DE OPCIONES PARA MENÚ CONTEXTUAL ===== */
+/* Generadores de opciones para menú contextual */
 
 interface OpcionMenuNivel {
     id: string;
@@ -101,13 +101,12 @@ export function opcionesMenuUrgencia(size = 12, conSinUrgencia = false): OpcionM
     return opciones;
 }
 
-/* ===== ARRAYS ORDENADOS (para SelectorNivel y formularios) ===== */
+/* Arrays ordenados (para SelectorNivel y formularios) */
 
-export const NIVELES_PRIORIDAD: NivelPrioridad[] = ['muy_alta', 'alta', 'media', 'baja'];
-export const NIVELES_IMPORTANCIA: NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'];
+export const NIVELES_PRIORIDAD: readonly NivelPrioridad[] = ['muy_alta', 'alta', 'media', 'baja'] as const;
+export const NIVELES_IMPORTANCIA: readonly NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'] as const;
 
-/* ===== DECORACION PARA SELECTOR NIVEL =====
- * [233A-45] Centraliza iconos y colores para que SelectorNivel
+/* [233A-45] Centraliza iconos y colores para que SelectorNivel
  * muestre los mismos que el menu contextual */
 
 interface DecoracionNivelItem {
