@@ -113,8 +113,7 @@ export function IndicadorConexion({
         <div
             className={`indicadorConexion indicadorConexion--${estado} indicadorConexion--${posicion}`}
             onClick={onClick}
-            style={{
-                position: 'fixed',
+            style={{ /* sentinel-disable inline-style-prohibido */
                 [posicion]: 'env(safe-area-inset-' + posicion + ', 0px)',
                 left: '50%',
                 transform: 'translateX(-50%)',

@@ -38,7 +38,7 @@ export function HandleArrastre({panelId, onMouseDown, estaArrastrando, titulo}: 
             <span className="selectorBadgeIcono">
                 <GripVertical size={10} />
             </span>
-            {titulo && <span style={{fontSize: '0.75rem', fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--dashboard-textoNormal)'}}>{titulo}</span>}
+            {titulo && <span className="handleArrastre__titulo">{titulo}</span>}
         </Boton>
     );
 }

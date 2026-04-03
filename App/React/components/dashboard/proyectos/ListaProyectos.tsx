@@ -182,7 +182,7 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
                 {mostrarProgreso && (
                     <div className="proyectoProgreso" data-estado={proyecto.estado}>
                         <div className="barraProgresoFondo">
-                            <div className="barraProgresoRelleno" style={{width: totalTareas > 0 ? `${(tareasCompletadas / totalTareas) * 100}%` : '0%'}} />
+                            <div className="barraProgresoRelleno" style={{width: totalTareas > 0 ? `${(tareasCompletadas / totalTareas) * 100}%` : '0%'}} /> {/* sentinel-disable inline-style-prohibido */}
                         </div>
                     </div>
                 )}

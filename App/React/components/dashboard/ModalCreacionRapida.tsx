@@ -58,7 +58,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                         setMenuImportancia={hook.setMenuImportancia}
                     />
 
-                    <Input tipo="file" ref={hook.fileInputRef} style={{display: 'none'}} onChange={hook.manejarArchivoSeleccionado} />
+                    <Input tipo="file" ref={hook.fileInputRef} claseAdicional="inputOculto" onChange={hook.manejarArchivoSeleccionado} />
                 </form>
             </div>
 

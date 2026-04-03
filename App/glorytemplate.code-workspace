@@ -7,5 +7,28 @@
 			"path": "../../../../../../../Extensión"
 		}
 	],
-    "settings": {}
+    "settings": {
+        "codeSentinel.exclude": [
+            "**/node_modules/**",
+            "**/vendor/**",
+            "**/dist/**",
+            "**/_generated/**",
+            "**/out/**",
+            "**/.vitepress/cache/**",
+            "**/build/**",
+            "**/desktop/src-tauri/**",
+            "**/desktop/node_modules/**",
+            "**/desktop/dist/**",
+            "**/Mezclador/**",
+            "**/temp/**",
+            "**/.vscode-test/**",
+            "**/.agent/**",
+            "**/target/**",
+            "**/scripts/**",
+            "**/api/generated.ts",
+            "**/mcp/**",
+            "**/fb-group-manager/**",
+            "**/kamples-scraper/**"
+        ]
+    }
 }

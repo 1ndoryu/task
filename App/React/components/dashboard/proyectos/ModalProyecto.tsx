@@ -48,8 +48,8 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
 
     /* Header Icons (Fase 9.2.8) */
     const accionesHeader = (
-        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-            <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" icono={<BarChart2 size={16} className="textoApagado" />} disabled claseAdicional="botonIcono botonIcono--sutil" style={{cursor: 'default', opacity: 0.5}} />
+        <div className="accionesHeaderFlex">
+            <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" icono={<BarChart2 size={16} className="textoApagado" />} disabled claseAdicional="botonIcono botonIcono--sutil botonIcono--deshabilitado" />
             <Boton
                 type="button"
                 variante="icono"
@@ -57,7 +57,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                 title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'}
                 icono={
                     tieneMensajesSinLeer ? (
-                        <div style={{position: 'relative'}}>
+                        <div className="posicionRelativa">
                             <Activity size={16} />
                             <span className="indicadorBadge" />
                         </div>
@@ -65,8 +65,7 @@ export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, parti
                         <Activity size={16} />
                     )
                 }
-                claseAdicional={`botonIcono ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`}
-                style={{cursor: 'pointer'}}
+                claseAdicional={`botonIcono botonIcono--clickable ${chatVisible && tieneMensajesSinLeer ? 'textoActivo' : 'textoApagado'}`}
             />
         </div>
     );

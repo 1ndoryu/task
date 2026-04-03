@@ -43,7 +43,7 @@ export function ResumenTareasProyecto({completadas, pendientes, mostrarBarra = t
             {/* Barra de progreso opcional */}
             {mostrarBarra && total > 0 && (
                 <div className="barraProgresoMini">
-                    <div className="barraProgresoMini__relleno" style={{width: `${porcentaje}%`}} />
+                    <div className="barraProgresoMini__relleno" style={{width: `${porcentaje}%`}} /> {/* sentinel-disable inline-style-prohibido */}
                 </div>
             )}
 

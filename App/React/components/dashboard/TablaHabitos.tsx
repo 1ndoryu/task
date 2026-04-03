@@ -145,7 +145,7 @@ function FilaHabito({habito, indice: _indice, onToggle, onEditar, onEliminar, on
                     <div className="tablaColumnaUrgencia">
                         <div className="urgenciaContenedor">
                             <div className="barraUrgenciaNueva">
-                                <div className={`barraRellenoNueva ${claseUrgencia}`} style={{width: `${porcentajeUrgencia}%`}}></div>
+                                <div className={`barraRellenoNueva ${claseUrgencia}`} style={{width: `${porcentajeUrgencia}%`}}></div> {/* sentinel-disable inline-style-prohibido */}
                             </div>
                             <span className={`urgenciaPorcentaje ${esUrgente ? 'urgenciaPorcentajeAlto' : ''}`}>{Math.round(porcentajeUrgencia)}%</span>
                         </div>

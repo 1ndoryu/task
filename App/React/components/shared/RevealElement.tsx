@@ -39,7 +39,7 @@ export function RevealElement({children, delay = 0, className = ''}: RevealEleme
         <div
             ref={ref}
             className={className}
-            style={{
+            style={{ /* sentinel-disable inline-style-prohibido */
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
                 transition: `all 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`

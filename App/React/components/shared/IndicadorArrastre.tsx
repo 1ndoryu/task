@@ -57,7 +57,7 @@ export function IndicadorArrastre({panelArrastrando, posicionMouse}: IndicadorAr
     return (
         <div
             className="indicadorArrastreFlotante"
-            style={{
+            style={{ /* sentinel-disable inline-style-prohibido */
                 left: posicionMouse.x + 15,
                 top: posicionMouse.y - 10
             }}>

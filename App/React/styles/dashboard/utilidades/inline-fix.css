@@ -1,0 +1,54 @@
+/* [034A-19] Clases utilitarias para reemplazar inline styles comunes.
+ * Cada clase aquí se usaba como style={{}} en múltiples componentes. */
+
+/* Botón icono deshabilitado (ej: "Estadísticas - Próximamente") */
+.botonIcono--deshabilitado {
+    cursor: default;
+    opacity: 0.5;
+}
+
+/* Botón icono clickable explícito */
+.botonIcono--clickable {
+    cursor: pointer;
+}
+
+/* Posicion relativa para badges e indicadores dentro de iconos */
+.posicionRelativa {
+    position: relative;
+}
+
+/* Input oculto (file input que se triggerea por JS) */
+.inputOculto {
+    display: none;
+}
+
+/* Flex row para acciones de header (ModalProyecto, PanelConfiguracionTarea) */
+.accionesHeaderFlex {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Flex row compacta para tokens/urls con botón copiar */
+.filaConBotonCopiar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    width: 100%;
+}
+
+/* Variante con margin-top para filas no-primera */
+.filaConBotonCopiar--conMargen {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+/* Título del handle de arrastre */
+.handleArrastre__titulo {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--dashboard-textoNormal);
+}

@@ -41,7 +41,7 @@ export function IndicadorAlmacenamiento({mostrarDetalles = true}: IndicadorAlmac
             <div className="barraAlmacenamientoContenedor">
                 <div
                     className="barraAlmacenamientoProgreso"
-                    style={{
+                    style={{ /* sentinel-disable inline-style-prohibido */
                         width: `${Math.min(porcentaje, 100)}%`,
                         backgroundColor: colorBarra
                     }}

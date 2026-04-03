@@ -36,8 +36,8 @@ export function SelectorNivel<T extends string>({niveles, seleccionado, onSelecc
                 const activo = seleccionado === nivel;
                 const deco = decoracion?.[nivel];
                 return (
-                    <Boton key={nivel} type="button" variante="ghost" claseAdicional={`selectorNivelBoton ${activo ? `selectorNivelBotonActivo selectorNivelBoton${claseSufijo}` : ''}`} onClick={() => onSeleccionar(nivel)} disabled={disabled} style={{textTransform: 'capitalize'}}>
-                        {deco && <span className="selectorNivelIcono" style={activo ? {color: deco.color} : undefined}>{deco.icono}</span>}
+                    <Boton key={nivel} type="button" variante="ghost" claseAdicional={`selectorNivelBoton ${activo ? `selectorNivelBotonActivo selectorNivelBoton${claseSufijo}` : ''}`} onClick={() => onSeleccionar(nivel)} disabled={disabled}>
+                        {deco && <span className="selectorNivelIcono" style={activo ? {color: deco.color} : undefined}>{deco.icono}</span>} {/* sentinel-disable inline-style-prohibido */}
                         {nivel}
                     </Boton>
                 );

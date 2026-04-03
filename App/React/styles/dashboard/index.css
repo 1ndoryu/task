@@ -89,6 +89,7 @@
 /* Utilidades */
 @import './utilidades/estados.css';
 @import './utilidades/acciones.css';
+@import './utilidades/inline-fix.css';
 
 /* Panel de Administración */
 @import './admin/panelAdministracion.css';

@@ -42,7 +42,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
         <div className="listaTareasCompacta">
             {' '}
             {/* Reutilizamos clase base para estructura */}
-            <div className="listaTareasCompacta__header" style={{marginBottom: '10px'}}>
+            <div className="listaTareasCompacta__header listaHitos__header">
                 <span className="listaTareasCompacta__titulo">Hitos</span>
                 <span className="listaTareasCompacta__contador">
                     {hitos.filter(h => h.completado).length}/{hitos.length}
@@ -52,26 +52,23 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                 {hitosOrdenados.map(hito => {
                     return (
                         <div key={hito.id} className="tareaItemCompactoContenedor">
-                            <div className={`tareaItemCompacto ${hito.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: 0, minHeight: '32px'}}>
+                            <div className={`tareaItemCompacto listaHitos__item ${hito.completado ? 'tareaItemCompacto--completada' : ''}`}>
                                 {/* Checkbox - Iconos reducidos */}
                                 <Boton type="button" claseAdicional={`tareaItemCompacto__checkbox ${hito.completado ? 'tareaItemCompacto__checkbox--checked' : ''}`} onClick={() => manejarToggle(hito.id)}>
                                     {hito.completado ? <CheckCircle2 size={14} /> : <Circle size={14} />}
                                 </Boton>
 
                                 {/* Titulo */}
-                                <span className="tareaItemCompacto__texto" style={{flex: 1, display: 'flex', alignItems: 'center', gap: '16px', overflow: 'hidden'}}>
-                                    <span style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>{hito.titulo}</span>
+                                <span className="tareaItemCompacto__texto listaHitos__textoContenedor">
+                                    <span className="listaHitos__textoTruncado">{hito.titulo}</span>
 
                                     {/* Badge de Prioridad junto al texto - Estilo PropiedadesCompactas */}
                                     <Boton
                                         type="button"
-                                        claseAdicional={`pillOpcion ${hito.prioridad === 'media' ? 'pillOpcion--vacio' : ''}`}
+                                        claseAdicional={`pillOpcion listaHitos__pillPrioridad ${hito.prioridad === 'media' ? 'pillOpcion--vacio' : ''}`}
                                         title={`Prioridad: ${ETIQUETAS_PRIORIDAD[hito.prioridad]}`}
                                         onClick={e => abrirMenuPrioridad(e, hito.id)}
-                                        style={{
-                                            padding: '2px 8px',
-                                            height: '24px',
-                                            fontSize: '11px',
+                                        style={{ /* sentinel-disable inline-style-prohibido */
                                             color: COLORES_PRIORIDAD[hito.prioridad],
                                             borderColor: hito.prioridad === 'alta' || hito.prioridad === 'muy_alta' ? COLORES_PRIORIDAD[hito.prioridad] : undefined
                                         }}>
@@ -81,8 +78,8 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                                 </span>
 
                                 {/* Controles: Solo eliminar, apareces on hover */}
-                                <div className="controlesHito" style={{display: 'flex', gap: '4px', opacity: 0}}>
-                                    <Boton type="button" variante="icono" title="Eliminar hito" onClick={() => manejarEliminar(hito.id)} style={{padding: '4px'}}>
+                                <div className="listaHitos__controles">
+                                    <Boton type="button" variante="icono" title="Eliminar hito" onClick={() => manejarEliminar(hito.id)} claseAdicional="listaHitos__botonEliminar">
                                         <Trash2 size={12} />
                                     </Boton>
                                 </div>
@@ -91,7 +88,7 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                     );
                 })}
                 <style>{`
-                    .tareaItemCompacto:hover .controlesHito { opacity: 1 !important; }
+                    .tareaItemCompacto:hover .listaHitos__controles { opacity: 1 !important; }
                 `}</style>
 
                 {/* Menu Contextual de Prioridad */}
@@ -111,12 +108,12 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                 {/* Input para nuevo hito */}
                 {mostrandoInput ? (
                     <div className="tareaItemCompactoContenedor">
-                        <div className="tareaItemCompacto" style={{paddingLeft: 0}}>
+                        <div className="tareaItemCompacto listaHitos__item">
                             <Circle size={14} className="textoApagado" />
                             <Input
                                 autoFocus
                                 tipo="text"
-                                claseAdicional="inputSinBorde"
+                                claseAdicional="inputSinBorde listaHitos__inputNuevo"
                                 placeholder="Nuevo hito..."
                                 value={nuevoHitoTexto}
                                 onChange={e => setNuevoHitoTexto(e.target.value)}
@@ -125,30 +122,14 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                                     if (nuevoHitoTexto.trim()) manejarAgregar();
                                     else setMostrandoInput(false);
                                 }}
-                                style={{
-                                    flex: 1,
-                                    marginLeft: '8px',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    outline: 'none',
-                                    color: 'var(--dashboard-textoPrincipal)',
-                                    fontSize: '13px'
-                                }}
                             />
                         </div>
                     </div>
                 ) : (
                     <Boton
                         type="button"
-                        claseAdicional="seccionModerna__botonAgregar"
-                        onClick={() => setMostrandoInput(true)}
-                        style={{
-                            marginTop: '8px',
-                            borderStyle: 'dashed',
-                            width: '100%',
-                            justifyContent: 'center',
-                            padding: '6px'
-                        }}>
+                        claseAdicional="seccionModerna__botonAgregar listaHitos__botonAgregar"
+                        onClick={() => setMostrandoInput(true)}>
                         <Plus size={14} />
                         <span>Agregar hito</span>
                     </Boton>

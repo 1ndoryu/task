@@ -31,7 +31,7 @@ const obtenerIcono = (icono: string, size: number) => {
         case 'x':
             return <X size={size} />;
         default:
-            return <Check size={size} style={{opacity: 0.3}} />;
+            return <Check size={size} className="botonIcono--deshabilitado" />;
     }
 };
 

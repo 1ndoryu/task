@@ -23,7 +23,7 @@ export function MenuFlotante({children, posicionX, posicionY, onCerrar, anchoMin
         <div
             ref={menuRef as React.RefObject<HTMLDivElement>}
             className={`menuContextual ${claseAdicional}`} // Reutilizamos estilos base de menuContextual
-            style={{
+            style={{ /* sentinel-disable inline-style-prohibido */
                 position: 'fixed',
                 minWidth: `${anchoMinimo}px`,
                 zIndex: 9999, // Asegurar que este por encima de todo

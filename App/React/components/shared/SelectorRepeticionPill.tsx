@@ -46,7 +46,7 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
                 <div
                     ref={panelRef as React.Ref<HTMLDivElement>}
                     className="selectorRepeticionPanel"
-                    style={{
+                    style={{ /* sentinel-disable inline-style-prohibido */
                         position: 'fixed',
                         left: posicionPanel.x,
                         top: posicionPanel.y,

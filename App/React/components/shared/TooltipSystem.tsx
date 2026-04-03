@@ -181,7 +181,7 @@ export function TooltipSystem(): JSX.Element | null {
         <div
             ref={tooltipRef}
             className={`tooltipContainer ${tooltip.visible ? 'tooltipVisible' : ''} tooltipPosicion${tooltip.posicion.charAt(0).toUpperCase() + tooltip.posicion.slice(1)}`}
-            style={{
+            style={{ /* sentinel-disable inline-style-prohibido */
                 left: tooltip.x,
                 top: tooltip.y,
                 transform: obtenerTransform()

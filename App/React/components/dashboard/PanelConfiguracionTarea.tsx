@@ -65,16 +65,16 @@ export function PanelConfiguracionTarea({tarea, estaAbierto, onCerrar, onGuardar
      */
     const accionesHeader =
         modoEdicion && !esMovil ? (
-            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+            <div className="accionesHeaderFlex">
                 {/* Estadisticas (Placeholder) */}
-                <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" style={{cursor: 'default', opacity: 0.5}}>
+                <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" claseAdicional="botonIcono--deshabilitado">
                     <BarChart2 size={16} />
                 </Boton>
 
                 {/* Actividad / Chat */}
-                <Boton type="button" variante="icono" onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} style={{cursor: 'pointer'}}>
+                <Boton type="button" variante="icono" onClick={toggleChat} title={chatVisible ? 'Ocultar chat' : 'Mostrar chat e historial'} claseAdicional="botonIcono--clickable">
                     {tieneMensajesSinLeer ? (
-                        <div style={{position: 'relative'}}>
+                        <div className="posicionRelativa">
                             <Activity size={16} />
                             <span className="indicadorBadge" />
                         </div>

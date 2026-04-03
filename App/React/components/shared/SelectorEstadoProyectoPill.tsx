@@ -60,7 +60,7 @@ export function SelectorEstadoProyectoPill({estado, onChange, deshabilitado = fa
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado del proyecto" style={{color: estadoActual.color}}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado del proyecto" style={{ /* sentinel-disable inline-style-prohibido */ color: estadoActual.color}}>
                 {obtenerIcono(estado, 14)}
                 <span>{estadoActual.etiqueta}</span>
             </Boton>

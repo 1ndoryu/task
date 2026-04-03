@@ -159,6 +159,65 @@
 /* 
  * AUDIO PLAYER
  */
+
+/* [034A-19] Clases auxiliares para ListaHitos — mueven inline styles a CSS */
+.listaHitos__header {
+    margin-bottom: 10px;
+}
+
+.listaHitos__item {
+    padding-left: 0;
+    min-height: 32px;
+}
+
+.listaHitos__textoContenedor {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.listaHitos__textoTruncado {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.listaHitos__pillPrioridad {
+    padding: 2px 8px;
+    height: 24px;
+    font-size: 11px;
+}
+
+.listaHitos__controles {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+}
+
+.listaHitos__botonEliminar {
+    padding: 4px;
+}
+
+.listaHitos__inputNuevo {
+    flex: 1;
+    margin-left: 8px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--dashboard-textoPrincipal);
+    font-size: 13px;
+}
+
+.listaHitos__botonAgregar {
+    margin-top: 8px;
+    border-style: dashed;
+    width: 100%;
+    justify-content: center;
+    padding: 6px;
+}
+
 .adjuntoAudioControl {
     display: flex;
     align-items: center;

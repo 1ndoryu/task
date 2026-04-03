@@ -59,7 +59,7 @@ export function SelectorEstadoHabitoPill({estado, onChange, deshabilitado = fals
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${estado === 'pendiente' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado de hoy" style={{color: estadoActual.color}}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${estado === 'pendiente' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado de hoy" style={{ /* sentinel-disable inline-style-prohibido */ color: estadoActual.color}}>
                 {obtenerIcono(estado, 14)}
                 <span>{estadoActual.etiqueta}</span>
             </Boton>

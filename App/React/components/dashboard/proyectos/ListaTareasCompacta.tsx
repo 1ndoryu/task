@@ -27,7 +27,7 @@ export function TareaItemCompacto({tarea, subtareas, onToggle, nivel = 0}: Tarea
 
     return (
         <div className="tareaItemCompactoContenedor">
-            <div className={`tareaItemCompacto ${tarea.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: `${nivel * 16}px`}}>
+            <div className={`tareaItemCompacto ${tarea.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: `${nivel * 16}px`}}> {/* sentinel-disable inline-style-prohibido */}
                 {/* Botón expandir/colapsar si tiene subtareas */}
                 <Boton
                     variante="icono"
