@@ -405,23 +405,27 @@
 }
 
 /* ── [024A-30] Editor de categorías ── */
+/* [034A-13] padding eliminado: el Modal ya provee su propio spacing */
+/* [034A-20] Padding interno — el modal ya no agrega padding exterior para que
+ * los pickers (icono/color) no queden recortados por overflow del contenedor padre */
 .editorCategorias {
-    padding: 8px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 12px 16px;
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
 }
 
 /* [034A-5] Header y título eliminados: Modal provee su propio encabezado */
 
+/* [034A-20] overflow: visible para que los pickers (icono/color) de cada fila
+ * no queden recortados. El max-height del contenedor .editorCategorias con
+ * overflow-y: auto en el .modalContenido maneja el scroll si hay muchas categorías. */
 .editorCategorias__lista {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-height: 300px;
-    overflow-y: auto;
 }
 
 .editorCategorias__fila {
@@ -511,8 +515,9 @@
     width: 180px;
 }
 
+/* [034A-20] Ensanchado y 4 columnas para que las muestras de color tengan buen tamaño */
 .editorCategorias__pickerColores {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     width: 160px;
 }
 
@@ -541,8 +546,8 @@
 }
 
 .editorCategorias__colorMuestra {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
@@ -605,10 +610,109 @@
     font-size: 0.72rem;
 }
 
+/* [034A-13] border-top eliminado por pedido del usuario */
 .editorCategorias__acciones {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 4px;
+}
+
+/* [034A-14] Selector de entornos — dropdown en header del panel */
+.selectorEntornos {
+    position: relative;
+    z-index: 10;
+}
+
+.selectorEntornos__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--dashboard-espacioXs);
+    min-width: 200px;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.selectorEntornos__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: 4px var(--dashboard-espacioSm);
+    font-size: 0.72rem;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.selectorEntornos__opcion:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.selectorEntornos__opcion--activo {
+    color: var(--dashboard-textoNormal);
+    font-weight: 500;
+}
+
+.selectorEntornos__opcion--crear {
+    color: var(--dashboard-acento);
     border-top: 1px solid var(--dashboard-bordeSutil);
+    margin-top: var(--dashboard-espacioXs);
+    padding-top: var(--dashboard-espacioSm);
+}
+
+.selectorEntornos__opcionClick {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex: 1;
+    min-width: 0;
+}
+
+.selectorEntornos__indicador {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.selectorEntornos__nombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selectorEntornos__check {
+    flex-shrink: 0;
+    color: var(--dashboard-acento);
+}
+
+.selectorEntornos__acciones {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.selectorEntornos__opcion:hover .selectorEntornos__acciones {
+    opacity: 1;
+}
+
+.selectorEntornos__crear,
+.selectorEntornos__editar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 4px var(--dashboard-espacioSm);
+    width: 100%;
+}
+
+.selectorEntornos__inputCrear,
+.selectorEntornos__inputEditar {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.72rem;
 }

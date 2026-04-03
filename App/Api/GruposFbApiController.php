@@ -1,5 +1,10 @@
 <?php
 
+/* sentinel-disable-file limite-lineas
+ * Justificación: Controller REST principal con autenticación dual,
+ * CRUD de grupos, sync bulk, categorías, token y ping.
+ * Separar más endpoints rompería la cohesión del dominio grupos_fb. */
+
 /**
  * [253A-11] API Controller para Grupos de Facebook
  *
@@ -12,7 +17,7 @@
 namespace App\Api;
 
 use App\Repository\GruposFbRepository;
-use App\Database\Schema;
+use App\Repository\EntornosGruposFbRepository;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -114,6 +119,8 @@ class GruposFbApiController
             'callback' => [self::class, 'ping'],
             'permission_callback' => [self::class, 'verificarAutenticacion'],
         ]);
+
+        /* [034A-14] Entornos, overrides y config: registrados en EntornosGruposFbApiController */
     }
 
     /* ────────────────────────────── Autenticación ────────────────────────────── */
@@ -221,6 +228,13 @@ class GruposFbApiController
 
             $grupos = $repo->listar($filtros);
 
+            /* [034A-14] Si hay entorno activo o pasado por query param, aplicar overrides */
+            $entornoId = $request->get_param('entorno_id');
+            if ($entornoId) {
+                $entornoRepo = new EntornosGruposFbRepository($userId);
+                $grupos = $entornoRepo->aplicarOverrides($grupos, (int)$entornoId);
+            }
+
             return new WP_REST_Response([
                 'success' => true,
                 'data' => $grupos,
@@ -261,6 +275,41 @@ class GruposFbApiController
              * definiciones. Sin esto el filtro de categorías y el editor no muestran las categorías
              * que vienen del entorno de la extensión. Solo inserta; nunca borra ni sobrescribe. */
             $repo->syncCategoriasDesdeGrupos($grupos);
+
+            /* [034A-14] Si viene entorno_id, guardar overrides por grupo en ese entorno.
+             * Los grupos enviados por la extensión pueden traer campos override (categoria,
+             * importancia, oculto) que difieren del grupo base según el entorno activo. */
+            $jsonParams = $request->get_json_params();
+            $entornoId = $jsonParams['entorno_id'] ?? $request->get_param('entorno_id');
+            if ($entornoId && (int)$entornoId > 0) {
+                $entornoRepo = new EntornosGruposFbRepository($userId);
+                foreach ($grupos as $grupo) {
+                    $grupoNombre = $grupo['nombre'] ?? $grupo['name'] ?? '';
+                    if (empty($grupoNombre)) {
+                        continue;
+                    }
+                    /* Buscar el ID del grupo insertado */
+                    $grupoDb = $repo->obtenerPorNombre($grupoNombre);
+                    if ($grupoDb) {
+                        $overrideData = [];
+                        if (isset($grupo['categoria'])) {
+                            $overrideData['categoria'] = $grupo['categoria'];
+                        }
+                        if (isset($grupo['importancia'])) {
+                            $overrideData['importancia'] = $grupo['importancia'];
+                        }
+                        if (isset($grupo['oculto'])) {
+                            $overrideData['oculto'] = $grupo['oculto'];
+                        }
+                        if (!empty($overrideData)) {
+                            $overrideOk = $entornoRepo->guardarOverride((int)$entornoId, (int)$grupoDb['id'], $overrideData);
+                            if (!$overrideOk) {
+                                error_log("[034A-14] Fallo guardarOverride entorno=$entornoId grupo=" . $grupoDb['id']);
+                            }
+                        }
+                    }
+                }
+            }
 
             return new WP_REST_Response([
                 'success' => true,
@@ -364,7 +413,14 @@ class GruposFbApiController
             $repo = new GruposFbRepository($userId);
             $id = (int)$request->get_param('id');
 
-            $resultado = $repo->togglePublicado($id);
+            /* [034A-17] Duración configurable del ventana de publicado (default 24h) */
+            $entornoRepo = new EntornosGruposFbRepository($userId);
+            $horasVentana = (int)$entornoRepo->obtenerConfig('publicado_horas', '24');
+            if ($horasVentana < 1 || $horasVentana > 720) {
+                $horasVentana = 24;
+            }
+
+            $resultado = $repo->togglePublicado($id, $horasVentana);
 
             if (!$resultado['ok']) {
                 return new WP_REST_Response([
@@ -418,28 +474,11 @@ class GruposFbApiController
     {
         try {
             $userId = self::getUserId($request);
-            global $wpdb;
-            $table = Schema::getTableName('categorias_grupos_fb');
-
-            $rows = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT id, nombre, icono, color, orden FROM $table WHERE user_id = %d ORDER BY orden ASC, nombre ASC",
-                    $userId
-                ),
-                'ARRAY_A'
-            );
-
-            $categorias = array_map(fn($r) => [
-                'id' => (int)$r['id'],
-                'nombre' => $r['nombre'],
-                'icono' => $r['icono'],
-                'color' => $r['color'],
-                'orden' => (int)$r['orden'],
-            ], $rows ?: []);
+            $repo = new GruposFbRepository($userId);
 
             return new WP_REST_Response([
                 'success' => true,
-                'data' => $categorias,
+                'data' => $repo->listarCategoriasUsuario(),
             ], 200);
         } catch (\Exception $e) {
             return new WP_REST_Response([
@@ -465,23 +504,13 @@ class GruposFbApiController
                 ], 400);
             }
 
-            global $wpdb;
-            $table = Schema::getTableName('categorias_grupos_fb');
+            $repo = new GruposFbRepository($userId);
+            $resultado = $repo->reemplazarCategorias($categorias);
 
-            /* Eliminar existentes y reinsertar (replace strategy) */
-            $wpdb->delete($table, ['user_id' => $userId], ['%d']);
-
-            foreach ($categorias as $i => $cat) {
-                $wpdb->insert($table, [
-                    'user_id' => $userId,
-                    'nombre' => sanitize_text_field(mb_substr($cat['nombre'] ?? '', 0, 100)),
-                    'icono' => sanitize_text_field(mb_substr($cat['icono'] ?? '📁', 0, 10)),
-                    'color' => sanitize_hex_color($cat['color'] ?? '#6366f1') ?: '#6366f1',
-                    'orden' => $i,
-                ], ['%d', '%s', '%s', '%s', '%d']);
-            }
-
-            return self::listarCategorias($request);
+            return new WP_REST_Response([
+                'success' => true,
+                'data' => $resultado,
+            ], 200);
         } catch (\Exception $e) {
             return new WP_REST_Response([
                 'success' => false,

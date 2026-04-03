@@ -1,14 +1,27 @@
 /* [024A-30] EditorCategorias
- * UI inline para gestionar categorías de grupos de Facebook.
+ * UI para gestionar categorías de grupos de Facebook dentro de un Modal.
  * CRUD completo: crear, renombrar, cambiar icono/color, reordenar, eliminar.
  * Lógica extraída a useEditorCategorias. */
-/* sentinel-disable-file emoji-unicode */
 /* sentinel-disable-file css-inline — backgroundColor es dinámico por usuario, no puede ser clase CSS */
 
 import {Plus, Trash2, ChevronUp, Save} from 'lucide-react';
+import {icons} from 'lucide-react';
 import {Boton, Input} from '../ui';
 import {useEditorCategorias, ICONOS_PRESET, COLORES_PRESET} from '../../hooks/paneles/useEditorCategorias';
 import type {CategoriaGrupoFb} from '../../stores/gruposFbStore';
+
+/* [034A-13] Renderiza un icono lucide por su nombre kebab-case.
+ * Convierte 'book-open' → 'BookOpen' para buscar en el registro de iconos. */
+function toPascalCase(str: string): string {
+    return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+}
+
+function IconoCategoria({nombre, size = 14}: {nombre: string; size?: number}): JSX.Element {
+    const pascalName = toPascalCase(nombre);
+    const LucideIcon = icons[pascalName as keyof typeof icons];
+    if (!LucideIcon) return <span>{nombre}</span>;
+    return <LucideIcon size={size} />;
+}
 
 interface EditorCategoriasProps {
     categorias: CategoriaGrupoFb[];
@@ -45,7 +58,7 @@ export function EditorCategorias({categorias, onGuardar, onCerrar}: EditorCatego
                                 onClick={() => togglePicker('icono', cat.key)}
                                 title="Cambiar icono"
                                 claseAdicional="editorCategorias__iconoBtn"
-                                icono={<span>{cat.icono}</span>}
+                                icono={<IconoCategoria nombre={cat.icono} />}
                             />
                             {pickerAbierto?.tipo === 'icono' && pickerAbierto.key === cat.key && (
                                 <div className="editorCategorias__picker editorCategorias__pickerIconos">
@@ -56,7 +69,7 @@ export function EditorCategorias({categorias, onGuardar, onCerrar}: EditorCatego
                                             soloIcono
                                             claseAdicional={`editorCategorias__pickerItem ${cat.icono === ic ? 'editorCategorias__pickerItem--activo' : ''}`}
                                             onClick={() => { actualizar(cat.key, 'icono', ic); togglePicker('icono', cat.key); }}
-                                            icono={<span>{ic}</span>}
+                                            icono={<IconoCategoria nombre={ic} />}
                                         />
                                     ))}
                                 </div>
@@ -118,7 +131,7 @@ export function EditorCategorias({categorias, onGuardar, onCerrar}: EditorCatego
             {error && <div className="editorCategorias__error">{error}</div>}
 
             <div className="editorCategorias__acciones">
-                <Boton variante="badge" onClick={agregar} icono={<Plus size={11} />}>
+                <Boton variante="ghost" onClick={agregar} icono={<Plus size={11} />}>
                     Agregar
                 </Boton>
                 <Boton variante="ghost" onClick={guardar} icono={<Save size={11} />} disabled={guardando}>

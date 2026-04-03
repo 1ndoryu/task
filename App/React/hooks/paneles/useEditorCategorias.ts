@@ -19,12 +19,12 @@ export const COLORES_PRESET = [
     '#f97316', '#6366f1', '#14b8a6', '#e879f9'
 ];
 
-/* Los iconos de categoría son emojis por diseño — la extensión y la API los almacenan así.
- * sentinel-disable-line emoji-unicode */
+/* [034A-13] Iconos de categoría como nombres de lucide-react en vez de emojis.
+ * Se almacenan como strings (ej: 'megaphone') y el componente los renderiza como SVG. */
 export const ICONOS_PRESET = [
-    '\u{1F4E2}', '\u{1F4BB}', '\u{1F465}', '\u{1F602}', '\u{1F4BC}', '\u{1F4DA}',
-    '\u{1F3AE}', '\u{1F3A8}', '\u{1F3B5}', '\u{1F4AA}', '\u{1F355}', '\u{1F30D}',
-    '\u{1F4F7}', '\u{1F3E0}', '\u{1F4A1}', '\u{1F527}', '\u{1F3AF}', '\u2B50'
+    'megaphone', 'monitor', 'users', 'smile', 'briefcase', 'book-open',
+    'gamepad-2', 'palette', 'music', 'dumbbell', 'pizza', 'globe',
+    'camera', 'home', 'lightbulb', 'wrench', 'target', 'star'
 ];
 
 let keyCounter = 0;
@@ -66,7 +66,7 @@ export function useEditorCategorias(
         setLocales(prev => [...prev, {
             key: `new-${keyCounter}`,
             nombre: '',
-            icono: '\u{1F4C1}',
+            icono: 'folder',
             color: colorDisponible
         }]);
     }, [locales]);

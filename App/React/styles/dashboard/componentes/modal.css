@@ -119,6 +119,11 @@
     scrollbar-color: var(--dashboard-scrollbarThumb) var(--dashboard-scrollbarFondo);
 }
 
+/* [034A-20] Clase utilitaria para modales cuyo contenido gestiona su propio padding */
+.modalContenido--sinPadding {
+    padding: 0;
+}
+
 /* 
  * MODAL EXPANDIDO - DOBLE COLUMNA
  * Variante para modales con 2 columnas (ej: tarea con chat)

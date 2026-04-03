@@ -4,12 +4,20 @@
  * Cada dato (tipo, miembros, pub/día) es su propia columna. */
 
 import {useState, memo} from 'react';
-import {Check, Users, ExternalLink, EyeOff, Star, FolderOpen} from 'lucide-react';
+import {Check, Users, ExternalLink, EyeOff, Star, FolderOpen, icons} from 'lucide-react';
 import {MenuContextual} from '../shared';
 import {Boton} from '../ui';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import {esPublicadoReciente} from '../../stores/gruposFbStore';
 import type {ColumnId} from '../../hooks/paneles/useColumnasGruposFb';
+
+/* [034A-13] Renderiza icono de categoría como SVG de lucide */
+function iconoCategoriaSvg(nombre: string, size = 12): JSX.Element {
+    const pascalName = nombre.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+    const LucideIcon = icons[pascalName as keyof typeof icons];
+    if (!LucideIcon) return <FolderOpen size={size} />;
+    return <LucideIcon size={size} />;
+}
 
 interface FilaGrupoProps {
     grupo: GrupoFb;
@@ -103,7 +111,7 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
                     >
                         {grupo.categoria ? (
                             <>
-                                {categorias.find(c => c.nombre === grupo.categoria)?.icono || <FolderOpen size={12} />}
+                                {iconoCategoriaSvg(categorias.find(c => c.nombre === grupo.categoria)?.icono || 'folder-open')}
                                 {' '}{grupo.categoria}
                             </>
                         ) : (
@@ -114,7 +122,7 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
                         <MenuContextual
                             opciones={[
                                 {id: '__ninguna', etiqueta: 'Sin categoría'},
-                                ...categorias.map(c => ({id: c.nombre, etiqueta: `${c.icono} ${c.nombre}`}))
+                                ...categorias.map(c => ({id: c.nombre, etiqueta: c.nombre, icono: iconoCategoriaSvg(c.icono)}))
                             ]}
                             posicionX={menuCat.x}
                             posicionY={menuCat.y}

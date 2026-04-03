@@ -43,6 +43,25 @@ export interface EstadisticasGruposFb {
     publicadosHoy: number;
 }
 
+/* [034A-14] Entorno: vista filtrada con overrides por grupo */
+export interface EntornoGrupoFb {
+    id: number;
+    nombre: string;
+    icono: string;
+    color: string;
+    activo: boolean;
+    aiPrompt: string | null;
+    orden: number;
+    createdAt: string;
+}
+
+/* [034A-14] Override de un grupo en un entorno */
+export interface OverrideGrupoFb {
+    categoria: string | null;
+    importancia: number | null;
+    oculto: number | null;
+}
+
 interface RespuestaApi<T> {
     success: boolean;
     data?: T;
@@ -73,7 +92,7 @@ async function fetchApi<T>(url: string, opciones: RequestInit = {}): Promise<T> 
 }
 
 export const gruposFbService = {
-    async listar(filtros?: {oculto?: number; categoria?: string; importancia?: number; busqueda?: string}): Promise<GrupoFb[]> {
+    async listar(filtros?: {oculto?: number; categoria?: string; importancia?: number; busqueda?: string; entorno_id?: number}): Promise<GrupoFb[]> {
         const params = new URLSearchParams();
         if (filtros) {
             Object.entries(filtros).forEach(([k, v]) => {
@@ -123,5 +142,59 @@ export const gruposFbService = {
 
     async regenerarToken(): Promise<{token: string; mensaje: string}> {
         return fetchApi<{token: string; mensaje: string}>(`${BASE}/token/regenerar`, {method: 'POST'});
+    },
+
+    /* [034A-14] Entornos CRUD */
+    async listarEntornos(): Promise<EntornoGrupoFb[]> {
+        return fetchApi<EntornoGrupoFb[]>(`${BASE}/entornos`);
+    },
+
+    async crearEntorno(datos: Omit<EntornoGrupoFb, 'id' | 'activo' | 'createdAt'>): Promise<EntornoGrupoFb> {
+        return fetchApi<EntornoGrupoFb>(`${BASE}/entornos`, {
+            method: 'POST',
+            body: JSON.stringify(datos)
+        });
+    },
+
+    async actualizarEntorno(id: number, datos: Partial<Omit<EntornoGrupoFb, 'id' | 'createdAt'>>): Promise<EntornoGrupoFb> {
+        return fetchApi<EntornoGrupoFb>(`${BASE}/entornos/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos)
+        });
+    },
+
+    async eliminarEntorno(id: number): Promise<void> {
+        await fetchApi<void>(`${BASE}/entornos/${id}`, {method: 'DELETE'});
+    },
+
+    async activarEntorno(entornoId: number | null): Promise<EntornoGrupoFb | null> {
+        return fetchApi<EntornoGrupoFb | null>(`${BASE}/entornos/activar`, {
+            method: 'POST',
+            body: JSON.stringify({entornoId})
+        });
+    },
+
+    /* [034A-14] Overrides por entorno */
+    async listarOverrides(entornoId: number): Promise<Record<string, OverrideGrupoFb>> {
+        return fetchApi<Record<string, OverrideGrupoFb>>(`${BASE}/entornos/${entornoId}/overrides`);
+    },
+
+    async guardarOverride(entornoId: number, grupoId: number, datos: Partial<OverrideGrupoFb>): Promise<void> {
+        await fetchApi<void>(`${BASE}/entornos/${entornoId}/overrides`, {
+            method: 'POST',
+            body: JSON.stringify({grupoId, ...datos})
+        });
+    },
+
+    /* [034A-17] Config usuario */
+    async obtenerConfig(claves: string[]): Promise<Record<string, string>> {
+        return fetchApi<Record<string, string>>(`${BASE}/config?claves=${claves.join(',')}`);
+    },
+
+    async guardarConfig(datos: Record<string, string>): Promise<{guardadas: number}> {
+        return fetchApi<{guardadas: number}>(`${BASE}/config`, {
+            method: 'POST',
+            body: JSON.stringify(datos)
+        });
     }
 };

@@ -1,13 +1,13 @@
 /* [263A-5] Sección de configuración para Grupos FB
  * Gestión de token de API para la extensión del navegador.
- * El token permite que la extensión fb-group-manager envíe grupos detectados. */
+ * [034A-17] Añadido control de duración de "publicado recientemente". */
 
-import {Key, Copy, RefreshCw, Check} from 'lucide-react';
+import {Key, Copy, RefreshCw, Check, Clock} from 'lucide-react';
 import {Boton, Input} from '../../ui';
 import {useSeccionConfigGruposFb} from '../../../hooks/configuracion/useSeccionConfigGruposFb';
 
 export function SeccionConfigGruposFb(): JSX.Element {
-    const {token, tieneToken, cargando, copiado, error, apiUrl, verificarToken, generarToken, copiarToken} = useSeccionConfigGruposFb();
+    const {token, tieneToken, cargando, copiado, error, apiUrl, publicadoHoras, guardandoConfig, verificarToken, generarToken, copiarToken, guardarPublicadoHoras} = useSeccionConfigGruposFb();
 
     return (
         <div className="contenedorOpcionesConfig">
@@ -79,6 +79,31 @@ export function SeccionConfigGruposFb(): JSX.Element {
                             claseAdicional="panelGruposFb__tokenInput"
                         />
                         <Boton variante="badge" soloIcono onClick={() => navigator.clipboard.writeText(apiUrl)} icono={<Copy size={12} />} title="Copiar URL" />
+                    </div>
+                </div>
+            </div>
+            <div className="separadorOpcionesConfig" />
+
+            {/* [034A-17] Duración de "publicado recientemente" */}
+            <div className="itemOpcionConfig">
+                <div className="detallesOpcionConfig">
+                    <span className="tituloOpcionConfig">
+                        <Clock size={14} style={{marginRight: 4, verticalAlign: 'middle'}} />
+                        Duración de publicado
+                    </span>
+                    <span className="descripcionOpcionConfig">
+                        Horas durante las cuales un grupo marcado como publicado se considera reciente. Por defecto 24h.
+                    </span>
+                    <div style={{display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px', maxWidth: '160px'}}>
+                        <Input
+                            tipo="number"
+                            value={publicadoHoras}
+                            onChange={e => guardarPublicadoHoras(e.target.value)}
+                            min={1}
+                            max={720}
+                            disabled={guardandoConfig}
+                        />
+                        <span className="descripcionOpcionConfig">horas</span>
                     </div>
                 </div>
             </div>

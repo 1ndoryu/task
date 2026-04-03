@@ -502,7 +502,7 @@ class Schema
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
             nombre varchar(100) NOT NULL,
-            icono varchar(10) DEFAULT '📁',
+            icono varchar(50) DEFAULT 'folder',
             color varchar(20) DEFAULT '#6366f1',
             orden int(11) DEFAULT 0,
             PRIMARY KEY  (id),
@@ -512,6 +512,57 @@ class Schema
 
         dbDelta($sql_grupos_fb);
         dbDelta($sql_categorias_fb);
+
+        /* [034A-14] Tabla de entornos para grupos de Facebook.
+         * Cada usuario puede tener múltiples entornos (ej: "Negocios", "Música").
+         * Un entorno activo filtra la vista de grupos con overrides por grupo. */
+        $table_entornos = $wpdb->prefix . 'glory_entornos_grupos_fb';
+        $sql_entornos = "CREATE TABLE $table_entornos (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            nombre varchar(100) NOT NULL,
+            icono varchar(50) DEFAULT 'layers',
+            color varchar(20) DEFAULT '#6366f1',
+            activo tinyint(1) DEFAULT 0,
+            orden int(11) DEFAULT 0,
+            ai_prompt text DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            UNIQUE KEY user_nombre (user_id, nombre)
+        ) $charset_collate;";
+
+        /* [034A-14] Overrides de grupo por entorno.
+         * Permite que cada grupo tenga categoría, importancia y oculto diferentes
+         * según el entorno activo. Los valores NULL significan "usar dato base del grupo". */
+        $table_overrides = $wpdb->prefix . 'glory_grupos_fb_entorno_overrides';
+        $sql_overrides = "CREATE TABLE $table_overrides (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            grupo_id bigint(20) NOT NULL,
+            entorno_id bigint(20) NOT NULL,
+            categoria varchar(100) DEFAULT NULL,
+            importancia tinyint DEFAULT NULL,
+            oculto tinyint(1) DEFAULT NULL,
+            PRIMARY KEY  (id),
+            KEY grupo_id (grupo_id),
+            KEY entorno_id (entorno_id),
+            UNIQUE KEY grupo_entorno (grupo_id, entorno_id)
+        ) $charset_collate;";
+
+        /* [034A-17] Configuración por usuario para grupos FB (duración publicado, etc.) */
+        $table_config = $wpdb->prefix . 'glory_grupos_fb_config';
+        $sql_config = "CREATE TABLE $table_config (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            clave varchar(100) NOT NULL,
+            valor text NOT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY user_clave (user_id, clave)
+        ) $charset_collate;";
+
+        dbDelta($sql_entornos);
+        dbDelta($sql_overrides);
+        dbDelta($sql_config);
     }
 
     /**

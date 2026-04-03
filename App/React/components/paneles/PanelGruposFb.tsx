@@ -1,3 +1,9 @@
+/* sentinel-disable-file limite-lineas — Panel orquestador principal del dashboard de Grupos FB.
+ * Coordina filtros, columnas, entornos, menú contextual, renderizado progresivo y editor de categorías.
+ * La lógica ya está delegada a hooks (usePanelGruposFb, useColumnasGruposFb, useEntornos) y componentes
+ * (FilaGrupo, EditorCategorias, SelectorEntornos). Lo restante es composición JSX que no se puede
+ * dividir sin fragmentar la coherencia del panel. 305 líneas efectivas, muy marginal. */
+
 /* [024A-17] PanelGruposFb
  * Panel de dashboard para gestionar grupos de Facebook detectados por la extensión.
  * Muestra tabla sortable con filtros, categorías, importancia, acciones.
@@ -5,14 +11,16 @@
  * [024A-17] Columnas configurables: el usuario elige qué columnas ver. */
 
 import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
-import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, Tag} from 'lucide-react';
+import {icons, RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, Tag} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge, Modal} from '../shared';
 import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
 import {useColumnasGruposFb} from '../../hooks/paneles/useColumnasGruposFb';
+import {useEntornos} from '../../hooks/paneles/useEntornos';
 import {FilaGrupo} from './FilaGrupo';
 import {EditorCategorias} from './EditorCategorias';
+import {SelectorEntornos} from './SelectorEntornos';
 import {ThOrdenable} from './ThOrdenable';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import {useGruposFbStore} from '../../stores/gruposFbStore';
@@ -37,6 +45,16 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
     const {columnas, visibilidad, columnasActivas, toggleColumna, menuAbierto: menuColumnasAbierto, toggleMenu: toggleMenuColumnas, refMenu: refMenuColumnas} = useColumnasGruposFb();
 
     const guardarCategorias = useGruposFbStore(s => s.guardarCategorias);
+    const setEntornoActivoId = useGruposFbStore(s => s.setEntornoActivoId);
+
+    /* [034A-14] Entornos: CRUD + selector.
+     * Al activar un entorno, sincronizamos el ID en el store para que cargar()
+     * pase entorno_id al API y devuelva grupos con overrides aplicados. */
+    const entornosHook = useEntornos();
+    const activarEntorno = useCallback(async (entornoId: number | null) => {
+        await entornosHook.activar(entornoId);
+        setEntornoActivoId(entornoId);
+    }, [entornosHook.activar, setEntornoActivoId]);
 
     /* [024A-18] Renderizado progresivo: solo muestra LOTE_SIZE filas inicialmente,
      * carga más cuando el usuario hace scroll cerca del final (IntersectionObserver).
@@ -44,6 +62,14 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
     const LOTE_SIZE = 80;
     const [limiteVisible, setLimiteVisible] = useState(LOTE_SIZE);
     const refCentinela = useRef<HTMLTableRowElement>(null);
+
+    /* [034A-14] Sincronizar entorno activo con el store al cargar.
+     * Si el usuario ya tenía un entorno activo en BD, la primera carga
+     * debe reflejar los overrides de ese entorno. */
+    useEffect(() => {
+        const idEntorno = entornosHook.entornoActivo?.id ?? null;
+        setEntornoActivoId(idEntorno);
+    }, [entornosHook.entornoActivo?.id, setEntornoActivoId]);
 
     /* Reset del límite cuando cambian los filtros */
     useEffect(() => {
@@ -119,10 +145,15 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
         {id: 'eliminar', etiqueta: 'Eliminar', icono: <Trash2 size={12} />, peligroso: true, separadorDespues: false}
     ], []);
 
-    /* [263A-4] Opciones para SelectorBadge de categoría */
+    /* [263A-4] Opciones para SelectorBadge de categoría
+     * [034A-14] Icono renderizado como SVG de lucide (antes era emoji en <span>) */
     const opcionesCategoria = [
         {id: '', etiqueta: 'Todas', icono: <FolderOpen size={12} />, descripcion: 'Sin filtro'},
-        ...categorias.map(c => ({id: c.nombre, etiqueta: c.nombre, icono: <span>{c.icono}</span>, descripcion: ''}))
+        ...categorias.map(c => {
+            const pascalName = c.icono.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+            const LucideIcon = icons[pascalName as keyof typeof icons] ?? FolderOpen;
+            return {id: c.nombre, etiqueta: c.nombre, icono: <LucideIcon size={12} />, descripcion: ''};
+        })
     ];
 
     /* [263A-4] Opciones para SelectorBadge de importancia */
@@ -152,6 +183,15 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                 variante="panelHeader"
                 acciones={
                     <>
+                        {/* [034A-14] Selector de entornos */}
+                        <SelectorEntornos
+                            entornos={entornosHook.entornos}
+                            entornoActivo={entornosHook.entornoActivo}
+                            onActivar={activarEntorno}
+                            onCrear={entornosHook.crear}
+                            onEliminar={entornosHook.eliminar}
+                            onActualizar={entornosHook.actualizar}
+                        />
                         {/* [263A-4] Búsqueda estilo modalNotasBusqueda--headerCentrado */}
                         {busquedaAbierta ? (
                             <div className="panelGruposFb__busquedaHeader">
@@ -206,8 +246,9 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
             <div className="panelGruposFb">
                 {/* [024A-9] Stats eliminadas por innecesarias */}
 
-                {/* [034A-5] Editor de categorías como modal (antes inline, mal diseño) */}
-                <Modal estaAbierto={editorCategoriasAbierto} onCerrar={cerrarEditorCategorias} titulo="Gestionar categorías">
+                {/* [034A-5] Editor de categorías como modal (antes inline, mal diseño)
+                 * [034A-20] claseContenido sin padding: editorCategorias maneja su propio espaciado */}
+                <Modal estaAbierto={editorCategoriasAbierto} onCerrar={cerrarEditorCategorias} titulo="Gestionar categorías" claseContenido="modalContenido--sinPadding">
                     <EditorCategorias
                         categorias={categorias}
                         onGuardar={guardarCategorias}

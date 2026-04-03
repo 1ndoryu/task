@@ -9,6 +9,10 @@
  * @package App\Repository
  */
 
+/* sentinel-disable-file limite-lineas
+ * Justificación: Repository central de grupos_fb con CRUD, sync bulk,
+ * categorías y estadísticas. Dividirlo rompería la cohesión del dominio. */
+
 namespace App\Repository;
 
 use App\Database\Schema;
@@ -84,6 +88,48 @@ class GruposFbRepository
             $wpdb->prepare(
                 "SELECT * FROM $table WHERE id = %d AND user_id = %d AND deleted_at IS NULL",
                 $id,
+                $this->userId
+            ),
+            'ARRAY_A'
+        );
+
+        return $row ? $this->formatearGrupo($row) : null;
+    }
+
+    /**
+     * [034A-14] Obtiene un grupo por su nombre (para vincular overrides en sync).
+     * Busca solo en grupos no eliminados del usuario actual.
+     */
+    public function obtenerPorNombre(string $nombre): ?array
+    {
+        global $wpdb;
+        $table = Schema::getTableName('grupos_fb');
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM $table WHERE nombre = %s AND user_id = %d AND deleted_at IS NULL LIMIT 1",
+                $nombre,
+                $this->userId
+            ),
+            'ARRAY_A'
+        );
+
+        return $row ? $this->formatearGrupo($row) : null;
+    }
+
+    /**
+     * [034A-14] Obtiene un grupo por su fb_group_id (ID de Facebook).
+     * Necesario para vincular overrides desde la extensión que envía IDs de Facebook.
+     */
+    public function obtenerPorFbGroupId(string $fbGroupId): ?array
+    {
+        global $wpdb;
+        $table = Schema::getTableName('grupos_fb');
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM $table WHERE fb_group_id = %s AND user_id = %d AND deleted_at IS NULL LIMIT 1",
+                $fbGroupId,
                 $this->userId
             ),
             'ARRAY_A'
@@ -504,5 +550,61 @@ class GruposFbRepository
                 error_log("[GruposFb] Error insertando categoría '$nombre': " . $wpdb->last_error);
             }
         }
+    }
+
+    /**
+     * [034A-14] Lista las categorías definidas por el usuario.
+     */
+    public function listarCategoriasUsuario(): array
+    {
+        global $wpdb;
+        $table = Schema::getTableName('categorias_grupos_fb');
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT id, nombre, icono, color, orden FROM $table WHERE user_id = %d ORDER BY orden ASC, nombre ASC",
+                $this->userId
+            ),
+            'ARRAY_A'
+        );
+
+        return array_map(fn($r) => [
+            'id' => (int)$r['id'],
+            'nombre' => $r['nombre'],
+            'icono' => $r['icono'],
+            'color' => $r['color'],
+            'orden' => (int)$r['orden'],
+        ], $rows ?: []);
+    }
+
+    /**
+     * [034A-14] Reemplaza todas las categorías del usuario (delete + bulk insert).
+     * Retorna las categorías guardadas.
+     */
+    public function reemplazarCategorias(array $categorias): array
+    {
+        global $wpdb;
+        $table = Schema::getTableName('categorias_grupos_fb');
+
+        $deleted = $wpdb->delete($table, ['user_id' => $this->userId], ['%d']);
+        if ($deleted === false) {
+            error_log('[034A-14] Fallo al borrar categorías userId=' . $this->userId);
+        }
+
+        foreach ($categorias as $i => $cat) {
+            $insertResult = $wpdb->insert($table, [
+                'user_id' => $this->userId,
+                'nombre' => sanitize_text_field(mb_substr($cat['nombre'] ?? '', 0, 100)),
+                'icono' => sanitize_text_field(mb_substr($cat['icono'] ?? 'folder', 0, 50)),
+                'color' => sanitize_hex_color($cat['color'] ?? '#6366f1') ?: '#6366f1',
+                'orden' => $i,
+            ], ['%d', '%s', '%s', '%s', '%d']);
+
+            if ($insertResult === false) {
+                error_log("[034A-14] Fallo al insertar categoría: " . $wpdb->last_error);
+            }
+        }
+
+        return $this->listarCategoriasUsuario();
     }
 }

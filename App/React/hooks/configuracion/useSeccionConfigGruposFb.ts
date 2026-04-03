@@ -1,7 +1,8 @@
 /* [263A-5] Hook para la sección de configuración de Grupos FB
- * Gestiona el estado de token y las acciones de generación/copia. */
+ * Gestiona el estado de token, acciones de generación/copia y config de publicado.
+ * [034A-17] Añadido publicadoHoras: duración configurable para "marcado como publicado". */
 
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 import {gruposFbService} from '../../services/gruposFbService';
 
 export function useSeccionConfigGruposFb() {
@@ -10,6 +11,30 @@ export function useSeccionConfigGruposFb() {
     const [cargando, setCargando] = useState(false);
     const [copiado, setCopiado] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    /* [034A-17] Duración de "publicado recientemente" en horas */
+    const [publicadoHoras, setPublicadoHoras] = useState<string>('24');
+    const [guardandoConfig, setGuardandoConfig] = useState(false);
+
+    useEffect(() => {
+        gruposFbService.obtenerConfig(['publicado_horas']).then(cfg => {
+            if (cfg.publicado_horas) setPublicadoHoras(cfg.publicado_horas);
+        }).catch(() => { /* usa default 24 */ });
+    }, []);
+
+    const guardarPublicadoHoras = useCallback(async (valor: string) => {
+        const num = parseInt(valor, 10);
+        if (isNaN(num) || num < 1) return;
+        setPublicadoHoras(valor);
+        setGuardandoConfig(true);
+        try {
+            await gruposFbService.guardarConfig({publicado_horas: String(num)});
+        } catch {
+            /* silencioso — el valor se muestra igual */
+        } finally {
+            setGuardandoConfig(false);
+        }
+    }, []);
 
     const verificarToken = useCallback(async () => {
         setCargando(true);
@@ -55,5 +80,5 @@ export function useSeccionConfigGruposFb() {
      * la extensión genera /grupos-fb/grupos-fb/sync → 404. Mostrar solo la base. */
     const apiUrl = `${window.location.origin}/wp-json/glory/v1`;
 
-    return {token, tieneToken, cargando, copiado, error, apiUrl, verificarToken, generarToken, copiarToken};
+    return {token, tieneToken, cargando, copiado, error, apiUrl, publicadoHoras, guardandoConfig, verificarToken, generarToken, copiarToken, guardarPublicadoHoras};
 }
