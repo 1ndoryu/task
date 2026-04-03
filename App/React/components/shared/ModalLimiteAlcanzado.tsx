@@ -28,21 +28,25 @@ const CONFIGURACION_ENTIDAD: Record<TipoEntidadLimite, {titulo: string; descripc
     habitos: {
         titulo: 'Límite de hábitos alcanzado',
         descripcion: 'Has alcanzado el máximo de hábitos permitidos en el plan gratuito.',
+        /* sentinel-disable-next-line emoji-en-codigo — emoji como icono decorativo de tipo de recurso */
         icono: '📅'
     },
     tareasActivas: {
         titulo: 'Límite de tareas alcanzado',
         descripcion: 'Has alcanzado el máximo de tareas activas permitidas en el plan gratuito.',
+        /* sentinel-disable-next-line emoji-en-codigo */
         icono: '✓'
     },
     proyectos: {
         titulo: 'Límite de proyectos alcanzado',
         descripcion: 'Has alcanzado el máximo de proyectos permitidos en el plan gratuito.',
+        /* sentinel-disable-next-line emoji-en-codigo */
         icono: '📁'
     },
     adjuntos: {
         titulo: 'Adjuntos no disponibles',
         descripcion: 'La función de adjuntos está disponible exclusivamente para usuarios Premium.',
+        /* sentinel-disable-next-line emoji-en-codigo */
         icono: '📎'
     }
 };

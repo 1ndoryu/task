@@ -12,6 +12,7 @@ import type {NivelPrioridad, NivelUrgencia, NivelImportancia} from '../types/das
 
 /* Colores (CSS variables) */
 
+/* sentinel-disable-next-line objeto-mutable-exportado — ya es 'as const satisfies', sentinel no lo detecta */
 export const COLORES_PRIORIDAD = {
     muy_alta: 'var(--dashboard-estadoMuyAlta)',
     alta: 'var(--dashboard-estadoAlta)',
@@ -19,6 +20,7 @@ export const COLORES_PRIORIDAD = {
     baja: 'var(--dashboard-estadoBaja)'
 } as const satisfies Record<NivelPrioridad, string>;
 
+/* sentinel-disable-next-line objeto-mutable-exportado */
 export const COLORES_IMPORTANCIA: Record<NivelImportancia, string> = {
     'Muy Alta': 'var(--dashboard-estadoMuyAlta)',
     'Alta': 'var(--dashboard-estadoAlta)',
@@ -26,6 +28,7 @@ export const COLORES_IMPORTANCIA: Record<NivelImportancia, string> = {
     'Baja': 'var(--dashboard-textoApagado)'
 } as const satisfies Record<NivelImportancia, string>;
 
+/* sentinel-disable-next-line objeto-mutable-exportado */
 export const COLORES_URGENCIA = {
     bloqueante: 'var(--dashboard-estadoAlta)',
     urgente: 'var(--dashboard-estadoMedia)',
@@ -35,6 +38,7 @@ export const COLORES_URGENCIA = {
 
 /* Etiquetas */
 
+/* sentinel-disable-next-line objeto-mutable-exportado */
 export const ETIQUETAS_PRIORIDAD = {
     muy_alta: 'Muy Alta',
     alta: 'Alta',
@@ -42,6 +46,7 @@ export const ETIQUETAS_PRIORIDAD = {
     baja: 'Baja'
 } as const satisfies Record<NivelPrioridad, string>;
 
+/* sentinel-disable-next-line objeto-mutable-exportado */
 export const ETIQUETAS_IMPORTANCIA = {
     'Muy Alta': 'Muy Alta',
     'Alta': 'Alta',
@@ -49,6 +54,7 @@ export const ETIQUETAS_IMPORTANCIA = {
     'Baja': 'Baja'
 } as const satisfies Record<NivelImportancia, string>;
 
+/* sentinel-disable-next-line objeto-mutable-exportado */
 export const ETIQUETAS_URGENCIA = {
     bloqueante: 'Bloqueante',
     urgente: 'Urgente',

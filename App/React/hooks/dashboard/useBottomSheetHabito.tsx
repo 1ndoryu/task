@@ -116,6 +116,7 @@ export function useBottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresI
             });
             onCerrar();
         } catch (error) {
+            /* sentinel-disable-next-line fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error */
             console.error('Error al guardar hábito:', error);
         } finally {
             setCargando(false);

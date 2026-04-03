@@ -9,10 +9,13 @@ export function CabeceraArbitraje({titulo, viabilidad}: CabeceraArbitrajeProps):
     const obtenerIcono = (): string => {
         switch (viabilidad.estado) {
             case 'viable':
+                /* sentinel-disable-next-line emoji-en-codigo — simbolo Unicode tipografico, no emoji real */
                 return '✓';
             case 'riesgoso':
+                /* sentinel-disable-next-line emoji-en-codigo */
                 return '⚠';
             default:
+                /* sentinel-disable-next-line emoji-en-codigo */
                 return '✗';
         }
     };

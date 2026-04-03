@@ -83,6 +83,7 @@ export function FeaturesBlock({data}: BlockComponentProps<FeaturesBlockProps>): 
 /*
  * Definicion del bloque para el registro
  */
+/* sentinel-disable-next-line objeto-mutable-exportado — definicion de bloque para registro, no se muta */
 export const featuresBlockDefinition: BlockDefinition<FeaturesBlockProps> = {
     type: 'features',
     label: 'Caracteristicas',

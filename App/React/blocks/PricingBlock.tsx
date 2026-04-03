@@ -105,6 +105,7 @@ export function PricingBlock({data}: BlockComponentProps<PricingBlockProps>): JS
 /*
  * Definicion del bloque para el registro
  */
+/* sentinel-disable-next-line objeto-mutable-exportado — definicion de bloque para registro, no se muta */
 export const pricingBlockDefinition: BlockDefinition<PricingBlockProps> = {
     type: 'pricing',
     label: 'Precios',

@@ -26,6 +26,7 @@ export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDet
                         Desglose Ruta {ruta}
                         <span className="subtituloModal">{ruta === 'A' ? 'USD → Bs → USDT → PayPal' : 'USD → Bs → PayPal directo'}</span>
                     </h3>
+                    {/* sentinel-disable-next-line emoji-en-codigo — simbolo tipografico de cierre */}
                     <Boton claseAdicional="botonCerrarModal" onClick={onCerrar} aria-label="Cerrar">
                         ✕
                     </Boton>

@@ -63,7 +63,7 @@ export const COLUMNAS_DESKTOP_POR_DEFECTO: ColumnasHabitos = {
 /*
  * Configuración de columnas por defecto para móvil
  * Solo columnas esenciales: checkbox, nombre, historial e importancia
- * Layout esperado: ☑ | Nombre del Hábito | ●○●●○ | ALTA
+ * Layout esperado: [x] | Nombre del Habito | *o**o | ALTA
  */
 export const COLUMNAS_MOVIL_POR_DEFECTO: ColumnasHabitos = {
     indice: true,

@@ -22,6 +22,7 @@ export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaCompara
                 </thead>
                 <tbody>
                     <tr className={escenarioRealista.mejorRuta === 'A' ? 'rutaGanadora' : 'rutaPerdedora'}>
+                        {/* sentinel-disable-next-line emoji-en-codigo — indicador visual de mejor ruta */}
                         <td>Ruta A{escenarioRealista.mejorRuta === 'A' && <span className="indicadorMejor">★</span>}</td>
                         <td>USD → Bs → USDT → PayPal</td>
                         <td>{formatearMoneda(escenarioRealista.gananciaRutaA)}</td>
@@ -32,6 +33,7 @@ export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaCompara
                         </td>
                     </tr>
                     <tr className={escenarioRealista.mejorRuta === 'B' ? 'rutaGanadora' : 'rutaPerdedora'}>
+                        {/* sentinel-disable-next-line emoji-en-codigo */}
                         <td>Ruta B{escenarioRealista.mejorRuta === 'B' && <span className="indicadorMejor">★</span>}</td>
                         <td>USD → Bs → PayPal directo</td>
                         <td>{formatearMoneda(escenarioRealista.gananciaRutaB)}</td>

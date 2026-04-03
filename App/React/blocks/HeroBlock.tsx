@@ -35,8 +35,7 @@ export function HeroBlock({data}: BlockComponentProps<HeroBlockProps>): JSX.Elem
             {/* Efecto de glow */}
             <div
                 className="absolute w-[600px] h-[600px] top-[-200px] left-1/2 -translate-x-1/2 z-[-1] pointer-events-none"
-                {/* sentinel-disable-next-line inline-style-prohibido — radial-gradient no soportado por Tailwind */}
-                style={{
+                style={{ /* sentinel-disable inline-style-prohibido — radial-gradient no soportado por Tailwind */
                     background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(5,5,5,0) 70%)'
                 }}
             />
@@ -51,8 +50,7 @@ export function HeroBlock({data}: BlockComponentProps<HeroBlockProps>): JSX.Elem
                 <RevealElement delay={100}>
                     <h1
                         className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]"
-                        {/* sentinel-disable-next-line inline-style-prohibido — gradient text-clip no soportado por Tailwind */}
-                        style={{
+                        style={{ /* sentinel-disable inline-style-prohibido — gradient text-clip no soportado por Tailwind */
                             background: 'linear-gradient(180deg, #fff, #888)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
@@ -91,6 +89,7 @@ export function HeroBlock({data}: BlockComponentProps<HeroBlockProps>): JSX.Elem
 /*
  * Definicion del bloque para el registro
  */
+/* sentinel-disable-next-line objeto-mutable-exportado — definicion de bloque para registro, no se muta */
 export const heroBlockDefinition: BlockDefinition<HeroBlockProps> = {
     type: 'hero',
     label: 'Hero Section',

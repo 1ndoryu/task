@@ -86,6 +86,7 @@ export function generarContexto(tareas: Tarea[]): string {
         const hoy = new Date().toISOString().split('T')[0];
         for (const h of habitosActivos) {
             const completadoHoy = h.historialCompletados?.includes(hoy);
+            /* sentinel-disable-next-line emoji-en-codigo — indicadores de estado para contexto IA */
             const estado = completadoHoy ? '✓' : '○';
             ctx += `- [id:${h.id}] ${estado} ${h.nombre} (racha:${h.racha}, importancia:${h.importancia})\n`;
         }

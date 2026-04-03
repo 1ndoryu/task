@@ -30,6 +30,7 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
             setTimeout(() => setCopiado(false), 2000);
         } catch (error) {
             console.error('Error al copiar token:', error);
+            alert('No se pudo copiar el token. Cópialo manualmente.');
         }
     };
 
