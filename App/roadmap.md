@@ -15,4 +15,6 @@
 
 ## Tareas pendientes
 
-(Sin tareas pendientes)
+- Ejecutar `coolify-manager auth-drive` manualmente para autorizar Google Drive y que los backups suban al remoto en vez de quedarse locales (requiere abrir URL en navegador y autorizar con cuenta Google).
+
+- Resolver todos los problemas de `.sentinel-report.md` y `.varsense-report.md` hasta que queden vacíos: falsos positivos se corrigen en la extensión, problemas reales se resuelven en el código.

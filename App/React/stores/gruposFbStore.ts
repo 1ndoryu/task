@@ -146,20 +146,29 @@ export const useGruposFbStore = create<GruposFbStore>()(
                 }
             },
 
-            /* Marcar como publicado */
+            /* [034A-2] Toggle publicado: usa la respuesta del servidor para reflejar el estado real */
             marcarPublicado: async (id) => {
-                const ahora = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                const estadoAnterior = get().grupos;
+                const grupoActual = estadoAnterior.find(g => g.id === id);
+                if (!grupoActual) return;
+
+                /* Optimista: toggle el estado local */
+                const estabaPublicado = grupoActual.ultimaPublicacion && esPublicadoReciente(grupoActual.ultimaPublicacion);
+                const nuevaPublicacion = estabaPublicado ? null : new Date().toISOString().replace('T', ' ').substring(0, 19);
 
                 set(state => ({
-                    grupos: state.grupos.map(g => g.id === id ? {...g, ultimaPublicacion: ahora} : g)
-                }), false, 'marcarPublicado/optimista');
+                    grupos: state.grupos.map(g => g.id === id ? {...g, ultimaPublicacion: nuevaPublicacion} : g)
+                }), false, 'togglePublicado/optimista');
 
                 try {
-                    await gruposFbService.marcarPublicado(id);
-                } catch (e) {
-                    /* Recargar para estado consistente */
-                    get().cargar();
-                    throw e;
+                    const resultado = await gruposFbService.marcarPublicado(id);
+                    /* Aplicar el estado real del servidor */
+                    set(state => ({
+                        grupos: state.grupos.map(g => g.id === id ? {...g, ultimaPublicacion: resultado.ultimaPublicacion} : g)
+                    }), false, 'togglePublicado/confirmado');
+                } catch {
+                    /* Rollback */
+                    set({grupos: estadoAnterior}, false, 'togglePublicado/rollback');
                 }
             },
 
@@ -185,3 +194,11 @@ export const useGruposFbInicializado = () => useGruposFbStore(s => s.inicializad
 export const useGruposFbFiltros = () => useGruposFbStore(s => s.filtros);
 export const useGruposFbEstadisticas = () => useGruposFbStore(s => s.estadisticas);
 export const useCategoriasFb = () => useGruposFbStore(s => s.categorias);
+
+/* [034A-2] Verifica si una publicación es "reciente" (dentro de las últimas 24h).
+ * Exportada para usar en FilaGrupo y otros componentes. */
+export function esPublicadoReciente(fecha: string | null, horasVentana = 24): boolean {
+    if (!fecha) return false;
+    const diff = Date.now() - new Date(fecha).getTime();
+    return diff < horasVentana * 3600 * 1000;
+}

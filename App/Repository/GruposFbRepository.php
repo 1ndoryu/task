@@ -286,7 +286,65 @@ class GruposFbRepository
     }
 
     /**
+     * [034A-2] Toggle publicación: si el grupo fue publicado dentro de las últimas $horasVentana horas,
+     * desmarcar (poner NULL). Si no, marcar con la hora actual.
+     * Retorna: ['publicado' => bool, 'ultimaPublicacion' => string|null]
+     */
+    public function togglePublicado(int $id, int $horasVentana = 24): array
+    {
+        global $wpdb;
+        $table = Schema::getTableName('grupos_fb');
+
+        $ultimaPub = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ultima_publicacion FROM $table WHERE id = %d AND user_id = %d AND deleted_at IS NULL",
+                $id,
+                $this->userId
+            )
+        );
+
+        $dentroDeVentana = false;
+        if ($ultimaPub) {
+            $diff = time() - strtotime($ultimaPub);
+            $dentroDeVentana = $diff < ($horasVentana * 3600);
+        }
+
+        if ($dentroDeVentana) {
+            /* Desmarcar */
+            $resultado = $wpdb->query(
+                $wpdb->prepare(
+                    "UPDATE $table SET ultima_publicacion = NULL WHERE id = %d AND user_id = %d AND deleted_at IS NULL",
+                    $id,
+                    $this->userId
+                )
+            );
+            return [
+                'ok' => $resultado !== false,
+                'publicado' => false,
+                'ultimaPublicacion' => null
+            ];
+        }
+
+        /* Marcar */
+        $ahora = current_time('mysql');
+        $resultado = $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE $table SET ultima_publicacion = %s WHERE id = %d AND user_id = %d AND deleted_at IS NULL",
+                $ahora,
+                $id,
+                $this->userId
+            )
+        );
+        return [
+            'ok' => $resultado !== false,
+            'publicado' => true,
+            'ultimaPublicacion' => $ahora
+        ];
+    }
+
+    /**
      * Marcar grupo como publicado (actualiza ultima_publicacion a ahora)
+     * @deprecated Usar togglePublicado() en su lugar
      */
     public function marcarPublicado(int $id): bool
     {
@@ -374,5 +432,77 @@ class GruposFbRepository
             'ultimaDeteccion' => $row['ultima_deteccion'],
             'datosExtra' => $datosExtra
         ];
+    }
+
+    /**
+     * [034A-1] Auto-crea categorías que llegan vía sync pero no existen en la tabla de definiciones.
+     * Extrae nombres únicos del payload, compara con existentes, e inserta las faltantes
+     * con icono/color de un preset automático. Nunca borra ni sobrescribe categorías existentes.
+     *
+     * @param array $grupos Payload raw de la extensión (mismo formato que syncDesdeExtension)
+     */
+    public function syncCategoriasDesdeGrupos(array $grupos): void
+    {
+        global $wpdb;
+        $tableCat = Schema::getTableName('categorias_grupos_fb');
+
+        $categoriasNuevas = [];
+        foreach ($grupos as $grupo) {
+            $cat = $grupo['category'] ?? $grupo['categoria'] ?? null;
+            if (!empty($cat)) {
+                $nombre = sanitize_text_field($cat);
+                if ($nombre !== '') {
+                    $categoriasNuevas[$nombre] = true;
+                }
+            }
+        }
+
+        if (empty($categoriasNuevas)) {
+            return;
+        }
+
+        $existentes = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT nombre FROM $tableCat WHERE user_id = %d",
+                $this->userId
+            )
+        );
+        $existentesMap = array_flip($existentes ?: []);
+
+        /* Filtrar solo las que faltan */
+        $faltantes = array_diff_key($categoriasNuevas, $existentesMap);
+        if (empty($faltantes)) {
+            return;
+        }
+
+        $maxOrden = (int)$wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COALESCE(MAX(orden), -1) FROM $tableCat WHERE user_id = %d",
+                $this->userId
+            )
+        );
+
+        $iconosPreset = ['📢', '💻', '👥', '😂', '💼', '📚', '🎵', '🎮', '📷', '🏋️', '🎨', '🌍'];
+        $coloresPreset = ['#f59e0b', '#3b82f6', '#10b981', '#f472b6', '#8b5cf6', '#06b6d4', '#ef4444', '#84cc16', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+
+        $indice = 0;
+        foreach (array_keys($faltantes) as $nombre) {
+            $maxOrden++;
+            $icono = $iconosPreset[$indice % count($iconosPreset)];
+            $color = $coloresPreset[$indice % count($coloresPreset)];
+            $indice++;
+
+            $resultado = $wpdb->insert($tableCat, [
+                'user_id' => $this->userId,
+                'nombre'  => $nombre,
+                'icono'   => $icono,
+                'color'   => $color,
+                'orden'   => $maxOrden,
+            ], ['%d', '%s', '%s', '%s', '%d']);
+
+            if ($resultado === false) {
+                error_log("[GruposFb] Error insertando categoría '$nombre': " . $wpdb->last_error);
+            }
+        }
     }
 }

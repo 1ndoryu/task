@@ -138,9 +138,11 @@
  * COMPENSAR CONTENIDO
  * Añadir padding al contenedor principal cuando la nav está visible
  * Espacio extra para asegurar que las últimas tareas no queden ocultas
+ * [034A-10] Doble clase para ganar especificidad sobre movilBase.css que
+ * se importa despues y define .dashboardContenedor { padding-bottom } genérico.
  */
 @media (max-width: 480px) {
-    .dashboardContenedor--conNavegacionInferior {
+    .dashboardContenedor.dashboardContenedor--conNavegacionInferior {
         padding-bottom: calc(var(--dashboard-alturaNavInferior) + var(--dashboard-safeAreaBottom) + var(--dashboard-espacioXl) + var(--dashboard-espacioMd));
     }
 }

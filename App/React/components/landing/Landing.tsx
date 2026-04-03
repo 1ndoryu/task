@@ -6,16 +6,18 @@
 import '../../styles/dashboard/componentes/Landing/landing.css';
 import {Boton} from '../ui';
 import {GloryLink} from '../../../../Glory/assets/react/src/core/router/GloryLink';
-
-/* [024A-31] URL estática del SVG preview — no usar import de Vite porque genera
- * un archivo hasheado que da 404 en producción (el hash cambia entre builds). */
-const PREVIEW_SVG_URL = '/wp-content/themes/glorytemplate/App/Assets/svg/Task.svg';
+import {useGloryContext} from '../../../../Glory/assets/react/src/hooks/useGloryContext';
 
 interface LandingProps {
     onLogin: () => void;
 }
 
 export function Landing({onLogin}: LandingProps): JSX.Element {
+    /* [034A-4] themeUrl dinámico desde GLORY_CONTEXT inyectado por PHP.
+     * En local apunta a /wp-content/themes/glorytemplate, pero en producción
+     * el tema se llama 'glory' → la URL estática hardcodeada daba 404. */
+    const {themeUrl} = useGloryContext();
+    const previewSvgUrl = `${themeUrl}/App/Assets/svg/Task.svg`;
     return (
         <div id="landing-contenedor" className="landingContenedor">
             {/* NAVEGACION */}
@@ -58,7 +60,7 @@ export function Landing({onLogin}: LandingProps): JSX.Element {
                 </div>
 
                 <div className="landingHeroPreview">
-                    <img src={PREVIEW_SVG_URL} alt="Dashboard Preview" width="1474" height="714" />
+                    <img src={previewSvgUrl} alt="Dashboard Preview" width="1474" height="714" />
                 </div>
 
                 <div className="landingHeroGrid">

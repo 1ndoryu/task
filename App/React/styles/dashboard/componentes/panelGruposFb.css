@@ -414,17 +414,7 @@
     font-size: var(--dashboard-tamanoBase);
 }
 
-.editorCategorias__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.editorCategorias__titulo {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--dashboard-textoNormal);
-}
+/* [034A-5] Header y título eliminados: Modal provee su propio encabezado */
 
 .editorCategorias__lista {
     display: flex;

@@ -8,6 +8,7 @@ import {Check, Users, ExternalLink, EyeOff, Star, FolderOpen} from 'lucide-react
 import {MenuContextual} from '../shared';
 import {Boton} from '../ui';
 import type {GrupoFb} from '../../stores/gruposFbStore';
+import {esPublicadoReciente} from '../../stores/gruposFbStore';
 import type {ColumnId} from '../../hooks/paneles/useColumnasGruposFb';
 
 interface FilaGrupoProps {
@@ -24,7 +25,8 @@ interface FilaGrupoProps {
  * Crítico para 600+ grupos donde cada re-render del padre dispararía 600 renders hijos. */
 export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVisibles, onPublicar, onCambiarCategoria, onCambiarImportancia, onMenuContextual}: FilaGrupoProps): JSX.Element {
     const [menuCat, setMenuCat] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
-    const hoyPublicado = grupo.ultimaPublicacion && esFechaHoy(grupo.ultimaPublicacion);
+    /* [034A-2] Usar ventana de 24h en vez de solo "hoy" para determinar si está publicado */
+    const hoyPublicado = esPublicadoReciente(grupo.ultimaPublicacion);
     const v = columnasVisibles;
 
     return (
@@ -37,7 +39,7 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
                         soloIcono
                         claseAdicional={`panelGruposFb__checkPublicado ${hoyPublicado ? 'panelGruposFb__checkPublicado--activo' : ''}`}
                         onClick={onPublicar}
-                        title={hoyPublicado ? 'Publicado hoy' : 'Marcar como publicado'}
+                        title={hoyPublicado ? 'Desmarcar publicado' : 'Marcar como publicado'}
                         icono={hoyPublicado ? <Check size={10} color="#fff" /> : undefined}
                     />
                 </td>
@@ -155,14 +157,6 @@ export const FilaGrupo = memo(function FilaGrupo({grupo, categorias, columnasVis
         </tr>
     );
 });
-
-/* Utilidad: verificar si una fecha es hoy */
-function esFechaHoy(fecha: string): boolean {
-    if (!fecha) return false;
-    const hoy = new Date();
-    const d = new Date(fecha);
-    return d.getFullYear() === hoy.getFullYear() && d.getMonth() === hoy.getMonth() && d.getDate() === hoy.getDate();
-}
 
 /* [024A-24] Limpiar texto de "Público"/"Privado" que a veces queda pegado en cantidadMiembros.
  * Solo mantiene la parte que contiene dígitos + "miembros"/"members". */

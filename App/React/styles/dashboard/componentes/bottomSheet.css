@@ -133,12 +133,19 @@
  * [233A-37] Sin bordes, centrados respecto a su contenido
  * [233A-48] justify-content: flex-start → texto a la izquierda
  * [233A-57] Reset padding — portal pierde herencia de .dashboardContenedor
- * [024A-8] width:100% solo para botones de menú (hijos directos), no para badges/acciones */
+ * [024A-8] width:100% solo para botones de menú (hijos directos), no para badges/acciones
+ * [034A-7] Botones especializados (ej: bottomSheetHabito__*) sobreescriben width vía su propia clase */
 .bottomSheetContenido > .boton {
     width: 100%;
     padding: 0;
     border: none;
     justify-content: flex-start;
+}
+
+/* [034A-7] Reset: botones con clase propia que definen su propio ancho */
+.bottomSheetContenido > .boton[class*="bottomSheetHabito__"] {
+    width: auto;
+    justify-content: center;
 }
 
 .bottomSheetContenido > .boton .botonTexto {

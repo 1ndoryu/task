@@ -55,3 +55,12 @@ export function obtenerPanelesDePlugin(pluginId: string): string[] {
     const plugin = _registroPlugins.get(pluginId);
     return plugin?.panelesIds ?? [];
 }
+
+/* [034A-11] Dado un panelId, retorna el pluginId al que pertenece (si pertenece a alguno).
+ * Retorna undefined si el panel no es de ningun plugin (es un panel base del dashboard). */
+export function obtenerPluginDePanelId(panelId: string): string | undefined {
+    for (const [pluginId, def] of _registroPlugins) {
+        if (def.panelesIds.includes(panelId)) return pluginId;
+    }
+    return undefined;
+}

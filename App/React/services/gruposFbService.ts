@@ -97,8 +97,9 @@ export const gruposFbService = {
         await fetchApi<void>(`${BASE}/${id}`, {method: 'DELETE'});
     },
 
-    async marcarPublicado(id: number): Promise<void> {
-        await fetchApi<void>(`${BASE}/${id}/publicar`, {method: 'POST'});
+    /* [034A-2] Toggle publicado: retorna el nuevo estado */
+    async marcarPublicado(id: number): Promise<{publicado: boolean; ultimaPublicacion: string | null}> {
+        return fetchApi<{publicado: boolean; ultimaPublicacion: string | null}>(`${BASE}/${id}/publicar`, {method: 'POST'});
     },
 
     async estadisticas(): Promise<EstadisticasGruposFb> {

@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-04-02 — fueCompletadoHoy solo verificaba ultimoCompletado
+
+**Patrón del error:** `fueCompletadoHoy` comparaba solo `ultimoCompletado === obtenerFechaHoy()`. Pero `actualizarHistorialHabito` recalcula `ultimoCompletado` como la última fecha cronológica del historial (`.sort()` + last). Si hay fechas "futuras" en el historial (por cambio de `horaFinDia`), `ultimoCompletado` apunta a una fecha que no es el "hoy" lógico, y el hábito nunca se muestra como completado.
+
+**Lección:** Cuando un campo calculado (`ultimoCompletado`) puede desincronizarse de la fuente de verdad (`historialCompletados`), las funciones de verificación deben consultar AMBOS. Nunca confiar solo en campos derivados para determinar estado actual.
+
+**Fix:** `fueCompletadoHoy(ultimoCompletado, historialCompletados?)` ahora verifica ambos. `actualizarHistorialHabito` prioriza `obtenerFechaHoy()` como `ultimoCompletado` si está en el historial.
+
 ## 2026-03-28 — Heatmap no llenaba el 100% del contenedor (5 fallos previos)
 
 **Patrón del error:** Aplicar fixes internos (overflow, min-width, aspect-ratio en celdas) sin analizar la cadena completa container → flexbox → max-width. Todos los intentos previos corregían síntomas dentro del grid, pero el limitante real era `max-width` fijo en las columnas de semana y en las celdas.

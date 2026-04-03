@@ -119,17 +119,20 @@ body::-webkit-scrollbar-thumb:hover {
     }
 }
 
-.columnaHabitos,
-.internaColumna {
+/* [034A-6] internaColumna sin gap — el usuario pidió eliminarlo explícitamente */
+.columnaHabitos {
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioLg);
 }
 
-/* Cuando internaColumna es parte de panelDashboard, no debe tener gap */
-.panelDashboard.internaColumna {
+.internaColumna {
+    display: flex;
+    flex-direction: column;
     gap: 0;
 }
+
+/* internaColumna ya tiene gap: 0, no necesita override dentro de panelDashboard */
 
 .columnaTareas {
     display: flex;

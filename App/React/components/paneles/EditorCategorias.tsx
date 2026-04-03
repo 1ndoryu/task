@@ -5,7 +5,7 @@
 /* sentinel-disable-file emoji-unicode */
 /* sentinel-disable-file css-inline — backgroundColor es dinámico por usuario, no puede ser clase CSS */
 
-import {Plus, Trash2, ChevronUp, X, Save} from 'lucide-react';
+import {Plus, Trash2, ChevronUp, Save} from 'lucide-react';
 import {Boton, Input} from '../ui';
 import {useEditorCategorias, ICONOS_PRESET, COLORES_PRESET} from '../../hooks/paneles/useEditorCategorias';
 import type {CategoriaGrupoFb} from '../../stores/gruposFbStore';
@@ -22,13 +22,9 @@ export function EditorCategorias({categorias, onGuardar, onCerrar}: EditorCatego
         agregar, eliminar, actualizar, mover, togglePicker, guardar
     } = useEditorCategorias(categorias, onGuardar, onCerrar);
 
+    /* [034A-5] Header eliminado: ahora el Modal padre provee título y botón de cierre */
     return (
         <div className="editorCategorias" ref={refContenedor}>
-            <div className="editorCategorias__header">
-                <span className="editorCategorias__titulo">Gestionar categorías</span>
-                <Boton variante="badge" soloIcono onClick={onCerrar} icono={<X size={12} />} title="Cerrar" />
-            </div>
-
             <div className="editorCategorias__lista">
                 {locales.map((cat, index) => (
                     <div key={cat.key} className="editorCategorias__fila">

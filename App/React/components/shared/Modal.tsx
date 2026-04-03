@@ -28,7 +28,12 @@ export interface ModalProps {
 }
 
 export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false, claseContenido = ''}: ModalProps): JSX.Element | null {
-    const {esMovil, manejarClickOverlay} = useModal({estaAbierto, onCerrar});
+    const {esMovil, esTablet, manejarClickOverlay} = useModal({estaAbierto, onCerrar});
+
+    /* [034A-9] Mostrar flecha de retroceso en movil y tablet (<=768px) para que
+     * siempre exista un boton visible de cierre. Corrige el caso donde
+     * ocultarBotonCerrar=true y no habia ningun cierre visible en pantallas intermedias. */
+    const mostrarFlechaRetroceso = esTablet;
 
     if (!estaAbierto) return null;
 
@@ -36,8 +41,8 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
         <div className={`modalOverlay ${claseOverlay}`} onClick={manejarClickOverlay}>
             <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
                 <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
-                    {/* Boton Volver en movil - solo icono, sin texto */}
-                    {esMovil && (
+                    {/* Boton Volver en movil/tablet - solo icono, sin texto */}
+                    {mostrarFlechaRetroceso && (
                         <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Volver">
                             <ArrowLeft size={18} />
                         </Boton>
@@ -48,8 +53,8 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                     </h2>
                     <div className="modalAccionesEncabezado">
                         {accionesEncabezado}
-                        {/* En movil, mostrar X solo si no hay boton volver visible */}
-                        {!ocultarBotonCerrar && !esMovil && (
+                        {/* X visible solo en desktop (>768px) y si no esta oculto */}
+                        {!ocultarBotonCerrar && !mostrarFlechaRetroceso && (
                             <Boton variante="icono" soloIcono onClick={onCerrar} aria-label="Cerrar modal">
                                 <X size={14} />
                             </Boton>

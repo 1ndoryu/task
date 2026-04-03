@@ -7,7 +7,7 @@
 import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
 import {RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, Tag} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
-import {MenuContextual, SelectorBadge} from '../shared';
+import {MenuContextual, SelectorBadge, Modal} from '../shared';
 import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
 import {useColumnasGruposFb} from '../../hooks/paneles/useColumnasGruposFb';
@@ -206,14 +206,14 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
             <div className="panelGruposFb">
                 {/* [024A-9] Stats eliminadas por innecesarias */}
 
-                {/* [024A-30] Editor de categorías inline */}
-                {editorCategoriasAbierto && (
+                {/* [034A-5] Editor de categorías como modal (antes inline, mal diseño) */}
+                <Modal estaAbierto={editorCategoriasAbierto} onCerrar={cerrarEditorCategorias} titulo="Gestionar categorías">
                     <EditorCategorias
                         categorias={categorias}
                         onGuardar={guardarCategorias}
-                        onCerrar={() => cerrarEditorCategorias()}
+                        onCerrar={cerrarEditorCategorias}
                     />
-                )}
+                </Modal>
 
                 {/* Contenido */}
                 {cargando && !inicializado && (

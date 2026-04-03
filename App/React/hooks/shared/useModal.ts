@@ -14,11 +14,13 @@ interface UseModalParams {
 
 interface UseModalResult {
     esMovil: boolean;
+    esTablet: boolean;
     manejarClickOverlay: (evento: React.MouseEvent<HTMLDivElement>) => void;
 }
 
+/* [034A-9] Exponer esTablet para que Modal muestre ArrowLeft en tablets (<=768px) */
 export function useModal({estaAbierto, onCerrar}: UseModalParams): UseModalResult {
-    const {esMovil} = useEsMovil();
+    const {esMovil, esTablet} = useEsMovil();
 
     /* Cierra el modal al presionar Escape */
     const manejarTecla = useCallback(
@@ -51,5 +53,5 @@ export function useModal({estaAbierto, onCerrar}: UseModalParams): UseModalResul
         [onCerrar]
     );
 
-    return {esMovil, manejarClickOverlay};
+    return {esMovil, esTablet, manejarClickOverlay};
 }

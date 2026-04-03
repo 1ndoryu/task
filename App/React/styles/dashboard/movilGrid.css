@@ -47,9 +47,13 @@
  */
 @media (max-width: 480px) {
     /* Panel en modo móvil: fullscreen sin bordes ni padding */
+    /* [034A-10] flex: 1 + min-height: 0 para que el panel llene toda
+     * la altura disponible en la página móvil. Sin esto, el scratchpad
+     * y otros paneles no expanden correctamente su contenido. */
     .panelDashboard--movil {
         width: 100%;
-        height: auto;
+        flex: 1;
+        min-height: 0;
         border: none;
         border-radius: 0;
         box-shadow: none;
@@ -79,6 +83,15 @@
         padding: 0;
         height: auto;
         max-height: none;
+    }
+
+    /* [034A-10] internaColumna y dashboardPanel deben llenar el panel padre
+     * para que el scratchpad y otros componentes con flex: 1 tomen
+     * toda la altura disponible en la página móvil */
+    .panelDashboard--movil .internaColumna,
+    .panelDashboard--movil .dashboardPanel {
+        flex: 1;
+        min-height: 0;
     }
 
     /* Ajustes específicos para .dashboardPanel */
@@ -146,11 +159,11 @@
     }
 
     /* Grupo de opciones */
-    /* [014A-9] gap 14px para separar opciones dentro del grupo */
+    /* [014A-9] gap para separar opciones dentro del grupo */
     .menuOpcionesPanelGrupo {
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: var(--dashboard-espacioMd);
     }
 
     /* Título del grupo */

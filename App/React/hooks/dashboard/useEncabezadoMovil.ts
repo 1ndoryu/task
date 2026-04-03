@@ -8,6 +8,8 @@ import {useMemo, useCallback, createElement} from 'react';
 import {SlidersHorizontal} from 'lucide-react';
 import {obtenerOpcionesMenuUsuario, obtenerOpcionCerrarSesion} from '../../utils/opcionesMenuUsuario';
 import {obtenerTodosPanelesNavegables} from '../../config/registroPaneles';
+import {obtenerPluginDePanelId} from '../../config/registroPlugins';
+import {usePluginsStore} from '../../stores/pluginsStore';
 import type {OpcionDrawer} from '../../components/shared/DrawerMovil';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../types/dashboard';
 import type {PaginaMovil} from '../usePaginaMovil';
@@ -65,6 +67,9 @@ export function useEncabezadoMovil({
     onCambiarPagina,
     onPersonalizarBarra
 }: UseEncabezadoMovilParams): UseEncabezadoMovilReturn {
+    /* [034A-11] Selector específico de plugins activos para filtrar paneles del drawer */
+    const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+
     /* Manejar selección de opción en el drawer */
     const manejarOpcionDrawer = useCallback(
         (opcionId: string) => {
@@ -139,8 +144,16 @@ export function useEncabezadoMovil({
      * + opción "Personalizar barra" para configurar la barra inferior.
      */
     const opcionesDrawer = useMemo((): OpcionDrawer[] => {
-        /* Paneles navegables como primera sección del drawer */
-        const paneles = obtenerTodosPanelesNavegables();
+        /* Paneles navegables como primera sección del drawer.
+         * [034A-11] Filtra paneles de plugins inactivos para que no aparezcan
+         * en el drawer páginas de plugins que el usuario no ha activado. */
+        const paneles = obtenerTodosPanelesNavegables().filter(panel => {
+            const pluginId = obtenerPluginDePanelId(panel.id);
+            /* Si no pertenece a ningún plugin, es un panel base → siempre visible */
+            if (!pluginId) return true;
+            /* Si pertenece a un plugin, solo mostrar si está activo */
+            return pluginsActivos.includes(pluginId);
+        });
         const opcionesPaneles: OpcionDrawer[] = paneles.map((panel, idx) => ({
             id: `panel:${panel.idPagina}`,
             etiqueta: panel.titulo,
@@ -176,7 +189,7 @@ export function useEncabezadoMovil({
             }));
 
         return [...opcionesPaneles, ...opcionesConfig];
-    }, [suscripcion]);
+    }, [suscripcion, pluginsActivos]);
 
     /*
      * Opciones secundarias: solo cerrar sesión al final

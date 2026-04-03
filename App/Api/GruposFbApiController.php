@@ -257,6 +257,11 @@ class GruposFbApiController
 
             $resultado = $repo->syncDesdeExtension($grupos);
 
+            /* [034A-1] Auto-crear categorías que la extensión envía pero no existen en la tabla de
+             * definiciones. Sin esto el filtro de categorías y el editor no muestran las categorías
+             * que vienen del entorno de la extensión. Solo inserta; nunca borra ni sobrescribe. */
+            $repo->syncCategoriasDesdeGrupos($grupos);
+
             return new WP_REST_Response([
                 'success' => true,
                 'data' => $resultado,
@@ -348,7 +353,9 @@ class GruposFbApiController
     }
 
     /**
-     * POST /grupos-fb/{id}/publicar — Marcar como publicado
+     * [034A-2] POST /grupos-fb/{id}/publicar — Toggle publicado.
+     * Si el grupo fue publicado dentro de las últimas 24h (configurable), desmarca.
+     * Si no, marca con hora actual. Retorna el nuevo estado.
      */
     public static function marcarPublicado(WP_REST_Request $request): WP_REST_Response
     {
@@ -357,9 +364,9 @@ class GruposFbApiController
             $repo = new GruposFbRepository($userId);
             $id = (int)$request->get_param('id');
 
-            $ok = $repo->marcarPublicado($id);
+            $resultado = $repo->togglePublicado($id);
 
-            if (!$ok) {
+            if (!$resultado['ok']) {
                 return new WP_REST_Response([
                     'success' => false,
                     'message' => 'Grupo no encontrado',
@@ -368,11 +375,15 @@ class GruposFbApiController
 
             return new WP_REST_Response([
                 'success' => true,
+                'data' => [
+                    'publicado' => $resultado['publicado'],
+                    'ultimaPublicacion' => $resultado['ultimaPublicacion'],
+                ],
             ], 200);
         } catch (\Exception $e) {
             return new WP_REST_Response([
                 'success' => false,
-                'message' => 'Error al marcar publicado: ' . $e->getMessage(),
+                'message' => 'Error al toggle publicado: ' . $e->getMessage(),
             ], 500);
         }
     }
