@@ -169,8 +169,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                             key={tareaPadre.id}
                                             value={tareaPadre}
                                             as="div"
-                                            style={{position: 'relative'}}
-                                            className={`tareaPadreReorder ${tareaArrastrandoId === tareaPadre.id ? 'tareaPadreReorderArrastrando' : ''} ${tareaArrastrandoId === tareaPadre.id && esGestoSubtarea ? 'tareaPadreReorderGestoSubtarea' : ''}`}
+                                            className={`posicionRelativa tareaPadreReorder ${tareaArrastrandoId === tareaPadre.id ? 'tareaPadreReorderArrastrando' : ''} ${tareaArrastrandoId === tareaPadre.id && esGestoSubtarea ? 'tareaPadreReorderGestoSubtarea' : ''}`}
                                             dragListener={true}
                                             onPointerDown={(e: React.PointerEvent) => handleDragStart(tareaPadre.id, e)}
                                             onDragEnd={handleDragEnd}
@@ -181,7 +180,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                                     setEsGestoSubtarea(nuevoEsGesto);
                                                 }
                                             }}>
-                                            {tareaArrastrandoId === tareaPadre.id && esGestoSubtarea && <div className="tareaDropIndicador tareaDropIndicadorSubtarea tareaDropIndicadorActivo" style={{top: 0}} />}
+                                            {tareaArrastrandoId === tareaPadre.id && esGestoSubtarea && <div className="tareaDropIndicador tareaDropIndicadorSubtarea tareaDropIndicadorActivo" />}
 
                                             {renderTareaItem(tareaPadre, false)}
 

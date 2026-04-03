@@ -29,7 +29,7 @@ export function SelectorFechaCalendario({posicionX, posicionY, onSeleccionar, on
     const {hoy, mesVista, celdas, contenedorRef, posicionAjustada, mesAnterior, mesSiguiente, seleccionarRapida} = useSelectorFechaCalendario({posicionX, posicionY, fechaActual, onCerrar, onSeleccionar});
 
     return (
-        <div ref={contenedorRef} className="selectorFechaCalendario" style={{left: posicionAjustada.x, top: posicionAjustada.y}}>
+        <div ref={contenedorRef} className="selectorFechaCalendario" style={{/* sentinel-disable inline-style-prohibido */ left: posicionAjustada.x, top: posicionAjustada.y}}>
             {/* Opciones rápidas */}
             <div className="selectorFechaCalendario__rapidas">
                 <Boton type="button" variante="ghost" claseAdicional="selectorFechaCalendario__opcionRapida" onClick={() => seleccionarRapida('hoy')} icono={<Calendar size={12} />}>

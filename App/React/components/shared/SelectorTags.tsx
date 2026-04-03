@@ -21,7 +21,7 @@ export function SelectorTags({tags, onTagsChange, placeholder: _placeholder = 'N
     const {tagsNormalizados, mostrandoInput, nuevoTag, setNuevoTag, inputRef, contenedorRef, agregarTag: _agregarTag, removerTag, manejarKeyDown, abrirInput, manejarBlur} = useSelectorTags({tags, onTagsChange});
 
     return (
-        <div className="propiedadesCompactas__contenido" ref={contenedorRef} style={{flexWrap: 'wrap'}}>
+        <div className="propiedadesCompactas__contenido" ref={contenedorRef}>
             {/* Lista de tags existentes - Estilo Pill consistente */}
             {tagsNormalizados.map(tag => (
                 <div key={tag} className="propiedadesCompactas__item">

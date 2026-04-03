@@ -21,6 +21,21 @@
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
+/* [034A-19] Variantes de opacidad para hábitos pendientes */
+.landingHabitRow--pendiente {
+    opacity: 0.6;
+}
+
+.landingHabitRow--lejano {
+    opacity: 0.4;
+}
+
+/* Check inactivo para hábitos no completados */
+.landingHabitCheck--inactivo {
+    animation: none;
+    border-color: #444;
+}
+
 .landingHabitCheck {
     width: 20px;
     height: 20px;
@@ -155,6 +170,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* [034A-19] Variantes de color por tipo de proyecto */
+.landingProjectIcon--verde {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.landingProjectIcon--naranja {
+    background: rgba(217, 119, 6, 0.2);
+    color: #d97706;
+}
+
+.landingProjectIcon--azul {
+    background: rgba(37, 99, 235, 0.2);
+    color: #3b82f6;
+}
+
+.landingProjectIcon--rojo {
+    background: rgba(225, 29, 72, 0.2);
+    color: #e11d48;
 }
 
 .landingProjectTitle {

@@ -122,28 +122,28 @@ export function SelectorIconoProyecto({iconoId, colorIcono, onCambio}: SelectorI
 
     return (
         <div ref={contenedorRef} className="selectorIconoProyecto">
-            <Boton type="button" variante="ghost" claseAdicional="selectorIconoProyecto__trigger" style={{width: '32px', height: '32px'}} onClick={() => setAbierto(!abierto)} title="Cambiar icono">
-                <IconoActual size={16} style={{color: colorIcono}} />
+            <Boton type="button" variante="ghost" claseAdicional="selectorIconoProyecto__trigger" onClick={() => setAbierto(!abierto)} title="Cambiar icono">
+                <IconoActual size={16} style={{/* sentinel-disable inline-style-prohibido */ color: colorIcono}} />
             </Boton>
 
             {abierto && (
-                <div className="selectorIconoProyecto__dropdown" style={{minWidth: '220px', padding: '12px'}}>
+                <div className="selectorIconoProyecto__dropdown">
                     {Object.entries(CATEGORIAS_ICONOS).map(([categoria, iconos]) => (
                         <div key={categoria} className="selectorIconoProyecto__categoria">
                             <div className="selectorIconoProyecto__categoriaTitulo">{NOMBRES_CATEGORIAS[categoria]}</div>
-                            <div className="selectorIconoProyecto__grid" style={{gap: '4px'}}>
+                            <div className="selectorIconoProyecto__grid">
                                 {iconos.map(({id, Icono}) => (
-                                    <Boton key={id} type="button" variante="ghost" claseAdicional={`selectorIconoProyecto__opcion${id === iconoId ? ' selectorIconoProyecto__opcion--seleccionado' : ''}`} style={{width: '28px', height: '28px'}} onClick={() => manejarSeleccionIcono(id)} title={id}>
-                                        <Icono size={14} style={{color: colorIcono}} />
+                                    <Boton key={id} type="button" variante="ghost" claseAdicional={`selectorIconoProyecto__opcion${id === iconoId ? ' selectorIconoProyecto__opcion--seleccionado' : ''}`} onClick={() => manejarSeleccionIcono(id)} title={id}>
+                                        <Icono size={14} style={{/* sentinel-disable inline-style-prohibido */ color: colorIcono}} />
                                     </Boton>
                                 ))}
                             </div>
                         </div>
                     ))}
 
-                    <div className="selectorColores" style={{paddingTop: '8px', gap: '6px'}}>
+                    <div className="selectorColores">
                         {COLORES_DISPONIBLES.map(({id, valor}) => (
-                            <Boton key={id} type="button" variante="ghost" claseAdicional={`selectorColores__opcion${valor === colorIcono ? ' selectorColores__opcion--seleccionado' : ''}`} style={{backgroundColor: valor, width: '20px', height: '20px'}} onClick={() => manejarSeleccionColor(valor)} title={id} />
+                            <Boton key={id} type="button" variante="ghost" claseAdicional={`selectorColores__opcion${valor === colorIcono ? ' selectorColores__opcion--seleccionado' : ''}`} style={{/* sentinel-disable inline-style-prohibido */ backgroundColor: valor}} onClick={() => manejarSeleccionColor(valor)} title={id} />
                         ))}
                     </div>
                 </div>

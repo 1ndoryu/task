@@ -24,7 +24,7 @@ export function SeccionConfigGruposFb(): JSX.Element {
 
             {/* Estado del token */}
             <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig" style={{gap: '8px'}}>
+                <div className="detallesOpcionConfig detallesOpcionConfig--compacto">
                     {tieneToken === null && !cargando && (
                         <Boton variante="ghost" onClick={verificarToken} icono={<Key size={14} />}>
                             Verificar token existente
@@ -44,7 +44,7 @@ export function SeccionConfigGruposFb(): JSX.Element {
                     )}
 
                     {token && (
-                        <div style={{display: 'flex', gap: '6px', alignItems: 'center', width: '100%'}}>
+                        <div className="filaConBotonCopiar">
                             <Input
                                 tipo="text"
                                 value={token}
@@ -56,7 +56,7 @@ export function SeccionConfigGruposFb(): JSX.Element {
                     )}
 
                     {error && (
-                        <span className="descripcionOpcionConfig" style={{color: 'var(--dashboard-estadoError, #ef4444)'}}>
+                        <span className="descripcionOpcionConfig descripcionOpcionConfig--error">
                             {error}
                         </span>
                     )}
@@ -71,7 +71,7 @@ export function SeccionConfigGruposFb(): JSX.Element {
                     <span className="descripcionOpcionConfig">
                         Copia esta URL en el campo &quot;API URL&quot; de la extensión. No añadas rutas adicionales.
                     </span>
-                    <div style={{display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px'}}>
+                    <div className="filaConBotonCopiar--conMargen">
                         <Input
                             tipo="text"
                             value={apiUrl}
@@ -88,13 +88,13 @@ export function SeccionConfigGruposFb(): JSX.Element {
             <div className="itemOpcionConfig">
                 <div className="detallesOpcionConfig">
                     <span className="tituloOpcionConfig">
-                        <Clock size={14} style={{marginRight: 4, verticalAlign: 'middle'}} />
+                        <Clock size={14} className="iconoInline" />
                         Duración de publicado
                     </span>
                     <span className="descripcionOpcionConfig">
                         Horas durante las cuales un grupo marcado como publicado se considera reciente. Por defecto 24h.
                     </span>
-                    <div style={{display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px', maxWidth: '160px'}}>
+                    <div className="filaConBotonCopiar--compacto">
                         <Input
                             tipo="number"
                             value={publicadoHoras}

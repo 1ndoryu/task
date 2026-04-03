@@ -69,7 +69,7 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
 
                             <CampoTexto titulo="Contraseña" valor={password} onChange={setPassword} tipo="password" disabled={loading} />
 
-                            <div style={{marginTop: 8}}></div>
+                            <div className="espaciadorSm"></div>
 
                             <Boton
                                 type="submit"
@@ -80,7 +80,7 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
                             >
                                 {!loading && (
                                     <>
-                                        <LogIn size={16} style={{marginRight: 8}} />
+                                        <LogIn size={16} className="iconoConMargen" />
                                         {modo === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
                                     </>
                                 )}

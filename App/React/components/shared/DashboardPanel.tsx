@@ -20,7 +20,7 @@ export function DashboardPanel({titulo, icono, acciones, children, className = '
     return (
         <section id={id} className={`dashboardPanel ${className}`} onContextMenu={onContextMenu}>
             {titulo && (
-                <div className="seccionEncabezado" style={{padding: 'var(--dashboard-espacioMd) var(--dashboard-espacioLg)', marginBottom: 0}}>
+                <div className="seccionEncabezado dashboardPanel__encabezado">
                     <h2 className="seccionTitulo">
                         {icono} {titulo}
                     </h2>

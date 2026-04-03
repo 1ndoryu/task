@@ -5,12 +5,12 @@ export function LandingHabitAnimation(): JSX.Element {
                 <div className="landingHabitCheck" />
                 <span className="landingHabitLabel">Leer 20 páginas de filosofía</span>
             </div>
-            <div className="landingHabitRow" style={{opacity: 0.6}}>
-                <div className="landingHabitCheck" style={{animation: 'none', borderColor: '#444'}} />
+            <div className="landingHabitRow landingHabitRow--pendiente">
+                <div className="landingHabitCheck landingHabitCheck--inactivo" />
                 <span className="landingHabitLabel">Meditación matutina (15 min)</span>
             </div>
-            <div className="landingHabitRow" style={{opacity: 0.4}}>
-                <div className="landingHabitCheck" style={{animation: 'none', borderColor: '#444'}} />
+            <div className="landingHabitRow landingHabitRow--lejano">
+                <div className="landingHabitCheck landingHabitCheck--inactivo" />
                 <span className="landingHabitLabel">Revisar métricas semanales</span>
             </div>
         </div>

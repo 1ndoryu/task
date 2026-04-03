@@ -31,10 +31,10 @@ export function AdjuntoItemModerno({adjunto, onDelete, urlPreview, esCifrado, on
                                 e.stopPropagation();
                                 onToggleAudio(adjunto.id);
                             }}
-                            icono={isPlaying ? <Pause size={14} /> : <Play size={14} style={{marginLeft: '2px'}} />}
+                            icono={isPlaying ? <Pause size={14} /> : <Play size={14} className="playIconoCentrado" />}
                             claseAdicional="adjuntosGrid__audioBtn"
                         />
-                        <audio ref={audioRef} src={adjunto.url} onTimeUpdate={() => onTimeUpdate(adjunto.id)} onEnded={() => onAudioEnded(adjunto.id)} style={{display: 'none'}} />
+                        <audio ref={audioRef} src={adjunto.url} onTimeUpdate={() => onTimeUpdate(adjunto.id)} onEnded={() => onAudioEnded(adjunto.id)} className="inputOculto" />
                     </div>
                 ) : (
                     <File size={32} strokeWidth={1.5} className="adjuntosGrid__icono" />
@@ -45,7 +45,7 @@ export function AdjuntoItemModerno({adjunto, onDelete, urlPreview, esCifrado, on
             <div className="adjuntosGrid__info">
                 <div className="adjuntosGrid__nombre" title={adjunto.nombre}>
                     {esCifrado && <Lock size={12} className="adjuntosGrid__iconoCifrado" />}
-                    <span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{adjunto.nombre}</span>
+                    <span className="textoTruncado">{adjunto.nombre}</span>
                 </div>
                 <div className="adjuntosGrid__acciones">
                     {/* Download */}

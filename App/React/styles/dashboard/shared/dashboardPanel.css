@@ -12,7 +12,11 @@
     overflow: hidden; /* Para contener bordes redondeados */
 }
 
-/* Header styles removed to use shared .seccionEncabezado structure */
+/* Override de .seccionEncabezado para contexto de panel */
+.dashboardPanel__encabezado {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    margin-bottom: 0;
+}
 
 .dashboardPanelContent {
     padding: 0; /* Por defecto sin padding para permitir listas borde a borde */

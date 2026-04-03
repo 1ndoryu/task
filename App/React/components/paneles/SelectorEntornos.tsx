@@ -80,7 +80,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                         className={`selectorEntornos__opcion ${!entornoActivo ? 'selectorEntornos__opcion--activo' : ''}`}
                         onClick={() => { onActivar(null); setMenuAbierto(false); }}
                     >
-                        <span className="selectorEntornos__indicador" style={{ backgroundColor: '#6b7280' }} />
+                        <span className="selectorEntornos__indicador selectorEntornos__indicador--base" />
                         <span className="selectorEntornos__nombre">Base</span>
                         {!entornoActivo && <Check size={12} className="selectorEntornos__check" />}
                     </div>
@@ -109,7 +109,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                                         className="selectorEntornos__opcionClick"
                                         onClick={() => { onActivar(e.id); setMenuAbierto(false); }}
                                     >
-                                        <span className="selectorEntornos__indicador" style={{ backgroundColor: e.color }} />
+                                        <span className="selectorEntornos__indicador" style={{/* sentinel-disable inline-style-prohibido */ backgroundColor: e.color}} />
                                         <span className="selectorEntornos__nombre">{e.nombre}</span>
                                         {e.id === entornoActivo?.id && <Check size={12} className="selectorEntornos__check" />}
                                     </span>

@@ -63,8 +63,7 @@ const SubtareaItem = ({tarea, onToggle, onConfigurar, onEliminar, onMenuPriorida
                     /* Badge de Prioridad - Estilo Panel Ejecucion (Texto) */
                     p && p !== 'media' && (
                         <Boton
-                            claseAdicional={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable`}
-                            style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}
+                            claseAdicional={`badgeInfo badgeInfo--prioridad${p === 'muy_alta' ? 'MuyAlta' : p.charAt(0).toUpperCase() + p.slice(1)} badgeInfoClickable badgeInfo--compacto`}
                             title={`Prioridad: ${ETIQUETAS_PRIORIDAD[p]}`}
                             onClick={e => {
                                 e.stopPropagation();

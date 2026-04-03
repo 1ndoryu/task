@@ -52,3 +52,63 @@
     letter-spacing: -0.02em;
     color: var(--dashboard-textoNormal);
 }
+
+/* Icono inline (dentro de texto, ej: icon + label) */
+.iconoInline {
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* Fila con botón copiar compacta (max-width para inputs numéricos) */
+.filaConBotonCopiar--compacto {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 4px;
+    max-width: 160px;
+}
+
+/* Texto error de opción config */
+.descripcionOpcionConfig--error {
+    color: var(--dashboard-estadoError, #ef4444);
+}
+
+/* Gap compacto para detalles opción config */
+.detallesOpcionConfig--compacto {
+    gap: 8px;
+}
+
+/* Texto truncado genérico (overflow ellipsis) */
+.textoTruncado {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Espaciador vertical pequeño */
+.espaciadorSm {
+    margin-top: 8px;
+}
+
+/* Icono con margin-right para botones */
+.iconoConMargen {
+    margin-right: 8px;
+}
+
+/* Margen izquierdo para error inline */
+.textoError--conMargen {
+    margin-left: 10px;
+}
+
+/* Nota informativa estilo italic */
+.notaAyuda {
+    font-size: 11px;
+    color: var(--dashboard-textoApagado);
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Play icon centrado (compensa el triángulo visual) */
+.playIconoCentrado {
+    margin-left: 2px;
+}

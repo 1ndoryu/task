@@ -122,7 +122,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                 <Input
                     tipo="file"
                     ref={fileInputRef}
-                    style={{display: 'none'}}
+                    claseAdicional="inputOculto"
                     onChange={e => {
                         handleFileSelect(e);
                         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -156,7 +156,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                         <span>{alcanzadoLimite ? 'Límite' : 'Agregar'}</span>
                     </Boton>
                     {(error || estadoSubida.error) && (
-                        <div className="textoPequeno textoError" style={{marginLeft: '10px'}}>
+                        <div className="textoPequeno textoError textoError--conMargen">
                             {error || estadoSubida.error}
                         </div>
                     )}
@@ -175,7 +175,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
             <Input
                 tipo="file"
                 ref={fileInputRef}
-                style={{display: 'none'}}
+                claseAdicional="inputOculto"
                 onChange={e => {
                     handleFileSelect(e);
                     if (fileInputRef.current) fileInputRef.current.value = '';

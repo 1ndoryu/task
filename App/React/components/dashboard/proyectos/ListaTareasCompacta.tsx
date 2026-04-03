@@ -93,6 +93,7 @@ export function ListaTareasCompacta({tareas, onToggleTarea}: ListaTareasCompacta
 
         return (
             <div className="tareaItemCompactoContenedor">
+                {/* sentinel-disable inline-style-prohibido */}
                 <div className={`tareaItemCompacto ${tarea.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: `${nivel * 12}px`}}>
                     <Boton
                         variante="icono"

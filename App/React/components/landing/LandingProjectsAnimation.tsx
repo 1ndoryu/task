@@ -2,7 +2,7 @@ export function LandingProjectsAnimation(): JSX.Element {
     return (
         <div className="landingProjectsWidget">
             <div className="landingProjectCard variant-4">
-                <div className="landingProjectIcon" style={{background: 'rgba(16, 185, 129, 0.2)', color: '#10b981'}}>
+                <div className="landingProjectIcon landingProjectIcon--verde">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -11,7 +11,7 @@ export function LandingProjectsAnimation(): JSX.Element {
                 <div className="landingProjectTitle">Investigación</div>
             </div>
             <div className="landingProjectCard variant-3">
-                <div className="landingProjectIcon" style={{background: 'rgba(217, 119, 6, 0.2)', color: '#d97706'}}>
+                <div className="landingProjectIcon landingProjectIcon--naranja">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                     </svg>
@@ -19,7 +19,7 @@ export function LandingProjectsAnimation(): JSX.Element {
                 <div className="landingProjectTitle">Marketing Q4</div>
             </div>
             <div className="landingProjectCard variant-2">
-                <div className="landingProjectIcon" style={{background: 'rgba(37, 99, 235, 0.2)', color: '#3b82f6'}}>
+                <div className="landingProjectIcon landingProjectIcon--azul">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                     </svg>
@@ -27,7 +27,7 @@ export function LandingProjectsAnimation(): JSX.Element {
                 <div className="landingProjectTitle">Diseño Sistema</div>
             </div>
             <div className="landingProjectCard variant-1">
-                <div className="landingProjectIcon" style={{background: 'rgba(225, 29, 72, 0.2)', color: '#e11d48'}}>
+                <div className="landingProjectIcon landingProjectIcon--rojo">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                     </svg>

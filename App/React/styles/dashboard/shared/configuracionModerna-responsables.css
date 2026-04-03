@@ -166,6 +166,12 @@
     padding: var(--dashboard-espacioSm);
 }
 
+/* Variante inline (sin posición absoluta, ej: dentro de propiedades compactas) */
+.seccionResponsables__menuAgregar--inline {
+    position: static;
+    margin-top: 0;
+}
+
 .seccionResponsables__menuTitulo {
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoMuyApagado);
@@ -277,6 +283,12 @@
     border-radius: var(--dashboard-radioSm);
     box-shadow: var(--dashboard-sombraFuerte);
     padding: var(--dashboard-espacioXs);
+}
+
+/* Variante inline del menú participante (sin posición absoluta) */
+.seccionResponsables__menuParticipante--inline {
+    position: static;
+    margin-top: 0;
 }
 
 .seccionResponsables__menuSeccion {

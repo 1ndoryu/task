@@ -32,7 +32,7 @@ export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, ya
                     <Loader2 size={20} className="adjuntoIcono iconoGirando" />
                 ) : adjunto.tipo === 'imagen' && urlPreview ? (
                     <>
-                        <img src={urlPreview} alt={adjunto.nombre} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                        <img src={urlPreview} alt={adjunto.nombre} />
                         {esCifrado && !yaDescifrado && (
                             <div className="adjuntoIndicadorCifrado">
                                 <Lock size={10} />
@@ -50,7 +50,7 @@ export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, ya
 
             {/* Info / Player */}
             <div className="adjuntoInfo">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <div className="adjuntoInfoFila">
                     {adjunto.tipo === 'audio' ? (
                         <div className="adjuntoAudioControl">
                             <Boton claseAdicional="adjuntoBotonPlay" onClick={() => onToggleAudio(adjunto.id)}>
@@ -59,8 +59,8 @@ export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, ya
                             <div className="adjuntoAudioBarra">
                                 <div className="adjuntoAudioProgreso" style={{width: `${progress}%`}} />
                             </div>
-                            <audio ref={audioRef} src={adjunto.url} onTimeUpdate={() => onTimeUpdate(adjunto.id)} onEnded={() => onAudioEnded(adjunto.id)} style={{display: 'none'}} />
-                            <span className="adjuntoMeta" style={{fontSize: '9px', maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}} title={adjunto.nombre}>
+                            <audio ref={audioRef} src={adjunto.url} onTimeUpdate={() => onTimeUpdate(adjunto.id)} onEnded={() => onAudioEnded(adjunto.id)} className="inputOculto" />
+                            <span className="adjuntoMeta adjuntoMeta--truncado" title={adjunto.nombre}>
                                 {adjunto.nombre}
                             </span>
                         </div>

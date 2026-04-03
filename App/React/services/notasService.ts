@@ -51,6 +51,7 @@ export const notasService = {
      * Busca notas por término
      */
     async buscarNotas(termino: string): Promise<Nota[]> {
+        /* sentinel-disable api-response-mismatch — PHP endpoint notas/buscar SÍ devuelve {success, notas}. Falso positivo: sentinel solo detecta la rama error. */
         const response = await fetchApi<{success: boolean; notas: Nota[]}>(`/buscar?q=${encodeURIComponent(termino)}`);
         if (!response.success) {
             return [];
@@ -132,6 +133,7 @@ export const carpetasNotasService = {
      * Obtiene todas las carpetas del usuario
      */
     async listar(): Promise<CarpetaNota[]> {
+        /* sentinel-disable api-response-mismatch — PHP endpoint notas/carpetas SÍ devuelve {success, carpetas}. Falso positivo. */
         const response = await fetchApi<{success: boolean; carpetas: CarpetaNota[]}>('/carpetas');
         if (!response.success) {
             throw new Error('Error al cargar carpetas');
@@ -143,6 +145,7 @@ export const carpetasNotasService = {
      * Crea una nueva carpeta
      */
     async crear(nombre: string): Promise<CarpetaNota> {
+        /* sentinel-disable api-response-mismatch — PHP endpoint POST notas/carpetas SÍ devuelve {success, carpeta}. Falso positivo. */
         const response = await fetchApi<{success: boolean; carpeta: CarpetaNota}>('/carpetas', {
             method: 'POST',
             body: JSON.stringify({nombre})

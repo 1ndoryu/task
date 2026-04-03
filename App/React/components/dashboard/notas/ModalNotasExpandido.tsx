@@ -50,13 +50,13 @@ export function ModalNotasExpandido({abierto, onCerrar, tamanoFuente, delayGuard
         <>
             {/* Indicador de guardado */}
             {guardando && (
-                <span className="modalNotasGuardando" style={{display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--dashboard-textoSecundario, #888)'}}>
+                <span className="modalNotasGuardando">
                     <Save size={12} className="animacionGirar" />
                     Guardando...
                 </span>
             )}
             {notaActiva.modificada && !guardando && (
-                <span className="modalNotasModificada" style={{fontSize: '11px', color: 'var(--dashboard-estadoAdvertencia, #fbbf24)'}}>
+                <span className="modalNotasModificada">
                     Sin guardar
                 </span>
             )}

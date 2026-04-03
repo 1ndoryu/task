@@ -54,7 +54,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
 
     /* Header Icons (similar a ModalProyecto) */
     const accionesHeader = modoEdicion ? (
-        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+        <div className="accionesHeaderFlex">
             {/* Estadisticas (Placeholder) */}
             <Boton type="button" variante="icono" title="Estadísticas (Próximamente)" claseAdicional="botonIcono--deshabilitado">
                 <BarChart2 size={16} />

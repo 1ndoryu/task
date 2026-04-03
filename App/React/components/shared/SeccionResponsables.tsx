@@ -88,7 +88,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                 {/* Menu agregar para modo compacto */}
                 {menuAgregarAbierto && modoCompacto && (
                     <MenuFlotante posicionX={menuAgregarPos.x} posicionY={menuAgregarPos.y} onCerrar={() => setMenuAgregarAbierto(false)}>
-                        <div className="seccionResponsables__menuAgregar" style={{position: 'static', marginTop: 0}}>
+                        <div className="seccionResponsables__menuAgregar seccionResponsables__menuAgregar--inline">
                             <div className="seccionResponsables__menuTitulo">Agregar participante</div>
 
                             {/* Selector de rol */}
@@ -173,7 +173,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
             {/* Menu agregar para modo inline */}
             {menuAgregarAbierto && !modoCompacto && (
                 <MenuFlotante posicionX={menuAgregarPos.x} posicionY={menuAgregarPos.y} onCerrar={() => setMenuAgregarAbierto(false)}>
-                    <div className="seccionResponsables__menuAgregar" style={{position: 'static', marginTop: 0}}>
+                    <div className="seccionResponsables__menuAgregar seccionResponsables__menuAgregar--inline">
                         <div className="seccionResponsables__menuTitulo">Agregar participante</div>
 
                         {/* Selector de rol */}
@@ -212,7 +212,7 @@ export function SeccionResponsables({participantes, companeros = [], onAgregar, 
                         if (!participante) return null;
 
                         return (
-                            <div className="seccionResponsables__menuParticipante" style={{position: 'static', marginTop: 0}}>
+                            <div className="seccionResponsables__menuParticipante seccionResponsables__menuParticipante--inline">
                                 <div className="seccionResponsables__menuSeccion">
                                     <span className="seccionResponsables__menuEtiqueta">Cambiar rol</span>
                                     <Boton type="button" claseAdicional={`seccionResponsables__menuOpcion ${participante.rol === 'colaborador' ? 'seccionResponsables__menuOpcion--activo' : ''}`} onClick={() => manejarCambiarRol(participante.id, 'colaborador')}>

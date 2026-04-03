@@ -12,6 +12,21 @@
     max-height: 70vh;
 }
 
+/* Indicador guardando en header ModalNotasExpandido */
+.modalNotasGuardando {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--dashboard-textoSecundario, #888);
+}
+
+/* Indicador sin guardar */
+.modalNotasModificada {
+    font-size: 11px;
+    color: var(--dashboard-estadoAdvertencia, #fbbf24);
+}
+
 .modalNotasBusqueda {
     display: flex;
     align-items: center;

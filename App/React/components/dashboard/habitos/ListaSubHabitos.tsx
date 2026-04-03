@@ -107,7 +107,7 @@ function FilaSubHabito({subhabito, onToggle, onEliminar, onEditar}: FilaSubHabit
                 )}
                 {/* Badge de racha si tiene */}
                 {!editando && subhabito.racha > 0 && (
-                    <span className="badgeInfo badgeInfo--racha" style={{marginLeft: 4, height: 16, fontSize: '0.65rem', padding: '0 4px'}}>
+                    <span className="badgeInfo badgeInfo--racha">
                         <span className="badgeInfoTexto">🔥 {subhabito.racha}</span>
                     </span>
                 )}

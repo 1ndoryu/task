@@ -10,8 +10,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionClara);
     border: 1px solid var(--dashboard-bordeSutil);
@@ -29,7 +29,7 @@
     top: calc(100% + var(--dashboard-espacioSm));
     left: 0;
     z-index: 100;
-    min-width: 240px;
+    min-width: 220px;
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
@@ -63,8 +63,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: var(--dashboard-radioSm);
     background: transparent;
     border: 1px solid transparent;
@@ -93,8 +93,8 @@
 }
 
 .selectorColores__opcion {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: var(--dashboard-radioCirculo);
     border: 2px solid transparent;
     cursor: pointer;

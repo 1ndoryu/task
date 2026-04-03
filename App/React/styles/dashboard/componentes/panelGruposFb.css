@@ -678,6 +678,10 @@
     flex-shrink: 0;
 }
 
+.selectorEntornos__indicador--base {
+    background-color: #6b7280;
+}
+
 .selectorEntornos__nombre {
     overflow: hidden;
     text-overflow: ellipsis;

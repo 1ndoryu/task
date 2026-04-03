@@ -335,6 +335,7 @@
 .selectorRelojCircular__svg {
     touch-action: none; /* Importante para prevenir scroll en mÃ³viles */
     transition: transform var(--dashboard-transicionNormal);
+    cursor: pointer;
 }
 
 .selectorRelojCircular__svg--arrastrando {
@@ -356,4 +357,8 @@
     color: var(--dashboard-textoSecundario);
     opacity: 0.7;
     margin: 0;
+}
+
+.selectorRelojCircular__texto {
+    pointer-events: none;
 }

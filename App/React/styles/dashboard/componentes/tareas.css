@@ -644,6 +644,7 @@
 .tareaDropIndicadorSubtarea {
     left: var(--dashboard-espacioLg);
     background-color: var(--dashboard-estadoMedia);
+    top: 0;
 }
 
 /* 

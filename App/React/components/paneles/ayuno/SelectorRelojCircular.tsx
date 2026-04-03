@@ -54,7 +54,7 @@ export function SelectorRelojCircular({
                 const xTexto = centro + rTexto * Math.cos(rad);
                 const yTexto = centro + rTexto * Math.sin(rad);
                 items.push(
-                    <text key={`t-${i}`} x={xTexto} y={yTexto} textAnchor="middle" dominantBaseline="central" fill="var(--dashboard-textoSecundario)" fontSize="12" fontWeight="500" style={{pointerEvents: 'none'}}>
+                    <text key={`t-${i}`} x={xTexto} y={yTexto} textAnchor="middle" dominantBaseline="central" fill="var(--dashboard-textoSecundario)" fontSize="12" fontWeight="500" className="selectorRelojCircular__texto">
                         {i.toString().padStart(2, '0')}
                     </text>
                 );
@@ -79,7 +79,6 @@ export function SelectorRelojCircular({
                 className={`selectorRelojCircular__svg ${arrastrando ? 'selectorRelojCircular__svg--arrastrando' : ''}`}
                 onMouseDown={manejarInicioArrastre}
                 onTouchStart={manejarInicioArrastre}
-                style={{cursor: 'pointer'}} // Mostrar mano al hover
             >
                 {/* Fondo circular interactivo */}
                 <circle cx={centro} cy={centro} r={radioReloj} fill="transparent" stroke="var(--dashboard-bordeSutil)" strokeWidth="1" />

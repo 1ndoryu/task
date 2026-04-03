@@ -4,11 +4,14 @@
  * Este archivo solo contiene estilos adicionales específicos para subhábitos (badge racha, edición inline)
  */
 
-/* Badge de racha para subhábitos */
+/* Badge de racha para subhábitos — incluye sizing reducido que antes era inline */
 .badgeInfo--racha {
     background: transparent;
     color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-size: 0.65rem;
+    margin-left: 4px;
+    height: 16px;
+    padding: 0 4px;
 }
 
 /* [253A-1] Input de edición inline para nombres de subhábitos */
