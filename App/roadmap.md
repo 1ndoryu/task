@@ -15,8 +15,6 @@
 
 ## Tareas pendientes
 
-- Las configuraciones muestran configuraciones de plugin que estan desactivados, no deberían.
-
 - Este repositorio duplicarlo en https://github.com/1ndoryu/task, es un espejo, seguiremos usando glorytemplate en esta rama, por favor ten cuidado de cualquier perdida de datos, tiene que duplicarse con cada commit y cada cosa.
 
 - Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
