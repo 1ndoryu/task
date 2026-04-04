@@ -34,6 +34,4 @@
 
 - Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
 
-- Arrastrar para mover tareas dejo de funcionar, no funciona cuando el ordenamiento es manual, de hecho agrega listaTareasPendientes y deja un espacio vacío, no se si es por que solo tengo habitos en el panel de ejecucion, pero si, parece ser que el ordenamiento solo funciona con las tareas y no con los habitos pero en realidad tiene que funncionar con todo lo que hay en el panal de ejecución. 
-
 - Agrega una nueva prioridad "Muy baja" asegurate de que funcione en todos los contextos.
