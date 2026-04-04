@@ -16,4 +16,4 @@
 
 ## Tareas pendientes
 
-- SIguen saliendo cientos de subhabitos en los habitos en el panel de ejecucion.
+- Haz un readme detallado de este proyecto, el svg del inicio agregalo al inicio del readme. El proyecto es un gestor de tarea de codigo abierto, blablabla, habla de todas las caracteristicas, no hables de los plugins en si sino de la capacidad de agregar plugins, etc.
