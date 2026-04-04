@@ -12,6 +12,7 @@ export function AdjuntoOverlay({previewImage, url, onClose}: AdjuntoOverlayProps
     return (
         /* sentinel-disable-next-line componente-artesanal — overlay especializado de preview de adjuntos */
         <div className="adjuntoOverlay" onClick={onClose}>
+            {/* sentinel-disable-next-line componente-artesanal — contenedor interno del overlay */}
             <div className="adjuntoOverlayContenido" onClick={e => e.stopPropagation()}>
                 <Boton
                     variante="icono"

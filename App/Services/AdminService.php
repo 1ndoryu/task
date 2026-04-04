@@ -109,7 +109,8 @@ class AdminService
         // sentinel-disable-next-line retorno-ignorado-repo — falso positivo: resultado SI se captura en $resultado
         $resultado = $suscripcionService->activarPremium($diasDuracion);
 
-        /* Registrar acción en logs */
+        /* Registrar accion en logs */
+        // sentinel-disable-next-line retorno-ignorado-repo — registro de log, no critico
         $this->registrarAccion($userId, 'activar_premium', [
             'duracion' => $diasDuracion,
             'admin_id' => get_current_user_id(),
@@ -127,7 +128,8 @@ class AdminService
         // sentinel-disable-next-line retorno-ignorado-repo — falso positivo: resultado SI se captura en $resultado
         $resultado = $suscripcionService->cancelar();
 
-        /* Registrar acción en logs */
+        /* Registrar accion en logs */
+        // sentinel-disable-next-line retorno-ignorado-repo — registro de log, no critico
         $this->registrarAccion($userId, 'cancelar_premium', [
             'admin_id' => get_current_user_id(),
         ]);
@@ -172,7 +174,8 @@ class AdminService
         // sentinel-disable-next-line retorno-ignorado-repo — update_user_meta, operacion interna de WP, fallo improbable
         update_user_meta($userId, self::META_SUSCRIPCION, $suscripcion);
 
-        /* Registrar acción en logs */
+        /* Registrar accion en logs */
+        // sentinel-disable-next-line retorno-ignorado-repo — registro de log, no critico
         $this->registrarAccion($userId, 'extender_trial', [
             'dias' => $dias,
             'nueva_fecha' => $nuevaFecha,

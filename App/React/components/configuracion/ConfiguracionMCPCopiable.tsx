@@ -42,7 +42,8 @@ export function ConfiguracionMCPCopiable({titulo, codigo}: ConfiguracionMCPCopia
 
             setCopiado(true);
             setTimeout(() => setCopiado(false), 2000);
-        } catch (error) { /* sentinel-disable fallo-sin-feedback — tiene alert() como feedback */
+        // sentinel-disable-next-line fallo-sin-feedback — tiene alert() como feedback
+        } catch (error) {
             console.error('Error al copiar:', error);
             /* Mostrar alerta como último recurso */
             alert('No se pudo copiar automáticamente. Por favor, selecciona el texto manualmente y usa Ctrl+C.');

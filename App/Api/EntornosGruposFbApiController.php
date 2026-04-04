@@ -179,6 +179,7 @@ class EntornosGruposFbApiController
             $datos = [];
             $permitidos = ['nombre', 'icono', 'color', 'aiPrompt', 'orden'];
             foreach ($permitidos as $campo) {
+                // sentinel-disable-next-line request-json-directo — whitelist de campos permitidos
                 if (array_key_exists($campo, $json)) {
                     $datos[$campo] = $json[$campo];
                 }

@@ -115,7 +115,8 @@ export function useBottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresI
                 id: habitoExistente?.id
             });
             onCerrar();
-        } catch (error) { /* sentinel-disable fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error */
+        // sentinel-disable-next-line fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error
+        } catch (error) {
             console.error('Error al guardar hábito:', error);
         } finally {
             setCargando(false);

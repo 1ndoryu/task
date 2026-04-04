@@ -225,9 +225,11 @@ class DashboardRepository
                 $applied[] = $data['id'];
             } elseif (($type === 'create' || $type === 'update') && $data) {
                 match ($entity) {
-                    // sentinel-disable retorno-ignorado-repo — match expression, excepciones propagan al caller
+                    // sentinel-disable-next-line retorno-ignorado-repo — match expression, excepciones propagan al caller
                     'habito' => $this->habitosRepo->saveAll([$data], true),
+                    // sentinel-disable-next-line retorno-ignorado-repo
                     'tarea' => $this->tareasRepo->saveAll([$data], true),
+                    // sentinel-disable-next-line retorno-ignorado-repo
                     'proyecto' => $this->proyectosRepo->saveAll([$data], true),
                     default => null
                 };
@@ -260,10 +262,13 @@ class DashboardRepository
 
     public function deleteAll(): bool
     {
-        // sentinel-disable retorno-ignorado-repo — cascada de borrado total, excepciones propagan
+        // sentinel-disable-next-line retorno-ignorado-repo — cascada de borrado total, excepciones propagan
         $this->habitosRepo->deleteAll();
+        // sentinel-disable-next-line retorno-ignorado-repo
         $this->tareasRepo->deleteAll();
+        // sentinel-disable-next-line retorno-ignorado-repo
         $this->proyectosRepo->deleteAll();
+        // sentinel-disable-next-line retorno-ignorado-repo
         $this->configRepo->deleteAll();
         return true;
     }
