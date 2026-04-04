@@ -288,9 +288,11 @@
     min-height: 0;
 }
 
-/* [024A-17] Contenedor del botón + dropdown de columnas */
+/* [024A-17] Contenedor del boton + dropdown de columnas
+ * [044A-16] display: inline-flex para alinear con otros botones en el flex parent .seccionAcciones */
 .panelGruposFb__columnasContenedor {
     position: relative;
+    display: inline-flex;
 }
 
 /* [024A-17] Dropdown de columnas visibles */
@@ -617,9 +619,11 @@
     justify-content: space-between;
 }
 
-/* [034A-14] Selector de entornos — dropdown en header del panel */
+/* [034A-14] Selector de entornos — dropdown en header del panel
+ * [044A-16] display: inline-flex para alinear con otros botones en el flex parent .seccionAcciones */
 .selectorEntornos {
     position: relative;
+    display: inline-flex;
     z-index: 10;
 }
 

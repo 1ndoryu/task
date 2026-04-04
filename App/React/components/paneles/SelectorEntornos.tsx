@@ -29,7 +29,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
     return (
         <div className="selectorEntornos" ref={refMenu}>
             <Boton
-                variante="badge"
+                variante="ghost"
                 onClick={toggleMenu}
                 icono={<Layers size={12} />}
                 title={`Entorno: ${etiquetaActiva}`}
