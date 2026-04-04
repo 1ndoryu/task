@@ -39,6 +39,8 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
                     return 'prioridadMedia';
                 case 'baja':
                     return 'prioridadBaja';
+                case 'muy_baja':
+                    return 'prioridadMuyBaja';
             }
         };
 

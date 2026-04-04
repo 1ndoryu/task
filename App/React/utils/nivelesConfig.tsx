@@ -17,7 +17,8 @@ export const COLORES_PRIORIDAD = {
     muy_alta: 'var(--dashboard-estadoMuyAlta)',
     alta: 'var(--dashboard-estadoAlta)',
     media: 'var(--dashboard-estadoMedia)',
-    baja: 'var(--dashboard-estadoBaja)'
+    baja: 'var(--dashboard-estadoBaja)',
+    muy_baja: 'var(--dashboard-estadoMuyBaja)'
 } as const satisfies Record<NivelPrioridad, string>;
 
 /* sentinel-disable-next-line objeto-mutable-exportado */
@@ -25,7 +26,8 @@ export const COLORES_IMPORTANCIA: Record<NivelImportancia, string> = {
     'Muy Alta': 'var(--dashboard-estadoMuyAlta)',
     'Alta': 'var(--dashboard-estadoAlta)',
     'Media': 'var(--dashboard-estadoMedia)',
-    'Baja': 'var(--dashboard-textoApagado)'
+    'Baja': 'var(--dashboard-textoApagado)',
+    'Muy Baja': 'var(--dashboard-estadoMuyBaja)'
 } as const satisfies Record<NivelImportancia, string>;
 
 /* sentinel-disable-next-line objeto-mutable-exportado */
@@ -43,7 +45,8 @@ export const ETIQUETAS_PRIORIDAD = {
     muy_alta: 'Muy Alta',
     alta: 'Alta',
     media: 'Media',
-    baja: 'Baja'
+    baja: 'Baja',
+    muy_baja: 'Muy Baja'
 } as const satisfies Record<NivelPrioridad, string>;
 
 /* sentinel-disable-next-line objeto-mutable-exportado */
@@ -51,7 +54,8 @@ export const ETIQUETAS_IMPORTANCIA = {
     'Muy Alta': 'Muy Alta',
     'Alta': 'Alta',
     'Media': 'Media',
-    'Baja': 'Baja'
+    'Baja': 'Baja',
+    'Muy Baja': 'Muy Baja'
 } as const satisfies Record<NivelImportancia, string>;
 
 /* sentinel-disable-next-line objeto-mutable-exportado */
@@ -76,7 +80,8 @@ export function opcionesMenuPrioridad(size = 12, conSinPrioridad = false): Opcio
         {id: 'muy_alta', etiqueta: 'Muy Alta', icono: <Flag size={size} color={COLORES_PRIORIDAD.muy_alta} />},
         {id: 'alta', etiqueta: 'Alta', icono: <Flag size={size} color={COLORES_PRIORIDAD.alta} />},
         {id: 'media', etiqueta: 'Media', icono: <Flag size={size} color={COLORES_PRIORIDAD.media} />},
-        {id: 'baja', etiqueta: 'Baja', icono: <Flag size={size} color={COLORES_PRIORIDAD.baja} />}
+        {id: 'baja', etiqueta: 'Baja', icono: <Flag size={size} color={COLORES_PRIORIDAD.baja} />},
+        {id: 'muy_baja', etiqueta: 'Muy Baja', icono: <Flag size={size} color={COLORES_PRIORIDAD.muy_baja} />}
     ];
     if (conSinPrioridad) {
         opciones.push({id: 'sin-prioridad', etiqueta: 'Sin prioridad', icono: <X size={size} />});
@@ -89,7 +94,8 @@ export function opcionesMenuImportancia(size = 12): OpcionMenuNivel[] {
         {id: 'Muy Alta', etiqueta: 'Muy Alta', icono: <Star size={size} color={COLORES_IMPORTANCIA['Muy Alta']} fill={COLORES_IMPORTANCIA['Muy Alta']} />},
         {id: 'Alta', etiqueta: 'Alta', icono: <Star size={size} color={COLORES_IMPORTANCIA.Alta} fill={COLORES_IMPORTANCIA.Alta} />},
         {id: 'Media', etiqueta: 'Media', icono: <Star size={size} color={COLORES_IMPORTANCIA.Media} />},
-        {id: 'Baja', etiqueta: 'Baja', icono: <Star size={size} color={COLORES_IMPORTANCIA.Baja} />}
+        {id: 'Baja', etiqueta: 'Baja', icono: <Star size={size} color={COLORES_IMPORTANCIA.Baja} />},
+        {id: 'Muy Baja', etiqueta: 'Muy Baja', icono: <Star size={size} color={COLORES_IMPORTANCIA['Muy Baja']} />}
     ];
 }
 
@@ -109,8 +115,8 @@ export function opcionesMenuUrgencia(size = 12, conSinUrgencia = false): OpcionM
 
 /* Arrays ordenados (para SelectorNivel y formularios) */
 
-export const NIVELES_PRIORIDAD: readonly NivelPrioridad[] = ['muy_alta', 'alta', 'media', 'baja'] as const;
-export const NIVELES_IMPORTANCIA: readonly NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja'] as const;
+export const NIVELES_PRIORIDAD: readonly NivelPrioridad[] = ['muy_alta', 'alta', 'media', 'baja', 'muy_baja'] as const;
+export const NIVELES_IMPORTANCIA: readonly NivelImportancia[] = ['Muy Alta', 'Alta', 'Media', 'Baja', 'Muy Baja'] as const;
 
 /* [233A-45] Centraliza iconos y colores para que SelectorNivel
  * muestre los mismos que el menu contextual */
@@ -125,7 +131,8 @@ export function decoracionSelectorPrioridad(size = 14): Record<string, Decoracio
         muy_alta: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.muy_alta},
         alta: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.alta},
         media: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.media},
-        baja: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.baja}
+        baja: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.baja},
+        muy_baja: {icono: <Flag size={size} />, color: COLORES_PRIORIDAD.muy_baja}
     };
 }
 
@@ -134,6 +141,7 @@ export function decoracionSelectorImportancia(size = 14): Record<string, Decorac
         'Muy Alta': {icono: <Star size={size} fill="currentColor" />, color: COLORES_IMPORTANCIA['Muy Alta']},
         'Alta': {icono: <Star size={size} fill="currentColor" />, color: COLORES_IMPORTANCIA.Alta},
         'Media': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Media},
-        'Baja': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Baja}
+        'Baja': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Baja},
+        'Muy Baja': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA['Muy Baja']}
     };
 }

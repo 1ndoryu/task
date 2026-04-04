@@ -61,12 +61,14 @@ const PESO_URGENCIA: Record<NivelUrgencia, number> = {
  * alta: 300
  * media: 100 (default si no se especifica)
  * baja: 0
+ * muy_baja: -100
  */
 const PESO_PRIORIDAD: Record<NivelPrioridad | 'default', number> = {
     muy_alta: 500,
     alta: 300,
     media: 100,
     baja: 0,
+    muy_baja: -100,
     default: 100
 };
 

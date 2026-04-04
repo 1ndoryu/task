@@ -37,6 +37,7 @@ export function obtenerVariantePrioridad(importancia: Habito['importancia']): Va
         case 'Alta': return 'prioridadAlta';
         case 'Media': return 'prioridadMedia';
         case 'Baja': return 'prioridadBaja';
+        case 'Muy Baja': return 'prioridadMuyBaja';
     }
 }
 

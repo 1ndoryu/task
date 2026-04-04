@@ -68,7 +68,7 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         dragStartXRef, dragCurrentXRef,
         handleDragStart, handleDragEnd, handleReorder,
         UMBRAL_INDENT,
-        tareasPrincipalesPendientes, tareasHabitoPendientes,
+        tareasPrincipalesPendientes,
         tareasSinGrupo, tareasPorGrupo,
         mensajesNoLeidosPorTarea,
         crearTareaConProyecto

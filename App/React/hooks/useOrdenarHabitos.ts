@@ -30,10 +30,11 @@ export const MODOS_ORDEN: ModoOrdenInfo[] = [
 ];
 
 const PESO_IMPORTANCIA: Record<Habito['importancia'], number> = {
-    'Muy Alta': 4,
-    Alta: 3,
-    Media: 2,
-    Baja: 1
+    'Muy Alta': 5,
+    Alta: 4,
+    Media: 3,
+    Baja: 2,
+    'Muy Baja': 1
 };
 
 /*

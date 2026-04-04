@@ -302,8 +302,8 @@ export function ejecutarAccionDestructiva(accion: AccionLLM, ejecutoresTareas: E
     }
 }
 
-function validarPrioridad(val: unknown): 'muy_alta' | 'alta' | 'media' | 'baja' | undefined {
-    if (val === 'muy_alta' || val === 'alta' || val === 'media' || val === 'baja') return val;
+function validarPrioridad(val: unknown): 'muy_alta' | 'alta' | 'media' | 'baja' | 'muy_baja' | undefined {
+    if (val === 'muy_alta' || val === 'alta' || val === 'media' || val === 'baja' || val === 'muy_baja') return val;
     return undefined;
 }
 
@@ -312,7 +312,7 @@ function validarUrgencia(val: unknown): 'bloqueante' | 'urgente' | 'normal' | 'c
     return undefined;
 }
 
-function validarImportancia(val: unknown): 'Muy Alta' | 'Alta' | 'Media' | 'Baja' {
-    if (val === 'Muy Alta' || val === 'Alta' || val === 'Media' || val === 'Baja') return val;
+function validarImportancia(val: unknown): 'Muy Alta' | 'Alta' | 'Media' | 'Baja' | 'Muy Baja' {
+    if (val === 'Muy Alta' || val === 'Alta' || val === 'Media' || val === 'Baja' || val === 'Muy Baja') return val;
     return 'Media';
 }

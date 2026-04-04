@@ -40,7 +40,7 @@ class AIApiController
                 'args' => [
                     'texto' => ['required' => true, 'validate_callback' => fn($p) => is_string($p) && strlen($p) > 0, 'sanitize_callback' => $san],
                     'proyectoId' => ['required' => false, 'validate_callback' => $numVal, 'sanitize_callback' => 'absint'],
-                    'prioridad' => ['required' => false, 'enum' => ['Alta', 'Media', 'Baja', null], 'sanitize_callback' => $san],
+                    'prioridad' => ['required' => false, 'enum' => ['Muy Alta', 'Alta', 'Media', 'Baja', 'Muy Baja', null], 'sanitize_callback' => $san],
                     'urgencia' => ['required' => false, 'default' => 'normal', 'enum' => ['bloqueante', 'urgente', 'normal', 'chill'], 'sanitize_callback' => $san],
                     'fechaMaxima' => ['required' => false, 'validate_callback' => fn($p) => is_string($p), 'sanitize_callback' => $san],
                 ],
@@ -78,7 +78,7 @@ class AIApiController
 
         register_rest_route($ns, '/ai/habitos', [
             'methods' => 'GET', 'callback' => [self::class, 'obtenerHabitos'], 'permission_callback' => $auth,
-            'args' => ['importancia' => ['required' => false, 'enum' => ['Alta', 'Media', 'Baja'], 'sanitize_callback' => $san]],
+            'args' => ['importancia' => ['required' => false, 'enum' => ['Muy Alta', 'Alta', 'Media', 'Baja', 'Muy Baja'], 'sanitize_callback' => $san]],
         ]);
 
         register_rest_route($ns, '/ai/resumen', [

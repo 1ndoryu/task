@@ -28,7 +28,8 @@ const mapearImportanciaAPrioridad = (importancia: Habito['importancia']): NivelP
         'Muy Alta': 'muy_alta',
         Alta: 'alta',
         Media: 'media',
-        Baja: 'baja'
+        Baja: 'baja',
+        'Muy Baja': 'muy_baja'
     };
     return mapa[importancia];
 };

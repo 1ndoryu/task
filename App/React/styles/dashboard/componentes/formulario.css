@@ -117,6 +117,11 @@
     border-color: var(--dashboard-estadoBajaBorde);
 }
 
+.formularioBotonImportanciaMuyBaja {
+    color: var(--dashboard-estadoMuyBaja);
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+}
+
 /* 
  * CAMPO DE TAGS 
  */

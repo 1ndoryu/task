@@ -116,9 +116,11 @@ class MensajesService
         string $nuevaPrioridad
     ): bool {
         $prioridadesLegibles = [
+            'muy_alta' => 'Muy Alta',
             'alta' => 'Alta',
             'media' => 'Media',
-            'baja' => 'Baja'
+            'baja' => 'Baja',
+            'muy_baja' => 'Muy Baja'
         ];
         $prioridadLegible = $prioridadesLegibles[$nuevaPrioridad] ?? $nuevaPrioridad;
 

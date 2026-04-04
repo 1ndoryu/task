@@ -160,6 +160,16 @@
     padding: 2px 8px;
 }
 
+/* Prioridad Muy Baja */
+.badgeInfo--prioridadMuyBaja {
+    color: var(--dashboard-estadoMuyBaja);
+    background-color: transparent;
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
 /* 
  * VARIANTES DE URGENCIA
  * Temporalidad: bloqueante, urgente, chill (normal no muestra badge)

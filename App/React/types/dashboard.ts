@@ -11,14 +11,14 @@
  * Media: habitos importantes pero no criticos
  * Baja: habitos deseables pero opcionales
  */
-export type NivelImportancia = 'Muy Alta' | 'Alta' | 'Media' | 'Baja';
+export type NivelImportancia = 'Muy Alta' | 'Alta' | 'Media' | 'Baja' | 'Muy Baja';
 
 /*
  * Niveles de prioridad para tareas (importancia)
  * Usado para ordenar y destacar tareas importantes
  * muy_alta: tareas críticas e innegociables (máxima prioridad)
  */
-export type NivelPrioridad = 'muy_alta' | 'alta' | 'media' | 'baja';
+export type NivelPrioridad = 'muy_alta' | 'alta' | 'media' | 'baja' | 'muy_baja';
 
 /*
  * Niveles de urgencia para tareas y proyectos (temporalidad)

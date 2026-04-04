@@ -263,7 +263,7 @@ function validarTarea(tarea: unknown): ResultadoValidacion {
         return {esValido: false, mensaje: 'Fecha de completado de tarea inválida'};
     }
 
-    if (t.prioridad !== undefined && !['muy_alta', 'alta', 'media', 'baja'].includes(t.prioridad as string)) {
+    if (t.prioridad !== undefined && !['muy_alta', 'alta', 'media', 'baja', 'muy_baja'].includes(t.prioridad as string)) {
         return {esValido: false, mensaje: 'Prioridad de tarea inválida'};
     }
 

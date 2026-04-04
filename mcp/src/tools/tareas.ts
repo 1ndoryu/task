@@ -22,7 +22,7 @@ export const obtenerTareaSchema = z.object({
 export const crearTareaSchema = z.object({
     texto: z.string().describe('Texto/título de la tarea'),
     proyectoId: z.number().optional().describe('ID del proyecto (opcional)'),
-    prioridad: z.enum(['alta', 'media', 'baja']).optional().describe('Nivel de prioridad'),
+    prioridad: z.enum(['muy_alta', 'alta', 'media', 'baja', 'muy_baja']).optional().describe('Nivel de prioridad'),
     urgencia: z.enum(['bloqueante', 'urgente', 'normal', 'chill']).optional().describe('Nivel de urgencia'),
     fechaMaxima: z.string().optional().describe('Fecha límite en formato ISO'),
     tags: z.array(z.string()).optional().describe('Etiquetas de la tarea')
@@ -31,7 +31,7 @@ export const crearTareaSchema = z.object({
 export const editarTareaSchema = z.object({
     id: z.number().describe('ID de la tarea a editar'),
     texto: z.string().optional().describe('Nuevo texto de la tarea'),
-    prioridad: z.enum(['alta', 'media', 'baja']).nullable().optional().describe('Nueva prioridad (null para eliminar)'),
+    prioridad: z.enum(['muy_alta', 'alta', 'media', 'baja', 'muy_baja']).nullable().optional().describe('Nueva prioridad (null para eliminar)'),
     urgencia: z.enum(['bloqueante', 'urgente', 'normal', 'chill']).nullable().optional().describe('Nueva urgencia'),
     proyectoId: z.number().optional().describe('Nuevo proyecto'),
     tags: z.array(z.string()).optional().describe('Nuevas etiquetas')

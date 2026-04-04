@@ -127,7 +127,7 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 onMoverProyecto?.();
             } else if (opcionId === 'compartir') {
                 onCompartir?.();
-            } else if (['muy_alta', 'alta', 'media', 'baja'].includes(opcionId)) {
+            } else if (['muy_alta', 'alta', 'media', 'baja', 'muy_baja'].includes(opcionId)) {
                 onEditar?.({
                     prioridad: opcionId as NivelPrioridad
                 });

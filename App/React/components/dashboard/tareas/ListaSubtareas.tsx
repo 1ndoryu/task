@@ -98,7 +98,7 @@ export function ListaSubtareas({tareas, parentId, prioridadPadre, onToggleTarea,
 
     useEffect(() => {
         /* Ordenar por prioridad: Muy Alta > Alta > Media > Baja */
-        const peso: Record<string, number> = {muy_alta: 4, alta: 3, media: 2, baja: 1};
+        const peso: Record<string, number> = {muy_alta: 5, alta: 4, media: 3, baja: 2, muy_baja: 1};
         const tareasOrdenadas = [...tareas].sort((a, b) => {
             const pesoA = peso[a.prioridad || 'media'] || 2;
             const pesoB = peso[b.prioridad || 'media'] || 2;

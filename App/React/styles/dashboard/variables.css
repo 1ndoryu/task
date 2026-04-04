@@ -34,6 +34,9 @@
     --dashboard-estadoMediaBorde: rgba(113, 63, 18, 0.3);
     --dashboard-estadoBaja: #000000 0;
     --dashboard-estadoBajaBorde: #333;
+    --dashboard-estadoMuyBaja: #4b5563;
+    --dashboard-estadoMuyBajaFondo: rgba(75, 85, 99, 0.1);
+    --dashboard-estadoMuyBajaBorde: rgba(75, 85, 99, 0.3);
     --dashboard-estadoExito: #22c55e;
     --dashboard-estadoExitoFondo: rgba(34, 197, 94, 0.1);
     --dashboard-estadoExitoBorde: rgba(34, 197, 94, 0.3);
@@ -258,6 +261,9 @@
     --dashboard-estadoMediaBorde: rgba(253, 126, 20, 0.3);
     --dashboard-estadoBaja: #6c757d;
     --dashboard-estadoBajaBorde: #adb5bd;
+    --dashboard-estadoMuyBaja: #9ca3af;
+    --dashboard-estadoMuyBajaFondo: rgba(156, 163, 175, 0.1);
+    --dashboard-estadoMuyBajaBorde: rgba(156, 163, 175, 0.3);
     --dashboard-estadoExito: #198754;
     --dashboard-estadoExitoFondo: rgba(25, 135, 84, 0.1);
     --dashboard-estadoExitoBorde: rgba(25, 135, 84, 0.3);

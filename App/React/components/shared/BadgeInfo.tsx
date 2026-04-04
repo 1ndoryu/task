@@ -8,7 +8,7 @@ import type {ReactNode, KeyboardEvent} from 'react';
 
 export type TipoBadge = 'adjunto' | 'descripcion' | 'repeticion' | 'fecha' | 'prioridad' | 'frecuencia' | 'racha' | 'destacado' | 'personalizado';
 
-export type VarianteBadge = 'normal' | 'urgente' | 'exito' | 'advertencia' | 'prioridadMuyAlta' | 'prioridadAlta' | 'prioridadMedia' | 'prioridadBaja' | 'urgenciaBloqueante' | 'urgenciaUrgente' | 'urgenciaChill' | 'destacado' | 'racha' | 'rachaPeligro' | 'rachaActiva' | 'rachaCompletada' | 'frecuencia' | 'habito' | 'mensajeNoLeido' | 'pospuesto';
+export type VarianteBadge = 'normal' | 'urgente' | 'exito' | 'advertencia' | 'prioridadMuyAlta' | 'prioridadAlta' | 'prioridadMedia' | 'prioridadBaja' | 'prioridadMuyBaja' | 'urgenciaBloqueante' | 'urgenciaUrgente' | 'urgenciaChill' | 'destacado' | 'racha' | 'rachaPeligro' | 'rachaActiva' | 'rachaCompletada' | 'frecuencia' | 'habito' | 'mensajeNoLeido' | 'pospuesto';
 
 export interface BadgeInfoProps {
     tipo: TipoBadge;

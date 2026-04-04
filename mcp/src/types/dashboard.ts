@@ -4,13 +4,13 @@
  */
 
 /* Niveles de prioridad para tareas (importancia) */
-export type NivelPrioridad = 'alta' | 'media' | 'baja';
+export type NivelPrioridad = 'muy_alta' | 'alta' | 'media' | 'baja' | 'muy_baja';
 
 /* Niveles de urgencia para tareas (temporalidad) */
 export type NivelUrgencia = 'bloqueante' | 'urgente' | 'normal' | 'chill';
 
 /* Niveles de importancia para hábitos */
-export type NivelImportancia = 'Muy Alta' | 'Alta' | 'Media' | 'Baja';
+export type NivelImportancia = 'Muy Alta' | 'Alta' | 'Media' | 'Baja' | 'Muy Baja';
 
 /* Tipos de frecuencia para hábitos */
 export type TipoFrecuencia = 'diario' | 'cadaXDias' | 'semanal' | 'diasEspecificos' | 'mensual';

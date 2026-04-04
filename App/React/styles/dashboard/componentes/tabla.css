@@ -239,6 +239,12 @@
     border-color: var(--dashboard-estadoBajaBorde);
 }
 
+.etiquetaMuyBaja {
+    color: var(--dashboard-estadoMuyBaja);
+    background-color: transparent;
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+}
+
 /* 
  * INDICADOR DE INACTIVIDAD 
  */

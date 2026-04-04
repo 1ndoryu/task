@@ -8,7 +8,7 @@ import {gloryClient} from '../api/gloryClient.js';
 
 /* Esquemas Zod para validación */
 export const obtenerHabitosSchema = z.object({
-    importancia: z.enum(['Alta', 'Media', 'Baja']).optional().describe('Filtrar por importancia')
+    importancia: z.enum(['Muy Alta', 'Alta', 'Media', 'Baja', 'Muy Baja']).optional().describe('Filtrar por importancia')
 });
 
 /* Handlers */

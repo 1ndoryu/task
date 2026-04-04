@@ -79,6 +79,12 @@
     border-color: var(--dashboard-estadoBajaBorde);
 }
 
+/* MUY BAJA */
+.selectorNivelBotonMuyBaja.selectorNivelBotonActivo {
+    color: var(--dashboard-estadoMuyBaja);
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+}
+
 /* 
  * VARIANTES PARA URGENCIA
  * bloqueante = rojo (igual que alta)

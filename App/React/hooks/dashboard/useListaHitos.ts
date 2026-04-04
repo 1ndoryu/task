@@ -20,7 +20,7 @@ export function useListaHitos({hitos, onChange}: UseListaHitosParams) {
 
     /* Ordenar hitos: no completados primero, luego por prioridad, luego por id */
     const hitosOrdenados = useMemo(() => {
-        const prioridadValor: Record<NivelPrioridad, number> = {muy_alta: 4, alta: 3, media: 2, baja: 1};
+        const prioridadValor: Record<NivelPrioridad, number> = {muy_alta: 5, alta: 4, media: 3, baja: 2, muy_baja: 1};
 
         return [...hitos].sort((a, b) => {
             if (a.completado !== b.completado) return a.completado ? 1 : -1;
