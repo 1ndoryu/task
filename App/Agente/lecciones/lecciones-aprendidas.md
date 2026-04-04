@@ -22,6 +22,14 @@
 
 **Lección:** Cuando un bug CSS reaparece, rastrear la cadena complete de layout de fuera hacia dentro: contenedor padre → flex/grid → hijo → nieto. El primer punto donde el tamaño se fija o se cap (max-width, fixed width) es probablemente la raíz. No atacar el interior sin verificar que el exterior permite el crecimiento.
 
+## 2026-04-04 — Zustand persist: onRehydrateStorage no persiste mutaciones (044A-24)
+
+**Patrón del error:** `onRehydrateStorage` recibe el state ya mergeado y permite mutarlo, pero las mutaciones directas (ej: `habito.subhabitos = limpiados`) NO disparan `subscribe()`, por lo que el middleware persist no escribe los cambios a localStorage. La limpieza era efímera: funcionaba en memoria pero los datos corruptos reaparecían en cada recarga.
+
+**Lección:** En Zustand persist, `onRehydrateStorage` es solo para efectos secundarios o modificaciones en memoria. Para que los cambios persistan, SIEMPRE usar `useStore.setState()` (disponible vía `setTimeout(() => ..., 0)` para asegurar que el store está inicializado). Nunca mutar state directamente si se espera que persist lo capture.
+
+**Lección 2:** Cuando se deduplica por ID, considerar que los IDs pueden haber colisionado (ej: `Date.now()` llamado en el mismo milisegundo). La dedup por ID debe distinguir: mismo ID + mismo nombre = duplicado real (descartar) vs mismo ID + nombre diferente = colisión (reasignar nuevo ID). Eliminar ciegamente por ID destruye datos válidos.
+
 **Fix correcto:** Calcular el tamaño de celda dinámicamente en JS basado en el ancho real del contenedor (ResizeObserver) y pasar como CSS variable `--mapa-calor-tamano-celda`. Así el grid siempre llena 100% independientemente del tamaño del contenedor.
 
 ## 2026-04-02 — CSS unclosed block no detectado antes de commit (024A-15)
