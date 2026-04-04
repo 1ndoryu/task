@@ -89,6 +89,7 @@
     --dashboard-tamanoMicro: 9px;
     --dashboard-tamanoMuyPequeno: 10px;
     --dashboard-tamanoPequeno: 11px;
+    --dashboard-tamanoDetalle: 0.72rem;
     --dashboard-tamanoBase: 13px;
     --dashboard-tamanoNormal: 1rem;
     --dashboard-tamanoGrande: 1.1rem;
@@ -100,6 +101,7 @@
     --dashboard-tamanoH2: 1.75rem;
     --dashboard-tamanoDisplay: 2.5rem;
     --dashboard-espacioXxs: 2px;
+    --dashboard-espacioHairline: 1px;
     --dashboard-espacioMini: 3px;
     --dashboard-espacioXs: 0.25rem;
     --dashboard-espacioSx: 0.35rem;
@@ -119,6 +121,7 @@
     --dashboard-radioMinimo: 1px;
     --dashboard-radioXs: 2px;
     --dashboard-radioMini: 3px;
+    --dashboard-radioSutil: 6px;
     --dashboard-radioSm: 0;
     --dashboard-radioMd: 0;
     --dashboard-radioLg: 0;

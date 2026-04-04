@@ -40,7 +40,7 @@
     border: none;
     outline: none;
     color: var(--dashboard-textoSecundario);
-    font-size: 0.7rem;
+    font-size: var(--dashboard-tamanoPequeno);
     padding: 0;
     min-width: 0;
 }
@@ -53,7 +53,7 @@
 .panelGruposFb__tabla {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     table-layout: fixed;
 }
 
@@ -62,7 +62,7 @@
     padding: 4px 6px;
     color: var(--dashboard-textoApagado);
     font-weight: 500;
-    font-size: 0.68rem;
+    font-size: var(--dashboard-tamanoPequeno);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
@@ -86,7 +86,7 @@
 .panelGruposFb__thContenido {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: var(--dashboard-espacioMini);
 }
 
 .panelGruposFb__thFlecha {
@@ -114,14 +114,14 @@
 .panelGruposFb__celdaNombre {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
     min-width: 0;
 }
 
 .panelGruposFb__avatar {
     width: 28px;
     height: 28px;
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioSutil);
     object-fit: cover;
     flex-shrink: 0;
     background: var(--dashboard-fondoTerciario);
@@ -131,14 +131,14 @@
 .panelGruposFb__avatarPlaceholder {
     width: 28px;
     height: 28px;
-    border-radius: 6px;
+    border-radius: var(--dashboard-radioSutil);
     background: var(--dashboard-fondoTerciario);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     color: var(--dashboard-textoApagado);
-    font-size: 0.65rem;
+    font-size: var(--dashboard-tamanoMuyPequeno);
 }
 
 .panelGruposFb__nombreTexto {
@@ -161,10 +161,10 @@
 .panelGruposFb__badgeCategoria {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 0.68rem;
+    gap: var(--dashboard-espacioMini);
+    padding: 1px var(--dashboard-espacioS);
+    border-radius: var(--dashboard-radioMini);
+    font-size: var(--dashboard-tamanoPequeno);
     background: var(--dashboard-fondoTerciario);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
@@ -178,13 +178,13 @@
 /* ── Estrellas importancia ── */
 .panelGruposFb__estrellas {
     display: flex;
-    gap: 1px;
+    gap: var(--dashboard-espacioHairline);
 }
 
 .panelGruposFb__estrella {
     cursor: pointer;
     color: var(--dashboard-bordePrincipal);
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     line-height: 1;
     transition: color 0.1s;
 }
@@ -201,7 +201,7 @@
 .panelGruposFb__checkPublicado {
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 1.5px solid var(--dashboard-bordePrincipal);
     display: flex;
     align-items: center;
@@ -224,7 +224,7 @@
 /* ── Acciones por fila ── */
 .panelGruposFb__acciones {
     display: flex;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     opacity: 0;
     transition: opacity 0.15s;
 }
@@ -238,11 +238,11 @@
     text-align: center;
     padding: 24px 12px;
     color: var(--dashboard-textoApagado);
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
 }
 
 .panelGruposFb__vacioPrincipal {
@@ -261,7 +261,7 @@
 .panelGruposFb__vacioAyuda {
     margin: 0;
     color: var(--dashboard-textoMuyApagado, var(--dashboard-textoApagado));
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoDetalle);
     max-width: 280px;
 }
 
@@ -274,9 +274,9 @@
 /* ── Estado cargando ── */
 .panelGruposFb__cargando {
     text-align: center;
-    padding: 24px;
+    padding: var(--dashboard-espacioXl);
     color: var(--dashboard-textoApagado);
-    font-size: 0.8rem;
+    font-size: var(--dashboard-tamanoBase);
 }
 
 /* [024A-21] Contenedor scroll: max-height limita la tabla cuando el panel es alturaAuto.
@@ -310,9 +310,9 @@
 .panelGruposFb__menuColumnasItem {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    font-size: 0.72rem;
+    gap: var(--dashboard-espacioS);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSmMd);
+    font-size: var(--dashboard-tamanoDetalle);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     user-select: none;
@@ -325,7 +325,7 @@
 .panelGruposFb__menuColumnasCheck {
     width: 12px;
     height: 12px;
-    border-radius: 2px;
+    border-radius: var(--dashboard-radioXs);
     border: 1.5px solid var(--dashboard-bordePrincipal);
     display: flex;
     align-items: center;
@@ -362,8 +362,8 @@
 .panelGruposFb__toggleOcultos {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.7rem;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
     cursor: pointer;
     user-select: none;
@@ -399,9 +399,9 @@
 /* [024A-18] Centinela para carga progresiva */
 .panelGruposFb__centinela td {
     text-align: center;
-    padding: 8px;
+    padding: var(--dashboard-espacioSm);
     color: var(--dashboard-textoApagado);
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoDetalle);
 }
 
 /* ── [024A-30] Editor de categorías ── */
@@ -411,8 +411,8 @@
 .editorCategorias {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
 }
@@ -425,14 +425,14 @@
 .editorCategorias__lista {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
 }
 
 .editorCategorias__fila {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 6px;
+    gap: var(--dashboard-espacioS);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioS);
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
@@ -473,7 +473,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: var(--dashboard-tamanoBase);
     padding: 0;
 }
 
@@ -485,7 +485,7 @@
 .editorCategorias__colorBtn {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 2px solid var(--dashboard-bordeSutil);
     cursor: pointer;
     padding: 0;
@@ -504,10 +504,10 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
-    padding: 6px;
+    padding: var(--dashboard-espacioS);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     display: grid;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
 }
 
 .editorCategorias__pickerIconos {
@@ -531,7 +531,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: var(--dashboard-tamanoBase);
     padding: 0;
 }
 
@@ -548,7 +548,7 @@
 .editorCategorias__colorMuestra {
     width: 26px;
     height: 26px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     border: 2px solid transparent;
     cursor: pointer;
     padding: 0;
@@ -569,8 +569,8 @@
     background: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
-    padding: 3px 6px;
-    font-size: 0.72rem;
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioS);
+    font-size: var(--dashboard-tamanoDetalle);
     color: var(--dashboard-textoNormal);
     font-family: inherit;
     outline: none;
@@ -596,18 +596,18 @@
 
 .editorCategorias__vacio {
     text-align: center;
-    padding: 16px;
+    padding: var(--dashboard-espacioLg);
     color: var(--dashboard-textoApagado);
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoDetalle);
 }
 
 .editorCategorias__error {
     padding: 4px 8px;
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-estadoError);
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoDetalle);
 }
 
 /* [034A-13] border-top eliminado por pedido del usuario */
@@ -641,7 +641,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     padding: 4px var(--dashboard-espacioSm);
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoDetalle);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: background 0.15s;
@@ -674,12 +674,12 @@
 .selectorEntornos__indicador {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: var(--dashboard-radioCirculo);
     flex-shrink: 0;
 }
 
 .selectorEntornos__indicador--base {
-    background-color: #6b7280;
+    background-color: var(--dashboard-textoApagado);
 }
 
 .selectorEntornos__nombre {
@@ -695,7 +695,7 @@
 
 .selectorEntornos__acciones {
     display: flex;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
     flex-shrink: 0;
     opacity: 0;
     transition: opacity 0.15s;
@@ -718,5 +718,5 @@
 .selectorEntornos__inputEditar {
     flex: 1;
     min-width: 0;
-    font-size: 0.72rem;
+    font-size: var(--dashboard-tamanoDetalle);
 }
