@@ -102,7 +102,22 @@ export const useHabitosStore = create<HabitosStore>()(
 
                 /* Inicialización */
                 setHabitos: habitos => {
-                    set({habitos, inicializado: true}, false, 'setHabitos');
+                    /* [044A-22] Sanitizar subhábitos al recibir datos del servidor:
+                     * deduplica por ID, filtra sin nombre, limita a 50 por hábito */
+                    const sanitizados = habitos.map(h => {
+                        if (!h.subhabitos || h.subhabitos.length === 0) return h;
+                        const idsVistos = new Set<number>();
+                        const unicos: SubHabito[] = [];
+                        for (const sh of h.subhabitos) {
+                            if (sh.nombre && sh.nombre.trim() && !idsVistos.has(sh.id)) {
+                                idsVistos.add(sh.id);
+                                unicos.push(sh);
+                            }
+                        }
+                        if (unicos.length === h.subhabitos.length) return h;
+                        return {...h, subhabitos: unicos.slice(0, 50)};
+                    });
+                    set({habitos: sanitizados, inicializado: true}, false, 'setHabitos');
                 },
 
                 marcarInicializado: () => {
@@ -559,9 +574,13 @@ export const useHabitosStore = create<HabitosStore>()(
                     const habito = get().habitos.find(h => h.id === habitoId);
                     if (!habito) return null;
 
+                    /* [044A-22] Límite de subhábitos por hábito para prevenir crecimiento descontrolado */
+                    if ((habito.subhabitos || []).length >= 50) return null;
+
                     const hoy = obtenerFechaHoy();
+                    /* [044A-22] Sufijo aleatorio para evitar colisión de Date.now() en llamadas rápidas */
                     const nuevoSubHabito: SubHabito = {
-                        id: Date.now(),
+                        id: Date.now() * 1000 + Math.floor(Math.random() * 1000),
                         nombre: datos.nombre,
                         importancia: datos.importancia,
                         frecuencia: datos.frecuencia || habito.frecuencia,
@@ -710,15 +729,35 @@ export const useHabitosStore = create<HabitosStore>()(
                 }),
                 version: 1,
                 /* [263A-2] Limpiar subhábitos fantasma (sin nombre) al rehidratar.
-                 * Surgieron de estados corruptos en localStorage; sin esto reaparecen eternamente. */
+                 * Surgieron de estados corruptos en localStorage; sin esto reaparecen eternamente.
+                 * [044A-22] También deduplica subhábitos por ID y limita a 50 por hábito
+                 * para prevenir arrays que crecen sin control. */
                 onRehydrateStorage: () => (state) => {
                     if (!state) return;
+                    let totalEliminados = 0;
                     for (const habito of state.habitos) {
                         if (habito.subhabitos) {
-                            habito.subhabitos = habito.subhabitos.filter(
+                            const antesLength = habito.subhabitos.length;
+                            /* Paso 1: filtrar sin nombre */
+                            const conNombre = habito.subhabitos.filter(
                                 (sh: SubHabito) => sh.nombre && sh.nombre.trim()
                             );
+                            /* Paso 2: deduplicar por ID (conservar el primero) */
+                            const idsVistos = new Set<number>();
+                            const unicos: SubHabito[] = [];
+                            for (const sh of conNombre) {
+                                if (!idsVistos.has(sh.id)) {
+                                    idsVistos.add(sh.id);
+                                    unicos.push(sh);
+                                }
+                            }
+                            /* Paso 3: limitar a 50 subhábitos por hábito */
+                            habito.subhabitos = unicos.slice(0, 50);
+                            totalEliminados += antesLength - habito.subhabitos.length;
                         }
+                    }
+                    if (totalEliminados > 0) {
+                        console.warn(`[HabitosStore] onRehydrate: eliminados ${totalEliminados} subhábitos duplicados/inválidos`);
                     }
                 }
             }

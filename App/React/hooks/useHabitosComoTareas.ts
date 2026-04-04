@@ -182,12 +182,18 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
 
             /* Agregar subhábitos que "tocan hoy" como tareas virtuales */
             if (habito.subhabitos && habito.subhabitos.length > 0) {
+                /* [044A-22] Set de IDs vistos para no generar tareas duplicadas
+                 * si el array de subhábitos tiene entradas con mismo ID */
+                const subIdsVistos = new Set<number>();
                 for (const subhabito of habito.subhabitos) {
                     /* [253A-1] Filtrar subhábitos fantasma (sin nombre válido) */
                     if (!subhabito.nombre || !subhabito.nombre.trim()) continue;
                     /* Solo incluir si no está pausado y "toca hoy" */
                     if (subhabito.pausado) continue;
                     if (!subhabitoTocaHoy(subhabito, habito.frecuencia)) continue;
+                    /* [044A-22] Deduplicar: solo una tarea virtual por subhábito */
+                    if (subIdsVistos.has(subhabito.id)) continue;
+                    subIdsVistos.add(subhabito.id);
 
                     /* [253A-1] Crear tarea virtual para el subhábito.
                      * Prioridad hereda siempre del padre para consistencia visual en ejecución. */
