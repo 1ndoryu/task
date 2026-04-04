@@ -56,21 +56,25 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                         <div className="panelIAAcciones">
                             {mensaje.acciones.map((accion, i) => (
                                 accion.pendienteConfirmacion ? (
-                                    <div key={i} className="panelIAAccionBadge panelIAAccionBadge--pendiente">
+                                    <div key={`${mensaje.id}-${i}`} className="panelIAAccionBadge panelIAAccionBadge--pendiente">
                                         <AlertTriangle size={10} />
                                         <span>{accion.resultado || accion.tipo}</span>
-                                        <button
-                                            className="panelIAAccionBtn panelIAAccionBtn--confirmar"
+                                        <Boton
+                                            variante="ghost"
+                                            tamano="pequeño"
+                                            claseAdicional="panelIAAccionBtn panelIAAccionBtn--confirmar"
                                             onClick={() => confirmarAccion(mensaje.id, i)}
-                                        >Confirmar</button>
-                                        <button
-                                            className="panelIAAccionBtn panelIAAccionBtn--cancelar"
+                                        >Confirmar</Boton>
+                                        <Boton
+                                            variante="ghost"
+                                            tamano="pequeño"
+                                            claseAdicional="panelIAAccionBtn panelIAAccionBtn--cancelar"
                                             onClick={() => rechazarAccion(mensaje.id, i)}
-                                        >Cancelar</button>
+                                        >Cancelar</Boton>
                                     </div>
                                 ) : (
                                     <div
-                                        key={i}
+                                        key={`${mensaje.id}-${i}`}
                                         className={`panelIAAccionBadge ${accion.ejecutada ? 'panelIAAccionBadge--exito' : 'panelIAAccionBadge--error'}`}
                                     >
                                         {accion.ejecutada ? <CheckCircle size={10} /> : <XCircle size={10} />}

@@ -1,3 +1,7 @@
+/* sentinel-disable-file limite-lineas
+ * Justificacion: archivo de datos estaticos (historial de versiones).
+ * Dividirlo no mejora mantenibilidad — cada entrada es independiente y se agrega al inicio. */
+
 export interface Cambio {
     tipo: 'nuevo' | 'mejora' | 'arreglo';
     descripcion: string;

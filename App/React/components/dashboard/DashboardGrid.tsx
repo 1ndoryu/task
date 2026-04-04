@@ -51,6 +51,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         }
 
         /* Generar props según el tipo de panel - any necesario: dispatch dinámico por registro de paneles */
+        // sentinel-disable-next-line any-type-explicito — props varían por tipo de panel via generadorProps
         let props: any;
         if (baseId === 'ejecucion') {
             props = generadorProps(propsContexto, renderHandleArrastre, handleMinimizarElement, manejarToggleTarea, manejarEditarHabitoPorId, esMovil);

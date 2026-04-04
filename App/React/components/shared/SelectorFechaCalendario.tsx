@@ -76,9 +76,9 @@ export function SelectorFechaCalendario({posicionX, posicionY, onSeleccionar, on
                     if (esSeleccionado) clase += ' selectorFechaCalendario__dia--seleccionado';
 
                     return (
-                        <button key={celda.fecha} type="button" className={clase} onClick={() => onSeleccionar(celda.fecha)}>
+                        <Boton key={celda.fecha} variante="ghost" tamano="pequeño" claseAdicional={clase} onClick={() => onSeleccionar(celda.fecha)}>
                             {celda.dia}
-                        </button>
+                        </Boton>
                     );
                 })}
             </div>

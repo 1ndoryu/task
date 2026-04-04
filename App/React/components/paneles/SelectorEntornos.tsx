@@ -1,10 +1,11 @@
 /* [034A-14] SelectorEntornos: dropdown en el header de PanelGruposFb
  * para cambiar entre entornos (vistas filtradas) de grupos.
- * Incluye opciones para crear/editar/eliminar entornos. */
+ * Incluye opciones para crear/editar/eliminar entornos.
+ * [034A-19] Logica extraida a useSelectorEntornos (usestate-excesivo). */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
 import { Layers, Plus, Pencil, Trash2, Check } from 'lucide-react';
 import { Boton, Input } from '../ui';
+import { useSelectorEntornos } from '../../hooks/paneles/useSelectorEntornos';
 import type { EntornoGrupoFb } from '../../services/gruposFbService';
 
 interface SelectorEntornosProps {
@@ -17,56 +18,19 @@ interface SelectorEntornosProps {
 }
 
 export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, onEliminar, onActualizar }: SelectorEntornosProps): JSX.Element {
-    const [menuAbierto, setMenuAbierto] = useState(false);
-    const [modoCrear, setModoCrear] = useState(false);
-    const [modoEditar, setModoEditar] = useState<number | null>(null);
-    const [nombreNuevo, setNombreNuevo] = useState('');
-    const refMenu = useRef<HTMLDivElement>(null);
-
-    /* Cerrar al click fuera */
-    useEffect(() => {
-        if (!menuAbierto) return;
-        const handler = (e: MouseEvent) => {
-            if (refMenu.current && !refMenu.current.contains(e.target as Node)) {
-                setMenuAbierto(false);
-                setModoCrear(false);
-                setModoEditar(null);
-            }
-        };
-        /* sentinel-disable-next-line componente-artesanal — patron estandar de click-outside */
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [menuAbierto]);
-
-    const handleCrear = useCallback(async () => {
-        if (!nombreNuevo.trim()) return;
-        const result = await onCrear({ nombre: nombreNuevo.trim() });
-        if (result) {
-            setNombreNuevo('');
-            setModoCrear(false);
-        }
-    }, [nombreNuevo, onCrear]);
-
-    const handleEditar = useCallback(async (id: number) => {
-        if (!nombreNuevo.trim()) return;
-        const result = await onActualizar(id, { nombre: nombreNuevo.trim() });
-        if (result) {
-            setNombreNuevo('');
-            setModoEditar(null);
-        }
-    }, [nombreNuevo, onActualizar]);
-
-    const handleEliminar = useCallback(async (id: number) => {
-        await onEliminar(id);
-    }, [onEliminar]);
-
-    const etiquetaActiva = entornoActivo ? entornoActivo.nombre : 'Base';
+    const {
+        menuAbierto, modoCrear, modoEditar, nombreNuevo, refMenu,
+        setNombreNuevo,
+        handleCrear, handleEditar, handleEliminar,
+        toggleMenu, cerrarMenu, iniciarCrear, iniciarEditar,
+        etiquetaActiva
+    } = useSelectorEntornos({ onCrear, onEliminar, onActualizar, entornoActivo });
 
     return (
         <div className="selectorEntornos" ref={refMenu}>
             <Boton
                 variante="badge"
-                onClick={() => setMenuAbierto(!menuAbierto)}
+                onClick={toggleMenu}
                 icono={<Layers size={12} />}
                 title={`Entorno: ${etiquetaActiva}`}
                 claseAdicional={entornoActivo ? 'selectorBadgeBoton--activo' : ''}
@@ -79,7 +43,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                     {/* Opción: Vista base (sin entorno) */}
                     <div
                         className={`selectorEntornos__opcion ${!entornoActivo ? 'selectorEntornos__opcion--activo' : ''}`}
-                        onClick={() => { onActivar(null); setMenuAbierto(false); }}
+                        onClick={() => { onActivar(null); cerrarMenu(); }}
                     >
                         <span className="selectorEntornos__indicador selectorEntornos__indicador--base" />
                         <span className="selectorEntornos__nombre">Base</span>
@@ -108,7 +72,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                                 <>
                                     <span
                                         className="selectorEntornos__opcionClick"
-                                        onClick={() => { onActivar(e.id); setMenuAbierto(false); }}
+                                        onClick={() => { onActivar(e.id); cerrarMenu(); }}
                                     >
                                         <span className="selectorEntornos__indicador" style={{/* sentinel-disable inline-style-prohibido */ backgroundColor: e.color}} />
                                         <span className="selectorEntornos__nombre">{e.nombre}</span>
@@ -118,7 +82,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                                         <Boton
                                             variante="ghost"
                                             soloIcono
-                                            onClick={(ev) => { ev.stopPropagation(); setModoEditar(e.id); setNombreNuevo(e.nombre); }}
+                                            onClick={(ev) => { ev.stopPropagation(); iniciarEditar(e.id, e.nombre); }}
                                             icono={<Pencil size={10} />}
                                             title="Editar"
                                         />
@@ -149,7 +113,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                             <Boton variante="ghost" soloIcono onClick={handleCrear} icono={<Check size={10} />} title="Crear" />
                         </div>
                     ) : (
-                        <div className="selectorEntornos__opcion selectorEntornos__opcion--crear" onClick={() => { setModoCrear(true); setNombreNuevo(''); }}>
+                        <div className="selectorEntornos__opcion selectorEntornos__opcion--crear" onClick={iniciarCrear}>
                             <Plus size={12} />
                             <span>Nuevo entorno</span>
                         </div>
