@@ -101,7 +101,7 @@
 
 /* Variante truncada para meta en audio player */
 .adjuntoMeta--truncado {
-    font-size: 9px;
+    font-size: var(--dashboard-tamanoMicro);
     max-width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;

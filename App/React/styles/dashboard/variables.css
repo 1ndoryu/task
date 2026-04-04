@@ -25,6 +25,7 @@
     --dashboard-estadoMuyAlta: #ef4444;
     --dashboard-estadoMuyAltaFondo: rgba(153, 27, 27, 0.1);
     --dashboard-estadoMuyAltaBorde: rgba(153, 27, 27, 0.3);
+    --dashboard-estadoMuyAltaRgb: 239, 68, 68;
     --dashboard-estadoAlta: #ef4444;
     --dashboard-estadoAltaFondo: rgba(153, 27, 27, 0.1);
     --dashboard-estadoAltaBorde: rgba(153, 27, 27, 0.3);
@@ -111,6 +112,7 @@
     --dashboard-espacioMd: 0.75rem;
     --dashboard-espacioMdLg: 15px;
     --dashboard-espacioLg: 1rem;
+    --dashboard-espacioLgXl: 20px;
     --dashboard-espacioXl: 1.5rem;
     --dashboard-espacio2xl: 2rem;
     --dashboard-espacioXxl: 2.5rem;
@@ -122,6 +124,9 @@
     --dashboard-radioXs: 2px;
     --dashboard-radioMini: 3px;
     --dashboard-radioSutil: 6px;
+    --dashboard-radioMedio: 8px;
+    --dashboard-radioSmMd: 10px;
+    --dashboard-radioGrande: 12px;
     --dashboard-radioSm: 0;
     --dashboard-radioMd: 0;
     --dashboard-radioLg: 0;
@@ -163,6 +168,7 @@
     --dashboard-safeAreaRight: env(safe-area-inset-right, 0px);
     --dashboard-alturaHeaderMovil: 56px;
     --dashboard-alturaNavInferior: 52px;
+    --mapa-calor-tamano-celda: 14px;
 }
 /* 1e1e1e
  * TEMA OSCURO (Dark Mode Estándar)
@@ -243,6 +249,7 @@
     --dashboard-estadoMuyAlta: #e11d48;
     --dashboard-estadoMuyAltaFondo: rgba(225, 29, 72, 0.12);
     --dashboard-estadoMuyAltaBorde: rgba(225, 29, 72, 0.35);
+    --dashboard-estadoMuyAltaRgb: 225, 29, 72;
     --dashboard-estadoAlta: #dc3545;
     --dashboard-estadoAltaFondo: rgba(220, 53, 69, 0.1);
     --dashboard-estadoAltaBorde: rgba(220, 53, 69, 0.3);

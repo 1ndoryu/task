@@ -8,10 +8,10 @@
 .badgeInfo--racha {
     background: transparent;
     color: var(--dashboard-textoApagado);
-    font-size: 0.65rem;
-    margin-left: 4px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    margin-left: var(--dashboard-espacioXs);
     height: 16px;
-    padding: 0 4px;
+    padding: 0 var(--dashboard-espacioXs);
 }
 
 /* [253A-1] Input de edición inline para nombres de subhábitos */

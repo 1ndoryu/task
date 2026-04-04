@@ -311,7 +311,7 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    color: #fff;
+    color: var(--dashboard-textoSobreAcento);
     background: none !important;
     border: none !important;
     border-radius: var(--dashboard-radioSm);
@@ -323,7 +323,7 @@
 
 .bottomSheetHabito__botonGuardar:hover,
 .bottomSheetHabito__botonGuardar:active {
-    color: #fff;
+    color: var(--dashboard-textoSobreAcento);
     background: none !important;
     transform: scale(1.1);
 }

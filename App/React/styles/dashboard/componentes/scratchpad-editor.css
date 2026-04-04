@@ -152,7 +152,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -1px; /* Solapamiento visual */
+    margin-top: calc(-1 * var(--dashboard-espacioHairline)); /* Solapamiento visual */
     opacity: 0;
     transition: opacity 0.2s;
 }

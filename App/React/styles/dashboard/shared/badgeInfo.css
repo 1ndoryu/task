@@ -60,10 +60,10 @@
 
 /* [034A-19] Variante compacta para subtareas: menos padding, menor height */
 .badgeInfo--compacto {
-    margin-left: 4px;
+    margin-left: var(--dashboard-espacioXs);
     height: 16px;
-    font-size: 0.65rem;
-    padding: 0 4px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: 0 var(--dashboard-espacioXs);
 }
 
 /* 

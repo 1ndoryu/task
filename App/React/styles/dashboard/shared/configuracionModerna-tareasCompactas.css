@@ -162,7 +162,7 @@
 
 /* [034A-19] Clases auxiliares para ListaHitos — mueven inline styles a CSS */
 .listaHitos__header {
-    margin-bottom: 10px;
+    margin-bottom: var(--dashboard-espacioSmMd);
 }
 
 .listaHitos__item {
@@ -174,7 +174,7 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--dashboard-espacioLg);
     overflow: hidden;
 }
 
@@ -187,35 +187,35 @@
 .listaHitos__pillPrioridad {
     padding: 2px 8px;
     height: 24px;
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .listaHitos__controles {
     display: flex;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
     opacity: 0;
 }
 
 .listaHitos__botonEliminar {
-    padding: 4px;
+    padding: var(--dashboard-espacioXs);
 }
 
 .listaHitos__inputNuevo {
     flex: 1;
-    margin-left: 8px;
+    margin-left: var(--dashboard-espacioSm);
     background: transparent;
     border: none;
     outline: none;
-    color: var(--dashboard-textoPrincipal);
-    font-size: 13px;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
 }
 
 .listaHitos__botonAgregar {
-    margin-top: 8px;
+    margin-top: var(--dashboard-espacioSm);
     border-style: dashed;
     width: 100%;
     justify-content: center;
-    padding: 6px;
+    padding: var(--dashboard-espacioS);
 }
 
 .adjuntoAudioControl {

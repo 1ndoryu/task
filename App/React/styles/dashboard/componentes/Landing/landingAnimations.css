@@ -33,7 +33,7 @@
 /* Check inactivo para hábitos no completados */
 .landingHabitCheck--inactivo {
     animation: none;
-    border-color: #444;
+    border-color: var(--dashboard-textoIndice);
 }
 
 .landingHabitCheck {
@@ -174,23 +174,23 @@
 
 /* [034A-19] Variantes de color por tipo de proyecto */
 .landingProjectIcon--verde {
-    background: rgba(16, 185, 129, 0.2);
-    color: #10b981;
+    background: rgba(var(--dashboard-exitoRgb), 0.2);
+    color: var(--dashboard-estadoExito);
 }
 
 .landingProjectIcon--naranja {
-    background: rgba(217, 119, 6, 0.2);
-    color: #d97706;
+    background: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.2);
+    color: var(--dashboard-estadoAdvertencia);
 }
 
 .landingProjectIcon--azul {
-    background: rgba(37, 99, 235, 0.2);
-    color: #3b82f6;
+    background: rgba(var(--dashboard-estadoInfoRgb), 0.2);
+    color: var(--dashboard-estadoInfo);
 }
 
 .landingProjectIcon--rojo {
-    background: rgba(225, 29, 72, 0.2);
-    color: #e11d48;
+    background: rgba(var(--dashboard-estadoMuyAltaRgb), 0.2);
+    color: var(--dashboard-estadoMuyAlta);
 }
 
 .landingProjectTitle {

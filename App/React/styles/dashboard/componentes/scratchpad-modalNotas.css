@@ -16,15 +16,15 @@
 .modalNotasGuardando {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    color: var(--dashboard-textoSecundario, #888);
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
 }
 
 /* Indicador sin guardar */
 .modalNotasModificada {
-    font-size: 11px;
-    color: var(--dashboard-estadoAdvertencia, #fbbf24);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAdvertencia);
 }
 
 .modalNotasBusqueda {

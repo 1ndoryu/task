@@ -159,7 +159,7 @@
     .panelDashboard.internaColumna--notas {
         border: none !important;
         background: transparent !important;
-        height: calc(100dvh - var(--dashboard-alturaHeaderMovil, 56px) - var(--dashboard-alturaNavInferior, 56px)) !important;
+        height: calc(100dvh - var(--dashboard-alturaHeaderMovil) - var(--dashboard-alturaNavInferior)) !important;
         display: flex;
         flex-direction: column;
     }
@@ -193,7 +193,7 @@
     .scratchpadTextarea--resaltado {
         height: 100% !important;
         /* Padding inferior para que el texto no quede cubierto por el nav */
-        padding-bottom: calc(var(--dashboard-alturaNavInferior, 56px) + var(--dashboard-espacioLg)) !important;
+        padding-bottom: calc(var(--dashboard-alturaNavInferior) + var(--dashboard-espacioLg)) !important;
     }
 
     /* Modal de notas expandido en mÃ³vil: fullscreen */

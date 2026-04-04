@@ -115,7 +115,7 @@
 .selectorFechaCalendario__grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+    gap: var(--dashboard-espacioHairline);
     padding: 0 var(--dashboard-espacioSm) var(--dashboard-espacioSm);
 }
 

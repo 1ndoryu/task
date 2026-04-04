@@ -23,7 +23,7 @@
 .configBarraInferiorLista {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--dashboard-espacioXs);
 }
 
 .configBarraInferiorItem {

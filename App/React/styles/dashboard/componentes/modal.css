@@ -89,7 +89,7 @@
     overflow-y: auto;
     flex: 1;
     min-height: 0;
-    padding: 20px; /* sentinel-disable-line: padding base de modal acordado con el usuario */
+    padding: var(--dashboard-espacioLgXl); /* sentinel-disable-line: padding base de modal acordado con el usuario */
 }
 
 /* 

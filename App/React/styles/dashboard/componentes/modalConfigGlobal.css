@@ -94,7 +94,7 @@
  * [233A-67] padding 20px y overflow auto agregados — desplazamiento de contenido largo */
 .configGlobalContenido {
     flex: 1;
-    padding: 20px; /* sentinel-disable-line */
+    padding: var(--dashboard-espacioLgXl); /* sentinel-disable-line */
     overflow: auto;
 }
 
@@ -209,11 +209,11 @@
     padding: var(--dashboard-espacioXs) 0;
 }
 
-/* [014A-10] Grupo — gap 10px */
+/* [014A-10] Grupo — gap token */
 .configMovilGrupo {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--dashboard-espacioSmMd);
 }
 
 /* [014A-10] Título sin padding lateral */
@@ -253,8 +253,8 @@
     margin-left: auto;
 }
 
-/* [014A-10] font-size 13px */
+/* [014A-10] font-size token */
 .configMovilItemTexto {
     font-weight: 500;
-    font-size: 13px;
+    font-size: var(--dashboard-tamanoBase);
 }

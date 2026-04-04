@@ -26,13 +26,13 @@
 .accionesHeaderFlex {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--dashboard-espacioLg);
 }
 
 /* Flex row compacta para tokens/urls con botón copiar */
 .filaConBotonCopiar {
     display: flex;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     align-items: center;
     width: 100%;
 }
@@ -40,14 +40,14 @@
 /* Variante con margin-top para filas no-primera */
 .filaConBotonCopiar--conMargen {
     display: flex;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     align-items: center;
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
 }
 
 /* Título del handle de arrastre */
 .handleArrastre__titulo {
-    font-size: 0.75rem;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 500;
     letter-spacing: -0.02em;
     color: var(--dashboard-textoNormal);
@@ -55,27 +55,27 @@
 
 /* Icono inline (dentro de texto, ej: icon + label) */
 .iconoInline {
-    margin-right: 4px;
+    margin-right: var(--dashboard-espacioXs);
     vertical-align: middle;
 }
 
 /* Fila con botón copiar compacta (max-width para inputs numéricos) */
 .filaConBotonCopiar--compacto {
     display: flex;
-    gap: 6px;
+    gap: var(--dashboard-espacioS);
     align-items: center;
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
     max-width: 160px;
 }
 
 /* Texto error de opción config */
 .descripcionOpcionConfig--error {
-    color: var(--dashboard-estadoError, #ef4444);
+    color: var(--dashboard-estadoError);
 }
 
 /* Gap compacto para detalles opción config */
 .detallesOpcionConfig--compacto {
-    gap: 8px;
+    gap: var(--dashboard-espacioSm);
 }
 
 /* Texto truncado genérico (overflow ellipsis) */
@@ -87,28 +87,28 @@
 
 /* Espaciador vertical pequeño */
 .espaciadorSm {
-    margin-top: 8px;
+    margin-top: var(--dashboard-espacioSm);
 }
 
 /* Icono con margin-right para botones */
 .iconoConMargen {
-    margin-right: 8px;
+    margin-right: var(--dashboard-espacioSm);
 }
 
 /* Margen izquierdo para error inline */
 .textoError--conMargen {
-    margin-left: 10px;
+    margin-left: var(--dashboard-espacioSmMd);
 }
 
 /* Nota informativa estilo italic */
 .notaAyuda {
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioXs);
     font-style: italic;
 }
 
 /* Play icon centrado (compensa el triángulo visual) */
 .playIconoCentrado {
-    margin-left: 2px;
+    margin-left: var(--dashboard-espacioXxs);
 }
