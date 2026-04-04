@@ -31,5 +31,3 @@
 - Me parece que el enfoque que tomaste con algunos sentinel-disable-next esta mal, en vez de solucionar el problema de raiz, colocaste sentinel-disable-next en muchos lugares en vez de mejorar la precisión de la extensión, se requiere una auditoría de todos los sentinel-disable-next para mejorar la precisión de la extensión. 
 
 - Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
-
-- Agrega una nueva prioridad "Muy baja" asegurate de que funcione en todos los contextos.
