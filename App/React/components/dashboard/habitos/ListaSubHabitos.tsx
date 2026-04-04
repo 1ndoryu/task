@@ -9,7 +9,7 @@
  */
 
 import {useState, useCallback, useRef, useEffect} from 'react';
-import {Check, Plus, Trash2, Pencil} from 'lucide-react';
+import {Check, Plus, Trash2, Pencil, Flame} from 'lucide-react';
 import type {SubHabito, NivelImportancia, FrecuenciaHabito, DatosNuevoSubHabito} from '../../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../../types/dashboard';
 import {obtenerFechaHoy} from '../../../utils/fecha';
@@ -108,8 +108,8 @@ function FilaSubHabito({subhabito, onToggle, onEliminar, onEditar}: FilaSubHabit
                 {/* Badge de racha si tiene */}
                 {!editando && subhabito.racha > 0 && (
                     <span className="badgeInfo badgeInfo--racha">
-                        {/* sentinel-disable-next-line emoji-en-codigo — emoji decorativo de racha */}
-                        <span className="badgeInfoTexto">🔥 {subhabito.racha}</span>
+                        {/* [044A-14] Reemplazado emoji por icono SVG Flame */}
+                        <span className="badgeInfoTexto"><Flame size={12} /> {subhabito.racha}</span>
                     </span>
                 )}
             </div>

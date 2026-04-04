@@ -6,6 +6,7 @@
 import type {TablaComparacionProps} from './types/arbitraje.types';
 import {formatearMoneda} from './utils/arbitraje.utils';
 import {Boton} from '../ui/Boton';
+import {Star} from 'lucide-react';
 
 export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaComparacionProps): JSX.Element {
     return (
@@ -22,8 +23,8 @@ export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaCompara
                 </thead>
                 <tbody>
                     <tr className={escenarioRealista.mejorRuta === 'A' ? 'rutaGanadora' : 'rutaPerdedora'}>
-                        {/* sentinel-disable-next-line emoji-en-codigo — indicador visual de mejor ruta */}
-                        <td>Ruta A{escenarioRealista.mejorRuta === 'A' && <span className="indicadorMejor">★</span>}</td>
+                        {/* [044A-14] Reemplazado emoji por icono SVG Star */}
+                        <td>Ruta A{escenarioRealista.mejorRuta === 'A' && <span className="indicadorMejor"><Star size={14} fill="currentColor" /></span>}</td>
                         <td>USD → Bs → USDT → PayPal</td>
                         <td>{formatearMoneda(escenarioRealista.gananciaRutaA)}</td>
                         <td>
@@ -33,8 +34,7 @@ export function TablaComparacion({escenarioRealista, onVerDetalle}: TablaCompara
                         </td>
                     </tr>
                     <tr className={escenarioRealista.mejorRuta === 'B' ? 'rutaGanadora' : 'rutaPerdedora'}>
-                        {/* sentinel-disable-next-line emoji-en-codigo */}
-                        <td>Ruta B{escenarioRealista.mejorRuta === 'B' && <span className="indicadorMejor">★</span>}</td>
+                        <td>Ruta B{escenarioRealista.mejorRuta === 'B' && <span className="indicadorMejor"><Star size={14} fill="currentColor" /></span>}</td>
                         <td>USD → Bs → PayPal directo</td>
                         <td>{formatearMoneda(escenarioRealista.gananciaRutaB)}</td>
                         <td>

@@ -1,22 +1,21 @@
 /*
  * Cabecera de la calculadora de arbitraje
  * Muestra título e indicador de viabilidad
+ * [044A-14] Reemplazados simbolos Unicode por iconos SVG de lucide-react
  */
 
 import type {CabeceraArbitrajeProps} from './types/arbitraje.types';
+import {Check, AlertTriangle, X} from 'lucide-react';
 
 export function CabeceraArbitraje({titulo, viabilidad}: CabeceraArbitrajeProps): JSX.Element {
-    const obtenerIcono = (): string => {
+    const obtenerIcono = (): JSX.Element => {
         switch (viabilidad.estado) {
             case 'viable':
-                /* sentinel-disable-next-line emoji-en-codigo — simbolo Unicode tipografico, no emoji real */
-                return '✓';
+                return <Check size={16} />;
             case 'riesgoso':
-                /* sentinel-disable-next-line emoji-en-codigo */
-                return '⚠';
+                return <AlertTriangle size={16} />;
             default:
-                /* sentinel-disable-next-line emoji-en-codigo */
-                return '✗';
+                return <X size={16} />;
         }
     };
 

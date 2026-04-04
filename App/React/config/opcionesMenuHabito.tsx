@@ -18,7 +18,6 @@ import {opcionesMenuImportancia} from '../utils/nivelesConfig';
 
 /* [2303A-41] Opciones de tiempo para posponer con duración.
  * Compartidas entre menú de tareas y hábitos. */
-/* sentinel-disable-next-line objeto-mutable-exportado — ya es 'as const' */
 export const POSPONER_IDS = {
     HOY: 'posponer',
     UNA_HORA: 'posponer-1h',
@@ -149,7 +148,6 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
  * IDs de opciones de menú conocidos para hábitos
  * Usar estos IDs evita typos y facilita el mantenimiento
  */
-/* sentinel-disable-next-line objeto-mutable-exportado — ya es 'as const' */
 export const MENU_HABITO_IDS = {
     CONFIGURAR: 'configurar',
     TOGGLE: 'toggle',

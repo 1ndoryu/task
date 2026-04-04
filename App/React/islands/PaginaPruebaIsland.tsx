@@ -8,6 +8,7 @@
 
 import {useState, useEffect} from 'react';
 import {Boton} from '../components/ui';
+import {Check} from 'lucide-react';
 
 interface PaginaPruebaIslandProps {
     titulo?: string;
@@ -55,14 +56,11 @@ export function PaginaPruebaIsland({titulo = 'Página de Prueba', mensaje = 'El 
                     <div className="infoSistema">
                         <h2 className="subtituloInfo">Sistema OCP Validado</h2>
                         <ul className="listaValidacion">
-                            {/* sentinel-disable-next-line emoji-en-codigo — simbolo tipografico de validacion */}
-                            <li className="itemValidacion validado">✓ Island creada sin modificar appIslands.tsx</li>
-                            {/* sentinel-disable-next-line emoji-en-codigo */}
-                            <li className="itemValidacion validado">✓ Registrada en inicializarIslands.ts</li>
-                            {/* sentinel-disable-next-line emoji-en-codigo */}
-                            <li className="itemValidacion validado">✓ Ruta definida en pages.php</li>
-                            {/* sentinel-disable-next-line emoji-en-codigo */}
-                            <li className="itemValidacion validado">✓ Componente renderizado correctamente</li>
+                            {/* [044A-14] Reemplazados simbolos por iconos SVG Check */}
+                            <li className="itemValidacion validado"><Check size={14} /> Island creada sin modificar appIslands.tsx</li>
+                            <li className="itemValidacion validado"><Check size={14} /> Registrada en inicializarIslands.ts</li>
+                            <li className="itemValidacion validado"><Check size={14} /> Ruta definida en pages.php</li>
+                            <li className="itemValidacion validado"><Check size={14} /> Componente renderizado correctamente</li>
                         </ul>
                     </div>
                 </div>

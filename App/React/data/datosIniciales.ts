@@ -63,7 +63,6 @@ export const habitosIniciales: Habito[] = [
 export const tareasIniciales: Tarea[] = [
     {
         id: 1,
-        /* sentinel-disable-next-line emoji-en-codigo — emoji en texto visible para el usuario */
         texto: '👋 ¡Bienvenido! Explora el dashboard',
         completado: false,
         prioridad: 'alta',
@@ -98,7 +97,6 @@ export const tareasIniciales: Tarea[] = [
 /*
  * Notas iniciales del scratchpad - Nota de bienvenida Beta
  */
-/* sentinel-disable-next-line emoji-en-codigo — contenido Markdown con emojis decorativos, no se pueden reemplazar con SVG en strings */
 export const notasIniciales = `# ¡Bienvenido a la Beta de Nakomi Task! 🎉
 
 Gracias por unirte a nuestra primera beta abierta. Este proyecto está hecho con mucho cariño, pensando en una gestión de tareas y hábitos **inteligente y minimalista**.

@@ -119,7 +119,6 @@ export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: stri
         try {
             log.push(`[2] Modelo: ${modelo}`);
             const resultado = await calcularMacrosGroq(modelo, apiKeyGroq, descripcion);
-            /* sentinel-disable-next-line emoji-en-codigo — checkmark en log tecnico de proceso */
             log.push(`[3] ✓ ${modelo} — ${resultado.calorias}kcal P:${resultado.proteinas}g C:${resultado.carbohidratos}g G:${resultado.grasas}g A:${resultado.azucar}g`);
             return {
                 ...resultado,

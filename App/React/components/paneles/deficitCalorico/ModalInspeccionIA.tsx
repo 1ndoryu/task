@@ -31,7 +31,6 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
                     <div className="modalInspeccionLog">
                         {log.map((linea, index) => {
                             const esError = linea.startsWith('[X]') || linea.startsWith('[!]');
-                            /* sentinel-disable-next-line emoji-en-codigo — detecta lineas exitosas del log */
                             const esExito = linea.includes('✓');
                             const esInput = linea.startsWith('[1]');
 

@@ -7,6 +7,7 @@
 import type {ModalDetalleRutaProps} from './types/arbitraje.types';
 import {formatearMoneda, formatearNumero} from './utils/arbitraje.utils';
 import {Boton} from '../ui';
+import {X} from 'lucide-react';
 
 export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDetalleRutaProps): JSX.Element {
     /* Calcular pérdidas totales en el proceso de conversión */
@@ -27,10 +28,9 @@ export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDet
                         Desglose Ruta {ruta}
                         <span className="subtituloModal">{ruta === 'A' ? 'USD → Bs → USDT → PayPal' : 'USD → Bs → PayPal directo'}</span>
                     </h3>
-                    {/* sentinel-disable-next-line emoji-en-codigo — simbolo tipografico de cierre */}
+                    {/* [044A-14] Reemplazado emoji por icono SVG X */}
                     <Boton claseAdicional="botonCerrarModal" onClick={onCerrar} aria-label="Cerrar">
-                        {/* sentinel-disable-next-line emoji-en-codigo */}
-                        ✕
+                        <X size={16} />
                     </Boton>
                 </header>
 

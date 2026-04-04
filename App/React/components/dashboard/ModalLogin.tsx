@@ -8,7 +8,7 @@
 import {Modal} from '../shared/Modal';
 import {CampoTexto} from '../shared/CampoTexto';
 import {Boton} from '../ui';
-import {Chrome, LogIn} from 'lucide-react';
+import {Chrome, LogIn, AlertTriangle} from 'lucide-react';
 import '../../styles/dashboard/componentes/modalLogin.css';
 import {useModalLogin} from '../../hooks/dashboard/useModalLogin';
 
@@ -57,8 +57,8 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
 
                         {error && (
                             <div className="loginError">
-                            {/* sentinel-disable-next-line emoji-en-codigo — icono de advertencia en mensaje de error */}
-                                <span className="loginError__icono">⚠️</span>
+                                {/* [044A-14] Reemplazado emoji por icono SVG de lucide-react */}
+                                <span className="loginError__icono"><AlertTriangle size={16} /></span>
                                 <span className="loginError__texto">{error}</span>
                             </div>
                         )}

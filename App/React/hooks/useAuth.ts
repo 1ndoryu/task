@@ -123,10 +123,8 @@ export function useAuth(): UseAuthReturn {
                 const errString = JSON.stringify(e);
 
                 if (errorCode === '10' || errString.includes('"code":"10"') || errString.includes('"code":10')) {
-                    /* sentinel-disable-next-line emoji-en-codigo — emoji de advertencia en mensaje de error para usuario */
                     alertMsg = '⚠️ Error 10: Configuración Incorrecta\n\n' + '- Revisa el SHA-1 en Google Console vs Keystore.\n' + '- Verifica que "server_client_id" esté en strings.xml.\n' + '- Asegúrate de que el package name coincida.';
                 } else if (errorCode === '12500' || errString.includes('12500') || errorMessage.includes('12500')) {
-                    /* sentinel-disable-next-line emoji-en-codigo */
                     alertMsg = '⚠️ Error 12500: Sign In Failed\n\n' + 'Causas probables:\n' + '1. Email de soporte NO configurado en OAuth Consent Screen.\n' + '2. Tu email no está en "Test Users" (si la app no está publicada).\n' + '3. Falta SHA-1 del Debug Keystore en Google Console.\n' + '4. El dispositivo no tiene Google Play Services actualizado.';
                 } else {
                     // Si no es un error conocido, mostrar todo para depurar 'Authentication failed' genérico

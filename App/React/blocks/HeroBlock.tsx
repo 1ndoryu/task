@@ -89,7 +89,6 @@ export function HeroBlock({data}: BlockComponentProps<HeroBlockProps>): JSX.Elem
 /*
  * Definicion del bloque para el registro
  */
-/* sentinel-disable-next-line objeto-mutable-exportado — definicion de bloque para registro, no se muta */
 export const heroBlockDefinition: BlockDefinition<HeroBlockProps> = {
     type: 'hero',
     label: 'Hero Section',

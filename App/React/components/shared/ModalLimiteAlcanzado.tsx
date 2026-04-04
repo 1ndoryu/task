@@ -24,30 +24,24 @@ interface ModalLimiteAlcanzadoProps {
 /*
  * Configuración por tipo de entidad
  */
-const CONFIGURACION_ENTIDAD: Record<TipoEntidadLimite, {titulo: string; descripcion: string; icono: string}> = {
+/* [044A-14] Campo icono eliminado: antes usaba emojis como iconos pero nunca se renderizaba.
+ * El modal usa AlertTriangle para todos los tipos, suficiente para su proposito de advertencia. */
+const CONFIGURACION_ENTIDAD: Record<TipoEntidadLimite, {titulo: string; descripcion: string}> = {
     habitos: {
         titulo: 'Límite de hábitos alcanzado',
-        descripcion: 'Has alcanzado el máximo de hábitos permitidos en el plan gratuito.',
-        /* sentinel-disable-next-line emoji-en-codigo — emoji como icono decorativo de tipo de recurso */
-        icono: '📅'
+        descripcion: 'Has alcanzado el máximo de hábitos permitidos en el plan gratuito.'
     },
     tareasActivas: {
         titulo: 'Límite de tareas alcanzado',
-        descripcion: 'Has alcanzado el máximo de tareas activas permitidas en el plan gratuito.',
-        /* sentinel-disable-next-line emoji-en-codigo */
-        icono: '✓'
+        descripcion: 'Has alcanzado el máximo de tareas activas permitidas en el plan gratuito.'
     },
     proyectos: {
         titulo: 'Límite de proyectos alcanzado',
-        descripcion: 'Has alcanzado el máximo de proyectos permitidos en el plan gratuito.',
-        /* sentinel-disable-next-line emoji-en-codigo */
-        icono: '📁'
+        descripcion: 'Has alcanzado el máximo de proyectos permitidos en el plan gratuito.'
     },
     adjuntos: {
         titulo: 'Adjuntos no disponibles',
-        descripcion: 'La función de adjuntos está disponible exclusivamente para usuarios Premium.',
-        /* sentinel-disable-next-line emoji-en-codigo */
-        icono: '📎'
+        descripcion: 'La función de adjuntos está disponible exclusivamente para usuarios Premium.'
     }
 };
 
