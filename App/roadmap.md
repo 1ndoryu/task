@@ -15,10 +15,6 @@
 
 ## Tareas pendientes
 
-- boton boton--badge boton--mediano se esta usando en el boton de cambiar el entorno en el panel de grupos!! boton--badge NO SE USA PARA BOTONES QUE TIENEN TEXTOS!! ese boton tiene que ser boton boton--ghost boton--mediano
-
-- panelGruposFb__columnasContenedor se ve el boton diferente, no se ve centrado, tampoco selector-badge-contenedor, porque son botones dentro de un div??? hace que se vean mal! 
-
 - En Gestionar categorías se siguen usando emojis en vez de svg
 
 - Las configuraciones muestaran configuraciones de plugin que estan desactivados, no deberían.
