@@ -235,6 +235,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    /* varsense-disable-next-line — viewport unit intencional para modal buscador */
     padding-top: 15vh;
 }
 

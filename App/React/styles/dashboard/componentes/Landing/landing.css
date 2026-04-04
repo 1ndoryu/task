@@ -98,6 +98,7 @@
     justify-content: space-between;
     align-items: flex-end;
     width: 100%;
+    /* varsense-disable-next-line — viewport unit intencional para hero section */
     padding-top: 35vh;
     margin-bottom: calc(var(--dashboard-espacioXl) * 2);
     gap: var(--dashboard-espacioXl);

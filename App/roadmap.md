@@ -15,8 +15,6 @@
 
 ## Tareas pendientes
 
-- Resolver todo lo que hay en Agente\prevencion y reinstalar la extension.
-
 - boton boton--badge boton--mediano se esta usando en el boton de cambiar el entorno en el panel de grupos!! boton--badge NO SE USA PARA BOTONES QUE TIENEN TEXTOS!! ese boton tiene que ser boton boton--ghost boton--mediano
 
 - panelGruposFb__columnasContenedor se ve el boton diferente, no se ve centrado, tampoco selector-badge-contenedor, porque son botones dentro de un div??? hace que se vean mal! 
@@ -35,3 +33,7 @@
 - Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
 
 - Agrega una nueva prioridad "Muy baja" asegurate de que funcione en todos los contextos.
+
+- El arrastre no funciona bien, al arrastrar se abre el modal de configurar de ese habito en vez de moverse. 
+
+- Un bug grave ha sucedido, muy probablmente por lo del arrastre, tengo varios habitos y esos habitos ahora tienen cientos de subhabitos (dice 0/56) o sea varios habitos tienen varias subtareas con el nombre del mismo habito, pero al abrir la configuracion esos subhabitos no aparecen en "Subhábitos" asi que supongo que es algo que se puede arreglar, se necesita corregir urgente
