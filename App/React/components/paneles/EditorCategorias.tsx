@@ -4,14 +4,15 @@
  * Lógica extraída a useEditorCategorias. */
 /* sentinel-disable-file css-inline — backgroundColor es dinámico por usuario, no puede ser clase CSS */
 
-import {Plus, Trash2, ChevronUp, Save} from 'lucide-react';
+import {Plus, Trash2, ChevronUp, Save, FolderOpen} from 'lucide-react';
 import {icons} from 'lucide-react';
 import {Boton, Input} from '../ui';
 import {useEditorCategorias, ICONOS_PRESET, COLORES_PRESET} from '../../hooks/paneles/useEditorCategorias';
 import type {CategoriaGrupoFb} from '../../stores/gruposFbStore';
 
 /* [034A-13] Renderiza un icono lucide por su nombre kebab-case.
- * Convierte 'book-open' → 'BookOpen' para buscar en el registro de iconos. */
+ * Convierte 'book-open' → 'BookOpen' para buscar en el registro de iconos.
+ * [044A-17] Fallback a FolderOpen SVG en vez de <span> con texto/emoji raw. */
 function toPascalCase(str: string): string {
     return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 }
@@ -19,7 +20,7 @@ function toPascalCase(str: string): string {
 function IconoCategoria({nombre, size = 14}: {nombre: string; size?: number}): JSX.Element {
     const pascalName = toPascalCase(nombre);
     const LucideIcon = icons[pascalName as keyof typeof icons];
-    if (!LucideIcon) return <span>{nombre}</span>;
+    if (!LucideIcon) return <FolderOpen size={size} />;
     return <LucideIcon size={size} />;
 }
 
