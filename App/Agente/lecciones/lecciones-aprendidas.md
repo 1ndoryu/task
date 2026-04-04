@@ -28,6 +28,12 @@
 
 **Lección:** En Zustand persist, `onRehydrateStorage` es solo para efectos secundarios o modificaciones en memoria. Para que los cambios persistan, SIEMPRE usar `useStore.setState()` (disponible vía `setTimeout(() => ..., 0)` para asegurar que el store está inicializado). Nunca mutar state directamente si se espera que persist lo capture.
 
+## 2026-04-04 — Dedup solo en setHabitos no cubre todas las vías (044A-27)
+
+**Patrón del error:** La deduplicación de subhábitos estaba en `setHabitos` y `onRehydrateStorage`, pero `restaurarHabito`, `restaurarHabitos`, `toggleHabito` y todos los `set()` directos del store bypassean la lógica. La dedup por ID (`subIdsVistos`) en `useHabitosComoTareas` no servía porque los 56 duplicados tenían IDs únicos de `Date.now()`.
+
+**Lección:** Cuando un store Zustand tiene lógica de sanitización, NUNCA confiar en que solo se ejecute en un action específico. Agregar un `store.subscribe()` global como safety net que intercepte TODOS los cambios y sanitice. Además, la dedup en la capa de rendering es un safety net visual gratuito — incluso si el store tiene basura, el usuario no la ve. Finalmente, la dedup server-side (PHP) es la última línea de defensa: impide que datos corruptos se persistan en la BD.
+
 **Lección 2:** Cuando se deduplica por ID, considerar que los IDs pueden haber colisionado (ej: `Date.now()` llamado en el mismo milisegundo). La dedup por ID debe distinguir: mismo ID + mismo nombre = duplicado real (descartar) vs mismo ID + nombre diferente = colisión (reasignar nuevo ID). Eliminar ciegamente por ID destruye datos válidos.
 
 **Fix correcto:** Calcular el tamaño de celda dinámicamente en JS basado en el ancho real del contenedor (ResizeObserver) y pasar como CSS variable `--mapa-calor-tamano-celda`. Así el grid siempre llena 100% independientemente del tamaño del contenedor.

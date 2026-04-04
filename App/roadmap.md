@@ -16,4 +16,4 @@
 
 ## Tareas pendientes
 
-- Fix definitivo subhábitos duplicados (044A-27): 56 copias siguen apareciendo. Dedup imposible de bypasear en 3 capas.
+(vacío)
