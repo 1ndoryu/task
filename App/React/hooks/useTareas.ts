@@ -445,22 +445,30 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
      * Reordenar tareas (para drag & drop)
      * Fusiona las tareas reordenadas con las existentes que no están en la lista
      * Esto permite reordenar tareas de un proyecto sin perder las de otros proyectos
+     *
+     * [044A-12] Filtra tareas virtuales de hábitos (IDs negativos) que vienen
+     * de tareasConHabitos via handleReorder. Sin este filtro, las tareas virtuales
+     * se persisten como reales y se multiplican en cada reorder, causando cientos
+     * de subtareas fantasma. También limpia parentId corrompidos que apuntan a
+     * IDs de hábitos virtuales.
      */
     const reordenarTareas = useCallback(
         (tareasReordenadas: Tarea[]) => {
             setTareas(prev => {
-                /* Crear un Set de IDs de las tareas reordenadas para búsqueda O(1) */
-                const idsReordenados = new Set(tareasReordenadas.map(t => t.id));
+                /* Excluir tareas virtuales de hábitos (IDs negativos) de ambas listas */
+                const soloReales = tareasReordenadas.filter(t => t.id > 0);
+                const prevLimpias = prev.filter(t => t.id > 0);
 
-                /* Conservar las tareas que NO están en la lista de reordenamiento */
-                /* Estas son tareas de otros proyectos/contextos que no deben perderse */
-                const tareasNoAfectadas = prev.filter(t => !idsReordenados.has(t.id));
+                const idsReordenados = new Set(soloReales.map(t => t.id));
+                const tareasNoAfectadas = prevLimpias.filter(t => !idsReordenados.has(t.id));
+                const tareasFinales = [...soloReales, ...tareasNoAfectadas];
 
-                /* Combinar: primero las reordenadas (con nuevo orden), luego las no afectadas */
-                const tareasFinales = [...tareasReordenadas, ...tareasNoAfectadas];
-
-                /* Recalcular campo orden para todas las tareas */
-                return tareasFinales.map((t, idx) => ({...t, orden: idx}));
+                /* Recalcular orden y restaurar parentId corrompidos (apuntan a IDs negativos) */
+                return tareasFinales.map((t, idx) => ({
+                    ...t,
+                    orden: idx,
+                    ...(t.parentId !== undefined && t.parentId < 0 ? {parentId: undefined} : {})
+                }));
             });
         },
         [setTareas]

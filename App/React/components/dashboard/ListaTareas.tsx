@@ -8,6 +8,7 @@
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
 import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Proyecto, Participante, GrupoTareas} from '../../types/dashboard';
+import {esTareaHabito} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
 import {InputNuevaTarea} from './InputNuevaTarea';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
@@ -170,7 +171,10 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                             value={tareaPadre}
                                             as="div"
                                             className={`posicionRelativa tareaPadreReorder ${tareaArrastrandoId === tareaPadre.id ? 'tareaPadreReorderArrastrando' : ''} ${tareaArrastrandoId === tareaPadre.id && esGestoSubtarea ? 'tareaPadreReorderGestoSubtarea' : ''}`}
-                                            dragListener={true}
+                                            /* [044A-12] Hábitos no son arrastrables: su orden lo define la urgencia,
+                                             * no el usuario. Arrastrarlos causaba persistir tareas virtuales
+                                             * (IDs negativos) en localStorage y abrir el modal de config. */
+                                            dragListener={!esTareaHabito(tareaPadre)}
                                             onPointerDown={(e: React.PointerEvent) => handleDragStart(tareaPadre.id, e)}
                                             onDragEnd={handleDragEnd}
                                             onDrag={(_: unknown, info: {offset: {x: number; y: number}}) => {

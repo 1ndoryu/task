@@ -112,6 +112,24 @@ export function useDashboard(): UseDashboardReturn {
         };
     }, []);
 
+    /* [044A-12] Limpieza de datos corrompidos: tareas virtuales de hábitos
+     * (IDs negativos) persistidas erróneamente en localStorage.
+     * Se ejecuta una vez al terminar la carga inicial. */
+    useEffect(() => {
+        if (cargandoDatosLocales) return;
+
+        setTareas(prev => {
+            const tieneVirtuales = prev.some(t => t.id < 0);
+            const tieneParentIdCorrupto = prev.some(t => t.parentId !== undefined && t.parentId < 0);
+
+            if (!tieneVirtuales && !tieneParentIdCorrupto) return prev;
+
+            return prev
+                .filter(t => t.id > 0)
+                .map(t => t.parentId !== undefined && t.parentId < 0 ? {...t, parentId: undefined} : t);
+        });
+    }, [cargandoDatosLocales, setTareas]);
+
     // 3. Gestión de Hábitos
     const {habitos, cargandoHabitos, toggleHabito, posponerHabito, posponerHabitoConTiempo, pausarHabito, actualizarHistorialHabito, actualizarOrdenTareasHabito, crearHabito, editarHabito, eliminarHabito, modalCrearHabitoAbierto, abrirModalCrearHabito, cerrarModalCrearHabito, habitoEditando, abrirModalEditarHabito, cerrarModalEditarHabito} = useDashboardHabitos({registrarAccion, mostrarMensaje});
 
