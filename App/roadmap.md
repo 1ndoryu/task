@@ -15,4 +15,4 @@
 
 ## Tareas pendientes
 
-- Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
+- https://github.com/1ndoryu/task solo tiene que ser esta rama! y los repositorios dentro que aca y en https://github.com/1ndoryu/task tienen que ser submodulos o subrepositorios no se como dice.
