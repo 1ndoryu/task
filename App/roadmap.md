@@ -6,6 +6,7 @@
 > **Servidor:** nakomi (Coolify) stack UUID: u00gc8ss4csc4cckkg4g00ks
 > **Deploy:** Coolify (.agent/coolify-manager-rs) sitio: nakomi
 > **Repositorio:** glorytemplate: rama glory-react-logic
+> **Espejo:** https://github.com/1ndoryu/task (rama main = glory-react-logic). Push: `git push task`. Submodulos: Glory, .agent/code-sentinel, .agent/varsense, .agent/coolify-manager-rs, .agent/coolify-manager.
 
 ## Herramientas del agente
 
@@ -15,4 +16,4 @@
 
 ## Tareas pendientes
 
-- https://github.com/1ndoryu/task solo tiene que ser esta rama! y los repositorios dentro que aca y en https://github.com/1ndoryu/task tienen que ser submodulos o subrepositorios no se como dice.
+- SIguen saliendo cientos de subhabitos en los habitos en el panel de ejecucion.
