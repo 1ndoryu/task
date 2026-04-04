@@ -25,9 +25,4 @@
 
 - Este repositorio duplicarlo en https://github.com/1ndoryu/task, es un espejo, seguiremos usando glorytemplate en esta rama, por favor ten cuidado de cualquier perdida de datos, tiene que duplicarse con cada commit y cada cosa.
 
--   {/* sentinel-disable-next-line emoji-en-codigo — icono de advertencia en mensaje de error */}
-    <span className="loginError__icono">⚠️</span> veo que hiciste cosas asi cuando claramente no es un falso positivo, realmente necesita un icono de bilioteca, no un emojoi!! Vais a tener que corregir todos los sentinel-disable-next-line emoji-en-codigo !!
-
-- Me parece que el enfoque que tomaste con algunos sentinel-disable-next esta mal, en vez de solucionar el problema de raiz, colocaste sentinel-disable-next en muchos lugares en vez de mejorar la precisión de la extensión, se requiere una auditoría de todos los sentinel-disable-next para mejorar la precisión de la extensión. 
-
 - Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
