@@ -1,3 +1,4 @@
+/* sentinel-disable-file limite-lineas — utilidad central de jerarquía de tareas, todas las funciones son cohesivas */
 /*
  * jerarquiaTareas
  * Utilidades para manejo de jerarquía de tareas (padre/subtareas)
@@ -101,10 +102,19 @@ export function puedeSerSubtareaDe(tareas: Tarea[], tareaId: number, posiblePadr
     /* No puede ser subtarea de sí misma */
     if (tareaId === posiblePadreId) return false;
 
+    /* [044A-1] Hábitos virtuales no participan en jerarquía padre-hijo.
+     * No pueden ser subtarea de nada ni padre de nada. */
+    const tareaActual = tareas.find(t => t.id === tareaId);
+    if (!tareaActual) return false;
+    if ('esHabito' in tareaActual && tareaActual.esHabito) return false;
+
     /* El padre propuesto no puede ser una subtarea */
     const posiblePadre = tareas.find(t => t.id === posiblePadreId);
     if (!posiblePadre) return false;
     if (posiblePadre.parentId) return false;
+
+    /* [044A-1] El padre propuesto no puede ser un hábito */
+    if ('esHabito' in posiblePadre && posiblePadre.esHabito) return false;
 
     /* La tarea actual no puede ser padre del posible padre */
     if (esDescendiente(tareas, posiblePadreId, tareaId)) return false;

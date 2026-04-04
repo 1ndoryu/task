@@ -182,8 +182,11 @@ export function useListaTareas({
     });
 
     /* Datos calculados */
+    /* [044A-1] tareasPrincipalesPendientes incluye TANTO tareas como hábitos.
+     * Antes filtraba hábitos con !esTareaHabito(t), lo que los excluía
+     * del Reorder.Group haciendo imposible arrastrarlos. */
     const tareasPrincipalesPendientes = useMemo(
-        () => pendientes.filter(t => !t.parentId && !esTareaHabito(t)),
+        () => pendientes.filter(t => !t.parentId),
         [pendientes]
     );
     const tareasHabitoPendientes = useMemo(

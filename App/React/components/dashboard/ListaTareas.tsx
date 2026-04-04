@@ -194,19 +194,8 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
                                 })}
                             </Reorder.Group>
 
-                            {tareasHabitoPendientes.map(tareaHabito => {
-                                const subtareasVisibles = obtenerSubtareasVisibles(tareaHabito.id);
-                                return (
-                                    <div key={tareaHabito.id} className="tareaHabitoContenedor">
-                                        {renderTareaItem(tareaHabito, false)}
-                                        {subtareasVisibles.map(subtarea => (
-                                            <div key={subtarea.id} className="subtareaContenedor">
-                                                {renderTareaItem(subtarea, true)}
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })}
+                            {/* [044A-1] Hábitos ahora se incluyen dentro del Reorder.Group
+                             * via tareasPrincipalesPendientes. Ya no se renderizan por separado. */}
                         </>
                     ) : (
                         <div className="listaTareasPendientes">
