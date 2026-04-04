@@ -11,6 +11,7 @@ import {Modal} from '../shared/Modal';
 import {BottomSheet} from '../shared/BottomSheet';
 import {Boton} from '../ui';
 import {useEsMovil} from '../../hooks/useEsMovil';
+import {usePluginsStore} from '../../stores/pluginsStore';
 import type {SeccionConfigGlobal} from '../../hooks/useModalesDashboard';
 
 /* Secciones de paneles */
@@ -50,8 +51,12 @@ const SECCIONES_SIDEBAR: ItemSidebar[] = [
     {id: 'backups', nombre: 'Copias', icono: <Database size={14} />, grupo: 'Avanzado'}
 ];
 
-/* Obtener grupos únicos en orden */
-const GRUPOS = [...new Set(SECCIONES_SIDEBAR.map(s => s.grupo))];
+/* [044A-18] Secciones que dependen de un plugin activo.
+ * Si el plugin asociado no esta activo, la seccion se oculta del sidebar. */
+const SECCION_PLUGIN_MAP: Partial<Record<SeccionConfigGlobal, string>> = {
+    gruposFb: 'gruposFb',
+    panelIA: 'ia-asistente'
+};
 
 /* Título visible para cada sección */
 const TITULOS_SECCION: Record<SeccionConfigGlobal, string> = {
@@ -108,6 +113,15 @@ export function ModalConfiguracionGlobal({estaAbierto, onCerrar, seccionInicial,
     /* En móvil: null = mostrar tabs, string = mostrar contenido expandido */
     const [seccionMovil, setSeccionMovil] = useState<SeccionConfigGlobal | null>(null);
 
+    /* [044A-18] Filtrar secciones de plugins desactivados */
+    const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+    const seccionesVisibles = SECCIONES_SIDEBAR.filter(s => {
+        const pluginRequerido = SECCION_PLUGIN_MAP[s.id];
+        if (!pluginRequerido) return true;
+        return pluginsActivos.includes(pluginRequerido);
+    });
+    const gruposVisibles = [...new Set(seccionesVisibles.map(s => s.grupo))];
+
     /* Sincronizar sección cuando se abre con una diferente
      * [014A-14] En móvil, si se abre con sección específica, ir directo
      * a esa sección sin mostrar la lista completa.
@@ -140,10 +154,10 @@ export function ModalConfiguracionGlobal({estaAbierto, onCerrar, seccionInicial,
                     ) : (
                         /* Fase 1: Lista de secciones como botones */
                         <div className="configMovilSecciones">
-                            {GRUPOS.map(grupo => (
+                            {gruposVisibles.map(grupo => (
                                 <div key={grupo} className="configMovilGrupo">
                                     <div className="configMovilGrupoTitulo">{grupo}</div>
-                                    {SECCIONES_SIDEBAR.filter(s => s.grupo === grupo).map(s => (
+                                    {seccionesVisibles.filter(s => s.grupo === grupo).map(s => (
                                         <Boton key={s.id} type="button" variante="ghost" claseAdicional="configMovilItem" onClick={() => setSeccionMovil(s.id)}>
                                             <span className="configMovilItemIcono">{s.icono}</span>
                                             <span className="configMovilItemTexto">{s.nombre}</span>
@@ -163,10 +177,10 @@ export function ModalConfiguracionGlobal({estaAbierto, onCerrar, seccionInicial,
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo={TITULOS_SECCION[seccion]} claseExtra="modalConfigGlobal">
             <div className="configGlobalLayout">
                 <nav className="configGlobalSidebar">
-                    {GRUPOS.map(grupo => (
+                    {gruposVisibles.map(grupo => (
                         <div key={grupo}>
                             <div className="configGlobalNavGrupo">{grupo}</div>
-                            {SECCIONES_SIDEBAR.filter(s => s.grupo === grupo).map(s => (
+                            {seccionesVisibles.filter(s => s.grupo === grupo).map(s => (
                                 <Boton key={s.id} type="button" variante="ghost" claseAdicional={`configGlobalNavItem ${seccion === s.id ? 'activo' : ''}`} onClick={() => setSeccion(s.id)}>
                                     {s.icono}
                                     <span>{s.nombre}</span>
