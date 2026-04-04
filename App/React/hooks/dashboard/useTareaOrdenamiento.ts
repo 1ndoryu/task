@@ -33,17 +33,24 @@ export function useTareaOrdenamiento({tareas, pendientes, completadas, onReorden
         (nuevoOrdenPrincipales: Tarea[]) => {
             if (!onReordenarTareas || !onEditarTarea) return;
 
+            /* [044A-25] Filtrar virtual tasks de hábitos (IDs negativos) al inicio.
+             * Sin esto, el loop de reconstrucción incluye hábitos virtuales y sus
+             * subhábitos virtuales, contaminando la lista antes de que reordenarTareas
+             * pueda filtrarlos. El filtro en reordenarTareas (044A-12) no alcanza
+             * porque la reconstrucción con obtenerSubtareas ya amplificó los datos. */
+            const principalesSoloReales = nuevoOrdenPrincipales.filter(t => t.id > 0);
+
             /* Calcular offset X del gesto horizontal */
             const offsetX = dragCurrentXRef.current - dragStartXRef.current;
 
             /* Si hay una tarea siendo arrastrada y hay offset significativo hacia la derecha */
             if (tareaArrastrandoId !== null && offsetX > UMBRAL_INDENT) {
                 /* Encontrar la nueva posición de la tarea arrastrada */
-                const nuevaPosicion = nuevoOrdenPrincipales.findIndex(t => t.id === tareaArrastrandoId);
+                const nuevaPosicion = principalesSoloReales.findIndex(t => t.id === tareaArrastrandoId);
 
                 if (nuevaPosicion > 0) {
                     /* La tarea de arriba será el nuevo padre */
-                    const posiblePadre = nuevoOrdenPrincipales[nuevaPosicion - 1];
+                    const posiblePadre = principalesSoloReales[nuevaPosicion - 1];
 
                     /* Validar que puede ser subtarea */
                     if (puedeSerSubtareaDe(tareas, tareaArrastrandoId, posiblePadre.id)) {
@@ -58,7 +65,7 @@ export function useTareaOrdenamiento({tareas, pendientes, completadas, onReorden
                         });
 
                         /* Reconstruir lista sin la tarea convertida (ahora es subtarea) */
-                        const nuevaListaSinConvertida = nuevoOrdenPrincipales.filter(t => t.id !== tareaArrastrandoId);
+                        const nuevaListaSinConvertida = principalesSoloReales.filter(t => t.id !== tareaArrastrandoId);
 
                         const nuevaListaPendientes: Tarea[] = [];
                         for (const padre of nuevaListaSinConvertida) {
@@ -76,7 +83,7 @@ export function useTareaOrdenamiento({tareas, pendientes, completadas, onReorden
             /* Comportamiento normal: reconstruir lista con jerarquía */
             const nuevaListaPendientes: Tarea[] = [];
 
-            for (const padre of nuevoOrdenPrincipales) {
+            for (const padre of principalesSoloReales) {
                 nuevaListaPendientes.push(padre);
                 /* Añadir subtareas de este padre en su orden original */
                 const subtareas = obtenerSubtareas(pendientes, padre.id);

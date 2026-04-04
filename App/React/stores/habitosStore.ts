@@ -102,32 +102,43 @@ export const useHabitosStore = create<HabitosStore>()(
 
                 /* Inicialización */
                 setHabitos: habitos => {
-                    /* [044A-24] Sanitizar subhábitos al recibir datos del servidor:
-                     * filtra sin nombre, reasigna IDs colisionados (mismo ID distinto nombre),
-                     * elimina duplicados verdaderos (mismo ID + mismo nombre), limita a 50.
-                     * Antes (044A-22) solo eliminaba por ID, destruyendo subhábitos distintos
-                     * que colisionaron por Date.now(). */
+                    /* [044A-25] Sanitizar subhábitos al recibir datos del servidor:
+                     * 1. filtra sin nombre
+                     * 2. reasigna IDs colisionados (mismo ID distinto nombre)
+                     * 3. elimina duplicados verdaderos (mismo ID + mismo nombre)
+                     * 4. elimina duplicados por nombre (distinto ID pero mismo nombre)
+                     * 5. limita a 50
+                     * La dedup por nombre es necesaria porque Date.now() generó IDs únicos
+                     * para cientos de copias del mismo subhábito (arrastrar hábitos). */
                     const sanitizados = habitos.map(h => {
                         if (!h.subhabitos || h.subhabitos.length === 0) return h;
                         const conNombre = h.subhabitos.filter(sh => sh.nombre && sh.nombre.trim());
+                        /* Paso 1: resolver colisiones de ID */
                         const idsVistos = new Map<number, string>();
-                        const resultado: SubHabito[] = [];
-                        let huboColision = false;
+                        const sinColisionId: SubHabito[] = [];
                         for (const sh of conNombre) {
                             const nombreExistente = idsVistos.get(sh.id);
                             if (nombreExistente === undefined) {
                                 idsVistos.set(sh.id, sh.nombre);
-                                resultado.push(sh);
+                                sinColisionId.push(sh);
                             } else if (nombreExistente !== sh.nombre) {
-                                /* Colisión de ID con nombre diferente: reasignar ID */
-                                const nuevoId = Date.now() * 1000 + Math.floor(Math.random() * 1000) + resultado.length;
-                                resultado.push({...sh, id: nuevoId});
-                                huboColision = true;
+                                const nuevoId = Date.now() * 1000 + Math.floor(Math.random() * 1000) + sinColisionId.length;
+                                sinColisionId.push({...sh, id: nuevoId});
                             }
                             /* Mismo ID + mismo nombre = duplicado verdadero, se descarta */
                         }
+                        /* Paso 2: dedup por nombre (conservar el primero con cada nombre) */
+                        const nombresVistos = new Set<string>();
+                        const resultado: SubHabito[] = [];
+                        for (const sh of sinColisionId) {
+                            const nombreNorm = sh.nombre.trim().toLowerCase();
+                            if (!nombresVistos.has(nombreNorm)) {
+                                nombresVistos.add(nombreNorm);
+                                resultado.push(sh);
+                            }
+                        }
                         const final = resultado.slice(0, 50);
-                        if (final.length === h.subhabitos.length && !huboColision) return h;
+                        if (final.length === h.subhabitos.length) return h;
                         return {...h, subhabitos: final};
                     });
                     set({habitos: sanitizados, inicializado: true}, false, 'setHabitos');
@@ -590,6 +601,10 @@ export const useHabitosStore = create<HabitosStore>()(
                     /* [044A-22] Límite de subhábitos por hábito para prevenir crecimiento descontrolado */
                     if ((habito.subhabitos || []).length >= 50) return null;
 
+                    /* [044A-25] No permitir dos subhábitos con el mismo nombre en el mismo hábito */
+                    const nombreNorm = datos.nombre.trim().toLowerCase();
+                    if ((habito.subhabitos || []).some(sh => sh.nombre.trim().toLowerCase() === nombreNorm)) return null;
+
                     const hoy = obtenerFechaHoy();
                     /* [044A-22] Sufijo aleatorio para evitar colisión de Date.now() en llamadas rápidas */
                     const nuevoSubHabito: SubHabito = {
@@ -741,16 +756,13 @@ export const useHabitosStore = create<HabitosStore>()(
                     habitos: state.habitos
                 }),
                 version: 1,
-                /* [263A-2] Limpiar subhábitos fantasma (sin nombre) al rehidratar.
-                 * Surgieron de estados corruptos en localStorage; sin esto reaparecen eternamente.
-                 * [044A-24] Corrige 044A-22: la dedup por ID destruía subhábitos distintos que
-                 * colisionaron por Date.now(). Ahora reasigna IDs en colisiones con nombre
-                 * diferente y fuerza re-persist a localStorage (antes la limpieza era efímera
-                 * porque mutaba state sin llamar setState → localStorage conservaba duplicados). */
+                /* [044A-25] Limpiar subhábitos al rehidratar desde localStorage.
+                 * Triple dedup: (1) sin nombre, (2) colisiones de ID, (3) nombre duplicado.
+                 * Fuerza re-persist vía setState para que localStorage se actualice.
+                 * Sin esto, la limpieza era efímera — localStorage conservaba duplicados. */
                 onRehydrateStorage: () => (state) => {
                     if (!state) return;
                     let totalEliminados = 0;
-                    let totalReasignados = 0;
                     const habitosLimpiados: Habito[] = state.habitos.map(habito => {
                         if (!habito.subhabitos || habito.subhabitos.length === 0) return habito;
                         const antesLength = habito.subhabitos.length;
@@ -758,35 +770,42 @@ export const useHabitosStore = create<HabitosStore>()(
                         const conNombre = habito.subhabitos.filter(
                             (sh: SubHabito) => sh.nombre && sh.nombre.trim()
                         );
-                        /* Paso 2: resolver colisiones de ID de forma segura.
+                        /* Paso 2: resolver colisiones de ID.
                          * Mismo ID + mismo nombre = duplicado verdadero → descartar.
                          * Mismo ID + nombre diferente = colisión de Date.now() → reasignar ID. */
                         const idsVistos = new Map<number, string>();
-                        const unicos: SubHabito[] = [];
+                        const sinColisionId: SubHabito[] = [];
                         for (const sh of conNombre) {
                             const nombreExistente = idsVistos.get(sh.id);
                             if (nombreExistente === undefined) {
                                 idsVistos.set(sh.id, sh.nombre);
-                                unicos.push(sh);
+                                sinColisionId.push(sh);
                             } else if (nombreExistente !== sh.nombre) {
-                                const nuevoId = Date.now() * 1000 + Math.floor(Math.random() * 1000) + unicos.length;
-                                unicos.push({...sh, id: nuevoId});
-                                totalReasignados++;
+                                const nuevoId = Date.now() * 1000 + Math.floor(Math.random() * 1000) + sinColisionId.length;
+                                sinColisionId.push({...sh, id: nuevoId});
                             }
-                            /* Mismo ID + mismo nombre → duplicado verdadero, ignorar */
                         }
-                        /* Paso 3: limitar a 50 subhábitos por hábito */
-                        const resultado = unicos.slice(0, 50);
-                        totalEliminados += antesLength - resultado.length;
-                        if (resultado.length === antesLength && totalReasignados === 0) return habito;
-                        return {...habito, subhabitos: resultado};
+                        /* Paso 3: dedup por nombre (conservar el primero con cada nombre) */
+                        const nombresVistos = new Set<string>();
+                        const resultado: SubHabito[] = [];
+                        for (const sh of sinColisionId) {
+                            const nombreNorm = sh.nombre.trim().toLowerCase();
+                            if (!nombresVistos.has(nombreNorm)) {
+                                nombresVistos.add(nombreNorm);
+                                resultado.push(sh);
+                            }
+                        }
+                        /* Paso 4: limitar a 50 subhábitos por hábito */
+                        const final = resultado.slice(0, 50);
+                        totalEliminados += antesLength - final.length;
+                        if (final.length === antesLength) return habito;
+                        return {...habito, subhabitos: final};
                     });
-                    if (totalEliminados > 0 || totalReasignados > 0) {
+                    if (totalEliminados > 0) {
                         console.warn(
-                            `[HabitosStore] onRehydrate: ${totalEliminados} eliminados, ${totalReasignados} IDs reasignados`
+                            `[HabitosStore] onRehydrate: ${totalEliminados} subhábitos eliminados (fantasma/duplicados)`
                         );
-                        /* Forzar setState para que persist escriba los cambios a localStorage.
-                         * Sin esto, la limpieza era efímera (mutación directa no dispara persist). */
+                        /* Forzar setState para que persist escriba los cambios a localStorage */
                         setTimeout(() => {
                             useHabitosStore.setState({habitos: habitosLimpiados});
                         }, 0);
