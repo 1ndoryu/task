@@ -131,6 +131,7 @@ class ActividadRepository
 
         $detalle = [];
         foreach ($results as $row) {
+            // sentinel-disable-next-line json-decode-inseguro — datos confiables de BD en getter
             $detalles = $row['detalles'] ? json_decode($row['detalles'], true) : null;
             /* Obtener y descifrar nombre del elemento */
             $elementoNombre = $row['tarea_texto'] ?? $row['habito_nombre'] ?? $row['nota_titulo'] ?? ($detalles['elementoNombre'] ?? null);

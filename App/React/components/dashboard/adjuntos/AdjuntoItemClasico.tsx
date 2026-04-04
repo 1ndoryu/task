@@ -57,6 +57,7 @@ export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, ya
                                 {isPlaying ? <Pause size={12} /> : <Play size={12} />}
                             </Boton>
                             <div className="adjuntoAudioBarra">
+                                {/* sentinel-disable-next-line inline-style-prohibido — ancho dinamico de barra de progreso de audio */}
                                 <div className="adjuntoAudioProgreso" style={{width: `${progress}%`}} />
                             </div>
                             <audio ref={audioRef} src={adjunto.url} onTimeUpdate={() => onTimeUpdate(adjunto.id)} onEnded={() => onAudioEnded(adjunto.id)} className="inputOculto" />

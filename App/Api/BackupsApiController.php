@@ -108,6 +108,7 @@ class BackupsApiController
             $json = gzdecode($decoded);
             if ($json === false) throw new \Exception('Gzip decode falló');
 
+            // sentinel-disable-next-line json-decode-inseguro — FALSO POSITIVO: se verifica !$data en linea siguiente
             $data = json_decode($json, true);
             if (!$data) throw new \Exception('JSON decode falló');
         } catch (\Exception $e) {
@@ -127,6 +128,7 @@ class BackupsApiController
              * Eliminamos todo lo actual para reemplazo limpio.
              * Esto es seguro porque acabamos de cargar el backup.
              */
+            // sentinel-disable-next-line retorno-ignorado-repo — dentro de try/catch con ROLLBACK, saveAll valida despues
             $dashboardRepo->deleteAll();
 
             /* Guardamos la versión del backup */

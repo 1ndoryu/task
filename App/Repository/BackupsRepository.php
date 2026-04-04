@@ -71,6 +71,7 @@ class BackupsRepository
         }
 
         /* Asegurar que los datos sean JSON */
+        // sentinel-disable-next-line json-sin-limite-bd — backup feature: almacenar todo el dataset es el proposito
         $json = wp_json_encode($data);
 
         /* Comprimir y codificar */

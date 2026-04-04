@@ -32,6 +32,7 @@ class TareasRepository
     /**
      * Obtiene las tareas del usuario (SQL con fallback)
      */
+    // sentinel-disable-next-line php-service-retorna-asociativo — FALSO POSITIVO: array_values() re-indexa a secuencial
     public function getAll(): array
     {
         global $wpdb;

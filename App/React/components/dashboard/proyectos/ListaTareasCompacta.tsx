@@ -93,7 +93,7 @@ export function ListaTareasCompacta({tareas, onToggleTarea}: ListaTareasCompacta
 
         return (
             <div className="tareaItemCompactoContenedor">
-                {/* sentinel-disable inline-style-prohibido */}
+                {/* sentinel-disable-next-line inline-style-prohibido — padding dinamico segun nivel de anidacion */}
                 <div className={`tareaItemCompacto ${tarea.completado ? 'tareaItemCompacto--completada' : ''}`} style={{paddingLeft: `${nivel * 12}px`}}>
                     <Boton
                         variante="icono"

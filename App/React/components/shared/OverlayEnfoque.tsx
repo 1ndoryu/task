@@ -28,6 +28,7 @@ export function OverlayEnfoque({estaActivo, onCerrar, children, titulo}: Overlay
     if (!estaActivo) return null;
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — ES el overlay de enfoque primitivo del sistema */
         <div id="overlay-enfoque" className={`overlayEnfoque ${bloqueado ? 'overlayEnfoque--bloqueado' : ''}`} onClick={manejarClickOverlay}>
             <div className="overlayEnfoqueContenedor">
                 <div className="overlayEnfoqueHeader">

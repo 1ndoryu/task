@@ -92,7 +92,7 @@ export function EditorCategorias({categorias, onGuardar, onCerrar}: EditorCatego
                                         <span
                                             key={cl}
                                             className={`editorCategorias__colorMuestra ${cat.color === cl ? 'editorCategorias__colorMuestra--activo' : ''}`}
-                                            style={{backgroundColor: cl}}
+                                            style={{backgroundColor: cl}} /* sentinel-disable inline-style-prohibido — color dinamico de preset */
                                             onClick={() => { actualizar(cat.key, 'color', cl); togglePicker('color', cat.key); }}
                                             role="button"
                                             tabIndex={0}

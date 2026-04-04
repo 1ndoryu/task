@@ -203,6 +203,7 @@ class CarpetasNotasRepository
         }
 
         /* Mover notas de esta carpeta a General (NULL) */
+        // sentinel-disable-next-line retorno-ignorado-repo — pre-delete cleanup, la eliminacion real se verifica despues
         $wpdb->update(
             $tableNotas,
             ['carpeta_id' => null],

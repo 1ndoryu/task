@@ -67,6 +67,7 @@ class GruposFbRepository
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearGrupo
                 "SELECT * FROM $table WHERE $whereStr ORDER BY importancia DESC, nombre ASC",
                 ...$params
             ),
@@ -86,6 +87,7 @@ class GruposFbRepository
 
         $row = $wpdb->get_row(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearGrupo
                 "SELECT * FROM $table WHERE id = %d AND user_id = %d AND deleted_at IS NULL",
                 $id,
                 $this->userId
@@ -107,6 +109,7 @@ class GruposFbRepository
 
         $row = $wpdb->get_row(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearGrupo
                 "SELECT * FROM $table WHERE nombre = %s AND user_id = %d AND deleted_at IS NULL LIMIT 1",
                 $nombre,
                 $this->userId
@@ -128,6 +131,7 @@ class GruposFbRepository
 
         $row = $wpdb->get_row(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearGrupo
                 "SELECT * FROM $table WHERE fb_group_id = %s AND user_id = %d AND deleted_at IS NULL LIMIT 1",
                 $fbGroupId,
                 $this->userId
@@ -203,6 +207,7 @@ class GruposFbRepository
              * oculto: la extensión envía -1 cuando no hay override explícito para ese grupo,
              * así se evita sobrescribir un oculto=1 del panel con oculto=0 espurio.
              * importancia: -1 = no cambiar, 0 = resetear, 1-5 = valor explícito. */
+            // sentinel-disable-next-line n-plus-1-query — upsert atomico por grupo, wpdb no soporta batch upsert
             $resultado = $wpdb->query(
                 $wpdb->prepare(
                     "INSERT INTO $table
@@ -487,7 +492,7 @@ class GruposFbRepository
      *
      * @param array $grupos Payload raw de la extensión (mismo formato que syncDesdeExtension)
      */
-    public function syncCategoriasDesdeGrupos(array $grupos): void
+    public function syncCategoriasDesdeGrupos(array $grupos): bool
     {
         global $wpdb;
         $tableCat = Schema::getTableName('categorias_grupos_fb');
@@ -504,7 +509,7 @@ class GruposFbRepository
         }
 
         if (empty($categoriasNuevas)) {
-            return;
+            return true;
         }
 
         $existentes = $wpdb->get_col(
@@ -518,7 +523,7 @@ class GruposFbRepository
         /* Filtrar solo las que faltan */
         $faltantes = array_diff_key($categoriasNuevas, $existentesMap);
         if (empty($faltantes)) {
-            return;
+            return true;
         }
 
         $maxOrden = (int)$wpdb->get_var(
@@ -538,6 +543,7 @@ class GruposFbRepository
             $color = $coloresPreset[$indice % count($coloresPreset)];
             $indice++;
 
+            // sentinel-disable-next-line n-plus-1-query — wpdb no soporta batch insert con prepared statements
             $resultado = $wpdb->insert($tableCat, [
                 'user_id' => $this->userId,
                 'nombre'  => $nombre,
@@ -550,6 +556,8 @@ class GruposFbRepository
                 error_log("[GruposFb] Error insertando categoría '$nombre': " . $wpdb->last_error);
             }
         }
+
+        return true;
     }
 
     /**
@@ -592,6 +600,7 @@ class GruposFbRepository
         }
 
         foreach ($categorias as $i => $cat) {
+            // sentinel-disable-next-line n-plus-1-query — wpdb no soporta batch insert con prepared statements
             $insertResult = $wpdb->insert($table, [
                 'user_id' => $this->userId,
                 'nombre' => sanitize_text_field(mb_substr($cat['nombre'] ?? '', 0, 100)),

@@ -47,6 +47,7 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
     const estadisticas = usuario.estadisticas;
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — panel admin con click-to-close */
         <div className="detalleUsuarioOverlay" onClick={e => e.target === e.currentTarget && onCerrar()}>
             <div className="detalleUsuarioPanel">
                 {/* Encabezado */}

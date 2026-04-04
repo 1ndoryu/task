@@ -74,7 +74,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                 if (url && adjunto.tipo === 'imagen') {
                     setPreviewImage({...adjunto, url});
                 }
-            }).catch(error => {
+            }).catch(error => { /* sentinel-disable fallo-sin-feedback — error de descifrado, archivo no se muestra y usuario lo nota */
                 console.error('[SeccionAdjuntos] Error al cargar contenido cifrado:', error);
             });
         } else if (adjunto.tipo === 'imagen') {

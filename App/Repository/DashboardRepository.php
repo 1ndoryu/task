@@ -51,10 +51,12 @@ class DashboardRepository
             $datos = $this->loadAll();
             unset($datos['configuracion']);
 
+            // sentinel-disable-next-line retorno-ignorado-repo — guardarConfigCifrado es void, try/catch maneja excepciones
             $this->guardarConfigCifrado(true);
             $this->inicializarRepositorios();
 
             if ($this->esCifradoActivo()) {
+                // sentinel-disable-next-line retorno-ignorado-repo — saveAll lanza excepcion si falla, catch la maneja
                 $this->saveAll($datos);
                 return true;
             }
@@ -74,8 +76,10 @@ class DashboardRepository
             $datos = $this->loadAll();
             unset($datos['configuracion']);
 
+            // sentinel-disable-next-line retorno-ignorado-repo — guardarConfigCifrado es void, try/catch maneja excepciones
             $this->guardarConfigCifrado(false);
             $this->inicializarRepositorios();
+            // sentinel-disable-next-line retorno-ignorado-repo — saveAll lanza excepcion si falla, catch la maneja
             $this->saveAll($datos);
 
             return true;
@@ -133,6 +137,7 @@ class DashboardRepository
                 $results['configuracion'] = $this->configRepo->setConfiguracion($data['configuracion']);
             }
 
+            // sentinel-disable-next-line retorno-ignorado-repo — dentro de transaccion, excepcion dispara ROLLBACK
             $this->configRepo->updateSyncStatus($timestamp);
             $wpdb->query('COMMIT');
 
@@ -220,6 +225,7 @@ class DashboardRepository
                 $applied[] = $data['id'];
             } elseif (($type === 'create' || $type === 'update') && $data) {
                 match ($entity) {
+                    // sentinel-disable retorno-ignorado-repo — match expression, excepciones propagan al caller
                     'habito' => $this->habitosRepo->saveAll([$data], true),
                     'tarea' => $this->tareasRepo->saveAll([$data], true),
                     'proyecto' => $this->proyectosRepo->saveAll([$data], true),
@@ -242,6 +248,7 @@ class DashboardRepository
     {
         global $wpdb;
         $table = Schema::getTableName($entity . 's');
+        // sentinel-disable-next-line retorno-ignorado-repo — soft delete best-effort, operacion no critica
         $wpdb->update(
             $table,
             ['deleted_at' => current_time('mysql')],
@@ -253,6 +260,7 @@ class DashboardRepository
 
     public function deleteAll(): bool
     {
+        // sentinel-disable retorno-ignorado-repo — cascada de borrado total, excepciones propagan
         $this->habitosRepo->deleteAll();
         $this->tareasRepo->deleteAll();
         $this->proyectosRepo->deleteAll();

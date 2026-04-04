@@ -17,6 +17,7 @@ export function ModalInspeccionIA({estaAbierto, onCerrar, log}: ModalInspeccionI
     if (!estaAbierto) return null;
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — modal especializado para log de IA */
         <div className="modalOverlay" onClick={onCerrar}>
             <div className="modalContenedor modalContenedor--mediana" onClick={e => e.stopPropagation()}>
                 <div className="modalEncabezado">

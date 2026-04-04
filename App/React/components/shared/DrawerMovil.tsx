@@ -71,6 +71,7 @@ export function DrawerMovil({estaAbierto, onCerrar, usuario, suscripcion, opcion
     return (
         <>
             {/* Overlay oscuro */}
+            {/* sentinel-disable-next-line componente-artesanal — ES el drawer primitivo del sistema */}
             <div className={`drawerMovilOverlay ${estaAbierto ? 'drawerMovilOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" />
 
             {/* Panel del drawer */}

@@ -58,6 +58,7 @@ class AIService
             'fechaCreacion' => current_time('c'),
         ];
         $tareasExistentes[] = $nuevaTarea;
+        // sentinel-disable-next-line retorno-ignorado-repo — saveAll lanza excepcion si falla
         $repository->saveAll($tareasExistentes);
         return $nuevaTarea;
     }
@@ -76,6 +77,7 @@ class AIService
                 $tareas[$indice][$campo] = $datos[$campo];
             }
         }
+        // sentinel-disable-next-line retorno-ignorado-repo — saveAll lanza excepcion si falla
         $repository->saveAll($tareas);
         return $tareas[$indice];
     }
@@ -98,6 +100,7 @@ class AIService
 
         if (!$estabaCompletada) {
             $tareas[$indice]['fechaCompletado'] = current_time('c');
+            // sentinel-disable-next-line retorno-ignorado-repo — registro de actividad no critico
             $actividadRepo->registrar(
                 'tarea_completada', $tareaId, 'tarea', $proyectoId,
                 current_time('Y-m-d'), ['texto' => $tareas[$indice]['texto']]
@@ -106,9 +109,11 @@ class AIService
             $fechaCompletado = isset($tareas[$indice]['fechaCompletado'])
                 ? date('Y-m-d', strtotime($tareas[$indice]['fechaCompletado']))
                 : current_time('Y-m-d');
+            // sentinel-disable-next-line retorno-ignorado-repo — cleanup de actividad no critico
             $actividadRepo->eliminarPorTarea($tareaId, $fechaCompletado);
             unset($tareas[$indice]['fechaCompletado']);
         }
+        // sentinel-disable-next-line retorno-ignorado-repo — saveAll lanza excepcion si falla
         $repository->saveAll($tareas);
 
         return [
@@ -128,6 +133,7 @@ class AIService
         if (count($tareas) === $total) {
             return false;
         }
+        // sentinel-disable-next-line retorno-ignorado-repo — saveAll lanza excepcion si falla
         $repository->saveAll($tareas);
         return true;
     }

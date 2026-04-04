@@ -57,6 +57,7 @@ export function ModalLogin({estaAbierto, onCerrar, onLoginGoogle, onLoginCredent
 
                         {error && (
                             <div className="loginError">
+                            {/* sentinel-disable-next-line emoji-en-codigo — icono de advertencia en mensaje de error */}
                                 <span className="loginError__icono">⚠️</span>
                                 <span className="loginError__texto">{error}</span>
                             </div>

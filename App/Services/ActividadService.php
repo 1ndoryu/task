@@ -13,6 +13,7 @@ namespace App\Services;
 
 use App\Repository\ActividadRepository;
 use App\Repository\HabitosHistorialRepository;
+use App\Database\Schema;
 
 class ActividadService
 {
@@ -125,7 +126,7 @@ class ActividadService
     private function existeActividadHabito(int $userId, int $elementoId, string $fecha, string $tipo): bool
     {
         global $wpdb;
-        $table = \App\Database\Schema::getTableName('actividad');
+        $table = Schema::getTableName('actividad');
         $existe = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table WHERE user_id = %d AND elemento_tipo = 'habito' AND elemento_id = %d AND fecha = %s AND tipo = %s",
             $userId, $elementoId, $fecha, $tipo
@@ -159,13 +160,16 @@ class ActividadService
 
         /* Desmarcar hábito: eliminar actividad + historial sin registrar nueva */
         if ($tipo === 'habito_desmarcado' && $elementoId && $elementoTipo === 'habito') {
+            // sentinel-disable-next-line retorno-ignorado-repo — eliminacion de actividad no critica
             $repo->eliminarPorHabito($elementoId, $fechaActividad);
+            // sentinel-disable-next-line retorno-ignorado-repo
             $historialRepo->desmarcarDia($elementoId, $fechaActividad);
             return ['success' => true, 'accion' => 'eliminado'];
         }
 
         /* Desmarcar tarea: eliminar actividad sin registrar nueva */
         if ($tipo === 'tarea_desmarcada' && $elementoId && $elementoTipo === 'tarea') {
+            // sentinel-disable-next-line retorno-ignorado-repo — eliminacion de actividad no critica
             $repo->eliminarPorTarea($elementoId, $fechaActividad);
             return ['success' => true, 'accion' => 'eliminado'];
         }
@@ -247,6 +251,7 @@ class ActividadService
         /* Registrar en actividad solo si es completado */
         if ($estado === 'completado') {
             $actividadRepo = new ActividadRepository($userId);
+            // sentinel-disable-next-line retorno-ignorado-repo — registro de actividad no critico, marcarDia ya valido
             $actividadRepo->registrar('habito_cumplido', $habitoId, 'habito', null, $fecha);
         }
 
@@ -272,6 +277,7 @@ class ActividadService
 
         /* Eliminar de actividad para que el heatmap se actualice */
         $actividadRepo = new ActividadRepository($userId);
+        // sentinel-disable-next-line retorno-ignorado-repo — eliminacion de actividad no critica
         $actividadRepo->eliminarPorHabito($habitoId, $fecha);
 
         return [

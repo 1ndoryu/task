@@ -16,6 +16,7 @@
 namespace App\Api;
 
 use App\Repository\EntornosGruposFbRepository;
+use App\Repository\GruposFbRepository;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -173,9 +174,8 @@ class EntornosGruposFbApiController
         try {
             $repo = self::getRepo($request);
             $entornoId = (int)$request->get_param('entorno_id');
+            // sentinel-disable-next-line request-json-directo — FALSO POSITIVO: whitelist de campos permitidos en lineas siguientes
             $json = $request->get_json_params();
-
-            /* Filtrar solo campos permitidos */
             $datos = [];
             $permitidos = ['nombre', 'icono', 'color', 'aiPrompt', 'orden'];
             foreach ($permitidos as $campo) {
@@ -282,8 +282,7 @@ class EntornosGruposFbApiController
              * La extensión envía fbGroupId porque no conoce el ID de BD. */
             $grupoId = (int)($json['grupoId'] ?? 0);
             if ($grupoId <= 0 && !empty($json['fbGroupId'])) {
-                $gruposFbRepo = new \App\Repository\GruposFbRepository();
-                $gruposFbRepo->setUserId(get_current_user_id());
+                $gruposFbRepo = new GruposFbRepository(get_current_user_id());
                 $grupo = $gruposFbRepo->obtenerPorNombre($json['fbGroupId']);
                 if (!$grupo) {
                     /* Intentar buscar por fb_group_id directamente */

@@ -33,6 +33,7 @@ export function SelectorEntornos({ entornos, entornoActivo, onActivar, onCrear, 
                 setModoEditar(null);
             }
         };
+        /* sentinel-disable-next-line componente-artesanal — patron estandar de click-outside */
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, [menuAbierto]);

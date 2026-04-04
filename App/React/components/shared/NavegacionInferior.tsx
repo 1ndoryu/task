@@ -69,6 +69,7 @@ export function NavegacionInferior({paginaActiva, onCambiarPagina, onCrearRapido
 
     return (
         <>
+            {/* sentinel-disable-next-line componente-artesanal — overlay del menu FAB, parte del componente de navegacion */}
             {menuFabAbierto && <div className="navegacionInferiorOverlay" onClick={cerrarMenuFab} aria-hidden="true" />}
 
             {menuFabAbierto && (

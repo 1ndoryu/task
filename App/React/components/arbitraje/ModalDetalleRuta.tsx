@@ -19,6 +19,7 @@ export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDet
     const diferenciaConversion = ventaInicial - detalle.totalFinal;
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — modal especializado de arbitraje */
         <div className="fondoModal" onClick={onCerrar}>
             <div className="contenidoModal" onClick={e => e.stopPropagation()}>
                 <header className="cabeceraModal">
@@ -28,6 +29,7 @@ export function ModalDetalleRuta({ruta, detalle, costoTotal, onCerrar}: ModalDet
                     </h3>
                     {/* sentinel-disable-next-line emoji-en-codigo — simbolo tipografico de cierre */}
                     <Boton claseAdicional="botonCerrarModal" onClick={onCerrar} aria-label="Cerrar">
+                        {/* sentinel-disable-next-line emoji-en-codigo */}
                         ✕
                     </Boton>
                 </header>

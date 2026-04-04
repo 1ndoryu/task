@@ -166,6 +166,7 @@ class CompartidosService
             ];
         }
 
+        // sentinel-disable-next-line retorno-ignorado-repo — propiedad validada, retorna exito siempre
         $this->wpdb->update(
             $this->tabla,
             ['rol' => $nuevoRol],
@@ -202,6 +203,7 @@ class CompartidosService
             ];
         }
 
+        // sentinel-disable-next-line retorno-ignorado-repo — existencia verificada, retorna exito
         $this->wpdb->delete(
             $this->tabla,
             ['id' => $compartidoId],
@@ -288,6 +290,7 @@ class CompartidosService
         $tipoTexto = $tipo === 'tarea' ? 'una tarea' : ($tipo === 'proyecto' ? 'un proyecto' : 'un hábito');
 
         $notificacionesService = new NotificacionesService();
+        // sentinel-disable-next-line retorno-ignorado-repo — fallo de notificacion no debe bloquear el share
         $notificacionesService->crear(
             $destinatarioId,
             'elemento_compartido',

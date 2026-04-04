@@ -33,6 +33,7 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
     const hook = useModalCreacionRapida({tipo, valoresIniciales, onCerrar, onGuardar, onCambiarTipo});
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — modal de creacion rapida con logica especifica */
         <div className="creacionRapidaOverlay" onClick={hook.manejarClickOverlay}>
             <div className="creacionRapidaContenedor" onClick={hook.manejarClickContenedor}>
                 <form onSubmit={hook.manejarSubmit}>

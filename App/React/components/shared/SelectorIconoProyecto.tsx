@@ -92,6 +92,7 @@ export function SelectorIconoProyecto({iconoId, colorIcono, onCambio}: SelectorI
         };
 
         if (abierto) {
+            /* sentinel-disable-next-line componente-artesanal — patron estandar de click-outside para selector */
             document.addEventListener('mousedown', manejarClickFuera);
         }
 

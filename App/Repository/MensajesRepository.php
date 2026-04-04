@@ -62,6 +62,7 @@ class MensajesRepository
                 'tipoMensaje' => $row['tipo_mensaje'],
                 'contenido' => $row['contenido'],
                 'accionSistema' => $row['accion_sistema'],
+                // sentinel-disable-next-line json-decode-inseguro — datos confiables de BD en getter
                 'datosExtra' => $row['datos_extra'] ? json_decode($row['datos_extra'], true) : null,
                 'fechaCreacion' => $row['fecha_creacion'],
                 'esPropio' => (int)$row['usuario_id'] === $this->userId
@@ -175,6 +176,7 @@ class MensajesRepository
         global $wpdb;
         $table = Schema::getTableName('mensajes');
 
+        // sentinel-disable-next-line retorno-ignorado-repo — cleanup al eliminar elemento, retorna true siempre
         $wpdb->delete(
             $table,
             [
@@ -220,6 +222,7 @@ class MensajesRepository
         ));
 
         if ($existe) {
+            // sentinel-disable-next-line retorno-ignorado-repo — tracking de lectura, no critico
             $wpdb->update(
                 $tableLeidos,
                 ['ultimo_mensaje_leido' => $ultimoMensajeId],
@@ -228,6 +231,7 @@ class MensajesRepository
                 ['%d']
             );
         } else {
+            // sentinel-disable-next-line retorno-ignorado-repo — tracking de lectura, no critico
             $wpdb->insert(
                 $tableLeidos,
                 [

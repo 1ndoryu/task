@@ -32,6 +32,7 @@ class HabitosRepository
     /**
      * Obtiene los hábitos del usuario (SQL con fallback a Meta)
      */
+    // sentinel-disable-next-line php-service-retorna-asociativo — FALSO POSITIVO: array_values() re-indexa a secuencial
     public function getAll(): array
     {
         global $wpdb;
@@ -59,6 +60,7 @@ class HabitosRepository
         if (!empty($metaData)) {
             $habitos = $this->decodeData($metaData, []);
             if (!empty($habitos)) {
+                // sentinel-disable-next-line retorno-ignorado-repo — migracion fallback, reintenta en siguiente getAll()
                 $this->saveAll($habitos);
                 delete_user_meta($this->userId, self::META_HABITOS);
                 return $habitos;
@@ -251,6 +253,7 @@ class HabitosRepository
     public function deleteAll(): bool
     {
         global $wpdb;
+        // sentinel-disable-next-line retorno-ignorado-repo — cleanup completo, retorna true
         $wpdb->delete(Schema::getTableName('habitos'), ['user_id' => $this->userId]);
         return true;
     }

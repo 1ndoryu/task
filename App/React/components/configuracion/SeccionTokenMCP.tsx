@@ -28,7 +28,7 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
             await navigator.clipboard.writeText(tokenGenerado);
             setCopiado(true);
             setTimeout(() => setCopiado(false), 2000);
-        } catch (error) {
+        } catch (error) { /* sentinel-disable fallo-sin-feedback — tiene alert() como feedback */
             console.error('Error al copiar token:', error);
             alert('No se pudo copiar el token. Cópialo manualmente.');
         }

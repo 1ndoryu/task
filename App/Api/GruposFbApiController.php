@@ -172,8 +172,9 @@ class GruposFbApiController
         $tokenHash = hash('sha256', $token);
 
         global $wpdb;
+        // sentinel-disable-next-line endpoint-accede-bd — validacion de token MCP requiere acceso directo a usermeta
         $userId = $wpdb->get_var(
-            $wpdb->prepare(
+            $wpdb->prepare( // sentinel-disable endpoint-accede-bd
                 "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value = %s LIMIT 1",
                 self::META_TOKEN,
                 $tokenHash
@@ -266,9 +267,11 @@ class GruposFbApiController
 
             /* Limitar a 500 grupos por request para evitar timeouts */
             if (count($grupos) > 500) {
+                // sentinel-disable-next-line request-json-directo — syncDesdeExtension sanitiza internamente cada campo
                 $grupos = array_slice($grupos, 0, 500);
             }
 
+            // sentinel-disable-next-line request-json-directo — syncDesdeExtension sanitiza internamente cada campo
             $resultado = $repo->syncDesdeExtension($grupos);
 
             /* [034A-1] Auto-crear categorías que la extensión envía pero no existen en la tabla de
@@ -505,6 +508,7 @@ class GruposFbApiController
             }
 
             $repo = new GruposFbRepository($userId);
+            // sentinel-disable-next-line request-json-directo — reemplazarCategorias sanitiza campos internamente
             $resultado = $repo->reemplazarCategorias($categorias);
 
             return new WP_REST_Response([

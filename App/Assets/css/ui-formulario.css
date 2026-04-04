@@ -297,8 +297,8 @@
     border-color: var(--dashboard-acento);
 }
 
-/* sentinel-disable-next-line emoji-en-codigo — checkmark tipografico para checkbox CSS */
 .checkbox:checked + .checkboxMarca::after {
+    /* sentinel-disable-next-line emoji-en-codigo — checkmark tipografico para checkbox CSS */
     content: '✓';
     color: var(--dashboard-textoSobreAcento);
     font-size: var(--dashboard-tamanoBase);

@@ -102,6 +102,7 @@ export function SelectorVentanaOportunidad({ventana, onChange}: SelectorVentanaO
             {menuAbierto && (
                 <>
                     {/* Overlay para móvil (solo visible vía CSS @media) */}
+                    {/* sentinel-disable-next-line componente-artesanal — overlay condicional solo para mobile via CSS */}
                     <div className="selectorVentanaOportunidad__overlay" onClick={() => setMenuAbierto(false)} />
 
                     <div className="selectorVentanaOportunidad__menu" ref={menuRef}>

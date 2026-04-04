@@ -27,6 +27,7 @@ export function EncabezadoBuscador({tareas, habitos, proyectos, onSeleccionarTar
 
             {/* MODAL BUSCADOR MOVIL */}
             {mostrarModal && (
+                /* sentinel-disable-next-line componente-artesanal — modal de busqueda movil con posicionamiento especifico */
                 <div className="buscadorModalOverlay" onClick={onCerrarModal}>
                     <div className="buscadorModalContenido" onClick={e => e.stopPropagation()}>
                         <div className="buscadorModalHeader">

@@ -167,6 +167,7 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo: _titulo}: 
     const contenido = (
         <>
             {/* Overlay oscuro */}
+            {/* sentinel-disable-next-line componente-artesanal — ES el bottom sheet primitivo del sistema */}
             <div className={`bottomSheetOverlay ${estaAbierto ? 'bottomSheetOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" />
 
             {/* Panel inferior */}

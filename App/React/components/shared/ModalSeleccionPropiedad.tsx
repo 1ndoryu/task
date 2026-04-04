@@ -49,6 +49,7 @@ export function ModalSeleccionPropiedad({estaAbierto, titulo: _titulo, opciones,
     /* [024A-7] Removida cabecera innecesaria. Cerrar via overlay click o seleccion. */
     /* Usar Portal para renderizar fuera del BottomSheet */
     const contenidoModal = (
+        /* sentinel-disable-next-line componente-artesanal — modal con portal y posicionamiento especifico */
         <div className="modalSeleccionPropiedadOverlay" onClick={manejarClickOverlay}>
             <div className="modalSeleccionPropiedad">
                 {/* Lista de opciones */}

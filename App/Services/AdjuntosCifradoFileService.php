@@ -88,6 +88,7 @@ class AdjuntosCifradoFileService
             $contenido = $this->descifrarArchivo($contenidoCifrado);
 
             /* Guardar en cache para futuras peticiones */
+            // sentinel-disable-next-line retorno-ignorado-repo — cache write, no critico
             $this->guardarEnCache($nombreArchivo, $contenido);
 
             return $contenido;

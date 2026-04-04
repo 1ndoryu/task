@@ -125,7 +125,9 @@ class AdjuntosService
         $nombreFinal = $nombreBase . $extension;
         $rutaCompleta = trailingslashit($this->fileSystem->getRutaUsuario()) . $nombreFinal;
 
+        // sentinel-disable-next-line retorno-ignorado-repo — FALSO POSITIVO: retorno capturado en $exito via ternario
         $exito = $debeCifrar
+            // sentinel-disable-next-line retorno-ignorado-repo — FALSO POSITIVO: retorno capturado en $exito
             ? $this->cifradoFile->guardarArchivoCifrado($archivo['tmp_name'], $rutaCompleta)
             : move_uploaded_file($archivo['tmp_name'], $rutaCompleta);
 

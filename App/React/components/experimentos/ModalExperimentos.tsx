@@ -42,6 +42,7 @@ export function ModalExperimentos({abierto, onCerrar, acciones}: ModalExperiment
     };
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — modal especializado de experimentos */
         <div className="modalExperimentos__overlay" onClick={onCerrar}>
             <div className="modalExperimentos" onClick={e => e.stopPropagation()}>
                 <header className="modalExperimentos__encabezado">

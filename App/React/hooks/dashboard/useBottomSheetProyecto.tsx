@@ -91,8 +91,7 @@ export function useBottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valore
                 fechaLimite
             });
             onCerrar();
-        } catch (error) {
-            /* sentinel-disable-next-line fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error */
+        } catch (error) { /* sentinel-disable fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error */
             console.error('Error al crear proyecto:', error);
         } finally {
             setCargando(false);

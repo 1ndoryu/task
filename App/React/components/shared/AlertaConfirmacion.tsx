@@ -61,6 +61,7 @@ export function AlertaConfirmacion({alerta, onResponder}: AlertaConfirmacionProp
     const Icono = tipo === 'peligro' || tipo === 'advertencia' ? AlertTriangle : HelpCircle;
 
     return (
+        /* sentinel-disable-next-line componente-artesanal — ES el componente primitivo de alerta/confirmacion del sistema */
         <div id="alerta-confirmacion-overlay" className="alertaConfirmacionOverlay" onClick={manejarClickOverlay}>
             <div id="alerta-confirmacion-modal" className={`alertaConfirmacionModal ${obtenerClaseTipo()}`} role="alertdialog" aria-modal="true" aria-labelledby="alerta-confirmacion-titulo" aria-describedby="alerta-confirmacion-mensaje">
                 <div className="alertaConfirmacionEncabezado">

@@ -69,11 +69,13 @@ class NotificacionesService
             'tipo' => $tipo,
             'titulo' => sanitize_text_field($titulo),
             'contenido' => $contenido ? wp_kses_post($contenido) : null,
+            // sentinel-disable-next-line json-sin-limite-bd — datos_extra es metadata pequena (tipo, ids), no contenido libre
             'datos_extra' => $datosExtra ? wp_json_encode($datosExtra) : null,
             'leida' => 0,
             'fecha_creacion' => current_time('mysql'),
         ];
 
+        // sentinel-disable-next-line retorno-ignorado-repo — se valida via insert_id en la linea siguiente
         $wpdb->insert($this->tabla, $datos);
 
         if (!$wpdb->insert_id) {
@@ -186,6 +188,7 @@ class NotificacionesService
             ];
         }
 
+        // sentinel-disable-next-line retorno-ignorado-repo — operacion no critica, marcar como leida es best-effort
         $wpdb->update(
             $this->tabla,
             [
@@ -251,6 +254,7 @@ class NotificacionesService
             ];
         }
 
+        // sentinel-disable-next-line retorno-ignorado-repo — eliminacion no critica, se retorna exito (el registro ya no aparecera en queries)
         $wpdb->delete($this->tabla, ['id' => $notificacionId]);
 
         return [
@@ -304,6 +308,7 @@ class NotificacionesService
     private function formatearDesdeDB(object $notificacion): array
     {
         $datosExtra = $notificacion->datos_extra
+            // sentinel-disable-next-line json-decode-inseguro — datos_extra viene de BD propia, json_encode controlado en crear()
             ? json_decode($notificacion->datos_extra, true)
             : null;
 

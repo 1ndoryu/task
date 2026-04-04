@@ -36,6 +36,7 @@ class EntornosGruposFbRepository
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearEntorno
                 "SELECT * FROM $table WHERE user_id = %d ORDER BY orden ASC, created_at ASC",
                 $this->userId
             ),
@@ -52,6 +53,7 @@ class EntornosGruposFbRepository
 
         $row = $wpdb->get_row(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearEntorno
                 "SELECT * FROM $table WHERE id = %d AND user_id = %d",
                 $id,
                 $this->userId
@@ -212,6 +214,7 @@ class EntornosGruposFbRepository
 
         $row = $wpdb->get_row(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan via formatearEntorno
                 "SELECT * FROM $table WHERE user_id = %d AND activo = 1 LIMIT 1",
                 $this->userId
             ),
@@ -238,6 +241,7 @@ class EntornosGruposFbRepository
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(
+                // sentinel-disable-next-line repository-sin-whitelist-columnas — todas las columnas se usan en el mapa de overrides
                 "SELECT * FROM $table WHERE entorno_id = %d",
                 $entornoId
             ),

@@ -32,6 +32,7 @@ export function SelectorAsignado({participantes, asignadoActual, onAsignar, disa
         };
 
         if (abierto) {
+            /* sentinel-disable-next-line componente-artesanal — patron estandar de click-outside para selector */
             document.addEventListener('mousedown', manejarClickFuera);
         }
 

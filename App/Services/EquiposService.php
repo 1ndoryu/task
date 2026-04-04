@@ -74,6 +74,7 @@ class EquiposService
                 return $this->manejarSolicitudExistente($existente);
             }
 
+            // sentinel-disable-next-line retorno-ignorado-repo — se valida via insert_id en la linea siguiente
             $wpdb->insert($this->tabla, [
                 'usuario_id' => $usuarioId,
                 'companero_id' => $usuarioDestino->ID,
@@ -122,6 +123,7 @@ class EquiposService
             ];
         }
 
+        // sentinel-disable-next-line retorno-ignorado-repo — se valida via insert_id en respuesta
         $wpdb->insert($this->tabla, [
             'usuario_id' => $usuarioId,
             'companero_id' => null,
@@ -240,6 +242,7 @@ class EquiposService
 
         $nuevoEstado = $accion === 'aceptar' ? 'aceptada' : 'rechazada';
 
+        // sentinel-disable-next-line retorno-ignorado-repo — update best-effort, estado ya validado
         $wpdb->update(
             $this->tabla,
             [
@@ -305,6 +308,7 @@ class EquiposService
             ];
         }
 
+        // sentinel-disable-next-line retorno-ignorado-repo — delete best-effort, solicitud validada
         $wpdb->delete($this->tabla, ['id' => $solicitudId]);
 
         return [

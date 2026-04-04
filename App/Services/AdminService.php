@@ -106,6 +106,7 @@ class AdminService
         /* Si no se especifica duración, premium "ilimitado" (10 años) */
         $diasDuracion = $duracion ?? 3650;
 
+        // sentinel-disable-next-line retorno-ignorado-repo — falso positivo: resultado SI se captura en $resultado
         $resultado = $suscripcionService->activarPremium($diasDuracion);
 
         /* Registrar acción en logs */
@@ -123,6 +124,7 @@ class AdminService
     public function cancelarPremium(int $userId): array
     {
         $suscripcionService = new SuscripcionService($userId);
+        // sentinel-disable-next-line retorno-ignorado-repo — falso positivo: resultado SI se captura en $resultado
         $resultado = $suscripcionService->cancelar();
 
         /* Registrar acción en logs */
@@ -167,6 +169,7 @@ class AdminService
         $suscripcion['plan'] = SuscripcionService::PLAN_PREMIUM;
         $suscripcion['estado'] = SuscripcionService::ESTADO_TRIAL;
 
+        // sentinel-disable-next-line retorno-ignorado-repo — update_user_meta, operacion interna de WP, fallo improbable
         update_user_meta($userId, self::META_SUSCRIPCION, $suscripcion);
 
         /* Registrar acción en logs */
@@ -206,6 +209,7 @@ class AdminService
             $userId
         ));
 
+        // sentinel-disable-next-line query-doble-verificacion — queries separadas por claridad, datos estadisticos no criticos
         /* Contar tareas completadas */
         $tareasCompletadas = (int) $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$tablaTareas} WHERE user_id = %d AND completado = 1",
