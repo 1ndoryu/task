@@ -15,6 +15,25 @@
 
 ## Tareas pendientes
 
-- Ejecutar `coolify-manager auth-drive` manualmente para autorizar Google Drive y que los backups suban al remoto en vez de quedarse locales (requiere abrir URL en navegador y autorizar con cuenta Google). (Dejame el comando exacto que es no funciona para yo ejecutarlo)
+- Resolver todo lo que hay en Agente\prevencion y reinstalar la extension.
 
-- Resolver todos los problemas de `.sentinel-report.md` y `.varsense-report.md` hasta que queden vacíos: falsos positivos se corrigen en la extensión, problemas reales se resuelven en el código.
+- boton boton--badge boton--mediano se esta usando en el boton de cambiar el entorno en el panel de grupos!! boton--badge NO SE USA PARA BOTONES QUE TIENEN TEXTOS!! ese boton tiene que ser boton boton--ghost boton--mediano
+
+- panelGruposFb__columnasContenedor se ve el boton diferente, no se ve centrado, tampoco selector-badge-contenedor, porque son botones dentro de un div??? hace que se vean mal! 
+
+- En Gestionar categorías se siguen usando emojis en vez de svg
+
+- Las configuraciones muestaran configuraciones de plugin que estan desactivados, no deberían.
+
+- Este repositorio duplicarlo en https://github.com/1ndoryu/task, es un espejo, seguiremos usando glorytemplate en esta rama, por favor ten cuidado de cualquier perdida de datos, tiene que duplicarse con cada commit y cada cosa.
+
+-   {/* sentinel-disable-next-line emoji-en-codigo — icono de advertencia en mensaje de error */}
+    <span className="loginError__icono">⚠️</span> veo que hiciste cosas asi cuando claramente no es un falso positivo, realmente necesita un icono de bilioteca, no un emojoi!! Vais a tener que corregir todos los sentinel-disable-next-line emoji-en-codigo !!
+
+- Me parece que el enfoque que tomaste con algunos sentinel-disable-next esta mal, en vez de solucionar el problema de raiz, colocaste sentinel-disable-next en muchos lugares en vez de mejorar la precisión de la extensión, se requiere una auditoría de todos los sentinel-disable-next para mejorar la precisión de la extensión. 
+
+- Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
+
+- Arrastrar para mover tareas dejo de funcionar, no funciona cuando el ordenamiento es manual, de hecho agrega listaTareasPendientes y deja un espacio vacío, no se si es por que solo tengo habitos en el panel de ejecucion, pero si, parece ser que el ordenamiento solo funciona con las tareas y no con los habitos pero en realidad tiene que funncionar con todo lo que hay en el panal de ejecución. 
+
+- Agrega una nueva prioridad "Muy baja" asegurate de que funcione en todos los contextos.
