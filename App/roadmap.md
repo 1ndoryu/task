@@ -15,9 +15,7 @@
 
 ## Tareas pendientes
 
-- En Gestionar categorías se siguen usando emojis en vez de svg
-
-- Las configuraciones muestaran configuraciones de plugin que estan desactivados, no deberían.
+- Las configuraciones muestran configuraciones de plugin que estan desactivados, no deberían.
 
 - Este repositorio duplicarlo en https://github.com/1ndoryu/task, es un espejo, seguiremos usando glorytemplate en esta rama, por favor ten cuidado de cualquier perdida de datos, tiene que duplicarse con cada commit y cada cosa.
 
