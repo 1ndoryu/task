@@ -817,6 +817,48 @@ export const useHabitosStore = create<HabitosStore>()(
     )
 );
 
+/* [044A-27] Subscriber global: deduplicar subhábitos en CADA cambio de estado.
+ * Esto atrapa duplicados que entren por CUALQUIER vía (set directo, restaurar,
+ * WebSocket merge, etc.) sin importar si pasan por setHabitos o no.
+ * Solo actúa si detecta duplicados — no genera re-renders innecesarios. */
+let dedupEnCurso = false;
+useHabitosStore.subscribe((state) => {
+    if (dedupEnCurso) return;
+    let necesitaLimpieza = false;
+
+    for (const habito of state.habitos) {
+        if (!habito.subhabitos || habito.subhabitos.length <= 1) continue;
+        const nombresVistos = new Set<string>();
+        for (const sh of habito.subhabitos) {
+            if (!sh.nombre || !sh.nombre.trim()) { necesitaLimpieza = true; break; }
+            const norm = sh.nombre.trim().toLowerCase();
+            if (nombresVistos.has(norm)) { necesitaLimpieza = true; break; }
+            nombresVistos.add(norm);
+        }
+        if (necesitaLimpieza) break;
+    }
+
+    if (!necesitaLimpieza) return;
+
+    dedupEnCurso = true;
+    const habitosLimpios = state.habitos.map(h => {
+        if (!h.subhabitos || h.subhabitos.length <= 1) return h;
+        const nombresVistos = new Set<string>();
+        const limpio: SubHabito[] = [];
+        for (const sh of h.subhabitos) {
+            if (!sh.nombre || !sh.nombre.trim()) continue;
+            const norm = sh.nombre.trim().toLowerCase();
+            if (nombresVistos.has(norm)) continue;
+            nombresVistos.add(norm);
+            limpio.push(sh);
+        }
+        if (limpio.length === h.subhabitos.length) return h;
+        return {...h, subhabitos: limpio};
+    });
+    useHabitosStore.setState({habitos: habitosLimpios});
+    dedupEnCurso = false;
+});
+
 /*
  * Selectores optimizados
  */

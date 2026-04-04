@@ -182,9 +182,11 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
 
             /* Agregar subhábitos que "tocan hoy" como tareas virtuales */
             if (habito.subhabitos && habito.subhabitos.length > 0) {
-                /* [044A-22] Set de IDs vistos para no generar tareas duplicadas
-                 * si el array de subhábitos tiene entradas con mismo ID */
+                /* [044A-27] Dedup por nombre + por ID. Evita mostrar 56 copias
+                 * aunque el store tenga subhabitos con IDs únicos pero mismo nombre.
+                 * Safety net del rendering: incluso si el store no deduplica, la UI sí. */
                 const subIdsVistos = new Set<number>();
+                const subNombresVistos = new Set<string>();
                 for (const subhabito of habito.subhabitos) {
                     /* [253A-1] Filtrar subhábitos fantasma (sin nombre válido) */
                     if (!subhabito.nombre || !subhabito.nombre.trim()) continue;
@@ -194,6 +196,10 @@ export function useHabitosComoTareas({habitos, tareas, mostrarHabitos, onToggleH
                     /* [044A-22] Deduplicar: solo una tarea virtual por subhábito */
                     if (subIdsVistos.has(subhabito.id)) continue;
                     subIdsVistos.add(subhabito.id);
+                    /* [044A-27] Dedup por nombre: IDs únicos pero mismo nombre = duplicado */
+                    const nombreNorm = subhabito.nombre.trim().toLowerCase();
+                    if (subNombresVistos.has(nombreNorm)) continue;
+                    subNombresVistos.add(nombreNorm);
 
                     /* [253A-1] Crear tarea virtual para el subhábito.
                      * Prioridad hereda siempre del padre para consistencia visual en ejecución. */

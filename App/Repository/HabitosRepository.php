@@ -52,7 +52,10 @@ class HabitosRepository
                 return $data;
             }, $rows);
 
-            return array_values(array_filter($habitos, fn($h) => $h !== null && is_array($h)));
+            $habitos = array_values(array_filter($habitos, fn($h) => $h !== null && is_array($h)));
+            /* [044A-27] Dedup subhábitos por nombre al leer de BD.
+             * Previene que el cliente reciba duplicados aunque estén guardados. */
+            return array_map([$this, 'dedupSubhabitos'], $habitos);
         }
 
         /* Fallback: migrar desde user_meta si existe */
@@ -109,6 +112,9 @@ class HabitosRepository
 
         foreach ($habitos as $habito) {
             if (!isset($habito['id'])) continue;
+
+            /* [044A-27] Dedup subhábitos antes de persistir */
+            $habito = $this->dedupSubhabitos($habito);
 
             $idLocal = (int)$habito['id'];
             $incomingIds[] = $idLocal;
@@ -256,5 +262,31 @@ class HabitosRepository
         // sentinel-disable-next-line retorno-ignorado-repo — cleanup completo, retorna true
         $wpdb->delete(Schema::getTableName('habitos'), ['user_id' => $this->userId]);
         return true;
+    }
+
+    /* [044A-27] Deduplicar subhábitos por nombre (normalizado a lowercase trim).
+     * Conserva el primero con cada nombre, descarta el resto.
+     * Previene que IDs únicos pero nombres idénticos persistan como duplicados. */
+    private function dedupSubhabitos(array $habito): array
+    {
+        if (empty($habito['subhabitos']) || !is_array($habito['subhabitos'])) {
+            return $habito;
+        }
+        $nombresVistos = [];
+        $limpio = [];
+        foreach ($habito['subhabitos'] as $sh) {
+            if (!is_array($sh)) continue;
+            $nombre = isset($sh['nombre']) ? trim((string)$sh['nombre']) : '';
+            if ($nombre === '') continue;
+            $norm = mb_strtolower($nombre);
+            if (isset($nombresVistos[$norm])) continue;
+            $nombresVistos[$norm] = true;
+            $limpio[] = $sh;
+        }
+        if (count($limpio) === count($habito['subhabitos'])) {
+            return $habito;
+        }
+        $habito['subhabitos'] = array_values($limpio);
+        return $habito;
     }
 }
