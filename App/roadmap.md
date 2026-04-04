@@ -16,4 +16,4 @@
 
 ## Tareas pendientes
 
-haz el readme español y actualiza el repositorio espejo
+(vacío)
