@@ -33,7 +33,3 @@
 - Agregar una regla nueva en glory sentinel para detectar todos los to-do o cosas pendientes en el codigo. 
 
 - Agrega una nueva prioridad "Muy baja" asegurate de que funcione en todos los contextos.
-
-- El arrastre no funciona bien, al arrastrar se abre el modal de configurar de ese habito en vez de moverse. 
-
-- Un bug grave ha sucedido, muy probablmente por lo del arrastre, tengo varios habitos y esos habitos ahora tienen cientos de subhabitos (dice 0/56) o sea varios habitos tienen varias subtareas con el nombre del mismo habito, pero al abrir la configuracion esos subhabitos no aparecen en "Subhábitos" asi que supongo que es algo que se puede arreglar, se necesita corregir urgente

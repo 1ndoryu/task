@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-04-04 — Tareas virtuales contaminan estado real vía drag & drop (044A-12)
+
+**Patrón del error:** `handleReorder` recibe `nuevoOrdenPrincipales` que incluye tareas virtuales de hábitos (IDs negativos de `useHabitosComoTareas`). La lista se pasa a `reordenarTareas` → `setTareas` → localStorage sin filtrar. Cada reorder subsecuente multiplica las copias porque las persistidas aparecen como subtareas del hábito vía `tareas.filter(t => t.habitoId === habito.id)`.
+
+**Lección:** Cuando se combina estado real con datos computados (virtuales) para renderizar, el callback de reorder NO debe persistir los datos computados al store real. En general: todo callback que modifica estado permanente debe filtrar entidades transitorias (IDs negativos, virtuales, computadas). El boundary entre "datos para display" y "datos para persistencia" debe estar explícito.
+
+**Fix:** Filtrar `t.id > 0` en `reordenarTareas`, cleanup `parentId < 0` → undefined, y `dragListener={false}` para hábitos.
+
 ## 2026-04-02 — fueCompletadoHoy solo verificaba ultimoCompletado
 
 **Patrón del error:** `fueCompletadoHoy` comparaba solo `ultimoCompletado === obtenerFechaHoy()`. Pero `actualizarHistorialHabito` recalcula `ultimoCompletado` como la última fecha cronológica del historial (`.sort()` + last). Si hay fechas "futuras" en el historial (por cambio de `horaFinDia`), `ultimoCompletado` apunta a una fecha que no es el "hoy" lógico, y el hábito nunca se muestra como completado.
