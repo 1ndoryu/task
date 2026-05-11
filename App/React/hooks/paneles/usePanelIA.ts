@@ -13,6 +13,29 @@ import {aprobarAccionAgente, guardarMensajeAgente, limpiarMensajesAgente, listar
 import {ejecutarAccionDestructiva} from '../../config/accionesIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
+import type {AccionAgente} from '../../services/agentActionsService';
+
+function describirAccionExterna(accion: AccionAgente): string {
+    if (accion.estado !== 'completado') {
+        return `Estado: ${accion.estado}`;
+    }
+
+    const resultado = accion.resultado as {provider?: string; localMode?: boolean; message?: string; toMasked?: string} | null;
+    if (resultado?.provider === 'wacli-local' || resultado?.localMode) {
+        return 'Simulado en local: no se envió WhatsApp real. Configura wacli/autenticación fuera de local para envío real.';
+    }
+    if (resultado?.provider === 'wacli') {
+        return `WhatsApp enviado${resultado.toMasked ? ` a ${resultado.toMasked}` : ''}`;
+    }
+    if (resultado?.provider === 'github-local-draft') {
+        return 'Borrador GitHub preparado localmente; no se publicó nada real.';
+    }
+    if (resultado?.provider === 'local-notification') {
+        return 'Recordatorio creado como notificación local.';
+    }
+
+    return resultado?.message || 'Acción externa ejecutada';
+}
 
 export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const [inputTexto, setInputTexto] = useState('');
@@ -160,7 +183,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                 nuevasAcciones[indiceAccion] = {
                     ...accion,
                     ejecutada: accionEjecutada.estado === 'completado',
-                    resultado: accionEjecutada.estado === 'completado' ? 'Acción externa ejecutada' : `Estado: ${accionEjecutada.estado}`,
+                    resultado: describirAccionExterna(accionEjecutada),
                     pendienteConfirmacion: false
                 };
                 actualizarMensaje(mensajeId, {acciones: nuevasAcciones});

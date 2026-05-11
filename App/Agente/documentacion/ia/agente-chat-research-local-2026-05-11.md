@@ -25,12 +25,19 @@
 - La autocompactación existe en herramientas de agente/editor, pero no debe tratarse como fuente de verdad de la app.
 - MemPalace puede ser útil como inspiración si se quiere memoria vectorial/episódica, pero en este proyecto primero conviene estabilizar una memoria explícita y auditable: tablas SQL, permisos por usuario, límites, logs y providers intercambiables.
 
+## OpenClaw/OpenCraw e internet en local
+- `research_local` no usa internet ni OpenClaw/OpenCraw; solo busca en datos locales del dashboard.
+- En local no se está usando OpenClaw mientras no exista un gateway/provider configurado detrás de `ResearchProviderInterface`.
+- Si el usuario pide web/internet, el asistente debe decirlo explícitamente y no fingir resultados externos.
+- El siguiente paso técnico para web real es añadir un provider `OpenClawResearchProvider` con URL/env, timeout, auth y fallback local.
+
 ## Seguridad y límites
 - El prompt solo propone acciones; el backend decide qué tipos existen y cuáles requieren aprobación.
 - Las rutas de acciones externas son admin-only.
 - El chat y research aplican rate limit por usuario.
 - Los tokens de IA se limitan antes de llamar al backend/proveedor.
 - Las ejecuciones externas quedan registradas con logs visibles y resultado persistido.
+- Si WACLI corre en modo local, la UI muestra “simulado en local” para no confundirlo con un envío real.
 
 ## Pendientes futuros no bloqueantes
 - Provider web/OpenClaw real detrás de `ResearchProviderInterface`.

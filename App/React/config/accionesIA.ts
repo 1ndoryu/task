@@ -130,7 +130,8 @@ REGLAS:
 - Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
 - proponer_whatsapp NO envía el mensaje: crea una acción externa pendiente para que el usuario la apruebe en la interfaz.
 - Solo usa proponer_whatsapp cuando el usuario pida enviar o programar un mensaje de WhatsApp.
-- research_local busca en notas, tareas y hábitos del usuario; úsalo cuando el usuario pida investigar su propio dashboard o encontrar contexto local.
+- research_local busca en notas, tareas y hábitos del usuario; no busca internet, no usa OpenClaw/OpenCraw y no debe presentarse como búsqueda web.
+- Si el usuario pregunta por internet/OpenClaw, explica que en local solo está activo research_local y que el provider web externo aún requiere configurar un gateway.
 - proponer_github prepara un borrador aprobable; no abre issues/PR reales sin confirmación.
 - programar_recordatorio crea un recordatorio local aprobable y luego WP-Cron lo ejecuta cuando venza.
 ${promptSistema ? `\nINSTRUCCIONES PERSONALIZADAS DEL SISTEMA:\n${promptSistema}` : ''}

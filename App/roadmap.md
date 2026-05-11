@@ -16,4 +16,4 @@
 
 ## Tareas pendientes
 
-- Lo siento, no tengo la capacidad de buscar información en internet. Sólo puedo consultar los datos locales de tu dashboard (tareas, notas, hábitos) mediante la acción research_local. Si deseas buscar algo dentro de tu propio contexto, dime qué buscar y lo haré. ¿porque no peude buscar por internet, no se supone que openclaw puede hacer eso?
+(sin tareas pendientes)
