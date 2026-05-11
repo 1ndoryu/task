@@ -189,8 +189,8 @@ class OpencodeJobService
     }
 
     /* [115A-cont] Crea job de continuacion reutilizando la sesion OpenCode del job anterior.
-     * Gotcha: session_id solo existe si el runner capturo la linea "Session: xxx" del output.
-     * Siempre incluye previous_output como contexto de fallback si la sesion expiro. */
+     * Gotcha: OpenCode 1.14.48 no siempre imprime el ID en stdout; el runner lo resuelve
+     * con `opencode session list` y lo guarda en resultado.session_id. */
     public function crearContinuacion(int $jobAnteriorId, int $userId, string $prompt): array
     {
         global $wpdb;
@@ -203,14 +203,14 @@ class OpencodeJobService
             throw new \RuntimeException('El job anterior pertenece a otro usuario.');
         }
 
-        /* [115A-cont] NO reutilizamos session_id aunque el job anterior haya exitado 0.
-         * Si el run anterior entro en "modo protocolo" su sesion tiene contexto corrupto;
-         * continuar con --session <id> hace que OpenCode vea el nuevo prompt como parte
-         * de ese flujo confundido. El previousOutput como texto ya es suficiente contexto. */
+        /* [115A-16c] Si el usuario pide continuar la misma sesion, debemos pasar el ID real
+         * al runner para que OpenCode reciba --session <id>. previous_output queda como
+         * respaldo legible si la sesion local expiro o no fue capturada por jobs antiguos. */
+        $sessionId      = sanitize_text_field((string)($jobAnterior['resultado']['session_id'] ?? $jobAnterior['payload']['session_id'] ?? ''));
         $previousOutput = mb_substr((string)($jobAnterior['resultado']['output'] ?? ''), -1000);
         $payload        = array_merge($jobAnterior['payload'], [
             'prompt'          => sanitize_textarea_field($prompt),
-            'session_id'      => '',
+            'session_id'      => $sessionId,
             'previous_output' => $previousOutput,
             'continua_job_id' => $jobAnteriorId,
         ]);

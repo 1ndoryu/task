@@ -198,6 +198,39 @@ function assertOpencodeAvailable(commandSpec) {
     return (result.stdout || result.stderr || '').trim();
 }
 
+function cleanTerminalOutput(text) {
+    return text.replace(/\x1b\[[0-9;]*[mGKHF]|\x1b[\\]|\x0f|\x0e/g, '');
+}
+
+function extractWhatsAppSummary(output) {
+    const clean = cleanTerminalOutput(output);
+    const direct = clean.match(/=== RESUMEN PARA WHATSAPP ===([\s\S]*?)=== FIN RESUMEN ===/);
+    if (direct) return direct[1].trim();
+
+    const withoutFences = clean.replace(/^```[^\n]*\n?/gm, '').replace(/```/g, '');
+    const fenced = withoutFences.match(/=== RESUMEN PARA WHATSAPP ===([\s\S]*?)=== FIN RESUMEN ===/);
+    return fenced ? fenced[1].trim() : '';
+}
+
+function resolveLatestSessionId(commandSpec, projectPath) {
+    const result = spawnSync(
+        commandSpec.command,
+        [...commandSpec.argsPrefix, 'session', 'list', '--format', 'json', '--max-count', '5'],
+        {cwd: projectPath, encoding: 'utf8', timeout: 10000, env: process.env}
+    );
+    if (result.status !== 0 || result.error) return '';
+
+    try {
+        const sessions = JSON.parse(result.stdout || '[]');
+        if (!Array.isArray(sessions)) return '';
+        const currentProjectPath = path.resolve(projectPath).toLowerCase();
+        const session = sessions.find(item => path.resolve(String(item?.directory || '')).toLowerCase() === currentProjectPath) || sessions[0];
+        return typeof session?.id === 'string' ? session.id : '';
+    } catch {
+        return '';
+    }
+}
+
 function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessionId}) {
     const opencodeArgs = ['run', '--dir', projectPath, '--model', model];
     if (agent) opencodeArgs.push('--agent', agent);
@@ -208,7 +241,7 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessio
     return opencodeArgs;
 }
 
-function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs}) {
+function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId = ''}) {
     return new Promise((resolve, reject) => {
         /* Ejecutar sin shell: el prompt multilinea debe viajar como un unico argv.
          * En Windows resolvemos el wrapper npm a `node .../opencode` para evitar cmd.exe. */
@@ -219,7 +252,7 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs}) {
         });
 
         const lines = [];
-        let sessionId = '';
+        let sessionId = requestedSessionId;
         const onData = (stream, chunk) => {
             stream.write(chunk);
             const text = chunk.toString();
@@ -238,28 +271,46 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs}) {
 
         const timeout = setTimeout(() => {
             child.kill('SIGTERM');
-            reject(Object.assign(new Error(`Timeout ejecutando OpenCode tras ${timeoutMs}ms.`), {output: getOutput(), session_id: sessionId}));
+            const output = getOutput();
+            reject(Object.assign(new Error(`Timeout ejecutando OpenCode tras ${timeoutMs}ms.`), {
+                output,
+                session_id: sessionId,
+                whatsapp_summary: extractWhatsAppSummary(output),
+            }));
         }, timeoutMs);
 
         child.on('error', error => {
             clearTimeout(timeout);
-            reject(Object.assign(error, {output: getOutput(), session_id: sessionId}));
+            const output = getOutput();
+            reject(Object.assign(error, {
+                output,
+                session_id: sessionId,
+                whatsapp_summary: extractWhatsAppSummary(output),
+            }));
         });
 
         /* [115A-16b] Usar 'close' en lugar de 'exit': el evento 'exit' dispara cuando
          * el proceso termina pero los buffers de stdout/stderr pueden no haberse
          * vaciado todavia. 'close' garantiza que todos los streams cerraron y toda
-         * la data (incluidos los marcadores del resumen) ya fue emitida como 'data'. */
+         * la data (incluidos los marcadores del resumen) ya fue emitida como 'data'.
+         * Gotcha: OpenCode 1.14.48 no imprime siempre el ID de sesion; se resuelve
+         * desde `opencode session list` al terminar para poder continuar con --session. */
         let exitCodeCapture = 0;
         child.on('exit', code => { exitCodeCapture = code ?? 0; });
         child.on('close', () => {
             clearTimeout(timeout);
             const output = getOutput();
+            const resolvedSessionId = sessionId || resolveLatestSessionId(commandSpec, projectPath);
+            const whatsappSummary = extractWhatsAppSummary(output);
             if (exitCodeCapture === 0) {
-                resolve({output, session_id: sessionId});
+                resolve({output, session_id: resolvedSessionId, whatsapp_summary: whatsappSummary});
                 return;
             }
-            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCodeCapture}.`), {output, session_id: sessionId}));
+            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCodeCapture}.`), {
+                output,
+                session_id: resolvedSessionId,
+                whatsapp_summary: whatsappSummary,
+            }));
         });
     });
 }
@@ -327,7 +378,7 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
 
     const version = assertOpencodeAvailable(commandSpec);
     console.error(`OpenCode detectado: ${version}`);
-    const runResult = await runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs});
+    const runResult = await runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId: sessionId});
     return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
 }
 

@@ -285,8 +285,11 @@ class AgentRestHandlers
             try {
                 $output = trim((string)($resultado['output'] ?? ''));
                 $prompt = self::extraerPromptPreview((string)($job['payload']['prompt'] ?? ''));
-                $sessionIdCodigo = trim((string)($resultado['session_id'] ?? ''));
-                $resumen = $output !== '' ? self::extraerResumenWhatsApp($output) : '';
+                $sessionIdCodigo = trim((string)($resultado['session_id'] ?? $job['payload']['session_id'] ?? ''));
+                $resumen = trim((string)($resultado['whatsapp_summary'] ?? ''));
+                if ($resumen === '' && $output !== '') {
+                    $resumen = self::extraerResumenWhatsApp($output);
+                }
                 $rechazados = $output !== '' ? self::extraerPermisosRechazados($output) : [];
                 if ($exito) {
                     $waMsg = "\u{2705} *OpenCode termin\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($resumen !== '' ? "\n\n{$resumen}" : '');
