@@ -95,6 +95,22 @@ class AgentApiController
             'callback' => [AgentRestHandlers::class, 'aprobarAccion'],
             'permission_callback' => $admin,
         ]);
+
+        /* [109B] Webhook público de wacli sync --webhook.
+         * Auth por HMAC-SHA256 (X-Wacli-Signature), no por cookie WP.
+         * wacli envía NDJSON (una línea por evento). */
+        register_rest_route($ns, '/whatsapp/webhook', [
+            'methods'             => 'POST',
+            'callback'            => [AgentRestHandlers::class, 'whatsappWebhook'],
+            'permission_callback' => '__return_true', // auth via HMAC interna
+        ]);
+
+        /* [109A] Chat procesado server-side (para integraciones futuras; autenticado). */
+        register_rest_route($ns, '/agent/chat/process', [
+            'methods'             => 'POST',
+            'callback'            => [AgentRestHandlers::class, 'procesarChatServerSide'],
+            'permission_callback' => $auth,
+        ]);
     }
 
     public static function requireAdmin(): bool

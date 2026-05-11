@@ -252,4 +252,56 @@ class AgentRestHandlers
         $length = strlen($value);
         return $length <= 6 ? str_repeat('*', $length) : substr($value, 0, 3) . str_repeat('*', max(0, $length - 6)) . substr($value, -3);
     }
+
+    /* [109B] Webhook de wacli sync --webhook. Auth via HMAC-SHA256.
+     * wacli envía NDJSON: una línea JSON por evento.
+     * Responde 200 rápido; procesamiento puede ser lento (LLM call). */
+    public static function whatsappWebhook(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $body      = $request->get_body();
+        $firma     = (string)($request->get_header('X-Wacli-Signature') ?? '');
+        $service   = new WhatsAppWebhookService();
+
+        if (!$service->validarFirma($body, $firma)) {
+            return new \WP_REST_Response(['error' => 'Firma inválida'], 401);
+        }
+
+        /* NDJSON: procesar cada línea */
+        foreach (explode("\n", trim($body)) as $linea) {
+            $linea = trim($linea);
+            if ($linea === '') {
+                continue;
+            }
+            $evento = json_decode($linea, true);
+            if (is_array($evento)) {
+                $service->procesarEvento($evento);
+            }
+        }
+
+        return new \WP_REST_Response(['ok' => true], 200);
+    }
+
+    /* [109A] Procesa un mensaje de chat desde el servidor (para canales server-side).
+     * Alternativa autenticada al flujo React-LLM para testing e integraciones. */
+    public static function procesarChatServerSide(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $json      = self::json($request);
+            $mensaje   = trim((string)($json['mensaje'] ?? $json['message'] ?? ''));
+            $sessionId = sanitize_text_field((string)($json['sessionId'] ?? 'default'));
+            $canal     = in_array($json['canal'] ?? 'app', ['app', 'whatsapp'], true) ? $json['canal'] : 'app';
+
+            if ($mensaje === '') {
+                return self::error('El campo mensaje es obligatorio.', 'chat_message_required', 400);
+            }
+
+            (new AgentRateLimitService())->assertAllowed(get_current_user_id(), 'chat_process', 20, HOUR_IN_SECONDS);
+
+            $resultado = (new AgentChatProcessor())->procesar(get_current_user_id(), $sessionId, $mensaje, $canal);
+            return self::ok($resultado, 200);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'chat_process_error', 500);
+        }
+    }
 }
+

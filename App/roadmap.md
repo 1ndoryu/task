@@ -16,4 +16,17 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
+### 109A — MemPalace: memoria semántica del chatbot
+- Instalar MemPalace en el servidor host + Flask REST wrapper en /data/mempalace/
+- Systemd service `mempalace-api` en 127.0.0.1:4001
+- Añadir `extra_hosts: host.docker.internal:host-gateway` al compose de nakomi
+- `MemPalaceService.php`: search + remember via HTTP al wrapper
+- `AgentChatProcessor.php`: motor PHP para procesar mensajes (context, LLM, acciones, memoria)
+- Integrar memoria en el flujo: inyectar en system prompt, guardar hechos al final
+
+### 109B — WhatsApp bidireccional + recordatorios recurrentes
+- Systemd service `wacli-daemon` en el host: `wacli sync --follow --webhook URL --webhook-secret SECRET`
+- `WhatsAppWebhookService.php`: HMAC verify + rutear mensaje al AgentChatProcessor
+- Endpoint público `POST /wp-json/glory/v1/whatsapp/webhook` (auth via HMAC)
+- Recordatorios recurrentes: `every_5_minutes` WP-Cron schedule + payload.recurrence_minutes
+- WACLI_WEBHOOK_SECRET env var en Coolify + local
