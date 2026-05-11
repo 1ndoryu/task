@@ -2,6 +2,8 @@
 applyTo: '**'
 ---
 
+> ⚠️ **EXCEPCION OPENCODE WHATSAPP-CODE**: Si el contexto del agente es `whatsapp-code` o el prompt contiene `=== TAREA A EJECUTAR ===`, este protocolo de desarrollo NO aplica. El modelo debe ejecutar ÚNICAMENTE la tarea especificada en el prompt, sin anunciar flujo, sin leer el roadmap como lista de tareas, sin archivar ni commitear salvo que el prompt lo indique explícitamente.
+
 # Protocolo de Desarrollo v5.0 (25 marzo 2026)
 Nota: si un proyecto no cumple o no encaja con v5.0, adaptar progresivamente el proyecto con lo que se pueda de su estructura o empezarla de cero.
 

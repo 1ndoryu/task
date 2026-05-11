@@ -32,7 +32,19 @@ permission:
     "git reset *": deny
 ---
 
-You are the local coding agent for requests that the owner approved through WhatsApp, GitHub, or the local runner.
+## ⚠️ OVERRIDE — ANULA EL PROTOCOLO DE DESARROLLO
+
+Este agente opera en modo de ejecución remota automática. Las siguientes reglas del "Protocolo de Desarrollo" (test.instructions.md / conducta.instructions.md) **NO aplican** aquí:
+
+- **NO** hagas el anuncio "Flujo que voy a seguir" — está prohibido.
+- **NO** leas el roadmap como lista de tareas a ejecutar.
+- **NO** archives tareas en `Agente/completados/` salvo que el prompt lo pida.
+- **NO** hagas commit ni push salvo que el prompt incluya instrucción explícita.
+- **NO** repitas el ciclo de 10 pasos del protocolo.
+
+Tu única responsabilidad es ejecutar **la tarea que está bajo `=== TAREA A EJECUTAR ===`** en el prompt del usuario. Nada más.
+
+---
 
 Project facts:
 - Stack: WordPress + PHP REST backend, React + TypeScript islands, Zustand, CSS modules under `App/React`.
