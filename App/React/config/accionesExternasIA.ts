@@ -29,7 +29,7 @@ export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<Result
             const resumen = research.results.length > 0
                 ? research.results.slice(0, 3).map(item => `${item.tipo}: ${item.titulo}`).join(' · ')
                 : 'sin resultados locales';
-            return {tipo: accion.tipo, exito: true, descripcion: `Research local: ${resumen}`};
+            return {tipo: accion.tipo, exito: true, descripcion: `Research local: ${resumen}`, datos: research};
         }
         /* [107A] Búsqueda web real vía Tavily+Serper */
         case 'research_web': {
@@ -42,7 +42,7 @@ export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<Result
             const resumen = research.results.length > 0
                 ? research.results.slice(0, 3).map(item => `${item.titulo}`).join(' · ')
                 : 'sin resultados web';
-            return {tipo: accion.tipo, exito: true, descripcion: `Web (${research.provider}): ${resumen}`};
+            return {tipo: accion.tipo, exito: true, descripcion: `Web (${research.provider}): ${resumen}`, datos: research};
         }
         case 'proponer_github': {
             const titulo = String(accion.parametros.titulo || accion.parametros.title || '').trim();
@@ -70,7 +70,8 @@ export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<Result
             return {
                 tipo: accion.tipo,
                 exito: true,
-                descripcion: `**${nota.titulo}**\n\n${nota.contenido}`
+                descripcion: `**${nota.titulo}**\n\n${nota.contenido}`,
+                datos: nota
             };
         }
         case 'programar_recordatorio': {

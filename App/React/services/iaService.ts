@@ -184,9 +184,20 @@ export interface ResultadoMensajeIA {
     tokensUsados: number;
 }
 
+/* [115A-1] Construir prompt para la segunda llamada con resultados de consultas */
+function construirPromptResultados(resultados: Array<{tipo: string; datos?: unknown}>): string {
+    const lineas = resultados.map(r => {
+        return `--- ${r.tipo} ---\n${JSON.stringify(r.datos, null, 2)}`;
+    });
+    return `[RESULTADOS DE HERRAMIENTAS]\n\n${lineas.join('\n\n')}\n\nAhora responde al usuario usando estos datos de forma natural y completa. Integra la informacion directamente en tu respuesta.`;
+}
+
 /*
- * Flujo completo: system prompt → historial → API → parseo → ejecución
+ * Flujo completo: system prompt → historial → API → parseo → ejecución → [2da llamada si hay consultas]
  * Extraído del hook para mantener usePanelIA bajo el límite de 120 líneas.
+ *
+ * [115A-1] Segunda llamada al LLM cuando acciones de consulta (leer_nota, research_*)
+ * devuelven datos. Sin esto el modelo responde antes de ver los datos y dice "no puedo acceder".
  */
 export async function procesarMensajeIA(
     mensajes: MensajeIA[],
@@ -209,8 +220,9 @@ export async function procesarMensajeIA(
         }))
     ];
 
-    /* Llamar al LLM */
+    /* Primera llamada al LLM */
     const respuesta = await enviarMensajeLLM(historial, config, signal);
+    let tokensTotal = respuesta.tokensPrompt + respuesta.tokensComplecion;
 
     /* Parsear respuesta JSON con acciones */
     const parsed = parsearRespuestaLLM(respuesta.contenido);
@@ -227,11 +239,34 @@ export async function procesarMensajeIA(
             pendienteConfirmacion: r.pendienteConfirmacion,
             accionExternaId: r.accionExternaId
         }));
+
+        /* [115A-1] Segunda llamada al LLM si alguna acción de consulta devolvió datos */
+        const TIPOS_CONSULTA = ['leer_nota', 'research_local', 'research_web'];
+        const resultadosConDatos = resultados.filter(
+            r => r.exito && TIPOS_CONSULTA.includes(r.tipo) && r.datos != null
+        );
+        if (resultadosConDatos.length > 0) {
+            try {
+                const historial2: MensajeAPI[] = [
+                    ...historial,
+                    {role: 'assistant', content: respuesta.contenido},
+                    {role: 'user', content: construirPromptResultados(resultadosConDatos)}
+                ];
+                const respuesta2 = await enviarMensajeLLM(historial2, config, signal, {maxTokens: 1000});
+                const parsed2 = parsearRespuestaLLM(respuesta2.contenido);
+                if (parsed2.respuesta) {
+                    parsed.respuesta = parsed2.respuesta;
+                }
+                tokensTotal += respuesta2.tokensPrompt + respuesta2.tokensComplecion;
+            } catch {
+                /* Fallback: mantener la respuesta original si la segunda llamada falla */
+            }
+        }
     }
 
     return {
         contenido: parsed.respuesta,
         acciones: accionesResultado,
-        tokensUsados: respuesta.tokensPrompt + respuesta.tokensComplecion
+        tokensUsados: tokensTotal
     };
 }

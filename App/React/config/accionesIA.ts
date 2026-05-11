@@ -39,6 +39,8 @@ export interface ResultadoAccion {
     descripcion: string;
     pendienteConfirmacion?: boolean;
     accionExternaId?: number;
+    datos?: unknown; /* [115A-1] Datos completos devueltos por acciones de consulta (leer_nota, research)
+                      * para alimentar la segunda llamada al LLM y que responda con información real. */
 }
 
 /*
