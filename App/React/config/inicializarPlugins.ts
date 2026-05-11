@@ -203,7 +203,8 @@ registrarPanel({
     componente: PanelIA as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
     idPaginaMovil: 'ia',
-    manejaAlturaPropia: true
+    /* [105E] El chat IA usa el resize estándar del dashboard; antes quedaba sin handle de altura. */
+    manejaAlturaPropia: false
 });
 
 /* Export vacío para side-effect */

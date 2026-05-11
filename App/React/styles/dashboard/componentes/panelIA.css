@@ -13,6 +13,14 @@
     flex-direction: column;
 }
 
+/* [105E] En altura fija, el wrapper de resize vive fuera del panel IA.
+ * El componente debe tomar todo el alto para que mensajes scrolleen y el input quede fijo abajo. */
+.panelAlturaFija .panelDashboard > .panelIA {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
 /* Contenedor de mensajes */
 .panelIAMensajes {
     flex: 1;
@@ -22,6 +30,10 @@
     flex-direction: column;
     gap: var(--dashboard-espacioSm);
     min-height: 120px;
+}
+
+.panelAlturaFija .panelIA .panelIAMensajes {
+    min-height: 0;
 }
 
 /* Estado vacío */
@@ -227,16 +239,3 @@
 }
 
 /* [243A-1] Config inline eliminada — ahora vive en el modal global (sección 'panelIA') */
-
-/* [014A-1] Override con alta especificidad: .boton--ghost aplica border: 1px solid
- * y ganaba en cascada. !important necesario porque el botón hereda de .boton--ghost */
-.panelIABotonEnviar {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border: none !important;
-    border-radius: var(--dashboard-radioMedio);
-    margin-bottom: var(--dashboard-espacioXxs);
-    color: var(--dashboard-textoSobreAcento);
-    cursor: pointer;
-}

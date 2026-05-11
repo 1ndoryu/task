@@ -60,15 +60,13 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                                         <AlertTriangle size={10} />
                                         <span>{accion.resultado || accion.tipo}</span>
                                         <Boton
-                                            variante="ghost"
+                                            variante="peligro"
                                             tamano="pequeño"
-                                            claseAdicional="panelIAAccionBtn panelIAAccionBtn--confirmar"
                                             onClick={() => confirmarAccion(mensaje.id, i)}
                                         >Confirmar</Boton>
                                         <Boton
                                             variante="ghost"
                                             tamano="pequeño"
-                                            claseAdicional="panelIAAccionBtn panelIAAccionBtn--cancelar"
                                             onClick={() => rechazarAccion(mensaje.id, i)}
                                         >Cancelar</Boton>
                                     </div>
@@ -167,9 +165,9 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                 />
                 <Boton
                     type="button"
-                    variante="ghost"
+                    variante="primario"
+                    tamano="pequeño"
                     soloIcono
-                    claseAdicional="panelIABotonEnviar"
                     onClick={manejarEnviar}
                     disabled={enviando || !inputTexto.trim() || !apiKey}
                     icono={enviando ? <Loader2 size={16} className="animacionGirar" /> : <Send size={16} />}
