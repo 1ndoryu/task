@@ -203,11 +203,14 @@ class OpencodeJobService
             throw new \RuntimeException('El job anterior pertenece a otro usuario.');
         }
 
-        $sessionId      = (string)($jobAnterior['resultado']['session_id'] ?? '');
+        /* [115A-cont] NO reutilizamos session_id aunque el job anterior haya exitado 0.
+         * Si el run anterior entro en "modo protocolo" su sesion tiene contexto corrupto;
+         * continuar con --session <id> hace que OpenCode vea el nuevo prompt como parte
+         * de ese flujo confundido. El previousOutput como texto ya es suficiente contexto. */
         $previousOutput = mb_substr((string)($jobAnterior['resultado']['output'] ?? ''), -1000);
         $payload        = array_merge($jobAnterior['payload'], [
             'prompt'          => sanitize_textarea_field($prompt),
-            'session_id'      => $sessionId,
+            'session_id'      => '',
             'previous_output' => $previousOutput,
             'continua_job_id' => $jobAnteriorId,
         ]);
