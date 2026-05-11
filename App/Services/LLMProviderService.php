@@ -199,9 +199,10 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
     /**
      * Transcribe un archivo de audio usando Groq Whisper.
      * [115A-5] Endpoint separado: /openai/v1/audio/transcriptions (multipart form).
+     * [116A-3] Rota entre todas las keys de Groq disponibles (igual que enviarChat).
      *
      * @param string $filePath  Ruta local al archivo de audio
-     * @param string $mimeType  MIME type del audio (audio/ogg, audio/mp4, etc.)
+     * @param string $mimeType  MIME type del audio (audio/ogg, audio/ogg; codecs=opus, etc.)
      * @return string           Texto transcrito
      */
     public function transcribirAudio(string $filePath, string $mimeType = 'audio/ogg'): string
@@ -216,7 +217,9 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
             throw new \RuntimeException('No se pudo leer el archivo de audio: ' . basename($filePath));
         }
 
-        $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $mimeType)[1] ?? 'ogg') ?: 'ogg';
+        /* [116A-3] Sanitizar MIME type: 'audio/ogg; codecs=opus' → 'audio/ogg' para ext y Content-Type */
+        $baseMime = trim(explode(';', $mimeType)[0]);
+        $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $baseMime)[1] ?? 'ogg') ?: 'ogg';
         $boundary = '----GroqW' . md5(uniqid('', true));
         $body     = "--{$boundary}\r\n"
             . "Content-Disposition: form-data; name=\"model\"\r\n\r\nwhisper-large-v3\r\n"
@@ -224,36 +227,46 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
             . "Content-Disposition: form-data; name=\"language\"\r\n\r\nes\r\n"
             . "--{$boundary}\r\n"
             . "Content-Disposition: form-data; name=\"file\"; filename=\"audio.{$ext}\"\r\n"
-            . "Content-Type: {$mimeType}\r\n\r\n"
+            . "Content-Type: {$baseMime}\r\n\r\n"
             . $fileContent
             . "\r\n--{$boundary}--";
 
-        $response = wp_remote_post('https://api.groq.com/openai/v1/audio/transcriptions', [
-            'timeout' => 60,
-            'headers' => [
-                'Content-Type'  => "multipart/form-data; boundary={$boundary}",
-                'Authorization' => 'Bearer ' . $keys[0],
-            ],
-            'body' => $body,
-        ]);
+        $ultimoError = null;
+        foreach ($keys as $key) {
+            try {
+                $response = wp_remote_post('https://api.groq.com/openai/v1/audio/transcriptions', [
+                    'timeout' => 60,
+                    'headers' => [
+                        'Content-Type'  => "multipart/form-data; boundary={$boundary}",
+                        'Authorization' => 'Bearer ' . $key,
+                    ],
+                    'body' => $body,
+                ]);
 
-        if (is_wp_error($response)) {
-            throw new \RuntimeException('Groq Whisper: ' . $response->get_error_message());
+                if (is_wp_error($response)) {
+                    throw new \RuntimeException('Groq Whisper: ' . $response->get_error_message());
+                }
+
+                $status = (int)wp_remote_retrieve_response_code($response);
+                $data   = json_decode((string)wp_remote_retrieve_body($response), true);
+
+                if ($status < 200 || $status >= 300) {
+                    $err = is_array($data) ? ($data['error']['message'] ?? 'Error Whisper') : 'Error Whisper';
+                    throw new \RuntimeException("Groq Whisper {$status}: {$err}");
+                }
+
+                $transcripcion = trim((string)($data['text'] ?? ''));
+                if ($transcripcion === '') {
+                    throw new \RuntimeException('Groq Whisper no devolvio transcripcion.');
+                }
+                return $transcripcion;
+            } catch (\Throwable $e) {
+                $ultimoError = $e;
+                error_log('[LLMProviderService] Whisper key fallida: ' . $e->getMessage());
+            }
         }
 
-        $status = (int)wp_remote_retrieve_response_code($response);
-        $data   = json_decode((string)wp_remote_retrieve_body($response), true);
-
-        if ($status < 200 || $status >= 300) {
-            $err = is_array($data) ? ($data['error']['message'] ?? 'Error Whisper') : 'Error Whisper';
-            throw new \RuntimeException("Groq Whisper {$status}: {$err}");
-        }
-
-        $transcripcion = trim((string)($data['text'] ?? ''));
-        if ($transcripcion === '') {
-            throw new \RuntimeException('Groq Whisper no devolvio transcripcion.');
-        }
-        return $transcripcion;
+        throw new \RuntimeException($ultimoError ? $ultimoError->getMessage() : 'Groq Whisper: todas las keys fallaron.');
     }
 
     private function obtenerKeysProvider(string $provider): array

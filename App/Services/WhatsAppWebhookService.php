@@ -146,10 +146,14 @@ class WhatsAppWebhookService
                     }
                 } catch (\Throwable $mediaErr) {
                     error_log('[WhatsApp] Error procesando media: ' . $mediaErr->getMessage());
-                    /* Si no hay texto tampoco, no hay nada que procesar */
                     if ($mensajeParaAgente === '') {
-                        (new WacliService())->enviarTexto($destino, 'No pude procesar el archivo multimedia. Intenta enviarlo de nuevo.');
-                        return;
+                        /* [116A-3] En lugar de responder directamente y cortar, informar al LLM
+                         * para que responda de forma natural y pida al usuario que reenvíe. */
+                        if (str_starts_with($mediaEvento['type'], 'audio/') || str_starts_with($mediaEvento['type'], 'video/')) {
+                            $mensajeParaAgente = '[El usuario envió un audio que no se pudo transcribir (error técnico). Dile que lo reenvíe o escriba el mensaje.]';
+                        } else {
+                            $mensajeParaAgente = '[El usuario envió un archivo multimedia que no se pudo procesar. Dile que lo reenvíe.]';
+                        }
                     }
                 } finally {
                     if ($tmpFile !== null && file_exists($tmpFile)) {
