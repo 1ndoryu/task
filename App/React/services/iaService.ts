@@ -24,7 +24,7 @@ export interface ModeloIA {
 
 export const PROVEEDORES_IA: Array<{id: ProveedorIA; nombre: string; descripcion: string}> = [
     {id: 'groq', nombre: 'Groq', descripcion: 'Modelos rápidos y producción por defecto'},
-    {id: 'deepseek', nombre: 'DeepSeek', descripcion: 'DeepSeek Chat y Reasoner'}
+    {id: 'deepseek', nombre: 'DeepSeek', descripcion: 'DeepSeek V4 Flash'}
 ];
 
 /* [243A-4] Modelos más inteligentes disponibles en Groq (actualizado marzo 2026)
@@ -36,13 +36,12 @@ export const MODELOS_IA = [
     {id: 'qwen/qwen3-32b', nombre: 'Qwen3 32B (Groq)', proveedor: 'groq'},
     {id: 'llama-3.3-70b-versatile', nombre: 'Llama 3.3 70B — rápido (Groq)', proveedor: 'groq'},
     {id: 'meta-llama/llama-4-scout-17b-16e-instruct', nombre: 'Llama 4 Scout — flash (Groq)', proveedor: 'groq'},
-    {id: 'deepseek-chat', nombre: 'DeepSeek Chat — flash', proveedor: 'deepseek'},
-    {id: 'deepseek-reasoner', nombre: 'DeepSeek Reasoner', proveedor: 'deepseek'}
+    {id: 'deepseek-v4-flash', nombre: 'DeepSeek V4 Flash', proveedor: 'deepseek'}
 ] as const;
 
 export const MODELO_FLASH_POR_PROVEEDOR: Record<ProveedorIA, string> = {
     groq: 'meta-llama/llama-4-scout-17b-16e-instruct',
-    deepseek: 'deepseek-chat'
+    deepseek: 'deepseek-v4-flash'
 };
 
 export interface ConfigProveedorIA {

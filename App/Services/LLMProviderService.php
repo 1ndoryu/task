@@ -31,7 +31,7 @@ class LLMProviderService
         'deepseek' => [
             'url' => 'https://api.deepseek.com/chat/completions',
             'env' => ['DEEPSEEK_API', 'DEEPSEEK-API', 'DEEPSEEK_API_KEY'],
-            'models' => ['deepseek-chat', 'deepseek-reasoner'],
+            'models' => ['deepseek-v4-flash'],
         ],
     ];
 
