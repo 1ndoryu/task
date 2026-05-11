@@ -158,6 +158,60 @@ class AgentActionService
         return $this->ejecutarAccion($id, $executor, $adminId);
     }
 
+    /* [115A-4] Cancela un recordatorio/acción programada del usuario. */
+    public function cancelar(int $id, int $userId): bool
+    {
+        global $wpdb;
+        $accion = $this->obtener($id);
+        if (!$accion || (int)$accion['user_id'] !== $userId) {
+            return false;
+        }
+        if (in_array($accion['estado'], ['completado', 'cancelado'], true)) {
+            return false; // ya finalizado
+        }
+        return $wpdb->update(
+            $this->tabla,
+            ['estado' => 'cancelado'],
+            ['id' => $id],
+            ['%s'],
+            ['%d']
+        ) !== false;
+    }
+
+    /* [115A-4] Edita la fecha y/o payload de un recordatorio pendiente.
+     * $cambios puede incluir: 'fecha_programada' (string ISO8601), 'titulo' (string),
+     * 'payload_merge' (array que se fusiona con el payload existente). */
+    public function editarProgramada(int $id, int $userId, array $cambios): ?array
+    {
+        global $wpdb;
+        $accion = $this->obtener($id);
+        if (!$accion || (int)$accion['user_id'] !== $userId) {
+            return null;
+        }
+        if (!in_array($accion['estado'], ['pendiente', 'requiere_aprobacion'], true)) {
+            return null;
+        }
+
+        if (isset($cambios['fecha_programada'])) {
+            $ts = strtotime((string)$cambios['fecha_programada']);
+            if ($ts === false) {
+                throw new \InvalidArgumentException('Fecha inválida para editar recordatorio.');
+            }
+            $_ok = $wpdb->update($this->tabla, ['fecha_programada' => gmdate('Y-m-d H:i:s', $ts)], ['id' => $id], ['%s'], ['%d']);
+        }
+
+        if (!empty($cambios['titulo'])) {
+            $_ok = $wpdb->update($this->tabla, ['titulo' => sanitize_text_field((string)$cambios['titulo'])], ['id' => $id], ['%s'], ['%d']);
+        }
+
+        if (!empty($cambios['payload_merge']) && is_array($cambios['payload_merge'])) {
+            $payload = array_merge((array)($accion['payload'] ?? []), $cambios['payload_merge']);
+            $_ok = $wpdb->update($this->tabla, ['payload' => $this->codificarJson($payload)], ['id' => $id], ['%s'], ['%d']);
+        }
+
+        return $this->obtener($id);
+    }
+
     public function aprobarProgramada(int $id, int $adminId): array
     {
         global $wpdb;

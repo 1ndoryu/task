@@ -4,6 +4,7 @@
  * Cada sección usa su hook directamente — no depende de props del padre
  * [243A-1] Agrega SeccionConfigIAPanelChat (proveedor, modelo, preferencias) */
 
+import {useEffect} from 'react';
 import {ToggleSwitch} from '../../shared/ToggleSwitch';
 import {Boton, Input, Select, Textarea} from '../../ui';
 import {useConfiguracionTareas} from '../../../hooks/useConfiguracionTareas';
@@ -14,7 +15,7 @@ import {useConfiguracionActividad} from '../../../hooks/useConfiguracionActivida
 import {useEsDispositivoMovil} from '../../../hooks/useEsMovil';
 import {useIAStore} from '../../../stores/iaStore';
 import {MODELOS_IA, MODELO_FLASH_POR_PROVEEDOR, PROVEEDORES_IA} from '../../../services/iaService';
-import {esUsuarioAdmin} from '../../../utils/dashboardRuntime';
+import {esUsuarioAdmin, obtenerNonceWP} from '../../../utils/dashboardRuntime';
 import type {ProveedorIA} from '../../../stores/iaStore';
 import type {ColumnasHabitos, ToleranciaPreset} from '../../../hooks/useConfiguracionHabitos';
 import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
@@ -225,6 +226,23 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
     const setPromptSistema = useIAStore(s => s.setPromptSistema);
     const esAdmin = esUsuarioAdmin();
     const modelosProveedor = MODELOS_IA.filter(m => m.proveedor === proveedor);
+
+    /* [115A-1] Sincronizar proveedor+modelo al servidor (WP options) para que
+     * AgentChatProcessor.php los use en el chatbot WhatsApp sin leer localStorage. */
+    useEffect(() => {
+        if (!esAdmin) return;
+        const nonce = obtenerNonceWP();
+        if (!nonce) return;
+        const ctrl = new AbortController();
+        fetch('/wp-json/glory/v1/admin/chatbot-config', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-WP-Nonce': nonce},
+            credentials: 'same-origin',
+            signal: ctrl.signal,
+            body: JSON.stringify({proveedor, modelo}),
+        }).catch(() => {/* ignorar errores de red — localStorage es la fuente de verdad */});
+        return () => ctrl.abort();
+    }, [proveedor, modelo, esAdmin]);
 
     const manejarProveedor = (valor: string) => {
         const proveedorNuevo = valor as ProveedorIA;

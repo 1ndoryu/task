@@ -30,3 +30,40 @@
 - Endpoint público `POST /wp-json/glory/v1/whatsapp/webhook` (auth via HMAC)
 - Recordatorios recurrentes: `every_5_minutes` WP-Cron schedule + payload.recurrence_minutes
 - WACLI_WEBHOOK_SECRET env var en Coolify + local
+
+### 115A-1 — Chatbot: modelo desde configuración + compactación por contexto
+- `AgentChatProcessor.php`: leer proveedor/modelo desde WP option `glory_chatbot_proveedor` / `glory_chatbot_modelo` (fallback: groq / llama-3.3-70b-versatile)
+- Sincronizar el modelo elegido en el panel React (iaStore) al guardar → `POST /wp-json/glory/v1/admin/opciones` guardando las claves WP
+- Reemplazar `COMPACTION_THRESHOLD` (mensajes) por umbral en chars totales del historial (default 8000), configurable vía WP option `glory_chatbot_compaction_chars`
+- La compactación también usa el modelo configurado (no hardcodeado)
+
+### 115A-2 — Chatbot: filtrar número Venezuela
+- `WhatsAppWebhookService.php`: en `resolverAdminDesdeRemitente()`, rechazar JIDs que coincidan con `WHATSAPP_SEGUNDO_NUMERO` aunque tengan mapping en wp_usermeta
+- Solo el número `WHATSAPP` (EEUU) debe activar el agente; el segundo número debe recibir un mensaje de "solo respondo al número de EEUU" o simplemente ignorarse (decidir)
+
+### 115A-3 — Chatbot: contexto maestro persistente y modificable
+- Añadir tabla o WP option `glory_chatbot_master_context_{userId}` con texto libre del usuario
+- El agente puede leer y modificar este contexto mediante acción `actualizar_contexto_maestro {texto}`
+- El contexto maestro se inyecta siempre en el system prompt antes del contexto de tareas
+- Si el contexto maestro supera ~9000 tokens (≈36000 chars), compactarlo automáticamente con el LLM
+
+### 115A-4 — Chatbot: gestión de recordatorios (listar, editar, eliminar)
+- Añadir acciones: `listar_recordatorios`, `editar_recordatorio {id, campo, valor}`, `eliminar_recordatorio {id}`
+- Revisar `AgentActionService` para exponer listado de acciones programadas del usuario
+- El agente debe incluir los recordatorios activos en `buildContexto()` para poder referirse a ellos por ID
+
+### 115A-5 — Chatbot: visión e imágenes/audios por WhatsApp
+- Revisar documentación Groq vision: modelos `meta-llama/llama-4-scout-17b-16e-instruct` o `llama-4-maverick-17b-128e-instruct`
+- `WhatsAppWebhookService.php`: si `Media.Type` comienza con `image/`, descargar via wacli/DirectPath+MediaKey, convertir a base64, enviar al modelo visión de Groq con image_url en content array
+- Audios: transcripción via Groq Whisper (`whisper-large-v3` o `distil-whisper-large-v3-en`), luego procesar texto transcrito normalmente
+- Añadir descarga de media a `WacliService` o nuevo `WacliMediaService`
+
+### 115A-6 — Chatbot: acciones de notas y hábitos completos
+- Sub-hábitos: leer campo `subhabitos` de HabitosRepository en `buildContexto()`, mostrarlos indentados con su estado
+- Acciones nuevas: `completar_habito {id}`, `completar_subhabito {id, subId}`, `leer_notas {limite?}`, `crear_nota {titulo, contenido}`, `editar_nota {id, contenido, titulo?}`, `buscar_nota {termino}`
+- Usar `NotasRepository->guardar()`, `->actualizar()`, `->listar()`, `->buscar()`
+
+### 115A-7 — Roadmap: integración chatbot con ayuno y calorías
+- Planificar acciones del agente para el plugin de ayuno: `iniciar_ayuno`, `terminar_ayuno`, `estado_ayuno`
+- Planificar acciones para registro de calorías: `registrar_comida {descripcion, calorias?}`, `resumen_calorias_hoy`
+- Revisar APIs existentes del plugin de ayuno y del módulo de calorías antes de implementar

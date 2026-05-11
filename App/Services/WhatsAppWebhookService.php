@@ -125,11 +125,29 @@ class WhatsAppWebhookService
      *   Si no hay mapeo guardado, compara los dígitos del @lid vs números autorizados
      *   como fallback (cubre el caso del admin que nunca mapeó su JID manualmente).
      * En todos los casos, el usuario resultante DEBE tener rol administrator.
+     *
+     * [115A-2] Solo el número WHATSAPP (principal) y WHATSAPP_AGENT_TO activan el bot.
+     * WHATSAPP_SEGUNDO_NUMERO queda EXCLUIDO del set autorizado: el bot solo responde al
+     * número primario (EEUU). JIDs específicos se pueden bloquear via WHATSAPP_BLOCKED_JIDS
+     * (lista separada por comas, ej: 55959850381429@lid).
      */
     private function resolverAdminDesdeRemitente(string $from): ?int
     {
         $fromNorm = preg_replace('/[^0-9]/', '', $from) ?? '';
         $esLid    = str_contains($from, '@lid');
+
+        $env = function (string $k): string {
+            return (string)($_ENV[$k] ?? getenv($k) ?: '');
+        };
+
+        /* [115A-2] Bloquear JIDs explícitamente excluidos.
+         * WHATSAPP_BLOCKED_JIDS: lista separada por comas (ej: 55959850381429@lid).
+         * Útil para bloquear números mapeados en wp_usermeta que no deben activar el bot. */
+        $blockedJids = array_filter(array_map('trim', explode(',', $env('WHATSAPP_BLOCKED_JIDS'))));
+        if (!empty($blockedJids) && in_array($from, $blockedJids, true)) {
+            error_log('[WhatsApp] JID en lista de bloqueados, ignorado: ' . substr($from, 0, 20));
+            return null;
+        }
 
         if ($esLid) {
             /* Buscar mapeo explícito JID→user (guardado por primera autenticación exitosa) */
@@ -146,13 +164,10 @@ class WhatsAppWebhookService
             /* Fallback: comparar dígitos del @lid vs números env (ej: 584120825234@lid → 584120825234) */
         }
 
-        /* Comparación por dígitos de teléfono vs números autorizados en .env */
-        $env = function (string $k): string {
-            return (string)($_ENV[$k] ?? getenv($k) ?: '');
-        };
+        /* Solo WHATSAPP (número principal) y WHATSAPP_AGENT_TO activan el bot.
+         * WHATSAPP_SEGUNDO_NUMERO excluido — el bot solo responde al número primario. */
         $numerosPermitidos = array_filter([
             $env('WHATSAPP'),
-            $env('WHATSAPP_SEGUNDO_NUMERO'),
             $env('WHATSAPP_AGENT_TO'),
         ]);
 

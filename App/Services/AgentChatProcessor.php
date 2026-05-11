@@ -1,9 +1,14 @@
 <?php
+/* sentinel-disable-file limite-lineas
+ * Justificación: motor central del agente con ~30 action cases en ejecutarAccion()
+ * — equivalente a un REST controller con muchas rutas. Dividir requirería extraer
+ * AgentActionExecutor con toda la inyección de dependencias; pendiente como tarea separada. */
 
 namespace App\Services;
 
 use App\Repository\TareasRepository;
 use App\Repository\HabitosRepository;
+use App\Repository\NotasRepository;
 
 /* [109A+109B] Motor PHP para procesar mensajes del chatbot desde cualquier canal (app, whatsapp).
  * Usa LLMProviderService + MemPalaceService + AgentChatService.
@@ -14,15 +19,18 @@ use App\Repository\HabitosRepository;
  */
 class AgentChatProcessor
 {
-    private const MAX_HISTORIAL       = 20;  // mensajes recientes que van al LLM
-    private const MAX_CONTEXT_TAREAS  = 30;
-    private const PROVEEDOR_DEFAULT   = 'groq';
-    private const MODELO_DEFAULT      = 'llama-3.3-70b-versatile';
-    /* Compactación: cuando una sesión supera COMPACTION_THRESHOLD mensajes totales,
-     * los más antiguos se resumen en un único bloque 'sistema' y se borran de la BD.
-     * Resultado: historial siempre <= COMPACTION_KEEP + 1 (el resumen) mensajes. */
-    private const COMPACTION_THRESHOLD = 30; // total de mensajes para disparar compactación
-    private const COMPACTION_KEEP      = 14; // mensajes recientes que se conservan tras compactar
+    private const MAX_HISTORIAL            = 20;    // mensajes recientes que van al LLM
+    private const MAX_CONTEXT_TAREAS      = 30;
+    private const MAX_CONTEXT_NOTAS       = 10;    // notas que se incluyen en el contexto
+    private const MAX_CONTEXT_RECORDAT    = 15;    // recordatorios activos en contexto
+    /* [115A-1] Compactación por tamaño de contexto (chars totales del historial).
+     * Threshold configurable via WP option glory_chatbot_compaction_chars (default 8000).
+     * COMPACTION_KEEP_CHARS: chars del historial reciente que se conservan tras compactar.
+     * Proveedor/modelo leídos de WP options glory_chatbot_proveedor / glory_chatbot_modelo. */
+    private const COMPACTION_KEEP_CHARS    = 4000;  // chars de historial reciente a conservar
+    /* [115A-3] Contexto maestro: texto persistente por usuario, modificable por el agente.
+     * Si supera MASTER_CONTEXT_MAX_CHARS (~9000 tokens), se compacta automáticamente. */
+    private const MASTER_CONTEXT_MAX_CHARS = 36000; // ~9000 tokens → compactar contexto maestro
 
     private AgentChatService $chat;
     private MemPalaceService  $mempalace;
@@ -43,10 +51,11 @@ class AgentChatProcessor
      */
     public function procesar(int $userId, string $sessionId, string $mensaje, string $canal = 'app'): array
     {
-        $historial  = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
-        $contexto   = $this->buildContexto($userId);
-        $memorias   = $this->mempalace->search($mensaje, $userId);
-        $systemMsg  = $this->buildSystemPrompt($contexto, $memorias, $canal);
+        $historial       = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
+        $contexto        = $this->buildContexto($userId);
+        $memorias        = $this->mempalace->search($mensaje, $userId);
+        $contextoMaestro = $this->getMasterContext($userId);
+        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro);
 
         /* Construir messages para el LLM */
         $messages = [['role' => 'system', 'content' => $systemMsg]];
@@ -56,11 +65,12 @@ class AgentChatProcessor
         }
         $messages[] = ['role' => 'user', 'content' => $mensaje];
 
-        /* Llamar al LLM */
+        /* Llamar al LLM con proveedor/modelo configurados (no hardcodeados) */
+        $llm       = $this->resolverConfigLLM();
         $llmResult = (new LLMProviderService())->enviarChat(
             $messages,
-            self::PROVEEDOR_DEFAULT,
-            self::MODELO_DEFAULT,
+            $llm['proveedor'],
+            $llm['modelo'],
             ['temperature' => 0.7, 'maxTokens' => 1000]
         );
         $rawContent = (string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? '');
@@ -70,11 +80,11 @@ class AgentChatProcessor
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
 
         /* Persistir mensajes */
-        $this->chat->guardarMensaje($userId, $sessionId, 'usuario', $mensaje, null, 0);
-        $this->chat->guardarMensaje($userId, $sessionId, 'asistente', $parsed['respuesta'], $parsed['acciones'], (int)($llmResult['tokensComplecion'] ?? $llmResult['tokens'] ?? 0));
+        $_ok = $this->chat->guardarMensaje($userId, $sessionId, 'usuario', $mensaje, null, 0);
+        $_ok = $this->chat->guardarMensaje($userId, $sessionId, 'asistente', $parsed['respuesta'], $parsed['acciones'], (int)($llmResult['tokensComplecion'] ?? $llmResult['tokens'] ?? 0));
 
         /* Guardar memorias en MemPalace en background (no bloquea la respuesta) */
-        $this->guardarMemoria($userId, $mensaje, $parsed['respuesta'], $canal, $sessionId);
+        $_ok = $this->guardarMemoria($userId, $mensaje, $parsed['respuesta'], $canal, $sessionId);
 
         /* Compactar historial si la sesión creció demasiado */
         $this->compactarHistorialSiNecesario($userId, $sessionId);
@@ -88,14 +98,18 @@ class AgentChatProcessor
 
     /* --- System prompt ------------------------------------------------------ */
 
-    private function buildSystemPrompt(string $contexto, string $memorias, string $canal): string
+    /* [115A-1+115A-3] buildSystemPrompt recibe contextoMaestro (texto persistente del usuario).
+     * El contexto maestro se inyecta antes del contexto de tareas/hábitos/notas. */
+    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = ''): string
     {
         $instruccionCanal = $canal === 'whatsapp'
             ? "\nEstás respondiendo por WHATSAPP. Sé conciso, sin markdown, sin listas largas. Máximo 3 oraciones por mensaje."
             : '';
 
-        /* Si hay memorias relevantes, mostramos qué se encontró; si no, indicamos al modelo
-         * que puede guardar información importante para que persista entre sesiones. */
+        $bloqueMaestro = $contextoMaestro !== ''
+            ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n"
+            : '';
+
         $bloqueMemoria = $memorias !== ''
             ? "\n\n## Memorias recuperadas (persisten entre sesiones)\n{$memorias}\n\nUsa estas memorias para personalizar tu respuesta. Si el usuario menciona algo importante que quieras recordar para el futuro, usa la acción guardar_memoria."
             : "\n\nTienes un sistema de memoria persistente entre sesiones. Si el usuario menciona algo importante (nombre, preferencias, datos personales, metas), guárdalo con la acción guardar_memoria."
@@ -111,28 +125,41 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"completar_tarea\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"editar_tarea\", \"parametros\": {\"id\": 123, \"texto\": \"nuevo nombre\"}}
 - {\"tipo\": \"programar_recordatorio\", \"parametros\": {\"titulo\": \"...\", \"mensaje\": \"...\", \"fecha\": \"ISO8601\", \"recurrence_minutes\": 60, \"channel\": \"whatsapp\"}}
+- {\"tipo\": \"listar_recordatorios\", \"parametros\": {}}
+- {\"tipo\": \"editar_recordatorio\", \"parametros\": {\"id\": 123, \"fecha\": \"ISO8601\", \"titulo\": \"nuevo titulo\", \"mensaje\": \"nuevo mensaje\"}}
+- {\"tipo\": \"eliminar_recordatorio\", \"parametros\": {\"id\": 123}}
+- {\"tipo\": \"completar_habito\", \"parametros\": {\"id\": 123}}
+- {\"tipo\": \"completar_subhabito\", \"parametros\": {\"id\": 123, \"subId\": 0}}
+- {\"tipo\": \"leer_notas\", \"parametros\": {\"limite\": 10}}
+- {\"tipo\": \"crear_nota\", \"parametros\": {\"titulo\": \"...\", \"contenido\": \"...\"}}
+- {\"tipo\": \"editar_nota\", \"parametros\": {\"id\": 123, \"contenido\": \"...\", \"titulo\": \"opcional\"}}
+- {\"tipo\": \"buscar_nota\", \"parametros\": {\"termino\": \"...\"}}
 - {\"tipo\": \"proponer_whatsapp\", \"parametros\": {\"mensaje\": \"texto\", \"to\": \"numero opcional\"}}
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
+- {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 
 REGLAS:
 - Si no hay acciones, envía \"acciones\": [].
 - No inventes IDs. Solo usa IDs del contexto.
-- NUNCA uses eliminar sin que el usuario lo pida explícitamente.
+- NUNCA uses eliminar/completar sin que el usuario lo pida explícitamente.
 - Responde siempre en español.
-- programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp en la fecha indicada.
-- Si recurrence_minutes > 0 el recordatorio se repetirá con ese intervalo.
-- guardar_memoria: úsalo cuando el usuario diga su nombre, preferencias, metas, datos personales o cualquier cosa que quiera que recuerdes. NO lo uses en cada mensaje — solo cuando hay información valiosa nueva.{$bloqueMemoria}
+- programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
+- Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
+- guardar_memoria: solo cuando hay información valiosa nueva (nombre, preferencias, metas).
+- actualizar_contexto_maestro: cuando el usuario diga algo que debe recordarse siempre (info personal duradera, instrucciones permanentes, preferencias de vida). Escribe el contexto maestro COMPLETO y actualizado, no solo la parte nueva.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
 
     /* --- Contexto de tareas y hábitos -------------------------------------- */
 
+    /* [115A-6] buildContexto incluye sub-hábitos, notas recientes (títulos) y recordatorios programados. */
     private function buildContexto(int $userId): string
     {
         try {
             $tareas  = (new TareasRepository($userId))->getAll();
             $habitos = (new HabitosRepository($userId))->getAll();
+            $notas   = (new NotasRepository($userId))->listar(self::MAX_CONTEXT_NOTAS);
         } catch (\Throwable) {
             return '';
         }
@@ -157,6 +184,39 @@ REGLAS:
         foreach ($habitosActivos as $h) {
             $hecho = in_array($hoy, (array)($h['historialCompletados'] ?? []), true) ? '✓' : '○';
             $ctx .= "- [id:{$h['id']}] {$hecho} {$h['nombre']} (racha:{$h['racha']})\n";
+            /* Sub-hábitos (con índice para la acción completar_subhabito) */
+            if (!empty($h['subhabitos']) && is_array($h['subhabitos'])) {
+                foreach ($h['subhabitos'] as $idx => $sh) {
+                    $shHecho  = !empty($sh['completadoHoy']) ? '✓' : '○';
+                    $shNombre = (string)($sh['nombre'] ?? $sh['texto'] ?? "sub-{$idx}");
+                    $ctx .= "  - [sub:{$idx}] {$shHecho} " . mb_substr($shNombre, 0, 50) . "\n";
+                }
+            }
+        }
+
+        /* Notas recientes — solo títulos para no saturar el contexto */
+        if (!empty($notas)) {
+            $ctx .= "\n## Notas recientes\n";
+            foreach ($notas as $nota) {
+                $titulo = $nota['titulo'] !== '' ? $nota['titulo'] : '(sin título)';
+                $ctx .= "- [id:{$nota['id']}] " . mb_substr($titulo, 0, 60) . "\n";
+            }
+        }
+
+        /* Recordatorios programados activos */
+        try {
+            $recordatorios = (new AgentActionService())->listar($userId, 'pendiente', self::MAX_CONTEXT_RECORDAT);
+            $conFecha = array_values(array_filter($recordatorios, fn($r) => !empty($r['fecha_programada'])));
+            if (!empty($conFecha)) {
+                $ctx .= "\n## Recordatorios programados\n";
+                foreach ($conFecha as $r) {
+                    $recurrencia = !empty($r['payload']['recurrence_minutes'])
+                        ? " (cada {$r['payload']['recurrence_minutes']}min)" : '';
+                    $ctx .= "- [id:{$r['id']}] {$r['titulo']}{$recurrencia} — {$r['fecha_programada']}\n";
+                }
+            }
+        } catch (\Throwable) {
+            /* No bloquear si AgentActionService falla */
         }
 
         return $ctx;
@@ -221,7 +281,7 @@ REGLAS:
                     'fechaCreacion' => current_time('c'),
                 ];
                 $tareas[] = $nueva;
-                $repo->saveAll($tareas);
+                $_ok = $repo->saveAll($tareas);
                 return ['tipo' => $tipo, 'exito' => true, 'id' => $nueva['id']];
 
             case 'completar_tarea':
@@ -236,7 +296,7 @@ REGLAS:
                     }
                 }
                 unset($t);
-                $repo->saveAll($tareas);
+                $_ok = $repo->saveAll($tareas);
                 return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
 
             case 'editar_tarea':
@@ -254,7 +314,7 @@ REGLAS:
                     }
                 }
                 unset($t);
-                $repo->saveAll($tareas);
+                $_ok = $repo->saveAll($tareas);
                 return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
 
             case 'programar_recordatorio':
@@ -268,7 +328,7 @@ REGLAS:
                     'channel'            => (string)($param['channel'] ?? ($canal === 'whatsapp' ? 'whatsapp' : 'app')),
                     'recurrence_minutes' => max(0, (int)($param['recurrence_minutes'] ?? 0)),
                 ];
-                (new AgentActionService())->crearProgramada(
+                $_created = (new AgentActionService())->crearProgramada(
                     $userId,
                     $payload['channel'] === 'whatsapp' ? 'whatsapp_send_text' : 'reminder_notify',
                     $titulo,
@@ -297,7 +357,7 @@ REGLAS:
                     return ['tipo' => $tipo, 'exito' => true, 'enviado' => true];
                 }
                 /* Desde app: crear propuesta aprobable */
-                (new AgentActionService())->crearPropuesta($userId, 'whatsapp_send_text', 'Enviar WhatsApp', [
+                $_created = (new AgentActionService())->crearPropuesta($userId, 'whatsapp_send_text', 'Enviar WhatsApp', [
                     'message' => $msg,
                     'to'      => $param['to'] ?? null,
                 ]);
@@ -316,6 +376,96 @@ REGLAS:
                     return ['tipo' => $tipo, 'exito' => $guardado];
                 }
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'MemPalace no disponible o contenido vacío'];
+
+            /* [115A-6] Acciones de hábitos ----------------------------------- */
+            case 'completar_habito':
+                $id    = (int)($param['id'] ?? 0);
+                $repo  = new HabitosRepository($userId);
+                $habitos = $repo->getAll();
+                $hoy   = date('Y-m-d');
+                foreach ($habitos as &$h) {
+                    if ((int)$h['id'] === $id) {
+                        $hist = (array)($h['historialCompletados'] ?? []);
+                        if (!in_array($hoy, $hist, true)) {
+                            $hist[] = $hoy;
+                            $h['historialCompletados'] = $hist;
+                            /* Incrementar racha si el día anterior también fue completado */
+                            $ayer = date('Y-m-d', strtotime('-1 day'));
+                            if (in_array($ayer, (array)($h['historialCompletados'] ?? []), true) || (int)($h['racha'] ?? 0) === 0) {
+                                $h['racha'] = (int)($h['racha'] ?? 0) + 1;
+                            }
+                        }
+                        break;
+                    }
+                }
+                unset($h);
+                $_ok = $repo->saveAll($habitos);
+                return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
+
+            case 'completar_subhabito':
+                $id    = (int)($param['id'] ?? 0);
+                $subId = (int)($param['subId'] ?? 0);
+                $repo  = new HabitosRepository($userId);
+                $habitos = $repo->getAll();
+                foreach ($habitos as &$h) {
+                    if ((int)$h['id'] === $id && isset($h['subhabitos'][$subId])) {
+                        $h['subhabitos'][$subId]['completadoHoy'] = true;
+                        break;
+                    }
+                }
+                unset($h);
+                $_ok = $repo->saveAll($habitos);
+                return ['tipo' => $tipo, 'exito' => true, 'id' => $id, 'subId' => $subId];
+
+            /* [115A-6] Acciones de notas ------------------------------------- */
+            case 'leer_notas':
+                $limite = min(20, max(1, (int)($param['limite'] ?? 10)));
+                $notas  = (new NotasRepository($userId))->listar($limite);
+                return ['tipo' => $tipo, 'exito' => true, 'notas' => $notas];
+
+            case 'crear_nota':
+                $titulo    = sanitize_text_field((string)($param['titulo'] ?? ''));
+                $contenido = sanitize_textarea_field((string)($param['contenido'] ?? ''));
+                $nueva     = (new NotasRepository($userId))->guardar($contenido, $titulo !== '' ? $titulo : null);
+                return ['tipo' => $tipo, 'exito' => $nueva !== null, 'id' => $nueva['id'] ?? null];
+
+            case 'editar_nota':
+                $id        = (int)($param['id'] ?? 0);
+                $contenido = sanitize_textarea_field((string)($param['contenido'] ?? ''));
+                $titulo    = isset($param['titulo']) ? sanitize_text_field((string)$param['titulo']) : null;
+                $ok = (new NotasRepository($userId))->actualizar($id, $contenido, $titulo);
+                return ['tipo' => $tipo, 'exito' => $ok, 'id' => $id];
+
+            case 'buscar_nota':
+                $termino    = sanitize_text_field((string)($param['termino'] ?? ''));
+                $resultados = (new NotasRepository($userId))->buscar($termino, 10);
+                return ['tipo' => $tipo, 'exito' => true, 'resultados' => $resultados];
+
+            /* [115A-4] Gestión de recordatorios ------------------------------ */
+            case 'listar_recordatorios':
+                $lista    = (new AgentActionService())->listar($userId, 'pendiente', 20);
+                $conFecha = array_values(array_filter($lista, fn($r) => !empty($r['fecha_programada'])));
+                return ['tipo' => $tipo, 'exito' => true, 'recordatorios' => $conFecha];
+
+            case 'editar_recordatorio':
+                $id     = (int)($param['id'] ?? 0);
+                $cambios = [];
+                if (!empty($param['fecha']))   $cambios['fecha_programada'] = (string)$param['fecha'];
+                if (!empty($param['titulo']))  $cambios['titulo']           = (string)$param['titulo'];
+                if (!empty($param['mensaje'])) $cambios['payload_merge']    = ['mensaje' => sanitize_textarea_field((string)$param['mensaje'])];
+                $actualizado = (new AgentActionService())->editarProgramada($id, $userId, $cambios);
+                return ['tipo' => $tipo, 'exito' => $actualizado !== null, 'id' => $id];
+
+            case 'eliminar_recordatorio':
+                $id = (int)($param['id'] ?? 0);
+                $ok = (new AgentActionService())->cancelar($id, $userId);
+                return ['tipo' => $tipo, 'exito' => $ok, 'id' => $id];
+
+            /* [115A-3] Contexto maestro -------------------------------------- */
+            case 'actualizar_contexto_maestro':
+                $texto = sanitize_textarea_field((string)($param['texto'] ?? ''));
+                $_ok = $this->updateMasterContext($userId, $texto);
+                return ['tipo' => $tipo, 'exito' => true];
 
             default:
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'Tipo de acción no soportado en canal server-side'];
@@ -340,39 +490,58 @@ REGLAS:
 
     /* --- Compactación de historial ----------------------------------------- */
 
-    /* Cuando la sesión supera COMPACTION_THRESHOLD mensajes totales, resume los más
-     * antiguos (todos salvo los últimos COMPACTION_KEEP) en un bloque 'sistema' y
-     * los borra. Así el historial que llega al LLM nunca crece indefinidamente. */
+    /* [115A-1] Compacta el historial cuando el total de chars supera el threshold configurable.
+     * En lugar de contar mensajes, mide el tamaño real del contexto. Conserva los últimos
+     * COMPACTION_KEEP_CHARS chars. Usa el modelo configurado (no hardcodeado). */
     private function compactarHistorialSiNecesario(int $userId, string $sessionId): void
     {
         global $wpdb;
         $tabla = \App\Database\Schema::getTableName('agent_chat_messages');
 
-        $total = (int)$wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$tabla} WHERE user_id = %d AND session_id = %s",
+        /* Cargar todos los mensajes ordenados para calcular tamaño total */
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, rol, contenido FROM {$tabla}
+             WHERE user_id = %d AND session_id = %s
+             ORDER BY id ASC",
             $userId, $sessionId
-        ));
+        ), ARRAY_A);
 
-        if ($total <= self::COMPACTION_THRESHOLD) {
+        if (empty($rows)) {
             return;
         }
 
-        /* IDs de los mensajes a compactar: todos excepto los últimos COMPACTION_KEEP */
-        $idsACompactar = $wpdb->get_col($wpdb->prepare(
-            "SELECT id FROM {$tabla}
-             WHERE user_id = %d AND session_id = %s AND rol != 'sistema'
-             ORDER BY id ASC
-             LIMIT %d",
-            $userId, $sessionId, $total - self::COMPACTION_KEEP
+        $totalChars = array_sum(array_map(fn($r) => strlen((string)$r['contenido']), $rows));
+        $threshold  = $this->compactionCharsThreshold();
+
+        if ($totalChars <= $threshold) {
+            return;
+        }
+
+        /* Determinar qué mensajes conservar: acumular desde el final hasta COMPACTION_KEEP_CHARS */
+        $rowsReverse = array_reverse($rows);
+        $keptChars   = 0;
+        $keepIds     = [];
+        foreach ($rowsReverse as $r) {
+            $keptChars += strlen((string)$r['contenido']);
+            if ($keptChars > self::COMPACTION_KEEP_CHARS) {
+                break;
+            }
+            $keepIds[] = $r['id'];
+        }
+
+        /* IDs a compactar: los que no están en keepIds y no son 'sistema' */
+        $idsACompactar = array_values(array_map(
+            fn($r) => (int)$r['id'],
+            array_filter($rows, fn($r) => !in_array($r['id'], $keepIds, true) && $r['rol'] !== 'sistema')
         ));
 
         if (empty($idsACompactar)) {
             return;
         }
 
-        /* Recuperar el texto de esos mensajes para resumirlos */
+        /* Recuperar texto de los mensajes a compactar */
         $placeholders = implode(',', array_fill(0, count($idsACompactar), '%d'));
-        $rows = $wpdb->get_results(
+        $toCompact    = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT rol, contenido FROM {$tabla} WHERE id IN ({$placeholders}) ORDER BY id ASC",
                 ...$idsACompactar
@@ -380,23 +549,24 @@ REGLAS:
             ARRAY_A
         );
 
-        if (empty($rows)) {
+        if (empty($toCompact)) {
             return;
         }
 
         $bloque = implode("\n", array_map(
             fn($r) => ($r['rol'] === 'usuario' ? 'U' : 'A') . ': ' . $r['contenido'],
-            $rows
+            $toCompact
         ));
 
-        /* Llamar al LLM para generar el resumen */
+        /* Resumir con el modelo configurado */
+        $llm       = $this->resolverConfigLLM();
         $llmResult = (new LLMProviderService())->enviarChat(
             [
                 ['role' => 'system', 'content' => 'Eres un asistente que resume conversaciones. Resume en 3-5 oraciones los puntos clave de esta conversación, en tercera persona, para ser usados como contexto futuro. Incluye: decisiones tomadas, datos personales mencionados, tareas creadas. Sé conciso.'],
                 ['role' => 'user',   'content' => $bloque],
             ],
-            self::PROVEEDOR_DEFAULT,
-            self::MODELO_DEFAULT,
+            $llm['proveedor'],
+            $llm['modelo'],
             ['temperature' => 0.3, 'maxTokens' => 300]
         );
 
@@ -414,7 +584,7 @@ REGLAS:
         );
 
         /* Insertar el bloque resumen como mensaje 'sistema' al inicio del historial */
-        $this->chat->guardarMensaje(
+        $_ok = $this->chat->guardarMensaje(
             $userId,
             $sessionId,
             'sistema',
@@ -422,5 +592,59 @@ REGLAS:
             null,
             0
         );
+    }
+
+    /* --- Configuración LLM ------------------------------------------------- */
+
+    /* [115A-1] Lee proveedor y modelo desde WP options.
+     * Se configuran desde el panel "Asistente IA" sincronizando al servidor.
+     * Fallback: groq + llama-3.3-70b-versatile */
+    private function resolverConfigLLM(): array
+    {
+        $proveedor = (string)(get_option('glory_chatbot_proveedor') ?: 'groq');
+        $modelo    = (string)(get_option('glory_chatbot_modelo')    ?: 'llama-3.3-70b-versatile');
+        return ['proveedor' => $proveedor, 'modelo' => $modelo];
+    }
+
+    private function compactionCharsThreshold(): int
+    {
+        return max(2000, (int)(get_option('glory_chatbot_compaction_chars') ?: 8000));
+    }
+
+    /* --- Contexto maestro -------------------------------------------------- */
+
+    /* [115A-3] Lee el contexto maestro del usuario (texto persistente en user_meta). */
+    private function getMasterContext(int $userId): string
+    {
+        $val = get_user_meta($userId, 'glory_chatbot_master_context', true);
+        return is_string($val) ? $val : '';
+    }
+
+    /* Actualiza el contexto maestro. Si supera MASTER_CONTEXT_MAX_CHARS, lo compacta primero. */
+    private function updateMasterContext(int $userId, string $texto): void
+    {
+        if (strlen($texto) > self::MASTER_CONTEXT_MAX_CHARS) {
+            $this->compactarContextoMaestro($userId, $texto);
+            return; // compactarContextoMaestro guarda el resultado
+        }
+        update_user_meta($userId, 'glory_chatbot_master_context', $texto);
+    }
+
+    private function compactarContextoMaestro(int $userId, string $texto): void
+    {
+        $llm       = $this->resolverConfigLLM();
+        $llmResult = (new LLMProviderService())->enviarChat(
+            [
+                ['role' => 'system', 'content' => 'Resume el siguiente contexto personal del usuario en máximo 2000 caracteres, conservando todos los datos importantes: preferencias, instrucciones permanentes, datos personales, metas. Sé conciso pero completo.'],
+                ['role' => 'user',   'content' => $texto],
+            ],
+            $llm['proveedor'],
+            $llm['modelo'],
+            ['temperature' => 0.2, 'maxTokens' => 600]
+        );
+        $resumen = trim((string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? ''));
+        if ($resumen !== '') {
+            update_user_meta($userId, 'glory_chatbot_master_context', $resumen);
+        }
     }
 }

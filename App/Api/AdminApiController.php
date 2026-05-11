@@ -118,6 +118,41 @@ class AdminApiController
                 ],
             ],
         ]);
+
+        /* [115A-1] Guardar configuración del chatbot (proveedor + modelo) en WP options
+         * para que AgentChatProcessor.php pueda leerlos sin necesidad de localStorage */
+        register_rest_route(self::API_NAMESPACE, '/admin/chatbot-config', [
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => [self::class, 'guardarChatbotConfig'],
+            'permission_callback' => [self::class, 'requireAdminPermission'],
+            'args'                => [
+                'proveedor' => [
+                    'required'          => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => fn($p) => in_array($p, ['groq', 'deepseek'], true),
+                ],
+                'modelo' => [
+                    'required'          => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'validate_callback' => fn($m) => is_string($m) && strlen($m) > 0 && strlen($m) <= 120,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * [115A-1] Guarda el proveedor y modelo del chatbot en WP options.
+     * Estas opciones son leídas por AgentChatProcessor::resolverConfigLLM().
+     */
+    public static function guardarChatbotConfig(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $proveedor = $request->get_param('proveedor');
+        $modelo    = $request->get_param('modelo');
+
+        update_option('glory_chatbot_proveedor', $proveedor, false);
+        update_option('glory_chatbot_modelo',    $modelo,    false);
+
+        return new \WP_REST_Response(['ok' => true, 'proveedor' => $proveedor, 'modelo' => $modelo], 200);
     }
 
     /**
