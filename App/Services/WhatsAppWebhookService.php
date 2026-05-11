@@ -48,8 +48,8 @@ class WhatsAppWebhookService
         /* Log para capturar el formato real de wacli */
         error_log('[WhatsApp] evento tipo=' . $tipo . ' raw=' . json_encode($evento));
 
-        /* Detectar formato nuevo: sin "type", con "Text" y "Chat" */
-        $esFormatoNuevo = $tipo === '' && isset($evento['Text'], $evento['Chat']);
+        /* Detectar formato nuevo: sin "type", con "Text"/"Chat" o con "Media"/"Chat" */
+        $esFormatoNuevo = $tipo === '' && isset($evento['Chat']) && (isset($evento['Text']) || isset($evento['Media']));
 
         if (!$esFormatoNuevo && $tipo !== 'message.received') {
             return;
@@ -69,8 +69,20 @@ class WhatsAppWebhookService
             $text = trim((string)($msg['text']['body'] ?? $msg['body'] ?? $evento['body'] ?? ''));
         }
 
+        /* [115A-5] Extraer media si el mensaje la incluye (puede venir con o sin caption) */
+        $mediaEvento = null;
+        if ($esFormatoNuevo && isset($evento['Media']['Type'])) {
+            $directPath = (string)($evento['Media']['DirectPath'] ?? '');
+            $mediaKey   = (string)($evento['Media']['MediaKey'] ?? '');
+            $mediaType  = (string)($evento['Media']['Type'] ?? '');
+            if ($directPath !== '' && $mediaKey !== '' && $mediaType !== '') {
+                $mediaEvento = ['type' => $mediaType, 'directPath' => $directPath, 'mediaKey' => $mediaKey];
+            }
+        }
+
         $isGroup = str_contains($from, '@g.us');
-        if ($isGroup || $text === '' || $from === '') {
+        /* Descartar solo si texto vacío Y sin media procesable */
+        if ($isGroup || ($text === '' && $mediaEvento === null) || $from === '') {
             return;
         }
 
@@ -100,7 +112,57 @@ class WhatsAppWebhookService
         $destino = $esLid ? $from : ('+' . $fromNum);
 
         try {
-            $resultado = (new AgentChatProcessor())->procesar($adminId, $sessionId, $text, 'whatsapp');
+            /* [115A-5] Procesar media si existe: imagen → visión, audio → transcripción */
+            $mensajeParaAgente = $text;
+            $mediaParaAgente   = null;
+
+            if ($mediaEvento !== null) {
+                $tmpFile = null;
+                try {
+                    $tmpFile = (new WacliService())->descargarMedia(
+                        $mediaEvento['directPath'],
+                        $mediaEvento['mediaKey'],
+                        $mediaEvento['type']
+                    );
+
+                    if (str_starts_with($mediaEvento['type'], 'image/')) {
+                        /* Enviar imagen al LLM con visión multimodal */
+                        $b64             = base64_encode((string)file_get_contents($tmpFile));
+                        $mediaParaAgente = ['mimeType' => $mediaEvento['type'], 'base64' => $b64];
+                        /* Mantener caption si el usuario escribió algo junto a la imagen */
+                        if ($mensajeParaAgente === '') {
+                            $mensajeParaAgente = '[Imagen recibida]';
+                        }
+                        error_log('[WhatsApp] Imagen recibida, type=' . $mediaEvento['type'] . ' size=' . strlen($b64));
+                    } elseif (str_starts_with($mediaEvento['type'], 'audio/') || str_starts_with($mediaEvento['type'], 'video/')) {
+                        /* Transcribir audio con Groq Whisper */
+                        $mensajeParaAgente = (new LLMProviderService())->transcribirAudio($tmpFile, $mediaEvento['type']);
+                        error_log('[WhatsApp] Audio transcrito (' . $mediaEvento['type'] . '): ' . mb_substr($mensajeParaAgente, 0, 120));
+                    } else {
+                        error_log('[WhatsApp] Tipo de media no soportado: ' . $mediaEvento['type']);
+                        if ($mensajeParaAgente === '') {
+                            return; /* nada procesable */
+                        }
+                    }
+                } catch (\Throwable $mediaErr) {
+                    error_log('[WhatsApp] Error procesando media: ' . $mediaErr->getMessage());
+                    /* Si no hay texto tampoco, no hay nada que procesar */
+                    if ($mensajeParaAgente === '') {
+                        (new WacliService())->enviarTexto($destino, 'No pude procesar el archivo multimedia. Intenta enviarlo de nuevo.');
+                        return;
+                    }
+                } finally {
+                    if ($tmpFile !== null && file_exists($tmpFile)) {
+                        unlink($tmpFile);
+                    }
+                }
+            }
+
+            if ($mensajeParaAgente === '') {
+                return;
+            }
+
+            $resultado = (new AgentChatProcessor())->procesar($adminId, $sessionId, $mensajeParaAgente, 'whatsapp', $mediaParaAgente);
 
             if (!empty($resultado['respuesta'])) {
                 (new WacliService())->enviarTexto($destino, $resultado['respuesta']);

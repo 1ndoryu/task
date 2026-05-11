@@ -23,6 +23,9 @@ class LLMProviderService
                 'meta-llama/llama-4-scout-17b-16e-instruct',
                 'moonshotai/kimi-k2-instruct',
                 'openai/gpt-oss-20b',
+                /* [115A-5] Whisper solo se usa en transcribirAudio(), no en enviarChat() */
+                'whisper-large-v3',
+                'whisper-large-v3-turbo',
             ],
         ],
         'deepseek' => [
@@ -175,12 +178,15 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
     {
         $validos = [];
         foreach (array_slice($messages, -25) as $message) {
-            $role = $message['role'] ?? '';
+            $role    = $message['role'] ?? '';
             $content = $message['content'] ?? '';
-            if (!in_array($role, ['system', 'user', 'assistant'], true) || !is_string($content) || trim($content) === '') {
+            /* [115A-5] Content puede ser array multimodal (vision) o string (texto normal) */
+            $esString = is_string($content);
+            $contentValido = $esString ? trim($content) !== '' : (is_array($content) && !empty($content));
+            if (!in_array($role, ['system', 'user', 'assistant'], true) || !$contentValido) {
                 continue;
             }
-            $validos[] = ['role' => $role, 'content' => substr($content, 0, 12000)];
+            $validos[] = ['role' => $role, 'content' => $esString ? substr($content, 0, 12000) : $content];
         }
 
         if (empty($validos)) {
@@ -188,6 +194,66 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
         }
 
         return $validos;
+    }
+
+    /**
+     * Transcribe un archivo de audio usando Groq Whisper.
+     * [115A-5] Endpoint separado: /openai/v1/audio/transcriptions (multipart form).
+     *
+     * @param string $filePath  Ruta local al archivo de audio
+     * @param string $mimeType  MIME type del audio (audio/ogg, audio/mp4, etc.)
+     * @return string           Texto transcrito
+     */
+    public function transcribirAudio(string $filePath, string $mimeType = 'audio/ogg'): string
+    {
+        $keys = $this->obtenerKeysProvider('groq');
+        if (empty($keys)) {
+            throw new \RuntimeException('No hay API key de Groq para transcripción de audio.');
+        }
+
+        $fileContent = file_get_contents($filePath);
+        if ($fileContent === false || $fileContent === '') {
+            throw new \RuntimeException('No se pudo leer el archivo de audio: ' . basename($filePath));
+        }
+
+        $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $mimeType)[1] ?? 'ogg') ?: 'ogg';
+        $boundary = '----GroqW' . md5(uniqid('', true));
+        $body     = "--{$boundary}\r\n"
+            . "Content-Disposition: form-data; name=\"model\"\r\n\r\nwhisper-large-v3\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Disposition: form-data; name=\"language\"\r\n\r\nes\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Disposition: form-data; name=\"file\"; filename=\"audio.{$ext}\"\r\n"
+            . "Content-Type: {$mimeType}\r\n\r\n"
+            . $fileContent
+            . "\r\n--{$boundary}--";
+
+        $response = wp_remote_post('https://api.groq.com/openai/v1/audio/transcriptions', [
+            'timeout' => 60,
+            'headers' => [
+                'Content-Type'  => "multipart/form-data; boundary={$boundary}",
+                'Authorization' => 'Bearer ' . $keys[0],
+            ],
+            'body' => $body,
+        ]);
+
+        if (is_wp_error($response)) {
+            throw new \RuntimeException('Groq Whisper: ' . $response->get_error_message());
+        }
+
+        $status = (int)wp_remote_retrieve_response_code($response);
+        $data   = json_decode((string)wp_remote_retrieve_body($response), true);
+
+        if ($status < 200 || $status >= 300) {
+            $err = is_array($data) ? ($data['error']['message'] ?? 'Error Whisper') : 'Error Whisper';
+            throw new \RuntimeException("Groq Whisper {$status}: {$err}");
+        }
+
+        $transcripcion = trim((string)($data['text'] ?? ''));
+        if ($transcripcion === '') {
+            throw new \RuntimeException('Groq Whisper no devolvio transcripcion.');
+        }
+        return $transcripcion;
     }
 
     private function obtenerKeysProvider(string $provider): array

@@ -49,11 +49,20 @@ class AgentChatProcessor
      * @param string $canal      'app' | 'whatsapp'
      * @return array{respuesta: string, acciones: array, ejecutadas: array}
      */
-    public function procesar(int $userId, string $sessionId, string $mensaje, string $canal = 'app'): array
+    /**
+     * Procesa un mensaje del usuario y retorna la respuesta.
+     * @param int        $userId     WP user ID
+     * @param string     $sessionId  ID de sesión ('default', 'whatsapp_NUMERO', etc.)
+     * @param string     $mensaje    Mensaje del usuario (o texto de transcripción de audio)
+     * @param string     $canal      'app' | 'whatsapp'
+     * @param array|null $media      Opcional: ['mimeType' => string, 'base64' => string] para visión
+     * @return array{respuesta: string, acciones: array, ejecutadas: array}
+     */
+    public function procesar(int $userId, string $sessionId, string $mensaje, string $canal = 'app', ?array $media = null): array
     {
         $historial       = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
         $contexto        = $this->buildContexto($userId);
-        $memorias        = $this->mempalace->search($mensaje, $userId);
+        $memorias        = $this->mempalace->search($mensaje !== '' ? $mensaje : 'imagen recibida', $userId);
         $contextoMaestro = $this->getMasterContext($userId);
         $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro);
 
@@ -63,10 +72,25 @@ class AgentChatProcessor
             $rol = $m['rol'] === 'usuario' ? 'user' : 'assistant';
             $messages[] = ['role' => $rol, 'content' => $m['contenido']];
         }
-        $messages[] = ['role' => 'user', 'content' => $mensaje];
 
-        /* Llamar al LLM con proveedor/modelo configurados (no hardcodeados) */
-        $llm       = $this->resolverConfigLLM();
+        /* [115A-5] Si hay imagen, usar content array multimodal para visión */
+        $esImagen = $media !== null && str_starts_with((string)($media['mimeType'] ?? ''), 'image/') && !empty($media['base64']);
+        if ($esImagen) {
+            $textoUsuario = $mensaje !== '' ? $mensaje : 'El usuario envió esta imagen.';
+            $messages[] = ['role' => 'user', 'content' => [
+                ['type' => 'text', 'text' => $textoUsuario],
+                ['type' => 'image_url', 'image_url' => ['url' => 'data:' . $media['mimeType'] . ';base64,' . $media['base64']]],
+            ]];
+        } else {
+            $messages[] = ['role' => 'user', 'content' => $mensaje];
+        }
+
+        /* Llamar al LLM con proveedor/modelo configurados (no hardcodeados).
+         * Para visión forzamos un modelo multimodal de Groq. */
+        $llm = $this->resolverConfigLLM();
+        if ($esImagen) {
+            $llm = ['proveedor' => 'groq', 'modelo' => 'meta-llama/llama-4-scout-17b-16e-instruct'];
+        }
         $llmResult = (new LLMProviderService())->enviarChat(
             $messages,
             $llm['proveedor'],
@@ -188,10 +212,37 @@ REGLAS:
 
         $hoy = date('Y-m-d');
         $ctx .= "\n## Hábitos activos\n";
-        $habitosActivos = array_filter($habitos, fn($h) => empty($h['pausado']));
+        $habitosActivos = array_values(array_filter($habitos, fn($h) => empty($h['pausado'])));
+
+        /* [115A-habit-order] Ordenar: pendientes hoy primero, dentro de cada grupo por importancia desc.
+         * Pesos: muy_alta=5, alta=4, media=3, baja=2, muy_baja=1, sin valor=0. */
+        $pesosImp = ['muy_alta' => 5, 'alta' => 4, 'media' => 3, 'baja' => 2, 'muy_baja' => 1];
+        usort($habitosActivos, function (array $a, array $b) use ($hoy, $pesosImp) {
+            $aHecho = in_array($hoy, (array)($a['historialCompletados'] ?? []), true);
+            $bHecho = in_array($hoy, (array)($b['historialCompletados'] ?? []), true);
+            if ($aHecho !== $bHecho) {
+                return $aHecho ? 1 : -1; /* incompletos primero */
+            }
+            $pa = $pesosImp[$a['importancia'] ?? ''] ?? 0;
+            $pb = $pesosImp[$b['importancia'] ?? ''] ?? 0;
+            return $pb <=> $pa; /* mayor importancia primero */
+        });
+
         foreach ($habitosActivos as $h) {
             $hecho = in_array($hoy, (array)($h['historialCompletados'] ?? []), true) ? '✓' : '○';
-            $ctx .= "- [id:{$h['id']}] {$hecho} {$h['nombre']} (racha:{$h['racha']})\n";
+            $imp   = (string)($h['importancia'] ?? '');
+            $det   = array_values(array_filter([
+                $imp !== '' ? "importancia:{$imp}" : '',
+                (int)($h['racha'] ?? 0) > 0 ? "racha:{$h['racha']}" : '',
+                (!empty($h['ventanaOportunidad']['habilitada']))
+                    ? sprintf('ventana:%02d:%02d-%02d:%02d',
+                        (int)($h['ventanaOportunidad']['horaInicio'] ?? 0),
+                        (int)($h['ventanaOportunidad']['minutoInicio'] ?? 0),
+                        (int)($h['ventanaOportunidad']['horaFin'] ?? 0),
+                        (int)($h['ventanaOportunidad']['minutoFin'] ?? 0))
+                    : '',
+            ]));
+            $ctx .= '- [id:' . $h['id'] . "] {$hecho} {$h['nombre']}" . (!empty($det) ? ' (' . implode(', ', $det) . ')' : '') . "\n";
             /* Sub-hábitos (con índice para la acción completar_subhabito) */
             if (!empty($h['subhabitos']) && is_array($h['subhabitos'])) {
                 foreach ($h['subhabitos'] as $idx => $sh) {

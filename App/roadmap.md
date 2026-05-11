@@ -52,33 +52,17 @@
 - Revisar `AgentActionService` para exponer listado de acciones programadas del usuario
 - El agente debe incluir los recordatorios activos en `buildContexto()` para poder referirse a ellos por ID
 
-### 115A-8 — Chatbot: búsqueda semántica de memorias (MemPalace search por mensaje)
-- MemPalaceService.search() ya usa el mensaje actual como query y devuelve top-5 relevantes — no vuelca todo el palace
-- Aclarar en el system prompt: las memorias ya están filtradas por relevancia; `guardar_memoria` es para hechos nuevos importantes, no para repetir lo que ya está
-- Revisar que el prompt explica claramente cuándo buscar vs cuándo guardar
+### ✅ 115A-8 — Chatbot: búsqueda semántica de memorias
+### ✅ 115A-9 — Chatbot: retry de acciones fallidas (3 intentos + feedback)
+### ✅ 115A-10 — Chatbot: auto-actualización del contexto maestro
+### ✅ 115A-11 — Chatbot: acciones paralelas + crear_tarea_si_no_existe + agent_invoke
 
-### 115A-9 — Chatbot: retry de acciones fallidas (3 intentos + feedback)
-- `ejecutarAcciones()`: reintentar cada acción hasta 3 veces si lanza excepción (backoff 200/400ms)
-- Si los 3 intentos fallan, agregar al texto de respuesta un bloque de error visible al usuario con el motivo
-- No reintentar errores lógicos (ID no encontrado, etc.) — solo errores transitorios
-
-### 115A-10 — Chatbot: auto-actualización del contexto maestro
-- El agente debe llamar `actualizar_contexto_maestro` de su propio criterio cuando detecte info importante
-- Reforzar instrucción en el system prompt: ejemplos de cuándo actualizar (datos personales, preferencias de vida, cambios de rutina)
-- Nota: la instrucción ya existe pero necesita ser más prescriptiva — el agente debe hacerlo proactivamente sin que el usuario lo pida
-
-### 115A-11 — Chatbot: acciones paralelas + condiciones en recordatorios
-- El LLM ya puede retornar múltiples acciones en un array; aclarar esto en el system prompt con ejemplos
-- Nueva acción `crear_tarea_si_no_existe {texto, prioridad?, urgencia?}`: crea la tarea solo si no existe una activa con ese nombre exacto
-- Nueva acción de scheduler `agent_invoke {message, channel, session?}`: el scheduler llama a AgentChatProcessor con un mensaje natural → el agente usa su criterio
-- Esto permite programar recordatorios complejos: "a las 3pm cada día: asegúrate de que exista la tarea 'Sacar el perro'"
-- AgentSchedulerService: manejar tipo `agent_invoke` y `crear_tarea_si_no_existe`
-
-
-- Revisar documentación Groq vision: modelos `meta-llama/llama-4-scout-17b-16e-instruct` o `llama-4-maverick-17b-128e-instruct`
-- `WhatsAppWebhookService.php`: si `Media.Type` comienza con `image/`, descargar via wacli/DirectPath+MediaKey, convertir a base64, enviar al modelo visión de Groq con image_url en content array
-- Audios: transcripción via Groq Whisper (`whisper-large-v3` o `distil-whisper-large-v3-en`), luego procesar texto transcrito normalmente
-- Añadir descarga de media a `WacliService` o nuevo `WacliMediaService`
+### ✅ 115A-5 — Chatbot: visión e imágenes/audios WhatsApp
+- WhatsAppWebhookService: detecta Media en eventos wacli, no descarta mensajes con solo imagen/audio
+- Imágenes: descarga via WacliService.descargarMedia(), base64 → AgentChatProcessor con modelo de visión (meta-llama/llama-4-scout-17b-16e-instruct)
+- Audios: transcripción via LLMProviderService.transcribirAudio() con Groq Whisper (whisper-large-v3)
+- LLMProviderService: validarMensajes() soporta array content (multimodal), método transcribirAudio() agregado
+- Hábitos en contexto: ordenados por completado+importancia, muestran nivel importancia y ventana de oportunidad
 
 ### ✅ 115A-6 — Chatbot: acciones de notas y hábitos completos
 - Sub-hábitos: leer campo `subhabitos` de HabitosRepository en `buildContexto()`, mostrarlos indentados con su estado

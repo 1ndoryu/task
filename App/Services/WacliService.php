@@ -93,6 +93,36 @@ class WacliService
         ];
     }
 
+    /**
+     * Descarga un archivo de media recibido por WhatsApp usando wacli.
+     * [115A-5] Retorna la ruta al archivo temporal. El llamador es responsable de unlink().
+     *
+     * @param string $directPath  DirectPath del evento Media (ej: /v/f2/...)
+     * @param string $mediaKey    MediaKey en base64 para descifrado
+     * @param string $mediaType   MIME type (ej: image/jpeg, audio/ogg)
+     * @return string             Ruta al archivo temporal descargado
+     */
+    public function descargarMedia(string $directPath, string $mediaKey, string $mediaType): string
+    {
+        $ext     = preg_replace('/[^a-z0-9]/', '', explode('/', $mediaType)[1] ?? 'bin') ?: 'bin';
+        $tmpFile = sys_get_temp_dir() . '/wacli_media_' . md5($directPath . $mediaKey) . '.' . $ext;
+
+        /* wacli media download --direct-path <path> --media-key <key> --output <file>
+         * Gotcha: el comando puede variar según versión de wacli. Si falla, revisar `wacli media --help`. */
+        $this->ejecutarWacli([
+            'media', 'download',
+            '--direct-path', $directPath,
+            '--media-key',   $mediaKey,
+            '--output',      $tmpFile,
+        ], 30);
+
+        if (!file_exists($tmpFile) || filesize($tmpFile) === 0) {
+            throw new \RuntimeException('wacli no generó el archivo de media esperado en ' . $tmpFile);
+        }
+
+        return $tmpFile;
+    }
+
     public function resolverDestinatario(?string $to, bool $required): string
     {
         $recipient = trim((string)($to ?? ''));
