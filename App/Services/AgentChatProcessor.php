@@ -108,17 +108,20 @@ class AgentChatProcessor
         $parsed['acciones'] = $this->normalizarAccionesDesdeMensajeUsuario($parsed['acciones'], $mensaje, $canal);
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
 
-        /* [116A-1] Segunda llamada al LLM cuando alguna acción de consulta retornó datos.
-         * Sin esto el modelo responde antes de ver los datos y dice "no puedo acceder".
-         * Solo aplica a acciones que devuelven datos; las de mutación no necesitan 2da llamada. */
-        $accionesConsulta = ['leer_nota', 'leer_notas', 'buscar_nota', 'listar_tareas', 'listar_recordatorios', 'buscar_memoria'];
-        $hayDatosConsulta = false;
+        /* [116A-1] Segunda llamada al LLM cuando se ejecutó alguna acción síncrona.
+         * Aplica tanto a consultas (leer_nota → devuelve datos) como a mutaciones
+         * (actualizar_contexto_maestro, guardar_memoria → el LLM confirma que funcionó).
+         * Las acciones async (solicitar_opencode, continuar_opencode) se excluyen porque
+         * el job queda pendiente y la confirmación llega por otra vía. */
+        $accionesAsync = ['solicitar_opencode', 'continuar_opencode'];
+        $hayAccionSincrona = false;
         foreach ($ejecutadas as $ej) {
-            if (in_array($ej['tipo'] ?? '', $accionesConsulta, true) && ($ej['exito'] ?? false)) {
-                $hayDatosConsulta = true;
+            if (($ej['exito'] ?? false) && !in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
+                $hayAccionSincrona = true;
                 break;
             }
         }
+        $hayDatosConsulta = $hayAccionSincrona; // alias para compatibilidad con el bloque de abajo
         if ($hayDatosConsulta) {
             $messages[] = ['role' => 'assistant', 'content' => $rawContent];
             $lineasResultados = [];
