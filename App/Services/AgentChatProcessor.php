@@ -141,12 +141,12 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"buscar_nota\", \"parametros\": {\"termino\": \"...\"}}
 - {\"tipo\": \"proponer_whatsapp\", \"parametros\": {\"mensaje\": \"texto\", \"to\": \"numero opcional\"}}
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
-- {"tipo": "crear_tarea_si_no_existe", "parametros": {"texto": "nombre", "prioridad": "alta|media|baja", "urgencia": "urgente|normal|chill"}}
-- {"tipo": "actualizar_contexto_maestro", "parametros": {"texto": "contexto completo actualizado"}}
+- {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
+- {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 
 REGLAS:
 - Puedes incluir MÚLTIPLES acciones en el array y se ejecutan todas. Úsalas en paralelo cuando sea necesario (ej: crear tarea + guardar memoria + programar recordatorio en una sola respuesta).
-- Si no hay acciones, envía "acciones": [].
+- Si no hay acciones, envía \"acciones\": [].
 - No inventes IDs. Solo usa IDs del contexto.
 - NUNCA uses eliminar/completar sin que el usuario lo pida explícitamente.
 - Responde siempre en español.
