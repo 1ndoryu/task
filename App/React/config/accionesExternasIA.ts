@@ -1,5 +1,5 @@
 import type {AccionLLM, ResultadoAccion} from './accionesIA';
-import {buscarResearchLocal, proponerGithub, proponerRecordatorio, proponerWhatsapp} from '../services/agentActionsService';
+import {buscarResearchLocal, buscarResearchWeb, proponerGithub, proponerRecordatorio, proponerWhatsapp} from '../services/agentActionsService';
 
 export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<ResultadoAccion | null> {
     switch (accion.tipo) {
@@ -30,6 +30,19 @@ export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<Result
                 ? research.results.slice(0, 3).map(item => `${item.tipo}: ${item.titulo}`).join(' · ')
                 : 'sin resultados locales';
             return {tipo: accion.tipo, exito: true, descripcion: `Research local: ${resumen}`};
+        }
+        /* [107A] Búsqueda web real vía Tavily+Serper */
+        case 'research_web': {
+            const query = String(accion.parametros.query || accion.parametros.consulta || '').trim();
+            const limit = Number(accion.parametros.limit || 5);
+            if (!query) {
+                return {tipo: accion.tipo, exito: false, descripcion: 'Consulta web vacía'};
+            }
+            const research = await buscarResearchWeb(query, Number.isFinite(limit) ? limit : 5);
+            const resumen = research.results.length > 0
+                ? research.results.slice(0, 3).map(item => `${item.titulo}`).join(' · ')
+                : 'sin resultados web';
+            return {tipo: accion.tipo, exito: true, descripcion: `Web (${research.provider}): ${resumen}`};
         }
         case 'proponer_github': {
             const titulo = String(accion.parametros.titulo || accion.parametros.title || '').trim();

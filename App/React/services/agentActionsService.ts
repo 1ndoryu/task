@@ -26,6 +26,13 @@ export interface ResultadoResearchLocal {
     results: Array<{tipo: string; id: number; titulo: string; resumen: string; score: number; fecha?: string | null}>;
 }
 
+/* [107A] Resultado de búsqueda web (Tavily o Serper) */
+export interface ResultadoResearchWeb {
+    provider: 'tavily' | 'serper';
+    query: string;
+    results: Array<{tipo: 'web'; titulo: string; url: string; resumen: string; score: number}>;
+}
+
 interface RespuestaApi<T> {
     success?: boolean;
     data?: T;
@@ -78,7 +85,15 @@ export async function proponerRecordatorio(title: string, message: string, sched
 export async function buscarResearchLocal(query: string, limit = 10): Promise<ResultadoResearchLocal> {
     return requestAgente<ResultadoResearchLocal>('/agent/research', {
         method: 'POST',
-        body: JSON.stringify({query, limit})
+        body: JSON.stringify({query, limit, type: 'local'})
+    });
+}
+
+/* [107A] Búsqueda web vía Tavily (primario) + Serper (fallback en 429). */
+export async function buscarResearchWeb(query: string, limit = 5): Promise<ResultadoResearchWeb> {
+    return requestAgente<ResultadoResearchWeb>('/agent/research', {
+        method: 'POST',
+        body: JSON.stringify({query, limit, type: 'web'})
     });
 }
 

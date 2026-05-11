@@ -88,15 +88,19 @@ class AgentRestHandlers
         }
     }
 
+    /* [107A] type='local' (default) o type='web' (Tavily+Serper). */
     public static function buscarResearch(\WP_REST_Request $request): \WP_REST_Response
     {
         try {
-            $json = $request->get_json_params();
-            $json = is_array($json) ? $json : [];
-            $resultado = (new AgentResearchService())->buscar(
+            $json  = $request->get_json_params();
+            $json  = is_array($json) ? $json : [];
+            $type  = in_array(($json['type'] ?? 'local'), ['local', 'web'], true) ? $json['type'] : 'local';
+            $limit = isset($json['limit']) ? (int)$json['limit'] : 10;
+            $resultado = (new AgentResearchService(null, $type))->buscar(
                 get_current_user_id(),
                 trim((string)($json['query'] ?? '')),
-                isset($json['limit']) ? (int)$json['limit'] : 10
+                $limit,
+                $type
             );
             return self::ok($resultado);
         } catch (\Throwable $e) {

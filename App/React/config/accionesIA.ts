@@ -118,6 +118,7 @@ ACCIONES DISPONIBLES (incluir en el array "acciones" cuando corresponda):
 - {"tipo": "eliminar_habito", "parametros": {"id": 456}}
 - {"tipo": "proponer_whatsapp", "parametros": {"mensaje": "texto", "to": "opcional número/JID"}}
 - {"tipo": "research_local", "parametros": {"query": "texto a buscar", "limit": 10}}
+- {"tipo": "research_web", "parametros": {"query": "texto a buscar en internet", "limit": 5}}
 - {"tipo": "proponer_github", "parametros": {"titulo": "título", "descripcion": "detalle", "tipo": "issue|pull_request|comment|assign", "repo": "owner/repo opcional"}}
 - {"tipo": "programar_recordatorio", "parametros": {"titulo": "título", "mensaje": "texto", "fecha": "ISO 8601 o fecha parseable"}}
 
@@ -130,8 +131,8 @@ REGLAS:
 - Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
 - proponer_whatsapp NO envía el mensaje: crea una acción externa pendiente para que el usuario la apruebe en la interfaz.
 - Solo usa proponer_whatsapp cuando el usuario pida enviar o programar un mensaje de WhatsApp.
-- research_local busca en notas, tareas y hábitos del usuario; no busca internet, no usa OpenClaw/OpenCraw y no debe presentarse como búsqueda web.
-- Si el usuario pregunta por internet/OpenClaw, explica que en local solo está activo research_local y que el provider web externo aún requiere configurar un gateway.
+- research_local busca en notas, tareas y hábitos del usuario (sin internet).
+- research_web busca en internet vía Tavily/Serper; úsalo cuando el usuario pida información de la web, noticias, precios, docs externas o cualquier cosa que no esté en sus datos locales.
 - proponer_github prepara un borrador aprobable; no abre issues/PR reales sin confirmación.
 - programar_recordatorio crea un recordatorio local aprobable y luego WP-Cron lo ejecuta cuando venza.
 ${promptSistema ? `\nINSTRUCCIONES PERSONALIZADAS DEL SISTEMA:\n${promptSistema}` : ''}
