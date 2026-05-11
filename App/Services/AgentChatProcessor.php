@@ -284,12 +284,21 @@ REGLAS:
             }
         }
 
-        /* Notas recientes — solo títulos para no saturar el contexto */
+        /* Notas recientes — título + preview de contenido (primeros 300 chars).
+         * Incluir contenido evita que el modelo diga "no puedo acceder" sin llamar leer_nota.
+         * Para el contenido completo de una nota larga, el modelo puede usar leer_nota. */
         if (!empty($notas)) {
             $ctx .= "\n## Notas recientes\n";
             foreach ($notas as $nota) {
-                $titulo = $nota['titulo'] !== '' ? $nota['titulo'] : '(sin título)';
+                $titulo    = $nota['titulo'] !== '' ? $nota['titulo'] : '(sin título)';
+                $contenido = (string)($nota['contenido'] ?? '');
+                $preview   = mb_strlen($contenido) > 300
+                    ? mb_substr($contenido, 0, 300) . '… [usa leer_nota id:' . $nota['id'] . ' para ver completa]'
+                    : $contenido;
                 $ctx .= "- [id:{$nota['id']}] " . mb_substr($titulo, 0, 60) . "\n";
+                if ($preview !== '') {
+                    $ctx .= "  Contenido: " . str_replace("\n", ' ', $preview) . "\n";
+                }
             }
         }
 
