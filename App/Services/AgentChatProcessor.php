@@ -100,8 +100,37 @@ class AgentChatProcessor
         $rawContent = (string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? '');
         $parsed     = $this->parsear($rawContent);
 
-        /* Ejecutar acciones (con retry) y anotar fallos en la respuesta */
+        /* Ejecutar acciones (con retry) */
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
+
+        /* [116A-1] Segunda llamada al LLM cuando alguna acción de consulta retornó datos.
+         * Sin esto el modelo responde antes de ver los datos y dice "no puedo acceder".
+         * Solo aplica a acciones que devuelven datos; las de mutación no necesitan 2da llamada. */
+        $accionesConsulta = ['leer_nota', 'leer_notas', 'buscar_nota', 'listar_tareas', 'listar_recordatorios', 'buscar_memoria'];
+        $hayDatosConsulta = false;
+        foreach ($ejecutadas as $ej) {
+            if (in_array($ej['tipo'] ?? '', $accionesConsulta, true) && ($ej['exito'] ?? false)) {
+                $hayDatosConsulta = true;
+                break;
+            }
+        }
+        if ($hayDatosConsulta) {
+            $messages[] = ['role' => 'assistant', 'content' => $rawContent];
+            $lineasResultados = [];
+            foreach ($ejecutadas as $ej) {
+                if ($ej['exito'] ?? false) {
+                    $lineasResultados[] = ($ej['tipo'] ?? 'accion') . ' → ' . json_encode($ej, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                }
+            }
+            $messages[] = ['role' => 'user', 'content' => "[RESULTADOS DE HERRAMIENTAS]\n" . implode("\n", $lineasResultados) . "\n\nAhora responde al usuario usando estos datos."];
+            $llmResult2  = (new LLMProviderService())->enviarChat($messages, $llm['proveedor'], $llm['modelo'], ['temperature' => 0.7, 'maxTokens' => 1000]);
+            $rawContent2 = (string)($llmResult2['contenido'] ?? $llmResult2['content'] ?? $llmResult2['message'] ?? '');
+            $parsed2     = $this->parsear($rawContent2);
+            if ($parsed2['respuesta'] !== '') {
+                $parsed['respuesta'] = $parsed2['respuesta'];
+            }
+        }
+
         $parsed['respuesta'] = $this->anotarFallosEnRespuesta($parsed['respuesta'], $ejecutadas);
 
         /* Persistir mensajes */
