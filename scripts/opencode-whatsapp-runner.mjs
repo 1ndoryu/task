@@ -260,11 +260,17 @@ function normalizeApiUrl(options) {
 }
 
 function getRunnerSecret(options) {
-    const secret = typeof options.secret === 'string' ? options.secret : (process.env.OPENCODE_RUNNER_SECRET || '');
-    if (secret.trim() === '') {
-        throw new Error('poll-once requiere --secret o OPENCODE_RUNNER_SECRET.');
-    }
-    return secret;
+    const fromArg = typeof options.secret === 'string' ? options.secret.trim() : '';
+    if (fromArg) return fromArg;
+    if (process.env.OPENCODE_RUNNER_SECRET) return process.env.OPENCODE_RUNNER_SECRET;
+    /* Fallback: leer OPENCODE_RUNNER_SECRET de .env en la raiz del repo */
+    try {
+        const envFile = path.join(repoRoot, '.env');
+        const envContent = readFileSync(envFile, 'utf8');
+        const match = envContent.match(/^OPENCODE_RUNNER_SECRET=([^\r\n]+)/m);
+        if (match) return match[1].trim().replace(/^["']|["']$/g, '');
+    } catch { /* .env no encontrado */ }
+    throw new Error('poll-once requiere --secret o OPENCODE_RUNNER_SECRET (o definirlo en .env).');
 }
 
 function signRunnerRequest({secret, timestamp, method, route, bodyText}) {

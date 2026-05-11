@@ -18,6 +18,7 @@
         "roadmap": "node scripts/check-roadmap.mjs",
         "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
         "opencode:runner": "node scripts/opencode-whatsapp-runner.mjs",
+        "opencode:runner:loop": "node scripts/opencode-whatsapp-runner.mjs loop --api-url https://task.nakomi.studio/wp-json/glory/v1",
         "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1"
     },
     "dependencies": {
