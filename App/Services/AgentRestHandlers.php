@@ -274,14 +274,26 @@ class AgentRestHandlers
             if (!$job) {
                 return self::error('Job no disponible para reportar resultado.', 'opencode_job_not_reportable', 409);
             }
-            /* [115A-15] Notificar por WhatsApp al terminar */
+            /* [115A-15] Notificar por WhatsApp al terminar.
+             * Usa marcadores === RESUMEN PARA WHATSAPP === si el agente los definió;
+             * si no, toma las últimas líneas limpias. ANSI strips siempre.
+             * Permisos rechazados por OpenCode se listan al final para visibilidad. */
             try {
                 $output = trim((string)($resultado['output'] ?? ''));
-                $prompt = mb_substr((string)($job['payload']['prompt'] ?? ''), 0, 80);
+                $prompt = self::extraerPromptPreview((string)($job['payload']['prompt'] ?? ''));
+                $resumen = $output !== '' ? self::extraerResumenWhatsApp($output) : '';
+                $rechazados = $output !== '' ? self::extraerPermisosRechazados($output) : [];
                 if ($exito) {
-                    $waMsg = "\u{2705} *OpenCode termin\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($output !== '' ? "\n\n" . mb_substr($output, -600) : '');
+                    $waMsg = "\u{2705} *OpenCode termin\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($resumen !== '' ? "\n\n{$resumen}" : '');
                 } else {
-                    $waMsg = "\u{274C} *OpenCode fall\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n{$mensaje}" . ($output !== '' ? "\n\n" . mb_substr($output, -400) : '');
+                    $waMsg = "\u{274C} *OpenCode fall\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n{$mensaje}" . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                }
+                if (!empty($rechazados)) {
+                    $waMsg .= "\n\n\u{26A0}\uFE0F *Permisos rechazados:*";
+                    foreach ($rechazados as $cmd) {
+                        $waMsg .= "\n\u{2022} `{$cmd}`";
+                    }
+                    $waMsg .= "\n\nResponde *PERMITIR <comando>* para agregarlo a opencode.jsonc.";
                 }
                 (new WacliService())->enviarTexto(null, $waMsg);
             } catch (\Throwable) { /* no bloquear si WhatsApp falla */ }
@@ -316,6 +328,60 @@ class AgentRestHandlers
     private static function error(string $message, string $code, int $status): \WP_REST_Response
     {
         return new \WP_REST_Response(['success' => false, 'error' => ['code' => $code, 'message' => $message]], $status);
+    }
+
+    /* [115A-15] Limpia secuencias de escape ANSI del output del terminal.
+     * Cubre SGR (\x1b[...m), así como ESC solos. */
+    private static function limpiarAnsi(string $text): string
+    {
+        return (string) preg_replace('/\x1b\[[0-9;]*[mGKHF]|\x1b[\\]|\x0f|\x0e/', '', $text);
+    }
+
+    /* [115A-15] Extrae el resumen para WhatsApp del output de OpenCode.
+     * Si el agente definió marcadores explícitos los usa; si no, devuelve
+     * las últimas 25 líneas no-vacías tras limpiar ANSI.
+     * Gotcha: la búsqueda es case-sensitive en los marcadores para coincidir
+     * con lo que el agente produce exactamente. */
+    private static function extraerResumenWhatsApp(string $output): string
+    {
+        $output = self::limpiarAnsi($output);
+        if (preg_match('/=== RESUMEN PARA WHATSAPP ===(.*?)=== FIN RESUMEN ===/s', $output, $m)) {
+            return trim($m[1]);
+        }
+        $lines = array_values(array_filter(
+            array_map('trim', explode("\n", $output)),
+            static fn(string $l): bool => $l !== ''
+        ));
+        $tail = array_slice($lines, -25);
+        return implode("\n", $tail);
+    }
+
+    /* [115A-15] Extrae el mensaje original del usuario del prompt completo.
+     * El prompt construido por el runner empieza con "=== TAREA A EJECUTAR ==="
+     * seguido del mensaje del usuario hasta "=== FIN DE TAREA ===". */
+    private static function extraerPromptPreview(string $fullPrompt): string
+    {
+        if (preg_match('/=== TAREA A EJECUTAR ===(.*?)=== FIN DE TAREA ===/s', $fullPrompt, $m)) {
+            return mb_substr(trim($m[1]), 0, 120);
+        }
+        return mb_substr($fullPrompt, 0, 80);
+    }
+
+    /* [115A-15] Extrae los comandos bash que OpenCode rechazó por permisos.
+     * OpenCode emite: "permission requested: bash (COMMAND); auto-rejecting"
+     * o similar. Se desduplicam los comandos encontrados. */
+    private static function extraerPermisosRechazados(string $output): array
+    {
+        $clean = self::limpiarAnsi($output);
+        $comandos = [];
+        preg_match_all('/permission requested:\s+bash\s+\(([^)]+)\)/i', $clean, $matches);
+        foreach ($matches[1] as $cmd) {
+            $cmd = trim($cmd);
+            if ($cmd !== '' && !in_array($cmd, $comandos, true)) {
+                $comandos[] = $cmd;
+            }
+        }
+        return $comandos;
     }
 
     /* [115A-13] Autenticacion HMAC para runner local de OpenCode.
