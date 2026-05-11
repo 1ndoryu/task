@@ -68,7 +68,24 @@ class AgentChatProcessor
         $contexto        = $this->buildContexto($userId);
         $memorias        = $this->mempalace->search($mensaje !== '' ? $mensaje : 'imagen recibida', $userId);
         $contextoMaestro = $this->getMasterContext($userId);
-        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro);
+
+        /* [116A-2] Pre-calcular stats del historial para inyectarlas en el system prompt.
+         * Así el LLM ya tiene el dato real y puede responder sin llamar reportar_contexto. */
+        global $wpdb;
+        $tablaMsg    = \App\Database\Schema::getTableName('agent_chat_messages');
+        $ctxRows     = $wpdb->get_results($wpdb->prepare(
+            "SELECT contenido FROM {$tablaMsg} WHERE user_id = %d AND session_id = %s",
+            $userId, $sessionId
+        ), ARRAY_A);
+        $ctxChars    = array_sum(array_map(fn($r) => strlen((string)$r['contenido']), $ctxRows));
+        $ctxMsgs     = count($ctxRows);
+        $ctxLimit    = $this->compactionCharsThreshold();
+        $ctxPct      = $ctxLimit > 0 ? (int) round($ctxChars / $ctxLimit * 100) : 0;
+        $ctxTokens   = (int) round($ctxChars / 4);
+        $limTokens   = (int) round($ctxLimit / 4);
+        $statsHistorial = ['chars' => $ctxChars, 'tokens' => $ctxTokens, 'msgs' => $ctxMsgs, 'pct' => $ctxPct, 'limit_chars' => $ctxLimit, 'limit_tokens' => $limTokens];
+
+        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, '', '', $statsHistorial);
 
         /* Construir messages para el LLM */
         $messages = [['role' => 'system', 'content' => $systemMsg]];
@@ -95,8 +112,8 @@ class AgentChatProcessor
         if ($esImagen) {
             $llm = ['proveedor' => 'groq', 'modelo' => 'meta-llama/llama-4-scout-17b-16e-instruct'];
         }
-        /* Reconstruir system prompt incluyendo nombre del modelo para que el LLM pueda reportarlo */
-        $messages[0]['content'] = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, $llm['proveedor'], $llm['modelo']);
+        /* Reconstruir system prompt incluyendo nombre del modelo y stats reales del historial */
+        $messages[0]['content'] = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, $llm['proveedor'], $llm['modelo'], $statsHistorial);
         $llmResult = (new LLMProviderService())->enviarChat(
             $messages,
             $llm['proveedor'],
@@ -172,19 +189,26 @@ class AgentChatProcessor
 
     /* [115A-1+115A-3] buildSystemPrompt recibe contextoMaestro (texto persistente del usuario).
      * El contexto maestro se inyecta antes del contexto de tareas/hábitos/notas. */
-    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = ''): string
+    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = '', array $statsHistorial = []): string
     {
         $instruccionCanal = $canal === 'whatsapp'
             ? "\nEstás respondiendo por WHATSAPP. Sé conciso, sin markdown, sin listas largas. Máximo 3 oraciones por mensaje."
+            : '';
+
+        /* [116A-2] Stats del historial inyectados aquí para que el LLM responda sin llamar reportar_contexto.
+         * NUNCA estimar manualmente — usar siempre estos datos cuando el usuario pregunte. */
+        $bloqueStats = !empty($statsHistorial)
+            ? "\nSTATS DE SESIÓN: historial={$statsHistorial['chars']} chars (~{$statsHistorial['tokens']} tokens), {$statsHistorial['msgs']} mensajes, {$statsHistorial['pct']}% del límite de compactación ({$statsHistorial['limit_tokens']} tokens / {$statsHistorial['limit_chars']} chars). Cuando el usuario pregunte cuántos tokens, chars o mensajes hay, responde SIEMPRE con estos datos exactos — NUNCA estimes ni cuentes manualmente."
             : '';
 
         $bloqueModelo = $modelo !== ''
             ? "\nTu modelo: {$modelo} (proveedor: {$proveedor}). Cuando el usuario pregunte qué modelo eres, puedes decirlo."
             : '';
 
-        /* [116A-1] Si el usuario pide 'leer el contexto maestro', ya lo tienes aquí — no llames ninguna acción. */
+        /* [116A-1+116A-2] El contexto maestro se embebe directamente en el prompt — NO es una nota.
+         * No tiene ID numérico. NUNCA llames leer_nota para él. Si el usuario lo pide, reprodúcelo. */
         $bloqueMaestro = $contextoMaestro !== ''
-            ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n(Este contenido ya está en tu contexto. Si el usuario pide leer o ver el contexto maestro, reprodúcelo directamente sin llamar ninguna acción.)"
+            ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n(IMPORTANTE: este bloque NO es una nota, no tiene ID numérico. NUNCA uses leer_nota para el contexto maestro. Ya está aquí — si el usuario pide verlo, reprodúcelo directamente.)"
             : '';
 
         /* [115A-8] Las memorias ya vienen filtradas semánticamente por MemPalace (top-5 relevantes
@@ -196,7 +220,7 @@ class AgentChatProcessor
             : "\n\nTienes un sistema de memoria semántica persistente. Si el usuario menciona algo importante y nuevo (nombre real, preferencias de vida, datos personales, metas duraderas), guárdalo con guardar_memoria."
         ;
 
-        return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}{$bloqueModelo}
+        return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}{$bloqueStats}{$bloqueModelo}
 
 RESPONDE SIEMPRE en formato JSON con esta estructura exacta:
 {\"respuesta\": \"tu mensaje al usuario en español\", \"acciones\": []}
@@ -227,7 +251,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
 
 REGLAS:
-- NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido.
+- NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido. EXCEPCIÓN: el CONTEXTO MAESTRO no es una nota — ya está embebido en el bloque '## Contexto personal' de este prompt, NO tiene ID, NUNCA uses leer_nota para él.
 - Puedes incluir MÚLTIPLES acciones en el array y se ejecutan todas. Úsalas en paralelo cuando sea necesario (ej: crear tarea + guardar memoria + programar recordatorio en una sola respuesta).
 - Si no hay acciones, envía \"acciones\": [].
 - No inventes IDs. Solo usa IDs del contexto.
@@ -240,7 +264,7 @@ REGLAS:
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala SOLO cuando el usuario explícitamente amplía o corrige un job anterior (ej: \"y agrega X también\", \"modifica lo que hiciste\", \"faltó Y\"). Si el usuario repite la misma solicitud, dice \"de nuevo\", \"no funcionó\", \"repite\" o pide algo nuevo aunque sea sobre el mismo tema, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.
-- reportar_contexto: úsala cuando el usuario pregunte cuántos tokens, contexto o mensajes hay en la conversación. Responde con los datos: \"Hay X chars (~Y tokens), Z% del límite (N mensajes). Límite: L tokens.\".
+- reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
 - compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
 - cambiar_limite_compactacion: úsala cuando el usuario quiera cambiar el límite para la compactación automática. Convierte tokens a chars × 4 si el usuario da tokens.{$bloqueMemoria}{$bloqueMaestro}
 
