@@ -19,13 +19,16 @@ permission:
     "git commit *": allow
     "git pull --rebase*": allow
     "git push*": allow
+    "git remote*": allow
+    "git branch*": allow
+    "git checkout *": allow
+    "git switch *": allow
     ".agent/coolify-manager-rs/target/release/coolify-manager.exe *": allow
     ".agent\\coolify-manager-rs\\target\\release\\coolify-manager.exe *": allow
     "ssh *": deny
     "scp *": deny
     "docker *": deny
     "git reset *": deny
-    "git checkout *": deny
 ---
 
 You are the local coding agent for requests that the owner approved through WhatsApp, GitHub, or the local runner.
