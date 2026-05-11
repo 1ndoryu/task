@@ -111,7 +111,7 @@ function readMessage(options) {
     throw new Error('La solicitud remota requiere --message o --message-file.');
 }
 
-function buildPrompt({message, projectId, project, commitRequested, deployRequested}) {
+function buildPrompt({message, projectId, project, commitRequested, deployRequested, previousOutput}) {
     const lines = [
         'Solicitud remota aprobada para OpenCode.',
         `Proyecto: ${projectId}`,
@@ -137,6 +137,13 @@ function buildPrompt({message, projectId, project, commitRequested, deployReques
         lines.push(`- El usuario autorizo deploy: usa ${deploy.coolifyManagerPath || 'coolify-manager-rs'} deploy --name ${deploy.site || '<sitio>'} --update y luego health.`);
     }
 
+    /* [115A-cont] Si hay output previo, inyectarlo como contexto antes del mensaje nuevo */
+    if (previousOutput) {
+        lines.push('', '--- Contexto de la sesion anterior ---');
+        lines.push(previousOutput.slice(-800));
+        lines.push('--- Fin del contexto anterior ---');
+    }
+
     lines.push('', 'Solicitud del usuario:', message);
     return lines.join('\n');
 }
@@ -153,11 +160,12 @@ function assertOpencodeAvailable(opencodeBin) {
     return (result.stdout || result.stderr || '').trim();
 }
 
-function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt}) {
-    const opencodeArgs = ['run', '--dir', projectPath, '--model', model, '--agent', agent];
-    if (attachUrl) {
-        opencodeArgs.push('--attach', attachUrl);
-    }
+function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessionId}) {
+    const opencodeArgs = ['run', '--dir', projectPath, '--model', model];
+    if (agent) opencodeArgs.push('--agent', agent);
+    /* [115A-cont] Continuacion de sesion: --session pasa el ID al contexto previo de OpenCode */
+    if (sessionId) opencodeArgs.push('--session', sessionId);
+    if (attachUrl) opencodeArgs.push('--attach', attachUrl);
     opencodeArgs.push(prompt);
     return opencodeArgs;
 }
@@ -174,9 +182,16 @@ function runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs}) {
         });
 
         const lines = [];
+        let sessionId = '';
         const onData = (stream, chunk) => {
             stream.write(chunk);
-            lines.push(...chunk.toString().split('\n'));
+            const text = chunk.toString();
+            /* [115A-cont] Capturar session ID del output de OpenCode para continuacion de sesion */
+            if (!sessionId) {
+                const m = text.match(/session[:\s]+([a-zA-Z0-9_-]{6,64})/i);
+                if (m) sessionId = m[1];
+            }
+            lines.push(...text.split('\n'));
             if (lines.length > 120) lines.splice(0, lines.length - 120);
         };
         child.stdout.on('data', chunk => onData(process.stdout, chunk));
@@ -186,22 +201,22 @@ function runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs}) {
 
         const timeout = setTimeout(() => {
             child.kill('SIGTERM');
-            reject(Object.assign(new Error(`Timeout ejecutando OpenCode tras ${timeoutMs}ms.`), {output: getOutput()}));
+            reject(Object.assign(new Error(`Timeout ejecutando OpenCode tras ${timeoutMs}ms.`), {output: getOutput(), session_id: sessionId}));
         }, timeoutMs);
 
         child.on('error', error => {
             clearTimeout(timeout);
-            reject(Object.assign(error, {output: getOutput()}));
+            reject(Object.assign(error, {output: getOutput(), session_id: sessionId}));
         });
 
         child.on('exit', exitCode => {
             clearTimeout(timeout);
             const output = getOutput();
             if (exitCode === 0) {
-                resolve({output});
+                resolve({output, session_id: sessionId});
                 return;
             }
-            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCode}.`), {output}));
+            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCode}.`), {output, session_id: sessionId}));
         });
     });
 }
@@ -229,12 +244,17 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
         console.error(`[runner] Rama activa: ${branch}`);
     }
 
+    const sessionId = typeof overrides.sessionId === 'string' ? overrides.sessionId
+        : (typeof options.sessionId === 'string' ? options.sessionId : '');
+    const previousOutput = typeof overrides.previousOutput === 'string' ? overrides.previousOutput
+        : (typeof options.previousOutput === 'string' ? options.previousOutput : '');
     const prompt = buildPrompt({
         message,
         projectId,
         project,
         commitRequested: Boolean(overrides.commit ?? options.commit),
         deployRequested: Boolean(overrides.deploy ?? options.deploy),
+        previousOutput,
     });
     const opencodeArgs = buildOpencodeArgs({
         projectPath,
@@ -242,6 +262,7 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
         agent,
         attachUrl: typeof options.attach === 'string' ? options.attach : '',
         prompt,
+        sessionId,
     });
 
     const dryRunResult = {
@@ -324,6 +345,9 @@ function optionsFromJobPayload(options, payload) {
         message: payload.prompt || payload.message || payload.mensaje || '',
         commit: Boolean(payload.commit),
         deploy: Boolean(payload.deploy),
+        /* [115A-cont] Campos de continuacion de sesion */
+        sessionId: typeof payload.session_id === 'string' ? payload.session_id : '',
+        previousOutput: typeof payload.previous_output === 'string' ? payload.previous_output : '',
     };
 }
 

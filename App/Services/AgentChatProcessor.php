@@ -198,6 +198,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 - {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
+- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": 42, \"mensaje\": \"mensaje de seguimiento al job anterior\"}}
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido.
@@ -211,7 +212,8 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente.{$bloqueMemoria}{$bloqueMaestro}
+- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente.
+- continuar_opencode: úsala cuando el usuario quiera dar seguimiento, ampliar o corregir un job OpenCode que ya aparece en el contexto (completado o fallido). Preserva la sesión para que el agente recuerde lo que hizo antes. Requiere job_id del job anterior visible en el contexto y el mensaje del usuario. Usa esta acción en vez de solicitar_opencode cuando ya existe un job reciente sobre el mismo tema.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
@@ -319,15 +321,24 @@ REGLAS:
         } catch (\Throwable) {
             /* No bloquear si AgentActionService falla */
         }
-        /* [115A-15] Status breve de jobs OpenCode activos */
+        /* [115A-15+115A-cont] Status de jobs OpenCode activos y recientes (con session_id para continuar) */
         try {
-            $jobsActivos = (new \App\Services\Agent\OpencodeJobService())->listarActivos();
-            if (!empty($jobsActivos)) {
-                $ctx .= "\n## OpenCode (agente de c\u00f3digo)\n";
+            $svc           = new \App\Services\Agent\OpencodeJobService();
+            $jobsActivos   = $svc->listarActivos();
+            $jobsRecientes = $svc->listarRecientes(4);
+            if (!empty($jobsActivos) || !empty($jobsRecientes)) {
+                $ctx .= "\n## OpenCode (agente de código)\n";
                 foreach ($jobsActivos as $j) {
                     $prompt = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
-                    $icono = $j['estado'] === 'ejecutando' ? '\ud83d\udd04' : '\u23f3';
+                    $icono  = $j['estado'] === 'ejecutando' ? '🔄' : '⏳';
                     $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
+                }
+                foreach ($jobsRecientes as $j) {
+                    $prompt    = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
+                    $sessionId = (string)($j['resultado']['session_id'] ?? '');
+                    $icono     = $j['estado'] === 'completado' ? '✅' : '❌';
+                    $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
+                    $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
                 }
             }
         } catch (\Throwable) { /* No bloquear el contexto */ }
@@ -704,6 +715,22 @@ REGLAS:
                     'exito'              => true,
                     'pendiente_aprobacion' => $requiereAprobacion,
                     'accion_id'          => $accion['id'] ?? null,
+                ];
+
+            /* [115A-cont] Continuacion de sesion OpenCode: reutiliza session_id del job anterior
+             * para que el agente recuerde el contexto de lo que ya hizo. */
+            case 'continuar_opencode':
+                $jobId  = (int)($param['job_id'] ?? 0);
+                $prompt = sanitize_textarea_field((string)($param['mensaje'] ?? $param['prompt'] ?? ''));
+                if ($jobId <= 0 || $prompt === '') {
+                    throw new \LogicException('continuar_opencode requiere job_id y mensaje.');
+                }
+
+                $accion = (new \App\Services\Agent\OpencodeJobService())->crearContinuacion($jobId, $userId, $prompt);
+                return [
+                    'tipo'      => $tipo,
+                    'exito'     => true,
+                    'accion_id' => $accion['id'] ?? null,
                 ];
 
             default:

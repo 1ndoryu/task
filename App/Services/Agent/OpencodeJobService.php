@@ -188,6 +188,71 @@ class OpencodeJobService
         return json_last_error() === JSON_ERROR_NONE ? $decoded : $fallback;
     }
 
+    /* [115A-cont] Crea job de continuacion reutilizando la sesion OpenCode del job anterior.
+     * Gotcha: session_id solo existe si el runner capturo la linea "Session: xxx" del output.
+     * Siempre incluye previous_output como contexto de fallback si la sesion expiro. */
+    public function crearContinuacion(int $jobAnteriorId, int $userId, string $prompt): array
+    {
+        global $wpdb;
+
+        $jobAnterior = $this->obtener($jobAnteriorId);
+        if (!$jobAnterior) {
+            throw new \RuntimeException("Job anterior #{$jobAnteriorId} no encontrado.");
+        }
+        if ((int)$jobAnterior['user_id'] !== $userId) {
+            throw new \RuntimeException('El job anterior pertenece a otro usuario.');
+        }
+
+        $sessionId      = (string)($jobAnterior['resultado']['session_id'] ?? '');
+        $previousOutput = mb_substr((string)($jobAnterior['resultado']['output'] ?? ''), -1000);
+        $payload        = array_merge($jobAnterior['payload'], [
+            'prompt'          => sanitize_textarea_field($prompt),
+            'session_id'      => $sessionId,
+            'previous_output' => $previousOutput,
+            'continua_job_id' => $jobAnteriorId,
+        ]);
+
+        $titulo   = 'OpenCode (cont. #' . $jobAnteriorId . '): ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 60);
+        $inserted = $wpdb->insert(
+            $this->tabla,
+            [
+                'user_id'             => $userId,
+                'tipo'                => self::TIPO,
+                'titulo'              => $titulo,
+                'estado'              => 'pendiente',
+                'requiere_aprobacion' => 0,
+                'payload'             => $this->codificarJson($payload),
+                'fecha_creacion'      => current_time('mysql'),
+            ],
+            ['%d', '%s', '%s', '%s', '%d', '%s', '%s']
+        );
+
+        if (!$inserted) {
+            throw new \RuntimeException('No se pudo crear el job de continuación OpenCode.');
+        }
+
+        return $this->obtener((int)$wpdb->insert_id) ?? [];
+    }
+
+    /* [115A-cont] Jobs completados/fallidos en las ultimas N horas — expone session_id al chatbot. */
+    public function listarRecientes(int $horas = 4, int $limit = 3): array
+    {
+        global $wpdb;
+
+        $limit = max(1, min(10, $limit));
+        $desde = date('Y-m-d H:i:s', time() - ($horas * 3600));
+        $rows  = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->tabla} WHERE tipo = %s AND estado IN ('completado', 'fallido') AND fecha_ejecucion >= %s ORDER BY id DESC LIMIT %d",
+                self::TIPO,
+                $desde,
+                $limit
+            ),
+            ARRAY_A
+        );
+        return array_map([$this, 'normalizarFila'], is_array($rows) ? $rows : []);
+    }
+
     private function agregarLog(array $logs, string $evento, string $mensaje): array
     {
         $logs[] = ['evento' => $evento, 'mensaje' => sanitize_text_field($mensaje), 'fecha' => current_time('mysql')];

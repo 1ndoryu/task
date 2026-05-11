@@ -11,6 +11,17 @@
                 "site": "nakomi",
                 "coolifyManagerPath": ".agent/coolify-manager-rs/target/release/coolify-manager.exe"
             }
+        },
+        "glory-rust": {
+            "path": "C:\\Users\\Owner\\OneDrive\\Documentos\\glory-rust-template",
+            "repo": "1ndoryu/glory-rust-template",
+            "branch": "main",
+            "defaultModel": "opencode/deepseek-v4-flash-free",
+            "deploy": {
+                "provider": "coolify-manager-rs",
+                "site": "glory-rest",
+                "coolifyManagerPath": "C:\\Users\\Owner\\OneDrive\\Documentos\\WP\\app\\public\\wp-content\\themes\\glorytemplate\\.agent\\coolify-manager-rs\\target\\release\\coolify-manager.exe"
+            }
         }
     }
 }
