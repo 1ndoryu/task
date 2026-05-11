@@ -473,6 +473,13 @@ REGLAS:
                 $titulo   = sanitize_text_field((string)($param['titulo'] ?? 'Recordatorio'));
                 $mensajeR = sanitize_textarea_field((string)($param['mensaje'] ?? ''));
                 $fecha    = (string)($param['fecha'] ?? '');
+                /* [116A-3] Si la fecha está vacía o es inválida (ej: LLM no generó fecha,
+                 * o generó una en pasado), usar "ahora" como fallback. Esto es clave para
+                 * recordatorios recurrentes donde el usuario pide "cada X minutos" sin fecha. */
+                $fechaValida = $fecha !== '' && strtotime($fecha) !== false;
+                if (!$fechaValida) {
+                    $fecha = current_time('mysql');
+                }
                 $payload  = [
                     'titulo'             => $titulo,
                     'mensaje'            => $mensajeR,
