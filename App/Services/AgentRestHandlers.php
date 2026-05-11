@@ -332,6 +332,8 @@ class AgentRestHandlers
         $body = $request->get_body();
         $base = $timestamp . "\n" . strtoupper($request->get_method()) . "\n" . $request->get_route() . "\n" . $body;
         $esperada = 'sha256=' . hash_hmac('sha256', $base, $secret);
+        // [debug-temp] eliminar tras verificar firma
+        error_log('[OpenCodeRunner-debug] route=' . $request->get_route() . ' method=' . $request->get_method() . ' ts=' . $timestamp . ' secret_len=' . strlen($secret) . ' esperada=' . $esperada . ' recibida=' . $firma);
         return hash_equals($esperada, $firma);
     }
 
