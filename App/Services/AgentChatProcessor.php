@@ -95,6 +95,8 @@ class AgentChatProcessor
         if ($esImagen) {
             $llm = ['proveedor' => 'groq', 'modelo' => 'meta-llama/llama-4-scout-17b-16e-instruct'];
         }
+        /* Reconstruir system prompt incluyendo nombre del modelo para que el LLM pueda reportarlo */
+        $messages[0]['content'] = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, $llm['proveedor'], $llm['modelo']);
         $llmResult = (new LLMProviderService())->enviarChat(
             $messages,
             $llm['proveedor'],
@@ -130,12 +132,18 @@ class AgentChatProcessor
                     $lineasResultados[] = ($ej['tipo'] ?? 'accion') . ' → ' . json_encode($ej, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 }
             }
-            $messages[] = ['role' => 'user', 'content' => "[RESULTADOS DE HERRAMIENTAS]\n" . implode("\n", $lineasResultados) . "\n\nAhora responde al usuario usando estos datos."];
-            $llmResult2  = (new LLMProviderService())->enviarChat($messages, $llm['proveedor'], $llm['modelo'], ['temperature' => 0.7, 'maxTokens' => 1000]);
+            $mensajeHerramientas = "[RESULTADOS DE HERRAMIENTAS]\n" . implode("\n", $lineasResultados)
+                . "\n\nAhora responde al usuario con los datos anteriores. "
+                . 'Responde en formato JSON: {"respuesta": "tu mensaje", "acciones": []}';
+            $messages[] = ['role' => 'user', 'content' => $mensajeHerramientas];
+            $llmResult2  = (new LLMProviderService())->enviarChat($messages, $llm['proveedor'], $llm['modelo'], ['temperature' => 0.7, 'maxTokens' => 1500]);
             $rawContent2 = (string)($llmResult2['contenido'] ?? $llmResult2['content'] ?? $llmResult2['message'] ?? '');
             $parsed2     = $this->parsear($rawContent2);
-            if ($parsed2['respuesta'] !== '') {
-                $parsed['respuesta'] = $parsed2['respuesta'];
+            /* Fallback: si parsear() falla (JSON roto por comillas en el contenido de la nota),
+             * usar el texto raw directamente — cualquier cosa es mejor que el anuncio original. */
+            $respuesta2 = $parsed2['respuesta'] !== '' ? $parsed2['respuesta'] : trim($rawContent2);
+            if ($respuesta2 !== '') {
+                $parsed['respuesta'] = $respuesta2;
             }
         }
 
@@ -162,14 +170,19 @@ class AgentChatProcessor
 
     /* [115A-1+115A-3] buildSystemPrompt recibe contextoMaestro (texto persistente del usuario).
      * El contexto maestro se inyecta antes del contexto de tareas/hábitos/notas. */
-    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = ''): string
+    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = ''): string
     {
         $instruccionCanal = $canal === 'whatsapp'
             ? "\nEstás respondiendo por WHATSAPP. Sé conciso, sin markdown, sin listas largas. Máximo 3 oraciones por mensaje."
             : '';
 
+        $bloqueModelo = $modelo !== ''
+            ? "\nTu modelo: {$modelo} (proveedor: {$proveedor}). Cuando el usuario pregunte qué modelo eres, puedes decirlo."
+            : '';
+
+        /* [116A-1] Si el usuario pide 'leer el contexto maestro', ya lo tienes aquí — no llames ninguna acción. */
         $bloqueMaestro = $contextoMaestro !== ''
-            ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n"
+            ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n(Este contenido ya está en tu contexto. Si el usuario pide leer o ver el contexto maestro, reprodúcelo directamente sin llamar ninguna acción.)"
             : '';
 
         /* [115A-8] Las memorias ya vienen filtradas semánticamente por MemPalace (top-5 relevantes
@@ -181,7 +194,7 @@ class AgentChatProcessor
             : "\n\nTienes un sistema de memoria semántica persistente. Si el usuario menciona algo importante y nuevo (nombre real, preferencias de vida, datos personales, metas duraderas), guárdalo con guardar_memoria."
         ;
 
-        return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}
+        return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}{$bloqueModelo}
 
 RESPONDE SIEMPRE en formato JSON con esta estructura exacta:
 {\"respuesta\": \"tu mensaje al usuario en español\", \"acciones\": []}
@@ -223,7 +236,7 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente.
+- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala SOLO cuando el usuario explícitamente amplía o corrige un job anterior (ej: \"y agrega X también\", \"modifica lo que hiciste\", \"faltó Y\"). Si el usuario repite la misma solicitud, dice \"de nuevo\", \"no funcionó\", \"repite\" o pide algo nuevo aunque sea sobre el mismo tema, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.
 - reportar_contexto: úsala cuando el usuario pregunte cuántos tokens, contexto o mensajes hay en la conversación. Responde con los datos: \"Hay X chars (~Y tokens), Z% del límite (N mensajes). Límite: L tokens.\".
 - compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
