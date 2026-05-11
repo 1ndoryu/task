@@ -14,7 +14,8 @@ class WhatsAppWebhookService
 
     public function __construct()
     {
-        $this->secret = (string)(getenv('WACLI_WEBHOOK_SECRET') ?: '');
+        // phpdotenv createImmutable no llama putenv(), usar $_ENV como fallback
+        $this->secret = (string)($_ENV['WACLI_WEBHOOK_SECRET'] ?? getenv('WACLI_WEBHOOK_SECRET') ?: '');
     }
 
     /**
