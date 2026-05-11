@@ -31,34 +31,56 @@
 - Recordatorios recurrentes: `every_5_minutes` WP-Cron schedule + payload.recurrence_minutes
 - WACLI_WEBHOOK_SECRET env var en Coolify + local
 
-### 115A-1 — Chatbot: modelo desde configuración + compactación por contexto
+### ✅ 115A-1 — Chatbot: modelo desde configuración + compactación por contexto
 - `AgentChatProcessor.php`: leer proveedor/modelo desde WP option `glory_chatbot_proveedor` / `glory_chatbot_modelo` (fallback: groq / llama-3.3-70b-versatile)
 - Sincronizar el modelo elegido en el panel React (iaStore) al guardar → `POST /wp-json/glory/v1/admin/opciones` guardando las claves WP
 - Reemplazar `COMPACTION_THRESHOLD` (mensajes) por umbral en chars totales del historial (default 8000), configurable vía WP option `glory_chatbot_compaction_chars`
 - La compactación también usa el modelo configurado (no hardcodeado)
 
-### 115A-2 — Chatbot: filtrar número Venezuela
+### ✅ 115A-2 — Chatbot: filtrar número Venezuela
 - `WhatsAppWebhookService.php`: en `resolverAdminDesdeRemitente()`, rechazar JIDs que coincidan con `WHATSAPP_SEGUNDO_NUMERO` aunque tengan mapping en wp_usermeta
 - Solo el número `WHATSAPP` (EEUU) debe activar el agente; el segundo número debe recibir un mensaje de "solo respondo al número de EEUU" o simplemente ignorarse (decidir)
 
-### 115A-3 — Chatbot: contexto maestro persistente y modificable
+### ✅ 115A-3 — Chatbot: contexto maestro persistente y modificable
 - Añadir tabla o WP option `glory_chatbot_master_context_{userId}` con texto libre del usuario
 - El agente puede leer y modificar este contexto mediante acción `actualizar_contexto_maestro {texto}`
 - El contexto maestro se inyecta siempre en el system prompt antes del contexto de tareas
 - Si el contexto maestro supera ~9000 tokens (≈36000 chars), compactarlo automáticamente con el LLM
 
-### 115A-4 — Chatbot: gestión de recordatorios (listar, editar, eliminar)
+### ✅ 115A-4 — Chatbot: gestión de recordatorios (listar, editar, eliminar)
 - Añadir acciones: `listar_recordatorios`, `editar_recordatorio {id, campo, valor}`, `eliminar_recordatorio {id}`
 - Revisar `AgentActionService` para exponer listado de acciones programadas del usuario
 - El agente debe incluir los recordatorios activos en `buildContexto()` para poder referirse a ellos por ID
 
-### 115A-5 — Chatbot: visión e imágenes/audios por WhatsApp
+### 115A-8 — Chatbot: búsqueda semántica de memorias (MemPalace search por mensaje)
+- MemPalaceService.search() ya usa el mensaje actual como query y devuelve top-5 relevantes — no vuelca todo el palace
+- Aclarar en el system prompt: las memorias ya están filtradas por relevancia; `guardar_memoria` es para hechos nuevos importantes, no para repetir lo que ya está
+- Revisar que el prompt explica claramente cuándo buscar vs cuándo guardar
+
+### 115A-9 — Chatbot: retry de acciones fallidas (3 intentos + feedback)
+- `ejecutarAcciones()`: reintentar cada acción hasta 3 veces si lanza excepción (backoff 200/400ms)
+- Si los 3 intentos fallan, agregar al texto de respuesta un bloque de error visible al usuario con el motivo
+- No reintentar errores lógicos (ID no encontrado, etc.) — solo errores transitorios
+
+### 115A-10 — Chatbot: auto-actualización del contexto maestro
+- El agente debe llamar `actualizar_contexto_maestro` de su propio criterio cuando detecte info importante
+- Reforzar instrucción en el system prompt: ejemplos de cuándo actualizar (datos personales, preferencias de vida, cambios de rutina)
+- Nota: la instrucción ya existe pero necesita ser más prescriptiva — el agente debe hacerlo proactivamente sin que el usuario lo pida
+
+### 115A-11 — Chatbot: acciones paralelas + condiciones en recordatorios
+- El LLM ya puede retornar múltiples acciones en un array; aclarar esto en el system prompt con ejemplos
+- Nueva acción `crear_tarea_si_no_existe {texto, prioridad?, urgencia?}`: crea la tarea solo si no existe una activa con ese nombre exacto
+- Nueva acción de scheduler `agent_invoke {message, channel, session?}`: el scheduler llama a AgentChatProcessor con un mensaje natural → el agente usa su criterio
+- Esto permite programar recordatorios complejos: "a las 3pm cada día: asegúrate de que exista la tarea 'Sacar el perro'"
+- AgentSchedulerService: manejar tipo `agent_invoke` y `crear_tarea_si_no_existe`
+
+
 - Revisar documentación Groq vision: modelos `meta-llama/llama-4-scout-17b-16e-instruct` o `llama-4-maverick-17b-128e-instruct`
 - `WhatsAppWebhookService.php`: si `Media.Type` comienza con `image/`, descargar via wacli/DirectPath+MediaKey, convertir a base64, enviar al modelo visión de Groq con image_url en content array
 - Audios: transcripción via Groq Whisper (`whisper-large-v3` o `distil-whisper-large-v3-en`), luego procesar texto transcrito normalmente
 - Añadir descarga de media a `WacliService` o nuevo `WacliMediaService`
 
-### 115A-6 — Chatbot: acciones de notas y hábitos completos
+### ✅ 115A-6 — Chatbot: acciones de notas y hábitos completos
 - Sub-hábitos: leer campo `subhabitos` de HabitosRepository en `buildContexto()`, mostrarlos indentados con su estado
 - Acciones nuevas: `completar_habito {id}`, `completar_subhabito {id, subId}`, `leer_notas {limite?}`, `crear_nota {titulo, contenido}`, `editar_nota {id, contenido, titulo?}`, `buscar_nota {termino}`
 - Usar `NotasRepository->guardar()`, `->actualizar()`, `->listar()`, `->buscar()`

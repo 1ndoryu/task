@@ -76,8 +76,9 @@ class AgentChatProcessor
         $rawContent = (string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? '');
         $parsed     = $this->parsear($rawContent);
 
-        /* Ejecutar acciones */
+        /* Ejecutar acciones (con retry) y anotar fallos en la respuesta */
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
+        $parsed['respuesta'] = $this->anotarFallosEnRespuesta($parsed['respuesta'], $ejecutadas);
 
         /* Persistir mensajes */
         $_ok = $this->chat->guardarMensaje($userId, $sessionId, 'usuario', $mensaje, null, 0);
@@ -110,9 +111,13 @@ class AgentChatProcessor
             ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n"
             : '';
 
+        /* [115A-8] Las memorias ya vienen filtradas semánticamente por MemPalace (top-5 relevantes
+         * al mensaje actual). No es un volcado completo — es búsqueda vectorial por relevancia.
+         * guardar_memoria solo se usa para hechos NUEVOS que el usuario menciona y que no están
+         * en las memorias recuperadas. No repetir lo que ya está en el bloque de memorias. */
         $bloqueMemoria = $memorias !== ''
-            ? "\n\n## Memorias recuperadas (persisten entre sesiones)\n{$memorias}\n\nUsa estas memorias para personalizar tu respuesta. Si el usuario menciona algo importante que quieras recordar para el futuro, usa la acción guardar_memoria."
-            : "\n\nTienes un sistema de memoria persistente entre sesiones. Si el usuario menciona algo importante (nombre, preferencias, datos personales, metas), guárdalo con la acción guardar_memoria."
+            ? "\n\n## Memorias relevantes (filtradas por similitud al mensaje actual)\n{$memorias}\n\nEstas memorias ya están filtradas por relevancia. Úsalas para personalizar tu respuesta. Si el usuario menciona algo NUEVO e importante que no está aquí, usa guardar_memoria."
+            : "\n\nTienes un sistema de memoria semántica persistente. Si el usuario menciona algo importante y nuevo (nombre real, preferencias de vida, datos personales, metas duraderas), guárdalo con guardar_memoria."
         ;
 
         return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}
@@ -136,17 +141,20 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"buscar_nota\", \"parametros\": {\"termino\": \"...\"}}
 - {\"tipo\": \"proponer_whatsapp\", \"parametros\": {\"mensaje\": \"texto\", \"to\": \"numero opcional\"}}
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
-- {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
+- {"tipo": "crear_tarea_si_no_existe", "parametros": {"texto": "nombre", "prioridad": "alta|media|baja", "urgencia": "urgente|normal|chill"}}
+- {"tipo": "actualizar_contexto_maestro", "parametros": {"texto": "contexto completo actualizado"}}
 
 REGLAS:
-- Si no hay acciones, envía \"acciones\": [].
+- Puedes incluir MÚLTIPLES acciones en el array y se ejecutan todas. Úsalas en paralelo cuando sea necesario (ej: crear tarea + guardar memoria + programar recordatorio en una sola respuesta).
+- Si no hay acciones, envía "acciones": [].
 - No inventes IDs. Solo usa IDs del contexto.
 - NUNCA uses eliminar/completar sin que el usuario lo pida explícitamente.
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
 - Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
-- guardar_memoria: solo cuando hay información valiosa nueva (nombre, preferencias, metas).
-- actualizar_contexto_maestro: cuando el usuario diga algo que debe recordarse siempre (info personal duradera, instrucciones permanentes, preferencias de vida). Escribe el contexto maestro COMPLETO y actualizado, no solo la parte nueva.{$bloqueMemoria}{$bloqueMaestro}
+- guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
+- crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
+- actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
@@ -250,19 +258,53 @@ REGLAS:
 
     /* --- Ejecutores de acciones -------------------------------------------- */
 
+    /* [115A-9] Retry hasta 3 intentos con backoff 200/400ms para errores transitorios.
+     * Los errores lógicos (ID inexistente, validación) fallan rápido sin reintentar.
+     * Los fallos persistentes se anotan en la respuesta para que el usuario los vea. */
     private function ejecutarAcciones(int $userId, string $canal, array $acciones): array
     {
         $ejecutadas = [];
         foreach ($acciones as $accion) {
             $tipo  = (string)($accion['tipo'] ?? '');
             $param = (array)($accion['parametros'] ?? []);
-            try {
-                $ejecutadas[] = $this->ejecutarAccion($userId, $canal, $tipo, $param);
-            } catch (\Throwable $e) {
-                $ejecutadas[] = ['tipo' => $tipo, 'exito' => false, 'error' => $e->getMessage()];
+            $resultado   = null;
+            $ultimoError = '';
+            for ($intento = 1; $intento <= 3; $intento++) {
+                try {
+                    $resultado = $this->ejecutarAccion($userId, $canal, $tipo, $param);
+                    break; // éxito — salir del loop
+                } catch (\LogicException $e) {
+                    /* Error lógico (validación, ID no encontrado) — no reintentar */
+                    $ultimoError = $e->getMessage();
+                    break;
+                } catch (\Throwable $e) {
+                    $ultimoError = $e->getMessage();
+                    error_log("[AgentChatProcessor] Acción {$tipo} intento {$intento}/3 falló: {$ultimoError}");
+                    if ($intento < 3) {
+                        usleep(200000 * $intento); // 200ms, 400ms
+                    }
+                }
             }
+            if ($resultado === null) {
+                $resultado = ['tipo' => $tipo, 'exito' => false, 'error' => $ultimoError, 'intentos' => 3];
+            }
+            $ejecutadas[] = $resultado;
         }
         return $ejecutadas;
+    }
+
+    /* [115A-9] Si alguna acción falló tras 3 intentos, anota el motivo en el texto de respuesta. */
+    private function anotarFallosEnRespuesta(string $respuesta, array $ejecutadas): string
+    {
+        $fallos = array_filter($ejecutadas, fn($e) => !($e['exito'] ?? false) && isset($e['intentos']));
+        if (empty($fallos)) {
+            return $respuesta;
+        }
+        $detalle = implode('\n', array_map(
+            fn($f) => '• ' . ($f['tipo'] ?? '?') . ': ' . ($f['error'] ?? 'error desconocido'),
+            array_values($fallos)
+        ));
+        return $respuesta . "\n\n⚠️ Algunas acciones no pudieron completarse tras 3 intentos:\n{$detalle}";
     }
 
     private function ejecutarAccion(int $userId, string $canal, string $tipo, array $param): array
@@ -283,6 +325,33 @@ REGLAS:
                 $tareas[] = $nueva;
                 $_ok = $repo->saveAll($tareas);
                 return ['tipo' => $tipo, 'exito' => true, 'id' => $nueva['id']];
+
+            /* [115A-11] Solo crea la tarea si no hay una activa (no completada) con el mismo nombre.
+             * Ideal para recordatorios recurrentes o acciones de scheduler que no deben duplicar. */
+            case 'crear_tarea_si_no_existe':
+                $textoBuscar = sanitize_text_field((string)($param['texto'] ?? ''));
+                if ($textoBuscar === '') {
+                    throw new \LogicException('crear_tarea_si_no_existe requiere parámetro texto.');
+                }
+                $repo   = new TareasRepository($userId);
+                $tareas = $repo->getAll();
+                foreach ($tareas as $t) {
+                    if (empty($t['completado']) && mb_strtolower(trim($t['texto'])) === mb_strtolower(trim($textoBuscar))) {
+                        return ['tipo' => $tipo, 'exito' => true, 'creada' => false, 'razon' => 'Ya existe tarea activa con ese nombre'];
+                    }
+                }
+                $maxId  = empty($tareas) ? 0 : max(0, ...array_column($tareas, 'id'));
+                $nueva  = [
+                    'id'           => $maxId + 1,
+                    'texto'        => $textoBuscar,
+                    'completado'   => false,
+                    'prioridad'    => $param['prioridad'] ?? null,
+                    'urgencia'     => $param['urgencia'] ?? 'normal',
+                    'fechaCreacion' => current_time('c'),
+                ];
+                $tareas[] = $nueva;
+                $_ok = $repo->saveAll($tareas);
+                return ['tipo' => $tipo, 'exito' => true, 'creada' => true, 'id' => $nueva['id']];
 
             case 'completar_tarea':
                 $id = (int)($param['id'] ?? 0);

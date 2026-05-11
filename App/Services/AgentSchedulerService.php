@@ -103,6 +103,49 @@ class AgentSchedulerService
             );
         }
 
+        /* [115A-11] agent_invoke: el scheduler llama a AgentChatProcessor con un mensaje natural.
+         * Permite programar recordatorios complejos con lógica de agente (ej: "crea la tarea X
+         * si no existe"). El agente evaluará el mensaje y ejecutará las acciones que considere.
+         * payload: { message: string, channel?: string, session?: string } */
+        if ($tipo === 'agent_invoke') {
+            $msg     = sanitize_textarea_field((string)($payload['message'] ?? ''));
+            $channel = (string)($payload['channel'] ?? 'app');
+            $session = (string)($payload['session'] ?? 'agent_scheduled');
+            if ($msg === '' || $userId === 0) {
+                return ['provider' => 'agent_invoke', 'ok' => false, 'error' => 'Mensaje o userId vacío'];
+            }
+            $resultado = (new \App\Services\AgentChatProcessor())->procesar($userId, $session, $msg, $channel);
+            return ['provider' => 'agent_invoke', 'ok' => true, 'respuesta' => $resultado['respuesta'] ?? ''];
+        }
+
+        /* [115A-11] crear_tarea_si_no_existe como tipo directo del scheduler (sin LLM overhead).
+         * Solo crea la tarea si no hay ninguna activa (no completada) con el mismo nombre. */
+        if ($tipo === 'crear_tarea_si_no_existe') {
+            $texto = sanitize_text_field((string)($payload['texto'] ?? ''));
+            if ($texto === '' || $userId === 0) {
+                return ['provider' => 'local', 'ok' => false, 'error' => 'Texto o userId vacío'];
+            }
+            $repo   = new \App\Repository\TareasRepository($userId);
+            $tareas = $repo->getAll();
+            foreach ($tareas as $t) {
+                if (empty($t['completado']) && mb_strtolower(trim($t['texto'])) === mb_strtolower(trim($texto))) {
+                    return ['provider' => 'local', 'ok' => true, 'creada' => false, 'razon' => 'Ya existe tarea activa'];
+                }
+            }
+            $maxId = empty($tareas) ? 0 : max(0, ...array_column($tareas, 'id'));
+            $nueva = [
+                'id'           => $maxId + 1,
+                'texto'        => $texto,
+                'completado'   => false,
+                'prioridad'    => $payload['prioridad'] ?? null,
+                'urgencia'     => $payload['urgencia'] ?? 'normal',
+                'fechaCreacion' => current_time('c'),
+            ];
+            $tareas[] = $nueva;
+            $_ok = $repo->saveAll($tareas);
+            return ['provider' => 'local', 'ok' => true, 'creada' => true, 'id' => $nueva['id']];
+        }
+
         return ['provider' => 'local', 'message' => 'Tipo programado sin ejecutor específico.'];
     }
 
@@ -110,7 +153,7 @@ class AgentSchedulerService
     {
         try {
             $fechaSiguiente = date('Y-m-d H:i:s', time() + ($minutosIntervalo * MINUTE_IN_SECONDS));
-            (new AgentActionService())->crearProgramada(
+            $_created = (new AgentActionService())->crearProgramada(
                 $userId,
                 $tipo,
                 (string)($payload['titulo'] ?? 'Recordatorio recurrente'),
