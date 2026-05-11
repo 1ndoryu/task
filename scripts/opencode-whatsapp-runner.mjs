@@ -197,10 +197,22 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
         : (typeof options.project === 'string' ? options.project : 'glorytemplate');
     const {project, projectPath} = resolveProject(config, projectId);
     const message = typeof overrides.message === 'string' ? overrides.message : readMessage(options);
-    const model = typeof overrides.model === 'string' ? overrides.model : (typeof options.model === 'string' ? options.model : project.defaultModel);
+    const branch = typeof overrides.branch === 'string' ? overrides.branch
+        : (typeof options.branch === 'string' ? options.branch : (project.branch || ''));
+    const model = project.defaultModel;
     const agent = typeof overrides.agent === 'string' ? overrides.agent : (typeof options.agent === 'string' ? options.agent : project.defaultAgent);
     const opencodeBin = typeof options.bin === 'string' ? options.bin : 'opencode';
     const timeoutMs = Number.isFinite(Number(options.timeout)) ? Number(options.timeout) : defaultTimeoutMs;
+
+    // Cambiar de rama si se especificó y el proyecto tiene ruta local
+    if (branch && !options['dry-run']) {
+        const gitSwitch = spawnSync('git', ['-C', projectPath, 'checkout', branch], {encoding: 'utf8'});
+        if (gitSwitch.status !== 0) {
+            throw new Error(`No se pudo cambiar a rama ${branch}: ${(gitSwitch.stderr || '').trim()}`);
+        }
+        console.error(`[runner] Rama activa: ${branch}`);
+    }
+
     const prompt = buildPrompt({
         message,
         projectId,
@@ -285,7 +297,7 @@ function optionsFromJobPayload(options, payload) {
     return {
         ...options,
         project: payload.project || payload.proyecto || 'glorytemplate',
-        model: payload.model || payload.modelo || undefined,
+        branch: payload.branch || payload.rama || undefined,
         agent: payload.agent || payload.agente || undefined,
         message: payload.prompt || payload.message || payload.mensaje || '',
         commit: Boolean(payload.commit),

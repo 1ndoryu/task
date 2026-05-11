@@ -211,7 +211,7 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- solicitar_opencode: úsala cuando el usuario pida cambios de código, investigación técnica con edición, commit, push, PR o deploy. Esta acción NO ejecuta código desde PHP: crea una solicitud aprobable para el runner local OpenCode. Solo incluye deploy=true si el usuario lo pide explícitamente.{$bloqueMemoria}{$bloqueMaestro}
+- solicitar_opencode: úsala cuando el usuario pida cambios de código, investigación técnica, leer roadmap o archivos, commit, push, PR o deploy. El proyecto siempre es "glorytemplate" salvo que el usuario especifique otro. La rama por defecto es "glory-react-logic"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp, el runner ejecuta sin aprobación adicional; NO le digas al usuario que necesita aprobar algo. Solo incluye deploy=true si el usuario lo pide explícitamente.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
@@ -667,28 +667,32 @@ REGLAS:
                     throw new \LogicException('solicitar_opencode requiere parámetro prompt.');
                 }
 
-                $proyecto = sanitize_key((string)($param['proyecto'] ?? 'glorytemplate')) ?: 'glorytemplate';
-                $modelo = sanitize_text_field((string)($param['modelo'] ?? 'opencode/gpt-5.3-codex'));
-                $agente = sanitize_key((string)($param['agente'] ?? 'whatsapp-code')) ?: 'whatsapp-code';
-                $commit = filter_var($param['commit'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                $deploy = filter_var($param['deploy'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                $titulo = 'OpenCode: ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 80);
+                $proyecto  = sanitize_key((string)($param['proyecto'] ?? 'glorytemplate')) ?: 'glorytemplate';
+                $agente    = sanitize_key((string)($param['agente'] ?? 'whatsapp-code')) ?: 'whatsapp-code';
+                $branch    = sanitize_text_field((string)($param['branch'] ?? 'glory-react-logic')) ?: 'glory-react-logic';
+                $commit    = filter_var($param['commit'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $deploy    = filter_var($param['deploy'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $titulo    = 'OpenCode: ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 80);
+
+                /* [115A-15] WhatsApp ya autentico al usuario via HMAC: sin doble aprobacion.
+                 * Otros canales (web, CLI) requieren aprobacion manual. */
+                $requiereAprobacion = ($canal !== 'whatsapp');
 
                 $accion = (new AgentActionService())->crearPropuesta($userId, 'opencode_job', $titulo, [
                     'project' => $proyecto,
-                    'model' => $modelo,
-                    'agent' => $agente,
-                    'prompt' => $prompt,
-                    'commit' => $commit,
-                    'deploy' => $deploy,
-                    'source' => $canal,
-                ], true);
+                    'agent'   => $agente,
+                    'branch'  => $branch,
+                    'prompt'  => $prompt,
+                    'commit'  => $commit,
+                    'deploy'  => $deploy,
+                    'source'  => $canal,
+                ], $requiereAprobacion);
 
                 return [
-                    'tipo' => $tipo,
-                    'exito' => true,
-                    'pendiente_aprobacion' => true,
-                    'accion_id' => $accion['id'] ?? null,
+                    'tipo'               => $tipo,
+                    'exito'              => true,
+                    'pendiente_aprobacion' => $requiereAprobacion,
+                    'accion_id'          => $accion['id'] ?? null,
                 ];
 
             default:
