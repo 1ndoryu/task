@@ -473,11 +473,11 @@ REGLAS:
                 $titulo   = sanitize_text_field((string)($param['titulo'] ?? 'Recordatorio'));
                 $mensajeR = sanitize_textarea_field((string)($param['mensaje'] ?? ''));
                 $fecha    = (string)($param['fecha'] ?? '');
-                /* [116A-3] Si la fecha está vacía o es inválida (ej: LLM no generó fecha,
-                 * o generó una en pasado), usar "ahora" como fallback. Esto es clave para
-                 * recordatorios recurrentes donde el usuario pide "cada X minutos" sin fecha. */
-                $fechaValida = $fecha !== '' && strtotime($fecha) !== false;
-                if (!$fechaValida) {
+                /* [116A-3] El LLM puede no generar fecha (ej: "cada 30 minutos"), o generarla
+                 * en pasado (la genera durante su thinking). Normalizar ambas al momento actual
+                 * para que el scheduler con recurrence_minutes se encargue de la recurrencia. */
+                $tsFecha = $fecha !== '' ? strtotime($fecha) : false;
+                if ($tsFecha === false || $tsFecha < (time() - 60)) {
                     $fecha = current_time('mysql');
                 }
                 $payload  = [
