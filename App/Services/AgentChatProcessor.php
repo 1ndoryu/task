@@ -497,7 +497,7 @@ REGLAS:
                 ];
                 $_created = (new AgentActionService())->crearProgramada(
                     $userId,
-                    $payload['channel'] === 'whatsapp' ? 'whatsapp_send_text' : 'reminder_notify',
+                    'reminder_notify',
                     $titulo,
                     $payload,
                     $fecha,
