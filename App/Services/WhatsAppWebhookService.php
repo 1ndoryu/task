@@ -40,14 +40,18 @@ class WhatsAppWebhookService
     {
         $tipo = (string)($evento['type'] ?? '');
 
+        /* Log para capturar el formato real de wacli (remover tras primera prueba exitosa) */
+        error_log('[WhatsApp] evento tipo=' . $tipo . ' raw=' . json_encode($evento));
+
         /* Solo mensajes entrantes */
         if ($tipo !== 'message.received') {
             return;
         }
 
-        $msg  = $evento['message'] ?? [];
-        $from = (string)($msg['from'] ?? '');
-        $text = trim((string)($msg['text']['body'] ?? $msg['body'] ?? ''));
+        /* Soportar ambos formatos: {message:{from:...}} y {from:...} directo */
+        $msg  = $evento['message'] ?? $evento;
+        $from = (string)($msg['from'] ?? $evento['from'] ?? '');
+        $text = trim((string)($msg['text']['body'] ?? $msg['body'] ?? $evento['body'] ?? ''));
         $isGroup = str_contains($from, '@g.us');
 
         if ($isGroup || $text === '' || $from === '') {
@@ -86,10 +90,13 @@ class WhatsAppWebhookService
 
     private function esNúmeroAutorizado(string $from): bool
     {
+        $env = function (string $k): string {
+            return (string)($_ENV[$k] ?? getenv($k) ?: '');
+        };
         $numerosPermitidos = array_filter([
-            (string)(getenv('WHATSAPP') ?: ''),
-            (string)(getenv('WHATSAPP-SEGUNDO-NUMERO') ?: ''),
-            (string)(getenv('WHATSAPP_AGENT_TO') ?: ''),
+            $env('WHATSAPP'),
+            $env('WHATSAPP-SEGUNDO-NUMERO'),
+            $env('WHATSAPP_AGENT_TO'),
         ]);
 
         $fromNorm = preg_replace('/[^0-9]/', '', $from) ?? '';
