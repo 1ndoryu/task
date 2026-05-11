@@ -319,7 +319,18 @@ REGLAS:
         } catch (\Throwable) {
             /* No bloquear si AgentActionService falla */
         }
-
+        /* [115A-15] Status breve de jobs OpenCode activos */
+        try {
+            $jobsActivos = (new \App\Services\Agent\OpencodeJobService())->listarActivos();
+            if (!empty($jobsActivos)) {
+                $ctx .= "\n## OpenCode (agente de c\u00f3digo)\n";
+                foreach ($jobsActivos as $j) {
+                    $prompt = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
+                    $icono = $j['estado'] === 'ejecutando' ? '\ud83d\udd04' : '\u23f3';
+                    $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
+                }
+            }
+        } catch (\Throwable) { /* No bloquear el contexto */ }
         return $ctx;
     }
 

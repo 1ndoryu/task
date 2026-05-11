@@ -274,6 +274,17 @@ class AgentRestHandlers
             if (!$job) {
                 return self::error('Job no disponible para reportar resultado.', 'opencode_job_not_reportable', 409);
             }
+            /* [115A-15] Notificar por WhatsApp al terminar */
+            try {
+                $output = trim((string)($resultado['output'] ?? ''));
+                $prompt = mb_substr((string)($job['payload']['prompt'] ?? ''), 0, 80);
+                if ($exito) {
+                    $waMsg = "\u2705 *OpenCode termin\u00f3*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($output !== '' ? "\n\n" . mb_substr($output, -600) : '');
+                } else {
+                    $waMsg = "\u274c *OpenCode fall\u00f3*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n{$mensaje}" . ($output !== '' ? "\n\n" . mb_substr($output, -400) : '');
+                }
+                (new WacliService())->enviarTexto(null, $waMsg);
+            } catch (\Throwable) { /* no bloquear si WhatsApp falla */ }
             return self::ok(['job' => $job]);
         } catch (\Throwable $e) {
             return self::error($e->getMessage(), 'opencode_job_result_error', 500);

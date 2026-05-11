@@ -164,31 +164,44 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt}) {
 
 function runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs}) {
     return new Promise((resolve, reject) => {
-        /* shell: true necesario en Windows (.cmd wrappers de npm) */
+        /* shell: true necesario en Windows (.cmd wrappers de npm)
+         * stdio: pipe en stdout/stderr para capturar salida y reenviarla al terminal */
         const child = spawn(opencodeBin, opencodeArgs, {
             cwd: projectPath,
-            stdio: 'inherit',
+            stdio: ['inherit', 'pipe', 'pipe'],
             shell: true,
             env: process.env,
         });
 
+        const lines = [];
+        const onData = (stream, chunk) => {
+            stream.write(chunk);
+            lines.push(...chunk.toString().split('\n'));
+            if (lines.length > 120) lines.splice(0, lines.length - 120);
+        };
+        child.stdout.on('data', chunk => onData(process.stdout, chunk));
+        child.stderr.on('data', chunk => onData(process.stderr, chunk));
+
+        const getOutput = () => lines.slice(-80).join('\n').trim();
+
         const timeout = setTimeout(() => {
             child.kill('SIGTERM');
-            reject(new Error(`Timeout ejecutando OpenCode tras ${timeoutMs}ms.`));
+            reject(Object.assign(new Error(`Timeout ejecutando OpenCode tras ${timeoutMs}ms.`), {output: getOutput()}));
         }, timeoutMs);
 
         child.on('error', error => {
             clearTimeout(timeout);
-            reject(error);
+            reject(Object.assign(error, {output: getOutput()}));
         });
 
         child.on('exit', exitCode => {
             clearTimeout(timeout);
+            const output = getOutput();
             if (exitCode === 0) {
-                resolve();
+                resolve({output});
                 return;
             }
-            reject(new Error(`OpenCode finalizo con exit ${exitCode}.`));
+            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCode}.`), {output}));
         });
     });
 }
@@ -249,8 +262,8 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
 
     const version = assertOpencodeAvailable(opencodeBin);
     console.error(`OpenCode detectado: ${version}`);
-    await runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs});
-    return {projectId, projectPath, model, agent, dryRun: false};
+    const runResult = await runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs});
+    return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
 }
 
 function normalizeApiUrl(options) {
@@ -367,7 +380,7 @@ async function pollOnce(options) {
             method: 'POST',
             pathSuffix: `/agent/opencode/jobs/${job.id}/result`,
             route: `/glory/v1/agent/opencode/jobs/${job.id}/result`,
-            body: {success: false, message: error.message, result: {error: error.message}},
+            body: {success: false, message: error.message, result: {error: error.message, output: error.output || ''}},
         });
         throw error;
     }

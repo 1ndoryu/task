@@ -21,6 +21,21 @@ class OpencodeJobService
         Schema::ensureTableExists('agent_actions');
     }
 
+    public function listarActivos(int $limit = 5): array
+    {
+        global $wpdb;
+        $limit = max(1, min(10, $limit));
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->tabla} WHERE tipo = %s AND estado IN ('pendiente', 'ejecutando') ORDER BY id DESC LIMIT %d",
+                self::TIPO,
+                $limit
+            ),
+            ARRAY_A
+        );
+        return array_map([$this, 'normalizarFila'], is_array($rows) ? $rows : []);
+    }
+
     public function listarPendientes(int $limit = 10): array
     {
         global $wpdb;
