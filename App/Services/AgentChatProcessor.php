@@ -40,7 +40,7 @@ class AgentChatProcessor
     {
         $historial  = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
         $contexto   = $this->buildContexto($userId);
-        $memorias   = $this->mempalace->search($mensaje);
+        $memorias   = $this->mempalace->search($mensaje, $userId);
         $systemMsg  = $this->buildSystemPrompt($contexto, $memorias, $canal);
 
         /* Construir messages para el LLM */
@@ -69,7 +69,7 @@ class AgentChatProcessor
         $this->chat->guardarMensaje($userId, $sessionId, 'asistente', $parsed['respuesta'], $parsed['acciones'], (int)($llmResult['tokensComplecion'] ?? $llmResult['tokens'] ?? 0));
 
         /* Guardar memorias en MemPalace en background (no bloquea la respuesta) */
-        $this->guardarMemoria($userId, $mensaje, $parsed['respuesta'], $canal);
+        $this->guardarMemoria($userId, $mensaje, $parsed['respuesta'], $canal, $sessionId);
 
         return [
             'respuesta' => $parsed['respuesta'],
@@ -268,8 +268,19 @@ REGLAS:
             case 'proponer_whatsapp':
                 $msg = sanitize_textarea_field((string)($param['mensaje'] ?? ''));
                 if ($canal === 'whatsapp' && $msg !== '') {
-                    /* Desde WhatsApp: enviar directamente (usuario ya aprobó implícitamente) */
-                    (new WacliService())->enviarTexto($param['to'] ?? null, $msg);
+                    /* Desde WhatsApp: solo se puede responder al propio sessionId.
+                     * Prohibido enviar a números arbitrarios desde canal whatsapp
+                     * para evitar que el LLM use el bot como herramienta de spam. */
+                    $toParam = isset($param['to']) ? trim((string)$param['to']) : '';
+                    if ($toParam !== '') {
+                        /* Validar que el destino sea el mismo número de la sesión */
+                        $sessionNum = preg_replace('/[^0-9]/', '', $sessionId);
+                        $toNum      = preg_replace('/[^0-9]/', '', $toParam);
+                        if ($sessionNum !== $toNum) {
+                            return ['tipo' => $tipo, 'exito' => false, 'error' => 'Destino externo no permitido desde canal whatsapp'];
+                        }
+                    }
+                    (new WacliService())->enviarTexto($toParam !== '' ? $toParam : null, $msg);
                     return ['tipo' => $tipo, 'exito' => true, 'enviado' => true];
                 }
                 /* Desde app: crear propuesta aprobable */
@@ -286,7 +297,7 @@ REGLAS:
 
     /* --- Memoria ------------------------------------------------------------ */
 
-    private function guardarMemoria(int $userId, string $userMsg, string $assistantMsg, string $canal): void
+    private function guardarMemoria(int $userId, string $userMsg, string $assistantMsg, string $canal, string $sessionId): void
     {
         if (!$this->mempalace->disponible()) {
             return;
@@ -296,6 +307,6 @@ REGLAS:
             return;
         }
         $resumen = "Usuario (canal:{$canal}): {$userMsg}\nAsistente: {$assistantMsg}";
-        $this->mempalace->remember($resumen, 'chat');
+        $this->mempalace->remember($resumen, 'chat', $userId);
     }
 }

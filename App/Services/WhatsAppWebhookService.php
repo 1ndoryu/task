@@ -4,7 +4,9 @@ namespace App\Services;
 
 /* [109B] Procesa eventos POST de wacli sync --webhook.
  * wacli envía NDJSON: una línea JSON por evento con X-Wacli-Signature: sha256=HMAC.
- * Solo se procesan mensajes recibidos del número autorizado (WHATSAPP o WHATSAPP-SEGUNDO-NUMERO).
+ * Seguridad: solo el número admin (WHATSAPP/WHATSAPP_SEGUNDO_NUMERO/WHATSAPP_AGENT_TO) puede
+ * usar el chatbot. Los JIDs @lid se verifican buscando el WP user con ese JID en meta.
+ * Rate-limit: máx 20 mensajes por número cada 5 minutos (transient WP).
  * Gotcha: wacli env WACLI_STORE_DIR debe estar seteado en el systemd service del host,
  *         no solo en el contenedor Docker.
  */
@@ -72,17 +74,19 @@ class WhatsAppWebhookService
             return;
         }
 
-        $adminId = $this->obtenerAdminUserId();
-        if (!$adminId) {
+        /* Rate-limit: máx 20 mensajes por JID cada 5 minutos (evita flood/abuso LLM) */
+        if ($this->excedeLimite($from)) {
+            error_log('[WhatsApp] Rate-limit alcanzado para JID: ' . substr($from, 0, 20));
             return;
         }
 
-        /* @lid JIDs son identificadores internos de WhatsApp — no se pueden convertir a
-         * número de teléfono. Como el número wacli es privado, solo el admin lo conoce,
-         * así que se permite cualquier remitente @lid no-grupo. Para @s.whatsapp.net sí
-         * verificamos el número de forma explícita. */
-        $esLid = str_contains($from, '@lid');
-        if (!$esLid && !$this->esNúmeroAutorizado($from)) {
+        /* Verificar que el remitente es un número admin autorizado.
+         * @lid JIDs no tienen número de teléfono legible; los buscamos por meta WP si
+         * existe mapeo, o los verificamos contra la lista de dígitos del JID vs números env.
+         * Sin verificación exitosa → se descarta el mensaje silenciosamente. */
+        $adminId = $this->resolverAdminDesdeRemitente($from);
+        if (!$adminId) {
+            error_log('[WhatsApp] Remitente no autorizado descartado: ' . substr($from, 0, 20));
             return;
         }
 
@@ -92,6 +96,7 @@ class WhatsAppWebhookService
 
         /* Para enviar: @lid JIDs se pasan tal cual a wacli (protocolo nativo);
          * @s.whatsapp.net se usa como +dígitos */
+        $esLid   = str_contains($from, '@lid');
         $destino = $esLid ? $from : ('+' . $fromNum);
 
         try {
@@ -112,8 +117,36 @@ class WhatsAppWebhookService
 
     /* --- Helpers privados --------------------------------------------------- */
 
-    private function esNúmeroAutorizado(string $from): bool
+    /**
+     * Resuelve qué usuario administrador corresponde al remitente.
+     * Para @s.whatsapp.net: compara dígitos vs números autorizados en .env y devuelve
+     *   el primer admin de WP que coincida (o null si no hay coincidencia).
+     * Para @lid: busca en wp_usermeta la clave 'whatsapp_lid' con el JID completo.
+     *   Si no hay mapeo guardado, compara los dígitos del @lid vs números autorizados
+     *   como fallback (cubre el caso del admin que nunca mapeó su JID manualmente).
+     * En todos los casos, el usuario resultante DEBE tener rol administrator.
+     */
+    private function resolverAdminDesdeRemitente(string $from): ?int
     {
+        $fromNorm = preg_replace('/[^0-9]/', '', $from) ?? '';
+        $esLid    = str_contains($from, '@lid');
+
+        if ($esLid) {
+            /* Buscar mapeo explícito JID→user (guardado por primera autenticación exitosa) */
+            $users = get_users([
+                'meta_key'   => 'whatsapp_lid',
+                'meta_value' => $from,
+                'role'       => 'administrator',
+                'number'     => 1,
+                'fields'     => 'ID',
+            ]);
+            if (!empty($users)) {
+                return (int)$users[0];
+            }
+            /* Fallback: comparar dígitos del @lid vs números env (ej: 584120825234@lid → 584120825234) */
+        }
+
+        /* Comparación por dígitos de teléfono vs números autorizados en .env */
         $env = function (string $k): string {
             return (string)($_ENV[$k] ?? getenv($k) ?: '');
         };
@@ -123,19 +156,35 @@ class WhatsAppWebhookService
             $env('WHATSAPP_AGENT_TO'),
         ]);
 
-        $fromNorm = preg_replace('/[^0-9]/', '', $from) ?? '';
-
         foreach ($numerosPermitidos as $num) {
-            if ($fromNorm === preg_replace('/[^0-9]/', '', $num)) {
-                return true;
+            if ($fromNorm !== '' && $fromNorm === (preg_replace('/[^0-9]/', '', $num) ?? '')) {
+                /* Número coincide — obtener el primer admin de WP */
+                $admins = get_users(['role' => 'administrator', 'number' => 1, 'fields' => 'ID']);
+                if (!empty($admins)) {
+                    return (int)$admins[0];
+                }
             }
         }
-        return false;
+
+        return null;
     }
 
-    private function obtenerAdminUserId(): ?int
+    /**
+     * Rate-limit por JID: máx 20 peticiones en ventana de 5 minutos.
+     * Usa transients de WP (no requiere Redis ni tabla extra).
+     */
+    private function excedeLimite(string $jid): bool
     {
-        $admins = get_users(['role' => 'administrator', 'number' => 1, 'fields' => 'ID']);
-        return !empty($admins) ? (int)$admins[0] : null;
+        $key   = 'wa_rl_' . md5($jid);
+        $count = (int)(get_transient($key) ?: 0);
+        if ($count === 0) {
+            set_transient($key, 1, 5 * MINUTE_IN_SECONDS);
+            return false;
+        }
+        if ($count >= 20) {
+            return true;
+        }
+        set_transient($key, $count + 1, 5 * MINUTE_IN_SECONDS);
+        return false;
     }
 }

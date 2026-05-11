@@ -33,14 +33,19 @@ class MemPalaceService
     /**
      * Busca memorias relevantes para la query. Retorna texto vacío si no disponible.
      * Se inyecta en el system prompt como "## Memorias relevantes".
+     * @param int|null $userId WP user ID para aislar memoria por usuario (null = global)
      */
-    public function search(string $query): string
+    public function search(string $query, ?int $userId = null): string
     {
         if (trim($query) === '') {
             return '';
         }
         try {
-            $resp = $this->get('/search', ['q' => $query, 'limit' => 5]);
+            $params = ['q' => $query, 'limit' => 5];
+            if ($userId !== null) {
+                $params['namespace'] = 'user_' . $userId;
+            }
+            $resp = $this->get('/search', $params);
             return is_string($resp['text'] ?? null) ? trim($resp['text']) : '';
         } catch (\Throwable $e) {
             error_log('[MemPalace] search falló: ' . $e->getMessage());
@@ -50,17 +55,22 @@ class MemPalaceService
 
     /**
      * Guarda un hecho/resumen en MemPalace. No bloquea si falla.
-     * @param string $content Texto del hecho a recordar
-     * @param string $category Wing/categoría ('chat', 'preferencias', 'hechos', 'whatsapp')
+     * @param string   $content  Texto del hecho a recordar
+     * @param string   $category Wing/categoría ('chat', 'preferencias', 'hechos', 'whatsapp')
+     * @param int|null $userId   WP user ID para aislar memoria por usuario (null = global)
      */
-    public function remember(string $content, string $category = 'chat'): bool
+    public function remember(string $content, string $category = 'chat', ?int $userId = null): bool
     {
         $content = trim($content);
         if ($content === '') {
             return false;
         }
         try {
-            $resp = $this->post('/remember', ['content' => $content, 'category' => $category]);
+            $body = ['content' => $content, 'category' => $category];
+            if ($userId !== null) {
+                $body['namespace'] = 'user_' . $userId;
+            }
+            $resp = $this->post('/remember', $body);
             return !empty($resp['ok']);
         } catch (\Throwable $e) {
             error_log('[MemPalace] remember falló: ' . $e->getMessage());
