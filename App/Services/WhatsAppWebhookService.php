@@ -72,11 +72,11 @@ class WhatsAppWebhookService
         /* [115A-5] Extraer media si el mensaje la incluye (puede venir con o sin caption) */
         $mediaEvento = null;
         if ($esFormatoNuevo && isset($evento['Media']['Type'])) {
-            $directPath = (string)($evento['Media']['DirectPath'] ?? '');
-            $mediaKey   = (string)($evento['Media']['MediaKey'] ?? '');
             $mediaType  = (string)($evento['Media']['Type'] ?? '');
-            if ($directPath !== '' && $mediaKey !== '' && $mediaType !== '') {
-                $mediaEvento = ['type' => $mediaType, 'directPath' => $directPath, 'mediaKey' => $mediaKey];
+            $messageId  = (string)($evento['ID'] ?? '');
+            /* [116A-3] wacli media download usa --chat y --id (no --direct-path/--media-key) */
+            if ($mediaType !== '' && $messageId !== '') {
+                $mediaEvento = ['type' => $mediaType, 'chat' => $from, 'messageId' => $messageId];
             }
         }
 
@@ -120,8 +120,8 @@ class WhatsAppWebhookService
                 $tmpFile = null;
                 try {
                     $tmpFile = (new WacliService())->descargarMedia(
-                        $mediaEvento['directPath'],
-                        $mediaEvento['mediaKey'],
+                        $mediaEvento['chat'],
+                        $mediaEvento['messageId'],
                         $mediaEvento['type']
                     );
 

@@ -96,24 +96,25 @@ class WacliService
     /**
      * Descarga un archivo de media recibido por WhatsApp usando wacli.
      * [115A-5] Retorna la ruta al archivo temporal. El llamador es responsable de unlink().
+     * [116A-3] API actualizada: wacli media download usa --chat y --id (ya no --direct-path/--media-key).
      *
-     * @param string $directPath  DirectPath del evento Media (ej: /v/f2/...)
-     * @param string $mediaKey    MediaKey en base64 para descifrado
-     * @param string $mediaType   MIME type (ej: image/jpeg, audio/ogg)
-     * @return string             Ruta al archivo temporal descargado
+     * @param string $chat       Chat JID (ej: 55959850381429@lid)
+     * @param string $messageId  ID del mensaje (ej: A5D6288F4A70D61E70E4E765760C03E9)
+     * @param string $mediaType  MIME type (ej: image/jpeg, audio/ogg; codecs=opus)
+     * @return string            Ruta al archivo temporal descargado
      */
-    public function descargarMedia(string $directPath, string $mediaKey, string $mediaType): string
+    public function descargarMedia(string $chat, string $messageId, string $mediaType): string
     {
-        $ext     = preg_replace('/[^a-z0-9]/', '', explode('/', $mediaType)[1] ?? 'bin') ?: 'bin';
-        $tmpFile = sys_get_temp_dir() . '/wacli_media_' . md5($directPath . $mediaKey) . '.' . $ext;
+        $baseMime = trim(explode(';', $mediaType)[0]);
+        $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $baseMime)[1] ?? 'bin') ?: 'bin';
+        $tmpFile  = sys_get_temp_dir() . '/wacli_media_' . md5($chat . $messageId) . '.' . $ext;
 
-        /* wacli media download --direct-path <path> --media-key <key> --output <file>
-         * Gotcha: el comando puede variar según versión de wacli. Si falla, revisar `wacli media --help`. */
+        /* wacli media download --chat <jid> --id <msgid> --output <file> */
         $this->ejecutarWacli([
             'media', 'download',
-            '--direct-path', $directPath,
-            '--media-key',   $mediaKey,
-            '--output',      $tmpFile,
+            '--chat',   $chat,
+            '--id',     $messageId,
+            '--output', $tmpFile,
         ], 30);
 
         if (!file_exists($tmpFile) || filesize($tmpFile) === 0) {
