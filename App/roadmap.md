@@ -22,10 +22,15 @@
 - Ejecutar `workflow_dispatch` de prueba con prompt de solo lectura
 - Probar comentario `/oc` en issue/PR y verificar rama/PR generado
 
-### 115A-15 — Activar OpenCode real local desde WhatsApp
-- Instalar/autenticar OpenCode en esta PC (`opencode` no esta en PATH al 2026-05-11)
-- Configurar `OPENCODE_RUNNER_SECRET` en WordPress y en esta PC
-- Confirmar flujo completo: WhatsApp -> job aprobado -> runner local `poll-once` -> OpenCode -> validacion -> commit/push -> deploy opcional por Coolify Manager
+### ✅ 115A-15 — Activar OpenCode real local desde WhatsApp
+- OpenCode 1.14.48 instalado globalmente
+- Modelo: `opencode/deepseek-v4-flash-free` (gratuito) en opencode.jsonc, agente y projects
+- `OPENCODE_API_KEY` configurada en .env local, .env contenedor y Coolify
+- `OPENCODE_RUNNER_SECRET` generado, en .env local, .env contenedor y Coolify
+- WhatsApp NO requiere aprobación doble: jobs se crean directamente en `pendiente`
+- Runner soporta `branch` en payload → hace `git checkout` automático antes de OpenCode
+- Modelo no se pasa en payload (siempre usa el configurado en opencode.jsonc)
+- HMAC verificado: runner conecta limpio con `poll-once --dry-run`
 
 ### ✅ 109A — MemPalace: memoria semántica del chatbot
 - Instalar MemPalace en el servidor host + Flask REST wrapper en /data/mempalace/
@@ -84,3 +89,7 @@
 - Planificar acciones del agente para el plugin de ayuno: `iniciar_ayuno`, `terminar_ayuno`, `estado_ayuno`
 - Planificar acciones para registro de calorías: `registrar_comida {descripcion, calorias?}`, `resumen_calorias_hoy`
 - Revisar APIs existentes del plugin de ayuno y del módulo de calorías antes de implementar
+
+---
+
+## hello world
