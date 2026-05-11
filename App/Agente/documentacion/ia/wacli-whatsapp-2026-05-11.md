@@ -35,3 +35,9 @@
 - Los números se devuelven enmascarados en estado/resultado.
 - `wacli send` solo se ejecuta después de aprobar una acción persistida.
 - Los comandos se ejecutan con `proc_open` y argumentos separados, sin shell interpolation.
+
+## Recordatorios dinamicos
+- Los recordatorios `reminder_notify` cuyo titulo/mensaje indiquen `Habito pendiente` o cuyo payload use `dynamic_type=habit_pending` se resuelven al momento de ejecutarse.
+- `AgentSchedulerService` consulta `HabitosRepository`, descarta habitos pausados y completados hoy, ordena por `importancia` (`muy_alta`, `alta`, `media`, `baja`, `muy_baja`) y envia el primer pendiente.
+- El mensaje WhatsApp queda como `Hábito pendiente: Tu hábito pendiente de mayor prioridad es: {nombre} ({importancia}).`.
+- Si no hay habitos pendientes, se omite la notificacion para no enviar recordatorios falsos.

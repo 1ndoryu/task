@@ -8,9 +8,10 @@
 - MCP no es necesario para la primera version: CLI/servidor de OpenCode cubren ejecucion, modelo, agente y proyecto. MCP queda para herramientas externas adicionales.
 
 ## Estado local
-- `opencode` no esta instalado ni disponible en PATH en esta PC al 2026-05-11.
-- No se pudo ejecutar una prueba real contra Zen por falta de binario local.
-- Se dejo un runner dry-run y configuracion por proyecto para activar cuando OpenCode este instalado/autenticado.
+- `opencode` 1.14.48 esta instalado y disponible en PATH en esta PC.
+- Modelo activo para el runner: `opencode/deepseek-v4-flash-free`, definido en `opencode.jsonc`, el agente y `config/opencode-projects.json`.
+- El runner local funciona en modo `loop` contra `https://task.nakomi.studio/wp-json/glory/v1` y reclama jobs `opencode_job` via HMAC.
+- Los instruction files `.github/instructions/*.md` con `applyTo: '**'` tambien son visibles para OpenCode; `test.instructions.md` contiene excepcion explicita para `whatsapp-code` y prompts con `=== TAREA A EJECUTAR ===`.
 
 ## Arquitectura elegida
 1. WhatsApp entra por el webhook existente y `AgentChatProcessor`.
@@ -83,3 +84,4 @@ Para usar GitHub:
 - Riesgo: solicitud WhatsApp ejecuta codigo sin control. Mitigacion: job aprobable, proyecto whitelisted y modelo/agente declarados.
 - Riesgo: deploy directo inseguro. Mitigacion: agente y config bloquean SSH/docker/scp y documentan `coolify-manager-rs`.
 - Riesgo: secretos en prompts/logs. Mitigacion: `.env` denegado en config y runner no imprime auth.
+- Riesgo: MemPalace o contexto del chatbot reemplaza la tarea real al generar `solicitar_opencode.prompt`. Mitigacion: `AgentChatProcessor` antepone siempre el mensaje original de WhatsApp al prompt que entra al job, dejando cualquier interpretacion del LLM como contexto secundario.

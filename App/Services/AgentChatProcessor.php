@@ -101,6 +101,7 @@ class AgentChatProcessor
         $parsed     = $this->parsear($rawContent);
 
         /* Ejecutar acciones (con retry) */
+        $parsed['acciones'] = $this->normalizarAccionesDesdeMensajeUsuario($parsed['acciones'], $mensaje, $canal);
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
 
         /* [116A-1] Segunda llamada al LLM cuando alguna acción de consulta retornó datos.
@@ -369,6 +370,37 @@ REGLAS:
 
         /* Fallback: devolver el texto como respuesta sin acciones */
         return ['respuesta' => $limpio, 'acciones' => []];
+    }
+
+    /* [115A-15] WhatsApp puede pedir código mientras MemPalace inyecta contexto relevante.
+     * Gotcha: el LLM a veces puso ese contexto en solicitar_opencode.prompt y omitió el
+     * mensaje real; por eso el backend antepone el texto original como fuente de verdad. */
+    private function normalizarAccionesDesdeMensajeUsuario(array $acciones, string $mensaje, string $canal): array
+    {
+        $mensajeOriginal = trim($mensaje);
+        if ($canal !== 'whatsapp' || $mensajeOriginal === '') {
+            return $acciones;
+        }
+
+        foreach ($acciones as &$accion) {
+            $tipo = (string)($accion['tipo'] ?? '');
+            if ($tipo !== 'solicitar_opencode') {
+                continue;
+            }
+
+            $param = (array)($accion['parametros'] ?? []);
+            $promptGenerado = trim((string)($param['prompt'] ?? $param['mensaje'] ?? ''));
+            if ($promptGenerado === '') {
+                $param['prompt'] = $mensajeOriginal;
+            } elseif (!str_contains($promptGenerado, $mensajeOriginal)) {
+                $param['prompt'] = "Mensaje original de WhatsApp:\n{$mensajeOriginal}\n\nInterpretación generada por el chatbot:\n{$promptGenerado}";
+            }
+            unset($param['mensaje']);
+            $accion['parametros'] = $param;
+        }
+        unset($accion);
+
+        return $acciones;
     }
 
     /* --- Ejecutores de acciones -------------------------------------------- */

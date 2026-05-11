@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-11 — El prompt de OpenCode debe preservar el mensaje original de WhatsApp
+
+**Patrón del error:** El chatbot recibía memorias semánticas relevantes y debía crear una acción `solicitar_opencode`, pero el LLM podía poner el bloque de memoria/contexto en `prompt` y dejar fuera la tarea real del usuario. OpenCode obedecía correctamente, pero el bloque `=== TAREA A EJECUTAR ===` contenía contexto en vez de la solicitud.
+
+**Lección:** Cuando una acción delega trabajo a otro agente, el backend no debe confiar en que el LLM transcriba fielmente la intención. La frontera debe preservar el mensaje original como fuente de verdad y dejar cualquier resumen del LLM como contexto secundario.
+
+**Fix:** `AgentChatProcessor::normalizarAccionesDesdeMensajeUsuario()` antepone el texto original de WhatsApp a `solicitar_opencode.prompt`. El scheduler de hábitos también resuelve recordatorios dinámicos en runtime para no depender del texto genérico generado al crearlos.
+
 ## 2026-05-11 — WhatsApp no debe ejecutar agentes de codigo directo desde produccion
 
 **Patrón del error:** Un webhook WhatsApp en produccion puede recibir una orden valida, pero el codigo que debe cambiar vive en una PC local y requiere credenciales, Git, OpenCode y permisos de deploy. Intentar que WordPress ejecute eso directamente mezcla fronteras de red, secretos y produccion.

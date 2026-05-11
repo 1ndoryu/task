@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Repository\HabitosRepository;
+
 /* [109B] Scheduler del agente con soporte de recordatorios recurrentes y sub-hourly.
  * Se registra el schedule 'every_5_minutes' para granularidad de 5 min en recordatorios.
  * La recurrencia se gestiona via payload.recurrence_minutes: al ejecutar una acción recurrente
@@ -75,6 +77,12 @@ class AgentSchedulerService
             $titulo  = sanitize_text_field((string)($payload['titulo'] ?? 'Recordatorio del agente'));
             $mensaje = sanitize_textarea_field((string)($payload['mensaje'] ?? 'Tienes un recordatorio pendiente.'));
             $channel = (string)($payload['channel'] ?? 'app');
+            $recordatorio = self::resolverRecordatorioDinamico($payload, $titulo, $mensaje, $userId);
+            if (!empty($recordatorio['omitir'])) {
+                return ['provider' => 'local-notification', 'skipped' => true, 'reason' => $recordatorio['razon'] ?? 'dynamic_reminder_without_target'];
+            }
+            $titulo  = (string)($recordatorio['titulo'] ?? $titulo);
+            $mensaje = (string)($recordatorio['mensaje'] ?? $mensaje);
 
             /* Notificación en app siempre */
             $resultado = (new NotificacionesService())->crear($userId, NotificacionesService::TIPO_MENSAJE_CHAT, $titulo, $mensaje, [
@@ -147,6 +155,111 @@ class AgentSchedulerService
         }
 
         return ['provider' => 'local', 'message' => 'Tipo programado sin ejecutor específico.'];
+    }
+
+    /* [115A-15] Recordatorios de hábitos se resuelven al ejecutarse, no al crearse.
+     * Gotcha: el texto guardado por el LLM puede ser genérico; el hábito prioritario cambia
+     * con el estado del día, así que se consulta HabitosRepository justo antes de notificar. */
+    private static function resolverRecordatorioDinamico(array $payload, string $titulo, string $mensaje, int $userId): array
+    {
+        if (!self::esRecordatorioHabitoPendiente($payload, $titulo, $mensaje) || $userId <= 0) {
+            return ['titulo' => $titulo, 'mensaje' => $mensaje];
+        }
+
+        $habito = self::obtenerHabitoPendientePrioritario($userId);
+        if ($habito === null) {
+            return ['omitir' => true, 'razon' => 'no_pending_habits'];
+        }
+
+        $nombre = sanitize_text_field((string)($habito['nombre'] ?? 'hábito sin nombre'));
+        $importancia = self::etiquetaImportancia((string)($habito['importancia'] ?? ''));
+        $detalleImportancia = $importancia !== '' ? " ({$importancia})" : '';
+
+        return [
+            'titulo' => 'Hábito pendiente',
+            'mensaje' => "Tu hábito pendiente de mayor prioridad es: {$nombre}{$detalleImportancia}.",
+        ];
+    }
+
+    private static function esRecordatorioHabitoPendiente(array $payload, string $titulo, string $mensaje): bool
+    {
+        $tipoDinamico = self::normalizarTexto((string)($payload['dynamic_type'] ?? $payload['tipo_dinamico'] ?? ''));
+        if (in_array($tipoDinamico, ['habit_pending', 'habito_pendiente'], true)) {
+            return true;
+        }
+
+        $texto = self::normalizarTexto($titulo . ' ' . $mensaje);
+        return str_contains($texto, 'habito pendiente') || str_contains($texto, 'habitos pendientes');
+    }
+
+    private static function obtenerHabitoPendientePrioritario(int $userId): ?array
+    {
+        try {
+            $hoy = current_time('Y-m-d');
+            $habitos = (new HabitosRepository($userId))->getAll();
+            $pendientes = array_values(array_filter($habitos, function (array $habito) use ($hoy): bool {
+                return empty($habito['pausado']) && !self::habitoCompletadoEnFecha($habito, $hoy);
+            }));
+
+            if (empty($pendientes)) {
+                return null;
+            }
+
+            usort($pendientes, function (array $a, array $b): int {
+                $pesoA = self::pesoImportancia((string)($a['importancia'] ?? ''));
+                $pesoB = self::pesoImportancia((string)($b['importancia'] ?? ''));
+                if ($pesoA !== $pesoB) {
+                    return $pesoB <=> $pesoA;
+                }
+                return ((int)($a['id'] ?? 0)) <=> ((int)($b['id'] ?? 0));
+            });
+
+            return $pendientes[0];
+        } catch (\Throwable $e) {
+            error_log('[AgentSchedulerService] No se pudo resolver hábito pendiente prioritario: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private static function habitoCompletadoEnFecha(array $habito, string $fecha): bool
+    {
+        if (($habito['ultimoCompletado'] ?? '') === $fecha) {
+            return true;
+        }
+        return in_array($fecha, (array)($habito['historialCompletados'] ?? []), true);
+    }
+
+    private static function pesoImportancia(string $importancia): int
+    {
+        return [
+            'muy_alta' => 5,
+            'alta' => 4,
+            'media' => 3,
+            'baja' => 2,
+            'muy_baja' => 1,
+        ][self::normalizarImportancia($importancia)] ?? 0;
+    }
+
+    private static function etiquetaImportancia(string $importancia): string
+    {
+        return [
+            'muy_alta' => 'importancia muy alta',
+            'alta' => 'importancia alta',
+            'media' => 'importancia media',
+            'baja' => 'importancia baja',
+            'muy_baja' => 'importancia muy baja',
+        ][self::normalizarImportancia($importancia)] ?? '';
+    }
+
+    private static function normalizarImportancia(string $importancia): string
+    {
+        return str_replace(' ', '_', self::normalizarTexto($importancia));
+    }
+
+    private static function normalizarTexto(string $texto): string
+    {
+        $texto = mb_strtolower(trim($texto));
+        return strtr($texto, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
     }
 
     private static function programarSiguienteRecurrencia(int $userId, string $tipo, array $payload, int $minutosIntervalo): void
