@@ -203,7 +203,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 - {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
-- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": 42, \"mensaje\": \"mensaje de seguimiento al job anterior\"}}
+- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"mensaje de seguimiento al job anterior\"}} (job_id = n\u00famero exacto de [id:N] en la lista de jobs OpenCode del contexto; NUNCA uses un n\u00famero inventado)
 - {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
 - {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
@@ -373,6 +373,17 @@ REGLAS:
         /* Extraer JSON de code block */
         if (preg_match('/```(?:json)?\s*([\s\S]+?)```/', $limpio, $m)) {
             $decoded = json_decode(trim($m[1]), true);
+            if (is_array($decoded) && isset($decoded['respuesta'])) {
+                return ['respuesta' => (string)$decoded['respuesta'], 'acciones' => (array)($decoded['acciones'] ?? [])];
+            }
+        }
+
+        /* [fix-json-inline] Extraer JSON inline cuando el LLM escribe texto libre + JSON sin code block.
+         * Gotcha: algunos modelos responden "Déjame leer..., {"respuesta":...}" mezclando texto y JSON.
+         * Buscar el primer { y dejar que json_decode parse el objeto completo desde ahí. */
+        $pos = strpos($limpio, '{');
+        if ($pos !== false) {
+            $decoded = json_decode(substr($limpio, $pos), true);
             if (is_array($decoded) && isset($decoded['respuesta'])) {
                 return ['respuesta' => (string)$decoded['respuesta'], 'acciones' => (array)($decoded['acciones'] ?? [])];
             }
@@ -760,15 +771,35 @@ REGLAS:
                 ];
 
             /* [115A-cont] Continuacion de sesion OpenCode: reutiliza session_id del job anterior
-             * para que el agente recuerde el contexto de lo que ya hizo. */
+             * para que el agente recuerde el contexto de lo que ya hizo.
+             * [fix-job-fallback] Si el LLM envía un job_id incorrecto (ej: copia el del ejemplo),
+             * se busca automáticamente el job completado más reciente con session_id. */
             case 'continuar_opencode':
                 $jobId  = (int)($param['job_id'] ?? 0);
                 $prompt = sanitize_textarea_field((string)($param['mensaje'] ?? $param['prompt'] ?? ''));
-                if ($jobId <= 0 || $prompt === '') {
-                    throw new \LogicException('continuar_opencode requiere job_id y mensaje.');
+                if ($prompt === '') {
+                    throw new \LogicException('continuar_opencode requiere mensaje.');
                 }
-
-                $accion = (new \App\Services\Agent\OpencodeJobService())->crearContinuacion($jobId, $userId, $prompt);
+                $svc = new \App\Services\Agent\OpencodeJobService();
+                try {
+                    if ($jobId <= 0) {
+                        throw new \RuntimeException('job_id inválido, buscando fallback');
+                    }
+                    $accion = $svc->crearContinuacion($jobId, $userId, $prompt);
+                } catch (\RuntimeException) {
+                    /* Fallback: buscar el job completado más reciente con session_id */
+                    $fallbackId = 0;
+                    foreach ($svc->listarRecientes(72, 5) as $j) {
+                        if (!empty($j['resultado']['session_id'])) {
+                            $fallbackId = (int)$j['id'];
+                            break;
+                        }
+                    }
+                    if ($fallbackId <= 0) {
+                        throw new \LogicException("Job anterior #{$jobId} no encontrado y no hay sesiones recientes disponibles.");
+                    }
+                    $accion = $svc->crearContinuacion($fallbackId, $userId, $prompt);
+                }
                 return [
                     'tipo'      => $tipo,
                     'exito'     => true,
