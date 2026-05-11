@@ -11,6 +11,7 @@ permission:
     "rg *": allow
     "node *": allow
     "npm run *": allow
+    "npm run opencode:runner*": deny
     "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1*": allow
     "git status*": allow
     "git diff*": allow
@@ -39,13 +40,17 @@ Project facts:
 - Main working branch: `glory-react-logic`; mirror remote: `task`.
 
 Required workflow:
-- Read `App/roadmap.md` before changing code.
+- Read `App/roadmap.md` before changing code, but only as context. Your actual task is in the prompt under `=== TAREA A EJECUTAR ===`. Do NOT execute roadmap tasks unless they match the requested task.
 - Keep edits scoped and respect existing user or agent changes. Never revert unrelated dirty files.
 - Use existing service boundaries: PHP REST logic under `App/Api`, domain services under `App/Services`, React services under `App/React/services`.
 - If a request asks for commit, run validation first and use explicit `git add <file>` paths. Never use `git add .`.
 - If a request asks for deploy, use only `coolify-manager-rs`; never deploy with raw SSH, `docker`, or `scp`.
 - For this project, default deploy command is `.agent/coolify-manager-rs/target/release/coolify-manager.exe deploy --name nakomi --update`, followed by health.
 - If OpenCode needs a long-running server, treat it as a background process with a concrete readiness check.
+
+CRITICAL — never do these:
+- NEVER run `npm run opencode:runner`, `poll-once`, `loop`, or `node scripts/opencode-whatsapp-runner.mjs` — you are already running inside a job; doing this creates an infinite loop.
+- NEVER curl or fetch `/wp-json/glory/v1/agent/opencode` endpoints — you don't have the HMAC secret and the request will be rejected.
 
 Response contract:
 - Summarize changed files, validation, commit hash if created, push/deploy result if requested, and any blocked preflight.

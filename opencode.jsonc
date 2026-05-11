@@ -6,6 +6,12 @@
     "small_model": "opencode/deepseek-v4-flash-free",
     "default_agent": "whatsapp-code",
     "share": "disabled",
+    // [115A-15] auto: compacta la sesion cuando el contexto esta lleno. prune: elimina outputs viejos de tools.
+    // Ambos son true por defecto pero los declaramos explicitamente para que no se pierdan.
+    "compaction": {
+        "auto": true,
+        "prune": true
+    },
     "provider": {
         "opencode": {
             "options": {
@@ -27,6 +33,7 @@
             "rg *": "allow",
             "node *": "allow",
             "npm run *": "allow",
+            "npm run opencode:runner*": "deny",
             "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1*": "allow",
             "git status*": "allow",
             "git diff*": "allow",

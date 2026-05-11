@@ -112,14 +112,22 @@ function readMessage(options) {
 }
 
 function buildPrompt({message, projectId, project, commitRequested, deployRequested, previousOutput}) {
+    /* [115A-cont] La tarea va PRIMERO para que OpenCode no entre en "modo protocolo".
+     * El boilerplate de instrucciones va después como contexto secundario. */
     const lines = [
-        'Solicitud remota aprobada para OpenCode.',
+        '=== TAREA A EJECUTAR ===',
+        message,
+        '=== FIN DE TAREA ===',
+        '',
         `Proyecto: ${projectId}`,
         `Repositorio GitHub: ${project.repo || 'no configurado'}`,
         `Rama esperada: ${project.branch || 'no configurada'}`,
         '',
         'Instrucciones obligatorias:',
-        '- Lee App/roadmap.md y respeta AGENTS.md antes de editar.',
+        '- Ejecuta SOLO la tarea descrita arriba. El roadmap es contexto, no una lista de tareas a ejecutar.',
+        '- NUNCA ejecutes npm run opencode:runner, poll-once, loop ni node scripts/opencode-whatsapp-runner.mjs — ese proceso ya gestiono este job y correria en loop infinito.',
+        '- NUNCA hagas curl ni fetch a /wp-json/glory/v1/agent/opencode — no tienes el secreto HMAC.',
+        '- Lee App/roadmap.md y respeta AGENTS.md antes de editar codigo.',
         '- No reviertas cambios ajenos ni uses comandos destructivos.',
         '- Mantén los cambios acotados al pedido.',
         '- No leas ni imprimas secretos o archivos .env.',
@@ -144,7 +152,6 @@ function buildPrompt({message, projectId, project, commitRequested, deployReques
         lines.push('--- Fin del contexto anterior ---');
     }
 
-    lines.push('', 'Solicitud del usuario:', message);
     return lines.join('\n');
 }
 
