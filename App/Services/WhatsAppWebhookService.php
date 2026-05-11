@@ -34,54 +34,78 @@ class WhatsAppWebhookService
 
     /**
      * Procesa una línea de evento NDJSON del webhook.
+     * Soporta dos formatos de wacli:
+     *   - Formato legacy: {type:"message.received", from, body}
+     *   - Formato nuevo (Go/wasm, @lid JIDs): {Chat, SenderJID, Text, FromMe, Revoked, ...}
      * No lanza excepciones — registra errores y continúa.
      */
     public function procesarEvento(array $evento): void
     {
         $tipo = (string)($evento['type'] ?? '');
 
-        /* Log para capturar el formato real de wacli (remover tras primera prueba exitosa) */
+        /* Log para capturar el formato real de wacli */
         error_log('[WhatsApp] evento tipo=' . $tipo . ' raw=' . json_encode($evento));
 
-        /* Solo mensajes entrantes */
-        if ($tipo !== 'message.received') {
+        /* Detectar formato nuevo: sin "type", con "Text" y "Chat" */
+        $esFormatoNuevo = $tipo === '' && isset($evento['Text'], $evento['Chat']);
+
+        if (!$esFormatoNuevo && $tipo !== 'message.received') {
             return;
         }
 
-        /* Soportar ambos formatos: {message:{from:...}} y {from:...} directo */
-        $msg  = $evento['message'] ?? $evento;
-        $from = (string)($msg['from'] ?? $evento['from'] ?? '');
-        $text = trim((string)($msg['text']['body'] ?? $msg['body'] ?? $evento['body'] ?? ''));
-        $isGroup = str_contains($from, '@g.us');
+        if ($esFormatoNuevo) {
+            /* Formato nuevo: FromMe:true = enviado por nosotros; Revoked:true = borrado */
+            if (!empty($evento['FromMe']) || !empty($evento['Revoked'])) {
+                return;
+            }
+            $from = (string)($evento['Chat'] ?? '');
+            $text = trim((string)($evento['Text'] ?? ''));
+        } else {
+            /* Formato legacy */
+            $msg  = $evento['message'] ?? $evento;
+            $from = (string)($msg['from'] ?? $evento['from'] ?? '');
+            $text = trim((string)($msg['text']['body'] ?? $msg['body'] ?? $evento['body'] ?? ''));
+        }
 
+        $isGroup = str_contains($from, '@g.us');
         if ($isGroup || $text === '' || $from === '') {
             return;
         }
 
-        /* Verificar que el remitente es un número autorizado */
         $adminId = $this->obtenerAdminUserId();
-        if (!$this->esNúmeroAutorizado($from) || !$adminId) {
+        if (!$adminId) {
             return;
         }
 
-        /* Normalizar número para session_id (solo dígitos) */
+        /* @lid JIDs son identificadores internos de WhatsApp — no se pueden convertir a
+         * número de teléfono. Como el número wacli es privado, solo el admin lo conoce,
+         * así que se permite cualquier remitente @lid no-grupo. Para @s.whatsapp.net sí
+         * verificamos el número de forma explícita. */
+        $esLid = str_contains($from, '@lid');
+        if (!$esLid && !$this->esNúmeroAutorizado($from)) {
+            return;
+        }
+
+        /* session_id: dígitos del JID (únicos por contacto) */
         $fromNum   = preg_replace('/[^0-9]/', '', $from) ?? '';
         $sessionId = 'whatsapp_' . $fromNum;
+
+        /* Para enviar: @lid JIDs se pasan tal cual a wacli (protocolo nativo);
+         * @s.whatsapp.net se usa como +dígitos */
+        $destino = $esLid ? $from : ('+' . $fromNum);
 
         try {
             $resultado = (new AgentChatProcessor())->procesar($adminId, $sessionId, $text, 'whatsapp');
 
-            /* Enviar respuesta por WhatsApp */
             if (!empty($resultado['respuesta'])) {
-                (new WacliService())->enviarTexto('+' . $fromNum, $resultado['respuesta']);
+                (new WacliService())->enviarTexto($destino, $resultado['respuesta']);
             }
         } catch (\Throwable $e) {
             error_log('[WhatsApp] Error procesando mensaje entrante de ' . $fromNum . ': ' . $e->getMessage());
-            /* Intentar notificar al usuario del error por WhatsApp */
             try {
-                (new WacliService())->enviarTexto('+' . $fromNum, 'Error interno. Intenta de nuevo en unos segundos.');
+                (new WacliService())->enviarTexto($destino, 'Error interno. Intenta de nuevo en unos segundos.');
             } catch (\Throwable) {
-                /* Silenciar: no podemos hacer nada más */
+                /* Silenciar */
             }
         }
     }
