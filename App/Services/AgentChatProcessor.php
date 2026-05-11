@@ -111,14 +111,14 @@ class AgentChatProcessor
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
 
         /* [116A-1] Segunda llamada al LLM cuando se ejecutó alguna acción síncrona.
-         * Aplica tanto a consultas (leer_nota → devuelve datos) como a mutaciones
-         * (actualizar_contexto_maestro, guardar_memoria → el LLM confirma que funcionó).
+         * Se activa para CUALQUIER acción ejecutada (exito true o false), para que el LLM
+         * pueda reportar tanto resultados como fallos en lugar de dejar el anuncio inicial.
          * Las acciones async (solicitar_opencode, continuar_opencode) se excluyen porque
          * el job queda pendiente y la confirmación llega por otra vía. */
         $accionesAsync = ['solicitar_opencode', 'continuar_opencode'];
         $hayAccionSincrona = false;
         foreach ($ejecutadas as $ej) {
-            if (($ej['exito'] ?? false) && !in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
+            if (!in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
                 $hayAccionSincrona = true;
                 break;
             }
@@ -128,7 +128,9 @@ class AgentChatProcessor
             $messages[] = ['role' => 'assistant', 'content' => $rawContent];
             $lineasResultados = [];
             foreach ($ejecutadas as $ej) {
-                if ($ej['exito'] ?? false) {
+                /* Incluir TODAS las acciones (exitosas y fallidas) para que el LLM
+                 * pueda reportar errores en lugar de dejar el anuncio como respuesta final. */
+                if (!in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
                     $lineasResultados[] = ($ej['tipo'] ?? 'accion') . ' → ' . json_encode($ej, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 }
             }
@@ -994,7 +996,7 @@ REGLAS:
     private function resolverConfigLLM(): array
     {
         $proveedor = (string)(get_option('glory_chatbot_proveedor') ?: 'groq');
-        $modelo    = (string)(get_option('glory_chatbot_modelo')    ?: 'llama-3.3-70b-versatile');
+        $modelo    = (string)(get_option('glory_chatbot_modelo')    ?: 'openai/gpt-oss-120b');
         return ['proveedor' => $proveedor, 'modelo' => $modelo];
     }
 
