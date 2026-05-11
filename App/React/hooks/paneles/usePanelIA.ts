@@ -9,7 +9,7 @@
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
 import {obtenerApiKeyParaProveedor, procesarMensajeIA, proveedorTieneCredenciales} from '../../services/iaService';
-import {aprobarAccionAgente} from '../../services/agentActionsService';
+import {aprobarAccionAgente, guardarMensajeAgente, limpiarMensajesAgente, listarMensajesAgente} from '../../services/agentActionsService';
 import {ejecutarAccionDestructiva} from '../../config/accionesIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
@@ -21,6 +21,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
 
     /* Selectores específicos del store */
     const mensajes = useIAStore(s => s.mensajes);
+    const sessionId = useIAStore(s => s.sessionId);
     const enviando = useIAStore(s => s.enviando);
     const error = useIAStore(s => s.error);
     const apiKey = useIAStore(s => s.apiKey);
@@ -29,11 +30,33 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const modelo = useIAStore(s => s.modelo);
     const tokensUsados = useIAStore(s => s.tokensUsados);
     const agregarMensaje = useIAStore(s => s.agregarMensaje);
+    const setMensajes = useIAStore(s => s.setMensajes);
     const actualizarMensaje = useIAStore(s => s.actualizarMensaje);
     const setEnviando = useIAStore(s => s.setEnviando);
     const setError = useIAStore(s => s.setError);
     const incrementarTokens = useIAStore(s => s.incrementarTokens);
     const limpiarChat = useIAStore(s => s.limpiarChat);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        listarMensajesAgente(sessionId, controller.signal)
+            .then(mensajesPersistidos => {
+                if (controller.signal.aborted || mensajesPersistidos.length === 0) return;
+                setMensajes(mensajesPersistidos.map(mensaje => ({
+                    id: `persistido-${mensaje.id}`,
+                    rol: mensaje.rol,
+                    contenido: mensaje.contenido,
+                    acciones: Array.isArray(mensaje.acciones) ? mensaje.acciones as MensajeIA['acciones'] : undefined,
+                    timestamp: mensaje.fechaCreacion ? Date.parse(mensaje.fechaCreacion) : Date.now()
+                })));
+            })
+            .catch(err => {
+                if (!controller.signal.aborted) {
+                    setError(err instanceof Error ? err.message : 'Error cargando historial IA');
+                }
+            });
+        return () => controller.abort();
+    }, [sessionId, setMensajes, setError]);
 
     /* Scroll automático al último mensaje */
     useEffect(() => {
@@ -61,6 +84,9 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             timestamp: Date.now()
         };
         agregarMensaje(mensajeUsuario);
+        guardarMensajeAgente({sessionId, rol: 'usuario', contenido: texto}).catch(err => {
+            setError(err instanceof Error ? err.message : 'Error guardando mensaje IA');
+        });
         setEnviando(true);
         refAbort.current = new AbortController();
 
@@ -78,12 +104,22 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                 refAbort.current.signal
             );
 
-            agregarMensaje({
+            const mensajeAsistente: MensajeIA = {
                 id: generarIdMensaje(),
                 rol: 'asistente',
                 contenido: resultado.contenido,
                 acciones: resultado.acciones.length > 0 ? resultado.acciones : undefined,
                 timestamp: Date.now()
+            };
+            agregarMensaje(mensajeAsistente);
+            guardarMensajeAgente({
+                sessionId,
+                rol: 'asistente',
+                contenido: resultado.contenido,
+                acciones: resultado.acciones,
+                tokens: resultado.tokensUsados
+            }).catch(err => {
+                setError(err instanceof Error ? err.message : 'Error guardando respuesta IA');
             });
             incrementarTokens(resultado.tokensUsados);
         } catch (err) {
@@ -93,7 +129,14 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             setEnviando(false);
             refAbort.current = null;
         }
-    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, proveedor, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens]);
+    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, proveedor, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens, sessionId]);
+
+    const limpiarChatPersistente = useCallback(() => {
+        limpiarMensajesAgente(sessionId).catch(err => {
+            setError(err instanceof Error ? err.message : 'Error limpiando historial IA');
+        });
+        limpiarChat();
+    }, [sessionId, limpiarChat, setError]);
 
     const manejarTecla = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -168,7 +211,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
         inputTexto, setInputTexto,
         refScroll,
         mensajes, enviando, error, apiKey: proveedorTieneCredenciales(proveedor, apiKey, apiKeyDeepseek) ? 'configurada' : '', tokensUsados,
-        limpiarChat,
+        limpiarChat: limpiarChatPersistente,
         manejarEnviar, manejarTecla,
         confirmarAccion, rechazarAccion
     };

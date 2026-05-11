@@ -84,6 +84,9 @@ $directorios = [
  */
 $preCarga = [
     'App/Services/CifradoService.php',
+    /* [105C] ResearchProviderInterface debe existir antes de cargar AgentResearchService/LocalResearchProvider.
+     * Gotcha: el barrido recursivo usa glob alfabetico y PHP evalua interfaces implementadas al incluir clase. */
+    'App/Services/ResearchProviderInterface.php',
     'App/Repository/CifradoTrait.php'
 ];
 

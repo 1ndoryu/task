@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-11 — Interfaces PHP deben precargarse antes del barrido recursivo
+
+**Patrón del error:** `AgentResearchService` y `LocalResearchProvider` dependían de `ResearchProviderInterface`, pero el cargador recursivo de `App/` usa `glob` por orden alfabético. PHP evalúa tipos e interfaces implementadas al incluir la clase, así que el archivo de la interfaz podía cargarse después y producir fatal en local.
+
+**Lección:** En proyectos sin autoload PSR-4 puro, cualquier interfaz/trait usada por clases incluidas en un barrido recursivo debe precargarse explícitamente o vivir en un archivo cuyo orden garantice carga anterior. El lint por archivo no detecta este fallo porque cada archivo aislado es sintácticamente válido.
+
+**Fix:** `functions.php` precarga `App/Services/ResearchProviderInterface.php` antes de recorrer `App/`, igual que ya hacía con dependencias de cifrado.
+
 ## 2026-05-11 — Plugins simples no deben requerir generador de props manual
 
 **Patrón del error:** Escalador de Imagen estaba registrado como plugin y panel, y al activarlo se actualizaba la visibilidad del layout. Pero `DashboardGrid` rechazaba cualquier panel sin entrada específica en `GENERADORES_PROPS`, aunque el componente solo necesitara `PanelBaseProps`.

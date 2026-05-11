@@ -9,7 +9,7 @@
 
 import type {DatosEdicionTarea, Tarea, Habito} from '../types/dashboard';
 import {useHabitosStore} from '../stores/habitosStore';
-import {proponerWhatsapp} from '../services/agentActionsService';
+import {ejecutarAccionExternaIA} from './accionesExternasIA';
 
 /* Ejecutores de tareas — proveídos por el dashboard (React hooks, no Zustand) */
 export interface EjecutoresTareasIA {
@@ -117,6 +117,9 @@ ACCIONES DISPONIBLES (incluir en el array "acciones" cuando corresponda):
 - {"tipo": "completar_habito", "parametros": {"id": 456}}
 - {"tipo": "eliminar_habito", "parametros": {"id": 456}}
 - {"tipo": "proponer_whatsapp", "parametros": {"mensaje": "texto", "to": "opcional número/JID"}}
+- {"tipo": "research_local", "parametros": {"query": "texto a buscar", "limit": 10}}
+- {"tipo": "proponer_github", "parametros": {"titulo": "título", "descripcion": "detalle", "tipo": "issue|pull_request|comment|assign", "repo": "owner/repo opcional"}}
+- {"tipo": "programar_recordatorio", "parametros": {"titulo": "título", "mensaje": "texto", "fecha": "ISO 8601 o fecha parseable"}}
 
 REGLAS:
 - Si no necesitas ejecutar acciones, envía "acciones": [].
@@ -127,6 +130,9 @@ REGLAS:
 - Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
 - proponer_whatsapp NO envía el mensaje: crea una acción externa pendiente para que el usuario la apruebe en la interfaz.
 - Solo usa proponer_whatsapp cuando el usuario pida enviar o programar un mensaje de WhatsApp.
+- research_local busca en notas, tareas y hábitos del usuario; úsalo cuando el usuario pida investigar su propio dashboard o encontrar contexto local.
+- proponer_github prepara un borrador aprobable; no abre issues/PR reales sin confirmación.
+- programar_recordatorio crea un recordatorio local aprobable y luego WP-Cron lo ejecuta cuando venza.
 ${promptSistema ? `\nINSTRUCCIONES PERSONALIZADAS DEL SISTEMA:\n${promptSistema}` : ''}
 ${preferencias ? `\nPREFERENCIAS DEL USUARIO:\n${preferencias}` : ''}
 ${contexto}`;
@@ -265,26 +271,11 @@ export async function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: 
                     resultados.push({tipo: accion.tipo, exito: false, descripcion: `Eliminar "${habito?.nombre || `#${id}`}" — pendiente de confirmación`, pendienteConfirmacion: true});
                     break;
                 }
-                case 'proponer_whatsapp': {
-                    const mensaje = String(accion.parametros.mensaje || accion.parametros.message || '').trim();
-                    const to = accion.parametros.to ? String(accion.parametros.to) : undefined;
-                    if (!mensaje) {
-                        resultados.push({tipo: accion.tipo, exito: false, descripcion: 'Mensaje WhatsApp vacío'});
-                        break;
-                    }
-                    const propuesta = await proponerWhatsapp(mensaje, to);
-                    const destino = String(propuesta.payload?.toMasked || 'destinatario configurado');
-                    resultados.push({
-                        tipo: accion.tipo,
-                        exito: false,
-                        descripcion: `WhatsApp a ${destino} — pendiente de aprobación`,
-                        pendienteConfirmacion: true,
-                        accionExternaId: propuesta.id
-                    });
+                default: {
+                    const externa = await ejecutarAccionExternaIA(accion);
+                    resultados.push(externa ?? {tipo: accion.tipo, exito: false, descripcion: 'Acción no reconocida'});
                     break;
                 }
-                default:
-                    resultados.push({tipo: accion.tipo, exito: false, descripcion: 'Acción no reconocida'});
             }
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Error desconocido';

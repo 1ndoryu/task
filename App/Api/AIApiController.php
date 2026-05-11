@@ -11,6 +11,7 @@
 namespace App\Api;
 
 use App\Services\AIService;
+use App\Services\AgentRateLimitService;
 use App\Services\LLMProviderService;
 
 class AIApiController
@@ -242,13 +243,16 @@ class AIApiController
         try {
             $json = $request->get_json_params();
             $json = is_array($json) ? $json : [];
+            (new AgentRateLimitService())->assertAllowed(get_current_user_id(), 'ai_chat_backend', 80, HOUR_IN_SECONDS);
+            $maxTokens = isset($json['maxTokens']) ? (int)$json['maxTokens'] : 2048;
+            $maxTokens = max(64, min(4096, $maxTokens));
             $resultado = (new LLMProviderService())->enviarChat(
                 is_array($json['messages'] ?? null) ? $json['messages'] : [],
                 sanitize_text_field((string)($json['provider'] ?? 'groq')),
                 sanitize_text_field((string)($json['model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct')),
                 [
                     'temperature' => isset($json['temperature']) ? (float)$json['temperature'] : 0.7,
-                    'maxTokens' => isset($json['maxTokens']) ? (int)$json['maxTokens'] : 2048,
+                    'maxTokens' => $maxTokens,
                 ]
             );
             return self::ok($resultado);
@@ -267,6 +271,7 @@ class AIApiController
         try {
             $json = $request->get_json_params();
             $json = is_array($json) ? $json : [];
+            (new AgentRateLimitService())->assertAllowed(get_current_user_id(), 'ai_nutrition_backend', 60, HOUR_IN_SECONDS);
             $resultado = (new LLMProviderService())->estimarNutricion(
                 (string)($json['descripcion'] ?? ''),
                 sanitize_text_field((string)($json['provider'] ?? 'groq')),

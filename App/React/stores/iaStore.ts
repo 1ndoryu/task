@@ -37,6 +37,7 @@ export interface MensajeIA {
 
 /* Estado persistente (configuración) */
 interface IAConfigPersistente {
+    sessionId: string;
     proveedor: ProveedorIA;
     apiKey: string;
     apiKeyDeepseek: string;
@@ -55,6 +56,7 @@ interface IAEstadoSesion {
 
 /* Acciones */
 interface IAAcciones {
+    setMensajes: (mensajes: MensajeIA[]) => void;
     setProveedor: (proveedor: ProveedorIA) => void;
     setApiKey: (key: string) => void;
     setApiKeyDeepseek: (key: string) => void;
@@ -77,10 +79,15 @@ export function generarIdMensaje(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+export function generarIdSesionIA(): string {
+    return `ia-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export const useIAStore = create<IAStore>()(
     persist(
         (set) => ({
             /* Config persistente */
+            sessionId: generarIdSesionIA(),
             proveedor: 'groq',
             apiKey: '',
             apiKeyDeepseek: '',
@@ -95,6 +102,7 @@ export const useIAStore = create<IAStore>()(
             tokensUsados: 0,
 
             /* Acciones de configuración */
+            setMensajes: (mensajes) => set({mensajes}),
             setProveedor: (proveedor) => set({proveedor}),
             setApiKey: (key) => set({apiKey: key}),
             setApiKeyDeepseek: (key) => set({apiKeyDeepseek: key}),
@@ -125,6 +133,7 @@ export const useIAStore = create<IAStore>()(
             /* Solo persistir configuración, no estado de sesión */
             partialize: (state) => ({
                 proveedor: state.proveedor,
+                sessionId: state.sessionId,
                 apiKey: state.apiKey,
                 apiKeyDeepseek: state.apiKeyDeepseek,
                 modelo: state.modelo,

@@ -31,6 +31,7 @@ class WacliService
         return [
             'provider' => 'wacli',
             'installed' => $instalado,
+            'localMode' => $this->modoLocalActivo(),
             'bin' => $bin,
             'account' => $account !== '' ? $account : null,
             'defaultRecipientConfigured' => $recipient !== '',
@@ -57,6 +58,16 @@ class WacliService
         }
 
         if (!$this->comandoDisponible($this->obtenerBinario())) {
+            if ($this->modoLocalActivo()) {
+                return [
+                    'provider' => 'wacli-local',
+                    'localMode' => true,
+                    'toMasked' => $this->mascarar($recipient),
+                    'exitCode' => 0,
+                    'stdout' => ['message' => 'Envío simulado en local. Instala/autentica wacli para enviar WhatsApp real.'],
+                    'stderr' => '',
+                ];
+            }
             throw new \RuntimeException('wacli no está instalado o no está disponible en PATH.');
         }
 
@@ -213,6 +224,15 @@ class WacliService
     private function obtenerEnv(array $keys): string
     {
         return EnvService::first($keys);
+    }
+
+    private function modoLocalActivo(): bool
+    {
+        $flag = EnvService::get('WACLI_LOCAL_MODE');
+        if ($flag !== '') {
+            return filter_var($flag, FILTER_VALIDATE_BOOLEAN);
+        }
+        return filter_var(EnvService::get('LOCAL'), FILTER_VALIDATE_BOOLEAN) || filter_var(EnvService::get('DEV'), FILTER_VALIDATE_BOOLEAN);
     }
 
     private function mascarar(string $value): string

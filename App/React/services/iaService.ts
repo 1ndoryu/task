@@ -74,6 +74,11 @@ export function estimarTokens(texto: string): number {
     return Math.ceil(texto.length / 4);
 }
 
+function limitarMaxTokens(maxTokens?: number): number {
+    const value = maxTokens ?? 2048;
+    return Math.max(64, Math.min(4096, value));
+}
+
 /*
  * Enviar mensajes al LLM via Groq API
  * Retorna el contenido de la respuesta + uso de tokens
@@ -98,9 +103,9 @@ export async function enviarMensajeLLM(
         temperature: opciones.temperature ?? 0.7
     };
     if (config.proveedor === 'groq') {
-        body.max_completion_tokens = opciones.maxTokens ?? 2048;
+        body.max_completion_tokens = limitarMaxTokens(opciones.maxTokens);
     } else {
-        body.max_tokens = opciones.maxTokens ?? 2048;
+        body.max_tokens = limitarMaxTokens(opciones.maxTokens);
     }
 
     const respuesta = await fetch(URLS_PROVIDER[config.proveedor], {
@@ -151,7 +156,7 @@ async function enviarMensajeLLMBackend(mensajes: MensajeAPI[], config: ConfigPro
             model: config.modelo,
             messages: mensajes,
             temperature: opciones.temperature ?? 0.7,
-            maxTokens: opciones.maxTokens ?? 2048
+            maxTokens: limitarMaxTokens(opciones.maxTokens)
         }),
         signal
     });

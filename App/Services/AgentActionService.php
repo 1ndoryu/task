@@ -19,22 +19,71 @@ class AgentActionService
 
     public function crearPropuesta(int $userId, string $tipo, string $titulo, array $payload, bool $requiereAprobacion = true): array
     {
+        return $this->crearAccion($userId, $tipo, $titulo, $payload, $requiereAprobacion, null);
+    }
+
+    public function crearProgramada(int $userId, string $tipo, string $titulo, array $payload, string $fechaProgramada, bool $requiereAprobacion = true): array
+    {
+        $timestamp = strtotime($fechaProgramada);
+        if ($timestamp === false || $timestamp < (time() - 60)) {
+            throw new \InvalidArgumentException('Fecha programada inválida para la acción del agente.');
+        }
+
+        return $this->crearAccion($userId, $tipo, $titulo, $payload, $requiereAprobacion, date('Y-m-d H:i:s', $timestamp));
+    }
+
+    public function procesarProgramadas(callable $executor, int $limit = 20): int
+    {
+        global $wpdb;
+
+        $limit = max(1, min(50, $limit));
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->tabla} WHERE estado = %s AND fecha_programada IS NOT NULL AND fecha_programada <= %s ORDER BY fecha_programada ASC LIMIT %d",
+                'pendiente',
+                current_time('mysql'),
+                $limit
+            ),
+            ARRAY_A
+        );
+
+        $procesadas = 0;
+        foreach (is_array($rows) ? $rows : [] as $row) {
+            $accion = $this->normalizarFila($row);
+            try {
+                $this->ejecutarAccion((int)$accion['id'], $executor, null);
+                $procesadas++;
+            } catch (\Throwable $e) {
+                error_log('[AgentActionService] Acción programada falló id=' . (int)$accion['id'] . ': ' . $e->getMessage());
+            }
+        }
+
+        return $procesadas;
+    }
+
+    private function crearAccion(int $userId, string $tipo, string $titulo, array $payload, bool $requiereAprobacion, ?string $fechaProgramada): array
+    {
         global $wpdb;
 
         $estado = $requiereAprobacion ? 'requiere_aprobacion' : 'pendiente';
+        $correlationId = $this->crearCorrelationId();
         $payloadJson = $this->codificarJson($payload);
+        $logsJson = $this->codificarJson([$this->crearLog('creada', 'Acción registrada por el agente.')]);
         $insertado = $wpdb->insert(
             $this->tabla,
             [
                 'user_id' => $userId,
+                'correlation_id' => $correlationId,
                 'tipo' => $tipo,
                 'titulo' => $titulo,
                 'estado' => $estado,
                 'requiere_aprobacion' => $requiereAprobacion ? 1 : 0,
                 'payload' => $payloadJson,
+                'logs' => $logsJson,
+                'fecha_programada' => $fechaProgramada,
                 'fecha_creacion' => current_time('mysql'),
             ],
-            ['%d', '%s', '%s', '%s', '%d', '%s', '%s']
+            ['%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s']
         );
 
         if (!$insertado) {
@@ -106,15 +155,66 @@ class AgentActionService
             throw new \RuntimeException('La acción no está en un estado aprobable.');
         }
 
+        return $this->ejecutarAccion($id, $executor, $adminId);
+    }
+
+    public function aprobarProgramada(int $id, int $adminId): array
+    {
+        global $wpdb;
+
+        $accion = $this->obtener($id);
+        if (!$accion) {
+            throw new \RuntimeException('Acción del agente no encontrada.');
+        }
+        if ((int)$accion['user_id'] !== $adminId) {
+            throw new \RuntimeException('La acción pertenece a otro usuario.');
+        }
+        if (empty($accion['fecha_programada'])) {
+            throw new \RuntimeException('La acción no tiene fecha programada.');
+        }
+
+        $logs = $this->agregarLog($accion['logs'] ?? [], 'programada_aprobada', 'La acción quedó aprobada y pendiente de su fecha programada.');
+        $actualizado = $wpdb->update(
+            $this->tabla,
+            [
+                'estado' => 'pendiente',
+                'aprobado_por' => $adminId,
+                'fecha_aprobacion' => current_time('mysql'),
+                'logs' => $this->codificarJson($logs),
+            ],
+            ['id' => $id],
+            ['%s', '%d', '%s', '%s'],
+            ['%d']
+        );
+
+        if ($actualizado === false) {
+            throw new \RuntimeException('No se pudo aprobar la acción programada.');
+        }
+
+        return $this->obtener($id) ?? [];
+    }
+
+    private function ejecutarAccion(int $id, callable $executor, ?int $adminId): array
+    {
+        global $wpdb;
+
+        $accion = $this->obtener($id);
+        if (!$accion) {
+            throw new \RuntimeException('Acción del agente no encontrada.');
+        }
+
+        $logs = $this->agregarLog($accion['logs'] ?? [], 'ejecutando', 'La acción pasó a ejecución.');
+
         $actualizado = $wpdb->update(
             $this->tabla,
             [
                 'estado' => 'ejecutando',
-                'aprobado_por' => $adminId,
-                'fecha_aprobacion' => current_time('mysql'),
+                'aprobado_por' => $adminId ?: ($accion['aprobado_por'] ?? null),
+                'fecha_aprobacion' => $adminId ? current_time('mysql') : ($accion['fecha_aprobacion'] ?? null),
+                'logs' => $this->codificarJson($logs),
             ],
             ['id' => $id],
-            ['%s', '%d', '%s'],
+            ['%s', '%d', '%s', '%s'],
             ['%d']
         );
         if ($actualizado === false) {
@@ -124,15 +224,17 @@ class AgentActionService
         try {
             $resultado = $executor($this->obtener($id));
             $resultadoJson = $this->codificarJson($resultado);
+            $logs = $this->agregarLog($logs, 'completada', 'La acción terminó correctamente.');
             $actualizado = $wpdb->update(
                 $this->tabla,
                 [
                     'estado' => 'completado',
                     'resultado' => $resultadoJson,
+                    'logs' => $this->codificarJson($logs),
                     'fecha_ejecucion' => current_time('mysql'),
                 ],
                 ['id' => $id],
-                ['%s', '%s', '%s'],
+                ['%s', '%s', '%s', '%s'],
                 ['%d']
             );
             if ($actualizado === false) {
@@ -140,15 +242,17 @@ class AgentActionService
             }
         } catch (\Throwable $e) {
             $errorJson = $this->codificarJson(['error' => $e->getMessage()]);
+            $logs = $this->agregarLog($logs, 'fallida', $e->getMessage());
             $actualizado = $wpdb->update(
                 $this->tabla,
                 [
                     'estado' => 'fallido',
                     'resultado' => $errorJson,
+                    'logs' => $this->codificarJson($logs),
                     'fecha_ejecucion' => current_time('mysql'),
                 ],
                 ['id' => $id],
-                ['%s', '%s', '%s'],
+                ['%s', '%s', '%s', '%s'],
                 ['%d']
             );
             if ($actualizado === false) {
@@ -164,17 +268,21 @@ class AgentActionService
     {
         $payload = $this->decodificarJson((string)($row['payload'] ?? '{}'), []);
         $resultado = $this->decodificarJson((string)($row['resultado'] ?? 'null'), null);
+        $logs = $this->decodificarJson((string)($row['logs'] ?? '[]'), []);
 
         return [
             'id' => (int)$row['id'],
             'user_id' => (int)$row['user_id'],
+            'correlation_id' => $row['correlation_id'] ?? null,
             'tipo' => (string)$row['tipo'],
             'titulo' => (string)$row['titulo'],
             'estado' => (string)$row['estado'],
             'requiere_aprobacion' => (bool)$row['requiere_aprobacion'],
             'payload' => is_array($payload) ? $payload : [],
             'resultado' => $resultado,
+            'logs' => is_array($logs) ? $logs : [],
             'aprobado_por' => isset($row['aprobado_por']) ? (int)$row['aprobado_por'] : null,
+            'fecha_programada' => $row['fecha_programada'] ?? null,
             'fecha_creacion' => $row['fecha_creacion'] ?? null,
             'fecha_aprobacion' => $row['fecha_aprobacion'] ?? null,
             'fecha_ejecucion' => $row['fecha_ejecucion'] ?? null,
@@ -201,5 +309,25 @@ class AgentActionService
             return $fallback;
         }
         return $decoded;
+    }
+
+    private function crearCorrelationId(): string
+    {
+        return 'agent_' . bin2hex(random_bytes(8));
+    }
+
+    private function crearLog(string $evento, string $mensaje): array
+    {
+        return [
+            'evento' => $evento,
+            'mensaje' => sanitize_text_field($mensaje),
+            'fecha' => current_time('mysql'),
+        ];
+    }
+
+    private function agregarLog(array $logs, string $evento, string $mensaje): array
+    {
+        $logs[] = $this->crearLog($evento, $mensaje);
+        return array_slice($logs, -50);
     }
 }
