@@ -1,0 +1,16 @@
+{
+    "projects": {
+        "glorytemplate": {
+            "path": ".",
+            "repo": "1ndoryu/task",
+            "branch": "glory-react-logic",
+            "defaultModel": "opencode/gpt-5.3-codex",
+            "defaultAgent": "whatsapp-code",
+            "deploy": {
+                "provider": "coolify-manager-rs",
+                "site": "nakomi",
+                "coolifyManagerPath": ".agent/coolify-manager-rs/target/release/coolify-manager.exe"
+            }
+        }
+    }
+}

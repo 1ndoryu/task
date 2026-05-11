@@ -197,6 +197,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
+- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"modelo\": \"opencode/gpt-5.3-codex\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false}}
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido.
@@ -209,7 +210,8 @@ REGLAS:
 - Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
-- actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.{$bloqueMemoria}{$bloqueMaestro}
+- actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
+- solicitar_opencode: úsala cuando el usuario pida cambios de código, investigación técnica con edición, commit, push, PR o deploy. Esta acción NO ejecuta código desde PHP: crea una solicitud aprobable para el runner local OpenCode. Solo incluye deploy=true si el usuario lo pide explícitamente.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
@@ -655,6 +657,39 @@ REGLAS:
                 $texto = sanitize_textarea_field((string)($param['texto'] ?? ''));
                 $_ok = $this->updateMasterContext($userId, $texto);
                 return ['tipo' => $tipo, 'exito' => true];
+
+            /* [115A-13] Solicitudes de codigo remotas: crear propuesta aprobable, no ejecutar.
+             * Gotcha: WhatsApp vive en produccion, pero OpenCode corre en la PC local del usuario.
+             * Por eso solo persistimos job; el runner local lo reclamara con HMAC tras aprobacion. */
+            case 'solicitar_opencode':
+                $prompt = sanitize_textarea_field((string)($param['prompt'] ?? $param['mensaje'] ?? ''));
+                if ($prompt === '') {
+                    throw new \LogicException('solicitar_opencode requiere parámetro prompt.');
+                }
+
+                $proyecto = sanitize_key((string)($param['proyecto'] ?? 'glorytemplate')) ?: 'glorytemplate';
+                $modelo = sanitize_text_field((string)($param['modelo'] ?? 'opencode/gpt-5.3-codex'));
+                $agente = sanitize_key((string)($param['agente'] ?? 'whatsapp-code')) ?: 'whatsapp-code';
+                $commit = filter_var($param['commit'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $deploy = filter_var($param['deploy'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $titulo = 'OpenCode: ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 80);
+
+                $accion = (new AgentActionService())->crearPropuesta($userId, 'opencode_job', $titulo, [
+                    'project' => $proyecto,
+                    'model' => $modelo,
+                    'agent' => $agente,
+                    'prompt' => $prompt,
+                    'commit' => $commit,
+                    'deploy' => $deploy,
+                    'source' => $canal,
+                ], true);
+
+                return [
+                    'tipo' => $tipo,
+                    'exito' => true,
+                    'pendiente_aprobacion' => true,
+                    'accion_id' => $accion['id'] ?? null,
+                ];
 
             default:
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'Tipo de acción no soportado en canal server-side'];

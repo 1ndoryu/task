@@ -17,6 +17,7 @@
         "type-check:app": "npm run type-check --prefix App/React",
         "roadmap": "node scripts/check-roadmap.mjs",
         "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
+        "opencode:runner": "node scripts/opencode-whatsapp-runner.mjs",
         "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1"
     },
     "dependencies": {

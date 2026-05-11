@@ -1,5 +1,21 @@
 # Lecciones Aprendidas
 
+## 2026-05-11 — WhatsApp no debe ejecutar agentes de codigo directo desde produccion
+
+**Patrón del error:** Un webhook WhatsApp en produccion puede recibir una orden valida, pero el codigo que debe cambiar vive en una PC local y requiere credenciales, Git, OpenCode y permisos de deploy. Intentar que WordPress ejecute eso directamente mezcla fronteras de red, secretos y produccion.
+
+**Lección:** Las solicitudes remotas de codigo necesitan una cola aprobable y un runner local con proyectos whitelisted. El backend guarda intencion, permisos, estado y logs; la PC local ejecuta OpenCode solo para proyectos declarados. Commit/push/deploy deben ser flags explicitos del job.
+
+**Fix:** Base `115A-12`: `opencode.jsonc`, agente `whatsapp-code`, runner `scripts/opencode-whatsapp-runner.mjs`, workflow GitHub y plan para cola `opencode_job`.
+
+## 2026-05-11 — HMAC runner WordPress debe firmar el route REST, no la URL completa
+
+**Patrón del error:** Un runner local puede llamar a `/wp-json/glory/v1/...`, pero WordPress valida internamente `$request->get_route()` como `/glory/v1/...` y sin query string.
+
+**Lección:** Para endpoints HMAC de REST WP, documentar y testear exactamente la base firmada: `timestamp + METHOD + route + body`. Las queries (`?limit=1`) no deben entrar si el servidor no las firma.
+
+**Fix:** `115A-13` implementa firma consistente en `AgentRestHandlers::validarOpencodeRunner()` y `scripts/opencode-whatsapp-runner.mjs`.
+
 ## 2026-05-11 — Interfaces PHP deben precargarse antes del barrido recursivo
 
 **Patrón del error:** `AgentResearchService` y `LocalResearchProvider` dependían de `ResearchProviderInterface`, pero el cargador recursivo de `App/` usa `glob` por orden alfabético. PHP evalúa tipos e interfaces implementadas al incluir la clase, así que el archivo de la interfaz podía cargarse después y producir fatal en local.

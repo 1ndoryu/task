@@ -1,0 +1,66 @@
+name: opencode
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: Prompt to run with OpenCode.
+        required: true
+        type: string
+      model:
+        description: OpenCode model ID.
+        required: false
+        default: opencode/gpt-5.3-codex
+        type: string
+      agent:
+        description: OpenCode agent.
+        required: false
+        default: whatsapp-code
+        type: string
+
+jobs:
+  opencode:
+    # [115A-12] GitHub-side implementation: comments use /oc or /opencode; dispatch runs an explicit prompt.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode'))) ||
+      (github.event_name == 'pull_request_review_comment' && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')))
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run OpenCode from comment
+        if: github.event_name != 'workflow_dispatch'
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: opencode/gpt-5.3-codex
+          agent: whatsapp-code
+          use_github_token: true
+
+      - name: Run OpenCode manual prompt
+        if: github.event_name == 'workflow_dispatch'
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: ${{ inputs.model }}
+          agent: ${{ inputs.agent }}
+          prompt: ${{ inputs.prompt }}
+          use_github_token: true

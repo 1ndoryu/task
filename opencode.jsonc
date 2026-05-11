@@ -1,0 +1,55 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    // [115A-12] Configuracion base para solicitudes remotas aprobadas desde WhatsApp/GitHub.
+    // Zen usa IDs provider/model; el runner puede sobrescribirlo con --model.
+    "model": "opencode/gpt-5.3-codex",
+    "small_model": "opencode/gpt-5-nano",
+    "default_agent": "whatsapp-code",
+    "share": "disabled",
+    "provider": {
+        "opencode": {
+            "options": {
+                "apiKey": "{env:OPENCODE_API_KEY}"
+            }
+        }
+    },
+    "permission": {
+        "read": {
+            "*": "allow",
+            "*.env": "deny",
+            "*.env.*": "deny",
+            "*.env.example": "allow"
+        },
+        "edit": "allow",
+        "webfetch": "allow",
+        "bash": {
+            "*": "ask",
+            "rg *": "allow",
+            "node *": "allow",
+            "npm run *": "allow",
+            "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1*": "allow",
+            "git status*": "allow",
+            "git diff*": "allow",
+            "git log*": "allow",
+            "git add *": "allow",
+            "git commit *": "allow",
+            "git pull --rebase*": "allow",
+            "git push*": "allow",
+            ".agent/coolify-manager-rs/target/release/coolify-manager.exe *": "allow",
+            ".agent\\coolify-manager-rs\\target\\release\\coolify-manager.exe *": "allow",
+            "ssh *": "deny",
+            "scp *": "deny",
+            "docker *": "deny",
+            "git reset *": "deny",
+            "git checkout *": "deny"
+        }
+    },
+    "watcher": {
+        "ignore": [
+            "vendor/**",
+            "node_modules/**",
+            ".agent/**/.vscode-test/**",
+            "Glory/cache/**"
+        ]
+    }
+}

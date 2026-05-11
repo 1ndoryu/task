@@ -1,4 +1,6 @@
 <?php
+/* sentinel-disable-file directorio-abarrotado: App/Api es una carpeta legacy de controllers REST WordPress;
+ * reorganizarla requiere un bloque propio para no romper registro de rutas/autoload. */
 
 namespace App\Api;
 
@@ -94,6 +96,28 @@ class AgentApiController
             'methods' => 'POST',
             'callback' => [AgentRestHandlers::class, 'aprobarAccion'],
             'permission_callback' => $admin,
+        ]);
+
+        /* [115A-13] Cola HMAC para runner local OpenCode.
+         * No usa cookie WP: el runner firma cada request con OPENCODE_RUNNER_SECRET. */
+        register_rest_route($ns, '/agent/opencode/jobs', [
+            'methods' => 'GET',
+            'callback' => [AgentRestHandlers::class, 'listarOpencodeJobs'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        register_rest_route($ns, '/agent/opencode/jobs/(?P<id>\d+)/claim', [
+            'methods' => 'POST',
+            'callback' => [AgentRestHandlers::class, 'reclamarOpencodeJob'],
+            'permission_callback' => '__return_true',
+            'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
+        ]);
+
+        register_rest_route($ns, '/agent/opencode/jobs/(?P<id>\d+)/result', [
+            'methods' => 'POST',
+            'callback' => [AgentRestHandlers::class, 'reportarOpencodeJob'],
+            'permission_callback' => '__return_true',
+            'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
         ]);
 
         /* [109B] Webhook público de wacli sync --webhook.

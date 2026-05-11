@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Services\Agent\OpencodeJobService;
+
 class AgentRestHandlers
 {
     public static function wacliStatus(): \WP_REST_Response
@@ -212,10 +214,69 @@ class AgentRestHandlers
             if ($accion['tipo'] === 'reminder_notify') {
                 return self::ok(['accion' => $service->aprobarProgramada($id, get_current_user_id())]);
             }
+            if ($accion['tipo'] === 'opencode_job') {
+                return self::ok(['accion' => (new OpencodeJobService())->aprobarParaRunner($id, get_current_user_id())]);
+            }
 
             return self::ok(['accion' => $service->aprobarYEjecutar($id, get_current_user_id(), [self::class, 'ejecutarAccionAprobada'])]);
         } catch (\Throwable $e) {
             return self::error($e->getMessage(), 'agent_action_approve_error', 500);
+        }
+    }
+
+    public static function listarOpencodeJobs(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!self::validarOpencodeRunner($request)) {
+            return self::error('Firma del runner inválida.', 'opencode_runner_unauthorized', 401);
+        }
+
+        try {
+            $limit = (int)($request->get_param('limit') ?? 5);
+            $jobs = (new OpencodeJobService())->listarPendientes($limit);
+            return self::ok(['jobs' => $jobs]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'opencode_jobs_error', 500);
+        }
+    }
+
+    public static function reclamarOpencodeJob(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!self::validarOpencodeRunner($request)) {
+            return self::error('Firma del runner inválida.', 'opencode_runner_unauthorized', 401);
+        }
+
+        try {
+            $id = (int)$request->get_param('id');
+            $job = (new OpencodeJobService())->reclamar($id);
+            if (!$job) {
+                return self::error('Job no disponible para reclamar.', 'opencode_job_not_claimable', 409);
+            }
+            return self::ok(['job' => $job]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'opencode_job_claim_error', 500);
+        }
+    }
+
+    public static function reportarOpencodeJob(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!self::validarOpencodeRunner($request)) {
+            return self::error('Firma del runner inválida.', 'opencode_runner_unauthorized', 401);
+        }
+
+        try {
+            $id = (int)$request->get_param('id');
+            $json = self::json($request);
+            $exito = filter_var($json['success'] ?? $json['exito'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $resultado = is_array($json['result'] ?? null) ? $json['result'] : ['message' => (string)($json['message'] ?? '')];
+            $mensaje = sanitize_text_field((string)($json['message'] ?? ($exito ? 'OpenCode finalizo correctamente.' : 'OpenCode reporto fallo.')));
+
+            $job = (new OpencodeJobService())->reportarResultado($id, $exito, $resultado, $mensaje);
+            if (!$job) {
+                return self::error('Job no disponible para reportar resultado.', 'opencode_job_not_reportable', 409);
+            }
+            return self::ok(['job' => $job]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'opencode_job_result_error', 500);
         }
     }
 
@@ -244,6 +305,34 @@ class AgentRestHandlers
     private static function error(string $message, string $code, int $status): \WP_REST_Response
     {
         return new \WP_REST_Response(['success' => false, 'error' => ['code' => $code, 'message' => $message]], $status);
+    }
+
+    /* [115A-13] Autenticacion HMAC para runner local de OpenCode.
+     * Firma: sha256=HMAC(secret, timestamp + "\n" + METHOD + "\n" + route + "\n" + body).
+     * Route debe ser el route WP REST, por ejemplo /glory/v1/agent/opencode/jobs. */
+    private static function validarOpencodeRunner(\WP_REST_Request $request): bool
+    {
+        $secret = EnvService::get('OPENCODE_RUNNER_SECRET');
+        if ($secret === '') {
+            error_log('[OpenCodeRunner] OPENCODE_RUNNER_SECRET no configurado.');
+            return false;
+        }
+
+        $timestamp = (string)($request->get_header('X-OpenCode-Timestamp') ?? '');
+        $firma = (string)($request->get_header('X-OpenCode-Signature') ?? '');
+        if ($timestamp === '' || $firma === '') {
+            return false;
+        }
+
+        $ts = (int)$timestamp;
+        if ($ts <= 0 || abs(time() - $ts) > 300) {
+            return false;
+        }
+
+        $body = $request->get_body();
+        $base = $timestamp . "\n" . strtoupper($request->get_method()) . "\n" . $request->get_route() . "\n" . $body;
+        $esperada = 'sha256=' . hash_hmac('sha256', $base, $secret);
+        return hash_equals($esperada, $firma);
     }
 
     private static function mask(string $value): string

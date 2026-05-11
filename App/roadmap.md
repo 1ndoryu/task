@@ -16,6 +16,17 @@
 
 ## Tareas pendientes
 
+### 115A-14 — GitHub: activar OpenCode Action en repo espejo
+- Agregar secret `OPENCODE_API_KEY` en GitHub para el proveedor OpenCode Zen
+- Confirmar si se usara OpenCode GitHub App o solo `GITHUB_TOKEN`
+- Ejecutar `workflow_dispatch` de prueba con prompt de solo lectura
+- Probar comentario `/oc` en issue/PR y verificar rama/PR generado
+
+### 115A-15 — Activar OpenCode real local desde WhatsApp
+- Instalar/autenticar OpenCode en esta PC (`opencode` no esta en PATH al 2026-05-11)
+- Configurar `OPENCODE_RUNNER_SECRET` en WordPress y en esta PC
+- Confirmar flujo completo: WhatsApp -> job aprobado -> runner local `poll-once` -> OpenCode -> validacion -> commit/push -> deploy opcional por Coolify Manager
+
 ### ✅ 109A — MemPalace: memoria semántica del chatbot
 - Instalar MemPalace en el servidor host + Flask REST wrapper en /data/mempalace/
 - Systemd service `mempalace-api` en 0.0.0.0:4001
