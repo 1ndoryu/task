@@ -210,32 +210,4 @@
     flex-wrap: wrap;
 }
 
-.panelIAAccionBtn {
-    padding: 2px 8px;
-    border: none;
-    border-radius: var(--dashboard-radioSutil);
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.panelIAAccionBtn--confirmar {
-    background: rgba(var(--dashboard-estadoErrorRgb), 0.2);
-    color: var(--dashboard-estadoError);
-}
-
-.panelIAAccionBtn--confirmar:hover {
-    background: rgba(var(--dashboard-estadoErrorRgb), 0.35);
-}
-
-.panelIAAccionBtn--cancelar {
-    background: var(--dashboard-superposicionClara);
-    color: var(--dashboard-textoSecundario);
-}
-
-.panelIAAccionBtn--cancelar:hover {
-    background: var(--dashboard-superposicionMedia);
-}
-
 /* [243A-1] Config inline eliminada — ahora vive en el modal global (sección 'panelIA') */

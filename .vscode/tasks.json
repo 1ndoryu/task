@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Roadmap Watcher",
+      "type": "shell",
+      "command": "node",
+      "args": ["scripts/check-roadmap.mjs", "--watch"],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "roadmap-watcher",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+):\\s+warning:\\s+(.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        },
+        "severity": "warning",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[roadmap-watcher\\] (Cambio detectado|Vigilando)",
+          "endsPattern": "^\\[roadmap-watcher\\] \\d+ tarea|^\\[roadmap-watcher\\] Sin tareas"
+        }
+      },
+      "runOptions": {"runOn": "folderOpen"},
+      "presentation": {"reveal": "silent", "panel": "dedicated", "showReuseMessage": false}
+    }
+  ]
+}
