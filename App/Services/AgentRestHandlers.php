@@ -1,4 +1,8 @@
 <?php
+/* sentinel-disable-file limite-lineas
+ * Justificación: controlador REST con métodos de handlers, helpers de parseo de output
+ * y validación HMAC. Dividir requeriría extraer AgentOutputParser + HmacValidator separados;
+ * pendiente como tarea futura. */
 
 namespace App\Services;
 
@@ -281,12 +285,16 @@ class AgentRestHandlers
             try {
                 $output = trim((string)($resultado['output'] ?? ''));
                 $prompt = self::extraerPromptPreview((string)($job['payload']['prompt'] ?? ''));
+                $sessionIdCodigo = trim((string)($resultado['session_id'] ?? ''));
                 $resumen = $output !== '' ? self::extraerResumenWhatsApp($output) : '';
                 $rechazados = $output !== '' ? self::extraerPermisosRechazados($output) : [];
                 if ($exito) {
                     $waMsg = "\u{2705} *OpenCode termin\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($resumen !== '' ? "\n\n{$resumen}" : '');
                 } else {
                     $waMsg = "\u{274C} *OpenCode fall\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n{$mensaje}" . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                }
+                if ($sessionIdCodigo !== '') {
+                    $waMsg .= "\n\n\u{1F511} _Sesi\u{00F3}n: {$sessionIdCodigo}_";
                 }
                 if (!empty($rechazados)) {
                     $waMsg .= "\n\n\u{26A0}\uFE0F *Permisos rechazados:*";
@@ -340,16 +348,22 @@ class AgentRestHandlers
     /* [115A-15] Extrae el resumen para WhatsApp del output de OpenCode.
      * Si el agente definió marcadores explícitos los usa; si no, devuelve
      * las últimas 25 líneas no-vacías tras limpiar ANSI.
-     * Gotcha: la búsqueda es case-sensitive en los marcadores para coincidir
-     * con lo que el agente produce exactamente. */
+     * Gotcha: el agente a veces envuelve el bloque en backtick code fences.
+     * Se intenta primero sin strips y luego con strips para cubrir ambos casos. */
     private static function extraerResumenWhatsApp(string $output): string
     {
-        $output = self::limpiarAnsi($output);
-        if (preg_match('/=== RESUMEN PARA WHATSAPP ===(.*?)=== FIN RESUMEN ===/s', $output, $m)) {
+        $limpio = self::limpiarAnsi($output);
+        if (preg_match('/=== RESUMEN PARA WHATSAPP ===(.*?)=== FIN RESUMEN ===/s', $limpio, $m)) {
+            return trim($m[1]);
+        }
+        /* Fallback: eliminar backtick code fences y reintentar */
+        $sinFences = (string) preg_replace('/^```[^\n]*\n?/m', '', $limpio);
+        $sinFences = str_replace('```', '', $sinFences);
+        if (preg_match('/=== RESUMEN PARA WHATSAPP ===(.*?)=== FIN RESUMEN ===/s', $sinFences, $m)) {
             return trim($m[1]);
         }
         $lines = array_values(array_filter(
-            array_map('trim', explode("\n", $output)),
+            array_map('trim', explode("\n", $limpio)),
             static fn(string $l): bool => $l !== ''
         ));
         $tail = array_slice($lines, -25);

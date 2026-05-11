@@ -67,12 +67,10 @@ CRITICAL — never do these:
 Response contract:
 - Summarize changed files, validation, commit hash if created, push/deploy result if requested, and any blocked preflight.
 - If a request cannot be executed safely, stop with the smallest actionable blocker instead of inventing credentials or bypassing permissions.
-- **ALWAYS end your final response** with a clean summary block using these exact markers (no ANSI, no code fences inside, plain text, max 5 bullet points):
+- **ALWAYS end your final response** with a plain-text summary block. Output it as raw text — **NOT inside a code block** (no backtick fences), no ANSI escape codes, max 5 bullet points. The block must use exactly these two marker lines:
 
-```
-=== RESUMEN PARA WHATSAPP ===
-• [what was done, one line per item]
-=== FIN RESUMEN ===
-```
+  === RESUMEN PARA WHATSAPP ===
+  • [what was done, one line per item]
+  === FIN RESUMEN ===
 
-This block will be extracted and sent to the user via WhatsApp. Keep it short, human-readable, and without terminal formatting codes.
+  This block will be extracted and sent to the user via WhatsApp. Keep it short, human-readable, plain text only.

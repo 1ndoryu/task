@@ -34,6 +34,9 @@ class AgentChatProcessor
 
     private AgentChatService $chat;
     private MemPalaceService  $mempalace;
+    /* [115A-context] Session activa; se establece en procesar() para que los action handlers
+     * puedan acceder al session_id sin recibirlo como parámetro adicional. */
+    private string $activeSessionId = 'default';
 
     public function __construct()
     {
@@ -60,6 +63,7 @@ class AgentChatProcessor
      */
     public function procesar(int $userId, string $sessionId, string $mensaje, string $canal = 'app', ?array $media = null): array
     {
+        $this->activeSessionId = $sessionId;
         $historial       = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
         $contexto        = $this->buildContexto($userId);
         $memorias        = $this->mempalace->search($mensaje !== '' ? $mensaje : 'imagen recibida', $userId);
@@ -200,6 +204,9 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 - {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
 - {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": 42, \"mensaje\": \"mensaje de seguimiento al job anterior\"}}
+- {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
+- {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
+- {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido.
@@ -214,7 +221,10 @@ REGLAS:
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente.
-- continuar_opencode: úsala SOLO cuando el usuario explícitamente amplía o corrige un job anterior (ej: \"y agrega X también\", \"modifica lo que hiciste\", \"faltó Y\"). Si el usuario repite la misma solicitud, dice \"de nuevo\", \"no funcionó\", \"repite\" o pide algo nuevo aunque sea sobre el mismo tema, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.{$bloqueMemoria}{$bloqueMaestro}
+- continuar_opencode: úsala SOLO cuando el usuario explícitamente amplía o corrige un job anterior (ej: \"y agrega X también\", \"modifica lo que hiciste\", \"faltó Y\"). Si el usuario repite la misma solicitud, dice \"de nuevo\", \"no funcionó\", \"repite\" o pide algo nuevo aunque sea sobre el mismo tema, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.
+- reportar_contexto: úsala cuando el usuario pregunte cuántos tokens, contexto o mensajes hay en la conversación. Responde con los datos: \"Hay X chars (~Y tokens), Z% del límite (N mensajes). Límite: L tokens.\".
+- compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
+- cambiar_limite_compactacion: úsala cuando el usuario quiera cambiar el límite para la compactación automática. Convierte tokens a chars × 4 si el usuario da tokens.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
@@ -570,7 +580,7 @@ REGLAS:
                     $toParam = isset($param['to']) ? trim((string)$param['to']) : '';
                     if ($toParam !== '') {
                         /* Validar que el destino sea el mismo número de la sesión */
-                        $sessionNum = preg_replace('/[^0-9]/', '', $sessionId);
+                        $sessionNum = preg_replace('/[^0-9]/', '', $this->activeSessionId);
                         $toNum      = preg_replace('/[^0-9]/', '', $toParam);
                         if ($sessionNum !== $toNum) {
                             return ['tipo' => $tipo, 'exito' => false, 'error' => 'Destino externo no permitido desde canal whatsapp'];
@@ -765,6 +775,42 @@ REGLAS:
                     'accion_id' => $accion['id'] ?? null,
                 ];
 
+            /* [115A-context] Devuelve estadísticas del contexto de la sesión actual. */
+            case 'reportar_contexto':
+                global $wpdb;
+                $tabla = \App\Database\Schema::getTableName('agent_chat_messages');
+                $ctxRows = $wpdb->get_results($wpdb->prepare(
+                    "SELECT contenido FROM {$tabla} WHERE user_id = %d AND session_id = %s",
+                    $userId, $this->activeSessionId
+                ), ARRAY_A);
+                $ctxChars   = array_sum(array_map(fn($r) => strlen((string)$r['contenido']), $ctxRows));
+                $ctxMsgs    = count($ctxRows);
+                $ctxLimit   = $this->compactionCharsThreshold();
+                $ctxPct     = $ctxLimit > 0 ? (int) round($ctxChars / $ctxLimit * 100) : 0;
+                $ctxTokens  = (int) round($ctxChars / 4);
+                $limTokens  = (int) round($ctxLimit / 4);
+                return [
+                    'tipo'           => $tipo,
+                    'exito'          => true,
+                    'chars'          => $ctxChars,
+                    'tokens_aprox'   => $ctxTokens,
+                    'mensajes'       => $ctxMsgs,
+                    'limite_chars'   => $ctxLimit,
+                    'limite_tokens'  => $limTokens,
+                    'porcentaje_uso' => $ctxPct,
+                ];
+
+            /* [115A-context] Fuerza compactación inmediata del historial. */
+            case 'compactar_ahora':
+                $this->compactarHistorialSiNecesario($userId, $this->activeSessionId, true);
+                return ['tipo' => $tipo, 'exito' => true];
+
+            /* [115A-context] Cambia el límite de chars para compactación automática. */
+            case 'cambiar_limite_compactacion':
+                $nuevoLimite = max(2000, (int)($param['chars'] ?? 0));
+                update_option('glory_chatbot_compaction_chars', $nuevoLimite);
+                return ['tipo' => $tipo, 'exito' => true, 'nuevo_limite_chars' => $nuevoLimite, 'nuevo_limite_tokens' => (int) round($nuevoLimite / 4)];
+
             default:
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'Tipo de acción no soportado en canal server-side'];
         }
@@ -791,7 +837,8 @@ REGLAS:
     /* [115A-1] Compacta el historial cuando el total de chars supera el threshold configurable.
      * En lugar de contar mensajes, mide el tamaño real del contexto. Conserva los últimos
      * COMPACTION_KEEP_CHARS chars. Usa el modelo configurado (no hardcodeado). */
-    private function compactarHistorialSiNecesario(int $userId, string $sessionId): void
+    /* [115A-context] $forzar=true omite el check del threshold — para compactación manual. */
+    private function compactarHistorialSiNecesario(int $userId, string $sessionId, bool $forzar = false): void
     {
         global $wpdb;
         $tabla = \App\Database\Schema::getTableName('agent_chat_messages');
@@ -811,7 +858,7 @@ REGLAS:
         $totalChars = array_sum(array_map(fn($r) => strlen((string)$r['contenido']), $rows));
         $threshold  = $this->compactionCharsThreshold();
 
-        if ($totalChars <= $threshold) {
+        if (!$forzar && $totalChars <= $threshold) {
             return;
         }
 
