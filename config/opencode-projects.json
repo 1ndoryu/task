@@ -4,7 +4,7 @@
             "path": ".",
             "repo": "1ndoryu/task",
             "branch": "glory-react-logic",
-            "defaultModel": "opencode/gpt-5.3-codex",
+            "defaultModel": "opencode/deepseek-v4-flash-free",
             "defaultAgent": "whatsapp-code",
             "deploy": {
                 "provider": "coolify-manager-rs",

@@ -1,7 +1,7 @@
 ---
 description: "Use when: executing approved code-change requests received from WhatsApp or GitHub for this WordPress/React project."
 mode: primary
-model: opencode/gpt-5.3-codex
+model: opencode/deepseek-v4-flash-free
 temperature: 0.1
 permission:
   edit: allow

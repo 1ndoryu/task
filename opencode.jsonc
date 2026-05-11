@@ -2,8 +2,8 @@
     "$schema": "https://opencode.ai/config.json",
     // [115A-12] Configuracion base para solicitudes remotas aprobadas desde WhatsApp/GitHub.
     // Zen usa IDs provider/model; el runner puede sobrescribirlo con --model.
-    "model": "opencode/gpt-5.3-codex",
-    "small_model": "opencode/gpt-5-nano",
+    "model": "opencode/deepseek-v4-flash-free",
+    "small_model": "opencode/deepseek-v4-flash-free",
     "default_agent": "whatsapp-code",
     "share": "disabled",
     "provider": {
