@@ -142,7 +142,8 @@ function buildPrompt({message, projectId, project, commitRequested, deployReques
 }
 
 function assertOpencodeAvailable(opencodeBin) {
-    const result = spawnSync(opencodeBin, ['--version'], {encoding: 'utf8'});
+    /* shell: true es necesario en Windows donde los binarios npm son .cmd wrappers */
+    const result = spawnSync(opencodeBin, ['--version'], {encoding: 'utf8', shell: true});
     if (result.error) {
         throw new Error(`OpenCode no esta disponible en PATH (${opencodeBin}). Instala con npm install -g opencode-ai o el metodo oficial.`);
     }
@@ -163,10 +164,11 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt}) {
 
 function runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs}) {
     return new Promise((resolve, reject) => {
+        /* shell: true necesario en Windows (.cmd wrappers de npm) */
         const child = spawn(opencodeBin, opencodeArgs, {
             cwd: projectPath,
             stdio: 'inherit',
-            shell: false,
+            shell: true,
             env: process.env,
         });
 
