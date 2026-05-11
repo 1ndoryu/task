@@ -10,6 +10,7 @@ import {useIAStore} from '../stores/iaStore';
 import {usePluginsStore} from '../stores/pluginsStore';
 import {calcularTDEE, obtenerMetodoCalculo} from '../utils/calculoTMB';
 import {estimarCaloriasTexto} from '../services/geminiCaloriasService';
+import {obtenerApiKeyParaProveedor, proveedorTieneCredenciales} from '../services/iaService';
 import type {ComidaRegistrada} from '../types/deficitCalorico';
 
 function generarIdComida(): string {
@@ -49,10 +50,14 @@ export function useDeficitCalorico(fechaActiva?: string) {
     /* Seleccionar directamente del state para referencia estable (evita loop infinito por objeto nuevo en cada snapshot) */
     const config = usePluginsStore(s => s.configuracionPlugins['deficit-calorico']) as unknown as {apiKey?: string} | undefined;
 
-    /* [303A-6] Centralización API Groq: prioridad local > iaStore > pluginsStore.
-     * Si el usuario configuró la key en el panel IA, no necesita repetirla aquí. */
+    /* [105A-1] Centralización IA: Déficit Calórico ya no pide una key propia.
+     * Usuarios normales usan Configuración → Asistente IA; admin usa env rotado por backend. */
     const apiKeyIA = useIAStore(s => s.apiKey);
-    const apiKey = store.apiKeyGemini || apiKeyIA || config?.apiKey || '';
+    const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
+    const proveedorIA = useIAStore(s => s.proveedor);
+    const modeloIA = useIAStore(s => s.modelo);
+    const apiKeyActual = store.apiKeyGemini || obtenerApiKeyParaProveedor(proveedorIA, apiKeyIA || config?.apiKey || '', apiKeyDeepseek);
+    const iaConfigurada = proveedorTieneCredenciales(proveedorIA, apiKeyIA || store.apiKeyGemini || config?.apiKey || '', apiKeyDeepseek);
 
     /* TMB calculada */
     const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);
@@ -74,8 +79,8 @@ export function useDeficitCalorico(fechaActiva?: string) {
     /* Registrar comida por texto usando IA */
     const registrarPorTexto = useCallback(
         async (descripcion: string, fechaObjetivo?: string) => {
-            if (!apiKey) {
-                store.setErrorIA('Configura tu API Key de Groq (IA) primero');
+            if (!iaConfigurada) {
+                store.setErrorIA('Configura tu proveedor de IA en Configuración → Asistente IA');
                 return;
             }
 
@@ -84,7 +89,11 @@ export function useDeficitCalorico(fechaActiva?: string) {
 
             try {
                 const fechaRegistro = normalizarFecha(fechaObjetivo ?? fechaSeleccionada);
-                const resultado = await estimarCaloriasTexto(descripcion, apiKey);
+                const resultado = await estimarCaloriasTexto(descripcion, {
+                    proveedor: proveedorIA,
+                    apiKey: apiKeyActual,
+                    modelo: modeloIA
+                });
                 const comida: ComidaRegistrada = {
                     id: generarIdComida(),
                     descripcion: resultado.descripcion || descripcion,
@@ -106,7 +115,7 @@ export function useDeficitCalorico(fechaActiva?: string) {
                 store.setCargandoIA(false);
             }
         },
-        [apiKey, store, fechaSeleccionada]
+        [iaConfigurada, proveedorIA, apiKeyActual, modeloIA, store, fechaSeleccionada]
     );
 
     return {
@@ -120,7 +129,7 @@ export function useDeficitCalorico(fechaActiva?: string) {
         tdee,
         deficit,
         metodoCalculo,
-        apiKey,
+        apiKey: iaConfigurada ? 'configurada' : '',
         datosUsuario: store.datosUsuario,
         cargandoIA: store.cargandoIA,
         errorIA: store.errorIA,

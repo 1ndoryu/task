@@ -127,7 +127,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                         <Bot size={32} />
                         <p>Escribe para planificar tu día, crear tareas o preguntar lo que necesites.</p>
                         {!apiKey && (
-                            <p className="panelIAVacioAviso">Configura tu API Key de Groq para empezar.</p>
+                            <p className="panelIAVacioAviso">Configura tu proveedor de IA para empezar.</p>
                         )}
                     </div>
                 ) : (
@@ -160,7 +160,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                     value={inputTexto}
                     onChange={e => setInputTexto(e.target.value)}
                     onKeyDown={manejarTecla}
-                    placeholder={apiKey ? 'Escribe un mensaje...' : 'Configura tu API Key primero'}
+                    placeholder={apiKey ? 'Escribe un mensaje...' : 'Configura tu proveedor IA primero'}
                     disabled={enviando || !apiKey}
                     filas={1}
                     autoAjustar

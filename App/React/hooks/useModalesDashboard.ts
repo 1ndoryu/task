@@ -10,7 +10,8 @@ import type {Proyecto, Habito, Tarea} from '../types/dashboard';
 /* [233A-27] Secciones disponibles en el modal de configuración global */
 /* [243A-1] Agrega 'panelIA' para la config del chat IA (API key, modelo, preferencias) */
 /* [263A-5] Agrega 'gruposFb' para config del panel de grupos FB (token, API URL) */
-export type SeccionConfigGlobal = 'tareas' | 'habitos' | 'proyectos' | 'notas' | 'actividad' | 'panelIA' | 'gruposFb' | 'layout' | 'perfil' | 'preferencias' | 'temas' | 'seguridad' | 'ia' | 'backups' | 'plugins';
+/* [105A-1] Agrega 'deficitCalorico' para centralizar el formulario de calorías. */
+export type SeccionConfigGlobal = 'tareas' | 'habitos' | 'proyectos' | 'notas' | 'actividad' | 'deficitCalorico' | 'panelIA' | 'gruposFb' | 'layout' | 'perfil' | 'preferencias' | 'temas' | 'seguridad' | 'ia' | 'backups' | 'plugins';
 
 interface PosicionModal {
     x: number;

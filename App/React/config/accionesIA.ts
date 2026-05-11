@@ -97,7 +97,7 @@ export function generarContexto(tareas: Tarea[]): string {
 /*
  * System prompt completo con esquema de acciones y contexto
  */
-export function generarSystemPrompt(contexto: string, preferencias: string): string {
+export function generarSystemPrompt(contexto: string, preferencias: string, promptSistema = ''): string {
     return `Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas/hábitos y gestionar su productividad.
 
 RESPONDE SIEMPRE en formato JSON con esta estructura exacta:
@@ -122,6 +122,7 @@ REGLAS:
 - Responde siempre en español.
 - NUNCA uses eliminar_tarea o eliminar_habito a menos que el usuario haya pedido EXPLÍCITAMENTE borrar o eliminar algo. Si el usuario dice "limpiar", "organizar" o "arreglar", NO elimines — pregunta primero qué quiere hacer con cada elemento.
 - Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
+${promptSistema ? `\nINSTRUCCIONES PERSONALIZADAS DEL SISTEMA:\n${promptSistema}` : ''}
 ${preferencias ? `\nPREFERENCIAS DEL USUARIO:\n${preferencias}` : ''}
 ${contexto}`;
 }

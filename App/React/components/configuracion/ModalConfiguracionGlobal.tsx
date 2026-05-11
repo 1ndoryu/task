@@ -6,17 +6,19 @@
  *   2. Al seleccionar sección, expande a 80% mostrando el contenido con botón volver */
 
 import {useState, useEffect} from 'react';
-import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle, Bot, Users} from 'lucide-react';
+import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle, Bot, Users, Utensils} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {BottomSheet} from '../shared/BottomSheet';
 import {Boton} from '../ui';
 import {useEsMovil} from '../../hooks/useEsMovil';
 import {usePluginsStore} from '../../stores/pluginsStore';
+import {esUsuarioAdmin} from '../../utils/dashboardRuntime';
 import type {SeccionConfigGlobal} from '../../hooks/useModalesDashboard';
 
 /* Secciones de paneles */
 import {SeccionConfigTareas, SeccionConfigHabitos, SeccionConfigProyectos, SeccionConfigScratchpad, SeccionConfigActividad, SeccionConfigIAPanelChat} from './global/SeccionesConfigPaneles';
 import {SeccionConfigGruposFb} from './global/SeccionConfigGruposFb';
+import {ConfigDeficitCalorico} from '../dashboard/ConfigDeficitCalorico';
 /* Secciones generales */
 import {SeccionConfigLayout, SeccionConfigPreferencias, SeccionConfigTemas, SeccionConfigPerfil, SeccionConfigSeguridad, SeccionConfigMCP, SeccionConfigBackups} from './global/SeccionesConfigGeneral';
 import {SeccionConfigPlugins} from './global/SeccionConfigPlugins';
@@ -36,6 +38,7 @@ const SECCIONES_SIDEBAR: ItemSidebar[] = [
     {id: 'proyectos', nombre: 'Proyectos', icono: <Folder size={14} />, grupo: 'Paneles'},
     {id: 'notas', nombre: 'Notas', icono: <FileText size={14} />, grupo: 'Paneles'},
     {id: 'actividad', nombre: 'Actividad', icono: <Activity size={14} />, grupo: 'Paneles'},
+    {id: 'deficitCalorico', nombre: 'Calorías', icono: <Utensils size={14} />, grupo: 'Paneles'},
     {id: 'panelIA', nombre: 'Asistente IA', icono: <Bot size={14} />, grupo: 'Paneles'},
     {id: 'gruposFb', nombre: 'Grupos FB', icono: <Users size={14} />, grupo: 'Paneles'},
     /* Grupo: Apariencia */
@@ -54,8 +57,13 @@ const SECCIONES_SIDEBAR: ItemSidebar[] = [
 /* [044A-18] Secciones que dependen de un plugin activo.
  * Si el plugin asociado no esta activo, la seccion se oculta del sidebar. */
 const SECCION_PLUGIN_MAP: Partial<Record<SeccionConfigGlobal, string>> = {
+    deficitCalorico: 'deficit-calorico',
     gruposFb: 'gruposFb',
     panelIA: 'ia-asistente'
+};
+
+const SECCIONES_SOLO_ADMIN: Partial<Record<SeccionConfigGlobal, boolean>> = {
+    gruposFb: true
 };
 
 /* Título visible para cada sección */
@@ -65,6 +73,7 @@ const TITULOS_SECCION: Record<SeccionConfigGlobal, string> = {
     proyectos: 'Configuración de Proyectos',
     notas: 'Configuración de Notas',
     actividad: 'Configuración de Actividad',
+    deficitCalorico: 'Configuración de Calorías',
     panelIA: 'Configuración del Asistente IA',
     gruposFb: 'Configuración de Grupos FB',
     layout: 'Configuración de Layout',
@@ -93,6 +102,7 @@ function ContenidoSeccion({seccion, onCerrar, onAbrirUpgrade}: {seccion: Seccion
             {seccion === 'proyectos' && <SeccionConfigProyectos />}
             {seccion === 'notas' && <SeccionConfigScratchpad />}
             {seccion === 'actividad' && <SeccionConfigActividad />}
+            {seccion === 'deficitCalorico' && <ConfigDeficitCalorico onCerrar={onCerrar} />}
             {seccion === 'panelIA' && <SeccionConfigIAPanelChat />}
             {seccion === 'gruposFb' && <SeccionConfigGruposFb />}
             {seccion === 'layout' && <SeccionConfigLayout />}
@@ -115,7 +125,9 @@ export function ModalConfiguracionGlobal({estaAbierto, onCerrar, seccionInicial,
 
     /* [044A-18] Filtrar secciones de plugins desactivados */
     const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+    const esAdmin = esUsuarioAdmin();
     const seccionesVisibles = SECCIONES_SIDEBAR.filter(s => {
+        if (SECCIONES_SOLO_ADMIN[s.id] && !esAdmin) return false;
         const pluginRequerido = SECCION_PLUGIN_MAP[s.id];
         if (!pluginRequerido) return true;
         return pluginsActivos.includes(pluginRequerido);

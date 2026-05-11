@@ -13,6 +13,7 @@ import {persist} from 'zustand/middleware';
 
 /* Roles del chat */
 export type RolMensaje = 'usuario' | 'asistente' | 'sistema';
+export type ProveedorIA = 'groq' | 'deepseek';
 
 /* Acción estructurada que la IA puede ejecutar (Fase 3)
  * [303A-11] pendienteConfirmacion: acciones destructivas requieren confirmación del usuario */
@@ -35,9 +36,12 @@ export interface MensajeIA {
 
 /* Estado persistente (configuración) */
 interface IAConfigPersistente {
+    proveedor: ProveedorIA;
     apiKey: string;
+    apiKeyDeepseek: string;
     modelo: string;
     preferenciasUsuario: string;
+    promptSistema: string;
 }
 
 /* Estado de sesión (no persistido) */
@@ -50,9 +54,12 @@ interface IAEstadoSesion {
 
 /* Acciones */
 interface IAAcciones {
+    setProveedor: (proveedor: ProveedorIA) => void;
     setApiKey: (key: string) => void;
+    setApiKeyDeepseek: (key: string) => void;
     setModelo: (modelo: string) => void;
     setPreferencias: (preferencias: string) => void;
+    setPromptSistema: (prompt: string) => void;
     agregarMensaje: (mensaje: MensajeIA) => void;
     /* [303A-11] Actualizar un mensaje existente (para confirmar/rechazar acciones pendientes) */
     actualizarMensaje: (id: string, cambios: Partial<MensajeIA>) => void;
@@ -73,9 +80,12 @@ export const useIAStore = create<IAStore>()(
     persist(
         (set) => ({
             /* Config persistente */
+            proveedor: 'groq',
             apiKey: '',
+            apiKeyDeepseek: '',
             modelo: 'meta-llama/llama-4-scout-17b-16e-instruct',
             preferenciasUsuario: '',
+            promptSistema: '',
 
             /* Estado de sesión */
             mensajes: [],
@@ -84,9 +94,12 @@ export const useIAStore = create<IAStore>()(
             tokensUsados: 0,
 
             /* Acciones de configuración */
+            setProveedor: (proveedor) => set({proveedor}),
             setApiKey: (key) => set({apiKey: key}),
+            setApiKeyDeepseek: (key) => set({apiKeyDeepseek: key}),
             setModelo: (modelo) => set({modelo}),
             setPreferencias: (preferencias) => set({preferenciasUsuario: preferencias}),
+            setPromptSistema: (prompt) => set({promptSistema: prompt}),
 
             /* Acciones de chat */
             agregarMensaje: (mensaje) => set(state => ({
@@ -110,9 +123,12 @@ export const useIAStore = create<IAStore>()(
             name: 'glory-ia-panel',
             /* Solo persistir configuración, no estado de sesión */
             partialize: (state) => ({
+                proveedor: state.proveedor,
                 apiKey: state.apiKey,
+                apiKeyDeepseek: state.apiKeyDeepseek,
                 modelo: state.modelo,
-                preferenciasUsuario: state.preferenciasUsuario
+                preferenciasUsuario: state.preferenciasUsuario,
+                promptSistema: state.promptSistema
             })
         }
     )

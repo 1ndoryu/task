@@ -11,6 +11,7 @@
 namespace App\Api;
 
 use App\Services\AIService;
+use App\Services\LLMProviderService;
 
 class AIApiController
 {
@@ -83,6 +84,14 @@ class AIApiController
 
         register_rest_route($ns, '/ai/resumen', [
             'methods' => 'GET', 'callback' => [self::class, 'obtenerResumen'], 'permission_callback' => $auth,
+        ]);
+
+        register_rest_route($ns, '/ai/chat', [
+            'methods' => 'POST', 'callback' => [self::class, 'enviarChat'], 'permission_callback' => $auth,
+        ]);
+
+        register_rest_route($ns, '/ai/nutricion', [
+            'methods' => 'POST', 'callback' => [self::class, 'estimarNutricion'], 'permission_callback' => $auth,
         ]);
     }
 
@@ -221,6 +230,52 @@ class AIApiController
             return self::ok((new AIService())->obtenerResumen(get_current_user_id()));
         } catch (\Exception $e) {
             return self::error('Error al obtener resumen: ' . $e->getMessage(), 'resumen_error');
+        }
+    }
+
+    public static function enviarChat(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!current_user_can('manage_options')) {
+            return self::error('Los usuarios normales deben usar su propia API key desde el navegador.', 'ia_env_solo_admin', 403);
+        }
+
+        try {
+            $json = $request->get_json_params();
+            $json = is_array($json) ? $json : [];
+            $resultado = (new LLMProviderService())->enviarChat(
+                is_array($json['messages'] ?? null) ? $json['messages'] : [],
+                sanitize_text_field((string)($json['provider'] ?? 'groq')),
+                sanitize_text_field((string)($json['model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct')),
+                [
+                    'temperature' => isset($json['temperature']) ? (float)$json['temperature'] : 0.7,
+                    'maxTokens' => isset($json['maxTokens']) ? (int)$json['maxTokens'] : 2048,
+                ]
+            );
+            return self::ok($resultado);
+        } catch (\Throwable $e) {
+            error_log('[AIApiController] Error en enviarChat: ' . $e->getMessage());
+            return self::error($e->getMessage(), 'ia_chat_error', 500);
+        }
+    }
+
+    public static function estimarNutricion(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!current_user_can('manage_options')) {
+            return self::error('Los usuarios normales deben configurar su propia API key para nutrición.', 'nutricion_env_solo_admin', 403);
+        }
+
+        try {
+            $json = $request->get_json_params();
+            $json = is_array($json) ? $json : [];
+            $resultado = (new LLMProviderService())->estimarNutricion(
+                (string)($json['descripcion'] ?? ''),
+                sanitize_text_field((string)($json['provider'] ?? 'groq')),
+                sanitize_text_field((string)($json['model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct'))
+            );
+            return self::ok($resultado);
+        } catch (\Throwable $e) {
+            error_log('[AIApiController] Error en estimarNutricion: ' . $e->getMessage());
+            return self::error($e->getMessage(), 'nutricion_error', 500);
         }
     }
 }

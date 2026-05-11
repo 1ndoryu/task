@@ -7,6 +7,7 @@
 import {useState, useCallback} from 'react';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
 import {useIAStore} from '../../stores/iaStore';
+import {proveedorTieneCredenciales} from '../../services/iaService';
 import {useShallow} from 'zustand/react/shallow';
 import {calcularTDEE, obtenerMetodoCalculo} from '../../utils/calculoTMB';
 import type {DatosUsuarioTMB} from '../../types/deficitCalorico';
@@ -38,11 +39,13 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
         }))
     );
 
-    /* [303A-6] API key centralizada: lee de iaStore (fuente principal) o deficitStore (legacy).
-     * El usuario configura la key en Configuración → Asistente IA. */
+    /* [105A-1] API key centralizada: lee de Asistente IA o legacy.
+     * Admin no necesita key local: backend usa env rotado. */
+    const proveedorIA = useIAStore(s => s.proveedor);
     const apiKeyIA = useIAStore(s => s.apiKey);
+    const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
     const apiKeyLegacy = useDeficitCaloricoStore(s => s.apiKeyGemini);
-    const tieneApiKey = !!(apiKeyIA || apiKeyLegacy);
+    const tieneApiKey = proveedorTieneCredenciales(proveedorIA, apiKeyIA || apiKeyLegacy, apiKeyDeepseek);
 
     const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
 

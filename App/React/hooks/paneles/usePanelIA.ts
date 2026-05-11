@@ -8,7 +8,7 @@
 
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
-import {procesarMensajeIA} from '../../services/iaService';
+import {obtenerApiKeyParaProveedor, procesarMensajeIA, proveedorTieneCredenciales} from '../../services/iaService';
 import {ejecutarAccionDestructiva} from '../../config/accionesIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
@@ -23,6 +23,8 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const enviando = useIAStore(s => s.enviando);
     const error = useIAStore(s => s.error);
     const apiKey = useIAStore(s => s.apiKey);
+    const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
+    const proveedor = useIAStore(s => s.proveedor);
     const modelo = useIAStore(s => s.modelo);
     const tokensUsados = useIAStore(s => s.tokensUsados);
     const agregarMensaje = useIAStore(s => s.agregarMensaje);
@@ -63,9 +65,16 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
 
         try {
             const preferencias = useIAStore.getState().preferenciasUsuario;
+            const promptSistema = useIAStore.getState().promptSistema;
+            const apiKeyActual = obtenerApiKeyParaProveedor(proveedor, apiKey, apiKeyDeepseek);
             const mensajesActuales = useIAStore.getState().mensajes;
             const resultado = await procesarMensajeIA(
-                mensajesActuales, apiKey, modelo, preferencias, ejecutoresTareas, refAbort.current.signal
+                mensajesActuales,
+                {proveedor, apiKey: apiKeyActual, modelo},
+                preferencias,
+                promptSistema,
+                ejecutoresTareas,
+                refAbort.current.signal
             );
 
             agregarMensaje({
@@ -83,7 +92,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             setEnviando(false);
             refAbort.current = null;
         }
-    }, [inputTexto, enviando, apiKey, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens]);
+    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, proveedor, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens]);
 
     const manejarTecla = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -133,7 +142,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     return {
         inputTexto, setInputTexto,
         refScroll,
-        mensajes, enviando, error, apiKey, tokensUsados,
+        mensajes, enviando, error, apiKey: proveedorTieneCredenciales(proveedor, apiKey, apiKeyDeepseek) ? 'configurada' : '', tokensUsados,
         limpiarChat,
         manejarEnviar, manejarTecla,
         confirmarAccion, rechazarAccion

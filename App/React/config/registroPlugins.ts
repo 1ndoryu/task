@@ -6,6 +6,7 @@
  */
 
 import type {DefinicionPlugin} from '../types/plugins';
+import {esUsuarioAdmin} from '../utils/dashboardRuntime';
 
 /* Mapa interno del registro de plugins */
 const _registroPlugins: Map<string, DefinicionPlugin> = new Map();
@@ -32,6 +33,16 @@ export function obtenerPlugin(id: string): DefinicionPlugin | undefined {
  */
 export function obtenerTodosPlugins(): DefinicionPlugin[] {
     return Array.from(_registroPlugins.values());
+}
+
+export function obtenerPluginsVisibles(): DefinicionPlugin[] {
+    const esAdmin = esUsuarioAdmin();
+    return obtenerTodosPlugins().filter(plugin => !plugin.soloAdmin || esAdmin);
+}
+
+export function pluginPuedeMostrarse(pluginId: string): boolean {
+    const plugin = _registroPlugins.get(pluginId);
+    return !plugin?.soloAdmin || esUsuarioAdmin();
 }
 
 /*

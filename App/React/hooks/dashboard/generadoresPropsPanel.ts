@@ -258,7 +258,7 @@ export function generarPropsPanelDeficitCalorico(
     return {
         renderHandleArrastre,
         handleMinimizar,
-        onAbrirConfiguracion: modales.abrirModalConfigDeficitCalorico
+        onAbrirConfiguracion: () => modales.abrirModalConfigGlobal('deficitCalorico')
     };
 }
 

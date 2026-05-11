@@ -181,7 +181,7 @@ export function PanelDeficitCalorico({renderHandleArrastre, handleMinimizar, onA
             {sinApiKey && (
                 <div className="deficitAviso">
                     <AlertCircle size={14} />
-                    <span>Configura tu API Key de Gemini en Plugins → Déficit Calórico</span>
+                    <span>Configura Groq o DeepSeek en Configuración → Asistente IA</span>
                 </div>
             )}
 

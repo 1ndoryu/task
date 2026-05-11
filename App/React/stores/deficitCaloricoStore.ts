@@ -37,9 +37,9 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                 }));
             },
 
-            guardarApiKey: (keyGroq) => {
+            guardarApiKey: (keyIA) => {
                 set({
-                    apiKeyGemini: keyGroq
+                    apiKeyGemini: keyIA
                 });
             },
 

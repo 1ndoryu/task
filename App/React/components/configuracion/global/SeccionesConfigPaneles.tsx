@@ -2,7 +2,7 @@
  * Componentes: SeccionConfigTareas, SeccionConfigHabitos, SeccionConfigProyectos,
  * SeccionConfigScratchpad, SeccionConfigActividad, SeccionConfigIAPanelChat
  * Cada sección usa su hook directamente — no depende de props del padre
- * [243A-1] Agrega SeccionConfigIAPanelChat (API Key Groq, modelo, preferencias) */
+ * [243A-1] Agrega SeccionConfigIAPanelChat (proveedor, modelo, preferencias) */
 
 import {ToggleSwitch} from '../../shared/ToggleSwitch';
 import {Boton, Input, Select, Textarea} from '../../ui';
@@ -13,7 +13,9 @@ import {useConfiguracionScratchpad} from '../../../hooks/useConfiguracionScratch
 import {useConfiguracionActividad} from '../../../hooks/useConfiguracionActividad';
 import {useEsDispositivoMovil} from '../../../hooks/useEsMovil';
 import {useIAStore} from '../../../stores/iaStore';
-import {MODELOS_IA} from '../../../services/iaService';
+import {MODELOS_IA, MODELO_FLASH_POR_PROVEEDOR, PROVEEDORES_IA} from '../../../services/iaService';
+import {esUsuarioAdmin} from '../../../utils/dashboardRuntime';
+import type {ProveedorIA} from '../../../stores/iaStore';
 import type {ColumnasHabitos, ToleranciaPreset} from '../../../hooks/useConfiguracionHabitos';
 import type {TamanoFuente} from '../../../hooks/useConfiguracionScratchpad';
 import type {PeriodoActividad, FiltroTipoActividad, TamanoCeldaActividad} from '../../../hooks/useConfiguracionActividad';
@@ -206,31 +208,70 @@ export function SeccionConfigActividad(): JSX.Element {
 }
 
 /* ── ASISTENTE IA ──────────────────────────────────────── */
-/* [243A-1] Config del chat IA: API Key Groq, modelo y preferencias personales
- * Lee/escribe directamente en iaStore (persiste en localStorage). */
+/* [105A-2] Config del chat IA: proveedor, modelo, keys de usuario y prompt system.
+ * Admin usa backend con env rotation para no exponer claves del entorno. */
 export function SeccionConfigIAPanelChat(): JSX.Element {
+    const proveedor = useIAStore(s => s.proveedor);
     const apiKey = useIAStore(s => s.apiKey);
+    const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
     const modelo = useIAStore(s => s.modelo);
     const preferencias = useIAStore(s => s.preferenciasUsuario);
+    const promptSistema = useIAStore(s => s.promptSistema);
+    const setProveedor = useIAStore(s => s.setProveedor);
     const setApiKey = useIAStore(s => s.setApiKey);
+    const setApiKeyDeepseek = useIAStore(s => s.setApiKeyDeepseek);
     const setModelo = useIAStore(s => s.setModelo);
     const setPreferencias = useIAStore(s => s.setPreferencias);
+    const setPromptSistema = useIAStore(s => s.setPromptSistema);
+    const esAdmin = esUsuarioAdmin();
+    const modelosProveedor = MODELOS_IA.filter(m => m.proveedor === proveedor);
+
+    const manejarProveedor = (valor: string) => {
+        const proveedorNuevo = valor as ProveedorIA;
+        setProveedor(proveedorNuevo);
+        if (!MODELOS_IA.some(m => m.proveedor === proveedorNuevo && m.id === modelo)) {
+            setModelo(MODELO_FLASH_POR_PROVEEDOR[proveedorNuevo]);
+        }
+    };
 
     return (
         <div className="contenedorOpcionesConfig">
             <div className="itemOpcionConfig">
                 <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">API Key de Groq</span>
-                    <span className="descripcionOpcionConfig">Obtén tu clave en console.groq.com → API Keys</span>
+                    <span className="tituloOpcionConfig">Proveedor de IA</span>
+                    <span className="descripcionOpcionConfig">El admin usa las claves del entorno; los usuarios normales configuran sus propias claves aquí.</span>
                 </div>
             </div>
-            <div className="separadorOpcionesConfig" />
-            <Input
-                tipo="password"
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                placeholder="gsk_..."
+            <Select
+                value={proveedor}
+                onChange={e => manejarProveedor(e.target.value)}
+                opciones={PROVEEDORES_IA.map(p => ({valor: p.id, etiqueta: p.nombre}))}
             />
+            <div className="separadorOpcionesConfig" />
+            {!esAdmin && proveedor === 'groq' && (
+                <Input
+                    tipo="password"
+                    value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    placeholder="gsk_..."
+                />
+            )}
+            {!esAdmin && proveedor === 'deepseek' && (
+                <Input
+                    tipo="password"
+                    value={apiKeyDeepseek}
+                    onChange={e => setApiKeyDeepseek(e.target.value)}
+                    placeholder="sk-..."
+                />
+            )}
+            {esAdmin && (
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">API del entorno activa</span>
+                        <span className="descripcionOpcionConfig">Se usarán GROQ_API/GROQ_API_1..3 o DEEPSEEK_API/DEEPSEEK-API desde WordPress/Coolify.</span>
+                    </div>
+                </div>
+            )}
             <div className="separadorOpcionesConfig" />
             <div className="itemOpcionConfig">
                 <div className="detallesOpcionConfig">
@@ -241,7 +282,20 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
             <Select
                 value={modelo}
                 onChange={e => setModelo(e.target.value)}
-                opciones={MODELOS_IA.map(m => ({valor: m.id, etiqueta: m.nombre}))}
+                opciones={modelosProveedor.map(m => ({valor: m.id, etiqueta: m.nombre}))}
+            />
+            <div className="separadorOpcionesConfig" />
+            <div className="itemOpcionConfig">
+                <div className="detallesOpcionConfig">
+                    <span className="tituloOpcionConfig">Prompt system</span>
+                    <span className="descripcionOpcionConfig">Instrucciones persistentes que se añaden al sistema del asistente sin reemplazar sus permisos seguros.</span>
+                </div>
+            </div>
+            <Textarea
+                value={promptSistema}
+                onChange={e => setPromptSistema(e.target.value)}
+                placeholder="Ej: Sé directo, prioriza tareas bloqueantes, pregunta antes de acciones externas..."
+                filas={3}
             />
             <div className="separadorOpcionesConfig" />
             <div className="itemOpcionConfig">

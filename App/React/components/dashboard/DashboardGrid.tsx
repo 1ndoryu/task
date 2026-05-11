@@ -8,7 +8,7 @@
  */
 
 import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel, ResizeHandleColumn, PullToRefresh} from '../shared';
-import {obtenerPanelOBase, panelManejaAlturaPropia, paginaMovilAPanelId, obtenerIdBase} from '../../config/registroPaneles';
+import {obtenerPanelOBase, panelManejaAlturaPropia, paginaMovilAPanelId, obtenerIdBase, panelPuedeMostrarse} from '../../config/registroPaneles';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
@@ -33,6 +33,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
      */
     const renderizarContenidoPanel = (panelId: PanelId): JSX.Element | null => {
         const baseId = obtenerIdBase(panelId);
+        if (!panelPuedeMostrarse(baseId)) return null;
+
         const definicionPanel = obtenerPanelOBase(panelId);
         if (!definicionPanel) {
             console.warn(`Panel "${panelId}" no encontrado en el registro`);
@@ -113,7 +115,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         </PanelArrastrable>
     );
 
-    const renderizarColumna = (columna: 1 | 2 | 3): JSX.Element[] => layout.obtenerPanelesColumna(columna).map(renderizarPanel);
+    const renderizarColumna = (columna: 1 | 2 | 3): JSX.Element[] => layout.obtenerPanelesColumna(columna).filter(panelPuedeMostrarse).map(renderizarPanel);
 
     /*
      * MODO MÓVIL: Renderizamos solo el panel correspondiente a la página activa

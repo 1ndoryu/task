@@ -15,6 +15,7 @@ interface GloryDashboardData {
     apiUrl: string;
     apiBase?: string;
     isLoggedIn?: boolean;
+    esAdmin?: boolean;
     userId?: number;
     suscripcion?: import('./dashboard').InfoSuscripcion;
 }

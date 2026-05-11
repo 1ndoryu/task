@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-10 — Solo ocultar UI no protege plugins admin
+
+**Patrón del error:** Grupos FB podía ocultarse en React, pero los endpoints seguían aceptando usuarios logueados o tokens Bearer sin comprobar `manage_options`. Un panel sensible persistido en localStorage también podía reaparecer si solo se filtraba el menú.
+
+**Lección:** Toda función admin-only necesita tres capas: filtro de registro/visibilidad, guard en render/layout para estado persistido antiguo, y verificación en REST/token. La capa de UI mejora UX; la capa backend es la frontera real de seguridad.
+
+**Fix:** `soloAdmin` en definiciones de plugin/panel, filtros `pluginPuedeMostrarse`/`panelPuedeMostrarse`, y `GruposFbApiController` validando `current_user_can('manage_options')` o `user_can($userId, 'manage_options')`.
+
 ## 2026-04-04 — Tareas virtuales contaminan estado real vía drag & drop (044A-12)
 
 **Patrón del error:** `handleReorder` recibe `nuevoOrdenPrincipales` que incluye tareas virtuales de hábitos (IDs negativos de `useHabitosComoTareas`). La lista se pasa a `reordenarTareas` → `setTareas` → localStorage sin filtrar. Cada reorder subsecuente multiplica las copias porque las persistidas aparecen como subtareas del hábito vía `tareas.filter(t => t.habitoId === habito.id)`.

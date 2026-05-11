@@ -6,7 +6,7 @@
 import {useCallback, useMemo, useState} from 'react';
 import {Settings, ChevronLeft} from 'lucide-react';
 import {Boton} from '../../ui/Boton';
-import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../../config/registroPlugins';
+import {obtenerPluginsVisibles, obtenerPanelesDePlugin, pluginPuedeMostrarse} from '../../../config/registroPlugins';
 import {usePluginsStore} from '../../../stores/pluginsStore';
 import {useHabitosStore} from '../../../stores/habitosStore';
 import {useConfiguracionLayout} from '../../../hooks/useConfiguracionLayout';
@@ -54,10 +54,12 @@ export function SeccionConfigPlugins(): JSX.Element {
     const {mostrarPanel, ocultarPanel} = useConfiguracionLayout();
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
 
-    const plugins = useMemo(() => obtenerTodosPlugins(), []);
+    const plugins = useMemo(() => obtenerPluginsVisibles(), []);
 
     const manejarToggle = useCallback(
         (pluginId: string) => {
+            if (!pluginPuedeMostrarse(pluginId)) return;
+
             const estabaActivo = pluginsActivos.includes(pluginId);
             togglePlugin(pluginId);
 
@@ -79,7 +81,9 @@ export function SeccionConfigPlugins(): JSX.Element {
                 }
             }
 
-            /* [303A-8] Mostrar/ocultar paneles al activar/desactivar plugin desde config global.
+            /* [105A-3] Los plugins solo-admin se filtran antes del toggle.
+             * Evita que un usuario normal reactive paneles sensibles desde localStorage.
+             * [303A-8] Mostrar/ocultar paneles al activar/desactivar plugin desde config global.
              * Antes solo se cambiaba el estado del store pero el panel seguía visible. */
             const panelesIds = obtenerPanelesDePlugin(pluginId);
             panelesIds.forEach(panelId => {

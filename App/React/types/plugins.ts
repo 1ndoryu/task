@@ -41,6 +41,8 @@ export interface DefinicionPlugin {
     habitos?: ConfigHabitoPlugin[];
     /* Si el plugin requiere configuración antes de activarse */
     requiereConfiguracion?: boolean;
+    /* Si solo debe mostrarse a usuarios administradores */
+    soloAdmin?: boolean;
 }
 
 /*

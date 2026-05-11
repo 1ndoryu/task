@@ -47,6 +47,8 @@ export interface DefinicionPanel<TProps extends PanelBaseProps = PanelBaseProps>
     /* Si aparece en navegación móvil y con qué nombre */
     enNavegacionMovil?: boolean;
     idPaginaMovil?: string;
+    /* Si solo debe renderizarse para administradores */
+    soloAdmin?: boolean;
 
     /*
      * Indica si el panel maneja su propia altura (scratchpad, actividad)

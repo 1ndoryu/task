@@ -11,9 +11,12 @@
         "postinstall": "npm install --prefix App/React",
         "install:all": "npm install --prefix Glory/assets/react && npm install --prefix App/React",
         "types:add": "npm install --save-dev --prefix App/React",
-        "type-check": "npm run type-check --prefix Glory/assets/react && npx -p typescript tsc --noEmit --project App/React/tsconfig.json",
+        "type-check": "npm run type-check --prefix Glory/assets/react && npm run type-check --prefix App/React",
         "type-check:glory": "npm run type-check --prefix Glory/assets/react",
-        "type-check:app": "npx -p typescript tsc --noEmit --project App/React/tsconfig.json"
+        "type-check:app": "npm run type-check --prefix App/React",
+        "roadmap": "node scripts/check-roadmap.mjs",
+        "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
+        "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1"
     },
     "dependencies": {
         "@measured/puck": "^0.20.2"

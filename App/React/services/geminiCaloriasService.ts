@@ -1,15 +1,14 @@
 /*
  * services/geminiCaloriasService.ts
+ * Nombre legacy: el cálculo usa el proveedor IA central, no Gemini.
  * [243A-17] API Ninjas pasó a freemium: calories y protein_g son premium.
- * Solución: una sola llamada a Groq que entiende el input directamente y devuelve macros.
+ * Solución: una llamada al proveedor IA central que entiende el input directamente y devuelve macros.
  * El modelo ya tiene el USDA FoodData Central en su entrenamiento — no hay que pasarle una tabla.
- * Flujo: Texto usuario -> Groq (comprende + calcula macros) -> JSON macros
+ * Flujo: Texto usuario -> proveedor IA (comprende + calcula macros) -> JSON macros
  */
 
-/* Modelos Groq en orden de preferencia */
-const MODELOS_GROQ = ['moonshotai/kimi-k2-instruct', 'moonshotai/kimi-k2-instruct-0905', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
-
-const URL_BASE_GROQ = 'https://api.groq.com/openai/v1/chat/completions';
+import {enviarMensajeLLM, type ConfigProveedorIA} from './iaService';
+import {esUsuarioAdmin, obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
 
 interface RespuestaCaloriasIA {
     calorias: number;
@@ -58,31 +57,18 @@ JSON format:
 {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>,"azucar":<g>}`;
 
 /*
- * Llama a Groq con el input del usuario directo (acepta español).
+ * Llama al proveedor IA central con el input del usuario directo (acepta español).
  * Gotcha: el JSON puede venir envuelto en backticks de markdown — se sanitiza.
  */
-async function calcularMacrosGroq(modelo: string, apiKey: string, descripcion: string): Promise<RespuestaCaloriasIA> {
-    const respuesta = await fetch(URL_BASE_GROQ, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}`},
-        body: JSON.stringify({
-            model: modelo,
-            messages: [
-                {role: 'system', content: PROMPT_NUTRICION},
-                {role: 'user', content: descripcion}
-            ],
-            temperature: 0.1,
-            max_completion_tokens: 150
-        })
-    });
-
-    if (!respuesta.ok) {
-        const error = await respuesta.text();
-        throw new Error(`Groq ${modelo}: ${respuesta.status} - ${error}`);
+async function calcularMacrosIA(config: ConfigProveedorIA, descripcion: string): Promise<RespuestaCaloriasIA> {
+    const respuesta = await enviarMensajeLLM([
+        {role: 'system', content: PROMPT_NUTRICION},
+        {role: 'user', content: descripcion}
+    ], config, undefined, {temperature: 0.1, maxTokens: 180});
+    const contenido = respuesta.contenido.trim();
+    if (!contenido) {
+        throw new Error('La IA devolvió una respuesta vacía; revisa modelo, proveedor o cuota disponible.');
     }
-
-    const datos = await respuesta.json();
-    const contenido: string = datos.choices?.[0]?.message?.content?.trim() ?? '';
 
     /* Quitar posibles backticks de markdown */
     const jsonLimpio = contenido.replace(/^```[a-z]*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
@@ -108,30 +94,44 @@ async function calcularMacrosGroq(modelo: string, apiKey: string, descripcion: s
     };
 }
 
+async function calcularMacrosBackend(config: ConfigProveedorIA, descripcion: string): Promise<RespuestaCaloriasIA> {
+    const respuesta = await fetch(`${obtenerApiUrlWP()}/ai/nutricion`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': obtenerNonceWP()
+        },
+        body: JSON.stringify({descripcion, provider: config.proveedor, model: config.modelo})
+    });
+
+    const datos = await respuesta.json().catch(() => null) as {success?: boolean; data?: RespuestaCaloriasIA; error?: {message?: string}} | null;
+    if (!respuesta.ok || !datos?.success || !datos.data) {
+        throw new Error(datos?.error?.message || `Error del servidor de nutrición (${respuesta.status})`);
+    }
+    return {...datos.data, descripcion: datos.data.descripcion || descripcion.charAt(0).toUpperCase() + descripcion.slice(1)};
+}
+
 /*
  * Orquestador: intenta cada modelo en orden hasta que uno responda bien.
  */
-export async function estimarCaloriasTexto(descripcion: string, apiKeyGroq: string): Promise<RespuestaCaloriasIA> {
+export async function estimarCaloriasTexto(descripcion: string, config: ConfigProveedorIA): Promise<RespuestaCaloriasIA> {
     const log: string[] = [`[1] Input: "${descripcion}"`];
-    let ultimoError: unknown = null;
-
-    for (const modelo of MODELOS_GROQ) {
-        try {
-            log.push(`[2] Modelo: ${modelo}`);
-            const resultado = await calcularMacrosGroq(modelo, apiKeyGroq, descripcion);
-            log.push(`[3] ✓ ${modelo} — ${resultado.calorias}kcal P:${resultado.proteinas}g C:${resultado.carbohidratos}g G:${resultado.grasas}g A:${resultado.azucar}g`);
-            return {
-                ...resultado,
-                descripcion: descripcion.charAt(0).toUpperCase() + descripcion.slice(1),
-                logProceso: log
-            };
-        } catch (e) {
-            ultimoError = e;
-            log.push(`[!] ${modelo}: ${e instanceof Error ? e.message : String(e)}`);
-            console.warn(`[Nutrición] Fallo ${modelo}:`, e);
-        }
+    try {
+        log.push(`[2] Proveedor: ${config.proveedor} / ${config.modelo}`);
+        const resultado = !config.apiKey && esUsuarioAdmin()
+            ? await calcularMacrosBackend(config, descripcion)
+            : await calcularMacrosIA(config, descripcion);
+        log.push(`[3] OK ${config.modelo} — ${resultado.calorias}kcal P:${resultado.proteinas}g C:${resultado.carbohidratos}g G:${resultado.grasas}g A:${resultado.azucar}g`);
+        return {
+            ...resultado,
+            descripcion: resultado.descripcion || descripcion.charAt(0).toUpperCase() + descripcion.slice(1),
+            logProceso: log
+        };
+    } catch (e) {
+        log.push(`[!] ${config.modelo}: ${e instanceof Error ? e.message : String(e)}`);
+        console.warn('[Nutrición] Fallo proveedor IA:', e);
+        const msg = e instanceof Error ? e.message : 'Ningún modelo respondió';
+        throw new Error(`Error calculando macros: ${msg}`);
     }
-
-    const msg = ultimoError instanceof Error ? ultimoError.message : 'Ningún modelo respondió';
-    throw new Error(`Error calculando macros: ${msg}`);
 }

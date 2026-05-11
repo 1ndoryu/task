@@ -7,8 +7,8 @@
 import {Target, Folder, Terminal, FileText, Activity, LayoutGrid, Bot} from 'lucide-react';
 import {Boton} from '../ui';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import {obtenerPanel} from '../../config/registroPaneles';
-import {obtenerTodosPlugins} from '../../config/registroPlugins';
+import {obtenerPanel, panelPuedeMostrarse} from '../../config/registroPaneles';
+import {obtenerPluginsVisibles, obtenerTodosPlugins} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
 
 interface BarraPanelesOcultosProps {
@@ -59,7 +59,7 @@ export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanel
     const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
 
     const panelesPluginActivos = new Set(
-        obtenerTodosPlugins()
+        obtenerPluginsVisibles()
             .filter(plugin => pluginsActivos.includes(plugin.id))
             .flatMap(plugin => plugin.panelesIds)
     );
@@ -67,6 +67,8 @@ export function BarraPanelesOcultos({panelesOcultos, onMostrarPanel}: BarraPanel
     const panelesPluginRegistrados = new Set(obtenerTodosPlugins().flatMap(plugin => plugin.panelesIds));
 
     const panelesOcultosVisibles = panelesOcultos.filter(panelId => {
+        if (!panelPuedeMostrarse(panelId)) return false;
+
         if (!panelesPluginRegistrados.has(panelId)) {
             return true;
         }

@@ -1,7 +1,7 @@
 /*
  * ConfigDeficitCalorico.tsx
  * Formulario de configuración del plugin de déficit calórico
- * Permite configurar datos del usuario para TMB y API Keys
+ * Permite configurar datos del usuario para TMB; la IA se centraliza en Asistente IA.
  * Lógica extraída a useConfigDeficitCalorico (SRP)
  */
 
@@ -76,13 +76,13 @@ export function ConfigDeficitCalorico({onCerrar}: ConfigDeficitCaloricoProps): J
                 )}
             </div>
 
-            {/* [303A-6] API key centralizada — se configura desde Configuración → Panel IA */}
+            {/* [105A-1] API centralizada — usuarios normales configuran Asistente IA; admin usa env. */}
             <div className="configDeficitSeccion">
-                <h4 className="configDeficitSeccionTitulo">API Key de Groq (IA)</h4>
+                <h4 className="configDeficitSeccionTitulo">Proveedor de IA</h4>
                 <p className="configDeficitSeccionNota">
                     {tieneApiKey
-                        ? 'API Key configurada correctamente desde Configuración → Asistente IA.'
-                        : 'Configura tu API Key de Groq en Configuración → Asistente IA para usar el cálculo por IA.'}
+                        ? 'IA disponible desde Configuración → Asistente IA o desde las variables de entorno del admin.'
+                        : 'Configura Groq o DeepSeek en Configuración → Asistente IA para usar el cálculo por IA.'}
                 </p>
             </div>
 

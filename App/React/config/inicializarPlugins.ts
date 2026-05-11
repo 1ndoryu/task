@@ -9,7 +9,7 @@
  * La activación real se hace desde el ModalPlugins cuando el usuario lo activa.
  */
 
-import {Timer, Utensils, Users, Bot} from 'lucide-react';
+import {Timer, Utensils, Users, Bot, ImageUp} from 'lucide-react';
 import {createElement} from 'react';
 import type {ComponentType} from 'react';
 import {registrarPlugin} from './registroPlugins';
@@ -21,6 +21,7 @@ import {PanelAyuno} from '../components/paneles/PanelAyuno';
 import {PanelDeficitCalorico} from '../components/paneles/PanelDeficitCalorico';
 import {PanelGruposFb} from '../components/paneles/PanelGruposFb';
 import {PanelIA} from '../components/paneles/PanelIA';
+import {PanelEscaladorImagen} from '../components/paneles/PanelEscaladorImagen';
 
 /* Helper para posiciones (reutilizado de inicializarPaneles) */
 function crearPosicionDefecto(
@@ -75,12 +76,12 @@ registrarPanel({
 
 /*
  * Plugin de Déficit Calórico
- * Panel de registro calórico con IA Gemini
+ * Panel de registro calórico con proveedor IA centralizado
  */
 registrarPlugin({
     id: 'deficit-calorico',
     nombre: 'Déficit Calórico',
-    descripcion: 'Registro de calorías con IA (Gemini) y cálculo de TMB',
+    descripcion: 'Registro de calorías con IA y cálculo de TMB',
     icono: createElement(Utensils, {size: 18}),
     version: '1.0.0',
     panelesIds: ['deficit-calorico'],
@@ -123,7 +124,8 @@ registrarPlugin({
     icono: createElement(Users, {size: 18}),
     version: '1.0.0',
     panelesIds: ['gruposFb'],
-    requiereConfiguracion: true
+    requiereConfiguracion: true,
+    soloAdmin: true
 });
 
 /* Registrar panel del plugin de Grupos FB */
@@ -138,14 +140,45 @@ registrarPanel({
     componente: PanelGruposFb as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
     idPaginaMovil: 'gruposFb',
-    manejaAlturaPropia: false
+    manejaAlturaPropia: false,
+    soloAdmin: true
+});
+
+/*
+ * [105A-3] Plugin Escalador de Imagen
+ * Usa Magnific desde backend admin-only para no exponer la API key.
+ */
+registrarPlugin({
+    id: 'escalador-imagen',
+    nombre: 'Escalador de Imagen',
+    descripcion: 'Upscaling admin con Magnific Creative/Precision',
+    icono: createElement(ImageUp, {size: 18}),
+    version: '1.0.0',
+    panelesIds: ['escalador-imagen'],
+    requiereConfiguracion: false,
+    soloAdmin: true
+});
+
+registrarPanel({
+    id: 'escalador-imagen',
+    titulo: 'Escalar imagen',
+    tituloMovil: 'Escalar',
+    icono: createElement(ImageUp, {size: 14}),
+    visiblePorDefecto: false,
+    alturaDefecto: 'auto',
+    posicionDefecto: crearPosicionDefecto([1, 8], [2, 6], [3, 6]),
+    componente: PanelEscaladorImagen as ComponentType<PanelBaseProps>,
+    enNavegacionMovil: false,
+    idPaginaMovil: 'escalador-imagen',
+    manejaAlturaPropia: false,
+    soloAdmin: true
 });
 
 /*
  * [014A-6] Plugin Asistente IA
  * Asistente de IA para planificación de tareas/hábitos por lenguaje natural.
  * Desactivado por defecto — se activa desde la sección Plugins.
- * Requiere configuración (API key de Groq).
+ * Requiere configuración del proveedor IA.
  */
 registrarPlugin({
     id: 'ia-asistente',

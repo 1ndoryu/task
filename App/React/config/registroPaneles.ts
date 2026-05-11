@@ -9,6 +9,7 @@
 
 import type {ReactNode} from 'react';
 import type {DefinicionPanel, ModoColumnas, OrdenPanel} from '../types/paneles';
+import {esUsuarioAdmin} from '../utils/dashboardRuntime';
 
 /* Mapa interno del registro */
 const _registro: Map<string, DefinicionPanel> = new Map();
@@ -62,6 +63,11 @@ export function obtenerPanelOBase(id: string): DefinicionPanel | undefined {
     return _registro.get(id) || _registro.get(obtenerIdBase(id));
 }
 
+export function panelPuedeMostrarse(id: string): boolean {
+    const panel = obtenerPanelOBase(id);
+    return !panel?.soloAdmin || esUsuarioAdmin();
+}
+
 /* Obtener todas las definiciones de paneles */
 export function obtenerTodosPaneles(): DefinicionPanel[] {
     return Array.from(_registro.values());
@@ -105,7 +111,7 @@ export function obtenerPanelesMovil(): Array<{id: string; titulo: string; idPagi
     const paneles: Array<{id: string; titulo: string; idPagina: string}> = [];
 
     _registro.forEach((def, id) => {
-        if (def.enNavegacionMovil) {
+        if (def.enNavegacionMovil && panelPuedeMostrarse(id)) {
             paneles.push({
                 id,
                 titulo: def.tituloMovil || def.titulo,
@@ -128,6 +134,7 @@ export function obtenerTituloPanelMovil(panelId: string): string {
  * para que cualquier panel sea navegable desde móvil (drawer, config barra). */
 export function paginaMovilAPanelId(idPagina: string): string | undefined {
     for (const [panelId, def] of _registro) {
+        if (!panelPuedeMostrarse(panelId)) continue;
         const idPaginaPanel = def.idPaginaMovil || panelId;
         if (idPaginaPanel === idPagina) {
             return panelId;
@@ -140,6 +147,7 @@ export function paginaMovilAPanelId(idPagina: string): string | undefined {
 export function obtenerPaginasMovilValidas(): string[] {
     const paginas: string[] = [];
     _registro.forEach((def, panelId) => {
+        if (!panelPuedeMostrarse(panelId)) return;
         paginas.push(def.idPaginaMovil || panelId);
     });
     return paginas;
@@ -158,6 +166,7 @@ export function obtenerTodosPanelesNavegables(): Array<{id: string; titulo: stri
     const paneles: Array<{id: string; titulo: string; idPagina: string; icono: ReactNode | undefined}> = [];
 
     _registro.forEach((def, id) => {
+        if (!panelPuedeMostrarse(id)) return;
         paneles.push({
             id,
             titulo: def.tituloMovil || def.titulo,

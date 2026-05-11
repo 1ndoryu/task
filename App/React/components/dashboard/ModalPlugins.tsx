@@ -10,7 +10,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Settings} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {Boton} from '../ui/Boton';
-import {obtenerTodosPlugins, obtenerPanelesDePlugin} from '../../config/registroPlugins';
+import {obtenerPluginsVisibles, obtenerPanelesDePlugin, pluginPuedeMostrarse} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {ConfigDeficitCalorico} from './ConfigDeficitCalorico';
@@ -68,7 +68,7 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
     const [configAbierta, setConfigAbierta] = useState<string | null>(null);
 
     const plugins = useMemo(() => {
-        return abierto ? obtenerTodosPlugins() : [];
+        return abierto ? obtenerPluginsVisibles() : [];
     }, [abierto]);
 
     /* Resetear la vista de config al cerrar el modal */
@@ -91,6 +91,8 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
 
     const manejarToggle = useCallback(
         (pluginId: string) => {
+            if (!pluginPuedeMostrarse(pluginId)) return;
+
             const estabaActivo = pluginsActivos.includes(pluginId);
             togglePlugin(pluginId);
 
@@ -113,6 +115,8 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
                 }
             }
 
+            /* [105A-3] Mismo guard que en configuración global: un plugin admin-only
+             * no puede reactivarse si quedó persistido en un navegador no admin. */
             const panelesIds = obtenerPanelesDePlugin(pluginId);
             panelesIds.forEach(panelId => {
                 if (estabaActivo) {

@@ -9,7 +9,7 @@
  * [253A-11] API Controller para Grupos de Facebook
  *
  * Endpoints REST para gestión de grupos detectados por la extensión fb-group-manager.
- * Soporta autenticación dual: cookie WordPress (dashboard) + Bearer token (extensión).
+ * Soporta autenticación dual admin: cookie WordPress + Bearer token de un admin.
  *
  * @package App\Api
  */
@@ -126,14 +126,16 @@ class GruposFbApiController
     /* ────────────────────────────── Autenticación ────────────────────────────── */
 
     /**
-     * Autenticación dual: cookie WordPress O Bearer token.
+     * [105A-3] Autenticación dual restringida a administradores.
+     * El plugin Grupos FB ya no es accesible para usuarios normales aunque conserven
+     * el panel o token en localStorage/configuración antigua.
      * Si es Bearer token, inyecta el user_id en el request para usarlo en callbacks.
      */
     public static function verificarAutenticacion(WP_REST_Request $request): bool
     {
         /* 1. Cookie auth (dashboard) */
         if (is_user_logged_in()) {
-            return true;
+            return current_user_can('manage_options');
         }
 
         /* 2. Bearer token (extensión) */
@@ -145,7 +147,7 @@ class GruposFbApiController
      */
     public static function requiereCookieAuth(): bool
     {
-        return is_user_logged_in();
+        return is_user_logged_in() && current_user_can('manage_options');
     }
 
     /**
@@ -186,6 +188,10 @@ class GruposFbApiController
         }
 
         /* Inyectar user_id para que los callbacks lo usen */
+        if (!user_can((int)$userId, 'manage_options')) {
+            return false;
+        }
+
         $request->set_param('_ext_user_id', (int)$userId);
         return true;
     }

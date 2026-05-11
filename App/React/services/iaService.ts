@@ -6,22 +6,50 @@
  * Fase 2+3: Flujo completo con system prompt, acciones y parsing.
  */
 
-import type {MensajeIA, AccionIA} from '../stores/iaStore';
+import type {MensajeIA, AccionIA, ProveedorIA} from '../stores/iaStore';
 import type {EjecutoresTareasIA} from '../config/accionesIA';
 import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAcciones} from '../config/accionesIA';
+import {esUsuarioAdmin, obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
 
-const URL_BASE_GROQ = 'https://api.groq.com/openai/v1/chat/completions';
+const URLS_PROVIDER: Record<ProveedorIA, string> = {
+    groq: 'https://api.groq.com/openai/v1/chat/completions',
+    deepseek: 'https://api.deepseek.com/chat/completions'
+};
+
+export interface ModeloIA {
+    id: string;
+    nombre: string;
+    proveedor: ProveedorIA;
+}
+
+export const PROVEEDORES_IA: Array<{id: ProveedorIA; nombre: string; descripcion: string}> = [
+    {id: 'groq', nombre: 'Groq', descripcion: 'Modelos rápidos y producción por defecto'},
+    {id: 'deepseek', nombre: 'DeepSeek', descripcion: 'DeepSeek Chat y Reasoner'}
+];
 
 /* [243A-4] Modelos más inteligentes disponibles en Groq (actualizado marzo 2026)
  * Orden: más capaz primero. Fuente: console.groq.com/docs/models */
 export const MODELOS_IA = [
-    {id: 'openai/gpt-oss-120b', nombre: 'GPT-OSS 120B — más inteligente (producción)'},
-    {id: 'moonshotai/kimi-k2-instruct-0905', nombre: 'Kimi K2 — 262K contexto (preview)'},
-    {id: 'meta-llama/llama-4-maverick-17b-128e-instruct', nombre: 'Llama 4 Maverick (preview)'},
-    {id: 'qwen/qwen3-32b', nombre: 'Qwen3 32B (preview)'},
-    {id: 'llama-3.3-70b-versatile', nombre: 'Llama 3.3 70B — rápido (producción)'},
-    {id: 'meta-llama/llama-4-scout-17b-16e-instruct', nombre: 'Llama 4 Scout — ultrarrápido (preview)'}
+    {id: 'openai/gpt-oss-120b', nombre: 'GPT-OSS 120B — más inteligente (Groq)', proveedor: 'groq'},
+    {id: 'moonshotai/kimi-k2-instruct-0905', nombre: 'Kimi K2 — 262K contexto (Groq)', proveedor: 'groq'},
+    {id: 'meta-llama/llama-4-maverick-17b-128e-instruct', nombre: 'Llama 4 Maverick (Groq)', proveedor: 'groq'},
+    {id: 'qwen/qwen3-32b', nombre: 'Qwen3 32B (Groq)', proveedor: 'groq'},
+    {id: 'llama-3.3-70b-versatile', nombre: 'Llama 3.3 70B — rápido (Groq)', proveedor: 'groq'},
+    {id: 'meta-llama/llama-4-scout-17b-16e-instruct', nombre: 'Llama 4 Scout — flash (Groq)', proveedor: 'groq'},
+    {id: 'deepseek-chat', nombre: 'DeepSeek Chat — flash', proveedor: 'deepseek'},
+    {id: 'deepseek-reasoner', nombre: 'DeepSeek Reasoner', proveedor: 'deepseek'}
 ] as const;
+
+export const MODELO_FLASH_POR_PROVEEDOR: Record<ProveedorIA, string> = {
+    groq: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    deepseek: 'deepseek-chat'
+};
+
+export interface ConfigProveedorIA {
+    proveedor: ProveedorIA;
+    apiKey?: string;
+    modelo: string;
+}
 
 /* Mensaje para la API (formato OpenAI-compatible) */
 export interface MensajeAPI {
@@ -36,6 +64,11 @@ export interface RespuestaLLM {
     tokensComplecion: number;
 }
 
+export interface OpcionesLLM {
+    temperature?: number;
+    maxTokens?: number;
+}
+
 /* Estimación simple de tokens (~4 chars = 1 token) */
 export function estimarTokens(texto: string): number {
     return Math.ceil(texto.length / 4);
@@ -47,26 +80,36 @@ export function estimarTokens(texto: string): number {
  */
 export async function enviarMensajeLLM(
     mensajes: MensajeAPI[],
-    apiKey: string,
-    modelo: string,
-    signal?: AbortSignal
+    config: ConfigProveedorIA,
+    signal?: AbortSignal,
+    opciones: OpcionesLLM = {}
 ): Promise<RespuestaLLM> {
-    if (!apiKey) {
-        throw new Error('API Key de Groq no configurada. Ve a configuración del panel IA.');
+    if (!config.apiKey && esUsuarioAdmin()) {
+        return enviarMensajeLLMBackend(mensajes, config, signal, opciones);
     }
 
-    const respuesta = await fetch(URL_BASE_GROQ, {
+    if (!config.apiKey) {
+        throw new Error('API key no configurada. Ve a Configuración → Asistente IA.');
+    }
+
+    const body: Record<string, unknown> = {
+        model: config.modelo,
+        messages: mensajes,
+        temperature: opciones.temperature ?? 0.7
+    };
+    if (config.proveedor === 'groq') {
+        body.max_completion_tokens = opciones.maxTokens ?? 2048;
+    } else {
+        body.max_tokens = opciones.maxTokens ?? 2048;
+    }
+
+    const respuesta = await fetch(URLS_PROVIDER[config.proveedor], {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'Authorization': `Bearer ${config.apiKey}`
         },
-        body: JSON.stringify({
-            model: modelo,
-            messages: mensajes,
-            temperature: 0.7,
-            max_completion_tokens: 2048
-        }),
+        body: JSON.stringify(body),
         signal
     });
 
@@ -95,6 +138,39 @@ export async function enviarMensajeLLM(
     };
 }
 
+async function enviarMensajeLLMBackend(mensajes: MensajeAPI[], config: ConfigProveedorIA, signal?: AbortSignal, opciones: OpcionesLLM = {}): Promise<RespuestaLLM> {
+    const respuesta = await fetch(`${obtenerApiUrlWP()}/ai/chat`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': obtenerNonceWP()
+        },
+        body: JSON.stringify({
+            provider: config.proveedor,
+            model: config.modelo,
+            messages: mensajes,
+            temperature: opciones.temperature ?? 0.7,
+            maxTokens: opciones.maxTokens ?? 2048
+        }),
+        signal
+    });
+
+    const datos = await respuesta.json().catch(() => null) as {success?: boolean; data?: RespuestaLLM; error?: {message?: string}} | null;
+    if (!respuesta.ok || !datos?.success || !datos.data) {
+        throw new Error(datos?.error?.message || `Error del servidor IA (${respuesta.status})`);
+    }
+    return datos.data;
+}
+
+export function obtenerApiKeyParaProveedor(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string): string {
+    return proveedor === 'deepseek' ? apiKeyDeepseek : apiKeyGroq;
+}
+
+export function proveedorTieneCredenciales(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string): boolean {
+    return Boolean(obtenerApiKeyParaProveedor(proveedor, apiKeyGroq, apiKeyDeepseek)) || esUsuarioAdmin();
+}
+
 /*
  * [233A-69] Fase 2+3: Resultado completo del flujo IA
  */
@@ -110,15 +186,15 @@ export interface ResultadoMensajeIA {
  */
 export async function procesarMensajeIA(
     mensajes: MensajeIA[],
-    apiKey: string,
-    modelo: string,
+    config: ConfigProveedorIA,
     preferencias: string,
+    promptSistema: string,
     ejecutoresTareas: EjecutoresTareasIA,
     signal?: AbortSignal
 ): Promise<ResultadoMensajeIA> {
     /* Generar system prompt con contexto actual de tareas/hábitos */
     const contexto = generarContexto(ejecutoresTareas.tareas);
-    const systemPrompt = generarSystemPrompt(contexto, preferencias);
+    const systemPrompt = generarSystemPrompt(contexto, preferencias, promptSistema);
 
     /* Construir historial para la API (últimos 20 mensajes) */
     const historial: MensajeAPI[] = [
@@ -130,7 +206,7 @@ export async function procesarMensajeIA(
     ];
 
     /* Llamar al LLM */
-    const respuesta = await enviarMensajeLLM(historial, apiKey, modelo, signal);
+    const respuesta = await enviarMensajeLLM(historial, config, signal);
 
     /* Parsear respuesta JSON con acciones */
     const parsed = parsearRespuestaLLM(respuesta.contenido);

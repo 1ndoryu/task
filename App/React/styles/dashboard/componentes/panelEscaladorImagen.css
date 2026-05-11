@@ -1,0 +1,86 @@
+/* [105A-3] Panel admin para Magnific Upscaler.
+ * La key vive en backend; el panel solo envía opciones y consulta estado. */
+
+.panelEscaladorImagen {
+    display: flex;
+    flex-direction: column;
+}
+
+.escaladorImagenContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSmMd);
+    padding: var(--dashboard-espacioMd);
+    overflow: auto;
+}
+
+.escaladorImagenPreview {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--dashboard-radioMedio);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.escaladorImagenPreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.escaladorImagenGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dashboard-espacioSm);
+}
+
+.escaladorImagenAjustes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--dashboard-espacioSm);
+}
+
+.escaladorImagenAjuste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    min-width: 0;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.escaladorImagenError {
+    padding: var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioMedio);
+    background: var(--dashboard-estadoErrorFondo);
+    color: var(--dashboard-estadoError);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.escaladorImagenResultado {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    color: var(--dashboard-acento);
+    text-decoration: none;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+@media (max-width: 480px) {
+    .escaladorImagenGrid,
+    .escaladorImagenAjustes {
+        grid-template-columns: 1fr;
+    }
+}
+
+.escaladorImagenToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}

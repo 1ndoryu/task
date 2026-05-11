@@ -3,6 +3,9 @@
     "private": true,
     "version": "1.0.0",
     "description": "Tipos y dependencias para componentes React en App/React",
+    "scripts": {
+        "type-check": "tsc --noEmit --project tsconfig.json"
+    },
     "overrides": {
         "tar": ">=7.5.7"
     },
