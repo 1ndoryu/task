@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-11 — Plugins simples no deben requerir generador de props manual
+
+**Patrón del error:** Escalador de Imagen estaba registrado como plugin y panel, y al activarlo se actualizaba la visibilidad del layout. Pero `DashboardGrid` rechazaba cualquier panel sin entrada específica en `GENERADORES_PROPS`, aunque el componente solo necesitara `PanelBaseProps`.
+
+**Lección:** En una arquitectura extensible, el registro debe soportar el caso simple por defecto. Un plugin que solo usa `renderHandleArrastre` y `handleMinimizar` no debe obligar a tocar un mapa central adicional. Los mapas específicos son para props especiales, no para permitir render básico.
+
+**Fix:** `generarPropsPanelBase()` y `obtenerGeneradorPropsPanel()` devuelven props base cuando no existe generador específico, dejando `DashboardGrid` compatible con plugins simples.
+
 ## 2026-05-10 — Solo ocultar UI no protege plugins admin
 
 **Patrón del error:** Grupos FB podía ocultarse en React, pero los endpoints seguían aceptando usuarios logueados o tokens Bearer sin comprobar `manage_options`. Un panel sensible persistido en localStorage también podía reaparecer si solo se filtraba el menú.

@@ -12,7 +12,7 @@ import {obtenerPanelOBase, panelManejaAlturaPropia, paginaMovilAPanelId, obtener
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import {useDashboardGrid, GENERADORES_PROPS} from '../../hooks/dashboard/useDashboardGrid';
+import {useDashboardGrid, obtenerGeneradorPropsPanel} from '../../hooks/dashboard/useDashboardGrid';
 
 /* Tipo para pages móviles - ahora dinámico desde el registro */
 type PaginaMovil = string;
@@ -46,11 +46,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         const handleMinimizarElement = esMovil ? <></> : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
         /* [263A-3] Buscar generador por ID exacto primero, luego por base */
-        const generadorProps = GENERADORES_PROPS[panelId] || GENERADORES_PROPS[baseId];
-        if (!generadorProps) {
-            console.warn(`No hay generador de props para panel "${panelId}"`);
-            return null;
-        }
+        const generadorProps = obtenerGeneradorPropsPanel(panelId, baseId);
 
         /* Generar props según el tipo de panel - any necesario: dispatch dinámico por registro de paneles */
         // sentinel-disable-next-line any-type-explicito — props varían por tipo de panel via generadorProps

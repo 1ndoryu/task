@@ -204,7 +204,6 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
 
     private function leerEnv(string $name): string
     {
-        $value = $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name);
-        return is_string($value) ? trim($value) : '';
+        return EnvService::get($name);
     }
 }

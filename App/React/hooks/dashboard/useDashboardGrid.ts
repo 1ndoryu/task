@@ -14,7 +14,7 @@ import type {Habito} from '../../types/dashboard';
 import type {PropsContextoPaneles} from './generadoresPropsPanel';
 
 /* Re-exportar para que DashboardGrid los use sin cambiar su import */
-export {GENERADORES_PROPS} from './generadoresPropsPanel';
+export {GENERADORES_PROPS, obtenerGeneradorPropsPanel} from './generadoresPropsPanel';
 
 /*
  * Hook principal que encapsula la lógica del DashboardGrid

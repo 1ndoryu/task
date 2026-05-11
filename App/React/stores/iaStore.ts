@@ -23,6 +23,7 @@ export interface AccionIA {
     ejecutada?: boolean;
     resultado?: string;
     pendienteConfirmacion?: boolean;
+    accionExternaId?: number;
 }
 
 /* Mensaje individual del chat */

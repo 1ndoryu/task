@@ -36,6 +36,14 @@ export interface PropsContextoPaneles {
     limites: DashboardCompletoRetorno['limites'];
 }
 
+export function generarPropsPanelBase(
+    _ctx: PropsContextoPaneles,
+    renderHandleArrastre: (titulo?: string) => JSX.Element,
+    handleMinimizar: JSX.Element
+) {
+    return {renderHandleArrastre, handleMinimizar};
+}
+
 export function generarPropsPanelEjecucion(
     ctx: PropsContextoPaneles,
     renderHandleArrastre: (titulo?: string) => JSX.Element,
@@ -312,3 +320,7 @@ export const GENERADORES_PROPS: Record<string, Function> = {
     /* [253A-11] Panel Grupos FB — solo necesita props base */
     gruposFb: generarPropsPanelGruposFb
 };
+
+export function obtenerGeneradorPropsPanel(panelId: string, baseId: string): Function {
+    return GENERADORES_PROPS[panelId] || GENERADORES_PROPS[baseId] || generarPropsPanelBase;
+}

@@ -16,4 +16,4 @@
 
 ## Tareas pendientes
 
-(vacío)
+(vacío; prerrequisitos externos de OpenClaw/wacli documentados en App/Agente/planes/plan-chat-agente-opencraw-2026-05-10.md)

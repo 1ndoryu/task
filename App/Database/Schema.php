@@ -6,9 +6,9 @@ class Schema
 {
     /**
      * Versión actual de la base de datos
-     * v1.0.13: Tabla de grupos de Facebook para extensión fb-group-manager
+    * v1.0.14: Tabla de acciones externas del agente con aprobación/auditoría
      */
-    public const DB_VERSION = '1.0.13';
+    public const DB_VERSION = '1.0.14';
 
     /**
      * Nombre de la opción donde guardamos la versión instalada
@@ -445,6 +445,27 @@ class Schema
             KEY fecha_creacion (fecha_creacion)
         ) $charset_collate;";
 
+        $table_agent_actions = $wpdb->prefix . 'glory_agent_actions';
+        $sql_agent_actions = "CREATE TABLE $table_agent_actions (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            tipo varchar(80) NOT NULL,
+            titulo varchar(255) NOT NULL,
+            estado varchar(50) NOT NULL DEFAULT 'requiere_aprobacion',
+            requiere_aprobacion tinyint(1) NOT NULL DEFAULT 1,
+            payload longtext DEFAULT NULL,
+            resultado longtext DEFAULT NULL,
+            aprobado_por bigint(20) DEFAULT NULL,
+            fecha_creacion datetime DEFAULT CURRENT_TIMESTAMP,
+            fecha_aprobacion datetime DEFAULT NULL,
+            fecha_ejecucion datetime DEFAULT NULL,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id),
+            KEY tipo (tipo),
+            KEY estado (estado),
+            KEY fecha_creacion (fecha_creacion)
+        ) $charset_collate;";
+
         dbDelta($sql_habitos);
         dbDelta($sql_equipos);
         dbDelta($sql_notificaciones);
@@ -459,6 +480,7 @@ class Schema
         dbDelta($sql_habitos_historial);
         dbDelta($sql_backups);
         dbDelta($sql_feedback);
+        dbDelta($sql_agent_actions);
 
         /* [253A-11] Tabla de Grupos de Facebook (extensión fb-group-manager)
          * Almacena grupos detectados por la extensión Chrome.

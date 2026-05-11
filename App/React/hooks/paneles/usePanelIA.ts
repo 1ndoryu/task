@@ -9,6 +9,7 @@
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
 import {obtenerApiKeyParaProveedor, procesarMensajeIA, proveedorTieneCredenciales} from '../../services/iaService';
+import {aprobarAccionAgente} from '../../services/agentActionsService';
 import {ejecutarAccionDestructiva} from '../../config/accionesIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
@@ -103,11 +104,35 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
 
     /* [303A-11] Confirmar acción destructiva pendiente (eliminar tarea/hábito).
      * Ejecuta la eliminación real y actualiza el mensaje en el chat. */
-    const confirmarAccion = useCallback((mensajeId: string, indiceAccion: number) => {
+    const confirmarAccion = useCallback(async (mensajeId: string, indiceAccion: number) => {
         const mensaje = useIAStore.getState().mensajes.find(m => m.id === mensajeId);
         if (!mensaje?.acciones?.[indiceAccion]) return;
         const accion = mensaje.acciones[indiceAccion];
         if (!accion.pendienteConfirmacion) return;
+
+        if (accion.accionExternaId) {
+            try {
+                const accionEjecutada = await aprobarAccionAgente(accion.accionExternaId);
+                const nuevasAcciones = [...mensaje.acciones];
+                nuevasAcciones[indiceAccion] = {
+                    ...accion,
+                    ejecutada: accionEjecutada.estado === 'completado',
+                    resultado: accionEjecutada.estado === 'completado' ? 'Acción externa ejecutada' : `Estado: ${accionEjecutada.estado}`,
+                    pendienteConfirmacion: false
+                };
+                actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+            } catch (err) {
+                const nuevasAcciones = [...mensaje.acciones];
+                nuevasAcciones[indiceAccion] = {
+                    ...accion,
+                    ejecutada: false,
+                    resultado: err instanceof Error ? err.message : 'Error ejecutando acción externa',
+                    pendienteConfirmacion: false
+                };
+                actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+            }
+            return;
+        }
 
         const resultado = ejecutarAccionDestructiva(
             {tipo: accion.tipo, parametros: accion.parametros},

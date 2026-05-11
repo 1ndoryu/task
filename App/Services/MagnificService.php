@@ -122,11 +122,9 @@ class MagnificService
 
     private function obtenerApiKey(): string
     {
-        foreach (['MAGNIFIC_API_KEY', 'x-magnific-api-key', 'MAGNIFIC_API', 'MAGNIFIC_KEY'] as $name) {
-            $value = $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name);
-            if (is_string($value) && trim($value) !== '') {
-                return trim($value);
-            }
+        $value = EnvService::first(['MAGNIFIC_API_KEY', 'x-magnific-api-key', 'MAGNIFIC_API', 'MAGNIFIC_KEY']);
+        if ($value !== '') {
+            return $value;
         }
 
         throw new \RuntimeException('MAGNIFIC_API_KEY no está configurada en el entorno.');

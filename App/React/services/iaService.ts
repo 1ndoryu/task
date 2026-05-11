@@ -214,13 +214,14 @@ export async function procesarMensajeIA(
     /* Ejecutar acciones si hay */
     let accionesResultado: AccionIA[] = [];
     if (parsed.acciones.length > 0) {
-        const resultados = ejecutarAcciones(parsed.acciones, ejecutoresTareas);
+        const resultados = await ejecutarAcciones(parsed.acciones, ejecutoresTareas);
         accionesResultado = resultados.map((r, i) => ({
             tipo: parsed.acciones[i].tipo,
             parametros: parsed.acciones[i].parametros,
             ejecutada: r.exito,
             resultado: r.descripcion,
-            pendienteConfirmacion: r.pendienteConfirmacion
+            pendienteConfirmacion: r.pendienteConfirmacion,
+            accionExternaId: r.accionExternaId
         }));
     }
 

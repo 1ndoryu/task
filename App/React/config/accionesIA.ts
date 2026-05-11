@@ -9,6 +9,7 @@
 
 import type {DatosEdicionTarea, Tarea, Habito} from '../types/dashboard';
 import {useHabitosStore} from '../stores/habitosStore';
+import {proponerWhatsapp} from '../services/agentActionsService';
 
 /* Ejecutores de tareas — proveídos por el dashboard (React hooks, no Zustand) */
 export interface EjecutoresTareasIA {
@@ -37,6 +38,7 @@ export interface ResultadoAccion {
     exito: boolean;
     descripcion: string;
     pendienteConfirmacion?: boolean;
+    accionExternaId?: number;
 }
 
 /*
@@ -114,6 +116,7 @@ ACCIONES DISPONIBLES (incluir en el array "acciones" cuando corresponda):
 - {"tipo": "crear_habito", "parametros": {"nombre": "nombre", "importancia": "Muy Alta|Alta|Media|Baja", "tags": ["tag"]}}
 - {"tipo": "completar_habito", "parametros": {"id": 456}}
 - {"tipo": "eliminar_habito", "parametros": {"id": 456}}
+- {"tipo": "proponer_whatsapp", "parametros": {"mensaje": "texto", "to": "opcional número/JID"}}
 
 REGLAS:
 - Si no necesitas ejecutar acciones, envía "acciones": [].
@@ -122,6 +125,8 @@ REGLAS:
 - Responde siempre en español.
 - NUNCA uses eliminar_tarea o eliminar_habito a menos que el usuario haya pedido EXPLÍCITAMENTE borrar o eliminar algo. Si el usuario dice "limpiar", "organizar" o "arreglar", NO elimines — pregunta primero qué quiere hacer con cada elemento.
 - Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
+- proponer_whatsapp NO envía el mensaje: crea una acción externa pendiente para que el usuario la apruebe en la interfaz.
+- Solo usa proponer_whatsapp cuando el usuario pida enviar o programar un mensaje de WhatsApp.
 ${promptSistema ? `\nINSTRUCCIONES PERSONALIZADAS DEL SISTEMA:\n${promptSistema}` : ''}
 ${preferencias ? `\nPREFERENCIAS DEL USUARIO:\n${preferencias}` : ''}
 ${contexto}`;
@@ -168,7 +173,7 @@ export function parsearRespuestaLLM(contenido: string): RespuestaIA {
  * Ejecutar acciones recibidas del LLM
  * Valida cada acción antes de ejecutarla y retorna resultados
  */
-export function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: EjecutoresTareasIA): ResultadoAccion[] {
+export async function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: EjecutoresTareasIA): Promise<ResultadoAccion[]> {
     const resultados: ResultadoAccion[] = [];
     const storeHabitos = useHabitosStore.getState();
 
@@ -258,6 +263,24 @@ export function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: Ejecut
                     /* [303A-11] Las eliminaciones requieren confirmación — no se ejecutan directamente */
                     const habito = storeHabitos.habitos.find(h => h.id === id);
                     resultados.push({tipo: accion.tipo, exito: false, descripcion: `Eliminar "${habito?.nombre || `#${id}`}" — pendiente de confirmación`, pendienteConfirmacion: true});
+                    break;
+                }
+                case 'proponer_whatsapp': {
+                    const mensaje = String(accion.parametros.mensaje || accion.parametros.message || '').trim();
+                    const to = accion.parametros.to ? String(accion.parametros.to) : undefined;
+                    if (!mensaje) {
+                        resultados.push({tipo: accion.tipo, exito: false, descripcion: 'Mensaje WhatsApp vacío'});
+                        break;
+                    }
+                    const propuesta = await proponerWhatsapp(mensaje, to);
+                    const destino = String(propuesta.payload?.toMasked || 'destinatario configurado');
+                    resultados.push({
+                        tipo: accion.tipo,
+                        exito: false,
+                        descripcion: `WhatsApp a ${destino} — pendiente de aprobación`,
+                        pendienteConfirmacion: true,
+                        accionExternaId: propuesta.id
+                    });
                     break;
                 }
                 default:
