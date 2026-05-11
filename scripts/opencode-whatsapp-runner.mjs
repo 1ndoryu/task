@@ -246,14 +246,20 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs}) {
             reject(Object.assign(error, {output: getOutput(), session_id: sessionId}));
         });
 
-        child.on('exit', exitCode => {
+        /* [115A-16b] Usar 'close' en lugar de 'exit': el evento 'exit' dispara cuando
+         * el proceso termina pero los buffers de stdout/stderr pueden no haberse
+         * vaciado todavia. 'close' garantiza que todos los streams cerraron y toda
+         * la data (incluidos los marcadores del resumen) ya fue emitida como 'data'. */
+        let exitCodeCapture = 0;
+        child.on('exit', code => { exitCodeCapture = code ?? 0; });
+        child.on('close', () => {
             clearTimeout(timeout);
             const output = getOutput();
-            if (exitCode === 0) {
+            if (exitCodeCapture === 0) {
                 resolve({output, session_id: sessionId});
                 return;
             }
-            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCode}.`), {output, session_id: sessionId}));
+            reject(Object.assign(new Error(`OpenCode finalizo con exit ${exitCodeCapture}.`), {output, session_id: sessionId}));
         });
     });
 }
