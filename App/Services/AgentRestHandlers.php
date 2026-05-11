@@ -71,6 +71,23 @@ class AgentRestHandlers
         }
     }
 
+    /* [106A] Actualiza acciones de un mensaje de chat (PATCH). Permite que el frontend
+     * persista el estado de confirmación/rechazo de acciones tras el remount del panel. */
+    public static function actualizarAccionesChat(\WP_REST_Request $request): \WP_REST_Response
+    {
+        try {
+            $id = (int)$request->get_param('id');
+            $json = self::json($request);
+            if (!isset($json['acciones']) || !is_array($json['acciones'])) {
+                return self::error('El campo acciones es obligatorio y debe ser un array.', 'agent_chat_update_invalid', 400);
+            }
+            $mensaje = (new AgentChatService())->actualizarAcciones($id, get_current_user_id(), $json['acciones']);
+            return self::ok(['mensaje' => $mensaje]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'agent_chat_update_error', 500);
+        }
+    }
+
     public static function buscarResearch(\WP_REST_Request $request): \WP_REST_Response
     {
         try {

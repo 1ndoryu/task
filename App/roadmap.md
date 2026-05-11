@@ -16,4 +16,5 @@
 
 ## Tareas pendientes
 
-(sin tareas pendientes)
+- [ ] WhatsApp real: instalar wacli en el servidor (Docker) y configurar `WACLI_BIN` + `WACLI_ACCOUNT` en Coolify envs. Ver instrucciones en Agente/documentacion/ia/.
+- [ ] Búsqueda web: implementar `WebResearchProvider` (Serper/DuckDuckGo) que implemente `ResearchProviderInterface`; requiere `SERPER_API_KEY` env.

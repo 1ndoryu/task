@@ -9,7 +9,7 @@
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
 import {obtenerApiKeyParaProveedor, procesarMensajeIA, proveedorTieneCredenciales} from '../../services/iaService';
-import {aprobarAccionAgente, guardarMensajeAgente, limpiarMensajesAgente, listarMensajesAgente} from '../../services/agentActionsService';
+import {actualizarAccionesMensajeAgente, aprobarAccionAgente, guardarMensajeAgente, limpiarMensajesAgente, listarMensajesAgente} from '../../services/agentActionsService';
 import {ejecutarAccionDestructiva} from '../../config/accionesIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
@@ -65,12 +65,14 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
         listarMensajesAgente(sessionId, controller.signal)
             .then(mensajesPersistidos => {
                 if (controller.signal.aborted || mensajesPersistidos.length === 0) return;
+                /* [106A] _dbId se almacena para poder actualizar acciones en BD tras confirm/rechazo */
                 setMensajes(mensajesPersistidos.map(mensaje => ({
                     id: `persistido-${mensaje.id}`,
                     rol: mensaje.rol,
                     contenido: mensaje.contenido,
                     acciones: Array.isArray(mensaje.acciones) ? mensaje.acciones as MensajeIA['acciones'] : undefined,
-                    timestamp: mensaje.fechaCreacion ? Date.parse(mensaje.fechaCreacion) : Date.now()
+                    timestamp: mensaje.fechaCreacion ? Date.parse(mensaje.fechaCreacion) : Date.now(),
+                    _dbId: mensaje.id
                 })));
             })
             .catch(err => {
@@ -107,9 +109,10 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             timestamp: Date.now()
         };
         agregarMensaje(mensajeUsuario);
-        guardarMensajeAgente({sessionId, rol: 'usuario', contenido: texto}).catch(err => {
-            setError(err instanceof Error ? err.message : 'Error guardando mensaje IA');
-        });
+        /* [106A] _dbId del mensaje de usuario para consistencia de sesión */
+        guardarMensajeAgente({sessionId, rol: 'usuario', contenido: texto})
+            .then(persistido => { actualizarMensaje(mensajeUsuario.id, {_dbId: persistido.id}); })
+            .catch(err => { setError(err instanceof Error ? err.message : 'Error guardando mensaje IA'); });
         setEnviando(true);
         refAbort.current = new AbortController();
 
@@ -135,15 +138,17 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                 timestamp: Date.now()
             };
             agregarMensaje(mensajeAsistente);
+            /* [106A] Guardamos _dbId del mensaje asistente para poder actualizar acciones en BD
+             * cuando el usuario confirme/rechace una acción pendiente de confirmación. */
             guardarMensajeAgente({
                 sessionId,
                 rol: 'asistente',
                 contenido: resultado.contenido,
                 acciones: resultado.acciones,
                 tokens: resultado.tokensUsados
-            }).catch(err => {
-                setError(err instanceof Error ? err.message : 'Error guardando respuesta IA');
-            });
+            })
+                .then(persistido => { actualizarMensaje(mensajeAsistente.id, {_dbId: persistido.id}); })
+                .catch(err => { setError(err instanceof Error ? err.message : 'Error guardando respuesta IA'); });
             incrementarTokens(resultado.tokensUsados);
         } catch (err) {
             if (err instanceof Error && err.name === 'AbortError') return;
@@ -187,6 +192,10 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                     pendienteConfirmacion: false
                 };
                 actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+                /* [106A] Persistir el estado confirmado en BD para que no revierta al re-montar */
+                if (mensaje._dbId) {
+                    actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
+                }
             } catch (err) {
                 const nuevasAcciones = [...mensaje.acciones];
                 nuevasAcciones[indiceAccion] = {
@@ -196,6 +205,9 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                     pendienteConfirmacion: false
                 };
                 actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+                if (mensaje._dbId) {
+                    actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
+                }
             }
             return;
         }
@@ -213,6 +225,10 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             pendienteConfirmacion: false
         };
         actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+        /* [106A] Persistir el estado de confirm/rechazo en BD para que no revierta al re-montar */
+        if (mensaje._dbId) {
+            actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
+        }
     }, [ejecutoresTareas, actualizarMensaje]);
 
     /* [303A-11] Rechazar acción destructiva pendiente */
@@ -228,6 +244,10 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             pendienteConfirmacion: false
         };
         actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
+        /* [106A] Persistir rechazo en BD para que no revierta al re-montar el panel */
+        if (mensaje._dbId) {
+            actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
+        }
     }, [actualizarMensaje]);
 
     return {

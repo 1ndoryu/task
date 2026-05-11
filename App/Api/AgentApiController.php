@@ -83,6 +83,13 @@ class AgentApiController
             'permission_callback' => $admin,
         ]);
 
+        register_rest_route($ns, '/agent/chat/messages/(?P<id>\d+)', [
+            'methods' => 'PATCH',
+            'callback' => [AgentRestHandlers::class, 'actualizarAccionesChat'],
+            'permission_callback' => $auth,
+            'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
+        ]);
+
         register_rest_route($ns, '/agent/actions/(?P<id>\d+)/approve', [
             'methods' => 'POST',
             'callback' => [AgentRestHandlers::class, 'aprobarAccion'],

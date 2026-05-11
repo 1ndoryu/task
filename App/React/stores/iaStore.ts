@@ -33,6 +33,8 @@ export interface MensajeIA {
     contenido: string;
     acciones?: AccionIA[];
     timestamp: number;
+    /* [106A] id del registro en BD; permite actualizar acciones en backend tras confirmar/rechazar */
+    _dbId?: number;
 }
 
 /* Estado persistente (configuración) */

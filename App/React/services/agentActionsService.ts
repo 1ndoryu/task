@@ -101,6 +101,16 @@ export async function guardarMensajeAgente(params: {
     return data.mensaje;
 }
 
+/* [106A] Actualiza el campo `acciones` de un mensaje ya persistido. Necesario para que
+ * confirmar/rechazar acciones pendientes sobreviva un re-mount del panel. */
+export async function actualizarAccionesMensajeAgente(id: number, acciones: unknown[]): Promise<MensajeAgentePersistido> {
+    const data = await requestAgente<{mensaje: MensajeAgentePersistido}>(`/agent/chat/messages/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({acciones})
+    });
+    return data.mensaje;
+}
+
 export async function limpiarMensajesAgente(sessionId: string): Promise<number> {
     const data = await requestAgente<{deleted: number}>(`/agent/chat/messages?sessionId=${encodeURIComponent(sessionId)}`, {method: 'DELETE'});
     return data.deleted;

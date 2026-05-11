@@ -70,6 +70,28 @@ class AgentChatService
         return array_reverse($mensajes);
     }
 
+    /* [106A] Actualiza el JSON de acciones de un mensaje existente.
+     * Permite persistir el estado de acciones confirmadas/rechazadas en el panel IA. */
+    public function actualizarAcciones(int $id, int $userId, array $acciones): array
+    {
+        global $wpdb;
+
+        $accionesJson = $this->codificarJson($acciones, self::MAX_ACTIONS_LENGTH);
+        $actualizado = $wpdb->update(
+            $this->tabla,
+            ['acciones' => $accionesJson],
+            ['id' => $id, 'user_id' => $userId],
+            ['%s'],
+            ['%d', '%d']
+        );
+
+        if ($actualizado === false) {
+            throw new \RuntimeException('No se pudo actualizar las acciones del mensaje del agente.');
+        }
+
+        return $this->obtener($id) ?? [];
+    }
+
     public function limpiarSesion(int $userId, string $sessionId): int
     {
         global $wpdb;
