@@ -18,12 +18,12 @@ function printHelp() {
     console.log(`Usage:
   npm run opencode:runner -- run --project glorytemplate --message "Fix X" [--commit] [--deploy] [--dry-run]
     npm run opencode:runner -- poll-once --api-url https://task.nakomi.studio/wp-json/glory/v1 [--dry-run]
+    npm run opencode:runner -- loop --api-url https://task.nakomi.studio/wp-json/glory/v1 [--interval 15]
 
 Options:
   --project <id>       Project key from config/opencode-projects.json.
   --message <text>     User request to send to OpenCode.
   --message-file <p>   Read request text from a file.
-  --model <id>         Override OpenCode model, e.g. opencode/gpt-5.3-codex.
   --agent <id>         Override OpenCode agent, default from project config.
   --attach <url>       Attach opencode run to an existing opencode serve URL.
   --commit             Ask the agent to validate, commit and push if changes are made.
@@ -34,6 +34,7 @@ Options:
 Polling options:
     --api-url <url>      REST namespace base, e.g. https://site/wp-json/glory/v1.
     --secret <value>     Runner HMAC secret. Defaults to OPENCODE_RUNNER_SECRET.
+    --interval <s>       Seconds between polls in loop mode. Default: 15.
 `);
 }
 
@@ -364,6 +365,27 @@ async function pollOnce(options) {
     }
 }
 
+/* [115A-15] Modo loop: poll continuo cada N segundos.
+ * Queda corriendo hasta Ctrl+C. Solo ejecuta un job a la vez (no paralelo).
+ * Si OpenCode tarda mucho, el siguiente poll se hace en cuanto termina. */
+async function pollLoop(options) {
+    const intervalSec = Math.max(5, Number(options.interval) || 15);
+    const apiUrl = normalizeApiUrl(options);
+    const secret = getRunnerSecret(options);
+    console.error(`[runner] Loop activo — polling cada ${intervalSec}s. Ctrl+C para detener.`);
+    console.error(`[runner] API: ${apiUrl}`);
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        try {
+            await pollOnce(options);
+        } catch (error) {
+            console.error(`[runner] Error en poll: ${error.message}`);
+        }
+        await new Promise(resolve => setTimeout(resolve, intervalSec * 1000));
+    }
+}
+
 async function main() {
     const options = parseArgs(process.argv.slice(2));
     const command = options._[0] || 'help';
@@ -379,7 +401,11 @@ async function main() {
         await pollOnce(options);
         return;
     }
-    throw new Error(`Comando no soportado: ${command}. Usa run o poll-once.`);
+    if (command === 'loop') {
+        await pollLoop(options);
+        return;
+    }
+    throw new Error(`Comando no soportado: ${command}. Usa run, poll-once o loop.`);
 }
 
 main().catch(error => {

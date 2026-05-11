@@ -197,7 +197,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
-- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"modelo\": \"opencode/gpt-5.3-codex\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false}}
+- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido.
@@ -211,7 +211,7 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- solicitar_opencode: úsala cuando el usuario pida cambios de código, investigación técnica, leer roadmap o archivos, commit, push, PR o deploy. El proyecto siempre es "glorytemplate" salvo que el usuario especifique otro. La rama por defecto es "glory-react-logic"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp, el runner ejecuta sin aprobación adicional; NO le digas al usuario que necesita aprobar algo. Solo incluye deploy=true si el usuario lo pide explícitamente.{$bloqueMemoria}{$bloqueMaestro}
+- solicitar_opencode: úsala cuando el usuario pida cambios de código, investigación técnica, leer roadmap o archivos, commit, push, PR o deploy. El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp, el runner ejecuta sin aprobación adicional; NO le digas al usuario que necesita aprobar algo. Solo incluye deploy=true si el usuario lo pide explícitamente.{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
