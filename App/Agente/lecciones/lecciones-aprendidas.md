@@ -8,6 +8,14 @@
 
 **Fix:** `AgentChatProcessor::normalizarAccionesDesdeMensajeUsuario()` antepone el texto original de WhatsApp a `solicitar_opencode.prompt`. El scheduler de hábitos también resuelve recordatorios dinámicos en runtime para no depender del texto genérico generado al crearlos.
 
+## 2026-05-11 — No pasar prompts multilinea a wrappers npm con shell:true
+
+**Patrón del error:** El runner construía un prompt correcto, pero lo enviaba a `opencode run` con `spawn(opencode, args, {shell:true})`. En Windows eso pasa por `cmd.exe` y los argumentos no se escapan; el propio Node avisaba con `[DEP0190]`. El resultado fue que OpenCode recibía un prompt roto y actuaba sobre contexto de Supermemory en vez de la tarea real.
+
+**Lección:** Para prompts multilinea o texto controlado por usuario, nunca usar wrappers `.cmd` con `shell:true`. Resolver el ejecutable real del paquete npm o invocarlo con `node` sin shell, de forma que el prompt viaje como un unico argv.
+
+**Fix:** `scripts/opencode-whatsapp-runner.mjs` resuelve `opencode` en Windows a `node_modules/opencode-ai/bin/opencode` y ejecuta `process.execPath` sin shell.
+
 ## 2026-05-11 — WhatsApp no debe ejecutar agentes de codigo directo desde produccion
 
 **Patrón del error:** Un webhook WhatsApp en produccion puede recibir una orden valida, pero el codigo que debe cambiar vive en una PC local y requiere credenciales, Git, OpenCode y permisos de deploy. Intentar que WordPress ejecute eso directamente mezcla fronteras de red, secretos y produccion.

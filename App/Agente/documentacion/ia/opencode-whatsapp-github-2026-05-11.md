@@ -12,6 +12,7 @@
 - Modelo activo para el runner: `opencode/deepseek-v4-flash-free`, definido en `opencode.jsonc`, el agente y `config/opencode-projects.json`.
 - El runner local funciona en modo `loop` contra `https://task.nakomi.studio/wp-json/glory/v1` y reclama jobs `opencode_job` via HMAC.
 - Los instruction files `.github/instructions/*.md` con `applyTo: '**'` tambien son visibles para OpenCode; `test.instructions.md` contiene excepcion explicita para `whatsapp-code` y prompts con `=== TAREA A EJECUTAR ===`.
+- En Windows el runner no debe invocar `opencode.cmd` con `shell: true`: resuelve el wrapper npm a `node_modules/opencode-ai/bin/opencode` y ejecuta `node` sin shell para preservar prompts multilinea.
 
 ## Arquitectura elegida
 1. WhatsApp entra por el webhook existente y `AgentChatProcessor`.
@@ -85,3 +86,4 @@ Para usar GitHub:
 - Riesgo: deploy directo inseguro. Mitigacion: agente y config bloquean SSH/docker/scp y documentan `coolify-manager-rs`.
 - Riesgo: secretos en prompts/logs. Mitigacion: `.env` denegado en config y runner no imprime auth.
 - Riesgo: MemPalace o contexto del chatbot reemplaza la tarea real al generar `solicitar_opencode.prompt`. Mitigacion: `AgentChatProcessor` antepone siempre el mensaje original de WhatsApp al prompt que entra al job, dejando cualquier interpretacion del LLM como contexto secundario.
+- Riesgo: Windows `cmd.exe` rompe prompts multilinea al pasar argumentos con `shell: true`. Mitigacion: `scripts/opencode-whatsapp-runner.mjs` ejecuta OpenCode via `node .../opencode` sin shell.

@@ -155,11 +155,42 @@ function buildPrompt({message, projectId, project, commitRequested, deployReques
     return lines.join('\n');
 }
 
-function assertOpencodeAvailable(opencodeBin) {
-    /* shell: true es necesario en Windows donde los binarios npm son .cmd wrappers */
-    const result = spawnSync(opencodeBin, ['--version'], {encoding: 'utf8', shell: true});
+function resolveOpencodeCommand(opencodeBin) {
+    if (process.platform !== 'win32') {
+        return {command: opencodeBin, argsPrefix: []};
+    }
+
+    const rutas = [];
+    if (path.isAbsolute(opencodeBin) && existsSync(opencodeBin)) {
+        rutas.push(opencodeBin);
+    } else {
+        const where = spawnSync('where.exe', [opencodeBin], {encoding: 'utf8'});
+        if (where.status === 0) {
+            rutas.push(...(where.stdout || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean));
+        }
+    }
+
+    for (const ruta of rutas) {
+        if (ruta.toLowerCase().endsWith('.exe')) {
+            return {command: ruta, argsPrefix: []};
+        }
+
+        const npmBin = path.join(path.dirname(ruta), 'node_modules', 'opencode-ai', 'bin', 'opencode');
+        if (existsSync(npmBin)) {
+            return {command: process.execPath, argsPrefix: [npmBin]};
+        }
+    }
+
+    if (rutas.length > 0) {
+        throw new Error(`OpenCode se encontro como wrapper de Windows (${rutas[0]}), pero no se pudo resolver node_modules/opencode-ai/bin/opencode.`);
+    }
+    throw new Error(`OpenCode no esta disponible en PATH (${opencodeBin}). Instala con npm install -g opencode-ai o el metodo oficial.`);
+}
+
+function assertOpencodeAvailable(commandSpec) {
+    const result = spawnSync(commandSpec.command, [...commandSpec.argsPrefix, '--version'], {encoding: 'utf8'});
     if (result.error) {
-        throw new Error(`OpenCode no esta disponible en PATH (${opencodeBin}). Instala con npm install -g opencode-ai o el metodo oficial.`);
+        throw new Error(`OpenCode no esta disponible: ${result.error.message}`);
     }
     if (result.status !== 0) {
         throw new Error(`OpenCode respondio con exit ${result.status}: ${(result.stderr || result.stdout || '').trim()}`);
@@ -177,14 +208,13 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessio
     return opencodeArgs;
 }
 
-function runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs}) {
+function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs}) {
     return new Promise((resolve, reject) => {
-        /* shell: true necesario en Windows (.cmd wrappers de npm)
-         * stdio: pipe en stdout/stderr para capturar salida y reenviarla al terminal */
-        const child = spawn(opencodeBin, opencodeArgs, {
+        /* Ejecutar sin shell: el prompt multilinea debe viajar como un unico argv.
+         * En Windows resolvemos el wrapper npm a `node .../opencode` para evitar cmd.exe. */
+        const child = spawn(commandSpec.command, [...commandSpec.argsPrefix, ...opencodeArgs], {
             cwd: projectPath,
             stdio: ['inherit', 'pipe', 'pipe'],
-            shell: true,
             env: process.env,
         });
 
@@ -240,6 +270,7 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
     const model = project.defaultModel;
     const agent = typeof overrides.agent === 'string' ? overrides.agent : (typeof options.agent === 'string' ? options.agent : project.defaultAgent);
     const opencodeBin = typeof options.bin === 'string' ? options.bin : 'opencode';
+    const commandSpec = resolveOpencodeCommand(opencodeBin);
     const timeoutMs = Number.isFinite(Number(options.timeout)) ? Number(options.timeout) : defaultTimeoutMs;
 
     // Cambiar de rama si se especificó y el proyecto tiene ruta local
@@ -277,7 +308,7 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
         projectPath,
         model,
         agent,
-        command: [opencodeBin, ...opencodeArgs.slice(0, -1), '<prompt>'],
+        command: [commandSpec.command, ...commandSpec.argsPrefix, ...opencodeArgs.slice(0, -1), '<prompt>'],
         prompt,
     };
 
@@ -288,9 +319,9 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
         return {...dryRunResult, dryRun: true};
     }
 
-    const version = assertOpencodeAvailable(opencodeBin);
+    const version = assertOpencodeAvailable(commandSpec);
     console.error(`OpenCode detectado: ${version}`);
-    const runResult = await runOpencode({opencodeBin, opencodeArgs, projectPath, timeoutMs});
+    const runResult = await runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs});
     return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
 }
 
