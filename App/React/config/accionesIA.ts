@@ -117,6 +117,7 @@ ACCIONES DISPONIBLES (incluir en el array "acciones" cuando corresponda):
 - {"tipo": "completar_habito", "parametros": {"id": 456}}
 - {"tipo": "eliminar_habito", "parametros": {"id": 456}}
 - {"tipo": "proponer_whatsapp", "parametros": {"mensaje": "texto", "to": "opcional número/JID"}}
+- {"tipo": "leer_nota", "parametros": {"id": 38}} — lee el contenido COMPLETO de una nota por su ID
 - {"tipo": "research_local", "parametros": {"query": "texto a buscar", "limit": 10}}
 - {"tipo": "research_web", "parametros": {"query": "texto a buscar en internet", "limit": 5}}
 - {"tipo": "proponer_github", "parametros": {"titulo": "título", "descripcion": "detalle", "tipo": "issue|pull_request|comment|assign", "repo": "owner/repo opcional"}}

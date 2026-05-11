@@ -1,5 +1,5 @@
 import type {AccionLLM, ResultadoAccion} from './accionesIA';
-import {buscarResearchLocal, buscarResearchWeb, proponerGithub, proponerRecordatorio, proponerWhatsapp} from '../services/agentActionsService';
+import {buscarResearchLocal, buscarResearchWeb, proponerGithub, proponerRecordatorio, proponerWhatsapp, leerNota} from '../services/agentActionsService';
 
 export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<ResultadoAccion | null> {
     switch (accion.tipo) {
@@ -59,6 +59,18 @@ export async function ejecutarAccionExternaIA(accion: AccionLLM): Promise<Result
                 descripcion: `GitHub ${tipo} — borrador pendiente de aprobación`,
                 pendienteConfirmacion: true,
                 accionExternaId: propuesta.id
+            };
+        }
+        case 'leer_nota': {
+            const noteId = Number(accion.parametros.id);
+            if (!noteId || noteId <= 0) {
+                return {tipo: accion.tipo, exito: false, descripcion: 'ID de nota inválido'};
+            }
+            const nota = await leerNota(noteId);
+            return {
+                tipo: accion.tipo,
+                exito: true,
+                descripcion: `**${nota.titulo}**\n\n${nota.contenido}`
             };
         }
         case 'programar_recordatorio': {

@@ -160,6 +160,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"completar_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"completar_subhabito\", \"parametros\": {\"id\": 123, \"subId\": 0}}
 - {\"tipo\": \"leer_notas\", \"parametros\": {\"limite\": 10}}
+- {\"tipo\": \"leer_nota\", \"parametros\": {\"id\": 38}} — lee el contenido COMPLETO de una nota especifica por su ID. Usala cuando el titulo no basta.
 - {\"tipo\": \"crear_nota\", \"parametros\": {\"titulo\": \"...\", \"contenido\": \"...\"}}
 - {\"tipo\": \"editar_nota\", \"parametros\": {\"id\": 123, \"contenido\": \"...\", \"titulo\": \"opcional\"}}
 - {\"tipo\": \"buscar_nota\", \"parametros\": {\"termino\": \"...\"}}
@@ -542,6 +543,28 @@ REGLAS:
                 $limite = min(20, max(1, (int)($param['limite'] ?? 10)));
                 $notas  = (new NotasRepository($userId))->listar($limite);
                 return ['tipo' => $tipo, 'exito' => true, 'notas' => $notas];
+
+            /* [115A-6+116A-1] leer_nota: acción singular para leer contenido COMPLETO de una nota
+             * por su ID. El contexto solo muestra títulos; esta acción permite al LLM obtener
+             * el contenido completo cuando el usuario pregunta sobre una nota específica. */
+            case 'leer_nota':
+                $notaId = (int)($param['id'] ?? 0);
+                if ($notaId <= 0) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => 'ID de nota inválido'];
+                }
+                $nota = (new NotasRepository($userId))->obtener($notaId);
+                if ($nota === null) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => 'Nota no encontrada'];
+                }
+                /* Devolver contenido completo para que el LLM pueda leerlo */
+                return [
+                    'tipo' => $tipo,
+                    'exito' => true,
+                    'id' => $nota['id'],
+                    'titulo' => $nota['titulo'],
+                    'contenido' => $nota['contenido'],
+                    'fecha' => $nota['fechaModificacion'] ?? $nota['fechaCreacion'] ?? null
+                ];
 
             case 'crear_nota':
                 $titulo    = sanitize_text_field((string)($param['titulo'] ?? ''));

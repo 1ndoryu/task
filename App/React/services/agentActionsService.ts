@@ -58,6 +58,19 @@ async function requestAgente<T>(path: string, init: RequestInit = {}, signal?: A
     return datos.data;
 }
 
+export interface NotaCompleta {
+    id: number;
+    titulo: string;
+    contenido: string;
+    carpetaId: number | null;
+    fechaCreacion: string | null;
+    fechaModificacion: string | null;
+}
+
+export async function leerNota(id: number): Promise<NotaCompleta> {
+    return requestAgente<NotaCompleta>(`/notas/${id}`);
+}
+
 export async function proponerWhatsapp(message: string, to?: string): Promise<AccionAgente> {
     const data = await requestAgente<{accion: AccionAgente}>('/agent/actions/whatsapp', {
         method: 'POST',
