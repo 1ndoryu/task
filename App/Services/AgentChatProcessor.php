@@ -58,7 +58,7 @@ class AgentChatProcessor
             self::MODELO_DEFAULT,
             ['temperature' => 0.7, 'maxTokens' => 1000]
         );
-        $rawContent = (string)($llmResult['content'] ?? $llmResult['message'] ?? '');
+        $rawContent = (string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? '');
         $parsed     = $this->parsear($rawContent);
 
         /* Ejecutar acciones */
@@ -66,7 +66,7 @@ class AgentChatProcessor
 
         /* Persistir mensajes */
         $this->chat->guardarMensaje($userId, $sessionId, 'usuario', $mensaje, null, 0);
-        $this->chat->guardarMensaje($userId, $sessionId, 'asistente', $parsed['respuesta'], $parsed['acciones'], (int)($llmResult['tokens'] ?? 0));
+        $this->chat->guardarMensaje($userId, $sessionId, 'asistente', $parsed['respuesta'], $parsed['acciones'], (int)($llmResult['tokensComplecion'] ?? $llmResult['tokens'] ?? 0));
 
         /* Guardar memorias en MemPalace en background (no bloquea la respuesta) */
         $this->guardarMemoria($userId, $mensaje, $parsed['respuesta'], $canal);

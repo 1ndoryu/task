@@ -95,7 +95,7 @@ class WhatsAppWebhookService
         };
         $numerosPermitidos = array_filter([
             $env('WHATSAPP'),
-            $env('WHATSAPP-SEGUNDO-NUMERO'),
+            $env('WHATSAPP_SEGUNDO_NUMERO'),
             $env('WHATSAPP_AGENT_TO'),
         ]);
 
