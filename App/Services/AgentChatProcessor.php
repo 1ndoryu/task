@@ -265,6 +265,7 @@ REGLAS:
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.
+- actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados (comandos bloqueados) y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"php *\", \"composer *\"]} (glob patterns como los del allowlist existente). Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode para reintentar el job con los nuevos permisos. NO la uses sin confirmación explícita del usuario.
 - reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
 - compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
 - cambiar_limite_compactacion: úsala cuando el usuario quiera cambiar el límite para la compactación automática. Convierte tokens a chars × 4 si el usuario da tokens.{$bloqueMemoria}{$bloqueMaestro}
@@ -863,14 +864,17 @@ REGLAS:
                  * Otros canales (web, CLI) requieren aprobacion manual. */
                 $requiereAprobacion = ($canal !== 'whatsapp');
 
+                /* [125A-1] Incluir permisos extra guardados por el usuario para este job */
+                $extraAllow = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
                 $accion = (new AgentActionService())->crearPropuesta($userId, 'opencode_job', $titulo, [
-                    'project' => $proyecto,
-                    'agent'   => $agente,
-                    'branch'  => $branch,
-                    'prompt'  => $prompt,
-                    'commit'  => $commit,
-                    'deploy'  => $deploy,
-                    'source'  => $canal,
+                    'project'           => $proyecto,
+                    'agent'             => $agente,
+                    'branch'            => $branch,
+                    'prompt'            => $prompt,
+                    'commit'            => $commit,
+                    'deploy'            => $deploy,
+                    'source'            => $canal,
+                    'extra_permissions' => $extraAllow,
                 ], $requiereAprobacion);
 
                 return [
@@ -915,6 +919,26 @@ REGLAS:
                     'exito'     => true,
                     'accion_id' => $accion['id'] ?? null,
                 ];
+
+            /* [125A-1] Agrega comandos bash al allowlist persistente de OpenCode.
+             * El runner los inyecta en el YAML del agente antes de ejecutar cada job.
+             * El chatbot debe confirmar con el usuario antes de llamar esta acción. */
+            case 'actualizar_opencode_allowlist':
+                $comandos = array_values(array_filter(
+                    array_map('sanitize_text_field', (array)($param['comandos'] ?? [])),
+                    fn(string $c): bool => $c !== ''
+                ));
+                if (empty($comandos)) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => 'Se requieren comandos a permitir.'];
+                }
+                $actual = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
+                foreach ($comandos as $cmd) {
+                    if (!in_array($cmd, $actual, true)) {
+                        $actual[] = $cmd;
+                    }
+                }
+                update_option('glory_opencode_extra_allow', $actual);
+                return ['tipo' => $tipo, 'exito' => true, 'permitidos' => $actual];
 
             /* [115A-context] Devuelve estadísticas del contexto de la sesión actual. */
             case 'reportar_contexto':

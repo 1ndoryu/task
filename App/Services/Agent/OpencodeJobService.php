@@ -208,11 +208,15 @@ class OpencodeJobService
          * respaldo legible si la sesion local expiro o no fue capturada por jobs antiguos. */
         $sessionId      = sanitize_text_field((string)($jobAnterior['resultado']['session_id'] ?? $jobAnterior['payload']['session_id'] ?? ''));
         $previousOutput = mb_substr((string)($jobAnterior['resultado']['output'] ?? ''), -1000);
+        /* [125A-1] Siempre tomar el allowlist actualizado (el usuario puede haberlo ampliado
+         * justo antes de pedir la continuacion, p. ej. via actualizar_opencode_allowlist). */
+        $extraAllow = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
         $payload        = array_merge($jobAnterior['payload'], [
-            'prompt'          => sanitize_textarea_field($prompt),
-            'session_id'      => $sessionId,
-            'previous_output' => $previousOutput,
-            'continua_job_id' => $jobAnteriorId,
+            'prompt'            => sanitize_textarea_field($prompt),
+            'session_id'        => $sessionId,
+            'previous_output'   => $previousOutput,
+            'continua_job_id'   => $jobAnteriorId,
+            'extra_permissions' => $extraAllow,
         ]);
 
         $titulo   = 'OpenCode (cont. #' . $jobAnteriorId . '): ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 60);

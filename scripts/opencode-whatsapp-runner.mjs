@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {spawn, spawnSync} from 'node:child_process';
 import {createHmac} from 'node:crypto';
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync, readFileSync, writeFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -244,6 +244,21 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessio
     return opencodeArgs;
 }
 
+/* [125A-1] Inyecta comandos extra en el YAML frontmatter del agente antes de ejecutar.
+ * Inserta las nuevas entradas justo antes de "\"*\": ask" para que tengan precedencia.
+ * Devuelve el contenido original para restaurar tras ejecutar. */
+function injectExtraPermissions(agentFilePath, extraCommands) {
+    if (!existsSync(agentFilePath) || extraCommands.length === 0) return null;
+    const original = readFileSync(agentFilePath, 'utf8');
+    const marker = '"*": ask';
+    if (!original.includes(marker)) return null;
+    const additions = extraCommands.map(cmd => `    "${cmd}": allow`).join('\n');
+    const patched = original.replace(marker, `${additions}\n    ${marker}`);
+    writeFileSync(agentFilePath, patched, 'utf8');
+    console.error(`[runner] Extra permissions inyectados (${extraCommands.length}): ${extraCommands.join(', ')}`);
+    return original;
+}
+
 function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId = ''}) {
     return new Promise((resolve, reject) => {
         /* Ejecutar sin shell: el prompt multilinea debe viajar como un unico argv.
@@ -347,6 +362,13 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
         : (typeof options.sessionId === 'string' ? options.sessionId : '');
     const previousOutput = typeof overrides.previousOutput === 'string' ? overrides.previousOutput
         : (typeof options.previousOutput === 'string' ? options.previousOutput : '');
+
+    /* [125A-1] Aplicar permisos extra del payload antes de ejecutar; restaurar después */
+    const extraPermissions = Array.isArray(overrides.extra_permissions) ? overrides.extra_permissions
+        : (Array.isArray(options.extra_permissions) ? options.extra_permissions : []);
+    const agentFilePath = agent ? path.join(repoRoot, '.opencode', 'agents', `${agent}.md`) : '';
+    const originalAgentContent = agentFilePath ? injectExtraPermissions(agentFilePath, extraPermissions) : null;
+
     const prompt = buildPrompt({
         message,
         projectId,
@@ -382,8 +404,16 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
 
     const version = assertOpencodeAvailable(commandSpec);
     console.error(`OpenCode detectado: ${version}`);
-    const runResult = await runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId: sessionId});
-    return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
+    try {
+        const runResult = await runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId: sessionId});
+        return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
+    } finally {
+        /* [125A-1] Restaurar el agente YAML a su estado original tras ejecutar */
+        if (originalAgentContent !== null && agentFilePath) {
+            writeFileSync(agentFilePath, originalAgentContent, 'utf8');
+            console.error('[runner] Archivo de agente restaurado.');
+        }
+    }
 }
 
 function normalizeApiUrl(options) {
@@ -447,6 +477,8 @@ function optionsFromJobPayload(options, payload) {
         /* [115A-cont] Campos de continuacion de sesion */
         sessionId: typeof payload.session_id === 'string' ? payload.session_id : '',
         previousOutput: typeof payload.previous_output === 'string' ? payload.previous_output : '',
+        /* [125A-1] Permisos extra acumulados por el usuario */
+        extra_permissions: Array.isArray(payload.extra_permissions) ? payload.extra_permissions : [],
     };
 }
 
