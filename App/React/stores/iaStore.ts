@@ -4,8 +4,10 @@
  * Gestiona chat, preferencias y configuración del asistente
  *
  * [233A-69] Fase 1: Store base con estado de mensajes y configuración persistente.
- * La config (apiKey, modelo, preferencias) se persiste en localStorage.
- * Los mensajes y estado de sesión viven solo en memoria.
+ * [SEC-001] CRÍTICO: API keys eliminadas de localStorage.
+ *   Las keys ahora viven solo en memoria y se obtienen del servidor (backend proxy)
+ *   para usuarios admin. Usuarios no-admin deben ingresar su key cada sesión
+ *   (nunca se persiste en el navegador).
  */
 
 import {create} from 'zustand';
@@ -37,12 +39,11 @@ export interface MensajeIA {
     _dbId?: number;
 }
 
-/* Estado persistente (configuración) */
+/* Estado persistente (configuración) — solo datos no sensibles.
+ * [SEC-001] API keys NUNCA se persisten en localStorage. */
 interface IAConfigPersistente {
     sessionId: string;
     proveedor: ProveedorIA;
-    apiKey: string;
-    apiKeyDeepseek: string;
     modelo: string;
     preferenciasUsuario: string;
     promptSistema: string;
@@ -54,6 +55,9 @@ interface IAEstadoSesion {
     enviando: boolean;
     error: string | null;
     tokensUsados: number;
+    /* [SEC-001] API keys solo en memoria, nunca en localStorage */
+    apiKey: string;
+    apiKeyDeepseek: string;
 }
 
 /* Acciones */
@@ -88,20 +92,20 @@ export function generarIdSesionIA(): string {
 export const useIAStore = create<IAStore>()(
     persist(
         (set) => ({
-            /* Config persistente */
+            /* Config persistente — solo datos no sensibles */
             sessionId: generarIdSesionIA(),
             proveedor: 'groq',
-            apiKey: '',
-            apiKeyDeepseek: '',
             modelo: 'meta-llama/llama-4-scout-17b-16e-instruct',
             preferenciasUsuario: '',
             promptSistema: '',
 
-            /* Estado de sesión */
+            /* Estado de sesión (incluyendo API keys en memoria — NUNCA persisten) */
             mensajes: [],
             enviando: false,
             error: null,
             tokensUsados: 0,
+            apiKey: '',
+            apiKeyDeepseek: '',
 
             /* Acciones de configuración */
             setMensajes: (mensajes) => set({mensajes}),
@@ -132,12 +136,11 @@ export const useIAStore = create<IAStore>()(
         }),
         {
             name: 'glory-ia-panel',
-            /* Solo persistir configuración, no estado de sesión */
+            /* [SEC-001] Solo persistir configuración no sensible.
+             * API keys explícitamente excluidas — nunca en localStorage. */
             partialize: (state) => ({
                 proveedor: state.proveedor,
                 sessionId: state.sessionId,
-                apiKey: state.apiKey,
-                apiKeyDeepseek: state.apiKeyDeepseek,
                 modelo: state.modelo,
                 preferenciasUsuario: state.preferenciasUsuario,
                 promptSistema: state.promptSistema

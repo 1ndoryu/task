@@ -40,13 +40,30 @@ class WhatsAppWebhookService
      *   - Formato legacy: {type:"message.received", from, body}
      *   - Formato nuevo (Go/wasm, @lid JIDs): {Chat, SenderJID, Text, FromMe, Revoked, ...}
      * No lanza excepciones — registra errores y continúa.
+     * [SEC-005] Rate-limit global por IP: máx 100 peticiones/minuto por dirección IP
+     * para prevenir abuso del webhook más allá del rate-limit por JID.
      */
     public function procesarEvento(array $evento): void
     {
+        /* [SEC-005] Rate-limit global por IP */
+        if ($this->ipExcedeLimiteGlobal()) {
+            error_log('[WhatsApp] Rate-limit global IP alcanzado');
+            return;
+        }
+
         $tipo = (string)($evento['type'] ?? '');
 
-        /* Log para capturar el formato real de wacli */
-        error_log('[WhatsApp] evento tipo=' . $tipo . ' raw=' . json_encode($evento));
+        /* [SEC-002] Log sin datos sensibles: solo tipo y metadatos anonimizados.
+         * Nunca se logea el contenido del mensaje, JID completo o datos del usuario. */
+        $fromLog = '';
+        if ($tipo !== '') {
+            $fromLog = substr(preg_replace('/[^0-9]/', '', (string)($evento['from'] ?? '')), 0, 4) . '****';
+        } elseif (isset($evento['Chat'])) {
+            $fromLog = substr(preg_replace('/[^0-9]/', '', (string)$evento['Chat']), 0, 4) . '****@...';
+        }
+        $hasMedia = isset($evento['Media']) ? ' media' : '';
+        $hasText  = isset($evento['Text']) || isset($evento['body']) ? ' text' : '';
+        error_log('[WhatsApp] evento tipo=' . $tipo . ' from=' . $fromLog . $hasMedia . $hasText);
 
         /* Detectar formato nuevo: sin "type", con "Text"/"Chat" o con "Media"/"Chat" */
         $esFormatoNuevo = $tipo === '' && isset($evento['Chat']) && (isset($evento['Text']) || isset($evento['Media']));
@@ -104,7 +121,9 @@ class WhatsAppWebhookService
 
         /* Rate-limit: máx 20 mensajes por JID cada 5 minutos (evita flood/abuso LLM) */
         if ($this->excedeLimite($from)) {
-            error_log('[WhatsApp] Rate-limit alcanzado para JID: ' . substr($from, 0, 20));
+            /* [SEC-002] No logear el JID completo — solo dígitos parciales */
+            $fromMasked = substr(preg_replace('/[^0-9]/', '', $from), 0, 4) . '****';
+            error_log('[WhatsApp] Rate-limit alcanzado para JID: ' . $fromMasked);
             return;
         }
 
@@ -114,7 +133,9 @@ class WhatsAppWebhookService
          * Sin verificación exitosa → se descarta el mensaje silenciosamente. */
         $adminId = $this->resolverAdminDesdeRemitente($from);
         if (!$adminId) {
-            error_log('[WhatsApp] Remitente no autorizado descartado: ' . substr($from, 0, 20));
+            /* [SEC-002] No logear JID completo */
+            $fromMasked = substr(preg_replace('/[^0-9]/', '', $from), 0, 4) . '****';
+            error_log('[WhatsApp] Remitente no autorizado descartado: ' . $fromMasked);
             return;
         }
 
@@ -159,13 +180,16 @@ class WhatsAppWebhookService
                         if ($mensajeParaAgente === '') {
                             $mensajeParaAgente = '[Imagen recibida]';
                         }
-                        error_log('[WhatsApp] Imagen recibida, type=' . $mimeType . ' size=' . strlen($b64));
+                        /* [SEC-002] Logear solo que se procesó la imagen, no el contenido base64 ni tamaño */
+                        error_log('[WhatsApp] Imagen recibida OK, type=' . $mimeType);
                     } elseif (str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/') || in_array($mediaKind, ['audio', 'video'], true)) {
                         /* Transcribir audio con Groq Whisper */
                         $mensajeParaAgente = (new LLMProviderService())->transcribirAudio($tmpFile, $mimeType);
-                        error_log('[WhatsApp] Audio transcrito (' . $mimeType . '): ' . mb_substr($mensajeParaAgente, 0, 120));
+                        /* [SEC-002] Logear solo éxito y tipo, no el contenido transcrito */
+                        $transcripcionLen = mb_strlen($mensajeParaAgente);
+                        error_log('[WhatsApp] Audio transcrito OK, type=' . $mimeType . ' chars=' . $transcripcionLen);
                     } else {
-                        error_log('[WhatsApp] Tipo de media no soportado: ' . $mediaKind . ' mime=' . $mimeType);
+                        error_log('[WhatsApp] Media no soportado: type=' . $mediaKind . ' mime=' . $mimeType);
                         if ($mensajeParaAgente === '') {
                             return; /* nada procesable */
                         }
@@ -204,7 +228,8 @@ class WhatsAppWebhookService
                 (new WacliService())->enviarTexto($destino, $resultado['respuesta']);
             }
         } catch (\Throwable $e) {
-            error_log('[WhatsApp] Error procesando mensaje entrante de ' . $fromNum . ': ' . $e->getMessage());
+            /* [SEC-002] $fromNum son solo dígitos (sin JID completo), seguro para log */
+            error_log('[WhatsApp] Error procesando mensaje entrante: ' . get_class($e) . ': ' . $e->getMessage());
             try {
                 (new WacliService())->enviarTexto($destino, 'Error interno. Intenta de nuevo en unos segundos.');
             } catch (\Throwable) {
@@ -243,7 +268,8 @@ class WhatsAppWebhookService
          * Útil para bloquear números mapeados en wp_usermeta que no deben activar el bot. */
         $blockedJids = array_filter(array_map('trim', explode(',', $env('WHATSAPP_BLOCKED_JIDS'))));
         if (!empty($blockedJids) && in_array($from, $blockedJids, true)) {
-            error_log('[WhatsApp] JID en lista de bloqueados, ignorado: ' . substr($from, 0, 20));
+            $fromMasked = substr(preg_replace('/[^0-9]/', '', $from), 0, 4) . '****';
+            error_log('[WhatsApp] JID bloqueado ignorado: ' . $fromMasked);
             return null;
         }
 
@@ -298,6 +324,28 @@ class WhatsAppWebhookService
             return true;
         }
         set_transient($key, $count + 1, 5 * MINUTE_IN_SECONDS);
+        return false;
+    }
+
+    /**
+     * [SEC-005] Rate-limit global por IP: máx 100 peticiones/minuto.
+     * Previene abuso del webhook endpoint desde una misma dirección IP.
+     */
+    private function ipExcedeLimiteGlobal(): bool
+    {
+        if (empty($_SERVER['REMOTE_ADDR'])) {
+            return false;
+        }
+        $key   = 'wa_ip_rl_' . md5((string)$_SERVER['REMOTE_ADDR']);
+        $count = (int)(get_transient($key) ?: 0);
+        if ($count === 0) {
+            set_transient($key, 1, MINUTE_IN_SECONDS);
+            return false;
+        }
+        if ($count >= 100) {
+            return true;
+        }
+        set_transient($key, $count + 1, MINUTE_IN_SECONDS);
         return false;
     }
 }

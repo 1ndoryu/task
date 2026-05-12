@@ -8,6 +8,57 @@ class WacliService
     private const ACCOUNT_ENV_KEYS = ['WACLI_ACCOUNT', 'OPENCLAW_WACLI_ACCOUNT'];
     private const RECIPIENT_ENV_KEYS = ['WHATSAPP_AGENT_TO', 'WHATSAPP_TO', 'WHATSAPP'];
 
+    /**
+     * [SEC-007] Constructor: asegura que el directorio temporal privado existe
+     * y limpia archivos viejos al instanciar.
+     */
+    public function __construct()
+    {
+        $this->asegurarDirectorioTemp();
+    }
+
+    /**
+     * [SEC-007] Retorna un directorio temporal privado dentro de wp-content/uploads/.
+     * No usa sys_get_temp_dir() para evitar que archivos con datos de usuario
+     * queden accesibles por otros procesos del sistema.
+     */
+    private function obtenerDirectorioTemp(): string
+    {
+        $uploadDir = wp_upload_dir();
+        return rtrim($uploadDir['basedir'], '/\\') . '/glory_media_temp';
+    }
+
+    /**
+     * Crea el directorio temporal con protección .htaccess y limpia archivos viejos.
+     */
+    private function asegurarDirectorioTemp(): void
+    {
+        $tempDir = $this->obtenerDirectorioTemp();
+        if (!is_dir($tempDir)) {
+            wp_mkdir_p($tempDir);
+            @file_put_contents($tempDir . '/.htaccess', "Deny from all\n");
+        }
+        /* Limpiar archivos con más de 1 hora */
+        $this->limpiarArchivosViejos($tempDir, 3600);
+    }
+
+    /**
+     * Elimina archivos temporales más viejos que maxAgeSecs segundos.
+     */
+    private function limpiarArchivosViejos(string $dir, int $maxAgeSecs): void
+    {
+        $files = glob($dir . '/*');
+        if ($files === false) {
+            return;
+        }
+        $now = time();
+        foreach ($files as $file) {
+            if (is_file($file) && ($now - filemtime($file)) > $maxAgeSecs) {
+                @unlink($file);
+            }
+        }
+    }
+
     public function estado(): array
     {
         $bin = $this->obtenerBinario();
@@ -107,7 +158,8 @@ class WacliService
     {
         $baseMime = trim(explode(';', $mediaType)[0]);
         $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $baseMime)[1] ?? 'bin') ?: 'bin';
-        $tmpFile  = sys_get_temp_dir() . '/wacli_media_' . md5($chat . $messageId) . '.' . $ext;
+        /* [SEC-007] Usar directorio temporal privado, no sys_get_temp_dir() */
+        $tmpFile  = $this->obtenerDirectorioTemp() . '/wacli_media_' . md5($chat . $messageId) . '.' . $ext;
 
         /* wacli media download --chat <jid> --id <msgid> --output <file> */
         $this->ejecutarWacli([
@@ -201,7 +253,8 @@ class WacliService
         /* Extensión basada en MIME */
         $baseMime = trim(explode(';', $mimeType)[0]);
         $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $baseMime)[1] ?? 'bin') ?: 'bin';
-        $tmpFile  = sys_get_temp_dir() . '/wamedia_' . md5($directPath) . '.' . $ext;
+        /* [SEC-007] Usar directorio temporal privado, no sys_get_temp_dir() */
+        $tmpFile  = $this->obtenerDirectorioTemp() . '/wamedia_' . md5($directPath) . '.' . $ext;
 
         if (file_put_contents($tmpFile, $decrypted) === false) {
             throw new \RuntimeException('descargarMediaDirecto: no se pudo escribir el archivo temporal.');
@@ -212,7 +265,8 @@ class WacliService
             throw new \RuntimeException('descargarMediaDirecto: archivo temporal vacío tras descifrar.');
         }
 
-        error_log('[WacliService] Media descargada directo CDN: type=' . $mediaType . ' size=' . filesize($tmpFile) . ' ext=' . $ext);
+        /* [SEC-002] Log solo tipo y extensión, no tamaño del archivo */
+        error_log('[WacliService] Media descargada CDN: type=' . $mediaType . ' ext=' . $ext);
         return $tmpFile;
     }
 

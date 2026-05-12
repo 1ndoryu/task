@@ -8,10 +8,21 @@ use App\Repository\TareasRepository;
 
 class AgentProactiveService
 {
+    /**
+     * [SEC-006] Análisis proactivo del usuario.
+     * Si el usuario tiene glory_agent_proactive_opt_out = true en user_meta,
+     * se omite el análisis sin importar el flag $force.
+     */
     public function analizarUsuario(int $userId, bool $force = false): array
     {
         if ($userId <= 0) {
             throw new \InvalidArgumentException('Usuario inválido para análisis activo del agente.');
+        }
+
+        /* [SEC-006] Respetar opt-out del usuario */
+        $optOut = (bool) get_user_meta($userId, 'glory_agent_proactive_opt_out', true);
+        if ($optOut) {
+            return ['created' => 0, 'skipped' => true, 'reason' => 'opt_out'];
         }
 
         $transientKey = 'glory_agent_active_scan_' . $userId;

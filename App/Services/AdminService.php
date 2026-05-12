@@ -236,12 +236,17 @@ class AdminService
     /**
      * Formatea usuario para respuesta de API
      */
+    /**
+     * [SEC-003] stripeCustomerId y ultimoPago se leen internamente pero NO se exponen
+     * en la API. El admin panel puede consultarlos solo via operaciones específicas
+     * que requieren autenticación adicional.
+     */
     private function formatearUsuario(\WP_User $user, bool $detallado = false): array
     {
         $suscripcion = get_user_meta($user->ID, self::META_SUSCRIPCION, true);
-        $stripeCustomerId = get_user_meta($user->ID, self::META_STRIPE_CUSTOMER, true);
+        /* [SEC-003] stripeCustomerId y ultimoPago NO se exponen en la API pública.
+         * Se leen internamente solo para lógica del servicio. */
         $cifradoActivo = (bool) get_user_meta($user->ID, self::META_CIFRADO_ACTIVO, true);
-        $ultimoPago = get_user_meta($user->ID, self::META_ULTIMO_PAGO, true);
 
         /* Valores por defecto para suscripción */
         if (empty($suscripcion) || !is_array($suscripcion)) {
@@ -274,8 +279,7 @@ class AdminService
                 'fechaInicio' => $suscripcion['fechaInicio'] ?? null,
                 'fechaExpiracion' => $suscripcion['fechaExpiracion'] ?? null,
                 'diasRestantes' => $diasRestantes,
-                'stripeCustomerId' => $stripeCustomerId ?: null,
-                'ultimoPago' => $ultimoPago ?: null,
+                /* [SEC-003] stripeCustomerId y ultimoPago explícitamente excluidos */
             ],
             'cifradoActivo' => $cifradoActivo,
         ];
@@ -356,17 +360,31 @@ class AdminService
     /**
      * Registra acciones administrativas en logs
      */
+    /**
+     * [SEC-002] Registro de acciones admin sin datos sensibles.
+     * $datos puede contener user_id, timestamps y metadatos de operación,
+     * pero NUNCA stripeCustomerId, API keys, contraseñas o contenido de mensajes.
+     */
     private function registrarAccion(int $userId, string $accion, array $datos = []): void
     {
+        /* Filtrar datos sensibles antes de loggear */
+        $camposBloqueados = ['stripeCustomerId', 'stripe_customer_id', 'apiKey', 'password', 'token', 'secret'];
+        $datosSeguros = $datos;
+        foreach ($camposBloqueados as $campo) {
+            if (isset($datosSeguros[$campo])) {
+                $datosSeguros[$campo] = '***';
+            }
+        }
+
         $log = [
             'timestamp' => current_time('mysql'),
             'admin_id' => get_current_user_id(),
             'user_id' => $userId,
             'accion' => $accion,
-            'datos' => $datos,
+            'datos' => $datosSeguros,
         ];
 
-        error_log('[AdminService] ' . json_encode($log));
+        error_log('[AdminService] ' . wp_json_encode($log, JSON_UNESCAPED_UNICODE));
     }
 
     /**

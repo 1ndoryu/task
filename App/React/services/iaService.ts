@@ -88,7 +88,9 @@ export async function enviarMensajeLLM(
     signal?: AbortSignal,
     opciones: OpcionesLLM = {}
 ): Promise<RespuestaLLM> {
-    if (!config.apiKey && esUsuarioAdmin()) {
+    /* [SEC-001] Admin usa backend proxy siempre (API key no expuesta al cliente).
+     * La ausencia de apiKey en config es normal para admin — el servidor tiene las keys. */
+    if (esUsuarioAdmin()) {
         return enviarMensajeLLMBackend(mensajes, config, signal, opciones);
     }
 
@@ -172,7 +174,12 @@ export function obtenerApiKeyParaProveedor(proveedor: ProveedorIA, apiKeyGroq: s
 }
 
 export function proveedorTieneCredenciales(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string): boolean {
-    return Boolean(obtenerApiKeyParaProveedor(proveedor, apiKeyGroq, apiKeyDeepseek)) || esUsuarioAdmin();
+    /* [SEC-001] Admin siempre tiene credenciales via backend proxy.
+     * Otros usuarios necesitan API key en memoria (nunca en localStorage). */
+    if (esUsuarioAdmin()) {
+        return true;
+    }
+    return Boolean(obtenerApiKeyParaProveedor(proveedor, apiKeyGroq, apiKeyDeepseek));
 }
 
 /*

@@ -16,6 +16,14 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
+    "git --no-pager*": allow
+    "git hash-object*": allow
+    "git cat-file*": allow
+    "git show*": allow
+    "git rev-parse*": allow
+    "git blame*": allow
+    "git stash*": allow
+    "git fetch*": allow
     "git add *": allow
     "git commit *": allow
     "git pull --rebase*": allow
@@ -24,6 +32,23 @@ permission:
     "git branch*": allow
     "git checkout *": allow
     "git switch *": allow
+    "Test-Path*": allow
+    "Measure-Object*": allow
+    "Get-Content*": allow
+    "Get-ChildItem*": allow
+    "Select-String*": allow
+    "Where-Object*": allow
+    "Select-Object*": allow
+    "Out-String*": allow
+    "Write-Output*": allow
+    "head*": allow
+    "tail*": allow
+    "cat*": allow
+    "wc*": allow
+    "php -l*": allow
+    "php -i*": allow
+    "php -r*": allow
+    "php -v*": allow
     ".agent/coolify-manager-rs/target/release/coolify-manager.exe *": allow
     ".agent\\coolify-manager-rs\\target\\release\\coolify-manager.exe *": allow
     "ssh *": deny
