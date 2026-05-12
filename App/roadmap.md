@@ -49,4 +49,4 @@ El daemon wacli perdió la conexión (~18:49 UTC hoy) y no se auto-recuperó. Es
 MemPalace `curl` tarda 8s antes de timeout en cada búsqueda. Investigar si el servicio está caído o congestionado:
 - Revisar logs y estado de MemPalace (URL, contenedor, health).
 - Si está caído: restaurar.
-- Si es lento estructuralmente: hacer la búsqueda no-bloqueante (fire-and-forget o timeout de 2s con fallback a contexto vacío).
+- Si es lento estructuralmente: hacer la búsqueda no-bloqueante (fire-and-forget o timeout de 2s con fallback a contexto vacío). Nota mía: esto debería funcionar siempre pero no ser bloqueante ¿porque es lento? no se supone que es algo local? 
