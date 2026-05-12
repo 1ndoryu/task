@@ -69,14 +69,16 @@ class WhatsAppWebhookService
             $text = trim((string)($msg['text']['body'] ?? $msg['body'] ?? $evento['body'] ?? ''));
         }
 
-        /* [115A-5] Extraer media si el mensaje la incluye (puede venir con o sin caption) */
+        /* [115A-5][125A-3] Extraer media si el mensaje la incluye (puede venir con o sin caption).
+         * Gotcha: wacli envía Media.Type como kind (audio/image) y Media.MimeType como MIME real para Whisper/visión. */
         $mediaEvento = null;
         if ($esFormatoNuevo && isset($evento['Media']['Type'])) {
-            $mediaType  = (string)($evento['Media']['Type'] ?? '');
+            $mediaKind  = (string)($evento['Media']['Type'] ?? '');
+            $mediaType  = (string)($evento['Media']['MimeType'] ?? $mediaKind);
             $messageId  = (string)($evento['ID'] ?? '');
             /* [116A-3] wacli media download usa --chat y --id (no --direct-path/--media-key) */
-            if ($mediaType !== '' && $messageId !== '') {
-                $mediaEvento = ['type' => $mediaType, 'chat' => $from, 'messageId' => $messageId];
+            if ($mediaKind !== '' && $messageId !== '') {
+                $mediaEvento = ['type' => $mediaKind, 'mimeType' => $mediaType, 'chat' => $from, 'messageId' => $messageId];
             }
         }
 
@@ -119,27 +121,29 @@ class WhatsAppWebhookService
             if ($mediaEvento !== null) {
                 $tmpFile = null;
                 try {
+                    $mimeType = (string)($mediaEvento['mimeType'] ?? $mediaEvento['type']);
+                    $mediaKind = (string)($mediaEvento['type'] ?? '');
                     $tmpFile = (new WacliService())->descargarMedia(
                         $mediaEvento['chat'],
                         $mediaEvento['messageId'],
-                        $mediaEvento['type']
+                        $mimeType
                     );
 
-                    if (str_starts_with($mediaEvento['type'], 'image/')) {
+                    if (str_starts_with($mimeType, 'image/') || $mediaKind === 'image') {
                         /* Enviar imagen al LLM con visión multimodal */
                         $b64             = base64_encode((string)file_get_contents($tmpFile));
-                        $mediaParaAgente = ['mimeType' => $mediaEvento['type'], 'base64' => $b64];
+                        $mediaParaAgente = ['mimeType' => $mimeType, 'base64' => $b64];
                         /* Mantener caption si el usuario escribió algo junto a la imagen */
                         if ($mensajeParaAgente === '') {
                             $mensajeParaAgente = '[Imagen recibida]';
                         }
-                        error_log('[WhatsApp] Imagen recibida, type=' . $mediaEvento['type'] . ' size=' . strlen($b64));
-                    } elseif (str_starts_with($mediaEvento['type'], 'audio/') || str_starts_with($mediaEvento['type'], 'video/')) {
+                        error_log('[WhatsApp] Imagen recibida, type=' . $mimeType . ' size=' . strlen($b64));
+                    } elseif (str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/') || in_array($mediaKind, ['audio', 'video'], true)) {
                         /* Transcribir audio con Groq Whisper */
-                        $mensajeParaAgente = (new LLMProviderService())->transcribirAudio($tmpFile, $mediaEvento['type']);
-                        error_log('[WhatsApp] Audio transcrito (' . $mediaEvento['type'] . '): ' . mb_substr($mensajeParaAgente, 0, 120));
+                        $mensajeParaAgente = (new LLMProviderService())->transcribirAudio($tmpFile, $mimeType);
+                        error_log('[WhatsApp] Audio transcrito (' . $mimeType . '): ' . mb_substr($mensajeParaAgente, 0, 120));
                     } else {
-                        error_log('[WhatsApp] Tipo de media no soportado: ' . $mediaEvento['type']);
+                        error_log('[WhatsApp] Tipo de media no soportado: ' . $mediaKind . ' mime=' . $mimeType);
                         if ($mensajeParaAgente === '') {
                             return; /* nada procesable */
                         }
@@ -149,7 +153,9 @@ class WhatsAppWebhookService
                     if ($mensajeParaAgente === '') {
                         /* [116A-3] En lugar de responder directamente y cortar, informar al LLM
                          * para que responda de forma natural y pida al usuario que reenvíe. */
-                        if (str_starts_with($mediaEvento['type'], 'audio/') || str_starts_with($mediaEvento['type'], 'video/')) {
+                        $mimeType = (string)($mediaEvento['mimeType'] ?? $mediaEvento['type']);
+                        $mediaKind = (string)($mediaEvento['type'] ?? '');
+                        if (str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/') || in_array($mediaKind, ['audio', 'video'], true)) {
                             $mensajeParaAgente = '[El usuario envió un audio que no se pudo transcribir (error técnico). Dile que lo reenvíe o escriba el mensaje.]';
                         } else {
                             $mensajeParaAgente = '[El usuario envió un archivo multimedia que no se pudo procesar. Dile que lo reenvíe.]';

@@ -1,5 +1,21 @@
 # Lecciones Aprendidas
 
+## 2026-05-12 — Media.Type de wacli no es MIME y rompe Whisper
+
+**Patrón del error:** Los audios llegaban con `Media.Type=audio` y `Media.MimeType=audio/ogg; codecs=opus`. El backend usaba `Type` como MIME, por lo que descargaba el archivo pero no entraba a la rama `audio/` y mandaba `[Audio]` al LLM.
+
+**Lección:** En eventos wacli, `Media.Type` es solo la categoría (`audio`, `image`, `video`) y `Media.MimeType` es la fuente para Whisper, visión y extensión temporal.
+
+**Fix:** `WhatsAppWebhookService` conserva `type` como kind, usa `mimeType` para descarga/transcripción y acepta ambas señales al decidir audio/imagen.
+
+## 2026-05-12 — Acciones backend sobre hábitos deben renovar updatedAt y verificar persistencia
+
+**Patrón del error:** `completar_habito` podía decir éxito porque `saveAll()` retornaba true, pero el JSON quedaba igual o un sync posterior pisaba el cambio al conservar `updatedAt` viejo.
+
+**Lección:** Las mutaciones de hábitos fuera de React deben actualizar `updatedAt`, guardar parcial para no tocar la lista completa y re-leer la entidad antes de confirmar éxito al LLM.
+
+**Fix:** `AgentChatProcessor` usa fecha local del canal WhatsApp, actualiza `updatedAt`, persiste solo el hábito afectado y verifica que `ultimoCompletado` o `historialCompletados` contengan la fecha.
+
 ## 2026-05-11 — Regex ANSI roto oculta resumen de OpenCode
 
 **Patrón del error:** El backend intentaba limpiar ANSI con `\x1b[\\]` dentro de un patrón PCRE PHP. La clase quedaba inválida y `preg_replace` fallaba, por lo que el extractor de resumen devolvía vacío y WhatsApp mostraba solo “OpenCode terminó” + sesión.

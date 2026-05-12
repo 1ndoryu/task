@@ -16,6 +16,7 @@
 - `WACLI_BIN`: ruta del binario, default `wacli` en PATH.
 - `WACLI_ACCOUNT`: cuenta wacli opcional para stores con varios números.
 - `WHATSAPP_AGENT_TO`, `WHATSAPP_TO` o `WHATSAPP`: destinatario por defecto.
+- `WHATSAPP_USER_TIMEZONE`: zona horaria lógica para acciones WhatsApp con fecha de usuario; default `America/Caracas`.
 - `WACLI_LOCAL_MODE=true`: permite aprobar la acción en local aunque no exista `wacli`; devuelve `wacli-local` y no manda WhatsApp real.
 
 ## Modo local
@@ -40,7 +41,12 @@
 ## Media entrante
 - `wacli media download` usa la API actual `--chat <jid> --id <messageId> --output <file>`.
 - Los eventos nuevos de wacli proveen `Chat` e `ID`; no usar `DirectPath`/`MediaKey` como flags porque la versión actual los rechaza.
+- `Media.Type` es el kind (`audio`, `image`, `video`) y `Media.MimeType` es el MIME real (`audio/ogg; codecs=opus`). Whisper y visión deben usar `MimeType`.
 - Si el store está ocupado, `--lock-wait` debe esperar antes de fallar; sin esto, audios e imágenes caen al fallback del chatbot.
+
+## Hábitos por WhatsApp
+- Las acciones de hábitos usan la fecha local del canal, no la fecha PHP/WordPress, para coincidir con el día que ve el usuario en el teléfono.
+- Toda marca de hábito debe renovar `updatedAt`, guardar parcial y verificar por relectura antes de responder éxito.
 
 ## Recordatorios dinamicos
 - Los recordatorios `reminder_notify` cuyo titulo/mensaje indiquen `Habito pendiente` o cuyo payload use `dynamic_type=habit_pending` se resuelven al momento de ejecutarse.

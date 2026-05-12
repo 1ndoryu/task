@@ -65,7 +65,7 @@ class AgentChatProcessor
     {
         $this->activeSessionId = $sessionId;
         $historial       = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
-        $contexto        = $this->buildContexto($userId);
+        $contexto        = $this->buildContexto($userId, $canal);
         $memorias        = $this->mempalace->search($mensaje !== '' ? $mensaje : 'imagen recibida', $userId);
         $contextoMaestro = $this->getMasterContext($userId);
 
@@ -276,7 +276,7 @@ REGLAS:
     /* --- Contexto de tareas y hábitos -------------------------------------- */
 
     /* [115A-6] buildContexto incluye sub-hábitos, notas recientes (títulos) y recordatorios programados. */
-    private function buildContexto(int $userId): string
+    private function buildContexto(int $userId, string $canal = 'app'): string
     {
         try {
             $tareas  = (new TareasRepository($userId))->getAll();
@@ -300,7 +300,7 @@ REGLAS:
             }
         }
 
-        $hoy = date('Y-m-d');
+        $hoy = $this->fechaHoyParaCanal($canal);
         $ctx .= "\n## Hábitos activos\n";
         $habitosActivos = array_values(array_filter($habitos, fn($h) => empty($h['pausado'])));
 
@@ -398,6 +398,25 @@ REGLAS:
             }
         } catch (\Throwable) { /* No bloquear el contexto */ }
         return $ctx;
+    }
+
+    private function fechaHoyParaCanal(string $canal): string
+    {
+        if ($canal === 'whatsapp') {
+            $timezone = EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas';
+            try {
+                return (new \DateTimeImmutable('now', new \DateTimeZone($timezone)))->format('Y-m-d');
+            } catch (\Throwable) {
+                return current_time('Y-m-d');
+            }
+        }
+
+        return current_time('Y-m-d');
+    }
+
+    private function timestampMs(): int
+    {
+        return (int)floor(microtime(true) * 1000);
     }
 
     /* --- Parseo respuesta LLM ---------------------------------------------- */
@@ -732,13 +751,15 @@ REGLAS:
                 }
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'MemPalace no disponible o contenido vacío'];
 
-            /* [115A-6] Acciones de hábitos ----------------------------------- */
+            /* [115A-6][125A-4] Acciones de hábitos.
+             * Gotcha: WhatsApp usa fecha local del usuario y updatedAt nuevo para no perder el cambio por sync posterior. */
             case 'completar_habito':
                 $id    = (int)($param['id'] ?? 0);
                 $repo  = new HabitosRepository($userId);
                 $habitos = $repo->getAll();
-                $hoy   = date('Y-m-d');
+                $hoy   = $this->fechaHoyParaCanal($canal);
                 $encontrado = false;
+                $habitoActualizado = null;
                 foreach ($habitos as &$h) {
                     if ((int)$h['id'] === $id) {
                         $encontrado = true;
@@ -748,11 +769,13 @@ REGLAS:
                             $h['historialCompletados'] = $hist;
                             $h['ultimoCompletado'] = $hoy;
                             /* Incrementar racha si el día anterior también fue completado */
-                            $ayer = date('Y-m-d', strtotime('-1 day'));
+                            $ayer = date('Y-m-d', strtotime($hoy . ' -1 day'));
                             if (in_array($ayer, $hist, true) || (int)($h['racha'] ?? 0) === 0) {
                                 $h['racha'] = (int)($h['racha'] ?? 0) + 1;
                             }
                         }
+                        $h['updatedAt'] = $this->timestampMs();
+                        $habitoActualizado = $h;
                         break;
                     }
                 }
@@ -760,8 +783,19 @@ REGLAS:
                 if (!$encontrado) {
                     return ['tipo' => $tipo, 'exito' => false, 'error' => "Hábito id:{$id} no encontrado."];
                 }
-                $ok = $repo->saveAll($habitos);
-                return ['tipo' => $tipo, 'exito' => (bool)$ok, 'id' => $id];
+                $ok = $repo->saveAll([$habitoActualizado], true);
+                if (!$ok) {
+                    return ['tipo' => $tipo, 'exito' => false, 'id' => $id, 'error' => 'No se pudo guardar el hábito.'];
+                }
+                $verificado = false;
+                foreach ($repo->getAll() as $persistido) {
+                    if ((int)($persistido['id'] ?? 0) === $id) {
+                        $histPersistido = (array)($persistido['historialCompletados'] ?? []);
+                        $verificado = ($persistido['ultimoCompletado'] ?? '') === $hoy || in_array($hoy, $histPersistido, true);
+                        break;
+                    }
+                }
+                return ['tipo' => $tipo, 'exito' => $verificado, 'id' => $id, 'fecha' => $hoy, 'error' => $verificado ? null : 'El hábito no quedó persistido tras guardar.'];
 
             case 'completar_subhabito':
                 $id    = (int)($param['id'] ?? 0);
