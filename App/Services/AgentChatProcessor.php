@@ -274,15 +274,15 @@ REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido. EXCEPCIÓN: el CONTEXTO MAESTRO no es una nota — ya está embebido en el bloque '## Contexto personal' de este prompt, NO tiene ID, NUNCA uses leer_nota para él.
 - Puedes incluir MÚLTIPLES acciones en el array y se ejecutan todas. Úsalas en paralelo cuando sea necesario (ej: crear tarea + guardar memoria + programar recordatorio en una sola respuesta).
 - Si no hay acciones, envía \"acciones\": [].
-- No inventes IDs. Solo usa IDs del contexto.
-- NUNCA uses eliminar/completar sin que el usuario lo pida explícitamente.
+- NUNCA uses eliminar/completar una tarea sin que el usuario lo pida explícitamente. PERO si el usuario dice 'borra', 'elimina', 'quita' esa tarea: usa directamente `eliminar_tarea` sin confirmar — su mensaje ya ES la confirmación. Si dice 'completa', 'marca como hecho', 'terminé': usa directamente `completar_tarea` sin confirmar. NUNCA preguntes '¿confirmas?'
+- crear_tarea SOLO crea tareas para el usuario. Si el mensaje contiene 'tarea para opencode', 'pídele a opencode', 'dile a opencode', 'ejecuta en opencode' o cualquier variante de destinar la instrucción a OpenCode: usa OBLIGATORIAMENTE `solicitar_opencode`, nunca `crear_tarea`.
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
 - Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
+- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. TAMBIÉN OBLIGATORIO cuando el usuario use frases como 'tarea para opencode', 'pídele a opencode que', 'dile a opencode que', 'ejecuta en opencode' o cualquier variante que destine la instrucción a OpenCode — en ese caso usa solicitar_opencode, NUNCA crear_tarea. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` incluye el ses_XXXXX explícitamente, ej: \"Continuando la sesión ses_1e5cc66deffe4BZxD3PLgISQhX, dame un momento.\" — NUNCA omitas el ses_XXXXX en la respuesta, es importante para que el usuario sepa qué sesión se está reanudando. NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
 - actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"git --no-pager*\", \"Test-Path*\"]}. REGLA CRÍTICA: usa el PATRÓN MÁS AMPLIO posible que cubra el TIPO de comando, NUNCA el comando específico con rutas o argumentos. Ejemplos obligatorios: `git --no-pager log --oneline -10` → `git --no-pager*` (cubre TODO git con --no-pager); `Test-Path \"App\\file.php\"` → `Test-Path*`; `Measure-Object -Line` → `Measure-Object*`; `Get-Content file.php` → `Get-Content*`; `php -l File.php` → `php -l*`; `git hash-object \"file\"` → `git hash-object*`. El patrón SIEMPRE termina en `*`. Guardar el comando exacto con rutas específicas solo permite ESE comando y el problema se repite. Lee 'Permisos rechazados' del job para identificar el tipo. Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode. NO la uses sin confirmación explícita del usuario.
 - cancelar_opencode: cuando el usuario pide cancelar o detener un job de OpenCode activo. Lee el contexto para ver jobs activos (estado 🔄 ejecutando o ⏳ pendiente) y usa el id del job activo. El runner detectará el cambio en su polling y matará el proceso. Si no hay jobs activos, informa al usuario.
@@ -762,14 +762,39 @@ REGLAS:
                 $id = (int)($param['id'] ?? 0);
                 $repo = new TareasRepository($userId);
                 $tareas = $repo->getAll();
+                $textoTarea = '';
                 foreach ($tareas as &$t) {
                     if ((int)$t['id'] === $id) {
+                        $textoTarea = (string)($t['texto'] ?? '');
                         $t['completado'] = true;
                         $t['fechaCompletado'] = current_time('c');
                         break;
                     }
                 }
                 unset($t);
+                $_ok = $repo->saveAll($tareas);
+                /* [fix-actividad-tarea] Registrar en actividad igual que el flujo web.
+                 * Falla silenciosa: no interrumpe el flujo principal si ActividadService falla. */
+                try {
+                    (new ActividadService())->registrarActividad($userId, [
+                        'tipo'         => 'tarea_completada',
+                        'elementoId'   => $id,
+                        'elementoTipo' => 'tarea',
+                        'detalles'     => ['elementoNombre' => $textoTarea],
+                    ]);
+                } catch (\Throwable $actErr) {
+                    error_log('[AgentChatProcessor] Error registrando actividad para tarea ' . $id . ': ' . $actErr->getMessage());
+                }
+                return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
+
+            case 'eliminar_tarea':
+                /* [fix-eliminar-tarea] Soft-delete real: quita del array y saveAll() marca
+                 * como deleted_at en la tabla. No pedir confirmación — el usuario ya la dio
+                 * al decir 'borra', 'elimina' o 'quita'. */
+                $id = (int)($param['id'] ?? 0);
+                $repo = new TareasRepository($userId);
+                $tareas = $repo->getAll();
+                $tareas = array_values(array_filter($tareas, fn(array $t): bool => (int)$t['id'] !== $id));
                 $_ok = $repo->saveAll($tareas);
                 return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
 

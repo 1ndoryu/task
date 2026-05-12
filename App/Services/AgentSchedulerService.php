@@ -39,10 +39,24 @@ class AgentSchedulerService
 
     public static function ensureScheduled(): void
     {
-        if (!wp_next_scheduled(self::CRON_HOOK)) {
-            /* Usar every_5_minutes para granularidad de recordatorios frecuentes */
-            wp_schedule_event(time() + 30, 'every_5_minutes', self::CRON_HOOK);
+        $next = wp_next_scheduled(self::CRON_HOOK);
+
+        /* [fix-schedule-interval] Si el hook ya existe pero con un intervalo distinto a
+         * every_5_minutes (ej: quedó registrado como 'hourly' de una versión anterior),
+         * des-registrarlo y volver a agendar con el intervalo correcto.
+         * Gotcha: wp_get_schedule() devuelve false si el hook no existe, o el nombre
+         * del schedule si existe — comparamos solo el string. */
+        $scheduleActual = $next !== false ? wp_get_schedule(self::CRON_HOOK) : null;
+        if ($next !== false && $scheduleActual === 'every_5_minutes') {
+            return; // Ya está correctamente registrado
         }
+
+        if ($next !== false) {
+            /* Des-registrar el evento con intervalo incorrecto antes de recrear */
+            wp_unschedule_event($next, self::CRON_HOOK);
+        }
+
+        wp_schedule_event(time() + 30, 'every_5_minutes', self::CRON_HOOK);
     }
 
     public static function processDueActions(): void
