@@ -208,6 +208,7 @@ class AgentChatProcessor
 
         /* [116A-1+116A-2] El contexto maestro se embebe directamente en el prompt — NO es una nota.
          * No tiene ID numérico. NUNCA llames leer_nota para él. Si el usuario lo pide, reprodúcelo. */
+        /* [SEC-004] Si el usuario activó privacidad, el contexto muestra datos anonimizados */
         $bloqueMaestro = $contextoMaestro !== ''
             ? "\n\n## Contexto personal (permanente — recuerda esto siempre)\n{$contextoMaestro}\n(IMPORTANTE: este bloque NO es una nota, no tiene ID numérico. NUNCA uses leer_nota para el contexto maestro. Ya está aquí — si el usuario pide verlo, reprodúcelo directamente.)"
             : '';
@@ -275,9 +276,17 @@ REGLAS:
 
     /* --- Contexto de tareas y hábitos -------------------------------------- */
 
-    /* [115A-6] buildContexto incluye sub-hábitos, notas recientes (títulos) y recordatorios programados. */
+    /**
+     * [115A-6] buildContexto incluye sub-hábitos, notas recientes (títulos) y recordatorios programados.
+     * [SEC-004] Si el usuario tiene activado glory_chatbot_privacy_mode en user_meta,
+     * los datos se envían anonimizados al LLM (solo nombres/títulos, sin contenido real de notas,
+     * sin detalles de tareas, sin contenido de hábitos).
+     */
     private function buildContexto(int $userId, string $canal = 'app'): string
     {
+        /* [SEC-004] Verificar modo privacidad */
+        $privacyMode = (bool) get_user_meta($userId, 'glory_chatbot_privacy_mode', true);
+
         try {
             $tareas  = (new TareasRepository($userId))->getAll();
             $habitos = (new HabitosRepository($userId))->getAll();
@@ -291,12 +300,17 @@ REGLAS:
         if (empty($pendientes)) {
             $ctx .= "No hay tareas pendientes.\n";
         } else {
-            foreach ($pendientes as $t) {
-                $det = implode(', ', array_filter([
-                    !empty($t['prioridad']) ? "prioridad:{$t['prioridad']}" : '',
-                    (!empty($t['urgencia']) && $t['urgencia'] !== 'normal') ? "urgencia:{$t['urgencia']}" : '',
-                ]));
-                $ctx .= "- [id:{$t['id']}] {$t['texto']}" . ($det ? " ({$det})" : '') . "\n";
+            if ($privacyMode) {
+                /* [SEC-004] Modo privacidad: solo contar tareas pendientes, sin detalles ni contenido */
+                $ctx .= "Tienes " . count($pendientes) . " tareas pendientes.\n";
+            } else {
+                foreach ($pendientes as $t) {
+                    $det = implode(', ', array_filter([
+                        !empty($t['prioridad']) ? "prioridad:{$t['prioridad']}" : '',
+                        (!empty($t['urgencia']) && $t['urgencia'] !== 'normal') ? "urgencia:{$t['urgencia']}" : '',
+                    ]));
+                    $ctx .= "- [id:{$t['id']}] {$t['texto']}" . ($det ? " ({$det})" : '') . "\n";
+                }
             }
         }
 
@@ -318,45 +332,55 @@ REGLAS:
             return $pb <=> $pa; /* mayor importancia primero */
         });
 
-        foreach ($habitosActivos as $h) {
-            $hecho = in_array($hoy, (array)($h['historialCompletados'] ?? []), true) ? '✓' : '○';
-            $imp   = (string)($h['importancia'] ?? '');
-            $det   = array_values(array_filter([
-                $imp !== '' ? "importancia:{$imp}" : '',
-                (int)($h['racha'] ?? 0) > 0 ? "racha:{$h['racha']}" : '',
-                (!empty($h['ventanaOportunidad']['habilitada']))
-                    ? sprintf('ventana:%02d:%02d-%02d:%02d',
-                        (int)($h['ventanaOportunidad']['horaInicio'] ?? 0),
-                        (int)($h['ventanaOportunidad']['minutoInicio'] ?? 0),
-                        (int)($h['ventanaOportunidad']['horaFin'] ?? 0),
-                        (int)($h['ventanaOportunidad']['minutoFin'] ?? 0))
-                    : '',
-            ]));
-            $ctx .= '- [id:' . $h['id'] . "] {$hecho} {$h['nombre']}" . (!empty($det) ? ' (' . implode(', ', $det) . ')' : '') . "\n";
-            /* Sub-hábitos (con índice para la acción completar_subhabito) */
-            if (!empty($h['subhabitos']) && is_array($h['subhabitos'])) {
-                foreach ($h['subhabitos'] as $idx => $sh) {
-                    $shHecho  = !empty($sh['completadoHoy']) ? '✓' : '○';
-                    $shNombre = (string)($sh['nombre'] ?? $sh['texto'] ?? "sub-{$idx}");
-                    $ctx .= "  - [sub:{$idx}] {$shHecho} " . mb_substr($shNombre, 0, 50) . "\n";
+        if ($privacyMode) {
+            /* [SEC-004] Modo privacidad: solo contar hábitos, sin nombres ni detalles */
+            $completados = count(array_filter($habitosActivos, fn($h) => in_array($hoy, (array)($h['historialCompletados'] ?? []), true)));
+            $pendientes  = count($habitosActivos) - $completados;
+            $ctx .= "Activos: {$pendientes} pendientes, {$completados} completados hoy.\n";
+        } else {
+            foreach ($habitosActivos as $h) {
+                $hecho = in_array($hoy, (array)($h['historialCompletados'] ?? []), true) ? '✓' : '○';
+                $imp   = (string)($h['importancia'] ?? '');
+                $det   = array_values(array_filter([
+                    $imp !== '' ? "importancia:{$imp}" : '',
+                    (int)($h['racha'] ?? 0) > 0 ? "racha:{$h['racha']}" : '',
+                    (!empty($h['ventanaOportunidad']['habilitada']))
+                        ? sprintf('ventana:%02d:%02d-%02d:%02d',
+                            (int)($h['ventanaOportunidad']['horaInicio'] ?? 0),
+                            (int)($h['ventanaOportunidad']['minutoInicio'] ?? 0),
+                            (int)($h['ventanaOportunidad']['horaFin'] ?? 0),
+                            (int)($h['ventanaOportunidad']['minutoFin'] ?? 0))
+                        : '',
+                ]));
+                $ctx .= '- [id:' . $h['id'] . "] {$hecho} {$h['nombre']}" . (!empty($det) ? ' (' . implode(', ', $det) . ')' : '') . "\n";
+                /* Sub-hábitos (con índice para la acción completar_subhabito) */
+                if (!empty($h['subhabitos']) && is_array($h['subhabitos'])) {
+                    foreach ($h['subhabitos'] as $idx => $sh) {
+                        $shHecho  = !empty($sh['completadoHoy']) ? '✓' : '○';
+                        $shNombre = (string)($sh['nombre'] ?? $sh['texto'] ?? "sub-{$idx}");
+                        $ctx .= "  - [sub:{$idx}] {$shHecho} " . mb_substr($shNombre, 0, 50) . "\n";
+                    }
                 }
             }
         }
 
         /* Notas recientes — título + preview de contenido (primeros 300 chars).
          * Incluir contenido evita que el modelo diga "no puedo acceder" sin llamar leer_nota.
-         * Para el contenido completo de una nota larga, el modelo puede usar leer_nota. */
+         * Para el contenido completo de una nota larga, el modelo puede usar leer_nota.
+         * [SEC-004] En modo privacidad, solo se muestran títulos sin contenido. */
         if (!empty($notas)) {
             $ctx .= "\n## Notas recientes\n";
             foreach ($notas as $nota) {
-                $titulo    = $nota['titulo'] !== '' ? $nota['titulo'] : '(sin título)';
-                $contenido = (string)($nota['contenido'] ?? '');
-                $preview   = mb_strlen($contenido) > 300
-                    ? mb_substr($contenido, 0, 300) . '… [usa leer_nota id:' . $nota['id'] . ' para ver completa]'
-                    : $contenido;
+                $titulo = $nota['titulo'] !== '' ? $nota['titulo'] : '(sin título)';
                 $ctx .= "- [id:{$nota['id']}] " . mb_substr($titulo, 0, 60) . "\n";
-                if ($preview !== '') {
-                    $ctx .= "  Contenido: " . str_replace("\n", ' ', $preview) . "\n";
+                if (!$privacyMode) {
+                    $contenido = (string)($nota['contenido'] ?? '');
+                    $preview   = mb_strlen($contenido) > 300
+                        ? mb_substr($contenido, 0, 300) . '… [usa leer_nota id:' . $nota['id'] . ' para ver completa]'
+                        : $contenido;
+                    if ($preview !== '') {
+                        $ctx .= "  Contenido: " . str_replace("\n", ' ', $preview) . "\n";
+                    }
                 }
             }
         }
@@ -469,7 +493,12 @@ REGLAS:
         }
 
         if ($this->mensajePideContinuarOpencode($mensajeOriginal)) {
-            $jobId = $this->resolverJobOpencodeReciente($userId);
+            /* [125A-cont] Si hay session ID explícito en el mensaje, buscar ese job primero.
+             * Esto resuelve el caso donde el usuario pega el ID que imprimió la notificación. */
+            $sessionIdExplicito = $this->extraerSessionIdExplicito($mensajeOriginal);
+            $jobId = $sessionIdExplicito !== ''
+                ? ($this->resolverJobPorSessionId($userId, $sessionIdExplicito) ?: $this->resolverJobOpencodeReciente($userId))
+                : $this->resolverJobOpencodeReciente($userId);
             $acciones = array_values(array_filter(
                 $acciones,
                 static fn(array $accion): bool => (string)($accion['tipo'] ?? '') !== 'solicitar_opencode'
@@ -524,13 +553,49 @@ REGLAS:
     }
 
     /* [116A-4] WhatsApp usa lenguaje natural corto para continuar sesiones OpenCode.
-     * No dejamos esta decisión solo al LLM porque puede responder "continuando" sin emitir acción. */
+     * No dejamos esta decisión solo al LLM porque puede responder "continuando" sin emitir acción.
+     * [125A-cont] También se activa si el mensaje contiene un session ID explícito (ses_XXXXX),
+     * incluso sin palabras clave de continuación — el usuario pegó el ID directamente. */
     private function mensajePideContinuarOpencode(string $mensaje): bool
     {
+        /* Si hay session ID explícito en el mensaje, siempre es una petición de continuar */
+        if ($this->extraerSessionIdExplicito($mensaje) !== '') {
+            return true;
+        }
         $normalizado = mb_strtolower($mensaje);
         $mencionaSesion = (bool)preg_match('/\b(opencode|sesion|sesión|anterior)\b/u', $normalizado);
         $pideContinuar = (bool)preg_match('/\b(continua|continúa|continuar|sigue|seguir|reanuda|reanudar|reintenta|reintentar|retry)\b/u', $normalizado);
         return $mencionaSesion && $pideContinuar;
+    }
+
+    /* [125A-cont] Extrae el ID de sesión OpenCode si el usuario lo pegó explícitamente.
+     * Patrón: ses_ seguido de 6-80 caracteres alfanuméricos. */
+    private function extraerSessionIdExplicito(string $mensaje): string
+    {
+        if (preg_match('/\bses_([a-zA-Z0-9]{6,80})\b/', $mensaje, $m)) {
+            return 'ses_' . $m[1];
+        }
+        return '';
+    }
+
+    /* [125A-cont] Si el usuario especificó un session ID explícito, buscar el job que lo tiene.
+     * Si no hay match, devuelve 0 para que resolverJobOpencodeReciente lo maneje. */
+    private function resolverJobPorSessionId(int $userId, string $sessionId): int
+    {
+        try {
+            $svc = new \App\Services\Agent\OpencodeJobService();
+            foreach ($svc->listarRecientes(168, 10) as $job) {
+                if ((int)($job['user_id'] ?? 0) !== $userId) {
+                    continue;
+                }
+                $resultSid  = (string)($job['resultado']['session_id'] ?? '');
+                $payloadSid = (string)($job['payload']['session_id'] ?? '');
+                if ($resultSid === $sessionId || $payloadSid === $sessionId) {
+                    return (int)$job['id'];
+                }
+            }
+        } catch (\Throwable) { /* fallback: resolverJobOpencodeReciente */ }
+        return 0;
     }
 
     private function resolverJobOpencodeReciente(int $userId): int
