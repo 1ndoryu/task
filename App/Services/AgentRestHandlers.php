@@ -237,7 +237,11 @@ class AgentRestHandlers
         try {
             $limit = (int)($request->get_param('limit') ?? 5);
             $jobs = (new OpencodeJobService())->listarPendientes($limit);
-            return self::ok(['jobs' => $jobs]);
+            /* [fix-allowlist-race] Incluir el allowlist actual en la respuesta para que el runner
+             * siempre fusione el snapshot del job con los permisos más recientes. Así, aunque
+             * actualizar_opencode_allowlist se llamó después de crear el job, el runner lo aplica. */
+            $currentExtra = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
+            return self::ok(['jobs' => $jobs, 'current_extra_permissions' => $currentExtra]);
         } catch (\Throwable $e) {
             return self::error($e->getMessage(), 'opencode_jobs_error', 500);
         }

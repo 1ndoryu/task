@@ -537,7 +537,12 @@ async function requestRunner({apiUrl, secret, method, pathSuffix, route, body}) 
     return data.data;
 }
 
-function optionsFromJobPayload(options, payload) {
+/* [fix-allowlist-race] currentExtra: allowlist fresco del servidor (current_extra_permissions de
+ * la respuesta jobs). Se fusiona con el snapshot del payload para que permisos añadidos después
+ * de crear el job igualmente se apliquen en la ejecución. */
+function optionsFromJobPayload(options, payload, currentExtra = []) {
+    const payloadExtra = Array.isArray(payload.extra_permissions) ? payload.extra_permissions : [];
+    const mergedExtra  = [...new Set([...payloadExtra, ...currentExtra])];
     return {
         ...options,
         project: payload.project || payload.proyecto || 'glorytemplate',
@@ -549,8 +554,8 @@ function optionsFromJobPayload(options, payload) {
         /* [115A-cont] Campos de continuacion de sesion */
         sessionId: typeof payload.session_id === 'string' ? payload.session_id : '',
         previousOutput: typeof payload.previous_output === 'string' ? payload.previous_output : '',
-        /* [125A-1] Permisos extra acumulados por el usuario */
-        extra_permissions: Array.isArray(payload.extra_permissions) ? payload.extra_permissions : [],
+        /* [125A-1] Permisos extra: merge de snapshot del job + allowlist actual del servidor */
+        extra_permissions: mergedExtra,
     };
 }
 
@@ -573,7 +578,9 @@ async function pollOnce(options) {
 
     const job = jobs[0];
     const payload = job.payload || {};
-    const runOptions = optionsFromJobPayload(options, payload);
+    /* [fix-allowlist-race] Fusionar allowlist actual (currentExtra) con el snapshot del payload */
+    const currentExtra = Array.isArray(listData.current_extra_permissions) ? listData.current_extra_permissions : [];
+    const runOptions = optionsFromJobPayload(options, payload, currentExtra);
 
     if (options['dry-run']) {
         const preview = await executeRun(runOptions, {}, false);

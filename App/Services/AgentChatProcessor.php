@@ -171,6 +171,14 @@ class AgentChatProcessor
 
         $parsed['respuesta'] = $this->anotarFallosEnRespuesta($parsed['respuesta'], $ejecutadas);
 
+        /* [fix-session-confirm] Si el usuario pidió continuar con ses_XXXXX y la respuesta
+         * no lo menciona (el LLM lo olvida), inyectarlo para que el usuario sepa qué sesión
+         * está reanudando antes de que llegue la notificación del runner. */
+        $sesionExplicita = $this->extraerSessionIdExplicito($mensaje);
+        if ($sesionExplicita !== '' && !str_contains($parsed['respuesta'], $sesionExplicita)) {
+            $parsed['respuesta'] = rtrim($parsed['respuesta'], '.!? ') . " (sesión {$sesionExplicita})";
+        }
+
         /* Persistir mensajes */
         $_ok = $this->chat->guardarMensaje($userId, $sessionId, 'usuario', $mensaje, null, 0);
         $_ok = $this->chat->guardarMensaje($userId, $sessionId, 'asistente', $parsed['respuesta'], $parsed['acciones'], (int)($llmResult['tokensComplecion'] ?? $llmResult['tokens'] ?? 0));
@@ -275,7 +283,7 @@ REGLAS:
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
-- continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` di algo breve como \"Continuando esa sesión, dame un momento\". NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
+- continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` incluye el ses_XXXXX explícitamente, ej: \"Continuando la sesión ses_1e5cc66deffe4BZxD3PLgISQhX, dame un momento.\" — NUNCA omitas el ses_XXXXX en la respuesta, es importante para que el usuario sepa qué sesión se está reanudando. NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
 - actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados (comandos bloqueados) y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"git *\", \"php *\"]} donde cada entrada es el glob que permite ese comando. El PATRÓN es '<binario> *' (ej: 'git *' para 'git --no-pager diff', 'php *' para 'php -l File.php'). Lee el Resumen del job fallido en el contexto — los comandos rechazados están bajo 'Permisos rechazados' o en el Resumen. EXTRAE el binario del comando rechazado y añade ' *'. NUNCA inventes patrones ni uses globs genéricos como 'agente/*'. Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode para reintentar el job con los nuevos permisos. NO la uses sin confirmación explícita del usuario.
 - cancelar_opencode: cuando el usuario pide cancelar o detener un job de OpenCode activo. Lee el contexto para ver jobs activos (estado 🔄 ejecutando o ⏳ pendiente) y usa el id del job activo. El runner detectará el cambio en su polling y matará el proceso. Si no hay jobs activos, informa al usuario.
 - reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
@@ -646,9 +654,20 @@ REGLAS:
 
     /* [115A-9] Retry hasta 3 intentos con backoff 200/400ms para errores transitorios.
      * Los errores lógicos (ID inexistente, validación) fallan rápido sin reintentar.
-     * Los fallos persistentes se anotan en la respuesta para que el usuario los vea. */
+     * Los fallos persistentes se anotan en la respuesta para que el usuario los vea.
+     * [fix-allowlist-race] actualizar_opencode_allowlist se ejecuta primero aunque el LLM
+     * lo ponga después de continuar_opencode. Así crearContinuacion siempre lee el allowlist
+     * ya actualizado y el job hereda los permisos correctos. */
     private function ejecutarAcciones(int $userId, string $canal, array $acciones): array
     {
+        /* Mover actualizar_opencode_allowlist al frente para evitar la race condition:
+         * si el LLM emite continuar_opencode antes de actualizar_opencode_allowlist,
+         * crearContinuacion leería el allowlist viejo y el job heredaría permisos desactualizados. */
+        usort($acciones, static function (array $a, array $b): int {
+            $prioridad = static fn(string $t): int => $t === 'actualizar_opencode_allowlist' ? 0 : 1;
+            return $prioridad((string)($a['tipo'] ?? '')) <=> $prioridad((string)($b['tipo'] ?? ''));
+        });
+
         $ejecutadas = [];
         foreach ($acciones as $accion) {
             $tipo  = (string)($accion['tipo'] ?? '');
