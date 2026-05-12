@@ -114,7 +114,7 @@ class AgentChatProcessor
 
         /* Llamar al LLM con proveedor/modelo configurados (no hardcodeados).
          * Para visión forzamos un modelo multimodal de Groq. */
-        $llm = $this->resolverConfigLLM();
+        $llm = $this->resolverConfigLLM($userId);
         if ($esImagen) {
             $llm = ['proveedor' => 'groq', 'modelo' => 'meta-llama/llama-4-scout-17b-16e-instruct'];
         }
@@ -277,6 +277,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"listar_proyectos\", \"parametros\": {}}
 - {\"tipo\": \"listar_ramas\", \"parametros\": {\"proyecto\": \"opcional — ID del proyecto. Si se omite, usa el proyecto activo.\"}}
 - {\"tipo\": \"cambiar_proyecto\", \"parametros\": {\"proyecto\": \"glorytemplate\"}}
+- {\"tipo\": \"automejora\", \"parametros\": {\"prompt\": \"que mejora hacer\", \"riesgo\": \"bajo|medio|alto\"}} — AUTO-MEJORA DEL AGENTE. Úsala cuando el usuario pida 'automejora', 'mejora el agente', 'mejora tu codigo', 'mejora tu propio codigo', 'agregame una accion al agente', 'añade una accion' o cualquier variante de modificar el código del agente (el repositorio glorytemplate, rama glory-react-logic). Esto modifica EL CÓDIGO DEL PROPIO AGENTE (OpenCode + PHP + React del agente), no el del proyecto del usuario. Siempre hace commit. Solo hace deploy si riesgo es \"bajo\" (default: \"medio\", sin deploy). La rama por defecto es glory-react-logic. NO uses solicitar_opencode para automejoras — usa automejora para que el sistema sepa que es una modificación del propio agente. En la respuesta di algo como \"Procesando automejora, te aviso cuando termine\". El runner local lo ejecutará automáticamente.
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido. EXCEPCIÓN: el CONTEXTO MAESTRO no es una nota — ya está embebido en el bloque '## Contexto personal' de este prompt, NO tiene ID, NUNCA uses leer_nota para él.
@@ -587,7 +588,7 @@ REGLAS:
 
         foreach ($acciones as &$accion) {
             $tipo = (string)($accion['tipo'] ?? '');
-            if ($tipo !== 'solicitar_opencode') {
+            if (!in_array($tipo, ['solicitar_opencode', 'automejora'], true)) {
                 continue;
             }
 
@@ -1370,6 +1371,62 @@ REGLAS:
                 $this->setActiveProject($userId, $nuevoProyecto);
                 return ['tipo' => $tipo, 'exito' => true, 'proyecto' => $nuevoProyecto];
 
+            case 'automejora':
+                /* [125A-8] Automejora del agente: modifica el código del propio agente
+                 * (repositorio glorytemplate, rama glory-react-logic).
+                 * Siempre hace commit; deploy solo si riesgo es "bajo".
+                 * Parámetros: prompt (obligatorio), riesgo (opcional: bajo|medio|alto, default medio). */
+                $promptAutomejora = sanitize_textarea_field((string)($param['prompt'] ?? ''));
+                if ($promptAutomejora === '') {
+                    throw new \LogicException('automejora requiere parámetro prompt.');
+                }
+
+                $riesgoAutomejora = in_array((string)($param['riesgo'] ?? ''), ['bajo', 'medio', 'alto'], true)
+                    ? (string)$param['riesgo'] : 'medio';
+                $commitAutomejora = true;  // automejora siempre hace commit
+                $deployAutomejora = ($riesgoAutomejora === 'bajo'); // solo deploy si riesgo bajo
+
+                $proyectosAutomejora = $this->loadProjectsConfig();
+                $proyectoAutomejora  = 'glorytemplate';
+                $branchAutomejora    = (string)($proyectosAutomejora[$proyectoAutomejora]['branch'] ?? 'glory-react-logic');
+                $agenteAutomejora    = 'whatsapp-code';
+
+                /* Prompt compuesto: deja claro que es automejora del agente */
+                $promptCompletoAutomejora = "AUTOMEJORA DEL AGENTE\n"
+                    . "Proyecto: glorytemplate\n"
+                    . "Rama: {$branchAutomejora}\n"
+                    . "Riesgo: {$riesgoAutomejora}\n\n"
+                    . "Tarea:\n{$promptAutomejora}";
+
+                $extraAllowAutomejora = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
+                $accionAutomejora = (new AgentActionService())->crearPropuesta(
+                    $userId,
+                    'opencode_job',
+                    'Automejora: ' . mb_substr(str_replace(["\r", "\n"], ' ', $promptAutomejora), 0, 80),
+                    [
+                        'project'           => $proyectoAutomejora,
+                        'agent'             => $agenteAutomejora,
+                        'branch'            => $branchAutomejora,
+                        'prompt'            => $promptCompletoAutomejora,
+                        'reasoning_effort'  => 'max',
+                        'commit'            => $commitAutomejora,
+                        'deploy'            => $deployAutomejora,
+                        'source'            => $canal,
+                        'extra_permissions' => $extraAllowAutomejora,
+                    ],
+                    ($canal !== 'whatsapp')  // auto-aprobar desde WhatsApp
+                );
+
+                return [
+                    'tipo'                 => $tipo,
+                    'exito'                => true,
+                    'pendiente_aprobacion' => ($canal !== 'whatsapp'),
+                    'accion_id'            => $accionAutomejora['id'] ?? null,
+                    'proyecto'             => $proyectoAutomejora,
+                    'branch'               => $branchAutomejora,
+                    'riesgo'               => $riesgoAutomejora,
+                ];
+
             default:
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'Tipo de acción no soportado en canal server-side'];
         }
@@ -1463,7 +1520,7 @@ REGLAS:
         ));
 
         /* Resumir con el modelo configurado */
-        $llm       = $this->resolverConfigLLM();
+        $llm       = $this->resolverConfigLLM($userId);
         $llmResult = (new LLMProviderService())->enviarChat(
             [
                 ['role' => 'system', 'content' => 'Eres un asistente que resume conversaciones. Resume en 3-5 oraciones los puntos clave de esta conversación, en tercera persona, para ser usados como contexto futuro. Incluye: decisiones tomadas, datos personales mencionados, tareas creadas. Sé conciso.'],
@@ -1500,13 +1557,14 @@ REGLAS:
 
     /* --- Configuración LLM ------------------------------------------------- */
 
-    /* [115A-1] Lee proveedor y modelo desde WP options.
+    /* [Fase-6] Lee proveedor y modelo desde user_meta del usuario primero,
+     * con fallback a WP options globales.
      * Se configuran desde el panel "Asistente IA" sincronizando al servidor.
      * Fallback: groq + llama-3.3-70b-versatile */
-    private function resolverConfigLLM(): array
+    private function resolverConfigLLM(int $userId): array
     {
-        $proveedor = (string)(get_option('glory_chatbot_proveedor') ?: 'groq');
-        $modelo    = (string)(get_option('glory_chatbot_modelo')    ?: 'openai/gpt-oss-120b');
+        $proveedor = (string)(get_user_meta($userId, 'glory_chatbot_proveedor', true) ?: get_option('glory_chatbot_proveedor') ?: 'groq');
+        $modelo    = (string)(get_user_meta($userId, 'glory_chatbot_modelo', true)    ?: get_option('glory_chatbot_modelo')    ?: 'openai/gpt-oss-120b');
         return ['proveedor' => $proveedor, 'modelo' => $modelo];
     }
 
@@ -1536,7 +1594,7 @@ REGLAS:
 
     private function compactarContextoMaestro(int $userId, string $texto): void
     {
-        $llm       = $this->resolverConfigLLM();
+        $llm       = $this->resolverConfigLLM($userId);
         $llmResult = (new LLMProviderService())->enviarChat(
             [
                 ['role' => 'system', 'content' => 'Resume el siguiente contexto personal del usuario en máximo 2000 caracteres, conservando todos los datos importantes: preferencias, instrucciones permanentes, datos personales, metas. Sé conciso pero completo.'],

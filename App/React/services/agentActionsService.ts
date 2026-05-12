@@ -129,6 +129,12 @@ export async function guardarMensajeAgente(params: {
     return data.mensaje;
 }
 
+/* [125A-8] Acción automejora: modifica el código del propio agente (glorytemplate,
+ * rama glory-react-logic). Se usa desde el LLM vía el system prompt; el backend
+ * crea un opencode_job con commit=true y deploy condicional al nivel de riesgo.
+ * No necesita función TypeScript específica porque el flujo es server-side:
+ *   LLM → AgentChatProcessor → OpencodeJobService → runner → OpenCode. */
+
 /* [106A] Actualiza el campo `acciones` de un mensaje ya persistido. Necesario para que
  * confirmar/rechazar acciones pendientes sobreviva un re-mount del panel. */
 export async function actualizarAccionesMensajeAgente(id: number, acciones: unknown[]): Promise<MensajeAgentePersistido> {
