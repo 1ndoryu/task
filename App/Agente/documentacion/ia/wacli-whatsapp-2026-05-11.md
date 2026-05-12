@@ -35,6 +35,12 @@
 - Los números se devuelven enmascarados en estado/resultado.
 - `wacli send` solo se ejecuta después de aprobar una acción persistida.
 - Los comandos se ejecutan con `proc_open` y argumentos separados, sin shell interpolation.
+- `WacliService` pasa `--lock-wait` en cada comando para tolerar bloqueos breves del store cuando `wacli sync --follow` está activo.
+
+## Media entrante
+- `wacli media download` usa la API actual `--chat <jid> --id <messageId> --output <file>`.
+- Los eventos nuevos de wacli proveen `Chat` e `ID`; no usar `DirectPath`/`MediaKey` como flags porque la versión actual los rechaza.
+- Si el store está ocupado, `--lock-wait` debe esperar antes de fallar; sin esto, audios e imágenes caen al fallback del chatbot.
 
 ## Recordatorios dinamicos
 - Los recordatorios `reminder_notify` cuyo titulo/mensaje indiquen `Habito pendiente` o cuyo payload use `dynamic_type=habit_pending` se resuelven al momento de ejecutarse.

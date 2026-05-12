@@ -124,7 +124,7 @@ class AgentChatProcessor
         $parsed     = $this->parsear($rawContent);
 
         /* Ejecutar acciones (con retry) */
-        $parsed['acciones'] = $this->normalizarAccionesDesdeMensajeUsuario($parsed['acciones'], $mensaje, $canal);
+        $parsed['acciones'] = $this->normalizarAccionesDesdeMensajeUsuario($parsed['acciones'], $mensaje, $canal, $userId);
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
 
         /* [116A-1] Segunda llamada al LLM cuando se ejecutó alguna acción síncrona.
@@ -264,7 +264,7 @@ REGLAS:
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
-- continuar_opencode: úsala cuando el usuario quiera ampliar, corregir o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'continúa', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). Si el usuario repite la misma solicitud de cero o pide algo nuevo, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.
+- continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca). Requiere job_id visible en el contexto.
 - reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
 - compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
 - cambiar_limite_compactacion: úsala cuando el usuario quiera cambiar el límite para la compactación automática. Convierte tokens a chars × 4 si el usuario da tokens.{$bloqueMemoria}{$bloqueMaestro}
@@ -439,11 +439,45 @@ REGLAS:
     /* [115A-15] WhatsApp puede pedir código mientras MemPalace inyecta contexto relevante.
      * Gotcha: el LLM a veces puso ese contexto en solicitar_opencode.prompt y omitió el
      * mensaje real; por eso el backend antepone el texto original como fuente de verdad. */
-    private function normalizarAccionesDesdeMensajeUsuario(array $acciones, string $mensaje, string $canal): array
+    private function normalizarAccionesDesdeMensajeUsuario(array $acciones, string $mensaje, string $canal, int $userId): array
     {
         $mensajeOriginal = trim($mensaje);
         if ($canal !== 'whatsapp' || $mensajeOriginal === '') {
             return $acciones;
+        }
+
+        if ($this->mensajePideContinuarOpencode($mensajeOriginal)) {
+            $jobId = $this->resolverJobOpencodeReciente($userId);
+            $acciones = array_values(array_filter(
+                $acciones,
+                static fn(array $accion): bool => (string)($accion['tipo'] ?? '') !== 'solicitar_opencode'
+            ));
+            $tieneContinuacion = false;
+            foreach ($acciones as &$accion) {
+                if ((string)($accion['tipo'] ?? '') !== 'continuar_opencode') {
+                    continue;
+                }
+                $param = (array)($accion['parametros'] ?? []);
+                if (empty($param['job_id']) && $jobId > 0) {
+                    $param['job_id'] = $jobId;
+                }
+                if (trim((string)($param['mensaje'] ?? $param['prompt'] ?? '')) === '') {
+                    $param['mensaje'] = $mensajeOriginal;
+                }
+                unset($param['prompt']);
+                $accion['parametros'] = $param;
+                $tieneContinuacion = true;
+            }
+            unset($accion);
+            if (!$tieneContinuacion) {
+                $acciones[] = [
+                    'tipo' => 'continuar_opencode',
+                    'parametros' => [
+                        'job_id' => $jobId,
+                        'mensaje' => $mensajeOriginal,
+                    ],
+                ];
+            }
         }
 
         foreach ($acciones as &$accion) {
@@ -465,6 +499,39 @@ REGLAS:
         unset($accion);
 
         return $acciones;
+    }
+
+    /* [116A-4] WhatsApp usa lenguaje natural corto para continuar sesiones OpenCode.
+     * No dejamos esta decisión solo al LLM porque puede responder "continuando" sin emitir acción. */
+    private function mensajePideContinuarOpencode(string $mensaje): bool
+    {
+        $normalizado = mb_strtolower($mensaje);
+        $mencionaSesion = (bool)preg_match('/\b(opencode|sesion|sesión|anterior)\b/u', $normalizado);
+        $pideContinuar = (bool)preg_match('/\b(continua|continúa|continuar|sigue|seguir|reanuda|reanudar|reintenta|reintentar|retry)\b/u', $normalizado);
+        return $mencionaSesion && $pideContinuar;
+    }
+
+    private function resolverJobOpencodeReciente(int $userId): int
+    {
+        try {
+            $svc = new \App\Services\Agent\OpencodeJobService();
+            foreach ($svc->listarRecientes(72, 10) as $job) {
+                if ((int)($job['user_id'] ?? 0) !== $userId) {
+                    continue;
+                }
+                if (!empty($job['resultado']['session_id']) || !empty($job['payload']['session_id'])) {
+                    return (int)$job['id'];
+                }
+            }
+            foreach ($svc->listarRecientes(72, 10) as $job) {
+                if ((int)($job['user_id'] ?? 0) === $userId) {
+                    return (int)$job['id'];
+                }
+            }
+        } catch (\Throwable) {
+            /* La acción continuar_opencode tiene su propio fallback y error visible. */
+        }
+        return 0;
     }
 
     /* --- Ejecutores de acciones -------------------------------------------- */

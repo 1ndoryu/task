@@ -1,5 +1,29 @@
 # Lecciones Aprendidas
 
+## 2026-05-11 — Regex ANSI roto oculta resumen de OpenCode
+
+**Patrón del error:** El backend intentaba limpiar ANSI con `\x1b[\\]` dentro de un patrón PCRE PHP. La clase quedaba inválida y `preg_replace` fallaba, por lo que el extractor de resumen devolvía vacío y WhatsApp mostraba solo “OpenCode terminó” + sesión.
+
+**Lección:** Todo filtro de salida terminal debe tener una prueba mínima con una cadena ANSI real. Si el resumen depende de marcadores, el runner debe conservar suficiente output para que el extractor los vea.
+
+**Fix:** `AgentRestHandlers::limpiarAnsi()` usa regex CSI/ESC válidos; el runner conserva hasta 120KB de output y reporta `whatsapp_summary` también en fallos.
+
+## 2026-05-11 — Continuar OpenCode no debe depender solo del LLM
+
+**Patrón del error:** El usuario decía “continúa la sesión anterior” y el modelo respondía “Continuando…” sin emitir `continuar_opencode`, o interpretaba “reintenta” como job nuevo.
+
+**Lección:** Las intenciones operativas cortas de WhatsApp deben normalizarse en backend. Cuando una frase implica continuar/reintentar sesión previa, el sistema debe crear la acción aunque el LLM omita la tool call.
+
+**Fix:** `AgentChatProcessor` detecta mensajes con sesión/anterior/opencode + continuar/reintentar y fuerza `continuar_opencode` apuntando al job reciente.
+
+## 2026-05-11 — wacli sync puede bloquear el store durante media download
+
+**Patrón del error:** Audios e imágenes caían al fallback porque `wacli media download` fallaba con `store is locked` mientras `wacli sync --follow` estaba activo.
+
+**Lección:** Cualquier comando wacli ejecutado desde PHP debe usar `--lock-wait`; fallar inmediatamente transforma bloqueos breves en falsos errores de transcripción/imagen.
+
+**Fix:** `WacliService::ejecutarWacli()` agrega `--lock-wait` y media download sube timeout a 45s.
+
 ## 2026-05-11 — El prompt de OpenCode debe preservar el mensaje original de WhatsApp
 
 **Patrón del error:** El chatbot recibía memorias semánticas relevantes y debía crear una acción `solicitar_opencode`, pero el LLM podía poner el bloque de memoria/contexto en `prompt` y dejar fuera la tarea real del usuario. OpenCode obedecía correctamente, pero el bloque `=== TAREA A EJECUTAR ===` contenía contexto en vez de la solicitud.

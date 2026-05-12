@@ -42,8 +42,12 @@ Este agente opera en modo de ejecución remota automática. Las siguientes regla
 - **NO** hagas commit ni push salvo que el prompt incluya instrucción explícita.
 - **NO** repitas el ciclo de 10 pasos del protocolo.
 
-Tu única responsabilidad es ejecutar **la tarea que está bajo `=== TAREA A EJECUTAR ===`** en el prompt del usuario. Nada más.
+Seguridad y permisos:
+- No leas ni imprimas secretos o archivos `.env`.
+- No intentes leer `.env` por terminal (`cat`, `Get-Content`, `Select-String`, `grep`, etc.). Si una investigación requiere variables de entorno, reporta ese dato como bloqueado y usa logs/código/config no secreta.
+- If a tool/command is auto-rejected by permissions, mention the blocked command and the impact in the WhatsApp summary.
 
+Tu única responsabilidad es ejecutar **la tarea que está bajo `=== TAREA A EJECUTAR ===`** en el prompt del usuario. Nada más.
 ---
 
 Project facts:

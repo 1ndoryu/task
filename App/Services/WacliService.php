@@ -115,7 +115,7 @@ class WacliService
             '--chat',   $chat,
             '--id',     $messageId,
             '--output', $tmpFile,
-        ], 30);
+        ], 45);
 
         if (!file_exists($tmpFile) || filesize($tmpFile) === 0) {
             throw new \RuntimeException('wacli no generó el archivo de media esperado en ' . $tmpFile);
@@ -157,6 +157,10 @@ class WacliService
             $parts[] = $account;
         }
 
+        /* [116A-4] wacli sync --follow puede mantener el store ocupado brevemente.
+         * --lock-wait evita fallos transitorios tipo "store is locked" en media/send. */
+        $parts[] = '--lock-wait';
+        $parts[] = min(30, max(5, (int)floor($timeoutSeconds / 2))) . 's';
         $parts[] = '--json';
         $parts[] = '--timeout';
         $parts[] = $timeoutSeconds . 's';

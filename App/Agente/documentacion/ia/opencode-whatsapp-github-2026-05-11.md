@@ -13,6 +13,7 @@
 - El runner local funciona en modo `loop` contra `https://task.nakomi.studio/wp-json/glory/v1` y reclama jobs `opencode_job` via HMAC.
 - Los instruction files `.github/instructions/*.md` con `applyTo: '**'` tambien son visibles para OpenCode; `test.instructions.md` contiene excepcion explicita para `whatsapp-code` y prompts con `=== TAREA A EJECUTAR ===`.
 - En Windows el runner no debe invocar `opencode.cmd` con `shell: true`: resuelve el wrapper npm a `node_modules/opencode-ai/bin/opencode` y ejecuta `node` sin shell para preservar prompts multilinea.
+- El resumen WhatsApp depende de `=== RESUMEN PARA WHATSAPP ===`; el runner conserva una ventana amplia de output y el backend limpia ANSI con regex PCRE válido antes de extraerlo.
 
 ## Arquitectura elegida
 1. WhatsApp entra por el webhook existente y `AgentChatProcessor`.
@@ -87,3 +88,5 @@ Para usar GitHub:
 - Riesgo: secretos en prompts/logs. Mitigacion: `.env` denegado en config y runner no imprime auth.
 - Riesgo: MemPalace o contexto del chatbot reemplaza la tarea real al generar `solicitar_opencode.prompt`. Mitigacion: `AgentChatProcessor` antepone siempre el mensaje original de WhatsApp al prompt que entra al job, dejando cualquier interpretacion del LLM como contexto secundario.
 - Riesgo: Windows `cmd.exe` rompe prompts multilinea al pasar argumentos con `shell: true`. Mitigacion: `scripts/opencode-whatsapp-runner.mjs` ejecuta OpenCode via `node .../opencode` sin shell.
+- Riesgo: OpenCode headless pide permiso (`bash *: ask`) y auto-rechaza porque no hay canal interactivo con WhatsApp. Mitigacion: el agente no debe intentar leer `.env`; si un comando queda bloqueado, el resumen debe indicarlo. La aprobación interactiva por WhatsApp no existe todavía.
+- Riesgo: el LLM responda “continuando” sin emitir acción. Mitigacion: `AgentChatProcessor` detecta mensajes de continuar/reintentar sesion anterior y fuerza `continuar_opencode` con el job reciente.

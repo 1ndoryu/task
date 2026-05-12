@@ -304,7 +304,7 @@ class AgentRestHandlers
                     foreach ($rechazados as $cmd) {
                         $waMsg .= "\n\u{2022} `{$cmd}`";
                     }
-                    $waMsg .= "\n\nResponde *PERMITIR <comando>* para agregarlo a opencode.jsonc.";
+                    $waMsg .= "\n\nOpenCode remoto no puede pedir aprobacion interactiva por WhatsApp; ajusta la tarea o el allowlist antes de reintentar.";
                 }
                 (new WacliService())->enviarTexto(null, $waMsg);
             } catch (\Throwable) { /* no bloquear si WhatsApp falla */ }
@@ -345,7 +345,11 @@ class AgentRestHandlers
      * Cubre SGR (\x1b[...m), así como ESC solos. */
     private static function limpiarAnsi(string $text): string
     {
-        return (string) preg_replace('/\x1b\[[0-9;]*[mGKHF]|\x1b[\\]|\x0f|\x0e/', '', $text);
+        /* [116A-4] Evitar clases PCRE inválidas como \x1b[\\].
+         * Limpiar CSI ANSI y secuencias ESC simples sin romper la extracción del resumen. */
+        $clean = (string) preg_replace('/\x1b\[[0-?]*[ -\/]*[@-~]/', '', $text);
+        $clean = (string) preg_replace('/\x1b[ -\/]*[@-~]/', '', $clean);
+        return (string) preg_replace('/[\x0f\x0e]/', '', $clean);
     }
 
     /* [115A-15] Extrae el resumen para WhatsApp del output de OpenCode.

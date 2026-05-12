@@ -199,7 +199,10 @@ function assertOpencodeAvailable(commandSpec) {
 }
 
 function cleanTerminalOutput(text) {
-    return text.replace(/\x1b\[[0-9;]*[mGKHF]|\x1b[\\]|\x0f|\x0e/g, '');
+    return text
+        .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '')
+        .replace(/\x1b[ -/]*[@-~]/g, '')
+        .replace(/[\x0f\x0e]/g, '');
 }
 
 function extractWhatsAppSummary(output) {
@@ -251,23 +254,24 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, request
             env: process.env,
         });
 
-        const lines = [];
+        let outputBuffer = '';
         let sessionId = requestedSessionId;
         const onData = (stream, chunk) => {
             stream.write(chunk);
             const text = chunk.toString();
+            outputBuffer += text;
+            if (outputBuffer.length > 120000) outputBuffer = outputBuffer.slice(-120000);
             /* [115A-cont] Capturar session ID del output de OpenCode para continuacion de sesion */
             if (!sessionId) {
                 const m = text.match(/session[:\s]+([a-zA-Z0-9_-]{6,64})/i);
                 if (m) sessionId = m[1];
             }
-            lines.push(...text.split('\n'));
-            if (lines.length > 120) lines.splice(0, lines.length - 120);
         };
         child.stdout.on('data', chunk => onData(process.stdout, chunk));
         child.stderr.on('data', chunk => onData(process.stderr, chunk));
 
-        const getOutput = () => lines.slice(-80).join('\n').trim();
+        /* [116A-4] Conservar una ventana amplia: el resumen puede quedar antes de logs finales. */
+        const getOutput = () => outputBuffer.trim();
 
         const timeout = setTimeout(() => {
             child.kill('SIGTERM');
@@ -499,7 +503,16 @@ async function pollOnce(options) {
             method: 'POST',
             pathSuffix: `/agent/opencode/jobs/${job.id}/result`,
             route: `/glory/v1/agent/opencode/jobs/${job.id}/result`,
-            body: {success: false, message: error.message, result: {error: error.message, output: error.output || ''}},
+            body: {
+                success: false,
+                message: error.message,
+                result: {
+                    error: error.message,
+                    output: error.output || '',
+                    session_id: error.session_id || '',
+                    whatsapp_summary: error.whatsapp_summary || '',
+                },
+            },
         });
         throw error;
     }
