@@ -230,7 +230,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"crear_tarea\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"completar_tarea\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"editar_tarea\", \"parametros\": {\"id\": 123, \"texto\": \"nuevo nombre\"}}
-- {\"tipo\": \"programar_recordatorio\", \"parametros\": {\"titulo\": \"...\", \"mensaje\": \"...\", \"fecha\": \"ISO8601\", \"recurrence_minutes\": 60, \"channel\": \"whatsapp\"}}
+- {\"tipo\": \"programar_recordatorio\", \"parametros\": {\"titulo\": \"...\", \"mensaje\": \"...\", \"fecha\": \"ISO8601\", \"recurrence_minutes\": 30, \"channel\": \"whatsapp\"}}
 - {\"tipo\": \"listar_recordatorios\", \"parametros\": {}}
 - {\"tipo\": \"editar_recordatorio\", \"parametros\": {\"id\": 123, \"fecha\": \"ISO8601\", \"titulo\": \"nuevo titulo\", \"mensaje\": \"nuevo mensaje\"}}
 - {\"tipo\": \"eliminar_recordatorio\", \"parametros\": {\"id\": 123}}

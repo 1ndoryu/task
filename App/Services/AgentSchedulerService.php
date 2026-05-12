@@ -265,7 +265,12 @@ class AgentSchedulerService
     private static function programarSiguienteRecurrencia(int $userId, string $tipo, array $payload, int $minutosIntervalo): void
     {
         try {
-            $fechaSiguiente = date('Y-m-d H:i:s', time() + ($minutosIntervalo * MINUTE_IN_SECONDS));
+            /* [125A-5] Bug fix: date() usaba time() (UTC) pero procesarProgramadas() compara con
+             * current_time('mysql') (hora local del sitio). Para sitios con gmt_offset negativo
+             * (ej. UTC-4 Venezuela), la recurrencia se retrasaba por el valor del offset.
+             * Fix: usar current_time('timestamp') que ya incluye el gmt_offset, equivalente a
+             * time() + gmt_offset*3600. Así la fecha almacenada y la query usan la misma zona. */
+            $fechaSiguiente = date('Y-m-d H:i:s', current_time('timestamp') + ($minutosIntervalo * MINUTE_IN_SECONDS));
             $_created = (new AgentActionService())->crearProgramada(
                 $userId,
                 $tipo,
