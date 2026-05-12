@@ -251,7 +251,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"editar_tarea\", \"parametros\": {\"id\": 123, \"texto\": \"nuevo nombre\"}}
 - {\"tipo\": \"programar_recordatorio\", \"parametros\": {\"titulo\": \"...\", \"mensaje\": \"...\", \"fecha\": \"ISO8601\", \"recurrence_minutes\": 30, \"channel\": \"whatsapp\"}}
 - {\"tipo\": \"listar_recordatorios\", \"parametros\": {}}
-- {\"tipo\": \"editar_recordatorio\", \"parametros\": {\"id\": 123, \"fecha\": \"ISO8601\", \"titulo\": \"nuevo titulo\", \"mensaje\": \"nuevo mensaje\"}}
+- {\"tipo\": \"editar_recordatorio\", \"parametros\": {\"id\": 123, \"fecha\": \"ISO8601\", \"titulo\": \"nuevo titulo\", \"mensaje\": \"nuevo mensaje\", \"recurrence_minutes\": 15}}
 - {\"tipo\": \"eliminar_recordatorio\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"completar_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"posponer_habito\", \"parametros\": {\"id\": 123}}
@@ -1050,12 +1050,25 @@ REGLAS:
                 $conFecha = array_values(array_filter($lista, fn($r) => !empty($r['fecha_programada'])));
                 return ['tipo' => $tipo, 'exito' => true, 'recordatorios' => $conFecha];
 
+            /* [126A-1] Fix: soportar recurrence_minutes en editar_recordatorio.
+             * El LLM necesitaba poder cambiar el intervalo de repetición (ej: de 30 a 15 min)
+             * pero el handler anterior no recolectaba este campo. Se mergea al payload
+             * via payload_merge para que el scheduler lo use en programarSiguienteRecurrencia.
+             * Gotcha: el cambio solo afecta a la acción pendiente actual; cuando se ejecute,
+             * la siguiente recurrencia usará el nuevo intervalo automáticamente. */
             case 'editar_recordatorio':
                 $id     = (int)($param['id'] ?? 0);
                 $cambios = [];
                 if (!empty($param['fecha']))   $cambios['fecha_programada'] = (string)$param['fecha'];
                 if (!empty($param['titulo']))  $cambios['titulo']           = (string)$param['titulo'];
                 if (!empty($param['mensaje'])) $cambios['payload_merge']    = ['mensaje' => sanitize_textarea_field((string)$param['mensaje'])];
+                /* [126A-1] Soportar edición del intervalo de repetición */
+                if (isset($param['recurrence_minutes'])) {
+                    $cambios['payload_merge'] = array_merge(
+                        (array)($cambios['payload_merge'] ?? []),
+                        ['recurrence_minutes' => max(0, (int)$param['recurrence_minutes'])]
+                    );
+                }
                 $actualizado = (new AgentActionService())->editarProgramada($id, $userId, $cambios);
                 return ['tipo' => $tipo, 'exito' => $actualizado !== null, 'id' => $id];
 
