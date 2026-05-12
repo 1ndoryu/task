@@ -29,6 +29,8 @@
         "edit": "allow",
         "webfetch": "allow",
         "bash": {
+            "New-Item *": "allow",
+            "powershell *scripts/self-check.ps1*": "allow",
             "*": "ask",
             "rg *": "allow",
             "node *": "allow",

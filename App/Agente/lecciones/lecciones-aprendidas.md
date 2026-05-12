@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-12 — IDs elegidos por LLM no son frontera confiable
+
+**Patrón del error:** El usuario decía que completó el hábito de ejercicio, el contexto incluía el hábito correcto, pero el LLM emitía `completar_habito` con un ID inexistente y el backend respondía que no lo encontraba.
+
+**Lección:** Para acciones críticas sobre datos del usuario, el backend debe validar el ID y recuperar por nombre/intención cuando hay contexto suficiente. Las instrucciones del prompt ayudan, pero la frontera de consistencia es el servidor.
+
+**Fix:** `AgentChatProcessor` conserva el mensaje actual, normaliza texto, puntúa hábitos activos por nombre/tokens/intención de ejercicio y solo confirma éxito tras guardar y verificar persistencia.
+
 ## 2026-05-12 — Media.Type de wacli no es MIME y rompe Whisper
 
 **Patrón del error:** Los audios llegaban con `Media.Type=audio` y `Media.MimeType=audio/ogg; codecs=opus`. El backend usaba `Type` como MIME, por lo que descargaba el archivo pero no entraba a la rama `audio/` y mandaba `[Audio]` al LLM.

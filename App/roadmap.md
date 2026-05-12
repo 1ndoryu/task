@@ -16,80 +16,21 @@
 
 ## Tareas pendientes
 
-### 115A-14 — GitHub: activar OpenCode Action en repo espejo
-- Agregar secret `OPENCODE_API_KEY` en GitHub para el proveedor OpenCode Zen
-- Confirmar si se usara OpenCode GitHub App o solo `GITHUB_TOKEN`
-- Ejecutar `workflow_dispatch` de prueba con prompt de solo lectura
-- Probar comentario `/oc` en issue/PR y verificar rama/PR generado
-
-### ✅ 115A-15 — Activar OpenCode real local desde WhatsApp
-- OpenCode 1.14.48 instalado globalmente
-- Modelo: `opencode/deepseek-v4-flash-free` (gratuito) en opencode.jsonc, agente y projects
-- `OPENCODE_API_KEY` configurada en .env local, .env contenedor y Coolify
-- `OPENCODE_RUNNER_SECRET` generado, en .env local, .env contenedor y Coolify
-- WhatsApp NO requiere aprobación doble: jobs se crean directamente en `pendiente`
-- Runner soporta `branch` en payload → hace `git checkout` automático antes de OpenCode
-- Modelo no se pasa en payload (siempre usa el configurado en opencode.jsonc)
-- HMAC verificado: runner conecta limpio con `poll-once --dry-run`
-
-### ✅ 109A — MemPalace: memoria semántica del chatbot
-- Instalar MemPalace en el servidor host + Flask REST wrapper en /data/mempalace/
-- Systemd service `mempalace-api` en 0.0.0.0:4001
-- Añadir `extra_hosts: host.docker.internal:host-gateway` al compose de nakomi
-- `MemPalaceService.php`: search + remember via HTTP al wrapper
-- `AgentChatProcessor.php`: motor PHP para procesar mensajes (context, LLM, acciones, memoria)
-- Integrar memoria en el flujo: inyectar en system prompt, guardar hechos al final
-
-### ✅ 109B — WhatsApp bidireccional + recordatorios recurrentes
-- Systemd service `wacli-daemon` en el host: `wacli sync --follow --webhook URL --webhook-secret SECRET`
-- `WhatsAppWebhookService.php`: HMAC verify + rutear mensaje al AgentChatProcessor
-- Endpoint público `POST /wp-json/glory/v1/whatsapp/webhook` (auth via HMAC)
-- Recordatorios recurrentes: `every_5_minutes` WP-Cron schedule + payload.recurrence_minutes
-- WACLI_WEBHOOK_SECRET env var en Coolify + local
-
-### ✅ 115A-1 — Chatbot: modelo desde configuración + compactación por contexto
-- `AgentChatProcessor.php`: leer proveedor/modelo desde WP option `glory_chatbot_proveedor` / `glory_chatbot_modelo` (fallback: groq / llama-3.3-70b-versatile)
-- Sincronizar el modelo elegido en el panel React (iaStore) al guardar → `POST /wp-json/glory/v1/admin/opciones` guardando las claves WP
-- Reemplazar `COMPACTION_THRESHOLD` (mensajes) por umbral en chars totales del historial (default 8000), configurable vía WP option `glory_chatbot_compaction_chars`
-- La compactación también usa el modelo configurado (no hardcodeado)
-
-### ✅ 115A-2 — Chatbot: filtrar número Venezuela
-- `WhatsAppWebhookService.php`: en `resolverAdminDesdeRemitente()`, rechazar JIDs que coincidan con `WHATSAPP_SEGUNDO_NUMERO` aunque tengan mapping en wp_usermeta
-- Solo el número `WHATSAPP` (EEUU) debe activar el agente; el segundo número debe recibir un mensaje de "solo respondo al número de EEUU" o simplemente ignorarse (decidir)
-
-### ✅ 115A-3 — Chatbot: contexto maestro persistente y modificable
-- Añadir tabla o WP option `glory_chatbot_master_context_{userId}` con texto libre del usuario
-- El agente puede leer y modificar este contexto mediante acción `actualizar_contexto_maestro {texto}`
-- El contexto maestro se inyecta siempre en el system prompt antes del contexto de tareas
-- Si el contexto maestro supera ~9000 tokens (≈36000 chars), compactarlo automáticamente con el LLM
-
-### ✅ 115A-4 — Chatbot: gestión de recordatorios (listar, editar, eliminar)
-- Añadir acciones: `listar_recordatorios`, `editar_recordatorio {id, campo, valor}`, `eliminar_recordatorio {id}`
-- Revisar `AgentActionService` para exponer listado de acciones programadas del usuario
-- El agente debe incluir los recordatorios activos en `buildContexto()` para poder referirse a ellos por ID
-
-### ✅ 115A-8 — Chatbot: búsqueda semántica de memorias
-### ✅ 115A-9 — Chatbot: retry de acciones fallidas (3 intentos + feedback)
-### ✅ 115A-10 — Chatbot: auto-actualización del contexto maestro
-### ✅ 115A-11 — Chatbot: acciones paralelas + crear_tarea_si_no_existe + agent_invoke
-
-### ✅ 115A-5 — Chatbot: visión e imágenes/audios WhatsApp
-- WhatsAppWebhookService: detecta Media en eventos wacli, no descarta mensajes con solo imagen/audio
-- Imágenes: descarga via WacliService.descargarMedia(), base64 → AgentChatProcessor con modelo de visión (meta-llama/llama-4-scout-17b-16e-instruct)
-- Audios: transcripción via LLMProviderService.transcribirAudio() con Groq Whisper (whisper-large-v3)
-- LLMProviderService: validarMensajes() soporta array content (multimodal), método transcribirAudio() agregado
-- Hábitos en contexto: ordenados por completado+importancia, muestran nivel importancia y ventana de oportunidad
-
-### ✅ 115A-6 — Chatbot: acciones de notas y hábitos completos
-- Sub-hábitos: leer campo `subhabitos` de HabitosRepository en `buildContexto()`, mostrarlos indentados con su estado
-- Acciones nuevas: `completar_habito {id}`, `completar_subhabito {id, subId}`, `leer_notas {limite?}`, `crear_nota {titulo, contenido}`, `editar_nota {id, contenido, titulo?}`, `buscar_nota {termino}`
-- Usar `NotasRepository->guardar()`, `->actualizar()`, `->listar()`, `->buscar()`
+### 125A-10 — Auditoría del Plan v2 WhatsApp multi-usuario con QR
+- Revisar profundamente todas las modificaciones relacionadas con `Plan v2: Chatbot WhatsApp multi-usuario con QR — 2026-05-12`, especialmente las hechas por agente de menor inteligencia.
+- Validar compatibilidad con la integración admin existente: el webhook/admin actual no debe romperse por exigir `account=user_X` ni por migraciones automáticas inseguras.
+- Auditar seguridad: SQL preparado, HMAC, permisos REST, `proc_open`/sudo/systemd, paths de stores, aislamiento por usuario, fuga de JIDs y logs.
+- Auditar arquitectura y escalabilidad: worker, cola, locks, rate limit LLM, cron/systemd, health checks, backup de stores, POC pendiente y documentación.
+- Corregir inconsistencias de IDs, comentarios, rutas, frontend, registro de controllers, límites diarios y cualquier error de compilación o integración detectado.
 
 ### 115A-7 — Roadmap: integración chatbot con ayuno y calorías
-- Planificar acciones del agente para el plugin de ayuno: `iniciar_ayuno`, `terminar_ayuno`, `estado_ayuno`
-- Planificar acciones para registro de calorías: `registrar_comida {descripcion, calorias?}`, `resumen_calorias_hoy`
+- Planificar acciones del agente para el plugin de ayuno: `iniciar_ayuno`, `terminar_ayuno`, `estado_ayuno` (lo que espero es que sea capaz registrar el ayuno con el tiempo correcto, aqui el tiempo y hora exacta es muy importante, claramente tiene que marse el habito de ayuno cuando se complete un ayuno)
+- Planificar acciones para registro de calorías: `registrar_comida {descripcion, calorias?}`, `resumen_calorias_hoy` (lo que espero es que pueda decirle una comida y que no vaya a fallar por ello, que pueda decirme cuantas calorías llevo, que adapte a la meta de calorías diaras objetivo basado en la configuracion del plugin)
 - Revisar APIs existentes del plugin de ayuno y del módulo de calorías antes de implementar
 
----
-
-## hello world
+### 125A-11 — Auditoría profunda y mejora estratégica del agente
+- necesito una revision detallada y profunda del agente, una auditoría de seguridad, optimización, revision, etc, profunda, necesito ver en que se puede mejorar el agente, investiga sobre los modelos que sueñan para organizar informacion y como podemos emular, lo de los recordatorio por ejemplo falla, a veces no recuerda ni avisa, lo hace en tiempo incorrecto, se le dice cierto tiempo y sigue atorado en la anterior tiempo. 
+- planifica la gestión de miniagentes (que usen el modelo mas inteligente de grop), para pulir los pasos intermedios si es que es necesario
+- Reducción de las intrucciones, revisar si las instrucciones son eficiente y ordenadas para el modelo y como se puede mejorar la eficiencia. 
+- Actualmente la api del modelo usa grop y tiene opcion para la api de deepseek, revisa si podemos usar opencode directamente (que es gratis con el modelo deepseek sin remplazar totalmente la integración), esto sería genial porque deepseek flash v4 (nivel de pensamiento max) es un mejor modelo que gpt oss 120B
+- Revisar que haya salto de modelos, si un modelo no responde salta al proximo mas cercano en inteligencia en el chatbot. 

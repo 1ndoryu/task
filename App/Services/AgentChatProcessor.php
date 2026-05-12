@@ -40,6 +40,9 @@ class AgentChatProcessor
     /* [115A-context] Session activa; se establece en procesar() para que los action handlers
      * puedan acceder al session_id sin recibirlo como parámetro adicional. */
     private string $activeSessionId = 'default';
+    /* [125A-9] Mensaje actual; permite resolver referencias naturales cuando el LLM
+     * entrega IDs incorrectos o incompletos en acciones críticas. */
+    private string $activeUserMessage = '';
 
     public function __construct()
     {
@@ -67,6 +70,7 @@ class AgentChatProcessor
     public function procesar(int $userId, string $sessionId, string $mensaje, string $canal = 'app', ?array $media = null): array
     {
         $this->activeSessionId = $sessionId;
+        $this->activeUserMessage = $mensaje;
         $historial       = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
         /* [SEC-004] Verificar privacidad una vez; buildContexto() lo usa para anonimizar datos,
          * y buildSystemPrompt() necesita saberlo para instruir al LLM. */
@@ -174,6 +178,7 @@ class AgentChatProcessor
         }
 
         $parsed['respuesta'] = $this->anotarFallosEnRespuesta($parsed['respuesta'], $ejecutadas);
+        $parsed['respuesta'] = $this->asegurarRespuestaOpencodeConSesion($parsed['respuesta'], $ejecutadas);
 
         /* [fix-session-confirm] Si el usuario pidió continuar con ses_XXXXX y la respuesta
          * no lo menciona (el LLM lo olvida), inyectarlo para que el usuario sepa qué sesión
@@ -270,6 +275,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 - {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\", \"reasoning_effort\": \"max\"}} — reasoning_effort opcional: \"max\", \"high\" o \"minimal\" (default: \"max\" del proyecto). Controla el nivel de pensamiento del modelo DeepSeek.
 - {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"instruccion real del usuario para OpenCode\"}} (job_id = número exacto de [id:N] visible en el contexto, o 0 si el usuario ya proporcionó un ses_XXXXX — el backend lo resuelve solo. En 'mensaje' pon la instrucción real del usuario, NUNCA el ses_XXXXX; si el usuario solo pide continuar sin instrucción nueva, pon \"Continúa desde donde quedaste en esta sesión.\")
+- {\"tipo\": \"actualizar_opencode_allowlist\", \"parametros\": {\"comandos\": [\"New-Item *\", \"powershell *scripts/self-check.ps1*\"]}} — cuando OpenCode reportó permisos rechazados y el usuario confirma permitir ese comando o tipo de comandos. Después emite continuar_opencode para la misma sesión.
 - {\"tipo\": \"cancelar_opencode\", \"parametros\": {\"job_id\": ID}} (cuando el usuario pide cancelar o detener un job activo)
 - {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
@@ -440,13 +446,21 @@ REGLAS:
             if (!empty($jobsActivos) || !empty($jobsRecientes)) {
                 $ctx .= "\n## OpenCode (agente de código)\n";
                 foreach ($jobsActivos as $j) {
+                    if ((int)($j['user_id'] ?? 0) !== $userId) {
+                        continue;
+                    }
                     $prompt = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
                     $icono  = $j['estado'] === 'ejecutando' ? '🔄' : '⏳';
-                    $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
+                    $sessionId = $this->extraerSessionIdDeJob($j);
+                    $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
+                    $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
                 }
                 foreach ($jobsRecientes as $j) {
+                    if ((int)($j['user_id'] ?? 0) !== $userId) {
+                        continue;
+                    }
                     $prompt    = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
-                    $sessionId = (string)($j['resultado']['session_id'] ?? '');
+                    $sessionId = $this->extraerSessionIdDeJob($j);
                     $icono     = $j['estado'] === 'completado' ? '✅' : '❌';
                     $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
                     $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
@@ -548,16 +562,33 @@ REGLAS:
         }
 
         if ($this->mensajePideContinuarOpencode($mensajeOriginal)) {
+            $mensajePermiteComandos = $this->mensajeConfirmaPermisosOpencode($mensajeOriginal);
             /* [125A-cont] Si hay session ID explícito en el mensaje, buscar ese job primero.
              * Esto resuelve el caso donde el usuario pega el ID que imprimió la notificación. */
             $sessionIdExplicito = $this->extraerSessionIdExplicito($mensajeOriginal);
             $jobId = $sessionIdExplicito !== ''
                 ? ($this->resolverJobPorSessionId($userId, $sessionIdExplicito) ?: $this->resolverJobOpencodeReciente($userId))
-                : $this->resolverJobOpencodeReciente($userId);
+                : ($mensajePermiteComandos ? $this->resolverJobOpencodeConPermisosRecientes($userId) : $this->resolverJobOpencodeReciente($userId));
+            if ($jobId <= 0) {
+                $jobId = $this->resolverJobOpencodeReciente($userId);
+            }
             $acciones = array_values(array_filter(
                 $acciones,
                 static fn(array $accion): bool => (string)($accion['tipo'] ?? '') !== 'solicitar_opencode'
             ));
+            if ($mensajePermiteComandos && $jobId > 0) {
+                $comandos = $this->comandosPermitidosDesdeJob($userId, $jobId);
+                if (!empty($comandos)) {
+                    $acciones = array_values(array_filter(
+                        $acciones,
+                        static fn(array $accion): bool => (string)($accion['tipo'] ?? '') !== 'actualizar_opencode_allowlist'
+                    ));
+                    array_unshift($acciones, [
+                        'tipo' => 'actualizar_opencode_allowlist',
+                        'parametros' => ['comandos' => $comandos],
+                    ]);
+                }
+            }
             $tieneContinuacion = false;
             foreach ($acciones as &$accion) {
                 if ((string)($accion['tipo'] ?? '') !== 'continuar_opencode') {
@@ -620,7 +651,18 @@ REGLAS:
         $normalizado = mb_strtolower($mensaje);
         $mencionaSesion = (bool)preg_match('/\b(opencode|sesion|sesión|anterior)\b/u', $normalizado);
         $pideContinuar = (bool)preg_match('/\b(continua|continúa|continuar|sigue|seguir|reanuda|reanudar|reintenta|reintentar|retry)\b/u', $normalizado);
-        return $mencionaSesion && $pideContinuar;
+        $permiteYContinua = $this->mensajeConfirmaPermisosOpencode($mensaje) && $pideContinuar;
+        return ($mencionaSesion && $pideContinuar) || $permiteYContinua;
+    }
+
+    /* [125A-9] Detecta confirmaciones tipo "permite ese comando y continúa" para
+     * decidir job y permisos por datos del servidor, no por inferencia del LLM. */
+    private function mensajeConfirmaPermisosOpencode(string $mensaje): bool
+    {
+        $normalizado = mb_strtolower($mensaje);
+        $mencionaPermiso = (bool)preg_match('/\b(permite|permitir|autoriza|autorizar|aprueba|aprobar|allowlist|comando|comandos)\b/u', $normalizado);
+        $mencionaReferencia = (bool)preg_match('/\b(ese|esa|tipo|comando|comandos|sesion|sesión|opencode)\b/u', $normalizado);
+        return $mencionaPermiso && $mencionaReferencia;
     }
 
     /* [125A-cont] Extrae el ID de sesión OpenCode si el usuario lo pegó explícitamente.
@@ -643,9 +685,7 @@ REGLAS:
                 if ((int)($job['user_id'] ?? 0) !== $userId) {
                     continue;
                 }
-                $resultSid  = (string)($job['resultado']['session_id'] ?? '');
-                $payloadSid = (string)($job['payload']['session_id'] ?? '');
-                if ($resultSid === $sessionId || $payloadSid === $sessionId) {
+                if ($this->extraerSessionIdDeJob($job) === $sessionId) {
                     return (int)$job['id'];
                 }
             }
@@ -661,7 +701,7 @@ REGLAS:
                 if ((int)($job['user_id'] ?? 0) !== $userId) {
                     continue;
                 }
-                if (!empty($job['resultado']['session_id']) || !empty($job['payload']['session_id'])) {
+                if ($this->extraerSessionIdDeJob($job) !== '') {
                     return (int)$job['id'];
                 }
             }
@@ -674,6 +714,213 @@ REGLAS:
             /* La acción continuar_opencode tiene su propio fallback y error visible. */
         }
         return 0;
+    }
+
+    private function resolverJobOpencodeConPermisosRecientes(int $userId): int
+    {
+        try {
+            $svc = new \App\Services\Agent\OpencodeJobService();
+            foreach ($svc->listarRecientes(168, 10) as $job) {
+                if ((int)($job['user_id'] ?? 0) !== $userId) {
+                    continue;
+                }
+                if (!empty($this->comandosRechazadosDeJob($job))) {
+                    return (int)$job['id'];
+                }
+            }
+        } catch (\Throwable) { /* fallback: sin job */ }
+        return 0;
+    }
+
+    private function comandosPermitidosDesdeJob(int $userId, int $jobId): array
+    {
+        try {
+            $svc = new \App\Services\Agent\OpencodeJobService();
+            $job = $svc->obtenerPublico($jobId);
+            if (!$job || (int)($job['user_id'] ?? 0) !== $userId) {
+                return [];
+            }
+            return array_values(array_unique(array_filter(array_map(
+                [$this, 'generalizarComandoOpencode'],
+                $this->comandosRechazadosDeJob($job)
+            ))));
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    private function comandosRechazadosDeJob(array $job): array
+    {
+        $resultado = is_array($job['resultado'] ?? null) ? $job['resultado'] : [];
+        $rechazados = array_values(array_filter((array)($resultado['permisos_rechazados'] ?? [])));
+        if (!empty($rechazados)) {
+            return array_map('strval', $rechazados);
+        }
+        $output = (string)($resultado['output'] ?? $resultado['whatsapp_summary'] ?? '');
+        if ($output === '') {
+            return [];
+        }
+        preg_match_all('/permission requested:\s+bash\s+\(([^)]+)\)/i', $output, $matches);
+        return array_values(array_unique(array_map('trim', $matches[1] ?? [])));
+    }
+
+    private function generalizarComandoOpencode(string $cmd): string
+    {
+        $cmd = trim($cmd);
+        $cmdNormalizado = str_replace('\\', '/', $cmd);
+        $lower = mb_strtolower($cmdNormalizado);
+        if ($cmd === '') {
+            return '';
+        }
+        if (str_starts_with($lower, 'powershell') && str_contains($lower, 'scripts/self-check.ps1')) {
+            return 'powershell *scripts/self-check.ps1*';
+        }
+        if (str_starts_with($lower, 'new-item')) {
+            return 'New-Item *';
+        }
+        if (str_starts_with($lower, 'test-path')) {
+            return 'Test-Path*';
+        }
+        if (str_starts_with($lower, 'get-content')) {
+            return 'Get-Content*';
+        }
+        if (str_starts_with($lower, 'get-childitem')) {
+            return 'Get-ChildItem*';
+        }
+        if (str_starts_with($lower, 'measure-object')) {
+            return 'Measure-Object*';
+        }
+        if (str_starts_with($lower, 'select-string')) {
+            return 'Select-String*';
+        }
+        if (str_starts_with($lower, 'git --no-pager')) {
+            return 'git --no-pager*';
+        }
+        if (str_starts_with($lower, 'git hash-object')) {
+            return 'git hash-object*';
+        }
+        if (str_starts_with($lower, 'php -l')) {
+            return 'php -l*';
+        }
+        $primerToken = strtok($cmd, ' ');
+        return $primerToken !== false && $primerToken !== '' ? $primerToken . '*' : '';
+    }
+
+    private function extraerSessionIdDeJob(array $job): string
+    {
+        $sessionId = (string)($job['resultado']['session_id'] ?? $job['payload']['session_id'] ?? '');
+        if ($sessionId !== '') {
+            return $sessionId;
+        }
+        foreach ((array)($job['logs'] ?? []) as $log) {
+            $mensaje = (string)($log['mensaje'] ?? '');
+            if (preg_match('/Session ID:\s*(ses_[a-zA-Z0-9]{6,80}|[a-zA-Z0-9_-]{6,80})/i', $mensaje, $m)) {
+                return $m[1];
+            }
+        }
+        return '';
+    }
+
+    private function asegurarRespuestaOpencodeConSesion(string $respuesta, array $ejecutadas): string
+    {
+        $allowlistOk = false;
+        $continuacion = null;
+        foreach ($ejecutadas as $ejecutada) {
+            if (($ejecutada['tipo'] ?? '') === 'actualizar_opencode_allowlist' && !empty($ejecutada['exito'])) {
+                $allowlistOk = true;
+            }
+            if (($ejecutada['tipo'] ?? '') === 'continuar_opencode' && !empty($ejecutada['exito'])) {
+                $continuacion = $ejecutada;
+            }
+        }
+        if ($continuacion === null) {
+            return $respuesta;
+        }
+        $sessionId = (string)($continuacion['session_id'] ?? '');
+        if ($sessionId !== '' && str_contains($respuesta, $sessionId)) {
+            return $respuesta;
+        }
+        if ($sessionId !== '') {
+            return $allowlistOk
+                ? "Permiso actualizado correctamente, continúo con la sesión {$sessionId}."
+                : "Continúo con la sesión {$sessionId}, te aviso cuando termine.";
+        }
+        $accionId = (int)($continuacion['accion_id'] ?? 0);
+        return $accionId > 0
+            ? "Continúo con el job OpenCode #{$accionId}; te aviso cuando tenga el ID de sesión."
+            : $respuesta;
+    }
+
+    private function habitoExiste(array $habitos, int $id): bool
+    {
+        foreach ($habitos as $habito) {
+            if ((int)($habito['id'] ?? 0) === $id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function resolverHabitoReferido(array $habitos, array $param, string $mensaje, string $hoy): ?array
+    {
+        $query = trim(implode(' ', array_filter([
+            (string)($param['nombre'] ?? ''),
+            (string)($param['texto'] ?? ''),
+            (string)($param['busqueda'] ?? ''),
+            $mensaje,
+        ])));
+        if ($query === '') {
+            return null;
+        }
+
+        $queryNorm = $this->normalizarTextoBusqueda($query);
+        $tokensQuery = array_values(array_filter(explode(' ', $queryNorm), fn(string $token): bool => mb_strlen($token) >= 4));
+        $esEjercicio = (bool)preg_match('/\b(ejercicio|entreno|entrenamiento|mover|moverte|activarte|kcal|caloria|calorias|cardio)\b/u', $queryNorm);
+        $mejor = null;
+        $mejorScore = 0;
+
+        foreach ($habitos as $habito) {
+            if (!empty($habito['pausado'])) {
+                continue;
+            }
+            $nombre = (string)($habito['nombre'] ?? '');
+            if ($nombre === '') {
+                continue;
+            }
+            $nombreNorm = $this->normalizarTextoBusqueda($nombre);
+            $score = 0;
+            if ($nombreNorm !== '' && (str_contains($queryNorm, $nombreNorm) || str_contains($nombreNorm, $queryNorm))) {
+                $score += 100;
+            }
+            foreach ($tokensQuery as $token) {
+                if (str_contains($nombreNorm, $token)) {
+                    $score += 12;
+                }
+            }
+            if ($esEjercicio && preg_match('/\b(ejercicio|entreno|entrenamiento|mover|activarte|kcal|caloria|calorias|cardio)\b/u', $nombreNorm)) {
+                $score += 80;
+            }
+            if (!in_array($hoy, (array)($habito['historialCompletados'] ?? []), true)) {
+                $score += 8;
+            }
+            if ($score > $mejorScore) {
+                $mejorScore = $score;
+                $mejor = $habito;
+            }
+        }
+
+        return $mejorScore >= 30 && is_array($mejor) ? $mejor : null;
+    }
+
+    private function normalizarTextoBusqueda(string $texto): string
+    {
+        $texto = mb_strtolower($texto);
+        $texto = strtr($texto, [
+            'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+            'Á' => 'a', 'É' => 'e', 'Í' => 'i', 'Ó' => 'o', 'Ú' => 'u', 'Ü' => 'u', 'Ñ' => 'n',
+        ]);
+        $texto = (string)preg_replace('/[^a-z0-9]+/u', ' ', $texto);
+        return trim((string)preg_replace('/\s+/', ' ', $texto));
     }
 
     /* --- Project management (multi-project OpenCode) ----------------------- */
@@ -848,12 +1095,15 @@ REGLAS:
                 /* [fix-actividad-tarea] Registrar en actividad igual que el flujo web.
                  * Falla silenciosa: no interrumpe el flujo principal si ActividadService falla. */
                 try {
-                    (new ActividadService())->registrarActividad($userId, [
+                    $actividad = (new ActividadService())->registrarActividad($userId, [
                         'tipo'         => 'tarea_completada',
                         'elementoId'   => $id,
                         'elementoTipo' => 'tarea',
                         'detalles'     => ['elementoNombre' => $textoTarea],
                     ]);
+                    if (empty($actividad['success'])) {
+                        error_log('[AgentChatProcessor] Actividad no registrada para tarea ' . $id . ': ' . ($actividad['error'] ?? 'error desconocido'));
+                    }
                 } catch (\Throwable $actErr) {
                     error_log('[AgentChatProcessor] Error registrando actividad para tarea ' . $id . ': ' . $actErr->getMessage());
                 }
@@ -962,6 +1212,14 @@ REGLAS:
                 $repo  = new HabitosRepository($userId);
                 $habitos = $repo->getAll();
                 $hoy   = $this->fechaHoyParaCanal($canal);
+                /* [125A-9] Si el LLM eligió un ID viejo/inexistente, recuperar por nombre
+                 * o intención del mensaje antes de decirle al usuario que no existe. */
+                if ($id <= 0 || !$this->habitoExiste($habitos, $id)) {
+                    $resuelto = $this->resolverHabitoReferido($habitos, $param, $this->activeUserMessage, $hoy);
+                    if ($resuelto !== null) {
+                        $id = (int)$resuelto['id'];
+                    }
+                }
                 $encontrado = false;
                 $habitoActualizado = null;
                 $esNuevoCompletado = false;
@@ -1006,13 +1264,16 @@ REGLAS:
                  * evitamos la llamada redundante. Falla silenciosa: no rompe el flujo principal. */
                 if ($verificado && $esNuevoCompletado) {
                     try {
-                        (new ActividadService())->registrarActividad($userId, [
+                        $actividad = (new ActividadService())->registrarActividad($userId, [
                             'tipo'        => 'habito_cumplido',
                             'elementoId'  => $id,
                             'elementoTipo' => 'habito',
                             'fecha'       => $hoy,
                             'detalles'    => ['elementoNombre' => $habitoActualizado['nombre'] ?? ''],
                         ]);
+                        if (empty($actividad['success'])) {
+                            error_log('[AgentChatProcessor] Actividad no registrada para hábito ' . $id . ': ' . ($actividad['error'] ?? 'error desconocido'));
+                        }
                     } catch (\Throwable $actErr) {
                         error_log('[AgentChatProcessor] Error registrando actividad para hábito ' . $id . ': ' . $actErr->getMessage());
                     }
@@ -1039,13 +1300,16 @@ REGLAS:
                 unset($h);
                 $_ok = $repo->saveAll($habitos);
                 try {
-                    (new ActividadService())->registrarActividad($userId, [
+                    $actividad = (new ActividadService())->registrarActividad($userId, [
                         'tipo'         => 'habito_pospuesto',
                         'elementoId'   => $id,
                         'elementoTipo' => 'habito',
                         'fecha'        => $hoy,
                         'detalles'     => ['elementoNombre' => $nombreHabito],
                     ]);
+                    if (empty($actividad['success'])) {
+                        error_log('[AgentChatProcessor] Actividad no registrada para posponer hábito ' . $id . ': ' . ($actividad['error'] ?? 'error desconocido'));
+                    }
                 } catch (\Throwable $actErr) {
                     error_log('[AgentChatProcessor] Error registrando actividad posponer hábito ' . $id . ': ' . $actErr->getMessage());
                 }
@@ -1213,6 +1477,7 @@ REGLAS:
                     $prompt = 'Continúa desde donde quedaste en esta sesión.';
                 }
                 $svc = new \App\Services\Agent\OpencodeJobService();
+                $jobUsado = $jobId;
                 try {
                     if ($jobId <= 0) {
                         throw new \RuntimeException('job_id inválido, buscando fallback');
@@ -1220,9 +1485,14 @@ REGLAS:
                     $accion = $svc->crearContinuacion($jobId, $userId, $prompt);
                 } catch (\RuntimeException) {
                     /* Fallback: buscar el job completado más reciente con session_id */
-                    $fallbackId = 0;
-                    foreach ($svc->listarRecientes(72, 5) as $j) {
-                        if (!empty($j['resultado']['session_id'])) {
+                    $fallbackId = $this->mensajeConfirmaPermisosOpencode($this->activeUserMessage)
+                        ? $this->resolverJobOpencodeConPermisosRecientes($userId)
+                        : 0;
+                    if ($fallbackId <= 0) {
+                        foreach ($svc->listarRecientes(72, 5) as $j) {
+                            if ((int)($j['user_id'] ?? 0) !== $userId || $this->extraerSessionIdDeJob($j) === '') {
+                                continue;
+                            }
                             $fallbackId = (int)$j['id'];
                             break;
                         }
@@ -1230,12 +1500,15 @@ REGLAS:
                     if ($fallbackId <= 0) {
                         throw new \LogicException("Job anterior #{$jobId} no encontrado y no hay sesiones recientes disponibles.");
                     }
+                    $jobUsado = $fallbackId;
                     $accion = $svc->crearContinuacion($fallbackId, $userId, $prompt);
                 }
                 return [
                     'tipo'      => $tipo,
                     'exito'     => true,
                     'accion_id' => $accion['id'] ?? null,
+                    'job_id'    => $jobUsado,
+                    'session_id' => (string)($accion['payload']['session_id'] ?? ''),
                 ];
 
             /* [125A-1] Agrega comandos bash al allowlist persistente de OpenCode.

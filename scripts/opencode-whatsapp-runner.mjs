@@ -262,6 +262,15 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessio
     return opencodeArgs;
 }
 
+function resolveAgentFilePath(agent) {
+    if (!agent) return '';
+    const candidates = [
+        path.join(repoRoot, '.opencode', 'agent', `${agent}.md`),
+        path.join(repoRoot, '.opencode', 'agents', `${agent}.md`),
+    ];
+    return candidates.find(candidate => existsSync(candidate)) || '';
+}
+
 /* [125A-1] Inyecta comandos extra en el YAML frontmatter del agente antes de ejecutar.
  * Usa markers idempotentes: si el proceso anterior fue matado antes del finally (restore),
  * el bloque previo se limpia antes de volver a inyectar → sin YAML duplicado ni corrupcion.
@@ -389,6 +398,14 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, request
             const output = getOutput();
             const resolvedSessionId = sessionId || resolveLatestSessionId(commandSpec, projectPath);
             const whatsappSummary = extractWhatsAppSummary(output);
+            if (/agent\s+"[^"]+"\s+not\s+found[\s\S]*falling\s+back/i.test(output)) {
+                reject(Object.assign(new Error('OpenCode no cargó el agente solicitado y cayó al agente por defecto.'), {
+                    output,
+                    session_id: resolvedSessionId,
+                    whatsapp_summary: whatsappSummary,
+                }));
+                return;
+            }
             if (exitCodeCapture === 0) {
                 resolve({output, session_id: resolvedSessionId, whatsapp_summary: whatsappSummary});
                 return;
@@ -440,7 +457,10 @@ async function executeRun(options, overrides = {}, printDryRun = true, handleRef
     /* [125A-1] Aplicar permisos extra del payload antes de ejecutar; restaurar después */
     const extraPermissions = Array.isArray(overrides.extra_permissions) ? overrides.extra_permissions
         : (Array.isArray(options.extra_permissions) ? options.extra_permissions : []);
-    const agentFilePath = agent ? path.join(repoRoot, '.opencode', 'agents', `${agent}.md`) : '';
+    const agentFilePath = resolveAgentFilePath(agent);
+    if (agent && !agentFilePath) {
+        throw new Error(`Agente OpenCode no encontrado: ${agent}. Crea .opencode/agent/${agent}.md o corrige config/opencode-projects.json.`);
+    }
     const originalAgentContent = agentFilePath ? injectExtraPermissions(agentFilePath, extraPermissions) : null;
 
     const prompt = buildPrompt({
