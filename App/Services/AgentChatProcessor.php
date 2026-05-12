@@ -760,11 +760,13 @@ REGLAS:
                 $hoy   = $this->fechaHoyParaCanal($canal);
                 $encontrado = false;
                 $habitoActualizado = null;
+                $esNuevoCompletado = false;
                 foreach ($habitos as &$h) {
                     if ((int)$h['id'] === $id) {
                         $encontrado = true;
                         $hist = (array)($h['historialCompletados'] ?? []);
                         if (!in_array($hoy, $hist, true)) {
+                            $esNuevoCompletado = true;
                             $hist[] = $hoy;
                             $h['historialCompletados'] = $hist;
                             $h['ultimoCompletado'] = $hoy;
@@ -793,6 +795,22 @@ REGLAS:
                         $histPersistido = (array)($persistido['historialCompletados'] ?? []);
                         $verificado = ($persistido['ultimoCompletado'] ?? '') === $hoy || in_array($hoy, $histPersistido, true);
                         break;
+                    }
+                }
+                /* [125A-5] Registrar actividad igual que el flujo web (habitosStore → ActividadService).
+                 * Solo cuando es un nuevo completado para hoy; ActividadService ya tiene dedup pero
+                 * evitamos la llamada redundante. Falla silenciosa: no rompe el flujo principal. */
+                if ($verificado && $esNuevoCompletado) {
+                    try {
+                        (new ActividadService())->registrarActividad($userId, [
+                            'tipo'        => 'habito_cumplido',
+                            'elementoId'  => $id,
+                            'elementoTipo' => 'habito',
+                            'fecha'       => $hoy,
+                            'detalles'    => ['elementoNombre' => $habitoActualizado['nombre'] ?? ''],
+                        ]);
+                    } catch (\Throwable $actErr) {
+                        error_log('[AgentChatProcessor] Error registrando actividad para hábito ' . $id . ': ' . $actErr->getMessage());
                     }
                 }
                 return ['tipo' => $tipo, 'exito' => $verificado, 'id' => $id, 'fecha' => $hoy, 'error' => $verificado ? null : 'El hábito no quedó persistido tras guardar.'];

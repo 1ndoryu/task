@@ -83,8 +83,11 @@ class WhatsAppWebhookService
         }
 
         $isGroup = str_contains($from, '@g.us');
+        /* [125A-5] wacli puede enviar Text:"[Audio]"/[Image] como placeholder cuando el mensaje es solo media.
+         * Tratar esos placeholders igual que texto vacío para el chequeo de descarte. */
+        $textEfectivo = (preg_match('/^\[.{1,20}\]$/', $text) && $mediaEvento !== null) ? '' : $text;
         /* Descartar solo si texto vacío Y sin media procesable */
-        if ($isGroup || ($text === '' && $mediaEvento === null) || $from === '') {
+        if ($isGroup || ($textEfectivo === '' && $mediaEvento === null) || $from === '') {
             return;
         }
 
@@ -114,8 +117,9 @@ class WhatsAppWebhookService
         $destino = $esLid ? $from : ('+' . $fromNum);
 
         try {
-            /* [115A-5] Procesar media si existe: imagen → visión, audio → transcripción */
-            $mensajeParaAgente = $text;
+            /* [115A-5] Procesar media si existe: imagen → visión, audio → transcripción.
+             * [125A-5] Usar $textEfectivo (placeholders de wacli ya limpios) como base. */
+            $mensajeParaAgente = $textEfectivo;
             $mediaParaAgente   = null;
 
             if ($mediaEvento !== null) {
@@ -150,11 +154,15 @@ class WhatsAppWebhookService
                     }
                 } catch (\Throwable $mediaErr) {
                     error_log('[WhatsApp] Error procesando media: ' . $mediaErr->getMessage());
-                    if ($mensajeParaAgente === '') {
-                        /* [116A-3] En lugar de responder directamente y cortar, informar al LLM
-                         * para que responda de forma natural y pida al usuario que reenvíe. */
-                        $mimeType = (string)($mediaEvento['mimeType'] ?? $mediaEvento['type']);
-                        $mediaKind = (string)($mediaEvento['type'] ?? '');
+                    /* [125A-5] wacli puede enviar Text:"[Audio]"/[Image]/[Video] como placeholder.
+                     * Si $mensajeParaAgente es vacío o un placeholder wacli, reemplazarlo con mensaje
+                     * informativo para el LLM. De lo contrario (caption real del usuario), conservarlo. */
+                    $mimeType  = (string)($mediaEvento['mimeType'] ?? $mediaEvento['type']);
+                    $mediaKind = (string)($mediaEvento['type'] ?? '');
+                    $placeholdersWacli = ['', '[Audio]', '[Image]', '[Video]', '[Document]', '[Sticker]', '[GIF]'];
+                    $esPlaceholder = in_array($mensajeParaAgente, $placeholdersWacli, true)
+                        || preg_match('/^\[.{1,20}\]$/', $mensajeParaAgente);
+                    if ($esPlaceholder) {
                         if (str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/') || in_array($mediaKind, ['audio', 'video'], true)) {
                             $mensajeParaAgente = '[El usuario envió un audio que no se pudo transcribir (error técnico). Dile que lo reenvíe o escriba el mensaje.]';
                         } else {
