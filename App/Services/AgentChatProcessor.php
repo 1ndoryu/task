@@ -738,15 +738,18 @@ REGLAS:
                 $repo  = new HabitosRepository($userId);
                 $habitos = $repo->getAll();
                 $hoy   = date('Y-m-d');
+                $encontrado = false;
                 foreach ($habitos as &$h) {
                     if ((int)$h['id'] === $id) {
+                        $encontrado = true;
                         $hist = (array)($h['historialCompletados'] ?? []);
                         if (!in_array($hoy, $hist, true)) {
                             $hist[] = $hoy;
                             $h['historialCompletados'] = $hist;
+                            $h['ultimoCompletado'] = $hoy;
                             /* Incrementar racha si el día anterior también fue completado */
                             $ayer = date('Y-m-d', strtotime('-1 day'));
-                            if (in_array($ayer, (array)($h['historialCompletados'] ?? []), true) || (int)($h['racha'] ?? 0) === 0) {
+                            if (in_array($ayer, $hist, true) || (int)($h['racha'] ?? 0) === 0) {
                                 $h['racha'] = (int)($h['racha'] ?? 0) + 1;
                             }
                         }
@@ -754,8 +757,11 @@ REGLAS:
                     }
                 }
                 unset($h);
-                $_ok = $repo->saveAll($habitos);
-                return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
+                if (!$encontrado) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => "Hábito id:{$id} no encontrado."];
+                }
+                $ok = $repo->saveAll($habitos);
+                return ['tipo' => $tipo, 'exito' => (bool)$ok, 'id' => $id];
 
             case 'completar_subhabito':
                 $id    = (int)($param['id'] ?? 0);
