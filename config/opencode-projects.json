@@ -5,6 +5,7 @@
             "repo": "1ndoryu/task",
             "branch": "glory-react-logic",
             "defaultModel": "opencode/deepseek-v4-flash-free",
+            "defaultReasoningEffort": "max",
             "defaultAgent": "whatsapp-code",
             "deploy": {
                 "provider": "coolify-manager-rs",
@@ -17,6 +18,7 @@
             "repo": "1ndoryu/glory-rust-template",
             "branch": "main",
             "defaultModel": "opencode/deepseek-v4-flash-free",
+            "defaultReasoningEffort": "max",
             "deploy": {
                 "provider": "coolify-manager-rs",
                 "site": "glory-rest",

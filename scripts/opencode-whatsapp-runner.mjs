@@ -249,9 +249,12 @@ function resolveLatestSessionId(commandSpec, projectPath) {
     return '';
 }
 
-function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessionId}) {
+function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessionId, variant}) {
     const opencodeArgs = ['run', '--dir', projectPath, '--model', model];
     if (agent) opencodeArgs.push('--agent', agent);
+    /* [126A-2] Reasoning effort: --variant pasa el nivel de pensamiento al modelo DeepSeek.
+     * Valores: max, high, minimal. Por defecto se usa el configurado en opencode-projects.json. */
+    if (variant) opencodeArgs.push('--variant', variant);
     /* [115A-cont] Continuacion de sesion: --session pasa el ID al contexto previo de OpenCode */
     if (sessionId) opencodeArgs.push('--session', sessionId);
     if (attachUrl) opencodeArgs.push('--attach', attachUrl);
@@ -410,6 +413,11 @@ async function executeRun(options, overrides = {}, printDryRun = true, handleRef
     const branch = typeof overrides.branch === 'string' ? overrides.branch
         : (typeof options.branch === 'string' ? options.branch : (project.branch || ''));
     const model = project.defaultModel;
+    const reasoningEffort = typeof overrides.reasoningEffort === 'string' && overrides.reasoningEffort !== ''
+        ? overrides.reasoningEffort
+        : (typeof options.reasoningEffort === 'string' && options.reasoningEffort !== ''
+            ? options.reasoningEffort
+            : (project.defaultReasoningEffort || ''));
     const agent = typeof overrides.agent === 'string' ? overrides.agent : (typeof options.agent === 'string' ? options.agent : project.defaultAgent);
     const opencodeBin = typeof options.bin === 'string' ? options.bin : 'opencode';
     const commandSpec = resolveOpencodeCommand(opencodeBin);
@@ -447,6 +455,7 @@ async function executeRun(options, overrides = {}, printDryRun = true, handleRef
         projectPath,
         model,
         agent,
+        variant: reasoningEffort,
         attachUrl: typeof options.attach === 'string' ? options.attach : '',
         prompt,
         sessionId,
@@ -456,6 +465,7 @@ async function executeRun(options, overrides = {}, printDryRun = true, handleRef
         projectId,
         projectPath,
         model,
+        reasoningEffort,
         agent,
         command: [commandSpec.command, ...commandSpec.argsPrefix, ...opencodeArgs.slice(0, -1), '<prompt>'],
         prompt,
@@ -478,7 +488,7 @@ async function executeRun(options, overrides = {}, printDryRun = true, handleRef
         });
         if (handleRef) handleRef.cancel = cancel;
         const runResult = await promise;
-        return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
+        return {projectId, projectPath, model, reasoningEffort, agent, dryRun: false, ...runResult};
     } finally {
         /* [125A-1] Restaurar el agente YAML a su estado original tras ejecutar */
         if (originalAgentContent !== null && agentFilePath) {
@@ -551,11 +561,60 @@ function optionsFromJobPayload(options, payload, currentExtra = []) {
         message: payload.prompt || payload.message || payload.mensaje || '',
         commit: Boolean(payload.commit),
         deploy: Boolean(payload.deploy),
+        /* [126A-2] Reasoning effort (--variant) desde el payload del job */
+        reasoningEffort: typeof payload.reasoning_effort === 'string' ? payload.reasoning_effort : '',
         /* [115A-cont] Campos de continuacion de sesion */
         sessionId: typeof payload.session_id === 'string' ? payload.session_id : '',
         previousOutput: typeof payload.previous_output === 'string' ? payload.previous_output : '',
         /* [125A-1] Permisos extra: merge de snapshot del job + allowlist actual del servidor */
         extra_permissions: mergedExtra,
+    };
+}
+
+/* [126A-1] Ejecuta un comando rápido (ej: git branch -a) directamente sin OpenCode.
+ * Usa spawnSync con shell para comandos simples. El resultado se envuelve con los
+ * marcadores === RESUMEN PARA WHATSAPP === para que el servidor lo procese normal. */
+async function handleQuickCommand({project: projectId, branch, comando, apiUrl, secret, jobId}) {
+    const config = loadConfig();
+    const {project, projectPath} = resolveProject(config, projectId);
+
+    /* Cambiar a la rama si se especificó */
+    if (branch) {
+        const gitSwitch = spawnSync('git', ['-C', projectPath, 'checkout', branch], {encoding: 'utf8'});
+        if (gitSwitch.status !== 0) {
+            console.error(`[runner] No se pudo cambiar a rama ${branch}: ${(gitSwitch.stderr || '').trim()}`);
+        } else {
+            console.error(`[runner] Rama activa: ${branch}`);
+        }
+    }
+
+    /* Ejecutar el comando via shell (cmd.exe en Windows, que parsea git branch -a correctamente) */
+    const result = spawnSync(comando, [], {
+        cwd: projectPath,
+        encoding: 'utf8',
+        shell: true,
+        timeout: 30000,
+        maxBuffer: 1024 * 1024,
+    });
+
+    const stdout   = (result.stdout || '').trim();
+    const stderr   = (result.stderr || '').trim();
+    const exitCode = result.status ?? 1;
+
+    console.error(`[runner] Consulta rápida exit code: ${exitCode}`);
+
+    /* Construir resumen con marcadores WhatsApp */
+    const body = exitCode === 0
+        ? (stdout || stderr || 'Comando ejecutado sin salida.')
+        : (stderr || stdout || 'Error desconocido.');
+
+    const whatsappSummary = `Comando: ${comando}\nProyecto: ${project}\nExit code: ${exitCode}\n\n${body}`;
+    const output = `=== RESUMEN PARA WHATSAPP ===\n${whatsappSummary}\n=== FIN RESUMEN ===`;
+
+    return {
+        output,
+        session_id: '',
+        whatsapp_summary: whatsappSummary,
     };
 }
 
@@ -633,6 +692,46 @@ async function pollOnce(options) {
             console.error(`[runner] Error al verificar estado cancel: ${e.message}`);
         }
     }, 10000);
+
+    /* [126A-1] Consulta rápida: ejecutar comando directamente sin OpenCode */
+    if (payload.es_consulta_rapida) {
+        clearInterval(cancelInterval);
+        try {
+            const result = await handleQuickCommand({
+                project: runOptions.project,
+                branch: runOptions.branch,
+                comando: payload.comando || 'git branch -a',
+                apiUrl,
+                secret,
+                jobId: job.id,
+            });
+            await requestRunner({
+                apiUrl, secret,
+                method: 'POST',
+                pathSuffix: `/agent/opencode/jobs/${job.id}/result`,
+                route: `/glory/v1/agent/opencode/jobs/${job.id}/result`,
+                body: {success: true, message: 'Consulta rápida completada.', result},
+            });
+        } catch (error) {
+            await requestRunner({
+                apiUrl, secret,
+                method: 'POST',
+                pathSuffix: `/agent/opencode/jobs/${job.id}/result`,
+                route: `/glory/v1/agent/opencode/jobs/${job.id}/result`,
+                body: {
+                    success: false,
+                    message: error.message,
+                    result: {
+                        error: error.message,
+                        output: '',
+                        session_id: '',
+                        whatsapp_summary: 'Error ejecutando consulta rápida.',
+                    },
+                },
+            });
+        }
+        return;
+    }
 
     try {
         const result = await executeRun(runOptions, {}, false, cancelHandle);

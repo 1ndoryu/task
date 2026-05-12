@@ -308,13 +308,22 @@ class AgentRestHandlers
                     $resumen = self::extraerResumenWhatsApp($output);
                 }
                 $rechazados = $output !== '' ? self::extraerPermisosRechazados($output) : [];
-                if ($exito) {
-                    $waMsg = "\u{2705} *OpenCode termin\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                $esConsulta = !empty($job['payload']['es_consulta_rapida']);
+                if ($esConsulta) {
+                    if ($exito) {
+                        $waMsg = "\u{1F50D} *Consulta*" . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                    } else {
+                        $waMsg = "\u{274C} *Consulta fall\u{00F3}*" . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                    }
                 } else {
-                    $waMsg = "\u{274C} *OpenCode fall\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n{$mensaje}" . ($resumen !== '' ? "\n\n{$resumen}" : '');
-                }
-                if ($sessionIdCodigo !== '') {
-                    $waMsg .= "\n\n\u{1F511} _Sesi\u{00F3}n: {$sessionIdCodigo}_";
+                    if ($exito) {
+                        $waMsg = "\u{2705} *OpenCode termin\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                    } else {
+                        $waMsg = "\u{274C} *OpenCode fall\u{00F3}*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n{$mensaje}" . ($resumen !== '' ? "\n\n{$resumen}" : '');
+                    }
+                    if ($sessionIdCodigo !== '') {
+                        $waMsg .= "\n\n\u{1F511} _Sesi\u{00F3}n: {$sessionIdCodigo}_";
+                    }
                 }
                 if (!empty($rechazados)) {
                     $waMsg .= "\n\n\u{26A0}\uFE0F *Permisos rechazados:*";

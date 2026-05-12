@@ -226,6 +226,8 @@ class OpencodeJobService
             'session_id'        => $sessionId,
             'previous_output'   => $previousOutput,
             'continua_job_id'   => $jobAnteriorId,
+            /* [126A-2] Mantener el reasoning_effort del job original en la continuación */
+            'reasoning_effort'  => (string)($jobAnterior['payload']['reasoning_effort'] ?? ''),
             'extra_permissions' => $extraAllow,
         ]);
 

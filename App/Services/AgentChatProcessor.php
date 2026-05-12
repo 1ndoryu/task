@@ -31,6 +31,9 @@ class AgentChatProcessor
     /* [115A-3] Contexto maestro: texto persistente por usuario, modificable por el agente.
      * Si supera MASTER_CONTEXT_MAX_CHARS (~9000 tokens), se compacta automáticamente. */
     private const MASTER_CONTEXT_MAX_CHARS = 36000; // ~9000 tokens → compactar contexto maestro
+    /* [126A-1] Clave user_meta para persistir el proyecto activo del usuario.
+     * Se consulta en buildContexto(), en las acciones de proyecto y como default de solicitar_opencode. */
+    private const ACTIVE_PROJECT_META_KEY = 'glory_active_opencode_project';
 
     private AgentChatService $chat;
     private MemPalaceService  $mempalace;
@@ -265,12 +268,15 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
-- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
+- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\", \"reasoning_effort\": \"max\"}} — reasoning_effort opcional: \"max\", \"high\" o \"minimal\" (default: \"max\" del proyecto). Controla el nivel de pensamiento del modelo DeepSeek.
 - {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"instruccion real del usuario para OpenCode\"}} (job_id = número exacto de [id:N] visible en el contexto, o 0 si el usuario ya proporcionó un ses_XXXXX — el backend lo resuelve solo. En 'mensaje' pon la instrucción real del usuario, NUNCA el ses_XXXXX; si el usuario solo pide continuar sin instrucción nueva, pon \"Continúa desde donde quedaste en esta sesión.\")
 - {\"tipo\": \"cancelar_opencode\", \"parametros\": {\"job_id\": ID}} (cuando el usuario pide cancelar o detener un job activo)
 - {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
 - {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
+- {\"tipo\": \"listar_proyectos\", \"parametros\": {}}
+- {\"tipo\": \"listar_ramas\", \"parametros\": {}}
+- {\"tipo\": \"cambiar_proyecto\", \"parametros\": {\"proyecto\": \"glorytemplate\"}}
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido. EXCEPCIÓN: el CONTEXTO MAESTRO no es una nota — ya está embebido en el bloque '## Contexto personal' de este prompt, NO tiene ID, NUNCA uses leer_nota para él.
@@ -286,7 +292,10 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. TAMBIÉN OBLIGATORIO cuando el usuario use frases como 'tarea para opencode', 'pídele a opencode que', 'dile a opencode que', 'ejecuta en opencode' o cualquier variante que destine la instrucción a OpenCode — en ese caso usa solicitar_opencode, NUNCA crear_tarea. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
+- listar_proyectos: cuando el usuario pregunte qué proyectos OpenCode hay disponibles, qué proyectos existen, o quiera cambiar de proyecto pero no sepa los IDs. Devuelve la lista completa y cuál está activo. TAMBIÉN disponible si el usuario pide 'ver proyectos', 'qué proyectos tengo', 'cambiar de proyecto'.
+- listar_ramas: cuando el usuario quiera ver las ramas git del proyecto activo. Ejecuta una consulta rápida sin OpenCode — la respuesta llega en segundos. Usa esta acción, NUNCA solicitar_opencode para 'ver ramas' o 'listar ramas'.
+- cambiar_proyecto: cuando el usuario pida explícitamente cambiar de proyecto OpenCode. El parámetro proyecto debe ser uno de los IDs visibles en ## Proyecto activo del contexto. Después de cambiar, el nuevo proyecto se usa como default en solicitar_opencode.
+- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. TAMBIÉN OBLIGATORIO cuando el usuario use frases como 'tarea para opencode', 'pídele a opencode que', 'dile a opencode que', 'ejecuta en opencode' o cualquier variante que destine la instrucción a OpenCode — en ese caso usa solicitar_opencode, NUNCA crear_tarea. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto activo está en ## Proyecto activo del contexto — úsalo como default para el parámetro proyecto. La rama por defecto del proyecto activo se usa si no se especifica otra. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. reasoning_effort opcional: \"max\", \"high\" o \"minimal\" (por defecto \"max\"). Si el usuario pide 'máximo pensamiento', 'razona al máximo' o similar, usa reasoning_effort:\"max\". Si pide 'menos pensamiento', 'sin razonar tanto' o 'más rápido', usa reasoning_effort:\"minimal\". NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` incluye el ses_XXXXX explícitamente, ej: \"Continuando la sesión ses_1e5cc66deffe4BZxD3PLgISQhX, dame un momento.\" — NUNCA omitas el ses_XXXXX en la respuesta, es importante para que el usuario sepa qué sesión se está reanudando. NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
 - actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"git --no-pager*\", \"Test-Path*\"]}. REGLA CRÍTICA: usa el PATRÓN MÁS AMPLIO posible que cubra el TIPO de comando, NUNCA el comando específico con rutas o argumentos. Ejemplos obligatorios: `git --no-pager log --oneline -10` → `git --no-pager*` (cubre TODO git con --no-pager); `Test-Path \"App\\file.php\"` → `Test-Path*`; `Measure-Object -Line` → `Measure-Object*`; `Get-Content file.php` → `Get-Content*`; `php -l File.php` → `php -l*`; `git hash-object \"file\"` → `git hash-object*`. El patrón SIEMPRE termina en `*`. Guardar el comando exacto con rutas específicas solo permite ESE comando y el problema se repite. Lee 'Permisos rechazados' del job para identificar el tipo. Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode. NO la uses sin confirmación explícita del usuario.
 - cancelar_opencode: cuando el usuario pide cancelar o detener un job de OpenCode activo. Lee el contexto para ver jobs activos (estado 🔄 ejecutando o ⏳ pendiente) y usa el id del job activo. El runner detectará el cambio en su polling y matará el proceso. Si no hay jobs activos, informa al usuario.
@@ -454,6 +463,18 @@ REGLAS:
                         $ctx .= '  Permisos rechazados: ' . implode(', ', array_map(fn($c) => "`{$c}`", $rechazados)) . "\n";
                     }
                 }
+            }
+        } catch (\Throwable) { /* No bloquear el contexto */ }
+        /* [126A-1] Mostrar proyecto activo para que el LLM sepa en qué proyecto está
+         * y pueda usar listar_proyectos, listar_ramas, cambiar_proyecto correctamente. */
+        try {
+            $proyectos = $this->loadProjectsConfig();
+            if (!empty($proyectos)) {
+                $activo = $this->getActiveProject($userId);
+                $ctx .= "\n## Proyecto activo\n";
+                $ctx .= "- Proyecto: {$activo}\n";
+                $ctx .= "- Proyectos disponibles: " . implode(', ', array_keys($proyectos)) . "\n";
+                $ctx .= "- Para ver ramas del proyecto activo usa 'listar_ramas'\n";
             }
         } catch (\Throwable) { /* No bloquear el contexto */ }
         return $ctx;
@@ -652,6 +673,52 @@ REGLAS:
             /* La acción continuar_opencode tiene su propio fallback y error visible. */
         }
         return 0;
+    }
+
+    /* --- Project management (multi-project OpenCode) ----------------------- */
+
+    /* [126A-1] Lee la whitelist de proyectos del JSON config.
+     * Retorna array clave→config o array vacío si no existe/falla el parse. */
+    private function loadProjectsConfig(): array
+    {
+        $configPath = get_template_directory() . '/config/opencode-projects.json';
+        if (!file_exists($configPath)) {
+            return [];
+        }
+        $raw  = file_get_contents($configPath);
+        $data = json_decode(is_string($raw) ? $raw : '{}', true);
+        return is_array($data['projects'] ?? null) ? $data['projects'] : [];
+    }
+
+    /* [126A-1] Obtiene el proyecto activo del usuario desde user_meta.
+     * Si no hay proyecto guardado, retorna el predeterminado 'glorytemplate'. */
+    private function getActiveProject(int $userId): string
+    {
+        $saved = get_user_meta($userId, self::ACTIVE_PROJECT_META_KEY, true);
+        if (is_string($saved) && $saved !== '') {
+            return $saved;
+        }
+        return 'glorytemplate';
+    }
+
+    /* [126A-1] Persiste el proyecto activo del usuario en user_meta.
+     * Retorna true si se guardó correctamente. */
+    private function setActiveProject(int $userId, string $projectId): bool
+    {
+        $projectId = sanitize_key($projectId);
+        if ($projectId === '') {
+            return false;
+        }
+        return (bool) update_user_meta($userId, self::ACTIVE_PROJECT_META_KEY, $projectId);
+    }
+
+    /* [126A-1] Obtiene la rama por defecto del proyecto activo desde la config.
+     * Si el proyecto no existe en la config, retorna 'main' como fallback seguro. */
+    private function getActiveProjectBranch(int $userId, array $projectsConfig): string
+    {
+        $active  = $this->getActiveProject($userId);
+        $project = $projectsConfig[$active] ?? [];
+        return (string)($project['branch'] ?? 'main');
     }
 
     /* --- Ejecutores de acciones -------------------------------------------- */
@@ -1092,12 +1159,17 @@ REGLAS:
                     throw new \LogicException('solicitar_opencode requiere parámetro prompt.');
                 }
 
-                $proyecto  = sanitize_key((string)($param['proyecto'] ?? 'glorytemplate')) ?: 'glorytemplate';
-                $agente    = sanitize_key((string)($param['agente'] ?? 'whatsapp-code')) ?: 'whatsapp-code';
-                $branch    = sanitize_text_field((string)($param['branch'] ?? 'glory-react-logic')) ?: 'glory-react-logic';
-                $commit    = filter_var($param['commit'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                $deploy    = filter_var($param['deploy'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                $titulo    = 'OpenCode: ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 80);
+                $proyectos  = $this->loadProjectsConfig();
+                $proyecto   = sanitize_key((string)($param['proyecto'] ?? $this->getActiveProject($userId))) ?: 'glorytemplate';
+                $agente     = sanitize_key((string)($param['agente'] ?? 'whatsapp-code')) ?: 'whatsapp-code';
+                $branch     = sanitize_text_field((string)($param['branch'] ?? '')) ?: (string)($proyectos[$proyecto]['branch'] ?? 'main');
+                /* [126A-2] Reasoning effort: valores validos 'max', 'high', 'minimal' o vacio (default del proyecto).
+                 * Se pasa como --variant al runner y controla el nivel de pensamiento del modelo DeepSeek. */
+                $reasoningEffort = in_array((string)($param['reasoning_effort'] ?? ''), ['max', 'high', 'minimal'], true)
+                    ? (string)$param['reasoning_effort'] : '';
+                $commit     = filter_var($param['commit'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $deploy     = filter_var($param['deploy'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $titulo     = 'OpenCode: ' . mb_substr(str_replace(["\r", "\n"], ' ', $prompt), 0, 80);
 
                 /* [115A-15] WhatsApp ya autentico al usuario via HMAC: sin doble aprobacion.
                  * Otros canales (web, CLI) requieren aprobacion manual. */
@@ -1110,6 +1182,7 @@ REGLAS:
                     'agent'             => $agente,
                     'branch'            => $branch,
                     'prompt'            => $prompt,
+                    'reasoning_effort'  => $reasoningEffort,
                     'commit'            => $commit,
                     'deploy'            => $deploy,
                     'source'            => $canal,
@@ -1232,6 +1305,66 @@ REGLAS:
                 $nuevoLimite = max(2000, (int)($param['chars'] ?? 0));
                 update_option('glory_chatbot_compaction_chars', $nuevoLimite);
                 return ['tipo' => $tipo, 'exito' => true, 'nuevo_limite_chars' => $nuevoLimite, 'nuevo_limite_tokens' => (int) round($nuevoLimite / 4)];
+
+            /* [126A-1] Lista los proyectos disponibles desde config/opencode-projects.json.
+             * Devuelve ID, repo, branch_default y cuál está activo para que el LLM lo muestre al usuario. */
+            case 'listar_proyectos':
+                $proyectos = $this->loadProjectsConfig();
+                $activo    = $this->getActiveProject($userId);
+                $lista     = [];
+                foreach ($proyectos as $id => $cfg) {
+                    $lista[] = [
+                        'id'             => $id,
+                        'repo'           => (string)($cfg['repo'] ?? ''),
+                        'branch_default' => (string)($cfg['branch'] ?? ''),
+                        'activo'         => ($id === $activo),
+                    ];
+                }
+                return ['tipo' => $tipo, 'exito' => true, 'proyectos' => $lista, 'activo' => $activo];
+
+            /* [126A-1] Crea un job de consulta rápida en el proyecto activo para listar ramas git.
+             * El runner ejecuta el comando directamente sin OpenCode y reporta el resultado.
+             * No requiere aprobación porque no modifica nada — es solo consulta. */
+            case 'listar_ramas':
+                $proyectos  = $this->loadProjectsConfig();
+                $activo     = $this->getActiveProject($userId);
+                $proyectoCfg = $proyectos[$activo] ?? [];
+                if (empty($proyectoCfg)) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => "Proyecto activo '{$activo}' no encontrado en configuración."];
+                }
+                $titulo     = 'Consultar ramas: ' . $activo;
+                $extraAllow = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
+                $accion     = (new AgentActionService())->crearPropuesta($userId, 'opencode_job', $titulo, [
+                    'project'            => $activo,
+                    'prompt'             => '',
+                    'es_consulta_rapida' => true,
+                    'comando'            => 'git branch -a',
+                    'branch'             => '',
+                    'commit'             => false,
+                    'deploy'             => false,
+                    'source'             => $canal,
+                    'extra_permissions'  => $extraAllow,
+                ], false); // sin aprobación — es solo consulta
+                return [
+                    'tipo'      => $tipo,
+                    'exito'     => true,
+                    'accion_id' => $accion['id'] ?? null,
+                    'proyecto'  => $activo,
+                ];
+
+            /* [126A-1] Cambia el proyecto activo del usuario. Valida contra la whitelist
+             * antes de persistir para evitar proyectos no configurados. */
+            case 'cambiar_proyecto':
+                $nuevoProyecto = sanitize_key((string)($param['proyecto'] ?? $param['project'] ?? ''));
+                if ($nuevoProyecto === '') {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => 'Se requiere parámetro proyecto.'];
+                }
+                $proyectos = $this->loadProjectsConfig();
+                if (!isset($proyectos[$nuevoProyecto])) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => "Proyecto '{$nuevoProyecto}' no está en la whitelist de opencode-projects.json."];
+                }
+                $this->setActiveProject($userId, $nuevoProyecto);
+                return ['tipo' => $tipo, 'exito' => true, 'proyecto' => $nuevoProyecto];
 
             default:
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'Tipo de acción no soportado en canal server-side'];
