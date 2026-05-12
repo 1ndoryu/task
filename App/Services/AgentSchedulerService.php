@@ -85,8 +85,15 @@ class AgentSchedulerService
             $titulo  = (string)($recordatorio['titulo'] ?? $titulo);
             $mensaje = (string)($recordatorio['mensaje'] ?? $mensaje);
 
+            /* [fix-personalizar-todos] Personalizar el mensaje via LLM para todos los canales.
+             * Aplica tanto a recordatorios de hábitos como a recordatorios de una sola vez
+             * (ej: "comprar pollo"). Fallback al texto resuelto si la llamada LLM falla. */
+            $mensajeEnviado = $userId > 0
+                ? self::generarMensajePersonalizado($userId, $mensaje)
+                : $mensaje;
+
             /* Notificación en app siempre */
-            $resultado = (new NotificacionesService())->crear($userId, NotificacionesService::TIPO_MENSAJE_CHAT, $titulo, $mensaje, [
+            $resultado = (new NotificacionesService())->crear($userId, NotificacionesService::TIPO_MENSAJE_CHAT, $titulo, $mensajeEnviado, [
                 'source' => 'agent_reminder',
             ]);
             if (empty($resultado['exito'])) {
@@ -96,7 +103,7 @@ class AgentSchedulerService
             /* Si el canal es WhatsApp, también enviar por WhatsApp */
             if ($channel === 'whatsapp') {
                 try {
-                    (new WacliService())->enviarTexto(null, "⏰ {$titulo}: {$mensaje}");
+                    (new WacliService())->enviarTexto(null, "⏰ {$titulo}: {$mensajeEnviado}");
                 } catch (\Throwable $e) {
                     error_log('[AgentSchedulerService] No se pudo enviar recordatorio por WhatsApp: ' . $e->getMessage());
                 }
@@ -172,12 +179,13 @@ class AgentSchedulerService
             return ['omitir' => true, 'razon' => 'no_pending_habits'];
         }
 
-        /* [fix-habito-personalizado] Generar mensaje con LLM en vez de texto generico */
-        $mensaje = self::generarMensajeHabitoPersonalizado($userId, $habito);
+        $nombre = sanitize_text_field((string)($habito['nombre'] ?? 'hábito sin nombre'));
+        $importancia = self::etiquetaImportancia((string)($habito['importancia'] ?? ''));
+        $detalleImportancia = $importancia !== '' ? " ({$importancia})" : '';
 
         return [
             'titulo' => 'Hábito pendiente',
-            'mensaje' => $mensaje,
+            'mensaje' => "{$nombre}{$detalleImportancia}",
         ];
     }
 
@@ -192,16 +200,19 @@ class AgentSchedulerService
         return str_contains($texto, 'habito pendiente') || str_contains($texto, 'habitos pendientes');
     }
 
-    /* [fix-habito-personalizado] Genera recordatorio via LLM con contexto maestro + mensajes recientes.
-     * Fallback al texto generico si la llamada LLM falla. */
-    private static function generarMensajeHabitoPersonalizado(int $userId, array $habito): string
+    /* [fix-personalizar-todos] Genera un recordatorio cálido y personalizado via LLM para
+     * cualquier tipo de recordatorio (hábito, one-shot, etc.).
+     * Recibe el asunto/descripción ya resuelto y lo convierte en mensaje natural.
+     * Fallback al texto recibido si la llamada LLM falla. */
+    private static function generarMensajePersonalizado(int $userId, string $asunto): string
     {
-        $nombre = sanitize_text_field((string)($habito['nombre'] ?? 'hábito sin nombre'));
-        $importancia = self::etiquetaImportancia((string)($habito['importancia'] ?? ''));
-        $fallback = "Tu hábito pendiente de mayor prioridad es: {$nombre}" . ($importancia !== '' ? " ({$importancia})" : '') . '.';
+        if ($asunto === '') {
+            return $asunto;
+        }
+        $fallback = $asunto;
 
         try {
-            $maestro = (string)(get_user_meta($userId, 'glory_chatbot_master_context', true));
+            $maestro   = (string)(get_user_meta($userId, 'glory_chatbot_master_context', true));
             $proveedor = (string)(get_option('glory_chatbot_proveedor') ?: 'groq');
             $modelo    = (string)(get_option('glory_chatbot_modelo') ?: 'llama-3.3-70b-versatile');
 
@@ -221,8 +232,8 @@ class AgentSchedulerService
                 $mensajesRecientes = implode("\n", $partes);
             }
 
-            $system = 'Eres el asistente personal del usuario. Genera un recordatorio breve, cálido y personalizado (1-2 oraciones máximo) para que complete su hábito. Usa un tono natural y directo, NO genérico. Responde SOLO con el mensaje del recordatorio, sin explicaciones adicionales.';
-            $userMsg = "Contexto del usuario:\n{$maestro}\n\nÚltimos mensajes del chat:\n{$mensajesRecientes}\n\nHábito: {$nombre}" . ($importancia !== '' ? " (importancia: {$importancia})" : '') . "\n\nGenera el recordatorio personalizado:";
+            $system  = 'Eres el asistente personal del usuario. Tu tarea es convertir un asunto de recordatorio en un mensaje breve, cálido y natural (1-2 oraciones). No expliques nada, no añadas frases genéricas de bot. Responde SOLO con el texto del mensaje para enviar al usuario.';
+            $userMsg = "Contexto del usuario:\n{$maestro}\n\nÚltimos mensajes del chat:\n{$mensajesRecientes}\n\nAsunto del recordatorio: {$asunto}\n\nEscribe el mensaje del recordatorio:";
 
             $llmResult = (new LLMProviderService())->enviarChat(
                 [
