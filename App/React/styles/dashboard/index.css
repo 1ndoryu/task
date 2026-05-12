@@ -1,3 +1,6 @@
+/* sentinel-disable-file directorio-abarrotado: dashboard legacy conserva imports centrales;
+ * estilos nuevos deben entrar en subdirectorios por dominio. */
+
 /*
  * DASHBOARD STYLES - ARCHIVO PRINCIPAL
  * 
@@ -171,6 +174,9 @@
 
 /* Ventana de Oportunidad para Hábitos (TAREA 4) */
 @import './componentes/ventanaOportunidad.css';
+
+/* WhatsApp multi-usuario */
+@import './componentes/whatsapp/whatsapp.css';
 
 /* Estilos Movil (PWA) - Siempre al final para mayor especificidad */
 /* Modularizado en archivos específicos por funcionalidad */

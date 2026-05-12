@@ -6,9 +6,10 @@ class Schema
 {
     /**
      * Versión actual de la base de datos
-    * v1.0.15: Chat persistente, acciones programadas y observabilidad del agente
+     * v1.0.15: Chat persistente, acciones programadas y observabilidad del agente
+     * v1.0.16: Multi-usuario WhatsApp — glory_whatsapp_accounts + glory_whatsapp_event_queue
      */
-    public const DB_VERSION = '1.0.15';
+    public const DB_VERSION = '1.0.16';
 
     /**
      * Nombre de la opción donde guardamos la versión instalada
@@ -606,6 +607,74 @@ class Schema
         dbDelta($sql_entornos);
         dbDelta($sql_overrides);
         dbDelta($sql_config);
+
+        /* [125B-1] Tabla de Cuentas WhatsApp (multi-usuario)
+         * Almacena una cuenta por usuario, con estado de autenticación y métricas diarias.
+         * account_name: correlaciona con --account de wacli (ej: user_3, user_7).
+         * phone_primary: número de teléfono del usuario (E.164).
+         * jid_primary: JID de WhatsApp cuando está autenticado.
+         * authenticated: 0 = pendiente de escanear QR, 1 = vinculado.
+         * blocked: bloqueado manualmente por admin (spam/abuso).
+         * daily_msg_count: mensajes procesados hoy (reset diario vía daily_msg_date).
+         * health_status: 'unknown', 'healthy', 'degraded', 'dead'.
+         */
+        $table_wa_accounts = $wpdb->prefix . 'glory_whatsapp_accounts';
+        $sql_wa_accounts = "CREATE TABLE $table_wa_accounts (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL UNIQUE,
+            account_name varchar(32) NOT NULL UNIQUE,
+            phone_primary varchar(20) NOT NULL UNIQUE,
+            jid_primary varchar(64) DEFAULT NULL,
+            authenticated tinyint(1) DEFAULT 0,
+            linked_jid varchar(64) DEFAULT NULL,
+            store_path varchar(255) DEFAULT NULL,
+            enabled tinyint(1) DEFAULT 1,
+            blocked tinyint(1) DEFAULT 0,
+            status_transition varchar(20) DEFAULT NULL,
+            daily_msg_count int(11) DEFAULT 0,
+            daily_msg_date date DEFAULT NULL,
+            last_sync datetime DEFAULT NULL,
+            last_health_check datetime DEFAULT NULL,
+            health_status varchar(20) DEFAULT 'unknown',
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_account_name (account_name),
+            KEY idx_jid_primary (jid_primary),
+            KEY idx_enabled (enabled),
+            KEY idx_health_status (health_status)
+        ) $charset_collate;";
+
+        /* [125B-1] Tabla de Cola de Eventos WhatsApp (webhook asíncrono)
+         * Almacena eventos NDJSON entrantes de wacli para procesamiento diferido.
+         * account_name: correlaciona con glory_whatsapp_accounts.account_name.
+         * event_body: JSON completo del evento.
+         * signature: HMAC-SHA256 recibido (verificación de integridad).
+         * status: pending | processing | completed | failed.
+         * locked_until: evita que dos workers procesen el mismo evento.
+         * attempts: contador de reintentos (max_attempts default 3).
+         */
+        $table_wa_events = $wpdb->prefix . 'glory_whatsapp_event_queue';
+        $sql_wa_events = "CREATE TABLE $table_wa_events (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            account_name varchar(32) NOT NULL,
+            event_body longtext NOT NULL,
+            signature varchar(128) NOT NULL,
+            status varchar(20) DEFAULT 'pending',
+            attempts int(11) DEFAULT 0,
+            max_attempts int(11) DEFAULT 3,
+            locked_until datetime DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            processed_at datetime DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY idx_status (status),
+            KEY idx_locked (locked_until),
+            KEY idx_created (created_at)
+        ) $charset_collate;";
+
+        dbDelta($sql_wa_accounts);
+        dbDelta($sql_wa_events);
     }
 
     /**

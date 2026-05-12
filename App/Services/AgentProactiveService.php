@@ -58,6 +58,36 @@ class AgentProactiveService
         return $resultados;
     }
 
+    /* [Fase-6] Analiza todos los usuarios con chatbot activo: admins + usuarios
+     * con capability glory_whatsapp_chatbot.
+     * Esto permite que el agente proactivo cubra a todos los usuarios del sistema,
+     * no solo a los administradores. */
+    public function analizarTodos(bool $force = false): array
+    {
+        $usuarios = get_users([
+            'role__in' => ['administrator'],
+            'fields'   => ['ID'],
+        ]);
+        $resultados = [];
+        foreach ($usuarios as $u) {
+            $resultados[(int)$u->ID] = $this->analizarUsuario((int)$u->ID, $force);
+        }
+
+        /* Agregar usuarios no-admin que tengan la capability glory_whatsapp_chatbot */
+        $conChatbot = get_users([
+            'capability__in' => ['glory_whatsapp_chatbot'],
+            'fields'         => ['ID'],
+        ]);
+        foreach ($conChatbot as $u) {
+            $uid = (int)$u->ID;
+            if (!isset($resultados[$uid])) {
+                $resultados[$uid] = $this->analizarUsuario($uid, $force);
+            }
+        }
+
+        return $resultados;
+    }
+
     private function generarPropuestas(int $userId): array
     {
         $notas = (new NotasRepository($userId))->listar(10, 0);

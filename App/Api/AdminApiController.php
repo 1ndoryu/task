@@ -20,6 +20,9 @@
 namespace App\Api;
 
 use App\Services\AdminService;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
 
 class AdminApiController
 {
@@ -141,8 +144,9 @@ class AdminApiController
     }
 
     /**
-     * [115A-1] Guarda el proveedor y modelo del chatbot en WP options.
-     * Estas opciones son leídas por AgentChatProcessor::resolverConfigLLM().
+     * [115A-1][Fase-6] Guarda el proveedor y modelo del chatbot.
+     * Almacena en WP options (global default) + user_meta del admin actual
+     * para que AgentChatProcessor::resolverConfigLLM() lo lea por usuario.
      */
     public static function guardarChatbotConfig(\WP_REST_Request $request): \WP_REST_Response
     {
@@ -151,6 +155,13 @@ class AdminApiController
 
         update_option('glory_chatbot_proveedor', $proveedor, false);
         update_option('glory_chatbot_modelo',    $modelo,    false);
+
+        /* [Fase-6] También guardar en user_meta del admin actual */
+        $userId = get_current_user_id();
+        if ($userId > 0) {
+            update_user_meta($userId, 'glory_chatbot_proveedor', $proveedor);
+            update_user_meta($userId, 'glory_chatbot_modelo', $modelo);
+        }
 
         return new \WP_REST_Response(['ok' => true, 'proveedor' => $proveedor, 'modelo' => $modelo], 200);
     }
@@ -372,6 +383,7 @@ class AdminApiController
             ], 500);
         }
     }
+
 }
 
 /* Registrar el controlador automáticamente */

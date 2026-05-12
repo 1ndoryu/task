@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-12 — Migraciones multiusuario no deben romper el canal legacy
+
+**Patrón del error:** El plan multiusuario convirtió el webhook WhatsApp en obligatorio `?account=user_X`, pero el admin existente ya usaba un webhook sin account y números configurados por env vars.
+
+**Lección:** Toda migración multi-tenant debe tener una ruta legacy explícita, no implícita. Si el sistema viejo sigue en producción, el nuevo branch debe activarse solo por señal inequívoca y el health check no debe gestionar recursos legacy.
+
+**Fix:** `AgentRestHandlers::whatsappWebhook()` enruta sin `account` o con `WACLI_ACCOUNT` al flujo legacy; el worker solo procesa cuentas self-service, y la capability `glory_whatsapp_chatbot` queda para admin o suscripción activa.
+
 ## 2026-05-12 — IDs elegidos por LLM no son frontera confiable
 
 **Patrón del error:** El usuario decía que completó el hábito de ejercicio, el contexto incluía el hábito correcto, pero el LLM emitía `completar_habito` con un ID inexistente y el backend respondía que no lo encontraba.

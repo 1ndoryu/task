@@ -549,31 +549,95 @@ class AgentRestHandlers
         return $length <= 6 ? str_repeat('*', $length) : substr($value, 0, 3) . str_repeat('*', max(0, $length - 6)) . substr($value, -3);
     }
 
-    /* [109B] Webhook de wacli sync --webhook. Auth via HMAC-SHA256.
-     * wacli envía NDJSON: una línea JSON por evento.
-     * Responde 200 rápido; procesamiento puede ser lento (LLM call). */
+    /* [109B][125B-1] Webhook de wacli sync --webhook.
+     * Compatibilidad crítica: sin account, o con el account legacy del admin,
+     * conserva el flujo síncrono existente. Solo account=user_X entra a la cola
+     * multiusuario para no romper el chatbot operativo del administrador. */
     public static function whatsappWebhook(\WP_REST_Request $request): \WP_REST_Response
     {
-        $body      = $request->get_body();
-        $firma     = (string)($request->get_header('X-Wacli-Signature') ?? '');
-        $service   = new WhatsAppWebhookService();
+        $body        = $request->get_body();
+        $firma       = (string)($request->get_header('X-Wacli-Signature') ?? '');
+        $accountName = sanitize_key((string)($request->get_param('account') ?? ''));
+        $service     = new WhatsAppWebhookService();
 
+        /* 1. Validar HMAC */
         if (!$service->validarFirma($body, $firma)) {
             return new \WP_REST_Response(['error' => 'Firma inválida'], 401);
         }
 
-        /* NDJSON: procesar cada línea */
-        foreach (explode("\n", trim($body)) as $linea) {
-            $linea = trim($linea);
+        if (self::esWebhookAdminLegacy($accountName)) {
+            return self::procesarWebhookAdminLegacy($body, $service);
+        }
+
+        /* 2. Validar account_name multiusuario */
+        global $wpdb;
+        $cuenta = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT id, enabled FROM {$wpdb->prefix}glory_whatsapp_accounts WHERE account_name = %s",
+                $accountName
+            )
+        );
+        if (!$cuenta || !$cuenta->enabled) {
+            return new \WP_REST_Response(['error' => 'Cuenta inválida o deshabilitada'], 404);
+        }
+
+        /* 3. Encolar eventos NDJSON */
+        $lineas = array_filter(array_map('trim', explode("\n", trim($body))));
+        $eventosValidos = [];
+
+        foreach ($lineas as $linea) {
             if ($linea === '') {
                 continue;
             }
+            /* Validar que sea JSON válido antes de insertar */
+            $evento = json_decode($linea, true);
+            if (!is_array($evento)) {
+                error_log('[WhatsAppWebhook] Línea NDJSON inválida ignorada: ' . substr($linea, 0, 100));
+                continue;
+            }
+            $eventosValidos[] = $linea;
+        }
+
+        $insertados = 0;
+        if (!empty($eventosValidos)) {
+            $tablaCola = $wpdb->prefix . 'glory_whatsapp_event_queue';
+            $placeholders = [];
+            $valores = [];
+            foreach ($eventosValidos as $linea) {
+                $placeholders[] = '(%s, %s, %s, %s)';
+                array_push($valores, $accountName, $linea, $firma, 'pending');
+            }
+            $sql = "INSERT INTO {$tablaCola} (account_name, event_body, signature, status) VALUES " . implode(', ', $placeholders);
+            $insertResult = $wpdb->query($wpdb->prepare($sql, $valores));
+            if ($insertResult === false || $insertResult <= 0) {
+                error_log('[WhatsAppWebhook] Error encolando eventos para ' . $accountName . ': ' . $wpdb->last_error);
+                return new \WP_REST_Response(['error' => 'No se pudo encolar el evento'], 500);
+            }
+            $insertados = (int)$insertResult;
+        }
+
+        error_log('[WhatsAppWebhook] Encolados ' . $insertados . ' eventos para ' . $accountName);
+
+        return new \WP_REST_Response(['ok' => true, 'queued' => $insertados], 202);
+    }
+
+    private static function esWebhookAdminLegacy(string $accountName): bool
+    {
+        if ($accountName === '') {
+            return true;
+        }
+        $adminAccount = sanitize_key(EnvService::first(['WACLI_ACCOUNT', 'OPENCLAW_WACLI_ACCOUNT']));
+        return $adminAccount !== '' && hash_equals($adminAccount, $accountName);
+    }
+
+    private static function procesarWebhookAdminLegacy(string $body, WhatsAppWebhookService $service): \WP_REST_Response
+    {
+        foreach (array_filter(array_map('trim', explode("\n", trim($body)))) as $linea) {
             $evento = json_decode($linea, true);
             if (is_array($evento)) {
                 $service->procesarEvento($evento);
             }
         }
-
         return new \WP_REST_Response(['ok' => true], 200);
     }
 

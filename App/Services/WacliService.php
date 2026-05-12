@@ -145,6 +145,97 @@ class WacliService
     }
 
     /**
+     * [125B-1] Sobrecarga multi-account: ejecuta wacli con account y store-dir específicos.
+     * Lee los parámetros de glory_whatsapp_accounts según el userId.
+     *
+     * @param int    $userId  ID del usuario WordPress
+     * @param array  $args    Argumentos para wacli
+     * @param int    $timeout Timeout en segundos
+     * @return array          ['exitCode' => int, 'stdout' => string, 'stderr' => string]
+     */
+    public function ejecutarComoUsuario(int $userId, array $args, int $timeout = 60): array
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'glory_whatsapp_accounts';
+        $cuenta = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT account_name, store_path FROM $table WHERE user_id = %d AND enabled = 1",
+                $userId
+            )
+        );
+
+        if (!$cuenta) {
+            throw new \RuntimeException("Cuenta WhatsApp no encontrada o deshabilitada para user_id={$userId}");
+        }
+
+        $accountName = $cuenta->account_name;
+        $storeDir    = $cuenta->store_path ?? '';
+
+        $bin = $this->obtenerBinario();
+        $parts = [$bin];
+
+        if ($accountName !== '') {
+            $parts[] = '--account';
+            $parts[] = $accountName;
+        }
+        if ($storeDir !== '') {
+            $parts[] = '--store-dir';
+            $parts[] = $storeDir;
+        }
+
+        $parts[] = '--lock-wait';
+        $parts[] = min(30, max(5, (int)floor($timeout / 2))) . 's';
+        $parts[] = '--json';
+        $parts[] = '--timeout';
+        $parts[] = $timeout . 's';
+        $parts = array_merge($parts, $args);
+
+        return $this->ejecutarProcOpen($parts, $timeout);
+    }
+
+    /**
+     * [125B-1] Envía texto como un usuario específico (multi-account).
+     * No requiere env var WHATSAPP — usa el JID del destinatario directamente.
+     *
+     * @param int    $userId     ID del usuario WordPress
+     * @param string $jid        JID del destinatario (ej: 584141234567@s.whatsapp.net)
+     * @param string $message    Contenido del mensaje (máx 4000 caracteres)
+     * @return array             Resultado de wacli
+     */
+    public function enviarTextoComoUsuario(int $userId, string $jid, string $message): array
+    {
+        $message = trim($message);
+        if ($message === '') {
+            throw new \InvalidArgumentException('El mensaje de WhatsApp no puede estar vacío.');
+        }
+        if (strlen($message) > 4000) {
+            throw new \InvalidArgumentException('El mensaje de WhatsApp supera el límite interno de 4000 caracteres.');
+        }
+
+        if (!$this->comandoDisponible($this->obtenerBinario())) {
+            throw new \RuntimeException('wacli no está instalado o no está disponible en PATH.');
+        }
+
+        $resultado = $this->ejecutarComoUsuario($userId, [
+            'send', 'text',
+            '--to', $jid,
+            '--message', $message,
+            '--post-send-wait', '2s',
+        ], 120);
+
+        $json = json_decode($resultado['stdout'], true);
+
+        return [
+            'provider' => 'wacli',
+            'toMasked' => $this->mascarar($jid),
+            'exitCode' => $resultado['exitCode'],
+            'stdout' => is_array($json) ? $json : trim($resultado['stdout']),
+            'stderr' => trim($resultado['stderr']),
+        ];
+    }
+
+    /**
      * Descarga un archivo de media recibido por WhatsApp usando wacli.
      * [115A-5] Retorna la ruta al archivo temporal. El llamador es responsable de unlink().
      * [116A-3] API actualizada: wacli media download usa --chat y --id (ya no --direct-path/--media-key).
@@ -288,12 +379,12 @@ class WacliService
         return $recipient;
     }
 
+    /**
+     * [125B-1] Ejecuta un array de argumentos wacli con proc_open (env-based, legacy).
+     * Para multi-account, usar ejecutarComoUsuario().
+     */
     private function ejecutarWacli(array $args, int $timeoutSeconds): array
     {
-        if (!function_exists('proc_open')) {
-            throw new \RuntimeException('proc_open no está disponible para ejecutar wacli.');
-        }
-
         $bin = $this->obtenerBinario();
         $account = $this->obtenerEnv(self::ACCOUNT_ENV_KEYS);
         $parts = [$bin];
@@ -311,6 +402,23 @@ class WacliService
         $parts[] = '--timeout';
         $parts[] = $timeoutSeconds . 's';
         $parts = array_merge($parts, $args);
+
+        return $this->ejecutarProcOpen($parts, $timeoutSeconds);
+    }
+
+    /**
+     * [125B-1] Núcleo de ejecución proc_open compartido entre env-based y multi-account.
+     * Maneja pipes, timeout, y parseo de salida. Lanza RuntimeException si falla.
+     *
+     * @param array $parts          Array de argumentos (bin + args)
+     * @param int   $timeoutSeconds Timeout total en segundos
+     * @return array                ['exitCode' => int, 'stdout' => string, 'stderr' => string]
+     */
+    private function ejecutarProcOpen(array $parts, int $timeoutSeconds): array
+    {
+        if (!function_exists('proc_open')) {
+            throw new \RuntimeException('proc_open no está disponible para ejecutar wacli.');
+        }
 
         $descriptorSpec = [
             0 => ['pipe', 'r'],

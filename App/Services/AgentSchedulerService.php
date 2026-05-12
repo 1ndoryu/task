@@ -78,7 +78,8 @@ class AgentSchedulerService
 
                 return $resultado;
             });
-            (new AgentProactiveService())->analizarAdmins(false);
+            /* [Fase-6] Analizar todos los usuarios con WhatsApp activo, no solo admins */
+            (new AgentProactiveService())->analizarTodos(false);
         } catch (\Throwable $e) {
             error_log('[AgentSchedulerService] Error procesando acciones programadas: ' . $e->getMessage());
         }
@@ -227,8 +228,9 @@ class AgentSchedulerService
 
         try {
             $maestro   = (string)(get_user_meta($userId, 'glory_chatbot_master_context', true));
-            $proveedor = (string)(get_option('glory_chatbot_proveedor') ?: 'groq');
-            $modelo    = (string)(get_option('glory_chatbot_modelo') ?: 'llama-3.3-70b-versatile');
+            /* [Fase-6] Leer de user_meta con fallback a WP option global */
+            $proveedor = (string)(get_user_meta($userId, 'glory_chatbot_proveedor', true) ?: get_option('glory_chatbot_proveedor') ?: 'groq');
+            $modelo    = (string)(get_user_meta($userId, 'glory_chatbot_modelo', true)    ?: get_option('glory_chatbot_modelo')    ?: 'llama-3.3-70b-versatile');
 
             global $wpdb;
             $tabla = Schema::getTableName('agent_chat_messages');

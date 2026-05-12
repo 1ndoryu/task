@@ -16,13 +16,6 @@
 
 ## Tareas pendientes
 
-### 125A-10 — Auditoría del Plan v2 WhatsApp multi-usuario con QR
-- Revisar profundamente todas las modificaciones relacionadas con `Plan v2: Chatbot WhatsApp multi-usuario con QR — 2026-05-12`, especialmente las hechas por agente de menor inteligencia.
-- Validar compatibilidad con la integración admin existente: el webhook/admin actual no debe romperse por exigir `account=user_X` ni por migraciones automáticas inseguras.
-- Auditar seguridad: SQL preparado, HMAC, permisos REST, `proc_open`/sudo/systemd, paths de stores, aislamiento por usuario, fuga de JIDs y logs.
-- Auditar arquitectura y escalabilidad: worker, cola, locks, rate limit LLM, cron/systemd, health checks, backup de stores, POC pendiente y documentación.
-- Corregir inconsistencias de IDs, comentarios, rutas, frontend, registro de controllers, límites diarios y cualquier error de compilación o integración detectado.
-
 ### 115A-7 — Roadmap: integración chatbot con ayuno y calorías
 - Planificar acciones del agente para el plugin de ayuno: `iniciar_ayuno`, `terminar_ayuno`, `estado_ayuno` (lo que espero es que sea capaz registrar el ayuno con el tiempo correcto, aqui el tiempo y hora exacta es muy importante, claramente tiene que marse el habito de ayuno cuando se complete un ayuno)
 - Planificar acciones para registro de calorías: `registrar_comida {descripcion, calorias?}`, `resumen_calorias_hoy` (lo que espero es que pueda decirle una comida y que no vaya a fallar por ello, que pueda decirme cuantas calorías llevo, que adapte a la meta de calorías diaras objetivo basado en la configuracion del plugin)
