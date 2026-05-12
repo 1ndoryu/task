@@ -65,7 +65,10 @@ class AgentChatProcessor
     {
         $this->activeSessionId = $sessionId;
         $historial       = $this->chat->listarMensajes($userId, $sessionId, self::MAX_HISTORIAL);
-        $contexto        = $this->buildContexto($userId, $canal);
+        /* [SEC-004] Verificar privacidad una vez; buildContexto() lo usa para anonimizar datos,
+         * y buildSystemPrompt() necesita saberlo para instruir al LLM. */
+        $privacyMode     = (bool) get_user_meta($userId, 'glory_chatbot_privacy_mode', true);
+        $contexto        = $this->buildContexto($userId, $canal, $privacyMode);
         $memorias        = $this->mempalace->search($mensaje !== '' ? $mensaje : 'imagen recibida', $userId);
         $contextoMaestro = $this->getMasterContext($userId);
 
@@ -85,7 +88,7 @@ class AgentChatProcessor
         $limTokens   = (int) round($ctxLimit / 4);
         $statsHistorial = ['chars' => $ctxChars, 'tokens' => $ctxTokens, 'msgs' => $ctxMsgs, 'pct' => $ctxPct, 'limit_chars' => $ctxLimit, 'limit_tokens' => $limTokens];
 
-        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, '', '', $statsHistorial);
+        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, '', '', $statsHistorial, $privacyMode);
 
         /* Construir messages para el LLM */
         $messages = [['role' => 'system', 'content' => $systemMsg]];
@@ -189,11 +192,17 @@ class AgentChatProcessor
 
     /* [115A-1+115A-3] buildSystemPrompt recibe contextoMaestro (texto persistente del usuario).
      * El contexto maestro se inyecta antes del contexto de tareas/hábitos/notas. */
-    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = '', array $statsHistorial = []): string
+    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = '', array $statsHistorial = [], bool $privacyMode = false): string
     {
         $instruccionCanal = $canal === 'whatsapp'
             ? "\nEstás respondiendo por WHATSAPP. Sé conciso, sin markdown, sin listas largas. Máximo 3 oraciones por mensaje."
             . "\nLos audios llegan TRANSCRITOS — el texto entre corchetes '[El usuario envió un audio...]' es tu señal de que hubo fallo técnico de transcripción; pide al usuario que lo reenvíe. NUNCA digas 'no puedo procesar audio' — el audio ya viene en texto."
+            : '';
+
+        /* [SEC-004] Modo privacidad activado: el contexto muestra datos anonimizados.
+         * El LLM debe saber que no es un error — es intencional por privacidad. */
+        $instruccionPrivacidad = $privacyMode
+            ? "\nMODO PRIVACIDAD ACTIVADO. Los datos de tareas, hábitos y notas aparecen limitados o anonimizados por decisión del usuario. No preguntes por qué faltan detalles — responde con la información disponible. Si el usuario necesita acceder a contenido específico, sugiérele que desactive el modo privacidad en la configuración."
             : '';
 
         /* [116A-2] Stats del historial inyectados aquí para que el LLM responda sin llamar reportar_contexto.
@@ -222,7 +231,7 @@ class AgentChatProcessor
             : "\n\nTienes un sistema de memoria semántica persistente. Si el usuario menciona algo importante y nuevo (nombre real, preferencias de vida, datos personales, metas duraderas), guárdalo con guardar_memoria."
         ;
 
-        return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}{$bloqueStats}{$bloqueModelo}
+        return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}{$instruccionPrivacidad}{$bloqueStats}{$bloqueModelo}
 
 RESPONDE SIEMPRE en formato JSON con esta estructura exacta:
 {\"respuesta\": \"tu mensaje al usuario en español\", \"acciones\": []}
@@ -278,14 +287,11 @@ REGLAS:
 
     /**
      * [115A-6] buildContexto incluye sub-hábitos, notas recientes (títulos) y recordatorios programados.
-     * [SEC-004] Si el usuario tiene activado glory_chatbot_privacy_mode en user_meta,
-     * los datos se envían anonimizados al LLM (solo nombres/títulos, sin contenido real de notas,
-     * sin detalles de tareas, sin contenido de hábitos).
+     * [SEC-004] Si $privacyMode es true, los datos se envían anonimizados al LLM (solo nombres/títulos,
+     * sin contenido real de notas, sin detalles de tareas, sin contenido de hábitos).
      */
-    private function buildContexto(int $userId, string $canal = 'app'): string
+    private function buildContexto(int $userId, string $canal = 'app', bool $privacyMode = false): string
     {
-        /* [SEC-004] Verificar modo privacidad */
-        $privacyMode = (bool) get_user_meta($userId, 'glory_chatbot_privacy_mode', true);
 
         try {
             $tareas  = (new TareasRepository($userId))->getAll();
@@ -420,6 +426,13 @@ REGLAS:
                     $icono     = $j['estado'] === 'completado' ? '✅' : '❌';
                     $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
                     $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
+                    /* [fix-resumen-contexto] Incluir el resumen del job para que el LLM sepa
+                     * qué se hizo, qué falló y qué permisos fueron rechazados. Sin esto
+                     * el LLM no puede generar el glob correcto en actualizar_opencode_allowlist. */
+                    $resumen = mb_substr((string)($j['resultado']['whatsapp_summary'] ?? ''), 0, 300);
+                    if ($resumen !== '') {
+                        $ctx .= "  Resumen: {$resumen}\n";
+                    }
                 }
             }
         } catch (\Throwable) { /* No bloquear el contexto */ }

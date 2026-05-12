@@ -207,7 +207,11 @@ class OpencodeJobService
          * al runner para que OpenCode reciba --session <id>. previous_output queda como
          * respaldo legible si la sesion local expiro o no fue capturada por jobs antiguos. */
         $sessionId      = sanitize_text_field((string)($jobAnterior['resultado']['session_id'] ?? $jobAnterior['payload']['session_id'] ?? ''));
-        $previousOutput = mb_substr((string)($jobAnterior['resultado']['output'] ?? ''), -1000);
+        /* [fix-resumen-contexto] Usar whatsapp_summary como contexto previo: es limpio y
+         * estructurado vs el output crudo (lleno de ANSI/logs). Con --session el historial
+         * completo ya vive en OpenCode; el summary es solo un recordatorio compacto. */
+        $summary        = (string)($jobAnterior['resultado']['whatsapp_summary'] ?? '');
+        $previousOutput = $summary !== '' ? $summary : mb_substr((string)($jobAnterior['resultado']['output'] ?? ''), -800);
         /* [125A-1] Siempre tomar el allowlist actualizado (el usuario puede haberlo ampliado
          * justo antes de pedir la continuacion, p. ej. via actualizar_opencode_allowlist). */
         $extraAllow = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
