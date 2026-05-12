@@ -277,8 +277,12 @@ function injectExtraPermissions(agentFilePath, extraCommands) {
     return original;
 }
 
-function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId = ''}) {
-    return new Promise((resolve, reject) => {
+function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId = '', onSessionDetected = null}) {
+    /* [cancel+notify] Expone cancel() para que pollOnce pueda matar el proceso si el
+     * usuario cancela el job desde WhatsApp. onSessionDetected se llama una sola vez
+     * cuando se detecta el ID de sesión en el output, para notificar al servidor. */
+    let externalCancel = null;
+    const promise = new Promise((resolve, reject) => {
         /* Ejecutar sin shell: el prompt multilinea debe viajar como un unico argv.
          * En Windows resolvemos el wrapper npm a `node .../opencode` para evitar cmd.exe. */
         const child = spawn(commandSpec.command, [...commandSpec.argsPrefix, ...opencodeArgs], {
@@ -289,6 +293,7 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, request
 
         let outputBuffer = '';
         let sessionId = requestedSessionId;
+        let sessionNotified = requestedSessionId !== '';
         const onData = (stream, chunk) => {
             stream.write(chunk);
             const text = chunk.toString();
@@ -297,7 +302,13 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, request
             /* [115A-cont] Capturar session ID del output de OpenCode para continuacion de sesion */
             if (!sessionId) {
                 const m = text.match(/session[:\s]+([a-zA-Z0-9_-]{6,64})/i);
-                if (m) sessionId = m[1];
+                if (m) {
+                    sessionId = m[1];
+                    if (!sessionNotified && onSessionDetected) {
+                        sessionNotified = true;
+                        Promise.resolve(onSessionDetected(sessionId)).catch(() => {});
+                    }
+                }
             }
         };
         child.stdout.on('data', chunk => onData(process.stdout, chunk));
@@ -305,6 +316,17 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, request
 
         /* [116A-4] Conservar una ventana amplia: el resumen puede quedar antes de logs finales. */
         const getOutput = () => outputBuffer.trim();
+
+        externalCancel = (reason = 'Cancelado por el usuario.') => {
+            child.kill('SIGTERM');
+            const output = getOutput();
+            reject(Object.assign(new Error(reason), {
+                output,
+                session_id: sessionId || resolveLatestSessionId(commandSpec, projectPath),
+                whatsapp_summary: extractWhatsAppSummary(output),
+                cancelled: true,
+            }));
+        };
 
         const timeout = setTimeout(() => {
             child.kill('SIGTERM');
@@ -350,9 +372,10 @@ function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, request
             }));
         });
     });
+    return {promise, cancel: (reason) => externalCancel?.(reason)};
 }
 
-async function executeRun(options, overrides = {}, printDryRun = true) {
+async function executeRun(options, overrides = {}, printDryRun = true, handleRef = null) {
     const config = loadConfig();
     const projectId = typeof overrides.project === 'string'
         ? overrides.project
@@ -423,7 +446,13 @@ async function executeRun(options, overrides = {}, printDryRun = true) {
     const version = assertOpencodeAvailable(commandSpec);
     console.error(`OpenCode detectado: ${version}`);
     try {
-        const runResult = await runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId: sessionId});
+        const {promise, cancel} = runOpencode({
+            commandSpec, opencodeArgs, projectPath, timeoutMs,
+            requestedSessionId: sessionId,
+            onSessionDetected: handleRef?.onSessionDetected ?? null,
+        });
+        if (handleRef) handleRef.cancel = cancel;
+        const runResult = await promise;
         return {projectId, projectPath, model, agent, dryRun: false, ...runResult};
     } finally {
         /* [125A-1] Restaurar el agente YAML a su estado original tras ejecutar */
@@ -536,8 +565,46 @@ async function pollOnce(options) {
         body: {},
     });
 
+    /* [cancel+notify] cancelHandle.cancel() mata el proceso si el usuario cancela.
+     * onSessionDetected notifica el ID de sesión al servidor en cuanto se detecta
+     * para que el bot pueda mostrarlo al usuario al inicio de la ejecución. */
+    const cancelHandle = { cancel: null, onSessionDetected: null };
+
+    cancelHandle.onSessionDetected = async (detectedSessionId) => {
+        try {
+            await requestRunner({
+                apiUrl, secret,
+                method: 'POST',
+                pathSuffix: `/agent/opencode/jobs/${job.id}/notify-session`,
+                route: `/glory/v1/agent/opencode/jobs/${job.id}/notify-session`,
+                body: { session_id: detectedSessionId },
+            });
+            console.error(`[runner] Sesión ${detectedSessionId} notificada para job ${job.id}.`);
+        } catch (e) {
+            console.error(`[runner] No se pudo notificar sesión: ${e.message}`);
+        }
+    };
+
+    const cancelInterval = setInterval(async () => {
+        try {
+            const statusData = await requestRunner({
+                apiUrl, secret,
+                method: 'GET',
+                pathSuffix: `/agent/opencode/jobs/${job.id}/status`,
+                route: `/glory/v1/agent/opencode/jobs/${job.id}/status`,
+            });
+            if (statusData?.job?.estado === 'cancelado') {
+                console.error(`[runner] Job ${job.id} cancelado por el usuario. Matando proceso OpenCode.`);
+                cancelHandle.cancel?.('Cancelado por el usuario desde WhatsApp.');
+            }
+        } catch (e) {
+            console.error(`[runner] Error al verificar estado cancel: ${e.message}`);
+        }
+    }, 10000);
+
     try {
-        const result = await executeRun(runOptions, {}, false);
+        const result = await executeRun(runOptions, {}, false, cancelHandle);
+        clearInterval(cancelInterval);
         await requestRunner({
             apiUrl,
             secret,
@@ -547,6 +614,7 @@ async function pollOnce(options) {
             body: {success: true, message: 'OpenCode finalizo correctamente.', result},
         });
     } catch (error) {
+        clearInterval(cancelInterval);
         await requestRunner({
             apiUrl,
             secret,
@@ -561,6 +629,7 @@ async function pollOnce(options) {
                     output: error.output || '',
                     session_id: error.session_id || '',
                     whatsapp_summary: error.whatsapp_summary || '',
+                    cancelled: error.cancelled === true,
                 },
             },
         });

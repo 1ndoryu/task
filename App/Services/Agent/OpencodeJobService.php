@@ -148,6 +148,12 @@ class OpencodeJobService
         return is_array($row) ? $this->normalizarFila($row) : null;
     }
 
+    /* Alias publico de obtener() para uso externo (handlers REST, etc.) */
+    public function obtenerPublico(int $id): ?array
+    {
+        return $this->obtener($id);
+    }
+
     private function normalizarFila(array $row): array
     {
         $payload = $this->decodificarJson((string)($row['payload'] ?? '{}'), []);
@@ -243,6 +249,47 @@ class OpencodeJobService
         }
 
         return $this->obtener((int)$wpdb->insert_id) ?? [];
+    }
+
+    /* [fix-cancelar] Cancela un job pendiente o en ejecución. El runner detecta este estado
+     * en su polling periódico y mata el proceso hijo. */
+    public function cancelar(int $id): ?array
+    {
+        global $wpdb;
+        $accion = $this->obtener($id);
+        if (!$accion || $accion['tipo'] !== self::TIPO || !in_array($accion['estado'], ['pendiente', 'ejecutando'], true)) {
+            return null;
+        }
+        $logs = $this->agregarLog($accion['logs'] ?? [], 'cancelado', 'Job cancelado por el usuario.');
+        $actualizado = $wpdb->update(
+            $this->tabla,
+            ['estado' => 'cancelado', 'logs' => $this->codificarJson($logs)],
+            ['id' => $id, 'tipo' => self::TIPO],
+            ['%s', '%s'],
+            ['%d', '%s']
+        );
+        return $actualizado !== false ? $this->obtener($id) : null;
+    }
+
+    /* [fix-notify-session] Guarda el session_id en los logs del job cuando OpenCode
+     * lo emite al inicio. El handler envía WA con el ID para que el usuario pueda
+     * continuar la sesión si algo falla antes del resultado final. */
+    public function guardarSesionEnLogs(int $id, string $sessionId): ?array
+    {
+        global $wpdb;
+        $accion = $this->obtener($id);
+        if (!$accion || $accion['tipo'] !== self::TIPO) {
+            return null;
+        }
+        $logs = $this->agregarLog($accion['logs'] ?? [], 'session_iniciada', "Session ID: {$sessionId}");
+        $actualizado = $wpdb->update(
+            $this->tabla,
+            ['logs' => $this->codificarJson($logs)],
+            ['id' => $id, 'tipo' => self::TIPO],
+            ['%s'],
+            ['%d', '%s']
+        );
+        return $actualizado !== false ? $this->obtener($id) : null;
     }
 
     /* [115A-cont] Jobs completados/fallidos en las ultimas N horas — expone session_id al chatbot. */

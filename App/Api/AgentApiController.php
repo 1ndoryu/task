@@ -120,6 +120,28 @@ class AgentApiController
             'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
         ]);
 
+        /* [fix-cancel+notify] Cancelacion y notificacion de sesion en tiempo real. */
+        register_rest_route($ns, '/agent/opencode/jobs/(?P<id>\d+)/cancel', [
+            'methods' => 'POST',
+            'callback' => [AgentRestHandlers::class, 'cancelarOpencodeJob'],
+            'permission_callback' => '__return_true',
+            'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
+        ]);
+
+        register_rest_route($ns, '/agent/opencode/jobs/(?P<id>\d+)/status', [
+            'methods' => 'GET',
+            'callback' => [AgentRestHandlers::class, 'estadoOpencodeJob'],
+            'permission_callback' => '__return_true',
+            'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
+        ]);
+
+        register_rest_route($ns, '/agent/opencode/jobs/(?P<id>\d+)/notify-session', [
+            'methods' => 'POST',
+            'callback' => [AgentRestHandlers::class, 'notificarSesionOpencodeJob'],
+            'permission_callback' => '__return_true',
+            'args' => ['id' => ['required' => true, 'type' => 'integer', 'minimum' => 1]],
+        ]);
+
         /* [109B] Webhook público de wacli sync --webhook.
          * Auth por HMAC-SHA256 (X-Wacli-Signature), no por cookie WP.
          * wacli envía NDJSON (una línea por evento). */

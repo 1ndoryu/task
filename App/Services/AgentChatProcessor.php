@@ -135,7 +135,7 @@ class AgentChatProcessor
          * pueda reportar tanto resultados como fallos en lugar de dejar el anuncio inicial.
          * Las acciones async (solicitar_opencode, continuar_opencode) se excluyen porque
          * el job queda pendiente y la confirmación llega por otra vía. */
-        $accionesAsync = ['solicitar_opencode', 'continuar_opencode'];
+        $accionesAsync = ['solicitar_opencode', 'continuar_opencode', 'cancelar_opencode'];
         $hayAccionSincrona = false;
         foreach ($ejecutadas as $ej) {
             if (!in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
@@ -257,6 +257,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 - {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
 - {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"instruccion real del usuario para OpenCode\"}} (job_id = número exacto de [id:N] visible en el contexto, o 0 si el usuario ya proporcionó un ses_XXXXX — el backend lo resuelve solo. En 'mensaje' pon la instrucción real del usuario, NUNCA el ses_XXXXX; si el usuario solo pide continuar sin instrucción nueva, pon \"Continúa desde donde quedaste en esta sesión.\")
+- {\"tipo\": \"cancelar_opencode\", \"parametros\": {\"job_id\": ID}} (cuando el usuario pide cancelar o detener un job activo)
 - {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
 - {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
@@ -275,7 +276,8 @@ REGLAS:
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto siempre es \"glorytemplate\" salvo que el usuario especifique otro. La rama por defecto es \"glory-react-logic\"; inclúyela siempre en branch. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` di algo breve como \"Continuando esa sesión, dame un momento\". NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
-- actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados (comandos bloqueados) y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"php *\", \"composer *\"]} (glob patterns como los del allowlist existente). Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode para reintentar el job con los nuevos permisos. NO la uses sin confirmación explícita del usuario.
+- actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados (comandos bloqueados) y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"git *\", \"php *\"]} donde cada entrada es el glob que permite ese comando. El PATRÓN es '<binario> *' (ej: 'git *' para 'git --no-pager diff', 'php *' para 'php -l File.php'). Lee el Resumen del job fallido en el contexto — los comandos rechazados están bajo 'Permisos rechazados' o en el Resumen. EXTRAE el binario del comando rechazado y añade ' *'. NUNCA inventes patrones ni uses globs genéricos como 'agente/*'. Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode para reintentar el job con los nuevos permisos. NO la uses sin confirmación explícita del usuario.
+- cancelar_opencode: cuando el usuario pide cancelar o detener un job de OpenCode activo. Lee el contexto para ver jobs activos (estado 🔄 ejecutando o ⏳ pendiente) y usa el id del job activo. El runner detectará el cambio en su polling y matará el proceso. Si no hay jobs activos, informa al usuario.
 - reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
 - compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
 - cambiar_limite_compactacion: úsala cuando el usuario quiera cambiar el límite para la compactación automática. Convierte tokens a chars × 4 si el usuario da tokens.{$bloqueMemoria}{$bloqueMaestro}
@@ -432,6 +434,12 @@ REGLAS:
                     $resumen = mb_substr((string)($j['resultado']['whatsapp_summary'] ?? ''), 0, 300);
                     if ($resumen !== '') {
                         $ctx .= "  Resumen: {$resumen}\n";
+                    }
+                    /* Mostrar permisos rechazados explícitamente para que el LLM pueda
+                     * derivar el glob correcto en actualizar_opencode_allowlist. */
+                    $rechazados = array_values(array_filter((array)($j['resultado']['permisos_rechazados'] ?? [])));
+                    if (!empty($rechazados)) {
+                        $ctx .= '  Permisos rechazados: ' . implode(', ', array_map(fn($c) => "`{$c}`", $rechazados)) . "\n";
                     }
                 }
             }
@@ -1082,6 +1090,19 @@ REGLAS:
                 }
                 update_option('glory_opencode_extra_allow', $actual);
                 return ['tipo' => $tipo, 'exito' => true, 'permitidos' => $actual];
+
+            /* Cancela un job de OpenCode activo (pendiente o ejecutando). El runner detecta
+             * el cambio de estado en su polling y mata el proceso OpenCode. */
+            case 'cancelar_opencode':
+                $jobId = (int)($param['job_id'] ?? 0);
+                if ($jobId <= 0) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => 'Se requiere job_id válido.'];
+                }
+                $cancelado = (new \App\Services\Agent\OpencodeJobService())->cancelar($jobId);
+                if ($cancelado === null) {
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => "Job {$jobId} no encontrado o ya en estado final."];
+                }
+                return ['tipo' => $tipo, 'exito' => true, 'job' => $cancelado];
 
             /* [115A-context] Devuelve estadísticas del contexto de la sesión actual. */
             case 'reportar_contexto':

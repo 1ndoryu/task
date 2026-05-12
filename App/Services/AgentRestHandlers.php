@@ -274,6 +274,19 @@ class AgentRestHandlers
             $resultado = is_array($json['result'] ?? null) ? $json['result'] : ['message' => (string)($json['message'] ?? '')];
             $mensaje = sanitize_text_field((string)($json['message'] ?? ($exito ? 'OpenCode finalizo correctamente.' : 'OpenCode reporto fallo.')));
 
+            /* [fix-permisos-rechazados] Extraer permisos rechazados del output y guardarlos
+             * en el resultado antes de persistirlo en BD. Asi el LLM PHP los ve en el contexto
+             * y puede generar el glob correcto en actualizar_opencode_allowlist.
+             * Si whatsapp_summary esta vacio y hay permisos rechazados, construir uno basico. */
+            $output = trim((string)($resultado['output'] ?? ''));
+            $rechazados = $output !== '' ? self::extraerPermisosRechazados($output) : [];
+            if (!empty($rechazados)) {
+                $resultado['permisos_rechazados'] = $rechazados;
+                if (empty($resultado['whatsapp_summary'])) {
+                    $resultado['whatsapp_summary'] = "⚠️ Permisos rechazados:\n" . implode("\n", array_map(fn(string $c): string => "• {$c}", $rechazados));
+                }
+            }
+
             $job = (new OpencodeJobService())->reportarResultado($id, $exito, $resultado, $mensaje);
             if (!$job) {
                 return self::error('Job no disponible para reportar resultado.', 'opencode_job_not_reportable', 409);
@@ -311,6 +324,82 @@ class AgentRestHandlers
             return self::ok(['job' => $job]);
         } catch (\Throwable $e) {
             return self::error($e->getMessage(), 'opencode_job_result_error', 500);
+        }
+    }
+
+    /* [fix-cancel] Cancela un job activo. Acepta HMAC del runner o admin logueado en WP.
+     * El runner detecta el estado cancelado en polling periodico y mata el proceso hijo. */
+    public static function cancelarOpencodeJob(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $esRunner = self::validarOpencodeRunner($request);
+        $esAdmin  = !$esRunner && is_user_logged_in() && current_user_can('manage_options');
+        if (!$esRunner && !$esAdmin) {
+            return self::error('No autorizado.', 'opencode_cancel_unauthorized', 401);
+        }
+        try {
+            $id  = (int)$request->get_param('id');
+            $job = (new OpencodeJobService())->cancelar($id);
+            if (!$job) {
+                return self::error('Job no disponible para cancelar (ya terminó o no existe).', 'opencode_job_not_cancellable', 409);
+            }
+            try {
+                $prompt = self::extraerPromptPreview((string)($job['payload']['prompt'] ?? ''));
+                $waMsg  = "⏹️ *OpenCode cancelado*" . ($prompt !== '' ? "\n_{$prompt}_" : '');
+                (new WacliService())->enviarTexto(null, $waMsg);
+            } catch (\Throwable) { /* no bloquear */ }
+            return self::ok(['job' => $job]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'opencode_cancel_error', 500);
+        }
+    }
+
+    /* [fix-cancel] El runner pollea este endpoint cada ~10s para detectar si el job fue cancelado.
+     * Autenticado con HMAC. Solo devuelve estado minimo para reducir latencia. */
+    public static function estadoOpencodeJob(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!self::validarOpencodeRunner($request)) {
+            return self::error('Firma del runner invalida.', 'opencode_runner_unauthorized', 401);
+        }
+        try {
+            $id  = (int)$request->get_param('id');
+            $svc = new OpencodeJobService();
+            $job = $svc->obtenerPublico($id);
+            if (!$job) {
+                return self::error('Job no encontrado.', 'opencode_job_not_found', 404);
+            }
+            return self::ok(['job' => ['id' => $job['id'], 'estado' => $job['estado']]]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'opencode_status_error', 500);
+        }
+    }
+
+    /* [fix-notify-session] El runner llama este endpoint en cuanto OpenCode emite el session ID.
+     * Envia mensaje WA para que el usuario lo tenga y pueda continuar la sesion si algo falla. */
+    public static function notificarSesionOpencodeJob(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (!self::validarOpencodeRunner($request)) {
+            return self::error('Firma del runner invalida.', 'opencode_runner_unauthorized', 401);
+        }
+        try {
+            $id        = (int)$request->get_param('id');
+            $json      = self::json($request);
+            $sessionId = sanitize_text_field((string)($json['session_id'] ?? ''));
+            if ($sessionId === '') {
+                return self::error('session_id requerido.', 'opencode_session_required', 400);
+            }
+            $svc = new OpencodeJobService();
+            $job = $svc->guardarSesionEnLogs($id, $sessionId);
+            if (!$job) {
+                return self::error('Job no encontrado.', 'opencode_job_not_found', 404);
+            }
+            try {
+                $prompt = self::extraerPromptPreview((string)($job['payload']['prompt'] ?? ''));
+                $waMsg  = "🚀 *OpenCode iniciando*" . ($prompt !== '' ? "\n_{$prompt}_" : '') . "\n\n🔑 _Sesión: {$sessionId}_\n_Guarda este ID para continuar si algo falla._";
+                (new WacliService())->enviarTexto(null, $waMsg);
+            } catch (\Throwable) { /* no bloquear */ }
+            return self::ok(['job' => $job, 'session_id' => $sessionId]);
+        } catch (\Throwable $e) {
+            return self::error($e->getMessage(), 'opencode_notify_session_error', 500);
         }
     }
 
