@@ -286,9 +286,14 @@ function injectExtraPermissions(agentFilePath, extraCommands) {
     const marker = '    "*": ask';
     if (!clean.includes(marker)) return null;
 
+    /* YAML double-quoted strings requieren escapar \ y " para no romper el parse.
+     * Sin esto, comandos como Test-Path "App\file" generan YAML invalido y OpenCode
+     * no puede parsear el agente → "not found. Falling back to default agent". */
+    const yamlEscapeDouble = (s) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
     const block = [
         INJECT_MARKER_START,
-        ...extraCommands.map(cmd => `    "${cmd}": allow`),
+        ...extraCommands.map(cmd => `    "${yamlEscapeDouble(cmd)}": allow`),
         INJECT_MARKER_END,
     ].join('\n');
     const patched = clean.replace(marker, `${block}\n${marker}`);
