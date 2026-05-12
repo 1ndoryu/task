@@ -155,8 +155,9 @@ class AgentChatProcessor
                 }
             }
             $mensajeHerramientas = "[RESULTADOS DE HERRAMIENTAS]\n" . implode("\n", $lineasResultados)
-                . "\n\nAhora responde al usuario con los datos anteriores. "
-                . 'Responde en formato JSON: {"respuesta": "tu mensaje", "acciones": []}';
+                . "\n\nIMPORTANTE: los campos 'id', 'texto', 'exito' de los resultados son los valores REALES del servidor. "
+                . "Úsalos en tu respuesta (p.ej. el id real de la tarea creada), NO los valores que generaste antes. "
+                . "Responde al usuario con los datos anteriores en formato JSON: {\"respuesta\": \"tu mensaje\", \"acciones\": []}";
             $messages[] = ['role' => 'user', 'content' => $mensajeHerramientas];
             $llmResult2  = (new LLMProviderService())->enviarChat($messages, $llm['proveedor'], $llm['modelo'], ['temperature' => 0.7, 'maxTokens' => 1500]);
             $rawContent2 = (string)($llmResult2['contenido'] ?? $llmResult2['content'] ?? $llmResult2['message'] ?? '');
@@ -253,6 +254,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"editar_recordatorio\", \"parametros\": {\"id\": 123, \"fecha\": \"ISO8601\", \"titulo\": \"nuevo titulo\", \"mensaje\": \"nuevo mensaje\"}}
 - {\"tipo\": \"eliminar_recordatorio\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"completar_habito\", \"parametros\": {\"id\": 123}}
+- {\"tipo\": \"posponer_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"completar_subhabito\", \"parametros\": {\"id\": 123, \"subId\": 0}}
 - {\"tipo\": \"leer_notas\", \"parametros\": {\"limite\": 10}}
 - {\"tipo\": \"leer_nota\", \"parametros\": {\"id\": 38}} — lee el contenido COMPLETO de una nota por su ID. El contexto SOLO muestra títulos, no el contenido. SIEMPRE usa esta acción cuando el usuario pida ver, leer o preguntar sobre el contenido de una nota.
@@ -275,7 +277,9 @@ REGLAS:
 - Puedes incluir MÚLTIPLES acciones en el array y se ejecutan todas. Úsalas en paralelo cuando sea necesario (ej: crear tarea + guardar memoria + programar recordatorio en una sola respuesta).
 - Si no hay acciones, envía \"acciones\": [].
 - NUNCA uses eliminar/completar una tarea sin que el usuario lo pida explícitamente. PERO si el usuario dice 'borra', 'elimina', 'quita' esa tarea: usa directamente `eliminar_tarea` sin confirmar — su mensaje ya ES la confirmación. Si dice 'completa', 'marca como hecho', 'terminé': usa directamente `completar_tarea` sin confirmar. NUNCA preguntes '¿confirmas?'
+- INFERENCIA DE HÁBITOS Y TAREAS — REGLA CRÍTICA: Si el usuario menciona un hábito o tarea por nombre parcial o por contexto ('el de leer', 'ese hábito', 'el recordatorio de antes'), búscalo en la lista del contexto (## Hábitos activos, ## Tareas pendientes) y usa el ID directamente. Si el mensaje anterior del bot mencionó un hábito específico (ej: en un recordatorio '⏰ Hábito pendiente: leer enunciado...'), ese es el hábito referido — úsalo sin preguntar. NUNCA pidas el ID numérico al usuario. Si hay ambigüedad real entre 2+ hábitos similares, muestra los nombres y pregunta cuál, pero jamás el ID.
 - crear_tarea SOLO crea tareas para el usuario. Si el mensaje contiene 'tarea para opencode', 'pídele a opencode', 'dile a opencode', 'ejecuta en opencode' o cualquier variante de destinar la instrucción a OpenCode: usa OBLIGATORIAMENTE `solicitar_opencode`, nunca `crear_tarea`.
+- Al CREAR una tarea con `crear_tarea`, NUNCA menciones un ID específico en tu respuesta — no conoces el ID real hasta que la acción se ejecute y recibes los resultados. Di simplemente "Tarea creada: [nombre]" sin ningún número de ID.
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
 - Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
@@ -946,6 +950,38 @@ REGLAS:
                     }
                 }
                 return ['tipo' => $tipo, 'exito' => $verificado, 'id' => $id, 'fecha' => $hoy, 'error' => $verificado ? null : 'El hábito no quedó persistido tras guardar.'];
+
+            case 'posponer_habito':
+                /* [fix-posponer-habito] Marca el hábito como pospuesto para hoy.
+                 * Registra en ActividadService con tipo habito_pospuesto (igual que el flujo web). */
+                $id     = (int)($param['id'] ?? 0);
+                $hoy    = $this->fechaHoyParaCanal($canal);
+                $repo   = new HabitosRepository($userId);
+                $habitos = $repo->getAll();
+                $nombreHabito = '';
+                foreach ($habitos as &$h) {
+                    if ((int)$h['id'] === $id) {
+                        $nombreHabito = (string)($h['nombre'] ?? '');
+                        /* Marcar como pospuesto hoy — el frontend usa este flag */
+                        $h['pospuesto'] = true;
+                        $h['pospuestoHoy'] = $hoy;
+                        break;
+                    }
+                }
+                unset($h);
+                $_ok = $repo->saveAll($habitos);
+                try {
+                    (new ActividadService())->registrarActividad($userId, [
+                        'tipo'         => 'habito_pospuesto',
+                        'elementoId'   => $id,
+                        'elementoTipo' => 'habito',
+                        'fecha'        => $hoy,
+                        'detalles'     => ['elementoNombre' => $nombreHabito],
+                    ]);
+                } catch (\Throwable $actErr) {
+                    error_log('[AgentChatProcessor] Error registrando actividad posponer hábito ' . $id . ': ' . $actErr->getMessage());
+                }
+                return ['tipo' => $tipo, 'exito' => true, 'id' => $id, 'fecha' => $hoy];
 
             case 'completar_subhabito':
                 $id    = (int)($param['id'] ?? 0);
