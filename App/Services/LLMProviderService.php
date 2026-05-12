@@ -14,15 +14,16 @@ class LLMProviderService
         'groq' => [
             'url' => 'https://api.groq.com/openai/v1/chat/completions',
             'env' => ['GROQ_API', 'GROQ_API_1', 'GROQ_API_2', 'GROQ_API_3'],
+            /* [135A-M1] Verificados contra docs Groq mayo 2026. Rotacion: 3 keys por provider.
+             * llama-4-maverick eliminado — no aparece en produccion ni preview de Groq docs. */
             'models' => [
-                'openai/gpt-oss-120b',
-                'moonshotai/kimi-k2-instruct-0905',
-                'meta-llama/llama-4-maverick-17b-128e-instruct',
-                'qwen/qwen3-32b',
-                'llama-3.3-70b-versatile',
-                'meta-llama/llama-4-scout-17b-16e-instruct',
-                'moonshotai/kimi-k2-instruct',
-                'openai/gpt-oss-20b',
+                'openai/gpt-oss-120b',          // production
+                'moonshotai/kimi-k2-instruct-0905', // partner beta, funciona
+                'qwen/qwen3-32b',               // preview
+                'llama-3.3-70b-versatile',      // production
+                'meta-llama/llama-4-scout-17b-16e-instruct', // preview
+                'moonshotai/kimi-k2-instruct',  // alias sin fecha
+                'openai/gpt-oss-20b',           // production
                 /* [115A-5] Whisper solo se usa en transcribirAudio(), no en enviarChat() */
                 'whisper-large-v3',
                 'whisper-large-v3-turbo',
@@ -31,6 +32,7 @@ class LLMProviderService
         'deepseek' => [
             'url' => 'https://api.deepseek.com/chat/completions',
             'env' => ['DEEPSEEK_API', 'DEEPSEEK-API', 'DEEPSEEK_API_KEY'],
+            /* Por favor solo usar deepseek-v4-flash; este modelo puede razonar correctamente */
             'models' => ['deepseek-v4-flash'],
         ],
     ];

@@ -44,10 +44,18 @@ class HabitosRepository
         ), 'ARRAY_A');
 
         if (!empty($rows)) {
-            $habitos = array_map(function ($row) {
+            $hoyWp = current_time('Y-m-d');
+            $habitos = array_map(function ($row) use ($hoyWp) {
                 $data = $this->decodeData($row['data'], null);
                 if (is_array($data)) {
                     $data['id'] = (int)$row['id_local'];
+                    /* [135A-H1] Recomputar completadoHoy al leer para evitar datos stale.
+                     * El JSON guardado puede tener completadoHoy=1 del día anterior (no resetea automáticamente),
+                     * o completadoHoy=0 por bug de timezone en saveAll (corregido en mismo commit).
+                     * Si ultimoCompletado es hoy (WP timezone), el hábito está completado. */
+                    $uc = $data['ultimoCompletado'] ?? '';
+                    $enHistorial = in_array($hoyWp, (array)($data['historialCompletados'] ?? []), true);
+                    $data['completadoHoy'] = ($uc === $hoyWp || $enHistorial) ? 1 : 0;
                 }
                 return $data;
             }, $rows);
@@ -124,7 +132,10 @@ class HabitosRepository
 
             $frecuenciaData = $habito['frecuencia'] ?? null;
             $frecuencia = is_array($frecuenciaData) ? ($frecuenciaData['tipo'] ?? 'diario') : 'diario';
-            $completadoHoy = isset($habito['ultimoCompletado']) && $habito['ultimoCompletado'] === date('Y-m-d') ? 1 : 0;
+            /* [135A-H1] Usar current_time('Y-m-d') (timezone WP) en lugar de date('Y-m-d') (UTC).
+             * Si el usuario es UTC-4 y completa el hábito a las 20:00 local (00:00 UTC del día siguiente),
+             * date() daría mañana y completadoHoy quedaría en 0 incorrectamente. */
+            $completadoHoy = isset($habito['ultimoCompletado']) && $habito['ultimoCompletado'] === current_time('Y-m-d') ? 1 : 0;
 
             $exists = $existingMap[$idLocal] ?? null;
 
