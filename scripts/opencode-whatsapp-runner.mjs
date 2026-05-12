@@ -216,22 +216,37 @@ function extractWhatsAppSummary(output) {
 }
 
 function resolveLatestSessionId(commandSpec, projectPath) {
-    const result = spawnSync(
-        commandSpec.command,
+    /* [115A-cont] Intentar con --max-count primero (OpenCode reciente) y sin el
+     * flag como fallback (versiones anteriores que no lo soportan).
+     * El JSON puede ser array directo [{id, directory}] o {sessions: [...]}.
+     * En Windows path.resolve usa backslashes; normalizar para comparar. */
+    const argVariants = [
         [...commandSpec.argsPrefix, 'session', 'list', '--format', 'json', '--max-count', '5'],
-        {cwd: projectPath, encoding: 'utf8', timeout: 10000, env: process.env}
-    );
-    if (result.status !== 0 || result.error) return '';
+        [...commandSpec.argsPrefix, 'session', 'list', '--format', 'json'],
+    ];
+    const normalizePath = p => path.resolve(p).toLowerCase().replace(/\\/g, '/');
+    const currentProjectPath = normalizePath(projectPath);
 
-    try {
-        const sessions = JSON.parse(result.stdout || '[]');
-        if (!Array.isArray(sessions)) return '';
-        const currentProjectPath = path.resolve(projectPath).toLowerCase();
-        const session = sessions.find(item => path.resolve(String(item?.directory || '')).toLowerCase() === currentProjectPath) || sessions[0];
-        return typeof session?.id === 'string' ? session.id : '';
-    } catch {
-        return '';
+    for (const args of argVariants) {
+        const result = spawnSync(
+            commandSpec.command,
+            args,
+            {cwd: projectPath, encoding: 'utf8', timeout: 10000, env: process.env}
+        );
+        if (result.status !== 0 || result.error) continue;
+        try {
+            const parsed = JSON.parse(result.stdout || '[]');
+            const sessions = Array.isArray(parsed) ? parsed
+                : Array.isArray(parsed?.sessions) ? parsed.sessions
+                : [];
+            if (sessions.length === 0) continue;
+            const session = sessions.find(item => normalizePath(String(item?.directory || '')) === currentProjectPath) || sessions[0];
+            if (typeof session?.id === 'string' && session.id) return session.id;
+        } catch {
+            // probar siguiente variante
+        }
     }
+    return '';
 }
 
 function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessionId}) {

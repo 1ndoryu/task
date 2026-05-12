@@ -380,7 +380,9 @@ REGLAS:
         try {
             $svc           = new \App\Services\Agent\OpencodeJobService();
             $jobsActivos   = $svc->listarActivos();
-            $jobsRecientes = $svc->listarRecientes(4);
+            /* [125A-7] Ventana ampliada 4h→48h para que el LLM vea sesiones anteriores
+             * y pueda seleccionar el job_id correcto al pedir "continúa la sesión". */
+            $jobsRecientes = $svc->listarRecientes(48, 6);
             if (!empty($jobsActivos) || !empty($jobsRecientes)) {
                 $ctx .= "\n## OpenCode (agente de código)\n";
                 foreach ($jobsActivos as $j) {

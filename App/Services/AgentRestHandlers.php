@@ -383,7 +383,14 @@ class AgentRestHandlers
     private static function extraerPromptPreview(string $fullPrompt): string
     {
         if (preg_match('/=== TAREA A EJECUTAR ===(.*?)=== FIN DE TAREA ===/s', $fullPrompt, $m)) {
-            return mb_substr(trim($m[1]), 0, 120);
+            $inner = trim($m[1]);
+            /* Eliminar el prefijo "Mensaje original de WhatsApp:" que agrega
+             * normalizarAccionesDesdeMensajeUsuario para que la preview muestre
+             * el mensaje real, no el encabezado interno. */
+            if (str_starts_with($inner, 'Mensaje original de WhatsApp:')) {
+                $inner = trim(mb_substr($inner, mb_strlen('Mensaje original de WhatsApp:')));
+            }
+            return mb_substr($inner, 0, 120);
         }
         return mb_substr($fullPrompt, 0, 80);
     }
