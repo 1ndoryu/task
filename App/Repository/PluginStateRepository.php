@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Repository\CifradoTrait;
+use App\Services\UserTimeService;
 
 class PluginStateRepository
 {
@@ -30,9 +31,9 @@ class PluginStateRepository
         return $this->normalizarAyuno($stored);
     }
 
-    public function setAyuno(array $state): bool
+    public function setAyuno(array $state, bool $protectStale = false): bool
     {
-        return $this->setState(self::META_AYUNO, $this->normalizarAyuno($state));
+        return $this->setState(self::META_AYUNO, $this->normalizarAyuno($state), $protectStale);
     }
 
     public function getDeficitCalorico(): array
@@ -41,9 +42,9 @@ class PluginStateRepository
         return $this->normalizarDeficitCalorico($stored);
     }
 
-    public function setDeficitCalorico(array $state): bool
+    public function setDeficitCalorico(array $state, bool $protectStale = false): bool
     {
-        return $this->setState(self::META_DEFICIT_CALORICO, $this->normalizarDeficitCalorico($state));
+        return $this->setState(self::META_DEFICIT_CALORICO, $this->normalizarDeficitCalorico($state), $protectStale);
     }
 
     public function deleteAll(): bool
@@ -60,8 +61,23 @@ class PluginStateRepository
         return is_array($decoded) ? $decoded : $default;
     }
 
-    private function setState(string $metaKey, array $state): bool
+    private function setState(string $metaKey, array $state, bool $protectStale = false): bool
     {
+        if ($protectStale) {
+            $current = $this->getState($metaKey, []);
+            $currentUpdatedAt = (int)($current['updatedAt'] ?? 0);
+            $incomingUpdatedAt = (int)($state['updatedAt'] ?? 0);
+            if ($currentUpdatedAt > 0 && $incomingUpdatedAt < $currentUpdatedAt) {
+                return true;
+            }
+        } else {
+            $state['updatedAt'] = $this->timestampMs();
+        }
+
+        if (empty($state['updatedAt'])) {
+            $state['updatedAt'] = $this->timestampMs();
+        }
+
         $encoded = $this->encodeData($state);
         $updated = update_user_meta($this->userId, $metaKey, $encoded);
         return $updated !== false || get_user_meta($this->userId, $metaKey, true) === $encoded;
@@ -89,6 +105,7 @@ class PluginStateRepository
             'ultimoAyunoCompletado' => isset($state['ultimoAyunoCompletado']) && is_array($state['ultimoAyunoCompletado'])
                 ? $this->normalizarSesionAyuno($state['ultimoAyunoCompletado'])
                 : null,
+            'updatedAt' => max(0, (int)($state['updatedAt'] ?? 0)),
         ];
     }
 
@@ -134,7 +151,13 @@ class PluginStateRepository
             'historial' => array_slice((array)($state['historial'] ?? []), 0, self::MAX_HISTORIAL_DEFICIT),
             'cargandoIA' => false,
             'errorIA' => null,
+            'updatedAt' => max(0, (int)($state['updatedAt'] ?? 0)),
         ];
+    }
+
+    private function timestampMs(): int
+    {
+        return (int)floor(microtime(true) * 1000);
     }
 
     private function normalizarDatosUsuario(array $datos): array
@@ -166,7 +189,9 @@ class PluginStateRepository
             'azucar' => max(0, (int)round((float)($comida['azucar'] ?? 0))),
             'fotoUrl' => isset($comida['fotoUrl']) ? esc_url_raw((string)$comida['fotoUrl']) : null,
             'horaRegistro' => max(0, (int)($comida['horaRegistro'] ?? 0)),
-            'fecha' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($comida['fecha'] ?? '')) ? (string)$comida['fecha'] : current_time('Y-m-d'),
+            'fecha' => isset($comida['fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$comida['fecha'])
+                ? (string)$comida['fecha']
+                : UserTimeService::today($this->userId),
             'fuenteEstimacion' => in_array((string)($comida['fuenteEstimacion'] ?? ''), ['ia', 'manual'], true) ? (string)$comida['fuenteEstimacion'] : 'manual',
             'promptOriginal' => isset($comida['promptOriginal']) ? sanitize_text_field((string)$comida['promptOriginal']) : null,
             'logProceso' => array_values(array_filter(array_map('sanitize_text_field', (array)($comida['logProceso'] ?? [])))),

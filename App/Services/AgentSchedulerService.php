@@ -189,7 +189,8 @@ class AgentSchedulerService
             return ['titulo' => $titulo, 'mensaje' => $mensaje];
         }
 
-        $habito = self::obtenerHabitoPendientePrioritario($userId);
+        $channel = (string)($payload['channel'] ?? 'app');
+        $habito = self::obtenerHabitoPendientePrioritario($userId, $channel);
         if ($habito === null) {
             return ['omitir' => true, 'razon' => 'no_pending_habits'];
         }
@@ -268,10 +269,10 @@ class AgentSchedulerService
         }
     }
 
-    private static function obtenerHabitoPendientePrioritario(int $userId): ?array
+    private static function obtenerHabitoPendientePrioritario(int $userId, string $channel = 'app'): ?array
     {
         try {
-            $hoy = current_time('Y-m-d');
+            $hoy = UserTimeService::today($userId, $channel);
             $habitos = (new HabitosRepository($userId))->getAll();
             /* [fix-completadoHoy] Tambien verificar el flag completadoHoy del frontend
              * (consistente con AgentProactiveService) ademas del check por fecha. */
@@ -345,12 +346,15 @@ class AgentSchedulerService
     private static function programarSiguienteRecurrencia(int $userId, string $tipo, array $payload, int $minutosIntervalo): void
     {
         try {
-            /* [125A-5] Bug fix: date() usaba time() (UTC) pero procesarProgramadas() compara con
-             * current_time('mysql') (hora local del sitio). Para sitios con gmt_offset negativo
-             * (ej. UTC-4 Venezuela), la recurrencia se retrasaba por el valor del offset.
-             * Fix: usar current_time('timestamp') que ya incluye el gmt_offset, equivalente a
-             * time() + gmt_offset*3600. Así la fecha almacenada y la query usan la misma zona. */
-            $fechaSiguiente = date('Y-m-d H:i:s', current_time('timestamp') + ($minutosIntervalo * MINUTE_IN_SECONDS));
+            $channel = (string)($payload['channel'] ?? 'app');
+            $timezone = UserTimeService::resolveTimezoneName($userId, $channel);
+            $payload['timezone'] = $timezone;
+            /* [125A-RT] Recurrencias en timezone del usuario.
+             * Antes se sumaba contra current_time() global de WP: con WP en Madrid y el usuario en otro país,
+             * el texto/listado del recordatorio quedaba corrido aunque la intención fuera local. */
+            $fechaSiguiente = (new \DateTimeImmutable('now', new \DateTimeZone($timezone)))
+                ->modify('+' . max(1, $minutosIntervalo) . ' minutes')
+                ->format('Y-m-d H:i:s');
             $_created = (new AgentActionService())->crearProgramada(
                 $userId,
                 $tipo,

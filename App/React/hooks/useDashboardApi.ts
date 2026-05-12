@@ -91,6 +91,14 @@ interface UseDashboardApiReturn {
 /* Base URL de la API */
 const API_BASE = '/wp-json/glory/v1/dashboard';
 
+function obtenerTimezoneCliente(): string | null {
+    try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+    } catch {
+        return null;
+    }
+}
+
 /**
  * Hook principal para la API del Dashboard
  */
@@ -134,11 +142,13 @@ export function useDashboardApi(): UseDashboardApiReturn {
         abortControllerRef.current = new AbortController();
         const url = `${API_BASE}${endpoint}`;
 
+        const timezoneCliente = obtenerTimezoneCliente();
         const defaultOptions: RequestInit = {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'X-WP-Nonce': nonce
+                'X-WP-Nonce': nonce,
+                ...(timezoneCliente ? {'X-Glory-Timezone': timezoneCliente} : {})
             },
             signal: abortControllerRef.current.signal
         };

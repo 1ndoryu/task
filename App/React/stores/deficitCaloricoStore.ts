@@ -30,38 +30,43 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
             historial: [],
             cargandoIA: false,
             errorIA: null,
+            updatedAt: 0,
 
             guardarDatosUsuario: datos => {
                 set(prev => ({
-                    datosUsuario: {...prev.datosUsuario, ...datos}
+                    datosUsuario: {...prev.datosUsuario, ...datos},
+                    updatedAt: Date.now()
                 }));
             },
 
             guardarApiKey: (keyIA) => {
                 set({
-                    apiKeyGemini: keyIA
+                    apiKeyGemini: keyIA,
+                    updatedAt: Date.now()
                 });
             },
 
             agregarComida: (comida: ComidaRegistrada) => {
                 set(prev => ({
                     comidas: [...prev.comidas, comida],
-                    errorIA: null
+                    errorIA: null,
+                    updatedAt: Date.now()
                 }));
             },
 
             eliminarComida: (comidaId: string) => {
                 set(prev => ({
-                    comidas: prev.comidas.filter(c => c.id !== comidaId)
+                    comidas: prev.comidas.filter(c => c.id !== comidaId),
+                    updatedAt: Date.now()
                 }));
             },
 
             setCargandoIA: (cargando: boolean) => {
-                set({cargandoIA: cargando});
+                set({cargandoIA: cargando, updatedAt: Date.now()});
             },
 
             setErrorIA: (error: string | null) => {
-                set({errorIA: error});
+                set({errorIA: error, updatedAt: Date.now()});
             },
 
             sincronizarDesdeServidor: estadoServidor => {
@@ -72,7 +77,8 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                     comidas: estadoServidor.comidas ?? [],
                     historial: estadoServidor.historial ?? [],
                     cargandoIA: false,
-                    errorIA: estadoServidor.errorIA ?? null
+                    errorIA: estadoServidor.errorIA ?? null,
+                    updatedAt: estadoServidor.updatedAt ?? 0
                 });
             },
 
@@ -116,7 +122,8 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                 set({
                     historial: nuevoHistorial.slice(0, MAX_HISTORIAL),
                     /* Limpiar comidas consolidadas del array principal */
-                    comidas: comidas.filter(c => c.fecha !== fecha)
+                    comidas: comidas.filter(c => c.fecha !== fecha),
+                    updatedAt: Date.now()
                 });
             },
 

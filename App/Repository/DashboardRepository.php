@@ -141,10 +141,10 @@ class DashboardRepository
                 $results['configuracion'] = $this->configRepo->setConfiguracion($data['configuracion']);
             }
             if (isset($data['ayuno']) && is_array($data['ayuno'])) {
-                $results['ayuno'] = $this->pluginStateRepo->setAyuno($data['ayuno']);
+                $results['ayuno'] = $this->pluginStateRepo->setAyuno($data['ayuno'], true);
             }
             if (isset($data['deficitCalorico']) && is_array($data['deficitCalorico'])) {
-                $results['deficitCalorico'] = $this->pluginStateRepo->setDeficitCalorico($data['deficitCalorico']);
+                $results['deficitCalorico'] = $this->pluginStateRepo->setDeficitCalorico($data['deficitCalorico'], true);
             }
 
             // sentinel-disable-next-line retorno-ignorado-repo — dentro de transaccion, excepcion dispara ROLLBACK

@@ -40,6 +40,7 @@ export interface AyunoState {
     } | null;
     historial: SesionAyuno[];
     ultimoAyunoCompletado: SesionAyuno | null;
+    updatedAt?: number;
 }
 
 /* Acciones del store de ayuno */

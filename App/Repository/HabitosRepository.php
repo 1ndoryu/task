@@ -13,6 +13,7 @@ namespace App\Repository;
 
 use App\Database\Schema;
 use App\Repository\CifradoTrait;
+use App\Services\UserTimeService;
 
 class HabitosRepository
 {
@@ -44,18 +45,16 @@ class HabitosRepository
         ), 'ARRAY_A');
 
         if (!empty($rows)) {
-            $hoyWp = current_time('Y-m-d');
-            $habitos = array_map(function ($row) use ($hoyWp) {
+            $hoyUsuario = UserTimeService::today($this->userId);
+            $habitos = array_map(function ($row) use ($hoyUsuario) {
                 $data = $this->decodeData($row['data'], null);
                 if (is_array($data)) {
                     $data['id'] = (int)$row['id_local'];
-                    /* [135A-H1] Recomputar completadoHoy al leer para evitar datos stale.
-                     * El JSON guardado puede tener completadoHoy=1 del día anterior (no resetea automáticamente),
-                     * o completadoHoy=0 por bug de timezone en saveAll (corregido en mismo commit).
-                     * Si ultimoCompletado es hoy (WP timezone), el hábito está completado. */
+                    /* [135A-H1+125A-RT] Recomputar completadoHoy al leer evita datos stale.
+                     * Gotcha: la fecha correcta no es la timezone de WordPress sino la local del usuario. */
                     $uc = $data['ultimoCompletado'] ?? '';
-                    $enHistorial = in_array($hoyWp, (array)($data['historialCompletados'] ?? []), true);
-                    $data['completadoHoy'] = ($uc === $hoyWp || $enHistorial) ? 1 : 0;
+                    $enHistorial = in_array($hoyUsuario, (array)($data['historialCompletados'] ?? []), true);
+                    $data['completadoHoy'] = ($uc === $hoyUsuario || $enHistorial) ? 1 : 0;
                 }
                 return $data;
             }, $rows);
@@ -83,7 +82,7 @@ class HabitosRepository
 
     /**
      * Guarda los hábitos (Upsert + Soft Delete opcional)
-     * 
+     *
      * @param array $habitos Lista de hábitos a guardar
      * @param bool $partialUpdate Si es true, NO borra los hábitos que faltan (modo incremental)
      */
@@ -117,6 +116,7 @@ class HabitosRepository
         $incomingIds = [];
         $toUpdate = [];
         $toInsert = [];
+        $hoyUsuario = UserTimeService::today($this->userId);
 
         foreach ($habitos as $habito) {
             if (!isset($habito['id'])) continue;
@@ -132,10 +132,9 @@ class HabitosRepository
 
             $frecuenciaData = $habito['frecuencia'] ?? null;
             $frecuencia = is_array($frecuenciaData) ? ($frecuenciaData['tipo'] ?? 'diario') : 'diario';
-            /* [135A-H1] Usar current_time('Y-m-d') (timezone WP) en lugar de date('Y-m-d') (UTC).
-             * Si el usuario es UTC-4 y completa el hábito a las 20:00 local (00:00 UTC del día siguiente),
-             * date() daría mañana y completadoHoy quedaría en 0 incorrectamente. */
-            $completadoHoy = isset($habito['ultimoCompletado']) && $habito['ultimoCompletado'] === current_time('Y-m-d') ? 1 : 0;
+            /* [125A-RT] Usar fecha local por usuario, no timezone global de WordPress.
+             * WhatsApp y dashboard comparten hábitos; la fecha debe ser la del usuario real. */
+            $completadoHoy = isset($habito['ultimoCompletado']) && $habito['ultimoCompletado'] === $hoyUsuario ? 1 : 0;
 
             $exists = $existingMap[$idLocal] ?? null;
 
@@ -158,7 +157,7 @@ class HabitosRepository
                     'nombre' => $nombre,
                     'frecuencia_tipo' => $frecuencia,
                     'completado_hoy' => $completadoHoy,
-                    'data' => $dataJson
+                    'data' => $dataJson,
                 ];
             } else {
                 $toInsert[] = [
@@ -168,7 +167,7 @@ class HabitosRepository
                     'frecuencia_tipo' => $frecuencia,
                     'completado_hoy' => $completadoHoy,
                     'fecha_creacion' => $now,
-                    'data' => $dataJson
+                    'data' => $dataJson,
                 ];
             }
         }

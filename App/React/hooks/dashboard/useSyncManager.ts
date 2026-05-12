@@ -224,6 +224,36 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
         }
     }, [loadingMeta, isInitialized, isDataReady, performInitialSync]);
 
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        const refrescarDesdeServidor = async () => {
+            if (document.visibilityState !== 'visible' || hasChanges || transportState.isSaving) return;
+            const serverData = await loadData();
+            if (!serverData) return;
+            onDataReceived(serverData);
+            resetVersion(serverData);
+            setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
+        };
+
+        const intervalo = window.setInterval(() => {
+            refrescarDesdeServidor().catch(error => console.warn('[SyncManager] Refresh servidor falló:', error));
+        }, 30000);
+
+        const manejarFoco = () => {
+            refrescarDesdeServidor().catch(error => console.warn('[SyncManager] Refresh en foco falló:', error));
+        };
+
+        window.addEventListener('focus', manejarFoco);
+        document.addEventListener('visibilitychange', manejarFoco);
+
+        return () => {
+            window.clearInterval(intervalo);
+            window.removeEventListener('focus', manejarFoco);
+            document.removeEventListener('visibilitychange', manejarFoco);
+        };
+    }, [isInitialized, hasChanges, transportState.isSaving, loadData, onDataReceived, resetVersion, setSyncMeta]);
+
     // --- Lógica de Sincronización Continua (Save Loop) ---
 
     // Detectar cambios y programar guardado

@@ -251,7 +251,7 @@ class WhatsAppEventWorker
             )
         );
         if ($cuenta) {
-            $hoy = current_time('Y-m-d');
+            $hoy = UserTimeService::today($userId, 'whatsapp');
             $msgCount = (int)$cuenta->daily_msg_count;
             $msgDate  = $cuenta->daily_msg_date;
 

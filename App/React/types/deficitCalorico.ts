@@ -50,6 +50,7 @@ export interface DeficitCaloricoState {
     historial: RegistroDiario[];
     cargandoIA: boolean;
     errorIA: string | null;
+    updatedAt?: number;
 }
 
 /* Acciones del store */

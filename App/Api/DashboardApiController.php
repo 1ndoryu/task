@@ -1,5 +1,7 @@
 <?php
 
+/* sentinel-disable-file limite-lineas — controlador REST legacy del dashboard; agrupa rutas históricas hasta refactor de endpoints. */
+
 /**
  * Dashboard API Controller
  *
@@ -21,6 +23,7 @@ namespace App\Api;
 use App\Repository\DashboardRepository;
 use App\Repository\BackupsRepository;
 use App\Services\SuscripcionService;
+use App\Services\UserTimeService;
 
 class DashboardApiController
 {
@@ -141,6 +144,7 @@ class DashboardApiController
     public static function loadDashboard(\WP_REST_Request $request): \WP_REST_Response
     {
         $userId = get_current_user_id();
+        self::syncTimezoneFromRequest($userId, $request);
 
         try {
             $repository = new DashboardRepository($userId);
@@ -178,6 +182,7 @@ class DashboardApiController
     public static function saveDashboard(\WP_REST_Request $request): \WP_REST_Response
     {
         $userId = get_current_user_id();
+        self::syncTimezoneFromRequest($userId, $request);
 
         $data = [
             'habitos' => $request->get_param('habitos') ?? [],
@@ -338,6 +343,7 @@ class DashboardApiController
     public static function pushChanges(\WP_REST_Request $request): \WP_REST_Response
     {
         $userId = get_current_user_id();
+        self::syncTimezoneFromRequest($userId, $request);
         $changes = $request->get_param('changes');
         $clientTimestamp = (int) $request->get_param('clientTimestamp');
         $generateBackup = (bool) $request->get_param('generateBackup');
@@ -371,6 +377,12 @@ class DashboardApiController
                 'message' => 'Error al aplicar cambios.',
             ], 500);
         }
+    }
+
+    private static function syncTimezoneFromRequest(int $userId, \WP_REST_Request $request): void
+    {
+        $timezone = $request->get_header('X-Glory-Timezone') ?: $request->get_param('timezone');
+        UserTimeService::syncFromClient($userId, $timezone, 'dashboard');
     }
 }
 

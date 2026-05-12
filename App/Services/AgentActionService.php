@@ -24,24 +24,26 @@ class AgentActionService
 
     public function crearProgramada(int $userId, string $tipo, string $titulo, array $payload, string $fechaProgramada, bool $requiereAprobacion = true): array
     {
-        $fecha = $this->parseFechaProgramada($fechaProgramada);
+        $channel = (string)($payload['channel'] ?? 'app');
+        $timezone = UserTimeService::resolveTimezoneName($userId, $channel, $payload['timezone'] ?? null);
+        $payload['timezone'] = $timezone;
+        $fecha = $this->parseFechaProgramada($fechaProgramada, $timezone);
         if ($fecha->getTimestamp() < (time() - 60)) {
             throw new \InvalidArgumentException('Fecha programada inválida para la acción del agente.');
         }
 
-        return $this->crearAccion($userId, $tipo, $titulo, $payload, $requiereAprobacion, $this->formatFechaProgramada($fecha));
+        return $this->crearAccion($userId, $tipo, $titulo, $payload, $requiereAprobacion, $this->formatFechaProgramada($fecha, $timezone));
     }
 
-    public function procesarProgramadas(callable $executor, int $limit = 20): int
+    public function procesarProgramadas(callable $executor, int $limit = 500): int
     {
         global $wpdb;
 
-        $limit = max(1, min(50, $limit));
+        $limit = max(1, min(500, $limit));
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->tabla} WHERE estado = %s AND fecha_programada IS NOT NULL AND fecha_programada <= %s ORDER BY fecha_programada ASC LIMIT %d",
+                "SELECT * FROM {$this->tabla} WHERE estado = %s AND fecha_programada IS NOT NULL ORDER BY fecha_programada ASC LIMIT %d",
                 'pendiente',
-                current_time('mysql'),
                 $limit
             ),
             ARRAY_A
@@ -50,6 +52,9 @@ class AgentActionService
         $procesadas = 0;
         foreach (is_array($rows) ? $rows : [] as $row) {
             $accion = $this->normalizarFila($row);
+            if (!$this->accionEstaVencida($accion)) {
+                continue;
+            }
             try {
                 $this->ejecutarAccion((int)$accion['id'], $executor, null);
                 $procesadas++;
@@ -192,35 +197,42 @@ class AgentActionService
             return null;
         }
 
+        $payload = array_merge((array)($accion['payload'] ?? []), is_array($cambios['payload_merge'] ?? null) ? $cambios['payload_merge'] : []);
+        $guardarPayload = !empty($cambios['payload_merge']) && is_array($cambios['payload_merge']);
+        if (!isset($payload['timezone'])) {
+            $payload['timezone'] = UserTimeService::resolveTimezoneName($userId, (string)($payload['channel'] ?? 'app'));
+            $guardarPayload = true;
+        }
+
         if (isset($cambios['fecha_programada'])) {
-            $fecha = $this->parseFechaProgramada((string)$cambios['fecha_programada']);
-            $_ok = $wpdb->update($this->tabla, ['fecha_programada' => $this->formatFechaProgramada($fecha)], ['id' => $id], ['%s'], ['%d']);
+            $timezone = UserTimeService::actionTimezoneName($payload, $userId, (string)($payload['channel'] ?? 'app'));
+            $fecha = $this->parseFechaProgramada((string)$cambios['fecha_programada'], $timezone);
+            $_ok = $wpdb->update($this->tabla, ['fecha_programada' => $this->formatFechaProgramada($fecha, $timezone)], ['id' => $id], ['%s'], ['%d']);
         }
 
         if (!empty($cambios['titulo'])) {
             $_ok = $wpdb->update($this->tabla, ['titulo' => sanitize_text_field((string)$cambios['titulo'])], ['id' => $id], ['%s'], ['%d']);
         }
 
-        if (!empty($cambios['payload_merge']) && is_array($cambios['payload_merge'])) {
-            $payload = array_merge((array)($accion['payload'] ?? []), $cambios['payload_merge']);
+        if ($guardarPayload) {
             $_ok = $wpdb->update($this->tabla, ['payload' => $this->codificarJson($payload)], ['id' => $id], ['%s'], ['%d']);
         }
 
         return $this->obtener($id);
     }
 
-    private function parseFechaProgramada(string $fechaProgramada): \DateTimeImmutable
+    private function parseFechaProgramada(string $fechaProgramada, string $timezone): \DateTimeImmutable
     {
         try {
-            return new \DateTimeImmutable($fechaProgramada, wp_timezone());
+            return new \DateTimeImmutable($fechaProgramada, new \DateTimeZone($timezone));
         } catch (\Throwable) {
             throw new \InvalidArgumentException('Fecha programada inválida para la acción del agente.');
         }
     }
 
-    private function formatFechaProgramada(\DateTimeImmutable $fecha): string
+    private function formatFechaProgramada(\DateTimeImmutable $fecha, string $timezone): string
     {
-        return $fecha->setTimezone(wp_timezone())->format('Y-m-d H:i:s');
+        return $fecha->setTimezone(new \DateTimeZone($timezone))->format('Y-m-d H:i:s');
     }
 
     public function aprobarProgramada(int $id, int $adminId): array
@@ -334,10 +346,25 @@ class AgentActionService
         $payload = $this->decodificarJson((string)($row['payload'] ?? '{}'), []);
         $resultado = $this->decodificarJson((string)($row['resultado'] ?? 'null'), null);
         $logs = $this->decodificarJson((string)($row['logs'] ?? '[]'), []);
+        $userId = (int)$row['user_id'];
+        $channel = is_array($payload) ? (string)($payload['channel'] ?? 'app') : 'app';
+        $sourceTimezone = UserTimeService::actionTimezoneName(is_array($payload) ? $payload : [], $userId, $channel);
+        $displayTimezone = UserTimeService::resolveTimezoneName($userId, $channel);
+        $fechaProgramada = $row['fecha_programada'] ?? null;
+        $fechaProgramadaUsuario = null;
+        if (is_string($fechaProgramada) && $fechaProgramada !== '') {
+            try {
+                $fechaProgramadaUsuario = (new \DateTimeImmutable($fechaProgramada, new \DateTimeZone($sourceTimezone)))
+                    ->setTimezone(new \DateTimeZone($displayTimezone))
+                    ->format('Y-m-d H:i:s');
+            } catch (\Throwable) {
+                $fechaProgramadaUsuario = $fechaProgramada;
+            }
+        }
 
         return [
             'id' => (int)$row['id'],
-            'user_id' => (int)$row['user_id'],
+            'user_id' => $userId,
             'correlation_id' => $row['correlation_id'] ?? null,
             'tipo' => (string)$row['tipo'],
             'titulo' => (string)$row['titulo'],
@@ -347,11 +374,31 @@ class AgentActionService
             'resultado' => $resultado,
             'logs' => is_array($logs) ? $logs : [],
             'aprobado_por' => isset($row['aprobado_por']) ? (int)$row['aprobado_por'] : null,
-            'fecha_programada' => $row['fecha_programada'] ?? null,
+            'fecha_programada' => $fechaProgramada,
+            'fecha_programada_usuario' => $fechaProgramadaUsuario,
+            'fecha_programada_timezone' => $displayTimezone,
+            'fecha_programada_source_timezone' => $sourceTimezone,
             'fecha_creacion' => $row['fecha_creacion'] ?? null,
             'fecha_aprobacion' => $row['fecha_aprobacion'] ?? null,
             'fecha_ejecucion' => $row['fecha_ejecucion'] ?? null,
         ];
+    }
+
+    private function accionEstaVencida(array $accion): bool
+    {
+        $fecha = $accion['fecha_programada'] ?? null;
+        if (!is_string($fecha) || $fecha === '') {
+            return false;
+        }
+
+        try {
+            $timezone = (string)($accion['fecha_programada_source_timezone'] ?? UserTimeService::resolveTimezoneName());
+            $programada = new \DateTimeImmutable($fecha, new \DateTimeZone($timezone));
+            return $programada->getTimestamp() <= time();
+        } catch (\Throwable $e) {
+            error_log('[AgentActionService] Fecha programada inválida id=' . (int)($accion['id'] ?? 0) . ': ' . $e->getMessage());
+            return false;
+        }
     }
 
     private function codificarJson(mixed $value): string

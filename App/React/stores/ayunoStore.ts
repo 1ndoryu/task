@@ -26,6 +26,7 @@ export const useAyunoStore = create<AyunoStore>()(
             sesionActiva: null,
             historial: [],
             ultimoAyunoCompletado: null,
+            updatedAt: 0,
 
             iniciarAyuno: (duracionHoras: number, horaUltimaComidaMs?: number) => {
                 const ahora = Date.now();
@@ -37,7 +38,8 @@ export const useAyunoStore = create<AyunoStore>()(
                         inicio: inicioReal,
                         horaUltimaComidaMs,
                         duracionObjetivoMs: duracionHoras * 60 * 60 * 1000
-                    }
+                    },
+                    updatedAt: Date.now()
                 });
             },
 
@@ -66,7 +68,8 @@ export const useAyunoStore = create<AyunoStore>()(
                     estado: 'inactivo',
                     sesionActiva: null,
                     historial: nuevoHistorial,
-                    ultimoAyunoCompletado: sesionFinalizada
+                    ultimoAyunoCompletado: sesionFinalizada,
+                    updatedAt: Date.now()
                 });
 
                 /* Hábito especial: si el ayuno duró >= 12h, completar el hábito del plugin (si existe) */
@@ -89,7 +92,8 @@ export const useAyunoStore = create<AyunoStore>()(
                     sesionActiva: {
                         ...sesionActiva,
                         duracionObjetivoMs
-                    }
+                    },
+                    updatedAt: Date.now()
                 });
             },
 
@@ -98,7 +102,8 @@ export const useAyunoStore = create<AyunoStore>()(
                     estado: estadoServidor.estado ?? 'inactivo',
                     sesionActiva: estadoServidor.sesionActiva ?? null,
                     historial: estadoServidor.historial ?? [],
-                    ultimoAyunoCompletado: estadoServidor.ultimoAyunoCompletado ?? null
+                    ultimoAyunoCompletado: estadoServidor.ultimoAyunoCompletado ?? null,
+                    updatedAt: estadoServidor.updatedAt ?? 0
                 });
             },
 
@@ -106,7 +111,8 @@ export const useAyunoStore = create<AyunoStore>()(
             reiniciarAyuno: () => {
                 set({
                     estado: 'inactivo',
-                    sesionActiva: null
+                    sesionActiva: null,
+                    updatedAt: Date.now()
                 });
             },
 
@@ -115,7 +121,8 @@ export const useAyunoStore = create<AyunoStore>()(
                 const nuevoHistorial = historial.filter(s => s.id !== sesionId);
                 set({
                     historial: nuevoHistorial,
-                    ultimoAyunoCompletado: ultimoAyunoCompletado?.id === sesionId ? null : ultimoAyunoCompletado
+                    ultimoAyunoCompletado: ultimoAyunoCompletado?.id === sesionId ? null : ultimoAyunoCompletado,
+                    updatedAt: Date.now()
                 });
             },
 

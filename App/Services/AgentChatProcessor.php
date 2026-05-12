@@ -143,7 +143,7 @@ class AgentChatProcessor
          * pueda reportar tanto resultados como fallos en lugar de dejar el anuncio inicial.
          * Las acciones async (solicitar_opencode, continuar_opencode) se excluyen porque
          * el job queda pendiente y la confirmación llega por otra vía. */
-        $accionesAsync = ['solicitar_opencode', 'continuar_opencode', 'cancelar_opencode'];
+        $accionesAsync = ['solicitar_opencode', 'continuar_opencode', 'cancelar_opencode', 'automejora'];
         $hayAccionSincrona = false;
         foreach ($ejecutadas as $ej) {
             if (!in_array($ej['tipo'] ?? '', $accionesAsync, true) || empty($ej['exito'])) {
@@ -180,6 +180,7 @@ class AgentChatProcessor
 
         $parsed['respuesta'] = $this->anotarFallosEnRespuesta($parsed['respuesta'], $ejecutadas);
         $parsed['respuesta'] = $this->asegurarRespuestaOpencodeConSesion($parsed['respuesta'], $ejecutadas);
+        $parsed['respuesta'] = $this->asegurarRespuestaAutomejoraPendiente($parsed['respuesta'], $ejecutadas);
 
         /* [fix-session-confirm] Si el usuario pidió continuar con ses_XXXXX y la respuesta
          * no lo menciona (el LLM lo olvida), inyectarlo para que el usuario sepa qué sesión
@@ -308,7 +309,7 @@ REGLAS:
 - 'borra'/'elimina'/'quita' → eliminar_tarea sin confirmar. 'completa'/'terminé' → completar_tarea sin confirmar. NUNCA preguntes '¿confirmas?'
 - HÁBITOS/TAREAS: si el usuario los menciona por nombre parcial o contexto, búscalos en ## Hábitos activos / ## Tareas pendientes y usa el ID directamente. NUNCA pidas el ID al usuario. Si hay ambigüedad real entre 2+, muestra nombres y pregunta cuál.
 - AYUNO: iniciar_ayuno al empezar (con hora_ultima_comida en ISO8601 si la menciona; si dice 'ahora', omítela). terminar_ayuno al romperlo (con fin si da hora exacta). estado_ayuno para preguntas de estado. No inventes horas.
-- CALORÍAS: registrar_comida al comer/beber (sin calorias si el usuario no las dio; el backend estima). resumen_calorias_hoy para total/déficit del día.
+- CALORÍAS: registrar_comida al comer/beber. Usa calorias SOLO si el usuario dio un número real; si no, omite el campo para que el backend estime. Nunca pongas calorias: 0 como marcador.
 - crear_tarea SOLO para tareas personales; nunca para código, repos, commits, deploys u OpenCode. Al crear, NUNCA menciones un ID — no lo conoces aún. Di 'Tarea creada: [nombre]'.
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
@@ -316,7 +317,8 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: llámala proactivamente cuando detectes información duradera (nombre real, horarios, rutinas, preferencias permanentes). Escribe el contexto COMPLETO actualizado — persiste entre sesiones.
-{$bloqueReglasCodigo}- reportar_contexto: usa solo si los stats del system prompt parecen desactualizados o el usuario lo pide.
+{$bloqueReglasCodigo}- AUTOMEJORA/CÓDIGO: no afirmes que leíste, ejecutaste, depuraste o modificaste código salvo que exista un job OpenCode visible con resultado. Si pides automejora o solicitar_opencode, responde que queda en ejecución/pendiente hasta tener resultado.
+- reportar_contexto: usa solo si los stats del system prompt parecen desactualizados o el usuario lo pide.
 - compactar_ahora: solo cuando el usuario lo pida explícitamente.
 {$bloqueMemoria}{$bloqueMaestro}
 
@@ -344,7 +346,7 @@ REGLAS:
         $pendientes = array_slice(array_filter($tareas, fn($t) => empty($t['completado'])), 0, self::MAX_CONTEXT_TAREAS);
         /* [135A-1] Inyectar fecha y hora actual para que el LLM calcule bien fechas de recordatorios.
          * Sin esto, "recuérdame a las 3pm" no tiene referencia temporal y genera fechas incorrectas. */
-        $ctx = "## Fecha y hora actual\n" . $this->horaLocalActual($canal) . "\n\n## Tareas pendientes\n";
+        $ctx = "## Fecha y hora actual\n" . $this->horaLocalActual($userId, $canal) . "\n\n## Tareas pendientes\n";
         if (empty($pendientes)) {
             $ctx .= "No hay tareas pendientes.\n";
         } else {
@@ -362,7 +364,7 @@ REGLAS:
             }
         }
 
-        $hoy = $this->fechaHoyParaCanal($canal);
+        $hoy = $this->fechaHoyParaCanal($userId, $canal);
         $ctx .= "\n## Hábitos activos\n";
         $habitosActivos = array_values(array_filter($habitos, fn($h) => empty($h['pausado'])));
 
@@ -444,7 +446,9 @@ REGLAS:
                 foreach ($conFecha as $r) {
                     $recurrencia = !empty($r['payload']['recurrence_minutes'])
                         ? " (cada {$r['payload']['recurrence_minutes']}min)" : '';
-                    $ctx .= "- [id:{$r['id']}] {$r['titulo']}{$recurrencia} — {$r['fecha_programada']}\n";
+                    $fechaLocal = $r['fecha_programada_usuario'] ?? $r['fecha_programada'];
+                    $tzLocal = $r['fecha_programada_timezone'] ?? UserTimeService::resolveTimezoneName($userId, $canal);
+                    $ctx .= "- [id:{$r['id']}] {$r['titulo']}{$recurrencia} — {$fechaLocal} ({$tzLocal})\n";
                 }
             }
         } catch (\Throwable) {
@@ -538,33 +542,16 @@ REGLAS:
         return $ctx;
     }
 
-    private function fechaHoyParaCanal(string $canal): string
+    private function fechaHoyParaCanal(int $userId, string $canal): string
     {
-        if ($canal === 'whatsapp') {
-            $timezone = EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas';
-            try {
-                return (new \DateTimeImmutable('now', new \DateTimeZone($timezone)))->format('Y-m-d');
-            } catch (\Throwable) {
-                return current_time('Y-m-d');
-            }
-        }
-
-        return current_time('Y-m-d');
+        return UserTimeService::today($userId, $canal);
     }
 
     /* [135A-1] Retorna la fecha y hora actual en la zona horaria del canal.
      * Inyectada en buildContexto() para que el LLM calcule recordatorios correctamente. */
-    private function horaLocalActual(string $canal): string
+    private function horaLocalActual(int $userId, string $canal): string
     {
-        $tz = $canal === 'whatsapp'
-            ? (EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas')
-            : (function_exists('wp_timezone_string') ? (wp_timezone_string() ?: 'UTC') : 'UTC');
-        try {
-            $ahora = new \DateTimeImmutable('now', new \DateTimeZone($tz));
-            return $ahora->format('Y-m-d H:i:s') . " ({$tz})";
-        } catch (\Throwable) {
-            return current_time('Y-m-d H:i:s') . ' (WP local)';
-        }
+        return UserTimeService::nowLocalLabel($userId, $canal);
     }
 
     private function timestampMs(): int
@@ -912,6 +899,19 @@ REGLAS:
             : $respuesta;
     }
 
+    private function asegurarRespuestaAutomejoraPendiente(string $respuesta, array $ejecutadas): string
+    {
+        foreach ($ejecutadas as $ejecutada) {
+            if (($ejecutada['tipo'] ?? '') !== 'automejora' || empty($ejecutada['exito'])) {
+                continue;
+            }
+            $accionId = (int)($ejecutada['accion_id'] ?? 0);
+            $idTexto = $accionId > 0 ? " #{$accionId}" : '';
+            return "Automejora enviada a OpenCode{$idTexto}; te aviso cuando tenga resultado real. Todavía no voy a afirmar cambios ni investigación de código hasta que el job termine.";
+        }
+        return $respuesta;
+    }
+
     private function habitoExiste(array $habitos, int $id): bool
     {
         foreach ($habitos as $habito) {
@@ -1232,9 +1232,14 @@ REGLAS:
                  * en pasado (la genera durante su thinking).
                  * [135A-1] Si la fecha está en el pasado, intentar recalcular con ReminderAgent
                  * usando el mensaje original del usuario como fuente de verdad. */
-                $tsFecha = $fecha !== '' ? strtotime($fecha) : false;
+                $channelRecordatorio = (string)($param['channel'] ?? ($canal === 'whatsapp' ? 'whatsapp' : 'app'));
+                $tzRecordatorio = UserTimeService::resolveTimezoneName($userId, $channelRecordatorio);
+                try {
+                    $tsFecha = $fecha !== '' ? (new \DateTimeImmutable($fecha, new \DateTimeZone($tzRecordatorio)))->getTimestamp() : false;
+                } catch (\Throwable) {
+                    $tsFecha = false;
+                }
                 if ($tsFecha === false || $tsFecha < (time() - 60)) {
-                    $tzRecordatorio = EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas';
                     $fechaRecalc    = \App\Services\Agents\ReminderAgent::resolverFecha(
                         $this->activeUserMessage,
                         $this->activeUserMessage,
@@ -1243,12 +1248,13 @@ REGLAS:
                     /* Si ReminderAgent devuelve fecha futura, usarla; si no, usar now */
                     $fecha = ($fechaRecalc !== null && !(\App\Services\Agents\ReminderAgent::necesitaCorreccion($fechaRecalc, $tzRecordatorio)))
                         ? $fechaRecalc
-                        : current_time('mysql');
+                        : UserTimeService::nowLocalMysql($userId, $channelRecordatorio);
                 }
                 $payload  = [
                     'titulo'             => $titulo,
                     'mensaje'            => $mensajeR,
-                    'channel'            => (string)($param['channel'] ?? ($canal === 'whatsapp' ? 'whatsapp' : 'app')),
+                    'channel'            => $channelRecordatorio,
+                    'timezone'           => $tzRecordatorio,
                     'recurrence_minutes' => max(0, (int)($param['recurrence_minutes'] ?? 0)),
                 ];
                 $_created = (new AgentActionService())->crearProgramada(
@@ -1306,7 +1312,7 @@ REGLAS:
                 $id    = (int)($param['id'] ?? 0);
                 $repo  = new HabitosRepository($userId);
                 $habitos = $repo->getAll();
-                $hoy   = $this->fechaHoyParaCanal($canal);
+                $hoy   = $this->fechaHoyParaCanal($userId, $canal);
                 /* [125A-9] Si el LLM eligió un ID viejo/inexistente, recuperar por nombre
                  * o intención del mensaje antes de decirle al usuario que no existe. */
                 if ($id <= 0 || !$this->habitoExiste($habitos, $id)) {
@@ -1379,7 +1385,7 @@ REGLAS:
                 /* [fix-posponer-habito] Marca el hábito como pospuesto para hoy.
                  * Registra en ActividadService con tipo habito_pospuesto (igual que el flujo web). */
                 $id     = (int)($param['id'] ?? 0);
-                $hoy    = $this->fechaHoyParaCanal($canal);
+                $hoy    = $this->fechaHoyParaCanal($userId, $canal);
                 $repo   = new HabitosRepository($userId);
                 $habitos = $repo->getAll();
                 $nombreHabito = '';

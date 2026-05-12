@@ -30,12 +30,14 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
     const ayunoSesionActiva = useAyunoStore(state => state.sesionActiva);
     const ayunoHistorial = useAyunoStore(state => state.historial);
     const ayunoUltimoCompletado = useAyunoStore(state => state.ultimoAyunoCompletado);
+    const ayunoUpdatedAt = useAyunoStore(state => state.updatedAt);
     const sincronizarAyunoDesdeServidor = useAyunoStore(state => state.sincronizarDesdeServidor);
     const deficitDatosUsuario = useDeficitCaloricoStore(state => state.datosUsuario);
     const deficitComidas = useDeficitCaloricoStore(state => state.comidas);
     const deficitHistorial = useDeficitCaloricoStore(state => state.historial);
     const deficitCargandoIA = useDeficitCaloricoStore(state => state.cargandoIA);
     const deficitErrorIA = useDeficitCaloricoStore(state => state.errorIA);
+    const deficitUpdatedAt = useDeficitCaloricoStore(state => state.updatedAt);
     const sincronizarDeficitDesdeServidor = useDeficitCaloricoStore(state => state.sincronizarDesdeServidor);
     const {esPremium: _esPremium} = useSuscripcion();
 
@@ -78,7 +80,8 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 estado: ayunoEstado,
                 sesionActiva: ayunoSesionActiva,
                 historial: ayunoHistorial,
-                ultimoAyunoCompletado: ayunoUltimoCompletado
+                ultimoAyunoCompletado: ayunoUltimoCompletado,
+                updatedAt: ayunoUpdatedAt
             },
             deficitCalorico: {
                 datosUsuario: deficitDatosUsuario,
@@ -86,7 +89,8 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 comidas: deficitComidas,
                 historial: deficitHistorial,
                 cargandoIA: deficitCargandoIA,
-                errorIA: deficitErrorIA
+                errorIA: deficitErrorIA,
+                updatedAt: deficitUpdatedAt
             },
             // Valores por defecto para tipos requeridos por DashboardData que no manejamos directamente aquí
             version: '1.0.0',
@@ -113,11 +117,13 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             ayunoSesionActiva,
             ayunoHistorial,
             ayunoUltimoCompletado,
+            ayunoUpdatedAt,
             deficitDatosUsuario,
             deficitComidas,
             deficitHistorial,
             deficitCargandoIA,
-            deficitErrorIA
+            deficitErrorIA,
+            deficitUpdatedAt
         ]
     );
 

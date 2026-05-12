@@ -19,7 +19,7 @@ class AgentWellnessService
         }
 
         $duracionHoras = $this->normalizarDuracionHoras($params['duracion_horas'] ?? $params['duracionHoras'] ?? null);
-        $inicioMs = $this->parseTimestampMs($params['hora_ultima_comida'] ?? $params['horaUltimaComida'] ?? $params['inicio'] ?? null, $canal);
+        $inicioMs = $this->parseTimestampMs($params['hora_ultima_comida'] ?? $params['horaUltimaComida'] ?? $params['inicio'] ?? null, $userId, $canal);
 
         $sesion = [
             'id' => $this->generarId('ayuno'),
@@ -34,7 +34,7 @@ class AgentWellnessService
         return [
             'exito' => $repo->setAyuno($state),
             'estado' => 'activo',
-            'inicio' => $this->formatearMs($inicioMs, $canal),
+            'inicio' => $this->formatearMs($inicioMs, $userId, $canal),
             'duracion_horas' => $duracionHoras,
             'sesion' => $sesion,
         ];
@@ -49,7 +49,7 @@ class AgentWellnessService
             return ['exito' => false, 'error' => 'No hay un ayuno activo para terminar.'];
         }
 
-        $finMs = $this->parseTimestampMs($params['fin'] ?? $params['fin_iso'] ?? $params['finIso'] ?? null, $canal);
+        $finMs = $this->parseTimestampMs($params['fin'] ?? $params['fin_iso'] ?? $params['finIso'] ?? null, $userId, $canal);
         $inicioMs = (int)($activa['inicio'] ?? $finMs);
         $tiempoMs = max(0, $finMs - $inicioMs);
         $objetivoMs = max(1, (int)($activa['duracionObjetivoMs'] ?? self::DEFAULT_FAST_HOURS * 3600000));
@@ -74,14 +74,14 @@ class AgentWellnessService
         $state['ultimoAyunoCompletado'] = $sesionFinalizada;
 
         $habitResult = $tiempoMs >= self::MIN_FAST_FOR_HABIT_MS
-            ? $this->completarHabitoAyuno($userId, $this->fechaLocal($finMs, $canal))
+            ? $this->completarHabitoAyuno($userId, $this->fechaLocal($finMs, $userId, $canal))
             : ['marcado' => false, 'razon' => 'duracion_menor_12h'];
 
         return [
             'exito' => $repo->setAyuno($state),
             'estado' => 'inactivo',
-            'inicio' => $this->formatearMs($inicioMs, $canal),
-            'fin' => $this->formatearMs($finMs, $canal),
+            'inicio' => $this->formatearMs($inicioMs, $userId, $canal),
+            'fin' => $this->formatearMs($finMs, $userId, $canal),
             'duracion' => $this->formatearDuracion($tiempoMs),
             'duracion_ms' => $tiempoMs,
             'completada' => $completada,
@@ -95,14 +95,14 @@ class AgentWellnessService
         $state = (new PluginStateRepository($userId))->getAyuno();
         $activa = $state['sesionActiva'] ?? null;
         if (($state['estado'] ?? '') === 'activo' && is_array($activa)) {
-            $ahoraMs = $this->parseTimestampMs(null, $canal);
+            $ahoraMs = $this->parseTimestampMs(null, $userId, $canal);
             $inicioMs = (int)($activa['inicio'] ?? $ahoraMs);
             $objetivoMs = max(1, (int)($activa['duracionObjetivoMs'] ?? self::DEFAULT_FAST_HOURS * 3600000));
             $transcurrido = max(0, $ahoraMs - $inicioMs);
 
             return [
                 'estado' => 'activo',
-                'inicio' => $this->formatearMs($inicioMs, $canal),
+                'inicio' => $this->formatearMs($inicioMs, $userId, $canal),
                 'transcurrido' => $this->formatearDuracion($transcurrido),
                 'restante' => $this->formatearDuracion(max(0, $objetivoMs - $transcurrido)),
                 'objetivo_horas' => round($objetivoMs / 3600000, 2),
@@ -114,8 +114,8 @@ class AgentWellnessService
         return [
             'estado' => 'inactivo',
             'ultimo' => is_array($ultimo) ? [
-                'inicio' => $this->formatearMs((int)($ultimo['inicio'] ?? 0), $canal),
-                'fin' => $this->formatearMs((int)($ultimo['fin'] ?? 0), $canal),
+                'inicio' => $this->formatearMs((int)($ultimo['inicio'] ?? 0), $userId, $canal),
+                'fin' => $this->formatearMs((int)($ultimo['fin'] ?? 0), $userId, $canal),
                 'duracion' => $this->formatearDuracion((int)($ultimo['tiempoEfectivoMs'] ?? 0)),
                 'completada' => (bool)($ultimo['completada'] ?? false),
             ] : null,
@@ -129,8 +129,9 @@ class AgentWellnessService
             throw new \LogicException('registrar_comida requiere descripcion.');
         }
 
-        $fecha = $this->fechaLocal($this->parseTimestampMs($params['fecha'] ?? null, $canal), $canal);
-        $nutricion = isset($params['calorias']) && is_numeric($params['calorias'])
+        $fecha = $this->fechaLocal($this->parseTimestampMs($params['fecha'] ?? null, $userId, $canal), $userId, $canal);
+        $caloriasManual = isset($params['calorias']) && is_numeric($params['calorias']) ? (int)$params['calorias'] : null;
+        $nutricion = $caloriasManual !== null && $caloriasManual > 0
             ? $this->nutricionManual($descripcion, (int)$params['calorias'], $params)
             : $this->estimarNutricion($userId, $descripcion);
 
@@ -144,7 +145,7 @@ class AgentWellnessService
             'carbohidratos' => (int)($nutricion['carbohidratos'] ?? 0),
             'grasas' => (int)($nutricion['grasas'] ?? 0),
             'azucar' => (int)($nutricion['azucar'] ?? 0),
-            'horaRegistro' => $this->parseTimestampMs(null, $canal),
+            'horaRegistro' => $this->parseTimestampMs(null, $userId, $canal),
             'fecha' => $fecha,
             'fuenteEstimacion' => $nutricion['fuente'],
             'promptOriginal' => $descripcion,
@@ -164,7 +165,7 @@ class AgentWellnessService
 
     public function resumenCalorias(int $userId, array $params, string $canal): array
     {
-        $fecha = $this->fechaLocal($this->parseTimestampMs($params['fecha'] ?? null, $canal), $canal);
+        $fecha = $this->fechaLocal($this->parseTimestampMs($params['fecha'] ?? null, $userId, $canal), $userId, $canal);
         $state = (new PluginStateRepository($userId))->getDeficitCalorico();
         $comidas = array_values(array_filter((array)($state['comidas'] ?? []), fn($comida) => ($comida['fecha'] ?? '') === $fecha));
 
@@ -276,7 +277,7 @@ class AgentWellnessService
         ];
     }
 
-    private function parseTimestampMs(mixed $value, string $canal): int
+    private function parseTimestampMs(mixed $value, int $userId, string $canal): int
     {
         if ($value === null || $value === '') {
             return $this->timestampMs();
@@ -287,40 +288,27 @@ class AgentWellnessService
         }
 
         try {
-            $date = new \DateTimeImmutable((string)$value, $this->timezone($canal));
+            $date = new \DateTimeImmutable((string)$value, UserTimeService::timezone($userId, $canal));
             return ((int)$date->format('U')) * 1000;
         } catch (\Throwable) {
             return $this->timestampMs();
         }
     }
 
-    private function fechaLocal(int $timestampMs, string $canal): string
+    private function fechaLocal(int $timestampMs, int $userId, string $canal): string
     {
-        $date = (new \DateTimeImmutable('@' . (int)floor($timestampMs / 1000)))->setTimezone($this->timezone($canal));
+        $date = (new \DateTimeImmutable('@' . (int)floor($timestampMs / 1000)))->setTimezone(UserTimeService::timezone($userId, $canal));
         return $date->format('Y-m-d');
     }
 
-    private function formatearMs(int $timestampMs, string $canal): string
+    private function formatearMs(int $timestampMs, int $userId, string $canal): string
     {
         if ($timestampMs <= 0) {
             return '';
         }
         return (new \DateTimeImmutable('@' . (int)floor($timestampMs / 1000)))
-            ->setTimezone($this->timezone($canal))
+            ->setTimezone(UserTimeService::timezone($userId, $canal))
             ->format(DATE_ATOM);
-    }
-
-    private function timezone(string $canal): \DateTimeZone
-    {
-        $timezone = $canal === 'whatsapp'
-            ? (EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas')
-            : (wp_timezone_string() ?: 'UTC');
-
-        try {
-            return new \DateTimeZone($timezone);
-        } catch (\Throwable) {
-            return new \DateTimeZone('UTC');
-        }
     }
 
     private function normalizarDuracionHoras(mixed $value): int

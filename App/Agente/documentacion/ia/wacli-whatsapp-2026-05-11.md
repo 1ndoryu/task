@@ -16,7 +16,7 @@
 - `WACLI_BIN`: ruta del binario, default `wacli` en PATH.
 - `WACLI_ACCOUNT`: cuenta wacli opcional para stores con varios números.
 - `WHATSAPP_AGENT_TO`, `WHATSAPP_TO` o `WHATSAPP`: destinatario por defecto.
-- `WHATSAPP_USER_TIMEZONE`: zona horaria lógica para acciones WhatsApp con fecha de usuario; default `America/Caracas`.
+- Timezone usuario: desde [125A-RT], `UserTimeService` usa meta por usuario (`glory_user_timezone` / `glory_whatsapp_timezone`), `X-Glory-Timezone` del dashboard y fallback de país del número WhatsApp. `WHATSAPP_USER_TIMEZONE` queda legacy y no debe usarse para usuarios nuevos.
 - `WACLI_LOCAL_MODE=true`: permite aprobar la acción en local aunque no exista `wacli`; devuelve `wacli-local` y no manda WhatsApp real.
 
 ## Modo local
@@ -45,7 +45,7 @@
 - Si el store está ocupado, `--lock-wait` debe esperar antes de fallar; sin esto, audios e imágenes caen al fallback del chatbot.
 
 ## Hábitos por WhatsApp
-- Las acciones de hábitos usan la fecha local del canal, no la fecha PHP/WordPress, para coincidir con el día que ve el usuario en el teléfono.
+- Las acciones de hábitos usan la fecha local real del usuario vía `UserTimeService`, no la fecha PHP/WordPress, para coincidir con el día que ve en web y teléfono.
 - Toda marca de hábito debe renovar `updatedAt`, guardar parcial y verificar por relectura antes de responder éxito.
 
 ## Recordatorios dinamicos
@@ -53,3 +53,4 @@
 - `AgentSchedulerService` consulta `HabitosRepository`, descarta habitos pausados y completados hoy, ordena por `importancia` (`muy_alta`, `alta`, `media`, `baja`, `muy_baja`) y envia el primer pendiente.
 - El mensaje WhatsApp queda como `Hábito pendiente: Tu hábito pendiente de mayor prioridad es: {nombre} ({importancia}).`.
 - Si no hay habitos pendientes, se omite la notificacion para no enviar recordatorios falsos.
+- Desde [125A-RT], cada recordatorio nuevo guarda `payload.timezone`; los legacy sin timezone se interpretan con la timezone WordPress original para no desplazar recordatorios ya creados.
