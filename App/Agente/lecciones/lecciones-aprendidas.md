@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-12 — Plugins que WhatsApp modifica no pueden vivir solo en localStorage
+
+**Patrón del error:** Ayuno y déficit calórico persistían en Zustand/localStorage. El chatbot server-side podía responder sobre ellos, pero cualquier mutación desde WhatsApp quedaba invisible para el panel porque no compartían almacenamiento.
+
+**Lección:** Todo estado que deba ser manipulado por canales server-side debe cruzar la frontera del dashboard sync o tener un repositorio propio. LocalStorage sirve como cache/fallback de UI, no como fuente única si hay acciones por WhatsApp, cron o agentes.
+
+**Fix:** `PluginStateRepository` guarda ayuno/calorías por usuario, `DashboardRepository` los incluye en `loadAll/saveAll`, React hidrata los stores desde el servidor, y `AgentWellnessService` ejecuta las acciones del chatbot sobre esa misma fuente.
+
 ## 2026-05-12 — Migraciones multiusuario no deben romper el canal legacy
 
 **Patrón del error:** El plan multiusuario convirtió el webhook WhatsApp en obligatorio `?account=user_X`, pero el admin existente ya usaba un webhook sin account y números configurados por env vars.

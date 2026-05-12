@@ -60,6 +60,7 @@ export interface DeficitCaloricoActions {
     eliminarComida: (comidaId: string) => void;
     setCargandoIA: (cargando: boolean) => void;
     setErrorIA: (error: string | null) => void;
+    sincronizarDesdeServidor: (estado: DeficitCaloricoState) => void;
     obtenerComidasHoy: () => ComidaRegistrada[];
     obtenerCaloriasHoy: () => number;
     consolidarDia: (fecha: string, tmb: number) => void;

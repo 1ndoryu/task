@@ -186,6 +186,14 @@ class DashboardApiController
             'notas' => $request->get_param('notas') ?? '',
             'configuracion' => $request->get_param('configuracion') ?? [],
         ];
+        $ayuno = $request->get_param('ayuno');
+        if (is_array($ayuno)) {
+            $data['ayuno'] = $ayuno;
+        }
+        $deficitCalorico = $request->get_param('deficitCalorico');
+        if (is_array($deficitCalorico)) {
+            $data['deficitCalorico'] = $deficitCalorico;
+        }
         $generateBackup = (bool) $request->get_param('generateBackup');
 
         try {

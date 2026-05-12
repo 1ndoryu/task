@@ -64,6 +64,18 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                 set({errorIA: error});
             },
 
+            sincronizarDesdeServidor: estadoServidor => {
+                const apiKeyGeminiLocal = get().apiKeyGemini;
+                set({
+                    datosUsuario: estadoServidor.datosUsuario ?? {},
+                    apiKeyGemini: estadoServidor.apiKeyGemini || apiKeyGeminiLocal,
+                    comidas: estadoServidor.comidas ?? [],
+                    historial: estadoServidor.historial ?? [],
+                    cargandoIA: false,
+                    errorIA: estadoServidor.errorIA ?? null
+                });
+            },
+
             obtenerComidasHoy: (): ComidaRegistrada[] => {
                 const hoy = obtenerFechaHoy();
                 return get().comidas.filter(c => c.fecha === hoy);

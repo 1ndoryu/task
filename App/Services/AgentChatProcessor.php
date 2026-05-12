@@ -264,6 +264,11 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"completar_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"posponer_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"completar_subhabito\", \"parametros\": {\"id\": 123, \"subId\": 0}}
+- {\"tipo\": \"iniciar_ayuno\", \"parametros\": {\"duracion_horas\": 16, \"hora_ultima_comida\": \"ISO8601 opcional\"}}
+- {\"tipo\": \"terminar_ayuno\", \"parametros\": {\"fin\": \"ISO8601 opcional\"}}
+- {\"tipo\": \"estado_ayuno\", \"parametros\": {}}
+- {\"tipo\": \"registrar_comida\", \"parametros\": {\"descripcion\": \"arepa con queso\", \"calorias\": 500}}
+- {\"tipo\": \"resumen_calorias_hoy\", \"parametros\": {}}
 - {\"tipo\": \"leer_notas\", \"parametros\": {\"limite\": 10}}
 - {\"tipo\": \"leer_nota\", \"parametros\": {\"id\": 38}} — lee el contenido COMPLETO de una nota por su ID. El contexto SOLO muestra títulos, no el contenido. SIEMPRE usa esta acción cuando el usuario pida ver, leer o preguntar sobre el contenido de una nota.
 - {\"tipo\": \"crear_nota\", \"parametros\": {\"titulo\": \"...\", \"contenido\": \"...\"}}
@@ -291,6 +296,8 @@ REGLAS:
 - Si no hay acciones, envía \"acciones\": [].
 - NUNCA uses eliminar/completar una tarea sin que el usuario lo pida explícitamente. PERO si el usuario dice 'borra', 'elimina', 'quita' esa tarea: usa directamente `eliminar_tarea` sin confirmar — su mensaje ya ES la confirmación. Si dice 'completa', 'marca como hecho', 'terminé': usa directamente `completar_tarea` sin confirmar. NUNCA preguntes '¿confirmas?'
 - INFERENCIA DE HÁBITOS Y TAREAS — REGLA CRÍTICA: Si el usuario menciona un hábito o tarea por nombre parcial o por contexto ('el de leer', 'ese hábito', 'el recordatorio de antes'), búscalo en la lista del contexto (## Hábitos activos, ## Tareas pendientes) y usa el ID directamente. Si el mensaje anterior del bot mencionó un hábito específico (ej: en un recordatorio '⏰ Hábito pendiente: leer enunciado...'), ese es el hábito referido — úsalo sin preguntar. NUNCA pidas el ID numérico al usuario. Si hay ambigüedad real entre 2+ hábitos similares, muestra los nombres y pregunta cuál, pero jamás el ID.
+- AYUNO: usa iniciar_ayuno cuando el usuario diga que inicia/empieza ayuno. Si menciona última comida, desde cuándo empezó o una hora concreta, convierte esa hora a ISO8601 local y pásala como hora_ultima_comida; si dice ahora, omite la hora. Usa terminar_ayuno cuando diga que rompió/terminó el ayuno; si da hora exacta, pásala como fin. Usa estado_ayuno para preguntas como cuánto llevo, cuánto falta o estado del ayuno. No inventes horas exactas si el usuario no las dio.
+- CALORÍAS: usa registrar_comida cuando el usuario diga que comió, bebió o quiere registrar comida. Incluye calorias solo si el usuario las dio explícitamente; si no, el backend estimará nutrición. Usa resumen_calorias_hoy cuando pregunte total del día, calorías restantes, déficit o resumen nutricional.
 - crear_tarea SOLO crea tareas para el usuario. Si el mensaje contiene 'tarea para opencode', 'pídele a opencode', 'dile a opencode', 'ejecuta en opencode' o cualquier variante de destinar la instrucción a OpenCode: usa OBLIGATORIAMENTE `solicitar_opencode`, nunca `crear_tarea`.
 - Al CREAR una tarea con \`crear_tarea\`, NUNCA menciones un ID específico en tu respuesta — no conoces el ID real hasta que la acción se ejecute y recibes los resultados. Di simplemente \'Tarea creada: [nombre]\' sin ningún número de ID.
 - Responde siempre en español.
@@ -400,6 +407,8 @@ REGLAS:
             }
         }
 
+        $ctx .= $this->buildWellnessContext($userId, $canal, $privacyMode);
+
         /* Notas recientes — título + preview de contenido (primeros 300 chars).
          * Incluir contenido evita que el modelo diga "no puedo acceder" sin llamar leer_nota.
          * Para el contenido completo de una nota larga, el modelo puede usar leer_nota.
@@ -492,6 +501,39 @@ REGLAS:
                 $ctx .= "- Para ver ramas de un proyecto usa 'listar_ramas' (con proyecto opcional)\n";
             }
         } catch (\Throwable) { /* No bloquear el contexto */ }
+        return $ctx;
+    }
+
+    private function buildWellnessContext(int $userId, string $canal, bool $privacyMode): string
+    {
+        if ($privacyMode) {
+            return "\n## Ayuno y calorías\nDetalles ocultos por modo privacidad. Puedes usar acciones de estado/resumen si el usuario lo pide explícitamente.\n";
+        }
+
+        try {
+            $wellness = new AgentWellnessService();
+            $ayuno = $wellness->estadoAyuno($userId, $canal);
+            $calorias = $wellness->resumenCalorias($userId, [], $canal);
+        } catch (\Throwable) {
+            return '';
+        }
+
+        $ctx = "\n## Ayuno y calorías\n";
+        if (($ayuno['estado'] ?? '') === 'activo') {
+            $ctx .= "Ayuno activo desde {$ayuno['inicio']}; transcurrido {$ayuno['transcurrido']}; restante {$ayuno['restante']}; objetivo {$ayuno['objetivo_horas']}h.\n";
+        } else {
+            $ultimo = $ayuno['ultimo'] ?? null;
+            $ctx .= is_array($ultimo)
+                ? "Ayuno inactivo. Último: {$ultimo['duracion']} ({$ultimo['inicio']} a {$ultimo['fin']}).\n"
+                : "Ayuno inactivo. Sin ayunos completados registrados.\n";
+        }
+
+        $totales = (array)($calorias['totales'] ?? []);
+        $ctx .= "Calorías hoy ({$calorias['fecha']}): {$totales['calorias']} kcal en {$calorias['comidas']} comidas";
+        if (isset($calorias['calorias_restantes']) && $calorias['calorias_restantes'] !== null) {
+            $ctx .= "; restantes objetivo: {$calorias['calorias_restantes']} kcal";
+        }
+        $ctx .= ". Macros: P {$totales['proteinas']}g, C {$totales['carbohidratos']}g, G {$totales['grasas']}g.\n";
         return $ctx;
     }
 
@@ -1137,6 +1179,21 @@ REGLAS:
                 unset($t);
                 $_ok = $repo->saveAll($tareas);
                 return ['tipo' => $tipo, 'exito' => true, 'id' => $id];
+
+            case 'iniciar_ayuno':
+                return ['tipo' => $tipo] + (new AgentWellnessService())->iniciarAyuno($userId, $param, $canal);
+
+            case 'terminar_ayuno':
+                return ['tipo' => $tipo] + (new AgentWellnessService())->terminarAyuno($userId, $param, $canal);
+
+            case 'estado_ayuno':
+                return ['tipo' => $tipo, 'exito' => true, 'estado' => (new AgentWellnessService())->estadoAyuno($userId, $canal)];
+
+            case 'registrar_comida':
+                return ['tipo' => $tipo] + (new AgentWellnessService())->registrarComida($userId, $param, $canal);
+
+            case 'resumen_calorias_hoy':
+                return ['tipo' => $tipo] + (new AgentWellnessService())->resumenCalorias($userId, $param, $canal);
 
             case 'programar_recordatorio':
                 /* Soporta recurrence_minutes y channel en payload */

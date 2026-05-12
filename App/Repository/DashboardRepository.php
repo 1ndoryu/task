@@ -21,6 +21,7 @@ class DashboardRepository
     private ProyectosRepository $proyectosRepo;
     private ConfiguracionRepository $configRepo;
     private CompartidosRepository $compartidosRepo;
+    private PluginStateRepository $pluginStateRepo;
 
     private const SCHEMA_VERSION = '1.0.0';
     private const META_CONFIG = '_glory_dashboard_config';
@@ -41,6 +42,7 @@ class DashboardRepository
         $this->proyectosRepo = new ProyectosRepository($this->userId);
         $this->configRepo = new ConfiguracionRepository($this->userId);
         $this->compartidosRepo = new CompartidosRepository($this->userId);
+        $this->pluginStateRepo = new PluginStateRepository($this->userId);
     }
 
     public function habilitarCifrado(): bool
@@ -108,6 +110,8 @@ class DashboardRepository
             'proyectos' => array_merge($this->proyectosRepo->getAll(), $compartidos['proyectos']),
             'notas' => $this->configRepo->getNotas(),
             'configuracion' => $this->configRepo->getConfiguracion(),
+            'ayuno' => $this->pluginStateRepo->getAyuno(),
+            'deficitCalorico' => $this->pluginStateRepo->getDeficitCalorico(),
             'ultimaActualizacion' => $this->configRepo->getLastUpdate(),
         ];
     }
@@ -135,6 +139,12 @@ class DashboardRepository
             }
             if (isset($data['configuracion'])) {
                 $results['configuracion'] = $this->configRepo->setConfiguracion($data['configuracion']);
+            }
+            if (isset($data['ayuno']) && is_array($data['ayuno'])) {
+                $results['ayuno'] = $this->pluginStateRepo->setAyuno($data['ayuno']);
+            }
+            if (isset($data['deficitCalorico']) && is_array($data['deficitCalorico'])) {
+                $results['deficitCalorico'] = $this->pluginStateRepo->setDeficitCalorico($data['deficitCalorico']);
             }
 
             // sentinel-disable-next-line retorno-ignorado-repo — dentro de transaccion, excepcion dispara ROLLBACK
@@ -270,6 +280,8 @@ class DashboardRepository
         $this->proyectosRepo->deleteAll();
         // sentinel-disable-next-line retorno-ignorado-repo
         $this->configRepo->deleteAll();
+        // sentinel-disable-next-line retorno-ignorado-repo
+        $this->pluginStateRepo->deleteAll();
         return true;
     }
 }

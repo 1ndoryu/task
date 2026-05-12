@@ -12,6 +12,8 @@
 
 import {useState, useCallback, useRef, useEffect} from 'react';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
+import type {AyunoState} from '../types/ayuno';
+import type {DeficitCaloricoState} from '../types/deficitCalorico';
 import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 
 /*
@@ -24,6 +26,8 @@ interface DashboardData {
     proyectos: Proyecto[];
     notas: string;
     configuracion: ConfiguracionUsuario;
+    ayuno?: AyunoState;
+    deficitCalorico?: DeficitCaloricoState;
     ultimaActualizacion: string | null;
 }
 

@@ -93,6 +93,15 @@ export const useAyunoStore = create<AyunoStore>()(
                 });
             },
 
+            sincronizarDesdeServidor: estadoServidor => {
+                set({
+                    estado: estadoServidor.estado ?? 'inactivo',
+                    sesionActiva: estadoServidor.sesionActiva ?? null,
+                    historial: estadoServidor.historial ?? [],
+                    ultimoAyunoCompletado: estadoServidor.ultimoAyunoCompletado ?? null
+                });
+            },
+
             /* Reiniciar descarta el ayuno sin registrarlo en historial */
             reiniciarAyuno: () => {
                 set({

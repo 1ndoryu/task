@@ -8,6 +8,8 @@ import {useSincronizacionTiempoReal} from '../useSincronizacionTiempoReal';
 import {useNotificadorCambiosWebSocket} from '../useNotificadorCambiosWebSocket';
 import {obtenerUserId} from '../useSincronizacion';
 import {useNotasStore, PANEL_SCRATCHPAD} from '../../stores/notasStore';
+import {useAyunoStore} from '../../stores/ayunoStore';
+import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
 import {invalidarCache as invalidarCacheActividad} from '../../services/actividadStore';
 
 interface UseDashboardSyncProps {
@@ -24,6 +26,17 @@ interface UseDashboardSyncProps {
 
 export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, setProyectos, setNotas, cargandoDatos, cargandoDatosLocales}: UseDashboardSyncProps) {
     const storeSetHabitos = useHabitosStore(state => state.setHabitos);
+    const ayunoEstado = useAyunoStore(state => state.estado);
+    const ayunoSesionActiva = useAyunoStore(state => state.sesionActiva);
+    const ayunoHistorial = useAyunoStore(state => state.historial);
+    const ayunoUltimoCompletado = useAyunoStore(state => state.ultimoAyunoCompletado);
+    const sincronizarAyunoDesdeServidor = useAyunoStore(state => state.sincronizarDesdeServidor);
+    const deficitDatosUsuario = useDeficitCaloricoStore(state => state.datosUsuario);
+    const deficitComidas = useDeficitCaloricoStore(state => state.comidas);
+    const deficitHistorial = useDeficitCaloricoStore(state => state.historial);
+    const deficitCargandoIA = useDeficitCaloricoStore(state => state.cargandoIA);
+    const deficitErrorIA = useDeficitCaloricoStore(state => state.errorIA);
+    const sincronizarDeficitDesdeServidor = useDeficitCaloricoStore(state => state.sincronizarDesdeServidor);
     const {esPremium: _esPremium} = useSuscripcion();
 
     /*
@@ -61,6 +74,20 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             tareas,
             proyectos,
             notas,
+            ayuno: {
+                estado: ayunoEstado,
+                sesionActiva: ayunoSesionActiva,
+                historial: ayunoHistorial,
+                ultimoAyunoCompletado: ayunoUltimoCompletado
+            },
+            deficitCalorico: {
+                datosUsuario: deficitDatosUsuario,
+                apiKeyGemini: '',
+                comidas: deficitComidas,
+                historial: deficitHistorial,
+                cargandoIA: deficitCargandoIA,
+                errorIA: deficitErrorIA
+            },
             // Valores por defecto para tipos requeridos por DashboardData que no manejamos directamente aquí
             version: '1.0.0',
             ultimaActualizacion: null, // Evitar timestamps dinámicos en useMemo para estabilidad referencial
@@ -77,7 +104,21 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 ordenHabitos: 'importancia'
             }
         }),
-        [habitos, tareas, proyectos, notas]
+        [
+            habitos,
+            tareas,
+            proyectos,
+            notas,
+            ayunoEstado,
+            ayunoSesionActiva,
+            ayunoHistorial,
+            ayunoUltimoCompletado,
+            deficitDatosUsuario,
+            deficitComidas,
+            deficitHistorial,
+            deficitCargandoIA,
+            deficitErrorIA
+        ]
     );
 
     /*
@@ -89,8 +130,10 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             if (datos.tareas !== undefined) setTareas(datos.tareas);
             if (datos.proyectos !== undefined) setProyectos(datos.proyectos);
             if (datos.notas !== undefined) setNotas(datos.notas);
+            if (datos.ayuno !== undefined) sincronizarAyunoDesdeServidor(datos.ayuno);
+            if (datos.deficitCalorico !== undefined) sincronizarDeficitDesdeServidor(datos.deficitCalorico);
         },
-        [storeSetHabitos, setTareas, setProyectos, setNotas]
+        [storeSetHabitos, setTareas, setProyectos, setNotas, sincronizarAyunoDesdeServidor, sincronizarDeficitDesdeServidor]
     );
 
     /*
