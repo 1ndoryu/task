@@ -247,7 +247,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
 - {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\"}}
-- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"mensaje de seguimiento al job anterior\"}} (job_id = número exacto de [id:N] visible en el contexto, o 0 si el usuario ya proporcionó un ses_XXXXX — el backend lo resuelve solo)
+- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"instruccion real del usuario para OpenCode\"}} (job_id = número exacto de [id:N] visible en el contexto, o 0 si el usuario ya proporcionó un ses_XXXXX — el backend lo resuelve solo. En 'mensaje' pon la instrucción real del usuario, NUNCA el ses_XXXXX; si el usuario solo pide continuar sin instrucción nueva, pon \"Continúa desde donde quedaste en esta sesión.\")
 - {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
 - {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
@@ -1016,8 +1016,13 @@ REGLAS:
             case 'continuar_opencode':
                 $jobId  = (int)($param['job_id'] ?? 0);
                 $prompt = sanitize_textarea_field((string)($param['mensaje'] ?? $param['prompt'] ?? ''));
+                /* [fix-prompt-cleanup] El LLM a veces incluye el ses_XXXXX o frases como
+                 * "Continuar sesión ses_XXX" como mensaje — eso llega a OpenCode como prompt
+                 * literal y el modelo lo repite sin hacer nada útil. Strip esas partes. */
+                $prompt = trim(preg_replace('/\bses_[a-zA-Z0-9]{6,80}\b/', '', $prompt));
+                $prompt = trim(preg_replace('/^(continua|continuar|sigue|resume)(\s+(la|esa|esta|desde|la\s+sesion|sesion|session|desde\s+donde))*[\s:.,;-]*/iu', '', $prompt));
                 if ($prompt === '') {
-                    throw new \LogicException('continuar_opencode requiere mensaje.');
+                    $prompt = 'Continúa desde donde quedaste en esta sesión.';
                 }
                 $svc = new \App\Services\Agent\OpencodeJobService();
                 try {
