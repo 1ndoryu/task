@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repository\HabitosRepository;
+use App\Database\Schema;
 
 /* [109B] Scheduler del agente con soporte de recordatorios recurrentes y sub-hourly.
  * Se registra el schedule 'every_5_minutes' para granularidad de 5 min en recordatorios.
@@ -171,13 +172,12 @@ class AgentSchedulerService
             return ['omitir' => true, 'razon' => 'no_pending_habits'];
         }
 
-        $nombre = sanitize_text_field((string)($habito['nombre'] ?? 'hábito sin nombre'));
-        $importancia = self::etiquetaImportancia((string)($habito['importancia'] ?? ''));
-        $detalleImportancia = $importancia !== '' ? " ({$importancia})" : '';
+        /* [fix-habito-personalizado] Generar mensaje con LLM en vez de texto generico */
+        $mensaje = self::generarMensajeHabitoPersonalizado($userId, $habito);
 
         return [
             'titulo' => 'Hábito pendiente',
-            'mensaje' => "Tu hábito pendiente de mayor prioridad es: {$nombre}{$detalleImportancia}.",
+            'mensaje' => $mensaje,
         ];
     }
 
@@ -192,13 +192,66 @@ class AgentSchedulerService
         return str_contains($texto, 'habito pendiente') || str_contains($texto, 'habitos pendientes');
     }
 
+    /* [fix-habito-personalizado] Genera recordatorio via LLM con contexto maestro + mensajes recientes.
+     * Fallback al texto generico si la llamada LLM falla. */
+    private static function generarMensajeHabitoPersonalizado(int $userId, array $habito): string
+    {
+        $nombre = sanitize_text_field((string)($habito['nombre'] ?? 'hábito sin nombre'));
+        $importancia = self::etiquetaImportancia((string)($habito['importancia'] ?? ''));
+        $fallback = "Tu hábito pendiente de mayor prioridad es: {$nombre}" . ($importancia !== '' ? " ({$importancia})" : '') . '.';
+
+        try {
+            $maestro = (string)(get_user_meta($userId, 'glory_chatbot_master_context', true));
+            $proveedor = (string)(get_option('glory_chatbot_proveedor') ?: 'groq');
+            $modelo    = (string)(get_option('glory_chatbot_modelo') ?: 'llama-3.3-70b-versatile');
+
+            global $wpdb;
+            $tabla = Schema::getTableName('agent_chat_messages');
+            $rows  = $wpdb->get_results($wpdb->prepare(
+                "SELECT rol, contenido FROM {$tabla} WHERE user_id = %d ORDER BY id DESC LIMIT 8",
+                $userId
+            ), ARRAY_A);
+            $mensajesRecientes = '';
+            if (!empty($rows)) {
+                $rows  = array_reverse($rows);
+                $partes = array_map(fn(array $r): string =>
+                    ucfirst((string)($r['rol'] ?? '')) . ': ' . mb_substr((string)($r['contenido'] ?? ''), 0, 200),
+                    $rows
+                );
+                $mensajesRecientes = implode("\n", $partes);
+            }
+
+            $system = 'Eres el asistente personal del usuario. Genera un recordatorio breve, cálido y personalizado (1-2 oraciones máximo) para que complete su hábito. Usa un tono natural y directo, NO genérico. Responde SOLO con el mensaje del recordatorio, sin explicaciones adicionales.';
+            $userMsg = "Contexto del usuario:\n{$maestro}\n\nÚltimos mensajes del chat:\n{$mensajesRecientes}\n\nHábito: {$nombre}" . ($importancia !== '' ? " (importancia: {$importancia})" : '') . "\n\nGenera el recordatorio personalizado:";
+
+            $llmResult = (new LLMProviderService())->enviarChat(
+                [
+                    ['role' => 'system', 'content' => $system],
+                    ['role' => 'user',   'content' => $userMsg],
+                ],
+                $proveedor,
+                $modelo,
+                ['temperature' => 0.7, 'maxTokens' => 120]
+            );
+            $generado = trim((string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? ''));
+            return $generado !== '' ? $generado : $fallback;
+        } catch (\Throwable $e) {
+            error_log('[AgentSchedulerService] No se pudo generar recordatorio personalizado: ' . $e->getMessage());
+            return $fallback;
+        }
+    }
+
     private static function obtenerHabitoPendientePrioritario(int $userId): ?array
     {
         try {
             $hoy = current_time('Y-m-d');
             $habitos = (new HabitosRepository($userId))->getAll();
+            /* [fix-completadoHoy] Tambien verificar el flag completadoHoy del frontend
+             * (consistente con AgentProactiveService) ademas del check por fecha. */
             $pendientes = array_values(array_filter($habitos, function (array $habito) use ($hoy): bool {
-                return empty($habito['pausado']) && !self::habitoCompletadoEnFecha($habito, $hoy);
+                return empty($habito['pausado'])
+                    && empty($habito['completadoHoy'])
+                    && !self::habitoCompletadoEnFecha($habito, $hoy);
             }));
 
             if (empty($pendientes)) {

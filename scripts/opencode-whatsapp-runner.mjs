@@ -260,21 +260,41 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessio
 }
 
 /* [125A-1] Inyecta comandos extra en el YAML frontmatter del agente antes de ejecutar.
- * Inserta las nuevas entradas justo antes de "\"*\": ask" para que tengan precedencia.
- * Devuelve el contenido original para restaurar tras ejecutar. */
+ * Usa markers idempotentes: si el proceso anterior fue matado antes del finally (restore),
+ * el bloque previo se limpia antes de volver a inyectar → sin YAML duplicado ni corrupcion.
+ * Los markers son comentarios YAML validos; no afectan el parse del frontmatter.
+ * Devuelve el contenido LIMPIO (sin inyeccion) para restaurar tras ejecutar. */
+const INJECT_MARKER_START = '    # __RUNNER_EXTRA_START__';
+const INJECT_MARKER_END   = '    # __RUNNER_EXTRA_END__';
+
 function injectExtraPermissions(agentFilePath, extraCommands) {
     if (!existsSync(agentFilePath) || extraCommands.length === 0) return null;
-    const original = readFileSync(agentFilePath, 'utf8');
-    /* [fix-inject-indent] El marker debe incluir la indentacion real de la linea.
-     * Sin ella, replace() deja los 4 espacios originales + añade 4 mas = 8 espacios,
-     * rompiendo la indentacion YAML y haciendo que OpenCode no pueda parsear el agente. */
+    const raw = readFileSync(agentFilePath, 'utf8');
+
+    /* Limpiar bloque previo sin restaurar (crash/SIGTERM antes del finally). */
+    let clean = raw;
+    const startIdx = clean.indexOf(INJECT_MARKER_START);
+    if (startIdx !== -1) {
+        const endMarkerIdx = clean.indexOf(INJECT_MARKER_END, startIdx);
+        if (endMarkerIdx !== -1) {
+            const endOfLine = clean.indexOf('\n', endMarkerIdx);
+            const removeEnd = endOfLine !== -1 ? endOfLine + 1 : endMarkerIdx + INJECT_MARKER_END.length;
+            clean = clean.slice(0, startIdx) + clean.slice(removeEnd);
+        }
+    }
+
     const marker = '    "*": ask';
-    if (!original.includes(marker)) return null;
-    const additions = extraCommands.map(cmd => `    "${cmd}": allow`).join('\n');
-    const patched = original.replace(marker, `${additions}\n${marker}`);
+    if (!clean.includes(marker)) return null;
+
+    const block = [
+        INJECT_MARKER_START,
+        ...extraCommands.map(cmd => `    "${cmd}": allow`),
+        INJECT_MARKER_END,
+    ].join('\n');
+    const patched = clean.replace(marker, `${block}\n${marker}`);
     writeFileSync(agentFilePath, patched, 'utf8');
     console.error(`[runner] Extra permissions inyectados (${extraCommands.length}): ${extraCommands.join(', ')}`);
-    return original;
+    return clean; /* Retornar LIMPIO, no raw con posible bloque previo */
 }
 
 function runOpencode({commandSpec, opencodeArgs, projectPath, timeoutMs, requestedSessionId = '', onSessionDetected = null}) {
