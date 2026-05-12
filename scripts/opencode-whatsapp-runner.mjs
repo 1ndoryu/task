@@ -265,10 +265,13 @@ function buildOpencodeArgs({projectPath, model, agent, attachUrl, prompt, sessio
 function injectExtraPermissions(agentFilePath, extraCommands) {
     if (!existsSync(agentFilePath) || extraCommands.length === 0) return null;
     const original = readFileSync(agentFilePath, 'utf8');
-    const marker = '"*": ask';
+    /* [fix-inject-indent] El marker debe incluir la indentacion real de la linea.
+     * Sin ella, replace() deja los 4 espacios originales + añade 4 mas = 8 espacios,
+     * rompiendo la indentacion YAML y haciendo que OpenCode no pueda parsear el agente. */
+    const marker = '    "*": ask';
     if (!original.includes(marker)) return null;
     const additions = extraCommands.map(cmd => `    "${cmd}": allow`).join('\n');
-    const patched = original.replace(marker, `${additions}\n    ${marker}`);
+    const patched = original.replace(marker, `${additions}\n${marker}`);
     writeFileSync(agentFilePath, patched, 'utf8');
     console.error(`[runner] Extra permissions inyectados (${extraCommands.length}): ${extraCommands.join(', ')}`);
     return original;
