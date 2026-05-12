@@ -275,7 +275,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
 - {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
 - {\"tipo\": \"listar_proyectos\", \"parametros\": {}}
-- {\"tipo\": \"listar_ramas\", \"parametros\": {}}
+- {\"tipo\": \"listar_ramas\", \"parametros\": {\"proyecto\": \"opcional — ID del proyecto. Si se omite, usa el proyecto activo.\"}}
 - {\"tipo\": \"cambiar_proyecto\", \"parametros\": {\"proyecto\": \"glorytemplate\"}}
 
 REGLAS:
@@ -293,7 +293,7 @@ REGLAS:
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
 - listar_proyectos: cuando el usuario pregunte qué proyectos OpenCode hay disponibles, qué proyectos existen, o quiera cambiar de proyecto pero no sepa los IDs. Devuelve la lista completa y cuál está activo. TAMBIÉN disponible si el usuario pide 'ver proyectos', 'qué proyectos tengo', 'cambiar de proyecto'.
-- listar_ramas: cuando el usuario quiera ver las ramas git del proyecto activo. Ejecuta una consulta rápida sin OpenCode — la respuesta llega en segundos. Usa esta acción, NUNCA solicitar_opencode para 'ver ramas' o 'listar ramas'.
+- listar_ramas: cuando el usuario quiera ver las ramas git de un proyecto. Usa el parámetro opcional proyecto si el usuario menciona un proyecto específico (ej: 'qué ramas hay en glory rust?' → proyecto:'glory-rust'); si se omite, usa el proyecto activo. Ejecuta una consulta rápida sin OpenCode — la respuesta llega en segundos. Usa esta acción, NUNCA solicitar_opencode para 'ver ramas' o 'listar ramas'.
 - cambiar_proyecto: cuando el usuario pida explícitamente cambiar de proyecto OpenCode. El parámetro proyecto debe ser uno de los IDs visibles en ## Proyecto activo del contexto. Después de cambiar, el nuevo proyecto se usa como default en solicitar_opencode.
 - solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. TAMBIÉN OBLIGATORIO cuando el usuario use frases como 'tarea para opencode', 'pídele a opencode que', 'dile a opencode que', 'ejecuta en opencode' o cualquier variante que destine la instrucción a OpenCode — en ese caso usa solicitar_opencode, NUNCA crear_tarea. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto activo está en ## Proyecto activo del contexto — úsalo como default para el parámetro proyecto. La rama por defecto del proyecto activo se usa si no se especifica otra. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. reasoning_effort opcional: \"max\", \"high\" o \"minimal\" (por defecto \"max\"). Si el usuario pide 'máximo pensamiento', 'razona al máximo' o similar, usa reasoning_effort:\"max\". Si pide 'menos pensamiento', 'sin razonar tanto' o 'más rápido', usa reasoning_effort:\"minimal\". NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
 - continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` incluye el ses_XXXXX explícitamente, ej: \"Continuando la sesión ses_1e5cc66deffe4BZxD3PLgISQhX, dame un momento.\" — NUNCA omitas el ses_XXXXX en la respuesta, es importante para que el usuario sepa qué sesión se está reanudando. NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
@@ -474,7 +474,7 @@ REGLAS:
                 $ctx .= "\n## Proyecto activo\n";
                 $ctx .= "- Proyecto: {$activo}\n";
                 $ctx .= "- Proyectos disponibles: " . implode(', ', array_keys($proyectos)) . "\n";
-                $ctx .= "- Para ver ramas del proyecto activo usa 'listar_ramas'\n";
+                $ctx .= "- Para ver ramas de un proyecto usa 'listar_ramas' (con proyecto opcional)\n";
             }
         } catch (\Throwable) { /* No bloquear el contexto */ }
         return $ctx;
@@ -1326,16 +1326,20 @@ REGLAS:
              * El runner ejecuta el comando directamente sin OpenCode y reporta el resultado.
              * No requiere aprobación porque no modifica nada — es solo consulta. */
             case 'listar_ramas':
-                $proyectos  = $this->loadProjectsConfig();
-                $activo     = $this->getActiveProject($userId);
-                $proyectoCfg = $proyectos[$activo] ?? [];
+                $proyectos   = $this->loadProjectsConfig();
+                /* Si el LLM especificó un proyecto en parámetros, usarlo; si no, el activo */
+                $proyectoSolicitado = sanitize_key((string)($param['proyecto'] ?? $param['project'] ?? ''));
+                $proyectoDestino    = ($proyectoSolicitado !== '' && isset($proyectos[$proyectoSolicitado]))
+                    ? $proyectoSolicitado
+                    : $this->getActiveProject($userId);
+                $proyectoCfg = $proyectos[$proyectoDestino] ?? [];
                 if (empty($proyectoCfg)) {
-                    return ['tipo' => $tipo, 'exito' => false, 'error' => "Proyecto activo '{$activo}' no encontrado en configuración."];
+                    return ['tipo' => $tipo, 'exito' => false, 'error' => "Proyecto activo '{$proyectoDestino}' no encontrado en configuración."];
                 }
-                $titulo     = 'Consultar ramas: ' . $activo;
+                $titulo     = 'Consultar ramas: ' . $proyectoDestino;
                 $extraAllow = array_values(array_filter((array)get_option('glory_opencode_extra_allow', [])));
                 $accion     = (new AgentActionService())->crearPropuesta($userId, 'opencode_job', $titulo, [
-                    'project'            => $activo,
+                    'project'            => $proyectoDestino,
                     'prompt'             => '',
                     'es_consulta_rapida' => true,
                     'comando'            => 'git branch -a',
@@ -1349,7 +1353,7 @@ REGLAS:
                     'tipo'      => $tipo,
                     'exito'     => true,
                     'accion_id' => $accion['id'] ?? null,
-                    'proyecto'  => $activo,
+                    'proyecto'  => $proyectoDestino,
                 ];
 
             /* [126A-1] Cambia el proyecto activo del usuario. Valida contra la whitelist

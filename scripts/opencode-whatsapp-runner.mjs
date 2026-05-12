@@ -608,7 +608,8 @@ async function handleQuickCommand({project: projectId, branch, comando, apiUrl, 
         ? (stdout || stderr || 'Comando ejecutado sin salida.')
         : (stderr || stdout || 'Error desconocido.');
 
-    const whatsappSummary = `Comando: ${comando}\nProyecto: ${project}\nExit code: ${exitCode}\n\n${body}`;
+    const projectName = project.name || projectId || project.path || projectId;
+    const whatsappSummary = `Comando: ${comando}\nProyecto: ${projectName}\nExit code: ${exitCode}\n\n${body}`;
     const output = `=== RESUMEN PARA WHATSAPP ===\n${whatsappSummary}\n=== FIN RESUMEN ===`;
 
     return {
