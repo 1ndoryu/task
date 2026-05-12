@@ -289,7 +289,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"registrar_comida\", \"parametros\": {\"descripcion\": \"arepa con queso\", \"calorias\": 500}}
 - {\"tipo\": \"resumen_calorias_hoy\", \"parametros\": {}}
 - {\"tipo\": \"leer_notas\", \"parametros\": {\"limite\": 10}}
-- {\"tipo\": \"leer_nota\", \"parametros\": {\"id\": 38}} — lee el contenido COMPLETO de una nota por su ID. El contexto SOLO muestra títulos, no el contenido. SIEMPRE usa esta acción cuando el usuario pida ver, leer o preguntar sobre el contenido de una nota.
+- {\"tipo\": \"leer_nota\", \"parametros\": {\"id\": 38}}
 - {\"tipo\": \"crear_nota\", \"parametros\": {\"titulo\": \"...\", \"contenido\": \"...\"}}
 - {\"tipo\": \"editar_nota\", \"parametros\": {\"id\": 123, \"contenido\": \"...\", \"titulo\": \"opcional\"}}
 - {\"tipo\": \"buscar_nota\", \"parametros\": {\"termino\": \"...\"}}
@@ -302,23 +302,22 @@ ACCIONES DISPONIBLES:
 {$bloqueAccionesCodigo}
 
 REGLAS:
-- NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido. EXCEPCIÓN: el CONTEXTO MAESTRO no es una nota — ya está embebido en el bloque '## Contexto personal' de este prompt, NO tiene ID, NUNCA uses leer_nota para él.
+- NOTAS: el contexto muestra SOLO el título. Para ver el contenido usa leer_nota con el ID. Jamás digas que no puedes acceder — siempre puedes con leer_nota. EXCEPCIÓN: '## Contexto personal' NO es una nota y no tiene ID.
 - Puedes incluir MÚLTIPLES acciones en el array y se ejecutan todas. Úsalas en paralelo cuando sea necesario (ej: crear tarea + guardar memoria + programar recordatorio en una sola respuesta).
 - Si no hay acciones, envía \"acciones\": [].
-- NUNCA uses eliminar/completar una tarea sin que el usuario lo pida explícitamente. PERO si el usuario dice 'borra', 'elimina', 'quita' esa tarea: usa directamente `eliminar_tarea` sin confirmar — su mensaje ya ES la confirmación. Si dice 'completa', 'marca como hecho', 'terminé': usa directamente `completar_tarea` sin confirmar. NUNCA preguntes '¿confirmas?'
-- INFERENCIA DE HÁBITOS Y TAREAS — REGLA CRÍTICA: Si el usuario menciona un hábito o tarea por nombre parcial o por contexto ('el de leer', 'ese hábito', 'el recordatorio de antes'), búscalo en la lista del contexto (## Hábitos activos, ## Tareas pendientes) y usa el ID directamente. Si el mensaje anterior del bot mencionó un hábito específico (ej: en un recordatorio '⏰ Hábito pendiente: leer enunciado...'), ese es el hábito referido — úsalo sin preguntar. NUNCA pidas el ID numérico al usuario. Si hay ambigüedad real entre 2+ hábitos similares, muestra los nombres y pregunta cuál, pero jamás el ID.
-- AYUNO: usa iniciar_ayuno cuando el usuario diga que inicia/empieza ayuno. Si menciona última comida, desde cuándo empezó o una hora concreta, convierte esa hora a ISO8601 local y pásala como hora_ultima_comida; si dice ahora, omite la hora. Usa terminar_ayuno cuando diga que rompió/terminó el ayuno; si da hora exacta, pásala como fin. Usa estado_ayuno para preguntas como cuánto llevo, cuánto falta o estado del ayuno. No inventes horas exactas si el usuario no las dio.
-- CALORÍAS: usa registrar_comida cuando el usuario diga que comió, bebió o quiere registrar comida. Incluye calorias solo si el usuario las dio explícitamente; si no, el backend estimará nutrición. Usa resumen_calorias_hoy cuando pregunte total del día, calorías restantes, déficit o resumen nutricional.
-- crear_tarea SOLO crea tareas personales para el usuario. No la uses para solicitudes de código, repositorios, commits, deploys u OpenCode.
-- Al CREAR una tarea con \`crear_tarea\`, NUNCA menciones un ID específico en tu respuesta — no conoces el ID real hasta que la acción se ejecute y recibes los resultados. Di simplemente \'Tarea creada: [nombre]\' sin ningún número de ID.
+- 'borra'/'elimina'/'quita' → eliminar_tarea sin confirmar. 'completa'/'terminé' → completar_tarea sin confirmar. NUNCA preguntes '¿confirmas?'
+- HÁBITOS/TAREAS: si el usuario los menciona por nombre parcial o contexto, búscalos en ## Hábitos activos / ## Tareas pendientes y usa el ID directamente. NUNCA pidas el ID al usuario. Si hay ambigüedad real entre 2+, muestra nombres y pregunta cuál.
+- AYUNO: iniciar_ayuno al empezar (con hora_ultima_comida en ISO8601 si la menciona; si dice 'ahora', omítela). terminar_ayuno al romperlo (con fin si da hora exacta). estado_ayuno para preguntas de estado. No inventes horas.
+- CALORÍAS: registrar_comida al comer/beber (sin calorias si el usuario no las dio; el backend estima). resumen_calorias_hoy para total/déficit del día.
+- crear_tarea SOLO para tareas personales; nunca para código, repos, commits, deploys u OpenCode. Al crear, NUNCA menciones un ID — no lo conoces aún. Di 'Tarea creada: [nombre]'.
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
 - Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
-- actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-{$bloqueReglasCodigo}- reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
-- compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
+- actualizar_contexto_maestro: llámala proactivamente cuando detectes información duradera (nombre real, horarios, rutinas, preferencias permanentes). Escribe el contexto COMPLETO actualizado — persiste entre sesiones.
+{$bloqueReglasCodigo}- reportar_contexto: usa solo si los stats del system prompt parecen desactualizados o el usuario lo pide.
+- compactar_ahora: solo cuando el usuario lo pida explícitamente.
 {$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
@@ -343,7 +342,9 @@ REGLAS:
         }
 
         $pendientes = array_slice(array_filter($tareas, fn($t) => empty($t['completado'])), 0, self::MAX_CONTEXT_TAREAS);
-        $ctx = "## Tareas pendientes\n";
+        /* [135A-1] Inyectar fecha y hora actual para que el LLM calcule bien fechas de recordatorios.
+         * Sin esto, "recuérdame a las 3pm" no tiene referencia temporal y genera fechas incorrectas. */
+        $ctx = "## Fecha y hora actual\n" . $this->horaLocalActual($canal) . "\n\n## Tareas pendientes\n";
         if (empty($pendientes)) {
             $ctx .= "No hay tareas pendientes.\n";
         } else {
@@ -549,6 +550,21 @@ REGLAS:
         }
 
         return current_time('Y-m-d');
+    }
+
+    /* [135A-1] Retorna la fecha y hora actual en la zona horaria del canal.
+     * Inyectada en buildContexto() para que el LLM calcule recordatorios correctamente. */
+    private function horaLocalActual(string $canal): string
+    {
+        $tz = $canal === 'whatsapp'
+            ? (EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas')
+            : (function_exists('wp_timezone_string') ? (wp_timezone_string() ?: 'UTC') : 'UTC');
+        try {
+            $ahora = new \DateTimeImmutable('now', new \DateTimeZone($tz));
+            return $ahora->format('Y-m-d H:i:s') . " ({$tz})";
+        } catch (\Throwable) {
+            return current_time('Y-m-d H:i:s') . ' (WP local)';
+        }
     }
 
     private function timestampMs(): int
@@ -1213,11 +1229,21 @@ REGLAS:
                 $mensajeR = sanitize_textarea_field((string)($param['mensaje'] ?? ''));
                 $fecha    = (string)($param['fecha'] ?? '');
                 /* [116A-3] El LLM puede no generar fecha (ej: "cada 30 minutos"), o generarla
-                 * en pasado (la genera durante su thinking). Normalizar ambas al momento actual
-                 * para que el scheduler con recurrence_minutes se encargue de la recurrencia. */
+                 * en pasado (la genera durante su thinking).
+                 * [135A-1] Si la fecha está en el pasado, intentar recalcular con ReminderAgent
+                 * usando el mensaje original del usuario como fuente de verdad. */
                 $tsFecha = $fecha !== '' ? strtotime($fecha) : false;
                 if ($tsFecha === false || $tsFecha < (time() - 60)) {
-                    $fecha = current_time('mysql');
+                    $tzRecordatorio = EnvService::get('WHATSAPP_USER_TIMEZONE') ?: 'America/Caracas';
+                    $fechaRecalc    = \App\Services\Agents\ReminderAgent::resolverFecha(
+                        $this->activeUserMessage,
+                        $this->activeUserMessage,
+                        $tzRecordatorio
+                    );
+                    /* Si ReminderAgent devuelve fecha futura, usarla; si no, usar now */
+                    $fecha = ($fechaRecalc !== null && !(\App\Services\Agents\ReminderAgent::necesitaCorreccion($fechaRecalc, $tzRecordatorio)))
+                        ? $fechaRecalc
+                        : current_time('mysql');
                 }
                 $payload  = [
                     'titulo'             => $titulo,
