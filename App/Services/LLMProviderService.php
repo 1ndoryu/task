@@ -142,15 +142,25 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
             throw new \RuntimeException("{$provider} {$status}: {$mensaje}");
         }
 
+        $finishReason = $data['choices'][0]['finish_reason'] ?? '';
         $contenido = $data['choices'][0]['message']['content'] ?? '';
         if (!is_string($contenido) || trim($contenido) === '') {
             throw new \RuntimeException('Respuesta vacía del modelo.');
+        }
+
+        /* [125C-1] Detectar truncamiento por max_tokens.
+         * Cuando finish_reason es 'length', el modelo se quedó sin tokens para completar
+         * la respuesta. Esto produce mensajes cortados sin que el código se dé cuenta. */
+        if ($finishReason === 'length') {
+            $tokens = (int)($data['usage']['completion_tokens'] ?? 0);
+            error_log("[LLMProviderService] Respuesta truncada por max_tokens: provider={$provider} model={$model} tokens={$tokens}");
         }
 
         return [
             'contenido' => $contenido,
             'tokensPrompt' => (int)($data['usage']['prompt_tokens'] ?? 0),
             'tokensComplecion' => (int)($data['usage']['completion_tokens'] ?? 0),
+            'finishReason' => $finishReason,
             'provider' => $provider,
             'model' => $model,
         ];

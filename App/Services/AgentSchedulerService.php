@@ -256,7 +256,7 @@ class AgentSchedulerService
                 ],
                 $proveedor,
                 $modelo,
-                ['temperature' => 0.7, 'maxTokens' => 120]
+                ['temperature' => 0.7, 'maxTokens' => 300]
             );
             $generado = trim((string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? ''));
             return $generado !== '' ? $generado : $fallback;
