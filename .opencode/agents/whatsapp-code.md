@@ -7,6 +7,17 @@ permission:
   edit: allow
   webfetch: allow
   bash:
+    # __RUNNER_EXTRA_START__
+    "agente/*": allow
+    "php -i": allow
+    "git --no-pager diff --stat HEAD": allow
+    "git --no-pager diff HEAD -- App/Services/AgentChatProcessor.php": allow
+    "git diff HEAD -- App/Services/AgentChatProcessor.php | head -30": allow
+    "Test-Path \"App\\Services\\AgentChatProcessor.php\"": allow
+    "Test-Path \".\\wp-content\\uploads\\glory_media_temp\\.htaccess\"": allow
+    "git *": allow
+    "php *": allow
+    # __RUNNER_EXTRA_END__
     "*": ask
     "rg *": allow
     "node *": allow

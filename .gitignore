@@ -113,3 +113,6 @@ desktop/src-tauri/
 
 temp/
 kamples-scraper/
+.opencode/agents/whatsapp-code.md
+.opencode/
+AGENTS.md
