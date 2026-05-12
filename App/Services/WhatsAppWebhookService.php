@@ -70,12 +70,15 @@ class WhatsAppWebhookService
         }
 
         /* [115A-5][125A-3] Extraer media si el mensaje la incluye (puede venir con o sin caption).
-         * Gotcha: wacli envía Media.Type como kind (audio/image) y Media.MimeType como MIME real para Whisper/visión. */
+         * Gotcha: wacli envía Media.Type como kind (audio/image) y Media.MimeType como MIME real para Whisper/visión.
+         * [125A-5] Logging temporal del evento completo de media para diagnóstico de store lock. */
         $mediaEvento = null;
         if ($esFormatoNuevo && isset($evento['Media']['Type'])) {
             $mediaKind  = (string)($evento['Media']['Type'] ?? '');
             $mediaType  = (string)($evento['Media']['MimeType'] ?? $mediaKind);
             $messageId  = (string)($evento['ID'] ?? '');
+            /* Log temporal: capturar el evento COMPLETO para ver si viene URL/DirectPath/LocalPath */
+            file_put_contents('/tmp/last_wacli_media_event.json', json_encode($evento, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             /* [116A-3] wacli media download usa --chat y --id (no --direct-path/--media-key) */
             if ($mediaKind !== '' && $messageId !== '') {
                 $mediaEvento = ['type' => $mediaKind, 'mimeType' => $mediaType, 'chat' => $from, 'messageId' => $messageId];
