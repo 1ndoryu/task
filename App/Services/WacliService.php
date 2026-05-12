@@ -124,6 +124,98 @@ class WacliService
         return $tmpFile;
     }
 
+    /**
+     * [125A-5] Descarga y descifra media de WhatsApp directamente desde el CDN de Meta,
+     * sin usar wacli ni necesitar el store lock.
+     *
+     * Algoritmo:
+     *   1. Derivar clave/IV con HKDF-SHA256(mediaKey, 112 bytes, appInfo según tipo).
+     *   2. Descargar el archivo cifrado desde mmg.whatsapp.net + DirectPath.
+     *   3. Quitar los últimos 10 bytes (firma HMAC-SHA256 de WhatsApp).
+     *   4. Descifrar con AES-256-CBC.
+     *
+     * @param array $mediaEvento  Debe incluir: 'directPath', 'mediaKey', 'type', 'mimeType'
+     * @return string             Ruta al archivo temporal descifrado (el llamador hace unlink)
+     */
+    public function descargarMediaDirecto(array $mediaEvento): string
+    {
+        $directPath  = (string)($mediaEvento['directPath'] ?? '');
+        $mediaKeyB64 = (string)($mediaEvento['mediaKey'] ?? '');
+        $mediaType   = strtolower((string)($mediaEvento['type'] ?? ''));
+        $mimeType    = (string)($mediaEvento['mimeType'] ?? $mediaType);
+
+        if ($directPath === '' || $mediaKeyB64 === '') {
+            throw new \RuntimeException('descargarMediaDirecto: faltan directPath o mediaKey.');
+        }
+
+        $mediaKey = base64_decode($mediaKeyB64, true);
+        if ($mediaKey === false || strlen($mediaKey) < 32) {
+            throw new \RuntimeException('descargarMediaDirecto: mediaKey inválida (base64 decode falló).');
+        }
+
+        /* App info según tipo: https://github.com/tulir/whatsmeow/blob/main/download.go */
+        $appInfo = match ($mediaType) {
+            'image'    => 'WhatsApp Image Keys',
+            'video'    => 'WhatsApp Video Keys',
+            'document' => 'WhatsApp Document Keys',
+            'sticker'  => 'WhatsApp Image Keys',
+            default    => 'WhatsApp Audio Keys',   /* audio, ptt, etc. */
+        };
+
+        /* HKDF-SHA256: IKM=mediaKey, salt='' (vacío = ceros en RFC 5869 extract), info=appInfo, length=112 */
+        $expanded  = hash_hkdf('sha256', $mediaKey, 112, $appInfo, '');
+        $iv        = substr($expanded, 0, 16);
+        $cipherKey = substr($expanded, 16, 32);
+
+        /* Descargar el archivo cifrado desde el CDN de Meta */
+        $url = 'https://mmg.whatsapp.net' . $directPath;
+        $ch  = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_USERAGENT      => 'WhatsApp/2.24.6.80 A',
+        ]);
+        $encryptedData = curl_exec($ch);
+        $httpCode      = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr       = curl_error($ch);
+        curl_close($ch);
+
+        if ($encryptedData === false || $curlErr !== '') {
+            throw new \RuntimeException('descargarMediaDirecto: cURL falló: ' . $curlErr);
+        }
+        if ($httpCode < 200 || $httpCode >= 300) {
+            throw new \RuntimeException("descargarMediaDirecto: CDN respondió HTTP {$httpCode} para {$url}.");
+        }
+
+        /* Quitar los últimos 10 bytes (HMAC-SHA256 que WhatsApp añade al final) */
+        $dataToDecrypt = substr($encryptedData, 0, -10);
+
+        /* Descifrar AES-256-CBC */
+        $decrypted = openssl_decrypt($dataToDecrypt, 'AES-256-CBC', $cipherKey, OPENSSL_RAW_DATA, $iv);
+        if ($decrypted === false) {
+            throw new \RuntimeException('descargarMediaDirecto: AES-256-CBC falló. Puede que la mediaKey haya expirado.');
+        }
+
+        /* Extensión basada en MIME */
+        $baseMime = trim(explode(';', $mimeType)[0]);
+        $ext      = preg_replace('/[^a-z0-9]/', '', explode('/', $baseMime)[1] ?? 'bin') ?: 'bin';
+        $tmpFile  = sys_get_temp_dir() . '/wamedia_' . md5($directPath) . '.' . $ext;
+
+        if (file_put_contents($tmpFile, $decrypted) === false) {
+            throw new \RuntimeException('descargarMediaDirecto: no se pudo escribir el archivo temporal.');
+        }
+
+        if (filesize($tmpFile) === 0) {
+            @unlink($tmpFile);
+            throw new \RuntimeException('descargarMediaDirecto: archivo temporal vacío tras descifrar.');
+        }
+
+        error_log('[WacliService] Media descargada directo CDN: type=' . $mediaType . ' size=' . filesize($tmpFile) . ' ext=' . $ext);
+        return $tmpFile;
+    }
+
     public function resolverDestinatario(?string $to, bool $required): string
     {
         $recipient = trim((string)($to ?? ''));

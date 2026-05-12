@@ -71,17 +71,25 @@ class WhatsAppWebhookService
 
         /* [115A-5][125A-3] Extraer media si el mensaje la incluye (puede venir con o sin caption).
          * Gotcha: wacli envía Media.Type como kind (audio/image) y Media.MimeType como MIME real para Whisper/visión.
-         * [125A-5] Logging temporal del evento completo de media para diagnóstico de store lock. */
+         * [125A-5] Incluir DirectPath+MediaKey para descarga directa CDN (bypass store lock). */
         $mediaEvento = null;
         if ($esFormatoNuevo && isset($evento['Media']['Type'])) {
             $mediaKind  = (string)($evento['Media']['Type'] ?? '');
             $mediaType  = (string)($evento['Media']['MimeType'] ?? $mediaKind);
             $messageId  = (string)($evento['ID'] ?? '');
-            /* Log temporal: capturar el evento COMPLETO para ver si viene URL/DirectPath/LocalPath */
-            file_put_contents('/tmp/last_wacli_media_event.json', json_encode($evento, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             /* [116A-3] wacli media download usa --chat y --id (no --direct-path/--media-key) */
             if ($mediaKind !== '' && $messageId !== '') {
-                $mediaEvento = ['type' => $mediaKind, 'mimeType' => $mediaType, 'chat' => $from, 'messageId' => $messageId];
+                $mediaEvento = [
+                    'type'          => $mediaKind,
+                    'mimeType'      => $mediaType,
+                    'chat'          => $from,
+                    'messageId'     => $messageId,
+                    /* Campos crypto para descarga directa CDN (evita wacli store lock) */
+                    'directPath'    => (string)($evento['Media']['DirectPath'] ?? ''),
+                    'mediaKey'      => (string)($evento['Media']['MediaKey'] ?? ''),
+                    'fileEncSHA256' => (string)($evento['Media']['FileEncSHA256'] ?? ''),
+                    'fileLength'    => (int)($evento['Media']['FileLength'] ?? 0),
+                ];
             }
         }
 
@@ -130,11 +138,18 @@ class WhatsAppWebhookService
                 try {
                     $mimeType = (string)($mediaEvento['mimeType'] ?? $mediaEvento['type']);
                     $mediaKind = (string)($mediaEvento['type'] ?? '');
-                    $tmpFile = (new WacliService())->descargarMedia(
-                        $mediaEvento['chat'],
-                        $mediaEvento['messageId'],
-                        $mimeType
-                    );
+                    $wacliSvc  = new WacliService();
+                    /* [125A-5] Intentar descarga directa CDN primero (no necesita store lock).
+                     * Fallback a wacli media download solo si faltan campos crypto. */
+                    if (!empty($mediaEvento['directPath']) && !empty($mediaEvento['mediaKey'])) {
+                        $tmpFile = $wacliSvc->descargarMediaDirecto($mediaEvento);
+                    } else {
+                        $tmpFile = $wacliSvc->descargarMedia(
+                            $mediaEvento['chat'],
+                            $mediaEvento['messageId'],
+                            $mimeType
+                        );
+                    }
 
                     if (str_starts_with($mimeType, 'image/') || $mediaKind === 'image') {
                         /* Enviar imagen al LLM con visión multimodal */
