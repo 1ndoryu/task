@@ -1,5 +1,13 @@
 # Lecciones Aprendidas
 
+## 2026-05-12 — El prompt no es frontera para acciones sensibles
+
+**Patrón del error:** El agente podía describir y emitir acciones de OpenCode, automejora, proyectos, ramas o configuración global dentro del mismo prompt usado por usuarios normales. Aunque el modelo obedeciera la intención, un usuario no-admin podía recibir contexto de repositorios o provocar una acción sensible si el LLM la generaba.
+
+**Lección:** Las instrucciones del prompt solo guían conducta; la seguridad vive en el servidor. Toda acción que toque código, repositorios, deploy, permisos o configuración global debe pasar por un gate backend independiente del LLM y del canal.
+
+**Fix:** `AgentChatProcessor` oculta contexto de OpenCode/proyectos para usuarios sin `manage_options`, reduce el prompt de código a admins y bloquea server-side las acciones sensibles aunque aparezcan en el JSON del modelo.
+
 ## 2026-05-12 — Plugins que WhatsApp modifica no pueden vivir solo en localStorage
 
 **Patrón del error:** Ayuno y déficit calórico persistían en Zustand/localStorage. El chatbot server-side podía responder sobre ellos, pero cualquier mutación desde WhatsApp quedaba invisible para el panel porque no compartían almacenamiento.

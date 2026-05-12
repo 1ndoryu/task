@@ -24,12 +24,12 @@ class AgentActionService
 
     public function crearProgramada(int $userId, string $tipo, string $titulo, array $payload, string $fechaProgramada, bool $requiereAprobacion = true): array
     {
-        $timestamp = strtotime($fechaProgramada);
-        if ($timestamp === false || $timestamp < (time() - 60)) {
+        $fecha = $this->parseFechaProgramada($fechaProgramada);
+        if ($fecha->getTimestamp() < (time() - 60)) {
             throw new \InvalidArgumentException('Fecha programada inválida para la acción del agente.');
         }
 
-        return $this->crearAccion($userId, $tipo, $titulo, $payload, $requiereAprobacion, date('Y-m-d H:i:s', $timestamp));
+        return $this->crearAccion($userId, $tipo, $titulo, $payload, $requiereAprobacion, $this->formatFechaProgramada($fecha));
     }
 
     public function procesarProgramadas(callable $executor, int $limit = 20): int
@@ -193,11 +193,8 @@ class AgentActionService
         }
 
         if (isset($cambios['fecha_programada'])) {
-            $ts = strtotime((string)$cambios['fecha_programada']);
-            if ($ts === false) {
-                throw new \InvalidArgumentException('Fecha inválida para editar recordatorio.');
-            }
-            $_ok = $wpdb->update($this->tabla, ['fecha_programada' => gmdate('Y-m-d H:i:s', $ts)], ['id' => $id], ['%s'], ['%d']);
+            $fecha = $this->parseFechaProgramada((string)$cambios['fecha_programada']);
+            $_ok = $wpdb->update($this->tabla, ['fecha_programada' => $this->formatFechaProgramada($fecha)], ['id' => $id], ['%s'], ['%d']);
         }
 
         if (!empty($cambios['titulo'])) {
@@ -210,6 +207,20 @@ class AgentActionService
         }
 
         return $this->obtener($id);
+    }
+
+    private function parseFechaProgramada(string $fechaProgramada): \DateTimeImmutable
+    {
+        try {
+            return new \DateTimeImmutable($fechaProgramada, wp_timezone());
+        } catch (\Throwable) {
+            throw new \InvalidArgumentException('Fecha programada inválida para la acción del agente.');
+        }
+    }
+
+    private function formatFechaProgramada(\DateTimeImmutable $fecha): string
+    {
+        return $fecha->setTimezone(wp_timezone())->format('Y-m-d H:i:s');
     }
 
     public function aprobarProgramada(int $id, int $adminId): array

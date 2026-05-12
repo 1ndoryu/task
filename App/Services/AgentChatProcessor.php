@@ -26,7 +26,7 @@ class AgentChatProcessor
     /* [115A-1] Compactación por tamaño de contexto (chars totales del historial).
      * Threshold configurable via WP option glory_chatbot_compaction_chars (default 8000).
      * COMPACTION_KEEP_CHARS: chars del historial reciente que se conservan tras compactar.
-     * Proveedor/modelo leídos de WP options glory_chatbot_proveedor / glory_chatbot_modelo. */
+    * Proveedor/modelo leídos de user_meta con fallback global y salto de modelo en LLMProviderService. */
     private const COMPACTION_KEEP_CHARS    = 4000;  // chars de historial reciente a conservar
     /* [115A-3] Contexto maestro: texto persistente por usuario, modificable por el agente.
      * Si supera MASTER_CONTEXT_MAX_CHARS (~9000 tokens), se compacta automáticamente. */
@@ -75,7 +75,8 @@ class AgentChatProcessor
         /* [SEC-004] Verificar privacidad una vez; buildContexto() lo usa para anonimizar datos,
          * y buildSystemPrompt() necesita saberlo para instruir al LLM. */
         $privacyMode     = (bool) get_user_meta($userId, 'glory_chatbot_privacy_mode', true);
-        $contexto        = $this->buildContexto($userId, $canal, $privacyMode);
+        $accionesCodigoPermitidas = $this->puedeUsarAccionesCodigo($userId);
+        $contexto        = $this->buildContexto($userId, $canal, $privacyMode, $accionesCodigoPermitidas);
         $memorias        = $this->mempalace->search($mensaje !== '' ? $mensaje : 'imagen recibida', $userId);
         $contextoMaestro = $this->getMasterContext($userId);
 
@@ -95,7 +96,7 @@ class AgentChatProcessor
         $limTokens   = (int) round($ctxLimit / 4);
         $statsHistorial = ['chars' => $ctxChars, 'tokens' => $ctxTokens, 'msgs' => $ctxMsgs, 'pct' => $ctxPct, 'limit_chars' => $ctxLimit, 'limit_tokens' => $limTokens];
 
-        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, '', '', $statsHistorial, $privacyMode);
+        $systemMsg       = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, '', '', $statsHistorial, $privacyMode, $accionesCodigoPermitidas);
 
         /* Construir messages para el LLM */
         $messages = [['role' => 'system', 'content' => $systemMsg]];
@@ -123,7 +124,7 @@ class AgentChatProcessor
             $llm = ['proveedor' => 'groq', 'modelo' => 'meta-llama/llama-4-scout-17b-16e-instruct'];
         }
         /* Reconstruir system prompt incluyendo nombre del modelo y stats reales del historial */
-        $messages[0]['content'] = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, $llm['proveedor'], $llm['modelo'], $statsHistorial);
+        $messages[0]['content'] = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, $llm['proveedor'], $llm['modelo'], $statsHistorial, $privacyMode, $accionesCodigoPermitidas);
         $llmResult = (new LLMProviderService())->enviarChat(
             $messages,
             $llm['proveedor'],
@@ -145,7 +146,7 @@ class AgentChatProcessor
         $accionesAsync = ['solicitar_opencode', 'continuar_opencode', 'cancelar_opencode'];
         $hayAccionSincrona = false;
         foreach ($ejecutadas as $ej) {
-            if (!in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
+            if (!in_array($ej['tipo'] ?? '', $accionesAsync, true) || empty($ej['exito'])) {
                 $hayAccionSincrona = true;
                 break;
             }
@@ -157,7 +158,7 @@ class AgentChatProcessor
             foreach ($ejecutadas as $ej) {
                 /* Incluir TODAS las acciones (exitosas y fallidas) para que el LLM
                  * pueda reportar errores en lugar de dejar el anuncio como respuesta final. */
-                if (!in_array($ej['tipo'] ?? '', $accionesAsync, true)) {
+                if (!in_array($ej['tipo'] ?? '', $accionesAsync, true) || empty($ej['exito'])) {
                     $lineasResultados[] = ($ej['tipo'] ?? 'accion') . ' → ' . json_encode($ej, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 }
             }
@@ -209,7 +210,7 @@ class AgentChatProcessor
 
     /* [115A-1+115A-3] buildSystemPrompt recibe contextoMaestro (texto persistente del usuario).
      * El contexto maestro se inyecta antes del contexto de tareas/hábitos/notas. */
-    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = '', array $statsHistorial = [], bool $privacyMode = false): string
+    private function buildSystemPrompt(string $contexto, string $memorias, string $canal, string $contextoMaestro = '', string $proveedor = '', string $modelo = '', array $statsHistorial = [], bool $privacyMode = false, bool $accionesCodigoPermitidas = false): string
     {
         $instruccionCanal = $canal === 'whatsapp'
             ? "\nEstás respondiendo por WHATSAPP. Sé conciso, sin markdown, sin listas largas. Máximo 3 oraciones por mensaje."
@@ -248,6 +249,24 @@ class AgentChatProcessor
             : "\n\nTienes un sistema de memoria semántica persistente. Si el usuario menciona algo importante y nuevo (nombre real, preferencias de vida, datos personales, metas duraderas), guárdalo con guardar_memoria."
         ;
 
+        /* [125A-11] Las acciones de código/repositorio son admin-only. Usuarios normales
+         * pueden usar productividad personal, pero no OpenCode, automejora ni configuración global. */
+        $bloqueAccionesCodigo = $accionesCodigoPermitidas ? implode("\n", [
+            '- {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}',
+            '- {\"tipo\": \"listar_proyectos\", \"parametros\": {}}',
+            '- {\"tipo\": \"listar_ramas\", \"parametros\": {\"proyecto\": \"opcional\"}}',
+            '- {\"tipo\": \"cambiar_proyecto\", \"parametros\": {\"proyecto\": \"glorytemplate\"}}',
+            '- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\", \"reasoning_effort\": \"max\"}}',
+            '- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": 0, \"mensaje\": \"instruccion real del usuario para OpenCode\"}}',
+            '- {\"tipo\": \"actualizar_opencode_allowlist\", \"parametros\": {\"comandos\": [\"git --no-pager*\", \"Test-Path*\"]}}',
+            '- {\"tipo\": \"cancelar_opencode\", \"parametros\": {\"job_id\": 123}}',
+            '- {\"tipo\": \"automejora\", \"parametros\": {\"prompt\": \"mejora a implementar\", \"riesgo\": \"bajo|medio|alto\"}}',
+        ]) : '- Acciones de código, repositorios, OpenCode, automejora y configuración global: NO disponibles para este usuario.';
+
+        $bloqueReglasCodigo = $accionesCodigoPermitidas
+            ? "- ACCIONES DE CÓDIGO: usa solicitar_opencode solo para cambios o lectura literal de repositorios, roadmap, commit, push, PR o deploy. Usa listar_proyectos/listar_ramas para consultas rápidas. Usa continuar_opencode para ampliar o reintentar jobs visibles, y actualizar_opencode_allowlist solo si el usuario confirma permisos rechazados. Usa automejora solo cuando pida modificar el propio agente.\n- cambiar_limite_compactacion cambia una opción global: úsala solo si el usuario lo pide explícitamente.\n"
+            : "- ACCESO A CÓDIGO/REPOSITORIOS: este usuario no tiene permiso para OpenCode, automejora, proyectos, ramas, deploy, commit, push ni configuración global. Si lo pide, responde brevemente que esa función está restringida a administradores. No emitas acciones de código.\n";
+
         return "Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas y gestionar su productividad.{$instruccionCanal}{$instruccionPrivacidad}{$bloqueStats}{$bloqueModelo}
 
 RESPONDE SIEMPRE en formato JSON con esta estructura exacta:
@@ -278,17 +297,9 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"guardar_memoria\", \"parametros\": {\"contenido\": \"hecho a recordar\", \"categoria\": \"preferencias|hechos|metas|whatsapp\"}}
 - {\"tipo\": \"crear_tarea_si_no_existe\", \"parametros\": {\"texto\": \"nombre\", \"prioridad\": \"alta|media|baja\", \"urgencia\": \"urgente|normal|chill\"}}
 - {\"tipo\": \"actualizar_contexto_maestro\", \"parametros\": {\"texto\": \"contexto completo actualizado\"}}
-- {\"tipo\": \"solicitar_opencode\", \"parametros\": {\"proyecto\": \"glorytemplate\", \"agente\": \"whatsapp-code\", \"prompt\": \"cambio de codigo solicitado\", \"commit\": true, \"deploy\": false, \"branch\": \"glory-react-logic\", \"reasoning_effort\": \"max\"}} — reasoning_effort opcional: \"max\", \"high\" o \"minimal\" (default: \"max\" del proyecto). Controla el nivel de pensamiento del modelo DeepSeek.
-- {\"tipo\": \"continuar_opencode\", \"parametros\": {\"job_id\": ID_REAL_DEL_CONTEXTO, \"mensaje\": \"instruccion real del usuario para OpenCode\"}} (job_id = número exacto de [id:N] visible en el contexto, o 0 si el usuario ya proporcionó un ses_XXXXX — el backend lo resuelve solo. En 'mensaje' pon la instrucción real del usuario, NUNCA el ses_XXXXX; si el usuario solo pide continuar sin instrucción nueva, pon \"Continúa desde donde quedaste en esta sesión.\")
-- {\"tipo\": \"actualizar_opencode_allowlist\", \"parametros\": {\"comandos\": [\"New-Item *\", \"powershell *scripts/self-check.ps1*\"]}} — cuando OpenCode reportó permisos rechazados y el usuario confirma permitir ese comando o tipo de comandos. Después emite continuar_opencode para la misma sesión.
-- {\"tipo\": \"cancelar_opencode\", \"parametros\": {\"job_id\": ID}} (cuando el usuario pide cancelar o detener un job activo)
 - {\"tipo\": \"reportar_contexto\", \"parametros\": {}}
 - {\"tipo\": \"compactar_ahora\", \"parametros\": {}}
-- {\"tipo\": \"cambiar_limite_compactacion\", \"parametros\": {\"chars\": 8000}}
-- {\"tipo\": \"listar_proyectos\", \"parametros\": {}}
-- {\"tipo\": \"listar_ramas\", \"parametros\": {\"proyecto\": \"opcional — ID del proyecto. Si se omite, usa el proyecto activo.\"}}
-- {\"tipo\": \"cambiar_proyecto\", \"parametros\": {\"proyecto\": \"glorytemplate\"}}
-- {\"tipo\": \"automejora\", \"parametros\": {\"prompt\": \"que mejora hacer\", \"riesgo\": \"bajo|medio|alto\"}} — AUTO-MEJORA DEL AGENTE. Úsala cuando el usuario pida 'automejora', 'mejora el agente', 'mejora tu codigo', 'mejora tu propio codigo', 'agregame una accion al agente', 'añade una accion' o cualquier variante de modificar el código del agente (el repositorio glorytemplate, rama glory-react-logic). Esto modifica EL CÓDIGO DEL PROPIO AGENTE (OpenCode + PHP + React del agente), no el del proyecto del usuario. Siempre hace commit. Solo hace deploy si riesgo es \"bajo\" (default: \"medio\", sin deploy). La rama por defecto es glory-react-logic. NO uses solicitar_opencode para automejoras — usa automejora para que el sistema sepa que es una modificación del propio agente. En la respuesta di algo como \"Procesando automejora, te aviso cuando termine\". El runner local lo ejecutará automáticamente.
+{$bloqueAccionesCodigo}
 
 REGLAS:
 - NOTAS — REGLA CRÍTICA: Las notas en el contexto muestran SOLO el título. Para ver el contenido de una nota SIEMPRE debes llamar leer_nota con el ID. NUNCA digas \"no puedo acceder al contenido\" — siempre puedes, usando leer_nota. Si el usuario pide ver, leer o preguntar sobre una nota: llama leer_nota con su ID y responde con \"déjame leer esa nota\" o similar, luego recibirás el contenido. EXCEPCIÓN: el CONTEXTO MAESTRO no es una nota — ya está embebido en el bloque '## Contexto personal' de este prompt, NO tiene ID, NUNCA uses leer_nota para él.
@@ -298,7 +309,7 @@ REGLAS:
 - INFERENCIA DE HÁBITOS Y TAREAS — REGLA CRÍTICA: Si el usuario menciona un hábito o tarea por nombre parcial o por contexto ('el de leer', 'ese hábito', 'el recordatorio de antes'), búscalo en la lista del contexto (## Hábitos activos, ## Tareas pendientes) y usa el ID directamente. Si el mensaje anterior del bot mencionó un hábito específico (ej: en un recordatorio '⏰ Hábito pendiente: leer enunciado...'), ese es el hábito referido — úsalo sin preguntar. NUNCA pidas el ID numérico al usuario. Si hay ambigüedad real entre 2+ hábitos similares, muestra los nombres y pregunta cuál, pero jamás el ID.
 - AYUNO: usa iniciar_ayuno cuando el usuario diga que inicia/empieza ayuno. Si menciona última comida, desde cuándo empezó o una hora concreta, convierte esa hora a ISO8601 local y pásala como hora_ultima_comida; si dice ahora, omite la hora. Usa terminar_ayuno cuando diga que rompió/terminó el ayuno; si da hora exacta, pásala como fin. Usa estado_ayuno para preguntas como cuánto llevo, cuánto falta o estado del ayuno. No inventes horas exactas si el usuario no las dio.
 - CALORÍAS: usa registrar_comida cuando el usuario diga que comió, bebió o quiere registrar comida. Incluye calorias solo si el usuario las dio explícitamente; si no, el backend estimará nutrición. Usa resumen_calorias_hoy cuando pregunte total del día, calorías restantes, déficit o resumen nutricional.
-- crear_tarea SOLO crea tareas para el usuario. Si el mensaje contiene 'tarea para opencode', 'pídele a opencode', 'dile a opencode', 'ejecuta en opencode' o cualquier variante de destinar la instrucción a OpenCode: usa OBLIGATORIAMENTE `solicitar_opencode`, nunca `crear_tarea`.
+- crear_tarea SOLO crea tareas personales para el usuario. No la uses para solicitudes de código, repositorios, commits, deploys u OpenCode.
 - Al CREAR una tarea con \`crear_tarea\`, NUNCA menciones un ID específico en tu respuesta — no conoces el ID real hasta que la acción se ejecute y recibes los resultados. Di simplemente \'Tarea creada: [nombre]\' sin ningún número de ID.
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
@@ -306,16 +317,9 @@ REGLAS:
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: DEBES llamarla proactivamente (sin que el usuario lo pida) cuando detectes información duradera importante: nombre real, horarios de trabajo, rutinas fijas, preferencias de vida, instrucciones permanentes, cambios de situación personal. Escribe el contexto maestro COMPLETO actualizado, no solo la parte nueva. Esto es lo que persiste entre todas las sesiones — mantenlo útil y conciso.
-- listar_proyectos: cuando el usuario pregunte qué proyectos OpenCode hay disponibles, qué proyectos existen, o quiera cambiar de proyecto pero no sepa los IDs. Devuelve la lista completa y cuál está activo. TAMBIÉN disponible si el usuario pide 'ver proyectos', 'qué proyectos tengo', 'cambiar de proyecto'.
-- listar_ramas: cuando el usuario quiera ver las ramas git de un proyecto. Usa el parámetro opcional proyecto si el usuario menciona un proyecto específico (ej: 'qué ramas hay en glory rust?' → proyecto:'glory-rust'); si se omite, usa el proyecto activo. Ejecuta una consulta rápida sin OpenCode — la respuesta llega en segundos. Usa esta acción, NUNCA solicitar_opencode para 'ver ramas' o 'listar ramas'.
-- cambiar_proyecto: cuando el usuario pida explícitamente cambiar de proyecto OpenCode. El parámetro proyecto debe ser uno de los IDs visibles en ## Proyecto activo del contexto. Después de cambiar, el nuevo proyecto se usa como default en solicitar_opencode.
-- solicitar_opencode: OBLIGATORIO cuando el usuario pida: cambios de código, investigación técnica, leer roadmap, ver tareas pendientes, acceder a archivos o código, commit, push, PR o deploy. TAMBIÉN OBLIGATORIO cuando el usuario use frases como 'tarea para opencode', 'pídele a opencode que', 'dile a opencode que', 'ejecuta en opencode' o cualquier variante que destine la instrucción a OpenCode — en ese caso usa solicitar_opencode, NUNCA crear_tarea. NUNCA respondas \"no tengo acceso\" ni \"voy a solicitar acceso\" — emite la acción directamente y en `respuesta` di algo breve como \"En proceso, te aviso cuando esté listo\" o \"Revisando ahora, dame un momento\". El proyecto activo está en ## Proyecto activo del contexto — úsalo como default para el parámetro proyecto. La rama por defecto del proyecto activo se usa si no se especifica otra. No incluyas modelo: se usa el configurado. Cuando llega por WhatsApp el runner ejecuta automáticamente; NO le digas que necesita aprobar nada. Solo incluye deploy=true si el usuario lo pide explícitamente. reasoning_effort opcional: \"max\", \"high\" o \"minimal\" (por defecto \"max\"). Si el usuario pide 'máximo pensamiento', 'razona al máximo' o similar, usa reasoning_effort:\"max\". Si pide 'menos pensamiento', 'sin razonar tanto' o 'más rápido', usa reasoning_effort:\"minimal\". NUNCA uses solicitar_opencode para preguntas de identidad (quién te creó, qué eres, qué modelo eres), conversación general, opiniones o cualquier tema que no requiera acceder literalmente a archivos del repositorio.
-- continuar_opencode: úsala cuando el usuario quiera ampliar, corregir, reintentar o continuar un job anterior. Ejemplos: 'y agrega X también', 'modifica lo que hiciste', 'faltó Y', 'continúa la sesión', 'reintenta ejecutar la sesión anterior', 'sigue desde donde quedaste'. Usa el id del job más reciente visible en el contexto (número de [id:N]). CASO ESPECIAL: si el usuario incluye en su mensaje un ID de sesión con el formato ses_XXXXX (ej: \"continua la sesion ses_1e5cc66deffe4BZxD3PLgISQhX\"), el backend resuelve automáticamente qué job usar — en ese caso usa job_id: 0 (el backend lo sobreescribirá) y en \`respuesta\` incluye el ses_XXXXX explícitamente, ej: \"Continuando la sesión ses_1e5cc66deffe4BZxD3PLgISQhX, dame un momento.\" — NUNCA omitas el ses_XXXXX en la respuesta, es importante para que el usuario sepa qué sesión se está reanudando. NUNCA pidas el job_id al usuario si ya proporcionó un ses_XXXXX. Si el usuario repite una solicitud de cero o pide algo nuevo sin mencionar sesión/anterior/continuación, usa solicitar_opencode (sesión fresca).
-- actualizar_opencode_allowlist: cuando OpenCode reporta permisos rechazados y el usuario confirma que los quiere permitir, usa esta acción con {\"comandos\": [\"git --no-pager*\", \"Test-Path*\"]}. REGLA CRÍTICA: usa el PATRÓN MÁS AMPLIO posible que cubra el TIPO de comando, NUNCA el comando específico con rutas o argumentos. Ejemplos obligatorios: `git --no-pager log --oneline -10` → `git --no-pager*` (cubre TODO git con --no-pager); `Test-Path \"App\\file.php\"` → `Test-Path*`; `Measure-Object -Line` → `Measure-Object*`; `Get-Content file.php` → `Get-Content*`; `php -l File.php` → `php -l*`; `git hash-object \"file\"` → `git hash-object*`. El patrón SIEMPRE termina en `*`. Guardar el comando exacto con rutas específicas solo permite ESE comando y el problema se repite. Lee 'Permisos rechazados' del job para identificar el tipo. Los comandos se guardan para todos los jobs futuros. Después de actualizar, emite también continuar_opencode. NO la uses sin confirmación explícita del usuario.
-- cancelar_opencode: cuando el usuario pide cancelar o detener un job de OpenCode activo. Lee el contexto para ver jobs activos (estado 🔄 ejecutando o ⏳ pendiente) y usa el id del job activo. El runner detectará el cambio en su polling y matará el proceso. Si no hay jobs activos, informa al usuario.
-- reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
+{$bloqueReglasCodigo}- reportar_contexto: los datos del historial ya están al inicio del system prompt (STATS DE SESIÓN). Responde directamente desde ahí. Solo usa esta acción si los datos del system prompt parecen desactualizados o el usuario pide recalcular.
 - compactar_ahora: úsala cuando el usuario pida compactar, limpiar o resumir el historial/contexto de la conversación. No la uses sin que el usuario lo pida.
-- cambiar_limite_compactacion: úsala cuando el usuario quiera cambiar el límite para la compactación automática. Convierte tokens a chars × 4 si el usuario da tokens.{$bloqueMemoria}{$bloqueMaestro}
+{$bloqueMemoria}{$bloqueMaestro}
 
 {$contexto}";
     }
@@ -327,7 +331,7 @@ REGLAS:
      * [SEC-004] Si $privacyMode es true, los datos se envían anonimizados al LLM (solo nombres/títulos,
      * sin contenido real de notas, sin detalles de tareas, sin contenido de hábitos).
      */
-    private function buildContexto(int $userId, string $canal = 'app', bool $privacyMode = false): string
+    private function buildContexto(int $userId, string $canal = 'app', bool $privacyMode = false, bool $accionesCodigoPermitidas = false): string
     {
 
         try {
@@ -445,62 +449,58 @@ REGLAS:
         } catch (\Throwable) {
             /* No bloquear si AgentActionService falla */
         }
-        /* [115A-15+115A-cont] Status de jobs OpenCode activos y recientes (con session_id para continuar) */
-        try {
-            $svc           = new \App\Services\Agent\OpencodeJobService();
-            $jobsActivos   = $svc->listarActivos();
-            /* [125A-7] Ventana ampliada 4h→48h para que el LLM vea sesiones anteriores
-             * y pueda seleccionar el job_id correcto al pedir "continúa la sesión". */
-            $jobsRecientes = $svc->listarRecientes(48, 6);
-            if (!empty($jobsActivos) || !empty($jobsRecientes)) {
-                $ctx .= "\n## OpenCode (agente de código)\n";
-                foreach ($jobsActivos as $j) {
-                    if ((int)($j['user_id'] ?? 0) !== $userId) {
-                        continue;
+        if ($accionesCodigoPermitidas) {
+            /* [115A-15+115A-cont] Status de jobs OpenCode activos y recientes (con session_id para continuar) */
+            try {
+                $svc           = new \App\Services\Agent\OpencodeJobService();
+                $jobsActivos   = $svc->listarActivos();
+                /* [125A-7] Ventana ampliada 4h→48h para que el LLM vea sesiones anteriores
+                 * y pueda seleccionar el job_id correcto al pedir "continúa la sesión". */
+                $jobsRecientes = $svc->listarRecientes(48, 6);
+                if (!empty($jobsActivos) || !empty($jobsRecientes)) {
+                    $ctx .= "\n## OpenCode (agente de código)\n";
+                    foreach ($jobsActivos as $j) {
+                        if ((int)($j['user_id'] ?? 0) !== $userId) {
+                            continue;
+                        }
+                        $prompt = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
+                        $icono  = $j['estado'] === 'ejecutando' ? '🔄' : '⏳';
+                        $sessionId = $this->extraerSessionIdDeJob($j);
+                        $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
+                        $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
                     }
-                    $prompt = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
-                    $icono  = $j['estado'] === 'ejecutando' ? '🔄' : '⏳';
-                    $sessionId = $this->extraerSessionIdDeJob($j);
-                    $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
-                    $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
-                }
-                foreach ($jobsRecientes as $j) {
-                    if ((int)($j['user_id'] ?? 0) !== $userId) {
-                        continue;
-                    }
-                    $prompt    = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
-                    $sessionId = $this->extraerSessionIdDeJob($j);
-                    $icono     = $j['estado'] === 'completado' ? '✅' : '❌';
-                    $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
-                    $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
-                    /* [fix-resumen-contexto] Incluir el resumen del job para que el LLM sepa
-                     * qué se hizo, qué falló y qué permisos fueron rechazados. Sin esto
-                     * el LLM no puede generar el glob correcto en actualizar_opencode_allowlist. */
-                    $resumen = mb_substr((string)($j['resultado']['whatsapp_summary'] ?? ''), 0, 300);
-                    if ($resumen !== '') {
-                        $ctx .= "  Resumen: {$resumen}\n";
-                    }
-                    /* Mostrar permisos rechazados explícitamente para que el LLM pueda
-                     * derivar el glob correcto en actualizar_opencode_allowlist. */
-                    $rechazados = array_values(array_filter((array)($j['resultado']['permisos_rechazados'] ?? [])));
-                    if (!empty($rechazados)) {
-                        $ctx .= '  Permisos rechazados: ' . implode(', ', array_map(fn($c) => "`{$c}`", $rechazados)) . "\n";
+                    foreach ($jobsRecientes as $j) {
+                        if ((int)($j['user_id'] ?? 0) !== $userId) {
+                            continue;
+                        }
+                        $prompt    = mb_substr((string)($j['payload']['prompt'] ?? ''), 0, 80);
+                        $sessionId = $this->extraerSessionIdDeJob($j);
+                        $icono     = $j['estado'] === 'completado' ? '✅' : '❌';
+                        $sesInfo   = $sessionId !== '' ? " [sesion:{$sessionId}]" : '';
+                        $ctx .= "- [id:{$j['id']}] {$icono} {$j['estado']}{$sesInfo}" . ($prompt !== '' ? ": {$prompt}" : '') . "\n";
+                        $resumen = mb_substr((string)($j['resultado']['whatsapp_summary'] ?? ''), 0, 300);
+                        if ($resumen !== '') {
+                            $ctx .= "  Resumen: {$resumen}\n";
+                        }
+                        $rechazados = array_values(array_filter((array)($j['resultado']['permisos_rechazados'] ?? [])));
+                        if (!empty($rechazados)) {
+                            $ctx .= '  Permisos rechazados: ' . implode(', ', array_map(fn($c) => "`{$c}`", $rechazados)) . "\n";
+                        }
                     }
                 }
-            }
-        } catch (\Throwable) { /* No bloquear el contexto */ }
-        /* [126A-1] Mostrar proyecto activo para que el LLM sepa en qué proyecto está
-         * y pueda usar listar_proyectos, listar_ramas, cambiar_proyecto correctamente. */
-        try {
-            $proyectos = $this->loadProjectsConfig();
-            if (!empty($proyectos)) {
-                $activo = $this->getActiveProject($userId);
-                $ctx .= "\n## Proyecto activo\n";
-                $ctx .= "- Proyecto: {$activo}\n";
-                $ctx .= "- Proyectos disponibles: " . implode(', ', array_keys($proyectos)) . "\n";
-                $ctx .= "- Para ver ramas de un proyecto usa 'listar_ramas' (con proyecto opcional)\n";
-            }
-        } catch (\Throwable) { /* No bloquear el contexto */ }
+            } catch (\Throwable) { /* No bloquear el contexto */ }
+            /* [126A-1] Mostrar proyecto activo solo a usuarios con permiso de código. */
+            try {
+                $proyectos = $this->loadProjectsConfig();
+                if (!empty($proyectos)) {
+                    $activo = $this->getActiveProject($userId);
+                    $ctx .= "\n## Proyecto activo\n";
+                    $ctx .= "- Proyecto: {$activo}\n";
+                    $ctx .= "- Proyectos disponibles: " . implode(', ', array_keys($proyectos)) . "\n";
+                    $ctx .= "- Para ver ramas de un proyecto usa 'listar_ramas' (con proyecto opcional)\n";
+                }
+            } catch (\Throwable) { /* No bloquear el contexto */ }
+        }
         return $ctx;
     }
 
@@ -600,6 +600,9 @@ REGLAS:
     {
         $mensajeOriginal = trim($mensaje);
         if ($canal !== 'whatsapp' || $mensajeOriginal === '') {
+            return $acciones;
+        }
+        if (!$this->puedeUsarAccionesCodigo($userId)) {
             return $acciones;
         }
 
@@ -1075,6 +1078,15 @@ REGLAS:
 
     private function ejecutarAccion(int $userId, string $canal, string $tipo, array $param): array
     {
+        if ($this->esAccionCodigoRestringida($tipo) && !$this->puedeUsarAccionesCodigo($userId)) {
+            return [
+                'tipo' => $tipo,
+                'exito' => false,
+                'error' => 'Acción restringida a administradores.',
+                'codigo' => 'admin_only',
+            ];
+        }
+
         switch ($tipo) {
             case 'crear_tarea':
                 $repo = new TareasRepository($userId);
@@ -1760,6 +1772,26 @@ REGLAS:
             default:
                 return ['tipo' => $tipo, 'exito' => false, 'error' => 'Tipo de acción no soportado en canal server-side'];
         }
+    }
+
+    private function puedeUsarAccionesCodigo(int $userId): bool
+    {
+        return $userId > 0 && user_can($userId, 'manage_options');
+    }
+
+    private function esAccionCodigoRestringida(string $tipo): bool
+    {
+        return in_array($tipo, [
+            'solicitar_opencode',
+            'continuar_opencode',
+            'actualizar_opencode_allowlist',
+            'cancelar_opencode',
+            'listar_proyectos',
+            'listar_ramas',
+            'cambiar_proyecto',
+            'automejora',
+            'cambiar_limite_compactacion',
+        ], true);
     }
 
     /* --- Memoria ------------------------------------------------------------ */

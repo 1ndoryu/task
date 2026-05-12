@@ -35,6 +35,13 @@ class LLMProviderService
         ],
     ];
 
+    private const CHAT_FALLBACK_CHAIN = [
+        ['provider' => 'groq', 'model' => 'openai/gpt-oss-120b'],
+        ['provider' => 'groq', 'model' => 'moonshotai/kimi-k2-instruct-0905'],
+        ['provider' => 'groq', 'model' => 'llama-3.3-70b-versatile'],
+        ['provider' => 'deepseek', 'model' => 'deepseek-v4-flash'],
+    ];
+
     private const PROMPT_NUTRICION = 'You are a certified nutritionist estimating macros for a home-cooked Latin American diet.
 Rules:
 - Use USDA FoodData Central values. For Venezuelan/Latin foods use accurate regional data.
@@ -47,9 +54,25 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
 
     public function enviarChat(array $messages, string $provider, string $model, array $options = []): array
     {
+        $messages = $this->validarMensajes($messages);
+
+        $errores = [];
+        foreach ($this->resolverCandidatosChat($provider, $model) as $candidato) {
+            try {
+                return $this->enviarChatDirecto($messages, $candidato['provider'], $candidato['model'], $options);
+            } catch (\Throwable $e) {
+                $errores[] = $candidato['provider'] . '/' . $candidato['model'] . ': ' . $e->getMessage();
+                error_log('[LLMProviderService] Fallback chat falló provider=' . $candidato['provider'] . ' model=' . $candidato['model'] . ': ' . $e->getMessage());
+            }
+        }
+
+        throw new \RuntimeException('No se pudo contactar un modelo IA disponible. ' . implode(' | ', array_slice($errores, -3)));
+    }
+
+    private function enviarChatDirecto(array $messages, string $provider, string $model, array $options = []): array
+    {
         $provider = $this->normalizarProvider($provider);
         $model = $this->validarModelo($provider, $model);
-        $messages = $this->validarMensajes($messages);
         $keys = $this->obtenerKeysProvider($provider);
 
         if (empty($keys)) {
@@ -67,6 +90,34 @@ JSON format: {"calorias":<kcal>,"proteinas":<g>,"carbohidratos":<g>,"grasas":<g>
         }
 
         throw new \RuntimeException($ultimoError ? $ultimoError->getMessage() : 'No se pudo contactar el proveedor IA.');
+    }
+
+    private function resolverCandidatosChat(string $provider, string $model): array
+    {
+        $candidatos = [];
+        try {
+            $providerNormalizado = $this->normalizarProvider($provider);
+            $candidatos[] = [
+                'provider' => $providerNormalizado,
+                'model' => $this->validarModelo($providerNormalizado, $model),
+            ];
+        } catch (\Throwable $e) {
+            error_log('[LLMProviderService] Configuración IA inválida, usando fallback: ' . $e->getMessage());
+        }
+
+        foreach (self::CHAT_FALLBACK_CHAIN as $fallback) {
+            $candidatos[] = $fallback;
+        }
+
+        $vistos = [];
+        return array_values(array_filter($candidatos, function (array $candidato) use (&$vistos): bool {
+            $key = $candidato['provider'] . '|' . $candidato['model'];
+            if (isset($vistos[$key])) {
+                return false;
+            }
+            $vistos[$key] = true;
+            return true;
+        }));
     }
 
     public function estimarNutricion(string $descripcion, string $provider, string $model): array
