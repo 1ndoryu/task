@@ -49,6 +49,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const error = useIAStore(s => s.error);
     const apiKey = useIAStore(s => s.apiKey);
     const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
+    const apiKeyCerebras = useIAStore(s => s.apiKeyCerebras);
     const proveedor = useIAStore(s => s.proveedor);
     const modelo = useIAStore(s => s.modelo);
     const tokensUsados = useIAStore(s => s.tokensUsados);
@@ -119,7 +120,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
         try {
             const preferencias = useIAStore.getState().preferenciasUsuario;
             const promptSistema = useIAStore.getState().promptSistema;
-            const apiKeyActual = obtenerApiKeyParaProveedor(proveedor, apiKey, apiKeyDeepseek);
+            const apiKeyActual = obtenerApiKeyParaProveedor(proveedor, apiKey, apiKeyDeepseek, apiKeyCerebras);
             const mensajesActuales = useIAStore.getState().mensajes;
             const resultado = await procesarMensajeIA(
                 mensajesActuales,
@@ -157,7 +158,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             setEnviando(false);
             refAbort.current = null;
         }
-    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, proveedor, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens, sessionId]);
+    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, apiKeyCerebras, proveedor, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens, sessionId]);
 
     const limpiarChatPersistente = useCallback(() => {
         limpiarMensajesAgente(sessionId).catch(err => {
@@ -253,7 +254,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     return {
         inputTexto, setInputTexto,
         refScroll,
-        mensajes, enviando, error, apiKey: proveedorTieneCredenciales(proveedor, apiKey, apiKeyDeepseek) ? 'configurada' : '', tokensUsados,
+        mensajes, enviando, error, apiKey: proveedorTieneCredenciales(proveedor, apiKey, apiKeyDeepseek, apiKeyCerebras) ? 'configurada' : '', tokensUsados,
         limpiarChat: limpiarChatPersistente,
         manejarEnviar, manejarTecla,
         confirmarAccion, rechazarAccion

@@ -15,7 +15,7 @@ import {persist} from 'zustand/middleware';
 
 /* Roles del chat */
 export type RolMensaje = 'usuario' | 'asistente' | 'sistema';
-export type ProveedorIA = 'groq' | 'deepseek';
+export type ProveedorIA = 'cerebras' | 'groq' | 'deepseek';
 
 /* Acción estructurada que la IA puede ejecutar (Fase 3)
  * [303A-11] pendienteConfirmacion: acciones destructivas requieren confirmación del usuario */
@@ -58,6 +58,7 @@ interface IAEstadoSesion {
     /* [SEC-001] API keys solo en memoria, nunca en localStorage */
     apiKey: string;
     apiKeyDeepseek: string;
+    apiKeyCerebras: string;
 }
 
 /* Acciones */
@@ -66,6 +67,7 @@ interface IAAcciones {
     setProveedor: (proveedor: ProveedorIA) => void;
     setApiKey: (key: string) => void;
     setApiKeyDeepseek: (key: string) => void;
+    setApiKeyCerebras: (key: string) => void;
     setModelo: (modelo: string) => void;
     setPreferencias: (preferencias: string) => void;
     setPromptSistema: (prompt: string) => void;
@@ -106,12 +108,14 @@ export const useIAStore = create<IAStore>()(
             tokensUsados: 0,
             apiKey: '',
             apiKeyDeepseek: '',
+            apiKeyCerebras: '',
 
             /* Acciones de configuración */
             setMensajes: (mensajes) => set({mensajes}),
             setProveedor: (proveedor) => set({proveedor}),
             setApiKey: (key) => set({apiKey: key}),
             setApiKeyDeepseek: (key) => set({apiKeyDeepseek: key}),
+            setApiKeyCerebras: (key) => set({apiKeyCerebras: key}),
             setModelo: (modelo) => set({modelo}),
             setPreferencias: (preferencias) => set({preferenciasUsuario: preferencias}),
             setPromptSistema: (prompt) => set({promptSistema: prompt}),

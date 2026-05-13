@@ -56,8 +56,8 @@ export function useDeficitCalorico(fechaActiva?: string) {
     const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
     const proveedorIA = useIAStore(s => s.proveedor);
     const modeloIA = useIAStore(s => s.modelo);
-    const apiKeyActual = store.apiKeyGemini || obtenerApiKeyParaProveedor(proveedorIA, apiKeyIA || config?.apiKey || '', apiKeyDeepseek);
-    const iaConfigurada = proveedorTieneCredenciales(proveedorIA, apiKeyIA || store.apiKeyGemini || config?.apiKey || '', apiKeyDeepseek);
+    const apiKeyActual = store.apiKeyGemini || obtenerApiKeyParaProveedor(proveedorIA, apiKeyIA || config?.apiKey || '', apiKeyDeepseek, '');
+    const iaConfigurada = proveedorTieneCredenciales(proveedorIA, apiKeyIA || store.apiKeyGemini || config?.apiKey || '', apiKeyDeepseek, '');
 
     /* TMB calculada */
     const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);

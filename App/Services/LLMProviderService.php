@@ -35,9 +35,18 @@ class LLMProviderService
             /* Por favor solo usar deepseek-v4-flash; este modelo puede razonar correctamente */
             'models' => ['deepseek-v4-flash'],
         ],
+        'cerebras' => [
+            'url' => 'https://api.cerebras.ai/v1/chat/completions',
+            'env' => ['CEREBRAS_API_KEY'],
+            /* [135M-1] Z.ai GLM 4.7 via Cerebras Inference — primera opcion del fallback chain.
+             * ~1000 tok/s, 64k contexto free tier, tool calling, structured outputs.
+             * Rate limit free: 10 req/min, 60k tokens/min, 1M tokens/dia. */
+            'models' => ['zai-glm-4.7'],
+        ],
     ];
 
     private const CHAT_FALLBACK_CHAIN = [
+        ['provider' => 'cerebras', 'model' => 'zai-glm-4.7'],          // primera opcion, rate limit free: 10 req/min
         ['provider' => 'groq', 'model' => 'openai/gpt-oss-120b'],
         ['provider' => 'groq', 'model' => 'moonshotai/kimi-k2-instruct-0905'],
         ['provider' => 'groq', 'model' => 'llama-3.3-70b-versatile'],

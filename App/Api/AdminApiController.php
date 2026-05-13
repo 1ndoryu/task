@@ -132,7 +132,7 @@ class AdminApiController
                 'proveedor' => [
                     'required'          => true,
                     'sanitize_callback' => 'sanitize_text_field',
-                    'validate_callback' => fn($p) => in_array($p, ['groq', 'deepseek'], true),
+                    'validate_callback' => fn($p) => in_array($p, ['cerebras', 'groq', 'deepseek'], true),
                 ],
                 'modelo' => [
                     'required'          => true,

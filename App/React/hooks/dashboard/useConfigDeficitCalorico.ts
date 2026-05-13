@@ -45,7 +45,7 @@ export function useConfigDeficitCalorico({onCerrar}: UseConfigDeficitCaloricoPar
     const apiKeyIA = useIAStore(s => s.apiKey);
     const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
     const apiKeyLegacy = useDeficitCaloricoStore(s => s.apiKeyGemini);
-    const tieneApiKey = proveedorTieneCredenciales(proveedorIA, apiKeyIA || apiKeyLegacy, apiKeyDeepseek);
+    const tieneApiKey = proveedorTieneCredenciales(proveedorIA, apiKeyIA || apiKeyLegacy, apiKeyDeepseek, '');
 
     const [datos, setDatos] = useState<DatosUsuarioTMB>({...datosUsuario});
 

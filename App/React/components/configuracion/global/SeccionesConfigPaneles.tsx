@@ -215,12 +215,14 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
     const proveedor = useIAStore(s => s.proveedor);
     const apiKey = useIAStore(s => s.apiKey);
     const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
+    const apiKeyCerebras = useIAStore(s => s.apiKeyCerebras);
     const modelo = useIAStore(s => s.modelo);
     const preferencias = useIAStore(s => s.preferenciasUsuario);
     const promptSistema = useIAStore(s => s.promptSistema);
     const setProveedor = useIAStore(s => s.setProveedor);
     const setApiKey = useIAStore(s => s.setApiKey);
     const setApiKeyDeepseek = useIAStore(s => s.setApiKeyDeepseek);
+    const setApiKeyCerebras = useIAStore(s => s.setApiKeyCerebras);
     const setModelo = useIAStore(s => s.setModelo);
     const setPreferencias = useIAStore(s => s.setPreferencias);
     const setPromptSistema = useIAStore(s => s.setPromptSistema);
@@ -282,11 +284,19 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
                     placeholder="sk-..."
                 />
             )}
+            {!esAdmin && proveedor === 'cerebras' && (
+                <Input
+                    tipo="password"
+                    value={apiKeyCerebras}
+                    onChange={e => setApiKeyCerebras(e.target.value)}
+                    placeholder="csk-..."
+                />
+            )}
             {esAdmin && (
                 <div className="itemOpcionConfig">
                     <div className="detallesOpcionConfig">
                         <span className="tituloOpcionConfig">API del entorno activa</span>
-                        <span className="descripcionOpcionConfig">Se usarán GROQ_API/GROQ_API_1..3 o DEEPSEEK_API/DEEPSEEK-API desde WordPress/Coolify.</span>
+                        <span className="descripcionOpcionConfig">Se usarán CEREBRAS_API_KEY, GROQ_API/GROQ_API_1..3 o DEEPSEEK_API/DEEPSEEK-API desde WordPress/Coolify.</span>
                     </div>
                 </div>
             )}

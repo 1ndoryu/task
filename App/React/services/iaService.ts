@@ -12,6 +12,7 @@ import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAccio
 import {esUsuarioAdmin, obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
 
 const URLS_PROVIDER: Record<ProveedorIA, string> = {
+    cerebras: 'https://api.cerebras.ai/v1/chat/completions',
     groq: 'https://api.groq.com/openai/v1/chat/completions',
     deepseek: 'https://api.deepseek.com/chat/completions'
 };
@@ -23,13 +24,17 @@ export interface ModeloIA {
 }
 
 export const PROVEEDORES_IA: Array<{id: ProveedorIA; nombre: string; descripcion: string}> = [
+    {id: 'cerebras', nombre: 'Cerebras', descripcion: 'Z.ai GLM 4.7 — primera opción (~1000 tok/s)'},
     {id: 'groq', nombre: 'Groq', descripcion: 'Modelos rápidos y producción por defecto'},
     {id: 'deepseek', nombre: 'DeepSeek', descripcion: 'DeepSeek V4 Flash'}
 ];
 
-/* [243A-4] Modelos más inteligentes disponibles en Groq (actualizado marzo 2026)
- * Orden: más capaz primero. Fuente: console.groq.com/docs/models */
+/* [135M-1] Z.ai GLM 4.7 via Cerebras Inference como primera opcion.
+ * ~1000 tok/s, 64k contexto free tier, tool calling, structured outputs.
+ * Rate limit free: 10 req/min — pasar a siguiente en fallback si da 429.
+ * Fuente: inference-docs.cerebras.ai/models/zai-glm-47 */
 export const MODELOS_IA = [
+    {id: 'zai-glm-4.7', nombre: 'Z.ai GLM 4.7 — primera opción (Cerebras)', proveedor: 'cerebras'},
     {id: 'openai/gpt-oss-120b', nombre: 'GPT-OSS 120B — más inteligente (Groq)', proveedor: 'groq'},
     {id: 'moonshotai/kimi-k2-instruct-0905', nombre: 'Kimi K2 — 262K contexto (Groq)', proveedor: 'groq'},
     {id: 'meta-llama/llama-4-maverick-17b-128e-instruct', nombre: 'Llama 4 Maverick (Groq)', proveedor: 'groq'},
@@ -40,6 +45,7 @@ export const MODELOS_IA = [
 ] as const;
 
 export const MODELO_FLASH_POR_PROVEEDOR: Record<ProveedorIA, string> = {
+    cerebras: 'zai-glm-4.7',
     groq: 'meta-llama/llama-4-scout-17b-16e-instruct',
     deepseek: 'deepseek-v4-flash'
 };
@@ -169,17 +175,18 @@ async function enviarMensajeLLMBackend(mensajes: MensajeAPI[], config: ConfigPro
     return datos.data;
 }
 
-export function obtenerApiKeyParaProveedor(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string): string {
+export function obtenerApiKeyParaProveedor(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string, apiKeyCerebras: string): string {
+    if (proveedor === 'cerebras') return apiKeyCerebras;
     return proveedor === 'deepseek' ? apiKeyDeepseek : apiKeyGroq;
 }
 
-export function proveedorTieneCredenciales(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string): boolean {
+export function proveedorTieneCredenciales(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string, apiKeyCerebras: string): boolean {
     /* [SEC-001] Admin siempre tiene credenciales via backend proxy.
      * Otros usuarios necesitan API key en memoria (nunca en localStorage). */
     if (esUsuarioAdmin()) {
         return true;
     }
-    return Boolean(obtenerApiKeyParaProveedor(proveedor, apiKeyGroq, apiKeyDeepseek));
+    return Boolean(obtenerApiKeyParaProveedor(proveedor, apiKeyGroq, apiKeyDeepseek, apiKeyCerebras));
 }
 
 /*
