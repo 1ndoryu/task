@@ -69,8 +69,21 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                 set({errorIA: error, updatedAt: Date.now()});
             },
 
+            /* [135A-7+8] Sincroniza desde servidor CON stale-protection por timestamp.
+             * Solo acepta datos del servidor si su updatedAt es ESTRICTAMENTE mayor
+             * que el local. Si el servidor devuelve datos mas viejos o iguales,
+             * preserva el estado local (que es mas reciente). Esto evita la perdida
+             * de datos cuando el auto-save (2s debounce) no ha completado antes de
+             * un refresh de 30s, focus change, o recarga de pagina.
+             * Misma proteccion que PluginStateRepository::setState() usa en PHP. */
             sincronizarDesdeServidor: estadoServidor => {
-                const apiKeyGeminiLocal = get().apiKeyGemini;
+                const local = get();
+                const serverUpdatedAt = estadoServidor.updatedAt ?? 0;
+                if (serverUpdatedAt > 0 && serverUpdatedAt <= local.updatedAt) {
+                    /* Servidor tiene datos mas viejos o iguales — preservar estado local */
+                    return;
+                }
+                const apiKeyGeminiLocal = local.apiKeyGemini;
                 set({
                     datosUsuario: estadoServidor.datosUsuario ?? {},
                     apiKeyGemini: estadoServidor.apiKeyGemini || apiKeyGeminiLocal,
@@ -78,7 +91,7 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
                     historial: estadoServidor.historial ?? [],
                     cargandoIA: false,
                     errorIA: estadoServidor.errorIA ?? null,
-                    updatedAt: estadoServidor.updatedAt ?? 0
+                    updatedAt: serverUpdatedAt || local.updatedAt
                 });
             },
 

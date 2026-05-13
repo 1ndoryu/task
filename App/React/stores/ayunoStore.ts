@@ -97,13 +97,23 @@ export const useAyunoStore = create<AyunoStore>()(
                 });
             },
 
+            /* [135A-7+8] Sincroniza desde servidor CON stale-protection por timestamp.
+             * Solo acepta datos del servidor si su updatedAt es ESTRICTAMENTE mayor
+             * que el local. Si el servidor devuelve datos mas viejos o iguales,
+             * preserva el estado local (que es mas reciente). Misma proteccion
+             * que la implementada en deficitCaloricoStore. */
             sincronizarDesdeServidor: estadoServidor => {
+                const localUpdatedAt = get().updatedAt;
+                const serverUpdatedAt = estadoServidor.updatedAt ?? 0;
+                if (serverUpdatedAt > 0 && serverUpdatedAt <= localUpdatedAt) {
+                    return;
+                }
                 set({
                     estado: estadoServidor.estado ?? 'inactivo',
                     sesionActiva: estadoServidor.sesionActiva ?? null,
                     historial: estadoServidor.historial ?? [],
                     ultimoAyunoCompletado: estadoServidor.ultimoAyunoCompletado ?? null,
-                    updatedAt: estadoServidor.updatedAt ?? 0
+                    updatedAt: serverUpdatedAt || localUpdatedAt
                 });
             },
 
