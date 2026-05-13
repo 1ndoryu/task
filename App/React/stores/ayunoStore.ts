@@ -103,9 +103,11 @@ export const useAyunoStore = create<AyunoStore>()(
              * preserva el estado local (que es mas reciente). Misma proteccion
              * que la implementada en deficitCaloricoStore. */
             sincronizarDesdeServidor: estadoServidor => {
-                const localUpdatedAt = get().updatedAt;
+                const localUpdatedAt = get().updatedAt ?? 0;
                 const serverUpdatedAt = estadoServidor.updatedAt ?? 0;
-                if (serverUpdatedAt > 0 && serverUpdatedAt <= localUpdatedAt) {
+                /* Misma corrección que deficitCaloricoStore: preservar local si tiene datos (> 0)
+                 * y el servidor no es estrictamente mas nuevo. Cubre el caso updatedAt=0 del servidor. */
+                if (localUpdatedAt > 0 && serverUpdatedAt <= localUpdatedAt) {
                     return;
                 }
                 set({

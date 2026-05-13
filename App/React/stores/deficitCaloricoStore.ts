@@ -79,7 +79,13 @@ export const useDeficitCaloricoStore = create<DeficitCaloricoStore>()(
             sincronizarDesdeServidor: estadoServidor => {
                 const local = get();
                 const serverUpdatedAt = estadoServidor.updatedAt ?? 0;
-                if (serverUpdatedAt > 0 && serverUpdatedAt <= local.updatedAt) {
+                const localUpdatedAt = local.updatedAt ?? 0;
+                /* Preservar local si tiene datos (updatedAt > 0) y el servidor no es estrictamente mas nuevo.
+                 * Esto cubre el caso critico: servidor devuelve updatedAt=0 (nunca guardado) pero el
+                 * usuario ya ingreso datos localmente. Sin esta guarda, updatedAt=0 del servidor
+                 * sobreescribiria los datos recien ingresados porque la condicion anterior era
+                 * `serverUpdatedAt > 0 && ...` — fallaba cuando server = 0. */
+                if (localUpdatedAt > 0 && serverUpdatedAt <= localUpdatedAt) {
                     /* Servidor tiene datos mas viejos o iguales — preservar estado local */
                     return;
                 }
