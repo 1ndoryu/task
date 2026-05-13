@@ -147,11 +147,18 @@ class DashboardRepository
                 $results['deficitCalorico'] = $this->pluginStateRepo->setDeficitCalorico($data['deficitCalorico'], true);
             }
 
+            /* Verificar resultados antes de commit: si algun componente fallo, hacer ROLLBACK */
+            $failedComponents = array_keys(array_filter($results, fn($v) => $v === false));
+            if (!empty($failedComponents)) {
+                $wpdb->query('ROLLBACK');
+                error_log('[DashboardRepo] saveAll fallo en componentes: ' . implode(', ', $failedComponents));
+                return false;
+            }
+
             // sentinel-disable-next-line retorno-ignorado-repo — dentro de transaccion, excepcion dispara ROLLBACK
             $this->configRepo->updateSyncStatus($timestamp);
             $wpdb->query('COMMIT');
-
-            return !in_array(false, $results, true);
+            return true;
         } catch (\Exception $e) {
             $wpdb->query('ROLLBACK');
             error_log('[DashboardRepo] Error saving dashboard: ' . $e->getMessage());

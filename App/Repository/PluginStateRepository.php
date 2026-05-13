@@ -80,7 +80,19 @@ class PluginStateRepository
 
         $encoded = $this->encodeData($state);
         $updated = update_user_meta($this->userId, $metaKey, $encoded);
-        return $updated !== false || get_user_meta($this->userId, $metaKey, true) === $encoded;
+        if ($updated !== false) {
+            return true;
+        }
+        /* update_user_meta devuelve false cuando (a) el valor no cambio (OK) o (b) error de BD.
+         * Distinguir usando $wpdb->last_error: si hay error es fallo real, si no hay error es
+         * 'sin cambios' y el guardado fue exitoso. La comparacion de strings ciframos/no-ciframos
+         * era fragil — el IV aleatorio hace que el string cambie aunque el contenido sea igual. */
+        global $wpdb;
+        if (!empty($wpdb->last_error)) {
+            error_log('[PluginStateRepo] DB error en setState ' . $metaKey . ': ' . $wpdb->last_error);
+            return false;
+        }
+        return true;
     }
 
     private function normalizarAyuno(array $state): array
