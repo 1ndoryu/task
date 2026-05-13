@@ -10,6 +10,9 @@ namespace App\Services;
 
 class LLMProviderService
 {
+    /* [135M-1] Cerebras como primer proveedor en fallback chain.
+     * Rate limit gratuito: 10 req/min. Si excede, cae automaticamente a Groq/DeepSeek.
+     * CEREBRAS_API_KEY en env (Coolify). Modelo: zai-glm-4.7 (GLM-47, ~1000 tok/s). */
     private const PROVIDERS = [
         'groq' => [
             'url' => 'https://api.groq.com/openai/v1/chat/completions',

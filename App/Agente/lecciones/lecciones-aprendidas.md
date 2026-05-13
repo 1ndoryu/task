@@ -40,6 +40,22 @@
 
 **Fix:** `WhatsAppWebhookService` conserva `type` como kind, usa `mimeType` para descarga/transcripción y acepta ambas señales al decidir audio/imagen.
 
+## 2026-05-13 — Añadir proveedor LLM requiere tocar 8+ archivos sincronizados
+
+**Patrón del error:** La tarea parecía sencilla (añadir un proveedor más), pero un proveedor LLM toca: backend provider config + modelo whitelist + fallback chain, frontend types + store + service + UI + hook, admin validation. Cada uno es punto de fallo si se olvida.
+
+**Lección:** Añadir proveedor LLM es un barrido completo que sigue un patrón fijo. Documentar la checklist en lecciones evita olvidos:
+1. Backend: `LLMProviderService` (PROVIDERS + CHAT_FALLBACK_CHAIN)
+2. Frontend type: `iaStore.ts` (ProveedorIA + apiKey state)
+3. Frontend service: `iaService.ts` (URLS_PROVIDER + MODELOS_IA + PROVEEDORES_IA + MODELO_FLASH + función helper)
+4. Frontend UI: `SeccionesConfigPaneles.tsx` (API key input)
+5. Admin validation: `AdminApiController.php` (validate_callback)
+6. Hooks: `usePanelIA.ts`, `useDeficitCalorico.ts`, `useConfigDeficitCalorico.ts` (nuevo parámetro en helpers)
+7. .env + Coolify sync: añadir env var a .env y sync-env push
+8. Deploy: commit, push, deploy con timeout suficiente
+
+**Fix:** Se completó el barrido completo. TODO: Idealmente el proveedor debería ser data-driven (configurable desde BD) para no requerir deploy de código al añadir uno nuevo.
+
 ## 2026-05-12 — Acciones backend sobre hábitos deben renovar updatedAt y verificar persistencia
 
 **Patrón del error:** `completar_habito` podía decir éxito porque `saveAll()` retornaba true, pero el JSON quedaba igual o un sync posterior pisaba el cambio al conservar `updatedAt` viejo.

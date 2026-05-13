@@ -1,9 +1,11 @@
 /*
  * services/iaService.ts
- * Servicio para comunicación con LLM (Groq API / OpenAI-compatible)
+ * Servicio para comunicación con LLMs via APIs OpenAI-compatibles.
+ * Proveedores: Cerebras (primero), Groq, DeepSeek.
  *
  * [233A-69] Fase 1: Estructura base del servicio.
  * Fase 2+3: Flujo completo con system prompt, acciones y parsing.
+ * [135M-1] Cerebras añadido como primer proveedor. zai-glm-4.7 via api.cerebras.ai.
  */
 
 import type {MensajeIA, AccionIA, ProveedorIA} from '../stores/iaStore';
