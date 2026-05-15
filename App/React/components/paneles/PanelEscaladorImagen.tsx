@@ -12,7 +12,13 @@ const OPCIONES_MODO = [
     {valor: 'precision', etiqueta: 'Precision'}
 ];
 
-const OPCIONES_SCALE = ['2x', '4x', '8x', '16x'].map(valor => ({valor, etiqueta: valor}));
+const OPCIONES_SCALE_CREATIVE = ['2x', '4x', '8x', '16x'].map(valor => ({valor, etiqueta: valor}));
+const OPCIONES_SCALE_PRECISION = [2, 4, 8, 16].map(valor => ({valor, etiqueta: `${valor}x`}));
+const OPCIONES_FLAVOR = [
+    {valor: 'photo', etiqueta: 'Photo'},
+    {valor: 'sublime', etiqueta: 'Sublime (ilustraciones)'},
+    {valor: 'photo_denoiser', etiqueta: 'Photo Denoiser'}
+];
 const OPCIONES_PRESET = [
     {valor: 'standard', etiqueta: 'Standard'},
     {valor: 'soft_portraits', etiqueta: 'Soft portraits'},
@@ -30,7 +36,7 @@ const CAMPOS_PRECISION = ['sharpen', 'smart_grain', 'ultra_detail'] as const;
 type CampoNumericoMagnific = typeof CAMPOS_CREATIVE[number] | typeof CAMPOS_PRECISION[number];
 
 export function PanelEscaladorImagen({renderHandleArrastre, handleMinimizar}: PanelBaseProps): JSX.Element {
-    const {imagen, opciones, taskId, estado, resultadoUrl, error, cargando, puedeIniciar, actualizarOpcion, cargarArchivo, iniciar, consultarEstado} = usePanelEscaladorImagen();
+    const {imagen, opciones, taskId, estado, resultadoUrl, error, cargando, puedeIniciar, costoEstimado, actualizarOpcion, cargarArchivo, iniciar, consultarEstado} = usePanelEscaladorImagen();
 
     const manejarNumero = (campo: CampoNumericoMagnific, valor: string) => {
         actualizarOpcion(campo, Number(valor));
@@ -61,12 +67,25 @@ export function PanelEscaladorImagen({renderHandleArrastre, handleMinimizar}: Pa
                 )}
 
                 <div className="escaladorImagenGrid">
-                    <Select value={opciones.mode} opciones={OPCIONES_MODO} onChange={e => actualizarOpcion('mode', e.target.value as 'creative' | 'precision')} />
-                    {opciones.mode === 'creative' && (
+                    <Select
+                        value={opciones.mode}
+                        opciones={OPCIONES_MODO}
+                        onChange={e => {
+                            const nuevoModo = e.target.value as 'creative' | 'precision';
+                            actualizarOpcion('mode', nuevoModo);
+                            actualizarOpcion('scale_factor', nuevoModo === 'creative' ? '2x' : 2);
+                        }}
+                    />
+                    {opciones.mode === 'creative' ? (
                         <>
-                            <Select value={opciones.scale_factor} opciones={OPCIONES_SCALE} onChange={e => actualizarOpcion('scale_factor', e.target.value)} />
+                            <Select value={String(opciones.scale_factor)} opciones={OPCIONES_SCALE_CREATIVE} onChange={e => actualizarOpcion('scale_factor', e.target.value)} />
                             <Select value={opciones.optimized_for} opciones={OPCIONES_PRESET} onChange={e => actualizarOpcion('optimized_for', e.target.value)} />
                             <Select value={opciones.engine} opciones={OPCIONES_ENGINE} onChange={e => actualizarOpcion('engine', e.target.value)} />
+                        </>
+                    ) : (
+                        <>
+                            <Select value={String(opciones.scale_factor)} opciones={OPCIONES_SCALE_PRECISION} onChange={e => actualizarOpcion('scale_factor', Number(e.target.value))} />
+                            <Select value={opciones.flavor} opciones={OPCIONES_FLAVOR} onChange={e => actualizarOpcion('flavor', e.target.value)} />
                         </>
                     )}
                 </div>
@@ -86,6 +105,13 @@ export function PanelEscaladorImagen({renderHandleArrastre, handleMinimizar}: Pa
                     <span>Filtro NSFW</span>
                     <ToggleSwitch checked={opciones.filter_nsfw} onChange={valor => actualizarOpcion('filter_nsfw', valor)} />
                 </label>
+
+                {costoEstimado !== null && (
+                    <div className="escaladorCosto">
+                        <span>Costo estimado</span>
+                        <span className="escaladorCostoValor">≈ €{costoEstimado.toFixed(2)}</span>
+                    </div>
+                )}
 
                 {error && <div className="escaladorImagenError">{error}</div>}
 

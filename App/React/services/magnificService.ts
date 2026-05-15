@@ -5,7 +5,8 @@ export type ModoMagnific = 'creative' | 'precision';
 export interface OpcionesMagnific {
     mode: ModoMagnific;
     image: string;
-    scale_factor: string;
+    /* scale_factor: string para creative ('2x', '4x'…), number para precision (2, 4, 8, 16) */
+    scale_factor: string | number;
     optimized_for: string;
     engine: string;
     prompt: string;
@@ -17,6 +18,7 @@ export interface OpcionesMagnific {
     smart_grain: number;
     ultra_detail: number;
     filter_nsfw: boolean;
+    flavor: string;
 }
 
 export interface RespuestaMagnific {
@@ -85,4 +87,17 @@ export function extraerEstado(respuesta: RespuestaMagnific): string {
 export function extraerImagenGenerada(respuesta: RespuestaMagnific): string {
     const generada = respuesta.data?.generated || respuesta.generated || '';
     return Array.isArray(generada) ? (generada[0] || '') : generada;
+}
+
+/**
+ * Estima el costo en euros basado en el área del output (pixeles de salida).
+ * Fuente: Magnific pricing docs (tiers por megapíxeles de output).
+ */
+export function calcularCostoEstimado(ancho: number, alto: number, scaleFactor: number): number {
+    const outputMP = (ancho * scaleFactor * alto * scaleFactor) / 1_000_000;
+    if (outputMP <= 4) return 0.10;
+    if (outputMP <= 10) return 0.20;
+    if (outputMP <= 16) return 0.40;
+    if (outputMP <= 22) return 0.50;
+    return Number((outputMP * 0.025).toFixed(2));
 }

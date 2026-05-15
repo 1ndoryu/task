@@ -84,3 +84,20 @@
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
 }
+
+.escaladorCosto {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioMedio);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.escaladorCostoValor {
+    color: var(--dashboard-texto);
+    font-weight: 500;
+}

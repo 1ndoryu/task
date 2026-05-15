@@ -12,7 +12,8 @@ class MagnificService
 {
     private const ENDPOINTS = [
         'creative' => 'https://api.magnific.com/v1/ai/image-upscaler',
-        'precision' => 'https://api.magnific.com/v1/ai/image-upscaler-precision',
+        /* [precision-v2] Endpoint V2 agrega scale_factor, flavor y mejoras de calidad */
+        'precision' => 'https://api.magnific.com/v1/ai/image-upscaler-precision-v2',
     ];
 
     private const CAMPOS_PERMITIDOS = [
@@ -21,7 +22,7 @@ class MagnificService
             'fractality', 'engine', 'filter_nsfw', 'webhook_url',
         ],
         'precision' => [
-            'sharpen', 'smart_grain', 'ultra_detail', 'filter_nsfw', 'webhook_url',
+            'scale_factor', 'sharpen', 'smart_grain', 'ultra_detail', 'flavor', 'filter_nsfw', 'webhook_url',
         ],
     ];
 
@@ -35,7 +36,7 @@ class MagnificService
             if (!array_key_exists($campo, $payload) || $payload[$campo] === '' || $payload[$campo] === null) {
                 continue;
             }
-            $body[$campo] = $this->normalizarValor($campo, $payload[$campo]);
+            $body[$campo] = $this->normalizarValor($campo, $payload[$campo], $modo);
         }
 
         return $this->request('POST', self::ENDPOINTS[$modo], $body);
@@ -109,11 +110,16 @@ class MagnificService
         return $image;
     }
 
-    private function normalizarValor(string $campo, mixed $valor): mixed
+    private function normalizarValor(string $campo, mixed $valor, string $modo = 'creative'): mixed
     {
         return match ($campo) {
             'creativity', 'hdr', 'resemblance', 'fractality' => max(-10, min(10, (int)$valor)),
             'sharpen', 'smart_grain', 'ultra_detail' => max(0, min(100, (int)$valor)),
+            /* scale_factor: precision V2 espera entero 2-16; creative espera string '2x', '4x', etc. */
+            'scale_factor' => $modo === 'precision'
+                ? max(2, min(16, is_numeric($valor) ? (int)$valor : (int)rtrim((string)$valor, 'x')))
+                : sanitize_text_field((string)$valor),
+            'flavor' => in_array($valor, ['sublime', 'photo', 'photo_denoiser'], true) ? $valor : 'photo',
             'filter_nsfw' => (bool)$valor,
             'webhook_url' => esc_url_raw((string)$valor),
             default => sanitize_text_field((string)$valor),
