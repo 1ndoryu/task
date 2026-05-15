@@ -212,8 +212,23 @@ class AgentSchedulerService
             return true;
         }
 
+        /* [fix-dynamic-habit-patterns] Detectar patrones genéricos que el LLM genera cuando
+         * el usuario pide "recordatorio del hábito con mayor prioridad" sin usar dynamic_type.
+         * Cuantos más patrones detectemos, menos dependemos de que el LLM recuerde el campo. */
         $texto = self::normalizarTexto($titulo . ' ' . $mensaje);
-        return str_contains($texto, 'habito pendiente') || str_contains($texto, 'habitos pendientes');
+        $patronesDinamicos = [
+            'habito pendiente', 'habitos pendientes',
+            'habito con mayor prioridad', 'habito mas importante',
+            'habito prioritario', 'habito de mayor prioridad',
+            'mayor prioridad pendiente', 'siguiente habito',
+            'habito sin completar', 'habito incompleto',
+        ];
+        foreach ($patronesDinamicos as $patron) {
+            if (str_contains($texto, $patron)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /* [fix-personalizar-todos] Genera un recordatorio cálido y personalizado via LLM para
