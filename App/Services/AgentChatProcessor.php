@@ -134,6 +134,15 @@ class AgentChatProcessor
         $rawContent = (string)($llmResult['contenido'] ?? $llmResult['content'] ?? $llmResult['message'] ?? '');
         $parsed     = $this->parsear($rawContent);
 
+        /* [185A-1] Si el provider/model real difiere del configurado (fallback activo), actualizar
+         * messages[0] para que la segunda llamada LLM tenga info correcta del modelo usado. */
+        $realProvider = (string)($llmResult['provider'] ?? $llm['proveedor']);
+        $realModel    = (string)($llmResult['model'] ?? $llm['modelo']);
+        if ($realProvider !== $llm['proveedor'] || $realModel !== $llm['modelo']) {
+            error_log('[AgentChatProcessor] Fallback activo: configurado=' . $llm['proveedor'] . '/' . $llm['modelo'] . ' real=' . $realProvider . '/' . $realModel);
+            $messages[0]['content'] = $this->buildSystemPrompt($contexto, $memorias, $canal, $contextoMaestro, $realProvider, $realModel, $statsHistorial, $privacyMode, $accionesCodigoPermitidas);
+        }
+
         /* Ejecutar acciones (con retry) */
         $parsed['acciones'] = $this->normalizarAccionesDesdeMensajeUsuario($parsed['acciones'], $mensaje, $canal, $userId);
         $ejecutadas = $this->ejecutarAcciones($userId, $canal, $parsed['acciones']);
@@ -281,6 +290,7 @@ ACCIONES DISPONIBLES:
 - {\"tipo\": \"listar_recordatorios\", \"parametros\": {}}
 - {\"tipo\": \"editar_recordatorio\", \"parametros\": {\"id\": 123, \"fecha\": \"ISO8601\", \"titulo\": \"nuevo titulo\", \"mensaje\": \"nuevo mensaje\", \"recurrence_minutes\": 15}}
 - {\"tipo\": \"eliminar_recordatorio\", \"parametros\": {\"id\": 123}}
+- {\"tipo\": \"cancelar_todos_recordatorios\", \"parametros\": {}}
 - {\"tipo\": \"completar_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"posponer_habito\", \"parametros\": {\"id\": 123}}
 - {\"tipo\": \"completar_subhabito\", \"parametros\": {\"id\": 123, \"subId\": 0}}
@@ -314,7 +324,7 @@ REGLAS:
 - Responde siempre en español.
 - programar_recordatorio con channel=whatsapp enviará el mensaje por WhatsApp. Si recurrence_minutes > 0, se repetirá con ese intervalo.
 - RECORDATORIO DINÁMICO DE HÁBITOS: si el usuario pide recordatorio del \"hábito con mayor prioridad\", \"hábito pendiente\", \"siguiente hábito\", \"hábito más importante\" o cualquier referencia genérica a hábitos sin especificar uno concreto, agrega \"dynamic_type\": \"habito_pendiente\" al payload de programar_recordatorio. Así el scheduler evalúa EN EL MOMENTO de disparar cuál es el hábito pendiente de mayor prioridad — y omite el recordatorio si todos están completados. NUNCA uses el nombre de un hábito específico en estos casos porque el recordatorio quedará obsoleto una vez completado ese hábito.
-- Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar.
+- Los recordatorios activos ya están listados en el contexto con sus IDs — úsalos para editar o eliminar. Para borrar UN recordatorio específico usa eliminar_recordatorio con su ID. Para borrar TODOS usa cancelar_todos_recordatorios (nunca uses eliminar_recordatorio múltiples veces si el usuario pide borrar todos — esos IDs pueden estar obsoletos).
 - guardar_memoria: solo para información nueva y valiosa (nombre, preferencias, metas) que no esté ya en las memorias recuperadas.
 - crear_tarea_si_no_existe: úsala en recordatorios automáticos o cuando quieras asegurarte de no duplicar. Solo crea si no hay tarea activa (no completada) con ese nombre exacto.
 - actualizar_contexto_maestro: llámala proactivamente cuando detectes información duradera (nombre real, horarios, rutinas, preferencias permanentes). Escribe el contexto COMPLETO actualizado — persiste entre sesiones.
@@ -1509,7 +1519,25 @@ REGLAS:
             case 'eliminar_recordatorio':
                 $id = (int)($param['id'] ?? 0);
                 $ok = (new AgentActionService())->cancelar($id, $userId);
-                return ['tipo' => $tipo, 'exito' => $ok, 'id' => $id];
+                /* [185A-1] Incluir razon en fallo para que el LLM sepa si el ID es obsoleto */
+                return $ok
+                    ? ['tipo' => $tipo, 'exito' => true, 'id' => $id]
+                    : ['tipo' => $tipo, 'exito' => false, 'id' => $id, 'razon' => 'ID no encontrado, ya ejecutado o cancelado. Usa cancelar_todos_recordatorios o listar_recordatorios para obtener IDs actuales.'];
+
+            /* [185A-1] Cancela TODOS los recordatorios pendientes del usuario de una vez.
+             * Evita el problema de IDs obsoletos cuando el usuario pide 'borra todos'. */
+            case 'cancelar_todos_recordatorios':
+                $service = new AgentActionService();
+                $pendientes = $service->listar($userId, 'pendiente', 100);
+                $cancelados = 0;
+                $ids = [];
+                foreach ($pendientes as $r) {
+                    if ($service->cancelar((int)$r['id'], $userId)) {
+                        $cancelados++;
+                        $ids[] = (int)$r['id'];
+                    }
+                }
+                return ['tipo' => $tipo, 'exito' => true, 'cancelados' => $cancelados, 'ids' => $ids];
 
             /* [115A-3] Contexto maestro -------------------------------------- */
             case 'actualizar_contexto_maestro':
