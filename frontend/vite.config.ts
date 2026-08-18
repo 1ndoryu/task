@@ -35,24 +35,29 @@ function pluginModulosExternos(): Plugin {
     };
 }
 
+/* [18-08-2026] Proxy configurable por env: el repo convive con otros proyectos
+ * en la misma maquina (WANDORIUS usa :3000/:5173). Con VITE_API_PROXY_TARGET
+ * y --port se levanta un stack aislado sin pisar a otros agentes. */
+const PROXY_TARGET = process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:3000';
+
 export default defineConfig({
     plugins: [pluginModulosExternos(), react()],
     base: './',
     server: {
-        port: 5173,
+        port: Number(process.env.VITE_PORT) || 5173,
         strictPort: true,
         /* Proxy API requests al backend Rust en desarrollo */
         proxy: {
             '/api': {
-                target: 'http://127.0.0.1:3000',
+                target: PROXY_TARGET,
                 changeOrigin: true,
             },
             '/swagger-ui': {
-                target: 'http://127.0.0.1:3000',
+                target: PROXY_TARGET,
                 changeOrigin: true,
             },
             '/api-docs': {
-                target: 'http://127.0.0.1:3000',
+                target: PROXY_TARGET,
                 changeOrigin: true,
             },
         },

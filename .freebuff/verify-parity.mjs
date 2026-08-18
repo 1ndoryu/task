@@ -1,7 +1,8 @@
 /* Verificación end-to-end de los dominios de paridad (18-08-2026).
  * Recorre el ciclo de vida real de cada dominio contra el backend en vivo
  * y falla con código 1 si algún assert no se cumple. */
-const BASE = 'http://127.0.0.1:3000/api';
+const BASE = process.env.PARITY_BASE_URL || 'http://127.0.0.1:3000/api';
+const WS_URL = BASE.replace(/^http/, 'ws').replace(/\/api$/, '/api/realtime/ws');
 
 let pasados = 0;
 let fallados = 0;
@@ -169,7 +170,7 @@ async function main() {
   r = await api('PUT', `/tasks/${tareaId}`, {body: {texto: 'Tarea para verificar chat RT', completado: false}, csrf});
   assert(r.status === 200, 'crear tarea para el chat');
   const wsEvento = await new Promise(resolve => {
-    const ws = new WebSocket('ws://127.0.0.1:3000/api/realtime/ws', {headers: {cookie: headerCookie()}});
+    const ws = new WebSocket(WS_URL, {headers: {cookie: headerCookie()}});
     const timer = setTimeout(() => { ws.close(); resolve(null); }, 8000);
     ws.onopen = async () => {
       await new Promise(s => setTimeout(s, 400));
