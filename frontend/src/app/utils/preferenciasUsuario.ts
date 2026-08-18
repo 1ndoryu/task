@@ -15,9 +15,18 @@
  */
 
 /* Claves de preferencias persistibles. NO incluir: secretos (API keys, tokens
- * MCP), datos que ya se sincronizan por su propia vía (habitos/tareas/notas/
- * proyectos via dashboard, actividad via /api/activity) ni caches efímeros
- * (actividad sessionStorage, sync retries). */
+ * MCP, glory_mcp_token_base64), marcas de proceso (glory_usuario_inicializado,
+ * glory_sync_init_retries), caches regenerables (HabitosHistorialStore TTL 10m,
+ * glory_actividad_cache sessionStorage TTL 5m, glory_offline_db IndexedDB) ni
+ * datos que ya se sincronizan por su propia vía (dashboard_* via dashboard,
+ * glory-habitos-store via /api/habits, actividad via /api/activity).
+ *
+ * [18-08-2026] Auditoría exhaustiva: se añadieron glory-ayuno y
+ * glory-deficit-calorico (el sync los incluye en datosActuales pero el backend
+ * Rust NO tiene campos/handlers para ellos → viven solo en localStorage),
+ * grupos de tareas/FB, estado de paneles (escalador de imagen, columnas FB,
+ * página móvil, nota activa) y las claves de la isla Arbitraje del mismo SPA.
+ */
 export const CLAVES_PREFERENCIAS: string[] = [
     /* Layout y paneles */
     'glory_config_layout',
@@ -44,6 +53,25 @@ export const CLAVES_PREFERENCIAS: string[] = [
     'glory-time-tracker',
     'glory-recordatorios',
     'glory_grupos_ejecucion',
+    /* Datos de plugin sin backend Rust (el sync de dashboard no los persiste) */
+    'glory-ayuno',
+    'glory-deficit-calorico',
+    /* Grupos (service legacy /wp-json, sin backend Rust) */
+    'grupos-tareas-storage',
+    'GruposFbStore',
+    /* Estado de paneles y UI */
+    'magnific_last_task',
+    'gruposFb_columnas',
+    'gloryPaginaMovilActiva',
+    'glory_nota_activa_id',
+    'glory_notas_activas_panel',
+    /* Isla Arbitraje (misma SPA, ruta /arbitraje/) */
+    'arbitraje_costoProducto',
+    'arbitraje_costoEnvio',
+    'arbitraje_precioVenta',
+    'arbitraje_tasas',
+    'arbitraje_numeroCiclos',
+    'arbitraje_modoSimulacion',
     /* Tema (hook useTema) */
     'dashboard_tema',
 ];

@@ -259,7 +259,21 @@ async function main() {
     'glory_orden_habitos': 'inteligente',
     'glory_orden_tareas': 'manual',
     'dashboard_tema': 'oscuro',
-    'glory-config-usuario': {state: {horaFinDia: 4}, version: 0}
+    'glory-config-usuario': {state: {horaFinDia: 4}, version: 0},
+    /* [18-08-2026] Auditoría exhaustiva: claves añadidas tras inventario total
+     * de writes de localStorage (stores persist + hooks + writes directos). */
+    'glory-ayuno': {state: {estado: 'activo', historial: [{inicio: 1000, fin: 2000}]}, version: 0},
+    'glory-deficit-calorico': {state: {datosUsuario: {sexo: 'masculino'}}, version: 0},
+    'grupos-tareas-storage': {state: {grupos: [{id: 1, nombre: 'Trabajo', colapsado: false}]}, version: 0},
+    'GruposFbStore': {state: {grupos: [{id: 'g1', nombre: 'Grupo A'}]}, version: 0},
+    'magnific_last_task': {taskId: 't-123', estado: 'done', mode: 'precision'},
+    'gruposFb_columnas': {check: true, nombre: true, acciones: false},
+    'gloryPaginaMovilActiva': 'tareas',
+    'glory_nota_activa_id': 42,
+    'glory_notas_activas_panel': {'scratchpad': 42},
+    'arbitraje_costoProducto': {min: 10, max: 20},
+    'arbitraje_tasas': {usdABs: 36.5},
+    'arbitraje_modoSimulacion': 'ciclos'
   };
   r = await api('PUT', '/dashboard/settings', {body: {notas: 'nota-prefs', configuracion: {}, preferencias: blobPrefs}, csrf: csrfAdmin});
   assert(r.status === 204, 'PUT settings con preferencias → 204');
@@ -271,6 +285,16 @@ async function main() {
   assert(prefsDevueltas?.['glory_orden_habitos'] === 'inteligente', 'orden de hábitos persistido');
   assert(prefsDevueltas?.['dashboard_tema'] === 'oscuro', 'tema persistido');
   assert(prefsDevueltas?.['glory-config-usuario']?.state?.horaFinDia === 4, 'hora fin de día persistida (glory-config-usuario)');
+  assert(prefsDevueltas?.['glory-ayuno']?.state?.estado === 'activo', 'datos de ayuno persistidos (glory-ayuno, sin backend propio)');
+  assert(prefsDevueltas?.['glory-deficit-calorico']?.state?.datosUsuario?.sexo === 'masculino', 'datos de déficit calórico persistidos');
+  assert(prefsDevueltas?.['grupos-tareas-storage']?.state?.grupos?.[0]?.nombre === 'Trabajo', 'grupos de tareas persistidos');
+  assert(prefsDevueltas?.['GruposFbStore']?.state?.grupos?.[0]?.nombre === 'Grupo A', 'grupos FB persistidos (service legacy sin backend)');
+  assert(prefsDevueltas?.['magnific_last_task']?.taskId === 't-123', 'estado del escalador de imagen persistido');
+  assert(prefsDevueltas?.['gruposFb_columnas']?.acciones === false, 'columnas de grupos FB persistidas');
+  assert(prefsDevueltas?.['gloryPaginaMovilActiva'] === 'tareas', 'página móvil activa persistida');
+  assert(prefsDevueltas?.['glory_nota_activa_id'] === 42, 'nota activa persistida');
+  assert(prefsDevueltas?.['glory_notas_activas_panel']?.scratchpad === 42, 'mapa de notas activas por panel persistido');
+  assert(prefsDevueltas?.['arbitraje_costoProducto']?.min === 10, 'config de la isla Arbitraje persistida');
   /* PUT parcial: solo preferencias, sin notas → notas se conservan; y PUT
    * solo notas → preferencias no se borran (merge COALESCE del backend). */
   r = await api('PUT', '/dashboard/settings', {body: {notas: 'nota-parcial', configuracion: {}, preferencias: {'glory_sidebar_expandido': true}}, csrf: csrfAdmin});
