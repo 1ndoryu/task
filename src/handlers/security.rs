@@ -1,4 +1,5 @@
 use axum::extract::{Path, State};
+use axum::http::StatusCode;
 use axum::routing::{delete, get, put};
 use axum::{Json, Router};
 use uuid::Uuid;
@@ -84,9 +85,10 @@ pub async fn mcp_token_state(
 pub async fn mcp_token_generate(
     State(state): State<AppState>,
     auth: AuthUser,
-) -> Result<Json<McpTokenGenerated>, AppError> {
-    Ok(Json(
-        SecurityService::mcp_generate(&state.pool, auth.user_id).await?,
+) -> Result<(StatusCode, Json<McpTokenGenerated>), AppError> {
+    Ok((
+        StatusCode::CREATED,
+        Json(SecurityService::mcp_generate(&state.pool, auth.user_id).await?),
     ))
 }
 

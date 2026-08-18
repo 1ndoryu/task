@@ -112,6 +112,7 @@ impl SecurityService {
         let row = SecurityRepository::create_token(pool, user_id, &hash, "mcp").await?;
         Ok(McpTokenGenerated {
             success: true,
+            id: row.id,
             token: raw,
             fecha_creacion: row.creado_en,
         })

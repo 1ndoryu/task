@@ -22,14 +22,22 @@ export function useMensajesNoLeidos(tipoElemento: 'tarea' | 'proyecto' | 'habito
     const [cargando, setCargando] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
 
+    /* [18-08-2026] Los callers construyen el array de ids inline (nueva
+     * identidad cada render). Se compara por CLAVE serializada para no
+     * relanzar el efecto en bucle (Maximum update depth exceeded). */
+    const elementoIdsRef = useRef(elementoIds);
+    elementoIdsRef.current = elementoIds;
+    const claveIds = elementoIds.join(',');
+
     const refrescar = useCallback(async (): Promise<void> => {
+        const ids = elementoIdsRef.current;
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
         }
         abortControllerRef.current = new AbortController();
         const signal = abortControllerRef.current.signal;
 
-        if (elementoIds.length === 0) {
+        if (ids.length === 0) {
             setNoLeidos({});
             setCargando(false);
             return;
@@ -38,8 +46,8 @@ export function useMensajesNoLeidos(tipoElemento: 'tarea' | 'proyecto' | 'habito
         setCargando(true);
 
         const resultado: Record<number, number> = {};
-        for (let i = 0; i < elementoIds.length; i += LIMITE_PETICIONES_PARALELAS) {
-            const lote = elementoIds.slice(i, i + LIMITE_PETICIONES_PARALELAS);
+        for (let i = 0; i < ids.length; i += LIMITE_PETICIONES_PARALELAS) {
+            const lote = ids.slice(i, i + LIMITE_PETICIONES_PARALELAS);
             await Promise.allSettled(
                 lote.map(async id => {
                     const respuesta = await apiFetch<{unread: number}>(
@@ -54,7 +62,7 @@ export function useMensajesNoLeidos(tipoElemento: 'tarea' | 'proyecto' | 'habito
 
         setNoLeidos(resultado);
         setCargando(false);
-    }, [tipoElemento, elementoIds]);
+    }, [tipoElemento, claveIds]);
 
     /* Cargar al montar o cuando cambian los IDs */
     useEffect(() => {

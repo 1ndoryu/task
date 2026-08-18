@@ -86,7 +86,7 @@ pub async fn upload_file(
     State(state): State<AppState>,
     auth: AuthUser,
     mut multipart: Multipart,
-) -> Result<Json<Attachment>, AppError> {
+) -> Result<(StatusCode, Json<Attachment>), AppError> {
     let mut nombre: Option<String> = None;
     let mut tipo: Option<String> = None;
     let mut entity_type: Option<String> = None;
@@ -196,7 +196,7 @@ pub async fn upload_file(
     )
     .await?;
 
-    Ok(Json(Attachment {
+    Ok((StatusCode::CREATED, Json(Attachment {
         id: row.id,
         tipo: row.tipo,
         url: format!("/api/storage/files/{}", row.id),
@@ -204,7 +204,7 @@ pub async fn upload_file(
         tamano: row.tamano,
         fecha_subida: row.creado_en,
         thumbnail_url: None,
-    }))
+    })))
 }
 
 /// Descarga autenticada: la cookie de sesión viaja en el mismo origen.

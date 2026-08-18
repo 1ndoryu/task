@@ -64,6 +64,7 @@ pub struct McpTokenState {
 #[serde(rename_all = "camelCase")]
 pub struct McpTokenGenerated {
     pub success: bool,
+    pub id: Uuid,
     pub token: String,
     pub fecha_creacion: DateTime<Utc>,
 }

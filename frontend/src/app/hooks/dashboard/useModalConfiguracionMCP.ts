@@ -157,11 +157,12 @@ export function useModalConfiguracionMCP({estaAbierto}: UseModalConfiguracionMCP
     const manejarGenerarToken = useCallback(async () => {
         setCargando(true);
         try {
-            const respuesta = await apiFetch<{success: boolean; token: string; fechaCreacion: string}>(
+            const respuesta = await apiFetch<{success: boolean; id: string; token: string; fechaCreacion: string}>(
                 '/security/mcp/token',
                 {method: 'POST'}
             );
             if (respuesta.success) {
+                tokenIdRef.current = respuesta.id;
                 setTokenGenerado(respuesta.token);
                 setTokenBase64(btoa(respuesta.token));
                 setTokenExiste(true);
