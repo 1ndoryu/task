@@ -27,12 +27,24 @@ pub struct DashboardData {
 
 /// Guarda el estado de dashboard no tipado (scratchpad de notas + configuración).
 /// [188A-1] El front es el unico escritor; se persiste el blob completo.
+/// [18-08-2026] `preferencias` es el blob de UI/plugins por usuario (layout,
+/// sidebar, tema, ordenes, filtros, plugins activos...) que en WordPress vivia
+/// solo en localStorage y se perdia al cambiar de navegador o limpiar cache.
+/// Ahora el servidor es la fuente de verdad: se guarda dentro del objeto `config`
+/// bajo la clave `preferencias` (JSONB, sin migracion de esquema).
+///
+/// PUT parcial: los tres campos son opcionales; el repositorio hace merge y
+/// conserva lo no enviado (COALESCE). El front puede subir SOLO preferencias
+/// sin reenviar notas ni configuracion.
 #[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateDashboardSettingsRequest {
-    pub notas: String,
-    #[serde(default = "default_dashboard_config")]
-    pub configuracion: Value,
+    #[serde(default)]
+    pub notas: Option<String>,
+    #[serde(default)]
+    pub configuracion: Option<Value>,
+    #[serde(default)]
+    pub preferencias: Option<Value>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]

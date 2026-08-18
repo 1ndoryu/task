@@ -245,6 +245,50 @@ async function main() {
   r = await api('POST', `/admin/users/${uid}/cancel-premium`, {csrf: csrfAdmin});
   assert(r.status === 200 && r.data.success, 'admin cancela premium');
 
+  /* [18-08-2026] Preferencias UI/plugins por usuario: el servidor debe
+   * persistir el blob (layout, plugins, tema...) y devolverlo en el GET.
+   * En WordPress esto vivía solo en localStorage y se perdía al cambiar
+   * de navegador o limpiar cache. */
+  console.log('\n== Preferencias de usuario (persistencia UI/plugins) ==');
+  const blobPrefs = {
+    'glory_config_layout': {modoColumnas: 2, anchos: {izquierda: 320, derecha: 380}},
+    'glory_sidebar_expandido': false,
+    'glory-plugins': {pluginsActivos: ['ayuno', 'time-tracker'], configuracionPlugins: {ayuno: {habitoId: 7}}},
+    'glory_config_tareas': {ocultarCompletadas: true, modoCompacto: false},
+    'glory_config_habitos_desktop': {columnasVisibles: {nombre: true, progreso: true}},
+    'glory_orden_habitos': 'inteligente',
+    'glory_orden_tareas': 'manual',
+    'dashboard_tema': 'oscuro',
+    'glory-config-usuario': {state: {horaFinDia: 4}, version: 0}
+  };
+  r = await api('PUT', '/dashboard/settings', {body: {notas: 'nota-prefs', configuracion: {}, preferencias: blobPrefs}, csrf: csrfAdmin});
+  assert(r.status === 204, 'PUT settings con preferencias → 204');
+  r = await api('GET', '/dashboard');
+  const prefsDevueltas = r.data?.data?.configuracion?.preferencias;
+  assert(r.status === 200 && prefsDevueltas?.['glory_config_layout']?.modoColumnas === 2, 'GET dashboard devuelve glory_config_layout persistida');
+  assert(prefsDevueltas?.['glory-plugins']?.pluginsActivos?.includes('time-tracker'), 'plugins activos persistidos (glory-plugins)');
+  assert(prefsDevueltas?.['glory_config_tareas']?.ocultarCompletadas === true, 'config de tareas persistida');
+  assert(prefsDevueltas?.['glory_orden_habitos'] === 'inteligente', 'orden de hábitos persistido');
+  assert(prefsDevueltas?.['dashboard_tema'] === 'oscuro', 'tema persistido');
+  assert(prefsDevueltas?.['glory-config-usuario']?.state?.horaFinDia === 4, 'hora fin de día persistida (glory-config-usuario)');
+  /* PUT parcial: solo preferencias, sin notas → notas se conservan; y PUT
+   * solo notas → preferencias no se borran (merge COALESCE del backend). */
+  r = await api('PUT', '/dashboard/settings', {body: {notas: 'nota-parcial', configuracion: {}, preferencias: {'glory_sidebar_expandido': true}}, csrf: csrfAdmin});
+  assert(r.status === 204, 'PUT notas+config+prefs → 204');
+  r = await api('PUT', '/dashboard/settings', {body: {preferencias: {'glory_config_layout': {modoColumnas: 3}}}, csrf: csrfAdmin});
+  assert(r.status === 204, 'PUT solo preferencias (parcial) → 204');
+  r = await api('GET', '/dashboard');
+  assert(r.data?.data?.notas === 'nota-parcial', 'PUT parcial conserva notas existentes');
+  assert(r.data?.data?.configuracion?.preferencias?.['glory_config_layout']?.modoColumnas === 3, 'PUT parcial actualiza preferencias');
+  r = await api('PUT', '/dashboard/settings', {body: {notas: 'nota-solo'}, csrf: csrfAdmin});
+  assert(r.status === 204, 'PUT solo notas (parcial inverso) → 204');
+  r = await api('GET', '/dashboard');
+  assert(r.data?.data?.notas === 'nota-solo', 'notas actualizadas por PUT parcial');
+  assert(r.data?.data?.configuracion?.preferencias?.['glory_config_layout']?.modoColumnas === 3, 'PUT solo notas NO borra preferencias (merge COALESCE)');
+  /* Restaurar preferencias vacías para no dejar el usuario de paridad sucio. */
+  r = await api('PUT', '/dashboard/settings', {body: {notas: 'nota-prefs', configuracion: {}, preferencias: {}}, csrf: csrfAdmin});
+  assert(r.status === 204, 'limpieza de preferencias de prueba → 204');
+
   /* [18-08-2026] Paridad actividad: el front llama GET /api/activity/dia
    * (WordPress: /actividad/dia); la ruta Rust era /activity/day y el front
    * recibía el HTML del SPA ("Unexpected token '<'"). */

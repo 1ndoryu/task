@@ -23,8 +23,9 @@ impl DashboardService {
         DashboardRepository::upsert_settings(
             pool,
             user_id,
-            &request.notas,
+            request.notas.as_deref(),
             request.configuracion,
+            request.preferencias,
         )
         .await?;
         Ok(())

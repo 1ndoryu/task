@@ -112,6 +112,17 @@ impl BackupService {
             .to_string();
         let configuracion = data.get("configuracion").cloned().unwrap_or_default();
 
+        /* [18-08-2026] Las preferencias UI/plugins viajan dentro de configuracion.
+         * Si el backup es anterior a este cambio (no trae `preferencias`), se
+         * conservan las actuales del usuario en lugar de borrarlas: restaurar un
+         * backup viejo no debe perder layout/plugins actuales. Se pasa None para
+         * que el repositorio conserve la config actual si no hay preferencias. */
+        let preferencias = if configuracion.get("preferencias").is_some() {
+            configuracion.get("preferencias").cloned()
+        } else {
+            None
+        };
+
         let mut restored = 0;
         // Tareas y proyectos: upsert por legacy_id (id local del front).
         for tarea in data
@@ -181,8 +192,9 @@ impl BackupService {
         crate::repositories::DashboardRepository::upsert_settings(
             pool,
             user_id,
-            &notas,
-            configuracion,
+            Some(&notas),
+            Some(configuracion),
+            preferencias,
         )
         .await?;
 

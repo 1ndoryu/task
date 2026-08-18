@@ -11,6 +11,8 @@ import {useNotasStore, PANEL_SCRATCHPAD} from '../../stores/notasStore';
 import {useAyunoStore} from '../../stores/ayunoStore';
 import {useDeficitCaloricoStore} from '../../stores/deficitCaloricoStore';
 import {invalidarCache as invalidarCacheActividad} from '../../services/actividadStore';
+import {aplicarPreferenciasServidor} from '../../utils/preferenciasUsuario';
+import {usePreferenciasServidor} from './usePreferenciasServidor';
 
 interface UseDashboardSyncProps {
     habitos: Habito[];
@@ -131,6 +133,12 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
             if (datos.notas !== undefined) setNotas(datos.notas);
             if (datos.ayuno !== undefined) sincronizarAyunoDesdeServidor(datos.ayuno);
             if (datos.deficitCalorico !== undefined) sincronizarDeficitDesdeServidor(datos.deficitCalorico);
+
+            /* [18-08-2026] Restaurar preferencias UI/plugins del servidor en las
+             * claves ausentes localmente (navegador nuevo / cache limpia). */
+            const preferencias = (datos.configuracion as {preferencias?: Record<string, unknown>} | null)
+                ?.preferencias;
+            aplicarPreferenciasServidor(preferencias);
         },
         [storeSetHabitos, setTareas, setProyectos, setNotas, sincronizarAyunoDesdeServidor, sincronizarDeficitDesdeServidor]
     );
@@ -341,6 +349,12 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
      * - Carga inicial inteligente
      * - Debounce
      */
+    /* [18-08-2026] Observador de preferencias: cuando el usuario cambia layout,
+     * plugins, tema, órdenes... se sube el blob por PUT parcial con debounce,
+     * aunque no cambien tareas/hábitos/notas (el SyncManager no lo detectaría). */
+    const esSesionActiva = ((window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard?.isLoggedIn ?? false);
+    usePreferenciasServidor(esSesionActiva);
+
     const {syncState, forceSync} = useSyncManager({
         currentData: datosActuales,
         onDataReceived: handleDatosServidor,
@@ -349,7 +363,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
          * sesion) el SyncManager no debe inicializarse (no hay datos que
          * sincronizar y el login recarga la pagina, asi que no hay deadlock).
          * Evita logs de subida pendiente/guard en la landing. */
-        isDataReady: !cargandoDatosLocales && ((window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard?.isLoggedIn ?? false)
+        isDataReady: !cargandoDatosLocales && esSesionActiva
         /* [275A-1] Pasamos habitosInicializado al guard esProbableWipeout.
          * Si Zustand aun no hidrato, el guard es mas agresivo (bloquea con 2 arrays vacios).
          */,

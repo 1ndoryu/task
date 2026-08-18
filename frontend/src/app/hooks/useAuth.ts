@@ -4,6 +4,7 @@ import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import GoogleAuthNative from '../plugins/GoogleAuthNative';
 import {Capacitor} from '@capacitor/core';
 import {limpiarTodosLosDatosUsuario} from '../utils/limpiezaSesion';
+import {persistirPreferenciasAhora} from '../utils/preferenciasUsuario';
 
 /* [correccion 18-08-2026] Lee el token CSRF de la cookie no HttpOnly
  * (contrato Rust ADR-02); reemplaza al nonce de WordPress. */
@@ -111,6 +112,12 @@ export function useAuth(): UseAuthReturn {
     const logout = useCallback(async () => {
         setLoading(true);
         try {
+            /* [18-08-2026] Flush de preferencias ANTES de limpiar: si el usuario
+             * cambió layout/plugins/tema dentro del debounce del observador, se
+             * suben al servidor (fuente de verdad) antes de borrar el localStorage.
+             * Sin esto, ese último cambio se perdía al cerrar sesión. */
+            await persistirPreferenciasAhora();
+
             /* Limpiar todos los datos del usuario antes de recargar para evitar cruce de sesiones */
             limpiarTodosLosDatosUsuario();
 

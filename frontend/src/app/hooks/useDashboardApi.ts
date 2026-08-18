@@ -15,6 +15,7 @@ import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 import type {AyunoState} from '../types/ayuno';
 import type {DeficitCaloricoState} from '../types/deficitCalorico';
 import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
+import {recolectarPreferencias} from '../utils/preferenciasUsuario';
 
 /*
  * Tipos para la API
@@ -313,14 +314,18 @@ export function useDashboardApi(): UseDashboardApiReturn {
                     );
                 }
 
-                /* Scratchpad de notas + configuracion de usuario (PUT /api/dashboard/settings) */
+                /* Scratchpad de notas + configuracion de usuario (PUT /api/dashboard/settings).
+                 * [18-08-2026] El blob `preferencias` (layout, plugins, tema, ordenes...) se
+                 * sube en cada guardado: el servidor es la fuente de verdad para que nada
+                 * se pierda al cambiar de navegador o limpiar cache. */
                 if (datos.notas !== undefined || datos.configuracion !== undefined) {
                     operaciones.push(
                         fetchApi('/api/dashboard/settings', {
                             method: 'PUT',
                             body: JSON.stringify({
                                 notas: datos.notas ?? '',
-                                configuracion: datos.configuracion ?? {}
+                                configuracion: datos.configuracion ?? {},
+                                preferencias: recolectarPreferencias()
                             })
                         })
                     );

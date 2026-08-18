@@ -97,13 +97,52 @@ struct SharedTaskRow {
 pub struct DashboardRepository;
 
 impl DashboardRepository {
-    /// Guarda el scratchpad de notas y la configuración ([188A-1]).
+    /// Guarda el scratchpad de notas, configuración y preferencias ([188A-1]).
+    /// [18-08-2026] PUT parcial con merge: cada campo opcional conserva el
+    /// valor actual si no viene (COALESCE). `preferencias` (blob UI/plugins)
+    /// se persiste dentro del objeto `config` bajo la clave `preferencias`;
+    /// el front la recupera en GET /api/dashboard como
+    /// `configuracion.preferencias`. Un guardado que no la incluya no la borra.
     pub async fn upsert_settings(
         pool: &PgPool,
         user_id: Uuid,
-        notas: &str,
-        config: Value,
+        notas: Option<&str>,
+        config: Option<Value>,
+        preferencias: Option<Value>,
     ) -> Result<(), sqlx::Error> {
+        let actual = Self::settings(pool, user_id).await?;
+
+        let notas_final = notas
+            .map(str::to_owned)
+            .or_else(|| actual.as_ref().map(|row| row.notes.clone()))
+            .unwrap_or_default();
+
+        /* Merge de config: la entrante gana por clave, excepto `preferencias`
+         * que se maneja aparte para que un PUT parcial no la borre. */
+        let mut config_final = actual
+            .as_ref()
+            .map(|row| row.config.clone())
+            .unwrap_or_else(default_dashboard_config);
+        if let (Value::Object(base), Some(Value::Object(entrante))) = (&mut config_final, config) {
+            for (clave, valor) in entrante {
+                if clave != "preferencias" {
+                    base.insert(clave, valor);
+                }
+            }
+        }
+
+        let preferencias_final = preferencias.unwrap_or_else(|| {
+            config_final
+                .get("preferencias")
+                .cloned()
+                .unwrap_or_else(|| serde_json::json!({}))
+        });
+        if let Value::Object(map) = &mut config_final {
+            map.insert(String::from("preferencias"), preferencias_final);
+        } else {
+            config_final = serde_json::json!({});
+        }
+
         sqlx::query(
             "INSERT INTO dashboard_settings (user_id, notes, config, updated_at)
              VALUES ($1, $2, $3, NOW())
@@ -113,8 +152,8 @@ impl DashboardRepository {
                 updated_at = NOW()",
         )
         .bind(user_id)
-        .bind(notas)
-        .bind(config)
+        .bind(notas_final)
+        .bind(config_final)
         .execute(pool)
         .await?;
         Ok(())
