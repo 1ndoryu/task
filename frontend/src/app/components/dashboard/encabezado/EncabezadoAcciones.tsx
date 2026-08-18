@@ -1,8 +1,9 @@
 import {useState} from 'react';
-import {LayoutGrid, Bell, Settings, Plus, CheckSquare, Activity, Folder} from 'lucide-react';
-import {IndicadorPlan, MenuContextual} from '../../shared';
+import {LayoutGrid, Bell, Settings, Plus, CheckSquare, Activity, Folder, PanelsTopLeft} from 'lucide-react';
+import {IndicadorPlan, MenuContextual, PanelesOcultosEncabezado} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
+import type {PanelId} from '../../../hooks/useConfiguracionLayout';
 
 interface EncabezadoAccionesProps {
     suscripcion?: InfoSuscripcion | null;
@@ -14,6 +15,11 @@ interface EncabezadoAccionesProps {
 
     onClickPlan?: () => void;
     onClickLayout?: () => void;
+    /* [18-08-2026] Botón de gestión de paneles (modal activar/desactivar) */
+    onClickPaneles?: () => void;
+    /* [18-08-2026] Paneles minimizados renderizados en el encabezado (antes en la esquina inferior izquierda) */
+    panelesOcultos?: PanelId[];
+    onMostrarPanel?: (panel: PanelId) => void;
     onClickNotificaciones?: (evento: React.MouseEvent) => void;
     onClickExperimentos?: () => void;
     onClickAdmin?: () => void;
@@ -21,7 +27,7 @@ interface EncabezadoAccionesProps {
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
 }
 
-export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
+export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, panelesOcultos, onMostrarPanel, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
     const [menuCrear, setMenuCrear] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
@@ -70,6 +76,18 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
                 <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={onClickLayout} title={esTablet ? undefined : 'Configurar Layout'}>
                     <LayoutGrid size={14} />
                 </Boton>
+            )}
+
+            {/* Paneles: modal activar/desactivar (incl. minimizados) */}
+            {onClickPaneles && (
+                <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={onClickPaneles} title={esTablet ? undefined : 'Paneles'}>
+                    <PanelsTopLeft size={14} />
+                </Boton>
+            )}
+
+            {/* [18-08-2026] Minimizados en el encabezado, junto al botón de Layout */}
+            {onMostrarPanel && panelesOcultos && (
+                <PanelesOcultosEncabezado panelesOcultos={panelesOcultos} onMostrarPanel={onMostrarPanel} />
             )}
 
             {/* Notificaciones */}

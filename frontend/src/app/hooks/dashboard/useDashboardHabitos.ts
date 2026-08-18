@@ -1,6 +1,7 @@
 import {useState, useCallback, useMemo} from 'react';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {migrarYActualizarHabitos} from '../../utils/migracionHabitos';
+import {marcarBorrado, desmarcarBorrado} from '../../utils/borradosPendientes';
 import type {Habito, ConfiguracionDashboard, DatosNuevoHabito} from '../../types/dashboard';
 
 const CONFIGURACION_POR_DEFECTO: ConfiguracionDashboard = {
@@ -135,10 +136,17 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
             const habitoEliminado = storeEliminarHabito(id);
             if (!habitoEliminado) return;
 
+            /* [18-08-2026] Tombstone: el sync por entidad no informa borrados al
+             * servidor; sin este registro el hábito eliminado reaparecía al
+             * refrescar. guardar() lo envía como DELETE /api/habits/{id}.
+             * Se marca solo para IDs reales (positivos). */
+            if (id > 0) marcarBorrado('habitos', id);
+
             setHabitoEditandoId(null);
             mostrarMensaje(`Habito "${habitoEliminado.nombre}" eliminado`, 'exito');
 
             registrarAccion(`"${habitoEliminado.nombre}" eliminado`, () => {
+                if (id > 0) desmarcarBorrado('habitos', id);
                 storeRestaurarHabito(habitoEliminado);
             });
         },

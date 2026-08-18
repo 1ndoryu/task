@@ -319,3 +319,125 @@
     border-color: var(--dashboard-bordeSutil);
     color: var(--dashboard-textoNormal);
 }
+
+/* 
+ * [18-08-2026] PANELES MINIMIZADOS EN EL ENCABEZADO
+ * Reemplazan la barra fija de la esquina izquierda: chips compactos junto al
+ * botón de Layout. Click en un chip restaura el panel.
+ */
+.panelesOcultosEncabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXxs);
+    padding-left: var(--dashboard-espacioXxs);
+    border-left: 1px solid var(--dashboard-bordeSutil);
+}
+
+.botonPanelOculto--encabezado {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+}
+
+/* 
+ * [18-08-2026] MODAL DE GESTIÓN DE PANELES
+ */
+.gestionPanelesContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioMd) 0;
+}
+
+.gestionPanelesDescripcion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0;
+}
+
+.gestionPanelesSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.gestionPanelesSeccionTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+    margin: 0;
+}
+
+.gestionPanelesLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.gestionPanelesItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.gestionPanelesItemInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+}
+
+.gestionPanelesItemIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-textoSecundario);
+}
+
+.gestionPanelesItemTexto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+.gestionPanelesItemNombre {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+}
+
+.gestionPanelesItemPlugin {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.gestionPanelesBadgeMinimizado {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: var(--dashboard-radioMini);
+    background: var(--dashboard-estadoAdvertenciaFondo, rgba(245, 158, 11, 0.12));
+    border: 1px solid var(--dashboard-estadoAdvertenciaBorde, rgba(245, 158, 11, 0.35));
+    color: var(--dashboard-estadoAdvertencia, #d97706);
+    white-space: nowrap;
+}
+
+.gestionPanelesVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoApagado);
+}
+
+.gestionPanelesVacio p {
+    margin: 0;
+    font-size: var(--dashboard-tamanoPequeno);
+}

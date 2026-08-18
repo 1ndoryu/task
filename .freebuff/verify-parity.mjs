@@ -321,6 +321,30 @@ async function main() {
   r = await api('GET', '/activity?fechaHoyLocal=2026-08-18&periodo=anio');
   assert(r.status === 200 && typeof r.data.heatmap === 'object', 'heatmap de actividad');
 
+  /* [18-08-2026] Tombstones de borrado: el bug era que eliminar tareas solo
+   * filtraba en el cliente y el backend las conservaba (soft-delete nunca
+   * llegaba) → reaparecían al refrescar. Ahora DELETE /tasks/:id hace
+   * soft-delete y el upsert posterior (undo/re-creación) lo revive. */
+  console.log('\n== Tombstones de tareas (borrar no debe reaparecer) ==');
+  const tareaBorradaId = 9700010001;
+  r = await api('PUT', `/tasks/${tareaBorradaId}`, {body: {texto: 'tarea a borrar (tombstone)', completado: false}, csrf: csrfAdmin});
+  assert(r.status === 200, 'crear tarea para tombstone → 200');
+  r = await api('GET', '/dashboard');
+  assert(Array.isArray(r.data?.data?.tareas) && r.data.data.tareas.some(t => t.id === tareaBorradaId), 'tarea visible en el dashboard');
+  r = await api('DELETE', `/tasks/${tareaBorradaId}`, {csrf: csrfAdmin});
+  assert(r.status === 204, 'DELETE soft de tarea → 204');
+  r = await api('GET', '/dashboard');
+  assert(!r.data?.data?.tareas.some(t => t.id === tareaBorradaId), 'tarea borrada NO aparece tras refrescar el dashboard');
+  r = await api('DELETE', `/tasks/${tareaBorradaId}`, {csrf: csrfAdmin});
+  assert(r.status === 204, 'DELETE repetido es idempotente → 204');
+  /* Upsert posterior revive (camino de undo/re-creación del cliente). */
+  r = await api('PUT', `/tasks/${tareaBorradaId}`, {body: {texto: 'tarea revivida (undo)', completado: false}, csrf: csrfAdmin});
+  assert(r.status === 200, 're-PUT de tarea borrada → 200');
+  r = await api('GET', '/dashboard');
+  assert(r.data?.data?.tareas.some(t => t.id === tareaBorradaId && t.texto === 'tarea revivida (undo)'), 'upsert revive la tarea (undo del cliente)');
+  r = await api('DELETE', `/tasks/${tareaBorradaId}`, {csrf: csrfAdmin});
+  assert(r.status === 204, 'limpieza del tombstone de prueba → 204');
+
   console.log(`\n== RESULTADO: ${pasados} pasados, ${fallados} fallados ==`);
   if (fallados > 0) {
     console.log('Fallaron:', errores.join(' | '));

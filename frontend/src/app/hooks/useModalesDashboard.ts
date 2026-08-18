@@ -75,6 +75,10 @@ interface UseModalesDashboardReturn {
     modalConfigLayoutAbierto: boolean;
     abrirModalConfigLayout: () => void;
     cerrarModalConfigLayout: () => void;
+    /* [18-08-2026] Modal de gestión de paneles (activar/desactivar/minimizados) */
+    modalPanelesAbierto: boolean;
+    abrirModalPaneles: () => void;
+    cerrarModalPaneles: () => void;
     modalVersionesAbierto: boolean;
     abrirModalVersiones: () => void;
     cerrarModalVersiones: () => void;
@@ -148,6 +152,7 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     const configScratchpad = useModalSimple();
     const configActividad = useModalSimple();
     const configLayout = useModalSimple();
+    const paneles = useModalSimple();
     const versiones = useModalSimple();
     const nuevaTarea = useModalSimple();
     const temas = useModalSimple();
@@ -272,6 +277,9 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         modalConfigLayoutAbierto: configLayout.abierto,
         abrirModalConfigLayout: configLayout.abrir,
         cerrarModalConfigLayout: configLayout.cerrar,
+        modalPanelesAbierto: paneles.abierto,
+        abrirModalPaneles: paneles.abrir,
+        cerrarModalPaneles: paneles.cerrar,
         modalVersionesAbierto: versiones.abierto,
         abrirModalVersiones: versiones.abrir,
         cerrarModalVersiones: versiones.cerrar,

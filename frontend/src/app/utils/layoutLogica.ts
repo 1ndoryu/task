@@ -156,9 +156,13 @@ export function crearDuplicadoPanel(
 }
 
 /* [263A-3] Crear una división lado a lado de un panel dentro de la misma columna.
- * Se comporta como duplicado pero marca ambos paneles con panelDivisionId. */
+ * Se comporta como duplicado pero marca ambos paneles con panelDivisionId.
+ * [18-08-2026] Repara estados huérfanos: si el original conserva el flag de
+ * división pero su compañero ya no existe (p. ej. el compañero se perdió por
+ * una restauración parcial del layout), el flag se limpia primero para que el
+ * split vuelva a funcionar en vez de quedarse bloqueado en silencio. */
 export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): ConfiguracionLayout {
-    const paneles = [...(prev.ordenPaneles || [])];
+    let paneles = [...(prev.ordenPaneles || [])];
     const panelOriginal = paneles.find(p => p.id === baseId);
     if (!panelOriginal) return prev;
 
@@ -166,7 +170,16 @@ export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): C
 
     /* Evitar múltiples divisiones del mismo panel */
     const yaDividido = paneles.some(p => p.panelDivisionId === divisionId);
-    if (yaDividido) return prev;
+    if (yaDividido) {
+        /* Reparar estado huérfano: flag presente pero sin panel compañero real
+         * (p. ej. el compañero se perdió por restauración parcial). En vez de
+         * quedarse bloqueado, se limpia el flag y se continúa creando la división. */
+        const companeroExiste = paneles.some(p => p.panelDivisionId === divisionId && p.id !== baseId);
+        if (companeroExiste) return prev;
+        paneles = paneles.map(p =>
+            p.panelDivisionId === divisionId ? {...p, dividido: undefined, panelDivisionId: undefined} : p
+        );
+    }
 
     const existentes = paneles
         .filter(p => p.id.startsWith(baseId + '-'))

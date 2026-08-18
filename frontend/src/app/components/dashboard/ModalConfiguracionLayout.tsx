@@ -5,11 +5,10 @@
  */
 
 import {Modal} from '../shared/Modal';
-import {ToggleSwitch} from '../shared/ToggleSwitch';
 import {Boton} from '../ui';
-import {Columns2, Columns3, Square, Target, Folder, Terminal, FileText, RotateCcw, ArrowUpDown, Activity, LayoutGrid, PanelLeft} from 'lucide-react';
+import {Columns2, Columns3, Square, RotateCcw, ArrowUpDown, LayoutGrid, PanelLeft} from 'lucide-react';
 import {ListaOrdenPaneles} from './ListaOrdenPaneles';
-import type {ModoColumnas, VisibilidadPaneles, PanelId, OrdenPanel, TipoLayout} from '../../hooks/useConfiguracionLayout';
+import type {ModoColumnas, PanelId, OrdenPanel, TipoLayout} from '../../hooks/useConfiguracionLayout';
 import {useTema} from '../../hooks/useTema';
 
 interface ModalConfiguracionLayoutProps {
@@ -17,11 +16,9 @@ interface ModalConfiguracionLayoutProps {
     onCerrar: () => void;
     tipoLayout: TipoLayout;
     modoColumnas: ModoColumnas;
-    visibilidad: VisibilidadPaneles;
     ordenPaneles: OrdenPanel[];
     onCambiarTipoLayout: (tipo: TipoLayout) => void;
     onCambiarModo: (modo: ModoColumnas) => void;
-    onTogglePanel: (panel: PanelId) => void;
     onMoverPanelArriba: (panelId: PanelId) => void;
     onMoverPanelAbajo: (panelId: PanelId) => void;
     onMoverPanelAColumna: (panelId: PanelId, columna: 1 | 2 | 3) => void;
@@ -29,41 +26,11 @@ interface ModalConfiguracionLayoutProps {
     onResetear: () => void;
 }
 
-/* Info de paneles para los toggles */
-const PANELES: {id: PanelId; nombre: string; icono: JSX.Element; descripcion: string}[] = [
-    {
-        id: 'focoPrioritario',
-        nombre: 'Foco Prioritario',
-        icono: <Target size={14} />,
-        descripcion: 'Panel de hábitos y racha'
-    },
-    {
-        id: 'proyectos',
-        nombre: 'Proyectos',
-        icono: <Folder size={14} />,
-        descripcion: 'Lista de proyectos'
-    },
-    {
-        id: 'ejecucion',
-        nombre: 'Ejecución',
-        icono: <Terminal size={14} />,
-        descripcion: 'Lista de tareas activas'
-    },
-    {
-        id: 'scratchpad',
-        nombre: 'Scratchpad',
-        icono: <FileText size={14} />,
-        descripcion: 'Notas rápidas'
-    },
-    {
-        id: 'actividad',
-        nombre: 'Actividad',
-        icono: <Activity size={14} />,
-        descripcion: 'Mapa de calor de actividad'
-    }
-];
+/* [18-08-2026] La visibilidad de paneles ya no vive en este modal: el botón
+ * "Paneles" del encabezado abre un modal dedicado con todos los paneles
+ * (incl. plugins activos y minimizados). */
 
-export function ModalConfiguracionLayout({estaAbierto, onCerrar, tipoLayout, modoColumnas, visibilidad, ordenPaneles, onCambiarTipoLayout, onCambiarModo, onTogglePanel, onMoverPanelArriba, onMoverPanelAbajo, onMoverPanelAColumna, onResetearOrden, onResetear}: ModalConfiguracionLayoutProps): JSX.Element {
+export function ModalConfiguracionLayout({estaAbierto, onCerrar, tipoLayout, modoColumnas, ordenPaneles, onCambiarTipoLayout, onCambiarModo, onMoverPanelArriba, onMoverPanelAbajo, onMoverPanelAColumna, onResetearOrden, onResetear}: ModalConfiguracionLayoutProps): JSX.Element {
     const {cambiarTema} = useTema();
     const esGrid = tipoLayout === 'grid';
 
@@ -164,27 +131,6 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, tipoLayout, mod
                         <ListaOrdenPaneles ordenPaneles={ordenPaneles} modoColumnas={modoColumnas} onMoverArriba={onMoverPanelArriba} onMoverAbajo={onMoverPanelAbajo} onCambiarColumna={onMoverPanelAColumna} />
                     </div>
                 )}
-
-                {/* Visibilidad de paneles */}
-                <div className="configLayoutSeccion">
-                    <h4 className="configLayoutSeccionTitulo">Visibilidad de Paneles</h4>
-                    <p className="configLayoutSeccionDescripcion">{esGrid ? 'Oculta paneles que no necesites. Aparecerán en la barra lateral.' : 'Selecciona qué paneles aparecen en el menú lateral.'}</p>
-
-                    <div className="configLayoutPaneles">
-                        {PANELES.map(panel => (
-                            <div key={panel.id} className="configLayoutPanelItem">
-                                <div className="configLayoutPanelInfo">
-                                    <span className="configLayoutPanelIcono">{panel.icono}</span>
-                                    <div className="configLayoutPanelTexto">
-                                        <span className="configLayoutPanelNombre">{panel.nombre}</span>
-                                        <span className="configLayoutPanelDescripcion">{panel.descripcion}</span>
-                                    </div>
-                                </div>
-                                <ToggleSwitch checked={visibilidad[panel.id]} onChange={() => onTogglePanel(panel.id)} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
 
                 {/* Botón de reset */}
                 <div className="configLayoutAcciones">

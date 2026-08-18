@@ -4,7 +4,7 @@
  * Cada sección usa sus hooks directamente */
 
 import {useState, type Ref} from 'react';
-import {Square, Columns2, Columns3, ArrowUpDown, RotateCcw, Target, Folder, Terminal, FileText, Activity, LayoutGrid, PanelLeft} from 'lucide-react';
+import {Square, Columns2, Columns3, ArrowUpDown, RotateCcw, LayoutGrid, PanelLeft, PanelsTopLeft} from 'lucide-react';
 import {Lock, Unlock, Shield, ShieldCheck, Camera, Save, Moon, Sun, Check, Sparkles, Globe, Plug as PlugIcon, Loader2} from 'lucide-react';
 import {RotateCcw as RotateCcwBackup, ShieldCheck as ShieldCheckBackup, AlertTriangle, Database, Trash2} from 'lucide-react';
 import {ToggleSwitch} from '../../shared/ToggleSwitch';
@@ -24,20 +24,11 @@ import {useCifrado} from '../../../hooks';
 import {useSuscripcionStore} from '../../../stores/suscripcionStore';
 import {useModalConfiguracionMCP} from '../../../hooks/dashboard/useModalConfiguracionMCP';
 import {useModalHistorialBackups} from '../../../hooks/dashboard/useModalHistorialBackups';
-import type {PanelId, ModoColumnas} from '../../../hooks/useConfiguracionLayout';
-
-/* Info de paneles para visibilidad */
-const PANELES: {id: PanelId; nombre: string; icono: JSX.Element; descripcion: string}[] = [
-    {id: 'focoPrioritario', nombre: 'Foco Prioritario', icono: <Target size={14} />, descripcion: 'Panel de hábitos y racha'},
-    {id: 'proyectos', nombre: 'Proyectos', icono: <Folder size={14} />, descripcion: 'Lista de proyectos'},
-    {id: 'ejecucion', nombre: 'Ejecución', icono: <Terminal size={14} />, descripcion: 'Lista de tareas activas'},
-    {id: 'scratchpad', nombre: 'Scratchpad', icono: <FileText size={14} />, descripcion: 'Notas rápidas'},
-    {id: 'actividad', nombre: 'Actividad', icono: <Activity size={14} />, descripcion: 'Mapa de calor de actividad'}
-];
+import type {ModoColumnas} from '../../../hooks/useConfiguracionLayout';
 
 /* ── LAYOUT ────────────────────────────────────────────── */
 export function SeccionConfigLayout(): JSX.Element {
-    const {tipoLayout, modoColumnas, visibilidad, ordenPaneles, cambiarTipoLayout, cambiarModoColumnas, toggleVisibilidadPanel, moverPanelArriba, moverPanelAbajo, moverPanelAColumna, resetearOrdenPaneles, resetearLayout} = useConfiguracionLayout();
+    const {tipoLayout, modoColumnas, ordenPaneles, cambiarTipoLayout, cambiarModoColumnas, moverPanelArriba, moverPanelAbajo, moverPanelAColumna, resetearOrdenPaneles, resetearLayout} = useConfiguracionLayout();
     const {cambiarTema} = useTema();
     const esGrid = tipoLayout === 'grid';
 
@@ -99,24 +90,11 @@ export function SeccionConfigLayout(): JSX.Element {
                 </>
             )}
 
-            {/* Visibilidad: siempre visible */}
+            {/* [18-08-2026] Visibilidad de paneles movida al boton Paneles del encabezado */}
             <div className="configLayoutSeccion">
-                <h4 className="configLayoutSeccionTitulo">Visibilidad de Paneles</h4>
-                <p className="configLayoutSeccionDescripcion">{esGrid ? 'Oculta paneles que no necesites' : 'Selecciona qué paneles aparecen en el menú lateral'}</p>
-                <div className="configLayoutPaneles">
-                    {PANELES.map(panel => (
-                        <div key={panel.id} className="configLayoutPanelItem">
-                            <div className="configLayoutPanelInfo">
-                                <span className="configLayoutPanelIcono">{panel.icono}</span>
-                                <div className="configLayoutPanelTexto">
-                                    <span className="configLayoutPanelNombre">{panel.nombre}</span>
-                                    <span className="configLayoutPanelDescripcion">{panel.descripcion}</span>
-                                </div>
-                            </div>
-                            <ToggleSwitch checked={visibilidad[panel.id]} onChange={() => toggleVisibilidadPanel(panel.id)} />
-                        </div>
-                    ))}
-                </div>
+                <p className="configLayoutSeccionDescripcion">
+                    <PanelsTopLeft size={14} /> Activa, desactiva o restaura paneles desde el boton Paneles del encabezado.
+                </p>
             </div>
 
             <div className="configLayoutAcciones">

@@ -171,6 +171,64 @@ impl ProductivityRepository {
 
     /// Upsert de hábito con la misma semántica LWW que tareas/proyectos
     /// ([188A-1]): expected_updated_at NULL = escritura incondicional.
+    /// Soft-delete de proyecto: marca `deleted_at` y lo excluye del dashboard.
+    /// Idempotente: si no existe (o ya estaba borrado) no es error; las lecturas
+    /// ya filtran `deleted_at IS NULL`, así que el upsert posterior lo revive.
+    /// [18-08-2026] El front syncroniza borrados por entidad (tombsones) porque
+    /// el guardado por upsert nunca informa al servidor de lo que desapareció.
+    pub async fn delete_project(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE dashboard_projects
+             SET deleted_at = NOW(), updated_at = NOW()
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(legacy_id)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    /// Soft-delete de tarea con la misma semántica que delete_project.
+    pub async fn delete_task(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE dashboard_tasks
+             SET deleted_at = NOW(), updated_at = NOW()
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(legacy_id)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    /// Soft-delete de hábito con la misma semántica que delete_project.
+    pub async fn delete_habit(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE dashboard_habits
+             SET deleted_at = NOW(), updated_at = NOW()
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(legacy_id)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn upsert_habit(
         pool: &PgPool,
         user_id: Uuid,

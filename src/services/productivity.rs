@@ -50,6 +50,35 @@ impl ProductivityService {
             .ok_or_else(|| AppError::Conflict("El hábito cambió; vuelve a cargarlo".into()))?;
         Ok(response(row))
     }
+
+    /// Soft-delete idempotente: borra si existe y es del usuario; si no existe
+    /// (ya borrado o ajeno) no es error — el objetivo es converger a "ausente".
+    pub async fn delete_project(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<(), AppError> {
+        ProductivityRepository::delete_project(pool, user_id, legacy_id).await?;
+        Ok(())
+    }
+
+    pub async fn delete_task(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<(), AppError> {
+        ProductivityRepository::delete_task(pool, user_id, legacy_id).await?;
+        Ok(())
+    }
+
+    pub async fn delete_habit(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<(), AppError> {
+        ProductivityRepository::delete_habit(pool, user_id, legacy_id).await?;
+        Ok(())
+    }
 }
 
 fn response(row: ProductivityWriteRow) -> ProductivityWriteResponse {

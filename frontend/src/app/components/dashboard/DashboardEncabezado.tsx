@@ -34,6 +34,10 @@ interface DashboardEncabezadoProps {
     onClickSeguridad?: () => void;
     onClickAdmin?: () => void;
     onClickLayout?: () => void;
+    /* [18-08-2026] Modal de paneles + minimizados en el encabezado */
+    onClickPaneles?: () => void;
+    panelesOcultos?: string[];
+    onMostrarPanel?: (panel: string) => void;
     onClickVersion?: () => void;
     onClickUsuario?: () => void;
     onClickEquipos?: () => void;
@@ -85,6 +89,9 @@ export function DashboardEncabezado({
     onClickSeguridad,
     onClickAdmin,
     onClickLayout,
+    onClickPaneles,
+    panelesOcultos,
+    onMostrarPanel,
     onClickVersion,
     onClickUsuario,
     onClickEquipos,
@@ -164,7 +171,7 @@ export function DashboardEncabezado({
             <nav className="encabezadoNav">
                 {/* [233A-56] Botón de búsqueda quitado del encabezado móvil — accesible desde el menú contextual (BottomSheet) */}
 
-                <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} />
+                <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickPaneles={onClickPaneles} panelesOcultos={panelesOcultos} onMostrarPanel={onMostrarPanel} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} />
 
                 <EncabezadoEstado sincronizacion={sincronizacion} />
 

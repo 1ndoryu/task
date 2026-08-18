@@ -16,6 +16,10 @@ import type {AyunoState} from '../types/ayuno';
 import type {DeficitCaloricoState} from '../types/deficitCalorico';
 import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 import {recolectarPreferencias} from '../utils/preferenciasUsuario';
+import {
+    obtenerBorradosPendientes,
+    confirmarBorradosConfirmados,
+} from '../utils/borradosPendientes';
 
 /*
  * Tipos para la API
@@ -331,8 +335,38 @@ export function useDashboardApi(): UseDashboardApiReturn {
                     );
                 }
 
+                /* [18-08-2026] Flush de borrados pendientes (tombstones). El sync por
+                 * entidad solo hace upsert de lo presente, así que sin DELETE explícito
+                 * el servidor conserva las filas eliminadas y estas reaparecen en el
+                 * siguiente refresh. Se omiten los IDs que siguen presentes en los datos
+                 * (deshacer dentro del debounce): el upsert ya los revivirá. */
+                const pendientes = obtenerBorradosPendientes();
+                const idsPresentes = (tipo: 'tareas' | 'proyectos' | 'habitos') => {
+                    const lista = tipo === 'tareas' ? (datos.tareas ?? []) : tipo === 'proyectos' ? (datos.proyectos ?? []) : (datos.habitos ?? []);
+                    return new Set(lista.map(entidad => entidad.id));
+                };
+                const confirmados: Array<{tipo: 'tareas' | 'proyectos' | 'habitos'; id: number}> = [];
+                (['tareas', 'proyectos', 'habitos'] as const).forEach(tipo => {
+                    const presentes = idsPresentes(tipo);
+                    pendientes[tipo].forEach(id => {
+                        if (presentes.has(id)) return; // deshacer: el upsert lo revive
+                        operaciones.push(
+                            fetchApi(`/api/${tipo === 'tareas' ? 'tasks' : tipo === 'proyectos' ? 'projects' : 'habits'}/${id}`, {
+                                method: 'DELETE'
+                            }).then(() => {
+                                confirmados.push({tipo, id});
+                            })
+                        );
+                    });
+                });
+
                 const resultados = await Promise.allSettled(operaciones);
                 const fallaron = resultados.filter(r => r.status === 'rejected');
+
+                /* [18-08-2026] Los borrados confirmados salen del registro aunque otro
+                 * upsert del lote haya fallado: son idempotentes y el próximo guardado
+                 * los reenviaría sin efecto. El error visible sigue siendo el del batch. */
+                confirmarBorradosConfirmados(confirmados);
 
                 setEstado(prev => ({
                     ...prev,

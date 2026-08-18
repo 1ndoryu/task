@@ -12,6 +12,7 @@ import {obtenerSubtareas} from '../utils/jerarquiaTareas';
 import {registrarEventoSistema, type AccionSistema} from '../utils/mensajes';
 import {registrarTareaCompletada, registrarTareaDesmarcada} from '../services/actividadService';
 import {useTimeTrackerStore} from '../stores/timeTrackerStore';
+import {marcarBorrado, desmarcarBorrado} from '../utils/borradosPendientes';
 
 export interface UseTareasParams {
     tareas: Tarea[];
@@ -310,10 +311,19 @@ export function useTareas({tareas, setTareas, registrarAccion, mostrarMensaje}: 
                     });
             });
 
+            /* [18-08-2026] Tombstone: el sync por entidad no informa borrados al
+             * servidor; sin este registro la tarea eliminada reaparecía en el
+             * siguiente refresh. guardar() la envía como DELETE /api/tasks/{id}.
+             * Se marca solo para IDs reales (positivos): las virtuales de hábitos
+             * nunca existieron en servidor. */
+            if (id > 0) marcarBorrado('tareas', id);
+
             const mensajeExtra = subtareasHuerfanas.length > 0 ? ` (${subtareasHuerfanas.length} subtareas promovidas)` : '';
             mostrarMensaje?.(`Tarea eliminada${mensajeExtra}`, 'exito');
 
             registrarAccion(`Tarea eliminada`, () => {
+                /* Deshacer: desmarcar tombstone para que el próximo upsert la reviva */
+                if (id > 0) desmarcarBorrado('tareas', id);
                 setTareas(prev => {
                     /* Restaurar tarea y re-asignar parentId a subtareas */
                     const nuevaLista = [...prev];

@@ -7,6 +7,7 @@ import {useSuscripcion} from '../useSuscripcion';
 import type {DashboardData} from '../useDashboardApi';
 import {tareasIniciales, notasIniciales, habitosIniciales} from '../../data/datosIniciales';
 import {apiFetch} from '../../utils/apiClient';
+import {hayBorradosPendientes} from '../../utils/borradosPendientes';
 
 /* [18-08-2026] Paridad con WP (DashboardApiController + generateBackup): al
  * guardar como premium se intenta una copia de seguridad automática; el
@@ -167,8 +168,10 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     // Prioridad a local: Intentar subir primero
                     console.log('[SyncManager] Subiendo cambios locales pendientes...');
                     /* [275A-1] Safety guard: abortar si los datos están vacíos
-                     * pero ya hubo una sync previa (race condition de hidratación). */
-                    if (esProbableWipeout(currentData, lastSync, habitosInicializado)) {
+                     * pero ya hubo una sync previa (race condition de hidratación).
+                     * [18-08-2026] Se permite si hay tombstones pendientes (borrado
+                     * deliberado de TODO): el guardado con tombstones no es un wipe. */
+                    if (esProbableWipeout(currentData, lastSync, habitosInicializado) && !hayBorradosPendientes()) {
                         /* [18-08-2026] El guard anti-wipeout funciona por diseno: evita
                          * subir datos vacios (p. ej. race tras logout/limpieza de sesion).
                          * No es un fallo -> warn, no error (ruido en consola al cerrar sesion). */
@@ -343,7 +346,12 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                 /* [275A-1] Safety guard: abortar auto-save si los datos estan vacios.
                  * Esto atrapa el caso donde la hidratacion se completa tarde
                  * y el auto-save se dispara con datos parciales. */
-                if (syncMeta && esProbableWipeout(currentData, syncMeta.lastSync, habitosInicializado)) {
+                /* [18-08-2026] El guard anti-wipeout se salta cuando hay tombstones
+                 * pendientes: el usuario puede borrar TODOS los elementos a propósito
+                 * y ese estado vacío es legítimo. Con tombstones el guardado no es un
+                 * wipe (los upserts solo tocan lo presente + los DELETE informados),
+                 * así que permitirlo no arriesga datos. */
+                if (syncMeta && esProbableWipeout(currentData, syncMeta.lastSync, habitosInicializado) && !hayBorradosPendientes()) {
                     console.warn('[SyncManager] Auto-save omitido: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
                     markChangesAsSynced(); // Resetear hash para evitar loop
                     return;

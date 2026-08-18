@@ -5,6 +5,7 @@
  */
 
 import {ModalConfiguracionLayout} from '../ModalConfiguracionLayout';
+import {ModalGestionPaneles} from '../ModalGestionPaneles';
 import {ModalConfiguracionTareas} from '../ModalConfiguracionTareas';
 import {ModalConfiguracionHabitos} from '../ModalConfiguracionHabitos';
 import {ModalConfiguracionScratchpad} from '../ModalConfiguracionScratchpad';
@@ -37,7 +38,10 @@ export function ModalesConfiguracion({modales, configTareas, configHabitos, conf
             <ModalConfiguracionProyectos estaAbierto={modales.modalConfigProyectosAbierto} onCerrar={modales.cerrarModalConfigProyectos} configuracion={configProyectos.configuracion} onToggleCompletados={configProyectos.toggleOcultarCompletados} onToggleTareasCompletadas={configProyectos.toggleOcultarTareasCompletadas} onToggleProgreso={configProyectos.toggleMostrarProgreso} onToggleModoCompacto={configProyectos.toggleModoCompacto} />
             <ModalConfiguracionScratchpad estaAbierto={modales.modalConfigScratchpadAbierto} onCerrar={modales.cerrarModalConfigScratchpad} configuracion={configScratchpad.configuracion} onCambiarFuente={configScratchpad.cambiarTamanoFuente} onCambiarAltura={configScratchpad.cambiarAltura} onCambiarIntervalo={configScratchpad.cambiarAutoGuardado} />
             <ModalConfiguracionActividad estaAbierto={modales.modalConfigActividadAbierto} onCerrar={modales.cerrarModalConfigActividad} configuracion={configActividad.configuracion} onCambiarPeriodo={configActividad.cambiarPeriodo} onCambiarFiltroTipo={configActividad.cambiarFiltroTipo} onCambiarTamanoCelda={configActividad.cambiarTamanoCelda} onToggleLeyenda={configActividad.toggleLeyenda} />
-            <ModalConfiguracionLayout estaAbierto={modales.modalConfigLayoutAbierto} onCerrar={modales.cerrarModalConfigLayout} tipoLayout={layout.tipoLayout} modoColumnas={layout.modoColumnas} visibilidad={layout.visibilidad} ordenPaneles={layout.ordenPaneles} onCambiarTipoLayout={layout.cambiarTipoLayout} onCambiarModo={layout.cambiarModoColumnas} onTogglePanel={layout.toggleVisibilidadPanel} onMoverPanelArriba={layout.moverPanelArriba} onMoverPanelAbajo={layout.moverPanelAbajo} onMoverPanelAColumna={layout.moverPanelAColumna} onResetearOrden={layout.resetearOrdenPaneles} onResetear={layout.resetearLayout} />
+            <ModalConfiguracionLayout estaAbierto={modales.modalConfigLayoutAbierto} onCerrar={modales.cerrarModalConfigLayout} tipoLayout={layout.tipoLayout} modoColumnas={layout.modoColumnas} ordenPaneles={layout.ordenPaneles} onCambiarTipoLayout={layout.cambiarTipoLayout} onCambiarModo={layout.cambiarModoColumnas} onMoverPanelArriba={layout.moverPanelArriba} onMoverPanelAbajo={layout.moverPanelAbajo} onMoverPanelAColumna={layout.moverPanelAColumna} onResetearOrden={layout.resetearOrdenPaneles} onResetear={layout.resetearLayout} />
+
+            {/* [18-08-2026] Modal de gestión de paneles (activar/desactivar, incl. minimizados) */}
+            <ModalGestionPaneles estaAbierto={modales.modalPanelesAbierto} onCerrar={modales.cerrarModalPaneles} visibilidad={layout.visibilidad} onTogglePanel={layout.toggleVisibilidadPanel} />
 
             {/* Modales Generales */}
             <ModalVersiones estaAbierto={modales.modalVersionesAbierto} onCerrar={modales.cerrarModalVersiones} />

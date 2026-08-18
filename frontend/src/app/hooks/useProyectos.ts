@@ -7,6 +7,7 @@
 import {useCallback} from 'react';
 import type {Proyecto, NivelPrioridad, NivelUrgencia, Adjunto, Hito} from '../types/dashboard';
 import {obtenerFechaHoy} from '../utils/fecha';
+import {marcarBorrado, desmarcarBorrado} from '../utils/borradosPendientes';
 
 export interface DatosNuevoProyecto {
     nombre: string;
@@ -108,9 +109,14 @@ export function useProyectos({proyectos, setProyectos, registrarAccion, mostrarM
             const indiceOriginal = proyectos.findIndex(p => p.id === id);
 
             setProyectos(prev => prev.filter(p => p.id !== id));
+
+            /* [18-08-2026] Tombstone para que el servidor borre la fila (soft) en
+             * el próximo guardado; sin esto el proyecto reaparecía al refrescar. */
+            if (id > 0) marcarBorrado('proyectos', id);
             mostrarMensaje?.(`Proyecto "${proyectoEliminado.nombre}" eliminado`, 'exito');
 
             registrarAccion(`Proyecto eliminado`, () => {
+                if (id > 0) desmarcarBorrado('proyectos', id);
                 setProyectos(prev => {
                     const nuevaLista = [...prev];
                     nuevaLista.splice(indiceOriginal, 0, proyectoEliminado);

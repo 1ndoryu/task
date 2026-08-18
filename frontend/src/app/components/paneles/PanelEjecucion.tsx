@@ -137,7 +137,11 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
             onConfigurarSubHabito={onConfigurarSubHabito}
             modoCompacto={modoCompacto}
             onConfigurarTarea={onConfigurarTarea}
-            onAbrirModalCrear={onAbrirModalNuevaTarea}
+            /* [18-08-2026] El estado vacío y el botón "+ Añadir" abren el modal de
+             * creación con el grupo activo del panel (igual que el botón del
+             * header): sin esto, crear la primera tarea de un grupo la creaba sin
+             * grupo y desaparecía de la vista filtrada. */
+            onAbrirModalCrear={() => onAbrirModalNuevaTarea({grupoEjecucion: grupoActivo})}
             onAbrirModalCrearHabito={onAbrirModalCrearHabito}
             onReordenarHabitos={esOrdenManual ? onReordenarHabitos : undefined}
         />

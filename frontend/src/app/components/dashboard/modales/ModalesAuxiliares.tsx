@@ -5,7 +5,7 @@
  */
 
 import {Bell, Trash2} from 'lucide-react';
-import {ToastDeshacer, TooltipSystem, BarraPanelesOcultos, IndicadorArrastre} from '../../shared';
+import {ToastDeshacer, TooltipSystem, IndicadorArrastre} from '../../shared';
 import {PanelAdministracion} from '../../admin';
 import {ModalExperimentos} from '../../experimentos/ModalExperimentos';
 
@@ -45,8 +45,9 @@ export function ModalesAuxiliares({dashboard, auth, modales, layout, arrastre, a
             {/* Toast Deshacer */}
             {dashboard.accionDeshacer && <ToastDeshacer mensaje={dashboard.accionDeshacer.mensaje} tiempoRestante={dashboard.accionDeshacer.tiempoRestante} tiempoTotal={5000} onDeshacer={dashboard.ejecutarDeshacer} onDescartar={dashboard.descartarDeshacer} />}
 
-            {/* Barra de Paneles Ocultos */}
-            {auth.user && <BarraPanelesOcultos panelesOcultos={layout.panelesOcultos} onMostrarPanel={layout.mostrarPanel} />}
+            {/* [18-08-2026] Los paneles minimizados ya NO se muestran en la esquina
+             * inferior izquierda: viven como chips en el encabezado (junto al botón
+             * de Layout) y se gestionan desde el modal de Paneles. */}
 
             {/* Sistema de Tooltips global */}
             <TooltipSystem />

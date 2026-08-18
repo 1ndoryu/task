@@ -44,7 +44,10 @@ const PANELES_INFO_FALLBACK: Record<PanelId, {icono: JSX.Element; nombre: string
     }
 };
 
-function obtenerInfoPanel(panelId: PanelId): {icono: JSX.Element; nombre: string} {
+/* [18-08-2026] Exportado para reutilizarlo en ModalGestionPaneles y en la barra
+ * de paneles ocultos del encabezado (la barra de la esquina inferior izquierda
+ * se eliminó; los minimizados viven ahora junto al botón de Layout). */
+export function obtenerInfoPanel(panelId: PanelId): {icono: JSX.Element; nombre: string} {
     const definicion = obtenerPanel(panelId);
 
     const nombre = definicion?.titulo || PANELES_INFO_FALLBACK[panelId]?.nombre || panelId;

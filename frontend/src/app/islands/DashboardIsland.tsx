@@ -281,6 +281,9 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onClickSeguridad={() => modales.abrirModalConfigGlobal('seguridad')}
                         onClickAdmin={modales.abrirPanelAdmin}
                         onClickLayout={() => modales.abrirModalConfigGlobal('layout')}
+                        onClickPaneles={modales.abrirModalPaneles}
+                        panelesOcultos={layout.panelesOcultos}
+                        onMostrarPanel={layout.mostrarPanel}
                         onClickVersion={modales.abrirModalVersiones}
                         onClickUsuario={() => modales.abrirModalConfigGlobal('perfil')}
                         onClickEquipos={modales.abrirModalEquipos}
