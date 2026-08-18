@@ -8,7 +8,7 @@ pub const PLAN_PREMIUM: &str = "premium";
 pub const ESTADO_ACTIVA: &str = "activa";
 pub const ESTADO_TRIAL: &str = "trial";
 pub const ESTADO_EXPIRADA: &str = "expirada";
-pub const TRIAL_DAYS: i64 = 14;
+pub const TRIAL_DAYS: i64 = 30; // Paridad con WordPress: SuscripcionService.php DIAS_TRIAL = 30
 
 /// Límites por plan, tal como los consume el front original (camelCase).
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -27,8 +27,8 @@ pub struct PlanLimits {
 impl PlanLimits {
     pub fn free() -> Self {
         Self {
-            habitos: 10,
-            tareas_activas: 50,
+            habitos: 5,
+            tareas_activas: 20,
             proyectos: 3,
             adjuntos_por_tarea: 0,
             sincronizacion: false,

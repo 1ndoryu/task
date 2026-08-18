@@ -38,7 +38,7 @@ impl SubscriptionRepository {
         .await
     }
 
-    /// Activa el trial de 14 días si no está activo ni se usó antes.
+    /// Activa el trial (30 días, paridad con WordPress) si no está activo ni se usó antes.
     pub async fn activate_trial(
         pool: &PgPool,
         user_id: Uuid,

@@ -3,7 +3,7 @@
  *
  * Modal que muestra los beneficios de Premium y permite
  * proceder al checkout con Stripe.
- * El trial se configura directamente en Stripe (14 dias de prueba).
+ * El trial se configura directamente en Stripe (30 dias de prueba, paridad con WordPress).
  *
  * @package App/React/components/shared
  */

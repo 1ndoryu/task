@@ -59,10 +59,11 @@ async function main() {
   console.log('\n== Suscripción ==');
   r = await api('GET', '/subscription');
   assert(r.status === 200 && r.data.plan === 'free' && r.data.trialDisponible === true, 'GET /subscription → free, trialDisponible');
+  assert(r.data.limites.habitos === 5 && r.data.limites.tareasActivas === 20 && r.data.limites.proyectos === 3 && r.data.limites.adjuntosPorTarea === 0, 'límites FREE = 5/20/3/0 (paridad WordPress)');
   r = await api('POST', '/subscription/trial', {csrf});
   assert(r.status === 200 && r.data.success && r.data.data.estado === 'trial', 'POST /subscription/trial → trial activo');
   r = await api('GET', '/subscription');
-  assert(r.status === 200 && r.data.estado === 'trial' && r.data.diasRestantes >= 13, 'trial persistido (diasRestantes >= 13)');
+  assert(r.status === 200 && r.data.estado === 'trial' && r.data.diasRestantes >= 29, 'trial de 30 días persistido (diasRestantes >= 29)');
   r = await api('POST', '/subscription/trial', {}); // sin CSRF
   assert(r.status === 403, 'mutación sin CSRF → 403');
 
@@ -77,6 +78,7 @@ async function main() {
   const adjId = r.data.id;
   r = await api('GET', '/storage');
   assert(r.status === 200 && r.data.usado >= 30, 'GET /storage → usado > 0');
+  assert(r.data.limite === 52428800 && r.data.limiteFormateado === '50.0 MB', 'límite FREE = 50 MB (paridad WordPress AlmacenamientoService)');
   const descarga = await api('GET', `/storage/files/${adjId}`);
   assert(descarga.status === 200 && descarga.data.includes('contenido de prueba'), 'descarga autenticada → 200 con contenido');
   r = await api('DELETE', `/storage/files/${adjId}`, {csrf});

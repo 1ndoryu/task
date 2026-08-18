@@ -7,6 +7,7 @@ $env:PORT = '3000'
 $env:CORS_ORIGINS = 'http://localhost:5173,http://127.0.0.1:5173'
 $log = 'C:/Users/Owner/OneDrive/Documentos/area-trabajo/.freebuff/preview-eed1f4ab-5590-41f5-83ce-f00baf4e9110.log'
 $err = "$log.err"
-$exe = 'C:\tmp\glory-target\glory_backend_main\debug\glory-backend.exe'
+# El crate vive en la raiz del repo; el binario queda en <target>/debug (no en <target>/<crate>/debug).
+$exe = 'C:\tmp\glory-target\debug\glory-backend.exe'
 $p = Start-Process -FilePath $exe -WorkingDirectory 'C:\Users\Owner\OneDrive\Documentos\area-trabajo\PROYECTO TASKS' -RedirectStandardOutput $log -RedirectStandardError $err -WindowStyle Hidden -PassThru
 Write-Output "PID=$($p.Id)"

@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-pub const LIMITE_FREE_BYTES: i64 = 107_374_1824; // 1 GB
-pub const LIMITE_PREMIUM_BYTES: i64 = 10_737_418_240; // 10 GB
+pub const LIMITE_FREE_BYTES: i64 = 52_428_800; // 50 MB — paridad con WordPress AlmacenamientoService.php
+pub const LIMITE_PREMIUM_BYTES: i64 = 1_073_741_824; // 1 GB — paridad con WordPress AlmacenamientoService.php
 pub const MAX_FILE_BYTES: usize = 5 * 1024 * 1024; // 5 MB por archivo
 
 /// Respuesta de uso de almacenamiento (igual shape que InfoAlmacenamiento del front).
