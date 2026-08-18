@@ -6,6 +6,7 @@
 
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {useAuth} from '../useAuth';
+import {apiFetch} from '../../utils/apiClient';
 
 interface DatosPerfil {
     nombre: string;
@@ -113,37 +114,22 @@ export function useModalPerfil({estaAbierto, onCerrar: _onCerrar}: UseModalPerfi
         setMensaje(null);
 
         try {
-            const nonce = window.gloryDashboard?.nonce;
-            if (!nonce) {
-                throw new Error('Error de autenticación: No se encontró nonce');
-            }
+            /* [18-08-2026] PUT /api/profile contra Rust; sin nonce. El cambio de
+             * contrasena/avatar local (descripcion) no tiene backend aun: solo se
+             * persiste display_name y avatar (si es URL). */
+            const esAvatarUrl = datos.avatarUrl.startsWith('http://') || datos.avatarUrl.startsWith('https://');
 
-            const payload = {
-                nombre: datos.nombre,
-                descripcion: datos.descripcion,
-                passwordActual: datos.passwordActual,
-                passwordNueva: datos.passwordNueva,
-                avatar: datos.avatarUrl
-            };
-
-            const response = await fetch('/wp-json/glory/v1/perfil', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': nonce
-                },
-                body: JSON.stringify(payload)
+            await apiFetch('/profile', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    displayName: datos.nombre,
+                    avatarUrl: esAvatarUrl ? datos.avatarUrl : null
+                })
             });
 
-            const data = await response.json();
+            setMensaje({tipo: 'exito', texto: 'Perfil actualizado correctamente'});
 
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Error al actualizar perfil');
-            }
-
-            setMensaje({tipo: 'exito', texto: data.message || 'Perfil actualizado correctamente'});
-
-            /* Recargar la página para actualizar los datos del usuario en WP */
+            /* Recargar para actualizar el usuario en el shim de sesion */
             setTimeout(() => {
                 window.location.reload();
             }, 1500);

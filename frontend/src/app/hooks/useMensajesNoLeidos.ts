@@ -21,71 +21,12 @@ export function useMensajesNoLeidos(tipoElemento: 'tarea' | 'proyecto' | 'habito
     const [cargando, setCargando] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
 
+    /* [18-08-2026] Mensajes no tiene backend Rust aun: se degrada a cero
+     * sin llamar a /wp-json (sin badges falsos ni ruido en consola). */
     const refrescar = useCallback(async (): Promise<void> => {
-        /* Guard: No ejecutar si no hay usuario autenticado */
-        const nonce = obtenerNonce();
-        if (!nonce) {
-            setNoLeidos({});
-            return;
-        }
-
-        if (elementoIds.length === 0) {
-            setNoLeidos({});
-            return;
-        }
-
-        /* Cancelar peticion anterior */
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-        abortControllerRef.current = new AbortController();
-
-        setCargando(true);
-
-        try {
-            const response = await fetch(`${API_BASE}/no-leidos-masivo`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': obtenerNonce()
-                },
-                body: JSON.stringify({
-                    tipoElemento,
-                    elementoIds
-                }),
-                signal: abortControllerRef.current.signal
-            });
-
-            /* Silenciar errores 401 (usuario no autenticado) */
-            if (response.status === 401) {
-                setNoLeidos({});
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Error al obtener mensajes no leídos');
-            }
-
-            const data = (await response.json()) as {success: boolean; noLeidos: Record<string, number>};
-
-            if (data.success) {
-                /* Convertir claves de string a number */
-                const resultado: Record<number, number> = {};
-                for (const [key, value] of Object.entries(data.noLeidos)) {
-                    resultado[parseInt(key, 10)] = value;
-                }
-                setNoLeidos(resultado);
-            }
-        } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-                return;
-            }
-            console.error('Error obteniendo mensajes no leídos:', error);
-        } finally {
-            setCargando(false);
-        }
-    }, [tipoElemento, JSON.stringify(elementoIds)]);
+        setNoLeidos({});
+        setCargando(false);
+    }, []);
 
     /* Cargar al montar o cuando cambian los IDs */
     useEffect(() => {

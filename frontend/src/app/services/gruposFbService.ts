@@ -68,27 +68,10 @@ interface RespuestaApi<T> {
     message?: string;
 }
 
-async function fetchApi<T>(url: string, opciones: RequestInit = {}): Promise<T> {
-    const resp = await fetch(url, {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': obtenerNonce(),
-            ...opciones.headers
-        },
-        ...opciones
-    });
-
-    if (!resp.ok) {
-        throw new Error(`Error ${resp.status}: ${resp.statusText}`);
-    }
-
-    const json: RespuestaApi<T> = await resp.json();
-    if (!json.success) {
-        throw new Error(json.message || 'Error desconocido');
-    }
-
-    return json.data as T;
+/* [18-08-2026] Sin backend de integracion con Facebook en Rust aun: todas
+ * las operaciones fallan con mensaje claro sin llamar a /wp-json. */
+async function fetchApi<T>(_url: string, _opciones: RequestInit = {}): Promise<T> {
+    throw new Error('La integración con Facebook aún no está disponible');
 }
 
 export const gruposFbService = {

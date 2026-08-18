@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 use utoipa::ToSchema;
 
@@ -23,6 +23,16 @@ pub struct DashboardData {
     pub notas: String,
     pub configuracion: Value,
     pub ultima_actualizacion: Option<DateTime<Utc>>,
+}
+
+/// Guarda el estado de dashboard no tipado (scratchpad de notas + configuración).
+/// [188A-1] El front es el unico escritor; se persiste el blob completo.
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateDashboardSettingsRequest {
+    pub notas: String,
+    #[serde(default = "default_dashboard_config")]
+    pub configuracion: Value,
 }
 
 #[derive(Debug, Serialize, ToSchema)]

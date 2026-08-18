@@ -107,6 +107,34 @@ impl UpsertTaskRequest {
     }
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertHabitRequest {
+    pub nombre: String,
+    #[serde(default = "default_habit_importance")]
+    pub importancia: String,
+    #[serde(default = "default_frequency")]
+    pub frecuencia: String,
+    #[serde(default)]
+    pub orden: i32,
+    #[serde(default = "empty_payload")]
+    pub payload: Value,
+    #[serde(default)]
+    pub expected_updated_at: Option<DateTime<Utc>>,
+}
+
+impl UpsertHabitRequest {
+    #[must_use]
+    pub fn payload_for_storage(&self, legacy_id: i64) -> Value {
+        let mut object = object_with_id(self.payload.clone(), legacy_id);
+        object.insert("nombre".into(), Value::String(self.nombre.clone()));
+        object.insert("importancia".into(), Value::String(self.importancia.clone()));
+        object.insert("frecuencia".into(), Value::String(self.frecuencia.clone()));
+        object.insert("orden".into(), Value::from(self.orden));
+        Value::Object(object)
+    }
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProductivityWriteResponse {
@@ -121,6 +149,14 @@ fn default_project_status() -> String {
 
 fn default_urgency() -> String {
     "normal".to_owned()
+}
+
+fn default_habit_importance() -> String {
+    "Media".to_owned()
+}
+
+fn default_frequency() -> String {
+    "diario".to_owned()
 }
 
 #[cfg(test)]

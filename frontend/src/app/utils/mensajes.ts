@@ -32,35 +32,11 @@ export async function registrarEventoSistema(tipoElemento: 'tarea' | 'proyecto' 
     /* No registrar eventos para elementos que no existen (IDs negativos = habitos virtuales) */
     if (elementoId <= 0) return false;
 
-    try {
-        const response = await fetch(`${API_BASE}/evento`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            },
-            body: JSON.stringify({
-                tipoElemento,
-                elementoId,
-                accion,
-                detalle
-            })
-        });
-
-        if (!response.ok) {
-            console.warn('Error al registrar evento del sistema:', response.status);
-            return false;
-        }
-
-        const data = (await response.json()) as {success: boolean; skipped?: boolean};
-
-        /* Si fue saltado por timing de sincronizacion, no es un error - simplemente retornar false silenciosamente */
-        return data.success;
-    } catch (error) {
-        console.warn('Error al registrar evento del sistema:', error);
-        return false;
-    }
+    /* [18-08-2026] Sin backend de mensajes en Rust aun: no-op silencioso. */
+    void tipoElemento;
+    void accion;
+    void detalle;
+    return false;
 }
 
 /**

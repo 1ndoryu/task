@@ -97,6 +97,29 @@ struct SharedTaskRow {
 pub struct DashboardRepository;
 
 impl DashboardRepository {
+    /// Guarda el scratchpad de notas y la configuración ([188A-1]).
+    pub async fn upsert_settings(
+        pool: &PgPool,
+        user_id: Uuid,
+        notas: &str,
+        config: Value,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "INSERT INTO dashboard_settings (user_id, notes, config, updated_at)
+             VALUES ($1, $2, $3, NOW())
+             ON CONFLICT (user_id) DO UPDATE SET
+                notes = EXCLUDED.notes,
+                config = EXCLUDED.config,
+                updated_at = NOW()",
+        )
+        .bind(user_id)
+        .bind(notas)
+        .bind(config)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn read(pool: &PgPool, user_id: Uuid) -> Result<DashboardReadResponse, sqlx::Error> {
         let (settings, own_projects, own_tasks, own_habits, shared_projects, shared_tasks) = tokio::try_join!(
             Self::settings(pool, user_id),

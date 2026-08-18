@@ -78,7 +78,9 @@ export function useSeccionConfigGruposFb() {
     /* [024A-16] La extensión concatena /grupos-fb/sync a la URL base.
      * Si mostramos la URL completa con /grupos-fb, el usuario la copia y
      * la extensión genera /grupos-fb/grupos-fb/sync → 404. Mostrar solo la base. */
-    const apiUrl = `${window.location.origin}/wp-json/glory/v1`;
+    /* [18-08-2026] Sin backend de integracion FB en Rust: la URL mostrada
+     * apunta a /api (la extension aun no tiene endpoint). */
+    const apiUrl = `${window.location.origin}/api`;
 
     return {token, tieneToken, cargando, copiado, error, apiUrl, publicadoHoras, guardandoConfig, verificarToken, generarToken, copiarToken, guardarPublicadoHoras};
 }

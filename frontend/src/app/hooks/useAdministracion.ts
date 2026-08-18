@@ -65,32 +65,13 @@ export function useAdministracion() {
         return (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
     }, []);
 
-    /* Hacer petición a la API */
+    /* [18-08-2026] Sin backend de administracion en Rust aun: fetchApi
+     * degrada sin llamar a /wp-json (todos los flujos devuelven fallo claro). */
     const fetchApi = useCallback(
-        async <T>(endpoint: string, options: RequestInit = {}): Promise<{success: boolean; data?: T; message?: string}> => {
-            const nonce = getNonce();
-
-            const defaultOptions: RequestInit = {
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': nonce
-                }
-            };
-
-            const response = await fetch(getApiUrl(endpoint), {
-                ...defaultOptions,
-                ...options,
-                headers: {
-                    ...defaultOptions.headers,
-                    ...(options.headers || {})
-                }
-            });
-
-            const json = await response.json();
-            return json;
+        async <T>(_endpoint: string, _options: RequestInit = {}): Promise<{success: boolean; data?: T; message?: string}> => {
+            return {success: false, message: 'La administración aún no está disponible'};
         },
-        [getApiUrl, getNonce]
+        []
     );
 
     /* Cargar lista de usuarios */

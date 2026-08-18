@@ -3,7 +3,7 @@ use serde_json::Value;
 use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
-use crate::models::productivity::{UpsertProjectRequest, UpsertTaskRequest};
+use crate::models::productivity::{UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest};
 
 #[derive(Debug, FromRow)]
 pub struct ProductivityWriteRow {
@@ -167,5 +167,44 @@ impl ProductivityRepository {
         .await?;
         transaction.commit().await?;
         Ok(row.map_or(TaskUpsertOutcome::Conflict, TaskUpsertOutcome::Written))
+    }
+
+    /// Upsert de hábito con la misma semántica LWW que tareas/proyectos
+    /// ([188A-1]): expected_updated_at NULL = escritura incondicional.
+    pub async fn upsert_habit(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+        request: &UpsertHabitRequest,
+    ) -> Result<Option<ProductivityWriteRow>, sqlx::Error> {
+        sqlx::query_as(
+            "INSERT INTO dashboard_habits
+                (user_id, legacy_id, name, importance, frequency_type, sort_order, payload)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             ON CONFLICT (user_id, legacy_id) DO UPDATE SET
+                name = EXCLUDED.name,
+                importance = EXCLUDED.importance,
+                frequency_type = EXCLUDED.frequency_type,
+                sort_order = EXCLUDED.sort_order,
+                payload = EXCLUDED.payload,
+                updated_at = NOW(),
+                deleted_at = NULL
+             /* [188A-1] El front es el unico escritor: expected_updated_at NULL =
+              * escritura incondicional (last-write-wins). Con timestamp se
+              * mantiene el lock optimista para clientes concurrentes. */
+             WHERE ($8::timestamptz IS NOT NULL AND dashboard_habits.updated_at = $8)
+                OR ($8::timestamptz IS NULL)
+             RETURNING legacy_id, payload, updated_at",
+        )
+        .bind(user_id)
+        .bind(legacy_id)
+        .bind(&request.nombre)
+        .bind(&request.importancia)
+        .bind(&request.frecuencia)
+        .bind(request.orden)
+        .bind(request.payload_for_storage(legacy_id))
+        .bind(request.expected_updated_at)
+        .fetch_optional(pool)
+        .await
     }
 }

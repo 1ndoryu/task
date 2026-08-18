@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::productivity::{
-    ProductivityWriteResponse, UpsertProjectRequest, UpsertTaskRequest,
+    ProductivityWriteResponse, UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
 };
 use crate::repositories::{ProductivityRepository, ProductivityWriteRow, TaskUpsertOutcome};
 
@@ -37,6 +37,18 @@ impl ProductivityService {
                 "La tarea padre debe existir, pertenecer al usuario y ser principal; una tarea con subtareas no puede convertirse en hija".into(),
             )),
         }
+    }
+
+    pub async fn upsert_habit(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+        request: UpsertHabitRequest,
+    ) -> Result<ProductivityWriteResponse, AppError> {
+        let row = ProductivityRepository::upsert_habit(pool, user_id, legacy_id, &request)
+            .await?
+            .ok_or_else(|| AppError::Conflict("El hábito cambió; vuelve a cargarlo".into()))?;
+        Ok(response(row))
     }
 }
 

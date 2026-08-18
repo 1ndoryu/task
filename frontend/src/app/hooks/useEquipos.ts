@@ -1,12 +1,12 @@
-/*
- * Hook useEquipos
- *
- * Gestiona la comunicación con la API de equipos
- * y el estado del panel de equipos (social).
- */
+/* [18-08-2026] useEquipos contra /api/teams (backend Rust).
+ * Sesion por cookie HttpOnly + X-CSRF-Token. El backend identifica usuarios
+ * y conexiones con UUID; se conservan los tipos del front (ids numericos)
+ * pasando los UUID como string en runtime. Estados: pending -> pendiente,
+ * accepted -> aceptada, rejected -> rechazada, pending_registration -> pendiente_registro. */
 
 import {useState, useCallback, useEffect, useRef} from 'react';
-import type {EquipoCompleto} from '../types/dashboard';
+import {apiFetch} from '../utils/apiClient';
+import type {EquipoCompleto, SolicitudEquipo, CompaneroEquipo, ContadoresEquipo, UsuarioEquipo, EstadoSolicitud} from '../types/dashboard';
 
 interface EstadoEquipos {
     equipo: EquipoCompleto | null;
@@ -29,23 +29,93 @@ const estadoInicial: EstadoEquipos = {
     error: null
 };
 
-/*
- * Verifica si el usuario está autenticado y retorna el nonce
- * Retorna string vacío si no hay usuario logueado
- */
-const obtenerNonce = (): string => {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string; isLoggedIn?: boolean}}).gloryDashboard;
-    /* Solo retornar nonce si el usuario está logueado */
-    if (!wpData?.isLoggedIn) {
-        return '';
-    }
-    return wpData.nonce || '';
+/* Contratos Rust (JSON plano, camelCase) */
+interface UsuarioRust {
+    id: string;
+    displayName: string;
+    email: string;
+    avatarUrl: string | null;
+}
+
+interface ConexionRust {
+    id: string;
+    status: string;
+    requestedAt: string;
+    respondedAt: string | null;
+    email: string;
+    user: UsuarioRust | null;
+    isMine: boolean;
+}
+
+interface MiembroRust {
+    id: string;
+    connectionId: string;
+    user: UsuarioRust;
+    connectedAt: string | null;
+}
+
+interface EquipoRust {
+    received: ConexionRust[];
+    sent: ConexionRust[];
+    members: MiembroRust[];
+    counts: {received: number; sent: number; members: number};
+}
+
+const ESTADOS: Record<string, EstadoSolicitud> = {
+    pending: 'pendiente',
+    accepted: 'aceptada',
+    rejected: 'rechazada',
+    pending_registration: 'pendiente_registro'
 };
 
-const obtenerHeaders = (): HeadersInit => ({
-    'Content-Type': 'application/json',
-    'X-WP-Nonce': obtenerNonce()
-});
+function mapearUsuario(u: UsuarioRust): UsuarioEquipo {
+    return {
+        id: u.id as unknown as number,
+        nombre: u.displayName,
+        email: u.email,
+        avatar: u.avatarUrl || ''
+    };
+}
+
+function mapearSolicitud(c: ConexionRust): SolicitudEquipo {
+    return {
+        id: c.id as unknown as number,
+        estado: ESTADOS[c.status] || 'pendiente',
+        fechaSolicitud: c.requestedAt,
+        fechaRespuesta: c.respondedAt,
+        email: c.email,
+        usuario: c.user ? mapearUsuario(c.user) : null,
+        esMia: c.isMine
+    };
+}
+
+function mapearCompanero(m: MiembroRust): CompaneroEquipo {
+    return {
+        id: m.id as unknown as number,
+        companeroId: m.user.id as unknown as number,
+        nombre: m.user.displayName,
+        email: m.user.email,
+        avatar: m.user.avatarUrl || '',
+        fechaConexion: m.connectedAt || ''
+    };
+}
+
+function mapearEquipo(datos: EquipoRust): EquipoCompleto {
+    return {
+        recibidas: (datos.received || []).map(mapearSolicitud),
+        enviadas: (datos.sent || []).map(mapearSolicitud),
+        companeros: (datos.members || []).map(mapearCompanero),
+        contadores: {
+            recibidas: datos.counts?.received ?? 0,
+            enviadas: datos.counts?.sent ?? 0,
+            companeros: datos.counts?.members ?? 0
+        }
+    };
+}
+
+const haySesion = (): boolean => {
+    return Boolean((window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard?.isLoggedIn);
+};
 
 export function useEquipos() {
     const [estado, setEstado] = useState<EstadoEquipos>(estadoInicial);
@@ -62,13 +132,9 @@ export function useEquipos() {
         setEstado(prev => ({...prev, enviando}));
     }, []);
 
-    /**
-     * Obtiene el equipo completo del usuario
-     */
+    /* Obtiene el equipo completo del usuario */
     const cargarEquipo = useCallback(async (): Promise<void> => {
-        /* No ejecutar si no hay nonce (usuario no autenticado) */
-        const nonce = obtenerNonce();
-        if (!nonce) {
+        if (!haySesion()) {
             setEstado(prev => ({...prev, cargando: false}));
             return;
         }
@@ -77,28 +143,18 @@ export function useEquipos() {
         setError(null);
 
         try {
-            const response = await fetch('/wp-json/glory/v1/equipos', {
-                method: 'GET',
-                headers: obtenerHeaders(),
-                credentials: 'same-origin'
-            });
+            const datos = await apiFetch<EquipoRust>('/teams?page=1&perPage=50');
 
-            const data = await response.json();
-
-            if (data.success) {
-                setEstado(prev => ({
-                    ...prev,
-                    equipo: data.data,
-                    pendientes: data.data.contadores.recibidas,
-                    cargando: false,
-                    error: null
-                }));
-            } else {
-                throw new Error(data.message || 'Error al cargar equipo');
-            }
+            setEstado(prev => ({
+                ...prev,
+                equipo: mapearEquipo(datos),
+                pendientes: datos.counts?.received ?? 0,
+                cargando: false,
+                error: null
+            }));
         } catch (error) {
-            /* Silenciar errores 401 (no autenticado) para evitar ruido en consola */
-            if (error instanceof Error && error.message.includes('401')) {
+            const status = (error as {status?: number})?.status;
+            if (status === 401) {
                 setEstado(prev => ({...prev, cargando: false}));
                 return;
             }
@@ -111,67 +167,38 @@ export function useEquipos() {
         }
     }, [setCargando, setError]);
 
-    /**
-     * Cuenta solicitudes pendientes (para el badge del header)
-     */
+    /* Cuenta solicitudes pendientes (para el badge del header) */
     const contarPendientes = useCallback(async (): Promise<number> => {
-        /* No ejecutar si no hay nonce (usuario no autenticado) */
-        const nonce = obtenerNonce();
-        if (!nonce) {
+        if (!haySesion()) {
             return 0;
         }
 
         try {
-            const response = await fetch('/wp-json/glory/v1/equipos/pendientes', {
-                method: 'GET',
-                headers: obtenerHeaders(),
-                credentials: 'same-origin'
-            });
-
-            /* Silenciar errores 401 esperados */
-            if (response.status === 401) {
-                return 0;
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                const pendientes = data.data.pendientes;
-                setEstado(prev => ({...prev, pendientes}));
-                return pendientes;
-            }
-            return 0;
+            const datos = await apiFetch<{pending: number}>('/teams/pending-count');
+            const pendientes = datos?.pending ?? 0;
+            setEstado(prev => ({...prev, pendientes}));
+            return pendientes;
         } catch {
             return 0;
         }
     }, []);
 
-    /**
-     * Envía una solicitud de conexión por email
-     */
+    /* Envía una solicitud de conexión por email */
     const enviarSolicitud = useCallback(
         async (email: string): Promise<AccionResultado> => {
             setEnviando(true);
             setError(null);
 
             try {
-                const response = await fetch('/wp-json/glory/v1/equipos/solicitud', {
+                await apiFetch('/teams/requests', {
                     method: 'POST',
-                    headers: obtenerHeaders(),
-                    credentials: 'same-origin',
                     body: JSON.stringify({email})
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    await cargarEquipo();
-                    return {exito: true, mensaje: data.message};
-                } else {
-                    throw new Error(data.message || 'Error al enviar solicitud');
-                }
+                await cargarEquipo();
+                return {exito: true, mensaje: 'Solicitud enviada correctamente'};
             } catch (error) {
-                const mensaje = error instanceof Error ? error.message : 'Error desconocido';
+                const mensaje = error instanceof Error ? error.message : 'Error al enviar solicitud';
                 setError(mensaje);
                 return {exito: false, mensaje};
             } finally {
@@ -181,32 +208,22 @@ export function useEquipos() {
         [setEnviando, setError, cargarEquipo]
     );
 
-    /**
-     * Acepta una solicitud recibida
-     */
+    /* Acepta una solicitud recibida */
     const aceptarSolicitud = useCallback(
         async (solicitudId: number): Promise<AccionResultado> => {
             setEnviando(true);
             setError(null);
 
             try {
-                const response = await fetch(`/wp-json/glory/v1/equipos/${solicitudId}/responder`, {
+                await apiFetch(`/teams/requests/${solicitudId}`, {
                     method: 'PUT',
-                    headers: obtenerHeaders(),
-                    credentials: 'same-origin',
-                    body: JSON.stringify({accion: 'aceptar'})
+                    body: JSON.stringify({action: 'accept'})
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    await cargarEquipo();
-                    return {exito: true, mensaje: data.message};
-                } else {
-                    throw new Error(data.message || 'Error al aceptar solicitud');
-                }
+                await cargarEquipo();
+                return {exito: true, mensaje: 'Solicitud aceptada'};
             } catch (error) {
-                const mensaje = error instanceof Error ? error.message : 'Error desconocido';
+                const mensaje = error instanceof Error ? error.message : 'Error al aceptar solicitud';
                 setError(mensaje);
                 return {exito: false, mensaje};
             } finally {
@@ -216,32 +233,22 @@ export function useEquipos() {
         [setEnviando, setError, cargarEquipo]
     );
 
-    /**
-     * Rechaza una solicitud recibida
-     */
+    /* Rechaza una solicitud recibida */
     const rechazarSolicitud = useCallback(
         async (solicitudId: number): Promise<AccionResultado> => {
             setEnviando(true);
             setError(null);
 
             try {
-                const response = await fetch(`/wp-json/glory/v1/equipos/${solicitudId}/responder`, {
+                await apiFetch(`/teams/requests/${solicitudId}`, {
                     method: 'PUT',
-                    headers: obtenerHeaders(),
-                    credentials: 'same-origin',
-                    body: JSON.stringify({accion: 'rechazar'})
+                    body: JSON.stringify({action: 'reject'})
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    await cargarEquipo();
-                    return {exito: true, mensaje: data.message};
-                } else {
-                    throw new Error(data.message || 'Error al rechazar solicitud');
-                }
+                await cargarEquipo();
+                return {exito: true, mensaje: 'Solicitud rechazada'};
             } catch (error) {
-                const mensaje = error instanceof Error ? error.message : 'Error desconocido';
+                const mensaje = error instanceof Error ? error.message : 'Error al rechazar solicitud';
                 setError(mensaje);
                 return {exito: false, mensaje};
             } finally {
@@ -251,31 +258,19 @@ export function useEquipos() {
         [setEnviando, setError, cargarEquipo]
     );
 
-    /**
-     * Cancela una solicitud enviada o elimina una conexión
-     */
+    /* Cancela una solicitud enviada o elimina una conexión */
     const eliminarConexion = useCallback(
         async (id: number): Promise<AccionResultado> => {
             setEnviando(true);
             setError(null);
 
             try {
-                const response = await fetch(`/wp-json/glory/v1/equipos/${id}`, {
-                    method: 'DELETE',
-                    headers: obtenerHeaders(),
-                    credentials: 'same-origin'
-                });
+                await apiFetch(`/teams/${id}`, {method: 'DELETE'});
 
-                const data = await response.json();
-
-                if (data.success) {
-                    await cargarEquipo();
-                    return {exito: true, mensaje: data.message};
-                } else {
-                    throw new Error(data.message || 'Error al eliminar conexión');
-                }
+                await cargarEquipo();
+                return {exito: true, mensaje: 'Conexión eliminada'};
             } catch (error) {
-                const mensaje = error instanceof Error ? error.message : 'Error desconocido';
+                const mensaje = error instanceof Error ? error.message : 'Error al eliminar conexión';
                 setError(mensaje);
                 return {exito: false, mensaje};
             } finally {
@@ -288,22 +283,13 @@ export function useEquipos() {
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const INTERVALO_POLLING = 30000;
 
-    /**
-     * Carga inicial y polling para actualizar el badge en tiempo real
-     * Solo si hay usuario autenticado
-     */
+    /* Carga inicial y polling para actualizar el badge en tiempo real */
     useEffect(() => {
-        const nonce = obtenerNonce();
-        
-        /* No cargar datos si no hay usuario autenticado */
-        if (!nonce) {
+        if (!haySesion()) {
             return;
         }
 
-        /* Cargar equipo completo al inicio para tener los compañeros disponibles */
-        cargarEquipo();
         contarPendientes();
-
         intervalRef.current = setInterval(() => {
             contarPendientes();
         }, INTERVALO_POLLING);
@@ -313,7 +299,7 @@ export function useEquipos() {
                 clearInterval(intervalRef.current);
             }
         };
-    }, [cargarEquipo, contarPendientes]);
+    }, [contarPendientes]);
 
     return {
         /* Estado */

@@ -2,6 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
+use crate::models::dashboard::UpdateDashboardSettingsRequest;
 use crate::models::DashboardReadResponse;
 use crate::repositories::DashboardRepository;
 
@@ -12,5 +13,20 @@ impl DashboardService {
         DashboardRepository::read(pool, user_id)
             .await
             .map_err(AppError::from)
+    }
+
+    pub async fn update_settings(
+        pool: &PgPool,
+        user_id: Uuid,
+        request: UpdateDashboardSettingsRequest,
+    ) -> Result<(), AppError> {
+        DashboardRepository::upsert_settings(
+            pool,
+            user_id,
+            &request.notas,
+            request.configuracion,
+        )
+        .await?;
+        Ok(())
     }
 }

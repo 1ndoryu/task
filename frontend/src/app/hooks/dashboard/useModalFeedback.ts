@@ -53,24 +53,10 @@ export function useModalFeedback({estaAbierto, onCerrar}: UseModalFeedbackProps)
         }
     }, [estaAbierto]);
 
+    /* [18-08-2026] Sin backend de feedback en Rust aun: degradado sin llamar
+     * a /wp-json. */
     const cargarEstado = async () => {
-        setEstado(prev => ({...prev, cargando: true}));
-        try {
-            const response = await fetch('/wp-json/glory/v1/feedback/restante', {
-                credentials: 'include',
-                headers: {'X-WP-Nonce': obtenerNonce()}
-            });
-            const data = await response.json();
-            if (data.success) {
-                setEstado({
-                    restante: data.restante,
-                    esPremium: data.esPremium,
-                    cargando: false
-                });
-            }
-        } catch {
-            setEstado(prev => ({...prev, cargando: false}));
-        }
+        setEstado({restante: 0, esPremium: false, cargando: false});
     };
 
     const enviarFeedback = useCallback(async () => {
@@ -82,36 +68,10 @@ export function useModalFeedback({estaAbierto, onCerrar}: UseModalFeedbackProps)
         setEnviando(true);
         setResultado(null);
 
-        try {
-            const response = await fetch('/wp-json/glory/v1/feedback', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': obtenerNonce()
-                },
-                body: JSON.stringify({tipo, mensaje})
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setResultado({exito: true, mensaje: data.mensaje});
-                setMensaje('');
-                setEstado(prev => ({...prev, restante: data.restante}));
-                /* Cerrar automáticamente después de éxito */
-                setTimeout(() => {
-                    onCerrar();
-                    setResultado(null);
-                }, 2000);
-            } else {
-                setResultado({exito: false, mensaje: data.error || 'Error al enviar'});
-            }
-        } catch {
-            setResultado({exito: false, mensaje: 'Error de conexión'});
-        } finally {
+        setTimeout(() => {
             setEnviando(false);
-        }
+            setResultado({exito: false, mensaje: 'El envío de feedback aún no está disponible'});
+        }, 400);
     }, [tipo, mensaje, onCerrar]);
 
     const manejarTecla = useCallback((e: React.KeyboardEvent) => {

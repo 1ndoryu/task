@@ -151,43 +151,18 @@ export function useAccionesDashboard(props: UseAccionesDashboardProps): UseAccio
         [abrirModalEquipos, cerrarModalNotificaciones]
     );
 
+    /* [18-08-2026] Sin endpoint de prueba de notificaciones en Rust: se
+     * degrada a false sin llamar a /wp-json. */
     const crearNotificacionPrueba = useCallback(async (): Promise<boolean> => {
-        try {
-            const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
-            const response = await fetch('/wp-json/glory/v1/notificaciones/test', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-WP-Nonce': nonce},
-                body: JSON.stringify({tipo: 'solicitud_equipo', titulo: 'Notificación de prueba', contenido: 'Esta es una notificación de prueba.'})
-            });
-            const data = await response.json();
-            if (data.success) {
-                refrescarNotificaciones();
-                return true;
-            }
-            return false;
-        } catch {
-            return false;
-        }
-    }, [refrescarNotificaciones]);
+        return false;
+    }, []);
 
+    /* [18-08-2026] Sin endpoint de limpiar actividad en Rust: solo limpia el
+     * cache local (sin llamada a /wp-json). */
     const limpiarActividadCompleta = useCallback(async (): Promise<boolean> => {
-        try {
-            const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
-            const response = await fetch('/wp-json/glory/v1/actividad/limpiar', {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json', 'X-WP-Nonce': nonce}
-            });
-            const data = await response.json();
-            if (data.success) {
-                /* Limpiar cache local de actividad y historial */
-                invalidarCache();
-                useHabitosHistorialStore.getState().limpiarTodoHistorialDetallado();
-                return true;
-            }
-            return false;
-        } catch {
-            return false;
-        }
+        invalidarCache();
+        useHabitosHistorialStore.getState().limpiarTodoHistorialDetallado();
+        return true;
     }, []);
 
     return {

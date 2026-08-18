@@ -43,89 +43,23 @@ export function useAlmacenamiento() {
         error: null
     });
 
-    /* Cargar información de almacenamiento */
+    /* [18-08-2026] Sin backend de almacenamiento/adjuntos en Rust aun: se
+     * degrada a valores locales sin llamar a /wp-json. */
     const cargar = useCallback(async () => {
-        setEstado(prev => ({...prev, cargando: true, error: null}));
-
-        try {
-            const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce;
-
-            const headers: HeadersInit = {
-                'Content-Type': 'application/json'
-            };
-
-            if (nonce) {
-                headers['X-WP-Nonce'] = nonce;
-            }
-
-            const response = await fetch('/wp-json/glory/v1/almacenamiento', {
-                method: 'GET',
-                credentials: 'include',
-                headers
-            });
-
-            const data: RespuestaApi = await response.json();
-
-            if (data.success && data.data) {
-                setEstado({
-                    info: data.data,
-                    cargando: false,
-                    error: null
-                });
-            } else {
-                setEstado({
-                    info: ALMACENAMIENTO_INICIAL,
-                    cargando: false,
-                    error: data.message || 'Error al cargar almacenamiento'
-                });
-            }
-        } catch (err) {
-            setEstado({
-                info: ALMACENAMIENTO_INICIAL,
-                cargando: false,
-                error: 'Error de conexión'
-            });
-        }
+        setEstado({
+            info: ALMACENAMIENTO_INICIAL,
+            cargando: false,
+            error: null
+        });
     }, []);
 
     /* Verificar si se puede subir un archivo de X bytes */
-    const verificarEspacio = useCallback(async (tamanoBytes: number): Promise<{puedeSubir: boolean; mensaje: string; info: InfoAlmacenamiento | null}> => {
-        try {
-            const nonce = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce;
-
-            const headers: HeadersInit = {
-                'Content-Type': 'application/json'
-            };
-
-            if (nonce) {
-                headers['X-WP-Nonce'] = nonce;
-            }
-
-            const response = await fetch('/wp-json/glory/v1/almacenamiento', {
-                method: 'POST',
-                credentials: 'include',
-                headers,
-                body: JSON.stringify({tamano: tamanoBytes})
-            });
-
-            const data: RespuestaVerificacion = await response.json();
-
-            if (data.data) {
-                setEstado(prev => ({...prev, info: data.data as InfoAlmacenamiento}));
-            }
-
-            return {
-                puedeSubir: data.puedeSubir ?? false,
-                mensaje: data.message || (data.puedeSubir ? 'Espacio disponible' : 'Sin espacio suficiente'),
-                info: data.data || null
-            };
-        } catch {
-            return {
-                puedeSubir: false,
-                mensaje: 'Error al verificar espacio',
-                info: null
-            };
-        }
+    const verificarEspacio = useCallback(async (_tamanoBytes: number): Promise<{puedeSubir: boolean; mensaje: string; info: InfoAlmacenamiento | null}> => {
+        return {
+            puedeSubir: false,
+            mensaje: 'Los adjuntos aún no están disponibles',
+            info: ALMACENAMIENTO_INICIAL
+        };
     }, []);
 
     /* Cargar al montar */

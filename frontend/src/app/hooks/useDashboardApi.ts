@@ -3,10 +3,9 @@
  *
  * [188A-1] Se abandona el contrato WordPress (/wp-json/glory/v1/dashboard +
  * nonce): la lectura viene de GET /api/dashboard y el guardado se hace por
- * entidad (PUT /api/tasks/{id} y PUT /api/projects/{id}). La sesion viaja en
- * cookie HttpOnly y las mutaciones usan X-CSRF-Token (cookie csrf_token).
- * Habitos, scratchpad de notas y configuracion aun no tienen endpoint Rust:
- * se omiten del guardado (quedan locales) hasta que existan.
+ * entidad (PUT /api/tasks/{id}, PUT /api/projects/{id} y PUT /api/habits/{id})
+ * mas PUT /api/dashboard/settings para scratchpad (notas) y configuracion.
+ * La sesion viaja en cookie HttpOnly y las mutaciones usan X-CSRF-Token.
  *
  * @package App/React/hooks
  */
@@ -125,6 +124,21 @@ function proyectoARequest(proyecto: Proyecto): Record<string, unknown> {
     };
 }
 
+function habitoARequest(habito: Habito): Record<string, unknown> {
+    /* frecuencia en el front es {tipo: 'diario'} (objeto); Rust espera string. */
+    const frecuencia = typeof habito.frecuencia === 'string'
+        ? habito.frecuencia
+        : (habito.frecuencia as {tipo?: string} | undefined)?.tipo ?? 'diario';
+    return {
+        nombre: habito.nombre,
+        importancia: habito.importancia ?? 'media',
+        frecuencia,
+        orden: Number((habito as {orden?: number}).orden ?? 0),
+        payload: habito,
+        expectedUpdatedAt: null,
+    };
+}
+
 /**
  * Hook principal para la API del Dashboard
  */
@@ -142,7 +156,6 @@ export function useDashboardApi(): UseDashboardApiReturn {
      * entidad (varias PUT en paralelo) y abortar la peticion anterior al iniciar
      * una nueva cancelaria el batch entero. Solo se aborta en unmount/timeout. */
     const abortControllersRef = useRef<Set<AbortController>>(new Set());
-    const avisoDominiosSinBackend = useRef(false);
 
     /* Cleanup: Abortar peticiones pendientes al desmontar */
     useEffect(() => {
@@ -280,16 +293,27 @@ export function useDashboardApi(): UseDashboardApiReturn {
                     );
                 }
 
-                if (!avisoDominiosSinBackend.current) {
-                    const sinBackend = [
-                        datos.habitos?.length ? 'habitos' : null,
-                        datos.notas ? 'scratchpad-notas' : null,
-                        datos.configuracion ? 'configuracion' : null,
-                    ].filter(Boolean);
-                    if (sinBackend.length > 0) {
-                        console.warn(`[DashboardApi] Dominios sin endpoint Rust (quedan locales): ${sinBackend.join(', ')}`);
-                        avisoDominiosSinBackend.current = true;
-                    }
+                for (const habito of datos.habitos ?? []) {
+                    if (typeof habito.id !== 'number') continue;
+                    operaciones.push(
+                        fetchApi(`/api/habits/${habito.id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(habitoARequest(habito))
+                        })
+                    );
+                }
+
+                /* Scratchpad de notas + configuracion de usuario (PUT /api/dashboard/settings) */
+                if (datos.notas !== undefined || datos.configuracion !== undefined) {
+                    operaciones.push(
+                        fetchApi('/api/dashboard/settings', {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                notas: datos.notas ?? '',
+                                configuracion: datos.configuracion ?? {}
+                            })
+                        })
+                    );
                 }
 
                 const resultados = await Promise.allSettled(operaciones);

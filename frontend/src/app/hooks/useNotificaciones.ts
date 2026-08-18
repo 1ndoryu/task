@@ -1,12 +1,11 @@
-/*
- * Hook useNotificaciones
- *
- * Gestiona el estado y las operaciones del sistema de notificaciones.
- * Proporciona polling cada 30 segundos para actualizaciones en tiempo real.
- * Incluye cache local para carga instantánea.
- */
+/* [18-08-2026] useNotificaciones contra /api/notifications (backend Rust).
+ * Sesion por cookie HttpOnly + X-CSRF-Token en mutaciones. El contrato Rust
+ * devuelve JSON plano ({items, page, perPage, hasMore, total}) con UUIDs y
+ * campos camelCase; este hook mapea al tipo Notificacion del front original.
+ * Mantiene el polling de 30s y la cache local del diseno original. */
 
 import {useState, useEffect, useCallback, useRef} from 'react';
+import {apiFetch} from '../utils/apiClient';
 import type {Notificacion, RespuestaNotificaciones, PaginacionNotificaciones} from '../types/dashboard';
 
 interface EstadoNotificaciones {
@@ -30,11 +29,38 @@ interface AccionesNotificaciones {
 interface HookNotificaciones extends EstadoNotificaciones, AccionesNotificaciones {}
 
 const INTERVALO_POLLING = 30000;
-const BASE_URL = '/wp-json/glory/v1';
 
-const obtenerNonce = (): string => {
-    return (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
-};
+interface NotificacionRust {
+    id: string;
+    notificationType: string;
+    title: string;
+    content: string | null;
+    read: boolean;
+    createdAt: string;
+    readAt: string | null;
+    metadata: unknown;
+}
+
+interface ListadoRust {
+    items: NotificacionRust[];
+    page: number;
+    perPage: number;
+    hasMore: boolean;
+    total: number;
+}
+
+function mapearNotificacion(n: NotificacionRust): Notificacion {
+    return {
+        id: n.id as unknown as number,
+        tipo: n.notificationType as Notificacion['tipo'],
+        titulo: n.title,
+        contenido: n.content,
+        leida: n.read,
+        fechaCreacion: n.createdAt,
+        fechaLectura: n.readAt,
+        datosExtra: (n.metadata ?? null) as Notificacion['datosExtra'],
+    };
+}
 
 export function useNotificaciones(habilitado: boolean = true): HookNotificaciones {
     const [estado, setEstado] = useState<EstadoNotificaciones>({
@@ -66,39 +92,29 @@ export function useNotificaciones(habilitado: boolean = true): HookNotificacione
 
             try {
                 const params = new URLSearchParams({
-                    pagina: pagina.toString(),
-                    porPagina: '20',
-                    soloNoLeidas: soloNoLeidas.toString()
+                    page: pagina.toString(),
+                    perPage: '20',
+                    unreadOnly: soloNoLeidas.toString()
                 });
 
-                const respuesta = await fetch(`${BASE_URL}/notificaciones?${params}`, {
-                    headers: {
-                        'X-WP-Nonce': obtenerNonce()
-                    }
-                });
-
-                if (!respuesta.ok) {
-                    throw new Error(`Error HTTP: ${respuesta.status}`);
-                }
-
-                const json = await respuesta.json();
+                const datos = await apiFetch<ListadoRust>(`/notifications?${params}`);
 
                 if (!montadoRef.current) return;
 
-                if (json.success && json.data) {
-                    const datos = json.data as RespuestaNotificaciones;
-                    hayCargaInicialRef.current = true;
-                    setEstado(prev => ({
-                        ...prev,
-                        notificaciones: datos.notificaciones,
-                        total: datos.total,
-                        paginacion: datos.paginacion,
-                        cargando: false,
-                        cargandoPrimeraVez: false
-                    }));
-                } else {
-                    throw new Error(json.message || 'Error al cargar notificaciones');
-                }
+                hayCargaInicialRef.current = true;
+                const totalPaginas = datos.perPage > 0 ? Math.ceil(datos.total / datos.perPage) : 0;
+                setEstado(prev => ({
+                    ...prev,
+                    notificaciones: datos.items.map(mapearNotificacion),
+                    total: datos.total,
+                    paginacion: {
+                        pagina: datos.page,
+                        porPagina: datos.perPage,
+                        totalPaginas
+                    },
+                    cargando: false,
+                    cargandoPrimeraVez: false
+                }));
             } catch (err) {
                 if (!montadoRef.current) return;
                 setEstado(prev => ({
@@ -117,24 +133,14 @@ export function useNotificaciones(habilitado: boolean = true): HookNotificacione
         if (!habilitado) return;
 
         try {
-            const respuesta = await fetch(`${BASE_URL}/notificaciones/no-leidas`, {
-                headers: {
-                    'X-WP-Nonce': obtenerNonce()
-                }
-            });
-
-            if (!respuesta.ok) return;
-
-            const json = await respuesta.json();
+            const datos = await apiFetch<{unread: number}>(`/notifications/unread-count`);
 
             if (!montadoRef.current) return;
 
-            if (json.success && json.data) {
-                setEstado(prev => ({
-                    ...prev,
-                    noLeidas: json.data.noLeidas || 0
-                }));
-            }
+            setEstado(prev => ({
+                ...prev,
+                noLeidas: datos?.unread ?? 0
+            }));
         } catch {
             /* Silenciar errores de polling */
         }
@@ -143,27 +149,15 @@ export function useNotificaciones(habilitado: boolean = true): HookNotificacione
     /* Marcar una notificación como leída */
     const marcarLeida = useCallback(async (id: number): Promise<boolean> => {
         try {
-            const respuesta = await fetch(`${BASE_URL}/notificaciones/${id}/leer`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': obtenerNonce()
-                }
-            });
-
-            const json = await respuesta.json();
-
-            if (json.success) {
-                setEstado(prev => ({
-                    ...prev,
-                    notificaciones: prev.notificaciones.map(n => (n.id === id ? {...n, leida: true, fechaLectura: new Date().toISOString()} : n)),
-                    noLeidas: Math.max(0, prev.noLeidas - 1)
-                }));
-                return true;
-            }
-
-            return false;
+            await apiFetch(`/notifications/${id}/read`, {method: 'PUT'});
+            setEstado(prev => ({
+                ...prev,
+                notificaciones: prev.notificaciones.map(n => (String(n.id) === String(id) ? {...n, leida: true, fechaLectura: n.fechaLectura || new Date().toISOString()} : n)),
+                noLeidas: Math.max(0, prev.noLeidas - 1)
+            }));
+            return true;
         } catch {
+            /* Silenciar errores como en el original */
             return false;
         }
     }, []);
@@ -171,30 +165,17 @@ export function useNotificaciones(habilitado: boolean = true): HookNotificacione
     /* Marcar todas las notificaciones como leídas */
     const marcarTodasLeidas = useCallback(async (): Promise<boolean> => {
         try {
-            const respuesta = await fetch(`${BASE_URL}/notificaciones/leer-todas`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': obtenerNonce()
-                }
-            });
-
-            const json = await respuesta.json();
-
-            if (json.success) {
-                setEstado(prev => ({
-                    ...prev,
-                    notificaciones: prev.notificaciones.map(n => ({
-                        ...n,
-                        leida: true,
-                        fechaLectura: n.fechaLectura || new Date().toISOString()
-                    })),
-                    noLeidas: 0
-                }));
-                return true;
-            }
-
-            return false;
+            await apiFetch(`/notifications/read-all`, {method: 'PUT'});
+            setEstado(prev => ({
+                ...prev,
+                notificaciones: prev.notificaciones.map(n => ({
+                    ...n,
+                    leida: true,
+                    fechaLectura: n.fechaLectura || new Date().toISOString()
+                })),
+                noLeidas: 0
+            }));
+            return true;
         } catch {
             return false;
         }
@@ -203,31 +184,19 @@ export function useNotificaciones(habilitado: boolean = true): HookNotificacione
     /* Eliminar una notificación */
     const eliminar = useCallback(async (id: number): Promise<boolean> => {
         try {
-            const respuesta = await fetch(`${BASE_URL}/notificaciones/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-WP-Nonce': obtenerNonce()
-                }
+            await apiFetch(`/notifications/${id}`, {method: 'DELETE'});
+            setEstado(prev => {
+                const notificacionEliminada = prev.notificaciones.find(n => String(n.id) === String(id));
+                const eraNoLeida = notificacionEliminada && !notificacionEliminada.leida;
+
+                return {
+                    ...prev,
+                    notificaciones: prev.notificaciones.filter(n => String(n.id) !== String(id)),
+                    total: Math.max(0, prev.total - 1),
+                    noLeidas: eraNoLeida ? Math.max(0, prev.noLeidas - 1) : prev.noLeidas
+                };
             });
-
-            const json = await respuesta.json();
-
-            if (json.success) {
-                setEstado(prev => {
-                    const notificacionEliminada = prev.notificaciones.find(n => n.id === id);
-                    const eraNoLeida = notificacionEliminada && !notificacionEliminada.leida;
-
-                    return {
-                        ...prev,
-                        notificaciones: prev.notificaciones.filter(n => n.id !== id),
-                        total: Math.max(0, prev.total - 1),
-                        noLeidas: eraNoLeida ? Math.max(0, prev.noLeidas - 1) : prev.noLeidas
-                    };
-                });
-                return true;
-            }
-
-            return false;
+            return true;
         } catch {
             return false;
         }

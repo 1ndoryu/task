@@ -105,30 +105,14 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
     /**
      * Realiza una petición a la API de mensajes
      */
-    const fetchApi = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-        const url = `${API_BASE}${endpoint}`;
-
-        const defaultOptions: RequestInit = {
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            }
-        };
-
-        const response = await fetch(url, {...defaultOptions, ...options});
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('No autenticado. Inicia sesión para continuar.');
-            }
-            if (response.status === 403) {
-                throw new Error('Sin permisos para acceder a este elemento.');
-            }
-            throw new Error(`Error del servidor: ${response.status}`);
+    /* [18-08-2026] Sin backend de mensajes en Rust aun: se degrada sin llamar
+     * a /wp-json. Las lecturas devuelven vacio (timeline sin ruido) y los
+     * envios fallan con mensaje claro. */
+    const fetchApi = useCallback(async <T>(_endpoint: string, options: RequestInit = {}): Promise<T> => {
+        if ((options.method || 'GET').toUpperCase() !== 'GET') {
+            throw new Error('El chat aún no está disponible');
         }
-
-        return response.json();
+        return {success: true, mensajes: [], total: 0} as T;
     }, []);
 
     /**

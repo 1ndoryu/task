@@ -4,7 +4,7 @@ use axum::{Json, Router};
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::productivity::{
-    ProductivityWriteResponse, UpsertProjectRequest, UpsertTaskRequest,
+    ProductivityWriteResponse, UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
 };
 use crate::services::ProductivityService;
 use crate::AppState;
@@ -59,6 +59,31 @@ pub async fn upsert_task(
     ))
 }
 
+#[utoipa::path(
+    put,
+    tag = "habits",
+    path = "/api/habits/{legacy_id}",
+    params(("legacy_id" = i64, Path, description = "ID legacy del hábito")),
+    request_body = UpsertHabitRequest,
+    responses(
+        (status = 200, description = "Hábito guardado", body = ProductivityWriteResponse),
+        (status = 409, description = "Conflicto de versión", body = ErrorResponse),
+        (status = 422, description = "Error de validación", body = ErrorResponse)
+    ),
+    security(("session_cookie" = []))
+)]
+pub async fn upsert_habit(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(legacy_id): Path<i64>,
+    Json(request): Json<UpsertHabitRequest>,
+) -> Result<Json<ProductivityWriteResponse>, AppError> {
+    validate_legacy_id(legacy_id)?;
+    Ok(Json(
+        ProductivityService::upsert_habit(&state.pool, auth.user_id, legacy_id, request).await?,
+    ))
+}
+
 fn validate_legacy_id(legacy_id: i64) -> Result<(), AppError> {
     if legacy_id <= 0 {
         return Err(AppError::Validation("legacy_id debe ser positivo".into()));
@@ -70,4 +95,5 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/projects/:legacy_id", axum::routing::put(upsert_project))
         .route("/tasks/:legacy_id", axum::routing::put(upsert_task))
+        .route("/habits/:legacy_id", axum::routing::put(upsert_habit))
 }

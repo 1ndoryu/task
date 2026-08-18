@@ -17,6 +17,7 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
 import {obtenerDelCache, guardarEnCache, suscribirACambios} from '../services/actividadStore';
 import {obtenerFechaHoy} from '../utils/fecha';
+import {apiFetch, obtenerTokenCsrf} from '../utils/apiClient';
 
 /* Tipos para el mapa de calor */
 export interface DatosHeatmap {
@@ -71,15 +72,11 @@ interface UseActividadReturn {
 }
 
 /* Base URL de la API */
-const API_BASE = '/wp-json/glory/v1/actividad';
+const API_BASE = '/activity';
 
 /**
  * Obtiene el nonce de WordPress para autenticación
  */
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
-}
 
 /**
  * Hook principal para el mapa de calor de actividad
@@ -124,11 +121,14 @@ export function useActividad(filtrosIniciales?: FiltrosActividad): UseActividadR
     const fetchApi = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
         const url = `${API_BASE}${endpoint}`;
 
+        const metodo = (options.method || 'GET').toUpperCase();
+        const esMutacion = metodo !== 'GET' && metodo !== 'HEAD';
+
         const defaultOptions: RequestInit = {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
+                ...(esMutacion ? {'X-CSRF-Token': obtenerTokenCsrf()} : {})
             }
         };
 

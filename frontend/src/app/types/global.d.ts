@@ -5,6 +5,8 @@
 
 interface GloryDashboardData {
     currentUser?: {
+        /* [18-08-2026] id = UUID del usuario en Rust (compartidos/equipos). */
+        id?: string;
         name: string;
         email?: string;
         login?: string;

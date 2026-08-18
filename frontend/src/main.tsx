@@ -24,7 +24,10 @@ window.__GLORY_ROUTES__ = {
  * El nonce queda vacio (Rust usa cookie HttpOnly + CSRF); los hooks que
  * dependen de nonce se adaptan por dominio en la migracion. */
 async function cargarSesionRust(): Promise<void> {
-    const base = { nonce: '', apiUrl: '/wp-json/glory/v1', apiBase: '/wp-json/glory/v1' };
+    /* [18-08-2026] El shim ya no es un puente de WordPress: es el contexto de
+     * sesion Rust (isLoggedIn, currentUser con id UUID para compartidos/equipos).
+     * apiUrl/apiBase quedan obsoletos y apuntan a /api por compatibilidad. */
+    const base = { nonce: '', apiUrl: '/api', apiBase: '/api' };
     try {
         const respuesta = await fetch('/api/auth/me', { credentials: 'include' });
         if (!respuesta.ok) {
@@ -36,6 +39,7 @@ async function cargarSesionRust(): Promise<void> {
         window.gloryDashboard = {
             ...base,
             currentUser: {
+                id: usuario?.id,
                 name: usuario?.display_name || usuario?.email || '',
                 email: usuario?.email,
                 avatarUrl: usuario?.avatar_url ?? undefined,

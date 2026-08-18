@@ -1,12 +1,72 @@
-/**
- * Servicio de Hábitos
- * Maneja la comunicación con la API para operaciones de hábitos
- */
+/* [18-08-2026] habitosService contra /api/habits/:id/history (backend Rust).
+ * Se mapea {habitId, history, summary7Days, stats} a {historial, resumen7Dias,
+ * estadisticas} del front original. Sesion por cookie HttpOnly + CSRF. */
 import type {HistorialHabito, EstadisticasHabito, DiaHistorial} from '../types/historialHabitos';
+import {apiFetch} from '../utils/apiClient';
 
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
+interface EntradaHistorialRust {
+    date: string;
+    status: string;
+    notes: string | null;
+    recordedAt: string;
+}
+
+interface DiaResumenRust {
+    date: string;
+    weekday: number;
+    status: string | null;
+    isToday: boolean;
+}
+
+interface EstadisticasRust {
+    completed: number;
+    postponed: number;
+    skipped: number;
+    total: number;
+    completionRate: number;
+    days: number;
+}
+
+interface HistorialRust {
+    habitId: number;
+    history: EntradaHistorialRust[];
+    summary7Days: DiaResumenRust[];
+    stats: EstadisticasRust;
+}
+
+const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+
+function mapearHistorial(datos: HistorialRust): HistorialHabito {
+    const historial: HistorialHabito = {};
+    for (const entrada of datos.history || []) {
+        historial[entrada.date] = {
+            estado: entrada.status as HistorialHabito[string]['estado'],
+            notas: entrada.notes,
+            fechaRegistro: entrada.recordedAt
+        };
+    }
+    return historial;
+}
+
+function mapearResumen(datos: HistorialRust): DiaHistorial[] {
+    return (datos.summary7Days || []).map((dia): DiaHistorial => ({
+        fecha: dia.date,
+        diaSemana: DIAS_SEMANA[dia.weekday] ?? String(dia.weekday),
+        estado: (dia.status ?? null) as DiaHistorial['estado'],
+        esHoy: dia.isToday
+    }));
+}
+
+function mapearEstadisticas(datos: HistorialRust): EstadisticasHabito | null {
+    if (!datos.stats) return null;
+    return {
+        completados: datos.stats.completed,
+        pospuestos: datos.stats.postponed,
+        omitidos: datos.stats.skipped,
+        total: datos.stats.total,
+        porcentajeCumplimiento: datos.stats.completionRate,
+        dias: datos.stats.days
+    };
 }
 
 export const habitosService = {
@@ -14,23 +74,14 @@ export const habitosService = {
      * Marca un día con un estado específico (completado, pospuesto, etc)
      */
     async marcarDia(habitoId: number, fecha: string, estado: string | null): Promise<boolean> {
-        const response = await fetch(`/wp-json/glory/v1/habitos/${habitoId}/historial`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            },
-            body: JSON.stringify({fecha, estado})
+        await apiFetch<HistorialRust>(`/habits/${habitoId}/history`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                date: fecha,
+                status: estado || 'completado',
+                notes: null
+            })
         });
-
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error('Error al marcar día');
-        }
         return true;
     },
 
@@ -38,24 +89,9 @@ export const habitosService = {
      * Elimina el registro de un día (desmarcar)
      */
     async desmarcarDia(habitoId: number, fecha: string): Promise<boolean> {
-        const response = await fetch(`/wp-json/glory/v1/habitos/${habitoId}/historial/${fecha}`, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            }
+        await apiFetch<HistorialRust>(`/habits/${habitoId}/history/${fecha}`, {
+            method: 'DELETE'
         });
-
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error('Error al desmarcar día');
-        }
-
         return true;
     },
 
@@ -63,28 +99,12 @@ export const habitosService = {
      * Obtiene el historial detallado, resumen y estadísticas
      */
     async obtenerHistorialDetallado(habitoId: number, dias: number): Promise<{historial: HistorialHabito; resumen7Dias: DiaHistorial[]; estadisticas: EstadisticasHabito | null}> {
-        const response = await fetch(`/wp-json/glory/v1/habitos/${habitoId}/historial?dias=${dias}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error('Error al cargar historial');
-        }
+        const datos = await apiFetch<HistorialRust>(`/habits/${habitoId}/history?days=${dias}`);
 
         return {
-            historial: data.historial,
-            resumen7Dias: data.resumen7Dias,
-            estadisticas: data.estadisticas
+            historial: mapearHistorial(datos),
+            resumen7Dias: mapearResumen(datos),
+            estadisticas: mapearEstadisticas(datos)
         };
     }
 };

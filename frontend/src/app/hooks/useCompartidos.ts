@@ -1,4 +1,11 @@
+/* [18-08-2026] useCompartidos contra /api/shared (backend Rust).
+ * El backend identifica usuarios con UUID; el front original usaba ids
+ * numericos de WP. Los ids de usuario y de compartido se pasan como string
+ * UUID en runtime (tipos del front conservados por compatibilidad).
+ * Sesion por cookie HttpOnly + X-CSRF-Token en mutaciones. */
+
 import {useState, useCallback, useRef, useEffect} from 'react';
+import {apiFetch} from '../utils/apiClient';
 import type {TipoElementoCompartido, RolCompartido, ElementoCompartidoConmigo, ElementoCompartidoPorMi, Participante, PermisosAcceso, ContadoresCompartidos, CompaneroEquipo} from '../types/dashboard';
 import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 
@@ -21,7 +28,42 @@ interface UseCompartidosReturn extends EstadoCompartidos {
     estaCompartido: (tipo: TipoElementoCompartido, elementoId: number) => boolean;
 }
 
-const API_BASE = '/wp-json/glory/v1';
+/* Contratos Rust (JSON plano, camelCase) */
+interface UsuarioRust {
+    id: string;
+    displayName: string;
+    email: string;
+    avatarUrl: string | null;
+}
+
+interface CompartidoRust {
+    id: string;
+    itemType: string;
+    itemId: number;
+    owner: UsuarioRust;
+    recipient: UsuarioRust;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface ParticipanteRust {
+    id: string | null;
+    user: UsuarioRust;
+    role: string;
+    isOwner: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
+interface ListadoRust {
+    items: CompartidoRust[];
+    total: number;
+}
+
+function obtenerIdUsuarioActual(): string {
+    return (window as unknown as {gloryDashboard?: {currentUser?: {id?: string}}}).gloryDashboard?.currentUser?.id || '';
+}
 
 export function useCompartidos(): UseCompartidosReturn {
     const [estado, setEstado] = useState<EstadoCompartidos>({
@@ -34,77 +76,74 @@ export function useCompartidos(): UseCompartidosReturn {
 
     const abortControllerRef = useRef<AbortController | null>(null);
 
-    /* Obtiene el nonce solo si el usuario está logueado */
-    const obtenerNonce = useCallback((): string => {
-        const wpData = (window as unknown as {gloryDashboard?: {nonce?: string; isLoggedIn?: boolean}}).gloryDashboard;
-        /* Solo retornar nonce si el usuario está logueado */
-        if (!wpData?.isLoggedIn) {
-            return '';
-        }
-        return wpData.nonce ?? '';
+    const haySesion = useCallback((): boolean => {
+        return Boolean(obtenerIdUsuarioActual());
     }, []);
 
-    /* Realiza una petición fetch autenticada - NO hace fetch si no hay nonce */
+    /* Peticion autenticada; sin sesion lanza ErrorSilencioso sin fetch */
     const fetchAutenticado = useCallback(
-        async (url: string, opciones: RequestInit = {}): Promise<Response> => {
-            const nonce = obtenerNonce();
-            
-            /* Si no hay nonce válido, lanzar error silencioso SIN hacer fetch */
-            if (!nonce || nonce.trim() === '') {
+        async <T = unknown>(path: string, opciones: RequestInit = {}): Promise<T> => {
+            if (!haySesion()) {
                 throw new ErrorSilencioso('No autenticado');
             }
-
-            const response = await fetch(url, {
-                ...opciones,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': nonce,
-                    ...opciones.headers
-                },
-                credentials: 'same-origin'
-            });
-
-            /* Si recibimos 401, lanzar error silencioso para evitar ruido en consola */
-            if (response.status === 401) {
-                throw new ErrorSilencioso('No autenticado');
+            try {
+                return await apiFetch<T>(path, opciones as never);
+            } catch (error) {
+                if (error instanceof ErrorSilencioso) throw error;
+                if (error instanceof Error && (error as {status?: number}).status === 401) {
+                    throw new ErrorSilencioso('No autenticado');
+                }
+                throw error;
             }
-
-            return response;
         },
-        [obtenerNonce]
+        [haySesion]
     );
+
+    const mapearConmigo = useCallback((item: CompartidoRust): ElementoCompartidoConmigo => ({
+        id: item.id as unknown as number,
+        tipo: item.itemType as TipoElementoCompartido,
+        elementoId: item.itemId,
+        propietarioId: item.owner.id as unknown as number,
+        propietarioNombre: item.owner.displayName,
+        propietarioEmail: item.owner.email,
+        propietarioAvatar: item.owner.avatarUrl || '',
+        rol: item.role as RolCompartido,
+        fechaCompartido: item.createdAt
+    }), []);
+
+    const mapearPorMi = useCallback((item: CompartidoRust): ElementoCompartidoPorMi => ({
+        id: item.id as unknown as number,
+        tipo: item.itemType as TipoElementoCompartido,
+        elementoId: item.itemId,
+        usuarioId: item.recipient.id as unknown as number,
+        usuarioNombre: item.recipient.displayName,
+        usuarioEmail: item.recipient.email,
+        usuarioAvatar: item.recipient.avatarUrl || '',
+        rol: item.role as RolCompartido,
+        fechaCompartido: item.createdAt
+    }), []);
 
     /* Carga compartidos conmigo */
     const cargarCompartidosConmigo = useCallback(async (): Promise<ElementoCompartidoConmigo[]> => {
-        const respuesta = await fetchAutenticado(`${API_BASE}/compartidos`);
-        const datos = await respuesta.json();
-
-        if (datos.exito) {
-            return datos.compartidos;
-        }
-        return [];
-    }, [fetchAutenticado]);
+        const datos = await fetchAutenticado<ListadoRust>('/shared?page=1&perPage=50');
+        return (datos?.items || []).map(mapearConmigo);
+    }, [fetchAutenticado, mapearConmigo]);
 
     /* Carga elementos que yo he compartido */
     const cargarMisCompartidos = useCallback(async (): Promise<ElementoCompartidoPorMi[]> => {
-        const respuesta = await fetchAutenticado(`${API_BASE}/compartidos/mis`);
-        const datos = await respuesta.json();
-
-        if (datos.exito) {
-            return datos.compartidos;
-        }
-        return [];
-    }, [fetchAutenticado]);
+        const datos = await fetchAutenticado<ListadoRust>('/shared/mine?page=1&perPage=50');
+        return (datos?.items || []).map(mapearPorMi);
+    }, [fetchAutenticado, mapearPorMi]);
 
     /* Carga contadores */
     const cargarContadores = useCallback(async (): Promise<ContadoresCompartidos> => {
-        const respuesta = await fetchAutenticado(`${API_BASE}/compartidos/contadores`);
-        const datos = await respuesta.json();
-
-        if (datos.exito) {
-            return datos.contadores;
-        }
-        return {tareas: 0, proyectos: 0, habitos: 0, total: 0};
+        const datos = await fetchAutenticado<{tasks: number; projects: number; habits: number; total: number}>('/shared/counts');
+        return {
+            tareas: datos?.tasks ?? 0,
+            proyectos: datos?.projects ?? 0,
+            habitos: datos?.habits ?? 0,
+            total: datos?.total ?? 0
+        };
     }, [fetchAutenticado]);
 
     /* Recarga todos los datos */
@@ -128,7 +167,6 @@ export function useCompartidos(): UseCompartidosReturn {
             });
         } catch (error) {
             if (error instanceof Error && error.name !== 'AbortError') {
-                /* No mostrar error si es de tipo silent (401 sin auth) */
                 if (esErrorSilencioso(error)) {
                     setEstado(prev => ({...prev, cargando: false}));
                     return;
@@ -142,73 +180,61 @@ export function useCompartidos(): UseCompartidosReturn {
         }
     }, [cargarCompartidosConmigo, cargarMisCompartidos, cargarContadores]);
 
-    /* Comparte un elemento con otro usuario */
+    /* Comparte un elemento con otro usuario (usuarioId = UUID del receptor) */
     const compartir = useCallback(
         async (tipo: TipoElementoCompartido, elementoId: number, usuarioId: number, rol: RolCompartido = 'colaborador'): Promise<boolean> => {
             try {
-                const respuesta = await fetchAutenticado(`${API_BASE}/compartidos`, {
+                const datos = await fetchAutenticado<CompartidoRust>('/shared', {
                     method: 'POST',
-                    body: JSON.stringify({tipo, elementoId, usuarioId, rol})
+                    body: JSON.stringify({
+                        itemType: tipo,
+                        itemId: elementoId,
+                        userId: String(usuarioId),
+                        role: rol
+                    })
                 });
 
-                const datos = await respuesta.json();
-
-                if (datos.exito) {
-                    /* Añadir a la lista local */
-                    setEstado(prev => ({
-                        ...prev,
-                        misCompartidos: [...prev.misCompartidos, datos.compartido],
-                        contadores: {
-                            ...prev.contadores,
-                            [tipo + 's']: (prev.contadores[(tipo + 's') as keyof ContadoresCompartidos] as number) + 1,
-                            total: prev.contadores.total + 1
-                        }
-                    }));
-                    return true;
-                }
-
-                return false;
+                setEstado(prev => ({
+                    ...prev,
+                    misCompartidos: [...prev.misCompartidos, mapearPorMi(datos)],
+                    contadores: {
+                        ...prev.contadores,
+                        [tipo + 's']: (prev.contadores[(tipo + 's') as keyof ContadoresCompartidos] as number) + 1,
+                        total: prev.contadores.total + 1
+                    }
+                }));
+                return true;
             } catch {
                 return false;
             }
         },
-        [fetchAutenticado]
+        [fetchAutenticado, mapearPorMi]
     );
 
-    /* Deja de compartir un elemento */
+    /* Deja de compartir un elemento (id = UUID del compartido) */
     const dejarDeCompartir = useCallback(
         async (compartidoId: number): Promise<boolean> => {
             try {
-                const respuesta = await fetchAutenticado(`${API_BASE}/compartidos/${compartidoId}`, {
-                    method: 'DELETE'
+                await fetchAutenticado(`/shared/${compartidoId}`, {method: 'DELETE'});
+                setEstado(prev => {
+                    const enMisCompartidos = prev.misCompartidos.find(c => c.id === compartidoId);
+                    const enCompartidosConmigo = prev.compartidosConmigo.find(c => c.id === compartidoId);
+                    const tipo = enMisCompartidos?.tipo ?? enCompartidosConmigo?.tipo;
+
+                    return {
+                        ...prev,
+                        misCompartidos: prev.misCompartidos.filter(c => c.id !== compartidoId),
+                        compartidosConmigo: prev.compartidosConmigo.filter(c => c.id !== compartidoId),
+                        contadores: tipo
+                            ? {
+                                  ...prev.contadores,
+                                  [tipo + 's']: Math.max(0, (prev.contadores[(tipo + 's') as keyof ContadoresCompartidos] as number) - 1),
+                                  total: Math.max(0, prev.contadores.total - 1)
+                              }
+                            : prev.contadores
+                    };
                 });
-
-                const datos = await respuesta.json();
-
-                if (datos.exito) {
-                    /* Remover de la lista local */
-                    setEstado(prev => {
-                        const enMisCompartidos = prev.misCompartidos.find(c => c.id === compartidoId);
-                        const enCompartidosConmigo = prev.compartidosConmigo.find(c => c.id === compartidoId);
-                        const tipo = enMisCompartidos?.tipo ?? enCompartidosConmigo?.tipo;
-
-                        return {
-                            ...prev,
-                            misCompartidos: prev.misCompartidos.filter(c => c.id !== compartidoId),
-                            compartidosConmigo: prev.compartidosConmigo.filter(c => c.id !== compartidoId),
-                            contadores: tipo
-                                ? {
-                                      ...prev.contadores,
-                                      [tipo + 's']: Math.max(0, (prev.contadores[(tipo + 's') as keyof ContadoresCompartidos] as number) - 1),
-                                      total: Math.max(0, prev.contadores.total - 1)
-                                  }
-                                : prev.contadores
-                        };
-                    });
-                    return true;
-                }
-
-                return false;
+                return true;
             } catch {
                 return false;
             }
@@ -216,27 +242,19 @@ export function useCompartidos(): UseCompartidosReturn {
         [fetchAutenticado]
     );
 
-    /* Actualiza el rol de un participante */
+    /* Actualiza el rol de un compartido */
     const actualizarRol = useCallback(
         async (compartidoId: number, nuevoRol: RolCompartido): Promise<boolean> => {
             try {
-                const respuesta = await fetchAutenticado(`${API_BASE}/compartidos/${compartidoId}/rol`, {
+                await fetchAutenticado(`/shared/${compartidoId}/role`, {
                     method: 'PUT',
-                    body: JSON.stringify({rol: nuevoRol})
+                    body: JSON.stringify({role: nuevoRol})
                 });
-
-                const datos = await respuesta.json();
-
-                if (datos.exito) {
-                    /* Actualizar en la lista local */
-                    setEstado(prev => ({
-                        ...prev,
-                        misCompartidos: prev.misCompartidos.map(c => (c.id === compartidoId ? {...c, rol: nuevoRol} : c))
-                    }));
-                    return true;
-                }
-
-                return false;
+                setEstado(prev => ({
+                    ...prev,
+                    misCompartidos: prev.misCompartidos.map(c => (c.id === compartidoId ? {...c, rol: nuevoRol} : c))
+                }));
+                return true;
             } catch {
                 return false;
             }
@@ -244,19 +262,24 @@ export function useCompartidos(): UseCompartidosReturn {
         [fetchAutenticado]
     );
 
-    /* Obtiene los participantes de un elemento */
+    /* Obtiene los participantes de un elemento (propietario = usuario actual) */
     const obtenerParticipantes = useCallback(
         async (tipo: TipoElementoCompartido, elementoId: number): Promise<Participante[]> => {
             try {
-                const respuesta = await fetchAutenticado(`${API_BASE}/compartidos/participantes/${tipo}/${elementoId}`);
+                const propietarioId = obtenerIdUsuarioActual();
+                if (!propietarioId) return [];
 
-                const datos = await respuesta.json();
+                const datos = await fetchAutenticado<{participants: ParticipanteRust[]}>(`/shared/participants/${tipo}/${elementoId}/${propietarioId}`);
 
-                if (datos.exito) {
-                    return datos.participantes;
-                }
-
-                return [];
+                return (datos?.participants || []).map((p): Participante => ({
+                    id: (p.id || p.user.id) as unknown as number,
+                    usuarioId: p.user.id as unknown as number,
+                    nombre: p.user.displayName,
+                    email: p.user.email,
+                    avatar: p.user.avatarUrl || '',
+                    rol: p.role as RolCompartido,
+                    esPropietario: p.isOwner
+                }));
             } catch {
                 return [];
             }
@@ -268,14 +291,15 @@ export function useCompartidos(): UseCompartidosReturn {
     const verificarAcceso = useCallback(
         async (tipo: TipoElementoCompartido, elementoId: number, propietarioId: number): Promise<PermisosAcceso | null> => {
             try {
-                const respuesta = await fetchAutenticado(`${API_BASE}/compartidos/acceso/${tipo}/${elementoId}/${propietarioId}`);
+                const datos = await fetchAutenticado<{hasAccess: boolean; access: {role: string; canEdit: boolean; canDelete: boolean} | null}>(`/shared/access/${tipo}/${elementoId}/${propietarioId}`);
 
-                const datos = await respuesta.json();
-
-                if (datos.exito && datos.tieneAcceso) {
-                    return datos.acceso;
+                if (datos?.hasAccess && datos.access) {
+                    return {
+                        rol: datos.access.role as RolCompartido,
+                        puedeEditar: datos.access.canEdit,
+                        puedeEliminar: datos.access.canDelete
+                    };
                 }
-
                 return null;
             } catch {
                 return null;
@@ -306,10 +330,7 @@ export function useCompartidos(): UseCompartidosReturn {
 
     /* Carga inicial - solo si hay usuario autenticado */
     useEffect(() => {
-        const nonce = obtenerNonce();
-        
-        /* No cargar datos si no hay usuario autenticado */
-        if (!nonce) {
+        if (!haySesion()) {
             setEstado(prev => ({...prev, cargando: false}));
             return;
         }
@@ -321,7 +342,7 @@ export function useCompartidos(): UseCompartidosReturn {
                 abortControllerRef.current.abort();
             }
         };
-    }, [recargar, obtenerNonce]);
+    }, [recargar, haySesion]);
 
     return {
         ...estado,

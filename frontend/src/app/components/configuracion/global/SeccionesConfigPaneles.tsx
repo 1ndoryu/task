@@ -230,22 +230,13 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
     const esAdmin = esUsuarioAdmin();
     const modelosProveedor = MODELOS_IA.filter(m => m.proveedor === proveedor);
 
-    /* [115A-1] Sincronizar proveedor+modelo al servidor (WP options) para que
-     * AgentChatProcessor.php los use en el chatbot WhatsApp sin leer localStorage. */
+    /* [115A-1] Sincronizar proveedor+modelo al servidor para que el backend
+     * los use en el chatbot. [18-08-2026] Sin backend de IA/chatbot en Rust
+     * aun: localStorage es la unica fuente de verdad (sin llamada a /wp-json). */
     useEffect(() => {
-        if (!esAdmin) return;
-        const nonce = obtenerNonceWP();
-        if (!nonce) return;
-        const ctrl = new AbortController();
-        fetch('/wp-json/glory/v1/admin/chatbot-config', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-WP-Nonce': nonce},
-            credentials: 'same-origin',
-            signal: ctrl.signal,
-            body: JSON.stringify({proveedor, modelo}),
-        }).catch(() => {/* ignorar errores de red — localStorage es la fuente de verdad */});
-        return () => ctrl.abort();
-    }, [proveedor, modelo, esAdmin]);
+        void esAdmin;
+        void obtenerNonceWP;
+    }, [esAdmin]);
 
     const manejarProveedor = (valor: string) => {
         const proveedorNuevo = valor as ProveedorIA;

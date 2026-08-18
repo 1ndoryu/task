@@ -10,16 +10,17 @@
 
 import {invalidarCache, invalidarCacheParcial} from './actividadStore';
 import {obtenerFechaHoy} from '../utils/fecha';
+import {obtenerTokenCsrf} from '../utils/apiClient';
 
 /* Base URL de la API */
-const API_BASE = '/wp-json/glory/v1/actividad';
+const API_BASE = '/activity';
 
-/**
- * Obtiene el nonce de WordPress para autenticacion
- */
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
+function headersPara(metodo: string): Record<string, string> {
+    const esMutacion = metodo !== 'GET' && metodo !== 'HEAD';
+    return {
+        'Content-Type': 'application/json',
+        ...(esMutacion ? {'X-CSRF-Token': obtenerTokenCsrf()} : {})
+    };
 }
 
 /**
@@ -89,10 +90,7 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
         const response = await fetch(API_BASE, {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            },
+            headers: headersPara('POST'),
             body: JSON.stringify(paramsConHora)
         });
 
@@ -134,16 +132,12 @@ export async function obtenerDetalleActividadDia(params: ObtenerDetalleActividad
 
     const response = await fetch(`${API_BASE}/dia?${query.toString()}`, {
         method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': obtenerNonce()
-        }
-    });
+        credentials: 'include',            headers: headersPara('GET')
+        });
 
-    if (!response.ok) {
-        throw new Error('Error al cargar detalle de actividad');
-    }
+        if (!response.ok) {
+            throw new Error('Error al cargar detalle de actividad');
+        }
 
     const data = (await response.json()) as {success: boolean; detalle?: DetalleActividadItem[]; error?: string};
 
@@ -160,10 +154,7 @@ export async function eliminarActividad(actividadId: number): Promise<boolean> {
         const response = await fetch(`${API_BASE}/${actividadId}`, {
             method: 'DELETE',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': obtenerNonce()
-            }
+            headers: headersPara('DELETE')
         });
 
         if (!response.ok) {

@@ -39,48 +39,18 @@ export function useListaFeedbackAdmin({visible}: UseListaFeedbackAdminParams) {
         return wpData?.nonce || '';
     };
 
-    /* Cargar feedback desde la API */
-    const cargarFeedback = useCallback(async (pagina = 1) => {
-        setCargando(true);
+    /* [18-08-2026] Sin backend de feedback admin en Rust aun: se degrada a
+     * lista vacia sin llamar a /wp-json. */
+    const cargarFeedback = useCallback(async (_pagina = 1) => {
+        setCargando(false);
         setError(null);
-
-        try {
-            const response = await fetch(`/wp-json/glory/v1/admin/feedback?pagina=${pagina}&porPagina=15`, {
-                credentials: 'include',
-                headers: {'X-WP-Nonce': obtenerNonce()}
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al cargar feedback');
-            }
-
-            const data = await response.json();
-            setFeedback(data.feedbacks || []);
-            setPaginacion({
-                pagina: data.pagina || 1,
-                totalPaginas: data.totalPaginas || 1,
-                total: data.total || 0
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-        } finally {
-            setCargando(false);
-        }
+        setFeedback([]);
+        setPaginacion({pagina: 1, totalPaginas: 1, total: 0});
     }, []);
 
     /* Marcar feedback como leído */
-    const marcarLeido = async (id: number) => {
-        try {
-            await fetch(`/wp-json/glory/v1/admin/feedback/${id}/leido`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {'X-WP-Nonce': obtenerNonce()}
-            });
-
-            setFeedback(prev => prev.map(item => (item.id === id ? {...item, leido: true} : item)));
-        } catch (err) {
-            console.error('Error marcando leído:', err);
-        }
+    const marcarLeido = async (_id: number) => {
+        /* no-op: no hay backend */
     };
 
     /* Cargar al hacer visible */

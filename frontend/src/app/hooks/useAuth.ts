@@ -13,6 +13,7 @@ function obtenerTokenCsrf(): string {
 }
 
 interface User {
+    id?: string;
     name: string;
     email?: string;
     login?: string;
@@ -42,108 +43,18 @@ export function useAuth(): UseAuthReturn {
         return wpData?.currentUser || null;
     });
 
-    const handleCallback = useCallback(async (code: string) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch('/wp-json/glory/v1/auth/google/login', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({code})
-            });
-            const data = await response.json();
-
-            if (data.success) {
-                window.location.reload();
-            } else {
-                throw new Error(data.message || 'Error en login con Google');
-            }
-        } catch (e) {
-            const msg = e instanceof Error ? e.message : 'Error desconocido';
-            setError(msg);
-            setLoading(false);
-        }
+    /* [18-08-2026] Google OAuth no tiene backend en Rust aun: se degrada a un
+     * mensaje claro sin llamar a /wp-json. Cuando exista el flujo OAuth en
+     * Rust se restaura este manejador. */
+    const handleCallback = useCallback(async (_code: string) => {
+        setLoading(false);
+        setError('El acceso con Google aún no está disponible');
     }, []);
 
     const loginWithGoogle = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            if (Capacitor.isNativePlatform()) {
-                console.log('[GoogleAuthNative] Starting native sign-in...');
-
-                await GoogleAuthNative.initialize({
-                    serverClientId: '84327954353-6vcogj4mjjg4c2kip5imvh3vqijqslck.apps.googleusercontent.com'
-                });
-
-                const user = await GoogleAuthNative.signIn();
-                console.log('[GoogleAuthNative] Success:', user);
-
-                if (user.serverAuthCode) {
-                    await handleCallback(user.serverAuthCode);
-                } else {
-                    throw new Error('No se recibió código de autorización de Google (serverAuthCode missing)');
-                }
-            } else {
-                const response = await fetch('/wp-json/glory/v1/auth/google/url', {
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    window.location.href = data.url;
-                } else {
-                    throw new Error(data.message || 'Error obteniendo URL de login');
-                }
-            }
-        } catch (e: unknown) {
-            const msg = e instanceof Error ? e.message : 'Error de conexión';
-
-            // Log detallado para debugging nativo
-            console.error('[GoogleAuth] Catch Error:', e);
-
-            // Enviar log al servidor para verlo con -wpDebug
-            // Intentamos extraer toda la info posible del objeto de error nativo
-            /* Extraer propiedades del error nativo (Capacitor puede lanzar objetos con .code/.message) */
-            const errorProps = e instanceof Object ? (e as Record<string, unknown>) : {};
-            const errorMessage = String(errorProps.message ?? 'No message');
-            const errorCode = errorProps.code != null ? String(errorProps.code) : 'No code';
-            const errorDetails = {
-                message: errorMessage,
-                code: errorCode,
-                fullError: JSON.stringify(e, e instanceof Object ? Object.getOwnPropertyNames(e) : undefined)
-            };
-
-            await fetch('/wp-json/glory/v1/auth/log', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    message: 'Fallo en GoogleAuth.signIn()',
-                    data: errorDetails
-                })
-            }).catch(err => console.error('Fallo enviando log al servidor', err));
-
-            // Alertar en móvil para verlo inmediatamente
-            if (Capacitor.isNativePlatform()) {
-                let alertMsg = `Error Google Login:\n${errorMessage}\nCode: ${errorCode}`;
-
-                const errString = JSON.stringify(e);
-
-                if (errorCode === '10' || errString.includes('"code":"10"') || errString.includes('"code":10')) {
-                    alertMsg = '⚠️ Error 10: Configuración Incorrecta\n\n' + '- Revisa el SHA-1 en Google Console vs Keystore.\n' + '- Verifica que "server_client_id" esté en strings.xml.\n' + '- Asegúrate de que el package name coincida.';
-                } else if (errorCode === '12500' || errString.includes('12500') || errorMessage.includes('12500')) {
-                    alertMsg = '⚠️ Error 12500: Sign In Failed\n\n' + 'Causas probables:\n' + '1. Email de soporte NO configurado en OAuth Consent Screen.\n' + '2. Tu email no está en "Test Users" (si la app no está publicada).\n' + '3. Falta SHA-1 del Debug Keystore en Google Console.\n' + '4. El dispositivo no tiene Google Play Services actualizado.';
-                } else {
-                    // Si no es un error conocido, mostrar todo para depurar 'Authentication failed' genérico
-                    alertMsg = `Error Google Login (RAW):\n${errString}\n\nMsg: ${errorMessage}`;
-                }
-                alert(alertMsg);
-            }
-
-            setError(msg);
-            setLoading(false);
-        }
-    }, [handleCallback]);
+        setLoading(false);
+        setError('El acceso con Google aún no está disponible');
+    }, []);
 
     const loginWithCredentials = useCallback(async (username: string, password: string) => {
         setLoading(true);

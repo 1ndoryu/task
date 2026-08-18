@@ -1,35 +1,52 @@
-import {obtenerNonce} from '../utils/notasUtils';
-import {Nota, CarpetaNota, RespuestaListaNotas, RespuestaOperacionNota} from '../types/notas';
+/* [18-08-2026] notasService contra /api/notes (backend Rust).
+ * El backend devuelve JSON plano (Note: id/folderId/title/content/createdAt/
+ * updatedAt, ids UUID) y envelope de carpetas como array plano. Este servicio
+ * mapea al contrato del front ({success, notas, total, hayMas}, CarpetaNota).
+ * Sesion por cookie HttpOnly + X-CSRF-Token en mutaciones. */
 
-const API_BASE = '/wp-json/glory/v1/notas';
+import {apiFetch} from '../utils/apiClient';
+import {Nota, CarpetaNota, RespuestaListaNotas} from '../types/notas';
 
-/**
- * Helper interno para realizar peticiones a la API
- */
-async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE}${endpoint}`;
+interface NotaRust {
+    id: string;
+    folderId: string | null;
+    title: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
-    const defaultOptions: RequestInit = {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': obtenerNonce()
-        }
+interface CarpetaRust {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface ListadoRust {
+    items: NotaRust[];
+    total: number;
+}
+
+function mapearNota(n: NotaRust): Nota {
+    return {
+        id: n.id as unknown as number,
+        carpetaId: (n.folderId ?? null) as unknown as number | null,
+        titulo: n.title,
+        contenido: n.content,
+        fechaCreacion: n.createdAt,
+        fechaModificacion: n.updatedAt
     };
+}
 
-    const response = await fetch(url, {...defaultOptions, ...options});
-
-    if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error('No autenticado. Inicia sesión para continuar.');
-        }
-        if (response.status === 403) {
-            throw new Error('Sin permisos para acceder a las notas.');
-        }
-        throw new Error(`Error del servidor: ${response.status}`);
-    }
-
-    return response.json();
+function mapearCarpeta(c: CarpetaRust): CarpetaNota {
+    return {
+        id: c.id as unknown as number,
+        nombre: c.name,
+        orden: 0,
+        totalNotas: 0,
+        esVirtual: false
+    };
 }
 
 /**
@@ -40,71 +57,52 @@ export const notasService = {
      * Carga el listado de notas paginado
      */
     async cargarNotas(limite: number, offset: number): Promise<RespuestaListaNotas> {
-        const response = await fetchApi<RespuestaListaNotas>(`?limite=${limite}&offset=${offset}`);
-        if (!response.success) {
-            throw new Error('Error al cargar notas');
-        }
-        return response;
+        const pagina = Math.floor(offset / limite) + 1;
+        const datos = await apiFetch<ListadoRust>(`/notes?page=${pagina}&perPage=${limite}`);
+
+        return {
+            success: true,
+            notas: (datos?.items || []).map(mapearNota),
+            total: datos?.total ?? 0,
+            hayMas: offset + (datos?.items?.length || 0) < (datos?.total ?? 0)
+        };
     },
 
     /**
      * Busca notas por término
      */
     async buscarNotas(termino: string): Promise<Nota[]> {
-        const response = await fetchApi<{success: boolean; notas: Nota[]}>(`/buscar?q=${encodeURIComponent(termino)}`);
-        if (!response.success) {
-            return [];
-        }
-        return response.notas;
+        const datos = await apiFetch<ListadoRust>(`/notes?page=1&perPage=50&search=${encodeURIComponent(termino)}`);
+        return (datos?.items || []).map(mapearNota);
     },
 
     /**
      * Crea una nueva nota
      */
     async crearNota(titulo: string, contenido: string): Promise<Nota> {
-        const response = await fetchApi<RespuestaOperacionNota>('', {
+        const nota = await apiFetch<NotaRust>('/notes', {
             method: 'POST',
-            body: JSON.stringify({
-                contenido,
-                titulo
-            })
+            body: JSON.stringify({title: titulo, content: contenido})
         });
-
-        if (!response.success) {
-            throw new Error('Error al crear nota');
-        }
-        return response.nota;
+        return mapearNota(nota);
     },
 
     /**
      * Actualiza una nota existente
      */
     async actualizarNota(id: number, titulo: string, contenido: string): Promise<Nota> {
-        const response = await fetchApi<RespuestaOperacionNota>(`/${id}`, {
+        const nota = await apiFetch<NotaRust>(`/notes/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({
-                contenido,
-                titulo
-            })
+            body: JSON.stringify({title: titulo, content: contenido})
         });
-
-        if (!response.success) {
-            throw new Error('Error al actualizar nota');
-        }
-        return response.nota;
+        return mapearNota(nota);
     },
 
     /**
      * Elimina una nota por ID
      */
     async eliminarNota(id: number): Promise<boolean> {
-        const response = await fetchApi<{success: boolean}>(`/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.success) {
-            throw new Error('Error al eliminar nota');
-        }
+        await apiFetch(`/notes/${id}`, {method: 'DELETE'});
         return true;
     },
 
@@ -112,14 +110,10 @@ export const notasService = {
      * Mueve una nota a otra carpeta
      */
     async moverNota(notaId: number, carpetaId: number | null): Promise<boolean> {
-        const response = await fetchApi<{success: boolean}>(`/${notaId}/mover`, {
+        await apiFetch(`/notes/${notaId}/folder`, {
             method: 'PUT',
-            body: JSON.stringify({carpetaId})
+            body: JSON.stringify({folderId: carpetaId !== null ? String(carpetaId) : null})
         });
-
-        if (!response.success) {
-            throw new Error('Error al mover nota');
-        }
         return true;
     }
 };
@@ -132,43 +126,29 @@ export const carpetasNotasService = {
      * Obtiene todas las carpetas del usuario
      */
     async listar(): Promise<CarpetaNota[]> {
-        /* GET /notas/carpetas devuelve 'carpetas' (listarCarpetas); el indexador PHP
-         * cruza con la última ruta registrada (POST crearCarpeta) que devuelve 'carpeta'. */
-        /* sentinel-disable-next-line api-response-mismatch */
-        const response = await fetchApi<{success: boolean; carpetas: CarpetaNota[]}>('/carpetas');
-        if (!response.success) {
-            throw new Error('Error al cargar carpetas');
-        }
-        return response.carpetas;
+        const carpetas = await apiFetch<CarpetaRust[]>('/notes/folders');
+        return (carpetas || []).map(mapearCarpeta);
     },
 
     /**
      * Crea una nueva carpeta
      */
     async crear(nombre: string): Promise<CarpetaNota> {
-        const response = await fetchApi<{success: boolean; carpeta: CarpetaNota}>('/carpetas', {
+        const carpeta = await apiFetch<CarpetaRust>('/notes/folders', {
             method: 'POST',
-            body: JSON.stringify({nombre})
+            body: JSON.stringify({name: nombre})
         });
-
-        if (!response.success) {
-            throw new Error('Error al crear carpeta');
-        }
-        return response.carpeta;
+        return mapearCarpeta(carpeta);
     },
 
     /**
      * Renombra una carpeta
      */
     async renombrar(id: number, nombre: string): Promise<boolean> {
-        const response = await fetchApi<{success: boolean}>(`/carpetas/${id}`, {
+        await apiFetch(`/notes/folders/${id}`, {
             method: 'PUT',
-            body: JSON.stringify({nombre})
+            body: JSON.stringify({name: nombre})
         });
-
-        if (!response.success) {
-            throw new Error('Error al renombrar carpeta');
-        }
         return true;
     },
 
@@ -176,13 +156,7 @@ export const carpetasNotasService = {
      * Elimina una carpeta (las notas se mueven a General)
      */
     async eliminar(id: number): Promise<boolean> {
-        const response = await fetchApi<{success: boolean}>(`/carpetas/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.success) {
-            throw new Error('Error al eliminar carpeta');
-        }
+        await apiFetch(`/notes/folders/${id}`, {method: 'DELETE'});
         return true;
     }
 };

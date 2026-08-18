@@ -65,20 +65,12 @@ export function useModalLogin({onLoginCredentials, onRegister, loading: _loading
         setRecuperarLoading(true);
         setRecuperarMensaje(null);
 
-        try {
-            const response = await fetch('/wp-json/glory/v1/auth/recuperar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: emailRecuperar})
-            });
-            const data = await response.json();
-            setRecuperarMensaje({tipo: 'exito', texto: data.message});
-            setEmailRecuperar('');
-        } catch {
-            setRecuperarMensaje({tipo: 'error', texto: 'Error al procesar la solicitud'});
-        } finally {
+        /* [18-08-2026] Sin backend de recuperacion en Rust aun: se degrada con
+         * mensaje claro en vez de llamar a /wp-json. */
+        setTimeout(() => {
             setRecuperarLoading(false);
-        }
+            setRecuperarMensaje({tipo: 'error', texto: 'La recuperación de contraseña aún no está disponible'});
+        }, 400);
     };
 
     const irARecuperarContrasena = () => {
