@@ -1,0 +1,402 @@
+/*
+ * Estilos para sistema de carpetas de notas
+ * TAREA 2.1: Sistema de Carpetas para Notas
+ * Revision 7: Estilo tipo explorador de archivos
+ */
+
+/* Navegador de Carpetas - Contenedor principal */
+.navegadorCarpetas {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--dashboard-fondoSecundario);
+}
+
+/* Header del explorador de carpetas */
+.navegadorCarpetasHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTarjeta);
+}
+
+.navegadorCarpetasTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.navegadorCarpetasBotonNueva {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.navegadorCarpetasBotonNueva:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-acento);
+}
+
+/* Formulario crear/editar carpeta */
+.navegadorCarpetasFormulario {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoTarjeta);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.navegadorCarpetasFormulario--inline {
+    padding: 0;
+    background: transparent;
+    border-bottom: none;
+    flex: 1;
+}
+
+.navegadorCarpetasInput {
+    flex: 1;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+}
+
+.navegadorCarpetasInput:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+    box-shadow: 0 0 0 2px rgba(var(--dashboard-acentoRgb), 0.15);
+}
+
+.navegadorCarpetasBotonAccion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.navegadorCarpetasBotonAccion--confirmar {
+    color: var(--dashboard-estadoExito);
+}
+
+.navegadorCarpetasBotonAccion--confirmar:hover {
+    background: var(--dashboard-estadoExitoFondo);
+}
+
+.navegadorCarpetasBotonAccion--cancelar {
+    color: var(--dashboard-textoSecundario);
+}
+
+.navegadorCarpetasBotonAccion--cancelar:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+/* Lista de carpetas - estilo arbol de archivos */
+.navegadorCarpetasLista {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.navegadorCarpetasCargando {
+    color: var(--dashboard-textoMuyApagado);
+    text-align: center;
+    padding: var(--dashboard-espacioLg);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+/* Item de carpeta - estilo explorador de archivos */
+.navegadorCarpetaItem {
+    display: flex;
+    align-items: center;
+    position: relative;
+    border-radius: var(--dashboard-radioSm);
+}
+
+.navegadorCarpetaItem:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.navegadorCarpetaItem--virtual .navegadorCarpetaIcono {
+    color: var(--dashboard-acento);
+}
+
+/* Boton principal de carpeta */
+/* [024A-10] justify-content explícito para que texto quede a la izquierda
+ * y la flecha (ChevronRight) al final via flex. width:100% para ocupar toda la fila. */
+.navegadorCarpetaBoton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--dashboard-transicionRapida);
+    font-family: inherit;
+    width: 100%;
+}
+
+.navegadorCarpetaBoton:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+/* Icono de carpeta */
+.navegadorCarpetaIcono {
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+/* Nombre de carpeta */
+.navegadorCarpetaNombre {
+    flex: 1;
+    font-size: var(--dashboard-tamanoPequeno);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Contador de notas en carpeta */
+.navegadorCarpetaContador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    background: var(--dashboard-fondoHover);
+    padding: 2px 6px;
+    border-radius: var(--dashboard-radioPildora);
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Flecha indicadora */
+.navegadorCarpetaFlecha {
+    color: var(--dashboard-textoMuyApagado);
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+}
+
+/* Acciones de carpeta (editar, eliminar) */
+.navegadorCarpetaAcciones {
+    display: none;
+    gap: var(--dashboard-espacioXxs);
+    padding-right: var(--dashboard-espacioXs);
+}
+
+.navegadorCarpetaItem:hover .navegadorCarpetaAcciones {
+    display: flex;
+}
+
+/* Botones de accion en carpetas */
+.navegadorCarpetaAccionBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.navegadorCarpetaAccionBoton:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+.navegadorCarpetaAccionBoton--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Header con botón volver */
+.notasHeaderConCarpeta {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+}
+
+.notasBotonVolver {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.notasBotonVolver:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-acento);
+}
+
+.notasCarpetaActual {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+}
+
+/* Menu contextual mover a carpeta */
+.menuMoverACarpeta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+    padding: var(--dashboard-espacioXs);
+    min-width: 150px;
+}
+
+.menuMoverACarpetaTitulo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    margin-bottom: var(--dashboard-espacioXs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.menuMoverACarpetaOpcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+}
+
+.menuMoverACarpetaOpcion:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.menuMoverACarpetaOpcion--activa {
+    background: rgba(var(--dashboard-acentoRgb), 0.1);
+    color: var(--dashboard-acento);
+}
+
+/* Estilos para botones de acción en lista de notas */
+.listaNotasItemAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+.listaNotasItemBotonAccion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.listaNotasItemBotonAccion:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+.listaNotasItemMoverContenedor {
+    position: relative;
+}
+
+.listaNotasItemMoverContenedor .menuMoverACarpeta {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 100;
+    background: var(--dashboard-fondoTarjeta);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: var(--dashboard-sombraMedia);
+    min-width: 160px;
+}
+
+/* Ajuste de la búsqueda para mostrar carpeta activa */
+.vistaNotasBusqueda {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+}
+
+/*
+ * Acciones del header del modal de notas
+ * Layout de 3 secciones: izquierda, centro, derecha
+ */
+.notasAccionesHeaderIzquierda,
+.notasAccionesHeaderDerecha {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSx);
+}
+
+.notasAccionesHeaderIzquierda {
+    justify-content: flex-start;
+}
+
+.notasAccionesHeaderDerecha {
+    justify-content: flex-end;
+}
+
+/* Estado activo para botones de panel */
+.vistaNotasAccionBoton--activo {
+    background: var(--dashboard-acento);
+    color: var(--dashboard-fondoPrincipal);
+    border-color: var(--dashboard-acento);
+}
+
+.vistaNotasAccionBoton--activo:hover {
+    background: var(--dashboard-acentoHover);
+}

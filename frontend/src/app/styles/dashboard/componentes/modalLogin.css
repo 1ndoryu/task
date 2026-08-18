@@ -1,0 +1,152 @@
+/*
+ * Modal Login - Overlay Opaco
+ * Cuando el usuario no está autenticado, el overlay debe ser completamente
+ * opaco para no mostrar la app de fondo
+ */
+.modalLoginOverlay {
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
+/* [024A-12] font-family movido a .modalContenedor (modal.css) para cubrir header + contenido */
+.modalLoginContenido {
+    padding: 0 0.5rem;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+.botonFull {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    border-radius: var(--dashboard-radioMd);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* [233A-32] Botón Primario: blanco con texto negro — override variante primario del Boton */
+.modalLoginContenido .botonPrimario {
+    background-color: var(--dashboard-textoActivo);
+    color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-textoActivo);
+}
+
+.modalLoginContenido .botonPrimario:hover:not(:disabled) {
+    filter: brightness(0.9);
+}
+
+.botonPrimario:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.botonPrimario:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Botón Secundario: Estilo "Ghost" / Outline */
+.botonSecundario {
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+}
+
+.botonSecundario:hover:not(:disabled) {
+    border-color: var(--dashboard-textoActivo);
+    color: var(--dashboard-textoActivo);
+    background-color: var(--dashboard-superposicionMuyClara);
+}
+
+.botonGoogle {
+    text-transform: none;
+    letter-spacing: normal;
+    margin-top: var(--dashboard-espacioLg);
+}
+
+.loginError {
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.3);
+    color: var(--dashboard-estadoAlta);
+    padding: var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioMd);
+    margin-bottom: var(--dashboard-espacioLg);
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.loginTabs {
+    display: flex;
+    margin-bottom: var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* Tabs migrados a Boton variante="pestaña" (Fase 6.5) */
+
+/* 
+ * Enlace Recuperar Contrasena
+ */
+.enlaceRecuperar {
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    text-align: center;
+    padding: var(--dashboard-espacioSm) 0;
+    transition: color 0.2s ease;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.enlaceRecuperar:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * Contenedor de Recuperacion
+ */
+.recuperarContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.recuperarDescripcion {
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.5;
+    margin: 0 0 var(--dashboard-espacioSm) 0;
+}
+
+/* 
+ * Mensajes de Feedback en Recuperacion
+ */
+.mensajeRecuperar {
+    padding: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    border-radius: var(--dashboard-radioMd);
+}
+
+.mensajeRecuperar--exito {
+    background-color: var(--dashboard-estadoExitoFondo);
+    color: var(--dashboard-estadoExito);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
+}
+
+.mensajeRecuperar--error {
+    background-color: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+}

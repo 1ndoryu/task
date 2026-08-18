@@ -1,0 +1,321 @@
+/*
+ * PANEL DE CONFIGURACION DE TAREA
+ * Estilos para el modal de configuracion avanzada de tareas
+ */
+
+/*
+ * PANEL DE CONFIGURACION DE TAREA
+ * Estilos para el modal de configuracion avanzada de tareas
+ */
+
+/* 
+ * NOTA: El contenedor principal y el encabezado ahora usan las clases
+ * estandar .modalContenedor y .modalEncabezado de modal.css, gestionados
+ * por el componente compartido Modal.
+ */
+
+/* 
+ * NOMBRE DE LA TAREA
+ */
+.panelConfiguracionTarea {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    background-color: var(--dashboard-fondoPrincipal);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelConfiguracionTareaNombre {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    word-break: break-word;
+}
+
+/* 
+ * CONTENIDO DEL PANEL
+ */
+.panelConfiguracionContenido {
+    padding: var(--dashboard-espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+/* 
+ * SECCION GENERICA
+ */
+.panelConfiguracionSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.panelConfiguracionSeccionEncabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoBase);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 
+ * CAMPO CON ESTADOS
+ */
+.panelConfiguracionCampo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    position: relative;
+}
+
+.panelConfiguracionCampoVencida {
+    border-left: 3px solid var(--dashboard-estadoAlta);
+    padding-left: var(--dashboard-espacioSm);
+}
+
+.panelConfiguracionCampoUrgente {
+    border-left: 3px solid var(--dashboard-estadoMedia);
+    padding-left: var(--dashboard-espacioSm);
+}
+
+.panelConfiguracionCampoProxima {
+    border-left: 3px solid var(--dashboard-estadoExito);
+    padding-left: var(--dashboard-espacioSm);
+}
+
+/* 
+ * INPUT DE FECHA
+ */
+.panelConfiguracionInputFecha {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    outline: none;
+    transition: border-color var(--dashboard-transicionNormal);
+    min-width: 160px;
+}
+
+.panelConfiguracionInputFecha:focus {
+    border-color: var(--dashboard-textoApagado);
+}
+
+.panelConfiguracionInputFecha::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+}
+
+/* 
+ * ALERTAS DE FECHA
+ */
+.panelConfiguracionAlerta {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 2px 6px;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-radius: var(--dashboard-radioSm);
+}
+
+.panelConfiguracionAlertaVencida {
+    background-color: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+}
+
+.panelConfiguracionAlertaUrgente {
+    background-color: var(--dashboard-estadoAdvertenciaFondo);
+    color: var(--dashboard-estadoAdvertencia);
+    border: 1px solid var(--dashboard-estadoAdvertenciaBorde);
+}
+
+.panelConfiguracionAlertaProxima {
+    background-color: var(--dashboard-estadoExitoFondo);
+    color: var(--dashboard-estadoExito);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
+}
+
+/* 
+ * BOTON LIMPIAR
+ */
+.panelConfiguracionBotonLimpiar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelConfiguracionBotonLimpiar:hover {
+    color: var(--dashboard-estadoAlta);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+/* 
+ * TEXTAREA DESCRIPCION
+ */
+.panelConfiguracionTextarea {
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    line-height: 1.5;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    border-radius: var(--dashboard-radioSm);
+    transition: border-color var(--dashboard-transicionNormal);
+}
+
+.panelConfiguracionTextarea:focus {
+    border-color: var(--dashboard-textoApagado);
+}
+
+.panelConfiguracionTextarea::placeholder {
+    color: var(--dashboard-textoPlaceholder);
+}
+
+/* 
+ * TOGGLE SWITCH
+ * Reemplazado por componente compartido ToggleSwitch
+ */
+
+/* 
+ * ACCIONES DEL PANEL
+ * Gestionado por AccionesFormulario.tsx
+ */
+
+/* 
+ * LAYOUT DOS COLUMNAS - MODAL EXPANDIDO
+ * Estructura para mostrar configuracion + chat/historial
+ */
+.panelConfiguracionDosColumnas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* max-height: 600px; */
+    min-height: 400px;
+    height: 100%;
+}
+/* Variante sin chat: una sola columna */
+.panelConfiguracionDosColumnas--sinChat {
+    grid-template-columns: 1fr;
+}
+
+.panelConfiguracionDosColumnas--sinChat .panelConfiguracionColumnaIzquierda {
+    border-right: none;
+}
+
+/* 
+ * MODO CREACION (sin clase --expandido en el modal)
+ * Nota: En modal.css quitamos padding y overflow de .modalContenido
+ * para que el scroll y padding los maneje .panelConfiguracionColumnaScroll
+ * Los botones quedan fijos gracias a la estructura flexbox existente.
+ */
+
+.panelConfiguracionColumnaIzquierda {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--dashboard-bordePrincipal);
+    overflow: hidden;
+    position: relative;
+}
+
+/* 
+ * Ajuste para botones de acción dentro del modal expandido
+ * Centrados y con padding correcto
+ */
+.panelConfiguracionColumnaIzquierda .accionesFormularioContenedor {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    background-color: var(--dashboard-fondoSecundario);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    margin-top: 0;
+}
+
+.panelConfiguracionColumnaDerecha {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--dashboard-fondoPrincipal);
+    min-height: 0;
+    height: 100%;
+}
+
+.panelConfiguracionColumnaScroll {
+    flex: 1;
+    /* 
+     * Usar scroll auto para que solo aparezca cuando sea necesario
+     */
+    overflow-y: auto;
+    padding: var(--dashboard-espacioLg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+    min-height: 0;
+}
+
+/* 
+ * Input de comentarios dentro de la columna izquierda
+ * NO debe ser flotante/absoluto, debe ser parte del flujo para que
+ * el scroll termine antes del input y no se vea por debajo
+ */
+.panelConfiguracionColumnaIzquierda .timelineInput--flotante {
+    position: static;
+    flex-shrink: 0;
+}
+
+/* 
+ * Los estilos de scrollbar ya estan definidos globalmente en base.css
+ * No es necesario repetirlos aqui
+ */
+
+/* 
+ * PESTANAS PARA MOVIL (DEPRECADO - Fase 10.8.6)
+ * Las pestañas ya no se usan, en móvil solo se muestra configuración
+ * Se mantiene el CSS por si hay referencias pero siempre oculto
+ */
+.panelConfiguracionPestanas {
+    display: none !important;
+}
+
+/* Pestanas migradas a Boton variante="pestaña" (Fase 6.5) */
+
+/* 
+ * SUBTAREAS
+ */
+
+
+/* 
+ * RESPONSIVE: Modo una columna en móvil (sin pestañas)
+ * Fase 10.8.6: Solo se muestra la columna de configuración
+ */
+@media (max-width: 700px) {
+    .panelConfiguracionDosColumnas {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panelConfiguracionColumnaIzquierda {
+        border-right: none;
+        display: flex;
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* Columna derecha (chat) oculta en móvil */
+    .panelConfiguracionColumnaDerecha {
+        display: none !important;
+    }
+}

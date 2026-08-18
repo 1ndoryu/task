@@ -1,0 +1,32 @@
+/*
+ * DASHBOARD PANEL
+ * Contenedor principal estandarizado para modulos del dashboard
+ * (Ej: Tabla de Habitos, Lista de Proyectos, Detalle de Proyecto)
+ */
+
+.dashboardPanel {
+    background-color: var(--dashboard-fondoSecundario);
+    /* border removido - lo maneja el contenedor padre .panelDashboard */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Para contener bordes redondeados */
+}
+
+/* Override de .seccionEncabezado para contexto de panel */
+.dashboardPanel__encabezado {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
+    margin-bottom: 0;
+}
+
+.dashboardPanelContent {
+    padding: 0; /* Por defecto sin padding para permitir listas borde a borde */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Variante con padding en contenido */
+.dashboardPanelContent.conPadding {
+    padding: var(--dashboard-espacioLg);
+}

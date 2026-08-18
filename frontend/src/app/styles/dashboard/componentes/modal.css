@@ -1,0 +1,294 @@
+/*
+ * MODAL
+ * Overlay, contenedor y estructura del modal
+ * Incluye scrollbar minimalista dark mode
+ */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--dashboard-superposicionDensa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--dashboard-espacioLg);
+    animation: aparecerModal 0.15s ease-out;
+}
+
+/* [024A-12] font-family, font-size y color explícitos en el contenedor del modal
+ * para que todo el modal (header, contenido, botones) herede la fuente del dashboard.
+ * Sin esto, cuando el modal se monta en contexto de landing o body de WordPress,
+ * hereda la fuente del body en lugar del dashboard. */
+.modalContenedor {
+    width: 100%;
+    max-height: calc(100vh - -10rem);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    animation: deslizarModal 0.2s ease-out;
+    max-height: 90vh;
+    max-width: 480px;
+    overflow: hidden;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+}
+.modalEncabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    flex-shrink: 0;
+    min-width: 0;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+    /* Permitir salto de linea en titulos largos */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+    flex: 1;
+}
+
+/* Botones cerrar/volver migrados a Boton variante="icono" (Fase 6.5) */
+
+/* [233A-11] Botones del encabezado sin padding ni fondo al hover */
+.modalAccionesEncabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex-shrink: 0;
+}
+
+.modalAccionesEncabezado .boton {
+    padding: 0;
+    background: transparent;
+}
+
+.modalAccionesEncabezado .boton:hover {
+    background: transparent;
+}
+
+/* [243A-16] Padding directo en el contenedor: más robusto que > * porque el CSS de componentes
+ * hijos no puede sobreescribirlo. Excepciones: expandido, panelConfig, notas, configGlobal. */
+.modalContenido {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding: var(--dashboard-espacioLgXl); /* sentinel-disable-line: padding base de modal acordado con el usuario */
+}
+
+/* 
+ * SCROLLBAR MINIMALISTA PARA MODAL
+ * Delgado, semitransparente, no ocupa espacio
+ */
+.modalContenido::-webkit-scrollbar {
+    width: var(--dashboard-scrollbarAncho);
+}
+
+.modalContenido::-webkit-scrollbar-track {
+    background: var(--dashboard-scrollbarFondo);
+}
+
+.modalContenido::-webkit-scrollbar-thumb {
+    background: var(--dashboard-scrollbarThumb);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.modalContenido::-webkit-scrollbar-thumb:hover {
+    background: var(--dashboard-scrollbarThumbHover);
+}
+
+/* Firefox */
+.modalContenido {
+    scrollbar-width: thin;
+    scrollbar-color: var(--dashboard-scrollbarThumb) var(--dashboard-scrollbarFondo);
+}
+
+/* [034A-20] Clase utilitaria para modales cuyo contenido gestiona su propio padding */
+.modalContenido--sinPadding {
+    padding: 0;
+}
+
+/* 
+ * MODAL EXPANDIDO - DOBLE COLUMNA
+ * Variante para modales con 2 columnas (ej: tarea con chat)
+ */
+.modalContenedor--expandido {
+    max-width: 825px;
+}
+
+.modalContenedor--expandido .modalContenido {
+    padding: 0;
+}
+
+/* 
+ * Responsive: en pantallas pequeñas, el modal expandido ocupa todo el ancho
+ */
+@media (max-width: 960px) {
+    .modalContenedor--expandido {
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+/* 
+ * MODAL COLAPSADO - CHAT OCULTO
+ * Cuando el panel de chat está oculto, modal más amplio para propiedades Linear
+ */
+.modalContenedor--expandido:has(.panelConfiguracionDosColumnas--sinChat) {
+    max-width: 450px;
+}
+
+/* 
+ * MODAL DE CONFIGURACION SIN EXPANDIR (modo creacion)
+ * Cuando NO es --expandido pero contiene el panel de configuracion,
+ * quitamos el overflow y padding de modalContenido para evitar conflictos.
+ * El scroll lo maneja .panelConfiguracionColumnaScroll
+ */
+.panelConfiguracionContenedor:not(.modalContenedor--expandido) .modalContenido {
+    overflow: visible;
+    padding: 0; /* El scroll lo maneja .panelConfiguracionColumnaScroll */
+}
+
+/* 
+ * MODAL DE NOTAS - ANCHO EXTRA
+ * Para el selector de notas guardadas del Scratchpad
+ */
+.modalNotasContenedor {
+    max-width: 900px;
+    width: 90vw;
+}
+
+.modalNotasExpandidoContenedor .modalContenido {
+    overflow: hidden;
+    padding: 0;
+}
+
+/* 
+ * MODAL MODERNO - ESTILO LINEAR
+ * Para la nueva UI de configuracion de proyectos/tareas/habitos
+ * Fase 9.3: Aumentar tamaño del modal
+ */
+.modalContenedor--moderno {
+    max-width: 600px;
+}
+
+@media (max-width: 700px) {
+    .modalContenedor--moderno {
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+@media (max-width: 960px) {
+    .modalNotasContenedor {
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+/* 
+ * MODAL FULLSCREEN EN MOVIL
+ * Fase 10.2: Modales ocupan toda la pantalla en dispositivos móviles
+ * Fase 10.8.6: Header compacto con layout <- | Titulo | X
+ */
+@media (max-width: 480px) {
+    .modalOverlay {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .modalContenedor,
+    .modalContenedor--moderno,
+    .modalContenedor--expandido {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: 100vh !important; /* Fallback */
+        max-height: 100dvh !important;
+        height: 100vh !important; /* Fallback */
+        height: 100dvh !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+    }
+
+    /* 
+     * HEADER COMPACTO MOVIL - Fase 10.8.6
+     * Altura reducida (~40px), layout tipo barra de navegación
+     * Estructura: [<-] | Titulo | [X opcional]
+     */
+    .modalEncabezado--movil {
+        position: sticky;
+        top: 0;
+        background: var(--dashboard-fondoSecundario);
+        z-index: 10;
+        display: grid;
+        grid-template-columns: 40px 1fr 40px;
+        align-items: center;
+        padding: 0 var(--dashboard-espacioSm);
+        height: 50px;
+        min-height: 50px;
+        max-height: 50px;
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        gap: var(--dashboard-espacioXs);
+    }
+
+    .modalContenido {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: var(--dashboard-espacioMovilMd);
+    }
+
+    /* Evitar scroll del body cuando modal esta abierto */
+    body:has(.modalOverlay) {
+        overflow: hidden;
+    }
+
+    /* 
+     * TITULO COMPACTO MOVIL - Fase 10.8.6
+     * Titulo visible en móvil, tamaño reducido, centrado
+     * Revisión: quitar uppercase, agregar padding vertical
+     */
+    .modalTitulo--movilCompacto {
+        font-size: calc(var(--dashboard-tamanoMovilPequeno) - 1px);
+        font-weight: 600;
+        color: var(--dashboard-textoActivo);
+        text-align: center;
+        text-transform: none;
+        letter-spacing: 0.01em;
+        margin: 0;
+        padding: 5px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+
+    /* 
+     * Espacio reservado derecho para simetría (donde iría el X)
+     * Fase 10.8.11: Ocultar iconos de acciones en móvil
+     * El chat se muestra inline al final del modal
+     */
+    .modalEncabezado--movil .modalAccionesEncabezado {
+        justify-content: flex-end;
+        min-width: 40px;
+    }
+
+    /* Ocultar iconos/botones dentro de las acciones del header en móvil */
+    .modalEncabezado--movil .modalAccionesEncabezado > * {
+        display: none !important;
+    }
+}

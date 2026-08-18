@@ -1,0 +1,291 @@
+﻿/* 
+ * BOTON DE SEGURIDAD 
+ */
+.botonSeguridad {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.botonSeguridad:hover {
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-acento);
+    background: rgba(var(--dashboard-violetaRgb), 0.1);
+}
+
+.botonSeguridad:active {
+    transform: scale(0.95);
+}
+
+/* 
+ * BADGE DE ADMINISTRACIÃ“N 
+ */
+.badgeEncabezado--admin {
+    cursor: pointer;
+    background: rgba(var(--dashboard-violetaRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-violetaRgb), 0.3);
+    color: var(--dashboard-acentoPrimario);
+}
+
+.badgeEncabezado--admin:hover {
+    background: rgba(var(--dashboard-violetaRgb), 0.2);
+    border-color: rgba(var(--dashboard-violetaRgb), 0.5);
+    color: var(--dashboard-violetaPalido);
+    transform: translateY(-1px);
+}
+
+.badgeEncabezado--admin:active {
+    transform: scale(0.95);
+}
+
+/* 
+ * BOTON DE LAYOUT 
+ */
+.botonLayout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.botonLayout:hover {
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoHover);
+}
+
+.botonLayout:active {
+    transform: scale(0.95);
+}
+
+/* 
+ * BOTON ICONO UNIFICADO DEL ENCABEZADO 
+ * Estilo compartido para todos los botones de solo icono
+ */
+.botonIconoEncabezado {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionNormal);
+    box-sizing: border-box;
+    line-height: 1.4;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.botonIconoEncabezado:hover {
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoHover);
+}
+
+.botonIconoEncabezado:active {
+    transform: scale(0.95);
+}
+
+/* 
+ * ESTADO DE CONEXION - SOLO ICONO 
+ */
+.estadoConexionIcono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid;
+    box-sizing: border-box;
+    line-height: 1.4;
+    font-size: var(--dashboard-tamanoPequeno);
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.estadoConexionIcono--conectado {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    color: var(--dashboard-estadoExito);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.3);
+}
+
+.estadoConexionIcono--desconectado {
+    background-color: rgba(var(--dashboard-grisNeutroRgb), 0.15);
+    color: var(--dashboard-grisNeutro);
+    border-color: rgba(var(--dashboard-grisNeutroRgb), 0.3);
+    cursor: pointer;
+    gap: var(--dashboard-espacioXs);
+}
+
+.estadoConexionIcono--desconectado:hover {
+    background-color: rgba(var(--dashboard-grisNeutroRgb), 0.25);
+    border-color: rgba(var(--dashboard-grisNeutroRgb), 0.5);
+}
+
+.estadoConexionIcono__texto {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.estadoConexionIcono--error {
+    background-color: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border-color: var(--dashboard-estadoAltaBorde);
+    cursor: pointer;
+}
+
+.estadoConexionIcono--error:hover {
+    background-color: rgba(var(--dashboard-estadoErrorRgb), 0.2);
+    border-color: rgba(var(--dashboard-estadoErrorRgb), 0.5);
+}
+
+.estadoConexionIcono--sincronizando {
+    background-color: rgba(var(--dashboard-acentoRgb), 0.15);
+    color: var(--dashboard-estadoInfo);
+    border-color: rgba(var(--dashboard-acentoRgb), 0.3);
+}
+
+/* Animacion de giro para icono de sincronizacion */
+.iconoGirando {
+    animation: rotarSpinner 1s linear infinite;
+}
+
+/* 
+ * BOTON DE EQUIPOS 
+ */
+.botonIconoEncabezado--equipo {
+    gap: var(--dashboard-espacioXs);
+}
+
+.botonIconoEncabezado__contador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    color: var(--dashboard-estadoAlta);
+}
+
+/* 
+ * BOTON DE NOTIFICACIONES 
+ */
+.botonIconoEncabezado--notificaciones {
+    position: relative;
+    gap: var(--dashboard-espacioXs);
+}
+
+.botonIconoEncabezado--notificaciones.tieneNuevas {
+    color: var(--dashboard-textoActivo);
+}
+
+.botonIconoEncabezado__contadorNotificaciones {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Punto de notificacion cuando hay nuevas (para indicador sin numero) */
+.botonIconoEncabezado__puntoNotificacion {
+    width: 6px;
+    height: 6px;
+    background: var(--dashboard-estadoAlta);
+    border-radius: var(--dashboard-radioCirculo);
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+/* 
+ * BOTONES MOVIL (Menu)
+ */
+.botonMenuMovil {
+    display: none; /* Oculto por defecto en desktop */
+}
+
+/* Reducir tamaÃ±o de iconos del header en mÃ³vil (-1px) */
+@media (max-width: 480px) {
+    .botonIconoEncabezado svg {
+        width: 17px;
+        height: 17px;
+    }
+}
+
+/* 
+ * MODAL BUSCADOR MOVIL
+ */
+.buscadorModalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: var(--dashboard-superposicionFuerte);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    /* varsense-disable-next-line — viewport unit intencional para modal buscador */
+    padding-top: 15vh;
+}
+
+.buscadorModalContenido {
+    width: 90%;
+    max-width: 600px;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    /* overflow: hidden;  <-- CAUSING CLIPPING OF RESULTS */
+    overflow: visible;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: entradaModal 0.2s ease-out;
+    position: relative; /* Context for absolute results if needed */
+}
+
+.buscadorModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.buscadorModalTitulo {
+    margin: 0;
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+}
+
+.buscadorModalCerrar {
+    background: none;
+    border: none;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    padding: var(--dashboard-espacioXs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes entradaModal {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

@@ -1,0 +1,794 @@
+/*
+ * LISTA DE TAREAS
+ * Items de tareas, checkbox, estados y formulario de creacion
+ */
+
+/* 
+ * ITEM DE TAREA
+ */
+.tareaItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd);
+    /* border-bottom: 1px solid var(--dashboard-bordePrincipal); */
+    transition: background-color var(--dashboard-transicionNormal);
+    position: relative;
+    align-content: center;
+}
+
+.tareaItem:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+/*
+ * Tarea seleccionada (Ctrl+Click para selección múltiple)
+ * Visual similar a la selección de archivos en un explorador
+ */
+.tareaItem--seleccionada {
+    background-color: var(--dashboard-superposicionMuyClara);
+}
+
+.tareaItem--seleccionada:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* 
+ * SUBTAREAS
+ */
+.tareaItem--conSubtareas {
+    padding-right: var(--dashboard-espacio3xl);
+}
+
+.tareaItemSubtarea {
+    padding-left: var(--dashboard-espacio2xl);
+    width: calc(100% - var(--dashboard-espacioLg));
+    /* border-left: 2px solid var(--dashboard-bordeSutil); */
+    /* background-color: #0000; */
+    /* background-color: #00000005; */
+}
+
+.tareaItemSubtarea:hover {
+    background-color: var(--dashboard-superposicionClara);
+}
+
+/* 
+ * CHECKBOX
+ * align-self: center asegura centrado vertical incluso con contenido multilinea
+ */
+.tareaCheckbox {
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1px solid var(--dashboard-textoIndice);
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    cursor: pointer;
+    transition: border-color var(--dashboard-transicionNormal), background-color var(--dashboard-transicionNormal);
+    flex-shrink: 0;
+}
+
+.tareaCheckbox:hover {
+    border-color: var(--dashboard-textoApagado);
+}
+
+.tareaCheckboxCompletado {
+    background-color: var(--dashboard-bordeSutil);
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
+/* 
+ * CONTENIDO
+ */
+.tareaContenido {
+    flex: 1;
+    min-width: 0;
+}
+
+.tareaTextoWrapper {
+    display: block;
+    line-height: 1.6;
+}
+
+.tareaTexto {
+    display: inline;
+    color: var(--dashboard-textoNormal);
+    word-break: break-word;
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.tareaTextoCompletado {
+    color: var(--dashboard-textoIndice);
+    text-decoration: line-through;
+    text-decoration-color: var(--dashboard-textoIndice);
+}
+
+.tareaPrioridadIndicador {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+}
+
+/* 
+ * INDICADOR DE FECHA LIMITE
+ */
+.tareaFechaIndicador {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    padding: 1px 5px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioXs);
+    white-space: nowrap;
+}
+
+.tareaFechaVencida {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+.tareaFechaUrgente {
+    color: var(--dashboard-estadoAdvertencia);
+    background-color: var(--dashboard-estadoAdvertenciaFondo);
+    border-color: var(--dashboard-estadoAdvertenciaBorde);
+}
+
+.tareaFechaProxima {
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+/* 
+ * ACCIONES DE TAREA (eliminar, etc)
+ */
+.tareaAccionesContenedor {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dashboard-transicionRapida);
+    /* Aseguramos que ocupe espacio aunque no se vea */
+    display: flex;
+    align-items: center;
+}
+
+.tareaItem:hover .tareaAccionesContenedor {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modificamos .tareaAcciones para que herede o se comporte bien dentro del contenedor */
+.tareaAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    /* opacity: 1; -> Ya no necesario, controlado por contenedor */
+}
+
+.tareaBotonEliminar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioXs);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+/* [233A-31] Sin background hover — solo cambio de color */
+.tareaBotonEliminar:hover {
+    color: var(--dashboard-estadoAlta);
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.tareaBotonEditar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioXs);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.tareaBotonEditar:hover {
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-bordePrincipal);
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* 
+ * MODO EDICION INLINE
+ * El input debe ser visualmente identico al texto para edicion seamless
+ */
+.tareaItemEditando {
+    background-color: transparent;
+}
+
+.tareaItemEditando:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.tareaEdicionContenedor {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* 
+ * Input invisible - hereda estilos del texto para edicion seamless
+ */
+.tareaEdicionInput {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    line-height: 1.4;
+    outline: none;
+    transition: border-color var(--dashboard-transicionNormal);
+}
+
+.tareaEdicionInput:focus {
+    border-bottom-color: var(--dashboard-textoApagado);
+}
+
+/* 
+ * Acciones de edicion - ocultas por defecto, visibles en hover de item
+ */
+.tareaEdicionAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.tareaItemEditando:hover .tareaEdicionAcciones {
+    opacity: 1;
+}
+
+.tareaEdicionConfirmar,
+.tareaEdicionCancelar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.tareaEdicionConfirmar {
+    color: var(--dashboard-estadoExito);
+}
+
+.tareaEdicionConfirmar:hover {
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+.tareaEdicionCancelar {
+    color: var(--dashboard-textoApagado);
+}
+
+.tareaEdicionCancelar:hover {
+    color: var(--dashboard-estadoAlta);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+/* 
+ * BOTON NUEVA TAREA
+ */
+.tareaNuevoBoton {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: var(--dashboard-espacioMd);
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--dashboard-bordePunteado);
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    text-align: left;
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.tareaNuevoBoton:hover {
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* 
+ * FORMULARIO NUEVA TAREA
+ */
+.tareaNuevoFormulario {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.tareaNuevoInput {
+    width: 100%;
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    outline: none;
+    transition: border-color var(--dashboard-transicionNormal);
+}
+
+.tareaNuevoInput:focus {
+    border-color: var(--dashboard-textoApagado);
+}
+
+.tareaNuevoInput::placeholder {
+    color: var(--dashboard-textoPlaceholder);
+}
+
+.tareaNuevoAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.tareaNuevoConfirmar,
+.tareaNuevoCancelar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.tareaNuevoConfirmar {
+    color: var(--dashboard-estadoExito);
+}
+
+.tareaNuevoConfirmar:hover:not(:disabled) {
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+.tareaNuevoConfirmar:disabled {
+    color: var(--dashboard-textoIndice);
+    cursor: not-allowed;
+}
+
+.tareaNuevoCancelar {
+    color: var(--dashboard-textoApagado);
+}
+
+.tareaNuevoCancelar:hover {
+    color: var(--dashboard-estadoAlta);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+/* 
+ * INPUT INLINE NUEVA TAREA
+ * El estilo BASE de .areaNuevoInline está centralizado en tabla.css
+ * junto a .añadirHabito para mantener coherencia visual entre ambos.
+ *
+ * Clases modificadoras específicas de InputNuevaTarea (internas):
+ */
+
+/*
+ * Texto "+ Añadir" visible por defecto
+ */
+.tareaNuevoInlineTexto {
+    color: inherit;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+}
+
+/* 
+ * Input oculto por defecto, visible al enfocar
+ */
+.tareaNuevoInlineInput {
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    line-height: 1.4;
+    outline: none;
+    text-align: left;
+}
+
+.tareaNuevoInlineInputOculto {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.tareaNuevoInlineInput::placeholder {
+    color: var(--dashboard-textoApagado);
+}
+
+/* 
+ * Boton de confirmar - solo visible cuando hay texto
+ */
+.tareaNuevoInlineConfirmar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-estadoExito);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioXs);
+    transition: all var(--dashboard-transicionRapida);
+    opacity: 0;
+    animation: aparecer var(--dashboard-transicionRapida) ease forwards;
+}
+
+.tareaNuevoInlineConfirmar:hover {
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+/* [207A-4] Submenu de areaNuevoInline: elegir entre Tarea y Hábito */
+.submenuNuevoInline {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    box-shadow: var(--dashboard-sombraMedia);
+    z-index: 100;
+    min-width: 140px;
+    padding: var(--dashboard-espacioXxs) 0;
+    animation: aparecer var(--dashboard-transicionRapida) ease;
+    margin-bottom: var(--dashboard-espacioXxs);
+}
+
+.submenuNuevoInline__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: none;
+    border: none;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: background-color var(--dashboard-transicionRapida);
+}
+
+.submenuNuevoInline__opcion:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.submenuNuevoInline__opcion svg {
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+}
+
+/* 
+ * ARRASTRAR Y REORDENAR
+ */
+
+/* [218A-3] Handle de arrastre dedicado para Reorder.Item (clase legacy) */
+.tareaArrastreHandle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--dashboard-textoApagado);
+    opacity: 0.35;
+    padding: 0 4px;
+    margin-left: -4px;
+    transition: opacity var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+    flex-shrink: 0;
+}
+
+.tareaArrastreHandle:hover {
+    opacity: 0.9;
+    color: var(--dashboard-textoNormal);
+}
+
+.tareaArrastreHandle:active {
+    cursor: grabbing;
+}
+
+.tareaItem:hover .tareaArrastreHandle {
+    opacity: 0.7;
+}
+
+
+
+/*
+ * Contenedor del item padre en el reorder
+ * Contiene la tarea padre y todas sus subtareas
+ */
+.tareaPadreReorder {
+    position: relative;
+}
+
+/* 
+ * Efecto visual durante el arrastre
+ * Resalta todo el grupo (padre + subtareas)
+ */
+.tareaPadreReorder:active {
+    z-index: 10;
+}
+
+.tareaPadreReorder[style*='transform'] {
+    background-color: var(--dashboard-fondoSecundario);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: var(--dashboard-radioSm);
+}
+
+/* 
+ * Estado de arrastre activo
+ * Clase añadida cuando la tarea está siendo arrastrada
+ */
+.tareaPadreReorderArrastrando {
+    z-index: 20;
+    cursor: grabbing;
+}
+
+/* 
+ * Indicador visual de gesto horizontal
+ * Muestra al usuario que puede arrastrar hacia la derecha para convertir en subtarea
+ */
+.tareaPadreReorderArrastrando::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background: linear-gradient(to right, transparent 0%, var(--dashboard-estadoMedia) 50%, var(--dashboard-estadoExito) 100%);
+    opacity: 0.5;
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.tareaPadreReorderArrastrando:hover::after {
+    opacity: 0.8;
+}
+
+/* 
+ * Estado de gesto de conversión a subtarea
+ * Se activa cuando el usuario arrastra la tarea hacia la derecha
+ */
+.tareaPadreReorderGestoSubtarea {
+    border-left: 3px solid var(--dashboard-estadoMedia);
+    margin-left: var(--dashboard-espacioMd);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.tareaPadreReorderGestoSubtarea .tareaItem {
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* 
+ * Contenedor de subtarea
+ * Las subtareas no son draggables individualmente
+ */
+.subtareaContenedor {
+    position: relative;
+}
+
+.listaTareasSeparador {
+    height: 0.8px;
+    background-color: var(--dashboard-bordePrincipal);
+    margin: var(--dashboard-espacioMd) 0;
+}
+
+/* 
+ * CONTENEDOR DE TAREA CON COLAPSADOR
+ */
+.tareaConColapsador {
+    display: flex;
+    align-items: center; /* Centrado vertical para alinear botón con checkbox */
+    position: relative;
+}
+
+.tareaConColapsador > .tareaItem {
+    flex: 1;
+}
+
+/* 
+ * BOTON COLAPSAR SUBTAREAS
+ * Posicionado a la derecha, centrado verticalmente
+ */
+.tareaColapsadorBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: var(--dashboard-espacioSm);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    border-radius: var(--dashboard-radioXs);
+    flex-shrink: 0;
+}
+
+.tareaColapsadorBoton:hover {
+    color: var(--dashboard-textoNormal);
+}
+
+/* 
+ * CONTADOR DE SUBTAREAS COLAPSADAS
+ */
+.tareaColapsadorContador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    margin-left: var(--dashboard-espacioXxs);
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+/* 
+ * Contador cuando las subtareas estan expandidas
+ */
+.tareaColapsadorContadorExpandido {
+    color: var(--dashboard-textoMuyApagado);
+    padding: 0 2px;
+}
+
+/* 
+ * Resaltar cuando hay subtareas completadas
+ */
+
+/* 
+ * INDICADORES DE ZONA DE DROP
+ * Muestran visualmente dónde caerá la tarea al soltarla
+ */
+
+/* 
+ * Linea indicadora de drop entre tareas
+ */
+.tareaDropIndicador {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--dashboard-textoApagado);
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida);
+}
+
+.tareaDropIndicadorActivo {
+    opacity: 1;
+}
+
+/* 
+ * Indicador para conversión a subtarea (indentado)
+ */
+.tareaDropIndicadorSubtarea {
+    left: var(--dashboard-espacioLg);
+    background-color: var(--dashboard-estadoMedia);
+    top: 0;
+}
+
+/* 
+ * Indicador para tarea principal
+ */
+.tareaDropIndicadorPrincipal {
+    background-color: var(--dashboard-estadoExito);
+}
+
+/* 
+ * Zona de drop superior de la lista (primera posición)
+ */
+.listaTareasDropZonaSuperior {
+    height: 8px;
+    background: transparent;
+    position: relative;
+    transition: background-color var(--dashboard-transicionRapida);
+}
+
+.listaTareasDropZonaSuperior.dropActivo {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.1);
+}
+
+.listaTareasDropZonaSuperior.dropActivo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--dashboard-estadoExito);
+}
+
+/* [014A-21] Padding en lista pendientes solo desktop para respiro visual */
+@media (min-width: 481px) {
+    .listaTareasPendientes {
+        padding: var(--dashboard-espacioS);
+    }
+}
+
+/* 
+ * MODO COMPACTO
+ * Reducción de espaciado y fuente
+ */
+.tareaItem--compacto {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Padding vertical reducido, horizontal normal */
+    gap: var(--dashboard-espacioMd); /* Gap normal para mantener alineacion */
+    min-height: 32px;
+}
+
+.tareaItem--compacto.tareaItem--conSubtareas {
+    padding-right: var(--dashboard-espacioXxl); /* Mantener espacio para el colapsador */
+}
+
+.tareaTexto--compacto {
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.4;
+}
+
+.tareaItem--compacto.tareaItemSubtarea {
+    padding-left: var(--dashboard-espacio2xl); /* Mantener indentacion */
+}
+
+/* Modo compacto: ajustar tamaño del colapsador pero mantener centrado */
+.tareaConColapsador--compacto .tareaColapsadorBoton {
+    width: 1rem;
+    height: 1rem;
+}
+
+.tareaItem--compacto .tareaCheckbox {
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-top: var(--dashboard-espacioXxs);
+}

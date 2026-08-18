@@ -1,0 +1,153 @@
+/*
+ * SwipeableItem
+ * Estilos para gestos de deslizamiento en móvil
+ * Tarea 0.1: Swipe para completar/eliminar tareas
+ * Revision 0.2: Gradientes difuminados, cubrir 100% ancho
+ */
+
+.swipeableItem {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y; /* Permite scroll vertical, captura horizontal */
+    user-select: none;
+    -webkit-user-select: none;
+    /* Asegurar que ocupa todo el ancho disponible */
+    width: 100%;
+}
+
+.swipeableItem--arrastrando {
+    cursor: grabbing;
+}
+
+/* Contenido que se desliza */
+.swipeableItem__contenido {
+    position: relative;
+    z-index: 2;
+    background-color: var(--dashboard-fondoPrincipal);
+    will-change: transform;
+    /* Asegurar que el contenido ocupe todo el ancho */
+    width: 100%;
+}
+
+/* Acciones reveladas al deslizar */
+.swipeableItem__accion {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: 0 var(--dashboard-espacioMd);
+    color: var(--dashboard-textoSobreAcento);
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    z-index: 1;
+}
+
+/* Acción izquierda (revelada al deslizar a la derecha = completar) */
+.swipeableItem__accion--izquierda {
+    justify-content: flex-start;
+    /* Degradado verde difuminado que ocupa todo el fondo */
+    background: linear-gradient(
+        to right,
+        rgba(var(--dashboard-estadoExitoRgb), 0.7) 0%,
+        rgba(var(--dashboard-estadoExitoRgb), 0.7) 30%,
+        rgba(var(--dashboard-estadoExitoRgb), 0.3) 60%,
+        rgba(var(--dashboard-estadoExitoRgb), 0) 100%
+    );
+}
+
+/* Acción derecha (revelada al deslizar a la izquierda = eliminar) */
+.swipeableItem__accion--derecha {
+    justify-content: flex-end;
+    /* Degradado rojo difuminado que ocupa todo el fondo */
+    background: linear-gradient(
+        to left,
+        rgba(var(--dashboard-estadoErrorRgb), 0.7) 0%,
+        rgba(var(--dashboard-estadoErrorRgb), 0.7) 30%,
+        rgba(var(--dashboard-estadoErrorRgb), 0.3) 60%,
+        rgba(var(--dashboard-estadoErrorRgb), 0) 100%
+    );
+}
+
+/* Ocultar icono dentro de la acción */
+.swipeableItem__accionIcono {
+    display: none;
+}
+
+/* Etiqueta de la acción - texto pequeño */
+.swipeableItem__accionEtiqueta {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    white-space: nowrap;
+    padding: 0px 10px;
+}
+
+/* Feedback visual cuando se supera el umbral */
+.swipeableItem__accion[style*="opacity: 1"],
+.swipeableItem__accion[style*="opacity:1"] {
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Animación sutil al activar */
+@keyframes swipeActivado {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.swipeableItem__accionIcono--activo {
+    animation: swipeActivado 0.2s ease-out;
+}
+
+/* Solo habilitar en móvil - en desktop se ocultan las acciones */
+@media (min-width: 769px) {
+    .swipeableItem {
+        touch-action: auto;
+    }
+
+    .swipeableItem__accion {
+        display: none;
+    }
+
+    .swipeableItem__contenido {
+        transform: none !important;
+    }
+}
+
+/* Mejoras táctiles para móvil */
+@media (max-width: 768px) {
+    .swipeableItem {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Indicador visual de que es deslizable */
+    .swipeableItem::after {
+        content: '';
+        position: absolute;
+        left: var(--dashboard-espacioXs);
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 20px;
+        background: var(--dashboard-bordePrincipal);
+        border-radius: var(--dashboard-radioXs);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    /* Mostrar indicador al tocar */
+    .swipeableItem--arrastrando::after {
+        opacity: 0.5;
+    }
+}

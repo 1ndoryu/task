@@ -1,0 +1,541 @@
+/*
+ * panelDeficitCalorico.css
+ * Estilos del panel de déficit calórico
+ * Diseño minimalista con indicador visual de balance calórico y macros
+ */
+
+.panelDeficitCalorico {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.deficitContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioLg);
+}
+
+/* Resumen Nutricional (Nuevo) */
+.deficitResumenNutricional {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    padding-bottom: var(--dashboard-espacioSm);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+/* Sección Calorías Principal */
+.deficitCaloriasPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.deficitNavegacionFecha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioXxs);
+}
+
+.deficitNavegacionFechaBoton {
+    color: var(--dashboard-textoSecundario);
+}
+
+.deficitNavegacionFechaBoton:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+.deficitNavegacionFechaTexto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: capitalize;
+    letter-spacing: 0.03em;
+    min-width: 120px;
+    text-align: center;
+}
+
+.deficitCaloriasInfo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.deficitCaloriasValor {
+    font-size: var(--dashboard-tamanoTitulo);
+    font-weight: 700;
+    color: var(--dashboard-textoActivo);
+    line-height: 1;
+}
+
+.deficitCaloriasMeta {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+}
+
+.deficitCaloriasEstado {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.deficitBarraGrandeFondo {
+    width: 100%;
+    height: 5px;
+    background: var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMini);
+    overflow: hidden;
+    margin-top: var(--dashboard-espacioXxs);
+}
+
+.deficitBarraGrandeProgreso {
+    height: 100%;
+    border-radius: var(--dashboard-radioMini);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Grilla de Macros */
+.deficitMacrosGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+}
+
+.deficitMacroItem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMini);
+}
+
+.deficitMacroHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.deficitMacroLabel {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.deficitMacroValor {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoNormal);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitMacroBarraFondo {
+    width: 100%;
+    height: 5px;
+    background: var(--dashboard-fondoTerciario);
+    border-radius: var(--dashboard-radioMini);
+    overflow: hidden;
+}
+
+.deficitMacroBarraProgreso {
+    height: 100%;
+    background: var(--dashboard-estadoExito);
+    border-radius: var(--dashboard-radioMini);
+    transition: width 0.5s ease;
+}
+
+.deficitMacroBarraProgreso--excedido {
+    background: var(--dashboard-estadoAlta);
+}
+
+/* Entrada de comida */
+.deficitEntrada {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioS);
+}
+
+.deficitEntradaInputContenedor {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    align-items: center;
+}
+
+.deficitEntradaInput {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTerciario);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    outline: none;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.deficitEntradaInput:focus {
+    border-color: var(--dashboard-acento);
+}
+
+.deficitEntradaInput::placeholder {
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.5;
+}
+
+.deficitEntradaCargando {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-acento);
+}
+
+.deficitSpinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Avisos y errores */
+.deficitAviso,
+.deficitError {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    padding: 8px 10px;
+    border-radius: var(--dashboard-radioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.deficitAviso {
+    background: var(--dashboard-estadoInfoFondo);
+    color: var(--dashboard-estadoInfo);
+    border: 1px solid var(--dashboard-estadoInfoBorde);
+}
+
+.deficitError {
+    background: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+}
+
+/* Lista de comidas */
+.deficitListaComidas {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.deficitComidaItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.deficitComidaItem:last-child {
+    border-bottom: none;
+}
+
+.deficitComidaInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+    flex: 1;
+    min-width: 0;
+    padding-right: var(--dashboard-espacioSm);
+}
+
+.deficitComidaDesc {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.deficitComidaDetalles {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+}
+
+.deficitComidaHora {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.deficitComidaMacro {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXxs);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 4px;
+    border-radius: var(--dashboard-radioMini);
+}
+
+.deficitComidaAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex-shrink: 0;
+}
+
+.deficitComidaCalorias {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitComidaEliminar {
+    display: flex;
+    align-items: center;
+    padding: var(--dashboard-espacioXs);
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.deficitComidaEliminar:hover {
+    color: var(--dashboard-estadoAlta);
+    /* [253A-3] Sin background en hover — botones de acción en listas no deben tener fondo */
+    background: transparent;
+}
+
+/* Historial agrupado por días */
+.deficitHistorial {
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    width: 100%;
+}
+
+.deficitHistorialToggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.deficitHistorialTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.deficitHistorialContador {
+    margin-left: auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+}
+
+.deficitHistorialLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    margin-top: var(--dashboard-espacioSm);
+}
+
+/* Grupo de comidas por día */
+.deficitHistorialDiaGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioS);
+    padding-bottom: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.deficitHistorialDiaGrupo:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.deficitHistorialDiaHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.deficitHistorialDiaFecha {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.deficitHistorialDiaTotalCalorias {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitHistorialDiaComidas {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Botones de acción adicionales (reintentar, inspeccionar) */
+.deficitComidaBotonAccion {
+    display: flex;
+    align-items: center;
+    padding: var(--dashboard-espacioXs);
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.deficitComidaBotonAccion--reintentar:hover {
+    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
+}
+
+.deficitComidaBotonAccion--inspeccionar:hover {
+    color: var(--dashboard-estadoInfo);
+    background: var(--dashboard-estadoInfoFondo);
+}
+
+/* Paginación */
+.deficitHistorialPaginacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--dashboard-espacioSmMd);
+    padding-top: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.deficitHistorialPaginacionBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.deficitHistorialPaginacionBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.deficitHistorialPaginacionBoton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.deficitHistorialPaginacionBoton:disabled:hover {
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+}
+
+.deficitHistorialPaginacionTexto {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Modal de Inspección de IA */
+.modalInspeccionLog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+    background: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    padding: var(--dashboard-espacioMd);
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+}
+
+.modalInspeccionLogLinea {
+    padding: 2px 0;
+    color: var(--dashboard-textoNormal);
+    line-height: 1.4;
+}
+
+.modalInspeccionLogLinea--input {
+    color: var(--dashboard-acento);
+    font-weight: 600;
+}
+
+.modalInspeccionLogLinea--exito {
+    color: var(--dashboard-estadoExito);
+}
+
+.modalInspeccionLogLinea--error {
+    color: var(--dashboard-estadoAlta);
+    font-weight: 600;
+}
+
+/* Ajustes para mantener retrocompatibilidad */
+.deficitHistorialItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.deficitHistorialFecha {
+    color: var(--dashboard-textoSecundario);
+    min-width: 60px;
+}
+
+.deficitHistorialCalorias {
+    color: var(--dashboard-textoNormal);
+    font-variant-numeric: tabular-nums;
+}
+
+.deficitHistorialBalance {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    min-width: 50px;
+    text-align: right;
+}
+
+.deficitHistorialBalance--deficit {
+    color: var(--dashboard-estadoExito);
+}
+
+.deficitHistorialBalance--superavit {
+    color: var(--dashboard-estadoAlta);
+}

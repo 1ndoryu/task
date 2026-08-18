@@ -1,0 +1,14 @@
+{
+  "texto": "Revisar migración",
+  "completado": true,
+  "prioridad": "alta",
+  "urgencia": "normal",
+  "proyectoId": 301,
+  "parentId": null,
+  "orden": 1,
+  "payload": {
+    "id": 999,
+    "texto": "valor antiguo"
+  },
+  "expectedUpdatedAt": "2025-01-01T00:00:00Z"
+}

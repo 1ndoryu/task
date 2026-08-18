@@ -1,0 +1,364 @@
+﻿/* Modal: Finalizar ayuno */
+.modalAyunoFinalizarContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+/* Estilos para el Modal RediseÃ±ado de Finalizar Ayuno */
+.modalAyunoHero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--dashboard-espacioSmMd) 0 20px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+    margin-bottom: var(--dashboard-espacioMdLg);
+}
+
+.modalAyunoHeroTiempo {
+    font-size: var(--dashboard-tamanoHero);
+    font-weight: 700;
+    color: var(--dashboard-textoActivo);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.modalAyunoHeroTiempo--completado {
+    color: var(--dashboard-estadoExito);
+    text-shadow: 0 0 20px rgba(var(--dashboard-estadoExitoRgb), 0.2);
+}
+
+.modalAyunoHeroObjetivo {
+    margin-top: var(--dashboard-espacioS);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+}
+
+.modalAyunoTimeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: var(--dashboard-tamanoMovilBase); /* Espacio para la linea */
+}
+
+.modalAyunoTimelineItem {
+    display: flex;
+    gap: var(--dashboard-espacioLg);
+    padding-bottom: var(--dashboard-espacioXl);
+    position: relative;
+    min-height: 48px;
+}
+
+.modalAyunoTimelineItem:last-child {
+    padding-bottom: 0;
+}
+
+/* LÃ­nea vertical conectora */
+.modalAyunoTimelineItem::before {
+    content: '';
+    position: absolute;
+    left: 12px; /* Centro del icono de 24px (+ borde) */
+    top: var(--dashboard-espacioXl);
+    bottom: -4px;
+    width: 2px;
+    background: var(--dashboard-bordeSutil);
+    transform: translateX(-50%);
+    z-index: 0;
+    opacity: 0.5;
+}
+
+.modalAyunoTimelineItem:last-child::before {
+    display: none;
+}
+
+.modalAyunoTimelineItem--faseComida::before {
+    border-left: 2px dashed var(--dashboard-bordeSutil);
+    background: transparent;
+    opacity: 0.8;
+}
+
+.modalAyunoTimelineIcono {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--dashboard-radioCirculo);
+    background: var(--dashboard-fondoSecundario);
+    border: 2px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.modalAyunoTimelineIcono--inicio {
+    color: var(--dashboard-textoSobreAcento);
+    background: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+}
+
+.modalAyunoTimelineIcono--fin {
+    color: var(--dashboard-estadoExito);
+    border-color: var(--dashboard-estadoExito);
+    background: var(--dashboard-estadoExitoFondo);
+}
+
+.modalAyunoTimelineIcono--comida {
+    color: var(--dashboard-textoSecundario);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.modalAyunoTimelineIcono--proximo {
+    color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-fondoSecundario);
+}
+
+.modalAyunoTimelineContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+    padding-top: var(--dashboard-espacioXxs);
+    flex: 1;
+}
+
+.modalAyunoTimelineTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.modalAyunoTimelineHora {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.modalAyunoTimelineExtra {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
+    margin-top: var(--dashboard-espacioXxs);
+    font-style: italic;
+}
+
+.modalAyunoTimelineHoraEditable {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalAyunoTimelineHoraInput {
+    width: 88px !important;
+    min-width: 88px;
+    max-width: 88px;
+    flex: 0 0 88px;
+    display: inline-block;
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
+.modalAyunoTimelineDia {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.modalAyunoFinalizarAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioSmMd);
+    flex-wrap: wrap;
+    margin-top: var(--dashboard-espacioSmMd);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    padding-top: var(--dashboard-espacioMdLg);
+}
+
+.modalAyunoFinalizarBoton {
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioMd);
+    padding: 8px 16px;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalAyunoFinalizarBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoFinalizarBoton--primario {
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+    background: transparent;
+}
+
+.modalAyunoFinalizarBoton--primario:hover {
+    background: var(--dashboard-acentoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalAyunoFinalizarBoton--peligro {
+    border-color: var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAltaTexto);
+}
+
+.modalAyunoFinalizarBoton--peligro:hover {
+    background: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+.panelAyunoHistorialTitulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.panelAyunoHistorialLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+.panelAyunoHistorialItem {
+    padding: var(--dashboard-espacioS) 0;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelAyunoHistorialItem:last-child {
+    border-bottom: none;
+}
+
+.panelAyunoHistorialFila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--dashboard-espacioSmMd);
+}
+
+.panelAyunoHistorialItem--completado .panelAyunoHistorialItemTiempo {
+    color: var(--dashboard-estadoExito);
+}
+
+.panelAyunoHistorialAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+}
+
+.panelAyunoHistorialItemFecha {
+    opacity: 0.7;
+}
+
+.panelAyunoHistorialItemTiempo {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.panelAyunoHistorialEliminar {
+    opacity: 0.75;
+}
+
+.panelAyunoHistorialEliminar:hover {
+    opacity: 1;
+}
+
+/* Selector Reloj Circular Interactivo */
+
+.selectorRelojCircular {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioSmMd) 0;
+    user-select: none;
+}
+
+.selectorRelojCircular__display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoHero);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    line-height: 1;
+    background: var(--dashboard-fondoSecundario);
+    padding: 8px 16px;
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+    box-shadow: var(--dashboard-sombraMedia);
+}
+
+.selectorRelojCircular__separador {
+    margin: 0 2px;
+    opacity: 0.6;
+    animation: parpadeoReloj 1s infinite steps(2, start);
+}
+
+@keyframes parpadeoReloj {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.selectorRelojCircular__svg {
+    touch-action: none; /* Importante para prevenir scroll en mÃ³viles */
+    transition: transform var(--dashboard-transicionNormal);
+    cursor: pointer;
+}
+
+.selectorRelojCircular__svg--arrastrando {
+    cursor: grabbing !important;
+    transform: scale(1.02);
+}
+
+.selectorRelojCircular__knob {
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+    transition: r 0.2s ease;
+}
+
+.selectorRelojCircular__svg--arrastrando .selectorRelojCircular__knob {
+    r: 10; /* Hacer mÃ¡s grande al arrastrar */
+}
+
+.selectorRelojCircular__instruccion {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.7;
+    margin: 0;
+}
+
+.selectorRelojCircular__texto {
+    pointer-events: none;
+}

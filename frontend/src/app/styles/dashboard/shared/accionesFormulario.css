@@ -1,0 +1,69 @@
+/*
+ * COMPONENTE REUTILIZABLE: ACCIONES DE FORMULARIO
+ * Botones Guardar, Cancelar y Zona de Peligro (Eliminar)
+ */
+
+.accionesFormularioContenedor {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioLg);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* Contenedor para botones extra a la izquierda */
+.accionesFormularioExtra {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin-right: auto;
+}
+
+/* Estilos de botones migrados a variantes atomicas de Boton (Fase 6.5) */
+
+/* 
+ * ZONA DE PELIGRO (ELIMINAR) 
+ */
+.accionesFormularioZonaPeligro {
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioMd);
+    border-top: 1px dashed var(--dashboard-estadoAltaBorde);
+}
+
+
+
+/* 
+ * CONFIRMACION DE ELIMINAR 
+ */
+.accionesFormularioConfirmacion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    animation: aparecerConfirmacion 0.2s ease-out;
+}
+
+.accionesFormularioConfirmacionTexto {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-estadoAlta);
+    text-align: center;
+}
+
+.accionesFormularioConfirmacionBotones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+
+
+@keyframes aparecerConfirmacion {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

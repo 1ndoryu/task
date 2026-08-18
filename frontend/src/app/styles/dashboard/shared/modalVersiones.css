@@ -1,0 +1,132 @@
+/* [014A-15] Override: quitar padding de modalContenido para este modal.
+ * Selector compuesto para ganar en especificidad a .modalContenido { padding: 20px }
+ * que se carga después en el bundle. */
+.modalContenido.modalContenidoVersiones {
+    padding: 0;
+}
+
+.contenedorVersiones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacio2xl);
+    padding: var(--dashboard-espacioLgXl);
+    max-height: 60vh;
+    overflow-y: auto;
+    /* Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--dashboard-bordeSutil) transparent;
+}
+
+.contenedorVersiones::-webkit-scrollbar {
+    width: var(--dashboard-scrollbarAncho);
+}
+
+.contenedorVersiones::-webkit-scrollbar-thumb {
+    background-color: var(--dashboard-scrollbarThumb);
+    border-radius: var(--dashboard-radioMini);
+}
+
+.contenedorVersiones::-webkit-scrollbar-thumb:hover {
+    background-color: var(--dashboard-scrollbarThumbHover);
+}
+
+.grupoVersion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+    padding-bottom: var(--dashboard-espacio2xl);
+    border-bottom: 1px dashed var(--dashboard-bordeSutil);
+}
+
+.grupoVersion:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.encabezadoVersion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--dashboard-superposicionMuyClara);
+    border-radius: var(--dashboard-radioMd);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.infoVersion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 700;
+    color: var(--dashboard-textoActivo);
+}
+
+.iconoVersion {
+    opacity: 0.8;
+}
+
+.fechaVersion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
+}
+
+.listaCambios {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding-left: var(--dashboard-espacioSm);
+}
+
+.itemCambio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.4;
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+.iconoCambio {
+    margin-top: var(--dashboard-espacioXxs);
+    flex-shrink: 0;
+}
+
+.tipo-nuevo .iconoCambio {
+    color: var(--dashboard-estadoExito);
+}
+
+.tipo-mejora .iconoCambio {
+    color: var(--dashboard-textoActivo); /* Usamos texto activo para mejoras/info */
+}
+
+/* Móvil: 100% ancho sin padding */
+@media (max-width: 480px) {
+    .contenedorVersiones {
+        padding: 0;
+        max-height: none;
+    }
+}
+
+.tipo-arreglo .iconoCambio {
+    color: var(--dashboard-estadoAlta);
+}
+
+.textoCambio {
+    opacity: 0.9;
+}
+
+/* [303A-7] Indicador de carga diferida */
+.contenedorVersionesCargando {
+    text-align: center;
+    padding: var(--dashboard-espacioLg) 0;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}

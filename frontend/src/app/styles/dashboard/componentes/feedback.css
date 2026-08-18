@@ -1,0 +1,212 @@
+/*
+ * Estilos del Modal de Feedback
+ * Modal para usuarios Premium
+ */
+
+.modalFeedback {
+    max-width: 480px;
+    width: 95%;
+}
+
+.modalFeedbackContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Estado de carga */
+.modalFeedbackCargando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoSecundario);
+}
+
+/* Estado bloqueado (no premium) */
+.modalFeedbackBloqueado,
+.modalFeedbackLimite {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalFeedbackBloqueado h3,
+.modalFeedbackLimite h3 {
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoNormal);
+    margin: 0;
+}
+
+.modalFeedbackBloqueado p,
+.modalFeedbackLimite p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Info de comentarios restantes */
+.modalFeedbackInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalFeedbackInfo strong {
+    color: var(--dashboard-textoActivo);
+}
+
+/* Selector de tipo */
+.modalFeedbackTipos {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+.modalFeedbackTipo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    cursor: pointer;
+    transition: var(--dashboard-transicionRapida);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.modalFeedbackTipo:hover {
+    border-color: var(--dashboard-textoSecundario);
+    color: var(--dashboard-textoNormal);
+}
+
+.modalFeedbackTipoActivo {
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+/* Textarea */
+/* [303A-5] box-sizing: border-box para que width:100% + padding no desborde el modal */
+.modalFeedbackTextarea {
+    width: 100%;
+    min-height: 120px;
+    padding: var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    color: var(--dashboard-textoNormal);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoBase);
+    resize: vertical;
+    transition: var(--dashboard-transicionRapida);
+    box-sizing: border-box;
+}
+
+.modalFeedbackTextarea:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.modalFeedbackTextarea::placeholder {
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalFeedbackTextarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Contador de caracteres */
+.modalFeedbackContador {
+    text-align: right;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+/* Resultado */
+.modalFeedbackResultado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.modalFeedbackExito {
+    background: var(--dashboard-estadoExitoFondo);
+    border: 1px solid var(--dashboard-estadoExitoBorde);
+    color: var(--dashboard-estadoExito);
+}
+
+.modalFeedbackError {
+    background: var(--dashboard-estadoAltaFondo);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* Acciones */
+.modalFeedbackAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioMd);
+}
+
+.modalFeedbackAcciones button {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: var(--dashboard-transicionRapida);
+}
+
+.modalFeedbackAcciones .botonSecundario {
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalFeedbackAcciones .botonSecundario:hover:not(:disabled) {
+    border-color: var(--dashboard-textoSecundario);
+    color: var(--dashboard-textoNormal);
+}
+
+.modalFeedbackAcciones .botonPrimario {
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    background: unset;
+}
+
+.modalFeedbackAcciones .botonPrimario:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.modalFeedbackAcciones button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Nota inferior */
+.modalFeedbackNota {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-align: center;
+    font-style: italic;
+}

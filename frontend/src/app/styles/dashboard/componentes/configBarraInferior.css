@@ -1,0 +1,80 @@
+/* [014A-12] Estilos para ConfigBarraInferior (bottom sheet de personalización) */
+
+.configBarraInferior {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd);
+}
+
+.configBarraInferiorTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+    margin: 0;
+}
+
+.configBarraInferiorDescripcion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0;
+}
+
+.configBarraInferiorLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.configBarraInferiorItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioSm);
+    width: 100%;
+    justify-content: flex-start;
+    min-height: 40px;
+}
+
+.configBarraInferiorItem--fijado {
+    background: var(--dashboard-superposicionSutil);
+}
+
+.configBarraInferiorItem--deshabilitado {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.configBarraInferiorItemIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: var(--dashboard-textoSecundario);
+}
+
+.configBarraInferiorItem--fijado .configBarraInferiorItemIcono {
+    color: var(--dashboard-acento);
+}
+
+.configBarraInferiorItemTexto {
+    flex: 1;
+    text-align: left;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+}
+
+.configBarraInferiorItemPin {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-textoSecundario);
+}
+
+.configBarraInferiorItem--fijado .configBarraInferiorItemPin {
+    color: var(--dashboard-acento);
+}
+
+.configBarraInferiorCerrar {
+    margin-top: var(--dashboard-espacioSm);
+}

@@ -1,0 +1,260 @@
+/*
+ * [233A-27] MODAL DE CONFIGURACIÓN GLOBAL
+ * Layout con sidebar de navegación + área de contenido
+ * Reusa clases existentes: .contenedorOpcionesConfig, .itemOpcionConfig, etc.
+ */
+
+/* Override del modalContenedor para hacerlo más ancho y con altura fija */
+/* [233A-58] Altura fija de 750px solicitada por el usuario */
+.modalConfigGlobal {
+    max-width: 720px;
+    height: 750px;
+    max-height: 90vh;
+}
+
+/* Layout principal: sidebar + contenido */
+/* [233A-55] gap agregado por solicitud del usuario
+ * [233A-64] height 100% para que ocupe toda la altura del modal
+ * [233A-67] gap quitado — padding 20px en sidebar y contenido reemplaza el espaciado */
+.configGlobalLayout {
+    display: flex;
+    height: 100%;
+    min-height: 400px;
+    max-height: calc(90vh - 60px);
+    overflow: hidden;
+}
+
+/* [243A-16] Excepción: configGlobal maneja su propio padding interno (sidebar + contenido por separado) */
+.modalConfigGlobal .modalContenido {
+    padding: 0;
+}
+
+/* Sidebar de navegación */
+/* [303A-2] padding reducido de 20 a 10 */
+.configGlobalSidebar {
+    width: 180px;
+    min-width: 180px;
+    border-right: 1px solid var(--dashboard-bordePrincipal);
+    overflow-y: auto;
+    padding: var(--dashboard-espacioSmMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+/* Grupo de secciones en sidebar */
+.configGlobalNavGrupo {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--dashboard-textoMuyApagado);
+    letter-spacing: 0.5px;
+}
+
+.configGlobalNavGrupo:not(:first-child) {
+    margin-top: var(--dashboard-espacioXs);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+    padding-top: var(--dashboard-espacioSm);
+}
+
+/* Item de navegación en sidebar */
+/* [233A-43] justify-content para que botones no queden centrados */
+.configGlobalNavItem {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--dashboard-espacioXs);
+    padding: 6px var(--dashboard-espacioSm);
+    margin: 0 var(--dashboard-espacioXs);
+    border-radius: var(--dashboard-radioSm);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border: none;
+    background: none;
+    text-align: left;
+    width: calc(100% - var(--dashboard-espacioSm));
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.configGlobalNavItem:hover {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.configGlobalNavItem.activo {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+/* Área de contenido */
+/* [233A-52] Eliminados overflow-y, padding y min-width — innecesarios
+ * [233A-67] padding 20px y overflow auto agregados — desplazamiento de contenido largo */
+.configGlobalContenido {
+    flex: 1;
+    padding: var(--dashboard-espacioLgXl); /* sentinel-disable-line */
+    overflow: auto;
+}
+
+/* Título de sección en el contenido */
+.configGlobalTituloSeccion {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    margin-bottom: var(--dashboard-espacioMd);
+}
+
+/* Responsive: en móvil, sidebar se convierte en horizontal */
+@media (max-width: 600px) {
+    .modalConfigGlobal {
+        max-width: 100%;
+    }
+
+    .configGlobalLayout {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .configGlobalSidebar {
+        width: 100%;
+        min-width: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--dashboard-bordePrincipal);
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: var(--dashboard-espacioXs);
+        gap: var(--dashboard-espacioXs);
+        max-height: none;
+    }
+
+    .configGlobalNavGrupo {
+        display: none;
+    }
+
+    .configGlobalNavItem {
+        white-space: nowrap;
+        width: auto;
+        margin: 0;
+        padding: 6px var(--dashboard-espacioSm);
+    }
+
+    .configGlobalContenido {
+        max-height: 60vh;
+    }
+}
+
+/*
+ * [233A-54] VERSIÓN MÓVIL: Config como BottomSheet
+ * Fase 1: tabs como botones (BottomSheet compacto)
+ * Fase 2: al seleccionar, expande a 80vh mostrando contenido
+ */
+
+/* Expandir el BottomSheet cuando hay sección seleccionada */
+.bottomSheetPanel:has(.configMovilContenedor--expandido) {
+    max-height: 80vh;
+}
+
+/* Contenedor principal dentro del BottomSheet */
+.configMovilContenedor {
+    display: flex;
+    flex-direction: column;
+}
+
+.configMovilContenedor--expandido {
+    height: 75vh;
+}
+
+/* Encabezado con botón volver + título
+ * [024A-5] Quitado padding lateral: lo hereda de bottomSheetContenido.
+ * El botón de solo icono dentro del encabezado no debe tener width:100% ni aspect-ratio. */
+.configMovilEncabezado {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) 0;
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    flex-shrink: 0;
+}
+
+/* [024A-5] Botón de solo icono (back) en encabezado: no heredar width:100% del bottomSheet */
+.configMovilEncabezado .boton {
+    width: auto;
+    aspect-ratio: unset;
+}
+
+.configMovilTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+}
+
+/* Contenido scrollable de la sección
+ * [024A-4] Sin padding propio: bottomSheetContenido ya aporta padding,
+ * evitando duplicación de espacio cuando configMovil está dentro del BottomSheet. */
+.configMovilContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    min-height: 0;
+}
+
+/* [014A-10] Lista de secciones — gap 16px */
+.configMovilSecciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+/* [014A-10] Grupo — gap token */
+.configMovilGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSmMd);
+}
+
+/* [014A-10] Título sin padding lateral */
+.configMovilGrupoTitulo {
+    padding: var(--dashboard-espacioXs) 0;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--dashboard-textoMuyApagado);
+    letter-spacing: 0.5px;
+}
+
+/* Item de sección individual */
+.configMovilItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioSm);
+    width: 100%;
+    text-align: left;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.configMovilItem:hover,
+.configMovilItem:active {
+    background: var(--dashboard-fondoHover);
+}
+
+/* [014A-10] Icono a la derecha como los demás bottomsheet */
+.configMovilItemIcono {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-textoApagado);
+    order: 1;
+    margin-left: auto;
+}
+
+/* [014A-10] font-size token */
+.configMovilItemTexto {
+    font-weight: 500;
+    font-size: var(--dashboard-tamanoBase);
+}

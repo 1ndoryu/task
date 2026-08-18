@@ -1,0 +1,188 @@
+/* 
+ * Lista Orden Paneles
+ * Estilos para el componente de reordenamiento de paneles
+ */
+
+.listaOrdenPaneles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Grid de columnas para modo 2-3 columnas */
+.listaOrdenColumnasGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--dashboard-espacioMd);
+}
+
+/* Contenedor de una columna */
+.listaOrdenColumna {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.listaOrdenColumnaLabel {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: var(--dashboard-espacioXs);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* Lista de items */
+.listaOrdenItems {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* Item individual de panel */
+.listaOrdenItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    gap: var(--dashboard-espacioSm);
+}
+
+.listaOrdenItem:hover {
+    border-color: var(--dashboard-acento);
+}
+
+/* Info del panel (icono + nombre) */
+.listaOrdenItemInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex: 1;
+    min-width: 0;
+}
+
+.listaOrdenItemIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+}
+
+.listaOrdenItemNombre {
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Acciones (botones) */
+.listaOrdenItemAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    flex-shrink: 0;
+}
+
+/* Botón de mover arriba/abajo */
+.listaOrdenBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMini);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.listaOrdenBoton:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoTerciario);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-acento);
+}
+
+.listaOrdenBoton:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Selector de columnas */
+.listaOrdenColumnas {
+    display: flex;
+    gap: var(--dashboard-espacioXxs);
+    margin-left: var(--dashboard-espacioXs);
+}
+
+.listaOrdenColumnaBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMini);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.listaOrdenColumnaBtn:hover {
+    background-color: var(--dashboard-fondoTerciario);
+    border-color: var(--dashboard-acento);
+}
+
+.listaOrdenColumnaBtn.activa {
+    background-color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-fondoPrincipal);
+}
+
+/* Vista previa compacta del layout */
+.listaOrdenPreview {
+    display: grid;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    margin-top: var(--dashboard-espacioMd);
+}
+
+.listaOrdenPreview--2col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.listaOrdenPreview--3col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.listaOrdenPreviewColumna {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+.listaOrdenPreviewItem {
+    height: 12px;
+    background-color: var(--dashboard-fondoTerciario);
+    border-radius: var(--dashboard-radioXs);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.listaOrdenPreviewItem--activo {
+    background-color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+}

@@ -1,0 +1,66 @@
+/*
+ * CONFIGURACION DE TAREAS
+ * Estilos para el modal de configuracion
+ */
+
+.contenedorOpcionesConfig {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd); /* Reducir gap */
+    padding: var(--dashboard-espacioSm); /* Reducir padding */
+}
+
+.itemOpcionConfig {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioMd);
+    padding: 2px 0; /* Padding vertical minimo */
+}
+
+.detallesOpcionConfig {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.tituloOpcionConfig {
+    font-size: var(--dashboard-tamanoMovilPequeno); /* Mas pequeño */
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+}
+
+.descripcionOpcionConfig {
+    font-size: var(--dashboard-tamanoMuyPequeno); /* Mas pequeño */
+    color: var(--dashboard-textoApagado);
+    line-height: 1.2;
+}
+
+.separadorOpcionesConfig {
+    height: 0.8px;
+    background-color: var(--dashboard-bordeSutil);
+    width: 100%;
+}
+
+/* Selector de ordenamiento de grupos */
+.selectorOrdenamiento {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+    cursor: pointer;
+    min-width: 100px;
+}
+
+.selectorOrdenamiento:focus {
+    outline: none;
+    border-color: var(--dashboard-acento);
+}
+
+.selectorOrdenamiento option {
+    background: var(--dashboard-fondoTarjeta);
+    color: var(--dashboard-textoNormal);
+}

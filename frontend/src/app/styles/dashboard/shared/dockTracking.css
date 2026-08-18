@@ -1,0 +1,158 @@
+/*
+ * dockTracking.css
+ * Estilos para la barra inferior de tracking de tiempo
+ * Diseño minimalista estilo terminal
+ */
+
+.dockTracking {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--dashboard-fondoTerciario);
+    /* border-top: 1px solid var(--dashboard-bordePrincipal); */
+    transition: opacity 0.2s ease;
+    margin: 40px auto;
+    max-width: 600px;
+    zoom: 1.1;
+}
+
+/* En móvil, posicionar encima de NavegacionInferior */
+.dockTracking--movil {
+    bottom: 56px; /* Altura de la barra de navegación inferior */
+}
+
+.dockTracking--pausado {
+    opacity: 0.85;
+}
+
+/* Barra de progreso hacia tiempo mínimo */
+.dockTrackingProgreso {
+    height: 2px;
+    background: var(--dashboard-bordeSutil);
+    width: 100%;
+    overflow: hidden;
+}
+
+.dockTrackingProgresoRelleno {
+    height: 100%;
+    background: var(--dashboard-estadoExito);
+    transition: width 1s linear;
+}
+
+/* Contenido principal del dock */
+.dockTrackingContenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioMd);
+    gap: var(--dashboard-espacioMd);
+    min-height: 36px;
+}
+
+/* Info de la entidad */
+.dockTrackingInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.dockTrackingIcono {
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+}
+
+.dockTrackingNombre {
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    color: var(--dashboard-textoNormal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Timer */
+.dockTrackingTimer {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    flex-shrink: 0;
+}
+
+.dockTrackingTiempo {
+    font-size: var(--dashboard-tamanoBase);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: var(--dashboard-textoActivo);
+    letter-spacing: 0.5px;
+}
+
+.dockTrackingTiempo--completado {
+    color: var(--dashboard-estadoExito);
+}
+
+.dockTrackingCheckMinimo {
+    color: var(--dashboard-estadoExito);
+}
+
+/* Botones de acción */
+.dockTrackingAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    flex-shrink: 0;
+}
+
+/* [014A-17] Todos los botones usan <Boton> (default primario) que hereda hover
+ * con background color. Override con !important para anular .boton--primario:hover.
+ * Tamaños unificados a 28px — las variantes ya no reducen width/height. */
+.dockTrackingBoton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    background: transparent !important;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.dockTrackingBoton:hover {
+    background: transparent !important;
+    color: var(--dashboard-textoActivo);
+}
+
+.dockTrackingBoton--reanudar:hover {
+    color: var(--dashboard-estadoExito);
+}
+
+.dockTrackingBoton--completar:hover {
+    color: var(--dashboard-estadoInfo);
+}
+
+.dockTrackingBoton--cancelar:hover {
+    color: var(--dashboard-estadoAlta);
+}
+
+.dockTrackingBoton--ajusteTiempo {
+    cursor: ew-resize;
+    touch-action: none;
+}
+
+.dockTrackingBoton--ajusteTiempo:hover {
+    color: var(--dashboard-estadoInfo);
+}
+
+/* Padding adicional al body cuando el dock está visible */
+.conDockTracking {
+    padding-bottom: var(--dashboard-tamanoTactilMinimo) !important;
+}
+
+.conDockTracking.conDockTrackingMovil {
+    padding-bottom: var(--dashboard-espacio6xl) !important;
+}

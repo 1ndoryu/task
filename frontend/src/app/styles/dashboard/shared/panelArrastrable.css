@@ -1,0 +1,220 @@
+/*
+ * ESTILOS SISTEMA DE ARRASTRE DE PANELES
+ * Sistema personalizado basado en mouse events
+ * Handle de arrastre, indicador flotante, zonas de drop
+ */
+
+/* 
+ * HANDLE DE ARRASTRE
+ * Botón en el encabezado de cada panel
+ */
+.handleArrastre {
+    /* Dimensiones y estilos visuales heredados de .selectorBadgeBoton */
+    cursor: grab;
+}
+
+/* Hover manejado por .selectorBadgeBoton */
+.handleArrastre:hover {
+    color: var(--dashboard-textoSecundario);
+    /* El resto lo maneja la clase base */
+}
+
+.handleArrastre:active,
+.handleArrastre.activo {
+    cursor: grabbing;
+    color: var(--dashboard-acento);
+    background: rgba(var(--dashboard-acentoRgb), 0.1);
+    border-color: var(--dashboard-acento);
+}
+
+/* 
+ * INDICADOR FLOTANTE
+ * Preview del panel que sigue el cursor
+ */
+.indicadorArrastreFlotante {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-acento);
+    border-radius: var(--dashboard-radioMd);
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(var(--dashboard-acentoRgb), 0.2);
+    pointer-events: none;
+    animation: aparecer 0.15s ease-out;
+}
+
+@keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.indicadorArrastreIcono {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-acento);
+}
+
+.indicadorArrastreNombre {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    color: var(--dashboard-textoNormal);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 
+ * ZONA DE DROP
+ * Linea brillante que indica donde se insertara el panel
+ */
+.indicadorZonaDrop {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--dashboard-acento);
+    border-radius: var(--dashboard-radioSm);
+    z-index: 100;
+    box-shadow: 0 0 12px var(--dashboard-acento), 0 0 24px rgba(var(--dashboard-acentoRgb), 0.4);
+    animation: pulsoZona 1s ease-in-out infinite;
+}
+
+.indicadorZonaDropSuperior {
+    top: -6px;
+}
+
+.indicadorZonaDropInferior {
+    bottom: -6px;
+}
+
+@keyframes pulsoZona {
+    0%,
+    100% {
+        opacity: 0.8;
+        box-shadow: 0 0 12px var(--dashboard-acento), 0 0 24px rgba(var(--dashboard-acentoRgb), 0.4);
+    }
+    50% {
+        opacity: 0.4;
+        box-shadow: 0 0 8px var(--dashboard-acento), 0 0 16px rgba(var(--dashboard-acentoRgb), 0.2);
+    }
+}
+
+/* 
+ * PLACEHOLDER FANTASMA
+ * Espacio visual que muestra donde va a quedar el panel
+ * Reemplaza o complementa la linea brillante para mayor claridad
+ */
+.indicadorPlaceholder {
+    height: 60px; /* Altura minima visual */
+    background: rgba(var(--dashboard-acentoRgb), 0.05);
+    border: 2px dashed var(--dashboard-acento);
+    border-radius: var(--dashboard-radioMd);
+    margin: var(--dashboard-espacioMd) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-acento);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    transition: all var(--dashboard-transicionRapida);
+    animation: aparecerPlaceholder 0.2s ease-out;
+}
+
+.indicadorPlaceholder::after {
+    content: 'SOLTAR AQUÍ';
+    opacity: 0.7;
+}
+
+@keyframes aparecerPlaceholder {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+        height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+        height: 60px;
+    }
+}
+
+/* 
+ * PANEL ARRASTRABLE - CONTENEDOR
+ */
+.panelArrastrable {
+    position: relative;
+    transition: opacity var(--dashboard-transicionNormal), transform var(--dashboard-transicionNormal);
+}
+
+/* Panel que esta siendo arrastrado */
+.panelArrastrable.arrastrando {
+    opacity: 0.4;
+    transform: scale(0.98);
+}
+
+/* Otros paneles mientras hay arrastre activo */
+.panelArrastrable.puedeRecibirDrop {
+    position: relative;
+}
+
+/* 
+ * ANIMACION DE SNAP AL SOLTAR
+ */
+@keyframes panelSnap {
+    0% {
+        transform: scale(1.02);
+    }
+    50% {
+        transform: scale(0.99);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.panelArrastrable.recienSoltado {
+    animation: panelSnap 0.25s ease-out;
+}
+
+/* 
+ * ESTADO GLOBAL DE ARRASTRE
+ * Estilos cuando hay un arrastre activo
+ * Nota: la clase arrastrandoPanel se aplica a .dashboardGridColumnas
+ */
+.dashboardGridColumnas.arrastrandoPanel {
+    cursor: grabbing;
+}
+
+.dashboardGridColumnas.arrastrandoPanel .panelDashboard {
+    pointer-events: none;
+}
+
+.dashboardGridColumnas.arrastrandoPanel .panelArrastrable {
+    pointer-events: auto;
+}
+
+/* 
+ * RESPONSIVE - OCULTAR HANDLES EN MOVIL
+ */
+@media (max-width: 768px) {
+    .handleArrastre {
+        display: none;
+    }
+}
+
+/* 
+ * ACCESIBILIDAD
+ */
+.handleArrastre:focus-visible {
+    outline: 2px solid var(--dashboard-acento);
+    outline-offset: 2px;
+}

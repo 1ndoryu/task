@@ -1,0 +1,14 @@
+.git
+.github
+target
+temp
+node_modules
+frontend/node_modules
+frontend/dist
+frontend/src/app
+frontend/src/glory-core
+frontend/public/legacy-assets
+*.log
+.env
+Agente
+glory-rs

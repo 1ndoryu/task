@@ -1,0 +1,91 @@
+/*
+ * SAFE AREAS Y OPTIMIZACIONES - movilSafeAreas.css
+ * 
+ * Soporte para dispositivos con notch, cámara perforada o barra de navegación
+ * Optimizaciones de rendimiento WebView con GPU
+ * viewport-fit=cover debe estar en el meta viewport para que funcione
+ */
+
+/* 
+ * SAFE AREAS CONTENEDOR
+ * Contenedor principal con safe areas
+ */
+.contenedorConSafeArea {
+    padding-top: var(--dashboard-safeAreaTop);
+    padding-bottom: var(--dashboard-safeAreaBottom);
+    padding-left: var(--dashboard-safeAreaLeft);
+    padding-right: var(--dashboard-safeAreaRight);
+}
+
+/* 
+ * HEADER CON SAFE AREA SUPERIOR
+ */
+@media (max-width: 480px) {
+    .dashboardEncabezado {
+        padding-top: max(var(--dashboard-espacioSm), var(--dashboard-safeAreaTop));
+    }
+}
+
+/* 
+ * NAVEGACION INFERIOR CON SAFE AREA
+ */
+@media (max-width: 480px) {
+    .navegacionInferior {
+        padding-bottom: var(--dashboard-safeAreaBottom);
+        /* Altura total = altura base + safe area */
+        height: calc(60px + var(--dashboard-safeAreaBottom));
+    }
+
+    /* Compensar contenido cuando hay navegación inferior */
+    .dashboardContenedor--conNavegacion {
+        padding-bottom: calc(60px + var(--dashboard-safeAreaBottom) + var(--dashboard-espacioLg));
+    }
+}
+
+/* 
+ * DRAWER CON SAFE AREAS LATERALES
+ */
+@media (max-width: 480px) {
+    .drawerMovilPanel {
+        padding-left: var(--dashboard-safeAreaLeft);
+    }
+}
+
+/* 
+ * MODALES FULLSCREEN CON SAFE AREAS
+ */
+@media (max-width: 480px) {
+    .modalMovil {
+        padding-top: var(--dashboard-safeAreaTop);
+        padding-bottom: var(--dashboard-safeAreaBottom);
+    }
+
+    .modalMovil__cabecera {
+        padding-top: max(var(--dashboard-espacioMd), var(--dashboard-safeAreaTop));
+    }
+}
+
+/* 
+ * BOTTOMSHEET CON SAFE AREA INFERIOR
+ */
+@media (max-width: 480px) {
+    .bottomSheet {
+        padding-bottom: var(--dashboard-safeAreaBottom);
+    }
+}
+
+/* 
+ * OPTIMIZACIONES DE RENDIMIENTO WEBVIEW
+ * Animaciones GPU y compositing optimizado
+ */
+
+/* Forzar GPU rendering en elementos animados */
+.drawerMovilPanel,
+.bottomSheet,
+.modalMovil,
+.pullToRefresh {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}

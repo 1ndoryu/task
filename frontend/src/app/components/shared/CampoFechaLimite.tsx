@@ -1,0 +1,74 @@
+/*
+ * CampoFechaLimite
+ * Campo de fecha con indicador de urgencia visual
+ * Extraido de PanelConfiguracionTarea para reutilizacion
+ */
+
+import {X, AlertCircle} from 'lucide-react';
+import {SeccionPanel} from './SeccionPanel';
+import {obtenerFechaEfectiva} from '../../utils/fecha';
+import {Boton} from '../ui';
+import {Input} from '../ui/Input';
+
+type EstadoFecha = 'vencida' | 'urgente' | 'proxima' | 'normal' | null;
+
+interface CampoFechaLimiteProps {
+    titulo?: string;
+    valor: string;
+    onChange: (valor: string) => void;
+    mostrarBotonLimpiar?: boolean;
+    disabled?: boolean;
+}
+
+function calcularEstadoFecha(fecha: string): EstadoFecha {
+    if (!fecha) return null;
+
+    /* Usamos obtenerFechaEfectiva para respetar la hora de fin del día */
+    const hoy = obtenerFechaEfectiva();
+    const fechaLimite = new Date(fecha);
+    const diferenciaDias = Math.ceil((fechaLimite.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diferenciaDias < 0) return 'vencida';
+    if (diferenciaDias === 0) return 'urgente';
+    if (diferenciaDias <= 3) return 'proxima';
+    return 'normal';
+}
+
+export function CampoFechaLimite({titulo = 'Fecha Limite', valor, onChange, mostrarBotonLimpiar = true, disabled = false}: CampoFechaLimiteProps): JSX.Element {
+    const estadoFecha = calcularEstadoFecha(valor);
+
+    const claseEstado = estadoFecha ? `campoFechaLimite${estadoFecha.charAt(0).toUpperCase() + estadoFecha.slice(1)}` : '';
+
+    return (
+        <SeccionPanel titulo={titulo}>
+            <div className={`campoFechaLimiteContenedor ${claseEstado}`}>
+                <Input tipo="date" claseAdicional="campoFechaLimiteInput" value={valor} onChange={e => onChange((e.target as HTMLInputElement).value)} disabled={disabled} />
+
+                {estadoFecha === 'vencida' && (
+                    <span className="campoFechaLimiteAlerta campoFechaLimiteAlertaVencida">
+                        <AlertCircle size={12} />
+                        Vencida
+                    </span>
+                )}
+
+                {estadoFecha === 'urgente' && (
+                    <span className="campoFechaLimiteAlerta campoFechaLimiteAlertaUrgente">
+                        <AlertCircle size={12} />
+                        Hoy
+                    </span>
+                )}
+
+                {estadoFecha === 'proxima' && <span className="campoFechaLimiteAlerta campoFechaLimiteAlertaProxima">Pronto</span>}
+
+                {mostrarBotonLimpiar && valor && (
+                    <Boton type="button" claseAdicional="campoFechaLimiteBotonLimpiar" onClick={() => onChange('')} title="Quitar fecha" disabled={disabled}>
+                        <X size={12} />
+                    </Boton>
+                )}
+            </div>
+        </SeccionPanel>
+    );
+}
+
+export {calcularEstadoFecha};
+export type {EstadoFecha};

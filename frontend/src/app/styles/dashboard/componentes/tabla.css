@@ -1,0 +1,729 @@
+/*
+ * TABLA DE HABITOS
+ * Grid de habitos, filas, columnas e indicadores
+ */
+
+/* 
+ * ESTRUCTURA DE LA TABLA 
+ */
+.tablaEncabezado {
+    display: none; /* Oculto: el titulo ahora va en SeccionEncabezado del panel */
+    grid-template-columns: 2rem 3fr 1fr 1fr 2fr 1.5fr auto;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.tablaColumnaCheckbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 
+ * CHECKBOX DE HABITO
+ * Cuadrado interactivo para completar rapidamente
+ */
+.habitoCheckbox {
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1px solid var(--dashboard-textoIndice);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+    background-color: transparent;
+}
+
+.habitoCheckbox:hover {
+    border-color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
+}
+
+.habitoCheckboxCompletado {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
+}
+
+.habitoCheckboxCompletado:hover {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.25);
+}
+
+.tablaColumnaId {
+    text-align: center;
+}
+
+.tablaColumnaNombre {
+    overflow: hidden;
+}
+
+.tablaColumnaPrioridad {
+    text-align: center;
+}
+
+.tablaColumnaInactividad {
+    text-align: center;
+}
+
+.tablaColumnaUrgencia {
+    text-align: center;
+}
+
+.tablaColumnaRacha {
+    text-align: center;
+}
+
+.tablaColumnaHistorial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.tablaColumnaAccion {
+    text-align: right;
+}
+
+.tablaColumnaAcciones {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 60px;
+}
+
+/* 
+ * FILA DE LA TABLA 
+ */
+.tablaFila {
+    display: grid;
+    grid-template-columns: 2rem 3fr 1fr 1fr 2fr 1.5fr auto;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    /*border-bottom: 1px solid var(--dashboard-bordePrincipal); */
+    align-items: center;
+    transition: background-color var(--dashboard-transicionNormal);
+    cursor: default;
+}
+
+.tablaFila:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.tablaFila:hover .filaIndice {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.filaIndice {
+    font-weight: bold;
+    color: var(--dashboard-textoIndice);
+    transition: color var(--dashboard-transicionNormal);
+}
+
+.filaNombre {
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+.filaTags {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioXs);
+}
+
+.filaTag {
+    color: var(--dashboard-textoMuyApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    border: 1px solid var(--dashboard-bordeSutil);
+    padding: 0 var(--dashboard-espacioXs);
+    border-radius: var(--dashboard-radioXs);
+}
+
+/* 
+ * INDICADOR DE FRECUENCIA EN TITULO 
+ * Muestra icono de reloj y numero de intervalo junto al nombre
+ */
+.filaNombreIndicadorFrecuencia {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXxs);
+    margin-left: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 400;
+    color: var(--dashboard-textoApagado);
+    opacity: 0.8;
+}
+
+.filaNombreIndicadorFrecuencia svg {
+    position: relative;
+    top: 1px;
+}
+
+/* 
+ * CONTENEDOR DE NOMBRE CON FRECUENCIA 
+ */
+.filaNombreContenedor {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex-wrap: wrap;
+}
+
+/* 
+ * BADGE TOCA HOY 
+ */
+.filaTocaHoyBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    font-size: var(--dashboard-tamanoMicro);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--dashboard-estadoDestacado);
+    background-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
+    border-radius: var(--dashboard-radioXs);
+    animation: pulsarBadgeTocaHoy 2s ease-in-out infinite;
+}
+
+@keyframes pulsarBadgeTocaHoy {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* 
+ * FILA QUE TOCA HOY 
+ * El badge "Hoy" en el nombre ya indica el estado - sin fondo ni borde adicional
+ */
+.tablaFilaTocaHoy {
+    background-color: transparent;
+}
+
+.tablaFilaTocaHoy:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* 
+ * ETIQUETAS DE PRIORIDAD 
+ */
+.etiquetaPrioridad {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: var(--dashboard-tamanoPequeno);
+    border: 1px solid;
+}
+
+.etiquetaAlta {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+.etiquetaMedia {
+    color: var(--dashboard-estadoMedia);
+    background-color: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+}
+
+.etiquetaBaja {
+    color: var(--dashboard-estadoBaja);
+    background-color: transparent;
+    border-color: var(--dashboard-estadoBajaBorde);
+}
+
+.etiquetaMuyBaja {
+    color: var(--dashboard-estadoMuyBaja);
+    background-color: transparent;
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+}
+
+/* 
+ * INDICADOR DE INACTIVIDAD 
+ */
+.inactividadIndicador {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+.inactividadIcono {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.inactividadIconoUrgente {
+    color: var(--dashboard-estadoAlta);
+}
+
+.inactividadTexto {
+    color: var(--dashboard-textoApagado);
+}
+
+.inactividadTextoUrgente {
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * BARRA DE URGENCIA (legacy) 
+ */
+.barraUrgencia {
+    width: 100%;
+    height: 6px;
+    background-color: var(--dashboard-barraFondo);
+    margin-top: var(--dashboard-espacioXs);
+    overflow: hidden;
+}
+
+.barraRelleno {
+    height: 100%;
+    background-color: var(--dashboard-barraNormal);
+}
+
+.barraRellenoUrgente {
+    background: linear-gradient(90deg, var(--dashboard-estadoMedia), var(--dashboard-barraUrgente));
+}
+
+/* 
+ * COLUMNA URGENCIA (nueva) 
+ */
+.urgenciaContenedor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioXxs);
+}
+
+.barraUrgenciaNueva {
+    width: 100%;
+    height: 8px;
+    background-color: var(--dashboard-barraFondo);
+    border-radius: var(--dashboard-radioXs);
+    overflow: hidden;
+    position: relative;
+}
+
+.barraRellenoNueva {
+    height: 100%;
+    background-color: var(--dashboard-barraNormal);
+    border-radius: var(--dashboard-radioXs);
+    transition:
+        width 0.3s ease,
+        background-color 0.3s ease;
+}
+
+.barraRellenoAdvertencia {
+    background: linear-gradient(90deg, var(--dashboard-barraNormal), var(--dashboard-estadoMedia));
+}
+
+.barraRellenoUrgenteCritico {
+    background: linear-gradient(90deg, var(--dashboard-barraUrgente), #ff0000);
+    animation: pulsarBarra 1.5s ease-in-out infinite;
+}
+
+.barraRellenoCompletado {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.4);
+}
+
+.urgenciaPorcentaje {
+    font-size: var(--dashboard-tamanoMicro);
+    color: var(--dashboard-textoMuyApagado);
+    line-height: 1;
+}
+
+.urgenciaPorcentajeAlto {
+    color: var(--dashboard-estadoAlta);
+    font-weight: 600;
+}
+
+/* 
+ * COLUMNA RACHA 
+ */
+.rachaContenedor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioMini);
+    padding: 2px 6px;
+    border-radius: var(--dashboard-radioMini);
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.rachaContenedorPeligro {
+    background-color: rgba(var(--dashboard-estadoMediaRgb), 0.1);
+    border: 1px solid rgba(var(--dashboard-estadoMediaRgb), 0.3);
+}
+
+.rachaContenedorCompletado {
+    background-color: var(--dashboard-estadoExitoFondo);
+    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.2);
+}
+
+.rachaIcono {
+    color: var(--dashboard-textoMuyApagado);
+}
+
+.rachaIconoActivo {
+    color: var(--dashboard-estadoMedia);
+}
+
+.rachaIconoAdvertencia {
+    color: var(--dashboard-estadoMedia);
+    animation: pulsarAdvertencia 1.5s ease-in-out infinite;
+}
+
+.rachaIconoPerdida {
+    color: var(--dashboard-textoMuyApagado);
+    opacity: 0.5;
+}
+
+.rachaNumero {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoSecundario);
+}
+
+.rachaContenedorPeligro .rachaNumero {
+    color: var(--dashboard-estadoMedia);
+}
+
+.rachaContenedorCompletado .rachaNumero {
+    color: var(--dashboard-estadoExito);
+}
+
+.rachaTiempoRestante {
+    font-size: var(--dashboard-tamanoMicro);
+    color: var(--dashboard-estadoMedia);
+    opacity: 0.8;
+}
+
+/* 
+ * INDICADORES DE RACHA (legacy) 
+ */
+.filaRacha {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    margin-top: var(--dashboard-espacioXs);
+    display: block;
+}
+
+.filaRachaContenedor {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioXs);
+}
+
+.filaRachaAdvertencia {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-estadoMedia);
+    animation: pulsarAdvertencia 1.5s ease-in-out infinite;
+}
+
+.filaRachaPerdida {
+    display: flex;
+    align-items: center;
+    color: var(--dashboard-textoMuyApagado);
+    opacity: 0.6;
+}
+
+.filaRachaEnPeligro {
+    color: var(--dashboard-estadoMedia);
+    font-weight: 500;
+}
+
+.filaRachaTiempo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoMedia);
+    opacity: 0.8;
+}
+
+/* 
+ * COLUMNA ACCION 
+ */
+.accionContenedor {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* 
+ * FILA COMPLETADA 
+ */
+.tablaFilaCompletada {
+    /* Fondo removido para reducir ruido visual - el checkbox ya indica completado */
+    background-color: transparent;
+}
+
+.tablaFilaCompletada:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.filaNombreCompletado {
+    color: var(--dashboard-textoApagado);
+}
+
+/* 
+ * FILA EDITABLE 
+ */
+.tablaFilaEditable {
+    cursor: pointer;
+}
+
+.tablaFilaEditable:hover .filaIndice {
+    color: var(--dashboard-textoSecundario);
+}
+
+.tablaFilaAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* 
+ * BOTON COMPLETAR HABITO 
+ */
+.botonCompletarHabito {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoMuyApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+    min-width: 60px;
+}
+
+.botonCompletarHabito:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-estadoExito);
+    color: var(--dashboard-estadoExito);
+}
+
+.botonCompletarHabito:disabled {
+    cursor: default;
+}
+
+.botonCompletarHabitoActivo {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
+}
+
+/* 
+ * BOTON EDITAR HABITO 
+ */
+.botonEditarHabito {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXs);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoIndice);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+    opacity: 0;
+}
+
+.tablaFila:hover .botonEditarHabito {
+    opacity: 1;
+}
+
+.botonEditarHabito:hover {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+}
+
+/* 
+ * AÑADIR HABITO / AREA NUEVO INLINE
+ * Estilo compartido entre:
+ *   .añadirHabito     — TablaHabitos y ListaSubHabitos
+ *   .areaNuevoInline  — InputNuevaTarea (tareas)
+ * Centralizado aqui (tabla.css) para mantener coherencia visual.
+ * En móvil, .añadirHabito se oculta pero .areaNuevoInline permanece visible.
+ */
+.añadirHabito,
+.areaNuevoInline {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    transition: all var(--dashboard-transicionNormal);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Reset para cuando se usa en elemento <button> nativo */
+button.añadirHabito {
+    background: none;
+    border: none;
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoPequeno);
+    outline: none;
+}
+
+/* Override alta especificidad: Boton con clase añadirHabito — elimina fondo y borde del Boton base */
+.añadirHabito.boton {
+    background: none;
+    border: none;
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+    border-radius: 0;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    font-weight: normal;
+    width: 100%;
+    justify-content: center;
+    color: var(--dashboard-textoApagado);
+    box-sizing: border-box;
+}
+
+.añadirHabito.boton:hover {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+    filter: none;
+}
+
+.añadirHabito:hover,
+.añadirHabitoActivo,
+.areaNuevoInline:hover,
+.areaNuevoInlineActivo {
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* 
+ * MODO COMPACTO 
+ * TAREA 6: Aumentado gap entre filas de habitos (+2px margin-bottom)
+ */
+.tablaFilaCompacta {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    min-height: 32px;
+    gap: var(--dashboard-espacioMd);
+    align-items: center;
+    margin-bottom: var(--dashboard-espacioXxs);
+}
+
+.tablaFilaCompacta .habitoCheckbox {
+    width: 0.65rem;
+    height: 0.65rem;
+}
+
+.tablaFilaCompacta .filaNombre {
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.4;
+}
+
+.tablaFilaCompacta .filaNombreContenedor {
+    align-items: center;
+}
+
+.tablaFilaCompacta .filaTags {
+    margin-top: 0;
+}
+
+/* 
+ * SECCION HABITOS PAUSADOS 
+ * Separador visual para agrupar habitos en pausa
+ */
+.tablaSeparadorPausados {
+    display: flex;
+    align-items: center;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    margin-top: var(--dashboard-espacioSm);
+    border-top: 1px dashed var(--dashboard-bordePunteado);
+}
+
+.tablaSeparadorPausados__texto {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* 
+ * FILA PAUSADA 
+ * Estilo visual para habitos en pausa
+ */
+.tablaFilaPausada,
+.tablaFila[data-pausado='true'] {
+    opacity: 0.6;
+}
+
+.tablaFilaPausada:hover,
+.tablaFila[data-pausado='true']:hover {
+    opacity: 0.8;
+}
+
+.tablaFilaPausada .filaNombre,
+.tablaFila[data-pausado='true'] .filaNombre {
+    color: var(--dashboard-textoApagado);
+}
+
+/* 
+ * [218A-1] DRAG & DROP DE HABITOS (orden manual)
+ * Contenedor Reorder.Group y cada Reorder.Item
+ */
+.listaHabitosReorder {
+    display: contents;
+}
+
+.habitoReorderItem {
+    position: relative;
+    cursor: grab;
+    transition: box-shadow var(--dashboard-transicionNormal), background-color var(--dashboard-transicionNormal);
+}
+
+.habitoReorderItem:active {
+    cursor: grabbing;
+}
+
+
+
+/* 
+ * [218A-2] DRAG DE HABITOS EN PANEL DE EJECUCION
+ * Los hábitos virtuales (TareaHabito) dentro de ListaTareas
+ * ahora son arrastrables. Estilos para feedback visual.
+ */
+.tareaPadreReorder .tablaFila,
+.tareaPadreReorder {
+    cursor: grab;
+}
+
+.tareaPadreReorder:active,
+.tareaPadreReorder .tablaFila:active {
+    cursor: grabbing;
+}
+
+/* 
+ * SUBHÁBITOS EN PANEL DE HÁBITOS
+ * Indentación visual del nombre para distinguir subhábitos bajo su padre.
+ */
+.filaNombreSubhabito {
+    padding-left: 1.5rem;
+}

@@ -1,0 +1,321 @@
+/* COMPONENTES UI ATÓMICOS - ESTILOS BASE */
+@import './ui-formulario.css';
+
+/* Boton */
+.boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 500;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
+}
+
+.boton:focus-visible {
+    outline: 2px solid var(--dashboard-acento);
+    outline-offset: 2px;
+}
+
+/* Variantes de botón */
+/* [243A-14] Fondo blanco letras negras según variables del tema */
+.boton--primario {
+    background: var(--dashboard-botonPrimarioFondo);
+    color: var(--dashboard-botonPrimarioTexto);
+}
+
+.boton--primario:hover:not(:disabled) {
+    background: var(--dashboard-botonPrimarioHover);
+    filter: none;
+}
+
+/* [233A-50] Sin background, con borde */
+.boton--secundario {
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.boton--secundario:hover:not(:disabled) {
+    filter: brightness(1.15);
+}
+
+.boton--peligro {
+    background: var(--dashboard-estadoAlta);
+    color: var(--dashboard-textoSobreAcento);
+}
+
+.boton--peligro:hover:not(:disabled) {
+    filter: brightness(1.15);
+}
+
+.boton--icono {
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    padding: var(--dashboard-espacioSm);
+}
+
+.boton--icono:hover:not(:disabled) {
+    filter: brightness(1.15);
+}
+
+.boton--ghost {
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.boton--ghost:hover:not(:disabled) {
+    filter: brightness(1.15);
+}
+
+.boton--link {
+    background: transparent;
+    color: var(--dashboard-acento);
+    padding: 0;
+}
+
+.boton--link:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+/* Variante pestaña - para tabs */
+.boton--pestaña {
+    flex: 1;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.boton--pestaña:hover:not(:disabled) {
+    color: var(--dashboard-textoActivo);
+    filter: brightness(1.15);
+}
+
+.boton--pestaña.boton--activo {
+    color: var(--dashboard-textoActivo);
+    border-bottom-color: var(--dashboard-textoActivo);
+}
+
+/* Variante navegacion - para barra inferior móvil */
+.boton--navegacion {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    padding: var(--dashboard-espacioMd);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+    transition: color var(--dashboard-transicionRapida), opacity var(--dashboard-transicionRapida);
+}
+
+.boton--navegacion:active {
+    opacity: 0.7;
+}
+
+.boton--navegacion.boton--activo {
+    color: var(--dashboard-textoActivo);
+}
+
+/* Variante badge - para badges compactos en paneles */
+.boton--badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    width: 26px;
+    height: 26px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 500;
+    color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 0;
+    transition: all var(--dashboard-transicionRapida);
+    white-space: nowrap;
+    min-height: 0;
+}
+
+.boton--badge:hover:not(:disabled) {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    filter: brightness(1.15);
+}
+
+.boton--badge.boton--activo {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.boton--badge.boton--soloIcono {
+    background: transparent;
+    border: none;
+    width: auto;
+    height: auto;
+    min-height: unset;
+    padding: var(--dashboard-espacioMini);
+    color: var(--dashboard-textoSecundario);
+}
+
+.boton--badge.boton--soloIcono .botonTexto {
+    color: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    gap: 0;
+}
+
+.boton--badge.boton--soloIcono .botonIcono,
+.boton--badge.boton--soloIcono .botonTexto {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.boton--badge.boton--soloIcono .botonIcono svg {
+    width: 12px;
+    height: 12px;
+    color: inherit;
+    filter: none;
+}
+
+.boton--badge.boton--soloIcono:hover:not(:disabled) {
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoActivo);
+}
+
+/* [233A-17] Variante opcion - sin borde, verde cuando activo */
+.boton--opcion {
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    padding: 2px 8px;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    transition: all var(--dashboard-transicionRapida);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    height: 22px;
+}
+
+.boton--opcion:hover:not(:disabled) {
+    color: var(--dashboard-textoActivo);
+}
+
+/* [233A-45] Sin background cuando activo, solo cambio de color */
+.boton--opcion.boton--activo {
+    color: var(--dashboard-estadoExito);
+}
+
+.boton--opcion .botonTexto {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+/* Props adicionales */
+.boton--anchoCompleto {
+    width: 100%;
+}
+
+.boton--compacto {
+    padding: 4px 8px;
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.boton--destacado {
+    position: relative;
+    animation: botonPulse 2s infinite;
+}
+
+@keyframes botonPulse {
+    0% { box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoRgb, 0, 123, 255), 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(var(--dashboard-acentoRgb, 0, 123, 255), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--dashboard-acentoRgb, 0, 123, 255), 0); }
+}
+
+/* Tamaños */
+.boton--pequeño {
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.boton--mediano {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
+    font-size: var(--dashboard-tamanoBase);
+    height: 30px;
+}
+
+.boton--grande {
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioXl);
+    font-size: var(--dashboard-tamanoGrande);
+}
+
+/* Solo icono */
+.boton--soloIcono {
+    padding: var(--dashboard-espacioSm);
+    aspect-ratio: 1;
+}
+
+.boton--soloIcono.boton--pequeño {
+    padding: var(--dashboard-espacioS);
+}
+
+.boton--soloIcono.boton--grande {
+    padding: var(--dashboard-espacioMd);
+}
+
+/* Estados */
+.boton:disabled,
+.boton--deshabilitado {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.boton--cargando {
+    pointer-events: none;
+}
+
+.botonCargando {
+    display: inline-block;
+}
+
+.botonIcono {
+    display: inline-flex;
+    align-items: center;
+}
+
+.botonTexto {
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-decoration: underline;
+    padding: 0;
+    display: flex;
+    gap: var(--dashboard-espacioSmMd);
+    align-items: center;
+    text-decoration: unset;
+}

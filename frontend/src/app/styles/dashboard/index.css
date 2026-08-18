@@ -1,0 +1,204 @@
+/* sentinel-disable-file directorio-abarrotado: dashboard legacy conserva imports centrales;
+ * estilos nuevos deben entrar en subdirectorios por dominio. */
+
+/*
+ * DASHBOARD STYLES - ARCHIVO PRINCIPAL
+ * 
+ * Sistema de diseno modular para el dashboard estilo terminal
+ * Todos los estilos estan divididos en modulos por responsabilidad
+ * 
+ * Estructura:
+ * - variables.css      : Tokens de diseno (colores, espaciados, tipografia)
+ * - animaciones.css    : Keyframes reutilizables
+ * - base.css           : Contenedor principal y grid
+ * - componentes/       : Estilos por componente
+ * - utilidades/        : Estados de carga y acciones
+ */
+
+/* Tokens de diseno */
+@import './variables.css';
+
+/* Animaciones */
+@import './animaciones.css';
+
+/* Base y layout */
+@import './base.css';
+
+/* UI Kit Global (Botones, Inputs, etc) */
+@import '../../../assets/css/ui.css';
+
+/* Componentes compartidos */
+@import './shared/accionesFormulario.css';
+@import './shared/selectorNivel.css';
+@import './shared/seccionPanel.css';
+@import './shared/toggleSwitch.css';
+@import './shared/selectorDias.css';
+@import './shared/dashboardPanel.css';
+@import './shared/badgeInfo.css';
+@import './shared/accionesItem.css';
+@import './shared/campoFechaLimite.css';
+@import './shared/indicadorSincronizacion.css';
+@import './shared/suscripcion.css';
+@import './shared/panelSeguridad.css';
+@import './shared/selectorBadge.css';
+@import './shared/selectorGrupo.css';
+@import './shared/tooltip.css';
+@import './shared/layoutManager.css';
+@import './shared/panelArrastrable.css';
+@import './shared/alertas.css';
+@import './shared/indicadorAlmacenamiento.css';
+@import './shared/dockTracking.css';
+@import './shared/resizePanel.css';
+@import './shared/resizeHandleColumna.css';
+@import './shared/mapaCalor.css';
+@import './shared/historialHabito.css';
+@import './shared/mapaCalorHabito.css';
+@import './shared/mapaCalorProyecto.css';
+@import './shared/selectorProyecto.css';
+@import './shared/selectorEstado.css';
+@import './shared/configuracionModerna-campos.css';
+@import './shared/configuracionModerna-secciones.css';
+@import './shared/configuracionModerna-formularios.css';
+@import './shared/configuracionModerna-responsables.css';
+@import './shared/configuracionModerna-tareasCompactas.css';
+@import './shared/configuracionModerna-adjuntos.css';
+
+/* Componentes */
+@import './componentes/encabezado-base.css';
+@import './componentes/encabezado-botones.css';
+@import './componentes/encabezado-movil.css';
+@import './componentes/tabla.css';
+@import './componentes/tareas.css';
+@import './componentes/gruposTareas.css';
+@import './componentes/scratchpad-editor.css';
+@import './componentes/scratchpad-modalNotas.css';
+@import './componentes/scratchpad-vistaPrevia.css';
+@import './componentes/scratchpad-vistaExpandida.css';
+@import './componentes/modal.css';
+@import './componentes/formulario.css';
+@import './componentes/toast.css';
+@import './componentes/ordenamiento.css';
+@import './componentes/menuContextual.css';
+@import './componentes/frecuencia.css';
+@import './componentes/panelConfiguracion.css';
+@import './componentes/adjuntos.css';
+@import './componentes/proyectos.css';
+@import './componentes/configuracionTareas.css';
+@import './componentes/configuracionHabitos.css';
+@import './componentes/modalMoverTarea.css';
+@import './componentes/listaOrdenPaneles.css';
+@import './componentes/configuracionProyectos.css';
+@import './componentes/historialBackups.css';
+
+/* Utilidades */
+@import './utilidades/estados.css';
+@import './utilidades/acciones.css';
+@import './utilidades/inline-fix.css';
+
+/* Layout Sidebar */
+@import './componentes/sidebarMenu.css';
+@import './componentes/dashboardPanelView.css';
+
+/* Panel de Administración */
+@import './admin/panelAdministracion.css';
+@import './admin/detalleUsuario.css';
+@import './componentes/perfil.css';
+
+/* Dependencias condicionales */
+@import './componentes/dependencias.css';
+
+/* Sistema de Equipos */
+@import './componentes/equipos.css';
+
+/* Division de paneles */
+@import './componentes/dashboardPanelDivision.css';
+
+/* Sistema de Notificaciones */
+@import './componentes/notificaciones.css';
+
+/* Sistema de Compartidos */
+@import './componentes/compartidos.css';
+
+/* Chat e Historial */
+@import './componentes/chatHistorial.css';
+
+/* Panel de Actividad */
+@import './componentes/panelActividad.css';
+
+/* Panel Ayuno (Plugin) */
+@import './componentes/panelAyuno-base.css';
+@import './componentes/panelAyuno-historial.css';
+@import './componentes/panelAyuno-modales.css';
+
+/* Panel Déficit Calórico (Plugin) */
+@import './componentes/panelDeficitCalorico.css';
+
+/* Modal de Límites Alcanzados */
+@import './componentes/modalLimiteAlcanzado.css';
+@import './componentes/modalPlugins.css';
+
+/* Mensaje Bloqueo Premium (reutilizable) */
+@import './componentes/mensajeBloquePremium.css';
+
+/* Landing Page */
+@import './componentes/Landing/landing.css';
+
+/* Sistema de Temas */
+@import './modalTemas.css';
+
+/* Configuración MCP */
+@import './componentes/modalConfiguracionMCP.css';
+
+/* [233A-27] Modal de Configuración Global */
+@import './componentes/modalConfigGlobal.css';
+@import './componentes/modalConfiguracionUsuario.css';
+
+/* [014A-12] Configuración de barra inferior móvil */
+@import './componentes/configBarraInferior.css';
+
+/* Sistema de Feedback (Premium) */
+@import './componentes/feedback.css';
+
+/* Overlay de Enfoque */
+@import './componentes/overlayEnfoque.css';
+
+/* Bottom Sheet (menus movil) */
+@import './componentes/bottomSheet.css';
+
+/* Drawer Movil (navegacion lateral) */
+@import './componentes/drawerMovil.css';
+
+/* Navegacion Inferior Movil (Fase 10.6) */
+@import './componentes/navegacionInferior.css';
+
+/* Estado Vacio Unificado */
+@import './componentes/estadoVacio.css';
+
+/* Swipeable Item (gestos deslizamiento móvil) */
+@import './componentes/swipeableItem.css';
+
+/* SubHabitos (hábitos anidados) */
+@import './componentes/subhabitos.css';
+
+/* Carpetas de Notas (organización jerárquica) */
+@import './componentes/carpetasNotas.css';
+
+/* Ventana de Oportunidad para Hábitos (TAREA 4) */
+@import './componentes/ventanaOportunidad.css';
+
+/* WhatsApp multi-usuario */
+@import './componentes/whatsapp/whatsapp.css';
+
+/* Plugin Recordatorios */
+@import './componentes/recordatorios.css';
+
+/* Estilos Movil (PWA) - Siempre al final para mayor especificidad */
+/* Modularizado en archivos específicos por funcionalidad */
+@import './movilBase.css';
+@import './movilUtilidades.css';
+@import './movilComponentes.css';
+@import './movilNavegacion.css';
+@import './movilSafeAreas.css';
+@import './movilGrid.css';
+@import './movilFormularios.css';
+@import './movilListas.css';

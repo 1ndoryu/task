@@ -1,0 +1,328 @@
+/*
+ * BADGE INFO
+ * Estilos para badges de informacion reutilizables
+ * Usado en tareas, habitos y proyectos
+ */
+
+/* 
+ * CONTENEDOR DE BADGES 
+ */
+/* [233A-61] inline-flex + align-items:center para que todos los badges tengan la misma altura visual */
+/* [014A-3+7] Gap aumentado a 6px para separación visible entre badges */
+.badgeGroup {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioS);
+    vertical-align: middle;
+}
+
+.badgeGroup > *:last-child {
+    margin-right: 0;
+}
+
+/* 
+ * BADGE BASE 
+ */
+/* [233A-49] Fondo transparente y padding consistente (2px 8px) para igualar altura con variantes */
+.badgeInfo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    padding: 2px 8px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoApagado);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    white-space: nowrap;
+    line-height: 1.3;
+    transition: all var(--dashboard-transicionRapida);
+    /* [014A-3] Reducido de 20px a 18px para compactar 2px de altura */
+    min-height: 18px;
+}
+
+/* [014A-3] Eliminada regla .badgeInfo.boton: ya no se usa <Boton> para badges clickables.
+ * Todos los badges son <span> con role="button" para consistencia visual total. */
+
+/* 
+ * BADGE CLICKABLE 
+ */
+.badgeInfoClickable {
+    cursor: pointer;
+}
+
+.badgeInfoClickable:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+/* [034A-19] Variante compacta para subtareas: menos padding, menor height */
+.badgeInfo--compacto {
+    margin-left: var(--dashboard-espacioXs);
+    height: 16px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    padding: 0 var(--dashboard-espacioXs);
+}
+
+/* 
+ * ICONO 
+ */
+.badgeInfoIcono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* 
+ * TEXTO 
+ */
+.badgeInfoTexto {
+    font-weight: 500;
+}
+
+/* 
+ * VARIANTES DE ESTADO
+ */
+
+/* Normal (por defecto) — [233A-49] fondo transparente, borde consistente */
+.badgeInfo--normal {
+    color: var(--dashboard-textoApagado);
+    background-color: transparent;
+    border-color: var(--dashboard-bordeSutil);
+}
+
+/* Urgente (rojo) */
+.badgeInfo--urgente {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+/* Exito (verde) */
+.badgeInfo--exito {
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+/* Advertencia (amarillo/naranja) */
+.badgeInfo--advertencia {
+    color: var(--dashboard-estadoAdvertencia);
+    background-color: var(--dashboard-estadoAdvertenciaFondo);
+    border-color: var(--dashboard-estadoAdvertenciaBorde);
+}
+
+/* 
+ * VARIANTES DE PRIORIDAD
+ */
+
+/* Prioridad Muy Alta */
+/* Prioridad Muy Alta - Igual que Alta pero con texto diferente */
+.badgeInfo--prioridadMuyAlta {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* Prioridad Alta */
+.badgeInfo--prioridadAlta {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* Prioridad Media */
+.badgeInfo--prioridadMedia {
+    color: var(--dashboard-estadoMedia);
+    background-color: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* Prioridad Baja */
+.badgeInfo--prioridadBaja {
+    color: var(--dashboard-estadoBaja);
+    background-color: transparent;
+    border-color: var(--dashboard-estadoBajaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* Prioridad Muy Baja */
+.badgeInfo--prioridadMuyBaja {
+    color: var(--dashboard-estadoMuyBaja);
+    background-color: transparent;
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* 
+ * VARIANTES DE URGENCIA
+ * Temporalidad: bloqueante, urgente, chill (normal no muestra badge)
+ */
+
+/* Urgencia Bloqueante (rojo - igual que prioridad alta) */
+.badgeInfo--urgenciaBloqueante {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* Urgencia Urgente (naranja - igual que prioridad media) */
+.badgeInfo--urgenciaUrgente {
+    color: var(--dashboard-estadoMedia);
+    background-color: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* Urgencia Chill (verde) */
+.badgeInfo--urgenciaChill {
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* 
+ * BADGE DESTACADO (Toca hoy, activo)
+ */
+/* [233A-46] Estructura igualada a las variantes de prioridad (padding, font-weight, text-transform) */
+.badgeInfo--destacado {
+    color: var(--dashboard-estadoDestacado);
+    background-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.15);
+    border-color: rgba(var(--dashboard-estadoDestacadoRgb), 0.3);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 8px;
+}
+
+/* 
+ * BADGE RACHA
+ */
+.badgeInfo--racha {
+    padding: 2px 6px;
+    border-radius: var(--dashboard-radioSm);
+    font-weight: 600;
+}
+
+.badgeInfo--rachaPeligro {
+    color: var(--dashboard-estadoMedia);
+    background-color: rgba(var(--dashboard-estadoMediaRgb), 0.1);
+    border-color: rgba(var(--dashboard-estadoMediaRgb), 0.3);
+}
+
+.badgeInfo--rachaActiva {
+    color: var(--dashboard-estadoMedia);
+    background-color: transparent;
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.badgeInfo--rachaCompletada {
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.2);
+}
+
+/* 
+ * FRECUENCIA (sutil, junto al nombre)
+ */
+.badgeInfo--frecuencia {
+    padding: 0;
+    margin-left: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 400;
+    color: var(--dashboard-textoApagado);
+    background-color: transparent;
+    border: none;
+    opacity: 0.8;
+}
+
+/* 
+ * HABITO (tarea virtual de habito)
+ * Usa estilos base sin color especial
+ */
+/* [243A-5] Padding igualado al estándar (2px 8px) para altura consistente con otros badges */
+.badgeInfo--habito {
+    font-weight: 600;
+    padding: 2px 8px;
+}
+
+/* 
+ * MENSAJE NO LEIDO
+ * Badge para indicar mensajes sin leer en tareas compartidas
+ * Color azul distintivo con animación de pulsación
+ */
+.badgeInfo--mensajeNoLeido {
+    color: var(--dashboard-estadoInfo);
+    background-color: rgba(var(--dashboard-acentoRgb), 0.15);
+    border-color: rgba(var(--dashboard-acentoRgb), 0.4);
+    font-weight: 600;
+    padding: 2px 6px;
+    animation: pulsarMensaje 2s ease-in-out infinite;
+}
+
+.badgeInfo--mensajeNoLeido .badgeInfoIcono {
+    animation: reboteMensaje 1s ease-in-out infinite;
+}
+
+@keyframes pulsarMensaje {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes reboteMensaje {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-1px);
+    }
+}
+
+/* 
+ * POSPUESTO
+ * Badge para habitos pospuestos (pausados por hoy)
+ * Color gris/morado que indica estado inactivo pero perdonado
+ */
+.badgeInfo--pospuesto {
+    color: var(--dashboard-acentoPrimario);
+    background-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.12);
+    border-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+}
+
+/* [014A-3] Eliminada regla button.badgeInfo: ya no hay badges <button>.
+ * Todos se renderizan como <span> con estilos unificados. */

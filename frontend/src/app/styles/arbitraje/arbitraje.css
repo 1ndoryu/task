@@ -1,0 +1,23 @@
+/*
+ * ESTILOS CALCULADORA DE ARBITRAJE
+ * Archivo principal que importa todos los módulos
+ *
+ * Estructura modular:
+ * - base.css: Contenedor principal y layout
+ * - cabecera.css: Header y estado de viabilidad
+ * - resumen.css: Barra de métricas rápidas
+ * - inputs.css: Panel lateral con inputs
+ * - tarjetas.css: Tarjetas de escenarios
+ * - tabla.css: Tabla de comparación de rutas
+ * - simulador.css: Simulador de ciclos
+ * - modal.css: Modal de detalle
+ */
+
+@import './base.css';
+@import './cabecera.css';
+@import './resumen.css';
+@import './inputs.css';
+@import './tarjetas.css';
+@import './tabla.css';
+@import './simulador.css';
+@import './modal.css';

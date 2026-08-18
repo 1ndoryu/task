@@ -1,0 +1,307 @@
+/*
+ * modalPlugins.css
+ * Estilos para el modal de gestión de plugins
+ */
+
+.modalPlugins {
+    /* Sobrescribe ancho del Modal compartido sutilmente si es necesario */
+    max-width: 420px;
+    width: 90%;
+}
+
+.modalPluginsCuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioS);
+    padding: 0; /* Padding ya manejado por modalContenido en shared */
+}
+
+.modalPluginsFila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoSecundario);
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.modalPluginsFila--activo {
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+.modalPluginsInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSmMd);
+    flex: 1;
+    min-width: 0;
+}
+
+.modalPluginsIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoSecundario);
+    flex-shrink: 0;
+}
+
+.modalPluginsFila--activo .modalPluginsIcono {
+    color: var(--dashboard-estadoExito);
+    background: var(--dashboard-estadoExitoFondo);
+}
+
+.modalPluginsTexto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+    min-width: 0;
+}
+
+.modalPluginsNombre {
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+.modalPluginsDescripcion {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    line-height: 1.3;
+}
+
+.modalPluginsVersion {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* Toggle switch estilo iOS */
+.modalPluginsToggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: var(--dashboard-espacioSmMd);
+    border: none;
+    background: var(--dashboard-bordeSutil);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.modalPluginsToggle--activo {
+    background: var(--dashboard-estadoExito);
+}
+
+.modalPluginsToggleIndicador {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--dashboard-radioCirculo);
+    background: var(--dashboard-textoActivo);
+    transition: transform 0.2s ease;
+}
+
+.modalPluginsToggle--activo .modalPluginsToggleIndicador {
+    transform: translateX(16px);
+}
+
+.modalPluginsVacio {
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoBase);
+    padding: 20px 0;
+}
+
+/* Acciones de la fila (config + toggle) */
+.modalPluginsAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    flex-shrink: 0;
+}
+
+.modalPluginsBotonConfig {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXs);
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    border-radius: var(--dashboard-radioSm);
+    transition: all 0.15s;
+}
+
+.modalPluginsBotonConfig:hover {
+    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
+}
+
+/* Formulario de configuración de plugin */
+.configDeficitContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+    padding: 4px 0;
+}
+
+.configDeficitSeccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.configDeficitSeccionTitulo {
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    margin: 0;
+}
+
+.configDeficitSeccionNota {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    margin: 0;
+}
+
+.configDeficitCampos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--dashboard-espacioSm);
+}
+
+.configDeficitCampo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMini);
+}
+
+.configDeficitLabel {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.configDeficitInput {
+    height: 32px;
+    width: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoTerciario);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.configDeficitInput:focus {
+    border-color: var(--dashboard-acento);
+}
+
+.configDeficitInput::placeholder {
+    color: var(--dashboard-textoApagado);
+}
+
+.configDeficitApiKey {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    align-items: center;
+}
+
+.configDeficitInputApiKey {
+    flex: 1;
+}
+
+.configDeficitBotonOjo {
+    display: flex;
+    align-items: center;
+    padding: var(--dashboard-espacioS);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.configDeficitBotonOjo:hover {
+    color: var(--dashboard-acento);
+}
+
+.configDeficitPreview {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    padding: 8px 10px;
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-superposicionSutil);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.configDeficitPreviewLabel {
+    color: var(--dashboard-textoSecundario);
+}
+
+.configDeficitPreviewValor {
+    font-weight: 600;
+    color: var(--dashboard-estadoAlta);
+}
+
+.configDeficitPreviewMetodo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.configDeficitAcciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.configDeficitBotonCancelar {
+    padding: 6px 14px;
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.configDeficitBotonCancelar:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.configDeficitBotonGuardar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    padding: 6px 14px;
+    border-radius: var(--dashboard-radioSm);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: transparent;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.configDeficitBotonGuardar:hover {
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
+}

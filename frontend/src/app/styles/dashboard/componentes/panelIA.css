@@ -1,0 +1,213 @@
+/*
+ * panelIA.css
+ * Estilos del panel de asistente IA
+ *
+ * [233A-69] Fase 1: Estilos base del chat.
+ * Burbuja usuario: color primario. Burbuja asistente: fondo secundario.
+ * Input fijo en la parte inferior con borde superior.
+ */
+
+/* Panel IA como contenedor flex */
+.panelIA {
+    display: flex;
+    flex-direction: column;
+}
+
+/* [105E] En altura fija, el wrapper de resize vive fuera del panel IA.
+ * El componente debe tomar todo el alto para que mensajes scrolleen y el input quede fijo abajo. */
+.panelAlturaFija .panelDashboard > .panelIA {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Contenedor de mensajes */
+.panelIAMensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--dashboard-espacioMd);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    min-height: 120px;
+}
+
+.panelAlturaFija .panelIA .panelIAMensajes {
+    min-height: 0;
+}
+
+/* Estado vacío */
+.panelIAVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXl) var(--dashboard-espacioLg);
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    flex: 1;
+}
+
+.panelIAVacio p {
+    font-size: var(--dashboard-tamanoBase);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.panelIAVacioAviso {
+    color: var(--dashboard-estadoAdvertencia);
+    font-size: var(--dashboard-tamanoMovilPequeno);
+}
+
+/* Mensaje individual */
+.panelIAMensaje {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    max-width: 85%;
+}
+
+.panelIAMensaje--usuario {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.panelIAMensaje--asistente {
+    align-self: flex-start;
+}
+
+/* Avatar del bot */
+.panelIAMensajeAvatar {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--dashboard-radioCirculo);
+    background: var(--dashboard-fondoTerciario);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--dashboard-textoSecundario);
+}
+
+/* Burbuja */
+.panelIAMensajeBurbuja {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-radius: var(--dashboard-radioGrande);
+    font-size: var(--dashboard-tamanoBase);
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.panelIAMensaje--usuario .panelIAMensajeBurbuja {
+    background: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
+    border-bottom-right-radius: 4px;
+}
+
+.panelIAMensaje--asistente .panelIAMensajeBurbuja {
+    background: var(--dashboard-fondoSecundario);
+    color: var(--dashboard-textoNormal);
+    border-bottom-left-radius: 4px;
+}
+
+.panelIAMensajeBurbuja--cargando {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    color: var(--dashboard-textoApagado);
+}
+
+.panelIAMensajeTexto {
+    white-space: pre-wrap;
+}
+
+/* Error */
+.panelIAError {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-estadoErrorFondo);
+    border-radius: var(--dashboard-radioMedio);
+    color: var(--dashboard-estadoError);
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    text-align: center;
+}
+
+/* Input */
+.panelIAInput {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--dashboard-espacioS);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+/* Textarea UI component wrapper — quitar padding/márgenes extra */
+/* [014A-1] min-width: 0 para que flex: 1 funcione correctamente y el textarea
+ * ocupe el 100% del espacio disponible sin desbordarse */
+.panelIAInput .textareaContenedor {
+    flex: 1;
+    min-width: 0;
+}
+
+/* [303A-6] width: 100% para que el textarea ocupe todo el ancho del contenedor */
+.panelIAInputTexto {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoBase);
+    line-height: 1.4;
+    resize: none;
+    outline: none;
+    min-height: 20px;
+    max-height: 80px;
+    padding: 4px 0;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.panelIAInputTexto::placeholder {
+    color: var(--dashboard-textoApagado);
+}
+
+.panelIAInputTexto:disabled {
+    opacity: 0.5;
+}
+
+/* [233A-69] Fase 2+3: Badges de acciones ejecutadas por el LLM */
+.panelIAAcciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioS);
+    padding-top: var(--dashboard-espacioS);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelIAAccionBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 2px var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSmMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    line-height: 1.3;
+}
+
+.panelIAAccionBadge--exito {
+    background: var(--dashboard-estadoExitoFondo);
+    color: var(--dashboard-estadoExito);
+}
+
+.panelIAAccionBadge--error {
+    background: var(--dashboard-estadoErrorFondo);
+    color: var(--dashboard-estadoError);
+}
+
+/* [303A-11] Acciones destructivas pendientes de confirmación */
+.panelIAAccionBadge--pendiente {
+    background: rgba(var(--dashboard-estadoPendienteRgb), 0.15);
+    color: var(--dashboard-estadoPendiente);
+    flex-wrap: wrap;
+}
+
+/* [243A-1] Config inline eliminada — ahora vive en el modal global (sección 'panelIA') */

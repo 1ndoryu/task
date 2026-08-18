@@ -1,0 +1,187 @@
+/*
+ * Modal Creación Rápida
+ * Estilos para el modal minimalista tipo Spotlight
+ */
+
+.creacionRapidaOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--dashboard-superposicionOscuro);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centrado vertical completo */
+    animation: fadeIn var(--dashboard-transicionRapida);
+}
+
+.creacionRapidaContenedor {
+    width: 600px;
+    max-width: 90%;
+    background-color: var(--dashboard-fondoCristal);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--dashboard-sombraFuerte);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Para que el contenido respete el radio del contenedor */
+}
+
+.creacionRapidaInputWrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: var(--dashboard-espacioLg);
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+/* [233A-34] Anula estilos base del componente Input — el modal ya tiene su propia caja visual */
+.creacionRapidaInputWrapper .input,
+.creacionRapidaInputWrapper .input:focus {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    padding: 0;
+}
+
+.creacionRapidaIcono {
+    color: var(--dashboard-textoSecundario);
+    margin-right: var(--dashboard-espacioMd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+/* New Selector Styles */
+.creacionRapidaIconoSelector {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    margin-right: var(--dashboard-espacioMd);
+    cursor: pointer;
+    color: var(--dashboard-textoSecundario);
+    transition: all var(--dashboard-transicionRapida);
+    padding: var(--dashboard-espacioS);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.creacionRapidaIconoSelector:hover {
+    background-color: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+}
+
+.creacionRapidaChevron {
+    opacity: 0.6;
+}
+
+.iconoTipoTarea {
+    color: var(--dashboard-estadoInfo);
+}
+.iconoTipoHabito {
+    color: var(--dashboard-estadoExito);
+}
+.iconoTipoProyecto {
+    color: var(--dashboard-estadoMedia);
+}
+
+.creacionRapidaInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoBase); /* Reducido de 1.25rem a tamaño base */
+    padding: 0;
+    outline: none;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    height: 24px;
+    line-height: var(--dashboard-espacioXl);
+}
+
+.creacionRapidaInput::placeholder {
+    color: var(--dashboard-textoApagado);
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* [233A-45] Usa .boton.creacionRapidaBotonEnviar para superar especificidad de .boton--primario */
+.boton.creacionRapidaBotonEnviar {
+    background: transparent;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    margin-left: var(--dashboard-espacioMd);
+    padding: 0;
+}
+
+.boton.creacionRapidaBotonEnviar:hover:not(:disabled) {
+    color: var(--dashboard-textoActivo);
+    /* [253A-3] Forzar background transparent para que .boton--primario:hover no aplique blanco */
+    background: transparent;
+}
+
+.boton.creacionRapidaBotonEnviar:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.creacionRapidaOpciones {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioLg) var(--dashboard-espacioMd);
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    /* Fondo transparente para mantener efecto glass */
+}
+
+/* Botones opcion migrados a Boton variante="opcion" (Fase 6.5) */
+
+.creacionRapidaInfo {
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-style: italic;
+}
+
+/* Helper Text Colors for Menu */
+.textoInfo {
+    color: var(--dashboard-estadoInfo);
+}
+.textoExito {
+    color: var(--dashboard-estadoExito);
+}
+.textoAdvertencia {
+    color: var(--dashboard-estadoMedia);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,257 @@
+/* Estilos para el Modal de Historial de Backups */
+.contenedorBackups {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+.panelInfoBackup {
+    background: var(--dashboard-fondoTerciario);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Más compacto */
+    border-radius: var(--dashboard-radioSm);
+    display: flex;
+    gap: var(--dashboard-espacioMd);
+    align-items: center;
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.mensajeError {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background: var(--dashboard-estadoAltaFondo);
+    color: var(--dashboard-estadoAlta);
+    border: 1px solid var(--dashboard-estadoAlta);
+    border-radius: var(--dashboard-radioSm);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.iconoInfo {
+    color: var(--dashboard-estadoExito);
+    flex-shrink: 0;
+}
+
+.textoInfo {
+    line-height: 1.4;
+}
+
+.listaBackups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--dashboard-espacioXs);
+}
+
+/* Scrollbar personalizada para la lista */
+.listaBackups::-webkit-scrollbar {
+    width: var(--dashboard-scrollbarAncho);
+}
+
+.listaBackups::-webkit-scrollbar-thumb {
+    background-color: var(--dashboard-scrollbarThumb);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.itemBackup {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--dashboard-espacioMd);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.itemBackup:hover {
+    border-color: var(--dashboard-acento);
+}
+
+.infoBackup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.fechaBackup {
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+.metaBackup {
+    display: flex;
+    gap: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    align-items: center;
+}
+
+.badgeTrigger {
+    text-transform: uppercase;
+    background: var(--dashboard-fondoTerciario);
+    padding: 2px 6px;
+    border-radius: var(--dashboard-radioMini);
+    font-size: var(--dashboard-tamanoPequeno);
+    letter-spacing: 0.5px;
+    border: 1px solid var(--dashboard-bordeSutil);
+}
+
+.accionesBackup {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    align-items: center;
+}
+
+.botonRestaurar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoPequeno);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonRestaurar:hover {
+    background: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAlta);
+    color: var(--dashboard-estadoAlta);
+}
+
+.botonEliminar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    font-size: var(--dashboard-tamanoPequeno);
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.botonEliminar:hover {
+    background: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAlta);
+    color: var(--dashboard-estadoAlta);
+}
+
+.estadoVacio {
+    text-align: center;
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoApagado);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioLg);
+}
+
+.spinnerCarga {
+    text-align: center;
+    padding: var(--dashboard-espacioLg);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoBase);
+}
+
+/* Móvil: quitar padding del contenedor principal */
+@media (max-width: 480px) {
+    .contenedorBackups {
+        padding: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Panel de info más compacto en móvil */
+    .panelInfoBackup {
+        padding: var(--dashboard-espacioSm);
+        gap: var(--dashboard-espacioSm);
+        margin-bottom: var(--dashboard-espacioSm);
+    }
+
+    .panelInfoBackup .textoInfo {
+        font-size: var(--dashboard-tamanoPequeno);
+    }
+
+    /* Lista ocupa todo el espacio disponible */
+    .listaBackups {
+        flex: 1;
+        max-height: none;
+        height: 100%;
+        overflow-y: auto;
+        gap: var(--dashboard-espacioXs);
+        padding-right: 0;
+    }
+
+    /* Items de backup más compactos en móvil */
+    .itemBackup {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--dashboard-espacioSm);
+        padding: var(--dashboard-espacioSm);
+    }
+
+    .infoBackup {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .fechaBackup {
+        font-size: var(--dashboard-tamanoPequeno);
+    }
+
+    .metaBackup {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: var(--dashboard-espacioXs);
+        font-size: var(--dashboard-tamanoMuyPequeno);
+    }
+
+    /* Botones de acciones en fila compacta */
+    .accionesBackup {
+        flex-direction: row;
+        width: 100%;
+        border-top: 1px solid var(--dashboard-bordeSutil);
+        padding-top: var(--dashboard-espacioSm);
+        gap: var(--dashboard-espacioSm);
+    }
+
+    .botonRestaurar,
+    .botonEliminar {
+        flex: 1;
+        justify-content: center;
+        padding: var(--dashboard-espacioSm);
+    }
+
+    /* Ocultar texto de botones, solo iconos */
+    .botonRestaurar span,
+    .botonEliminar span {
+        display: none;
+    }
+
+    /* Icono más grande para touch */
+    .botonRestaurar svg,
+    .botonEliminar svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .estadoVacio {
+        padding: var(--dashboard-espacioLg);
+    }
+}

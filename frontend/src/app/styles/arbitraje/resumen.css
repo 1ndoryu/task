@@ -1,0 +1,124 @@
+/*
+ * ESTILOS RESUMEN RÁPIDO - Calculadora de Arbitraje
+ * Barra de métricas principales con división por rutas
+ */
+
+.resumenRapido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-superposicionMuyClara);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* Secciones horizontales del resumen */
+.resumenComun,
+.resumenFinal {
+    display: flex;
+    gap: var(--dashboard-espacioLg);
+    justify-content: center;
+}
+
+/* División de ganancias por ruta */
+.resumenDividido {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.columnaRuta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: var(--dashboard-superposicionClara);
+    border-radius: var(--dashboard-radioSm);
+    min-width: 140px;
+    transition: background-color 0.2s ease;
+}
+
+.columnaRuta.rutaMejor {
+    background-color: var(--dashboard-superposicionMedia);
+    border: 1px solid var(--dashboard-estadoExito);
+}
+
+.tituloColumna {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.valorGananciaRuta {
+    font-size: var(--dashboard-tamanoMediano);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+}
+
+.valorGananciaRuta.positivo {
+    color: var(--dashboard-estadoExito);
+}
+
+.valorGananciaRuta.negativo {
+    color: var(--dashboard-estadoAlta);
+}
+
+.separadorVertical {
+    width: 1px;
+    background-color: var(--dashboard-bordePrincipal);
+    align-self: stretch;
+}
+
+/* Badge de mejor ruta */
+.badgeMejorRuta {
+    background-color: var(--dashboard-superposicionMedia);
+    padding: 2px 8px;
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-estadoExito);
+}
+
+/* Items individuales */
+.itemResumen {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+    align-items: center;
+}
+
+.valorResumen {
+    font-size: var(--dashboard-tamanoMovilBase);
+    font-weight: 500;
+    color: var(--dashboard-textoActivo);
+}
+
+.etiquetaResumen {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+@media (max-width: 600px) {
+    .resumenComun,
+    .resumenFinal {
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+
+    .resumenDividido {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .separadorVertical {
+        width: 80%;
+        height: 0.8px;
+    }
+
+    .columnaRuta {
+        width: 100%;
+    }
+}

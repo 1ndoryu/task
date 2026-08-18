@@ -1,0 +1,390 @@
+/*
+ * CONFIGURACION DE HABITOS
+ * Estilos para el modal de configuracion de habitos
+ * Extiende visualmente el sistema de configuracionTareas.css
+ */
+
+.gridOpcionesColumnas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--dashboard-espacioSm) var(--dashboard-espacioLg);
+    margin-top: var(--dashboard-espacioXs);
+}
+
+.itemColumnaConfig {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    transition: all var(--dashboard-transicionNormal);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.itemColumnaConfig:last-child {
+    border-bottom: none;
+}
+
+.itemColumnaConfig:hover {
+    background-color: transparent;
+}
+
+.infoColumnaConfig {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+.etiquetaColumna {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.descripcionColumna {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    line-height: 1.2;
+}
+
+/* Ajustes para el título de la sección */
+.seccionConfiguracion {
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.tituloSeccionConfig {
+    margin: 0 0 var(--dashboard-espacioMd) 0;
+    font-size: var(--dashboard-tamanoBase);
+    font-weight: 600;
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: var(--dashboard-espacioSm);
+    border-bottom: 2px solid var(--dashboard-fondoHover);
+    display: inline-block;
+}
+
+/* 
+ * Seccion de tolerancia de urgencia
+ * Grid de botones para seleccionar preset
+ */
+.descripcionSeccionConfig {
+    display: block;
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    margin-bottom: var(--dashboard-espacioMd);
+    line-height: 1.4;
+}
+
+.gridOpcionesTolerancia {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--dashboard-espacioSm);
+}
+
+.botonPresetTolerancia {
+    /* El botón usa componente Boton que wrapa contenido en .botonTexto con flex-row */
+    /* Sobrescribimos .botonTexto abajo */
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+    text-align: left;
+    height: auto; /* Asegurar altura automática */
+}
+
+/* Fix para que el contenido del botón se apile verticalmente */
+.botonPresetTolerancia .botonTexto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioXs);
+    width: 100%;
+}
+
+.botonPresetTolerancia:hover {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-textoApagado);
+}
+
+.botonPresetTolerancia--activo {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-acento);
+}
+
+.botonPresetTolerancia--activo:hover {
+    border-color: var(--dashboard-acento);
+}
+
+.etiquetaPreset {
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+}
+
+.descripcionPreset {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    line-height: 1.3;
+    white-space: break-spaces;
+}
+
+@media (max-width: 480px) {
+    .gridOpcionesTolerancia {
+        grid-template-columns: 1fr;
+    }
+}
+
+/*
+ * LISTA DE TAREAS DE HABITO - VERSION COMPACTA
+ * Componente para gestionar tareas asociadas a un hábito
+ * Fase 14.8: Subtareas de hábitos
+ */
+
+.listaTareasHabito {
+    margin-top: var(--dashboard-espacioSm);
+}
+
+/* [233A-21] Modo compacto: sin fondo, sin borde
+ * [233A-39] encabezado no centrado (align-self: stretch), boton centrado, mas gap, sin padding-top
+ * [243A-8] Items alineados a la izquierda (stretch), solo el boton centrado */
+.listaTareasHabito--compacto {
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--dashboard-espacioSm);
+}
+
+.listaTareasHabito--compacto .listaTareasHabito__encabezado {
+    margin-bottom: 0;
+    align-self: stretch;
+}
+
+.listaTareasHabito__encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
+.listaTareasHabito__titulo {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    color: var(--dashboard-textoApagado);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.listaTareasHabito__contador {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    background: var(--dashboard-fondoSecundario);
+    padding: 1px 6px;
+    border-radius: var(--dashboard-radioLg);
+}
+
+.listaTareasHabito__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs); /* Gap externo entre subtareas */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.listaTareasHabito__item {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    padding: 6px 0px;
+    background: var(--dashboard-fondoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    padding: 6px 0px;
+    background: var(--dashboard-fondoSecundario);
+    border-radius: var(--dashboard-radioSm);
+    cursor: default;
+    transition: all var(--dashboard-transicionRapida);
+    /* Match exacto con tareaItem--compacto, pero sin padding lateral */
+    padding: 2px 0; /* Sin padding lateral, minimo vertical */
+    gap: var(--dashboard-espacioMd); /* Gap interno restaurado */
+    min-height: 32px;
+}
+
+/* Padding condicional para drag */
+.listaTareasHabito__item--conDrag {
+    padding-left: 0;
+}
+
+.listaTareasHabito__item:hover {
+    background: var(--dashboard-fondoHover);
+}
+
+.listaTareasHabito__item--completado {
+    opacity: 0.5;
+}
+
+.listaTareasHabito__item--completado .listaTareasHabito__texto {
+    text-decoration: line-through;
+    color: var(--dashboard-textoApagado);
+}
+
+.listaTareasHabito__dragHandle {
+    touch-action: none;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    padding-right: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoApagado);
+}
+
+.listaTareasHabito__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dashboard-textoApagado);
+    transition: color var(--dashboard-transicionRapida);
+    flex-shrink: 0;
+}
+
+.listaTareasHabito__checkbox:hover {
+    color: var(--dashboard-acento);
+}
+
+.listaTareasHabito__checkbox .iconoCheck {
+    color: var(--dashboard-estadoExito);
+}
+
+/* Override para el checkbox dentro de lista subtasks/habitos para igualar modo compacto */
+.listaTareasHabito__item .tareaCheckbox {
+    width: var(--dashboard-tamanoMuyPequeno);
+    height: var(--dashboard-tamanoMuyPequeno);
+    margin-top: var(--dashboard-espacioXxs);
+}
+
+.listaTareasHabito__contenido {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    min-width: 0; /* Para que el text-overflow funcione */
+}
+
+.listaTareasHabito__texto {
+    font-size: var(--dashboard-tamanoPequeno); /* 0.75rem / 12px */
+    line-height: 1.4;
+    color: var(--dashboard-textoNormal);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionRapida);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.listaTareasHabito__texto:hover {
+    color: var(--dashboard-acento);
+}
+
+/* Estilos para el pill de prioridad - Eliminados (ahora se usa BadgeInfo global) */
+
+.listaTareasHabito__eliminar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXxs);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dashboard-textoApagado);
+    opacity: 0;
+    transition: all var(--dashboard-transicionRapida);
+    border-radius: var(--dashboard-radioXs);
+    flex-shrink: 0;
+}
+
+.listaTareasHabito__item:hover .listaTareasHabito__eliminar {
+    opacity: 1;
+}
+
+/* [243A-11] En items sinDrag (modal configuración), el botón de eliminar siempre visible */
+.listaTareasHabito__item--sinDrag .listaTareasHabito__eliminar {
+    opacity: 1;
+}
+
+.listaTareasHabito__eliminar:hover {
+    color: var(--dashboard-estadoAlta);
+}
+
+.listaTareasHabito__vacio {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    text-align: center;
+    padding: var(--dashboard-espacioSm);
+    font-style: italic;
+}
+
+.listaTareasHabito__inputContenedor {
+    margin-top: var(--dashboard-espacioXs);
+    width: 100%;
+}
+
+.listaTareasHabito__input {
+    width: 100%;
+    padding: 5px 8px;
+    font-size: var(--dashboard-tamanoPequeno);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoNormal);
+    outline: none;
+    transition: border-color var(--dashboard-transicionRapida);
+}
+
+.listaTareasHabito__input:focus {
+    border-color: var(--dashboard-bordePrincipal);
+    box-shadow: none;
+    outline: none;
+}
+
+.listaTareasHabito__input::placeholder {
+    color: var(--dashboard-textoApagado);
+}
+
+/* [243A-8] El boton de añadir debe estar centrado dentro del contenedor stretch */
+.listaTareasHabito--compacto > .boton {
+    align-self: center;
+}
+
+/* Boton agregar - compacto y centrado */
+.listaTareasHabito__botonAgregar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioXs);
+    padding: 4px 10px;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    background: transparent;
+    border: 1px dashed var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.listaTareasHabito__botonAgregar:hover {
+    color: var(--dashboard-acento);
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-fondoSecundario);
+}

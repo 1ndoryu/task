@@ -1,0 +1,12 @@
+{
+  "texto": "Reactivar tarea",
+  "completado": false,
+  "urgencia": "normal",
+  "proyectoId": null,
+  "parentId": null,
+  "orden": 1,
+  "payload": {
+    "id": 201
+  },
+  "expectedUpdatedAt": null
+}

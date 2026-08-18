@@ -1,0 +1,156 @@
+/*
+ * Estilos para páginas legales (Política de Privacidad, Términos de Servicio).
+ * Diseño limpio y legible, optimizado para lectura de documentos extensos.
+ */
+
+.contenedorPaginaLegal {
+  min-height: 100vh;
+  background: var(--dashboard-fondoPrincipal);
+  padding: 3rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.contenidoLegal {
+  max-width: 900px;
+  width: 100%;
+  background: var(--dashboard-fondoTerciario);
+  border: 1px solid var(--dashboard-bordePrincipal);
+  border-radius: 0;
+  padding: 3rem 2.5rem;
+  box-shadow: var(--dashboard-sombraMedia);
+}
+
+.contenidoLegal h1 {
+  font-size: var(--dashboard-tamanoDisplay);
+  font-weight: 700;
+  color: var(--dashboard-textoActivo);
+  margin-bottom: var(--dashboard-espacioMd);
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.fechaActualizacion {
+  text-align: center;
+  color: var(--dashboard-textoSecundario);
+  font-size: var(--dashboard-tamanoMovilBase);
+  margin-bottom: var(--dashboard-espacio3xl);
+  font-style: italic;
+}
+
+.seccionLegal {
+  margin-bottom: var(--dashboard-espacio3xl);
+}
+
+.seccionLegal h2 {
+  font-size: var(--dashboard-tamanoH2);
+  font-weight: 600;
+  color: var(--dashboard-textoActivo);
+  margin-bottom: var(--dashboard-espacioLg);
+  padding-bottom: var(--dashboard-espacioSm);
+  border-bottom: 2px solid var(--dashboard-bordePrincipal);
+}
+
+.seccionLegal h3 {
+  font-size: var(--dashboard-tamanoTitulo);
+  font-weight: 500;
+  color: var(--dashboard-textoNormal);
+  margin-top: var(--dashboard-espacioLg);
+  margin-bottom: var(--dashboard-espacioMd);
+}
+
+.seccionLegal p {
+  font-size: var(--dashboard-tamanoNormal);
+  line-height: 1.7;
+  color: var(--dashboard-textoNormal);
+  margin-bottom: var(--dashboard-espacioMd);
+}
+
+.seccionLegal ul {
+  list-style: disc;
+  padding-left: var(--dashboard-espacioXl);
+  margin-bottom: var(--dashboard-espacioMd);
+}
+
+.seccionLegal li {
+  font-size: var(--dashboard-tamanoNormal);
+  line-height: 1.7;
+  color: var(--dashboard-textoNormal);
+  margin-bottom: var(--dashboard-espacioSm);
+}
+
+.seccionLegal li strong {
+  color: var(--dashboard-textoActivo);
+  font-weight: 600;
+}
+
+.listaContacto {
+  list-style: none !important;
+  padding-left: 0 !important;
+  background: var(--dashboard-fondoSecundario);
+  border-left: 4px solid var(--dashboard-acento);
+  padding: var(--dashboard-espacioMd) !important;
+  border-radius: 0;
+}
+
+.listaContacto li {
+  margin-bottom: var(--dashboard-espacioXs) !important;
+}
+
+.listaContacto a {
+  color: var(--dashboard-acento);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.listaContacto a:hover {
+  border-bottom-color: var(--dashboard-acento);
+}
+
+.notaFinal {
+  margin-top: var(--dashboard-espacio3xl);
+  padding: var(--dashboard-espacioLg);
+  background: var(--dashboard-estadoInfoFondo);
+  border: 1px solid var(--dashboard-estadoInfoBorde);
+  border-radius: 0;
+}
+
+.notaFinal p {
+  margin: 0;
+  font-size: var(--dashboard-tamanoNormal);
+  line-height: 1.6;
+  color: var(--dashboard-textoNormal);
+}
+
+/* Responsividad móvil */
+@media (max-width: 768px) {
+  .contenedorPaginaLegal {
+    padding: var(--dashboard-espacioMd);
+  }
+
+  .contenidoLegal {
+    padding: 1rem 0.75rem;
+  }
+
+  .contenidoLegal h1 {
+    font-size: var(--dashboard-tamanoH2);
+  }
+
+  .seccionLegal h2 {
+    font-size: var(--dashboard-tamanoHero);
+  }
+
+  .seccionLegal h3 {
+    font-size: var(--dashboard-tamanoGrande);
+  }
+
+  .seccionLegal p,
+  .seccionLegal li {
+    font-size: var(--dashboard-tamanoNormal);
+  }
+
+  .seccionLegal ul {
+    padding-left: var(--dashboard-espacioLg);
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "glory-rs",
+  "private": true,
+  "description": "Comandos unificados para el monorepo Rust + React",
+  "scripts": {
+    "dev": "node glory-rs/scripts/dev.mjs",
+    "check": "npm run check:back && npm run check:front",
+    "self-check": "powershell -ExecutionPolicy Bypass -File scripts/self-check.ps1",
+    "check:back": "node scripts/run-with-db.mjs check && node scripts/run-with-db.mjs clippy",
+    "check:front": "npm --prefix frontend run type-check && node scripts/check-frontend-boundary.mjs",
+    "fmt": "cargo fmt",
+    "fmt:check": "cargo fmt --check",
+    "dev:back": "node scripts/run-with-db.mjs run --bin glory-backend",
+    "dev:front": "npm --prefix frontend run dev",
+    "openapi:export": "node scripts/export-openapi.mjs",
+    "openapi:export:local": "node scripts/export-openapi-local.mjs && npm run openapi:normalize",
+    "openapi:normalize": "node scripts/normalize-openapi.mjs",
+    "codegen": "npm --prefix frontend run codegen && node scripts/normalize-generated.mjs",
+    "preflight:exposure": "node scripts/preflight-exposure.mjs",
+    "test": "node scripts/run-with-db.mjs test",
+    "roadmap": "node scripts/check-roadmap.mjs",
+    "roadmap:watch": "node scripts/check-roadmap.mjs --watch"
+  }
+}

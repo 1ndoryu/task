@@ -1,0 +1,59 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+
+# Environment (secrets)
+.env
+
+# Frontend
+/frontend/node_modules/
+/frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+/logs/
+
+# Local runtime scratch space
+/temp/
+
+# Python local envs / caches
+**/.venv/
+**/__pycache__/
+*.pyc
+
+/scripts/*
+!/scripts/branch-db.mjs
+!/scripts/run-with-db.mjs
+!/scripts/dev.mjs
+!/scripts/check-roadmap.mjs
+!/scripts/self-check.ps1
+!/scripts/check-frontend-boundary.mjs
+!/scripts/export-openapi.mjs
+!/scripts/export-openapi-local.mjs
+!/scripts/normalize-openapi.mjs
+!/scripts/normalize-generated.mjs
+!/scripts/preflight-exposure.mjs
+/backups/
+/clients/
+/frontend/public/legacy-assets/
+/prerendered/
+/node_modules/
+/cliente/
+/uploads/
+.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+glory-rust-template.code-workspace
+.sentinel-report.md
+.cargo/config.toml

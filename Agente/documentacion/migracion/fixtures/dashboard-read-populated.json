@@ -1,0 +1,53 @@
+{
+  "data": {
+    "version": "1.0.0",
+    "habitos": [
+      {
+        "id": 101,
+        "nombre": "Leer",
+        "importancia": "Alta",
+        "historialCompletados": [],
+        "completadoHoy": 0,
+        "updatedAt": "2025-01-01T00:00:00Z"
+      }
+    ],
+    "tareas": [
+      {
+        "id": 201,
+        "texto": "Revisar migración",
+        "completado": false,
+        "proyectoId": 301,
+        "updatedAt": "2025-01-01T00:00:00Z"
+      }
+    ],
+    "proyectos": [
+      {
+        "id": 301,
+        "nombre": "Glory RS",
+        "estado": "activo",
+        "prioridad": "alta",
+        "updatedAt": "2025-01-01T00:00:00Z"
+      }
+    ],
+    "notas": "",
+    "configuracion": {
+      "notificaciones": {
+        "email": false,
+        "frecuenciaResumen": "nunca",
+        "horaPreferida": "09:00",
+        "tareasPorVencer": true,
+        "rachaEnPeligro": true
+      },
+      "cifradoE2E": false,
+      "tema": "terminal",
+      "ordenHabitos": "inteligente"
+    },
+    "ultimaActualizacion": "2025-01-01T00:00:00Z"
+  },
+  "meta": {
+    "loadedAt": "2026-08-11T00:00:00Z",
+    "serverTimestamp": 1735689600000,
+    "sharedItemsIncluded": false,
+    "truncated": false
+  }
+}

@@ -1,0 +1,83 @@
+/**
+ * Estilos para MapaCalorProyecto
+ * 
+ * Personalización del mapa de calor para proyectos.
+ * Extiende los estilos base del mapaCalor.css
+ *
+ * @package App/React/styles/dashboard/shared
+ */
+
+/* 
+ * Contenedor principal
+ */
+.mapaCalorProyectoContenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+}
+
+.mapaCalorProyectoContenedor--compacto {
+    padding: var(--dashboard-espacioXs);
+    gap: var(--dashboard-espacioXs);
+}
+
+.mapaCalorProyectoContenedor--cargando,
+.mapaCalorProyectoContenedor--error,
+.mapaCalorProyectoContenedor--vacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+/* 
+ * Estados de carga y error
+ */
+.mapaCalorProyectoCargando {
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.mapaCalorProyectoError {
+    color: var(--dashboard-estadoAlta);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.mapaCalorProyectoVacio {
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-style: italic;
+}
+
+/* 
+ * Encabezado con estadísticas
+ */
+.mapaCalorProyectoEncabezado {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: var(--dashboard-espacioXs);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.mapaCalorProyectoStats {
+    display: flex;
+    gap: var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.mapaCalorProyectoStat {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+}
+
+.mapaCalorProyectoStat strong {
+    color: var(--dashboard-textoActivo);
+    font-weight: 600;
+}

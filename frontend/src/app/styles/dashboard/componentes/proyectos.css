@@ -1,0 +1,271 @@
+/*
+ * LISTA DE PROYECTOS
+ * Estilos para el panel de proyectos y items individuales
+ */
+
+.listaProyectos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+/* 
+ * WRAPPER DEL PROYECTO
+ * Contiene el item y sus tareas
+ */
+
+.proyectoItemWrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.proyectoItemWrapperActivo {
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
+.proyectoItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    background-color: var(--dashboard-fondoSecundario);
+    cursor: pointer;
+    transition: background-color var(--dashboard-transicionNormal);
+    border-left: 3px solid transparent;
+}
+
+.proyectoItem:hover {
+    background-color: var(--dashboard-fondoHover);
+}
+
+.proyectoItemActivo {
+    background-color: var(--dashboard-fondoHover);
+}
+
+/* Chevron de toggle */
+.proyectoItemChevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dashboard-textoApagado);
+    flex-shrink: 0;
+}
+
+.proyectoItemActivo .proyectoItemChevron {
+    color: var(--dashboard-textoActivo);
+}
+
+.proyectoItemContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    flex: 1;
+    min-width: 0;
+}
+
+.proyectoNombre {
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.proyectoMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+.proyectoProgreso {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    width: 50px;
+    flex-shrink: 0;
+}
+
+/* Acciones en linea (editar/eliminar) */
+.proyectoAcciones {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    flex-shrink: 0;
+    margin-left: var(--dashboard-espacioSm);
+}
+
+.proyectoAcciones .botonIcono {
+    padding: var(--dashboard-espacioXs);
+}
+
+/* 
+ * TAREAS DEL PROYECTO
+ * Lista de tareas anidada dentro del proyecto
+ */
+
+.proyectoTareas {
+    border-left: 3px solid var(--dashboard-textoActivo);
+}
+
+/* Margen superior para botón añadir dentro de proyectos */
+.proyectoTareas .inputNuevaTarea {
+    margin-top: var(--dashboard-espacioXxs);
+}
+
+.barraProgresoFondo {
+    flex: 1;
+    height: 4px;
+    background-color: var(--dashboard-barraFondo);
+    border-radius: var(--dashboard-radioXs);
+    overflow: hidden;
+}
+
+.barraProgresoRelleno {
+    height: 100%;
+    background-color: var(--dashboard-barraNormal);
+    border-radius: var(--dashboard-radioXs);
+    transition: width var(--dashboard-transicionNormal);
+}
+
+.proyectoProgreso[data-estado='completado'] .barraProgresoRelleno {
+    background-color: var(--dashboard-estadoExito);
+}
+
+/* 
+ * VISTA DETALLE PROYECTO
+ * Estilos para el panel de vista de proyecto individual
+ */
+
+.vistaProyecto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+}
+
+.vistaProyectoAcciones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+.botonVolver {
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoApagado);
+    cursor: pointer;
+    transition: color var(--dashboard-transicionNormal);
+}
+
+.botonVolver:hover {
+    color: var(--dashboard-textoActivo);
+}
+
+.botonPeligro {
+    color: var(--dashboard-estadoAlta);
+}
+
+.botonPeligro:hover {
+    color: var(--dashboard-estadoAlta);
+}
+
+.vistaProyectoProgreso {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.vistaProyectoProgreso .barraProgresoFondo {
+    flex: 1;
+    height: 6px;
+}
+
+.vistaProyectoPorcentaje {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+    min-width: 32px;
+    text-align: right;
+}
+
+.vistaProyectoDescripcion {
+    margin: 0;
+    padding: var(--dashboard-espacioMd);
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoBase);
+    line-height: 1.5;
+}
+
+/* 
+ * ESTADO VACIO
+ * Mensaje cuando no hay proyectos
+ */
+
+.estadoVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioXl);
+    color: var(--dashboard-textoApagado);
+    text-align: center;
+}
+
+.estadoVacio span {
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.botonTexto:hover {
+    opacity: 0.8;
+}
+
+/* 
+ * MODO COMPACTO
+ * Reducción de espaciado, fuente y layout de una sola fila
+ */
+.proyectoItemWrapper--compacto .proyectoItem {
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd); /* Vertical reducido, horizontal normal */
+    gap: var(--dashboard-espacioSm);
+    min-height: 36px;
+}
+
+.proyectoItemWrapper--compacto .proyectoItemContenido {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioMd);
+}
+
+.proyectoNombre--compacto {
+    font-size: var(--dashboard-tamanoBase);
+    /* margin-bottom o padding reset si hubiera */
+}
+
+/* 
+ * AÑADIR PROYECTO 
+ * Estilo unificado con añadirHabito
+ */
+.añadirProyecto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoApagado);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    border-top: 1px solid var(--dashboard-bordePunteado);
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.añadirProyecto:hover {
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoHover);
+}

@@ -1,0 +1,20 @@
+/* CONFIGURACION DE PROYECTOS */
+/* Estilos especificos para el modal de configuracion de proyectos */
+
+/* Reutiliza clases genericas de configuracion, añade especificas si es necesario */
+
+.selectOpcionConfig {
+    background-color: var(--dashboard-fondoTerciario);
+    color: var(--dashboard-textoNormal);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    padding: 4px 8px;
+    font-size: var(--dashboard-tamanoMovilPequeno);
+    outline: none;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.selectOpcionConfig:focus {
+    border-color: var(--dashboard-acento);
+}

@@ -1,0 +1,112 @@
+/* 
+ * Indicador de Sincronización
+ * Muestra el estado de sync con el servidor
+ */
+
+.indicadorSync {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioSm);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoSecundario);
+    cursor: default;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+/* 
+ * Estado sincronizado
+ */
+.indicadorSync--ok {
+    color: var(--dashboard-estadoExito);
+    background-color: var(--dashboard-estadoExitoFondo);
+    border-color: var(--dashboard-estadoExitoBorde);
+    cursor: pointer;
+}
+
+.indicadorSync--ok:hover {
+    border-color: var(--dashboard-estadoExito);
+}
+
+.indicadorSync--ok .indicadorSync__icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 
+ * Estado pendiente / sincronizando
+ */
+.indicadorSync--pendiente {
+    color: var(--dashboard-estadoMedia);
+    background-color: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+}
+
+/* Icono base */
+.indicadorSync__icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Spinner con SVG */
+.indicadorSync__icono--spinner {
+    animation: spinSync 1s linear infinite;
+}
+
+@keyframes spinSync {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 
+ * Estado error
+ */
+.indicadorSync--error {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+    cursor: pointer;
+}
+
+.indicadorSync--error:hover {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+/* 
+ * Estado offline / modo local
+ */
+.indicadorSync--offline {
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+}
+
+.indicadorSync--offline:hover {
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+/* 
+ * Texto del indicador
+ */
+.indicadorSync__texto {
+    white-space: nowrap;
+}
+
+/* 
+ * Ocultar texto en pantallas pequeñas
+ */
+@media (max-width: 768px) {
+    .indicadorSync__texto {
+        display: none;
+    }
+}

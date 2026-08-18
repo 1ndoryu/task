@@ -1,0 +1,258 @@
+/*
+ * sidebarMenu.css
+ *
+ * [300A-2] Estilos para el layout tipo sidebar (menú lateral).
+ * Modo alternativo al grid: una barra vertical de iconos a la izquierda
+ * y un panel único a la derecha.
+ *
+ * Variables de diseño: reutiliza tokens de variables.css
+ *   - fondoPrincipal, fondoSecundario, fondoHover → fondos
+ *   - bordePrincipal, bordeSutil → bordes
+ *   - textoActivo, textoSecundario, textoApagado → tipografía
+ *   - acento, acentoHover → indicador activo
+ *   - transicionRapida, transicionNormal → animaciones
+ */
+
+.dashboardSidebarLayout {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+    padding: 10px;
+    gap: 10px;
+}
+
+.dashboardSidebarMain {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #0e0e0e;
+    border-radius: 5px;
+}
+
+.sidebarMenu {
+    display: flex;
+    flex-direction: column;
+    width: 180px;
+    min-width: 56px;
+    flex-shrink: 0;
+    background: #0e0e0e;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: width var(--dashboard-transicionNormal);
+    gap: 10px;
+}
+
+/* Expandido: ancho fijo 180px para icono + texto */
+.sidebarMenu--expandido {
+    width: 180px;
+}
+
+/* Colapsado: solo iconos */
+.sidebarMenu--colapsado {
+    width: 56px;
+}
+
+/* Contenedor de items (scroll independiente del toggle) */
+.sidebarMenuItems {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: var(--dashboard-espacioXs);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 var(--dashboard-espacioXs);
+}
+
+.sidebarMenuHeader {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px;
+    padding-right: 10px;
+}
+
+.sidebarMenuHeaderTitulo {
+    font-size: var(--dashboard-tamanoMediano);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Colapsado: header solo con toggle centrado */
+.sidebarMenu--colapsado .sidebarMenuHeader {
+    justify-content: center;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioXs) var(--dashboard-espacioXs);
+    height: 34px;
+}
+
+.sidebarMenuFooter {
+    flex-shrink: 0;
+    display: flex;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioXs);
+}
+
+/* Colapsado: footer centrado */
+.sidebarMenu--colapsado .sidebarMenuFooter {
+    justify-content: center;
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+/* Scrollbar minimalista en sidebar */
+.sidebarMenuItems::-webkit-scrollbar {
+    width: 2px;
+}
+.sidebarMenuItems::-webkit-scrollbar-thumb {
+    background: var(--dashboard-scrollbarThumb);
+    border-radius: var(--dashboard-radioXs);
+}
+
+/* Quitar bordes del boton ghost dentro del sidebar y alinear icono+texto */
+.sidebarMenuBoton.boton--ghost {
+    border: none;
+    justify-content: flex-start;
+    white-space: nowrap;
+    padding-left: 12px;
+    height: 32px;
+    opacity: 0.6;
+}
+
+/* [300A-8d] Iconos +2px y fuente +1px en botones del sidebar */
+.sidebarMenuBoton.boton--ghost .botonIcono svg {
+    width: 15px;
+    height: 15px;
+}
+
+.sidebarMenuBoton.boton--ghost .botonTexto {
+    font-size: calc(var(--dashboard-tamanoPequeno) + 1px);
+}
+
+/* Colapsado: centrar icono */
+.sidebarMenu--colapsado .sidebarMenuBoton.boton--ghost {
+    justify-content: center;
+    padding-left: var(--dashboard-espacioSm);
+}
+
+/* Indicador activo: barra vertical izquierda */
+.sidebarMenuBoton--activo {
+    position: relative;
+    opacity: 1 !important;
+    filter: brightness(1.6);
+}
+
+/* [multi-panel-sidebar] Panel presente en la grilla sidebar */
+.sidebarMenuBoton--enGrilla {
+    opacity: 1 !important;
+}
+
+.sidebarMenuBoton--enGrilla .botonIcono {
+    /* color: var(--dashboard-acento, #5a6bf3); */
+}
+
+/* Hover sutil */
+.sidebarMenuBoton.boton--ghost:hover:not(:disabled) {
+    background: var(--dashboard-fondoHover);
+    filter: none;
+}
+
+.sidebarMenuToggleBoton.boton--ghost {
+    border: none;
+    color: var(--dashboard-textoApagado);
+}
+.sidebarMenuToggleBoton.boton--ghost:hover:not(:disabled) {
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoHover);
+    filter: none;
+}
+
+.sidebarMenuConfigBoton.boton--ghost {
+    border: none;
+    color: var(--dashboard-textoApagado);
+    justify-content: flex-start;
+    white-space: nowrap;
+}
+.sidebarMenu--colapsado .sidebarMenuConfigBoton.boton--ghost {
+    justify-content: center;
+}
+
+.sidebarMenuConfigBoton.boton--ghost:hover:not(:disabled) {
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoHover);
+    filter: none;
+}
+
+.dashboardSidebarContenido {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--dashboard-espacioLg);
+    min-height: 0;
+    padding-top: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-bottom: 0px;
+}
+/* Transición suave al cambiar de panel */
+.dashboardSidebarPanel--entrando {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+.dashboardSidebarPanel--visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--dashboard-transicionNormal), transform var(--dashboard-transicionNormal);
+}
+
+/* [300A-9] Ocultar areaNuevoInline (+ Añadir tarea) en modo sidebar */
+.dashboardSidebarLayout .areaNuevoInline {
+    display: none;
+}
+
+/* [300A-10] Botones de seccionAcciones 2px más grandes en modo sidebar */
+.dashboardSidebarLayout .seccionAcciones .botonIcono svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* [300A-12] Títulos de paneles en modo sidebar: texto normal sin uppercase */
+.dashboardSidebarLayout .seccionTitulo {
+    text-transform: none;
+}
+
+@media (max-width: 1023px) {
+    .sidebarMenu--expandido {
+        width: 160px;
+    }
+
+    .sidebarMenu--colapsado {
+        width: 48px;
+    }
+
+    .dashboardSidebarContenido {
+        padding: var(--dashboard-espacioMd);
+    }
+
+    .dashboardSidebarLayout {
+        height: calc(100vh - 100px);
+    }
+}
+
+@media (max-width: 767px) {
+    /* En móvil ocultar sidebar y usar sistema de navegación móvil existente */
+    .dashboardSidebarLayout {
+        display: none;
+    }
+}

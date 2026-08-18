@@ -1,0 +1,309 @@
+/*
+ * PANEL DE ACTIVIDAD
+ * Estilos para el panel de heatmap de actividad
+ */
+
+/* 
+ * Contenedor Principal 
+ */
+.panelActividadContenedor {
+    min-height: 120px;
+}
+
+/* 
+ * Cuerpo con el mapa 
+ */
+
+/* 
+ * Estados de carga y error 
+ */
+.panelActividadCargando,
+.panelActividadError {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-align: center;
+    padding: var(--dashboard-espacioMd);
+}
+
+.panelActividadError {
+    color: var(--dashboard-estadoAlta);
+}
+
+/* [233A-15] panelActividadStats eliminado */
+
+.panelActividadDetalle {
+    margin-top: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioMd);
+    border: 1px dashed var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+}
+
+.panelActividadDetalleEncabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.panelActividadDetalleTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+}
+
+.panelActividadDetalleBoton {
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.panelActividadDetalleBoton:hover {
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
+.panelActividadDetalleEstado,
+.panelActividadDetalleError,
+.panelActividadDetalleVacio {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    padding: var(--dashboard-espacioSm) 0;
+}
+
+.panelActividadDetalleError {
+    color: var(--dashboard-estadoAlta);
+}
+
+.panelActividadDetalleLista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+.panelActividadDetalleItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.panelActividadDetalleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs);
+}
+
+.panelActividadDetalleTipo {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+}
+
+.panelActividadDetalleElemento,
+.panelActividadDetalleProyecto {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.panelActividadDetalleHora {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
+/* [024A-34] Boton eliminar actividad — sutil, aparece al hover del item.
+ * [024A-35] Resetear todos los estilos del .boton base y .boton--ghost
+ * para que sea solo un icono minúsculo sin bordes ni altura extra. */
+.panelActividadDetalleEliminar {
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida);
+    padding: 0;
+    min-width: unset;
+    min-height: unset;
+    width: auto;
+    height: auto;
+    border: none;
+    background: transparent;
+    line-height: 1;
+    font-size: inherit;
+}
+
+.panelActividadDetalleItemUnificado:hover .panelActividadDetalleEliminar {
+    opacity: 0.6;
+}
+
+.panelActividadDetalleEliminar:hover {
+    opacity: 1 !important;
+    color: var(--dashboard-peligroClaro);
+}
+
+/* 
+ * Modal de configuracion - Selector de periodo 
+ */
+.selectorPeriodoActividad {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    flex-wrap: wrap;
+}
+
+.selectorPeriodoBoton {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorPeriodoBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorPeriodoBoton--activo {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoNormal);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+/* 
+ * Opciones visuales en modal 
+ */
+.opcionesVisualesActividad {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.opcionVisualActividad {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+}
+
+.opcionVisualActividad:hover span {
+    color: var(--dashboard-textoNormal);
+}
+
+/*
+ * Lista de actividad unificada (nuevo formato)
+ * Una sola línea por actividad: Tipo "Nombre" · Proyecto
+ */
+.panelActividadDetalleLista--unificada {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.panelActividadDetalleItemUnificado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioXs) 0;
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.panelActividadDetalleItemUnificado:last-child {
+    border-bottom: none;
+}
+
+.panelActividadDetalleTexto {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panelActividadDetalleProyectoTag {
+    color: var(--dashboard-textoSecundario);
+}
+
+.panelActividadDetalleTrackingTag {
+    color: var(--dashboard-textoSecundario);
+}
+
+/*
+ * Mensaje de bloqueo para usuarios FREE
+ */
+.panelActividadBloqueado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dashboard-espacioXl) var(--dashboard-espacioMd);
+    text-align: center;
+    color: var(--dashboard-textoSecundario);
+    min-height: 120px;
+}
+
+.panelActividadBloqueado svg {
+    color: var(--dashboard-textoApagado);
+    margin-bottom: var(--dashboard-espacioSm);
+}
+
+.panelActividadBloqueadoTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    margin: 0 0 var(--dashboard-espacioXs) 0;
+}
+
+.panelActividadBloqueadoTexto {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    margin: 0 0 var(--dashboard-espacioMd) 0;
+    max-width: 280px;
+}
+
+.panelActividadBloqueadoBoton {
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    background: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.panelActividadBloqueadoBoton:hover {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
+/* 
+ * Responsive 
+ */
+@media (max-width: 768px) {
+    .panelActividadStats {
+        display: none;
+    }
+
+    .panelActividadCuerpo {
+        padding: var(--dashboard-espacioXs);
+    }
+}

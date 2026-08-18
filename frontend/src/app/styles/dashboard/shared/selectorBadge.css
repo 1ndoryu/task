@@ -1,0 +1,240 @@
+/*
+ * SELECTOR BADGE
+ * Estilos para el componente de selección estilo badge
+ * Usado para filtros y selectores elegantes
+ */
+
+/* 
+ * CONTENEDOR 
+ */
+.selectorBadgeContenedor {
+    position: relative;
+    display: inline-flex;
+}
+
+/* 
+ * BOTON PRINCIPAL 
+ */
+.selectorBadgeBoton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* Centrar contenido */
+    gap: 0; /* Sin gap para icono único */
+    padding: 0; /* Sin padding */
+    width: 26px; /* Aumentado de 22px para más espacio */
+    height: 26px; /* Alto fijo igual al ancho */
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 500;
+    color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 0;
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+    white-space: nowrap;
+    min-height: 0; /* Eliminar min-height anterior */
+}
+
+/* 
+ * VARIANTE CON TEXTO (compacto)
+ * Muestra el icono junto a un texto, con ancho automático
+ */
+.selectorBadgeBotonCompacto {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    padding: 2px 8px;
+    min-height: 26px;
+    width: auto;
+    height: auto;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    background-color: var(--dashboard-fondoHover);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+}
+
+.selectorBadgeBotonCompacto:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.selectorBadgeBoton:hover {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+.selectorBadgeBotonActivo {
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoNormal);
+    background-color: var(--dashboard-fondoSecundario);
+}
+
+/* 
+ * VARIANTE SOLO ICONO
+ * Sin background ni borde, solo muestra el icono
+ * Usado en headers de paneles para acciones discretas
+ */
+.selectorBadgeBoton--soloIcono {
+    background: transparent;
+    border: none;
+    width: auto;
+    height: auto;
+    min-height: unset;
+    padding: var(--dashboard-espacioMini);
+    color: var(--dashboard-textoSecundario);
+}
+
+.selectorBadgeBoton--soloIcono .botonTexto {
+    color: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    gap: 0;
+}
+
+.selectorBadgeBoton--soloIcono .botonIcono,
+.selectorBadgeBoton--soloIcono .botonTexto,
+.selectorBadgeBoton--soloIcono .selectorBadgeIcono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selectorBadgeBoton--soloIcono .botonIcono svg,
+.selectorBadgeBoton--soloIcono .selectorBadgeIcono svg {
+    width: 12px;
+    height: 12px;
+    color: inherit;
+    filter: none;
+}
+
+/* [233A-33] Especificidad aumentada para ganar sobre .boton--primario:hover:not(:disabled) */
+.selectorBadgeBoton--soloIcono:hover,
+.selectorBadgeBoton--soloIcono:hover:not(:disabled) {
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoActivo);
+}
+
+/* 
+ * ICONOS 
+ */
+.selectorBadgeIcono {
+    display: flex; /* Cambiado a flex para mejor centrado vertical */
+    align-items: center;
+    justify-content: center;
+}
+
+.selectorBadgeFlecha {
+    transition: transform var(--dashboard-transicionRapida);
+    opacity: 0.8; /* Unificado ligeramente menos que 1 para jerarquía visual, pero más consistente */
+}
+
+.selectorBadgeFlechaAbierta {
+    transform: rotate(180deg);
+}
+
+/* 
+ * MENU DESPLEGABLE 
+ */
+.selectorBadgeMenu {
+    position: fixed;
+    z-index: 10000;
+    min-width: 220px;
+    width: max-content;
+    max-width: 280px;
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    animation: selectorBadgeAparecer 0.15s ease-out;
+}
+
+@keyframes selectorBadgeAparecer {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 
+ * OPCIONES 
+ */
+.selectorBadgeOpcion {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--dashboard-espacioSm);
+    width: 100%;
+    padding: 8px 12px;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoSecundario);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.selectorBadgeOpcion:hover {
+    background-color: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoNormal);
+}
+
+.selectorBadgeOpcionActiva {
+    background-color: var(--dashboard-fondoSecundario);
+    color: var(--dashboard-textoNormal);
+    position: relative;
+}
+
+.selectorBadgeOpcionActiva::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--dashboard-acento);
+}
+
+.selectorBadgeOpcion + .selectorBadgeOpcion {
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.selectorBadgeOpcionIcono {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.selectorBadgeOpcionTexto {
+    flex: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.selectorBadgeOpcionDesc {
+    font-size: var(--dashboard-tamanoMicro);
+    color: var(--dashboard-textoApagado);
+    margin-left: auto;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+    text-align: right;
+}

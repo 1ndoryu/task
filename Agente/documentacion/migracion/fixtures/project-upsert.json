@@ -1,0 +1,13 @@
+{
+  "nombre": "Glory RS",
+  "estado": "activo",
+  "prioridad": "alta",
+  "urgencia": "normal",
+  "fechaLimite": null,
+  "orden": 0,
+  "payload": {
+    "id": 999,
+    "nombre": "valor antiguo"
+  },
+  "expectedUpdatedAt": "2025-01-01T00:00:00Z"
+}

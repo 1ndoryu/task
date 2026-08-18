@@ -1,0 +1,283 @@
+/*
+ * FORMULARIO DE HABITO
+ * Campos, etiquetas, botones de importancia, tags y acciones
+ */
+
+/* 
+ * ESTRUCTURA DEL FORMULARIO 
+ */
+.formularioHabito {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioLg);
+}
+
+.formularioCampo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+}
+
+/* 
+ * Campo de mapa de calor (historial de habito)
+ * Se asegura de ocupar todo el ancho disponible
+ */
+.formularioCampo--mapaCalor {
+    width: 100%;
+    margin-top: var(--dashboard-espacioSm);
+}
+
+.formularioEtiqueta {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.formularioEtiquetaOpcional {
+    color: var(--dashboard-textoMuyApagado);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* 
+ * INPUTS 
+ */
+.formularioInput {
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    transition: border-color var(--dashboard-transicionNormal);
+}
+
+.formularioInput:focus {
+    outline: none;
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
+.formularioInput::placeholder {
+    color: var(--dashboard-textoIndice);
+}
+
+.formularioInputError {
+    border-color: var(--dashboard-estadoAlta);
+}
+
+.formularioMensajeError {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-estadoAlta);
+}
+
+/* 
+ * BOTONES DE IMPORTANCIA 
+ */
+.formularioGrupoBotones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+.formularioBotonImportancia {
+    flex: 1;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoMuyApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.formularioBotonImportancia:hover:not(:disabled) {
+    border-color: var(--dashboard-textoMuyApagado);
+    color: var(--dashboard-textoSecundario);
+}
+
+.formularioBotonImportanciaActivo {
+    font-weight: 600;
+}
+
+.formularioBotonImportanciaAlta {
+    color: var(--dashboard-estadoAlta);
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+.formularioBotonImportanciaMedia {
+    color: var(--dashboard-estadoMedia);
+    background-color: var(--dashboard-estadoMediaFondo);
+    border-color: var(--dashboard-estadoMediaBorde);
+}
+
+.formularioBotonImportanciaBaja {
+    color: var(--dashboard-estadoBaja);
+    border-color: var(--dashboard-estadoBajaBorde);
+}
+
+.formularioBotonImportanciaMuyBaja {
+    color: var(--dashboard-estadoMuyBaja);
+    border-color: var(--dashboard-estadoMuyBajaBorde);
+}
+
+/* 
+ * CAMPO DE TAGS 
+ */
+.formularioTagsInput {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+}
+
+.formularioTagsInput:focus-within {
+    border-color: var(--dashboard-textoMuyApagado);
+}
+
+.formularioTagsIcono {
+    color: var(--dashboard-textoMuyApagado);
+    flex-shrink: 0;
+}
+
+.formularioInputTag {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--dashboard-textoActivo);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    padding: var(--dashboard-espacioXs);
+}
+
+.formularioInputTag:focus {
+    outline: none;
+}
+
+.formularioInputTag::placeholder {
+    color: var(--dashboard-textoIndice);
+}
+
+/* Botones tag migrados a variantes atomicas (Fase 6.5) */
+
+.formularioTagsLista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
+}
+
+.formularioTag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno);
+    border: 1px solid var(--dashboard-bordeSutil);
+    padding: 2px var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-radioXs);
+    background-color: var(--dashboard-fondoPrincipal);
+}
+
+/* Boton eliminar tag migrado a Boton variante="icono" (Fase 6.5) */
+
+/* 
+ * BOTONES DE ACCION 
+ */
+.formularioAcciones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioLg);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.formularioBotonCancelar {
+    flex: 1;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.formularioBotonCancelar:hover:not(:disabled) {
+    background-color: var(--dashboard-fondoHover);
+    border-color: var(--dashboard-bordeSutil);
+}
+
+.formularioBotonGuardar {
+    flex: 1;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.4);
+    color: var(--dashboard-estadoExito);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.formularioBotonGuardar:hover:not(:disabled) {
+    background-color: rgba(var(--dashboard-exitoRgb), 0.25);
+    border-color: rgba(var(--dashboard-exitoRgb), 0.6);
+}
+
+.formularioBotonGuardar:disabled,
+.formularioBotonCancelar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 
+ * ZONA DE PELIGRO (ELIMINAR) 
+ */
+.formularioZonaPeligro {
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioMd);
+    border-top: 1px dashed var(--dashboard-estadoAltaBorde);
+}
+
+.formularioBotonEliminar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    background-color: transparent;
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-textoMuyApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionNormal);
+}
+
+.formularioBotonEliminar:hover:not(:disabled) {
+    background-color: var(--dashboard-estadoAltaFondo);
+    border-color: var(--dashboard-estadoAlta);
+    color: var(--dashboard-estadoAlta);
+}
+
+.formularioBotonEliminar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 
+ * NOTA SOBRE ACCIONES Y ZONA PELIGRO:
+ * 
+ * Los estilos para botones de guardar/cancelar y la zona de eliminacion
+ * han sido MOVIDOS a styles/dashboard/shared/accionesFormulario.css
+ * para ser reutilizados en otros formularios.
+ * 
+ * Se mantienen aqui solo si hay especificidades unicas del habito,
+ * de lo contrario, usar AccionesFormulario.tsx
+ */

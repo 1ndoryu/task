@@ -1,0 +1,73 @@
+/*
+ * dashboardPanelView.css
+ *
+ * [300A-2] Contenedor del panel individual en modo sidebar.
+ * Ocupa el 100% del área de contenido y envuelve el panel
+ * sin handles de arrastre ni resize (no aplican en este modo).
+ */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.dashboardPanelView {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* El wrapper de animacion (.dashboardSidebarPanel--visible/--entrando) debe
+   participar en la cadena flex, no ser un div neutro */
+.dashboardPanelView > [class*="dashboardSidebarPanel"] {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+/* El panel ocupa todo el alto disponible */
+.dashboardPanelView .panelDashboard {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* [300A-5] Quitar fondos, bordes y sombras de los paneles dentro del sidebar */
+.dashboardPanelView .panelDashboard,
+.dashboardPanelView .panelDashboard > *,
+.dashboardPanelView .panelContenido,
+.dashboardPanelView [class*="panel"],
+.dashboardPanelView .mapaCalorContenedor {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Ocultar "+ Añadir" inline — en sidebar ya existe el botón "+" en el header del panel */
+.dashboardPanelView .añadirHabito {
+    display: none;
+}
+
+/* Scratchpad: quitar fondo y barra decorativa, ocupar toda la altura */
+.dashboardPanelView .scratchpadPanel {
+    background: transparent !important;
+    min-height: 0;
+}
+.dashboardPanelView .scratchpadBarra {
+    display: none;
+}
+/* internaColumna debe llenar el panel en modo sidebar */
+.dashboardPanelView .internaColumna {
+    flex: 1;
+    min-height: 0;
+}
+
+/* ===== ESTADO VACÍO ===== */
+.dashboardPanelVacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+}
