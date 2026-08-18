@@ -1,6 +1,7 @@
 # task — Roadmap
 
 > **Descripcion:** app de productividad personal (tareas, habitos, proyectos, notas) con backend Rust/Axum + PostgreSQL y el frontend React original como SPA.
+> **Objetivo de paridad:** todo lo que funcionaba en WordPress debe funcionar aqui — los dominios degradados se implementan hasta alcanzar paridad completa, no se descartan.
 > **Stack:** Rust (Axum, SQLx, utoipa/Orval) + React 18 (Zustand, Vite) + PostgreSQL.
 > **URL produccion:** pendiente de definir.
 > **Deploy:** Coolify / pendiente.
@@ -12,11 +13,11 @@ El frontend original (antes de WordPress) es el frontend real del producto, serv
 
 ## Bloque actual
 
-Ninguno — la fase de conexion de datos esta cerrada. Siguiente bloque sugerido: definir el destino de produccion (Coolify) y el gate de exposicion, o implementar los dominios degradados por valor de negocio.
+Implementar los dominios degradados hasta la **paridad completa con WordPress** (objetivo explicito del producto). Orden por valor: 1) mensajes/chat, 2) suscripcion/Stripe, 3) almacenamiento/adjuntos, 4) backups, 5) WebSocket/tiempo real, 6) IA/WhatsApp/MCP/Facebook/Google OAuth, 7) admin/feedback, 8) cifrado E2E. Paralelo: cambio de contrasena en el perfil.
 
 ## Pendientes por dependencia
 
-- **Dominios degradados** (sin backend, la UI muestra "no disponible"): mensajes/chat, suscripcion/Stripe, almacenamiento/adjuntos, backups, IA/WhatsApp/Google OAuth/MCP/Facebook, admin/feedback. Decidir cuales implementar y en que orden.
+- **Dominios degradados — implementar TODOS para paridad** (la UI muestra "no disponible" hoy): mensajes/chat, suscripcion/Stripe, almacenamiento/adjuntos, backups, WebSocket/tiempo real, IA/WhatsApp/Google OAuth/MCP/Facebook, admin/feedback, cifrado E2E.
 - **Cambio de contrasena y avatar local** del perfil: el backend expone display_name/avatar_url; falta flujo de cambio de contrasena.
 - **Paridad de estados**: verificar estados carga/vacio/error de los paneles conectados con datos reales (notificaciones, equipos, compartidos) y limpiar los `console.warn` residuales de dominios degradados si molestan.
 - **Gate de exposicion**: memoria, `X-Forwarded-For`, cookies detras del proxy, `docker build`/healthcheck en CI, ingress real; baseline p95 roja por memoria del host (12-08); rate limit single-replica.
