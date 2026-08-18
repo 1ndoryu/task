@@ -201,6 +201,16 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
             if (!response.ok) {
                 if (response.status === 401) {
+                    /* [18-08-2026] Sesion perdida en mitad del uso (p. ej. cookie
+                     * pisada por otra app del mismo host en dev, o sesion revocada
+                     * en servidor). Si creiamos estar autenticados, avisamos al
+                     * boot para recargar y caer en la landing limpia en vez de
+                     * dejar el dashboard congelado en 'Cargando datos...'. El gate
+                     * (isLoggedIn) evita bucles de recarga en la landing. */
+                    const glory = (window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard;
+                    if (glory?.isLoggedIn) {
+                        window.dispatchEvent(new Event('glory:sesion-perdida'));
+                    }
                     throw new ErrorSilencioso('No autenticado. Inicia sesión para continuar.');
                 }
                 if (response.status === 403) {

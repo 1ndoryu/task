@@ -222,8 +222,16 @@ export function useSuscripcion(): UseSuscripcionReturn {
         }
     }, []);
 
-    /* Cargar la suscripción real al montar */
+    /* Cargar la suscripción real al montar. [18-08-2026] Solo con sesion:
+     * en la landing /api/subscription devolveria 401 y ensuciaria la consola
+     * para un estado (FREE) que ahi no aplica. El store Zustand tambien se
+     * auto-hidrata cuando hay sesion. */
     useEffect(() => {
+        const glory = (window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard;
+        if (!glory?.isLoggedIn) {
+            setCargando(false);
+            return;
+        }
         recargarSuscripcion();
     }, [recargarSuscripcion]);
 

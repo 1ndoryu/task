@@ -3,6 +3,7 @@
 # backend propio (3001) via VITE_API_PROXY_TARGET. Logs dedicados.
 $ErrorActionPreference = 'Stop'
 $env:VITE_PORT = '5174'
+$env:VITE_HOST = '127.0.0.1'
 $env:VITE_API_PROXY_TARGET = 'http://127.0.0.1:3001'
 $dir = 'C:\Users\Owner\OneDrive\Documentos\area-trabajo\PROYECTO TASKS\.freebuff'
 $log = Join-Path $dir 'vite.out.log'

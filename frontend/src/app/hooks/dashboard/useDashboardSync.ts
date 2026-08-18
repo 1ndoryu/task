@@ -345,7 +345,11 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
         currentData: datosActuales,
         onDataReceived: handleDatosServidor,
         debounceMs: 2000,
-        isDataReady: !cargandoDatosLocales
+        /* [18-08-2026] isDataReady tambien exige sesion: en la landing (sin
+         * sesion) el SyncManager no debe inicializarse (no hay datos que
+         * sincronizar y el login recarga la pagina, asi que no hay deadlock).
+         * Evita logs de subida pendiente/guard en la landing. */
+        isDataReady: !cargandoDatosLocales && ((window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard?.isLoggedIn ?? false)
         /* [275A-1] Pasamos habitosInicializado al guard esProbableWipeout.
          * Si Zustand aun no hidrato, el guard es mas agresivo (bloquea con 2 arrays vacios).
          */,

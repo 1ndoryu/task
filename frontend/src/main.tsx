@@ -54,6 +54,18 @@ async function cargarSesionRust(): Promise<void> {
 
 async function iniciarApp(): Promise<void> {
     await cargarSesionRust();
+
+    /* [18-08-2026] Recuperacion de sesion perdida: el dashboard detecta un 401
+     * estando autenticado y emite 'glory:sesion-perdida'; aqui recargamos para
+     * que /api/auth/me (401) deje la app en la landing. El gate isLoggedIn
+     * evita bucles: en la landing ya es false y no se vuelve a recargar. */
+    window.addEventListener('glory:sesion-perdida', () => {
+        if (window.gloryDashboard?.isLoggedIn) {
+            console.warn('[Sesion] Perdida durante el uso, recargando a la landing...');
+            window.location.reload();
+        }
+    });
+
     initializeIslands({ appProvider: AppProvider });
 }
 

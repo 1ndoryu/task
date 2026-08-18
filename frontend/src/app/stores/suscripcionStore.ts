@@ -133,10 +133,19 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
 
     /* [18-08-2026] Auto-hidratacion con el contrato Rust: al cargar la pagina
      * (incluido el reload post-login) se refresca la suscripcion real. Antes el
-     * store quedaba FREE para siempre porque nada lo actualizaba desde /api. */
-    setTimeout(() => {
-        void get().recargarSuscripcion();
-    }, 0);    return {
+     * store quedaba FREE para siempre porque nada lo actualizaba desde /api.
+     * IMPORTANTE: este modulo se evalua al importarse, ANTES de que
+     * cargarSesionRust() cree window.gloryDashboard, asi que no se puede
+     * consultar isLoggedIn aqui. La senal fiable en este punto es la cookie
+     * csrf_token (no HttpOnly, se fija junto a session_id al entrar y se
+     * elimina al salir): si existe, hay sesion -> hidratar. En la landing sin
+     * sesion se omite y el store se queda en FREE sin generar 401 de consola. */
+    const tieneSesionPorCookie = /(?:^|;\s*)csrf_token=/.test(document.cookie);
+    if (tieneSesionPorCookie) {
+        setTimeout(() => {
+            void get().recargarSuscripcion();
+        }, 0);
+    }    return {
         ...estadoInicial,
 
     /* Getters computados */

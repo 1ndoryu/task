@@ -85,7 +85,15 @@ export function useCifrado(): UseCifradoReturn {
         }
     }, []);
 
+    /* [18-08-2026] Solo consulta el estado de cifrado con sesion activa:
+     * los paneles que usan este hook solo viven dentro del dashboard, y en la
+     * landing /api/security/e2e devolveria 401 (errores de consola). */
     useEffect(() => {
+        const glory = (window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard;
+        if (!glory?.isLoggedIn) {
+            setCargando(false);
+            return;
+        }
         cargarEstado();
     }, [cargarEstado]);
 

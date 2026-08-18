@@ -127,7 +127,12 @@ export function useAuth(): UseAuthReturn {
                     'X-CSRF-Token': obtenerTokenCsrf()
                 }
             });
-            if (response.ok) {
+            /* [18-08-2026] Un 401 en logout significa que la sesion YA no es
+             * valida (p. ej. cookie pisada por otra app del mismo host en dev,
+             * o sesion revocada en servidor). En ese caso recargar igualmente:
+             * /api/auth/me devolvera 401 y la app caera en la landing limpia.
+             * Antes, el 401 dejaba la UI congelada mostrando errores. */
+            if (response.ok || response.status === 401) {
                 window.location.reload();
             } else {
                 console.error('Logout failed:', response.status);

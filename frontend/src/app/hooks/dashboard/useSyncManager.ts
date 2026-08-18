@@ -169,7 +169,10 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     /* [275A-1] Safety guard: abortar si los datos están vacíos
                      * pero ya hubo una sync previa (race condition de hidratación). */
                     if (esProbableWipeout(currentData, lastSync, habitosInicializado)) {
-                        console.error('[SyncManager] ABORTADO: Se intentó subir datos completamente vacíos. Posible race condition de hidratación.');
+                        /* [18-08-2026] El guard anti-wipeout funciona por diseno: evita
+                         * subir datos vacios (p. ej. race tras logout/limpieza de sesion).
+                         * No es un fallo -> warn, no error (ruido en consola al cerrar sesion). */
+                        console.warn('[SyncManager] Subida inicial omitida: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
                         sessionStorage.removeItem(RETRY_KEY);
                         return;
                     }
@@ -341,7 +344,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                  * Esto atrapa el caso donde la hidratacion se completa tarde
                  * y el auto-save se dispara con datos parciales. */
                 if (syncMeta && esProbableWipeout(currentData, syncMeta.lastSync, habitosInicializado)) {
-                    console.error('[SyncManager] Auto-save ABORTADO: datos completamente vacios. Posible race condition.');
+                    console.warn('[SyncManager] Auto-save omitido: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
                     markChangesAsSynced(); // Resetear hash para evitar loop
                     return;
                 }

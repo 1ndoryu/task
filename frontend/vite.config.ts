@@ -40,10 +40,18 @@ function pluginModulosExternos(): Plugin {
  * y --port se levanta un stack aislado sin pisar a otros agentes. */
 const PROXY_TARGET = process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:3000';
 
+/* [18-08-2026] Host por defecto 127.0.0.1: aisla las cookies de sesion de
+ * otras apps que corren en el MISMO host 'localhost' (WANDORIUS usa :5173).
+ * Las cookies host-only se comparten entre puertos del mismo host, asi que
+ * una app hermana puede pisar session_id/csrf_token. Con 127.0.0.1 el alcance
+ * es distinto y no hay colision. */
+const VITE_HOST = process.env.VITE_HOST || '127.0.0.1';
+
 export default defineConfig({
     plugins: [pluginModulosExternos(), react()],
     base: './',
     server: {
+        host: VITE_HOST,
         port: Number(process.env.VITE_PORT) || 5173,
         strictPort: true,
         /* Proxy API requests al backend Rust en desarrollo */
