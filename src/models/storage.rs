@@ -7,6 +7,29 @@ pub const LIMITE_FREE_BYTES: i64 = 52_428_800; // 50 MB — paridad con WordPres
 pub const LIMITE_PREMIUM_BYTES: i64 = 1_073_741_824; // 1 GB — paridad con WordPress AlmacenamientoService.php
 pub const MAX_FILE_BYTES: usize = 5 * 1024 * 1024; // 5 MB por archivo
 
+/// Tipos MIME permitidos, paridad con AdjuntosService::TIPOS_* (WP).
+pub const ALLOWED_MIME_TYPES: [&str; 13] = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wav",
+    "audio/ogg",
+    "audio/webm",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+];
+
+/// Paridad con AdjuntosService::validarTipoMime (WP).
+#[must_use]
+pub fn mime_permitido(mime: &str) -> bool {
+    ALLOWED_MIME_TYPES.contains(&mime)
+}
+
 /// Respuesta de uso de almacenamiento (igual shape que InfoAlmacenamiento del front).
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]

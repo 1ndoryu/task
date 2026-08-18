@@ -6,6 +6,45 @@ use crate::models::backup::BackupRow;
 pub struct BackupRepository;
 
 impl BackupRepository {
+    /// Paridad con BackupsRepository (WP): retención de 30 días y máximo 50 copias.
+    pub const RETENCION_DIAS: i64 = 30;
+    pub const MAX_BACKUPS: i64 = 50;
+    /// Intervalo mínimo entre copias (WP: INTERVALO_MINUTOS = 30).
+    pub const INTERVALO_MINUTOS: i64 = 30;
+    /// Devuelve la fecha del último backup si existe (para el intervalo).
+    pub async fn last_created_at(
+        pool: &PgPool,
+        user_id: Uuid,
+    ) -> Result<Option<chrono::DateTime<chrono::Utc>>, sqlx::Error> {
+        sqlx::query_scalar::<_, chrono::DateTime<chrono::Utc>>(
+            "SELECT creado_en FROM backups WHERE user_id = $1 ORDER BY creado_en DESC LIMIT 1",
+        )
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await
+    }
+
+    /// Paridad con BackupsRepository::cleanupOldBackups (WP): elimina copias
+    /// fuera de la ventana de retención y deja solo las últimas MAX_BACKUPS.
+    pub async fn cleanup(pool: &PgPool, user_id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "DELETE FROM backups
+             WHERE user_id = $1 AND (creado_en < NOW() - ($2 || ' days')::interval
+                 OR id IN (
+                     SELECT id FROM (
+                         SELECT id, ROW_NUMBER() OVER (ORDER BY creado_en DESC, id DESC) AS rn
+                         FROM backups WHERE user_id = $1
+                     ) t WHERE t.rn > $3
+                 ))",
+        )
+        .bind(user_id)
+        .bind(Self::RETENCION_DIAS)
+        .bind(Self::MAX_BACKUPS)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn create(
         pool: &PgPool,
         user_id: Uuid,

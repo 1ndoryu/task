@@ -6,6 +6,15 @@ import {useLocalStorage, CLAVES_LOCALSTORAGE} from '../useLocalStorage';
 import {useSuscripcion} from '../useSuscripcion';
 import type {DashboardData} from '../useDashboardApi';
 import {tareasIniciales, notasIniciales, habitosIniciales} from '../../data/datosIniciales';
+import {apiFetch} from '../../utils/apiClient';
+
+/* [18-08-2026] Paridad con WP (DashboardApiController + generateBackup): al
+ * guardar como premium se intenta una copia de seguridad automática; el
+ * backend aplica el intervalo de 30 minutos y descarta el exceso. */
+function dispararBackupAutomatico(esPremium: boolean): void {
+    if (!esPremium) return;
+    apiFetch('/backups', {method: 'POST', body: {trigger: 'auto'}}).catch(() => {});
+}
 
 interface SyncMeta {
     lastModified: number;
@@ -174,6 +183,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                         setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
                         markChangesAsSynced(); // Actualizar hash base
                         sessionStorage.removeItem(RETRY_KEY); // Éxito -> Resetear contador
+                        dispararBackupAutomatico(esPremium);
                     }
                 }
             } else {
@@ -348,6 +358,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                 if (success) {
                     setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
                     markChangesAsSynced();
+                    dispararBackupAutomatico(esPremium);
                 }
             }, debounceMs);
         }

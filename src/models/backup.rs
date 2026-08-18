@@ -60,7 +60,8 @@ fn default_trigger() -> String {
 #[serde(rename_all = "camelCase")]
 pub struct CreateBackupResponse {
     pub success: bool,
-    pub backup: BackupMetadata,
+    pub backup: Option<BackupMetadata>,
+    pub message: Option<String>,
 }
 
 /// Respuesta de restauración.

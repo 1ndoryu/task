@@ -10,6 +10,11 @@ pub struct SubscriptionService;
 impl SubscriptionService {
     pub async fn info(pool: &PgPool, user_id: Uuid) -> Result<SubscriptionInfo, AppError> {
         let row = SubscriptionRepository::ensure(pool, user_id).await?;
+        // Paridad con WP verificarExpiracion(): degradar a FREE/expirada al vencer.
+        SubscriptionRepository::expire_if_due(pool, user_id).await?;
+        let row = SubscriptionRepository::get(pool, user_id)
+            .await?
+            .unwrap_or(row);
         Ok(row.into_info())
     }
 

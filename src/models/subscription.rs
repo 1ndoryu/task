@@ -99,15 +99,19 @@ pub struct SubscriptionRow {
 
 impl SubscriptionRow {
     #[must_use]
+    /// Paridad con WP SuscripcionService::esPremium(): premium = plan premium
+    /// y estado distinto de 'expirada' (el trial es premium).
     pub fn es_premium(&self) -> bool {
-        self.plan == PLAN_PREMIUM && self.estado == ESTADO_ACTIVA
+        self.plan == PLAN_PREMIUM && self.estado != ESTADO_EXPIRADA
     }
 
     #[must_use]
+    /// Paridad con WP (SuscripcionService): el trial se usa una sola vez
+    /// (trialUsado queda en true aunque el trial expire o se degrade).
     pub fn trial_disponible(&self) -> bool {
         self.estado != ESTADO_TRIAL
             && self.plan != PLAN_PREMIUM
-            && self.trial_fin.is_none_or(|fin| fin < Utc::now())
+            && self.trial_fin.is_none()
     }
 
     #[must_use]

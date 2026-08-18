@@ -21,7 +21,7 @@ Quedan dos frentes, ninguno bloqueado por codigo:
 ## Pendientes por dependencia
 
 - **IA / WhatsApp / Google OAuth / Facebook grupos / Stripe real / servidor MCP**: requieren credenciales externas; elegir proveedores y crear las cuentas antes de implementar.
-- **Paridad de estados**: verificado en vivo el 18-08-2026 — paneles de suscripcion, seguridad/cifrado, copias y perfil cargan con datos reales del backend y estados correctos (FREE vs premium); limites alineados con WordPress (habitos 5 / tareas 20 / trial 30 dias / almacenamiento 50 MB-1 GB). Queda revisar a fondo los estados carga/vacio/error de mensajes, admin y feedback con datos masivos y limpiar `console.warn` residuales si molestan.
+- **Auditoria de contrato vs WordPress (18-08-2026)**: comparados los servicios PHP originales (`App/Services`, `App/Repository`) contra backend Rust y hooks front — corregidos: ofuscacion de emails en compartidos, trial de un solo uso + degradacion a FREE con estado `expirada` al vencer, backups solo premium con intervalo 30 min y retencion 30 dias/50 max + backup automatico en el save del dashboard, validacion MIME de adjuntos, y trial ahora activa premium de verdad. Suite de regresion `verify-parity.mjs` reforzada: **59/59 asserts**. Queda revisar estados carga/vacio/error con datos masivos si molestan.
 - **Gate de exposicion**: memoria, `X-Forwarded-For`, cookies detras del proxy, `docker build`/healthcheck en CI, ingress real; baseline p95 roja por memoria del host (12-08); rate limit single-replica.
 - Mantener snapshot OpenAPI + cliente Orval sincronizado (`openapi:export` + `codegen` sin drift).
 

@@ -2,7 +2,9 @@ use chrono::{DateTime, Duration, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::subscription::{SubscriptionRow, ESTADO_ACTIVA, ESTADO_TRIAL, PLAN_FREE};
+use crate::models::subscription::{
+    SubscriptionRow, ESTADO_ACTIVA, ESTADO_TRIAL, PLAN_FREE, PLAN_PREMIUM,
+};
 
 pub struct SubscriptionRepository;
 
@@ -47,8 +49,8 @@ impl SubscriptionRepository {
         let fin = now + Duration::days(crate::models::subscription::TRIAL_DAYS);
         sqlx::query_as::<_, SubscriptionRow>(
             "UPDATE subscriptions
-             SET estado = $2, trial_inicio = $3, trial_fin = $4,
-                 fecha_inicio = $3, fecha_expiracion = NULL
+             SET plan = $6, estado = $2, trial_inicio = $3, trial_fin = $4,
+                 fecha_inicio = $3, fecha_expiracion = $4
              WHERE user_id = $1
                AND plan = $5
                AND estado <> $2
@@ -61,8 +63,30 @@ impl SubscriptionRepository {
         .bind(now)
         .bind(fin)
         .bind(PLAN_FREE)
+        .bind(PLAN_PREMIUM) // Paridad WP: activarTrial pone plan = premium
         .fetch_optional(pool)
         .await
+    }
+
+    /// Paridad con WP verificarExpiracion(): si el trial o premium vencieron,
+    /// degrada a FREE con estado 'expirada' (persistido). Mantiene trial_fin
+    /// para que el trial siga contando como usado.
+    pub async fn expire_if_due(pool: &PgPool, user_id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE subscriptions
+             SET plan = $2, estado = $3, fecha_expiracion = NULL
+             WHERE user_id = $1
+               AND (
+                   (estado = 'trial' AND trial_fin IS NOT NULL AND trial_fin < NOW())
+                   OR (estado = 'premium' AND fecha_expiracion IS NOT NULL AND fecha_expiracion < NOW())
+               )",
+        )
+        .bind(user_id)
+        .bind(PLAN_FREE)
+        .bind("expirada")
+        .execute(pool)
+        .await?;
+        Ok(())
     }
 
     /// Actualiza plan/estado (usado por admin y por Stripe webhook en el futuro).

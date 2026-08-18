@@ -47,23 +47,45 @@ async function api(metodo, ruta, {body, csrf, crudo} = {}) {
   return {status: res.status, data};
 }
 
+/* El backend limita /auth/* a 10 solicitudes/minuto por IP (FixedWindowLimiter):
+ * este script hace ~10 llamadas de auth en ráfaga, así que se auto-espacia
+ * para no chocar con el límite real del producto. */
+const llamadasAuth = [];
+async function apiAuth(metodo, ruta, opts) {
+  const ahora = Date.now();
+  const recientes = llamadasAuth.filter(t => ahora - t < 60000);
+  llamadasAuth.length = 0;
+  llamadasAuth.push(...recientes);
+  if (recientes.length >= 9) {
+    const masAntigua = Math.min(...recientes);
+    const espera = 60000 - (ahora - masAntigua) + 300;
+    await new Promise(r => setTimeout(r, espera));
+  }
+  llamadasAuth.push(Date.now());
+  return api(metodo, ruta, opts);
+}
+
 async function main() {
   const email = `verif-${Date.now()}@test.app`;
   console.log(`\n== Registro y sesión (${email}) ==`);
-  let r = await api('POST', '/auth/register', {body: {email, password: 'password123'}});
+  let r = await apiAuth('POST', '/auth/register', {body: {email, password: 'password123'}});
+  if (r.status !== 201) console.log('  [debug] register →', r.status, JSON.stringify(r.data)?.slice(0, 200));
   assert(r.status === 201 && r.data?.user?.id, 'register 201 con user.id');
   const uid = r.data.user.id;
-  const csrf = cookies['csrf_token'];
+  let csrf = cookies['csrf_token'];
   assert(!!csrf, 'cookie csrf_token emitida');
 
   console.log('\n== Suscripción ==');
   r = await api('GET', '/subscription');
   assert(r.status === 200 && r.data.plan === 'free' && r.data.trialDisponible === true, 'GET /subscription → free, trialDisponible');
   assert(r.data.limites.habitos === 5 && r.data.limites.tareasActivas === 20 && r.data.limites.proyectos === 3 && r.data.limites.adjuntosPorTarea === 0, 'límites FREE = 5/20/3/0 (paridad WordPress)');
+  r = await api('GET', '/storage');
+  assert(r.status === 200 && r.data.limite === 52428800 && r.data.limiteFormateado === '50.0 MB', 'límite FREE = 50 MB (paridad WordPress AlmacenamientoService)');
   r = await api('POST', '/subscription/trial', {csrf});
   assert(r.status === 200 && r.data.success && r.data.data.estado === 'trial', 'POST /subscription/trial → trial activo');
   r = await api('GET', '/subscription');
   assert(r.status === 200 && r.data.estado === 'trial' && r.data.diasRestantes >= 29, 'trial de 30 días persistido (diasRestantes >= 29)');
+  assert(r.data.trialDisponible === false, 'trial de un solo uso: trialDisponible=false tras activarlo (paridad trialUsado)');
   r = await api('POST', '/subscription/trial', {}); // sin CSRF
   assert(r.status === 403, 'mutación sin CSRF → 403');
 
@@ -78,18 +100,34 @@ async function main() {
   const adjId = r.data.id;
   r = await api('GET', '/storage');
   assert(r.status === 200 && r.data.usado >= 30, 'GET /storage → usado > 0');
-  assert(r.data.limite === 52428800 && r.data.limiteFormateado === '50.0 MB', 'límite FREE = 50 MB (paridad WordPress AlmacenamientoService)');
+  assert(r.data.limite === 1073741824 && r.data.limiteFormateado === '1.0 GB', 'límite premium (trial) = 1 GB (paridad WordPress AlmacenamientoService)');
   const descarga = await api('GET', `/storage/files/${adjId}`);
   assert(descarga.status === 200 && descarga.data.includes('contenido de prueba'), 'descarga autenticada → 200 con contenido');
   r = await api('DELETE', `/storage/files/${adjId}`, {csrf});
   assert(r.status === 204, 'DELETE adjunto → 204');
   r = await api('GET', `/storage/files/${adjId}`);
   assert(r.status === 404, 'adjunto eliminado → 404');
+  const fdProhibido = new FormData();
+  fdProhibido.append('file', new Blob(['contenido'], {type: 'application/x-msdownload'}), 'malo.exe');
+  r = await api('POST', '/storage/files', {body: fdProhibido, csrf});
+  assert(r.status === 422, 'upload con MIME no permitido → 422 (paridad AdjuntosService)');
 
-  console.log('\n== Backups ==');
+  console.log('\n== Backups (beneficio Premium) ==');
+  /* Gate: un usuario FREE no puede tocar backups (paridad BackupsApiController::checkPermission). */
+  const emailFree = `verif-free-${Date.now()}@test.app`;
+  r = await apiAuth('POST', '/auth/register', {body: {email: emailFree, password: 'password123'}});
+  assert(r.status === 201, 'registrar usuario FREE para el gate');
+  r = await api('POST', '/backups', {body: {trigger: 'manual'}});
+  assert(r.status === 403, 'backups con plan FREE → 403');
+  /* Volver a la sesión del usuario verificado (trial = premium). */
+  r = await apiAuth('POST', '/auth/login', {body: {email, password: 'password123'}});
+  assert(r.status === 200, 're-login usuario verificado');
+  csrf = cookies['csrf_token'];
   r = await api('POST', '/backups', {body: {trigger: 'manual'}, csrf});
-  assert(r.status === 200 && r.data.success && r.data.backup.hash, 'crear backup → snapshot con hash');
+  assert(r.status === 200 && r.data.success && r.data.backup?.hash, 'crear backup (trial) → snapshot con hash');
   const backupId = r.data.backup.id;
+  r = await api('POST', '/backups', {body: {trigger: 'auto'}, csrf});
+  assert(r.status === 200 && r.data.success === false, 'segunda copia inmediata → rechazada (intervalo 30 min, paridad WP)');
   r = await api('GET', '/backups');
   assert(r.status === 200 && Array.isArray(r.data) && r.data.some(b => b.id === backupId), 'lista backups contiene el creado');
   r = await api('POST', `/backups/${backupId}/restore`, {csrf});
@@ -148,19 +186,51 @@ async function main() {
   });
   assert(!!wsEvento, 'broadcast WS al enviar mensaje de timeline');
 
+  console.log('\n== Compartidos (roles + ofuscación de email) ==');
+  /* Registrar un compañero y conectar el equipo (paridad EquiposService). */
+  const emailComp = `verif-comp-${Date.now()}@test.app`;
+  r = await apiAuth('POST', '/auth/register', {body: {email: emailComp, password: 'password123'}});
+  assert(r.status === 201, 'registrar compañero');
+  const compId = r.data.user.id;
+  r = await apiAuth('POST', '/auth/login', {body: {email, password: 'password123'}});
+  assert(r.status === 200, 're-login usuario verificado');
+  csrf = cookies['csrf_token'];
+  r = await api('POST', '/teams/requests', {body: {email: emailComp}, csrf});
+  assert(r.status === 201 || r.status === 200, 'enviar solicitud de equipo');
+  r = await apiAuth('POST', '/auth/login', {body: {email: emailComp, password: 'password123'}});
+  assert(r.status === 200, 'login compañero');
+  csrf = cookies['csrf_token'];
+  r = await api('GET', '/teams');
+  const solicitudId = r.data?.received?.[0]?.id;
+  assert(!!solicitudId, 'compañero tiene solicitud recibida');
+  r = await api('PUT', `/teams/requests/${solicitudId}`, {body: {action: 'accept'}, csrf});
+  assert(r.status === 200 && r.data?.status === 'accepted', 'aceptar solicitud → accepted');
+  /* El usuario verificado comparte la tarea del chat con el compañero. */
+  r = await apiAuth('POST', '/auth/login', {body: {email, password: 'password123'}});
+  assert(r.status === 200, 're-login usuario A');
+  csrf = cookies['csrf_token'];
+  r = await api('POST', '/shared', {body: {itemType: 'tarea', itemId: tareaId, userId: compId, role: 'colaborador'}, csrf});
+  assert(r.status === 201 && r.data?.id, 'compartir tarea con el compañero');
+  assert(r.data.recipient.email.includes('***') && !r.data.recipient.email.includes('@test.app'), 'email del destinatario ofuscado en la respuesta (paridad CompartidosService)');
+  r = await api('GET', `/shared/participants/tarea/${tareaId}/${uid}`);
+  assert(r.status === 200 && r.data.participants.length >= 2 && r.data.participants.every(p => p.user.email.includes('***')), 'participantes con email ofuscado');
+  r = await api('POST', '/shared', {body: {itemType: 'tarea', itemId: tareaId, userId: compId, role: 'colaborador'}, csrf});
+  assert(r.status === 409, 'compartir dos veces el mismo elemento → 409');
+
   console.log('\n== Cambio de contraseña ==');
   r = await api('PUT', '/security/password', {body: {nuevaContrasena: 'clave-nueva-99'}, csrf});
   assert(r.status === 200 && r.data.success, 'cambiar contraseña → success');
   r = await api('GET', '/auth/me');
   assert(r.status === 401, 'sesión antigua invalidada → 401');
-  r = await api('POST', '/auth/login', {body: {email, password: 'clave-nueva-99'}});
+  r = await apiAuth('POST', '/auth/login', {body: {email, password: 'clave-nueva-99'}});
   assert(r.status === 200, 'login con la nueva contraseña → 200');
-  r = await api('POST', '/auth/login', {body: {email, password: 'password123'}});
+  r = await apiAuth('POST', '/auth/login', {body: {email, password: 'password123'}});
   assert(r.status === 401, 'login con la contraseña vieja → 401');
 
   console.log('\n== Admin (es_admin) ==');
   /* El usuario paridad@test.app ya es admin en BD; login con su contraseña actual. */
-  r = await api('POST', '/auth/login', {body: {email: 'paridad@test.app', password: 'nueva12345'}});
+  r = await apiAuth('POST', '/auth/login', {body: {email: 'paridad@test.app', password: 'nueva12345'}});
+  if (r.status !== 200) console.log('  [debug] login admin →', r.status, JSON.stringify(r.data)?.slice(0, 160));
   assert(r.status === 200, 'login admin paridad');
   const csrfAdmin = cookies['csrf_token'];
   r = await api('GET', '/admin/stats');

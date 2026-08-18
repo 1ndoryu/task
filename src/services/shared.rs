@@ -163,7 +163,7 @@ impl SharedService {
             user: SharedUser {
                 id: owner.id,
                 display_name: owner.display_name,
-                email: owner.email,
+                email: Self::ofuscar_email(&owner.email),
                 avatar_url: owner.avatar_url,
             },
             role: "propietario".into(),
@@ -182,7 +182,7 @@ impl SharedService {
                         user: SharedUser {
                             id: row.user_id,
                             display_name: row.display_name,
-                            email: row.email,
+                            email: Self::ofuscar_email(&row.email),
                             avatar_url: row.avatar_url,
                         },
                         role: row.role,
@@ -250,6 +250,26 @@ impl SharedService {
         })
     }
 
+    /// Paridad con CompartidosService::ofuscarEmail (WP): nunca exponer PII
+    /// completa en respuestas API — "usuario@dominio.com" -> "u***@d***.com".
+    fn ofuscar_email(email: &str) -> String {
+        let Some((local, dominio)) = email.split_once('@') else {
+            return "***@***.***".into();
+        };
+        if local.is_empty() || dominio.is_empty() {
+            return "***@***.***".into();
+        }
+        let Some((sub, tld)) = dominio.split_once('.') else {
+            return "***@***.***".into();
+        };
+        if sub.is_empty() || tld.is_empty() {
+            return "***@***.***".into();
+        }
+        let local_inicial: String = local.chars().take(1).collect();
+        let sub_inicial: String = sub.chars().take(1).collect();
+        format!("{local_inicial}***@{sub_inicial}***.{tld}")
+    }
+
     fn item(row: SharedItemRow) -> SharedItem {
         SharedItem {
             id: row.id,
@@ -258,13 +278,13 @@ impl SharedService {
             owner: SharedUser {
                 id: row.owner_id,
                 display_name: row.owner_display_name,
-                email: row.owner_email,
+                email: Self::ofuscar_email(&row.owner_email),
                 avatar_url: row.owner_avatar_url,
             },
             recipient: SharedUser {
                 id: row.recipient_id,
                 display_name: row.recipient_display_name,
-                email: row.recipient_email,
+                email: Self::ofuscar_email(&row.recipient_email),
                 avatar_url: row.recipient_avatar_url,
             },
             role: row.role,

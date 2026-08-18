@@ -153,6 +153,12 @@ pub async fn upload_file(
     }
     let tamano = i64::try_from(bytes.len()).unwrap_or(i64::MAX);
     let mime = mime.unwrap_or_else(|| "application/octet-stream".into());
+    // Paridad con AdjuntosService::validarTipoMime (WP): solo tipos permitidos.
+    if !crate::models::mime_permitido(&mime) {
+        return Err(AppError::Validation(format!(
+            "Tipo de archivo no permitido ({mime})"
+        )));
+    }
 
     // Cuota y límite por archivo.
     StorageService::verify_space(
