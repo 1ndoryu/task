@@ -65,7 +65,7 @@ pub async fn stats(
 #[utoipa::path(
     get,
     tag = "activity",
-    path = "/api/activity/day",
+    path = "/api/activity/dia",
     params(ActivityDayQuery),
     responses(
         (status = 200, body = ActivityDayResponse),
@@ -140,6 +140,6 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/activity", axum::routing::get(heatmap).post(record))
         .route("/activity/estadisticas", axum::routing::get(stats))
-        .route("/activity/day", axum::routing::get(day))
+        .route("/activity/dia", axum::routing::get(day))
         .route("/activity/:id", axum::routing::delete(delete))
 }

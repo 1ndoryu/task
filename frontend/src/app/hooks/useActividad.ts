@@ -72,7 +72,8 @@ interface UseActividadReturn {
 }
 
 /* Base URL de la API */
-const API_BASE = '/activity';
+/* [18-08-2026] Contrato Rust: /api/activity (sin /api vite devuelve HTML). */
+const API_BASE = '/api/activity';
 
 /**
  * Obtiene el nonce de WordPress para autenticación

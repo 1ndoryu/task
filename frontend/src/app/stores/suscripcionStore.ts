@@ -123,11 +123,21 @@ interface SuscripcionActions {
     limpiarError: () => void;
 }
 
-export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>((set, get) => ({
+export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>((set, get) => {
     /* Estado inicial */
-    suscripcion: obtenerSuscripcionInicial(),
-    cargando: false,
-    error: null,
+    const estadoInicial: SuscripcionState = {
+        suscripcion: obtenerSuscripcionInicial(),
+        cargando: false,
+        error: null,
+    };
+
+    /* [18-08-2026] Auto-hidratacion con el contrato Rust: al cargar la pagina
+     * (incluido el reload post-login) se refresca la suscripcion real. Antes el
+     * store quedaba FREE para siempre porque nada lo actualizaba desde /api. */
+    setTimeout(() => {
+        void get().recargarSuscripcion();
+    }, 0);    return {
+        ...estadoInicial,
 
     /* Getters computados */
     esPremium: () => get().suscripcion.esPremium,
@@ -239,30 +249,23 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
 
     /*
      * Recarga la información de suscripción desde el servidor
+     * [18-08-2026] Contrato Rust: GET /api/subscription -> InfoSuscripcion directa
+     * (la version WordPress exigia nonce/apiBase y no hacia nada en Rust).
      */
     recargarSuscripcion: async () => {
-        const wpData = (
-            window as unknown as {
-                gloryDashboard?: {nonce?: string; apiBase?: string};
-            }
-        ).gloryDashboard;
-
-        if (!wpData?.apiBase || !wpData?.nonce) return;
-
         set({cargando: true});
 
         try {
-            const response = await fetch(wpData.apiBase.replace('/dashboard', '/suscripcion'), {
+            const response = await fetch('/api/subscription', {
                 method: 'GET',
-                headers: {'X-WP-Nonce': wpData.nonce},
                 credentials: 'include'
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                set({suscripcion: data.data, cargando: false});
+            if (response.ok) {
+                const data: InfoSuscripcion = await response.json();
+                set({suscripcion: data, error: null, cargando: false});
             } else {
+                /* Sin sesion o error: se mantiene el estado actual (free por defecto) */
                 set({cargando: false});
             }
         } catch (err) {
@@ -279,7 +282,8 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
     },
 
     limpiarError: () => set({error: null})
-}));
+    };
+});
 
 /*
  * Selectores atómicos para evitar re-renders innecesarios

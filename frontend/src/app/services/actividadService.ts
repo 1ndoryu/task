@@ -13,7 +13,9 @@ import {obtenerFechaHoy} from '../utils/fecha';
 import {obtenerTokenCsrf} from '../utils/apiClient';
 
 /* Base URL de la API */
-const API_BASE = '/activity';
+/* [18-08-2026] Contrato Rust: /api/activity (antes /activity sin /api no lo
+ * proxya vite y devolvia el HTML del SPA -> "Unexpected token '<'"). */
+const API_BASE = '/api/activity';
 
 function headersPara(metodo: string): Record<string, string> {
     const esMutacion = metodo !== 'GET' && metodo !== 'HEAD';

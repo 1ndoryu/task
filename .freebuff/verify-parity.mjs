@@ -245,6 +245,14 @@ async function main() {
   r = await api('POST', `/admin/users/${uid}/cancel-premium`, {csrf: csrfAdmin});
   assert(r.status === 200 && r.data.success, 'admin cancela premium');
 
+  /* [18-08-2026] Paridad actividad: el front llama GET /api/activity/dia
+   * (WordPress: /actividad/dia); la ruta Rust era /activity/day y el front
+   * recibía el HTML del SPA ("Unexpected token '<'"). */
+  r = await api('GET', '/activity/dia?fecha=2026-08-18');
+  assert(r.status === 200 && r.data.success === true, 'detalle de actividad por dia (ruta dia)');
+  r = await api('GET', '/activity?fechaHoyLocal=2026-08-18&periodo=anio');
+  assert(r.status === 200 && typeof r.data.heatmap === 'object', 'heatmap de actividad');
+
   console.log(`\n== RESULTADO: ${pasados} pasados, ${fallados} fallados ==`);
   if (fallados > 0) {
     console.log('Fallaron:', errores.join(' | '));
