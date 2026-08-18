@@ -4,28 +4,22 @@
 > **Stack:** Rust (Axum, SQLx, utoipa/Orval) + React 18 (Zustand, Vite) + PostgreSQL.
 > **URL produccion:** pendiente de definir.
 > **Deploy:** Coolify / pendiente.
-> **Repositorio:** nuevo repo separado `task` (rama `main`), independiente de WANDORIUS.
+> **Repositorio:** repo separado `task` (rama `main`), independiente de WANDORIUS.
 
 ## Estado
 
-El frontend original (antes de WordPress) es el frontend real del producto, incorporado al checkout y servido como SPA por el backend Rust con sesion por cookie HttpOnly + CSRF. El backend Rust cubre: auth, perfil, dashboard (lectura), tareas/proyectos (upsert), historial de habitos, notas/carpetas, actividad, equipos, compartidos/roles, notificaciones y timeline. Login/registro/logout del front ya apuntan a `/api`. Falta conectar el resto de la capa de datos del front a `/api` y cerrar dominios que el backend aun no expone.
+El frontend original (antes de WordPress) es el frontend real del producto, servido como SPA por el backend Rust con sesion por cookie HttpOnly + CSRF. **La capa de datos del front esta conectada a `/api` por dominio** (18-08-2026): dashboard (lectura + escritura por entidad), tareas, proyectos, habitos (upsert + historial), scratchpad de notas + configuracion, perfil, notificaciones, equipos, compartidos, actividad y notas/carpetas. Los dominios sin backend estan degradados a "no disponible" sin romper la UI. El slice viejo fue retirado; `window.gloryDashboard` es solo el contexto de sesion Rust (isLoggedIn + currentUser con id UUID).
 
 ## Bloque actual
 
-Conectar la capa de datos del front original a la API Rust por dominio:
-
-1. `useDashboardApi`: lectura desde `GET /api/dashboard` y guardado de tareas/proyectos via `PUT /api/tasks/{id}` y `PUT /api/projects/{id}`; quitar la dependencia de nonce (sesion + CSRF).
-2. Pendientes de backend para cerrar el dashboard: upsert de habitos, scratchpad de notas (campo `notas` del agregado) y configuracion de usuario; sin ellos esos datos quedan solo locales.
-3. Adaptar servicios restantes del front: notificaciones, equipos, compartidos, actividad, historial de habitos, notas estructuradas (ya tienen backend `/api`), y degradar con estado "no disponible" los dominios sin backend (mensajes, suscripcion/Stripe, almacenamiento, IA/WhatsApp/Google OAuth, admin).
-4. Retirar el slice viejo (`frontend/src/features/*`, `App.tsx`) y el shim `window.gloryDashboard` cuando la paridad este cerrada.
+Ninguno — la fase de conexion de datos esta cerrada. Siguiente bloque sugerido: definir el destino de produccion (Coolify) y el gate de exposicion, o implementar los dominios degradados por valor de negocio.
 
 ## Pendientes por dependencia
 
-- Upsert de habitos en Rust (hoy solo hay historial) para persistir el panel de habitos.
-- Endpoint para el scratchpad de notas (campo `notas` string del agregado) o decidir su modelo.
-- Persistencia de `configuracion` de usuario (tema, orden de habitos, notificaciones).
-- Dominios sin backend (mensajes, suscripcion, almacenamiento/adjuntos, IA/WhatsApp/Facebook/MCP, Google OAuth): definir si se implementan o se ocultan en la UI.
-- Gate de exposicion: memoria, `X-Forwarded-For`, cookies detras del proxy, `docker build`/healthcheck en CI, ingress real; baseline p95 roja por memoria del host (12-08); rate limit single-replica.
+- **Dominios degradados** (sin backend, la UI muestra "no disponible"): mensajes/chat, suscripcion/Stripe, almacenamiento/adjuntos, backups, IA/WhatsApp/Google OAuth/MCP/Facebook, admin/feedback. Decidir cuales implementar y en que orden.
+- **Cambio de contrasena y avatar local** del perfil: el backend expone display_name/avatar_url; falta flujo de cambio de contrasena.
+- **Paridad de estados**: verificar estados carga/vacio/error de los paneles conectados con datos reales (notificaciones, equipos, compartidos) y limpiar los `console.warn` residuales de dominios degradados si molestan.
+- **Gate de exposicion**: memoria, `X-Forwarded-For`, cookies detras del proxy, `docker build`/healthcheck en CI, ingress real; baseline p95 roja por memoria del host (12-08); rate limit single-replica.
 - Mantener snapshot OpenAPI + cliente Orval sincronizado (`openapi:export` + `codegen` sin drift).
 
 ## Notas
