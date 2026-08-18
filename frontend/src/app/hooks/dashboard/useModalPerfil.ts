@@ -114,10 +114,19 @@ export function useModalPerfil({estaAbierto, onCerrar: _onCerrar}: UseModalPerfi
         setMensaje(null);
 
         try {
-            /* [18-08-2026] PUT /api/profile contra Rust; sin nonce. El cambio de
-             * contrasena/avatar local (descripcion) no tiene backend aun: solo se
-             * persiste display_name y avatar (si es URL). */
+            /* [18-08-2026] PUT /api/profile contra Rust; sin nonce. El cambio
+             * de contraseña va a PUT /api/security/password (invalida todas las
+             * sesiones: el usuario debe volver a iniciar sesión). */
             const esAvatarUrl = datos.avatarUrl.startsWith('http://') || datos.avatarUrl.startsWith('https://');
+
+            let cambioContrasena = false;
+            if (datos.passwordNueva) {
+                await apiFetch('/security/password', {
+                    method: 'PUT',
+                    body: JSON.stringify({nuevaContrasena: datos.passwordNueva})
+                });
+                cambioContrasena = true;
+            }
 
             await apiFetch('/profile', {
                 method: 'PUT',
@@ -127,7 +136,12 @@ export function useModalPerfil({estaAbierto, onCerrar: _onCerrar}: UseModalPerfi
                 })
             });
 
-            setMensaje({tipo: 'exito', texto: 'Perfil actualizado correctamente'});
+            setMensaje({
+                tipo: 'exito',
+                texto: cambioContrasena
+                    ? 'Perfil actualizado y contraseña cambiada; vuelve a iniciar sesión'
+                    : 'Perfil actualizado correctamente'
+            });
 
             /* Recargar para actualizar el usuario en el shim de sesion */
             setTimeout(() => {

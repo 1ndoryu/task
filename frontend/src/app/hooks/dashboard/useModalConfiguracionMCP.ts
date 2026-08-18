@@ -4,8 +4,9 @@
  * Gestiona token, verificación, generación, revocación y configuraciones.
  */
 
-import {useState, useCallback, useEffect} from 'react';
+import {useState, useCallback, useEffect, useRef} from 'react';
 import {useSuscripcionStore} from '../../stores/suscripcionStore';
+import {apiFetch} from '../../utils/apiClient';
 
 type ClienteMCP = 'claude' | 'cursor' | 'apirest';
 
@@ -30,12 +31,6 @@ export interface UseModalConfiguracionMCPReturn {
     manejarGenerarToken: () => Promise<void>;
     manejarRevocarToken: () => Promise<void>;
     obtenerConfiguracion: (cliente: ClienteMCP) => string;
-}
-
-/* Obtiene el nonce de WordPress para autenticación */
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
 }
 
 /* Genera el contexto copiable para asistentes IA */
@@ -124,10 +119,11 @@ export function useModalConfiguracionMCP({estaAbierto}: UseModalConfiguracionMCP
     const [verificando, setVerificando] = useState(true);
 
     const esPremium = useSuscripcionStore(s => s.esPremium());
-    /* [18-08-2026] Sin backend MCP en Rust aun: apiUrl apunta a /api y el
-     * token queda como no existente; la generacion de config JSON sigue
-     * funcionando localmente sin llamar a /wp-json. */
+    /* [18-08-2026] Contrato Rust /api/security/mcp/token:
+     * GET -> { existe, id, fechaCreacion } | POST -> { success, token, fechaCreacion }
+     * DELETE /{id} -> { success }. El token plano se muestra una sola vez. */
     const apiUrl = `${window.location.origin}/api`;
+    const tokenIdRef = useRef<string | null>(null);
 
     /* Verificar estado del token al abrir el modal */
     useEffect(() => {
@@ -139,23 +135,66 @@ export function useModalConfiguracionMCP({estaAbierto}: UseModalConfiguracionMCP
         setTokenBase64(null);
         setFechaCreacion(null);
         localStorage.removeItem('glory_mcp_token_base64');
-        setVerificando(false);
+
+        (async () => {
+            try {
+                const estado = await apiFetch<{existe: boolean; id: string | null; fechaCreacion: string | null}>(
+                    '/security/mcp/token'
+                );
+                tokenIdRef.current = estado.id;
+                setTokenExiste(estado.existe);
+                setFechaCreacion(estado.fechaCreacion);
+            } catch {
+                /* Sin token o sin backend: estado por defecto */
+                tokenIdRef.current = null;
+            } finally {
+                setVerificando(false);
+            }
+        })();
     }, [estaAbierto]);
 
     /* Generar nuevo token vía API */
     const manejarGenerarToken = useCallback(async () => {
-        setCargando(false);
-        console.warn('[MCP] La generación de tokens aún no está disponible');
+        setCargando(true);
+        try {
+            const respuesta = await apiFetch<{success: boolean; token: string; fechaCreacion: string}>(
+                '/security/mcp/token',
+                {method: 'POST'}
+            );
+            if (respuesta.success) {
+                setTokenGenerado(respuesta.token);
+                setTokenBase64(btoa(respuesta.token));
+                setTokenExiste(true);
+                setFechaCreacion(respuesta.fechaCreacion);
+                localStorage.setItem('glory_mcp_token_base64', btoa(respuesta.token));
+            }
+        } catch (err) {
+            console.error('[MCP] No se pudo generar el token:', err);
+        } finally {
+            setCargando(false);
+        }
     }, []);
 
     /* Revocar token existente vía API */
     const manejarRevocarToken = useCallback(async () => {
-        setCargando(false);
-        setTokenGenerado(null);
-        setTokenBase64(null);
-        setTokenExiste(false);
-        setFechaCreacion(null);
-        localStorage.removeItem('glory_mcp_token_base64');
+        setCargando(true);
+        try {
+            if (tokenIdRef.current) {
+                await apiFetch<{success: boolean}>(`/security/mcp/token/${tokenIdRef.current}`, {
+                    method: 'DELETE'
+                });
+            }
+            tokenIdRef.current = null;
+            setTokenGenerado(null);
+            setTokenBase64(null);
+            setTokenExiste(false);
+            setFechaCreacion(null);
+            localStorage.removeItem('glory_mcp_token_base64');
+        } catch (err) {
+            console.error('[MCP] No se pudo revocar el token:', err);
+        } finally {
+            setCargando(false);
+        }
     }, []);
 
     /* Obtener configuración JSON según cliente */

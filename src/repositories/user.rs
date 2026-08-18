@@ -17,7 +17,7 @@ impl UserRepository {
         sqlx::query_as::<_, User>(
             "INSERT INTO users (id, email, password_hash) \
              VALUES ($1, $2, $3) \
-             RETURNING id, email, password_hash, display_name, avatar_url, created_at",
+             RETURNING id, email, password_hash, display_name, avatar_url, es_admin, created_at",
         )
         .bind(id)
         .bind(email)
@@ -29,7 +29,7 @@ impl UserRepository {
     /// Busca un usuario por email
     pub async fn find_by_email(pool: &PgPool, email: &str) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as::<_, User>(
-            "SELECT id, email, password_hash, display_name, avatar_url, created_at \
+            "SELECT id, email, password_hash, display_name, avatar_url, es_admin, created_at \
              FROM users WHERE lower(email) = lower($1)",
         )
         .bind(email)
@@ -40,7 +40,7 @@ impl UserRepository {
     /// Busca un usuario por ID
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as::<_, User>(
-            "SELECT id, email, password_hash, display_name, avatar_url, created_at \
+            "SELECT id, email, password_hash, display_name, avatar_url, es_admin, created_at \
              FROM users WHERE id = $1",
         )
         .bind(id)
@@ -57,10 +57,27 @@ impl UserRepository {
         sqlx::query_as::<_, User>(
             "UPDATE users SET display_name = $1, avatar_url = $2 \
              WHERE id = $3 \
-             RETURNING id, email, password_hash, display_name, avatar_url, created_at",
+             RETURNING id, email, password_hash, display_name, avatar_url, es_admin, created_at",
         )
         .bind(display_name)
         .bind(avatar_url)
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+    }
+
+    /// Actualiza el hash de contraseña (cambio de contraseña del perfil).
+    pub async fn update_password(
+        pool: &PgPool,
+        id: Uuid,
+        password_hash: &str,
+    ) -> Result<Option<User>, sqlx::Error> {
+        sqlx::query_as::<_, User>(
+            "UPDATE users SET password_hash = $1 \
+             WHERE id = $2 \
+             RETURNING id, email, password_hash, display_name, avatar_url, es_admin, created_at",
+        )
+        .bind(password_hash)
         .bind(id)
         .fetch_optional(pool)
         .await

@@ -534,7 +534,7 @@ export interface EstadisticasUsuario {
  * Usuario con información de administración
  */
 export interface UsuarioAdmin {
-    id: number;
+    id: string;
     nombre: string;
     email: string;
     avatar: string;

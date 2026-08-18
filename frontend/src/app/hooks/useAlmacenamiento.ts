@@ -6,6 +6,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 import type {InfoAlmacenamiento} from '../types/dashboard';
+import {apiFetch} from '../utils/apiClient';
 
 interface EstadoAlmacenamiento {
     info: InfoAlmacenamiento | null;
@@ -26,16 +27,6 @@ const ALMACENAMIENTO_INICIAL: InfoAlmacenamiento = {
     esPremium: false
 };
 
-interface RespuestaApi {
-    success: boolean;
-    data?: InfoAlmacenamiento;
-    message?: string;
-}
-
-interface RespuestaVerificacion extends RespuestaApi {
-    puedeSubir: boolean;
-}
-
 export function useAlmacenamiento() {
     const [estado, setEstado] = useState<EstadoAlmacenamiento>({
         info: null,
@@ -43,23 +34,37 @@ export function useAlmacenamiento() {
         error: null
     });
 
-    /* [18-08-2026] Sin backend de almacenamiento/adjuntos en Rust aun: se
-     * degrada a valores locales sin llamar a /wp-json. */
+    /* [18-08-2026] Contrato Rust: GET /api/storage -> StorageInfo (mismo shape). */
     const cargar = useCallback(async () => {
-        setEstado({
-            info: ALMACENAMIENTO_INICIAL,
-            cargando: false,
-            error: null
-        });
+        setEstado(prev => ({...prev, cargando: true, error: null}));
+        try {
+            const info = await apiFetch<InfoAlmacenamiento>('/storage');
+            setEstado({info, cargando: false, error: null});
+        } catch (err) {
+            const mensaje = err instanceof Error ? err.message : 'Error de conexión';
+            setEstado({info: null, cargando: false, error: mensaje});
+        }
     }, []);
 
     /* Verificar si se puede subir un archivo de X bytes */
-    const verificarEspacio = useCallback(async (_tamanoBytes: number): Promise<{puedeSubir: boolean; mensaje: string; info: InfoAlmacenamiento | null}> => {
-        return {
-            puedeSubir: false,
-            mensaje: 'Los adjuntos aún no están disponibles',
-            info: ALMACENAMIENTO_INICIAL
-        };
+    /* [18-08-2026] Contrato Rust: POST /api/storage/verify { tamano } -> { puedeSubir, message }. */
+    const verificarEspacio = useCallback(async (tamanoBytes: number): Promise<{puedeSubir: boolean; mensaje: string; info: InfoAlmacenamiento | null}> => {
+        try {
+            const respuesta = await apiFetch<{success: boolean; puedeSubir: boolean; message: string | null}>(
+                '/storage/verify',
+                {method: 'POST', body: {tamano: tamanoBytes}}
+            );
+            const info = await apiFetch<InfoAlmacenamiento>('/storage');
+            return {
+                puedeSubir: respuesta.puedeSubir,
+                mensaje: respuesta.message || '',
+                info
+            };
+        } catch (err) {
+            const mensaje = err instanceof Error ? err.message : 'Error de conexión';
+            setEstado(prev => ({...prev, error: mensaje}));
+            return {puedeSubir: false, mensaje, info: null};
+        }
     }, []);
 
     /* Cargar al montar */

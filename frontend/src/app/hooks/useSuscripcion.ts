@@ -8,8 +8,9 @@
  * @package App/React/hooks
  */
 
-import {useState, useCallback, useMemo} from 'react';
+import {useState, useCallback, useMemo, useEffect} from 'react';
 import type {InfoSuscripcion, LimitesPlan, ErrorLimite} from '../types/dashboard';
+import {apiFetch} from '../utils/apiClient';
 
 /*
  * Límites por defecto para plan FREE (fallback)
@@ -181,41 +182,19 @@ export function useSuscripcion(): UseSuscripcionReturn {
 
     /*
      * Activa el trial de 14 días
+     * [18-08-2026] Contrato Rust: POST /api/subscription/trial -> { success, data }
      */
     const activarTrial = useCallback(async (): Promise<boolean> => {
-        const wpData = (
-            window as unknown as {
-                gloryDashboard?: {nonce?: string; apiBase?: string};
-            }
-        ).gloryDashboard;
-
-        if (!wpData?.apiBase || !wpData?.nonce) {
-            setError('No hay conexión con el servidor');
-            return false;
-        }
-
         setCargando(true);
         setError(null);
 
         try {
-            const response = await fetch(wpData.apiBase.replace('/dashboard', '/suscripcion/trial'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': wpData.nonce
-                },
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setSuscripcion(data.data);
-                return true;
-            }
-
-            setError(data.message || 'No se pudo activar el trial');
-            return false;
+            const respuesta = await apiFetch<{success: boolean; data: InfoSuscripcion}>(
+                '/subscription/trial',
+                {method: 'POST'}
+            );
+            setSuscripcion(respuesta.data);
+            return true;
         } catch (err) {
             const mensaje = err instanceof Error ? err.message : 'Error de conexión';
             setError(mensaje);
@@ -227,40 +206,26 @@ export function useSuscripcion(): UseSuscripcionReturn {
 
     /*
      * Recarga la información de suscripción desde el servidor
+     * [18-08-2026] Contrato Rust: GET /api/subscription -> SubscriptionInfo (sin envelope)
      */
     const recargarSuscripcion = useCallback(async (): Promise<void> => {
-        const wpData = (
-            window as unknown as {
-                gloryDashboard?: {nonce?: string; apiBase?: string};
-            }
-        ).gloryDashboard;
-
-        if (!wpData?.apiBase || !wpData?.nonce) {
-            return;
-        }
-
         setCargando(true);
 
         try {
-            const response = await fetch(wpData.apiBase.replace('/dashboard', '/suscripcion'), {
-                method: 'GET',
-                headers: {
-                    'X-WP-Nonce': wpData.nonce
-                },
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setSuscripcion(data.data);
-            }
+            const data = await apiFetch<InfoSuscripcion>('/subscription');
+            setSuscripcion(data);
         } catch (err) {
-            console.error('[useSuscripcion] Error al recargar:', err);
+            /* No romper la UI si el endpoint falla; se mantiene el estado actual */
+            console.warn('[useSuscripcion] No se pudo recargar:', err);
         } finally {
             setCargando(false);
         }
     }, []);
+
+    /* Cargar la suscripción real al montar */
+    useEffect(() => {
+        recargarSuscripcion();
+    }, [recargarSuscripcion]);
 
     return {
         suscripcion,

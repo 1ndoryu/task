@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS api_tokens;
+DROP TABLE IF EXISTS e2e_keys;
+DROP TABLE IF EXISTS feedback;
+DROP TABLE IF EXISTS backups;
+DROP TABLE IF EXISTS attachments;
+DROP TABLE IF EXISTS subscriptions;
+
+ALTER TABLE users DROP COLUMN IF EXISTS es_admin;

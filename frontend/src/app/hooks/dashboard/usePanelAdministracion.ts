@@ -17,12 +17,12 @@ export interface UsePanelAdministracionParams {
 export interface UsePanelAdministracionReturn {
     admin: ReturnType<typeof useAdministracion>;
     usuarioDetalle: UsuarioAdmin | null;
-    cargandoAccion: number | null;
+    cargandoAccion: string | null;
     tabActiva: TabAdmin;
     setTabActiva: React.Dispatch<React.SetStateAction<TabAdmin>>;
-    manejarActivarPremium: (userId: number, duracion?: number) => Promise<void>;
-    manejarCancelarPremium: (userId: number) => Promise<void>;
-    manejarExtenderTrial: (userId: number, dias: number) => Promise<void>;
+    manejarActivarPremium: (userId: string, duracion?: number) => Promise<void>;
+    manejarCancelarPremium: (userId: string) => Promise<void>;
+    manejarExtenderTrial: (userId: string, dias: number) => Promise<void>;
     manejarVerDetalle: (usuario: UsuarioAdmin) => Promise<void>;
     cerrarDetalle: () => void;
 }
@@ -30,7 +30,7 @@ export interface UsePanelAdministracionReturn {
 export function usePanelAdministracion({estaAbierto}: UsePanelAdministracionParams): UsePanelAdministracionReturn {
     const admin = useAdministracion();
     const [usuarioDetalle, setUsuarioDetalle] = useState<UsuarioAdmin | null>(null);
-    const [cargandoAccion, setCargandoAccion] = useState<number | null>(null);
+    const [cargandoAccion, setCargandoAccion] = useState<string | null>(null);
     const [tabActiva, setTabActiva] = useState<TabAdmin>('usuarios');
 
     /* Cargar datos al abrir el panel */
@@ -42,7 +42,7 @@ export function usePanelAdministracion({estaAbierto}: UsePanelAdministracionPara
     }, [estaAbierto]);
 
     /* Manejar activar premium */
-    const manejarActivarPremium = async (userId: number, duracion?: number) => {
+    const manejarActivarPremium = async (userId: string, duracion?: number) => {
         setCargandoAccion(userId);
         const resultado = await admin.activarPremium(userId, duracion);
         setCargandoAccion(null);
@@ -56,7 +56,7 @@ export function usePanelAdministracion({estaAbierto}: UsePanelAdministracionPara
     };
 
     /* Manejar cancelar premium */
-    const manejarCancelarPremium = async (userId: number) => {
+    const manejarCancelarPremium = async (userId: string) => {
         setCargandoAccion(userId);
         const resultado = await admin.cancelarPremium(userId);
         setCargandoAccion(null);
@@ -70,7 +70,7 @@ export function usePanelAdministracion({estaAbierto}: UsePanelAdministracionPara
     };
 
     /* Manejar extender trial */
-    const manejarExtenderTrial = async (userId: number, dias: number) => {
+    const manejarExtenderTrial = async (userId: string, dias: number) => {
         setCargandoAccion(userId);
         const resultado = await admin.extenderTrial(userId, dias);
         setCargandoAccion(null);

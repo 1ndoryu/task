@@ -19,7 +19,7 @@ interface ListaUsuariosProps {
     onVerDetalle: (usuario: UsuarioAdmin) => void;
     onActivarPremium: (usuario: UsuarioAdmin) => void;
     onCancelarPremium: (usuario: UsuarioAdmin) => void;
-    cargandoAccion: number | null;
+    cargandoAccion: string | null;
 }
 
 export function ListaUsuarios({usuarios, cargando, error, paginacion, onCambiarPagina, onVerDetalle, onActivarPremium, onCancelarPremium, cargandoAccion}: ListaUsuariosProps): JSX.Element {

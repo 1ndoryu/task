@@ -5,18 +5,10 @@
  */
 
 import type {MensajeTimeline, TipoMensaje, AccionSistema} from '../hooks/useMensajes';
+import {apiFetch} from './apiClient';
 
 /* Re-exportar tipos para que los consumidores puedan importarlos desde aqui */
 export type {MensajeTimeline, TipoMensaje, AccionSistema};
-
-/* Base URL de la API */
-const API_BASE = '/wp-json/glory/v1/mensajes';
-
-/* Obtiene el nonce de WordPress para autenticacion */
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
-}
 
 /**
  * Registra un evento del sistema en el timeline (historial de cambios)
@@ -32,11 +24,22 @@ export async function registrarEventoSistema(tipoElemento: 'tarea' | 'proyecto' 
     /* No registrar eventos para elementos que no existen (IDs negativos = habitos virtuales) */
     if (elementoId <= 0) return false;
 
-    /* [18-08-2026] Sin backend de mensajes en Rust aun: no-op silencioso. */
-    void tipoElemento;
-    void accion;
-    void detalle;
-    return false;
+    /* [18-08-2026] Contrato Rust: POST /timeline/events { itemType, itemId, action, detail }. */
+    try {
+        const respuesta = await apiFetch<{success: boolean; created: boolean}>('/timeline/events', {
+            method: 'POST',
+            body: {
+                itemType: tipoElemento,
+                itemId: elementoId,
+                action: accion,
+                detail: detalle ?? null
+            }
+        });
+        return respuesta.success;
+    } catch {
+        /* El historial no debe romper la accion principal; se registra y se ignora. */
+        return false;
+    }
 }
 
 /**

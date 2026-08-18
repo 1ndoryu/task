@@ -20,24 +20,22 @@ import {Capacitor} from '@capacitor/core';
 /*
  * Detección de entorno para WebSocket
  *
- * Estrategia de conexión:
- * - Todo HTTPS (web y APK): usa wss://ws.nakomi.studio (con SSL via Traefik/Coolify)
- * - Localhost HTTP: usa ws:// sin problemas
- *
- * Nota: La APK carga desde https://task.nakomi.studio/, por lo que la WebView
- * bloquea conexiones ws:// por mixed content. Usamos wss:// para todo HTTPS.
+ * [18-08-2026] El backend Rust expone /api/realtime/ws en el mismo origen
+ * (sesión por cookie, sin registro manual). En dev el front corre en 5173 y
+ * el backend en 3000; en producción van tras el mismo proxy con wss://.
  */
 const esPlataformaNativa = Capacitor.isNativePlatform();
 const esHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 
 /* URL del WebSocket según el entorno */
 const obtenerUrlWebSocket = (): string => {
-    /* Si estamos en HTTPS (web o APK), usar wss:// para evitar mixed content */
+    const host = window.location.hostname || 'localhost';
+    /* HTTPS (producción): mismo origen, wss:// para evitar mixed content */
     if (esHttps) {
-        return 'wss://ws.nakomi.studio';
+        return `wss://${window.location.host}/api/realtime/ws`;
     }
-    /* Solo localhost/HTTP usa ws:// sin SSL */
-    return 'ws://66.94.100.241:8082';
+    /* HTTP local: backend Rust en el puerto 3000 */
+    return `ws://${host}:3000/api/realtime/ws`;
 };
 
 /* Configuración del WebSocket */
@@ -154,7 +152,8 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
     /* Enviar heartbeat (ping) */
     const enviarHeartbeat = useCallback(() => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-            wsRef.current.send(JSON.stringify({tipo: 'ping', timestamp: Date.now()}));
+            /* El backend responde 'pong' al texto plano 'ping' */
+            wsRef.current.send('ping');
 
             /* Configurar timeout para esperar pong */
             heartbeatTimeoutRef.current = setTimeout(() => {
@@ -202,14 +201,9 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
                 setEstado('conectado');
                 intentosReconexionRef.current = 0;
 
-                /* Registrar usuario */
-                ws.send(
-                    JSON.stringify({
-                        accion: 'registrar',
-                        idUsuario: userId,
-                        timestamp: Date.now()
-                    })
-                );
+                /* [18-08-2026] El backend identifica por cookie de sesión;
+                 * no hace falta registrar el usuario. */
+                void userId;
 
                 /* Iniciar heartbeat */
                 iniciarHeartbeat();

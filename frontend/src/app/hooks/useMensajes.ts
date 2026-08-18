@@ -10,6 +10,8 @@
  */
 
 import {useState, useCallback, useRef, useEffect} from 'react';
+import {apiFetch} from '../utils/apiClient';
+import {suscribirEvento} from '../utils/eventBus';
 
 /* Tipos para el sistema de mensajes */
 export type TipoMensaje = 'enviado' | 'recibido' | 'sistema';
@@ -17,10 +19,10 @@ export type TipoMensaje = 'enviado' | 'recibido' | 'sistema';
 export type AccionSistema = 'creado' | 'editado' | 'completado' | 'reabierto' | 'asignado' | 'desasignado' | 'adjunto_agregado' | 'adjunto_eliminado' | 'prioridad' | 'urgencia' | 'fecha_limite' | 'participante_agregado' | 'participante_removido' | 'compartido' | 'descripcion' | 'nombre' | 'repeticion';
 
 export interface MensajeTimeline {
-    id: number;
+    id: string;
     tipoElemento: 'tarea' | 'proyecto' | 'habito';
     elementoId: number;
-    usuarioId: number;
+    usuarioId: string;
     usuarioNombre: string;
     avatar: string;
     tipoMensaje: 'usuario' | 'sistema';
@@ -48,8 +50,49 @@ interface UseMensajesReturn {
     limpiarError: () => void;
 }
 
-/* Base URL de la API */
-const API_BASE = '/wp-json/glory/v1/mensajes';
+/* [18-08-2026] Contrato Rust /api/timeline (camelCase):
+ * GET /timeline/{itemType}/{itemId} -> { items, total, limit, offset, hasMore }
+ * POST /timeline { itemType, itemId, content } -> TimelineItem (201) */
+
+interface TimelineItemRust {
+    id: string;
+    itemType: 'tarea' | 'proyecto' | 'habito';
+    itemId: number;
+    userId: string;
+    userName: string;
+    avatarUrl: string | null;
+    messageType: 'usuario' | 'sistema';
+    content: string;
+    systemAction: AccionSistema | null;
+    metadata: Record<string, unknown> | null;
+    createdAt: string;
+    isOwn: boolean;
+}
+
+interface TimelineResponseRust {
+    items: TimelineItemRust[];
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+}
+
+function mapearMensaje(mensaje: TimelineItemRust): MensajeTimeline {
+    return {
+        id: mensaje.id,
+        tipoElemento: mensaje.itemType,
+        elementoId: mensaje.itemId,
+        usuarioId: mensaje.userId,
+        usuarioNombre: mensaje.userName,
+        avatar: mensaje.avatarUrl || '',
+        tipoMensaje: mensaje.messageType,
+        contenido: mensaje.content,
+        accionSistema: mensaje.systemAction,
+        datosExtra: mensaje.metadata,
+        fechaCreacion: mensaje.createdAt,
+        esPropio: mensaje.isOwn,
+    };
+}
 
 /*
  * IDs de tareas de bienvenida (datos iniciales para nuevos usuarios)
@@ -78,14 +121,6 @@ function filtrarMensajesAdmin(mensajes: MensajeTimeline[], tipoElemento: string,
 }
 
 /**
- * Obtiene el nonce de WordPress para autenticación
- */
-export function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
-}
-
-/**
  * Hook principal para el sistema de mensajes
  */
 export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', elementoId: number): UseMensajesReturn {
@@ -103,19 +138,6 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
     const limiteRef = useRef(50);
 
     /**
-     * Realiza una petición a la API de mensajes
-     */
-    /* [18-08-2026] Sin backend de mensajes en Rust aun: se degrada sin llamar
-     * a /wp-json. Las lecturas devuelven vacio (timeline sin ruido) y los
-     * envios fallan con mensaje claro. */
-    const fetchApi = useCallback(async <T>(_endpoint: string, options: RequestInit = {}): Promise<T> => {
-        if ((options.method || 'GET').toUpperCase() !== 'GET') {
-            throw new Error('El chat aún no está disponible');
-        }
-        return {success: true, mensajes: [], total: 0} as T;
-    }, []);
-
-    /**
      * Carga los mensajes del timeline
      */
     const cargarMensajes = useCallback(async (): Promise<void> => {
@@ -129,28 +151,25 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
         offsetRef.current = 0;
 
         try {
-            const response = await fetchApi<{
-                success: boolean;
-                mensajes: MensajeTimeline[];
-                total: number;
-            }>(`/${tipoElemento}/${elementoId}?limite=${limiteRef.current}&offset=0`);
+            const response = await apiFetch<TimelineResponseRust>(
+                `/timeline/${tipoElemento}/${elementoId}?limit=${limiteRef.current}&offset=0`,
+                {signal: abortControllerRef.current.signal}
+            );
 
-            if (!response.success) {
-                throw new Error('Error al cargar mensajes');
-            }
+            const mensajes = response.items.map(mapearMensaje);
 
             /* Filtrar mensajes de admin para tareas de bienvenida */
-            const mensajesFiltrados = filtrarMensajesAdmin(response.mensajes, tipoElemento, elementoId);
+            const mensajesFiltrados = filtrarMensajesAdmin(mensajes, tipoElemento, elementoId);
 
             setEstado(prev => ({
                 ...prev,
                 cargando: false,
                 mensajes: mensajesFiltrados,
-                total: mensajesFiltrados.length,
-                hayMas: mensajesFiltrados.length < response.total
+                total: response.total,
+                hayMas: response.hasMore
             }));
 
-            offsetRef.current = response.mensajes.length;
+            offsetRef.current = mensajes.length;
         } catch (error) {
             if (error instanceof Error && error.name === 'AbortError') {
                 return;
@@ -158,7 +177,7 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
             const mensaje = error instanceof Error ? error.message : 'Error desconocido';
             setEstado(prev => ({...prev, cargando: false, error: mensaje}));
         }
-    }, [fetchApi, tipoElemento, elementoId]);
+    }, [tipoElemento, elementoId]);
 
     /**
      * Carga más mensajes (paginación)
@@ -169,32 +188,28 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
         setEstado(prev => ({...prev, cargando: true}));
 
         try {
-            const response = await fetchApi<{
-                success: boolean;
-                mensajes: MensajeTimeline[];
-                total: number;
-            }>(`/${tipoElemento}/${elementoId}?limite=${limiteRef.current}&offset=${offsetRef.current}`);
+            const response = await apiFetch<TimelineResponseRust>(
+                `/timeline/${tipoElemento}/${elementoId}?limit=${limiteRef.current}&offset=${offsetRef.current}`
+            );
 
-            if (!response.success) {
-                throw new Error('Error al cargar más mensajes');
-            }
+            const mensajes = response.items.map(mapearMensaje);
 
             /* Filtrar mensajes de admin para tareas de bienvenida */
-            const mensajesFiltrados = filtrarMensajesAdmin(response.mensajes, tipoElemento, elementoId);
+            const mensajesFiltrados = filtrarMensajesAdmin(mensajes, tipoElemento, elementoId);
 
             setEstado(prev => ({
                 ...prev,
                 cargando: false,
                 mensajes: [...prev.mensajes, ...mensajesFiltrados],
-                hayMas: prev.mensajes.length + mensajesFiltrados.length < response.total
+                hayMas: response.hasMore
             }));
 
-            offsetRef.current += response.mensajes.length;
+            offsetRef.current += mensajes.length;
         } catch (error) {
             const mensaje = error instanceof Error ? error.message : 'Error desconocido';
             setEstado(prev => ({...prev, cargando: false, error: mensaje}));
         }
-    }, [fetchApi, tipoElemento, elementoId, estado.cargando, estado.hayMas]);
+    }, [tipoElemento, elementoId, estado.cargando, estado.hayMas]);
 
     /**
      * Envía un mensaje de usuario
@@ -206,27 +221,20 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
             setEstado(prev => ({...prev, enviando: true, error: null}));
 
             try {
-                const response = await fetchApi<{
-                    success: boolean;
-                    mensaje: MensajeTimeline;
-                }>('', {
+                const mensaje = await apiFetch<TimelineItemRust>('/timeline', {
                     method: 'POST',
-                    body: JSON.stringify({
-                        tipoElemento,
-                        elementoId,
-                        contenido
-                    })
+                    body: {
+                        itemType: tipoElemento,
+                        itemId: elementoId,
+                        content: contenido.trim()
+                    }
                 });
 
-                if (!response.success) {
-                    throw new Error('Error al enviar mensaje');
-                }
-
-                /* Agregar mensaje al estado (optimistic update) */
+                /* Agregar mensaje al estado (respuesta del servidor) */
                 setEstado(prev => ({
                     ...prev,
                     enviando: false,
-                    mensajes: [...prev.mensajes, response.mensaje],
+                    mensajes: [...prev.mensajes, mapearMensaje(mensaje)],
                     total: prev.total + 1
                 }));
 
@@ -237,7 +245,7 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
                 return false;
             }
         },
-        [fetchApi, tipoElemento, elementoId]
+        [tipoElemento, elementoId]
     );
 
     /**
@@ -253,12 +261,21 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
             cargarMensajes();
         }
 
+        /* [18-08-2026] Tiempo real: recargar cuando llega un evento de timeline
+         * para este elemento (enviado desde otro dispositivo). */
+        const desuscribir = suscribirEvento(evento => {
+            if (evento.itemType === tipoElemento && evento.itemId === elementoId) {
+                cargarMensajes();
+            }
+        });
+
         return () => {
+            desuscribir();
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
         };
-    }, [tipoElemento, elementoId, cargarMensajes]);
+    }, [cargarMensajes, elementoId, tipoElemento]);
 
     return {
         estado,
@@ -268,7 +285,3 @@ export function useMensajes(tipoElemento: 'tarea' | 'proyecto' | 'habito', eleme
         limpiarError
     };
 }
-
-/* Re-exportar funciones y hooks movidos para compatibilidad retroactiva */
-export {registrarEventoSistema, obtenerTipoVisual, obtenerIconoAccion} from '../utils/mensajes';
-export {useMensajesNoLeidos} from './useMensajesNoLeidos';

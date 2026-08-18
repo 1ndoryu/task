@@ -6,6 +6,7 @@
  */
 
 import {useState, useEffect, useCallback} from 'react';
+import {apiFetch} from '../utils/apiClient';
 
 export interface EstadoCifrado {
     habilitado: boolean;
@@ -21,34 +22,21 @@ interface UseCifradoReturn {
     recargar: () => Promise<void>;
 }
 
-/*
- * Obtiene la configuracion de WordPress inyectada en el frontend
- * Nota: apiBase apunta a /glory/v1/dashboard, pero para seguridad
- * necesitamos /glory/v1, por eso removemos el sufijo /dashboard
- * Retorna null si el usuario no está autenticado
- */
-function obtenerConfigWP(): {nonce: string; apiBase: string} | null {
-    const wpData = (
-        window as unknown as {
-            gloryDashboard?: {nonce?: string; apiBase?: string; isLoggedIn?: boolean};
-        }
-    ).gloryDashboard;
+/* [18-08-2026] Contrato Rust /api/security/e2e:
+ * GET -> { habilitado, algoritmo, tipoClaveDerivacion }
+ * PUT { habilitado, claveCifrada, algoritmo?, derivacion? } -> { success, estado }
+ * La clave se genera en el cliente (AES-GCM 256 bits, base64) y el servidor
+ * solo la guarda como blob; el cifrado real de los datos es responsabilidad
+ * del cliente (Web Crypto) cuando se active el flujo completo. */
 
-    /* Verificar que el usuario esté logueado, no solo que exista el nonce */
-    if (!wpData?.isLoggedIn || !wpData?.nonce) {
-        return null;
+function generarClaveAesGcm(): string {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    let binaria = '';
+    for (const byte of bytes) {
+        binaria += String.fromCharCode(byte);
     }
-
-    /* Obtener la base sin /dashboard para endpoints fuera de dashboard */
-    let apiBase = wpData.apiBase || '/wp-json/glory/v1/dashboard';
-    if (apiBase.endsWith('/dashboard')) {
-        apiBase = apiBase.replace('/dashboard', '');
-    }
-
-    return {
-        nonce: wpData.nonce,
-        apiBase
-    };
+    return btoa(binaria);
 }
 
 export function useCifrado(): UseCifradoReturn {
@@ -56,18 +44,45 @@ export function useCifrado(): UseCifradoReturn {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    /* [18-08-2026] Sin backend de cifrado E2E en Rust aun: se degrada a estado
-     * deshabilitado sin llamar a /wp-json. El flag cifradoE2E se persiste via
-     * PUT /api/dashboard/settings cuando exista el flujo de claves. */
     const cargarEstado = useCallback(async () => {
-        setEstadoCifrado(null);
-        setCargando(false);
+        setCargando(true);
         setError(null);
+        try {
+            const estado = await apiFetch<EstadoCifrado>('/security/e2e');
+            setEstadoCifrado(estado);
+        } catch (err) {
+            const mensaje = err instanceof Error ? err.message : 'Error de conexión';
+            setError(mensaje);
+            setEstadoCifrado(null);
+        } finally {
+            setCargando(false);
+        }
     }, []);
 
-    const toggleCifrado = useCallback(async (_habilitar: boolean): Promise<boolean> => {
-        setError('El cifrado de extremo a extremo aún no está disponible');
-        return false;
+    const toggleCifrado = useCallback(async (habilitar: boolean): Promise<boolean> => {
+        setCargando(true);
+        setError(null);
+        try {
+            const respuesta = await apiFetch<{success: boolean; estado: EstadoCifrado}>('/security/e2e', {
+                method: 'PUT',
+                body: habilitar
+                    ? {
+                          habilitado: true,
+                          claveCifrada: generarClaveAesGcm(),
+                          algoritmo: 'AES-GCM',
+                          derivacion: 'PBKDF2'
+                      }
+                    : {habilitado: false, claveCifrada: ''}
+            });
+            setEstadoCifrado(respuesta.estado);
+            return respuesta.success;
+        } catch (err) {
+            const mensaje = err instanceof Error ? err.message : 'Error de conexión';
+            setError(mensaje);
+            return false;
+        } finally {
+            setCargando(false);
+        }
     }, []);
 
     useEffect(() => {

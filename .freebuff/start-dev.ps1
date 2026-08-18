@@ -1,0 +1,11 @@
+# Arranca el launcher dev (backend Rust + Vite) en background y devuelve el PID.
+# [18-08-2026] Overrides locales: PostgreSQL local 127.0.0.1:5432, PORT=3000.
+$ErrorActionPreference = 'Stop'
+$env:GLORY_DEV_DATABASE_URL_TEMPLATE = 'postgres://postgres:root@127.0.0.1:5432/{db}'
+$env:GLORY_DEV_DB_NAME = 'glory_backend_local'
+$env:PORT = '3000'
+$env:CORS_ORIGINS = 'http://localhost:5173,http://127.0.0.1:5173'
+$log = 'C:/Users/Owner/OneDrive/Documentos/area-trabajo/.freebuff/preview-eed1f4ab-5590-41f5-83ce-f00baf4e9110.log'
+$err = "$log.err"
+$p = Start-Process -FilePath 'npm.cmd' -ArgumentList 'run','dev' -WorkingDirectory 'C:\Users\Owner\OneDrive\Documentos\area-trabajo\PROYECTO TASKS' -RedirectStandardOutput $log -RedirectStandardError $err -WindowStyle Hidden -PassThru
+Write-Output "PID=$($p.Id)"

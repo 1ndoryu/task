@@ -1,15 +1,22 @@
 #![allow(clippy::needless_for_each)] // Generado por utoipa OpenApi derive
 
 mod activity;
+pub mod admin;
 pub mod auth;
+mod backup;
 mod collaboration;
 mod dashboard;
+mod feedback;
 mod habit_history;
 mod health;
 mod notes;
 mod notifications;
 mod productivity;
+mod realtime;
+mod security;
 mod shared;
+mod storage;
+mod subscription;
 mod timeline;
 
 use axum::body::Body;
@@ -107,6 +114,36 @@ impl utoipa::Modify for SecurityAddon {
         timeline::count,
         timeline::unread,
         timeline::mark_read,
+        subscription::get_subscription,
+        subscription::activate_trial,
+        subscription::checkout,
+        storage::storage_info,
+        storage::verify_space,
+        storage::list_files,
+        storage::upload_file,
+        storage::delete_file,
+        backup::list_backups,
+        backup::create_backup,
+        backup::restore_backup,
+        backup::delete_backup,
+        feedback::create_feedback,
+        feedback::feedback_state,
+        feedback::my_feedback,
+        feedback::admin_feedback,
+        feedback::admin_feedback_stats,
+        feedback::admin_feedback_read,
+        security::get_e2e,
+        security::save_e2e,
+        security::change_password,
+        security::mcp_token_state,
+        security::mcp_token_generate,
+        security::mcp_token_revoke,
+        admin::list_users,
+        admin::get_user,
+        admin::admin_stats,
+        admin::activate_premium,
+        admin::cancel_premium,
+        admin::extend_trial,
     ),
     components(schemas(
         health::HealthResponse,
@@ -177,6 +214,41 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::productivity::ProductivityWriteResponse,
         crate::models::productivity::UpsertProjectRequest,
         crate::models::productivity::UpsertTaskRequest,
+        crate::models::subscription::SubscriptionInfo,
+        crate::models::subscription::TrialResponse,
+        crate::models::subscription::CheckoutResponse,
+        crate::models::subscription::PlanLimits,
+        crate::models::storage::StorageInfo,
+        crate::models::storage::Attachment,
+        crate::models::storage::VerifySpaceRequest,
+        crate::models::storage::VerifySpaceResponse,
+        crate::models::backup::BackupMetadata,
+        crate::models::backup::CreateBackupRequest,
+        crate::models::backup::CreateBackupResponse,
+        crate::models::backup::RestoreBackupResponse,
+        crate::models::feedback::CreateFeedbackRequest,
+        crate::models::feedback::CreateFeedbackResponse,
+        crate::models::feedback::FeedbackItem,
+        crate::models::feedback::FeedbackState,
+        crate::models::feedback::FeedbackStats,
+        crate::models::feedback::PaginatedFeedback,
+        crate::models::security::E2EState,
+        crate::models::security::SaveE2ERequest,
+        crate::models::security::SaveE2EResponse,
+        crate::models::security::ChangePasswordRequest,
+        crate::models::security::ChangePasswordResponse,
+        crate::models::security::McpTokenState,
+        crate::models::security::McpTokenGenerated,
+        crate::models::security::McpTokenRevoked,
+        crate::models::admin::AdminUser,
+        crate::models::admin::AdminSubscription,
+        crate::models::admin::AdminUserStats,
+        crate::models::admin::AdminPagination,
+        crate::models::admin::AdminUsersResponse,
+        crate::models::admin::AdminStatsResponse,
+        crate::models::admin::AdminPremiumRequest,
+        crate::models::admin::AdminTrialRequest,
+        crate::models::admin::AdminActionResponse,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -224,7 +296,8 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api", api_routes(&state))
         .layer(TraceLayer::new_for_http())
-        .layer(RequestBodyLimitLayer::new(1024 * 1024))
+        // 6 MB para soportar adjuntos de hasta 5 MB + multipart overhead.
+        .layer(RequestBodyLimitLayer::new(6 * 1024 * 1024))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|_: BoxError| async {
@@ -310,4 +383,11 @@ fn api_routes(state: &AppState) -> Router<AppState> {
         .merge(notifications::routes())
         .merge(timeline::routes())
         .merge(notes::routes())
+        .merge(subscription::routes())
+        .merge(storage::routes())
+        .merge(backup::routes())
+        .merge(feedback::routes())
+        .merge(security::routes())
+        .merge(realtime::routes())
+        .merge(admin::routes())
 }

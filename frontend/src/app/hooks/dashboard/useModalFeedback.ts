@@ -5,6 +5,7 @@
  */
 
 import {useState, useEffect, useCallback} from 'react';
+import {apiFetch} from '../../utils/apiClient';
 
 type TipoFeedback = 'sugerencia' | 'bug' | 'otro';
 
@@ -34,10 +35,9 @@ export interface UseModalFeedbackReturn {
     manejarTecla: (e: React.KeyboardEvent) => void;
 }
 
-function obtenerNonce(): string {
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard;
-    return wpData?.nonce || '';
-}
+/* [18-08-2026] Contrato Rust /api/feedback:
+ * GET /feedback/state -> { restante, esPremium }
+ * POST /feedback { tipo, mensaje } -> { success, message } */
 
 export function useModalFeedback({estaAbierto, onCerrar}: UseModalFeedbackProps): UseModalFeedbackReturn {
     const [tipo, setTipo] = useState<TipoFeedback>('sugerencia');
@@ -46,18 +46,26 @@ export function useModalFeedback({estaAbierto, onCerrar}: UseModalFeedbackProps)
     const [enviando, setEnviando] = useState(false);
     const [resultado, setResultado] = useState<{exito: boolean; mensaje: string} | null>(null);
 
+    const cargarEstado = useCallback(async () => {
+        setEstado(prev => ({...prev, cargando: true}));
+        try {
+            const datos = await apiFetch<{restante: number; esPremium: boolean}>('/feedback/state');
+            setEstado({...datos, cargando: false});
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Error de conexión';
+            setEstado({restante: 0, esPremium: false, cargando: false});
+            setResultado({exito: false, mensaje: msg});
+        }
+    }, []);
+
     /* Cargar estado de comentarios restantes */
     useEffect(() => {
         if (estaAbierto) {
             cargarEstado();
+            setMensaje('');
+            setResultado(null);
         }
-    }, [estaAbierto]);
-
-    /* [18-08-2026] Sin backend de feedback en Rust aun: degradado sin llamar
-     * a /wp-json. */
-    const cargarEstado = async () => {
-        setEstado({restante: 0, esPremium: false, cargando: false});
-    };
+    }, [estaAbierto, cargarEstado]);
 
     const enviarFeedback = useCallback(async () => {
         if (!mensaje.trim() || mensaje.length < 10) {
@@ -68,11 +76,25 @@ export function useModalFeedback({estaAbierto, onCerrar}: UseModalFeedbackProps)
         setEnviando(true);
         setResultado(null);
 
-        setTimeout(() => {
+        try {
+            const respuesta = await apiFetch<{success: boolean; message: string}>('/feedback', {
+                method: 'POST',
+                body: {tipo, mensaje: mensaje.trim()}
+            });
+            setResultado({exito: respuesta.success, mensaje: respuesta.message});
+            if (respuesta.success) {
+                setMensaje('');
+                /* Actualizar restantes tras el envío */
+                cargarEstado();
+                setTimeout(() => onCerrar(), 1200);
+            }
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Error de conexión';
+            setResultado({exito: false, mensaje: msg});
+        } finally {
             setEnviando(false);
-            setResultado({exito: false, mensaje: 'El envío de feedback aún no está disponible'});
-        }, 400);
-    }, [tipo, mensaje, onCerrar]);
+        }
+    }, [tipo, mensaje, onCerrar, cargarEstado]);
 
     const manejarTecla = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && e.ctrlKey && !enviando && estado.restante > 0) {

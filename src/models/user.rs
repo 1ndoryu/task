@@ -13,6 +13,7 @@ pub struct User {
     pub password_hash: String,
     pub display_name: String,
     pub avatar_url: Option<String>,
+    pub es_admin: bool,
     pub created_at: DateTime<Utc>,
 }
 
@@ -23,6 +24,7 @@ pub struct UserResponse {
     pub email: String,
     pub display_name: String,
     pub avatar_url: Option<String>,
+    pub es_admin: bool,
     pub created_at: DateTime<Utc>,
 }
 
@@ -33,6 +35,7 @@ impl From<User> for UserResponse {
             email: user.email,
             display_name: user.display_name,
             avatar_url: user.avatar_url,
+            es_admin: user.es_admin,
             created_at: user.created_at,
         }
     }

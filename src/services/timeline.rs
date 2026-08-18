@@ -74,6 +74,15 @@ impl TimelineService {
             &row,
         )
         .await;
+        Self::broadcast_event(
+            pool,
+            owner_id,
+            &request.item_type,
+            request.item_id,
+            user_id,
+            &row,
+        )
+        .await;
         Ok(Self::item(row, user_id))
     }
 
@@ -221,6 +230,37 @@ impl TimelineService {
         for participant_id in participants.into_iter().filter(|id| *id != sender_id) {
             NotificationService::emit(pool, participant_id, "mensaje_chat", "Nuevo mensaje", Some(row.content.as_str()), json!({ "messageId": row.id, "itemType": item_type, "itemId": item_id, "senderId": sender_id }), Some(format!("timeline:{}:{}", row.id, participant_id))).await;
         }
+    }
+
+    /// Emite el evento por WebSocket a los participantes conectados del item.
+    async fn broadcast_event(
+        pool: &PgPool,
+        owner_id: Uuid,
+        item_type: &str,
+        item_id: i64,
+        sender_id: Uuid,
+        row: &TimelineRow,
+    ) {
+        let Ok(mut participants) =
+            TimelineRepository::participant_ids(pool, owner_id, item_type, item_id).await
+        else {
+            return;
+        };
+        participants.push(sender_id);
+        let event = serde_json::json!({
+            "type": "timeline",
+            "data": {
+                "id": row.id,
+                "itemType": item_type,
+                "itemId": item_id,
+                "messageType": row.message_type,
+                "content": row.content,
+                "userId": row.user_id,
+                "userName": row.user_name,
+                "createdAt": row.created_at,
+            }
+        });
+        crate::services::RealtimeHub::global().publish_to(&participants, event);
     }
 
     fn item(row: TimelineRow, viewer_id: Uuid) -> TimelineItem {

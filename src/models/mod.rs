@@ -1,11 +1,17 @@
 pub mod activity;
+pub mod admin;
+pub mod backup;
 pub mod collaboration;
 pub mod dashboard;
+pub mod feedback;
 pub mod habit_history;
 mod note;
 pub mod notifications;
 pub mod productivity;
+pub mod security;
 pub mod shared;
+pub mod storage;
+pub mod subscription;
 pub mod timeline;
 mod user;
 
@@ -33,3 +39,9 @@ pub use timeline::*;
 pub use user::{
     AuthResponse, LoginRequest, RegisterRequest, UpdateProfileRequest, User, UserResponse,
 };
+pub use admin::*;
+pub use backup::*;
+pub use feedback::*;
+pub use security::*;
+pub use storage::*;
+pub use subscription::*;

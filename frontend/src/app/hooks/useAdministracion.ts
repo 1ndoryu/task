@@ -7,6 +7,7 @@
 
 import {useState, useCallback} from 'react';
 import type {UsuarioAdmin, FiltrosAdmin, RespuestaListaUsuarios, ResumenAdmin} from '../types/dashboard';
+import {apiFetch} from '../utils/apiClient';
 
 interface EstadoAdmin {
     usuarios: UsuarioAdmin[];
@@ -54,22 +55,32 @@ export function useAdministracion() {
     const [estado, setEstado] = useState<EstadoAdmin>(estadoInicial);
     const [filtros, setFiltros] = useState<FiltrosAdmin>(filtrosIniciales);
 
-    /* Obtener URL base de la API */
-    const getApiUrl = useCallback((endpoint: string): string => {
-        const baseUrl = (window as unknown as {gloryDashboard?: {apiUrl?: string}}).gloryDashboard?.apiUrl || '/wp-json/glory/v1';
-        return `${baseUrl}${endpoint}`;
-    }, []);
-
-    /* Obtener nonce para autenticación */
-    const getNonce = useCallback((): string => {
-        return (window as unknown as {gloryDashboard?: {nonce?: string}}).gloryDashboard?.nonce || '';
-    }, []);
-
-    /* [18-08-2026] Sin backend de administracion en Rust aun: fetchApi
-     * degrada sin llamar a /wp-json (todos los flujos devuelven fallo claro). */
+    /* [18-08-2026] Contrato Rust /api/admin (sin envelope): fetchApi adapta
+     * los endpoints del panel al backend: /admin/users (lista), /admin/stats
+     * (resumen), /admin/users/{id}/premium|cancel-premium|trial. */
     const fetchApi = useCallback(
-        async <T>(_endpoint: string, _options: RequestInit = {}): Promise<{success: boolean; data?: T; message?: string}> => {
-            return {success: false, message: 'La administración aún no está disponible'};
+        async <T>(endpoint: string, opciones: RequestInit = {}): Promise<{success: boolean; data?: T; message?: string}> => {
+            /* Mapear rutas del contrato WordPress al contrato Rust */
+            const ruta = endpoint
+                .replace('/admin/usuarios', '/admin/users')
+                .replace('/admin/usuario/', '/admin/users/')
+                .replace('/admin/resumen', '/admin/stats')
+                .replace('/activar-premium', '/premium')
+                .replace('/cancelar-premium', '/cancel-premium')
+                .replace('/extender-trial', '/trial');
+            try {
+                /* headers de RequestInit (HeadersInit) no calzan con OpcionesApi;
+                 * el front nunca envía headers propios: se omiten (apiFetch agrega CSRF). */
+                const {headers: _headersIgnorados, ...resto} = opciones;
+                const data = await apiFetch<T>(ruta, {
+                    ...resto,
+                    body: opciones.body
+                });
+                return {success: true, data};
+            } catch (err) {
+                const mensaje = err instanceof Error ? err.message : 'Error de conexión';
+                return {success: false, message: mensaje};
+            }
         },
         []
     );
@@ -141,7 +152,7 @@ export function useAdministracion() {
 
     /* Obtener detalle de usuario */
     const obtenerDetalleUsuario = useCallback(
-        async (userId: number): Promise<UsuarioAdmin | null> => {
+        async (userId: string): Promise<UsuarioAdmin | null> => {
             try {
                 const resultado = await fetchApi<UsuarioAdmin>(`/admin/usuario/${userId}`);
 
@@ -163,7 +174,7 @@ export function useAdministracion() {
 
     /* Activar premium */
     const activarPremium = useCallback(
-        async (userId: number, duracion?: number): Promise<AccionResultado> => {
+        async (userId: string, duracion?: number): Promise<AccionResultado> => {
             try {
                 const resultado = await fetchApi<{exito: boolean; mensaje: string}>(`/admin/usuario/${userId}/activar-premium`, {
                     method: 'POST',
@@ -191,7 +202,7 @@ export function useAdministracion() {
 
     /* Cancelar premium */
     const cancelarPremium = useCallback(
-        async (userId: number): Promise<AccionResultado> => {
+        async (userId: string): Promise<AccionResultado> => {
             try {
                 const resultado = await fetchApi<{exito: boolean; mensaje: string}>(`/admin/usuario/${userId}/cancelar-premium`, {method: 'POST'});
 
@@ -215,7 +226,7 @@ export function useAdministracion() {
 
     /* Extender trial */
     const extenderTrial = useCallback(
-        async (userId: number, dias: number): Promise<AccionResultado> => {
+        async (userId: string, dias: number): Promise<AccionResultado> => {
             try {
                 const resultado = await fetchApi<{exito: boolean; mensaje: string}>(`/admin/usuario/${userId}/extender-trial`, {
                     method: 'POST',

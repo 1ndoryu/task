@@ -17,6 +17,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useWebSocket, type MensajeWS, type MensajeSincronizacion, type EstadoConexion} from './useWebSocket';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
+import {publicarEvento} from '../utils/eventBus';
 
 /* Configuración */
 const CONFIG_SYNC_RT = {
@@ -87,6 +88,20 @@ export function useSincronizacionTiempoReal(
     /* Handler de mensajes WebSocket */
     const manejarMensaje = useCallback(
         (mensaje: MensajeWS) => {
+            /* [18-08-2026] Evento de timeline del backend Rust: lo re-publica
+             * al bus local para que el chat recargue sin acoplarse al WS. */
+            if (mensaje.tipo === 'timeline') {
+                const datos = (mensaje as {data?: {itemType?: string; itemId?: number}}).data;
+                if (datos?.itemType && typeof datos.itemId === 'number') {
+                    publicarEvento({
+                        tipo: 'timeline',
+                        itemType: datos.itemType as 'tarea' | 'proyecto' | 'habito',
+                        itemId: datos.itemId
+                    });
+                }
+                return;
+            }
+
             /* Manejar mensaje de sincronización */
             if (mensaje.tipo === 'sync') {
                 const syncMsg = mensaje as MensajeSincronizacion;
