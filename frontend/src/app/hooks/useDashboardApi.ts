@@ -1,11 +1,12 @@
 /**
- * Hook para sincronización con la API del Dashboard
+ * Hook para sincronización con la API del Dashboard (backend Rust /api).
  *
- * Maneja la comunicación con el backend WordPress para:
- * - Cargar datos del servidor
- * - Guardar datos en el servidor
- * - Sincronización incremental
- * - Estados de carga y error
+ * [188A-1] Se abandona el contrato WordPress (/wp-json/glory/v1/dashboard +
+ * nonce): la lectura viene de GET /api/dashboard y el guardado se hace por
+ * entidad (PUT /api/tasks/{id} y PUT /api/projects/{id}). La sesion viaja en
+ * cookie HttpOnly y las mutaciones usan X-CSRF-Token (cookie csrf_token).
+ * Habitos, scratchpad de notas y configuracion aun no tienen endpoint Rust:
+ * se omiten del guardado (quedan locales) hasta que existan.
  *
  * @package App/React/hooks
  */
@@ -44,25 +45,6 @@ interface ConfiguracionUsuario {
     ordenHabitos: string;
 }
 
-interface ApiResponse<T> {
-    success: boolean;
-    data?: T;
-    message?: string;
-    code?: string;
-    errors?: string[];
-    meta?: {
-        userId?: number;
-        loadedAt?: string;
-        savedAt?: string;
-        serverTimestamp?: number;
-        counts?: {
-            habitos: number;
-            tareas: number;
-            proyectos: number;
-        };
-    };
-}
-
 interface SyncStatus {
     lastSync: number | null;
     lastUpdate: string | null;
@@ -88,8 +70,16 @@ interface UseDashboardApiReturn {
     limpiarError: () => void;
 }
 
-/* Base URL de la API */
-const API_BASE = '/wp-json/glory/v1/dashboard';
+/* Respuesta del backend Rust: { data, meta } (no envuelto en { success }) */
+interface DashboardReadResponse {
+    data: DashboardData;
+    meta: {
+        loadedAt: string;
+        serverTimestamp: number;
+        sharedItemsIncluded: boolean;
+        truncated: boolean;
+    };
+}
 
 function obtenerTimezoneCliente(): string | null {
     try {
@@ -97,6 +87,42 @@ function obtenerTimezoneCliente(): string | null {
     } catch {
         return null;
     }
+}
+
+/* Lee el token CSRF de la cookie no HttpOnly (contrato Rust ADR-02). */
+function obtenerTokenCsrf(): string {
+    const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
+/* Mapea una tarea del front al contrato UpsertTaskRequest de Rust.
+ * El payload conserva el objeto completo para que el round-trip no pierda
+ * campos (subtareas, dependencias, tags, etc.). */
+function tareaARequest(tarea: Tarea): Record<string, unknown> {
+    return {
+        texto: tarea.texto,
+        completado: Boolean(tarea.completado),
+        prioridad: tarea.prioridad ?? null,
+        urgencia: tarea.urgencia ?? 'normal',
+        proyectoId: tarea.proyectoId ?? null,
+        parentId: tarea.parentId ?? null,
+        orden: tarea.orden ?? 0,
+        payload: tarea,
+        expectedUpdatedAt: null,
+    };
+}
+
+function proyectoARequest(proyecto: Proyecto): Record<string, unknown> {
+    return {
+        nombre: proyecto.nombre,
+        estado: proyecto.estado ?? 'activo',
+        prioridad: proyecto.prioridad ?? null,
+        urgencia: proyecto.urgencia ?? 'normal',
+        fechaLimite: proyecto.fechaLimite ?? null,
+        orden: Number((proyecto as {orden?: number}).orden ?? 0),
+        payload: proyecto,
+        expectedUpdatedAt: null,
+    };
 }
 
 /**
@@ -112,114 +138,87 @@ export function useDashboardApi(): UseDashboardApiReturn {
         online: navigator.onLine
     });
 
-    const abortControllerRef = useRef<AbortController | null>(null);
+    /* [188A-1] Cada peticion tiene su propio AbortController: el guardado es por
+     * entidad (varias PUT en paralelo) y abortar la peticion anterior al iniciar
+     * una nueva cancelaria el batch entero. Solo se aborta en unmount/timeout. */
+    const abortControllersRef = useRef<Set<AbortController>>(new Set());
+    const avisoDominiosSinBackend = useRef(false);
 
     /* Cleanup: Abortar peticiones pendientes al desmontar */
     useEffect(() => {
         return () => {
-            if (abortControllerRef.current) {
-                console.debug('[DashboardApi] Aborting pending requests due to unmount');
-                abortControllerRef.current.abort();
+            for (const controller of abortControllersRef.current) {
+                controller.abort();
             }
+            abortControllersRef.current.clear();
         };
     }, []);
 
     /**
-     * Realiza una petición a la API
+     * Realiza una petición a la API Rust
      */
-    const fetchApi = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> => {
-        /* Guard: No ejecutar si no hay nonce válido (usuario no autenticado) */
-        const nonce = obtenerNonce();
-        if (!nonce) {
+    const fetchApi = useCallback(async <T>(url: string, options: RequestInit = {}): Promise<T> => {
+        /* Guard: No ejecutar si el usuario no esta autenticado */
+        const autenticado = Boolean((window as unknown as {gloryDashboard?: {isLoggedIn?: boolean}}).gloryDashboard?.isLoggedIn);
+        if (!autenticado) {
             throw new ErrorSilencioso('No autenticado');
         }
 
-        /* Cancelar petición anterior si existe */
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-
-        abortControllerRef.current = new AbortController();
-        const url = `${API_BASE}${endpoint}`;
-
+        const controller = new AbortController();
+        abortControllersRef.current.add(controller);
         const timezoneCliente = obtenerTimezoneCliente();
+        const esMutacion = ['POST', 'PUT', 'PATCH', 'DELETE'].includes((options.method || 'GET').toUpperCase());
+
         const defaultOptions: RequestInit = {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'X-WP-Nonce': nonce,
+                ...(esMutacion ? {'X-CSRF-Token': obtenerTokenCsrf()} : {}),
                 ...(timezoneCliente ? {'X-Glory-Timezone': timezoneCliente} : {})
             },
-            signal: abortControllerRef.current.signal
+            signal: controller.signal
         };
-
-        const controller = abortControllerRef.current;
 
         try {
             const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-            console.group('[DashboardApi] Fetch Start');
-            console.log('URL:', url);
-            console.log('Method:', options.method || 'GET');
-            if (options.body) console.log('Payload Size:', (options.body as string).length);
+            const liberar = () => abortControllersRef.current.delete(controller);
 
             const response = await fetch(url, {...defaultOptions, ...options});
             clearTimeout(timeoutId);
 
-            console.log('Status:', response.status);
-
-            // Debug: Clone and read text to see raw response (PHP errors often hidden here)
-            const responseClone = response.clone();
-            const rawText = await responseClone.text();
-            
-            /* Solo mostrar respuesta si no es 401 (para evitar ruido sin autenticación) */
-            if (response.status !== 401) {
-                console.log('Raw Response Body:', rawText.substring(0, 1000) + (rawText.length > 1000 ? '...' : ''));
-            }
-            console.groupEnd();
-
             if (!response.ok) {
                 if (response.status === 401) {
-                    /* Marcar error como silencioso para evitar logs innecesarios */
                     throw new ErrorSilencioso('No autenticado. Inicia sesión para continuar.');
                 }
                 if (response.status === 403) {
-                    /* Marcar 403 como silencioso: usuarios FREE que exceden límites generan 403 esperados */
                     throw new ErrorSilencioso('Sin permisos para realizar esta acción.');
                 }
 
-                // Try to extract error message from JSON if possible, otherwise use status
                 try {
-                    const errorJson = JSON.parse(rawText);
+                    const errorJson = await response.json();
                     throw new Error(errorJson.message || `Error del servidor: ${response.status}`);
-                } catch {
-                    throw new Error(`Error del servidor: ${response.status} - ${rawText.substring(0, 100)}`);
+                } catch (parseError) {
+                    if (parseError instanceof Error && parseError.message.startsWith('Error del servidor')) {
+                        throw parseError;
+                    }
+                    throw new Error(`Error del servidor: ${response.status}`);
                 }
             }
 
-            const data = await response.json();
-            return data as ApiResponse<T>;
+            if (response.status === 204) {
+                liberar();
+                return undefined as T;
+            }
+            const resultado = await response.json() as T;
+            liberar();
+            return resultado;
         } catch (error: unknown) {
-            // Ignorar errores de cancelación (AbortError / DOMException)
             if (error instanceof Error && error.name === 'AbortError') {
-                if (abortControllerRef.current !== controller) {
-                    // Fue cancelado por una nueva petición
-                    console.debug('[DashboardApi] Petición silenciada (reemplazada).');
-                } else {
-                    // Fue cancelado por timeout o desmontaje
-                    console.warn('[DashboardApi] Petición cancelada o timeout.');
-                }
-
-                // Lanzamos un error controlado para que el caller sepa que no hubo datos,
-                // pero con un mensaje que no asuste en los logs si se imprime
                 throw new Error('Petición cancelada');
             }
-
-            /* Silenciar errores 401 esperados (sin autenticación) */
             if (esErrorSilencioso(error) || (error instanceof Error && error.message.includes('No autenticado'))) {
                 throw error;
             }
-
             console.error('[DashboardApi] Fetch Error:', error);
             throw error;
         }
@@ -232,11 +231,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
         setEstado(prev => ({...prev, cargando: true, error: null}));
 
         try {
-            const response = await fetchApi<DashboardData>('', {method: 'GET'});
-
-            if (!response.success || !response.data) {
-                throw new Error(response.message || 'Error al cargar datos');
-            }
+            const response = await fetchApi<DashboardReadResponse>('/api/dashboard', {method: 'GET'});
 
             setEstado(prev => ({
                 ...prev,
@@ -253,29 +248,61 @@ export function useDashboardApi(): UseDashboardApiReturn {
     }, [fetchApi]);
 
     /**
-     * Guarda datos en el servidor
+     * Guarda datos en el servidor.
+     * Tareas y proyectos se persisten por entidad (PUT /api/tasks|projects/{id});
+     * habitos, scratchpad de notas y configuracion no tienen endpoint Rust aun
+     * y se omiten (quedan locales) — aviso unico en consola.
      */
     const guardar = useCallback(
         async (datos: Partial<DashboardData>): Promise<boolean> => {
             setEstado(prev => ({...prev, guardando: true, error: null}));
 
             try {
-                const response = await fetchApi<void>('', {
-                    method: 'POST',
-                    body: JSON.stringify(datos)
-                });
+                const operaciones: Promise<unknown>[] = [];
 
-                if (!response.success) {
-                    throw new Error(response.message || 'Error al guardar datos');
+                for (const tarea of datos.tareas ?? []) {
+                    if (typeof tarea.id !== 'number') continue;
+                    operaciones.push(
+                        fetchApi(`/api/tasks/${tarea.id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(tareaARequest(tarea))
+                        })
+                    );
                 }
+
+                for (const proyecto of datos.proyectos ?? []) {
+                    if (typeof proyecto.id !== 'number') continue;
+                    operaciones.push(
+                        fetchApi(`/api/projects/${proyecto.id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(proyectoARequest(proyecto))
+                        })
+                    );
+                }
+
+                if (!avisoDominiosSinBackend.current) {
+                    const sinBackend = [
+                        datos.habitos?.length ? 'habitos' : null,
+                        datos.notas ? 'scratchpad-notas' : null,
+                        datos.configuracion ? 'configuracion' : null,
+                    ].filter(Boolean);
+                    if (sinBackend.length > 0) {
+                        console.warn(`[DashboardApi] Dominios sin endpoint Rust (quedan locales): ${sinBackend.join(', ')}`);
+                        avisoDominiosSinBackend.current = true;
+                    }
+                }
+
+                const resultados = await Promise.allSettled(operaciones);
+                const fallaron = resultados.filter(r => r.status === 'rejected');
 
                 setEstado(prev => ({
                     ...prev,
                     guardando: false,
-                    ultimaSync: response.meta?.serverTimestamp || Date.now()
+                    ultimaSync: Date.now(),
+                    error: fallaron.length > 0 ? 'No se pudieron guardar todos los datos' : null
                 }));
 
-                return true;
+                return fallaron.length === 0;
             } catch (error) {
                 const mensaje = error instanceof Error ? error.message : 'Error desconocido';
                 setEstado(prev => ({...prev, guardando: false, error: mensaje}));
@@ -286,21 +313,12 @@ export function useDashboardApi(): UseDashboardApiReturn {
     );
 
     /**
-     * Obtiene el estado de sincronización del servidor
+     * Obtiene el estado de sincronización del servidor.
+     * Rust no expone este endpoint; se retorna null (el manager usa timestamps locales).
      */
     const obtenerEstadoSync = useCallback(async (): Promise<SyncStatus | null> => {
-        try {
-            const response = await fetchApi<SyncStatus>('/sync', {method: 'GET'});
-
-            if (!response.success || !response.data) {
-                return null;
-            }
-
-            return response.data;
-        } catch {
-            return null;
-        }
-    }, [fetchApi]);
+        return null;
+    }, []);
 
     /**
      * Sincroniza datos locales con el servidor
@@ -311,7 +329,6 @@ export function useDashboardApi(): UseDashboardApiReturn {
             setEstado(prev => ({...prev, sincronizando: true, error: null}));
 
             try {
-                /* 1. Obtener estado del servidor */
                 const estadoServidor = await obtenerEstadoSync();
 
                 if (!estadoServidor) {
@@ -324,12 +341,10 @@ export function useDashboardApi(): UseDashboardApiReturn {
                     throw new Error('Error al sincronizar por primera vez');
                 }
 
-                /* 2. Comparar timestamps */
                 const timestampLocal = estado.ultimaSync || 0;
                 const timestampServidor = estadoServidor.lastSync || 0;
 
                 if (timestampLocal >= timestampServidor) {
-                    /* Datos locales más recientes - subir */
                     const guardado = await guardar(datosLocales);
                     if (guardado) {
                         setEstado(prev => ({...prev, sincronizando: false}));
@@ -338,7 +353,6 @@ export function useDashboardApi(): UseDashboardApiReturn {
                     throw new Error('Error al subir datos locales');
                 }
 
-                /* 3. Datos del servidor más recientes - descargar */
                 const datosServidor = await cargar();
 
                 if (!datosServidor) {
@@ -375,16 +389,11 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
 /**
  * Obtiene el nonce de WordPress para autenticación
- * Retorna string vacío si el usuario no está logueado
+ * [188A-1] Retorna '' — Rust no usa nonces; la sesion viaja en cookie HttpOnly.
+ * Se conserva para que los hooks legacy que lo leen no rompan.
  */
 export function obtenerNonce(): string {
-    /* El nonce debería estar disponible en una variable global */
-    const wpData = (window as unknown as {gloryDashboard?: {nonce?: string; isLoggedIn?: boolean}}).gloryDashboard;
-    /* Solo retornar nonce si el usuario está logueado */
-    if (!wpData?.isLoggedIn) {
-        return '';
-    }
-    return wpData.nonce || '';
+    return '';
 }
 
 /**

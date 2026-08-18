@@ -42,8 +42,11 @@ impl ProductivityRepository {
                 payload = EXCLUDED.payload,
                 updated_at = NOW(),
                 deleted_at = NULL
+             /* [188A-1] El front es el unico escritor: expected_updated_at NULL =
+              * escritura incondicional (last-write-wins). Con timestamp se
+              * mantiene el lock optimista para clientes concurrentes. */
              WHERE ($10::timestamptz IS NOT NULL AND dashboard_projects.updated_at = $10)
-                OR ($10::timestamptz IS NULL AND dashboard_projects.deleted_at IS NOT NULL)
+                OR ($10::timestamptz IS NULL)
              RETURNING legacy_id, payload, updated_at",
         )
         .bind(user_id)
@@ -141,8 +144,11 @@ impl ProductivityRepository {
                 END,
                 updated_at = NOW(),
                 deleted_at = NULL
+             /* [188A-1] El front es el unico escritor: expected_updated_at NULL =
+              * escritura incondicional (last-write-wins). Con timestamp se
+              * mantiene el lock optimista para clientes concurrentes. */
              WHERE ($12::timestamptz IS NOT NULL AND dashboard_tasks.updated_at = $12)
-                OR ($12::timestamptz IS NULL AND dashboard_tasks.deleted_at IS NOT NULL)
+                OR ($12::timestamptz IS NULL)
              RETURNING legacy_id, payload, updated_at",
         )
         .bind(user_id)
