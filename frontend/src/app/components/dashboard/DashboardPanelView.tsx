@@ -62,10 +62,11 @@ export function DashboardPanelView({panelId, ctx, esMovil = false, accionesExtra
         props = generadorProps(propsContexto, noopHandle, handleConAcciones, esMovil);
     }
 
-    /* Inyectar panelId para scratchpad */
-    if (baseId === 'scratchpad') {
-        props.panelId = panelId;
-    }
+    /* [20-08-2026] Inyectar panelId a todos los paneles (igual que DashboardGrid):
+     * sin esto, las instancias divididas en sidebar (ejecucion-2, scratchpad-1)
+     * quedan sin panelId y los selectores por-instancia (grupo de ejecución) no
+     * persisten el cambio (cambiarGrupo hace no-op sin panelId). */
+    props.panelId = panelId;
 
     /* [20-08-2026] Dividir panel en modo sidebar: mismo contrato que
      * DashboardGrid (onDividirPanel para ejecución y scratchpad), pero la
