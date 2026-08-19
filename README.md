@@ -25,7 +25,7 @@ El frontend reproduce la experiencia del tema original de WordPress: mismo layou
 | Linter               | clippy (paranoia)            | Código limpio                           |
 | Frontend             | React + TypeScript + Vite    | UI (dashboard migrado del tema WP)      |
 | State management     | Zustand                      | Estado del cliente (layout, sync, UI)   |
-| Core compartido      | glory-rs (submodulo)         | Lógica agnóstica reutilizable           |
+| Core compartido      | glory-rs (incluido)           | Lógica agnóstica reutilizable           |
 
 ## Requisitos
 
@@ -97,7 +97,7 @@ npm run build          # Build producción
 │       ├── stores/         # Stores Zustand (layout, suscripción, UI)
 │       ├── styles/         # CSS por componente (variables centralizadas)
 │       └── islands/        # Islas (DashboardIsland, etc.)
-├── glory-rs/               # Submodulo: core agnóstico compartido
+├── glory-rs/               # Core agnóstico compartido (copia incluida, scripts adaptados)
 ├── Agente/                 # Roadmap, planes y documentación de trabajo
 ├── .env.example            # Variables de entorno de ejemplo
 └── README.md
