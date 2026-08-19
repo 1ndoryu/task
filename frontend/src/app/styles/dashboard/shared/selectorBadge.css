@@ -168,7 +168,10 @@
 /* 
  * OPCIONES 
  */
-.selectorBadgeOpcion {
+/* [19-08-2026] Sin bordes de ningun tipo dentro del menu: el Boton base
+ * (variante ghost) trae border 1px y las opciones llevaban border-top entre
+ * ellas. El estado activo se distingue SOLO por opacidad (activa 1, resto 0.8). */
+.selectorBadgeMenu .selectorBadgeOpcion {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -180,34 +183,21 @@
     color: var(--dashboard-textoSecundario);
     background-color: transparent;
     border: none;
+    opacity: 0.8;
     cursor: pointer;
     text-align: left;
     transition: all var(--dashboard-transicionRapida);
 }
 
-.selectorBadgeOpcion:hover {
+.selectorBadgeMenu .selectorBadgeOpcion:hover {
     background-color: var(--dashboard-fondoHover);
     color: var(--dashboard-textoNormal);
+    opacity: 1;
 }
 
-.selectorBadgeOpcionActiva {
-    background-color: var(--dashboard-fondoSecundario);
+.selectorBadgeMenu .selectorBadgeOpcionActiva {
+    opacity: 1;
     color: var(--dashboard-textoNormal);
-    position: relative;
-}
-
-.selectorBadgeOpcionActiva::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: var(--dashboard-acento);
-}
-
-.selectorBadgeOpcion + .selectorBadgeOpcion {
-    border-top: 1px solid var(--dashboard-bordeSutil);
 }
 
 .selectorBadgeOpcionIcono {
