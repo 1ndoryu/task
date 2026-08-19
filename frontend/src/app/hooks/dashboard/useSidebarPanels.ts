@@ -37,6 +37,10 @@ interface UseSidebarPanelesReturn {
     sidebarState: SidebarPanelState;
     /** Agrega un panel al final de la grilla. Máx 4. Si ya existe, es no-op. */
     agregarPanel: (panelId: PanelId) => void;
+    /** [20-08-2026] Divide un panel en la vista: crea una instancia baseId-N
+     * (mismo enfoque que "Agregar a la vista", pero duplicando el panel actual).
+     * Máx 4. Si el panel base no está en la vista, lo agrega sin sufijo. */
+    dividirPanelEnVista: (baseId: PanelId) => void;
     /** Quita un panel de la grilla. Si era el único, no hace nada (mín 1 panel). */
     quitarPanel: (panelId: PanelId) => void;
     /** Verifica si un panel está activo en la grilla sidebar */
@@ -111,6 +115,40 @@ export function useSidebarPaneles(panelInicial?: PanelId): UseSidebarPanelesRetu
         });
     }, []);
 
+    /* [20-08-2026] Dividir en modo sidebar: el botón "Dividir panel" de
+     * ejecución/scratchpad crea una instancia baseId-N en la grilla (como
+     * hace el grid con crearDivisionPanel). Si el panel base no está aún en
+     * la vista, simplemente se agrega sin sufijo. */
+    const dividirPanelEnVista = useCallback((baseId: PanelId) => {
+        setSidebarState(prev => {
+            if (prev.paneles.length >= MAX_PANELES) return prev; // límite
+
+            /* Si el panel base no está en la vista, agregarlo directamente */
+            if (!prev.paneles.includes(baseId)) {
+                return {
+                    ...prev,
+                    paneles: [...prev.paneles, baseId]
+                };
+            }
+
+            /* Siguiente sufijo disponible para instancias baseId-N */
+            const sufijos = prev.paneles
+                .filter(p => p.startsWith(`${baseId}-`))
+                .map(p => {
+                    const m = p.match(/-(\d+)$/);
+                    return m ? parseInt(m[1], 10) : 0;
+                });
+            const siguiente = sufijos.length > 0 ? Math.max(...sufijos) + 1 : 1;
+            const nuevoId = `${baseId}-${siguiente}`;
+
+            if (prev.paneles.includes(nuevoId)) return prev;
+            return {
+                ...prev,
+                paneles: [...prev.paneles, nuevoId]
+            };
+        });
+    }, []);
+
     const quitarPanel = useCallback((panelId: PanelId) => {
         setSidebarState(prev => {
             if (prev.paneles.length <= 1) return prev; // mínimo 1 panel
@@ -163,6 +201,7 @@ export function useSidebarPaneles(panelInicial?: PanelId): UseSidebarPanelesRetu
     return {
         sidebarState,
         agregarPanel,
+        dividirPanelEnVista,
         quitarPanel,
         tienePanel,
         moverPanel,

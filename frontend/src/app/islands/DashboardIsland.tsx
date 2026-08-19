@@ -76,6 +76,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     const {
         sidebarState,
         agregarPanel,
+        dividirPanelEnVista,
         quitarPanel,
         moverPanel,
         setPaneles,
@@ -292,6 +293,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                                     onAjustarAnchos={ajustarAnchos}
                                     onAjustarAlturasFilas={ajustarAlturasFilas}
                                     onMoverPanel={moverPanel}
+                                    onDividirPanel={dividirPanelEnVista}
                                 />
                             </div>
                         )}

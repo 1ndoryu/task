@@ -241,6 +241,13 @@
     text-transform: none;
 }
 
+/* [20-08-2026] Sin modo enfoque en modo sidebar: el overlay de enfoque no tiene
+ * sentido cuando el panel ya ocupa toda la vista; se oculta el botón en todos
+ * los paneles (todos comparten title="Modo enfoque"). */
+.dashboardSidebarLayout .seccionAcciones button[title="Modo enfoque"] {
+    display: none;
+}
+
 @media (max-width: 1023px) {
     .sidebarMenu--expandido {
         width: 160px;

@@ -23,9 +23,11 @@ interface DashboardPanelViewProps {
     /** [multi-panel-sidebar] Botones extra para renderizar en seccionAcciones
      *  Se inyectan a través de handleMinimizar que los paneles colocan en acciones */
     accionesExtra?: React.ReactNode;
+    /** [20-08-2026] Dividir panel en modo sidebar: crea instancia baseId-N en la vista */
+    onDividirPanel?: (baseId: string) => void;
 }
 
-export function DashboardPanelView({panelId, ctx, esMovil = false, accionesExtra}: DashboardPanelViewProps): JSX.Element | null {
+export function DashboardPanelView({panelId, ctx, esMovil = false, accionesExtra, onDividirPanel}: DashboardPanelViewProps): JSX.Element | null {
     const {propsContexto, manejarToggleTarea, manejarEditarHabitoPorId} = useDashboardGrid(ctx, esMovil);
     const [animando, setAnimando] = useState(false);
 
@@ -63,6 +65,13 @@ export function DashboardPanelView({panelId, ctx, esMovil = false, accionesExtra
     /* Inyectar panelId para scratchpad */
     if (baseId === 'scratchpad') {
         props.panelId = panelId;
+    }
+
+    /* [20-08-2026] Dividir panel en modo sidebar: mismo contrato que
+     * DashboardGrid (onDividirPanel para ejecución y scratchpad), pero la
+     * acción crea una instancia en la grilla sidebar en vez de un split del grid. */
+    if ((baseId === 'ejecucion' || baseId === 'scratchpad') && onDividirPanel) {
+        props.onDividirPanel = () => onDividirPanel(baseId);
     }
 
     const Componente = definicionPanel.componente;

@@ -33,9 +33,11 @@ interface DashboardSidebarGridProps {
     onAjustarAnchos?: (nuevosAnchos: [number, number]) => void;
     onAjustarAlturasFilas?: (nuevasAlturas: [number, number]) => void;
     onMoverPanel?: (panelId: PanelId, nuevoIndice: number) => void;
+    /* [20-08-2026] Dividir panel en modo sidebar (crea instancia baseId-N) */
+    onDividirPanel?: (baseId: PanelId) => void;
 }
 
-export function DashboardSidebarGrid({paneles, ctx, anchos, alturaFilas, onQuitarPanel, onAjustarAnchos, onAjustarAlturasFilas, onMoverPanel}: DashboardSidebarGridProps): JSX.Element | null {
+export function DashboardSidebarGrid({paneles, ctx, anchos, alturaFilas, onQuitarPanel, onAjustarAnchos, onAjustarAlturasFilas, onMoverPanel, onDividirPanel}: DashboardSidebarGridProps): JSX.Element | null {
     if (paneles.length === 0) return null;
 
     const count = paneles.length;
@@ -49,6 +51,7 @@ export function DashboardSidebarGrid({paneles, ctx, anchos, alturaFilas, onQuita
                     onQuitar={onQuitarPanel}
                     indice={0}
                     total={1}
+                    onDividir={onDividirPanel}
                 />
             </div>
         );
@@ -81,6 +84,7 @@ export function DashboardSidebarGrid({paneles, ctx, anchos, alturaFilas, onQuita
             total={count}
             onMoverArriba={onMoverPanel ? () => onMoverPanel(panelId, indice - 1) : undefined}
             onMoverAbajo={onMoverPanel ? () => onMoverPanel(panelId, indice + 1) : undefined}
+            onDividir={onDividirPanel}
         />
     );
 
@@ -145,9 +149,10 @@ interface SidebarGridCellProps {
     total: number;
     onMoverArriba?: () => void;
     onMoverAbajo?: () => void;
+    onDividir?: (baseId: PanelId) => void;
 }
 
-function SidebarGridCell({panelId, ctx, onQuitar, indice, total, onMoverArriba, onMoverAbajo}: SidebarGridCellProps): JSX.Element {
+function SidebarGridCell({panelId, ctx, onQuitar, indice, total, onMoverArriba, onMoverAbajo, onDividir}: SidebarGridCellProps): JSX.Element {
     const handleQuitar = useCallback(() => {
         onQuitar(panelId);
     }, [panelId, onQuitar]);
@@ -167,7 +172,7 @@ function SidebarGridCell({panelId, ctx, onQuitar, indice, total, onMoverArriba, 
 
     return (
         <div className="sidebarGridCelda">
-            <DashboardPanelView panelId={panelId} ctx={ctx} accionesExtra={accionesExtra} />
+            <DashboardPanelView panelId={panelId} ctx={ctx} accionesExtra={accionesExtra} onDividirPanel={onDividir} />
         </div>
     );
 }
