@@ -13,17 +13,23 @@ interface EncabezadoBuscadorProps {
     mostrarModal: boolean;
     onCerrarModal: () => void;
     estaConectado: boolean;
+    /* [19-08-2026] Cuando el input de escritorio choca con encabezadoNav, el
+     * header lo colapsa a un boton de lupa en la nav; aqui se oculta el input
+     * en linea y solo se mantiene el modal de busqueda. */
+    colapsado?: boolean;
 }
 
-export function EncabezadoBuscador({tareas, habitos, proyectos, onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, mostrarModal, onCerrarModal, estaConectado}: EncabezadoBuscadorProps) {
+export function EncabezadoBuscador({tareas, habitos, proyectos, onSeleccionarTarea, onSeleccionarHabito, onSeleccionarProyecto, mostrarModal, onCerrarModal, estaConectado, colapsado = false}: EncabezadoBuscadorProps) {
     const puedeBuscar = Boolean(estaConectado && onSeleccionarTarea && onSeleccionarHabito && onSeleccionarProyecto);
     if (!puedeBuscar) return null;
 
     return (
         <>
-            <div className="encabezadoBuscador">
-                <BuscadorGlobal tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea!} onSeleccionarHabito={onSeleccionarHabito!} onSeleccionarProyecto={onSeleccionarProyecto!} />
-            </div>
+            {!colapsado && (
+                <div className="encabezadoBuscador">
+                    <BuscadorGlobal tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea!} onSeleccionarHabito={onSeleccionarHabito!} onSeleccionarProyecto={onSeleccionarProyecto!} />
+                </div>
+            )}
 
             {/* MODAL BUSCADOR MOVIL */}
             {mostrarModal && (

@@ -4,7 +4,9 @@
  * Refactorizado para usar sub-componentes (SOLID) y prevenir re-renders de BuscadorGlobal
  */
 
-import {useState} from 'react';
+import {useLayoutEffect, useRef, useState} from 'react';
+import {Search} from 'lucide-react';
+import {Boton} from '../ui/Boton';
 import {APP_TEXTS} from '../../constants/appTexts';
 import {VERSION_ACTUAL} from '../../data/changelog';
 import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
@@ -125,8 +127,56 @@ export function DashboardEncabezado({
     const [mostrarBuscadorMovil, setMostrarBuscadorMovil] = useState(false);
     const [menuOpcionesMovilAbierto, setMenuOpcionesMovilAbierto] = useState(false);
 
+    /* [19-08-2026] Buscador responsive: si el input centrado de escritorio
+     * choca con los botones de encabezadoNav (viewport estrecho), se colapsa
+     * a un boton de lupa dentro de la nav que abre el mismo modal de busqueda.
+     * Se mide con ResizeObserver para reaccionar a cambios de ancho. */
+    const encabezadoRef = useRef<HTMLElement>(null);
+    const navRef = useRef<HTMLElement>(null);
+    const [buscadorColapsado, setBuscadorColapsado] = useState(false);
+
+    const puedeBuscarGlobal = Boolean(estaConectado && onSeleccionarTarea && onSeleccionarHabito && onSeleccionarProyecto);
+
+    /* El input de escritorio (.encabezadoBuscador) es position:absolute centrado
+     * con ancho fijo 320px, así que su borde derecho = centro del header + 160.
+     * Calcular contra el header evita el deadlock de medir el propio input
+     * (que desaparece al colapsar y nunca se restauraría). */
+    const ANCHO_BUSCADOR = 320;
+
+    useLayoutEffect(() => {
+        const encabezado = encabezadoRef.current;
+        if (!encabezado) return;
+
+        const medir = () => {
+            const nav = navRef.current;
+            if (!nav) return;
+            const nRect = nav.getBoundingClientRect();
+            const hRect = encabezado.getBoundingClientRect();
+            const centroHeader = hRect.left + hRect.width / 2;
+            const bordeDerechoBuscador = centroHeader + ANCHO_BUSCADOR / 2;
+            /* El boton de lupa colapsado vive DENTRO de la nav: medirlo como
+             * parte de la nav crearia un deadlock (la lupa empuja la nav a la
+             * izquierda y el choque nunca se restaura). Se excluye su ancho. */
+            const botonLupa = nav.querySelector<HTMLElement>('.botonBuscadorEncabezado');
+            const anchoLupa = botonLupa ? botonLupa.getBoundingClientRect().width + 8 : 0;
+            const navLeftSinLupa = nRect.left + anchoLupa;
+            /* choca cuando el borde derecho del buscador pasa el borde izquierdo
+             * de la nav sin la lupa (con 8px de margen de seguridad) */
+            setBuscadorColapsado(bordeDerechoBuscador > navLeftSinLupa - 8);
+        };
+        medir();
+
+        const observador = new ResizeObserver(medir);
+        observador.observe(encabezado);
+        window.addEventListener('resize', medir);
+        return () => {
+            observador.disconnect();
+            window.removeEventListener('resize', medir);
+        };
+    }, [puedeBuscarGlobal]);
+
     return (
-        <header id="dashboard-encabezado" className="dashboardEncabezado">
+        <header id="dashboard-encabezado" className="dashboardEncabezado" ref={encabezadoRef}>
             <EncabezadoMenuMovil
                 drawerAbierto={drawerAbierto}
                 onAbrirDrawer={() => setDrawerAbierto(true)}
@@ -162,10 +212,17 @@ export function DashboardEncabezado({
 
             <EncabezadoTitulo titulo={titulo} paginaMovilActiva={paginaMovilActiva} esTablet={esTablet} />
 
-            <EncabezadoBuscador tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} mostrarModal={mostrarBuscadorMovil} onCerrarModal={() => setMostrarBuscadorMovil(false)} estaConectado={estaConectado} />
+            <EncabezadoBuscador tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} mostrarModal={mostrarBuscadorMovil} onCerrarModal={() => setMostrarBuscadorMovil(false)} estaConectado={estaConectado} colapsado={buscadorColapsado} />
 
-            <nav className="encabezadoNav">
-                {/* [233A-56] Botón de búsqueda quitado del encabezado móvil — accesible desde el menú contextual (BottomSheet) */}
+            <nav className="encabezadoNav" ref={navRef}>
+                {/* [19-08-2026] Cuando el buscador de escritorio no cabe, se
+                 * colapsa a un boton de lupa aqui (mismo estilo de la nav) que
+                 * abre el modal de busqueda. */}
+                {buscadorColapsado && puedeBuscarGlobal && (
+                    <Boton type="button" claseAdicional="botonIconoEncabezado botonBuscadorEncabezado" onClick={() => setMostrarBuscadorMovil(true)} title={esTablet ? undefined : 'Buscar'}>
+                        <Search size={14} />
+                    </Boton>
+                )}
 
                 <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickPaneles={onClickPaneles} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} />
 
