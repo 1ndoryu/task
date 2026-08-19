@@ -51,17 +51,19 @@ impl BackupRepository {
         trigger_origen: &str,
         tamano: i64,
         hash: &str,
+        device: &str,
         datos: &serde_json::Value,
     ) -> Result<BackupRow, sqlx::Error> {
         sqlx::query_as::<_, BackupRow>(
-            "INSERT INTO backups (user_id, trigger_origen, tamano, hash, datos)
-             VALUES ($1, $2, $3, $4, $5)
-             RETURNING id, user_id, trigger_origen, tamano, hash, datos, creado_en",
+            "INSERT INTO backups (user_id, trigger_origen, tamano, hash, device, datos)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING id, user_id, trigger_origen, tamano, hash, device, datos, creado_en",
         )
         .bind(user_id)
         .bind(trigger_origen)
         .bind(tamano)
         .bind(hash)
+        .bind(device)
         .bind(datos)
         .fetch_one(pool)
         .await
@@ -69,7 +71,7 @@ impl BackupRepository {
 
     pub async fn list(pool: &PgPool, user_id: Uuid) -> Result<Vec<BackupRow>, sqlx::Error> {
         sqlx::query_as::<_, BackupRow>(
-            "SELECT id, user_id, trigger_origen, tamano, hash, datos, creado_en
+            "SELECT id, user_id, trigger_origen, tamano, hash, device, datos, creado_en
              FROM backups WHERE user_id = $1 ORDER BY creado_en DESC",
         )
         .bind(user_id)
@@ -83,7 +85,7 @@ impl BackupRepository {
         id: Uuid,
     ) -> Result<Option<BackupRow>, sqlx::Error> {
         sqlx::query_as::<_, BackupRow>(
-            "SELECT id, user_id, trigger_origen, tamano, hash, datos, creado_en
+            "SELECT id, user_id, trigger_origen, tamano, hash, device, datos, creado_en
              FROM backups WHERE id = $1 AND user_id = $2",
         )
         .bind(id)

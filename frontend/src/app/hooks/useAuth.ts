@@ -4,6 +4,7 @@ import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import GoogleAuthNative from '../plugins/GoogleAuthNative';
 import {Capacitor} from '@capacitor/core';
 import {limpiarTodosLosDatosUsuario} from '../utils/limpiezaSesion';
+import {devLog} from '../utils/devLog';
 import {persistirPreferenciasAhora} from '../utils/preferenciasUsuario';
 
 /* [correccion 18-08-2026] Lee el token CSRF de la cookie no HttpOnly
@@ -70,7 +71,7 @@ export function useAuth(): UseAuthReturn {
                 body: JSON.stringify({email: username, password})
             });
             if (response.ok) {
-                console.log('[Auth] Login exitoso, recargando...');
+                devLog('[Auth] Login exitoso, recargando...');
                 window.location.reload();
                 return;
             }

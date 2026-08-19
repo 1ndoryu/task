@@ -14,6 +14,8 @@
     --dashboard-bordePrincipal: #1a1a1a;
     --dashboard-bordeSutil: #222;
     --dashboard-bordePunteado: #1a1a1a;
+    /* [H-F14-01] Border neutro del mapa de calor (celda omitida) */
+    --dashboard-bordeNeutro: #374151;
     --dashboard-textoActivo: #eaeaea;
     --dashboard-textoNormal: #ccc;
     --dashboard-textoSecundario: #888;
@@ -41,6 +43,9 @@
     --dashboard-estadoExito: #22c55e;
     --dashboard-estadoExitoFondo: rgba(34, 197, 94, 0.1);
     --dashboard-estadoExitoBorde: rgba(34, 197, 94, 0.3);
+    /* [H-F14-01] Verde fuerte para gradientes/bordes de celdas completadas */
+    --dashboard-estadoExitoFuerte: #16a34a;
+    --dashboard-estadoExitoFuerteBorde: #15803d;
     --dashboard-exitoRgb: 34, 197, 94;
     --dashboard-estadoExitoRgb: 34, 197, 94;
     --dashboard-estadoInfo: #3b82f6;
@@ -53,6 +58,11 @@
     --dashboard-estadoAdvertencia: #f59e0b;
     --dashboard-estadoAdvertenciaFondo: rgba(245, 158, 11, 0.1);
     --dashboard-estadoAdvertenciaBorde: rgba(245, 158, 11, 0.3);
+    /* [H-F14-01] Ámbar fuerte para gradientes/bordes de celdas pospuestas */
+    --dashboard-estadoAdvertenciaFuerte: #d97706;
+    --dashboard-estadoAdvertenciaFuerteBorde: #b45309;
+    /* [H-F14-01] Rojo máximo del gradiente de urgencia crítica */
+    --dashboard-estadoUrgenciaMaxima: #ff0000;
     --dashboard-estadoAdvertenciaRgb: 245, 158, 11;
     --dashboard-estadoDestacado: #fbbf24;
     --dashboard-estadoDestacadoRgb: 251, 191, 36;
@@ -80,7 +90,8 @@
     --dashboard-superposicionMuyClara: rgba(125, 125, 125, 0.01);
     --dashboard-superposicionSutil: rgba(125, 125, 125, 0.1);
     --dashboard-superposicionMedia: rgba(125, 125, 125, 0.15);
-    --dashboard-superposicioMedioOscuro: rgb(37 37 37 / 16%);
+    /* [H-F14-03] Nombre corregido: faltaba la 'n' de superposicion */
+    --dashboard-superposicionMedioOscuro: rgb(37 37 37 / 16%);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.5);
     --dashboard-superposicionOscuro: rgb(2 2 2 / 60%);
     --dashboard-superposicionDensa: rgba(0, 0, 0, 0.85);
@@ -90,6 +101,8 @@
     --dashboard-barraFondo: #111;
     --dashboard-barraNormal: #333;
     --dashboard-barraUrgente: #dc2626;
+    /* [H-F14-01] Fondo del sidebar (antes hardcodeado #0e0e0e) */
+    --dashboard-sidebarFondo: #0e0e0e;
     --dashboard-fuenteMonoespaciada: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
     --dashboard-tamanoMicro: 9px;
     --dashboard-tamanoMuyPequeno: 10px;
@@ -109,7 +122,7 @@
     --dashboard-espacioHairline: 1px;
     --dashboard-espacioMini: 3px;
     --dashboard-espacioXs: 0.25rem;
-    --dashboard-espacioSx: 0.35rem;
+    /* [H-F14-03] `espacioSx` (0.35rem) eliminado: duplicado semántico de espacioXs */
     --dashboard-espacioS: 6px;
     --dashboard-espacioSm: 0.5rem;
     --dashboard-espacioSmMd: 10px;
@@ -131,6 +144,7 @@
     --dashboard-radioMedio: 8px;
     --dashboard-radioSmMd: 10px;
     --dashboard-radioGrande: 12px;
+    /* EL USUARIO PREFIERE ESTOS VALORES EN 0 PARA EL TEMA TERMINAL, NO CAMBIAR */
     --dashboard-radioSm: 0;
     --dashboard-radioMd: 0;
     --dashboard-radioLg: 0;
@@ -142,7 +156,8 @@
     --dashboard-botonPrimarioSombra: none;
     --dashboard-acento: #4a665b;
     --dashboard-acentoHover: #3d5a4e;
-    --dashboard-acentoRgb: 59, 130, 246;
+    /* [H-F14-03] acentoRgb ahora corresponde al acento base (#4a665b = 74,102,91) */
+    --dashboard-acentoRgb: 74, 102, 91;
     --dashboard-sombraElevada: none;
     --dashboard-sombraSutil: none;
     --dashboard-sombraFlotante: var(--dashboard-sombraElevada);
@@ -173,6 +188,9 @@
     --dashboard-alturaHeaderMovil: 56px;
     --dashboard-alturaNavInferior: 52px;
     --mapa-calor-tamano-celda: 14px;
+    /* [H-F14-01] Gradiente decorativo del grid de la landing (oculto por defecto) */
+    --dashboard-landingGradienteClaro: #c5d7ed;
+    --dashboard-landingGradienteLavanda: #dbd4ea;
     
     --font-primary: "Neue Montreal", system-ui, -apple-system, sans-serif;
     --font-serif: "Anthropic Serif", serif;
@@ -215,7 +233,7 @@
     --dashboard-superposicionMuyClara: rgba(255, 255, 255, 0.01);
     --dashboard-superposicionSutil: rgba(255, 255, 255, 0.06);
     --dashboard-superposicionMedia: rgba(255, 255, 255, 0.1);
-    --dashboard-superposicioMedioOscuro: rgba(0, 0, 0, 0.3);
+    --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.3);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.5);
     --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.6);
     --dashboard-superposicionFuerte: rgba(0, 0, 0, 0.8);
@@ -297,7 +315,7 @@
     --dashboard-superposicionMuyClara: rgba(0, 0, 0, 0.01);
     --dashboard-superposicionSutil: rgba(0, 0, 0, 0.06);
     --dashboard-superposicionMedia: rgba(0, 0, 0, 0.1);
-    --dashboard-superposicioMedioOscuro: rgba(0, 0, 0, 0.15);
+    --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.15);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.4);
     --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.5);
     --dashboard-superposicionFuerte: rgba(0, 0, 0, 0.65);

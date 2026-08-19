@@ -41,12 +41,27 @@ impl From<User> for UserResponse {
     }
 }
 
+/// [H-B02-01] El límite de 72 bytes evita DoS por hashing de contraseñas
+/// kilométricas y respeta el límite recomendado por argon2 (PHC string format).
+/// [H-B02-01] Reutilizada por ChangePasswordRequest (models/security.rs).
+pub(crate) fn validar_contrasena(password: &str) -> Result<(), validator::ValidationError> {
+    if password.len() > 72 {
+        let mut error = validator::ValidationError::new("password_too_long");
+        error.message = Some("La contraseña no puede exceder 72 bytes".into());
+        return Err(error);
+    }
+    Ok(())
+}
+
 /// Request body para registrar un nuevo usuario
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct RegisterRequest {
     #[validate(email(message = "Formato de email inválido"), length(max = 255))]
     pub email: String,
-    #[validate(length(min = 8, message = "La contraseña debe tener al menos 8 caracteres"))]
+    #[validate(
+        length(min = 8, message = "La contraseña debe tener al menos 8 caracteres"),
+        custom(function = "validar_contrasena")
+    )]
     pub password: String,
 }
 
@@ -55,6 +70,7 @@ pub struct RegisterRequest {
 pub struct LoginRequest {
     #[validate(email)]
     pub email: String,
+    #[validate(custom(function = "validar_contrasena"))]
     pub password: String,
 }
 

@@ -16,6 +16,7 @@ import {BlockRegistry} from '@/pageBuilder';
 import {HeroBlock, heroBlockDefinition} from './HeroBlock';
 import {FeaturesBlock, featuresBlockDefinition} from './FeaturesBlock';
 import {PricingBlock, pricingBlockDefinition} from './PricingBlock';
+import {devLog} from '../utils/devLog';
 
 /*
  * Array de todas las definiciones de bloque del proyecto
@@ -27,7 +28,8 @@ const blockDefinitions = [heroBlockDefinition, featuresBlockDefinition, pricingB
  */
 export function registerAppBlocks(): void {
     BlockRegistry.registerAll(blockDefinitions as unknown as import('@/pageBuilder').BlockDefinition<Record<string, unknown>>[]);
-    console.log(`[App Blocks] ${blockDefinitions.length} bloques registrados`);
+    /* [H-F12-03] Log de registro solo en desarrollo. */
+    devLog(`[App Blocks] ${blockDefinitions.length} bloques registrados`);
 }
 
 /*

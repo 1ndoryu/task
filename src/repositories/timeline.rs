@@ -60,6 +60,10 @@ impl TimelineRepository {
             .await
     }
 
+    /// [H-B03-05] Se eliminó el parámetro `_viewer_id` (no se usaba): la
+    /// autorización la hace el service con `authorized_owner` y la query lista
+    /// los mensajes del item completo (timeline compartida), sin filtro por
+    /// viewer. Si algún día se necesita visibilidad por rol, se agrega entonces.
     pub async fn list(
         pool: &PgPool,
         owner_id: Uuid,
@@ -67,7 +71,6 @@ impl TimelineRepository {
         item_id: i64,
         limit: i64,
         offset: i64,
-        _viewer_id: Uuid,
     ) -> Result<Vec<TimelineRow>, sqlx::Error> {
         sqlx::query_as::<_, TimelineRow>(
             "SELECT m.id, m.item_type, m.item_legacy_id AS item_id, m.user_id,

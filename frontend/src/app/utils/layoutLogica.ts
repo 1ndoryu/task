@@ -1,40 +1,18 @@
 /**
  * layoutLogica.ts
  *
- * Lógica de negocio pura para la gestión del layout.
- * Incluye normalización de posiciones y migración de configuraciones antiguas.
+ * [H-F15-01] Lógica de negocio pura para la gestión del layout.
+ * Aquí: migración de configuraciones antiguas. Las operaciones de
+ * duplicado/división viven en duplicadosPanel.ts y la normalización de
+ * posiciones en normalizarLayout.ts (se re-exportan para no romper
+ * importadores).
  *
  * @package App/React/utils
  */
 
 import {generarVisibilidadDefecto, generarAlturasDefecto} from '../config/registroPaneles';
 import {generarOrdenPanelesDefecto, generarConfigLayoutDefecto} from './layoutFactory';
-import type {ConfiguracionLayout, ModoColumnas, OrdenPanel} from '../types/paneles';
-
-/*
- * Normalizar posiciones dentro de una columna
- * Asegura que las posiciones sean consecutivas (0, 1, 2...)
- * Helper puro.
- */
-export function normalizarPosiciones(paneles: OrdenPanel[]): OrdenPanel[] {
-    const porColumna: Record<number, OrdenPanel[]> = {1: [], 2: [], 3: []};
-
-    paneles.forEach(p => {
-        porColumna[p.columna].push(p);
-    });
-
-    /* Ordenar cada columna por posición y reasignar índices */
-    const resultado: OrdenPanel[] = [];
-    [1, 2, 3].forEach(col => {
-        porColumna[col]
-            .sort((a, b) => a.posicion - b.posicion)
-            .forEach((panel, idx) => {
-                resultado.push({...panel, posicion: idx});
-            });
-    });
-
-    return resultado;
-}
+import type {ConfiguracionLayout} from '../types/paneles';
 
 /*
  * Migración automática: asegura compatibilidad con usuarios existentes
@@ -115,148 +93,5 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
     return config;
 }
 
-/* [263A-3] Crear un panel duplicado con ID sufijo (e.g., scratchpad-1).
- * Se ubica en la misma columna que el original, justo después.
- * Retorna nueva configuración sin mutar la original. */
-export function crearDuplicadoPanel(
-    prev: ConfiguracionLayout,
-    baseId: string,
-    ordenDefecto: Record<ModoColumnas, OrdenPanel[]>
-): ConfiguracionLayout {
-    const paneles = [...(prev.ordenPaneles || ordenDefecto[prev.modoColumnas])];
-    const panelOriginal = paneles.find(p => p.id === baseId);
-    if (!panelOriginal) return prev;
-
-    /* Siguiente sufijo disponible */
-    const existentes = paneles
-        .filter(p => p.id.startsWith(baseId + '-'))
-        .map(p => {
-            const m = p.id.match(/-(\d+)$/);
-            return m ? parseInt(m[1], 10) : 0;
-        });
-    const siguienteNum = existentes.length > 0 ? Math.max(...existentes) + 1 : 1;
-    const nuevoId = `${baseId}-${siguienteNum}`;
-
-    /* Insertar justo después del original */
-    const nuevaPosicion = panelOriginal.posicion + 1;
-    const panelesActualizados = paneles.map(p => {
-        if (p.columna === panelOriginal.columna && p.posicion >= nuevaPosicion) {
-            return {...p, posicion: p.posicion + 1};
-        }
-        return p;
-    });
-    panelesActualizados.push({id: nuevoId, columna: panelOriginal.columna, posicion: nuevaPosicion});
-
-    return {
-        ...prev,
-        ordenPaneles: normalizarPosiciones(panelesActualizados),
-        visibilidad: {...(prev.visibilidad || {}), [nuevoId]: true},
-        alturas: {...(prev.alturas || {}), [nuevoId]: prev.alturas?.[baseId] || 'auto'}
-    };
-}
-
-/* [263A-3] Crear una división lado a lado de un panel dentro de la misma columna.
- * Se comporta como duplicado pero marca ambos paneles con panelDivisionId.
- * [18-08-2026] Repara estados huérfanos: si el original conserva el flag de
- * división pero su compañero ya no existe (p. ej. el compañero se perdió por
- * una restauración parcial del layout), el flag se limpia primero para que el
- * split vuelva a funcionar en vez de quedarse bloqueado en silencio. */
-export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): ConfiguracionLayout {
-    let paneles = [...(prev.ordenPaneles || [])];
-    let visibilidad = {...(prev.visibilidad || {})};
-    let alturas = {...(prev.alturas || {})};
-    const panelOriginal = paneles.find(p => p.id === baseId);
-    if (!panelOriginal) return prev;
-
-    const divisionId = `${baseId}-split`;
-
-    /* Evitar múltiples divisiones del mismo panel */
-    const yaDividido = paneles.some(p => p.panelDivisionId === divisionId);
-    if (yaDividido) {
-        /* Reparar estado huérfano: flag presente pero sin panel compañero real
-         * (p. ej. el compañero se perdió por restauración parcial o quedó oculto
-         * por un minimizar de un duplicado). En vez de quedarse bloqueado, se
-         * limpian los flags y se continúa creando la división; los compañeros
-         * obsoletos ocultos se eliminan del layout para que no se acumulen. */
-        const companeroExiste = paneles.some(
-            p => p.panelDivisionId === divisionId && p.id !== baseId && visibilidad[p.id] !== false
-        );
-        if (companeroExiste) return prev;
-        const obsoletos = paneles
-            .filter(p => p.panelDivisionId === divisionId && p.id !== baseId)
-            .map(p => p.id);
-        paneles = paneles
-            .filter(p => !obsoletos.includes(p.id))
-            .map(p =>
-                p.panelDivisionId === divisionId ? {...p, dividido: undefined, panelDivisionId: undefined} : p
-            );
-        for (const id of obsoletos) {
-            delete visibilidad[id];
-            delete alturas[id];
-        }
-    }
-
-    const existentes = paneles
-        .filter(p => p.id.startsWith(baseId + '-'))
-        .map(p => {
-            const m = p.id.match(/-(\d+)$/);
-            return m ? parseInt(m[1], 10) : 0;
-        });
-    const siguienteNum = existentes.length > 0 ? Math.max(...existentes) + 1 : 1;
-    const nuevoId = `${baseId}-${siguienteNum}`;
-
-    const nuevaPosicion = panelOriginal.posicion + 1;
-    const panelesActualizados = paneles.map(p => {
-        if (p.columna === panelOriginal.columna && p.posicion >= nuevaPosicion) {
-            return {...p, posicion: p.posicion + 1};
-        }
-        return p;
-    });
-    panelesActualizados.push({
-        id: nuevoId,
-        columna: panelOriginal.columna,
-        posicion: nuevaPosicion,
-        dividido: true,
-        panelDivisionId: divisionId
-    });
-
-    /* Marcar también el original como dividido */
-    const conOriginalDividido = panelesActualizados.map(p =>
-        p.id === baseId ? {...p, dividido: true, panelDivisionId: divisionId} : p
-    );
-
-    return {
-        ...prev,
-        ordenPaneles: normalizarPosiciones(conOriginalDividido),
-        visibilidad: {...visibilidad, [nuevoId]: true},
-        alturas: {...alturas, [nuevoId]: prev.alturas?.[baseId] || 'auto'}
-    };
-}
-
-/* [263A-3] Eliminar un panel duplicado del layout */
-export function eliminarPanelDuplicado(prev: ConfiguracionLayout, instanceId: string): ConfiguracionLayout {
-    const paneles = (prev.ordenPaneles || []).filter(p => p.id !== instanceId);
-    const {[instanceId]: _vis, ...restoVisibilidad} = prev.visibilidad || {};
-    const {[instanceId]: _alt, ...restoAlturas} = prev.alturas || {};
-
-    /* Limpiar flags de división si el panel cerrado era el último de su grupo.
-     * [19-08-2026] Solo cuentan los duplicados reales (id con sufijo): si el
-     * base quedara contado como "miembro", cerrar el último duplicado dejaba el
-     * flag huérfano en el base (bloqueaba futuros splits hasta el repair). */
-    const configEliminado = prev.ordenPaneles?.find(p => p.id === instanceId);
-    const divisionId = configEliminado?.panelDivisionId;
-    const hayMasDelGrupo = divisionId
-        ? paneles.some(p => p.panelDivisionId === divisionId && p.id !== divisionId.replace(/-split$/, ''))
-        : false;
-
-    const panelesLimpios = divisionId && !hayMasDelGrupo
-        ? paneles.map(p => (p.panelDivisionId === divisionId ? {...p, dividido: undefined, panelDivisionId: undefined} : p))
-        : paneles;
-
-    return {
-        ...prev,
-        ordenPaneles: normalizarPosiciones(panelesLimpios),
-        visibilidad: restoVisibilidad,
-        alturas: restoAlturas
-    };
-}
+export {normalizarPosiciones} from './normalizarLayout';
+export {crearDuplicadoPanel, crearDivisionPanel, eliminarPanelDuplicado} from './duplicadosPanel';

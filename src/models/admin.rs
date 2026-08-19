@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
+use validator::Validate;
 
 /// Suscripción visible en el panel admin.
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -69,9 +70,10 @@ pub struct AdminStatsResponse {
 }
 
 /// Body para activar premium (días de duración; None = sin expiración).
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct AdminPremiumRequest {
+    #[validate(range(min = 1, message = "duracion debe ser un número de días positivo"))]
     pub duracion: Option<i64>,
 }
 

@@ -48,27 +48,37 @@ function formatearTiempo(ms: number): string {
 }
 
 export function useTimeTracker(): UseTimeTrackerReturn {
-    const store = useTimeTrackerStore();
+    /* [H-F12-04] Selectores atómicos: suscribirse al store completo re-renderiza
+     * el hook con cada cambio (sesión, timer, ...). Se selecciona campo a campo. */
+    const estado = useTimeTrackerStore(s => s.estado);
+    const sesionActiva = useTimeTrackerStore(s => s.sesionActiva);
+    const obtenerTiempoEfectivoActual = useTimeTrackerStore(s => s.obtenerTiempoEfectivoActual);
+    const iniciarTracking = useTimeTrackerStore(s => s.iniciarTracking);
+    const pausarTracking = useTimeTrackerStore(s => s.pausarTracking);
+    const reanudarTracking = useTimeTrackerStore(s => s.reanudarTracking);
+    const completarTracking = useTimeTrackerStore(s => s.completarTracking);
+    const cancelarTracking = useTimeTrackerStore(s => s.cancelarTracking);
+    const ajustarTiempoTracking = useTimeTrackerStore(s => s.ajustarTiempoTracking);
     const alertas = useAlertasOpcional();
     const [tiempoMs, setTiempoMs] = useState(0);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     /* Actualizar el timer cada segundo cuando está activo */
     useEffect(() => {
-        if (store.estado === 'activo') {
+        if (estado === 'activo') {
             /* Actualización inmediata */
-            setTiempoMs(store.obtenerTiempoEfectivoActual());
+            setTiempoMs(obtenerTiempoEfectivoActual());
 
             intervalRef.current = setInterval(() => {
-                setTiempoMs(store.obtenerTiempoEfectivoActual());
+                setTiempoMs(obtenerTiempoEfectivoActual());
             }, 1000);
-        } else if (store.estado === 'pausado') {
+        } else if (estado === 'pausado') {
             /* Pausado: mantener el último valor pero limpiar interval */
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
-            setTiempoMs(store.obtenerTiempoEfectivoActual());
+            setTiempoMs(obtenerTiempoEfectivoActual());
         } else {
             /* Inactivo */
             if (intervalRef.current) {
@@ -84,14 +94,14 @@ export function useTimeTracker(): UseTimeTrackerReturn {
                 intervalRef.current = null;
             }
         };
-    }, [store.estado]);
+    }, [estado, obtenerTiempoEfectivoActual]);
 
     useEffect(() => {
-        if (store.estado === 'inactivo') return;
-        setTiempoMs(store.obtenerTiempoEfectivoActual());
-    }, [store.estado, store.sesionActiva]);
+        if (estado === 'inactivo') return;
+        setTiempoMs(obtenerTiempoEfectivoActual());
+    }, [estado, sesionActiva, obtenerTiempoEfectivoActual]);
 
-    const tiempoMinimoMs = (store.sesionActiva?.tiempoMinimoMinutos ?? 0) * 60 * 1000;
+    const tiempoMinimoMs = (sesionActiva?.tiempoMinimoMinutos ?? 0) * 60 * 1000;
     const alcanzoMinimo = tiempoMinimoMs > 0 && tiempoMs >= tiempoMinimoMs;
     const porcentajeProgreso = tiempoMinimoMs > 0 ? Math.min(100, (tiempoMs / tiempoMinimoMs) * 100) : 0;
 
@@ -101,7 +111,6 @@ export function useTimeTracker(): UseTimeTrackerReturn {
     /* [233A-10] Confirmacion antes de reemplazar tracking activo */
     const iniciar = useCallback(
         async (entidadId: number, tipo: TipoEntidadTracker, nombre: string, tiempoMinimo?: number) => {
-            const sesionActiva = store.sesionActiva;
             if (sesionActiva && alertas?.confirmar) {
                 const confirmado = await alertas.confirmar({
                     titulo: 'Tracking activo',
@@ -111,28 +120,28 @@ export function useTimeTracker(): UseTimeTrackerReturn {
                 });
                 if (!confirmado) return;
             }
-            store.iniciarTracking(entidadId, tipo, nombre, tiempoMinimo);
+            iniciarTracking(entidadId, tipo, nombre, tiempoMinimo);
         },
-        [store.iniciarTracking, store.sesionActiva, alertas]
+        [iniciarTracking, sesionActiva, alertas]
     );
 
-    const pausar = useCallback(() => store.pausarTracking(), [store.pausarTracking]);
-    const reanudar = useCallback(() => store.reanudarTracking(), [store.reanudarTracking]);
-    const completar = useCallback(() => store.completarTracking(), [store.completarTracking]);
-    const cancelar = useCallback(() => store.cancelarTracking(), [store.cancelarTracking]);
-    const ajustarTiempo = useCallback((deltaMs: number) => store.ajustarTiempoTracking(deltaMs), [store.ajustarTiempoTracking]);
+    const pausar = useCallback(() => pausarTracking(), [pausarTracking]);
+    const reanudar = useCallback(() => reanudarTracking(), [reanudarTracking]);
+    const completar = useCallback(() => completarTracking(), [completarTracking]);
+    const cancelar = useCallback(() => cancelarTracking(), [cancelarTracking]);
+    const ajustarTiempo = useCallback((deltaMs: number) => ajustarTiempoTracking(deltaMs), [ajustarTiempoTracking]);
 
     return {
-        estaActivo: store.estado === 'activo',
-        estaPausado: store.estado === 'pausado',
+        estaActivo: estado === 'activo',
+        estaPausado: estado === 'pausado',
         tiempoMs,
         tiempoFormateado: formatearTiempo(tiempoMs),
         progresoFormateado,
         porcentajeProgreso,
         alcanzoMinimo,
-        nombreEntidad: store.sesionActiva?.nombreEntidad ?? '',
-        tipoEntidad: store.sesionActiva?.tipoEntidad ?? null,
-        entidadId: store.sesionActiva?.entidadId ?? null,
+        nombreEntidad: sesionActiva?.nombreEntidad ?? '',
+        tipoEntidad: sesionActiva?.tipoEntidad ?? null,
+        entidadId: sesionActiva?.entidadId ?? null,
         iniciar,
         pausar,
         reanudar,

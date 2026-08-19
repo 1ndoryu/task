@@ -1,27 +1,24 @@
-/* sentinel-disable-file limite-lineas — Panel orquestador principal del dashboard de Grupos FB.
- * Coordina filtros, columnas, entornos, menú contextual, renderizado progresivo y editor de categorías.
- * La lógica ya está delegada a hooks (usePanelGruposFb, useColumnasGruposFb, useEntornos) y componentes
- * (FilaGrupo, EditorCategorias, SelectorEntornos). Lo restante es composición JSX que no se puede
- * dividir sin fragmentar la coherencia del panel. 305 líneas efectivas, muy marginal. */
-
 /* [024A-17] PanelGruposFb
  * Panel de dashboard para gestionar grupos de Facebook detectados por la extensión.
  * Muestra tabla sortable con filtros, categorías, importancia, acciones.
  * [263A-4] Rediseño: filtros en header como SelectorBadge, búsqueda estilo modalNotasBusqueda.
- * [024A-17] Columnas configurables: el usuario elige qué columnas ver. */
+ * [024A-17] Columnas configurables: el usuario elige qué columnas ver.
+ * [H-F13-01] Composicion: la tabla vive en TablaGruposFb, los estados
+ * (carga/error/vacio) en EstadosPanelGruposFb. La logica sigue delegada a
+ * usePanelGruposFb/useColumnasGruposFb/useEntornos y FilaGrupo/EditorCategorias. */
 
 import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
-import {icons, RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Users, Search, Star, FolderOpen, Settings, SlidersHorizontal, Tag} from 'lucide-react';
+import {icons, RefreshCw, ExternalLink, EyeOff, Eye, Trash2, Check, Search, Star, FolderOpen, Settings, SlidersHorizontal, Tag} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {MenuContextual, SelectorBadge, Modal} from '../shared';
 import {Boton, Input} from '../ui';
 import {usePanelGruposFb} from '../../hooks/paneles/usePanelGruposFb';
 import {useColumnasGruposFb} from '../../hooks/paneles/useColumnasGruposFb';
 import {useEntornos} from '../../hooks/paneles/useEntornos';
-import {FilaGrupo} from './FilaGrupo';
 import {EditorCategorias} from './EditorCategorias';
 import {SelectorEntornos} from './SelectorEntornos';
-import {ThOrdenable} from './ThOrdenable';
+import {TablaGruposFb} from './TablaGruposFb';
+import {EstadosPanelGruposFb} from './EstadosPanelGruposFb';
 import type {GrupoFb} from '../../stores/gruposFbStore';
 import {useGruposFbStore} from '../../stores/gruposFbStore';
 import '../../styles/dashboard/componentes/panelGruposFb.css';
@@ -228,7 +225,7 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                                             onClick={() => !col.fija && toggleColumna(col.id)}
                                         >
                                             <span className={`panelGruposFb__menuColumnasCheck ${visibilidad[col.id] ? 'panelGruposFb__menuColumnasCheck--activo' : ''}`}>
-                                                {visibilidad[col.id] && <Check size={8} color="#fff" />}
+                                                {visibilidad[col.id] && <Check size={8} color="var(--dashboard-textoSobreAcento)" />}
                                             </span>
                                             {col.etiqueta}
                                         </div>
@@ -244,8 +241,6 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
             />
 
             <div className="panelGruposFb">
-                {/* [024A-9] Stats eliminadas por innecesarias */}
-
                 {/* [034A-5] Editor de categorías como modal (antes inline, mal diseño)
                  * [034A-20] claseContenido sin padding: editorCategorias maneja su propio espaciado */}
                 <Modal estaAbierto={editorCategoriasAbierto} onCerrar={cerrarEditorCategorias} titulo="Gestionar categorías" claseContenido="modalContenido--sinPadding">
@@ -257,121 +252,53 @@ export function PanelGruposFb({renderHandleArrastre, handleMinimizar, onAbrirCon
                 </Modal>
 
                 {/* Contenido */}
-                {cargando && !inicializado && (
-                    <div className="panelGruposFb__cargando">Cargando grupos...</div>
-                )}
-
-                {error && (
-                    <div className="panelGruposFb__vacio">
-                        <p>Error: {error}</p>
-                        <Boton variante="ghost" onClick={recargar}>Reintentar</Boton>
-                    </div>
-                )}
-
-                {/* [263A-6] Empty state diagnóstico: distingue DB vacía vs filtros ocultan grupos */}
-                {inicializado && !error && grupos.length === 0 && (
-                    <div className="panelGruposFb__vacio">
-                        <Users size={24} />
-                        {todosLosGrupos.length > 0 ? (
-                            /* Grupos existen pero los filtros activos los ocultan */
-                            <>
-                                <p className="panelGruposFb__vacioPrincipal">
-                                    {todosLosGrupos.length} grupos cargados — ninguno visible con los filtros actuales
-                                </p>
-                                {!filtros.mostrarOcultos && todosLosGrupos.some(g => g.oculto) && (
-                                    <p className="panelGruposFb__vacioDetalle">
-                                        {todosLosGrupos.filter(g => g.oculto).length} grupos están ocultos.
-                                        Activa el filtro <EyeOff size={11} className="panelGruposFb__vacioIconoInline" /> para verlos.
-                                    </p>
-                                )}
-                                {(filtros.categoria || filtros.importancia || filtros.busqueda) && (
-                                    <p className="panelGruposFb__vacioDetalle">
-                                        Hay filtros activos (categoría, importancia o búsqueda). Límpialos para ver más.
-                                    </p>
-                                )}
-                            </>
-                        ) : estadisticas && estadisticas.total > 0 ? (
-                            /* La estadística dice que hay grupos pero todos están marcados ocultos en el store */
-                            <>
-                                <p className="panelGruposFb__vacioPrincipal">
-                                    {estadisticas.total} grupos en el servidor — todos ocultos
-                                </p>
-                                <p className="panelGruposFb__vacioDetalle">
-                                    Activa <EyeOff size={11} className="panelGruposFb__vacioIconoInline" /> para mostrar grupos ocultos.
-                                </p>
-                            </>
-                        ) : (
-                            /* DB genuinamente vacía — la extensión nunca sincronizó o falló */
-                            <>
-                                <p className="panelGruposFb__vacioPrincipal">
-                                    El servidor no tiene grupos (total en BD: {estadisticas?.total ?? 0})
-                                </p>
-                                <p className="panelGruposFb__vacioDetalle">
-                                    La extensión tiene los grupos localmente pero aún no los sincronizó.
-                                    Abre la extensión → Config → &quot;Sincronizar ahora&quot;, o navega por Facebook para activar la detección automática.
-                                </p>
-                                <p className="panelGruposFb__vacioAyuda">
-                                    Verifica también que el token API y la URL estén configurados correctamente en <Settings size={11} className="panelGruposFb__vacioIconoInline" />.
-                                </p>
-                            </>
-                        )}
-                        <Boton variante="ghost" onClick={recargar}>Recargar</Boton>
-                    </div>
-                )}
+                <EstadosPanelGruposFb
+                    cargando={cargando}
+                    inicializado={inicializado}
+                    error={error}
+                    grupos={grupos}
+                    todosLosGrupos={todosLosGrupos}
+                    mostrarOcultos={filtros.mostrarOcultos}
+                    hayFiltrosActivos={!!(filtros.categoria || filtros.importancia || filtros.busqueda)}
+                    totalServidor={estadisticas?.total ?? 0}
+                    recargar={recargar}
+                />
 
                 {grupos.length > 0 && (
-                    <div className="panelGruposFb__tablaContenedor">
-                        <table className="panelGruposFb__tabla">
-                            <thead>
-                                <tr>
-                                    {visibilidad.check && <th className="panelGruposFb__colCheck"><Check size={11} /></th>}
-                                    {visibilidad.imagen && <th className="panelGruposFb__colImagen" />}
-                                    {visibilidad.nombre && <ThOrdenable campo="nombre" etiqueta="Grupo" orden={orden} onClick={cambiarOrden} />}
-                                    {visibilidad.tipo && <ThOrdenable campo="tipo" etiqueta="Tipo" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colTipo" />}
-                                    {visibilidad.miembros && <ThOrdenable campo="miembros" etiqueta="Miembros" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colMiembros" />}
-                                    {visibilidad.publicaciones && <th className="panelGruposFb__colPub">Pub/día</th>}
-                                    {visibilidad.categoria && <ThOrdenable campo="categoria" etiqueta="Categoría" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colCategoria" />}
-                                    {visibilidad.importancia && <ThOrdenable campo="importancia" etiqueta="Importancia" orden={orden} onClick={cambiarOrden} className="panelGruposFb__colImportancia" />}
-                                    {visibilidad.acciones && <th className="panelGruposFb__colAcciones" />}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {gruposVisibles.map(grupo => (
-                                    <FilaGrupo
-                                        key={grupo.id}
-                                        grupo={grupo}
-                                        categorias={categorias}
-                                        columnasVisibles={visibilidad}
-                                        onPublicar={() => publicar(grupo.id)}
-                                        onCambiarCategoria={(cat) => cambiarCategoria(grupo.id, cat)}
-                                        onCambiarImportancia={(imp) => cambiarImportancia(grupo.id, imp)}
-                                        onMenuContextual={(e) => abrirMenuGrupo(e, grupo.id)}
-                                    />
-                                ))}
-                                {/* [024A-18] Centinela invisible: el IntersectionObserver lo detecta para cargar más */}
-                                {hayMasGrupos && (
-                                    <tr ref={refCentinela} className="panelGruposFb__centinela">
-                                        <td colSpan={columnasActivas.length}>
-                                            Cargando más ({limiteVisible} de {grupos.length})...
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                    <TablaGruposFb
+                        gruposVisibles={gruposVisibles}
+                        visibilidad={visibilidad}
+                        orden={orden}
+                        cambiarOrden={cambiarOrden}
+                        categorias={categorias}
+                        columnasActivas={columnasActivas.length}
+                        hayMasGrupos={hayMasGrupos}
+                        limiteVisible={limiteVisible}
+                        totalGrupos={grupos.length}
+                        refCentinela={refCentinela}
+                        onPublicar={publicar}
+                        onCambiarCategoria={cambiarCategoria}
+                        onCambiarImportancia={cambiarImportancia}
+                        onMenuContextual={abrirMenuGrupo}
+                    />
                 )}
             </div>
 
             {/* Menú contextual */}
-            {menuContextual.visible && menuContextual.grupoId && (
-                <MenuContextual
-                    opciones={obtenerOpcionesMenu(grupos.find(g => g.id === menuContextual.grupoId)!)}
-                    posicionX={menuContextual.x}
-                    posicionY={menuContextual.y}
-                    onSeleccionar={manejarSeleccionMenu}
-                    onCerrar={cerrarMenuContextual}
-                />
-            )}
+            {menuContextual.visible && (() => {
+                /* [H-F13-04] Sin non-null: si el grupo se eliminó del store entre render y click, no crashear */
+                const grupo = grupos.find(g => g.id === menuContextual.grupoId);
+                if (!grupo) return null;
+                return (
+                    <MenuContextual
+                        opciones={obtenerOpcionesMenu(grupo)}
+                        posicionX={menuContextual.x}
+                        posicionY={menuContextual.y}
+                        onSeleccionar={manejarSeleccionMenu}
+                        onCerrar={cerrarMenuContextual}
+                    />
+                );
+            })()}
         </div>
     );
 }

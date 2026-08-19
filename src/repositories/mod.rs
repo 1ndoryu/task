@@ -28,7 +28,7 @@ pub use shared::{SharedCreateOutcome, SharedItemRow, SharedParticipantRow, Share
 pub use timeline::{TimelineRepository, TimelineRow, TimelineSystemInsert};
 pub use admin::AdminRepository;
 pub use backup::BackupRepository;
-pub use feedback::FeedbackRepository;
+pub use feedback::{AdminFeedbackRow, FeedbackRepository};
 pub use security::SecurityRepository;
 pub use storage::StorageRepository;
 pub use subscription::SubscriptionRepository;

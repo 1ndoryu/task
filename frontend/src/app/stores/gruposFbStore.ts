@@ -5,6 +5,7 @@
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 import {gruposFbService} from '../services/gruposFbService';
+import {devLog} from '../utils/devLog';
 import type {GrupoFb, CategoriaGrupoFb, EstadisticasGruposFb, OverrideGrupoFb} from '../services/gruposFbService';
 
 export type {GrupoFb, CategoriaGrupoFb, EstadisticasGruposFb, OverrideGrupoFb};
@@ -70,7 +71,7 @@ export const useGruposFbStore = create<GruposFbStore>()(
             cargar: async () => {
                 if (get().cargando) return;
                 set({cargando: true, error: null}, false, 'cargar/inicio');
-                console.log('[GruposFb] Iniciando carga de grupos...');
+                devLog('[GruposFb] Iniciando carga de grupos...');
 
                 try {
                     const entornoId = get().entornoActivoId;
@@ -81,7 +82,7 @@ export const useGruposFbStore = create<GruposFbStore>()(
                         gruposFbService.estadisticas()
                     ]);
 
-                    console.log('[GruposFb] Carga exitosa:', {total: grupos.length, estadisticas});
+                    devLog('[GruposFb] Carga exitosa:', {total: grupos.length, estadisticas});
 
                     set({
                         grupos,

@@ -126,7 +126,7 @@
 .pillOpcion {
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioSx);
+    gap: var(--dashboard-espacioXs);
     padding: 5px 11px;
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);

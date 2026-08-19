@@ -6,20 +6,17 @@ use crate::errors::AppError;
 use crate::models::{
     BackupMetadata, BackupRow, CreateBackupRequest, CreateBackupResponse, RestoreBackupResponse,
 };
-use crate::repositories::{BackupRepository, SubscriptionRepository};
-use crate::services::DashboardService;
+use crate::repositories::{BackupRepository, ProductivityRepository, TaskUpsertOutcome};
+use crate::services::{DashboardService, SubscriptionService};
 
 pub struct BackupService;
 
 impl BackupService {
     /// Paridad con BackupsApiController::checkPermission (WP): las copias de
     /// seguridad son un beneficio Premium (trial incluido).
+    /// [H-B04-08] Usa el helper activo de SubscriptionService (una lectura).
     async fn ensure_premium(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
-        let row = SubscriptionRepository::ensure(pool, user_id).await?;
-        SubscriptionRepository::expire_if_due(pool, user_id).await?;
-        let row = SubscriptionRepository::get(pool, user_id)
-            .await?
-            .unwrap_or(row);
+        let row = SubscriptionService::active_row(pool, user_id).await?;
         if !row.es_premium() {
             return Err(AppError::Forbidden(
                 "Las copias de seguridad son un beneficio Premium".into(),
@@ -67,8 +64,14 @@ impl BackupService {
             .map_err(|error| AppError::Internal(format!("No se pudo serializar el backup: {error}")))?;
         let hash = fingerprint(&serialized);
         let tamano = i64::try_from(serialized.len()).unwrap_or(i64::MAX);
+        /* [H-B02-03] El dispositivo del cliente se persiste y refleja en la metadata. */
+        let device = req
+            .device
+            .filter(|d| !d.trim().is_empty())
+            .unwrap_or_else(|| "unknown".to_string());
 
-        let row = BackupRepository::create(pool, user_id, &trigger, tamano, &hash, &datos).await?;
+        let row =
+            BackupRepository::create(pool, user_id, &trigger, tamano, &hash, &device, &datos).await?;
         // Paridad con cleanupOldBackups (WP): retención 30 días + máx 50 copias.
         BackupRepository::cleanup(pool, user_id).await?;
         Ok(CreateBackupResponse {
@@ -123,7 +126,16 @@ impl BackupService {
             None
         };
 
+        /* [H-B04-03] Restore atómico: todo el restore corre en UNA transacción.
+         * - Error duro de BD → aborta el restore completo (rollback al soltar tx).
+         * - Fallos suaves por ítem (conflicto LWW = datos más nuevos que el
+         *   snapshot, padre inválido, formato inválido) se saltan, se cuentan y
+         *   no abortan: aplicar el backup no debe pisar ediciones posteriores.
+         * Antes cada upsert abría su propia conexión y un fallo a mitad dejaba
+         * un estado parcial (settings restaurados y tareas no, o viceversa). */
         let mut restored = 0;
+        let mut fallos = 0;
+        let mut tx = pool.begin().await?;
         // Tareas y proyectos: upsert por legacy_id (id local del front).
         for tarea in data
             .get("tareas")
@@ -132,17 +144,37 @@ impl BackupService {
             .flatten()
         {
             if let Some(legacy_id) = tarea.get("id").and_then(serde_json::Value::as_i64) {
-                if let Ok(request) = serde_json::from_value::<crate::models::productivity::UpsertTaskRequest>(
+                match serde_json::from_value::<crate::models::productivity::UpsertTaskRequest>(
                     tarea.clone(),
                 ) {
-                    let _ = crate::services::ProductivityService::upsert_task(
-                        pool,
-                        user_id,
-                        legacy_id,
-                        request,
-                    )
-                    .await;
-                    restored += 1;
+                    Ok(request) => {
+                        match ProductivityRepository::upsert_task_in(
+                            &mut tx,
+                            user_id,
+                            legacy_id,
+                            &request,
+                        )
+                        .await
+                        {
+                            Ok(TaskUpsertOutcome::Written(_)) => restored += 1,
+                            Ok(_) => {
+                                fallos += 1;
+                                tracing::warn!(
+                                    %legacy_id,
+                                    "Restore: tarea saltada (datos más nuevos o padre inválido)"
+                                );
+                            }
+                            Err(error) => {
+                                return Err(AppError::Internal(format!(
+                                    "Restore interrumpido al restaurar la tarea {legacy_id}: {error}"
+                                )));
+                            }
+                        }
+                    },
+                    Err(error) => {
+                        fallos += 1;
+                        tracing::warn!(%legacy_id, %error, "Restore: tarea con formato inválido");
+                    }
                 }
             }
         }
@@ -153,17 +185,37 @@ impl BackupService {
             .flatten()
         {
             if let Some(legacy_id) = proyecto.get("id").and_then(serde_json::Value::as_i64) {
-                if let Ok(request) = serde_json::from_value::<crate::models::productivity::UpsertProjectRequest>(
+                match serde_json::from_value::<crate::models::productivity::UpsertProjectRequest>(
                     proyecto.clone(),
                 ) {
-                    let _ = crate::services::ProductivityService::upsert_project(
-                        pool,
-                        user_id,
-                        legacy_id,
-                        request,
-                    )
-                    .await;
-                    restored += 1;
+                    Ok(request) => {
+                        match ProductivityRepository::upsert_project(
+                            &mut *tx,
+                            user_id,
+                            legacy_id,
+                            &request,
+                        )
+                        .await
+                        {
+                            Ok(Some(_)) => restored += 1,
+                            Ok(None) => {
+                                fallos += 1;
+                                tracing::warn!(
+                                    %legacy_id,
+                                    "Restore: proyecto saltado (datos más nuevos)"
+                                );
+                            }
+                            Err(error) => {
+                                return Err(AppError::Internal(format!(
+                                    "Restore interrumpido al restaurar el proyecto {legacy_id}: {error}"
+                                )));
+                            }
+                        }
+                    },
+                    Err(error) => {
+                        fallos += 1;
+                        tracing::warn!(%legacy_id, %error, "Restore: proyecto con formato inválido");
+                    }
                 }
             }
         }
@@ -174,23 +226,43 @@ impl BackupService {
             .flatten()
         {
             if let Some(legacy_id) = habito.get("id").and_then(serde_json::Value::as_i64) {
-                if let Ok(request) = serde_json::from_value::<crate::models::productivity::UpsertHabitRequest>(
+                match serde_json::from_value::<crate::models::productivity::UpsertHabitRequest>(
                     habito.clone(),
                 ) {
-                    let _ = crate::services::ProductivityService::upsert_habit(
-                        pool,
-                        user_id,
-                        legacy_id,
-                        request,
-                    )
-                    .await;
-                    restored += 1;
+                    Ok(request) => {
+                        match ProductivityRepository::upsert_habit(
+                            &mut *tx,
+                            user_id,
+                            legacy_id,
+                            &request,
+                        )
+                        .await
+                        {
+                            Ok(Some(_)) => restored += 1,
+                            Ok(None) => {
+                                fallos += 1;
+                                tracing::warn!(
+                                    %legacy_id,
+                                    "Restore: hábito saltado (datos más nuevos)"
+                                );
+                            }
+                            Err(error) => {
+                                return Err(AppError::Internal(format!(
+                                    "Restore interrumpido al restaurar el hábito {legacy_id}: {error}"
+                                )));
+                            }
+                        }
+                    },
+                    Err(error) => {
+                        fallos += 1;
+                        tracing::warn!(%legacy_id, %error, "Restore: hábito con formato inválido");
+                    }
                 }
             }
         }
 
         crate::repositories::DashboardRepository::upsert_settings(
-            pool,
+            &mut *tx,
             user_id,
             Some(&notas),
             Some(configuracion),
@@ -198,9 +270,15 @@ impl BackupService {
         )
         .await?;
 
+        tx.commit().await?;
+
         Ok(RestoreBackupResponse {
             success: true,
-            message: format!("Restaurados {restored} elementos y la configuración"),
+            message: if fallos > 0 {
+                format!("Restaurados {restored} elementos y la configuración ({fallos} con errores, ver logs)")
+            } else {
+                format!("Restaurados {restored} elementos y la configuración")
+            },
         })
     }
 

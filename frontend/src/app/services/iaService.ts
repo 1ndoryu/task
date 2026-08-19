@@ -12,6 +12,7 @@ import type {MensajeIA, AccionIA, ProveedorIA} from '../stores/iaStore';
 import type {EjecutoresTareasIA} from '../config/accionesIA';
 import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAcciones} from '../config/accionesIA';
 import {esUsuarioAdmin, obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
+import {devWarn} from '../utils/devLog';
 
 const URLS_PROVIDER: Record<ProveedorIA, string> = {
     cerebras: 'https://api.cerebras.ai/v1/chat/completions',
@@ -170,7 +171,11 @@ async function enviarMensajeLLMBackend(mensajes: MensajeAPI[], config: ConfigPro
         signal
     });
 
-    const datos = await respuesta.json().catch(() => null) as {success?: boolean; data?: RespuestaLLM; error?: {message?: string}} | null;
+    const datos = await respuesta.json().catch(() => {
+        /* [H-F11-07] Respuesta no-JSON: observable en DEV, no un fallo silencioso */
+        devWarn('iaService', 'La respuesta de la IA no es JSON válido', {status: respuesta.status});
+        return null;
+    }) as {success?: boolean; data?: RespuestaLLM; error?: {message?: string}} | null;
     if (!respuesta.ok || !datos?.success || !datos.data) {
         throw new Error(datos?.error?.message || `Error del servidor IA (${respuesta.status})`);
     }
@@ -274,8 +279,10 @@ export async function procesarMensajeIA(
                     parsed.respuesta = parsed2.respuesta;
                 }
                 tokensTotal += respuesta2.tokensPrompt + respuesta2.tokensComplecion;
-            } catch {
-                /* Fallback: mantener la respuesta original si la segunda llamada falla */
+            } catch (error) {
+                /* [H-F11-07] Fallback controlado: se mantiene la respuesta original,
+                 * pero el fallo queda registrado en DEV */
+                devWarn('iaService', 'Falló la 2ª llamada LLM; se mantiene la respuesta original', error);
             }
         }
     }

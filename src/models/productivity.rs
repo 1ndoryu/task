@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use utoipa::ToSchema;
 use uuid::Uuid;
+use validator::Validate;
 
 use super::dashboard::object_with_id;
 
@@ -10,9 +11,23 @@ fn empty_payload() -> Value {
     Value::Object(Map::new())
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+/// [H-B02-02] Tope del payload JSONB: el front es el escritor legítimo, pero
+/// un payload arbitrario de megabytes llegaría al almacenamiento sin control.
+const PAYLOAD_MAX_BYTES: usize = 1024 * 1024;
+
+fn validar_payload(payload: &Value) -> Result<(), validator::ValidationError> {
+    if serde_json::to_vec(payload).map_or(0, |bytes| bytes.len()) > PAYLOAD_MAX_BYTES {
+        let mut error = validator::ValidationError::new("payload_too_large");
+        error.message = Some("El payload no puede exceder 1 MB".into());
+        return Err(error);
+    }
+    Ok(())
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpsertProjectRequest {
+    #[validate(length(max = 120, message = "El nombre del proyecto no debe exceder 120 caracteres"))]
     pub nombre: String,
     #[serde(default = "default_project_status")]
     pub estado: String,
@@ -25,6 +40,7 @@ pub struct UpsertProjectRequest {
     #[serde(default)]
     pub orden: i32,
     #[serde(default = "empty_payload")]
+    #[validate(custom(function = "validar_payload"))]
     pub payload: Value,
     #[serde(default)]
     pub expected_updated_at: Option<DateTime<Utc>>,
@@ -50,9 +66,10 @@ impl UpsertProjectRequest {
     }
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpsertTaskRequest {
+    #[validate(length(max = 1000, message = "El texto de la tarea no debe exceder 1000 caracteres"))]
     pub texto: String,
     #[serde(default)]
     pub completado: bool,
@@ -67,6 +84,7 @@ pub struct UpsertTaskRequest {
     #[serde(default)]
     pub orden: i32,
     #[serde(default = "empty_payload")]
+    #[validate(custom(function = "validar_payload"))]
     pub payload: Value,
     #[serde(default)]
     pub expected_updated_at: Option<DateTime<Utc>>,
@@ -107,9 +125,10 @@ impl UpsertTaskRequest {
     }
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpsertHabitRequest {
+    #[validate(length(max = 120, message = "El nombre del hábito no debe exceder 120 caracteres"))]
     pub nombre: String,
     #[serde(default = "default_habit_importance")]
     pub importancia: String,
@@ -118,6 +137,7 @@ pub struct UpsertHabitRequest {
     #[serde(default)]
     pub orden: i32,
     #[serde(default = "empty_payload")]
+    #[validate(custom(function = "validar_payload"))]
     pub payload: Value,
     #[serde(default)]
     pub expected_updated_at: Option<DateTime<Utc>>,

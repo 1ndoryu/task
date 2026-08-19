@@ -16,6 +16,7 @@
 
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
+import {devLog} from '../utils/devLog';
 
 /*
  * Detección de entorno para WebSocket
@@ -95,7 +96,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
     /* Log inicial de configuración para depuración */
     useEffect(() => {
-        console.log('[WebSocket] Config inicial:', {
+        devLog('[WebSocket] Config inicial:', {
             url: CONFIG_WS.url,
             userId,
             habilitado,
@@ -173,19 +174,19 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
     /* Conectar al WebSocket */
     const conectar = useCallback(() => {
         if (!habilitado) {
-            console.log('[WebSocket] No conecta: habilitado=false');
+            devLog('[WebSocket] No conecta: habilitado=false');
             return;
         }
         if (!userId) {
-            console.log('[WebSocket] No conecta: userId es null/undefined');
+            devLog('[WebSocket] No conecta: userId es null/undefined');
             return;
         }
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-            console.log('[WebSocket] No conecta: ya hay conexión abierta');
+            devLog('[WebSocket] No conecta: ya hay conexión abierta');
             return;
         }
 
-        console.log('[WebSocket] Conectando a:', CONFIG_WS.url);
+        devLog('[WebSocket] Conectando a:', CONFIG_WS.url);
 
         /* Cerrar conexión existente si hay */
         cerrarConexion();
@@ -197,7 +198,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
             ws.onopen = () => {
                 if (!montadoRef.current) return;
 
-                console.log('[WebSocket] Conectado');
+                devLog('[WebSocket] Conectado');
                 setEstado('conectado');
                 intentosReconexionRef.current = 0;
 
@@ -215,7 +216,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
                 try {
                     const mensaje = JSON.parse(evento.data) as MensajeWS;
-                    console.log('[WebSocket] Mensaje recibido:', mensaje.tipo);
+                    devLog('[WebSocket] Mensaje recibido:', mensaje.tipo);
                     setUltimaActividad(new Date());
 
                     /* Manejar pong (respuesta a heartbeat) */
@@ -228,7 +229,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
                     }
 
                     /* Pasar mensaje al handler (usar ref para tener siempre la versión actualizada) */
-                    console.log('[WebSocket] Pasando a handler:', JSON.stringify(mensaje).substring(0, 100));
+                    devLog('[WebSocket] Pasando a handler:', JSON.stringify(mensaje).substring(0, 100));
                     onMensajeRef.current?.(mensaje);
                 } catch (error) {
                     console.error('[WebSocket] Error parseando mensaje:', error);
@@ -243,7 +244,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
             ws.onclose = evento => {
                 if (!montadoRef.current) return;
 
-                console.log('[WebSocket] Desconectado. Código:', evento.code);
+                devLog('[WebSocket] Desconectado. Código:', evento.code);
                 limpiarHeartbeat();
 
                 /* Reconectar automáticamente si no fue cierre intencional */
@@ -278,7 +279,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
         /* Backoff exponencial: 1s, 2s, 4s, 8s... hasta 30s */
         const delay = Math.min(CONFIG_WS.reconexionBaseMs * Math.pow(2, intentosReconexionRef.current - 1), CONFIG_WS.reconexionMaxMs);
 
-        console.log(`[WebSocket] Reconectando en ${delay}ms (intento ${intentosReconexionRef.current})`);
+        devLog(`[WebSocket] Reconectando en ${delay}ms (intento ${intentosReconexionRef.current})`);
 
         reconexionTimeoutRef.current = setTimeout(() => {
             if (montadoRef.current) {
@@ -322,11 +323,11 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
         const manejarVisibilidad = () => {
             if (document.visibilityState === 'visible') {
-                console.log('[WebSocket] Página visible, verificando conexión...');
+                devLog('[WebSocket] Página visible, verificando conexión...');
 
                 /* Verificar si la conexión sigue viva */
                 if (wsRef.current?.readyState !== WebSocket.OPEN) {
-                    console.log('[WebSocket] Conexión perdida, reconectando...');
+                    devLog('[WebSocket] Conexión perdida, reconectando...');
                     /* [066A-1] Limpiar timeout de reconexión pendiente y reconectar
                      * inmediatamente al volver a la pestaña. Sin esto, si el backoff
                      * estaba esperando 30s, el usuario tendría que esperar ese tiempo
@@ -350,13 +351,13 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
         if (!habilitado) return;
 
         const manejarOnline = () => {
-            console.log('[WebSocket] Red disponible, reconectando...');
+            devLog('[WebSocket] Red disponible, reconectando...');
             intentosReconexionRef.current = 0;
             conectar();
         };
 
         const manejarOffline = () => {
-            console.log('[WebSocket] Red perdida');
+            devLog('[WebSocket] Red perdida');
             setEstado('desconectado');
         };
 
@@ -383,7 +384,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
                 const listener = await App.addListener('appStateChange', ({isActive}: {isActive: boolean}) => {
                     if (isActive && montadoRef.current) {
-                        console.log('[WebSocket] App activa, verificando conexión...');
+                        devLog('[WebSocket] App activa, verificando conexión...');
                         if (wsRef.current?.readyState !== WebSocket.OPEN) {
                             intentosReconexionRef.current = 0;
                             conectar();

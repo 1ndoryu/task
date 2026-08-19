@@ -379,7 +379,7 @@
 .notasAccionesHeaderDerecha {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSx);
+    gap: var(--dashboard-espacioXs);
 }
 
 .notasAccionesHeaderIzquierda {

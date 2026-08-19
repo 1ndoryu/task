@@ -1,14 +1,21 @@
+/* [H-F13-01] useTareaMenu quedó como composición: la construcción de opciones
+ * vive en opcionesMenuTarea.ts (funciones puras) y el dispatch por entidad en
+ * manejarOpcionesMenu.ts (un handler por dominio: hábito, subhábito, tarea). */
+
 import React, {useCallback, useMemo} from 'react';
-import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Play, Square, Clock, Link2} from 'lucide-react';
-import type {Tarea, TareaHabito, TareaSubHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
+import type {Tarea, TareaHabito, TareaSubHabito, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
 import {esTareaSubHabito} from '../../../types/dashboard';
-import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion, POSPONER_IDS, calcularFechaPosponer, opcionesMenuPosponerTiempo} from '../../../config/opcionesMenuHabito';
 import type {OpcionMenu} from '../../shared/MenuContextual';
-import {opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../../utils/nivelesConfig';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
 import {useTimeTrackerStore} from '../../../stores/timeTrackerStore';
-import {useDependenciasUIStore} from '../../../stores/dependenciasUIStore';
 import {useShallow} from 'zustand/react/shallow';
+import {
+    construirOpcionesHabitoMenu,
+    construirOpcionesSubHabitoMenu,
+    construirOpcionesTareaMenu
+} from './opcionesMenuTarea';
+import {manejarOpcionHabito, manejarOpcionSubHabito} from './manejarOpcionHabito';
+import {manejarOpcionTarea} from './manejarOpcionTarea';
 
 interface UseTareaMenuProps {
     tarea: Tarea;
@@ -64,277 +71,65 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
         [menuContextual, estaSeleccionada, cantidadSeleccionadas]
     );
 
+    /* [H-F13-01] Dispatch por dominio: cada tipo de entidad delega en su handler */
     const manejarOpcionMenu = useCallback(
         (opcionId: string) => {
-            /* Acciones específicas para hábitos */
             if (esHabito) {
-                const tareaHabito = tarea as TareaHabito;
-
-                /* Tracking de tiempo para hábitos */
-                if (opcionId === 'iniciar-tracking') {
-                    tracker.iniciarTracking(tareaHabito.habitoId, 'habito', tareaHabito.texto);
-                    return;
-                }
-                if (opcionId === 'detener-tracking') {
-                    tracker.completarTracking();
-                    return;
-                }
-
-                switch (opcionId) {
-                    case MENU_HABITO_IDS.CONFIGURAR:
-                    case MENU_HABITO_IDS.EDITAR:
-                        onEditarHabito?.(tareaHabito.habitoId);
-                        break;
-                    case 'dependencias':
-                        /* [19-08-2026] Acceso directo: abre el modal de edición del
-                         * hábito con el selector de dependencias ya abierto. */
-                        useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'habito', id: tareaHabito.habitoId});
-                        onEditarHabito?.(tareaHabito.habitoId);
-                        break;
-                    case MENU_HABITO_IDS.TOGGLE:
-                        onToggleHabito?.(tareaHabito.habitoId);
-                        break;
-                    case MENU_HABITO_IDS.POSPONER:
-                        onPosponerHabito?.(tareaHabito.habitoId);
-                        break;
-                    case POSPONER_IDS.UNA_HORA:
-                    case POSPONER_IDS.CUATRO_HORAS:
-                    case POSPONER_IDS.OCHO_HORAS:
-                    case POSPONER_IDS.MANANA:
-                    case POSPONER_IDS.DOS_DIAS:
-                    case POSPONER_IDS.UNA_SEMANA:
-                    case POSPONER_IDS.QUITAR:
-                        onPosponerHabitoConTiempo?.(tareaHabito.habitoId, calcularFechaPosponer(opcionId));
-                        break;
-                    case MENU_HABITO_IDS.PAUSAR:
-                        onPausarHabito?.(tareaHabito.habitoId);
-                        break;
-                    case MENU_HABITO_IDS.ELIMINAR:
-                        onEliminarHabito?.(tareaHabito.habitoId);
-                        break;
-                }
-                /* Manejar cambio de importancia */
-                const nuevaImportancia = extraerImportanciaDeOpcion(opcionId) as import('../../../types/dashboard').NivelImportancia | null;
-                if (nuevaImportancia) {
-                    onActualizarHabito?.(tareaHabito.habitoId, {importancia: nuevaImportancia});
-                }
+                manejarOpcionHabito(opcionId, {
+                    tarea: tarea as TareaHabito,
+                    tracker,
+                    onEditarHabito,
+                    onEliminarHabito,
+                    onToggleHabito,
+                    onPosponerHabito,
+                    onPosponerHabitoConTiempo,
+                    onPausarHabito,
+                    onActualizarHabito
+                });
                 return;
             }
 
-            /* [217A-2] Acciones para subhábitos: ahora independientes del hábito padre.
-             * Toggle, eliminar, posponer, prioridad y configuración van al subhábito directamente. */
             if (esTareaSubHabito(tarea)) {
-                const sub = tarea as TareaSubHabito;
-
-                if (opcionId === 'iniciar-tracking') {
-                    tracker.iniciarTracking(sub.subHabitoId, 'tarea', sub.texto);
-                    return;
-                }
-                if (opcionId === 'detener-tracking') {
-                    tracker.completarTracking();
-                    return;
-                }
-
-                switch (opcionId) {
-                    case 'dependencias':
-                        useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'subhabito', id: sub.subHabitoId, padreId: sub.habitoPadreId});
-                        onConfigurarSubHabito?.(sub.habitoPadreId, sub.subHabitoId);
-                        break;
-                    case MENU_HABITO_IDS.TOGGLE:
-                        onToggleSubHabito?.(sub.habitoPadreId, sub.subHabitoId);
-                        break;
-                    case MENU_HABITO_IDS.ELIMINAR:
-                        onEliminarSubHabito?.(sub.habitoPadreId, sub.subHabitoId);
-                        break;
-                    case MENU_HABITO_IDS.CONFIGURAR:
-                    case MENU_HABITO_IDS.EDITAR:
-                        onConfigurarSubHabito?.(sub.habitoPadreId, sub.subHabitoId);
-                        break;
-                    case MENU_HABITO_IDS.POSPONER:
-                        onPosponerSubHabitoConTiempo?.(sub.habitoPadreId, sub.subHabitoId, calcularFechaPosponer(POSPONER_IDS.MANANA));
-                        break;
-                    case POSPONER_IDS.UNA_HORA:
-                    case POSPONER_IDS.CUATRO_HORAS:
-                    case POSPONER_IDS.OCHO_HORAS:
-                    case POSPONER_IDS.MANANA:
-                    case POSPONER_IDS.DOS_DIAS:
-                    case POSPONER_IDS.UNA_SEMANA:
-                    case POSPONER_IDS.QUITAR:
-                        onPosponerSubHabitoConTiempo?.(sub.habitoPadreId, sub.subHabitoId, calcularFechaPosponer(opcionId));
-                        break;
-                }
-                const nuevaImportancia = extraerImportanciaDeOpcion(opcionId) as import('../../../types/dashboard').NivelImportancia | null;
-                if (nuevaImportancia) {
-                    onActualizarSubHabito?.(sub.habitoPadreId, sub.subHabitoId, {importancia: nuevaImportancia});
-                }
-                return;
-            }
-
-            /* Acciones para tareas normales */
-            if (opcionId === 'iniciar-tracking') {
-                tracker.iniciarTracking(tarea.id, 'tarea', tarea.texto);
-                return;
-            }
-            if (opcionId === 'detener-tracking') {
-                tracker.completarTracking();
-                return;
-            }
-
-            if (opcionId === 'eliminar') {
-                onEliminar?.();
-            } else if (opcionId === 'dependencias') {
-                /* [19-08-2026] Acceso directo: abre el modal de configuración de la
-                 * tarea con el selector de dependencias ya abierto. */
-                useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'tarea', id: tarea.id});
-                onConfigurar?.();
-            } else if (opcionId === 'configurar') {
-                onConfigurar?.();
-            } else if (opcionId === 'agregar-subtarea') {
-                onCrearNueva?.(tarea.id, tarea.id);
-            } else if (opcionId === 'sin-prioridad') {
-                onEditar?.({prioridad: null});
-            } else if (opcionId === 'mover-proyecto') {
-                onMoverProyecto?.();
-            } else if (opcionId === 'compartir') {
-                onCompartir?.();
-            } else if (['muy_alta', 'alta', 'media', 'baja', 'muy_baja'].includes(opcionId)) {
-                onEditar?.({
-                    prioridad: opcionId as NivelPrioridad
+                manejarOpcionSubHabito(opcionId, {
+                    tarea: tarea as TareaSubHabito,
+                    tracker,
+                    onToggleSubHabito,
+                    onEliminarSubHabito,
+                    onPosponerSubHabitoConTiempo,
+                    onActualizarSubHabito,
+                    onConfigurarSubHabito
                 });
-            } else if (['bloqueante', 'urgente', 'normal', 'chill'].includes(opcionId)) {
-                onEditar?.({
-                    urgencia: opcionId as NivelUrgencia
-                });
-            } else if (opcionId.startsWith('posponer-')) {
-                /* [2303A-41] Posponer tarea por tiempo */
-                onEditar?.({pospuestoHasta: calcularFechaPosponer(opcionId)});
+                return;
             }
+
+            manejarOpcionTarea(opcionId, {
+                tarea,
+                tracker,
+                onEditar,
+                onEliminar,
+                onConfigurar,
+                onCrearNueva,
+                onMoverProyecto,
+                onCompartir
+            });
         },
-        [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, tracker, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito]
+        [onEliminar, onEditar, onConfigurar, onMoverProyecto, onCompartir, esHabito, tarea, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, tracker, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, onToggleSubHabito, onEliminarSubHabito, onCrearNueva]
     );
 
     /* Detectar si esta tarea/hábito está siendo trackeada */
     const entidadTrackingId = esHabito ? (tarea as TareaHabito).habitoId : esTareaSubHabito(tarea) ? (tarea as TareaSubHabito).subHabitoId : tarea.id;
     const estaEnTracking = tracker.sesionActiva?.entidadId === entidadTrackingId && tracker.estado !== 'inactivo';
 
-    /* Opciones del menu contextual */
+    /* Opciones del menu contextual (construidas por dominio) */
     const opcionesMenu: OpcionMenu[] = useMemo(() => {
         if (esHabito) return []; // Se generan por separado para hábitos
 
-        /* [207A-3] Subhábitos: menú simplificado (sin agregar subtarea, sin mover a proyecto) */
         if (esTareaSubHabito(tarea)) {
-            const opcionTracking: OpcionMenu = estaEnTracking
-                ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
-                : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
-
-            return [
-                {
-                    id: 'configurar',
-                    etiqueta: 'Configurar subhábito',
-                    icono: <Settings size={12} />,
-                    separadorDespues: false
-                },
-                opcionTracking,
-                {
-                    id: 'dependencias',
-                    etiqueta: 'Dependencias',
-                    icono: <Link2 size={12} />,
-                    separadorDespues: true
-                },
-                {
-                    id: 'posponer-menu',
-                    etiqueta: 'Posponer',
-                    icono: <Clock size={12} />,
-                    subOpciones: opcionesMenuPosponerTiempo(false),
-                    separadorDespues: true
-                },
-                {
-                    id: 'eliminar',
-                    etiqueta: 'Eliminar subhábito',
-                    icono: <Trash2 size={12} />,
-                    variante: 'peligro'
-                }
-            ];
+            return construirOpcionesSubHabitoMenu(estaEnTracking);
         }
 
-        /* Opción de tracking dinámica */
-        const opcionTracking: OpcionMenu = estaEnTracking
-            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
-            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
-
-        const opciones: OpcionMenu[] = [
-            {
-                id: 'configurar',
-                etiqueta: 'Configurar tarea',
-                icono: <Settings size={12} />,
-                separadorDespues: false
-            },
-            {
-                id: 'agregar-subtarea',
-                etiqueta: 'Agregar subtarea',
-                icono: <Plus size={12} />
-            },
-            opcionTracking,
-            /* TO-DO: Habilitar cuando sistema de compartir esté listo
-            {
-                id: 'compartir',
-                etiqueta: 'Compartir tarea',
-                icono: <Share2 size={12} />
-            },
-            */
-            {
-                id: 'mover-proyecto',
-                etiqueta: 'Mover a proyecto',
-                icono: <Folder size={12} />,
-                separadorDespues: false
-            },
-            {
-                id: 'dependencias',
-                etiqueta: 'Dependencias',
-                icono: <Link2 size={12} />,
-                separadorDespues: true
-            },
-            {
-                id: 'prioridad-menu',
-                etiqueta: 'Prioridad',
-                icono: <Flag size={12} />,
-                subOpciones: [
-                    ...opcionesMenuPrioridad(12),
-                    ...(tarea.prioridad
-                        ? [
-                              {
-                                  id: 'sin-prioridad',
-                                  etiqueta: 'Sin prioridad',
-                                  icono: <X size={12} />,
-                                  separadorDespues: false
-                              }
-                          ]
-                        : [])
-                ]
-            },
-            {
-                id: 'urgencia-menu',
-                etiqueta: 'Urgencia',
-                icono: <Zap size={12} />,
-                separadorDespues: true,
-                subOpciones: opcionesMenuUrgencia(12)
-            },
-            {
-                id: 'posponer-menu',
-                etiqueta: 'Posponer',
-                icono: <Clock size={12} />,
-                separadorDespues: true,
-                subOpciones: opcionesMenuPosponerTiempo(!!tarea.pospuestoHasta)
-            },
-            {
-                id: 'eliminar',
-                etiqueta: 'Eliminar tarea',
-                icono: <Trash2 size={12} />,
-                peligroso: true
-            }
-        ];
-        return opciones;
-    }, [tarea, tarea.prioridad, tarea.pospuestoHasta, esHabito, estaEnTracking]);
+        return construirOpcionesTareaMenu(tarea, estaEnTracking);
+    }, [tarea, esHabito, estaEnTracking]);
 
     /* Opciones para hábitos */
     const opcionesMenuHabito: OpcionMenu[] = useMemo(() => {
@@ -342,23 +137,13 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
             return [];
         }
 
-        const opcionesBase = generarOpcionesMenuHabito({
+        return construirOpcionesHabitoMenu({
             completadoHoy: habitoCompletadoHoy ?? false,
             estaPausado: habitoPausado ?? false,
             tieneActualizar: !!onActualizarHabito,
-            pospuestoHoy: habitoPospuestoHoy ?? false
+            pospuestoHoy: habitoPospuestoHoy ?? false,
+            estaEnTracking
         });
-
-        const opcionTracking: OpcionMenu = estaEnTracking
-            ? {id: 'detener-tracking', etiqueta: 'Detener tracking', icono: <Square size={12} />, separadorDespues: true}
-            : {id: 'iniciar-tracking', etiqueta: 'Iniciar tracking', icono: <Play size={12} />, separadorDespues: true};
-
-        const indiceInsercion = Math.max(
-            0,
-            opcionesBase.findIndex(opcion => opcion.id === MENU_HABITO_IDS.ELIMINAR)
-        );
-
-        return [...opcionesBase.slice(0, indiceInsercion), opcionTracking, ...opcionesBase.slice(indiceInsercion)];
     }, [habitoCompletadoHoy, habitoPausado, onActualizarHabito, esHabito, habitoPospuestoHoy, estaEnTracking]);
 
     return {

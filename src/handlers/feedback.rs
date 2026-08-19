@@ -5,12 +5,12 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::errors::AppError;
+use crate::middleware::admin::require_admin;
 use crate::middleware::auth::AuthUser;
 use crate::models::{
     CreateFeedbackRequest, CreateFeedbackResponse, FeedbackItem, FeedbackState,
     FeedbackStats, PaginatedFeedback,
 };
-use crate::repositories::UserRepository;
 use crate::services::FeedbackService;
 use crate::AppState;
 
@@ -119,17 +119,6 @@ pub async fn admin_feedback_read(
     require_admin(&state, auth.user_id).await?;
     FeedbackService::admin_mark_read(&state.pool, id).await?;
     Ok(axum::http::StatusCode::NO_CONTENT)
-}
-
-/// Guard para endpoints de administración: solo usuarios con es_admin.
-pub async fn require_admin(state: &AppState, user_id: Uuid) -> Result<(), AppError> {
-    let user = UserRepository::find_by_id(&state.pool, user_id)
-        .await?
-        .ok_or(AppError::Unauthorized)?;
-    if !user.es_admin {
-        return Err(AppError::Forbidden("Se requiere rol de administrador".into()));
-    }
-    Ok(())
 }
 
 pub fn routes() -> Router<AppState> {

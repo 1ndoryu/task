@@ -1,4 +1,5 @@
 import {useMemo, useCallback, useEffect, useRef} from 'react';
+import {devLog} from '../../utils/devLog';
 import type {Habito, Tarea, Proyecto} from '../../types/dashboard';
 import type {DashboardData} from '../useDashboardApi';
 import {useHabitosStore, useHabitosInicializado} from '../../stores/habitosStore';
@@ -157,7 +158,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
     const callbacksWebSocket = useMemo(
         () => ({
             onTareaRemota: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Tarea>) => {
-                console.log('[SyncRT] Tarea remota recibida:', accion, datos);
+                devLog('[SyncRT] Tarea remota recibida:', accion, datos);
                 /* [014A-19] Registrar ID como remoto para prevenir eco WS y auto-save HTTP */
                 if (datos.id) {
                     cambiosRemotosRecientesRef.current.tareas.add(datos.id);
@@ -177,7 +178,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 }
             },
             onHabitoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Habito>) => {
-                console.log('[SyncRT] Hábito remoto recibido:', accion, datos);
+                devLog('[SyncRT] Hábito remoto recibido:', accion, datos);
                 /* [014A-19] Registrar como remoto */
                 if (datos.id) {
                     cambiosRemotosRecientesRef.current.habitos.add(datos.id);
@@ -195,7 +196,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                         const historialLocalStr = JSON.stringify(habitoLocal.historialCompletados);
                         const historialRemotoStr = JSON.stringify(datos.historialCompletados);
                         if (historialLocalStr === historialRemotoStr) {
-                            console.log('[SyncRT] Toggle hábito ignorado (historial idéntico, probable eco)');
+                            devLog('[SyncRT] Toggle hábito ignorado (historial idéntico, probable eco)');
                             return;
                         }
                     }
@@ -212,7 +213,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 }
             },
             onProyectoRemoto: (accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: Partial<Proyecto>) => {
-                console.log('[SyncRT] Proyecto remoto recibido:', accion, datos);
+                devLog('[SyncRT] Proyecto remoto recibido:', accion, datos);
                 /* [014A-19] Registrar como remoto */
                 if (datos.id) {
                     cambiosRemotosRecientesRef.current.proyectos.add(datos.id);
@@ -231,7 +232,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 }
             },
             onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string; id?: number; titulo?: string}) => {
-                console.log('[SyncRT] Nota remota recibida');
+                devLog('[SyncRT] Nota remota recibida');
                 /* [014A-19] Registrar como remoto para absorción HTTP */
                 contadorCambiosRemotosRef.current++;
                 if (datos.contenido !== undefined) {
@@ -263,7 +264,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 }
             },
             onSincronizacionCompleta: () => {
-                console.log('[SyncRT] Sincronización WebSocket completa');
+                devLog('[SyncRT] Sincronización WebSocket completa');
             },
             /* [014A-8] Invalidar cache de actividad al recibir cualquier cambio remoto.
              * Esto fuerza recarga del heatmap y panel de actividad en <200ms

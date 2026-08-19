@@ -8,6 +8,7 @@ import './glory-core/index.css';
 import { islandRegistry } from './glory-core/core';
 import { initializeIslands } from './glory-core/core/hydration';
 import appIslands, { AppProvider } from '@app/appIslands';
+import {inicializarSuscripcionStore} from '@app/stores/suscripcionStore';
 import type { GloryRoutesMap } from './glory-core/core/router/navigationStore';
 
 islandRegistry.registerAll(appIslands);
@@ -34,8 +35,9 @@ async function cargarSesionRust(): Promise<void> {
             window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
             return;
         }
-        const datos = await respuesta.json();
-        const usuario = datos?.user;
+        const usuario = await respuesta.json();
+        /* [H-F15-03] /api/auth/me devuelve el UserResponse directamente (no
+         * envuelto en {user}): es_admin real para el gate del panel admin. */
         window.gloryDashboard = {
             ...base,
             currentUser: {
@@ -45,7 +47,7 @@ async function cargarSesionRust(): Promise<void> {
                 avatarUrl: usuario?.avatar_url ?? undefined,
             },
             isLoggedIn: true,
-            esAdmin: false,
+            esAdmin: Boolean(usuario?.es_admin),
         };
     } catch {
         window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
@@ -54,6 +56,9 @@ async function cargarSesionRust(): Promise<void> {
 
 async function iniciarApp(): Promise<void> {
     await cargarSesionRust();
+    /* [H-F11-03] Hidratación de suscripción explícita (antes setTimeout en la
+     * evaluación del store, fuera del ciclo de React). */
+    inicializarSuscripcionStore();
 
     /* [18-08-2026] Recuperacion de sesion perdida: el dashboard detecta un 401
      * estando autenticado y emite 'glory:sesion-perdida'; aqui recargamos para

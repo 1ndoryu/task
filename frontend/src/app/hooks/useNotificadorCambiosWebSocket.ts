@@ -15,6 +15,7 @@
  */
 
 import {useRef, useEffect, useCallback} from 'react';
+import {devLog} from '../utils/devLog';
 import type React from 'react';
 import type {Tarea, Habito, Proyecto} from '../types/dashboard';
 import type {CambioLocal, AccionSincronizacion, EntidadSincronizable} from './useSincronizacionTiempoReal';
@@ -144,7 +145,7 @@ export function useNotificadorCambiosWebSocket({
             actual.forEach((tarea, id) => {
                 if (!anterior.has(id)) {
                     if (esOrigenRemoto('tareas', id)) return;
-                    console.log('[NotificadorWS] Tarea creada:', id);
+                    devLog('[NotificadorWS] Tarea creada:', id);
                     notificar('tarea', 'crear', id, tarea);
                 }
             });
@@ -153,7 +154,7 @@ export function useNotificadorCambiosWebSocket({
             anterior.forEach((_tarea, id) => {
                 if (!actual.has(id)) {
                     if (esOrigenRemoto('tareas', id)) return;
-                    console.log('[NotificadorWS] Tarea eliminada:', id);
+                    devLog('[NotificadorWS] Tarea eliminada:', id);
                     notificar('tarea', 'eliminar', id, {id});
                 }
             });
@@ -163,7 +164,7 @@ export function useNotificadorCambiosWebSocket({
                 const tareaAnterior = anterior.get(id);
                 if (tareaAnterior && hayCambiosRelevantes(tareaAnterior, tareaActual, ['orden'])) {
                     if (esOrigenRemoto('tareas', id)) return;
-                    console.log('[NotificadorWS] Tarea editada:', id);
+                    devLog('[NotificadorWS] Tarea editada:', id);
                     notificar('tarea', 'editar', id, tareaActual);
                 }
             });
@@ -187,7 +188,7 @@ export function useNotificadorCambiosWebSocket({
             actual.forEach((habito, id) => {
                 if (!anterior.has(id)) {
                     if (esOrigenRemoto('habitos', id)) return;
-                    console.log('[NotificadorWS] Hábito creado:', id);
+                    devLog('[NotificadorWS] Hábito creado:', id);
                     notificar('habito', 'crear', id, habito);
                 }
             });
@@ -196,7 +197,7 @@ export function useNotificadorCambiosWebSocket({
             anterior.forEach((_habito, id) => {
                 if (!actual.has(id)) {
                     if (esOrigenRemoto('habitos', id)) return;
-                    console.log('[NotificadorWS] Hábito eliminado:', id);
+                    devLog('[NotificadorWS] Hábito eliminado:', id);
                     notificar('habito', 'eliminar', id, {id});
                 }
             });
@@ -212,11 +213,11 @@ export function useNotificadorCambiosWebSocket({
 
                     if (cambioHistorial) {
                         if (esOrigenRemoto('habitos', id)) return;
-                        console.log('[NotificadorWS] Hábito toggle/pospuesto:', id);
+                        devLog('[NotificadorWS] Hábito toggle/pospuesto:', id);
                         notificar('habito', 'toggle', id, habitoActual);
                     } else if (hayCambiosRelevantes(habitoAnterior, habitoActual, ['historialCompletados', 'historialPospuestos', 'diasInactividad', 'racha'])) {
                         if (esOrigenRemoto('habitos', id)) return;
-                        console.log('[NotificadorWS] Hábito editado:', id);
+                        devLog('[NotificadorWS] Hábito editado:', id);
                         notificar('habito', 'editar', id, habitoActual);
                     }
                 }
@@ -240,7 +241,7 @@ export function useNotificadorCambiosWebSocket({
             actual.forEach((proyecto, id) => {
                 if (!anterior.has(id)) {
                     if (esOrigenRemoto('proyectos', id)) return;
-                    console.log('[NotificadorWS] Proyecto creado:', id);
+                    devLog('[NotificadorWS] Proyecto creado:', id);
                     notificar('proyecto', 'crear', id, proyecto);
                 }
             });
@@ -249,7 +250,7 @@ export function useNotificadorCambiosWebSocket({
             anterior.forEach((_proyecto, id) => {
                 if (!actual.has(id)) {
                     if (esOrigenRemoto('proyectos', id)) return;
-                    console.log('[NotificadorWS] Proyecto eliminado:', id);
+                    devLog('[NotificadorWS] Proyecto eliminado:', id);
                     notificar('proyecto', 'eliminar', id, {id});
                 }
             });
@@ -259,7 +260,7 @@ export function useNotificadorCambiosWebSocket({
                 const proyectoAnterior = anterior.get(id);
                 if (proyectoAnterior && hayCambiosRelevantes(proyectoAnterior, proyectoActual, ['progreso'])) {
                     if (esOrigenRemoto('proyectos', id)) return;
-                    console.log('[NotificadorWS] Proyecto editado:', id);
+                    devLog('[NotificadorWS] Proyecto editado:', id);
                     notificar('proyecto', 'editar', id, proyectoActual);
                 }
             });
@@ -282,7 +283,7 @@ export function useNotificadorCambiosWebSocket({
 
             /* Debounce de 1s para notas */
             debounceNotasRef.current = setTimeout(() => {
-                console.log('[NotificadorWS] Notas editadas');
+                devLog('[NotificadorWS] Notas editadas');
                 notificar('nota', 'editar', undefined, {contenido: notas});
             }, 1000);
         }
@@ -305,7 +306,7 @@ export function useNotificadorCambiosWebSocket({
             /* Pequeño delay para asegurar que el estado se ha estabilizado */
             const timer = setTimeout(() => {
                 estadoAnteriorRef.current.inicializado = true;
-                console.log('[NotificadorWS] Sistema inicializado, comenzando detección de cambios');
+                devLog('[NotificadorWS] Sistema inicializado, comenzando detección de cambios');
             }, 500);
 
             return () => clearTimeout(timer);

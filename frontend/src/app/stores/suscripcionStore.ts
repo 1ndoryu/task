@@ -9,13 +9,14 @@
  */
 
 import {create} from 'zustand';
+import {apiFetch} from '../utils/apiClient';
 import type {InfoSuscripcion, LimitesPlan} from '../types/dashboard';
 
-/*
- * Límites por defecto para plan FREE
- * Nota: cifradoE2E disponible para todos los planes
- */
-const LIMITES_FREE: LimitesPlan = {
+/* [H-F11-02] El backend (/api/subscription) es la autoridad de límites: este
+ * default solo pinta el estado FREE pre-hidratación (recargarSuscripcion
+ * reemplaza suscripcion con los límites del servidor). LIMITES_PREMIUM era
+ * duplicación muerta del contrato Rust y se eliminó. */
+const LIMITES_FREE_FALLBACK: LimitesPlan = {
     habitos: 5,
     tareasActivas: 20,
     proyectos: 3,
@@ -23,20 +24,6 @@ const LIMITES_FREE: LimitesPlan = {
     sincronizacion: false,
     estadisticasAvanzadas: false,
     temas: false,
-    cifradoE2E: true
-};
-
-/*
- * Límites para plan PREMIUM
- */
-export const LIMITES_PREMIUM: LimitesPlan = {
-    habitos: -1,
-    tareasActivas: -1,
-    proyectos: -1,
-    adjuntosPorTarea: 10,
-    sincronizacion: true,
-    estadisticasAvanzadas: true,
-    temas: true,
     cifradoE2E: true
 };
 
@@ -50,7 +37,7 @@ function crearSuscripcionFree(): InfoSuscripcion {
         esPremium: false,
         diasRestantes: null,
         trialDisponible: true,
-        limites: LIMITES_FREE,
+        limites: LIMITES_FREE_FALLBACK,
         fechaInicio: new Date().toISOString(),
         fechaExpiracion: null
     };
@@ -131,21 +118,7 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
         error: null,
     };
 
-    /* [18-08-2026] Auto-hidratacion con el contrato Rust: al cargar la pagina
-     * (incluido el reload post-login) se refresca la suscripcion real. Antes el
-     * store quedaba FREE para siempre porque nada lo actualizaba desde /api.
-     * IMPORTANTE: este modulo se evalua al importarse, ANTES de que
-     * cargarSesionRust() cree window.gloryDashboard, asi que no se puede
-     * consultar isLoggedIn aqui. La senal fiable en este punto es la cookie
-     * csrf_token (no HttpOnly, se fija junto a session_id al entrar y se
-     * elimina al salir): si existe, hay sesion -> hidratar. En la landing sin
-     * sesion se omite y el store se queda en FREE sin generar 401 de consola. */
-    const tieneSesionPorCookie = /(?:^|;\s*)csrf_token=/.test(document.cookie);
-    if (tieneSesionPorCookie) {
-        setTimeout(() => {
-            void get().recargarSuscripcion();
-        }, 0);
-    }    return {
+    return {
         ...estadoInicial,
 
     /* Getters computados */
@@ -214,41 +187,19 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
     },
 
     /*
-     * Activa el trial de 14 días
+     * Activa el trial de 30 días (contrato Rust POST /api/subscription/trial)
+     * [H-F11-02] apiFetch en vez del fetch con nonce WP + replace de URL frágil.
      */
     activarTrial: async () => {
-        const wpData = (
-            window as unknown as {
-                gloryDashboard?: {nonce?: string; apiBase?: string};
-            }
-        ).gloryDashboard;
-
-        if (!wpData?.apiBase || !wpData?.nonce) {
-            set({error: 'No hay conexión con el servidor'});
-            return false;
-        }
-
         set({cargando: true, error: null});
 
         try {
-            const response = await fetch(wpData.apiBase.replace('/dashboard', '/suscripcion/trial'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': wpData.nonce
-                },
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                set({suscripcion: data.data, cargando: false});
-                return true;
-            }
-
-            set({error: data.message || 'No se pudo activar el trial', cargando: false});
-            return false;
+            const data = await apiFetch<{success: boolean; data: InfoSuscripcion; message?: string}>(
+                '/subscription/trial',
+                {method: 'POST'}
+            );
+            set({suscripcion: data.data, cargando: false});
+            return true;
         } catch (err) {
             const mensaje = err instanceof Error ? err.message : 'Error de conexión';
             set({error: mensaje, cargando: false});
@@ -258,26 +209,17 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
 
     /*
      * Recarga la información de suscripción desde el servidor
-     * [18-08-2026] Contrato Rust: GET /api/subscription -> InfoSuscripcion directa
-     * (la version WordPress exigia nonce/apiBase y no hacia nada en Rust).
+     * [18-08-2026] Contrato Rust: GET /api/subscription -> InfoSuscripcion
+     * directa. [H-F11-02] apiFetch: CSRF y errores unificados.
      */
     recargarSuscripcion: async () => {
         set({cargando: true});
 
         try {
-            const response = await fetch('/api/subscription', {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const data: InfoSuscripcion = await response.json();
-                set({suscripcion: data, error: null, cargando: false});
-            } else {
-                /* Sin sesion o error: se mantiene el estado actual (free por defecto) */
-                set({cargando: false});
-            }
+            const data = await apiFetch<InfoSuscripcion>('/subscription');
+            set({suscripcion: data, error: null, cargando: false});
         } catch (err) {
+            /* Sin sesion o error: se mantiene el estado actual (free por defecto) */
             console.error('[SuscripcionStore] Error al recargar:', err);
             set({cargando: false});
         }
@@ -301,3 +243,14 @@ export const selectEsPremium = (state: SuscripcionState & SuscripcionActions) =>
 export const selectEnTrial = (state: SuscripcionState & SuscripcionActions) => state.enTrial();
 export const selectLimites = (state: SuscripcionState & SuscripcionActions) => state.obtenerLimites();
 export const selectSuscripcion = (state: SuscripcionState & SuscripcionActions) => state.suscripcion;
+
+/*
+ * [H-F11-03] Hidratación explícita: se llama una vez desde el boot (main.tsx)
+ * en vez de un setTimeout oculto en la evaluación del módulo. La señal fiable
+ * es la cookie csrf_token (no HttpOnly): existe = hay sesión. En la landing
+ * sin sesión se omite y el store queda en FREE sin generar 401 de consola. */
+export function inicializarSuscripcionStore(): void {
+    if (/(?:^|;\s*)csrf_token=/.test(document.cookie)) {
+        void useSuscripcionStore.getState().recargarSuscripcion();
+    }
+}

@@ -27,6 +27,9 @@
  * grupos de tareas/FB, estado de paneles (escalador de imagen, columnas FB,
  * página móvil, nota activa) y las claves de la isla Arbitraje del mismo SPA.
  */
+import {apiFetch} from './apiClient';
+import {leerClave, escribirClave} from './almacenamientoPreferencias';
+
 export const CLAVES_PREFERENCIAS: string[] = [
     /* Layout y paneles */
     'glory_config_layout',
@@ -76,21 +79,6 @@ export const CLAVES_PREFERENCIAS: string[] = [
     'dashboard_tema',
 ];
 
-/* Eventos que usan los hooks/stores para reaccionar a cambios en la misma
- * pestaña (useLocalStorage) y entre pestañas (storage). */
-const EVENTO_SYNC_LOCAL = '__glory_ls_update__';
-
-/** Lee una clave de localStorage y devuelve su valor parseado (o undefined). */
-function leerClave(clave: string): unknown | undefined {
-    try {
-        const raw = localStorage.getItem(clave);
-        if (raw === null) return undefined;
-        return JSON.parse(raw);
-    } catch {
-        return undefined;
-    }
-}
-
 /**
  * Junta el blob completo de preferencias del usuario desde localStorage.
  * Solo incluye claves presentes; el resultado se sube con cada guardado.
@@ -102,30 +90,6 @@ export function recolectarPreferencias(): Record<string, unknown> {
         if (valor !== undefined) preferencias[clave] = valor;
     }
     return preferencias;
-}
-
-/** Escribe una clave en localStorage y notifica a hooks/stores de la pestaña. */
-function escribirClave(clave: string, valor: unknown): void {
-    try {
-        const serializado = JSON.stringify(valor);
-        localStorage.setItem(clave, serializado);
-        /* [233A-66] Mismo canal que useLocalStorage: actualiza instancias de la
-         * misma pestaña; el evento 'storage' (nativo, cross-tab) también se
-         * dispara solo en otras pestañas, así que emitimos el CustomEvent. */
-        window.dispatchEvent(new CustomEvent(EVENTO_SYNC_LOCAL, {
-            detail: {clave, valor: serializado}
-        }));
-        /* Los stores Zustand con persist (plugins, nav móvil, IA, etc.) escuchan
-         * el evento nativo 'storage': un StorageEvent sintético en la misma
-         * pestaña les rehidrata el estado sin recargar la página. */
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: clave,
-            newValue: serializado,
-            storageArea: localStorage
-        }));
-    } catch (error) {
-        console.warn(`[Preferencias] No se pudo escribir "${clave}":`, error);
-    }
 }
 
 /**
@@ -144,30 +108,17 @@ export async function persistirPreferenciasAhora(): Promise<boolean> {
     const preferencias = recolectarPreferencias();
     if (Object.keys(preferencias).length === 0) return true;
     try {
-        const respuesta = await fetch('/api/dashboard/settings', {
+        /* [H-F15-02] apiFetch: CSRF, JSON y manejo de errores unificados con
+         * el resto del cliente (el endpoint responde 204 No Content). */
+        await apiFetch('/dashboard/settings', {
             method: 'PUT',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': obtenerTokenCsrf()
-            },
-            body: JSON.stringify({preferencias})
+            body: {preferencias}
         });
-        if (!respuesta.ok) {
-            console.warn('[Preferencias] Flush de logout falló:', respuesta.status);
-            return false;
-        }
         return true;
     } catch (error) {
         console.warn('[Preferencias] Flush de logout falló:', error);
         return false;
     }
-}
-
-/* Token CSRF de la cookie no HttpOnly (mismo contrato que apiClient). */
-function obtenerTokenCsrf(): string {
-    const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : '';
 }
 
 export function aplicarPreferenciasServidor(

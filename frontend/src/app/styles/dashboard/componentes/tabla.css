@@ -324,7 +324,7 @@
 }
 
 .barraRellenoUrgenteCritico {
-    background: linear-gradient(90deg, var(--dashboard-barraUrgente), #ff0000);
+    background: linear-gradient(90deg, var(--dashboard-barraUrgente), var(--dashboard-estadoUrgenciaMaxima));
     animation: pulsarBarra 1.5s ease-in-out infinite;
 }
 

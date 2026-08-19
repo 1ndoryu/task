@@ -334,24 +334,37 @@ export function generarPropsPanelGruposFb(
     };
 }
 
+/* [H-F12-11] Tipo concreto del generador: ctx + helpers de renderizado comunes
+ * y props extra posicionales por tipo de panel (el dispatch acotado vive en
+ * DashboardGrid/DashboardPanelView). Sustituye al tipo `Function` (any). */
+export type GeneradorPropsPanel = (
+    ctx: PropsContextoPaneles,
+    renderHandleArrastre: (titulo?: string) => JSX.Element,
+    handleMinimizar: JSX.Element,
+    ...rest: unknown[]
+) => unknown;
+
 /*
  * Mapeo de panelId a función generadora de props
  * TO-DO: En el futuro, cada panel podría registrar su propia función generadora
+ * Los generadores con argumentos extra (ejecucion, focoPrioritario, ayuno) se
+ * asignan con cast acotado: sus params específicos son subtipos de `unknown`
+ * y el chequeo real ocurre en el caller (dispatch por tipo de panel).
  */
-export const GENERADORES_PROPS: Record<string, Function> = {
-    ejecucion: generarPropsPanelEjecucion,
-    focoPrioritario: generarPropsPanelFocoPrioritario,
-    proyectos: generarPropsPanelProyectos,
-    scratchpad: generarPropsPanelScratchpad,
-    actividad: generarPropsPanelActividad,
-    ayuno: generarPropsPanelAyuno,
-    'deficit-calorico': generarPropsPanelDeficitCalorico,
-    ia: generarPropsPanelIA,
+export const GENERADORES_PROPS: Record<string, GeneradorPropsPanel> = {
+    ejecucion: generarPropsPanelEjecucion as GeneradorPropsPanel,
+    focoPrioritario: generarPropsPanelFocoPrioritario as GeneradorPropsPanel,
+    proyectos: generarPropsPanelProyectos as GeneradorPropsPanel,
+    scratchpad: generarPropsPanelScratchpad as GeneradorPropsPanel,
+    actividad: generarPropsPanelActividad as GeneradorPropsPanel,
+    ayuno: generarPropsPanelAyuno as GeneradorPropsPanel,
+    'deficit-calorico': generarPropsPanelDeficitCalorico as GeneradorPropsPanel,
+    ia: generarPropsPanelIA as GeneradorPropsPanel,
     /* [253A-11] Panel Grupos FB — solo necesita props base */
-    gruposFb: generarPropsPanelGruposFb,
-    recordatorios: generarPropsPanelRecordatorios
+    gruposFb: generarPropsPanelGruposFb as GeneradorPropsPanel,
+    recordatorios: generarPropsPanelRecordatorios as GeneradorPropsPanel
 };
 
-export function obtenerGeneradorPropsPanel(panelId: string, baseId: string): Function {
+export function obtenerGeneradorPropsPanel(panelId: string, baseId: string): GeneradorPropsPanel {
     return GENERADORES_PROPS[panelId] || GENERADORES_PROPS[baseId] || generarPropsPanelBase;
 }

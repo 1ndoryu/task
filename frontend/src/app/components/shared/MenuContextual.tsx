@@ -4,7 +4,7 @@
  * Responsabilidad unica: mostrar acciones contextuales en posicion del cursor
  */
 
-import {ChevronRight} from 'lucide-react';
+import {ChevronRight, Check} from 'lucide-react';
 import {Boton} from '../ui';
 import {useMenuContextual} from '../../hooks/shared/useMenuContextual';
 
@@ -16,6 +16,9 @@ export interface OpcionMenu {
     deshabilitado?: boolean;
     separadorDespues?: boolean;
     subOpciones?: OpcionMenu[];
+    /* [19-08-2026] Marca la opcion como activa (valor actual de un selector
+     * convertido a submenu) y la muestra con un check. */
+    marcada?: boolean;
 }
 
 interface MenuContextualProps {
@@ -38,6 +41,11 @@ export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, o
                     <Boton type="button" variante="ghost" claseAdicional={`menuContextualOpcion ${opcion.peligroso ? 'menuContextualOpcionPeligrosa' : ''} ${opcion.deshabilitado ? 'menuContextualOpcionDeshabilitada' : ''} ${opcionActivaId === opcion.id && opcion.subOpciones ? 'menuContextualOpcionActiva' : ''}`} onClick={() => manejarClick(opcion)} disabled={opcion.deshabilitado} role="menuitem">
                         {opcion.icono && <span className="menuContextualIcono">{opcion.icono}</span>}
                         <span className="menuContextualEtiqueta">{opcion.etiqueta}</span>
+                        {opcion.marcada && (
+                            <span className="menuContextualMarca">
+                                <Check size={12} />
+                            </span>
+                        )}
                         {opcion.subOpciones && opcion.subOpciones.length > 0 && (
                             <span className="menuContextualFlecha">
                                 <ChevronRight size={12} />

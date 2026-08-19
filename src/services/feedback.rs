@@ -7,36 +7,12 @@ use crate::errors::AppError;
 use crate::models::{
     CreateFeedbackRequest, CreateFeedbackResponse, FeedbackItem, FeedbackState, PaginatedFeedback,
 };
-use crate::repositories::FeedbackRepository;
+use crate::repositories::{AdminFeedbackRow, FeedbackRepository};
+use crate::services::SubscriptionService;
 
-/// Fila del JOIN feedback + users para el panel admin.
-#[derive(sqlx::FromRow)]
-struct AdminFeedbackRow {
-    id: uuid::Uuid,
-    display_name: String,
-    email: String,
-    tipo: String,
-    mensaje: String,
-    leido: bool,
-    creado_en: chrono::DateTime<Utc>,
-}
-
-impl AdminFeedbackRow {
-    fn into_item(self) -> FeedbackItem {
-        FeedbackItem {
-            id: self.id,
-            usuario_nombre: self.display_name,
-            usuario_email: self.email,
-            tipo: self.tipo,
-            mensaje: self.mensaje,
-            leido: self.leido,
-            fecha_creacion: self.creado_en,
-        }
-    }
-}
-
-/// Límite diario de envíos de feedback para usuarios free.
-const LIMITE_DIARIO_FREE: i64 = 3;
+/// Límite diario de envíos de feedback (aplica a todos los que pueden enviar;
+/// el envío es un beneficio Premium según el contrato del front).
+const LIMITE_DIARIO: i64 = 3;
 
 pub struct FeedbackService;
 
@@ -49,17 +25,21 @@ impl FeedbackService {
         req.validate()
             .map_err(|error| AppError::Validation(error.to_string()))?;
 
+        // [H-B04-09] El gate premium se aplica en el backend, no solo en la UI:
+        // el front lo trata como beneficio Premium (ModalFeedback lo bloquea).
+        let es_premium = SubscriptionService::active_row(pool, user_id)
+            .await?
+            .es_premium();
+        if !es_premium {
+            return Err(AppError::Forbidden(
+                "El envío de comentarios es un beneficio Premium".into(),
+            ));
+        }
+
         // Límite diario: evita spam; el count usa el índice de creado_en.
         let hoy = Utc::now().date_naive();
-        let enviados = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM feedback
-             WHERE user_id = $1 AND creado_en >= $2",
-        )
-        .bind(user_id)
-        .bind(hoy)
-        .fetch_one(pool)
-        .await?;
-        if enviados >= LIMITE_DIARIO_FREE {
+        let enviados = FeedbackRepository::count_since(pool, user_id, hoy).await?;
+        if enviados >= LIMITE_DIARIO {
             return Err(AppError::TooManyRequests);
         }
 
@@ -71,17 +51,21 @@ impl FeedbackService {
     }
 
     pub async fn state(pool: &PgPool, user_id: Uuid) -> Result<FeedbackState, AppError> {
-        let hoy = Utc::now().date_naive();
-        let enviados = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM feedback WHERE user_id = $1 AND creado_en >= $2",
-        )
-        .bind(user_id)
-        .bind(hoy)
-        .fetch_one(pool)
-        .await?;
+        /* [H-B04-09] es_premium real: la UI decide con él si muestra el gate
+         * premium o el límite diario. */
+        let es_premium = SubscriptionService::active_row(pool, user_id)
+            .await?
+            .es_premium();
+        let restante = if es_premium {
+            let hoy = Utc::now().date_naive();
+            let enviados = FeedbackRepository::count_since(pool, user_id, hoy).await?;
+            (LIMITE_DIARIO - enviados).max(0)
+        } else {
+            0
+        };
         Ok(FeedbackState {
-            restante: (LIMITE_DIARIO_FREE - enviados).max(0),
-            es_premium: false,
+            restante,
+            es_premium,
         })
     }
 
@@ -114,18 +98,7 @@ impl FeedbackService {
         let offset = (page - 1).checked_mul(per_page).ok_or_else(|| {
             AppError::Validation("página demasiado grande".into())
         })?;
-        let rows = sqlx::query_as::<_, AdminFeedbackRow>(
-            "SELECT f.id, u.display_name, u.email, f.tipo, f.mensaje, f.leido, f.creado_en
-             FROM feedback f JOIN users u ON u.id = f.user_id
-             ORDER BY f.creado_en DESC LIMIT $1 OFFSET $2",
-        )
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(pool)
-        .await?;
-        let total = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM feedback")
-            .fetch_one(pool)
-            .await?;
+        let (rows, total) = FeedbackRepository::admin_list(pool, per_page, offset).await?;
         let items: Vec<FeedbackItem> = rows
             .into_iter()
             .map(AdminFeedbackRow::into_item)

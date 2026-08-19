@@ -6,7 +6,7 @@
  * Cada ruta mapea un path a un island + props.
  */
 
-import { create } from 'zustand';
+import { create, type StoreApi } from 'zustand';
 
 export interface GloryRoute {
     island: string;
@@ -132,6 +132,39 @@ function resolverPropsParaRuta(rutas: GloryRoutesMap, rutaNormalizada: string): 
     return {};
 }
 
+/* [H-F16-01] El listener de popstate se registra una sola vez a nivel de
+ * módulo: re-inicializar el store (HMR, remount) no acumula listeners
+ * duplicados (efectos dobles + fuga de memoria). El closure lee el estado
+ * actual vía get(), así que sigue siendo correcto con el registro único. */
+let popstateRegistrado = false;
+
+function registrarListenerPopstate(
+    set: StoreApi<NavigationState & NavigationActions>['setState'],
+    get: StoreApi<NavigationState & NavigationActions>['getState'],
+): void {
+    if (popstateRegistrado) return;
+    popstateRegistrado = true;
+    window.addEventListener('popstate', () => {
+        const nuevaRuta = normalizarRuta(window.location.pathname);
+        const rutasActuales = get().rutas;
+        const nuevaConfig = buscarRutaEnMapa(rutasActuales, nuevaRuta);
+
+        if (nuevaConfig) {
+            set({
+                rutaActual: nuevaRuta,
+                islaActual: nuevaConfig.island,
+                /* Extraer slug de la URL para rutas dinámicas (ej: /cancion/slug/) */
+                propsActuales: resolverPropsParaRuta(rutasActuales, nuevaRuta),
+                tituloActual: nuevaConfig.title,
+                navegando: true,
+            });
+
+            if (nuevaConfig.title) document.title = nuevaConfig.title;
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+    });
+}
+
 export const useNavigationStore = create<NavigationState & NavigationActions>((set, get) => ({
     rutaActual: normalizarRuta(window.location.pathname),
     islaActual: null,
@@ -161,26 +194,8 @@ export const useNavigationStore = create<NavigationState & NavigationActions>((s
             tituloActual: config?.title ?? document.title,
         });
 
-        /* Escuchar popstate para navegacion con historial (boton atras/adelante) */
-        window.addEventListener('popstate', () => {
-            const nuevaRuta = normalizarRuta(window.location.pathname);
-            const rutasActuales = get().rutas;
-            const nuevaConfig = buscarRutaEnMapa(rutasActuales, nuevaRuta);
-
-            if (nuevaConfig) {
-                set({
-                    rutaActual: nuevaRuta,
-                    islaActual: nuevaConfig.island,
-                    /* Extraer slug de la URL para rutas dinámicas (ej: /cancion/slug/) */
-                    propsActuales: resolverPropsParaRuta(rutasActuales, nuevaRuta),
-                    tituloActual: nuevaConfig.title,
-                    navegando: true,
-                });
-
-                if (nuevaConfig.title) document.title = nuevaConfig.title;
-                window.scrollTo({ top: 0, behavior: 'instant' });
-            }
-        });
+        /* [H-F16-01] popstate: registro único a nivel de módulo (sin duplicados). */
+        registrarListenerPopstate(set, get);
     },
 
     navegar: (ruta) => {

@@ -194,7 +194,7 @@
 
 .mapaCalorCelda--nivel4 {
     background: var(--dashboard-estadoExito);
-    border: 1px solid #16a34a;
+    border: 1px solid var(--dashboard-estadoExitoFuerte);
 }
 
 /* [303A-1] mapaCalorLeyenda eliminada del componente React.

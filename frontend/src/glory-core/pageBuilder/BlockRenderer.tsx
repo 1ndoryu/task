@@ -63,10 +63,10 @@ function renderBlock(
         );
     }
 
-    /* @types/react 19 rompe el tipado de ComponentType con JSX intrinsics — cast a any para bypass */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // sentinel-disable-next-line any-type-explicito — React 19 ComponentType incompatible con JSX intrinsics
-    const Component = definition.component as any;
+    /* [H-F16-02] BlockDefinition.component ya está tipado como
+     * ComponentType<BlockComponentProps<T>>: el cast a any era heredado de
+     * antes de existir types.ts y ya no hace falta. */
+    const Component = definition.component;
     const blockContent = <Component data={block.props} blockId={block.id} isEditing={isEditMode} />;
 
     /* En modo vista, renderizar directamente */

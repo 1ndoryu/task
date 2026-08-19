@@ -121,9 +121,14 @@ export function useModalPerfil({estaAbierto, onCerrar: _onCerrar}: UseModalPerfi
 
             let cambioContrasena = false;
             if (datos.passwordNueva) {
+                /* [H-B04-01] El backend verifica la contraseña actual: una
+                 * sesión robada ya no basta para tomar la cuenta. */
                 await apiFetch('/security/password', {
                     method: 'PUT',
-                    body: JSON.stringify({nuevaContrasena: datos.passwordNueva})
+                    body: JSON.stringify({
+                        nuevaContrasena: datos.passwordNueva,
+                        contrasenaActual: datos.passwordActual
+                    })
                 });
                 cambioContrasena = true;
             }

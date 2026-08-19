@@ -3,11 +3,14 @@
  * Componente para mostrar la lista de tareas pendientes
  * Responsabilidad única: renderizar tareas con checkbox, input de creación, edición inline y acciones
  * Lógica extraída a useListaTareas hook wrapper
+ * [H-F13-01] El contrato de props vive en lista-tareas/ListaTareasProps.ts y el
+ * cableado de cada fila en lista-tareas/TareaListaItem.tsx; aquí queda la
+ * composición (estado vacío, grupos, drag, modales y menú masivo).
  */
 
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
-import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Proyecto, Participante, GrupoTareas} from '../../types/dashboard';
+import type {Tarea, GrupoTareas} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
 import {InputNuevaTarea} from './InputNuevaTarea';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
@@ -16,56 +19,26 @@ import {DashboardPanel} from '../shared/DashboardPanel';
 import {EstadoVacio} from '../shared/EstadoVacio';
 import {MenuAccionesMasivas} from './lista-tareas/MenuAccionesMasivas';
 import {GrupoTareasHeader} from './lista-tareas/GrupoTareasHeader';
-import {TareaConColapsador} from './lista-tareas/TareaConColapsador';
 import {TareaReorderItem} from './lista-tareas/TareaReorderItem';
+import {TareaListaItem} from './lista-tareas/TareaListaItem';
+import type {ListaTareasProps} from './lista-tareas/ListaTareasProps';
 import {useListaTareas} from '../../hooks/dashboard/useListaTareas';
 import {useHabitosStore} from '../../stores/habitosStore';
 
-interface ListaTareasProps {
-    tareas: Tarea[];
-    proyectoId?: number;
-    onToggleTarea?: (id: number) => void;
-    onCrearTarea?: (datos: DatosEdicionTarea) => void;
-    onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
-    onEliminarTarea?: (id: number) => void;
-    onReordenarTareas?: (tareas: Tarea[]) => void;
-    habilitarDrag?: boolean;
-    proyectos?: Proyecto[];
-    ocultarCompletadas?: boolean;
-    ocultarBadgeProyecto?: boolean;
-    /* Ocultar subtareas automáticamente (colapsadas por defecto) */
-    ocultarSubtareasAutomaticamente?: boolean;
-    onCompartirTarea?: (tarea: Tarea) => void;
-    estaCompartida?: (tareaId: number) => boolean;
-    obtenerParticipantes?: (tarea: Tarea) => Participante[];
-    /* Callbacks para hábitos - Sincronizado con TablaHabitos (Fase UI/UX) */
-    onEditarHabito?: (habitoId: number) => void;
-    onEliminarHabito?: (habitoId: number) => void;
-    onToggleHabito?: (habitoId: number) => void;
-    onPosponerHabito?: (habitoId: number) => void;
-    onPosponerHabitoConTiempo?: (habitoId: number, hasta: string | null) => void;
-    onPausarHabito?: (habitoId: number) => void;
-    onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
-    /* [207A-3] Callbacks para subhábitos */
-    onToggleSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    onEliminarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    /* [217A-2] Subhábitos: acciones independientes */
-    onPosponerSubHabitoConTiempo?: (habitoPadreId: number, subHabitoId: number, hasta: string | null) => void;
-    onActualizarSubHabito?: (habitoPadreId: number, subHabitoId: number, datos: Partial<DatosNuevoHabito>) => void;
-    onConfigurarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    modoCompacto?: boolean;
-    onConfigurarTarea?: (tarea: Tarea) => void;
-    /* Callback para abrir modal de creación rápida (usado en estado vacío y botón añadir) */
-    onAbrirModalCrear?: () => void;
-    /* [207A-4] Callback para abrir modal de creación de hábito desde areaNuevoInline */
-    onAbrirModalCrearHabito?: () => void;
-    /* Ocultar placeholder vacío completo (útil dentro de proyectos expandidos) */
-    ocultarPlaceholderVacio?: boolean;
-    /* [218A-2] Callback para actualizar orden de hábitos desde drag */
-    onReordenarHabitos?: (ordenes: Map<number, number>) => void;
-}
+export function ListaTareas(props: ListaTareasProps): JSX.Element {
+    const {
+        tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea,
+        onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false,
+        ocultarBadgeProyecto = false, ocultarSubtareasAutomaticamente = false,
+        onCompartirTarea, estaCompartida, obtenerParticipantes,
+        onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito,
+        onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito,
+        onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo,
+        onActualizarSubHabito, onConfigurarSubHabito, modoCompacto = false, onConfigurarTarea,
+        onAbrirModalCrear, onAbrirModalCrearHabito, ocultarPlaceholderVacio = false,
+        onReordenarHabitos
+    } = props;
 
-export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, habilitarDrag = true, proyectos = [], ocultarCompletadas = false, ocultarBadgeProyecto = false, ocultarSubtareasAutomaticamente = false, onCompartirTarea, estaCompartida, obtenerParticipantes, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, modoCompacto = false, onConfigurarTarea,    onAbrirModalCrear, onAbrirModalCrearHabito, ocultarPlaceholderVacio = false, onReordenarHabitos}: ListaTareasProps): JSX.Element {
     const habitos = useHabitosStore(state => state.habitos);
     const {
         pendientes, completadas,
@@ -91,54 +64,32 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
         ocultarSubtareasAutomaticamente, onReordenarHabitos
     });
 
+    /* [H-F13-01] Cableado compartido de fila: una sola construcción para las
+     * 3 ramas que renderizan tareas (grupos, drag y sin drag). */
+    const estadoFila = {
+        tareas: pendientes,
+        tareasExpandidas,
+        onToggleExpandir: toggleColapsar,
+        estaSeleccionada,
+        manejarSeleccionMultiple,
+        modoSeleccionActivo,
+        abrirConfiguracion,
+        setTareaMoviendo,
+        handleIndent,
+        handleOutdent,
+        handleCrearNueva,
+        mensajesNoLeidosPorTarea,
+        suprimirClickRef: seArrastroRef
+    };
+
     /* Renderizado de Tarea Individual (Wrapper común) */
     const renderTareaItem = (tarea: Tarea, esSubtarea: boolean) => (
-        <TareaConColapsador
+        <TareaListaItem
             key={`wrapper-${tarea.id}`}
             tarea={tarea}
             esSubtarea={esSubtarea}
-            tareas={pendientes}
-            tareasExpandidas={tareasExpandidas}
-            onToggleExpandir={toggleColapsar}
-            proyectos={proyectos}
-            modoCompacto={modoCompacto}
-            ocultarBadgeProyecto={ocultarBadgeProyecto}
-            mensajesNoLeidos={mensajesNoLeidosPorTarea[tarea.id] || 0}
-            estaCompartida={estaCompartida?.(tarea.id) ?? false}
-            // Acciones
-            onToggleTarea={onToggleTarea}
-            onEditarTarea={onEditarTarea}
-            onEliminarTarea={onEliminarTarea}
-            onIndent={handleIndent}
-            onOutdent={handleOutdent}
-            onCrearNueva={handleCrearNueva}
-            onConfigurar={abrirConfiguracion}
-            onMoverProyecto={t => setTareaMoviendo(t)}
-            onCompartir={onCompartirTarea}
-            // Hábitos - Sincronizado con TablaHabitos
-            onEditarHabito={onEditarHabito}
-            onEliminarHabito={onEliminarHabito}
-            onToggleHabito={onToggleHabito}
-            onPosponerHabito={onPosponerHabito}
-            onPosponerHabitoConTiempo={onPosponerHabitoConTiempo}
-            onPausarHabito={onPausarHabito}
-            onActualizarHabito={onActualizarHabito}
-            /* [207A-3] Subhábitos */
-            onToggleSubHabito={onToggleSubHabito}
-            onEliminarSubHabito={onEliminarSubHabito}
-            /* [217A-2] Subhábitos: acciones independientes */
-            onPosponerSubHabitoConTiempo={onPosponerSubHabitoConTiempo}
-            onActualizarSubHabito={onActualizarSubHabito}
-            onConfigurarSubHabito={onConfigurarSubHabito}
-            // Suprimir click tras drag - [218A-2]
-            suprimirClickRef={seArrastroRef}
-            // Selección múltiple - TAREA 3.1
-            estaSeleccionada={estaSeleccionada(tarea.id)}
-            onSeleccionMultiple={manejarSeleccionMultiple}
-            modoSeleccionActivo={modoSeleccionActivo}
-            // Dependencias
-            todasTareas={tareas}
-            todosHabitos={habitos}
+            listaProps={props}
+            estado={estadoFila}
         />
     );
 
@@ -185,7 +136,8 @@ export function ListaTareas({tareas, proyectoId, onToggleTarea, onCrearTarea, on
 
                     {/* Tareas sin grupo (o todas si secciones desactivadas) */}
                     {habilitarDrag ? (
-                        <>                            <Reorder.Group
+                        <>
+                            <Reorder.Group
                                 axis="y"
                                 /* [218A-fix] Rastrear IDs primitivos (number) en vez de objetos Tarea.
                                  * Framer Motion usa Object.is (===) para emparejar items entre renders.

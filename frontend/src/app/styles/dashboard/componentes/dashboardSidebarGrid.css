@@ -131,14 +131,14 @@
 .sidebarGridResizeHandleLinea {
     width: 2px;
     height: 40%;
-    background: var(--dashboard-bordeSutil, #2a2a3e);
+    background: var(--dashboard-bordeSutil);
     border-radius: 2px;
     transition: background var(--dashboard-transicionRapida, 0.15s), height var(--dashboard-transicionRapida, 0.15s);
 }
 
 .sidebarGridResizeHandle:hover .sidebarGridResizeHandleLinea,
 .sidebarGridResizeHandle--arrastrando .sidebarGridResizeHandleLinea {
-    background: var(--dashboard-acento, #5a6bf3);
+    background: var(--dashboard-acento);
     height: 70%;
 }
 
@@ -148,7 +148,7 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: var(--dashboard-textoApagado, #4a5568);
+    color: var(--dashboard-textoApagado);
     font-family: var(--dashboard-fuenteMonoespaciada, monospace);
     font-size: var(--dashboard-tamanoBase, 13px);
 }

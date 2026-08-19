@@ -9,7 +9,7 @@ export {useDeshacer} from './useDeshacer';
 export {useOrdenarHabitos, MODOS_ORDEN} from './useOrdenarHabitos';
 export type {ModoOrdenHabitos} from './useOrdenarHabitos';
 export {useDashboardApi} from './useDashboardApi';
-export type {DashboardData, EstadoApi, SyncStatus} from './useDashboardApi';
+export type {DashboardData, EstadoApi} from './useDashboardApi';
 export {useSincronizacion, estaUsuarioLogueado, obtenerUserId} from './useSincronizacion';
 export {useSuscripcion} from './useSuscripcion';
 export {useCifrado} from './useCifrado';

@@ -17,6 +17,8 @@ pub struct BackupMetadata {
 }
 
 /// Fila de la tabla backups.
+/// [H-B02-03] `device` se persiste (CreateBackupRequest.device) y se refleja
+/// en la metadata; las filas históricas quedan con el default 'unknown'.
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct BackupRow {
     pub id: Uuid,
@@ -24,6 +26,7 @@ pub struct BackupRow {
     pub trigger_origen: String,
     pub tamano: i64,
     pub hash: String,
+    pub device: String,
     pub datos: Value,
     pub creado_en: DateTime<Utc>,
 }
@@ -35,7 +38,7 @@ impl BackupRow {
             id: self.id,
             timestamp: self.creado_en.timestamp_millis(),
             size_bytes: self.tamano,
-            device: "this-device".to_string(),
+            device: self.device,
             hash: self.hash,
             trigger: self.trigger_origen,
         }

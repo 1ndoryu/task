@@ -35,10 +35,20 @@ pub struct SaveE2EResponse {
 }
 
 /// Request de cambio de contraseña.
+/// [H-B04-01] `contrasena_actual` es obligatoria: una sesión robada no basta
+/// para tomar la cuenta sin conocer la contraseña vigente.
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ChangePasswordRequest {
-    #[validate(length(min = 8, message = "La nueva contraseña debe tener al menos 8 caracteres"))]
+    #[validate(
+        length(min = 1, message = "Debes ingresar tu contraseña actual"),
+        custom(function = "crate::models::user::validar_contrasena")
+    )]
+    pub contrasena_actual: String,
+    #[validate(
+        length(min = 8, message = "La nueva contraseña debe tener al menos 8 caracteres"),
+        custom(function = "crate::models::user::validar_contrasena")
+    )]
     pub nueva_contrasena: String,
 }
 

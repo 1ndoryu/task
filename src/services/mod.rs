@@ -16,6 +16,7 @@ mod shared;
 mod storage;
 mod subscription;
 mod timeline;
+pub mod crypto;
 
 pub use activity::ActivityService;
 pub use auth::AuthService;

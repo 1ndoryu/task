@@ -12,6 +12,7 @@ pub mod models;
 pub mod repositories;
 pub mod services;
 
+use axum::http::HeaderValue;
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
@@ -25,6 +26,8 @@ pub struct AppState {
     pub cookie_secure: bool,
     pub trust_proxy_headers: bool,
     pub cookie_domain: Option<String>,
+    /// [H-B05-09] Orígenes CORS permitidos (validación de Origin en WebSocket).
+    pub cors_origins: Vec<HeaderValue>,
     pub auth_rate_limiter: Arc<FixedWindowLimiter>,
     pub auth_crypto_semaphore: Arc<Semaphore>,
 }

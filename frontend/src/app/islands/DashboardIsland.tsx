@@ -15,6 +15,7 @@ import {DashboardEncabezado, DashboardGrid, DashboardModales, SidebarMenu, Dashb
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
+import {devLog} from '../utils/devLog';
 import {NavegacionInferior} from '../components/shared';
 import {DockTracking} from '../components/shared/DockTracking';
 
@@ -114,11 +115,11 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
      */
     useDeteccionCambioDia({
         onCambioDia: () => {
-            console.log('[Dashboard] Cambio de día detectado, forzando sincronización');
+            devLog('[Dashboard] Cambio de día detectado, forzando sincronización');
             dashboard.sincronizacion.sincronizarAhora();
         },
         onRetornoInactividad: () => {
-            console.log('[Dashboard] Retorno tras inactividad, verificando datos');
+            devLog('[Dashboard] Retorno tras inactividad, verificando datos');
             dashboard.sincronizacion.sincronizarAhora();
         },
         minutosInactividad: 5,
@@ -166,66 +167,13 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         onAbrirConfigNotas: () => modales.abrirModalConfigGlobal('notas')
     });
 
-    /* TAREA 1: Interceptar botón back en APK para cerrar modales/menus antes de salir */
+    /* TAREA 1: Interceptar botón back en APK para cerrar modales/menus antes de salir.
+     * [H-F11-04] Se pasa el objeto `modales` completo: los nombres de estado y
+     * acciones coinciden 1:1 con el contrato del hook, así que agregar un modal
+     * ya no exige tocar este mapa manual de ~27 pares. */
     useBackButtonCapacitor({
-        elementos: {
-            modalLoginAbierto: modales.modalLoginAbierto,
-            modalUpgradeAbierto: modales.modalUpgradeAbierto,
-            modalPerfilAbierto: modales.modalPerfilAbierto,
-            modalEquiposAbierto: modales.modalEquiposAbierto,
-            modalNotificacionesAbierto: modales.modalNotificacionesAbierto,
-            modalExperimentosAbierto: modales.modalExperimentosAbierto,
-            modalCrearProyectoAbierto: modales.modalCrearProyectoAbierto,
-            proyectoEditando: modales.proyectoEditando,
-            modalConfigTareasAbierto: modales.modalConfigTareasAbierto,
-            modalConfigHabitosAbierto: modales.modalConfigHabitosAbierto,
-            modalConfigProyectosAbierto: modales.modalConfigProyectosAbierto,
-            modalConfigScratchpadAbierto: modales.modalConfigScratchpadAbierto,
-            modalConfigActividadAbierto: modales.modalConfigActividadAbierto,
-            modalConfigLayoutAbierto: modales.modalConfigLayoutAbierto,
-            modalVersionesAbierto: modales.modalVersionesAbierto,
-            modalNuevaTareaAbierto: modales.modalNuevaTareaAbierto,
-            tareaEditando: modales.tareaEditando,
-            tareaEditandoMovil: modales.tareaEditandoMovil,
-            habitoEditandoMovil: modales.habitoEditandoMovil,
-            modalCreacionRapida: modales.modalCreacionRapida,
-            modalTemasAbierto: modales.modalTemasAbierto,
-            modalConfigMCPAbierto: modales.modalConfigMCPAbierto,
-            modalConfigUsuarioAbierto: modales.modalConfigUsuarioAbierto,
-            modalBackupsAbierto: modales.modalBackupsAbierto,
-            modalFeedbackAbierto: modales.modalFeedbackAbierto,
-            panelSeguridadAbierto: modales.panelSeguridadAbierto,
-            panelAdminAbierto: modales.panelAdminAbierto
-        },
-        acciones: {
-            cerrarModalLogin: modales.cerrarModalLogin,
-            cerrarModalUpgrade: modales.cerrarModalUpgrade,
-            cerrarModalPerfil: modales.cerrarModalPerfil,
-            cerrarModalEquipos: modales.cerrarModalEquipos,
-            cerrarModalNotificaciones: modales.cerrarModalNotificaciones,
-            cerrarModalExperimentos: modales.cerrarModalExperimentos,
-            cerrarModalCrearProyecto: modales.cerrarModalCrearProyecto,
-            cerrarModalEditarProyecto: modales.cerrarModalEditarProyecto,
-            cerrarModalConfigTareas: modales.cerrarModalConfigTareas,
-            cerrarModalConfigHabitos: modales.cerrarModalConfigHabitos,
-            cerrarModalConfigProyectos: modales.cerrarModalConfigProyectos,
-            cerrarModalConfigScratchpad: modales.cerrarModalConfigScratchpad,
-            cerrarModalConfigActividad: modales.cerrarModalConfigActividad,
-            cerrarModalConfigLayout: modales.cerrarModalConfigLayout,
-            cerrarModalVersiones: modales.cerrarModalVersiones,
-            cerrarModalNuevaTarea: modales.cerrarModalNuevaTarea,
-            cerrarModalEditarTarea: modales.cerrarModalEditarTarea,
-            cerrarEdicionTareaMovil: modales.cerrarEdicionTareaMovil,
-            cerrarEdicionHabitoMovil: modales.cerrarEdicionHabitoMovil,
-            cerrarCreacionRapida: modales.cerrarCreacionRapida,
-            cerrarModalTemas: modales.cerrarModalTemas,
-            cerrarModalConfigMCP: modales.cerrarModalConfigMCP,
-            cerrarModalConfigUsuario: modales.cerrarModalConfigUsuario,
-            cerrarModalBackups: modales.cerrarModalBackups,
-            cerrarModalFeedback: modales.cerrarModalFeedback,
-            cerrarPanelSeguridad: modales.cerrarPanelSeguridad,
-            cerrarPanelAdmin: modales.cerrarPanelAdmin
-        }
+        elementos: modales,
+        acciones: modales
     });
 
     /* Memoizar objeto de sincronización para evitar re-renders innecesarios */

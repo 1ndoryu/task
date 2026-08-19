@@ -67,13 +67,23 @@ const ADMIN_USER_SELECT: &str = r#"
            s.plan, s.estado, s.fecha_inicio, s.fecha_expiracion,
            s.stripe_customer_id, s.ultimo_pago,
            (e.user_id IS NOT NULL) AS cifrado_activo,
-           (SELECT COUNT(*) FROM dashboard_habits h WHERE h.user_id = u.id) AS habitos,
-           (SELECT COUNT(*) FROM dashboard_tasks t WHERE t.user_id = u.id) AS tareas,
-           (SELECT COUNT(*) FROM dashboard_projects p WHERE p.user_id = u.id) AS proyectos,
-           (SELECT COUNT(*) FROM dashboard_tasks t2 WHERE t2.user_id = u.id AND (t2.payload->>'completado')::boolean) AS tareas_completadas
+           /* [H-B03-03] Joins agregados + COUNT(DISTINCT) en vez de 4
+            * subconsultas correlacionadas por fila (una pasada por página).
+            * [H-B03-04] deleted_at IS NULL: paridad con dashboard.rs — los
+            * soft-delete no inflan los contadores. */
+           COUNT(DISTINCT h.id) AS habitos,
+           COUNT(DISTINCT t.id) AS tareas,
+           COUNT(DISTINCT p.id) AS proyectos,
+           COUNT(DISTINCT t.id) FILTER (WHERE (t.payload->>'completado')::boolean) AS tareas_completadas
     FROM users u
     LEFT JOIN subscriptions s ON s.user_id = u.id
     LEFT JOIN e2e_keys e ON e.user_id = u.id
+    LEFT JOIN dashboard_habits h ON h.user_id = u.id AND h.deleted_at IS NULL
+    LEFT JOIN dashboard_tasks t ON t.user_id = u.id AND t.deleted_at IS NULL
+    LEFT JOIN dashboard_projects p ON p.user_id = u.id AND p.deleted_at IS NULL
+    GROUP BY u.id, u.display_name, u.email, u.avatar_url, u.created_at,
+             s.plan, s.estado, s.fecha_inicio, s.fecha_expiracion,
+             s.stripe_customer_id, s.ultimo_pago, e.user_id
 "#;
 
 impl AdminRepository {

@@ -10,6 +10,7 @@
  */
 
 import {useEffect, useCallback, useRef, useState} from 'react';
+import {devLog} from '../utils/devLog';
 import {useDashboardApi, type DashboardData} from './useDashboardApi';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from './useLocalStorage';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
@@ -71,7 +72,8 @@ function obtenerUserId(): number {
 }
 
 export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (datos: DashboardData) => void): UseSincronizacionReturn {
-    const {estado: estadoApi, cargar, guardar, obtenerEstadoSync: _obtenerEstadoSync} = useDashboardApi();
+    /* [H-F12-06] obtenerEstadoSync eliminado del contrato de useDashboardApi. */
+    const {estado: estadoApi, cargar, guardar} = useDashboardApi();
 
     const [estado, setEstado] = useState<EstadoSincronizacion>({
         sincronizado: true,
@@ -111,16 +113,16 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                 const {lastModified, lastSync} = syncMeta;
                 const tieneCambiosLocales = lastModified > lastSync;
 
-                console.log('[Sync] Iniciando. Meta:', syncMeta, 'Cambios locales:', tieneCambiosLocales);
+                devLog('[Sync] Iniciando. Meta:', syncMeta, 'Cambios locales:', tieneCambiosLocales);
 
                 if (tieneCambiosLocales) {
                     /* PREVENCIÓN DE PÉRDIDA DE DATOS:
                      * Si hay cambios locales sin sincronizar, intentamos subirlos primero.
                      * No descargamos ciegamente del servidor.
                      */
-                    console.log('[Sync] Detectados cambios locales sin sincronizar. Subiendo...');
+                    devLog('[Sync] Detectados cambios locales sin sincronizar. Subiendo...');
                     const resultado = await guardarEnServidor();
-                    console.log('[Sync] Subida de cambios locales completada. Resultado:', resultado);
+                    devLog('[Sync] Subida de cambios locales completada. Resultado:', resultado);
                     
                     /* Después de guardar, podríamos descargar para obtener actualizaciones de otros dispositivos,
                      * pero por seguridad terminamos aquí y dejamos que futuras syncs manejen eso.

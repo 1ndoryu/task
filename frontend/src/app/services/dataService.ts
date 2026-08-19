@@ -24,6 +24,10 @@ export interface DatosDashboardExportados {
 /* Version del formato de exportacion - incrementar al añadir campos */
 const VERSION_ACTUAL = '1.1.0';
 
+/* [H-F11-06] Limite de tamano para importaciones: evita que un archivo
+ * gigante cargue todo en memoria con el FileReader (DoS del tab). */
+const LIMITE_TAMANO_IMPORTACION = 10 * 1024 * 1024; // 10 MB
+
 /*
  * Exporta los datos del dashboard a un archivo JSON
  */
@@ -58,6 +62,11 @@ export function importarDatos(archivo: File): Promise<DatosDashboardExportados> 
     return new Promise((resolve, reject) => {
         if (!archivo.name.endsWith('.json')) {
             reject(new Error('El archivo debe ser de tipo JSON'));
+            return;
+        }
+
+        if (archivo.size > LIMITE_TAMANO_IMPORTACION) {
+            reject(new Error('El archivo es demasiado grande (máximo 10 MB)'));
             return;
         }
 
@@ -191,16 +200,17 @@ function validarHabito(habito: unknown): ResultadoValidacion {
         return {esValido: false, mensaje: 'Racha invalida'};
     }
 
-    if (!Array.isArray(h.tags)) {
+    if (!esArrayDeStrings(h.tags)) {
         return {esValido: false, mensaje: 'Tags de habito invalidos'};
     }
 
-    /* Campos opcionales del nuevo formato (historial completo) */
-    if (h.historialCompletados !== undefined && !Array.isArray(h.historialCompletados)) {
+    /* [H-F11-06] Validacion profunda: no basta con que sean arrays; cada item
+     * debe ser string para no romper aguas abajo con datos malformados. */
+    if (h.historialCompletados !== undefined && !esArrayDeStrings(h.historialCompletados)) {
         return {esValido: false, mensaje: 'Historial de completados invalido'};
     }
 
-    if (h.historialPospuestos !== undefined && !Array.isArray(h.historialPospuestos)) {
+    if (h.historialPospuestos !== undefined && !esArrayDeStrings(h.historialPospuestos)) {
         return {esValido: false, mensaje: 'Historial de pospuestos invalido'};
     }
 
@@ -274,6 +284,13 @@ function validarTarea(tarea: unknown): ResultadoValidacion {
     /* Proyecto es opcional para compatibilidad con datos antiguos */
 
     return {esValido: true, mensaje: 'OK'};
+}
+
+/*
+ * True si el valor es un array donde todos los items son strings.
+ */
+function esArrayDeStrings(valor: unknown): valor is string[] {
+    return Array.isArray(valor) && valor.every(item => typeof item === 'string');
 }
 
 /*

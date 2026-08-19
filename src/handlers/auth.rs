@@ -98,14 +98,9 @@ pub async fn login(
     responses((status = 200, description = "Usuario autenticado", body = UserResponse)),
     security(("session_cookie" = []))
 )]
-pub async fn me(
-    State(state): State<AppState>,
-    auth: AuthUser,
-) -> Result<Json<UserResponse>, AppError> {
-    let user = crate::repositories::UserRepository::find_by_id(&state.pool, auth.user_id)
-        .await?
-        .ok_or(AppError::Unauthorized)?;
-    Ok(Json(user.into()))
+/// [H-B05-02] Sin re-consulta: AuthUser ya porta el User del JOIN de sesión.
+pub async fn me(auth: AuthUser) -> Result<Json<UserResponse>, AppError> {
+    Ok(Json(auth.user.into()))
 }
 
 #[utoipa::path(
@@ -115,14 +110,9 @@ pub async fn me(
     responses((status = 200, description = "Perfil del usuario", body = UserResponse)),
     security(("session_cookie" = []))
 )]
-pub async fn profile(
-    State(state): State<AppState>,
-    auth: AuthUser,
-) -> Result<Json<UserResponse>, AppError> {
-    let user = crate::repositories::UserRepository::find_by_id(&state.pool, auth.user_id)
-        .await?
-        .ok_or(AppError::Unauthorized)?;
-    Ok(Json(user.into()))
+/// [H-B05-02] Sin re-consulta: AuthUser ya porta el User del JOIN de sesión.
+pub async fn profile(auth: AuthUser) -> Result<Json<UserResponse>, AppError> {
+    Ok(Json(auth.user.into()))
 }
 
 #[utoipa::path(

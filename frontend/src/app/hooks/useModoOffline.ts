@@ -77,11 +77,21 @@ interface AccionesOffline {
     limpiarDatosLocales: () => Promise<void>;
 }
 
+/* [H-F12-10] Reintentos acotados: cada intento fallido incrementa `intentos`
+ * de las operaciones pendientes; tras MAX_INTENTOS fallos se detiene el
+ * auto-reintento (forzarSync sigue disponible). */
+const MAX_INTENTOS = 5;
+
+/* [H-F12-08] Conexión IndexedDB compartida: antes se abría y cerraba en cada
+ * operación (open + close por transacción). La promesa se cachea a nivel de
+ * módulo y las transacciones ya no cierran la conexión. */
+let promesaBaseDatos: Promise<IDBDatabase> | null = null;
+
 /*
- * Abre o crea la base de datos IndexedDB
+ * Abre o crea la base de datos IndexedDB (una sola vez por sesión)
  */
 function abrirBaseDatos(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
+    promesaBaseDatos ??= new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
         request.onerror = () => reject(new Error('Error al abrir IndexedDB'));
@@ -108,6 +118,43 @@ function abrirBaseDatos(): Promise<IDBDatabase> {
             }
         };
     });
+    return promesaBaseDatos;
+}
+
+/*
+ * [H-F12-10] Suma 1 a `intentos` de todas las operaciones pendientes tras un
+ * intento de sync fallido (la cola se reintenta entera).
+ */
+async function incrementarIntentosDeCola(): Promise<void> {
+    const db = await abrirBaseDatos();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORES.cola, 'readwrite');
+        const store = transaction.objectStore(STORES.cola);
+        const lectura = store.getAll();
+        lectura.onsuccess = () => {
+            const operaciones = lectura.result as OperacionCola[];
+            for (const operacion of operaciones) {
+                store.put({...operacion, intentos: (operacion.intentos ?? 0) + 1});
+            }
+        };
+        lectura.onerror = () => reject(lectura.error);
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+    });
+}
+
+/*
+ * [H-F12-10] True si alguna operación pendiente agotó sus reintentos.
+ */
+async function hayOperacionesAgotadas(): Promise<boolean> {
+    const db = await abrirBaseDatos();
+    return new Promise((resolve) => {
+        const transaction = db.transaction(STORES.cola, 'readonly');
+        const store = transaction.objectStore(STORES.cola);
+        const request = store.getAll() as IDBRequest<OperacionCola[]>;
+        request.onsuccess = () => resolve(request.result.some(op => op.intentos >= MAX_INTENTOS));
+        request.onerror = () => resolve(false);
+    });
 }
 
 /*
@@ -128,7 +175,8 @@ async function ejecutarTransaccion<T>(
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
 
-        transaction.oncomplete = () => db.close();
+        /* [H-F12-08] La conexión es compartida: no se cierra por transacción. */
+        transaction.oncomplete = () => {};
     });
 }
 
@@ -148,9 +196,15 @@ export function useModoOffline(
 
     /* Detectar cambios en conexión */
     useEffect(() => {
-        const manejarOnline = () => {
+        const manejarOnline = async () => {
             if (!montadoRef.current) return;
             setEstado(prev => ({...prev, offline: false}));
+            /* [H-F12-10] Si la cola agotó reintentos, no auto-reintentar en bucle;
+             * el usuario usa forzarSync (manual). */
+            if (await hayOperacionesAgotadas()) {
+                setEstado(prev => ({...prev, error: 'Demasiados reintentos; usa sincronizar manualmente'}));
+                return;
+            }
             /* Intentar sincronizar cuando volvemos online */
             procesarCola();
         };
@@ -226,8 +280,9 @@ export function useModoOffline(
                     setEstado(prev => ({...prev, operacionesPendientes: count}));
                 }
 
-                /* Si estamos online, intentar sincronizar */
-                if (navigator.onLine) {
+                /* [H-F12-10] Si estamos online y la cola no agotó reintentos,
+                 * intentar sincronizar */
+                if (navigator.onLine && !(await hayOperacionesAgotadas())) {
                     procesarCola();
                 }
             } catch (error) {
@@ -246,14 +301,9 @@ export function useModoOffline(
                 const store = transaction.objectStore(STORES.cola);
                 const request = store.count();
 
-                request.onsuccess = () => {
-                    db.close();
-                    resolve(request.result);
-                };
-                request.onerror = () => {
-                    db.close();
-                    resolve(0);
-                };
+                /* [H-F12-08] Conexión compartida: no se cierra por lectura. */
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => resolve(0);
             });
         } catch {
             return 0;
@@ -313,6 +363,9 @@ export function useModoOffline(
                 throw new Error('Sincronización rechazada por el servidor');
             }
         } catch (error) {
+            /* [H-F12-10] Contar el intento fallido: acota los reintentos
+             * automáticos (la cola se reintenta entera). */
+            await incrementarIntentosDeCola();
             const mensaje = error instanceof Error ? error.message : 'Error de sincronización';
             if (montadoRef.current) {
                 setEstado(prev => ({...prev, error: mensaje}));
@@ -345,14 +398,9 @@ export function useModoOffline(
             transaction.objectStore(STORES.meta).clear();
 
             await new Promise<void>((resolve, reject) => {
-                transaction.oncomplete = () => {
-                    db.close();
-                    resolve();
-                };
-                transaction.onerror = () => {
-                    db.close();
-                    reject(transaction.error);
-                };
+                /* [H-F12-08] Conexión compartida: no se cierra por transacción. */
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
             });
 
             if (montadoRef.current) {

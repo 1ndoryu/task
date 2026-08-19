@@ -14,6 +14,7 @@ import {useTareaMenu} from './tarea-item/useTareaMenu';
 import {useCantidadSeleccionadas} from '../../stores/seleccionMultipleStore';
 import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
 import {useShallow} from 'zustand/react/shallow';
+import {useAlertasOpcional} from '../../context/AlertasContext';
 
 import type {TareaItemProps} from './tarea-item/types';
 
@@ -132,6 +133,7 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
     );
 
     const {bloqueado, nombresBloqueantes} = useDependenciasElemento('tarea', tarea.id, undefined, tarea, tareas, habitos);
+    const alertas = useAlertasOpcional();
     const [destello, activarDestello] = [useDependenciasUIStore(s => s.destello), useDependenciasUIStore(s => s.activarDestello)];
     const esDestello = destello?.tipo === 'tarea' && destello.id === tarea.id;
 
@@ -140,7 +142,8 @@ export function TareaItem(props: TareaItemProps): JSX.Element {
             e?.stopPropagation();
             e?.preventDefault();
             activarDestello({tipo: 'tarea', id: tarea.id});
-            alert(nombresBloqueantes.join(', '));
+            /* [H-F13-02] Feedback del sistema en vez de alert() nativo; el destello ya da señal visual */
+            alertas?.mostrarAdvertencia(`Debes completar primero: ${nombresBloqueantes.join(', ')}`);
             return;
         }
         onToggle?.();

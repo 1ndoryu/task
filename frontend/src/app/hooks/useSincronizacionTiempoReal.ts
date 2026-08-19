@@ -15,6 +15,7 @@
  */
 
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {devLog} from '../utils/devLog';
 import {useWebSocket, type MensajeWS, type MensajeSincronizacion, type EstadoConexion} from './useWebSocket';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 import {publicarEvento} from '../utils/eventBus';
@@ -112,11 +113,11 @@ export function useSincronizacionTiempoReal(
                  * que la última sincronización local. Esto evita bucles de eco.
                  */
                 if (tsRemoto && tsRemoto <= ultimaSincRef.current) {
-                    console.log('[SyncRT] Cambio remoto ignorado (LWW): ts remoto', tsRemoto, '<= local', ultimaSincRef.current);
+                    devLog('[SyncRT] Cambio remoto ignorado (LWW): ts remoto', tsRemoto, '<= local', ultimaSincRef.current);
                     return;
                 }
 
-                console.log('[SyncRT] Cambio remoto recibido:', entidad, accion, 'ts:', tsRemoto);
+                devLog('[SyncRT] Cambio remoto recibido:', entidad, accion, 'ts:', tsRemoto);
 
                 /* Usar callbacksRef.current para siempre tener la versión más actual */
                 const currentCallbacks = callbacksRef.current;
@@ -146,7 +147,7 @@ export function useSincronizacionTiempoReal(
 
             /* Manejar confirmación de sincronización completa */
             if (mensaje.tipo === 'syncCompleta') {
-                console.log('[SyncRT] Sincronización completa confirmada');
+                devLog('[SyncRT] Sincronización completa confirmada');
                 callbacksRef.current.onSincronizacionCompleta?.();
             }
         },
@@ -188,7 +189,7 @@ export function useSincronizacionTiempoReal(
 
         setCambiosPendientes(false);
         ultimaSincRef.current = Date.now();
-        console.log('[SyncRT] Enviados', cambios.length, 'cambios');
+        devLog('[SyncRT] Enviados', cambios.length, 'cambios');
     }, [conectado, enviar]);
 
     /* Notificar cambio local */

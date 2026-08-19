@@ -2,20 +2,28 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::models::{CheckoutResponse, SubscriptionInfo, TrialResponse};
+use crate::models::{
+    CheckoutResponse, SubscriptionInfo, SubscriptionRow, TrialResponse,
+};
 use crate::repositories::SubscriptionRepository;
 
 pub struct SubscriptionService;
 
 impl SubscriptionService {
-    pub async fn info(pool: &PgPool, user_id: Uuid) -> Result<SubscriptionInfo, AppError> {
+    /// [H-B04-08] Devuelve la fila de suscripción ya expirada/actualizada en un
+    /// solo lugar: sustituye el patrón ensure → expire_if_due → get (3 queries)
+    /// que se repetía en info/backup/storage.
+    pub async fn active_row(pool: &PgPool, user_id: Uuid) -> Result<SubscriptionRow, AppError> {
         let row = SubscriptionRepository::ensure(pool, user_id).await?;
         // Paridad con WP verificarExpiracion(): degradar a FREE/expirada al vencer.
         SubscriptionRepository::expire_if_due(pool, user_id).await?;
-        let row = SubscriptionRepository::get(pool, user_id)
+        Ok(SubscriptionRepository::get(pool, user_id)
             .await?
-            .unwrap_or(row);
-        Ok(row.into_info())
+            .unwrap_or(row))
+    }
+
+    pub async fn info(pool: &PgPool, user_id: Uuid) -> Result<SubscriptionInfo, AppError> {
+        Ok(Self::active_row(pool, user_id).await?.into_info())
     }
 
     pub async fn activate_trial(pool: &PgPool, user_id: Uuid) -> Result<TrialResponse, AppError> {

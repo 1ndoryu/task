@@ -5,15 +5,18 @@ use axum::http::Method;
 use uuid::Uuid;
 
 use crate::errors::AppError;
-use crate::repositories::UserRepository;
+use crate::models::User;
 use crate::services::SessionService;
 use crate::AppState;
 
 pub const SESSION_COOKIE: &str = "session_id";
 pub const CSRF_COOKIE: &str = "csrf_token";
 
+/// [H-B01-01/H-B05-02] Porta el `User` completo: la query de sesión ya hace el
+/// JOIN con users, así que me/profile no re-consultan la BD.
 pub struct AuthUser {
     pub user_id: Uuid,
+    pub user: User,
 }
 
 #[async_trait]
@@ -25,11 +28,7 @@ impl FromRequestParts<AppState> for AuthUser {
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
         let raw_token = extract_cookie(parts, SESSION_COOKIE).ok_or(AppError::Unauthorized)?;
-        let session = SessionService::validate(&state.pool, raw_token)
-            .await?
-            .ok_or(AppError::Unauthorized)?;
-
-        let user = UserRepository::find_by_id(&state.pool, session.user_id)
+        let (_session, user) = SessionService::validate_with_user(&state.pool, raw_token)
             .await?
             .ok_or(AppError::Unauthorized)?;
 
@@ -37,7 +36,10 @@ impl FromRequestParts<AppState> for AuthUser {
             verify_csrf(parts, state, raw_token).await?;
         }
 
-        Ok(Self { user_id: user.id })
+        Ok(Self {
+            user_id: user.id,
+            user,
+        })
     }
 }
 

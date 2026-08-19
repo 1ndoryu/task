@@ -268,11 +268,14 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         cookie_secure: config.cookie_secure,
         trust_proxy_headers: config.trust_proxy_headers,
         cookie_domain: config.cookie_domain,
+        cors_origins: config.cors_origins.clone(),
         auth_rate_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
-            10,
+            config.auth_rate_limit_per_minute,
             std::time::Duration::from_mins(1),
         )),
-        auth_crypto_semaphore: std::sync::Arc::new(tokio::sync::Semaphore::new(4)),
+        auth_crypto_semaphore: std::sync::Arc::new(tokio::sync::Semaphore::new(
+            config.auth_crypto_semaphore_permits,
+        )),
     };
 
     let cors = CorsLayer::new()
@@ -296,8 +299,8 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .nest("/api", api_routes(&state))
         .layer(TraceLayer::new_for_http())
-        // 6 MB para soportar adjuntos de hasta 5 MB + multipart overhead.
-        .layer(RequestBodyLimitLayer::new(6 * 1024 * 1024))
+        // [H-B05-08] Límite de body configurable (default 6 MB: adjuntos 5 MB + multipart).
+        .layer(RequestBodyLimitLayer::new(config.max_body_bytes))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|_: BoxError| async {

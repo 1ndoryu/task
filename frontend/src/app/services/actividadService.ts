@@ -83,9 +83,12 @@ export interface ObtenerDetalleActividadParams {
  */
 export async function registrarActividad(params: RegistroActividadParams): Promise<boolean> {
     try {
-        /* TAREA 2: Agregar hora local si no viene en params */
+        /* [H-B04-10] Siempre se envían fecha y hora locales del cliente: el
+         * backend usa el huso del servidor por defecto y un usuario en UTC+13
+         * registrando a las 00:30 caería en el día anterior. */
         const paramsConHora = {
             ...params,
+            fecha: params.fecha || obtenerFechaHoy(),
             horaLocal: params.horaLocal || obtenerHoraLocal()
         };
 

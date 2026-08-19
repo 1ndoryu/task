@@ -57,7 +57,13 @@ pub async fn change_password(
     Json(req): Json<ChangePasswordRequest>,
 ) -> Result<Json<ChangePasswordResponse>, AppError> {
     Ok(Json(
-        SecurityService::change_password(&state.pool, auth.user_id, req).await?,
+        SecurityService::change_password(
+            &state.pool,
+            &auth.user,
+            req,
+            state.auth_crypto_semaphore.clone(),
+        )
+        .await?,
     ))
 }
 
@@ -88,7 +94,12 @@ pub async fn mcp_token_generate(
 ) -> Result<(StatusCode, Json<McpTokenGenerated>), AppError> {
     Ok((
         StatusCode::CREATED,
-        Json(SecurityService::mcp_generate(&state.pool, auth.user_id).await?),
+        Json(SecurityService::mcp_generate(
+            &state.pool,
+            auth.user_id,
+            state.auth_crypto_semaphore.clone(),
+        )
+        .await?),
     ))
 }
 

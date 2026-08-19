@@ -189,33 +189,6 @@
     max-width: 100%;
 }
 
-/* [19-08-2026] Popover de acciones colapsadas (mismo lenguaje visual que los
- * menús contextuales: fondo principal, borde, sombra). */
-.seccionAccionesPopover {
-    position: fixed;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm);
-    background-color: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    animation: seccionAccionesAparecer 0.15s ease-out;
-}
-
-@keyframes seccionAccionesAparecer {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* 
  * VARIANTE PANEL HEADER
  * Simula barra de titulo de ventana de programa

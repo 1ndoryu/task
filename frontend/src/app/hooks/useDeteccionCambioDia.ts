@@ -7,6 +7,7 @@
 
 import {useEffect, useRef, useCallback} from 'react';
 import {obtenerFechaHoy} from '../utils/fecha';
+import {devLog} from '../utils/devLog';
 
 interface ConfigCambioDia {
     /* Callback cuando se detecta un cambio de día */
@@ -38,7 +39,7 @@ export function useDeteccionCambioDia({
     const verificarCambioDia = useCallback(() => {
         const fechaActual = obtenerFechaHoy();
         if (fechaActual !== fechaConocidaRef.current) {
-            console.log('[CambioDia] Día cambiado:', fechaConocidaRef.current, '->', fechaActual);
+            devLog('[CambioDia] Día cambiado:', fechaConocidaRef.current, '->', fechaActual);
             fechaConocidaRef.current = fechaActual;
             onCambioDiaRef.current();
         }
@@ -60,7 +61,7 @@ export function useDeteccionCambioDia({
 
                 /* Si estuvo inactivo más de X minutos, disparar callback de retorno */
                 if (minutosInactivo >= minutosInactividad) {
-                    console.log(`[CambioDia] Retorno tras ${Math.round(minutosInactivo)}min de inactividad`);
+                    devLog(`[CambioDia] Retorno tras ${Math.round(minutosInactivo)}min de inactividad`);
                     onRetornoRef.current?.();
                 }
 

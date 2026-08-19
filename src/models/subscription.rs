@@ -97,6 +97,42 @@ pub struct SubscriptionRow {
     pub ultimo_pago: Option<DateTime<Utc>>,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{Duration, TimeZone};
+
+    fn fila_premium(fecha_expiracion: Option<DateTime<Utc>>) -> SubscriptionRow {
+        SubscriptionRow {
+            user_id: Uuid::nil(),
+            plan: PLAN_PREMIUM.into(),
+            estado: ESTADO_ACTIVA.into(),
+            trial_inicio: None,
+            trial_fin: None,
+            fecha_inicio: Utc::now(),
+            fecha_expiracion,
+            stripe_customer_id: None,
+            ultimo_pago: None,
+        }
+    }
+
+    #[test]
+    fn dias_restantes_usa_el_reloj_inyectado() {
+        let ahora = Utc
+            .with_ymd_and_hms(2026, 8, 19, 12, 0, 0)
+            .single()
+            .expect("fecha válida");
+        let row = fila_premium(Some(ahora + Duration::days(5)));
+
+        assert_eq!(row.dias_restantes_en(ahora), Some(5));
+        assert_eq!(row.dias_restantes_en(ahora + Duration::days(4)), Some(1));
+        /* Premium expirado: sin .max(0), se reporta el negativo (el caller
+         * decide si tratarlo como 0 o como vencido). */
+        assert_eq!(row.dias_restantes_en(ahora + Duration::days(10)), Some(-5));
+        assert_eq!(fila_premium(None).dias_restantes_en(ahora), None);
+    }
+}
+
 impl SubscriptionRow {
     #[must_use]
     /// Paridad con WP SuscripcionService::esPremium(): premium = plan premium
@@ -116,10 +152,17 @@ impl SubscriptionRow {
 
     #[must_use]
     pub fn dias_restantes(&self) -> Option<i64> {
+        self.dias_restantes_en(Utc::now())
+    }
+
+    /// [H-B02-04] Variante con reloj inyectable: permite testear estados de
+    /// expiración sin depender del tiempo real.
+    #[must_use]
+    pub fn dias_restantes_en(&self, ahora: DateTime<Utc>) -> Option<i64> {
         match (self.plan.as_str(), &self.trial_fin, &self.fecha_expiracion) {
-            (PLAN_PREMIUM, _, Some(exp)) => Some((*exp - Utc::now()).num_days()),
+            (PLAN_PREMIUM, _, Some(exp)) => Some((*exp - ahora).num_days()),
             (PLAN_PREMIUM, _, None) => None,
-            (_, Some(fin), _) => Some((*fin - Utc::now()).num_days().max(0)),
+            (_, Some(fin), _) => Some((*fin - ahora).num_days().max(0)),
             _ => None,
         }
     }

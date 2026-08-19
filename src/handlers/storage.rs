@@ -133,7 +133,14 @@ pub async fn upload_file(
                     .text()
                     .await
                     .map_err(|error| AppError::BadRequest(format!("Campo entityId inválido: {error}")))?;
-                entity_id = text.trim().parse::<i64>().ok();
+                /* [H-B05-04] El campo viene pero no parsea: feedback explícito en
+                 * vez de convertir silenciosamente a None (que desvinculaba el
+                 * adjunto de su entidad sin avisar al cliente). */
+                entity_id = Some(
+                    text.trim()
+                        .parse::<i64>()
+                        .map_err(|_| AppError::BadRequest(format!("Campo entityId inválido: {text:?}")))?,
+                );
             }
             _ => {}
         }
@@ -224,15 +231,66 @@ pub async fn download_file(
     let bytes = tokio::fs::read(&path)
         .await
         .map_err(|_| AppError::NotFound("El archivo ya no existe en disco".into()))?;
+
+    /* [H-B05-03] El nombre viene del cliente: si se interpolaba crudo en
+     * Content-Disposition, un nombre con CR/LF o `"` permitía inyección de
+     * headers o panic del HeaderValue. Se sanitiza el fallback quoted-string,
+     * se limita a 255 bytes y el nombre real viaja por `filename*=UTF-8''`
+     * (RFC 5987) percent-encoded; el HeaderValue se construye con error
+     * mapeado en vez de `.expect` (sin pánico posible). */
+    let nombre_acotado = acotar_bytes(&row.nombre, 255);
+    let content_disposition = format!(
+        "inline; filename=\"{}\"; filename*=UTF-8''{}",
+        sanitizar_nombre_disposicion(&nombre_acotado),
+        codificar_rfc5987(&nombre_acotado),
+    );
+    let content_disposition = header::HeaderValue::from_str(&content_disposition)
+        .map_err(|_| AppError::Internal("Nombre de archivo inválido para la descarga".into()))?;
+
     Ok(Response::builder()
         .status(StatusCode::OK)
         .header(header::CONTENT_TYPE, row.mime)
-        .header(
-            header::CONTENT_DISPOSITION,
-            format!("inline; filename={}{}{}", '"', row.nombre, '"'),
-        )
+        .header(header::CONTENT_DISPOSITION, content_disposition)
         .body(Body::from(bytes))
         .expect("respuesta de descarga válida"))
+}
+
+/// Recorta un string a un máximo de bytes sin partir un carácter UTF-8.
+fn acotar_bytes(nombre: &str, max_bytes: usize) -> String {
+    let mut resultado = String::new();
+    let mut total = 0usize;
+    for caracter in nombre.chars() {
+        let tamano = caracter.len_utf8();
+        if total + tamano > max_bytes {
+            break;
+        }
+        resultado.push(caracter);
+        total += tamano;
+    }
+    resultado
+}
+
+/// Sanitiza un nombre para el valor quoted-string de Content-Disposition:
+/// elimina `"`, `\\`, CR, LF y cualquier carácter de control (H-B05-03).
+fn sanitizar_nombre_disposicion(nombre: &str) -> String {
+    nombre
+        .chars()
+        .filter(|caracter| !matches!(caracter, '"' | '\\' | '\r' | '\n') && !caracter.is_control())
+        .collect()
+}
+
+/// Codifica RFC 5987 (filename*=UTF-8''...): percent-encode de todo byte fuera
+/// de los unreserved de RFC 3986 (A-Z a-z 0-9 . _ ~ -).
+fn codificar_rfc5987(nombre: &str) -> String {
+    let mut resultado = String::new();
+    for byte in nombre.as_bytes() {
+        if byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'~' | b'-') {
+            resultado.push(char::from(*byte));
+        } else {
+            resultado.push_str(&format!("%{byte:02X}"));
+        }
+    }
+    resultado
 }
 
 #[utoipa::path(

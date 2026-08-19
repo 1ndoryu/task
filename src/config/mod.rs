@@ -15,6 +15,10 @@ pub enum ConfigError {
     InsecureCookieConfiguration(String),
     #[error("{0} debe ser un número de segundos positivo")]
     InvalidSeconds(String),
+    #[error("Cantidad de conexiones inválida: {0}")]
+    InvalidConnectionCount(String),
+    #[error("Valor de configuración inválido: {0}")]
+    InvalidConfigValue(String),
     #[error("DB_MIN_CONNECTIONS no puede superar DB_MAX_CONNECTIONS")]
     InvalidPoolBounds,
 }
@@ -31,6 +35,9 @@ pub struct AppConfig {
     pub db_idle_timeout_seconds: u64,
     pub db_max_lifetime_seconds: u64,
     pub request_timeout_seconds: u64,
+    pub auth_rate_limit_per_minute: u32,
+    pub auth_crypto_semaphore_permits: usize,
+    pub max_body_bytes: usize,
     pub cors_origins: Vec<HeaderValue>,
     pub cookie_secure: bool,
     pub trust_proxy_headers: bool,
@@ -56,15 +63,32 @@ impl AppConfig {
             db_max_connections: std::env::var("DB_MAX_CONNECTIONS")
                 .unwrap_or_else(|_| "10".to_string())
                 .parse()
-                .map_err(ConfigError::InvalidPort)?,
+                .map_err(|_| {
+                    ConfigError::InvalidConnectionCount("DB_MAX_CONNECTIONS".into())
+                })?,
             db_min_connections: std::env::var("DB_MIN_CONNECTIONS")
                 .unwrap_or_else(|_| "2".to_string())
                 .parse()
-                .map_err(ConfigError::InvalidPort)?,
+                .map_err(|_| {
+                    ConfigError::InvalidConnectionCount("DB_MIN_CONNECTIONS".into())
+                })?,
             db_acquire_timeout_seconds: env_seconds("DB_ACQUIRE_TIMEOUT_SECONDS", 5)?,
             db_idle_timeout_seconds: env_seconds("DB_IDLE_TIMEOUT_SECONDS", 600)?,
             db_max_lifetime_seconds: env_seconds("DB_MAX_LIFETIME_SECONDS", 1800)?,
             request_timeout_seconds: env_seconds("REQUEST_TIMEOUT_SECONDS", 30)?,
+            /* [H-B05-08] Límites operativos configurables (antes hardcodeados en
+             * handlers/mod.rs): auth 10 req/min, semáforo crypto 4, body 6 MB. */
+            auth_rate_limit_per_minute: env_positive("AUTH_RATE_LIMIT_PER_MINUTE", 10)?
+                .try_into()
+                .map_err(|_| ConfigError::InvalidConfigValue("AUTH_RATE_LIMIT_PER_MINUTE".into()))?,
+            auth_crypto_semaphore_permits: env_positive("AUTH_CRYPTO_SEMAPHORE_PERMITS", 4)?
+                .try_into()
+                .map_err(|_| {
+                    ConfigError::InvalidConfigValue("AUTH_CRYPTO_SEMAPHORE_PERMITS".into())
+                })?,
+            max_body_bytes: env_positive("MAX_BODY_BYTES", 6 * 1024 * 1024)?
+                .try_into()
+                .map_err(|_| ConfigError::InvalidConfigValue("MAX_BODY_BYTES".into()))?,
             cors_origins: std::env::var("CORS_ORIGINS")
                 .unwrap_or_else(|_| "http://localhost:5173,http://127.0.0.1:5173".to_string())
                 .split(',')
@@ -91,6 +115,18 @@ impl AppConfig {
         }
         Ok(config)
     }
+}
+
+/// Parsea una variable de entorno numérica positiva (default si falta).
+fn env_positive(name: &str, default: u64) -> Result<u64, ConfigError> {
+    let value = std::env::var(name)
+        .unwrap_or_else(|_| default.to_string())
+        .parse::<u64>()
+        .map_err(|_| ConfigError::InvalidConfigValue(name.to_owned()))?;
+    if value == 0 {
+        return Err(ConfigError::InvalidConfigValue(name.to_owned()));
+    }
+    Ok(value)
 }
 
 fn env_seconds(name: &str, default: u64) -> Result<u64, ConfigError> {

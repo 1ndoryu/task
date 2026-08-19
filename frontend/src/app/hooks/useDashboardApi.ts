@@ -16,6 +16,7 @@ import type {AyunoState} from '../types/ayuno';
 import type {DeficitCaloricoState} from '../types/deficitCalorico';
 import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 import {recolectarPreferencias} from '../utils/preferenciasUsuario';
+import {obtenerTokenCsrf} from '../utils/apiClient';
 import {
     obtenerBorradosPendientes,
     confirmarBorradosConfirmados,
@@ -49,13 +50,6 @@ interface ConfiguracionUsuario {
     ordenHabitos: string;
 }
 
-interface SyncStatus {
-    lastSync: number | null;
-    lastUpdate: string | null;
-    version: string;
-    serverTimestamp: number;
-}
-
 interface EstadoApi {
     cargando: boolean;
     guardando: boolean;
@@ -69,7 +63,6 @@ interface UseDashboardApiReturn {
     estado: EstadoApi;
     cargar: () => Promise<DashboardData | null>;
     guardar: (datos: Partial<DashboardData>) => Promise<boolean>;
-    obtenerEstadoSync: () => Promise<SyncStatus | null>;
     sincronizar: (datosLocales: DashboardData) => Promise<DashboardData | null>;
     limpiarError: () => void;
 }
@@ -91,12 +84,6 @@ function obtenerTimezoneCliente(): string | null {
     } catch {
         return null;
     }
-}
-
-/* Lee el token CSRF de la cookie no HttpOnly (contrato Rust ADR-02). */
-function obtenerTokenCsrf(): string {
-    const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : '';
 }
 
 /* Mapea una tarea del front al contrato UpsertTaskRequest de Rust.
@@ -277,9 +264,9 @@ export function useDashboardApi(): UseDashboardApiReturn {
 
     /**
      * Guarda datos en el servidor.
-     * Tareas y proyectos se persisten por entidad (PUT /api/tasks|projects/{id});
-     * habitos, scratchpad de notas y configuracion no tienen endpoint Rust aun
-     * y se omiten (quedan locales) — aviso unico en consola.
+     * [H-F12-12] Comentario actualizado: tareas/proyectos/hábitos se persisten
+     * por entidad (PUT /api/tasks|projects|habits/{id}) y notas + configuracion
+     * via PUT /api/dashboard/settings — todos con endpoint Rust activo.
      */
     const guardar = useCallback(
         async (datos: Partial<DashboardData>): Promise<boolean> => {
@@ -386,61 +373,29 @@ export function useDashboardApi(): UseDashboardApiReturn {
     );
 
     /**
-     * Obtiene el estado de sincronización del servidor.
-     * Rust no expone este endpoint; se retorna null (el manager usa timestamps locales).
-     */
-    const obtenerEstadoSync = useCallback(async (): Promise<SyncStatus | null> => {
-        return null;
-    }, []);
-
-    /**
-     * Sincroniza datos locales con el servidor
-     * Estrategia: Last-Write-Wins con merge inteligente
+     * Sincroniza datos locales con el servidor.
+     * [H-F12-06] Se eliminó `obtenerEstadoSync` (el backend Rust no expone el
+     * endpoint y siempre devolvía null): la rama LWW del merge era código
+     * muerto — el flujo es subir todo (LWW simple con timestamps locales).
      */
     const sincronizar = useCallback(
         async (datosLocales: DashboardData): Promise<DashboardData | null> => {
             setEstado(prev => ({...prev, sincronizando: true, error: null}));
 
             try {
-                const estadoServidor = await obtenerEstadoSync();
-
-                if (!estadoServidor) {
-                    /* Primera vez - subir todo */
-                    const guardado = await guardar(datosLocales);
-                    if (guardado) {
-                        setEstado(prev => ({...prev, sincronizando: false}));
-                        return datosLocales;
-                    }
-                    throw new Error('Error al sincronizar por primera vez');
+                const guardado = await guardar(datosLocales);
+                if (guardado) {
+                    setEstado(prev => ({...prev, sincronizando: false}));
+                    return datosLocales;
                 }
-
-                const timestampLocal = estado.ultimaSync || 0;
-                const timestampServidor = estadoServidor.lastSync || 0;
-
-                if (timestampLocal >= timestampServidor) {
-                    const guardado = await guardar(datosLocales);
-                    if (guardado) {
-                        setEstado(prev => ({...prev, sincronizando: false}));
-                        return datosLocales;
-                    }
-                    throw new Error('Error al subir datos locales');
-                }
-
-                const datosServidor = await cargar();
-
-                if (!datosServidor) {
-                    throw new Error('Error al descargar datos del servidor');
-                }
-
-                setEstado(prev => ({...prev, sincronizando: false}));
-                return datosServidor;
+                throw new Error('Error al sincronizar los datos locales');
             } catch (error) {
                 const mensaje = error instanceof Error ? error.message : 'Error de sincronización';
                 setEstado(prev => ({...prev, sincronizando: false, error: mensaje}));
                 return null;
             }
         },
-        [cargar, guardar, obtenerEstadoSync, estado.ultimaSync]
+        [guardar]
     );
 
     /**
@@ -454,7 +409,6 @@ export function useDashboardApi(): UseDashboardApiReturn {
         estado,
         cargar,
         guardar,
-        obtenerEstadoSync,
         sincronizar,
         limpiarError
     };
@@ -475,7 +429,10 @@ export function obtenerNonce(): string {
 export function useOnlineStatus(): boolean {
     const [online, setOnline] = useState(navigator.onLine);
 
-    useState(() => {
+    /* [H-F12-05] Antes se usaba useState(() => {...}) como si fuera un efecto:
+     * el inicializador se ejecutaba en cada render y su cleanup se descartaba
+     * (listeners duplicados/fugas). Es un efecto real: listeners + cleanup. */
+    useEffect(() => {
         const handleOnline = () => setOnline(true);
         const handleOffline = () => setOnline(false);
 
@@ -486,9 +443,9 @@ export function useOnlineStatus(): boolean {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    });
+    }, []);
 
     return online;
 }
 
-export type {DashboardData, ConfiguracionUsuario, SyncStatus, EstadoApi};
+export type {DashboardData, ConfiguracionUsuario, EstadoApi};

@@ -5,14 +5,17 @@ use crate::errors::AppError;
 use crate::models::{
     Attachment, AttachmentRow, StorageInfo, VerifySpaceRequest, VerifySpaceResponse,
 };
-use crate::repositories::{StorageRepository, SubscriptionRepository};
+use crate::repositories::StorageRepository;
+use crate::services::SubscriptionService;
 
 pub struct StorageService;
 
 impl StorageService {
+    /// [H-B04-08] Usa el helper activo de SubscriptionService; además de
+    /// consolidar queries, ahora degrada suscripciones vencidas (expire_if_due)
+    /// igual que info/backup — antes un premium expirado seguía viendo cuota.
     async fn is_premium(pool: &PgPool, user_id: Uuid) -> Result<bool, AppError> {
-        let row = SubscriptionRepository::ensure(pool, user_id).await?;
-        Ok(row.es_premium())
+        Ok(SubscriptionService::active_row(pool, user_id).await?.es_premium())
     }
 
     async fn used_bytes(pool: &PgPool, user_id: Uuid) -> Result<i64, AppError> {
@@ -69,7 +72,18 @@ impl StorageService {
     pub async fn delete(pool: &PgPool, user_id: Uuid, id: Uuid) -> Result<bool, AppError> {
         let row = Self::get(pool, user_id, id).await?;
         let path = std::path::PathBuf::from(&row.ruta);
-        let _ = tokio::fs::remove_file(path).await;
+        /* [H-B04-04] No silenciar el fallo de borrado: si el archivo queda en
+         * disco sin registro en BD, es fuga de almacenamiento no detectable.
+         * Se registra el error y se continúa (el borrado lógico es la parte
+         * crítica para el usuario; el huérfano queda trazado para limpieza). */
+        if let Err(error) = tokio::fs::remove_file(&path).await {
+            tracing::warn!(
+                ruta = %path.display(),
+                adjunto_id = %row.id,
+                %error,
+                "No se pudo borrar el archivo del adjunto; queda huérfano en disco"
+            );
+        }
         Ok(StorageRepository::delete(pool, user_id, id).await?)
     }
 

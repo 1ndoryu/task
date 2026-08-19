@@ -89,6 +89,26 @@ impl SubscriptionRepository {
         Ok(())
     }
 
+    /// [H-B05-05] Extiende el trial (admin): plan free + estado trial con fecha
+    /// de expiración propia (no pasa por activate_trial porque ya pudo usarse).
+    pub async fn extend_trial(pool: &PgPool, user_id: Uuid, dias: i64) -> Result<(), sqlx::Error> {
+        let ahora = Utc::now();
+        let fin = ahora + Duration::days(dias);
+        sqlx::query(
+            "UPDATE subscriptions
+             SET estado = $2, trial_inicio = $3, trial_fin = $4, plan = 'free',
+                 fecha_expiracion = NULL
+             WHERE user_id = $1",
+        )
+        .bind(user_id)
+        .bind(ESTADO_TRIAL)
+        .bind(ahora)
+        .bind(fin)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
     /// Actualiza plan/estado (usado por admin y por Stripe webhook en el futuro).
     pub async fn set_plan(
         pool: &PgPool,

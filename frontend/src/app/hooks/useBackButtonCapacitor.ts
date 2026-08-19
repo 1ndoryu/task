@@ -166,6 +166,45 @@ function cerrarModalGenerico(): boolean {
     return false;
 }
 
+/* [H-F12-07] Pares (abierto, cerrar) declarativos en orden de prioridad de
+ * cierre: agregar un modal = añadir una tupla aquí, sin tocar la lógica de
+ * back ni DashboardIsland (que pasa el objeto `modales` completo). */
+const PARES_CIERRE_MODALES: Array<[keyof ElementosCerrables, keyof AccionesCierre]> = [
+    /* Modales de edición */
+    ['tareaEditando', 'cerrarModalEditarTarea'],
+    ['proyectoEditando', 'cerrarModalEditarProyecto'],
+    /* Modales de creación */
+    ['modalCreacionRapida', 'cerrarCreacionRapida'],
+    ['modalNuevaTareaAbierto', 'cerrarModalNuevaTarea'],
+    ['modalCrearProyectoAbierto', 'cerrarModalCrearProyecto'],
+    /* Modales de configuración */
+    ['modalConfigTareasAbierto', 'cerrarModalConfigTareas'],
+    ['modalConfigHabitosAbierto', 'cerrarModalConfigHabitos'],
+    ['modalConfigProyectosAbierto', 'cerrarModalConfigProyectos'],
+    ['modalConfigScratchpadAbierto', 'cerrarModalConfigScratchpad'],
+    ['modalConfigActividadAbierto', 'cerrarModalConfigActividad'],
+    ['modalConfigLayoutAbierto', 'cerrarModalConfigLayout'],
+    ['modalConfigMCPAbierto', 'cerrarModalConfigMCP'],
+    ['modalConfigUsuarioAbierto', 'cerrarModalConfigUsuario'],
+    /* Modales auxiliares */
+    ['modalNotificacionesAbierto', 'cerrarModalNotificaciones'],
+    ['modalTemasAbierto', 'cerrarModalTemas'],
+    ['modalVersionesAbierto', 'cerrarModalVersiones'],
+    ['modalBackupsAbierto', 'cerrarModalBackups'],
+    ['modalFeedbackAbierto', 'cerrarModalFeedback'],
+    /* Modales principales */
+    ['modalPerfilAbierto', 'cerrarModalPerfil'],
+    ['modalEquiposAbierto', 'cerrarModalEquipos'],
+    ['modalExperimentosAbierto', 'cerrarModalExperimentos'],
+    ['modalUpgradeAbierto', 'cerrarModalUpgrade'],
+    ['modalLoginAbierto', 'cerrarModalLogin'],
+    /* Paneles */
+    ['panelSeguridadAbierto', 'cerrarPanelSeguridad'],
+    ['panelAdminAbierto', 'cerrarPanelAdmin'],
+    /* Modal de notas */
+    ['modalNotasAbierto', 'cerrarModalNotas'],
+];
+
 export function useBackButtonCapacitor({elementos, acciones, drawerAbierto, cerrarDrawer}: UseBackButtonCapacitorParams): void {
     /* Ref para evitar múltiples ejecuciones */
     const procesandoRef = useRef(false);
@@ -213,124 +252,13 @@ export function useBackButtonCapacitor({elementos, acciones, drawerAbierto, cerr
             }
         }
 
-        /* Prioridad 4: Modales (orden de profundidad) */
-
-        /* Modales de edición */
-        if (elementos.tareaEditando && acciones.cerrarModalEditarTarea) {
-            acciones.cerrarModalEditarTarea();
-            return;
-        }
-        if (elementos.proyectoEditando && acciones.cerrarModalEditarProyecto) {
-            acciones.cerrarModalEditarProyecto();
-            return;
-        }
-
-        /* Modales de creación */
-        if (elementos.modalCreacionRapida && acciones.cerrarCreacionRapida) {
-            acciones.cerrarCreacionRapida();
-            return;
-        }
-        if (elementos.modalNuevaTareaAbierto && acciones.cerrarModalNuevaTarea) {
-            acciones.cerrarModalNuevaTarea();
-            return;
-        }
-        if (elementos.modalCrearProyectoAbierto && acciones.cerrarModalCrearProyecto) {
-            acciones.cerrarModalCrearProyecto();
-            return;
-        }
-
-        /* Modales de configuración */
-        if (elementos.modalConfigTareasAbierto && acciones.cerrarModalConfigTareas) {
-            acciones.cerrarModalConfigTareas();
-            return;
-        }
-        if (elementos.modalConfigHabitosAbierto && acciones.cerrarModalConfigHabitos) {
-            acciones.cerrarModalConfigHabitos();
-            return;
-        }
-        if (elementos.modalConfigProyectosAbierto && acciones.cerrarModalConfigProyectos) {
-            acciones.cerrarModalConfigProyectos();
-            return;
-        }
-        if (elementos.modalConfigScratchpadAbierto && acciones.cerrarModalConfigScratchpad) {
-            acciones.cerrarModalConfigScratchpad();
-            return;
-        }
-        if (elementos.modalConfigActividadAbierto && acciones.cerrarModalConfigActividad) {
-            acciones.cerrarModalConfigActividad();
-            return;
-        }
-        if (elementos.modalConfigLayoutAbierto && acciones.cerrarModalConfigLayout) {
-            acciones.cerrarModalConfigLayout();
-            return;
-        }
-        if (elementos.modalConfigMCPAbierto && acciones.cerrarModalConfigMCP) {
-            acciones.cerrarModalConfigMCP();
-            return;
-        }
-        if (elementos.modalConfigUsuarioAbierto && acciones.cerrarModalConfigUsuario) {
-            acciones.cerrarModalConfigUsuario();
-            return;
-        }
-
-        /* Modales auxiliares */
-        if (elementos.modalNotificacionesAbierto && acciones.cerrarModalNotificaciones) {
-            acciones.cerrarModalNotificaciones();
-            return;
-        }
-        if (elementos.modalTemasAbierto && acciones.cerrarModalTemas) {
-            acciones.cerrarModalTemas();
-            return;
-        }
-        if (elementos.modalVersionesAbierto && acciones.cerrarModalVersiones) {
-            acciones.cerrarModalVersiones();
-            return;
-        }
-        if (elementos.modalBackupsAbierto && acciones.cerrarModalBackups) {
-            acciones.cerrarModalBackups();
-            return;
-        }
-        if (elementos.modalFeedbackAbierto && acciones.cerrarModalFeedback) {
-            acciones.cerrarModalFeedback();
-            return;
-        }
-
-        /* Modales principales */
-        if (elementos.modalPerfilAbierto && acciones.cerrarModalPerfil) {
-            acciones.cerrarModalPerfil();
-            return;
-        }
-        if (elementos.modalEquiposAbierto && acciones.cerrarModalEquipos) {
-            acciones.cerrarModalEquipos();
-            return;
-        }
-        if (elementos.modalExperimentosAbierto && acciones.cerrarModalExperimentos) {
-            acciones.cerrarModalExperimentos();
-            return;
-        }
-        if (elementos.modalUpgradeAbierto && acciones.cerrarModalUpgrade) {
-            acciones.cerrarModalUpgrade();
-            return;
-        }
-        if (elementos.modalLoginAbierto && acciones.cerrarModalLogin) {
-            acciones.cerrarModalLogin();
-            return;
-        }
-
-        /* Paneles */
-        if (elementos.panelSeguridadAbierto && acciones.cerrarPanelSeguridad) {
-            acciones.cerrarPanelSeguridad();
-            return;
-        }
-        if (elementos.panelAdminAbierto && acciones.cerrarPanelAdmin) {
-            acciones.cerrarPanelAdmin();
-            return;
-        }
-
-        /* Modal de notas */
-        if (elementos.modalNotasAbierto && acciones.cerrarModalNotas) {
-            acciones.cerrarModalNotas();
-            return;
+        /* Prioridad 4: Modales (orden de profundidad, declarativo) */
+        for (const [estado, cerrar] of PARES_CIERRE_MODALES) {
+            const cerrarAccion = acciones[cerrar];
+            if (elementos[estado] && cerrarAccion) {
+                cerrarAccion();
+                return;
+            }
         }
 
         /* 

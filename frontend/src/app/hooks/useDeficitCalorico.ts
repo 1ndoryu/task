@@ -46,7 +46,20 @@ function deduplicarComidas(comidas: ComidaRegistrada[]): ComidaRegistrada[] {
 }
 
 export function useDeficitCalorico(fechaActiva?: string) {
-    const store = useDeficitCaloricoStore();
+    /* [H-F12-04] Selectores atómicos: el store completo re-renderiza el hook
+     * con cualquier cambio; cada campo se selecciona por separado. */
+    const datosUsuario = useDeficitCaloricoStore(s => s.datosUsuario);
+    const comidas = useDeficitCaloricoStore(s => s.comidas);
+    const historial = useDeficitCaloricoStore(s => s.historial);
+    const apiKeyGemini = useDeficitCaloricoStore(s => s.apiKeyGemini);
+    const errorIA = useDeficitCaloricoStore(s => s.errorIA);
+    const cargandoIA = useDeficitCaloricoStore(s => s.cargandoIA);
+    const setErrorIA = useDeficitCaloricoStore(s => s.setErrorIA);
+    const setCargandoIA = useDeficitCaloricoStore(s => s.setCargandoIA);
+    const agregarComida = useDeficitCaloricoStore(s => s.agregarComida);
+    const eliminarComida = useDeficitCaloricoStore(s => s.eliminarComida);
+    const guardarDatosUsuario = useDeficitCaloricoStore(s => s.guardarDatosUsuario);
+    const guardarApiKey = useDeficitCaloricoStore(s => s.guardarApiKey);
     /* Seleccionar directamente del state para referencia estable (evita loop infinito por objeto nuevo en cada snapshot) */
     const config = usePluginsStore(s => s.configuracionPlugins['deficit-calorico']) as unknown as {apiKey?: string} | undefined;
 
@@ -56,19 +69,19 @@ export function useDeficitCalorico(fechaActiva?: string) {
     const apiKeyDeepseek = useIAStore(s => s.apiKeyDeepseek);
     const proveedorIA = useIAStore(s => s.proveedor);
     const modeloIA = useIAStore(s => s.modelo);
-    const apiKeyActual = store.apiKeyGemini || obtenerApiKeyParaProveedor(proveedorIA, apiKeyIA || config?.apiKey || '', apiKeyDeepseek, '');
-    const iaConfigurada = proveedorTieneCredenciales(proveedorIA, apiKeyIA || store.apiKeyGemini || config?.apiKey || '', apiKeyDeepseek, '');
+    const apiKeyActual = apiKeyGemini || obtenerApiKeyParaProveedor(proveedorIA, apiKeyIA || config?.apiKey || '', apiKeyDeepseek, '');
+    const iaConfigurada = proveedorTieneCredenciales(proveedorIA, apiKeyIA || apiKeyGemini || config?.apiKey || '', apiKeyDeepseek, '');
 
     /* TMB calculada */
-    const tdee = useMemo(() => calcularTDEE(store.datosUsuario), [store.datosUsuario]);
-    const metodoCalculo = useMemo(() => obtenerMetodoCalculo(store.datosUsuario), [store.datosUsuario]);
+    const tdee = useMemo(() => calcularTDEE(datosUsuario), [datosUsuario]);
+    const metodoCalculo = useMemo(() => obtenerMetodoCalculo(datosUsuario), [datosUsuario]);
 
     const fechaSeleccionada = useMemo(() => normalizarFecha(fechaActiva), [fechaActiva]);
 
     const comidasTotales = useMemo(() => {
-        const historialComidas = store.historial.flatMap(registro => registro.comidas);
-        return deduplicarComidas([...store.comidas, ...historialComidas]);
-    }, [store.comidas, store.historial]);
+        const historialComidas = historial.flatMap(registro => registro.comidas);
+        return deduplicarComidas([...comidas, ...historialComidas]);
+    }, [comidas, historial]);
 
     const comidasDelDia = useMemo(() => comidasTotales.filter(c => c.fecha === fechaSeleccionada), [comidasTotales, fechaSeleccionada]);
 
@@ -80,12 +93,12 @@ export function useDeficitCalorico(fechaActiva?: string) {
     const registrarPorTexto = useCallback(
         async (descripcion: string, fechaObjetivo?: string) => {
             if (!iaConfigurada) {
-                store.setErrorIA('Configura tu proveedor de IA en Configuración → Asistente IA');
+                setErrorIA('Configura tu proveedor de IA en Configuración → Asistente IA');
                 return;
             }
 
-            store.setCargandoIA(true);
-            store.setErrorIA(null);
+            setCargandoIA(true);
+            setErrorIA(null);
 
             try {
                 const fechaRegistro = normalizarFecha(fechaObjetivo ?? fechaSeleccionada);
@@ -108,14 +121,14 @@ export function useDeficitCalorico(fechaActiva?: string) {
                     promptOriginal: descripcion /* Guardar input original para reintentar */,
                     logProceso: resultado.logProceso /* Guardar log de debugging */
                 };
-                store.agregarComida(comida);
+                agregarComida(comida);
             } catch (error) {
-                store.setErrorIA(error instanceof Error ? error.message : 'Error al analizar');
+                setErrorIA(error instanceof Error ? error.message : 'Error al analizar');
             } finally {
-                store.setCargandoIA(false);
+                setCargandoIA(false);
             }
         },
-        [iaConfigurada, proveedorIA, apiKeyActual, modeloIA, store, fechaSeleccionada]
+        [iaConfigurada, proveedorIA, apiKeyActual, modeloIA, setErrorIA, setCargandoIA, agregarComida, fechaSeleccionada]
     );
 
     return {
@@ -130,13 +143,13 @@ export function useDeficitCalorico(fechaActiva?: string) {
         deficit,
         metodoCalculo,
         apiKey: iaConfigurada ? 'configurada' : '',
-        datosUsuario: store.datosUsuario,
-        cargandoIA: store.cargandoIA,
-        errorIA: store.errorIA,
-        historial: store.historial,
+        datosUsuario,
+        cargandoIA,
+        errorIA,
+        historial,
         registrarPorTexto,
-        eliminarComida: store.eliminarComida,
-        guardarDatosUsuario: store.guardarDatosUsuario,
-        guardarApiKey: store.guardarApiKey
+        eliminarComida,
+        guardarDatosUsuario,
+        guardarApiKey
     };
 }

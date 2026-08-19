@@ -132,7 +132,7 @@
 }
 
 .landingHeroGridItem {
-    background: linear-gradient(180deg, #c5d7ed 0%, #dbd4ea 100%);
+    background: linear-gradient(180deg, var(--dashboard-landingGradienteClaro) 0%, var(--dashboard-landingGradienteLavanda) 100%);
     border: none;
     height: 400px;
     display: flex;

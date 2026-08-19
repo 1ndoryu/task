@@ -1,17 +1,16 @@
-use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
-    Argon2,
-};
 use sqlx::PgPool;
+use std::sync::Arc;
+use tokio::sync::Semaphore;
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::errors::AppError;
 use crate::models::{
     ChangePasswordRequest, ChangePasswordResponse, E2EState, McpTokenGenerated, McpTokenRevoked,
-    McpTokenState, SaveE2ERequest, SaveE2EResponse,
+    McpTokenState, SaveE2ERequest, SaveE2EResponse, User,
 };
-use crate::repositories::{SecurityRepository, UserRepository};
+use crate::repositories::SecurityRepository;
+use crate::services::crypto;
 
 pub struct SecurityService;
 
@@ -59,29 +58,39 @@ impl SecurityService {
         })
     }
 
-    /// Cambio de contraseña: invalida las sesiones activas del usuario para
-    /// forzar re-login en todos los dispositivos.
+    /// Cambio de contraseña: exige la contraseña actual (H-B04-01) y ejecuta
+    /// Argon2 fuera del runtime async con el semáforo compartido (H-B04-02).
+    /// Invalida las sesiones activas del usuario para forzar re-login.
     pub async fn change_password(
         pool: &PgPool,
-        user_id: Uuid,
+        user: &User,
         req: ChangePasswordRequest,
+        crypto_semaphore: Arc<Semaphore>,
     ) -> Result<ChangePasswordResponse, AppError> {
         req.validate()
             .map_err(|error| AppError::Validation(error.to_string()))?;
 
-        let salt = SaltString::generate(&mut OsRng);
-        let hash = Argon2::default()
-            .hash_password(req.nueva_contrasena.as_bytes(), &salt)
-            .map_err(|error| AppError::Internal(format!("No se pudo cifrar la contraseña: {error}")))?
-            .to_string();
+        let actual_ok = crypto::verify_password(
+            req.contrasena_actual,
+            user.password_hash.clone(),
+            crypto_semaphore.clone(),
+        )
+        .await?;
+        if !actual_ok {
+            return Err(AppError::Validation(
+                "La contraseña actual es incorrecta".into(),
+            ));
+        }
 
-        UserRepository::update_password(pool, user_id, &hash)
+        let hash = crypto::hash_password(req.nueva_contrasena, crypto_semaphore).await?;
+
+        crate::repositories::UserRepository::update_password(pool, user.id, &hash)
             .await?
             .ok_or(AppError::Unauthorized)?;
 
         // Invalida todas las sesiones previas (cambio de credenciales).
         sqlx::query("DELETE FROM auth_sessions WHERE user_id = $1")
-            .bind(user_id)
+            .bind(user.id)
             .execute(pool)
             .await?;
 
@@ -102,13 +111,14 @@ impl SecurityService {
         })
     }
 
-    pub async fn mcp_generate(pool: &PgPool, user_id: Uuid) -> Result<McpTokenGenerated, AppError> {
+    /// [H-B04-02] El hash del token MCP también sale del runtime async.
+    pub async fn mcp_generate(
+        pool: &PgPool,
+        user_id: Uuid,
+        crypto_semaphore: Arc<Semaphore>,
+    ) -> Result<McpTokenGenerated, AppError> {
         let raw = format!("mcp_{}", Uuid::new_v4().simple());
-        let salt = SaltString::generate(&mut OsRng);
-        let hash = Argon2::default()
-            .hash_password(raw.as_bytes(), &salt)
-            .map_err(|error| AppError::Internal(format!("No se pudo cifrar el token: {error}")))?
-            .to_string();
+        let hash = crypto::hash_password(raw.clone(), crypto_semaphore).await?;
         let row = SecurityRepository::create_token(pool, user_id, &hash, "mcp").await?;
         Ok(McpTokenGenerated {
             success: true,

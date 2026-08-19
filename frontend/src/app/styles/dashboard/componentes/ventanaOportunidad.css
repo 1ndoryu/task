@@ -86,7 +86,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--dashboard-superposicioMedioOscuro);
+        background: var(--dashboard-superposicionMedioOscuro);
         z-index: 9998;
         backdrop-filter: blur(2px);
     }

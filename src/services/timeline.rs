@@ -24,6 +24,8 @@ impl TimelineService {
         query: TimelineQuery,
     ) -> Result<TimelineResponse, AppError> {
         let owner_id = Self::authorized_owner(pool, viewer_id, item_type, item_id).await?;
+        /* [H-B03-05] viewer_id ya no se pasa a list (no se usaba); la
+         * autorización queda en authorized_owner. */
         let items = TimelineRepository::list(
             pool,
             owner_id,
@@ -31,7 +33,6 @@ impl TimelineService {
             item_id,
             query.limit,
             query.offset,
-            viewer_id,
         )
         .await?;
         let total = TimelineRepository::count(pool, owner_id, item_type, item_id).await?;
@@ -86,26 +87,16 @@ impl TimelineService {
         Ok(Self::item(row, user_id))
     }
 
+    /// [H-B04-05] `authorized_owner` distingue 404 (elemento inexistente) de
+    /// 403 (sin acceso), igual que list/send/count: el front puede diferenciar
+    /// "no pasó nada" de "no tienes permiso" (ya tolera errores vía catch).
     pub async fn event(
         pool: &PgPool,
         user_id: Uuid,
         request: CreateTimelineEventRequest,
     ) -> Result<TimelineMutationResponse, AppError> {
-        let Some(owner_id) =
-            TimelineRepository::owner_id(pool, user_id, &request.item_type, request.item_id)
-                .await?
-        else {
-            return Ok(TimelineMutationResponse {
-                success: false,
-                created: false,
-            });
-        };
-        if !Self::has_access(pool, user_id, owner_id, &request.item_type, request.item_id).await? {
-            return Ok(TimelineMutationResponse {
-                success: false,
-                created: false,
-            });
-        }
+        let owner_id =
+            Self::authorized_owner(pool, user_id, &request.item_type, request.item_id).await?;
         let actor = UserRepository::find_by_id(pool, user_id)
             .await?
             .ok_or_else(|| AppError::NotFound("Usuario no encontrado".into()))?;

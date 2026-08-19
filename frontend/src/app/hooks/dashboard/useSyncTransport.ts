@@ -1,5 +1,6 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
 import {useDashboardApi, DashboardData} from '../useDashboardApi';
+import {devLog} from '../../utils/devLog';
 
 interface SyncTransportConfig {
     maxRetries?: number;
@@ -75,7 +76,7 @@ export function useSyncTransport(config: SyncTransportConfig = {}): UseSyncTrans
                     retryCount.current++;
                     const delay = initialRetryDelay * Math.pow(2, retryCount.current - 1); // 2s, 4s, 8s...
 
-                    console.log(`[SyncTransport] Retrying in ${delay}ms (Attempt ${retryCount.current}/${maxRetries})`);
+                    devLog(`[SyncTransport] Retrying in ${delay}ms (Attempt ${retryCount.current}/${maxRetries})`);
 
                     return new Promise(resolve => {
                         retryTimeout.current = setTimeout(async () => {

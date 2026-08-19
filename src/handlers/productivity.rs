@@ -1,5 +1,6 @@
 use axum::extract::{Path, State};
 use axum::{http::StatusCode, Json, Router};
+use validator::Validate;
 
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
@@ -29,6 +30,9 @@ pub async fn upsert_project(
     Json(request): Json<UpsertProjectRequest>,
 ) -> Result<Json<ProductivityWriteResponse>, AppError> {
     validate_legacy_id(legacy_id)?;
+    request
+        .validate()
+        .map_err(|error| AppError::Validation(error.to_string()))?;
     Ok(Json(
         ProductivityService::upsert_project(&state.pool, auth.user_id, legacy_id, request).await?,
     ))
@@ -54,6 +58,9 @@ pub async fn upsert_task(
     Json(request): Json<UpsertTaskRequest>,
 ) -> Result<Json<ProductivityWriteResponse>, AppError> {
     validate_legacy_id(legacy_id)?;
+    request
+        .validate()
+        .map_err(|error| AppError::Validation(error.to_string()))?;
     Ok(Json(
         ProductivityService::upsert_task(&state.pool, auth.user_id, legacy_id, request).await?,
     ))
@@ -79,6 +86,9 @@ pub async fn upsert_habit(
     Json(request): Json<UpsertHabitRequest>,
 ) -> Result<Json<ProductivityWriteResponse>, AppError> {
     validate_legacy_id(legacy_id)?;
+    request
+        .validate()
+        .map_err(|error| AppError::Validation(error.to_string()))?;
     Ok(Json(
         ProductivityService::upsert_habit(&state.pool, auth.user_id, legacy_id, request).await?,
     ))

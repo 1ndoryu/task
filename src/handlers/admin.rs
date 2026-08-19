@@ -4,16 +4,17 @@ use axum::{Json, Router};
 use chrono::{Duration, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
+use validator::Validate;
 
 use crate::errors::AppError;
-use crate::handlers::feedback::require_admin;
+use crate::middleware::admin::require_admin;
 use crate::middleware::auth::AuthUser;
 use crate::models::admin::{
     AdminActionResponse, AdminPremiumRequest, AdminStatsResponse, AdminTrialRequest, AdminUser,
     AdminUsersResponse, AdminPagination,
 };
 use crate::repositories::{AdminRepository, SubscriptionRepository};
-use crate::models::{ESTADO_ACTIVA, ESTADO_TRIAL, PLAN_PREMIUM};
+use crate::models::{ESTADO_ACTIVA, PLAN_PREMIUM};
 use crate::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -119,6 +120,10 @@ pub async fn activate_premium(
     Json(req): Json<AdminPremiumRequest>,
 ) -> Result<Json<AdminActionResponse>, AppError> {
     require_admin(&state, auth.user_id).await?;
+    /* [H-B05-06] Validación en el modelo (range min=1): duracion negativa o 0
+     * expiraba en el pasado. */
+    req.validate()
+        .map_err(|error| AppError::Validation(error.to_string()))?;
     let expiracion = req.duracion.map(|dias| Utc::now() + Duration::days(dias));
     SubscriptionRepository::ensure(&state.pool, id).await?;
     SubscriptionRepository::set_plan(&state.pool, id, PLAN_PREMIUM, ESTADO_ACTIVA, expiracion)
@@ -172,21 +177,8 @@ pub async fn extend_trial(
         ));
     }
     SubscriptionRepository::ensure(&state.pool, id).await?;
-    let ahora = Utc::now();
-    let fin = ahora + Duration::days(req.dias);
-    // Trial con fecha de expiración propia (no pasa por activate_trial porque ya pudo usarse).
-    sqlx::query(
-        "UPDATE subscriptions
-         SET estado = $2, trial_inicio = $3, trial_fin = $4, plan = 'free',
-             fecha_expiracion = NULL
-         WHERE user_id = $1",
-    )
-    .bind(id)
-    .bind(ESTADO_TRIAL)
-    .bind(ahora)
-    .bind(fin)
-    .execute(&state.pool)
-    .await?;
+    /* [H-B05-05] El UPDATE de trial vive en SubscriptionRepository. */
+    SubscriptionRepository::extend_trial(&state.pool, id, req.dias).await?;
     Ok(Json(AdminActionResponse {
         success: true,
         message: format!("Trial extendido {} días", req.dias),

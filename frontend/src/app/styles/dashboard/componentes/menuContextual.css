@@ -139,6 +139,16 @@
     opacity: 0.5;
 }
 
+/* [19-08-2026] Check de opcion activa (selector convertido a submenu) */
+.menuContextualMarca {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 1rem;
+    margin-left: var(--dashboard-espacioXs);
+    color: var(--dashboard-acentoPrincipal, var(--dashboard-estadoMedia));
+}
+
 .menuContextualOpcionActiva {
     background-color: var(--dashboard-fondoHover);
 }

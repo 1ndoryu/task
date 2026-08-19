@@ -38,6 +38,21 @@ pub async fn ws_handler(
         .ok_or(AppError::Unauthorized)?;
     let user_id = session.user_id;
 
+    /* [H-B05-09] Hardening CSWSH: si el navegador envía Origin, debe estar en
+     * los orígenes CORS configurados. Sin header (clientes no-navegador) se
+     * permite; SameSite=Lax ya mitiga el resto. */
+    if let Some(origin) = headers.get(axum::http::header::ORIGIN) {
+        let permitido = state
+            .cors_origins
+            .iter()
+            .any(|configurado| configurado == origin);
+        if !permitido {
+            return Err(AppError::Forbidden(
+                "Origen no permitido para la conexión WebSocket".into(),
+            ));
+        }
+    }
+
     Ok(ws.on_upgrade(move |socket| handle_socket(socket, user_id)))
 }
 

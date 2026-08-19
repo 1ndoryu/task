@@ -257,8 +257,8 @@
  * Estado: Completado 
  */
 .mapaCalorHabitoCelda--completado {
-    background: linear-gradient(135deg, var(--dashboard-estadoExito) 0%, #16a34a 100%);
-    border: 1px solid #15803d;
+    background: linear-gradient(135deg, var(--dashboard-estadoExito) 0%, var(--dashboard-estadoExitoFuerte) 100%);
+    border: 1px solid var(--dashboard-estadoExitoFuerteBorde);
     box-shadow: 0 0 4px var(--dashboard-estadoExitoBorde);
 }
 
@@ -266,8 +266,8 @@
  * Estado: Pospuesto 
  */
 .mapaCalorHabitoCelda--pospuesto {
-    background: linear-gradient(135deg, var(--dashboard-estadoAdvertencia) 0%, #d97706 100%);
-    border: 1px solid #b45309;
+    background: linear-gradient(135deg, var(--dashboard-estadoAdvertencia) 0%, var(--dashboard-estadoAdvertenciaFuerte) 100%);
+    border: 1px solid var(--dashboard-estadoAdvertenciaFuerteBorde);
     box-shadow: 0 0 4px var(--dashboard-estadoAdvertenciaBorde);
 }
 
@@ -276,7 +276,7 @@
  */
 .mapaCalorHabitoCelda--omitido {
     background: linear-gradient(135deg, var(--dashboard-textoApagado) 0%, var(--dashboard-textoMuyApagado) 100%);
-    border: 1px solid #374151;
+    border: 1px solid var(--dashboard-bordeNeutro);
 }
 
 /* 

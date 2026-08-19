@@ -1,4 +1,5 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
+import {devLog} from '../../utils/devLog';
 import type React from 'react';
 import {useChangeDetector} from './useChangeDetector';
 import {useSyncTransport} from './useSyncTransport';
@@ -153,7 +154,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
         const hasUnsyncedLocalChanges = lastModified > lastSync;
         const RETRY_KEY = 'glory_sync_init_retries';
 
-        console.log('[SyncManager] Inicializando. Cambios locales pendientes:', hasUnsyncedLocalChanges);
+        devLog('[SyncManager] Inicializando. Cambios locales pendientes:', hasUnsyncedLocalChanges);
 
         try {
             if (hasUnsyncedLocalChanges) {
@@ -166,7 +167,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     sessionStorage.setItem(RETRY_KEY, (retries + 1).toString());
 
                     // Prioridad a local: Intentar subir primero
-                    console.log('[SyncManager] Subiendo cambios locales pendientes...');
+                    devLog('[SyncManager] Subiendo cambios locales pendientes...');
                     /* [275A-1] Safety guard: abortar si los datos están vacíos
                      * pero ya hubo una sync previa (race condition de hidratación).
                      * [18-08-2026] Se permite si hay tombstones pendientes (borrado
@@ -215,8 +216,8 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                      */
                     const datosIniciales = generarDatosInicialesUsuarioNuevo(currentData);
                     
-                    console.log('[SyncManager] Usuario nuevo detectado. Generando datos de bienvenida...');
-                    console.log('[SyncManager] Datos a subir:', {
+                    devLog('[SyncManager] Usuario nuevo detectado. Generando datos de bienvenida...');
+                    devLog('[SyncManager] Datos a subir:', {
                         habitos: datosIniciales.habitos?.length,
                         tareas: datosIniciales.tareas?.length,
                         notasLength: datosIniciales.notas?.length
@@ -229,7 +230,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     });
                     
                     if (success) {
-                        console.log('[SyncManager] Datos iniciales sincronizados correctamente.');
+                        devLog('[SyncManager] Datos iniciales sincronizados correctamente.');
                         
                         /* 
                          * Marcar usuario como inicializado para evitar repetir
@@ -247,7 +248,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                         markChangesAsSynced();
                     }
                 } else if (serverData) {
-                    console.log('[SyncManager] Datos descargados del servidor.');
+                    devLog('[SyncManager] Datos descargados del servidor.');
                     onDataReceived(serverData);
                     resetVersion(serverData); // Resetear hash base a lo nuevo
                     setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
@@ -320,7 +321,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
             if (contadorCambiosRemotosRef?.current && contadorCambiosRemotosRef.current > 0) {
                 contadorCambiosRemotosRef.current = 0;
                 markChangesAsSynced();
-                console.log('[SyncManager] Cambio remoto WS absorbido — hash actualizado sin HTTP auto-save');
+                devLog('[SyncManager] Cambio remoto WS absorbido — hash actualizado sin HTTP auto-save');
                 return;
             }
 
@@ -342,7 +343,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
             if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
             debounceTimer.current = setTimeout(async () => {
-                console.log('[SyncManager] Auto-guardando cambios...');
+                devLog('[SyncManager] Auto-guardando cambios...');
                 /* [275A-1] Safety guard: abortar auto-save si los datos estan vacios.
                  * Esto atrapa el caso donde la hidratacion se completa tarde
                  * y el auto-save se dispara con datos parciales. */

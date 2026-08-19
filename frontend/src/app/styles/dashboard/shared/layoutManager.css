@@ -399,7 +399,7 @@
     border-radius: var(--dashboard-radioMini);
     background: var(--dashboard-estadoAdvertenciaFondo, rgba(245, 158, 11, 0.12));
     border: 1px solid var(--dashboard-estadoAdvertenciaBorde, rgba(245, 158, 11, 0.35));
-    color: var(--dashboard-estadoAdvertencia, #d97706);
+    color: var(--dashboard-estadoAdvertencia);
     white-space: nowrap;
 }
 

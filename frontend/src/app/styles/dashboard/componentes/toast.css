@@ -79,6 +79,6 @@
 
 .toastDeshacerBarraRelleno {
     height: 100%;
-    background: linear-gradient(to right, #22c55e, var(--dashboard-estadoMedia));
+    background: linear-gradient(to right, var(--dashboard-estadoExito), var(--dashboard-estadoMedia));
     transition: width 0.1s linear;
 }

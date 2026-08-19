@@ -3,6 +3,7 @@ import {Nota, NotaActiva} from '../types/notas';
 import {notasService} from '../services/notasService';
 import {extraerTitulo, emitirCambioNotaActiva, CONTENIDO_NOTA_NUEVA, obtenerNotaActivaPanelGuardada, persistirNotaActivaPanel} from '../utils/notasUtils';
 import {notasIniciales} from '../data/datosIniciales';
+import {devWarn} from '../utils/devLog';
 
 /* [263A-12] ID del panel scratchpad base. Solo este panel persiste su nota en localStorage y emite eventos de tab sync. */
 export const PANEL_SCRATCHPAD = 'scratchpad';
@@ -254,8 +255,10 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
                     try {
                         await notasService.moverNota(notaGuardada.id, notaActiva.carpetaId);
                         notaGuardada = {...notaGuardada, carpetaId: notaActiva.carpetaId};
-                    } catch {
-                        /* Si falla el mover, la nota queda en General - no es crítico */
+                    } catch (error) {
+                        /* [H-F11-07] Si falla el mover, la nota queda en General: no crítico,
+                         * pero se registra en DEV en vez de tragarse el error */
+                        devWarn('notasStore', 'No se pudo mover la nota a su carpeta; queda en General', {notaId: notaGuardada.id, carpetaId: notaActiva.carpetaId, error});
                     }
                 }
 

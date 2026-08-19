@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde_json::Value;
-use sqlx::{FromRow, PgPool};
+use sqlx::{Executor, FromRow, PgPool, PgTransaction, Postgres};
 use uuid::Uuid;
 
 use crate::models::productivity::{UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest};
@@ -22,12 +22,19 @@ pub enum TaskUpsertOutcome {
 pub struct ProductivityRepository;
 
 impl ProductivityRepository {
-    pub async fn upsert_project(
-        pool: &PgPool,
+    /* [H-B04-03] Los upserts aceptan cualquier ejecutor sqlx (`&PgPool` para el
+     * camino HTTP o `&mut Transaction` para orquestaciones atómicas como el
+     * restore de backups): la firma pública no cambia y los call sites con pool
+     * compilan igual porque `&PgPool` implementa `Executor`. */
+    pub async fn upsert_project<'e, E>(
+        executor: E,
         user_id: Uuid,
         legacy_id: i64,
         request: &UpsertProjectRequest,
-    ) -> Result<Option<ProductivityWriteRow>, sqlx::Error> {
+    ) -> Result<Option<ProductivityWriteRow>, sqlx::Error>
+    where
+        E: Executor<'e, Database = Postgres>,
+    {
         sqlx::query_as(
             "INSERT INTO dashboard_projects
                 (user_id, legacy_id, name, status, priority, urgency, due_at, sort_order, payload)
@@ -59,7 +66,7 @@ impl ProductivityRepository {
         .bind(request.orden)
         .bind(request.payload_for_storage(legacy_id))
         .bind(request.expected_updated_at)
-        .fetch_optional(pool)
+        .fetch_optional(executor)
         .await
     }
 
@@ -70,6 +77,24 @@ impl ProductivityRepository {
         request: &UpsertTaskRequest,
     ) -> Result<TaskUpsertOutcome, sqlx::Error> {
         let mut transaction = pool.begin().await?;
+        let outcome = Self::upsert_task_in(&mut transaction, user_id, legacy_id, request).await?;
+        transaction.commit().await?;
+        Ok(outcome)
+    }
+
+    /// Variante tx-aware de `upsert_task` para orquestaciones atómicas (p. ej.
+    /// restore de backups): corre locks + validación + upsert dentro de una
+    /// transacción ajena sin commit propio; quien abrió la transacción decide
+    /// el commit/rollback. [H-B04-03]
+    /* [H-B04-03] Recibe `&mut PgTransaction` y ejecuta sobre su conexión
+     * interna (`&mut **transaction`): en sqlx 0.8 `&mut Transaction` ya no
+     * implementa `Executor`, solo `&mut PgConnection` (doc de sqlx-core). */
+    pub async fn upsert_task_in(
+        transaction: &mut PgTransaction<'_>,
+        user_id: Uuid,
+        legacy_id: i64,
+        request: &UpsertTaskRequest,
+    ) -> Result<TaskUpsertOutcome, sqlx::Error> {
         let mut lock_ids = vec![legacy_id];
         if let Some(parent_id) = request.parent_id {
             lock_ids.push(parent_id);
@@ -85,7 +110,7 @@ impl ProductivityRepository {
             )
             .bind(user_id)
             .bind(lock_id)
-            .fetch_optional(&mut *transaction)
+            .fetch_optional(&mut **transaction)
             .await?;
         }
 
@@ -100,7 +125,7 @@ impl ProductivityRepository {
             )
             .bind(user_id)
             .bind(parent_id)
-            .fetch_optional(&mut *transaction)
+            .fetch_optional(&mut **transaction)
             .await?
             .is_some();
             let target_has_children = sqlx::query_scalar::<_, i64>(
@@ -113,7 +138,7 @@ impl ProductivityRepository {
             )
             .bind(user_id)
             .bind(legacy_id)
-            .fetch_optional(&mut *transaction)
+            .fetch_optional(&mut **transaction)
             .await?
             .is_some();
             if parent_id == legacy_id || !parent_is_root || target_has_children {
@@ -163,9 +188,8 @@ impl ProductivityRepository {
         .bind(request.payload_for_storage(legacy_id))
         .bind(asignado_user_id)
         .bind(request.expected_updated_at)
-        .fetch_optional(&mut *transaction)
+        .fetch_optional(&mut **transaction)
         .await?;
-        transaction.commit().await?;
         Ok(row.map_or(TaskUpsertOutcome::Conflict, TaskUpsertOutcome::Written))
     }
 
@@ -229,12 +253,15 @@ impl ProductivityRepository {
         Ok(())
     }
 
-    pub async fn upsert_habit(
-        pool: &PgPool,
+    pub async fn upsert_habit<'e, E>(
+        executor: E,
         user_id: Uuid,
         legacy_id: i64,
         request: &UpsertHabitRequest,
-    ) -> Result<Option<ProductivityWriteRow>, sqlx::Error> {
+    ) -> Result<Option<ProductivityWriteRow>, sqlx::Error>
+    where
+        E: Executor<'e, Database = Postgres>,
+    {
         sqlx::query_as(
             "INSERT INTO dashboard_habits
                 (user_id, legacy_id, name, importance, frequency_type, sort_order, payload)
@@ -262,7 +289,7 @@ impl ProductivityRepository {
         .bind(request.orden)
         .bind(request.payload_for_storage(legacy_id))
         .bind(request.expected_updated_at)
-        .fetch_optional(pool)
+        .fetch_optional(executor)
         .await
     }
 }
