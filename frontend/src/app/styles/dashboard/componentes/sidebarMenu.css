@@ -32,17 +32,19 @@
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background: #0e0e0e;
+    background: var(--dashboard-sidebarFondo);
     border-radius: 5px;
 }
 
+/* [20-08-2026] Sin fondo: la barra de paneles se integra con el layout,
+ * solo los botones conservan su hover individual. */
 .sidebarMenu {
     display: flex;
     flex-direction: column;
     width: 180px;
     min-width: 56px;
     flex-shrink: 0;
-    background: #0e0e0e;
+    background: transparent;
     border-radius: 5px;
     overflow: hidden;
     transition: width var(--dashboard-transicionNormal);
