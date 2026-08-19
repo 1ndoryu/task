@@ -101,6 +101,7 @@
 
 /* Panel de Administración */
 @import './admin/panelAdministracion.css';
+@import './admin/listaFeedback.css';
 @import './admin/detalleUsuario.css';
 @import './componentes/perfil.css';
 

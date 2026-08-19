@@ -18,7 +18,7 @@
 ```
 
 - `[ ]` = hallazgo pendiente de resolver. `[x]` = resuelto (con fecha y commit al lado).
-- La severidad y categoría van entre backticks para poder filtrarlas con grep (ej: `grep "ALTA" Agente/auditoria/ -r`).
+- La severidad y categoría van entre backticks para poder filtrarlas con grep (ej: `grep "ALTA" Agente/archivado/auditoria-2026-08-19/ -r`).
 
 ## Severidades
 
@@ -57,10 +57,16 @@
 | F11 Stores/servicios/islands | [frontend/11-stores-servicios-islands.md](frontend/11-stores-servicios-islands.md) | 36 | 7.180 | 36 | 8 | 0 |
 | F12 Hooks | [frontend/12-hooks.md](frontend/12-hooks.md) | 146 | 25.748 | 146 | 12 | 0 |
 | F13 Componentes | [frontend/13-componentes.md](frontend/13-componentes.md) | 264 | 26.936 | 264 | 7 | 0 |
-| F14 Estilos CSS | [frontend/14-estilos.md](frontend/14-estilos.md) | 142 | 30.804 | 142 | 3 | 1 |
+| F14 Estilos CSS | [frontend/14-estilos.md](frontend/14-estilos.md) | 142 | 30.804 | 142 | 3 | 0 |
 | F15 Tipos/utils/config/raíz | [frontend/15-tipos-utils-config.md](frontend/15-tipos-utils-config.md) | 64 | 6.905 | 64 | 4 | 0 |
 | F16 glory-core | [frontend/16-glory-core.md](frontend/16-glory-core.md) | 46 | 4.122 | 46 | 3 | 0 |
-| **Total** | | **792** | **119.631** | **792** | **69** | **1** |
+| **Total** | | **792** | **119.631** | **792** | **69** | **0** |
+
+## Estado 2026-08-19 (sesión 18 — último hallazgo H-F14-02, auditoría 100%)
+
+**H-F14-02 cerrado: auditoría completa (69/69, 0 abiertos)** — evidencia: `npm run build` OK con **hash CSS idéntico** (`index-B05DI39S.css`, 553.84 kB) antes/después + verificación semántica por script (91 selectores de bottomSheet + 99 de admin, 0 diferencias). **2 refactorizados por duplicación/cohesión real:** `bottomSheetCreacion.css` 648→216 (4 copias base+tarea+hábito+proyecto colapsadas en selectores agrupados + overrides de variante; `modalSeleccionPropiedad.css` 215 nuevo con la feature modal+badges, import actualizado en el componente) y `panelAdministracion.css` 693→505 (`admin/listaFeedback.css` 190 nuevo, import en cascada). **6 documentados como justificados** (extensos pero cohesivos — un solo componente/feature; dividir sería churn): `tareas.css` 791 (más 2 hex muertos en comentarios limpiados), `compartidos.css` 730, `tabla.css` 729, `panelGruposFb.css` 726, `panelDeficitCalorico.css` 541, `chatHistorial.css` 448.
+
+**Acumulado: 69 resueltos + 0 parciales de 69 → 0 abiertos. Auditoría SOLID cerrada al 100%.**
 
 ## Estado 2026-08-19 (sesión 17 — hooks H-F12-01 por criterio + commit completo)
 
@@ -206,7 +212,7 @@ Backend completo: **80/80 archivos revisados, 31 hallazgos** (0 BLOQUEANTE, 2 AL
 - H-B04-02 — `services/security.rs` Argon2 en runtime async sin `spawn_blocking`/semáforo (bloquea workers de tokio).
 - H-B01-01 (MEDIA) + H-B05-02 relacionados: 2-3 roundtrips por request autenticado.
 
-**Para continuar (sesión 17):** **1 abierto — H-F14-02** (8 CSS monolíticos, T6). Fuera de la auditoría quedó registrado el **cluster de sincronización** (T7) como refactor coordinado pendiente en `Agente/planes/00-PLAN-RESOLUCION.md` y `roadmap.md`.
+**Para continuar (sesión 18):** **0 abiertos — auditoría 100% cerrada (69/69).** Fuera de la auditoría quedó registrado el **cluster de sincronización** (T7) como refactor coordinado pendiente en `Agente/planes/00-PLAN-RESOLUCION.md` y `roadmap.md`.
 
 **Cómo resolver:** al corregir un hallazgo, marcar `[x]` con fecha y commit; actualizar esta tabla. Los hallazgos `ALTA`/`MEDIA` de seguridad y rendimiento son candidatos a plan en `Agente/planes/`.
 

@@ -11,7 +11,7 @@
 import {type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {Boton} from '../ui/Boton';
-import '../../styles/dashboard/componentes/bottomSheetCreacion.css';
+import '../../styles/dashboard/componentes/modalSeleccionPropiedad.css';
 
 interface OpcionPropiedad {
     id: string;

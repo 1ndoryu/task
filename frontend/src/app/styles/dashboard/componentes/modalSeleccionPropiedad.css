@@ -1,0 +1,215 @@
+/*
+ * MODAL SELECCIÓN PROPIEDAD + BADGES PROPIEDAD
+ * Modal centrado para seleccionar propiedades (proyecto, prioridad, urgencia...)
+ * y badges de propiedades seleccionadas.
+ *
+ * [H-F14-02] Extraído de bottomSheetCreacion.css — feature independiente de los
+ * BottomSheet de creación; cada componente importa solo su hoja de estilos.
+ */
+
+/* Modal Selección Propiedad - Modal centrado para seleccionar propiedades */
+
+/* [024A-7] font-family explícito: el portal renderiza en body, fuera de .dashboardContenedor */
+.modalSeleccionPropiedadOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--dashboard-superposicionOscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1600;
+    padding: var(--dashboard-espacioLg);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoSecundario);
+}
+
+.modalSeleccionPropiedad {
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+    min-width: 260px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modalSeleccionPropiedad__encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.modalSeleccionPropiedad__titulo {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoActivo);
+    font-weight: 500;
+}
+
+.modalSeleccionPropiedad__cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: var(--dashboard-textoApagado);
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm);
+    cursor: pointer;
+    transition: all var(--dashboard-transicionRapida);
+}
+
+.modalSeleccionPropiedad__cerrar:hover {
+    color: var(--dashboard-textoActivo);
+    background: var(--dashboard-fondoHover);
+}
+
+/* [233A-37] Botones sin background dentro de la lista — override variante por defecto del Boton */
+.modalSeleccionPropiedad__lista .boton {
+    background: none;
+    border: none;
+    color: var(--dashboard-textoNormal);
+}
+
+.modalSeleccionPropiedad__lista {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.modalSeleccionPropiedad__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    padding: calc(var(--dashboard-espacioSm) + 2px) var(--dashboard-espacioMd);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--dashboard-transicionRapida);
+    min-height: var(--dashboard-tamanoTactilMinimo);
+}
+
+.modalSeleccionPropiedad__opcion:last-child {
+    border-bottom: none;
+}
+
+.modalSeleccionPropiedad__opcion:hover {
+    background: var(--dashboard-fondoHover);
+    color: var(--dashboard-textoActivo);
+}
+
+.modalSeleccionPropiedad__opcion--activa {
+    background: var(--dashboard-superposicionClara);
+    color: var(--dashboard-acento);
+}
+
+.modalSeleccionPropiedad__opcion--peligroso {
+    color: var(--dashboard-estadoAlta);
+}
+
+.modalSeleccionPropiedad__opcion--peligroso:hover {
+    color: var(--dashboard-estadoMuyAlta);
+    background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
+}
+
+.modalSeleccionPropiedad__opcionIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.modalSeleccionPropiedad__opcionTexto {
+    flex: 1;
+}
+
+.modalSeleccionPropiedad__opcionDescripcion {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    margin-left: auto;
+}
+
+/* Badges Propiedad - Badges de propiedades seleccionadas */
+
+.badgesPropiedad {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioS);
+    padding: var(--dashboard-espacioXs) 0;
+}
+
+.badgesPropiedad__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: 3px 8px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    color: var(--dashboard-textoNormal);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
+}
+
+.badgesPropiedad__badgeIcono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badgesPropiedad__badgeTexto {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Boton eliminar badge migrado a Boton variante="icono" (Fase 6.5) */
+
+/* Variantes de color para badges - Usan variables de estado existentes */
+.badgesPropiedad__badge--proyecto {
+    color: var(--dashboard-acentoPrimario);
+    border-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.4);
+}
+
+.badgesPropiedad__badge--prioridad {
+    color: var(--dashboard-estadoMedia);
+    border-color: var(--dashboard-estadoMediaBorde);
+}
+
+.badgesPropiedad__badge--urgencia {
+    color: var(--dashboard-estadoAlta);
+    border-color: var(--dashboard-estadoAltaBorde);
+}
+
+.badgesPropiedad__badge--fecha {
+    color: var(--dashboard-estadoInfo);
+    border-color: var(--dashboard-estadoInfoBorde);
+}
+
+.badgesPropiedad__badge--frecuencia {
+    color: var(--dashboard-estadoExito);
+    border-color: var(--dashboard-estadoExitoBorde);
+}
+
+.badgesPropiedad__badge--importancia {
+    color: var(--dashboard-estadoMuyAlta);
+    border-color: var(--dashboard-estadoMuyAltaBorde);
+}

@@ -1,7 +1,7 @@
 # Plan de resolución de hallazgos de auditoría SOLID — task
 
 > **Estado:** ACTIVO — creado 2026-08-19 tras completar la auditoría (792/792 archivos, 69 hallazgos).
-> **Fuentes:** `Agente/auditoria/00-INDICE.md` y los MD por módulo (cada hallazgo vive allí con su detalle; este plan solo prioriza y agrupa).
+> **Fuentes:** `Agente/archivado/auditoria-2026-08-19/00-INDICE.md` y los MD por módulo (cada hallazgo vive allí con su detalle; este plan solo prioriza y agrupa). Auditoría archivada al cerrarse 69/69 el 19-08-2026.
 > **Regla:** un hallazgo se considera resuelto cuando su checkbox en el MD de auditoría pasa a `[x]` con fecha y evidencia (build/tests), y el índice se actualiza.
 
 ## 1. Criterios de priorización
@@ -109,7 +109,7 @@ Cada uno es una tarea de refactor con su propio plan y pruebas; se ejecuta en or
 3. **H-B03-01** — `DashboardRepository` ✔ 2026-08-19: `dashboard.rs` 536→141; lectura en `dashboard/lectura.rs`, proyección en `dashboard/proyeccion.rs`; merge atómico de settings conservado (H-B03-02).
 4. **H-F13-01** — componentes >300 líneas ✔ 2026-08-19: `TablaHabitos` 470→99 (sesión 12) + los 6 restantes en sesión 16 — PanelGruposFb 377→304 (`TablaGruposFb`/`EstadosPanelGruposFb`, sin `sentinel-disable-file`), useTareaMenu 343→156 (`opcionesMenuTarea.tsx` + `manejarOpcionHabito.ts`/`manejarOpcionTarea.ts`), SeccionesConfigPaneles 335→10 barrel (6 secciones en `global/paneles/`), SeccionesConfigGeneral 328→11 barrel (7 secciones en `global/general/`), useArbitraje 323→125 (`arbitraje/calculos/`), ListaTareas 309→261 (`ListaTareasProps.ts` + `TareaListaItem.tsx`).
 5. **H-F15-01** — utils >150 ✔ 2026-08-19: 8 utils divididas por dominio (facade en ruta original), `accionesIA` 337→15 (5 módulos IA), `types/dashboard.ts` 839→49 (barrel sobre habito/tarea/proyecto/suscripcion/social).
-6. **H-F14-02** — 8 CSS monolíticos (~4.800 líneas sobre 111 `@import` en cascada).
+6. **H-F14-02** — 8 CSS monolíticos (~4.800 líneas sobre 111 `@import` en cascada). ✔ 2026-08-19 (sesión 18): 2 refactorizados por duplicación/cohesión real (`bottomSheetCreacion.css` 648→216 colapsando las 4 copias en selectores agrupados + overrides; feature modal+badges a `modalSeleccionPropiedad.css`; `panelAdministracion.css` 693→505 con feature feedback a `admin/listaFeedback.css`) y 6 documentados como justificados (extensos pero cohesivos — un solo componente/feature; dividir sería churn). Evidencia: `npm run build` con hash CSS idéntico antes/después + verificación semántica por script (190 selectores, 0 diferencias).
 7. **H-B04-03** — transacción de `restore` ✔ 2026-08-19 (sesión 15): `restore` atómico en una transacción (`pool.begin()` → `tx.commit()`, rollback al soltar `tx`); repositorios tx-aware vía `Executor<'e, Database = Postgres>` (`upsert_settings`/`upsert_project`/`upsert_habit`) y `upsert_task_in` sobre `&mut PgTransaction`. Errores duros abortan; fallos suaves por ítem se saltan y se cuentan. Evidencia: `cargo check` + `cargo test` 11/11.
 7. **H-F10-01** — tipar los `unknown` del contrato OpenAPI en los modelos Rust (regenerar Orval).
 
@@ -189,7 +189,7 @@ Leyenda: `—` pendiente · `T0..T6` tanda asignada · `PARC` resuelto en parte 
 | H-F13-06 | BAJA | G-DUP | T3 | ✔ |
 | H-F13-07 | BAJA | G-DUP | T3 | ✔ |
 | H-F14-01 | MEDIA | G-CSS | T5 | ✔ |
-| H-F14-02 | MEDIA | G-CSS | T6 | — |
+| H-F14-02 | MEDIA | G-CSS | T6 | ✔ (2 split por duplicación real, 6 justificados) |
 | H-F14-03 | BAJA | G-CSS | T5 | ✔ |
 | H-F15-01 | ALTA | G-GOD | T6 | ✔ (utils/tipos por dominio) |
 | H-F15-02 | MEDIA | G-DUP | T5 | ✔ |
@@ -199,7 +199,7 @@ Leyenda: `—` pendiente · `T0..T6` tanda asignada · `PARC` resuelto en parte 
 | H-F16-02 | INFO | G-GLORY | T5 | ✔ |
 | H-F16-03 | INFO | G-GLORY | T5 | ✔ |
 
-**Totales:** 69 hallazgos (0 BLOQUEANTE, 7 ALTA, 21 MEDIA, 29 BAJA, 12 INFO). **Estado 2026-08-19 (hooks H-F12-01 por criterio): 68 resueltos + 0 parciales → 1 abierto** (H-F14-02, CSS monolíticos). El cluster de sincronización quedó registrado como refactor pendiente en T7 (no es hallazgo abierto de auditoría).
+**Totales:** 69 hallazgos (0 BLOQUEANTE, 7 ALTA, 21 MEDIA, 29 BAJA, 12 INFO). **Estado 2026-08-19 (sesión 18): 69 resueltos + 0 parciales → 0 abiertos. Auditoría SOLID cerrada al 100%.** El cluster de sincronización quedó registrado como refactor pendiente en T7 (no es hallazgo abierto de auditoría).
 
 ## 5. Definition of Done y seguimiento
 
