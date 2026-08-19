@@ -43,7 +43,12 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
 
         /* En móvil, no renderizamos handle de arrastre ni botón minimizar */
         const renderHandleArrastre = (titulo?: string) => (esMovil ? <></> : <HandleArrastre panelId={panelId} onMouseDown={arrastre.iniciarArrastre} estaArrastrando={arrastre.panelArrastrando === panelId} titulo={titulo} />);
-        const handleMinimizarElement = esMovil ? <></> : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
+        /* [19-08-2026] Un panel dividido/duplicado NO se minimiza: ocultarlo lo
+         * haría desaparecer de todos lados sin forma de volver (el flag de
+         * división quedaría huérfano y bloquearía nuevas divisiones). Solo el
+         * panel base tiene botón de minimizar; los duplicados solo se cierran. */
+        const esPanelDuplicado = panelId !== baseId;
+        const handleMinimizarElement = esMovil || esPanelDuplicado ? <></> : <BotonMinimizarPanel panelId={panelId} onMinimizar={layout.ocultarPanel} />;
 
         /* [263A-3] Buscar generador por ID exacto primero, luego por base */
         const generadorProps = obtenerGeneradorPropsPanel(panelId, baseId);

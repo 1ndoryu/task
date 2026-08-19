@@ -163,6 +163,8 @@ export function crearDuplicadoPanel(
  * split vuelva a funcionar en vez de quedarse bloqueado en silencio. */
 export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): ConfiguracionLayout {
     let paneles = [...(prev.ordenPaneles || [])];
+    let visibilidad = {...(prev.visibilidad || {})};
+    let alturas = {...(prev.alturas || {})};
     const panelOriginal = paneles.find(p => p.id === baseId);
     if (!panelOriginal) return prev;
 
@@ -172,13 +174,26 @@ export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): C
     const yaDividido = paneles.some(p => p.panelDivisionId === divisionId);
     if (yaDividido) {
         /* Reparar estado huérfano: flag presente pero sin panel compañero real
-         * (p. ej. el compañero se perdió por restauración parcial). En vez de
-         * quedarse bloqueado, se limpia el flag y se continúa creando la división. */
-        const companeroExiste = paneles.some(p => p.panelDivisionId === divisionId && p.id !== baseId);
-        if (companeroExiste) return prev;
-        paneles = paneles.map(p =>
-            p.panelDivisionId === divisionId ? {...p, dividido: undefined, panelDivisionId: undefined} : p
+         * (p. ej. el compañero se perdió por restauración parcial o quedó oculto
+         * por un minimizar de un duplicado). En vez de quedarse bloqueado, se
+         * limpian los flags y se continúa creando la división; los compañeros
+         * obsoletos ocultos se eliminan del layout para que no se acumulen. */
+        const companeroExiste = paneles.some(
+            p => p.panelDivisionId === divisionId && p.id !== baseId && visibilidad[p.id] !== false
         );
+        if (companeroExiste) return prev;
+        const obsoletos = paneles
+            .filter(p => p.panelDivisionId === divisionId && p.id !== baseId)
+            .map(p => p.id);
+        paneles = paneles
+            .filter(p => !obsoletos.includes(p.id))
+            .map(p =>
+                p.panelDivisionId === divisionId ? {...p, dividido: undefined, panelDivisionId: undefined} : p
+            );
+        for (const id of obsoletos) {
+            delete visibilidad[id];
+            delete alturas[id];
+        }
     }
 
     const existentes = paneles
@@ -213,8 +228,8 @@ export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): C
     return {
         ...prev,
         ordenPaneles: normalizarPosiciones(conOriginalDividido),
-        visibilidad: {...(prev.visibilidad || {}), [nuevoId]: true},
-        alturas: {...(prev.alturas || {}), [nuevoId]: prev.alturas?.[baseId] || 'auto'}
+        visibilidad: {...visibilidad, [nuevoId]: true},
+        alturas: {...alturas, [nuevoId]: prev.alturas?.[baseId] || 'auto'}
     };
 }
 
@@ -224,10 +239,15 @@ export function eliminarPanelDuplicado(prev: ConfiguracionLayout, instanceId: st
     const {[instanceId]: _vis, ...restoVisibilidad} = prev.visibilidad || {};
     const {[instanceId]: _alt, ...restoAlturas} = prev.alturas || {};
 
-    /* Limpiar flags de división si el panel cerrado era el último de su grupo */
+    /* Limpiar flags de división si el panel cerrado era el último de su grupo.
+     * [19-08-2026] Solo cuentan los duplicados reales (id con sufijo): si el
+     * base quedara contado como "miembro", cerrar el último duplicado dejaba el
+     * flag huérfano en el base (bloqueaba futuros splits hasta el repair). */
     const configEliminado = prev.ordenPaneles?.find(p => p.id === instanceId);
     const divisionId = configEliminado?.panelDivisionId;
-    const hayMasDelGrupo = divisionId ? paneles.some(p => p.panelDivisionId === divisionId) : false;
+    const hayMasDelGrupo = divisionId
+        ? paneles.some(p => p.panelDivisionId === divisionId && p.id !== divisionId.replace(/-split$/, ''))
+        : false;
 
     const panelesLimpios = divisionId && !hayMasDelGrupo
         ? paneles.map(p => (p.panelDivisionId === divisionId ? {...p, dividido: undefined, panelDivisionId: undefined} : p))

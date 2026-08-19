@@ -8,7 +8,7 @@
 
 import {useLocalStorage} from './useLocalStorage';
 import {useCallback, useMemo} from 'react';
-import {obtenerIdsPaneles} from '../config/registroPaneles';
+import {obtenerIdsPaneles, obtenerIdBase} from '../config/registroPaneles';
 import type {ModoColumnas, OrdenPanel, AnchoColumnas, ConfiguracionLayout, TipoLayout} from '../types/paneles';
 import {generarConfigLayoutDefecto, generarOrdenPanelesDefecto, PRESETS_ANCHOS, ANCHO_MINIMO_COLUMNA, ANCHO_MAXIMO_COLUMNA} from '../utils/layoutFactory';
 import {migrarConfiguracion, normalizarPosiciones, crearDuplicadoPanel, eliminarPanelDuplicado, crearDivisionPanel} from '../utils/layoutLogica';
@@ -148,13 +148,22 @@ export function useConfiguracionLayout() {
     /* Ocultar un panel */
     const ocultarPanel = useCallback(
         (panel: PanelId) => {
-            setValor(prev => ({
-                ...prev,
-                visibilidad: {
-                    ...prev.visibilidad,
-                    [panel]: false
+            setValor(prev => {
+                /* [19-08-2026] Un panel dividido/duplicado (id con sufijo -N) no
+                 * debe poder ocultarse: sin presencia en la lista base desaparecería
+                 * de todos lados y el flag de división quedaría huérfano, bloqueando
+                 * futuras divisiones. Ocultar un duplicado equivale a cerrarlo. */
+                if (panel !== obtenerIdBase(panel)) {
+                    return eliminarPanelDuplicado(prev, panel);
                 }
-            }));
+                return {
+                    ...prev,
+                    visibilidad: {
+                        ...prev.visibilidad,
+                        [panel]: false
+                    }
+                };
+            });
         },
         [setValor]
     );
