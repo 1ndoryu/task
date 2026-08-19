@@ -92,6 +92,38 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
 
     const gruposDisponibles = useGruposEjecucion(tareas, habitos);
 
+    /* [20-08-2026] Renombrar un grupo propaga el nuevo nombre a tareas y hábitos
+     * que lo usan (además del store gruposConocidos/grupoPorPanel). */
+    const renombrarGrupo = useCallback((grupoViejo: string, grupoNuevo: string) => {
+        useGruposEjecucionStore.getState().renombrarGrupo(grupoViejo, grupoNuevo);
+        tareas.forEach(tarea => {
+            if (tarea.grupoEjecucion === grupoViejo) {
+                onEditarTarea(tarea.id, {grupoEjecucion: grupoNuevo});
+            }
+        });
+        habitos.forEach(habito => {
+            if (habito.grupoEjecucion === grupoViejo) {
+                onActualizarHabito?.(habito.id, {grupoEjecucion: grupoNuevo} as Partial<Habito>);
+            }
+        });
+    }, [tareas, habitos, onEditarTarea, onActualizarHabito]);
+
+    /* [20-08-2026] Eliminar un grupo desasigna tareas y hábitos (grupoEjecucion
+     * a null) y lo quita del store. */
+    const eliminarGrupo = useCallback((grupo: string) => {
+        tareas.forEach(tarea => {
+            if (tarea.grupoEjecucion === grupo) {
+                onEditarTarea(tarea.id, {grupoEjecucion: null});
+            }
+        });
+        habitos.forEach(habito => {
+            if (habito.grupoEjecucion === grupo) {
+                onActualizarHabito?.(habito.id, {grupoEjecucion: null} as Partial<Habito>);
+            }
+        });
+        useGruposEjecucionStore.getState().eliminarGrupo(grupo);
+    }, [tareas, habitos, onEditarTarea, onActualizarHabito]);
+
     const tareasFiltradas = useMemo(() => {
         if (!grupoActivo) return tareas.filter(t => !t.grupoEjecucion);
         return tareas.filter(t => t.grupoEjecucion === grupoActivo);
@@ -163,6 +195,8 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                             titulo="Grupo de ejecución"
                             soloIcono={true}
                             variante="badge"
+                            onRenombrarGrupo={renombrarGrupo}
+                            onEliminarGrupo={eliminarGrupo}
                         />
                         <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" soloIcono={true} />
                         <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />

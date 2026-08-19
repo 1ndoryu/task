@@ -6,7 +6,7 @@
  */
 
 import {useState, useRef, useCallback} from 'react';
-import {FolderOpen, Plus, Folder} from 'lucide-react';
+import {FolderOpen, Plus, Folder, Pencil, Trash2, Check, X} from 'lucide-react';
 import {createPortal} from 'react-dom';
 import type {Ref} from 'react';
 import {Boton} from '../ui';
@@ -57,6 +57,11 @@ interface SelectorGrupoProps {
     titulo?: string;
     soloIcono?: boolean;
     variante?: 'pill' | 'badge';
+    /* [20-08-2026] Acciones de gestión de grupos desde el menú ⋯:
+     * renombrar/eliminar deben propagarse al dueño de los datos (PanelEjecucion)
+     * para actualizar también tareas y hábitos que usan ese grupo. */
+    onRenombrarGrupo?: (grupoViejo: string, grupoNuevo: string) => void;
+    onEliminarGrupo?: (grupo: string) => void;
 }
 
 export function SelectorGrupo({
@@ -66,7 +71,9 @@ export function SelectorGrupo({
     placeholder = 'Sin grupo',
     titulo = 'Grupo',
     soloIcono = false,
-    variante = 'pill'
+    variante = 'pill',
+    onRenombrarGrupo,
+    onEliminarGrupo
 }: SelectorGrupoProps): JSX.Element {
     const [nuevoGrupo, setNuevoGrupo] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
@@ -159,6 +166,26 @@ export function SelectorGrupo({
         onChange: manejarCambio
     });
 
+    /* [20-08-2026] Gestión de grupos: dos iconos directos por fila, sin menú
+     * intermedio: lápiz = renombrar (input inline), papelera = eliminar. */
+    const [renombrandoGrupo, setRenombrandoGrupo] = useState<string | null>(null);
+    const [nuevoNombre, setNuevoNombre] = useState('');
+
+    const confirmarRenombrar = useCallback((grupoViejo: string) => {
+        const nombre = nuevoNombre.trim();
+        if (nombre && nombre !== grupoViejo) {
+            onRenombrarGrupo?.(grupoViejo, nombre);
+        }
+        setRenombrandoGrupo(null);
+        setNuevoNombre('');
+        cerrarMenu();
+    }, [nuevoNombre, onRenombrarGrupo, cerrarMenu]);
+
+    const confirmarEliminar = useCallback((grupo: string) => {
+        onEliminarGrupo?.(grupo);
+        cerrarMenu();
+    }, [onEliminarGrupo, cerrarMenu]);
+
     const etiquetaBoton = grupoActual || placeholder;
     const icono = <FolderOpen size={12} />;
 
@@ -184,9 +211,71 @@ export function SelectorGrupo({
                     </Boton>
 
                     {grupos.map(grupo => (
-                        <Boton key={grupo} type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${grupoActual === grupo ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion({id: grupo, etiqueta: grupo})} role="menuitem">
-                            <span className="selectorBadgeOpcionTexto">{grupo}</span>
-                        </Boton>
+                        <div key={grupo} className="selectorBadgeFilaGrupo">
+                            {renombrandoGrupo === grupo ? (
+                                <div className="selectorGrupoRenombrar">
+                                    <input
+                                        autoFocus
+                                        type="text"
+                                        value={nuevoNombre}
+                                        onChange={e => setNuevoNombre(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                confirmarRenombrar(grupo);
+                                            }
+                                            if (e.key === 'Escape') {
+                                                e.stopPropagation();
+                                                setRenombrandoGrupo(null);
+                                                setNuevoNombre('');
+                                            }
+                                        }}
+                                        placeholder="Nuevo nombre"
+                                        className="selectorGrupoInput"
+                                    />
+                                    <Boton type="button" variante="ghost" soloIcono onClick={() => confirmarRenombrar(grupo)} icono={<Check size={14} />} title="Confirmar" />
+                                    <Boton type="button" variante="ghost" soloIcono onClick={e => { e.stopPropagation(); setRenombrandoGrupo(null); setNuevoNombre(''); }} icono={<X size={14} />} title="Cancelar" />
+                                </div>
+                            ) : (
+                                <>
+                                    <Boton type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${grupoActual === grupo ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion({id: grupo, etiqueta: grupo})} role="menuitem">
+                                        <span className="selectorBadgeOpcionTexto">{grupo}</span>
+                                    </Boton>
+                                    <div className="selectorBadgeGrupoAcciones">
+                                        <Boton
+                                            type="button"
+                                            variante="ghost"
+                                            soloIcono
+                                            icono={<Pencil size={12} />}
+                                            title="Renombrar"
+                                            role="menuitem"
+                                            /* [20-08-2026] stopPropagation: sin esto, el re-render al entrar en
+                                             * modo renombrar desconecta el botón clicado del DOM y el listener de
+                                             * "click fuera" de useSelectorBadge cree que fue un clic externo y
+                                             * cierra el menú. */
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                setNuevoNombre(grupo);
+                                                setRenombrandoGrupo(grupo);
+                                            }}
+                                        />
+                                        <Boton
+                                            type="button"
+                                            variante="ghost"
+                                            soloIcono
+                                            icono={<Trash2 size={12} />}
+                                            title="Eliminar"
+                                            role="menuitem"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                confirmarEliminar(grupo);
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     ))}
 
                     <FilaCrearGrupo nuevoGrupo={nuevoGrupo} onNuevoGrupoChange={setNuevoGrupo} inputRef={inputRef} onCrear={crearGrupo} onCerrar={cerrarMenu} />

@@ -45,3 +45,72 @@
     background: transparent;
     color: var(--dashboard-textoNormal);
 }
+
+/*
+ * [20-08-2026] Gestión de grupos desde el menú badge:
+ * - Fila de grupo = opción seleccionable + botón ⋯ (acciones).
+ * - Modo renombrar = input inline + confirmar/cancelar, mismo lenguaje
+ *   que FilaCrearGrupo (sin bordes).
+ */
+.selectorBadgeFilaGrupo {
+    display: flex;
+    align-items: center;
+}
+
+.selectorBadgeFilaGrupo .selectorBadgeOpcion {
+    flex: 1;
+    min-width: 0;
+}
+
+/* [20-08-2026] Iconos de acciones por grupo (lápiz renombrar / papelera
+ * eliminar): sin borde ni fondo, discretos como el resto del menú. */
+.selectorBadgeGrupoAcciones {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    padding-right: 8px;
+}
+
+.selectorBadgeGrupoAcciones .boton--ghost {
+    border: none !important;
+    background: transparent;
+    padding: 4px 2px;
+    color: var(--dashboard-textoApagado);
+    opacity: 0.8;
+}
+
+.selectorBadgeGrupoAcciones .boton--ghost:hover:not(:disabled) {
+    border: none !important;
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    opacity: 1;
+}
+
+/* Fila inline para renombrar un grupo */
+.selectorGrupoRenombrar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    flex: 1;
+    min-width: 0;
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioSm);
+}
+
+.selectorGrupoRenombrar .selectorGrupoInput {
+    flex: 1;
+    min-width: 0;
+}
+
+.selectorGrupoRenombrar .boton--ghost {
+    border: none;
+    background: transparent;
+    padding: 2px;
+    color: var(--dashboard-textoApagado);
+}
+
+.selectorGrupoRenombrar .boton--ghost:hover:not(:disabled) {
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+}

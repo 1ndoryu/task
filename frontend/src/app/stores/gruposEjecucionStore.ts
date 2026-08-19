@@ -12,6 +12,7 @@ interface GruposEjecucionActions {
     setGrupoPanel: (panelId: string, grupo: string | null) => void;
     getGrupoPanel: (panelId: string) => string | null;
     registrarGrupo: (grupo: string) => void;
+    renombrarGrupo: (grupoViejo: string, grupoNuevo: string) => void;
     eliminarGrupo: (grupo: string) => void;
 }
 
@@ -43,10 +44,35 @@ export const useGruposEjecucionStore = create<GruposEjecucionState & GruposEjecu
                 });
             },
 
+            /* [20-08-2026] Renombrar un grupo actualiza gruposConocidos y los
+             * paneles que apuntaban al nombre viejo (grupoPorPanel). */
+            renombrarGrupo: (grupoViejo, grupoNuevo) => {
+                const viejo = grupoViejo.trim();
+                const nuevo = grupoNuevo.trim();
+                if (!viejo || !nuevo || viejo === nuevo) return;
+                set(state => ({
+                    gruposConocidos: state.gruposConocidos.map(g => (g === viejo ? nuevo : g)),
+                    grupoPorPanel: Object.fromEntries(
+                        Object.entries(state.grupoPorPanel).map(([panelId, grupo]) => [
+                            panelId,
+                            grupo === viejo ? nuevo : grupo
+                        ])
+                    )
+                }));
+            },
+
+            /* [20-08-2026] Eliminar un grupo lo quita de gruposConocidos y
+             * limpia los paneles que lo tenian seleccionado (vuelven a null). */
             eliminarGrupo: (grupo) => {
                 const normalizado = grupo.trim();
                 set(state => ({
-                    gruposConocidos: state.gruposConocidos.filter(g => g !== normalizado)
+                    gruposConocidos: state.gruposConocidos.filter(g => g !== normalizado),
+                    grupoPorPanel: Object.fromEntries(
+                        Object.entries(state.grupoPorPanel).map(([panelId, grupoPanel]) => [
+                            panelId,
+                            grupoPanel === normalizado ? null : grupoPanel
+                        ])
+                    )
                 }));
             }
         }),
