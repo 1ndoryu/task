@@ -6,7 +6,7 @@
  *   2. Al seleccionar sección, expande a 80% mostrando el contenido con botón volver */
 
 import {useState, useEffect} from 'react';
-import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle, Bot, Users, Utensils} from 'lucide-react';
+import {ListTodo, Target, Folder, FileText, Activity, Layout, User, Settings, Palette, Shield, Plug, Database, ChevronLeft, Puzzle, Bot, Users, Utensils, PanelTop} from 'lucide-react';
 import {Modal} from '../shared/Modal';
 import {BottomSheet} from '../shared/BottomSheet';
 import {Boton} from '../ui';
@@ -20,7 +20,7 @@ import {SeccionConfigTareas, SeccionConfigHabitos, SeccionConfigProyectos, Secci
 import {SeccionConfigGruposFb} from './global/SeccionConfigGruposFb';
 import {ConfigDeficitCalorico} from '../dashboard/ConfigDeficitCalorico';
 /* Secciones generales */
-import {SeccionConfigLayout, SeccionConfigPreferencias, SeccionConfigTemas, SeccionConfigPerfil, SeccionConfigSeguridad, SeccionConfigMCP, SeccionConfigBackups} from './global/SeccionesConfigGeneral';
+import {SeccionConfigLayout, SeccionConfigPreferencias, SeccionConfigTemas, SeccionConfigPerfil, SeccionConfigSeguridad, SeccionConfigMCP, SeccionConfigBackups, SeccionConfigPaneles} from './global/SeccionesConfigGeneral';
 import {SeccionConfigPlugins} from './global/SeccionConfigPlugins';
 
 /* Definición de secciones para sidebar */
@@ -33,6 +33,7 @@ interface ItemSidebar {
 
 const SECCIONES_SIDEBAR: ItemSidebar[] = [
     /* Grupo: Paneles */
+    {id: 'paneles', nombre: 'Paneles del Dashboard', icono: <PanelTop size={14} />, grupo: 'Paneles'},
     {id: 'tareas', nombre: 'Tareas', icono: <ListTodo size={14} />, grupo: 'Paneles'},
     {id: 'habitos', nombre: 'Hábitos', icono: <Target size={14} />, grupo: 'Paneles'},
     {id: 'proyectos', nombre: 'Proyectos', icono: <Folder size={14} />, grupo: 'Paneles'},
@@ -68,6 +69,7 @@ const SECCIONES_SOLO_ADMIN: Partial<Record<SeccionConfigGlobal, boolean>> = {
 
 /* Título visible para cada sección */
 const TITULOS_SECCION: Record<SeccionConfigGlobal, string> = {
+    paneles: 'Paneles del Dashboard',
     tareas: 'Configuración de Tareas',
     habitos: 'Configuración de Hábitos',
     proyectos: 'Configuración de Proyectos',
@@ -97,6 +99,7 @@ interface ModalConfiguracionGlobalProps {
 function ContenidoSeccion({seccion, onCerrar, onAbrirUpgrade}: {seccion: SeccionConfigGlobal; onCerrar: () => void; onAbrirUpgrade?: () => void}): JSX.Element {
     return (
         <>
+            {seccion === 'paneles' && <SeccionConfigPaneles />}
             {seccion === 'tareas' && <SeccionConfigTareas />}
             {seccion === 'habitos' && <SeccionConfigHabitos />}
             {seccion === 'proyectos' && <SeccionConfigProyectos />}

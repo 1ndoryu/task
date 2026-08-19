@@ -16,14 +16,14 @@ import {obtenerPluginsVisibles, obtenerTodosPlugins, obtenerPlugin} from '../../
 import {usePluginsStore} from '../../stores/pluginsStore';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 
-interface ModalGestionPanelesProps {
-    estaAbierto: boolean;
-    onCerrar: () => void;
+interface ContenidoGestionPanelesProps {
     visibilidad: Record<string, boolean>;
     onTogglePanel: (panel: PanelId) => void;
 }
 
-export function ModalGestionPaneles({estaAbierto, onCerrar, visibilidad, onTogglePanel}: ModalGestionPanelesProps): JSX.Element {
+/* [20-08-2026] Contenido extraído para reutilizarlo como sección de las
+ * configuraciones globales (SeccionConfigPaneles) y en el modal independiente. */
+export function ContenidoGestionPaneles({visibilidad, onTogglePanel}: ContenidoGestionPanelesProps): JSX.Element {
     const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
 
     /* Paneles de plugin activos (misma semántica que la antigua barra de ocultos):
@@ -59,8 +59,7 @@ export function ModalGestionPaneles({estaAbierto, onCerrar, visibilidad, onToggl
     };
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Paneles del Dashboard">
-            <div className="gestionPanelesContenido">
+        <div className="gestionPanelesContenido">
 
                 {minimizados.length > 0 && (
                     <div className="gestionPanelesSeccion">
@@ -120,6 +119,20 @@ export function ModalGestionPaneles({estaAbierto, onCerrar, visibilidad, onToggl
                     </div>
                 )}
             </div>
+    );
+}
+
+interface ModalGestionPanelesProps {
+    estaAbierto: boolean;
+    onCerrar: () => void;
+    visibilidad: Record<string, boolean>;
+    onTogglePanel: (panel: PanelId) => void;
+}
+
+export function ModalGestionPaneles({estaAbierto, onCerrar, visibilidad, onTogglePanel}: ModalGestionPanelesProps): JSX.Element {
+    return (
+        <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Paneles del Dashboard">
+            <ContenidoGestionPaneles visibilidad={visibilidad} onTogglePanel={onTogglePanel} />
         </Modal>
     );
 }
