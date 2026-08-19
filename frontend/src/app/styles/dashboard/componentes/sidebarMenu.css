@@ -131,9 +131,16 @@
 }
 
 /* [300A-8d] Iconos +2px y fuente +1px en botones del sidebar */
+/* [20-08-2026] Iconos 2px más pequeños: paneles 15→13px, toggle/config 18→16px */
 .sidebarMenuBoton.boton--ghost .botonIcono svg {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
+}
+
+.sidebarMenuToggleBoton .botonIcono svg,
+.sidebarMenuConfigBoton .botonIcono svg {
+    width: 16px;
+    height: 16px;
 }
 
 .sidebarMenuBoton.boton--ghost .botonTexto {
