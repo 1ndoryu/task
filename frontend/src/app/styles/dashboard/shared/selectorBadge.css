@@ -195,9 +195,12 @@
     opacity: 1;
 }
 
+/* [19-08-2026] La activa se distingue por opacidad 1 + un leve brillo del
+ * texto (sin text-shadow: el halo se veía como un fondo detrás de las letras). */
 .selectorBadgeMenu .selectorBadgeOpcionActiva {
     opacity: 1;
-    color: var(--dashboard-textoNormal);
+    color: var(--dashboard-textoActivo);
+    filter: brightness(1.4);
 }
 
 .selectorBadgeOpcionIcono {
