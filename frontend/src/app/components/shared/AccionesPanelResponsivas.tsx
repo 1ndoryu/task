@@ -88,13 +88,15 @@ export function AccionesPanelResponsivas({children}: AccionesPanelResponsivasPro
 
             {colapsado ? (
                 <>
+                    {/* [19-08-2026] Misma variante que los iconos que agrupa
+                     * (boton--badge soloIcono): transparente, sin borde, icono 12px. */}
                     <Boton
                         type="button"
-                        variante="ghost"
+                        variante="badge"
                         soloIcono
                         onClick={abrirMenu}
                         title="Más acciones"
-                        icono={<MoreHorizontal size={14} />}
+                        icono={<MoreHorizontal size={12} />}
                     />
                     {abierto && createPortal(
                         <div className="seccionAccionesPopover" style={{left: posicion.x, top: posicion.y}} role="menu">
