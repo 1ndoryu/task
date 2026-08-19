@@ -252,30 +252,12 @@
     position: relative; /* Context for absolute results if needed */
 }
 
-.buscadorModalHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
-}
-
-.buscadorModalTitulo {
-    margin: 0;
-    font-size: var(--dashboard-tamanoBase);
-    font-weight: 600;
-    color: var(--dashboard-textoNormal);
-}
-
-.buscadorModalCerrar {
-    background: none;
-    border: none;
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    padding: var(--dashboard-espacioXs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* [19-08-2026] El header (titulo + boton cerrar) se elimino: el modal ahora
+ * solo muestra el buscador, mas alto que el de escritorio (+4px de grosor).
+ * El cierre queda en el click fuera del overlay. */
+.buscadorModalContenido .buscadorInputWrapper {
+    padding-top: calc(0.35rem + 2px);
+    padding-bottom: calc(0.35rem + 2px);
 }
 
 @keyframes entradaModal {
