@@ -104,7 +104,11 @@ export function ModalDependencias({
     }, [dependenciasLocal, onGuardar, onCerrar]);
 
     return (
-        <Modal estaAbierto={estaAbierto} onCerrar={handleCerrar} titulo="Dependencias">
+        /* [20-08-2026] Sin encabezado: picker compacto como ModalSeleccionPropiedad.
+         * El cierre queda en el click fuera (auto-guarda) o selección. La clase
+         * modalDependenciasContenido quita el padding base porque .modalDependencias
+         * gestiona el suyo. */
+        <Modal estaAbierto={estaAbierto} onCerrar={handleCerrar} titulo="Dependencias" claseExtra="modalDependenciasContenedor" claseContenido="modalDependenciasContenido">
             <div className="modalDependencias">
                 <div className="modalDependenciasBuscador">
                     <Input

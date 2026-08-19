@@ -8,6 +8,18 @@
  */
 
 
+/* [20-08-2026] Modal sin encabezado (picker compacto): se oculta el header
+ * del Modal compartido y el contenido gestiona su propio padding. El dropdown
+ * de resultados ya no flota (position:absolute) sino que crece inline dentro
+ * del modal, para que la altura se ajuste al contenido real. */
+.modalDependenciasContenedor .modalEncabezado {
+    display: none;
+}
+
+.modalDependenciasContenido {
+    padding: 0 !important;
+}
+
 .modalDependencias {
     display: flex;
     flex-direction: column;
@@ -21,14 +33,10 @@
 }
 
 .modalDependenciasResultados {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
+    margin-top: var(--dashboard-espacioSm);
     background: var(--dashboard-fondoTerciario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSutil);
-    z-index: 10;
     max-height: 240px;
     overflow-y: auto;
 }
