@@ -55,12 +55,18 @@
 | B05 Handlers | [backend/05-handlers.md](backend/05-handlers.md) | 19 | 3.017 | 19 | 9 | 0 |
 | F10 API generado (Orval) | [frontend/10-api-generado.md](frontend/10-api-generado.md) | 14 | 6.581 | 14 | 1 | 0 |
 | F11 Stores/servicios/islands | [frontend/11-stores-servicios-islands.md](frontend/11-stores-servicios-islands.md) | 36 | 7.180 | 36 | 8 | 0 |
-| F12 Hooks | [frontend/12-hooks.md](frontend/12-hooks.md) | 146 | 25.748 | 146 | 12 | 1 |
+| F12 Hooks | [frontend/12-hooks.md](frontend/12-hooks.md) | 146 | 25.748 | 146 | 12 | 0 |
 | F13 Componentes | [frontend/13-componentes.md](frontend/13-componentes.md) | 264 | 26.936 | 264 | 7 | 0 |
 | F14 Estilos CSS | [frontend/14-estilos.md](frontend/14-estilos.md) | 142 | 30.804 | 142 | 3 | 1 |
 | F15 Tipos/utils/config/raíz | [frontend/15-tipos-utils-config.md](frontend/15-tipos-utils-config.md) | 64 | 6.905 | 64 | 4 | 0 |
 | F16 glory-core | [frontend/16-glory-core.md](frontend/16-glory-core.md) | 46 | 4.122 | 46 | 3 | 0 |
-| **Total** | | **792** | **119.631** | **792** | **69** | **2** |
+| **Total** | | **792** | **119.631** | **792** | **69** | **1** |
+
+## Estado 2026-08-19 (sesión 17 — hooks H-F12-01 por criterio + commit completo)
+
+**H-F12-01 cerrado por criterio (decisión del usuario): el límite de 120 líneas para hooks se reinterpreta** — el anti-patrón real es la multi-responsabilidad y el tamaño extremo, no la longitud. ≈78 de 87 hooks quedan justificados (superficies de configuración/estado con callbacks de una línea que ya delegan a utils, form-modales, derivaciones puras, máquinas de estado de conexión cohesivas — detalle en `12-hooks.md`); el cluster de sincronización (`useDashboardApi` 451, `useSyncManager` 405, `useDashboardSync` 407, `useSincronizacion` 343, `useSincronizacionTiempoReal` 253, `useNotificadorCambiosWebSocket` 315, `generadoresPropsPanel` 370) quedó registrado como refactor coordinado en **T7** del plan y en `roadmap.md`. Commit completo del trabajo: `46a27fb` (181 archivos, +9338/−6149). Regla 8 del AGENTS.md señalada para revisión (~300 líneas single-responsibility).
+
+**Acumulado: 68 resueltos + 0 parciales de 69 → 1 abierto (H-F14-02, CSS monolíticos).**
 
 ## Estado 2026-08-19 (sesión 16 — componentes H-F13-01)
 
@@ -200,7 +206,7 @@ Backend completo: **80/80 archivos revisados, 31 hallazgos** (0 BLOQUEANTE, 2 AL
 - H-B04-02 — `services/security.rs` Argon2 en runtime async sin `spawn_blocking`/semáforo (bloquea workers de tokio).
 - H-B01-01 (MEDIA) + H-B05-02 relacionados: 2-3 roundtrips por request autenticado.
 
-**Para continuar (sesión 16):** **los 2 abiertos son refactors dedicados (T6)**: H-F12-01 (87 hooks >120 líneas, useTareas ya resuelto) y H-F14-02 (CSS monolíticos) — cada uno con plan activo en `Agente/planes/`.
+**Para continuar (sesión 17):** **1 abierto — H-F14-02** (8 CSS monolíticos, T6). Fuera de la auditoría quedó registrado el **cluster de sincronización** (T7) como refactor coordinado pendiente en `Agente/planes/00-PLAN-RESOLUCION.md` y `roadmap.md`.
 
 **Cómo resolver:** al corregir un hallazgo, marcar `[x]` con fecha y commit; actualizar esta tabla. Los hallazgos `ALTA`/`MEDIA` de seguridad y rendimiento son candidatos a plan en `Agente/planes/`.
 

@@ -20,6 +20,8 @@ Quedan dos frentes, ninguno bloqueado por codigo:
 
 ## Pendientes por dependencia
 
+- **Refactor del cluster de sincronización (T7, 19-08-2026)**: los hooks de sync — `useDashboardApi` 451, `useSyncManager` 405, `useDashboardSync` 407, `useSincronizacion` 343, `useSincronizacionTiempoReal` 253, `useNotificadorCambiosWebSocket` 315, `generadoresPropsPanel` 370 — se refactorizan coordinados (mappers de contrato → utils; cada hook <~300 con responsabilidad única; API pública intacta; verificar flujo de sync real). Origen: cierre por criterio de H-F12-01 (límite de 120 líneas reinterpretado para hooks). Detalle en `Agente/planes/00-PLAN-RESOLUCION.md` (T7).
+- **Auditoría de estilos H-F14-02**: dividir los 8 CSS monolíticos por dominio (único hallazgo de auditoría abierto).
 - **IA / WhatsApp / Google OAuth / Facebook grupos / Stripe real / servidor MCP**: requieren credenciales externas; elegir proveedores y crear las cuentas antes de implementar.
 - **Auditoria de contrato vs WordPress (18-08-2026)**: comparados los servicios PHP originales (`App/Services`, `App/Repository`) contra backend Rust y hooks front — corregidos: ofuscacion de emails en compartidos, trial de un solo uso + degradacion a FREE con estado `expirada` al vencer, backups solo premium con intervalo 30 min y retencion 30 dias/50 max + backup automatico en el save del dashboard, validacion MIME de adjuntos, y trial ahora activa premium de verdad. Suite de regresion `verify-parity.mjs` reforzada: **59/59 asserts**. Queda revisar estados carga/vacio/error con datos masivos si molestan.
 - **Gate de exposicion**: memoria, `X-Forwarded-For`, cookies detras del proxy, `docker build`/healthcheck en CI, ingress real; baseline p95 roja por memoria del host (12-08); rate limit single-replica.

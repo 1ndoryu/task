@@ -104,7 +104,7 @@ Requieren cambiar contrato de API o tocar frontend y backend juntos; cada uno co
 
 ### T6 — Refactors dedicados (god-objects)
 Cada uno es una tarea de refactor con su propio plan y pruebas; se ejecuta en orden de riesgo:
-1. **H-F12-01 + H-F12-02** — `useTareas` ✔ 2026-08-19: compone `useTareaCrud`/`useTareaToggle`/`useTareaReordenar` + 4 utils puras (507→38 líneas, API intacta). H-F12-02 cerrado; H-F12-01 queda parcial (87 hooks siguen sobre 120; cada uno será su propia pasada).
+1. **H-F12-01 + H-F12-02** — `useTareas` ✔ 2026-08-19: compone `useTareaCrud`/`useTareaToggle`/`useTareaReordenar` + 4 utils puras (507→38 líneas, API intacta). **H-F12-01 cerrado por criterio (sesión 17)**: el límite de 120 líneas se reinterpreta para hooks (single-responsibility justificado hasta ~300; división solo con multi-responsabilidad o >~450). ≈78 de los 87 quedan justificados (superficies de configuración con callbacks de una línea, form-modales, derivaciones, máquinas de estado de conexión — detalle en `12-hooks.md`); el cluster de sincronización pasa a **T7** (abajo).
 2. **H-F11-01** — `habitosStore` ✔ 2026-08-19: 5 slices de dominio (`stores/habitos/`) + dedup extraída; 1.198→186 líneas, API intacta.
 3. **H-B03-01** — `DashboardRepository` ✔ 2026-08-19: `dashboard.rs` 536→141; lectura en `dashboard/lectura.rs`, proyección en `dashboard/proyeccion.rs`; merge atómico de settings conservado (H-B03-02).
 4. **H-F13-01** — componentes >300 líneas ✔ 2026-08-19: `TablaHabitos` 470→99 (sesión 12) + los 6 restantes en sesión 16 — PanelGruposFb 377→304 (`TablaGruposFb`/`EstadosPanelGruposFb`, sin `sentinel-disable-file`), useTareaMenu 343→156 (`opcionesMenuTarea.tsx` + `manejarOpcionHabito.ts`/`manejarOpcionTarea.ts`), SeccionesConfigPaneles 335→10 barrel (6 secciones en `global/paneles/`), SeccionesConfigGeneral 328→11 barrel (7 secciones en `global/general/`), useArbitraje 323→125 (`arbitraje/calculos/`), ListaTareas 309→261 (`ListaTareasProps.ts` + `TareaListaItem.tsx`).
@@ -112,6 +112,9 @@ Cada uno es una tarea de refactor con su propio plan y pruebas; se ejecuta en or
 6. **H-F14-02** — 8 CSS monolíticos (~4.800 líneas sobre 111 `@import` en cascada).
 7. **H-B04-03** — transacción de `restore` ✔ 2026-08-19 (sesión 15): `restore` atómico en una transacción (`pool.begin()` → `tx.commit()`, rollback al soltar `tx`); repositorios tx-aware vía `Executor<'e, Database = Postgres>` (`upsert_settings`/`upsert_project`/`upsert_habit`) y `upsert_task_in` sobre `&mut PgTransaction`. Errores duros abortan; fallos suaves por ítem se saltan y se cuentan. Evidencia: `cargo check` + `cargo test` 11/11.
 7. **H-F10-01** — tipar los `unknown` del contrato OpenAPI en los modelos Rust (regenerar Orval).
+
+### T7 — Cluster de sincronización (refactor coordinado, pendiente)
+Los hooks de sync comparten el mismo flujo de datos (lectura API → cola offline → WebSocket → orquestación de cambios); se refactorizan juntos, no por separado. Origen: H-F12-01 cerrado por criterio. Objetivo: `useDashboardApi` 451 (mappers de contrato → utils), `useSyncManager` 405, `useDashboardSync` 407, `useSincronizacion` 343, `useSincronizacionTiempoReal` 253, `useNotificadorCambiosWebSocket` 315, `generadoresPropsPanel` 370 — cada uno a <~300 con responsabilidad única, API pública intacta, verificado con `tsc --noEmit` y flujo de sync real. Registrado en `roadmap.md`.
 
 ## 4. Estado por hallazgo
 
@@ -166,7 +169,7 @@ Leyenda: `—` pendiente · `T0..T6` tanda asignada · `PARC` resuelto en parte 
 | H-F11-06 | BAJA | G-SEG-IO | T0 | ✔ |
 | H-F11-07 | BAJA | G-ERR | T3 | ✔ |
 | H-F11-08 | INFO | G-DUP (DIP) | Remate | ✔ |
-| H-F12-01 | ALTA | G-GOD | T6 | 🔄 parcial (useTareas 507→38; 87 hooks restantes) |
+| H-F12-01 | ALTA | G-GOD | T6 | ✔ (criterio: límite reinterpretado; cluster sync → T7) |
 | H-F12-02 | ALTA | G-GOD | T6 | ✔ (useTareas compuesto) |
 | H-F12-03 | BAJA | REGLA (logs) | T3 | ✔ |
 | H-F12-04 | BAJA | G-REND-FE | T3 | ✔ |
@@ -196,7 +199,7 @@ Leyenda: `—` pendiente · `T0..T6` tanda asignada · `PARC` resuelto en parte 
 | H-F16-02 | INFO | G-GLORY | T5 | ✔ |
 | H-F16-03 | INFO | G-GLORY | T5 | ✔ |
 
-**Totales:** 69 hallazgos (0 BLOQUEANTE, 7 ALTA, 21 MEDIA, 29 BAJA, 12 INFO). **Estado 2026-08-19 (componentes H-F13-01): 67 resueltos + 1 parcial (H-F12-01) → 2 abiertos** (H-F12-01, H-F14-02).
+**Totales:** 69 hallazgos (0 BLOQUEANTE, 7 ALTA, 21 MEDIA, 29 BAJA, 12 INFO). **Estado 2026-08-19 (hooks H-F12-01 por criterio): 68 resueltos + 0 parciales → 1 abierto** (H-F14-02, CSS monolíticos). El cluster de sincronización quedó registrado como refactor pendiente en T7 (no es hallazgo abierto de auditoría).
 
 ## 5. Definition of Done y seguimiento
 
