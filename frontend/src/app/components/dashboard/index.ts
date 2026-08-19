@@ -6,6 +6,7 @@ export {DashboardEncabezado} from './DashboardEncabezado';
 export {SeccionEncabezado} from './SeccionEncabezado';
 export {TablaHabitos} from './TablaHabitos';
 export {ListaTareas} from './ListaTareas';
+export {SubmenuNuevoInline} from './SubmenuNuevoInline';
 export {Scratchpad} from './Scratchpad';
 export {AccionesDatos} from './AccionesDatos';
 export {FormularioHabito} from './FormularioHabito';

@@ -7,7 +7,7 @@
 
 import {useState, useMemo, useCallback} from 'react';
 import {ArrowUpDown, Plus, Settings, Maximize2, Columns, X} from 'lucide-react';
-import {SeccionEncabezado, ListaTareas} from '../dashboard';
+import {SeccionEncabezado, ListaTareas, SubmenuNuevoInline} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque, SelectorGrupo} from '../shared';
 import {Boton} from '../ui';
 import type {Tarea, Proyecto, Participante, DatosEdicionTarea, Habito} from '../../types/dashboard';
@@ -78,6 +78,11 @@ interface PanelEjecucionProps {
 
 export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, ocultarSubtareasAutomaticamente = false, panelId, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalCrearHabito, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, modoCompacto = false, onConfigurarTarea, onReordenarHabitos, onDividirPanel, onCerrarPanel}: PanelEjecucionProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
+
+    /* [20-08-2026] Submenu del botón "+" del header: mismo submenu Tarea/Hábito
+     * que el "+ Añadir" del área inline. Al elegir Tarea se abre la creación con
+     * el grupo activo del panel; Hábito abre la creación de hábito. */
+    const [submenuNuevaAbierto, setSubmenuNuevaAbierto] = useState(false);
 
     /* Gestión de grupos de ejecución */
     const grupoActivo = useGruposEjecucionStore(s => (panelId ? s.grupoPorPanel[panelId] : null));
@@ -200,7 +205,23 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                         />
                         <SelectorBadge opciones={opcionesFiltro} valorActual={valorFiltroActual} onChange={onCambiarFiltro} titulo="Filtrar tareas" soloIcono={true} />
                         <SelectorBadge opciones={opcionesOrdenTareas} valorActual={modoOrden} onChange={valor => onCambiarModoOrden(valor)} icono={<ArrowUpDown size={12} />} titulo="Ordenar tareas" soloIcono={true} />
-                        <Boton variante="badge" soloIcono onClick={() => onAbrirModalNuevaTarea({grupoEjecucion: grupoActivo})} icono={<Plus size={12} />} title="Nueva Tarea" />
+                        <div className="seccionAccionesItem">
+                            <Boton variante="badge" soloIcono onClick={() => setSubmenuNuevaAbierto(prev => !prev)} icono={<Plus size={12} />} title="Nueva Tarea" />
+                            {submenuNuevaAbierto && (
+                                <SubmenuNuevoInline
+                                    direccion="abajo"
+                                    onSeleccionar={tipo => {
+                                        setSubmenuNuevaAbierto(false);
+                                        if (tipo === 'tarea') {
+                                            onAbrirModalNuevaTarea({grupoEjecucion: grupoActivo});
+                                        } else {
+                                            onAbrirModalCrearHabito?.();
+                                        }
+                                    }}
+                                    onCerrar={() => setSubmenuNuevaAbierto(false)}
+                                />
+                            )}
+                        </div>
                         <Boton variante="badge" soloIcono onClick={onAbrirModalConfigTareas} icono={<Settings size={12} />} title="Configuración" />
                         <Boton variante="badge" soloIcono onClick={() => setModoEnfoque(true)} icono={<Maximize2 size={12} />} title="Modo enfoque" />
                         {onDividirPanel && <Boton variante="badge" soloIcono onClick={onDividirPanel} icono={<Columns size={12} />} title="Dividir panel" />}

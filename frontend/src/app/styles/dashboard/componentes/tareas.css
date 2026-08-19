@@ -43,9 +43,6 @@
 .tareaItemSubtarea {
     padding-left: var(--dashboard-espacio2xl);
     width: calc(100% - var(--dashboard-espacioLg));
-    /* border-left: 2px solid var(--dashboard-bordeSutil); */
-    /* background-color: #0000; */
-    /* background-color: #00000005; */
 }
 
 .tareaItemSubtarea:hover {
@@ -470,6 +467,8 @@
 }
 
 /* [207A-4] Submenu de areaNuevoInline: elegir entre Tarea y Hábito */
+/* [20-08-2026] Compartido con el botón "+" del header del panel de ejecución:
+ * la variante --abajo se abre hacia abajo (top: 100%) en vez de hacia arriba. */
 .submenuNuevoInline {
     position: absolute;
     bottom: 100%;
@@ -486,6 +485,22 @@
     padding: var(--dashboard-espacioXxs) 0;
     animation: aparecer var(--dashboard-transicionRapida) ease;
     margin-bottom: var(--dashboard-espacioXxs);
+}
+
+/* Contenedor del botón "+" en el header del panel: referencia para el submenu */
+.seccionAccionesItem {
+    position: relative;
+    display: inline-flex;
+}
+
+.submenuNuevoInline--abajo {
+    bottom: auto;
+    top: 100%;
+    left: auto;
+    right: 0;
+    transform: none;
+    margin-bottom: 0;
+    margin-top: var(--dashboard-espacioXxs);
 }
 
 .submenuNuevoInline__opcion {

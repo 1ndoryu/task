@@ -39,7 +39,7 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
     return (
         <div className="propiedadesCompactas__item">
             <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia" style={importancia !== 'Media' ? {color} : undefined}>
-                /* [19-08-2026] Sin relleno: el nivel se comunica con el color, igual que en los menús. */
+                {/* [19-08-2026] Sin relleno: el nivel se comunica con el color, igual que en los menús. */}
                 <Star size={14} />
                 <span>{etiqueta}</span>
             </Boton>

@@ -8,10 +8,11 @@
  * - Click con texto o Enter: crea tarea directamente
  */
 
-import {useState, useCallback, useRef, useEffect, type KeyboardEvent, type ChangeEvent} from 'react';
-import {Check, ListTodo, Repeat} from 'lucide-react';
+import {useState, useCallback, useRef, type KeyboardEvent, type ChangeEvent} from 'react';
+import {Check} from 'lucide-react';
 import type {DatosEdicionTarea} from '../../types/dashboard';
 import {Input, Boton} from '../ui';
+import {SubmenuNuevoInline} from './SubmenuNuevoInline';
 
 interface InputNuevaTareaProps {
     onCrear: (datos: DatosEdicionTarea) => void;
@@ -26,7 +27,6 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear, onAbrirModalCrearHa
     const [enfocado, setEnfocado] = useState(false);
     const [submenuAbierto, setSubmenuAbierto] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const submenuRef = useRef<HTMLDivElement>(null);
 
     const manejarEnvio = useCallback(() => {
         const textoLimpio = texto.trim();
@@ -56,18 +56,6 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear, onAbrirModalCrearHa
 
     const tieneTexto = texto.trim().length > 0;
 
-    /* [207A-4] Cerrar submenu al hacer click fuera */
-    useEffect(() => {
-        if (!submenuAbierto) return;
-        const manejarClickFuera = (e: MouseEvent) => {
-            if (submenuRef.current && !submenuRef.current.contains(e.target as Node)) {
-                setSubmenuAbierto(false);
-            }
-        };
-        document.addEventListener('mousedown', manejarClickFuera);
-        return () => document.removeEventListener('mousedown', manejarClickFuera);
-    }, [submenuAbierto]);
-
     /* [207A-4] Manejar click en "+ Añadir": si hay callbacks de modal, mostrar submenu */
     const manejarClickAñadir = useCallback(() => {
         if (onAbrirModalCrear && onAbrirModalCrearHabito) {
@@ -92,7 +80,10 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear, onAbrirModalCrearHa
     return (
         <div className={`areaNuevoInline ${enfocado || tieneTexto ? 'areaNuevoInlineActivo' : ''}`} onClick={manejarClickAñadir}>
             {!enfocado && !tieneTexto && (
-                <span className="tareaNuevoInlineTexto" onClick={manejarClickAñadir}>
+                /* [20-08-2026] stopPropagation: el div padre tiene el mismo handler;
+                 * sin esto el click en el span togglea el submenu dos veces (burbujeo)
+                 * y nunca llega a abrirse. */
+                <span className="tareaNuevoInlineTexto" onClick={e => { e.stopPropagation(); manejarClickAñadir(); }}>
                     + Añadir
                 </span>
             )}
@@ -120,18 +111,13 @@ export function InputNuevaTarea({onCrear, onAbrirModalCrear, onAbrirModalCrearHa
                     <Check size={12} />
                 </Boton>
             )}
-            {/* [207A-4] Submenu para elegir entre Tarea y Hábito */}
+            {/* [207A-4] Submenu para elegir entre Tarea y Hábito (compartido) */}
             {submenuAbierto && (
-                <div className="submenuNuevoInline" ref={submenuRef}>
-                    <button className="submenuNuevoInline__opcion" onMouseDown={e => { e.preventDefault(); e.stopPropagation(); manejarSeleccionSubmenu('tarea'); }}>
-                        <ListTodo size={14} />
-                        <span>Tarea</span>
-                    </button>
-                    <button className="submenuNuevoInline__opcion" onMouseDown={e => { e.preventDefault(); e.stopPropagation(); manejarSeleccionSubmenu('habito'); }}>
-                        <Repeat size={14} />
-                        <span>Hábito</span>
-                    </button>
-                </div>
+                <SubmenuNuevoInline
+                    direccion="arriba"
+                    onSeleccionar={manejarSeleccionSubmenu}
+                    onCerrar={() => setSubmenuAbierto(false)}
+                />
             )}
         </div>
     );
