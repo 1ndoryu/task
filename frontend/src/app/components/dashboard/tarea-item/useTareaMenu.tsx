@@ -1,5 +1,5 @@
 import React, {useCallback, useMemo} from 'react';
-import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Play, Square, Clock} from 'lucide-react';
+import {Settings, Plus, Folder, Flag, X, Zap, Trash2, Play, Square, Clock, Link2} from 'lucide-react';
 import type {Tarea, TareaHabito, TareaSubHabito, NivelPrioridad, NivelUrgencia, DatosEdicionTarea, DatosNuevoHabito} from '../../../types/dashboard';
 import {esTareaSubHabito} from '../../../types/dashboard';
 import {MENU_HABITO_IDS, generarOpcionesMenuHabito, extraerImportanciaDeOpcion, POSPONER_IDS, calcularFechaPosponer, opcionesMenuPosponerTiempo} from '../../../config/opcionesMenuHabito';
@@ -7,6 +7,7 @@ import type {OpcionMenu} from '../../shared/MenuContextual';
 import {opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../../utils/nivelesConfig';
 import {useMenuContextualConId} from '../../../hooks/useMenuContextualGlobal';
 import {useTimeTrackerStore} from '../../../stores/timeTrackerStore';
+import {useDependenciasUIStore} from '../../../stores/dependenciasUIStore';
 import {useShallow} from 'zustand/react/shallow';
 
 interface UseTareaMenuProps {
@@ -84,6 +85,12 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                     case MENU_HABITO_IDS.EDITAR:
                         onEditarHabito?.(tareaHabito.habitoId);
                         break;
+                    case 'dependencias':
+                        /* [19-08-2026] Acceso directo: abre el modal de edición del
+                         * hábito con el selector de dependencias ya abierto. */
+                        useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'habito', id: tareaHabito.habitoId});
+                        onEditarHabito?.(tareaHabito.habitoId);
+                        break;
                     case MENU_HABITO_IDS.TOGGLE:
                         onToggleHabito?.(tareaHabito.habitoId);
                         break;
@@ -129,6 +136,10 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 }
 
                 switch (opcionId) {
+                    case 'dependencias':
+                        useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'subhabito', id: sub.subHabitoId, padreId: sub.habitoPadreId});
+                        onConfigurarSubHabito?.(sub.habitoPadreId, sub.subHabitoId);
+                        break;
                     case MENU_HABITO_IDS.TOGGLE:
                         onToggleSubHabito?.(sub.habitoPadreId, sub.subHabitoId);
                         break;
@@ -171,6 +182,11 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
 
             if (opcionId === 'eliminar') {
                 onEliminar?.();
+            } else if (opcionId === 'dependencias') {
+                /* [19-08-2026] Acceso directo: abre el modal de configuración de la
+                 * tarea con el selector de dependencias ya abierto. */
+                useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'tarea', id: tarea.id});
+                onConfigurar?.();
             } else if (opcionId === 'configurar') {
                 onConfigurar?.();
             } else if (opcionId === 'agregar-subtarea') {
@@ -220,6 +236,12 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 },
                 opcionTracking,
                 {
+                    id: 'dependencias',
+                    etiqueta: 'Dependencias',
+                    icono: <Link2 size={12} />,
+                    separadorDespues: true
+                },
+                {
                     id: 'posponer-menu',
                     etiqueta: 'Posponer',
                     icono: <Clock size={12} />,
@@ -264,6 +286,12 @@ export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigura
                 id: 'mover-proyecto',
                 etiqueta: 'Mover a proyecto',
                 icono: <Folder size={12} />,
+                separadorDespues: false
+            },
+            {
+                id: 'dependencias',
+                etiqueta: 'Dependencias',
+                icono: <Link2 size={12} />,
                 separadorDespues: true
             },
             {

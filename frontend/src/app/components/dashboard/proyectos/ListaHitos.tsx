@@ -72,7 +72,8 @@ export function ListaHitos({hitos, onChange}: ListaHitosProps): JSX.Element {
                                             color: COLORES_PRIORIDAD[hito.prioridad],
                                             borderColor: hito.prioridad === 'alta' || hito.prioridad === 'muy_alta' ? COLORES_PRIORIDAD[hito.prioridad] : undefined
                                         }}>
-                                        <Flag size={12} fill={hito.prioridad === 'alta' || hito.prioridad === 'muy_alta' ? 'currentColor' : 'none'} />
+                                        /* [19-08-2026] Sin relleno: el nivel se comunica con el color (igual que en el resto). */
+                                        <Flag size={12} />
                                         <span>{ETIQUETAS_PRIORIDAD[hito.prioridad]}</span>
                                     </Boton>
                                 </span>

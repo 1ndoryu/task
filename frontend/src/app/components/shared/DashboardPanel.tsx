@@ -4,6 +4,7 @@
  */
 
 import {ReactNode} from 'react';
+import {AccionesPanelResponsivas} from './AccionesPanelResponsivas';
 
 interface DashboardPanelProps {
     titulo?: string;
@@ -24,7 +25,7 @@ export function DashboardPanel({titulo, icono, acciones, children, className = '
                     <h2 className="seccionTitulo">
                         {icono} {titulo}
                     </h2>
-                    {acciones && <div className="seccionAcciones">{acciones}</div>}
+                    {acciones && <AccionesPanelResponsivas>{acciones}</AccionesPanelResponsivas>}
                 </div>
             )}
             <div className={`dashboardPanelContent ${conPadding ? 'conPadding' : ''}`}>{children}</div>

@@ -14,6 +14,41 @@ import {MenuContextual, type OpcionMenu} from './MenuContextual';
 import {useSelectorBadge} from '../../hooks/shared/useSelectorBadge';
 import {useGruposEjecucionStore} from '../../stores/gruposEjecucionStore';
 
+/* [19-08-2026] Fila única para crear un grupo dentro del menú. Antes había dos
+ * variantes duplicadas (selectorGrupoCrear y selectorGrupoCrearPill) con estilos
+ * ligeramente distintos; ahora ambas variantes del selector usan exactamente la
+ * misma fila, sin bordes ni márgenes innecesarios (ver selectorGrupo.css). */
+interface FilaCrearGrupoProps {
+    nuevoGrupo: string;
+    onNuevoGrupoChange: (valor: string) => void;
+    inputRef: Ref<HTMLInputElement>;
+    onCrear: (cerrarMenuLocal: () => void) => void;
+    onCerrar: () => void;
+}
+
+function FilaCrearGrupo({nuevoGrupo, onNuevoGrupoChange, inputRef, onCrear, onCerrar}: FilaCrearGrupoProps): JSX.Element {
+    return (
+        <div className="selectorGrupoCrear">
+            <input
+                ref={inputRef}
+                type="text"
+                value={nuevoGrupo}
+                onChange={e => onNuevoGrupoChange(e.target.value)}
+                onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onCrear(onCerrar);
+                    }
+                }}
+                placeholder="Nuevo grupo"
+                className="selectorGrupoInput"
+            />
+            <Boton type="button" variante="ghost" soloIcono onClick={() => onCrear(onCerrar)} icono={<Plus size={14} />} title="Crear grupo" />
+        </div>
+    );
+}
+
 interface SelectorGrupoProps {
     grupos: string[];
     grupoActual: string | null;
@@ -100,24 +135,7 @@ export function SelectorGrupo({
                         onSeleccionar={seleccionar}
                         onCerrar={cerrarMenu}
                         footer={
-                            <div className="selectorGrupoCrearPill">
-                                <input
-                                    ref={inputRef}
-                                    type="text"
-                                    value={nuevoGrupo}
-                                    onChange={e => setNuevoGrupo(e.target.value)}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            crearGrupo(cerrarMenu);
-                                        }
-                                    }}
-                                    placeholder="Nuevo grupo"
-                                    className="selectorGrupoInputPill"
-                                />
-                                <Boton type="button" variante="ghost" soloIcono onClick={() => crearGrupo(cerrarMenu)} icono={<Plus size={14} />} title="Crear grupo" />
-                            </div>
+                            <FilaCrearGrupo nuevoGrupo={nuevoGrupo} onNuevoGrupoChange={setNuevoGrupo} inputRef={inputRef} onCrear={crearGrupo} onCerrar={cerrarMenu} />
                         }
                     />
                 )}
@@ -171,24 +189,7 @@ export function SelectorGrupo({
                         </Boton>
                     ))}
 
-                    <div className="selectorGrupoCrear">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={nuevoGrupo}
-                            onChange={e => setNuevoGrupo(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    crearGrupo(cerrarMenu);
-                                }
-                            }}
-                            placeholder="Nuevo grupo"
-                            className="selectorGrupoInput"
-                        />
-                        <Boton type="button" variante="ghost" soloIcono onClick={() => crearGrupo(cerrarMenu)} icono={<Plus size={14} />} title="Crear grupo" />
-                    </div>
+                    <FilaCrearGrupo nuevoGrupo={nuevoGrupo} onNuevoGrupoChange={setNuevoGrupo} inputRef={inputRef} onCrear={crearGrupo} onCerrar={cerrarMenu} />
                 </div>,
                 document.body
             )}

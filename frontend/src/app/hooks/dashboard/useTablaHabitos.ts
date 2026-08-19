@@ -9,6 +9,7 @@ import {useState, useCallback, useMemo} from 'react';
 import {useMenuContextualConId} from '../useMenuContextualGlobal';
 import {useEsMovil} from '../useEsMovil';
 import {useTimeTrackerStore} from '../../stores/timeTrackerStore';
+import {useDependenciasUIStore} from '../../stores/dependenciasUIStore';
 import {useShallow} from 'zustand/react/shallow';
 import type {Habito, NivelImportancia} from '../../types/dashboard';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
@@ -196,6 +197,12 @@ export function useFilaHabito({
             switch (opcionId) {
                 case MENU_HABITO_IDS.CONFIGURAR:
                 case MENU_HABITO_IDS.EDITAR:
+                    onEditar?.(habito);
+                    break;
+                case 'dependencias':
+                    /* [19-08-2026] Acceso directo desde el menú contextual: abre el
+                     * modal de edición con el selector de dependencias ya abierto. */
+                    useDependenciasUIStore.getState().solicitarAbrirDependencias({tipo: 'habito', id: habito.id});
                     onEditar?.(habito);
                     break;
                 case MENU_HABITO_IDS.TOGGLE:

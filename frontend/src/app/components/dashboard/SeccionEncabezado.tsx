@@ -5,6 +5,7 @@
  */
 
 import type {ReactNode} from 'react';
+import {AccionesPanelResponsivas} from '../shared/AccionesPanelResponsivas';
 
 interface SeccionEncabezadoProps {
     icono: ReactNode;
@@ -23,7 +24,7 @@ export function SeccionEncabezado({icono, titulo, subtitulo, acciones, variante 
                 {icono} {titulo}
             </h2>
             {subtitulo && <span className="seccionSubtitulo">{subtitulo}</span>}
-            {acciones && <div className="seccionAcciones">{acciones}</div>}
+            {acciones && <AccionesPanelResponsivas>{acciones}</AccionesPanelResponsivas>}
         </div>
     );
 }

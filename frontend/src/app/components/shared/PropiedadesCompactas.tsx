@@ -62,7 +62,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
                 {/* Prioridad */}
                 <div className="propiedadesCompactas__item">
                     <Boton ref={prioridadRef} type="button" claseAdicional={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: COLORES_PRIORIDAD[prioridad]} : undefined}>
-                        <Flag size={14} fill={prioridad === 'alta' || prioridad === 'muy_alta' ? COLORES_PRIORIDAD[prioridad] : 'none'} />
+                        <Flag size={14} />
                         <span>{ETIQUETAS_PRIORIDAD[prioridad]}</span>
                     </Boton>
                 </div>
@@ -70,7 +70,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
                 {/* Urgencia */}
                 <div className="propiedadesCompactas__item">
                     <Boton ref={urgenciaRef} type="button" claseAdicional={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: COLORES_URGENCIA[urgencia]} : undefined}>
-                        <Zap size={14} fill={urgencia ? COLORES_URGENCIA[urgencia] : 'none'} />
+                        <Zap size={14} />
                         <span>{urgencia ? ETIQUETAS_URGENCIA[urgencia] : 'Urgencia'}</span>
                     </Boton>
                 </div>

@@ -20,11 +20,15 @@ export const COLORES_PRIORIDAD = {
     muy_baja: 'var(--dashboard-estadoMuyBaja)'
 } as const satisfies Record<NivelPrioridad, string>;
 
+/* Escala coherente por nivel: Muy Alta→Alta→Media→Baja→Muy Baja descienden en
+ * intensidad (los niveles bajos se atenúan hacia gris, nunca desaparecen).
+ * [19-08-2026] 'Baja' usaba textoApagado y quedaba más claro que 'Muy Baja';
+ * ahora sigue la escala de prioridad (estadoBaja). */
 export const COLORES_IMPORTANCIA: Record<NivelImportancia, string> = {
     'Muy Alta': 'var(--dashboard-estadoMuyAlta)',
     'Alta': 'var(--dashboard-estadoAlta)',
     'Media': 'var(--dashboard-estadoMedia)',
-    'Baja': 'var(--dashboard-textoApagado)',
+    'Baja': 'var(--dashboard-estadoBaja)',
     'Muy Baja': 'var(--dashboard-estadoMuyBaja)'
 } as const satisfies Record<NivelImportancia, string>;
 
@@ -83,10 +87,12 @@ export function opcionesMenuPrioridad(size = 12, conSinPrioridad = false): Opcio
     return opciones;
 }
 
+/* [19-08-2026] Iconos siempre sin relleno: el nivel se comunica con el color,
+ * no con fill. Antes Muy Alta/Alta llevaban fill y el resto no (incoherente). */
 export function opcionesMenuImportancia(size = 12): OpcionMenuNivel[] {
     return [
-        {id: 'Muy Alta', etiqueta: 'Muy Alta', icono: <Star size={size} color={COLORES_IMPORTANCIA['Muy Alta']} fill={COLORES_IMPORTANCIA['Muy Alta']} />},
-        {id: 'Alta', etiqueta: 'Alta', icono: <Star size={size} color={COLORES_IMPORTANCIA.Alta} fill={COLORES_IMPORTANCIA.Alta} />},
+        {id: 'Muy Alta', etiqueta: 'Muy Alta', icono: <Star size={size} color={COLORES_IMPORTANCIA['Muy Alta']} />},
+        {id: 'Alta', etiqueta: 'Alta', icono: <Star size={size} color={COLORES_IMPORTANCIA.Alta} />},
         {id: 'Media', etiqueta: 'Media', icono: <Star size={size} color={COLORES_IMPORTANCIA.Media} />},
         {id: 'Baja', etiqueta: 'Baja', icono: <Star size={size} color={COLORES_IMPORTANCIA.Baja} />},
         {id: 'Muy Baja', etiqueta: 'Muy Baja', icono: <Star size={size} color={COLORES_IMPORTANCIA['Muy Baja']} />}
@@ -132,8 +138,8 @@ export function decoracionSelectorPrioridad(size = 14): Record<string, Decoracio
 
 export function decoracionSelectorImportancia(size = 14): Record<string, DecoracionNivelItem> {
     return {
-        'Muy Alta': {icono: <Star size={size} fill="currentColor" />, color: COLORES_IMPORTANCIA['Muy Alta']},
-        'Alta': {icono: <Star size={size} fill="currentColor" />, color: COLORES_IMPORTANCIA.Alta},
+        'Muy Alta': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA['Muy Alta']},
+        'Alta': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Alta},
         'Media': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Media},
         'Baja': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA.Baja},
         'Muy Baja': {icono: <Star size={size} />, color: COLORES_IMPORTANCIA['Muy Baja']}

@@ -11,7 +11,7 @@ import {useEffect, useMemo, useState, useCallback} from 'react';
 /* Importar store de configuración temprano para inicializar horaFinDia antes que otros módulos */
 import '../stores/configuracionUsuarioStore';
 
-import {DashboardEncabezado, DashboardFooter, DashboardGrid, DashboardModales, SidebarMenu, DashboardSidebarGrid} from '../components/dashboard';
+import {DashboardEncabezado, DashboardGrid, DashboardModales, SidebarMenu, DashboardSidebarGrid} from '../components/dashboard';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
@@ -282,8 +282,6 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onClickAdmin={modales.abrirPanelAdmin}
                         onClickLayout={() => modales.abrirModalConfigGlobal('layout')}
                         onClickPaneles={modales.abrirModalPaneles}
-                        panelesOcultos={layout.panelesOcultos}
-                        onMostrarPanel={layout.mostrarPanel}
                         onClickVersion={modales.abrirModalVersiones}
                         onClickUsuario={() => modales.abrirModalConfigGlobal('perfil')}
                         onClickEquipos={modales.abrirModalEquipos}
@@ -353,7 +351,6 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                 </div>
             )}
 
-            {esMovil || tipoLayout !== 'sidebar' ? <DashboardFooter /> : null}
             <DashboardModales ctx={ctx} />
 
 

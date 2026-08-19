@@ -13,7 +13,8 @@
  */
 
 import {Pause, Play} from 'lucide-react';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
+import {useDependenciasUIStore} from '../../../stores/dependenciasUIStore';
 import type {NivelImportancia, FrecuenciaHabito, Habito, SubHabito, DatosNuevoSubHabito, VentanaOportunidad, Tarea, DatosEdicionTarea, ReferenciaDependencia} from '../../../types/dashboard';
 import {useGruposEjecucion} from '../../../hooks/useGruposEjecucion';
 import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades, SelectorVentanaOportunidad, SelectorGrupo} from '../../shared';
@@ -91,6 +92,24 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
 
     /* Grupos de ejecución existentes para el selector */
     const gruposDisponibles = useGruposEjecucion(tareasParaDependencias, habitosParaDependencias);
+
+    /* [19-08-2026] Apertura directa del selector de dependencias desde el menú
+     * contextual: la solicitud viaja en dependenciasUIStore y se consume aquí
+     * al montar el formulario de edición (una sola vez). */
+    useEffect(() => {
+        const solicitud = useDependenciasUIStore.getState().abrirDependenciasDe;
+        if (!solicitud) return;
+        if (!modoEdicion || !onDependenciasChange) return;
+
+        const idElemento = subHabito ? subHabito.id : habito?.id;
+        const tipoEsperado = subHabito ? 'subhabito' : tipoElemento;
+        if (solicitud.tipo !== tipoEsperado || solicitud.id !== idElemento) return;
+        if (solicitud.tipo === 'subhabito' && solicitud.padreId !== padreId) return;
+
+        setModalDependenciasAbierto(true);
+        useDependenciasUIStore.getState().consumirSolicitudDependencias();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const nombreElemento = subHabito ? subHabito.nombre : nombre || 'Hábito';
     const idElemento = subHabito ? subHabito.id : habito?.id;

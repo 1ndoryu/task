@@ -12,7 +12,7 @@
  * - DIP: Los componentes dependen de esta abstracción, no de definiciones propias
  */
 
-import {Check, Calendar, Pause, Play, AlertTriangle, Star, Settings, Undo2, Clock, Timer} from 'lucide-react';
+import {Check, Calendar, Pause, Play, AlertTriangle, Star, Settings, Undo2, Clock, Timer, Link2} from 'lucide-react';
 import type {OpcionMenu} from '../components/shared/MenuContextual';
 import {opcionesMenuImportancia} from '../utils/nivelesConfig';
 
@@ -132,6 +132,14 @@ export function generarOpcionesMenuHabito(estado: EstadoHabitoMenu): OpcionMenu[
             separadorDespues: true
         });
     }
+
+    /* [19-08-2026] Acceso directo a dependencias desde el menú contextual */
+    opciones.push({
+        id: 'dependencias',
+        etiqueta: 'Dependencias',
+        icono: <Link2 size={12} />,
+        separadorDespues: true
+    });
 
     /* Eliminar siempre al final */
     opciones.push({

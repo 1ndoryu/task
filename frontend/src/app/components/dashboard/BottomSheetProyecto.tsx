@@ -12,7 +12,7 @@
  * - Badges de propiedades seleccionadas
  */
 
-import {Send, Flag, Hash, Calendar} from 'lucide-react';
+import {Send, Flag, Zap, Calendar} from 'lucide-react';
 import {BottomSheet, ModalSeleccionPropiedad, BadgesPropiedad} from '../shared';
 import {Input, Boton} from '../ui';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
@@ -62,7 +62,7 @@ export function BottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIn
                         <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${prioridad ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('prioridad')} aria-label={obtenerTextoPrioridad(prioridad) || 'Prioridad'} title={obtenerTextoPrioridad(prioridad) || 'Prioridad'} icono={<Flag size={18} />} />
 
                         {/* Urgencia */}
-                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'} icono={<Hash size={18} />} />
+                        <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${urgencia ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('urgencia')} aria-label={obtenerTextoUrgencia(urgencia) || 'Urgencia'} title={obtenerTextoUrgencia(urgencia) || 'Urgencia'} icono={<Zap size={18} />} />
 
                         {/* Fecha límite */}
                         <Boton type="button" variante="ghost" claseAdicional={`bottomSheetProyecto__accion ${fechaLimite ? 'bottomSheetProyecto__accion--activa' : ''}`} onClick={() => setModalActivo('fecha')} aria-label={fechaLimite || 'Fecha límite'} title={fechaLimite || 'Fecha límite'} icono={<Calendar size={18} />} />

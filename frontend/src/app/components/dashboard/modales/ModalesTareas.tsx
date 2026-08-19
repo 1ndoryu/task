@@ -54,6 +54,10 @@ export function ModalesTareas({dashboard, modales, acciones, esMovil, manejarGua
                     tarea={obtenerTareaConHerencia(modales.tareaEditando, dashboard.tareas, dashboard.habitos)}
                     participantes={[]}
                     companeros={[]}
+                    /* [19-08-2026] Sin tareas/hábitos el ModalDependencias abría vacío
+                     * (no había nada que elegir como dependencia). */
+                    tareas={dashboard.tareas}
+                    habitos={dashboard.habitos}
                     proyectos={dashboard.proyectos}
                     onCambiarProyecto={nuevoId => modales.tareaEditando && dashboard.editarTarea(modales.tareaEditando.id, {proyectoId: nuevoId})}
                     onToggleCompletado={completado => {

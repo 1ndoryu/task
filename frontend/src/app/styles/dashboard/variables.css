@@ -32,7 +32,8 @@
     --dashboard-estadoMedia: #ca8a04;
     --dashboard-estadoMediaFondo: rgba(113, 63, 18, 0.1);
     --dashboard-estadoMediaBorde: rgba(113, 63, 18, 0.3);
-    --dashboard-estadoBaja: #000000 0;
+    /* [19-08-2026] Valor roto (#000000 0 no es CSS válido) → iconos 'baja' invisibles. */
+    --dashboard-estadoBaja: #6b7280;
     --dashboard-estadoBajaBorde: #333;
     --dashboard-estadoMuyBaja: #4b5563;
     --dashboard-estadoMuyBajaFondo: rgba(75, 85, 99, 0.1);

@@ -7,7 +7,6 @@ export {SeccionEncabezado} from './SeccionEncabezado';
 export {TablaHabitos} from './TablaHabitos';
 export {ListaTareas} from './ListaTareas';
 export {Scratchpad} from './Scratchpad';
-export {DashboardFooter} from './DashboardFooter';
 export {AccionesDatos} from './AccionesDatos';
 export {FormularioHabito} from './FormularioHabito';
 export {SelectorOrden} from './SelectorOrden';

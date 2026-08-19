@@ -61,10 +61,6 @@ export function ModalGestionPaneles({estaAbierto, onCerrar, visibilidad, onToggl
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Paneles del Dashboard">
             <div className="gestionPanelesContenido">
-                <p className="gestionPanelesDescripcion">
-                    Activa o desactiva paneles. Los que desactives se minimizan: sus accesos rápidos
-                    aparecen arriba, junto al botón de Layout, y puedes volver a mostrarlos desde aquí.
-                </p>
 
                 {minimizados.length > 0 && (
                     <div className="gestionPanelesSeccion">

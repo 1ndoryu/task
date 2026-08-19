@@ -6,7 +6,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
-import {Flag, Hash, Calendar} from 'lucide-react';
+import {Flag, Zap, Calendar} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
 import {calcularFechaDesdeOpcion} from '../../utils/fechaUI';
@@ -114,7 +114,7 @@ export function useBottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valore
             badges.push({
                 id: 'urgencia',
                 etiqueta: obtenerTextoUrgencia(urgencia) || urgencia,
-                icono: <Hash size={10} />,
+                icono: <Zap size={10} />,
                 variante: 'urgencia' as const
             });
         }

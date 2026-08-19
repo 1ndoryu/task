@@ -1,4 +1,5 @@
 export * from './AccionesFormulario';
+export * from './AccionesPanelResponsivas';
 export * from './MenuContextual';
 export * from './RevealElement';
 export * from './ToastDeshacer';
@@ -21,7 +22,6 @@ export * from './ModalLimiteAlcanzado';
 export * from './TooltipSystem';
 export * from './LayoutManager';
 export * from './BarraPanelesOcultos';
-export * from './PanelesOcultosEncabezado';
 export * from './HandleArrastre';
 export * from './IndicadorArrastre';
 export * from './PanelArrastrable';

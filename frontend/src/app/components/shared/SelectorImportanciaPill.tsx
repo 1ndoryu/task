@@ -24,7 +24,6 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
 
     const color = COLORES_IMPORTANCIA[importancia];
     const etiqueta = ETIQUETAS_IMPORTANCIA[importancia];
-    const rellenar = importancia === 'Alta' || importancia === 'Muy Alta';
 
     const abrirMenu = () => {
         if (deshabilitado) return;
@@ -40,7 +39,8 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
     return (
         <div className="propiedadesCompactas__item">
             <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia" style={importancia !== 'Media' ? {color} : undefined}>
-                <Star size={14} fill={rellenar ? color : 'none'} />
+                /* [19-08-2026] Sin relleno: el nivel se comunica con el color, igual que en los menús. */
+                <Star size={14} />
                 <span>{etiqueta}</span>
             </Boton>
 

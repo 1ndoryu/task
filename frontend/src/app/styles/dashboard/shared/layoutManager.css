@@ -321,25 +321,6 @@
 }
 
 /* 
- * [18-08-2026] PANELES MINIMIZADOS EN EL ENCABEZADO
- * Reemplazan la barra fija de la esquina izquierda: chips compactos junto al
- * botón de Layout. Click en un chip restaura el panel.
- */
-.panelesOcultosEncabezado {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXxs);
-    padding-left: var(--dashboard-espacioXxs);
-    border-left: 1px solid var(--dashboard-bordeSutil);
-}
-
-.botonPanelOculto--encabezado {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-}
-
-/* 
  * [18-08-2026] MODAL DE GESTIÓN DE PANELES
  */
 .gestionPanelesContenido {
@@ -347,12 +328,6 @@
     flex-direction: column;
     gap: var(--dashboard-espacioLg);
     padding: var(--dashboard-espacioMd) 0;
-}
-
-.gestionPanelesDescripcion {
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
-    margin: 0;
 }
 
 .gestionPanelesSeccion {

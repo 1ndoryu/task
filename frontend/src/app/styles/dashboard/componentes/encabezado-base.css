@@ -169,8 +169,51 @@
 }
 
 .seccionAcciones {
+    position: relative;
     display: flex;
     gap: var(--dashboard-espacioSm);
+    align-items: center;
+    min-width: 0;
+}
+
+/* [19-08-2026] Copia invisible que mide el ancho real de las acciones
+ * (AccionesPanelResponsivas). No debe afectar el layout visible. */
+.seccionAccionesMedidor {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm);
+    max-width: 100%;
+}
+
+/* [19-08-2026] Popover de acciones colapsadas (mismo lenguaje visual que los
+ * menús contextuales: fondo principal, borde, sombra). */
+.seccionAccionesPopover {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioSm);
+    background-color: var(--dashboard-fondoPrincipal);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    animation: seccionAccionesAparecer 0.15s ease-out;
+}
+
+@keyframes seccionAccionesAparecer {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 
@@ -213,17 +256,6 @@
 .seccionEncabezado--panelHeader:hover .seccionTitulo,
 .seccionEncabezado--panelHeader:hover .seccionAcciones {
     opacity: 1;
-}
-
-/* 
- * FOOTER 
- */
-.dashboardFooter {
-    margin-top: var(--dashboard-espacio2xl);
-    text-align: center;
-    color: var(--dashboard-textoPlaceholder);
-    border-top: 1px solid var(--dashboard-bordePrincipal);
-    padding-top: var(--dashboard-espacioLg);
 }
 
 /* 

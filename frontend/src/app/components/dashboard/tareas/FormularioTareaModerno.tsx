@@ -7,8 +7,9 @@
  * Reutiliza componentes de Fase 9.2 (CampoTituloLimpio, PropiedadesCompactas, etc.)
  */
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito, CompaneroEquipo, RolCompartido, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
+import {useDependenciasUIStore} from '../../../stores/dependenciasUIStore';
 import {useGruposEjecucion} from '../../../hooks/useGruposEjecucion';
 import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades, SelectorTags, SeccionResponsables, SelectorGrupo} from '../../shared';
 import {Boton} from '../../ui';
@@ -96,6 +97,18 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
 
     /* Grupos de ejecución existentes para el selector */
     const gruposDisponibles = useGruposEjecucion(tareasParaDependencias, habitosParaDependencias);
+
+    /* [19-08-2026] Apertura directa del selector de dependencias desde el menú
+     * contextual: la solicitud viaja en dependenciasUIStore y se consume aquí
+     * al montar el formulario de edición (una sola vez). */
+    useEffect(() => {
+        const solicitud = useDependenciasUIStore.getState().abrirDependenciasDe;
+        if (!solicitud || solicitud.tipo !== 'tarea' || solicitud.id !== (tareaId || 0)) return;
+        if (!modoEdicion || !onDependenciasChange) return;
+        setModalDependenciasAbierto(true);
+        useDependenciasUIStore.getState().consumirSolicitudDependencias();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     /* Mostrar selector de proyecto solo si hay proyectos y callback */
 

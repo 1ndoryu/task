@@ -35,10 +35,29 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
             <Boton ref={botonRef as React.Ref<HTMLButtonElement>} type="button" variante="ghost" claseAdicional={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición" style={tieneRepeticion ? {color: 'var(--dashboard-textoNormal)'} : undefined}>
                 <Repeat size={14} />
                 <span>{descripcion}</span>
+                {/* [19-08-2026] span en vez de Boton: un <button> dentro de otro
+                 * <button> es HTML inválido (warning de React) y puede romper el
+                 * click del pill. Se mantiene accesible con role/tabIndex. */}
                 {tieneRepeticion && (
-                    <Boton type="button" variante="ghost" claseAdicional="pillOpcion__quitar" onClick={desactivarRepeticion} title="Quitar repetición">
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Quitar repetición"
+                        title="Quitar repetición"
+                        className="pillOpcion__quitar"
+                        onClick={e => {
+                            e.stopPropagation();
+                            desactivarRepeticion(e);
+                        }}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                desactivarRepeticion(e as unknown as React.MouseEvent);
+                            }
+                        }}>
                         <X size={10} />
-                    </Boton>
+                    </span>
                 )}
             </Boton>
 
