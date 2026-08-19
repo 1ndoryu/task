@@ -1,8 +1,10 @@
-# Glory RS
+# task
 
-Template para sitios web con **Rust (Axum) + React (TypeScript) + OpenAPI** en un solo repositorio.
+Aplicación de productividad tipo dashboard (tareas, hábitos, proyectos, notas, actividad) — migrada desde el tema WordPress **glorytemplate** a un stack moderno **Rust (Axum) + React (TypeScript) + Vite** en un solo repositorio.
 
-Pensado para máxima velocidad de desarrollo, seguridad por defecto y escalabilidad.
+El frontend reproduce la experiencia del tema original de WordPress: mismo layout de paneles, mismas configuraciones persistidas por usuario (posiciones, columnas, paneles minimizados, preferencias de plugins) y el mismo contrato de datos.
+
+> Estado: la migración está en curso; el refactor del backend Rust se está ejecutando en paralelo. La API canónica es `/api` (la compatibilidad `/wp-json` no se asume).
 
 ## Stack
 
@@ -21,9 +23,9 @@ Pensado para máxima velocidad de desarrollo, seguridad por defecto y escalabili
 | Hashing              | argon2                       | Hashing seguro de contraseñas           |
 | CORS                 | tower-http                   | Middleware CORS                         |
 | Linter               | clippy (paranoia)            | Código limpio                           |
-| Frontend             | React + TypeScript + Vite    | UI                                      |
-| State management     | React Query + Zustand        | Server state + client state             |
-| Codegen              | Orval                        | Genera cliente TypeScript desde OpenAPI |
+| Frontend             | React + TypeScript + Vite    | UI (dashboard migrado del tema WP)      |
+| State management     | Zustand                      | Estado del cliente (layout, sync, UI)   |
+| Core compartido      | glory-rs (submodulo)         | Lógica agnóstica reutilizable           |
 
 ## Requisitos
 
@@ -34,46 +36,44 @@ Pensado para máxima velocidad de desarrollo, seguridad por defecto y escalabili
 ## Inicio rápido
 
 ```bash
-# 1. Clonar el template con el framework fijado
-git clone --recurse-submodules --branch main https://github.com/1ndoryu/glory-rs-template.git nuevo-proyecto
-cd nuevo-proyecto
-git submodule update --init --recursive
+# 1. Instalar dependencias del frontend
+cd frontend && npm install && cd ..
+
+# 2. Configurar .env (copiar de .env.example y ajustar DATABASE_URL)
 cp .env.example .env
-# Editar .env con tus credenciales de PostgreSQL
 
-# 2. Crear la base de datos
-psql -U postgres -c "CREATE DATABASE glory_db;"
+# 3. Crear la base de datos y aplicar migraciones
+psql -U postgres -c "CREATE DATABASE glory_backend_local;"
+DATABASE_URL=postgres://postgres:root@127.0.0.1:5432/glory_backend_local cargo sqlx migrate run
 
-# 3. Backend
-cargo run
-# El servidor inicia en http://localhost:3000
-# Swagger UI en http://localhost:3000/swagger-ui/
-
-# 4. Frontend (en otra terminal)
-cd frontend
-npm install
+# 4. Arrancar todo (backend + frontend) con el launcher compartido
 npm run dev
-# Frontend en http://localhost:5173
-
-# 5. Codegen desde el snapshot versionado
-npm run codegen
-# Para refrescarlo desde un backend local:
-# OPENAPI_URL=http://localhost:3000/api-docs/openapi.json npm run openapi:export
 ```
 
-## Imagen de producción
+`npm run dev` usa el launcher de `glory-rs/scripts/dev.mjs`: prepara la BD por rama, el target Cargo por rama, sincroniza dependencias del frontend y arranca Vite.
 
-`Dockerfile` compila el frontend y el binario Rust en etapas separadas, copia únicamente `frontend/dist` y ejecuta un usuario sin privilegios. El proceso sirve el SPA y `/api` desde el mismo binario; PostgreSQL se entrega como servicio externo mediante `DATABASE_URL`.
+**Puertos por defecto de este proyecto** (aislados para no chocar con otras apps de la máquina):
+
+- Backend: `http://127.0.0.1:3001`
+- Frontend (Vite): `http://127.0.0.1:5174` — usar SIEMPRE `127.0.0.1`, no `localhost` (las cookies de `localhost` se comparten entre puertos y otras apps de la máquina pisarían la sesión).
+
+## Comandos útiles
 
 ```bash
-docker build --tag glory-react-logic-rs:local .
-docker run --rm --publish 3000:3000 \
-  --env DATABASE_URL=postgres://usuario:password@host.docker.internal:5432/glory_db \
-  --env CORS_ORIGINS=https://app.example.com \
-  glory-react-logic-rs:local
+npm run dev            # Backend + frontend (launcher glory-rs)
+npm run check          # cargo check + clippy + type-check + boundary
+npm run dev:back       # Solo backend
+npm run dev:front      # Solo frontend (Vite con HMR)
+npm test               # Tests del backend (con BD)
 ```
 
-El runtime fija `HOST=0.0.0.0`, `FRONTEND_DIST=/app/frontend/dist`, `COOKIE_SECURE=true` y expone un healthcheck en `/api/health`. El build Docker real debe ejecutarse en CI/host con Docker disponible antes de exponer el servicio.
+O directamente desde `frontend/`:
+
+```bash
+npm run dev            # Dev server con HMR
+npm run type-check     # Verificar tipos TypeScript
+npm run build          # Build producción
+```
 
 ## Estructura del proyecto
 
@@ -85,20 +85,22 @@ El runtime fija `HOST=0.0.0.0`, `FRONTEND_DIST=/app/frontend/dist`, `COOKIE_SECU
 │   ├── config/             # Configuración desde env vars
 │   ├── errors/             # Tipos de error → HTTP status codes
 │   ├── handlers/           # Capa HTTP (routing, request/response)
-│   ├── middleware/          # Sesión, CSRF, rate limit y límites
+│   ├── middleware/         # Sesión, CSRF, rate limit y límites
 │   ├── models/             # Structs de dominio y DTOs
 │   ├── repositories/       # Capa de base de datos (queries)
 │   └── services/           # Lógica de negocio
 ├── migrations/             # Migraciones SQL (SQLx)
 ├── frontend/
-│   ├── src/
-│   │   ├── api/            # Snapshot OpenAPI y cliente generado por Orval
-│   │   ├── App.tsx         # Componente raíz
-│   │   └── main.tsx        # Entry point React
-│   ├── orval.config.ts     # Configuración de codegen
-│   └── vite.config.ts      # Configuración de Vite + proxy
+│   └── src/app/            # Dashboard migrado del tema WordPress
+│       ├── components/     # Paneles, formularios, modales, menús
+│       ├── hooks/          # Lógica de dashboard, sync, preferencias
+│       ├── stores/         # Stores Zustand (layout, suscripción, UI)
+│       ├── styles/         # CSS por componente (variables centralizadas)
+│       └── islands/        # Islas (DashboardIsland, etc.)
+├── glory-rs/               # Submodulo: core agnóstico compartido
+├── Agente/                 # Roadmap, planes y documentación de trabajo
 ├── .env.example            # Variables de entorno de ejemplo
-└── .gitignore
+└── README.md
 ```
 
 ## Arquitectura
@@ -114,7 +116,7 @@ El backend sigue separación en capas:
 
 ## API canónica actual
 
-El consumidor incluye autenticación por cookie, perfil, dashboard, tareas/proyectos, historial de hábitos, notas/carpetas y actividad en distintos niveles de integración. El contrato canónico usa `/api`; la compatibilidad `/wp-json` no se asume. La paridad completa del frontend y las operaciones avanzadas siguen en migración:
+Autenticación por cookie, perfil, dashboard, tareas/proyectos, historial de hábitos, notas/carpetas y actividad. El contrato canónico usa `/api`:
 
 | Método | Ruta               | Descripción             | Auth |
 | ------ | ------------------ | ----------------------- | ---- |
@@ -142,47 +144,6 @@ El consumidor incluye autenticación por cookie, perfil, dashboard, tareas/proye
 | GET    | /api/activity/day  | Detalle diario           | Cookie |
 | POST   | /api/activity      | Registrar/desmarcar      | Cookie + CSRF |
 | DELETE | /api/activity/:id  | Eliminar actividad propia | Cookie + CSRF |
-
-## Ramas por sitio
-
-Este template está diseñado para usar **una rama por sitio/proyecto**:
-
-```bash
-git checkout -b mi-sitio-web
-# Desarrollar en la rama
-# Cambiar a otro sitio:
-git checkout otro-sitio
-```
-
-La estructura es idéntica en cada rama. Solo cambia el contenido específico del sitio.
-
-## Comandos útiles
-
-```bash
-# Comando unificado — verifica todo el proyecto (backend + frontend)
-npm run check
-
-# Backend
-cargo run --bin glory-backend # Iniciar servidor
-cargo check                  # Verificar compilación
-cargo clippy                 # Linter (nivel paranoia)
-cargo test                   # Tests
-cargo fmt                    # Formatear código
-npm run check:back           # cargo check + clippy
-
-# Frontend
-npm run dev:front            # Dev server con HMR
-npm run check:front          # Type-check TypeScript
-npm run codegen              # Regenerar desde frontend/src/api/openapi.json
-npm run openapi:export       # Exportar y normalizar desde un backend local
-
-# O directamente desde frontend/
-cd frontend
-npm run dev                  # Dev server con HMR
-npm run build                # Build producción
-npm run type-check           # Verificar tipos TypeScript
-npm run codegen               # Regenerar el cliente Orval
-```
 
 ## Clippy nivel paranoia
 
