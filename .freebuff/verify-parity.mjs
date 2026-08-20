@@ -219,7 +219,8 @@ async function main() {
   assert(r.status === 409, 'compartir dos veces el mismo elemento → 409');
 
   console.log('\n== Cambio de contraseña ==');
-  r = await api('PUT', '/security/password', {body: {nuevaContrasena: 'clave-nueva-99'}, csrf});
+  /* [H-B04-01] El contrato exige contrasenaActual (una sesión robada no basta). */
+  r = await api('PUT', '/security/password', {body: {contrasenaActual: 'password123', nuevaContrasena: 'clave-nueva-99'}, csrf});
   assert(r.status === 200 && r.data.success, 'cambiar contraseña → success');
   r = await api('GET', '/auth/me');
   assert(r.status === 401, 'sesión antigua invalidada → 401');

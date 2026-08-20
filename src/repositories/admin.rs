@@ -61,6 +61,10 @@ impl AdminUserRow {
 
 pub struct AdminRepository;
 
+/// [19-08-2026] SELECT base SIN GROUP BY: cada consulta inserta su WHERE
+/// entre el SELECT y el GROUP BY (SQL no permite WHERE tras GROUP BY).
+/// GOTCHA: antes el WHERE se concatenaba tras el GROUP BY y cualquier filtro
+/// (o el detalle de usuario) rompía con "syntax error near WHERE" → 500.
 const ADMIN_USER_SELECT: &str = r#"
     SELECT u.id, u.display_name AS nombre, u.email,
            u.avatar_url AS avatar, u.created_at AS fecha_registro,
@@ -81,6 +85,9 @@ const ADMIN_USER_SELECT: &str = r#"
     LEFT JOIN dashboard_habits h ON h.user_id = u.id AND h.deleted_at IS NULL
     LEFT JOIN dashboard_tasks t ON t.user_id = u.id AND t.deleted_at IS NULL
     LEFT JOIN dashboard_projects p ON p.user_id = u.id AND p.deleted_at IS NULL
+"#;
+
+const ADMIN_USER_GROUP_BY: &str = r#"
     GROUP BY u.id, u.display_name, u.email, u.avatar_url, u.created_at,
              s.plan, s.estado, s.fecha_inicio, s.fecha_expiracion,
              s.stripe_customer_id, s.ultimo_pago, e.user_id
@@ -125,7 +132,7 @@ impl AdminRepository {
         let limit_clause = format!(" LIMIT ${idx} OFFSET ${idx2}", idx = idx, idx2 = idx + 1);
 
         let sql = format!(
-            "{ADMIN_USER_SELECT}{where_clause} ORDER BY {orden_columna} {orden_dir}{limit_clause}"
+            "{ADMIN_USER_SELECT}{where_clause}{ADMIN_USER_GROUP_BY} ORDER BY {orden_columna} {orden_dir}{limit_clause}"
         );
         let mut query = sqlx::query_as::<_, AdminUserRow>(&sql);
         for b in &bindings {
@@ -151,7 +158,7 @@ impl AdminRepository {
     }
 
     pub async fn get_user(pool: &PgPool, user_id: Uuid) -> Result<Option<AdminUser>, sqlx::Error> {
-        let sql = format!("{ADMIN_USER_SELECT} WHERE u.id = $1");
+        let sql = format!("{ADMIN_USER_SELECT} WHERE u.id = $1{ADMIN_USER_GROUP_BY}");
         sqlx::query_as::<_, AdminUserRow>(&sql)
             .bind(user_id)
             .fetch_optional(pool)

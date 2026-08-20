@@ -9,7 +9,7 @@ use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
     CreateNoteFolderRequest, CreateNoteRequest, Note, NoteFolder, PaginatedNotes,
-    PaginationParams, UpdateNoteFolderRequest, UpdateNoteRequest,
+    UpdateNoteFolderRequest, UpdateNoteRequest,
 };
 use crate::services::NoteService;
 use crate::AppState;
@@ -41,15 +41,32 @@ pub async fn create_note(
 
 /// [H-B05-07] Reutiliza `PaginationParams` (models/note.rs) en vez de duplicar
 /// page/per_page y sus defaults; folder_id/search se añaden como extensión.
+///
+/// GOTCHA: NO usar `#[serde(flatten)]` con `PaginationParams` aquí —
+/// serde_urlencoded (query strings) no soporta flatten y falla con
+/// "invalid type: string, expected i64" (regresión detectada en vivo:
+/// `GET /api/notes` devolvía 400). Por eso los campos de paginación van
+/// inline, con los mismos defaults y validación de rango.
 #[derive(Debug, serde::Deserialize, utoipa::IntoParams, Validate)]
 pub struct NoteListQuery {
-    #[serde(flatten)]
-    pub paginacion: PaginationParams,
+    #[serde(default = "default_page")]
+    #[validate(range(min = 1))]
+    pub page: i64,
+    #[serde(default = "default_per_page")]
+    #[validate(range(min = 1, max = 100))]
+    pub per_page: i64,
     #[serde(default)]
     pub folder_id: Option<Uuid>,
     #[serde(default)]
     #[validate(length(max = 100))]
     pub search: Option<String>,
+}
+
+fn default_page() -> i64 {
+    1
+}
+fn default_per_page() -> i64 {
+    20
 }
 
 #[utoipa::path(
@@ -202,8 +219,8 @@ pub async fn list_notes(
     let notes = NoteService::list(
         &state.pool,
         auth.user_id,
-        params.paginacion.page,
-        params.paginacion.per_page,
+        params.page,
+        params.per_page,
         params.folder_id,
         params.search.as_deref(),
     )
