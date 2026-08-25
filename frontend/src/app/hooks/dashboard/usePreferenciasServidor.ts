@@ -14,27 +14,42 @@
 
 import {useEffect, useRef} from 'react';
 import {apiFetch} from '../../utils/apiClient';
+import {devWarn} from '../../utils/devLog';
 import {
     CLAVES_PREFERENCIAS,
     recolectarPreferencias,
 } from '../../utils/preferenciasUsuario';
+import {registrarEscritura} from '../../utils/timestampsPreferencias';
 
 const DEBOUNCE_MS = 1200;
 
-/* Fingerprint de las claves de preferencias: detecta cambios que NO pasan
- * por los eventos (stores persist de Zustand escriben directo a localStorage
- * sin CustomEvent). Se compara en un intervalo corto. */
-function fingerprintPreferencias(): string {
-    let total = 0;
+/* Snapshot de las claves de preferencias: detecta cambios que NO pasan por los
+ * eventos (stores persist de Zustand escriben directo a localStorage sin
+ * CustomEvent). Se compara por clave en un intervalo corto y se registra el ts
+ * de cada clave que cambió (necesario para el LWW multinavegador). */
+function snapshotPreferencias(): Record<string, string | null> {
+    const snapshot: Record<string, string | null> = {};
     for (const clave of CLAVES_PREFERENCIAS) {
         try {
-            const raw = localStorage.getItem(clave);
-            if (raw !== null) total += raw.length;
+            snapshot[clave] = localStorage.getItem(clave);
         } catch {
-            /* localStorage no disponible */
+            snapshot[clave] = null;
         }
     }
-    return String(total);
+    return snapshot;
+}
+
+/* Devuelve las claves cuyo valor cambió respecto al snapshot previo y actualiza
+ * el snapshot. `null` -> clave ausente (borrada). */
+function detectarCambios(
+    previo: Record<string, string | null>,
+    actual: Record<string, string | null>
+): string[] {
+    const cambiadas: string[] = [];
+    for (const clave of CLAVES_PREFERENCIAS) {
+        if (previo[clave] !== actual[clave]) cambiadas.push(clave);
+    }
+    return cambiadas;
 }
 
 export function usePreferenciasServidor(estaLogueado: boolean): void {
@@ -43,7 +58,7 @@ export function usePreferenciasServidor(estaLogueado: boolean): void {
 
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const enVueloRef = useRef(false);
-    const fingerprintRef = useRef(fingerprintPreferencias());
+    const snapshotRef = useRef<Record<string, string | null>>(snapshotPreferencias());
 
     useEffect(() => {
         const subir = () => {
@@ -57,7 +72,7 @@ export function usePreferenciasServidor(estaLogueado: boolean): void {
                 body: {preferencias}
             })
                 .catch(error => {
-                    console.warn('[Preferencias] No se pudo subir al servidor:', error);
+                    devWarn('[Preferencias] No se pudo subir al servidor:', error);
                 })
                 .finally(() => {
                     enVueloRef.current = false;
@@ -73,7 +88,8 @@ export function usePreferenciasServidor(estaLogueado: boolean): void {
         const handleCustomEvent = (event: Event) => {
             const detail = (event as CustomEvent<{clave: string}>).detail;
             if (detail && CLAVES_PREFERENCIAS.includes(detail.clave)) {
-                fingerprintRef.current = fingerprintPreferencias();
+                registrarEscritura(detail.clave);
+                snapshotRef.current[detail.clave] = localStorage.getItem(detail.clave);
                 programar();
             }
         };
@@ -81,7 +97,8 @@ export function usePreferenciasServidor(estaLogueado: boolean): void {
         /* Evento nativo (cross-tab) */
         const handleStorage = (event: StorageEvent) => {
             if (event.key && CLAVES_PREFERENCIAS.includes(event.key)) {
-                fingerprintRef.current = fingerprintPreferencias();
+                registrarEscritura(event.key);
+                snapshotRef.current[event.key] = event.newValue;
                 programar();
             }
         };
@@ -89,12 +106,16 @@ export function usePreferenciasServidor(estaLogueado: boolean): void {
         /* [18-08-2026] Polling ligero: los stores persist de Zustand (plugins,
          * ayuno, time tracker, recordatorios, grupos...) escriben directo a
          * localStorage sin emitir CustomEvent ni storage en la misma pestaña.
-         * El fingerprint por longitud es barato (~35 claves) y detecta cualquier
-         * write, incluso writes directos fuera de los hooks. */
+         * [25-08-2026] Comparación por clave: registra el ts de cada clave que
+         * cambió (el fingerprint por longitud no sabía cuál era). */
         const intervalo = window.setInterval(() => {
-            const actual = fingerprintPreferencias();
-            if (actual !== fingerprintRef.current) {
-                fingerprintRef.current = actual;
+            const actual = snapshotPreferencias();
+            const cambiadas = detectarCambios(snapshotRef.current, actual);
+            if (cambiadas.length > 0) {
+                for (const clave of cambiadas) {
+                    registrarEscritura(clave);
+                }
+                snapshotRef.current = actual;
                 programar();
             }
         }, 5000);

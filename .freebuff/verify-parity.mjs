@@ -4,7 +4,11 @@
 /* [25-08-2026] Puerto 3001: el backend de este proyecto vive en 3001 (ver
  * .freebuff/run.md — 3000 lo usan otros proyectos). El default 3000 daba
  * "fetch failed" en cada run sin PARITY_BASE_URL. */
-const BASE = process.env.PARITY_BASE_URL || 'http://127.0.0.1:3001/api';
+/* [25-08-2026] Normalización de la base: PARITY_BASE_URL puede venir como
+ * 'http://host:puerto' o 'http://host:puerto/api'; sin el sufijo /api todas
+ * las rutas dan 404 con body vacío (fallo silencioso). Se añade /api si falta. */
+const BASE_RAW = (process.env.PARITY_BASE_URL || 'http://127.0.0.1:3001/api').replace(/\/+$/, '');
+const BASE = BASE_RAW.endsWith('/api') ? BASE_RAW : BASE_RAW + '/api';
 const WS_URL = BASE.replace(/^http/, 'ws').replace(/\/api$/, '/api/realtime/ws');
 
 let pasados = 0;
@@ -348,6 +352,36 @@ async function main() {
   assert(r.data?.data?.tareas.some(t => t.id === tareaBorradaId && t.texto === 'tarea revivida (undo)'), 'upsert revive la tarea (undo del cliente)');
   r = await api('DELETE', `/tasks/${tareaBorradaId}`, {csrf: csrfAdmin});
   assert(r.status === 204, 'limpieza del tombstone de prueba → 204');
+
+  /* [25-08-2026] LWW de preferencias: el backend debe fusionar el blob por
+   * clave conservando la de mayor ts, nunca borrar claves ausentes y no dejar
+   * que un PUT vacío/parcial haga wipe (coherencia multinavegador). Usuario
+   * desechable: las claves de prueba quedan en su blob, no en el del admin. */
+  console.log('\n== Preferencias LWW (merge por clave con ts) ==');
+  const emailLww = `lww-${Date.now()}@test.app`;
+  r = await apiAuth('POST', '/auth/register', {body: {email: emailLww, password: 'password123'}});
+  assert(r.status === 201 && r.data?.user?.id, 'register usuario LWW → 201');
+  const csrfLww = cookies['csrf_token'];
+  const getPref = async () => {
+    const res = await api('GET', '/dashboard');
+    return res.data?.data?.configuracion?.preferencias || {};
+  };
+  r = await api('PUT', '/dashboard/settings', {body: {preferencias: {claveLww: {valor: 1, ts: 100}}}, csrf: csrfLww});
+  assert(r.status === 204 || r.status === 200, 'PUT preferencias inicial → 204/200');
+  let pref = await getPref();
+  assert(pref.claveLww?.valor === 1 && pref.claveLww?.ts === 100, 'blob guardado con {valor, ts}');
+  r = await api('PUT', '/dashboard/settings', {body: {preferencias: {claveLww: {valor: 2, ts: 50}}}, csrf: csrfLww});
+  pref = await getPref();
+  assert(pref.claveLww?.valor === 1, 'ts menor NO pisa (sigue valor 1)');
+  r = await api('PUT', '/dashboard/settings', {body: {preferencias: {claveLww: {valor: 3, ts: 200}}}, csrf: csrfLww});
+  pref = await getPref();
+  assert(pref.claveLww?.valor === 3, 'ts mayor pisa (valor 3)');
+  r = await api('PUT', '/dashboard/settings', {body: {preferencias: {}}, csrf: csrfLww});
+  pref = await getPref();
+  assert(pref.claveLww?.valor === 3, 'PUT vacío NO borra el blob (anti-wipe)');
+  r = await api('PUT', '/dashboard/settings', {body: {preferencias: {otraClaveLww: {valor: 'x', ts: 300}}}, csrf: csrfLww});
+  pref = await getPref();
+  assert(pref.claveLww?.valor === 3 && pref.otraClaveLww?.valor === 'x', 'PUT parcial conserva claves ajenas y añade las nuevas');
 
   console.log(`\n== RESULTADO: ${pasados} pasados, ${fallados} fallados ==`);
   if (fallados > 0) {

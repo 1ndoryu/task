@@ -56,8 +56,24 @@ impl DashboardRepository {
                 notes = COALESCE($2, dashboard_settings.notes),
                 config = COALESCE(dashboard_settings.config, $5)
                          || COALESCE($3, '{}'::jsonb)
-                         || jsonb_build_object('preferencias',
-                             COALESCE($4, dashboard_settings.config->'preferencias', '{}'::jsonb)),
+                         || jsonb_build_object('preferencias', (
+                             /* [25-08-2026] Merge LWW por clave: cada entrada del
+                              * blob es {valor, ts}. Se fusiona lo existente con lo
+                              * entrante y, por clave, gana la de mayor ts (legacy sin
+                              * ts -> NULLS LAST -> pierde contra cualquier ts real).
+                              * Un PUT parcial/vacío ya NO borra claves ajenas: el
+                              * blob del servidor es fuente de verdad por clave. */
+                             SELECT COALESCE(jsonb_object_agg(m.key, m.value), '{}'::jsonb)
+                             FROM (
+                                 SELECT DISTINCT ON (k.key) k.key AS key, k.value AS value
+                                 FROM (
+                                     SELECT key, value FROM jsonb_each(COALESCE(dashboard_settings.config->'preferencias', '{}'::jsonb))
+                                     UNION ALL
+                                     SELECT key, value FROM jsonb_each(COALESCE($4, '{}'::jsonb))
+                                 ) k
+                                 ORDER BY k.key, (k.value->>'ts')::bigint DESC NULLS LAST
+                             ) m
+                         )),
                 updated_at = NOW()",
         )
         .bind(user_id)
