@@ -57,6 +57,10 @@ interface SelectorGrupoProps {
     titulo?: string;
     soloIcono?: boolean;
     variante?: 'pill' | 'badge';
+    /* [25-08-2026] Portal del menú a body: necesario dentro de contenedores con
+     * backdrop-filter (p. ej. creacionRapidaContenedor), que convierten el
+     * contenedor en containing block y recortan los fixed descendientes. */
+    usarPortal?: boolean;
     /* [20-08-2026] Acciones de gestión de grupos desde el menú ⋯:
      * renombrar/eliminar deben propagarse al dueño de los datos (PanelEjecucion)
      * para actualizar también tareas y hábitos que usan ese grupo. */
@@ -72,6 +76,7 @@ export function SelectorGrupo({
     titulo = 'Grupo',
     soloIcono = false,
     variante = 'pill',
+    usarPortal = false,
     onRenombrarGrupo,
     onEliminarGrupo
 }: SelectorGrupoProps): JSX.Element {
@@ -134,18 +139,21 @@ export function SelectorGrupo({
                     <span>{grupoActual || placeholder}</span>
                 </Boton>
 
-                {menuAbierto && (
-                    <MenuContextual
-                        opciones={opciones}
-                        posicionX={posicionMenu.x}
-                        posicionY={posicionMenu.y}
-                        onSeleccionar={seleccionar}
-                        onCerrar={cerrarMenu}
-                        footer={
-                            <FilaCrearGrupo nuevoGrupo={nuevoGrupo} onNuevoGrupoChange={setNuevoGrupo} inputRef={inputRef} onCrear={crearGrupo} onCerrar={cerrarMenu} />
-                        }
-                    />
-                )}
+                {menuAbierto && (() => {
+                    const menu = (
+                        <MenuContextual
+                            opciones={opciones}
+                            posicionX={posicionMenu.x}
+                            posicionY={posicionMenu.y}
+                            onSeleccionar={seleccionar}
+                            onCerrar={cerrarMenu}
+                            footer={
+                                <FilaCrearGrupo nuevoGrupo={nuevoGrupo} onNuevoGrupoChange={setNuevoGrupo} inputRef={inputRef} onCrear={crearGrupo} onCerrar={cerrarMenu} />
+                            }
+                        />
+                    );
+                    return usarPortal ? createPortal(menu, document.body) : menu;
+                })()}
             </div>
         );
     }

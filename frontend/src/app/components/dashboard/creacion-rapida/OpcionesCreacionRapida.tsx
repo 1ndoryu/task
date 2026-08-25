@@ -7,6 +7,7 @@
 import {Calendar, Flag, Layers, Zap, Star, Paperclip, Loader2} from 'lucide-react';
 import {Boton} from '../../ui';
 import {SelectorFrecuenciaPill} from '../../shared/SelectorFrecuenciaPill';
+import {SelectorGrupo} from '../../shared/SelectorGrupo';
 import type {FrecuenciaHabito, Proyecto} from '../../../types/dashboard';
 import type {EstadoMenu, EstadoOpciones} from '../../../hooks/dashboard/useModalCreacionRapida';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../../utils/constantes';
@@ -27,13 +28,16 @@ interface OpcionesCreacionRapidaProps {
     setMenuImportancia: React.Dispatch<React.SetStateAction<EstadoMenu>>;
     frecuencia: FrecuenciaHabito;
     onCambiarFrecuencia: (frecuencia: FrecuenciaHabito) => void;
+    grupos: string[];
+    grupoActual: string | null;
+    onCambiarGrupo: (grupo: string | null) => void;
 }
 
 export function OpcionesCreacionRapida({
     tipo, opciones, proyectos, adjuntosCount, subiendo,
     obtenerEtiquetaFecha, abrirMenu, abrirSelectorArchivo,
     setMenuProyecto, setMenuFecha, setMenuPrioridad, setMenuUrgencia, setMenuImportancia,
-    frecuencia, onCambiarFrecuencia
+    frecuencia, onCambiarFrecuencia, grupos, grupoActual, onCambiarGrupo
 }: OpcionesCreacionRapidaProps): JSX.Element | null {
     if (tipo === 'tarea') {
         const proyectoSeleccionado = proyectos.find(p => p.id === opciones.proyectoId);
@@ -52,6 +56,9 @@ export function OpcionesCreacionRapida({
     if (tipo === 'habito') {
         return (
             <div className="creacionRapidaOpciones">
+                {/* Mismo selector de grupo que en configuraciones (propiedadesCompactas).
+                 * Sin elección → grupo por defecto ("Tareas"). */}
+                <SelectorGrupo grupos={grupos} grupoActual={grupoActual} onChange={onCambiarGrupo} titulo="Grupo" usarPortal />
                 {/* Mismo selector de frecuencia que en propiedadesCompactas (configuraciones) */}
                 <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onCambiarFrecuencia} usarPortal />
                 <Boton type="button" variante="opcion" soloIcono activo={!!opciones.importancia} onClick={e => abrirMenu(setMenuImportancia, e)} icono={<Star size={14} />} title={opciones.importancia ? `Importancia ${opciones.importancia}` : 'Importancia Media'} />

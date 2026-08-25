@@ -62,7 +62,10 @@ export function useCreacionEntidades({dashboard, limites, acciones}: UseCreacion
                 importancia: (opciones.importancia || 'Media') as NivelImportancia,
                 tags: [],
                 /* frecuencia completa (FrecuenciaHabito) elegida con el mismo selector de propiedadesCompactas */
-                frecuencia: opciones.frecuencia ?? {tipo: 'diario'}
+                frecuencia: opciones.frecuencia ?? {tipo: 'diario'},
+                /* grupo de ejecución elegido con el mismo selector de propiedadesCompactas;
+                 * undefined → grupo por defecto ("Tareas") */
+                grupoEjecucion: opciones.grupoEjecucion
             };
             await dashboard.crearHabito(datosHabito);
         } else if (tipo === 'proyecto') {

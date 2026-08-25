@@ -12,6 +12,7 @@ import {Input} from '../ui/Input';
 import type {Proyecto} from '../../types/dashboard';
 import type {DatosCreacion} from '../../hooks/dashboard/useModalCreacionRapida';
 import {useModalCreacionRapida} from '../../hooks/dashboard/useModalCreacionRapida';
+import {useGruposEjecucionStore} from '../../stores/gruposEjecucionStore';
 import {MenusCreacionRapida} from './creacion-rapida/MenusCreacionRapida';
 import {OpcionesCreacionRapida} from './creacion-rapida/OpcionesCreacionRapida';
 import '../../styles/dashboard/componentes/modalCreacionRapida.css';
@@ -32,6 +33,7 @@ interface ModalCreacionRapidaProps {
 
 export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}, onCerrar, onGuardar, onCambiarTipo}: ModalCreacionRapidaProps): JSX.Element {
     const hook = useModalCreacionRapida({tipo, valoresIniciales, onCerrar, onGuardar, onCambiarTipo});
+    const grupos = useGruposEjecucionStore(s => s.gruposConocidos);
 
     return (
         /* sentinel-disable-next-line componente-artesanal — modal de creacion rapida con logica especifica */
@@ -59,6 +61,9 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                         setMenuImportancia={hook.setMenuImportancia}
                         frecuencia={hook.opciones.frecuencia ?? {tipo: 'diario'}}
                         onCambiarFrecuencia={hook.establecerFrecuencia}
+                        grupos={grupos}
+                        grupoActual={hook.opciones.grupoEjecucion ?? null}
+                        onCambiarGrupo={hook.establecerGrupo}
                     />
 
                     <Input tipo="file" ref={hook.fileInputRef} claseAdicional="inputOculto" onChange={hook.manejarArchivoSeleccionado} />

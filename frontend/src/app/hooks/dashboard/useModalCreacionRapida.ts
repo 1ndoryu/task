@@ -216,6 +216,12 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         setOpciones(prev => ({...prev, frecuencia}));
     }, []);
 
+    /* Grupo de ejecución del hábito (mismo selector que en configuraciones).
+     * null/undefined = grupo por defecto ("Tareas"). */
+    const establecerGrupo = useCallback((grupo: string | null) => {
+        setOpciones(prev => ({...prev, grupoEjecucion: grupo}));
+    }, []);
+
     const seleccionarFecha = useCallback((id: string) => {
         setOpciones(prev => ({...prev, fecha: id === 'ninguna' ? undefined : id}));
         setMenuFecha(prev => ({...prev, visible: false}));
@@ -273,6 +279,8 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
 
         /* Selector de frecuencia (pill de propiedadesCompactas) */
         establecerFrecuencia,
+        /* Selector de grupo de ejecución (pill de propiedadesCompactas) */
+        establecerGrupo,
 
         /* Handlers */
         manejarSubmit,
