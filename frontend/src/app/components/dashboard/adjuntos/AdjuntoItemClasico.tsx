@@ -5,7 +5,7 @@ import {Boton} from '../../ui';
 
 interface AdjuntoItemClasicoProps {
     adjunto: Adjunto;
-    onDelete: (id: number) => void;
+    onDelete: (id: string) => void;
     // Preview
     urlPreview: string | null;
     esCifrado: boolean;
@@ -15,10 +15,10 @@ interface AdjuntoItemClasicoProps {
     // Audio
     isPlaying: boolean;
     progress: number;
-    onToggleAudio: (id: number) => void;
+    onToggleAudio: (id: string) => void;
     audioRef: (el: HTMLAudioElement | null) => void;
-    onTimeUpdate: (id: number) => void;
-    onAudioEnded: (id: number) => void;
+    onTimeUpdate: (id: string) => void;
+    onAudioEnded: (id: string) => void;
 }
 
 export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, yaDescifrado, cargando, onPreviewClick, isPlaying, progress, onToggleAudio, audioRef, onTimeUpdate, onAudioEnded}: AdjuntoItemClasicoProps) {

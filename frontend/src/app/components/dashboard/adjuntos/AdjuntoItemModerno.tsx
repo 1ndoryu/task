@@ -4,16 +4,16 @@ import type {Adjunto} from '../../../types/dashboard';
 
 interface AdjuntoItemModernoProps {
     adjunto: Adjunto;
-    onDelete: (id: number) => void;
+    onDelete: (id: string) => void;
     urlPreview: string | null;
     esCifrado: boolean;
     onPreviewClick: (adjunto: Adjunto) => void;
     // Audio
     isPlaying: boolean;
-    onToggleAudio: (id: number) => void;
+    onToggleAudio: (id: string) => void;
     audioRef: (el: HTMLAudioElement | null) => void;
-    onTimeUpdate: (id: number) => void;
-    onAudioEnded: (id: number) => void;
+    onTimeUpdate: (id: string) => void;
+    onAudioEnded: (id: string) => void;
 }
 
 export function AdjuntoItemModerno({adjunto, onDelete, urlPreview, esCifrado, onPreviewClick, isPlaying, onToggleAudio, audioRef, onTimeUpdate, onAudioEnded}: AdjuntoItemModernoProps) {

@@ -49,7 +49,7 @@ export function useGestionAdjuntos(adjuntos: Adjunto[], onChange: (adjuntos: Adj
                 const tipo = determinarTipo(file.type);
 
                 const nuevoAdjunto: Adjunto = {
-                    id: Date.now(),
+                    id: String(Date.now()),
                     tipo,
                     url,
                     nombre: file.name,
@@ -80,7 +80,7 @@ export function useGestionAdjuntos(adjuntos: Adjunto[], onChange: (adjuntos: Adj
     };
 
     const eliminarAdjunto = useCallback(
-        (id: number, onAudioStop?: (id: number) => void) => {
+        (id: string, onAudioStop?: (id: string) => void) => {
             const adjunto = adjuntos.find(a => a.id === id);
             if (!adjunto) return;
 

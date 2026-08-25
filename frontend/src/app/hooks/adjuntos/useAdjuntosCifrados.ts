@@ -2,8 +2,8 @@ import {useState, useCallback} from 'react';
 import type {Adjunto} from '../../types/dashboard';
 
 export function useAdjuntosCifrados() {
-    const [contenidoDescifrado, setContenidoDescifrado] = useState<{[key: number]: string}>({});
-    const [cargandoDescifrado, setCargandoDescifrado] = useState<{[key: number]: boolean}>({});
+    const [contenidoDescifrado, setContenidoDescifrado] = useState<{[key: string]: string}>({});
+    const [cargandoDescifrado, setCargandoDescifrado] = useState<{[key: string]: boolean}>({});
     const [errorDescifrado, setErrorDescifrado] = useState<string | null>(null);
 
     const esBase64 = (url: string): boolean => {
@@ -29,7 +29,7 @@ export function useAdjuntosCifrados() {
     }, []);
 
     const tieneContenidoCargado = useCallback(
-        (id: number): boolean => {
+        (id: string): boolean => {
             return contenidoDescifrado[id] !== undefined;
         },
         [contenidoDescifrado]
@@ -46,15 +46,10 @@ export function useAdjuntosCifrados() {
             setErrorDescifrado(null);
 
             try {
-                /* Obtener nonce para autenticación */
-                const gloryData = window.gloryDashboard;
-                const nonce = gloryData?.nonce || '';
-
+                /* [21-08-2026] Contrato Rust: la sesión viaja en la cookie
+                 * (mismo origen); el header X-WP-Nonce ya no existe. */
                 const response = await fetch(adjunto.url, {
-                    credentials: 'same-origin',
-                    headers: {
-                        'X-WP-Nonce': nonce
-                    }
+                    credentials: 'same-origin'
                 });
 
                 if (!response.ok) {

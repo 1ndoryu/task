@@ -59,7 +59,8 @@ export interface RepeticionTarea {
  * Archivo adjunto a una tarea
  */
 export interface Adjunto {
-    id: number;
+    /* [21-08-2026] UUID del backend Rust (antes eran ids numéricos de WP) */
+    id: string;
     tipo: 'imagen' | 'audio' | 'archivo';
     url: string;
     nombre: string;

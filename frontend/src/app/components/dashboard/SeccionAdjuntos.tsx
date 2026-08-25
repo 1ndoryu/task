@@ -86,7 +86,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
         }
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         eliminarAdjunto(id, id => audioPlayer.playingId === id && audioPlayer.toggleAudio(id));
     };
 
