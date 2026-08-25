@@ -3,6 +3,11 @@ import {persist} from 'zustand/middleware';
 
 export const GRUPO_SIN_GRUPO = '__sin_grupo__';
 
+/* [21-08-2026] Nombre del grupo por defecto (sin grupo asignado). Antes se
+ * llamaba "Sin grupo"; ahora "Tareas" para que el título del panel y el
+ * selector sean coherentes: sin grupo → "Tareas", con grupo → el nombre. */
+export const NOMBRE_GRUPO_DEFECTO = 'Tareas';
+
 interface GruposEjecucionState {
     grupoPorPanel: Record<string, string | null>;
     gruposConocidos: string[];

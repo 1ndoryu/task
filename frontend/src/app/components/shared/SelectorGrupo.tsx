@@ -12,7 +12,7 @@ import type {Ref} from 'react';
 import {Boton} from '../ui';
 import {MenuContextual, type OpcionMenu} from './MenuContextual';
 import {useSelectorBadge} from '../../hooks/shared/useSelectorBadge';
-import {useGruposEjecucionStore} from '../../stores/gruposEjecucionStore';
+import {useGruposEjecucionStore, NOMBRE_GRUPO_DEFECTO} from '../../stores/gruposEjecucionStore';
 
 /* [19-08-2026] Fila única para crear un grupo dentro del menú. Antes había dos
  * variantes duplicadas (selectorGrupoCrear y selectorGrupoCrearPill) con estilos
@@ -68,7 +68,7 @@ export function SelectorGrupo({
     grupos,
     grupoActual,
     onChange,
-    placeholder = 'Sin grupo',
+    placeholder = NOMBRE_GRUPO_DEFECTO,
     titulo = 'Grupo',
     soloIcono = false,
     variante = 'pill',
@@ -111,7 +111,7 @@ export function SelectorGrupo({
         const cerrarMenu = () => setMenuAbierto(false);
 
         const opciones: OpcionMenu[] = [
-            {id: '', etiqueta: 'Sin grupo', icono: <FolderOpen size={12} />},
+            {id: '', etiqueta: NOMBRE_GRUPO_DEFECTO, icono: <FolderOpen size={12} />},
             ...grupos.map(g => ({id: g, etiqueta: g, icono: <Folder size={12} />}))
         ];
 
@@ -152,7 +152,7 @@ export function SelectorGrupo({
 
     /* Variante BADGE: reutiliza selectorBadge (headers de panel) */
     const opciones = [
-        {id: '', etiqueta: 'Sin grupo'},
+        {id: '', etiqueta: NOMBRE_GRUPO_DEFECTO},
         ...grupos.map(g => ({id: g, etiqueta: g}))
     ];
 
@@ -206,8 +206,8 @@ export function SelectorGrupo({
 
             {menuAbierto && createPortal(
                 <div ref={menuRef as Ref<HTMLDivElement>} className="selectorBadgeMenu" role="menu">
-                    <Boton type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${grupoActual === null ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion({id: '', etiqueta: 'Sin grupo'})} role="menuitem">
-                        <span className="selectorBadgeOpcionTexto">Sin grupo</span>
+                    <Boton type="button" variante="ghost" claseAdicional={`selectorBadgeOpcion ${grupoActual === null ? 'selectorBadgeOpcionActiva' : ''}`} onClick={() => seleccionarOpcion({id: '', etiqueta: NOMBRE_GRUPO_DEFECTO})} role="menuitem">
+                        <span className="selectorBadgeOpcionTexto">{NOMBRE_GRUPO_DEFECTO}</span>
                     </Boton>
 
                     {grupos.map(grupo => (

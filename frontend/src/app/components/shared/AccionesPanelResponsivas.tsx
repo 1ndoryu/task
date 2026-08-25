@@ -17,6 +17,7 @@ import {useLayoutEffect, useRef, useState, Children, Fragment, isValidElement, t
 import {MoreHorizontal, FolderOpen} from 'lucide-react';
 import {Boton} from '../ui';
 import {MenuContextual, type OpcionMenu} from './MenuContextual';
+import {NOMBRE_GRUPO_DEFECTO} from '../../stores/gruposEjecucionStore';
 
 interface AccionesPanelResponsivasProps {
     children: ReactNode;
@@ -105,7 +106,7 @@ export function AccionesPanelResponsivas({children}: AccionesPanelResponsivasPro
                         etiqueta: titulo,
                         icono: <FolderOpen size={12} />,
                         subOpciones: [
-                            {id: `${idBase}::`, etiqueta: 'Sin grupo', marcada: grupoActual === null},
+                            {id: `${idBase}::`, etiqueta: NOMBRE_GRUPO_DEFECTO, marcada: grupoActual === null},
                             ...grupos.map(g => ({id: `${idBase}::${g}`, etiqueta: g, marcada: grupoActual === g}))
                         ]
                     });

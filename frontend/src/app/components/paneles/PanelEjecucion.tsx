@@ -11,7 +11,7 @@ import {SeccionEncabezado, ListaTareas, SubmenuNuevoInline} from '../dashboard';
 import {SelectorBadge, OverlayEnfoque, SelectorGrupo} from '../shared';
 import {Boton} from '../ui';
 import type {Tarea, Proyecto, Participante, DatosEdicionTarea, Habito} from '../../types/dashboard';
-import {useGruposEjecucionStore} from '../../stores/gruposEjecucionStore';
+import {useGruposEjecucionStore, NOMBRE_GRUPO_DEFECTO} from '../../stores/gruposEjecucionStore';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {useGruposEjecucion} from '../../hooks/useGruposEjecucion';
 
@@ -188,7 +188,9 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
         <>
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Tareas')}
+                /* [21-08-2026] El título del panel sigue al grupo activo: sin grupo
+                 * muestra "Tareas", con grupo muestra el nombre de ese grupo. */
+                titulo={renderHandleArrastre(grupoActivo || NOMBRE_GRUPO_DEFECTO)}
                 variante="panelHeader"
                 acciones={
                     <>
@@ -196,7 +198,6 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                             grupos={gruposDisponibles}
                             grupoActual={grupoActivo}
                             onChange={cambiarGrupo}
-                            placeholder="Sin grupo"
                             titulo="Grupo de ejecución"
                             soloIcono={true}
                             variante="badge"

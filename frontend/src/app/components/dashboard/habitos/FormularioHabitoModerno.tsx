@@ -194,7 +194,6 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
                         grupos={gruposDisponibles}
                         grupoActual={grupoEjecucion || null}
                         onChange={onGrupoEjecucionChange}
-                        placeholder="Sin grupo"
                         titulo="Grupo de ejecución"
                     />
                 </FilaPropiedades>

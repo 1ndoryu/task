@@ -211,7 +211,6 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
                         grupos={gruposDisponibles}
                         grupoActual={grupoEjecucion || null}
                         onChange={onGrupoEjecucionChange}
-                        placeholder="Sin grupo"
                         titulo="Grupo de ejecución"
                     />
                 </FilaPropiedades>
