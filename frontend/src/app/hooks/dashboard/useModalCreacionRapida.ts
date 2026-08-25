@@ -5,14 +5,14 @@
  */
 
 import {useState, useEffect, useRef, useCallback} from 'react';
-import type {Adjunto} from '../../types/dashboard';
+import type {Adjunto, FrecuenciaHabito} from '../../types/dashboard';
 import {useAdjuntos} from '../useAdjuntos';
 
 interface EstadoOpciones {
     proyectoId?: number;
     prioridad?: string;
     urgencia?: string;
-    frecuencia?: string;
+    frecuencia?: FrecuenciaHabito;
     fecha?: string;
     importancia?: string;
     grupoEjecucion?: string | null;
@@ -31,7 +31,7 @@ interface DatosCreacion {
     proyectoId?: number;
     prioridad?: string;
     urgencia?: string;
-    frecuencia?: string;
+    frecuencia?: FrecuenciaHabito;
     fecha?: string;
     importancia?: string;
     grupoEjecucion?: string | null;
@@ -74,7 +74,6 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
     const [menuProyecto, setMenuProyecto] = useState<EstadoMenu>(menuInicial);
     const [menuPrioridad, setMenuPrioridad] = useState<EstadoMenu>(menuInicial);
     const [menuUrgencia, setMenuUrgencia] = useState<EstadoMenu>(menuInicial);
-    const [menuFrecuencia, setMenuFrecuencia] = useState<EstadoMenu>(menuInicial);
     const [menuFecha, setMenuFecha] = useState<EstadoMenu>(menuInicial);
     const [menuImportancia, setMenuImportancia] = useState<EstadoMenu>(menuInicial);
 
@@ -89,12 +88,11 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         setMenuProyecto(prev => ({...prev, visible: false}));
         setMenuPrioridad(prev => ({...prev, visible: false}));
         setMenuUrgencia(prev => ({...prev, visible: false}));
-        setMenuFrecuencia(prev => ({...prev, visible: false}));
         setMenuFecha(prev => ({...prev, visible: false}));
         setMenuImportancia(prev => ({...prev, visible: false}));
     }, []);
 
-    const hayMenuAbierto = menuTipo.visible || menuProyecto.visible || menuPrioridad.visible || menuUrgencia.visible || menuFrecuencia.visible || menuFecha.visible || menuImportancia.visible;
+    const hayMenuAbierto = menuTipo.visible || menuProyecto.visible || menuPrioridad.visible || menuUrgencia.visible || menuFecha.visible || menuImportancia.visible;
 
     const manejarSubmit = useCallback(async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -210,9 +208,12 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         setMenuUrgencia(prev => ({...prev, visible: false}));
     }, []);
 
-    const seleccionarFrecuencia = useCallback((id: string) => {
-        setOpciones(prev => ({...prev, frecuencia: id}));
-        setMenuFrecuencia(prev => ({...prev, visible: false}));
+    /*
+     * Selector de frecuencia (mismo componente que en propiedadesCompactas)
+     * Recibe el objeto FrecuenciaHabito completo, no un string simple
+     */
+    const establecerFrecuencia = useCallback((frecuencia: FrecuenciaHabito) => {
+        setOpciones(prev => ({...prev, frecuencia}));
     }, []);
 
     const seleccionarFecha = useCallback((id: string) => {
@@ -250,7 +251,6 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         menuProyecto,
         menuPrioridad,
         menuUrgencia,
-        menuFrecuencia,
         menuFecha,
         menuImportancia,
 
@@ -260,7 +260,6 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         cerrarMenuProyecto: () => setMenuProyecto(prev => ({...prev, visible: false})),
         cerrarMenuPrioridad: () => setMenuPrioridad(prev => ({...prev, visible: false})),
         cerrarMenuUrgencia: () => setMenuUrgencia(prev => ({...prev, visible: false})),
-        cerrarMenuFrecuencia: () => setMenuFrecuencia(prev => ({...prev, visible: false})),
         cerrarMenuFecha: () => setMenuFecha(prev => ({...prev, visible: false})),
         cerrarMenuImportancia: () => setMenuImportancia(prev => ({...prev, visible: false})),
 
@@ -269,9 +268,11 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         seleccionarProyecto,
         seleccionarPrioridad,
         seleccionarUrgencia,
-        seleccionarFrecuencia,
         seleccionarFecha,
         seleccionarImportancia,
+
+        /* Selector de frecuencia (pill de propiedadesCompactas) */
+        establecerFrecuencia,
 
         /* Handlers */
         manejarSubmit,
@@ -286,7 +287,6 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
         setMenuProyecto,
         setMenuPrioridad,
         setMenuUrgencia,
-        setMenuFrecuencia,
         setMenuFecha,
         setMenuImportancia,
 

@@ -4,9 +4,10 @@
  * Separado para mantener ModalCreacionRapida dentro del límite de líneas.
  */
 
-import {Calendar, Flag, Layers, Zap, Star, Repeat, Paperclip, Loader2} from 'lucide-react';
+import {Calendar, Flag, Layers, Zap, Star, Paperclip, Loader2} from 'lucide-react';
 import {Boton} from '../../ui';
-import type {Proyecto} from '../../../types/dashboard';
+import {SelectorFrecuenciaPill} from '../../shared/SelectorFrecuenciaPill';
+import type {FrecuenciaHabito, Proyecto} from '../../../types/dashboard';
 import type {EstadoMenu, EstadoOpciones} from '../../../hooks/dashboard/useModalCreacionRapida';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../../utils/constantes';
 
@@ -23,14 +24,16 @@ interface OpcionesCreacionRapidaProps {
     setMenuFecha: React.Dispatch<React.SetStateAction<EstadoMenu>>;
     setMenuPrioridad: React.Dispatch<React.SetStateAction<EstadoMenu>>;
     setMenuUrgencia: React.Dispatch<React.SetStateAction<EstadoMenu>>;
-    setMenuFrecuencia: React.Dispatch<React.SetStateAction<EstadoMenu>>;
     setMenuImportancia: React.Dispatch<React.SetStateAction<EstadoMenu>>;
+    frecuencia: FrecuenciaHabito;
+    onCambiarFrecuencia: (frecuencia: FrecuenciaHabito) => void;
 }
 
 export function OpcionesCreacionRapida({
     tipo, opciones, proyectos, adjuntosCount, subiendo,
     obtenerEtiquetaFecha, abrirMenu, abrirSelectorArchivo,
-    setMenuProyecto, setMenuFecha, setMenuPrioridad, setMenuUrgencia, setMenuFrecuencia, setMenuImportancia
+    setMenuProyecto, setMenuFecha, setMenuPrioridad, setMenuUrgencia, setMenuImportancia,
+    frecuencia, onCambiarFrecuencia
 }: OpcionesCreacionRapidaProps): JSX.Element | null {
     if (tipo === 'tarea') {
         const proyectoSeleccionado = proyectos.find(p => p.id === opciones.proyectoId);
@@ -49,7 +52,8 @@ export function OpcionesCreacionRapida({
     if (tipo === 'habito') {
         return (
             <div className="creacionRapidaOpciones">
-                <Boton type="button" variante="opcion" soloIcono activo={!!opciones.frecuencia} onClick={e => abrirMenu(setMenuFrecuencia, e)} icono={<Repeat size={14} />} title={opciones.frecuencia ? opciones.frecuencia.charAt(0).toUpperCase() + opciones.frecuencia.slice(1) : 'Diario'} />
+                {/* Mismo selector de frecuencia que en propiedadesCompactas (configuraciones) */}
+                <SelectorFrecuenciaPill frecuencia={frecuencia} onChange={onCambiarFrecuencia} usarPortal />
                 <Boton type="button" variante="opcion" soloIcono activo={!!opciones.importancia} onClick={e => abrirMenu(setMenuImportancia, e)} icono={<Star size={14} />} title={opciones.importancia ? `Importancia ${opciones.importancia}` : 'Importancia Media'} />
             </div>
         );

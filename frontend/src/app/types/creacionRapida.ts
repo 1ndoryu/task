@@ -4,7 +4,7 @@
  * Extraído de DashboardModales para cumplir DIP/ISP
  */
 
-import type {Adjunto, NivelImportancia, NivelPrioridad, NivelUrgencia, TipoFrecuencia} from './dashboard';
+import type {Adjunto, FrecuenciaHabito, NivelImportancia, NivelPrioridad, NivelUrgencia} from './dashboard';
 
 /*
  * Datos genéricos de creación rápida desde ModalCreacionRapida
@@ -21,7 +21,7 @@ export interface DatosCreacionRapida {
     adjuntos?: Adjunto[];
     grupoEjecucion?: string | null;
     /* Campos para hábitos */
-    frecuencia?: TipoFrecuencia;
+    frecuencia?: FrecuenciaHabito;
     importancia?: NivelImportancia;
 }
 

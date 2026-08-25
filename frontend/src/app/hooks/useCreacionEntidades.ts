@@ -61,7 +61,8 @@ export function useCreacionEntidades({dashboard, limites, acciones}: UseCreacion
                 nombre: texto,
                 importancia: (opciones.importancia || 'Media') as NivelImportancia,
                 tags: [],
-                frecuencia: {tipo: (opciones.frecuencia || 'diario') as TipoFrecuencia}
+                /* frecuencia completa (FrecuenciaHabito) elegida con el mismo selector de propiedadesCompactas */
+                frecuencia: opciones.frecuencia ?? {tipo: 'diario'}
             };
             await dashboard.crearHabito(datosHabito);
         } else if (tipo === 'proyecto') {

@@ -56,8 +56,9 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                         setMenuFecha={hook.setMenuFecha}
                         setMenuPrioridad={hook.setMenuPrioridad}
                         setMenuUrgencia={hook.setMenuUrgencia}
-                        setMenuFrecuencia={hook.setMenuFrecuencia}
                         setMenuImportancia={hook.setMenuImportancia}
+                        frecuencia={hook.opciones.frecuencia ?? {tipo: 'diario'}}
+                        onCambiarFrecuencia={hook.establecerFrecuencia}
                     />
 
                     <Input tipo="file" ref={hook.fileInputRef} claseAdicional="inputOculto" onChange={hook.manejarArchivoSeleccionado} />
@@ -71,21 +72,18 @@ export function ModalCreacionRapida({tipo, proyectos = [], valoresIniciales = {}
                 menuProyecto={hook.menuProyecto}
                 menuPrioridad={hook.menuPrioridad}
                 menuUrgencia={hook.menuUrgencia}
-                menuFrecuencia={hook.menuFrecuencia}
                 menuFecha={hook.menuFecha}
                 menuImportancia={hook.menuImportancia}
                 seleccionarTipo={hook.seleccionarTipo}
                 seleccionarProyecto={hook.seleccionarProyecto}
                 seleccionarPrioridad={hook.seleccionarPrioridad}
                 seleccionarUrgencia={hook.seleccionarUrgencia}
-                seleccionarFrecuencia={hook.seleccionarFrecuencia}
                 seleccionarFecha={hook.seleccionarFecha}
                 seleccionarImportancia={hook.seleccionarImportancia}
                 cerrarMenuTipo={hook.cerrarMenuTipo}
                 cerrarMenuProyecto={hook.cerrarMenuProyecto}
                 cerrarMenuPrioridad={hook.cerrarMenuPrioridad}
                 cerrarMenuUrgencia={hook.cerrarMenuUrgencia}
-                cerrarMenuFrecuencia={hook.cerrarMenuFrecuencia}
                 cerrarMenuFecha={hook.cerrarMenuFecha}
                 cerrarMenuImportancia={hook.cerrarMenuImportancia}
             />

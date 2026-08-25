@@ -4,7 +4,7 @@
  * Separado para mantener ModalCreacionRapida dentro del límite de líneas.
  */
 
-import {CheckSquare, Activity, Folder, Repeat} from 'lucide-react';
+import {CheckSquare, Activity, Folder} from 'lucide-react';
 import {MenuContextual} from '../../shared';
 import {SelectorFechaCalendario} from '../../shared/SelectorFechaCalendario';
 import type {Proyecto} from '../../../types/dashboard';
@@ -19,7 +19,6 @@ interface MenusCreacionRapidaProps {
     menuProyecto: EstadoMenu;
     menuPrioridad: EstadoMenu;
     menuUrgencia: EstadoMenu;
-    menuFrecuencia: EstadoMenu;
     menuFecha: EstadoMenu;
     menuImportancia: EstadoMenu;
 
@@ -27,7 +26,6 @@ interface MenusCreacionRapidaProps {
     seleccionarProyecto: (id: string) => void;
     seleccionarPrioridad: (id: string) => void;
     seleccionarUrgencia: (id: string) => void;
-    seleccionarFrecuencia: (id: string) => void;
     seleccionarFecha: (id: string) => void;
     seleccionarImportancia: (id: string) => void;
 
@@ -35,7 +33,6 @@ interface MenusCreacionRapidaProps {
     cerrarMenuProyecto: () => void;
     cerrarMenuPrioridad: () => void;
     cerrarMenuUrgencia: () => void;
-    cerrarMenuFrecuencia: () => void;
     cerrarMenuFecha: () => void;
     cerrarMenuImportancia: () => void;
 }
@@ -43,9 +40,9 @@ interface MenusCreacionRapidaProps {
 export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Element {
     const {
         proyectos, fechaActual,
-        menuTipo, menuProyecto, menuPrioridad, menuUrgencia, menuFrecuencia, menuFecha, menuImportancia,
-        seleccionarTipo, seleccionarProyecto, seleccionarPrioridad, seleccionarUrgencia, seleccionarFrecuencia, seleccionarFecha, seleccionarImportancia,
-        cerrarMenuTipo, cerrarMenuProyecto, cerrarMenuPrioridad, cerrarMenuUrgencia, cerrarMenuFrecuencia, cerrarMenuFecha, cerrarMenuImportancia,
+        menuTipo, menuProyecto, menuPrioridad, menuUrgencia, menuFecha, menuImportancia,
+        seleccionarTipo, seleccionarProyecto, seleccionarPrioridad, seleccionarUrgencia, seleccionarFecha, seleccionarImportancia,
+        cerrarMenuTipo, cerrarMenuProyecto, cerrarMenuPrioridad, cerrarMenuUrgencia, cerrarMenuFecha, cerrarMenuImportancia,
     } = props;
 
     return (
@@ -105,22 +102,6 @@ export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Elemen
                         posicionY={menuUrgencia.y}
                         onSeleccionar={seleccionarUrgencia}
                         onCerrar={cerrarMenuUrgencia}
-                    />
-                </div>
-            )}
-
-            {menuFrecuencia.visible && (
-                <div onClick={e => e.stopPropagation()}>
-                    <MenuContextual
-                        opciones={[
-                            {id: 'diario', etiqueta: 'Diario', icono: <Repeat size={12} />},
-                            {id: 'semanal', etiqueta: 'Semanal', icono: <Repeat size={12} />},
-                            {id: 'mensual', etiqueta: 'Mensual', icono: <Repeat size={12} />}
-                        ]}
-                        posicionX={menuFrecuencia.x}
-                        posicionY={menuFrecuencia.y}
-                        onSeleccionar={seleccionarFrecuencia}
-                        onCerrar={cerrarMenuFrecuencia}
                     />
                 </div>
             )}
