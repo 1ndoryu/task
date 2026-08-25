@@ -81,3 +81,37 @@ export const useGruposEjecucionStore = create<GruposEjecucionState & GruposEjecu
         }
     )
 );
+
+/* [21-08-2026] Sincronización entre pestañas del store de grupos.
+ * Los grupos no son una entidad del servidor: viven solo en localStorage
+ * (glory_grupos_ejecucion), así que crear/renombrar/eliminar en una pestaña
+ * nunca llegaba a las demás y un grupo borrado en una reaparecía en otra
+ * (gruposConocidos conservaba el nombre). El evento `storage` de localStorage
+ * es el canal nativo entre pestañas para esta clave: al recibirlo aplicamos
+ * el estado remoto (last-write-wins). El guard de igualdad corta el bucle
+ * (persist reescribe la misma clave, pero el evento solo se dispara si el
+ * valor cambió de verdad). */
+if (typeof window !== 'undefined') {
+    window.addEventListener('storage', evento => {
+        if (evento.key !== 'glory_grupos_ejecucion') return;
+        if (!evento.newValue) return;
+        try {
+            const remoto = JSON.parse(evento.newValue) as {
+                state?: {grupoPorPanel?: Record<string, string | null>; gruposConocidos?: string[]};
+            };
+            const estadoRemoto = remoto?.state;
+            if (!estadoRemoto) return;
+            const local = useGruposEjecucionStore.getState();
+            const igual =
+                JSON.stringify(local.grupoPorPanel) === JSON.stringify(estadoRemoto.grupoPorPanel ?? {}) &&
+                JSON.stringify(local.gruposConocidos) === JSON.stringify(estadoRemoto.gruposConocidos ?? []);
+            if (igual) return;
+            useGruposEjecucionStore.setState({
+                grupoPorPanel: estadoRemoto.grupoPorPanel ?? {},
+                gruposConocidos: estadoRemoto.gruposConocidos ?? []
+            });
+        } catch {
+            /* JSON inválido en la clave: ignorar (otra pestaña a medio escribir) */
+        }
+    });
+}

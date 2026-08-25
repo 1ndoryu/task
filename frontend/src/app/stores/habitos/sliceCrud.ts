@@ -69,27 +69,36 @@ export const crearSliceCrud: CrearSliceHabitos<HabitosSliceCrud> = (set, get) =>
             return nuevoHabito;
         },
 
+        /* [21-08-2026] editarHabito con semántica de fusión: solo toca los campos
+         * presentes en `datos` (undefined = no tocar). Antes sobreescribía TODOS
+         * los campos con `datos.*`, de modo que las llamadas parciales (cambiar
+         * importancia desde el menú contextual, asignar/desasignar grupo al
+         * renombrar/eliminar un grupo) borraban nombre/importancia/tags/frecuencia
+         * y el registro envenenado tumbaba la isla (importancia.toUpperCase()).
+         * Igual que aplicarDatosEdicion (tareas) y editarSubHabito: null quita,
+         * undefined no toca, el resto asigna. */
         editarHabito: (id, datos) => {
             set(
                 state => ({
                     habitos: state.habitos.map(h => {
                         if (h.id !== id) return h;
-                        const actualizado = {
+                        const actualizado: Habito = {
                             ...h,
-                            nombre: datos.nombre,
-                            importancia: datos.importancia,
-                            tags: datos.tags,
-                            frecuencia: datos.frecuencia,
-                            /* TAREA 4: Incluir ventana de oportunidad */
-                            ventanaOportunidad: datos.ventanaOportunidad,
-                            dependencias: datos.dependencias,
                             /* [014A-19] Timestamp per-entity */
                             updatedAt: Date.now()
                         };
-                        /* Solo tocar grupoEjecucion si viene explicitamente */
-                        if (datos.grupoEjecucion !== undefined) {
-                            (actualizado as typeof actualizado & {grupoEjecucion?: string | null}).grupoEjecucion = datos.grupoEjecucion;
-                        }
+                        if (datos.nombre !== undefined) actualizado.nombre = datos.nombre;
+                        if (datos.importancia !== undefined) actualizado.importancia = datos.importancia;
+                        if (datos.tags !== undefined) actualizado.tags = datos.tags;
+                        if (datos.frecuencia !== undefined) actualizado.frecuencia = datos.frecuencia;
+                        if (datos.descripcion !== undefined) actualizado.descripcion = datos.descripcion;
+                        if (datos.icono !== undefined) actualizado.icono = datos.icono;
+                        if (datos.colorIcono !== undefined) actualizado.colorIcono = datos.colorIcono;
+                        /* TAREA 4: Incluir ventana de oportunidad */
+                        if (datos.ventanaOportunidad !== undefined) actualizado.ventanaOportunidad = datos.ventanaOportunidad;
+                        if (datos.dependencias !== undefined) actualizado.dependencias = datos.dependencias;
+                        /* null = quitar grupo, valor = asignar, undefined = no tocar */
+                        if (datos.grupoEjecucion !== undefined) actualizado.grupoEjecucion = datos.grupoEjecucion;
                         return actualizado;
                     })
                 }),

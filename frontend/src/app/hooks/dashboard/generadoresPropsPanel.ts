@@ -10,7 +10,7 @@
 import type {DashboardCompletoRetorno} from '../useDashboardCompleto';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {useHabitosStore} from '../../stores/habitosStore';
-import type {DatosEdicionTarea, Tarea, Habito} from '../../types/dashboard';
+import type {DatosEdicionTarea, DatosNuevoHabito, Tarea, Habito} from '../../types/dashboard';
 
 /*
  * Props que se pasan a cada panel según su tipo
@@ -122,7 +122,12 @@ export function generarPropsPanelEjecucion(
         onPosponerHabito: dashboard.posponerHabito,
         onPosponerHabitoConTiempo: dashboard.posponerHabitoConTiempo,
         onPausarHabito: dashboard.pausarHabito,
-        onActualizarHabito: dashboard.editarHabito,
+        /* [21-08-2026] onActualizarHabito es un parche parcial (grupo, importancia,
+         * etc.) — va directo al store, que ya fusiona (undefined = no tocar).
+         * Antes pasaba por dashboard.editarHabito, que es el flujo del modal de
+         * edición: mostraba el toast 'Habito "undefined" actualizado' y su
+         * detección de cambios comparaba contra un objeto parcial. */
+        onActualizarHabito: (id: number, datos: Partial<Habito>) => useHabitosStore.getState().editarHabito(id, datos as DatosNuevoHabito),
         /* [207A-3] Subhábitos: store directo para toggle y eliminar */
         onToggleSubHabito: useHabitosStore.getState().toggleSubHabito,
         onEliminarSubHabito: useHabitosStore.getState().eliminarSubHabito,
@@ -175,7 +180,8 @@ export function generarPropsPanelFocoPrioritario(
         onPausarHabito: dashboard.pausarHabito,
         onMarcarDiaHabito: ctx.marcarDiaHabitoConSync,
         onDesmarcarDiaHabito: ctx.desmarcarDiaHabitoConSync,
-        onActualizarHabito: dashboard.editarHabito,
+        /* [21-08-2026] Parche parcial directo al store (ver generarPropsPanelEjecucion) */
+        onActualizarHabito: (id: number, datos: Partial<Habito>) => useHabitosStore.getState().editarHabito(id, datos as DatosNuevoHabito),
         onCambiarModoHabitos: ordenHabitos.cambiarModo,
         /* [217A-5] Subhábitos en panel de hábitos */
         onToggleSubHabito: useHabitosStore.getState().toggleSubHabito,
