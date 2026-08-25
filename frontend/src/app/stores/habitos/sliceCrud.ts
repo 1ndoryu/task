@@ -8,6 +8,7 @@
 import type {Habito, DatosNuevoHabito} from '../../types/dashboard';
 import {obtenerFechaHoy} from '../../utils/fecha';
 import {sanitizarSubhabitos} from './dedupSubhabitos';
+import {normalizarHabitos} from './normalizarHabitos';
 import {useHabitosHistorialStore} from '../habitosHistorialStore';
 import type {HabitosSliceCrud, CrearSliceHabitos} from './tipos';
 
@@ -19,11 +20,16 @@ export const crearSliceCrud: CrearSliceHabitos<HabitosSliceCrud> = (set, get) =>
             /* [044A-25] Sanitizar subhábitos al recibir datos del servidor (dedupSubhabitos.ts) */
             const sanitizados = sanitizarSubhabitos(habitos).habitos;
 
+            /* [H-F11-01] Normalizar campos obligatorios: cualquier entrada (server,
+             * WS remoto, restauración) con nombre/importancia faltantes se cura
+             * aquí para que el render nunca reciba un hábito parcial. */
+            const normalizados = normalizarHabitos(sanitizados).habitos;
+
             /* [247A-2] Preservar ordenEjecucion local si el servidor no lo envía.
              * Evita perder el orden manual del panel de Ejecución cuando el sync
              * descarga datos que no incluyen este campo. */
             const actuales = get().habitos;
-            const conOrdenPreservado = sanitizados.map(h => {
+            const conOrdenPreservado = normalizados.map(h => {
                 if (h.ordenEjecucion !== undefined) return h;
                 const existente = actuales.find(a => a.id === h.id);
                 if (existente?.ordenEjecucion !== undefined) {
@@ -105,13 +111,14 @@ export const crearSliceCrud: CrearSliceHabitos<HabitosSliceCrud> = (set, get) =>
         },
 
         restaurarHabito: habito => {
+            const normalizado = normalizarHabitos([habito]).habitos[0] ?? habito;
             set(
                 state => {
-                    const existe = state.habitos.some(h => h.id === habito.id);
+                    const existe = state.habitos.some(h => h.id === normalizado.id);
                     if (existe) {
-                        return {habitos: state.habitos.map(h => (h.id === habito.id ? habito : h))};
+                        return {habitos: state.habitos.map(h => (h.id === normalizado.id ? normalizado : h))};
                     }
-                    return {habitos: [...state.habitos, habito]};
+                    return {habitos: [...state.habitos, normalizado]};
                 },
                 false,
                 'restaurarHabito'
@@ -119,6 +126,7 @@ export const crearSliceCrud: CrearSliceHabitos<HabitosSliceCrud> = (set, get) =>
         },
 
         restaurarHabitos: habitos => {
-            set({habitos}, false, 'restaurarHabitos');
+            const normalizados = normalizarHabitos(habitos).habitos;
+            set({habitos: normalizados}, false, 'restaurarHabitos');
         }
     });

@@ -1,7 +1,10 @@
 /* Verificación end-to-end de los dominios de paridad (18-08-2026).
  * Recorre el ciclo de vida real de cada dominio contra el backend en vivo
  * y falla con código 1 si algún assert no se cumple. */
-const BASE = process.env.PARITY_BASE_URL || 'http://127.0.0.1:3000/api';
+/* [25-08-2026] Puerto 3001: el backend de este proyecto vive en 3001 (ver
+ * .freebuff/run.md — 3000 lo usan otros proyectos). El default 3000 daba
+ * "fetch failed" en cada run sin PARITY_BASE_URL. */
+const BASE = process.env.PARITY_BASE_URL || 'http://127.0.0.1:3001/api';
 const WS_URL = BASE.replace(/^http/, 'ws').replace(/\/api$/, '/api/realtime/ws');
 
 let pasados = 0;

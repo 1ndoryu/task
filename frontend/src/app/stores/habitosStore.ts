@@ -24,6 +24,7 @@ import {crearSliceHistorial} from './habitos/sliceHistorial';
 import {crearSliceOrden} from './habitos/sliceOrden';
 import {crearSliceSubHabitos} from './habitos/sliceSubHabitos';
 import {sanitizarSubhabitos, limpiarSubhabitosDuplicados} from './habitos/dedupSubhabitos';
+import {normalizarHabitos} from './habitos/normalizarHabitos';
 import type {HabitosStore} from './habitos/tipos';
 
 export type {HabitosStore} from './habitos/tipos';
@@ -54,13 +55,17 @@ export const useHabitosStore = create<HabitosStore>()(
                 onRehydrateStorage: () => state => {
                     if (!state) return;
                     const {habitos: habitosLimpiados, eliminados: totalEliminados} = sanitizarSubhabitos(state.habitos);
-                    if (totalEliminados > 0) {
+                    /* [H-F11-01] Curar registros malformados (falta nombre/importancia):
+                     * una pestaña con código a medio refactor puede persistir hábitos
+                     * parciales que reventaban FilaHabito al rehidratar. */
+                    const {habitos: habitosNormalizados, corregidos: totalNormalizados} = normalizarHabitos(habitosLimpiados);
+                    if (totalEliminados > 0 || totalNormalizados > 0) {
                         console.warn(
-                            `[HabitosStore] onRehydrate: ${totalEliminados} subhábitos eliminados (fantasma/duplicados)`
+                            `[HabitosStore] onRehydrate: ${totalEliminados} subhábitos eliminados (fantasma/duplicados), ${totalNormalizados} hábitos normalizados (campos faltantes)`
                         );
                         /* Forzar setState para que persist escriba los cambios a localStorage */
                         setTimeout(() => {
-                            useHabitosStore.setState({habitos: habitosLimpiados});
+                            useHabitosStore.setState({habitos: habitosNormalizados});
                         }, 0);
                     }
                 }
