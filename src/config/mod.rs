@@ -23,6 +23,36 @@ pub enum ConfigError {
     InvalidPoolBounds,
 }
 
+/// Claves API de los proveedores LLM, leídas con los MISMOS nombres de entorno
+/// que usaba el proyecto anterior (WordPress/Coolify): CEREBRAS_API_KEY,
+/// GROQ_API/GROQ_API_1..3 y DEEPSEEK_API/DEEPSEEK-API/DEEPSEEK_API_KEY.
+/// Varias claves por proveedor = rotación (se prueban en orden hasta que una
+/// responde), igual que en el LLMProviderService.php original.
+#[derive(Debug, Clone, Default)]
+pub struct AiProviderKeys {
+    pub cerebras: Vec<String>,
+    pub groq: Vec<String>,
+    pub deepseek: Vec<String>,
+}
+
+impl AiProviderKeys {
+    pub fn from_env() -> Self {
+        fn env_list(names: &[&str]) -> Vec<String> {
+            names
+                .iter()
+                .filter_map(|name| std::env::var(name).ok())
+                .map(|value| value.trim().to_string())
+                .filter(|value| !value.is_empty())
+                .collect()
+        }
+        Self {
+            cerebras: env_list(&["CEREBRAS_API_KEY"]),
+            groq: env_list(&["GROQ_API", "GROQ_API_1", "GROQ_API_2", "GROQ_API_3"]),
+            deepseek: env_list(&["DEEPSEEK_API", "DEEPSEEK-API", "DEEPSEEK_API_KEY"]),
+        }
+    }
+}
+
 /// Configuración de la aplicación cargada desde variables de entorno
 #[derive(Debug, Clone)]
 pub struct AppConfig {
@@ -43,6 +73,11 @@ pub struct AppConfig {
     pub trust_proxy_headers: bool,
     pub cookie_domain: Option<String>,
     pub frontend_dist: Option<String>,
+    /// Claves LLM de los proveedores IA (envs del proyecto anterior).
+    pub ai_provider_keys: AiProviderKeys,
+    /// Límites por usuario/hora de los endpoints proxy IA (contrato PHP: 80 chat, 60 nutrición).
+    pub ai_chat_rate_limit_per_hour: u32,
+    pub ai_nutrition_rate_limit_per_hour: u32,
 }
 
 impl AppConfig {
@@ -75,7 +110,9 @@ impl AppConfig {
             db_acquire_timeout_seconds: env_seconds("DB_ACQUIRE_TIMEOUT_SECONDS", 5)?,
             db_idle_timeout_seconds: env_seconds("DB_IDLE_TIMEOUT_SECONDS", 600)?,
             db_max_lifetime_seconds: env_seconds("DB_MAX_LIFETIME_SECONDS", 1800)?,
-            request_timeout_seconds: env_seconds("REQUEST_TIMEOUT_SECONDS", 30)?,
+            /* [AI] 60s de margen: los proxies LLM (chat/nutrición) pueden tardar
+             * más que el resto de rutas; antes 30s cortaba llamadas legítimas. */
+            request_timeout_seconds: env_seconds("REQUEST_TIMEOUT_SECONDS", 60)?,
             /* [H-B05-08] Límites operativos configurables (antes hardcodeados en
              * handlers/mod.rs): auth 10 req/min, semáforo crypto 4, body 6 MB. */
             auth_rate_limit_per_minute: env_positive("AUTH_RATE_LIMIT_PER_MINUTE", 10)?
@@ -109,6 +146,15 @@ impl AppConfig {
             frontend_dist: std::env::var("FRONTEND_DIST")
                 .ok()
                 .filter(|path| !path.trim().is_empty()),
+            ai_provider_keys: AiProviderKeys::from_env(),
+            ai_chat_rate_limit_per_hour: env_positive("AI_CHAT_RATE_LIMIT_PER_HOUR", 80)?
+                .try_into()
+                .map_err(|_| ConfigError::InvalidConfigValue("AI_CHAT_RATE_LIMIT_PER_HOUR".into()))?,
+            ai_nutrition_rate_limit_per_hour: env_positive("AI_NUTRITION_RATE_LIMIT_PER_HOUR", 60)?
+                .try_into()
+                .map_err(|_| {
+                    ConfigError::InvalidConfigValue("AI_NUTRITION_RATE_LIMIT_PER_HOUR".into())
+                })?,
         };
         if config.db_min_connections > config.db_max_connections {
             return Err(ConfigError::InvalidPoolBounds);

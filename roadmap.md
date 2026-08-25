@@ -21,7 +21,7 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 Quedan dos frentes, ninguno bloqueado por codigo:
 
-1. **Dominios con credenciales externas** (no implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro): IA/chatbot, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume).
+1. **Dominios con credenciales externas** (no implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro): el **chat IA y la nutrición ya funcionan** vía proxy `/api/ai/chat` + `/api/ai/nutricion` con las envs del proyecto anterior (`CEREBRAS_API_KEY`, `GROQ_API*`, `DEEPSEEK_API*`; ver `.env.example` y `run.md`) — quedan externos: agent actions (WhatsApp/research), Magnific, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume).
 2. **Puesta en produccion** (siguiente bloque grande): definir destino (Coolify), gate de exposicion — memoria del proceso, `X-Forwarded-For`, cookies detras del proxy, `docker build`/healthcheck en CI, ingress real; mantener snapshot OpenAPI + cliente Orval sincronizado (`openapi:export` + `codegen` sin drift).
 
 ## Pendientes por dependencia

@@ -2,6 +2,7 @@
 
 mod activity;
 pub mod admin;
+pub mod ai;
 pub mod auth;
 mod backup;
 mod collaboration;
@@ -62,6 +63,8 @@ impl utoipa::Modify for SecurityAddon {
     paths(
         health::health_check,
         health::readiness_check,
+        ai::ai_chat,
+        ai::ai_nutricion,
         collaboration::send_request,
         collaboration::get_team,
         collaboration::pending_count,
@@ -249,6 +252,11 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::admin::AdminPremiumRequest,
         crate::models::admin::AdminTrialRequest,
         crate::models::admin::AdminActionResponse,
+        ai::AiChatRequest,
+        ai::AiChatResponse,
+        ai::AiNutricionRequest,
+        ai::AiNutritionResponse,
+        crate::services::ai::AiMessage,
         crate::errors::ErrorResponse,
     )),
     modifiers(&SecurityAddon),
@@ -275,6 +283,15 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         )),
         auth_crypto_semaphore: std::sync::Arc::new(tokio::sync::Semaphore::new(
             config.auth_crypto_semaphore_permits,
+        )),
+        ai_provider: crate::services::LlmProviderService::new(config.ai_provider_keys),
+        ai_chat_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
+            config.ai_chat_rate_limit_per_hour,
+            std::time::Duration::from_secs(60 * 60),
+        )),
+        ai_nutrition_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
+            config.ai_nutrition_rate_limit_per_hour,
+            std::time::Duration::from_secs(60 * 60),
         )),
     };
 
@@ -375,6 +392,7 @@ fn api_routes(state: &AppState) -> Router<AppState> {
     ));
     Router::new()
         .merge(health::routes())
+        .merge(ai::routes())
         .merge(public_auth)
         .merge(auth::protected_routes())
         .merge(dashboard::routes())

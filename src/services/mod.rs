@@ -1,4 +1,5 @@
 mod activity;
+pub mod ai;
 mod auth;
 mod backup;
 mod collaboration;
@@ -19,6 +20,7 @@ mod timeline;
 pub mod crypto;
 
 pub use activity::ActivityService;
+pub use ai::LlmProviderService;
 pub use auth::AuthService;
 pub use backup::BackupService;
 pub use collaboration::CollaborationService;

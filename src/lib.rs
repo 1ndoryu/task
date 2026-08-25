@@ -18,6 +18,7 @@ use std::sync::Arc;
 use tokio::sync::Semaphore;
 
 use crate::services::FixedWindowLimiter;
+use crate::services::ai::LlmProviderService;
 
 /// Estado compartido de la aplicación — accesible desde handlers y middleware
 #[derive(Clone)]
@@ -30,4 +31,9 @@ pub struct AppState {
     pub cors_origins: Vec<HeaderValue>,
     pub auth_rate_limiter: Arc<FixedWindowLimiter>,
     pub auth_crypto_semaphore: Arc<Semaphore>,
+    /// [AI] Proxy LLM del admin (keys de las envs del proyecto anterior).
+    pub ai_provider: LlmProviderService,
+    /// [AI] Límites por usuario/hora de los endpoints proxy IA.
+    pub ai_chat_limiter: Arc<FixedWindowLimiter>,
+    pub ai_nutrition_limiter: Arc<FixedWindowLimiter>,
 }

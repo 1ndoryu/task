@@ -47,8 +47,10 @@ hex = "0.4"
 uuid = { version = "1", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 
-[dev-dependencies]
+# HTTP client (proxy LLM de /api/ai/*; antes solo dev-dependency)
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+[dev-dependencies]
 tokio-test = "0.4"
 
 [lints.clippy]

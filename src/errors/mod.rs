@@ -36,6 +36,9 @@ pub enum AppError {
 
     #[error("Error de validación: {0}")]
     Validation(String),
+
+    #[error("Error del proveedor externo: {0}")]
+    Upstream(String),
 }
 
 /// Estructura de respuesta de error expuesta en la API
@@ -88,6 +91,14 @@ impl IntoResponse for AppError {
             Self::Validation(msg) => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 "validation_error",
+                msg.clone(),
+            ),
+            /* [AI] Error del proveedor LLM externo (Cerebras/Groq/DeepSeek): el
+             * mensaje SÍ se expone porque es la información que el usuario
+             * necesita (key no configurada, 401, 429, modelo no soportado). */
+            Self::Upstream(msg) => (
+                StatusCode::BAD_GATEWAY,
+                "upstream_error",
                 msg.clone(),
             ),
         };

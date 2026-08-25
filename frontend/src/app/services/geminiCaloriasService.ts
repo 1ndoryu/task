@@ -8,7 +8,8 @@
  */
 
 import {enviarMensajeLLM, type ConfigProveedorIA} from './iaService';
-import {esUsuarioAdmin, obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
+import {apiFetch} from '../utils/apiClient';
+import {esUsuarioAdmin} from '../utils/dashboardRuntime';
 
 interface RespuestaCaloriasIA {
     calorias: number;
@@ -94,22 +95,15 @@ async function calcularMacrosIA(config: ConfigProveedorIA, descripcion: string):
     };
 }
 
+/* [AI] El backend Rust sirve /api/ai/nutricion (proxy con las envs del
+ * proyecto anterior). apiFetch añade X-CSRF-Token, /api y parsea errores
+ * {message} — el envoltorio {success, data} de WordPress ya no existe. */
 async function calcularMacrosBackend(config: ConfigProveedorIA, descripcion: string): Promise<RespuestaCaloriasIA> {
-    const respuesta = await fetch(`${obtenerApiUrlWP()}/ai/nutricion`, {
+    const datos = await apiFetch<RespuestaCaloriasIA>('/ai/nutricion', {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': obtenerNonceWP()
-        },
-        body: JSON.stringify({descripcion, provider: config.proveedor, model: config.modelo})
+        body: {descripcion, provider: config.proveedor, model: config.modelo}
     });
-
-    const datos = await respuesta.json().catch(() => null) as {success?: boolean; data?: RespuestaCaloriasIA; error?: {message?: string}} | null;
-    if (!respuesta.ok || !datos?.success || !datos.data) {
-        throw new Error(datos?.error?.message || `Error del servidor de nutrición (${respuesta.status})`);
-    }
-    return {...datos.data, descripcion: datos.data.descripcion || descripcion.charAt(0).toUpperCase() + descripcion.slice(1)};
+    return {...datos, descripcion: datos.descripcion || descripcion.charAt(0).toUpperCase() + descripcion.slice(1)};
 }
 
 /*

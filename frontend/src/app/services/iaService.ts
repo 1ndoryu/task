@@ -11,7 +11,8 @@
 import type {MensajeIA, AccionIA, ProveedorIA} from '../stores/iaStore';
 import type {EjecutoresTareasIA} from '../config/accionesIA';
 import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAcciones} from '../config/accionesIA';
-import {esUsuarioAdmin, obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
+import {apiFetch} from '../utils/apiClient';
+import {esUsuarioAdmin} from '../utils/dashboardRuntime';
 import {devWarn} from '../utils/devLog';
 
 const URLS_PROVIDER: Record<ProveedorIA, string> = {
@@ -153,33 +154,28 @@ export async function enviarMensajeLLM(
     };
 }
 
+/* [AI] El backend Rust ahora sirve /api/ai/chat (proxy con las envs del
+ * proyecto anterior). apiFetch añade X-CSRF-Token, /api y parsea errores
+ * {message} — el envoltorio {success, data} de WordPress ya no existe. */
 async function enviarMensajeLLMBackend(mensajes: MensajeAPI[], config: ConfigProveedorIA, signal?: AbortSignal, opciones: OpcionesLLM = {}): Promise<RespuestaLLM> {
-    const respuesta = await fetch(`${obtenerApiUrlWP()}/ai/chat`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': obtenerNonceWP()
-        },
-        body: JSON.stringify({
-            provider: config.proveedor,
-            model: config.modelo,
-            messages: mensajes,
-            temperature: opciones.temperature ?? 0.7,
-            maxTokens: limitarMaxTokens(opciones.maxTokens)
-        }),
-        signal
-    });
-
-    const datos = await respuesta.json().catch(() => {
-        /* [H-F11-07] Respuesta no-JSON: observable en DEV, no un fallo silencioso */
-        devWarn('iaService', 'La respuesta de la IA no es JSON válido', {status: respuesta.status});
-        return null;
-    }) as {success?: boolean; data?: RespuestaLLM; error?: {message?: string}} | null;
-    if (!respuesta.ok || !datos?.success || !datos.data) {
-        throw new Error(datos?.error?.message || `Error del servidor IA (${respuesta.status})`);
+    try {
+        return await apiFetch<RespuestaLLM>('/ai/chat', {
+            method: 'POST',
+            signal,
+            body: {
+                provider: config.proveedor,
+                model: config.modelo,
+                messages: mensajes,
+                temperature: opciones.temperature ?? 0.7,
+                maxTokens: limitarMaxTokens(opciones.maxTokens)
+            }
+        });
+    } catch (error) {
+        /* [H-F11-07] El error ya trae el mensaje del backend (ErrorApi); se
+         * re-lanza con el texto legible para la UI. */
+        devWarn('iaService', 'Falló la llamada IA por backend', error);
+        throw error instanceof Error ? error : new Error(`Error del servidor IA (${String(error)})`);
     }
-    return datos.data;
 }
 
 export function obtenerApiKeyParaProveedor(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string, apiKeyCerebras: string): string {

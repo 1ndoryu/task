@@ -58,6 +58,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "PROYECTO TASKS/.freebuff/st
 
 Variables del backend: `PORT=3001`, `CORS_ORIGINS=http://localhost:5174,http://127.0.0.1:5174`,
 `DATABASE_URL=postgres://postgres:root@127.0.0.1:5432/glory_backend_local`.
+
+> **Claves IA (25-08-2026)**: `/api/ai/chat` y `/api/ai/nutricion` (solo admin)
+> leen las MISMAS envs del proyecto anterior (WordPress/Coolify):
+> `CEREBRAS_API_KEY`, `GROQ_API`/`GROQ_API_1..3` (rotación), `DEEPSEEK_API`/
+> `DEEPSEEK-API`/`DEEPSEEK_API_KEY`. Copia tus claves al `.env` del repo (el
+> bloque ya está ahí, vacío). Sin claves los endpoints responden con un error
+> claro ("/ai/nutricion → 400: No hay API key configurada para cerebras...").
+> Los límites por usuario/hora son `AI_CHAT_RATE_LIMIT_PER_HOUR=80` y
+> `AI_NUTRITION_RATE_LIMIT_PER_HOUR=60` (contrato PHP).
 Variables del vite: `VITE_PORT=5174`, `VITE_HOST=127.0.0.1`,
 `VITE_API_PROXY_TARGET=http://127.0.0.1:3001`.
 
