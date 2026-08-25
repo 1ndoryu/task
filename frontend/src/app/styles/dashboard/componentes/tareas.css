@@ -146,19 +146,36 @@
 
 /* 
  * ACCIONES DE TAREA (eliminar, etc)
+ * Solo ocupan espacio al hacer hover: oculto colapsa a ancho 0 (min-width: 0 +
+ * overflow hidden) y un margen negativo cancela el gap del flex de .tareaItem,
+ * de modo que el texto ocupa todo el ancho mientras las acciones no se ven.
  */
 .tareaAccionesContenedor {
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--dashboard-transicionRapida);
-    /* Aseguramos que ocupe espacio aunque no se vea */
+    visibility: hidden;
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
+    margin-left: calc(-1 * var(--dashboard-espacioMd));
     display: flex;
     align-items: center;
+    transition: opacity var(--dashboard-transicionRapida),
+        width var(--dashboard-transicionRapida),
+        margin-left var(--dashboard-transicionRapida),
+        visibility 0s linear var(--dashboard-transicionRapida);
 }
 
 .tareaItem:hover .tareaAccionesContenedor {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    width: auto;
+    margin-left: 0;
+    transition: opacity var(--dashboard-transicionRapida),
+        width var(--dashboard-transicionRapida),
+        margin-left var(--dashboard-transicionRapida),
+        visibility 0s;
 }
 
 /* Modificamos .tareaAcciones para que herede o se comporte bien dentro del contenedor */
