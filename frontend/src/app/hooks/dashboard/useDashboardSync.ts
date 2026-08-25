@@ -231,7 +231,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                     setProyectos((prev: Proyecto[]) => prev.map(p => (p.id === datos.id ? {...p, ...datos} : p)));
                 }
             },
-            onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string; id?: number; titulo?: string}) => {
+            onNotaRemota: (_accion: 'crear' | 'editar' | 'eliminar' | 'toggle', datos: {contenido: string; id?: string; titulo?: string}) => {
                 devLog('[SyncRT] Nota remota recibida');
                 /* [014A-19] Registrar como remoto para absorción HTTP */
                 contadorCambiosRemotosRef.current++;

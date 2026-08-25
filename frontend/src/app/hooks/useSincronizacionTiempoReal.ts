@@ -36,7 +36,9 @@ type AccionSincronizacion = 'crear' | 'editar' | 'eliminar' | 'toggle';
 interface CambioLocal {
     entidad: EntidadSincronizable;
     accion: AccionSincronizacion;
-    id?: number;
+    /* [25-08-2026] Las entidades del backend Rust usan UUID (string); el código
+     * legacy tipaba number. Se admite ambos hasta migrar los tipos de entidad. */
+    id?: string | number;
     datos?: unknown;
     timestamp: number;
 }

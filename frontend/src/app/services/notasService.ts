@@ -30,8 +30,8 @@ interface ListadoRust {
 
 function mapearNota(n: NotaRust): Nota {
     return {
-        id: n.id as unknown as number,
-        carpetaId: (n.folderId ?? null) as unknown as number | null,
+        id: n.id,
+        carpetaId: n.folderId ?? null,
         titulo: n.title,
         contenido: n.content,
         fechaCreacion: n.createdAt,
@@ -41,7 +41,7 @@ function mapearNota(n: NotaRust): Nota {
 
 function mapearCarpeta(c: CarpetaRust): CarpetaNota {
     return {
-        id: c.id as unknown as number,
+        id: c.id,
         nombre: c.name,
         orden: 0,
         totalNotas: 0,
@@ -90,7 +90,7 @@ export const notasService = {
     /**
      * Actualiza una nota existente
      */
-    async actualizarNota(id: number, titulo: string, contenido: string): Promise<Nota> {
+    async actualizarNota(id: string, titulo: string, contenido: string): Promise<Nota> {
         const nota = await apiFetch<NotaRust>(`/notes/${id}`, {
             method: 'PUT',
             body: JSON.stringify({title: titulo, content: contenido})
@@ -101,7 +101,7 @@ export const notasService = {
     /**
      * Elimina una nota por ID
      */
-    async eliminarNota(id: number): Promise<boolean> {
+    async eliminarNota(id: string): Promise<boolean> {
         await apiFetch(`/notes/${id}`, {method: 'DELETE'});
         return true;
     },
@@ -109,10 +109,10 @@ export const notasService = {
     /**
      * Mueve una nota a otra carpeta
      */
-    async moverNota(notaId: number, carpetaId: number | null): Promise<boolean> {
+    async moverNota(notaId: string, carpetaId: string | null): Promise<boolean> {
         await apiFetch(`/notes/${notaId}/folder`, {
             method: 'PUT',
-            body: JSON.stringify({folderId: carpetaId !== null ? String(carpetaId) : null})
+            body: JSON.stringify({folderId: carpetaId})
         });
         return true;
     }
@@ -144,7 +144,7 @@ export const carpetasNotasService = {
     /**
      * Renombra una carpeta
      */
-    async renombrar(id: number, nombre: string): Promise<boolean> {
+    async renombrar(id: string, nombre: string): Promise<boolean> {
         await apiFetch(`/notes/folders/${id}`, {
             method: 'PUT',
             body: JSON.stringify({name: nombre})
@@ -155,7 +155,7 @@ export const carpetasNotasService = {
     /**
      * Elimina una carpeta (las notas se mueven a General)
      */
-    async eliminar(id: number): Promise<boolean> {
+    async eliminar(id: string): Promise<boolean> {
         await apiFetch(`/notes/folders/${id}`, {method: 'DELETE'});
         return true;
     }

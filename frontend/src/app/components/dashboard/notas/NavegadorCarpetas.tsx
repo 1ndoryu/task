@@ -12,10 +12,10 @@ import {useNavegadorCarpetas} from '../../../hooks/dashboard/useNavegadorCarpeta
 
 interface NavegadorCarpetasProps {
     carpetas: CarpetaNota[];
-    onSeleccionar: (id: number | null) => void;
+    onSeleccionar: (id: string | null) => void;
     onCrear: (nombre: string) => Promise<void>;
-    onRenombrar: (id: number, nombre: string) => Promise<void>;
-    onEliminar: (id: number) => Promise<void>;
+    onRenombrar: (id: string, nombre: string) => Promise<void>;
+    onEliminar: (id: string) => Promise<void>;
     cargando: boolean;
 }
 

@@ -1,6 +1,7 @@
+/* [25-08-2026] Los ids de notas y carpetas son UUID (backend Rust), no numéricos (WordPress). */
 export interface Nota {
-    id: number;
-    carpetaId: number | null;
+    id: string;
+    carpetaId: string | null;
     titulo: string;
     contenido: string;
     fechaCreacion: string;
@@ -8,7 +9,7 @@ export interface Nota {
 }
 
 export interface CarpetaNota {
-    id: number | null;
+    id: string | null;
     nombre: string;
     orden: number;
     totalNotas: number;
@@ -16,10 +17,10 @@ export interface CarpetaNota {
 }
 
 export interface NotaActiva {
-    id: number | null;
+    id: string | null;
     contenido: string;
     modificada: boolean;
-    carpetaId?: number | null;
+    carpetaId?: string | null;
 }
 
 export interface RespuestaListaNotas {

@@ -7,11 +7,11 @@ import {NotaItem} from './NotaItem';
 interface ListaNotasGuardadasProps {
     notas: Nota[];
     modo: 'grid' | 'lista';
-    notaActivaId?: number | null;
+    notaActivaId?: string | null;
     onSeleccionar: (nota: Nota) => void;
-    onEliminar: (id: number) => void;
+    onEliminar: (id: string) => void;
     carpetas?: CarpetaNota[];
-    onMoverNota?: (notaId: number, carpetaId: number | null) => Promise<boolean>;
+    onMoverNota?: (notaId: string, carpetaId: string | null) => Promise<boolean>;
 }
 
 export function ListaNotasGuardadas({notas, modo, notaActivaId = null, onSeleccionar, onEliminar, carpetas = [], onMoverNota}: ListaNotasGuardadasProps): JSX.Element {

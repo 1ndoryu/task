@@ -65,7 +65,7 @@ export function ModalNotasGuardadas({abierto, onCerrar, onSeleccionarNota}: Moda
     );
 
     const manejarEliminar = useCallback(
-        (notaId: number) => {
+        (notaId: string) => {
             eliminarNota(notaId);
         },
         [eliminarNota]

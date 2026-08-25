@@ -27,7 +27,7 @@ export interface UseModalNotasExpandidoProps {
 export interface UseModalNotasExpandidoReturn {
     /* Store de notas */
     notas: Nota[];
-    notaActiva: {id: number | null; contenido: string; modificada: boolean};
+    notaActiva: {id: string | null; contenido: string; modificada: boolean};
     cargando: boolean;
     guardando: boolean;
     error: string | null;
@@ -36,16 +36,16 @@ export interface UseModalNotasExpandidoReturn {
 
     /* Carpetas */
     carpetas: CarpetaNota[];
-    carpetaActiva: number | null | undefined;
+    carpetaActiva: string | null | undefined;
     vistaActual: 'carpetas' | 'notas';
     cargandoCarpetas: boolean;
-    seleccionarCarpeta: (id: number | null) => void;
+    seleccionarCarpeta: (id: string | null) => void;
     volverACarpetas: () => void;
     nombreCarpetaActiva: string;
     manejarCrearCarpeta: (nombre: string) => Promise<void>;
-    manejarRenombrarCarpeta: (id: number, nombre: string) => Promise<void>;
-    manejarEliminarCarpeta: (id: number) => Promise<void>;
-    moverNota: (notaId: number, carpetaId: number | null) => Promise<boolean>;
+    manejarRenombrarCarpeta: (id: string, nombre: string) => Promise<void>;
+    manejarEliminarCarpeta: (id: string) => Promise<void>;
+    moverNota: (notaId: string, carpetaId: string | null) => Promise<boolean>;
 
     /* Búsqueda */
     terminoBusqueda: string;
@@ -71,7 +71,7 @@ export interface UseModalNotasExpandidoReturn {
     tituloActivo: string;
 
     /* Acciones */
-    manejarEliminar: (notaId: number) => void;
+    manejarEliminar: (notaId: string) => void;
     manejarCrearNuevaNota: () => void;
     manejarCerrarSeguro: () => Promise<void>;
 
@@ -203,7 +203,7 @@ export function useModalNotasExpandido({abierto, onCerrar, panelId}: UseModalNot
     }, [abierto, total, cargarCarpetas]);
 
     const manejarEliminar = useCallback(
-        (notaId: number) => {
+        (notaId: string) => {
             eliminarNota(notaId);
         },
         [eliminarNota]
@@ -252,14 +252,14 @@ export function useModalNotasExpandido({abierto, onCerrar, panelId}: UseModalNot
     );
 
     const manejarRenombrarCarpeta = useCallback(
-        async (id: number, nombre: string) => {
+        async (id: string, nombre: string) => {
             await renombrarCarpeta(id, nombre);
         },
         [renombrarCarpeta]
     );
 
     const manejarEliminarCarpeta = useCallback(
-        async (id: number) => {
+        async (id: string) => {
             await eliminarCarpeta(id);
             await cargarNotas(true);
         },

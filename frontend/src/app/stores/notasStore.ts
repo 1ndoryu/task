@@ -31,12 +31,12 @@ interface NotasActions {
     buscarNotas: (termino: string) => Promise<Nota[]>;
     /* [263A-12] Acciones de nota activa parametrizadas por panelId */
     seleccionarNota: (panelId: string, nota: Nota) => void;
-    crearNuevaNota: (panelId: string, carpetaId?: number | null) => void;
+    crearNuevaNota: (panelId: string, carpetaId?: string | null) => void;
     actualizarContenidoNotaActiva: (panelId: string, contenido: string) => void;
     guardarNotaActiva: (panelId: string) => Promise<Nota | null>;
-    eliminarNota: (id: number) => Promise<boolean>;
+    eliminarNota: (id: string) => Promise<boolean>;
     limpiarError: () => void;
-    establecerNotaActivaDesdeId: (panelId: string, id: number | null) => void;
+    establecerNotaActivaDesdeId: (panelId: string, id: string | null) => void;
     restaurarNotaActivaGuardada: (panelId: string) => void;
 }
 

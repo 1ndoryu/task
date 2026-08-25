@@ -10,7 +10,7 @@ import {useNotasStore} from './notasStore';
 
 interface CarpetasNotasState {
     carpetas: CarpetaNota[];
-    carpetaActiva: number | null; /* null = General */
+    carpetaActiva: string | null; /* null = General */
     cargando: boolean;
     error: string | null;
     vistaActual: 'carpetas' | 'notas';
@@ -19,10 +19,10 @@ interface CarpetasNotasState {
 interface CarpetasNotasActions {
     cargarCarpetas: () => Promise<void>;
     crearCarpeta: (nombre: string) => Promise<CarpetaNota | null>;
-    renombrarCarpeta: (id: number, nombre: string) => Promise<boolean>;
-    eliminarCarpeta: (id: number) => Promise<boolean>;
-    seleccionarCarpeta: (id: number | null) => void;
-    moverNota: (notaId: number, carpetaId: number | null) => Promise<boolean>;
+    renombrarCarpeta: (id: string, nombre: string) => Promise<boolean>;
+    eliminarCarpeta: (id: string) => Promise<boolean>;
+    seleccionarCarpeta: (id: string | null) => void;
+    moverNota: (notaId: string, carpetaId: string | null) => Promise<boolean>;
     setVistaActual: (vista: 'carpetas' | 'notas') => void;
     volverACarpetas: () => void;
     obtenerNombreCarpetaActiva: () => string;
@@ -90,7 +90,7 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
         }
     },
 
-    renombrarCarpeta: async (id: number, nombre: string) => {
+    renombrarCarpeta: async (id: string, nombre: string) => {
         try {
             await carpetasNotasService.renombrar(id, nombre);
             set(state => ({
@@ -104,7 +104,7 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
         }
     },
 
-    eliminarCarpeta: async (id: number) => {
+    eliminarCarpeta: async (id: string) => {
         const {carpetaActiva} = get();
 
         try {
@@ -126,11 +126,11 @@ export const useCarpetasNotasStore = create<CarpetasNotasStore>((set, get) => ({
         }
     },
 
-    seleccionarCarpeta: (id: number | null) => {
+    seleccionarCarpeta: (id: string | null) => {
         set({carpetaActiva: id, vistaActual: 'notas'});
     },
 
-    moverNota: async (notaId: number, carpetaId: number | null) => {
+    moverNota: async (notaId: string, carpetaId: string | null) => {
         try {
             await notasService.moverNota(notaId, carpetaId);
 

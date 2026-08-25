@@ -9,14 +9,14 @@ import type {CarpetaNota} from '../../types/notas';
 
 interface UseNavegadorCarpetasParams {
     onCrear: (nombre: string) => Promise<void>;
-    onRenombrar: (id: number, nombre: string) => Promise<void>;
-    onEliminar: (id: number) => Promise<void>;
+    onRenombrar: (id: string, nombre: string) => Promise<void>;
+    onEliminar: (id: string) => Promise<void>;
 }
 
 export function useNavegadorCarpetas({onCrear, onRenombrar, onEliminar}: UseNavegadorCarpetasParams) {
     const [creando, setCreando] = useState(false);
     const [nombreNueva, setNombreNueva] = useState('');
-    const [editandoId, setEditandoId] = useState<number | null>(null);
+    const [editandoId, setEditandoId] = useState<string | null>(null);
     const [nombreEditando, setNombreEditando] = useState('');
 
     /* Crear nueva carpeta y resetear formulario */
@@ -52,7 +52,7 @@ export function useNavegadorCarpetas({onCrear, onRenombrar, onEliminar}: UseNave
 
     /* Eliminar carpeta con confirmación */
     const manejarEliminar = useCallback(
-        async (id: number) => {
+        async (id: string) => {
             if (!confirm('¿Eliminar carpeta? Las notas se moverán a General.')) return;
             await onEliminar(id);
         },

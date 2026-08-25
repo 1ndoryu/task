@@ -11,9 +11,9 @@ interface NotaItemProps {
     nota: Nota;
     activa: boolean;
     onSeleccionar: (nota: Nota) => void;
-    onEliminar: (id: number) => void;
+    onEliminar: (id: string) => void;
     carpetas: CarpetaNota[];
-    onMoverNota?: (notaId: number, carpetaId: number | null) => Promise<boolean>;
+    onMoverNota?: (notaId: string, carpetaId: string | null) => Promise<boolean>;
 }
 
 export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onMoverNota}: NotaItemProps): JSX.Element {
@@ -42,8 +42,9 @@ export function NotaItem({nota, activa, onSeleccionar, onEliminar, carpetas, onM
             if (opcionId === 'eliminar') {
                 onEliminar(nota.id);
             } else if (opcionId.startsWith('mover-')) {
+                /* [25-08-2026] Los ids de carpeta son UUID; se pasan como string, sin parseInt. */
                 const carpetaIdStr = opcionId.replace('mover-', '');
-                const carpetaId = carpetaIdStr === 'general' ? null : parseInt(carpetaIdStr);
+                const carpetaId = carpetaIdStr === 'general' ? null : carpetaIdStr;
                 onMoverNota?.(nota.id, carpetaId);
             }
         },

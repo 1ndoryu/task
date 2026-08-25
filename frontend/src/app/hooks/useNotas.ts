@@ -34,7 +34,7 @@ interface UseNotasReturn {
     estado: EstadoNotas;
     cargarNotas: () => Promise<void>;
     guardarNotaActiva: () => Promise<Nota | null>;
-    eliminarNota: (id: number) => Promise<boolean>;
+    eliminarNota: (id: string) => Promise<boolean>;
     buscarNotas: (termino: string) => Promise<Nota[]>;
     cargarMas: () => Promise<void>;
     limpiarError: () => void;
@@ -80,7 +80,7 @@ export function useNotas(): UseNotasReturn {
     const crearNuevaNota = useCallback(() => crearNuevaNotaStore(PANEL_SCRATCHPAD), [crearNuevaNotaStore]);
     const actualizarContenidoNotaActiva = useCallback((c: string) => actualizarContenidoNotaActivaStore(PANEL_SCRATCHPAD, c), [actualizarContenidoNotaActivaStore]);
     const guardarNotaActiva = useCallback(() => guardarNotaActivaStore(PANEL_SCRATCHPAD), [guardarNotaActivaStore]);
-    const establecerNotaActivaDesdeId = useCallback((id: number | null) => establecerNotaActivaDesdeIdStore(PANEL_SCRATCHPAD, id), [establecerNotaActivaDesdeIdStore]);
+    const establecerNotaActivaDesdeId = useCallback((id: string | null) => establecerNotaActivaDesdeIdStore(PANEL_SCRATCHPAD, id), [establecerNotaActivaDesdeIdStore]);
     const restaurarNotaActivaGuardada = useCallback(() => restaurarNotaActivaGuardadaStore(PANEL_SCRATCHPAD), [restaurarNotaActivaGuardadaStore]);
 
     /* Refs para control de efectos (migrados del hook original) */
@@ -96,7 +96,7 @@ export function useNotas(): UseNotasReturn {
     /* 2. Escuchar cambios de nota activa en otras instancias/ventanas */
     useEffect(() => {
         const manejarNotaActiva = (evento: Event) => {
-            const detalle = (evento as CustomEvent<{id: number | null}>).detail;
+            const detalle = (evento as CustomEvent<{id: string | null}>).detail;
             if (detalle !== undefined) {
                 establecerNotaActivaDesdeId(detalle.id);
             }
