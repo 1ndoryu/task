@@ -140,7 +140,7 @@ export function PanelRecordatorios({renderHandleArrastre, handleMinimizar}: Pane
             {/* Overlay enfoque para imágenes */}
             {recordatorioActual && (
                 <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo={recordatorioActual.texto || 'Recordatorio'}>
-                    {recordatorioActual.adjuntos.length > 0 && (
+                    {(recordatorioActual.adjuntos?.length ?? 0) > 0 && (
                         <div className="recordatoriosEnfoqueImagenes">
                             {recordatorioActual.adjuntos.map((adj, i) => (
                                 <img key={adj.id ?? i} src={adj.url} alt={adj.nombre} />

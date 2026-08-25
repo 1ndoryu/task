@@ -55,7 +55,9 @@ export const useRecordatoriosStore = create<RecordatoriosStore>()(
                 const nuevo: Recordatorio = {
                     id: generarId(),
                     texto: datos.texto,
-                    adjuntos: datos.adjuntos,
+                    /* [21-08-2026] adjuntos siempre array: un caller sin adjuntos no
+                     * debe dejar el campo undefined (rompía .length en el render). */
+                    adjuntos: datos.adjuntos ?? [],
                     fechaCreacion: Date.now()
                 };
                 set(state => {
@@ -71,7 +73,7 @@ export const useRecordatoriosStore = create<RecordatoriosStore>()(
                 const nuevos = lista.map(datos => ({
                     id: generarId(),
                     texto: datos.texto,
-                    adjuntos: datos.adjuntos,
+                    adjuntos: datos.adjuntos ?? [],
                     fechaCreacion: Date.now()
                 }));
                 set(state => {
@@ -139,7 +141,27 @@ export const useRecordatoriosStore = create<RecordatoriosStore>()(
                 }
             }
         }),
-        {name: 'glory-recordatorios'}
+        {
+            name: 'glory-recordatorios',
+            /* [21-08-2026] Curar registros legacy persistidos sin el campo adjuntos
+             * (p. ej. id "r1" de otra versión): PanelRecordatorios y
+             * ModalRecordatoriosGuardados hacían .length sobre undefined y
+             * tumbaban la isla al renderizar. Igual patrón que normalizarHabitos. */
+            onRehydrateStorage: () => state => {
+                if (!state) return;
+                const hayIncompletos = (state.recordatorios || []).some(r => !Array.isArray(r.adjuntos));
+                if (!hayIncompletos) return;
+                const normalizados = (state.recordatorios || []).map(r => ({
+                    ...r,
+                    adjuntos: Array.isArray(r.adjuntos) ? r.adjuntos : []
+                }));
+                console.warn('[RecordatoriosStore] onRehydrate: recordatorios sin adjuntos normalizados');
+                /* Forzar setState para que persist reescriba localStorage */
+                setTimeout(() => {
+                    useRecordatoriosStore.setState({recordatorios: normalizados});
+                }, 0);
+            }
+        }
     )
 );
 

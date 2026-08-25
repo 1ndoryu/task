@@ -57,25 +57,25 @@ export function ModalRecordatoriosGuardados({abierto, onCerrar, onSeleccionar}: 
                                 </Boton>
                                 <div className="modalNotasItemContenido">
                                     {/* Imágenes como preview si las hay */}
-                                    {r.adjuntos.length > 0 && (
+                                    {(r.adjuntos?.length ?? 0) > 0 && (
                                         <div className="recordatorioCardImagenes">
                                             {r.adjuntos.slice(0, 3).map((adj, i) => (
                                                 <div key={adj.id ?? i} className="recordatorioCardImagen">
                                                     <img src={adj.thumbnailUrl || adj.url} alt={adj.nombre} />
                                                 </div>
                                             ))}
-                                            {r.adjuntos.length > 3 && (
+                                            {(r.adjuntos?.length ?? 0) > 3 && (
                                                 <div className="recordatorioCardImagenMas">
-                                                    +{r.adjuntos.length - 3}
+                                                    +{(r.adjuntos?.length ?? 0) - 3}
                                                 </div>
                                             )}
                                         </div>
                                     )}
                                     {/* Texto o indicador de imagen */}
                                     <div className="modalNotasItemTitulo">
-                                        {r.texto || (r.adjuntos.length > 0 ? `${r.adjuntos.length} imagen${r.adjuntos.length > 1 ? 'es' : ''}` : 'Sin contenido')}
+                                        {r.texto || ((r.adjuntos?.length ?? 0) > 0 ? `${r.adjuntos.length} imagen${r.adjuntos.length > 1 ? 'es' : ''}` : 'Sin contenido')}
                                     </div>
-                                    {r.texto && r.adjuntos.length > 0 && (
+                                    {r.texto && (r.adjuntos?.length ?? 0) > 0 && (
                                         <div className="modalNotasItemPreview">
                                             <Image size={10} /> {r.adjuntos.length} imagen{r.adjuntos.length > 1 ? 'es' : ''}
                                         </div>
