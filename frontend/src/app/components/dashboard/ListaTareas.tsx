@@ -8,11 +8,13 @@
  * composición (estado vacío, grupos, drag, modales y menú masivo).
  */
 
+import {useState} from 'react';
 import {Reorder} from 'framer-motion';
 import {CheckSquare} from 'lucide-react';
 import type {Tarea, GrupoTareas} from '../../types/dashboard';
 import {TareaItem} from './TareaItem';
 import {InputNuevaTarea} from './InputNuevaTarea';
+import {SubmenuNuevoInline} from './SubmenuNuevoInline';
 import {PanelConfiguracionTarea} from './PanelConfiguracionTarea';
 import {ModalMoverTarea} from './ModalMoverTarea';
 import {DashboardPanel} from '../shared/DashboardPanel';
@@ -40,7 +42,14 @@ export function ListaTareas(props: ListaTareasProps): JSX.Element {
     } = props;
 
     const habitos = useHabitosStore(state => state.habitos);
+
+    /* [25-08-2026] Submenu Tarea/Hábito del estado vacío: anclado al botón
+     * "+ Crear tarea" (coordenadas del rect), mismo componente que el "+" del
+     * header del panel. */
+    const [submenuVacio, setSubmenuVacio] = useState<{x: number; y: number} | null>(null);
+
     const {
+
         pendientes, completadas,
         estaSeleccionada, manejarSeleccionMultiple, manejarClickDerechoLista,
         modoSeleccionActivo, menuPosicion, ocultarMenu, limpiarSeleccion,
@@ -116,7 +125,46 @@ export function ListaTareas(props: ListaTareasProps): JSX.Element {
         <DashboardPanel id="lista-tareas" onContextMenu={manejarClickDerechoLista}>
             {/* Estado vacío cuando no hay tareas (ocultar en proyectos expandidos) */}
             {tareas.length === 0 && !ocultarPlaceholderVacio ? (
-                <EstadoVacio icono={<CheckSquare size={32} />} mensaje="No hay tareas pendientes" descripcion="Crea tu primera tarea para empezar" textoBoton="+ Crear tarea" onAccion={onAbrirModalCrear ?? (() => onCrearTarea?.({texto: 'Nueva tarea'}))} />
+                <>
+                    <EstadoVacio
+                        icono={<CheckSquare size={32} />}
+                        mensaje="No hay tareas pendientes"
+                        descripcion="Crea tu primera tarea para empezar"
+                        textoBoton="+ Crear tarea"
+                        onAccion={evento => {
+                            /* [25-08-2026] Mismo submenu Tarea/Hábito que el botón "+"
+                             * del header: si ambos callbacks existen, abrir el submenu
+                             * anclado al botón; si no, mantener el comportamiento previo. */
+                            if (onAbrirModalCrear && onAbrirModalCrearHabito) {
+                                if (evento) {
+                                    const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
+                                    setSubmenuVacio({x: rect.left, y: rect.bottom});
+                                }
+                            } else if (onAbrirModalCrear) {
+                                onAbrirModalCrear();
+                            } else {
+                                onCrearTarea?.({texto: 'Nueva tarea'});
+                            }
+                        }}
+                    />
+                    {submenuVacio && (
+                        <SubmenuNuevoInline
+                            direccion="abajo"
+                            claseAdicional="submenuNuevoInline--fijado"
+                            estiloPosicion={{left: submenuVacio.x, top: submenuVacio.y}}
+                            usarPortal={true}
+                            onSeleccionar={tipo => {
+                                setSubmenuVacio(null);
+                                if (tipo === 'tarea') {
+                                    onAbrirModalCrear?.();
+                                } else {
+                                    onAbrirModalCrearHabito?.();
+                                }
+                            }}
+                            onCerrar={() => setSubmenuVacio(null)}
+                        />
+                    )}
+                </>
             ) : tareas.length > 0 ? (
                 <>
                     {/* Renderizar grupos cuando las secciones están activas */}

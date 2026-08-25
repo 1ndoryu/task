@@ -16,8 +16,8 @@ interface EstadoVacioProps {
     descripcion?: string;
     /** Texto del botón de acción */
     textoBoton?: string;
-    /** Callback al hacer clic en el botón */
-    onAccion?: () => void;
+    /** Callback al hacer clic en el botón (recibe el evento para anclar menús al botón) */
+    onAccion?: (evento?: React.MouseEvent<HTMLButtonElement>) => void;
     /** Variante de estilo: normal o compacto */
     variante?: 'normal' | 'compacto';
 }

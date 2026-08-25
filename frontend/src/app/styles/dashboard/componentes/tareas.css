@@ -493,6 +493,10 @@
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
+    /* [25-08-2026] Font-family explícita: la variante portada a body (estado
+     * vacío) pierde la herencia de .dashboardContenedor y caía a Times New
+     * Roman (mismo caso documentado en modalSeleccionPropiedad/panelGruposFb). */
+    font-family: var(--dashboard-fuenteMonoespaciada);
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioMd);
@@ -518,6 +522,21 @@
     transform: none;
     margin-bottom: 0;
     margin-top: var(--dashboard-espacioXxs);
+}
+
+/* [25-08-2026] Variante fijada del estado vacío de tareas: se ancla a las
+ * coordenadas del botón "+ Crear tarea" (left/top van inline desde el rect);
+ * esta clase solo fija el modo de posicionamiento y neutraliza los valores
+ * de la base/--abajo que no aplican en fixed. */
+.submenuNuevoInline--fijado {
+    position: fixed;
+    bottom: auto;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    margin: 0;
+    z-index: 1000;
 }
 
 .submenuNuevoInline__opcion {
