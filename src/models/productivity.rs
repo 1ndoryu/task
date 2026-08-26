@@ -149,7 +149,16 @@ impl UpsertHabitRequest {
         let mut object = object_with_id(self.payload.clone(), legacy_id);
         object.insert("nombre".into(), Value::String(self.nombre.clone()));
         object.insert("importancia".into(), Value::String(self.importancia.clone()));
-        object.insert("frecuencia".into(), Value::String(self.frecuencia.clone()));
+        /* [26-08-2026] Conservar la frecuencia COMPLETA si el payload la trae en
+         * forma de objeto `{tipo, cadaDias?, diasSemana?, vecesAlMes?}`. Antes se
+         * sobrescribia con el string del tipo (`self.frecuencia`), descartando
+         * `cadaDias`/`diasSemana`/`vecesAlMes` y perdiendo el intervalo en el
+         * round-trip (plan-paridad-sync-export). El string del tipo solo se usa
+         * como fallback si el objeto no esta presente. */
+        let frecuencia_objeto = object.get("frecuencia").map_or(false, |v| matches!(v, Value::Object(_)));
+        if !frecuencia_objeto {
+            object.insert("frecuencia".into(), Value::String(self.frecuencia.clone()));
+        }
         object.insert("orden".into(), Value::from(self.orden));
         Value::Object(object)
     }
