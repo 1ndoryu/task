@@ -20,6 +20,9 @@ import type {DefinicionPlugin} from '../../types/plugins';
 interface ModalPluginsProps {
     abierto: boolean;
     pluginConfigInicial?: string | null;
+    /* [27-08-2026] La config se abrió directa (engranaje del panel EXP): al
+     * cerrarla se cierra todo el modal, no se vuelve a la lista. */
+    configDirecta?: boolean;
     onCerrar: () => void;
     onMostrarPanel?: (panelId: string) => void;
     onOcultarPanel?: (panelId: string) => void;
@@ -62,7 +65,7 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
     );
 }
 
-export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
+export function ModalPlugins({abierto, pluginConfigInicial = null, configDirecta = false, onCerrar, onMostrarPanel, onOcultarPanel}: ModalPluginsProps): JSX.Element | null {
     const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
     const togglePlugin = usePluginsStore(s => s.togglePlugin);
     const guardarConfiguracion = usePluginsStore(s => s.guardarConfiguracion);
@@ -144,16 +147,17 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
 
     /*
      * Lógica de cierre unificada:
-     * Si hay config abierta, volver a la lista.
-     * Si no, cerrar el modal.
+     * Si hay config abierta y NO es directa, volver a la lista.
+     * Si es directa (engranaje del panel), cerrar todo el modal.
+     * Si no hay config abierta, cerrar el modal.
      */
     const manejarCierreUnificado = useCallback(() => {
-        if (configAbierta) {
+        if (configAbierta && !configDirecta) {
             manejarCerrarConfig();
         } else {
             onCerrar();
         }
-    }, [configAbierta, manejarCerrarConfig, onCerrar]);
+    }, [configAbierta, configDirecta, manejarCerrarConfig, onCerrar]);
 
     const tituloModal = configAbierta ? `Configurar ${plugins.find(p => p.id === configAbierta)?.nombre ?? 'Plugin'}` : 'Plugins';
 
@@ -161,7 +165,7 @@ export function ModalPlugins({abierto, pluginConfigInicial = null, onCerrar, onM
 
     return (
         <Modal estaAbierto={abierto} onCerrar={manejarCierreUnificado} titulo={tituloModal} claseExtra="modalPlugins">
-            <div className="modalPluginsCuerpo">{ComponenteConfig ? <ComponenteConfig onCerrar={manejarCerrarConfig} /> : plugins.length === 0 ? <p className="modalPluginsVacio">No hay plugins disponibles.</p> : plugins.map(plugin => <FilaPlugin key={plugin.id} plugin={plugin} onToggle={manejarToggle} onAbrirConfig={manejarAbrirConfig} />)}</div>
+            <div className="modalPluginsCuerpo">{ComponenteConfig ? <ComponenteConfig onCerrar={configDirecta ? onCerrar : manejarCerrarConfig} /> : plugins.length === 0 ? <p className="modalPluginsVacio">No hay plugins disponibles.</p> : plugins.map(plugin => <FilaPlugin key={plugin.id} plugin={plugin} onToggle={manejarToggle} onAbrirConfig={manejarAbrirConfig} />)}</div>
         </Modal>
     );
 }

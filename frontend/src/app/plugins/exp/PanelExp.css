@@ -16,6 +16,12 @@
     margin-bottom: var(--dashboard-espacioXl, 1.5rem);
 }
 
+/* [27-08-2026] "Game" es un nombre propio: se muestra en mayúscula normal
+ * (el resto de paneles conserva su text-transform uppercase del sistema). */
+.panelExpFijo .seccionTitulo {
+    text-transform: none;
+}
+
 /* Cuerpo del panel: barras lado a lado con el padding estándar de panel. */
 .panelExpCuerpo {
     display: flex;

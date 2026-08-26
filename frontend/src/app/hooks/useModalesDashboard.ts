@@ -115,6 +115,9 @@ interface UseModalesDashboardReturn {
     cerrarModalFeedback: () => void;
     modalPluginsAbierto: boolean;
     pluginConfigInicial: string | null;
+    /* [27-08-2026] La config se abrió directa (engranaje del panel): al cerrarla
+     * se cierra TODO el modal, en vez de volver a la lista de plugins. */
+    pluginConfigDirecta: boolean;
     abrirModalPlugins: () => void;
     abrirModalPluginsConConfig: (pluginId: string) => void;
     cerrarModalPlugins: () => void;
@@ -190,6 +193,7 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     /* Plugins */
     const [modalPluginsAbierto, setModalPluginsAbierto] = useState(false);
     const [pluginConfigInicial, setPluginConfigInicial] = useState<string | null>(null);
+    const [pluginConfigDirecta, setPluginConfigDirecta] = useState(false);
 
     /* Handlers complejos (no cubiertos por useModalSimple) */
     const abrirModalNotificaciones = useCallback((evento: React.MouseEvent) => {
@@ -216,15 +220,18 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
     }, []);
     const abrirModalPlugins = useCallback(() => {
         setPluginConfigInicial(null);
+        setPluginConfigDirecta(false);
         setModalPluginsAbierto(true);
     }, []);
     const abrirModalPluginsConConfig = useCallback((pluginId: string) => {
         setPluginConfigInicial(pluginId);
+        setPluginConfigDirecta(true);
         setModalPluginsAbierto(true);
     }, []);
     const cerrarModalPlugins = useCallback(() => {
         setModalPluginsAbierto(false);
         setPluginConfigInicial(null);
+        setPluginConfigDirecta(false);
     }, []);
 
     return {
@@ -316,6 +323,7 @@ export function useModalesDashboard(): UseModalesDashboardReturn {
         cerrarModalFeedback: feedback.cerrar,
         modalPluginsAbierto,
         pluginConfigInicial,
+        pluginConfigDirecta,
         abrirModalPlugins,
         abrirModalPluginsConConfig,
         cerrarModalPlugins,

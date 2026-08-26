@@ -1,68 +1,163 @@
 /*
  * plugins/exp/ConfigExp.css
- * Estilos de la configuración del plugin EXP. Usa variables del sistema.
+ * Estilos de la configuración del plugin EXP. Sigue el lenguaje visual de la
+ * configuración de déficit calórico (secciones con título/nota, preview, pie
+ * con acciones) usando variables del sistema; el toggle replica el de
+ * activar/desactivar plugins y los ranges se estilizan custom.
  */
 
 .configExp {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espaciado-md, 12px);
+    gap: var(--dashboard-espacioLg, 16px);
     padding: 4px 0;
 }
 
-.configExpResumen {
+/* Resumen de estado (Vida / Nivel / EXP) — mismo patrón que el preview de TDEE. */
+.configExpPreview {
     display: flex;
-    gap: 14px;
+    align-items: center;
+    gap: var(--dashboard-espacioLg, 16px);
     padding: 8px 10px;
-    border-radius: 8px;
-    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.05));
-    font-size: var(--dashboard-fuenteSecundaria, 12px);
-    color: var(--dashboard-texto, #e8e8ea);
+    border-radius: var(--dashboard-radioSm, 4px);
+    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
 }
 
-.configExpResumen strong {
-    color: var(--dashboard-textoFuerte, #ffffff);
+.configExpPreview strong {
+    color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
-.configExpFila {
+/* Secciones — mismo patrón que configDeficitSeccion. */
+.configExpSeccion {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    font-size: var(--dashboard-fuenteSecundaria, 12px);
-    color: var(--dashboard-texto, #e8e8ea);
+    gap: var(--dashboard-espacioSm, 6px);
 }
 
-.configExpEtiqueta {
-    font-weight: 500;
+.configExpSeccionTitulo {
+    font-size: var(--dashboard-tamanoBase, 13px);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo, #e8e8ea);
+    margin: 0;
+}
+
+.configExpSeccionNota {
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
+    margin: 0;
+}
+
+.configExpCampo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMini, 3px);
+}
+
+.configExpLabel {
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
 }
 
 .configExpAyuda {
-    font-size: var(--dashboard-fuenteSecundaria, 11px);
-    color: var(--dashboard-textoSuave, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoApagado, #808080);
 }
 
-.configExpCheckbox {
+/* Fila con el toggle de dificultad automática. */
+.configExpFilaToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioSm, 6px);
+    padding-top: var(--dashboard-espacioMini, 3px);
+}
+
+/* Toggle switch — replica .modalPluginsToggle (activar/desactivar plugin). */
+.configExpToggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: var(--dashboard-espacioSmMd, 10px);
+    border: none;
+    background: var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.12));
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.configExpToggle--activo {
+    background: var(--dashboard-estadoExito, #4caf7d);
+}
+
+.configExpToggleIndicador {
+    position: absolute;
+    top: 2px;
+    left: 2px;
     width: 16px;
     height: 16px;
-    accent-color: var(--dashboard-acento, #7c9cff);
+    border-radius: 50%;
+    background: var(--dashboard-textoActivo, #e8e8ea);
+    transition: transform 0.2s ease;
 }
 
+.configExpToggle--activo .configExpToggleIndicador {
+    transform: translateX(16px);
+}
+
+/* Ranges custom — track fino con thumb circular en el acento del sistema. */
 .configExpRange {
+    -webkit-appearance: none;
+    appearance: none;
     width: 100%;
-    accent-color: var(--dashboard-acento, #7c9cff);
+    height: 4px;
+    border-radius: 999px;
+    background: var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.12));
+    outline: none;
+    cursor: pointer;
+}
+
+.configExpRange::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--dashboard-acento, #7c9cff);
+    border: 2px solid var(--dashboard-fondoSecundario, #1a1a1f);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.configExpRange::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--dashboard-acento, #7c9cff);
+    border: 2px solid var(--dashboard-fondoSecundario, #1a1a1f);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.configExpRange:focus-visible {
+    box-shadow: 0 0 0 2px var(--dashboard-acento, #7c9cff);
 }
 
 .configExpMultiplicadores {
     display: flex;
-    gap: 14px;
+    gap: var(--dashboard-espacioLg, 16px);
 }
 
-.configExpMultiplicadores .configExpFila {
+.configExpMultiplicadores .configExpCampo {
     flex: 1;
 }
 
+/* Pie de acciones — mismo patrón que configDeficitAcciones. */
 .configExpAcciones {
     display: flex;
     justify-content: flex-end;
-    margin-top: 4px;
+    gap: var(--dashboard-espacioSm, 6px);
+    padding-top: var(--dashboard-espacioSm, 6px);
+    border-top: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
 }

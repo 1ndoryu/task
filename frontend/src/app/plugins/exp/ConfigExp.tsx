@@ -3,31 +3,39 @@
  * Configuración del plugin EXP (se abre desde ModalPlugins / SeccionConfigPlugins
  * cuando el plugin está activo). Ajusta: dificultad automática, vida máxima,
  * penalización por incumplimiento, ventana de incumplimientos y multiplicadores.
+ *
+ * [27-08-2026] Reestructurado con el mismo lenguaje visual que la configuración
+ * de déficit calórico (secciones con título + nota, preview, pie con acciones):
+ * el checkbox pasó a un toggle switch (igual que el de activar plugins) y los
+ * rangos se estilizan custom en vez del input nativo con accent-color.
  */
 
 import {useExpStore} from './store';
 import {Boton} from '../../components/ui/Boton';
-function FilaConfig({etiqueta, ayuda, children}: {etiqueta: string; ayuda?: string; children: React.ReactNode}): JSX.Element {
-    return (
-        <label className="configExpFila">
-            <span className="configExpEtiqueta">{etiqueta}</span>
-            {ayuda && <span className="configExpAyuda">{ayuda}</span>}
-            {children}
-        </label>
-    );
-}
 
-function SelectorMultiplicador({valor, onChange}: {valor: number; onChange: (v: number) => void}): JSX.Element {
+function FilaRange({etiqueta, ayuda, min, max, step, valor, onChange}: {
+    etiqueta: string;
+    ayuda?: string;
+    min: number;
+    max: number;
+    step: number;
+    valor: number;
+    onChange: (v: number) => void;
+}): JSX.Element {
     return (
-        <input
-            type="range"
-            min={0.5}
-            max={3}
-            step={0.25}
-            className="configExpRange"
-            value={valor}
-            onChange={e => onChange(Number(e.target.value))}
-        />
+        <label className="configExpCampo">
+            <span className="configExpLabel">{etiqueta}</span>
+            {ayuda && <span className="configExpAyuda">{ayuda}</span>}
+            <input
+                type="range"
+                min={min}
+                max={max}
+                step={step}
+                className="configExpRange"
+                value={valor}
+                onChange={e => onChange(Number(e.target.value))}
+            />
+        </label>
     );
 }
 
@@ -40,64 +48,67 @@ export function ConfigExp({onCerrar}: {onCerrar: () => void}): JSX.Element {
 
     return (
         <div className="configExp">
-            <div className="configExpResumen">
+            <div className="configExpPreview">
                 <span>Vida: <strong>{Math.round(vida)} / {config.vidaMaxima}</strong></span>
                 <span>Nivel: <strong>{nivel}</strong></span>
                 <span>EXP: <strong>{exp}</strong></span>
             </div>
 
-            <FilaConfig etiqueta="Dificultad automática por IA" ayuda="Estima la dificultad de hábitos/tareas nuevos sin pedirla manualmente. Solo actúa con el plugin activo.">
-                <input
-                    type="checkbox"
-                    className="configExpCheckbox"
-                    checked={config.dificultadAutomatica}
-                    onChange={e => actualizarConfig({dificultadAutomatica: e.target.checked})}
-                />
-            </FilaConfig>
+            <div className="configExpSeccion">
+                <h4 className="configExpSeccionTitulo">Dificultad automática</h4>
+                <p className="configExpSeccionNota">Estima la dificultad de hábitos/tareas nuevos sin pedirla manualmente. Solo actúa con el plugin activo.</p>
+                <div className="configExpFilaToggle">
+                    <span className="configExpLabel">Dificultad automática por IA</span>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={config.dificultadAutomatica}
+                        className={`configExpToggle ${config.dificultadAutomatica ? 'configExpToggle--activo' : ''}`}
+                        onClick={() => actualizarConfig({dificultadAutomatica: !config.dificultadAutomatica})}
+                    >
+                        <span className="configExpToggleIndicador" />
+                    </button>
+                </div>
+            </div>
 
-            <FilaConfig etiqueta={`Vida máxima: ${config.vidaMaxima}`} ayuda="La vida empieza en este valor y baja por incumplimientos.">
-                <input
-                    type="range"
+            <div className="configExpSeccion">
+                <h4 className="configExpSeccionTitulo">Vida</h4>
+                <FilaRange
+                    etiqueta={`Vida máxima: ${config.vidaMaxima}`}
+                    ayuda="La vida empieza en este valor y baja por incumplimientos."
                     min={50}
                     max={200}
                     step={10}
-                    className="configExpRange"
-                    value={config.vidaMaxima}
-                    onChange={e => actualizarConfig({vidaMaxima: Number(e.target.value)})}
+                    valor={config.vidaMaxima}
+                    onChange={v => actualizarConfig({vidaMaxima: v})}
                 />
-            </FilaConfig>
-
-            <FilaConfig etiqueta={`Penalización por incumplimiento: ×${config.penalizacionFraccion}`} ayuda="Fracción de (dificultad × importancia) que resta cada día no cumplido.">
-                <input
-                    type="range"
+                <FilaRange
+                    etiqueta={`Penalización por incumplimiento: ×${config.penalizacionFraccion}`}
+                    ayuda="Fracción de (dificultad × importancia) que resta cada día no cumplido."
                     min={0.1}
                     max={1}
                     step={0.1}
-                    className="configExpRange"
-                    value={config.penalizacionFraccion}
-                    onChange={e => actualizarConfig({penalizacionFraccion: Number(e.target.value)})}
+                    valor={config.penalizacionFraccion}
+                    onChange={v => actualizarConfig({penalizacionFraccion: v})}
                 />
-            </FilaConfig>
-
-            <FilaConfig etiqueta={`Ventana de incumplimientos: ${config.ventanaIncumplimientos} días`} ayuda="Cuántos días hacia atrás cuentan para la vida.">
-                <input
-                    type="range"
+                <FilaRange
+                    etiqueta={`Ventana de incumplimientos: ${config.ventanaIncumplimientos} días`}
+                    ayuda="Cuántos días hacia atrás cuentan para la vida."
                     min={3}
                     max={30}
                     step={1}
-                    className="configExpRange"
-                    value={config.ventanaIncumplimientos}
-                    onChange={e => actualizarConfig({ventanaIncumplimientos: Number(e.target.value)})}
+                    valor={config.ventanaIncumplimientos}
+                    onChange={v => actualizarConfig({ventanaIncumplimientos: v})}
                 />
-            </FilaConfig>
+            </div>
 
-            <div className="configExpMultiplicadores">
-                <FilaConfig etiqueta={`Multiplicador hábito: ×${config.multHabito}`}>
-                    <SelectorMultiplicador valor={config.multHabito} onChange={multHabito => actualizarConfig({multHabito})} />
-                </FilaConfig>
-                <FilaConfig etiqueta={`Multiplicador tarea: ×${config.multTarea}`}>
-                    <SelectorMultiplicador valor={config.multTarea} onChange={multTarea => actualizarConfig({multTarea})} />
-                </FilaConfig>
+            <div className="configExpSeccion">
+                <h4 className="configExpSeccionTitulo">Multiplicadores</h4>
+                <p className="configExpSeccionNota">Cuánta EXP da cada tipo de entidad: dificultad × importancia × multiplicador.</p>
+                <div className="configExpMultiplicadores">
+                    <FilaRange etiqueta={`Hábito: ×${config.multHabito}`} min={0.5} max={3} step={0.25} valor={config.multHabito} onChange={v => actualizarConfig({multHabito: v})} />
+                    <FilaRange etiqueta={`Tarea: ×${config.multTarea}`} min={0.5} max={3} step={0.25} valor={config.multTarea} onChange={v => actualizarConfig({multTarea: v})} />
+                </div>
             </div>
 
             <div className="configExpAcciones">
