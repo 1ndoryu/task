@@ -7,7 +7,7 @@
  * - Importancia (hábitos) → Star icon
  * - Urgencia → Zap icon
  * - Colores siempre vía CSS variables, nunca hex hardcoded */
-import {Flag, Star, Zap, X} from 'lucide-react';
+import {Flag, Gauge, Star, Zap, X} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia, NivelImportancia} from '../types/dashboard';
 
 /* Colores (CSS variables) */
@@ -64,7 +64,50 @@ export const ETIQUETAS_URGENCIA = {
     chill: 'Chill'
 } as const satisfies Record<NivelUrgencia, string>;
 
-/* Generadores de opciones para menú contextual */
+/* Dificultad: misma escala de 5 niveles como importancia (Muy Baja..Muy Alta),
+ * reutiliza la misma paleta de colores para que sea coherente visualmente.
+ * [28-08-2026] Se muestra en la configuración de tarea junto a la importancia.
+ * Dificultad es tipo (string) del plugin EXP, no un NivelImportancia, así que
+ * el Record es una extensión de los mismos 5 valores. */
+export type DificultadNivel = 'Muy Baja' | 'Baja' | 'Media' | 'Alta' | 'Muy Alta';
+
+export const COLORES_DIFICULTAD: Record<DificultadNivel, string> = {
+    'Muy Alta': 'var(--dashboard-estadoMuyAlta)',
+    'Alta': 'var(--dashboard-estadoAlta)',
+    'Media': 'var(--dashboard-estadoMedia)',
+    'Baja': 'var(--dashboard-estadoBaja)',
+    'Muy Baja': 'var(--dashboard-estadoMuyBaja)'
+};
+
+export const ETIQUETAS_DIFICULTAD: Record<DificultadNivel, string> = {
+    'Muy Alta': 'Muy Alta',
+    'Alta': 'Alta',
+    'Media': 'Media',
+    'Baja': 'Baja',
+    'Muy Baja': 'Muy Baja'
+};
+
+export const NIVELES_DIFICULTAD: readonly DificultadNivel[] = ['Muy Alta', 'Alta', 'Media', 'Baja', 'Muy Baja'] as const;
+
+export function opcionesMenuDificultad(size = 12): OpcionMenuNivel[] {
+    return [
+        {id: 'Muy Alta', etiqueta: 'Muy Alta', icono: <Gauge size={size} color={COLORES_DIFICULTAD['Muy Alta']} />},
+        {id: 'Alta', etiqueta: 'Alta', icono: <Gauge size={size} color={COLORES_DIFICULTAD.Alta} />},
+        {id: 'Media', etiqueta: 'Media', icono: <Gauge size={size} color={COLORES_DIFICULTAD.Media} />},
+        {id: 'Baja', etiqueta: 'Baja', icono: <Gauge size={size} color={COLORES_DIFICULTAD.Baja} />},
+        {id: 'Muy Baja', etiqueta: 'Muy Baja', icono: <Gauge size={size} color={COLORES_DIFICULTAD['Muy Baja']} />}
+    ];
+}
+
+export function decoracionSelectorDificultad(size = 14): Record<string, DecoracionNivelItem> {
+    return {
+        'Muy Alta': {icono: <Gauge size={size} />, color: COLORES_DIFICULTAD['Muy Alta']},
+        'Alta': {icono: <Gauge size={size} />, color: COLORES_DIFICULTAD.Alta},
+        'Media': {icono: <Gauge size={size} />, color: COLORES_DIFICULTAD.Media},
+        'Baja': {icono: <Gauge size={size} />, color: COLORES_DIFICULTAD.Baja},
+        'Muy Baja': {icono: <Gauge size={size} />, color: COLORES_DIFICULTAD['Muy Baja']}
+    };
+}
 
 interface OpcionMenuNivel {
     id: string;

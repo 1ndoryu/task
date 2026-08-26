@@ -14,6 +14,7 @@ import {SelectorFechaCalendario} from './SelectorFechaCalendario';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {Boton} from '../ui';
 import {ETIQUETAS_PRIORIDAD, ETIQUETAS_URGENCIA, COLORES_PRIORIDAD, COLORES_URGENCIA, opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../utils/nivelesConfig';
+import {SelectorDificultadPill, type SelectorDificultadPillProps} from './SelectorDificultadPill';
 
 interface PropiedadesCompactasProps {
     prioridad: NivelPrioridad;
@@ -22,12 +23,15 @@ interface PropiedadesCompactasProps {
     onUrgenciaChange: (valor: NivelUrgencia | null) => void;
     fechaLimite: string;
     onFechaLimiteChange: (valor: string) => void;
+    /* [28-08-2026] Dificultad junto a prioridad/importancia (plugin EXP). */
+    dificultad?: NonNullable<SelectorDificultadPillProps['dificultad']>;
+    onDificultadChange?: SelectorDificultadPillProps['onChange'];
     mostrarEtiqueta?: boolean;
 }
 
 type MenuActivo = 'prioridad' | 'urgencia' | 'fecha' | null;
 
-export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, mostrarEtiqueta = true}: PropiedadesCompactasProps): JSX.Element {
+export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, dificultad, onDificultadChange, mostrarEtiqueta = true}: PropiedadesCompactasProps): JSX.Element {
     const [menuActivo, setMenuActivo] = useState<MenuActivo>(null);
     const [posicionMenu, setPosicionMenu] = useState({x: 0, y: 0});
 
@@ -82,6 +86,11 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
                         <span>{fechaLimite ? formatearFecha(fechaLimite) : 'Fecha'}</span>
                     </Boton>
                 </div>
+
+                {/* Dificultad (plugin EXP) - junto a prioridad/importancia */}
+                {dificultad && onDificultadChange && (
+                    <SelectorDificultadPill dificultad={dificultad} onChange={onDificultadChange} />
+                )}
             </div>
 
             {/* Menu Prioridad */}

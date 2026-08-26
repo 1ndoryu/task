@@ -10,6 +10,10 @@ import type {Tarea, TareaConfiguracion, NivelPrioridad, NivelUrgencia, Participa
 import {usePanelChat} from '../usePanelChat';
 import {useAutoguardado} from '../useAutoguardado';
 import {useEsDispositivoMovil} from '../useEsMovil';
+import {useExpStore} from '../../plugins/exp/store';
+import {estimarDificultad} from '../../plugins/exp/service';
+import type {Dificultad} from '../../plugins/exp/types';
+import {prioridadANivelImportancia} from '../../plugins/exp/useExpPlugin';
 
 interface UsePanelConfiguracionTareaParams {
     tarea?: Tarea;
@@ -36,6 +40,12 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
     const [tags, setTags] = useState<string[]>(tarea?.tags || []);
     const [dependencias, setDependencias] = useState<ReferenciaDependencia[]>(tarea?.dependencias || []);
     const [grupoEjecucion, setGrupoEjecucion] = useState<string | null>(tarea?.grupoEjecucion || null);
+
+    /* [28-08-2026] Dificultad del plugin EXP para esta tarea. Se lee del store
+     * (dificultades[id]) y se asigna automáticamente al abrir si no existe. */
+    const dificultades = useExpStore(s => s.dificultades);
+    const asignarDificultad = useExpStore(s => s.asignarDificultad);
+    const [dificultad, setDificultad] = useState<Dificultad>('Media');
 
     /* Estado de asignación */
     const [asignadoA, setAsignadoA] = useState<number | null>(tarea?.asignadoA || null);
@@ -120,6 +130,34 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
     /* Ref para evitar loops infinitos en useEffect */
     const lastTareaIdRef = useRef<number | undefined>(undefined);
 
+    /* [28-08-2026] Asignación automática de dificultad al abrir la config de una
+     * tarea SIN dificultad en el store EXP: se estima (IA para admin, heurística
+     * en caso contrario/fallo) y se persiste en el store (glory-exp). No se
+     * sobreescribe si la tarea ya tenía dificultad. */
+    useEffect(() => {
+        if (!tarea || tipoID(tarea.id) == null) return;
+        if (dificultades[String(tarea.id)]) return;
+        const dificultadEstimada = estimarDificultad({
+            nombre: tarea.texto,
+            importancia: prioridadANivelImportancia((tarea.prioridad ?? 'media') as never),
+            frecuenciaDesc: tarea.configuracion?.repeticion ? 'repetida' : 'una vez',
+            extras: tarea.configuracion?.descripcion
+        });
+        let cancelado = false;
+        dificultadEstimada.then(d => {
+            if (cancelado) return;
+            asignarDificultad(tarea.id, d);
+            setDificultad(d);
+        });
+        return () => { cancelado = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tarea?.id]);
+
+    /* [28-08-2026] Helper: el id de tarea debe ser número válido para el store. */
+    function tipoID(id: number): number | null {
+        return typeof id === 'number' && Number.isFinite(id) ? id : null;
+    }
+
     /* Sincronizar estado cuando cambia la tarea */
     useEffect(() => {
         if (tarea?.id === lastTareaIdRef.current) return;
@@ -130,6 +168,8 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
             setDescripcion(tarea.configuracion?.descripcion || '');
             setPrioridad(tarea.prioridad || null);
             setUrgencia(tarea.urgencia || null);
+            /* Sincronizar la dificultad desde el store EXP (si ya estaba). */
+            setDificultad(dificultades[String(tarea.id)] ?? 'Media');
             setFechaMaxima(tarea.configuracion?.fechaMaxima || '');
             setTieneRepeticion(!!tarea.configuracion?.repeticion);
 
@@ -217,6 +257,7 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         fechaMaxima, setFechaMaxima, tieneRepeticion, setTieneRepeticion,
         frecuencia, setFrecuencia, adjuntos, setAdjuntos, tags, setTags,
         dependencias, setDependencias, grupoEjecucion, setGrupoEjecucion,
+        dificultad, setDificultad,
         asignadoA, asignadoANombre, asignadoAAvatar,
         proyectoIdLocal, completadoLocal,
         modoEdicion, esMovil, claseModal,

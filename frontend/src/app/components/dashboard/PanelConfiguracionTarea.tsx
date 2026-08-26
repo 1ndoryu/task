@@ -48,6 +48,7 @@ export interface PanelConfiguracionTareaProps {
         frecuencia, setFrecuencia, adjuntos, setAdjuntos, tags, setTags,
         dependencias, setDependencias, grupoEjecucion, setGrupoEjecucion,
         asignadoA, asignadoANombre, asignadoAAvatar,
+        dificultad, setDificultad,
         proyectoIdLocal, completadoLocal,
         modoEdicion, esMovil, claseModal,
         panelChat,
@@ -132,6 +133,8 @@ export interface PanelConfiguracionTareaProps {
                                     habitosParaDependencias={habitos}
                                     grupoEjecucion={grupoEjecucion}
                                     onGrupoEjecucionChange={setGrupoEjecucion}
+                                    dificultad={dificultad}
+                                    onDificultadChange={setDificultad}
                                     modoEdicion={true}
                                     /* Subtareas */
                                     tareaId={tarea?.id}
@@ -167,7 +170,7 @@ export interface PanelConfiguracionTareaProps {
                 /* Modo creación simple */
                 <>
                     <div id="panel-tarea-contenido" className="formularioHabito">
-                        <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={false} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} tags={tags} onTagsChange={setTags} modoEdicion={false} asignadoA={null} asignadoANombre="" asignadoAAvatar="" />
+                        <FormularioTareaModerno texto={texto} onTextoChange={setTexto} descripcion={descripcion} onDescripcionChange={setDescripcion} completado={false} prioridad={prioridad} onPrioridadChange={setPrioridad} urgencia={urgencia} onUrgenciaChange={setUrgencia} fechaLimite={fechaMaxima} onFechaLimiteChange={setFechaMaxima} tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={setTieneRepeticion} frecuencia={frecuencia} onFrecuenciaChange={setFrecuencia} adjuntos={adjuntos} onAdjuntosChange={setAdjuntos} tags={tags} onTagsChange={setTags} modoEdicion={false} asignadoA={null} asignadoANombre="" asignadoAAvatar="" dificultad={dificultad} onDificultadChange={setDificultad} />
                     </div>
                     <AccionesFormulario onCancelar={onCerrar} onGuardar={manejarGuardar} textoGuardar="Crear tarea" />
                 </>

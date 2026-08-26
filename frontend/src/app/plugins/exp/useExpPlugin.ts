@@ -209,7 +209,10 @@ export function useExpPlugin(): void {
     }, [activo, config.dificultadAutomatica]);
 }
 
-function prioridadANivelImportancia(p: 'muy_alta' | 'alta' | 'media' | 'baja' | 'muy_baja'): 'Muy Alta' | 'Alta' | 'Media' | 'Baja' | 'Muy Baja' {
+/* [28-08-2026] Exportada para reutilizarla fuera del hook: asigna la dificultad
+ * automática de una tarea (misma escala de importancia) necesita traducir la
+ * prioridad de la tarea al nivel de importancia del plugin EXP. */
+export function prioridadANivelImportancia(p: 'muy_alta' | 'alta' | 'media' | 'baja' | 'muy_baja'): 'Muy Alta' | 'Alta' | 'Media' | 'Baja' | 'Muy Baja' {
     switch (p) {
         case 'muy_alta': return 'Muy Alta';
         case 'alta': return 'Alta';

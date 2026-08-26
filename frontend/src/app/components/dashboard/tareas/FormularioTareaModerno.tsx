@@ -33,6 +33,9 @@ interface FormularioTareaModernoProps {
     onUrgenciaChange: (valor: NivelUrgencia | null) => void;
     fechaLimite: string;
     onFechaLimiteChange: (valor: string) => void;
+    /* [28-08-2026] Dificultad del plugin EXP: misma escala que la importancia. */
+    dificultad?: import('../../../plugins/exp/types').Dificultad;
+    onDificultadChange?: (valor: import('../../../plugins/exp/types').Dificultad) => void;
     /* Proyecto */
     proyectoId?: number;
     proyectos?: Proyecto[];
@@ -93,7 +96,9 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
         tareasParaDependencias = [],
         habitosParaDependencias = [],
         grupoEjecucion,
-        onGrupoEjecucionChange}: FormularioTareaModernoProps): JSX.Element {    const [modalDependenciasAbierto, setModalDependenciasAbierto] = useState(false);
+        onGrupoEjecucionChange,
+        dificultad,
+        onDificultadChange}: FormularioTareaModernoProps): JSX.Element {    const [modalDependenciasAbierto, setModalDependenciasAbierto] = useState(false);
 
     /* Grupos de ejecución existentes para el selector */
     const gruposDisponibles = useGruposEjecucion(tareasParaDependencias, habitosParaDependencias);
@@ -138,7 +143,7 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
 
             {/* Grupo 2: Propiedades (Prioridad, Urgencia, Fecha) */}
             <FilaPropiedades etiqueta="Propiedades">
-                <PropiedadesCompactas prioridad={prioridad || 'media'} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} mostrarEtiqueta={false} />
+                <PropiedadesCompactas prioridad={prioridad || 'media'} onPrioridadChange={onPrioridadChange} urgencia={urgencia} onUrgenciaChange={onUrgenciaChange} fechaLimite={fechaLimite} onFechaLimiteChange={onFechaLimiteChange} mostrarEtiqueta={false} dificultad={dificultad} onDificultadChange={onDificultadChange} />
             </FilaPropiedades>
 
             {/* Dependencias */}

@@ -56,6 +56,7 @@ export * from './SelectorProyectoPill';
 export * from './SelectorRepeticionPill';
 export * from './SelectorEstadoHabitoPill';
 export * from './SelectorImportanciaPill';
+export * from './SelectorDificultadPill';
 export * from './SelectorFrecuenciaPill';
 export * from './SelectorEstadoProyectoPill';
 export * from './FilaPropiedades';
