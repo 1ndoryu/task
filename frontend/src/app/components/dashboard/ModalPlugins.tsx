@@ -14,6 +14,7 @@ import {obtenerPluginsVisibles, obtenerPanelesDePlugin, pluginPuedeMostrarse} fr
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {ConfigDeficitCalorico} from './ConfigDeficitCalorico';
+import {ConfigExp} from '../../plugins/exp';
 import type {DefinicionPlugin} from '../../types/plugins';
 
 interface ModalPluginsProps {
@@ -29,7 +30,8 @@ interface ModalPluginsProps {
  * Cada plugin con requiereConfiguracion debe tener su componente aquí
  */
 const COMPONENTES_CONFIG: Record<string, React.ComponentType<{onCerrar: () => void}>> = {
-    'deficit-calorico': ConfigDeficitCalorico
+    'deficit-calorico': ConfigDeficitCalorico,
+    'exp': ConfigExp
 };
 
 function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin; onToggle: (pluginId: string) => void; onAbrirConfig?: (pluginId: string) => void}): JSX.Element {

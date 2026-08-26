@@ -11,11 +11,13 @@ import {usePluginsStore} from '../../../stores/pluginsStore';
 import {useHabitosStore} from '../../../stores/habitosStore';
 import {useConfiguracionLayout} from '../../../hooks/useConfiguracionLayout';
 import {ConfigDeficitCalorico} from '../../dashboard/ConfigDeficitCalorico';
+import {ConfigExp} from '../../../plugins/exp';
 import type {DefinicionPlugin} from '../../../types/plugins';
 
 /* Mapa de componentes de configuración por pluginId */
 const COMPONENTES_CONFIG: Record<string, React.ComponentType<{onCerrar: () => void}>> = {
-    'deficit-calorico': ConfigDeficitCalorico
+    'deficit-calorico': ConfigDeficitCalorico,
+    'exp': ConfigExp
 };
 
 function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin; onToggle: (pluginId: string) => void; onAbrirConfig?: (pluginId: string) => void}): JSX.Element {

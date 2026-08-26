@@ -1,0 +1,68 @@
+/*
+ * plugins/exp/ConfigExp.css
+ * Estilos de la configuración del plugin EXP. Usa variables del sistema.
+ */
+
+.configExp {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espaciado-md, 12px);
+    padding: 4px 0;
+}
+
+.configExpResumen {
+    display: flex;
+    gap: 14px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.05));
+    font-size: var(--dashboard-fuenteSecundaria, 12px);
+    color: var(--dashboard-texto, #e8e8ea);
+}
+
+.configExpResumen strong {
+    color: var(--dashboard-textoFuerte, #ffffff);
+}
+
+.configExpFila {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: var(--dashboard-fuenteSecundaria, 12px);
+    color: var(--dashboard-texto, #e8e8ea);
+}
+
+.configExpEtiqueta {
+    font-weight: 500;
+}
+
+.configExpAyuda {
+    font-size: var(--dashboard-fuenteSecundaria, 11px);
+    color: var(--dashboard-textoSuave, #9a9aa3);
+}
+
+.configExpCheckbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--dashboard-acento, #7c9cff);
+}
+
+.configExpRange {
+    width: 100%;
+    accent-color: var(--dashboard-acento, #7c9cff);
+}
+
+.configExpMultiplicadores {
+    display: flex;
+    gap: 14px;
+}
+
+.configExpMultiplicadores .configExpFila {
+    flex: 1;
+}
+
+.configExpAcciones {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}

@@ -60,6 +60,7 @@ export const CLAVES_PREFERENCIAS: string[] = [
     /* Datos de plugin sin backend Rust (el sync de dashboard no los persiste) */
     'glory-ayuno',
     'glory-deficit-calorico',
+    'glory-exp',                // plugin EXP: vida, EXP, nivel, dificultades, registros
     /* Grupos (service legacy /wp-json, sin backend Rust) */
     'grupos-tareas-storage',
     'GruposFbStore',

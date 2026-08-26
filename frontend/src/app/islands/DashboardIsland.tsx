@@ -30,6 +30,7 @@ import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
 import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
 import {obtenerTodosPanelesNavegables} from '../config/registroPaneles';
 import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
+import {PanelExp, useExpPlugin} from '../plugins/exp';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -126,6 +127,10 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         minutosInactividad: 5,
         habilitado: !!auth.user
     });
+
+    /* [26-08-2026] Plugin EXP: rehidratación, recálculo de vida y registro de
+     * EXP por completados. No hace nada si el plugin no está activo. */
+    useExpPlugin();
 
     /* Estado y acciones para notas en móvil */
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
@@ -258,6 +263,10 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onToggleSeleccion={toggleModoSeleccionManual}
                     />
 
+                    {/* [26-08-2026] Panel EXP fijo superior (solo si el plugin
+                     * está activo; el propio componente retorna null si no). */}
+                    <PanelExp />
+
                     {dashboard.cargandoDatos ? (
                         <IndicadorCarga />
                     ) : (
@@ -280,6 +289,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onAgregarPanel={agregarPanel}
                     />
                     <div className="dashboardSidebarMain">
+                        <PanelExp />
                         {dashboard.cargandoDatos ? (
                             <IndicadorCarga />
                         ) : (

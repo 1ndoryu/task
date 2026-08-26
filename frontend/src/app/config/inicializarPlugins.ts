@@ -24,6 +24,11 @@ import {PanelIA} from '../components/paneles/PanelIA';
 import {PanelEscaladorImagen} from '../components/paneles/PanelEscaladorImagen';
 import {PanelRecordatorios} from '../components/paneles/PanelRecordatorios';
 
+/* [26-08-2026] Plugin EXP/gamificación (carpeta especializada plugins/exp).
+ * El registro del plugin es side-effect de su index; el panel es fijo superior
+ * (no entra en el grid), se renderiza desde DashboardIsland. */
+import '../plugins/exp';
+
 /* Helper para posiciones (reutilizado de inicializarPaneles) */
 function crearPosicionDefecto(
     pos1col: [1 | 2 | 3, number],

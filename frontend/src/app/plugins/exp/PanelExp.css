@@ -1,0 +1,100 @@
+/*
+ * plugins/exp/PanelExp.css
+ * Estilos del panel fijo EXP. Usa las variables del sistema de diseño
+ * (styles/dashboard/variables.css); sin colores hex ni tamaños hardcodeados
+ * aquí salvo los mínimos estructurales.
+ */
+
+.panelExpFijo {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espaciado-md, 12px);
+    padding: 6px 12px;
+    background: var(--dashboard-superficie, var(--dashboard-fondoElevado, #1e1e24));
+    border-bottom: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.08));
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.panelExpNivel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--dashboard-fuenteTitulo, 12px);
+    font-weight: 600;
+    color: var(--dashboard-texto, #e8e8ea);
+    white-space: nowrap;
+}
+
+.panelExpItem {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 120px;
+}
+
+.panelExpEtiqueta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--dashboard-fuenteSecundaria, 11px);
+    color: var(--dashboard-textoSuave, #9a9aa3);
+}
+
+.panelExpValor {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.panelExpBarra {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.07));
+    overflow: hidden;
+}
+
+.panelExpBarraRelleno {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.panelExpVida--alta {
+    background: var(--dashboard-exito, #4caf7d);
+}
+
+.panelExpVida--media {
+    background: var(--dashboard-aviso, #e0a83c);
+}
+
+.panelExpVida--baja {
+    background: var(--dashboard-error, #e0544c);
+}
+
+.panelExpExp {
+    background: var(--dashboard-acento, #7c9cff);
+}
+
+/* Modo sidebar: la barra también debe quedar arriba del contenido. */
+.dashboardContenedor--sidebar .panelExpFijo {
+    position: static;
+    border-bottom: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.08));
+}
+
+/* Móvil: compacto, una sola línea utilizable. */
+@media (max-width: 640px) {
+    .panelExpFijo {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .panelExpItem {
+        min-width: 100px;
+    }
+
+    .panelExpValor {
+        display: none;
+    }
+}
