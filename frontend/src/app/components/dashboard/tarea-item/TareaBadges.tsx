@@ -2,6 +2,9 @@ import React from 'react';
 import {Calendar, Paperclip, FileText, Repeat, Folder, Users, Zap, Repeat2, MessageCircle, Sparkles} from 'lucide-react';
 import type {Tarea, NivelPrioridad, NivelUrgencia, TareaHabito} from '../../../types/dashboard';
 import {esTareaHabito} from '../../../types/dashboard';
+import {useExpStore} from '../../../plugins/exp/store';
+import {usePluginActivo} from '../../../stores/pluginsStore';
+import {COLORES_DIFICULTAD} from '../../../utils/nivelesConfig';
 import {BadgeInfo, type VarianteBadge} from '../../shared/BadgeInfo';
 import {obtenerTextoFechaLimite as obtenerTextoFechaLim, obtenerVarianteFechaLimite as obtenerVarianteFecha, formatearFechaCorta as formatearFecha} from '../../../utils/fechaUI';
 
@@ -18,8 +21,48 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
     /* Helper para convertir tarea a tarea habito si es necesario */
     const esHabito = esTareaHabito(tarea);
 
+    /* [28-08-2026] Dificultad del plugin EXP (barra) si está activo y no oculto. */
+    const expActivo = usePluginActivo('exp');
+    const dificultades = useExpStore(s => s.dificultades);
+
+    /* Badges que el usuario ocultó en la configuración de esta tarea. */
+    const ocultos = tarea.configuracion?.badgesOcultos || {};
+
+    /* Renderizado del indicador de dificultad como barra (misma altura que los
+     * badges). Nivel → porcentaje de relleno. */
+    const renderIndicadorDificultad = () => {
+        if (!expActivo) return null;
+        if (ocultos.dificultad) return null;
+        if (!tarea || typeof tarea.id !== 'number') return null;
+        const nivel = dificultades[String(tarea.id)];
+        if (!nivel) return null;
+        const fraccion: Record<string, number> = {
+            'Muy Baja': 0.2,
+            'Baja': 0.4,
+            'Media': 0.6,
+            'Alta': 0.8,
+            'Muy Alta': 1
+        };
+        const pct = (fraccion[nivel] ?? 0.6) * 100;
+        const color = COLORES_DIFICULTAD[nivel as keyof typeof COLORES_DIFICULTAD]
+            || 'var(--dashboard-estadoMedia)';
+        return (
+            <span
+                className="badgeInfo badgeDificultad"
+                title={`Dificultad: ${nivel}`}
+                role="img"
+                aria-label={`Dificultad ${nivel}`}
+            >
+                <span className="badgeDificultadTrack">
+                    <span className="badgeDificultadFill" style={{width: `${pct}%`, backgroundColor: color}} />
+                </span>
+            </span>
+        );
+    };
+
     /* Renderizado del indicador de prioridad */
     const renderIndicadorPrioridad = () => {
+        if (ocultos.importancia) return null;
         if (esHabito) {
             const importaciaHabito = (tarea as TareaHabito).habitoImportancia;
             if (importaciaHabito === 'Muy Alta') {
@@ -49,6 +92,7 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
 
     /* Renderizado del indicador de urgencia */
     const renderIndicadorUrgencia = () => {
+        if (ocultos.urgencia) return null;
         if (!tarea.urgencia || tarea.urgencia === 'normal') return null;
 
         const obtenerVarianteUrgencia = (urgencia: NivelUrgencia): VarianteBadge => {
@@ -193,6 +237,7 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
             {nombreProyecto && <BadgeInfo tipo="personalizado" icono={<Folder size={10} />} texto={soloIconoProyecto ? undefined : nombreProyecto} titulo={`Proyecto: ${nombreProyecto}`} variante="normal" />}
             {renderIndicadorPrioridad()}
             {renderIndicadorUrgencia()}
+            {renderIndicadorDificultad()}
             {renderBadgeHabito()}
             {renderBadgeMensajesNoLeidos()}
         </>

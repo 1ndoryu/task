@@ -326,3 +326,39 @@
 
 /* [014A-3] Eliminada regla button.badgeInfo: ya no hay badges <button>.
  * Todos se renderizan como <span> con estilos unificados. */
+
+/* 
+ * BADGE DIFICULTAD (barra)
+ * Indicador de dificultad del plugin EXP: una barra de relleno de la MISMA
+ * altura que los badges (min-height 18px) para mantener consistencia visual.
+ * El relleno representa el nivel (Muy Baja..Muy Alta) con el color del nivel.
+ */
+.badgeDificultad {
+    /* Igual altura que el resto de badges (18px), sin texto ni padding extra. */
+    min-height: 18px;
+    height: 18px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    background-color: transparent;
+}
+
+.badgeDificultadTrack {
+    display: block;
+    width: 48px;
+    height: 8px;
+    border-radius: 2px;
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordeSutil);
+    overflow: hidden;
+}
+
+.badgeDificultadFill {
+    display: block;
+    height: 100%;
+    border-radius: 1px;
+    transition: width var(--dashboard-transicionRapida);
+}
