@@ -52,12 +52,12 @@ ok('celdasCompletas(100) = tronco + copa por defecto');
  * la por defecto debe reflejarse: no reaparece, porque celdasCompletas usa la
  * copa editada EN LUGAR de la por defecto, no la suma). */
 const editada = new Set(copa100);
-editada.add('15,7');           /* celda nueva dibujada */
-editada.delete('6,15');        /* celda de copa por defecto que el usuario borró */
+editada.add('15,7');           /* celda nueva dibujada (lateral, no tronco) */
+editada.delete('6,0');        /* celda de copa por defecto que el usuario borró */
 const con = celdasCompletas(100, editada);
 assert.ok(con.has('15,7'), 'celda dibujada visible');
 assert.equal([...con].filter(c => tronco.has(c)).length, tronco.size, 'tronco intacto');
-assert.ok(!con.has('6,15'), 'copa por defecto borrada por el usuario no reaparece');
+assert.ok(!con.has('6,0'), 'copa por defecto borrada por el usuario no reaparece');
 ok('copa editada reemplaza la por defecto conservando tronco');
 
 /* 4. Tronco bloqueado: pintar sobre él no añade celdas de copa. El tronco lo
@@ -66,7 +66,7 @@ ok('copa editada reemplaza la por defecto conservando tronco');
  * tronco ni en la copa por defecto; si el editor intenta pintarla, no debe
  * colapsar y la densidad de copa editada coincide con la invariable. */
 const editada4 = new Set(copaPorDefecto(25));
-editada4.add('7,3');   /* celda de TRONCO: el render la muestra, pero NO como copa extra */
+editada4.add('7,10');  /* celda de TRONCO (y 7..15): el render la muestra, pero NO como copa extra */
 const conTronco = celdasCompletas(25, editada4);
 /* El tronco completo sigue intacto (todas las celdas de tronco presentes). */
 assert.equal([...conTronco].filter(c => tronco.has(c)).length, tronco.size, 'tronco completo');

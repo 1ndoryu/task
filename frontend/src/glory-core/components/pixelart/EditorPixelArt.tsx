@@ -52,16 +52,18 @@ export function EditorPixelArt({
      * corrido al arrastrar (no requiere shift); la pluma pinta; 'ver' navega
      * sin tocar el lienzo. */
     const pintarEn = useCallback(
-        (x: number, y: number, forzar?: 'poner' | 'borrar') => {
+        (x: number, y: number, forzar?: 'borrar') => {
             if (bloqueadas.has(`${x},${y}`)) return;
             if (herramienta === 'ver') return;
 
             const siguiente = new Set(activas);
+            /* La pluma SIEMPRE pinta (nunca borra al pasar sobre una celda ya
+             * pintada); el borrador (o shift/click derecho que fuerza 'borrar')
+             * es lo único que elimina. Antes era un toggle (poner = !tiene) y
+             * al arrastrar el pincel sobre celdas pintadas las borraba. */
             let poner: boolean;
-            if (herramienta === 'borrador') poner = false;
-            else if (forzar === 'poner') poner = true;
-            else if (forzar === 'borrar') poner = false;
-            else poner = !siguiente.has(`${x},${y}`);
+            if (herramienta === 'borrador' || forzar === 'borrar') poner = false;
+            else poner = true;
 
             const operarCelda = (px: number, py: number, val: boolean) => {
                 if (px >= dimensiones || py >= dimensiones) return;
@@ -88,7 +90,7 @@ export function EditorPixelArt({
         (e: React.MouseEvent, x: number, y: number) => {
             pintandoRef.current = true;
             e.preventDefault();
-            const forzar: 'poner' | 'borrar' | undefined = e.shiftKey || e.button === 2 ? 'borrar' : undefined;
+            const forzar: 'borrar' | undefined = e.shiftKey || e.button === 2 ? 'borrar' : undefined;
             pintarEn(x, y, forzar);
         },
         [pintarEn]
@@ -100,7 +102,7 @@ export function EditorPixelArt({
             const clave = `${x},${y}`;
             if (ultimaClaveRef.current === clave) return;
             ultimaClaveRef.current = clave;
-            const forzar: 'poner' | 'borrar' | undefined = e.shiftKey || e.button === 2 ? 'borrar' : undefined;
+            const forzar: 'borrar' | undefined = e.shiftKey || e.button === 2 ? 'borrar' : undefined;
             pintarEn(x, y, forzar);
         },
         [pintarEn]

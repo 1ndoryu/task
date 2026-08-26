@@ -16,6 +16,12 @@
  * - `celdasCompletas(estado, copaExtra?)`: tronco + (copa por defecto ∪ editadas).
  * El render acepta `copaEditada` por estado (persistida en glory-exp) para
  * reflejar lo que el usuario dibujó en el editor.
+ *
+ * COORDENADAS (importante): todo el módulo usa el MISMO sistema que el editor
+ * pixel-art — origen (0,0) ARRIBA-izquierda, y crece hacia abajo. Así la copa
+ * (y=0..6) queda arriba, el tronco (y=7..15) abajo y las raíces (y=15) en la
+ * base. El SVG renderiza con y*tamaño (el eje y del SVG baja), por lo que lo
+ * que se dibuja en el editor coincide exactamente con el render.
  */
 
 /* Cuadrícula 16x16 (mismo origen que el editor: (0,0) arriba-izquierda). */
@@ -25,17 +31,18 @@ export type EstadoVida = 0 | 25 | 50 | 75 | 100;
 export const ESTADOS_ARBOL: EstadoVida[] = [0, 25, 50, 75, 100];
 
 /* Tronco + raíces: celdas fijas, idénticas en los 5 estados, NO editables.
- * Tronco 2 de ancho (x 7..8) desde y0 hasta y8; raíces a x 4/6/9/11 en y0. */
+ * Tronco 2 de ancho (x 7..8) desde y7 hasta y15 (base); raíces a x 4/6/9/11 en
+ * la base y15. (Coordenadas de editor: y=0 arriba, y=15 abajo.) */
 export const CELDAS_TRONCO: Set<string> = new Set<string>();
 (function () {
-    for (let y = 0; y <= 8; y++) {
+    for (let y = 7; y <= 15; y++) {
         CELDAS_TRONCO.add(`7,${y}`);
         CELDAS_TRONCO.add(`8,${y}`);
     }
-    CELDAS_TRONCO.add('6,0');
-    CELDAS_TRONCO.add('4,0');
-    CELDAS_TRONCO.add('9,0');
-    CELDAS_TRONCO.add('11,0');
+    CELDAS_TRONCO.add('6,15');
+    CELDAS_TRONCO.add('4,15');
+    CELDAS_TRONCO.add('9,15');
+    CELDAS_TRONCO.add('11,15');
 })();
 
 interface Pixel {
@@ -43,44 +50,46 @@ interface Pixel {
     y: number;
 }
 
+/* Copa por fila: fila 0 = tope del árbol (arriba), fila 6 = base de la copa
+ * (justo encima del tronco). Cada entrada es [x, y] con y == fila. */
 const POR_FILA: Record<number, Array<[number, number]>> = {
-    15: [
-        [6, 15], [7, 15], [8, 15], [9, 15],
-        [5, 15], [10, 15], [4, 15], [11, 15], [3, 15], [12, 15]
+    0: [
+        [6, 0], [7, 0], [8, 0], [9, 0],
+        [5, 0], [10, 0], [4, 0], [11, 0], [3, 0], [12, 0]
     ],
-    14: [
-        [5, 14], [6, 14], [7, 14], [8, 14], [9, 14], [10, 14], [11, 14],
-        [4, 14], [12, 14], [3, 14], [13, 14]
+    1: [
+        [5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1],
+        [4, 1], [12, 1], [3, 1], [13, 1]
     ],
-    13: [
-        [4, 13], [5, 13], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [12, 13],
-        [3, 13], [13, 13], [2, 13], [14, 13]
+    2: [
+        [4, 2], [5, 2], [6, 2], [7, 2], [8, 2], [9, 2], [10, 2], [11, 2], [12, 2],
+        [3, 2], [13, 2], [2, 2], [14, 2]
     ],
-    12: [
-        [4, 12], [5, 12], [6, 12], [7, 12], [8, 12], [9, 12], [10, 12], [11, 12], [12, 12],
-        [3, 12], [13, 12], [2, 12], [14, 12]
+    3: [
+        [4, 3], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [11, 3], [12, 3],
+        [3, 3], [13, 3], [2, 3], [14, 3]
     ],
-    11: [
-        [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11],
-        [4, 11], [11, 11], [3, 11], [12, 11]
+    4: [
+        [5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4],
+        [4, 4], [11, 4], [3, 4], [12, 4]
     ],
-    10: [
-        [5, 10], [6, 10], [7, 10], [8, 10], [9, 10], [10, 10],
-        [4, 10], [11, 10]
+    5: [
+        [5, 5], [6, 5], [7, 5], [8, 5], [9, 5], [10, 5],
+        [4, 5], [11, 5]
     ],
-    9: [
-        [6, 9], [7, 9], [8, 9], [9, 9],
-        [5, 9], [10, 9]
+    6: [
+        [6, 6], [7, 6], [8, 6], [9, 6],
+        [5, 6], [10, 6]
     ]
 };
 
-/* Copa por defecto de cada estado: densidad creciente de filas. */
+/* Copa por defecto de cada estado: densidad creciente de filas (0 = tope). */
 const COMPOSICION_ESTADOS: Record<EstadoVida, number[]> = {
     0: [],
-    25: [11],
-    50: [11, 12],
-    75: [11, 12, 13, 10],
-    100: [11, 12, 13, 14, 15, 10, 9]
+    25: [4],
+    50: [4, 3],
+    75: [4, 3, 2, 5],
+    100: [4, 3, 2, 1, 0, 5, 6]
 };
 
 function filasACeldas(filas: number[]): Set<string> {
@@ -134,10 +143,9 @@ export function ArbolVida({vida, copaEditada}: ArbolVidaProps): JSX.Element {
     const ancho = DIMENSION_ARBOL * tamaño;
     const alto = DIMENSION_ARBOL * tamaño;
 
-    /* Render: el SVG tiene el ORIGEN abajo-izquierda (eje y hacia arriba), mientras
-     * el editor usa (0,0) arriba-izquierda con y hacia abajo. Para que lo que el
-     * usuario dibuja corresponda con lo que ve (y=0 arriba), invertimos el eje y
-     * en el rect: la celda (x, DIMENSION-1) del editor es la BASE del árbol en el SVG. */
+    /* Render: las celdas ya están en coordenadas de editor (y=0 arriba). El eje
+     * y del SVG baja (como el grid del editor), así que y*tamaño pinta la copa
+     * arriba y las raíces abajo — coincidiendo con lo que el usuario dibuja. */
     return (
         <svg width="64" height="64" viewBox={`0 0 ${ancho} ${alto}`} shapeRendering="crispEdges" role="img" aria-label={`Árbol de vida (estado ${estado}%)`}>
             {celdas.map(clave => {
@@ -148,7 +156,7 @@ export function ArbolVida({vida, copaEditada}: ArbolVidaProps): JSX.Element {
                     <rect
                         key={clave}
                         x={x * tamaño}
-                        y={(DIMENSION_ARBOL - 1 - y) * tamaño}
+                        y={y * tamaño}
                         width={tamaño}
                         height={tamaño}
                         fill="#ffffff"
