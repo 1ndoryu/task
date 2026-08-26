@@ -1,38 +1,32 @@
 /*
  * plugins/exp/PanelExp.css
- * Estilos del panel fijo EXP. Usa las variables del sistema de diseño
- * (styles/dashboard/variables.css); sin colores hex ni tamaños hardcodeados
- * aquí salvo los mínimos estructurales.
+ * Estilos del panel fijo EXP. El contenedor visual (superficie, borde, radio)
+ * lo aporta `.panelDashboard` del sistema de diseño; aquí solo la disposición
+ * del cuerpo y las barras, con las variables del sistema (sin hex ni tamaños
+ * hardcodeados salvo los mínimos estructurales).
  */
 
+/* Contenedor fijo: ancla arriba del dashboard (grid y sidebar). */
 .panelExpFijo {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espaciado-md, 12px);
-    padding: 6px 12px;
-    background: var(--dashboard-superficie, var(--dashboard-fondoElevado, #1e1e24));
-    border-bottom: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.08));
     position: sticky;
     top: 0;
     z-index: 40;
 }
 
-.panelExpNivel {
+/* Cuerpo del panel: barras lado a lado con el padding estándar de panel. */
+.panelExpCuerpo {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: var(--dashboard-fuenteTitulo, 12px);
-    font-weight: 600;
-    color: var(--dashboard-texto, #e8e8ea);
-    white-space: nowrap;
+    gap: var(--dashboard-espacioLg, 16px);
+    padding: var(--dashboard-espacioMd, 10px) var(--dashboard-espacioLg, 16px);
+    align-items: stretch;
 }
 
 .panelExpItem {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
     flex: 1;
-    min-width: 120px;
+    min-width: 140px;
 }
 
 .panelExpEtiqueta {
@@ -77,17 +71,27 @@
     background: var(--dashboard-acento, #7c9cff);
 }
 
+/* Nivel en la zona de acciones del encabezado: misma escala que los iconos. */
+.panelExpNivel {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--dashboard-fuenteSecundaria, 11px);
+    font-weight: 600;
+    color: var(--dashboard-textoActivo, #e8e8ea);
+    white-space: nowrap;
+}
+
 /* Modo sidebar: la barra también debe quedar arriba del contenido. */
 .dashboardContenedor--sidebar .panelExpFijo {
     position: static;
-    border-bottom: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.08));
 }
 
 /* Móvil: compacto, una sola línea utilizable. */
 @media (max-width: 640px) {
-    .panelExpFijo {
-        flex-wrap: wrap;
-        gap: 6px;
+    .panelExpCuerpo {
+        gap: 8px;
+        padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 10px);
     }
 
     .panelExpItem {

@@ -4,9 +4,16 @@
  * del dashboard (grid y sidebar). Muestra la barra de vida y la barra de
  * EXP/nivel. No es un panel del grid: se renderiza desde DashboardIsland cuando
  * el plugin está activo.
+ *
+ * [27-08-2026] Reescrito para ser visualmente coherente con el resto de paneles:
+ * usa el contenedor canónico `.panelDashboard` (superficie, borde, radio) y el
+ * encabezado `SeccionEncabezado` con `variante="panelHeader"` (mismo fondo,
+ * borde inferior y hover de opacidad que los demás paneles), con el nivel en la
+ * zona de acciones y las barras como cuerpo del panel.
  */
 
-import {Heart, Sparkles, Zap} from 'lucide-react';
+import {GripVertical, Heart, Sparkles, Zap} from 'lucide-react';
+import {SeccionEncabezado} from '../../components/dashboard/SeccionEncabezado';
 import {useExpStore} from './store';
 import {usePluginActivo} from '../../stores/pluginsStore';
 
@@ -41,13 +48,22 @@ export function PanelExp(): JSX.Element | null {
     const vidaClase = vida >= 60 ? 'panelExpVida--alta' : vida >= 30 ? 'panelExpVida--media' : 'panelExpVida--baja';
 
     return (
-        <div className="panelExpFijo">
-            <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
-                <Zap size={14} />
-                <span>Nv. {nivel}</span>
+        <div className="panelDashboard panelExpFijo">
+            <SeccionEncabezado
+                icono={<GripVertical size={12} />}
+                titulo="EXP y Vida"
+                variante="panelHeader"
+                acciones={
+                    <span className="panelExpNivel" title={`${exp} EXP acumulada`}>
+                        <Zap size={12} />
+                        Nv. {nivel}
+                    </span>
+                }
+            />
+            <div className="panelExpCuerpo">
+                <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
+                <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
             </div>
-            <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
-            <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta={`EXP (${exp})`} colorClase="panelExpExp" />
         </div>
     );
 }
