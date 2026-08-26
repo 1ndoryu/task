@@ -71,25 +71,46 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
 
     if (!activo) return null;
 
-    /* [28-08-2026] Contadores derivados del historial real para flanquear el
-     * árbol: pendientes de HOY (debían cumplirse y no están) y completados de
-     * AYER. Coinciden con la lógica de vida (debioCumplirse) y de actividad.
-     * Un hábito pausado o pospuesto hoy no cuenta como pendiente. */
-    const {pendientesHoy, completadosAyer} = useMemo(() => {
+    /* [28-08-2026] Contadores + porcentajes derivados del historial real de
+     * hábitos para flanquear el árbol. Pendientes HOY: hábitos que debían
+     * cumplirse hoy y aún no están completados/pospuestos; su barra refleja el
+     * % ya cumplido hoy (completados / total debidos hoy) — si completas la
+     * mitad de los pendientes, la barra queda a la mitad. Completados AYER:
+     * hábitos con la fecha de ayer en su historial; su barra es el % cumplido
+     * ayer sobre el total de hábitos que debían cumplirse ayer. El resto usa
+     * la misma lógica de vida (debioCumplirse). */
+    const {pendientesHoy, pctPendientes, completadosAyer, pctCompletadosAyer} = useMemo(() => {
         const hoy = obtenerFechaHoy();
         const ayer = sumarDias(hoy, -1);
-        let pendientes = 0;
+        let debidosHoy = 0;
+        let cumplidosHoy = 0;
+        let pospuestosHoy = 0;
+        let debidosAyer = 0;
         let completadosAyer = 0;
         for (const h of habitos) {
             if (h.pausado) continue;
             const completados = h.historialCompletados || [];
-            if (completados.includes(ayer)) completadosAyer++;
-            /* Pendiente hoy: debe cumplirse, no completado, no pospuesto hoy. */
-            if (h.historialPospuestos?.includes(hoy)) continue;
-            if (completados.includes(hoy)) continue;
-            if (debioCumplirse(h.frecuencia as never, hoy)) pendientes++;
+            const pospuestoHoy = h.historialPospuestos?.includes(hoy) ?? false;
+
+            /* Ayer: hábitos que debían cumplirse y cuántos completaron. */
+            if (debioCumplirse(h.frecuencia as never, ayer)) {
+                debidosAyer++;
+                if (completados.includes(ayer)) completadosAyer++;
+            }
+
+            /* Hoy: debidos, completados y pospuestos del día. */
+            if (!debioCumplirse(h.frecuencia as never, hoy)) continue;
+            debidosHoy++;
+            if (completados.includes(hoy)) cumplidosHoy++;
+            else if (pospuestoHoy) pospuestosHoy++;
         }
-        return {pendientesHoy: pendientes, completadosAyer};
+        /* Pendientes reales hoy = debidos no completados ni pospuestos. */
+        const pendientesHoy = Math.max(0, debidosHoy - cumplidosHoy - pospuestosHoy);
+        /* Barra: % ya cumplido hoy sobre el total de debidos hoy — al completar
+         * la mitad de los pendientes queda a la mitad. */
+        const pctPendientes = debidosHoy > 0 ? Math.round((cumplidosHoy / debidosHoy) * 100) : 0;
+        const pctCompletadosAyer = debidosAyer > 0 ? Math.round((completadosAyer / debidosAyer) * 100) : 0;
+        return {pendientesHoy, pctPendientes, completadosAyer, pctCompletadosAyer};
     }, [habitos]);
 
     const vidaClase = vida >= 60 ? 'panelExpVida--alta' : vida >= 30 ? 'panelExpVida--media' : 'panelExpVida--baja';
@@ -124,14 +145,26 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
                     </div>
                     <div className="panelExpArbolFila">
                         <div className="panelExpArbolLateral panelExpArbolLateral--izq" title={`Hábitos que debían cumplirse hoy y aún no se completaron`}>
-                            <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
+                            <div className="panelExpArbolLateralFila">
+                                <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
+                                <div className="panelExpArbolLateralBarra">
+                                    <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--pendientes" style={{width: `${pctPendientes}%`}} />
+                                </div>
+                            </div>
                             <span className="panelExpArbolLateralEtiqueta">pendientes hoy</span>
                         </div>
-                        <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
-                            <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
+                        <div className="panelExpArbolArbolWrap">
+                            <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
+                                <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
+                            </div>
                         </div>
                         <div className="panelExpArbolLateral panelExpArbolLateral--der" title={`Hábitos completados ayer`}>
-                            <span className="panelExpArbolLateralValor">{completadosAyer}</span>
+                            <div className="panelExpArbolLateralFila">
+                                <div className="panelExpArbolLateralBarra">
+                                    <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--ayer" style={{width: `${pctCompletadosAyer}%`}} />
+                                </div>
+                                <span className="panelExpArbolLateralValor">{completadosAyer}</span>
+                            </div>
                             <span className="panelExpArbolLateralEtiqueta">completados ayer</span>
                         </div>
                     </div>

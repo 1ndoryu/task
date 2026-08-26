@@ -128,15 +128,15 @@
     color: var(--arbol-color, currentColor);
 }
 
-/* Bloques laterales del árbol: icono + número destacado + etiqueta pequeña,
- * alineados a los extremos de la fila. Utilizan el idioma visual del panel
- * (variables del sistema, sin hex). */
+/* Bloques laterales del árbol: número destacado + etiqueta pequeña + barra
+ * de progreso SIN bordes redondeados (esquinas rectas), junto al número.
+ * El porcentaje refleja el cumplimiento (pendientes hoy / completados ayer).
+ * Utilizan el idioma visual del panel (variables del sistema, sin hex). */
 .panelExpArbolLateral {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    min-width: 88px;
+    gap: 4px;
+    flex: 0 1 108px;
     color: var(--dashboard-textoSuave, #9a9aa3);
 }
 
@@ -150,12 +150,30 @@
     text-align: right;
 }
 
+/* Fila que junta el número con su barra, justo al lado. */
+.panelExpArbolLateralFila {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.panelExpArbolLateral--izq .panelExpArbolLateralFila {
+    justify-content: flex-start;
+}
+
+.panelExpArbolLateral--der .panelExpArbolLateralFila {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+}
+
 .panelExpArbolLateralValor {
     font-size: var(--dashboard-fuenteTitulo, 18px);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
     color: var(--dashboard-textoActivo, #e8e8ea);
+    flex: 0 0 auto;
 }
 
 .panelExpArbolLateralEtiqueta {
@@ -163,6 +181,38 @@
     text-transform: none;
     line-height: 1.15;
     color: var(--dashboard-textoSuave, #9a9aa3);
+}
+
+/* Barra de progreso: 6px de alto, esquinas RECTAS (sin radio), pista tenue. */
+.panelExpArbolLateralBarra {
+    position: relative;
+    flex: 1 1 auto;
+    height: 6px;
+    min-width: 40px;
+    border-radius: 0;
+    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.08));
+    overflow: hidden;
+}
+
+.panelExpArbolLateralBarraRelleno {
+    height: 100%;
+    border-radius: 0;
+    transition: width 0.4s ease;
+}
+
+/* Pendientes hoy: progreso del cumplimiento de hoy (acento). Ayer: éxito. */
+.panelExpArbolLateralBarra--pendientes {
+    background: var(--dashboard-acento, #7c9cff);
+}
+
+.panelExpArbolLateralBarra--ayer {
+    background: var(--dashboard-exito, #4caf7d);
+}
+
+/* Envoltorio del árbol: columna central estable para no depender del ancho
+ * de los bloques laterales. */
+.panelExpArbolArbolWrap {
+    flex: 0 0 auto;
 }
 
 /* Modo sidebar: el panel fluye con el contenido (sin posicionamiento especial). */
