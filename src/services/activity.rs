@@ -8,7 +8,9 @@ use crate::models::activity::{
     ActivityHeatmapResponse, ActivityPeriod, ActivityQuery, ActivityStats, ActivityStatsQuery,
     ActivityStatsResponse, RecordActivityRequest, RecordActivityResponse, ACTIVITY_TYPES,
 };
-use crate::repositories::{ActivityDetailParams, ActivityInsert, ActivityRepository};
+use crate::repositories::{
+    ActivityDetailParams, ActivityInsert, ActivityRepository, DerivedActivityRow,
+};
 
 const MAX_ACTIVITY_DAYS: i64 = 365;
 const MAX_DETAILS_BYTES: usize = 16 * 1024;
@@ -38,9 +40,23 @@ impl ActivityService {
             query.habito_id,
         )
         .await?;
+        /* [26-08-2026] El panel de Actividad refleja el HISTORIAL REAL de
+         * cumplimiento, no eventos registrados. Fusionamos las filas de
+         * activity_events con las derivadas del historial (payload de hábitos +
+         * tabla detallada + completed_at de tareas), deduplicando por
+         * (fecha, tipo, elemento). activity_events solo complementa con lo no
+         * derivable (notas/adjuntos) y la hora exacta del día. */
+        let derived = ActivityRepository::derived_history_rows(
+            pool,
+            user_id,
+            period.start,
+            period.end,
+        )
+        .await?;
+        let derived = apply_derived_filters(derived, query.r#type.as_deref(), query.proyecto_id, query.habito_id);
         Ok(ActivityHeatmapResponse {
             success: true,
-            heatmap: build_heatmap(rows),
+            heatmap: build_heatmap(rows, derived),
             periodo: period.into_response(),
         })
     }
@@ -58,19 +74,51 @@ impl ActivityService {
         )?;
         let totals =
             ActivityRepository::stats_by_type(pool, user_id, period.start, period.end).await?;
-        let active_days =
-            ActivityRepository::active_days(pool, user_id, period.start, period.end).await?;
         let recent_dates = ActivityRepository::recent_dates(pool, user_id, period.end).await?;
-        let mut total_map = std::collections::BTreeMap::new();
-        for (activity_type, count) in totals {
-            total_map.insert(activity_type, count);
+        /* [26-08-2026] Las estadísticas también deben reflejar el historial real
+         * de cumplimiento (mismo merge que el heatmap): sin esto, un usuario
+         * con todo su historial en el payload vería 0 totales y racha 0. */
+        let derived =
+            ActivityRepository::derived_history_rows(pool, user_id, period.start, period.end)
+                .await?;
+        let mut total_map: std::collections::BTreeMap<String, i64> = totals
+            .into_iter()
+            .collect();
+        let mut fechas_historial: std::collections::HashSet<NaiveDate> =
+            std::collections::HashSet::new();
+        let mut claves_derivadas = std::collections::HashSet::new();
+        for fila in derived {
+            fechas_historial.insert(fila.date);
+            if claves_derivadas.insert((fila.date, fila.activity_type.clone(), fila.element_id)) {
+                *total_map.entry(fila.activity_type).or_default() += 1;
+            }
         }
+        let active_days = {
+            let mut fechas_eventos = std::collections::HashSet::new();
+            for (fecha,) in ActivityRepository::distinct_dates(
+                pool,
+                user_id,
+                period.start,
+                period.end,
+            )
+            .await?
+            {
+                fechas_eventos.insert(fecha);
+            }
+            fechas_eventos.union(&fechas_historial).count() as i64
+        };
+        /* Racha: días con actividad, unión de eventos y historial */
+        let mut fechas_recientes: std::collections::HashSet<NaiveDate> =
+            recent_dates.into_iter().collect();
+        fechas_recientes.extend(fechas_historial);
+        let mut fechas_ordenadas: Vec<NaiveDate> = fechas_recientes.into_iter().collect();
+        fechas_ordenadas.sort_unstable_by(|a, b| b.cmp(a));
         Ok(ActivityStatsResponse {
             success: true,
             estadisticas: ActivityStats {
                 totales: total_map,
                 active_days,
-                racha: current_streak(&recent_dates, period.end),
+                racha: current_streak(&fechas_ordenadas, period.end),
             },
             periodo: period.into_response(),
         })
@@ -87,7 +135,7 @@ impl ActivityService {
             user_id,
             ActivityDetailParams {
                 date: query.fecha,
-                activity_type: query.r#type,
+                activity_type: query.r#type.clone(),
                 project_id: query.proyecto_id,
                 habit_id: query.habito_id,
                 page: query.page,
@@ -95,11 +143,48 @@ impl ActivityService {
             },
         )
         .await?;
+        let mut items = detail.items;
+        /* [26-08-2026] Fusionar el historial real del día: si el usuario marcó
+         * días (o los importó) sin que exista un evento registrado, el detalle
+         * debe mostrarlos igualmente (mismo merge que el heatmap). Se deduplica
+         * por (tipo, elemento): el evento real gana (tiene hora e id). Los
+         * derivados usan id sintético negativo y hora null. */
+        let derived = ActivityRepository::derived_history_rows(pool, user_id, query.fecha, query.fecha)
+            .await?;
+        let mut claves_presentes: std::collections::HashSet<(String, Option<i64>)> = items
+            .iter()
+            .map(|item| (item.activity_type.clone(), item.element_id))
+            .collect();
+        let mut id_sintetico: i64 = -1;
+        for fila in apply_derived_filters(
+            derived,
+            query.r#type.as_deref(),
+            query.proyecto_id,
+            query.habito_id,
+        ) {
+            let clave = (fila.activity_type.clone(), fila.element_id);
+            if claves_presentes.insert(clave) {
+                items.push(crate::models::activity::ActivityDetailItem {
+                    id: id_sintetico,
+                    activity_type: fila.activity_type,
+                    element_id: fila.element_id,
+                    element_type: fila.element_type,
+                    project_id: fila.project_id,
+                    date: query.fecha,
+                    time: None,
+                    element_name: fila.element_name,
+                    project_name: None,
+                    details: serde_json::Value::Object(serde_json::Map::default()),
+                });
+                id_sintetico -= 1;
+            }
+        }
+        /* Los derivados sin hora van al final (el SQL ya ordenó los eventos). */
         let truncated = detail.truncated;
         Ok(crate::models::activity::ActivityDayResponse {
             success: true,
             fecha: query.fecha,
-            detalle: detail.items,
+            detalle: items,
             page: query.page,
             per_page: query.per_page,
             truncated,
@@ -293,36 +378,80 @@ fn validate_record(request: &RecordActivityRequest) -> Result<(), AppError> {
 
 fn build_heatmap(
     rows: Vec<crate::repositories::ActivityCountRow>,
+    derived: Vec<DerivedActivityRow>,
 ) -> std::collections::BTreeMap<NaiveDate, ActivityHeatmapDay> {
-    let max_total = rows
-        .iter()
-        .fold(
-            std::collections::BTreeMap::<NaiveDate, i64>::new(),
-            |mut totals, row| {
-                *totals.entry(row.date).or_default() += row.count;
-                totals
-            },
-        )
-        .values()
-        .copied()
-        .max()
-        .unwrap_or(0);
-    let mut heatmap = std::collections::BTreeMap::new();
+    /* Filas de events agrupadas por (fecha, tipo, elemento). */
+    let mut eventos: std::collections::HashMap<(NaiveDate, String, Option<i64>), i64> =
+        std::collections::HashMap::new();
     for row in rows {
+        *eventos
+            .entry((row.date, row.activity_type.clone(), row.element_id))
+            .or_default() += row.count;
+    }
+    /* Historial real: una unidad por (fecha, tipo, elemento); si ya existe un
+     * evento para el mismo elemento no se duplica (el evento solo aporta la
+     * hora y el conteo de filas). */
+    let mut claves_derivadas = std::collections::HashSet::new();
+    for fila in &derived {
+        let clave = (fila.date, fila.activity_type.clone(), fila.element_id);
+        if claves_derivadas.insert(clave.clone()) && !eventos.contains_key(&clave) {
+            eventos.insert(clave, 1);
+        }
+    }
+    /* Agregar por día */
+    let mut por_dia: std::collections::BTreeMap<NaiveDate, i64> =
+        std::collections::BTreeMap::new();
+    for (clave, count) in &eventos {
+        *por_dia.entry(clave.0).or_default() += count;
+    }
+    let max_total = por_dia.values().copied().max().unwrap_or(0);
+    let mut heatmap = std::collections::BTreeMap::new();
+    for (clave, count) in &eventos {
         let day = heatmap
-            .entry(row.date)
+            .entry(clave.0)
             .or_insert_with(|| ActivityHeatmapDay {
                 nivel: 0,
                 total: 0,
                 tipos: std::collections::BTreeMap::new(),
             });
-        day.total += row.count;
-        day.tipos.insert(row.activity_type, row.count);
+        day.total += count;
+        *day.tipos.entry(clave.1.clone()).or_default() += count;
     }
     for day in heatmap.values_mut() {
         day.nivel = activity_level(day.total, max_total);
     }
     heatmap
+}
+
+/// Filtra las filas derivadas del historial real con los mismos filtros que
+/// activity_events (tipo / proyecto / hábito).
+fn apply_derived_filters(
+    derived: Vec<DerivedActivityRow>,
+    activity_type: Option<&str>,
+    project_id: Option<i64>,
+    habit_id: Option<i64>,
+) -> Vec<DerivedActivityRow> {
+    derived
+        .into_iter()
+        .filter(|fila| {
+            if let Some(activity_type) = activity_type {
+                if fila.activity_type != activity_type {
+                    return false;
+                }
+            }
+            if let Some(project_id) = project_id {
+                if fila.project_id != Some(project_id) {
+                    return false;
+                }
+            }
+            if let Some(habit_id) = habit_id {
+                if fila.element_id != Some(habit_id) || fila.element_type.as_deref() != Some("habito") {
+                    return false;
+                }
+            }
+            true
+        })
+        .collect()
 }
 
 fn activity_level(total: i64, max_total: i64) -> i32 {

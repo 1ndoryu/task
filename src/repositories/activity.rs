@@ -9,6 +9,7 @@ use crate::models::activity::ActivityDetailItem;
 pub struct ActivityCountRow {
     pub date: NaiveDate,
     pub activity_type: String,
+    pub element_id: Option<i64>,
     pub count: i64,
 }
 
@@ -50,6 +51,20 @@ pub struct ActivityInsert<'a> {
     pub details: &'a Value,
 }
 
+/// [26-08-2026] Fila derivada del historial REAL de cumplimiento (no de un
+/// evento registrado): hábitos cumplidos/pospuestos (payload + tabla detallada)
+/// y tareas completadas (`completed_at`). Es la fuente de verdad del panel de
+/// Actividad; `activity_events` solo complementa lo no derivable (notas,
+/// adjuntos) y aporta la hora exacta cuando existe.
+pub struct DerivedActivityRow {
+    pub date: NaiveDate,
+    pub activity_type: String,
+    pub element_id: Option<i64>,
+    pub element_type: Option<String>,
+    pub project_id: Option<i64>,
+    pub element_name: Option<String>,
+}
+
 pub struct ActivityRepository;
 
 impl ActivityRepository {
@@ -63,7 +78,8 @@ impl ActivityRepository {
         habit_id: Option<i64>,
     ) -> Result<Vec<ActivityCountRow>, sqlx::Error> {
         let mut query = QueryBuilder::<Postgres>::new(
-            "SELECT date, type AS activity_type, COUNT(*)::bigint AS count
+            "SELECT date, type AS activity_type, element_legacy_id AS element_id,
+                    COUNT(*)::bigint AS count
              FROM activity_events
              WHERE user_id = ",
         );
@@ -74,8 +90,127 @@ impl ActivityRepository {
             .push(" AND ")
             .push_bind(end);
         add_filters(&mut query, activity_type, project_id, habit_id);
-        query.push(" GROUP BY date, type ORDER BY date ASC, type ASC");
+        query.push(
+            " GROUP BY date, type, element_legacy_id ORDER BY date ASC, type ASC",
+        );
         query.build_query_as().fetch_all(pool).await
+    }
+
+    /// [26-08-2026] Deriva las filas de cumplimiento del HISTORIAL REAL (fuente
+    /// de verdad del panel de Actividad), no de eventos registrados:
+    /// - Hábitos: `payload.historialCompletados`/`historialPospuestos` + la
+    ///   tabla detallada `dashboard_habit_history` (estados precisos con notas).
+    /// - Tareas: `payload.fechaCompletado` (zona local del cliente) con
+    ///   fallback a `completed_at::date`.
+    pub async fn derived_history_rows(
+        pool: &PgPool,
+        user_id: Uuid,
+        start: NaiveDate,
+        end: NaiveDate,
+    ) -> Result<Vec<DerivedActivityRow>, sqlx::Error> {
+        let mut rows = Vec::new();
+
+        /* Hábitos: historial del payload + nombre para el detalle.
+         * [26-08-2026] NO se filtra por deleted_at: la actividad es un hecho
+         * durable. El soft-delete conserva el payload (con historialCompletados)
+         * y dashboard_habit_history/activity_events no se limpian al borrar la
+         * entidad, así que la actividad de hábitos eliminados debe persistir. */
+        let habits: Vec<(i64, Value)> = sqlx::query_as(
+            "SELECT legacy_id, payload FROM dashboard_habits
+             WHERE user_id = $1",
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+        for (legacy_id, payload) in habits {
+            let nombre = payload.get("nombre").and_then(Value::as_str).map(str::to_owned);
+            for (clave, tipo) in [
+                ("historialCompletados", "habito_cumplido"),
+                ("historialPospuestos", "habito_pospuesto"),
+            ] {
+                if let Some(fechas) = payload.get(clave).and_then(Value::as_array) {
+                    for valor in fechas {
+                        let Some(fecha_str) = valor.as_str() else { continue };
+                        let Ok(fecha) = NaiveDate::parse_from_str(fecha_str, "%Y-%m-%d") else {
+                            continue;
+                        };
+                        if fecha >= start && fecha <= end {
+                            rows.push(DerivedActivityRow {
+                                date: fecha,
+                                activity_type: tipo.to_string(),
+                                element_id: Some(legacy_id),
+                                element_type: Some("habito".into()),
+                                project_id: None,
+                                element_name: nombre.clone(),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        /* Tabla detallada: estados precisos (puede tener días que el payload
+         * ya no lista tras purga de 365; ambos se deduplican en el servicio). */
+        let detailed: Vec<(i64, NaiveDate, String)> = sqlx::query_as(
+            "SELECT habit_legacy_id, date, status FROM dashboard_habit_history
+             WHERE user_id = $1 AND date BETWEEN $2 AND $3",
+        )
+        .bind(user_id)
+        .bind(start)
+        .bind(end)
+        .fetch_all(pool)
+        .await?;
+        for (legacy_id, fecha, status) in detailed {
+            let activity_type = match status.as_str() {
+                "completado" => "habito_cumplido",
+                "pospuesto" => "habito_pospuesto",
+                /* "omitido" no es un tipo de actividad: no es cumplimiento */
+                _ => continue,
+            };
+            rows.push(DerivedActivityRow {
+                date: fecha,
+                activity_type: activity_type.to_string(),
+                element_id: Some(legacy_id),
+                element_type: Some("habito".into()),
+                project_id: None,
+                element_name: None,
+            });
+        }
+
+        /* Tareas completadas: fecha local del cliente si está en el payload,
+         * con fallback a completed_at (huso del servidor). Igual que hábitos:
+         * sin filtro deleted_at para conservar la actividad de tareas borradas. */
+        let tasks: Vec<(i64, Option<i64>, Value, Option<NaiveDate>)> = sqlx::query_as(
+            "SELECT legacy_id, project_legacy_id, payload, completed_at::date
+             FROM dashboard_tasks
+             WHERE user_id = $1
+               AND (payload ? 'fechaCompletado' OR completed_at IS NOT NULL)",
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+        for (legacy_id, project_id, payload, completed_date) in tasks {
+            let texto = payload.get("texto").and_then(Value::as_str).map(str::to_owned);
+            let fecha = payload
+                .get("fechaCompletado")
+                .and_then(Value::as_str)
+                .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok())
+                .or(completed_date);
+            if let Some(fecha) = fecha {
+                if fecha >= start && fecha <= end {
+                    rows.push(DerivedActivityRow {
+                        date: fecha,
+                        activity_type: "tarea_completada".to_string(),
+                        element_id: Some(legacy_id),
+                        element_type: Some("tarea".into()),
+                        project_id,
+                        element_name: texto,
+                    });
+                }
+            }
+        }
+
+        Ok(rows)
     }
 
     pub async fn detail_rows(
@@ -192,6 +327,25 @@ impl ActivityRepository {
         .fetch_one(pool)
         .await?;
         Ok(count)
+    }
+
+    /// Fechas distintas con actividad registrada en el rango (para unir con el
+    /// historial real al calcular días activos / racha).
+    pub async fn distinct_dates(
+        pool: &PgPool,
+        user_id: Uuid,
+        start: NaiveDate,
+        end: NaiveDate,
+    ) -> Result<Vec<(NaiveDate,)>, sqlx::Error> {
+        sqlx::query_as(
+            "SELECT DISTINCT date FROM activity_events
+             WHERE user_id = $1 AND date BETWEEN $2 AND $3",
+        )
+        .bind(user_id)
+        .bind(start)
+        .bind(end)
+        .fetch_all(pool)
+        .await
     }
 
     pub async fn recent_dates(

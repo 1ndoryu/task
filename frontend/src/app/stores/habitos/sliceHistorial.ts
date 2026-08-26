@@ -8,6 +8,7 @@
 import {obtenerFechaHoy} from '../../utils/fecha';
 import {habitosService} from '../../services/habitosService';
 import {invalidarCache} from '../../services/actividadStore';
+import {registrarActividad} from '../../services/actividadService';
 import {useHabitosHistorialStore} from '../habitosHistorialStore';
 import type {HabitosSliceHistorial, CrearSliceHabitos} from './tipos';
 
@@ -33,6 +34,20 @@ export const crearSliceHistorial: CrearSliceHabitos<HabitosSliceHistorial> = (se
             try {
                 /* Llamar al servicio */
                 await habitosService.marcarDia(habitoId, fecha, estado);
+
+                /* [26-08-2026] Registrar actividad con la FECHA marcada y la hora
+                 * local actual: el panel de Actividad se deriva del historial real,
+                 * y sin este registro la hora del marcado retroactivo se perdía
+                 * (el toggle del dashboard sí la registraba; el modal heatmap no). */
+                if (estado === 'completado' || estado === 'pospuesto') {
+                    registrarActividad({
+                        tipo: estado === 'completado' ? 'habito_cumplido' : 'habito_pospuesto',
+                        elementoId: habitoId,
+                        elementoTipo: 'habito',
+                        fecha,
+                        detalles: habito.nombre ? {elementoNombre: habito.nombre} : undefined
+                    });
+                }
 
                 /* Confirmar guardado exitoso */
                 set({estadoGuardado: 'idle', errorGuardado: null}, false, 'marcarDia/exito');
@@ -87,6 +102,16 @@ export const crearSliceHistorial: CrearSliceHabitos<HabitosSliceHistorial> = (se
             try {
                 /* Llamar al servicio */
                 await habitosService.desmarcarDia(habitoId, fecha);
+
+                /* [26-08-2026] Registrar la anulación con la fecha y hora local
+                 * (coherente con marcarDia y con el toggle del dashboard). */
+                registrarActividad({
+                    tipo: 'habito_desmarcado',
+                    elementoId: habitoId,
+                    elementoTipo: 'habito',
+                    fecha,
+                    detalles: habito.nombre ? {elementoNombre: habito.nombre} : undefined
+                });
 
                 /* Confirmar guardado exitoso */
                 set({estadoGuardado: 'idle', errorGuardado: null}, false, 'desmarcarDia/exito');

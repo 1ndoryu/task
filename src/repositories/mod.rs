@@ -16,7 +16,9 @@ mod subscription;
 mod timeline;
 mod user;
 
-pub use activity::{ActivityCountRow, ActivityDetailParams, ActivityInsert, ActivityRepository};
+pub use activity::{
+    ActivityCountRow, ActivityDetailParams, ActivityInsert, ActivityRepository, DerivedActivityRow,
+};
 pub use collaboration::{
     CollaborationRepository, TeamConnectionRow, TeamConnectionViewRow, TeamResponseOutcome,
 };
