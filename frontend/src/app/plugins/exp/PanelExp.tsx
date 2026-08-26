@@ -71,15 +71,19 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
             />
             {!minimizado && (
                 <div className="panelExpCuerpo">
-                    <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
-                        <Zap size={13} />
-                        <span>Nv. {nivel}</span>
+                    <div className="panelExpFila">
+                        <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
+                            <Zap size={13} />
+                            <span>Nv. {nivel}</span>
+                        </div>
+                        <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
+                        <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
                     </div>
+                    {/* [27-08-2026] El árbol va debajo de las barras, con su propio
+                     * margen: no compite con Nv/Vida/EXP en la fila superior. */}
                     <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
                         <ArbolVida vida={vida} />
                     </div>
-                    <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
-                    <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
                 </div>
             )}
         </div>

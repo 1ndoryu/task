@@ -19,11 +19,18 @@
     text-transform: none;
 }
 
-/* Cuerpo del panel: barras lado a lado con el padding estándar de panel. */
+/* Cuerpo del panel: dos filas apiladas (fila de stats arriba, árbol abajo). */
 .panelExpCuerpo {
     display: flex;
+    flex-direction: column;
     gap: var(--dashboard-espacioLg, 16px);
     padding: var(--dashboard-espacioMd, 10px) var(--dashboard-espacioLg, 16px);
+}
+
+/* Fila superior: Nivel + barras de Vida y EXP lado a lado. */
+.panelExpFila {
+    display: flex;
+    gap: var(--dashboard-espacioLg, 16px);
     align-items: stretch;
 }
 
@@ -91,13 +98,14 @@
 }
 
 /* Árbol pixel art del estado de vida: blanco sobre el fondo del panel, sin
- * caja. La copa aumenta de densidad con la vida (menos hojas = menos vida). */
+ * caja. Va debajo de las barras de Vida/EXP, centrado y con su propio margen
+ * superior para separarse de la fila de stats. La copa aumenta de densidad
+ * con la vida (menos hojas = menos vida). */
 .panelExpArbol {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
-    align-self: stretch;
+    margin-top: var(--dashboard-espacioSm, 6px);
     --arbol-color: var(--dashboard-textoActivo, #ffffff);
 }
 
@@ -114,8 +122,12 @@
 /* Móvil: compacto, una sola línea utilizable. */
 @media (max-width: 640px) {
     .panelExpCuerpo {
-        gap: 8px;
+        gap: var(--dashboard-espacioMd, 10px);
         padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 10px);
+    }
+
+    .panelExpFila {
+        gap: 8px;
     }
 
     .panelExpItem {
