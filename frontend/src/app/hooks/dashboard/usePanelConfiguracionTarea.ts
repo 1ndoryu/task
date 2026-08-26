@@ -115,9 +115,15 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
 
         configuracion.adjuntos = adjuntos;
         const asignacion = {asignadoA, asignadoANombre, asignadoAAvatar};
+        /* [28-08-2026] Persistir la dificultad (manual o auto-estimada) en el
+         * store EXP al guardar: si el usuario la cambió con la pill, se escribe,
+         * y al reabrir ya no se sobreescribe (el guard del auto-asigner lo ve). */
+        if (tarea && typeof tarea.id === 'number') {
+            asignarDificultad(tarea.id, dificultad);
+        }
         onGuardar(configuracion, prioridad, texto.trim(), asignacion, urgencia, tags, dependencias, grupoEjecucion);
         onCerrar();
-    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, dependencias, grupoEjecucion, onGuardar, onCerrar]);
+    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, dependencias, grupoEjecucion, onGuardar, onCerrar, tarea, dificultad, asignarDificultad]);
 
     /* Hook de autoguardado */
     const {guardarEstadoInicial, manejarCerrarConGuardado} = useAutoguardado({
@@ -129,11 +135,22 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
 
     /* Ref para evitar loops infinitos en useEffect */
     const lastTareaIdRef = useRef<number | undefined>(undefined);
+    /* [28-08-2026] Cuando el usuario cambia la dificultad manualmente con la pill
+     * se marca un override para que una estimación automática aún en vuelo no
+     * pise su elección al resolver. */
+    const overrideManualRef = useRef(false);
+
+    /* Wrapper del setter: cancela la auto-estimación pendiente si el usuario
+     * elige manualmente (la pill usa onDificultadChange = setDificultad). */
+    const manejarCambioDificultad = useCallback((valor: Dificultad) => {
+        overrideManualRef.current = true;
+        setDificultad(valor);
+    }, []);
 
     /* [28-08-2026] Asignación automática de dificultad al abrir la config de una
      * tarea SIN dificultad en el store EXP: se estima (IA para admin, heurística
      * en caso contrario/fallo) y se persiste en el store (glory-exp). No se
-     * sobreescribe si la tarea ya tenía dificultad. */
+     * sobreescribe si la tarea ya tenía dificultad ni si el usuario eligió manual. */
     useEffect(() => {
         if (!tarea || tipoID(tarea.id) == null) return;
         if (dificultades[String(tarea.id)]) return;
@@ -146,6 +163,8 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         let cancelado = false;
         dificultadEstimada.then(d => {
             if (cancelado) return;
+            /* No pisar una elección manual del usuario. */
+            if (overrideManualRef.current) return;
             asignarDificultad(tarea.id, d);
             setDificultad(d);
         });
@@ -257,7 +276,7 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         fechaMaxima, setFechaMaxima, tieneRepeticion, setTieneRepeticion,
         frecuencia, setFrecuencia, adjuntos, setAdjuntos, tags, setTags,
         dependencias, setDependencias, grupoEjecucion, setGrupoEjecucion,
-        dificultad, setDificultad,
+        dificultad, setDificultad: manejarCambioDificultad,
         asignadoA, asignadoANombre, asignadoAAvatar,
         proyectoIdLocal, completadoLocal,
         modoEdicion, esMovil, claseModal,

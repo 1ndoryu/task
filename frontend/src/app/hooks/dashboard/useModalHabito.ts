@@ -198,6 +198,10 @@ export function useModalHabito({
      * String(habito.id) — idéntica a la que usa el plugin EXP (useExpPlugin).
      * La frecuenciaDesc replica h.frecuencia?.tipo ?? 'diario' del plugin. */
     const ultimoHabitoIdRef = useRef<number | undefined>(undefined);
+    /* [28-08-2026] Cuando el usuario cambia la dificultad manualmente con la pill
+     * se marca un override para que la estimación automática (aún en vuelo al
+     * abrir) no pise su elección al resolver. */
+    const overrideManualRef = useRef(false);
     useEffect(() => {
         const idHabito = esModoSubHabito ? subHabito?.id : habito?.id;
         if (idHabito == null || typeof idHabito !== 'number') {
@@ -207,13 +211,21 @@ export function useModalHabito({
         if (idHabito !== ultimoHabitoIdRef.current) {
             ultimoHabitoIdRef.current = idHabito;
             if (idHabito == null) return;
-            /* Sincronizar la dificultad desde el store (si ya estaba). */
+            /* Cambio de entidad: resetear el override y sincronizar desde el store. */
+            overrideManualRef.current = false;
             setDificultad(dificultades[String(idHabito)] ?? 'Media');
             return;
         }
         /* Si la tarea/hábito ya cambió y la dificultad ya fue asignada en vivo,
          * no volver a estimar (evita loops). */
     }, [esModoSubHabito, subHabito?.id, habito?.id]);
+
+    /* Wrapper del setter: cancela la auto-estimación pendiente si el usuario
+     * elige manualmente (la pill usa onDificultadChange = setDificultad). */
+    const manejarCambioDificultad = useCallback((valor: Dificultad) => {
+        overrideManualRef.current = true;
+        setDificultad(valor);
+    }, []);
 
     /* Asignación automática (solo modo edición de hábito, no subhábito) cuando
      * la entidad no tiene dificultad en el store EXP. */
@@ -231,6 +243,8 @@ export function useModalHabito({
         });
         promesa.then(d => {
             if (cancelado) return;
+            /* No pisar una elección manual del usuario. */
+            if (overrideManualRef.current) return;
             asignarDificultad(idParaEstimar, d);
             setDificultad(d);
         });
@@ -359,8 +373,15 @@ export function useModalHabito({
                 grupoEjecucion
             });
         }
+        /* [28-08-2026] Persistir la dificultad (manual o auto-estimada) en el
+         * store EXP al guardar la edición de un hábito con id. Clave
+         * String(habito.id) idéntica al plugin; es el único modo con id real
+         * (el subhábito no tiene dificultad y al crear aún no hay id). */
+        if (!esModoSubHabito && habito && typeof habito.id === 'number') {
+            asignarDificultad(habito.id, dificultad);
+        }
         onCerrar();
-    }, [esModoSubHabito, subHabito, habitoPadre, nombre, importancia, frecuencia, ventanaOportunidad, descripcion, icono, colorIcono, grupoEjecucion, dependencias, validarFormulario, editarSubHabito, onGuardar, onCerrar, esHabitoEspecialAyuno]);
+    }, [esModoSubHabito, subHabito, habitoPadre, habito, nombre, importancia, dificultad, frecuencia, ventanaOportunidad, descripcion, icono, colorIcono, grupoEjecucion, dependencias, validarFormulario, editarSubHabito, onGuardar, onCerrar, esHabitoEspecialAyuno, asignarDificultad]);
 
     /* Auto-guardado: al cerrar el modal, guardar si hay nombre válido */
     const manejarCerrarConGuardado = useCallback(() => {
@@ -427,7 +448,7 @@ export function useModalHabito({
         setColorIcono,
         importancia,
         setImportancia,
-        dificultad, setDificultad,
+        dificultad, setDificultad: manejarCambioDificultad,
         frecuencia, setFrecuencia,
         ventanaOportunidad, setVentanaOportunidad,
         dependencias, setDependencias,
