@@ -1,93 +1,117 @@
 /*
  * plugins/exp/modalEditorArbol.css
- * Estilos del modal de dibujo del árbol de vida. Reutiliza las variables del
- * sistema de diseño del dashboard (superficie, texto, borde, espacios) para
- * ser visualmente coherente con el resto de modales.
+ * Estilos del modal de dibujo del árbol de vida.
+ *
+ * Usa el MISMO idioma visual que los demás modales (ConfigExp, déficit calórico):
+ * variables reales del sistema --dashboard-* (espacios, radio, superposición,
+ * bordes, tamaños, texto) en vez de fallbacks ad-hoc. Además mapea las variables
+ * del editor pixel-art AGNÓSTICO (--pixel-editor-*) a este tema para que el lienzo
+ * y su toolbar se vean como parte del dashboard, sin tocar el componente reusable.
  */
 
+/* ---- Overlay coherente con el resto de modales (.modalOverlay) ---- */
 .modalEditorArbolOverlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.55);
+    background-color: var(--dashboard-superposicionDensa, rgba(0, 0, 0, 0.6));
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: var(--dashboard-espacioLg, 16px);
+    animation: aparecerModal 0.15s ease-out;
 }
 
 .modalEditorArbol {
-    background: var(--dashboard-superficie, #16161a);
-    border: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.1));
-    border-radius: 10px;
+    background-color: var(--dashboard-fondoSecundario, #1a1a1f);
+    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.1));
+    border-radius: var(--dashboard-radioMd, 10px);
     width: min(760px, 100%);
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--dashboard-sombraElevada, 0 16px 48px rgba(0, 0, 0, 0.5));
+    font-family: var(--dashboard-fuenteMonoespaciada, inherit);
+    font-size: var(--dashboard-tamanoBase, 13px);
+    color: var(--dashboard-textoNormal, #e8e8ea);
+    animation: deslizarModal 0.2s ease-out;
 }
 
+/* ---- Cabecera ---- */
 .modalEditorArbolCabecera {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.1));
+    gap: var(--dashboard-espacioSm, 6px);
+    padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
 }
 
 .modalEditorArbolTitulo {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: var(--dashboard-fuenteTitulo, 13px);
+    gap: var(--dashboard-espacioMini, 4px);
+    font-size: var(--dashboard-tamanoBase, 13px);
     font-weight: 600;
     color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
 .modalEditorArbolCerrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
     background: none;
     border: none;
-    color: var(--dashboard-textoSuave, #9a9aa3);
-    font-size: 20px;
+    color: var(--dashboard-textoApagado, #808080);
+    font-size: var(--dashboard-tamanoMediano, 14px);
     line-height: 1;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 6px;
+    padding: 0;
+    border-radius: var(--dashboard-radioSm, 6px);
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
 .modalEditorArbolCerrar:hover {
-    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.07));
+    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
     color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
-/* Pestañas de estado */
+/* ---- Pestañas de estado ---- */
 .modalEditorArbolPestanas {
     display: flex;
-    gap: 6px;
-    padding: 10px 16px 0;
-    border-bottom: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.08));
+    gap: var(--dashboard-espacioMini, 4px);
+    padding: var(--dashboard-espacioMini, 4px);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
 }
 
 .modalEditorArbolPestana {
-    position: relative;
-    background: none;
-    border: 1px solid transparent;
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    padding: 7px 14px;
-    font-size: var(--dashboard-fuenteSecundaria, 12px);
-    color: var(--dashboard-textoSuave, #9a9aa3);
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioMini, 4px);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--dashboard-radioSm, 6px);
+    padding: var(--dashboard-espacioMini, 4px) var(--dashboard-espacioSmMd, 10px);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modalEditorArbolPestana:hover {
+    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
+    color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
 .modalEditorArbolPestana--activa {
-    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.06));
-    border-color: var(--dashboard-borde, rgba(255, 255, 255, 0.14));
+    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
+    border-color: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.12));
     color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
@@ -98,12 +122,12 @@
     background: var(--dashboard-acento, #7c9cff);
 }
 
-/* Cuerpo: lienzo + preview en columnas */
+/* ---- Cuerpo: lienzo + preview ---- */
 .modalEditorArbolCuerpo {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 180px;
-    gap: 16px;
-    padding: 16px;
+    gap: var(--dashboard-espacioLg, 16px);
+    padding: var(--dashboard-espacioLg, 16px);
     overflow-y: auto;
     align-items: start;
 }
@@ -112,32 +136,49 @@
 .modalEditorArbolPreview {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--dashboard-espacioSm, 6px);
 }
 
 .modalEditorArbolLienzoTitulo,
 .modalEditorArbolPreviewTitulo {
-    font-size: var(--dashboard-fuenteSecundaria, 12px);
-    color: var(--dashboard-textoSuave, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
 }
 
 .modalEditorArbolLienzo .editorPixel {
     max-width: 320px;
 }
 
+/* ---- Mapeo del editor AGNÓSTICO al tema del dashboard ---- */
+.modalEditorArbol {
+    --pixel-editor-icono: var(--dashboard-textoApagado, #808080);
+    --pixel-editor-iconoFondo: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.08));
+    --pixel-editor-iconoActivo: var(--dashboard-textoActivo, #e8e8ea);
+    --pixel-editor-iconoBorde: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.16));
+    --pixel-editor-error: var(--dashboard-error, #e0544c);
+    --pixel-editor-sep: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.12));
+    --pixel-editor-borde: var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.18));
+    --pixel-editor-fondo: var(--dashboard-fondo, #16161a);
+    --pixel-editor-guia: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.07));
+    --pixel-editor-relleno: #ffffff;
+    --pixel-editor-bloqueada: var(--dashboard-bordeNeutro, rgba(255, 255, 255, 0.35));
+}
+
+/* Botón de restaurar copa por defecto — estilo fantasma como el resto. */
 .modalEditorArbolRestaurar {
     align-self: flex-start;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioMini, 4px);
     background: none;
-    border: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.15));
-    border-radius: 6px;
-    color: var(--dashboard-textoSuave, #9a9aa3);
-    font-size: var(--dashboard-fuenteSecundaria, 11px);
-    padding: 5px 10px;
+    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.14));
+    border-radius: var(--dashboard-radioSm, 6px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    padding: var(--dashboard-espacioMini, 4px) var(--dashboard-espacioSmMd, 10px);
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: var(--dashboard-espacioMini, 4px);
+    transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .modalEditorArbolRestaurar:hover {
@@ -145,29 +186,31 @@
     color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
+/* Vista previa del árbol — caja sutil, no borde duro. */
 .modalEditorArbolPreviewArbol {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 96px;
-    border: 1px dashed var(--dashboard-borde, rgba(255, 255, 255, 0.15));
-    border-radius: 8px;
-    padding: 8px;
-    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.03));
+    border: 1px dashed var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.18));
+    border-radius: var(--dashboard-radioMd, 8px);
+    padding: var(--dashboard-espacioSm, 6px);
+    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.03));
 }
 
 .modalEditorArbolAyuda {
-    font-size: var(--dashboard-fuenteSecundaria, 11px);
-    color: var(--dashboard-textoSuave, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoApagado, #808080);
     line-height: 1.4;
     margin: 0;
 }
 
+/* ---- Pie ---- */
 .modalEditorArbolPie {
     display: flex;
     justify-content: flex-end;
-    padding: 12px 16px;
-    border-top: 1px solid var(--dashboard-borde, rgba(255, 255, 255, 0.1));
+    padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
+    border-top: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
 }
 
 @media (max-width: 640px) {
