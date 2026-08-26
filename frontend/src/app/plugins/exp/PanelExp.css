@@ -6,11 +6,14 @@
  * hardcodeados salvo los mínimos estructurales).
  */
 
-/* Contenedor fijo: ancla arriba del dashboard (grid y sidebar). */
+/* Contenedor fijo: ancla arriba del dashboard (grid y sidebar). El margen
+ * inferior usa el mismo espaciado que separa los paneles del grid
+ * (.dashboardGrid gap: var(--dashboard-espacioXl)). */
 .panelExpFijo {
     position: sticky;
     top: 0;
     z-index: 40;
+    margin-bottom: var(--dashboard-espacioXl, 1.5rem);
 }
 
 /* Cuerpo del panel: barras lado a lado con el padding estándar de panel. */
