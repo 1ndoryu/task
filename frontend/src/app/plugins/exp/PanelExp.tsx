@@ -7,15 +7,23 @@
  * [27-08-2026] El árbol carga su copa del store (`copasArbol`): si el usuario
  * editó el estado actual, se usa esa copa (persistida); si no, la por defecto
  * de ArbolVida. Un botón "Editar árbol" abre ModalEditorArbol.
+ *
+ * [28-08-2026] A los lados del árbol se muestran dos contadores derivados del
+ * historial real de hábitos (coherentes con el cálculo de vida/actividad):
+ * a la izquierda los PENDIENTES hoy (hábitos que debían cumplirse hoy y no
+ * están completados/pospuestos), a la derecha los COMPLETADOS ayer.
  */
 
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {Edit3, GripVertical, Heart, Minus, Settings, Sparkles, Zap} from 'lucide-react';
 import {Boton} from '../../components/ui';
 import {SeccionEncabezado} from '../../components/dashboard/SeccionEncabezado';
 import {useExpStore} from './store';
 import {usePluginActivo} from '../../stores/pluginsStore';
+import {useHabitos} from '../../stores/habitosStore';
+import {obtenerFechaHoy, sumarDias} from '../../utils/fecha';
 import {ArbolVida, type EstadoVida} from './ArbolVida';
+import {debioCumplirse} from './logica';
 import {ModalEditorArbol} from './ModalEditorArbol';
 
 interface PanelExpProps {
@@ -59,8 +67,30 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
     const minimizado = useExpStore(s => s.minimizado);
     const alternarMinimizado = useExpStore(s => s.alternarMinimizado);
     const copasArbol = useExpStore(s => s.copasArbol);
+    const habitos = useHabitos();
 
     if (!activo) return null;
+
+    /* [28-08-2026] Contadores derivados del historial real para flanquear el
+     * árbol: pendientes de HOY (debían cumplirse y no están) y completados de
+     * AYER. Coinciden con la lógica de vida (debioCumplirse) y de actividad.
+     * Un hábito pausado o pospuesto hoy no cuenta como pendiente. */
+    const {pendientesHoy, completadosAyer} = useMemo(() => {
+        const hoy = obtenerFechaHoy();
+        const ayer = sumarDias(hoy, -1);
+        let pendientes = 0;
+        let completadosAyer = 0;
+        for (const h of habitos) {
+            if (h.pausado) continue;
+            const completados = h.historialCompletados || [];
+            if (completados.includes(ayer)) completadosAyer++;
+            /* Pendiente hoy: debe cumplirse, no completado, no pospuesto hoy. */
+            if (h.historialPospuestos?.includes(hoy)) continue;
+            if (completados.includes(hoy)) continue;
+            if (debioCumplirse(h.frecuencia as never, hoy)) pendientes++;
+        }
+        return {pendientesHoy: pendientes, completadosAyer};
+    }, [habitos]);
 
     const vidaClase = vida >= 60 ? 'panelExpVida--alta' : vida >= 30 ? 'panelExpVida--media' : 'panelExpVida--baja';
 
@@ -92,8 +122,18 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
                         <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
                         <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
                     </div>
-                    <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
-                        <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
+                    <div className="panelExpArbolFila">
+                        <div className="panelExpArbolLateral panelExpArbolLateral--izq" title={`Hábitos que debían cumplirse hoy y aún no se completaron`}>
+                            <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
+                            <span className="panelExpArbolLateralEtiqueta">pendientes hoy</span>
+                        </div>
+                        <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
+                            <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
+                        </div>
+                        <div className="panelExpArbolLateral panelExpArbolLateral--der" title={`Hábitos completados ayer`}>
+                            <span className="panelExpArbolLateralValor">{completadosAyer}</span>
+                            <span className="panelExpArbolLateralEtiqueta">completados ayer</span>
+                        </div>
                     </div>
                 </div>
             )}

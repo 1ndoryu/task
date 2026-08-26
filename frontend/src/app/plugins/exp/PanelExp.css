@@ -97,17 +97,27 @@
     align-self: center;
 }
 
+/* Fila que flanquea el árbol: contadores laterales + árbol centrado.
+ * [28-08-2026] Se agregan dos resúmenes de hábitos a los lados (pendientes
+ * hoy a la izquierda, completados ayer a la derecha), coherentes con el
+ * historial real usado por vida/actividad. */
+.panelExpArbolFila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioLg, 16px);
+    margin-top: var(--dashboard-espacioXl, 24px);
+}
+
 /* Árbol pixel art del estado de vida: blanco sobre el fondo del panel, sin
- * caja. Va debajo de las barras de Vida/EXP, centrado y con su propio margen
- * para separarse de la fila de stats. La copa aumenta de densidad con la vida
- * (menos hojas = menos vida). [28-08-2026] El árbol se renderiza más grande
- * (128px vs los 64px por defecto del SVG) para que la silueta se aprecie, con
- * más separación respecto a la fila de stats. */
+ * caja. Centrado en su fila. La copa aumenta de densidad con la vida (menos
+ * hojas = menos vida). Se renderiza más grande (128px vs los 64px por defecto
+ * del SVG) para que la silueta se aprecie. */
 .panelExpArbol {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: var(--dashboard-espacioXl, 24px);
+    flex: 0 0 auto;
     --arbol-color: var(--dashboard-textoActivo, #ffffff);
 }
 
@@ -116,6 +126,43 @@
     width: 128px;
     height: 128px;
     color: var(--arbol-color, currentColor);
+}
+
+/* Bloques laterales del árbol: icono + número destacado + etiqueta pequeña,
+ * alineados a los extremos de la fila. Utilizan el idioma visual del panel
+ * (variables del sistema, sin hex). */
+.panelExpArbolLateral {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 88px;
+    color: var(--dashboard-textoSuave, #9a9aa3);
+}
+
+.panelExpArbolLateral--izq {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.panelExpArbolLateral--der {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.panelExpArbolLateralValor {
+    font-size: var(--dashboard-fuenteTitulo, 18px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--dashboard-textoActivo, #e8e8ea);
+}
+
+.panelExpArbolLateralEtiqueta {
+    font-size: var(--dashboard-fuenteSecundaria, 11px);
+    text-transform: none;
+    line-height: 1.15;
+    color: var(--dashboard-textoSuave, #9a9aa3);
 }
 
 /* Modo sidebar: el panel fluye con el contenido (sin posicionamiento especial). */
