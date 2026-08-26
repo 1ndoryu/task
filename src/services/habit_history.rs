@@ -31,8 +31,15 @@ impl HabitHistoryService {
         let today = Utc::now().date_naive();
         let requested_start = today - Duration::days(days - 1);
         let summary_start = today - Duration::days(days.max(7) - 1);
-        let history =
+        let mut history =
             HabitHistoryRepository::list(pool, user_id, habit_id, summary_start, today).await?;
+        /* Fusionar el historial legacy que vive en el payload del hábito
+         * (historialCompletados/historialPospuestos). El import y el sync
+         * escriben el historial en el payload; la tabla detallada puede estar
+         * vacía para hábitos importados, y sin esta fusión el heatmap del modal
+         * flashea los datos locales y luego los vacía con un fetch `[]`.
+         * La tabla tiene prioridad (notas/estados más precisos). */
+        merge_payload_history(pool, user_id, habit_id, &mut history).await?;
         Ok(build_response(
             habit_id,
             days,
@@ -96,6 +103,51 @@ fn validate_day(request: &MarkHabitDayRequest) -> Result<(), AppError> {
         return Err(AppError::Validation(
             "No se pueden marcar fechas futuras".into(),
         ));
+    }
+    Ok(())
+}
+
+/// Fusiona el historial legacy del payload del hábito en la lista de la tabla
+/// detallada. La tabla gana (tiene notas y estados más precisos); las fechas
+/// del payload solo se añaden si no existen ya en la tabla.
+async fn merge_payload_history(
+    pool: &PgPool,
+    user_id: Uuid,
+    habit_id: i64,
+    history: &mut Vec<HabitHistoryEntry>,
+) -> Result<(), AppError> {
+    let Some(payload) = HabitHistoryRepository::habit_payload(pool, user_id, habit_id).await?
+    else {
+        return Ok(());
+    };
+
+    let mut fechas_tabla: std::collections::HashSet<NaiveDate> =
+        history.iter().map(|entry| entry.date).collect();
+
+    /* `historialCompletados` / `historialPospuestos` → entradas de la tabla */
+    for (clave, estado) in [("historialCompletados", "completado"), ("historialPospuestos", "pospuesto")] {
+        let Some(fechas) = payload.get(clave).and_then(serde_json::Value::as_array) else {
+            continue;
+        };
+        for valor in fechas {
+            let Some(fecha_str) = valor.as_str() else {
+                continue;
+            };
+            let Ok(fecha) = NaiveDate::parse_from_str(fecha_str, "%Y-%m-%d") else {
+                continue;
+            };
+            if fechas_tabla.insert(fecha) {
+                history.push(HabitHistoryEntry {
+                    date: fecha,
+                    status: estado.to_string(),
+                    notes: None,
+                    recorded_at: fecha
+                        .and_hms_opt(12, 0, 0)
+                        .map(|momento| momento.and_utc())
+                        .unwrap_or_else(Utc::now),
+                });
+            }
+        }
     }
     Ok(())
 }

@@ -1,4 +1,5 @@
 use chrono::{DateTime, NaiveDate, Utc};
+use serde_json::Value;
 use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
@@ -31,6 +32,25 @@ impl HabitHistoryRepository {
         .fetch_one(pool)
         .await?;
         Ok(exists)
+    }
+
+    /// Payload crudo del hábito (fuente del historial legacy importado).
+    /// El historial importado vive en `payload.historialCompletados` /
+    /// `payload.historialPospuestos`; la tabla detallada puede estar vacía.
+    pub async fn habit_payload(
+        pool: &PgPool,
+        user_id: Uuid,
+        habit_id: i64,
+    ) -> Result<Option<Value>, sqlx::Error> {
+        let row: Option<(Value,)> = sqlx::query_as(
+            "SELECT payload FROM dashboard_habits
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(habit_id)
+        .fetch_optional(pool)
+        .await?;
+        Ok(row.map(|r| r.0))
     }
 
     pub async fn list(
