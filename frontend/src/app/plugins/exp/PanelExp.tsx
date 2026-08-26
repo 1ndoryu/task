@@ -17,6 +17,7 @@ import {Boton} from '../../components/ui';
 import {SeccionEncabezado} from '../../components/dashboard/SeccionEncabezado';
 import {useExpStore} from './store';
 import {usePluginActivo} from '../../stores/pluginsStore';
+import {ArbolVida} from './ArbolVida';
 
 interface PanelExpProps {
     /* Abre la configuración del plugin (Configuración → Plugins → EXP). */
@@ -73,6 +74,9 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
                     <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
                         <Zap size={13} />
                         <span>Nv. {nivel}</span>
+                    </div>
+                    <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
+                        <ArbolVida vida={vida} />
                     </div>
                     <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
                     <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />

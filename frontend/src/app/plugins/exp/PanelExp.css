@@ -90,6 +90,22 @@
     align-self: center;
 }
 
+/* Árbol pixel art del estado de vida: blanco sobre el fondo del panel, sin
+ * caja. La copa aumenta de densidad con la vida (menos hojas = menos vida). */
+.panelExpArbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    align-self: stretch;
+    --arbol-color: var(--dashboard-textoActivo, #ffffff);
+}
+
+.panelExpArbol svg {
+    display: block;
+    color: var(--arbol-color, currentColor);
+}
+
 /* Modo sidebar: el panel fluye con el contenido (sin posicionamiento especial). */
 .dashboardContenedor--sidebar .panelExpFijo {
     position: static;
