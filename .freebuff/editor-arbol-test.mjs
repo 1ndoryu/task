@@ -1,10 +1,14 @@
 /* Test de regresión del editor pixel-art del árbol (plugin exp).
  * Ejercita la lógica REAL exportada de ArbolVida (compilada con esbuild):
- * copaPorDefecto, celdasCompletas, CELDAS_TRONCO, ESTADOS_ARBOL.
- * - La copa por defecto nunca pisa el tronco fijo.
- * - celdasCompletas(estado, copaReemplazo): la copa editada (persistida en
- *   glory-exp/copasArbol) REEMPLAZA la por defecto y conserva el tronco.
- * - El tronco es bloqueado (aunque el editor lo intente no entra a la copa).
+ * copaPorDefecto, celdasCompletas, migrarCopaLegacy, CELDAS_TRONCO, ESTADOS_ARBOL.
+ *
+ * Contrato actual (el tronco YA es editable):
+ * - celdasCompletas(estado) sin edición = tronco + copa por defecto.
+ * - celdasCompletas(estado, imagenCompleta) devuelve la imagen EXACTA que el
+ *   usuario guardó: si borró el tronco, el render NO lo restaura.
+ * - migrarCopaLegacy convierte los datos legacy (copa sin tronco) añadiendo el
+ *   tronco por defecto; es idempotente (solo la corre el store una vez, con el
+ *   flag copasArbolMigrado).
  * - Densidad estrictamente creciente entre los 5 estados.
  */
 import assert from 'node:assert';
@@ -30,49 +34,45 @@ const code = r.outputFiles[0].text;
 const mod = {exports: {}};
 const fn = new Function('exports', 'module', 'require', code);
 fn(mod.exports, mod, reqFE);
-const {copaPorDefecto, celdasCompletas, CELDAS_TRONCO, ESTADOS_ARBOL} = mod.exports;
+const {copaPorDefecto, celdasCompletas, migrarCopaLegacy, CELDAS_TRONCO, ESTADOS_ARBOL} = mod.exports;
 const tronco = CELDAS_TRONCO;
 
 let pasados = 0;
 function ok(n) { pasados++; console.log(`  ✓ ${n}`); }
 
-/* 1. La copa por defecto nunca pisa el tronco fijo. */
+/* 1. La copa por defecto nunca pisa el tronco. */
 const copa100 = copaPorDefecto(100);
 assert.equal([...copa100].filter(c => tronco.has(c)).length, 0, 'copa def no toca tronco');
 ok('copa por defecto (100) no contiene celdas de tronco');
 
-/* 2. celdasCompletas sin reemplazo = tronco + copa por defecto. */
-const sinReemplazo = celdasCompletas(100);
-assert.equal(sinReemplazo.size, tronco.size + copa100.size, 'sinReemplazo suma');
-assert.equal([...sinReemplazo].filter(c => tronco.has(c)).length, tronco.size, 'tronco presente');
-ok('celdasCompletas(100) = tronco + copa por defecto');
+/* 2. celdasCompletas sin edición = tronco + copa por defecto. */
+const sinEdicion = celdasCompletas(100);
+assert.equal(sinEdicion.size, tronco.size + copa100.size, 'sinEdicion suma');
+assert.equal([...sinEdicion].filter(c => tronco.has(c)).length, tronco.size, 'tronco presente');
+ok('celdasCompletas(100) sin edición = tronco + copa por defecto');
 
-/* 3. Persistencia: pintar -> copa COMPLETA que reemplaza la por defecto.
- * La copa editada puede quitar y añadir hojas a voluntad (borrar una celda de
- * la por defecto debe reflejarse: no reaparece, porque celdasCompletas usa la
- * copa editada EN LUGAR de la por defecto, no la suma). */
-const editada = new Set(copa100);
-editada.add('15,7');           /* celda nueva dibujada (lateral, no tronco) */
-editada.delete('6,0');        /* celda de copa por defecto que el usuario borró */
-const con = celdasCompletas(100, editada);
-assert.ok(con.has('15,7'), 'celda dibujada visible');
-assert.equal([...con].filter(c => tronco.has(c)).length, tronco.size, 'tronco intacto');
-assert.ok(!con.has('6,0'), 'copa por defecto borrada por el usuario no reaparece');
-ok('copa editada reemplaza la por defecto conservando tronco');
+/* 3. Imagen editada reemplaza por completo: si el usuario borra el tronco, el
+ * render NO lo restaura (el tronco ya no es bloqueado). */
+const imagenSinTronco = new Set(copa100);
+imagenSinTronco.add('15,7');       /* celda nueva dibujada */
+imagenSinTronco.delete('6,0');     /* hoja por defecto borrada */
+const conEdicion = celdasCompletas(100, imagenSinTronco);
+assert.ok(conEdicion.has('15,7'), 'celda dibujada visible');
+assert.ok(!conEdicion.has('6,0'), 'hoja por defecto borrada no reaparece');
+assert.equal([...conEdicion].filter(c => tronco.has(c)).length, 0, 'sin tronco si el usuario lo borró');
+ok('celdasCompletas(estado, imagen) usa la imagen EXACTA (tronco borrable)');
 
-/* 4. Tronco bloqueado: pintar sobre él no añade celdas de copa. El tronco lo
- * pinta siempre CELDAS_TRONCO; la copa editada no debe poder añadir celdas que
- * dupliquen el tronco ni celdas fuera del borde 16x16. deja11,7 no existe en el
- * tronco ni en la copa por defecto; si el editor intenta pintarla, no debe
- * colapsar y la densidad de copa editada coincide con la invariable. */
-const editada4 = new Set(copaPorDefecto(25));
-editada4.add('7,10');  /* celda de TRONCO (y 7..15): el render la muestra, pero NO como copa extra */
-const conTronco = celdasCompletas(25, editada4);
-/* El tronco completo sigue intacto (todas las celdas de tronco presentes). */
-assert.equal([...conTronco].filter(c => tronco.has(c)).length, tronco.size, 'tronco completo');
-/* Ninguna celda fuera del borde. */
-for (const c of conTronco) { const [x, y] = c.split(',').map(Number); assert.ok(x >= 0 && x < 16 && y >= 0 && y < 16, `celda fuera de borde: ${c}`); }
-ok('celdas del tronco siempre presentes y nada fuera del borde 16x16');
+/* 3b. Imagen editada vacía = árbol vacío intencional. */
+assert.equal(celdasCompletas(50, new Set()).size, 0, 'set vacío → árbol vacío');
+ok('imagen editada vacía renderiza árbol vacío (borró todo a propósito)');
+
+/* 4. migrarCopaLegacy: añade el tronco a una copa legacy (v1) y es idempotente. */
+const migrada = migrarCopaLegacy([...copaPorDefecto(50)]);
+assert.equal([...migrada].filter(c => tronco.has(c)).length, tronco.size, 'legacy migrada conserva tronco');
+assert.equal(migrada.length, tronco.size + copaPorDefecto(50).size, 'tamaño = tronco + copa');
+assert.deepEqual(migrarCopaLegacy(migrada), migrada, 'idempotente');
+assert.deepEqual(migrarCopaLegacy([]), [...tronco], 'copa vacía legacy → solo tronco');
+ok('migrarCopaLegacy añade tronco a datos legacy y es idempotente');
 
 /* 5. Densidad estrictamente creciente entre los estados. */
 const d = ESTADOS_ARBOL.map(e => copaPorDefecto(e).size);

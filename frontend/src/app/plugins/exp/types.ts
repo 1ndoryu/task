@@ -77,9 +77,15 @@ export interface EstadoExp {
     /* Panel colapsado (minimizado): solo queda la cabecera. Persiste para que
      * el estado no se pierda entre sesiones. */
     minimizado: boolean;
-    /* [28-08-2026] Copas editadas por el usuario por estado (0..100): cada
-     * estado guarda las claves "x,y" de celdas de copa dibujadas en el editor
-     * pixel-art. Se suman a la copa por defecto de ArbolVida (nunca borran el
-     * tronco fijo). Arrays para persistencia JSON fiable (Set no serializa). */
+    /* [28-08-2026] Imágenes editadas por el usuario por estado (0..100): cada
+     * estado guarda las claves "x,y" de TODAS las celdas del árbol dibujadas en
+     * el editor pixel-art (tronco incluido si el usuario lo conservó). La imagen
+     * editada reemplaza por completo a la por defecto en el render. Arrays para
+     * persistencia JSON fiable (Set no serializa). */
     copasArbol: Record<string, string[]>;
+    /* [28-08-2026] Flag de migración del editor del árbol: la v1 guardaba solo
+     * la copa (sin tronco, porque era bloqueado). Al migrar una sola vez se
+     * añade el tronco por defecto (migrarCopaLegacy) y se marca aquí para no
+     * volver a fusionar (el usuario YA puede borrar el tronco a propósito). */
+    copasArbolMigrado: boolean;
 }

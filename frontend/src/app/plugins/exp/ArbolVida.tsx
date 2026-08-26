@@ -11,11 +11,14 @@
  * - Sin fondo ni fundido: píxeles celda a celda con `shape-rendering="crispEdges"`.
  *
  * Arquitectura reutilizable (para el editor pixel-art):
- * - `CELDAS_TRONCO` : Set de celdas fijas (tronco + raíces), no editables.
+ * - `CELDAS_TRONCO` : Set con el tronco + raíces POR DEFECTO de cada estado.
+ *   No es fijo: el editor permite al usuario borrarlo/redibujarlo si quiere
+ *   (la imagen guardada del estado reemplaza por completo la por defecto).
  * - `copaPorDefecto(estado)` : copa por defecto del estado como Set de celdas.
- * - `celdasCompletas(estado, copaExtra?)`: tronco + (copa por defecto ∪ editadas).
- * El render acepta `copaEditada` por estado (persistida en glory-exp) para
- * reflejar lo que el usuario dibujó en el editor.
+ * - `celdasCompletas(estado, imagenEditada?)`: imagen completa del estado:
+ *   por defecto = tronco + copa por defecto; si el usuario editó el estado
+ *   (persistido en glory-exp/copasArbol), la imagen editada REEMPLAZA por
+ *   completo a la por defecto (puede quitar el tronco o añadir lo que quiera).
  *
  * COORDENADAS (importante): todo el módulo usa el MISMO sistema que el editor
  * pixel-art — origen (0,0) ARRIBA-izquierda, y crece hacia abajo. Así la copa
@@ -30,9 +33,10 @@ export const DIMENSION_ARBOL = 16;
 export type EstadoVida = 0 | 25 | 50 | 75 | 100;
 export const ESTADOS_ARBOL: EstadoVida[] = [0, 25, 50, 75, 100];
 
-/* Tronco + raíces: celdas fijas, idénticas en los 5 estados, NO editables.
- * Tronco 2 de ancho (x 7..8) desde y7 hasta y15 (base); raíces a x 4/6/9/11 en
- * la base y15. (Coordenadas de editor: y=0 arriba, y=15 abajo.) */
+/* Tronco + raíces por defecto: idénticos en los 5 estados. Tronco 2 de ancho
+ * (x 7..8) desde y7 hasta y15 (base); raíces a x 4/6/9/11 en la base y15.
+ * (Coordenadas de editor: y=0 arriba, y=15 abajo.) NO son bloqueadas: si el
+ * usuario guarda una imagen editada, esta reemplaza por completo al tronco. */
 export const CELDAS_TRONCO: Set<string> = new Set<string>();
 (function () {
     for (let y = 7; y <= 15; y++) {
@@ -107,17 +111,28 @@ export function copaPorDefecto(estado: EstadoVida): Set<string> {
     return filasACeldas(COMPOSICION_ESTADOS[estado]);
 }
 
-/* Celdas totales para renderizar un estado.
- * - Si el usuario editó el estado (copaEditada completa en copasArbol), la copa
- *   editada REEMPLAZA a la por defecto (puede quitar hojas y dibujar otras).
- * - El tronco fijo (CELDAS_TRONCO) siempre se conserva. */
-export function celdasCompletas(estado: EstadoVida, copaReemplazo?: Set<string>): Set<string> {
-    const resultado = new Set<string>(CELDAS_TRONCO);
-    const origen: Iterable<string> = copaReemplazo ? copaReemplazo : copaPorDefecto(estado);
-    for (const c of origen) {
-        if (!CELDAS_TRONCO.has(c)) resultado.add(c);
+/* Imagen completa para renderizar un estado.
+ * - Sin edición (`imagenEditada === undefined`): tronco + copa por defecto.
+ * - Con edición: la imagen guardada REEMPLAZA por completo a la por defecto,
+ *   incluyendo el tronco — el usuario puede borrarlo/redibujarlo. Un Set
+ *   vacío guardado es intencional (el usuario borró todo el árbol).
+ * La migración de datos antiguos (copa sin tronco) NO se hace aquí: la hace
+ * el store una sola vez (migrarCopaLegacy + flag copasArbolMigrado), para que
+ * una imagen editada sin tronco no se confunda con datos legacy. */
+export function celdasCompletas(estado: EstadoVida, imagenEditada?: Set<string>): Set<string> {
+    if (imagenEditada === undefined) {
+        return new Set<string>([...CELDAS_TRONCO, ...copaPorDefecto(estado)]);
     }
-    return resultado;
+    return new Set<string>(imagenEditada);
+}
+
+/* Migración única de datos legacy del editor (v1): antes el store guardaba
+ * SOLO la copa (sin tronco) porque el tronco era bloqueado e iba implícito.
+ * Ahora el tronco es editable y la imagen guardada es completa; esta función
+ * convierte un array legacy añadiéndole el tronco por defecto (idempotente
+ * sobre datos ya migrados: tronco ∪ celdas). La usa el store una sola vez. */
+export function migrarCopaLegacy(celdas: string[]): string[] {
+    return [...new Set<string>([...CELDAS_TRONCO, ...celdas])];
 }
 
 interface ArbolVidaProps {

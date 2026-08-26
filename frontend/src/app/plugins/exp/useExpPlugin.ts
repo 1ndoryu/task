@@ -33,6 +33,7 @@ interface BlobGloryExp {
         registros: unknown[];
         minimizado: boolean;
         copasArbol: Record<string, string[]>;
+        copasArbolMigrado: boolean;
     }>;
     config?: Record<string, unknown>;
 }

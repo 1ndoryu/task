@@ -13,6 +13,7 @@ import type {ConfigExp, Dificultad, EstadoExp, RegistroExp, TipoEntidadExp} from
 import {CONFIG_EXP_POR_DEFECTO} from './types';
 import {calcularExp, calcularNivel, type ParametrosExp} from './logica';
 import {obtenerFechaHoy} from '../../utils/fecha';
+import {migrarCopaLegacy} from './ArbolVida';
 
 interface ExpStore extends EstadoExp {
     config: ConfigExp;
@@ -32,12 +33,27 @@ interface ExpStore extends EstadoExp {
     actualizarVida: (nuevaVida: number, fechaCalculo: string) => void;
     actualizarConfig: (parcial: Partial<ConfigExp>) => void;
     alternarMinimizado: () => void;
-    /* [28-08-2026] Guarda la copa editada por el usuario para un estado del
-     * árbol (0/25/50/75/100). Recibe un Set de celdas; se persiste como array. */
+    /* [28-08-2026] Guarda la imagen editada por el usuario para un estado del
+     * árbol (0/25/50/75/100). Recibe un Set de celdas con la imagen COMPLETA
+     * (tronco incluido si el usuario lo conservó); se persiste como array y
+     * reemplaza por completo a la por defecto en el render. */
     asignarCopaArbol: (estado: number, copa: Set<string>) => void;
-    /* Elimina la edición del usuario para un estado (vuelve a la copa por defecto). */
+    /* Elimina la edición del usuario para un estado (vuelve al árbol por defecto). */
     restablecerCopaArbol: (estado: number) => void;
     restaurarDesdeServidor: (estado: Partial<EstadoExp> | null, config?: Partial<ConfigExp>) => void;
+}
+
+/* Migración única de copasArbol legacy (v1: solo copa, sin tronco). Se ejecuta
+ * al rehidratar el store (persist) y al restaurar desde el servidor; con el
+ * flag copasArbolMigrado se garantiza que ocurre UNA sola vez, para que una
+ * imagen editada a propósito SIN tronco no se confunda con datos legacy. */
+function migrarCopasSiNecesario(state: EstadoExp): EstadoExp {
+    if (state.copasArbolMigrado) return state;
+    const copas: Record<string, string[]> = {};
+    for (const [estado, celdas] of Object.entries(state.copasArbol || {})) {
+        copas[estado] = Array.isArray(celdas) ? migrarCopaLegacy(celdas) : celdas;
+    }
+    return {...state, copasArbol: copas, copasArbolMigrado: true};
 }
 
 function crearIdRegistro(): string {
@@ -58,6 +74,7 @@ export const useExpStore = create<ExpStore>()(
             ultimoCalculoVida: '',
             minimizado: false,
             copasArbol: {},
+            copasArbolMigrado: false,
             config: {...CONFIG_EXP_POR_DEFECTO},
 
             deshacerExp: (entidadId, entidadTipo) => {
@@ -179,22 +196,51 @@ export const useExpStore = create<ExpStore>()(
 
             restaurarDesdeServidor: (estado, config) => {
                 if (!estado) return;
-                set(s => ({
-                    ...(typeof estado.vida === 'number' ? {vida: estado.vida} : {}),
-                    ...(typeof estado.exp === 'number' ? {exp: estado.exp} : {}),
-                    ...(typeof estado.nivel === 'number' ? {nivel: estado.nivel} : {}),
-                    ...(typeof estado.expEnNivel === 'number' ? {expEnNivel: estado.expEnNivel} : {}),
-                    ...(typeof estado.expParaSiguienteNivel === 'number' ? {expParaSiguienteNivel: estado.expParaSiguienteNivel} : {}),
-                    ...(estado.dificultades && typeof estado.dificultades === 'object' ? {dificultades: {...s.dificultades, ...estado.dificultades}} : {}),
-                    ...(Array.isArray(estado.registros) ? {registros: estado.registros} : {}),
-                    ...(typeof estado.minimizado === 'boolean' ? {minimizado: estado.minimizado} : {}),
-                    ...(estado.copasArbol && typeof estado.copasArbol === 'object' ? {copasArbol: {...s.copasArbol, ...estado.copasArbol}} : {}),
-                    ...(config ? {config: {...s.config, ...config}} : {})
-                }));
+                set(s => {
+                    /* [28-08-2026] El blob del servidor puede ser legacy (v1:
+                     * copa sin tronco, sin flag). Si el blob entrante NO lleva
+                     * copasArbolMigrado, sus copas son legacy y hay que migrarlas
+                     * ANTES de fusionarlas (si no, pisarían la migración local y
+                     * el flag ya puesto evitaría re-migrar). Si el blob entrante
+                     * SÍ está migrado, se respeta tal cual (el usuario pudo
+                     * borrar el tronco a propósito). */
+                    const entranteMigrado = estado.copasArbolMigrado === true;
+                    const copasEntrantes: Record<string, string[]> = {};
+                    if (estado.copasArbol && typeof estado.copasArbol === 'object') {
+                        for (const [k, celdas] of Object.entries(estado.copasArbol)) {
+                            if (!Array.isArray(celdas)) continue;
+                            copasEntrantes[k] = entranteMigrado ? celdas : migrarCopaLegacy(celdas);
+                        }
+                    }
+                    const fusionado: EstadoExp = {
+                        ...s,
+                        ...(typeof estado.vida === 'number' ? {vida: estado.vida} : {}),
+                        ...(typeof estado.exp === 'number' ? {exp: estado.exp} : {}),
+                        ...(typeof estado.nivel === 'number' ? {nivel: estado.nivel} : {}),
+                        ...(typeof estado.expEnNivel === 'number' ? {expEnNivel: estado.expEnNivel} : {}),
+                        ...(typeof estado.expParaSiguienteNivel === 'number' ? {expParaSiguienteNivel: estado.expParaSiguienteNivel} : {}),
+                        ...(estado.dificultades && typeof estado.dificultades === 'object' ? {dificultades: {...s.dificultades, ...estado.dificultades}} : {}),
+                        ...(Array.isArray(estado.registros) ? {registros: estado.registros} : {}),
+                        ...(typeof estado.minimizado === 'boolean' ? {minimizado: estado.minimizado} : {}),
+                        ...(Object.keys(copasEntrantes).length > 0 ? {copasArbol: {...s.copasArbol, ...copasEntrantes}} : {}),
+                        copasArbolMigrado: s.copasArbolMigrado || entranteMigrado
+                    };
+                    return migrarCopasSiNecesario(fusionado);
+                });
             }
         }),
         {
-            name: 'glory-exp'
+            name: 'glory-exp',
+            /* Migrar los datos legacy del editor del árbol una sola vez al
+             * rehidratar desde localStorage (antes de que cualquier render use
+             * copasArbol). El flag evita re-fusionar el tronco sobre una imagen
+             * editada a propósito sin tronco. */
+            merge: (persistido, actual) => {
+                /* El estado persistido convive con las acciones del store;
+                 * la migración toca solo el fragmento de estado (copasArbol). */
+                const base = {...actual, ...(persistido as object)} as ExpStore;
+                return {...base, ...migrarCopasSiNecesario(base)};
+            }
         }
     )
 );
