@@ -5,7 +5,7 @@
  * subhábitos, tareas del hábito y panel de chat.
  */
 
-import {useState, useCallback, useEffect, useMemo} from 'react';
+import {useState, useCallback, useEffect, useMemo, useRef} from 'react';
 import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, SubHabito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito, VentanaOportunidad} from '../../types/dashboard';
 import type {ParticipanteChat} from '../usePanelChat';
 import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
@@ -13,6 +13,9 @@ import type {EstadoHabito} from '../../components/shared';
 import {usePanelChat} from '../usePanelChat';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {usePluginsStore} from '../../stores/pluginsStore';
+import {useExpStore} from '../../plugins/exp/store';
+import {estimarDificultad} from '../../plugins/exp/service';
+import type {Dificultad} from '../../plugins/exp/types';
 import {obtenerFechaHoy} from '../../utils/fecha';
 
 type DatosFormulario = DatosNuevoHabito;
@@ -49,6 +52,9 @@ export interface UseModalHabitoReturn {
     setColorIcono: (v: string) => void;
     importancia: NivelImportancia;
     setImportancia: (v: NivelImportancia) => void;
+    /* Dificultad del plugin EXP */
+    dificultad: Dificultad;
+    setDificultad: (v: Dificultad) => void;
     frecuencia: FrecuenciaHabito;
     setFrecuencia: (v: FrecuenciaHabito) => void;
     ventanaOportunidad: VentanaOportunidad | undefined;
@@ -116,6 +122,12 @@ export function useModalHabito({
     const [icono, setIcono] = useState(habito?.icono || 'check-circle');
     const [colorIcono, setColorIcono] = useState(habito?.colorIcono || '#888888');
     const [importancia, setImportancia] = useState<NivelImportancia>((subHabito ? subHabito.importancia : habito?.importancia) || 'Media');
+    /* [28-08-2026] Dificultad del plugin EXP: misma escala que la importancia.
+     * Se lee del store (dificultades[String(id)]) y se asigna automáticamente al
+     * abrir la edición de un hábito sin dificultad. */
+    const dificultades = useExpStore(s => s.dificultades);
+    const asignarDificultad = useExpStore(s => s.asignarDificultad);
+    const [dificultad, setDificultad] = useState<Dificultad>('Media');
     const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>((subHabito ? subHabito.frecuencia : habito?.frecuencia) || FRECUENCIA_POR_DEFECTO);
     const [ventanaOportunidad, setVentanaOportunidad] = useState<VentanaOportunidad | undefined>(subHabito ? subHabito.ventanaOportunidad : habito?.ventanaOportunidad);
     const [dependencias, setDependencias] = useState<import('../../types/dashboard').ReferenciaDependencia[]>((subHabito ? subHabito.dependencias : habito?.dependencias) || []);
@@ -180,6 +192,51 @@ export function useModalHabito({
         },
         [habito, toggleSubHabito]
     );
+
+    /* [28-08-2026] Sincronizar dificultad desde el store EXP y asignación
+     * automática al abrir la edición de un hábito SIN dificultad. Clave
+     * String(habito.id) — idéntica a la que usa el plugin EXP (useExpPlugin).
+     * La frecuenciaDesc replica h.frecuencia?.tipo ?? 'diario' del plugin. */
+    const ultimoHabitoIdRef = useRef<number | undefined>(undefined);
+    useEffect(() => {
+        const idHabito = esModoSubHabito ? subHabito?.id : habito?.id;
+        if (idHabito == null || typeof idHabito !== 'number') {
+            ultimoHabitoIdRef.current = undefined;
+            return;
+        }
+        if (idHabito !== ultimoHabitoIdRef.current) {
+            ultimoHabitoIdRef.current = idHabito;
+            if (idHabito == null) return;
+            /* Sincronizar la dificultad desde el store (si ya estaba). */
+            setDificultad(dificultades[String(idHabito)] ?? 'Media');
+            return;
+        }
+        /* Si la tarea/hábito ya cambió y la dificultad ya fue asignada en vivo,
+         * no volver a estimar (evita loops). */
+    }, [esModoSubHabito, subHabito?.id, habito?.id]);
+
+    /* Asignación automática (solo modo edición de hábito, no subhábito) cuando
+     * la entidad no tiene dificultad en el store EXP. */
+    const idParaEstimar = modoEdicion && !esModoSubHabito ? habito?.id : undefined;
+    useEffect(() => {
+        if (idParaEstimar == null) return;
+        if (dificultades[String(idParaEstimar)]) return;
+        if (!habito) return;
+        let cancelado = false;
+        const promesa = estimarDificultad({
+            nombre: habito.nombre,
+            importancia: habito.importancia,
+            frecuenciaDesc: habito.frecuencia?.tipo ?? 'diario',
+            extras: habito.descripcion
+        });
+        promesa.then(d => {
+            if (cancelado) return;
+            asignarDificultad(idParaEstimar, d);
+            setDificultad(d);
+        });
+        return () => { cancelado = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [modoEdicion, esModoSubHabito, habito?.id]);
 
     /* Filtrar y ordenar tareas que pertenecen a este hábito */
     const tareasDelHabito = useMemo(() => {
@@ -369,7 +426,9 @@ export function useModalHabito({
         colorIcono,
         setColorIcono,
         importancia,
-        setImportancia,        frecuencia, setFrecuencia,
+        setImportancia,
+        dificultad, setDificultad,
+        frecuencia, setFrecuencia,
         ventanaOportunidad, setVentanaOportunidad,
         dependencias, setDependencias,
         grupoEjecucion, setGrupoEjecucion,

@@ -50,7 +50,7 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
     const {
         modoEdicion, nombre, setNombre, descripcion, setDescripcion,
         icono, setIcono, colorIcono, setColorIcono,
-        importancia, setImportancia, frecuencia, setFrecuencia,
+        importancia, setImportancia, dificultad, setDificultad, frecuencia, setFrecuencia,
         ventanaOportunidad, setVentanaOportunidad, dependencias, setDependencias, grupoEjecucion, setGrupoEjecucion, errores, esHabitoEspecialAyuno, esModoSubHabito,
         estadoHoy, manejarCambioEstado,
         chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna,
@@ -100,6 +100,8 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                 onNombreChange={setNombre}
                                 importancia={importancia}
                                 onImportanciaChange={setImportancia}
+                                dificultad={dificultad}
+                                onDificultadChange={setDificultad}
                                 frecuencia={frecuencia}
                                 onFrecuenciaChange={setFrecuencia}
                                 ventanaOportunidad={ventanaOportunidad}
@@ -144,6 +146,8 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                                     }}
                                     importancia={importancia}
                                     onImportanciaChange={setImportancia}
+                                    dificultad={dificultad}
+                                    onDificultadChange={setDificultad}
                                     frecuencia={frecuencia}
                                     onFrecuenciaChange={setFrecuencia}
                                     ventanaOportunidad={esHabitoEspecialAyuno ? undefined : ventanaOportunidad}
@@ -208,6 +212,8 @@ export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, h
                             }}
                             importancia={importancia}
                             onImportanciaChange={setImportancia}
+                            dificultad={dificultad}
+                            onDificultadChange={setDificultad}
                             frecuencia={frecuencia}
                             onFrecuenciaChange={setFrecuencia}
                             ventanaOportunidad={ventanaOportunidad}

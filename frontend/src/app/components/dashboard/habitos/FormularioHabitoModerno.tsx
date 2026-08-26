@@ -17,7 +17,7 @@ import {useState, useEffect} from 'react';
 import {useDependenciasUIStore} from '../../../stores/dependenciasUIStore';
 import type {NivelImportancia, FrecuenciaHabito, Habito, SubHabito, DatosNuevoSubHabito, VentanaOportunidad, Tarea, DatosEdicionTarea, ReferenciaDependencia} from '../../../types/dashboard';
 import {useGruposEjecucion} from '../../../hooks/useGruposEjecucion';
-import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorFrecuenciaPill, FilaPropiedades, SelectorVentanaOportunidad, SelectorGrupo} from '../../shared';
+import {CampoTituloLimpio, CampoSubtituloLimpio, SelectorIconoProyecto, SelectorEstadoHabitoPill, SelectorImportanciaPill, SelectorDificultadPill, SelectorFrecuenciaPill, FilaPropiedades, SelectorVentanaOportunidad, SelectorGrupo} from '../../shared';
 import type {EstadoHabito} from '../../shared';
 import {Boton} from '../../ui';
 import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
@@ -37,6 +37,9 @@ interface FormularioHabitoModernoProps {
     /* Propiedades */
     importancia: NivelImportancia;
     onImportanciaChange: (valor: NivelImportancia) => void;
+    /* Dificultad del plugin EXP (misma escala que la importancia) */
+    dificultad?: import('../../../plugins/exp/types').Dificultad;
+    onDificultadChange?: (valor: import('../../../plugins/exp/types').Dificultad) => void;
     /* Frecuencia */
     frecuencia: FrecuenciaHabito;
     onFrecuenciaChange: (frecuencia: FrecuenciaHabito) => void;
@@ -86,7 +89,7 @@ interface FormularioHabitoModernoProps {
     onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
 }
 
-export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, frecuencia, onFrecuenciaChange, ventanaOportunidad, onVentanaOportunidadChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, nombreBloqueado = false, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito, onConfigurarSubHabito, subHabito, onMarcarDiaSubHabito, onDesmarcarDiaSubHabito, dependencias = [], onDependenciasChange, tareasParaDependencias = [], habitosParaDependencias = [], padreId, tipoElemento = 'habito', grupoEjecucion, onGrupoEjecucionChange}: FormularioHabitoModernoProps): JSX.Element {
+export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, dificultad, onDificultadChange, frecuencia, onFrecuenciaChange, ventanaOportunidad, onVentanaOportunidadChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, nombreBloqueado = false, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito, onConfigurarSubHabito, subHabito, onMarcarDiaSubHabito, onDesmarcarDiaSubHabito, dependencias = [], onDependenciasChange, tareasParaDependencias = [], habitosParaDependencias = [], padreId, tipoElemento = 'habito', grupoEjecucion, onGrupoEjecucionChange}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;
     const [modalDependenciasAbierto, setModalDependenciasAbierto] = useState(false);
 
@@ -143,6 +146,13 @@ export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, on
             <FilaPropiedades etiqueta="Importancia">
                 <SelectorImportanciaPill importancia={importancia} onChange={onImportanciaChange} />
             </FilaPropiedades>
+
+            {/* Dificultad (plugin EXP) - misma escala que la importancia */}
+            {dificultad && onDificultadChange && (
+                <FilaPropiedades etiqueta="Dificultad">
+                    <SelectorDificultadPill dificultad={dificultad} onChange={onDificultadChange} />
+                </FilaPropiedades>
+            )}
 
             {/* Frecuencia */}
             <FilaPropiedades etiqueta="Frecuencia">
