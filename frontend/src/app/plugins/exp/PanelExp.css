@@ -150,7 +150,7 @@
     text-align: right;
 }
 
-/* Fila que junta el número con su barra, justo al lado. */
+/* Fila que junta la barra con el número (barra primero, número después). */
 .panelExpArbolLateralFila {
     display: flex;
     align-items: center;
@@ -163,8 +163,7 @@
 }
 
 .panelExpArbolLateral--der .panelExpArbolLateralFila {
-    justify-content: flex-end;
-    flex-direction: row-reverse;
+    justify-content: flex-start;
 }
 
 .panelExpArbolLateralValor {
@@ -183,30 +182,32 @@
     color: var(--dashboard-textoSuave, #9a9aa3);
 }
 
-/* Barra de progreso: 6px de alto, esquinas RECTAS (sin radio), pista tenue. */
+/* Barra de progreso del contador lateral: más alta y menos ancha, sin
+ * relleno de color propio ni pista/fondo, con borde de 1px del MISMO color
+ * del número (texto activo) y esquinas RECTAS. El relleno interior usa el
+ * mismo color -> la barra se ve como un contorno que se va llenando. */
 .panelExpArbolLateralBarra {
     position: relative;
-    flex: 1 1 auto;
-    height: 6px;
-    min-width: 40px;
+    flex: 0 1 auto;
+    width: 40px;
+    height: 10px;
+    min-width: 32px;
     border-radius: 0;
-    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--dashboard-textoActivo, #e8e8ea);
     overflow: hidden;
 }
 
 .panelExpArbolLateralBarraRelleno {
     height: 100%;
     border-radius: 0;
+    background: currentColor;
     transition: width 0.4s ease;
 }
 
-/* Pendientes hoy: progreso del cumplimiento de hoy (acento). Ayer: éxito. */
-.panelExpArbolLateralBarra--pendientes {
-    background: var(--dashboard-acento, #7c9cff);
-}
-
-.panelExpArbolLateralBarra--ayer {
-    background: var(--dashboard-exito, #4caf7d);
+/* El relleno usa el MISMO color del número (texto activo), no el del bloque
+ * (que es texto secundario para la etiqueta). Sin color propio en ambos. */
+.panelExpArbolLateralBarra {
+    color: var(--dashboard-textoActivo, #e8e8ea);
 }
 
 /* Envoltorio del árbol: columna central estable para no depender del ancho

@@ -146,10 +146,10 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
                     <div className="panelExpArbolFila">
                         <div className="panelExpArbolLateral panelExpArbolLateral--izq" title={`Hábitos que debían cumplirse hoy y aún no se completaron`}>
                             <div className="panelExpArbolLateralFila">
-                                <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
                                 <div className="panelExpArbolLateralBarra">
                                     <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--pendientes" style={{width: `${pctPendientes}%`}} />
                                 </div>
+                                <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
                             </div>
                             <span className="panelExpArbolLateralEtiqueta">pendientes hoy</span>
                         </div>
