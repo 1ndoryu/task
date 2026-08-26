@@ -22,6 +22,7 @@ interface ExpStore extends EstadoExp {
     asignarDificultades: (mapa: Record<string, Dificultad>) => void;
     actualizarVida: (nuevaVida: number, fechaCalculo: string) => void;
     actualizarConfig: (parcial: Partial<ConfigExp>) => void;
+    alternarMinimizado: () => void;
     restaurarDesdeServidor: (estado: Partial<EstadoExp> | null, config?: Partial<ConfigExp>) => void;
 }
 
@@ -41,6 +42,7 @@ export const useExpStore = create<ExpStore>()(
             registros: [],
             ultimaSync: 0,
             ultimoCalculoVida: '',
+            minimizado: false,
             config: {...CONFIG_EXP_POR_DEFECTO},
 
             registrarExp: (entidadId, entidadTipo, nombre, dificultad, importancia, multTipo) => {
@@ -90,6 +92,10 @@ export const useExpStore = create<ExpStore>()(
                 set(state => ({config: {...state.config, ...parcial}}));
             },
 
+            alternarMinimizado: () => {
+                set(state => ({minimizado: !state.minimizado}));
+            },
+
             restaurarDesdeServidor: (estado, config) => {
                 if (!estado) return;
                 set(s => ({
@@ -100,6 +106,7 @@ export const useExpStore = create<ExpStore>()(
                     ...(typeof estado.expParaSiguienteNivel === 'number' ? {expParaSiguienteNivel: estado.expParaSiguienteNivel} : {}),
                     ...(estado.dificultades && typeof estado.dificultades === 'object' ? {dificultades: {...s.dificultades, ...estado.dificultades}} : {}),
                     ...(Array.isArray(estado.registros) ? {registros: estado.registros} : {}),
+                    ...(typeof estado.minimizado === 'boolean' ? {minimizado: estado.minimizado} : {}),
                     ...(config ? {config: {...s.config, ...config}} : {})
                 }));
             }

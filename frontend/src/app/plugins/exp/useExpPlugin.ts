@@ -31,6 +31,7 @@ interface BlobGloryExp {
         expParaSiguienteNivel: number;
         dificultades: Record<string, Dificultad>;
         registros: unknown[];
+        minimizado: boolean;
     }>;
     config?: Record<string, unknown>;
 }

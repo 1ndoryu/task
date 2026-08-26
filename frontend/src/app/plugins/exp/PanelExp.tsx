@@ -5,17 +5,23 @@
  * EXP/nivel. No es un panel del grid: se renderiza desde DashboardIsland cuando
  * el plugin está activo.
  *
- * [27-08-2026] Reescrito para ser visualmente coherente con el resto de paneles:
- * usa el contenedor canónico `.panelDashboard` (superficie, borde, radio) y el
- * encabezado `SeccionEncabezado` con `variante="panelHeader"` (mismo fondo,
- * borde inferior y hover de opacidad que los demás paneles), con el nivel en la
- * zona de acciones y las barras como cuerpo del panel.
+ * [27-08-2026] Visualmente coherente con el resto de paneles: contenedor
+ * canónico `.panelDashboard` + encabezado `SeccionEncabezado` con
+ * `variante="panelHeader"`. El encabezado muestra "Game" y dos botones de
+ * acción: engranaje (abre la configuración del plugin) y minimizar (colapsa el
+ * cuerpo dejando solo la cabecera; el estado persiste en el store).
  */
 
-import {GripVertical, Heart, Sparkles, Zap} from 'lucide-react';
+import {GripVertical, Heart, Minus, Settings, Sparkles, Zap} from 'lucide-react';
+import {Boton} from '../../components/ui';
 import {SeccionEncabezado} from '../../components/dashboard/SeccionEncabezado';
 import {useExpStore} from './store';
 import {usePluginActivo} from '../../stores/pluginsStore';
+
+interface PanelExpProps {
+    /* Abre la configuración del plugin (Configuración → Plugins → EXP). */
+    onAbrirConfig?: () => void;
+}
 
 function Barra({valor, maximo, clase, icono, etiqueta, colorClase}: {valor: number; maximo: number; clase: string; icono: React.ReactNode; etiqueta: string; colorClase: string}): JSX.Element {
     const porcentaje = maximo > 0 ? Math.min(100, Math.max(0, (valor / maximo) * 100)) : 0;
@@ -33,7 +39,7 @@ function Barra({valor, maximo, clase, icono, etiqueta, colorClase}: {valor: numb
     );
 }
 
-export function PanelExp(): JSX.Element | null {
+export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
     const activo = usePluginActivo('exp');
     const vida = useExpStore(s => s.vida);
     const config = useExpStore(s => s.config);
@@ -41,6 +47,8 @@ export function PanelExp(): JSX.Element | null {
     const expParaSiguienteNivel = useExpStore(s => s.expParaSiguienteNivel);
     const nivel = useExpStore(s => s.nivel);
     const exp = useExpStore(s => s.exp);
+    const minimizado = useExpStore(s => s.minimizado);
+    const alternarMinimizado = useExpStore(s => s.alternarMinimizado);
 
     if (!activo) return null;
 
@@ -51,19 +59,25 @@ export function PanelExp(): JSX.Element | null {
         <div className="panelDashboard panelExpFijo">
             <SeccionEncabezado
                 icono={<GripVertical size={12} />}
-                titulo="EXP y Vida"
+                titulo="Game"
                 variante="panelHeader"
                 acciones={
-                    <span className="panelExpNivel" title={`${exp} EXP acumulada`}>
-                        <Zap size={12} />
-                        Nv. {nivel}
-                    </span>
+                    <>
+                        <Boton variante="badge" soloIcono onClick={onAbrirConfig} title="Configurar plugin" icono={<Settings size={12} />} />
+                        <Boton variante="badge" soloIcono onClick={alternarMinimizado} title={minimizado ? 'Restaurar panel' : 'Minimizar panel'} icono={<Minus size={12} />} />
+                    </>
                 }
             />
-            <div className="panelExpCuerpo">
-                <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
-                <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
-            </div>
+            {!minimizado && (
+                <div className="panelExpCuerpo">
+                    <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
+                        <Zap size={13} />
+                        <span>Nv. {nivel}</span>
+                    </div>
+                    <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
+                    <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
+                </div>
+            )}
         </div>
     );
 }

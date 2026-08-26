@@ -264,8 +264,9 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                     />
 
                     {/* [26-08-2026] Panel EXP fijo superior (solo si el plugin
-                     * está activo; el propio componente retorna null si no). */}
-                    <PanelExp />
+                     * está activo; el propio componente retorna null si no).
+                     * El engranaje del encabezado abre la config del plugin. */}
+                    <PanelExp onAbrirConfig={() => modales.abrirModalPluginsConConfig('exp')} />
 
                     {dashboard.cargandoDatos ? (
                         <IndicadorCarga />
@@ -289,7 +290,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onAgregarPanel={agregarPanel}
                     />
                     <div className="dashboardSidebarMain">
-                        <PanelExp />
+                        <PanelExp onAbrirConfig={() => modales.abrirModalPluginsConConfig('exp')} />
                         {dashboard.cargandoDatos ? (
                             <IndicadorCarga />
                         ) : (

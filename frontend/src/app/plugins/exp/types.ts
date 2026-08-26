@@ -74,4 +74,7 @@ export interface EstadoExp {
     ultimaSync: number;
     /* Fecha del último recálculo de vida (para no penalizar dos veces). */
     ultimoCalculoVida: string;
+    /* Panel colapsado (minimizado): solo queda la cabecera. Persiste para que
+     * el estado no se pierda entre sesiones. */
+    minimizado: boolean;
 }

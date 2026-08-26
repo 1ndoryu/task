@@ -74,15 +74,17 @@
     background: var(--dashboard-acento, #7c9cff);
 }
 
-/* Nivel en la zona de acciones del encabezado: misma escala que los iconos. */
+/* Nivel: columna compacta al inicio del cuerpo (antes de las barras). */
 .panelExpNivel {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: var(--dashboard-fuenteSecundaria, 11px);
+    gap: 5px;
+    min-width: 64px;
+    font-size: var(--dashboard-fuenteTitulo, 12px);
     font-weight: 600;
     color: var(--dashboard-textoActivo, #e8e8ea);
     white-space: nowrap;
+    align-self: center;
 }
 
 /* Modo sidebar: la barra también debe quedar arriba del contenido. */
