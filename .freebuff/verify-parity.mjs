@@ -9,6 +9,63 @@
  * las rutas dan 404 con body vacío (fallo silencioso). Se añade /api si falta. */
 const BASE_RAW = (process.env.PARITY_BASE_URL || 'http://127.0.0.1:3001/api').replace(/\/+$/, '');
 const BASE = BASE_RAW.endsWith('/api') ? BASE_RAW : BASE_RAW + '/api';
+
+/* [26-08-2026] Acceso directo a BD para auto-provisionar el admin de prueba.
+ * El contrato del producto no expone un endpoint para conceder es_admin, así
+ * que la suite promueve a su propio usuario recién registrado vía psql
+ * (DATABASE_URL del .env del proyecto, override con PARITY_DATABASE_URL).
+ * Si psql no está disponible, el bloque admin se OMITE con aviso documentado
+ * en vez de depender de un admin sembrado (paridad@test.app). */
+import pathApi from 'node:path';
+import fsApi from 'node:fs';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {fileURLToPath} from 'node:url';
+const promisifiedExecFile = promisify(execFile);
+const conn = (process.env.PARITY_DATABASE_URL || '');
+const dbUrl = conn || (() => {
+  try {
+    const dir = pathApi.dirname(fileURLToPath(import.meta.url));
+    const env = fsApi.readFileSync(pathApi.join(dir, '..', '.env'), 'utf8');
+    const m = env.match(/^DATABASE_URL=(.+)\s*$/m);
+    return m ? m[1].trim() : '';
+  } catch { return ''; }
+})();
+/* Caminos típicos de psql en Windows/Mac/Linux. */
+const psqlCandidatos = [
+  process.env.PARITY_PSQL,
+  'C:/Program Files/PostgreSQL/18/bin/psql.exe',
+  'C:/Program Files/PostgreSQL/17/bin/psql.exe',
+  'C:/Program Files/PostgreSQL/16/bin/psql.exe',
+  'psql'
+].filter(Boolean);
+async function ejecutarPsql(consulta, ...args) {
+  /* Intenta cada candidato en orden; un ENOENT (binario ausente) avanza al
+   * siguiente, cualquier otro error devuelve el fallo real. */
+  for (const bin of psqlCandidatos) {
+    try {
+      const {stdout} = await promisifiedExecFile(
+        bin, [dbUrl, '-q', '-t', '-A', '-c', consulta, ...args],
+        {timeout: 15000, windowsHide: true});
+      return {ok: true, stdout: String(stdout).trim(), code: 0};
+    } catch (err) {
+      if (err.code === 'ENOENT') continue;
+      return {ok: false, stdout: String(err.stdout || '').trim(), stderr: String(err.stderr || '').trim(), code: err.code};
+    }
+  }
+  return {ok: false, stdout: '', stderr: 'sin psql', code: 'ENOENT'};
+}
+let psqlDisponible = null; // undefined = sin probar; true/false = resultado
+async function psqlOK() {
+  if (psqlDisponible !== null) return psqlDisponible;
+  if (!dbUrl) { psqlDisponible = false; return false; }
+  const out = await ejecutarPsql('SELECT 1;');
+  psqlDisponible = out.ok;
+  if (!psqlDisponible) {
+    console.log('  ⚠ psql no disponible o BD no alcanzable (DATABASE_URL del .env) — bloque admin auto-provisionado se omite');
+  }
+  return psqlDisponible;
+}
 const WS_URL = BASE.replace(/^http/, 'ws').replace(/\/api$/, '/api/realtime/ws');
 
 let pasados = 0;
@@ -281,44 +338,57 @@ async function main() {
   assert(r.status === 200 && r.data.success, 'restaurar contraseña original → success (sin estado residual)');
 
   console.log('\n== Admin (es_admin) ==');
-  /* El usuario paridad@test.app ya es admin en BD. [26-08-2026] Password
-   * canónico = password123; si una corrida previa lo dejó con 'nueva12345'
-   * (residual histórico) se acepta como fallback y se restaura al final del
-   * bloque admin, para que las corridas sean deterministas. */
-  let contrasenaAdmin = 'password123';
-  r = await apiAuth('POST', '/auth/login', {body: {email: 'paridad@test.app', password: contrasenaAdmin}});
-  if (r.status !== 200) {
-    r = await apiAuth('POST', '/auth/login', {body: {email: 'paridad@test.app', password: 'nueva12345'}});
-    if (r.status === 200) contrasenaAdmin = 'nueva12345';
+  /* [26-08-2026] La suite NO depende de un admin sembrado: promueve a su propio
+   * usuario recién registrado (verif-...@test.app) a es_admin vía psql, porque
+   * el contrato del producto no expone un endpoint de concesión de admin.
+   * El middleware admin lee es_admin por request (join fresca a users), así que
+   * la sesión ya activa ve el rol sin re-login. Si psql/BD no está disponible,
+   * se omite el bloque con aviso documentado (skip legítimo). */
+  if (await psqlOK()) {
+    const prom = await ejecutarPsql(
+      "UPDATE users SET es_admin = TRUE WHERE id = '" + uid.replaceAll('\'', '') + "' RETURNING email;");
+    assert(prom.ok && prom.stdout.length > 0, 'auto-provisionar admin: es_admin=TRUE (psql)');
+  } else {
+    omitidos++;
+    console.log('  ⚠ omitido (auto-provisionar admin: psql/BD no disponible)');
   }
-  if (r.status !== 200) console.log('  [debug] login admin →', r.status, JSON.stringify(r.data)?.slice(0, 160));
-  assert(r.status === 200, 'login admin paridad');
+  /* El bloque de cambio de contraseña invalidó la sesión del usuario verificado
+   * (H-B04-01: cambiar password alza todas las sesiones). Re-login para que la
+   * sesión admin/preferencias/tombstones (csrfAdmin) esté viva y válida. */
+  r = await apiAuth('POST', '/auth/login', {body: {email, password: 'password123'}});
+  assert(r.status === 200, 're-login usuario verificable para bloque admin');
   const csrfAdmin = cookies['csrf_token'];
   r = await api('GET', '/admin/stats');
+  const adminDisponible = r.status === 200 && typeof r.data.totalUsuarios === 'number';
+  if (!adminDisponible) {
+    omitidos++;
+    console.log('  ⚠ omitido (admin no disponible en este entorno): stats admin → ' + r.status);
+  }
   assert(r.status === 200 && typeof r.data.totalUsuarios === 'number', 'admin stats → totalUsuarios');
-  r = await api('GET', '/admin/users?pagina=1&porPagina=5');
-  assert(r.status === 200 && Array.isArray(r.data.usuarios) && r.data.usuarios.length > 0, 'admin lista usuarios');
-  r = await api('GET', `/admin/users/${uid}`);
-  assert(r.status === 200 && r.data.id === uid, 'admin detalle del usuario verificado');
-  r = await api('POST', `/admin/users/${uid}/premium`, {body: {duracion: 30}, csrf: csrfAdmin});
-  assert(r.status === 200 && r.data.success, 'admin activa premium 30 días');
-  r = await api('POST', `/admin/users/${uid}/cancel-premium`, {csrf: csrfAdmin});
-  assert(r.status === 200 && r.data.success, 'admin cancela premium');
+  if (adminDisponible) {
+    r = await api('GET', '/admin/users?pagina=1&porPagina=5');
+    assert(r.status === 200 && Array.isArray(r.data.usuarios) && r.data.usuarios.length > 0, 'admin lista usuarios');
+    r = await api('GET', `/admin/users/${uid}`);
+    assert(r.status === 200 && r.data.id === uid, 'admin detalle del usuario verificado');
+    r = await api('POST', `/admin/users/${uid}/premium`, {body: {duracion: 30}, csrf: csrfAdmin});
+    assert(r.status === 200 && r.data.success, 'admin activa premium 30 días');
+    r = await api('POST', `/admin/users/${uid}/cancel-premium`, {csrf: csrfAdmin});
+    assert(r.status === 200 && r.data.success, 'admin cancela premium');
 
-  /* [26-08-2026] Proxy IA (paridad WordPress). Se verifica aquí, con la sesión
-   * admin ya activa, antes de que el bloque de contraseña deje la cookie jar
-   * en otro usuario. 2 llamadas reales por corrida (límites 80/h chat y 60/h
-   * nutrición por usuario). La cadena usa modelos vigentes de la cuenta
-   * (groq/compound-mini, gpt-oss-20b...) en vez de los obsoletos que daban
-   * 404 (kimi-k2-instruct-0905, llama-3.3-70b-versatile, zai-glm-4.7). */
-  console.log('\n== Proxy IA (/ai/*) ==');
-  const csrfIa = cookies['csrf_token'];
-  r = await api('POST', '/ai/chat', {body: {messages: [{role: 'user', content: 'hola'}]}, csrf: csrfIa});
-  assertIA(r.status === 200 && typeof r.data.contenido === 'string' && r.data.contenido.length > 0, 'chat IA admin → contenido real', r);
-  r = await api('POST', '/ai/nutricion', {body: {descripcion: 'un plato de arroz con pollo'}, csrf: csrfIa});
-  assertIA(r.status === 200 && typeof r.data.calorias === 'number' && r.data.calorias > 0, 'nutrición IA admin → macros con calorías', r);
-  r = await api('POST', '/ai/nutricion', {body: {descripcion: ''}, csrf: csrfIa});
-  assert(r.status === 422 || r.status === 400, 'nutrición sin descripción → error de validación');
+    /* [26-08-2026] Proxy IA (paridad WordPress). 2 llamadas reales por corrida
+     * (límites 80/h chat y 60/h nutrición por usuario). La cadena usa modelos
+     * vigentes de la cuenta en vez de los obsoletos que daban 404. TODO el
+     * dominio admin (incluido /ai/*, que exige require_admin) se omite si psql
+     * no pudo auto-provisionar al admin en este entorno. */
+    console.log('\n== Proxy IA (/ai/*) ==');
+    const csrfIa = cookies['csrf_token'];
+    r = await api('POST', '/ai/chat', {body: {messages: [{role: 'user', content: 'hola'}]}, csrf: csrfIa});
+    assertIA(r.status === 200 && typeof r.data.contenido === 'string' && r.data.contenido.length > 0, 'chat IA admin → contenido real', r);
+    r = await api('POST', '/ai/nutricion', {body: {descripcion: 'un plato de arroz con pollo'}, csrf: csrfIa});
+    assertIA(r.status === 200 && typeof r.data.calorias === 'number' && r.data.calorias > 0, 'nutrición IA admin → macros con calorías', r);
+    r = await api('POST', '/ai/nutricion', {body: {descripcion: ''}, csrf: csrfIa});
+    assert(r.status === 422 || r.status === 400, 'nutrición sin descripción → error de validación');
+  }
 
   /* [18-08-2026] Preferencias UI/plugins por usuario: el servidor debe
    * persistir el blob (layout, plugins, tema...) y devolverlo en el GET.
@@ -420,15 +490,6 @@ async function main() {
   r = await api('DELETE', `/tasks/${tareaBorradaId}`, {csrf: csrfAdmin});
   assert(r.status === 204, 'limpieza del tombstone de prueba → 204');
 
-  /* [26-08-2026] Restaurar el password canónico del admin de prueba si esta
-   * corrida entró por el fallback residual. Invalida la sesión admin, pero ya
-   * no queda trabajo de esa sesión: LWW registra usuario propio y la sección
-   * de actividad entra como admin@nakomi.studio. */
-  if (contrasenaAdmin !== 'password123') {
-    r = await api('PUT', '/security/password', {body: {contrasenaActual: contrasenaAdmin, nuevaContrasena: 'password123'}, csrf: csrfAdmin});
-    assert(r.status === 200 && r.data.success, 'restaurar password canónico del admin de prueba');
-  }
-
   /* [25-08-2026] LWW de preferencias: el backend debe fusionar el blob por
    * clave conservando la de mayor ts, nunca borrar claves ausentes y no dejar
    * que un PUT vacío/parcial haga wipe (coherencia multinavegador). Usuario
@@ -461,48 +522,64 @@ async function main() {
 
   /* [26-08-2026] PARIDAD DE CONCEPTO: el panel de Actividad debe reflejar el
    * HISTORIAL REAL de cumplimiento (payload de hábitos + completed_at de
-   * tareas), no depender de activity_events (vacía para datos importados).
-   * Regresión integrada de .freebuff/activity-test.mjs + activity-delete-test.mjs.
-   * Se verifica con admin@nakomi.studio (la cuenta con el historial importado). */
+   * tareas), no depender de activity_events. Regresión integrada de
+   * .freebuff/activity-test.mjs + activity-delete-test.mjs, con datos 100%
+   * autocontenidos: se crean hábitos con historial en fechas recientes
+   * deterministas (respecto a hoy) bajo la sesión del usuario verificable, y
+   * se comprueba que el historial del payload alimenta heatmap/detalle/
+   * estadísticas y que persiste tras borrar la entidad. NO depende de un
+   * admin sembrado ni de historial importado previo. */
   console.log('\n== Actividad derivada del historial real (no de activity_events) ==');
-  r = await apiAuth('POST', '/auth/login', {body: {email: 'admin@nakomi.studio', password: 'admin'}});
-  if (r.status !== 200) console.log('  [debug] login admin nakomi →', r.status, JSON.stringify(r.data)?.slice(0, 160));
-  assert(r.status === 200, 'login admin@nakomi.studio');
+  /* Usuario desechable dedicado: aisla el dominio de actividad de cualquier resto
+   * del resto de la suite y garantiza que los asserts midan solo los datos que
+   * este bloque crea (self-contained, sin depender de datos previos ni ajenos). */
+  const emailAct = `act-${Date.now()}@test.app`;
+  r = await apiAuth('POST', '/auth/register', {body: {email: emailAct, password: 'password123'}});
+  assert(r.status === 201 && r.data?.user?.id, 'register usuario dedicado de actividad → 201');
   const csrfAct = cookies['csrf_token'];
-  r = await api('GET', '/activity?periodo=anio&fechaHoyLocal=2026-08-26');
-  assert(r.status === 200 && typeof r.data.heatmap === 'object', 'heatmap de actividad (año) → 200');
-  const heatmapAct = r.data.heatmap || {};
-  const diasAct = Object.keys(heatmapAct).filter(d => (heatmapAct[d]?.total || 0) > 0);
-  const habitoCumplidoTotal = Object.values(heatmapAct).reduce((s, d) => s + (d.tipos?.habito_cumplido || 0), 0);
-  assert(diasAct.length >= 10, `heatmap refleja el historial importado (${diasAct.length} días con actividad)`);
-  assert(habitoCumplidoTotal >= 20, `habito_cumplido del historial importado (${habitoCumplidoTotal})`);
-  assert(!!heatmapAct['2026-07-12'] && !!heatmapAct['2026-08-25'], 'incluye fechas del historial importado (12 Jul y 25 Ago 2026)');
-  r = await api('GET', '/activity/dia?fecha=2026-08-25');
-  assert(r.status === 200 && Array.isArray(r.data.detalle) && r.data.detalle.some(i => i.tipo === 'habito_cumplido'), 'detalle del día refleja el historial real (habito_cumplido)');
-  r = await api('GET', '/activity/estadisticas?fechaHoyLocal=2026-08-26');
-  const statsAct = r.data?.estadisticas;
-  assert(r.status === 200 && (statsAct?.totales?.habito_cumplido || 0) >= 20 && (statsAct?.diasActivos || 0) > 0, 'estadísticas coherentes con el historial real');
-
-  /* Borrar una entidad NO borra su actividad (hecho durable: el soft-delete
-   * conserva el payload). Test autocontenido con fechas de un mes sin actividad
-   * previa para que antes/después sean deterministas. */
+  /* Fechas auxiliares ISO locales (YYYY-MM-DD), estables y dentro de la ventana
+   * periodo=anio respecto a hoy. Se evita colisionar con actividad previa: se
+   * usan 3 fechas contiguas hace <100 días y se comprueba antes/después por
+   * inclusión exacta, no por conteo global. */
+  const isoLocal = (dt) => {
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const d = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+  const hoy = new Date();
+  const fechaHoy = isoLocal(hoy);
+  const fechasAct = [18, 17, 16].map(n => {
+    const d = new Date(hoy); d.setDate(d.getDate() - n); return isoLocal(d);
+  }); // 3 fechas contiguas: hoy-16, hoy-17, hoy-18
   const actTestId = 987654321098;
-  const fechasAct = ['2026-02-01', '2026-02-02', '2026-02-03'];
   const payloadAct = {id: actTestId, nombre: 'Test Actividad Durable', importancia: 'Media',
     frecuencia: 'diario', historialCompletados: fechasAct, historialPospuestos: [],
-    fechaCreacion: '2026-01-01', ultimoCompletado: '2026-02-03'};
+    fechaCreacion: isoLocal(new Date(hoy.getFullYear(), hoy.getMonth() - 2, 1)), ultimoCompletado: fechasAct[0]};
   r = await api('PUT', `/habits/${actTestId}`, {csrf: csrfAct, body: {nombre: 'Test Actividad Durable', importancia: 'Media', frecuencia: 'diario', orden: 0, payload: payloadAct}});
-  assert(r.status === 200, 'crear hábito de prueba con historial → 200');
-  const enHeatmapAct = async () => {
-    const hm = await api('GET', '/activity?periodo=anio&fechaHoyLocal=2026-08-26');
-    return Object.keys(hm.data?.heatmap || {}).filter(d => fechasAct.includes(d));
+  assert(r.status === 200, 'crear hábito de prueba con historial en fechas recientes → 200');
+  const conActividad = (hm) => ({diasCon: Object.keys(hm).filter(d => (hm[d]?.total || 0) > 0 && fechasAct.includes(d)),
+    totalHabitos: Object.values(hm).reduce((s, d) => s + (d.tipos?.habito_cumplido || 0), 0)});
+  const leerHeatmap = async () => {
+    const hm = await api('GET', `/activity?periodo=anio&fechaHoyLocal=${fechaHoy}`);
+    return hm.data?.heatmap || {};
   };
-  const diasAntes = await enHeatmapAct();
-  assert(diasAntes.length === 3, 'el hábito de prueba aporta su historial al heatmap (derivación del payload)');
+  let hm = await leerHeatmap();
+  let vis = conActividad(hm);
+  assert(vis.diasCon.length === 3, `el hábito aporta su historial al heatmap (derivación del payload; fechas ${fechasAct})`);
+  assert(vis.totalHabitos >= 3, `habito_cumplido presente en el heatmap (${vis.totalHabitos})`);
+  /* Detalle del día más reciente: debe listar el cumplimiento del hábito. */
+  r = await api('GET', `/activity/dia?fecha=${fechasAct[0]}`);
+  assert(r.status === 200 && Array.isArray(r.data.detalle) && r.data.detalle.some(i => i.tipo === 'habito_cumplido'), 'detalle del día refleja el historial real (habito_cumplido)');
+  /* Estadísticas coherentes: totales de habito_cumplido >= las fechas creadas. */
+  r = await api('GET', `/activity/estadisticas?fechaHoyLocal=${fechaHoy}`);
+  assert(r.status === 200 && (r.data?.estadisticas?.totales?.habito_cumplido || 0) >= 3 && (r.data?.estadisticas?.diasActivos || 0) > 0, 'estadísticas coherentes con el historial creado');
+  /* Borrar una entidad NO borra su actividad (hecho durable: soft-delete). */
   r = await api('DELETE', `/habits/${actTestId}`, {csrf: csrfAct});
   assert(r.status === 204, 'DELETE soft del hábito de prueba → 204');
-  const diasDespues = await enHeatmapAct();
-  assert(diasDespues.length === 3, 'la actividad PERSISTE tras borrar el hábito (hecho durable)');
+  hm = await leerHeatmap();
+  const visPost = conActividad(hm);
+  assert(visPost.diasCon.length === 3, 'la actividad PERSISTE tras borrar el hábito (hecho durable)');
 
   console.log(`\n== RESULTADO: ${pasados} pasados, ${fallados} fallados${omitidos > 0 ? `, ${omitidos} omitidos (proveedor externo)` : ''} ==`);
   if (fallados > 0) {
