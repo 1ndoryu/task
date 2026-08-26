@@ -47,10 +47,6 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
     const asignarDificultad = useExpStore(s => s.asignarDificultad);
     const [dificultad, setDificultad] = useState<Dificultad>('Media');
 
-    /* [28-08-2026] Badges que el usuario oculta en la fila de la tarea
-     * (urgencia, importancia, dificultad). true = ocultar. */
-    const [badgesOcultos, setBadgesOcultos] = useState<NonNullable<Tarea['configuracion']>['badgesOcultos']>(tarea?.configuracion?.badgesOcultos || {});
-
     /* Estado de asignación */
     const [asignadoA, setAsignadoA] = useState<number | null>(tarea?.asignadoA || null);
     const [asignadoANombre, setAsignadoANombre] = useState<string>(tarea?.asignadoANombre || '');
@@ -118,13 +114,6 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         }
 
         configuracion.adjuntos = adjuntos;
-        /* [28-08-2026] Persistir la visibilidad de badges (urgencia, importancia,
-         * dificultad) en la configuración de la tarea. Solo se incluye si hay
-         * algún flag, para no guardar objetos vacíos en cada tarea. */
-        const ocultos = Object.entries(badgesOcultos || {}).some(([, v]) => !!v);
-        if (ocultos) {
-            configuracion.badgesOcultos = badgesOcultos;
-        }
         const asignacion = {asignadoA, asignadoANombre, asignadoAAvatar};
         /* [28-08-2026] Persistir la dificultad (manual o auto-estimada) en el
          * store EXP al guardar: si el usuario la cambió con la pill, se escribe,
@@ -134,7 +123,7 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         }
         onGuardar(configuracion, prioridad, texto.trim(), asignacion, urgencia, tags, dependencias, grupoEjecucion);
         onCerrar();
-    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, badgesOcultos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, dependencias, grupoEjecucion, onGuardar, onCerrar, tarea, dificultad, asignarDificultad]);
+    }, [fechaMaxima, descripcion, tieneRepeticion, frecuencia, adjuntos, asignadoA, asignadoANombre, asignadoAAvatar, prioridad, texto, urgencia, tags, dependencias, grupoEjecucion, onGuardar, onCerrar, tarea, dificultad, asignarDificultad]);
 
     /* Hook de autoguardado */
     const {guardarEstadoInicial, manejarCerrarConGuardado} = useAutoguardado({
@@ -218,7 +207,6 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
             }
             setFrecuencia(nuevaFrecuencia);
             setAdjuntos(tarea.configuracion?.adjuntos || []);
-            setBadgesOcultos(tarea.configuracion?.badgesOcultos || {});
             setAsignadoA(tarea.asignadoA || null);
             setAsignadoANombre(tarea.asignadoANombre || '');
             setAsignadoAAvatar(tarea.asignadoAAvatar || '');
@@ -289,7 +277,6 @@ export function usePanelConfiguracionTarea({tarea, onCerrar, onGuardar, particip
         frecuencia, setFrecuencia, adjuntos, setAdjuntos, tags, setTags,
         dependencias, setDependencias, grupoEjecucion, setGrupoEjecucion,
         dificultad, setDificultad: manejarCambioDificultad,
-        badgesOcultos, setBadgesOcultos,
         asignadoA, asignadoANombre, asignadoAAvatar,
         proyectoIdLocal, completadoLocal,
         modoEdicion, esMovil, claseModal,

@@ -11,6 +11,11 @@ export interface ConfiguracionTareas {
     ocultarSubtareasAutomaticamente: boolean;
     /* Ignorar urgencia en el ordenamiento por prioridad para permitir drag reorder */
     ignorarUrgenciaEnPrioridad: boolean;
+    /* [28-08-2026] Ocultar badges en las filas de tareas del panel (global).
+     * La de dificultad solo aplica cuando el plugin EXP está activo. */
+    ocultarBadgeUrgencia: boolean;
+    ocultarBadgeImportancia: boolean;
+    ocultarBadgeDificultad: boolean;
 }
 
 /* 
@@ -25,7 +30,10 @@ export const CONFIG_POR_DEFECTO: ConfiguracionTareas = {
     mostrarHabitosEnEjecucion: true,
     modoCompacto: false,
     ocultarSubtareasAutomaticamente: false,
-    ignorarUrgenciaEnPrioridad: false
+    ignorarUrgenciaEnPrioridad: false,
+    ocultarBadgeUrgencia: false,
+    ocultarBadgeImportancia: false,
+    ocultarBadgeDificultad: false
 };
 
 export function useConfiguracionTareas() {
@@ -61,6 +69,18 @@ export function useConfiguracionTareas() {
         setValor(prev => ({...prev, ignorarUrgenciaEnPrioridad: !prev.ignorarUrgenciaEnPrioridad}));
     };
 
+    const toggleOcultarBadgeUrgencia = () => {
+        setValor(prev => ({...prev, ocultarBadgeUrgencia: !prev.ocultarBadgeUrgencia}));
+    };
+
+    const toggleOcultarBadgeImportancia = () => {
+        setValor(prev => ({...prev, ocultarBadgeImportancia: !prev.ocultarBadgeImportancia}));
+    };
+
+    const toggleOcultarBadgeDificultad = () => {
+        setValor(prev => ({...prev, ocultarBadgeDificultad: !prev.ocultarBadgeDificultad}));
+    };
+
     return {
         configuracion: valor,
         actualizarConfiguracion: setValor,
@@ -70,6 +90,9 @@ export function useConfiguracionTareas() {
         toggleMostrarHabitosEnEjecucion,
         toggleModoCompacto,
         toggleOcultarSubtareasAutomaticamente,
-        toggleIgnorarUrgenciaEnPrioridad
+        toggleIgnorarUrgenciaEnPrioridad,
+        toggleOcultarBadgeUrgencia,
+        toggleOcultarBadgeImportancia,
+        toggleOcultarBadgeDificultad
     };
 }

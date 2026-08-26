@@ -8,13 +8,11 @@
  */
 
 import {useState, useEffect} from 'react';
-import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito, CompaneroEquipo, RolCompartido, Tarea, DatosEdicionTarea, TareaConfiguracion} from '../../../types/dashboard';
+import type {NivelPrioridad, NivelUrgencia, Participante, Proyecto, Adjunto, FrecuenciaHabito, CompaneroEquipo, RolCompartido, Tarea, DatosEdicionTarea} from '../../../types/dashboard';
 import {useDependenciasUIStore} from '../../../stores/dependenciasUIStore';
 import {useGruposEjecucion} from '../../../hooks/useGruposEjecucion';
-import {usePluginActivo} from '../../../stores/pluginsStore';
 import {CampoTituloLimpio, CampoSubtituloLimpio, PropiedadesCompactas, SelectorEstadoPill, SelectorProyectoPill, SelectorRepeticionPill, FilaPropiedades, SelectorTags, SeccionResponsables, SelectorGrupo} from '../../shared';
 import {Boton} from '../../ui';
-import {Checkbox} from '../../ui';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {SelectorAsignado} from '../../compartidos/SelectorAsignado';
 import {ModalDependencias} from '../ModalDependencias';
@@ -38,9 +36,6 @@ interface FormularioTareaModernoProps {
     /* [28-08-2026] Dificultad del plugin EXP: misma escala que la importancia. */
     dificultad?: import('../../../plugins/exp/types').Dificultad;
     onDificultadChange?: (valor: import('../../../plugins/exp/types').Dificultad) => void;
-    /* [28-08-2026] Badges ocultos (urgencia/importancia/dificultad) - true = ocultar */
-    badgesOcultos?: NonNullable<TareaConfiguracion['badgesOcultos']>;
-    onBadgesOcultosChange?: (valor: NonNullable<TareaConfiguracion['badgesOcultos']>) => void;
     /* Proyecto */
     proyectoId?: number;
     proyectos?: Proyecto[];
@@ -103,18 +98,7 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
         grupoEjecucion,
         onGrupoEjecucionChange,
         dificultad,
-        onDificultadChange,
-        badgesOcultos,
-        onBadgesOcultosChange}: FormularioTareaModernoProps): JSX.Element {    const [modalDependenciasAbierto, setModalDependenciasAbierto] = useState(false);
-
-    /* [28-08-2026] La opción de ocultar la dificultad solo tiene sentido cuando
-     * el plugin EXP está activo (es quien muestra/gestiona la dificultad). */
-    const expActivo = usePluginActivo('exp');
-
-    /* Toggle un flag de badges sin mutar el objeto directamente. */
-    const alternarBadgeOculto = (clave: 'urgencia' | 'importancia' | 'dificultad', valor: boolean) => {
-        onBadgesOcultosChange?.({...(badgesOcultos || {}), [clave]: valor});
-    };
+        onDificultadChange}: FormularioTareaModernoProps): JSX.Element {    const [modalDependenciasAbierto, setModalDependenciasAbierto] = useState(false);
 
     /* Grupos de ejecución existentes para el selector */
     const gruposDisponibles = useGruposEjecucion(tareasParaDependencias, habitosParaDependencias);
@@ -210,31 +194,6 @@ export function FormularioTareaModerno({texto, onTextoChange, descripcion, onDes
             <FilaPropiedades etiqueta="Repetición">
                 <SelectorRepeticionPill tieneRepeticion={tieneRepeticion} onTieneRepeticionChange={onTieneRepeticionChange} frecuencia={frecuencia} onFrecuenciaChange={onFrecuenciaChange} />
             </FilaPropiedades>
-
-            {/* Badges: ocultar indicadores de la fila de la tarea */}
-            {onBadgesOcultosChange && (
-                <FilaPropiedades etiqueta="Badges">
-                    <div className="configuracionBadges">
-                        <Checkbox
-                            etiqueta="Ocultar badge de urgencia"
-                            checked={!!badgesOcultos?.urgencia}
-                            onChange={e => alternarBadgeOculto('urgencia', e.target.checked)}
-                        />
-                        <Checkbox
-                            etiqueta="Ocultar badge de importancia"
-                            checked={!!badgesOcultos?.importancia}
-                            onChange={e => alternarBadgeOculto('importancia', e.target.checked)}
-                        />
-                        {expActivo && (
-                            <Checkbox
-                                etiqueta="Ocultar badge de dificultad"
-                                checked={!!badgesOcultos?.dificultad}
-                                onChange={e => alternarBadgeOculto('dificultad', e.target.checked)}
-                            />
-                        )}
-                    </div>
-                </FilaPropiedades>
-            )}
 
             {/* Grupo 2b: Compartido con (Colaboradores) - Solo en modo edición */}
             {modoEdicion && onAgregarParticipante && (

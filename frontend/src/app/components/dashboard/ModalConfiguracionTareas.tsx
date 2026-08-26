@@ -6,6 +6,7 @@
 import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import type {ConfiguracionTareas} from '../../hooks/useConfiguracionTareas';
+import {usePluginActivo} from '../../stores/pluginsStore';
 import {useGruposTareasStore} from '../../stores/gruposTareasStore';
 import {useShallow} from 'zustand/react/shallow';
 
@@ -21,10 +22,16 @@ interface ModalConfiguracionTareasProps {
     onToggleModoCompacto: () => void;
     onToggleOcultarSubtareas: () => void;
     onToggleIgnorarUrgencia: () => void;
+    /* [28-08-2026] Badges globales del panel. */
+    onToggleBadgeUrgencia: () => void;
+    onToggleBadgeImportancia: () => void;
+    onToggleBadgeDificultad: () => void;
 }
 
-export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas, onToggleIgnorarUrgencia}: ModalConfiguracionTareasProps): JSX.Element {
+export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas, onToggleIgnorarUrgencia, onToggleBadgeUrgencia, onToggleBadgeImportancia, onToggleBadgeDificultad}: ModalConfiguracionTareasProps): JSX.Element {
     const {seccionesActivas: _seccionesActivas, toggleSecciones: _toggleSecciones, ordenamientoGrupos: _ordenamientoGrupos, setOrdenamientoGrupos: _setOrdenamientoGrupos} = useGruposTareasStore(useShallow(s => ({seccionesActivas: s.seccionesActivas, toggleSecciones: s.toggleSecciones, ordenamientoGrupos: s.ordenamientoGrupos, setOrdenamientoGrupos: s.setOrdenamientoGrupos})));
+    /* [28-08-2026] La opción de dificultad solo aplica con el plugin EXP activo. */
+    const expActivo = usePluginActivo('exp');
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Vista">
@@ -48,6 +55,41 @@ export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, 
                     </div>
                     <ToggleSwitch checked={configuracion.ocultarBadgeProyecto} onChange={onToggleBadgeProyecto} />
                 </div>
+                <div className="separadorOpcionesConfig" />
+
+                {/* Badge de urgencia (global) */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Ocultar badge de urgencia</span>
+                        <span className="descripcionOpcionConfig">No mostrar el indicador de urgencia en las tareas</span>
+                    </div>
+                    <ToggleSwitch checked={configuracion.ocultarBadgeUrgencia} onChange={onToggleBadgeUrgencia} />
+                </div>
+                <div className="separadorOpcionesConfig" />
+
+                {/* Badge de importancia (global) */}
+                <div className="itemOpcionConfig">
+                    <div className="detallesOpcionConfig">
+                        <span className="tituloOpcionConfig">Ocultar badge de importancia</span>
+                        <span className="descripcionOpcionConfig">No mostrar el indicador de prioridad/importancia en las tareas</span>
+                    </div>
+                    <ToggleSwitch checked={configuracion.ocultarBadgeImportancia} onChange={onToggleBadgeImportancia} />
+                </div>
+
+                {expActivo && (
+                    <>
+                        <div className="separadorOpcionesConfig" />
+                        {/* Badge de dificultad (global, solo plugin EXP) */}
+                        <div className="itemOpcionConfig">
+                            <div className="detallesOpcionConfig">
+                                <span className="tituloOpcionConfig">Ocultar badge de dificultad</span>
+                                <span className="descripcionOpcionConfig">No mostrar la barra de dificultad (plugin EXP) en las tareas</span>
+                            </div>
+                            <ToggleSwitch checked={configuracion.ocultarBadgeDificultad} onChange={onToggleBadgeDificultad} />
+                        </div>
+                    </>
+                )}
+
                 <div className="separadorOpcionesConfig" />
 
                 {/* Opcion 3: Ocultar Subtareas Automáticamente */}

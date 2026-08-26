@@ -78,14 +78,6 @@ export interface TareaConfiguracion {
     descripcion?: string /* Notas detalladas */;
     repeticion?: RepeticionTarea;
     adjuntos?: Adjunto[];
-    /* [28-08-2026] Badges de la tarea que el usuario ocultó en la configuración.
-     * true = ocultar ese indicador en la fila de la tarea. La dificultad solo
-     * tiene efecto cuando el plugin EXP está activo. */
-    badgesOcultos?: {
-        urgencia?: boolean;
-        importancia?: boolean;
-        dificultad?: boolean;
-    };
 }
 
 export interface Tarea {

@@ -4,6 +4,7 @@ import type {Tarea, NivelPrioridad, NivelUrgencia, TareaHabito} from '../../../t
 import {esTareaHabito} from '../../../types/dashboard';
 import {useExpStore} from '../../../plugins/exp/store';
 import {usePluginActivo} from '../../../stores/pluginsStore';
+import {useConfiguracionTareas} from '../../../hooks/useConfiguracionTareas';
 import {COLORES_DIFICULTAD} from '../../../utils/nivelesConfig';
 import {BadgeInfo, type VarianteBadge} from '../../shared/BadgeInfo';
 import {obtenerTextoFechaLimite as obtenerTextoFechaLim, obtenerVarianteFechaLimite as obtenerVarianteFecha, formatearFechaCorta as formatearFecha} from '../../../utils/fechaUI';
@@ -21,12 +22,17 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
     /* Helper para convertir tarea a tarea habito si es necesario */
     const esHabito = esTareaHabito(tarea);
 
-    /* [28-08-2026] Dificultad del plugin EXP (barra) si está activo y no oculto. */
+    /* [28-08-2026] Dificultad del plugin EXP (barra) si está activo y no oculto.
+     * La visibilidad de badges (urgencia/importancia/dificultad) es global del
+     * panel (ConfiguracionTareas), no por tarea. */
     const expActivo = usePluginActivo('exp');
     const dificultades = useExpStore(s => s.dificultades);
-
-    /* Badges que el usuario ocultó en la configuración de esta tarea. */
-    const ocultos = tarea.configuracion?.badgesOcultos || {};
+    const configTareas = useConfiguracionTareas();
+    const ocultos = {
+        urgencia: configTareas.configuracion.ocultarBadgeUrgencia,
+        importancia: configTareas.configuracion.ocultarBadgeImportancia,
+        dificultad: configTareas.configuracion.ocultarBadgeDificultad
+    };
 
     /* Renderizado del indicador de dificultad como barra (misma altura que los
      * badges). Nivel → porcentaje de relleno. */

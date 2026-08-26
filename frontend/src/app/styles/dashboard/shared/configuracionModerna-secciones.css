@@ -148,12 +148,3 @@
     background: var(--dashboard-estadoExito);
     transition: width var(--dashboard-transicionNormal);
 }
-
-
-/* Badges: opciones para ocultar indicadores de la fila de la tarea */
-.configuracionBadges {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioS);
-    align-items: flex-start;
-}
