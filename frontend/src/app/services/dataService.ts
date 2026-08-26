@@ -188,7 +188,10 @@ function validarHabito(habito: unknown): ResultadoValidacion {
         return {esValido: false, mensaje: 'Habito sin nombre valido'};
     }
 
-    if (!['Alta', 'Media', 'Baja'].includes(h.importancia as string)) {
+    /* Los 5 niveles reales (Muy Alta/Muy Baja incluidos). Históricamente la
+     * validación solo aceptaba 3 niveles y rechazaba los exports de la era
+     * WordPress, que usaban los 5. */
+    if (!['Muy Alta', 'Alta', 'Media', 'Baja', 'Muy Baja'].includes(h.importancia as string)) {
         return {esValido: false, mensaje: 'Importancia de habito invalida'};
     }
 
