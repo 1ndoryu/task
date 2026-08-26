@@ -32,6 +32,7 @@ interface BlobGloryExp {
         dificultades: Record<string, Dificultad>;
         registros: unknown[];
         minimizado: boolean;
+        copasArbol: Record<string, string[]>;
     }>;
     config?: Record<string, unknown>;
 }

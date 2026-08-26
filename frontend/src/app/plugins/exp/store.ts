@@ -32,6 +32,11 @@ interface ExpStore extends EstadoExp {
     actualizarVida: (nuevaVida: number, fechaCalculo: string) => void;
     actualizarConfig: (parcial: Partial<ConfigExp>) => void;
     alternarMinimizado: () => void;
+    /* [28-08-2026] Guarda la copa editada por el usuario para un estado del
+     * árbol (0/25/50/75/100). Recibe un Set de celdas; se persiste como array. */
+    asignarCopaArbol: (estado: number, copa: Set<string>) => void;
+    /* Elimina la edición del usuario para un estado (vuelve a la copa por defecto). */
+    restablecerCopaArbol: (estado: number) => void;
     restaurarDesdeServidor: (estado: Partial<EstadoExp> | null, config?: Partial<ConfigExp>) => void;
 }
 
@@ -52,6 +57,7 @@ export const useExpStore = create<ExpStore>()(
             ultimaSync: 0,
             ultimoCalculoVida: '',
             minimizado: false,
+            copasArbol: {},
             config: {...CONFIG_EXP_POR_DEFECTO},
 
             deshacerExp: (entidadId, entidadTipo) => {
@@ -158,6 +164,19 @@ export const useExpStore = create<ExpStore>()(
                 set(state => ({minimizado: !state.minimizado}));
             },
 
+            asignarCopaArbol: (estado, copa) => {
+                set(state => ({
+                    copasArbol: {...state.copasArbol, [String(estado)]: [...copa]}
+                }));
+            },
+
+            restablecerCopaArbol: (estado) => {
+                set(state => {
+                    const {[String(estado)]: omitido, ...resto} = state.copasArbol;
+                    return {copasArbol: resto};
+                });
+            },
+
             restaurarDesdeServidor: (estado, config) => {
                 if (!estado) return;
                 set(s => ({
@@ -169,6 +188,7 @@ export const useExpStore = create<ExpStore>()(
                     ...(estado.dificultades && typeof estado.dificultades === 'object' ? {dificultades: {...s.dificultades, ...estado.dificultades}} : {}),
                     ...(Array.isArray(estado.registros) ? {registros: estado.registros} : {}),
                     ...(typeof estado.minimizado === 'boolean' ? {minimizado: estado.minimizado} : {}),
+                    ...(estado.copasArbol && typeof estado.copasArbol === 'object' ? {copasArbol: {...s.copasArbol, ...estado.copasArbol}} : {}),
                     ...(config ? {config: {...s.config, ...config}} : {})
                 }));
             }

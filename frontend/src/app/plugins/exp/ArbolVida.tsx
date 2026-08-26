@@ -9,128 +9,151 @@
  *
  * - Blanco y negro (blanco sobre el fondo del panel, sin rectángulo de fondo).
  * - Sin fondo ni fundido: píxeles celda a celda con `shape-rendering="crispEdges"`.
- * - Los niveles intermedios añaden/quito franjas de la copa manteniendo el
- *   contorno (nunca quedan "agujeros" hopos incoherentes).
+ *
+ * Arquitectura reutilizable (para el editor pixel-art):
+ * - `CELDAS_TRONCO` : Set de celdas fijas (tronco + raíces), no editables.
+ * - `copaPorDefecto(estado)` : copa por defecto del estado como Set de celdas.
+ * - `celdasCompletas(estado, copaExtra?)`: tronco + (copa por defecto ∪ editadas).
+ * El render acepta `copaEditada` por estado (persistida en glory-exp) para
+ * reflejar lo que el usuario dibujó en el editor.
  */
 
+/* Cuadrícula 16x16 (mismo origen que el editor: (0,0) arriba-izquierda). */
+export const DIMENSION_ARBOL = 16;
+
 export type EstadoVida = 0 | 25 | 50 | 75 | 100;
+export const ESTADOS_ARBOL: EstadoVida[] = [0, 25, 50, 75, 100];
+
+/* Tronco + raíces: celdas fijas, idénticas en los 5 estados, NO editables.
+ * Tronco 2 de ancho (x 7..8) desde y0 hasta y8; raíces a x 4/6/9/11 en y0. */
+export const CELDAS_TRONCO: Set<string> = new Set<string>();
+(function () {
+    for (let y = 0; y <= 8; y++) {
+        CELDAS_TRONCO.add(`7,${y}`);
+        CELDAS_TRONCO.add(`8,${y}`);
+    }
+    CELDAS_TRONCO.add('6,0');
+    CELDAS_TRONCO.add('4,0');
+    CELDAS_TRONCO.add('9,0');
+    CELDAS_TRONCO.add('11,0');
+})();
 
 interface Pixel {
     x: number;
     y: number;
-    tipo: 'tronco' | 'copa';
 }
 
-function buildGrid(): Map<string, Pixel> {
-    const cells = new Map<string, Pixel>();
-    /* Tronco: 2 de ancho (x 7..8), desde la raíz (y0) hasta y10. */
-    for (let y = 0; y <= 10; y++) {
-        cells.set(`${7},${y}`, {x: 7, y, tipo: 'tronco'});
-        cells.set(`${8},${y}`, {x: 8, y, tipo: 'tronco'});
-    }
-    /* Raíces: dos zarcillos a cada lado a y0 (mismo esquema en los 5 estados). */
-    cells.set(`${6},${0}`, {x: 6, y: 0, tipo: 'tronco'});
-    cells.set(`${4},${0}`, {x: 4, y: 0, tipo: 'tronco'});
-    cells.set(`${9},${0}`, {x: 9, y: 0, tipo: 'tronco'});
-    cells.set(`${11},${0}`, {x: 11, y: 0, tipo: 'tronco'});
-    return cells;
-}
+const POR_FILA: Record<number, Array<[number, number]>> = {
+    15: [
+        [6, 15], [7, 15], [8, 15], [9, 15],
+        [5, 15], [10, 15], [4, 15], [11, 15], [3, 15], [12, 15]
+    ],
+    14: [
+        [5, 14], [6, 14], [7, 14], [8, 14], [9, 14], [10, 14], [11, 14],
+        [4, 14], [12, 14], [3, 14], [13, 14]
+    ],
+    13: [
+        [4, 13], [5, 13], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [12, 13],
+        [3, 13], [13, 13], [2, 13], [14, 13]
+    ],
+    12: [
+        [4, 12], [5, 12], [6, 12], [7, 12], [8, 12], [9, 12], [10, 12], [11, 12], [12, 12],
+        [3, 12], [13, 12], [2, 12], [14, 12]
+    ],
+    11: [
+        [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11],
+        [4, 11], [11, 11], [3, 11], [12, 11]
+    ],
+    10: [
+        [5, 10], [6, 10], [7, 10], [8, 10], [9, 10], [10, 10],
+        [4, 10], [11, 10]
+    ],
+    9: [
+        [6, 9], [7, 9], [8, 9], [9, 9],
+        [5, 9], [10, 9]
+    ]
+};
 
-export function ArbolVida({vida}: {vida: number}): JSX.Element {
-    /* Mapea la vida (0..vidaMax) a 5 estados discretos. */
-    const porc = vida <= 0 ? 0 : vida <= 25 ? 25 : vida <= 50 ? 50 : vida <= 75 ? 75 : 100;
+/* Copa por defecto de cada estado: densidad creciente de filas. */
+const COMPOSICION_ESTADOS: Record<EstadoVida, number[]> = {
+    0: [],
+    25: [11],
+    50: [11, 12],
+    75: [11, 12, 13, 10],
+    100: [11, 12, 13, 14, 15, 10, 9]
+};
 
-    const base = buildGrid();
-
-    /* Definir copa por estado. Se añade la copa del nivel elegido. */
-    const copa: [number, number][] = copaParaNivel(porc);
-
-    for (const [x, y] of copa) {
-        if (y <= 15 && y >= 0 && x >= 0 && x <= 15) {
-            const k = `${x},${y}`;
-            /* La copa nunca pinta sobre el tronco (se ve el tronco). */
-            if (!base.has(k) || base.get(k)!.tipo !== 'tronco') {
-                base.set(k, {x, y, tipo: 'copa'});
-            }
+function filasACeldas(filas: number[]): Set<string> {
+    const set = new Set<string>();
+    for (const f of filas) {
+        for (const [x, y] of POR_FILA[f] || []) {
+            if (x < 0 || x >= DIMENSION_ARBOL || y < 0 || y >= DIMENSION_ARBOL) continue;
+            set.add(`${x},${y}`);
         }
     }
-
-    const celdas = Array.from(base.values());
-    /* Pixel art: celdas de 2px con borde duro. */
-    const tamaño = 20;
-    const ancho = 16 * tamaño;
-    const alto = 16 * tamaño;
-
-    return (
-        <svg
-            width="64"
-            height="64"
-            viewBox={`0 0 ${ancho} ${alto}`}
-            shapeRendering="crispEdges"
-            role="img"
-            aria-label={`Árbol de vida (estado ${porc}%)`}
-        >
-            {celdas.map((cel) => (
-                <rect
-                    key={`${cel.x}:${cel.y}`}
-                    x={cel.x * tamaño}
-                    y={(16 - 1 - cel.y) * tamaño}
-                    width={tamaño}
-                    height={tamaño}
-                    fill={cel.tipo === 'tronco' ? '#ffffff' : '#ffffff'}
-                    opacity="1"
-                />
-            ))}
-        </svg>
-    );
+    return set;
 }
 
-/* Copas por nivel (rejilla 16x16, copa centrada x 2..13, de y11 hasta alto). */
-function copaParaNivel(nivel: number): [number, number][] {
-    /* Filas (y de 11 a 15) que tienen copa por nivel, en orden de densidad.
-     * Un píxel copa activo = una hoja. Más hojas → más vida. */
-    const porFila: Record<number, [number, number][]> = {
-        15: [
-            [6, 15], [7, 15], [8, 15], [9, 15],
-            [5, 15], [10, 15]
-        ],
-        14: [
-            [5, 14], [6, 14], [7, 14], [8, 14], [9, 14], [10, 14], [11, 14]
-        ],
-        13: [
-            [4, 13], [5, 13], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [12, 13]
-        ],
-        12: [
-            [4, 12], [5, 12], [6, 12], [7, 12], [8, 12], [9, 12], [10, 12], [11, 12], [12, 12]
-        ],
-        11: [
-            [5, 11], [6, 11], [7, 11], [8, 11], [9, 11], [10, 11]
-        ]
-    };
+export function copaPorDefecto(estado: EstadoVida): Set<string> {
+    return filasACeldas(COMPOSICION_ESTADOS[estado]);
+}
 
-    /* Densidad por nivel de vida (fracción de hojas de cada fila) */
-    const niveles: Record<number, [number, number][]> = {
-        0: [],
-        25: [
-            ...porFila[11]
-        ],
-        50: [
-            ...porFila[11],
-            ...porFila[12]
-        ],
-        75: [
-            ...porFila[11],
-            ...porFila[12],
-            ...porFila[13]
-        ],
-        100: [
-            ...porFila[11],
-            ...porFila[12],
-            ...porFila[13],
-            ...porFila[14],
-            ...porFila[15]
-        ]
-    };
+/* Celdas totales para renderizar un estado.
+ * - Si el usuario editó el estado (copaEditada completa en copasArbol), la copa
+ *   editada REEMPLAZA a la por defecto (puede quitar hojas y dibujar otras).
+ * - El tronco fijo (CELDAS_TRONCO) siempre se conserva. */
+export function celdasCompletas(estado: EstadoVida, copaReemplazo?: Set<string>): Set<string> {
+    const resultado = new Set<string>(CELDAS_TRONCO);
+    const origen: Iterable<string> = copaReemplazo ? copaReemplazo : copaPorDefecto(estado);
+    for (const c of origen) {
+        if (!CELDAS_TRONCO.has(c)) resultado.add(c);
+    }
+    return resultado;
+}
 
-    return niveles[nivel] ?? [];
+interface ArbolVidaProps {
+    vida: number;
+    /* Copa completa del estado (persistida en copasArbol). Si se pasa,
+     * reemplaza la copa por defecto. */
+    copaEditada?: Set<string>;
+}
+
+function mapearAVida(valor: number): EstadoVida {
+    if (valor <= 0) return 0;
+    if (valor <= 25) return 25;
+    if (valor <= 50) return 50;
+    if (valor <= 75) return 75;
+    return 100;
+}
+
+export function ArbolVida({vida, copaEditada}: ArbolVidaProps): JSX.Element {
+    const estado = mapearAVida(vida);
+    const celdas = Array.from(celdasCompletas(estado, copaEditada));
+
+    const tamaño = 20; /* px por celda en el viewBox. */
+    const ancho = DIMENSION_ARBOL * tamaño;
+    const alto = DIMENSION_ARBOL * tamaño;
+
+    /* Rendering: misma inversión que el editor para que (x, y) coincidan —
+     * y=0 arriba en el SVG (arriba-izquierda origen). */
+    return (
+        <svg width="64" height="64" viewBox={`0 0 ${ancho} ${alto}`} shapeRendering="crispEdges" role="img" aria-label={`Árbol de vida (estado ${estado}%)`}>
+            {celdas.map(clave => {
+                const [xStr, yStr] = clave.split(',');
+                const x = Number(xStr);
+                const y = Number(yStr);
+                return (
+                    <rect
+                        key={clave}
+                        x={x * tamaño}
+                        y={y * tamaño}
+                        width={tamaño}
+                        height={tamaño}
+                        fill="#ffffff"
+                        opacity="1"
+                    />
+                );
+            })}
+        </svg>
+    );
 }

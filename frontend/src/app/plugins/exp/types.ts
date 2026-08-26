@@ -77,4 +77,9 @@ export interface EstadoExp {
     /* Panel colapsado (minimizado): solo queda la cabecera. Persiste para que
      * el estado no se pierda entre sesiones. */
     minimizado: boolean;
+    /* [28-08-2026] Copas editadas por el usuario por estado (0..100): cada
+     * estado guarda las claves "x,y" de celdas de copa dibujadas en el editor
+     * pixel-art. Se suman a la copa por defecto de ArbolVida (nunca borran el
+     * tronco fijo). Arrays para persistencia JSON fiable (Set no serializa). */
+    copasArbol: Record<string, string[]>;
 }

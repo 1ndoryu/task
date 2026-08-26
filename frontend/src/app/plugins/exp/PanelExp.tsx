@@ -1,23 +1,22 @@
 /*
  * plugins/exp/PanelExp.tsx
- * Panel FIJO superior del plugin EXP: una sola columna, siempre visible arriba
- * del dashboard (grid y sidebar). Muestra la barra de vida y la barra de
- * EXP/nivel. No es un panel del grid: se renderiza desde DashboardIsland cuando
- * el plugin está activo.
+ * Panel superior del plugin EXP (Game). Muestra Nv · Vida · EXP y el árbol de
+ * vida en pixel art, con su copa reflejando el nivel de vida. Incluye un botón
+ * que abre el editor del árbol (los 5 estados) y el estado minimizado.
  *
- * [27-08-2026] Visualmente coherente con el resto de paneles: contenedor
- * canónico `.panelDashboard` + encabezado `SeccionEncabezado` con
- * `variante="panelHeader"`. El encabezado muestra "Game" y dos botones de
- * acción: engranaje (abre la configuración del plugin) y minimizar (colapsa el
- * cuerpo dejando solo la cabecera; el estado persiste en el store).
+ * [27-08-2026] El árbol carga su copa del store (`copasArbol`): si el usuario
+ * editó el estado actual, se usa esa copa (persistida); si no, la por defecto
+ * de ArbolVida. Un botón "Editar árbol" abre ModalEditorArbol.
  */
 
-import {GripVertical, Heart, Minus, Settings, Sparkles, Zap} from 'lucide-react';
+import {useState} from 'react';
+import {Edit3, GripVertical, Heart, Minus, Settings, Sparkles, Zap} from 'lucide-react';
 import {Boton} from '../../components/ui';
 import {SeccionEncabezado} from '../../components/dashboard/SeccionEncabezado';
 import {useExpStore} from './store';
 import {usePluginActivo} from '../../stores/pluginsStore';
-import {ArbolVida} from './ArbolVida';
+import {ArbolVida, type EstadoVida} from './ArbolVida';
+import {ModalEditorArbol} from './ModalEditorArbol';
 
 interface PanelExpProps {
     /* Abre la configuración del plugin (Configuración → Plugins → EXP). */
@@ -40,7 +39,16 @@ function Barra({valor, maximo, clase, icono, etiqueta, colorClase}: {valor: numb
     );
 }
 
+function mapearAEscala(vida: number): EstadoVida {
+    if (vida <= 0) return 0;
+    if (vida <= 25) return 25;
+    if (vida <= 50) return 50;
+    if (vida <= 75) return 75;
+    return 100;
+}
+
 export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
+    const [editorAbierto, setEditorAbierto] = useState(false);
     const activo = usePluginActivo('exp');
     const vida = useExpStore(s => s.vida);
     const config = useExpStore(s => s.config);
@@ -50,11 +58,15 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
     const exp = useExpStore(s => s.exp);
     const minimizado = useExpStore(s => s.minimizado);
     const alternarMinimizado = useExpStore(s => s.alternarMinimizado);
+    const copasArbol = useExpStore(s => s.copasArbol);
 
     if (!activo) return null;
 
-    /* Clase de color según el estado de vida (verde/amarillo/rojo). */
     const vidaClase = vida >= 60 ? 'panelExpVida--alta' : vida >= 30 ? 'panelExpVida--media' : 'panelExpVida--baja';
+
+    /* Copa del estado actual: editada (persistida) o por defecto. */
+    const escala = mapearAEscala(vida);
+    const copaEditada = copasArbol[String(escala)];
 
     return (
         <div className="panelDashboard panelExpFijo">
@@ -64,6 +76,7 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
                 variante="panelHeader"
                 acciones={
                     <>
+                        <Boton variante="badge" soloIcono onClick={() => setEditorAbierto(true)} title="Editar árbol de vida" icono={<Edit3 size={12} />} />
                         <Boton variante="badge" soloIcono onClick={onAbrirConfig} title="Configurar plugin" icono={<Settings size={12} />} />
                         <Boton variante="badge" soloIcono onClick={alternarMinimizado} title={minimizado ? 'Restaurar panel' : 'Minimizar panel'} icono={<Minus size={12} />} />
                     </>
@@ -79,13 +92,13 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
                         <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
                         <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
                     </div>
-                    {/* [27-08-2026] El árbol va debajo de las barras, con su propio
-                     * margen: no compite con Nv/Vida/EXP en la fila superior. */}
                     <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
-                        <ArbolVida vida={vida} />
+                        <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
                     </div>
                 </div>
             )}
+
+            <ModalEditorArbol activo={editorAbierto} onCerrar={() => setEditorAbierto(false)} />
         </div>
     );
 }
