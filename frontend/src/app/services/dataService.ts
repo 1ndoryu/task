@@ -19,26 +19,90 @@ export interface DatosDashboardExportados {
     tareas: Tarea[];
     proyectos?: Proyecto[];
     notas: string;
+    /* [26-08-2026] v2: blob de extensiones (stores local-only que el sync por
+     * entidad del servidor NO persigue: recordatorios, grupos de ejecución,
+     * plugins, time-tracker, config-usuario, grupos-tareas, grupos-FB, panel IA).
+     * Se capturan como los blobs `{state, version}` crudos de zustand/persist
+     * para que el export/import sea fiel y no dependa del shape de cada store.
+     * Opcional: los exports v1.x no lo llevan y siguen validando. */
+    extensiones?: Record<string, unknown>;
 }
 
 /* Version del formato de exportacion - incrementar al añadir campos */
-const VERSION_ACTUAL = '1.1.0';
+const VERSION_ACTUAL = '2.0.0';
 
 /* [H-F11-06] Limite de tamano para importaciones: evita que un archivo
  * gigante cargue todo en memoria con el FileReader (DoS del tab). */
 const LIMITE_TAMANO_IMPORTACION = 10 * 1024 * 1024; // 10 MB
 
 /*
+ * Claves de zustand/persist cuyos datos viven SOLO en localStorage y NO se
+ * sincronizan al servidor por el sync por entidad (tareas/hábitos/proyectos +
+ * notas/config/preferencias + ayuno/déficit). Incluyéndolas en el archivo de
+ * export/import, migrar a otra máquina/navegador no pierde estos dominios.
+ * [26-08-2026] plan-paridad-sync-export. */
+export const CLAVES_EXTENSIONES_LOCAL = [
+    'glory-recordatorios',
+    'glory_grupos_ejecucion',
+    'glory-plugins',
+    'glory-time-tracker',
+    'glory-config-usuario',
+    'grupos-tareas-storage',
+    'GruposFbStore',
+    'glory-ia-panel'
+] as const;
+
+/*
+ * Recolecta, de localStorage, el estado persistido de cada store local-only
+ * (el blob `{state, version}` de zustand persist) para incluirlo en el export.
+ * Devuelve solo las claves presentes; nunca lanza por claves corruptas.
+ */
+export function recolectarExtensionesLocal(): Record<string, unknown> {
+    const resultado: Record<string, unknown> = {};
+    for (const clave of CLAVES_EXTENSIONES_LOCAL) {
+        try {
+            const crudo = localStorage.getItem(clave);
+            if (!crudo) continue;
+            const parseado = JSON.parse(crudo);
+            if (!parseado || typeof parseado !== 'object') continue;
+            resultado[clave] = parseado;
+        } catch {
+            /* Clave corrupta: omitir, no romper el export */
+        }
+    }
+    return resultado;
+}
+
+/*
+ * Restaura en localStorage los blobs de extensiones traídos en un export.
+ * Zuerst se escribe la clave para que el store persist la rehidrate en el
+ * próximo arranque (o via onRehydrateStorage). Solo escribe claves conocidas
+ * (evita inyectar claves arbitrarias desde un archivo).
+ */
+export function aplicarExtensionesLocal(extensiones: Record<string, unknown> | undefined): void {
+    if (!extensiones) return;
+    for (const clave of Object.keys(extensiones)) {
+        if (!(CLAVES_EXTENSIONES_LOCAL as readonly string[]).includes(clave)) continue;
+        try {
+            localStorage.setItem(clave, JSON.stringify(extensiones[clave]));
+        } catch {
+            /* localStorage lleno o no disponible: ignorar */
+        }
+    }
+}
+
+/*
  * Exporta los datos del dashboard a un archivo JSON
  */
-export function exportarDatos(habitos: Habito[], tareas: Tarea[], notas: string, proyectos?: Proyecto[]): void {
+export function exportarDatos(habitos: Habito[], tareas: Tarea[], notas: string, proyectos?: Proyecto[], extensiones?: Record<string, unknown>): void {
     const datosExportar: DatosDashboardExportados = {
         version: VERSION_ACTUAL,
         fechaExportacion: new Date().toISOString(),
         habitos,
         tareas,
         proyectos,
-        notas
+        notas,
+        extensiones
     };
 
     const jsonString = JSON.stringify(datosExportar, null, 2);
@@ -130,6 +194,14 @@ function validarDatosImportados(datos: unknown): ResultadoValidacion {
 
     if (typeof datosTyped.notas !== 'string') {
         return {esValido: false, mensaje: 'Las notas deben ser texto'};
+    }
+
+    /* [26-08-2026] v2: `extensiones` es opcional y debe ser un objeto plano de
+     * claves conocidas. No rechazamos su ausencia (exports v1.x siguen siendo
+     * válidos); si viene malformado, se ignora en la restauración, no se rompe.
+     * Se valida solo que, si está presente, tenga la forma de objeto. */
+    if (datosTyped.extensiones !== undefined && (typeof datosTyped.extensiones !== 'object' || datosTyped.extensiones === null)) {
+        return {esValido: false, mensaje: 'Bloque de extensiones inválido'};
     }
 
     for (const habito of datosTyped.habitos) {

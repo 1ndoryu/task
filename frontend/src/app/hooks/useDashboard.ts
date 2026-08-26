@@ -7,7 +7,7 @@
 
 import {useState, useCallback, useEffect, useRef} from 'react';
 import type {Habito, Tarea, Proyecto, DatosNuevoHabito, DatosEdicionTarea} from '../types/dashboard';
-import {exportarDatos, importarDatos} from '../services/dataService';
+import {exportarDatos, importarDatos, recolectarExtensionesLocal, aplicarExtensionesLocal} from '../services/dataService';
 import {useDeshacer} from './useDeshacer';
 import {useTareas} from './useTareas';
 import {useProyectos, DatosNuevoProyecto} from './useProyectos';
@@ -178,7 +178,10 @@ export function useDashboard(): UseDashboardReturn {
 
     const exportarTodosDatos = useCallback(() => {
         try {
-            exportarDatos(habitos, tareas, notas, proyectos);
+            /* [26-08-2026] v2: se incluyen los stores local-only (recordatorios,
+             * grupos de ejecución, plugins, etc.) para que el archivo sea un
+             * snapshot completo y migrar no pierda nada. plan-paridad-sync-export. */
+            exportarDatos(habitos, tareas, notas, proyectos, recolectarExtensionesLocal());
             mostrarMensaje('Datos exportados correctamente', 'exito');
         } catch (error) {
             mostrarMensaje('Error al exportar datos', 'error');
@@ -197,6 +200,9 @@ export function useDashboard(): UseDashboardReturn {
                 setTareas(datos.tareas);
                 if (datos.proyectos) setProyectos(datos.proyectos);
                 setNotas(datos.notas || '');
+                /* [26-08-2026] v2: restaurar los stores local-only traídos en el
+                 * archivo (recordatorios, grupos de ejecución, plugins, etc.). */
+                aplicarExtensionesLocal(datos.extensiones);
                 mostrarMensaje(`Datos restaurados (${datos.habitos.length} habitos, ${datos.tareas.length} tareas, ${datos.proyectos?.length || 0} proyectos)`, 'exito');
             } catch (error) {
                 const mensaje = error instanceof Error ? error.message : 'Error desconocido';

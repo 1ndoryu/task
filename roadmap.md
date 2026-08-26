@@ -19,6 +19,10 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 ## Bloque actual
 
+**En curso (26-08-2026): paridad de sync y export.** Dos bugs profundos heredados del legacy:
+1. **Reappear**: al borrar/completar una tarea a veces reaparece/des-completa (race intermitente entre el guardado debounced 2s y el refresco 30s/foco que sobrescribe local con datos stale). Fix: refresco tombstones-aware + no-clobber en `useSyncManager`. Plan: `Agente/planes/plan-paridad-sync-export-2026-08-26.md`.
+2. **Export incompleto**: el archivo solo lleva habitos/tareas/proyectos/notas-scratchpad; faltan recordatorios, notas guardadas, grupos (tareas/ejecución/FB), ayuno, déficit, timeTracker, plugins, config, preferencias. Fix: ampliar formato v2 con todas las secciones + validación tolerante + restore.
+
 Quedan dos frentes, ninguno bloqueado por codigo:
 
 1. **Dominios con credenciales externas** (no implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro): el **chat IA y la nutrición ya funcionan** vía proxy `/api/ai/chat` + `/api/ai/nutricion` con las envs del proyecto anterior (`CEREBRAS_API_KEY`, `GROQ_API*`, `DEEPSEEK_API*`; ver `.env.example` y `run.md`) — quedan externos: agent actions (WhatsApp/research), Magnific, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume).
