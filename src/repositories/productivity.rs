@@ -147,12 +147,19 @@ impl ProductivityRepository {
         }
 
         let asignado_user_id = request.asignado_user_id();
+        /* [27-08-2026] `completed_at` refleja SOLO la fecha real de completado
+         * que el cliente conoce: el payload `fechaCompletado` (fecha local de
+         * cuando se completó la tarea). Si el payload no la trae (p. ej. tareas
+         * importadas desde WordPress, que nunca guardó la fecha), NO inventamos
+         * NOW(): eso hacía que tareas viejas importadas aparecieran como
+         * completadas HOY en el panel de Actividad (derivado del historial real).
+         * Al desmarcar se limpia. Ver plan-paridad-sync-export. */
         let row = sqlx::query_as(
             "INSERT INTO dashboard_tasks
                 (user_id, legacy_id, project_legacy_id, parent_legacy_id, text, completed, priority,
                  urgency, sort_order, payload, asignado_user_id, completed_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-                     CASE WHEN $6 THEN NOW() ELSE NULL END)
+                     CASE WHEN $6 THEN NULLIF($10 ->> 'fechaCompletado', '')::date ELSE NULL END)
              ON CONFLICT (user_id, legacy_id) DO UPDATE SET
                 project_legacy_id = EXCLUDED.project_legacy_id,
                 parent_legacy_id = EXCLUDED.parent_legacy_id,
@@ -164,7 +171,15 @@ impl ProductivityRepository {
                 payload = EXCLUDED.payload,
                 asignado_user_id = EXCLUDED.asignado_user_id,
                 completed_at = CASE
-                    WHEN EXCLUDED.completed THEN COALESCE(dashboard_tasks.completed_at, NOW())
+                    WHEN EXCLUDED.completed
+                        THEN COALESCE(
+                            NULLIF(EXCLUDED.payload ->> 'fechaCompletado', '')::date,
+                            /* [27-08-2026] Conservar el completed_at legítimo
+                             * existente (tareas completadas en la app antes de
+                             * que el front escribiera fechaCompletado); las
+                             * importadas sin fecha ya fueron limpiadas. */
+                            dashboard_tasks.completed_at
+                        )
                     ELSE NULL
                 END,
                 updated_at = NOW(),

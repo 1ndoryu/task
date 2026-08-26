@@ -7,6 +7,7 @@
 
 import {useCallback} from 'react';
 import type {Tarea} from '../types/dashboard';
+import {obtenerFechaHoy} from '../utils/fecha';
 import {generarTareaRepetida} from '../utils/repeticionTareas';
 import {registrarEventoToggleSistema, registrarActividadToggle} from '../utils/registroActividadTarea';
 import type {UseTareasParams} from './useTareas';
@@ -31,7 +32,21 @@ export function useTareaToggle({tareas, setTareas, registrarAccion}: UseTareasPa
             }
 
             setTareas(prev => {
-                const actualizadas = prev.map(t => (t.id === id ? {...t, completado: !t.completado, updatedAt: Date.now()} : t));
+                const actualizadas = prev.map(t =>
+                    t.id === id
+                        ? {
+                              ...t,
+                              completado: !t.completado,
+                              /* [27-08-2026] La fecha real de completado vive en el
+                               * payload (el backend deriva de ahi el panel de
+                               * Actividad). Sin ella, el backend inventaba
+                               * completed_at = NOW() y tareas viejas importadas
+                               * aparecian como completadas hoy. */
+                              fechaCompletado: !t.completado ? obtenerFechaHoy() : undefined,
+                              updatedAt: Date.now()
+                          }
+                        : t
+                );
 
                 if (nuevaTareaRepetida) {
                     /* Insertar al inicio y recalcular ordenes */
@@ -47,7 +62,7 @@ export function useTareaToggle({tareas, setTareas, registrarAccion}: UseTareasPa
             registrarAccion(`Tarea "${tarea.texto.substring(0, 30)}..." ${accion}`, () => {
                 setTareas(prev => {
                     /* Restaurar estado original y eliminar tarea generada si existe */
-                    let listaRestaurada = prev.filter(t => t.id !== nuevaTareaRepetida?.id).map(t => (t.id === id ? {...t, completado: estadoAnterior} : t));
+                    let listaRestaurada = prev.filter(t => t.id !== nuevaTareaRepetida?.id).map(t => (t.id === id ? {...t, completado: estadoAnterior, fechaCompletado: estadoAnterior ? tarea.fechaCompletado : undefined} : t));
 
                     /* Si habia repeticion, normalizar ordenes tras eliminar la nueva */
                     if (nuevaTareaRepetida) {
@@ -56,6 +71,14 @@ export function useTareaToggle({tareas, setTareas, registrarAccion}: UseTareasPa
 
                     return listaRestaurada;
                 });
+
+                /* [27-08-2026] Deshacer debe revertir TAMBIÉN la actividad: al
+                 * completar se registró tarea_completada y, si solo se restauraba
+                 * el store, el evento quedaba en el backend y el panel de
+                 * Actividad seguía mostrando la tarea. Registrar la acción
+                 * inversa (desmarcada/completada) borra/crea el evento real.
+                 * `!estadoAnterior` invierte la semántica de registrarActividadToggle. */
+                registrarActividadToggle(tarea, !estadoAnterior);
             });
 
             registrarActividadToggle(tarea, estadoAnterior, opciones?.detallesActividad);

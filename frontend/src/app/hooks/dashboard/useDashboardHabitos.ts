@@ -2,6 +2,7 @@ import {useState, useCallback, useMemo} from 'react';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {migrarYActualizarHabitos} from '../../utils/migracionHabitos';
 import {marcarBorrado, desmarcarBorrado} from '../../utils/borradosPendientes';
+import {registrarHabitoCumplido, registrarHabitoDesmarcado} from '../../services/actividadService';
 import type {Habito, ConfiguracionDashboard, DatosNuevoHabito} from '../../types/dashboard';
 
 const CONFIGURACION_POR_DEFECTO: ConfiguracionDashboard = {
@@ -165,6 +166,16 @@ export function useDashboardHabitos({registrarAccion, mostrarMensaje}: UseDashbo
             const mensaje = accion === 'completado' ? `"${estadoAnterior.nombre}" completado` : `"${estadoAnterior.nombre}" desmarcado`;
 
             registrarAccion(mensaje, () => {
+                /* [27-08-2026] Deshacer debe revertir TAMBIÉN la actividad: al
+                 * completar se registró habito_cumplido (evento en el backend),
+                 * y si solo se restauraba el store, el panel de Actividad seguía
+                 * mostrando el hábito como realizado. Registrar la acción
+                 * inversa (desmarcar/cumplir) elimina/crea el evento real. */
+                if (accion === 'completado') {
+                    registrarHabitoDesmarcado(estadoAnterior.id, estadoAnterior.nombre);
+                } else {
+                    registrarHabitoCumplido(estadoAnterior.id, estadoAnterior.nombre);
+                }
                 storeRestaurarHabito(estadoAnterior);
             });
         },

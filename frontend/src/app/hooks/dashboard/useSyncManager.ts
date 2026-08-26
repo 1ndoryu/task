@@ -87,6 +87,16 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
      * pisotear un cambio local con datos stale del servidor. Ver plan
      * plan-paridad-sync-export-2026-08-26.md. */
     const guardadoPendienteRef = useRef(false);
+    /* [27-08-2026] Ref espejo de `syncMeta` para el refresh periódico/foco: el
+     * guard de pisoteo necesita comparar `lastModified > lastSync` (hay cambios
+     * locales que el servidor aún no confirmó), pero el interval se crea con un
+     * closure que NO incluye syncMeta en sus deps. Si el save del debounce
+     * FALLÓ, guardadoPendienteRef vuelve a false y el siguiente refresh pisaría
+     * el completado local con datos stale del servidor (bug de carrera al
+     * completar hábitos: "se marca y vuelve a aparecer"). Este ref permite
+     * saltar el refresh mientras existan cambios locales no confirmados. */
+    const syncMetaRef = useRef(syncMeta);
+    syncMetaRef.current = syncMeta;
 
     // --- Lógica de Inicialización (Load Strategy) ---
 
@@ -225,8 +235,15 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
              * ref (guardadoPendienteRef) en vez de `hasChanges` para no depender de
              * un closure stale en el setInterval/manejarFoco: aunque `hasChanges`
              * mida el hash entero, el ref refleja el ciclo guardar-debounce de forma
-             * determinista y evita que un pull pise una edición recién hecha. */
+             * determinista y evita que un pull pise una edición recién hecha.
+             * [27-08-2026] Además de la ventana del debounce, se salta el refresh si
+             * `lastModified > lastSync` (cambios locales aún no confirmados por el
+             * servidor). Esto cubre el caso en que el save FALLÓ: guardadoPendienteRef
+             * vuelve a false al terminar el intento, pero los datos locales siguen
+             * siendo más nuevos y un pull los pisaría (carrera al completar hábitos). */
+            const meta = syncMetaRef.current;
             if (document.visibilityState !== 'visible' || guardadoPendienteRef.current || transportState.isSaving) return;
+            if (meta && meta.lastModified > meta.lastSync) return;
             const serverData = await loadData();
             if (!serverData) return;
             /* [26-08-2026] Fix reappear (tombstones-aware): aunque el servidor
