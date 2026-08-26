@@ -18,15 +18,11 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
         "groq",
         "https://api.groq.com/openai/v1/chat/completions",
         &[
-            "openai/gpt-oss-120b",
-            "moonshotai/kimi-k2-instruct-0905",
-            "qwen/qwen3-32b",
-            "llama-3.3-70b-versatile",
-            "meta-llama/llama-4-scout-17b-16e-instruct",
-            "moonshotai/kimi-k2-instruct",
+            "groq/compound",
+            "groq/compound-mini",
             "openai/gpt-oss-20b",
-            "whisper-large-v3",
-            "whisper-large-v3-turbo",
+            "openai/gpt-oss-120b",
+            "qwen/qwen3.6-27b",
         ],
     ),
     (
@@ -37,16 +33,22 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
     (
         "cerebras",
         "https://api.cerebras.ai/v1/chat/completions",
-        &["zai-glm-4.7"],
+        &["gemma-4-31b", "gpt-oss-120b"],
     ),
 ];
 
 /// Cadena de fallback cuando el candidato solicitado falla (PHP CHAT_FALLBACK_CHAIN).
+/* [26-08-2026] Cadena actualizada a modelos reales de la cuenta (verificados
+ * contra /models de cada proveedor el 26-08): groq/compound-mini responde
+ * JSON en pocos tokens (ideal nutrición); gpt-oss son de razonamiento y
+ * agotan el presupuesto corto dejando content vacío, por eso van detrás. */
 const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
-    ("cerebras", "zai-glm-4.7"),
+    ("groq", "groq/compound-mini"),
+    ("groq", "groq/compound"),
+    ("cerebras", "gemma-4-31b"),
+    ("groq", "openai/gpt-oss-20b"),
     ("groq", "openai/gpt-oss-120b"),
-    ("groq", "moonshotai/kimi-k2-instruct-0905"),
-    ("groq", "llama-3.3-70b-versatile"),
+    ("groq", "qwen/qwen3.6-27b"),
     ("deepseek", "deepseek-v4-flash"),
 ];
 
@@ -167,9 +169,22 @@ impl LlmProviderService {
             }
         }
 
-        let detalle = errores.last().cloned().unwrap_or_default();
+        /* [26-08-2026] Reportar TODA la cadena de errores (sin duplicados por
+         * proveedor/modelo), no solo el último: ocultar los fallos previos
+         * impedía diagnosticar por qué cerebras/groq no respondían. */
+        let mut unicos: Vec<String> = Vec::new();
+        for e in &errores {
+            if !unicos.contains(e) {
+                unicos.push(e.clone());
+            }
+        }
+        let detalle = if unicos.is_empty() {
+            "sin errores de proveedor".to_string()
+        } else {
+            unicos.join(" | ")
+        };
         Err(AppError::Upstream(format!(
-            "No se pudo contactar un modelo IA disponible. {detalle}"
+            "No se pudo contactar un modelo IA disponible: {detalle}"
         )))
     }
 
@@ -203,18 +218,43 @@ impl LlmProviderService {
                 modelo,
                 AiChatOptions {
                     temperature: 0.1,
-                    max_tokens: 180,
+                    /* [26-08-2026] 180 era el contrato PHP, pero los modelos
+                     * actuales (compound-mini, gpt-oss, qwen) razonan antes de
+                     * responder: con presupuesto corto se cortan en <think> y
+                     * devuelven content vacío o JSON truncado. 512 deja margen. */
+                    max_tokens: 512,
                 },
             )
             .await?;
 
-        /* El modelo puede devolver el JSON envuelto en backticks de markdown. */
+        /* El modelo puede devolver el JSON envuelto en backticks de markdown
+         * y/o precedido de un bloque <think>...</think> (modelos que razonan
+         * en voz alta). Se limpia todo eso antes de parsear. */
         let contenido = respuesta.contenido.trim();
-        let json = contenido
+        /* [26-08-2026] Los modelos que razonan en voz alta (compound-mini,
+         * qwen, gpt-oss) pueden envolver su razonamiento en <think>...</think>
+         * ANTES del JSON. Hay que remover el bloque COMPLETO (etiquetas y
+         * contenido interior), no solo las etiquetas: si el texto del
+         * razonamiento queda pegado al JSON, el parseo falla. */
+        let mut sin_think = contenido.to_string();
+        loop {
+            let inicio = sin_think.find("<think");
+            let fin = sin_think.find("</think>");
+            match (inicio, fin) {
+                (Some(i), Some(f)) if f > i => {
+                    let antes = &sin_think[..i];
+                    let despues = &sin_think[f + "</think>".len()..];
+                    sin_think = format!("{antes}{despues}");
+                }
+                _ => break,
+            }
+        }
+        let sin_think = sin_think.trim();
+        let json = sin_think
             .strip_prefix("```json")
-            .or_else(|| contenido.strip_prefix("```"))
+            .or_else(|| sin_think.strip_prefix("```"))
             .map(str::trim_start)
-            .unwrap_or(contenido)
+            .unwrap_or(sin_think)
             .trim_end_matches("```")
             .trim();
 

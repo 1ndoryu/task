@@ -253,6 +253,21 @@ async function main() {
   r = await api('POST', `/admin/users/${uid}/cancel-premium`, {csrf: csrfAdmin});
   assert(r.status === 200 && r.data.success, 'admin cancela premium');
 
+  /* [26-08-2026] Proxy IA (paridad WordPress). Se verifica aquí, con la sesión
+   * admin ya activa, antes de que el bloque de contraseña deje la cookie jar
+   * en otro usuario. 2 llamadas reales por corrida (límites 80/h chat y 60/h
+   * nutrición por usuario). La cadena usa modelos vigentes de la cuenta
+   * (groq/compound-mini, gpt-oss-20b...) en vez de los obsoletos que daban
+   * 404 (kimi-k2-instruct-0905, llama-3.3-70b-versatile, zai-glm-4.7). */
+  console.log('\n== Proxy IA (/ai/*) ==');
+  const csrfIa = cookies['csrf_token'];
+  r = await api('POST', '/ai/chat', {body: {messages: [{role: 'user', content: 'hola'}]}, csrf: csrfIa});
+  assert(r.status === 200 && typeof r.data.contenido === 'string' && r.data.contenido.length > 0, 'chat IA admin → contenido real');
+  r = await api('POST', '/ai/nutricion', {body: {descripcion: 'un plato de arroz con pollo'}, csrf: csrfIa});
+  assert(r.status === 200 && typeof r.data.calorias === 'number' && r.data.calorias > 0, 'nutrición IA admin → macros con calorías');
+  r = await api('POST', '/ai/nutricion', {body: {descripcion: ''}, csrf: csrfIa});
+  assert(r.status === 422 || r.status === 400, 'nutrición sin descripción → error de validación');
+
   /* [18-08-2026] Preferencias UI/plugins por usuario: el servidor debe
    * persistir el blob (layout, plugins, tema...) y devolverlo en el GET.
    * En WordPress esto vivía solo en localStorage y se perdía al cambiar

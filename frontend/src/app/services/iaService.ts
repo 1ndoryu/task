@@ -28,29 +28,29 @@ export interface ModeloIA {
 }
 
 export const PROVEEDORES_IA: Array<{id: ProveedorIA; nombre: string; descripcion: string}> = [
-    {id: 'cerebras', nombre: 'Cerebras', descripcion: 'Z.ai GLM 4.7 — primera opción (~1000 tok/s)'},
     {id: 'groq', nombre: 'Groq', descripcion: 'Modelos rápidos y producción por defecto'},
+    {id: 'cerebras', nombre: 'Cerebras', descripcion: 'Gemma 4 31B — requiere saldo en la cuenta'},
     {id: 'deepseek', nombre: 'DeepSeek', descripcion: 'DeepSeek V4 Flash'}
 ];
 
-/* [135M-1] Z.ai GLM 4.7 via Cerebras Inference como primera opcion.
- * ~1000 tok/s, 64k contexto free tier, tool calling, structured outputs.
- * Rate limit free: 10 req/min — pasar a siguiente en fallback si da 429.
- * Fuente: inference-docs.cerebras.ai/models/zai-glm-47 */
+/* [26-08-2026] Modelos reales de la cuenta (verificados contra /models de
+ * cada proveedor): groq/compound-mini responde JSON rápido (ideal nutrición);
+ * gpt-oss son de razonamiento (con presupuesto corto devuelven content vacío).
+ * Los modelos antiguos (zai-glm-4.7, kimi-k2-instruct-0905, llama-3.3-70b,
+ * llama-4-scout, qwen3-32b) ya no existen en las cuentas -> 404. */
 export const MODELOS_IA = [
-    {id: 'zai-glm-4.7', nombre: 'Z.ai GLM 4.7 — primera opción (Cerebras)', proveedor: 'cerebras'},
+    {id: 'groq/compound-mini', nombre: 'Groq Compound Mini — rápido (Groq)', proveedor: 'groq'},
+    {id: 'groq/compound', nombre: 'Groq Compound (Groq)', proveedor: 'groq'},
+    {id: 'openai/gpt-oss-20b', nombre: 'GPT-OSS 20B (Groq)', proveedor: 'groq'},
     {id: 'openai/gpt-oss-120b', nombre: 'GPT-OSS 120B — más inteligente (Groq)', proveedor: 'groq'},
-    {id: 'moonshotai/kimi-k2-instruct-0905', nombre: 'Kimi K2 — 262K contexto (Groq)', proveedor: 'groq'},
-    {id: 'meta-llama/llama-4-maverick-17b-128e-instruct', nombre: 'Llama 4 Maverick (Groq)', proveedor: 'groq'},
-    {id: 'qwen/qwen3-32b', nombre: 'Qwen3 32B (Groq)', proveedor: 'groq'},
-    {id: 'llama-3.3-70b-versatile', nombre: 'Llama 3.3 70B — rápido (Groq)', proveedor: 'groq'},
-    {id: 'meta-llama/llama-4-scout-17b-16e-instruct', nombre: 'Llama 4 Scout — flash (Groq)', proveedor: 'groq'},
+    {id: 'qwen/qwen3.6-27b', nombre: 'Qwen3.6 27B (Groq)', proveedor: 'groq'},
+    {id: 'gemma-4-31b', nombre: 'Gemma 4 31B (Cerebras)', proveedor: 'cerebras'},
     {id: 'deepseek-v4-flash', nombre: 'DeepSeek V4 Flash', proveedor: 'deepseek'}
 ] as const;
 
 export const MODELO_FLASH_POR_PROVEEDOR: Record<ProveedorIA, string> = {
-    cerebras: 'zai-glm-4.7',
-    groq: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    cerebras: 'gemma-4-31b',
+    groq: 'groq/compound-mini',
     deepseek: 'deepseek-v4-flash'
 };
 
