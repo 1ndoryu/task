@@ -134,8 +134,10 @@ export function ArbolVida({vida, copaEditada}: ArbolVidaProps): JSX.Element {
     const ancho = DIMENSION_ARBOL * tamaño;
     const alto = DIMENSION_ARBOL * tamaño;
 
-    /* Rendering: misma inversión que el editor para que (x, y) coincidan —
-     * y=0 arriba en el SVG (arriba-izquierda origen). */
+    /* Render: el SVG tiene el ORIGEN abajo-izquierda (eje y hacia arriba), mientras
+     * el editor usa (0,0) arriba-izquierda con y hacia abajo. Para que lo que el
+     * usuario dibuja corresponda con lo que ve (y=0 arriba), invertimos el eje y
+     * en el rect: la celda (x, DIMENSION-1) del editor es la BASE del árbol en el SVG. */
     return (
         <svg width="64" height="64" viewBox={`0 0 ${ancho} ${alto}`} shapeRendering="crispEdges" role="img" aria-label={`Árbol de vida (estado ${estado}%)`}>
             {celdas.map(clave => {
@@ -146,7 +148,7 @@ export function ArbolVida({vida, copaEditada}: ArbolVidaProps): JSX.Element {
                     <rect
                         key={clave}
                         x={x * tamaño}
-                        y={y * tamaño}
+                        y={(DIMENSION_ARBOL - 1 - y) * tamaño}
                         width={tamaño}
                         height={tamaño}
                         fill="#ffffff"
