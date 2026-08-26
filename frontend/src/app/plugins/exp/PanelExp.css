@@ -150,7 +150,9 @@
     text-align: right;
 }
 
-/* Fila que junta la barra con el número (barra primero, número después). */
+/* Fila que junta la barra con el número (barra primero, número después).
+ * Izquierda: pegado al borde izquierdo del panel. Derecha: pegado al borde
+ * derecho (el bloque va contra el extremo y su contenido se alinea a la derecha). */
 .panelExpArbolLateralFila {
     display: flex;
     align-items: center;
@@ -163,7 +165,7 @@
 }
 
 .panelExpArbolLateral--der .panelExpArbolLateralFila {
-    justify-content: flex-start;
+    justify-content: flex-end;
 }
 
 .panelExpArbolLateralValor {
@@ -182,18 +184,19 @@
     color: var(--dashboard-textoSuave, #9a9aa3);
 }
 
-/* Barra de progreso del contador lateral: más alta y menos ancha, sin
- * relleno de color propio ni pista/fondo, con borde de 1px del MISMO color
- * del número (texto activo) y esquinas RECTAS. El relleno interior usa el
- * mismo color -> la barra se ve como un contorno que se va llenando. */
+/* Barra de progreso del contador lateral: alargada, sin pista/fondo, con
+ * borde de 1px y relleno del MISMO color del número (texto activo) y esquinas
+ * RECTAS. El relleno interior rellena del mismo color del borde -> contorno
+ * que se va llenando. */
 .panelExpArbolLateralBarra {
     position: relative;
     flex: 0 1 auto;
-    width: 40px;
+    width: 56px;
     height: 10px;
-    min-width: 32px;
+    min-width: 44px;
     border-radius: 0;
     border: 1px solid var(--dashboard-textoActivo, #e8e8ea);
+    background: transparent;
     overflow: hidden;
 }
 
