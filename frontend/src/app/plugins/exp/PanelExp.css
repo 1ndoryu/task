@@ -6,13 +6,10 @@
  * hardcodeados salvo los mínimos estructurales).
  */
 
-/* Contenedor fijo: ancla arriba del dashboard (grid y sidebar). El margen
- * inferior usa el mismo espaciado que separa los paneles del grid
- * (.dashboardGrid gap: var(--dashboard-espacioXl)). */
+/* [27-08-2026] El panel fluye con el resto del dashboard (no queda fijo ni
+ * sticky en la pantalla). El margen inferior usa el mismo espaciado que
+ * separa los paneles del grid (.dashboardGrid gap: var(--dashboard-espacioXl)). */
 .panelExpFijo {
-    position: sticky;
-    top: 0;
-    z-index: 40;
     margin-bottom: var(--dashboard-espacioXl, 1.5rem);
 }
 
@@ -93,7 +90,7 @@
     align-self: center;
 }
 
-/* Modo sidebar: la barra también debe quedar arriba del contenido. */
+/* Modo sidebar: el panel fluye con el contenido (sin posicionamiento especial). */
 .dashboardContenedor--sidebar .panelExpFijo {
     position: static;
 }
