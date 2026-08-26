@@ -39,8 +39,15 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
     const renderIndicadorDificultad = () => {
         if (!expActivo) return null;
         if (ocultos.dificultad) return null;
-        if (!tarea || typeof tarea.id !== 'number') return null;
-        const nivel = dificultades[String(tarea.id)];
+        /* [30-08-2026] Las filas de hábito usan un id sintético negativo
+         * (-habitoId - 10000, ver useHabitosComoTareas) que NO coincide con la
+         * clave del store EXP (String(habito.id)). Sin este ajuste la barra de
+         * dificultad nunca aparecía en filas de hábito del panel de ejecución. */
+        const claveDificultad = esHabito && (tarea as TareaHabito).habitoId != null
+            ? String((tarea as TareaHabito).habitoId)
+            : (tarea && typeof tarea.id === 'number' ? String(tarea.id) : null);
+        if (!claveDificultad) return null;
+        const nivel = dificultades[claveDificultad];
         if (!nivel) return null;
         const fraccion: Record<string, number> = {
             'Muy Baja': 0.2,
