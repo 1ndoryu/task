@@ -1,6 +1,7 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
-import {useDashboardApi, DashboardData} from '../useDashboardApi';
-import {devLog} from '../../utils/devLog';
+import {useDashboardApi} from '../useDashboardApi';
+import type {DatosGuardado, DashboardData} from '../useDashboardApi';
+import {devLog, devWarn} from '../../utils/devLog';
 
 interface SyncTransportConfig {
     maxRetries?: number;
@@ -9,7 +10,7 @@ interface SyncTransportConfig {
 
 interface UseSyncTransportReturn {
     // API Wrappers con lógica de reintento
-    saveData: (data: Partial<DashboardData>) => Promise<boolean>;
+    saveData: (data: DatosGuardado) => Promise<boolean>;
     loadData: () => Promise<DashboardData | null>;
 
     // Estados expuestos
@@ -52,7 +53,7 @@ export function useSyncTransport(config: SyncTransportConfig = {}): UseSyncTrans
      * Guarda datos con estrategia de Backoff Exponencial
      */
     const saveData = useCallback(
-        async (data: Partial<DashboardData>): Promise<boolean> => {
+        async (data: DatosGuardado): Promise<boolean> => {
             // Si ya estamos reintentando, cancelar el anterior (nueva data tiene prioridad)
             if (retryTimeout.current) {
                 clearTimeout(retryTimeout.current);
@@ -70,7 +71,7 @@ export function useSyncTransport(config: SyncTransportConfig = {}): UseSyncTrans
                     throw new Error('Error al guardar datos (API devolvió false)');
                 }
             } catch (error) {
-                console.warn('[SyncTransport] Error saving:', error);
+                devWarn('[SyncTransport] Error saving:', error);
 
                 if (retryCount.current < maxRetries) {
                     retryCount.current++;

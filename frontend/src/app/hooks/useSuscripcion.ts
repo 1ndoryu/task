@@ -11,6 +11,7 @@
 import {useState, useCallback, useMemo, useEffect} from 'react';
 import type {InfoSuscripcion, LimitesPlan, ErrorLimite} from '../types/dashboard';
 import {apiFetch} from '../utils/apiClient';
+import {devWarn} from '../utils/devLog';
 
 /*
  * Límites por defecto para plan FREE (fallback)
@@ -216,7 +217,7 @@ export function useSuscripcion(): UseSuscripcionReturn {
             setSuscripcion(data);
         } catch (err) {
             /* No romper la UI si el endpoint falla; se mantiene el estado actual */
-            console.warn('[useSuscripcion] No se pudo recargar:', err);
+            devWarn('[useSuscripcion] No se pudo recargar:', err);
         } finally {
             setCargando(false);
         }

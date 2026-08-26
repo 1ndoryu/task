@@ -2,6 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::models::{Note, NoteFolder};
+use crate::repositories::escape::escape_like_literal;
 
 pub struct NoteRepository;
 
@@ -210,19 +211,5 @@ impl NoteRepository {
     }
 }
 
-fn escape_like_literal(value: &str) -> String {
-    value
-        .replace('\\', "\\\\")
-        .replace('%', "\\%")
-        .replace('_', "\\_")
-}
-
-#[cfg(test)]
-mod tests {
-    use super::escape_like_literal;
-
-    #[test]
-    fn escapes_like_wildcards_as_literal_text() {
-        assert_eq!(escape_like_literal("a%b_c\\d"), "a\\%b\\_c\\\\d");
-    }
-}
+// [H-B03-06] `escape_like_literal` vive ahora en `repositories/escape.rs`
+// (compartido con admin.rs).

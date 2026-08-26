@@ -103,21 +103,25 @@
     --dashboard-barraUrgente: #dc2626;
     /* [H-F14-01] Fondo del sidebar (antes hardcodeado #0e0e0e) */
     --dashboard-sidebarFondo: #0e0e0e;
-    --dashboard-fuenteMonoespaciada: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
-    --dashboard-tamanoMicro: 9px;
-    --dashboard-tamanoMuyPequeno: 10px;
-    --dashboard-tamanoPequeno: 11px;
-    --dashboard-tamanoDetalle: 0.72rem;
-    --dashboard-tamanoBase: 13px;
-    --dashboard-tamanoNormal: 1rem;
-    --dashboard-tamanoGrande: 1.1rem;
-    --dashboard-tamanoMediano: 1.125rem;
-    --dashboard-tamanoEncabezado: 1.25rem;
-    --dashboard-tamanoTitulo: 1.3rem;
-    --dashboard-tamanoHero: 1.4rem;
-    --dashboard-tamanoSubtitulo: 1.5rem;
-    --dashboard-tamanoH2: 1.75rem;
-    --dashboard-tamanoDisplay: 2.5rem;
+    --dashboard-fuenteMonoespaciada: 'Departure Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+    /* [25-08-2026] Ajuste global de la escala tipografica tras adoptar Departure Mono
+     * (fuente mas ancha). Cada token = valor original + var(--dashboard-ajusteTipografia).
+     * -2px quedo pequeno -> ahora -1.5px. Para recalibrar, cambia SOLO esta variable. */
+    --dashboard-ajusteTipografia: -1.5px;
+    --dashboard-tamanoMicro: calc(9px + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoMuyPequeno: calc(10px + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoPequeno: calc(11px + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoDetalle: calc(0.72rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoBase: calc(13px + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoNormal: calc(1rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoGrande: calc(1.1rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoMediano: calc(1.125rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoEncabezado: calc(1.25rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoTitulo: calc(1.3rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoHero: calc(1.4rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoSubtitulo: calc(1.5rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoH2: calc(1.75rem + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoDisplay: calc(2.5rem + var(--dashboard-ajusteTipografia));
     --dashboard-espacioXxs: 2px;
     --dashboard-espacioHairline: 1px;
     --dashboard-espacioMini: 3px;
@@ -177,8 +181,8 @@
     --dashboard-espacioMovilSm: 0.25rem;
     --dashboard-espacioMovilMd: 0.5rem;
     --dashboard-espacioMovilLg: 0.75rem;
-    --dashboard-tamanoMovilBase: 14px;
-    --dashboard-tamanoMovilPequeno: 12px;
+    --dashboard-tamanoMovilBase: calc(14px + var(--dashboard-ajusteTipografia));
+    --dashboard-tamanoMovilPequeno: calc(12px + var(--dashboard-ajusteTipografia));
     --dashboard-tamanoTactilMinimo: 44px;
     --dashboard-espacioTactil: 8px;
     --dashboard-safeAreaTop: env(safe-area-inset-top, 0px);

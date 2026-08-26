@@ -12,6 +12,7 @@ import {useEffect, useRef, useCallback} from 'react';
 import {useNotasStore, PANEL_SCRATCHPAD} from '../stores/notasStore';
 import {EVENTO_NOTA_ACTIVA, extraerTitulo, obtenerNotaActivaIdGuardado, CONTENIDO_NOTA_NUEVA} from '../utils/notasUtils';
 import {Nota, NotaActiva} from '../types/notas';
+import {devWarn} from '../utils/devLog';
 
 /* Re-exportamos tipos para compatibilidad */
 export type {Nota, NotaActiva};
@@ -51,7 +52,7 @@ interface UseNotasReturn {
  */
 export function useNotas(): UseNotasReturn {
     useEffect(() => {
-        console.warn('useNotas is deprecated. Use useNotasStore instead to prevent performance issues.');
+        devWarn('useNotas is deprecated. Use useNotasStore instead to prevent performance issues.');
     }, []);
 
     /* Consumir el store — [263A-12] acciones ahora requieren panelId, usamos PANEL_SCRATCHPAD por defecto */

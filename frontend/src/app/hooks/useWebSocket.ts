@@ -16,7 +16,7 @@
 
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
-import {devLog} from '../utils/devLog';
+import {devLog, devWarn} from '../utils/devLog';
 
 /*
  * Detección de entorno para WebSocket
@@ -158,7 +158,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
             /* Configurar timeout para esperar pong */
             heartbeatTimeoutRef.current = setTimeout(() => {
-                console.warn('[WebSocket] No se recibió pong, reconectando...');
+                devWarn('[WebSocket] No se recibió pong, reconectando...');
                 cerrarConexion();
                 setEstado('reconectando');
             }, CONFIG_WS.heartbeatTimeoutMs);
@@ -291,7 +291,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
     /* Enviar mensaje */
     const enviar = useCallback((mensaje: MensajeWS): boolean => {
         if (wsRef.current?.readyState !== WebSocket.OPEN) {
-            console.warn('[WebSocket] No conectado, no se puede enviar mensaje');
+            devWarn('[WebSocket] No conectado, no se puede enviar mensaje');
             return false;
         }
 
@@ -378,7 +378,8 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
         (async () => {
             try {
-                /* @ts-ignore - Modulo solo disponible en plataforma nativa Capacitor */
+                /* [T7] `@capacitor/app` declara tipos (dist/esm/index.d.ts); se
+                 * resuelve por import dinámico solo en plataforma nativa. */
                 const modulo = await import('@capacitor/app');
                 const {App} = modulo;
 

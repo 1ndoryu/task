@@ -57,3 +57,7 @@ frontend/tsconfig.tsbuildinfo
 glory-rust-template.code-workspace
 .sentinel-report.md
 .cargo/config.toml
+
+# Artefactos de arranque del preview (Freebuff)
+.freebuff/*.err
+.freebuff/*-boot.log

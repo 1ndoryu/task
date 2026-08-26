@@ -11,6 +11,7 @@
  */
 
 import {useState, useCallback, useEffect} from 'react';
+import {devWarn} from '../utils/devLog';
 
 /* Nombre del evento de sincronización entre instancias (misma pestaña) */
 const EVENTO_SYNC = '__glory_ls_update__';
@@ -52,7 +53,7 @@ export function useLocalStorage<T>(clave: string, config: UseLocalStorageConfig<
             const valorParseado = JSON.parse(valorAlmacenado) as T;
 
             if (validarValor && !validarValor(valorParseado)) {
-                console.warn(`[useLocalStorage] Valor inválido para clave "${clave}", usando valor por defecto`);
+                devWarn(`[useLocalStorage] Valor inválido para clave "${clave}", usando valor por defecto`);
                 setCargando(false);
                 return;
             }

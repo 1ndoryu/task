@@ -1,22 +1,21 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
-import {devLog} from '../../utils/devLog';
+import {devLog, devWarn} from '../../utils/devLog';
 import type React from 'react';
 import {useChangeDetector} from './useChangeDetector';
 import {useSyncTransport} from './useSyncTransport';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from '../useLocalStorage';
 import {useSuscripcion} from '../useSuscripcion';
 import type {DashboardData} from '../useDashboardApi';
-import {tareasIniciales, notasIniciales, habitosIniciales} from '../../data/datosIniciales';
-import {apiFetch} from '../../utils/apiClient';
-import {hayBorradosPendientes} from '../../utils/borradosPendientes';
-
-/* [18-08-2026] Paridad con WP (DashboardApiController + generateBackup): al
- * guardar como premium se intenta una copia de seguridad automática; el
- * backend aplica el intervalo de 30 minutos y descarta el exceso. */
-function dispararBackupAutomatico(esPremium: boolean): void {
-    if (!esPremium) return;
-    apiFetch('/backups', {method: 'POST', body: {trigger: 'auto'}}).catch(() => {});
-}
+import {hayBorradosPendientes, obtenerBorradosPendientes, type TipoEntidadBorrable} from '../../utils/borradosPendientes';
+import {
+    CLAVE_USUARIO_INICIALIZADO,
+    esServidorVacio,
+    esProbableWipeout,
+    usuarioYaInicializado,
+    marcarUsuarioComoInicializado,
+    generarDatosInicialesUsuarioNuevo,
+    dispararBackupAutomatico
+} from '../../utils/syncAyudas';
 
 interface SyncMeta {
     lastModified: number;
@@ -36,93 +35,31 @@ interface UseSyncManagerProps {
     contadorCambiosRemotosRef?: React.MutableRefObject<number>;
 }
 
-/*
- * Clave para detectar si ya se inicializó con datos de bienvenida
- * Esto evita subir datos iniciales múltiples veces o a usuarios que ya tenían datos
- */
-const CLAVE_USUARIO_INICIALIZADO = 'glory_usuario_inicializado';
+/* [26-08-2026] Filtra del payload del servidor las entidades cuyo id está en el
+ * registro local de borrados pendientes (tombstones). Previene que un refresh
+ * periódico/de foco resucite elementos que el usuario borró localmente cuando el
+ * servidor aún no ha procesado el DELETE (race del debounce). Ver plan
+ * plan-paridad-sync-export-2026-08-26.md. */
+function aplicarTombstonesAlPayload(datos: DashboardData): DashboardData {
+    const pendientes = obtenerBorradosPendientes();
+    const set = (tipo: TipoEntidadBorrable) => new Set<number>(pendientes[tipo]);
 
-/*
- * Verifica si los datos del servidor están "vacíos" (usuario nuevo sin datos)
- * Consideramos vacío si no tiene hábitos, tareas, y notas vacías
- */
-function esServidorVacio(serverData: DashboardData | null): boolean {
-    if (!serverData) return true;
-    
-    const sinHabitos = !serverData.habitos || serverData.habitos.length === 0;
-    const sinTareas = !serverData.tareas || serverData.tareas.length === 0;
-    const sinNotas = !serverData.notas || serverData.notas.trim() === '';
-    
-    return sinHabitos && sinTareas && sinNotas;
-}
-
-/*
- * [275A-1] Safety guard contra wipeout: NUNCA subir datos si TODOS los arrays
- * principales están vacíos y ya existía una sincronización previa (lastSync > 0).
- * Esto previene la catástrofe cuando Zustand aún no ha hidratado sus stores
- * (habitos = []) pero isDataReady ya es true, causando que performInitialSync
- * o el auto-save envíen un estado vacío al servidor que soft-deletea todo.
- * Excepción: lastSync === 0 = primera sincronización (usuario nuevo), permitido.
- */
-function esProbableWipeout(data: DashboardData, lastSync: number, habitosInicializado?: boolean): boolean {
-  if (lastSync === 0) return false; // Primera vez = usuario nuevo, ok subir vacio
-  const sinHabitos = !data.habitos || data.habitos.length === 0;
-  const sinTareas = !data.tareas || data.tareas.length === 0;
-  const sinProyectos = !data.proyectos || data.proyectos.length === 0;
-  /* [275A-1] Si Zustand persist aun no hidrato (habitosInicializado=false),
-   * los arrays de habitos SIEMPRE estan vacios. Cualquier subida en este
-   * estado es peligrosa: bloquear si hay al menos 2 arrays vacios (no solo 3).
-   * Si habitosInicializado=true, mantenemos el umbral estricto (3 vacios). */
-  if (habitosInicializado === false) {
-    const arraysVacios = [sinHabitos, sinTareas, sinProyectos].filter(Boolean).length;
-    return arraysVacios >= 2;
-  }
-  /* Solo bloquear si TODOS los arrays estan vacios simultaneamente.
-   * Que un solo array sea vacio es normal (ej: el usuario no tiene proyectos). */
-  return sinHabitos && sinTareas && sinProyectos;
-}
-
-/*
- * Verifica si el usuario ya fue inicializado previamente con datos de bienvenida.
- * Esto evita que al borrar localStorage y recargar, se vuelvan a subir datos iniciales.
- */
-function usuarioYaInicializado(): boolean {
-    try {
-        return localStorage.getItem(CLAVE_USUARIO_INICIALIZADO) === 'true';
-    } catch {
-        return false;
-    }
-}
-
-/*
- * Marca al usuario como inicializado después de subir datos de bienvenida.
- * Esta marca persiste incluso si se borra el resto del localStorage.
- */
-function marcarUsuarioComoInicializado(): void {
-    try {
-        localStorage.setItem(CLAVE_USUARIO_INICIALIZADO, 'true');
-    } catch {
-        console.warn('[SyncManager] No se pudo guardar marca de inicialización');
-    }
-}
-
-/*
- * Genera datos iniciales completos para usuarios nuevos.
- * Combina datos base con los datos de bienvenida de datosIniciales.ts
- * 
- * IMPORTANTE: Esta función NO depende de currentData para evitar
- * condiciones de carrera con stores que se hidratan vacíos.
- */
-function generarDatosInicialesUsuarioNuevo(baseData: DashboardData): DashboardData {
     return {
-        ...baseData,
-        habitos: habitosIniciales,
-        tareas: tareasIniciales,
-        notas: notasIniciales,
-        proyectos: []
+        ...datos,
+        tareas: datos.tareas.filter(t => !set('tareas').has(t.id)),
+        proyectos: datos.proyectos ? datos.proyectos.filter(p => !set('proyectos').has(p.id)) : datos.proyectos,
+        habitos: datos.habitos.filter(h => !set('habitos').has(h.id))
     };
 }
 
+/* [T7] La lógica de bienvenida y los guards (esServidorVacio,
+ * esProbableWipeout, generarDatosInicialesUsuarioNuevo, marcadores de
+ * localStorage y dispararBackupAutomatico) viven en `utils/syncAyudas.ts`.
+ * La máquina de init/auto-save queda aquí de forma intencionada: ambas fases
+ * comparten el mismo estado (`syncMeta`, `hasChanges`, `isInitialized`) y las
+ * guards anti-loop/anti-wipeout/WS-absorb; separarlas en hooks elevaría ~10
+ * refs/props y reintroduciría riesgo de desincronización de las guards.
+ * Ver H-F12-13 en `Agente/archivado/auditoria-2026-08-25/frontend/12-hooks.md`. */
 export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, onInitComplete, isDataReady = true, habitosInicializado, contadorCambiosRemotosRef}: UseSyncManagerProps) {
     const {esPremium} = useSuscripcion();
 
@@ -144,6 +81,12 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
     const [isInitialized, setIsInitialized] = useState(false);
     const initializationStarted = useRef(false);
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    /* [26-08-2026] Ref de "guardado debounced pendiente": refleja si hay ediciones
+     * locales aún sin confirmar en el servidor. El refresco periódico/de foco lo
+     * consulta SIEMPRE via ref (nunca un closure stale de `hasChanges`) para no
+     * pisotear un cambio local con datos stale del servidor. Ver plan
+     * plan-paridad-sync-export-2026-08-26.md. */
+    const guardadoPendienteRef = useRef(false);
 
     // --- Lógica de Inicialización (Load Strategy) ---
 
@@ -161,7 +104,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                 // Check safety breaker
                 const retries = parseInt(sessionStorage.getItem(RETRY_KEY) || '0');
                 if (retries >= 3) {
-                    console.warn('[SyncManager] Loop detectado. Saltando subida inicial para estabilizar.');
+                    devWarn('[SyncManager] Loop detectado. Saltando subida inicial para estabilizar.');
                     // No subimos ahora. El loop de auto-guardado lo intentará después (con debounce).
                 } else {
                     sessionStorage.setItem(RETRY_KEY, (retries + 1).toString());
@@ -176,13 +119,12 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                         /* [18-08-2026] El guard anti-wipeout funciona por diseno: evita
                          * subir datos vacios (p. ej. race tras logout/limpieza de sesion).
                          * No es un fallo -> warn, no error (ruido en consola al cerrar sesion). */
-                        console.warn('[SyncManager] Subida inicial omitida: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
+                        devWarn('[SyncManager] Subida inicial omitida: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
                         sessionStorage.removeItem(RETRY_KEY);
                         return;
                     }
                     const success = await saveData({
                         ...currentData,
-                        // @ts-ignore - Flag opcional para backend
                         generateBackup: esPremium
                     });
 
@@ -225,7 +167,6 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     
                     const success = await saveData({
                         ...datosIniciales,
-                        // @ts-ignore - Flag opcional para backend
                         generateBackup: false
                     });
                     
@@ -279,20 +220,31 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
         if (!isInitialized) return;
 
         const refrescarDesdeServidor = async () => {
-            if (document.visibilityState !== 'visible' || hasChanges || transportState.isSaving) return;
+            /* [26-08-2026] Fix reappear: NO sobrescribir el estado local con datos
+             * del servidor si hay cambios locales pendientes de guardar. Se usa el
+             * ref (guardadoPendienteRef) en vez de `hasChanges` para no depender de
+             * un closure stale en el setInterval/manejarFoco: aunque `hasChanges`
+             * mida el hash entero, el ref refleja el ciclo guardar-debounce de forma
+             * determinista y evita que un pull pise una edición recién hecha. */
+            if (document.visibilityState !== 'visible' || guardadoPendienteRef.current || transportState.isSaving) return;
             const serverData = await loadData();
             if (!serverData) return;
-            onDataReceived(serverData);
+            /* [26-08-2026] Fix reappear (tombstones-aware): aunque el servidor
+             * devuelva una fila que el usuario borró localmente (por el race entre
+             * el DELETE del debounce y este pull), NO la resucitamos en local.
+             * Se descartan del payload servidor las entidades cuyo id está aún en
+             * el registro de borrados pendientes. */
+            onDataReceived(aplicarTombstonesAlPayload(serverData));
             resetVersion(serverData);
             setSyncMeta(prev => ({...prev, lastSync: Date.now()}));
         };
 
         const intervalo = window.setInterval(() => {
-            refrescarDesdeServidor().catch(error => console.warn('[SyncManager] Refresh servidor falló:', error));
+            refrescarDesdeServidor().catch(error => devWarn('[SyncManager] Refresh servidor falló:', error));
         }, 30000);
 
         const manejarFoco = () => {
-            refrescarDesdeServidor().catch(error => console.warn('[SyncManager] Refresh en foco falló:', error));
+            refrescarDesdeServidor().catch(error => devWarn('[SyncManager] Refresh en foco falló:', error));
         };
 
         window.addEventListener('focus', manejarFoco);
@@ -328,7 +280,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
             // Check Safety Breaker for Auto-Save too
             const retries = parseInt(sessionStorage.getItem('glory_sync_init_retries') || '0');
             if (retries >= 3) {
-                console.warn('[SyncManager] Auto-save pausado por inestabilidad (Safety Breaker activo).');
+                devWarn('[SyncManager] Auto-save pausado por inestabilidad (Safety Breaker activo).');
                 return;
             }
 
@@ -342,6 +294,10 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
             // 2. Debounce Save
             if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
+            /* Marcar que hay un guardado pendiente: el refresco periódico/foco no
+             * debe pisar el estado local hasta que este save confirme (o falle). */
+            guardadoPendienteRef.current = true;
+
             debounceTimer.current = setTimeout(async () => {
                 devLog('[SyncManager] Auto-guardando cambios...');
                 /* [275A-1] Safety guard: abortar auto-save si los datos estan vacios.
@@ -353,7 +309,8 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                  * wipe (los upserts solo tocan lo presente + los DELETE informados),
                  * así que permitirlo no arriesga datos. */
                 if (syncMeta && esProbableWipeout(currentData, syncMeta.lastSync, habitosInicializado) && !hayBorradosPendientes()) {
-                    console.warn('[SyncManager] Auto-save omitido: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
+                    devWarn('[SyncManager] Auto-save omitido: datos vacios detectados (guard anti-wipeout, p. ej. tras logout).');
+                    guardadoPendienteRef.current = false;
                     markChangesAsSynced(); // Resetear hash para evitar loop
                     return;
                 }
@@ -363,7 +320,6 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
 
                 const success = await saveData({
                     ...currentData,
-                    // @ts-ignore
                     generateBackup: esPremium
                 });
 
@@ -372,6 +328,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     markChangesAsSynced();
                     dispararBackupAutomatico(esPremium);
                 }
+                guardadoPendienteRef.current = false;
             }, debounceMs);
         }
 

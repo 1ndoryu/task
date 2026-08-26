@@ -1,5 +1,5 @@
 import {useMemo, useCallback, useEffect, useRef} from 'react';
-import {devLog} from '../../utils/devLog';
+import {devLog, devWarn} from '../../utils/devLog';
 import type {Habito, Tarea, Proyecto} from '../../types/dashboard';
 import type {DashboardData} from '../useDashboardApi';
 import {useHabitosStore, useHabitosInicializado} from '../../stores/habitosStore';
@@ -381,7 +381,7 @@ export function useDashboardSync({habitos, tareas, proyectos, notas, setTareas, 
                 const esErrorAuth = syncState.error && (syncState.error.includes('No autenticado') || syncState.error.includes('401'));
 
                 if (!esErrorAuth) {
-                    console.warn('[useDashboardSync] Forzando inicialización de store post-sync (Degradación Graciosa).');
+                    devWarn('[useDashboardSync] Forzando inicialización de store post-sync (Degradación Graciosa).');
                 }
                 useHabitosStore.getState().marcarInicializado();
             }

@@ -17,11 +17,12 @@
  *  - Ambos ajustan proporciones internas (no alturas individuales de paneles)
  */
 
-import {useCallback, useRef, useState} from 'react';
+import {useCallback} from 'react';
 import {X, ChevronUp, ChevronDown} from 'lucide-react';
 import {DashboardPanelView} from './DashboardPanelView';
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
+import {useResizeDrag} from '../../hooks/useResizeDrag';
 import {Boton} from '../ui';
 
 interface DashboardSidebarGridProps {
@@ -185,53 +186,16 @@ interface ResizeHandleSidebarProps {
 }
 
 function ResizeHandleSidebar({anchos, onAjustarAnchos}: ResizeHandleSidebarProps): JSX.Element {
-    const [arrastrando, setArrastrando] = useState(false);
-    const contenedorRef = useRef<HTMLDivElement>(null);
-
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setArrastrando(true);
-
-        const startX = e.clientX;
-        const contenedor = contenedorRef.current?.parentElement;
-        if (!contenedor) return;
-
-        const rect = contenedor.getBoundingClientRect();
-        const anchoTotal = rect.width;
-
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaX = moveEvent.clientX - startX;
-            const deltaPorcentaje = (deltaX / anchoTotal) * 100;
-
-            const nuevoAncho1 = Math.min(75, Math.max(25, anchos[0] + deltaPorcentaje));
-            const nuevoAncho2 = 100 - nuevoAncho1;
-
-            if (nuevoAncho2 >= 25 && nuevoAncho2 <= 75) {
-                onAjustarAnchos([Math.round(nuevoAncho1 * 10) / 10, Math.round(nuevoAncho2 * 10) / 10]);
-            }
-        };
-
-        const handleMouseUp = () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-            setArrastrando(false);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-    }, [anchos, onAjustarAnchos]);
+    /* [H-F13-09] Drag-resize unificado en useResizeDrag (eje X) — antes duplicado
+     * con ResizeHandleRow. */
+    const {arrastrando, contenedorRef, handleMouseDown, resetear} = useResizeDrag('x', anchos[0], onAjustarAnchos);
 
     return (
         <div
             ref={contenedorRef}
             className={`sidebarGridResizeHandle ${arrastrando ? 'sidebarGridResizeHandle--arrastrando' : ''}`}
             onMouseDown={handleMouseDown}
-            onDoubleClick={() => onAjustarAnchos([50, 50])}
+            onDoubleClick={resetear}
             title="Arrastrar para redimensionar. Doble clic para 50/50."
         >
             <div className="sidebarGridResizeHandleLinea" />
@@ -247,53 +211,15 @@ interface ResizeHandleRowProps {
 }
 
 function ResizeHandleRow({alturas, onAjustarAlturas}: ResizeHandleRowProps): JSX.Element {
-    const [arrastrando, setArrastrando] = useState(false);
-    const contenedorRef = useRef<HTMLDivElement>(null);
-
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setArrastrando(true);
-
-        const startY = e.clientY;
-        const contenedor = contenedorRef.current?.parentElement;
-        if (!contenedor) return;
-
-        const rect = contenedor.getBoundingClientRect();
-        const altoTotal = rect.height;
-
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaY = moveEvent.clientY - startY;
-            const deltaPorcentaje = (deltaY / altoTotal) * 100;
-
-            const nuevaAltura1 = Math.min(75, Math.max(25, alturas[0] + deltaPorcentaje));
-            const nuevaAltura2 = 100 - nuevaAltura1;
-
-            if (nuevaAltura2 >= 25 && nuevaAltura2 <= 75) {
-                onAjustarAlturas([Math.round(nuevaAltura1 * 10) / 10, Math.round(nuevaAltura2 * 10) / 10]);
-            }
-        };
-
-        const handleMouseUp = () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-            setArrastrando(false);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        document.body.style.cursor = 'row-resize';
-        document.body.style.userSelect = 'none';
-    }, [alturas, onAjustarAlturas]);
+    /* [H-F13-09] Drag-resize unificado en useResizeDrag (eje Y). */
+    const {arrastrando, contenedorRef, handleMouseDown, resetear} = useResizeDrag('y', alturas[0], onAjustarAlturas);
 
     return (
         <div
             ref={contenedorRef}
             className={`sidebarGridResizeHandle sidebarGridResizeHandle--horizontal ${arrastrando ? 'sidebarGridResizeHandle--arrastrando' : ''}`}
             onMouseDown={handleMouseDown}
-            onDoubleClick={() => onAjustarAlturas([50, 50])}
+            onDoubleClick={resetear}
             title="Arrastrar para redimensionar filas. Doble clic para 50/50."
         >
             <div className="sidebarGridResizeHandleLinea" />

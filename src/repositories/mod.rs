@@ -1,6 +1,7 @@
 mod activity;
 mod admin;
 mod backup;
+mod escape;
 mod collaboration;
 mod dashboard;
 mod feedback;

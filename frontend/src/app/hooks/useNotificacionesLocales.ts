@@ -15,6 +15,7 @@
 import {useCallback, useEffect, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
 import type {Habito} from '../types/dashboard';
+import {devWarn} from '../utils/devLog';
 
 /*
  * Interfaz para el plugin de notificaciones locales
@@ -79,7 +80,7 @@ async function obtenerPluginNotificaciones(): Promise<NotificacionLocalPlugin | 
         const modulo = await import('@capacitor/local-notifications');
         return modulo.LocalNotifications as unknown as NotificacionLocalPlugin;
     } catch {
-        console.warn('[Notificaciones] Plugin @capacitor/local-notifications no instalado');
+        devWarn('[Notificaciones] Plugin @capacitor/local-notifications no instalado');
         return null;
     }
 }

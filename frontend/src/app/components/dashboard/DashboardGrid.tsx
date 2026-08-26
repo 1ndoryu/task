@@ -11,6 +11,7 @@ import {PanelArrastrable, HandleArrastre, BotonMinimizarPanel, ResizeHandlePanel
 import {obtenerPanelOBase, panelManejaAlturaPropia, paginaMovilAPanelId, obtenerIdBase, panelPuedeMostrarse} from '../../config/registroPaneles';
 
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
+import {devWarn} from '../../utils/devLog';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 import {useDashboardGrid, obtenerGeneradorPropsPanel} from '../../hooks/dashboard/useDashboardGrid';
 
@@ -37,7 +38,7 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
 
         const definicionPanel = obtenerPanelOBase(panelId);
         if (!definicionPanel) {
-            console.warn(`Panel "${panelId}" no encontrado en el registro`);
+            devWarn(`Panel "${panelId}" no encontrado en el registro`);
             return null;
         }
 

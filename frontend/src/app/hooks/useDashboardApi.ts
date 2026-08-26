@@ -21,6 +21,7 @@ import {
     obtenerBorradosPendientes,
     confirmarBorradosConfirmados,
 } from '../utils/borradosPendientes';
+import {tareaARequest, proyectoARequest, habitoARequest} from '../utils/mappersContrato';
 
 /*
  * Tipos para la API
@@ -59,10 +60,18 @@ interface EstadoApi {
     online: boolean;
 }
 
+/* [T7] Documento de guardado: lo que el sync sube al servidor por entidad.
+ * Extiende Partial<DashboardData> con el flag opcional `generateBackup`
+ * (snapshot automático para premium, [18-08-2026]). El campo no contamina
+ * el tipo de lectura `DashboardData`: solo existe en el documento de escritura. */
+interface DatosGuardado extends Partial<DashboardData> {
+    generateBackup?: boolean;
+}
+
 interface UseDashboardApiReturn {
     estado: EstadoApi;
     cargar: () => Promise<DashboardData | null>;
-    guardar: (datos: Partial<DashboardData>) => Promise<boolean>;
+    guardar: (datos: DatosGuardado) => Promise<boolean>;
     sincronizar: (datosLocales: DashboardData) => Promise<DashboardData | null>;
     limpiarError: () => void;
 }
@@ -84,51 +93,6 @@ function obtenerTimezoneCliente(): string | null {
     } catch {
         return null;
     }
-}
-
-/* Mapea una tarea del front al contrato UpsertTaskRequest de Rust.
- * El payload conserva el objeto completo para que el round-trip no pierda
- * campos (subtareas, dependencias, tags, etc.). */
-function tareaARequest(tarea: Tarea): Record<string, unknown> {
-    return {
-        texto: tarea.texto,
-        completado: Boolean(tarea.completado),
-        prioridad: tarea.prioridad ?? null,
-        urgencia: tarea.urgencia ?? 'normal',
-        proyectoId: tarea.proyectoId ?? null,
-        parentId: tarea.parentId ?? null,
-        orden: tarea.orden ?? 0,
-        payload: tarea,
-        expectedUpdatedAt: null,
-    };
-}
-
-function proyectoARequest(proyecto: Proyecto): Record<string, unknown> {
-    return {
-        nombre: proyecto.nombre,
-        estado: proyecto.estado ?? 'activo',
-        prioridad: proyecto.prioridad ?? null,
-        urgencia: proyecto.urgencia ?? 'normal',
-        fechaLimite: proyecto.fechaLimite ?? null,
-        orden: Number((proyecto as {orden?: number}).orden ?? 0),
-        payload: proyecto,
-        expectedUpdatedAt: null,
-    };
-}
-
-function habitoARequest(habito: Habito): Record<string, unknown> {
-    /* frecuencia en el front es {tipo: 'diario'} (objeto); Rust espera string. */
-    const frecuencia = typeof habito.frecuencia === 'string'
-        ? habito.frecuencia
-        : (habito.frecuencia as {tipo?: string} | undefined)?.tipo ?? 'diario';
-    return {
-        nombre: habito.nombre,
-        importancia: habito.importancia ?? 'media',
-        frecuencia,
-        orden: Number((habito as {orden?: number}).orden ?? 0),
-        payload: habito,
-        expectedUpdatedAt: null,
-    };
 }
 
 /**
@@ -269,7 +233,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
      * via PUT /api/dashboard/settings — todos con endpoint Rust activo.
      */
     const guardar = useCallback(
-        async (datos: Partial<DashboardData>): Promise<boolean> => {
+        async (datos: DatosGuardado): Promise<boolean> => {
             setEstado(prev => ({...prev, guardando: true, error: null}));
 
             try {
@@ -414,38 +378,9 @@ export function useDashboardApi(): UseDashboardApiReturn {
     };
 }
 
-/**
- * Obtiene el nonce de WordPress para autenticación
- * [188A-1] Retorna '' — Rust no usa nonces; la sesion viaja en cookie HttpOnly.
- * Se conserva para que los hooks legacy que lo leen no rompan.
- */
-export function obtenerNonce(): string {
-    return '';
-}
+/* [T7] `useOnlineStatus` y `obtenerNonce` viven en `./useOnlineStatus` (módulo
+ * propio de conexión/sesión). Se re-exportan aquí para preservar el camino de
+ * import de los consumidores legacy. */
+export {useOnlineStatus, obtenerNonce} from './useOnlineStatus';
 
-/**
- * Hook para detectar estado online/offline
- */
-export function useOnlineStatus(): boolean {
-    const [online, setOnline] = useState(navigator.onLine);
-
-    /* [H-F12-05] Antes se usaba useState(() => {...}) como si fuera un efecto:
-     * el inicializador se ejecutaba en cada render y su cleanup se descartaba
-     * (listeners duplicados/fugas). Es un efecto real: listeners + cleanup. */
-    useEffect(() => {
-        const handleOnline = () => setOnline(true);
-        const handleOffline = () => setOnline(false);
-
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
-
-    return online;
-}
-
-export type {DashboardData, ConfiguracionUsuario, EstadoApi};
+export type {DashboardData, ConfiguracionUsuario, EstadoApi, DatosGuardado};

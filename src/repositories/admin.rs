@@ -115,7 +115,13 @@ impl AdminRepository {
         }
         if !busqueda.is_empty() {
             params.push(format!("(u.display_name ILIKE ${idx} OR u.email ILIKE ${idx})"));
-            bindings.push(format!("%{busqueda}%"));
+            /* [H-B03-06] Escapar wildcards del usuario (%, _, \\): buscar
+             * "%" o "_" no debe interpretarse como comodín global del patrón
+             * (consistente con note.rs, que usa escape_like_literal compartido). */
+            bindings.push(format!(
+                "%{}%",
+                crate::repositories::escape::escape_like_literal(&busqueda)
+            ));
             idx += 1;
         }
         if !params.is_empty() {

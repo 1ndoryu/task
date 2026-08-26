@@ -165,10 +165,6 @@
     opacity: 1 !important;
 }
 
-.sidebarMenuBoton--enGrilla .botonIcono {
-    /* color: var(--dashboard-acento, #5a6bf3); */
-}
-
 /* Hover sutil */
 .sidebarMenuBoton.boton--ghost:hover:not(:disabled) {
     background: var(--dashboard-fondoHover);

@@ -49,6 +49,10 @@ impl SharedRepository {
         role: &str,
     ) -> Result<SharedCreateOutcome, sqlx::Error> {
         let mut transaction = pool.begin().await?;
+        /* [H-B03-07] La tabla proviene de un `match` cerrado (whitelist de 3
+         * valores fijos del dev), nunca de input del request: seguro por
+         * construcción. Si se añade una rama que interpole input del usuario,
+         * introduce inyección SQL — revisar al tocar esta función. */
         let table = match item_type {
             "tarea" => "dashboard_tasks",
             "proyecto" => "dashboard_projects",
@@ -239,6 +243,7 @@ impl SharedRepository {
         item_type: &str,
         item_id: i64,
     ) -> Result<bool, sqlx::Error> {
+        /* [H-B03-07] Ídem create(): `table` viene de whitelist cerrada, no input. */
         let table = match item_type {
             "tarea" => "dashboard_tasks",
             "proyecto" => "dashboard_projects",
