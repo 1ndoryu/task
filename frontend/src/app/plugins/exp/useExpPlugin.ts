@@ -50,6 +50,8 @@ function leerBlobLocal(): BlobGloryExp | null {
 export function useExpPlugin(): void {
     const activo = usePluginActivo('exp');
     const registrarExp = useExpStore(s => s.registrarExp);
+    const deshacerExp = useExpStore(s => s.deshacerExp);
+    const purgarRegistrosFantasma = useExpStore(s => s.purgarRegistrosFantasma);
     const asignarDificultades = useExpStore(s => s.asignarDificultades);
     const actualizarVida = useExpStore(s => s.actualizarVida);
     const config = useExpStore(s => s.config);
@@ -62,6 +64,18 @@ export function useExpPlugin(): void {
 
     /* Snapshot previo para detectar completados nuevos (diff por fecha). */
     const prevSnapshotRef = useRef<{habitos: Record<number, string[]>; tareas: Record<number, boolean>}>({habitos: {}, tareas: {}});
+
+    /* [27-08-2026] Limpia una vez los registros huérfanos (completados deshechos
+     * antes de existir la reversión). Solo verifica entidades presentes en los
+     * datos actuales; si los datos aún cargan (arrays vacíos) se conservan. */
+    const purgadoRef = useRef(false);
+    useEffect(() => {
+        if (!activo || purgadoRef.current) return;
+        const completadosHabitos = new Map<number, string[]>(habitos.map(h => [h.id, h.historialCompletados || []]));
+        const completadosTareas = new Map<number, boolean>(tareas.map(t => [t.id, Boolean(t.completado)]));
+        purgarRegistrosFantasma(completadosHabitos, completadosTareas);
+        purgadoRef.current = true;
+    }, [activo, habitos, tareas, purgarRegistrosFantasma]);
 
     /* 1. Rehidratar desde localStorage al activarse (el blob ya fue restaurado
      * del servidor por aplicarPreferenciasServidor si era navegador nuevo). */
@@ -113,10 +127,18 @@ export function useExpPlugin(): void {
         for (const h of habitos) {
             ahora.habitos[h.id] = [...(h.historialCompletados || [])];
             const prev = snapshot.habitos[h.id];
-            const recienCompletado = prev && !prev.includes(hoy) && (h.historialCompletados || []).includes(hoy);
+            const historial = h.historialCompletados || [];
+            const recienCompletado = prev && !prev.includes(hoy) && historial.includes(hoy);
             if (recienCompletado) {
                 const dificultad: Dificultad = dificultades[String(h.id)] ?? 'Media';
                 registrarExp(h.id, 'habito', h.nombre, dificultad, h.importancia, config.multHabito);
+            }
+            /* [27-08-2026] Deshacer un completado revierte su EXP (mismo
+             * contrato que las tareas: lo que se completa da EXP y lo que se
+             * deshace la quita). */
+            const recienDeshecho = prev && prev.includes(hoy) && !historial.includes(hoy);
+            if (recienDeshecho) {
+                deshacerExp(h.id, 'habito');
             }
         }
 
@@ -129,10 +151,15 @@ export function useExpPlugin(): void {
                 const importancia = prioridadANivelImportancia((t.prioridad ?? 'media') as never);
                 registrarExp(t.id, 'tarea', t.texto, dificultad, importancia, config.multTarea);
             }
+            /* [27-08-2026] Deshacer un completado de tarea revierte su EXP. */
+            const recienDeshecho = prev === true && !t.completado;
+            if (recienDeshecho) {
+                deshacerExp(t.id, 'tarea');
+            }
         }
 
         prevSnapshotRef.current = ahora;
-    }, [activo, habitos, tareas, dificultades, config, fechaHoy, registrarExp]);
+    }, [activo, habitos, tareas, dificultades, config, fechaHoy, registrarExp, deshacerExp]);
 
     /* 4. Estimar dificultades pendientes (entidades sin dificultad) al activar,
      * en segundo plano y sin bloquear. Solo si config.dificultadAutomatica. */

@@ -18,6 +18,15 @@ interface ExpStore extends EstadoExp {
     config: ConfigExp;
     /* Acciones */
     registrarExp: (entidadId: number, entidadTipo: TipoEntidadExp, nombre: string, dificultad: Dificultad, importancia: 'Muy Alta' | 'Alta' | 'Media' | 'Baja' | 'Muy Baja', multTipo: number) => number;
+    /* [27-08-2026] Revierte el último registro de EXP de una entidad (al
+     * deshacer un completado): resta su exp, quita el registro y recalcula el
+     * nivel. Devuelve la exp revertida (0 si no hay registro). */
+    deshacerExp: (entidadId: number, entidadTipo: TipoEntidadExp) => number;
+    /* [27-08-2026] Limpia registros huérfanos: un registro cuya entidad ya NO
+     * está completada en esa fecha es fantasma (p. ej. se deshizo un completado
+     * antes de existir la reversión). Solo elimina entidades presentes en los
+     * mapas (las desconocidas se conservan para no perder datos en carga). */
+    purgarRegistrosFantasma: (completadosHabitos: Map<number, string[]>, completadosTareas: Map<number, boolean>) => void;
     asignarDificultad: (entidadId: number | string, dificultad: Dificultad) => void;
     asignarDificultades: (mapa: Record<string, Dificultad>) => void;
     actualizarVida: (nuevaVida: number, fechaCalculo: string) => void;
@@ -44,6 +53,59 @@ export const useExpStore = create<ExpStore>()(
             ultimoCalculoVida: '',
             minimizado: false,
             config: {...CONFIG_EXP_POR_DEFECTO},
+
+            deshacerExp: (entidadId, entidadTipo) => {
+                const {registros, exp} = get();
+                /* El registro más reciente de esa entidad corresponde al
+                 * completado que se está deshaciendo (el diff del hook solo
+                 * revierte transiciones detectadas, y cada alta crea un
+                 * registro que se quita al revertir). */
+                for (let i = registros.length - 1; i >= 0; i--) {
+                    const r = registros[i];
+                    if (r.entidadId !== entidadId || r.entidadTipo !== entidadTipo) continue;
+                    const nuevaExp = Math.max(0, exp - r.exp);
+                    const nivelInfo = calcularNivel(nuevaExp, get().config.expBaseNivel);
+                    set({
+                        exp: nuevaExp,
+                        nivel: nivelInfo.nivel,
+                        expEnNivel: nivelInfo.expEnNivel,
+                        expParaSiguienteNivel: nivelInfo.expParaSiguienteNivel,
+                        registros: [...registros.slice(0, i), ...registros.slice(i + 1)]
+                    });
+                    return r.exp;
+                }
+                /* Sin registro (p. ej. la entidad ya estaba completada antes de
+                 * activar el plugin): no hay exp que revertir. */
+                return 0;
+            },
+
+            purgarRegistrosFantasma: (completadosHabitos, completadosTareas) => {
+                const {registros} = get();
+                if (registros.length === 0) return;
+                const validos = registros.filter(r => {
+                    if (r.entidadTipo === 'habito') {
+                        const hist = completadosHabitos.get(r.entidadId);
+                        if (hist === undefined) return true; /* no verificable aún */
+                        return hist.includes(r.fecha);
+                    }
+                    if (r.entidadTipo === 'tarea') {
+                        const completada = completadosTareas.get(r.entidadId);
+                        if (completada === undefined) return true; /* no verificable aún */
+                        return completada;
+                    }
+                    return true; /* subhabito/proyecto: conservar */
+                });
+                if (validos.length === registros.length) return;
+                const nuevaExp = validos.reduce((acc, r) => acc + r.exp, 0);
+                const nivelInfo = calcularNivel(nuevaExp, get().config.expBaseNivel);
+                set({
+                    registros: validos,
+                    exp: nuevaExp,
+                    nivel: nivelInfo.nivel,
+                    expEnNivel: nivelInfo.expEnNivel,
+                    expParaSiguienteNivel: nivelInfo.expParaSiguienteNivel
+                });
+            },
 
             registrarExp: (entidadId, entidadTipo, nombre, dificultad, importancia, multTipo) => {
                 const params: ParametrosExp = {dificultad, importancia, multTipo};
