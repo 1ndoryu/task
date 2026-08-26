@@ -15,7 +15,7 @@
  */
 
 import {useState} from 'react';
-import {Pencil, RotateCcw} from 'lucide-react';
+import {RotateCcw} from 'lucide-react';
 import {EditorPixelArt} from '../../../glory-core/components/pixelart/EditorPixelArt';
 import {ArbolVida, CELDAS_TRONCO, copaPorDefecto, ESTADOS_ARBOL, type EstadoVida} from './ArbolVida';
 import {useExpStore} from './store';
@@ -55,9 +55,7 @@ export function ModalEditorArbol({activo, onCerrar}: ModalEditorArbolProps): JSX
         <div className="modalEditorArbolOverlay" onMouseDown={e => { if (e.target === e.currentTarget) onCerrar(); }}>
             <div className="modalEditorArbol" role="dialog" aria-modal="true" aria-label="Editor del árbol de vida">
                 <div className="modalEditorArbolCabecera">
-                    <span className="modalEditorArbolTitulo">
-                        <Pencil size={14} /> Editor del árbol de vida
-                    </span>
+                    <span className="modalEditorArbolTitulo">Editor del árbol de vida</span>
                     <button type="button" className="modalEditorArbolCerrar" onClick={onCerrar} aria-label="Cerrar">×</button>
                 </div>
 
