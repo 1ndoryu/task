@@ -84,6 +84,12 @@ impl AgentRuntime {
     pub fn nuevo(turno_config: TurnoConfig) -> Self {
         let mut registry = AgentToolRegistry::new();
         registrar_tools(&mut registry);
+        /* [29-08-2026] Fase 2: tools de archivo SOLO en AGENTE_MODO=local.
+         * Fail-closed: si el sandbox no se puede construir (raíz inválida o
+         * modo no-local), no se registran y el contexto va sin sandbox. */
+        if let Some(sandbox) = sandbox_desde_entorno() {
+            crate::agent::tools_archivo::registrar_tools_archivo(&mut registry, Some(sandbox));
+        }
         Self {
             registry,
             contexto: Arc::new(tokio::sync::Mutex::new(AgentContextManager::new(
@@ -336,6 +342,7 @@ impl AgentRuntime {
             pool: &state.pool,
             web_search: &state.web_search,
             ai_provider: &state.ai_provider,
+            sandbox_archivos: self.registry.sandbox(),
         };
         let resultado = self
             .registry
@@ -430,6 +437,30 @@ pub async fn cargar_historial(
         .into_iter()
         .map(|(rol, contenido)| AiMessage::texto(&rol, contenido))
         .collect())
+}
+
+/// [29-08-2026] Fase 2: construye el sandbox de archivos desde el entorno.
+/// Solo AGENTE_MODO=local; la raíz viene de AGENTE_WORKSPACE_ROOT (o el cwd
+/// como fallback para dev). Fail-closed: cualquier error → None (sin tools).
+fn sandbox_desde_entorno() -> Option<std::sync::Arc<crate::agent::sandbox::SandboxArchivos>> {
+    if std::env::var("AGENTE_MODO").as_deref() != Ok("local") {
+        return None;
+    }
+    let raiz = std::env::var("AGENTE_WORKSPACE_ROOT")
+        .ok()
+        .filter(|r| !r.trim().is_empty())
+        .unwrap_or_else(|| {
+            std::env::current_dir()
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default()
+        });
+    match crate::agent::sandbox::SandboxArchivos::nuevo(&raiz) {
+        Ok(sandbox) => Some(std::sync::Arc::new(sandbox)),
+        Err(error) => {
+            tracing::warn!(%error, "AGENTE_MODO=local pero el workspace no es accesible; tools de archivo desactivadas");
+            None
+        }
+    }
 }
 
 /// Crea la conversación si no existe y guarda el mensaje del usuario.

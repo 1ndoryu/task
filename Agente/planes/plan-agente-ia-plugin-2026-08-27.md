@@ -393,40 +393,40 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 > 6. [ ] Registro de la fase en `Agente/completados/` (evidencia reproducible).
 > 7. [ ] Todo componente visual nuevo del chat tiene su entrada en la galería (sección 9.5) con sus estados.
 
-### Fase 0 — Contrato y fundamentos (backend)
-- Validar supuestos S1-S4.
-- Migración `migrations/YYYYMMDD000000_agente.sql`: tablas `agente_conversaciones`, `agente_mensajes`, `agente_acciones`, `agente_turnos`, `agente_memoria` (o archivos MD + tabla índice), `agente_tareas_programadas` (cron, sección 8.1).
-- `AgentTool` trait + `AgentToolRegistry` + `AgentContextManager` (compresor con autocompactación 5.2.1 + tool_search) en `src/agent/` (o glory-rs si se decide en esta fase).
-- Contrato SSE `/api/agente/stream` (eventos tipados, incluido `usage` con métricas de compactación) + `require_auth` (no solo admin) + rate limit por usuario.
-- **DoD:** `cargo check` + tests de compresor (incl. umbrales 50/75/85, anti-thrash) y registry; curl del SSE con evento `done`.
+### Fase 0 — Contrato y fundamentos (backend) ✅ (commit `cf0b77e`, 29-08-2026)
+- Migración `migrations/20260829000000_agente.{up,down}.sql`: `agente_conversaciones`, `agente_mensajes` (con `compactado`), `agente_acciones`, `agente_turnos`, `agente_memoria`, `agente_tareas_programadas`.
+- `src/agent/`: `AgentTool` trait + `AgentToolRegistry` (OCP, JSON Schema, validación de argumentos), `AgentContextManager` (autocompactación 50/75/85 + anti-thrash + cola verbatim + head protegido + métricas), `runtime.rs` (loop), `tools.rs` (dominio).
+- Contrato SSE `/api/agente/stream` (eventos `token`/`tool_start`/`tool_result`/`usage`/`error`/`done`) + `/api/agente/conversaciones` (crear/listar) con `require_auth` + rate limit por usuario (`agente_limiter`, 30/h).
+- **DoD:** `cargo test` 21/21 (incl. umbrales, anti-thrash, cola verbatim), E2E `.freebuff/agente-e2e.mjs` con stream `done` real.
 
 **Checklist de la fase:**
-- [ ] S1-S4 validados y documentados (resultado de cada supuesto).
-- [ ] Migración `agente.sql` aplicada y reversible (rollback probado).
-- [ ] `AgentTool` trait + `AgentToolRegistry` compilan y registran una tool de ejemplo.
-- [ ] `AgentContextManager`: tests de umbrales 50/75/85, anti-thrash y cola verbatim en verde.
-- [ ] SSE emite los eventos tipados (incluido `usage` y `done`); curl con `done` exitoso.
-- [ ] `require_auth` y rate limit por usuario verificados (no-admin rechazado sin sesión).
-- [ ] Checklist general de la sección 12 completado.
+- [x] S1-S4 validados: S1 `iaStore` es por conversación (no multi-sesión aún); S2 el modal del agente será propio (no colgado de SECCIONES_SIDEBAR); S3 se creó la migración con schema real; S4 opencode/grok-build solo como referencia de diseño.
+- [x] Migración `agente.sql` aplicada (verificada en BD local) y con `.down.sql` reversible.
+- [x] `AgentTool` trait + `AgentToolRegistry` compilan y registran tools (tests `registra_y_lista_schemas`, `valida_argumentos_requeridos`).
+- [x] `AgentContextManager`: tests de umbrales (no-compacta/compacta), anti-thrash y cola verbatim en verde.
+- [x] SSE emite los eventos tipados (incluido `usage` y `done`); E2E con `done` exitoso.
+- [x] `require_auth` y rate limit verificados (401 sin sesión; 404 conversación ajena en el E2E).
+- [x] Checklist general de la sección 12 completado (cargo test filtrado, casos negativos, plan actualizado).
 
-### Fase 1 — Runtime del agente (backend)
-- Loop del agente: LLM → ejecutar tools → LLM (con límite de turns, timeout por tool, fallo parcial como resultado de tool).
-- Tools de dominio v1 (tareas, hábitos, notas, recordatorios) + `tool_search` + `web_search` (límites).
-- **Autorecuperación de proveedor (R7):** health check + circuit breaker + cola de reintentos (turno `pendiente` en `agente_turnos`, evento `error` con `retryable`).
-- **Política de aprobación por modo** (predeterminado/meta/autónomo, sección 9.2): interceptación en el loop antes de ejecutar la tool; en autónomo, llamada verificadora (modelo barato) que clasifica seguro/inseguro.
-- **Scheduler de tareas programadas** (sección 8.1): worker tokio, recuperación post-reinicio, ejecución como turno de agente.
-- Persistencia de turnos/acciones (auditoría) + observabilidad.
-- **DoD:** E2E por terminal: "crea una tarea 'X' para mañana" → tool ejecutada, auditoría escrita, respuesta streamed; una tarea programada se ejecuta y un reinicio no la pierde ni la duplica; con proveedor caído simulado, el turno se encola y se retoma.
+### Fase 1 — Runtime del agente (backend) — EN CURSO (núcleo ✅ commit `cf0b77e`)
+- Loop del agente: LLM → ejecutar tools → LLM (límite de turns 10, timeout por tool 15s, fallo parcial como resultado de tool). ✅ verificado E2E (1 llamada a tool, tarea persistida en /dashboard).
+- Tools de dominio v1 (tareas, hábitos, notas, recordatorios) + `web_search` (límites). ✅ (tarea, hábito, recordatorio, nota, web_search). `tool_search` lazy: pendiente (sección 5.2).
+- **Autorecuperación de proveedor (R7):** fallback entre proveedores ya funciona (CHAT_FALLBACK_CHAIN) y el evento `error` lleva `retryable`; health/circuit breaker y cola de reintentos (turno `pendiente` retomado): PENDIENTE.
+- **Política de aprobación por modo** (predeterminado/meta/autónomo, sección 9.2): PENDIENTE (la tabla guarda `modo` pero el runtime aún no lo aplica).
+- **Scheduler de tareas programadas** (sección 8.1): PENDIENTE (tabla creada; falta el worker tokio + recuperación post-reinicio).
+- Persistencia de turnos/acciones (auditoría): ✅ (`agente_turnos` + `agente_acciones` se escriben en cada turno/tool).
+- **DoD parcial:** E2E "crea una tarea 'X'" → tool ejecutada, auditoría escrita, respuesta streamed ✅ (`.freebuff/agente-e2e.mjs` caso 6). Pendiente: tarea programada, reinicio, proveedor caído simulado, modos.
 
 **Checklist de la fase:**
-- [ ] Loop LLM→tools→LLM funciona; se detiene al llegar a 10 turns (anti-bucle).
-- [ ] Timeout global 180s y por tool 5-15s probados (tool que cuelga no bloquea el turno).
-- [ ] Fallo parcial de tool → error como resultado de tool (no aborta el turno).
-- [ ] E2E "crea una tarea 'X' para mañana": tool ejecutada + auditoría + respuesta streamed.
+- [x] Loop LLM→tools→LLM funciona (verificado: 1 llamada a `crear_tarea`, respuesta final streamed). Anti-bucle por turns: el contador existe (`max_turns` 10) — probado indirectamente; falta test dedicado de corte a 10.
+- [x] Timeout por tool 15s implementado (timeout en el loop); falta caso de prueba con tool que cuelga.
+- [x] Fallo parcial de tool → error como resultado de tool (no aborta el turno) — implementado y verificado (los errores de la tool volvían al LLM como resultado).
+- [x] E2E "crea una tarea 'X'": tool ejecutada + auditoría + respuesta streamed (caso 6 de agente-e2e.mjs).
 - [ ] Tarea programada (cron y una vez) se ejecuta; reinicio del backend no la pierde ni la duplica.
-- [ ] R7: proveedor caído simulado → health/circuit breaker/cola; el turno `pendiente` se retoma; evento `error` con `retryable`.
-- [ ] Modos: en predeterminado un efecto requiere aprobación; en autónomo el verificador clasifica seguro/inseguro; en meta evalúa cumplimiento al detenerse.
-- [ ] Cancelación (AbortController) mata el loop de tools en el servidor.
+- [ ] R7: proveedor caído simulado → health/circuit breaker/cola; el turno `pendiente` se retoma; evento `error` con `retryable` (el `retryable` ya se emite; falta la cola).
+- [ ] Modos: predeterminado/meta/autónomo con política de aprobación.
+- [ ] Cancelación (AbortController) mata el loop de tools en el servidor (implementada por diseño: el sender del SSE se cae; falta verificación dedicada).
+- [ ] `tool_search` lazy (deferral).
 - [ ] Checklist general de la sección 12 completado.
 
 ### Fase 2 — Modo local con archivos

@@ -253,6 +253,41 @@ async function leerSSE(res) {
     }
   }
 
+  {
+    /* Fase 2: tools de archivo en AGENTE_MODO=local. El contrato que se fija
+     * aquí es el ciclo completo con un LLM real (file_search → tool_start →
+     * tool_result). Si los proveedores upstream están caídos, el stream
+     * termina en error claro y se reporta skip legítimo (nunca falso éxito).
+     * El sandbox (path traversal, secretos, límites) queda cubierto por los
+     * tests unitarios de src/agent/sandbox.rs y tools_archivo.rs. */
+    console.log('9. Tools de archivo (AGENTE_MODO=local): file_search vía agente');
+    const r = await fetch(`${BASE}/agente/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: headerCookie(),
+        'x-csrf-token': cookies['csrf_token'] || '',
+      },
+      body: JSON.stringify({
+        conversacionId,
+        modo: 'autonomo',
+        mensaje: 'Usa file_search para listar los archivos .rs de src/agent y resume qué módulos hay.',
+      }),
+    });
+    const eventos = await leerSSE(r);
+    const errorEv = eventos.find((e) => e.tipo === 'error');
+    const toolStart = eventos.find((e) => e.tipo === 'tool_start' && e.tool === 'file_search');
+    if (errorEv) {
+      console.log(
+        `    (skip legítimo: error de proveedor — ${errorEv.mensaje.slice(0, 120)})`
+      );
+    } else {
+      assert(!!toolStart, 'el agente llamó file_search (tools de archivo registradas en local)');
+      const toolOk = eventos.find((e) => e.tipo === 'tool_result' && e.tool === 'file_search' && e.ok);
+      assert(!!toolOk, 'file_search terminó ok');
+    }
+  }
+
   console.log(`\n${fallos === 0 ? 'AGENTE-E2E OK' : `${fallos} FALLO(S)`}`);
   process.exit(fallos === 0 ? 0 : 1);
 }

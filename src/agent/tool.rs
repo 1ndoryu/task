@@ -6,8 +6,10 @@ use async_trait::async_trait;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use std::sync::Arc;
 use uuid::Uuid;
 
+use crate::agent::sandbox::SandboxArchivos;
 use crate::errors::AppError;
 use crate::services::ai::LlmProviderService;
 use crate::services::web_search::WebSearchService;
@@ -19,6 +21,9 @@ pub struct AgentToolContext<'a> {
     pub pool: &'a PgPool,
     pub web_search: &'a WebSearchService,
     pub ai_provider: &'a LlmProviderService,
+    /// Sandbox de archivos (Fase 2). `None` en producción: las tools de
+    /// archivo no existen (fail-closed, ni siquiera admin).
+    pub sandbox_archivos: Option<Arc<SandboxArchivos>>,
 }
 
 /// Resultado de ejecutar una tool: texto legible para el LLM + estado.
@@ -76,6 +81,9 @@ pub trait AgentTool: Send + Sync {
 /// request al LLM; ejecutar() con validación de schema.
 pub struct AgentToolRegistry {
     tools: HashMap<&'static str, Box<dyn AgentTool>>,
+    /// Sandbox compartido (Fase 2). Se fija una vez por runtime; el runtime lo
+    /// inyecta en el contexto al ejecutar tools.
+    sandbox_archivos: Option<Arc<SandboxArchivos>>,
 }
 
 impl Default for AgentToolRegistry {
@@ -89,11 +97,22 @@ impl AgentToolRegistry {
     pub fn new() -> Self {
         Self {
             tools: HashMap::new(),
+            sandbox_archivos: None,
         }
     }
 
     pub fn registrar(&mut self, tool: Box<dyn AgentTool>) {
         self.tools.insert(tool.id(), tool);
+    }
+
+    /// Fija el sandbox de archivos del runtime (solo AGENTE_MODO=local).
+    pub fn registrar_sandbox(&mut self, sandbox: Arc<SandboxArchivos>) {
+        self.sandbox_archivos = Some(sandbox);
+    }
+
+    #[must_use]
+    pub fn sandbox(&self) -> Option<Arc<SandboxArchivos>> {
+        self.sandbox_archivos.clone()
     }
 
     #[must_use]
