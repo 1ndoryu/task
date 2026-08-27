@@ -302,9 +302,20 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
              * Esto es aceptable dado lo estrecho de la ventana temporal. */
             if (contadorCambiosRemotosRef?.current && contadorCambiosRemotosRef.current > 0) {
                 contadorCambiosRemotosRef.current = 0;
-                markChangesAsSynced();
-                devLog('[SyncManager] Cambio remoto WS absorbido — hash actualizado sin HTTP auto-save');
-                return;
+                /* [28-08-2026] Solo absorber si NO hay guardado local pendiente/en vuelo.
+                 * Si lo hay, el cleanup de este efecto ya limpió su timer: absorber aquí
+                 * cancelaría el save del cambio local y dejaría guardadoPendienteRef en
+                 * true indefinidamente (bloqueando TODOS los pulls futuros — la re-verificación
+                 * post-fetch los descartaría siempre). Al caer al save normal, el push envía
+                 * el estado completo —incluye el cambio remoto ya aplicado— y el upsert
+                 * idempotente del backend no duplica nada. */
+                if (guardadoPendienteRef.current) {
+                    devLog('[SyncManager] Cambio remoto WS con save local pendiente — el save en curso lo incluye');
+                } else {
+                    markChangesAsSynced();
+                    devLog('[SyncManager] Cambio remoto WS absorbido — hash actualizado sin HTTP auto-save');
+                    return;
+                }
             }
 
             // Check Safety Breaker for Auto-Save too
