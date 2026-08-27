@@ -246,6 +246,19 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
             if (meta && meta.lastModified > meta.lastSync) return;
             const serverData = await loadData();
             if (!serverData) return;
+            /* [28-08-2026] Re-verificar los guards DESPUÉS del fetch: entre el
+             * chequeo inicial y la respuesta pueden entrar cambios locales.
+             * Caso real (bug del toggle de hábitos): el clic que enfoca la
+             * ventana dispara manejarFoco (pull) y a la vez completa el
+             * hábito; la respuesta stale llegaba después y onDataReceived
+             * pisaba el toggle optimista → toast de "completado" y el hábito
+             * volvía a desmarcarse (solo quedaba al 2º/3º intento, sin evento
+             * de foco). Con el re-check, un payload que pisaría cambios
+             * locales se descarta y el próximo pull ya traerá el estado
+             * guardado. */
+            if (document.visibilityState !== 'visible' || guardadoPendienteRef.current) return;
+            const metaPostFetch = syncMetaRef.current;
+            if (metaPostFetch && metaPostFetch.lastModified > metaPostFetch.lastSync) return;
             /* [26-08-2026] Fix reappear (tombstones-aware): aunque el servidor
              * devuelva una fila que el usuario borró localmente (por el race entre
              * el DELETE del debounce y este pull), NO la resucitamos en local.
