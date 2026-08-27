@@ -64,11 +64,25 @@ export function TooltipSystem(): JSX.Element | null {
         /* Ajustar posición horizontal para no salirse de la pantalla */
         const mitadTooltip = contenidoAncho / 2;
 
-        if (x - mitadTooltip < MARGEN_BORDE) {
-            /* Se sale por la izquierda */
+        /* [28-08-2026] Si el tooltip centrado se sale por un borde y hay espacio
+         * al lado, mostrarlo en posición lateral (derecha/izquierda) en vez de
+         * desplazarlo al centro: así el tooltip queda junto al elemento. Típico
+         * de botones pegados al borde izquierdo (sidebar colapsado). */
+        if (x - mitadTooltip < MARGEN_BORDE && espacioDerecha >= contenidoAncho) {
+            /* Se sale por la izquierda y hay espacio a la derecha */
+            x = rect.right;
+            y = rect.top + rect.height / 2;
+            posicion = 'derecha';
+        } else if (x + mitadTooltip > viewportAncho - MARGEN_BORDE && espacioIzquierda >= contenidoAncho) {
+            /* Se sale por la derecha y hay espacio a la izquierda */
+            x = rect.left;
+            y = rect.top + rect.height / 2;
+            posicion = 'izquierda';
+        } else if (x - mitadTooltip < MARGEN_BORDE) {
+            /* Se sale por la izquierda sin espacio lateral: clavar al borde */
             x = Math.max(MARGEN_BORDE + mitadTooltip, rect.left + rect.width / 2);
         } else if (x + mitadTooltip > viewportAncho - MARGEN_BORDE) {
-            /* Se sale por la derecha */
+            /* Se sale por la derecha sin espacio lateral: clavar al borde */
             x = Math.min(viewportAncho - MARGEN_BORDE - mitadTooltip, rect.left + rect.width / 2);
         }
 

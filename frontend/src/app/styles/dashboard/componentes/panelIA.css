@@ -132,12 +132,14 @@
 }
 
 /* Input */
+/* [28-08-2026] position: relative para anclar el botón de enviar embebido */
 .panelIAInput {
     display: flex;
     align-items: flex-end;
     gap: var(--dashboard-espacioS);
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-top: 1px solid var(--dashboard-bordeSutil);
+    position: relative;
 }
 
 /* Textarea UI component wrapper — quitar padding/márgenes extra */
@@ -149,27 +151,52 @@
 }
 
 /* [303A-6] width: 100% para que el textarea ocupe todo el ancho del contenedor */
-.panelIAInputTexto {
+/* [28-08-2026] padding-right reserva espacio para el botón de enviar embebido */
+/* [28-08-2026] Fuente reducida a tamanoPequeno para el texto del input. Selector
+ * compuesto (.textarea.panelIAInputTexto) para ganar a .textarea base de
+ * ui-formulario.css que fija tamanoBase. */
+.panelIAInputTexto.textarea {
     width: 100%;
     border: none;
     background: transparent;
     color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
+    font-size: var(--dashboard-tamanoPequeno);
     line-height: 1.4;
     resize: none;
     outline: none;
     min-height: 20px;
     max-height: 80px;
-    padding: 4px 0;
+    padding: 4px 32px 4px 0;
     font-family: inherit;
     box-sizing: border-box;
 }
 
-.panelIAInputTexto::placeholder {
+/* [28-08-2026] Botón de enviar embebido: sin fondo, icono blanco, anclado a la
+ * derecha del input y centrado verticalmente. El estado deshabilitado usa la
+ * opacidad base de .boton:disabled. */
+/* [28-08-2026] right += 3px desplaza el botón 3px a la izquierda */
+.panelIAInputEnviar.boton--icono {
+    position: absolute;
+    right: calc(var(--dashboard-espacioMd) + 3px);
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    padding: var(--dashboard-espacioS);
+}
+
+.panelIAInputEnviar.boton--icono:hover:not(:disabled) {
+    filter: brightness(1.2);
+}
+
+.panelIAInputEnviar.boton--icono:disabled {
+    opacity: 0.5;
+}
+
+.panelIAInputTexto.textarea::placeholder {
     color: var(--dashboard-textoApagado);
 }
 
-.panelIAInputTexto:disabled {
+.panelIAInputTexto.textarea:disabled {
     opacity: 0.5;
 }
 

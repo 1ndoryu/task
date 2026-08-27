@@ -33,6 +33,7 @@ import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
 import {useExpPlugin} from '../plugins/exp';
 import {useGruposEjecucion} from '../hooks/useGruposEjecucion';
 import {useGruposEjecucionStore} from '../stores/gruposEjecucionStore';
+import type {DatosNuevoHabito} from '../types/dashboard';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -149,6 +150,32 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         setPaneles(['ejecucion']);
         setPanelSidebarActivo('ejecucion');
     }, [setGrupoPanel, setPaneles]);
+
+    /* [28-08-2026] Clic derecho en un grupo del sidebar → "Agregar a la vista":
+     * añade el panel Tareas con ese grupo a la grilla multi-panel (sin colapsar). */
+    const agregarGrupoAVista = useCallback((grupo: string) => {
+        setGrupoPanel('ejecucion', grupo);
+        agregarPanel('ejecucion');
+    }, [setGrupoPanel, agregarPanel]);
+
+    /* [28-08-2026] Clic derecho en un grupo del sidebar → "Cambiar nombre de
+     * grupo": mismo comportamiento que el renombrar del PanelEjecucion — propaga
+     * el nuevo nombre a tareas y hábitos que usan ese grupo, además del store. */
+    const renombrarGrupoSidebar = useCallback((grupoViejo: string, grupoNuevo: string) => {
+        useGruposEjecucionStore.getState().renombrarGrupo(grupoViejo, grupoNuevo);
+        dashboard.tareas.forEach(tarea => {
+            if (tarea.grupoEjecucion === grupoViejo) {
+                dashboard.editarTarea(tarea.id, {grupoEjecucion: grupoNuevo});
+            }
+        });
+        dashboard.habitos.forEach(habito => {
+            if (habito.grupoEjecucion === grupoViejo) {
+                /* Mismo patrón que generadoresPropsPanel.onActualizarHabito: el
+                 * store fusiona parciales pero el tipo exige DatosNuevoHabito. */
+                habitosActions.editarHabito(habito.id, {grupoEjecucion: grupoNuevo} as DatosNuevoHabito);
+            }
+        });
+    }, [dashboard.tareas, dashboard.habitos, dashboard.editarTarea]);
 
     /* Estado y acciones para notas en móvil */
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
@@ -305,7 +332,21 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                              * grupos se eligen desde la sección de grupos del sidebar. */
                             if (panelId === 'ejecucion') setGrupoPanel('ejecucion', null);
                         }}
-                        onAbrirConfig={() => modales.abrirModalConfigGlobal(null)}
+                        /* [28-08-2026] Footer con usuario: mismas props que el
+                         * EncabezadoPerfil del modo grid, para que el menú
+                         * contextual sea idéntico (config, plan, versión,
+                         * exportar/importar, cerrar sesión). */
+                        usuario={auth.user ? auth.user.name : usuario}
+                        avatarUrl={auth.user?.avatarUrl}
+                        version={version}
+                        suscripcion={suscripcion}
+                        sincronizacion={sincronizacionConAuth}
+                        onClickConfigUsuario={() => modales.abrirModalConfigGlobal(null)}
+                        onClickVersion={modales.abrirModalVersiones}
+                        onClickPlan={modales.abrirModalUpgrade}
+                        onClickFeedback={modales.abrirModalFeedback}
+                        onExportarDatos={dashboard.exportarTodosDatos}
+                        onImportarDatos={dashboard.importarTodosDatos}
                         panelesActivos={sidebarState.paneles}
                         onAgregarPanel={agregarPanel}
                         onCrearTarea={() => modales.abrirCreacionRapida('tarea')}
@@ -313,6 +354,8 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         grupos={gruposTareas}
                         grupoTareasActivo={grupoTareasActivo}
                         onSeleccionarGrupo={seleccionarGrupoTareas}
+                        onAgregarGrupoVista={agregarGrupoAVista}
+                        onRenombrarGrupo={renombrarGrupoSidebar}
                     />
                     <div className="dashboardSidebarMain">
                         {dashboard.cargandoDatos ? (

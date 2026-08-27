@@ -18,9 +18,9 @@
 
 import {useState, useCallback, useEffect, useRef, Fragment, useMemo} from 'react';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import {Settings, Plus, ChevronDown, ChevronRight, Folder} from 'lucide-react';
+import {Settings, Plus, ChevronDown, ChevronRight, Folder, Crown, ClipboardList, Download, Upload, LogOut, MessageSquarePlus, Pencil} from 'lucide-react';
 import type {ReactNode} from 'react';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 import {MenuContextual} from '../shared';
 import type {OpcionMenu} from '../shared';
 import {SubmenuNuevoInline} from './SubmenuNuevoInline';
@@ -35,7 +35,29 @@ interface SidebarMenuProps {
     paneles: PanelSidebar[];
     panelActivo: PanelId;
     onSeleccionarPanel: (panelId: PanelId) => void;
-    onAbrirConfig: () => void;
+    /** [28-08-2026] Usuario logueado: se muestra en el footer y abre el mismo
+     * menú contextual que en modo grid (EncabezadoPerfil). */
+    usuario: string;
+    /** Avatar del usuario (opcional): si no hay, se muestra la inicial */
+    avatarUrl?: string;
+    /** Versión actual de la app (se muestra como "Versión X" en el menú) */
+    version: string;
+    /** Suscripción para mostrar "Plan Premium" en el menú */
+    suscripcion?: {plan?: string; estado?: string} | null;
+    /** Sincronización con onLogout para "Cerrar Sesión" */
+    sincronizacion?: {onLogout?: () => void};
+    /** Abre el modal de configuración global (opción "Configuración") */
+    onClickConfigUsuario?: () => void;
+    /** Abre el modal de versiones */
+    onClickVersion?: () => void;
+    /** Abre el modal de upgrade (Plan Premium) */
+    onClickPlan?: () => void;
+    /** Abre el modal de feedback */
+    onClickFeedback?: () => void;
+    /** Exporta todos los datos (opción "Exportar datos") */
+    onExportarDatos?: () => void;
+    /** Importa todos los datos desde un archivo (opción "Importar datos") */
+    onImportarDatos?: (archivo: File) => void;
     /** [multi-panel-sidebar] IDs de paneles activos en la grilla (opcional) */
     panelesActivos?: PanelId[];
     /** [multi-panel-sidebar] Callback para agregar panel a la grilla (click derecho) */
@@ -50,6 +72,11 @@ interface SidebarMenuProps {
     grupoTareasActivo?: string | null;
     /** Al hacer clic en un grupo: va directo al panel Tareas con ese grupo (null = sin grupo) */
     onSeleccionarGrupo?: (grupo: string | null) => void;
+    /** [28-08-2026] Agregar un grupo a la vista multi-panel (clic derecho → "Agregar a la vista") */
+    onAgregarGrupoVista?: (grupo: string) => void;
+    /** [28-08-2026] Renombrar un grupo desde el sidebar (clic derecho → "Cambiar nombre de grupo").
+     * Debe propagarse al dueño de los datos (tareas/hábitos) como hace PanelEjecucion. */
+    onRenombrarGrupo?: (grupoViejo: string, grupoNuevo: string) => void;
 }
 
 /** Anchos mínimo y máximo del sidebar al arrastrar el borde (px) */
@@ -68,7 +95,7 @@ interface ContextMenuState {
 
 /* [300A-8] Iconos SVG reemplazados por lucide-react: Plus, Settings */
 
-export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirConfig, panelesActivos, onAgregarPanel, onCrearTarea, onCrearHabito, grupos = [], grupoTareasActivo, onSeleccionarGrupo}: SidebarMenuProps): JSX.Element | null {
+export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, usuario, avatarUrl, version, suscripcion, sincronizacion, onClickConfigUsuario, onClickVersion, onClickPlan, onClickFeedback, onExportarDatos, onImportarDatos, panelesActivos, onAgregarPanel, onCrearTarea, onCrearHabito, grupos = [], grupoTareasActivo, onSeleccionarGrupo, onAgregarGrupoVista, onRenombrarGrupo}: SidebarMenuProps): JSX.Element | null {
     /* [28-08-2026] El toggle de expandir/contraer se sustituye por arrastre del
      * borde: el ancho es dinámico (px) y se persiste. "expandido" se deriva del
      * ancho (ancho > umbral), de modo que el resto del componente (título,
@@ -159,6 +186,84 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
         }
     }, [onCrearTarea, onCrearHabito]);
 
+    /* [28-08-2026] Menú de usuario del footer: mismo patrón que EncabezadoPerfil
+     * en modo grid. Se abre sobre el botón de usuario (coordenadas del rect).
+     * MenuContextual usa position:fixed, así que no lo recorta el overflow
+     * del sidebar. */
+    const [menuUsuario, setMenuUsuario] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
+    const inputArchivoRef = useRef<HTMLInputElement>(null);
+
+    const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
+
+    const opcionesMenuUsuario: OpcionMenu[] = [
+        {id: 'configuracion', etiqueta: 'Configuración', icono: <Settings size={12} />, separadorDespues: true},
+        ...(esPremiumActivo
+            ? [
+                  {id: 'plan', etiqueta: 'Plan Premium', icono: <Crown size={12} />},
+                  {id: 'feedback', etiqueta: 'Enviar Comentarios', icono: <MessageSquarePlus size={12} />}
+              ]
+            : []),
+        {id: 'version', etiqueta: `Versión ${version}`, icono: <ClipboardList size={12} />, separadorDespues: true},
+        {id: 'exportar', etiqueta: 'Exportar datos', icono: <Download size={12} />},
+        {id: 'importar', etiqueta: 'Importar datos', icono: <Upload size={12} />, separadorDespues: true},
+        {id: 'logout', etiqueta: 'Cerrar Sesión', icono: <LogOut size={12} />, peligroso: true}
+    ];
+
+    const manejarClickUsuario = useCallback((evento: React.MouseEvent) => {
+        evento.preventDefault();
+        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
+        /* [28-08-2026] Anclaje al borde izquierdo del botón: el sidebar está a
+         * la izquierda de la pantalla, así que rect.right - ancho daría negativo
+         * y el clamp del menú lo pegaría a la esquina. Con rect.left el menú
+         * aparece justo desde donde se clickeó (el clamp solo lo ajusta si no
+         * cabe en pantalla). */
+        setMenuUsuario({
+            visible: true,
+            x: rect.left,
+            y: rect.bottom + 4
+        });
+    }, []);
+
+    const manejarOpcionMenu = useCallback((opcionId: string) => {
+        switch (opcionId) {
+            case 'configuracion':
+                onClickConfigUsuario?.();
+                break;
+            case 'version':
+                onClickVersion?.();
+                break;
+            case 'plan':
+                onClickPlan?.();
+                break;
+            case 'feedback':
+                onClickFeedback?.();
+                break;
+            case 'exportar':
+                onExportarDatos?.();
+                break;
+            case 'importar':
+                inputArchivoRef.current?.click();
+                break;
+            case 'logout':
+                /* [28-08-2026] Confirmación clásica antes de cerrar sesión */
+                if (window.confirm('¿Cerrar sesión?')) {
+                    sincronizacion?.onLogout?.();
+                }
+                break;
+        }
+        setMenuUsuario(prev => ({...prev, visible: false}));
+    }, [onClickConfigUsuario, onClickVersion, onClickPlan, onClickFeedback, onExportarDatos, sincronizacion]);
+
+    const manejarCambioArchivo = useCallback((evento: React.ChangeEvent<HTMLInputElement>) => {
+        const archivo = evento.target.files?.[0];
+        if (archivo && onImportarDatos) {
+            onImportarDatos(archivo);
+            if (inputArchivoRef.current) {
+                inputArchivoRef.current.value = '';
+            }
+        }
+    }, [onImportarDatos]);
+
     /* [28-08-2026] Orden de los botones del menú: drag & drop con persistencia
      * en localStorage (glory_sidebar_orden_paneles). Si no hay orden guardado
      * se usa el orden por defecto de los paneles; los paneles nuevos (no
@@ -176,7 +281,9 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
         return null;
     });
     const [arrastrandoPanelId, setArrastrandoPanelId] = useState<string | null>(null);
-    const [destinoPanelId, setDestinoPanelId] = useState<string | null>(null);
+    /* [28-08-2026] Zona de inserción del drag: botón destino + posición
+     * (antes/después según la mitad del puntero) para pintar la línea de guía. */
+    const [zonaDrop, setZonaDrop] = useState<{id: string; posicion: 'antes' | 'despues'} | null>(null);
 
     const panelesOrdenados = useMemo(() => {
         if (!ordenIds) return paneles;
@@ -204,36 +311,48 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
 
     /* [28-08-2026] Drag & drop para reordenar los botones del menú. El clic
      * normal sigue seleccionando (el navegador suprime el click tras un drag
-     * real); el clic derecho del menú contextual no se ve afectado. */
+     * real); el clic derecho del menú contextual no se ve afectado. Se oculta
+     * el fantasma nativo del navegador: el botón origen queda con transparencia
+     * (--arrastrando) y una línea de guía marca el punto de inserción
+     * (antes/después del botón destino según la mitad del puntero). */
     const iniciarArrastre = useCallback((e: React.DragEvent, panelId: string) => {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', panelId);
+        /* Ocultar la imagen fantasma genérica del navegador (drag nativo feo):
+         * se sustituye por la transparencia del botón origen + línea de guía. */
+        const lienzo = document.createElement('canvas');
+        lienzo.width = lienzo.height = 1;
+        e.dataTransfer.setDragImage(lienzo, 0, 0);
         setArrastrandoPanelId(panelId);
     }, []);
 
     const marcarDestino = useCallback((e: React.DragEvent, panelId: string) => {
         e.preventDefault();
-        setDestinoPanelId(panelId);
+        const rect = e.currentTarget.getBoundingClientRect();
+        const posicion = e.clientY < rect.top + rect.height / 2 ? 'antes' : 'despues';
+        setZonaDrop({id: panelId, posicion});
     }, []);
 
     const soltarEn = useCallback((e: React.DragEvent, panelId: string) => {
         e.preventDefault();
         const origen = arrastrandoPanelId || e.dataTransfer.getData('text/plain');
+        const posicion = zonaDrop?.id === panelId ? zonaDrop.posicion : 'antes';
         setArrastrandoPanelId(null);
-        setDestinoPanelId(null);
+        setZonaDrop(null);
         if (!origen || origen === panelId) return;
         const ids = panelesOrdenados.map(p => p.id);
         const iOrigen = ids.indexOf(origen);
-        const iDestino = ids.indexOf(panelId);
-        if (iOrigen === -1 || iDestino === -1) return;
+        if (iOrigen === -1) return;
         ids.splice(iOrigen, 1);
-        ids.splice(iDestino, 0, origen);
+        const iDestino = ids.indexOf(panelId);
+        if (iDestino === -1) return;
+        ids.splice(posicion === 'despues' ? iDestino + 1 : iDestino, 0, origen);
         guardarOrden(ids);
-    }, [arrastrandoPanelId, panelesOrdenados, guardarOrden]);
+    }, [arrastrandoPanelId, zonaDrop, panelesOrdenados, guardarOrden]);
 
     const terminarArrastre = useCallback(() => {
         setArrastrandoPanelId(null);
-        setDestinoPanelId(null);
+        setZonaDrop(null);
     }, []);
 
     /* [28-08-2026] Sección de grupos minimizable/maximizable, persistida en
@@ -256,6 +375,51 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
             }
             return nuevo;
         });
+    }, []);
+
+    /* [28-08-2026] Menú contextual de los grupos (clic derecho): "Agregar a la
+     * vista" (añade el grupo a la grilla multi-panel) y "Cambiar nombre de
+     * grupo" (abre un input inline para renombrar, propagado al dueño de los
+     * datos como hace PanelEjecucion). */
+    const [contextMenuGrupo, setContextMenuGrupo] = useState<{abierto: boolean; grupo: string | null; x: number; y: number}>({abierto: false, grupo: null, x: 0, y: 0});
+    const [renombrandoGrupo, setRenombrandoGrupo] = useState<string | null>(null);
+    const [nuevoNombreGrupo, setNuevoNombreGrupo] = useState('');
+
+    const handleContextMenuGrupo = useCallback((e: React.MouseEvent, grupo: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextMenuGrupo({abierto: true, grupo, x: e.clientX, y: e.clientY});
+    }, []);
+
+    const opcionesContextualGrupo: OpcionMenu[] = [
+        {id: 'agregar-vista', etiqueta: 'Agregar a la vista', icono: <Plus size={14} />},
+        {id: 'renombrar', etiqueta: 'Cambiar nombre de grupo', icono: <Pencil size={14} />}
+    ];
+
+    const handleSeleccionContextualGrupo = useCallback((opcionId: string) => {
+        const grupo = contextMenuGrupo.grupo;
+        if (opcionId === 'agregar-vista' && grupo) {
+            onAgregarGrupoVista?.(grupo);
+        } else if (opcionId === 'renombrar' && grupo) {
+            setNuevoNombreGrupo(grupo);
+            setRenombrandoGrupo(grupo);
+        }
+        setContextMenuGrupo(prev => ({...prev, abierto: false}));
+    }, [contextMenuGrupo.grupo, onAgregarGrupoVista]);
+
+    const confirmarRenombrarGrupo = useCallback(() => {
+        const nombre = nuevoNombreGrupo.trim();
+        const viejo = renombrandoGrupo;
+        if (viejo && nombre && nombre !== viejo) {
+            onRenombrarGrupo?.(viejo, nombre);
+        }
+        setRenombrandoGrupo(null);
+        setNuevoNombreGrupo('');
+    }, [nuevoNombreGrupo, renombrandoGrupo, onRenombrarGrupo]);
+
+    const cancelarRenombrarGrupo = useCallback(() => {
+        setRenombrandoGrupo(null);
+        setNuevoNombreGrupo('');
     }, []);
 
     /* Handler de click derecho en un botón del menú */
@@ -304,6 +468,17 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
                     onCerrar={() => setContextMenu(prev => ({...prev, abierto: false}))}
                 />
             )}
+            {/* [28-08-2026] Menú contextual de los grupos (clic derecho): agregar
+             * a la vista o cambiar nombre de grupo. */}
+            {contextMenuGrupo.abierto && contextMenuGrupo.grupo && (
+                <MenuContextual
+                    opciones={opcionesContextualGrupo}
+                    posicionX={contextMenuGrupo.x}
+                    posicionY={contextMenuGrupo.y}
+                    onSeleccionar={handleSeleccionContextualGrupo}
+                    onCerrar={() => setContextMenuGrupo(prev => ({...prev, abierto: false}))}
+                />
+            )}
             {/* [28-08-2026] Header: nombre de app + botón "+" para crear
              * Tarea/Hábito. Se retira el toggle de expandir/contraer: ahora el
              * tamaño se ajusta arrastrando el borde derecho del sidebar. */}
@@ -349,9 +524,10 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
                                     onDragEnd={terminarArrastre}
                                     variante="ghost"
                                     soloIcono={!expandido}
-                                    claseAdicional={`sidebarMenuBoton ${panelActivo === panel.id ? 'sidebarMenuBoton--activo' : ''} ${enGrilla ? 'sidebarMenuBoton--enGrilla' : ''} ${arrastrandoPanelId === panel.id ? 'sidebarMenuBoton--arrastrando' : ''} ${destinoPanelId === panel.id ? 'sidebarMenuBoton--destino' : ''}`}
+                                    claseAdicional={`sidebarMenuBoton ${panelActivo === panel.id ? 'sidebarMenuBoton--activo' : ''} ${enGrilla ? 'sidebarMenuBoton--enGrilla' : ''} ${arrastrandoPanelId === panel.id ? 'sidebarMenuBoton--arrastrando' : ''} ${zonaDrop?.id === panel.id ? (zonaDrop.posicion === 'antes' ? 'sidebarMenuBoton--guiaAntes' : 'sidebarMenuBoton--guiaDespues') : ''}`}
                                     onClick={() => onSeleccionarPanel(panel.id)}
                                     onContextMenu={(e) => handleContextMenu(e, panel.id)}
+                                    title={panel.titulo}
                                     icono={panel.icono}
                                 >
                                     {panel.titulo}
@@ -379,16 +555,45 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
                             {panel.id === 'ejecucion' && expandido && grupos.length > 0 && !gruposColapsados && (
                                 <div className="sidebarMenuGruposLista">
                                     {grupos.map(grupo => (
-                                        <Boton
-                                            key={grupo}
-                                            variante="ghost"
-                                            claseAdicional={`sidebarMenuBoton sidebarMenuGrupoBoton ${grupoTareasActivo === grupo ? 'sidebarMenuBoton--activo sidebarMenuGrupoBoton--activo' : ''}`}
-                                            onClick={() => onSeleccionarGrupo?.(grupo)}
-                                            icono={<Folder size={12} />}
-                                            title={grupo}
-                                        >
-                                            {grupo}
-                                        </Boton>
+                                        renombrandoGrupo === grupo ? (
+                                            /* [28-08-2026] Renombrar solo con teclado (Enter acepta,
+                                             * Escape cancela, sin botones) manteniendo el icono de
+                                             * carpeta del grupo para no perder el contexto visual. */
+                                            <div key={grupo} className="sidebarMenuGrupoRenombrar">
+                                                <Folder size={12} className="sidebarMenuGrupoRenombrarIcono" />
+                                                <input
+                                                    autoFocus
+                                                    type="text"
+                                                    value={nuevoNombreGrupo}
+                                                    onChange={e => setNuevoNombreGrupo(e.target.value)}
+                                                    onKeyDown={e => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            confirmarRenombrarGrupo();
+                                                        }
+                                                        if (e.key === 'Escape') {
+                                                            e.stopPropagation();
+                                                            cancelarRenombrarGrupo();
+                                                        }
+                                                    }}
+                                                    placeholder="Nuevo nombre"
+                                                    className="selectorGrupoInput"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <Boton
+                                                key={grupo}
+                                                variante="ghost"
+                                                claseAdicional={`sidebarMenuBoton sidebarMenuGrupoBoton ${grupoTareasActivo === grupo ? 'sidebarMenuBoton--activo sidebarMenuGrupoBoton--activo' : ''}`}
+                                                onClick={() => onSeleccionarGrupo?.(grupo)}
+                                                onContextMenu={(e) => handleContextMenuGrupo(e, grupo)}
+                                                icono={<Folder size={12} />}
+                                                title={`${grupo} (clic derecho: opciones)`}
+                                            >
+                                                {grupo}
+                                            </Boton>
+                                        )
                                     ))}
                                 </div>
                             )}
@@ -396,17 +601,42 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
                     );
                 })}
             </div>
-            {/* [300A-8] Footer: boton de configuracion */}
+            {/* [28-08-2026] Footer: botón de usuario (nombre/avatar) que abre el
+             * mismo menú contextual que en modo grid. En colapsado solo se
+             * muestra el avatar (soloIcono). */}
             <div className="sidebarMenuFooter">
                 <Boton
                     variante="ghost"
                     soloIcono={!expandido}
-                    claseAdicional="sidebarMenuConfigBoton"
-                    onClick={onAbrirConfig}
-                    icono={<Settings size={18} />}
+                    claseAdicional="sidebarMenuBoton sidebarMenuUsuarioBoton"
+                    onClick={manejarClickUsuario}
+                    title="Opciones de usuario"
+                    icono={
+                        avatarUrl ? (
+                            <img src={avatarUrl} alt="" className="sidebarMenuAvatar" />
+                        ) : (
+                            <span className="sidebarMenuAvatarInicial">{usuario.charAt(0).toUpperCase()}</span>
+                        )
+                    }
                 >
-                    Config
+                    {usuario}
                 </Boton>
+
+                {menuUsuario.visible && (
+                    <MenuContextual
+                        opciones={opcionesMenuUsuario}
+                        posicionX={menuUsuario.x}
+                        posicionY={menuUsuario.y}
+                        onSeleccionar={manejarOpcionMenu}
+                        onCerrar={() => setMenuUsuario(prev => ({...prev, visible: false}))}
+                    />
+                )}
+
+                {/* [28-08-2026] Input de archivo oculto para "Importar datos"
+                 * (mismo patrón que EncabezadoPerfil en grid) */}
+                <div className="inputOculto">
+                    <Input ref={inputArchivoRef} tipo="file" accept=".json" onChange={manejarCambioArchivo} />
+                </div>
             </div>
             {/* [28-08-2026] Handle de resize: franja vertical en el borde derecho
              * del sidebar. Con mousedown comienza el arrastre (ver state ancho). */}

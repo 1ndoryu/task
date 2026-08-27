@@ -13,6 +13,9 @@
  *   - transicionRapida, transicionNormal → animaciones
  */
 
+/* [28-08-2026] gap 0 entre menú y contenido: el sidebarMenuResizeHandle es el
+ * separador real (borde del panel de contenido), no un elemento flotando en
+ * un hueco. */
 .dashboardSidebarLayout {
     display: flex;
     flex-direction: row;
@@ -22,9 +25,19 @@
     gap: 0;
     overflow: hidden;
     padding: 10px;
-    gap: 10px;
 }
 
+/* [28-08-2026] Colapsado: sin padding izquierdo para que el rail de iconos
+ * quede pegado al borde de la ventana y no sobre espacio a la izquierda. */
+.dashboardSidebarLayout:has(.sidebarMenu--colapsado) {
+    padding-left: 0;
+}
+
+/* [28-08-2026] Borde izquierdo del panel de contenido: es la línea visual que
+ * separa el sidebar del contenido. El sidebarMenuResizeHandle es un área
+ * invisible encima de este borde; al arrastrarla se redimensiona el sidebar
+ * (ver SidebarMenu.tsx). Así el handle no aparece como elemento suelto sino
+ * como el propio borde del panel contiguo. */
 .dashboardSidebarMain {
     display: flex;
     flex-direction: column;
@@ -34,6 +47,7 @@
     overflow: hidden;
     background: var(--dashboard-sidebarFondo);
     border-radius: 5px;
+    border-left: 1px solid var(--dashboard-bordePrincipal);
 }
 
 /* [20-08-2026] Sin fondo: la barra de paneles se integra con el layout,
@@ -71,8 +85,10 @@
     transition: none;
 }
 
-/* [28-08-2026] Handle de resize: franja vertical sobre el borde derecho del
- * sidebar. Captura el mousedown para arrastrar (ver SidebarMenu.tsx). */
+/* [28-08-2026] Handle de resize: área invisible de arrastre sobre el borde
+ * izquierdo del contenido. Sin fondo ni borde propios para que NO aparezca
+ * como elemento; solo cambia el cursor a col-resize al pasar por encima y
+ * captura el mousedown para arrastrar (ver SidebarMenu.tsx). */
 .sidebarMenuResizeHandle {
     position: absolute;
     top: 0;
@@ -82,12 +98,6 @@
     cursor: col-resize;
     z-index: 5;
     touch-action: none;
-}
-
-.sidebarMenuResizeHandle:hover,
-.sidebarMenuResizeHandle:active {
-    background: var(--dashboard-fondoHover);
-    border-radius: var(--dashboard-radioXs);
 }
 
 /* Contenedor de items (scroll independiente del toggle) */
@@ -156,13 +166,18 @@
 /* [27-08-2026] 1px menos de padding: 10px → 9px (petición del usuario) */
 /* [27-08-2026] Altura 32px → 30px: el padding vertical no tenía efecto visual
    con la altura fija (el contenido se centra igual), así que se reduce la altura real. */
+/* [28-08-2026] Opacidad completa y ancho completo: los botones se veían
+ * contraídos (0.6 y al ancho de su contenido — solo Tareas se estiraba por su
+ * flex:1). Ahora ocupan todo el ancho del sidebar como antes; el activo se
+ * sigue distinguiendo por brightness(1.6) y el hover por su fondo. */
 .sidebarMenuBoton.boton--ghost {
     border: none;
     justify-content: flex-start;
     white-space: nowrap;
     padding-left: calc(var(--dashboard-espacioSmMd) - 1px);
     height: 28px;
-    opacity: 0.6;
+    width: 100%;
+    opacity: 1;
 }
 
 /* [300A-8d] Iconos +2px y fuente +1px en botones del sidebar */
@@ -173,8 +188,7 @@
     height: 12px;
 }
 
-.sidebarMenuNuevoBoton .botonIcono svg,
-.sidebarMenuConfigBoton .botonIcono svg {
+.sidebarMenuNuevoBoton .botonIcono svg {
     width: 16px;
     height: 16px;
 }
@@ -183,10 +197,19 @@
     font-size: calc(var(--dashboard-tamanoPequeno) + 1px);
 }
 
-/* Colapsado: centrar icono */
+/* [28-08-2026] Colapsado: centrar cada fila y el icono dentro del botón.
+ * La fila se vuelve flex con centrado horizontal, y el padding del botón se
+ * hace uniforme (8px) para que el icono quede centrado en el cuadrado 28x28
+ * (antes padding-left 6px descentraba el icono). */
+.sidebarMenu--colapsado .sidebarMenuFilaBoton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .sidebarMenu--colapsado .sidebarMenuBoton.boton--ghost {
     justify-content: center;
-    padding-left: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSm);
 }
 
 /* Indicador activo: barra vertical izquierda */
@@ -207,14 +230,20 @@
     filter: none;
 }
 
-/* [28-08-2026] Drag & drop para reordenar los botones del menú */
+/* [28-08-2026] Drag & drop para reordenar los botones del menú.
+ * El botón arrastrado queda con transparencia (indicando que está en vuelo)
+ * y el destino pinta una línea de guía (2px) en el borde superior o inferior
+ * según la mitad del puntero, como en los reordenamientos habituales. */
 .sidebarMenuBoton--arrastrando {
     opacity: 0.35;
 }
 
-.sidebarMenuBoton--destino {
-    background: var(--dashboard-fondoHover);
-    opacity: 1;
+.sidebarMenuBoton--guiaAntes {
+    box-shadow: inset 0 2px 0 0 var(--dashboard-acento);
+}
+
+.sidebarMenuBoton--guiaDespues {
+    box-shadow: inset 0 -2px 0 0 var(--dashboard-acento);
 }
 
 /* [28-08-2026] Fila del botón Tareas con la flecha de grupos al lado.
@@ -274,6 +303,31 @@
     filter: brightness(1.6);
 }
 
+/* [28-08-2026] Renombrar un grupo desde el sidebar (clic derecho → "Cambiar
+ * nombre de grupo"): fila con el icono de carpeta del grupo + input inline,
+ * solo Enter/Escape (sin botones). Alineada con los botones de grupo. */
+.sidebarMenuGrupoRenombrar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    height: 28px;
+    padding: 0 4px 0 24px;
+}
+
+.sidebarMenuGrupoRenombrarIcono {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    color: var(--dashboard-textoSecundario);
+}
+
+.sidebarMenuGrupoRenombrar .selectorGrupoInput {
+    flex: 1;
+    min-width: 0;
+    height: 22px;
+}
+
 /* [28-08-2026] Botón "+" del header (crear tarea/hábito): mismo estilo que el
  * toggle anterior para no cambiar el aspecto del header. */
 .sidebarMenuNuevoBoton.boton--ghost {
@@ -286,20 +340,44 @@
     filter: none;
 }
 
-.sidebarMenuConfigBoton.boton--ghost {
-    border: none;
-    color: var(--dashboard-textoApagado);
-    justify-content: flex-start;
-    white-space: nowrap;
-}
-.sidebarMenu--colapsado .sidebarMenuConfigBoton.boton--ghost {
-    justify-content: center;
+/* [28-08-2026] Botón de usuario del footer: sustituye al antiguo botón
+ * "Config". Lleva también .sidebarMenuBoton para verse exactamente igual que
+ * los botones del menú (misma altura, padding, opacidad, gap y hover); aquí
+ * solo se estiliza el avatar (foto/inicial). */
+
+/* Avatar circular del footer (imagen o inicial), mismo estilo que el del
+ * encabezado grid (.avatarEncabezado) pero algo menor para el sidebar. */
+.sidebarMenuAvatar,
+.sidebarMenuAvatarInicial {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--dashboard-radioCirculo);
+    flex-shrink: 0;
 }
 
-.sidebarMenuConfigBoton.boton--ghost:hover:not(:disabled) {
-    color: var(--dashboard-textoSecundario);
+.sidebarMenuAvatar {
+    object-fit: cover;
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+.sidebarMenuAvatarInicial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--dashboard-fondoHover);
-    filter: none;
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    border: 1px solid var(--dashboard-bordePrincipal);
+}
+
+/* [28-08-2026] Colapsado: el botón de usuario se vuelve un cuadrado 28x28
+ * igual que los botones del menú, con la foto (18px) centrada y sin padding
+ * extra (el avatar es el contenido y queda centrado). */
+.sidebarMenu--colapsado .sidebarMenuUsuarioBoton.boton--ghost {
+    width: 28px;
+    padding: 0;
+    justify-content: center;
 }
 
 /* [27-08-2026] Este contenedor ya NO hace scroll: antes con overflow-y:auto

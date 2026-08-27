@@ -12,7 +12,7 @@
  * [243A-3] Botón enviar más grande y con separación del borde.
  */
 
-import {Send, Trash2, Loader2, Bot, CheckCircle, XCircle, Settings, AlertTriangle} from 'lucide-react';
+import {ArrowUp, Trash2, Loader2, Bot, CheckCircle, XCircle, Settings, AlertTriangle} from 'lucide-react';
 import {SeccionEncabezado} from '../dashboard';
 import {Boton, Textarea} from '../ui';
 import {usePanelIA} from '../../hooks/paneles/usePanelIA';
@@ -155,6 +155,7 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
             <div className="panelIAInput">
                 <Textarea
                     claseAdicional="panelIAInputTexto"
+                    claseContenedor="panelIAInputContenedor"
                     value={inputTexto}
                     onChange={e => setInputTexto(e.target.value)}
                     onKeyDown={manejarTecla}
@@ -163,14 +164,18 @@ export function PanelIA({renderHandleArrastre, handleMinimizar, crearTarea, togg
                     filas={1}
                     autoAjustar
                 />
+                {/* [28-08-2026] Botón de enviar embebido dentro del input: sin
+                 * fondo (variante icono) y con el icono en blanco para que
+                 * quede integrado en el campo de escritura. */}
                 <Boton
                     type="button"
-                    variante="primario"
+                    variante="icono"
                     tamano="pequeño"
                     soloIcono
+                    claseAdicional="panelIAInputEnviar"
                     onClick={manejarEnviar}
                     disabled={enviando || !inputTexto.trim() || !apiKey}
-                    icono={enviando ? <Loader2 size={16} className="animacionGirar" /> : <Send size={16} />}
+                    icono={enviando ? <Loader2 size={16} className="animacionGirar" /> : <ArrowUp size={16} />}
                     title="Enviar"
                 />
             </div>
