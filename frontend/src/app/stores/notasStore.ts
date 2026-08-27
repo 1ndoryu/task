@@ -11,6 +11,15 @@ export const PANEL_SCRATCHPAD = 'scratchpad';
 /* [263A-12] Nota vacía para paneles sin estado previo */
 const NOTA_VACIA: NotaActiva = {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false};
 
+/* [28-08-2026] Guardado de nota en vuelo (no reactivo). Serializa llamadas
+ * concurrentes a guardarNotaActiva: el autoguardado debounced, el guardado
+ * manual y el modal expandido pueden dispararse casi juntos mientras la nota
+ * activa aún no tiene id (id=null); ambos leerían id nulo y llamarían a
+ * crearNota → la nota aparecía DUPLICADA en la lista. El segundo llamada
+ * espera al primero y re-evalúa el estado fresco: si aquel asignó id, pasa
+ * por el camino de update en vez de crear otra fila igual. */
+let guardadoNotaEnVuelo: Promise<Nota | null> | null = null;
+
 interface NotasState {
     notas: Nota[];
     /* [263A-12] Cada panel scratchpad tiene su propia nota activa independiente */
@@ -218,71 +227,17 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
     },
 
     guardarNotaActiva: async (panelId) => {
-        const notaActiva = get().notasActivaPorPanel[panelId];
-        if (!notaActiva) return null;
-        const contenido = notaActiva.contenido;
-
-        if (!contenido.trim()) return null;
-
-        set({guardando: true, error: null});
-        const titulo = extraerTitulo(contenido);
-
+        /* [28-08-2026] Ver guardadoNotaEnVuelo: serializa y re-evalúa con estado
+         * fresco tras la espera, así el segundo llamada actualiza en vez de duplicar. */
+        if (guardadoNotaEnVuelo) {
+            await guardadoNotaEnVuelo.catch(() => undefined);
+        }
+        const promesa = ejecutarGuardadoNota(panelId);
+        guardadoNotaEnVuelo = promesa;
         try {
-            let notaGuardada: Nota;
-
-            if (notaActiva.id) {
-                // Actualizar
-                notaGuardada = await notasService.actualizarNota(notaActiva.id, titulo, contenido);
-
-                set(state => ({
-                    guardando: false,
-                    notas: state.notas.map(n => (n.id === notaGuardada.id ? notaGuardada : n)),
-                    notasActivaPorPanel: {
-                        ...state.notasActivaPorPanel,
-                        [panelId]: {...(state.notasActivaPorPanel[panelId] ?? NOTA_VACIA), modificada: false}
-                    }
-                }));
-            } else {
-                // Crear
-                notaGuardada = await notasService.crearNota(titulo, contenido);
-
-                /*
-                 * Si la nota se creó desde una carpeta activa, moverla ahí.
-                 * La API de crearNota no acepta carpetaId, así que hacemos un
-                 * segundo paso: mover la nota recién creada a su carpeta destino.
-                 */
-                if (notaActiva.carpetaId) {
-                    try {
-                        await notasService.moverNota(notaGuardada.id, notaActiva.carpetaId);
-                        notaGuardada = {...notaGuardada, carpetaId: notaActiva.carpetaId};
-                    } catch (error) {
-                        /* [H-F11-07] Si falla el mover, la nota queda en General: no crítico,
-                         * pero se registra en DEV en vez de tragarse el error */
-                        devWarn('notasStore', 'No se pudo mover la nota a su carpeta; queda en General', {notaId: notaGuardada.id, carpetaId: notaActiva.carpetaId, error});
-                    }
-                }
-
-                persistirNotaActivaPanel(panelId, notaGuardada.id);
-                set(state => ({
-                    guardando: false,
-                    notas: [notaGuardada, ...state.notas],
-                    total: state.total + 1,
-                    notasActivaPorPanel: {
-                        ...state.notasActivaPorPanel,
-                        [panelId]: {
-                            id: notaGuardada.id,
-                            contenido: notaGuardada.contenido,
-                            modificada: false,
-                            carpetaId: notaGuardada.carpetaId
-                        }
-                    }
-                }));
-            }
-            return notaGuardada;
-        } catch (error) {
-            const mensaje = error instanceof Error ? error.message : 'Error al guardar';
-            set({guardando: false, error: mensaje});
-            return null;
+            return await promesa;
+        } finally {
+            if (guardadoNotaEnVuelo === promesa) guardadoNotaEnVuelo = null;
         }
     },
 
@@ -332,3 +287,75 @@ export const useNotasStore = create<NotasState & NotasActions>((set, get) => ({
 
     limpiarError: () => set({error: null})
 }));
+
+/* [28-08-2026] Implementación del guardado, extraída del store para poder
+ * serializarla desde guardarNotaActiva (ver guardadoNotaEnVuelo). Usa
+ * getState/setState porque vive fuera del closure de create(). */
+async function ejecutarGuardadoNota(panelId: string): Promise<Nota | null> {
+    const notaActiva = useNotasStore.getState().notasActivaPorPanel[panelId];
+    if (!notaActiva) return null;
+    const contenido = notaActiva.contenido;
+
+    if (!contenido.trim()) return null;
+
+    useNotasStore.setState({guardando: true, error: null});
+    const titulo = extraerTitulo(contenido);
+
+    try {
+        let notaGuardada: Nota;
+
+        if (notaActiva.id) {
+            // Actualizar
+            notaGuardada = await notasService.actualizarNota(notaActiva.id, titulo, contenido);
+
+            useNotasStore.setState(state => ({
+                guardando: false,
+                notas: state.notas.map(n => (n.id === notaGuardada.id ? notaGuardada : n)),
+                notasActivaPorPanel: {
+                    ...state.notasActivaPorPanel,
+                    [panelId]: {...(state.notasActivaPorPanel[panelId] ?? NOTA_VACIA), modificada: false}
+                }
+            }));
+        } else {
+            // Crear
+            notaGuardada = await notasService.crearNota(titulo, contenido);
+
+            /*
+             * Si la nota se creó desde una carpeta activa, moverla ahí.
+             * La API de crearNota no acepta carpetaId, así que hacemos un
+             * segundo paso: mover la nota recién creada a su carpeta destino.
+             */
+            if (notaActiva.carpetaId) {
+                try {
+                    await notasService.moverNota(notaGuardada.id, notaActiva.carpetaId);
+                    notaGuardada = {...notaGuardada, carpetaId: notaActiva.carpetaId};
+                } catch (error) {
+                    /* [H-F11-07] Si falla el mover, la nota queda en General: no crítico,
+                     * pero se registra en DEV en vez de tragarse el error */
+                    devWarn('notasStore', 'No se pudo mover la nota a su carpeta; queda en General', {notaId: notaGuardada.id, carpetaId: notaActiva.carpetaId, error});
+                }
+            }
+
+            persistirNotaActivaPanel(panelId, notaGuardada.id);
+            useNotasStore.setState(state => ({
+                guardando: false,
+                notas: [notaGuardada, ...state.notas],
+                total: state.total + 1,
+                notasActivaPorPanel: {
+                    ...state.notasActivaPorPanel,
+                    [panelId]: {
+                        id: notaGuardada.id,
+                        contenido: notaGuardada.contenido,
+                        modificada: false,
+                        carpetaId: notaGuardada.carpetaId
+                    }
+                }
+            }));
+        }
+        return notaGuardada;
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : 'Error al guardar';
+        useNotasStore.setState({guardando: false, error: mensaje});
+        return null;
+    }
+}
