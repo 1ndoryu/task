@@ -90,7 +90,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         <div className="internaColumna panelIA panelAgente">
             <SeccionEncabezado
                 icono={null}
-                titulo={renderHandleArrastre('Agente')}
+                titulo={renderHandleArrastre('IA')}
                 subtitulo={tabActiva?.enviando ? 'trabajando...' : undefined}
                 variante="panelHeader"
                 acciones={
