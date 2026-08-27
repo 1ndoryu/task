@@ -48,7 +48,9 @@ uuid = { version = "1", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 # HTTP client (proxy LLM de /api/ai/*; antes solo dev-dependency)
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+async-trait = "0.1"
+tokio-stream = { version = "0.1", features = ["sync"] }
 
 [dev-dependencies]
 tokio-test = "0.4"

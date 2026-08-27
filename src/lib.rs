@@ -4,6 +4,7 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
+pub mod agent;
 pub mod config;
 pub mod errors;
 pub mod handlers;
@@ -39,4 +40,6 @@ pub struct AppState {
     pub ai_nutrition_limiter: Arc<FixedWindowLimiter>,
     /// [AI] Búsqueda web autenticada (Serper/Tavily según env).
     pub web_search: WebSearchService,
+    /// [Agente] Límite de turnos del agente por usuario/hora.
+    pub agente_limiter: Arc<FixedWindowLimiter>,
 }

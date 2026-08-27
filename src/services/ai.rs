@@ -92,10 +92,71 @@ JSON format:
 
 /// Mensaje del chat (contrato del front). `content` puede ser string (texto)
 /// o array (multimodal, p. ej. vision) — igual que en PHP validarMensajes().
+/// `tool_calls`/`tool_call_id` son del agente (contrato OpenAI para tools);
+/// el front los omite (default).
 #[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
 pub struct AiMessage {
     pub role: String,
     pub content: serde_json::Value,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tool_calls: Option<Vec<AiToolCall>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tool_call_id: Option<String>,
+}
+
+impl AiMessage {
+    #[must_use]
+    pub fn texto(role: &str, contenido: impl Into<String>) -> Self {
+        Self {
+            role: role.into(),
+            content: serde_json::Value::String(contenido.into()),
+            tool_calls: None,
+            tool_call_id: None,
+        }
+    }
+}
+
+/// Tool call propuesta por el modelo (agente): id + nombre + argumentos JSON.
+/// Serializa al formato OpenAI de `tool_calls` en un mensaje assistant
+/// (`function.name` + `function.arguments` como string JSON), que es lo que
+/// exige el proveedor al reenviar el historial con tools.
+#[derive(Debug, Clone, Deserialize)]
+pub struct AiToolCall {
+    pub id: String,
+    pub nombre: String,
+    pub argumentos: serde_json::Value,
+}
+
+impl Serialize for AiToolCall {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeStruct;
+        let mut state = serializer.serialize_struct("AiToolCall", 3)?;
+        state.serialize_field("id", &self.id)?;
+        state.serialize_field("type", "function")?;
+        state.serialize_field(
+            "function",
+            &serde_json::json!({
+                "name": self.nombre,
+                "arguments": self.argumentos.to_string(),
+            }),
+        )?;
+        state.end()
+    }
+}
+
+/// Resultado de una llamada con streaming y tool calls (agente).
+#[derive(Debug, Clone)]
+pub struct AiStreamResult {
+    pub contenido: String,
+    pub tool_calls: Vec<AiToolCall>,
+    pub tokens_prompt: u32,
+    pub tokens_complecion: u32,
+    pub finish_reason: String,
+    pub provider: String,
+    pub modelo: String,
 }
 
 #[derive(Debug, Clone)]
@@ -227,14 +288,8 @@ impl LlmProviderService {
         }
 
         let mensajes = vec![
-            AiMessage {
-                role: "system".into(),
-                content: serde_json::Value::String(PROMPT_NUTRICION.to_string()),
-            },
-            AiMessage {
-                role: "user".into(),
-                content: serde_json::Value::String(descripcion.clone()),
-            },
+            AiMessage::texto("system", PROMPT_NUTRICION),
+            AiMessage::texto("user", descripcion.clone()),
         ];
         let respuesta = self
             .enviar_chat(
@@ -313,6 +368,251 @@ impl LlmProviderService {
             descripcion: mayuscula_primera(&descripcion),
             provider: respuesta.provider,
             modelo: respuesta.modelo,
+        })
+    }
+
+    /// [29-08-2026] Streaming SSE hacia el proveedor (agente, plan Fase 0/1).
+    /// Emite cada token vía `on_token` (para el contrato SSE del agente) y
+    /// acumula tool_calls en streaming. `tools` es la lista de schemas OpenAI
+    /// (vacía = llamada sin tools). Fallback: si el proveedor no soporta
+    /// streaming (o falla al abrir el stream), se hace una llamada no-stream y
+    /// se emite un único `on_token` con la respuesta completa.
+    pub async fn enviar_chat_stream(
+        &self,
+        mensajes: Vec<AiMessage>,
+        provider: &str,
+        modelo: &str,
+        opciones: AiChatOptions,
+        tools: Vec<serde_json::Value>,
+        on_token: &mut (dyn FnMut(&str) + Send),
+    ) -> Result<AiStreamResult, AppError> {
+        let mensajes_validos = validar_mensajes(mensajes)?;
+        let mut errores: Vec<String> = Vec::new();
+
+        for (proveedor, modelo) in resolver_candidatos(provider, modelo) {
+            let keys = self.keys_para(proveedor);
+            if keys.is_empty() && proveedor != "glory" {
+                errores.push(format!(
+                    "No hay API key configurada para {proveedor} en el entorno"
+                ));
+                continue;
+            }
+            let keys: Vec<String> = if keys.is_empty() {
+                vec![String::new()]
+            } else {
+                keys.to_vec()
+            };
+            for key in &keys {
+                match self
+                    .ejecutar_request_stream(proveedor, key, modelo, &mensajes_validos, &opciones, &tools, on_token)
+                    .await
+                {
+                    Ok(resultado) => return Ok(resultado),
+                    Err(error) => {
+                        tracing::warn!(%error, proveedor, modelo, "stream del proveedor falló");
+                        errores.push(format!("{proveedor}/{modelo}: {error}"));
+                    }
+                }
+            }
+        }
+
+        let mut unicos: Vec<String> = Vec::new();
+        for e in &errores {
+            if !unicos.contains(e) {
+                unicos.push(e.clone());
+            }
+        }
+        let detalle = if unicos.is_empty() {
+            "sin errores de proveedor".to_string()
+        } else {
+            unicos.join(" | ")
+        };
+        Err(AppError::Upstream(format!(
+            "No se pudo contactar un modelo IA disponible: {detalle}"
+        )))
+    }
+
+    /// Request con stream=true; parsea líneas SSE `data: {...}` acumulando
+    /// content y tool_calls. Fallback interno a no-stream si el proveedor
+    /// responde sin SSE (algunos proxies devuelven JSON directo).
+    async fn ejecutar_request_stream(
+        &self,
+        proveedor: &str,
+        api_key: &str,
+        modelo: &str,
+        mensajes: &[AiMessage],
+        opciones: &AiChatOptions,
+        tools: &[serde_json::Value],
+        on_token: &mut (dyn FnMut(&str) + Send),
+    ) -> Result<AiStreamResult, AppError> {
+        let (_, url, _) = PROVIDERS
+            .iter()
+            .find(|(id, _, _)| *id == proveedor)
+            .ok_or_else(|| AppError::BadRequest("Proveedor IA no soportado".into()))?;
+        let url = *url;
+
+        let mut body = serde_json::json!({
+            "model": modelo,
+            "messages": mensajes,
+            "temperature": opciones.temperature,
+            "stream": true,
+        });
+        if !tools.is_empty() {
+            body["tools"] = serde_json::Value::Array(tools.to_vec());
+        }
+        if proveedor == "groq" {
+            body["max_completion_tokens"] = serde_json::json!(opciones.max_tokens);
+        } else {
+            body["max_tokens"] = serde_json::json!(opciones.max_tokens);
+        }
+
+        let mut request = self.client.post(url);
+        if !api_key.is_empty() {
+            request = request.bearer_auth(api_key);
+        }
+        let respuesta = request
+            .json(&body)
+            .send()
+            .await
+            .map_err(|error| AppError::Upstream(format!("Error de red: {error}")))?;
+        let status = respuesta.status();
+        if !status.is_success() {
+            let datos: serde_json::Value = respuesta.json().await.unwrap_or_default();
+            let mensaje = datos
+                .get("error")
+                .and_then(|error| error.get("message"))
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("Error del proveedor");
+            return Err(AppError::Upstream(format!(
+                "{proveedor} {status}: {mensaje}"
+            )));
+        }
+
+        let content_type = respuesta
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("")
+            .to_string();
+
+        /* Fallback no-stream: si el proveedor no devuelve text/event-stream
+         * (p. ej. un proxy que responde JSON directo), se hace la llamada
+         * normal y se emite un único token. */
+        if !content_type.contains("text/event-stream") {
+            let datos: serde_json::Value = respuesta.json().await.map_err(|error| {
+                AppError::Upstream(format!("Respuesta no JSON del proveedor: {error}"))
+            })?;
+            let contenido = datos
+                .pointer("/choices/0/message/content")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+                .to_string();
+            on_token(&contenido);
+            return Ok(AiStreamResult {
+                contenido,
+                tool_calls: Vec::new(),
+                tokens_prompt: datos
+                    .pointer("/usage/prompt_tokens")
+                    .and_then(serde_json::Value::as_u64)
+                    .unwrap_or(0) as u32,
+                tokens_complecion: datos
+                    .pointer("/usage/completion_tokens")
+                    .and_then(serde_json::Value::as_u64)
+                    .unwrap_or(0) as u32,
+                finish_reason: datos
+                    .pointer("/choices/0/finish_reason")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+                    .to_string(),
+                provider: proveedor.to_string(),
+                modelo: modelo.to_string(),
+            });
+        }
+
+        let mut contenido = String::new();
+        let mut tool_calls: Vec<serde_json::Value> = Vec::new();
+        let mut tokens_prompt = 0u32;
+        let mut tokens_complecion = 0u32;
+        let mut finish_reason = String::new();
+
+        let mut bytes = respuesta.bytes_stream();
+        use futures_util::StreamExt;
+        while let Some(chunk) = bytes.next().await {
+            let chunk = chunk.map_err(|error| {
+                AppError::Upstream(format!("Error leyendo el stream del proveedor: {error}"))
+            })?;
+            let texto = String::from_utf8_lossy(&chunk);
+            for linea in texto.lines() {
+                let linea = linea.trim();
+                if !linea.starts_with("data:") {
+                    continue;
+                }
+                let data = linea.trim_start_matches("data:").trim();
+                if data == "[DONE]" {
+                    continue;
+                }
+                let Ok(evento) = serde_json::from_str::<serde_json::Value>(data) else {
+                    continue;
+                };
+                if let Some(usage) = evento.get("usage") {
+                    tokens_prompt = usage.get("prompt_tokens").and_then(serde_json::Value::as_u64).unwrap_or(0) as u32;
+                    tokens_complecion = usage.get("completion_tokens").and_then(serde_json::Value::as_u64).unwrap_or(0) as u32;
+                }
+                if let Some(delta) = evento.pointer("/choices/0/delta") {
+                    if let Some(texto_delta) = delta.get("content").and_then(serde_json::Value::as_str) {
+                        contenido.push_str(texto_delta);
+                        on_token(texto_delta);
+                    }
+                    if let Some(calls) = delta.get("tool_calls").and_then(serde_json::Value::as_array) {
+                        for call in calls {
+                            let index = call.get("index").and_then(serde_json::Value::as_u64).unwrap_or(0) as usize;
+                            if tool_calls.len() <= index {
+                                tool_calls.resize(index + 1, serde_json::json!({ "function": { "name": "", "arguments": "" } }));
+                            }
+                            if let Some(nombre) = call.pointer("/function/name").and_then(serde_json::Value::as_str) {
+                                tool_calls[index]["function"]["name"] = serde_json::Value::String(nombre.to_string());
+                            }
+                            if let Some(args) = call.pointer("/function/arguments").and_then(serde_json::Value::as_str) {
+                                let actual = tool_calls[index]["function"]["arguments"].as_str().unwrap_or("").to_string();
+                                tool_calls[index]["function"]["arguments"] =
+                                    serde_json::Value::String(format!("{actual}{args}"));
+                            }
+                            if let Some(id) = call.get("id").and_then(serde_json::Value::as_str) {
+                                tool_calls[index]["id"] = serde_json::Value::String(id.to_string());
+                            }
+                        }
+                    }
+                }
+                if let Some(fr) = evento.pointer("/choices/0/finish_reason").and_then(serde_json::Value::as_str) {
+                    if !fr.is_empty() && fr != "null" {
+                        finish_reason = fr.to_string();
+                    }
+                }
+            }
+        }
+
+        let tool_calls = tool_calls
+            .into_iter()
+            .filter_map(|call| {
+                let nombre = call.pointer("/function/name")?.as_str()?.to_string();
+                let id = call.get("id").and_then(serde_json::Value::as_str).unwrap_or("").to_string();
+                let argumentos: serde_json::Value = call
+                    .pointer("/function/arguments")
+                    .and_then(serde_json::Value::as_str)
+                    .and_then(|args| serde_json::from_str(args).ok())
+                    .unwrap_or_else(|| serde_json::json!({}));
+                Some(AiToolCall { id, nombre, argumentos })
+            })
+            .collect();
+
+        Ok(AiStreamResult {
+            contenido,
+            tool_calls,
+            tokens_prompt,
+            tokens_complecion,
+            finish_reason,
+            provider: proveedor.to_string(),
+            modelo: modelo.to_string(),
         })
     }
 
@@ -425,7 +725,13 @@ fn validar_mensajes(mensajes: Vec<AiMessage>) -> Result<Vec<AiMessage>, AppError
          * 'user'". Se vuelve a invertir para restaurar el orden cronológico. */
         .rev()
         .filter(|mensaje| {
-            if !matches!(mensaje.role.as_str(), "system" | "user" | "assistant") {
+            /* [29-08-2026] El agente usa role `tool` (resultado de tool con
+             * tool_call_id); sin él el modelo no ve el resultado y repite la
+             * llamada. Los mensajes de tool van junto a su assistant previo. */
+            if !matches!(
+                mensaje.role.as_str(),
+                "system" | "user" | "assistant" | "tool"
+            ) {
                 return false;
             }
             match &mensaje.content {

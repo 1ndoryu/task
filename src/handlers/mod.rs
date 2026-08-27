@@ -2,6 +2,7 @@
 
 mod activity;
 pub mod admin;
+pub mod agente;
 pub mod ai;
 pub mod auth;
 mod backup;
@@ -310,6 +311,10 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
             std::time::Duration::from_secs(60 * 60),
         )),
         web_search: crate::services::WebSearchService::from_env(),
+        agente_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
+            crate::handlers::agente::MAX_TURNOS_HORA,
+            std::time::Duration::from_secs(60 * 60),
+        )),
     };
 
     let cors = CorsLayer::new()
@@ -410,6 +415,7 @@ fn api_routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .merge(health::routes())
         .merge(ai::routes())
+        .merge(agente::routes())
         .merge(public_auth)
         .merge(auth::protected_routes())
         .merge(dashboard::routes())
