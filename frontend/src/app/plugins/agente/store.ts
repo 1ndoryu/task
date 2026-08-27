@@ -35,12 +35,42 @@ export interface TabAgente {
     error: string | null;
 }
 
+/* Config del agente persistida en localStorage (solo frontend v1: el modo
+ * viaja en la creación de conversación y el modelo en el stream). El backend
+ * decide proveedor/modelo por env/request; no simulamos maestros que no se
+ * respeten. */
+const CLAVE_CONFIG = 'glory-agente-config';
+
+export interface ConfigAgente {
+    modo: ModoAgente;
+    modelo: string;
+}
+
+function cargarConfig(): ConfigAgente {
+    try {
+        const crudo = localStorage.getItem(CLAVE_CONFIG);
+        if (crudo) {
+            const parsed = JSON.parse(crudo) as Partial<ConfigAgente>;
+            return {
+                modo: parsed.modo === 'meta' || parsed.modo === 'autonomo' || parsed.modo === 'predeterminado'
+                    ? parsed.modo
+                    : 'predeterminado',
+                modelo: typeof parsed.modelo === 'string' ? parsed.modelo : '',
+            };
+        }
+    } catch {
+        /* configuración corrupta: usar defaults */
+    }
+    return {modo: 'predeterminado', modelo: ''};
+}
+
 interface EstadoAgente {
     tabs: TabAgente[];
     tabActivaId: string | null;
     conversacionesCargadas: boolean;
     cargandoLista: boolean;
     errorLista: string | null;
+    config: ConfigAgente;
     /* Acciones */
     cargarConversaciones: () => Promise<void>;
     abrirTab: (id: string) => Promise<void>;
@@ -49,6 +79,7 @@ interface EstadoAgente {
     cerrarTab: (id: string) => Promise<void>;
     enviarMensaje: (texto: string, signal?: AbortSignal) => Promise<void>;
     limpiarErrorTab: (id: string) => void;
+    establecerConfig: (config: Partial<ConfigAgente>) => void;
 }
 
 function generarIdLocal(): string {
@@ -65,6 +96,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
     conversacionesCargadas: false,
     cargandoLista: false,
     errorLista: null,
+    config: cargarConfig(),
 
     cargarConversaciones: async () => {
         set({cargandoLista: true, errorLista: null});
@@ -140,7 +172,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
 
     crearTab: async () => {
         try {
-            const conversacion = await crearConversacion('Nueva conversación', 'predeterminado');
+            const conversacion = await crearConversacion('Nueva conversación', get().config.modo);
             set(state => ({
                 tabs: [
                     ...state.tabs,
@@ -269,6 +301,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                     }));
                 },
                 signal,
+                get().config.modelo || undefined,
             );
         } catch (error) {
             const mensajeError = error instanceof Error ? error.message : 'Error desconocido del agente';
@@ -309,6 +342,19 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         set(state => ({
             tabs: state.tabs.map(t => (t.conversacion.id === id ? {...t, error: null} : t)),
         }));
+    },
+
+    establecerConfig: (config) => {
+        const nueva = {...get().config, ...config};
+        if (nueva.modo !== 'predeterminado' && nueva.modo !== 'meta' && nueva.modo !== 'autonomo') {
+            nueva.modo = 'predeterminado';
+        }
+        try {
+            localStorage.setItem(CLAVE_CONFIG, JSON.stringify(nueva));
+        } catch {
+            /* almacenamiento no disponible: la config se mantiene solo en memoria */
+        }
+        set({config: nueva});
     },
 }));
 

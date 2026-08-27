@@ -76,6 +76,7 @@ export async function enviarMensajeAgente(
     mensaje: string,
     onEvento: (evento: EventoAgente) => void,
     signal?: AbortSignal,
+    modelo?: string,
 ): Promise<void> {
     const respuesta = await fetch('/api/agente/stream', {
         method: 'POST',
@@ -83,7 +84,7 @@ export async function enviarMensajeAgente(
             'Content-Type': 'application/json',
             'X-CSRF-Token': obtenerTokenCsrf(),
         },
-        body: JSON.stringify({conversacionId, mensaje}),
+        body: JSON.stringify({conversacionId, mensaje, ...(modelo ? {modelo} : {})}),
         signal,
     });
 

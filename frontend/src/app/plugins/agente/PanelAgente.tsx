@@ -7,10 +7,11 @@
  */
 
 import {useEffect, useRef, useState} from 'react';
-import {ArrowUp, Bot, Loader2, Plus, Trash2, X, Wrench, AlertTriangle, CheckCircle, XCircle} from 'lucide-react';
+import {ArrowUp, Bot, Loader2, Plus, Settings, X, Wrench, AlertTriangle, CheckCircle, XCircle} from 'lucide-react';
 import {SeccionEncabezado} from '../../components/dashboard';
 import {Boton, Textarea} from '../../components/ui';
 import {useAgenteStore, useTabActivaAgente} from './store';
+import {ModalConfigAgente} from './ModalConfigAgente';
 import type {PanelBaseProps} from '../../types/paneles';
 
 import '../../styles/dashboard/componentes/panelIA.css';
@@ -36,6 +37,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
     const [inputTexto, setInputTexto] = useState('');
     const [editandoTitulo, setEditandoTitulo] = useState<string | null>(null);
     const [tituloEdicion, setTituloEdicion] = useState('');
+    const [configAbierta, setConfigAbierta] = useState(false);
     const refScroll = useRef<HTMLDivElement>(null);
     const refAbort = useRef<AbortController | null>(null);
 
@@ -102,10 +104,18 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                             icono={<Plus size={12} />}
                             title="Nueva conversación"
                         />
+                        <Boton
+                            variante="badge"
+                            soloIcono
+                            onClick={() => setConfigAbierta(true)}
+                            icono={<Settings size={12} />}
+                            title="Configurar agente"
+                        />
                         {handleMinimizar}
                     </>
                 }
             />
+            <ModalConfigAgente activo={configAbierta} onCerrar={() => setConfigAbierta(false)} />
 
             {/* Tabs de conversaciones */}
             <div className="panelAgenteTabs">
