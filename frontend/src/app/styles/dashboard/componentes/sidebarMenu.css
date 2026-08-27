@@ -62,12 +62,13 @@
 }
 
 /* Contenedor de items (scroll independiente del toggle) */
+/* [27-08-2026] Menos separación vertical entre botones (gap 4px → 2px) */
 .sidebarMenuItems {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-height: 0;
-    gap: var(--dashboard-espacioXs);
+    gap: var(--dashboard-espacioXxs);
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0 var(--dashboard-espacioXs);
@@ -121,11 +122,12 @@
 }
 
 /* Quitar bordes del boton ghost dentro del sidebar y alinear icono+texto */
+/* [27-08-2026] Padding horizontal del botón 12px → 10px (más compacto) */
 .sidebarMenuBoton.boton--ghost {
     border: none;
     justify-content: flex-start;
     white-space: nowrap;
-    padding-left: 12px;
+    padding-left: var(--dashboard-espacioSmMd);
     height: 32px;
     opacity: 0.6;
 }
