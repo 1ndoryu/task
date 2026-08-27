@@ -37,7 +37,6 @@ export const crearSliceToggle: CrearSliceHabitos<HabitosSliceToggle> = (set, get
             nuevoHabito.updatedAt = Date.now();
 
             set(state => ({habitos: state.habitos.map(h => (h.id === id ? nuevoHabito : h))}), false, `toggleHabito/${accion}`);
-
             /* Actualizar historial detallado si existe */
             get().actualizarHistorialHabito(id, hoy, accion === 'completado' ? 'completado' : null);
 

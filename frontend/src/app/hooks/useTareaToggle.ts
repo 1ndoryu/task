@@ -72,12 +72,8 @@ export function useTareaToggle({tareas, setTareas, registrarAccion}: UseTareasPa
                     return listaRestaurada;
                 });
 
-                /* [27-08-2026] Deshacer debe revertir TAMBIÉN la actividad: al
-                 * completar se registró tarea_completada y, si solo se restauraba
-                 * el store, el evento quedaba en el backend y el panel de
-                 * Actividad seguía mostrando la tarea. Registrar la acción
-                 * inversa (desmarcada/completada) borra/crea el evento real.
-                 * `!estadoAnterior` invierte la semántica de registrarActividadToggle. */
+                /* Deshacer revierte también la actividad persistida: el helper
+                 * interpreta `false` como completada y `true` como desmarcada. */
                 registrarActividadToggle(tarea, !estadoAnterior);
             });
 

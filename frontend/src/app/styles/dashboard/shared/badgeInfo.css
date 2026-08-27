@@ -334,9 +334,9 @@
  * El relleno representa el nivel (Muy Baja..Muy Alta) con el color del nivel.
  */
 .badgeDificultad {
-    /* Igual altura que el resto de badges (18px), sin texto ni padding extra. */
-    min-height: 18px;
-    height: 18px;
+    /* Igual altura que el resto de badges, incluyendo el borde exterior. */
+    min-height: 22px;
+    height: 22px;
     padding: 0 6px;
     display: inline-flex;
     align-items: center;
