@@ -232,9 +232,10 @@
 }
 
 /* [300A-10] Botones de seccionAcciones 2px más grandes en modo sidebar */
+/* [27-08-2026] 15px → 13px: iconos de la barra de acciones 2px más pequeños */
 .dashboardSidebarLayout .seccionAcciones .botonIcono svg {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
 }
 
 /* [300A-12] Títulos de paneles en modo sidebar: texto normal sin uppercase */
