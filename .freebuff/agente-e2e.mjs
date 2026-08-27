@@ -176,6 +176,71 @@ async function leerSSE(res) {
     }
   }
 
+  {
+    /* Scheduler (Fase 1, sección 8.1): CRUD + validación. La ejecución real
+     * (worker → turno → entidad) se verifica en el caso 8 con espera. */
+    console.log(`7. Tareas programadas (CRUD + validación)`);
+    // Recurrente sin cron → 400.
+    let r = await api('/agente/tareas-programadas', {
+      method: 'POST',
+      body: { nombre: 'X', prompt: 'haz algo', tipo: 'recurrente' },
+    });
+    assert(r.status === 400, `recurrente sin cron → 400 (got ${r.status})`);
+    // Crear una_vez válida.
+    const pasado = new Date(Date.now() - 60_000).toISOString();
+    r = await api('/agente/tareas-programadas', {
+      method: 'POST',
+      body: {
+        nombre: 'E2E Scheduler',
+        prompt: 'Crea una tarea llamada TareaE2EScheduler',
+        tipo: 'una_vez',
+        ejecutar_en: pasado,
+      },
+    });
+    assert(r.status === 200, `crear tarea programada (got ${r.status})`);
+    const tareaProg = JSON.parse(r.body);
+    assert(!!tareaProg.id, 'tarea programada devuelve id');
+    // Listar la incluye.
+    r = await api('/agente/tareas-programadas');
+    const lista = JSON.parse(r.body);
+    assert(
+      lista.some((t) => t.id === tareaProg.id),
+      'la tarea programada aparece en el listado'
+    );
+    // Eliminar.
+    r = await api(`/agente/tareas-programadas/${tareaProg.id}`, { method: 'DELETE' });
+    assert(r.status === 204, `eliminar tarea programada (got ${r.status})`);
+  }
+
+  {
+    /* Ejecución real del scheduler: crear con ejecutar_en en el pasado y
+     * esperar un ciclo (el worker corre cada 30s). Verifica que el agente
+     * creó la tarea real y que la tarea programada quedó completada. */
+    console.log(`8. Scheduler: ejecución real (espera ~35s)`);
+    const nombreTarea = `TareaE2EScheduler-${Date.now()}`;
+    const pasado = new Date(Date.now() - 60_000).toISOString();
+    let r = await api('/agente/tareas-programadas', {
+      method: 'POST',
+      body: {
+        nombre: 'E2E Scheduler Real',
+        prompt: `Crea una tarea llamada ${nombreTarea}`,
+        tipo: 'una_vez',
+        ejecutar_en: pasado,
+      },
+    });
+    assert(r.status === 200, `crear tarea programada (got ${r.status})`);
+    const tareaProg = JSON.parse(r.body);
+    await new Promise((res) => setTimeout(res, 35_000));
+    r = await api('/agente/tareas-programadas');
+    const t = JSON.parse(r.body).find((x) => x.id === tareaProg.id);
+    assert(
+      t && t.estado === 'completada',
+      `el worker ejecutó la tarea (estado: ${t ? t.estado : '?'})`
+    );
+    const dash = await api('/dashboard');
+    assert(dash.body.includes(nombreTarea), `la tarea real '${nombreTarea}' persiste`);
+  }
+
   console.log(`\n${fallos === 0 ? 'AGENTE-E2E OK' : `${fallos} FALLO(S)`}`);
   process.exit(fallos === 0 ? 0 : 1);
 }

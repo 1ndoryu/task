@@ -286,13 +286,14 @@ impl utoipa::Modify for SecurityAddon {
 #[allow(clippy::needless_for_each)]
 pub struct ApiDoc;
 
-/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
-pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
-    let state = AppState {
+/// Construye el AppState compartido (usado por create_router y por el scheduler
+/// de tareas programadas del agente, que necesita el mismo state).
+pub fn estado_completo(pool: sqlx::PgPool, config: &crate::config::AppConfig) -> AppState {
+    AppState {
         pool,
         cookie_secure: config.cookie_secure,
         trust_proxy_headers: config.trust_proxy_headers,
-        cookie_domain: config.cookie_domain,
+        cookie_domain: config.cookie_domain.clone(),
         cors_origins: config.cors_origins.clone(),
         auth_rate_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
             config.auth_rate_limit_per_minute,
@@ -301,7 +302,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         auth_crypto_semaphore: std::sync::Arc::new(tokio::sync::Semaphore::new(
             config.auth_crypto_semaphore_permits,
         )),
-        ai_provider: crate::services::LlmProviderService::new(config.ai_provider_keys),
+        ai_provider: crate::services::LlmProviderService::new(config.ai_provider_keys.clone()),
         ai_chat_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
             config.ai_chat_rate_limit_per_hour,
             std::time::Duration::from_secs(60 * 60),
@@ -315,7 +316,12 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
             crate::handlers::agente::MAX_TURNOS_HORA,
             std::time::Duration::from_secs(60 * 60),
         )),
-    };
+    }
+}
+
+/// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
+pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
+    let state = estado_completo(pool, &config);
 
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::list(config.cors_origins))

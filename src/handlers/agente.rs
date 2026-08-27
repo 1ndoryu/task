@@ -219,11 +219,176 @@ pub async fn listar_conversaciones(
     ))
 }
 
+/// Límite de tareas programadas activas por usuario.
+const MAX_TAREAS_PROGRAMADAS: i64 = 20;
+
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+pub struct CrearTareaProgramadaRequest {
+    pub nombre: String,
+    pub prompt: String,
+    #[serde(default = "default_tipo")]
+    pub tipo: String,
+    pub cron_expr: Option<String>,
+    pub ejecutar_en: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+fn default_tipo() -> String {
+    "una_vez".to_string()
+}
+
+#[derive(Debug, serde::Serialize)]
+#[allow(non_snake_case)]
+pub struct TareaProgramadaResponse {
+    pub id: Uuid,
+    pub nombre: String,
+    pub prompt: String,
+    pub tipo: String,
+    pub cron_expr: Option<String>,
+    pub estado: String,
+    pub proxima_ejecucion: Option<chrono::DateTime<chrono::Utc>>,
+    pub result_summary: Option<String>,
+}
+
+/// Crea una tarea programada (el usuario programa; el agente ejecuta como
+/// turno). Valida nombre/prompt y el límite de activas por usuario.
+pub async fn crear_tarea_programada(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<CrearTareaProgramadaRequest>,
+) -> Result<Json<TareaProgramadaResponse>, AppError> {
+    let nombre = req.nombre.trim();
+    if nombre.is_empty() || nombre.chars().count() > 255 {
+        return Err(AppError::BadRequest("Nombre inválido".into()));
+    }
+    let prompt = req.prompt.trim();
+    if prompt.is_empty() || prompt.chars().count() > 4000 {
+        return Err(AppError::BadRequest("Prompt inválido".into()));
+    }
+    if !matches!(req.tipo.as_str(), "una_vez" | "recurrente") {
+        return Err(AppError::BadRequest("Tipo inválido (una_vez|recurrente)".into()));
+    }
+    if req.tipo == "recurrente" && req.cron_expr.is_none() {
+        return Err(AppError::BadRequest(
+            "Las tareas recurrentes requieren cron_expr (diario, cada{N}min, cada{N}h, cada{N}d)".into(),
+        ));
+    }
+    let activas: (i64,) = sqlx::query_as(
+        "SELECT COUNT(*) FROM agente_tareas_programadas
+         WHERE user_id = $1 AND estado IN ('pendiente', 'ejecutando', 'completada')",
+    )
+    .bind(auth.user_id)
+    .fetch_one(&state.pool)
+    .await?;
+    if activas.0 >= MAX_TAREAS_PROGRAMADAS {
+        return Err(AppError::Validation(format!(
+            "Límite de tareas programadas alcanzado ({MAX_TAREAS_PROGRAMADAS})"
+        )));
+    }
+
+    let id = Uuid::new_v4();
+    let proxima: Option<chrono::DateTime<chrono::Utc>> = if req.tipo == "recurrente" {
+        Some(chrono::Utc::now() + chrono::Duration::minutes(1))
+    } else {
+        req.ejecutar_en
+    };
+    sqlx::query(
+        "INSERT INTO agente_tareas_programadas
+         (id, user_id, nombre, prompt, tipo, cron_expr, ejecutar_en, proxima_ejecucion)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+    )
+    .bind(id)
+    .bind(auth.user_id)
+    .bind(nombre)
+    .bind(prompt)
+    .bind(&req.tipo)
+    .bind(&req.cron_expr)
+    .bind(req.ejecutar_en)
+    .bind(proxima)
+    .execute(&state.pool)
+    .await?;
+
+    Ok(Json(TareaProgramadaResponse {
+        id,
+        nombre: nombre.to_string(),
+        prompt: prompt.to_string(),
+        tipo: req.tipo.clone(),
+        cron_expr: req.cron_expr,
+        estado: "pendiente".to_string(),
+        proxima_ejecucion: proxima,
+        result_summary: None,
+    }))
+}
+
+/// Lista las tareas programadas del usuario.
+pub async fn listar_tareas_programadas(
+    State(state): State<AppState>,
+    auth: AuthUser,
+) -> Result<Json<Vec<TareaProgramadaResponse>>, AppError> {
+    let filas: Vec<(Uuid, String, String, String, Option<String>, String, Option<chrono::DateTime<chrono::Utc>>, Option<String>)> =
+        sqlx::query_as(
+            "SELECT id, nombre, prompt, tipo, cron_expr, estado, proxima_ejecucion, result_summary
+             FROM agente_tareas_programadas
+             WHERE user_id = $1
+             ORDER BY creado_en DESC LIMIT 50",
+        )
+        .bind(auth.user_id)
+        .fetch_all(&state.pool)
+        .await?;
+    Ok(Json(
+        filas
+            .into_iter()
+            .map(
+                |(id, nombre, prompt, tipo, cron_expr, estado, proxima_ejecucion, result_summary)| {
+                    TareaProgramadaResponse {
+                        id,
+                        nombre,
+                        prompt,
+                        tipo,
+                        cron_expr,
+                        estado,
+                        proxima_ejecucion,
+                        result_summary,
+                    }
+                },
+            )
+            .collect(),
+    ))
+}
+
+/// Elimina una tarea programada (solo del propietario).
+pub async fn eliminar_tarea_programada(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    axum::extract::Path(id): axum::extract::Path<Uuid>,
+) -> Result<axum::http::StatusCode, AppError> {
+    let borrada = sqlx::query(
+        "DELETE FROM agente_tareas_programadas WHERE id = $1 AND user_id = $2",
+    )
+    .bind(id)
+    .bind(auth.user_id)
+    .execute(&state.pool)
+    .await?
+    .rows_affected();
+    if borrada == 0 {
+        return Err(AppError::NotFound("Tarea programada no encontrada".into()));
+    }
+    Ok(axum::http::StatusCode::NO_CONTENT)
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/agente/stream", post(agente_stream))
         .route(
             "/agente/conversaciones",
             post(crear_conversacion).get(listar_conversaciones),
+        )
+        .route(
+            "/agente/tareas-programadas",
+            post(crear_tarea_programada).get(listar_tareas_programadas),
+        )
+        .route(
+            "/agente/tareas-programadas/:id",
+            axum::routing::delete(eliminar_tarea_programada),
         )
 }

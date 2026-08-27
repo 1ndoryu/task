@@ -43,6 +43,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
+    /* [29-08-2026] Scheduler de tareas programadas del agente (Fase 1, sección
+     * 8.1 del plan): worker ligero que ejecuta las tareas programadas como
+     * turnos de agente. Recibe el mismo AppState que el router. */
+    let scheduler_state = handlers::estado_completo(pool.clone(), &config);
+    tokio::spawn(async move {
+        glory_backend::agent::scheduler::correr_scheduler(scheduler_state, Duration::from_secs(30))
+            .await;
+    });
+
     let addr = format!("{}:{}", config.host, config.port);
     tracing::info!("Servidor iniciando en {addr}");
     tracing::info!("Swagger UI disponible en http://{addr}/swagger-ui/");

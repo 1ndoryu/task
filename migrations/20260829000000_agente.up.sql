@@ -95,6 +95,7 @@ CREATE TABLE agente_tareas_programadas (
     proxima_ejecucion TIMESTAMPTZ,
     result_summary TEXT,
     creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT agente_tareas_programadas_tipo_check
         CHECK (tipo IN ('una_vez', 'recurrente')),
     CONSTRAINT agente_tareas_programadas_estado_check
