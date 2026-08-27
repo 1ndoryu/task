@@ -197,11 +197,14 @@
     filter: none;
 }
 
+/* [27-08-2026] Este contenedor ya NO hace scroll: antes con overflow-y:auto
+ * aparecía aquí la barra "por fuera" cuando el contenido del panel superaba
+ * la altura. Ahora el scroll vive dentro del contenido de cada panel
+ * (ver dashboardPanelView.css), que llena la altura y desborda internamente. */
 .dashboardSidebarContenido {
     flex: 1;
     min-width: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     padding: var(--dashboard-espacioLg);
     min-height: 0;
     padding-top: 4px;

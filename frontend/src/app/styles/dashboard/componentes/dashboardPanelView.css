@@ -31,6 +31,24 @@
     flex-direction: column;
 }
 
+/* [27-08-2026] Scroll interno en modo sidebar. El DashboardPanel interno
+ * (usado por ListaTareas, proyectos, etc.) debe llenar la altura restante
+ * tras el encabezado (flex:1 + min-height:0) y hacer scroll de su propio
+ * contenido. Sin esto, el panel crece con el contenido y el exceso se recorta
+ * o empuja la barra al contenedor exterior. Mismo patrón que .panelAlturaFija
+ * de resizePanel.css en modo grid. */
+.dashboardPanelView .dashboardPanel {
+    flex: 1;
+    min-height: 0;
+}
+
+.dashboardPanelView .dashboardPanelContent {
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    padding-bottom: var(--dashboard-espacioLg); /* Para que la última tarea no quede cortada */
+}
+
 /* [300A-5] Quitar fondos, bordes y sombras de los paneles dentro del sidebar */
 .dashboardPanelView .panelDashboard,
 .dashboardPanelView .panelDashboard > *,

@@ -20,8 +20,15 @@
 }
 
 /* [300A-3] En modo sidebar el padding lo gestiona el layout interno */
+/* [27-08-2026] Scroll interno: el contenedor sidebar acota su altura al viewport
+ * (height fija, no solo min-height) y oculta el desborde. Sin esto, el contenido
+ * que excede la altura hace crecer el contenedor y el scroll aparece en el
+ * body/página en lugar de dentro del panel (bug reportado por el usuario). */
 .dashboardContenedor--sidebar {
     padding: 0;
+    height: 100vh; /* Fallback para navegadores sin soporte dvh */
+    height: 100dvh; /* Altura dinámica que respeta la barra del navegador móvil */
+    overflow: hidden;
 }
 
 /* 
