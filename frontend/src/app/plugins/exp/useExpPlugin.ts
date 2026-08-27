@@ -31,7 +31,6 @@ interface BlobGloryExp {
         expParaSiguienteNivel: number;
         dificultades: Record<string, Dificultad>;
         registros: unknown[];
-        minimizado: boolean;
         copasArbol: Record<string, string[]>;
         copasArbolMigrado: boolean;
     }>;

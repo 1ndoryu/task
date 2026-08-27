@@ -1,8 +1,13 @@
 /*
  * plugins/exp/PanelExp.tsx
- * Panel superior del plugin EXP (Game). Muestra Nv · Vida · EXP y el árbol de
- * vida en pixel art, con su copa reflejando el nivel de vida. Incluye un botón
- * que abre el editor del árbol (los 5 estados) y el estado minimizado.
+ * Panel del plugin EXP (Game). Muestra Nv · Vida · EXP y el árbol de vida en
+ * pixel art, con su copa reflejando el nivel de vida. Incluye un botón que
+ * abre el editor del árbol (los 5 estados).
+ *
+ * [27-08-2026] Convertido en panel REAL registrado en el grid (patrón
+ * PanelAyuno): recibe `renderHandleArrastre`/`handleMinimizar` del framework
+ * (el colapso ahora lo gestiona el layout, ya no el store). El contenedor
+ * visual `.panelDashboard` lo aporta el framework; aquí solo el cuerpo.
  *
  * [27-08-2026] El árbol carga su copa del store (`copasArbol`): si el usuario
  * editó el estado actual, se usa esa copa (persistida); si no, la por defecto
@@ -15,7 +20,7 @@
  */
 
 import {useMemo, useState} from 'react';
-import {Edit3, GripVertical, Heart, Minus, Settings, Sparkles, Zap} from 'lucide-react';
+import {Edit3, Heart, Settings, Sparkles, Zap} from 'lucide-react';
 import {Boton} from '../../components/ui';
 import {SeccionEncabezado} from '../../components/dashboard/SeccionEncabezado';
 import {useExpStore} from './store';
@@ -25,8 +30,9 @@ import {obtenerFechaHoy, sumarDias} from '../../utils/fecha';
 import {ArbolVida, type EstadoVida} from './ArbolVida';
 import {debioCumplirse} from './logica';
 import {ModalEditorArbol} from './ModalEditorArbol';
+import type {PanelBaseProps} from '../../types/paneles';
 
-interface PanelExpProps {
+interface PanelExpProps extends PanelBaseProps {
     /* Abre la configuración del plugin (Configuración → Plugins → EXP). */
     onAbrirConfig?: () => void;
 }
@@ -55,7 +61,7 @@ function mapearAEscala(vida: number): EstadoVida {
     return 100;
 }
 
-export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
+export function PanelExp({renderHandleArrastre, handleMinimizar, onAbrirConfig}: PanelExpProps): JSX.Element | null {
     const [editorAbierto, setEditorAbierto] = useState(false);
     const activo = usePluginActivo('exp');
     const vida = useExpStore(s => s.vida);
@@ -64,8 +70,6 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
     const expParaSiguienteNivel = useExpStore(s => s.expParaSiguienteNivel);
     const nivel = useExpStore(s => s.nivel);
     const exp = useExpStore(s => s.exp);
-    const minimizado = useExpStore(s => s.minimizado);
-    const alternarMinimizado = useExpStore(s => s.alternarMinimizado);
     const copasArbol = useExpStore(s => s.copasArbol);
     const habitos = useHabitos();
 
@@ -120,56 +124,54 @@ export function PanelExp({onAbrirConfig}: PanelExpProps): JSX.Element | null {
     const copaEditada = copasArbol[String(escala)];
 
     return (
-        <div className="panelDashboard panelExpFijo">
+        <div className="panelExp">
             <SeccionEncabezado
-                icono={<GripVertical size={12} />}
-                titulo="Game"
+                icono={null}
+                titulo={renderHandleArrastre('Game')}
                 variante="panelHeader"
                 acciones={
                     <>
                         <Boton variante="badge" soloIcono onClick={() => setEditorAbierto(true)} title="Editar árbol de vida" icono={<Edit3 size={12} />} />
                         <Boton variante="badge" soloIcono onClick={onAbrirConfig} title="Configurar plugin" icono={<Settings size={12} />} />
-                        <Boton variante="badge" soloIcono onClick={alternarMinimizado} title={minimizado ? 'Restaurar panel' : 'Minimizar panel'} icono={<Minus size={12} />} />
+                        {handleMinimizar}
                     </>
                 }
             />
-            {!minimizado && (
-                <div className="panelExpCuerpo">
-                    <div className="panelExpFila">
-                        <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
-                            <Zap size={13} />
-                            <span>Nv. {nivel}</span>
-                        </div>
-                        <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
-                        <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
+            <div className="panelExpCuerpo">
+                <div className="panelExpFila">
+                    <div className="panelExpNivel" title={`${exp} EXP acumulada`}>
+                        <Zap size={13} />
+                        <span>Nv. {nivel}</span>
                     </div>
-                    <div className="panelExpArbolFila">
-                        <div className="panelExpArbolLateral panelExpArbolLateral--izq" title={`Hábitos que debían cumplirse hoy y aún no se completaron`}>
-                            <div className="panelExpArbolLateralFila">
-                                <div className="panelExpArbolLateralBarra">
-                                    <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--pendientes" style={{width: `${pctPendientes}%`}} />
-                                </div>
-                                <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
+                    <Barra valor={vida} maximo={config.vidaMaxima} clase="panelExpBarra--vida" icono={<Heart size={13} />} etiqueta="Vida" colorClase={vidaClase} />
+                    <Barra valor={expEnNivel} maximo={expParaSiguienteNivel || 1} clase="panelExpBarra--exp" icono={<Sparkles size={13} />} etiqueta="EXP" colorClase="panelExpExp" />
+                </div>
+                <div className="panelExpArbolFila">
+                    <div className="panelExpArbolLateral panelExpArbolLateral--izq" title={`Hábitos que debían cumplirse hoy y aún no se completaron`}>
+                        <div className="panelExpArbolLateralFila">
+                            <div className="panelExpArbolLateralBarra">
+                                <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--pendientes" style={{width: `${pctPendientes}%`}} />
                             </div>
-                            <span className="panelExpArbolLateralEtiqueta">pendientes hoy</span>
+                            <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
                         </div>
-                        <div className="panelExpArbolArbolWrap">
-                            <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
-                                <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
+                        <span className="panelExpArbolLateralEtiqueta">pendientes hoy</span>
+                    </div>
+                    <div className="panelExpArbolArbolWrap">
+                        <div className="panelExpArbol" title={`Vida ${Math.round(vida)} / ${config.vidaMaxima}%`}>
+                            <ArbolVida vida={vida} copaEditada={copaEditada ? new Set(copaEditada) : undefined} />
+                        </div>
+                    </div>
+                    <div className="panelExpArbolLateral panelExpArbolLateral--der" title={`Hábitos completados ayer`}>
+                        <div className="panelExpArbolLateralFila">
+                            <div className="panelExpArbolLateralBarra">
+                                <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--ayer" style={{width: `${pctCompletadosAyer}%`}} />
                             </div>
+                            <span className="panelExpArbolLateralValor">{completadosAyer}</span>
                         </div>
-                        <div className="panelExpArbolLateral panelExpArbolLateral--der" title={`Hábitos completados ayer`}>
-                            <div className="panelExpArbolLateralFila">
-                                <div className="panelExpArbolLateralBarra">
-                                    <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--ayer" style={{width: `${pctCompletadosAyer}%`}} />
-                                </div>
-                                <span className="panelExpArbolLateralValor">{completadosAyer}</span>
-                            </div>
-                            <span className="panelExpArbolLateralEtiqueta">completados ayer</span>
-                        </div>
+                        <span className="panelExpArbolLateralEtiqueta">completados ayer</span>
                     </div>
                 </div>
-            )}
+            </div>
 
             <ModalEditorArbol activo={editorAbierto} onCerrar={() => setEditorAbierto(false)} />
         </div>

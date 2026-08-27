@@ -340,6 +340,20 @@ export function generarPropsPanelGruposFb(
     };
 }
 
+/* [27-08-2026] Panel del plugin EXP (Game): mismo patrón que ayuno — solo
+ * necesita los helpers base + abrir la configuración del plugin. */
+export function generarPropsPanelExp(
+    ctx: PropsContextoPaneles,
+    renderHandleArrastre: (titulo?: string) => JSX.Element,
+    handleMinimizar: JSX.Element
+) {
+    return {
+        renderHandleArrastre,
+        handleMinimizar,
+        onAbrirConfig: () => ctx.modales.abrirModalPluginsConConfig('exp')
+    };
+}
+
 /* [H-F12-11] Tipo concreto del generador: ctx + helpers de renderizado comunes
  * y props extra posicionales por tipo de panel (el dispatch acotado vive en
  * DashboardGrid/DashboardPanelView). Sustituye al tipo `Function` (any). */
@@ -368,6 +382,8 @@ export const GENERADORES_PROPS: Record<string, GeneradorPropsPanel> = {
     ia: generarPropsPanelIA as GeneradorPropsPanel,
     /* [253A-11] Panel Grupos FB — solo necesita props base */
     gruposFb: generarPropsPanelGruposFb as GeneradorPropsPanel,
+    /* [27-08-2026] Panel EXP (Game) — helpers base + abrir config del plugin */
+    exp: generarPropsPanelExp as GeneradorPropsPanel,
     recordatorios: generarPropsPanelRecordatorios as GeneradorPropsPanel
 };
 

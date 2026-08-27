@@ -1,21 +1,14 @@
 /*
  * plugins/exp/PanelExp.css
- * Estilos del panel fijo EXP. El contenedor visual (superficie, borde, radio)
- * lo aporta `.panelDashboard` del sistema de diseño; aquí solo la disposición
- * del cuerpo y las barras, con las variables del sistema (sin hex ni tamaños
- * hardcodeados salvo los mínimos estructurales).
+ * Estilos del panel EXP (Game). El contenedor visual (superficie, borde,
+ * radio) lo aporta `.panelDashboard` del framework al envolver el panel;
+ * aquí solo la disposición del cuerpo y las barras, con las variables del
+ * sistema (sin hex ni tamaños hardcodeados salvo los mínimos estructurales).
  */
-
-/* [27-08-2026] El panel fluye con el resto del dashboard (no queda fijo ni
- * sticky en la pantalla). El margen inferior usa el mismo espaciado que
- * separa los paneles del grid (.dashboardGrid gap: var(--dashboard-espacioXl)). */
-.panelExpFijo {
-    margin-bottom: var(--dashboard-espacioXl, 1.5rem);
-}
 
 /* [27-08-2026] "Game" es un nombre propio: se muestra en mayúscula normal
  * (el resto de paneles conserva su text-transform uppercase del sistema). */
-.panelExpFijo .seccionTitulo {
+.panelExp .seccionTitulo {
     text-transform: none;
 }
 
@@ -217,11 +210,6 @@
  * de los bloques laterales. */
 .panelExpArbolArbolWrap {
     flex: 0 0 auto;
-}
-
-/* Modo sidebar: el panel fluye con el contenido (sin posicionamiento especial). */
-.dashboardContenedor--sidebar .panelExpFijo {
-    position: static;
 }
 
 /* Móvil: compacto, una sola línea utilizable. */

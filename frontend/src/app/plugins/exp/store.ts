@@ -32,7 +32,6 @@ interface ExpStore extends EstadoExp {
     asignarDificultades: (mapa: Record<string, Dificultad>) => void;
     actualizarVida: (nuevaVida: number, fechaCalculo: string) => void;
     actualizarConfig: (parcial: Partial<ConfigExp>) => void;
-    alternarMinimizado: () => void;
     /* [28-08-2026] Guarda la imagen editada por el usuario para un estado del
      * árbol (0/25/50/75/100). Recibe un Set de celdas con la imagen COMPLETA
      * (tronco incluido si el usuario lo conservó); se persiste como array y
@@ -72,7 +71,6 @@ export const useExpStore = create<ExpStore>()(
             registros: [],
             ultimaSync: 0,
             ultimoCalculoVida: '',
-            minimizado: false,
             copasArbol: {},
             copasArbolMigrado: false,
             config: {...CONFIG_EXP_POR_DEFECTO},
@@ -177,10 +175,6 @@ export const useExpStore = create<ExpStore>()(
                 set(state => ({config: {...state.config, ...parcial}}));
             },
 
-            alternarMinimizado: () => {
-                set(state => ({minimizado: !state.minimizado}));
-            },
-
             asignarCopaArbol: (estado, copa) => {
                 set(state => ({
                     copasArbol: {...state.copasArbol, [String(estado)]: [...copa]}
@@ -221,7 +215,6 @@ export const useExpStore = create<ExpStore>()(
                         ...(typeof estado.expParaSiguienteNivel === 'number' ? {expParaSiguienteNivel: estado.expParaSiguienteNivel} : {}),
                         ...(estado.dificultades && typeof estado.dificultades === 'object' ? {dificultades: {...s.dificultades, ...estado.dificultades}} : {}),
                         ...(Array.isArray(estado.registros) ? {registros: estado.registros} : {}),
-                        ...(typeof estado.minimizado === 'boolean' ? {minimizado: estado.minimizado} : {}),
                         ...(Object.keys(copasEntrantes).length > 0 ? {copasArbol: {...s.copasArbol, ...copasEntrantes}} : {}),
                         copasArbolMigrado: s.copasArbolMigrado || entranteMigrado
                     };

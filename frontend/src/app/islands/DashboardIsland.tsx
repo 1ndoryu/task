@@ -30,7 +30,7 @@ import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
 import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
 import {obtenerTodosPanelesNavegables} from '../config/registroPaneles';
 import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
-import {PanelExp, useExpPlugin} from '../plugins/exp';
+import {useExpPlugin} from '../plugins/exp';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -263,10 +263,9 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onToggleSeleccion={toggleModoSeleccionManual}
                     />
 
-                    {/* [26-08-2026] Panel EXP fijo superior (solo si el plugin
-                     * está activo; el propio componente retorna null si no).
-                     * El engranaje del encabezado abre la config del plugin. */}
-                    <PanelExp onAbrirConfig={() => modales.abrirModalPluginsConConfig('exp')} />
+                    {/* [27-08-2026] El panel EXP se renderiza como panel real
+                     * del grid (registrado en plugins/exp/index.ts); el toggle
+                     * del plugin controla su visibilidad. */}
 
                     {dashboard.cargandoDatos ? (
                         <IndicadorCarga />
@@ -290,7 +289,6 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                         onAgregarPanel={agregarPanel}
                     />
                     <div className="dashboardSidebarMain">
-                        <PanelExp onAbrirConfig={() => modales.abrirModalPluginsConConfig('exp')} />
                         {dashboard.cargandoDatos ? (
                             <IndicadorCarga />
                         ) : (

@@ -74,9 +74,6 @@ export interface EstadoExp {
     ultimaSync: number;
     /* Fecha del último recálculo de vida (para no penalizar dos veces). */
     ultimoCalculoVida: string;
-    /* Panel colapsado (minimizado): solo queda la cabecera. Persiste para que
-     * el estado no se pierda entre sesiones. */
-    minimizado: boolean;
     /* [28-08-2026] Imágenes editadas por el usuario por estado (0..100): cada
      * estado guarda las claves "x,y" de TODAS las celdas del árbol dibujadas en
      * el editor pixel-art (tronco incluido si el usuario lo conservó). La imagen

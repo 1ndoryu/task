@@ -7,8 +7,18 @@
 
 ## Visión del producto
 
-El usuario quiere gamificar el cumplimiento: un **panel fijo arriba del dashboard**
-(una sola columna, siempre visible) que muestra una **barra de vida** y EXP/nivel.
+El usuario quiere gamificar el cumplimiento: un **panel** que muestra una **barra de
+vida** y EXP/nivel.
+
+> **[27-08-2026] Decisión de arquitectura (corrección 3):** el panel es un **panel real
+> registrado** en el grid (una columna, posición por defecto columna 1 arriba, debajo de
+> Ejecución tras normalizar) y un **panel real** en el modo sidebar (entrada en
+> SidebarMenu + render en `DashboardSidebarGrid`), con `manejaAlturaPropia: false`.
+> Reemplaza al montaje directo "fijo" en `DashboardIsland` que el usuario rechazó
+> ("parece un panel pero no lo es; no queda bien ahí arriba fijo"). El registro usa el
+> OCP de paneles (`registrarPanel` + `GENERADORES_PROPS` + `panelesIds: ['exp']`), igual
+> que el resto de paneles: toggle de visibilidad, arrastre, resize, minimizar y
+> persistencia de layout funcionan sin código específico.
 
 - **Dificultad** por hábito/tarea: se asigna **automáticamente por IA** (solo cuando el
   plugin está activo) en base a nombre, importancia y frecuencia. Sin input manual
@@ -44,11 +54,18 @@ frontend/src/app/plugins/exp/
 Puntos de integración (mínimos, sin tocar el grid):
 - `config/inicializarPlugins.ts`: importar `plugins/exp` y registrar el plugin `exp`
   con `panelesIds: ['exp']` + `requiereConfiguracion: true`.
-- El panel `exp` se registra con flag nuevo `esPanelFijo: true` (barra superior, no
-  entra en columnas del grid; se renderiza en `DashboardIsland` entre el encabezado y
-  el grid cuando el plugin está activo).
-- `DashboardIsland`: renderizar `<PanelExpFijo />` si `usePluginActivo('exp')`, en
-  modo grid y sidebar.
+- El panel `exp` se registra como **panel real** con `registrarPanel`:
+  `posicionDefecto: {1: {columna: 1, posicion: 0}, ...}` (columna 1 arriba; tras
+  `normalizarPosiciones` queda debajo de Ejecución), `visiblePorDefecto: false`
+  (aparece al activar el plugin), `enNavegacionMovil: false` (convención de todos los
+  paneles de plugins; la navegación móvil real usa `obtenerTodosPanelesNavegables`,
+  que no filtra por ese flag), `idPaginaMovil: 'exp'`,
+  `manejaAlturaPropia: false` (el grid gestiona su altura).
+- `generadoresPropsPanel.ts`: generador `exp` → `onAbrirConfig` abre la configuración
+  del plugin (`abrirModalPluginsConConfig('exp')`).
+- `DashboardIsland`: SIN montaje directo — el panel se renderiza vía el registro
+  (grid: `DashboardGrid`; sidebar: `DashboardSidebarGrid`). Los props
+  `renderHandleArrastre`/`handleMinimizar` los inyecta el sistema de paneles.
 - ModalPlugins: el toggle sale automático con el registro; añadir componente de
   configuración (`ConfigExp`) con opciones: dificultad automática on/off, penalización
   por incumplimiento, curva de EXP.
@@ -115,7 +132,8 @@ Puntos de integración (mínimos, sin tocar el grid):
   1. Carpeta `plugins/exp/` con tipos, lógica pura (exp/vida/niveles/dificultad IA),
      store persist + sync a preferencias, service, PanelExp (barra fija superior).
   2. Registro del plugin + toggle en ModalPlugins + componente de configuración.
-  3. Integración en DashboardIsland (panel fijo arriba, grid y sidebar).
+  4. **Panel real registrado** (grid + sidebar) vía `registrarPanel` + `GENERADORES_PROPS`;
+     sin montaje fijo en DashboardIsland. ✅ hecho (corrección 3, 27-08).
   4. Estimación de dificultad por IA al crear/editar (con fallback heurístico).
   5. Registro de EXP al completar (tareas y hábitos) + recálculo de vida al refrescar.
   6. Verificación en vivo (tsc, suite, round-trip de payload con dificultad).
