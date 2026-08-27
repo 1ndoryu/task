@@ -9,33 +9,11 @@
 import {useState, useRef, useCallback, useEffect} from 'react';
 import {useIAStore, generarIdMensaje} from '../../stores/iaStore';
 import {obtenerApiKeyParaProveedor, procesarMensajeIA, proveedorTieneCredenciales} from '../../services/iaService';
-import {actualizarAccionesMensajeAgente, aprobarAccionAgente, guardarMensajeAgente, limpiarMensajesAgente, listarMensajesAgente} from '../../services/agentActionsService';
+
 import {ejecutarAccionDestructiva} from '../../config/accionesIA';
+import {confirmarRecordatorio} from '../../config/accionesExternasIA';
 import type {MensajeIA} from '../../stores/iaStore';
 import type {EjecutoresTareasIA} from '../../config/accionesIA';
-import type {AccionAgente} from '../../services/agentActionsService';
-
-function describirAccionExterna(accion: AccionAgente): string {
-    if (accion.estado !== 'completado') {
-        return `Estado: ${accion.estado}`;
-    }
-
-    const resultado = accion.resultado as {provider?: string; localMode?: boolean; message?: string; toMasked?: string} | null;
-    if (resultado?.provider === 'wacli-local' || resultado?.localMode) {
-        return 'Simulado en local: no se envió WhatsApp real. Configura wacli/autenticación fuera de local para envío real.';
-    }
-    if (resultado?.provider === 'wacli') {
-        return `WhatsApp enviado${resultado.toMasked ? ` a ${resultado.toMasked}` : ''}`;
-    }
-    if (resultado?.provider === 'github-local-draft') {
-        return 'Borrador GitHub preparado localmente; no se publicó nada real.';
-    }
-    if (resultado?.provider === 'local-notification') {
-        return 'Recordatorio creado como notificación local.';
-    }
-
-    return resultado?.message || 'Acción externa ejecutada';
-}
 
 export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const [inputTexto, setInputTexto] = useState('');
@@ -44,7 +22,6 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
 
     /* Selectores específicos del store */
     const mensajes = useIAStore(s => s.mensajes);
-    const sessionId = useIAStore(s => s.sessionId);
     const enviando = useIAStore(s => s.enviando);
     const error = useIAStore(s => s.error);
     const apiKey = useIAStore(s => s.apiKey);
@@ -53,36 +30,15 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
     const proveedor = useIAStore(s => s.proveedor);
     const modelo = useIAStore(s => s.modelo);
     const tokensUsados = useIAStore(s => s.tokensUsados);
+    const temperatura = useIAStore(s => s.temperatura);
+    const maxTokens = useIAStore(s => s.maxTokens);
     const agregarMensaje = useIAStore(s => s.agregarMensaje);
-    const setMensajes = useIAStore(s => s.setMensajes);
     const actualizarMensaje = useIAStore(s => s.actualizarMensaje);
     const setEnviando = useIAStore(s => s.setEnviando);
     const setError = useIAStore(s => s.setError);
     const incrementarTokens = useIAStore(s => s.incrementarTokens);
     const limpiarChat = useIAStore(s => s.limpiarChat);
 
-    useEffect(() => {
-        const controller = new AbortController();
-        listarMensajesAgente(sessionId, controller.signal)
-            .then(mensajesPersistidos => {
-                if (controller.signal.aborted || mensajesPersistidos.length === 0) return;
-                /* [106A] _dbId se almacena para poder actualizar acciones en BD tras confirm/rechazo */
-                setMensajes(mensajesPersistidos.map(mensaje => ({
-                    id: `persistido-${mensaje.id}`,
-                    rol: mensaje.rol,
-                    contenido: mensaje.contenido,
-                    acciones: Array.isArray(mensaje.acciones) ? mensaje.acciones as MensajeIA['acciones'] : undefined,
-                    timestamp: mensaje.fechaCreacion ? Date.parse(mensaje.fechaCreacion) : Date.now(),
-                    _dbId: mensaje.id
-                })));
-            })
-            .catch(err => {
-                if (!controller.signal.aborted) {
-                    setError(err instanceof Error ? err.message : 'Error cargando historial IA');
-                }
-            });
-        return () => controller.abort();
-    }, [sessionId, setMensajes, setError]);
 
     /* Scroll automático al último mensaje */
     useEffect(() => {
@@ -110,10 +66,6 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             timestamp: Date.now()
         };
         agregarMensaje(mensajeUsuario);
-        /* [106A] _dbId del mensaje de usuario para consistencia de sesión */
-        guardarMensajeAgente({sessionId, rol: 'usuario', contenido: texto})
-            .then(persistido => { actualizarMensaje(mensajeUsuario.id, {_dbId: persistido.id}); })
-            .catch(err => { setError(err instanceof Error ? err.message : 'Error guardando mensaje IA'); });
         setEnviando(true);
         refAbort.current = new AbortController();
 
@@ -128,7 +80,8 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                 preferencias,
                 promptSistema,
                 ejecutoresTareas,
-                refAbort.current.signal
+                refAbort.current.signal,
+                {temperatura, maxTokens}
             );
 
             const mensajeAsistente: MensajeIA = {
@@ -139,17 +92,6 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
                 timestamp: Date.now()
             };
             agregarMensaje(mensajeAsistente);
-            /* [106A] Guardamos _dbId del mensaje asistente para poder actualizar acciones en BD
-             * cuando el usuario confirme/rechace una acción pendiente de confirmación. */
-            guardarMensajeAgente({
-                sessionId,
-                rol: 'asistente',
-                contenido: resultado.contenido,
-                acciones: resultado.acciones,
-                tokens: resultado.tokensUsados
-            })
-                .then(persistido => { actualizarMensaje(mensajeAsistente.id, {_dbId: persistido.id}); })
-                .catch(err => { setError(err instanceof Error ? err.message : 'Error guardando respuesta IA'); });
             incrementarTokens(resultado.tokensUsados);
         } catch (err) {
             if (err instanceof Error && err.name === 'AbortError') return;
@@ -158,14 +100,7 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             setEnviando(false);
             refAbort.current = null;
         }
-    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, apiKeyCerebras, proveedor, modelo, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens, sessionId]);
-
-    const limpiarChatPersistente = useCallback(() => {
-        limpiarMensajesAgente(sessionId).catch(err => {
-            setError(err instanceof Error ? err.message : 'Error limpiando historial IA');
-        });
-        limpiarChat();
-    }, [sessionId, limpiarChat, setError]);
+    }, [inputTexto, enviando, apiKey, apiKeyDeepseek, apiKeyCerebras, proveedor, modelo, temperatura, maxTokens, ejecutoresTareas, agregarMensaje, setEnviando, setError, incrementarTokens]);
 
     const manejarTecla = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -174,49 +109,38 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
         }
     }, [manejarEnviar]);
 
-    /* [303A-11] Confirmar acción destructiva pendiente (eliminar tarea/hábito).
-     * Ejecuta la eliminación real y actualiza el mensaje en el chat. */
+    /* [303A-11] Confirmar acción pendiente (eliminar tarea/hábito, o crear
+     * recordatorio). Ejecuta la acción real y actualiza el mensaje en el chat.
+     * [27-08-2026] Los recordatorios NO se crean en la propuesta: la propuesta
+     * solo valida y genera la idempotency_key; la escritura ocurre aquí, al
+     * confirmar, contra POST /api/reminders. */
     const confirmarAccion = useCallback(async (mensajeId: string, indiceAccion: number) => {
         const mensaje = useIAStore.getState().mensajes.find(m => m.id === mensajeId);
         if (!mensaje?.acciones?.[indiceAccion]) return;
         const accion = mensaje.acciones[indiceAccion];
         if (!accion.pendienteConfirmacion) return;
 
-        if (accion.accionExternaId) {
-            try {
-                const accionEjecutada = await aprobarAccionAgente(accion.accionExternaId);
-                const nuevasAcciones = [...mensaje.acciones];
-                nuevasAcciones[indiceAccion] = {
-                    ...accion,
-                    ejecutada: accionEjecutada.estado === 'completado',
-                    resultado: describirAccionExterna(accionEjecutada),
-                    pendienteConfirmacion: false
+        let resultado: {exito: boolean; descripcion: string};
+        try {
+            if (accion.tipo === 'programar_recordatorio') {
+                const datos = (accion.datos as Record<string, unknown>) || accion.parametros;
+                const reminder = await confirmarRecordatorio(datos);
+                resultado = {
+                    exito: true,
+                    descripcion: `Recordatorio "${reminder.titulo}" programado para ${new Date(reminder.programado_para).toLocaleString()}`
                 };
-                actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
-                /* [106A] Persistir el estado confirmado en BD para que no revierta al re-montar */
-                if (mensaje._dbId) {
-                    actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
-                }
-            } catch (err) {
-                const nuevasAcciones = [...mensaje.acciones];
-                nuevasAcciones[indiceAccion] = {
-                    ...accion,
-                    ejecutada: false,
-                    resultado: err instanceof Error ? err.message : 'Error ejecutando acción externa',
-                    pendienteConfirmacion: false
-                };
-                actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
-                if (mensaje._dbId) {
-                    actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
-                }
+            } else {
+                resultado = ejecutarAccionDestructiva(
+                    {tipo: accion.tipo, parametros: accion.parametros},
+                    ejecutoresTareas
+                );
             }
-            return;
+        } catch (error) {
+            resultado = {
+                exito: false,
+                descripcion: error instanceof Error ? error.message : 'Error ejecutando la acción'
+            };
         }
-
-        const resultado = ejecutarAccionDestructiva(
-            {tipo: accion.tipo, parametros: accion.parametros},
-            ejecutoresTareas
-        );
 
         const nuevasAcciones = [...mensaje.acciones];
         nuevasAcciones[indiceAccion] = {
@@ -226,10 +150,6 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             pendienteConfirmacion: false
         };
         actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
-        /* [106A] Persistir el estado de confirm/rechazo en BD para que no revierta al re-montar */
-        if (mensaje._dbId) {
-            actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
-        }
     }, [ejecutoresTareas, actualizarMensaje]);
 
     /* [303A-11] Rechazar acción destructiva pendiente */
@@ -245,17 +165,13 @@ export function usePanelIA(ejecutoresTareas: EjecutoresTareasIA) {
             pendienteConfirmacion: false
         };
         actualizarMensaje(mensajeId, {acciones: nuevasAcciones});
-        /* [106A] Persistir rechazo en BD para que no revierta al re-montar el panel */
-        if (mensaje._dbId) {
-            actualizarAccionesMensajeAgente(mensaje._dbId, nuevasAcciones).catch(() => null);
-        }
     }, [actualizarMensaje]);
 
     return {
         inputTexto, setInputTexto,
         refScroll,
         mensajes, enviando, error, apiKey: proveedorTieneCredenciales(proveedor, apiKey, apiKeyDeepseek, apiKeyCerebras) ? 'configurada' : '', tokensUsados,
-        limpiarChat: limpiarChatPersistente,
+        limpiarChat,
         manejarEnviar, manejarTecla,
         confirmarAccion, rechazarAccion
     };

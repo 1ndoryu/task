@@ -13,6 +13,7 @@ use crate::errors::AppError;
 use crate::middleware::admin::require_admin;
 use crate::middleware::auth::AuthUser;
 use crate::services::ai::{AiChatOptions, AiChatResult, AiMessage, AiNutritionResult};
+use crate::services::web_search::{WebSearchRequest, WebSearchResult};
 use crate::AppState;
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -162,8 +163,33 @@ pub async fn ai_nutricion(
     Ok(Json(resultado.into()))
 }
 
+#[utoipa::path(
+    post,
+    tag = "ai",
+    path = "/api/ai/tools/web-search",
+    request_body = WebSearchRequest,
+    responses(
+        (status = 200, description = "Resultados de búsqueda", body = WebSearchResult),
+        (status = 401, description = "No autorizado"),
+        (status = 503, description = "Búsqueda web no configurada (falta clave de proveedor)"),
+        (status = 422, description = "Error de validación")
+    ),
+    security(("session_cookie" = []))
+)]
+pub async fn ai_web_search(
+    State(state): State<AppState>,
+    _auth: AuthUser,
+    Json(req): Json<WebSearchRequest>,
+) -> Result<Json<WebSearchResult>, AppError> {
+    if req.query.trim().is_empty() {
+        return Err(AppError::BadRequest("Consulta de búsqueda vacía".into()));
+    }
+    Ok(Json(state.web_search.search(&req).await?))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/ai/chat", post(ai_chat))
         .route("/ai/nutricion", post(ai_nutricion))
+        .route("/ai/tools/web-search", post(ai_web_search))
 }

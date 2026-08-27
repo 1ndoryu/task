@@ -33,6 +33,7 @@ pub struct AiProviderKeys {
     pub cerebras: Vec<String>,
     pub groq: Vec<String>,
     pub deepseek: Vec<String>,
+    pub glory: Vec<String>,
 }
 
 impl AiProviderKeys {
@@ -49,6 +50,7 @@ impl AiProviderKeys {
             cerebras: env_list(&["CEREBRAS_API_KEY"]),
             groq: env_list(&["GROQ_API", "GROQ_API_1", "GROQ_API_2", "GROQ_API_3"]),
             deepseek: env_list(&["DEEPSEEK_API", "DEEPSEEK-API", "DEEPSEEK_API_KEY"]),
+            glory: env_list(&["GLORY_API_KEY", "GLORY_API", "EMPERO_API_KEY"]),
         }
     }
 }

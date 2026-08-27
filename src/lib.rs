@@ -19,6 +19,7 @@ use tokio::sync::Semaphore;
 
 use crate::services::FixedWindowLimiter;
 use crate::services::ai::LlmProviderService;
+use crate::services::web_search::WebSearchService;
 
 /// Estado compartido de la aplicación — accesible desde handlers y middleware
 #[derive(Clone)]
@@ -36,4 +37,6 @@ pub struct AppState {
     /// [AI] Límites por usuario/hora de los endpoints proxy IA.
     pub ai_chat_limiter: Arc<FixedWindowLimiter>,
     pub ai_nutrition_limiter: Arc<FixedWindowLimiter>,
+    /// [AI] Búsqueda web autenticada (Serper/Tavily según env).
+    pub web_search: WebSearchService,
 }

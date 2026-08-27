@@ -25,6 +25,12 @@ pub enum AppError {
     #[error("Servicio no disponible: {0}")]
     ServiceUnavailable(String),
 
+    /// Capacidad no configurada (p. ej. búsqueda web sin clave de proveedor):
+    /// 503 con el mensaje legible expuesto (a diferencia de `ServiceUnavailable`,
+    /// que oculta el detalle por diseño).
+    #[error("Capacidad no configurada: {0}")]
+    NotConfigured(String),
+
     #[error("Conflicto: {0}")]
     Conflict(String),
 
@@ -70,6 +76,11 @@ impl IntoResponse for AppError {
                 StatusCode::SERVICE_UNAVAILABLE,
                 "service_unavailable",
                 "Base de datos no disponible".to_string(),
+            ),
+            Self::NotConfigured(msg) => (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "not_configured",
+                msg.clone(),
             ),
             Self::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg.clone()),
             Self::Internal(msg) => {

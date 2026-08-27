@@ -63,9 +63,36 @@ export function generarContexto(tareas: Tarea[]): string {
 }
 
 /*
- * System prompt completo con esquema de acciones y contexto
- */
-export function generarSystemPrompt(contexto: string, preferencias: string, promptSistema = ''): string {
+ * System prompt completo con esquema de acciones y contexto.
+ * [27-08-2026] Parámetro de configuración (plan IA, Fase 4): idioma, estilo y
+ * permisos de herramientas; las acciones no permitidas se omiten del esquema
+ * para que el modelo no las proponga. WhatsApp/GitHub siempre quedan fuera. */
+export interface ConfigPromptIA {
+    idioma?: string;
+    estilo?: string;
+    permitirRecordatorios?: boolean;
+    permitirBusquedaWeb?: boolean;
+}
+
+export function generarSystemPrompt(contexto: string, preferencias: string, promptSistema = '', config: ConfigPromptIA = {}): string {
+    const idioma = config.idioma === 'en' ? 'English' : 'español';
+    const estiloGuia =
+        config.estilo === 'detallado'
+            ? 'Da respuestas detalladas y explica tu razonamiento.'
+            : config.estilo === 'amable'
+                ? 'Usa un tono cercano y motivador.'
+                : 'Sé conciso y directo.';
+
+    const accionesHerramientas = [
+        '{"tipo": "leer_nota", "parametros": {"id": "uuid"}} — lee el contenido COMPLETO de una nota por su UUID',
+        ...(config.permitirBusquedaWeb !== false
+            ? ['{"tipo": "research_web", "parametros": {"query": "consulta", "limit": 5}} — busca en internet y devuelve resultados; úsalo cuando el usuario pida información actual, noticias o datos que no están en su contexto']
+            : []),
+        ...(config.permitirRecordatorios !== false
+            ? ['{"tipo": "programar_recordatorio", "parametros": {"titulo": "nombre", "mensaje": "texto", "fecha": "ISO 8601 futura"}} — propone un recordatorio; SOLO se crea cuando el usuario confirma en la interfaz. Pide la fecha si no la dio']
+            : [])
+    ].join('\n');
+
     return `Eres un asistente de productividad integrado en un dashboard personal. Ayudas al usuario a planificar su día, crear tareas/hábitos y gestionar su productividad.
 
 RESPONDE SIEMPRE en formato JSON con esta estructura exacta:
@@ -82,12 +109,7 @@ ACCIONES DISPONIBLES (incluir en el array "acciones" cuando corresponda):
 - {"tipo": "crear_habito", "parametros": {"nombre": "nombre", "importancia": "Muy Alta|Alta|Media|Baja", "tags": ["tag"]}}
 - {"tipo": "completar_habito", "parametros": {"id": 456}}
 - {"tipo": "eliminar_habito", "parametros": {"id": 456}}
-- {"tipo": "proponer_whatsapp", "parametros": {"mensaje": "texto", "to": "opcional número/JID"}}
-- {"tipo": "leer_nota", "parametros": {"id": 38}} — lee el contenido COMPLETO de una nota por su ID
-- {"tipo": "research_local", "parametros": {"query": "texto a buscar", "limit": 10}}
-- {"tipo": "research_web", "parametros": {"query": "texto a buscar en internet", "limit": 5}}
-- {"tipo": "proponer_github", "parametros": {"titulo": "título", "descripcion": "detalle", "tipo": "issue|pull_request|comment|assign", "repo": "owner/repo opcional"}}
-- {"tipo": "programar_recordatorio", "parametros": {"titulo": "título", "mensaje": "texto", "fecha": "ISO 8601 o fecha parseable"}}
+${accionesHerramientas}
 
 REGLAS:
 - Si no necesitas ejecutar acciones, envía "acciones": [].
@@ -96,12 +118,10 @@ REGLAS:
 - Responde siempre en español.
 - NUNCA uses eliminar_tarea o eliminar_habito a menos que el usuario haya pedido EXPLÍCITAMENTE borrar o eliminar algo. Si el usuario dice "limpiar", "organizar" o "arreglar", NO elimines — pregunta primero qué quiere hacer con cada elemento.
 - Las eliminaciones requieren confirmación del usuario en la interfaz, así que inclúyelas solo cuando estés seguro de la intención.
-- proponer_whatsapp NO envía el mensaje: crea una acción externa pendiente para que el usuario la apruebe en la interfaz.
-- Solo usa proponer_whatsapp cuando el usuario pida enviar o programar un mensaje de WhatsApp.
-- research_local busca en notas, tareas y hábitos del usuario (sin internet).
-- research_web busca en internet vía Tavily/Serper; úsalo cuando el usuario pida información de la web, noticias, precios, docs externas o cualquier cosa que no esté en sus datos locales.
-- proponer_github prepara un borrador aprobable; no abre issues/PR reales sin confirmación.
-- programar_recordatorio crea un recordatorio local aprobable y luego WP-Cron lo ejecuta cuando venza.
+- Proponer acciones externas no implementadas no está permitido; informa que esa capacidad está pendiente.
+- Los recordatorios requieren confirmación del usuario en la interfaz; la propuesta NUNCA los crea por sí sola.
+- WhatsApp y GitHub están pendientes de implementación; no los propongas.
+- Responde en ${idioma}. ${estiloGuia}
 ${promptSistema ? `\nINSTRUCCIONES PERSONALIZADAS DEL SISTEMA:\n${promptSistema}` : ''}
 ${preferencias ? `\nPREFERENCIAS DEL USUARIO:\n${preferencias}` : ''}
 ${contexto}`;

@@ -14,6 +14,7 @@ mod notes;
 mod notifications;
 mod productivity;
 mod realtime;
+mod reminders;
 mod security;
 mod shared;
 mod storage;
@@ -65,6 +66,7 @@ impl utoipa::Modify for SecurityAddon {
         health::readiness_check,
         ai::ai_chat,
         ai::ai_nutricion,
+        ai::ai_web_search,
         collaboration::send_request,
         collaboration::get_team,
         collaboration::pending_count,
@@ -108,6 +110,12 @@ impl utoipa::Modify for SecurityAddon {
         shared::access,
         notifications::list,
         notifications::unread_count,
+        reminders::list,
+        reminders::create,
+        reminders::update,
+        reminders::complete,
+        reminders::cancel,
+        reminders::remove,
         notifications::mark_read,
         notifications::mark_all_read,
         notifications::remove_notification,
@@ -256,6 +264,14 @@ impl utoipa::Modify for SecurityAddon {
         ai::AiChatResponse,
         ai::AiNutricionRequest,
         ai::AiNutritionResponse,
+        crate::models::reminder::CreateReminderRequest,
+        crate::models::reminder::Reminder,
+        crate::models::reminder::ReminderListQuery,
+        crate::models::reminder::ReminderListResponse,
+        crate::models::reminder::UpdateReminderRequest,
+        crate::services::web_search::WebSearchRequest,
+        crate::services::web_search::WebSearchResult,
+        crate::services::web_search::WebSearchResultItem,
         crate::services::ai::AiMessage,
         crate::errors::ErrorResponse,
     )),
@@ -293,6 +309,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
             config.ai_nutrition_rate_limit_per_hour,
             std::time::Duration::from_secs(60 * 60),
         )),
+        web_search: crate::services::WebSearchService::from_env(),
     };
 
     let cors = CorsLayer::new()
@@ -404,6 +421,7 @@ fn api_routes(state: &AppState) -> Router<AppState> {
         .merge(notifications::routes())
         .merge(timeline::routes())
         .merge(notes::routes())
+        .merge(reminders::routes())
         .merge(subscription::routes())
         .merge(storage::routes())
         .merge(backup::routes())

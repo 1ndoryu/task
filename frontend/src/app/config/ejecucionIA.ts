@@ -6,6 +6,7 @@
 
 import type {DatosEdicionTarea} from '../types/dashboard';
 import {useHabitosStore} from '../stores/habitosStore';
+import {useIAStore} from '../stores/iaStore';
 import {ejecutarAccionExternaIA} from './accionesExternasIA';
 import {validarPrioridad, validarUrgencia, validarImportancia} from './validadoresIA';
 import type {AccionLLM, EjecutoresTareasIA, ResultadoAccion} from './tiposAccionesIA';
@@ -107,6 +108,18 @@ export async function ejecutarAcciones(acciones: AccionLLM[], ejecutoresTareas: 
                     break;
                 }
                 default: {
+                    /* [27-08-2026] Respetar los permisos de herramientas del
+                     * usuario: si el toggle está desactivado, la acción se
+                     * rechaza aunque el modelo la proponga. */
+                    const storeIA = useIAStore.getState();
+                    if (accion.tipo === 'programar_recordatorio' && storeIA.permitirRecordatorios === false) {
+                        resultados.push({tipo: accion.tipo, exito: false, descripcion: 'Los recordatorios están desactivados en la configuración'});
+                        break;
+                    }
+                    if (accion.tipo === 'research_web' && storeIA.permitirBusquedaWeb === false) {
+                        resultados.push({tipo: accion.tipo, exito: false, descripcion: 'La búsqueda web está desactivada en la configuración'});
+                        break;
+                    }
                     const externa = await ejecutarAccionExternaIA(accion);
                     resultados.push(externa ?? {tipo: accion.tipo, exito: false, descripcion: 'Acción no reconocida'});
                     break;

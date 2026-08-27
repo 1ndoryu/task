@@ -30,6 +30,13 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
         "https://api.deepseek.com/chat/completions",
         &["deepseek-v4-flash"],
     ),
+    /* [27-08-2026] Glory API (free.empero.org) expone el modelo real
+     * `glm-5.3-flash` (verificado contra /models) y responde sin API key. */
+    (
+        "glory",
+        "https://free.empero.org/v1/chat/completions",
+        &["glm-5.3-flash"],
+    ),
     (
         "cerebras",
         "https://api.cerebras.ai/v1/chat/completions",
@@ -50,6 +57,7 @@ const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
     ("groq", "openai/gpt-oss-120b"),
     ("groq", "qwen/qwen3.6-27b"),
     ("deepseek", "deepseek-v4-flash"),
+    ("glory", "glm-5.3-flash"),
 ];
 
 /// Prompt de nutrición calibrado regional (mismo que el front para que el
@@ -150,10 +158,27 @@ impl LlmProviderService {
 
         for (proveedor, modelo) in resolver_candidatos(provider, modelo) {
             let keys = self.keys_para(proveedor);
+            /* [27-08-2026] Glory API (free.empero.org) responde sin API key
+             * (verificado contra /models y /chat/completions). Para ese
+             * proveedor, sin clave configurada se prueba una llamada sin
+             * Authorization en vez de fallar por ausencia de key. */
             if keys.is_empty() {
-                errores.push(format!(
-                    "No hay API key configurada para {proveedor} en el entorno"
-                ));
+                if proveedor == "glory" {
+                    match self
+                        .ejecutar_request(proveedor, "", modelo, &mensajes_validos, &opciones)
+                        .await
+                    {
+                        Ok(resultado) => return Ok(resultado),
+                        Err(error) => {
+                            tracing::warn!(%error, proveedor, modelo, "glory sin key falló");
+                            errores.push(format!("{proveedor}/{modelo}: {error}"));
+                        }
+                    }
+                } else {
+                    errores.push(format!(
+                        "No hay API key configurada para {proveedor} en el entorno"
+                    ));
+                }
                 continue;
             }
             for key in keys {
@@ -296,6 +321,7 @@ impl LlmProviderService {
             "cerebras" => &self.keys.cerebras,
             "groq" => &self.keys.groq,
             "deepseek" => &self.keys.deepseek,
+            "glory" => &self.keys.glory,
             _ => &[],
         }
     }
@@ -326,10 +352,14 @@ impl LlmProviderService {
             body["max_tokens"] = serde_json::json!(opciones.max_tokens);
         }
 
-        let respuesta = self
-            .client
-            .post(url)
-            .bearer_auth(api_key)
+        /* [27-08-2026] Glory API (free.empero.org) responde sin API key y
+         * REJECTA un header Authorization vacío (400). Con key presente se
+         * envía el header; sin key no se envía Authorization en absoluto. */
+        let mut request = self.client.post(url);
+        if !api_key.is_empty() {
+            request = request.bearer_auth(api_key);
+        }
+        let respuesta = request
             .json(&body)
             .send()
             .await
@@ -347,6 +377,7 @@ impl LlmProviderService {
                 .and_then(serde_json::Value::as_str)
                 .or_else(|| datos.get("message").and_then(serde_json::Value::as_str))
                 .unwrap_or("Error del proveedor");
+            tracing::warn!(%proveedor, %status, %mensaje, detalle = %datos, "proveedor LLM rechazó el request");
             return Err(AppError::Upstream(format!(
                 "{proveedor} {status}: {mensaje}"
             )));
@@ -388,6 +419,11 @@ fn validar_mensajes(mensajes: Vec<AiMessage>) -> Result<Vec<AiMessage>, AppError
         .into_iter()
         .rev()
         .take(25)
+        /* [27-08-2026] El rev().take(25) anterior dejaba el historial EN ORDEN
+         * INVERSO: el último mensaje enviado al proveedor era el más antiguo
+         * (system), y groq/glory rechazaban con "last message role must be
+         * 'user'". Se vuelve a invertir para restaurar el orden cronológico. */
+        .rev()
         .filter(|mensaje| {
             if !matches!(mensaje.role.as_str(), "system" | "user" | "assistant") {
                 return false;

@@ -15,7 +15,7 @@ import {persist} from 'zustand/middleware';
 
 /* Roles del chat */
 export type RolMensaje = 'usuario' | 'asistente' | 'sistema';
-export type ProveedorIA = 'cerebras' | 'groq' | 'deepseek';
+export type ProveedorIA = 'cerebras' | 'groq' | 'deepseek' | 'glory';
 
 /* Acción estructurada que la IA puede ejecutar (Fase 3)
  * [303A-11] pendienteConfirmacion: acciones destructivas requieren confirmación del usuario */
@@ -26,6 +26,9 @@ export interface AccionIA {
     resultado?: string;
     pendienteConfirmacion?: boolean;
     accionExternaId?: number;
+    /* [27-08-2026] Datos estructurados de la propuesta (p. ej. el recordatorio
+     * validado con su idempotency_key) que la confirmación reenvía al backend. */
+    datos?: Record<string, unknown>;
 }
 
 /* Mensaje individual del chat */
@@ -40,13 +43,24 @@ export interface MensajeIA {
 }
 
 /* Estado persistente (configuración) — solo datos no sensibles.
- * [SEC-001] API keys NUNCA se persisten en localStorage. */
+ * [SEC-001] API keys NUNCA se persisten en localStorage.
+ * [27-08-2026] Configuración detallada (plan IA): comportamiento del modelo,
+ * contexto incluido y permisos de herramientas. Nada de esto es sensible. */
 interface IAConfigPersistente {
     sessionId: string;
     proveedor: ProveedorIA;
     modelo: string;
     preferenciasUsuario: string;
     promptSistema: string;
+    temperatura: number;
+    maxTokens: number;
+    idioma: string;
+    estilo: string;
+    incluirTareasCompletadas: boolean;
+    incluirHabitosPausados: boolean;
+    incluirNotasEnContexto: boolean;
+    permitirRecordatorios: boolean;
+    permitirBusquedaWeb: boolean;
 }
 
 /* Estado de sesión (no persistido) */
@@ -71,6 +85,15 @@ interface IAAcciones {
     setModelo: (modelo: string) => void;
     setPreferencias: (preferencias: string) => void;
     setPromptSistema: (prompt: string) => void;
+    setTemperatura: (temperatura: number) => void;
+    setMaxTokens: (maxTokens: number) => void;
+    setIdioma: (idioma: string) => void;
+    setEstilo: (estilo: string) => void;
+    setIncluirTareasCompletadas: (valor: boolean) => void;
+    setIncluirHabitosPausados: (valor: boolean) => void;
+    setIncluirNotasEnContexto: (valor: boolean) => void;
+    setPermitirRecordatorios: (valor: boolean) => void;
+    setPermitirBusquedaWeb: (valor: boolean) => void;
     agregarMensaje: (mensaje: MensajeIA) => void;
     /* [303A-11] Actualizar un mensaje existente (para confirmar/rechazar acciones pendientes) */
     actualizarMensaje: (id: string, cambios: Partial<MensajeIA>) => void;
@@ -96,10 +119,20 @@ export const useIAStore = create<IAStore>()(
         (set) => ({
             /* Config persistente — solo datos no sensibles */
             sessionId: generarIdSesionIA(),
-            proveedor: 'groq',
-            modelo: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            proveedor: 'glory',
+            modelo: 'glm-5.3-flash',
             preferenciasUsuario: '',
             promptSistema: '',
+            /* [27-08-2026] Defaults de la configuración detallada IA. */
+            temperatura: 0.7,
+            maxTokens: 2048,
+            idioma: 'es',
+            estilo: 'conciso',
+            incluirTareasCompletadas: false,
+            incluirHabitosPausados: false,
+            incluirNotasEnContexto: false,
+            permitirRecordatorios: true,
+            permitirBusquedaWeb: true,
 
             /* Estado de sesión (incluyendo API keys en memoria — NUNCA persisten) */
             mensajes: [],
@@ -119,6 +152,15 @@ export const useIAStore = create<IAStore>()(
             setModelo: (modelo) => set({modelo}),
             setPreferencias: (preferencias) => set({preferenciasUsuario: preferencias}),
             setPromptSistema: (prompt) => set({promptSistema: prompt}),
+            setTemperatura: (temperatura) => set({temperatura}),
+            setMaxTokens: (maxTokens) => set({maxTokens}),
+            setIdioma: (idioma) => set({idioma}),
+            setEstilo: (estilo) => set({estilo}),
+            setIncluirTareasCompletadas: (valor) => set({incluirTareasCompletadas: valor}),
+            setIncluirHabitosPausados: (valor) => set({incluirHabitosPausados: valor}),
+            setIncluirNotasEnContexto: (valor) => set({incluirNotasEnContexto: valor}),
+            setPermitirRecordatorios: (valor) => set({permitirRecordatorios: valor}),
+            setPermitirBusquedaWeb: (valor) => set({permitirBusquedaWeb: valor}),
 
             /* Acciones de chat */
             agregarMensaje: (mensaje) => set(state => ({
@@ -147,7 +189,16 @@ export const useIAStore = create<IAStore>()(
                 sessionId: state.sessionId,
                 modelo: state.modelo,
                 preferenciasUsuario: state.preferenciasUsuario,
-                promptSistema: state.promptSistema
+                promptSistema: state.promptSistema,
+                temperatura: state.temperatura,
+                maxTokens: state.maxTokens,
+                idioma: state.idioma,
+                estilo: state.estilo,
+                incluirTareasCompletadas: state.incluirTareasCompletadas,
+                incluirHabitosPausados: state.incluirHabitosPausados,
+                incluirNotasEnContexto: state.incluirNotasEnContexto,
+                permitirRecordatorios: state.permitirRecordatorios,
+                permitirBusquedaWeb: state.permitirBusquedaWeb
             })
         }
     )

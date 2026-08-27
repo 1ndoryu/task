@@ -1,7 +1,7 @@
 /*
  * services/iaService.ts
- * Servicio para comunicación con LLMs via APIs OpenAI-compatibles.
- * Proveedores: Cerebras (primero), Groq, DeepSeek.
+ * Servicio para comunicación con LLMs mediante el proxy backend y APIs compatibles.
+ * Proveedores: Glory, Cerebras, Groq y DeepSeek.
  *
  * [233A-69] Fase 1: Estructura base del servicio.
  * Fase 2+3: Flujo completo con system prompt, acciones y parsing.
@@ -9,6 +9,7 @@
  */
 
 import type {MensajeIA, AccionIA, ProveedorIA} from '../stores/iaStore';
+import {useIAStore} from '../stores/iaStore';
 import type {EjecutoresTareasIA} from '../config/accionesIA';
 import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAcciones} from '../config/accionesIA';
 import {apiFetch} from '../utils/apiClient';
@@ -18,7 +19,8 @@ import {devWarn} from '../utils/devLog';
 const URLS_PROVIDER: Record<ProveedorIA, string> = {
     cerebras: 'https://api.cerebras.ai/v1/chat/completions',
     groq: 'https://api.groq.com/openai/v1/chat/completions',
-    deepseek: 'https://api.deepseek.com/chat/completions'
+    deepseek: 'https://api.deepseek.com/chat/completions',
+    glory: 'https://free.empero.org/v1/chat/completions'
 };
 
 export interface ModeloIA {
@@ -28,6 +30,7 @@ export interface ModeloIA {
 }
 
 export const PROVEEDORES_IA: Array<{id: ProveedorIA; nombre: string; descripcion: string}> = [
+    {id: 'glory', nombre: 'Glory API', descripcion: 'Proveedor OpenAI-compatible interno'},
     {id: 'groq', nombre: 'Groq', descripcion: 'Modelos rápidos y producción por defecto'},
     {id: 'cerebras', nombre: 'Cerebras', descripcion: 'Gemma 4 31B — requiere saldo en la cuenta'},
     {id: 'deepseek', nombre: 'DeepSeek', descripcion: 'DeepSeek V4 Flash'}
@@ -45,10 +48,14 @@ export const MODELOS_IA = [
     {id: 'openai/gpt-oss-120b', nombre: 'GPT-OSS 120B — más inteligente (Groq)', proveedor: 'groq'},
     {id: 'qwen/qwen3.6-27b', nombre: 'Qwen3.6 27B (Groq)', proveedor: 'groq'},
     {id: 'gemma-4-31b', nombre: 'Gemma 4 31B (Cerebras)', proveedor: 'cerebras'},
-    {id: 'deepseek-v4-flash', nombre: 'DeepSeek V4 Flash', proveedor: 'deepseek'}
+    {id: 'deepseek-v4-flash', nombre: 'DeepSeek V4 Flash', proveedor: 'deepseek'},
+    /* [27-08-2026] Glory API (free.empero.org) expone el modelo real glm-5.3-flash
+     * (verificado contra /models) y responde sin API key. */
+    {id: 'glm-5.3-flash', nombre: 'Glory API — GLM 5.3 Flash', proveedor: 'glory'}
 ] as const;
 
 export const MODELO_FLASH_POR_PROVEEDOR: Record<ProveedorIA, string> = {
+    glory: 'glm-5.3-flash',
     cerebras: 'gemma-4-31b',
     groq: 'groq/compound-mini',
     deepseek: 'deepseek-v4-flash'
@@ -180,7 +187,9 @@ async function enviarMensajeLLMBackend(mensajes: MensajeAPI[], config: ConfigPro
 
 export function obtenerApiKeyParaProveedor(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string, apiKeyCerebras: string): string {
     if (proveedor === 'cerebras') return apiKeyCerebras;
-    return proveedor === 'deepseek' ? apiKeyDeepseek : apiKeyGroq;
+    if (proveedor === 'deepseek') return apiKeyDeepseek;
+    if (proveedor === 'glory') return '';
+    return apiKeyGroq;
 }
 
 export function proveedorTieneCredenciales(proveedor: ProveedorIA, apiKeyGroq: string, apiKeyDeepseek: string, apiKeyCerebras: string): boolean {
@@ -201,7 +210,7 @@ export interface ResultadoMensajeIA {
     tokensUsados: number;
 }
 
-/* [115A-1] Construir prompt para la segunda llamada con resultados de consultas */
+/ * Construir prompt para la segunda llamada con resultados de consultas */
 function construirPromptResultados(resultados: Array<{tipo: string; datos?: unknown}>): string {
     const lineas = resultados.map(r => {
         return `--- ${r.tipo} ---\n${JSON.stringify(r.datos, null, 2)}`;
@@ -213,20 +222,36 @@ function construirPromptResultados(resultados: Array<{tipo: string; datos?: unkn
  * Flujo completo: system prompt → historial → API → parseo → ejecución → [2da llamada si hay consultas]
  * Extraído del hook para mantener usePanelIA bajo el límite de 120 líneas.
  *
- * [115A-1] Segunda llamada al LLM cuando acciones de consulta (leer_nota, research_*)
+ * Segunda llamada al LLM cuando una consulta de nota devuelve datos
  * devuelven datos. Sin esto el modelo responde antes de ver los datos y dice "no puedo acceder".
  */
+/* [27-08-2026] Opciones del usuario (plan IA, Fase 4): temperatura y maxTokens
+ * se aplican a todas las llamadas del turno. */
+export interface OpcionesProcesamientoIA {
+    temperatura?: number;
+    maxTokens?: number;
+}
+
 export async function procesarMensajeIA(
     mensajes: MensajeIA[],
     config: ConfigProveedorIA,
     preferencias: string,
     promptSistema: string,
     ejecutoresTareas: EjecutoresTareasIA,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    opciones: OpcionesProcesamientoIA = {}
 ): Promise<ResultadoMensajeIA> {
-    /* Generar system prompt con contexto actual de tareas/hábitos */
+    /* [27-08-2026] Config del prompt desde el store (idioma, estilo, permisos).
+     * La configuración vive en iaStore (persistida, no sensible); se lee aquí
+     * para que el prompt refleje los toggles sin re-cablear el hook. */
+    const storeIA = useIAStore.getState();
     const contexto = generarContexto(ejecutoresTareas.tareas);
-    const systemPrompt = generarSystemPrompt(contexto, preferencias, promptSistema);
+    const systemPrompt = generarSystemPrompt(contexto, preferencias, promptSistema, {
+        idioma: storeIA.idioma,
+        estilo: storeIA.estilo,
+        permitirRecordatorios: storeIA.permitirRecordatorios,
+        permitirBusquedaWeb: storeIA.permitirBusquedaWeb
+    });
 
     /* Construir historial para la API (últimos 20 mensajes) */
     const historial: MensajeAPI[] = [
@@ -237,8 +262,11 @@ export async function procesarMensajeIA(
         }))
     ];
 
-    /* Primera llamada al LLM */
-    const respuesta = await enviarMensajeLLM(historial, config, signal);
+    /* Primera llamada al LLM (con la configuración del usuario) */
+    const respuesta = await enviarMensajeLLM(historial, config, signal, {
+        temperature: opciones.temperatura,
+        maxTokens: opciones.maxTokens
+    });
     let tokensTotal = respuesta.tokensPrompt + respuesta.tokensComplecion;
 
     /* Parsear respuesta JSON con acciones */
@@ -254,11 +282,16 @@ export async function procesarMensajeIA(
             ejecutada: r.exito,
             resultado: r.descripcion,
             pendienteConfirmacion: r.pendienteConfirmacion,
-            accionExternaId: r.accionExternaId
+            accionExternaId: r.accionExternaId,
+            /* [27-08-2026] Datos de la propuesta (recordatorio validado + key,
+             * resultados de búsqueda/nota) para confirmación o 2ª llamada LLM. */
+            datos: r.datos as Record<string, unknown> | undefined
         }));
 
-        /* [115A-1] Segunda llamada al LLM si alguna acción de consulta devolvió datos */
-        const TIPOS_CONSULTA = ['leer_nota', 'research_local', 'research_web'];
+        /* [115A-1] Segunda llamada al LLM si alguna acción de consulta devolvió datos.
+         * [27-08-2026] research_web añadido: la búsqueda devuelve resultados y el
+         * modelo los integra en la respuesta natural. */
+        const TIPOS_CONSULTA = ['leer_nota', 'research_web'];
         const resultadosConDatos = resultados.filter(
             r => r.exito && TIPOS_CONSULTA.includes(r.tipo) && r.datos != null
         );

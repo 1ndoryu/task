@@ -8,6 +8,7 @@ pub mod habit_history;
 mod note;
 pub mod notifications;
 pub mod productivity;
+pub mod reminder;
 pub mod security;
 pub mod shared;
 pub mod storage;
@@ -34,6 +35,10 @@ pub use note::{
     UpdateNoteFolderRequest, UpdateNoteRequest,
 };
 pub use notifications::*;
+pub use reminder::{
+    CreateReminderRequest, Reminder, ReminderListQuery, ReminderListResponse, UpdateReminderRequest,
+    es_estado_valido,
+};
 pub use shared::*;
 pub use timeline::*;
 pub use user::{
