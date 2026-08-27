@@ -1,8 +1,13 @@
 /*
  * plugins/agente/index.ts
- * Registro del plugin de agente de IA + re-exportaciones. Importar UNA vez
- * al inicio (después de inicializarPaneles) como side-effect: registrarPlugin
- * y registrarPanel. El panel `agente` es un panel REAL registrado en el grid.
+ * UNICO plugin de IA del dashboard. Reemplaza al legacy `ia-asistente`/`PanelIA`:
+ * conserva los ids estables `ia-asistente` (plugin) y `ia` (panel) para no romper
+ * el estado de grid/localStorage de los usuarios que ya lo tenían activado, pero
+ * renderiza el panel moderno (tabs de conversaciones persistidas + streaming SSE).
+ *
+ * Importar UNA vez como side-effect. El legacy PanelIA/iaStore ya no se registra
+ * como panel del grid (solo sobrevive como helper de acciones JSON del modal de
+ * configuración global, ver SeccionConfigIAPanelChat).
  */
 
 import {createElement} from 'react';
@@ -19,26 +24,27 @@ export * from './service';
 import './panelAgente.css';
 
 registrarPlugin({
-    id: 'agente',
-    nombre: 'Agente IA',
+    id: 'ia-asistente',
+    nombre: 'Asistente IA',
     descripcion: 'Asistente con herramientas: crea tareas, hábitos, notas y recordatorios; busca en la web y administra archivos locales',
     icono: createElement(Bot, {size: 18}),
     version: '1.0.0',
-    panelesIds: ['agente'],
+    panelesIds: ['ia'],
+    habitos: [],
     requiereConfiguracion: false,
 });
 
 registrarPanel({
-    id: 'agente',
-    titulo: 'Agente',
-    tituloMovil: 'Agente',
+    id: 'ia',
+    titulo: 'IA',
+    tituloMovil: 'IA',
     icono: createElement(Bot, {size: 14}),
     visiblePorDefecto: false,
     alturaDefecto: '320px',
-    posicionDefecto: {1: {columna: 1, posicion: 0}, 2: {columna: 1, posicion: 0}, 3: {columna: 1, posicion: 0}},
+    posicionDefecto: {1: {columna: 1, posicion: 5}, 2: {columna: 2, posicion: 3}, 3: {columna: 3, posicion: 3}},
     componente: PanelAgente as ComponentType<PanelBaseProps>,
     enNavegacionMovil: false,
-    idPaginaMovil: 'agente',
+    idPaginaMovil: 'ia',
     manejaAlturaPropia: false,
 });
 

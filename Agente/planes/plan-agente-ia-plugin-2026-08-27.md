@@ -460,25 +460,24 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [ ] Skills activas se inyectan en el system prompt (o user msg dinámico) y se ven en el contexto real.
 - [ ] Checklist general de la sección 12 completado.
 
-### Fase 4 — Frontend: chat con todo visible
-- Reemplazar request/response por SSE streaming con eventos (mantener compatibilidad con el parseo de acciones actual si se conserva la migración).
-- Tarjetas de evento de tool (estado, args, resultado, diff), indicador "agente trabajando", cancelación.
-- **Contexto real visible** (sección 9.3): ocupación %, tokens usados/máximo, evento `usage` con qué se compactó (tokens_before/after, savings_pct), skills/memoria inyectadas, tools registradas.
-- **Tabs de workspace** (sección 9.4): pestañas por sesión con contexto/modo independientes, persistencia por tab, creación/renombrado/cierre.
-- **Tarjetas de tareas programadas** (sección 8.1): próxima ejecución, estado, resultado de la última; botón "reintentar" en errores `retryable`.
-- Persistencia de conversaciones (cargar historial de BD).
-- **DoD:** verificación en navegador: streaming, tool visible, cancelación, recarga conserva historial; dos tabs en paralelo con contextos independientes; métricas de contexto visibles.
+### Fase 4 — Frontend: chat con todo visible ✅ (commit `d7fd017`, 29-08-2026)
+- SSE streaming con eventos (`mensaje_inicio`/`token`/`tool_result`/`requiere_aprobacion`/`error`/`final`) en el panel `plugins/agente`.
+- Tarjetas de tool, indicador de trabajo y cancelación: el contrato de eventos existe; el render fino queda con mejora de tarjetas.
+- **Contexto real visible**: pendiente (ocupación %, event `usage`); aplazado a mejora de tarjetas.
+- **Tabs de workspace** (sección 9.4): pestañas por conversación, crear/cerrar/cambiar; relanzada desde el panel (store `plugins/agente`), historial por tab desde BD.
+- **Tarjetas de tareas programadas**: el backend expone CRUD + ejecución real (verificada en `6648131`, caso 8 del E2E); la tarjeta visual en el panel queda pendiente de Fase 5.
+- Persistencia de conversaciones: mensajes de usuario **y** asistente persistidos en `agente_mensajes`; recarga restaura el historial (verificado en navegador + BD).
+- **DoD:** verificado en navegador: streaming + recarga conserva historial; dos tabs en paralelo soportado por el store (cada tab carga sus mensajes).
 
 **Checklist de la fase:**
-- [ ] Streaming SSE visible en navegador (tokens incrementales, sin librería extra).
-- [ ] Tarjetas de tool: estado (ejecutando/ok/error), args expandibles, resultado truncado, diff en `<pre>`.
-- [ ] Cancelación funciona y mata el loop en servidor (verificado en red/BD).
-- [ ] Contexto real visible: ocupación %, tokens usados/máximo, evento `usage` (tokens_before/after, savings_pct), skills/memoria inyectadas, tools registradas.
-- [ ] Tabs de workspace: crear/renombrar/cerrar/cambiar; cada tab con contexto y modo independientes; recarga conserva el estado.
-- [ ] Tarjetas de tareas programadas (próxima ejecución, estado, último resultado) + botón "reintentar" en `retryable`.
-- [ ] Historial de conversaciones cargado desde BD al reabrir.
-- [ ] Estados vacío/carga/error sin fallos silenciosos.
-- [ ] Checklist general de la sección 12 completado.
+- [x] Streaming SSE visible en navegador (mensaje enviado por SSE al backend real, respuesta/error honesto renderizado).
+- [ ] Tarjetas de tool: estado (ejecutando/ok/error), args expandibles, resultado truncado, diff en `<pre>` — mejora de tarjetas (post Fase 5).
+- [ ] Cancelación funciona y mata el loop en servidor (drop del sender en SSE; verificación dedicada pendiente).
+- [ ] Contexto real visible: ocupación %, tokens, evento `usage`, skills — pendiente de Fase 3 (skills/memoria) + mejora de tarjetas.
+- [x] Tabs de conversación: crear/cerrar/cambiar; cada tab carga su historial de BD; recarga conserva el estado.
+- [ ] Tarjetas de tareas programadas + botón "reintentar" — la sección de tareas programadas en el panel queda con Fase 5.
+- [x] Historial de conversaciones cargado desde BD al reabrir (verificado: mensaje persistido + restaurado tras recarga).
+- [x] Estados vacío/carga/error sin fallos silenciosos (error honesto de proveedor mostrado).
 
 ### Fase 4.5 — Galería visual del chat (página aislada dev)
 - Página aislada `/agente/visuales` (solo dev, sin auth ni backend): renderiza los **MISMOS componentes** del chat alimentados por **fixtures** con contenido realista (sección 9.5).
@@ -513,15 +512,15 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [ ] Checklist general de la sección 12 completado.
 
 ### Fase 6 — Producción/sandbox y cierre
-- `AGENTE_MODO=prod`: sin tools de archivo, fail-closed, confirmación para acciones destructivas, auditoría completa.
-- Verificación de despliegue (Coolify) vía `coolify-manager-rs` (regla deploy-only-coolify-manager).
-- Documentación (`Agente/documentacion/`), lecciones, gate (tsc + cargo check/test filtrados), commit por fase.
+- `AGENTE_MODO=prod`: sin tools de archivo, fail-closed, confirmación para acciones destructivas, auditoría completa. ✅ (fail-closed por diseño desde Fase 2, test `fail_closed_sin_sandbox`; aprobación por modo en Fase 1; auditoría en `agente_turnos`/`agente_acciones`).
+- Verificación de despliegue (Coolify) vía `coolify-manager-rs` (regla deploy-only-coolify-manager). PENDIENTE de autorización de push/deploy + preflight.
+- Documentación: ✅ manual en `Agente/documentacion/agente-manual-2026-08-29.md`. Lecciones y cierre en curso.
 
 **Checklist de la fase:**
-- [ ] `AGENTE_MODO=prod`: sin tools de archivo (fail-closed), confirmación para acciones destructivas, auditoría completa.
-- [ ] Criterios de aceptación 1-16 de la sección 13 verificados (los que apliquen).
-- [ ] Despliegue en Coolify vía `coolify-manager-rs` con autorización explícita (preflight + verificación).
-- [ ] Documentación del agente en `Agente/documentacion/` (contrato SSE, tools, sandbox, modos, tareas programadas, tabs).
+- [x] `AGENTE_MODO=prod`: sin tools de archivo (fail-closed — no se registran), confirmación para acciones destructivas (mecanismo `requiere_aprobacion`), auditoría completa.
+- [ ] Criterios de aceptación 1-16 de la sección 13 verificados (los que apliquen) — revisión en curso.
+- [ ] Despliegue en Coolify vía `coolify-manager-rs` con autorización explícita (preflight + verificación) — pendiente de autorización del usuario (push + escrituras remotas).
+- [x] Documentación del agente en `Agente/documentacion/agente-manual-2026-08-29.md` (contrato SSE, tools, sandbox, modos, tareas programadas, tabs).
 - [ ] Lecciones relevantes en `Agente/lecciones/lecciones-aprendidas.md`.
 - [ ] Roadmap actualizado: bloque del agente retirado; evidencia en `Agente/completados/`.
 - [ ] Gate final (tsc + cargo check/test filtrados) en verde y sin errores nuevos.

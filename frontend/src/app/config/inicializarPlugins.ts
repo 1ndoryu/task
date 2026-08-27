@@ -9,7 +9,7 @@
  * La activación real se hace desde el ModalPlugins cuando el usuario lo activa.
  */
 
-import {Timer, Utensils, Users, Bot, ImageUp, Bell} from 'lucide-react';
+import {Timer, Utensils, Users, ImageUp, Bell} from 'lucide-react';
 import {createElement} from 'react';
 import type {ComponentType} from 'react';
 import {registrarPlugin} from './registroPlugins';
@@ -20,7 +20,6 @@ import type {ModoColumnas, PanelBaseProps, PosicionDefectoPanel} from '../types/
 import {PanelAyuno} from '../components/paneles/PanelAyuno';
 import {PanelDeficitCalorico} from '../components/paneles/PanelDeficitCalorico';
 import {PanelGruposFb} from '../components/paneles/PanelGruposFb';
-import {PanelIA} from '../components/paneles/PanelIA';
 import {PanelEscaladorImagen} from '../components/paneles/PanelEscaladorImagen';
 import {PanelRecordatorios} from '../components/paneles/PanelRecordatorios';
 
@@ -188,36 +187,12 @@ registrarPanel({
 
 /*
  * [014A-6] Plugin Asistente IA
- * Asistente de IA para planificación de tareas/hábitos por lenguaje natural.
- * Desactivado por defecto — se activa desde la sección Plugins.
- * Requiere configuración del proveedor IA.
+ * UNICO plugin de IA (id estable `ia-asistente` / panel `ia`). El registro
+ * (plugin + panel `ia`) y el componente moderno viven en plugins/agente.tsx;
+ * renderiza tabs de conversaciones persistidas + streaming SSE. Desactivado
+ * por defecto — se activa desde la sección Plugins.
  */
-registrarPlugin({
-    id: 'ia-asistente',
-    nombre: 'Asistente IA',
-    descripcion: 'Planificación de tareas y hábitos por lenguaje natural con IA',
-    icono: createElement(Bot, {size: 18}),
-    version: '1.0.0',
-    panelesIds: ['ia'],
-    habitos: [],
-    requiereConfiguracion: true
-});
-
-/* Registrar panel del plugin de IA */
-registrarPanel({
-    id: 'ia',
-    titulo: 'IA',
-    tituloMovil: 'IA',
-    icono: createElement(Bot, {size: 14}),
-    visiblePorDefecto: false,
-    alturaDefecto: '300px',
-    posicionDefecto: crearPosicionDefecto([1, 5], [2, 3], [3, 3]),
-    componente: PanelIA as ComponentType<PanelBaseProps>,
-    enNavegacionMovil: false,
-    idPaginaMovil: 'ia',
-    /* [105E] El chat IA usa el resize estándar del dashboard; antes quedaba sin handle de altura. */
-    manejaAlturaPropia: false
-});
+/* El registro ahora lo hace `import '../plugins/agente'` (ver arriba). */
 
 /*
  * Plugin de Recordatorios
