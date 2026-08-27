@@ -125,16 +125,14 @@
 /* Quitar bordes del boton ghost dentro del sidebar y alinear icono+texto */
 /* [27-08-2026] Padding horizontal del botón 12px → 10px (más compacto) */
 /* [27-08-2026] 1px menos de padding: 10px → 9px (petición del usuario) */
-/* [27-08-2026] Padding vertical 1px menos: 8px → 7px (petición del usuario) */
-/* [27-08-2026] Padding vertical otro 1px menos: 7px → 6px (petición del usuario) */
+/* [27-08-2026] Altura 32px → 30px: el padding vertical no tenía efecto visual
+   con la altura fija (el contenido se centra igual), así que se reduce la altura real. */
 .sidebarMenuBoton.boton--ghost {
     border: none;
     justify-content: flex-start;
     white-space: nowrap;
     padding-left: calc(var(--dashboard-espacioSmMd) - 1px);
-    padding-top: calc(var(--dashboard-espacioSm) - 2px);
-    padding-bottom: calc(var(--dashboard-espacioSm) - 2px);
-    height: 32px;
+    height: 30px;
     opacity: 0.6;
 }
 
