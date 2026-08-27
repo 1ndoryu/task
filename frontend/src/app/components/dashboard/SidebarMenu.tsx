@@ -12,15 +12,18 @@
  *  - onSeleccionarPanel: callback al hacer click izquierdo
  *  - panelesActivos: opcional — IDs de paneles actualmente en la grilla sidebar
  *  - onAgregarPanel: opcional — callback de click derecho "Agregar a la vista"
+ *  - onCrearTarea / onCrearHabito: opcionales — abren la creación rápida desde
+ *    el botón "+" del header
  */
 
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect, useRef, Fragment, useMemo} from 'react';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
-import {PanelLeftClose, PanelLeftOpen, Settings, Plus} from 'lucide-react';
+import {Settings, Plus, ChevronDown, ChevronRight, Folder} from 'lucide-react';
 import type {ReactNode} from 'react';
 import {Boton} from '../ui';
 import {MenuContextual} from '../shared';
 import type {OpcionMenu} from '../shared';
+import {SubmenuNuevoInline} from './SubmenuNuevoInline';
 
 export interface PanelSidebar {
     id: PanelId;
@@ -37,7 +40,23 @@ interface SidebarMenuProps {
     panelesActivos?: PanelId[];
     /** [multi-panel-sidebar] Callback para agregar panel a la grilla (click derecho) */
     onAgregarPanel?: (panelId: PanelId) => void;
+    /** Abre la creación rápida de tarea desde el botón "+" del header */
+    onCrearTarea?: () => void;
+    /** Abre la creación rápida de hábito desde el botón "+" del header */
+    onCrearHabito?: () => void;
+    /** [28-08-2026] Grupos de ejecución disponibles (sección debajo de Tareas) */
+    grupos?: string[];
+    /** Grupo activo del panel Tareas (ejecucion) en el sidebar */
+    grupoTareasActivo?: string | null;
+    /** Al hacer clic en un grupo: va directo al panel Tareas con ese grupo (null = sin grupo) */
+    onSeleccionarGrupo?: (grupo: string | null) => void;
 }
+
+/** Anchos mínimo y máximo del sidebar al arrastrar el borde (px) */
+const ANCHO_MIN = 56;
+const ANCHO_MAX = 320;
+/** Umbral: al soltar por debajo de este ancho, encaja en colapsado (solo iconos) */
+const UMBRAL_COLAPSAR = 72;
 
 /** Estado del menú contextual de click derecho */
 interface ContextMenuState {
@@ -47,26 +66,191 @@ interface ContextMenuState {
     y: number;
 }
 
-/* [300A-8] Iconos SVG reemplazados por lucide-react: ChevronsLeft, ChevronsRight, Settings */
+/* [300A-8] Iconos SVG reemplazados por lucide-react: Plus, Settings */
 
-export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirConfig, panelesActivos, onAgregarPanel}: SidebarMenuProps): JSX.Element | null {
-    /* [300A-6] Estado de sidebar expandido/colapsado, persistido en localStorage */
-    const [expandido, setExpandido] = useState<boolean>(() => {
+export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirConfig, panelesActivos, onAgregarPanel, onCrearTarea, onCrearHabito, grupos = [], grupoTareasActivo, onSeleccionarGrupo}: SidebarMenuProps): JSX.Element | null {
+    /* [28-08-2026] El toggle de expandir/contraer se sustituye por arrastre del
+     * borde: el ancho es dinámico (px) y se persiste. "expandido" se deriva del
+     * ancho (ancho > umbral), de modo que el resto del componente (título,
+     * soloIcono, clase --colapsado) sigue funcionando igual. */
+    const [ancho, setAncho] = useState<number>(() => {
         try {
-            return localStorage.getItem('glory_sidebar_expandido') !== 'false';
+            const guardado = Number(localStorage.getItem('glory_sidebar_ancho'));
+            return Number.isFinite(guardado) && guardado >= ANCHO_MIN ? guardado : 180;
         } catch {
-            return true;
+            return 180;
         }
     });
+    const expandido = ancho > UMBRAL_COLAPSAR;
+
+    /* [28-08-2026] Arrastre del borde derecho del sidebar: mousedown sobre el
+     * handle captura el ancho inicial y el listener de mousemove en el documento
+     * recalcula ancho = inicio + (clientX - inicioX), acotado. Al soltar se
+     * persiste; si quedó por debajo del umbral, encaja en colapsado (56px). */
+    const [arrastrando, setArrastrando] = useState(false);
+    const inicioRef = useRef<{x: number; ancho: number} | null>(null);
+
+    const comenzarArrastre = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        inicioRef.current = {x: e.clientX, ancho};
+        setArrastrando(true);
+    }, [ancho]);
+
+    useEffect(() => {
+        if (!arrastrando) return;
+        const manejarMovimiento = (e: MouseEvent) => {
+            const inicio = inicioRef.current;
+            if (!inicio) return;
+            const nuevoAncho = Math.max(ANCHO_MIN, Math.min(ANCHO_MAX, inicio.ancho + (e.clientX - inicio.x)));
+            setAncho(nuevoAncho);
+        };
+        const manejarFin = () => {
+            inicioRef.current = null;
+            setArrastrando(false);
+            setAncho(prev => {
+                const final = prev < UMBRAL_COLAPSAR ? ANCHO_MIN : prev;
+                try {
+                    localStorage.setItem('glory_sidebar_ancho', String(final));
+                } catch {
+                    /* localStorage no disponible */
+                }
+                return final;
+            });
+        };
+        /* [28-08-2026] cursor/select del documento durante el arrastre para que
+         * no parpadee el cursor de texto al pasar por el contenido */
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        document.addEventListener('mousemove', manejarMovimiento);
+        document.addEventListener('mouseup', manejarFin);
+        return () => {
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', manejarMovimiento);
+            document.removeEventListener('mouseup', manejarFin);
+        };
+    }, [arrastrando]);
 
     /* [multi-panel-sidebar] Estado del menú contextual de click derecho */
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({abierto: false, panelId: null, x: 0, y: 0});
 
-    const toggleExpandido = useCallback(() => {
-        setExpandido(prev => {
+    /* [28-08-2026] Submenu "+" del header (Tarea/Hábito), anclado al botón.
+     * Se porta a body (usarPortal) porque .sidebarMenu tiene overflow:hidden y
+     * recortaría el submenu si se renderizara en flujo (mismo caso que el estado
+     * vacío de ListaTareas). */
+    const [submenuNuevo, setSubmenuNuevo] = useState<{x: number; y: number} | null>(null);
+    const botonNuevoRef = useRef<HTMLButtonElement | null>(null);
+
+    const abrirSubmenuNuevo = useCallback(() => {
+        if (botonNuevoRef.current) {
+            const rect = botonNuevoRef.current.getBoundingClientRect();
+            setSubmenuNuevo({x: rect.left, y: rect.bottom});
+        }
+    }, []);
+
+    const cerrarSubmenuNuevo = useCallback(() => setSubmenuNuevo(null), []);
+
+    const seleccionarSubmenuNuevo = useCallback((tipo: 'tarea' | 'habito') => {
+        setSubmenuNuevo(null);
+        if (tipo === 'tarea') {
+            onCrearTarea?.();
+        } else {
+            onCrearHabito?.();
+        }
+    }, [onCrearTarea, onCrearHabito]);
+
+    /* [28-08-2026] Orden de los botones del menú: drag & drop con persistencia
+     * en localStorage (glory_sidebar_orden_paneles). Si no hay orden guardado
+     * se usa el orden por defecto de los paneles; los paneles nuevos (no
+     * guardados) se añaden al final. */
+    const [ordenIds, setOrdenIds] = useState<string[] | null>(() => {
+        try {
+            const raw = localStorage.getItem('glory_sidebar_orden_paneles');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed.filter((id): id is string => typeof id === 'string');
+            }
+        } catch {
+            /* localStorage no disponible */
+        }
+        return null;
+    });
+    const [arrastrandoPanelId, setArrastrandoPanelId] = useState<string | null>(null);
+    const [destinoPanelId, setDestinoPanelId] = useState<string | null>(null);
+
+    const panelesOrdenados = useMemo(() => {
+        if (!ordenIds) return paneles;
+        const porId = new Map(paneles.map(p => [p.id, p]));
+        const ordenados: PanelSidebar[] = [];
+        ordenIds.forEach(id => {
+            const panel = porId.get(id);
+            if (panel) {
+                ordenados.push(panel);
+                porId.delete(id);
+            }
+        });
+        porId.forEach(panel => ordenados.push(panel));
+        return ordenados;
+    }, [paneles, ordenIds]);
+
+    const guardarOrden = useCallback((ids: string[]) => {
+        setOrdenIds(ids);
+        try {
+            localStorage.setItem('glory_sidebar_orden_paneles', JSON.stringify(ids));
+        } catch {
+            /* localStorage no disponible */
+        }
+    }, []);
+
+    /* [28-08-2026] Drag & drop para reordenar los botones del menú. El clic
+     * normal sigue seleccionando (el navegador suprime el click tras un drag
+     * real); el clic derecho del menú contextual no se ve afectado. */
+    const iniciarArrastre = useCallback((e: React.DragEvent, panelId: string) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', panelId);
+        setArrastrandoPanelId(panelId);
+    }, []);
+
+    const marcarDestino = useCallback((e: React.DragEvent, panelId: string) => {
+        e.preventDefault();
+        setDestinoPanelId(panelId);
+    }, []);
+
+    const soltarEn = useCallback((e: React.DragEvent, panelId: string) => {
+        e.preventDefault();
+        const origen = arrastrandoPanelId || e.dataTransfer.getData('text/plain');
+        setArrastrandoPanelId(null);
+        setDestinoPanelId(null);
+        if (!origen || origen === panelId) return;
+        const ids = panelesOrdenados.map(p => p.id);
+        const iOrigen = ids.indexOf(origen);
+        const iDestino = ids.indexOf(panelId);
+        if (iOrigen === -1 || iDestino === -1) return;
+        ids.splice(iOrigen, 1);
+        ids.splice(iDestino, 0, origen);
+        guardarOrden(ids);
+    }, [arrastrandoPanelId, panelesOrdenados, guardarOrden]);
+
+    const terminarArrastre = useCallback(() => {
+        setArrastrandoPanelId(null);
+        setDestinoPanelId(null);
+    }, []);
+
+    /* [28-08-2026] Sección de grupos minimizable/maximizable, persistida en
+     * localStorage (glory_sidebar_grupos_colapsado). */
+    const [gruposColapsados, setGruposColapsados] = useState<boolean>(() => {
+        try {
+            return localStorage.getItem('glory_sidebar_grupos_colapsado') === 'true';
+        } catch {
+            return false;
+        }
+    });
+
+    const toggleGruposColapsados = useCallback(() => {
+        setGruposColapsados(prev => {
             const nuevo = !prev;
             try {
-                localStorage.setItem('glory_sidebar_expandido', String(nuevo));
+                localStorage.setItem('glory_sidebar_grupos_colapsado', String(nuevo));
             } catch {
                 /* localStorage no disponible */
             }
@@ -106,8 +290,9 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
 
     return (
         <nav
-            className={`sidebarMenu ${expandido ? 'sidebarMenu--expandido' : 'sidebarMenu--colapsado'}`}
+            className={`sidebarMenu ${expandido ? 'sidebarMenu--expandido' : 'sidebarMenu--colapsado'} ${arrastrando ? 'sidebarMenu--arrastrando' : ''}`}
             aria-label="Menú de paneles"
+            style={{/* sentinel-disable inline-style-prohibido */ width: `${ancho}px`}}
         >
             {/* [multi-panel-sidebar] Menú contextual con MenuContextual */}
             {contextMenu.abierto && contextMenu.panelId && (
@@ -119,35 +304,95 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
                     onCerrar={() => setContextMenu(prev => ({...prev, abierto: false}))}
                 />
             )}
-            {/* [300A-8] Header: nombre de app + toggle expandir/contraer */}
+            {/* [28-08-2026] Header: nombre de app + botón "+" para crear
+             * Tarea/Hábito. Se retira el toggle de expandir/contraer: ahora el
+             * tamaño se ajusta arrastrando el borde derecho del sidebar. */}
             <div className="sidebarMenuHeader">
                 {expandido && <span className="sidebarMenuHeaderTitulo">Catask</span>}
                 <Boton
+                    ref={botonNuevoRef}
                     variante="ghost"
                     soloIcono
-                    claseAdicional="sidebarMenuToggleBoton"
-                    onClick={toggleExpandido}
-                    icono={expandido ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+                    claseAdicional="sidebarMenuNuevoBoton"
+                    onClick={abrirSubmenuNuevo}
+                    icono={<Plus size={18} />}
+                    title="Nueva tarea o hábito"
                 />
             </div>
 
+            {/* [28-08-2026] Submenu Tarea/Hábito anclado al botón "+" del header
+             * (portado a body, ver abrirSubmenuNuevo) */}
+            {submenuNuevo && (
+                <SubmenuNuevoInline
+                    direccion="abajo"
+                    claseAdicional="submenuNuevoInline--fijado"
+                    estiloPosicion={{left: submenuNuevo.x, top: submenuNuevo.y}}
+                    usarPortal={true}
+                    onSeleccionar={seleccionarSubmenuNuevo}
+                    onCerrar={cerrarSubmenuNuevo}
+                />
+            )}
+
             <div className="sidebarMenuItems">
-                {paneles.map(panel => {
+                {panelesOrdenados.map(panel => {
                     /* [multi-panel-sidebar] En modo multi-panel, un panel puede estar activo
                      * en la grilla aunque no sea el panelActivo (foco actual) */
                     const enGrilla = panelesActivos?.includes(panel.id);
                     return (
-                        <Boton
-                            key={panel.id}
-                            variante="ghost"
-                            soloIcono={!expandido}
-                            claseAdicional={`sidebarMenuBoton ${panelActivo === panel.id ? 'sidebarMenuBoton--activo' : ''} ${enGrilla ? 'sidebarMenuBoton--enGrilla' : ''}`}
-                            onClick={() => onSeleccionarPanel(panel.id)}
-                            onContextMenu={(e) => handleContextMenu(e, panel.id)}
-                            icono={panel.icono}
-                        >
-                            {panel.titulo}
-                        </Boton>
+                        <Fragment key={panel.id}>
+                            <div className={`sidebarMenuFilaBoton ${panel.id === 'ejecucion' && expandido && grupos.length > 0 ? 'sidebarMenuFilaBoton--conGrupos' : ''}`}>
+                                <Boton
+                                    draggable={expandido}
+                                    onDragStart={(e) => iniciarArrastre(e, panel.id)}
+                                    onDragOver={(e) => marcarDestino(e, panel.id)}
+                                    onDrop={(e) => soltarEn(e, panel.id)}
+                                    onDragEnd={terminarArrastre}
+                                    variante="ghost"
+                                    soloIcono={!expandido}
+                                    claseAdicional={`sidebarMenuBoton ${panelActivo === panel.id ? 'sidebarMenuBoton--activo' : ''} ${enGrilla ? 'sidebarMenuBoton--enGrilla' : ''} ${arrastrandoPanelId === panel.id ? 'sidebarMenuBoton--arrastrando' : ''} ${destinoPanelId === panel.id ? 'sidebarMenuBoton--destino' : ''}`}
+                                    onClick={() => onSeleccionarPanel(panel.id)}
+                                    onContextMenu={(e) => handleContextMenu(e, panel.id)}
+                                    icono={panel.icono}
+                                >
+                                    {panel.titulo}
+                                </Boton>
+                                {/* [28-08-2026] Flecha de minimizar/maximizar los
+                                 * grupos: al lado del botón Tareas (en su fila, sin
+                                 * separador). Solo con grupos existentes y sidebar
+                                 * expandido. */}
+                                {panel.id === 'ejecucion' && expandido && grupos.length > 0 && (
+                                    <button
+                                        type="button"
+                                        className="sidebarMenuGruposToggle"
+                                        onClick={toggleGruposColapsados}
+                                        onDragOver={(e) => marcarDestino(e, panel.id)}
+                                        onDrop={(e) => soltarEn(e, panel.id)}
+                                        title={gruposColapsados ? 'Mostrar grupos' : 'Minimizar grupos'}
+                                    >
+                                        {gruposColapsados ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+                                    </button>
+                                )}
+                            </div>
+                            {/* [28-08-2026] Lista de grupos debajo del botón Tareas:
+                             * clic en un grupo → onSeleccionarGrupo (va directo a ese
+                             * grupo). Solo con el sidebar expandido y sin minimizar. */}
+                            {panel.id === 'ejecucion' && expandido && grupos.length > 0 && !gruposColapsados && (
+                                <div className="sidebarMenuGruposLista">
+                                    {grupos.map(grupo => (
+                                        <Boton
+                                            key={grupo}
+                                            variante="ghost"
+                                            claseAdicional={`sidebarMenuBoton sidebarMenuGrupoBoton ${grupoTareasActivo === grupo ? 'sidebarMenuBoton--activo sidebarMenuGrupoBoton--activo' : ''}`}
+                                            onClick={() => onSeleccionarGrupo?.(grupo)}
+                                            icono={<Folder size={12} />}
+                                            title={grupo}
+                                        >
+                                            {grupo}
+                                        </Boton>
+                                    ))}
+                                </div>
+                            )}
+                        </Fragment>
                     );
                 })}
             </div>
@@ -163,6 +408,13 @@ export function SidebarMenu({paneles, panelActivo, onSeleccionarPanel, onAbrirCo
                     Config
                 </Boton>
             </div>
+            {/* [28-08-2026] Handle de resize: franja vertical en el borde derecho
+             * del sidebar. Con mousedown comienza el arrastre (ver state ancho). */}
+            <div
+                className="sidebarMenuResizeHandle"
+                onMouseDown={comenzarArrastre}
+                title="Arrastrar para cambiar el tamaño"
+            />
         </nav>
     );
 }

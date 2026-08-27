@@ -31,6 +31,8 @@ import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
 import {obtenerTodosPanelesNavegables} from '../config/registroPaneles';
 import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
 import {useExpPlugin} from '../plugins/exp';
+import {useGruposEjecucion} from '../hooks/useGruposEjecucion';
+import {useGruposEjecucionStore} from '../stores/gruposEjecucionStore';
 
 import '../styles/dashboard/componentes/experimentos.css';
 import '../styles/dashboard/componentes/buscador.css';
@@ -131,6 +133,22 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     /* [26-08-2026] Plugin EXP: rehidratación, recálculo de vida y registro de
      * EXP por completados. No hace nada si el plugin no está activo. */
     useExpPlugin();
+
+    /* [28-08-2026] Grupos de ejecución para la sección de grupos del sidebar:
+     * se derivan de tareas/hábitos y de gruposConocidos (igual que en
+     * PanelEjecucion). El grupo activo es el del panel Tareas (ejecucion). */
+    const gruposTareas = useGruposEjecucion(dashboard.tareas, dashboard.habitos);
+    const grupoTareasActivo = useGruposEjecucionStore(s => s.grupoPorPanel['ejecucion'] ?? null);
+    const setGrupoPanel = useGruposEjecucionStore(s => s.setGrupoPanel);
+
+    /* [28-08-2026] Ir directo a un grupo desde el sidebar: selecciona el panel
+     * Tareas y le asigna el grupo (persistido por panelId en gruposEjecucionStore).
+     * null = sin grupo (vista Tareas por defecto). */
+    const seleccionarGrupoTareas = useCallback((grupo: string | null) => {
+        setGrupoPanel('ejecucion', grupo);
+        setPaneles(['ejecucion']);
+        setPanelSidebarActivo('ejecucion');
+    }, [setGrupoPanel, setPaneles]);
 
     /* Estado y acciones para notas en móvil */
     const crearNuevaNota = useNotasStore(s => s.crearNuevaNota);
@@ -283,10 +301,18 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                             /* Click en sidebar: cambia a un solo panel (no agrega a grilla) */
                             setPaneles([panelId]);
                             setPanelSidebarActivo(panelId);
+                            /* [28-08-2026] El botón Tareas = vista sin grupo; los
+                             * grupos se eligen desde la sección de grupos del sidebar. */
+                            if (panelId === 'ejecucion') setGrupoPanel('ejecucion', null);
                         }}
                         onAbrirConfig={() => modales.abrirModalConfigGlobal(null)}
                         panelesActivos={sidebarState.paneles}
                         onAgregarPanel={agregarPanel}
+                        onCrearTarea={() => modales.abrirCreacionRapida('tarea')}
+                        onCrearHabito={() => modales.abrirCreacionRapida('habito')}
+                        grupos={gruposTareas}
+                        grupoTareasActivo={grupoTareasActivo}
+                        onSeleccionarGrupo={seleccionarGrupoTareas}
                     />
                     <div className="dashboardSidebarMain">
                         {dashboard.cargandoDatos ? (

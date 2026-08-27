@@ -38,6 +38,9 @@
 
 /* [20-08-2026] Sin fondo: la barra de paneles se integra con el layout,
  * solo los botones conservan su hover individual. */
+/* [28-08-2026] El ancho ya no es fijo: se aplica inline (px) desde el estado
+ * del componente (arrastre del borde). --expandido/--colapsado conservan el
+ * ancho por defecto para el primer render y como respaldo sin JS. */
 .sidebarMenu {
     display: flex;
     flex-direction: column;
@@ -49,16 +52,42 @@
     overflow: hidden;
     transition: width var(--dashboard-transicionNormal);
     gap: 10px;
+    position: relative;
 }
 
-/* Expandido: ancho fijo 180px para icono + texto */
+/* Expandido: ancho por defecto (lo pisa el inline del componente) */
 .sidebarMenu--expandido {
     width: 180px;
 }
 
-/* Colapsado: solo iconos */
+/* Colapsado: solo iconos (ancho por defecto, lo pisa el inline) */
 .sidebarMenu--colapsado {
     width: 56px;
+}
+
+/* [28-08-2026] Durante el arrastre se elimina la transición de width para que
+ * el handle siga al puntero sin latencia. */
+.sidebarMenu--arrastrando {
+    transition: none;
+}
+
+/* [28-08-2026] Handle de resize: franja vertical sobre el borde derecho del
+ * sidebar. Captura el mousedown para arrastrar (ver SidebarMenu.tsx). */
+.sidebarMenuResizeHandle {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 5;
+    touch-action: none;
+}
+
+.sidebarMenuResizeHandle:hover,
+.sidebarMenuResizeHandle:active {
+    background: var(--dashboard-fondoHover);
+    border-radius: var(--dashboard-radioXs);
 }
 
 /* Contenedor de items (scroll independiente del toggle) */
@@ -144,7 +173,7 @@
     height: 12px;
 }
 
-.sidebarMenuToggleBoton .botonIcono svg,
+.sidebarMenuNuevoBoton .botonIcono svg,
 .sidebarMenuConfigBoton .botonIcono svg {
     width: 16px;
     height: 16px;
@@ -178,11 +207,80 @@
     filter: none;
 }
 
-.sidebarMenuToggleBoton.boton--ghost {
+/* [28-08-2026] Drag & drop para reordenar los botones del menú */
+.sidebarMenuBoton--arrastrando {
+    opacity: 0.35;
+}
+
+.sidebarMenuBoton--destino {
+    background: var(--dashboard-fondoHover);
+    opacity: 1;
+}
+
+/* [28-08-2026] Fila del botón Tareas con la flecha de grupos al lado.
+ * La flecha (minimizar/maximizar) va en la misma fila que el botón, a la
+ * derecha, sin fila separada ni divisor. */
+.sidebarMenuFilaBoton--conGrupos {
+    position: relative;
+    display: flex;
+}
+
+.sidebarMenuFilaBoton--conGrupos .sidebarMenuBoton.boton--ghost {
+    flex: 1;
+    padding-right: 26px;
+}
+
+.sidebarMenuGruposToggle {
+    position: absolute;
+    top: 50%;
+    right: 3px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoApagado);
+    opacity: 0.6;
+    cursor: pointer;
+    border-radius: var(--dashboard-radioXs);
+}
+
+.sidebarMenuGruposToggle:hover {
+    opacity: 1;
+    color: var(--dashboard-textoSecundario);
+    background: var(--dashboard-fondoHover);
+}
+
+/* Lista de grupos debajo del botón Tareas: mismo aspecto que los botones del
+ * menú (reutiliza .sidebarMenuBoton), con icono de carpeta para todos y algo
+ * más de indentación para anidarlos bajo Tareas. */
+.sidebarMenuGruposLista {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 1px var(--dashboard-espacioXs) 0;
+    margin-bottom: 2px;
+}
+
+.sidebarMenuGrupoBoton.boton--ghost {
+    padding-left: 24px;
+}
+
+.sidebarMenuGrupoBoton--activo {
+    opacity: 1;
+    filter: brightness(1.6);
+}
+
+/* [28-08-2026] Botón "+" del header (crear tarea/hábito): mismo estilo que el
+ * toggle anterior para no cambiar el aspecto del header. */
+.sidebarMenuNuevoBoton.boton--ghost {
     border: none;
     color: var(--dashboard-textoApagado);
 }
-.sidebarMenuToggleBoton.boton--ghost:hover:not(:disabled) {
+.sidebarMenuNuevoBoton.boton--ghost:hover:not(:disabled) {
     color: var(--dashboard-textoSecundario);
     background: var(--dashboard-fondoHover);
     filter: none;
