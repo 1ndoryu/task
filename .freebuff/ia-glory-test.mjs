@@ -79,6 +79,35 @@ async function main() {
   assert(r.status === 200 && typeof r.data?.calorias === 'number' && r.data.calorias > 0, `nutrición 200 con calorías (${r.data?.calorias})`);
   if (r.status === 200) console.log(`  → proveedor efectivo: ${r.data.provider}/${r.data.model}`);
 
+  /* [28-08-2026] Contrato de web-search (fix admin-gate + 503 claro):
+   * la key del proveedor vive en el servidor, así que el endpoint es
+   * admin-only; sin clave configura da un 503 legible, no falso éxito.
+   * La sesión actual sigue siendo admin (promovida arriba). */
+  console.log('\n== Web-search: contrato de acceso y error sin clave ==');
+  r = await api('POST', '/ai/tools/web-search', {body: {query: 'noticias IA', limit: 3}, csrf});
+  if (r.status === 503) {
+    assert(r.data?.error === 'not_configured', 'admin sin clave → 503 not_configured');
+    const msg = String(r.data?.message || '');
+    assert(/SERPER_API_KEY|TAVILY_API_KEY/.test(msg) && msg.length > 20, 'mensaje 503 claro (nombra la env faltante)');
+  } else {
+    /* Con clave configurada el 503 no aplica; el contrato de acceso sí. */
+    assert(r.status === 200 && Array.isArray(r.data?.results), 'admin con clave → 200 con results');
+    console.log('  → clave de búsqueda configurada; se omite el assert 503');
+  }
+  r = await api('POST', '/ai/tools/web-search', {body: {query: '', limit: 3}, csrf});
+  assert(r.status === 400, 'query vacía → 400');
+
+  /* Usuario NO admin → 403 (la cuota del servidor no debe ser consumible
+   * por cualquier usuario autenticado). Se registra una sesión nueva. */
+  const emailUser = `ia-web-${Date.now()}@test.app`;
+  r = await api('POST', '/auth/register', {body: {email: emailUser, password: 'password123'}});
+  assert(r.status === 201, 'register no-admin 201');
+  const csrfUser = cookies['csrf_token'];
+  r = await api('POST', '/ai/tools/web-search', {body: {query: 'hola', limit: 3}, csrf: csrfUser});
+  assert(r.status === 403 && r.data?.error === 'forbidden', 'no-admin → 403 forbidden');
+  r = await api('POST', '/ai/tools/web-search', {body: {query: 'hola', limit: 3}});
+  assert(r.status === 403, 'POST mutación sin CSRF → 403');
+
   console.log(`\n== RESULTADO: ${pasados} pasados, ${fallados} fallados${omitidos > 0 ? `, ${omitidos} omitidos (proveedor externo saturado)` : ''} ==`);
   if (fallados > 0) { console.log('Fallaron:', errores.join(' | ')); process.exit(1); }
 }

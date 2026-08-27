@@ -67,6 +67,21 @@ async function main() {
   r = await api('POST', '/reminders', {body: {titulo: 'R2 dup', mensaje: 'm2', programado_para: futuro(2), idempotency_key: clave}, csrf});
   assert(r.status === 201 && r.data?.id === id2, 'misma clave → misma fila (no duplica)');
 
+  /* [28-08-2026] Regresión de la race de idempotencia (fix ON CONFLICT):
+   * dos confirmaciones SIMULTÁNEAS con la misma key no deben chocar con el
+   * UNIQUE y devolver 500 — deben obtener todas la misma fila. */
+  console.log('\n== Idempotencia concurrente (misma key, N simultáneos) ==');
+  const claveRace = 'k-race-' + Date.now();
+  const bodyRace = {titulo: 'R-race', mensaje: 'm', programado_para: futuro(2), idempotency_key: claveRace};
+  const simultaneos = await Promise.all(
+    Array.from({length: 5}, () => api('POST', '/reminders', {body: bodyRace, csrf}))
+  );
+  assert(simultaneos.every(x => x.status === 201), '5 confirmaciones simultáneas → todas 201 (sin 5xx)');
+  const idsRace = [...new Set(simultaneos.map(x => x.data?.id).filter(Boolean))];
+  assert(idsRace.length === 1, 'misma key concurrente → exactamente 1 id');
+  r = await api('GET', '/reminders');
+  assert(r.data.items.filter(x => x.titulo === 'R-race').length === 1, 'solo 1 fila R-race en el listado');
+
   console.log('\n== Listar / filtrar ==');
   r = await api('GET', '/reminders');
   assert(r.status === 200 && Array.isArray(r.data.items) && r.data.items.some(x => x.id === id1), 'listar incluye R1');
