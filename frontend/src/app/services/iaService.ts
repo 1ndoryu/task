@@ -15,6 +15,7 @@ import {generarContexto, generarSystemPrompt, parsearRespuestaLLM, ejecutarAccio
 import {apiFetch} from '../utils/apiClient';
 import {esUsuarioAdmin} from '../utils/dashboardRuntime';
 import {devWarn} from '../utils/devLog';
+import {notasService} from './notasService';
 
 const URLS_PROVIDER: Record<ProveedorIA, string> = {
     cerebras: 'https://api.cerebras.ai/v1/chat/completions',
@@ -245,7 +246,28 @@ export async function procesarMensajeIA(
      * La configuración vive en iaStore (persistida, no sensible); se lee aquí
      * para que el prompt refleje los toggles sin re-cablear el hook. */
     const storeIA = useIAStore.getState();
-    const contexto = generarContexto(ejecutoresTareas.tareas);
+    /* [28-08-2026] Los toggles de contexto de la configuración llegan por fin
+     * al prompt (antes eran UI muerta). `incluirNotasEnContexto` carga las
+     * notas recientes vía el servicio real; si falla, el contexto sigue sin
+     * notas y el error queda registrado en DEV, sin bloquear el chat. */
+    let contexto = generarContexto(ejecutoresTareas.tareas, {
+        incluirTareasCompletadas: storeIA.incluirTareasCompletadas,
+        incluirHabitosPausados: storeIA.incluirHabitosPausados
+    });
+    if (storeIA.incluirNotasEnContexto) {
+        try {
+            const notas = await notasService.cargarNotas(10, 0);
+            if (notas.notas.length > 0) {
+                const listaNotas = notas.notas
+                    .slice(0, 5)
+                    .map(n => `- [id:${n.id}] ${n.titulo}: ${n.contenido.slice(0, 150)}`)
+                    .join('\n');
+                contexto += `\n## Notas recientes\n${listaNotas}\n`;
+            }
+        } catch (error) {
+            devWarn('iaService', 'No se pudieron cargar notas para el contexto', error);
+        }
+    }
     const systemPrompt = generarSystemPrompt(contexto, preferencias, promptSistema, {
         idioma: storeIA.idioma,
         estilo: storeIA.estilo,

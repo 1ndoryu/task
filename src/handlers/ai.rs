@@ -178,9 +178,13 @@ pub async fn ai_nutricion(
 )]
 pub async fn ai_web_search(
     State(state): State<AppState>,
-    _auth: AuthUser,
+    auth: AuthUser,
     Json(req): Json<WebSearchRequest>,
 ) -> Result<Json<WebSearchResult>, AppError> {
+    /* [28-08-2026] La key del proveedor vive en el servidor (igual que chat y
+     * nutrición): requiere admin para que un usuario cualquiera no consuma la
+     * cuota de Serper/Tavily de la cuenta. */
+    require_admin(&state, auth.user_id).await?;
     if req.query.trim().is_empty() {
         return Err(AppError::BadRequest("Consulta de búsqueda vacía".into()));
     }

@@ -12,11 +12,18 @@ function obtenerHabitos(): Habito[] {
     return useHabitosStore.getState().habitos;
 }
 
+/* [28-08-2026] Flags de contexto (plan IA, Fase 4): los toggles de la
+ * configuración deben reflejarse en el prompt, no ser UI muerta. */
+export interface OpcionesContexto {
+    incluirTareasCompletadas?: boolean;
+    incluirHabitosPausados?: boolean;
+}
+
 /*
  * Generar contexto compacto de tareas y hábitos actuales
  * Se inyecta en el system prompt para que el LLM conozca el estado
  */
-export function generarContexto(tareas: Tarea[]): string {
+export function generarContexto(tareas: Tarea[], opciones: OpcionesContexto = {}): string {
     const habitos = obtenerHabitos();
     const tareasPendientes = tareas.filter(t => !t.completado).slice(0, 30);
     const tareasCompletadasHoy = tareas.filter(t => {
@@ -39,23 +46,25 @@ export function generarContexto(tareas: Tarea[]): string {
         }
     }
 
-    if (tareasCompletadasHoy.length > 0) {
+    if (opciones.incluirTareasCompletadas !== false && tareasCompletadasHoy.length > 0) {
         ctx += `\n## Tareas completadas hoy (${tareasCompletadasHoy.length})\n`;
         for (const t of tareasCompletadasHoy.slice(0, 10)) {
             ctx += `- [id:${t.id}] ${t.texto}\n`;
         }
     }
 
-    const habitosActivos = habitos.filter(h => !h.pausado);
-    ctx += '\n## Hábitos activos\n';
-    if (habitosActivos.length === 0) {
+    const habitosVisibles = opciones.incluirHabitosPausados
+        ? habitos
+        : habitos.filter(h => !h.pausado);
+    ctx += '\n## Hábitos' + (opciones.incluirHabitosPausados ? ' (incluye pausados)' : ' activos') + '\n';
+    if (habitosVisibles.length === 0) {
         ctx += 'No hay hábitos activos.\n';
     } else {
         const hoy = new Date().toISOString().split('T')[0];
-        for (const h of habitosActivos) {
+        for (const h of habitosVisibles) {
             const completadoHoy = h.historialCompletados?.includes(hoy);
-            const estado = completadoHoy ? '✓' : '○';
-            ctx += `- [id:${h.id}] ${estado} ${h.nombre} (racha:${h.racha}, importancia:${h.importancia})\n`;
+            const estado = completadoHoy ? '✓' : h.pausado ? '⏸' : '○';
+            ctx += `- [id:${h.id}] ${estado} ${h.nombre} (racha:${h.racha}, importancia:${h.importancia}${h.pausado ? ', pausado' : ''})\n`;
         }
     }
 
@@ -89,7 +98,7 @@ export function generarSystemPrompt(contexto: string, preferencias: string, prom
             ? ['{"tipo": "research_web", "parametros": {"query": "consulta", "limit": 5}} — busca en internet y devuelve resultados; úsalo cuando el usuario pida información actual, noticias o datos que no están en su contexto']
             : []),
         ...(config.permitirRecordatorios !== false
-            ? ['{"tipo": "programar_recordatorio", "parametros": {"titulo": "nombre", "mensaje": "texto", "fecha": "ISO 8601 futura"}} — propone un recordatorio; SOLO se crea cuando el usuario confirma en la interfaz. Pide la fecha si no la dio']
+            ? ['{"tipo": "programar_recordatorio", "parametros": {"titulo": "nombre", "mensaje": "texto", "fecha": "2026-08-28T09:00:00"}} — propone un recordatorio; SOLO se crea cuando el usuario confirma en la interfaz. La fecha SIEMPRE en hora LOCAL del usuario, sin sufijo de zona horaria (sin Z ni +hh:mm). Pide la fecha si no la dio']
             : [])
     ].join('\n');
 

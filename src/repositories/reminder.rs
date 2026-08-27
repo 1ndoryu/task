@@ -23,16 +23,16 @@ impl ReminderRepository {
         user_id: Uuid,
         req: &CreateReminderRequest,
     ) -> Result<ReminderCreateOutcome, sqlx::Error> {
-        if let Some(key) = req.idempotency_key.as_deref() {
-            if let Some(existente) =
-                Self::find_by_idempotency_key(pool, user_id, key).await?
-            {
-                return Ok(ReminderCreateOutcome::Idempotent(existente));
-            }
-        }
+        /* [28-08-2026] Inserción atómica con ON CONFLICT: el find-then-insert
+         * anterior tenía una carrera — dos confirmaciones concurrentes con la
+         * misma key pasaban ambas el find, y la segunda chocaba con el UNIQUE
+         * (user_id, idempotency_key) devolviendo 500 en vez de la fila ya
+         * creada. ON CONFLICT DO NOTHING + fetch posterior lo hace libre de
+         * carrera. Las filas sin key (NULL) nunca entran en conflicto. */
         let fila = sqlx::query_as::<_, Reminder>(
             "INSERT INTO reminders (user_id, titulo, mensaje, programado_para, idempotency_key) \
              VALUES ($1, $2, $3, $4, $5) \
+             ON CONFLICT (user_id, idempotency_key) DO NOTHING \
              RETURNING id, user_id, titulo, mensaje, programado_para, estado, creado_en, actualizado_en",
         )
         .bind(user_id)
@@ -40,9 +40,19 @@ impl ReminderRepository {
         .bind(&req.mensaje)
         .bind(req.programado_para)
         .bind(req.idempotency_key.as_deref())
-        .fetch_one(pool)
+        .fetch_optional(pool)
         .await?;
-        Ok(ReminderCreateOutcome::Created(fila))
+        match fila {
+            Some(fila) => Ok(ReminderCreateOutcome::Created(fila)),
+            None => {
+                let key = req.idempotency_key.as_deref().unwrap_or_default();
+                let existente = Self::find_by_idempotency_key(pool, user_id, key).await?;
+                match existente {
+                    Some(existente) => Ok(ReminderCreateOutcome::Idempotent(existente)),
+                    None => Err(sqlx::Error::RowNotFound),
+                }
+            }
+        }
     }
 
     pub async fn find_by_id(

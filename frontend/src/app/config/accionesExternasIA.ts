@@ -50,7 +50,14 @@ function proponerRecordatorio(accion: AccionLLM): ResultadoAccion {
     if (!fecha) {
         return {tipo: accion.tipo, exito: false, descripcion: 'Falta la fecha/hora del recordatorio'};
     }
-    const fechaMs = Date.parse(fecha);
+    /* [28-08-2026] Un string date-only ("2026-08-28") lo parsea Date.parse
+     * como UTC medianoche, lo que desvía la hora por el offset del usuario.
+     * Se normaliza a medianoche LOCAL para que el round-trip sea coherente:
+     * hora local → ISO UTC (backend) → toLocaleString (display). */
+    const fechaNormalizada = /^\d{4}-\d{2}-\d{2}$/.test(fecha.trim())
+        ? `${fecha.trim()}T00:00:00`
+        : fecha;
+    const fechaMs = Date.parse(fechaNormalizada);
     if (!Number.isFinite(fechaMs)) {
         return {tipo: accion.tipo, exito: false, descripcion: `Fecha inválida: ${fecha}`};
     }

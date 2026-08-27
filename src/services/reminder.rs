@@ -42,8 +42,9 @@ impl ReminderService {
                 }
                 Ok(reminder)
             }
-            /* Repetir la misma confirmación devuelve la fila ya creada (200),
-             * no un 409: la operación es idempotente por diseño. */
+            /* Repetir la misma confirmación devuelve la fila ya creada (201,
+             * como el resto de creaciones), no un 409: la operación es
+             * idempotente por diseño. */
             ReminderCreateOutcome::Idempotent(reminder) => Ok(reminder),
         }
     }
