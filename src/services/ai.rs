@@ -187,12 +187,26 @@ pub struct AiNutritionResult {
     pub modelo: String,
 }
 
+/// Estado del circuit breaker por proveedor (R7 del plan agente).
+#[derive(Debug, Clone)]
+struct CircuitoProveedor {
+    fallos_consecutivos: u32,
+    hasta: Option<std::time::Instant>,
+}
+
+/// Umbral de fallos consecutivos antes de abrir el circuito (cooldown 60s).
+const CIRCUITO_UMBRAL: u32 = 3;
+const CIRCUITO_COOLDOWN: std::time::Duration = std::time::Duration::from_secs(60);
+
 /// Servicio LLM con las keys del entorno. `Clone` es barato (reqwest::Client
 /// comparte el pool internamente), así que vive directo en `AppState`.
+/// El circuit breaker (fallos consecutivos por proveedor) vive en un `Mutex`
+/// compartido: `Clone` no duplica el estado.
 #[derive(Debug, Clone)]
 pub struct LlmProviderService {
     keys: AiProviderKeys,
     client: reqwest::Client,
+    circuito: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, CircuitoProveedor>>>,
 }
 
 impl LlmProviderService {
@@ -204,7 +218,55 @@ impl LlmProviderService {
             .timeout(std::time::Duration::from_secs(45))
             .build()
             .expect("reqwest client builder is infallible");
-        Self { keys, client }
+        Self {
+            keys,
+            client,
+            circuito: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
+        }
+    }
+
+    /// ¿Está el proveedor en cooldown por fallos consecutivos?
+    fn proveedor_abierto(&self, proveedor: &str) -> bool {
+        let estado = self
+            .circuito
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        match estado.get(proveedor) {
+            Some(c) => c
+                .hasta
+                .map(|hasta| std::time::Instant::now() < hasta)
+                .unwrap_or(false),
+            None => false,
+        }
+    }
+
+    /// Registra un fallo (abre el circuito tras N consecutivos) o un acierto
+    /// (cierra el circuito y resetea el contador).
+    fn registrar_fallo(&self, proveedor: &str) {
+        let mut estado = self
+            .circuito
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let entrada = estado.entry(proveedor.to_string()).or_insert(CircuitoProveedor {
+            fallos_consecutivos: 0,
+            hasta: None,
+        });
+        entrada.fallos_consecutivos += 1;
+        if entrada.fallos_consecutivos >= CIRCUITO_UMBRAL {
+            entrada.hasta = Some(std::time::Instant::now() + CIRCUITO_COOLDOWN);
+            tracing::warn!(proveedor, fallos = entrada.fallos_consecutivos, cooldown_s = 60, "circuit breaker abierto");
+        }
+    }
+
+    fn registrar_acierto(&self, proveedor: &str) {
+        let mut estado = self
+            .circuito
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if let Some(entrada) = estado.get_mut(proveedor) {
+            entrada.fallos_consecutivos = 0;
+            entrada.hasta = None;
+        }
     }
 
     pub async fn enviar_chat(
@@ -218,6 +280,14 @@ impl LlmProviderService {
         let mut errores: Vec<String> = Vec::new();
 
         for (proveedor, modelo) in resolver_candidatos(provider, modelo) {
+            /* [29-08-2026] Circuit breaker (R7): si el proveedor lleva N fallos
+             * consecutivos, se aparta 60s y se prueba el siguiente de la cadena. */
+            if self.proveedor_abierto(proveedor) {
+                errores.push(format!(
+                    "{proveedor}/{modelo}: proveedor en cooldown por fallos consecutivos"
+                ));
+                continue;
+            }
             let keys = self.keys_para(proveedor);
             /* [27-08-2026] Glory API (free.empero.org) responde sin API key
              * (verificado contra /models y /chat/completions). Para ese
@@ -229,9 +299,13 @@ impl LlmProviderService {
                         .ejecutar_request(proveedor, "", modelo, &mensajes_validos, &opciones)
                         .await
                     {
-                        Ok(resultado) => return Ok(resultado),
+                        Ok(resultado) => {
+                            self.registrar_acierto(proveedor);
+                            return Ok(resultado);
+                        }
                         Err(error) => {
                             tracing::warn!(%error, proveedor, modelo, "glory sin key falló");
+                            self.registrar_fallo(proveedor);
                             errores.push(format!("{proveedor}/{modelo}: {error}"));
                         }
                     }
@@ -247,8 +321,12 @@ impl LlmProviderService {
                     .ejecutar_request(proveedor, key, modelo, &mensajes_validos, &opciones)
                     .await
                 {
-                    Ok(resultado) => return Ok(resultado),
+                    Ok(resultado) => {
+                        self.registrar_acierto(proveedor);
+                        return Ok(resultado);
+                    }
                     Err(error) => {
+                        self.registrar_fallo(proveedor);
                         errores.push(format!("{proveedor}/{modelo}: {error}"));
                     }
                 }
@@ -390,6 +468,13 @@ impl LlmProviderService {
         let mut errores: Vec<String> = Vec::new();
 
         for (proveedor, modelo) in resolver_candidatos(provider, modelo) {
+            /* [29-08-2026] Circuit breaker (R7): mismo criterio que enviar_chat. */
+            if self.proveedor_abierto(proveedor) {
+                errores.push(format!(
+                    "{proveedor}/{modelo}: proveedor en cooldown por fallos consecutivos"
+                ));
+                continue;
+            }
             let keys = self.keys_para(proveedor);
             if keys.is_empty() && proveedor != "glory" {
                 errores.push(format!(
@@ -407,8 +492,12 @@ impl LlmProviderService {
                     .ejecutar_request_stream(proveedor, key, modelo, &mensajes_validos, &opciones, &tools, on_token)
                     .await
                 {
-                    Ok(resultado) => return Ok(resultado),
+                    Ok(resultado) => {
+                        self.registrar_acierto(proveedor);
+                        return Ok(resultado);
+                    }
                     Err(error) => {
+                        self.registrar_fallo(proveedor);
                         tracing::warn!(%error, proveedor, modelo, "stream del proveedor falló");
                         errores.push(format!("{proveedor}/{modelo}: {error}"));
                     }
@@ -795,5 +884,38 @@ fn mayuscula_primera(texto: &str) -> String {
     match chars.next() {
         Some(primera) => primera.to_uppercase().collect::<String>() + chars.as_str(),
         None => String::new(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LlmProviderService;
+    use crate::config::AiProviderKeys;
+
+    #[test]
+    fn circuito_abre_tras_fallos_y_cierra_con_acierto() {
+        let servicio = LlmProviderService::new(AiProviderKeys::default());
+        // Sin fallos: abierto = false.
+        assert!(!servicio.proveedor_abierto("groq"));
+        // 2 fallos: aún cerrado (umbral 3).
+        servicio.registrar_fallo("groq");
+        servicio.registrar_fallo("groq");
+        assert!(!servicio.proveedor_abierto("groq"));
+        // 3er fallo: abre.
+        servicio.registrar_fallo("groq");
+        assert!(servicio.proveedor_abierto("groq"));
+        // Un acierto cierra y resetea.
+        servicio.registrar_acierto("groq");
+        assert!(!servicio.proveedor_abierto("groq"));
+    }
+
+    #[test]
+    fn circuitos_son_independientes_por_proveedor() {
+        let servicio = LlmProviderService::new(AiProviderKeys::default());
+        for _ in 0..3 {
+            servicio.registrar_fallo("cerebras");
+        }
+        assert!(servicio.proveedor_abierto("cerebras"));
+        assert!(!servicio.proveedor_abierto("groq"));
     }
 }

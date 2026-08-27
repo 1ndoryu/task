@@ -58,6 +58,13 @@ pub trait AgentTool: Send + Sync {
     fn id(&self) -> &'static str;
     fn descripcion(&self) -> &'static str;
     fn schema(&self) -> Value;
+    /// ¿Tiene efectos (escribe/borra)? Las tools con efecto en modo
+    /// predeterminado requieren aprobación (diferenciado por la política de
+    /// modos, sección 9.2). Por defecto false: la mayoría de las tools de
+    /// dominio del v1 son de datos propios y se auditan, no se bloquean.
+    fn efecto(&self) -> bool {
+        false
+    }
     async fn ejecutar(
         &self,
         ctx: &AgentToolContext<'_>,
@@ -125,6 +132,15 @@ impl AgentToolRegistry {
                 .cmp(b["function"]["name"].as_str().unwrap_or(""))
         });
         schemas
+    }
+
+    /// ¿La tool tiene efectos (escribe/borra)? Para la política de modos.
+    #[must_use]
+    pub fn tiene_efecto(&self, tool_id: &str) -> bool {
+        self.tools
+            .get(tool_id)
+            .map(|tool| tool.efecto())
+            .unwrap_or(false)
     }
 
     pub async fn ejecutar(

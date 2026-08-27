@@ -67,23 +67,25 @@ pub async fn agente_stream(
         return Err(AppError::TooManyRequests);
     }
 
-    /* Verificar propiedad de la conversación (nunca confiar en el front). */
-    let conversacion: Option<(Uuid,)> = sqlx::query_as(
-        "SELECT id FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
+    /* Verificar propiedad de la conversación (nunca confiar en el front) y
+     * leer su modo de operación (sección 9.2). */
+    let conversacion: Option<(Uuid, String)> = sqlx::query_as(
+        "SELECT id, modo FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
     )
     .bind(req.conversacionId)
     .bind(auth.user_id)
     .fetch_optional(&state.pool)
     .await?;
-    if conversacion.is_none() {
+    let Some((_, modo)) = conversacion else {
         return Err(AppError::NotFound("Conversación no encontrada".into()));
-    }
+    };
 
     let turno_id = Uuid::new_v4();
     let (tx, rx) = mpsc::channel::<AgenteEvento>(128);
     let runtime = AgentRuntime::nuevo(TurnoConfig {
         provider: req.provider.unwrap_or_else(|| "groq".into()),
         modelo: req.modelo.unwrap_or_else(|| "groq/compound-mini".into()),
+        modo,
         ..TurnoConfig::default()
     });
 
@@ -130,11 +132,15 @@ pub async fn agente_stream(
                     retryable,
                 })
                 .await;
+            /* [29-08-2026] R7 cola de reintentos: un fallo retryable deja el
+             * turno en 'pendiente' (no 'fallido') con el prompt reconstruido,
+             * para que un reintento del usuario (o worker) lo retome. El
+             * front ofrece "reintentar" cuando `retryable` es true. */
             let _ = persistir_turno(
                 &state_clone,
                 turno_id,
                 user_id,
-                "fallido",
+                if retryable { "pendiente" } else { "fallido" },
                 &mensaje,
                 &provider,
                 &modelo,
@@ -159,6 +165,9 @@ pub async fn agente_stream(
 #[allow(non_snake_case)]
 pub struct CrearConversacionRequest {
     pub titulo: Option<String>,
+    /// Modo de operación de la conversación (predeterminado|meta|autonomo).
+    #[serde(default)]
+    pub modo: Option<String>,
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -183,19 +192,28 @@ pub async fn crear_conversacion(
     if titulo.is_empty() || titulo.chars().count() > 255 {
         return Err(AppError::BadRequest("Título inválido".into()));
     }
+    /* [29-08-2026] Modo de operación (sección 9.2): predeterminado (default),
+     * meta, autonomo. Se valida contra la lista cerrada de la BD. */
+    let modo = req
+        .modo
+        .unwrap_or_else(|| "predeterminado".to_string());
+    if !matches!(modo.as_str(), "predeterminado" | "meta" | "autonomo") {
+        return Err(AppError::BadRequest("Modo inválido (predeterminado|meta|autonomo)".into()));
+    }
     let id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO agente_conversaciones (id, user_id, titulo) VALUES ($1, $2, $3)",
+        "INSERT INTO agente_conversaciones (id, user_id, titulo, modo) VALUES ($1, $2, $3, $4)",
     )
     .bind(id)
     .bind(auth.user_id)
     .bind(titulo)
+    .bind(&modo)
     .execute(&state.pool)
     .await?;
     Ok(Json(ConversacionResponse {
         id,
         titulo: titulo.to_string(),
-        modo: "predeterminado".to_string(),
+        modo,
     }))
 }
 

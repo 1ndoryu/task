@@ -25,6 +25,10 @@ pub enum AgenteEvento {
     Token { texto: String },
     ToolStart { tool: String, argumentos: Value },
     ToolResult { tool: String, ok: bool, resumen: String },
+    /// [29-08-2026] Modo predeterminado: una tool con efecto requiere
+    /// aprobación (el front muestra diff/aprobar/rechazar; el SSE es
+    /// unidireccional, así que la aprobación llega como nuevo turno).
+    RequiereAprobacion { tool: String, argumentos: Value },
     Usage {
         tokens_prompt: u32,
         tokens_complecion: u32,
@@ -52,6 +56,8 @@ pub struct TurnoConfig {
     pub max_turns: usize,
     pub timeout_tool: Duration,
     pub contexto: ContextoConfig,
+    /// Modo de operación (sección 9.2): predeterminado | meta | autonomo.
+    pub modo: String,
 }
 
 impl Default for TurnoConfig {
@@ -62,6 +68,7 @@ impl Default for TurnoConfig {
             max_turns: 10,
             timeout_tool: Duration::from_secs(15),
             contexto: ContextoConfig::default(),
+            modo: "predeterminado".into(),
         }
     }
 }
@@ -167,6 +174,49 @@ impl AgentRuntime {
                         argumentos: call.argumentos.clone(),
                     })
                     .await;
+
+                /* [29-08-2026] Política de modos (sección 9.2): en
+                 * predeterminado, una tool con efectos requiere aprobación. El
+                 * SSE es unidireccional: se emite `RequiereAprobacion` y la
+                 * ejecución se omite (el LLM recibe el estado como resultado de
+                 * tool y puede responder pidiendo confirmación). En meta y
+                 * autónomo las tools de dominio se ejecutan (todas auditan). */
+                let requiere_aprobacion = self.turno_config.modo == "predeterminado"
+                    && self.registry.tiene_efecto(&call.nombre);
+                if requiere_aprobacion {
+                    let _ = tx
+                        .send(AgenteEvento::RequiereAprobacion {
+                            tool: call.nombre.clone(),
+                            argumentos: call.argumentos.clone(),
+                        })
+                        .await;
+                    let _ = tx
+                        .send(AgenteEvento::ToolResult {
+                            tool: call.nombre.clone(),
+                            ok: false,
+                            resumen: "requiere_aprobacion".to_string(),
+                        })
+                        .await;
+                    mensajes.push(AiMessage {
+                        role: "assistant".into(),
+                        content: serde_json::Value::Null,
+                        tool_calls: Some(vec![crate::services::ai::AiToolCall {
+                            id: call.id.clone(),
+                            nombre: call.nombre.clone(),
+                            argumentos: call.argumentos.clone(),
+                        }]),
+                        tool_call_id: None,
+                    });
+                    mensajes.push(AiMessage::texto(
+                        "tool",
+                        format!(
+                            "[{} REQUIERE APROBACIÓN DEL USUARIO] La acción no se ejecutó; explica al usuario qué se hará y pide confirmación.",
+                            call.nombre
+                        ),
+                    ));
+                    continue;
+                }
+
                 let resultado = tokio::time::timeout(
                     self.turno_config.timeout_tool,
                     self.ejecutar_tool(state, user_id, turno_id, call, tx),
