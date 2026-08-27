@@ -30,6 +30,11 @@ import {PanelRecordatorios} from '../components/paneles/PanelRecordatorios';
  * plugin lo muestra/oculta vía panelesIds). */
 import '../plugins/exp';
 
+/* [29-08-2026] Plugin de agente de IA (carpeta especializada plugins/agente):
+ * tabs de conversaciones persistidas en el servidor + streaming SSE. El
+ * registro (plugin + panel `agente`) es side-effect de su index. */
+import '../plugins/agente';
+
 /* Helper para posiciones (reutilizado de inicializarPaneles) */
 function crearPosicionDefecto(
     pos1col: [1 | 2 | 3, number],

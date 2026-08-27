@@ -1,0 +1,122 @@
+/*
+ * panelAgente.css
+ * Estilos del panel del agente de IA: tabs de conversaciones y tarjetas de
+ * herramientas. Reutiliza tokens del design system (variables --dashboard-*)
+ * y las clases de panelIA.css para la base del chat (mensajes, input).
+ */
+
+/* Tabs de conversaciones */
+.panelAgenteTabs {
+    display: flex;
+    gap: var(--dashboard-espacioXs, 4px);
+    padding: 0 var(--dashboard-espacioMd, 12px);
+    padding-top: var(--dashboard-espacioSm, 8px);
+    overflow-x: auto;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--dashboard-borde, rgba(0, 0, 0, 0.08));
+}
+
+.panelAgenteTab {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px 3px 10px;
+    border-radius: 6px 6px 0 0;
+    font-size: var(--dashboard-fuenteXs, 12px);
+    color: var(--dashboard-textoSecundario, #666);
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 160px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    user-select: none;
+}
+
+.panelAgenteTab:hover {
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+}
+
+.panelAgenteTab--activa {
+    background: var(--dashboard-fondoElevado, #fff);
+    border-color: var(--dashboard-borde, rgba(0, 0, 0, 0.12));
+    color: var(--dashboard-textoPrimario, #1a1a1a);
+    font-weight: 600;
+}
+
+.panelAgenteTabTitulo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.panelAgenteTabCerrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario, #666);
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.panelAgenteTabCerrar:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--dashboard-peligro, #c0392b);
+}
+
+.panelAgenteTabInput {
+    width: 100%;
+    min-width: 80px;
+    font-size: var(--dashboard-fuenteXs, 12px);
+    padding: 2px 4px;
+    border: 1px solid var(--dashboard-primario, #3b82f6);
+    border-radius: 4px;
+    background: var(--dashboard-fondoElevado, #fff);
+    color: var(--dashboard-textoPrimario, #1a1a1a);
+    outline: none;
+}
+
+/* Tarjetas de herramientas */
+.panelAgenteHerramientas {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.panelAgenteHerramienta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--dashboard-fuenteXs, 12px);
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.panelAgenteHerramienta--ok {
+    color: var(--dashboard-exito, #27ae60);
+}
+
+.panelAgenteHerramienta--error {
+    color: var(--dashboard-peligro, #c0392b);
+}
+
+.panelAgenteHerramientaResumen {
+    color: var(--dashboard-textoSecundario, #666);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+}
+
+.panelAgentePensando {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--dashboard-textoSecundario, #666);
+    font-size: var(--dashboard-fuenteXs, 12px);
+    margin-top: 6px;
+}

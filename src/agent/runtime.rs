@@ -111,6 +111,7 @@ impl AgentRuntime {
         state: &AppState,
         user_id: Uuid,
         turno_id: Uuid,
+        conversacion_id: Uuid,
         historial: Vec<AiMessage>,
         mensaje_usuario: String,
         tx: &Sender<AgenteEvento>,
@@ -124,6 +125,11 @@ impl AgentRuntime {
         let tokens_prompt_total = 0u32;
         let tokens_complecion_total = 0u32;
         let mut tools_ejecutadas = 0usize;
+        /* [29-08-2026] Persistencia de la conversación (Fase 4): la respuesta
+         * final del asistente se guarda en `agente_mensajes` al terminar el
+         * turno, para que recargar el front conserve el historial completo
+         * (el mensaje del usuario ya se persiste en el handler). */
+        let mut respuesta_final: Option<String> = None;
 
         for _turno in 0..self.turno_config.max_turns {
             /* Contexto: preparar (compactar si hace falta) ANTES de cada llamada. */
@@ -169,6 +175,9 @@ impl AgentRuntime {
                         ocupacion_pct: None,
                     })
                     .await;
+                if !ultimo_contenido.trim().is_empty() {
+                    respuesta_final = Some(ultimo_contenido);
+                }
                 break;
             }
 
@@ -292,6 +301,31 @@ impl AgentRuntime {
             None,
         )
         .await?;
+
+        /* [29-08-2026] Persistir la respuesta del asistente (si el proveedor
+         * devolvió texto) y tocar `actualizado_en` de la conversación para que
+         * el orden por recencia sea correcto. Si no hubo respuesta (fallo
+         * retryable), el turno ya quedó como pendiente/fallido y el usuario
+         * reintenta: no se escribe nada falso. Las tareas programadas pasan
+         * `conversacion_id = nil` (no tienen chat): no se persiste nada. */
+        if let Some(respuesta) = &respuesta_final {
+            if conversacion_id != Uuid::nil() {
+                sqlx::query(
+                    "INSERT INTO agente_mensajes (conversacion_id, user_id, rol, contenido, tokens_estimados)
+                     VALUES ($1, $2, 'assistant', $3, $4)",
+                )
+                .bind(conversacion_id)
+                .bind(user_id)
+                .bind(respuesta)
+                .bind(estimar_tokens(respuesta) as i32)
+                .execute(&state.pool)
+                .await?;
+                sqlx::query("UPDATE agente_conversaciones SET actualizado_en = NOW() WHERE id = $1")
+                    .bind(conversacion_id)
+                    .execute(&state.pool)
+                    .await?;
+            }
+        }
 
         let _ = tx.send(AgenteEvento::Done { turno_id }).await;
         Ok(())

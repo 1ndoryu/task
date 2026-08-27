@@ -118,11 +118,20 @@ async fn ejecutar_tarea(
     /* Turno de agente: reutiliza el mismo runtime. Sin conversación (las tareas
      * programadas no tienen chat); el turno se registra con estado y resumen. */
     let turno_id = Uuid::new_v4();
+    let conversacion_id = Uuid::nil();
     let (tx, _rx) = tokio::sync::mpsc::channel::<crate::agent::runtime::AgenteEvento>(8);
 
     let runtime = AgentRuntime::nuevo(crate::agent::runtime::TurnoConfig::default());
     match runtime
-        .ejecutar_turno(state, user_id, turno_id, Vec::new(), prompt.to_string(), &tx)
+        .ejecutar_turno(
+            state,
+            user_id,
+            turno_id,
+            conversacion_id,
+            Vec::new(),
+            prompt.to_string(),
+            &tx,
+        )
         .await
     {
         Ok(()) => {

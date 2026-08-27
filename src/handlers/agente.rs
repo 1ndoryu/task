@@ -7,14 +7,14 @@
  * Cancelación server-side: si el cliente corta, el mpsc receiver se cae y el
  * runtime aborta el loop (no sigue ejecutando tools ni consumiendo tokens). */
 
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::response::sse::{Event, KeepAlive, Sse};
 use axum::response::IntoResponse;
-use axum::routing::post;
+use axum::routing::{delete, post};
 use axum::{Json, Router};
 use futures_util::stream::Stream;
 use futures_util::StreamExt;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
@@ -113,13 +113,22 @@ pub async fn agente_stream(
     let tx_clone = tx.clone();
     let mensaje = req.mensaje.clone();
     let user_id = auth.user_id;
+    let conversacion_id = req.conversacionId;
     let provider = runtime.turno_config.provider.clone();
     let modelo = runtime.turno_config.modelo.clone();
 
     /* Loop del agente en background; al terminar cierra el canal. */
     tokio::spawn(async move {
         let resultado = runtime
-            .ejecutar_turno(&state_clone, user_id, turno_id, historial, mensaje.clone(), &tx_clone)
+            .ejecutar_turno(
+                &state_clone,
+                user_id,
+                turno_id,
+                conversacion_id,
+                historial,
+                mensaje.clone(),
+                &tx_clone,
+            )
             .await;
         if let Err(error) = resultado {
             let retryable = matches!(
@@ -235,6 +244,103 @@ pub async fn listar_conversaciones(
             .map(|(id, titulo, modo)| ConversacionResponse { id, titulo, modo })
             .collect(),
     ))
+}
+
+/// Mensaje de una conversación (para historial en el front).
+#[derive(Debug, Serialize)]
+#[allow(non_snake_case)]
+pub struct MensajeConversacionResponse {
+    pub id: i64,
+    pub rol: String,
+    pub contenido: String,
+    pub creadoEn: String,
+}
+
+/// [29-08-2026] Fase 4: historial completo de una conversación (persistencia
+/// de chats en el servidor). El front carga los mensajes al abrir una tab.
+pub async fn listar_mensajes_conversacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(conversacion_id): Path<Uuid>,
+) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
+    /* Propiedad: nunca confiar en el front. */
+    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> = sqlx::query_as(
+        "SELECT m.id, m.rol, m.contenido, m.creado_en
+         FROM agente_mensajes m
+         JOIN agente_conversaciones c ON c.id = m.conversacion_id
+         WHERE m.conversacion_id = $1 AND c.user_id = $2
+         ORDER BY m.id ASC",
+    )
+    .bind(conversacion_id)
+    .bind(auth.user_id)
+    .fetch_all(&state.pool)
+    .await?;
+    Ok(Json(
+        filas
+            .into_iter()
+            .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
+                id,
+                rol,
+                contenido,
+                creadoEn: creado_en.to_rfc3339(),
+            })
+            .collect(),
+    ))
+}
+
+/// Renombra una conversación (tabs: editar nombre).
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+pub struct RenombrarConversacionRequest {
+    pub titulo: String,
+}
+
+pub async fn renombrar_conversacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(conversacion_id): Path<Uuid>,
+    Json(req): Json<RenombrarConversacionRequest>,
+) -> Result<Json<ConversacionResponse>, AppError> {
+    let titulo = req.titulo.trim().to_string();
+    if titulo.is_empty() || titulo.chars().count() > 255 {
+        return Err(AppError::BadRequest("Título inválido".into()));
+    }
+    let resultado = sqlx::query(
+        "UPDATE agente_conversaciones SET titulo = $1, actualizado_en = NOW()
+         WHERE id = $2 AND user_id = $3",
+    )
+    .bind(&titulo)
+    .bind(conversacion_id)
+    .bind(auth.user_id)
+    .execute(&state.pool)
+    .await?;
+    if resultado.rows_affected() == 0 {
+        return Err(AppError::NotFound("Conversación no encontrada".into()));
+    }
+    Ok(Json(ConversacionResponse {
+        id: conversacion_id,
+        titulo,
+        modo: String::new(),
+    }))
+}
+
+/// Elimina una conversación (tabs: cerrar).
+pub async fn eliminar_conversacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(conversacion_id): Path<Uuid>,
+) -> Result<impl IntoResponse, AppError> {
+    let resultado = sqlx::query(
+        "DELETE FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
+    )
+    .bind(conversacion_id)
+    .bind(auth.user_id)
+    .execute(&state.pool)
+    .await?;
+    if resultado.rows_affected() == 0 {
+        return Err(AppError::NotFound("Conversación no encontrada".into()));
+    }
+    Ok(axum::http::StatusCode::NO_CONTENT)
 }
 
 /// Límite de tareas programadas activas por usuario.
@@ -400,6 +506,12 @@ pub fn routes() -> Router<AppState> {
         .route(
             "/agente/conversaciones",
             post(crear_conversacion).get(listar_conversaciones),
+        )
+        .route(
+            "/agente/conversaciones/:id",
+            delete(eliminar_conversacion)
+                .put(renombrar_conversacion)
+                .get(listar_mensajes_conversacion),
         )
         .route(
             "/agente/tareas-programadas",

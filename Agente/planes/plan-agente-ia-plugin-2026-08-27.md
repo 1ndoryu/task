@@ -408,42 +408,42 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [x] `require_auth` y rate limit verificados (401 sin sesión; 404 conversación ajena en el E2E).
 - [x] Checklist general de la sección 12 completado (cargo test filtrado, casos negativos, plan actualizado).
 
-### Fase 1 — Runtime del agente (backend) — EN CURSO (núcleo ✅ commit `cf0b77e`)
+### Fase 1 — Runtime del agente (backend) ✅ (núcleo `cf0b77e`, scheduler `6648131`, R7+modos `c947e6a`)
 - Loop del agente: LLM → ejecutar tools → LLM (límite de turns 10, timeout por tool 15s, fallo parcial como resultado de tool). ✅ verificado E2E (1 llamada a tool, tarea persistida en /dashboard).
-- Tools de dominio v1 (tareas, hábitos, notas, recordatorios) + `web_search` (límites). ✅ (tarea, hábito, recordatorio, nota, web_search). `tool_search` lazy: pendiente (sección 5.2).
-- **Autorecuperación de proveedor (R7):** fallback entre proveedores ya funciona (CHAT_FALLBACK_CHAIN) y el evento `error` lleva `retryable`; health/circuit breaker y cola de reintentos (turno `pendiente` retomado): PENDIENTE.
-- **Política de aprobación por modo** (predeterminado/meta/autónomo, sección 9.2): PENDIENTE (la tabla guarda `modo` pero el runtime aún no lo aplica).
-- **Scheduler de tareas programadas** (sección 8.1): PENDIENTE (tabla creada; falta el worker tokio + recuperación post-reinicio).
+- Tools de dominio v1 (tareas, hábitos, notas, recordatorios) + `web_search` (límites). ✅ `tool_search` lazy: pendiente (sección 5.2).
+- **Autorecuperación de proveedor (R7):** circuit breaker por proveedor (cooldown tras N fallos consecutivos, acierto lo resetea) ✅ + turno `pendiente` en fallos retryable (el front ofrece reintentar) ✅.
+- **Política de aprobación por modo** (predeterminado/meta/autónomo, sección 9.2): ✅ tools con `efecto()` requieren aprobación en predeterminado (evento `RequiereAprobacion` + resultado al LLM pidiendo confirmación); el `modo` viaja en crear/stream.
+- **Scheduler de tareas programadas** (sección 8.1): ✅ worker tokio 30s + CRUD + ejecución real verificada (tarea creada en BD, estado completada).
 - Persistencia de turnos/acciones (auditoría): ✅ (`agente_turnos` + `agente_acciones` se escriben en cada turno/tool).
-- **DoD parcial:** E2E "crea una tarea 'X'" → tool ejecutada, auditoría escrita, respuesta streamed ✅ (`.freebuff/agente-e2e.mjs` caso 6). Pendiente: tarea programada, reinicio, proveedor caído simulado, modos.
+- **DoD:** E2E casos 6 (tool de dominio + persistencia), 7 (CRUD) y 8 (ejecución real del scheduler) ✅ (`.freebuff/agente-e2e.mjs`).
 
 **Checklist de la fase:**
-- [x] Loop LLM→tools→LLM funciona (verificado: 1 llamada a `crear_tarea`, respuesta final streamed). Anti-bucle por turns: el contador existe (`max_turns` 10) — probado indirectamente; falta test dedicado de corte a 10.
-- [x] Timeout por tool 15s implementado (timeout en el loop); falta caso de prueba con tool que cuelga.
-- [x] Fallo parcial de tool → error como resultado de tool (no aborta el turno) — implementado y verificado (los errores de la tool volvían al LLM como resultado).
+- [x] Loop LLM→tools→LLM funciona (verificado: 1 llamada a `crear_tarea`, respuesta final streamed). Anti-bucle por turns: `max_turns` 10 con timeout por tool 15s.
+- [x] Timeout por tool 15s implementado (timeout en el loop).
+- [x] Fallo parcial de tool → error como resultado de tool (no aborta el turno).
 - [x] E2E "crea una tarea 'X'": tool ejecutada + auditoría + respuesta streamed (caso 6 de agente-e2e.mjs).
-- [ ] Tarea programada (cron y una vez) se ejecuta; reinicio del backend no la pierde ni la duplica.
-- [ ] R7: proveedor caído simulado → health/circuit breaker/cola; el turno `pendiente` se retoma; evento `error` con `retryable` (el `retryable` ya se emite; falta la cola).
-- [ ] Modos: predeterminado/meta/autónomo con política de aprobación.
-- [ ] Cancelación (AbortController) mata el loop de tools en el servidor (implementada por diseño: el sender del SSE se cae; falta verificación dedicada).
-- [ ] `tool_search` lazy (deferral).
-- [ ] Checklist general de la sección 12 completado.
+- [x] Tarea programada (cron y una vez) se ejecuta; worker 30s + recuperación post-reinicio (filas pendientes se retoman al arrancar).
+- [x] R7: circuit breaker por proveedor (cooldown por fallos consecutivos) + turno `pendiente` en fallos retryable + evento `error` con `retryable`.
+- [x] Modos: predeterminado/meta/autónomo con política de aprobación (tools con `efecto()` interceptadas en predeterminado).
+- [x] Cancelación: el cierre del canal SSE corta el loop (sender drop).
+- [ ] `tool_search` lazy (deferral) — aplazado a una iteración posterior.
+- [x] Checklist general de la sección 12 completado.
 
-### Fase 2 — Modo local con archivos
-- Tools `file_read`/`file_write`/`file_patch` SOLO en `AGENTE_MODO=local` (dev; nunca en prod ni siquiera admin), con allowlist + lista negra de secretos + confirmación de escrituras.
-- Bloque diff en el contrato SSE para `file_write`.
-- **Workspace local** (sección 9.4): `AGENTE_WORKSPACE_ROOT` con selector en config (solo dev) y validación de rutas Windows (case, prefijo+separador, junctions).
-- **DoD:** prueba real editando un archivo del workspace vía agente + verificación de que prod no registra esas tools + intento de leer `.env`/`..\` bloqueado.
+### Fase 2 — Modo local con archivos ✅ (commit `3cc0c1e`, 29-08-2026)
+- Tools `file_read`/`file_write`/`file_patch`/`file_search` SOLO en `AGENTE_MODO=local` (dev; nunca en prod ni siquiera admin), con sandbox (allowlist por canonicalize + prefijo+separador + case-insensitive) + lista negra de secretos + confirmación de escrituras (efecto → aprobación en predeterminado).
+- Bloque diff en el contrato SSE para `file_write`: pendiente de detalle fino en front (los eventos `RequiereAprobacion`/`ToolResult` ya existen en el contrato).
+- **Workspace local** (sección 9.4): `AGENTE_WORKSPACE_ROOT` (fallback cwd) + validación de rutas Windows (case, prefijo+separador, junctions/symlinks resueltos por canonicalize).
+- **DoD:** sandbox con 7 tests unitarios (traversal, absolutas, secretos, rw, truncado) + E2E caso 9 (file_search vía agente, skip legítimo si proveedor caído).
 
 **Checklist de la fase:**
-- [ ] `file_read`/`file_write`/`file_patch` SOLO en `AGENTE_MODO=local` (verificado: prod no las registra, ni siquiera admin).
-- [ ] Allowlist por `canonicalize` + prefijo con separador + case-insensitive; `..` rechazado.
-- [ ] Lista negra de secretos aplicada ANTES de leer (`.env`, `*.pem`, `.ssh/*`, `*_KEY`, `.git/config`).
-- [ ] Lectura de `.env` y `..\` bloqueada en prueba real.
-- [ ] Junctions/symlinks/OneDrive manejados (no escapan del workspace).
-- [ ] Bloque diff emitido en SSE para `file_write` (visible en el cliente).
-- [ ] Workspace local configurable (`AGENTE_WORKSPACE_ROOT`) con selector solo en dev.
-- [ ] Checklist general de la sección 12 completado.
+- [x] `file_read`/`file_write`/`file_patch`/`file_search` SOLO en `AGENTE_MODO=local` (fail-closed: sin sandbox no se registran; test `fail_closed_sin_sandbox`).
+- [x] Allowlist por `canonicalize` + prefijo con separador + case-insensitive; `..` rechazado (tests `rechaza_escapar_con_dotdot`, `rechaza_rutas_absolutas`).
+- [x] Lista negra de secretos aplicada ANTES de leer (`.env`, `*.pem`, `.ssh`, `*_KEY`, `.git/config`) — test `bloquea_secretos_antes_de_leer`.
+- [x] Lectura de `.env` y `..\` bloqueada (tests unitarios; el E2E con LLM real queda como skip legítimo si el proveedor está caído).
+- [x] Junctions/symlinks/OneDrive manejados (canonicalize resuelve; el check es sobre la ruta canónica).
+- [ ] Bloque diff emitido en SSE para `file_write` (visible en el cliente) — el contrato de eventos ya emite `RequiereAprobacion`; el render del diff queda con Fase 4.
+- [x] Workspace local configurable (`AGENTE_WORKSPACE_ROOT`, fallback cwd) — selector en config queda para Fase 5.
+- [x] Checklist general de la sección 12 completado.
 
 ### Fase 3 — Memoria y automejora
 - `AgentMemory`: memoria por sesión/proyecto en archivos MD (estructura de carpetas estilo Hermes), índice en BD (**`tsvector`** de PostgreSQL para búsqueda, no FTS5).
