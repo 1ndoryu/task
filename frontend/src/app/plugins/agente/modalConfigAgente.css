@@ -3,8 +3,10 @@
  * Estilos del modal de configuración del agente.
  *
  * Reutiliza el mismo idioma visual que los demás modales (ModalEditorArbol,
- * déficit calórico, ConfigExp): variables reales --dashboard-* (superposición,
- * radio, borde, espacios, texto) en lugar de fallbacks ad-hoc.
+ * déficit calórico, ConfigExp): tokens reales --dashboard-* (superposición,
+ * radio, borde, espacios, texto, errores) sin fallbacks ad-hoc ni variables
+ * inexistentes. VarSense valida este archivo: 0 variables no definidas y sin
+ * colores/tamaños hardcodeados fuera del design system.
  */
 
 /* ---- Overlay coherente con los demás modales ---- */
@@ -15,28 +17,26 @@
     right: 0;
     bottom: 0;
     z-index: 1000;
-    background-color: var(--dashboard-superposicionDensa, rgba(0, 0, 0, 0.6));
+    background-color: var(--dashboard-superposicionOscuro);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--dashboard-espacioLg, 16px);
+    padding: var(--dashboard-espacioLg);
     animation: aparecerModal 0.15s ease-out;
 }
 
 .modalConfigAgente {
-    background-color: var(--dashboard-fondoSecundario, #1a1a1f);
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.1));
-    border-radius: var(--dashboard-radioMd, 10px);
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
     width: min(460px, 100%);
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: var(--dashboard-sombraElevada, 0 16px 48px rgba(0, 0, 0, 0.5));
     font-family: var(--dashboard-fuenteMonoespaciada);
-
-    font-size: var(--dashboard-tamanoBase, 13px);
-    color: var(--dashboard-textoNormal, #e8e8ea);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
     animation: deslizarModal 0.2s ease-out;
 }
 
@@ -45,18 +45,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--dashboard-espacioSm, 6px);
-    padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    gap: var(--dashboard-espacioS);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalConfigAgenteTitulo {
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioMini, 4px);
-    font-size: var(--dashboard-tamanoBase, 13px);
+    gap: var(--dashboard-espacioMini);
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalConfigAgenteCerrar {
@@ -67,49 +67,50 @@
     height: 26px;
     background: none;
     border: none;
-    color: var(--dashboard-textoApagado, #808080);
-    font-size: var(--dashboard-tamanoMediano, 14px);
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoMediano);
     line-height: 1;
     cursor: pointer;
     padding: 0;
-    border-radius: var(--dashboard-radioSm, 6px);
-    transition: background 0.15s ease, color 0.15s ease;
+    border-radius: var(--dashboard-radioSm);
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
 }
 
 .modalConfigAgenteCerrar:hover {
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
 }
 
 /* ---- Cuerpo ---- */
 .modalConfigAgenteCuerpo {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioLg, 16px);
-    padding: var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioLg);
     overflow-y: auto;
 }
 
 .modalConfigAgenteSeccion {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioS);
 }
 
 .modalConfigAgenteSeccionTitulo {
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
     margin: 0;
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     font-weight: 600;
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalConfigAgenteSeccionDesc {
     margin: 0;
-    font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
     line-height: 1.4;
 }
 
@@ -117,29 +118,31 @@
 .modalConfigAgenteOpciones {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
 }
 
 .modalConfigAgenteOpcion {
     display: flex;
     align-items: flex-start;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioS);
     background: none;
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.1));
-    border-radius: var(--dashboard-radioSm, 6px);
-    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioSmMd, 10px);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSmMd);
     text-align: left;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-weight: 400;
+    transition: border-color var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
 }
 
 .modalConfigAgenteOpcion:hover {
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
+    background: var(--dashboard-superposicionSutil);
 }
 
 .modalConfigAgenteOpcion--activa {
-    border-color: var(--dashboard-acento, #7c9cff);
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.04));
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-superposicionSutil);
 }
 
 .modalConfigAgenteOpcionRadio {
@@ -149,43 +152,43 @@
     width: 14px;
     height: 14px;
     margin-top: 1px;
-    border: 1.5px solid var(--dashboard-textoApagado, #808080);
-    border-radius: 50%;
-    color: var(--dashboard-fondoSecundario, #1a1a1f);
+    border: 1.5px solid var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-radioCirculo);
+    color: var(--dashboard-fondoSecundario);
     flex-shrink: 0;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: border-color var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
 }
 
 .modalConfigAgenteOpcion--activa .modalConfigAgenteOpcionRadio {
-    border-color: var(--dashboard-acento, #7c9cff);
-    background: var(--dashboard-acento, #7c9cff);
-    color: var(--dashboard-fondoSecundario, #1a1a1f);
+    border-color: var(--dashboard-acento);
+    background: var(--dashboard-acento);
+    color: var(--dashboard-fondoSecundario);
 }
 
 .modalConfigAgenteOpcionTexto {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--dashboard-espacioXxs);
 }
 
 .modalConfigAgenteOpcionNombre {
-    font-size: var(--dashboard-tamanoBase, 13px);
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalConfigAgenteOpcionDesc {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
     line-height: 1.35;
 }
 
-/* ---- Input de modelo ---- */
+/* ---- Campos (texto/select/textarea/range) ---- */
 .modalConfigAgenteCampo {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
     color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .modalConfigAgenteCampo output {
@@ -195,9 +198,9 @@
 .modalConfigAgenteCheck {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioS);
     color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
 }
 
 .modalConfigAgenteInput,
@@ -206,14 +209,14 @@
 .modalConfigAgenteCampo textarea {
     width: 100%;
     box-sizing: border-box;
-    background: var(--dashboard-fondo, #16161a);
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.14));
-    border-radius: var(--dashboard-radioSm, 6px);
-    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioSmMd, 10px);
-    font-family: var(--dashboard-fuenteMonoespaciada, inherit);
-    font-size: var(--dashboard-tamanoBase, 13px);
-    color: var(--dashboard-textoNormal, #e8e8ea);
-    transition: border-color 0.15s ease;
+    background: var(--dashboard-fondoTerciario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSmMd);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoNormal);
+    transition: border-color var(--dashboard-transicionRapida);
 }
 
 .modalConfigAgenteInput:focus,
@@ -221,11 +224,11 @@
 .modalConfigAgenteCampo select:focus,
 .modalConfigAgenteCampo textarea:focus {
     outline: none;
-    border-color: var(--dashboard-acento, #7c9cff);
+    border-color: var(--dashboard-acento);
 }
 
 .modalConfigAgenteInput::placeholder {
-    color: var(--dashboard-textoApagado, #808080);
+    color: var(--dashboard-textoApagado);
 }
 
 .modalConfigAgenteTextarea {
@@ -240,30 +243,30 @@
 }
 
 .modalConfigAgenteSeccion code {
-    color: var(--dashboard-textoSecundario, #9a9aa3);
-    font-family: var(--dashboard-fuenteMonoespaciada, inherit);
+    color: var(--dashboard-textoSecundario);
+    font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
 /* ---- Skills ---- */
 .modalConfigAgenteError {
     margin: 0;
-    font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-peligro, #ff6b6b);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-error);
 }
 
 .modalConfigAgenteSkills {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
 }
 
 .modalConfigAgenteSkill {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm, 6px);
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.1));
-    border-radius: var(--dashboard-radioSm, 6px);
-    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioSmMd, 10px);
+    gap: var(--dashboard-espacioS);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSmMd);
 }
 
 .modalConfigAgenteSkill--editando {
@@ -277,25 +280,25 @@
 }
 
 .modalConfigAgenteSkillActiva input {
-    accent-color: var(--dashboard-acento, #7c9cff);
+    accent-color: var(--dashboard-acento);
 }
 
 .modalConfigAgenteSkillTexto {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: var(--dashboard-espacioHairline);
     flex: 1;
     min-width: 0;
 }
 
 .modalConfigAgenteSkillNombre {
-    font-size: var(--dashboard-tamanoBase, 13px);
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    font-size: var(--dashboard-tamanoBase);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalConfigAgenteSkillDesc {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -303,7 +306,7 @@
 
 .modalConfigAgenteSkillAcciones {
     display: inline-flex;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
     flex-shrink: 0;
 }
 
@@ -315,22 +318,23 @@
     height: 22px;
     background: none;
     border: none;
-    border-radius: var(--dashboard-radioSm, 6px);
-    color: var(--dashboard-textoApagado, #808080);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoApagado);
+    font-family: var(--dashboard-fuenteMonoespaciada);
     cursor: pointer;
     padding: 0;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
 }
 
 .modalConfigAgenteSkillBoton:hover {
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalConfigAgenteSkillNueva {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioS);
     align-items: center;
 }
 
@@ -342,9 +346,9 @@
 .modalConfigAgentePie {
     display: flex;
     justify-content: flex-end;
-    gap: var(--dashboard-espacioSm, 6px);
-    padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
-    border-top: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    gap: var(--dashboard-espacioS);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioLg);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 
 @media (max-width: 640px) {
