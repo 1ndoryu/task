@@ -53,6 +53,17 @@ REGLAS:
 pub struct TurnoConfig {
     pub provider: String,
     pub modelo: String,
+    pub temperatura: f32,
+    pub max_tokens: u32,
+    pub idioma: String,
+    pub incluir_notas: bool,
+    pub incluir_tareas_completadas: bool,
+    pub incluir_habitos_pausados: bool,
+    pub permitir_busqueda_web: bool,
+    pub permitir_recordatorios: bool,
+    pub prompt_sistema: String,
+    pub incluir_memoria: bool,
+    pub incluir_skills: bool,
     pub max_turns: usize,
     pub timeout_tool: Duration,
     pub contexto: ContextoConfig,
@@ -69,6 +80,17 @@ impl Default for TurnoConfig {
              * primero; el fallback global solo se usa si Glory falla. */
             provider: "glory".into(),
             modelo: "commandcode".into(),
+            temperatura: 0.2,
+            max_tokens: 2048,
+            idioma: "es".into(),
+            incluir_notas: false,
+            incluir_tareas_completadas: false,
+            incluir_habitos_pausados: false,
+            permitir_busqueda_web: true,
+            permitir_recordatorios: true,
+            prompt_sistema: String::new(),
+            incluir_memoria: true,
+            incluir_skills: true,
             max_turns: 10,
             timeout_tool: Duration::from_secs(15),
             contexto: ContextoConfig::default(),
@@ -122,7 +144,16 @@ impl AgentRuntime {
     ) -> Result<(), AppError> {
         let inicio = std::time::Instant::now();
         let mut mensajes: Vec<AiMessage> = Vec::new();
-        mensajes.push(AiMessage::texto("system", SYSTEM_PROMPT));
+        let mut prompt = self.turno_config.prompt_sistema.clone();
+        if prompt.trim().is_empty() {
+            prompt = SYSTEM_PROMPT.to_string();
+        }
+        prompt.push_str(&format!("\nIdioma de respuesta: {}.", self.turno_config.idioma));
+        prompt.push_str(&format!("\nPermisos activos: búsqueda web={}, recordatorios={}.", self.turno_config.permitir_busqueda_web, self.turno_config.permitir_recordatorios));
+        if self.turno_config.incluir_notas || self.turno_config.incluir_tareas_completadas || self.turno_config.incluir_habitos_pausados {
+            prompt.push_str(&format!("\nContexto solicitado: notas={}, tareas completadas={}, hábitos pausados={}.", self.turno_config.incluir_notas, self.turno_config.incluir_tareas_completadas, self.turno_config.incluir_habitos_pausados));
+        }
+        mensajes.push(AiMessage::texto("system", prompt));
         mensajes.extend(historial);
         mensajes.push(AiMessage::texto("user", mensaje_usuario.clone()));
 
@@ -154,7 +185,18 @@ impl AgentRuntime {
             }
             mensajes = mensajes_prep;
 
-            let schemas = self.registry.schemas_openai(None);
+            let mut ids = self.registry.ids();
+            if !self.turno_config.permitir_busqueda_web {
+                ids.retain(|id| *id != "web_search");
+            }
+            if !self.turno_config.permitir_recordatorios {
+                ids.retain(|id| *id != "crear_recordatorio");
+            }
+            if !self.turno_config.incluir_skills {
+                ids.retain(|id| !id.starts_with("skill_"));
+            }
+            let ids_ref: Vec<&str> = ids;
+            let schemas = self.registry.schemas_openai(Some(&ids_ref));
             let mut ultimo_contenido = String::new();
             let tool_calls = {
                 let mut on_token = |texto: &str| {
@@ -350,8 +392,8 @@ impl AgentRuntime {
                 &self.turno_config.provider,
                 &self.turno_config.modelo,
                 AiChatOptions {
-                    temperature: 0.2,
-                    max_tokens: 2048,
+                    temperature: self.turno_config.temperatura,
+                    max_tokens: self.turno_config.max_tokens,
                 },
                 schemas.to_vec(),
                 on_token,

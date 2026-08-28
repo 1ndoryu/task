@@ -33,7 +33,8 @@
     flex-direction: column;
     overflow: hidden;
     box-shadow: var(--dashboard-sombraElevada, 0 16px 48px rgba(0, 0, 0, 0.5));
-    font-family: var(--dashboard-fuenteBase, inherit);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+
     font-size: var(--dashboard-tamanoBase, 13px);
     color: var(--dashboard-textoNormal, #e8e8ea);
     animation: deslizarModal 0.2s ease-out;
@@ -179,7 +180,30 @@
 }
 
 /* ---- Input de modelo ---- */
-.modalConfigAgenteInput {
+.modalConfigAgenteCampo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMini, 4px);
+    color: var(--dashboard-textoSecundario);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+}
+
+.modalConfigAgenteCampo output {
+    color: var(--dashboard-textoActivo);
+}
+
+.modalConfigAgenteCheck {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm, 6px);
+    color: var(--dashboard-textoNormal);
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+}
+
+.modalConfigAgenteInput,
+.modalConfigAgenteCampo input,
+.modalConfigAgenteCampo select,
+.modalConfigAgenteCampo textarea {
     width: 100%;
     box-sizing: border-box;
     background: var(--dashboard-fondo, #16161a);
@@ -192,13 +216,27 @@
     transition: border-color 0.15s ease;
 }
 
-.modalConfigAgenteInput:focus {
+.modalConfigAgenteInput:focus,
+.modalConfigAgenteCampo input:focus,
+.modalConfigAgenteCampo select:focus,
+.modalConfigAgenteCampo textarea:focus {
     outline: none;
     border-color: var(--dashboard-acento, #7c9cff);
 }
 
 .modalConfigAgenteInput::placeholder {
     color: var(--dashboard-textoApagado, #808080);
+}
+
+.modalConfigAgenteTextarea {
+    min-height: 90px;
+    resize: vertical;
+    line-height: 1.4;
+}
+
+.modalConfigAgenteCampo input[type="range"] {
+    accent-color: var(--dashboard-acento);
+    padding: 0;
 }
 
 .modalConfigAgenteSeccion code {

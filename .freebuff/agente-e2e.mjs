@@ -289,6 +289,45 @@ async function leerSSE(res) {
   }
 
   {
+    /* Configuración avanzada: todos los campos del contrato llegan al stream.
+     * Glory/commandcode no se sobreescribe aquí: el backend debe elegirlo por
+     * defecto y devolver error honesto si el endpoint está caído. */
+    console.log('10. Configuración avanzada del stream');
+    const r = await fetch(`${BASE}/agente/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: headerCookie(),
+        'x-csrf-token': cookies['csrf_token'] || '',
+      },
+      body: JSON.stringify({
+        conversacionId,
+        mensaje: 'Prueba de configuración avanzada',
+        temperatura: 0.7,
+        max_tokens: 512,
+        idioma: 'es',
+        incluir_notas: true,
+        incluir_tareas_completadas: true,
+        incluir_habitos_pausados: true,
+        permitir_busqueda_web: false,
+        permitir_recordatorios: false,
+        prompt_sistema: 'Responde de forma breve.',
+        max_turns: 5,
+        timeout_tool_secs: 10,
+      }),
+    });
+    assert(r.status === 200, `stream acepta configuración avanzada (got ${r.status})`);
+    const eventos = await leerSSE(r);
+    const errorEv = eventos.find((e) => e.tipo === 'error');
+    const fin = eventos.find((e) => e.tipo === 'done');
+    assert(!!errorEv || !!fin, 'configuración avanzada termina con error honesto o done');
+    if (errorEv) {
+      assert(errorEv.retryable === true, 'fallo de proveedor marcado retryable');
+      assert(String(errorEv.mensaje).includes('glory/commandcode'), 'el default efectivo intentó glory/commandcode');
+    }
+  }
+
+  {
     /* Fase 3 v1: memoria persistente (CRUD). Verifica el contrato de
      * memoria que se inyecta como contexto en agente_stream (system). El
      * upsert se prueba poniendo dos veces la misma clave y confirmando que

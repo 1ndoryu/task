@@ -17,6 +17,24 @@ export interface ConversacionAgente {
     modo: ModoAgente;
 }
 
+export interface ConfigAgente {
+    modo: ModoAgente;
+    modelo: string;
+    temperatura: number;
+    maxTokens: number;
+    idioma: 'es' | 'en' | 'pt' | 'fr';
+    incluirNotas: boolean;
+    incluirTareasCompletadas: boolean;
+    incluirHabitosPausados: boolean;
+    permitirBusquedaWeb: boolean;
+    permitirRecordatorios: boolean;
+    promptSistema: string;
+    maxTurns: number;
+    timeoutToolSecs: number;
+    incluirMemoria: boolean;
+    incluirSkills: boolean;
+}
+
 export interface MensajeConversacion {
     id: number;
     rol: 'user' | 'assistant' | 'system' | 'tool';
@@ -71,12 +89,33 @@ export async function cargarHistorial(id: string): Promise<MensajeConversacion[]
  * por cada evento tipado; `onError` con el error real del backend. Devuelve
  * una promesa que resuelve al terminar (evento done) o con el error.
  */
+export function construirPayloadStream(conversacionId: string, mensaje: string, config: Partial<ConfigAgente> = {}): Record<string, unknown> {
+    return {
+        conversacionId,
+        mensaje,
+        ...(config.modelo ? {modelo: config.modelo} : {}),
+        ...(config.temperatura !== undefined ? {temperatura: config.temperatura} : {}),
+        ...(config.maxTokens !== undefined ? {max_tokens: config.maxTokens} : {}),
+        ...(config.idioma ? {idioma: config.idioma} : {}),
+        ...(config.incluirNotas !== undefined ? {incluir_notas: config.incluirNotas} : {}),
+        ...(config.incluirTareasCompletadas !== undefined ? {incluir_tareas_completadas: config.incluirTareasCompletadas} : {}),
+        ...(config.incluirHabitosPausados !== undefined ? {incluir_habitos_pausados: config.incluirHabitosPausados} : {}),
+        ...(config.permitirBusquedaWeb !== undefined ? {permitir_busqueda_web: config.permitirBusquedaWeb} : {}),
+        ...(config.permitirRecordatorios !== undefined ? {permitir_recordatorios: config.permitirRecordatorios} : {}),
+        ...(config.promptSistema ? {prompt_sistema: config.promptSistema} : {}),
+        ...(config.maxTurns !== undefined ? {max_turns: config.maxTurns} : {}),
+        ...(config.timeoutToolSecs !== undefined ? {timeout_tool_secs: config.timeoutToolSecs} : {}),
+        ...(config.incluirMemoria !== undefined ? {incluir_memoria: config.incluirMemoria} : {}),
+        ...(config.incluirSkills !== undefined ? {incluir_skills: config.incluirSkills} : {}),
+    };
+}
+
 export async function enviarMensajeAgente(
     conversacionId: string,
     mensaje: string,
     onEvento: (evento: EventoAgente) => void,
     signal?: AbortSignal,
-    modelo?: string,
+    config: Partial<ConfigAgente> = {},
 ): Promise<void> {
     const respuesta = await fetch('/api/agente/stream', {
         method: 'POST',
@@ -84,7 +123,7 @@ export async function enviarMensajeAgente(
             'Content-Type': 'application/json',
             'X-CSRF-Token': obtenerTokenCsrf(),
         },
-        body: JSON.stringify({conversacionId, mensaje, ...(modelo ? {modelo} : {})}),
+        body: JSON.stringify(construirPayloadStream(conversacionId, mensaje, config)),
         signal,
     });
 

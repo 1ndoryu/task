@@ -35,6 +35,19 @@ pub struct AgenteStreamRequest {
     pub mensaje: String,
     pub provider: Option<String>,
     pub modelo: Option<String>,
+    pub temperatura: Option<f32>,
+    pub max_tokens: Option<u32>,
+    pub idioma: Option<String>,
+    pub incluir_notas: Option<bool>,
+    pub incluir_tareas_completadas: Option<bool>,
+    pub incluir_habitos_pausados: Option<bool>,
+    pub permitir_busqueda_web: Option<bool>,
+    pub permitir_recordatorios: Option<bool>,
+    pub prompt_sistema: Option<String>,
+    pub max_turns: Option<usize>,
+    pub timeout_tool_secs: Option<u64>,
+    pub incluir_memoria: Option<bool>,
+    pub incluir_skills: Option<bool>,
 }
 
 /// Límite por usuario/hora de turnos de agente (reutiliza el patrón del chat).
@@ -87,11 +100,25 @@ pub async fn agente_stream(
      * vía que el usuario prefiere por ser la que siempre funciona). Glory va
      * PRIMERO como candidato via provider/modelo default; solo cae al fallback
      * global si Glory falla. El front puede sobreescribir provider/modelo. */
+    let defaults = TurnoConfig::default();
     let runtime = AgentRuntime::nuevo(TurnoConfig {
         provider: req.provider.unwrap_or_else(|| "glory".into()),
         modelo: req.modelo.unwrap_or_else(|| "commandcode".into()),
+        temperatura: req.temperatura.unwrap_or(defaults.temperatura).clamp(0.0, 2.0),
+        max_tokens: req.max_tokens.unwrap_or(defaults.max_tokens).clamp(64, 4096),
+        idioma: validar_idioma(req.idioma)?,
+        incluir_notas: req.incluir_notas.unwrap_or(false),
+        incluir_tareas_completadas: req.incluir_tareas_completadas.unwrap_or(false),
+        incluir_habitos_pausados: req.incluir_habitos_pausados.unwrap_or(false),
+        permitir_busqueda_web: req.permitir_busqueda_web.unwrap_or(true),
+        permitir_recordatorios: req.permitir_recordatorios.unwrap_or(true),
+        prompt_sistema: validar_prompt_sistema(req.prompt_sistema)?,
+        incluir_memoria: req.incluir_memoria.unwrap_or(true),
+        incluir_skills: req.incluir_skills.unwrap_or(true),
+        max_turns: req.max_turns.unwrap_or(defaults.max_turns).clamp(1, 10),
+        timeout_tool: std::time::Duration::from_secs(req.timeout_tool_secs.unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
         modo,
-        ..TurnoConfig::default()
+        ..defaults
     });
 
     /* Persistir el turno como ejecutando y el mensaje del usuario ANTES de
@@ -117,8 +144,10 @@ pub async fn agente_stream(
     /* [29-08-2026] Fase 3 (memoria v1): inyectar la memoria persistente del
      * usuario como mensajes system al inicio del historial (tras el
      * SYSTEM_PROMPT) para que el agente recuerde preferencias/lecciones. */
-    let memoria = cargar_memoria_agente(&state.pool, auth.user_id, 50).await?;
-    historial.splice(0..0, memoria);
+    if runtime.turno_config.incluir_memoria {
+        let memoria = cargar_memoria_agente(&state.pool, auth.user_id, 50).await?;
+        historial.splice(0..0, memoria);
+    }
     let state_clone = state.clone();
     let tx_clone = tx.clone();
     let mensaje = req.mensaje.clone();
@@ -597,6 +626,22 @@ fn tipo_clave_invalido(clave: &str) -> bool {
         || clave.contains("..")
         || clave.chars().all(|c| c == '.')
         || !clave.chars().all(|c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-')
+}
+
+fn validar_idioma(idioma: Option<String>) -> Result<String, AppError> {
+    let valor = idioma.unwrap_or_else(|| "es".into());
+    if !matches!(valor.as_str(), "es" | "en" | "pt" | "fr") {
+        return Err(AppError::BadRequest("Idioma inválido (es|en|pt|fr)".into()));
+    }
+    Ok(valor)
+}
+
+fn validar_prompt_sistema(prompt: Option<String>) -> Result<String, AppError> {
+    let valor = prompt.unwrap_or_default().trim().to_string();
+    if valor.chars().count() > 4000 {
+        return Err(AppError::BadRequest("El prompt de sistema no puede exceder 4000 caracteres".into()));
+    }
+    Ok(valor)
 }
 
 pub fn routes() -> Router<AppState> {

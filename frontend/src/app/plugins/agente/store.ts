@@ -8,7 +8,7 @@
  */
 
 import {create} from 'zustand';
-import type {ConversacionAgente, MensajeConversacion, ModoAgente} from './service';
+import type {ConversacionAgente, ConfigAgente, MensajeConversacion} from './service';
 import {
     cargarHistorial,
     crearConversacion,
@@ -35,16 +35,16 @@ export interface TabAgente {
     error: string | null;
 }
 
-/* Config del agente persistida en localStorage (solo frontend v1: el modo
- * viaja en la creación de conversación y el modelo en el stream). El backend
- * decide proveedor/modelo por env/request; no simulamos maestros que no se
- * respeten. */
+/* Configuración del agente persistida en localStorage y enviada en cada turno. */
 const CLAVE_CONFIG = 'glory-agente-config';
 
-export interface ConfigAgente {
-    modo: ModoAgente;
-    modelo: string;
-}
+const CONFIG_DEFECTO: ConfigAgente = {
+    modo: 'predeterminado', modelo: 'commandcode', temperatura: 0.2, maxTokens: 2048,
+    idioma: 'es', incluirNotas: false, incluirTareasCompletadas: false,
+    incluirHabitosPausados: false, permitirBusquedaWeb: true,
+    permitirRecordatorios: true, promptSistema: '', maxTurns: 10,
+    timeoutToolSecs: 15, incluirMemoria: true, incluirSkills: true,
+};
 
 function cargarConfig(): ConfigAgente {
     try {
@@ -52,16 +52,24 @@ function cargarConfig(): ConfigAgente {
         if (crudo) {
             const parsed = JSON.parse(crudo) as Partial<ConfigAgente>;
             return {
-                modo: parsed.modo === 'meta' || parsed.modo === 'autonomo' || parsed.modo === 'predeterminado'
-                    ? parsed.modo
-                    : 'predeterminado',
-                modelo: typeof parsed.modelo === 'string' ? parsed.modelo : '',
+                ...CONFIG_DEFECTO,
+                ...parsed,
+                modo: parsed.modo === 'meta' || parsed.modo === 'autonomo' || parsed.modo === 'predeterminado' ? parsed.modo : 'predeterminado',
+                modelo: typeof parsed.modelo === 'string' && parsed.modelo.trim() ? parsed.modelo.replace(/^glory\//, '') : CONFIG_DEFECTO.modelo,
+                temperatura: typeof parsed.temperatura === 'number' ? Math.max(0, Math.min(2, parsed.temperatura)) : CONFIG_DEFECTO.temperatura,
+                maxTokens: typeof parsed.maxTokens === 'number' ? Math.max(64, Math.min(4096, Math.round(parsed.maxTokens))) : CONFIG_DEFECTO.maxTokens,
+                maxTurns: typeof parsed.maxTurns === 'number' ? Math.max(1, Math.min(10, Math.round(parsed.maxTurns))) : CONFIG_DEFECTO.maxTurns,
+                timeoutToolSecs: typeof parsed.timeoutToolSecs === 'number' ? Math.max(1, Math.min(15, Math.round(parsed.timeoutToolSecs))) : CONFIG_DEFECTO.timeoutToolSecs,
+                idioma: parsed.idioma === 'es' || parsed.idioma === 'en' || parsed.idioma === 'pt' || parsed.idioma === 'fr' ? parsed.idioma : 'es',
+                promptSistema: typeof parsed.promptSistema === 'string' ? parsed.promptSistema.slice(0, 4000) : '',
+                incluirMemoria: typeof parsed.incluirMemoria === 'boolean' ? parsed.incluirMemoria : true,
+                incluirSkills: typeof parsed.incluirSkills === 'boolean' ? parsed.incluirSkills : true,
             };
         }
     } catch {
         /* configuración corrupta: usar defaults */
     }
-    return {modo: 'predeterminado', modelo: ''};
+    return {...CONFIG_DEFECTO};
 }
 
 interface EstadoAgente {
@@ -301,7 +309,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                     }));
                 },
                 signal,
-                get().config.modelo || undefined,
+                get().config,
             );
         } catch (error) {
             const mensajeError = error instanceof Error ? error.message : 'Error desconocido del agente';
@@ -346,6 +354,15 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
 
     establecerConfig: (config) => {
         const nueva = {...get().config, ...config};
+        nueva.modelo = nueva.modelo.trim().replace(/^glory\//, '') || 'commandcode';
+        nueva.temperatura = Math.max(0, Math.min(2, Number(nueva.temperatura) || 0));
+        nueva.maxTokens = Math.max(64, Math.min(4096, Math.round(Number(nueva.maxTokens) || 2048)));
+        nueva.maxTurns = Math.max(1, Math.min(10, Math.round(Number(nueva.maxTurns) || 10)));
+        nueva.timeoutToolSecs = Math.max(1, Math.min(15, Math.round(Number(nueva.timeoutToolSecs) || 15)));
+        nueva.promptSistema = nueva.promptSistema.trim().slice(0, 4000);
+        nueva.idioma = ['es', 'en', 'pt', 'fr'].includes(nueva.idioma) ? nueva.idioma : 'es';
+        nueva.incluirMemoria = Boolean(nueva.incluirMemoria);
+        nueva.incluirSkills = Boolean(nueva.incluirSkills);
         if (nueva.modo !== 'predeterminado' && nueva.modo !== 'meta' && nueva.modo !== 'autonomo') {
             nueva.modo = 'predeterminado';
         }
