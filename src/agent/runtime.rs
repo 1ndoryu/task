@@ -473,6 +473,35 @@ pub async fn cargar_historial(
         .collect())
 }
 
+/// [29-08-2026] Memoria persistente del usuario (Fase 3, v1): selecciona las
+/// memorias más recientes (hasta 50) y las expone como mensajes `system` para
+/// que el LLM las tenga en contexto (el agente "recuerda" preferencias dichas
+/// en sesiones anteriores). Se inserta al inicio del historial, tras el
+/// SYSTEM_PROMPT. La búsqueda semántica (tsvector) y la automejora quedan como
+/// iteración posterior; esta v1 es el bloque persistente verificable.
+pub async fn cargar_memoria_agente(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    limite: i64,
+) -> Result<Vec<AiMessage>, AppError> {
+    let filas: Vec<String> = sqlx::query_scalar(
+        "SELECT clave || ': ' || contenido FROM agente_memoria
+         WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT $2",
+    )
+    .bind(user_id)
+    .bind(limite)
+    .fetch_all(pool)
+    .await?;
+    if filas.is_empty() {
+        return Ok(Vec::new());
+    }
+    let bloque = format!(
+        "Memoria persistente del usuario (preferencias/lecciones de sesiones anteriores):\n{}",
+        filas.join("\n")
+    );
+    Ok(vec![AiMessage::texto("system", bloque)])
+}
+
 /// [29-08-2026] Fase 2: construye el sandbox de archivos desde el entorno.
 /// Solo AGENTE_MODO=local; la raíz viene de AGENTE_WORKSPACE_ROOT (o el cwd
 /// como fallback para dev). Fail-closed: cualquier error → None (sin tools).

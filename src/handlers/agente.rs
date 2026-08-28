@@ -21,8 +21,8 @@ use tokio_stream::wrappers::ReceiverStream;
 use uuid::Uuid;
 
 use crate::agent::runtime::{
-    cargar_historial, guardar_mensaje_usuario, persistir_turno, AgenteEvento, AgentRuntime,
-    TurnoConfig,
+    cargar_historial, cargar_memoria_agente, guardar_mensaje_usuario, persistir_turno, AgenteEvento,
+    AgentRuntime, TurnoConfig,
 };
 use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
@@ -108,7 +108,12 @@ pub async fn agente_stream(
     .await?;
     guardar_mensaje_usuario(&state.pool, req.conversacionId, auth.user_id, &req.mensaje).await?;
 
-    let historial = cargar_historial(&state.pool, req.conversacionId, auth.user_id).await?;
+    let mut historial = cargar_historial(&state.pool, req.conversacionId, auth.user_id).await?;
+    /* [29-08-2026] Fase 3 (memoria v1): inyectar la memoria persistente del
+     * usuario como mensajes system al inicio del historial (tras el
+     * SYSTEM_PROMPT) para que el agente recuerde preferencias/lecciones. */
+    let memoria = cargar_memoria_agente(&state.pool, auth.user_id, 50).await?;
+    historial.splice(0..0, memoria);
     let state_clone = state.clone();
     let tx_clone = tx.clone();
     let mensaje = req.mensaje.clone();
@@ -500,6 +505,95 @@ pub async fn eliminar_tarea_programada(
     Ok(axum::http::StatusCode::NO_CONTENT)
 }
 
+#[derive(Debug, serde::Serialize)]
+#[allow(non_snake_case)]
+pub struct MemoriaResponse {
+    pub clave: String,
+    pub contenido: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+pub struct GuardarMemoriaRequest {
+    pub clave: String,
+    pub contenido: String,
+}
+
+/// Lista la memoria persistente del usuario (preferencias/lecciones).
+pub async fn listar_memoria(
+    State(state): State<AppState>,
+    auth: AuthUser,
+) -> Result<Json<Vec<MemoriaResponse>>, AppError> {
+    let filas: Vec<(String, String)> = sqlx::query_as(
+        "SELECT clave, contenido FROM agente_memoria
+         WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT 200",
+    )
+    .bind(auth.user_id)
+    .fetch_all(&state.pool)
+    .await?;
+    Ok(Json(
+        filas.into_iter()
+            .map(|(clave, contenido)| MemoriaResponse { clave, contenido })
+            .collect(),
+    ))
+}
+
+/// U ata actualiza una entrada de memoria (upsert por clave, idempotente).
+pub async fn guardar_memoria(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<GuardarMemoriaRequest>,
+) -> Result<Json<MemoriaResponse>, AppError> {
+    let clave = req.clave.trim();
+    let contenido = req.contenido.trim();
+    if clave.is_empty() || tipo_clave_invalido(clave) {
+        return Err(AppError::BadRequest("Clave inválida (1-128 chars alfanumérica/._-".into()));
+    }
+    if contenido.is_empty() || contenido.chars().count() > 4000 {
+        return Err(AppError::BadRequest("El contenido debe tener entre 1 y 4000 caracteres".into()));
+    }
+    sqlx::query(
+        "INSERT INTO agente_memoria (user_id, clave, contenido)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (user_id, clave)
+         DO UPDATE SET contenido = EXCLUDED.contenido, actualizado_en = NOW()",
+    )
+    .bind(auth.user_id)
+    .bind(clave)
+    .bind(contenido)
+    .execute(&state.pool)
+    .await?;
+    Ok(Json(MemoriaResponse { clave: clave.into(), contenido: contenido.into() }))
+}
+
+/// Borra una entrada de memoria (solo del propietario).
+pub async fn eliminar_memoria(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    axum::extract::Path(clave): axum::extract::Path<String>,
+) -> Result<axum::http::StatusCode, AppError> {
+    let borrada = sqlx::query("DELETE FROM agente_memoria WHERE user_id = $1 AND clave = $2")
+        .bind(auth.user_id)
+        .bind(&clave)
+        .execute(&state.pool)
+        .await?
+        .rows_affected();
+    if borrada == 0 {
+        return Err(AppError::NotFound("Entrada de memoria no encontrada".into()));
+    }
+    Ok(axum::http::StatusCode::NO_CONTENT)
+}
+
+/// Valida una clave de memoria: 1-128 chars, alfanumérico + . _ -
+/// Rechaza claves de solo puntos o con `..` (para evitar ambigüedad de ruta
+/// en el DELETE /:clave y colisiones de segmentos).
+fn tipo_clave_invalido(clave: &str) -> bool {
+    clave.len() > 128
+        || clave.contains("..")
+        || clave.chars().all(|c| c == '.')
+        || !clave.chars().all(|c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-')
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/agente/stream", post(agente_stream))
@@ -520,5 +614,13 @@ pub fn routes() -> Router<AppState> {
         .route(
             "/agente/tareas-programadas/:id",
             axum::routing::delete(eliminar_tarea_programada),
+        )
+        .route(
+            "/agente/memoria",
+            axum::routing::get(listar_memoria).put(guardar_memoria),
+        )
+        .route(
+            "/agente/memoria/:clave",
+            axum::routing::delete(eliminar_memoria),
         )
 }

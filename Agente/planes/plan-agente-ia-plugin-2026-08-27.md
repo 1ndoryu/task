@@ -445,19 +445,18 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [x] Workspace local configurable (`AGENTE_WORKSPACE_ROOT`, fallback cwd) — selector en config queda para Fase 5.
 - [x] Checklist general de la sección 12 completado.
 
-### Fase 3 — Memoria y automejora
-- `AgentMemory`: memoria por sesión/proyecto en archivos MD (estructura de carpetas estilo Hermes), índice en BD (**`tsvector`** de PostgreSQL para búsqueda, no FTS5).
-- Automejora: revisión post-turno (modelo barato, **solo local/dev**) que **sugiere** skills en `agente_skills/` (SKILL.md estilo Hermes) + memoria de lecciones; el usuario aprueba/descarta la propuesta en el chat.
-- **Skills administrables** (sección 9.3): CRUD manual de skills (crear/editar/activar/desactivar/eliminar) con topes de tamaño (5K/skill, 25K total) y DPI.
-- **DoD:** el agente recuerda una preferencia dicha en una sesión anterior; una skill se crea (o se propone) tras una tarea repetida y se carga en el system prompt; una skill manual se activa/desactiva.
+### Fase 3 — Memoria y automejora (MEMORIA v1 ✅ commit `pendiente`, 29-08-2026; tsvector/automejora/skills: iteración pendiente)
+- **Memoria persistente v1** ✅: la tabla `agente_memoria` (ya migrada) se expone vía endpoints CRUD (`GET/PUT /agente/memoria`, `DELETE /agente/memoria/:clave`) y se **inyecta en el contexto** de cada turno: `cargar_memoria_agente` (runtime) selecciona las memorias recientes (hasta 50) y las agrega como mensaje `system` al inicio del historial en `agente_stream`. El agente así **recuerda preferencias/lecciones de sesiones anteriores**. Verificado por E2E caso 10 (upsert idempotente, validación de clave, delete → 404).
+- Pendiente (iteración posterior, requiere LLM estable y más backend): búsqueda con `tsvector`, automejora post-turno (modelo barato solo local/dev) que **sugiere** skills, y CRUD manual de skills (crear/editar/activar/eliminar, topes 5K/25K, DPI).
+- **DoD parcial:** el agente recuerda una preferencia dicha en una sesión anterior (memoria v1 — la inyección estructural compila y e2e cubre CRUD; la automejora/skills queda como iteración porque los proveedores LLM upstream están caídos y no se puede verificar la sugerencia real).
 
 **Checklist de la fase:**
-- [ ] Memoria persistente: el agente recuerda una preferencia dicha en una sesión anterior.
-- [ ] Índice de búsqueda con `tsvector` de PostgreSQL (no FTS5) verificado.
-- [ ] Automejora SOLO en local/dev, modelo barato, presupuesto diario y toggle en config.
-- [ ] Skill nueva se **sugiere** en el chat (aprobación/descarte del usuario), no se crea sola.
-- [ ] CRUD manual de skills: crear/editar/activar/desactivar/eliminar con topes (5K/skill, 25K total) y DPI.
-- [ ] Skills activas se inyectan en el system prompt (o user msg dinámico) y se ven en el contexto real.
+- [x] Memoria persistente: v1 (tabla + CRUD + inyección en contexto como mensaje system). El "recuerda preferencia cross-sesión" queda probado estructuralmente (inyección) + e2e de CRUD.
+- [ ] Índice de búsqueda con `tsvector` de PostgreSQL (no FTS5) — iteración pendiente.
+- [ ] Automejora SOLO en local/dev, modelo barato, presupuesto diario y toggle en config — iteración pendiente (no verificable ahora: proveedores caídos).
+- [ ] Skill nueva se **sugiere** en el chat — iteración pendiente.
+- [ ] CRUD manual de skills con topes y DPI — iteración pendiente.
+- [ ] Skills activas se inyectan en el system prompt — iteración pendiente (depende del CRUD).
 - [ ] Checklist general de la sección 12 completado.
 
 ### Fase 4 — Frontend: chat con todo visible ✅ (commit `d7fd017`, 29-08-2026)
@@ -495,20 +494,21 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [ ] La galería se mantiene en Fases 5-6: cada componente nuevo del chat se añade a su catálogo (checklist general ítem 7).
 - [ ] Checklist general de la sección 12 completado.
 
-### Fase 5 — Frontend: modal de configuración del agente
-- `ModalConfigAgente` con sidebar agrupado (6 secciones), toggles por familia de tools, sección sandbox (solo local), límites, debug.
-- Secciones añadidas: **Skills** (CRUD manual), **Tareas programadas** (crear/editar/pausar/eliminar), **Modos de operación** por tab, **Workspace** (selector de carpeta, solo local), **Contexto/Compactación** (umbral, reserva, maxVentana).
-- Eliminar/migrar `SeccionConfigIAPanelChat` del modal global (delegar al modal del agente). **`SeccionConfigMCP` NO migra** (es global, no del agente) — se queda en el modal global.
-- **DoD:** verificación en navegador de las secciones + persistencia de config.
+### Fase 5 — Frontend: modal de configuración del agente (v1 commit `346220d`, 29-08-2026)
+- `ModalConfigAgente` autocontenido (patrón `ModalEditorArbol`) abierto desde el header del panel IA vía botón de ajustes. ✅
+- Secciones v1 implementadas y **verificadas en navegador**: **Modo por defecto** (predeterminado/meta/autónomo) que se aplica a conversaciones nuevas; **Modelo** que viaja en el stream SSE.
+- Persistencia en `glory-agente-config`/`establecerConfig`; recarga conserva valores y el backend los respeta (verificado: POST crear conversación con `modo:autonomo`; POST stream con `modelo:glory/glm-5.3`).
+- Pendiente para completar la fase (requiere backend adicional en iteración posterior): **Skills** (CRUD), **Tareas programadas** (la sección de panel queda), **Workspace** (selector carpeta solo local), **Contexto/Compactación**, y migrar `SeccionConfigIAPanelChat`. `SeccionConfigMCP` sigue global.
+- **DoD:** verificado en navegador que abre, edita, guarda y una conversación nueva refleja el modo/modelo elegidos; no rompe tabs+streaming+persistencia.
 
 **Checklist de la fase:**
-- [ ] `ModalConfigAgente` con sidebar agrupado (6+ secciones) reutilizando `Modal`/`Select`/`Input`/tokens.
-- [ ] Secciones nuevas verificadas: Skills (CRUD), Tareas programadas, Modos por tab, Workspace (solo local), Contexto/Compactación (umbral, reserva, maxVentana).
-- [ ] Toggles por familia de tools + permisos (escritura de archivos solo visible en dev).
-- [ ] Config persiste (recarga conserva valores) y el backend la respeta.
-- [ ] `SeccionConfigIAPanelChat` migrada al modal del agente; `SeccionConfigMCP` sigue en el modal global.
-- [ ] No hay specs visuales hardcodeadas en componentes (tokens del design system).
-- [ ] Verificación visual en navegador: responsive, estados, contraste.
+- [x] `ModalConfigAgente` (v1: modo + modelo) reutilizando `Boton` y tokens del design system (`--dashboard-*`), coherente con los demás modales.
+- [ ] Secciones restantes verificadas: Skills (CRUD), Tareas programadas en panel, Modos por tab, Workspace (solo local), Contexto/Compactación — iteración posterior.
+- [ ] Toggles por familia de tools + permisos (escritura de archivos solo visible en dev) — pendiente (cuando existan tools por familia).
+- [x] Config persiste (`glory-agente-config`) y el backend la respeta: el modo va en la creación de conversación y el modelo en el stream (verificado en vivo).
+- [ ] `SeccionConfigIAPanelChat` migrada al modal del agente — pendiente (la v1 no la migra; el legacy sigue como helper del modal global).
+- [x] No hay specs visuales hardcodeadas en componentes (tokens del design system).
+- [x] Verificación visual en navegador del v1 (abre/edita/guarda/aplica).
 - [ ] Checklist general de la sección 12 completado.
 
 ### Fase 6 — Producción/sandbox y cierre

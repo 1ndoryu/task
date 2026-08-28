@@ -288,6 +288,40 @@ async function leerSSE(res) {
     }
   }
 
+  {
+    /* Fase 3 v1: memoria persistente (CRUD). Verifica el contrato de
+     * memoria que se inyecta como contexto en agente_stream (system). El
+     * upsert se prueba poniendo dos veces la misma clave y confirmando que
+     * queda UNA sola entrada con el contenido actualizado (idempotencia). */
+    console.log('10. Memoria persistente (CRUD)');
+    const clave = `e2e-mem-${Date.now()}`;
+    let r = await api('/agente/memoria', {
+      method: 'PUT',
+      body: { clave, contenido: 'preferencia E2E v1' },
+    });
+    assert(r.status === 200, `guardar memoria (got ${r.status})`);
+    // Upsert idempotente: misma clave, otro contenido → sigue una sola.
+    r = await api('/agente/memoria', {
+      method: 'PUT',
+      body: { clave, contenido: 'preferencia E2E v1 actualizada' },
+    });
+    assert(r.status === 200, `upsert memoria (got ${r.status})`);
+    let lista = JSON.parse((await api('/agente/memoria')).body);
+    const entradas = lista.filter((m) => m.clave === clave);
+    assert(entradas.length === 1, `upsert idempotente (1 entrada, hay ${entradas.length})`);
+    assert(entradas[0].contenido === 'preferencia E2E v1 actualizada', 'el contenido se actualizó');
+    // Validación: clave vacía/illegal rechazada.
+    r = await api('/agente/memoria', { method: 'PUT', body: { clave: '..', contenido: 'x' } });
+    assert(r.status === 400, `clave inválida rechazada (got ${r.status})`);
+    // Eliminar y confirmar 404 en un segundo intento.
+    r = await api(`/agente/memoria/${clave}`, { method: 'DELETE' });
+    assert(r.status === 204, `eliminar memoria (got ${r.status})`);
+    r = await api(`/agente/memoria/${clave}`, { method: 'DELETE' });
+    assert(r.status === 404, `eliminar dos veces -> 404 (got ${r.status})`);
+    lista = JSON.parse((await api('/agente/memoria')).body);
+    assert(!lista.some((m) => m.clave === clave), 'la memoria eliminada ya no está en la lista');
+  }
+
   console.log(`\n${fallos === 0 ? 'AGENTE-E2E OK' : `${fallos} FALLO(S)`}`);
   process.exit(fallos === 0 ? 0 : 1);
 }
