@@ -1,6 +1,6 @@
 /* Configuración del agente: todos los valores se persisten y se envían al runtime. */
 import {useEffect, useState} from 'react';
-import {Bot, Cpu, Check, Plus, Trash2, Pencil, X} from 'lucide-react';
+import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Check, Plus, Trash2, Pencil, X} from 'lucide-react';
 import {useAgenteStore} from './store';
 import {listarSkills, crearSkill, actualizarSkill, eliminarSkill} from './service';
 import type {ConfigAgente, SkillAgente} from './service';
@@ -83,7 +83,7 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                 </div>
                 <div className="modalConfigAgenteCuerpo">
                     <section className="modalConfigAgenteSeccion">
-                        <h3 className="modalConfigAgenteSeccionTitulo">Modo por defecto</h3>
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Route size={12}/> Modo por defecto</h3>
                         <div className="modalConfigAgenteOpciones" role="radiogroup" aria-label="Modo por defecto">
                             {MODOS.map(m => <button key={m.id} type="button" role="radio" aria-checked={draft.modo === m.id} className={`modalConfigAgenteOpcion ${draft.modo === m.id ? 'modalConfigAgenteOpcion--activa' : ''}`} onClick={() => actualizar('modo', m.id)}><span className="modalConfigAgenteOpcionRadio">{draft.modo === m.id && <Check size={12}/>}</span><span className="modalConfigAgenteOpcionTexto"><span className="modalConfigAgenteOpcionNombre">{m.nombre}</span><span className="modalConfigAgenteOpcionDesc">{m.descripcion}</span></span></button>)}
                         </div>
@@ -93,19 +93,22 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                         <label className="modalConfigAgenteCampo">Proveedor
                             <select className="modalConfigAgenteInput" value="glory" disabled><option value="glory">Glory API · ruta auto</option></select>
                         </label>
+                        {/* El backend fija provider/modelo a Glory API / commandcode
+                         * (ruta auto → DeepSeek Flash); el campo no es editable para
+                         * no dejar un control que parezca configurable pero sea inerte. */}
                         <label className="modalConfigAgenteCampo">Modelo
-                            <input className="modalConfigAgenteInput" value={draft.modelo} onChange={e => actualizar('modelo', e.target.value.replace(/^glory\//, ''))} placeholder="commandcode" />
+                            <input className="modalConfigAgenteInput" value="commandcode" disabled />
                         </label>
                     </section>
                     <section className="modalConfigAgenteSeccion">
-                        <h3 className="modalConfigAgenteSeccionTitulo">Respuesta y límites</h3>
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Gauge size={12}/> Respuesta y límites</h3>
                         <label className="modalConfigAgenteCampo">Temperatura <output>{draft.temperatura.toFixed(1)}</output><input type="range" min="0" max="2" step="0.1" value={draft.temperatura} onChange={e => actualizar('temperatura', clamped(Number(e.target.value), 0, 2))}/></label>
                         <label className="modalConfigAgenteCampo">Máximo de tokens <output>{draft.maxTokens}</output><input type="range" min="64" max="4096" step="64" value={draft.maxTokens} onChange={e => actualizar('maxTokens', clamped(Number(e.target.value), 64, 4096))}/></label>
                         <label className="modalConfigAgenteCampo">Turnos máximos <output>{draft.maxTurns}</output><input type="range" min="1" max="10" step="1" value={draft.maxTurns} onChange={e => actualizar('maxTurns', clamped(Number(e.target.value), 1, 10))}/></label>
                         <label className="modalConfigAgenteCampo">Timeout por herramienta (segundos) <output>{draft.timeoutToolSecs}</output><input type="range" min="1" max="15" step="1" value={draft.timeoutToolSecs} onChange={e => actualizar('timeoutToolSecs', clamped(Number(e.target.value), 1, 15))}/></label>
                     </section>
                     <section className="modalConfigAgenteSeccion">
-                        <h3 className="modalConfigAgenteSeccionTitulo">Idioma y contexto</h3>
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Languages size={12}/> Idioma y contexto</h3>
                         <label className="modalConfigAgenteCampo">Idioma
                             <select className="modalConfigAgenteInput" value={draft.idioma} onChange={e => actualizar('idioma', e.target.value as ConfigAgente['idioma'])}><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select>
                         </label>
@@ -120,11 +123,11 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                         ] as const).map(([campo, etiqueta]) => <label key={campo} className="modalConfigAgenteCheck"><input type="checkbox" checked={draft[campo]} onChange={e => actualizar(campo, e.target.checked)}/>{etiqueta}</label>)}
                     </section>
                     <section className="modalConfigAgenteSeccion">
-                        <h3 className="modalConfigAgenteSeccionTitulo">Prompt de sistema</h3>
+                        <h3 className="modalConfigAgenteSeccionTitulo"><FileText size={12}/> Prompt de sistema</h3>
                         <textarea className="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={4000} value={draft.promptSistema} onChange={e => actualizar('promptSistema', e.target.value)} placeholder="Instrucciones adicionales para el agente..." />
                     </section>
                     <section className="modalConfigAgenteSeccion">
-                        <h3 className="modalConfigAgenteSeccionTitulo">Skills</h3>
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Brain size={12}/> Skills</h3>
                         <p className="modalConfigAgenteSeccionDesc">Skills del usuario que el agente inyecta como contexto cuando «Incluir skills activas» está marcado.</p>
                         {skillsError && <p className="modalConfigAgenteError" role="alert">{skillsError}</p>}
                         <div className="modalConfigAgenteSkills">
