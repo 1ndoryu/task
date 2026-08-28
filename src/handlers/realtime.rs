@@ -85,14 +85,15 @@ async fn handle_socket(socket: WebSocket, user_id: Uuid) {
                 }
             }
             event = rx.recv() => {
+                // mpsc: None significa que el canal se cerró (socket ya no publica
+                // o el hub podó el canal); se termina la conexión.
                 match event {
-                    Ok(payload) => {
+                    Some(payload) => {
                         if sender.send(Message::Text(payload.to_string())).await.is_err() {
                             break;
                         }
                     }
-                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
-                    Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+                    None => break,
                 }
             }
         }
