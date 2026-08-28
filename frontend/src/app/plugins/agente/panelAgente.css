@@ -78,22 +78,32 @@
     outline: none;
 }
 
-/* Tarjetas de herramientas */
+/* Tarjetas de herramientas (details/summary: estado + args expandibles) */
 .panelAgenteHerramientas {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 6px;
+    gap: var(--dashboard-espacioXs, 4px);
+    margin-top: var(--dashboard-espacioSm, 6px);
 }
 
 .panelAgenteHerramienta {
+    font-size: var(--dashboard-fuenteXs, 12px);
+    border-radius: var(--dashboard-radioSm, 6px);
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+    overflow: hidden;
+}
+
+.panelAgenteHerramienta summary {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: var(--dashboard-fuenteXs, 12px);
+    gap: var(--dashboard-espacioXs, 4px);
     padding: 3px 8px;
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    list-style: none;
+}
+
+.panelAgenteHerramienta summary::-webkit-details-marker {
+    display: none;
 }
 
 .panelAgenteHerramienta--ok {
@@ -104,19 +114,203 @@
     color: var(--dashboard-peligro, #c0392b);
 }
 
-.panelAgenteHerramientaResumen {
+.panelAgenteHerramientaNombre {
+    color: var(--dashboard-textoPrimario, #1a1a1a);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.panelAgenteHerramientaTexto {
     color: var(--dashboard-textoSecundario, #666);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 180px;
+}
+
+.panelAgenteHerramientaArgs {
+    margin: 0;
+    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 12px);
+    border-top: 1px solid var(--dashboard-borde, rgba(0, 0, 0, 0.08));
+    font-family: var(--dashboard-fuenteMonoespaciada, monospace);
+    font-size: var(--dashboard-fuenteXs, 12px);
+    color: var(--dashboard-textoSecundario, #666);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+/* Contexto real recibido por el agente (eventos usage/contexto) */
+.panelAgenteContexto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dashboard-espacioSm, 6px);
+    margin-top: var(--dashboard-espacioSm, 6px);
+    font-size: var(--dashboard-fuenteXs, 12px);
+    color: var(--dashboard-textoApagado, #999);
+}
+
+.panelAgenteContexto span {
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+    padding: 1px var(--dashboard-espacioSm, 6px);
+    border-radius: var(--dashboard-radioSm, 6px);
 }
 
 .panelAgentePensando {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dashboard-espacioSm, 6px);
     color: var(--dashboard-textoSecundario, #666);
     font-size: var(--dashboard-fuenteXs, 12px);
-    margin-top: 6px;
+    margin-top: var(--dashboard-espacioSm, 6px);
+}
+
+/* Tareas programadas (sección colapsable del panel) */
+.panelAgenteTareas {
+    flex-shrink: 0;
+    border-top: 1px solid var(--dashboard-borde, rgba(0, 0, 0, 0.08));
+}
+
+.panelAgenteTareasCabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm, 6px);
+    width: 100%;
+    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 12px);
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario, #666);
+    font-size: var(--dashboard-fuenteXs, 12px);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.panelAgenteTareasCabecera:hover {
+    color: var(--dashboard-textoPrimario, #1a1a1a);
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+}
+
+.panelAgenteTareasCabecera span {
+    flex: 1;
+    text-align: left;
+}
+
+.panelAgenteTareasContenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm, 6px);
+    padding: 0 var(--dashboard-espacioMd, 12px) var(--dashboard-espacioSm, 6px);
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.panelAgenteTareasVacio {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm, 6px);
+    font-size: var(--dashboard-fuenteXs, 12px);
+    color: var(--dashboard-textoApagado, #999);
+}
+
+.panelAgenteTarea {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--dashboard-espacioSm, 6px);
+    border: 1px solid var(--dashboard-borde, rgba(0, 0, 0, 0.08));
+    border-radius: var(--dashboard-radioSm, 6px);
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+}
+
+.panelAgenteTareaFila {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm, 6px);
+}
+
+.panelAgenteTareaNombre {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--dashboard-fuenteXs, 12px);
+    color: var(--dashboard-textoPrimario, #1a1a1a);
+}
+
+.panelAgenteTareaEstado {
+    font-size: var(--dashboard-fuenteXs, 12px);
+    padding: 0 var(--dashboard-espacioSm, 6px);
+    border-radius: var(--dashboard-radioSm, 6px);
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+}
+
+.panelAgenteTareaEstado--pendiente {
+    color: var(--dashboard-acento, #3b82f6);
+}
+
+.panelAgenteTareaEstado--ejecutando {
+    color: var(--dashboard-acento, #3b82f6);
+}
+
+.panelAgenteTareaEstado--completada {
+    color: var(--dashboard-exito, #27ae60);
+}
+
+.panelAgenteTareaEstado--fallida {
+    color: var(--dashboard-peligro, #c0392b);
+}
+
+.panelAgenteTareaBorrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoApagado, #999);
+    border-radius: var(--dashboard-radioSm, 6px);
+    cursor: pointer;
+}
+
+.panelAgenteTareaBorrar:hover {
+    color: var(--dashboard-peligro, #c0392b);
+    background: var(--dashboard-fondoSuave, rgba(0, 0, 0, 0.04));
+}
+
+.panelAgenteTareaMeta,
+.panelAgenteTareaResumen {
+    font-size: var(--dashboard-fuenteXs, 12px);
+    color: var(--dashboard-textoApagado, #999);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panelAgenteTareaForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm, 6px);
+    padding-top: var(--dashboard-espacioSm, 6px);
+    border-top: 1px dashed var(--dashboard-borde, rgba(0, 0, 0, 0.12));
+}
+
+.panelAgenteTareaInput {
+    width: 100%;
+    padding: var(--dashboard-espacioSm, 6px);
+    border: 1px solid var(--dashboard-borde, rgba(0, 0, 0, 0.12));
+    border-radius: var(--dashboard-radioSm, 6px);
+    background: var(--dashboard-fondoElevado, #fff);
+    color: var(--dashboard-textoPrimario, #1a1a1a);
+    font-size: var(--dashboard-fuenteXs, 12px);
+    font-family: inherit;
+    outline: none;
+}
+
+.panelAgenteTareaInput:focus {
+    border-color: var(--dashboard-primario, #3b82f6);
+}
+
+.panelAgenteTareaPrompt {
+    resize: vertical;
+    min-height: 44px;
 }

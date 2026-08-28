@@ -472,11 +472,11 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 
 **Checklist de la fase:**
 - [x] Streaming SSE visible en navegador (mensaje enviado por SSE al backend real, respuesta/error honesto renderizado).
-- [ ] Tarjetas de tool: estado (ejecutando/ok/error), args expandibles, resultado truncado, diff en `<pre>` — mejora de tarjetas (post Fase 5).
+- [x] Tarjetas de tool: estado (ejecutando/ok/error) y args expandibles (eventos `tool_start`/`tool_result` con `argumentos` en el store y render en el panel). Diff en `<pre>` para `file_write`: pendiente (requiere el evento diff en el contrato SSE).
 - [ ] Cancelación funciona y mata el loop en servidor (drop del sender en SSE; verificación dedicada pendiente).
-- [ ] Contexto real visible: ocupación %, tokens, evento `usage`, skills — pendiente de Fase 3 (skills/memoria) + mejora de tarjetas.
+- [x] Contexto real visible: evento `usage` (ocupación %, tokens prompt/compleción) y evento `contexto` (skills inyectadas) declarados en `EventoAgente`, acumulados por mensaje en el store y renderizados en el panel (este bloque).
 - [x] Tabs de conversación: crear/cerrar/cambiar; cada tab carga su historial de BD; recarga conserva el estado.
-- [ ] Tarjetas de tareas programadas + botón "reintentar" — la sección de tareas programadas en el panel queda con Fase 5.
+- [x] Sección de tareas programadas en el panel (este bloque): listar (GET), crear (POST con nombre/prompt/tipo/fecha) y eliminar (DELETE) contra el backend real; verificada en navegador (crear → aparece como pendiente con próxima ejecución, persiste tras recarga, DELETE 204 con CSRF). Botón "reintentar" del turno: pendiente.
 - [x] Historial de conversaciones cargado desde BD al reabrir (verificado: mensaje persistido + restaurado tras recarga).
 - [x] Estados vacío/carga/error sin fallos silenciosos (error honesto de proveedor mostrado).
 

@@ -50,12 +50,24 @@ export interface SkillAgente {
     activa: boolean;
 }
 
+export interface TareaProgramada {
+    id: string;
+    nombre: string;
+    prompt: string;
+    tipo: 'una_vez' | 'recurrente';
+    cron_expr: string | null;
+    estado: 'pendiente' | 'ejecutando' | 'completada' | 'fallida' | 'cancelada';
+    proxima_ejecucion: string | null;
+    result_summary: string | null;
+}
+
 /* Eventos del contrato SSE (src/handlers/agente.rs + src/agent/runtime.rs). */
 export type EventoAgente =
     | {tipo: 'token'; texto: string}
     | {tipo: 'tool_start'; tool: string; argumentos: unknown}
     | {tipo: 'tool_result'; tool: string; ok: boolean; resumen: string}
     | {tipo: 'usage'; tokens_prompt?: number; tokens_complecion?: number; ocupacion_pct?: number | null}
+    | {tipo: 'contexto'; skills: number}
     | {tipo: 'requiere_aprobacion'; tool: string; argumentos: unknown}
     | {tipo: 'error'; mensaje: string; retryable: boolean}
     | {tipo: 'done'; turno_id: string};
@@ -100,6 +112,26 @@ export async function actualizarSkill(id: string, cambios: Partial<Pick<SkillAge
 
 export async function eliminarSkill(id: string): Promise<void> {
     await apiFetch<void>(`/agente/skills/${id}`, {method: 'DELETE'});
+}
+
+/* ---------- Tareas programadas (el agente las ejecuta como turnos) ---------- */
+
+export async function listarTareasProgramadas(): Promise<TareaProgramada[]> {
+    return apiFetch<TareaProgramada[]>('/agente/tareas-programadas');
+}
+
+export async function crearTareaProgramada(datos: {
+    nombre: string;
+    prompt: string;
+    tipo: 'una_vez' | 'recurrente';
+    cron_expr?: string;
+    ejecutar_en?: string;
+}): Promise<TareaProgramada> {
+    return apiFetch<TareaProgramada>('/agente/tareas-programadas', {method: 'POST', body: datos});
+}
+
+export async function eliminarTareaProgramada(id: string): Promise<void> {
+    await apiFetch<void>(`/agente/tareas-programadas/${id}`, {method: 'DELETE'});
 }
 
 /* ---------- Historial (persistencia en servidor) ---------- */

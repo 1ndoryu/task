@@ -8,14 +8,17 @@
  */
 
 import {create} from 'zustand';
-import type {ConversacionAgente, ConfigAgente, MensajeConversacion} from './service';
+import type {ConversacionAgente, ConfigAgente, MensajeConversacion, TareaProgramada} from './service';
 import {
     cargarHistorial,
     crearConversacion,
+    crearTareaProgramada,
+    eliminarTareaProgramada,
     guardarConfigConversacion,
     eliminarConversacion,
     enviarMensajeAgente,
     listarConversaciones,
+    listarTareasProgramadas,
     renombrarConversacion,
 } from './service';
 
@@ -24,8 +27,10 @@ export interface MensajeTabAgente {
     rol: 'user' | 'assistant';
     contenido: string;
     /* Eventos de tool del último turno (para las tarjetas). */
-    herramientas?: Array<{tool: string; ok: boolean; resumen: string}>;
+    herramientas?: Array<{tool: string; ok: boolean; resumen: string; argumentos?: unknown}>;
     aprobacionPendiente?: {tool: string; argumentos: unknown} | null;
+    /* Contexto real recibido por el agente en este turno (eventos usage/contexto). */
+    contexto?: {ocupacionPct: number | null; tokensPrompt: number; tokensComplecion: number; skills: number} | null;
 }
 
 export interface TabAgente {
@@ -97,6 +102,10 @@ interface EstadoAgente {
     cargandoLista: boolean;
     errorLista: string | null;
     config: ConfigAgente;
+    /* Tareas programadas (sección del panel). */
+    tareasProgramadas: TareaProgramada[];
+    cargandoTareas: boolean;
+    errorTareas: string | null;
     /* Acciones */
     cargarConversaciones: () => Promise<void>;
     abrirTab: (id: string) => Promise<void>;
@@ -106,6 +115,9 @@ interface EstadoAgente {
     enviarMensaje: (texto: string, signal?: AbortSignal) => Promise<void>;
     limpiarErrorTab: (id: string) => void;
     establecerConfig: (config: Partial<ConfigAgente>) => void;
+    cargarTareasProgramadas: () => Promise<void>;
+    crearTarea: (datos: {nombre: string; prompt: string; tipo: 'una_vez' | 'recurrente'; cron_expr?: string; ejecutar_en?: string}) => Promise<void>;
+    eliminarTarea: (id: string) => Promise<void>;
 }
 
 function generarIdLocal(): string {
@@ -123,6 +135,9 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
     cargandoLista: false,
     errorLista: null,
     config: cargarConfig(),
+    tareasProgramadas: [],
+    cargandoTareas: false,
+    errorTareas: null,
 
     cargarConversaciones: async () => {
         set({cargandoLista: true, errorLista: null});
@@ -304,13 +319,31 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                         case 'tool_start':
                             objetivo.herramientas = [
                                 ...(objetivo.herramientas ?? []),
-                                {tool: evento.tool, ok: true, resumen: 'ejecutando...'},
+                                {tool: evento.tool, ok: true, resumen: 'ejecutando...', argumentos: evento.argumentos},
                             ];
                             break;
                         case 'tool_result':
                             objetivo.herramientas = (objetivo.herramientas ?? []).map(h =>
-                                h.tool === evento.tool ? {tool: evento.tool, ok: evento.ok, resumen: evento.resumen} : h
+                                h.tool === evento.tool
+                                    ? {tool: evento.tool, ok: evento.ok, resumen: evento.resumen, argumentos: h.argumentos}
+                                    : h
                             );
+                            break;
+                        case 'usage':
+                            objetivo.contexto = {
+                                ocupacionPct: evento.ocupacion_pct ?? null,
+                                tokensPrompt: evento.tokens_prompt ?? 0,
+                                tokensComplecion: evento.tokens_complecion ?? 0,
+                                skills: objetivo.contexto?.skills ?? 0,
+                            };
+                            break;
+                        case 'contexto':
+                            objetivo.contexto = {
+                                ocupacionPct: objetivo.contexto?.ocupacionPct ?? null,
+                                tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
+                                tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
+                                skills: evento.skills,
+                            };
                             break;
                         case 'requiere_aprobacion':
                             objetivo.aprobacionPendiente = {tool: evento.tool, argumentos: evento.argumentos};
@@ -370,6 +403,39 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         set(state => ({
             tabs: state.tabs.map(t => (t.conversacion.id === id ? {...t, error: null} : t)),
         }));
+    },
+
+    cargarTareasProgramadas: async () => {
+        set({cargandoTareas: true, errorTareas: null});
+        try {
+            const tareas = await listarTareasProgramadas();
+            set({tareasProgramadas: tareas, cargandoTareas: false});
+        } catch (error) {
+            set({
+                cargandoTareas: false,
+                errorTareas: error instanceof Error ? error.message : 'No se pudieron cargar las tareas programadas',
+            });
+        }
+    },
+
+    crearTarea: async (datos) => {
+        set({errorTareas: null});
+        try {
+            const tarea = await crearTareaProgramada(datos);
+            set(state => ({tareasProgramadas: [tarea, ...state.tareasProgramadas]}));
+        } catch (error) {
+            set({errorTareas: error instanceof Error ? error.message : 'No se pudo crear la tarea programada'});
+        }
+    },
+
+    eliminarTarea: async (id) => {
+        set({errorTareas: null});
+        try {
+            await eliminarTareaProgramada(id);
+            set(state => ({tareasProgramadas: state.tareasProgramadas.filter(t => t.id !== id)}));
+        } catch (error) {
+            set({errorTareas: error instanceof Error ? error.message : 'No se pudo eliminar la tarea programada'});
+        }
     },
 
     establecerConfig: (config) => {
