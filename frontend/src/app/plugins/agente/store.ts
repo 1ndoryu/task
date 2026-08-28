@@ -12,6 +12,7 @@ import type {ConversacionAgente, ConfigAgente, MensajeConversacion} from './serv
 import {
     cargarHistorial,
     crearConversacion,
+    guardarConfigConversacion,
     eliminarConversacion,
     enviarMensajeAgente,
     listarConversaciones,
@@ -33,6 +34,7 @@ export interface TabAgente {
     cargandoHistorial: boolean;
     enviando: boolean;
     error: string | null;
+    config: ConfigAgente;
 }
 
 /* Configuración del agente persistida en localStorage y enviada en cada turno. */
@@ -46,12 +48,28 @@ const CONFIG_DEFECTO: ConfigAgente = {
     timeoutToolSecs: 15, incluirMemoria: true, incluirSkills: true,
 };
 
+function normalizarConfig(config: Partial<ConfigAgente>): ConfigAgente {
+    const base = {...CONFIG_DEFECTO, ...config};
+    return {
+        ...base,
+        modelo: (typeof base.modelo === 'string' ? base.modelo.trim().replace(/^glory\//, '') : '') || 'commandcode',
+        temperatura: Math.max(0, Math.min(2, Number(base.temperatura) || 0)),
+        maxTokens: Math.max(64, Math.min(4096, Math.round(Number(base.maxTokens) || 2048))),
+        maxTurns: Math.max(1, Math.min(10, Math.round(Number(base.maxTurns) || 10))),
+        timeoutToolSecs: Math.max(1, Math.min(15, Math.round(Number(base.timeoutToolSecs) || 15))),
+        promptSistema: typeof base.promptSistema === 'string' ? base.promptSistema.trim().slice(0, 4000) : '',
+        idioma: ['es', 'en', 'pt', 'fr'].includes(base.idioma) ? base.idioma : 'es',
+        incluirMemoria: Boolean(base.incluirMemoria),
+        incluirSkills: Boolean(base.incluirSkills),
+    };
+}
+
 function cargarConfig(): ConfigAgente {
     try {
         const crudo = localStorage.getItem(CLAVE_CONFIG);
         if (crudo) {
             const parsed = JSON.parse(crudo) as Partial<ConfigAgente>;
-            return {
+            return normalizarConfig({
                 ...CONFIG_DEFECTO,
                 ...parsed,
                 modo: parsed.modo === 'meta' || parsed.modo === 'autonomo' || parsed.modo === 'predeterminado' ? parsed.modo : 'predeterminado',
@@ -64,7 +82,7 @@ function cargarConfig(): ConfigAgente {
                 promptSistema: typeof parsed.promptSistema === 'string' ? parsed.promptSistema.slice(0, 4000) : '',
                 incluirMemoria: typeof parsed.incluirMemoria === 'boolean' ? parsed.incluirMemoria : true,
                 incluirSkills: typeof parsed.incluirSkills === 'boolean' ? parsed.incluirSkills : true,
-            };
+            });
         }
     } catch {
         /* configuración corrupta: usar defaults */
@@ -116,6 +134,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                 cargandoHistorial: false,
                 enviando: false,
                 error: null,
+                config: normalizarConfig(c.config ?? cargarConfig()),
             }));
             set({
                 tabs,
@@ -180,11 +199,12 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
 
     crearTab: async () => {
         try {
-            const conversacion = await crearConversacion('Nueva conversación', get().config.modo);
+            const config = get().config;
+            const conversacion = await crearConversacion('Nueva conversación', config.modo, config);
             set(state => ({
                 tabs: [
                     ...state.tabs,
-                    {conversacion, mensajes: [], cargandoHistorial: false, enviando: false, error: null},
+                    {conversacion: {...conversacion, config}, mensajes: [], cargandoHistorial: false, enviando: false, error: null, config},
                 ],
                 tabActivaId: conversacion.id,
             }));
@@ -309,7 +329,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                     }));
                 },
                 signal,
-                get().config,
+                tab.config,
             );
         } catch (error) {
             const mensajeError = error instanceof Error ? error.message : 'Error desconocido del agente';
@@ -353,6 +373,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
     },
 
     establecerConfig: (config) => {
+        const tabId = get().tabActivaId;
         const nueva = {...get().config, ...config};
         nueva.modelo = nueva.modelo.trim().replace(/^glory\//, '') || 'commandcode';
         nueva.temperatura = Math.max(0, Math.min(2, Number(nueva.temperatura) || 0));
@@ -371,7 +392,13 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         } catch {
             /* almacenamiento no disponible: la config se mantiene solo en memoria */
         }
-        set({config: nueva});
+        set(state => ({
+            config: nueva,
+            tabs: state.tabs.map(t => t.conversacion.id === tabId ? {...t, config: nueva, conversacion: {...t.conversacion, config: nueva}} : t),
+        }));
+        if (tabId) void guardarConfigConversacion(tabId, nueva).catch(error => {
+            set(state => ({tabs: state.tabs.map(t => t.conversacion.id === tabId ? {...t, error: error instanceof Error ? error.message : 'No se pudo guardar la configuración'} : t)}));
+        });
     },
 }));
 

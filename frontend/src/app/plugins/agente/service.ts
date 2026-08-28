@@ -15,6 +15,7 @@ export interface ConversacionAgente {
     id: string;
     titulo: string;
     modo: ModoAgente;
+    config?: ConfigAgente;
 }
 
 export interface ConfigAgente {
@@ -58,10 +59,10 @@ export async function listarConversaciones(): Promise<ConversacionAgente[]> {
     return apiFetch<ConversacionAgente[]>('/agente/conversaciones');
 }
 
-export async function crearConversacion(titulo: string, modo: ModoAgente): Promise<ConversacionAgente> {
+export async function crearConversacion(titulo: string, modo: ModoAgente, config: Partial<ConfigAgente>): Promise<ConversacionAgente> {
     return apiFetch<ConversacionAgente>('/agente/conversaciones', {
         method: 'POST',
-        body: {titulo, modo},
+        body: {titulo, modo, config},
     });
 }
 
@@ -77,6 +78,10 @@ export async function eliminarConversacion(id: string): Promise<void> {
 }
 
 /* ---------- Historial (persistencia en servidor) ---------- */
+
+export async function guardarConfigConversacion(id: string, config: Partial<ConfigAgente>): Promise<ConversacionAgente> {
+    return apiFetch<ConversacionAgente>(`/agente/conversaciones/${id}/config`, {method: 'PUT', body: {config}});
+}
 
 export async function cargarHistorial(id: string): Promise<MensajeConversacion[]> {
     return apiFetch<MensajeConversacion[]>(`/agente/conversaciones/${id}`);

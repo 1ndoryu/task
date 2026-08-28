@@ -150,10 +150,19 @@ impl AgentRuntime {
         }
         prompt.push_str(&format!("\nIdioma de respuesta: {}.", self.turno_config.idioma));
         prompt.push_str(&format!("\nPermisos activos: búsqueda web={}, recordatorios={}.", self.turno_config.permitir_busqueda_web, self.turno_config.permitir_recordatorios));
-        if self.turno_config.incluir_notas || self.turno_config.incluir_tareas_completadas || self.turno_config.incluir_habitos_pausados {
-            prompt.push_str(&format!("\nContexto solicitado: notas={}, tareas completadas={}, hábitos pausados={}.", self.turno_config.incluir_notas, self.turno_config.incluir_tareas_completadas, self.turno_config.incluir_habitos_pausados));
-        }
         mensajes.push(AiMessage::texto("system", prompt));
+        if self.turno_config.incluir_notas || self.turno_config.incluir_tareas_completadas || self.turno_config.incluir_habitos_pausados {
+            let contexto = cargar_contexto_productividad(
+                &state.pool,
+                user_id,
+                self.turno_config.incluir_notas,
+                self.turno_config.incluir_tareas_completadas,
+                self.turno_config.incluir_habitos_pausados,
+            ).await?;
+            if !contexto.is_empty() {
+                mensajes.push(AiMessage::texto("system", contexto));
+            }
+        }
         mensajes.extend(historial);
         mensajes.push(AiMessage::texto("user", mensaje_usuario.clone()));
 
@@ -546,6 +555,34 @@ pub async fn cargar_memoria_agente(
         filas.join("\n")
     );
     Ok(vec![AiMessage::texto("system", bloque)])
+}
+
+async fn cargar_contexto_productividad(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    incluir_notas: bool,
+    incluir_tareas_completadas: bool,
+    incluir_habitos_pausados: bool,
+) -> Result<String, AppError> {
+    let mut secciones = Vec::new();
+    if incluir_notas {
+        let filas: Vec<(String, String)> = sqlx::query_as(
+            "SELECT title, LEFT(content, 1200) FROM notes WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 20",
+        ).bind(user_id).fetch_all(pool).await?;
+        if !filas.is_empty() { secciones.push(format!("NOTAS:\n{}", filas.into_iter().map(|(t,c)| format!("- {t}: {c}")).collect::<Vec<_>>().join("\n"))); }
+    }
+    let tareas: Vec<(String, bool)> = sqlx::query_as(
+        "SELECT text, completed FROM dashboard_tasks WHERE user_id = $1 AND deleted_at IS NULL AND (completed = FALSE OR $2) ORDER BY updated_at DESC LIMIT 50",
+    ).bind(user_id).bind(incluir_tareas_completadas).fetch_all(pool).await?;
+    if !tareas.is_empty() { secciones.push(format!("TAREAS:\n{}", tareas.into_iter().map(|(t,c)| format!("- [{}] {t}", if c { "completada" } else { "pendiente" })).collect::<Vec<_>>().join("\n"))); }
+    let habitos: Vec<(String, String, Value)> = sqlx::query_as(
+        "SELECT name, frequency_type, payload FROM dashboard_habits WHERE user_id = $1 AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT 50",
+    ).bind(user_id).fetch_all(pool).await?;
+    let habitos: Vec<_> = habitos.into_iter().filter(|(_, _, payload)| {
+        incluir_habitos_pausados || !payload.get("paused").and_then(Value::as_bool).unwrap_or(false)
+    }).collect();
+    if !habitos.is_empty() { secciones.push(format!("HÁBITOS:\n{}", habitos.into_iter().map(|(n,f,p)| format!("- {n} ({f}){}", if p.get("paused").and_then(Value::as_bool).unwrap_or(false) { " [pausado]" } else { "" })).collect::<Vec<_>>().join("\n"))); }
+    Ok(secciones.join("\n\n").chars().take(12000).collect())
 }
 
 /// [29-08-2026] Fase 2: construye el sandbox de archivos desde el entorno.

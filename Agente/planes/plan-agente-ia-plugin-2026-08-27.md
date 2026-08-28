@@ -504,7 +504,9 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 **Checklist de la fase:**
 - [x] `ModalConfigAgente` (v1: modo + modelo) reutilizando `Boton` y tokens del design system (`--dashboard-*`), coherente con los demás modales.
 - [ ] Secciones restantes verificadas: Skills (CRUD), Tareas programadas en panel, Modos por tab, Workspace (solo local), Contexto/Compactación — iteración posterior.
-- [x] Parámetros avanzados enviados y validados por `/agente/stream`: temperatura, max_tokens, idioma, contexto solicitado, permisos web/recordatorios, prompt de sistema y límites de turnos/timeout. Memoria puede desactivarse por turno; skills quedan pendientes hasta existir contrato CRUD/inyección.
+- [x] Parámetros avanzados enviados y validados por `/agente/stream`: temperatura, max_tokens, idioma, contexto real limitado por user_id, permisos web/recordatorios, prompt de sistema y límites de turnos/timeout.
+- [x] Configuración aislada por conversación: columna JSONB, endpoint autenticado y carga por tab; cada stream usa la configuración de su conversación.
+- [ ] Skills CRUD/inyección completa y automejora: siguen pendientes porque todavía no existe contrato backend de skills verificable.
 - [x] Config persiste (`glory-agente-config`) y el backend la respeta: el modo va en la creación de conversación y el modelo en el stream (verificado en vivo).
 - [ ] `SeccionConfigIAPanelChat` migrada al modal del agente — pendiente (la v1 no la migra; el legacy sigue como helper del modal global).
 - [x] No hay specs visuales hardcodeadas en componentes (tokens del design system).

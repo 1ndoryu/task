@@ -82,41 +82,40 @@ pub async fn agente_stream(
 
     /* Verificar propiedad de la conversación (nunca confiar en el front) y
      * leer su modo de operación (sección 9.2). */
-    let conversacion: Option<(Uuid, String)> = sqlx::query_as(
-        "SELECT id, modo FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
+    let conversacion: Option<(Uuid, String, serde_json::Value)> = sqlx::query_as(
+        "SELECT id, modo, config FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
     )
     .bind(req.conversacionId)
     .bind(auth.user_id)
     .fetch_optional(&state.pool)
     .await?;
-    let Some((_, modo)) = conversacion else {
+    let Some((_, modo, config_guardada)) = conversacion else {
         return Err(AppError::NotFound("Conversación no encontrada".into()));
     };
 
     let turno_id = Uuid::new_v4();
     let (tx, rx) = mpsc::channel::<AgenteEvento>(128);
-    /* [29-08-2026] Default del agente: Glory API (free.empero.org) sin key,
-     * modelo `commandcode` (la ruta "auto" que resuelve a DeepSeek Flash — la
-     * vía que el usuario prefiere por ser la que siempre funciona). Glory va
-     * PRIMERO como candidato via provider/modelo default; solo cae al fallback
-     * global si Glory falla. El front puede sobreescribir provider/modelo. */
+    /* Glory/commandcode es política del servidor. Los parámetros avanzados se
+     * toman de la conversación; el request solo conserva compatibilidad con
+     * clientes antiguos y no puede cambiar proveedor/modelo. */
     let defaults = TurnoConfig::default();
+    let config = config_guardada;
     let runtime = AgentRuntime::nuevo(TurnoConfig {
-        provider: req.provider.unwrap_or_else(|| "glory".into()),
-        modelo: req.modelo.unwrap_or_else(|| "commandcode".into()),
-        temperatura: req.temperatura.unwrap_or(defaults.temperatura).clamp(0.0, 2.0),
-        max_tokens: req.max_tokens.unwrap_or(defaults.max_tokens).clamp(64, 4096),
-        idioma: validar_idioma(req.idioma)?,
-        incluir_notas: req.incluir_notas.unwrap_or(false),
-        incluir_tareas_completadas: req.incluir_tareas_completadas.unwrap_or(false),
-        incluir_habitos_pausados: req.incluir_habitos_pausados.unwrap_or(false),
-        permitir_busqueda_web: req.permitir_busqueda_web.unwrap_or(true),
-        permitir_recordatorios: req.permitir_recordatorios.unwrap_or(true),
-        prompt_sistema: validar_prompt_sistema(req.prompt_sistema)?,
-        incluir_memoria: req.incluir_memoria.unwrap_or(true),
-        incluir_skills: req.incluir_skills.unwrap_or(true),
-        max_turns: req.max_turns.unwrap_or(defaults.max_turns).clamp(1, 10),
-        timeout_tool: std::time::Duration::from_secs(req.timeout_tool_secs.unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
+        provider: "glory".into(),
+        modelo: "commandcode".into(),
+        temperatura: config.get("temperatura").and_then(serde_json::Value::as_f64).unwrap_or(defaults.temperatura as f64).clamp(0.0, 2.0) as f32,
+        max_tokens: config.get("max_tokens").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_tokens as u64).clamp(64, 4096) as u32,
+        idioma: validar_idioma(config.get("idioma").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        incluir_notas: config.get("incluir_notas").and_then(serde_json::Value::as_bool).unwrap_or(false),
+        incluir_tareas_completadas: config.get("incluir_tareas_completadas").and_then(serde_json::Value::as_bool).unwrap_or(false),
+        incluir_habitos_pausados: config.get("incluir_habitos_pausados").and_then(serde_json::Value::as_bool).unwrap_or(false),
+        permitir_busqueda_web: config.get("permitir_busqueda_web").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        permitir_recordatorios: config.get("permitir_recordatorios").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        prompt_sistema: validar_prompt_sistema(config.get("prompt_sistema").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        incluir_memoria: config.get("incluir_memoria").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        incluir_skills: config.get("incluir_skills").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        max_turns: config.get("max_turns").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_turns as u64).clamp(1, 10) as usize,
+        timeout_tool: std::time::Duration::from_secs(config.get("timeout_tool_secs").and_then(serde_json::Value::as_u64).unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
         modo,
         ..defaults
     });
@@ -216,6 +215,7 @@ pub struct CrearConversacionRequest {
     /// Modo de operación de la conversación (predeterminado|meta|autonomo).
     #[serde(default)]
     pub modo: Option<String>,
+    pub config: Option<serde_json::Value>,
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -224,6 +224,7 @@ pub struct ConversacionResponse {
     pub id: Uuid,
     pub titulo: String,
     pub modo: String,
+    pub config: serde_json::Value,
 }
 
 /// Crea una conversación del agente para el usuario (Fase 0: el front abre
@@ -249,19 +250,22 @@ pub async fn crear_conversacion(
         return Err(AppError::BadRequest("Modo inválido (predeterminado|meta|autonomo)".into()));
     }
     let id = Uuid::new_v4();
+    let config = req.config.unwrap_or_else(|| serde_json::json!({}));
     sqlx::query(
-        "INSERT INTO agente_conversaciones (id, user_id, titulo, modo) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO agente_conversaciones (id, user_id, titulo, modo, config) VALUES ($1, $2, $3, $4, $5)",
     )
     .bind(id)
     .bind(auth.user_id)
     .bind(titulo)
     .bind(&modo)
+    .bind(&config)
     .execute(&state.pool)
     .await?;
     Ok(Json(ConversacionResponse {
         id,
         titulo: titulo.to_string(),
         modo,
+        config,
     }))
 }
 
@@ -270,8 +274,8 @@ pub async fn listar_conversaciones(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<Vec<ConversacionResponse>>, AppError> {
-    let filas: Vec<(Uuid, String, String)> = sqlx::query_as(
-        "SELECT id, titulo, modo FROM agente_conversaciones
+    let filas: Vec<(Uuid, String, String, serde_json::Value)> = sqlx::query_as(
+        "SELECT id, titulo, modo, config FROM agente_conversaciones
          WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT 50",
     )
     .bind(auth.user_id)
@@ -280,7 +284,7 @@ pub async fn listar_conversaciones(
     Ok(Json(
         filas
             .into_iter()
-            .map(|(id, titulo, modo)| ConversacionResponse { id, titulo, modo })
+            .map(|(id, titulo, modo, config)| ConversacionResponse { id, titulo, modo, config })
             .collect(),
     ))
 }
@@ -356,11 +360,24 @@ pub async fn renombrar_conversacion(
     if resultado.rows_affected() == 0 {
         return Err(AppError::NotFound("Conversación no encontrada".into()));
     }
-    Ok(Json(ConversacionResponse {
-        id: conversacion_id,
-        titulo,
-        modo: String::new(),
-    }))
+    let config: serde_json::Value = sqlx::query_scalar("SELECT config FROM agente_conversaciones WHERE id = $1 AND user_id = $2")
+        .bind(conversacion_id).bind(auth.user_id).fetch_one(&state.pool).await?;
+    Ok(Json(ConversacionResponse { id: conversacion_id, titulo, modo: String::new(), config }))
+}
+
+pub async fn guardar_config_conversacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+    Json(req): Json<serde_json::Value>,
+) -> Result<Json<ConversacionResponse>, AppError> {
+    let config = req.get("config").cloned().unwrap_or_else(|| serde_json::json!({}));
+    let json = serde_json::to_string(&config).map_err(|_| AppError::BadRequest("Configuración inválida".into()))?;
+    if json.len() > 8000 { return Err(AppError::BadRequest("Configuración demasiado grande".into())); }
+    let fila: Option<(Uuid, String, String, serde_json::Value)> = sqlx::query_as("UPDATE agente_conversaciones SET config = $1, actualizado_en = NOW() WHERE id = $2 AND user_id = $3 RETURNING id, titulo, modo, config")
+        .bind(&config).bind(id).bind(auth.user_id).fetch_optional(&state.pool).await?;
+    let Some((id, titulo, modo, config)) = fila else { return Err(AppError::NotFound("Conversación no encontrada".into())); };
+    Ok(Json(ConversacionResponse { id, titulo, modo, config }))
 }
 
 /// Elimina una conversación (tabs: cerrar).
@@ -657,6 +674,7 @@ pub fn routes() -> Router<AppState> {
                 .put(renombrar_conversacion)
                 .get(listar_mensajes_conversacion),
         )
+        .route("/agente/conversaciones/:id/config", axum::routing::put(guardar_config_conversacion))
         .route(
             "/agente/tareas-programadas",
             post(crear_tarea_programada).get(listar_tareas_programadas),

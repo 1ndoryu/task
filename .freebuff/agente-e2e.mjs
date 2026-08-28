@@ -328,6 +328,19 @@ async function leerSSE(res) {
   }
 
   {
+    console.log('11. Configuración aislada por conversación');
+    const otra = await api('/agente/conversaciones', {method: 'POST', body: {titulo: 'E2E aislada', modo: 'meta', config: {modelo: 'commandcode', temperatura: 1.4, max_tokens: 512}}});
+    assert([200, 201].includes(otra.status), `segunda conversación con config propia (got ${otra.status})`);
+    const configOtra = otra.status === 200 || otra.status === 201 ? JSON.parse(otra.body).config : null;
+    console.log(`    config recibida: ${JSON.stringify(configOtra)}`);
+    assert(configOtra?.temperatura === 1.4 && configOtra?.max_tokens === 512, 'la configuración de la segunda conversación persiste sus valores');
+    const listaConfigs = JSON.parse((await api('/agente/conversaciones')).body);
+    const primera = listaConfigs.find((c) => c.id === conversacionId);
+    const segunda = listaConfigs.find((c) => c.id === (otra.status === 200 || otra.status === 201 ? JSON.parse(otra.body).id : ''));
+    assert(primera?.config?.temperatura !== segunda?.config?.temperatura, 'las configuraciones quedan aisladas en servidor');
+  }
+
+  {
     /* Fase 3 v1: memoria persistente (CRUD). Verifica el contrato de
      * memoria que se inyecta como contexto en agente_stream (system). El
      * upsert se prueba poniendo dos veces la misma clave y confirmando que
