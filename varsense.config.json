@@ -1,0 +1,46 @@
+{
+  "variableFiles": [
+    "frontend/src/app/styles/dashboard/variables.css",
+    "frontend/src/glory-core/index.css"
+  ],
+  "includePatterns": [
+    "frontend/src/**/*.css",
+    "frontend/src/**/*.ts",
+    "frontend/src/**/*.tsx"
+  ],
+  "excludePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.quality-tools/**",
+    "**/.quality-reports/**",
+    "**/.sentinel/**",
+    "frontend/src/api/generated/**"
+  ],
+  "scanAllFiles": false,
+  "hardcodedDetection": {
+    "enabled": true,
+    "severity": "warning",
+    "properties": {
+      "color": true,
+      "background": true,
+      "background-color": true,
+      "border-color": true,
+      "border-radius": true,
+      "font-size": true,
+      "font-family": true,
+      "box-shadow": true
+    },
+    "allowedValues": [
+      "0",
+      "0px",
+      "auto",
+      "inherit",
+      "initial",
+      "unset",
+      "transparent",
+      "currentColor",
+      "none"
+    ]
+  }
+}

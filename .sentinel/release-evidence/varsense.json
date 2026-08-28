@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "tool": "varsense",
+  "commit": "88f281f94e6febd02a386b7ed03d30d285eb82e1",
+  "compile": "passed",
+  "suite": "passed",
+  "cleanStaging": true,
+  "at": "2026-08-28T21:18:32.633Z"
+}

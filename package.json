@@ -19,6 +19,11 @@
     "preflight:exposure": "node scripts/preflight-exposure.mjs",
     "test": "node scripts/run-with-db.mjs test",
     "roadmap": "node scripts/check-roadmap.mjs",
-    "roadmap:watch": "node scripts/check-roadmap.mjs --watch"
+    "roadmap:watch": "node scripts/check-roadmap.mjs --watch",
+    "quality:setup": "node scripts/quality/quality-setup.mjs",
+    "quality:doctor": "node scripts/quality/quality-doctor.mjs",
+    "quality:analyze": "node scripts/quality/sentinel-analyze.mjs",
+    "quality:check": "node scripts/quality/task-check.mjs",
+    "quality:check:local": "node scripts/quality/task-check-local.mjs"
   }
 }
