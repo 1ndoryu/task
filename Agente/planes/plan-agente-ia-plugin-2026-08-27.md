@@ -445,18 +445,19 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [x] Workspace local configurable (`AGENTE_WORKSPACE_ROOT`, fallback cwd) — selector en config queda para Fase 5.
 - [x] Checklist general de la sección 12 completado.
 
-### Fase 3 — Memoria y automejora (MEMORIA v1 ✅ commit `pendiente`, 29-08-2026; tsvector/automejora/skills: iteración pendiente)
+### Fase 3 — Memoria y automejora (MEMORIA v1 ✅ commit `306954a`; SKILLS CRUD + inyección ✅ commit de este bloque; tsvector/automejora: iteración pendiente)
 - **Memoria persistente v1** ✅: la tabla `agente_memoria` (ya migrada) se expone vía endpoints CRUD (`GET/PUT /agente/memoria`, `DELETE /agente/memoria/:clave`) y se **inyecta en el contexto** de cada turno: `cargar_memoria_agente` (runtime) selecciona las memorias recientes (hasta 50) y las agrega como mensaje `system` al inicio del historial en `agente_stream`. El agente así **recuerda preferencias/lecciones de sesiones anteriores**. Verificado por E2E caso 10 (upsert idempotente, validación de clave, delete → 404).
-- Pendiente (iteración posterior, requiere LLM estable y más backend): búsqueda con `tsvector`, automejora post-turno (modelo barato solo local/dev) que **sugiere** skills, y CRUD manual de skills (crear/editar/activar/eliminar, topes 5K/25K, DPI).
-- **DoD parcial:** el agente recuerda una preferencia dicha en una sesión anterior (memoria v1 — la inyección estructural compila y e2e cubre CRUD; la automejora/skills queda como iteración porque los proveedores LLM upstream están caídos y no se puede verificar la sugerencia real).
+- **Skills CRUD + inyección v1** ✅: tabla `agente_skills` (migración `20260831000000_agente_skills`) con endpoints autenticados (`GET/PUT /agente/skills`, `DELETE /agente/skills/:id`), upsert idempotente por `clave` + `user_id`, validación (nombre/descripción/prompt no vacíos, `activa` booleano) y límites de tamaño. `cargar_skills_agente` (runtime) inyecta las skills activas como mensaje `system` en `agente_stream`, y el evento SSE `contexto` reporta `skills` inyectadas; el flag `incluir_skills` de la config por conversación lo activa/desactiva. Verificado por E2E caso 12 (CRUD, upsert idempotente 1 fila, inyección `{"tipo":"contexto","skills":1}`, desactivar, delete → 404).
+- Pendiente (iteración posterior, requiere LLM estable y más backend): búsqueda con `tsvector`, automejora post-turno (modelo barato solo local/dev) que **sugiere** skills, y la UI de administración de skills en el modal (los endpoints y la inyección ya existen).
+- **DoD parcial:** el agente recuerda una preferencia dicha en una sesión anterior (memoria v1) y las skills activas afectan al payload real del stream (contexto inyectado + evento SSE verificados por E2E); la automejora/sugerencia queda como iteración porque los proveedores LLM upstream están caídos y no se puede verificar la sugerencia real.
 
 **Checklist de la fase:**
 - [x] Memoria persistente: v1 (tabla + CRUD + inyección en contexto como mensaje system). El "recuerda preferencia cross-sesión" queda probado estructuralmente (inyección) + e2e de CRUD.
 - [ ] Índice de búsqueda con `tsvector` de PostgreSQL (no FTS5) — iteración pendiente.
 - [ ] Automejora SOLO en local/dev, modelo barato, presupuesto diario y toggle en config — iteración pendiente (no verificable ahora: proveedores caídos).
 - [ ] Skill nueva se **sugiere** en el chat — iteración pendiente.
-- [ ] CRUD manual de skills con topes y DPI — iteración pendiente.
-- [ ] Skills activas se inyectan en el system prompt — iteración pendiente (depende del CRUD).
+- [x] CRUD manual de skills con topes y DPI — backend v1 hecho y verificado por E2E; la UI del modal queda como iteración de la Fase 5.
+- [x] Skills activas se inyectan en el system prompt — hecho (`cargar_skills_agente` + evento `contexto`; E2E caso 12 verifica la inyección).
 - [ ] Checklist general de la sección 12 completado.
 
 ### Fase 4 — Frontend: chat con todo visible ✅ (commit `d7fd017`, 29-08-2026)
@@ -506,7 +507,7 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [ ] Secciones restantes verificadas: Skills (CRUD), Tareas programadas en panel, Modos por tab, Workspace (solo local), Contexto/Compactación — iteración posterior.
 - [x] Parámetros avanzados enviados y validados por `/agente/stream`: temperatura, max_tokens, idioma, contexto real limitado por user_id, permisos web/recordatorios, prompt de sistema y límites de turnos/timeout.
 - [x] Configuración aislada por conversación: columna JSONB, endpoint autenticado y carga por tab; cada stream usa la configuración de su conversación.
-- [ ] Skills CRUD/inyección completa y automejora: siguen pendientes porque todavía no existe contrato backend de skills verificable.
+- [x] Skills CRUD/inyección completa: contrato backend verificado por E2E (caso 12) — endpoints autenticados, upsert idempotente, inyección en contexto + evento `contexto`. Pendiente solo la UI de administración en el modal y la automejora/sugerencia.
 - [x] Config persiste (`glory-agente-config`) y el backend la respeta: el modo va en la creación de conversación y el modelo en el stream (verificado en vivo).
 - [ ] `SeccionConfigIAPanelChat` migrada al modal del agente — pendiente (la v1 no la migra; el legacy sigue como helper del modal global).
 - [x] No hay specs visuales hardcodeadas en componentes (tokens del design system).

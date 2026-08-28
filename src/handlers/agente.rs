@@ -21,8 +21,8 @@ use tokio_stream::wrappers::ReceiverStream;
 use uuid::Uuid;
 
 use crate::agent::runtime::{
-    cargar_historial, cargar_memoria_agente, guardar_mensaje_usuario, persistir_turno, AgenteEvento,
-    AgentRuntime, TurnoConfig,
+    cargar_historial, cargar_memoria_agente, cargar_skills_agente, guardar_mensaje_usuario,
+    persistir_turno, AgenteEvento, AgentRuntime, TurnoConfig,
 };
 use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
@@ -146,6 +146,16 @@ pub async fn agente_stream(
     if runtime.turno_config.incluir_memoria {
         let memoria = cargar_memoria_agente(&state.pool, auth.user_id, 50).await?;
         historial.splice(0..0, memoria);
+    }
+    /* [31-08-2026] Fase 3 (skills v1): inyectar las skills activas como
+     * contexto system y emitir el evento observable de cuántas entraron. */
+    if runtime.turno_config.incluir_skills {
+        let skills = cargar_skills_agente(&state.pool, auth.user_id, 20).await?;
+        let cantidad = skills.len();
+        if cantidad > 0 {
+            let _ = tx.send(AgenteEvento::Contexto { skills: cantidad }).await;
+            historial.splice(0..0, skills);
+        }
     }
     let state_clone = state.clone();
     let tx_clone = tx.clone();
@@ -635,6 +645,158 @@ pub async fn eliminar_memoria(
     Ok(axum::http::StatusCode::NO_CONTENT)
 }
 
+#[derive(Debug, serde::Serialize)]
+#[allow(non_snake_case)]
+pub struct SkillResponse {
+    pub id: Uuid,
+    pub nombre: String,
+    pub descripcion: String,
+    pub activa: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+pub struct CrearSkillRequest {
+    pub nombre: String,
+    pub descripcion: String,
+    #[serde(default = "default_activa")]
+    pub activa: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+pub struct ActualizarSkillRequest {
+    pub nombre: Option<String>,
+    pub descripcion: Option<String>,
+    pub activa: Option<bool>,
+}
+
+fn default_activa() -> bool {
+    true
+}
+
+fn validar_skill(nombre: &str, descripcion: &str) -> Result<(), AppError> {
+    let nombre = nombre.trim();
+    if nombre.is_empty() || nombre.chars().count() > 128 {
+        return Err(AppError::BadRequest("El nombre de la skill debe tener entre 1 y 128 caracteres".into()));
+    }
+    if descripcion.trim().is_empty() || descripcion.chars().count() > 4000 {
+        return Err(AppError::BadRequest("La descripción de la skill debe tener entre 1 y 4000 caracteres".into()));
+    }
+    Ok(())
+}
+
+/// Lista las skills del usuario (activas e inactivas).
+pub async fn listar_skills(
+    State(state): State<AppState>,
+    auth: AuthUser,
+) -> Result<Json<Vec<SkillResponse>>, AppError> {
+    let filas: Vec<(Uuid, String, String, bool)> = sqlx::query_as(
+        "SELECT id, nombre, descripcion, activa FROM agente_skills
+         WHERE user_id = $1 ORDER BY nombre LIMIT 200",
+    )
+    .bind(auth.user_id)
+    .fetch_all(&state.pool)
+    .await?;
+    Ok(Json(
+        filas.into_iter()
+            .map(|(id, nombre, descripcion, activa)| SkillResponse {
+                id,
+                nombre,
+                descripcion,
+                activa,
+            })
+            .collect(),
+    ))
+}
+
+/// Crea o actualiza una skill por nombre (idempotente: misma clave => misma
+/// fila, sin duplicados). La crea inactiva si `activa=false`.
+pub async fn crear_skill(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<CrearSkillRequest>,
+) -> Result<Json<SkillResponse>, AppError> {
+    let nombre = req.nombre.trim();
+    let descripcion = req.descripcion.trim();
+    validar_skill(nombre, descripcion)?;
+    let fila: (Uuid, String, String, bool) = sqlx::query_as(
+        "INSERT INTO agente_skills (user_id, nombre, descripcion, activa)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (user_id, nombre)
+         DO UPDATE SET descripcion = EXCLUDED.descripcion, activa = EXCLUDED.activa, actualizado_en = NOW()
+         RETURNING id, nombre, descripcion, activa",
+    )
+    .bind(auth.user_id)
+    .bind(nombre)
+    .bind(descripcion)
+    .bind(req.activa)
+    .fetch_one(&state.pool)
+    .await?;
+    Ok(Json(fila_a_skill(fila)))
+}
+
+/// Actualiza nombre/descripción/activa de una skill (solo del propietario).
+pub async fn actualizar_skill(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+    Json(req): Json<ActualizarSkillRequest>,
+) -> Result<Json<SkillResponse>, AppError> {
+    let actual: (String, String, bool) = sqlx::query_as(
+        "SELECT nombre, descripcion, activa FROM agente_skills WHERE id = $1 AND user_id = $2",
+    )
+    .bind(id)
+    .bind(auth.user_id)
+    .fetch_optional(&state.pool)
+    .await?
+    .ok_or_else(|| AppError::NotFound("Skill no encontrada".into()))?;
+    let nombre = req.nombre.as_deref().unwrap_or(&actual.0).trim().to_string();
+    let descripcion = req.descripcion.as_deref().unwrap_or(&actual.1).trim().to_string();
+    let activa = req.activa.unwrap_or(actual.2);
+    validar_skill(&nombre, &descripcion)?;
+    let fila: (Uuid, String, String, bool) = sqlx::query_as(
+        "UPDATE agente_skills SET nombre = $1, descripcion = $2, activa = $3, actualizado_en = NOW()
+         WHERE id = $4 AND user_id = $5
+         RETURNING id, nombre, descripcion, activa",
+    )
+    .bind(&nombre)
+    .bind(&descripcion)
+    .bind(activa)
+    .bind(id)
+    .bind(auth.user_id)
+    .fetch_one(&state.pool)
+    .await?;
+    Ok(Json(fila_a_skill(fila)))
+}
+
+/// Borra una skill (solo del propietario).
+pub async fn eliminar_skill(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<axum::http::StatusCode, AppError> {
+    let borrada = sqlx::query("DELETE FROM agente_skills WHERE id = $1 AND user_id = $2")
+        .bind(id)
+        .bind(auth.user_id)
+        .execute(&state.pool)
+        .await?
+        .rows_affected();
+    if borrada == 0 {
+        return Err(AppError::NotFound("Skill no encontrada".into()));
+    }
+    Ok(axum::http::StatusCode::NO_CONTENT)
+}
+
+fn fila_a_skill((id, nombre, descripcion, activa): (Uuid, String, String, bool)) -> SkillResponse {
+    SkillResponse {
+        id,
+        nombre,
+        descripcion,
+        activa,
+    }
+}
+
 /// Valida una clave de memoria: 1-128 chars, alfanumérico + . _ -
 /// Rechaza claves de solo puntos o con `..` (para evitar ambigüedad de ruta
 /// en el DELETE /:clave y colisiones de segmentos).
@@ -690,5 +852,13 @@ pub fn routes() -> Router<AppState> {
         .route(
             "/agente/memoria/:clave",
             axum::routing::delete(eliminar_memoria),
+        )
+        .route(
+            "/agente/skills",
+            axum::routing::get(listar_skills).post(crear_skill),
+        )
+        .route(
+            "/agente/skills/:id",
+            axum::routing::put(actualizar_skill).delete(eliminar_skill),
         )
 }

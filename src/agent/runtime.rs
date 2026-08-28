@@ -34,6 +34,10 @@ pub enum AgenteEvento {
         tokens_complecion: u32,
         ocupacion_pct: Option<f32>,
     },
+    /// [31-08-2026] Fase 3 (skills v1): informa cuántas skills activas se
+    /// inyectaron como contexto en este turno (observabilidad real del
+    /// contexto recibido; el front lo ignora de forma segura).
+    Contexto { skills: usize },
     Error { mensaje: String, retryable: bool },
     Done { turno_id: Uuid },
 }
@@ -200,9 +204,6 @@ impl AgentRuntime {
             }
             if !self.turno_config.permitir_recordatorios {
                 ids.retain(|id| *id != "crear_recordatorio");
-            }
-            if !self.turno_config.incluir_skills {
-                ids.retain(|id| !id.starts_with("skill_"));
             }
             let ids_ref: Vec<&str> = ids;
             let schemas = self.registry.schemas_openai(Some(&ids_ref));
@@ -557,6 +558,48 @@ pub async fn cargar_memoria_agente(
     Ok(vec![AiMessage::texto("system", bloque)])
 }
 
+/// [31-08-2026] Fase 3 (skills v1): skills activas del usuario como contexto
+/// system (mismo patrón que la memoria). `incluir_skills` las inyecta en el
+/// handler antes del loop del runtime.
+pub async fn cargar_skills_agente(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    limite: i64,
+) -> Result<Vec<AiMessage>, AppError> {
+    let filas: Vec<(String, String)> = sqlx::query_as(
+        "SELECT nombre, descripcion FROM agente_skills
+         WHERE user_id = $1 AND activa ORDER BY nombre LIMIT $2",
+    )
+    .bind(user_id)
+    .bind(limite)
+    .fetch_all(pool)
+    .await?;
+    Ok(construir_mensaje_skills(filas))
+}
+
+/// Construye el mensaje system con las skills activas. Puro y testeable:
+/// devuelve `None` si no hay skills que inyectar.
+pub fn construir_mensaje_skills(filas: Vec<(String, String)>) -> Vec<AiMessage> {
+    if filas.is_empty() {
+        return Vec::new();
+    }
+    let bloque = filas
+        .into_iter()
+        .map(|(nombre, descripcion)| format!("{nombre}: {descripcion}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let bloque = if bloque.chars().count() > 4000 {
+        let cortado: String = bloque.chars().take(4000).collect();
+        format!("{cortado}…")
+    } else {
+        bloque
+    };
+    vec![AiMessage::texto(
+        "system",
+        format!("Skills activas del usuario (síguelas al responder):\n{bloque}"),
+    )]
+}
+
 async fn cargar_contexto_productividad(
     pool: &sqlx::PgPool,
     user_id: Uuid,
@@ -631,11 +674,38 @@ pub async fn guardar_mensaje_usuario(
 
 #[cfg(test)]
 mod tests {
-    use super::mensajes_usuario_resumen;
+    use super::{construir_mensaje_skills, mensajes_usuario_resumen};
 
     #[test]
     fn resumen_acota_prompt() {
         let largo = "x".repeat(2000);
         assert_eq!(mensajes_usuario_resumen(&largo).len(), 500);
+    }
+
+    #[test]
+    fn skills_vacias_no_generan_contexto() {
+        assert!(construir_mensaje_skills(Vec::new()).is_empty());
+    }
+
+    #[test]
+    fn skills_activas_generan_mensaje_system() {
+        let mensajes = construir_mensaje_skills(vec![
+            ("resumen".into(), "Resume en 3 viñetas".into()),
+            ("tono".into(), "Responde en español".into()),
+        ]);
+        assert_eq!(mensajes.len(), 1);
+        assert_eq!(mensajes[0].role, "system");
+        let contenido = mensajes[0].content.as_str().unwrap();
+        assert!(contenido.contains("resumen: Resume en 3 viñetas"));
+        assert!(contenido.contains("tono: Responde en español"));
+    }
+
+    #[test]
+    fn skills_acotan_tamano() {
+        let enorme = "z".repeat(6000);
+        let mensajes = construir_mensaje_skills(vec![("larga".into(), enorme)]);
+        let contenido = mensajes[0].content.as_str().unwrap();
+        assert!(contenido.chars().count() <= 4100);
+        assert!(contenido.ends_with('…'));
     }
 }

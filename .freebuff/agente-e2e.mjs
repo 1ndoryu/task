@@ -374,6 +374,69 @@ async function leerSSE(res) {
     assert(!lista.some((m) => m.clave === clave), 'la memoria eliminada ya no está en la lista');
   }
 
+  {
+    /* Fase 3 (skills v1): CRUD persistente + inyección observable. Crea una
+     * skill activa, comprueba idempotencia por nombre, y verifica que un
+     * stream con incluir_skills=true emite el evento `contexto` con la skill
+     * inyectada — sin depender de una respuesta exitosa de Glory (el evento
+     * se emite antes de la llamada al proveedor). */
+    console.log('12. Skills CRUD + inyección de contexto');
+    const nombre = `e2e-skill-${Date.now()}`;
+    let r = await api('/agente/skills', {
+      method: 'POST',
+      body: { nombre, descripcion: 'Responder siempre con viñetas (E2E)', activa: true },
+    });
+    assert([200, 201].includes(r.status), `crear skill (got ${r.status})`);
+    const skill = JSON.parse(r.body);
+    assert(!!skill.id && skill.nombre === nombre && skill.activa === true, 'la skill creada persiste sus campos');
+    // Upsert idempotente por nombre: misma clave, una sola fila.
+    r = await api('/agente/skills', {
+      method: 'POST',
+      body: { nombre, descripcion: 'Responder siempre con viñetas (E2E v2)', activa: true },
+    });
+    assert([200, 201].includes(r.status), `upsert skill (got ${r.status})`);
+    let lista = JSON.parse((await api('/agente/skills')).body);
+    assert(lista.filter((s) => s.nombre === nombre).length === 1, `upsert idempotente (1 fila, hay ${lista.filter((s) => s.nombre === nombre).length})`);
+    // Validación: descripción vacía rechazada.
+    r = await api('/agente/skills', { method: 'POST', body: { nombre: `otra-${Date.now()}`, descripcion: ' ' } });
+    assert(r.status === 400, `skill inválida rechazada (got ${r.status})`);
+    // Inyección observable: conversación con incluir_skills=true.
+    const conv = await api('/agente/conversaciones', {
+      method: 'POST',
+      body: { titulo: 'E2E skills', modo: 'predeterminado', config: { incluir_skills: true } },
+    });
+    assert([200, 201].includes(conv.status), `conversación de skills (got ${conv.status})`);
+    const convId = JSON.parse(conv.body).id;
+    const sr = await fetch(`${BASE}/agente/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: headerCookie(),
+        'x-csrf-token': cookies['csrf_token'] || '',
+      },
+      body: JSON.stringify({ conversacionId: convId, mensaje: 'Prueba de skills' }),
+    });
+    assert(sr.status === 200, `stream con skills aceptado (got ${sr.status})`);
+    const eventos = await leerSSE(sr);
+    const ctx = eventos.find((e) => e.tipo === 'contexto');
+    assert(!!ctx && ctx.skills >= 1, `evento contexto con skills inyectadas (got ${JSON.stringify(ctx)})`);
+    const errorEv = eventos.find((e) => e.tipo === 'error');
+    const fin = eventos.find((e) => e.tipo === 'done');
+    assert(!!errorEv || !!fin, 'el stream termina con error honesto o done');
+    // Desactivar vía PUT y confirmar el estado.
+    r = await api(`/agente/skills/${skill.id}`, { method: 'PUT', body: { activa: false } });
+    assert(r.status === 200, `desactivar skill (got ${r.status})`);
+    lista = JSON.parse((await api('/agente/skills')).body);
+    assert(lista.find((s) => s.id === skill.id)?.activa === false, 'la skill quedó inactiva');
+    // Eliminar y confirmar 404 en el segundo intento.
+    r = await api(`/agente/skills/${skill.id}`, { method: 'DELETE' });
+    assert(r.status === 204, `eliminar skill (got ${r.status})`);
+    r = await api(`/agente/skills/${skill.id}`, { method: 'DELETE' });
+    assert(r.status === 404, `eliminar dos veces -> 404 (got ${r.status})`);
+    lista = JSON.parse((await api('/agente/skills')).body);
+    assert(!lista.some((s) => s.id === skill.id), 'la skill eliminada ya no está en la lista');
+  }
+
   console.log(`\n${fallos === 0 ? 'AGENTE-E2E OK' : `${fallos} FALLO(S)`}`);
   process.exit(fallos === 0 ? 0 : 1);
 }
