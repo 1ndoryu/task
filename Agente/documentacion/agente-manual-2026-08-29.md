@@ -50,6 +50,15 @@ Stream `text/event-stream`. Eventos:
   el front puede ofrecer "reintentar").
 - `final` — cierre del turno con el contenido del asistente (persistido).
 
+### Default de proveedor y modelo
+
+El agente usa por defecto **Glory API** (`https://free.empero.org/v1`, sin API
+key) con el modelo **`commandcode`** — la ruta "auto" del proveedor que resuelve
+a **DeepSeek Flash** y es la vía que siempre funciona. Glory va PRIMERO como
+candidato: el fallback global solo se usa si ese endpoint falla. El front puede
+sobreescribir `provider`/`modelo`; nunca hay falso éxito (si Gloria cae,
+responde error retryable claro).
+
 ## 2. Herramientas
 
 ### De dominio (todas las cuentas; validadas por `user_id`)

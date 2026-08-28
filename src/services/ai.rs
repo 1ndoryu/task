@@ -30,12 +30,15 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
         "https://api.deepseek.com/chat/completions",
         &["deepseek-v4-flash"],
     ),
-    /* [27-08-2026] Glory API (free.empero.org) expone el modelo real
-     * `glm-5.3-flash` (verificado contra /models) y responde sin API key. */
+    /* [27-08-2026] Glory API (free.empero.org) responde sin API key. La ruta
+     * "auto" del proveedor usa el modelo `commandcode`, que resuelve
+     * internamente a DeepSeek Flash (la vía que el usuario prefiere usar por
+     * ser la que siempre funciona). `glm-5.3-flash` se mantiene como modelo
+     * disponible. */
     (
         "glory",
         "https://free.empero.org/v1/chat/completions",
-        &["glm-5.3-flash"],
+        &["commandcode", "glm-5.3-flash"],
     ),
     (
         "cerebras",
@@ -50,6 +53,13 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
  * JSON en pocos tokens (ideal nutrición); gpt-oss son de razonamiento y
  * agotan el presupuesto corto dejando content vacío, por eso van detrás. */
 const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
+    /* [29-08-2026] Glory API/`commandcode` (ruta auto -> DeepSeek Flash) sin
+     * clave va PRIMERO: es la vía que siempre funciona y el default del agente.
+     * La nutrición no cambia: pasa un modelo groq válido, que `candidato_valido`
+     * pone antes de esta cadena (la cadena solo rige cuando el candidato
+     * solicitado es inválido/ausente). */
+    ("glory", "commandcode"),
+    ("glory", "glm-5.3-flash"),
     ("groq", "groq/compound-mini"),
     ("groq", "groq/compound"),
     ("cerebras", "gemma-4-31b"),
@@ -57,7 +67,6 @@ const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
     ("groq", "openai/gpt-oss-120b"),
     ("groq", "qwen/qwen3.6-27b"),
     ("deepseek", "deepseek-v4-flash"),
-    ("glory", "glm-5.3-flash"),
 ];
 
 /// Prompt de nutrición calibrado regional (mismo que el front para que el

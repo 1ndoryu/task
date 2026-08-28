@@ -82,16 +82,18 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
 
                     {/* Modelo */}
                     <section className="modalConfigAgenteSeccion">
-                        <h3 className="modalConfigAgenteSeccionTitulo"><Cpu size={12} /> Modelo</h3>
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Cpu size={12} /> Modelo del proveedor</h3>
                         <p className="modalConfigAgenteSeccionDesc">
-                            Identificador del modelo (ej. <code>groq/compound-mini</code>). Vacío = el predeterminado del backend.
+                            Nombre del modelo sin prefijo de proveedor. Por defecto <code>commandcode</code>,
+                            la ruta "auto" de Glory API (sin clave) que resuelve a DeepSeek Flash.
+                            Vacío = el predeterminado del backend.
                         </p>
                         <input
                             className="modalConfigAgenteInput"
                             type="text"
                             value={modelo}
-                            onChange={e => setModelo(e.target.value)}
-                            placeholder="groq/compound-mini"
+                            onChange={e => setModelo(e.target.value.replace(/^glory\//, ''))}
+                            placeholder="commandcode"
                         />
                     </section>
                 </div>

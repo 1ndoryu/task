@@ -63,8 +63,12 @@ pub struct TurnoConfig {
 impl Default for TurnoConfig {
     fn default() -> Self {
         Self {
-            provider: "groq".into(),
-            modelo: "groq/compound-mini".into(),
+            /* [29-08-2026] Default del agente: Glory API sin key (free.empero.org),
+             * modelo `commandcode` (la ruta "auto" que resuelve a DeepSeek Flash —
+             * la vez que el usuario prefiere porque siempre funciona). Glory va
+             * primero; el fallback global solo se usa si Glory falla. */
+            provider: "glory".into(),
+            modelo: "commandcode".into(),
             max_turns: 10,
             timeout_tool: Duration::from_secs(15),
             contexto: ContextoConfig::default(),

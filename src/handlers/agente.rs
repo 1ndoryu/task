@@ -82,9 +82,14 @@ pub async fn agente_stream(
 
     let turno_id = Uuid::new_v4();
     let (tx, rx) = mpsc::channel::<AgenteEvento>(128);
+    /* [29-08-2026] Default del agente: Glory API (free.empero.org) sin key,
+     * modelo `commandcode` (la ruta "auto" que resuelve a DeepSeek Flash — la
+     * vía que el usuario prefiere por ser la que siempre funciona). Glory va
+     * PRIMERO como candidato via provider/modelo default; solo cae al fallback
+     * global si Glory falla. El front puede sobreescribir provider/modelo. */
     let runtime = AgentRuntime::nuevo(TurnoConfig {
-        provider: req.provider.unwrap_or_else(|| "groq".into()),
-        modelo: req.modelo.unwrap_or_else(|| "groq/compound-mini".into()),
+        provider: req.provider.unwrap_or_else(|| "glory".into()),
+        modelo: req.modelo.unwrap_or_else(|| "commandcode".into()),
         modo,
         ..TurnoConfig::default()
     });
