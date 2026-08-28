@@ -423,6 +423,11 @@ async function leerSSE(res) {
     const errorEv = eventos.find((e) => e.tipo === 'error');
     const fin = eventos.find((e) => e.tipo === 'done');
     assert(!!errorEv || !!fin, 'el stream termina con error honesto o done');
+    // Editar vía PUT (nombre + descripción): la ruta que consume la UI del modal.
+    r = await api(`/agente/skills/${skill.id}`, { method: 'PUT', body: { nombre: `${nombre}-edit`, descripcion: 'Editada desde el modal (E2E)' } });
+    assert(r.status === 200, `editar skill (got ${r.status})`);
+    const editada = JSON.parse(r.body);
+    assert(editada.nombre === `${nombre}-edit` && editada.descripcion === 'Editada desde el modal (E2E)', 'el PUT edita nombre y descripción');
     // Desactivar vía PUT y confirmar el estado.
     r = await api(`/agente/skills/${skill.id}`, { method: 'PUT', body: { activa: false } });
     assert(r.status === 200, `desactivar skill (got ${r.status})`);

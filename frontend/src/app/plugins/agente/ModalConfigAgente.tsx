@@ -1,8 +1,9 @@
 /* Configuración del agente: todos los valores se persisten y se envían al runtime. */
 import {useEffect, useState} from 'react';
-import {Bot, Cpu, Check} from 'lucide-react';
+import {Bot, Cpu, Check, Plus, Trash2, Pencil, X} from 'lucide-react';
 import {useAgenteStore} from './store';
-import type {ConfigAgente} from './service';
+import {listarSkills, crearSkill, actualizarSkill, eliminarSkill} from './service';
+import type {ConfigAgente, SkillAgente} from './service';
 import {Boton} from '../../components/ui/Boton';
 import './modalConfigAgente.css';
 
@@ -18,12 +19,59 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
     const config = useAgenteStore(s => s.config);
     const establecerConfig = useAgenteStore(s => s.establecerConfig);
     const [draft, setDraft] = useState(config);
-    useEffect(() => { if (activo) setDraft(config); }, [activo, config]);
+    const [skills, setSkills] = useState<SkillAgente[]>([]);
+    const [skillsError, setSkillsError] = useState<string | null>(null);
+    const [nuevaSkill, setNuevaSkill] = useState({nombre: '', descripcion: ''});
+    const [editandoId, setEditandoId] = useState<string | null>(null);
+    const [editando, setEditando] = useState({nombre: '', descripcion: ''});
+    useEffect(() => {
+        if (activo) {
+            setDraft(config);
+            setSkillsError(null);
+            void listarSkills().then(setSkills).catch(e => setSkillsError(e instanceof Error ? e.message : 'No se pudieron cargar las skills'));
+        }
+    }, [activo, config]);
     if (!activo) return null;
     const actualizar = <K extends keyof ConfigAgente>(campo: K, valor: ConfigAgente[K]) => setDraft(actual => ({...actual, [campo]: valor}));
     const guardar = () => {
         establecerConfig(draft);
         onCerrar();
+    };
+    const crear = async () => {
+        const nombre = nuevaSkill.nombre.trim();
+        const descripcion = nuevaSkill.descripcion.trim();
+        if (!nombre || !descripcion) return;
+        try {
+            const skill = await crearSkill({nombre, descripcion, activa: true});
+            setSkills(prev => [...prev, skill]);
+            setNuevaSkill({nombre: '', descripcion: ''});
+            setSkillsError(null);
+        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo crear la skill'); }
+    };
+    const alternar = async (skill: SkillAgente) => {
+        try {
+            const actualizada = await actualizarSkill(skill.id, {activa: !skill.activa});
+            setSkills(prev => prev.map(s => s.id === skill.id ? actualizada : s));
+            setSkillsError(null);
+        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo actualizar la skill'); }
+    };
+    const guardarEdicion = async (skill: SkillAgente) => {
+        const nombre = editando.nombre.trim();
+        const descripcion = editando.descripcion.trim();
+        if (!nombre || !descripcion) return;
+        try {
+            const actualizada = await actualizarSkill(skill.id, {nombre, descripcion});
+            setSkills(prev => prev.map(s => s.id === skill.id ? actualizada : s));
+            setEditandoId(null);
+            setSkillsError(null);
+        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo guardar la skill'); }
+    };
+    const eliminar = async (id: string) => {
+        try {
+            await eliminarSkill(id);
+            setSkills(prev => prev.filter(s => s.id !== id));
+            setSkillsError(null);
+        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo eliminar la skill'); }
     };
 
     return (
@@ -74,6 +122,41 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo">Prompt de sistema</h3>
                         <textarea className="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={4000} value={draft.promptSistema} onChange={e => actualizar('promptSistema', e.target.value)} placeholder="Instrucciones adicionales para el agente..." />
+                    </section>
+                    <section className="modalConfigAgenteSeccion">
+                        <h3 className="modalConfigAgenteSeccionTitulo">Skills</h3>
+                        <p className="modalConfigAgenteSeccionDesc">Skills del usuario que el agente inyecta como contexto cuando «Incluir skills activas» está marcado.</p>
+                        {skillsError && <p className="modalConfigAgenteError" role="alert">{skillsError}</p>}
+                        <div className="modalConfigAgenteSkills">
+                            {skills.length === 0 && !skillsError && <p className="modalConfigAgenteSeccionDesc">Sin skills todavía.</p>}
+                            {skills.map(s => editandoId === s.id ? (
+                                <div key={s.id} className="modalConfigAgenteSkill modalConfigAgenteSkill--editando">
+                                    <input className="modalConfigAgenteInput" value={editando.nombre} onChange={e => setEditando({...editando, nombre: e.target.value})} placeholder="Nombre" onKeyDown={e => {if (e.key === 'Enter') void guardarEdicion(s); if (e.key === 'Escape') setEditandoId(null);}} />
+                                    <input className="modalConfigAgenteInput" value={editando.descripcion} onChange={e => setEditando({...editando, descripcion: e.target.value})} placeholder="Descripción" />
+                                    <div className="modalConfigAgenteSkillAcciones">
+                                        <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => void guardarEdicion(s)} aria-label="Guardar skill"><Check size={13}/></button>
+                                        <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => setEditandoId(null)} aria-label="Cancelar edición"><X size={13}/></button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div key={s.id} className="modalConfigAgenteSkill">
+                                    <label className="modalConfigAgenteSkillActiva" title={s.activa ? 'Desactivar' : 'Activar'}><input type="checkbox" checked={s.activa} onChange={() => void alternar(s)} /></label>
+                                    <div className="modalConfigAgenteSkillTexto">
+                                        <span className="modalConfigAgenteSkillNombre">{s.nombre}</span>
+                                        {s.descripcion && <span className="modalConfigAgenteSkillDesc">{s.descripcion}</span>}
+                                    </div>
+                                    <div className="modalConfigAgenteSkillAcciones">
+                                        <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => {setEditandoId(s.id); setEditando({nombre: s.nombre, descripcion: s.descripcion});}} aria-label={`Editar ${s.nombre}`}><Pencil size={13}/></button>
+                                        <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => void eliminar(s.id)} aria-label={`Eliminar ${s.nombre}`}><Trash2 size={13}/></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="modalConfigAgenteSkillNueva">
+                            <input className="modalConfigAgenteInput" value={nuevaSkill.nombre} onChange={e => setNuevaSkill({...nuevaSkill, nombre: e.target.value})} placeholder="Nombre de la skill" onKeyDown={e => {if (e.key === 'Enter') void crear();}} />
+                            <input className="modalConfigAgenteInput" value={nuevaSkill.descripcion} onChange={e => setNuevaSkill({...nuevaSkill, descripcion: e.target.value})} placeholder="Descripción" />
+                            <Boton type="button" variante="secundario" disabled={!nuevaSkill.nombre.trim() || !nuevaSkill.descripcion.trim()} onClick={() => void crear()}><Plus size={13}/> Añadir</Boton>
+                        </div>
                     </section>
                 </div>
                 <div className="modalConfigAgentePie"><Boton type="button" variante="primario" onClick={guardar}>Guardar</Boton></div>

@@ -43,6 +43,13 @@ export interface MensajeConversacion {
     creadoEn: string;
 }
 
+export interface SkillAgente {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    activa: boolean;
+}
+
 /* Eventos del contrato SSE (src/handlers/agente.rs + src/agent/runtime.rs). */
 export type EventoAgente =
     | {tipo: 'token'; texto: string}
@@ -75,6 +82,24 @@ export async function renombrarConversacion(id: string, titulo: string): Promise
 
 export async function eliminarConversacion(id: string): Promise<void> {
     await apiFetch<void>(`/agente/conversaciones/${id}`, {method: 'DELETE'});
+}
+
+/* ---------- Skills (persistentes por usuario, inyectadas en el contexto) ---------- */
+
+export async function listarSkills(): Promise<SkillAgente[]> {
+    return apiFetch<SkillAgente[]>('/agente/skills');
+}
+
+export async function crearSkill(datos: {nombre: string; descripcion: string; activa: boolean}): Promise<SkillAgente> {
+    return apiFetch<SkillAgente>('/agente/skills', {method: 'POST', body: datos});
+}
+
+export async function actualizarSkill(id: string, cambios: Partial<Pick<SkillAgente, 'nombre' | 'descripcion' | 'activa'>>): Promise<SkillAgente> {
+    return apiFetch<SkillAgente>(`/agente/skills/${id}`, {method: 'PUT', body: cambios});
+}
+
+export async function eliminarSkill(id: string): Promise<void> {
+    await apiFetch<void>(`/agente/skills/${id}`, {method: 'DELETE'});
 }
 
 /* ---------- Historial (persistencia en servidor) ---------- */

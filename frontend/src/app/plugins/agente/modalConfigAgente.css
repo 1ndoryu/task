@@ -244,6 +244,100 @@
     font-family: var(--dashboard-fuenteMonoespaciada, inherit);
 }
 
+/* ---- Skills ---- */
+.modalConfigAgenteError {
+    margin: 0;
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-peligro, #ff6b6b);
+}
+
+.modalConfigAgenteSkills {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMini, 4px);
+}
+
+.modalConfigAgenteSkill {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioSm, 6px);
+    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.1));
+    border-radius: var(--dashboard-radioSm, 6px);
+    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioSmMd, 10px);
+}
+
+.modalConfigAgenteSkill--editando {
+    flex-wrap: wrap;
+}
+
+.modalConfigAgenteSkillActiva {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.modalConfigAgenteSkillActiva input {
+    accent-color: var(--dashboard-acento, #7c9cff);
+}
+
+.modalConfigAgenteSkillTexto {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+}
+
+.modalConfigAgenteSkillNombre {
+    font-size: var(--dashboard-tamanoBase, 13px);
+    color: var(--dashboard-textoActivo, #e8e8ea);
+}
+
+.modalConfigAgenteSkillDesc {
+    font-size: var(--dashboard-tamanoPequeno, 11px);
+    color: var(--dashboard-textoSecundario, #9a9aa3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.modalConfigAgenteSkillAcciones {
+    display: inline-flex;
+    gap: var(--dashboard-espacioMini, 4px);
+    flex-shrink: 0;
+}
+
+.modalConfigAgenteSkillBoton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: none;
+    border: none;
+    border-radius: var(--dashboard-radioSm, 6px);
+    color: var(--dashboard-textoApagado, #808080);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modalConfigAgenteSkillBoton:hover {
+    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
+    color: var(--dashboard-textoActivo, #e8e8ea);
+}
+
+.modalConfigAgenteSkillNueva {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: var(--dashboard-espacioSm, 6px);
+    align-items: center;
+}
+
+.modalConfigAgenteSkillNueva .modalConfigAgenteInput {
+    min-width: 0;
+}
+
 /* ---- Pie ---- */
 .modalConfigAgentePie {
     display: flex;
