@@ -27,8 +27,14 @@ export interface MensajeTabAgente {
     rol: 'user' | 'assistant';
     contenido: string;
     /* Eventos de tool del último turno (para las tarjetas). */
-    herramientas?: Array<{tool: string; ok: boolean; resumen: string; argumentos?: unknown}>;
+    herramientas?: Array<{tool: string; ok: boolean; resumen: string; argumentos?: unknown; diff?: string}>;
     aprobacionPendiente?: {tool: string; argumentos: unknown} | null;
+    /* Clave de idempotencia del mensaje del usuario: un reintento con la misma
+     * clave no duplica la fila en BD (ON CONFLICT DO NOTHING). Se genera en el
+     * envío y se conserva en el mensaje para que el botón reintentar reutilice. */
+    claveIdempotencia?: string | null;
+    /* Fallo retryable del proveedor; el botón reintentar reenvía con la misma clave. */
+    reintentar?: boolean | null;
     /* Contexto real recibido por el agente en este turno (eventos usage/contexto). */
     contexto?: {ocupacionPct: number | null; tokensPrompt: number; tokensComplecion: number; skills: number} | null;
 }
@@ -112,7 +118,8 @@ interface EstadoAgente {
     crearTab: () => Promise<ConversacionAgente | null>;
     renombrarTab: (id: string, titulo: string) => Promise<void>;
     cerrarTab: (id: string) => Promise<void>;
-    enviarMensaje: (texto: string, signal?: AbortSignal) => Promise<void>;
+    enviarMensaje: (texto: string, signal?: AbortSignal, claveIdempotencia?: string) => Promise<void>;
+    reintentarMensaje: () => Promise<void>;
     limpiarErrorTab: (id: string) => void;
     establecerConfig: (config: Partial<ConfigAgente>) => void;
     cargarTareasProgramadas: () => Promise<void>;
@@ -124,8 +131,142 @@ function generarIdLocal(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/* Clave de idempotencia del turno (UUID v4 del cliente). El backend usa
+ * `ON CONFLICT (conversacion_id, user_id, clave_idempotencia) DO NOTHING`; por
+ * eso la clave debe ser estable para el mismo turno y única entre turnos. */
+function generarClaveIdempotencia(): string {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6]! & 0x0f) | 0x40; // variante 4
+    bytes[8] = (bytes[8]! & 0x3f) | 0x80; // range 10xx
+    const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 function tabDe(estado: EstadoAgente, id: string): TabAgente | undefined {
     return estado.tabs.find(t => t.conversacion.id === id);
+}
+
+/* Ejecuta el stream SSE de un turno y aplica los eventos a la burbuja del
+ * asistente. Idempotencia y reintento: la clave ya viene fijada. */
+async function correrTurno(
+    get: () => EstadoAgente,
+    set: (partial: Partial<EstadoAgente> | ((s: EstadoAgente) => Partial<EstadoAgente>)) => void,
+    tabId: string,
+    texto: string,
+    signal: AbortSignal | undefined,
+    clave: string,
+    msgUsuario: MensajeTabAgente,
+    msgAsistente: MensajeTabAgente,
+    config: ConfigAgente,
+): Promise<void> {
+    try {
+        await enviarMensajeAgente(
+            tabId,
+            texto,
+            evento => {
+                const estado = get();
+                const tabActual = tabDe(estado, tabId);
+                if (!tabActual) return;
+                const idx = tabActual.mensajes.findIndex(m => m.id === msgAsistente.id);
+                if (idx === -1) return;
+                const mensajes = [...tabActual.mensajes];
+                const objetivo = {...mensajes[idx]};
+                switch (evento.tipo) {
+                    case 'token':
+                        objetivo.contenido += evento.texto;
+                        break;
+                    case 'tool_start':
+                        objetivo.herramientas = [
+                            ...(objetivo.herramientas ?? []),
+                            {tool: evento.tool, ok: true, resumen: 'ejecutando...', argumentos: evento.argumentos},
+                        ];
+                        break;
+                    case 'tool_result':
+                        objetivo.herramientas = (objetivo.herramientas ?? []).map(h =>
+                            h.tool === evento.tool
+                                ? {tool: evento.tool, ok: evento.ok, resumen: evento.resumen, argumentos: h.argumentos, diff: evento.diff}
+                                : h
+                        );
+                        break;
+                    case 'usage':
+                        objetivo.contexto = {
+                            ocupacionPct: evento.ocupacion_pct ?? null,
+                            tokensPrompt: evento.tokens_prompt ?? 0,
+                            tokensComplecion: evento.tokens_complecion ?? 0,
+                            skills: objetivo.contexto?.skills ?? 0,
+                        };
+                        break;
+                    case 'contexto':
+                        objetivo.contexto = {
+                            ocupacionPct: objetivo.contexto?.ocupacionPct ?? null,
+                            tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
+                            tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
+                            skills: evento.skills,
+                        };
+                        break;
+                    case 'requiere_aprobacion':
+                        objetivo.aprobacionPendiente = {tool: evento.tool, argumentos: evento.argumentos};
+                        break;
+                    case 'error':
+                        /* El error retryable se muestra en la burbuja con el
+                         * botón reintentar; el mensaje no se marca fallido en
+                         * servidor. Se conserva la clave de idempotencia. */
+                        objetivo.contenido = objetivo.contenido || `⚠ ${evento.mensaje}`;
+                        objetivo.reintentar = evento.retryable;
+                        break;
+                }
+                mensajes[idx] = objetivo;
+                mensajesDe(set, get, tabId, mensajes);
+            },
+            signal,
+            config,
+            clave,
+        );
+    } catch (error) {
+        const mensajeError = error instanceof Error ? error.message : 'Error desconocido del agente';
+        set(state => ({
+            tabs: state.tabs.map(t =>
+                t.conversacion.id === tabId
+                    ? {
+                          ...t,
+                          enviando: false,
+                          error: mensajeError,
+                          mensajes: t.mensajes.map(m =>
+                              m.id === msgAsistente.id && m.contenido === ''
+                                  ? {...m, contenido: `⚠ ${mensajeError}`, claveIdempotencia: msgUsuario.claveIdempotencia, reintentar: true}
+                                  : m
+                          ),
+                      }
+                    : t
+            ),
+        }));
+        return;
+    }
+
+    set(state => ({
+        tabs: state.tabs.map(t =>
+            t.conversacion.id === tabId
+                ? {
+                      ...t,
+                      enviando: false,
+                      /* Los mensajes persisten en el servidor (el runtime
+                       * guarda user+assistant); la lista local ya los tiene. */
+                  }
+                : t
+        ),
+    }));
+}
+
+function mensajesDe(
+    set: (partial: Partial<EstadoAgente> | ((s: EstadoAgente) => Partial<EstadoAgente>)) => void,
+    get: () => EstadoAgente,
+    tabId: string,
+    mensajes: MensajeTabAgente[],
+) {
+    set(() => ({
+        tabs: get().tabs.map(t => (t.conversacion.id === tabId ? {...t, mensajes} : t)),
+    }));
 }
 
 export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
@@ -273,13 +414,20 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         }
     },
 
-    enviarMensaje: async (texto, signal) => {
+    enviarMensaje: async (texto, signal, claveIdempotencia) => {
         const tabId = get().tabActivaId;
         const tab = tabId ? tabDe(get(), tabId) : undefined;
         const limpio = texto.trim();
         if (!tabId || !tab || !limpio || tab.enviando) return;
 
-        const msgUsuario: MensajeTabAgente = {id: generarIdLocal(), rol: 'user', contenido: limpio};
+        const msgUsuario: MensajeTabAgente = {
+            id: generarIdLocal(),
+            rol: 'user',
+            contenido: limpio,
+            /* Se genera en el primer intento y se conserva en el mensaje para
+             * que un reintento con la misma clave no duplique la fila en BD. */
+            claveIdempotencia: claveIdempotencia ?? generarClaveIdempotencia(),
+        };
         const msgAsistente: MensajeTabAgente = {
             id: generarIdLocal(),
             rol: 'assistant',
@@ -300,103 +448,66 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
             ),
         }));
 
-        try {
-            await enviarMensajeAgente(
-                tabId,
-                limpio,
-                evento => {
-                    const estado = get();
-                    const tabActual = tabDe(estado, tabId);
-                    if (!tabActual) return;
-                    const idx = tabActual.mensajes.findIndex(m => m.id === msgAsistente.id);
-                    if (idx === -1) return;
-                    const mensajes = [...tabActual.mensajes];
-                    const objetivo = {...mensajes[idx]};
-                    switch (evento.tipo) {
-                        case 'token':
-                            objetivo.contenido += evento.texto;
-                            break;
-                        case 'tool_start':
-                            objetivo.herramientas = [
-                                ...(objetivo.herramientas ?? []),
-                                {tool: evento.tool, ok: true, resumen: 'ejecutando...', argumentos: evento.argumentos},
-                            ];
-                            break;
-                        case 'tool_result':
-                            objetivo.herramientas = (objetivo.herramientas ?? []).map(h =>
-                                h.tool === evento.tool
-                                    ? {tool: evento.tool, ok: evento.ok, resumen: evento.resumen, argumentos: h.argumentos}
-                                    : h
-                            );
-                            break;
-                        case 'usage':
-                            objetivo.contexto = {
-                                ocupacionPct: evento.ocupacion_pct ?? null,
-                                tokensPrompt: evento.tokens_prompt ?? 0,
-                                tokensComplecion: evento.tokens_complecion ?? 0,
-                                skills: objetivo.contexto?.skills ?? 0,
-                            };
-                            break;
-                        case 'contexto':
-                            objetivo.contexto = {
-                                ocupacionPct: objetivo.contexto?.ocupacionPct ?? null,
-                                tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
-                                tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
-                                skills: evento.skills,
-                            };
-                            break;
-                        case 'requiere_aprobacion':
-                            objetivo.aprobacionPendiente = {tool: evento.tool, argumentos: evento.argumentos};
-                            break;
-                        case 'error':
-                            /* El error retryable se muestra en la burbuja; el
-                             * mensaje no se marca como fallido en servidor. */
-                            objetivo.contenido = objetivo.contenido || `⚠ ${evento.mensaje}`;
-                            break;
-                        default:
-                            break;
-                    }
-                    mensajes[idx] = objetivo;
-                    set(state => ({
-                        tabs: state.tabs.map(t => (t.conversacion.id === tabId ? {...t, mensajes} : t)),
-                    }));
-                },
-                signal,
-                tab.config,
-            );
-        } catch (error) {
-            const mensajeError = error instanceof Error ? error.message : 'Error desconocido del agente';
-            set(state => ({
-                tabs: state.tabs.map(t =>
-                    t.conversacion.id === tabId
-                        ? {
-                              ...t,
-                              enviando: false,
-                              error: mensajeError,
-                              mensajes: t.mensajes.map(m =>
-                                  m.id === msgAsistente.id && m.contenido === ''
-                                      ? {...m, contenido: `⚠ ${mensajeError}`}
-                                      : m
-                              ),
-                          }
-                        : t
-                ),
-            }));
-            return;
-        }
+        await correrTurno(
+            get,
+            set,
+            tabId,
+            limpio,
+            signal,
+            msgUsuario.claveIdempotencia!,
+            msgUsuario,
+            msgAsistente,
+            tab.config,
+        );
+    },
 
+    /* Reintenta el último turno fallido reutilizando la misma clave de
+     * idempotencia: la fila del usuario ya existe en BD (ON CONFLICT DO
+     * NOTHING no duplica) y se reenvía a la red. Busca el último mensaje de
+     * usuario con clave y crea una burbuja de asistente nueva a continuación. */
+    reintentarMensaje: async () => {
+        const tabId = get().tabActivaId;
+        const tab = tabId ? tabDe(get(), tabId) : undefined;
+        if (!tabId || !tab || tab.enviando) return;
+
+        /* Último turno de usuario que ya se persistió (tiene clave). */
+        const ultimoUsuario = [...tab.mensajes].reverse().find(m => m.rol === 'user' && m.claveIdempotencia);
+        if (!ultimoUsuario) return;
+
+        /* Quitar la burbuja de asistente fallida que quedó debajo, si existe. */
+        const idxUsuario = tab.mensajes.findIndex(m => m.id === ultimoUsuario.id);
+        const sinBurbujaFallida = [...tab.mensajes].slice(0, idxUsuario + 1);
+        const msgAsistente: MensajeTabAgente = {
+            id: generarIdLocal(),
+            rol: 'assistant',
+            contenido: '',
+            herramientas: [],
+            aprobacionPendiente: null,
+        };
         set(state => ({
             tabs: state.tabs.map(t =>
                 t.conversacion.id === tabId
                     ? {
                           ...t,
-                          enviando: false,
-                          /* Los mensajes persisten en el servidor (el runtime
-                           * guarda user+assistant); la lista local ya los tiene. */
+                          enviando: true,
+                          error: null,
+                          mensajes: [...sinBurbujaFallida, msgAsistente],
                       }
                     : t
             ),
         }));
+
+        await correrTurno(
+            get,
+            set,
+            tabId,
+            ultimoUsuario.contenido,
+            undefined,
+            ultimoUsuario.claveIdempotencia!,
+            ultimoUsuario,
+            msgAsistente,
+            tab.config,
+        );
     },
 
     limpiarErrorTab: (id) => {

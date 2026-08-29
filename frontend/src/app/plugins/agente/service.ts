@@ -65,7 +65,7 @@ export interface TareaProgramada {
 export type EventoAgente =
     | {tipo: 'token'; texto: string}
     | {tipo: 'tool_start'; tool: string; argumentos: unknown}
-    | {tipo: 'tool_result'; tool: string; ok: boolean; resumen: string}
+    | {tipo: 'tool_result'; tool: string; ok: boolean; resumen: string; diff?: string}
     | {tipo: 'usage'; tokens_prompt?: number; tokens_complecion?: number; ocupacion_pct?: number | null}
     | {tipo: 'contexto'; skills: number}
     | {tipo: 'requiere_aprobacion'; tool: string; argumentos: unknown}
@@ -151,10 +151,16 @@ export async function cargarHistorial(id: string): Promise<MensajeConversacion[]
  * por cada evento tipado; `onError` con el error real del backend. Devuelve
  * una promesa que resuelve al terminar (evento done) o con el error.
  */
-export function construirPayloadStream(conversacionId: string, mensaje: string, config: Partial<ConfigAgente> = {}): Record<string, unknown> {
+export function construirPayloadStream(
+    conversacionId: string,
+    mensaje: string,
+    config: Partial<ConfigAgente> = {},
+    claveIdempotencia?: string,
+): Record<string, unknown> {
     return {
         conversacionId,
         mensaje,
+        ...(claveIdempotencia ? {clave_idempotencia: claveIdempotencia} : {}),
         ...(config.modelo ? {modelo: config.modelo} : {}),
         ...(config.temperatura !== undefined ? {temperatura: config.temperatura} : {}),
         ...(config.maxTokens !== undefined ? {max_tokens: config.maxTokens} : {}),
@@ -178,6 +184,7 @@ export async function enviarMensajeAgente(
     onEvento: (evento: EventoAgente) => void,
     signal?: AbortSignal,
     config: Partial<ConfigAgente> = {},
+    claveIdempotencia?: string,
 ): Promise<void> {
     const respuesta = await fetch('/api/agente/stream', {
         method: 'POST',
@@ -185,7 +192,7 @@ export async function enviarMensajeAgente(
             'Content-Type': 'application/json',
             'X-CSRF-Token': obtenerTokenCsrf(),
         },
-        body: JSON.stringify(construirPayloadStream(conversacionId, mensaje, config)),
+        body: JSON.stringify(construirPayloadStream(conversacionId, mensaje, config, claveIdempotencia)),
         signal,
     });
 

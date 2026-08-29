@@ -30,6 +30,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         renombrarTab,
         cerrarTab,
         enviarMensaje,
+        reintentarMensaje,
         limpiarErrorTab,
         tareasProgramadas,
         cargandoTareas,
@@ -283,10 +284,16 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                                                     <span className="panelAgenteHerramientaNombre">{h.tool}</span>
                                                     <span className="panelAgenteHerramientaTexto">{h.resumen}</span>
                                                 </summary>
-                                                {h.argumentos !== undefined && (
+                                                {h.diff !== undefined && h.diff !== null && h.diff !== '' ? (
                                                     <pre className="panelAgenteHerramientaArgs">
-                                                        {JSON.stringify(h.argumentos, null, 2)}
+                                                        {h.diff}
                                                     </pre>
+                                                ) : (
+                                                    h.argumentos !== undefined && (
+                                                        <pre className="panelAgenteHerramientaArgs">
+                                                            {JSON.stringify(h.argumentos, null, 2)}
+                                                        </pre>
+                                                    )
                                                 )}
                                             </details>
                                         ))}
@@ -308,6 +315,19 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                                             </span>
                                         )}
                                     </div>
+                                )}
+
+                                {/* Reintentar un turno con fallo retryable: reenvía con
+                                 * la misma clave de idempotencia (no duplica en BD). */}
+                                {mensaje.reintentar && !tabActiva.enviando && (
+                                    <Boton
+                                        variante="ghost"
+                                        tamano="pequeño"
+                                        onClick={() => void reintentarMensaje()}
+                                        title="Reenviar el último mensaje con la misma clave de idempotencia"
+                                    >
+                                        ↻ Reintentar
+                                    </Boton>
                                 )}
 
                                 {/* Aprobación pendiente (modo predeterminado) */}
