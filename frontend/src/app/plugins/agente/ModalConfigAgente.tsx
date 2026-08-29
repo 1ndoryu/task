@@ -5,14 +5,10 @@ import {useAgenteStore} from './store';
 import {listarSkills, crearSkill, actualizarSkill, eliminarSkill} from './service';
 import type {ConfigAgente, SkillAgente} from './service';
 import {Boton} from '../../components/ui/Boton';
+import {AvisoModoAutonomo, SelectorModo, SkillFila} from './componentes';
 import './modalConfigAgente.css';
 
 interface ModalConfigAgenteProps { activo: boolean; onCerrar: () => void; }
-const MODOS: Array<{id: ConfigAgente['modo']; nombre: string; descripcion: string}> = [
-    {id: 'predeterminado', nombre: 'Predeterminado', descripcion: 'Pide aprobación para herramientas con efecto.'},
-    {id: 'meta', nombre: 'Meta', descripcion: 'Permite ajustar reglas además de pedir aprobación.'},
-    {id: 'autonomo', nombre: 'Autónomo', descripcion: 'Ejecuta herramientas con efecto sin preguntar.'},
-];
 const clamped = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): JSX.Element | null {
@@ -84,9 +80,8 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                 <div className="modalConfigAgenteCuerpo">
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Route size={12}/> Modo por defecto</h3>
-                        <div className="modalConfigAgenteOpciones" role="radiogroup" aria-label="Modo por defecto">
-                            {MODOS.map(m => <button key={m.id} type="button" role="radio" aria-checked={draft.modo === m.id} className={`modalConfigAgenteOpcion ${draft.modo === m.id ? 'modalConfigAgenteOpcion--activa' : ''}`} onClick={() => actualizar('modo', m.id)}><span className="modalConfigAgenteOpcionRadio">{draft.modo === m.id && <Check size={12}/>}</span><span className="modalConfigAgenteOpcionTexto"><span className="modalConfigAgenteOpcionNombre">{m.nombre}</span><span className="modalConfigAgenteOpcionDesc">{m.descripcion}</span></span></button>)}
-                        </div>
+                        <SelectorModo modo={draft.modo} onChange={m => actualizar('modo', m)} />
+                        {draft.modo === 'autonomo' && <AvisoModoAutonomo />}
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Cpu size={12}/> Proveedor y modelo</h3>
@@ -142,17 +137,13 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                                     </div>
                                 </div>
                             ) : (
-                                <div key={s.id} className="modalConfigAgenteSkill">
-                                    <label className="modalConfigAgenteSkillActiva" title={s.activa ? 'Desactivar' : 'Activar'}><input type="checkbox" checked={s.activa} onChange={() => void alternar(s)} /></label>
-                                    <div className="modalConfigAgenteSkillTexto">
-                                        <span className="modalConfigAgenteSkillNombre">{s.nombre}</span>
-                                        {s.descripcion && <span className="modalConfigAgenteSkillDesc">{s.descripcion}</span>}
-                                    </div>
-                                    <div className="modalConfigAgenteSkillAcciones">
-                                        <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => {setEditandoId(s.id); setEditando({nombre: s.nombre, descripcion: s.descripcion});}} aria-label={`Editar ${s.nombre}`}><Pencil size={13}/></button>
-                                        <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => void eliminar(s.id)} aria-label={`Eliminar ${s.nombre}`}><Trash2 size={13}/></button>
-                                    </div>
-                                </div>
+                                <SkillFila
+                                    key={s.id}
+                                    skill={s}
+                                    onActivar={skill => void alternar(skill)}
+                                    onEditar={skill => {setEditandoId(skill.id); setEditando({nombre: skill.nombre, descripcion: skill.descripcion});}}
+                                    onEliminar={id => void eliminar(id)}
+                                />
                             ))}
                         </div>
                         <div className="modalConfigAgenteSkillNueva">

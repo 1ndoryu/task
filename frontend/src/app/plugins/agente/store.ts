@@ -224,6 +224,38 @@ async function correrTurno(
             clave,
         );
     } catch (error) {
+        /* Cancelación por el usuario (botón cancelar / cierre del panel): no es
+         * un fallo retryable del proveedor. La fila del usuario ya se persistió
+         * al inicio del turno (ON CONFLICT DO NOTHING), así que un reintento con
+         * la misma clave no duplica; se deja la burbuja como "cancelado" y con
+         * el botón reintentar por si el usuario quiere reanudar. */
+        const cancelado =
+            signal?.aborted === true ||
+            (error instanceof DOMException && error.name === 'AbortError') ||
+            (error instanceof Error && error.name === 'AbortError');
+        if (cancelado) {
+            set(state => ({
+                tabs: state.tabs.map(t =>
+                    t.conversacion.id === tabId
+                        ? {
+                              ...t,
+                              enviando: false,
+                              mensajes: t.mensajes.map(m =>
+                                  m.id === msgAsistente.id && m.contenido === ''
+                                      ? {
+                                            ...m,
+                                            contenido: '⏹ Turno cancelado',
+                                            claveIdempotencia: msgUsuario.claveIdempotencia,
+                                            reintentar: true,
+                                        }
+                                      : m
+                              ),
+                          }
+                        : t
+                ),
+            }));
+            return;
+        }
         const mensajeError = error instanceof Error ? error.message : 'Error desconocido del agente';
         set(state => ({
             tabs: state.tabs.map(t =>

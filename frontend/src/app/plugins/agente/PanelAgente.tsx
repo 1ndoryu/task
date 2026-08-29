@@ -4,14 +4,25 @@
  * conversaciones (persistidas en el servidor), streaming SSE con tarjetas
  * de tool y contexto visible. Reutiliza el sistema de diseño (SeccionEncabezado,
  * Boton, Textarea) y las clases de panelIA.css para coherencia visual.
+ * Los bloques visuales (mensajes, tools, tabs, tareas, estados) viven en
+ * componentes.tsx y son los MISMOS que renderiza la galería de Fase 4.5.
  */
 
 import {useEffect, useRef, useState} from 'react';
-import {ArrowUp, Bot, ChevronDown, ChevronUp, Clock, Loader2, Plus, Settings, Trash2, X, Wrench, AlertTriangle, CheckCircle, XCircle} from 'lucide-react';
+import {ArrowUp, Bot, ChevronDown, ChevronUp, Clock, Loader2, Plus, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../../components/dashboard';
 import {Boton, Textarea} from '../../components/ui';
 import {useAgenteStore, useTabActivaAgente} from './store';
 import {ModalConfigAgente} from './ModalConfigAgente';
+import {
+    BotonCancelar,
+    EstadoCarga,
+    EstadoVacio,
+    MensajeAsistente,
+    MensajeUsuario,
+    TabsWorkspace,
+    TarjetaTareaProgramada,
+} from './componentes';
 import type {PanelBaseProps} from '../../types/paneles';
 
 import '../../styles/dashboard/componentes/panelIA.css';
@@ -84,11 +95,15 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         };
     }, []);
 
+    const cancelarTurno = () => {
+        refAbort.current?.abort();
+        refAbort.current = null;
+    };
+
     const manejarEnviar = () => {
         const texto = inputTexto.trim();
         if (!texto || !tabActiva || tabActiva.enviando) return;
         setInputTexto('');
-        refAbort.current?.abort();
         refAbort.current = new AbortController();
         void enviarMensaje(texto, refAbort.current.signal);
     };
@@ -164,78 +179,36 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
             <ModalConfigAgente activo={configAbierta} onCerrar={() => setConfigAbierta(false)} />
 
             {/* Tabs de conversaciones */}
-            <div className="panelAgenteTabs">
-                {tabs.map(tab => {
-                    const activa = tab.conversacion.id === tabActivaId;
-                    const editando = editandoTitulo === tab.conversacion.id;
-                    return (
-                        <div
-                            key={tab.conversacion.id}
-                            className={`panelAgenteTab ${activa ? 'panelAgenteTab--activa' : ''}`}
-                            onClick={() => void abrirTab(tab.conversacion.id)}
-                            onDoubleClick={() => iniciarRenombrado(tab.conversacion.id, tab.conversacion.titulo)}
-                            title={tab.conversacion.titulo}
-                        >
-                            {editando ? (
-                                <input
-                                    className="panelAgenteTabInput"
-                                    value={tituloEdicion}
-                                    autoFocus
-                                    onChange={e => setTituloEdicion(e.target.value)}
-                                    onClick={e => e.stopPropagation()}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') confirmarRenombrado(tab.conversacion.id);
-                                        if (e.key === 'Escape') setEditandoTitulo(null);
-                                        e.stopPropagation();
-                                    }}
-                                />
-                            ) : (
-                                <span className="panelAgenteTabTitulo">{tab.conversacion.titulo}</span>
-                            )}
-                            <button
-                                className="panelAgenteTabCerrar"
-                                title="Cerrar conversación"
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    void cerrarTab(tab.conversacion.id);
-                                }}
-                            >
-                                <X size={10} />
-                            </button>
-                        </div>
-                    );
-                })}
-            </div>
+            <TabsWorkspace
+                tabs={tabs.map(t => ({id: t.conversacion.id, titulo: t.conversacion.titulo}))}
+                activaId={tabActivaId}
+                editandoId={editandoTitulo}
+                tituloEdicion={tituloEdicion}
+                onActivar={id => void abrirTab(id)}
+                onIniciarRenombrado={iniciarRenombrado}
+                onCambiarTituloEdicion={setTituloEdicion}
+                onConfirmarRenombrado={confirmarRenombrado}
+                onCancelarRenombrado={() => setEditandoTitulo(null)}
+                onCerrar={id => void cerrarTab(id)}
+            />
 
             {/* Área de mensajes */}
             <div ref={refScroll} className="panelIAMensajes">
-                {cargandoLista && (
-                    <div className="panelIAVacio">
-                        <Loader2 size={24} className="animacionGirar" />
-                        <p>Cargando conversaciones...</p>
-                    </div>
-                )}
+                {cargandoLista && <EstadoCarga texto="Cargando conversaciones..." />}
 
                 {errorLista && (
                     <div className="panelIAError">{errorLista}</div>
                 )}
 
                 {!cargandoLista && tabs.length === 0 && !errorLista && (
-                    <div className="panelIAVacio">
-                        <Bot size={32} />
-                        <p>Nueva conversación: pide al agente crear tareas, hábitos, notas o recordatorios.</p>
+                    <EstadoVacio icono={<Bot size={32} />} texto="Nueva conversación: pide al agente crear tareas, hábitos, notas o recordatorios.">
                         <Boton variante="primario" tamano="pequeño" onClick={() => void crearTab()}>
                             <Plus size={12} /> Nueva conversación
                         </Boton>
-                    </div>
+                    </EstadoVacio>
                 )}
 
-                {tabActiva?.cargandoHistorial && (
-                    <div className="panelIAVacio">
-                        <Loader2 size={24} className="animacionGirar" />
-                        <p>Cargando historial...</p>
-                    </div>
-                )}
+                {tabActiva?.cargandoHistorial && <EstadoCarga texto="Cargando historial..." />}
 
                 {tabActiva?.error && (
                     <div className="panelIAError">
@@ -251,103 +224,26 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                 )}
 
                 {tabActiva && !tabActiva.cargandoHistorial && tabActiva.mensajes.length === 0 && (
-                    <div className="panelIAVacio">
-                        <Bot size={32} />
-                        <p>Escribe un mensaje para comenzar. Doble clic en una tab para renombrarla.</p>
-                    </div>
+                    <EstadoVacio icono={<Bot size={32} />} texto="Escribe un mensaje para comenzar. Doble clic en una tab para renombrarla." />
                 )}
 
                 {tabActiva?.mensajes.map(mensaje => {
-                    const esUsuario = mensaje.rol === 'user';
+                    if (mensaje.rol === 'user') {
+                        return <MensajeUsuario key={mensaje.id} contenido={mensaje.contenido} />;
+                    }
+                    const ultimo = mensaje.id === tabActiva.mensajes[tabActiva.mensajes.length - 1]?.id;
                     return (
-                        <div key={mensaje.id} className={`panelIAMensaje ${esUsuario ? 'panelIAMensaje--usuario' : 'panelIAMensaje--asistente'}`}>
-                            {!esUsuario && (
-                                <div className="panelIAMensajeAvatar">
-                                    <Bot size={14} />
-                                </div>
-                            )}
-                            <div className="panelIAMensajeBurbuja">
-                                <span className="panelIAMensajeTexto">{mensaje.contenido || '...'}</span>
-
-                                {/* Tarjetas de herramientas ejecutadas (args expandibles) */}
-                                {mensaje.herramientas && mensaje.herramientas.length > 0 && (
-                                    <div className="panelAgenteHerramientas">
-                                        {mensaje.herramientas.map((h, i) => (
-                                            <details
-                                                key={`${mensaje.id}-${i}`}
-                                                className={`panelAgenteHerramienta ${h.ok ? 'panelAgenteHerramienta--ok' : 'panelAgenteHerramienta--error'}`}
-                                                open={h.resumen === 'ejecutando...'}
-                                            >
-                                                <summary className="panelAgenteHerramientaResumen">
-                                                    {h.ok ? <CheckCircle size={10} /> : <XCircle size={10} />}
-                                                    <Wrench size={10} />
-                                                    <span className="panelAgenteHerramientaNombre">{h.tool}</span>
-                                                    <span className="panelAgenteHerramientaTexto">{h.resumen}</span>
-                                                </summary>
-                                                {h.diff !== undefined && h.diff !== null && h.diff !== '' ? (
-                                                    <pre className="panelAgenteHerramientaArgs">
-                                                        {h.diff}
-                                                    </pre>
-                                                ) : (
-                                                    h.argumentos !== undefined && (
-                                                        <pre className="panelAgenteHerramientaArgs">
-                                                            {JSON.stringify(h.argumentos, null, 2)}
-                                                        </pre>
-                                                    )
-                                                )}
-                                            </details>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Contexto real recibido por el agente (usage/contexto) */}
-                                {mensaje.contexto && (mensaje.contexto.ocupacionPct !== null || mensaje.contexto.tokensPrompt > 0 || mensaje.contexto.skills > 0) && (
-                                    <div className="panelAgenteContexto">
-                                        {mensaje.contexto.skills > 0 && (
-                                            <span>{mensaje.contexto.skills} skills</span>
-                                        )}
-                                        {mensaje.contexto.ocupacionPct !== null && (
-                                            <span>{mensaje.contexto.ocupacionPct.toFixed(0)}% contexto</span>
-                                        )}
-                                        {mensaje.contexto.tokensPrompt > 0 && (
-                                            <span>
-                                                {mensaje.contexto.tokensPrompt} tok entrada · {mensaje.contexto.tokensComplecion} salida
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Reintentar un turno con fallo retryable: reenvía con
-                                 * la misma clave de idempotencia (no duplica en BD). */}
-                                {mensaje.reintentar && !tabActiva.enviando && (
-                                    <Boton
-                                        variante="ghost"
-                                        tamano="pequeño"
-                                        onClick={() => void reintentarMensaje()}
-                                        title="Reenviar el último mensaje con la misma clave de idempotencia"
-                                    >
-                                        ↻ Reintentar
-                                    </Boton>
-                                )}
-
-                                {/* Aprobación pendiente (modo predeterminado) */}
-                                {mensaje.aprobacionPendiente && (
-                                    <div className="panelIAAccionBadge panelIAAccionBadge--pendiente">
-                                        <AlertTriangle size={10} />
-                                        <span>
-                                            {mensaje.aprobacionPendiente.tool} requiere aprobación del usuario
-                                        </span>
-                                    </div>
-                                )}
-
-                                {tabActiva.enviando && !esUsuario && mensaje.id === tabActiva.mensajes[tabActiva.mensajes.length - 1]?.id && mensaje.contenido === '' && (
-                                    <div className="panelIAMensajeBurbuja--cargando panelAgentePensando">
-                                        <Loader2 size={12} className="animacionGirar" />
-                                        <span>Pensando...</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <MensajeAsistente
+                            key={mensaje.id}
+                            contenido={mensaje.contenido}
+                            herramientas={mensaje.herramientas}
+                            contexto={mensaje.contexto}
+                            aprobacionPendiente={mensaje.aprobacionPendiente}
+                            reintentar={mensaje.reintentar}
+                            enviando={tabActiva.enviando}
+                            ultimo={ultimo}
+                            onReintentar={() => void reintentarMensaje()}
+                        />
                     );
                 })}
             </div>
@@ -375,32 +271,11 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                             <div className="panelAgenteTareasVacio">Sin tareas programadas todavía.</div>
                         )}
                         {tareasProgramadas.map(tarea => (
-                            <div key={tarea.id} className="panelAgenteTarea">
-                                <div className="panelAgenteTareaFila">
-                                    <span className="panelAgenteTareaNombre">{tarea.nombre}</span>
-                                    <span className={`panelAgenteTareaEstado panelAgenteTareaEstado--${tarea.estado}`}>
-                                        {tarea.estado}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        className="panelAgenteTareaBorrar"
-                                        title="Eliminar tarea programada"
-                                        onClick={() => void eliminarTarea(tarea.id)}
-                                    >
-                                        <Trash2 size={10} />
-                                    </button>
-                                </div>
-                                <div className="panelAgenteTareaMeta">
-                                    {tarea.tipo === 'recurrente'
-                                        ? (tarea.cron_expr ?? 'recurrente')
-                                        : tarea.proxima_ejecucion
-                                            ? `próxima: ${new Date(tarea.proxima_ejecucion).toLocaleString()}`
-                                            : 'una vez'}
-                                </div>
-                                {tarea.result_summary && (
-                                    <div className="panelAgenteTareaResumen">{tarea.result_summary}</div>
-                                )}
-                            </div>
+                            <TarjetaTareaProgramada
+                                key={tarea.id}
+                                tarea={tarea}
+                                onEliminar={id => void eliminarTarea(id)}
+                            />
                         ))}
                         <form className="panelAgenteTareaForm" onSubmit={manejarCrearTarea}>
                             <input
@@ -465,17 +340,21 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                     filas={1}
                     autoAjustar
                 />
-                <Boton
-                    type="button"
-                    variante="icono"
-                    tamano="pequeño"
-                    soloIcono
-                    claseAdicional="panelIAInputEnviar"
-                    onClick={manejarEnviar}
-                    disabled={!tabActiva || tabActiva.enviando || !inputTexto.trim()}
-                    icono={tabActiva?.enviando ? <Loader2 size={16} className="animacionGirar" /> : <ArrowUp size={16} />}
-                    title="Enviar"
-                />
+                {tabActiva?.enviando ? (
+                    <BotonCancelar onCancelar={cancelarTurno} />
+                ) : (
+                    <Boton
+                        type="button"
+                        variante="icono"
+                        tamano="pequeño"
+                        soloIcono
+                        claseAdicional="panelIAInputEnviar"
+                        onClick={manejarEnviar}
+                        disabled={!tabActiva || !inputTexto.trim()}
+                        icono={<ArrowUp size={16} />}
+                        title="Enviar"
+                    />
+                )}
             </div>
         </div>
     );
