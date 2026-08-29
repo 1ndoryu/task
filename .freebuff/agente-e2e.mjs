@@ -442,6 +442,80 @@ async function leerSSE(res) {
     assert(!lista.some((s) => s.id === skill.id), 'la skill eliminada ya no está en la lista');
   }
 
+  /* Fase 4: idempotencia del mensaje de usuario al reintentar. Misma
+   * `clave_idempotencia` => misma fila en BD (ON CONFLICT DO NOTHING), de
+   * forma que reintentar un turno no duplica el mensaje del usuario. */
+  console.log('13. Idempotencia del mensaje (retry con misma clave)');
+  {
+    const r = await api('/agente/conversaciones', {
+      method: 'POST',
+      body: { titulo: 'E2E idempotencia' },
+    });
+    const convId = JSON.parse(r.body).id;
+    const clave = crypto.randomUUID();
+    const enviar = () =>
+      fetch(`${BASE}/agente/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          cookie: headerCookie(),
+          'x-csrf-token': cookies['csrf_token'] || '',
+        },
+        body: JSON.stringify({ conversacionId: convId, mensaje: 'Mensaje idempotente', clave_idempotencia: clave }),
+      });
+    // Primer envío y reintento con la MISMA clave.
+    await enviar();
+    await enviar();
+    const msgs = JSON.parse((await api(`/agente/conversaciones/${convId}`)).body);
+    const usuarios = msgs.filter((m) => m.rol === 'user');
+    assert(usuarios.length === 1, `misma clave => 1 mensaje de usuario (hay ${usuarios.length})`);
+    assert(msgs.filter((m) => m.rol === 'user' && m.contenido === 'Mensaje idempotente').length === 1, 'solo una fila con el contenido idempotente');
+  }
+
+  /* Fase 4: cancelación real. Abortar el SSE a mitad debe cerrar el stream y
+   * un reintento con la misma clave no debe duplicar el mensaje (la fila del
+   * usuario ya existía del envío abortado). */
+  console.log('14. Cancelación del turno (abort del SSE)');
+  {
+    const r = await api('/agente/conversaciones', {
+      method: 'POST',
+      body: { titulo: 'E2E cancelación' },
+    });
+    const convId = JSON.parse(r.body).id;
+    const clave = crypto.randomUUID();
+    // Envía y aborta a mitad para que el turno quede pendiente/fallido.
+    const ac = new AbortController();
+    const p = fetch(`${BASE}/agente/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: headerCookie(),
+        'x-csrf-token': cookies['csrf_token'] || '',
+      },
+      body: JSON.stringify({ conversacionId: convId, mensaje: 'Turno a cancelar', clave_idempotencia: clave }),
+      signal: ac.signal,
+    }).then((res) => leerSSE(res));
+    // Aborta poco después de iniciado (mientras el proveedor streama).
+    await new Promise((r) => setTimeout(r, 300));
+    ac.abort();
+    await p.catch(() => {});
+    // Reintento con la misma clave: NO debe duplicar el mensaje del usuario.
+    const retry = await fetch(`${BASE}/agente/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: headerCookie(),
+        'x-csrf-token': cookies['csrf_token'] || '',
+      },
+      body: JSON.stringify({ conversacionId: convId, mensaje: 'Turno a cancelar', clave_idempotencia: clave }),
+    });
+    await leerSSE(retry);
+    const msgs = JSON.parse((await api(`/agente/conversaciones/${convId}`)).body);
+    const usuarios = msgs.filter((m) => m.rol === 'user');
+    assert(retry.status === 200, `reintento acepta el turno (got ${retry.status})`);
+    assert(usuarios.length === 1, `abort + retry misma clave => 1 mensaje (hay ${usuarios.length})`);
+  }
+
   console.log(`\n${fallos === 0 ? 'AGENTE-E2E OK' : `${fallos} FALLO(S)`}`);
   process.exit(fallos === 0 ? 0 : 1);
 }
