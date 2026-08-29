@@ -20,6 +20,7 @@ import {registrarIsland, marcarIslandsInicializadas} from './registroIslands';
 
 import {DashboardIsland} from '../islands/DashboardIsland';
 import {PaginaPruebaIsland} from '../islands/PaginaPruebaIsland';
+import {GaleriaVisualIsland} from '../islands/GaleriaVisualIsland';
 import {ArbitrajeIsland} from '../islands/ArbitrajeIsland';
 import PoliticaPrivacidadIsland from '../islands/PoliticaPrivacidadIsland';
 import TerminosServicioIsland from '../islands/TerminosServicioIsland';
@@ -31,6 +32,10 @@ import '../styles/arbitraje/arbitraje.css';
 registrarIsland('DashboardIsland', DashboardIsland, 'Panel principal de productividad con tareas, hábitos y notas');
 
 registrarIsland('PaginaPruebaIsland', PaginaPruebaIsland, 'Página de prueba para validar el sistema OCP de auto-registro');
+
+/* [Fase 4.5] Galería visual del agente: ruta /agente/visuales solo en dev
+ * (ver main.tsx, registrada bajo import.meta.env.DEV). */
+registrarIsland('GaleriaVisualIsland', GaleriaVisualIsland, 'Galería visual del chat del agente (Fase 4.5, dev only)');
 
 registrarIsland('ArbitrajeIsland', ArbitrajeIsland, 'Calculadora de arbitraje para compra/venta internacional con conversión de divisas');
 

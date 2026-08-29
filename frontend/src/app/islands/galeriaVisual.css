@@ -1,0 +1,193 @@
+/*
+ * islands/galeriaVisual.css
+ * Página dev-only /agente/visuales (Fase 4.5). El chrome de la página usa
+ * SOLO tokens del design system (--dashboard-*); los componentes del chat
+ * renderizan con su propio CSS (panelIA/panelAgente/modalConfigAgente).
+ */
+
+.galeriaVisual {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXl);
+    padding: var(--dashboard-espacioXxl);
+    min-height: 100vh;
+    background: var(--dashboard-fondoPrincipal);
+    color: var(--dashboard-textoNormal);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+}
+
+.galeriaVisualCabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioLg);
+    padding-bottom: var(--dashboard-espacioLg);
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+.galeriaVisualTitulo {
+    margin: 0;
+    font-size: var(--dashboard-tamanoTitulo);
+    color: var(--dashboard-textoNormal);
+}
+
+.galeriaVisualSub {
+    margin: var(--dashboard-espacioSm) 0 0;
+    font-size: var(--dashboard-tamanoNormal);
+    color: var(--dashboard-textoSecundario);
+    max-width: 70ch;
+}
+
+.galeriaVisualTema {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
+    border: 1px solid var(--dashboard-bordeNeutro);
+    border-radius: var(--dashboard-espacioXs);
+    background: transparent;
+    color: var(--dashboard-textoNormal);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoPequeno);
+    cursor: pointer;
+    transition: border-color var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
+}
+
+.galeriaVisualTema:hover {
+    border-color: var(--dashboard-acentoPrimario);
+    color: var(--dashboard-acentoPrimario);
+}
+
+.galeriaVisualGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 42rem), 1fr));
+    gap: var(--dashboard-espacioXl);
+}
+
+.galeriaEntrada {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioMd);
+    padding: var(--dashboard-espacioLg);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-espacioSm);
+    background: var(--dashboard-fondoPrincipal);
+}
+
+.galeriaEntradaCabecera {
+    display: flex;
+    align-items: baseline;
+    gap: var(--dashboard-espacioSm);
+    flex-wrap: wrap;
+}
+
+.galeriaEntradaId {
+    font-size: var(--dashboard-tamanoMicro);
+    color: var(--dashboard-textoApagado);
+    letter-spacing: 0.08em;
+}
+
+.galeriaEntradaTitulo {
+    margin: 0;
+    font-size: var(--dashboard-tamanoMediano);
+    color: var(--dashboard-textoNormal);
+}
+
+.galeriaEntradaEstados {
+    font-size: var(--dashboard-tamanoMicro);
+    color: var(--dashboard-textoApagado);
+}
+
+.galeriaEntradaDesc {
+    margin: 0;
+    font-size: var(--dashboard-tamanoNormal);
+    color: var(--dashboard-textoSecundario);
+}
+
+.galeriaEntradaVista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioMd);
+    border: 1px dashed var(--dashboard-bordePunteado);
+    border-radius: var(--dashboard-espacioXs);
+    background: var(--dashboard-fondoPrincipal);
+}
+
+.galeriaEntradaPendiente {
+    margin: 0;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border: 1px solid var(--dashboard-estadoAdvertenciaBorde);
+    background: var(--dashboard-estadoAdvertenciaFondo);
+    color: var(--dashboard-estadoAdvertenciaFuerte);
+    font-size: var(--dashboard-tamanoPequeno);
+    border-radius: var(--dashboard-espacioXs);
+}
+
+.galeriaChat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    max-width: 52rem;
+}
+
+.galeriaTareas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.galeriaModal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+}
+
+.galeriaCancelar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMd);
+}
+
+.galeriaCancelarNota {
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+}
+
+.galeriaPropuesta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    max-width: 52rem;
+}
+
+.galeriaPropuesta p {
+    margin: 0;
+    font-size: var(--dashboard-tamanoNormal);
+    color: var(--dashboard-textoNormal);
+}
+
+.galeriaPropuestaAcciones {
+    display: flex;
+    gap: var(--dashboard-espacioSm);
+}
+
+.galeriaVerificacionSeguro,
+.galeriaVerificacionInseguro {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dashboard-espacioXs);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
+    border-radius: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
+}
+
+.galeriaVerificacionSeguro {
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    background: var(--dashboard-estadoAltaFondo);
+}
+
+.galeriaVerificacionInseguro {
+    border: 1px solid var(--dashboard-estadoErrorBorde);
+    background: var(--dashboard-estadoErrorFondo);
+}

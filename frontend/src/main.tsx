@@ -48,6 +48,11 @@ window.__GLORY_ROUTES__ = {
     '/privacidad/': { island: 'PoliticaPrivacidadIsland', title: 'Política de privacidad', props: {} },
     '/terminos/': { island: 'TerminosServicioIsland', title: 'Términos de servicio', props: {} },
     '/prueba/': { island: 'PaginaPruebaIsland', title: 'Página de prueba', props: {} },
+    /* [Fase 4.5] Galería visual del agente: SOLO en dev (import.meta.env.DEV).
+     * En build de producción esta entrada no existe: la ruta no se puede navegar. */
+    ...(import.meta.env.DEV
+        ? {'/agente/visuales/': { island: 'GaleriaVisualIsland', title: 'Galería visual del agente', props: {} }}
+        : {}),
 } as GloryRoutesMap;
 
 /* Sesion desde Rust: expone window.gloryDashboard para los hooks legacy.
