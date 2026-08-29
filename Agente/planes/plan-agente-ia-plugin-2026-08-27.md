@@ -441,7 +441,7 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [x] Lista negra de secretos aplicada ANTES de leer (`.env`, `*.pem`, `.ssh`, `*_KEY`, `.git/config`) — test `bloquea_secretos_antes_de_leer`.
 - [x] Lectura de `.env` y `..\` bloqueada (tests unitarios; el E2E con LLM real queda como skip legítimo si el proveedor está caído).
 - [x] Junctions/symlinks/OneDrive manejados (canonicalize resuelve; el check es sobre la ruta canónica).
-- [ ] Bloque diff emitido en SSE para `file_write` (visible en el cliente) — el contrato de eventos ya emite `RequiereAprobacion`; el render del diff queda con Fase 4.
+- [x] Bloque diff emitido en SSE para `file_write` (visible en el cliente) — módulo `diff.rs` + campo `diff` en `AgentToolResult` (Fase 4), evento SSE `tool_result.diff` y render en `<pre>` en el panel (commits `7da2990` y `1bcd7d5`).
 - [x] Workspace local configurable (`AGENTE_WORKSPACE_ROOT`, fallback cwd) — selector en config queda para Fase 5.
 - [x] Checklist general de la sección 12 completado.
 
@@ -472,11 +472,12 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 
 **Checklist de la fase:**
 - [x] Streaming SSE visible en navegador (mensaje enviado por SSE al backend real, respuesta/error honesto renderizado).
-- [x] Tarjetas de tool: estado (ejecutando/ok/error) y args expandibles (eventos `tool_start`/`tool_result` con `argumentos` en el store y render en el panel). Diff en `<pre>` para `file_write`: pendiente (requiere el evento diff en el contrato SSE).
-- [ ] Cancelación funciona y mata el loop en servidor (drop del sender en SSE; verificación dedicada pendiente).
+- [x] Tarjetas de tool: estado (ejecutando/ok/error) y args expandibles (eventos `tool_start`/`tool_result` con `argumentos` en el store y render en el panel). Diff en `<pre>` para herramientas de archivo: hecho (`tool_result.diff`, commits `7da2990`/`1bcd7d5`).
+- [x] Cancelación funciona y mata el loop en servidor: `on_token` devuelve `bool` y el cierre del SSE aborta la llamada al proveedor vía `AppError::Cancelado` (commit `f9d5b59`); verificado por E2E caso 14 (abort del SSE + reintento).
+- [x] Idempotencia del mensaje al reintentar: `guardar_mensaje_usuario` deduplica por `clave_idempotencia` (ON CONFLICT) y el botón reintentar reutiliza la clave del turno; verificado por E2E caso 13 (misma clave → 1 fila).
 - [x] Contexto real visible: evento `usage` (ocupación %, tokens prompt/compleción) y evento `contexto` (skills inyectadas) declarados en `EventoAgente`, acumulados por mensaje en el store y renderizados en el panel (este bloque).
 - [x] Tabs de conversación: crear/cerrar/cambiar; cada tab carga su historial de BD; recarga conserva el estado.
-- [x] Sección de tareas programadas en el panel (este bloque): listar (GET), crear (POST con nombre/prompt/tipo/fecha) y eliminar (DELETE) contra el backend real; verificada en navegador (crear → aparece como pendiente con próxima ejecución, persiste tras recarga, DELETE 204 con CSRF). Botón "reintentar" del turno: pendiente.
+- [x] Sección de tareas programadas en el panel (este bloque): listar (GET), crear (POST con nombre/prompt/tipo/fecha) y eliminar (DELETE) contra el backend real; verificada en navegador (crear → aparece como pendiente con próxima ejecución, persiste tras recarga, DELETE 204 con CSRF). Botón "reintentar" del turno: hecho (reutiliza `clave_idempotencia`; commits `1bcd7d5` + E2E caso 13).
 - [x] Historial de conversaciones cargado desde BD al reabrir (verificado: mensaje persistido + restaurado tras recarga).
 - [x] Estados vacío/carga/error sin fallos silenciosos (error honesto de proveedor mostrado).
 
