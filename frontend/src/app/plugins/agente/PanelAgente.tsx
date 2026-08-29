@@ -61,12 +61,13 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         }
     }, [conversacionesCargadas, cargandoLista, cargarConversaciones]);
 
-    /* Cargar las tareas programadas una vez al montar. */
+    /* Cargar las tareas programadas una vez al montar. La acción de zustand es
+     * estable, así que NUNCA debe depender de `cargandoTareas`: la propia carga
+     * alterna ese flag (true→false al terminar) y reintroducirlo como dependencia
+     * dispara un bucle de refetch infinito (una petición por segundo). */
     useEffect(() => {
-        if (!cargandoTareas) {
-            void cargarTareasProgramadas();
-        }
-    }, [cargandoTareas, cargarTareasProgramadas]);
+        void cargarTareasProgramadas();
+    }, [cargarTareasProgramadas]);
 
     /* Scroll automático al último mensaje. */
     useEffect(() => {
