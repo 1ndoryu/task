@@ -146,7 +146,7 @@
     justify-content: flex-end;
     width: 1rem;
     margin-left: var(--dashboard-espacioXs);
-    color: var(--dashboard-acentoPrincipal, var(--dashboard-estadoMedia));
+    color: var(--dashboard-acentoPrimario);
 }
 
 .menuContextualOpcionActiva {

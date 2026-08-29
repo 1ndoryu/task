@@ -5,11 +5,12 @@
  * import.meta.env.DEV). Renderiza los 19 ítems del checklist con los MISMOS
  * componentes del chat (plugins/agente/componentes.tsx) alimentados por
  * fixtures realistas (plugins/agente/fixtures.ts) — no hay copias ni maquetas
- * divergentes. Incluye toggle claro/oscuro (data-theme real del proyecto).
+ * divergentes. Incluye toggle de los 3 temas (data-theme real del proyecto:
+ * 'original' cae a :root, 'oscuro' y 'claro' tienen selector propio).
  */
 
 import {useEffect, useState} from 'react';
-import {AlertTriangle, Bot, Check, Moon, Plus, ShieldAlert, Sun} from 'lucide-react';
+import {AlertTriangle, Bot, Check, Moon, Monitor, Plus, ShieldAlert, Sun} from 'lucide-react';
 import {
     CATALOGO,
     fixtureAvisoMeta,
@@ -47,7 +48,7 @@ import '../plugins/agente/panelAgente.css';
 import '../plugins/agente/modalConfigAgente.css';
 import './galeriaVisual.css';
 
-type TemaGaleria = 'original' | 'claro';
+type TemaGaleria = 'original' | 'oscuro' | 'claro';
 
 /* Tool buscada en los fixtures de mensajes (misma fuente que el chat). */
 function toolDe(nombre: string) {
@@ -312,11 +313,11 @@ export function GaleriaVisualIsland(): JSX.Element {
                 <button
                     type="button"
                     className="galeriaVisualTema"
-                    onClick={() => setTema(t => (t === 'original' ? 'claro' : 'original'))}
-                    title="Alternar tema claro/oscuro"
+                    onClick={() => setTema(t => (t === 'original' ? 'oscuro' : t === 'oscuro' ? 'claro' : 'original'))}
+                    title="Alternar tema: Terminal → Oscuro → Claro"
                 >
-                    {tema === 'original' ? <Sun size={14} /> : <Moon size={14} />}
-                    {tema === 'original' ? 'Claro' : 'Terminal'}
+                    {tema === 'original' ? <Monitor size={14} /> : tema === 'oscuro' ? <Moon size={14} /> : <Sun size={14} />}
+                    {tema === 'original' ? 'Terminal' : tema === 'oscuro' ? 'Oscuro' : 'Claro'}
                 </button>
             </header>
 

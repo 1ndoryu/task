@@ -27,3 +27,9 @@
 - Un `var(--token, fallback)` sobre un token que no existe **no** es un error de CSS: la página renderiza con el fallback y el fallo queda silencioso. La única detección real es VarSense (variables no definidas) o `getComputedStyle` en vivo.
 - Mapeo canónico de los nombres inventados → tokens reales de `styles/dashboard/variables.css`: `--dashboard-borde`→`--dashboard-bordeSutil`/`--dashboard-bordePrincipal`, `--dashboard-fuenteXs`→`--dashboard-tamanoPequeno`, `--dashboard-fondoSuave`→`--dashboard-superposicionSutil`, `--dashboard-fondoElevado`→`--dashboard-fondoTarjeta`, `--dashboard-textoPrimario`→`--dashboard-textoActivo`, `--dashboard-peligro`→`--dashboard-peligroClaro`.
 - Al escribir CSS nuevo del dashboard hay que consultar `variables.css` y usar **solo tokens existentes**, sin fallback; los fallbacks de tokens inventados enmascaran el defecto y se cuelan al gate de VarSense.
+
+## 2026-08-29 — VarSense: falsos positivos por `variableFiles`/`scanAllFiles:false`
+- VarSense (2.2.1) con `scanAllFiles:false` construye el índice de variables **solo** con los archivos listados en `variableFiles` de `varsense.config.json`. Un token definido en un CSS que NO está en esa lista se reporta como `variableNoDefinida` aunque exista: falso positivo de indexación, no un bug del CSS.
+- Antes de corregir un `variableNoDefinida`, verificar primero si el token está definido en un CSS fuera de `variableFiles` (mecanismo: el analizador parsea definiciones solo sobre los archivos del índice). Si es así, la corrección es añadir ese CSS a `variableFiles`, no tocar el CSS.
+- Los tokens definidos **inline en TS/TSX** (p. ej. `style={{ ['--col1-fr' as string]: ... }}`) no son indexables por `variableFiles` (solo admite CSS); cubrirlos con un default en el CSS asociado o aceptarlos como límite conocido.
+- Tras ampliar `variableFiles`, re-ejecutar `varsense all` y comparar el conteo de `variableNoDefinida` (148 → 0 en esta corrección).

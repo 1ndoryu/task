@@ -492,7 +492,7 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - [x] La galería usa los MISMOS componentes del chat (`plugins/agente/componentes.tsx`, extraídos de `PanelAgente`/`ModalConfigAgente`; sin copias ni maquetas).
 - [x] Los 19 ítems de 9.5 tienen entrada con contenido realista (fixture).
 - [x] Fixtures compartidos con tests (la galería y `.freebuff/galeria-visual.mjs` usan la misma data).
-- [x] Criterios visuales verificados en navegador: tokens `--dashboard-*` reales, estados consistentes, toggle claro/oscuro, 0 hallazgos VarSense (sin variables inexistentes ni hardcodeos).
+- [x] Criterios visuales verificados en navegador: tokens `--dashboard-*` reales, estados consistentes, toggle de los **3 temas** (Terminal → Oscuro → Claro, `data-theme` real: `original` cae a `:root`, `oscuro` y `claro` tienen selector propio), 0 hallazgos VarSense de `variableNoDefinida` en el workspace (148 → 0; ver `Agente/completados/tareas-2026-08-29.md`).
 - [ ] Capturas de la galería completa (claro/oscuro) guardadas como evidencia — el webview del preview no compone frames para screenshot; la verificación visual se hizo por snapshot de accesibilidad + estilos computados (fuente Departure Mono, tokens reales) + logs de consola sin errores.
 - [ ] La galería se mantiene en Fases 5-6: cada componente nuevo del chat se añade a su catálogo (checklist general ítem 7).
 - [ ] Checklist general de la sección 12 completado (los ítems 17-19 de automejora/verificación quedan como entradas pendientes honestas hasta implementar el contrato SSE).

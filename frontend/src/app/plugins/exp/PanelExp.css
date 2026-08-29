@@ -39,8 +39,8 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: var(--dashboard-fuenteSecundaria, 11px);
-    color: var(--dashboard-textoSuave, #9a9aa3);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
 }
 
 .panelExpValor {
@@ -51,7 +51,7 @@
 .panelExpBarra {
     height: 8px;
     border-radius: 999px;
-    background: var(--dashboard-fondo, rgba(255, 255, 255, 0.07));
+    background: var(--dashboard-superposicionSutil);
     overflow: hidden;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .panelExpVida--media {
-    background: var(--dashboard-aviso, #e0a83c);
+    background: var(--dashboard-estadoAdvertencia);
 }
 
 .panelExpVida--baja {
@@ -83,9 +83,9 @@
     align-items: center;
     gap: 5px;
     min-width: 64px;
-    font-size: var(--dashboard-fuenteTitulo, 12px);
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
     white-space: nowrap;
     align-self: center;
 }
@@ -130,7 +130,7 @@
     flex-direction: column;
     gap: 4px;
     flex: 0 1 108px;
-    color: var(--dashboard-textoSuave, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
 }
 
 .panelExpArbolLateral--izq {
@@ -162,19 +162,19 @@
 }
 
 .panelExpArbolLateralValor {
-    font-size: var(--dashboard-fuenteTitulo, 18px);
+    font-size: var(--dashboard-tamanoGrande);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
     flex: 0 0 auto;
 }
 
 .panelExpArbolLateralEtiqueta {
-    font-size: var(--dashboard-fuenteSecundaria, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     text-transform: none;
     line-height: 1.15;
-    color: var(--dashboard-textoSuave, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
 }
 
 /* Barra de progreso del contador lateral: alargada, sin pista/fondo, con

@@ -64,28 +64,24 @@
    y haría invisibles las barras de Vida/EXP y el contorno del contador lateral.
    Se restauran SOLO los fondos/rellenos/bordes que son contenido del panel
    (no la superficie del panel, que debe seguir transparente), usando las
-   mismas variables del sistema que define PanelExp.css. OJO: varios tokens
-   (--dashboard-fondo, --dashboard-aviso) NO están definidos en variables.css;
-   se repiten aquí los mismos fallbacks que usa PanelExp.css para que la
-   declaración nunca quede inválida (un var() sin valor + !important se
-   descarta y el elemento vuelve a transparente). */
+   mismas variables del sistema que define PanelExp.css. */
 .dashboardPanelView .panelExpBarra {
-    background-color: var(--dashboard-fondo, rgba(255, 255, 255, 0.07)) !important;
+    background-color: var(--dashboard-superposicionSutil) !important;
 }
 .dashboardPanelView .panelExpBarraRelleno.panelExpVida--alta {
-    background-color: var(--dashboard-exito, #4caf7d) !important;
+    background-color: var(--dashboard-exito) !important;
 }
 .dashboardPanelView .panelExpBarraRelleno.panelExpVida--media {
-    background-color: var(--dashboard-aviso, #e0a83c) !important;
+    background-color: var(--dashboard-estadoAdvertencia) !important;
 }
 .dashboardPanelView .panelExpBarraRelleno.panelExpVida--baja {
-    background-color: var(--dashboard-error, #e0544c) !important;
+    background-color: var(--dashboard-error) !important;
 }
 .dashboardPanelView .panelExpBarraRelleno.panelExpExp {
-    background-color: var(--dashboard-acento, #7c9cff) !important;
+    background-color: var(--dashboard-acento) !important;
 }
 .dashboardPanelView .panelExpArbolLateralBarra {
-    border: 1px solid var(--dashboard-textoActivo, #e8e8ea) !important;
+    border: 1px solid var(--dashboard-textoActivo) !important;
     background-color: transparent !important;
 }
 .dashboardPanelView .panelExpArbolLateralBarraRelleno {

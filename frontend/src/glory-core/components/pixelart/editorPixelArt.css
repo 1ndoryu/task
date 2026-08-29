@@ -14,6 +14,8 @@
     gap: 8px;
     /* En manos de la app receptora en general; aquí solo estructura mínima. */
     max-width: 100%;
+    /* Default de la dimensión de la cuadrícula (la app la sobreescribe inline). */
+    --pixel-df: 16;
 }
 
 /* Barra de herramientas: fila de iconos compactos. */
