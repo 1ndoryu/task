@@ -59,6 +59,7 @@
     border-radius: 4px;
     cursor: pointer;
     flex-shrink: 0;
+    font-family: inherit;
 }
 
 .panelAgenteTabCerrar:hover {
