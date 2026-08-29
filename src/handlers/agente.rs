@@ -33,6 +33,9 @@ use crate::AppState;
 pub struct AgenteStreamRequest {
     pub conversacionId: Uuid,
     pub mensaje: String,
+    /// [01-09-2026] Fase 4: clave de idempotencia del cliente; un reintento
+    /// con la misma clave no duplica el mensaje en BD.
+    pub clave_idempotencia: Option<Uuid>,
     pub provider: Option<String>,
     pub modelo: Option<String>,
     pub temperatura: Option<f32>,
@@ -137,7 +140,14 @@ pub async fn agente_stream(
         None,
     )
     .await?;
-    guardar_mensaje_usuario(&state.pool, req.conversacionId, auth.user_id, &req.mensaje).await?;
+    guardar_mensaje_usuario(
+        &state.pool,
+        req.conversacionId,
+        auth.user_id,
+        &req.mensaje,
+        req.clave_idempotencia,
+    )
+    .await?;
 
     let mut historial = cargar_historial(&state.pool, req.conversacionId, auth.user_id).await?;
     /* [29-08-2026] Fase 3 (memoria v1): inyectar la memoria persistente del

@@ -24,7 +24,14 @@ use crate::AppState;
 pub enum AgenteEvento {
     Token { texto: String },
     ToolStart { tool: String, argumentos: Value },
-    ToolResult { tool: String, ok: bool, resumen: String },
+    ToolResult {
+        tool: String,
+        ok: bool,
+        resumen: String,
+        /// [01-09-2026] Fase 4: diff de líneas del cambio (file_write/patch),
+        /// para mostrarlo en el front; `None` si no aplica.
+        diff: Option<String>,
+    },
     /// [29-08-2026] Modo predeterminado: una tool con efecto requiere
     /// aprobación (el front muestra diff/aprobar/rechazar; el SSE es
     /// unidireccional, así que la aprobación llega como nuevo turno).
@@ -180,6 +187,12 @@ impl AgentRuntime {
         let mut respuesta_final: Option<String> = None;
 
         for _turno in 0..self.turno_config.max_turns {
+            /* [01-09-2026] Fase 4: cancelación real — si el cliente cortó el
+             * SSE (receiver dropeado), el sender está cerrado y no se sigue
+             * ejecutando tools ni consumiendo tokens. */
+            if tx.is_closed() {
+                break;
+            }
             /* Contexto: preparar (compactar si hace falta) ANTES de cada llamada. */
             let (mensajes_prep, metricas) = {
                 let mut cm = self.contexto.lock().await;
@@ -209,8 +222,13 @@ impl AgentRuntime {
             let schemas = self.registry.schemas_openai(Some(&ids_ref));
             let mut ultimo_contenido = String::new();
             let tool_calls = {
-                let mut on_token = |texto: &str| {
+                /* [01-09-2026] Fase 4: `on_token` devuelve false para abortar
+                 * el stream LLM en cuanto el cliente corta el SSE.
+                 * `enviar_chat_stream` corta la lectura de bytes y no consume
+                 * más tokens. */
+                let mut on_token = |texto: &str| -> bool {
                     ultimo_contenido.push_str(texto);
+                    !tx.is_closed()
                 };
                 self.llm_llamada(state, &mensajes, &schemas, &mut on_token, tx)
                     .await?
@@ -266,6 +284,7 @@ impl AgentRuntime {
                             tool: call.nombre.clone(),
                             ok: false,
                             resumen: "requiere_aprobacion".to_string(),
+                            diff: None,
                         })
                         .await;
                     mensajes.push(AiMessage {
@@ -293,9 +312,9 @@ impl AgentRuntime {
                     self.ejecutar_tool(state, user_id, turno_id, call, tx),
                 )
                 .await;
-                let (ok, contenido, resumen) = match resultado {
-                    Ok(Ok(r)) => (r.ok, r.contenido.clone(), r.resumen.clone()),
-                    Ok(Err(error)) => (false, format!("Error: {error}"), "error".to_string()),
+                let (ok, contenido, resumen, diff) = match resultado {
+                    Ok(Ok(r)) => (r.ok, r.contenido.clone(), r.resumen.clone(), r.diff.clone()),
+                    Ok(Err(error)) => (false, format!("Error: {error}"), "error".to_string(), None),
                     Err(_) => (
                         false,
                         format!(
@@ -304,6 +323,7 @@ impl AgentRuntime {
                             self.turno_config.timeout_tool.as_secs()
                         ),
                         "timeout".to_string(),
+                        None,
                     ),
                 };
                 tools_ejecutadas += 1;
@@ -312,8 +332,14 @@ impl AgentRuntime {
                         tool: call.nombre.clone(),
                         ok,
                         resumen: resumen.clone(),
+                        diff: diff.clone(),
                     })
                     .await;
+                /* Cancelación real: si el SSE se cortó a mitad de la ejecución
+                 * de tools, no seguimos con el resto de tool_calls. */
+                if tx.is_closed() {
+                    break;
+                }
                 /* El resultado vuelve al LLM como mensaje de tool (contrato
                  * OpenAI: assistant con tool_calls a nivel de mensaje + tool
                  * con tool_call_id). El content del assistant va null para que
@@ -392,7 +418,7 @@ impl AgentRuntime {
         state: &AppState,
         mensajes: &[AiMessage],
         schemas: &[Value],
-        on_token: &mut (dyn FnMut(&str) + Send),
+        on_token: &mut (dyn FnMut(&str) -> bool + Send),
         tx: &Sender<AgenteEvento>,
     ) -> Result<Vec<crate::services::ai::AiToolCall>, AppError> {
         let resultado = state
@@ -652,21 +678,29 @@ fn sandbox_desde_entorno() -> Option<std::sync::Arc<crate::agent::sandbox::Sandb
     }
 }
 
-/// Crea la conversación si no existe y guarda el mensaje del usuario.
+/// Guarda el mensaje del usuario. Fase 4: idempotente — si el cliente envía
+/// la misma `clave_idempotencia` (mismo turno reintentado), `ON CONFLICT DO
+/// NOTHING` evita duplicar la fila; `NULL` (clientes antiguos / scheduler)
+/// hace un insert normal.
 pub async fn guardar_mensaje_usuario(
     pool: &sqlx::PgPool,
     conversacion_id: Uuid,
     user_id: Uuid,
     contenido: &str,
+    clave_idempotencia: Option<Uuid>,
 ) -> Result<(), AppError> {
     sqlx::query(
-        "INSERT INTO agente_mensajes (conversacion_id, user_id, rol, contenido, tokens_estimados)
-         VALUES ($1, $2, 'user', $3, $4)",
+        "INSERT INTO agente_mensajes (conversacion_id, user_id, rol, contenido, tokens_estimados, clave_idempotencia)
+         VALUES ($1, $2, 'user', $3, $4, $5)
+         ON CONFLICT (conversacion_id, user_id, clave_idempotencia)
+           WHERE clave_idempotencia IS NOT NULL
+         DO NOTHING",
     )
     .bind(conversacion_id)
     .bind(user_id)
     .bind(contenido)
     .bind(estimar_tokens(contenido) as i32)
+    .bind(clave_idempotencia)
     .execute(pool)
     .await?;
     Ok(())

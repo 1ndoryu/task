@@ -45,6 +45,11 @@ pub enum AppError {
 
     #[error("Error del proveedor externo: {0}")]
     Upstream(String),
+
+    /// El cliente cortó el stream SSE (cancelación del turno): no es un error
+    /// del proveedor y no dispara fallback ni se registra como fallo.
+    #[error("Turno cancelado por el cliente")]
+    Cancelado,
 }
 
 /// Estructura de respuesta de error expuesta en la API
@@ -111,6 +116,12 @@ impl IntoResponse for AppError {
                 StatusCode::BAD_GATEWAY,
                 "upstream_error",
                 msg.clone(),
+            ),
+            /* Cliente cortó el SSE: el stream ya no recibe nada; status 408. */
+            Self::Cancelado => (
+                StatusCode::REQUEST_TIMEOUT,
+                "cancelado",
+                "Turno cancelado".to_string(),
             ),
         };
 

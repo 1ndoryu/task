@@ -471,7 +471,7 @@ impl LlmProviderService {
         modelo: &str,
         opciones: AiChatOptions,
         tools: Vec<serde_json::Value>,
-        on_token: &mut (dyn FnMut(&str) + Send),
+        on_token: &mut (dyn FnMut(&str) -> bool + Send),
     ) -> Result<AiStreamResult, AppError> {
         let mensajes_validos = validar_mensajes(mensajes)?;
         let mut errores: Vec<String> = Vec::new();
@@ -505,6 +505,9 @@ impl LlmProviderService {
                         self.registrar_acierto(proveedor);
                         return Ok(resultado);
                     }
+                    /* Cancelación del cliente: no es fallo del proveedor y no
+                     * hay que probar el siguiente — abortar el stream. */
+                    Err(AppError::Cancelado) => return Err(AppError::Cancelado),
                     Err(error) => {
                         self.registrar_fallo(proveedor);
                         tracing::warn!(%error, proveedor, modelo, "stream del proveedor falló");
@@ -541,7 +544,7 @@ impl LlmProviderService {
         mensajes: &[AiMessage],
         opciones: &AiChatOptions,
         tools: &[serde_json::Value],
-        on_token: &mut (dyn FnMut(&str) + Send),
+        on_token: &mut (dyn FnMut(&str) -> bool + Send),
     ) -> Result<AiStreamResult, AppError> {
         let (_, url, _) = PROVIDERS
             .iter()
@@ -605,7 +608,11 @@ impl LlmProviderService {
                 .and_then(serde_json::Value::as_str)
                 .unwrap_or("")
                 .to_string();
-            on_token(&contenido);
+            /* Fase 4: si el cliente canceló (on_token → false), se aborta y
+             * no se devuelve una respuesta parcial como resultado exitoso. */
+            if !on_token(&contenido) {
+                return Err(AppError::Cancelado);
+            }
             return Ok(AiStreamResult {
                 contenido,
                 tool_calls: Vec::new(),
@@ -659,7 +666,11 @@ impl LlmProviderService {
                 if let Some(delta) = evento.pointer("/choices/0/delta") {
                     if let Some(texto_delta) = delta.get("content").and_then(serde_json::Value::as_str) {
                         contenido.push_str(texto_delta);
-                        on_token(texto_delta);
+                        /* Fase 4: cancelación real — si el cliente cortó el SSE,
+                         * dejar de consumir el stream del proveedor de inmediato. */
+                        if !on_token(texto_delta) {
+                            return Err(AppError::Cancelado);
+                        }
                     }
                     if let Some(calls) = delta.get("tool_calls").and_then(serde_json::Value::as_array) {
                         for call in calls {
