@@ -1,6 +1,6 @@
 /* Configuración del agente: todos los valores se persisten y se envían al runtime. */
 import {useEffect, useState} from 'react';
-import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Check, Plus, Trash2, Pencil, X} from 'lucide-react';
+import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, Layers, Check, Plus, Trash2, Pencil, X} from 'lucide-react';
 import {useAgenteStore} from './store';
 import {listarSkills, crearSkill, actualizarSkill, eliminarSkill} from './service';
 import type {ConfigAgente, SkillAgente} from './service';
@@ -103,6 +103,20 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                         <label className="modalConfigAgenteCampo">Timeout por herramienta (segundos) <output>{draft.timeoutToolSecs}</output><input type="range" min="1" max="15" step="1" value={draft.timeoutToolSecs} onChange={e => actualizar('timeoutToolSecs', clamped(Number(e.target.value), 1, 15))}/></label>
                     </section>
                     <section className="modalConfigAgenteSeccion">
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Sparkles size={12}/> Comportamiento</h3>
+                        <p className="modalConfigAgenteSeccionDesc">Migrado de la configuración del chat IA: cómo redacta el agente y qué prefiere el usuario.</p>
+                        <label className="modalConfigAgenteCampo">Estilo de respuesta
+                            <select className="modalConfigAgenteInput" value={draft.estilo} onChange={e => actualizar('estilo', e.target.value as ConfigAgente['estilo'])}>
+                                <option value="conciso">Conciso — respuestas cortas y directas</option>
+                                <option value="detallado">Detallado — explica el razonamiento</option>
+                                <option value="amable">Amable — tono cercano y motivador</option>
+                            </select>
+                        </label>
+                        <label className="modalConfigAgenteCampo">Preferencias personales
+                            <textarea className="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={2000} value={draft.preferencias} onChange={e => actualizar('preferencias', e.target.value)} placeholder="Ej: Prefiero tareas cortas. Trabajo mejor de 9 a 14. Evitar notificaciones tarde..." />
+                        </label>
+                    </section>
+                    <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Languages size={12}/> Idioma y contexto</h3>
                         <label className="modalConfigAgenteCampo">Idioma
                             <select className="modalConfigAgenteInput" value={draft.idioma} onChange={e => actualizar('idioma', e.target.value as ConfigAgente['idioma'])}><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select>
@@ -120,6 +134,23 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><FileText size={12}/> Prompt de sistema</h3>
                         <textarea className="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={4000} value={draft.promptSistema} onChange={e => actualizar('promptSistema', e.target.value)} placeholder="Instrucciones adicionales para el agente..." />
+                    </section>
+                    <section className="modalConfigAgenteSeccion">
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Folder size={12}/> Workspace</h3>
+                        <p className="modalConfigAgenteSeccionDesc">Carpeta de trabajo de las herramientas de archivo. Solo aplica en modo local/dev (AGENTE_MODO=local); en producción el agente corre sin tools de archivo y este valor se ignora.</p>
+                        <label className="modalConfigAgenteCampo">Ruta de la carpeta (solo local)
+                            <input className="modalConfigAgenteInput" value={draft.workspace} onChange={e => actualizar('workspace', e.target.value)} placeholder="C:\ruta\al\workspace (vacío = AGENTE_WORKSPACE_ROOT o el directorio del servidor)" />
+                        </label>
+                    </section>
+                    <section className="modalConfigAgenteSeccion">
+                        <h3 className="modalConfigAgenteSeccionTitulo"><Layers size={12}/> Contexto y compactación</h3>
+                        <p className="modalConfigAgenteSeccionDesc">La ventana de contexto del modelo y cuándo el agente compacta el historial. La compactación nunca borra mensajes: marca el historial como compactado en BD.</p>
+                        <label className="modalConfigAgenteCampo">Ventana máxima de contexto
+                            <select className="modalConfigAgenteInput" value={draft.maxVentana} onChange={e => actualizar('maxVentana', Number(e.target.value))}>
+                                {[32768, 65536, 128000, 256000, 512000].map(v => <option key={v} value={v}>{v.toLocaleString('es')} tokens</option>)}
+                            </select>
+                        </label>
+                        <label className="modalConfigAgenteCampo">Umbral de compactación <output>{(draft.umbralCompactacion * 100).toFixed(0)}%</output><input type="range" min="0.3" max="0.85" step="0.05" value={draft.umbralCompactacion} onChange={e => actualizar('umbralCompactacion', clamped(Number(e.target.value), 0.1, 0.9))}/></label>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Brain size={12}/> Skills</h3>

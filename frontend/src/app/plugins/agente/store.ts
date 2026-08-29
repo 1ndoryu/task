@@ -10,6 +10,7 @@
 import {create} from 'zustand';
 import type {ConversacionAgente, ConfigAgente, MensajeConversacion, TareaProgramada} from './service';
 import {
+    aConfigFrontend,
     cargarHistorial,
     crearConversacion,
     crearTareaProgramada,
@@ -57,6 +58,8 @@ const CONFIG_DEFECTO: ConfigAgente = {
     incluirHabitosPausados: false, permitirBusquedaWeb: true,
     permitirRecordatorios: true, promptSistema: '', maxTurns: 10,
     timeoutToolSecs: 15, incluirMemoria: true, incluirSkills: true,
+    estilo: 'conciso', preferencias: '', workspace: '',
+    maxVentana: 128000, umbralCompactacion: 0.5,
 };
 
 function normalizarConfig(config: Partial<ConfigAgente>): ConfigAgente {
@@ -72,6 +75,11 @@ function normalizarConfig(config: Partial<ConfigAgente>): ConfigAgente {
         idioma: ['es', 'en', 'pt', 'fr'].includes(base.idioma) ? base.idioma : 'es',
         incluirMemoria: Boolean(base.incluirMemoria),
         incluirSkills: Boolean(base.incluirSkills),
+        estilo: base.estilo === 'detallado' || base.estilo === 'amable' ? base.estilo : 'conciso',
+        preferencias: typeof base.preferencias === 'string' ? base.preferencias.trim().slice(0, 2000) : '',
+        workspace: typeof base.workspace === 'string' ? base.workspace.trim() : '',
+        maxVentana: Math.max(8192, Math.min(512000, Math.round(Number(base.maxVentana) || 128000))),
+        umbralCompactacion: Math.max(0.1, Math.min(0.9, Number(base.umbralCompactacion) || 0.5)),
     };
 }
 
@@ -93,6 +101,11 @@ function cargarConfig(): ConfigAgente {
                 promptSistema: typeof parsed.promptSistema === 'string' ? parsed.promptSistema.slice(0, 4000) : '',
                 incluirMemoria: typeof parsed.incluirMemoria === 'boolean' ? parsed.incluirMemoria : true,
                 incluirSkills: typeof parsed.incluirSkills === 'boolean' ? parsed.incluirSkills : true,
+                estilo: parsed.estilo === 'detallado' || parsed.estilo === 'amable' ? parsed.estilo : 'conciso',
+                preferencias: typeof parsed.preferencias === 'string' ? parsed.preferencias.slice(0, 2000) : '',
+                workspace: typeof parsed.workspace === 'string' ? parsed.workspace.trim() : '',
+                maxVentana: typeof parsed.maxVentana === 'number' ? Math.max(8192, Math.min(512000, Math.round(parsed.maxVentana))) : CONFIG_DEFECTO.maxVentana,
+                umbralCompactacion: typeof parsed.umbralCompactacion === 'number' ? Math.max(0.1, Math.min(0.9, parsed.umbralCompactacion)) : CONFIG_DEFECTO.umbralCompactacion,
             });
         }
     } catch {
@@ -322,7 +335,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                 cargandoHistorial: false,
                 enviando: false,
                 error: null,
-                config: normalizarConfig(c.config ?? cargarConfig()),
+                config: c.config ? normalizarConfig(aConfigFrontend(c.config)) : cargarConfig(),
             }));
             set({
                 tabs,
@@ -593,6 +606,11 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         nueva.idioma = ['es', 'en', 'pt', 'fr'].includes(nueva.idioma) ? nueva.idioma : 'es';
         nueva.incluirMemoria = Boolean(nueva.incluirMemoria);
         nueva.incluirSkills = Boolean(nueva.incluirSkills);
+        nueva.estilo = nueva.estilo === 'detallado' || nueva.estilo === 'amable' ? nueva.estilo : 'conciso';
+        nueva.preferencias = (nueva.preferencias ?? '').trim().slice(0, 2000);
+        nueva.workspace = (nueva.workspace ?? '').trim();
+        nueva.maxVentana = Math.max(8192, Math.min(512000, Math.round(Number(nueva.maxVentana) || 128000)));
+        nueva.umbralCompactacion = Math.max(0.1, Math.min(0.9, Number(nueva.umbralCompactacion) || 0.5));
         if (nueva.modo !== 'predeterminado' && nueva.modo !== 'meta' && nueva.modo !== 'autonomo') {
             nueva.modo = 'predeterminado';
         }

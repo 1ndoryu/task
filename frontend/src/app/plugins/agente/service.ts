@@ -34,6 +34,73 @@ export interface ConfigAgente {
     timeoutToolSecs: number;
     incluirMemoria: boolean;
     incluirSkills: boolean;
+    /* [02-09-2026] Fase 5: comportamiento (migración de SeccionConfigIAPanelChat),
+     * workspace (solo local) y ventana/umbral de compactación. */
+    estilo: 'conciso' | 'detallado' | 'amable';
+    preferencias: string;
+    workspace: string;
+    maxVentana: number;
+    umbralCompactacion: number;
+}
+
+/* [02-09-2026] Fase 5: normaliza la config camelCase del front al contrato
+ * snake_case que lee el backend (clave única de verdad; antes la config de la
+ * conversación se guardaba con camelCase y el runtime nunca la leía). */
+export function aConfigBackend(config: Partial<ConfigAgente>): Record<string, unknown> {
+    const salida: Record<string, unknown> = {};
+    if (config.modo) salida.modo = config.modo;
+    if (config.modelo) salida.modelo = config.modelo;
+    if (config.temperatura !== undefined) salida.temperatura = config.temperatura;
+    if (config.maxTokens !== undefined) salida.max_tokens = config.maxTokens;
+    if (config.idioma) salida.idioma = config.idioma;
+    if (config.incluirNotas !== undefined) salida.incluir_notas = config.incluirNotas;
+    if (config.incluirTareasCompletadas !== undefined) salida.incluir_tareas_completadas = config.incluirTareasCompletadas;
+    if (config.incluirHabitosPausados !== undefined) salida.incluir_habitos_pausados = config.incluirHabitosPausados;
+    if (config.permitirBusquedaWeb !== undefined) salida.permitir_busqueda_web = config.permitirBusquedaWeb;
+    if (config.permitirRecordatorios !== undefined) salida.permitir_recordatorios = config.permitirRecordatorios;
+    if (config.promptSistema) salida.prompt_sistema = config.promptSistema;
+    if (config.maxTurns !== undefined) salida.max_turns = config.maxTurns;
+    if (config.timeoutToolSecs !== undefined) salida.timeout_tool_secs = config.timeoutToolSecs;
+    if (config.incluirMemoria !== undefined) salida.incluir_memoria = config.incluirMemoria;
+    if (config.incluirSkills !== undefined) salida.incluir_skills = config.incluirSkills;
+    if (config.estilo) salida.estilo = config.estilo;
+    if (config.preferencias) salida.preferencias = config.preferencias;
+    if (config.workspace) salida.workspace = config.workspace;
+    if (config.maxVentana !== undefined) salida.max_ventana = config.maxVentana;
+    if (config.umbralCompactacion !== undefined) salida.umbral_compactacion = config.umbralCompactacion;
+    return salida;
+}
+
+/* Inversa: config snake_case que devuelve el backend → camelCase del store
+ * (para que reabrir una conversación conserve sus valores reales). */
+export function aConfigFrontend(cruda: unknown): Partial<ConfigAgente> {
+    if (!cruda || typeof cruda !== 'object') return {};
+    const c = cruda as Record<string, unknown>;
+    const numero = (v: unknown): number | undefined => (typeof v === 'number' ? v : undefined);
+    const bool = (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined);
+    const texto = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
+    return {
+        modo: c.modo === 'meta' || c.modo === 'autonomo' ? c.modo : c.modo === 'predeterminado' ? 'predeterminado' : undefined,
+        modelo: texto(c.modelo),
+        temperatura: numero(c.temperatura),
+        maxTokens: numero(c.max_tokens),
+        idioma: c.idioma === 'es' || c.idioma === 'en' || c.idioma === 'pt' || c.idioma === 'fr' ? c.idioma : undefined,
+        incluirNotas: bool(c.incluir_notas),
+        incluirTareasCompletadas: bool(c.incluir_tareas_completadas),
+        incluirHabitosPausados: bool(c.incluir_habitos_pausados),
+        permitirBusquedaWeb: bool(c.permitir_busqueda_web),
+        permitirRecordatorios: bool(c.permitir_recordatorios),
+        promptSistema: texto(c.prompt_sistema),
+        maxTurns: numero(c.max_turns),
+        timeoutToolSecs: numero(c.timeout_tool_secs),
+        incluirMemoria: bool(c.incluir_memoria),
+        incluirSkills: bool(c.incluir_skills),
+        estilo: c.estilo === 'conciso' || c.estilo === 'detallado' || c.estilo === 'amable' ? c.estilo : undefined,
+        preferencias: texto(c.preferencias),
+        workspace: texto(c.workspace),
+        maxVentana: numero(c.max_ventana),
+        umbralCompactacion: numero(c.umbral_compactacion),
+    };
 }
 
 export interface MensajeConversacion {
@@ -81,7 +148,7 @@ export async function listarConversaciones(): Promise<ConversacionAgente[]> {
 export async function crearConversacion(titulo: string, modo: ModoAgente, config: Partial<ConfigAgente>): Promise<ConversacionAgente> {
     return apiFetch<ConversacionAgente>('/agente/conversaciones', {
         method: 'POST',
-        body: {titulo, modo, config},
+        body: {titulo, modo, config: aConfigBackend(config)},
     });
 }
 
@@ -137,7 +204,7 @@ export async function eliminarTareaProgramada(id: string): Promise<void> {
 /* ---------- Historial (persistencia en servidor) ---------- */
 
 export async function guardarConfigConversacion(id: string, config: Partial<ConfigAgente>): Promise<ConversacionAgente> {
-    return apiFetch<ConversacionAgente>(`/agente/conversaciones/${id}/config`, {method: 'PUT', body: {config}});
+    return apiFetch<ConversacionAgente>(`/agente/conversaciones/${id}/config`, {method: 'PUT', body: {config: aConfigBackend(config)}});
 }
 
 export async function cargarHistorial(id: string): Promise<MensajeConversacion[]> {
@@ -161,20 +228,7 @@ export function construirPayloadStream(
         conversacionId,
         mensaje,
         ...(claveIdempotencia ? {clave_idempotencia: claveIdempotencia} : {}),
-        ...(config.modelo ? {modelo: config.modelo} : {}),
-        ...(config.temperatura !== undefined ? {temperatura: config.temperatura} : {}),
-        ...(config.maxTokens !== undefined ? {max_tokens: config.maxTokens} : {}),
-        ...(config.idioma ? {idioma: config.idioma} : {}),
-        ...(config.incluirNotas !== undefined ? {incluir_notas: config.incluirNotas} : {}),
-        ...(config.incluirTareasCompletadas !== undefined ? {incluir_tareas_completadas: config.incluirTareasCompletadas} : {}),
-        ...(config.incluirHabitosPausados !== undefined ? {incluir_habitos_pausados: config.incluirHabitosPausados} : {}),
-        ...(config.permitirBusquedaWeb !== undefined ? {permitir_busqueda_web: config.permitirBusquedaWeb} : {}),
-        ...(config.permitirRecordatorios !== undefined ? {permitir_recordatorios: config.permitirRecordatorios} : {}),
-        ...(config.promptSistema ? {prompt_sistema: config.promptSistema} : {}),
-        ...(config.maxTurns !== undefined ? {max_turns: config.maxTurns} : {}),
-        ...(config.timeoutToolSecs !== undefined ? {timeout_tool_secs: config.timeoutToolSecs} : {}),
-        ...(config.incluirMemoria !== undefined ? {incluir_memoria: config.incluirMemoria} : {}),
-        ...(config.incluirSkills !== undefined ? {incluir_skills: config.incluirSkills} : {}),
+        ...aConfigBackend(config),
     };
 }
 
