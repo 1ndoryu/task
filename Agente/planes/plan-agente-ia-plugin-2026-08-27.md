@@ -487,15 +487,15 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - Criterios visuales aplicados: tokens del design system, escala tipográfica mínima, estados consistentes, claro/oscuro, contraste AA (sección 9.5).
 - **DoD:** en navegador, `/agente/visuales` lista TODAS las entradas, renderizan sin errores de consola y se revisan en claro/oscuro; capturas de la galería completa.
 
-**Checklist de la fase:**
-- [ ] Ruta `/agente/visuales` registrada solo en dev (ausente en producción).
-- [ ] La galería usa los MISMOS componentes del chat (sin copias ni maquetas).
-- [ ] Los 19 ítems de 9.5 tienen entrada con contenido realista (fixture).
-- [ ] Fixtures compartidos con tests (la galería y los tests usan la misma data).
-- [ ] Criterios visuales verificados en navegador: tokens, estados consistentes, claro/oscuro, contraste, sin specs hardcodeadas.
-- [ ] Capturas de la galería completa (claro/oscuro) guardadas como evidencia.
+**Checklist de la fase (commit `66b9cc1, 22dea8d`):**
+- [x] Ruta `/agente/visuales` registrada solo en dev (ausente en producción; `import.meta.env.DEV` en `main.tsx`).
+- [x] La galería usa los MISMOS componentes del chat (`plugins/agente/componentes.tsx`, extraídos de `PanelAgente`/`ModalConfigAgente`; sin copias ni maquetas).
+- [x] Los 19 ítems de 9.5 tienen entrada con contenido realista (fixture).
+- [x] Fixtures compartidos con tests (la galería y `.freebuff/galeria-visual.mjs` usan la misma data).
+- [x] Criterios visuales verificados en navegador: tokens `--dashboard-*` reales, estados consistentes, toggle claro/oscuro, 0 hallazgos VarSense (sin variables inexistentes ni hardcodeos).
+- [ ] Capturas de la galería completa (claro/oscuro) guardadas como evidencia — el webview del preview no compone frames para screenshot; la verificación visual se hizo por snapshot de accesibilidad + estilos computados (fuente Departure Mono, tokens reales) + logs de consola sin errores.
 - [ ] La galería se mantiene en Fases 5-6: cada componente nuevo del chat se añade a su catálogo (checklist general ítem 7).
-- [ ] Checklist general de la sección 12 completado.
+- [ ] Checklist general de la sección 12 completado (los ítems 17-19 de automejora/verificación quedan como entradas pendientes honestas hasta implementar el contrato SSE).
 
 ### Fase 5 — Frontend: modal de configuración del agente (v2 avanzada, en curso)
 - `ModalConfigAgente` autocontenido (patrón `ModalEditorArbol`) abierto desde el header del panel IA vía botón de ajustes. ✅
