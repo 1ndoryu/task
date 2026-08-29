@@ -33,6 +33,9 @@ pub struct AgentToolResult {
     pub contenido: String,
     /// Resumen corto para auditoría (sin secretos, sin contenido largo).
     pub resumen: String,
+    /// [31-08-2026] Fase 4: diff de líneas del cambio (file_write/file_patch)
+    /// para mostrarlo en el front; `None` si no aplica.
+    pub diff: Option<String>,
 }
 
 impl AgentToolResult {
@@ -42,6 +45,22 @@ impl AgentToolResult {
             ok: true,
             contenido: contenido.into(),
             resumen: resumen.into(),
+            diff: None,
+        }
+    }
+
+    /// Resultado ok con diff de líneas (para tools que modifican archivos).
+    #[must_use]
+    pub fn ok_con_diff(
+        contenido: impl Into<String>,
+        resumen: impl Into<String>,
+        diff: Option<String>,
+    ) -> Self {
+        Self {
+            ok: true,
+            contenido: contenido.into(),
+            resumen: resumen.into(),
+            diff,
         }
     }
 
@@ -51,6 +70,7 @@ impl AgentToolResult {
             ok: false,
             contenido: contenido.into(),
             resumen: "error".to_string(),
+            diff: None,
         }
     }
 }

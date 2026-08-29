@@ -105,10 +105,17 @@ impl AgentTool for ToolFileWrite {
             .get("contenido")
             .and_then(Value::as_str)
             .ok_or_else(|| AppError::BadRequest("contenido requerido".into()))?;
+        /* Diff contra el contenido previo (archivo nuevo → vacío) para
+         * mostrarlo en el front (Fase 4). */
+        let previo = sandbox
+            .leer(ruta, MAX_LECTURA_BYTES)
+            .map(|(contenido_previo, _)| contenido_previo)
+            .unwrap_or_default();
         sandbox.escribir(ruta, contenido)?;
-        Ok(AgentToolResult::ok(
+        Ok(AgentToolResult::ok_con_diff(
             format!("Archivo '{ruta}' escrito ({} bytes).", contenido.len()),
             format!("escritura {ruta}"),
+            crate::agent::diff::diff_lineas(&previo, contenido),
         ))
     }
 }
@@ -173,9 +180,10 @@ impl AgentTool for ToolFilePatch {
         }
         let nuevo = original.replacen(buscar, &reemplazar, 1);
         sandbox.escribir(ruta, &nuevo)?;
-        Ok(AgentToolResult::ok(
+        Ok(AgentToolResult::ok_con_diff(
             format!("Parche aplicado en '{ruta}'.",),
             format!("parche {ruta}"),
+            crate::agent::diff::diff_lineas(&original, &nuevo),
         ))
     }
 }

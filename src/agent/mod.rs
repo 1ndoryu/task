@@ -5,6 +5,7 @@
  * contexto) puede extraerse a glory-rs cuando exista un segundo consumidor. */
 
 pub mod context;
+pub mod diff;
 pub mod runtime;
 pub mod sandbox;
 pub mod scheduler;
