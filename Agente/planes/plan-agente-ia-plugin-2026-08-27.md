@@ -501,19 +501,20 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 - `ModalConfigAgente` autocontenido (patrón `ModalEditorArbol`) abierto desde el header del panel IA vía botón de ajustes. ✅
 - Secciones v1 implementadas y **verificadas en navegador**: **Modo por defecto** (predeterminado/meta/autónomo) que se aplica a conversaciones nuevas; **Modelo** que viaja en el stream SSE.
 - Persistencia en `glory-agente-config`/`establecerConfig`; recarga conserva valores y el backend los respeta (verificado: POST crear conversación con `modo:autonomo`; POST stream con `modelo:glory/glm-5.3`).
-- Pendiente para completar la fase (requiere backend adicional en iteración posterior): **Skills** (CRUD), **Tareas programadas** (la sección de panel queda), **Workspace** (selector carpeta solo local), **Contexto/Compactación**, y migrar `SeccionConfigIAPanelChat`. `SeccionConfigMCP` sigue global.
-- **DoD:** verificado en navegador que abre, edita, guarda y una conversación nueva refleja el modo/modelo elegidos; no rompe tabs+streaming+persistencia.
+- Secciones restantes (este bloque, commit en curso): **Workspace** (selector carpeta solo local), **Contexto/Compactación** (ventana máx. y umbral) y migración de `SeccionConfigIAPanelChat` (estilo + preferencias personales) — las tres presentes y funcionales en el modal. `SeccionConfigMCP` sigue global.
+- **Defecto de contrato corregido en este bloque:** la config del front se guardaba con claves camelCase pero el backend leía snake_case, así que la config avanzada nunca llegaba al runtime. Ahora `aConfigBackend`/`aConfigFrontend` (service.ts) normalizan en ambas direcciones y el stream lee estilo/preferencias/workspace/max_ventana/umbral_compactacion del JSONB de la conversación.
+- **DoD:** verificado en navegador que abre, edita, guarda y una conversación nueva refleja el modo/modelo elegidos; las nuevas secciones (Comportamiento/Workspace/Contexto) se guardan y persisten; no rompe tabs+streaming+persistencia ni la galería.
 
 **Checklist de la fase:**
 - [x] `ModalConfigAgente` (v1: modo + modelo) reutilizando `Boton` y tokens del design system (`--dashboard-*`), coherente con los demás modales.
-- [ ] Secciones restantes verificadas: Skills (CRUD), Tareas programadas en panel, Modos por tab, Workspace (solo local), Contexto/Compactación — iteración posterior.
+- [x] Secciones restantes verificadas: Skills (CRUD) ✅, Tareas programadas en panel ✅ (Fase 4), Workspace (solo local) ✅ y Contexto/Compactación ✅ (este bloque).
 - [x] Parámetros avanzados enviados y validados por `/agente/stream`: temperatura, max_tokens, idioma, contexto real limitado por user_id, permisos web/recordatorios, prompt de sistema y límites de turnos/timeout.
 - [x] Configuración aislada por conversación: columna JSONB, endpoint autenticado y carga por tab; cada stream usa la configuración de su conversación.
 - [x] Skills CRUD/inyección + UI de administración en el modal: contrato backend verificado por E2E (caso 12) y UI verificada en vivo (crear/editar/activar/desactivar/eliminar). Pendiente la automejora/sugerencia.
-- [x] Config persiste (`glory-agente-config`) y el backend la respeta: el modo va en la creación de conversación y el modelo en el stream (verificado en vivo).
-- [ ] `SeccionConfigIAPanelChat` migrada al modal del agente — pendiente (la v1 no la migra; el legacy sigue como helper del modal global).
+- [x] Config persiste (`glory-agente-config`) y el backend la respeta: el modo va en la creación de conversación, el modelo en el stream y estilo/preferencias/workspace/contexto en el JSONB (verificado en vivo).
+- [x] `SeccionConfigIAPanelChat` migrada al modal del agente: sección **Comportamiento** (estilo de respuesta + preferencias personales) inyectadas en el prompt del runtime (este bloque). El legacy sigue como helper del modal global (flujo separado del plan, no es código muerto).
 - [x] No hay specs visuales hardcodeadas en componentes (tokens del design system).
-- [x] Verificación visual en navegador del v1 (abre/edita/guarda/aplica).
+- [x] Verificación visual en navegador (abre/edita/guarda/aplica + nuevas secciones).
 - [ ] Checklist general de la sección 12 completado.
 
 ### Fase 6 — Producción/sandbox y cierre
