@@ -524,13 +524,13 @@ Principios transferidos a nuestro diseño: (1) tools-first con schema declarativ
 
 **Checklist de la fase:**
 - [x] `AGENTE_MODO=prod`: sin tools de archivo (fail-closed — no se registran), confirmación para acciones destructivas (mecanismo `requiere_aprobacion`), auditoría completa.
-- [ ] Criterios de aceptación 1-16 de la sección 13 verificados (los que apliquen) — revisión en curso.
-- [ ] Despliegue en Coolify vía `coolify-manager-rs` con autorización explícita (preflight + verificación) — pendiente de autorización del usuario (push + escrituras remotas).
+- [x] Criterios de aceptación 1-16 de la sección 13 verificados — 29-08-2026 con evidencia fresca (ver `Agente/completados/tareas-2026-08-29.md`).
+- [ ] Despliegue en Coolify vía `coolify-manager-rs` con autorización explícita (preflight + verificación) — **único pendiente**: requiere autorización del usuario (push + escrituras remotas).
 - [x] Documentación del agente en `Agente/documentacion/agente-manual-2026-08-29.md` (contrato SSE, tools, sandbox, modos, tareas programadas, tabs).
-- [ ] Lecciones relevantes en `Agente/lecciones/lecciones-aprendidas.md`.
-- [ ] Roadmap actualizado: bloque del agente retirado; evidencia en `Agente/completados/`.
-- [ ] Gate final (tsc + cargo check/test filtrados) en verde y sin errores nuevos.
-- [ ] Checklist general de la sección 12 completado.
+- [x] Lecciones relevantes en `Agente/lecciones/lecciones-aprendidas.md` (29-08-2026: tokens CSS del agente).
+- [x] Roadmap: el bloque del agente nunca tuvo entrada en `roadmap.md` (vive solo en `Agente/planes/`); evidencia en `Agente/completados/tareas-2026-08-29.md`. El diff actual de `roadmap.md` es trabajo ajeno (plan de deploy) — preservado.
+- [x] Gate final en verde: `cargo test --lib agent` 27/27, `tsc --noEmit` limpio, `agente-e2e` OK, `galeria-visual` 9 checks OK, `toggle-regression` OK, `verify-parity` 113/0, Sentinel analyze 0 errores, VarSense 0 errores en ruta del agente (corregido `panelAgente.css` 39→0).
+- [x] Checklist general de la sección 12 completado (aplica por fase; Fase 6 es cierre).
 
 ---
 
