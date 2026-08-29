@@ -9,7 +9,36 @@ import { islandRegistry } from './glory-core/core';
 import { initializeIslands } from './glory-core/core/hydration';
 import appIslands, { AppProvider } from '@app/appIslands';
 import {inicializarSuscripcionStore} from '@app/stores/suscripcionStore';
+import {limpiarTodosLosDatosUsuario} from '@app/utils/limpiezaSesion';
 import type { GloryRoutesMap } from './glory-core/core/router/navigationStore';
+
+/* [29-08-2026] Aislamiento de datos por cuenta: la caché y la meta de sync del
+ * dashboard viven en localStorage SIN scope por usuario. Si la cuenta B entra
+ * en un navegador donde quedó la caché de A (login/registro sin logout), la
+ * app mostraba las tareas/hábitos de A e incluso los SUBÍA a la cuenta B
+ * (performInitialSync: lastModified > lastSync → subida local). Para cortar la
+ * fuga, el boot compara el id del usuario autenticado contra un marcador
+ * persistido: si cambió (o no hay marcador = caché no fiable), limpia TODA la
+ * caché de usuario ANTES de montar la app y, por tanto, antes de cualquier
+ * sync. El mismo usuario conserva su caché (arranque rápido sin re-descarga). */
+const CLAVE_USUARIO_ACTIVO = 'glory_usuario_activo_id';
+
+function limpiarCacheSiCambioUsuario(userId: string | undefined): void {
+    if (!userId) return;
+    let anterior: string | null = null;
+    try {
+        anterior = localStorage.getItem(CLAVE_USUARIO_ACTIVO);
+    } catch {
+        /* localStorage no disponible: no hay caché que proteger */
+    }
+    if (anterior === userId) return;
+    limpiarTodosLosDatosUsuario();
+    try {
+        localStorage.setItem(CLAVE_USUARIO_ACTIVO, userId);
+    } catch {
+        /* sin persistencia el guard simplemente no actúa en el próximo arranque */
+    }
+}
 
 islandRegistry.registerAll(appIslands);
 
@@ -49,6 +78,7 @@ async function cargarSesionRust(): Promise<void> {
             isLoggedIn: true,
             esAdmin: Boolean(usuario?.es_admin),
         };
+        limpiarCacheSiCambioUsuario(usuario?.id);
     } catch {
         window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
     }
