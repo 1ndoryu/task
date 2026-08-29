@@ -15,6 +15,13 @@
    Estilos para contenido HTML generado por IA
    y articulos de blog. Proporciona espaciado
    adecuado entre elementos de texto.
+   ==============================================
+   NOTA (DIP): .prose usa tokens `--dashboard-*` del
+   consumidor (styles/dashboard/variables.css, cargado
+   en :root). Son tokens existentes de los 3 temas y
+   no se crean variables nuevas. Si glory-core ganara
+   un segundo consumidor sin esos tokens, habria que
+   definir tokens propios del nucleo con defaults.
    ============================================== */
 
 .prose {
