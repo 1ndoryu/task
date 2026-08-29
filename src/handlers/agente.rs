@@ -20,6 +20,7 @@ use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use uuid::Uuid;
 
+use crate::agent::context::ContextoConfig;
 use crate::agent::runtime::{
     cargar_historial, cargar_memoria_agente, cargar_skills_agente, guardar_mensaje_usuario,
     persistir_turno, AgenteEvento, AgentRuntime, TurnoConfig,
@@ -119,6 +120,17 @@ pub async fn agente_stream(
         incluir_skills: config.get("incluir_skills").and_then(serde_json::Value::as_bool).unwrap_or(true),
         max_turns: config.get("max_turns").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_turns as u64).clamp(1, 10) as usize,
         timeout_tool: std::time::Duration::from_secs(config.get("timeout_tool_secs").and_then(serde_json::Value::as_u64).unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
+        /* [02-09-2026] Fase 5: estilo, preferencias, workspace (solo local) y
+         * ventana/umbral de compactación vienen de la config de la conversación. */
+        estilo: validar_estilo(config.get("estilo").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        preferencias: validar_preferencias(config.get("preferencias").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        workspace: config.get("workspace").and_then(serde_json::Value::as_str).map(str::trim).filter(|w| !w.is_empty()).map(str::to_owned),
+        contexto: ContextoConfig {
+            max_ventana: config.get("max_ventana").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.max_ventana as u64).clamp(8_192, 512_000) as u32,
+            reserva_salida: config.get("reserva_salida").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.reserva_salida as u64).clamp(1_024, 64_000) as u32,
+            umbral: config.get("umbral_compactacion").and_then(serde_json::Value::as_f64).unwrap_or(defaults.contexto.umbral as f64).clamp(0.1, 0.9) as f32,
+            ..defaults.contexto.clone()
+        },
         modo,
         ..defaults
     });
@@ -829,6 +841,22 @@ fn validar_prompt_sistema(prompt: Option<String>) -> Result<String, AppError> {
     let valor = prompt.unwrap_or_default().trim().to_string();
     if valor.chars().count() > 4000 {
         return Err(AppError::BadRequest("El prompt de sistema no puede exceder 4000 caracteres".into()));
+    }
+    Ok(valor)
+}
+
+fn validar_estilo(estilo: Option<String>) -> Result<String, AppError> {
+    let valor = estilo.unwrap_or_else(|| "conciso".into());
+    if !matches!(valor.as_str(), "conciso" | "detallado" | "amable") {
+        return Err(AppError::BadRequest("Estilo inválido (conciso|detallado|amable)".into()));
+    }
+    Ok(valor)
+}
+
+fn validar_preferencias(preferencias: Option<String>) -> Result<String, AppError> {
+    let valor = preferencias.unwrap_or_default().trim().to_string();
+    if valor.chars().count() > 2000 {
+        return Err(AppError::BadRequest("Las preferencias personales no pueden exceder 2000 caracteres".into()));
     }
     Ok(valor)
 }

@@ -80,6 +80,13 @@ pub struct TurnoConfig {
     pub contexto: ContextoConfig,
     /// Modo de operación (sección 9.2): predeterminado | meta | autonomo.
     pub modo: String,
+    /// [02-09-2026] Fase 5: estilo de respuesta (conciso|detallado|amable) y
+    /// preferencias personales del usuario; ambos se inyectan en el prompt.
+    pub estilo: String,
+    pub preferencias: String,
+    /// [02-09-2026] Fase 5: raíz del workspace SOLO en AGENTE_MODO=local
+    /// (dev). None → AGENTE_WORKSPACE_ROOT env o cwd. En prod se ignora.
+    pub workspace: Option<String>,
 }
 
 impl Default for TurnoConfig {
@@ -106,6 +113,9 @@ impl Default for TurnoConfig {
             timeout_tool: Duration::from_secs(15),
             contexto: ContextoConfig::default(),
             modo: "predeterminado".into(),
+            estilo: "conciso".into(),
+            preferencias: String::new(),
+            workspace: None,
         }
     }
 }
@@ -124,7 +134,7 @@ impl AgentRuntime {
         /* [29-08-2026] Fase 2: tools de archivo SOLO en AGENTE_MODO=local.
          * Fail-closed: si el sandbox no se puede construir (raíz inválida o
          * modo no-local), no se registran y el contexto va sin sandbox. */
-        if let Some(sandbox) = sandbox_desde_entorno() {
+        if let Some(sandbox) = sandbox_desde_entorno(turno_config.workspace.as_deref()) {
             crate::agent::tools_archivo::registrar_tools_archivo(&mut registry, Some(sandbox));
         }
         Self {
@@ -160,7 +170,21 @@ impl AgentRuntime {
             prompt = SYSTEM_PROMPT.to_string();
         }
         prompt.push_str(&format!("\nIdioma de respuesta: {}.", self.turno_config.idioma));
+        prompt.push_str(&format!(
+            "\nEstilo de respuesta: {}.",
+            match self.turno_config.estilo.as_str() {
+                "detallado" => "responde de forma detallada, explicando el razonamiento",
+                "amable" => "tono cercano y motivador",
+                _ => "responde de forma concisa y directa",
+            }
+        ));
         prompt.push_str(&format!("\nPermisos activos: búsqueda web={}, recordatorios={}.", self.turno_config.permitir_busqueda_web, self.turno_config.permitir_recordatorios));
+        if !self.turno_config.preferencias.trim().is_empty() {
+            prompt.push_str(&format!(
+                "\nPreferencias personales del usuario (síguelas al responder):\n{}",
+                self.turno_config.preferencias.trim()
+            ));
+        }
         mensajes.push(AiMessage::texto("system", prompt));
         if self.turno_config.incluir_notas || self.turno_config.incluir_tareas_completadas || self.turno_config.incluir_habitos_pausados {
             let contexto = cargar_contexto_productividad(
@@ -655,15 +679,19 @@ async fn cargar_contexto_productividad(
 }
 
 /// [29-08-2026] Fase 2: construye el sandbox de archivos desde el entorno.
-/// Solo AGENTE_MODO=local; la raíz viene de AGENTE_WORKSPACE_ROOT (o el cwd
-/// como fallback para dev). Fail-closed: cualquier error → None (sin tools).
-fn sandbox_desde_entorno() -> Option<std::sync::Arc<crate::agent::sandbox::SandboxArchivos>> {
+/// Solo AGENTE_MODO=local; la raíz viene del override de la conversación, de
+/// AGENTE_WORKSPACE_ROOT (o el cwd como fallback para dev). Fail-closed:
+/// cualquier error → None (sin tools). El override nunca aplica en prod porque
+/// este gate exige AGENTE_MODO=local.
+fn sandbox_desde_entorno(workspace: Option<&str>) -> Option<std::sync::Arc<crate::agent::sandbox::SandboxArchivos>> {
     if std::env::var("AGENTE_MODO").as_deref() != Ok("local") {
         return None;
     }
-    let raiz = std::env::var("AGENTE_WORKSPACE_ROOT")
-        .ok()
-        .filter(|r| !r.trim().is_empty())
+    let raiz = workspace
+        .map(str::trim)
+        .filter(|r| !r.is_empty())
+        .map(str::to_owned)
+        .or_else(|| std::env::var("AGENTE_WORKSPACE_ROOT").ok().filter(|r| !r.trim().is_empty()))
         .unwrap_or_else(|| {
             std::env::current_dir()
                 .map(|p| p.to_string_lossy().into_owned())
