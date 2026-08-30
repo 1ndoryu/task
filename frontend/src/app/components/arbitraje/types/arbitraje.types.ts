@@ -32,9 +32,12 @@ export interface DetalleRuta {
     ganancia: number;
 }
 
-export interface ResultadoEscenario {
+export interface ResultadoEscenarioIdentidad {
     nombre: string;
     tipo: 'pesimista' | 'realista' | 'optimista';
+}
+
+export interface ResultadoEscenarioMontos {
     costoTotal: number;
     ventaUsd: number;
     gananciaRutaA: number;
@@ -43,9 +46,14 @@ export interface ResultadoEscenario {
     roi: number;
     margen: number;
     breakeven: number;
+}
+
+export interface ResultadoEscenarioDetalle {
     detalleRutaA: DetalleRuta;
     detalleRutaB: DetalleRuta;
 }
+
+export interface ResultadoEscenario extends ResultadoEscenarioIdentidad, ResultadoEscenarioMontos, ResultadoEscenarioDetalle {}
 
 export type ModoSimulacion = 'fijo' | 'reinversion';
 

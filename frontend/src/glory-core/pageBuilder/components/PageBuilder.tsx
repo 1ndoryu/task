@@ -41,7 +41,9 @@ import {AddBlockPanel} from './AddBlockPanel';
 import type {BlockData} from '../types';
 import {usePageBuilder} from '../hooks/usePageBuilder';
 
-export interface PageBuilderProps {
+/* Frente ISP 1408: PageBuilderProps dividida en fragmentos cohesivos via extends
+ * (misma forma plana para los consumidores; cada declaracion <= 10 campos). */
+export interface PageBuilderPropsDatos {
     /** Bloques iniciales (de PHP) */
     blocks?: BlockData[] | null;
     /** Si el usuario puede editar */
@@ -50,6 +52,13 @@ export interface PageBuilderProps {
     saveEndpoint?: string | null;
     /** Nonce para autenticacion REST */
     restNonce?: string | null;
+    /** Desactivar el Page Builder completamente */
+    disabled?: boolean;
+    /** Tipos de bloque permitidos (default: todos) */
+    allowedBlockTypes?: string[];
+}
+
+export interface PageBuilderPropsCallbacks {
     /** Render prop para contenido custom */
     children?: (blocks: BlockData[], isEditMode: boolean) => React.ReactNode;
     /** Callback cuando cambian los bloques (sin guardar) */
@@ -58,15 +67,16 @@ export interface PageBuilderProps {
     onSaveSuccess?: () => void;
     /** Callback si hay error al guardar */
     onSaveError?: (error: string) => void;
-    /** Desactivar el Page Builder completamente */
-    disabled?: boolean;
-    /** Tipos de bloque permitidos (default: todos) */
-    allowedBlockTypes?: string[];
+}
+
+export interface PageBuilderPropsUI {
     /** Texto personalizado para el boton de editar */
     editButtonText?: string;
     /** Texto personalizado para el toolbar */
     toolbarTitle?: string;
 }
+
+export interface PageBuilderProps extends PageBuilderPropsDatos, PageBuilderPropsCallbacks, PageBuilderPropsUI {}
 
 export function PageBuilder({blocks: initialBlocks, isAdmin = false, saveEndpoint, restNonce, children, onBlocksChange, onSaveSuccess, onSaveError, disabled = false, allowedBlockTypes, editButtonText = 'Editar Pagina', toolbarTitle = 'Editando Pagina'}: PageBuilderProps): JSX.Element | null {
     const {

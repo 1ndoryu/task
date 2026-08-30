@@ -11,26 +11,31 @@ import type {RangoValor, TasasConversion, ResultadoEscenario, ModoSimulacion, Es
 import {calcularEscenario} from '../calculos/calculoEscenarios';
 import {calcularSimulacionCiclos} from '../calculos/simulacionCiclos';
 
-interface UseArbitrajeReturn {
-    /* Estados */
+interface UseArbitrajeEstados {
     costoProducto: RangoValor;
     costoEnvio: RangoValor;
     precioVenta: RangoValor;
     tasas: TasasConversion;
     numeroCiclos: number;
     modoSimulacion: ModoSimulacion;
-    /* Setters */
+}
+
+interface UseArbitrajeSetters {
     setCostoProducto: React.Dispatch<React.SetStateAction<RangoValor>>;
     setCostoEnvio: React.Dispatch<React.SetStateAction<RangoValor>>;
     setPrecioVenta: React.Dispatch<React.SetStateAction<RangoValor>>;
     setTasas: React.Dispatch<React.SetStateAction<TasasConversion>>;
     setNumeroCiclos: React.Dispatch<React.SetStateAction<number>>;
     setModoSimulacion: React.Dispatch<React.SetStateAction<ModoSimulacion>>;
-    /* Cálculos */
+}
+
+interface UseArbitrajeCalculos {
     escenarios: ResultadoEscenario[];
     simulacionCiclos: SimulacionCiclos;
     viabilidad: EstadoViabilidad;
 }
+
+interface UseArbitrajeReturn extends UseArbitrajeEstados, UseArbitrajeSetters, UseArbitrajeCalculos {}
 
 export function useArbitraje(): UseArbitrajeReturn {
     /* Estados para inputs de compra (Persistentes) */

@@ -9,24 +9,34 @@ function obtenerNonce(): string {
 
 const BASE = '/wp-json/glory/v1/grupos-fb';
 
-export interface GrupoFb {
+/* Frente ISP 1408: GrupoFb dividida en fragmentos cohesivos compuestos via extends
+ * (misma forma plana para los consumidores; cada declaracion <= 10 campos). */
+export interface GrupoFbBase {
     id: number;
     fbGroupId: string;
     nombre: string;
     url: string;
     tipo: 'public' | 'private' | 'unknown';
+    categoria: string | null;
+    importancia: number;
+}
+
+export interface GrupoFbDetalle {
     cantidadMiembros: string;
     imagenUrl: string;
     fuente: string;
-    categoria: string | null;
-    importancia: number;
     notas: string;
     oculto: boolean;
     ultimaPublicacion: string | null;
+}
+
+export interface GrupoFbSeguimiento {
     fechaDeteccion: string;
     ultimaDeteccion: string;
     datosExtra: Record<string, unknown>;
 }
+
+export interface GrupoFb extends GrupoFbBase, GrupoFbDetalle, GrupoFbSeguimiento {}
 
 export interface CategoriaGrupoFb {
     id: number;

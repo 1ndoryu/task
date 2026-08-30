@@ -44,17 +44,22 @@ export interface SocialLink {
     href: string;
 }
 
-export interface PageLayoutProps {
+/* Frente ISP 1408: PageLayoutProps dividida en fragmentos cohesivos via extends
+ * (misma forma plana para los consumidores; cada declaracion <= 10 campos). */
+export interface PageLayoutPropsBasicas {
     /** Contenido de la pagina (alternativa a blocks) */
     children?: ReactNode;
-
-    /* Configuracion general */
     /** Nombre del sitio */
     siteName?: string;
     /** URL del logo (opcional) */
     logoUrl?: string;
+    /** Clase CSS adicional para el contenedor */
+    className?: string;
+    /** Color de fondo (default: #050505) */
+    bgColor?: string;
+}
 
-    /* Navegacion */
+export interface PageLayoutPropsNavegacion {
     /** Links del nav */
     navLinks?: NavLink[];
     /** Texto del boton CTA del nav */
@@ -63,16 +68,18 @@ export interface PageLayoutProps {
     navCtaUrl?: string;
     /** Ocultar navegacion */
     hideNav?: boolean;
+}
 
-    /* Footer */
+export interface PageLayoutPropsFooter {
     /** Texto de copyright */
     copyright?: string;
     /** Links sociales */
     socialLinks?: SocialLink[];
     /** Ocultar footer */
     hideFooter?: boolean;
+}
 
-    /* Page Builder */
+export interface PageLayoutPropsBuilder {
     /** Usar Page Builder (default: true si hay blocks) */
     usePageBuilder?: boolean;
     /** Bloques iniciales */
@@ -89,13 +96,9 @@ export interface PageLayoutProps {
     editButtonText?: string;
     /** Titulo del toolbar */
     toolbarTitle?: string;
-
-    /* Estilos */
-    /** Clase CSS adicional para el contenedor */
-    className?: string;
-    /** Color de fondo (default: #050505) */
-    bgColor?: string;
 }
+
+export interface PageLayoutProps extends PageLayoutPropsBasicas, PageLayoutPropsNavegacion, PageLayoutPropsFooter, PageLayoutPropsBuilder {}
 
 /*
  * Iconos sociales inline (evitar dependencia de lucide para el layout)

@@ -2,7 +2,9 @@ import {obtenerApiUrlWP, obtenerNonceWP} from '../utils/dashboardRuntime';
 
 export type ModoMagnific = 'creative' | 'precision';
 
-export interface OpcionesMagnific {
+/* Frente ISP 1408: OpcionesMagnific dividida en fragmentos cohesivos via extends
+ * (misma forma plana; cada declaracion <= 10 campos). */
+export interface OpcionesMagnificBasicas {
     mode: ModoMagnific;
     image: string;
     /* scale_factor: string para creative ('2x', '4x'…), number para precision (2, 4, 8, 16) */
@@ -10,6 +12,10 @@ export interface OpcionesMagnific {
     optimized_for: string;
     engine: string;
     prompt: string;
+    flavor: string;
+}
+
+export interface OpcionesMagnificEscala {
     creativity: number;
     hdr: number;
     resemblance: number;
@@ -17,9 +23,13 @@ export interface OpcionesMagnific {
     sharpen: number;
     smart_grain: number;
     ultra_detail: number;
-    filter_nsfw: boolean;
-    flavor: string;
 }
+
+export interface OpcionesMagnificSeguridad {
+    filter_nsfw: boolean;
+}
+
+export interface OpcionesMagnific extends OpcionesMagnificBasicas, OpcionesMagnificEscala, OpcionesMagnificSeguridad {}
 
 export interface RespuestaMagnific {
     data?: {

@@ -36,10 +36,14 @@ export interface UseBottomSheetTareaParams {
     tareaExistente?: Tarea;
 }
 
-interface UbstCampos {
+interface UbstCamposBasicos {
     esEdicion: boolean;
     texto: string;
     setTexto: React.Dispatch<React.SetStateAction<string>>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+interface UbstCamposSeleccion {
     proyectoId: number | undefined;
     setProyectoId: React.Dispatch<React.SetStateAction<number | undefined>>;
     prioridad: string | undefined;
@@ -48,8 +52,9 @@ interface UbstCampos {
     setUrgencia: React.Dispatch<React.SetStateAction<string | undefined>>;
     fecha: string | undefined;
     setFecha: React.Dispatch<React.SetStateAction<string | undefined>>;
-    inputRef: React.RefObject<HTMLInputElement | null>;
 }
+
+interface UbstCampos extends UbstCamposBasicos, UbstCamposSeleccion {}
 
 interface UbstControl {
     cargando: boolean;

@@ -13,7 +13,7 @@ import {ListaParticipantes} from './ListaParticipantes';
 import type {TipoElementoCompartido, RolCompartido, CompaneroEquipo, Participante} from '../../types/dashboard';
 import {useModalCompartir} from '../../hooks/dashboard/useModalCompartir';
 
-interface ModalCompartirProps {
+interface ModalCompartirPropsInfo {
     visible: boolean;
     onCerrar: () => void;
     tipo: TipoElementoCompartido;
@@ -22,11 +22,16 @@ interface ModalCompartirProps {
     companeros: CompaneroEquipo[];
     participantes: Participante[];
     cifradoActivo?: boolean;
+}
+
+interface ModalCompartirPropsAcciones {
     onCompartir: (usuarioId: number, rol: RolCompartido) => Promise<boolean>;
     onCambiarRol: (compartidoId: number, nuevoRol: RolCompartido) => Promise<boolean>;
     onDejarDeCompartir: (compartidoId: number) => Promise<boolean>;
     cargandoParticipantes?: boolean;
 }
+
+interface ModalCompartirProps extends ModalCompartirPropsInfo, ModalCompartirPropsAcciones {}
 
 export function ModalCompartir({visible, onCerrar, tipo, elementoId: _elementoId, elementoNombre, companeros, participantes, cifradoActivo = false, onCompartir, onCambiarRol, onDejarDeCompartir, cargandoParticipantes = false}: ModalCompartirProps): JSX.Element | null {
     const {
