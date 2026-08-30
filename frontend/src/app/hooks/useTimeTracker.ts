@@ -9,7 +9,7 @@ import {useTimeTrackerStore} from '../stores/timeTrackerStore';
 import {useAlertasOpcional} from '../context/AlertasContext';
 import type {TipoEntidadTracker} from '../types/timeTracker';
 
-interface UseTimeTrackerReturn {
+interface UseTimeTrackerEstado {
     /* Estado */
     estaActivo: boolean;
     estaPausado: boolean;
@@ -21,6 +21,8 @@ interface UseTimeTrackerReturn {
     nombreEntidad: string;
     tipoEntidad: TipoEntidadTracker | null;
     entidadId: number | null;
+}
+interface UseTimeTrackerAcciones {
     /* Acciones */
     iniciar: (entidadId: number, tipo: TipoEntidadTracker, nombre: string, tiempoMinimo?: number) => void;
     pausar: () => void;
@@ -29,6 +31,7 @@ interface UseTimeTrackerReturn {
     cancelar: () => void;
     ajustarTiempo: (deltaMs: number) => void;
 }
+interface UseTimeTrackerReturn extends UseTimeTrackerEstado, UseTimeTrackerAcciones {}
 
 /*
  * Formatea milisegundos a formato legible HH:MM:SS o MM:SS

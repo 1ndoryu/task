@@ -25,25 +25,29 @@ interface ValoresCreacionRapida {
     grupoEjecucion?: string | null;
 }
 
-interface UseModalesDashboardReturn {
+interface UmdModalesAcceso {
     modalLoginAbierto: boolean;
     abrirModalLogin: () => void;
     cerrarModalLogin: () => void;
     modalUpgradeAbierto: boolean;
     abrirModalUpgrade: () => void;
     cerrarModalUpgrade: () => void;
+    modalPerfilAbierto: boolean;
+    abrirModalPerfil: () => void;
+    cerrarModalPerfil: () => void;
+}
+interface UmdPanelesSeguridad {
     panelSeguridadAbierto: boolean;
     abrirPanelSeguridad: () => void;
     cerrarPanelSeguridad: () => void;
     panelAdminAbierto: boolean;
     abrirPanelAdmin: () => void;
     cerrarPanelAdmin: () => void;
-    modalPerfilAbierto: boolean;
-    abrirModalPerfil: () => void;
-    cerrarModalPerfil: () => void;
     modalEquiposAbierto: boolean;
     abrirModalEquipos: () => void;
     cerrarModalEquipos: () => void;
+}
+interface UmdNotificacionesExperimentos {
     modalNotificacionesAbierto: boolean;
     posicionModalNotificaciones: PosicionModal;
     abrirModalNotificaciones: (evento: React.MouseEvent) => void;
@@ -51,30 +55,40 @@ interface UseModalesDashboardReturn {
     modalExperimentosAbierto: boolean;
     abrirModalExperimentos: () => void;
     cerrarModalExperimentos: () => void;
+}
+interface UmdProyecto {
     modalCrearProyectoAbierto: boolean;
     abrirModalCrearProyecto: () => void;
     cerrarModalCrearProyecto: () => void;
     proyectoEditando: Proyecto | null;
     abrirModalEditarProyecto: (proyecto: Proyecto) => void;
     cerrarModalEditarProyecto: () => void;
+}
+interface UmdConfigTareasHabitos {
     modalConfigTareasAbierto: boolean;
     abrirModalConfigTareas: () => void;
     cerrarModalConfigTareas: () => void;
     modalConfigHabitosAbierto: boolean;
     abrirModalConfigHabitos: () => void;
     cerrarModalConfigHabitos: () => void;
+}
+interface UmdConfigProyectosScratchpad {
     modalConfigProyectosAbierto: boolean;
     abrirModalConfigProyectos: () => void;
     cerrarModalConfigProyectos: () => void;
     modalConfigScratchpadAbierto: boolean;
     abrirModalConfigScratchpad: () => void;
     cerrarModalConfigScratchpad: () => void;
+}
+interface UmdConfigActividadLayout {
     modalConfigActividadAbierto: boolean;
     abrirModalConfigActividad: () => void;
     cerrarModalConfigActividad: () => void;
     modalConfigLayoutAbierto: boolean;
     abrirModalConfigLayout: () => void;
     cerrarModalConfigLayout: () => void;
+}
+interface UmdPanelesVersionesNuevaTarea {
     /* [18-08-2026] Modal de gestión de paneles (activar/desactivar/minimizados) */
     modalPanelesAbierto: boolean;
     abrirModalPaneles: () => void;
@@ -85,6 +99,8 @@ interface UseModalesDashboardReturn {
     modalNuevaTareaAbierto: boolean;
     abrirModalNuevaTarea: () => void;
     cerrarModalNuevaTarea: () => void;
+}
+interface UmdEdicionTarea {
     tareaEditando: Tarea | null;
     abrirModalEditarTarea: (tarea: Tarea) => void;
     cerrarModalEditarTarea: () => void;
@@ -94,6 +110,8 @@ interface UseModalesDashboardReturn {
     habitoEditandoMovil: Habito | null;
     abrirEdicionHabitoMovil: (habito: Habito) => void;
     cerrarEdicionHabitoMovil: () => void;
+}
+interface UmdCreacionRapidaTemas {
     modalCreacionRapida: 'tarea' | 'habito' | 'proyecto' | null;
     valoresCreacionRapida: ValoresCreacionRapida;
     abrirCreacionRapida: (tipo: 'tarea' | 'habito' | 'proyecto', valores?: ValoresCreacionRapida) => void;
@@ -104,6 +122,8 @@ interface UseModalesDashboardReturn {
     modalConfigMCPAbierto: boolean;
     abrirModalConfigMCP: () => void;
     cerrarModalConfigMCP: () => void;
+}
+interface UmdUsuarioBackups {
     modalConfigUsuarioAbierto: boolean;
     abrirModalConfigUsuario: () => void;
     cerrarModalConfigUsuario: () => void;
@@ -113,6 +133,8 @@ interface UseModalesDashboardReturn {
     modalFeedbackAbierto: boolean;
     abrirModalFeedback: () => void;
     cerrarModalFeedback: () => void;
+}
+interface UmdPlugins {
     modalPluginsAbierto: boolean;
     pluginConfigInicial: string | null;
     /* [27-08-2026] La config se abrió directa (engranaje del panel): al cerrarla
@@ -121,6 +143,8 @@ interface UseModalesDashboardReturn {
     abrirModalPlugins: () => void;
     abrirModalPluginsConConfig: (pluginId: string) => void;
     cerrarModalPlugins: () => void;
+}
+interface UmdConfigGlobal {
     modalConfigDeficitCaloricoAbierto: boolean;
     abrirModalConfigDeficitCalorico: () => void;
     cerrarModalConfigDeficitCalorico: () => void;
@@ -130,6 +154,7 @@ interface UseModalesDashboardReturn {
     abrirModalConfigGlobal: (seccion?: SeccionConfigGlobal | null) => void;
     cerrarModalConfigGlobal: () => void;
 }
+interface UseModalesDashboardReturn extends UmdModalesAcceso, UmdPanelesSeguridad, UmdNotificacionesExperimentos, UmdProyecto, UmdConfigTareasHabitos, UmdConfigProyectosScratchpad, UmdConfigActividadLayout, UmdPanelesVersionesNuevaTarea, UmdEdicionTarea, UmdCreacionRapidaTemas, UmdUsuarioBackups, UmdPlugins, UmdConfigGlobal {}
 
 /* Helper: encapsula useState + useCallback para modales booleanos simples */
 function useModalSimple(initial = false) {

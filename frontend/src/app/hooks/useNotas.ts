@@ -31,19 +31,22 @@ export interface EstadoNotas {
     notaActiva: NotaActiva;
 }
 
-interface UseNotasReturn {
+interface UseNotasLectura {
     estado: EstadoNotas;
     cargarNotas: () => Promise<void>;
-    guardarNotaActiva: () => Promise<Nota | null>;
-    eliminarNota: (id: string) => Promise<boolean>;
     buscarNotas: (termino: string) => Promise<Nota[]>;
     cargarMas: () => Promise<void>;
+    obtenerTituloDeContenido: (contenido: string) => string;
+}
+interface UseNotasEscritura {
+    guardarNotaActiva: () => Promise<Nota | null>;
+    eliminarNota: (id: string) => Promise<boolean>;
     limpiarError: () => void;
     seleccionarNota: (nota: Nota) => void;
     crearNuevaNota: () => void;
     actualizarContenido: (contenido: string) => void;
-    obtenerTituloDeContenido: (contenido: string) => string;
 }
+interface UseNotasReturn extends UseNotasLectura, UseNotasEscritura {}
 
 /**
  * Hook principal para el sistema de notas (Legacy Wrapper)

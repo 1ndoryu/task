@@ -12,27 +12,36 @@ interface UseCompartirDashboardProps {
     proyectos?: Proyecto[];
 }
 
-interface UseCompartirDashboardReturn {
+interface UscdEstadoProyecto {
     /* Estado de compartir proyecto */
     proyectoCompartiendo: Proyecto | null;
     participantesProyecto: Participante[];
+    /* Cache de participantes */
+    cacheParticipantesProyecto: Map<number, Participante[]>;
+}
+interface UscdEstadoTarea {
     /* Estado de compartir tarea */
     tareaCompartiendo: Tarea | null;
     participantesTarea: Participante[];
     /* Cache de participantes */
-    cacheParticipantesProyecto: Map<number, Participante[]>;
     cacheParticipantesTarea: Map<number, Participante[]>;
+}
+interface UscdAccionesProyecto {
     /* Acciones de proyecto */
     manejarCompartirProyecto: (proyecto: Proyecto) => Promise<void>;
     manejarCompartirElemento: (usuarioId: number, rol: RolCompartido) => Promise<boolean>;
     manejarCambiarRolCompartido: (compartidoId: number, nuevoRol: RolCompartido) => Promise<boolean>;
     manejarDejarDeCompartir: (compartidoId: number) => Promise<boolean>;
     cerrarModalCompartirProyecto: () => void;
+}
+interface UscdAccionesTarea {
     /* Acciones de tarea */
     manejarCompartirTarea: (tarea: Tarea) => Promise<void>;
     manejarCompartirTareaElemento: (usuarioId: number, rol: RolCompartido) => Promise<boolean>;
     manejarCompartirTareaDesdeEdicion: (tareaId: number, usuarioId: number, rol: RolCompartido) => Promise<boolean>;
     manejarCambiarRolTareaDesdeEdicion: (tareaId: number, compartidoId: number, nuevoRol: RolCompartido) => Promise<boolean>;
+}
+interface UscdAccionesTareaAvanzadas {
     manejarDejarDeCompartirTareaDesdeEdicion: (tareaId: number, compartidoId: number) => Promise<boolean>;
     manejarCambiarRolTareaCompartida: (compartidoId: number, nuevoRol: RolCompartido) => Promise<boolean>;
     cerrarModalCompartirTarea: () => void;
@@ -42,6 +51,7 @@ interface UseCompartirDashboardReturn {
     estaCompartidaTarea: (id: number) => boolean;
     cargando: boolean;
 }
+interface UseCompartirDashboardReturn extends UscdEstadoProyecto, UscdEstadoTarea, UscdAccionesProyecto, UscdAccionesTarea, UscdAccionesTareaAvanzadas {}
 
 export function useCompartirDashboard({proyectos}: UseCompartirDashboardProps): UseCompartirDashboardReturn {
     const compartidos = useCompartidos();

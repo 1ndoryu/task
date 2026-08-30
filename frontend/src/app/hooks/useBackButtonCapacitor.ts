@@ -10,8 +10,9 @@ import {useEffect, useCallback, useRef} from 'react';
 import {App} from '@capacitor/app';
 import {Capacitor} from '@capacitor/core';
 
-interface ElementosCerrables {
-    /* Modales abiertos */
+/* Fragments cohesivos de ElementosCerrables para cumplir ISP (≤10 campos por
+ * declaración). Se componen con `extends`, conservando el contrato plano. */
+interface ElementosModalesBasicos {
     modalLoginAbierto?: boolean;
     modalUpgradeAbierto?: boolean;
     modalPerfilAbierto?: boolean;
@@ -20,6 +21,8 @@ interface ElementosCerrables {
     modalExperimentosAbierto?: boolean;
     modalCrearProyectoAbierto?: boolean;
     proyectoEditando?: unknown;
+}
+interface ElementosModalesConfig {
     modalConfigTareasAbierto?: boolean;
     modalConfigHabitosAbierto?: boolean;
     modalConfigProyectosAbierto?: boolean;
@@ -30,6 +33,8 @@ interface ElementosCerrables {
     modalNuevaTareaAbierto?: boolean;
     tareaEditando?: unknown;
     tareaEditandoMovil?: unknown;
+}
+interface ElementosModalesEdicion {
     habitoEditandoMovil?: unknown;
     modalCreacionRapida?: unknown;
     modalTemasAbierto?: boolean;
@@ -39,11 +44,12 @@ interface ElementosCerrables {
     modalFeedbackAbierto?: boolean;
     panelSeguridadAbierto?: boolean;
     panelAdminAbierto?: boolean;
-    /* Modal de notas */
     modalNotasAbierto?: boolean;
 }
+interface ElementosCerrables extends ElementosModalesBasicos, ElementosModalesConfig, ElementosModalesEdicion {}
 
-interface AccionesCierre {
+/* Fragments cohesivos de AccionesCierre (ISP). */
+interface AccionesModalesBasicas {
     cerrarModalLogin?: () => void;
     cerrarModalUpgrade?: () => void;
     cerrarModalPerfil?: () => void;
@@ -52,6 +58,8 @@ interface AccionesCierre {
     cerrarModalExperimentos?: () => void;
     cerrarModalCrearProyecto?: () => void;
     cerrarModalEditarProyecto?: () => void;
+}
+interface AccionesModalesConfig {
     cerrarModalConfigTareas?: () => void;
     cerrarModalConfigHabitos?: () => void;
     cerrarModalConfigProyectos?: () => void;
@@ -62,6 +70,8 @@ interface AccionesCierre {
     cerrarModalNuevaTarea?: () => void;
     cerrarModalEditarTarea?: () => void;
     cerrarEdicionTareaMovil?: () => void;
+}
+interface AccionesModalesEdicion {
     cerrarEdicionHabitoMovil?: () => void;
     cerrarCreacionRapida?: () => void;
     cerrarModalTemas?: () => void;
@@ -73,6 +83,7 @@ interface AccionesCierre {
     cerrarPanelAdmin?: () => void;
     cerrarModalNotas?: () => void;
 }
+interface AccionesCierre extends AccionesModalesBasicas, AccionesModalesConfig, AccionesModalesEdicion {}
 
 interface UseBackButtonCapacitorParams {
     elementos: ElementosCerrables;

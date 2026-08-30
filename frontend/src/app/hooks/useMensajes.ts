@@ -18,13 +18,15 @@ export type TipoMensaje = 'enviado' | 'recibido' | 'sistema';
 
 export type AccionSistema = 'creado' | 'editado' | 'completado' | 'reabierto' | 'asignado' | 'desasignado' | 'adjunto_agregado' | 'adjunto_eliminado' | 'prioridad' | 'urgencia' | 'fecha_limite' | 'participante_agregado' | 'participante_removido' | 'compartido' | 'descripcion' | 'nombre' | 'repeticion';
 
-export interface MensajeTimeline {
+interface MensajeTimelineIdentidad {
     id: string;
     tipoElemento: 'tarea' | 'proyecto' | 'habito';
     elementoId: number;
     usuarioId: string;
     usuarioNombre: string;
     avatar: string;
+}
+interface MensajeTimelineContenido {
     tipoMensaje: 'usuario' | 'sistema';
     contenido: string;
     accionSistema: AccionSistema | null;
@@ -32,6 +34,7 @@ export interface MensajeTimeline {
     fechaCreacion: string;
     esPropio: boolean;
 }
+export interface MensajeTimeline extends MensajeTimelineIdentidad, MensajeTimelineContenido {}
 
 interface EstadoMensajes {
     cargando: boolean;
@@ -54,13 +57,15 @@ interface UseMensajesReturn {
  * GET /timeline/{itemType}/{itemId} -> { items, total, limit, offset, hasMore }
  * POST /timeline { itemType, itemId, content } -> TimelineItem (201) */
 
-interface TimelineItemRust {
+interface TimelineItemRustIdentidad {
     id: string;
     itemType: 'tarea' | 'proyecto' | 'habito';
     itemId: number;
     userId: string;
     userName: string;
     avatarUrl: string | null;
+}
+interface TimelineItemRustContenido {
     messageType: 'usuario' | 'sistema';
     content: string;
     systemAction: AccionSistema | null;
@@ -68,6 +73,7 @@ interface TimelineItemRust {
     createdAt: string;
     isOwn: boolean;
 }
+interface TimelineItemRust extends TimelineItemRustIdentidad, TimelineItemRustContenido {}
 
 interface TimelineResponseRust {
     items: TimelineItemRust[];
