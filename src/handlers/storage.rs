@@ -75,25 +75,27 @@ pub async fn list_files(
     ))
 }
 
-#[utoipa::path(
-    post,
-    tag = "storage",
-    path = "/api/storage/files",
-    responses((status = 201, description = "Adjunto subido", body = Attachment)),
-    security(("session_cookie" = []))
-)]
-pub async fn upload_file(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    mut multipart: Multipart,
-) -> Result<(StatusCode, Json<Attachment>), AppError> {
-    let mut nombre: Option<String> = None;
-    let mut tipo: Option<String> = None;
-    let mut entity_type: Option<String> = None;
-    let mut entity_id: Option<i64> = None;
-    let mut bytes: Option<Vec<u8>> = None;
-    let mut mime: Option<String> = None;
+/// Campos parseados del multipart de subida, antes de validación.
+struct CamposSubida {
+    pub nombre: Option<String>,
+    pub tipo: Option<String>,
+    pub entity_type: Option<String>,
+    pub entity_id: Option<i64>,
+    pub bytes: Option<Vec<u8>>,
+    pub mime: Option<String>,
+}
 
+/* [F5-PT] Split de upload_file (>100 líneas): el parseo del multipart se
+extrae a su propio helper para mantener la responsabilidad de cada función. */
+async fn parsear_multipart(mut multipart: Multipart) -> Result<CamposSubida, AppError> {
+    let mut campos = CamposSubida {
+        nombre: None,
+        tipo: None,
+        entity_type: None,
+        entity_id: None,
+        bytes: None,
+        mime: None,
+    };
     while let Some(field) = multipart
         .next_field()
         .await
@@ -102,9 +104,9 @@ pub async fn upload_file(
         let name = field.name().unwrap_or_default().to_string();
         match name.as_str() {
             "file" => {
-                mime = field.content_type().map(ToString::to_string);
-                nombre = field.file_name().map(ToString::to_string);
-                bytes = Some(
+                campos.mime = field.content_type().map(ToString::to_string);
+                campos.nombre = field.file_name().map(ToString::to_string);
+                campos.bytes = Some(
                     field
                         .bytes()
                         .await
@@ -113,7 +115,7 @@ pub async fn upload_file(
                 );
             }
             "tipo" => {
-                tipo = Some(
+                campos.tipo = Some(
                     field
                         .text()
                         .await
@@ -121,7 +123,7 @@ pub async fn upload_file(
                 );
             }
             "entityType" => {
-                entity_type = Some(
+                campos.entity_type = Some(
                     field
                         .text()
                         .await
@@ -136,7 +138,7 @@ pub async fn upload_file(
                 /* [H-B05-04] El campo viene pero no parsea: feedback explícito en
                  * vez de convertir silenciosamente a None (que desvinculaba el
                  * adjunto de su entidad sin avisar al cliente). */
-                entity_id = Some(
+                campos.entity_id = Some(
                     text.trim()
                         .parse::<i64>()
                         .map_err(|_| AppError::BadRequest(format!("Campo entityId inválido: {text:?}")))?,
@@ -145,11 +147,13 @@ pub async fn upload_file(
             _ => {}
         }
     }
+    Ok(campos)
+}
 
-    let bytes = bytes.ok_or_else(|| AppError::BadRequest("Falta el campo file".into()))?;
-    let nombre = nombre.ok_or_else(|| AppError::BadRequest("Archivo sin nombre".into()))?;
+/// Valida y guarda el archivo en disco, devolviendo los metadatos de persistencia.
+fn tipo_inferido(mime: Option<&str>, tipo: Option<String>) -> Result<String, AppError> {
     let tipo = tipo.unwrap_or_else(|| {
-        if mime.as_deref().is_some_and(|m| m.starts_with("image/")) {
+        if mime.is_some_and(|m| m.starts_with("image/")) {
             "imagen".into()
         } else {
             "archivo".into()
@@ -158,8 +162,51 @@ pub async fn upload_file(
     if !["imagen", "audio", "archivo"].contains(&tipo.as_str()) {
         return Err(AppError::Validation("tipo debe ser imagen, audio o archivo".into()));
     }
+    Ok(tipo)
+}
+
+/* [F5-PT] Persistencia de archivo en disco extraída de upload_file para
+acotar la longitud y permisos del manejador HTTP. */
+async fn persistir_archivo(
+    user_id: &Uuid,
+    nombre: &str,
+    bytes: &[u8],
+) -> Result<(Uuid, std::path::PathBuf), AppError> {
+    let file_id = Uuid::new_v4();
+    let dir = std::path::PathBuf::from("uploads").join(user_id.to_string());
+    tokio::fs::create_dir_all(&dir)
+        .await
+        .map_err(|error| AppError::Internal(format!("No se pudo crear el directorio de subida: {error}")))?;
+    let ext = std::path::Path::new(nombre)
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| format!(".{e}"))
+        .unwrap_or_default();
+    let ruta = dir.join(format!("{file_id}{ext}"));
+    tokio::fs::write(&ruta, bytes)
+        .await
+        .map_err(|error| AppError::Internal(format!("No se pudo guardar el archivo: {error}")))?;
+    Ok((file_id, ruta))
+}
+
+#[utoipa::path(
+    post,
+    tag = "storage",
+    path = "/api/storage/files",
+    responses((status = 201, description = "Adjunto subido", body = Attachment)),
+    security(("session_cookie" = []))
+)]
+pub async fn upload_file(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    multipart: Multipart,
+) -> Result<(StatusCode, Json<Attachment>), AppError> {
+    let campos = parsear_multipart(multipart).await?;
+    let bytes = campos.bytes.ok_or_else(|| AppError::BadRequest("Falta el campo file".into()))?;
+    let nombre = campos.nombre.ok_or_else(|| AppError::BadRequest("Archivo sin nombre".into()))?;
+    let tipo = tipo_inferido(campos.mime.as_deref(), campos.tipo)?;
     let tamano = i64::try_from(bytes.len()).unwrap_or(i64::MAX);
-    let mime = mime.unwrap_or_else(|| "application/octet-stream".into());
+    let mime = campos.mime.unwrap_or_else(|| "application/octet-stream".into());
     // Paridad con AdjuntosService::validarTipoMime (WP): solo tipos permitidos.
     if !crate::models::mime_permitido(&mime) {
         return Err(AppError::Validation(format!(
@@ -178,28 +225,14 @@ pub async fn upload_file(
     .then_some(())
     .ok_or_else(|| AppError::Conflict("No tienes espacio suficiente para este archivo".into()))?;
 
-    // Persistencia en disco bajo uploads/{user_id}/:id.
-    let file_id = Uuid::new_v4();
-    let dir = std::path::PathBuf::from("uploads").join(auth.user_id.to_string());
-    tokio::fs::create_dir_all(&dir)
-        .await
-        .map_err(|error| AppError::Internal(format!("No se pudo crear el directorio de subida: {error}")))?;
-    let ext = std::path::Path::new(&nombre)
-        .extension()
-        .and_then(|e| e.to_str())
-        .map(|e| format!(".{e}"))
-        .unwrap_or_default();
-    let ruta = dir.join(format!("{file_id}{ext}"));
-    tokio::fs::write(&ruta, &bytes)
-        .await
-        .map_err(|error| AppError::Internal(format!("No se pudo guardar el archivo: {error}")))?;
+    let (file_id, ruta) = persistir_archivo(&auth.user_id, &nombre, &bytes).await?;
 
     let row = crate::repositories::StorageRepository::create(
         &state.pool,
         file_id,
         auth.user_id,
-        entity_type.as_deref(),
-        entity_id,
+        campos.entity_type.as_deref(),
+        campos.entity_id,
         &nombre,
         &tipo,
         &mime,
