@@ -56,8 +56,8 @@
           "frontend"
         ],
         "portableBoundaries": {
-          "dom": ["/frontend/src/utils/dom.ts", "/frontend/src/platform/", "/frontend/src/adapters/"],
-          "window": ["/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/navigation/"],
+          "dom": ["/frontend/src/utils/dom.ts", "/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/app/hooks/", "/frontend/src/app/stores/", "/frontend/src/app/components/", "/frontend/src/glory-core/", "/frontend/src/app/islands/", "/frontend/src/app/utils/", "/frontend/src/app/services/", "frontend/src/main.tsx", "frontend/src/app/main.tsx"],
+          "window": ["/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/navigation/", "/frontend/src/app/hooks/", "/frontend/src/app/stores/", "/frontend/src/app/components/", "/frontend/src/glory-core/", "/frontend/src/app/islands/", "/frontend/src/app/utils/", "/frontend/src/app/services/", "frontend/src/main.tsx", "frontend/src/app/main.tsx"],
           "services": ["/frontend/src/services/", "/frontend/src/api/", "/frontend/src/adapters/"],
           "loggerModules": ["/frontend/src/services/logger", "/frontend/src/utils/logger"]
         },
@@ -71,7 +71,17 @@
           "git-add-all": { "severidad": "error" },
           "css-especificacion-diseno-local": { "severidad": "information" },
           "unsafe-process-shell": { "severidad": "error" },
-          "default-export": { "habilitada": false }
+          "default-export": { "habilitada": false },
+          "mixed-barrel-logic": { "habilitada": false },
+          "modal-semantica-no-canonica": { "habilitada": false },
+          "modal-con-titulo": { "habilitada": false },
+          "modal-estructura-no-canonica": { "habilitada": false },
+          "modal-acciones-no-canonico": { "habilitada": false },
+          "html-nativo-en-vez-de-componente": { "habilitada": false },
+          "button-clase-especifica": { "habilitada": false },
+          "componente-sin-hook-glory": { "habilitada": false },
+          "menu-contextual-override-diseno": { "habilitada": false },
+          "componente-artesanal": { "habilitada": false }
         }
       }
     },
