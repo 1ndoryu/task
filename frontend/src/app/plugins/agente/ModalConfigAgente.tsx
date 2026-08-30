@@ -1,6 +1,6 @@
 /* Configuración del agente: todos los valores se persisten y se envían al runtime. */
 import {useEffect, useState} from 'react';
-import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, Layers, Check, Plus, Trash2, Pencil, X} from 'lucide-react';
+import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, Layers, Check, Plus, X} from 'lucide-react';
 import {useAgenteStore} from './store';
 import {listarSkills, crearSkill, actualizarSkill, eliminarSkill} from './service';
 import type {ConfigAgente, SkillAgente} from './service';

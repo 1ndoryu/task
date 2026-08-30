@@ -17,7 +17,7 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
 import {obtenerDelCache, guardarEnCache, suscribirACambios} from '../services/actividadStore';
 import {obtenerFechaHoy} from '../utils/fecha';
-import {apiFetch, obtenerTokenCsrf} from '../utils/apiClient';
+import {obtenerTokenCsrf} from '../utils/apiClient';
 
 /* Tipos para el mapa de calor */
 export interface DatosHeatmap {

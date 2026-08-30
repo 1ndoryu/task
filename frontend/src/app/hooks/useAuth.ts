@@ -1,8 +1,4 @@
 import {useState, useCallback} from 'react';
-/* @ts-ignore - Módulo solo disponible en plataforma nativa Capacitor */
-import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
-import GoogleAuthNative from '../plugins/GoogleAuthNative';
-import {Capacitor} from '@capacitor/core';
 import {limpiarTodosLosDatosUsuario} from '../utils/limpiezaSesion';
 import {devLog} from '../utils/devLog';
 import {persistirPreferenciasAhora} from '../utils/preferenciasUsuario';

@@ -12,7 +12,7 @@ import {Modal} from '../shared/Modal';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import {obtenerInfoPanel} from '../shared/BarraPanelesOcultos';
 import {obtenerIdsPaneles, obtenerIdBase, panelPuedeMostrarse} from '../../config/registroPaneles';
-import {obtenerPluginsVisibles, obtenerTodosPlugins, obtenerPlugin} from '../../config/registroPlugins';
+import {obtenerPluginsVisibles, obtenerTodosPlugins} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 
