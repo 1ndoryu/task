@@ -30,6 +30,7 @@ use crate::agent::runtime::{
 use crate::services::ai::AiMessage;
 use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
+use crate::repositories::{AgenteRepository, TareaInsert};
 use crate::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -89,12 +90,11 @@ pub async fn agente_stream(
 
     /* Verificar propiedad de la conversación (nunca confiar en el front) y
      * leer su modo de operación (sección 9.2). */
-    let conversacion: Option<(Uuid, String, serde_json::Value)> = sqlx::query_as(
-        "SELECT id, modo, config FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
+    let conversacion: Option<(Uuid, String, serde_json::Value)> = AgenteRepository::buscar_conversacion(
+        &state.pool,
+        req.conversacionId,
+        auth.user_id,
     )
-    .bind(req.conversacionId)
-    .bind(auth.user_id)
-    .fetch_optional(&state.pool)
     .await?;
     let Some((_, modo, config_guardada)) = conversacion else {
         return Err(AppError::NotFound("Conversación no encontrada".into()));
@@ -340,16 +340,8 @@ pub async fn crear_conversacion(
     }
     let id = Uuid::new_v4();
     let config = req.config.unwrap_or_else(|| serde_json::json!({}));
-    sqlx::query(
-        "INSERT INTO agente_conversaciones (id, user_id, titulo, modo, config) VALUES ($1, $2, $3, $4, $5)",
-    )
-    .bind(id)
-    .bind(auth.user_id)
-    .bind(titulo)
-    .bind(&modo)
-    .bind(&config)
-    .execute(&state.pool)
-    .await?;
+    AgenteRepository::crear_conversacion(&state.pool, id, auth.user_id, titulo, &modo, &config)
+        .await?;
     Ok(Json(ConversacionResponse {
         id,
         titulo: titulo.to_string(),
@@ -363,13 +355,8 @@ pub async fn listar_conversaciones(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<Vec<ConversacionResponse>>, AppError> {
-    let filas: Vec<(Uuid, String, String, serde_json::Value)> = sqlx::query_as(
-        "SELECT id, titulo, modo, config FROM agente_conversaciones
-         WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT 50",
-    )
-    .bind(auth.user_id)
-    .fetch_all(&state.pool)
-    .await?;
+    let filas: Vec<(Uuid, String, String, serde_json::Value)> =
+        AgenteRepository::listar_conversaciones(&state.pool, auth.user_id).await?;
     Ok(Json(
         filas
             .into_iter()
@@ -396,17 +383,8 @@ pub async fn listar_mensajes_conversacion(
     Path(conversacion_id): Path<Uuid>,
 ) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
     /* Propiedad: nunca confiar en el front. */
-    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> = sqlx::query_as(
-        "SELECT m.id, m.rol, m.contenido, m.creado_en
-         FROM agente_mensajes m
-         JOIN agente_conversaciones c ON c.id = m.conversacion_id
-         WHERE m.conversacion_id = $1 AND c.user_id = $2
-         ORDER BY m.id ASC",
-    )
-    .bind(conversacion_id)
-    .bind(auth.user_id)
-    .fetch_all(&state.pool)
-    .await?;
+    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
+        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
     Ok(Json(
         filas
             .into_iter()
@@ -437,20 +415,13 @@ pub async fn renombrar_conversacion(
     if titulo.is_empty() || titulo.chars().count() > 255 {
         return Err(AppError::BadRequest("Título inválido".into()));
     }
-    let resultado = sqlx::query(
-        "UPDATE agente_conversaciones SET titulo = $1, actualizado_en = NOW()
-         WHERE id = $2 AND user_id = $3",
-    )
-    .bind(&titulo)
-    .bind(conversacion_id)
-    .bind(auth.user_id)
-    .execute(&state.pool)
-    .await?;
-    if resultado.rows_affected() == 0 {
+    let afectadas = AgenteRepository::renombrar(&state.pool, &titulo, conversacion_id, auth.user_id)
+        .await?;
+    if afectadas == 0 {
         return Err(AppError::NotFound("Conversación no encontrada".into()));
     }
-    let config: serde_json::Value = sqlx::query_scalar("SELECT config FROM agente_conversaciones WHERE id = $1 AND user_id = $2")
-        .bind(conversacion_id).bind(auth.user_id).fetch_one(&state.pool).await?;
+    let config: serde_json::Value =
+        AgenteRepository::cargar_config(&state.pool, conversacion_id, auth.user_id).await?;
     Ok(Json(ConversacionResponse { id: conversacion_id, titulo, modo: String::new(), config }))
 }
 
@@ -463,8 +434,8 @@ pub async fn guardar_config_conversacion(
     let config = req.get("config").cloned().unwrap_or_else(|| serde_json::json!({}));
     let json = serde_json::to_string(&config).map_err(|_| AppError::BadRequest("Configuración inválida".into()))?;
     if json.len() > 8000 { return Err(AppError::BadRequest("Configuración demasiado grande".into())); }
-    let fila: Option<(Uuid, String, String, serde_json::Value)> = sqlx::query_as("UPDATE agente_conversaciones SET config = $1, actualizado_en = NOW() WHERE id = $2 AND user_id = $3 RETURNING id, titulo, modo, config")
-        .bind(&config).bind(id).bind(auth.user_id).fetch_optional(&state.pool).await?;
+    let fila: Option<(Uuid, String, String, serde_json::Value)> =
+        AgenteRepository::actualizar_config(&state.pool, &config, id, auth.user_id).await?;
     let Some((id, titulo, modo, config)) = fila else { return Err(AppError::NotFound("Conversación no encontrada".into())); };
     Ok(Json(ConversacionResponse { id, titulo, modo, config }))
 }
@@ -475,14 +446,8 @@ pub async fn eliminar_conversacion(
     auth: AuthUser,
     Path(conversacion_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
-    let resultado = sqlx::query(
-        "DELETE FROM agente_conversaciones WHERE id = $1 AND user_id = $2",
-    )
-    .bind(conversacion_id)
-    .bind(auth.user_id)
-    .execute(&state.pool)
-    .await?;
-    if resultado.rows_affected() == 0 {
+    let afectadas = AgenteRepository::eliminar(&state.pool, conversacion_id, auth.user_id).await?;
+    if afectadas == 0 {
         return Err(AppError::NotFound("Conversación no encontrada".into()));
     }
     Ok(axum::http::StatusCode::NO_CONTENT)
@@ -542,14 +507,8 @@ pub async fn crear_tarea_programada(
             "Las tareas recurrentes requieren cron_expr (diario, cada{N}min, cada{N}h, cada{N}d)".into(),
         ));
     }
-    let activas: (i64,) = sqlx::query_as(
-        "SELECT COUNT(*) FROM agente_tareas_programadas
-         WHERE user_id = $1 AND estado IN ('pendiente', 'ejecutando', 'completada')",
-    )
-    .bind(auth.user_id)
-    .fetch_one(&state.pool)
-    .await?;
-    if activas.0 >= MAX_TAREAS_PROGRAMADAS {
+    let activas = AgenteRepository::contar_tareas_activas(&state.pool, auth.user_id).await?;
+    if activas >= MAX_TAREAS_PROGRAMADAS {
         return Err(AppError::Validation(format!(
             "Límite de tareas programadas alcanzado ({MAX_TAREAS_PROGRAMADAS})"
         )));
@@ -561,20 +520,19 @@ pub async fn crear_tarea_programada(
     } else {
         req.ejecutar_en
     };
-    sqlx::query(
-        "INSERT INTO agente_tareas_programadas
-         (id, user_id, nombre, prompt, tipo, cron_expr, ejecutar_en, proxima_ejecucion)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+    AgenteRepository::crear_tarea(
+        &state.pool,
+        &TareaInsert {
+            id,
+            user_id: auth.user_id,
+            nombre,
+            prompt,
+            tipo: &req.tipo,
+            cron_expr: req.cron_expr.as_deref(),
+            ejecutar_en: req.ejecutar_en,
+            proxima,
+        },
     )
-    .bind(id)
-    .bind(auth.user_id)
-    .bind(nombre)
-    .bind(prompt)
-    .bind(&req.tipo)
-    .bind(&req.cron_expr)
-    .bind(req.ejecutar_en)
-    .bind(proxima)
-    .execute(&state.pool)
     .await?;
 
     Ok(Json(TareaProgramadaResponse {
@@ -595,15 +553,7 @@ pub async fn listar_tareas_programadas(
     auth: AuthUser,
 ) -> Result<Json<Vec<TareaProgramadaResponse>>, AppError> {
     let filas: Vec<(Uuid, String, String, String, Option<String>, String, Option<chrono::DateTime<chrono::Utc>>, Option<String>)> =
-        sqlx::query_as(
-            "SELECT id, nombre, prompt, tipo, cron_expr, estado, proxima_ejecucion, result_summary
-             FROM agente_tareas_programadas
-             WHERE user_id = $1
-             ORDER BY creado_en DESC LIMIT 50",
-        )
-        .bind(auth.user_id)
-        .fetch_all(&state.pool)
-        .await?;
+        AgenteRepository::listar_tareas(&state.pool, auth.user_id).await?;
     Ok(Json(
         filas
             .into_iter()
@@ -631,14 +581,7 @@ pub async fn eliminar_tarea_programada(
     auth: AuthUser,
     axum::extract::Path(id): axum::extract::Path<Uuid>,
 ) -> Result<axum::http::StatusCode, AppError> {
-    let borrada = sqlx::query(
-        "DELETE FROM agente_tareas_programadas WHERE id = $1 AND user_id = $2",
-    )
-    .bind(id)
-    .bind(auth.user_id)
-    .execute(&state.pool)
-    .await?
-    .rows_affected();
+    let borrada = AgenteRepository::eliminar_tarea(&state.pool, id, auth.user_id).await?;
     if borrada == 0 {
         return Err(AppError::NotFound("Tarea programada no encontrada".into()));
     }
@@ -664,13 +607,8 @@ pub async fn listar_memoria(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<Vec<MemoriaResponse>>, AppError> {
-    let filas: Vec<(String, String)> = sqlx::query_as(
-        "SELECT clave, contenido FROM agente_memoria
-         WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT 200",
-    )
-    .bind(auth.user_id)
-    .fetch_all(&state.pool)
-    .await?;
+    let filas: Vec<(String, String)> =
+        AgenteRepository::listar_memoria(&state.pool, auth.user_id).await?;
     Ok(Json(
         filas.into_iter()
             .map(|(clave, contenido)| MemoriaResponse { clave, contenido })
@@ -692,17 +630,7 @@ pub async fn guardar_memoria(
     if contenido.is_empty() || contenido.chars().count() > 4000 {
         return Err(AppError::BadRequest("El contenido debe tener entre 1 y 4000 caracteres".into()));
     }
-    sqlx::query(
-        "INSERT INTO agente_memoria (user_id, clave, contenido)
-         VALUES ($1, $2, $3)
-         ON CONFLICT (user_id, clave)
-         DO UPDATE SET contenido = EXCLUDED.contenido, actualizado_en = NOW()",
-    )
-    .bind(auth.user_id)
-    .bind(clave)
-    .bind(contenido)
-    .execute(&state.pool)
-    .await?;
+    AgenteRepository::guardar_memoria(&state.pool, auth.user_id, clave, contenido).await?;
     Ok(Json(MemoriaResponse { clave: clave.into(), contenido: contenido.into() }))
 }
 
@@ -712,12 +640,7 @@ pub async fn eliminar_memoria(
     auth: AuthUser,
     axum::extract::Path(clave): axum::extract::Path<String>,
 ) -> Result<axum::http::StatusCode, AppError> {
-    let borrada = sqlx::query("DELETE FROM agente_memoria WHERE user_id = $1 AND clave = $2")
-        .bind(auth.user_id)
-        .bind(&clave)
-        .execute(&state.pool)
-        .await?
-        .rows_affected();
+    let borrada = AgenteRepository::eliminar_memoria(&state.pool, auth.user_id, &clave).await?;
     if borrada == 0 {
         return Err(AppError::NotFound("Entrada de memoria no encontrada".into()));
     }
@@ -770,13 +693,8 @@ pub async fn listar_skills(
     State(state): State<AppState>,
     auth: AuthUser,
 ) -> Result<Json<Vec<SkillResponse>>, AppError> {
-    let filas: Vec<(Uuid, String, String, bool)> = sqlx::query_as(
-        "SELECT id, nombre, descripcion, activa FROM agente_skills
-         WHERE user_id = $1 ORDER BY nombre LIMIT 200",
-    )
-    .bind(auth.user_id)
-    .fetch_all(&state.pool)
-    .await?;
+    let filas: Vec<(Uuid, String, String, bool)> =
+        AgenteRepository::listar_skills(&state.pool, auth.user_id).await?;
     Ok(Json(
         filas.into_iter()
             .map(|(id, nombre, descripcion, activa)| SkillResponse {
@@ -799,19 +717,9 @@ pub async fn crear_skill(
     let nombre = req.nombre.trim();
     let descripcion = req.descripcion.trim();
     validar_skill(nombre, descripcion)?;
-    let fila: (Uuid, String, String, bool) = sqlx::query_as(
-        "INSERT INTO agente_skills (user_id, nombre, descripcion, activa)
-         VALUES ($1, $2, $3, $4)
-         ON CONFLICT (user_id, nombre)
-         DO UPDATE SET descripcion = EXCLUDED.descripcion, activa = EXCLUDED.activa, actualizado_en = NOW()
-         RETURNING id, nombre, descripcion, activa",
-    )
-    .bind(auth.user_id)
-    .bind(nombre)
-    .bind(descripcion)
-    .bind(req.activa)
-    .fetch_one(&state.pool)
-    .await?;
+    let fila: (Uuid, String, String, bool) =
+        AgenteRepository::crear_skill(&state.pool, auth.user_id, nombre, descripcion, req.activa)
+            .await?;
     Ok(Json(fila_a_skill(fila)))
 }
 
@@ -822,29 +730,21 @@ pub async fn actualizar_skill(
     Path(id): Path<Uuid>,
     Json(req): Json<ActualizarSkillRequest>,
 ) -> Result<Json<SkillResponse>, AppError> {
-    let actual: (String, String, bool) = sqlx::query_as(
-        "SELECT nombre, descripcion, activa FROM agente_skills WHERE id = $1 AND user_id = $2",
-    )
-    .bind(id)
-    .bind(auth.user_id)
-    .fetch_optional(&state.pool)
-    .await?
-    .ok_or_else(|| AppError::NotFound("Skill no encontrada".into()))?;
+    let actual: (String, String, bool) = AgenteRepository::cargar_skill(&state.pool, id, auth.user_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound("Skill no encontrada".into()))?;
     let nombre = req.nombre.as_deref().unwrap_or(&actual.0).trim().to_string();
     let descripcion = req.descripcion.as_deref().unwrap_or(&actual.1).trim().to_string();
     let activa = req.activa.unwrap_or(actual.2);
     validar_skill(&nombre, &descripcion)?;
-    let fila: (Uuid, String, String, bool) = sqlx::query_as(
-        "UPDATE agente_skills SET nombre = $1, descripcion = $2, activa = $3, actualizado_en = NOW()
-         WHERE id = $4 AND user_id = $5
-         RETURNING id, nombre, descripcion, activa",
+    let fila: (Uuid, String, String, bool) = AgenteRepository::actualizar_skill(
+        &state.pool,
+        &nombre,
+        &descripcion,
+        activa,
+        id,
+        auth.user_id,
     )
-    .bind(&nombre)
-    .bind(&descripcion)
-    .bind(activa)
-    .bind(id)
-    .bind(auth.user_id)
-    .fetch_one(&state.pool)
     .await?;
     Ok(Json(fila_a_skill(fila)))
 }
@@ -855,12 +755,7 @@ pub async fn eliminar_skill(
     auth: AuthUser,
     Path(id): Path<Uuid>,
 ) -> Result<axum::http::StatusCode, AppError> {
-    let borrada = sqlx::query("DELETE FROM agente_skills WHERE id = $1 AND user_id = $2")
-        .bind(id)
-        .bind(auth.user_id)
-        .execute(&state.pool)
-        .await?
-        .rows_affected();
+    let borrada = AgenteRepository::eliminar_skill(&state.pool, id, auth.user_id).await?;
     if borrada == 0 {
         return Err(AppError::NotFound("Skill no encontrada".into()));
     }

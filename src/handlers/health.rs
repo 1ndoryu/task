@@ -5,6 +5,7 @@ use axum::{extract::State, Json, Router};
 use serde::Serialize;
 use utoipa::ToSchema;
 
+use crate::repositories::HealthRepository;
 use crate::AppState;
 
 #[derive(Serialize, ToSchema)]
@@ -42,8 +43,7 @@ pub async fn health_check() -> Json<HealthResponse> {
 pub async fn readiness_check(
     State(state): State<crate::AppState>,
 ) -> Result<Json<HealthResponse>, crate::errors::AppError> {
-    sqlx::query("SELECT 1")
-        .execute(&state.pool)
+    HealthRepository::ping(&state.pool)
         .await
         .map_err(|error| {
             tracing::error!(error = %error, "Readiness check de PostgreSQL falló");

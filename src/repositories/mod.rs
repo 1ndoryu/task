@@ -1,11 +1,13 @@
 mod activity;
 mod admin;
+mod agente;
 mod backup;
 mod escape;
 mod collaboration;
 mod dashboard;
 mod feedback;
 mod habit_history;
+mod health;
 mod note;
 mod notifications;
 mod productivity;
@@ -17,6 +19,8 @@ mod subscription;
 mod timeline;
 mod user;
 
+pub use agente::{AgenteRepository, TareaInsert};
+pub use health::HealthRepository;
 pub use activity::{
     ActivityCountRow, ActivityDetailParams, ActivityInsert, ActivityRepository, DerivedActivityRow,
 };
