@@ -19,19 +19,27 @@ import {PanelChatHistorial} from '../PanelChatHistorial';
 import {FormularioProyectoModerno} from './FormularioProyectoModerno';
 import {useModalProyecto} from '../../../hooks/dashboard/useModalProyecto';
 
-interface ModalProyectoProps {
+interface MpBase {
     estaAbierto: boolean;
     onCerrar: () => void;
     onGuardar: (datos: DatosNuevoProyecto) => void;
     proyecto?: Proyecto;
     participantes?: Participante[];
     companeros?: CompaneroEquipo[];
+}
+
+interface MpParticipantes {
     onAgregarParticipante?: (companeroId: number, rol: RolCompartido) => void;
     onRemoverParticipante?: (participanteId: number) => void;
     onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
+}
+
+interface MpTareas {
     tareas?: Tarea[];
     onToggleTarea?: (id: number) => void;
 }
+
+interface ModalProyectoProps extends MpBase, MpParticipantes, MpTareas {}
 
 export function ModalProyecto({estaAbierto, onCerrar, onGuardar, proyecto, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, tareas = [], onToggleTarea: _onToggleTarea}: ModalProyectoProps): JSX.Element | null {
     const {

@@ -45,20 +45,28 @@ interface ListaProyectosPropsBase {
     estaCompartido?: (proyectoId: number) => boolean;
 }
 
-interface ListaProyectosTareasProps {
+interface LptAcciones {
     onToggleTarea: (id: number) => void;
     onCrearTarea: (datos: DatosEdicionTarea) => void;
     onEditarTarea: (id: number, datos: DatosEdicionTarea) => void;
     onEliminarTarea: (id: number) => void;
     onReordenarTareas: (tareas: Tarea[]) => void;
+}
+
+interface LptPrefs {
     ocultarCompletados?: boolean;
     ocultarTareasCompletadas?: boolean;
     ordenDefecto?: 'nombre' | 'fecha' | 'prioridad';
     mostrarProgreso?: boolean;
     modoCompacto?: boolean;
+}
+
+interface LptCrear {
     /* Callback para abrir modal de creación rápida con proyecto preseleccionado */
     onAbrirModalCrear?: (proyectoId: number) => void;
 }
+
+interface ListaProyectosTareasProps extends LptAcciones, LptPrefs, LptCrear {}
 
 interface ListaProyectosProps extends ListaProyectosPropsBase, ListaProyectosTareasProps {}
 

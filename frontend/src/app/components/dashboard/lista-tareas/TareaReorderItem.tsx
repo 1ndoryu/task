@@ -9,20 +9,28 @@
 import {Reorder} from 'framer-motion';
 import type {Tarea} from '../../../types/dashboard';
 
-interface TareaReorderItemProps {
+interface TriDatos {
     tareaPadre: Tarea;
     subtareasVisibles: Tarea[];
     tareaArrastrandoId: number | null;
     esGestoSubtarea: boolean;
     UMBRAL_INDENT: number;
+}
+
+interface TriRefs {
     seArrastroRef: React.MutableRefObject<boolean>;
     dragStartXRef: React.MutableRefObject<number>;
     dragCurrentXRef: React.MutableRefObject<number>;
+}
+
+interface TriAcciones {
     setEsGestoSubtarea: (valor: boolean) => void;
     handleDragStart: (tareaId: number, evento: React.PointerEvent) => void;
     handleDragEnd: () => void;
     renderTareaItem: (tarea: Tarea, esSubtarea: boolean) => JSX.Element;
 }
+
+interface TareaReorderItemProps extends TriDatos, TriRefs, TriAcciones {}
 
 export function TareaReorderItem({
     tareaPadre,

@@ -11,12 +11,15 @@ import {ListaOrdenPaneles} from './ListaOrdenPaneles';
 import type {ModoColumnas, PanelId, OrdenPanel, TipoLayout} from '../../hooks/useConfiguracionLayout';
 import {useTema} from '../../hooks/useTema';
 
-interface ModalConfiguracionLayoutProps {
+interface MclEstado {
     estaAbierto: boolean;
     onCerrar: () => void;
     tipoLayout: TipoLayout;
     modoColumnas: ModoColumnas;
     ordenPaneles: OrdenPanel[];
+}
+
+interface MclAcciones {
     onCambiarTipoLayout: (tipo: TipoLayout) => void;
     onCambiarModo: (modo: ModoColumnas) => void;
     onMoverPanelArriba: (panelId: PanelId) => void;
@@ -25,6 +28,8 @@ interface ModalConfiguracionLayoutProps {
     onResetearOrden: () => void;
     onResetear: () => void;
 }
+
+interface ModalConfiguracionLayoutProps extends MclEstado, MclAcciones {}
 
 /* [18-08-2026] La visibilidad de paneles ya no vive en este modal: el botón
  * "Paneles" del encabezado abre un modal dedicado con todos los paneles

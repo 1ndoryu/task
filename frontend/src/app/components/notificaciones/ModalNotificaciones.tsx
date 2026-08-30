@@ -11,7 +11,7 @@ import type {Notificacion} from '../../types/dashboard';
 import {ItemNotificacion} from './ItemNotificacion';
 import {useModalNotificaciones} from '../../hooks/dashboard/useModalNotificaciones';
 
-interface ModalNotificacionesProps {
+interface MnnEstado {
     notificaciones: Notificacion[];
     noLeidas: number;
     total: number;
@@ -19,12 +19,17 @@ interface ModalNotificacionesProps {
     cargandoPrimeraVez: boolean;
     posicionX: number;
     posicionY: number;
+}
+
+interface MnnAcciones {
     onMarcarLeida: (id: number) => Promise<boolean>;
     onMarcarTodasLeidas: () => Promise<boolean>;
     onEliminar: (id: number) => Promise<boolean>;
     onClickNotificacion: (notificacion: Notificacion) => void;
     onCerrar: () => void;
 }
+
+interface ModalNotificacionesProps extends MnnEstado, MnnAcciones {}
 
 export function ModalNotificaciones({notificaciones, noLeidas, total: _total, cargando: _cargando, cargandoPrimeraVez, posicionX, posicionY, onMarcarLeida, onMarcarTodasLeidas, onEliminar, onClickNotificacion, onCerrar}: ModalNotificacionesProps): JSX.Element {
     const {modalRef, calcularEstilo, manejarClickNotificacion, mostrarCargando} = useModalNotificaciones({noLeidas, posicionX, posicionY, notificaciones, cargandoPrimeraVez, onMarcarLeida, onMarcarTodasLeidas, onClickNotificacion, onCerrar});
