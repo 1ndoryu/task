@@ -56,6 +56,9 @@ desktop.ini
 frontend/tsconfig.tsbuildinfo
 glory-rust-template.code-workspace
 .sentinel-report.md
+.sentinel/
+.quality-tools/
+.quality-reports/
 .cargo/config.toml
 
 # Artefactos de arranque del preview (Freebuff)

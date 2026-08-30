@@ -3,8 +3,8 @@
 > **Descripcion:** app de productividad personal (tareas, habitos, proyectos, notas) con backend Rust/Axum + PostgreSQL y el frontend React original como SPA.
 > **Objetivo de paridad:** todo lo que funcionaba en WordPress debe funcionar aqui — los dominios degradados se implementan hasta alcanzar paridad completa, no se descartan.
 > **Stack:** Rust (Axum, SQLx, utoipa/Orval) + React 18 (Zustand, Vite) + PostgreSQL.
-> **URL produccion:** pendiente de definir.
-> **Deploy:** Coolify / pendiente.
+> **URL produccion:** propuesta `https://task.wandori.us` (pendiente de autorización; el sitio legacy `task.nakomi.studio`/nakomi queda intacto).
+> **Deploy:** Coolify (plan `Agente/planes/plan-deploy-task-wandori-us-2026-08-27.md` — pendiente de autorización de push + escrituras remotas).
 > **Repositorio:** repo separado `task` (rama `main`), independiente de WANDORIUS.
 
 ## Estado
