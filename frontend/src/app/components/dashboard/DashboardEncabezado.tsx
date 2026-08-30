@@ -21,7 +21,7 @@ import {EncabezadoPerfil} from './encabezado/EncabezadoPerfil';
 import {EncabezadoBuscador} from './encabezado/EncabezadoBuscador';
 import {EncabezadoMenuMovil, EncabezadoOpcionesMovil} from './encabezado/EncabezadoMovil';
 
-interface DashboardEncabezadoProps {
+interface DashboardEncabezadoBase {
     titulo?: string;
     version?: string;
     usuario?: string;
@@ -31,7 +31,9 @@ interface DashboardEncabezadoProps {
     esAdmin?: boolean;
     equiposPendientes?: number;
     notificacionesPendientes?: number;
-    // Callbacks
+}
+
+interface DashboardEncabezadoAcciones {
     onClickPlan?: () => void;
     onClickSeguridad?: () => void;
     onClickAdmin?: () => void;
@@ -42,6 +44,9 @@ interface DashboardEncabezadoProps {
     onClickUsuario?: () => void;
     onClickEquipos?: () => void;
     onClickNotificaciones?: (evento?: React.MouseEvent) => void;
+}
+
+interface DashboardEncabezadoAccionesExtra {
     onClickExperimentos?: () => void;
     onClickTemas?: () => void;
     onClickConfigUsuario?: () => void;
@@ -51,7 +56,9 @@ interface DashboardEncabezadoProps {
     onClickFeedback?: () => void;
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
-    // Buscador
+}
+
+interface DashboardEncabezadoBuscador {
     tareas?: Tarea[];
     habitos?: Habito[];
     proyectos?: Proyecto[];
@@ -59,7 +66,9 @@ interface DashboardEncabezadoProps {
     onSeleccionarHabito?: (habito: Habito) => void;
     onSeleccionarProyecto?: (proyecto: Proyecto) => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
-    // Movil
+}
+
+interface DashboardEncabezadoMovil {
     opcionesMovil?: {
         titulo: string;
         grupos?: GrupoOpciones[];
@@ -68,11 +77,14 @@ interface DashboardEncabezadoProps {
     };
     paginaMovilActiva?: string;
     onCambiarPagina?: (pagina: string) => void;
+}
 
-    /* Selección Múltiple Móvil */
+interface DashboardEncabezadoSeleccion {
     modoSeleccionActivo?: boolean;
     onToggleSeleccion?: () => void;
 }
+
+interface DashboardEncabezadoProps extends DashboardEncabezadoBase, DashboardEncabezadoAcciones, DashboardEncabezadoAccionesExtra, DashboardEncabezadoBuscador, DashboardEncabezadoMovil, DashboardEncabezadoSeleccion {}
 
 export function DashboardEncabezado({
     titulo = APP_TEXTS.dashboard.titulo,

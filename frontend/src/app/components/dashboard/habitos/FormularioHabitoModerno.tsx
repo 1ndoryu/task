@@ -24,7 +24,7 @@ import {MapaCalorHabito} from '../../shared/MapaCalorHabito';
 import {ListaSubHabitos} from './ListaSubHabitos';
 import {ModalDependencias} from '../ModalDependencias';
 
-interface FormularioHabitoModernoProps {
+interface FormularioHabitoBasico {
     /* Campos principales */
     nombre: string;
     onNombreChange: (valor: string) => void;
@@ -34,6 +34,9 @@ interface FormularioHabitoModernoProps {
     icono?: string;
     colorIcono?: string;
     onIconoChange?: (icono: string, color: string) => void;
+}
+
+interface FormularioHabitoPropiedades {
     /* Propiedades */
     importancia: NivelImportancia;
     onImportanciaChange: (valor: NivelImportancia) => void;
@@ -46,6 +49,9 @@ interface FormularioHabitoModernoProps {
     /* Ventana de oportunidad - TAREA 4 */
     ventanaOportunidad?: VentanaOportunidad;
     onVentanaOportunidadChange?: (ventana: VentanaOportunidad | undefined) => void;
+}
+
+interface FormularioHabitoEdicion {
     /* Estado del dia (solo en modo edicion) */
     estadoHoy?: EstadoHabito;
     onEstadoChange?: (estado: EstadoHabito) => void;
@@ -58,13 +64,17 @@ interface FormularioHabitoModernoProps {
     errorNombre?: string;
     /* Si es true, el nombre no se puede modificar (hábito especial generado por plugin) */
     nombreBloqueado?: boolean;
-    /* SubHabitos: CRUD y toggle para hábitos anidados */
+}
+
+interface FormularioHabitoSubHabitos {
     onCrearSubHabito?: (datos: DatosNuevoSubHabito) => void;
     onEditarSubHabito?: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
     onEliminarSubHabito?: (subHabitoId: number) => void;
     onToggleSubHabito?: (subHabitoId: number) => void;
     onConfigurarSubHabito?: (subhabito: SubHabito) => void;
-    /* Dependencias condicionales */
+}
+
+interface FormularioHabitoDependencias {
     dependencias?: ReferenciaDependencia[];
     onDependenciasChange?: (dependencias: ReferenciaDependencia[]) => void;
     tareasParaDependencias?: Tarea[];
@@ -72,13 +82,22 @@ interface FormularioHabitoModernoProps {
     elementoId?: number;
     padreId?: number;
     tipoElemento?: 'habito' | 'subhabito';
+}
+
+interface FormularioHabitoGrupo {
     /* Grupo de ejecución (solo hábitos) */
     grupoEjecucion?: string | null;
     onGrupoEjecucionChange?: (grupo: string | null) => void;
+}
+
+interface FormularioHabitoSubActual {
     /* [217A-3] Subhábito actual (para mostrar mapa de calor en configuración de subhábito) */
     subHabito?: SubHabito | null;
     onMarcarDiaSubHabito?: (fecha: string, estado: EstadoHabito) => boolean;
     onDesmarcarDiaSubHabito?: (fecha: string) => boolean;
+}
+
+interface FormularioHabitoTareas {
     /* Tareas del hábito - Fase 14.8 (props requeridas por ModalHabito pero no usadas aquí) */
     tareasHabito?: Tarea[];
     onToggleTareaHabito?: (id: number) => void;
@@ -88,6 +107,8 @@ interface FormularioHabitoModernoProps {
     onReordenarTareasHabito?: (tareasIds: number[]) => void;
     onEditarTareaHabito?: (id: number, datos: DatosEdicionTarea) => void;
 }
+
+interface FormularioHabitoModernoProps extends FormularioHabitoBasico, FormularioHabitoPropiedades, FormularioHabitoEdicion, FormularioHabitoSubHabitos, FormularioHabitoDependencias, FormularioHabitoGrupo, FormularioHabitoSubActual, FormularioHabitoTareas {}
 
 export function FormularioHabitoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, importancia, onImportanciaChange, dificultad, onDificultadChange, frecuencia, onFrecuenciaChange, ventanaOportunidad, onVentanaOportunidadChange, estadoHoy, onEstadoChange, onPausarHabito, habito, modoEdicion = false, errorNombre, nombreBloqueado = false, onCrearSubHabito, onEditarSubHabito, onEliminarSubHabito, onToggleSubHabito, onConfigurarSubHabito, subHabito, onMarcarDiaSubHabito, onDesmarcarDiaSubHabito, dependencias = [], onDependenciasChange, tareasParaDependencias = [], habitosParaDependencias = [], padreId, tipoElemento = 'habito', grupoEjecucion, onGrupoEjecucionChange}: FormularioHabitoModernoProps): JSX.Element {
     const estaPausado = habito?.pausado ?? false;

@@ -22,7 +22,13 @@ interface OpcionFiltro {
     descripcion: string;
 }
 
-interface PanelEjecucionProps {
+interface PanelEjecucionOpcionesOrden {
+    id: string;
+    etiqueta: string;
+    descripcion: string;
+}
+
+interface PanelEjecucionDatos {
     tareas: Tarea[];
     proyectos: Proyecto[];
     proyectoIdActual?: number;
@@ -32,11 +38,17 @@ interface PanelEjecucionProps {
     ocultarSubtareasAutomaticamente?: boolean;
     /* ID del panel para persistir grupo activo */
     panelId?: string;
+}
+
+interface PanelEjecucionOrden {
     modoOrden: string;
     valorFiltroActual: string;
     opcionesFiltro: OpcionFiltro[];
-    opcionesOrdenTareas: Array<{id: string; etiqueta: string; descripcion: string}>;
+    opcionesOrdenTareas: PanelEjecucionOpcionesOrden[];
     esOrdenManual: boolean;
+}
+
+interface PanelEjecucionAccionesTarea {
     onAbrirModalNuevaTarea: (valoresIniciales?: {grupoEjecucion?: string | null}) => void;
     /* [207A-4] Callback para abrir modal de creación de hábito */
     onAbrirModalCrearHabito?: () => void;
@@ -48,11 +60,19 @@ interface PanelEjecucionProps {
     onReordenarTareas?: (tareas: Tarea[]) => void;
     onCambiarFiltro: (valor: string) => void;
     onCambiarModoOrden: (modo: string) => void;
+}
+
+interface PanelEjecucionTarea {
     onCompartirTarea: (tarea: Tarea) => void;
     estaCompartida: (id: number) => boolean;
     obtenerParticipantes: (tarea: Tarea) => Participante[];
     renderHandleArrastre: (titulo?: string) => JSX.Element;
     handleMinimizar: JSX.Element;
+    modoCompacto?: boolean;
+    onConfigurarTarea?: (tarea: Tarea) => void;
+}
+
+interface PanelEjecucionHabitos {
     /* Callbacks para hábitos - Sincronizado con TablaHabitos (Fase UI/UX) */
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
@@ -61,6 +81,9 @@ interface PanelEjecucionProps {
     onPosponerHabitoConTiempo?: (habitoId: number, hasta: string | null) => void;
     onPausarHabito?: (habitoId: number) => void;
     onActualizarHabito?: (habitoId: number, datos: Partial<Habito>) => void;
+}
+
+interface PanelEjecucionSubHabitos {
     /* [207A-3] Callbacks para subhábitos */
     onToggleSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
     onEliminarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
@@ -68,13 +91,16 @@ interface PanelEjecucionProps {
     onPosponerSubHabitoConTiempo?: (habitoPadreId: number, subHabitoId: number, hasta: string | null) => void;
     onActualizarSubHabito?: (habitoPadreId: number, subHabitoId: number, datos: Partial<Habito>) => void;
     onConfigurarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    modoCompacto?: boolean;
-    onConfigurarTarea?: (tarea: Tarea) => void;
     /* [218A-2] Callback para actualizar orden de hábitos desde drag */
     onReordenarHabitos?: (ordenes: Map<number, number>) => void;
+}
+
+interface PanelEjecucionExtras {
     onDividirPanel?: () => void;
     onCerrarPanel?: () => void;
 }
+
+interface PanelEjecucionProps extends PanelEjecucionDatos, PanelEjecucionOrden, PanelEjecucionAccionesTarea, PanelEjecucionTarea, PanelEjecucionHabitos, PanelEjecucionSubHabitos, PanelEjecucionExtras {}
 
 export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, ocultarSubtareasAutomaticamente = false, panelId, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalCrearHabito, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, modoCompacto = false, onConfigurarTarea, onReordenarHabitos, onDividirPanel, onCerrarPanel}: PanelEjecucionProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
