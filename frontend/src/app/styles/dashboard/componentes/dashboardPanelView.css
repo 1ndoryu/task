@@ -3,7 +3,7 @@
  */
 
 
-/* ===== CONTENEDOR PRINCIPAL ===== */
+/* CONTENEDOR PRINCIPAL */
 .dashboardPanelView {
     display: flex;
     flex-direction: column;
@@ -126,7 +126,7 @@
     min-height: 0;
 }
 
-/* ===== ESTADO VACÍO ===== */
+/* ESTADO VACÍO */
 .dashboardPanelVacio {
     display: flex;
     align-items: center;

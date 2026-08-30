@@ -140,7 +140,7 @@ export function DashboardSidebarGrid({paneles, ctx, anchos, alturaFilas, onQuita
     );
 }
 
-/* ===== CELDA INDIVIDUAL (sin resize propio) ===== */
+/* CELDA INDIVIDUAL (sin resize propio) */
 
 interface SidebarGridCellProps {
     panelId: PanelId;
@@ -178,7 +178,7 @@ function SidebarGridCell({panelId, ctx, onQuitar, indice, total, onMoverArriba, 
     );
 }
 
-/* ===== RESIZE HANDLE HORIZONTAL ===== */
+/* RESIZE HANDLE HORIZONTAL */
 
 interface ResizeHandleSidebarProps {
     anchos: [number, number];
@@ -203,7 +203,7 @@ function ResizeHandleSidebar({anchos, onAjustarAnchos}: ResizeHandleSidebarProps
     );
 }
 
-/* ===== RESIZE HANDLE VERTICAL (entre filas) ===== */
+/* RESIZE HANDLE VERTICAL (entre filas) */
 
 interface ResizeHandleRowProps {
     alturas: [number, number];
