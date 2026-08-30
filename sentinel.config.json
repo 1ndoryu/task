@@ -74,6 +74,7 @@
           "panic-produccion-rs": { "severidad": "error" },
           "git-add-all": { "severidad": "error" },
           "css-especificacion-diseno-local": { "severidad": "information" },
+          "console-production": { "severidad": "information" },
           "unsafe-process-shell": { "severidad": "error" },
           "default-export": { "habilitada": false },
           "mixed-barrel-logic": { "habilitada": false },
