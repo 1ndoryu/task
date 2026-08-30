@@ -19,8 +19,16 @@ import {BadgeInfo, BadgeGroup} from '../../shared/BadgeInfo';
 import {AccionesItem} from '../../shared/AccionesItem';
 import {HistorialHabitoInline} from '../../shared/HistorialHabito';
 
-interface FilaHabitoProps {
+/* FilaHabitoProps se divide en datos + acciones + dependencias vía extends. */
+interface FilaHabitoDatos {
     habito: Habito;
+    configuracion: ConfiguracionHabitos;
+    estiloGrid: React.CSSProperties;
+    tareas?: Tarea[];
+    habitos?: Habito[];
+}
+
+interface FilaHabitoAcciones {
     onToggle?: (id: number) => void;
     onEditar?: (habito: Habito) => void;
     onEliminar?: (id: number) => void;
@@ -29,11 +37,9 @@ interface FilaHabitoProps {
     onMarcarDia?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDia?: (habitoId: number, fecha: string) => void;
     onActualizar?: (id: number, datos: Partial<Habito>) => void;
-    configuracion: ConfiguracionHabitos;
-    estiloGrid: React.CSSProperties;
-    tareas?: Tarea[];
-    habitos?: Habito[];
 }
+
+interface FilaHabitoProps extends FilaHabitoDatos, FilaHabitoAcciones {}
 
 /* [H-F13-07] Prop `indice` eliminada: no se usaba en FilaHabito. */
 export function FilaHabito({habito, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid, tareas = [], habitos = []}: FilaHabitoProps): JSX.Element {

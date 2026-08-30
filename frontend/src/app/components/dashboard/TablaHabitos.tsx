@@ -19,10 +19,15 @@ import {FilaHabito} from './tabla-habitos/FilaHabito';
 import {FilaSubHabito} from './tabla-habitos/FilaSubHabito';
 import {EncabezadoTabla} from './tabla-habitos/EncabezadoTabla';
 
-interface TablaHabitosProps {
+/* TablaHabitosProps se divide en datos + callbacks + drag/orden vía extends. */
+interface TablaHabitosDatos {
     habitos: Habito[];
     tareas?: Tarea[];
     onAñadirHabito?: () => void;
+    configuracion?: ConfiguracionHabitos;
+}
+
+interface TablaHabitosAccionesHabito {
     onToggleHabito?: (id: number) => void;
     onEditarHabito?: (habito: Habito) => void;
     onEliminarHabito?: (id: number) => void;
@@ -31,15 +36,22 @@ interface TablaHabitosProps {
     onMarcarDiaHabito?: (habitoId: number, fecha: string, estado: 'completado' | 'pospuesto') => void;
     onDesmarcarDiaHabito?: (habitoId: number, fecha: string) => void;
     onActualizarHabito?: (id: number, datos: Partial<Habito>) => void;
-    /* [217A-5] Callbacks para subhábitos */
+}
+
+/* [217A-5] Callbacks para subhábitos */
+interface TablaHabitosAccionesSubHabito {
     onToggleSubHabito?: (habitoId: number, subHabitoId: number) => void;
     onConfigurarSubHabito?: (habitoId: number, subHabitoId: number) => void;
     onPosponerSubHabitoConTiempo?: (habitoId: number, subHabitoId: number, hasta: string | null) => void;
-    /* [218A-1] Drag & drop para orden manual */
+}
+
+/* [218A-1] Drag & drop para orden manual */
+interface TablaHabitosDrag {
     habilitarDrag?: boolean;
     onReordenarHabitos?: (habitos: Habito[]) => void;
-    configuracion?: ConfiguracionHabitos;
 }
+
+interface TablaHabitosProps extends TablaHabitosDatos, TablaHabitosAccionesHabito, TablaHabitosAccionesSubHabito, TablaHabitosDrag {}
 
 export function TablaHabitos({habitos, tareas = [], onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onPausarHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onActualizarHabito, onToggleSubHabito, onConfigurarSubHabito, onPosponerSubHabitoConTiempo, habilitarDrag = false, onReordenarHabitos, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
     const {habitosVisibles, habitosPausados, estiloGrid} = useTablaHabitos(habitos, configuracion);

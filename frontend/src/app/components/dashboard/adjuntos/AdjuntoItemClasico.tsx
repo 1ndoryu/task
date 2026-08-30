@@ -3,16 +3,21 @@ import type {Adjunto} from '../../../types/dashboard';
 import {formatBytes} from '../../../utils/formato';
 import {Boton} from '../../ui';
 
-interface AdjuntoItemClasicoProps {
+/* AdjuntoItemClasicoProps se divide en preview + audio + base vía extends. */
+interface AdjuntoItemClasicoBase {
     adjunto: Adjunto;
     onDelete: (id: string) => void;
-    // Preview
+}
+
+interface AdjuntoItemClasicoPreview {
     urlPreview: string | null;
     esCifrado: boolean;
     yaDescifrado: boolean;
     cargando: boolean;
     onPreviewClick: (adjunto: Adjunto) => void;
-    // Audio
+}
+
+interface AdjuntoItemClasicoAudio {
     isPlaying: boolean;
     progress: number;
     onToggleAudio: (id: string) => void;
@@ -20,6 +25,8 @@ interface AdjuntoItemClasicoProps {
     onTimeUpdate: (id: string) => void;
     onAudioEnded: (id: string) => void;
 }
+
+interface AdjuntoItemClasicoProps extends AdjuntoItemClasicoBase, AdjuntoItemClasicoPreview, AdjuntoItemClasicoAudio {}
 
 export function AdjuntoItemClasico({adjunto, onDelete, urlPreview, esCifrado, yaDescifrado, cargando, onPreviewClick, isPlaying, progress, onToggleAudio, audioRef, onTimeUpdate, onAudioEnded}: AdjuntoItemClasicoProps) {
     const sinPreview = !urlPreview && !yaDescifrado;

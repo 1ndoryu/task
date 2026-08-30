@@ -7,7 +7,8 @@ import type {InfoSuscripcion, SincronizacionInfo} from '../../../types/dashboard
 
 /* [233A-43] Props simplificadas: perfil, seguridad, backups, temas, mcp, plugins
  * ahora están en el modal de configuración global, no en el menú contextual */
-interface EncabezadoPerfilProps {
+/* EncabezadoPerfilProps se divide en contexto + callbacks vía extends. */
+interface EncabezadoPerfilContexto {
     usuario: string;
     version: string;
     avatarUrl?: string;
@@ -15,7 +16,9 @@ interface EncabezadoPerfilProps {
     estaConectado: boolean;
     esTablet: boolean;
     sincronizacion?: SincronizacionInfo;
+}
 
+interface EncabezadoPerfilAcciones {
     onClickConfigUsuario?: () => void;
     onClickVersion?: () => void;
     onClickPlan?: () => void;
@@ -23,6 +26,8 @@ interface EncabezadoPerfilProps {
     onExportarDatos?: () => void;
     onImportarDatos?: (archivo: File) => void;
 }
+
+interface EncabezadoPerfilProps extends EncabezadoPerfilContexto, EncabezadoPerfilAcciones {}
 
 export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, estaConectado, esTablet, sincronizacion, onClickConfigUsuario, onClickVersion, onClickPlan, onClickFeedback, onExportarDatos, onImportarDatos}: EncabezadoPerfilProps) {
     const [menuUsuario, setMenuUsuario] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});

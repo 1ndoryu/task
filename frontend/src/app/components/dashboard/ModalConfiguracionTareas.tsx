@@ -10,23 +10,31 @@ import {usePluginActivo} from '../../stores/pluginsStore';
 import {useGruposTareasStore} from '../../stores/gruposTareasStore';
 import {useShallow} from 'zustand/react/shallow';
 
-interface ModalConfiguracionTareasProps {
+interface MctModalBase {
     estaAbierto: boolean;
     onCerrar: () => void;
     configuracion: ConfiguracionTareas;
+}
+
+interface MctTogglesVisibilidad {
     onToggleCompletadas: () => void;
     onToggleBadgeProyecto: () => void;
     onToggleEliminarCompletadas: () => void;
-    onToggleEstilos?: () => void;
     onToggleMostrarHabitos: () => void;
     onToggleModoCompacto: () => void;
     onToggleOcultarSubtareas: () => void;
     onToggleIgnorarUrgencia: () => void;
+}
+
+interface MctTogglesBadges {
+    onToggleEstilos?: () => void;
     /* [28-08-2026] Badges globales del panel. */
     onToggleBadgeUrgencia: () => void;
     onToggleBadgeImportancia: () => void;
     onToggleBadgeDificultad: () => void;
 }
+
+interface ModalConfiguracionTareasProps extends MctModalBase, MctTogglesVisibilidad, MctTogglesBadges {}
 
 export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas, onToggleIgnorarUrgencia, onToggleBadgeUrgencia, onToggleBadgeImportancia, onToggleBadgeDificultad}: ModalConfiguracionTareasProps): JSX.Element {
     const {seccionesActivas: _seccionesActivas, toggleSecciones: _toggleSecciones, ordenamientoGrupos: _ordenamientoGrupos, setOrdenamientoGrupos: _setOrdenamientoGrupos} = useGruposTareasStore(useShallow(s => ({seccionesActivas: s.seccionesActivas, toggleSecciones: s.toggleSecciones, ordenamientoGrupos: s.ordenamientoGrupos, setOrdenamientoGrupos: s.setOrdenamientoGrupos})));

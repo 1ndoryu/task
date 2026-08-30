@@ -23,13 +23,16 @@ import {useHabitosStore} from '../../stores/habitosStore';
 
 type DatosFormulario = DatosNuevoHabito;
 
-interface ModalHabitoProps {
+interface MhModalBase {
     estaAbierto: boolean;
     onCerrar: () => void;
     onGuardar: (datos: DatosFormulario) => void;
     onPausarHabito?: (id: number) => void;
     habito?: Habito;
     participantes?: Participante[];
+}
+
+interface MhTareas {
     /* Tareas del hábito - Fase 14.8 */
     tareas?: Tarea[];
     onToggleTarea?: (id: number) => void;
@@ -38,12 +41,17 @@ interface ModalHabitoProps {
     onConfigurarTarea?: (tarea: Tarea) => void;
     onActualizarOrdenTareasHabito?: (habitoId: number, tareasIds: number[]) => void;
     onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
+}
+
+interface MhSubHabitos {
     /* [217A-2c] Unificación: subhábitos se editan con el mismo modal */
     subHabito?: SubHabito | null;
     habitoPadre?: Habito | null;
     /** ⚙️ en lista de subhábitos → abrir ModalHabito para ese subhábito */
     onConfigurarSubHabito?: (subhabito: SubHabito) => void;
 }
+
+interface ModalHabitoProps extends MhModalBase, MhTareas, MhSubHabitos {}
 
 export function ModalHabito({estaAbierto, onCerrar, onGuardar, onPausarHabito, habito, participantes = [], tareas = [], onToggleTarea, onCrearTarea, onEliminarTarea, onConfigurarTarea, onActualizarOrdenTareasHabito, onEditarTarea, subHabito, habitoPadre, onConfigurarSubHabito}: ModalHabitoProps): JSX.Element | null {
     const habitos = useHabitosStore(state => state.habitos);

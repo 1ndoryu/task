@@ -4,14 +4,17 @@ import {IndicadorPlan, MenuContextual} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
 
-interface EncabezadoAccionesProps {
+/* EncabezadoAccionesProps se divide en contexto + callbacks vía extends. */
+interface EncabezadoAccionesContexto {
     suscripcion?: InfoSuscripcion | null;
     esAdmin?: boolean;
     equiposPendientes?: number;
     notificacionesPendientes?: number;
     estaConectado: boolean;
     esTablet: boolean;
+}
 
+interface EncabezadoAccionesAcciones {
     onClickPlan?: () => void;
     onClickLayout?: () => void;
     /* [18-08-2026] Botón de gestión de paneles (modal activar/desactivar) */
@@ -22,6 +25,8 @@ interface EncabezadoAccionesProps {
     onClickEquipos?: () => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
 }
+
+interface EncabezadoAccionesProps extends EncabezadoAccionesContexto, EncabezadoAccionesAcciones {}
 
 export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
     const [menuCrear, setMenuCrear] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});

@@ -31,7 +31,8 @@ function obtenerClasePrioridad(prioridad: string): string {
     }
 }
 
-interface ListaProyectosProps {
+/* ListaProyectosProps y ProyectoItemProps se dividen en fragmentos vía extends. */
+interface ListaProyectosPropsBase {
     proyectos: Proyecto[];
     tareas: Tarea[];
     onCrearProyecto: () => void;
@@ -42,6 +43,9 @@ interface ListaProyectosProps {
     onCambiarEstadoProyecto?: (id: number, estado: 'activo' | 'completado' | 'pausado') => void;
     onCompartirProyecto?: (proyecto: Proyecto) => void;
     estaCompartido?: (proyectoId: number) => boolean;
+}
+
+interface ListaProyectosTareasProps {
     onToggleTarea: (id: number) => void;
     onCrearTarea: (datos: DatosEdicionTarea) => void;
     onEditarTarea: (id: number, datos: DatosEdicionTarea) => void;
@@ -56,7 +60,9 @@ interface ListaProyectosProps {
     onAbrirModalCrear?: (proyectoId: number) => void;
 }
 
-interface ProyectoItemProps {
+interface ListaProyectosProps extends ListaProyectosPropsBase, ListaProyectosTareasProps {}
+
+interface ProyectoItemBaseProps {
     proyecto: Proyecto;
     activo: boolean;
     tareasProyecto: Tarea[];
@@ -65,6 +71,9 @@ interface ProyectoItemProps {
     onEditar?: () => void;
     onEliminar?: () => void;
     onContextMenu?: (e: React.MouseEvent) => void;
+}
+
+interface ProyectoItemTareasProps {
     onToggleTarea: (id: number) => void;
     onCrearTarea: (datos: DatosEdicionTarea) => void;
     onEditarTarea: (id: number, datos: DatosEdicionTarea) => void;
@@ -77,6 +86,8 @@ interface ProyectoItemProps {
     /* Callback para abrir modal de creación rápida con proyecto preseleccionado */
     onAbrirModalCrear?: () => void;
 }
+
+interface ProyectoItemProps extends ProyectoItemBaseProps, ProyectoItemTareasProps {}
 
 function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false, onToggle, onEditar, onEliminar, onContextMenu, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, mostrarProgreso = true, ocultarTareasCompletadas = false, ordenDefecto = 'fecha', modoCompacto = false, onAbrirModalCrear}: ProyectoItemProps): JSX.Element {
     const [mostrarAcciones, setMostrarAcciones] = useState(false);
