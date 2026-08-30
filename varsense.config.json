@@ -48,5 +48,28 @@
       "currentColor",
       "none"
     ]
+  },
+  "inlineDetection": {
+    "enabled": true,
+    "severity": "warning"
+  },
+  "tokenDetection": {
+    "duplicate": {
+      "enabled": true,
+      "severity": "warning"
+    },
+    "unused": {
+      "enabled": true,
+      "severity": "warning"
+    }
+  },
+  "bannedProperties": {
+    "enabled": true,
+    "severity": "warning",
+    "properties": []
+  },
+  "orphanClassDetection": {
+    "minClassLength": 3,
+    "excludeClassPatterns": []
   }
 }
