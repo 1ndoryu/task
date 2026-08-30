@@ -27,6 +27,7 @@ use crate::agent::runtime::{
     cargar_historial, cargar_memoria_agente, cargar_skills_agente, guardar_mensaje_usuario,
     persistir_turno, AgenteEvento, AgentRuntime, TurnoConfig,
 };
+use crate::services::ai::AiMessage;
 use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
 use crate::AppState;
@@ -104,83 +105,29 @@ pub async fn agente_stream(
     /* Glory/commandcode es política del servidor. Los parámetros avanzados se
      * toman de la conversación; el request solo conserva compatibilidad con
      * clientes antiguos y no puede cambiar proveedor/modelo. */
-    let defaults = TurnoConfig::default();
-    let config = config_guardada;
-    let runtime = AgentRuntime::nuevo(TurnoConfig {
-        provider: "glory".into(),
-        modelo: "commandcode".into(),
-        temperatura: config.get("temperatura").and_then(serde_json::Value::as_f64).unwrap_or(defaults.temperatura as f64).clamp(0.0, 2.0) as f32,
-        max_tokens: config.get("max_tokens").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_tokens as u64).clamp(64, 4096) as u32,
-        idioma: validar_idioma(config.get("idioma").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        incluir_notas: config.get("incluir_notas").and_then(serde_json::Value::as_bool).unwrap_or(false),
-        incluir_tareas_completadas: config.get("incluir_tareas_completadas").and_then(serde_json::Value::as_bool).unwrap_or(false),
-        incluir_habitos_pausados: config.get("incluir_habitos_pausados").and_then(serde_json::Value::as_bool).unwrap_or(false),
-        permitir_busqueda_web: config.get("permitir_busqueda_web").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        permitir_recordatorios: config.get("permitir_recordatorios").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        prompt_sistema: validar_prompt_sistema(config.get("prompt_sistema").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        incluir_memoria: config.get("incluir_memoria").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        incluir_skills: config.get("incluir_skills").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        max_turns: config.get("max_turns").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_turns as u64).clamp(1, 10) as usize,
-        timeout_tool: std::time::Duration::from_secs(config.get("timeout_tool_secs").and_then(serde_json::Value::as_u64).unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
-        /* [02-09-2026] Fase 5: estilo, preferencias, workspace (solo local) y
-         * ventana/umbral de compactación vienen de la config de la conversación. */
-        estilo: validar_estilo(config.get("estilo").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        preferencias: validar_preferencias(config.get("preferencias").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        workspace: config.get("workspace").and_then(serde_json::Value::as_str).map(str::trim).filter(|w| !w.is_empty()).map(str::to_owned),
-        contexto: ContextoConfig {
-            max_ventana: config.get("max_ventana").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.max_ventana as u64).clamp(8_192, 512_000) as u32,
-            reserva_salida: config.get("reserva_salida").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.reserva_salida as u64).clamp(1_024, 64_000) as u32,
-            umbral: config.get("umbral_compactacion").and_then(serde_json::Value::as_f64).unwrap_or(defaults.contexto.umbral as f64).clamp(0.1, 0.9) as f32,
-            ..defaults.contexto.clone()
-        },
-        modo,
-        ..defaults
-    });
+    let runtime = AgentRuntime::nuevo(config_desde_guardada(config_guardada, modo)?);
 
     /* Persistir el turno como ejecutando y el mensaje del usuario ANTES de
      * arrancar (recuperación de fallos). */
-    persistir_turno(
+    persistir_turno_y_mensaje(
         &state,
         turno_id,
         auth.user_id,
-        "ejecutando",
-        &req.mensaje,
+        &req,
         &runtime.turno_config.provider,
         &runtime.turno_config.modelo,
-        0,
-        0,
-        0,
-        0,
-        None,
-    )
-    .await?;
-    guardar_mensaje_usuario(
-        &state.pool,
-        req.conversacionId,
-        auth.user_id,
-        &req.mensaje,
-        req.clave_idempotencia,
     )
     .await?;
 
     let mut historial = cargar_historial(&state.pool, req.conversacionId, auth.user_id).await?;
-    /* [29-08-2026] Fase 3 (memoria v1): inyectar la memoria persistente del
-     * usuario como mensajes system al inicio del historial (tras el
-     * SYSTEM_PROMPT) para que el agente recuerde preferencias/lecciones. */
-    if runtime.turno_config.incluir_memoria {
-        let memoria = cargar_memoria_agente(&state.pool, auth.user_id, 50).await?;
-        historial.splice(0..0, memoria);
-    }
-    /* [31-08-2026] Fase 3 (skills v1): inyectar las skills activas como
-     * contexto system y emitir el evento observable de cuántas entraron. */
-    if runtime.turno_config.incluir_skills {
-        let skills = cargar_skills_agente(&state.pool, auth.user_id, 20).await?;
-        let cantidad = skills.len();
-        if cantidad > 0 {
-            let _ = tx.send(AgenteEvento::Contexto { skills: cantidad }).await;
-            historial.splice(0..0, skills);
-        }
-    }
+    inyectar_contexto(
+        &state.pool,
+        auth.user_id,
+        &runtime.turno_config,
+        &tx,
+        &mut historial,
+    )
+    .await?;
     let state_clone = state.clone();
     let tx_clone = tx.clone();
     let mensaje = req.mensaje.clone();
@@ -259,6 +206,114 @@ pub struct ConversacionResponse {
     pub titulo: String,
     pub modo: String,
     pub config: serde_json::Value,
+}
+
+/* Mapea la config_guardada (serde_json) de una conversación a TurnoConfig
+ * con validaciones y defaults. Extraída de agente_stream para acortarla
+ * (funcion-larga-rs). Glory/commandcode son política del servidor. */
+fn config_desde_guardada(
+    config: serde_json::Value,
+    modo: String,
+) -> Result<TurnoConfig, AppError> {
+    let defaults = TurnoConfig::default();
+    Ok(TurnoConfig {
+        provider: "glory".into(),
+        modelo: "commandcode".into(),
+        temperatura: config.get("temperatura").and_then(serde_json::Value::as_f64).unwrap_or(defaults.temperatura as f64).clamp(0.0, 2.0) as f32,
+        max_tokens: config.get("max_tokens").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_tokens as u64).clamp(64, 4096) as u32,
+        idioma: validar_idioma(config.get("idioma").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        incluir_notas: config.get("incluir_notas").and_then(serde_json::Value::as_bool).unwrap_or(false),
+        incluir_tareas_completadas: config.get("incluir_tareas_completadas").and_then(serde_json::Value::as_bool).unwrap_or(false),
+        incluir_habitos_pausados: config.get("incluir_habitos_pausados").and_then(serde_json::Value::as_bool).unwrap_or(false),
+        permitir_busqueda_web: config.get("permitir_busqueda_web").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        permitir_recordatorios: config.get("permitir_recordatorios").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        prompt_sistema: validar_prompt_sistema(config.get("prompt_sistema").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        incluir_memoria: config.get("incluir_memoria").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        incluir_skills: config.get("incluir_skills").and_then(serde_json::Value::as_bool).unwrap_or(true),
+        max_turns: config.get("max_turns").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_turns as u64).clamp(1, 10) as usize,
+        timeout_tool: std::time::Duration::from_secs(config.get("timeout_tool_secs").and_then(serde_json::Value::as_u64).unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
+        /* [02-09-2026] Fase 5: estilo, preferencias, workspace (solo local) y
+         * ventana/umbral de compactación vienen de la config de la conversación. */
+        estilo: validar_estilo(config.get("estilo").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        preferencias: validar_preferencias(config.get("preferencias").and_then(serde_json::Value::as_str).map(str::to_owned))?,
+        workspace: config.get("workspace").and_then(serde_json::Value::as_str).map(str::trim).filter(|w| !w.is_empty()).map(str::to_owned),
+        contexto: ContextoConfig {
+            max_ventana: config.get("max_ventana").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.max_ventana as u64).clamp(8_192, 512_000) as u32,
+            reserva_salida: config.get("reserva_salida").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.reserva_salida as u64).clamp(1_024, 64_000) as u32,
+            umbral: config.get("umbral_compactacion").and_then(serde_json::Value::as_f64).unwrap_or(defaults.contexto.umbral as f64).clamp(0.1, 0.9) as f32,
+            ..defaults.contexto.clone()
+        },
+        modo,
+        ..defaults
+    })
+}
+
+/* [memoria/skills] Inyecta la memoria persistente y las skills activas como
+ * contexto system al inicio del historial, si el turno las tiene habilitadas;
+ * emite el evento observable de cuántas skills entraron. Extraída de
+ * agente_stream para acortarla (funcion-larga-rs). */
+async fn inyectar_contexto(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+    turno: &TurnoConfig,
+    tx: &mpsc::Sender<AgenteEvento>,
+    historial: &mut Vec<AiMessage>,
+) -> Result<(), AppError> {
+    /* [29-08-2026] Fase 3 (memoria v1): inyectar la memoria persistente del
+     * usuario como mensajes system al inicio del historial (tras el
+     * SYSTEM_PROMPT) para que el agente recuerde preferencias/lecciones. */
+    if turno.incluir_memoria {
+        let memoria = cargar_memoria_agente(pool, user_id, 50).await?;
+        historial.splice(0..0, memoria);
+    }
+    /* [31-08-2026] Fase 3 (skills v1): inyectar las skills activas como
+     * contexto system y emitir el evento observable de cuántas entraron. */
+    if turno.incluir_skills {
+        let skills = cargar_skills_agente(pool, user_id, 20).await?;
+        let cantidad = skills.len();
+        if cantidad > 0 {
+            let _ = tx.send(AgenteEvento::Contexto { skills: cantidad }).await;
+            historial.splice(0..0, skills);
+        }
+    }
+    Ok(())
+}
+
+/* Persiste el turno (estado ejecutando) y el mensaje del usuario ANTES de
+ * arrancar el loop, para recuperación de fallos. Extraída de agente_stream
+ * para acortarla (funcion-larga-rs). */
+async fn persistir_turno_y_mensaje(
+    state: &AppState,
+    turno_id: Uuid,
+    user_id: Uuid,
+    req: &AgenteStreamRequest,
+    proveedor: &str,
+    modelo: &str,
+) -> Result<(), AppError> {
+    persistir_turno(
+        state,
+        turno_id,
+        user_id,
+        "ejecutando",
+        &req.mensaje,
+        proveedor,
+        modelo,
+        0,
+        0,
+        0,
+        0,
+        None,
+    )
+    .await?;
+    guardar_mensaje_usuario(
+        &state.pool,
+        req.conversacionId,
+        user_id,
+        &req.mensaje,
+        req.clave_idempotencia,
+    )
+    .await?;
+    Ok(())
 }
 
 /// Crea una conversación del agente para el usuario (Fase 0: el front abre
