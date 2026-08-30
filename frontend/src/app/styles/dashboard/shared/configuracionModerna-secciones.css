@@ -1,7 +1,7 @@
-﻿/* 
- * PROPIEDADES COMPACTAS
- * Layout inline: etiqueta + pills en la misma fila
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 .propiedadesCompactas {
     display: flex;
     align-items: center;

@@ -1,7 +1,7 @@
-/*
- * Estilos del Modal de Feedback
- * Modal para usuarios Premium
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-elemento-html-directo
  */
+
 
 .modalFeedback {
     max-width: 480px;

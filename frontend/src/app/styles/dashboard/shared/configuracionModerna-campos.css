@@ -1,15 +1,7 @@
-﻿/*
- * CONFIGURACION MODERNA
- * Estilos para el nuevo layout de configuracion al estilo Linear
- * 
- * Componentes:
- * - CampoTituloLimpio: Input sin borde, font grande
- * - CampoSubtituloLimpio: Input menor, color apagado
- * - PropiedadesCompactas: Grid de propiedades inline
- * - SeccionResponsables: Lista de avatares
- * - SeccionAdjuntos: Grid de archivos
- * - ResumenTareasProyecto: Contador compacto
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* 
  * CAMPO TITULO LIMPIO

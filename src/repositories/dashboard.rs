@@ -1,3 +1,5 @@
+// sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro
+// [por que] sqlx sin feature "macros" ni DB en compile-time: query! rompe el build.
 //! Repositorio del dashboard.
 //! [H-B03-01] `DashboardRepository` quedó como orquestación + API pública:
 //! las consultas SQL viven en `dashboard/lectura.rs` y la proyección a JSON en

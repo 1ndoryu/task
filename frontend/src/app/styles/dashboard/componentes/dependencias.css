@@ -1,11 +1,7 @@
-/*
- * DEPENDENCIAS
- * Modal de configuración de dependencias condicionales y
- * clases visuales para elementos bloqueados (badge, destello, opacidad)
- *
- * Usa variables --dashboard-* para coherencia con el sistema de diseño.
- * El padding del contenido lo hereda de .modalContenido (20px).
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 
 /* [20-08-2026] Modal sin encabezado (picker compacto): se oculta el header

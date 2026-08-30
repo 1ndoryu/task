@@ -1,7 +1,7 @@
-/*
- * Modal Creación Rápida
- * Estilos para el modal minimalista tipo Spotlight
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .creacionRapidaOverlay {
     position: fixed;

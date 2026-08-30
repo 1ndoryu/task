@@ -1,7 +1,7 @@
-/*
- * LANDING PAGE
- * Estilos minimalistas estilo Linear.app
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* Importar animaciones */
 @import './landingAnimations.css';

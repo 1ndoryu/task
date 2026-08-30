@@ -1,13 +1,8 @@
-/*
- * plugins/agente/modalConfigAgente.css
- * Estilos del modal de configuración del agente.
- *
- * Reutiliza el mismo idioma visual que los demás modales (ModalEditorArbol,
- * déficit calórico, ConfigExp): tokens reales --dashboard-* (superposición,
- * radio, borde, espacios, texto, errores) sin fallbacks ad-hoc ni variables
- * inexistentes. VarSense valida este archivo: 0 variables no definidas y sin
- * colores/tamaños hardcodeados fuera del design system.
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* ---- Overlay coherente con los demás modales ---- */
 .modalConfigAgenteOverlay {

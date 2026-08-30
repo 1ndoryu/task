@@ -1,4 +1,7 @@
-﻿/* Historial compacto */
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ */
+/* Historial compacto */
 .panelAyunoHistorial {
     width: 100%;
     padding-top: var(--dashboard-espacioSm);

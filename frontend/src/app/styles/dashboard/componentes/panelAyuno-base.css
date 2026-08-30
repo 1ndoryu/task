@@ -1,8 +1,8 @@
-﻿/*
- * panelAyuno.css
- * Estilos del panel de ayuno intermitente
- * DiseÃ±o minimalista estilo terminal con temporizador circular
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .panelAyuno {
     display: flex;

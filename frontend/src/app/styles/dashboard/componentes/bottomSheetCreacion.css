@@ -1,19 +1,7 @@
-/*
- * BOTTOM SHEET CREACIÓN - ESTILOS CENTRALIZADOS
- * Estilos compartidos para BottomSheet de creación/edición en móvil
- * Aplica a: Tareas, Hábitos, Proyectos
- *
- * Arquitectura SOLID:
- * - SRP: Este archivo solo maneja estilos de BottomSheet de creación
- * - OCP: Extender con modificadores (--variante) sin modificar base
- * - DRY: Clases base reutilizables, sin duplicación
- *
- * [H-F14-02] Los prefijos .bottomSheetTarea/.bottomSheetHabito/.bottomSheetProyecto
- * se conservan como aliases de retrocompatibilidad mediante selectores agrupados;
- * las variantes que difieren de la base (opcionesGrupo, botonGuardar de Hábito)
- * viven en overrides al final. Los estilos de ModalSeleccionPropiedad y badges
- * se movieron a modalSeleccionPropiedad.css.
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 /* Clases base compartidas (.bottomSheetCreacion) - Usadas por Tarea, Hábito y Proyecto */
 

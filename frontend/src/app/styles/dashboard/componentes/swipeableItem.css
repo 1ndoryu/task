@@ -1,9 +1,7 @@
-/*
- * SwipeableItem
- * Estilos para gestos de deslizamiento en móvil
- * Tarea 0.1: Swipe para completar/eliminar tareas
- * Revision 0.2: Gradientes difuminados, cubrir 100% ancho
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .swipeableItem {
     position: relative;

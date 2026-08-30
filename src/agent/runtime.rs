@@ -1,3 +1,6 @@
+// sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro
+// [por que] sqlx sin feature "macros" ni DB en compile-time (sin cache .sqlx
+// ni DATABASE_URL de build): convertir a query!/query_as! rompe el build.
 /* [29-08-2026] Runtime del agente (plan-agente-ia-plugin, Fase 1).
  * Loop LLM → tools → LLM con: límite de turns (10), timeout por tool,
  * fallo parcial como resultado de tool (no aborta el turno), cancelación

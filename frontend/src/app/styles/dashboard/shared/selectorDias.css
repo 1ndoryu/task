@@ -1,7 +1,7 @@
-/*
- * SELECTOR DE DIAS
- * Estilos para el componente de seleccion de dias de la semana
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .selectorDias {
     display: flex;

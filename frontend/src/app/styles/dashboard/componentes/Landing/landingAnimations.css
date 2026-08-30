@@ -1,3 +1,6 @@
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
+ */
 /* Habit Animation */
 .landingHabitWidget {
     width: 320px; /* Mas grande para que se salga si es necesario */

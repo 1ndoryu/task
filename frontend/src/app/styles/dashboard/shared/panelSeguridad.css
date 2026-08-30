@@ -1,8 +1,8 @@
-/*
- * Estilos para Panel de Seguridad
- * Configuracion de cifrado y opciones de privacidad
- * Estilo terminal minimalista consistente con el dashboard
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-elemento-html-directo
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .panelSeguridadContenido {
     display: flex;

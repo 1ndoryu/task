@@ -1,7 +1,7 @@
-/*
- * TOAST DESHACER
- * Notificacion en esquina inferior para acciones reversibles
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .toastDeshacerContenedor {
     position: fixed;

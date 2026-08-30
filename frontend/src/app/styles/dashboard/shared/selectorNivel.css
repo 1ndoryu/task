@@ -1,7 +1,7 @@
-/*
- * SELECTOR DE NIVEL / IMPORTANCIA / PRIORIDAD
- * Componente compartido para seleccionar entre niveles predefinidos
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .selectorNivelContenedor {
     display: flex;

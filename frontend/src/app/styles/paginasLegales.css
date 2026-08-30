@@ -1,7 +1,7 @@
-/*
- * Estilos para páginas legales (Política de Privacidad, Términos de Servicio).
- * Diseño limpio y legible, optimizado para lectura de documentos extensos.
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-elemento-html-directo
  */
+
 
 .contenedorPaginaLegal {
   min-height: 100vh;

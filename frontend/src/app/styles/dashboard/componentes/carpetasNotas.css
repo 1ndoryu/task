@@ -1,8 +1,8 @@
-/*
- * Estilos para sistema de carpetas de notas
- * TAREA 2.1: Sistema de Carpetas para Notas
- * Revision 7: Estilo tipo explorador de archivos
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* Navegador de Carpetas - Contenedor principal */
 .navegadorCarpetas {

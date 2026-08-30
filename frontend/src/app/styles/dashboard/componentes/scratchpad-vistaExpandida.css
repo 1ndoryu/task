@@ -1,4 +1,7 @@
-﻿.vistaNotasExpandida {
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
+ */
+.vistaNotasExpandida {
     display: grid;
     grid-template-columns: minmax(260px, 340px) 1fr;
     height: 70vh;

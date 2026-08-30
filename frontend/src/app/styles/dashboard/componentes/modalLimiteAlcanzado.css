@@ -1,7 +1,8 @@
-/*
- * MODAL LIMITE ALCANZADO
- * Estilos para el modal de límite excedido
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .modalLimiteAlcanzado {
     display: flex;

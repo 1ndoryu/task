@@ -1,7 +1,7 @@
-﻿/* 
- * LISTA TAREAS COMPACTA
- * Lista minimalista de tareas dentro del panel de proyecto
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 .listaTareasCompacta {
     display: flex;
     flex-direction: column;

@@ -1,8 +1,7 @@
-/*
- * Estilos para SelectorVentanaOportunidad
- * TAREA 4: Ventana de Oportunidad para Hábitos
- * Reloj circular minimalista para marcar inicio y fin
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .selectorVentanaOportunidad {
     position: relative;

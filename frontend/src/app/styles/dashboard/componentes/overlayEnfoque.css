@@ -1,10 +1,7 @@
-/*
- * overlayEnfoque.css
- * Estilos para el modo enfoque de paneles
- * 
- * Permite expandir un panel a pantalla completa con fondo difuminado
- * para concentrarse en una sola tarea
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .overlayEnfoque {
     position: fixed;

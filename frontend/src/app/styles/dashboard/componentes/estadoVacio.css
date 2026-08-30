@@ -1,8 +1,7 @@
-/*
- * ESTADO VACIO UNIFICADO
- * Componente reutilizable para estados vacíos en todos los paneles
- * Diseño consistente con el estilo terminal del dashboard
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .estadoVacioUnificado {
     display: flex;

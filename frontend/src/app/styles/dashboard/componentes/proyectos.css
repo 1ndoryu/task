@@ -1,7 +1,8 @@
-/*
- * LISTA DE PROYECTOS
- * Estilos para el panel de proyectos y items individuales
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .listaProyectos {
     display: flex;

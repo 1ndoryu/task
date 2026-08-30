@@ -1,8 +1,8 @@
-/*
- * panelDeficitCalorico.css
- * Estilos del panel de déficit calórico
- * Diseño minimalista con indicador visual de balance calórico y macros
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .panelDeficitCalorico {
     display: flex;

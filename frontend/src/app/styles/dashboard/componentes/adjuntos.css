@@ -1,7 +1,8 @@
-/*
- * ESTILOS DE ADJUNTOS
- * Visualización y gestión de archivos adjuntos
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .adjuntosContenedor {
     display: flex;

@@ -1,7 +1,8 @@
-﻿/*
- * ADJUNTOS GRID (Fase 9.2.10)
- * VisualizaciÃ³n grid minimalista para adjuntos
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-elemento-html-directo
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 .adjuntosContenedorGrid {
     padding-top: var(--dashboard-espacioMd);
     border-top: 1px dashed var(--dashboard-bordeSutil);

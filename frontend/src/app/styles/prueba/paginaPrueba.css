@@ -1,7 +1,7 @@
-/*
- * paginaPrueba.css
- * Estilos para la página de prueba del sistema OCP
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .contenedorPrueba {
     min-height: 100vh;

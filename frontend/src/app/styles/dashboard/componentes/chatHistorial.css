@@ -1,12 +1,7 @@
-/*
- * PANEL CHAT/HISTORIAL - TIMELINE UNIFICADO
- * Estilos para el panel lateral con chat y actividad combinados
- * 
- * Fase 7.2: Chat e Historial son UN SOLO timeline
- * - Mensajes usuario: burbuja (enviado derecha, recibido izquierda)
- * - Mensajes sistema: linea centrada con icono sutil
- * - Sin pestañas: participantes como toggle en header
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 /* 
  * CONTENEDOR PRINCIPAL

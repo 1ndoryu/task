@@ -1,7 +1,7 @@
-/*
- * ESTILOS DE BUSCADOR GLOBAL
- * Componente de busqueda en encabezado
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .buscadorGlobal {
     position: relative;

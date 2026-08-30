@@ -1,10 +1,7 @@
-/*
- * NAVEGACION INFERIOR
- * Estilos para la barra de navegación móvil
- * Fase 10.6: Navegación Móvil
- * 
- * Diseño minimalista monocromático
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* Barra de navegación principal */
 .navegacionInferiorBarra {

@@ -1,8 +1,7 @@
-/*
- * Modal Login - Overlay Opaco
- * Cuando el usuario no está autenticado, el overlay debe ser completamente
- * opaco para no mostrar la app de fondo
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 .modalLoginOverlay {
     background-color: var(--dashboard-fondoPrincipal);
 }

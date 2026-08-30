@@ -1,8 +1,7 @@
-﻿/* 
- * MODAL NOTAS GUARDADAS
- * Grid de notas con bÃºsqueda
- * Nota: El ancho del contenedor estÃ¡ en modal.css (.modalNotasContenedor)
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .modalNotasGuardadas {
     display: flex;

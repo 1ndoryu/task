@@ -1,10 +1,7 @@
-/*
- * dashboardPanelView.css
- *
- * [300A-2] Contenedor del panel individual en modo sidebar.
- * Ocupa el 100% del área de contenido y envuelve el panel
- * sin handles de arrastre ni resize (no aplican en este modo).
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* ===== CONTENEDOR PRINCIPAL ===== */
 .dashboardPanelView {

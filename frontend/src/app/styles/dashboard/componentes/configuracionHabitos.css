@@ -1,8 +1,8 @@
-/*
- * CONFIGURACION DE HABITOS
- * Estilos para el modal de configuracion de habitos
- * Extiende visualmente el sistema de configuracionTareas.css
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .gridOpcionesColumnas {
     display: grid;

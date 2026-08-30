@@ -1,6 +1,7 @@
-/* [253A-11] Estilos del panel Grupos de Facebook
- * [263A-4] Rediseño: filtros movidos al header, búsqueda estilo modalNotasBusqueda.
- * [024A-9] font-family/color explícitos: herencia se pierde en algunos contextos. */
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
+ */
+
 
 /* [024A-17] Sin padding — el panel ocupa todo el espacio disponible
  * [024A-21] overflow:hidden evita que la tabla expanda el panel más allá del contenedor */

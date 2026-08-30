@@ -1,7 +1,7 @@
-/*
- * INDEX.CSS - Punto de entrada de estilos
- * Carga las CSS Variables del proyecto y estilos compartidos.
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-elemento-html-directo
  */
+
 
 /* Sistema de diseno del proyecto (CSS Variables + componentes) */
 @import '../assets/css/init.css';

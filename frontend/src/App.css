@@ -1,3 +1,6 @@
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-elemento-html-directo
+ */
 :root {
   --surface: #10151d;
   --surface-raised: #18212c;

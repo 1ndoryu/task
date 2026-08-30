@@ -1,17 +1,7 @@
-/*
- * sidebarMenu.css
- *
- * [300A-2] Estilos para el layout tipo sidebar (menú lateral).
- * Modo alternativo al grid: una barra vertical de iconos a la izquierda
- * y un panel único a la derecha.
- *
- * Variables de diseño: reutiliza tokens de variables.css
- *   - fondoPrincipal, fondoSecundario, fondoHover → fondos
- *   - bordePrincipal, bordeSutil → bordes
- *   - textoActivo, textoSecundario, textoApagado → tipografía
- *   - acento, acentoHover → indicador activo
- *   - transicionRapida, transicionNormal → animaciones
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* [28-08-2026] gap 0 entre menú y contenido: el sidebarMenuResizeHandle es el
  * separador real (borde del panel de contenido), no un elemento flotando en

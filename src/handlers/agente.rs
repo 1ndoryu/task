@@ -1,3 +1,5 @@
+// sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro
+// [por que] sqlx sin feature "macros" ni DB en compile-time: query! rompe el build.
 /* [29-08-2026] Endpoint SSE del agente (plan-agente-ia-plugin, Fase 0/1).
  * POST /api/agente/stream con require_auth (no admin: el coste del LLM lo
  * absorbe el servidor para cualquier usuario autenticado, con rate limit y

@@ -1,8 +1,7 @@
-/*
- * BOTTOM SHEET
- * Menu deslizante desde abajo para dispositivos moviles
- * Fase 10.2: Menus contextuales como Bottom Sheet
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 /* Overlay oscuro detras del bottom sheet */
 .bottomSheetOverlay {

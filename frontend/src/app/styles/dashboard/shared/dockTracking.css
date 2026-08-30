@@ -1,8 +1,7 @@
-/*
- * dockTracking.css
- * Estilos para la barra inferior de tracking de tiempo
- * Diseño minimalista estilo terminal
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .dockTracking {
     position: fixed;

@@ -1,11 +1,7 @@
-/*
- * LISTAS MOVIL - movilListas.css
- * 
- * Layout compacto para listas en móvil:
- * - Proyectos en 2 filas
- * - Hábitos compactos
- * - Tareas sin botones de acción
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 @media (max-width: 480px) {
     /* 

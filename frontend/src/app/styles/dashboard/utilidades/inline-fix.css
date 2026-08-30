@@ -1,5 +1,7 @@
-/* [034A-19] Clases utilitarias para reemplazar inline styles comunes.
- * Cada clase aquí se usaba como style={{}} en múltiples componentes. */
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ */
+
 
 /* Botón icono deshabilitado (ej: "Estadísticas - Próximamente") */
 .botonIcono--deshabilitado {

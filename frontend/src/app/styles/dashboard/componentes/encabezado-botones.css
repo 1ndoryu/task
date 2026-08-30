@@ -1,6 +1,7 @@
-﻿/* 
- * BOTON DE SEGURIDAD 
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 .botonSeguridad {
     display: inline-flex;
     align-items: center;

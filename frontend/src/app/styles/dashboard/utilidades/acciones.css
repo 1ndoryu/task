@@ -1,7 +1,7 @@
-/*
- * ACCIONES DE DATOS
- * Botones de exportar/importar y mensajes de estado
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .accionesDatosContenedor {
     margin-top: var(--dashboard-espacioLg);

@@ -1,3 +1,5 @@
+// sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro
+// [por que] sqlx sin feature "macros" ni DB en compile-time: query! rompe el build.
 /* [29-08-2026] Scheduler de tareas programadas (plan-agente-ia-plugin, Fase 1,
  * sección 8.1). Worker tokio ligero que consulta `agente_tareas_programadas`
  * y ejecuta las que están pendientes de ejecutar como un turno de agente.

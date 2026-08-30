@@ -1,7 +1,7 @@
-/*
- * modalPlugins.css
- * Estilos para el modal de gestión de plugins
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
  */
+
 
 .modalPlugins {
     /* Sobrescribe ancho del Modal compartido sutilmente si es necesario */

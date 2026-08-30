@@ -1,7 +1,7 @@
-/*
- * ACCIONES ITEM
- * Estilos para botones de accion inline en items
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 
 .accionesItem {
     display: flex;

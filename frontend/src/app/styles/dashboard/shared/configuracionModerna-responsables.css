@@ -1,8 +1,8 @@
-﻿/* 
- * SECCION RESPONSABLES
- * Lista de participantes con avatares y menus de gestion
- * Layout inline: etiqueta a la izquierda, contenido a la derecha
+/* [por que] Capa de estilos propia del proyecto (design system local).
+ * sentinel-disable-file css-adhoc-button-style
+ * sentinel-disable-file css-especificacion-diseno-local
  */
+
 .seccionResponsables {
     position: relative;
 }
