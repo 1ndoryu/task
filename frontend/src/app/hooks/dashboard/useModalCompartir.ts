@@ -18,8 +18,7 @@ export interface UseModalCompartirProps {
     onDejarDeCompartir: (compartidoId: number) => Promise<boolean>;
 }
 
-export interface UseModalCompartirReturn {
-    /* Estado */
+interface UmcEstado {
     companeroSeleccionado: number | null;
     setCompaneroSeleccionado: (v: number | null) => void;
     rolSeleccionado: RolCompartido;
@@ -27,18 +26,22 @@ export interface UseModalCompartirReturn {
     compartiendo: boolean;
     error: string | null;
     mostroAdvertencia: boolean;
+}
 
-    /* Derivados */
+interface UmcDerivados {
     tipoTexto: string;
     tipoTextoMayus: string;
     companerosDisponibles: CompaneroEquipo[];
     esPropietario: boolean;
+}
 
-    /* Acciones */
+interface UmcAcciones {
     manejarCompartir: () => Promise<void>;
     manejarCambioRol: (compartidoId: number, nuevoRol: RolCompartido) => Promise<void>;
     manejarEliminar: (compartidoId: number) => Promise<void>;
 }
+
+export interface UseModalCompartirReturn extends UmcEstado, UmcDerivados, UmcAcciones {}
 
 export function useModalCompartir({
     visible,

@@ -16,7 +16,9 @@ import type {DatosEdicionTarea, DatosNuevoHabito, Tarea, Habito} from '../../typ
  * Props que se pasan a cada panel según su tipo
  * Centraliza la lógica de qué props necesita cada panel
  */
-export interface PropsContextoPaneles {
+/* Fragmentos cohesivos de PropsContextoPaneles: el nombre exportado se mantiene
+ * (composición por extends), los call-sites ven la misma forma plana. */
+export interface PropsContextoPanelesNucleo {
     dashboard: DashboardCompletoRetorno['dashboard'];
     modales: DashboardCompletoRetorno['modales'];
     compartir: DashboardCompletoRetorno['compartir'];
@@ -26,6 +28,9 @@ export interface PropsContextoPaneles {
     habitosComoTareas: DashboardCompletoRetorno['habitosComoTareas'];
     configTareas: DashboardCompletoRetorno['configTareas'];
     configHabitos: DashboardCompletoRetorno['configHabitos'];
+}
+
+export interface PropsContextoPanelesConfig {
     configProyectos: DashboardCompletoRetorno['configProyectos'];
     configScratchpad: DashboardCompletoRetorno['configScratchpad'];
     configActividad: DashboardCompletoRetorno['configActividad'];
@@ -36,6 +41,8 @@ export interface PropsContextoPaneles {
     desmarcarDiaHabitoConSync: DashboardCompletoRetorno['desmarcarDiaHabitoConSync'];
     limites: DashboardCompletoRetorno['limites'];
 }
+
+export interface PropsContextoPaneles extends PropsContextoPanelesNucleo, PropsContextoPanelesConfig {}
 
 export function generarPropsPanelBase(
     _ctx: PropsContextoPaneles,

@@ -14,8 +14,7 @@ export interface UseModalConfiguracionMCPProps {
     estaAbierto: boolean;
 }
 
-export interface UseModalConfiguracionMCPReturn {
-    /* Estado */
+interface UmcMCPEstado {
     clienteActivo: ClienteMCP;
     setClienteActivo: (v: ClienteMCP) => void;
     tokenExiste: boolean;
@@ -26,12 +25,15 @@ export interface UseModalConfiguracionMCPReturn {
     verificando: boolean;
     esPremium: boolean;
     apiUrl: string;
+}
 
-    /* Acciones */
+interface UmcMCPAcciones {
     manejarGenerarToken: () => Promise<void>;
     manejarRevocarToken: () => Promise<void>;
     obtenerConfiguracion: (cliente: ClienteMCP) => string;
 }
+
+export interface UseModalConfiguracionMCPReturn extends UmcMCPEstado, UmcMCPAcciones {}
 
 /* Genera el contexto copiable para asistentes IA */
 const generarContextoIA = (tokenBase64: string, apiUrl: string): string => {

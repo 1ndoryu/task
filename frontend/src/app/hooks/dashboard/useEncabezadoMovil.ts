@@ -14,10 +14,16 @@ import type {OpcionDrawer} from '../../components/shared/DrawerMovil';
 import type {InfoSuscripcion, SincronizacionInfo} from '../../types/dashboard';
 import type {PaginaMovil} from '../usePaginaMovil';
 
-export interface UseEncabezadoMovilParams {
+interface UemDatos {
     suscripcion?: InfoSuscripcion | null;
     sincronizacion?: SincronizacionInfo;
     onCerrarDrawer: () => void;
+    onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
+    onCambiarPagina?: (pagina: PaginaMovil) => void;
+    onPersonalizarBarra?: () => void;
+}
+
+interface UemAcciones {
     onClickPlan?: () => void;
     onClickSeguridad?: () => void;
     onClickAdmin?: () => void;
@@ -25,18 +31,20 @@ export interface UseEncabezadoMovilParams {
     onClickVersion?: () => void;
     onClickUsuario?: () => void;
     onClickEquipos?: () => void;
-    onClickNotificaciones?: (evento?: React.MouseEvent) => void;
-    onClickExperimentos?: () => void;
     onClickTemas?: () => void;
     onClickConfigUsuario?: () => void;
+    onClickNotificaciones?: (evento?: React.MouseEvent) => void;
+}
+
+interface UemExtra {
+    onClickExperimentos?: () => void;
     onClickBackups?: () => void;
     onClickConfigMCP?: () => void;
     onClickPlugins?: () => void;
     onExportarDatos?: () => void;
-    onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
-    onCambiarPagina?: (pagina: PaginaMovil) => void;
-    onPersonalizarBarra?: () => void;
 }
+
+export interface UseEncabezadoMovilParams extends UemDatos, UemAcciones, UemExtra {}
 
 export interface UseEncabezadoMovilReturn {
     manejarOpcionDrawer: (opcionId: string) => void;

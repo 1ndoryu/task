@@ -46,9 +46,11 @@ interface OpcionFiltro {
     icono?: React.ReactNode;
 }
 
-interface UseOpcionesPanelMovilParams {
+interface UseOpcionesPanelMovilParamsBase {
     paginaActiva: PaginaMovil;
-    /* Tareas */
+}
+
+interface UseOpcionesPanelMovilParamsTareas {
     opcionesFiltroTareas?: OpcionFiltro[];
     valorFiltroTareas?: string;
     onCambiarFiltroTareas?: (valor: string) => void;
@@ -56,23 +58,27 @@ interface UseOpcionesPanelMovilParams {
     modoOrdenTareas?: ModoOrdenTareas;
     onCambiarOrdenTareas?: (modo: ModoOrdenTareas) => void;
     onAbrirConfigTareas?: () => void;
-    /* Hábitos */
+}
+
+interface UseOpcionesPanelMovilParamsHabitosProyectos {
     opcionesOrdenHabitos?: OpcionOrdenHabitos[];
     modoOrdenHabitos?: ModoOrdenHabitos;
     onCambiarOrdenHabitos?: (modo: ModoOrdenHabitos) => void;
     onAbrirConfigHabitos?: () => void;
-    /* Proyectos */
     opcionesOrdenProyectos?: OpcionOrdenProyectos[];
     modoOrdenProyectos?: OrdenamientoProyectos;
     onCambiarOrdenProyectos?: (modo: OrdenamientoProyectos) => void;
     onAbrirConfigProyectos?: () => void;
-    /* Actividad */
+}
+
+interface UseOpcionesPanelMovilParamsAcciones {
     onAbrirConfigActividad?: () => void;
-    /* Notas (Scratchpad) */
     onNuevaNota?: () => void;
     onAbrirNotasGuardadas?: () => void;
     onAbrirConfigNotas?: () => void;
 }
+
+interface UseOpcionesPanelMovilParams extends UseOpcionesPanelMovilParamsBase, UseOpcionesPanelMovilParamsTareas, UseOpcionesPanelMovilParamsHabitosProyectos, UseOpcionesPanelMovilParamsAcciones {}
 
 interface UseOpcionesPanelMovilResult {
     titulo: string;

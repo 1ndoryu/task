@@ -12,8 +12,7 @@ export interface UseModalLoginProps {
     loading: boolean;
 }
 
-export interface UseModalLoginReturn {
-    /* Estado del formulario */
+interface UmlCampos {
     modo: 'login' | 'registro' | 'recuperar';
     setModo: (v: 'login' | 'registro' | 'recuperar') => void;
     username: string;
@@ -22,20 +21,24 @@ export interface UseModalLoginReturn {
     setEmail: (v: string) => void;
     password: string;
     setPassword: (v: string) => void;
+}
+
+interface UmlRecuperar {
     emailRecuperar: string;
     setEmailRecuperar: (v: string) => void;
     recuperarLoading: boolean;
     recuperarMensaje: {tipo: 'exito' | 'error'; texto: string} | null;
+}
 
-    /* Acciones */
+interface UmlAcciones {
     handleSubmit: (e: React.FormEvent) => Promise<void>;
     handleRecuperar: (e: React.FormEvent) => Promise<void>;
     irARecuperarContrasena: () => void;
     volverALogin: () => void;
-
-    /* Derivados */
     tituloModal: string;
 }
+
+export interface UseModalLoginReturn extends UmlCampos, UmlRecuperar, UmlAcciones {}
 
 export function useModalLogin({onLoginCredentials, onRegister, loading: _loading}: UseModalLoginProps): UseModalLoginReturn {
     const [modo, setModo] = useState<'login' | 'registro' | 'recuperar'>('login');

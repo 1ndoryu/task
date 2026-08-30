@@ -16,19 +16,24 @@ const DELAY_AUTOGUARDADO = 2000;
 /* [263A-12] Nota vacía por defecto para el selector de Zustand */
 const NOTA_VACIA: NotaActiva = {id: null, contenido: CONTENIDO_NOTA_NUEVA, modificada: false};
 
-interface UsePanelScratchpadReturn {
+interface UpscEstado {
     modalNotasExpandidoAbierto: boolean;
     setModalNotasExpandidoAbierto: (abierto: boolean) => void;
     modoEnfoque: boolean;
     setModoEnfoque: (activo: boolean) => void;
     notaActiva: NotaActiva;
     actualizarContenido: (contenido: string) => void;
+}
+
+interface UpscDerivados {
     tituloActivo: string;
     esNotaNueva: boolean;
     manejarNuevaNota: () => void;
     manejarLimpiar: () => void;
     manejarAbrirCarpeta: () => Promise<void>;
 }
+
+interface UsePanelScratchpadReturn extends UpscEstado, UpscDerivados {}
 
 /* [263A-12] El hook recibe panelId para que cada instancia gestione su propia nota independiente */
 export function usePanelScratchpad(panelId: string = PANEL_SCRATCHPAD): UsePanelScratchpadReturn {

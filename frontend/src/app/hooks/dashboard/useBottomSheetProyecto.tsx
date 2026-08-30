@@ -32,7 +32,7 @@ export interface UseBottomSheetProyectoParams {
     };
 }
 
-export interface UseBottomSheetProyectoReturn {
+interface UbspCampos {
     nombre: string;
     setNombre: React.Dispatch<React.SetStateAction<string>>;
     prioridad: NivelPrioridad | undefined;
@@ -41,15 +41,20 @@ export interface UseBottomSheetProyectoReturn {
     setUrgencia: React.Dispatch<React.SetStateAction<NivelUrgencia | undefined>>;
     fechaLimite: string | undefined;
     setFechaLimite: React.Dispatch<React.SetStateAction<string | undefined>>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+interface UbspControl {
     cargando: boolean;
     modalActivo: ModalActivoProyecto;
     setModalActivo: React.Dispatch<React.SetStateAction<ModalActivoProyecto>>;
-    inputRef: React.RefObject<HTMLInputElement | null>;
     badgesActivos: BadgeActivoProyecto[];
     manejarGuardar: () => Promise<void>;
     manejarEliminarBadge: (id: string) => void;
     manejarSeleccionFecha: (valor: string | undefined) => void;
 }
+
+export interface UseBottomSheetProyectoReturn extends UbspCampos, UbspControl {}
 
 export function useBottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}}: UseBottomSheetProyectoParams): UseBottomSheetProyectoReturn {
     const [nombre, setNombre] = useState('');

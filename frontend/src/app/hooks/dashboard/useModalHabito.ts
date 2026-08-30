@@ -20,7 +20,7 @@ import {obtenerFechaHoy} from '../../utils/fecha';
 
 type DatosFormulario = DatosNuevoHabito;
 
-export interface UseModalHabitoProps {
+interface BaseModalHabito {
     estaAbierto: boolean;
     onCerrar: () => void;
     onGuardar: (datos: DatosFormulario) => void;
@@ -28,19 +28,23 @@ export interface UseModalHabitoProps {
     habito?: Habito;
     participantes?: Participante[];
     tareas?: Tarea[];
+}
+
+interface CallbacksModalHabito {
     onToggleTarea?: (id: number) => void;
     onCrearTarea?: (datos: DatosEdicionTarea) => void;
     onEliminarTarea?: (id: number) => void;
     onConfigurarTarea?: (tarea: Tarea) => void;
     onActualizarOrdenTareasHabito?: (habitoId: number, tareasIds: number[]) => void;
     onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
-    /** Modo subhábito: cuando presente, el modal opera sobre un subhábito en vez de un hábito */
     subHabito?: SubHabito | null;
     habitoPadre?: Habito | null;
 }
 
-export interface UseModalHabitoReturn {
-    /* Estado del formulario */
+export interface UseModalHabitoProps extends BaseModalHabito, CallbacksModalHabito {}
+
+/* Fragmentos del retorno, cohesionados por dominio (ISP). */
+interface UmhEdicion {
     modoEdicion: boolean;
     nombre: string;
     setNombre: (v: string) => void;
@@ -50,9 +54,11 @@ export interface UseModalHabitoReturn {
     setIcono: (v: string) => void;
     colorIcono: string;
     setColorIcono: (v: string) => void;
+}
+
+interface UmhAtributos {
     importancia: NivelImportancia;
     setImportancia: (v: NivelImportancia) => void;
-    /* Dificultad del plugin EXP */
     dificultad: Dificultad;
     setDificultad: (v: Dificultad) => void;
     frecuencia: FrecuenciaHabito;
@@ -61,42 +67,41 @@ export interface UseModalHabitoReturn {
     setVentanaOportunidad: (v: VentanaOportunidad | undefined) => void;
     dependencias: import('../../types/dashboard').ReferenciaDependencia[];
     setDependencias: (v: import('../../types/dashboard').ReferenciaDependencia[]) => void;
+}
+
+interface UmhGrupo {
     grupoEjecucion: string | null;
     setGrupoEjecucion: (v: string | null) => void;
     errores: {nombre?: string};
     esHabitoEspecialAyuno: boolean;
     esModoSubHabito: boolean;
-
-    /* Estado del hábito hoy */
     estadoHoy: EstadoHabito;
     manejarCambioEstado: (nuevoEstado: EstadoHabito) => void;
+}
 
-    /* Chat */
+interface UmhChat {
     chatVisible: boolean;
     toggleChat: () => void;
     tieneMensajesSinLeer: boolean;
     participantesChat: ParticipanteChat[];
     mostrarChatColumna: boolean;
-
-    /* Tareas del hábito */
     tareasDelHabito: Tarea[];
     manejarReordenarTareas: (tareasIds: number[]) => void;
+}
 
-    /* SubHábitos */
+interface UmhSubHabitos {
     manejarCrearSubHabito: (datos: DatosNuevoSubHabito) => void;
     manejarEditarSubHabito: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
     manejarEliminarSubHabito: (subHabitoId: number) => void;
     manejarToggleSubHabito: (subHabitoId: number) => void;
-
-    /* [217A-3] Historial retroactivo subhábitos */
     manejarMarcarDiaSubHabito: (fecha: string, estado: EstadoHabito) => boolean;
     manejarDesmarcarDiaSubHabito: (fecha: string) => boolean;
-
-    /* Acciones */
     manejarGuardar: () => void;
     manejarCerrarConGuardado: () => void;
     manejarPausarHabito: (() => void) | undefined;
 }
+
+export interface UseModalHabitoReturn extends UmhEdicion, UmhAtributos, UmhGrupo, UmhChat, UmhSubHabitos {}
 
 export function useModalHabito({
     estaAbierto,

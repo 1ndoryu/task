@@ -39,7 +39,7 @@ export interface UseBottomSheetHabitoParams {
     habitoExistente?: Habito;
 }
 
-export interface UseBottomSheetHabitoReturn {
+interface UbshCampos {
     esEdicion: boolean;
     texto: string;
     setTexto: React.Dispatch<React.SetStateAction<string>>;
@@ -47,14 +47,19 @@ export interface UseBottomSheetHabitoReturn {
     setFrecuencia: React.Dispatch<React.SetStateAction<string | undefined>>;
     importancia: string | undefined;
     setImportancia: React.Dispatch<React.SetStateAction<string | undefined>>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+interface UbshControl {
     cargando: boolean;
     modalActivo: ModalActivoHabito;
     setModalActivo: React.Dispatch<React.SetStateAction<ModalActivoHabito>>;
-    inputRef: React.RefObject<HTMLInputElement | null>;
     badgesActivos: BadgeActivoHabito[];
     manejarGuardar: () => Promise<void>;
     manejarEliminarBadge: (id: string) => void;
 }
+
+export interface UseBottomSheetHabitoReturn extends UbshCampos, UbshControl {}
 
 export function useBottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresIniciales = {}, habitoExistente}: UseBottomSheetHabitoParams): UseBottomSheetHabitoReturn {
     const esEdicion = !!habitoExistente;

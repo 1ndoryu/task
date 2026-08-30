@@ -36,7 +36,7 @@ export interface UseBottomSheetTareaParams {
     tareaExistente?: Tarea;
 }
 
-export interface UseBottomSheetTareaReturn {
+interface UbstCampos {
     esEdicion: boolean;
     texto: string;
     setTexto: React.Dispatch<React.SetStateAction<string>>;
@@ -48,10 +48,13 @@ export interface UseBottomSheetTareaReturn {
     setUrgencia: React.Dispatch<React.SetStateAction<string | undefined>>;
     fecha: string | undefined;
     setFecha: React.Dispatch<React.SetStateAction<string | undefined>>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+interface UbstControl {
     cargando: boolean;
     modalActivo: ModalActivoTarea;
     setModalActivo: React.Dispatch<React.SetStateAction<ModalActivoTarea>>;
-    inputRef: React.RefObject<HTMLInputElement | null>;
     opcionesProyecto: Array<{id: string; etiqueta: string; icono: JSX.Element}>;
     badgesActivos: BadgeActivo[];
     manejarGuardar: () => Promise<void>;
@@ -59,6 +62,8 @@ export interface UseBottomSheetTareaReturn {
     manejarSeleccionFecha: (valor: string | undefined) => void;
     obtenerNombreProyecto: () => string | null;
 }
+
+export interface UseBottomSheetTareaReturn extends UbstCampos, UbstControl {}
 
 export function useBottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos = [], valoresIniciales = {}, tareaExistente}: UseBottomSheetTareaParams): UseBottomSheetTareaReturn {
     const esEdicion = !!tareaExistente;

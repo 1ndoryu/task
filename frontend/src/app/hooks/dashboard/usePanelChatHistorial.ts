@@ -10,19 +10,27 @@ import type {PanelChatHistorialProps} from '../../components/dashboard/PanelChat
 
 type HookParams = Pick<PanelChatHistorialProps, 'elementoId' | 'elementoTipo' | 'participantes' | 'avatarUsuario' | 'nombreUsuario'>;
 
-export interface UsePanelChatHistorialReturn {
+interface UpchEstado {
     mostrandoParticipantes: boolean;
     setMostrandoParticipantes: React.Dispatch<React.SetStateAction<boolean>>;
     mensajeNuevo: string;
     setMensajeNuevo: React.Dispatch<React.SetStateAction<string>>;
     refContenedor: React.RefObject<HTMLDivElement | null>;
+}
+
+interface UpchDatos {
     avatarFinal: string;
     nombreFinal: string;
     tieneParticipantes: boolean;
     estado: ReturnType<typeof useMensajes>['estado'];
+}
+
+interface UpchAcciones {
     manejarEnviarMensaje: () => Promise<void>;
     manejarTecla: (evento: React.KeyboardEvent) => void;
 }
+
+export interface UsePanelChatHistorialReturn extends UpchEstado, UpchDatos, UpchAcciones {}
 
 export function usePanelChatHistorial({elementoId, elementoTipo, participantes = [], avatarUsuario, nombreUsuario}: HookParams): UsePanelChatHistorialReturn {
     const [mostrandoParticipantes, setMostrandoParticipantes] = useState(false);
