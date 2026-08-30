@@ -2,10 +2,10 @@
 import {useEffect, useState} from 'react';
 import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, Layers, Check, Plus, X} from 'lucide-react';
 import {useAgenteStore} from './store';
-import {listarSkills, crearSkill, actualizarSkill, eliminarSkill} from './service';
 import type {ConfigAgente, SkillAgente} from './service';
 import {Boton} from '../../components/ui/Boton';
 import {AvisoModoAutonomo, SelectorModo, SkillFila} from './componentes';
+import {useGestionSkills} from './useGestionSkills';
 import './modalConfigAgente.css';
 
 interface ModalConfigAgenteProps { activo: boolean; onCerrar: () => void; }
@@ -15,59 +15,16 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
     const config = useAgenteStore(s => s.config);
     const establecerConfig = useAgenteStore(s => s.establecerConfig);
     const [draft, setDraft] = useState(config);
-    const [skills, setSkills] = useState<SkillAgente[]>([]);
-    const [skillsError, setSkillsError] = useState<string | null>(null);
-    const [nuevaSkill, setNuevaSkill] = useState({nombre: '', descripcion: ''});
-    const [editandoId, setEditandoId] = useState<string | null>(null);
-    const [editando, setEditando] = useState({nombre: '', descripcion: ''});
+    const gestion = useGestionSkills(activo);
+    const {skills, skillsError, nuevaSkill, setNuevaSkill, editandoId, setEditandoId, editando, setEditando, crear, alternar, guardarEdicion, eliminar} = gestion;
     useEffect(() => {
-        if (activo) {
-            setDraft(config);
-            setSkillsError(null);
-            void listarSkills().then(setSkills).catch(e => setSkillsError(e instanceof Error ? e.message : 'No se pudieron cargar las skills'));
-        }
+        if (activo) setDraft(config);
     }, [activo, config]);
     if (!activo) return null;
     const actualizar = <K extends keyof ConfigAgente>(campo: K, valor: ConfigAgente[K]) => setDraft(actual => ({...actual, [campo]: valor}));
     const guardar = () => {
         establecerConfig(draft);
         onCerrar();
-    };
-    const crear = async () => {
-        const nombre = nuevaSkill.nombre.trim();
-        const descripcion = nuevaSkill.descripcion.trim();
-        if (!nombre || !descripcion) return;
-        try {
-            const skill = await crearSkill({nombre, descripcion, activa: true});
-            setSkills(prev => [...prev, skill]);
-            setNuevaSkill({nombre: '', descripcion: ''});
-            setSkillsError(null);
-        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo crear la skill'); }
-    };
-    const alternar = async (skill: SkillAgente) => {
-        try {
-            const actualizada = await actualizarSkill(skill.id, {activa: !skill.activa});
-            setSkills(prev => prev.map(s => s.id === skill.id ? actualizada : s));
-            setSkillsError(null);
-        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo actualizar la skill'); }
-    };
-    const guardarEdicion = async (skill: SkillAgente) => {
-        const nombre = editando.nombre.trim();
-        const descripcion = editando.descripcion.trim();
-        if (!nombre || !descripcion) return;
-        try {
-            const actualizada = await actualizarSkill(skill.id, {nombre, descripcion});
-            setSkills(prev => prev.map(s => s.id === skill.id ? actualizada : s));
-            setEditandoId(null);
-            setSkillsError(null);
-        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo guardar la skill'); }
-    };
-    const eliminar = async (id: string) => {
-        try {
-            await eliminarSkill(id);
-            setSkills(prev => prev.filter(s => s.id !== id));
-            setSkillsError(null);
-        } catch (e) { setSkillsError(e instanceof Error ? e.message : 'No se pudo eliminar la skill'); }
     };
 
     return (
