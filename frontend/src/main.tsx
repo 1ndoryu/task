@@ -64,7 +64,16 @@ async function cargarSesionRust(): Promise<void> {
      * apiUrl/apiBase quedan obsoletos y apuntan a /api por compatibilidad. */
     const base = { nonce: '', apiUrl: '/api', apiBase: '/api' };
     try {
-        const respuesta = await fetch('/api/auth/me', { credentials: 'include' });
+        /* [fetch-sin-timeout] Timeout acotado para no bloquear el boot si
+         * /api/auth/me no responde (el fallo cae al catch y arranca no-auth). */
+        const control = new AbortController();
+        const temporizador = window.setTimeout(() => control.abort(), 8000);
+        let respuesta: Response;
+        try {
+            respuesta = await fetch('/api/auth/me', { credentials: 'include', signal: control.signal });
+        } finally {
+            window.clearTimeout(temporizador);
+        }
         if (!respuesta.ok) {
             window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
             return;
