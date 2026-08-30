@@ -80,14 +80,28 @@ export interface TareaConfiguracion {
     adjuntos?: Adjunto[];
 }
 
-export interface Tarea {
+/* Fragmentos cohesivos de Tarea (ISP): composicion coherente que conserva
+ * la forma plana del contrato. Ningun bloque supera 10 campos. */
+export interface TareaBasica {
     id: number;
     texto: string;
     completado: boolean;
-    fechaCreacion?: string /* Fecha ISO de cuando se creo la tarea */;
-    fechaCompletado?: string /* Fecha ISO de cuando se completo la tarea */;
     /* Orden manual para drag & drop (menor = primero) */
     orden?: number;
+}
+
+/* Temporalidad y sincronizacion de conflictos de una tarea */
+export interface TareaTemporalidad {
+    fechaCreacion?: string /* Fecha ISO de cuando se creo la tarea */;
+    fechaCompletado?: string /* Fecha ISO de cuando se completo la tarea */;
+    /* [2303A-41] Fecha ISO hasta la que la tarea está pospuesta. Si es futuro, se oculta del panel. */
+    pospuestoHasta?: string;
+    /* [014A-19] Timestamp de última modificación local (ms) para resolución de conflictos. */
+    updatedAt?: number;
+}
+
+/* Ubicacion de la tarea dentro de la jerarquia del dominio */
+export interface TareaOrganizacion {
     /* ID de tarea padre para subtareas (solo un nivel de anidacion) */
     parentId?: number;
     /* ID del proyecto al que pertenece la tarea (opcional) */
@@ -96,33 +110,47 @@ export interface Tarea {
     habitoId?: number;
     /* ID del grupo/seccion al que pertenece la tarea (TAREA 3) */
     grupoId?: number;
+    /* Grupo de ejecución para organizar paneles de ejecución múltiples */
+    grupoEjecucion?: string | null;
+}
+
+/* Planeacion y prioridad de la tarea */
+export interface TareaPlaneacion {
     /* Campos opcionales */
     prioridad?: NivelPrioridad;
     /* Urgencia: temporalidad (bloqueante, urgente, normal, chill) */
     urgencia?: NivelUrgencia;
     /* Configuracion avanzada (fecha limite, descripcion, repeticion, adjuntos) */
     configuracion?: TareaConfiguracion;
+}
+
+/* Asignacion de una tarea a un participante */
+export interface TareaAsignacion {
     /* Asignacion de tarea a un participante */
     asignadoA?: number /* ID del usuario asignado */;
     asignadoANombre?: string /* Nombre del usuario para evitar lookups */;
     asignadoAAvatar?: string /* Avatar del usuario asignado */;
+}
+
+/* Metadata de tareas compartidas/asignadas a mi */
+export interface TareaCompartida {
     /* Metadata para tareas compartidas/asignadas a mi */
     esCompartido?: boolean;
     propietarioId?: number;
     propietarioNombre?: string;
     propietarioAvatar?: string;
     miRol?: RolCompartido;
+}
+
+/* Tags y dependencias condicionales */
+export interface TareaExtras {
     /* Tags (Fase 9.7.3) */
     tags?: string[];
-    /* [2303A-41] Fecha ISO hasta la que la tarea está pospuesta. Si es futuro, se oculta del panel. */
-    pospuestoHasta?: string;
-    /* [014A-19] Timestamp de última modificación local (ms) para resolución de conflictos. */
-    updatedAt?: number;
     /* Dependencias condicionales: elementos que deben cumplirse antes de marcar esta tarea */
     dependencias?: ReferenciaDependencia[];
-    /* Grupo de ejecución para organizar paneles de ejecución múltiples */
-    grupoEjecucion?: string | null;
 }
+
+export interface Tarea extends TareaBasica, TareaTemporalidad, TareaOrganizacion, TareaPlaneacion, TareaAsignacion, TareaCompartida, TareaExtras {}
 
 /*
  * GrupoTareas: Seccion/agrupacion de tareas (TAREA 3)
@@ -208,32 +236,50 @@ export interface DatosNuevaTarea {
  * prioridad puede ser null para eliminar la prioridad de la tarea
  * urgencia puede ser null para eliminar la urgencia (vuelve a 'normal')
  */
-export interface DatosEdicionTarea {
+/* Fragmentos de DatosEdicionTarea (ISP) */
+export interface DatosEdicionBasico {
     texto?: string;
-    prioridad?: NivelPrioridad | null;
-    /* Urgencia: temporalidad (bloqueante, urgente, normal, chill) */
-    urgencia?: NivelUrgencia | null;
     completado?: boolean;
+}
+
+export interface DatosEdicionUbicacion {
     parentId?: number;
     /* ID de la tarea después de la cual insertar (solo para creación) */
     insertarDespuesDe?: number;
-    /* Configuración avanzada de la tarea */
-    configuracion?: TareaConfiguracion;
     proyectoId?: number;
     /* ID del habito al que pertenece la tarea - Fase 14.8 */
     habitoId?: number;
     /* ID del grupo/seccion al que pertenece la tarea (TAREA 3) */
     grupoId?: number;
+    /* Grupo de ejecución para organizar paneles de ejecución múltiples */
+    grupoEjecucion?: string | null;
+}
+
+export interface DatosEdicionPrioridad {
+    prioridad?: NivelPrioridad | null;
+    /* Urgencia: temporalidad (bloqueante, urgente, normal, chill) */
+    urgencia?: NivelUrgencia | null;
+    /* Configuración avanzada de la tarea */
+    configuracion?: TareaConfiguracion;
+}
+
+export interface DatosEdicionAsignacion {
     /* Asignación de tarea */
     asignadoA?: number | null;
     asignadoANombre?: string;
     asignadoAAvatar?: string;
+}
 
+export interface DatosEdicionExtras {
     tags?: string[];
     /* [2303A-41] Posponer tarea hasta fecha ISO. null = quitar posposición. */
     pospuestoHasta?: string | null;
     /* Dependencias condicionales para completar la tarea */
     dependencias?: ReferenciaDependencia[];
-    /* Grupo de ejecución para organizar paneles de ejecución múltiples */
-    grupoEjecucion?: string | null;
 }
+
+/* Datos para editar una tarea existente
+ * prioridad puede ser null para eliminar la prioridad de la tarea
+ * urgencia puede ser null para eliminar la urgencia (vuelve a 'normal')
+ */
+export interface DatosEdicionTarea extends DatosEdicionBasico, DatosEdicionUbicacion, DatosEdicionPrioridad, DatosEdicionAsignacion, DatosEdicionExtras {}

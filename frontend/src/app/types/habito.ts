@@ -80,18 +80,26 @@ export interface VentanaOportunidad {
  * Solo permite un nivel de anidación (sin subhábitos recursivos)
  * Hereda inicialmente propiedades del padre pero puede tener frecuencia e importancia independiente
  */
-export interface SubHabito {
+/* Fragmentos cohesivos de SubHabito (ISP) */
+export interface SubHabitoBasico {
     id: number;
     nombre: string;
     importancia: NivelImportancia;
     frecuencia?: FrecuenciaHabito;
+    fechaCreacion: string;
+}
+
+/* Historial y progreso del subhabito */
+export interface SubHabitoProgreso {
     historialCompletados: string[];
     historialPospuestos?: string[];
     ultimoCompletado?: string;
-    fechaCreacion: string;
-    /* Campos heredados del padre al crear (pueden modificarse independientemente) */
     diasInactividad: number;
     racha: number;
+}
+
+/* Estado y reglas condicionales del subhabito */
+export interface SubHabitoEstado {
     pausado?: boolean;
     fechaPausa?: string;
     /* Posposición temporal individual (diferente de historialPospuestos que es por día) */
@@ -102,10 +110,35 @@ export interface SubHabito {
     dependencias?: ReferenciaDependencia[];
 }
 
-export interface Habito {
+/*
+ * SubHabito: Hábito anidado dentro de otro hábito
+ * Solo permite un nivel de anidación (sin subhábitos recursivos)
+ * Hereda inicialmente propiedades del padre pero puede tener frecuencia e importancia independiente
+ */
+export interface SubHabito extends SubHabitoBasico, SubHabitoProgreso, SubHabitoEstado {}
+
+/* Fragmentos cohesivos de Habito (ISP) */
+export interface HabitoBasico {
     id: number;
     nombre: string;
     importancia: NivelImportancia;
+    fechaCreacion: string /* Fecha ISO de cuando se creo el habito */;
+}
+
+/* Frecuencia y aspecto visual del habito */
+export interface HabitoFrecuencia {
+    /* Frecuencia del habito (opcional, por defecto diario) */
+    frecuencia?: FrecuenciaHabito;
+    /* Campos esteticos */
+    descripcion?: string;
+    icono?: string;
+    colorIcono?: string;
+    /* Ventana de oportunidad: período de tiempo óptimo para realizar el hábito */
+    ventanaOportunidad?: VentanaOportunidad;
+}
+
+/* Progreso, racha e historial del habito */
+export interface HabitoProgreso {
     diasInactividad: number;
     racha: number;
     tags: string[];
@@ -113,27 +146,30 @@ export interface Habito {
     /* Historial de fechas pospuestas (no cuentan como incumplimiento) */
     historialPospuestos?: string[];
     ultimoCompletado?: string /* Fecha ISO del ultimo completado */;
-    fechaCreacion: string /* Fecha ISO de cuando se creo el habito */;
-    /* Frecuencia del habito (opcional, por defecto diario) */
-    frecuencia?: FrecuenciaHabito;
-    /* Campos esteticos */
-    descripcion?: string;
-    icono?: string;
-    colorIcono?: string;
+}
+
+/* Estado de pausa y sincronizacion de conflictos */
+export interface HabitoEstado {
     /* Estado de pausa: el habito no aparece en pendientes y la racha se congela */
     pausado?: boolean;
     fechaPausa?: string /* Fecha ISO de cuando se pauso el habito */;
-    /* IDs de tareas asociadas al habito, en orden personalizado (Fase 14.8) */
-    tareasIds?: number[];
-    /* SubHabitos: hábitos anidados con frecuencia e importancia independiente */
-    subhabitos?: SubHabito[];
-    /* Ventana de oportunidad: período de tiempo óptimo para realizar el hábito */
-    ventanaOportunidad?: VentanaOportunidad;
     /* [2303A-41] Fecha ISO hasta la que el hábito está pospuesto por tiempo (diferente de historialPospuestos que es por día) */
     pospuestoHasta?: string;
     /* [014A-19] Timestamp de última modificación local (ms). Usado para resolución de
      * conflictos per-entity: el backend rechaza writes con updatedAt menor al existente. */
     updatedAt?: number;
+}
+
+/* Contenido anidado: tareas asociadas y subhabitos */
+export interface HabitoNested {
+    /* IDs de tareas asociadas al habito, en orden personalizado (Fase 14.8) */
+    tareasIds?: number[];
+    /* SubHabitos: hábitos anidados con frecuencia e importancia independiente */
+    subhabitos?: SubHabito[];
+}
+
+/* Reglas condicionales y orden de presentacion */
+export interface HabitoExtras {
     /* Dependencias condicionales: elementos que deben cumplirse antes de marcar este habito */
     dependencias?: ReferenciaDependencia[];
     /* Orden manual para drag & drop (menor = primero). Igual patrón que Tarea.orden */
@@ -143,6 +179,8 @@ export interface Habito {
     /* Grupo de ejecución para organizar paneles de ejecución múltiples */
     grupoEjecucion?: string | null;
 }
+
+export interface Habito extends HabitoBasico, HabitoFrecuencia, HabitoProgreso, HabitoEstado, HabitoNested, HabitoExtras {}
 
 /*
  * Datos para crear un nuevo habito

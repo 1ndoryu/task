@@ -21,14 +21,19 @@ export type GloryContentMap = Record<string, WPPost[]>;
  * PHP inyecta TODAS estas propiedades via glory_react_context.
  * Usar Partial<GloryContext> solo en window.GLORY_CONTEXT (puede ser incompleto antes de mount).
  */
-export interface GloryContext {
+/* Fragmento base del contexto de aplicacion (ISP) */
+export interface GloryContextBase {
     siteUrl: string;
     themeUrl: string;
     restUrl: string;
     nonce: string;
     isAdmin: boolean;
-    userId?: number;
     locale: string;
+}
+
+/* Fragmento extendible: escritorio y opciones opcionales */
+export interface GloryContextExtendible {
+    userId?: number;
     options?: Record<string, unknown>;
     /* Desktop: URL base del servidor API (en web coincide con restUrl) */
     apiUrl?: string;
@@ -39,6 +44,13 @@ export interface GloryContext {
     /* Extensibilidad sin debilitar el tipado principal */
     extra?: Record<string, unknown>;
 }
+
+/*
+ * Contexto completo con propiedades obligatorias.
+ * PHP inyecta TODAS estas propiedades via glory_react_context.
+ * Usar Partial<GloryContext> solo en window.GLORY_CONTEXT (puede ser incompleto antes de mount).
+ */
+export interface GloryContext extends GloryContextBase, GloryContextExtendible {}
 
 /*
  * Props base que toda isla recibe automaticamente.

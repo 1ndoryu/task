@@ -39,25 +39,40 @@ export interface WPUser {
     url?: string;
 }
 
-export interface WPPost {
+/* Fragmento de contenido de un post (ISP) */
+export interface WPPostContenido {
     id: number;
     slug: string;
     title: string;
     excerpt: string;
     content: string;
+    permalink: string;
+}
+
+/* Temporalidad y metadatos de lectura */
+export interface WPPostTemporalidad {
     date: string;
     dateFormatted: string;
     modified?: string;
+    readTime: string;
+}
+
+/* Clasificacion (autor, taxonomias, meta libre) */
+export interface WPPostClasificacion {
     author: string;
-    featuredImage: WPMedia | null;
-    permalink: string;
     categories: WPCategory[];
     tags: WPTag[];
     meta: Record<string, unknown>;
-    readTime: string;
-    status?: 'publish' | 'draft' | 'pending' | 'private' | 'trash';
     type?: string;
 }
+
+/* Presentacion visual y ciclo de vida del post */
+export interface WPPostPresentacion {
+    featuredImage: WPMedia | null;
+    status?: 'publish' | 'draft' | 'pending' | 'private' | 'trash';
+}
+
+export interface WPPost extends WPPostContenido, WPPostTemporalidad, WPPostClasificacion, WPPostPresentacion {}
 
 export interface WPPage extends WPPost {
     template?: string;
@@ -65,19 +80,30 @@ export interface WPPage extends WPPost {
     parent?: number;
 }
 
-export interface WPMenuItem {
+/* Fragmento base de un item de menu (ISP) */
+export interface WPMenuItemBasico {
     id: number;
     title: string;
     url: string;
     target?: string;
-    classes?: string[];
     description?: string;
+}
+
+/* Jerarquia y presentacion del item en el menu */
+export interface WPMenuItemJerarquia {
+    classes?: string[];
     parent?: number;
     order?: number;
-    objectType?: string;
-    objectId?: number;
     children?: WPMenuItem[];
 }
+
+/* Objetivo del item (contenido al que apunta) */
+export interface WPMenuItemObjetivo {
+    objectType?: string;
+    objectId?: number;
+}
+
+export interface WPMenuItem extends WPMenuItemBasico, WPMenuItemJerarquia, WPMenuItemObjetivo {}
 
 export interface WPMenu {
     id: number;

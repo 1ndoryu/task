@@ -28,16 +28,25 @@ export interface PausaTracker {
 /*
  * Sesión de tracking activa o completada
  */
-export interface SesionTracking {
+/* Fragmentos cohesivos de SesionTracking (ISP) */
+export interface SesionTrackingIdentidad {
     id: string;
     entidadId: number;
     tipoEntidad: TipoEntidadTracker;
     nombreEntidad: string;
+}
+
+/* Intervalo temporal y pausas de la sesion */
+export interface SesionTrackingTiempo {
     inicio: number; /* timestamp ms */
     fin?: number; /* timestamp ms, undefined si sigue activa */
     pausas: PausaTracker[];
     /* Tiempo efectivo en ms (excluyendo pausas) */
     tiempoEfectivoMs: number;
+}
+
+/* Objetivo y estado final de la sesion */
+export interface SesionTrackingResultado {
     /* Ajuste manual en ms aplicado por el usuario (+/-) */
     ajusteManualMs?: number;
     /* Tiempo mínimo objetivo en minutos (opcional) */
@@ -45,6 +54,11 @@ export interface SesionTracking {
     completada: boolean;
     cancelada?: boolean;
 }
+
+/*
+ * Sesión de tracking activa o completada
+ */
+export interface SesionTracking extends SesionTrackingIdentidad, SesionTrackingTiempo, SesionTrackingResultado {}
 
 /*
  * Estado persistible del store de tracking

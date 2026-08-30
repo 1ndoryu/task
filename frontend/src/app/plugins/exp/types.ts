@@ -59,13 +59,18 @@ export const CONFIG_EXP_POR_DEFECTO: ConfigExp = {
 };
 
 /* Estado completo persistido del plugin. */
-export interface EstadoExp {
+/* Fragmento de nivel y experiencia (ISP) */
+export interface EstadoExpNivel {
     vida: number;
     exp: number;
     /* exp del nivel actual (para la barra) */
     expEnNivel: number;
     expParaSiguienteNivel: number;
     nivel: number;
+}
+
+/* Datos derivados por entidad y sincronizacion */
+export interface EstadoExpDatos {
     /* Dificultades por entidad (id → dificultad), cache local del payload. */
     dificultades: Record<string, Dificultad>;
     /* Registros de EXP ganada (últimos; el resto se deriva). */
@@ -74,6 +79,10 @@ export interface EstadoExp {
     ultimaSync: number;
     /* Fecha del último recálculo de vida (para no penalizar dos veces). */
     ultimoCalculoVida: string;
+}
+
+/* Imagenes editadas del arbol pixel-art por estado */
+export interface EstadoExpArbol {
     /* [28-08-2026] Imágenes editadas por el usuario por estado (0..100): cada
      * estado guarda las claves "x,y" de TODAS las celdas del árbol dibujadas en
      * el editor pixel-art (tronco incluido si el usuario lo conservó). La imagen
@@ -86,3 +95,6 @@ export interface EstadoExp {
      * volver a fusionar (el usuario YA puede borrar el tronco a propósito). */
     copasArbolMigrado: boolean;
 }
+
+/* Estado completo persistido del plugin. */
+export interface EstadoExp extends EstadoExpNivel, EstadoExpDatos, EstadoExpArbol {}

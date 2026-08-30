@@ -17,7 +17,8 @@ export interface DatosUsuarioTMB {
 }
 
 /* Comida registrada con estimación calórica */
-export interface ComidaRegistrada {
+/* Fragmento nutricional de una comida (ISP) */
+export interface ComidaRegistradaDatos {
     id: string;
     descripcion: string;
     calorias: number;
@@ -25,6 +26,10 @@ export interface ComidaRegistrada {
     carbohidratos: number;
     grasas: number;
     azucar?: number /* Nuevo campo para azúcar */;
+}
+
+/* Origen, contexto y trazabilidad de la estimacion */
+export interface ComidaRegistradaOrigen {
     fotoUrl?: string;
     horaRegistro: number;
     fecha: string;
@@ -32,6 +37,9 @@ export interface ComidaRegistrada {
     promptOriginal?: string /* Input original del usuario para reintentar */;
     logProceso?: string[] /* Log del proceso de IA para inspección */;
 }
+
+/* Comida registrada con estimación calórica */
+export interface ComidaRegistrada extends ComidaRegistradaDatos, ComidaRegistradaOrigen {}
 
 /* Registro diario de alimentación */
 export interface RegistroDiario {
@@ -54,7 +62,8 @@ export interface DeficitCaloricoState {
 }
 
 /* Acciones del store */
-export interface DeficitCaloricoActions {
+/* Acciones de escritura del store de deficit calorico */
+export interface DeficitCaloricoEscrituraActions {
     guardarDatosUsuario: (datos: Partial<DatosUsuarioTMB>) => void;
     guardarApiKey: (keyIA: string) => void;
     agregarComida: (comida: ComidaRegistrada) => void;
@@ -62,8 +71,15 @@ export interface DeficitCaloricoActions {
     setCargandoIA: (cargando: boolean) => void;
     setErrorIA: (error: string | null) => void;
     sincronizarDesdeServidor: (estado: DeficitCaloricoState) => void;
+    consolidarDia: (fecha: string, tmb: number) => void;
+}
+
+/* Acciones de lectura/consulta del store de deficit calorico */
+export interface DeficitCaloricoLecturaActions {
     obtenerComidasHoy: () => ComidaRegistrada[];
     obtenerCaloriasHoy: () => number;
-    consolidarDia: (fecha: string, tmb: number) => void;
     obtenerHistorial: (dias: number) => RegistroDiario[];
 }
+
+/* Acciones del store */
+export interface DeficitCaloricoActions extends DeficitCaloricoEscrituraActions, DeficitCaloricoLecturaActions {}
