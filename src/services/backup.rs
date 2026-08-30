@@ -133,133 +133,8 @@ impl BackupService {
          *   no abortan: aplicar el backup no debe pisar ediciones posteriores.
          * Antes cada upsert abría su propia conexión y un fallo a mitad dejaba
          * un estado parcial (settings restaurados y tareas no, o viceversa). */
-        let mut restored = 0;
-        let mut fallos = 0;
-        let mut tx = pool.begin().await?;
-        // Tareas y proyectos: upsert por legacy_id (id local del front).
-        for tarea in data
-            .get("tareas")
-            .and_then(serde_json::Value::as_array)
-            .into_iter()
-            .flatten()
-        {
-            if let Some(legacy_id) = tarea.get("id").and_then(serde_json::Value::as_i64) {
-                match serde_json::from_value::<crate::models::productivity::UpsertTaskRequest>(
-                    tarea.clone(),
-                ) {
-                    Ok(request) => {
-                        match ProductivityRepository::upsert_task_in(
-                            &mut tx,
-                            user_id,
-                            legacy_id,
-                            &request,
-                        )
-                        .await
-                        {
-                            Ok(TaskUpsertOutcome::Written(_)) => restored += 1,
-                            Ok(_) => {
-                                fallos += 1;
-                                tracing::warn!(
-                                    %legacy_id,
-                                    "Restore: tarea saltada (datos más nuevos o padre inválido)"
-                                );
-                            }
-                            Err(error) => {
-                                return Err(AppError::Internal(format!(
-                                    "Restore interrumpido al restaurar la tarea {legacy_id}: {error}"
-                                )));
-                            }
-                        }
-                    },
-                    Err(error) => {
-                        fallos += 1;
-                        tracing::warn!(%legacy_id, %error, "Restore: tarea con formato inválido");
-                    }
-                }
-            }
-        }
-        for proyecto in data
-            .get("proyectos")
-            .and_then(serde_json::Value::as_array)
-            .into_iter()
-            .flatten()
-        {
-            if let Some(legacy_id) = proyecto.get("id").and_then(serde_json::Value::as_i64) {
-                match serde_json::from_value::<crate::models::productivity::UpsertProjectRequest>(
-                    proyecto.clone(),
-                ) {
-                    Ok(request) => {
-                        match ProductivityRepository::upsert_project(
-                            &mut *tx,
-                            user_id,
-                            legacy_id,
-                            &request,
-                        )
-                        .await
-                        {
-                            Ok(Some(_)) => restored += 1,
-                            Ok(None) => {
-                                fallos += 1;
-                                tracing::warn!(
-                                    %legacy_id,
-                                    "Restore: proyecto saltado (datos más nuevos)"
-                                );
-                            }
-                            Err(error) => {
-                                return Err(AppError::Internal(format!(
-                                    "Restore interrumpido al restaurar el proyecto {legacy_id}: {error}"
-                                )));
-                            }
-                        }
-                    },
-                    Err(error) => {
-                        fallos += 1;
-                        tracing::warn!(%legacy_id, %error, "Restore: proyecto con formato inválido");
-                    }
-                }
-            }
-        }
-        for habito in data
-            .get("habitos")
-            .and_then(serde_json::Value::as_array)
-            .into_iter()
-            .flatten()
-        {
-            if let Some(legacy_id) = habito.get("id").and_then(serde_json::Value::as_i64) {
-                match serde_json::from_value::<crate::models::productivity::UpsertHabitRequest>(
-                    habito.clone(),
-                ) {
-                    Ok(request) => {
-                        match ProductivityRepository::upsert_habit(
-                            &mut *tx,
-                            user_id,
-                            legacy_id,
-                            &request,
-                        )
-                        .await
-                        {
-                            Ok(Some(_)) => restored += 1,
-                            Ok(None) => {
-                                fallos += 1;
-                                tracing::warn!(
-                                    %legacy_id,
-                                    "Restore: hábito saltado (datos más nuevos)"
-                                );
-                            }
-                            Err(error) => {
-                                return Err(AppError::Internal(format!(
-                                    "Restore interrumpido al restaurar el hábito {legacy_id}: {error}"
-                                )));
-                            }
-                        }
-                    },
-                    Err(error) => {
-                        fallos += 1;
-                        tracing::warn!(%legacy_id, %error, "Restore: hábito con formato inválido");
-                    }
-                }
-            }
-        }
+        let tx = pool.begin().await?;
+        let (mut tx, restored, fallos) = Self::restore_items(tx, user_id, &data).await?;
 
         crate::repositories::DashboardRepository::upsert_settings(
             &mut *tx,
@@ -285,6 +160,153 @@ impl BackupService {
     pub async fn delete(pool: &PgPool, user_id: Uuid, id: Uuid) -> Result<bool, AppError> {
         Self::ensure_premium(pool, user_id).await?;
         Ok(BackupRepository::delete(pool, user_id, id).await?)
+    }
+
+    /// Restaura por separado tareas/proyectos/hábitos dentro de la transacción
+    /// atómica del restore. [por que] Aloja cada bucle en una función corta para
+    /// mantener `restore` y cada helper por debajo del límite de complejidad;
+    /// mantiene el contrato atómico y de fallos suaves (acumula `fallos`).
+    async fn restore_items<'t>(
+        mut tx: sqlx::Transaction<'t, sqlx::Postgres>,
+        user_id: Uuid,
+        data: &serde_json::Value,
+    ) -> Result<(sqlx::Transaction<'t, sqlx::Postgres>, usize, usize), AppError> {
+        let mut restored = 0;
+        let mut fallos = 0;
+        let (t, r, f) = Self::restore_tareas(tx, user_id, data).await?;
+        tx = t;
+        restored += r;
+        fallos += f;
+        let (t, r, f) = Self::restore_proyectos(tx, user_id, data).await?;
+        tx = t;
+        restored += r;
+        fallos += f;
+        let (t, r, f) = Self::restore_habitos(tx, user_id, data).await?;
+        tx = t;
+        restored += r;
+        fallos += f;
+        Ok((tx, restored, fallos))
+    }
+
+    async fn restore_tareas<'t>(
+        mut tx: sqlx::Transaction<'t, sqlx::Postgres>,
+        user_id: Uuid,
+        data: &serde_json::Value,
+    ) -> Result<(sqlx::Transaction<'t, sqlx::Postgres>, usize, usize), AppError> {
+        let mut restored = 0;
+        let mut fallos = 0;
+        for item in data
+            .get("tareas")
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let Some(legacy_id) = item.get("id").and_then(serde_json::Value::as_i64) else {
+                continue;
+            };
+            let Ok(request) = serde_json::from_value::<crate::models::productivity::UpsertTaskRequest>(
+                item.clone(),
+            ) else {
+                fallos += 1;
+                tracing::warn!(%legacy_id, "Restore: tarea con formato inválido");
+                continue;
+            };
+            match ProductivityRepository::upsert_task_in(&mut tx, user_id, legacy_id, &request).await
+            {
+                Ok(TaskUpsertOutcome::Written(_)) => restored += 1,
+                Ok(_) => {
+                    fallos += 1;
+                    tracing::warn!(
+                        %legacy_id,
+                        "Restore: tarea saltada (datos más nuevos o padre inválido)"
+                    );
+                }
+                Err(error) => {
+                    return Err(AppError::Internal(format!(
+                        "Restore interrumpido al restaurar la tarea {legacy_id}: {error}"
+                    )));
+                }
+            }
+        }
+        Ok((tx, restored, fallos))
+    }
+
+    async fn restore_proyectos<'t>(
+        mut tx: sqlx::Transaction<'t, sqlx::Postgres>,
+        user_id: Uuid,
+        data: &serde_json::Value,
+    ) -> Result<(sqlx::Transaction<'t, sqlx::Postgres>, usize, usize), AppError> {
+        let mut restored = 0;
+        let mut fallos = 0;
+        for item in data
+            .get("proyectos")
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let Some(legacy_id) = item.get("id").and_then(serde_json::Value::as_i64) else {
+                continue;
+            };
+            let Ok(request) = serde_json::from_value::<crate::models::productivity::UpsertProjectRequest>(
+                item.clone(),
+            ) else {
+                fallos += 1;
+                tracing::warn!(%legacy_id, "Restore: proyecto con formato inválido");
+                continue;
+            };
+            match ProductivityRepository::upsert_project(&mut *tx, user_id, legacy_id, &request).await {
+                Ok(Some(_)) => restored += 1,
+                Ok(None) => {
+                    fallos += 1;
+                    tracing::warn!(%legacy_id, "Restore: proyecto saltado (datos más nuevos)");
+                }
+                Err(error) => {
+                    return Err(AppError::Internal(format!(
+                        "Restore interrumpido al restaurar el proyecto {legacy_id}: {error}"
+                    )));
+                }
+            }
+        }
+        Ok((tx, restored, fallos))
+    }
+
+    async fn restore_habitos<'t>(
+        mut tx: sqlx::Transaction<'t, sqlx::Postgres>,
+        user_id: Uuid,
+        data: &serde_json::Value,
+    ) -> Result<(sqlx::Transaction<'t, sqlx::Postgres>, usize, usize), AppError> {
+        let mut restored = 0;
+        let mut fallos = 0;
+        for item in data
+            .get("habitos")
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let Some(legacy_id) = item.get("id").and_then(serde_json::Value::as_i64) else {
+                continue;
+            };
+            let Ok(request) = serde_json::from_value::<crate::models::productivity::UpsertHabitRequest>(
+                item.clone(),
+            ) else {
+                fallos += 1;
+                tracing::warn!(%legacy_id, "Restore: hábito con formato inválido");
+                continue;
+            };
+            match ProductivityRepository::upsert_habit(&mut *tx, user_id, legacy_id, &request).await {
+                Ok(Some(_)) => restored += 1,
+                Ok(None) => {
+                    fallos += 1;
+                    tracing::warn!(%legacy_id, "Restore: hábito saltado (datos más nuevos)");
+                }
+                Err(error) => {
+                    return Err(AppError::Internal(format!(
+                        "Restore interrumpido al restaurar el hábito {legacy_id}: {error}"
+                    )));
+                }
+            }
+        }
+        Ok((tx, restored, fallos))
     }
 }
 
