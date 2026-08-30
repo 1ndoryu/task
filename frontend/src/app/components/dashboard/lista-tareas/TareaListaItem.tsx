@@ -8,21 +8,29 @@ import {useHabitosStore} from '../../../stores/habitosStore';
 import {TareaConColapsador} from './TareaConColapsador';
 import type {ListaTareasProps} from './ListaTareasProps';
 
-export interface EstadoFilaTarea {
+export interface EftDatos {
     tareas: Tarea[];
     tareasExpandidas: Set<number>;
-    onToggleExpandir: (id: number) => void;
-    estaSeleccionada: (id: number) => boolean;
-    manejarSeleccionMultiple: (tarea: Tarea, evento: React.MouseEvent) => void;
     modoSeleccionActivo: boolean;
-    abrirConfiguracion: (id: number) => void;
-    setTareaMoviendo: (tarea: Tarea | null) => void;
-    handleIndent: (id: number) => void;
-    handleOutdent: (id: number) => void;
-    handleCrearNueva: (parentId: number | undefined, tareaActualId: number) => void;
     mensajesNoLeidosPorTarea: Record<number, number>;
     suprimirClickRef: React.RefObject<boolean>;
 }
+
+export interface EftSeleccion {
+    estaSeleccionada: (id: number) => boolean;
+    manejarSeleccionMultiple: (tarea: Tarea, evento: React.MouseEvent) => void;
+    abrirConfiguracion: (id: number) => void;
+    setTareaMoviendo: (tarea: Tarea | null) => void;
+    onToggleExpandir: (id: number) => void;
+}
+
+export interface EftEdicion {
+    handleIndent: (id: number) => void;
+    handleOutdent: (id: number) => void;
+    handleCrearNueva: (parentId: number | undefined, tareaActualId: number) => void;
+}
+
+export interface EstadoFilaTarea extends EftDatos, EftSeleccion, EftEdicion {}
 
 interface TareaListaItemProps {
     tarea: Tarea;

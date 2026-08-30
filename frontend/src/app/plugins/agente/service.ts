@@ -18,30 +18,41 @@ export interface ConversacionAgente {
     config?: ConfigAgente;
 }
 
-export interface ConfigAgente {
+export interface ConfigAgenteModelo {
     modo: ModoAgente;
     modelo: string;
     temperatura: number;
     maxTokens: number;
     idioma: 'es' | 'en' | 'pt' | 'fr';
+}
+
+export interface ConfigAgenteDatos {
     incluirNotas: boolean;
     incluirTareasCompletadas: boolean;
     incluirHabitosPausados: boolean;
+    incluirMemoria: boolean;
+    incluirSkills: boolean;
+}
+
+export interface ConfigAgenteLimites {
     permitirBusquedaWeb: boolean;
     permitirRecordatorios: boolean;
     promptSistema: string;
     maxTurns: number;
     timeoutToolSecs: number;
-    incluirMemoria: boolean;
-    incluirSkills: boolean;
-    /* [02-09-2026] Fase 5: comportamiento (migración de SeccionConfigIAPanelChat),
-     * workspace (solo local) y ventana/umbral de compactación. */
+}
+
+/* [02-09-2026] Fase 5: comportamiento (migración de SeccionConfigIAPanelChat),
+ * workspace (solo local) y ventana/umbral de compactación. */
+export interface ConfigAgenteComportamiento {
     estilo: 'conciso' | 'detallado' | 'amable';
     preferencias: string;
     workspace: string;
     maxVentana: number;
     umbralCompactacion: number;
 }
+
+export interface ConfigAgente extends ConfigAgenteModelo, ConfigAgenteDatos, ConfigAgenteLimites, ConfigAgenteComportamiento {}
 
 /* [02-09-2026] Fase 5: normaliza la config camelCase del front al contrato
  * snake_case que lee el backend (clave única de verdad; antes la config de la
