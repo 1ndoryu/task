@@ -34,19 +34,26 @@ interface NotasState {
     limite: number;
 }
 
-interface NotasActions {
+/* [ISP] Acciones divididas por dominio: carga/listado vs nota activa por panel. */
+interface NotasActionsListado {
     cargarNotas: (reiniciar?: boolean) => Promise<void>;
     cargarMas: () => Promise<void>;
     buscarNotas: (termino: string) => Promise<Nota[]>;
+    eliminarNota: (id: string) => Promise<boolean>;
+    limpiarError: () => void;
+}
+
+interface NotasActionsActiva {
     /* [263A-12] Acciones de nota activa parametrizadas por panelId */
     seleccionarNota: (panelId: string, nota: Nota) => void;
     crearNuevaNota: (panelId: string, carpetaId?: string | null) => void;
     actualizarContenidoNotaActiva: (panelId: string, contenido: string) => void;
     guardarNotaActiva: (panelId: string) => Promise<Nota | null>;
-    eliminarNota: (id: string) => Promise<boolean>;
-    limpiarError: () => void;
     establecerNotaActivaDesdeId: (panelId: string, id: string | null) => void;
     restaurarNotaActivaGuardada: (panelId: string) => void;
+}
+
+interface NotasActions extends NotasActionsListado, NotasActionsActiva {
 }
 
 const LIMITE_POR_PAGINA = 50;

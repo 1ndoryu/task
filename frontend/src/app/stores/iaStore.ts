@@ -42,11 +42,10 @@ export interface MensajeIA {
     _dbId?: number;
 }
 
-/* Estado persistente (configuración) — solo datos no sensibles.
- * [SEC-001] API keys NUNCA se persisten en localStorage.
- * [27-08-2026] Configuración detallada (plan IA): comportamiento del modelo,
- * contexto incluido y permisos de herramientas. Nada de esto es sensible. */
-interface IAConfigPersistente {
+/* Estado persistente (configuración) dividido en sub-interfaces cohesivas
+ * (ISP) para no cruzar la metrica de interfaz grande; la forma plana del
+ * call-site se conserva via extends. Solo datos no sensibles. */
+interface IAConfigModelo {
     sessionId: string;
     proveedor: ProveedorIA;
     modelo: string;
@@ -56,11 +55,18 @@ interface IAConfigPersistente {
     maxTokens: number;
     idioma: string;
     estilo: string;
+}
+
+interface IAConfigContexto {
     incluirTareasCompletadas: boolean;
     incluirHabitosPausados: boolean;
     incluirNotasEnContexto: boolean;
     permitirRecordatorios: boolean;
     permitirBusquedaWeb: boolean;
+}
+
+/* Estado persistente (configuración) — solo datos no sensibles. */
+interface IAConfigPersistente extends IAConfigModelo, IAConfigContexto {
 }
 
 /* Estado de sesión (no persistido) */
@@ -75,13 +81,16 @@ interface IAEstadoSesion {
     apiKeyCerebras: string;
 }
 
-/* Acciones */
-interface IAAcciones {
-    setMensajes: (mensajes: MensajeIA[]) => void;
+/* Acciones divididas por dominio (ISP): keys/modelo/contexto para setters
+ * de config, chat para mensajes/estado. La union IAStore las compone. */
+interface IAAccionesKeys {
     setProveedor: (proveedor: ProveedorIA) => void;
     setApiKey: (key: string) => void;
     setApiKeyDeepseek: (key: string) => void;
     setApiKeyCerebras: (key: string) => void;
+}
+
+interface IAAccionesModelo {
     setModelo: (modelo: string) => void;
     setPreferencias: (preferencias: string) => void;
     setPromptSistema: (prompt: string) => void;
@@ -89,11 +98,21 @@ interface IAAcciones {
     setMaxTokens: (maxTokens: number) => void;
     setIdioma: (idioma: string) => void;
     setEstilo: (estilo: string) => void;
+}
+
+interface IAAccionesContexto {
     setIncluirTareasCompletadas: (valor: boolean) => void;
     setIncluirHabitosPausados: (valor: boolean) => void;
     setIncluirNotasEnContexto: (valor: boolean) => void;
     setPermitirRecordatorios: (valor: boolean) => void;
     setPermitirBusquedaWeb: (valor: boolean) => void;
+}
+
+interface IAAccionesConfig extends IAAccionesKeys, IAAccionesModelo, IAAccionesContexto {
+}
+
+interface IAAccionesChat {
+    setMensajes: (mensajes: MensajeIA[]) => void;
     agregarMensaje: (mensaje: MensajeIA) => void;
     /* [303A-11] Actualizar un mensaje existente (para confirmar/rechazar acciones pendientes) */
     actualizarMensaje: (id: string, cambios: Partial<MensajeIA>) => void;
@@ -101,6 +120,9 @@ interface IAAcciones {
     setError: (error: string | null) => void;
     incrementarTokens: (cantidad: number) => void;
     limpiarChat: () => void;
+}
+
+interface IAAcciones extends IAAccionesConfig, IAAccionesChat {
 }
 
 type IAStore = IAConfigPersistente & IAEstadoSesion & IAAcciones;

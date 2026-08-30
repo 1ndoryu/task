@@ -20,7 +20,8 @@ interface GruposTareasState {
     ordenamientoGrupos: OrdenamientoGrupos;
 }
 
-interface GruposTareasAcciones {
+/* [ISP] Acciones divididas por dominio: secciones/orden, colapso, lectura/orden. */
+interface GruposTareasAccionesCrud {
     /* Activar/desactivar el sistema de secciones */
     toggleSecciones: () => void;
 
@@ -31,7 +32,9 @@ interface GruposTareasAcciones {
     crearGrupo: (nombre: string, proyectoId?: number) => GrupoTareas;
     editarGrupo: (id: number, nombre: string) => void;
     eliminarGrupo: (id: number) => void;
+}
 
+interface GruposTareasAccionesColapso {
     /* Colapso */
     toggleColapsarGrupo: (id: number) => void;
     colapsarTodos: () => void;
@@ -39,7 +42,9 @@ interface GruposTareasAcciones {
 
     /* Reordenamiento */
     reordenarGrupos: (grupos: GrupoTareas[]) => void;
+}
 
+interface GruposTareasAccionesLectura {
     /* Obtener grupo por ID */
     obtenerGrupo: (id: number) => GrupoTareas | undefined;
 
@@ -48,6 +53,9 @@ interface GruposTareasAcciones {
 
     /* Ordenar grupos según criterio y tareas (para calcular importancia) */
     ordenarGrupos: (grupos: GrupoTareas[], tareasPorGrupo: Map<number, Tarea[]>) => GrupoTareas[];
+}
+
+interface GruposTareasAcciones extends GruposTareasAccionesCrud, GruposTareasAccionesColapso, GruposTareasAccionesLectura {
 }
 
 type GruposTareasStore = GruposTareasState & GruposTareasAcciones;

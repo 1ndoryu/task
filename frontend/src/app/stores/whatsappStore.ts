@@ -13,27 +13,37 @@ import type {AuthStatusResponse} from '../services/whatsappService';
 
 export type WhatsAppStep = 'idle' | 'registering' | 'qr' | 'authenticated' | 'error';
 
-export interface WhatsAppState {
+/* [ISP] WhatsAppState dividido por dominio (flujo, persistido, uso, UX). */
+export interface WhatsAppStateFlujo {
     /* Estado del flujo */
     step: WhatsAppStep;
     qrCode: string | null;
     accountName: string | null;
+}
 
+export interface WhatsAppStatePersistido {
     /* Estado persistido */
     phonePrimary: string | null;
     authenticated: boolean;
     linkedJid: string | null;
     enabled: boolean;
     healthStatus: string;
+}
 
+export interface WhatsAppStateUso {
     /* Uso diario */
     dailyMsgCount: number;
     dailyMsgDate: string | null;
+}
 
+export interface WhatsAppStateUx {
     /* UX */
     loading: boolean;
     error: string | null;
     qrRateLimited: boolean;
+}
+
+export interface WhatsAppState extends WhatsAppStateFlujo, WhatsAppStatePersistido, WhatsAppStateUso, WhatsAppStateUx {
 }
 
 export interface WhatsAppActions {

@@ -22,12 +22,15 @@ interface GruposFbState {
     entornoActivoId: number | null;
 
     /* Filtros activos */
-    filtros: {
-        busqueda: string;
-        categoria: string;
-        importancia: string;
-        mostrarOcultos: boolean;
-    };
+    filtros: FiltrosGruposFb;
+}
+
+/* [ISP] Filtros extraídos a tipo propio para no inflar GruposFbState */
+export interface FiltrosGruposFb {
+    busqueda: string;
+    categoria: string;
+    importancia: string;
+    mostrarOcultos: boolean;
 }
 
 interface GruposFbActions {
@@ -45,7 +48,7 @@ interface GruposFbActions {
 
 export type GruposFbStore = GruposFbState & GruposFbActions;
 
-const FILTROS_INICIALES: GruposFbState['filtros'] = {
+const FILTROS_INICIALES: FiltrosGruposFb = {
     busqueda: '',
     categoria: '',
     importancia: '',
