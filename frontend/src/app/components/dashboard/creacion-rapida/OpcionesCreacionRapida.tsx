@@ -12,13 +12,17 @@ import type {FrecuenciaHabito, Proyecto} from '../../../types/dashboard';
 import type {EstadoMenu, EstadoOpciones} from '../../../hooks/dashboard/useModalCreacionRapida';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../../utils/constantes';
 
-interface OpcionesCreacionRapidaProps {
+/* OpcionesCreacionRapidaProps se divide en fragmentos cohesivos vía extends. */
+interface OpcionesCreacionRapidaContexto {
     tipo: 'tarea' | 'habito' | 'proyecto';
     opciones: EstadoOpciones;
     proyectos: Proyecto[];
     adjuntosCount: number;
     subiendo: boolean;
     obtenerEtiquetaFecha: (val?: string) => string;
+}
+
+interface OpcionesCreacionRapidaAbrir {
     abrirMenu: (setter: React.Dispatch<React.SetStateAction<EstadoMenu>>, e: React.MouseEvent) => void;
     abrirSelectorArchivo: (e: React.MouseEvent) => void;
     setMenuProyecto: React.Dispatch<React.SetStateAction<EstadoMenu>>;
@@ -26,12 +30,17 @@ interface OpcionesCreacionRapidaProps {
     setMenuPrioridad: React.Dispatch<React.SetStateAction<EstadoMenu>>;
     setMenuUrgencia: React.Dispatch<React.SetStateAction<EstadoMenu>>;
     setMenuImportancia: React.Dispatch<React.SetStateAction<EstadoMenu>>;
+}
+
+interface OpcionesCreacionRapidaExtra {
     frecuencia: FrecuenciaHabito;
     onCambiarFrecuencia: (frecuencia: FrecuenciaHabito) => void;
     grupos: string[];
     grupoActual: string | null;
     onCambiarGrupo: (grupo: string | null) => void;
 }
+
+interface OpcionesCreacionRapidaProps extends OpcionesCreacionRapidaContexto, OpcionesCreacionRapidaAbrir, OpcionesCreacionRapidaExtra {}
 
 export function OpcionesCreacionRapida({
     tipo, opciones, proyectos, adjuntosCount, subiendo,

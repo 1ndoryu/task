@@ -114,7 +114,8 @@ function cargarConfig(): ConfigAgente {
     return {...CONFIG_DEFECTO};
 }
 
-interface EstadoAgente {
+/* EstadoAgente se divide en estado puro + acciones, compuesto vía extends. */
+interface EstadoAgenteDatos {
     tabs: TabAgente[];
     tabActivaId: string | null;
     conversacionesCargadas: boolean;
@@ -125,7 +126,9 @@ interface EstadoAgente {
     tareasProgramadas: TareaProgramada[];
     cargandoTareas: boolean;
     errorTareas: string | null;
-    /* Acciones */
+}
+
+interface EstadoAgenteAccionesConversacion {
     cargarConversaciones: () => Promise<void>;
     abrirTab: (id: string) => Promise<void>;
     crearTab: () => Promise<ConversacionAgente | null>;
@@ -135,10 +138,15 @@ interface EstadoAgente {
     reintentarMensaje: () => Promise<void>;
     limpiarErrorTab: (id: string) => void;
     establecerConfig: (config: Partial<ConfigAgente>) => void;
+}
+
+interface EstadoAgenteAccionesTareas {
     cargarTareasProgramadas: () => Promise<void>;
     crearTarea: (datos: {nombre: string; prompt: string; tipo: 'una_vez' | 'recurrente'; cron_expr?: string; ejecutar_en?: string}) => Promise<void>;
     eliminarTarea: (id: string) => Promise<void>;
 }
+
+interface EstadoAgente extends EstadoAgenteDatos, EstadoAgenteAccionesConversacion, EstadoAgenteAccionesTareas {}
 
 function generarIdLocal(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

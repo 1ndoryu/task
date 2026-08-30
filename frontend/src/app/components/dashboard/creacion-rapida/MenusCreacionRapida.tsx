@@ -11,24 +11,31 @@ import type {Proyecto} from '../../../types/dashboard';
 import type {EstadoMenu} from '../../../hooks/dashboard/useModalCreacionRapida';
 import {opcionesMenuPrioridad, opcionesMenuUrgencia, opcionesMenuImportancia} from '../../../utils/nivelesConfig';
 
-interface MenusCreacionRapidaProps {
+/* MenusCreacionRapidaProps se divide en estado + callbacks compuestos vía extends. */
+interface MenusCreacionRapidaContexto {
     proyectos: Proyecto[];
     fechaActual?: string;
+}
 
+interface MenusCreacionRapidaEstados {
     menuTipo: EstadoMenu;
     menuProyecto: EstadoMenu;
     menuPrioridad: EstadoMenu;
     menuUrgencia: EstadoMenu;
     menuFecha: EstadoMenu;
     menuImportancia: EstadoMenu;
+}
 
+interface MenusCreacionRapidaSeleccion {
     seleccionarTipo: (id: string) => void;
     seleccionarProyecto: (id: string) => void;
     seleccionarPrioridad: (id: string) => void;
     seleccionarUrgencia: (id: string) => void;
     seleccionarFecha: (id: string) => void;
     seleccionarImportancia: (id: string) => void;
+}
 
+interface MenusCreacionRapidaCierre {
     cerrarMenuTipo: () => void;
     cerrarMenuProyecto: () => void;
     cerrarMenuPrioridad: () => void;
@@ -36,6 +43,8 @@ interface MenusCreacionRapidaProps {
     cerrarMenuFecha: () => void;
     cerrarMenuImportancia: () => void;
 }
+
+interface MenusCreacionRapidaProps extends MenusCreacionRapidaContexto, MenusCreacionRapidaEstados, MenusCreacionRapidaSeleccion, MenusCreacionRapidaCierre {}
 
 export function MenusCreacionRapida(props: MenusCreacionRapidaProps): JSX.Element {
     const {

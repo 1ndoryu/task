@@ -10,7 +10,9 @@ import type {PaginaMovil} from '../../../hooks/usePaginaMovil';
 
 /* COMPONENT 1: MENU MOVIL (Left - Hamburger + Drawer) */
 
-interface EncabezadoMenuMovilProps {
+/* EncabezadoMenuMovilProps se divide en fragmentos cohesivos compuestos vía
+ * extends (cada bloque <10 campos) conservando el contrato plano de las props. */
+interface EncabezadoMenuMovilUsuario {
     usuario: string;
     avatarUrl?: string;
     suscripcion?: InfoSuscripcion | null;
@@ -20,12 +22,15 @@ interface EncabezadoMenuMovilProps {
     estaConectado: boolean;
     esTablet: boolean;
     sincronizacion?: SincronizacionInfo;
+}
 
+interface EncabezadoMenuMovilDrawer {
     drawerAbierto: boolean;
     onCerrarDrawer: () => void;
     onAbrirDrawer: () => void;
+}
 
-    // Actions needed for the Drawer Items
+interface EncabezadoMenuMovilAccionesPrincipales {
     onClickPlan?: () => void;
     onClickSeguridad?: () => void;
     onClickAdmin?: () => void;
@@ -34,6 +39,9 @@ interface EncabezadoMenuMovilProps {
     onClickUsuario?: () => void;
     onClickEquipos?: () => void;
     onClickNotificaciones?: (evento?: React.MouseEvent) => void;
+}
+
+interface EncabezadoMenuMovilAccionesSecundarias {
     onClickExperimentos?: () => void;
     onClickTemas?: () => void;
     onClickConfigUsuario?: () => void;
@@ -44,6 +52,8 @@ interface EncabezadoMenuMovilProps {
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
     onCambiarPagina?: (pagina: PaginaMovil) => void;
 }
+
+interface EncabezadoMenuMovilProps extends EncabezadoMenuMovilUsuario, EncabezadoMenuMovilDrawer, EncabezadoMenuMovilAccionesPrincipales, EncabezadoMenuMovilAccionesSecundarias {}
 
 export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin: _esAdmin, equiposPendientes = 0, notificacionesPendientes = 0, estaConectado: _estaConectado, esTablet, sincronizacion, drawerAbierto, onCerrarDrawer, onAbrirDrawer, onClickPlan, onClickSeguridad, onClickAdmin, onClickLayout, onClickVersion, onClickUsuario, onClickEquipos, onClickNotificaciones, onClickExperimentos, onClickTemas, onClickConfigUsuario, onClickBackups, onClickConfigMCP, onClickPlugins, onExportarDatos, onCrearRapido, onCambiarPagina}: EncabezadoMenuMovilProps) {
     /* [014A-12] Estado para el bottom sheet de personalización de barra inferior */

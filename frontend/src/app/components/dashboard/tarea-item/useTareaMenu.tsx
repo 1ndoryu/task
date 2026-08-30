@@ -17,7 +17,9 @@ import {
 import {manejarOpcionHabito, manejarOpcionSubHabito} from './manejarOpcionHabito';
 import {manejarOpcionTarea} from './manejarOpcionTarea';
 
-interface UseTareaMenuProps {
+/* UseTareaMenuProps se divide en fragmentos cohesivos compuestos vía extends:
+ * base de tarea + acciones de hábito + acciones de subhábito + selección. */
+interface UseTareaMenuBase {
     tarea: Tarea;
     esHabito: boolean;
     onEditar?: (datos: DatosEdicionTarea) => void;
@@ -26,8 +28,10 @@ interface UseTareaMenuProps {
     onCrearNueva?: (parentId: number | undefined, tareaActualId: number) => void;
     onMoverProyecto?: () => void;
     onCompartir?: () => void;
+}
 
-    /* Props para hábitos */
+/* Props para hábitos */
+interface UseTareaMenuHabitoProps {
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
     onToggleHabito?: (habitoId: number) => void;
@@ -38,19 +42,24 @@ interface UseTareaMenuProps {
     habitoCompletadoHoy?: boolean;
     habitoPausado?: boolean;
     habitoPospuestoHoy?: boolean;
+}
 
-    /* [207A-3] Props para subhábitos */
+/* [207A-3] Props para subhábitos */
+interface UseTareaMenuSubHabitoProps {
     onToggleSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
     onEliminarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    /* [217A-2] Configuración independiente de subhábitos */
     onPosponerSubHabitoConTiempo?: (habitoPadreId: number, subHabitoId: number, hasta: string | null) => void;
     onActualizarSubHabito?: (habitoPadreId: number, subHabitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     onConfigurarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
+}
 
-    /* Props para selección múltiple */
+/* Props para selección múltiple */
+interface UseTareaMenuSeleccionProps {
     estaSeleccionada?: boolean;
     cantidadSeleccionadas?: number;
 }
+
+interface UseTareaMenuProps extends UseTareaMenuBase, UseTareaMenuHabitoProps, UseTareaMenuSubHabitoProps, UseTareaMenuSeleccionProps {}
 
 export function useTareaMenu({tarea, esHabito, onEditar, onEliminar, onConfigurar, onCrearNueva, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, habitoCompletadoHoy, habitoPausado, habitoPospuestoHoy, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, estaSeleccionada = false, cantidadSeleccionadas = 0}: UseTareaMenuProps) {
     /* Menú contextual coordinado globalmente */
