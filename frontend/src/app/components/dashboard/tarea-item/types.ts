@@ -1,6 +1,8 @@
 import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Habito} from '../../../types/dashboard';
 
-export interface TareaItemProps {
+/* Frente ISP 1408: TareaItemProps dividida en fragmentos cohesivos via extends
+ * (misma forma plana; cada declaracion <= 10 campos). */
+export interface TareaItemAcciones {
     tarea: Tarea;
     onToggle?: () => void;
     onEditar?: (datos: DatosEdicionTarea) => void;
@@ -12,6 +14,8 @@ export interface TareaItemProps {
     onCrearNueva?: (parentId: number | undefined, tareaActualId: number) => void;
     /* Abrir panel de configuracion */
     onConfigurar?: () => void;
+}
+export interface TareaItemContexto {
     /* Nombre del proyecto al que pertenece (opcional) */
     nombreProyecto?: string;
     /* Mostrar solo el icono del proyecto sin texto */
@@ -24,7 +28,11 @@ export interface TareaItemProps {
     estaCompartida?: boolean;
     /* Contador de mensajes no leídos (para badge) */
     mensajesNoLeidos?: number;
-    /* Callbacks específicos para tareas-hábito (Fase 7.6.1) - Sincronizado con TablaHabitos */
+    /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
+    tieneSubtareas?: boolean;
+    modoCompacto?: boolean;
+}
+export interface TareaItemHabito {
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
     onToggleHabito?: (habitoId: number) => void;
@@ -38,6 +46,8 @@ export interface TareaItemProps {
     habitoPausado?: boolean;
     /* Indica si el hábito fue pospuesto hoy (para menú contextual) */
     habitoPospuestoHoy?: boolean;
+}
+export interface TareaItemSubHabito {
     /* [207A-3] Callbacks para subhábitos */
     onToggleSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
     onEliminarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
@@ -45,18 +55,19 @@ export interface TareaItemProps {
     onPosponerSubHabitoConTiempo?: (habitoPadreId: number, subHabitoId: number, hasta: string | null) => void;
     onActualizarSubHabito?: (habitoPadreId: number, subHabitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     onConfigurarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    /* Indica si la tarea tiene subtareas (para ajustar padding y evitar colisión con el contador) */
-    tieneSubtareas?: boolean;
-    modoCompacto?: boolean;
+}
+export interface TareaItemSeleccionFuente {
     /* Props para selección múltiple (Ctrl+Click) */
     estaSeleccionada?: boolean;
     onSeleccionMultiple?: (tarea: Tarea, evento: React.MouseEvent) => void;
-    modoSeleccionActivo?: boolean;    /* [218A-2] Ref para suprimir clicks posteriores a un drag */
+    modoSeleccionActivo?: boolean;
+    /* [218A-2] Ref para suprimir clicks posteriores a un drag */
     suprimirClickRef?: React.RefObject<boolean>;
     /* Listado de tareas y habitos para evaluar dependencias */
     tareas?: Tarea[];
     habitos?: Habito[];
 }
+export interface TareaItemProps extends TareaItemAcciones, TareaItemContexto, TareaItemHabito, TareaItemSubHabito, TareaItemSeleccionFuente {}
 
 export interface MenuContextualEstado {
     visible: boolean;

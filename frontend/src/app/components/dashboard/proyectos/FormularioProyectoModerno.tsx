@@ -14,7 +14,9 @@ import type {EstadoProyecto} from '../../shared';
 import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {ListaHitos} from './ListaHitos';
 
-interface FormularioProyectoModernoProps {
+/* Frente ISP 1408: FormularioProyectoModernoProps dividida en fragmentos
+ * cohesivos via extends (misma forma plana; cada declaracion <= 10 campos). */
+interface FormularioProyectoBasico {
     nombre: string;
     onNombreChange: (valor: string) => void;
     descripcion: string;
@@ -22,40 +24,40 @@ interface FormularioProyectoModernoProps {
     icono: string;
     colorIcono: string;
     onIconoChange: (icono: string, color: string) => void;
+    errorNombre?: string;
+    modoEdicion?: boolean;
+}
+interface FormularioProyectoPropiedades {
     prioridad: NivelPrioridad;
     onPrioridadChange: (valor: NivelPrioridad) => void;
     urgencia: NivelUrgencia | null;
     onUrgenciaChange: (valor: NivelUrgencia | null) => void;
     fechaLimite: string;
     onFechaLimiteChange: (valor: string) => void;
-    /* Estado del proyecto (Fase 9.6) */
     estado?: EstadoProyecto;
     onEstadoChange?: (estado: EstadoProyecto) => void;
-    errorNombre?: string;
-    modoEdicion?: boolean;
-    /* Participantes del proyecto (Fase 9.2.4) */
+}
+interface FormularioProyectoParticipantes {
     participantes?: Participante[];
-    /* Companeros disponibles para agregar */
     companeros?: CompaneroEquipo[];
-    /* Callbacks para gestion de participantes */
     onAgregarParticipante?: (companeroId: number, rol: RolCompartido) => void;
     onRemoverParticipante?: (participanteId: number) => void;
     onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
-    /* Si el usuario puede gestionar participantes */
     puedeGestionarParticipantes?: boolean;
-    /* Adjuntos del proyecto (Fase 9.2.5) */
+}
+interface FormularioProyectoAdjuntos {
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
-    /* Límites de suscripción para adjuntos */
     limiteAdjuntos?: number;
     onClickUpgrade?: () => void;
-    /* Tareas para la lista compacta (Fase 9.2.7) - DEPRECADO POR HITOS */
+}
+interface FormularioProyectoContenido {
     tareas?: Tarea[];
     onToggleTarea?: (id: number) => void;
-    /* Hitos del proyecto (Fase 9.2.7) */
     hitos?: Hito[];
     onHitosChange?: (hitos: Hito[]) => void;
 }
+interface FormularioProyectoModernoProps extends FormularioProyectoBasico, FormularioProyectoPropiedades, FormularioProyectoParticipantes, FormularioProyectoAdjuntos, FormularioProyectoContenido {}
 
 export function FormularioProyectoModerno({nombre, onNombreChange, descripcion, onDescripcionChange, icono, colorIcono, onIconoChange, prioridad, onPrioridadChange, urgencia, onUrgenciaChange, fechaLimite, onFechaLimiteChange, estado = 'activo', onEstadoChange, errorNombre, modoEdicion = false, participantes = [], companeros = [], onAgregarParticipante, onRemoverParticipante, onCambiarRolParticipante, puedeGestionarParticipantes = false, adjuntos = [], onAdjuntosChange, limiteAdjuntos = 0, onClickUpgrade, tareas: _tareas = [], onToggleTarea: _onToggleTarea, hitos = [], onHitosChange}: FormularioProyectoModernoProps): JSX.Element {
     /* Mostrar seccion de responsables solo en modo edicion */

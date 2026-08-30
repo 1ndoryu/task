@@ -17,16 +17,17 @@ import {SeccionAdjuntos} from '../SeccionAdjuntos';
 import {SelectorAsignado} from '../../compartidos/SelectorAsignado';
 import {ModalDependencias} from '../ModalDependencias';
 
-interface FormularioTareaModernoProps {
-    /* Campos principales */
+/* Frente ISP 1408: FormularioTareaModernoProps dividida en fragmentos cohesivos
+ * via extends (misma forma plana; cada declaracion <= 10 campos). */
+interface FormularioTareaCampos {
     texto: string;
     onTextoChange: (valor: string) => void;
     descripcion: string;
     onDescripcionChange: (valor: string) => void;
-    /* Estado de la tarea */
     completado: boolean;
     onCompletadoChange?: (valor: boolean) => void;
-    /* Propiedades */
+}
+interface FormularioTareaPropiedades {
     prioridad: NivelPrioridad | null;
     onPrioridadChange: (valor: NivelPrioridad) => void;
     urgencia: NivelUrgencia | null;
@@ -36,44 +37,50 @@ interface FormularioTareaModernoProps {
     /* [28-08-2026] Dificultad del plugin EXP: misma escala que la importancia. */
     dificultad?: import('../../../plugins/exp/types').Dificultad;
     onDificultadChange?: (valor: import('../../../plugins/exp/types').Dificultad) => void;
-    /* Proyecto */
-    proyectoId?: number;
-    proyectos?: Proyecto[];
-    onProyectoChange?: (proyectoId: number | undefined) => void;
-    /* Repeticion */
+}
+interface FormularioTareaRepeticion {
     tieneRepeticion: boolean;
     onTieneRepeticionChange: (valor: boolean) => void;
     frecuencia: FrecuenciaHabito;
     onFrecuenciaChange: (frecuencia: FrecuenciaHabito) => void;
-    /* Asignacion */
+}
+interface FormularioTareaProyecto {
+    proyectoId?: number;
+    proyectos?: Proyecto[];
+    onProyectoChange?: (proyectoId: number | undefined) => void;
+}
+interface FormularioTareaAsignacion {
     participantes?: Participante[];
     asignadoA: number | null;
     asignadoANombre: string;
     asignadoAAvatar: string;
     onAsignacionChange?: (usuarioId: number | null, nombre: string, avatar: string) => void;
-    /* Compartir / Colaboradores */
+}
+interface FormularioTareaColaboradores {
     companeros?: CompaneroEquipo[];
     onAgregarParticipante?: (usuarioId: number, rol: RolCompartido) => void;
     onRemoverParticipante?: (participanteId: number) => void;
     onCambiarRolParticipante?: (participanteId: number, nuevoRol: RolCompartido) => void;
-    /* Adjuntos */
+}
+interface FormularioTareaAdjuntos {
     adjuntos?: Adjunto[];
     onAdjuntosChange?: (adjuntos: Adjunto[]) => void;
-    /* Límites de suscripción para adjuntos */
     limiteAdjuntos?: number;
     onClickUpgrade?: () => void;
-    /* Etiquetas (Fase 9.7.3) */
+}
+interface FormularioTareaEtiquetasGrupo {
     tags?: string[];
     onTagsChange?: (tags: string[]) => void;
-    /* Grupo de ejecución */
     grupoEjecucion?: string | null;
     onGrupoEjecucionChange?: (grupo: string | null) => void;
-    /* Dependencias condicionales */
+}
+interface FormularioTareaDependencias {
     dependencias?: import('../../../types/dashboard').ReferenciaDependencia[];
     onDependenciasChange?: (dependencias: import('../../../types/dashboard').ReferenciaDependencia[]) => void;
     tareasParaDependencias?: import('../../../types/dashboard').Tarea[];
     habitosParaDependencias?: import('../../../types/dashboard').Habito[];
-    /* Subtareas */
+}
+interface FormularioTareaSubtareas {
     tareaId?: number;
     subtareas?: Tarea[];
     onCrearSubtarea?: (datos: DatosEdicionTarea) => void;
@@ -81,11 +88,13 @@ interface FormularioTareaModernoProps {
     onEliminarSubtarea?: (id: number) => void;
     onConfigurarSubtarea?: (tarea: Tarea) => void;
     onEditarSubtarea?: (id: number, datos: DatosEdicionTarea) => void;
-    /* Modo */
+}
+interface FormularioTareaModo {
     modoEdicion?: boolean;
     errorTexto?: string;
     esSubtarea?: boolean;
 }
+interface FormularioTareaModernoProps extends FormularioTareaCampos, FormularioTareaPropiedades, FormularioTareaRepeticion, FormularioTareaProyecto, FormularioTareaAsignacion, FormularioTareaColaboradores, FormularioTareaAdjuntos, FormularioTareaEtiquetasGrupo, FormularioTareaDependencias, FormularioTareaSubtareas, FormularioTareaModo {}
 
 import {ListaSubtareas} from './ListaSubtareas';
 

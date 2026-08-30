@@ -4,24 +4,32 @@
 
 import type {Tarea, DatosEdicionTarea, DatosNuevoHabito, Proyecto, Participante} from '../../../types/dashboard';
 
-export interface ListaTareasProps {
+/* Frente ISP 1408: ListaTareasProps dividida en fragmentos cohesivos via
+ * extends (misma forma plana; cada declaracion <= 10 campos). */
+export interface ListaTareasBase {
     tareas: Tarea[];
     proyectoId?: number;
+    proyectos?: Proyecto[];
+    habilitarDrag?: boolean;
+    modoCompacto?: boolean;
+    ocultarCompletadas?: boolean;
+    ocultarBadgeProyecto?: boolean;
+    ocultarSubtareasAutomaticamente?: boolean;
+    ocultarPlaceholderVacio?: boolean;
+}
+export interface ListaTareasTarea {
     onToggleTarea?: (id: number) => void;
     onCrearTarea?: (datos: DatosEdicionTarea) => void;
     onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
     onEliminarTarea?: (id: number) => void;
     onReordenarTareas?: (tareas: Tarea[]) => void;
-    habilitarDrag?: boolean;
-    proyectos?: Proyecto[];
-    ocultarCompletadas?: boolean;
-    ocultarBadgeProyecto?: boolean;
-    /* Ocultar subtareas automáticamente (colapsadas por defecto) */
-    ocultarSubtareasAutomaticamente?: boolean;
+    onConfigurarTarea?: (tarea: Tarea) => void;
+    onAbrirModalCrear?: () => void;
     onCompartirTarea?: (tarea: Tarea) => void;
     estaCompartida?: (tareaId: number) => boolean;
     obtenerParticipantes?: (tarea: Tarea) => Participante[];
-    /* Callbacks para hábitos - Sincronizado con TablaHabitos (Fase UI/UX) */
+}
+export interface ListaTareasHabito {
     onEditarHabito?: (habitoId: number) => void;
     onEliminarHabito?: (habitoId: number) => void;
     onToggleHabito?: (habitoId: number) => void;
@@ -29,21 +37,14 @@ export interface ListaTareasProps {
     onPosponerHabitoConTiempo?: (habitoId: number, hasta: string | null) => void;
     onPausarHabito?: (habitoId: number) => void;
     onActualizarHabito?: (habitoId: number, datos: Partial<DatosNuevoHabito>) => void;
-    /* [207A-3] Callbacks para subhábitos */
+    onAbrirModalCrearHabito?: () => void;
+    onReordenarHabitos?: (ordenes: Map<number, number>) => void;
+}
+export interface ListaTareasSubHabito {
     onToggleSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
     onEliminarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    /* [217A-2] Subhábitos: acciones independientes */
     onPosponerSubHabitoConTiempo?: (habitoPadreId: number, subHabitoId: number, hasta: string | null) => void;
     onActualizarSubHabito?: (habitoPadreId: number, subHabitoId: number, datos: Partial<DatosNuevoHabito>) => void;
     onConfigurarSubHabito?: (habitoPadreId: number, subHabitoId: number) => void;
-    modoCompacto?: boolean;
-    onConfigurarTarea?: (tarea: Tarea) => void;
-    /* Callback para abrir modal de creación rápida (usado en estado vacío y botón añadir) */
-    onAbrirModalCrear?: () => void;
-    /* [207A-4] Callback para abrir modal de creación de hábito desde areaNuevoInline */
-    onAbrirModalCrearHabito?: () => void;
-    /* Ocultar placeholder vacío completo (útil dentro de proyectos expandidos) */
-    ocultarPlaceholderVacio?: boolean;
-    /* [218A-2] Callback para actualizar orden de hábitos desde drag */
-    onReordenarHabitos?: (ordenes: Map<number, number>) => void;
 }
+export interface ListaTareasProps extends ListaTareasBase, ListaTareasTarea, ListaTareasHabito, ListaTareasSubHabito {}

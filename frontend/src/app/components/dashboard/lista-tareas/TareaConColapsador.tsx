@@ -13,7 +13,9 @@ import {tieneSubtareas, contarSubtareas} from '../../../utils/jerarquiaTareas';
 import {SwipeableItem} from '../../shared/SwipeableItem';
 import {useEsMovil} from '../../../hooks/useEsMovil';
 
-interface TareaConColapsadorProps {
+/* Frente ISP 1408: TareaConColapsadorProps dividida en fragmentos cohesivos
+ * via extends (misma forma plana; cada declaracion <= 10 campos). */
+interface TareaConColapsadorEsqueleto {
     tarea: Tarea;
     esSubtarea: boolean;
     tareas: Tarea[];
@@ -24,8 +26,8 @@ interface TareaConColapsadorProps {
     ocultarBadgeProyecto: boolean;
     mensajesNoLeidos: number;
     estaCompartida: boolean;
-
-    // Callbacks
+}
+interface TareaConColapsadorTareas {
     onToggleTarea?: (id: number) => void;
     onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
     onEliminarTarea?: (id: number) => void;
@@ -35,8 +37,8 @@ interface TareaConColapsadorProps {
     onConfigurar: (id: number) => void;
     onMoverProyecto: (tarea: Tarea) => void;
     onCompartir?: (tarea: Tarea) => void;
-
-    // Hábitos - Sincronizado con TablaHabitos (Fase UI/UX)
+}
+interface TareaConColapsadorHabitos {
     onEditarHabito?: (id: number) => void;
     onEliminarHabito?: (id: number) => void;
     onToggleHabito?: (id: number) => void;
@@ -44,25 +46,23 @@ interface TareaConColapsadorProps {
     onPosponerHabitoConTiempo?: (id: number, hasta: string | null) => void;
     onPausarHabito?: (id: number) => void;
     onActualizarHabito?: (id: number, datos: Partial<DatosNuevoHabito>) => void;
-
-    // Selección múltiple (Ctrl+Click) - TAREA 3.1
+}
+interface TareaConColapsadorSeleccion {
     estaSeleccionada?: boolean;
     onSeleccionMultiple?: (tarea: Tarea, evento: React.MouseEvent) => void;
     modoSeleccionActivo?: boolean;
-
-    /* [207A-3] Subhábitos: callbacks para menú contextual */
-    onToggleSubHabito?: (habitoId: number, subHabitoId: number) => void;
-    onEliminarSubHabito?: (habitoId: number, subHabitoId: number) => void;
-    /* [217A-2] Subhábitos: acciones independientes */
-    onPosponerSubHabitoConTiempo?: (habitoId: number, subHabitoId: number, hasta: string | null) => void;
-    onActualizarSubHabito?: (habitoId: number, subHabitoId: number, datos: Partial<DatosNuevoHabito>) => void;
-    onConfigurarSubHabito?: (habitoId: number, subHabitoId: number) => void;
-    /* [218A-2] Ref para suprimir clicks posteriores a un drag */
     suprimirClickRef?: React.RefObject<boolean>;
-    /* Listado de tareas y hábitos para evaluar dependencias */
     todasTareas?: Tarea[];
     todosHabitos?: Habito[];
 }
+interface TareaConColapsadorSubHabitos {
+    onToggleSubHabito?: (habitoId: number, subHabitoId: number) => void;
+    onEliminarSubHabito?: (habitoId: number, subHabitoId: number) => void;
+    onPosponerSubHabitoConTiempo?: (habitoId: number, subHabitoId: number, hasta: string | null) => void;
+    onActualizarSubHabito?: (habitoId: number, subHabitoId: number, datos: Partial<DatosNuevoHabito>) => void;
+    onConfigurarSubHabito?: (habitoId: number, subHabitoId: number) => void;
+}
+interface TareaConColapsadorProps extends TareaConColapsadorEsqueleto, TareaConColapsadorTareas, TareaConColapsadorHabitos, TareaConColapsadorSeleccion, TareaConColapsadorSubHabitos {}
 
 export const TareaConColapsador: React.FC<TareaConColapsadorProps> = ({tarea, esSubtarea, tareas, tareasExpandidas, onToggleExpandir, proyectos, modoCompacto, ocultarBadgeProyecto, mensajesNoLeidos, estaCompartida, onToggleTarea, onEditarTarea, onEliminarTarea, onIndent, onOutdent, onCrearNueva, onConfigurar, onMoverProyecto, onCompartir, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, estaSeleccionada, onSeleccionMultiple, modoSeleccionActivo, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, suprimirClickRef, todasTareas = tareas, todosHabitos = []}) => {
     const {esMovil} = useEsMovil();
