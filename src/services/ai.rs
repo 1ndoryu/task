@@ -634,85 +634,9 @@ impl LlmProviderService {
             });
         }
 
-        let mut contenido = String::new();
-        let mut tool_calls: Vec<serde_json::Value> = Vec::new();
-        let mut tokens_prompt = 0u32;
-        let mut tokens_complecion = 0u32;
-        let mut finish_reason = String::new();
-
-        let mut bytes = respuesta.bytes_stream();
-        use futures_util::StreamExt;
-        while let Some(chunk) = bytes.next().await {
-            let chunk = chunk.map_err(|error| {
-                AppError::Upstream(format!("Error leyendo el stream del proveedor: {error}"))
-            })?;
-            let texto = String::from_utf8_lossy(&chunk);
-            for linea in texto.lines() {
-                let linea = linea.trim();
-                if !linea.starts_with("data:") {
-                    continue;
-                }
-                let data = linea.trim_start_matches("data:").trim();
-                if data == "[DONE]" {
-                    continue;
-                }
-                let Ok(evento) = serde_json::from_str::<serde_json::Value>(data) else {
-                    continue;
-                };
-                if let Some(usage) = evento.get("usage") {
-                    tokens_prompt = usage.get("prompt_tokens").and_then(serde_json::Value::as_u64).unwrap_or(0) as u32;
-                    tokens_complecion = usage.get("completion_tokens").and_then(serde_json::Value::as_u64).unwrap_or(0) as u32;
-                }
-                if let Some(delta) = evento.pointer("/choices/0/delta") {
-                    if let Some(texto_delta) = delta.get("content").and_then(serde_json::Value::as_str) {
-                        contenido.push_str(texto_delta);
-                        /* Fase 4: cancelación real — si el cliente cortó el SSE,
-                         * dejar de consumir el stream del proveedor de inmediato. */
-                        if !on_token(texto_delta) {
-                            return Err(AppError::Cancelado);
-                        }
-                    }
-                    if let Some(calls) = delta.get("tool_calls").and_then(serde_json::Value::as_array) {
-                        for call in calls {
-                            let index = call.get("index").and_then(serde_json::Value::as_u64).unwrap_or(0) as usize;
-                            if tool_calls.len() <= index {
-                                tool_calls.resize(index + 1, serde_json::json!({ "function": { "name": "", "arguments": "" } }));
-                            }
-                            if let Some(nombre) = call.pointer("/function/name").and_then(serde_json::Value::as_str) {
-                                tool_calls[index]["function"]["name"] = serde_json::Value::String(nombre.to_string());
-                            }
-                            if let Some(args) = call.pointer("/function/arguments").and_then(serde_json::Value::as_str) {
-                                let actual = tool_calls[index]["function"]["arguments"].as_str().unwrap_or("").to_string();
-                                tool_calls[index]["function"]["arguments"] =
-                                    serde_json::Value::String(format!("{actual}{args}"));
-                            }
-                            if let Some(id) = call.get("id").and_then(serde_json::Value::as_str) {
-                                tool_calls[index]["id"] = serde_json::Value::String(id.to_string());
-                            }
-                        }
-                    }
-                }
-                if let Some(fr) = evento.pointer("/choices/0/finish_reason").and_then(serde_json::Value::as_str) {
-                    if !fr.is_empty() && fr != "null" {
-                        finish_reason = fr.to_string();
-                    }
-                }
-            }
-        }
-
-        let tool_calls = tool_calls
-            .into_iter()
-            .filter_map(|call| {
-                let nombre = call.pointer("/function/name")?.as_str()?.to_string();
-                let id = call.get("id").and_then(serde_json::Value::as_str).unwrap_or("").to_string();
-                let argumentos: serde_json::Value = call
-                    .pointer("/function/arguments")
-                    .and_then(serde_json::Value::as_str)
-                    .and_then(|args| serde_json::from_str(args).ok())
-                    .unwrap_or_else(|| serde_json::json!({}));
-                Some(AiToolCall { id, nombre, argumentos })
-            })
-            .collect();
+            let (contenido, tool_calls, tokens_prompt, tokens_complecion, finish_reason) =
+                hojear_stream(respuesta, on_token).await?;
+            let tool_calls = parsear_tool_calls(tool_calls);
 
         Ok(AiStreamResult {
             contenido,
@@ -905,6 +829,101 @@ fn mayuscula_primera(texto: &str) -> String {
         Some(primera) => primera.to_uppercase().collect::<String>() + chars.as_str(),
         None => String::new(),
     }
+}
+
+/* El bucle SSE aplanado en un helper: solo consume el stream, acumula
+ * content/token usage/tool_calls/finish_reason y gestiona la cancelación
+ * (on_token -> false). Devuelve la tupla cruda que ejecutar_request_stream
+ * envuelve en AiStreamResult. `respuesta` se consume por valor (bytes_stream). */
+async fn hojear_stream(
+    respuesta: reqwest::Response,
+    on_token: &mut (dyn FnMut(&str) -> bool + Send),
+) -> Result<(String, Vec<serde_json::Value>, u32, u32, String), AppError> {
+    let mut contenido = String::new();
+    let mut tool_calls: Vec<serde_json::Value> = Vec::new();
+    let mut tokens_prompt = 0u32;
+    let mut tokens_complecion = 0u32;
+    let mut finish_reason = String::new();
+
+    let mut bytes = respuesta.bytes_stream();
+    use futures_util::StreamExt;
+    while let Some(chunk) = bytes.next().await {
+        let chunk = chunk.map_err(|error| {
+            AppError::Upstream(format!("Error leyendo el stream del proveedor: {error}"))
+        })?;
+        let texto = String::from_utf8_lossy(&chunk);
+        for linea in texto.lines() {
+            let linea = linea.trim();
+            if !linea.starts_with("data:") {
+                continue;
+            }
+            let data = linea.trim_start_matches("data:").trim();
+            if data == "[DONE]" {
+                continue;
+            }
+            let Ok(evento) = serde_json::from_str::<serde_json::Value>(data) else {
+                continue;
+            };
+            if let Some(usage) = evento.get("usage") {
+                tokens_prompt = usage.get("prompt_tokens").and_then(serde_json::Value::as_u64).unwrap_or(0) as u32;
+                tokens_complecion = usage.get("completion_tokens").and_then(serde_json::Value::as_u64).unwrap_or(0) as u32;
+            }
+            if let Some(delta) = evento.pointer("/choices/0/delta") {
+                if let Some(texto_delta) = delta.get("content").and_then(serde_json::Value::as_str) {
+                    contenido.push_str(texto_delta);
+                    /* Fase 4: cancelación real — si el cliente cortó el SSE,
+                     * dejar de consumir el stream del proveedor de inmediato. */
+                    if !on_token(texto_delta) {
+                        return Err(AppError::Cancelado);
+                    }
+                }
+                if let Some(calls) = delta.get("tool_calls").and_then(serde_json::Value::as_array) {
+                    for call in calls {
+                        let index = call.get("index").and_then(serde_json::Value::as_u64).unwrap_or(0) as usize;
+                        if tool_calls.len() <= index {
+                            tool_calls.resize(index + 1, serde_json::json!({ "function": { "name": "", "arguments": "" } }));
+                        }
+                        if let Some(nombre) = call.pointer("/function/name").and_then(serde_json::Value::as_str) {
+                            tool_calls[index]["function"]["name"] = serde_json::Value::String(nombre.to_string());
+                        }
+                        if let Some(args) = call.pointer("/function/arguments").and_then(serde_json::Value::as_str) {
+                            let actual = tool_calls[index]["function"]["arguments"].as_str().unwrap_or("").to_string();
+                            tool_calls[index]["function"]["arguments"] =
+                                serde_json::Value::String(format!("{actual}{args}"));
+                        }
+                        if let Some(id) = call.get("id").and_then(serde_json::Value::as_str) {
+                            tool_calls[index]["id"] = serde_json::Value::String(id.to_string());
+                        }
+                    }
+                }
+            }
+            if let Some(fr) = evento.pointer("/choices/0/finish_reason").and_then(serde_json::Value::as_str) {
+                if !fr.is_empty() && fr != "null" {
+                    finish_reason = fr.to_string();
+                }
+            }
+        }
+    }
+
+    Ok((contenido, tool_calls, tokens_prompt, tokens_complecion, finish_reason))
+}
+
+/* Convierte las tool_calls crudas del SSE a la estructura tipada del dominio.
+ * Función pura extraída del método stream para acortarlo (funcion-larga-rs). */
+fn parsear_tool_calls(tool_calls: Vec<serde_json::Value>) -> Vec<AiToolCall> {
+    tool_calls
+        .into_iter()
+        .filter_map(|call| {
+            let nombre = call.pointer("/function/name")?.as_str()?.to_string();
+            let id = call.get("id").and_then(serde_json::Value::as_str).unwrap_or("").to_string();
+            let argumentos: serde_json::Value = call
+                .pointer("/function/arguments")
+                .and_then(serde_json::Value::as_str)
+                .and_then(|args| serde_json::from_str(args).ok())
+                .unwrap_or_else(|| serde_json::json!({}));
+            Some(AiToolCall { id, nombre, argumentos })
+        })
+        .collect()
 }
 
 #[cfg(test)]
