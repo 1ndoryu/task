@@ -16,32 +16,9 @@
  */
 
 import {useState, useEffect, useCallback, useRef} from 'react';
+import {abrirBaseDatos, ejecutarTransaccion, incrementarIntentosDeCola, hayOperacionesAgotadas, contarOperacionesPendientes, vaciarCola, STORES} from '../utils/offlineDB';
+import type {OperacionCola, TipoOperacion, TipoEntidad} from '../utils/offlineDB';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
-
-/* Nombre de la base de datos IndexedDB */
-const DB_NAME = 'glory_offline_db';
-const DB_VERSION = 1;
-
-/* Nombres de las stores (tablas) */
-const STORES = {
-    datos: 'datos_dashboard',
-    cola: 'cola_cambios',
-    meta: 'metadatos'
-} as const;
-
-/* Tipos de operaciones en cola */
-type TipoOperacion = 'crear' | 'editar' | 'eliminar' | 'toggle';
-type TipoEntidad = 'tarea' | 'habito' | 'proyecto' | 'nota';
-
-interface OperacionCola {
-    id: number;
-    tipo: TipoOperacion;
-    entidad: TipoEntidad;
-    entidadId?: number;
-    datos?: Record<string, unknown>;
-    timestamp: number;
-    intentos: number;
-}
 
 interface DatosOffline {
     habitos: Habito[];
@@ -75,109 +52,6 @@ interface AccionesOffline {
     forzarSync: () => Promise<void>;
     /* Limpiar datos locales */
     limpiarDatosLocales: () => Promise<void>;
-}
-
-/* [H-F12-10] Reintentos acotados: cada intento fallido incrementa `intentos`
- * de las operaciones pendientes; tras MAX_INTENTOS fallos se detiene el
- * auto-reintento (forzarSync sigue disponible). */
-const MAX_INTENTOS = 5;
-
-/* [H-F12-08] Conexión IndexedDB compartida: antes se abría y cerraba en cada
- * operación (open + close por transacción). La promesa se cachea a nivel de
- * módulo y las transacciones ya no cierran la conexión. */
-let promesaBaseDatos: Promise<IDBDatabase> | null = null;
-
-/*
- * Abre o crea la base de datos IndexedDB (una sola vez por sesión)
- */
-function abrirBaseDatos(): Promise<IDBDatabase> {
-    promesaBaseDatos ??= new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-        request.onerror = () => reject(new Error('Error al abrir IndexedDB'));
-
-        request.onsuccess = () => resolve(request.result);
-
-        request.onupgradeneeded = (event) => {
-            const db = (event.target as IDBOpenDBRequest).result;
-
-            /* Store para datos del dashboard */
-            if (!db.objectStoreNames.contains(STORES.datos)) {
-                db.createObjectStore(STORES.datos, {keyPath: 'id'});
-            }
-
-            /* Store para cola de operaciones pendientes */
-            if (!db.objectStoreNames.contains(STORES.cola)) {
-                const colaStore = db.createObjectStore(STORES.cola, {keyPath: 'id', autoIncrement: true});
-                colaStore.createIndex('timestamp', 'timestamp', {unique: false});
-            }
-
-            /* Store para metadatos */
-            if (!db.objectStoreNames.contains(STORES.meta)) {
-                db.createObjectStore(STORES.meta, {keyPath: 'clave'});
-            }
-        };
-    });
-    return promesaBaseDatos;
-}
-
-/*
- * [H-F12-10] Suma 1 a `intentos` de todas las operaciones pendientes tras un
- * intento de sync fallido (la cola se reintenta entera).
- */
-async function incrementarIntentosDeCola(): Promise<void> {
-    const db = await abrirBaseDatos();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORES.cola, 'readwrite');
-        const store = transaction.objectStore(STORES.cola);
-        const lectura = store.getAll();
-        lectura.onsuccess = () => {
-            const operaciones = lectura.result as OperacionCola[];
-            for (const operacion of operaciones) {
-                store.put({...operacion, intentos: (operacion.intentos ?? 0) + 1});
-            }
-        };
-        lectura.onerror = () => reject(lectura.error);
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-    });
-}
-
-/*
- * [H-F12-10] True si alguna operación pendiente agotó sus reintentos.
- */
-async function hayOperacionesAgotadas(): Promise<boolean> {
-    const db = await abrirBaseDatos();
-    return new Promise((resolve) => {
-        const transaction = db.transaction(STORES.cola, 'readonly');
-        const store = transaction.objectStore(STORES.cola);
-        const request = store.getAll() as IDBRequest<OperacionCola[]>;
-        request.onsuccess = () => resolve(request.result.some(op => op.intentos >= MAX_INTENTOS));
-        request.onerror = () => resolve(false);
-    });
-}
-
-/*
- * Ejecuta una transacción en IndexedDB
- */
-async function ejecutarTransaccion<T>(
-    storeName: string,
-    modo: IDBTransactionMode,
-    operacion: (store: IDBObjectStore) => IDBRequest<T>
-): Promise<T> {
-    const db = await abrirBaseDatos();
-
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(storeName, modo);
-        const store = transaction.objectStore(storeName);
-        const request = operacion(store);
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-
-        /* [H-F12-08] La conexión es compartida: no se cierra por transacción. */
-        transaction.oncomplete = () => {};
-    });
 }
 
 export function useModoOffline(
@@ -292,40 +166,6 @@ export function useModoOffline(
         []
     );
 
-    /* Contar operaciones pendientes */
-    const contarOperacionesPendientes = async (): Promise<number> => {
-        try {
-            const db = await abrirBaseDatos();
-            return new Promise((resolve) => {
-                const transaction = db.transaction(STORES.cola, 'readonly');
-                const store = transaction.objectStore(STORES.cola);
-                const request = store.count();
-
-                /* [H-F12-08] Conexión compartida: no se cierra por lectura. */
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => resolve(0);
-            });
-        } catch {
-            return 0;
-        }
-    };
-
-    /* Obtener todas las operaciones pendientes */
-    const obtenerOperacionesPendientes = async (): Promise<OperacionCola[]> => {
-        try {
-            return await ejecutarTransaccion<OperacionCola[]>(STORES.cola, 'readonly', (store) =>
-                store.getAll()
-            );
-        } catch {
-            return [];
-        }
-    };
-
-    /* Eliminar operación de la cola */
-    const eliminarOperacion = async (id: number): Promise<void> => {
-        await ejecutarTransaccion(STORES.cola, 'readwrite', (store) => store.delete(id));
-    };
-
     /* Procesar cola de operaciones */
     const procesarCola = useCallback(async (): Promise<void> => {
         if (sincronizandoRef.current || !navigator.onLine || !sincronizarConServidor) return;
@@ -345,11 +185,8 @@ export function useModoOffline(
             const exito = await sincronizarConServidor(datosLocales);
 
             if (exito) {
-                /* Limpiar cola de operaciones */
-                const operaciones = await obtenerOperacionesPendientes();
-                for (const op of operaciones) {
-                    await eliminarOperacion(op.id);
-                }
+                /* Limpiar cola de operaciones (helper puro en el módulo). */
+                await vaciarCola();
 
                 if (montadoRef.current) {
                     setEstado(prev => ({
@@ -440,5 +277,6 @@ export function useModoOffline(
     };
 }
 
-/* Exportar tipos */
+/* Re-exportar los tipos de la capa de datos para compatibilidad con los
+ * consumidores del hook (la fuente canónica es utils/offlineDB). */
 export type {DatosOffline, OperacionCola, EstadoOffline, TipoOperacion, TipoEntidad};
