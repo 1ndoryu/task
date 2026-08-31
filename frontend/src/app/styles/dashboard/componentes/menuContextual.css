@@ -49,13 +49,20 @@
     justify-content: flex-start;
 }
 
+/* [318A-2 fb] La opcion usa `variante="ghost"` (.boton--ghost:hover aplica
+ * `filter: brightness(1.15)` sobre todo el boton), lo que aclara el fondo y las
+ * letras y compite con el fondo hover propio del menu -> titileo al pasar el mouse.
+ * El menu contextual define su propio hover (fondo gris + texto normal), asi que
+ * anula el filtro del ghost. */
 .menuContextualOpcion:hover:not(:disabled) {
     background-color: var(--dashboard-fondoHover);
+    filter: none;
 }
 
 .menuContextualOpcion:focus {
     outline: none;
     background-color: var(--dashboard-fondoHover);
+    filter: none;
 }
 
 /* 
