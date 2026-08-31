@@ -231,21 +231,18 @@
     opacity: 1;
 }
 
-/* [318A-2 fb] En modo claro la opacidad 0.4 se ve demasiado tenue (iconos
- * poco definidos sobre fondo blanco); en dark se ve bien. Subir solo en claro,
- * el hover sigue al 100%. */
+/* [318A-2 fb] En modo claro NO se aplica opacidad al encabezado de panel
+ * (antes 0.7): los iconos y el título siempre se ven definidos sobre fondo
+ * blanco. La variante base (0.4 en reposo) se mantiene solo para el tema
+ * oscuro (original), donde reduce ruido visual; en claro reposo = 100%. */
 [data-theme='claro'] .seccionEncabezado--panelHeader .seccionTitulo,
 [data-theme='claro'] .seccionEncabezado--panelHeader .seccionAcciones {
-    opacity: 0.7;
-}
-
-/* [318A-2 fb] La regla de claro (0,3,0) declarada después ganaba sobre la
- * :hover base (0,3,0); repetir el hover con mayor especificidad para que el
- * hover en claro también llegue a 1. */
-[data-theme='claro'] .seccionEncabezado--panelHeader:hover .seccionTitulo,
-[data-theme='claro'] .seccionEncabezado--panelHeader:hover .seccionAcciones {
     opacity: 1;
 }
+
+/* [318A-2 fb] En claro reposo ya es 1, así que el hover queda redundante;
+ * se elimina la regla específica de hover en claro (la base :hover ya aplica
+ * a ambos temas). */
 
 /* 
  * ESTADO DE CONEXION 
