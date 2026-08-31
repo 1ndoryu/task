@@ -5,16 +5,16 @@
  * de tool y contexto visible. Reutiliza el sistema de diseño (SeccionEncabezado,
  * Boton, Textarea) y las clases de panelIA.css para coherencia visual.
  * Los bloques visuales (mensajes, tools, tabs, tareas, estados) viven en
- * componentes.tsx y son los MISMOS que renderiza la galería de Fase 4.5.
+ * componentes.tsx. Toda la lógica de estado vive en usePanelAgente.ts para
+ * mantener el componente bajo el límite de línea y sin usestate-excesivo.
  */
 
-import {useEffect, useRef, useState} from 'react';
 import {ArrowUp, Bot, Clock, Loader2, Plus, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../../components/dashboard';
 import {Boton, Textarea} from '../../components/ui';
 import {Modal} from '../../components/shared/Modal';
-import {useAgenteStore, useTabActivaAgente} from './store';
 import {ModalConfigAgente} from './ModalConfigAgente';
+import {usePanelAgente} from './usePanelAgente';
 import {
     BotonCancelar,
     EstadoCarga,
@@ -33,122 +33,47 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
     const {
         tabs,
         tabActivaId,
+        tabActiva,
         cargandoLista,
         errorLista,
-        conversacionesCargadas,
-        cargarConversaciones,
-        abrirTab,
-        crearTab,
-        renombrarTab,
-        cerrarTab,
-        enviarMensaje,
-        reintentarMensaje,
-        limpiarErrorTab,
         tareasProgramadas,
         cargandoTareas,
         errorTareas,
-        cargarTareasProgramadas,
-        crearTarea,
+        refScroll,
+        inputTexto,
+        setInputTexto,
+        editandoTitulo,
+        setEditandoTitulo,
+        tituloEdicion,
+        setTituloEdicion,
+        configAbierta,
+        setConfigAbierta,
+        tareasAbiertas,
+        setTareasAbiertas,
+        tareaNombre,
+        setTareaNombre,
+        tareaPrompt,
+        setTareaPrompt,
+        tareaTipo,
+        setTareaTipo,
+        tareaCron,
+        setTareaCron,
+        tareaEjecutarEn,
+        setTareaEjecutarEn,
+        tareaGuardando,
+        abrirTab,
+        crearTab,
+        cerrarTab,
+        limpiarErrorTab,
+        reintentarMensaje,
         eliminarTarea,
-    } = useAgenteStore();
-
-    const tabActiva = useTabActivaAgente();
-    const [inputTexto, setInputTexto] = useState('');
-    const [editandoTitulo, setEditandoTitulo] = useState<string | null>(null);
-    const [tituloEdicion, setTituloEdicion] = useState('');
-    const [configAbierta, setConfigAbierta] = useState(false);
-    const [tareasAbiertas, setTareasAbiertas] = useState(false);
-    const [tareaNombre, setTareaNombre] = useState('');
-    const [tareaPrompt, setTareaPrompt] = useState('');
-    const [tareaTipo, setTareaTipo] = useState<'una_vez' | 'recurrente'>('una_vez');
-    const [tareaCron, setTareaCron] = useState('');
-    const [tareaEjecutarEn, setTareaEjecutarEn] = useState('');
-    const [tareaGuardando, setTareaGuardando] = useState(false);
-    const refScroll = useRef<HTMLDivElement>(null);
-    const refAbort = useRef<AbortController | null>(null);
-
-    /* Cargar la lista de conversaciones una vez al montar. */
-    useEffect(() => {
-        if (!conversacionesCargadas && !cargandoLista) {
-            void cargarConversaciones();
-        }
-    }, [conversacionesCargadas, cargandoLista, cargarConversaciones]);
-
-    /* Cargar las tareas programadas una vez al montar. La acción de zustand es
-     * estable, así que NUNCA debe depender de `cargandoTareas`: la propia carga
-     * alterna ese flag (true→false al terminar) y reintroducirlo como dependencia
-     * dispara un bucle de refetch infinito (una petición por segundo). */
-    useEffect(() => {
-        void cargarTareasProgramadas();
-    }, [cargarTareasProgramadas]);
-
-    /* Scroll automático al último mensaje. */
-    useEffect(() => {
-        if (refScroll.current) {
-            refScroll.current.scrollTop = refScroll.current.scrollHeight;
-        }
-    }, [tabActiva?.mensajes.length, tabActiva?.mensajes[tabActiva.mensajes.length - 1]?.contenido]);
-
-    /* Cancelar el stream al desmontar. */
-    useEffect(() => {
-        return () => {
-            refAbort.current?.abort();
-        };
-    }, []);
-
-    const cancelarTurno = () => {
-        refAbort.current?.abort();
-        refAbort.current = null;
-    };
-
-    const manejarEnviar = () => {
-        const texto = inputTexto.trim();
-        if (!texto || !tabActiva || tabActiva.enviando) return;
-        setInputTexto('');
-        refAbort.current = new AbortController();
-        void enviarMensaje(texto, refAbort.current.signal);
-    };
-
-    const manejarTecla = (evento: React.KeyboardEvent) => {
-        if (evento.key === 'Enter' && !evento.shiftKey) {
-            evento.preventDefault();
-            manejarEnviar();
-        }
-    };
-
-    const iniciarRenombrado = (id: string, tituloActual: string) => {
-        setEditandoTitulo(id);
-        setTituloEdicion(tituloActual);
-    };
-
-    const confirmarRenombrado = (id: string) => {
-        void renombrarTab(id, tituloEdicion);
-        setEditandoTitulo(null);
-    };
-
-    const manejarCrearTarea = (evento: React.FormEvent) => {
-        evento.preventDefault();
-        const nombre = tareaNombre.trim();
-        const prompt = tareaPrompt.trim();
-        if (!nombre || !prompt || tareaGuardando) return;
-        setTareaGuardando(true);
-        void crearTarea({
-            nombre,
-            prompt,
-            tipo: tareaTipo,
-            ...(tareaTipo === 'recurrente'
-                ? {cron_expr: tareaCron.trim() || undefined}
-                : tareaEjecutarEn
-                    ? {ejecutar_en: new Date(tareaEjecutarEn).toISOString()}
-                    : {}),
-        }).finally(() => {
-            setTareaGuardando(false);
-            setTareaNombre('');
-            setTareaPrompt('');
-            setTareaCron('');
-            setTareaEjecutarEn('');
-        });
-    };
+        cancelarTurno,
+        manejarEnviar,
+        manejarTecla,
+        iniciarRenombrado,
+        confirmarRenombrado,
+        manejarCrearTarea,
+    } = usePanelAgente();
 
     return (
         <div className="internaColumna panelIA panelAgente">
@@ -350,7 +275,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                         tamano="pequeño"
                         soloIcono
                         claseAdicional="panelIAInputEnviar"
-                        onClick={manejarEnviar}
+                        onClick={() => manejarEnviar(inputTexto)}
                         disabled={!tabActiva || !inputTexto.trim()}
                         icono={<ArrowUp size={16} />}
                         title="Enviar"
