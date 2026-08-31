@@ -11,7 +11,22 @@ import type { ApiRequestOptions } from '../types/api';
 export const DEFAULT_CACHE_TTL = 30_000; /* 30 segundos */
 const MAX_CACHE_ENTRIES = 100;
 
-export const apiCache = new Map<string, { data: unknown; timestamp: number }>();
+type EntryCache = { data: unknown; timestamp: number };
+
+/* El estado mutable vive privado en este modulo (regla singleton-mutable-state):
+ * externamente solo se accede via leerCache/escribirCache/clear/invalidate. */
+const apiCache = new Map<string, EntryCache>();
+
+/* Acceso seguro por clave para stale-while-revalidate. */
+export function leerCache(key: string): EntryCache | undefined {
+    return apiCache.get(key);
+}
+
+/* Escribe una entrada y acota la memoria con limpiarCacheExpirado. */
+export function escribirCache(key: string, data: unknown, timestamp: number, ttl: number = DEFAULT_CACHE_TTL): void {
+    apiCache.set(key, { data, timestamp });
+    limpiarCacheExpirado(ttl);
+}
 
 /* Limpia entries expiradas del cache para evitar memory leak */
 export function limpiarCacheExpirado(ttl: number): void {

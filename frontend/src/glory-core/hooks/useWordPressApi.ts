@@ -13,8 +13,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { GloryApiResponse, ApiRequestOptions } from '../types/api';
 import {
-    apiCache, DEFAULT_CACHE_TTL, getCacheKey,
-    limpiarCacheExpirado
+    DEFAULT_CACHE_TTL, getCacheKey, leerCache, escribirCache
 } from '../utils/apiCache';
 import { getNonce, getRestUrl } from '../utils/wpCredentials';
 
@@ -56,7 +55,7 @@ export function useWordPressApi<T = unknown>(
 
         /* Stale-while-revalidate: devuelve cache si es valido */
         if (shouldCache) {
-            const cached = apiCache.get(cacheKey);
+            const cached = leerCache(cacheKey);
             if (cached && Date.now() - cached.timestamp < cacheTtl) {
                 setData(cached.data as T);
                 setIsLoading(false);
@@ -114,8 +113,7 @@ export function useWordPressApi<T = unknown>(
 
             /* Actualizar cache y limpiar entries expiradas */
             if (shouldCache) {
-                apiCache.set(cacheKey, { data: result, timestamp: Date.now() });
-                limpiarCacheExpirado(cacheTtl);
+                escribirCache(cacheKey, result, Date.now(), cacheTtl);
             }
         } catch (err) {
             if (err instanceof DOMException && err.name === 'AbortError') return;
