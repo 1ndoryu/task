@@ -11,6 +11,7 @@
  */
 
 import {useExpStore} from './store';
+import {ToggleSwitch} from '../../components/shared/ToggleSwitch';
 import {Boton} from '../../components/ui/Boton';
 
 function FilaRange({etiqueta, ayuda, min, max, step, valor, onChange}: {
@@ -59,15 +60,7 @@ export function ConfigExp({onCerrar}: {onCerrar: () => void}): JSX.Element {
                 <p className="configExpSeccionNota">Estima la dificultad de hábitos/tareas nuevos sin pedirla manualmente. Solo actúa con el plugin activo.</p>
                 <div className="configExpFilaToggle">
                     <span className="configExpLabel">Dificultad automática por IA</span>
-                    <button
-                        type="button"
-                        role="switch"
-                        aria-checked={config.dificultadAutomatica}
-                        className={`configExpToggle ${config.dificultadAutomatica ? 'configExpToggle--activo' : ''}`}
-                        onClick={() => actualizarConfig({dificultadAutomatica: !config.dificultadAutomatica})}
-                    >
-                        <span className="configExpToggleIndicador" />
-                    </button>
+                    <ToggleSwitch checked={config.dificultadAutomatica} onChange={v => actualizarConfig({dificultadAutomatica: v})} aria-label="Dificultad automática por IA" />
                 </div>
             </div>
 

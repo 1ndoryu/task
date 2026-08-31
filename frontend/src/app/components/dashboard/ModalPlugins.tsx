@@ -9,6 +9,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Settings} from 'lucide-react';
 import {Modal} from '../shared/Modal';
+import {ToggleSwitch} from '../shared/ToggleSwitch';
 import {Boton} from '../ui/Boton';
 import {obtenerPluginsVisibles, obtenerPanelesDePlugin, pluginPuedeMostrarse} from '../../config/registroPlugins';
 import {usePluginsStore} from '../../stores/pluginsStore';
@@ -57,9 +58,7 @@ function FilaPlugin({plugin, onToggle, onAbrirConfig}: {plugin: DefinicionPlugin
                         <Settings size={14} />
                     </Boton>
                 )}
-                <Boton type="button" claseAdicional={`modalPluginsToggle ${estaActivo ? 'modalPluginsToggle--activo' : ''}`} onClick={() => onToggle(plugin.id)} aria-label={estaActivo ? 'Desactivar plugin' : 'Activar plugin'}>
-                    <span className="modalPluginsToggleIndicador" />
-                </Boton>
+                <ToggleSwitch checked={estaActivo} onChange={() => onToggle(plugin.id)} aria-label={estaActivo ? 'Desactivar plugin' : 'Activar plugin'} />
             </div>
         </div>
     );

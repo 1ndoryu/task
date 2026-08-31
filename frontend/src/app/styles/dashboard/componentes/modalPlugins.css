@@ -80,39 +80,6 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* Toggle switch estilo iOS */
-.modalPluginsToggle {
-    position: relative;
-    width: 36px;
-    height: 20px;
-    border-radius: var(--dashboard-espacioSmMd);
-    border: none;
-    background: var(--dashboard-bordeSutil);
-    cursor: pointer;
-    transition: background 0.2s ease;
-    flex-shrink: 0;
-    padding: 0;
-}
-
-.modalPluginsToggle--activo {
-    background: var(--dashboard-estadoExito);
-}
-
-.modalPluginsToggleIndicador {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 16px;
-    height: 16px;
-    border-radius: var(--dashboard-radioCirculo);
-    background: var(--dashboard-textoActivo);
-    transition: transform 0.2s ease;
-}
-
-.modalPluginsToggle--activo .modalPluginsToggleIndicador {
-    transform: translateX(16px);
-}
-
 .modalPluginsVacio {
     text-align: center;
     color: var(--dashboard-textoApagado);

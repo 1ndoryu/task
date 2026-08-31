@@ -2,8 +2,8 @@
  * plugins/exp/ConfigExp.css
  * Estilos de la configuración del plugin EXP. Sigue el lenguaje visual de la
  * configuración de déficit calórico (secciones con título/nota, preview, pie
- * con acciones) usando variables del sistema; el toggle replica el de
- * activar/desactivar plugins y los ranges se estilizan custom.
+ * con acciones) usando variables del sistema; el toggle usa el componente
+ * compartido ToggleSwitch (toggleSlider) y los ranges se estilizan custom.
  */
 
 .configExp {
@@ -73,39 +73,6 @@
     justify-content: space-between;
     gap: var(--dashboard-espacioSm, 6px);
     padding-top: var(--dashboard-espacioMini, 3px);
-}
-
-/* Toggle switch — replica .modalPluginsToggle (activar/desactivar plugin). */
-.configExpToggle {
-    position: relative;
-    width: 36px;
-    height: 20px;
-    border-radius: var(--dashboard-radioSm);
-    border: none;
-    background: var(--dashboard-bordeSutil);
-    cursor: pointer;
-    transition: background 0.2s ease;
-    flex-shrink: 0;
-    padding: 0;
-}
-
-.configExpToggle--activo {
-    background: var(--dashboard-estadoExito);
-}
-
-.configExpToggleIndicador {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 16px;
-    height: 16px;
-    border-radius: 0;
-    background: var(--dashboard-textoActivo);
-    transition: transform 0.2s ease;
-}
-
-.configExpToggle--activo .configExpToggleIndicador {
-    transform: translateX(16px);
 }
 
 /* Ranges custom — track fino con thumb circular en el acento del sistema. */
