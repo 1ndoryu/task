@@ -33,3 +33,11 @@
 - Antes de corregir un `variableNoDefinida`, verificar primero si el token está definido en un CSS fuera de `variableFiles` (mecanismo: el analizador parsea definiciones solo sobre los archivos del índice). Si es así, la corrección es añadir ese CSS a `variableFiles`, no tocar el CSS.
 - Los tokens definidos **inline en TS/TSX** (p. ej. `style={{ ['--col1-fr' as string]: ... }}`) no son indexables por `variableFiles` (solo admite CSS); cubrirlos con un default en el CSS asociado o aceptarlos como límite conocido.
 - Tras ampliar `variableFiles`, re-ejecutar `varsense all` y comparar el conteo de `variableNoDefinida` (148 → 0 en esta corrección).
+
+## 2026-08-31 — @import en CSS: debe ir antes de @font-face o el navegador lo descarta
+- Un `@import` **después** de una regla `@font-face` (o cualquier regla) en el mismo CSS es **inválido** según la spec CSS y el navegador lo **descarta silenciosamente**: los estilos importados nunca se aplican y no hay error visible.
+- En `styles/dashboard/index.css` el `@import './monocromo.css'` estaba al final del archivo (después de `@font-face`); al moverlo **antes de `@font-face`** (p. ej. al principio del archivo) la anulación global de radios/sombras empezó a aplicarse de verdad. Regla: los `@import` siempre al inicio del CSS, antes de cualquier otra regla.
+
+## 2026-08-31 — VarSense `bannedProperties`: sin filtro de valor, solo nombre de propiedad
+- `bannedProperties` de VarSense (clave `propiedadesProhibidas` internamente) marca **CUALQUIER** declaración de la propiedad listada, **sin filtrar por valor**: añadir `border-radius` o `box-shadow` a `properties` generaría warnings sobre `border-radius: 0` y `box-shadow: none` (ahora la norma del diseño monocromo).
+- La protección de valores hardcoded real la da `hardcodedDetection` + `allowedValues` (`0/0px/auto/inherit/initial/unset/transparent/currentColor/none`): cualquier valor fuera de esa lista se reporta, incluidos fallbacks de `var()`. `bannedProperties` solo sirve para propiedades que no deban aparecer jamás (p. ej. `font-family` con valor concreto si se quisiera forzar tokens).
