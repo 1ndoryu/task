@@ -26,14 +26,22 @@
 
 .accionesItem .botonIcono:hover {
     color: var(--dashboard-textoActivo);
-    background-color: var(--dashboard-fondoHover);
+    /* [318A-2 fb] Sin fondo en hover: solo cambia el color del icono.
+     * La regla .boton--primario:hover de ui.css aplica un fondo
+     * (--dashboard-botonPrimarioHover); aquí se anula con especificidad
+     * mayor (.accionesItem .botonIcono). */
+    background-color: transparent;
 }
 
+/* [318A-2 fb] botonPeligro unificado con el resto de botones de acción:
+ * mismo color base y mismo hover. Antes usaba color de error (negro en
+ * monocromo) y hover sin fondo, lo que lo hacía ver más oscuro y sin fondo
+ * al pasar el ratón — incoherente con los otros dos botones. */
 .accionesItem .botonIcono.botonPeligro {
-    color: var(--dashboard-estadoError);
+    color: var(--dashboard-textoApagado);
 }
 
-/* [243A-10] Sin background hover en botonPeligro */
 .accionesItem .botonIcono.botonPeligro:hover {
+    color: var(--dashboard-textoActivo);
     background-color: transparent;
 }

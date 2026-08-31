@@ -629,25 +629,10 @@
     cursor: grabbing;
 }
 
-/* 
- * Indicador visual de gesto horizontal
- * Muestra al usuario que puede arrastrar hacia la derecha para convertir en subtarea
- */
-.tareaPadreReorderArrastrando::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -2px;
-    height: 2px;
-    background: linear-gradient(to right, transparent 0%, var(--dashboard-estadoMedia) 50%, var(--dashboard-estadoExito) 100%);
-    opacity: 0.5;
-    transition: opacity var(--dashboard-transicionRapida);
-}
-
-.tareaPadreReorderArrastrando:hover::after {
-    opacity: 0.8;
-}
+/* [318A-2 fb] Eliminado el ::after del estado de arrastre: dibujaba un borde
+ * inferior de 2px (gradiente) al arrastrar la tarea. El usuario pidió que no
+ * aparezca; el indicador real de conversión a subtarea es
+ * .tareaDropIndicadorSubtarea (renderizado por TareaReorderItem). */
 
 /* 
  * Estado de gesto de conversión a subtarea
