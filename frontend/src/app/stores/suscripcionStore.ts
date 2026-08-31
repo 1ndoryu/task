@@ -11,6 +11,7 @@
 import {create} from 'zustand';
 import {apiFetch} from '../utils/apiClient';
 import type {InfoSuscripcion, LimitesPlan} from '../types/dashboard';
+import {logError} from '../utils/logger';
 
 /* [H-F11-02] El backend (/api/subscription) es la autoridad de límites: este
  * default solo pinta el estado FREE pre-hidratación (recargarSuscripcion
@@ -220,7 +221,7 @@ export const useSuscripcionStore = create<SuscripcionState & SuscripcionActions>
             set({suscripcion: data, error: null, cargando: false});
         } catch (err) {
             /* Sin sesion o error: se mantiene el estado actual (free por defecto) */
-            console.error('[SuscripcionStore] Error al recargar:', err);
+            logError('suscripcionStore', 'Error al recargar:', err);
             set({cargando: false});
         }
     },

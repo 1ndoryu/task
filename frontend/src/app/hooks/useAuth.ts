@@ -2,6 +2,7 @@ import {useState, useCallback} from 'react';
 import {limpiarTodosLosDatosUsuario} from '../utils/limpiezaSesion';
 import {devLog} from '../utils/devLog';
 import {persistirPreferenciasAhora} from '../utils/preferenciasUsuario';
+import {logError} from '../utils/logger';
 
 /* [correccion 18-08-2026] Lee el token CSRF de la cookie no HttpOnly
  * (contrato Rust ADR-02); reemplaza al nonce de WordPress. */
@@ -139,11 +140,11 @@ export function useAuth(): UseAuthReturn {
             if (response.ok || response.status === 401) {
                 window.location.reload();
             } else {
-                console.error('Logout failed:', response.status);
+                logError('useAuth', 'Logout failed:', response.status);
                 setLoading(false);
             }
         } catch (e) {
-            console.error(e);
+            logError('useAuth', e);
             setLoading(false);
         }
     }, []);

@@ -22,6 +22,7 @@ import { StrictMode, Suspense, type ComponentType, type ReactNode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { islandRegistry } from './IslandRegistry';
 import { IslandErrorBoundary } from './ErrorBoundary';
+import {logError, logWarn} from '../../app/utils/logger';
 import { GloryProvider } from './GloryProvider';
 import { DevOverlay } from './DevOverlay';
 import { useNavigationStore } from './router/navigationStore';
@@ -75,7 +76,7 @@ function mountIsland(
 ): void {
     const resolved = islandRegistry.resolve(islandName);
     if (!resolved) {
-        console.error(`[Glory] Componente "${islandName}" no registrado en IslandRegistry`);
+        logError('hydration', `Componente "${islandName}" no registrado en IslandRegistry`);
         return;
     }
 
@@ -120,18 +121,18 @@ function mountIsland(
         if (shouldHydrate && hasContent) {
             hydrateRoot(container, element);
             if (import.meta.env.DEV) {
-                console.warn(`[Glory] Isla "${islandName}" hidratada (SSG)`);
+                logWarn('hydration', `Isla "${islandName}" hidratada (SSG)`);
             }
         } else {
             container.innerHTML = '';
             createRoot(container).render(element);
             if (import.meta.env.DEV) {
-                console.warn(`[Glory] Isla "${islandName}" montada (CSR)`);
+                logWarn('hydration', `Isla "${islandName}" montada (CSR)`);
             }
         }
     } catch (error) {
         /* El feedback real al usuario es renderFalloVisible (vuelca un mensaje
-         * visible en el contenedor con el detalle en el title): el console.error
+         * visible en el contenedor con el detalle en el title): el error
          * seria redundante, por eso no se registra aqui. */
         if (shouldHydrate) {
             /* Fallback: si la hidratacion falla, intentar CSR. El usuario recibe
@@ -214,14 +215,14 @@ function initializeSPA(routes: GloryRoutesMap, options: InitOptions): void {
 
     if (import.meta.env.DEV) {
         const rutasStr = Object.keys(routes).join(', ');
-        console.warn(`[Glory SPA] Modo SPA activo con ${Object.keys(routes).length} rutas: ${rutasStr}`);
+        logWarn('hydration', `Modo SPA activo con ${Object.keys(routes).length} rutas: ${rutasStr}`);
     }
 
     /* Encontrar el contenedor principal [data-island] para montar el PageRenderer */
     const container = document.querySelector<HTMLElement>('[data-island]');
     if (!container) {
         if (import.meta.env.DEV) {
-            console.error('[Glory SPA] No se encontro contenedor [data-island] para PageRenderer');
+            logError('hydration', 'No se encontro contenedor [data-island] para PageRenderer');
         }
         return;
     }
@@ -247,7 +248,7 @@ function initializeSPA(routes: GloryRoutesMap, options: InitOptions): void {
 
     if (import.meta.env.DEV) {
         const { islaActual } = useNavigationStore.getState();
-        console.warn(`[Glory SPA] PageRenderer montado, isla inicial: ${islaActual}`);
+        logWarn('hydration', `PageRenderer montado, isla inicial: ${islaActual}`);
     }
 }
 
@@ -259,20 +260,20 @@ function initializeClassicIslands(options: InitOptions): void {
 
     if (islands.length === 0) {
         if (import.meta.env.DEV) {
-            console.warn('[Glory] No se encontraron islas para montar');
+            logWarn('hydration', 'No se encontraron islas para montar');
         }
         return;
     }
 
     if (import.meta.env.DEV) {
-        console.warn(`[Glory] Montando ${islands.length} isla(s), registry: ${islandRegistry.getNames().join(', ')}`);
+        logWarn('hydration', `Montando ${islands.length} isla(s), registry: ${islandRegistry.getNames().join(', ')}`);
     }
 
     islands.forEach((container) => {
         const islandName = container.dataset.island;
 
         if (!islandName) {
-            console.error('[Glory] Contenedor sin nombre de isla:', container);
+            logError('hydration', 'Contenedor sin nombre de isla:', container);
             return;
         }
 

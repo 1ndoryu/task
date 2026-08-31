@@ -5,6 +5,7 @@
  */
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import {logError} from '../../app/utils/logger';
 
 interface ErrorBoundaryProps {
     islandName: string;
@@ -29,8 +30,9 @@ export class IslandErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
     }
 
     componentDidCatch(error: Error, info: ErrorInfo): void {
-        console.error(
-            `[Glory] Error en isla "${this.props.islandName}":`,
+        logError(
+            'ErrorBoundary',
+            `Error en isla "${this.props.islandName}":`,
             error,
             info.componentStack,
         );

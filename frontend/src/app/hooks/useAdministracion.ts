@@ -8,6 +8,7 @@
 import {useState, useCallback} from 'react';
 import type {UsuarioAdmin, FiltrosAdmin, RespuestaListaUsuarios, ResumenAdmin} from '../types/dashboard';
 import {apiFetch} from '../utils/apiClient';
+import {logError} from '../utils/logger';
 
 interface EstadoAdmin {
     usuarios: UsuarioAdmin[];
@@ -146,7 +147,7 @@ export function useAdministracion() {
                 }));
             }
         } catch (err) {
-            console.error('Error al cargar resumen:', err);
+            logError('useAdministracion', 'Error al cargar resumen:', err);
         }
     }, [fetchApi]);
 
@@ -165,7 +166,7 @@ export function useAdministracion() {
                 }
                 return null;
             } catch (err) {
-                console.error('Error al obtener usuario:', err);
+                logError('useAdministracion', 'Error al obtener usuario:', err);
                 return null;
             }
         },

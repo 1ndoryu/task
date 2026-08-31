@@ -17,6 +17,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
 import {devLog, devWarn} from '../utils/devLog';
+import {logError} from '../utils/logger';
 
 /*
  * Detección de entorno para WebSocket
@@ -232,12 +233,12 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
                     devLog('[WebSocket] Pasando a handler:', JSON.stringify(mensaje).substring(0, 100));
                     onMensajeRef.current?.(mensaje);
                 } catch (error) {
-                    console.error('[WebSocket] Error parseando mensaje:', error);
+                    logError('useWebSocket', 'Error parseando mensaje:', error);
                 }
             };
 
             ws.onerror = error => {
-                console.error('[WebSocket] Error:', error);
+                logError('useWebSocket', 'Error:', error);
                 setEstado('error');
             };
 
@@ -257,7 +258,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
 
             wsRef.current = ws;
         } catch (error) {
-            console.error('[WebSocket] Error al conectar:', error);
+            logError('useWebSocket', 'Error al conectar:', error);
             setEstado('error');
             programarReconexion();
         }
@@ -300,7 +301,7 @@ export function useWebSocket(userId: number | null, onMensaje?: MensajeHandler, 
             ultimaActividadRef.current = Date.now();
             return true;
         } catch (error) {
-            console.error('[WebSocket] Error enviando mensaje:', error);
+            logError('useWebSocket', 'Error enviando mensaje:', error);
             return false;
         }
     }, []);

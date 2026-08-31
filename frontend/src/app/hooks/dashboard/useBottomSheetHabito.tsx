@@ -6,6 +6,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
+import {logError} from '../../utils/logger';
 import {Repeat, Flag} from 'lucide-react';
 import {obtenerTextoFrecuencia, obtenerTextoImportancia} from '../../utils/constantes';
 import type {Habito} from '../../types/dashboard';
@@ -122,7 +123,7 @@ export function useBottomSheetHabito({estaAbierto, onCerrar, onGuardar, valoresI
             onCerrar();
         // sentinel-disable-next-line fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error
         } catch (error) {
-            console.error('Error al guardar hábito:', error);
+            logError('useBottomSheetHabito', 'Error al guardar hábito:', error);
         } finally {
             setCargando(false);
         }

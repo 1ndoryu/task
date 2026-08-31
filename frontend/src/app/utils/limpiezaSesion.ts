@@ -7,6 +7,7 @@
 import {useHabitosStore} from '../stores/habitosStore';
 import {useHabitosHistorialStore} from '../stores/habitosHistorialStore';
 import {CLAVES_LOCALSTORAGE} from '../hooks/useLocalStorage';
+import {logWarn} from './logger';
 
 /*
  * Claves de localStorage que deben limpiarse al cerrar sesión.
@@ -43,13 +44,13 @@ export function limpiarTodosLosDatosUsuario(): void {
     try {
         useHabitosStore.setState({habitos: [], inicializado: false, estadoGuardado: 'idle', errorGuardado: null});
     } catch (e) {
-        console.warn('[Limpieza] Error reseteando habitosStore:', e);
+        logWarn('limpiezaSesion', 'Error reseteando habitosStore:', e);
     }
 
     try {
         useHabitosHistorialStore.getState().limpiarTodoHistorialDetallado();
     } catch (e) {
-        console.warn('[Limpieza] Error limpiando historial:', e);
+        logWarn('limpiezaSesion', 'Error limpiando historial:', e);
     }
 
     /* 2. Limpiar todas las claves conocidas de localStorage */
@@ -57,7 +58,7 @@ export function limpiarTodosLosDatosUsuario(): void {
         try {
             localStorage.removeItem(clave);
         } catch (e) {
-            console.warn(`[Limpieza] Error eliminando clave "${clave}":`, e);
+            logWarn('limpiezaSesion', `Error eliminando clave "${clave}":`, e);
         }
     }
 
@@ -74,13 +75,13 @@ export function limpiarTodosLosDatosUsuario(): void {
             localStorage.removeItem(clave);
         }
     } catch (e) {
-        console.warn('[Limpieza] Error en limpieza por prefijo:', e);
+        logWarn('limpiezaSesion', 'Error en limpieza por prefijo:', e);
     }
 
     /* 4. Limpiar sessionStorage */
     try {
         sessionStorage.clear();
     } catch (e) {
-        console.warn('[Limpieza] Error limpiando sessionStorage:', e);
+        logWarn('limpiezaSesion', 'Error limpiando sessionStorage:', e);
     }
 }

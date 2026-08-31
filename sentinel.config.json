@@ -63,7 +63,7 @@
           "dom": ["/frontend/src/utils/dom.ts", "/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/app/hooks/", "/frontend/src/app/stores/", "/frontend/src/app/components/", "/frontend/src/glory-core/", "/frontend/src/app/islands/", "/frontend/src/app/utils/", "/frontend/src/app/services/", "frontend/src/main.tsx", "frontend/src/app/main.tsx"],
           "window": ["/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/navigation/", "/frontend/src/app/hooks/", "/frontend/src/app/stores/", "/frontend/src/app/components/", "/frontend/src/glory-core/", "/frontend/src/app/islands/", "/frontend/src/app/utils/", "/frontend/src/app/services/", "frontend/src/main.tsx", "frontend/src/app/main.tsx"],
           "services": ["/frontend/src/services/", "/frontend/src/api/", "/frontend/src/adapters/"],
-          "loggerModules": ["/frontend/src/services/logger", "/frontend/src/utils/logger"]
+          "loggerModules": ["/frontend/src/app/utils/logger"]
         },
         "rules": {
           "barras-decorativas": { "severidad": "warning" },

@@ -12,6 +12,7 @@
 import {BlockRegistry} from './BlockRegistry';
 import type {BlockData} from './types';
 import './styles/constructorPaginas.css';
+import {logError} from '../../app/utils/logger';
 
 interface BlockRendererProps {
     /** Array de bloques a renderizar */
@@ -52,7 +53,7 @@ function renderBlock(
     const definition = BlockRegistry.get(block.type);
 
     if (!definition) {
-        console.error(`[BlockRenderer] Tipo de bloque "${block.type}" no registrado`);
+        logError('BlockRenderer', `Tipo de bloque "${block.type}" no registrado`);
         return (
             <div
                 key={block.id}

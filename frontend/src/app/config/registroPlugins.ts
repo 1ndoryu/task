@@ -7,6 +7,7 @@
 
 import type {DefinicionPlugin} from '../types/plugins';
 import {esUsuarioAdmin} from '../utils/dashboardRuntime';
+import {logWarn} from '../utils/logger';
 
 /* Mapa interno del registro de plugins */
 const _registroPlugins: Map<string, DefinicionPlugin> = new Map();
@@ -16,7 +17,7 @@ const _registroPlugins: Map<string, DefinicionPlugin> = new Map();
  */
 export function registrarPlugin(definicion: DefinicionPlugin): void {
     if (_registroPlugins.has(definicion.id)) {
-        console.warn(`[Plugins] Plugin "${definicion.id}" ya registrado, sobrescribiendo...`);
+        logWarn('registroPlugins', `Plugin "${definicion.id}" ya registrado, sobrescribiendo...`);
     }
     _registroPlugins.set(definicion.id, definicion);
 }

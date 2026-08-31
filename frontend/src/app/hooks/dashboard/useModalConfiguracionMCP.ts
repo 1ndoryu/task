@@ -6,6 +6,7 @@
 
 import {useState, useCallback, useEffect, useRef} from 'react';
 import {useSuscripcionStore} from '../../stores/suscripcionStore';
+import {logError} from '../../utils/logger';
 import {apiFetch} from '../../utils/apiClient';
 
 type ClienteMCP = 'claude' | 'cursor' | 'apirest';
@@ -172,7 +173,7 @@ export function useModalConfiguracionMCP({estaAbierto}: UseModalConfiguracionMCP
                 localStorage.setItem('glory_mcp_token_base64', btoa(respuesta.token));
             }
         } catch (err) {
-            console.error('[MCP] No se pudo generar el token:', err);
+            logError('useModalConfiguracionMCP', 'No se pudo generar el token:', err);
         } finally {
             setCargando(false);
         }
@@ -194,7 +195,7 @@ export function useModalConfiguracionMCP({estaAbierto}: UseModalConfiguracionMCP
             setFechaCreacion(null);
             localStorage.removeItem('glory_mcp_token_base64');
         } catch (err) {
-            console.error('[MCP] No se pudo revocar el token:', err);
+            logError('useModalConfiguracionMCP', 'No se pudo revocar el token:', err);
         } finally {
             setCargando(false);
         }

@@ -10,6 +10,7 @@
  */
 
 import type {ComponentType} from 'react';
+import {logWarn} from '../utils/logger';
 
 /* Tipo para props de islands */
 type IslandProps = Record<string, unknown>;
@@ -38,7 +39,7 @@ let _inicializado = false;
  */
 export function registrarIsland(id: string, componente: IslandComponent, descripcion?: string): void {
     if (_registro.has(id)) {
-        console.warn(`[Glory Islands] Island "${id}" ya registrada, sobrescribiendo...`);
+        logWarn('registroIslands', `Island "${id}" ya registrada, sobrescribiendo...`);
     }
     _registro.set(id, {id, componente, descripcion});
 }

@@ -6,6 +6,7 @@
 
 import {useState} from 'react';
 import {Key, Eye, EyeOff, Copy, Check, Trash2, RefreshCw, AlertTriangle} from 'lucide-react';
+import * as logger from '../../utils/logger';
 import {Boton} from '../ui';
 import {Input} from '../ui/Input';
 
@@ -30,7 +31,7 @@ export function SeccionTokenMCP({tokenExiste, tokenGenerado, fechaCreacion, carg
             setTimeout(() => setCopiado(false), 2000);
         // sentinel-disable-next-line fallo-sin-feedback — tiene alert() como feedback
         } catch (error) {
-            console.error('Error al copiar token:', error);
+            logger.logError('SeccionTokenMCP', 'Error al copiar token:', error);
             alert('No se pudo copiar el token. Cópialo manualmente.');
         }
     };

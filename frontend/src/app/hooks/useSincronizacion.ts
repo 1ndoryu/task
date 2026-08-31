@@ -12,6 +12,7 @@
 import {useEffect, useCallback, useRef, useState} from 'react';
 import {devLog} from '../utils/devLog';
 import {useDashboardApi, type DashboardData} from './useDashboardApi';
+import {logError} from '../utils/logger';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from './useLocalStorage';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 
@@ -173,7 +174,7 @@ export function useSincronizacion(datosLocales: DatosLocales, onDatosServidor: (
                 }
             } catch (error) {
                 const mensaje = error instanceof Error ? error.message : 'Error de conexión';
-                console.error('[Sync] Error en carga inicial:', mensaje);
+                logError('useSincronizacion', 'Error en carga inicial:', mensaje);
                 setEstado(prev => ({
                     ...prev,
                     error: mensaje

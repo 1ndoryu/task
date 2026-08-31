@@ -9,6 +9,7 @@ import {useRef, useState} from 'react';
 import {Upload, Loader2, AlertTriangle} from 'lucide-react';
 import type {Adjunto} from '../../types/dashboard';
 import {SeccionPanel} from '../shared';
+import * as logger from '../../utils/logger';
 import {Boton, Input} from '../ui';
 
 import {useAudioPlayer} from '../../hooks/shared/useAudioPlayer';
@@ -76,7 +77,7 @@ export function SeccionAdjuntos({adjuntos, onChange, modoLegacy = false, estilo 
                 }
             // sentinel-disable-next-line fallo-sin-feedback — error de descifrado, archivo no se muestra y usuario lo nota
             }).catch(error => {
-                console.error('[SeccionAdjuntos] Error al cargar contenido cifrado:', error);
+                logger.logError('SeccionAdjuntos', 'Error al cargar contenido cifrado:', error);
             });
         } else if (adjunto.tipo === 'imagen') {
             const url = obtenerUrlPreview(adjunto) || adjunto.url;

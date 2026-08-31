@@ -1,4 +1,5 @@
 import {useState, useRef, useCallback} from 'react';
+import {logError} from '../../utils/logger';
 
 export function useAudioPlayer() {
     const audioRefs = useRef<{[id: string | number]: HTMLAudioElement}>({});
@@ -26,7 +27,7 @@ export function useAudioPlayer() {
                 if (playingId && audioRefs.current[playingId]) {
                     audioRefs.current[playingId].pause();
                 }
-                audio.play().catch(e => console.error('Error reproduciendo audio:', e));
+                audio.play().catch(e => logError('useAudioPlayer', 'Error reproduciendo audio:', e));
                 setPlayingId(id);
             }
         },

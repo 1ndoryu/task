@@ -6,6 +6,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
+import {logError} from '../../utils/logger';
 import {Calendar, Flag, Zap, Layers} from 'lucide-react';
 import type {Proyecto, Tarea} from '../../types/dashboard';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
@@ -145,7 +146,7 @@ export function useBottomSheetTarea({estaAbierto, onCerrar, onGuardar, proyectos
             onCerrar();
         // sentinel-disable-next-line fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error
         } catch (error) {
-            console.error('Error al guardar tarea:', error);
+            logError('useBottomSheetTarea', 'Error al guardar tarea:', error);
         } finally {
             setCargando(false);
         }

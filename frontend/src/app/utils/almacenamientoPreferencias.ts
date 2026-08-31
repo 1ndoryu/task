@@ -5,6 +5,7 @@
  */
 
 import {registrarEscritura} from './timestampsPreferencias';
+import {logWarn} from './logger';
 
 /* Eventos que usan los hooks/stores para reaccionar a cambios en la misma
  * pestaña (useLocalStorage) y entre pestañas (storage). */
@@ -45,6 +46,6 @@ export function escribirClave(clave: string, valor: unknown, ts?: number): void 
             storageArea: localStorage
         }));
     } catch (error) {
-        console.warn(`[Preferencias] No se pudo escribir "${clave}":`, error);
+        logWarn('almacenamientoPreferencias', `No se pudo escribir "${clave}":`, error);
     }
 }

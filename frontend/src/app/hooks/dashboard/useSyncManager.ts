@@ -2,6 +2,7 @@ import {useEffect, useCallback, useRef, useState} from 'react';
 import {devLog, devWarn} from '../../utils/devLog';
 import type React from 'react';
 import {useChangeDetector} from './useChangeDetector';
+import {logError} from '../../utils/logger';
 import {useSyncTransport} from './useSyncTransport';
 import {useLocalStorage, CLAVES_LOCALSTORAGE} from '../useLocalStorage';
 import {useSuscripcion} from '../useSuscripcion';
@@ -206,7 +207,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                 }
             }
         } catch (e) {
-            console.error('[SyncManager] Error en sincronización inicial:', e);
+            logError('useSyncManager', 'Error en sincronización inicial:', e);
         } finally {
             setIsInitialized(true);
             if (onInitComplete) onInitComplete();

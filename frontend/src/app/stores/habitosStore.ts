@@ -16,6 +16,7 @@
 import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
 import type {Habito, DatosNuevoHabito, DatosNuevoSubHabito} from '../types/dashboard';
+import {logWarn} from '../utils/logger';
 import type {EstadoHabito, DiaHistorial} from '../types/historialHabitos';
 import {generarResumen7Dias} from '../utils/habitosLogica';
 import {crearSliceCrud} from './habitos/sliceCrud';
@@ -60,8 +61,9 @@ export const useHabitosStore = create<HabitosStore>()(
                      * parciales que reventaban FilaHabito al rehidratar. */
                     const {habitos: habitosNormalizados, corregidos: totalNormalizados} = normalizarHabitos(habitosLimpiados);
                     if (totalEliminados > 0 || totalNormalizados > 0) {
-                        console.warn(
-                            `[HabitosStore] onRehydrate: ${totalEliminados} subhábitos eliminados (fantasma/duplicados), ${totalNormalizados} hábitos normalizados (campos faltantes)`
+                        logWarn(
+                            'habitosStore',
+                            `onRehydrate: ${totalEliminados} subhábitos eliminados (fantasma/duplicados), ${totalNormalizados} hábitos normalizados (campos faltantes)`
                         );
                         /* Forzar setState para que persist escriba los cambios a localStorage */
                         setTimeout(() => {

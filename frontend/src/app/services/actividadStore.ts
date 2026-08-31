@@ -13,6 +13,7 @@
  */
 
 import type {DatosHeatmap, FiltrosActividad, PeriodoActividad, EstadisticasActividad} from '../hooks/useActividad';
+import {logWarn} from '../utils/logger';
 
 /* Configuracion del cache */
 /* [014A-8] TTL reducido de 5min a 60s. Con WebSocket invalidando el cache
@@ -43,7 +44,7 @@ function cargarCacheDeStorage(): Map<string, CacheEntry> {
             return new Map(parsed);
         }
     } catch (e) {
-        console.warn('[ActividadStore] Error cargando cache:', e);
+        logWarn('actividadStore', 'Error cargando cache:', e);
     }
     return new Map();
 }
@@ -56,7 +57,7 @@ function guardarCacheEnStorage(): void {
         const entries = Array.from(cache.entries());
         sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(entries));
     } catch (e) {
-        console.warn('[ActividadStore] Error guardando cache:', e);
+        logWarn('actividadStore', 'Error guardando cache:', e);
     }
 }
 
@@ -189,7 +190,7 @@ function notificarListeners(): void {
         try {
             listener();
         } catch (error) {
-            console.warn('[ActividadStore] Error en listener:', error);
+            logWarn('actividadStore', 'Error en listener:', error);
         }
     });
 }

@@ -17,6 +17,7 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
 import {obtenerDelCache, guardarEnCache, suscribirACambios} from '../services/actividadStore';
 import {obtenerFechaHoy} from '../utils/fecha';
+import {logError} from '../utils/logger';
 import {obtenerTokenCsrf} from '../utils/apiClient';
 
 /* Tipos para el mapa de calor */
@@ -303,7 +304,7 @@ export function useActividad(filtrosIniciales?: FiltrosActividad): UseActividadR
 
                 return response.success;
             } catch (error) {
-                console.error('Error registrando actividad:', error);
+                logError('useActividad', 'Error registrando actividad:', error);
                 return false;
             }
         },

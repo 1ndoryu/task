@@ -7,6 +7,7 @@
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 import type {Recordatorio, ConfigRecordatorios, IntervaloRecordatorio, TamanoFuenteRecordatorio} from '../types/recordatorios';
+import {logWarn} from '../utils/logger';
 
 interface RecordatoriosActions {
     agregar: (recordatorio: Omit<Recordatorio, 'id' | 'fechaCreacion'>) => Recordatorio;
@@ -155,7 +156,7 @@ export const useRecordatoriosStore = create<RecordatoriosStore>()(
                     ...r,
                     adjuntos: Array.isArray(r.adjuntos) ? r.adjuntos : []
                 }));
-                console.warn('[RecordatoriosStore] onRehydrate: recordatorios sin adjuntos normalizados');
+                logWarn('recordatoriosStore', 'onRehydrate: recordatorios sin adjuntos normalizados');
                 /* Forzar setState para que persist reescriba localStorage */
                 setTimeout(() => {
                     useRecordatoriosStore.setState({recordatorios: normalizados});

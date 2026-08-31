@@ -8,6 +8,7 @@ import './glory-core/index.css';
 import { islandRegistry } from './glory-core/core';
 import { initializeIslands } from './glory-core/core/hydration';
 import appIslands, { AppProvider } from '@app/appIslands';
+import {logWarn} from './app/utils/logger';
 import {inicializarSuscripcionStore} from '@app/stores/suscripcionStore';
 import {limpiarTodosLosDatosUsuario} from '@app/utils/limpiezaSesion';
 import type { GloryRoutesMap } from './glory-core/core/router/navigationStore';
@@ -110,7 +111,7 @@ async function iniciarApp(): Promise<void> {
      * evita bucles: en la landing ya es false y no se vuelve a recargar. */
     window.addEventListener('glory:sesion-perdida', () => {
         if (window.gloryDashboard?.isLoggedIn) {
-            console.warn('[Sesion] Perdida durante el uso, recargando a la landing...');
+            logWarn('main', 'Perdida durante el uso, recargando a la landing...');
             window.location.reload();
         }
     });

@@ -6,6 +6,7 @@
 
 import {useState, useEffect, useRef, useCallback} from 'react';
 import type {Adjunto, FrecuenciaHabito} from '../../types/dashboard';
+import {logError} from '../../utils/logger';
 import {useAdjuntos} from '../useAdjuntos';
 
 interface EstadoOpciones {
@@ -112,7 +113,7 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
             setAdjuntos([]);
             onCerrar();
         } catch (error) {
-            console.error(error);
+            logError('useModalCreacionRapida', error);
         } finally {
             setCargando(false);
         }
@@ -134,7 +135,7 @@ export function useModalCreacionRapida({tipo, valoresIniciales = {}, onCerrar, o
                 setAdjuntos(prev => [...prev, nuevoAdjunto]);
             }
         } catch (error) {
-            console.error('Error subiendo archivo:', error);
+            logError('useModalCreacionRapida', 'Error subiendo archivo:', error);
         } finally {
             if (fileInputRef.current) fileInputRef.current.value = '';
         }

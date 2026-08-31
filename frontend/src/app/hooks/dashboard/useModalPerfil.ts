@@ -6,6 +6,7 @@
 
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {useAuth} from '../useAuth';
+import {logError} from '../../utils/logger';
 import {apiFetch} from '../../utils/apiClient';
 
 interface DatosPerfil {
@@ -161,7 +162,7 @@ export function useModalPerfil({estaAbierto, onCerrar: _onCerrar}: UseModalPerfi
                 passwordConfirmar: ''
             }));
         } catch (error) {
-            console.error(error);
+            logError('useModalPerfil', error);
             const msg = error instanceof Error ? error.message : 'Error desconocido al actualizar perfil';
             setMensaje({tipo: 'error', texto: msg});
         } finally {

@@ -7,6 +7,7 @@
 import {useState, useCallback} from 'react';
 import {Copy, Check} from 'lucide-react';
 import {Boton} from '../ui';
+import * as logger from '../../utils/logger';
 
 interface ConfiguracionMCPCopiableProps {
     titulo: string;
@@ -44,7 +45,7 @@ export function ConfiguracionMCPCopiable({titulo, codigo}: ConfiguracionMCPCopia
             setTimeout(() => setCopiado(false), 2000);
         // sentinel-disable-next-line fallo-sin-feedback — tiene alert() como feedback
         } catch (error) {
-            console.error('Error al copiar:', error);
+            logger.logError('ConfiguracionMCPCopiable', 'Error al copiar:', error);
             /* Mostrar alerta como último recurso */
             alert('No se pudo copiar automáticamente. Por favor, selecciona el texto manualmente y usa Ctrl+C.');
         }

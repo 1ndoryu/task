@@ -13,6 +13,7 @@
 import {useState, useCallback, useRef, useEffect} from 'react';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 import type {AyunoState} from '../types/ayuno';
+import {logError} from '../utils/logger';
 import type {DeficitCaloricoState} from '../types/deficitCalorico';
 import {ErrorSilencioso, esErrorSilencioso} from '../utils/errores';
 import {recolectarPreferencias} from '../utils/preferenciasUsuario';
@@ -198,7 +199,7 @@ export function useDashboardApi(): UseDashboardApiReturn {
             if (esErrorSilencioso(error) || (error instanceof Error && error.message.includes('No autenticado'))) {
                 throw error;
             }
-            console.error('[DashboardApi] Fetch Error:', error);
+            logError('useDashboardApi', 'Fetch Error:', error);
             throw error;
         }
     }, []);

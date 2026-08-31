@@ -10,6 +10,7 @@
 import {useEffect, useRef} from 'react';
 import EditorJS, {OutputData, API} from '@editorjs/editorjs';
 import Header from '@editorjs/header';
+import {logError} from '../utils/logger';
 import Paragraph from '@editorjs/paragraph';
 import List from '@editorjs/list';
 import Quote from '@editorjs/quote';
@@ -58,7 +59,7 @@ export function useEditorJs({data, onChange, onReady, placeholder, readOnly, min
         }
 
         if (!holderRef.current) {
-            console.error('[EditorJs] Holder element not found');
+            logError('useEditorJs', 'Holder element not found');
             return;
         }
 

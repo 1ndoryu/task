@@ -1,3 +1,5 @@
+import {logWarn} from './logger';
+
 /*
  * borradosPendientes.ts
  *
@@ -48,7 +50,7 @@ function escribirRegistro(registro: RegistroBorrados): void {
     try {
         localStorage.setItem(CLAVE_LOCALSTORAGE, JSON.stringify(registro));
     } catch (error) {
-        console.warn('[BorradosPendientes] No se pudo persistir:', error);
+        logWarn('borradosPendientes', 'No se pudo persistir:', error);
     }
 }
 

@@ -6,6 +6,7 @@
  */
 
 import {useState, useRef, useEffect, useMemo} from 'react';
+import {logError} from '../../utils/logger';
 import {Flag, Zap, Calendar} from 'lucide-react';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {obtenerTextoPrioridad, obtenerTextoUrgencia} from '../../utils/constantes';
@@ -98,7 +99,7 @@ export function useBottomSheetProyecto({estaAbierto, onCerrar, onGuardar, valore
             onCerrar();
         // sentinel-disable-next-line fallo-sin-feedback — TO-DO: integrar useAlertas para toast de error
         } catch (error) {
-            console.error('Error al crear proyecto:', error);
+            logError('useBottomSheetProyecto', 'Error al crear proyecto:', error);
         } finally {
             setCargando(false);
         }

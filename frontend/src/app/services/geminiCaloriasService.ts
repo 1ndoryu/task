@@ -10,6 +10,7 @@
 import {enviarMensajeLLM, type ConfigProveedorIA} from './iaService';
 import {apiFetch} from '../utils/apiClient';
 import {esUsuarioAdmin} from '../utils/dashboardRuntime';
+import {logWarn} from '../utils/logger';
 
 interface RespuestaCaloriasIA {
     calorias: number;
@@ -124,7 +125,7 @@ export async function estimarCaloriasTexto(descripcion: string, config: ConfigPr
         };
     } catch (e) {
         log.push(`[!] ${config.modelo}: ${e instanceof Error ? e.message : String(e)}`);
-        console.warn('[Nutrición] Fallo proveedor IA:', e);
+        logWarn('geminiCaloriasService', 'Fallo proveedor IA:', e);
         const msg = e instanceof Error ? e.message : 'Ningún modelo respondió';
         throw new Error(`Error calculando macros: ${msg}`);
     }

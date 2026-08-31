@@ -11,6 +11,7 @@
 import {invalidarCache, invalidarCacheParcial} from './actividadStore';
 import {obtenerFechaHoy} from '../utils/fecha';
 import {obtenerTokenCsrf} from '../utils/apiClient';
+import {logWarn} from '../utils/logger';
 
 /* Base URL de la API */
 /* [18-08-2026] Contrato Rust: /api/activity (antes /activity sin /api no lo
@@ -100,7 +101,7 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
         });
 
         if (!response.ok) {
-            console.warn('[Actividad] Error al registrar:', response.status);
+            logWarn('actividadService', 'Error al registrar:', response.status);
             return false;
         }
 
@@ -123,7 +124,7 @@ export async function registrarActividad(params: RegistroActividadParams): Promi
         return exito;
     } catch (error) {
         /* Silenciar errores para no afectar la experiencia del usuario */
-        console.warn('[Actividad] Error de red:', error);
+        logWarn('actividadService', 'Error de red:', error);
         return false;
     }
 }
@@ -163,7 +164,7 @@ export async function eliminarActividad(actividadId: number): Promise<boolean> {
         });
 
         if (!response.ok) {
-            console.warn('[Actividad] Error al eliminar:', response.status);
+            logWarn('actividadService', 'Error al eliminar:', response.status);
             return false;
         }
 
@@ -173,7 +174,7 @@ export async function eliminarActividad(actividadId: number): Promise<boolean> {
         }
         return data.success ?? false;
     } catch (error) {
-        console.warn('[Actividad] Error de red al eliminar:', error);
+        logWarn('actividadService', 'Error de red al eliminar:', error);
         return false;
     }
 }

@@ -6,6 +6,7 @@
  */
 
 import {useState, useRef, useCallback, useEffect} from 'react';
+import {logError} from '../../utils/logger';
 
 interface UsePullToRefreshParams {
     onRefresh: () => Promise<void>;
@@ -58,7 +59,7 @@ export function usePullToRefresh({onRefresh, umbralRefresh = 80, maxArrastre = 1
             try {
                 await onRefresh();
             } catch (error) {
-                console.error('[PullToRefresh] Error:', error);
+                logError('usePullToRefresh', 'Error:', error);
             } finally {
                 setRefrescando(false);
                 setArrastre(0);

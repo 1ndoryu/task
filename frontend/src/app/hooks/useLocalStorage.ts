@@ -12,6 +12,7 @@
 
 import {useState, useCallback, useEffect} from 'react';
 import {devWarn} from '../utils/devLog';
+import {logError} from '../utils/logger';
 
 /* Nombre del evento de sincronización entre instancias (misma pestaña) */
 const EVENTO_SYNC = '__glory_ls_update__';
@@ -60,7 +61,7 @@ export function useLocalStorage<T>(clave: string, config: UseLocalStorageConfig<
 
             setValorInterno(valorParseado);
         } catch (error) {
-            console.error(`[useLocalStorage] Error al leer clave "${clave}":`, error);
+            logError('useLocalStorage', `Error al leer clave "${clave}":`, error);
         } finally {
             setCargando(false);
         }
@@ -115,7 +116,7 @@ export function useLocalStorage<T>(clave: string, config: UseLocalStorageConfig<
                     localStorage.setItem(clave, valorJSON);
                     window.dispatchEvent(new CustomEvent(EVENTO_SYNC, {detail: {clave, valor: valorJSON}}));
                 } catch (error) {
-                    console.error(`[useLocalStorage] Error al guardar clave "${clave}":`, error);
+                    logError('useLocalStorage', `Error al guardar clave "${clave}":`, error);
                 }
 
                 return valorFinal;
@@ -132,7 +133,7 @@ export function useLocalStorage<T>(clave: string, config: UseLocalStorageConfig<
             localStorage.removeItem(clave);
             setValorInterno(valorPorDefecto);
         } catch (error) {
-            console.error(`[useLocalStorage] Error al eliminar clave "${clave}":`, error);
+            logError('useLocalStorage', `Error al eliminar clave "${clave}":`, error);
         }
     }, [clave, valorPorDefecto]);
 

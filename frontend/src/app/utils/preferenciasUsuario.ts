@@ -30,6 +30,7 @@
 import {apiFetch} from './apiClient';
 import {leerClave, escribirClave} from './almacenamientoPreferencias';
 import {obtenerTs, registrarEscritura} from './timestampsPreferencias';
+import {logWarn} from './logger';
 
 export const CLAVES_PREFERENCIAS: string[] = [
     /* Layout y paneles */
@@ -145,7 +146,7 @@ export async function persistirPreferenciasAhora(): Promise<boolean> {
         });
         return true;
     } catch (error) {
-        console.warn('[Preferencias] Flush de logout falló:', error);
+        logWarn('preferenciasUsuario', 'Flush de logout falló:', error);
         return false;
     }
 }

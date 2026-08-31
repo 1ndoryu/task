@@ -10,6 +10,7 @@
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 import type {HistorialHabito, EstadoHabito, DiaHistorial, EstadisticasHabito} from '../types/historialHabitos';
+import {logError} from '../utils/logger';
 import {habitosService} from '../services/habitosService';
 
 /*
@@ -68,7 +69,7 @@ export const useHabitosHistorialStore = create<HabitosHistorialStore>()(
                     /* Guardar en el store */
                     get().guardarHistorialDetallado(habitoId, data.historial, data.resumen7Dias, data.estadisticas, dias);
                 } catch (error) {
-                    console.error('[HabitosHistorialStore] Error cargando historial:', error);
+                    logError('habitosHistorialStore', 'Error cargando historial:', error);
                 }
             },
 

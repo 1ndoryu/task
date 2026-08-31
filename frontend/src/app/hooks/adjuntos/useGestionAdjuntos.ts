@@ -2,6 +2,7 @@ import {useState, useCallback} from 'react';
 import type {Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../useAdjuntos';
 import {formatBytes} from '../../utils/formato';
+import {logError} from '../../utils/logger';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -90,7 +91,7 @@ export function useGestionAdjuntos(adjuntos: Adjunto[], onChange: (adjuntos: Adj
 
             if (!esBase64(adjunto.url)) {
                 eliminarArchivoFisico(adjunto).catch(err => {
-                    console.error('Error eliminando archivo del servidor:', err);
+                    logError('useGestionAdjuntos', 'Error eliminando archivo del servidor:', err);
                 });
             }
         },

@@ -15,6 +15,7 @@
 import {useCallback, useEffect, useRef} from 'react';
 import {Capacitor} from '@capacitor/core';
 import type {Habito} from '../types/dashboard';
+import {logError} from '../utils/logger';
 import {devWarn} from '../utils/devLog';
 
 /*
@@ -128,7 +129,7 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
             permisoRef.current = resultado.display === 'granted';
             return permisoRef.current;
         } catch (error) {
-            console.error('[Notificaciones] Error al solicitar permisos:', error);
+            logError('useNotificacionesLocales', 'Error al solicitar permisos:', error);
             return false;
         }
     }, [esNativo]);
@@ -178,7 +179,7 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
                     ]
                 });
             } catch (error) {
-                console.error('[Notificaciones] Error al programar:', error);
+                logError('useNotificacionesLocales', 'Error al programar:', error);
             }
         },
         [esNativo]
@@ -192,7 +193,7 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
             try {
                 await pluginRef.current.cancel({notifications: [{id: ID_BASE_HABITOS + habitoId}]});
             } catch (error) {
-                console.error('[Notificaciones] Error al cancelar:', error);
+                logError('useNotificacionesLocales', 'Error al cancelar:', error);
             }
         },
         [esNativo]
@@ -208,7 +209,7 @@ export function useNotificacionesLocales(habitos: Habito[] = []): EstadoNotifica
                 await pluginRef.current.cancel({notifications: pendientes.notifications});
             }
         } catch (error) {
-            console.error('[Notificaciones] Error al cancelar todas:', error);
+            logError('useNotificacionesLocales', 'Error al cancelar todas:', error);
         }
     }, [esNativo]);
 

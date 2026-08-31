@@ -18,6 +18,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {abrirBaseDatos, ejecutarTransaccion, incrementarIntentosDeCola, hayOperacionesAgotadas, contarOperacionesPendientes, vaciarCola, STORES} from '../utils/offlineDB';
 import type {OperacionCola, TipoOperacion, TipoEntidad} from '../utils/offlineDB';
+import {logError} from '../utils/logger';
 import type {Habito, Tarea, Proyecto} from '../types/dashboard';
 
 interface DatosOffline {
@@ -113,7 +114,7 @@ export function useModoOffline(
                 store.put({id: 'dashboard', ...datosActualizados})
             );
         } catch (error) {
-            console.error('[Offline] Error al guardar localmente:', error);
+            logError('useModoOffline', 'Error al guardar localmente:', error);
         }
     }, []);
 
@@ -131,7 +132,7 @@ export function useModoOffline(
             const {id, ...datos} = resultado;
             return datos as DatosOffline;
         } catch (error) {
-            console.error('[Offline] Error al obtener datos locales:', error);
+            logError('useModoOffline', 'Error al obtener datos locales:', error);
             return null;
         }
     }, []);
@@ -160,7 +161,7 @@ export function useModoOffline(
                     procesarCola();
                 }
             } catch (error) {
-                console.error('[Offline] Error al encolar operación:', error);
+                logError('useModoOffline', 'Error al encolar operación:', error);
             }
         },
         []
@@ -248,7 +249,7 @@ export function useModoOffline(
                 }));
             }
         } catch (error) {
-            console.error('[Offline] Error al limpiar datos:', error);
+            logError('useModoOffline', 'Error al limpiar datos:', error);
         }
     }, []);
 

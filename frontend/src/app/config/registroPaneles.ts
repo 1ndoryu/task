@@ -10,6 +10,7 @@
 import type {ReactNode} from 'react';
 import type {DefinicionPanel, ModoColumnas, OrdenPanel} from '../types/paneles';
 import {esUsuarioAdmin} from '../utils/dashboardRuntime';
+import {logWarn} from '../utils/logger';
 
 /* Mapa interno del registro */
 const _registro: Map<string, DefinicionPanel> = new Map();
@@ -20,7 +21,7 @@ let _inicializado = false;
 /* Registrar un nuevo panel */
 export function registrarPanel(definicion: DefinicionPanel): void {
     if (_registro.has(definicion.id)) {
-        console.warn(`Panel "${definicion.id}" ya registrado, sobrescribiendo...`);
+        logWarn('registroPaneles', `Panel "${definicion.id}" ya registrado, sobrescribiendo...`);
     }
     _registro.set(definicion.id, definicion);
 }

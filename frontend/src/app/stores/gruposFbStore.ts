@@ -5,6 +5,7 @@
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 import {gruposFbService} from '../services/gruposFbService';
+import {logError} from '../utils/logger';
 import {devLog} from '../utils/devLog';
 import type {GrupoFb, CategoriaGrupoFb, EstadisticasGruposFb, OverrideGrupoFb} from '../services/gruposFbService';
 
@@ -95,7 +96,7 @@ export const useGruposFbStore = create<GruposFbStore>()(
                     }, false, 'cargar/exito');
                 } catch (e) {
                     const msg = e instanceof Error ? e.message : 'Error desconocido';
-                    console.error('[GruposFb] Error al cargar:', msg, e);
+                    logError('gruposFbStore', 'Error al cargar:', msg, e);
                     set({cargando: false, error: msg, inicializado: true}, false, 'cargar/error');
                 }
             },

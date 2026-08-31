@@ -8,6 +8,7 @@
  */
 
 import {create} from 'zustand';
+import {logWarn} from '../../utils/logger';
 import type {ConversacionAgente, ConfigAgente, MensajeConversacion, TareaProgramada} from './service';
 import {
     aConfigFrontend,
@@ -451,7 +452,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         } catch (error) {
             /* Fallo de red: la tab se cierra localmente igual; el servidor la
              * reconciliará en la próxima carga de la lista. */
-            console.warn('agente: no se pudo eliminar la conversación en el servidor', error);
+            logWarn('agenteStore', 'no se pudo eliminar la conversación en el servidor', error);
         }
         const resto = get().tabs.filter(t => t.conversacion.id !== id);
         set(state => ({

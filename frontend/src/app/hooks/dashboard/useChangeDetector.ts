@@ -1,4 +1,5 @@
 import {useCallback, useRef} from 'react';
+import {logError} from '../../utils/logger';
 
 export interface ChangeDetectorResult {
     hasChanges: boolean;
@@ -23,7 +24,7 @@ export function useChangeDetector<T>(data: T, skipInitial = false) {
         try {
             return JSON.stringify(data, (clave, valor) => (CAMPOS_VOLATILES.has(clave) ? undefined : valor));
         } catch (e) {
-            console.error('[ChangeDetector] Error hashing data', e);
+            logError('useChangeDetector', 'Error hashing data', e);
             return '';
         }
     };
