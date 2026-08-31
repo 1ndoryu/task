@@ -50,19 +50,19 @@
 
 .panelExpBarra {
     height: 8px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--dashboard-superposicionSutil);
     overflow: hidden;
 }
 
 .panelExpBarraRelleno {
     height: 100%;
-    border-radius: 999px;
+    border-radius: 0;
     transition: width 0.4s ease;
 }
 
 .panelExpVida--alta {
-    background: var(--dashboard-exito, #4caf7d);
+    background: var(--dashboard-exito);
 }
 
 .panelExpVida--media {
@@ -70,11 +70,11 @@
 }
 
 .panelExpVida--baja {
-    background: var(--dashboard-error, #e0544c);
+    background: var(--dashboard-error);
 }
 
 .panelExpExp {
-    background: var(--dashboard-acento, #7c9cff);
+    background: var(--dashboard-acento);
 }
 
 /* Nivel: columna compacta al inicio del cuerpo (antes de las barras). */
@@ -111,7 +111,7 @@
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    --arbol-color: var(--dashboard-textoActivo, #ffffff);
+    --arbol-color: var(--dashboard-textoActivo);
 }
 
 .panelExpArbol svg {
@@ -188,7 +188,7 @@
     height: 10px;
     min-width: 44px;
     border-radius: 0;
-    border: 1px solid var(--dashboard-textoActivo, #e8e8ea);
+    border: 1px solid var(--dashboard-textoActivo);
     background: transparent;
     overflow: hidden;
 }
@@ -203,7 +203,7 @@
 /* El relleno usa el MISMO color del número (texto activo), no el del bloque
  * (que es texto secundario para la etiqueta). Sin color propio en ambos. */
 .panelExpArbolLateralBarra {
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
 }
 
 /* Envoltorio del árbol: columna central estable para no depender del ancho

@@ -1,0 +1,20 @@
+/*
+ * monocromo.css — Refactor monocromo (31-08-2026)
+ * Anulación drástica y global: sin radios, sin sombras.
+ * Se importa AL FINAL de index.css para máxima precedencia.
+ * Los colores ya vienen de variables.css (escala de grises).
+ * La accesibilidad de foco se conserva con outline (no box-shadow).
+ */
+[data-theme] *,
+[data-theme] *::before,
+[data-theme] *::after {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Foco accesible: se mantiene con outline visible, nunca box-shadow. */
+[data-theme] :focus-visible {
+    outline: 2px solid var(--dashboard-textoActivo, #ffffff);
+    outline-offset: 2px;
+    box-shadow: none !important;
+}

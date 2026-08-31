@@ -7,6 +7,7 @@ import {useConfiguracionLayout} from '../../../../hooks/useConfiguracionLayout';
 export function SeccionConfigTemas(): JSX.Element {
     const {tema, cambiarTema} = useTema();
     const {tipoLayout} = useConfiguracionLayout();
+    /* En sidebar solo se ofrece 'claro' (el oscuro es el tema base). */
     const temasVisibles = tipoLayout === 'sidebar'
         ? TEMAS_DISPONIBLES.filter(t => t.id !== 'original')
         : TEMAS_DISPONIBLES;

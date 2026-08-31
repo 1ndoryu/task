@@ -19,6 +19,14 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 ## Bloque actual
 
+✅ **Resuelto (31-08-2026): refactor visual monocromo (318A-1).** Blanco y negro puro, sin
+colores, sin radios, sin sombras. `variables.css` reescrito a escala de grises (2 temas:
+`:root` oscuro `original` + `claro`), tema `oscuro` eliminado de `useTema` y TSX, anulación
+global vía `monocromo.css` (import al final de `index.css`), 13 CSS limpiados de valores
+hardcoded → tokens. Gate `GLORY-BASELINE` PASS. Evidencia:
+`Agente/completados/tareas-2026-08-31.md`. Pendiente real detectado (no bloqueante): bug visual
+del modal de tareas programadas (`[class*="panel"]` vs `panelAgenteTarea*`).
+
 **En curso (26-08-2026): paridad de sync y export.** Dos bugs profundos heredados del legacy:
 1. **Reappear**: al borrar/completar una tarea a veces reaparece/des-completa (race intermitente entre el guardado debounced 2s y el refresco 30s/foco que sobrescribe local con datos stale). Fix: refresco tombstones-aware + no-clobber en `useSyncManager`. Plan: `Agente/planes/plan-paridad-sync-export-2026-08-26.md`.
 2. **Export incompleto**: el archivo solo lleva habitos/tareas/proyectos/notas-scratchpad; faltan recordatorios, notas guardadas, grupos (tareas/ejecución/FB), ayuno, déficit, timeTracker, plugins, config, preferencias. Fix: ampliar formato v2 con todas las secciones + validación tolerante + restore.

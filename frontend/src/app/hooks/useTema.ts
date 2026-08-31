@@ -10,7 +10,7 @@ import {useLocalStorage} from './useLocalStorage';
 /*
  * Tipos de tema disponibles
  */
-export type TipoTema = 'original' | 'oscuro' | 'claro';
+export type TipoTema = 'original' | 'claro';
 
 interface UseTemaReturn {
     tema: TipoTema;
@@ -39,31 +39,21 @@ export const TEMAS_DISPONIBLES: InfoTema[] = [
     {
         id: 'original',
         nombre: 'Terminal',
-        descripcion: 'Tema oscuro minimalista estilo terminal',
+        descripcion: 'Tema oscuro monocromo',
         colores: {
-            fondo: '#090909',
-            texto: '#eaeaea',
-            acento: '#22c55e'
-        }
-    },
-    {
-        id: 'oscuro',
-        nombre: 'Oscuro',
-        descripcion: 'Dark mode monocromático en grises',
-        colores: {
-            fondo: '#121212',
-            texto: '#f5f5f5',
+            fondo: '#000000',
+            texto: '#ffffff',
             acento: '#ffffff'
         }
     },
     {
         id: 'claro',
         nombre: 'Claro',
-        descripcion: 'Tema claro para preferencias de día',
+        descripcion: 'Tema claro monocromo',
         colores: {
-            fondo: '#f8f9fa',
-            texto: '#1a1a1a',
-            acento: '#3b82f6'
+            fondo: '#ffffff',
+            texto: '#000000',
+            acento: '#000000'
         }
     }
 ];
@@ -75,7 +65,7 @@ const TEMA_POR_DEFECTO: TipoTema = 'original';
  * Valida que el valor sea un tema válido
  */
 function validarTema(valor: unknown): boolean {
-    return typeof valor === 'string' && ['original', 'oscuro', 'claro'].includes(valor);
+    return typeof valor === 'string' && ['original', 'claro'].includes(valor);
 }
 
 /*

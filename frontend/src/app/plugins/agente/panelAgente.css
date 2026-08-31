@@ -21,9 +21,9 @@
     align-items: center;
     gap: 4px;
     padding: 3px 6px 3px 10px;
-    border-radius: 6px 6px 0 0;
+    border-radius: 0;
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario, #666);
+    color: var(--dashboard-textoSecundario);
     cursor: pointer;
     white-space: nowrap;
     max-width: 160px;
@@ -55,15 +55,15 @@
     padding: 2px;
     border: none;
     background: transparent;
-    color: var(--dashboard-textoSecundario, #666);
-    border-radius: 4px;
+    color: var(--dashboard-textoSecundario);
+    border-radius: 0;
     cursor: pointer;
     flex-shrink: 0;
     font-family: inherit;
 }
 
 .panelAgenteTabCerrar:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-peligroClaro);
 }
 
@@ -72,8 +72,8 @@
     min-width: 80px;
     font-size: var(--dashboard-tamanoPequeno);
     padding: 2px 4px;
-    border: 1px solid var(--dashboard-primario, #3b82f6);
-    border-radius: 4px;
+    border: 1px solid var(--dashboard-primario);
+    border-radius: 0;
     background: var(--dashboard-fondoTarjeta);
     color: var(--dashboard-textoActivo);
     outline: none;
@@ -89,7 +89,7 @@
 
 .panelAgenteHerramienta {
     font-size: var(--dashboard-tamanoPequeno);
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
     overflow: hidden;
 }
@@ -108,7 +108,7 @@
 }
 
 .panelAgenteHerramienta--ok {
-    color: var(--dashboard-exito, #27ae60);
+    color: var(--dashboard-exito);
 }
 
 .panelAgenteHerramienta--error {
@@ -122,7 +122,7 @@
 }
 
 .panelAgenteHerramientaTexto {
-    color: var(--dashboard-textoSecundario, #666);
+    color: var(--dashboard-textoSecundario);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -134,7 +134,7 @@
     border-top: 1px solid var(--dashboard-bordeSutil);
     font-family: var(--dashboard-fuenteMonoespaciada, monospace);
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario, #666);
+    color: var(--dashboard-textoSecundario);
     white-space: pre-wrap;
     word-break: break-word;
     max-height: 120px;
@@ -148,20 +148,20 @@
     gap: var(--dashboard-espacioSm, 6px);
     margin-top: var(--dashboard-espacioSm, 6px);
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado, #999);
+    color: var(--dashboard-textoApagado);
 }
 
 .panelAgenteContexto span {
     background: var(--dashboard-superposicionSutil);
     padding: 1px var(--dashboard-espacioSm, 6px);
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
 }
 
 .panelAgentePensando {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm, 6px);
-    color: var(--dashboard-textoSecundario, #666);
+    color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
     margin-top: var(--dashboard-espacioSm, 6px);
 }
@@ -182,7 +182,7 @@
     align-items: center;
     gap: var(--dashboard-espacioSm, 6px);
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado, #999);
+    color: var(--dashboard-textoApagado);
 }
 
 .panelAgenteTarea {
@@ -191,7 +191,7 @@
     gap: 2px;
     padding: var(--dashboard-espacioSm, 6px);
     border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
 }
 
@@ -213,20 +213,20 @@
 .panelAgenteTareaEstado {
     font-size: var(--dashboard-tamanoPequeno);
     padding: 0 var(--dashboard-espacioSm, 6px);
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
 }
 
 .panelAgenteTareaEstado--pendiente {
-    color: var(--dashboard-acento, #3b82f6);
+    color: var(--dashboard-acento);
 }
 
 .panelAgenteTareaEstado--ejecutando {
-    color: var(--dashboard-acento, #3b82f6);
+    color: var(--dashboard-acento);
 }
 
 .panelAgenteTareaEstado--completada {
-    color: var(--dashboard-exito, #27ae60);
+    color: var(--dashboard-exito);
 }
 
 .panelAgenteTareaEstado--fallida {
@@ -240,8 +240,8 @@
     padding: 2px;
     border: none;
     background: transparent;
-    color: var(--dashboard-textoApagado, #999);
-    border-radius: var(--dashboard-radioSm, 6px);
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-radioSm);
     cursor: pointer;
 }
 
@@ -253,7 +253,7 @@
 .panelAgenteTareaMeta,
 .panelAgenteTareaResumen {
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado, #999);
+    color: var(--dashboard-textoApagado);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -271,7 +271,7 @@
     width: 100%;
     padding: var(--dashboard-espacioSm, 6px);
     border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-fondoTarjeta);
     color: var(--dashboard-textoActivo);
     font-size: var(--dashboard-tamanoPequeno);
@@ -280,7 +280,7 @@
 }
 
 .panelAgenteTareaInput:focus {
-    border-color: var(--dashboard-primario, #3b82f6);
+    border-color: var(--dashboard-primario);
 }
 
 .panelAgenteTareaPrompt {

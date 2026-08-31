@@ -19,15 +19,15 @@
     align-items: center;
     gap: var(--dashboard-espacioLg, 16px);
     padding: 8px 10px;
-    border-radius: var(--dashboard-radioSm, 4px);
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-superposicionSutil);
+    border: 1px solid var(--dashboard-bordePrincipal);
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
 }
 
 .configExpPreview strong {
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
 }
 
 /* Secciones — mismo patrón que configDeficitSeccion. */
@@ -40,13 +40,13 @@
 .configExpSeccionTitulo {
     font-size: var(--dashboard-tamanoBase, 13px);
     font-weight: 600;
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
     margin: 0;
 }
 
 .configExpSeccionNota {
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
     margin: 0;
 }
 
@@ -58,12 +58,12 @@
 
 .configExpLabel {
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
 }
 
 .configExpAyuda {
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoApagado, #808080);
+    color: var(--dashboard-textoApagado);
 }
 
 /* Fila con el toggle de dificultad automática. */
@@ -80,9 +80,9 @@
     position: relative;
     width: 36px;
     height: 20px;
-    border-radius: var(--dashboard-espacioSmMd, 10px);
+    border-radius: var(--dashboard-radioSm);
     border: none;
-    background: var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.12));
+    background: var(--dashboard-bordeSutil);
     cursor: pointer;
     transition: background 0.2s ease;
     flex-shrink: 0;
@@ -90,7 +90,7 @@
 }
 
 .configExpToggle--activo {
-    background: var(--dashboard-estadoExito, #4caf7d);
+    background: var(--dashboard-estadoExito);
 }
 
 .configExpToggleIndicador {
@@ -99,8 +99,8 @@
     left: 2px;
     width: 16px;
     height: 16px;
-    border-radius: 50%;
-    background: var(--dashboard-textoActivo, #e8e8ea);
+    border-radius: 0;
+    background: var(--dashboard-textoActivo);
     transition: transform 0.2s ease;
 }
 
@@ -114,8 +114,8 @@
     appearance: none;
     width: 100%;
     height: 4px;
-    border-radius: 999px;
-    background: var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.12));
+    border-radius: 0;
+    background: var(--dashboard-bordeSutil);
     outline: none;
     cursor: pointer;
 }
@@ -125,23 +125,24 @@
     appearance: none;
     width: 14px;
     height: 14px;
-    border-radius: 50%;
-    background: var(--dashboard-acento, #7c9cff);
-    border: 2px solid var(--dashboard-fondoSecundario, #1a1a1f);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    border-radius: 0;
+    background: var(--dashboard-acento);
+    border: 2px solid var(--dashboard-fondoSecundario);
+    box-shadow: none;
 }
 
 .configExpRange::-moz-range-thumb {
     width: 14px;
     height: 14px;
-    border-radius: 50%;
-    background: var(--dashboard-acento, #7c9cff);
-    border: 2px solid var(--dashboard-fondoSecundario, #1a1a1f);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    border-radius: 0;
+    background: var(--dashboard-acento);
+    border: 2px solid var(--dashboard-fondoSecundario);
+    box-shadow: none;
 }
 
 .configExpRange:focus-visible {
-    box-shadow: 0 0 0 2px var(--dashboard-acento, #7c9cff);
+    outline: 2px solid var(--dashboard-acento);
+    outline-offset: 1px;
 }
 
 .configExpMultiplicadores {
@@ -159,5 +160,5 @@
     justify-content: flex-end;
     gap: var(--dashboard-espacioSm, 6px);
     padding-top: var(--dashboard-espacioSm, 6px);
-    border-top: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    border-top: 1px solid var(--dashboard-bordePrincipal);
 }

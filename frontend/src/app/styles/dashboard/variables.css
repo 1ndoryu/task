@@ -1,112 +1,135 @@
 /*
- * VARIABLES DE DISEÑO
- * Paleta oscura minimalista estilo terminal
- * Todos los tokens de diseño centralizados
+ * VARIABLES DE DISEÑO — Refactor monocromo (31-08-2026)
+ * Blanco y negro puro. Sin colores, sin radios, sin sombras.
+ * Dos temas: :root (oscuro) y [data-theme='claro'] (claro).
+ * Los estados funcionales se diferencian por TONO DE GRIS, negrita e iconos.
+ * Se conservan TODOS los nombres de token para no romper componentes.
  */
 
 :root {
-    --dashboard-fondoPrincipal: #090909;
-    --dashboard-fondoSecundario: #090909;
-    --dashboard-fondoTerciario: #111111;
+    /* Fondos — escala de negro puro */
+    --dashboard-fondoPrincipal: #000000;
+    --dashboard-fondoSecundario: #000000;
+    --dashboard-fondoTerciario: #0a0a0a;
     --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
-    --dashboard-fondoHover: #0c0c0c;
-    --dashboard-fondoCristal: rgba(20, 20, 20, 0.2);
-    --dashboard-bordePrincipal: #1a1a1a;
-    --dashboard-bordeSutil: #222;
-    --dashboard-bordePunteado: #1a1a1a;
-    /* [H-F14-01] Border neutro del mapa de calor (celda omitida) */
-    --dashboard-bordeNeutro: #374151;
-    --dashboard-textoActivo: #eaeaea;
-    --dashboard-textoNormal: #ccc;
-    --dashboard-textoSecundario: #888;
-    --dashboard-textoApagado: #666;
-    --dashboard-textoMuyApagado: #555;
-    --dashboard-textoIndice: #333;
-    --dashboard-textoPlaceholder: #222;
-    --dashboard-textoSobreAcento: #ffffff;
-    --dashboard-estadoMuyAlta: #ef4444;
-    --dashboard-estadoMuyAltaFondo: rgba(153, 27, 27, 0.1);
-    --dashboard-estadoMuyAltaBorde: rgba(153, 27, 27, 0.3);
-    --dashboard-estadoMuyAltaRgb: 239, 68, 68;
-    --dashboard-estadoAlta: #ef4444;
-    --dashboard-estadoAltaFondo: rgba(153, 27, 27, 0.1);
-    --dashboard-estadoAltaBorde: rgba(153, 27, 27, 0.3);
-    --dashboard-estadoMedia: #ca8a04;
-    --dashboard-estadoMediaFondo: rgba(113, 63, 18, 0.1);
-    --dashboard-estadoMediaBorde: rgba(113, 63, 18, 0.3);
-    /* [19-08-2026] Valor roto (#000000 0 no es CSS válido) → iconos 'baja' invisibles. */
-    --dashboard-estadoBaja: #6b7280;
-    --dashboard-estadoBajaBorde: #333;
-    --dashboard-estadoMuyBaja: #4b5563;
-    --dashboard-estadoMuyBajaFondo: rgba(75, 85, 99, 0.1);
-    --dashboard-estadoMuyBajaBorde: rgba(75, 85, 99, 0.3);
-    --dashboard-estadoExito: #22c55e;
-    --dashboard-estadoExitoFondo: rgba(34, 197, 94, 0.1);
-    --dashboard-estadoExitoBorde: rgba(34, 197, 94, 0.3);
-    /* [H-F14-01] Verde fuerte para gradientes/bordes de celdas completadas */
-    --dashboard-estadoExitoFuerte: #16a34a;
-    --dashboard-estadoExitoFuerteBorde: #15803d;
-    --dashboard-exitoRgb: 34, 197, 94;
-    --dashboard-estadoExitoRgb: 34, 197, 94;
-    --dashboard-estadoInfo: #3b82f6;
-    --dashboard-estadoInfoFondo: rgba(59, 130, 246, 0.1);
-    --dashboard-estadoInfoBorde: rgba(59, 130, 246, 0.3);
-    --dashboard-estadoInfoRgb: 59, 130, 246;
-    --dashboard-estadoErrorRgb: 239, 68, 68;
-    --dashboard-estadoAltaTexto: #fca5a5;
-    --dashboard-estadoMediaTexto: #fcd34d;
-    --dashboard-estadoAdvertencia: #f59e0b;
-    --dashboard-estadoAdvertenciaFondo: rgba(245, 158, 11, 0.1);
-    --dashboard-estadoAdvertenciaBorde: rgba(245, 158, 11, 0.3);
-    /* [H-F14-01] Ámbar fuerte para gradientes/bordes de celdas pospuestas */
-    --dashboard-estadoAdvertenciaFuerte: #d97706;
-    --dashboard-estadoAdvertenciaFuerteBorde: #b45309;
-    /* [H-F14-01] Rojo máximo del gradiente de urgencia crítica */
-    --dashboard-estadoUrgenciaMaxima: #ff0000;
-    --dashboard-estadoAdvertenciaRgb: 245, 158, 11;
-    --dashboard-estadoDestacado: #fbbf24;
-    --dashboard-estadoDestacadoRgb: 251, 191, 36;
-    --dashboard-estadoMediaRgb: 202, 138, 4;
-    --dashboard-acentoPrimario: #a78bfa;
-    --dashboard-acentoPrimarioRgb: 167, 139, 250;
-    --dashboard-violeta: #8b5cf6;
-    --dashboard-violetaRgb: 139, 92, 246;
-    --dashboard-grisNeutro: #9ca3af;
-    --dashboard-grisNeutroRgb: 156, 163, 175;
-    --dashboard-estadoPendiente: #ffc107;
-    --dashboard-estadoPendienteRgb: 255, 193, 7;
-    --dashboard-violetaPalido: #c4b5fd;
-    --dashboard-peligroClaro: #f87171;
+    --dashboard-fondoHover: #111111;
+    --dashboard-fondoCristal: rgba(0, 0, 0, 0.85);
+    --dashboard-sidebarFondo: #000000;
+
+    /* Bordes — grises sobre negro */
+    --dashboard-bordePrincipal: #2a2a2a;
+    --dashboard-bordeSutil: #1c1c1c;
+    --dashboard-bordePunteado: #2a2a2a;
+    --dashboard-bordeNeutro: #3a3a3a;
+
+    /* Texto — escala de blanco puro */
+    --dashboard-textoActivo: #ffffff;
+    --dashboard-textoNormal: #e5e5e5;
+    --dashboard-textoSecundario: #b3b3b3;
+    --dashboard-textoApagado: #808080;
+    --dashboard-textoMuyApagado: #595959;
+    --dashboard-textoIndice: #3a3a3a;
+    --dashboard-textoPlaceholder: #4d4d4d;
+    --dashboard-textoSobreAcento: #000000;
+
+    /* Estados — diferenciados por tono de gris (sin color) */
+    --dashboard-estadoMuyAlta: #ffffff;
+    --dashboard-estadoMuyAltaFondo: rgba(255, 255, 255, 0.14);
+    --dashboard-estadoMuyAltaBorde: rgba(255, 255, 255, 0.5);
+    --dashboard-estadoMuyAltaRgb: 255, 255, 255;
+    --dashboard-estadoAlta: #ffffff;
+    --dashboard-estadoAltaFondo: rgba(255, 255, 255, 0.12);
+    --dashboard-estadoAltaBorde: rgba(255, 255, 255, 0.4);
+    --dashboard-estadoMedia: #d4d4d4;
+    --dashboard-estadoMediaFondo: rgba(255, 255, 255, 0.1);
+    --dashboard-estadoMediaBorde: rgba(255, 255, 255, 0.3);
+    --dashboard-estadoBaja: #9a9a9a;
+    --dashboard-estadoBajaBorde: #5a5a5a;
+    --dashboard-estadoMuyBaja: #6e6e6e;
+    --dashboard-estadoMuyBajaFondo: rgba(255, 255, 255, 0.06);
+    --dashboard-estadoMuyBajaBorde: rgba(255, 255, 255, 0.2);
+    --dashboard-estadoExito: #ffffff;
+    --dashboard-estadoExitoFondo: rgba(255, 255, 255, 0.12);
+    --dashboard-estadoExitoBorde: rgba(255, 255, 255, 0.4);
+    --dashboard-estadoExitoFuerte: #ffffff;
+    --dashboard-estadoExitoFuerteBorde: #ffffff;
+    --dashboard-exitoRgb: 255, 255, 255;
+    --dashboard-estadoExitoRgb: 255, 255, 255;
+    --dashboard-estadoInfo: #d4d4d4;
+    --dashboard-estadoInfoFondo: rgba(255, 255, 255, 0.1);
+    --dashboard-estadoInfoBorde: rgba(255, 255, 255, 0.3);
+    --dashboard-estadoInfoRgb: 212, 212, 212;
+    --dashboard-estadoErrorRgb: 255, 255, 255;
+    --dashboard-estadoAltaTexto: #ffffff;
+    --dashboard-estadoMediaTexto: #d4d4d4;
+    --dashboard-estadoAdvertencia: #d4d4d4;
+    --dashboard-estadoAdvertenciaFondo: rgba(255, 255, 255, 0.1);
+    --dashboard-estadoAdvertenciaBorde: rgba(255, 255, 255, 0.3);
+    --dashboard-estadoAdvertenciaFuerte: #ffffff;
+    --dashboard-estadoAdvertenciaFuerteBorde: #ffffff;
+    --dashboard-estadoUrgenciaMaxima: #ffffff;
+    --dashboard-estadoAdvertenciaRgb: 212, 212, 212;
+    --dashboard-estadoDestacado: #ffffff;
+    --dashboard-estadoDestacadoRgb: 255, 255, 255;
+    --dashboard-estadoMediaRgb: 212, 212, 212;
+    --dashboard-estadoPendiente: #ffffff;
+    --dashboard-estadoPendienteRgb: 255, 255, 255;
+
+    /* Acentos — blanco puro */
+    --dashboard-acentoPrimario: #ffffff;
+    --dashboard-acentoPrimarioRgb: 255, 255, 255;
+    --dashboard-acentoSecundario: #d4d4d4;
+    --dashboard-acentoSecundarioRgb: 212, 212, 212;
+    --dashboard-acento: #ffffff;
+    --dashboard-acentoHover: #d4d4d4;
+    --dashboard-acentoRgb: 255, 255, 255;
+    --dashboard-violeta: #d4d4d4;
+    --dashboard-violetaRgb: 212, 212, 212;
+    --dashboard-grisNeutro: #b3b3b3;
+    --dashboard-grisNeutroRgb: 179, 179, 179;
+    --dashboard-violetaPalido: #e5e5e5;
+    --dashboard-peligroClaro: #ffffff;
     --dashboard-gris100Rgb: 100, 100, 100;
-    --dashboard-azulClaro: #7eb8da;
-    --dashboard-azulClaroFondo: rgba(100, 140, 180, 0.2);
+    --dashboard-azulClaro: #d4d4d4;
+    --dashboard-azulClaroFondo: rgba(255, 255, 255, 0.1);
     --dashboard-primario: var(--dashboard-acento);
     --dashboard-exito: var(--dashboard-estadoExito);
     --dashboard-error: var(--dashboard-estadoAlta);
     --dashboard-estadoError: var(--dashboard-estadoAlta);
     --dashboard-estadoErrorFondo: var(--dashboard-estadoAltaFondo);
     --dashboard-estadoErrorBorde: var(--dashboard-estadoAltaBorde);
-    --dashboard-superposicionClara: rgba(125, 125, 125, 0.05);
-    --dashboard-superposicionMuyClara: rgba(125, 125, 125, 0.01);
-    --dashboard-superposicionSutil: rgba(125, 125, 125, 0.1);
-    --dashboard-superposicionMedia: rgba(125, 125, 125, 0.15);
-    /* [H-F14-03] Nombre corregido: faltaba la 'n' de superposicion */
-    --dashboard-superposicionMedioOscuro: rgb(37 37 37 / 16%);
+
+    /* Superposiciones — blanco translúcido sobre negro */
+    --dashboard-superposicionClara: rgba(255, 255, 255, 0.04);
+    --dashboard-superposicionMuyClara: rgba(255, 255, 255, 0.02);
+    --dashboard-superposicionSutil: rgba(255, 255, 255, 0.08);
+    --dashboard-superposicionMedia: rgba(255, 255, 255, 0.12);
+    --dashboard-superposicionMedioOscuro: rgba(255, 255, 255, 0.08);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.5);
-    --dashboard-superposicionOscuro: rgb(2 2 2 / 60%);
+    --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.7);
     --dashboard-superposicionDensa: rgba(0, 0, 0, 0.85);
-    --dashboard-superposicionProfunda: rgba(0, 0, 0, 0.9);
+    --dashboard-superposicionProfunda: rgba(0, 0, 0, 0.92);
+    --dashboard-superposicionBlancaSutil: rgba(255, 255, 255, 0.1);
+    --dashboard-superposicionFuerte: rgba(0, 0, 0, 0.85);
+
+    /* Sombras — eliminadas */
     --dashboard-sombraFuerte: none;
     --dashboard-sombraMedia: none;
-    --dashboard-barraFondo: #111;
-    --dashboard-barraNormal: #333;
-    --dashboard-barraUrgente: #dc2626;
-    /* [H-F14-01] Fondo del sidebar (antes hardcodeado #0e0e0e) */
-    --dashboard-sidebarFondo: #0e0e0e;
+    --dashboard-sombraElevada: none;
+    --dashboard-sombraSutil: none;
+    --dashboard-sombraFlotante: none;
+
+    /* Barras y scroll — grises */
+    --dashboard-barraFondo: #111111;
+    --dashboard-barraNormal: #3a3a3a;
+    --dashboard-barraUrgente: #ffffff;
+    --dashboard-scrollbarAncho: 4px;
+    --dashboard-scrollbarFondo: transparent;
+    --dashboard-scrollbarThumb: rgba(255, 255, 255, 0.18);
+    --dashboard-scrollbarThumbHover: rgba(255, 255, 255, 0.3);
+
+    /* Tipografía */
     --dashboard-fuenteMonoespaciada: 'Departure Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
-    /* [25-08-2026] Ajuste global de la escala tipografica tras adoptar Departure Mono
-     * (fuente mas ancha). Cada token = valor original + var(--dashboard-ajusteTipografia).
-     * -2px quedo pequeno -> ahora -1.5px. Para recalibrar, cambia SOLO esta variable. */
     --dashboard-ajusteTipografia: -1.5px;
     --dashboard-tamanoMicro: calc(9px + var(--dashboard-ajusteTipografia));
     --dashboard-tamanoMuyPequeno: calc(10px + var(--dashboard-ajusteTipografia));
@@ -122,11 +145,12 @@
     --dashboard-tamanoSubtitulo: calc(1.5rem + var(--dashboard-ajusteTipografia));
     --dashboard-tamanoH2: calc(1.75rem + var(--dashboard-ajusteTipografia));
     --dashboard-tamanoDisplay: calc(2.5rem + var(--dashboard-ajusteTipografia));
+
+    /* Espaciado */
     --dashboard-espacioXxs: 2px;
     --dashboard-espacioHairline: 1px;
     --dashboard-espacioMini: 3px;
     --dashboard-espacioXs: 0.25rem;
-    /* [H-F14-03] `espacioSx` (0.35rem) eliminado: duplicado semántico de espacioXs */
     --dashboard-espacioS: 6px;
     --dashboard-espacioSm: 0.5rem;
     --dashboard-espacioSmMd: 10px;
@@ -141,42 +165,42 @@
     --dashboard-espacio4xl: 3.75rem;
     --dashboard-espacio5xl: 4.5rem;
     --dashboard-espacio6xl: 6.25rem;
-    --dashboard-radioMinimo: 1px;
-    --dashboard-radioXs: 2px;
-    --dashboard-radioMini: 3px;
-    --dashboard-radioSutil: 6px;
-    --dashboard-radioMedio: 8px;
-    --dashboard-radioSmMd: 10px;
-    --dashboard-radioGrande: 12px;
-    /* EL USUARIO PREFIERE ESTOS VALORES EN 0 PARA EL TEMA TERMINAL, NO CAMBIAR */
+
+    /* Radios — eliminados (0) */
+    --dashboard-radioMinimo: 0;
+    --dashboard-radioXs: 0;
+    --dashboard-radioMini: 0;
+    --dashboard-radioSutil: 0;
+    --dashboard-radioMedio: 0;
+    --dashboard-radioSmMd: 0;
+    --dashboard-radioGrande: 0;
     --dashboard-radioSm: 0;
     --dashboard-radioMd: 0;
     --dashboard-radioLg: 0;
-    --dashboard-radioCirculo: 50%;
-    --dashboard-radioPildora: 9999px;
+    --dashboard-radioCirculo: 0;
+    --dashboard-radioPildora: 0;
+
+    /* Botón primario — inversión B/N */
     --dashboard-botonPrimarioFondo: #ffffff;
     --dashboard-botonPrimarioTexto: #000000;
-    --dashboard-botonPrimarioHover: rgba(255, 255, 255, 0.9);
+    --dashboard-botonPrimarioHover: #d4d4d4;
     --dashboard-botonPrimarioSombra: none;
-    --dashboard-acento: #4a665b;
-    --dashboard-acentoHover: #3d5a4e;
-    /* [H-F14-03] acentoRgb ahora corresponde al acento base (#4a665b = 74,102,91) */
-    --dashboard-acentoRgb: 74, 102, 91;
-    --dashboard-sombraElevada: none;
-    --dashboard-sombraSutil: none;
-    --dashboard-sombraFlotante: var(--dashboard-sombraElevada);
+
+    /* Transiciones */
     --dashboard-transicionRapida: 0.15s ease;
     --dashboard-transicionNormal: 0.2s ease;
-    --dashboard-scrollbarAncho: 4px;
-    --dashboard-scrollbarFondo: transparent;
-    --dashboard-scrollbarThumb: rgba(255, 255, 255, 0.15);
-    --dashboard-scrollbarThumbHover: rgba(255, 255, 255, 0.25);
+
+    /* Panel header */
     --dashboard-panelHeaderAltura: 42px;
     --dashboard-panelHeaderFondo: var(--dashboard-fondoSecundario);
     --dashboard-panelHeaderBorde: var(--dashboard-bordePrincipal);
+
+    /* Breakpoints */
     --breakpointMovil: 480px;
     --breakpointTablet: 768px;
     --breakpointEscritorio: 1024px;
+
+    /* Móvil */
     --dashboard-espacioMovilXs: 0.125rem;
     --dashboard-espacioMovilSm: 0.25rem;
     --dashboard-espacioMovilMd: 0.5rem;
@@ -191,144 +215,151 @@
     --dashboard-safeAreaRight: env(safe-area-inset-right, 0px);
     --dashboard-alturaHeaderMovil: 56px;
     --dashboard-alturaNavInferior: 52px;
+
+    /* Mapa de calor */
     --mapa-calor-tamano-celda: 14px;
-    /* [H-F14-01] Gradiente decorativo del grid de la landing (oculto por defecto) */
-    --dashboard-landingGradienteClaro: #c5d7ed;
-    --dashboard-landingGradienteLavanda: #dbd4ea;
-    
+    --dashboard-landingGradienteClaro: #ffffff;
+    --dashboard-landingGradienteLavanda: #ffffff;
+
+    /* Fuentes del proyecto */
     --font-primary: "Neue Montreal", system-ui, -apple-system, sans-serif;
     --font-serif: "Anthropic Serif", serif;
     --font-mono: "JetBrains Mono", monospace;
     --font-sans-alt: "Anthropic Sans", sans-serif;
 }
-/* 1e1e1e
- * TEMA OSCURO (Dark Mode Estándar)
- * Paleta monocromática en grises 
- */
-[data-theme='oscuro'] {
-    --dashboard-fondoPrincipal: #090909;
-    --dashboard-fondoSecundario: #0c0c0c;
-    --dashboard-fondoTerciario: #151515;
-    --dashboard-fondoHover: #1e1e1e;
-    --dashboard-fondoCristal: rgba(20, 20, 20, 0.8);
-    --dashboard-acentoPrimario: #a78bfa;
-    --dashboard-acentoPrimarioRgb: 167, 139, 250;
-    --dashboard-acentoSecundario: #60a5fa;
-    --dashboard-acentoSecundarioRgb: 96, 165, 250;
-    --dashboard-acento: var(--dashboard-acentoSecundario);
-    --dashboard-acentoHover: #3b82f6;
-    --dashboard-acentoRgb: var(--dashboard-acentoSecundarioRgb);
-    --dashboard-primario: var(--dashboard-acento);
-    --dashboard-bordePrincipal: #1a1a1a;
-    --dashboard-bordeSutil: #222;
-    --dashboard-fondoHover: #0c0c0c;
-    --dashboard-textoActivo: #f5f5f5;
-    --dashboard-textoNormal: #e0e0e0;
-    --dashboard-textoSecundario: #a0a0a0;
-    --dashboard-textoApagado: #808080;
-    --dashboard-textoMuyApagado: #606060;
-    --dashboard-textoIndice: #505050;
-    --dashboard-textoPlaceholder: #404040;
-    --dashboard-barraFondo: #2a2a2a;
-    --dashboard-barraNormal: #555555;
-    --dashboard-scrollbarThumb: rgba(255, 255, 255, 0.2);
-    --dashboard-scrollbarThumbHover: rgba(255, 255, 255, 0.35);
-    --dashboard-superposicionClara: rgba(255, 255, 255, 0.03);
-    --dashboard-superposicionMuyClara: rgba(255, 255, 255, 0.01);
-    --dashboard-superposicionSutil: rgba(255, 255, 255, 0.06);
-    --dashboard-superposicionMedia: rgba(255, 255, 255, 0.1);
-    --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.3);
-    --dashboard-superposicionModerada: rgba(0, 0, 0, 0.5);
-    --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.6);
-    --dashboard-superposicionFuerte: rgba(0, 0, 0, 0.8);
-    --dashboard-superposicionDensa: rgba(0, 0, 0, 0.85);
-    --dashboard-superposicionProfunda: rgba(0, 0, 0, 0.9);
-    --dashboard-superposicionBlancaSutil: rgba(255, 255, 255, 0.1);
-    --dashboard-radioSm: 4px;
-    --dashboard-radioMd: 4px;
-    --dashboard-radioLg: 4px;
-}
 
 /* 
- * TEMA CLARO (Light Mode)
+ * TEMA CLARO — Blanco puro
+ * (el tema oscuro se eliminó en el refactor monocromo; :root ya es oscuro)
  */
 [data-theme='claro'] {
-
-    --dashboard-fondoPrincipal: #f8f9fa;
+    --dashboard-fondoPrincipal: #ffffff;
     --dashboard-fondoSecundario: #ffffff;
-    --dashboard-fondoTerciario: #e9ecef;
-    --dashboard-fondoHover: #e9ecef;
-    --dashboard-fondoCristal: rgba(255, 255, 255, 0.85);
-    --dashboard-acentoPrimario: #7c3aed;
-    --dashboard-acentoPrimarioRgb: 124, 58, 237;
-    --dashboard-acentoSecundario: #2563eb;
-    --dashboard-acentoSecundarioRgb: 37, 99, 235;
-    --dashboard-acento: var(--dashboard-acentoSecundario);
-    --dashboard-acentoHover: #1d4ed8;
-    --dashboard-acentoRgb: var(--dashboard-acentoSecundarioRgb);
+    --dashboard-fondoTerciario: #f2f2f2;
+    --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
+    --dashboard-fondoHover: #e6e6e6;
+    --dashboard-fondoCristal: rgba(255, 255, 255, 0.9);
+    --dashboard-sidebarFondo: #ffffff;
+
+    --dashboard-bordePrincipal: #000000;
+    --dashboard-bordeSutil: #000000;
+    --dashboard-bordePunteado: #000000;
+    --dashboard-bordeNeutro: #000000;
+
+    --dashboard-textoActivo: #000000;
+    --dashboard-textoNormal: #1a1a1a;
+    --dashboard-textoSecundario: #4d4d4d;
+    --dashboard-textoApagado: #6e6e6e;
+    --dashboard-textoMuyApagado: #9a9a9a;
+    --dashboard-textoIndice: #cccccc;
+    --dashboard-textoPlaceholder: #b3b3b3;
+    --dashboard-textoSobreAcento: #ffffff;
+
+    --dashboard-estadoMuyAlta: #000000;
+    --dashboard-estadoMuyAltaFondo: rgba(0, 0, 0, 0.1);
+    --dashboard-estadoMuyAltaBorde: rgba(0, 0, 0, 0.5);
+    --dashboard-estadoMuyAltaRgb: 0, 0, 0;
+    --dashboard-estadoAlta: #000000;
+    --dashboard-estadoAltaFondo: rgba(0, 0, 0, 0.08);
+    --dashboard-estadoAltaBorde: rgba(0, 0, 0, 0.4);
+    --dashboard-estadoMedia: #333333;
+    --dashboard-estadoMediaFondo: rgba(0, 0, 0, 0.06);
+    --dashboard-estadoMediaBorde: rgba(0, 0, 0, 0.3);
+    --dashboard-estadoBaja: #6e6e6e;
+    --dashboard-estadoBajaBorde: #b3b3b3;
+    --dashboard-estadoMuyBaja: #9a9a9a;
+    --dashboard-estadoMuyBajaFondo: rgba(0, 0, 0, 0.04);
+    --dashboard-estadoMuyBajaBorde: rgba(0, 0, 0, 0.15);
+    --dashboard-estadoExito: #000000;
+    --dashboard-estadoExitoFondo: rgba(0, 0, 0, 0.08);
+    --dashboard-estadoExitoBorde: rgba(0, 0, 0, 0.4);
+    --dashboard-estadoExitoFuerte: #000000;
+    --dashboard-estadoExitoFuerteBorde: #000000;
+    --dashboard-exitoRgb: 0, 0, 0;
+    --dashboard-estadoExitoRgb: 0, 0, 0;
+    --dashboard-estadoInfo: #333333;
+    --dashboard-estadoInfoFondo: rgba(0, 0, 0, 0.06);
+    --dashboard-estadoInfoBorde: rgba(0, 0, 0, 0.3);
+    --dashboard-estadoInfoRgb: 51, 51, 51;
+    --dashboard-estadoErrorRgb: 0, 0, 0;
+    --dashboard-estadoAltaTexto: #000000;
+    --dashboard-estadoMediaTexto: #333333;
+    --dashboard-estadoAdvertencia: #333333;
+    --dashboard-estadoAdvertenciaFondo: rgba(0, 0, 0, 0.06);
+    --dashboard-estadoAdvertenciaBorde: rgba(0, 0, 0, 0.3);
+    --dashboard-estadoAdvertenciaFuerte: #000000;
+    --dashboard-estadoAdvertenciaFuerteBorde: #000000;
+    --dashboard-estadoUrgenciaMaxima: #000000;
+    --dashboard-estadoAdvertenciaRgb: 51, 51, 51;
+    --dashboard-estadoDestacado: #000000;
+    --dashboard-estadoDestacadoRgb: 0, 0, 0;
+    --dashboard-estadoMediaRgb: 51, 51, 51;
+    --dashboard-estadoPendiente: #000000;
+    --dashboard-estadoPendienteRgb: 0, 0, 0;
+
+    --dashboard-acentoPrimario: #000000;
+    --dashboard-acentoPrimarioRgb: 0, 0, 0;
+    --dashboard-acentoSecundario: #333333;
+    --dashboard-acentoSecundarioRgb: 51, 51, 51;
+    --dashboard-acento: #000000;
+    --dashboard-acentoHover: #333333;
+    --dashboard-acentoRgb: 0, 0, 0;
+    --dashboard-violeta: #333333;
+    --dashboard-violetaRgb: 51, 51, 51;
+    --dashboard-grisNeutro: #6e6e6e;
+    --dashboard-grisNeutroRgb: 110, 110, 110;
+    --dashboard-violetaPalido: #1a1a1a;
+    --dashboard-peligroClaro: #000000;
+    --dashboard-gris100Rgb: 100, 100, 100;
+    --dashboard-azulClaro: #333333;
+    --dashboard-azulClaroFondo: rgba(0, 0, 0, 0.06);
     --dashboard-primario: var(--dashboard-acento);
-    --dashboard-bordePrincipal: #dee2e6;
-    --dashboard-bordeSutil: #ced4da;
-    --dashboard-bordePunteado: #dee2e6;
-    --dashboard-textoActivo: #1a1a1a;
-    --dashboard-textoNormal: #343a40;
-    --dashboard-textoSecundario: #6c757d;
-    --dashboard-textoApagado: #868e96;
-    --dashboard-textoMuyApagado: #adb5bd;
-    --dashboard-textoIndice: #ced4da;
-    --dashboard-textoPlaceholder: #dee2e6;
-    --dashboard-estadoMuyAlta: #e11d48;
-    --dashboard-estadoMuyAltaFondo: rgba(225, 29, 72, 0.12);
-    --dashboard-estadoMuyAltaBorde: rgba(225, 29, 72, 0.35);
-    --dashboard-estadoMuyAltaRgb: 225, 29, 72;
-    --dashboard-estadoAlta: #dc3545;
-    --dashboard-estadoAltaFondo: rgba(220, 53, 69, 0.1);
-    --dashboard-estadoAltaBorde: rgba(220, 53, 69, 0.3);
-    --dashboard-estadoMedia: #fd7e14;
-    --dashboard-estadoMediaFondo: rgba(253, 126, 20, 0.1);
-    --dashboard-estadoMediaBorde: rgba(253, 126, 20, 0.3);
-    --dashboard-estadoBaja: #6c757d;
-    --dashboard-estadoBajaBorde: #adb5bd;
-    --dashboard-estadoMuyBaja: #9ca3af;
-    --dashboard-estadoMuyBajaFondo: rgba(156, 163, 175, 0.1);
-    --dashboard-estadoMuyBajaBorde: rgba(156, 163, 175, 0.3);
-    --dashboard-estadoExito: #198754;
-    --dashboard-estadoExitoFondo: rgba(25, 135, 84, 0.1);
-    --dashboard-estadoExitoBorde: rgba(25, 135, 84, 0.3);
-    --dashboard-exitoRgb: 25, 135, 84;
-    --dashboard-estadoExitoRgb: 25, 135, 84;
-    --dashboard-estadoInfo: #0d6efd;
-    --dashboard-estadoInfoFondo: rgba(13, 110, 253, 0.1);
-    --dashboard-estadoInfoBorde: rgba(13, 110, 253, 0.3);
-    --dashboard-estadoInfoRgb: 13, 110, 253;
-    --dashboard-estadoErrorRgb: 220, 53, 69;
-    --dashboard-estadoAltaTexto: #dc3545;
-    --dashboard-estadoMediaTexto: #fd7e14;
-    --dashboard-barraFondo: #e9ecef;
-    --dashboard-barraNormal: #adb5bd;
-    --dashboard-barraUrgente: #dc3545;
-    --dashboard-botonPrimarioFondo: #1a1a1a;
-    --dashboard-botonPrimarioTexto: #ffffff;
-    --dashboard-botonPrimarioHover: #333333;
-    --dashboard-botonPrimarioSombra: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --dashboard-sombraFuerte: 0 8px 32px rgba(0, 0, 0, 0.12);
-    --dashboard-sombraMedia: 0 4px 6px rgba(0, 0, 0, 0.08);
-    --dashboard-sombraElevada: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --dashboard-sombraSutil: 0 20px 50px rgba(0, 0, 0, 0.08);
-    --dashboard-superposicionClara: rgba(0, 0, 0, 0.03);
-    --dashboard-superposicionMuyClara: rgba(0, 0, 0, 0.01);
-    --dashboard-superposicionSutil: rgba(0, 0, 0, 0.06);
-    --dashboard-superposicionMedia: rgba(0, 0, 0, 0.1);
-    --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.15);
+    --dashboard-exito: var(--dashboard-estadoExito);
+    --dashboard-error: var(--dashboard-estadoAlta);
+    --dashboard-estadoError: var(--dashboard-estadoAlta);
+    --dashboard-estadoErrorFondo: var(--dashboard-estadoAltaFondo);
+    --dashboard-estadoErrorBorde: var(--dashboard-estadoAltaBorde);
+
+    --dashboard-superposicionClara: rgba(0, 0, 0, 0.04);
+    --dashboard-superposicionMuyClara: rgba(0, 0, 0, 0.02);
+    --dashboard-superposicionSutil: rgba(0, 0, 0, 0.08);
+    --dashboard-superposicionMedia: rgba(0, 0, 0, 0.12);
+    --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.08);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.4);
-    --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.5);
-    --dashboard-superposicionFuerte: rgba(0, 0, 0, 0.65);
+    --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.55);
     --dashboard-superposicionDensa: rgba(0, 0, 0, 0.7);
     --dashboard-superposicionProfunda: rgba(0, 0, 0, 0.8);
-    --dashboard-superposicionBlancaSutil: rgba(0, 0, 0, 0.05);
-    --dashboard-scrollbarThumb: rgba(0, 0, 0, 0.15);
-    --dashboard-scrollbarThumbHover: rgba(0, 0, 0, 0.25);
-    --dashboard-radioSm: 4px;
-    --dashboard-radioMd: 6px;
-    --dashboard-radioLg: 8px;
+    --dashboard-superposicionBlancaSutil: rgba(0, 0, 0, 0.06);
+    --dashboard-superposicionFuerte: rgba(0, 0, 0, 0.65);
+
+    --dashboard-sombraFuerte: none;
+    --dashboard-sombraMedia: none;
+    --dashboard-sombraElevada: none;
+    --dashboard-sombraSutil: none;
+    --dashboard-sombraFlotante: none;
+
+    --dashboard-barraFondo: #f2f2f2;
+    --dashboard-barraNormal: #cccccc;
+    --dashboard-barraUrgente: #000000;
+    --dashboard-scrollbarFondo: transparent;
+    --dashboard-scrollbarThumb: rgba(0, 0, 0, 0.18);
+    --dashboard-scrollbarThumbHover: rgba(0, 0, 0, 0.3);
+
+    --dashboard-botonPrimarioFondo: #000000;
+    --dashboard-botonPrimarioTexto: #ffffff;
+    --dashboard-botonPrimarioHover: #333333;
+    --dashboard-botonPrimarioSombra: none;
+
+    --dashboard-radioMinimo: 0;
+    --dashboard-radioXs: 0;
+    --dashboard-radioMini: 0;
+    --dashboard-radioSutil: 0;
+    --dashboard-radioMedio: 0;
+    --dashboard-radioSmMd: 0;
+    --dashboard-radioGrande: 0;
+    --dashboard-radioSm: 0;
+    --dashboard-radioMd: 0;
+    --dashboard-radioLg: 0;
+    --dashboard-radioCirculo: 0;
+    --dashboard-radioPildora: 0;
 }

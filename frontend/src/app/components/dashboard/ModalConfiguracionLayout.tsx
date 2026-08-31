@@ -9,7 +9,6 @@ import {Boton} from '../ui';
 import {Columns2, Columns3, Square, RotateCcw, ArrowUpDown, LayoutGrid, PanelLeft} from 'lucide-react';
 import {ListaOrdenPaneles} from './ListaOrdenPaneles';
 import type {ModoColumnas, PanelId, OrdenPanel, TipoLayout} from '../../hooks/useConfiguracionLayout';
-import {useTema} from '../../hooks/useTema';
 
 interface MclEstado {
     estaAbierto: boolean;
@@ -36,7 +35,6 @@ interface ModalConfiguracionLayoutProps extends MclEstado, MclAcciones {}
  * (incl. plugins activos y minimizados). */
 
 export function ModalConfiguracionLayout({estaAbierto, onCerrar, tipoLayout, modoColumnas, ordenPaneles, onCambiarTipoLayout, onCambiarModo, onMoverPanelArriba, onMoverPanelAbajo, onMoverPanelAColumna, onResetearOrden, onResetear}: ModalConfiguracionLayoutProps): JSX.Element {
-    const {cambiarTema} = useTema();
     const esGrid = tipoLayout === 'grid';
 
     return (
@@ -62,7 +60,6 @@ export function ModalConfiguracionLayout({estaAbierto, onCerrar, tipoLayout, mod
                             variante={!esGrid ? 'primario' : 'ghost'}
                             onClick={() => {
                                 onCambiarTipoLayout('sidebar');
-                                cambiarTema('oscuro');
                             }}
                             title="Modo sidebar"
                             claseAdicional={`configLayoutColumnaOpcion ${!esGrid ? 'activo' : ''}`}

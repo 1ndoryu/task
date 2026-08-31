@@ -6,11 +6,11 @@
  * componentes del chat (plugins/agente/componentes.tsx) alimentados por
  * fixtures realistas (plugins/agente/fixtures.ts) — no hay copias ni maquetas
  * divergentes. Incluye toggle de los 3 temas (data-theme real del proyecto:
- * 'original' cae a :root, 'oscuro' y 'claro' tienen selector propio).
+ * 'original' cae a :root (oscuro) y 'claro' tiene selector propio).
  */
 
 import {useEffect, useState} from 'react';
-import {AlertTriangle, Bot, Check, Moon, Monitor, Plus, ShieldAlert, Sun} from 'lucide-react';
+import {AlertTriangle, Bot, Check, Monitor, Plus, ShieldAlert, Sun} from 'lucide-react';
 import {
     CATALOGO,
     fixtureAvisoMeta,
@@ -48,7 +48,7 @@ import '../plugins/agente/panelAgente.css';
 import '../plugins/agente/modalConfigAgente.css';
 import './galeriaVisual.css';
 
-type TemaGaleria = 'original' | 'oscuro' | 'claro';
+type TemaGaleria = 'original' | 'claro';
 
 /* Tool buscada en los fixtures de mensajes (misma fuente que el chat). */
 function toolDe(nombre: string) {
@@ -313,11 +313,11 @@ export function GaleriaVisualIsland(): JSX.Element {
                 <button
                     type="button"
                     className="galeriaVisualTema"
-                    onClick={() => setTema(t => (t === 'original' ? 'oscuro' : t === 'oscuro' ? 'claro' : 'original'))}
-                    title="Alternar tema: Terminal → Oscuro → Claro"
+                    onClick={() => setTema(t => (t === 'original' ? 'claro' : 'original'))}
+                    title="Alternar tema: Terminal → Claro"
                 >
-                    {tema === 'original' ? <Monitor size={14} /> : tema === 'oscuro' ? <Moon size={14} /> : <Sun size={14} />}
-                    {tema === 'original' ? 'Terminal' : tema === 'oscuro' ? 'Oscuro' : 'Claro'}
+                    {tema === 'original' ? <Monitor size={14} /> : <Sun size={14} />}
+                    {tema === 'original' ? 'Terminal' : 'Claro'}
                 </button>
             </header>
 

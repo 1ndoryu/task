@@ -8,24 +8,24 @@
 
 .bloqueError {
     padding: 20px;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px dashed #ef4444;
-    border-radius: 8px;
-    color: #ef4444;
+    background: var(--dashboard-estadoAltaFondo);
+    border: 1px dashed var(--dashboard-estadoAlta);
+    border-radius: 0;
+    color: var(--dashboard-estadoAlta);
     text-align: center;
 }
 
 .bloqueEditable {
     position: relative;
-    outline: 1px dashed rgba(255, 255, 255, 0.2);
+    outline: 1px dashed var(--dashboard-bordeSutil);
     outline-offset: 4px;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     transition: outline 0.2s ease;
 }
 
 .bloqueSeleccionado {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--dashboard-acento);
 }
 
 .bloqueControles {
@@ -34,15 +34,15 @@
     left: 0;
     display: flex;
     gap: 4px;
-    background: #1a1a1a;
+    background: var(--dashboard-fondoSecundario);
     padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    border: 1px solid var(--dashboard-bordePrincipal);
     z-index: 100;
 }
 
 .bloqueControlEtiqueta {
-    color: #888;
+    color: var(--dashboard-textoApagado);
     font-size: 12px;
     margin-right: 8px;
     display: flex;
@@ -52,25 +52,25 @@
 .botonControlBloque {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--dashboard-textoActivo);
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 14px;
 }
 
 .botonControlBloque:disabled {
-    color: #444;
+    color: var(--dashboard-textoApagado);
     cursor: not-allowed;
 }
 
 .botonEditarBloque {
-    background: #3b82f6;
+    background: var(--dashboard-acento);
     border: none;
-    color: #fff;
+    color: var(--dashboard-textoSobreAcento);
     cursor: pointer;
     padding: 4px 12px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 500;
 }
@@ -78,17 +78,17 @@
 .botonEliminarBloque {
     background: transparent;
     border: none;
-    color: #ef4444;
+    color: var(--dashboard-estadoAlta);
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 14px;
 }
 
 .bloquesVacio {
     padding: 60px 20px;
     text-align: center;
-    color: #666;
+    color: var(--dashboard-textoApagado);
 }
 
 /* BlockEditorModal */
@@ -96,10 +96,10 @@
 .campoEntradaBase {
     width: 100%;
     padding: 10px 12px;
-    background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-    color: #fff;
+    background: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: 0;
+    color: var(--dashboard-textoActivo);
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
@@ -121,9 +121,9 @@
 }
 
 .campoArrayItem {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    background: var(--dashboard-superposicionSutil);
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: 0;
     padding: 12px;
 }
 
@@ -136,13 +136,13 @@
 
 .campoArrayItemNumero {
     font-size: 12px;
-    color: #888;
+    color: var(--dashboard-textoApagado);
 }
 
 .botonEliminarItem {
     background: transparent;
     border: none;
-    color: #ef4444;
+    color: var(--dashboard-estadoAlta);
     cursor: pointer;
     padding: 4px;
 }
@@ -156,7 +156,7 @@
 .campoArraySubEtiqueta {
     display: block;
     font-size: 11px;
-    color: #888;
+    color: var(--dashboard-textoApagado);
     margin-bottom: 4px;
     text-transform: uppercase;
 }
@@ -167,10 +167,10 @@
     justify-content: center;
     gap: 6px;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #888;
+    background: var(--dashboard-superposicionSutil);
+    border: 1px dashed var(--dashboard-bordePrincipal);
+    border-radius: 0;
+    color: var(--dashboard-textoApagado);
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;
@@ -179,7 +179,7 @@
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--dashboard-superposicionDensa);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -191,7 +191,7 @@
 .modalOverlayError {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--dashboard-superposicionDensa);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -199,16 +199,16 @@
 }
 
 .modalError {
-    background: #111;
+    background: var(--dashboard-fondoSecundario);
     padding: 24px;
-    border-radius: 12px;
-    color: #ef4444;
+    border-radius: 0;
+    color: var(--dashboard-estadoAlta);
 }
 
 .modalContenido {
-    background: #0a0a0a;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--dashboard-fondoPrincipal);
+    border-radius: 0;
+    border: 1px solid var(--dashboard-bordePrincipal);
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
@@ -222,20 +222,20 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalTitulo {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    color: #fff;
+    color: var(--dashboard-textoActivo);
 }
 
 .botonCerrarModal {
     background: transparent;
     border: none;
-    color: #888;
+    color: var(--dashboard-textoApagado);
     cursor: pointer;
     padding: 4px;
 }
@@ -247,7 +247,7 @@
 }
 
 .modalSinCampos {
-    color: #666;
+    color: var(--dashboard-textoApagado);
     text-align: center;
 }
 
@@ -261,7 +261,7 @@
     display: block;
     font-size: 13px;
     font-weight: 500;
-    color: #ccc;
+    color: var(--dashboard-textoSecundario);
     margin-bottom: 8px;
 }
 
@@ -270,25 +270,25 @@
     justify-content: flex-end;
     gap: 12px;
     padding: 20px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .botonCancelar {
     padding: 10px 20px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    border: 1px solid var(--dashboard-bordePrincipal);
     background: transparent;
-    color: #888;
+    color: var(--dashboard-textoApagado);
     cursor: pointer;
     font-size: 14px;
 }
 
 .botonGuardar {
     padding: 10px 24px;
-    border-radius: 8px;
+    border-radius: 0;
     border: none;
-    background: #3b82f6;
-    color: #fff;
+    background: var(--dashboard-acento);
+    color: var(--dashboard-textoSobreAcento);
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;

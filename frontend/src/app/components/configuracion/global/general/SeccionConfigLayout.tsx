@@ -3,12 +3,10 @@ import {Square, Columns2, Columns3, ArrowUpDown, RotateCcw, LayoutGrid, PanelLef
 import {Boton} from '../../../ui';
 import {ListaOrdenPaneles} from '../../../dashboard/ListaOrdenPaneles';
 import {useConfiguracionLayout} from '../../../../hooks/useConfiguracionLayout';
-import {useTema} from '../../../../hooks/useTema';
 import type {ModoColumnas} from '../../../../hooks/useConfiguracionLayout';
 
 export function SeccionConfigLayout(): JSX.Element {
     const {tipoLayout, modoColumnas, ordenPaneles, cambiarTipoLayout, cambiarModoColumnas, moverPanelArriba, moverPanelAbajo, moverPanelAColumna, resetearOrdenPaneles, resetearLayout} = useConfiguracionLayout();
-    const {cambiarTema} = useTema();
     const esGrid = tipoLayout === 'grid';
 
     return (
@@ -31,7 +29,6 @@ export function SeccionConfigLayout(): JSX.Element {
                         variante={!esGrid ? 'primario' : 'ghost'}
                         onClick={() => {
                             cambiarTipoLayout('sidebar');
-                            cambiarTema('oscuro');
                         }}
                         title="Modo sidebar"
                         claseAdicional={`configLayoutColumnaOpcion ${!esGrid ? 'activo' : ''}`}

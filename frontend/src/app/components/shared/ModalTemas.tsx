@@ -22,6 +22,7 @@ interface ModalTemasProps {
  */
 export function ModalTemas({estaAbierto, onCerrar, temaActual, onCambiarTema}: ModalTemasProps): JSX.Element | null {
     const {tipoLayout} = useConfiguracionLayout();
+    /* En sidebar solo se ofrece 'claro' (el oscuro es el tema base). */
     const temasVisibles = tipoLayout === 'sidebar'
         ? TEMAS_DISPONIBLES.filter(t => t.id !== 'original')
         : TEMAS_DISPONIBLES;

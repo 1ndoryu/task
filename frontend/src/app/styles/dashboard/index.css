@@ -204,6 +204,11 @@
 @import './movilFormularios.css';
 @import './movilListas.css';
 
+/* [31-08-2026] Refactor monocromo: anulación global de radios y sombras.
+ * Importado DESPUÉS de todos los módulos (y antes del @font-face, porque
+ * un @import posterior a cualquier regla CSS se descarta por el navegador). */
+@import './monocromo.css';
+
 /* Fuente monoespaciada del dashboard: Departure Mono (self-hosted) */
 @font-face {
     font-family: 'Departure Mono';

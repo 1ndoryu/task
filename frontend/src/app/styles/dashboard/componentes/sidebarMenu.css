@@ -36,7 +36,7 @@
     min-height: 0;
     overflow: hidden;
     background: var(--dashboard-sidebarFondo);
-    border-radius: 5px;
+    border-radius: 0;
     border-left: 1px solid var(--dashboard-bordePrincipal);
 }
 
@@ -52,7 +52,7 @@
     min-width: 56px;
     flex-shrink: 0;
     background: transparent;
-    border-radius: 5px;
+    border-radius: 0;
     overflow: hidden;
     transition: width var(--dashboard-transicionNormal);
     gap: 10px;

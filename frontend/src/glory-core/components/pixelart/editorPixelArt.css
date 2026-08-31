@@ -3,9 +3,9 @@
  * Estilos del EditorPixelArt agnóstico: toolbar, cuadrícula dibujable con
  * guías automáticas (líneas finas) y celdas rellenas de color sólido.
  *
- * Diseño pensado para reintegrarse en cualquier tema (dark por defecto, usa
- * variables CSS del sistema cuando están disponibles; caídas con tonos
- * grisáceos neutros). Sin cambios visuales dependientes del árbol.
+ * Los colores vienen de las variables --pixel-editor-* que el consumidor
+ * (p. ej. plugins/exp/modalEditorArbol.css) mapea a su design system.
+ * Sin valores de color locales: monocromo y sin radios ni sombras.
  */
 
 .editorPixel {
@@ -34,29 +34,29 @@
     height: 30px;
     padding: 0;
     border: 1px solid transparent;
-    border-radius: 6px;
+    border-radius: 0;
     background: transparent;
-    color: var(--pixel-editor-icono, #9a9aa3);
+    color: var(--pixel-editor-icono);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .editorPixelHerramienta:hover,
 .editorPixelHerramienta--activa {
-    background: var(--pixel-editor-iconoFondo, rgba(255, 255, 255, 0.08));
-    color: var(--pixel-editor-iconoActivo, #e8e8ea);
-    border-color: var(--pixel-editor-iconoBorde, rgba(255, 255, 255, 0.16));
+    background: var(--pixel-editor-iconoFondo);
+    color: var(--pixel-editor-iconoActivo);
+    border-color: var(--pixel-editor-iconoBorde);
 }
 
 .editorPixelHerramienta--destructiva {
-    color: var(--pixel-editor-error, #e0544c);
+    color: var(--pixel-editor-error);
 }
 
 .editorPixelToolbarSep {
     width: 1px;
     height: 18px;
     margin: 0 4px;
-    background: var(--pixel-editor-sep, rgba(255, 255, 255, 0.14));
+    background: var(--pixel-editor-sep);
 }
 
 /* Grid: contenedor cuadrado, columnas automáticas por celda (1fr). */
@@ -68,8 +68,8 @@
     aspect-ratio: 1;
     width: 100%;
     max-width: 320px;
-    border: 1px solid var(--pixel-editor-borde, rgba(255, 255, 255, 0.2));
-    background: var(--pixel-editor-fondo, #0c0c0e);
+    border: 1px solid var(--pixel-editor-borde);
+    background: var(--pixel-editor-fondo);
     user-select: none;
     touch-action: none;
     overflow: hidden;
@@ -78,8 +78,8 @@
 /* Guías automáticas de la cuadrícula: líneas finas en cada celda. */
 .editorPixelGrid--cuadricula .editorPixelCelda {
     background:
-        linear-gradient(to right, transparent calc(100% - 1px), var(--pixel-editor-guia, rgba(255, 255, 255, 0.07)) 1px),
-        linear-gradient(to bottom, transparent calc(100% - 1px), var(--pixel-editor-guia, rgba(255, 255, 255, 0.07)) 1px);
+        linear-gradient(to right, transparent calc(100% - 1px), var(--pixel-editor-guia) 1px),
+        linear-gradient(to bottom, transparent calc(100% - 1px), var(--pixel-editor-guia) 1px);
 }
 
 .editorPixelCelda {
@@ -89,14 +89,14 @@
 
 /* Celda pintada (relleno sólido del color dado). */
 .editorPixelCelda--activa {
-    background: var(--pixel-editor-relleno, #ffffff) !important;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+    background: var(--pixel-editor-relleno) !important;
+    box-shadow: none;
 }
 
 /* Celda bloqueada (no editable): ligeramente distinta para saber que no se
  * puede pintar encima. */
 .editorPixelCelda--bloqueada {
-    box-shadow: inset 0 0 0 1px var(--pixel-editor-bloqueada, rgba(255, 255, 255, 0.35));
+    box-shadow: inset 0 0 0 1px var(--pixel-editor-bloqueada);
 }
 
 .editorPixelCelda:hover {

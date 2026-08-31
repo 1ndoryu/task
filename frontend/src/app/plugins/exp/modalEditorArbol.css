@@ -17,7 +17,7 @@
     right: 0;
     bottom: 0;
     z-index: 1000;
-    background-color: var(--dashboard-superposicionDensa, rgba(0, 0, 0, 0.6));
+    background-color: var(--dashboard-superposicionDensa);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -26,18 +26,18 @@
 }
 
 .modalEditorArbol {
-    background-color: var(--dashboard-fondoSecundario, #1a1a1f);
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.1));
-    border-radius: var(--dashboard-radioMd, 10px);
+    background-color: var(--dashboard-fondoSecundario);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioMd);
     width: min(760px, 100%);
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: var(--dashboard-sombraElevada, 0 16px 48px rgba(0, 0, 0, 0.5));
+    box-shadow: var(--dashboard-sombraElevada);
     font-family: var(--dashboard-fuenteMonoespaciada, inherit);
     font-size: var(--dashboard-tamanoBase, 13px);
-    color: var(--dashboard-textoNormal, #e8e8ea);
+    color: var(--dashboard-textoNormal);
     animation: deslizarModal 0.2s ease-out;
 }
 
@@ -48,7 +48,7 @@
     justify-content: space-between;
     gap: var(--dashboard-espacioSm, 6px);
     padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalEditorArbolTitulo {
@@ -57,7 +57,7 @@
     gap: var(--dashboard-espacioMini, 4px);
     font-size: var(--dashboard-tamanoBase, 13px);
     font-weight: 600;
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalEditorArbolCerrar {
@@ -68,18 +68,18 @@
     height: 26px;
     background: none;
     border: none;
-    color: var(--dashboard-textoApagado, #808080);
+    color: var(--dashboard-textoApagado);
     font-size: var(--dashboard-tamanoMediano, 14px);
     line-height: 1;
     cursor: pointer;
     padding: 0;
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .modalEditorArbolCerrar:hover {
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
 }
 
 /* ---- Pestañas de estado ---- */
@@ -87,7 +87,7 @@
     display: flex;
     gap: var(--dashboard-espacioMini, 4px);
     padding: var(--dashboard-espacioMini, 4px);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalEditorArbolPestana {
@@ -96,30 +96,30 @@
     gap: var(--dashboard-espacioMini, 4px);
     background: none;
     border: 1px solid transparent;
-    border-radius: var(--dashboard-radioSm, 6px);
+    border-radius: var(--dashboard-radioSm);
     padding: var(--dashboard-espacioMini, 4px) var(--dashboard-espacioSmMd, 10px);
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .modalEditorArbolPestana:hover {
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalEditorArbolPestana--activa {
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.06));
-    border-color: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.12));
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalEditorArbolPestanaPunto {
     width: 6px;
     height: 6px;
-    border-radius: 50%;
-    background: var(--dashboard-acento, #7c9cff);
+    border-radius: 0;
+    background: var(--dashboard-acento);
 }
 
 /* ---- Cuerpo: lienzo + preview ---- */
@@ -142,7 +142,7 @@
 .modalEditorArbolLienzoTitulo,
 .modalEditorArbolPreviewTitulo {
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    color: var(--dashboard-textoSecundario);
 }
 
 .modalEditorArbolLienzo .editorPixel {
@@ -151,17 +151,17 @@
 
 /* ---- Mapeo del editor AGNÓSTICO al tema del dashboard ---- */
 .modalEditorArbol {
-    --pixel-editor-icono: var(--dashboard-textoApagado, #808080);
-    --pixel-editor-iconoFondo: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.08));
-    --pixel-editor-iconoActivo: var(--dashboard-textoActivo, #e8e8ea);
-    --pixel-editor-iconoBorde: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.16));
-    --pixel-editor-error: var(--dashboard-error, #e0544c);
-    --pixel-editor-sep: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.12));
-    --pixel-editor-borde: var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.18));
+    --pixel-editor-icono: var(--dashboard-textoApagado);
+    --pixel-editor-iconoFondo: var(--dashboard-superposicionSutil);
+    --pixel-editor-iconoActivo: var(--dashboard-textoActivo);
+    --pixel-editor-iconoBorde: var(--dashboard-bordePrincipal);
+    --pixel-editor-error: var(--dashboard-error);
+    --pixel-editor-sep: var(--dashboard-bordePrincipal);
+    --pixel-editor-borde: var(--dashboard-bordeSutil);
     --pixel-editor-fondo: var(--dashboard-fondoPrincipal);
-    --pixel-editor-guia: var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.07));
-    --pixel-editor-relleno: #ffffff;
-    --pixel-editor-bloqueada: var(--dashboard-bordeNeutro, rgba(255, 255, 255, 0.35));
+    --pixel-editor-guia: var(--dashboard-bordePrincipal);
+    --pixel-editor-relleno: var(--dashboard-textoActivo);
+    --pixel-editor-bloqueada: var(--dashboard-bordeNeutro);
 }
 
 /* Botón de restaurar copa por defecto — estilo fantasma como el resto. */
@@ -171,9 +171,9 @@
     align-items: center;
     gap: var(--dashboard-espacioMini, 4px);
     background: none;
-    border: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.14));
-    border-radius: var(--dashboard-radioSm, 6px);
-    color: var(--dashboard-textoSecundario, #9a9aa3);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno, 11px);
     padding: var(--dashboard-espacioMini, 4px) var(--dashboard-espacioSmMd, 10px);
     cursor: pointer;
@@ -182,8 +182,8 @@
 }
 
 .modalEditorArbolRestaurar:hover {
-    border-color: var(--dashboard-acento, #7c9cff);
-    color: var(--dashboard-textoActivo, #e8e8ea);
+    border-color: var(--dashboard-acento);
+    color: var(--dashboard-textoActivo);
 }
 
 /* Vista previa del árbol — caja sutil, no borde duro. */
@@ -192,15 +192,15 @@
     align-items: center;
     justify-content: center;
     min-height: 96px;
-    border: 1px dashed var(--dashboard-bordeSutil, rgba(255, 255, 255, 0.18));
-    border-radius: var(--dashboard-radioMd, 8px);
+    border: 1px dashed var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioMd);
     padding: var(--dashboard-espacioSm, 6px);
-    background: var(--dashboard-superposicionSutil, rgba(255, 255, 255, 0.03));
+    background: var(--dashboard-superposicionSutil);
 }
 
 .modalEditorArbolAyuda {
     font-size: var(--dashboard-tamanoPequeno, 11px);
-    color: var(--dashboard-textoApagado, #808080);
+    color: var(--dashboard-textoApagado);
     line-height: 1.4;
     margin: 0;
 }
@@ -210,7 +210,7 @@
     display: flex;
     justify-content: flex-end;
     padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
-    border-top: 1px solid var(--dashboard-bordePrincipal, rgba(255, 255, 255, 0.08));
+    border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 
 @media (max-width: 640px) {

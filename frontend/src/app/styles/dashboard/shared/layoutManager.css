@@ -397,8 +397,8 @@
     font-size: 11px;
     padding: 1px 6px;
     border-radius: var(--dashboard-radioMini);
-    background: var(--dashboard-estadoAdvertenciaFondo, rgba(245, 158, 11, 0.12));
-    border: 1px solid var(--dashboard-estadoAdvertenciaBorde, rgba(245, 158, 11, 0.35));
+    background: var(--dashboard-estadoAdvertenciaFondo);
+    border: 1px solid var(--dashboard-estadoAdvertenciaBorde);
     color: var(--dashboard-estadoAdvertencia);
     white-space: nowrap;
 }

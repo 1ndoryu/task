@@ -132,7 +132,7 @@
     width: 2px;
     height: 40%;
     background: var(--dashboard-bordeSutil);
-    border-radius: 2px;
+    border-radius: 0;
     transition: background var(--dashboard-transicionRapida, 0.15s), height var(--dashboard-transicionRapida, 0.15s);
 }
 
