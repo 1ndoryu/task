@@ -150,8 +150,10 @@ function renderFalloVisible(container: HTMLElement, islandName: string, error: u
     try {
         container.innerHTML = '';
         container.replaceChildren(escondido);
-    } catch {
-        /* El contenedor puede no estar en el DOM: no hay nada visible que hacer. */
+    } catch (cleanupError) {
+        /* El contenedor puede no estar en el DOM: no hay nada visible que hacer.
+         * Se registra porque un fallo de mensaje visible tambien es un fallo real. */
+        console.error(`[Glory] No se pudo volcar el fallo visible de "${islandName}":`, cleanupError);
     }
 }
 
@@ -194,8 +196,10 @@ function initializeSPA(routes: GloryRoutesMap, options: InitOptions): void {
     if (contenedorInicial?.dataset.props) {
         try {
             propsEvaluadosServidor = JSON.parse(contenedorInicial.dataset.props) as Record<string, unknown>;
-        } catch {
-            /* JSON inválido en data-props: continuar sin props evaluados */
+        } catch (parseError) {
+            /* JSON invalido en data-props: continuar sin props evaluados,
+             * pero registrando la causa para que no quede silenciado. */
+            console.warn('[Glory SPA] data-props JSON invalido, continúo sin props evaluados:', parseError);
         }
     }
 
