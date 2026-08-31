@@ -104,6 +104,11 @@
 
 /* 
  * ESTADO DE CONEXION - SOLO ICONO 
+ * [318A-2 fb] Unificado con los botones de icono del encabezado
+ * (.botonIconoEncabezado): mismo borde sólido, sin fondos tintados.
+ * Antes cada estado usaba un fondo rgba y un borde translúcido (0.3),
+ * incoherente con los botones cercanos. La diferenciación semántica
+ * se mantiene solo en el color del icono.
  */
 .estadoConexionIcono {
     display: inline-flex;
@@ -111,7 +116,7 @@
     justify-content: center;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     border-radius: var(--dashboard-radioSm);
-    border: 1px solid;
+    border: 1px solid var(--dashboard-bordePrincipal);
     box-sizing: border-box;
     line-height: 1.4;
     font-size: var(--dashboard-tamanoPequeno);
@@ -119,22 +124,21 @@
 }
 
 .estadoConexionIcono--conectado {
-    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
+    background-color: transparent;
     color: var(--dashboard-estadoExito);
-    border-color: rgba(var(--dashboard-exitoRgb), 0.3);
 }
 
 .estadoConexionIcono--desconectado {
-    background-color: rgba(var(--dashboard-grisNeutroRgb), 0.15);
+    background-color: transparent;
     color: var(--dashboard-grisNeutro);
-    border-color: rgba(var(--dashboard-grisNeutroRgb), 0.3);
     cursor: pointer;
     gap: var(--dashboard-espacioXs);
 }
 
 .estadoConexionIcono--desconectado:hover {
-    background-color: rgba(var(--dashboard-grisNeutroRgb), 0.25);
-    border-color: rgba(var(--dashboard-grisNeutroRgb), 0.5);
+    background-color: transparent;
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
 }
 
 .estadoConexionIcono__texto {
@@ -146,21 +150,20 @@
 }
 
 .estadoConexionIcono--error {
-    background-color: var(--dashboard-estadoAltaFondo);
+    background-color: transparent;
     color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAltaBorde);
     cursor: pointer;
 }
 
 .estadoConexionIcono--error:hover {
-    background-color: rgba(var(--dashboard-estadoErrorRgb), 0.2);
-    border-color: rgba(var(--dashboard-estadoErrorRgb), 0.5);
+    background-color: transparent;
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
 }
 
 .estadoConexionIcono--sincronizando {
-    background-color: rgba(var(--dashboard-acentoRgb), 0.15);
+    background-color: transparent;
     color: var(--dashboard-estadoInfo);
-    border-color: rgba(var(--dashboard-acentoRgb), 0.3);
 }
 
 /* Animacion de giro para icono de sincronizacion */
