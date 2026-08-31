@@ -309,7 +309,10 @@
 .botonTexto {
     background: transparent;
     border: none;
-    color: var(--dashboard-textoSecundario);
+    /* [318A-2 fb] Hereda el color del botón (p.ej. blanco en primario sobre
+     * fondo negro); antes forzaba --dashboard-textoSecundario (#4d4d4d) y
+     * hacía ilegible el texto de los botones con fondo oscuro. */
+    color: inherit;
     cursor: pointer;
     font-size: var(--dashboard-tamanoPequeno);
     text-decoration: underline;
