@@ -56,6 +56,6 @@ No afecta a los modos grid ni sidebar existentes.
 ## Siguiente paso
 Completado. Evidencia: `Agente/completados/tareas-2026-08-31.md`. Commits `8a53451`,
 `89068ce`, `ebf689f`, `3272404`, `bf19681`, `aa96a01`, `0c4aa0a`, `4947822`, `7b3e832`,
-`6cdf928` (rama `main`, push a `origin/main`). Gate
+`6cdf928`, `1edc0e8` (rama `main`, push a `origin/main`). Gate
 `GLORY-BASELINE` PASS en cada commit. Retirado del roadmap por no tener entrada propia (trabajo abierto ya archivado en
 completados).
