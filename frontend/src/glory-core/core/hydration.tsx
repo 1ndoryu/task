@@ -13,6 +13,9 @@
  *   3. Parsea props de data-props (JSON)
  *   4. Envuelve en: StrictMode > GloryProvider > AppProvider? > ErrorBoundary > Suspense? > DevOverlay?
  *   5. Monta con createRoot (CSR) o hydrateRoot (SSG)
+ *
+ * Si el montaje falla por completo, escribe un mensaje visible en el contenedor
+ * para que el fallo no quede silenciado (el usuario no ve la consola).
  */
 
 import { StrictMode, Suspense, type ComponentType, type ReactNode } from 'react';
@@ -125,8 +128,30 @@ function mountIsland(
                 createRoot(container).render(element);
             } catch (fallbackError) {
                 console.error(`[Glory] Fallback CSR tambien fallo para "${islandName}":`, fallbackError);
+                renderFalloVisible(container, islandName, fallbackError);
             }
+        } else {
+            renderFalloVisible(container, islandName, error);
         }
+    }
+}
+
+/* Fallo total de montaje: vuelca un mensaje visible en el contenedor en vez de
+ * dejarlo en blanco, para que el error no quede silenciado en produccion. */
+function renderFalloVisible(container: HTMLElement, islandName: string, error: unknown): void {
+    const detalle = error instanceof Error ? error.message : String(error);
+    const escondido = document.createElement('div');
+    escondido.style.padding = '12px';
+    escondido.style.textAlign = 'center';
+    escondido.style.color = '#b91c1c';
+    escondido.style.fontSize = '13px';
+    escondido.textContent = `La sección "${islandName}" no pudo cargarse. Recarga la página o reintenta luego.`;
+    escondido.title = `[Glory] ${detalle}`;
+    try {
+        container.innerHTML = '';
+        container.replaceChildren(escondido);
+    } catch {
+        /* El contenedor puede no estar en el DOM: no hay nada visible que hacer. */
     }
 }
 
@@ -248,6 +273,8 @@ function initializeClassicIslands(options: InitOptions): void {
             try {
                 props = JSON.parse(propsJson) as Record<string, unknown>;
             } catch (err) {
+                /* Degradación real: la isla monta con props vacíos ({}); se conserva
+                 * el island visible. El fallo de parseo solo se registra. */
                 console.error(`[Glory] Error parseando props para "${islandName}":`, err);
             }
         }

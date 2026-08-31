@@ -334,11 +334,11 @@ export function BotonCancelar({onCancelar}: {onCancelar?: () => void}): JSX.Elem
 
 /* ---------- Selector de modo + aviso de modo autónomo ---------- */
 
-export const MODOS_AGENTE: Array<{id: ModoAgente; nombre: string; descripcion: string}> = [
+export const MODOS_AGENTE: ReadonlyArray<{id: ModoAgente; nombre: string; descripcion: string}> = Object.freeze([
     {id: 'predeterminado', nombre: 'Predeterminado', descripcion: 'Pide aprobación para herramientas con efecto.'},
     {id: 'meta', nombre: 'Meta', descripcion: 'Permite ajustar reglas además de pedir aprobación.'},
     {id: 'autonomo', nombre: 'Autónomo', descripcion: 'Ejecuta herramientas con efecto sin preguntar.'},
-];
+]);
 
 export function SelectorModo({modo, onChange}: {modo: ModoAgente; onChange: (modo: ModoAgente) => void}): JSX.Element {
     return (

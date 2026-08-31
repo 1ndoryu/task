@@ -31,7 +31,7 @@
 export const DIMENSION_ARBOL = 16;
 
 export type EstadoVida = 0 | 25 | 50 | 75 | 100;
-export const ESTADOS_ARBOL: EstadoVida[] = [0, 25, 50, 75, 100];
+export const ESTADOS_ARBOL: readonly EstadoVida[] = Object.freeze([0, 25, 50, 75, 100]);
 
 /* Tronco + raíces por defecto: idénticos en los 5 estados. Tronco 2 de ancho
  * (x 7..8) desde y7 hasta y15 (base); raíces a x 4/6/9/11 en la base y15.

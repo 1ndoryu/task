@@ -71,13 +71,13 @@ export const ETIQUETAS_URGENCIA = {
  * el Record es una extensión de los mismos 5 valores. */
 export type DificultadNivel = 'Muy Baja' | 'Baja' | 'Media' | 'Alta' | 'Muy Alta';
 
-export const COLORES_DIFICULTAD: Record<DificultadNivel, string> = {
+export const COLORES_DIFICULTAD: Readonly<Record<DificultadNivel, string>> = Object.freeze({
     'Muy Alta': 'var(--dashboard-estadoMuyAlta)',
     'Alta': 'var(--dashboard-estadoAlta)',
     'Media': 'var(--dashboard-estadoMedia)',
     'Baja': 'var(--dashboard-estadoBaja)',
     'Muy Baja': 'var(--dashboard-estadoMuyBaja)'
-};
+});
 
 export const ETIQUETAS_DIFICULTAD: Record<DificultadNivel, string> = {
     'Muy Alta': 'Muy Alta',
