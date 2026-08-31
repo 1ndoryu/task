@@ -370,7 +370,7 @@
 
 .mcpCodigo__contenido::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioSm);
+    border-radius: 0;
 }
 
 /* 

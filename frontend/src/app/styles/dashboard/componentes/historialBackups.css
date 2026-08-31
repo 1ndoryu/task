@@ -59,7 +59,7 @@
 
 .listaBackups::-webkit-scrollbar-thumb {
     background-color: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioSm);
+    border-radius: 0;
 }
 
 .itemBackup {

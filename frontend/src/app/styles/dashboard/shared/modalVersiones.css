@@ -12,9 +12,8 @@
     padding: var(--dashboard-espacioLgXl);
     max-height: 60vh;
     overflow-y: auto;
-    /* Scrollbar */
-    scrollbar-width: thin;
-    scrollbar-color: var(--dashboard-bordeSutil) transparent;
+    /* [318A-2 fb] Sin scrollbar-width/scrollbar-color: en Chromium 121+ anulan
+     * el estilo ::-webkit-scrollbar y muestran el scrollbar nativo. */
 }
 
 .contenedorVersiones::-webkit-scrollbar {
@@ -23,7 +22,7 @@
 
 .contenedorVersiones::-webkit-scrollbar-thumb {
     background-color: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioMini);
+    border-radius: 0;
 }
 
 .contenedorVersiones::-webkit-scrollbar-thumb:hover {

@@ -224,7 +224,7 @@
 
 .equiposListaContenedor::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioSm);
+    border-radius: 0;
 }
 
 .equiposListaContenedor::-webkit-scrollbar-thumb:hover {

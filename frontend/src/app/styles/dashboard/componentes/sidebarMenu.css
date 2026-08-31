@@ -144,11 +144,11 @@
 
 /* Scrollbar minimalista en sidebar */
 .sidebarMenuItems::-webkit-scrollbar {
-    width: 2px;
+    width: var(--dashboard-scrollbarAncho);
 }
 .sidebarMenuItems::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioXs);
+    border-radius: 0;
 }
 
 /* Quitar bordes del boton ghost dentro del sidebar y alinear icono+texto */

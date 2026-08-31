@@ -32,36 +32,16 @@
 }
 
 /* 
- * SCROLLBAR GLOBAL - BODY Y HTML
- * Aplica el estilo minimalista dark mode al scroll de la pagina principal
+ * SCROLLBAR GLOBAL UNIFICADO
+ * [318A-2 fb] Todos los scrolls del documento son idénticos (incluidos los
+ * modales portaleados a body, que quedan fuera de .dashboardContenedor):
+ * delgado, sin flechas/botones, thumb sólido negro/blanco según tema y sin
+ * bordes redondeados. La definición global se hace aquí; los estilos por
+ * componente quedan subsumidos.
  */
 html,
 body {
-    scrollbar-width: thin;
-    scrollbar-color: var(--dashboard-scrollbarThumb) var(--dashboard-scrollbarFondo);
     background-color: var(--dashboard-fondoPrincipal);
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-    width: var(--dashboard-scrollbarAncho);
-    height: var(--dashboard-scrollbarAncho);
-}
-
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track {
-    background: var(--dashboard-scrollbarFondo);
-}
-
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb {
-    background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioSm);
-}
-
-html::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover {
-    background: var(--dashboard-scrollbarThumbHover);
 }
 
 .dashboardContenedor::selection {
@@ -201,47 +181,38 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 /* 
- * SCROLLBAR GLOBAL MINIMALISTA
- * Aplica a todo el dashboard: delgado, semitransparente, dark mode
+ * SCROLLBAR GLOBAL UNIFICADO
+ * [318A-2 fb] Un solo aspecto para todos los scrolls del documento (incluye
+ * modales portaleados a body, que quedan fuera de .dashboardContenedor):
+ * ancho token, sin flechas/botones, thumb sólido blanco/negro según tema y
+ * sin bordes redondeados. Se usa `*` para cubrir cualquier contenedor.
  */
-.dashboardContenedor *::-webkit-scrollbar {
+*::-webkit-scrollbar {
     width: var(--dashboard-scrollbarAncho);
     height: var(--dashboard-scrollbarAncho);
 }
 
-.dashboardContenedor *::-webkit-scrollbar-track {
+/* Quitar botones/flechas de scroll (webkit) */
+*::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+*::-webkit-scrollbar-track {
     background: var(--dashboard-scrollbarFondo);
 }
 
-.dashboardContenedor *::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioSm);
+    border-radius: 0;
 }
 
-.dashboardContenedor *::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover {
     background: var(--dashboard-scrollbarThumbHover);
 }
 
-/* Firefox - aplicar a elementos con scroll */
-.dashboardContenedor * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--dashboard-scrollbarThumb) var(--dashboard-scrollbarFondo);
-}
-
-/* Scrollbar para textareas */
-.dashboardContenedor textarea::-webkit-scrollbar {
-    width: var(--dashboard-scrollbarAncho);
-}
-
-.dashboardContenedor textarea::-webkit-scrollbar-track {
-    background: var(--dashboard-scrollbarFondo);
-}
-
-.dashboardContenedor textarea::-webkit-scrollbar-thumb {
-    background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioSm);
-}
-
-.dashboardContenedor textarea::-webkit-scrollbar-thumb:hover {
-    background: var(--dashboard-scrollbarThumbHover);
-}
+/* [318A-2 fb] OJO: NO usar scrollbar-width/scrollbar-color (propiedades estándar):
+ * en Chromium 121+ su presencia DESACTIVA el estilo ::-webkit-scrollbar y se
+ * muestra el scrollbar nativo (grande, con flechas y radio). El estilo WebKit
+ * global de arriba es el único mecanismo de aspecto. */

@@ -107,14 +107,11 @@
 
 .timelineContenedor::-webkit-scrollbar-thumb {
     background: var(--dashboard-scrollbarThumb);
-    border-radius: var(--dashboard-radioXs);
+    border-radius: 0;
 }
 
-/* Firefox */
-.timelineContenedor {
-    scrollbar-width: thin;
-    scrollbar-color: var(--dashboard-scrollbarThumb) var(--dashboard-scrollbarFondo);
-}
+/* [318A-2 fb] Sin scrollbar-width/scrollbar-color: en Chromium 121+ anulan el
+ * estilo ::-webkit-scrollbar y muestran el scrollbar nativo. */
 
 /* 
  * MENSAJE SISTEMA (HISTORIAL)

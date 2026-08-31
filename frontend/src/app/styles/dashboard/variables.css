@@ -123,10 +123,11 @@
     --dashboard-barraFondo: #111111;
     --dashboard-barraNormal: #3a3a3a;
     --dashboard-barraUrgente: #ffffff;
-    --dashboard-scrollbarAncho: 4px;
+    --dashboard-scrollbarAncho: 6px;
     --dashboard-scrollbarFondo: transparent;
-    --dashboard-scrollbarThumb: rgba(255, 255, 255, 0.18);
-    --dashboard-scrollbarThumbHover: rgba(255, 255, 255, 0.3);
+    /* [318A-2 fb] Thumb sólido según tema: blanco en oscuro, negro en claro */
+    --dashboard-scrollbarThumb: #ffffff;
+    --dashboard-scrollbarThumbHover: #ffffff;
 
     /* Tipografía */
     --dashboard-fuenteMonoespaciada: 'Departure Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
@@ -248,7 +249,7 @@
 
     --dashboard-textoActivo: #000000;
     --dashboard-textoNormal: #1a1a1a;
-    --dashboard-textoSecundario: #4d4d4d;
+    --dashboard-textoSecundario: #121212;
     --dashboard-textoApagado: #6e6e6e;
     --dashboard-textoMuyApagado: #9a9a9a;
     --dashboard-textoIndice: #cccccc;
@@ -342,8 +343,9 @@
     --dashboard-barraNormal: #cccccc;
     --dashboard-barraUrgente: #000000;
     --dashboard-scrollbarFondo: transparent;
-    --dashboard-scrollbarThumb: rgba(0, 0, 0, 0.18);
-    --dashboard-scrollbarThumbHover: rgba(0, 0, 0, 0.3);
+    /* [318A-2 fb] Thumb sólido según tema: blanco en oscuro, negro en claro */
+    --dashboard-scrollbarThumb: #000000;
+    --dashboard-scrollbarThumbHover: #000000;
 
     --dashboard-botonPrimarioFondo: #000000;
     --dashboard-botonPrimarioTexto: #ffffff;
