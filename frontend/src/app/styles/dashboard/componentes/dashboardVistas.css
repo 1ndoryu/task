@@ -99,22 +99,9 @@
     position: relative;
 }
 
-.selectorVistasMenuWrap {
-    position: relative;
-}
-
-.selectorVistasMenu {
-    position: absolute;
-    top: calc(100% + var(--dashboard-espacioS, 6px));
-    left: 0;
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXxs, 2px);
-    padding: var(--dashboard-espacioS, 6px);
-    background: var(--dashboard-fondoTerciario, #0a0a0a);
-    border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
-}
+/* [318A-2 fb] Eliminados .selectorVistasMenuWrap y .selectorVistasMenu: el menú
+ * de opciones por vista ahora usa el MenuContextual estándar (menuContextual.css),
+ * abierto con click derecho sobre el botón de la vista. */
 
 /* ── MAIN (grid libre) ──
  * Mismo margen/padding lateral que el encabezado para que los paneles queden
