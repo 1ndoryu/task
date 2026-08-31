@@ -174,12 +174,14 @@
     opacity: 1;
 }
 
-/* Handle en el borde derecho de la celda (ajusta la columna de la celda) */
+/* Handle en el borde derecho de la celda (ajusta la columna de la celda)
+ * [318A-2 fb] Ancho reducido de 10px a 6px: el handle invisible roba el
+ * mousedown de selección/scrollbar que empieza cerca del borde. */
 .dashboardVistasResize--derecha {
     top: 0;
     bottom: 0;
     right: 0;
-    width: 10px;
+    width: 6px;
     transform: translateX(50%);
     cursor: col-resize;
 }
@@ -189,7 +191,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 10px;
+    height: 6px;
     transform: translateY(50%);
     cursor: row-resize;
 }

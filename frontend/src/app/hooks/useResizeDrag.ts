@@ -8,28 +8,62 @@
 import {useCallback, useRef, useState} from 'react';
 import type {MouseEvent as ReactMouseEvent} from 'react';
 
+interface OpcionesResizeDrag {
+    /* [318A-2 fb] Distancia (px) de arrastre necesaria antes de activar el
+     * redimensionado. Evita que un clic o una selección de texto que empieza
+     * cerca del borde disparen el resize. Por defecto 5px. */
+    umbral?: number;
+}
+
 export function useResizeDrag(
     axis: 'x' | 'y',
     valorActual: number,
     onAjustar: (nuevo: [number, number]) => void,
+    opciones: OpcionesResizeDrag = {},
 ) {
     const [arrastrando, setArrastrando] = useState(false);
     const contenedorRef = useRef<HTMLDivElement>(null);
+    const umbral = opciones.umbral ?? 5;
 
     const handleMouseDown = useCallback(
         (e: ReactMouseEvent) => {
-            e.preventDefault();
+            /* [318A-2 fb] NO preventDefault en mousedown: así una selección de
+             * texto que empieza en el borde funciona. El resize solo se activa
+             * tras superar el umbral de arrastre y si el eje dominante del
+             * movimiento coincide con el del handle (no roba el scrollbar del
+             * panel, que se arrastra en el otro eje). */
             e.stopPropagation();
-            setArrastrando(true);
 
-            const start = axis === 'x' ? e.clientX : e.clientY;
-            const contenedor = contenedorRef.current?.parentElement;
-            if (!contenedor) return;
-
-            const rect = contenedor.getBoundingClientRect();
-            const total = axis === 'x' ? rect.width : rect.height;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            let activo = false;
 
             const handleMouseMove = (moveEvent: MouseEvent) => {
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+
+                if (!activo) {
+                    const distancia = Math.hypot(dx, dy);
+                    if (distancia < umbral) return;
+                    /* Solo activar si el movimiento domina en el eje del handle */
+                    const dominaEje = axis === 'x'
+                        ? Math.abs(dx) >= Math.abs(dy)
+                        : Math.abs(dy) >= Math.abs(dx);
+                    if (!dominaEje) return;
+
+                    activo = true;
+                    setArrastrando(true);
+                    document.body.style.cursor = axis === 'x' ? 'col-resize' : 'row-resize';
+                    document.body.style.userSelect = 'none';
+                    window.getSelection()?.removeAllRanges();
+                }
+
+                const contenedor = contenedorRef.current?.parentElement;
+                if (!contenedor) return;
+
+                const rect = contenedor.getBoundingClientRect();
+                const total = axis === 'x' ? rect.width : rect.height;
+                const start = axis === 'x' ? startX : startY;
                 const delta = (axis === 'x' ? moveEvent.clientX : moveEvent.clientY) - start;
                 const deltaPorcentaje = (delta / total) * 100;
 
@@ -51,10 +85,8 @@ export function useResizeDrag(
 
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = axis === 'x' ? 'col-resize' : 'row-resize';
-            document.body.style.userSelect = 'none';
         },
-        [axis, valorActual, onAjustar],
+        [axis, valorActual, onAjustar, umbral],
     );
 
     const resetear = useCallback(() => onAjustar([50, 50]), [onAjustar]);
