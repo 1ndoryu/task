@@ -13,6 +13,8 @@
 
 import {useCallback, useMemo} from 'react';
 import {obtenerIdsPaneles, obtenerPanel} from '../../../config/registroPaneles';
+import {obtenerPluginsVisibles, obtenerPluginDePanelId} from '../../../config/registroPlugins';
+import {usePluginsStore} from '../../../stores/pluginsStore';
 import type {PanelId} from '../../../hooks/useConfiguracionLayout';
 import {MenuContextual} from '../../shared';
 import type {OpcionMenu} from '../../shared';
@@ -26,7 +28,18 @@ interface SelectorPanelCeldaProps {
 }
 
 export function SelectorPanelCelda({celdaId, posicionX, posicionY, onSeleccionar, onCerrar}: SelectorPanelCeldaProps): JSX.Element {
-    const paneles = useMemo(() => obtenerIdsPaneles(), []);
+    const pluginsActivos = usePluginsStore(s => s.pluginsActivos);
+
+    /* [318A-2 fb] Misma semántica que ModalGestionPaneles: un panel de plugin
+     * solo se ofrece si su plugin está activado. Sin este filtro el selector
+     * mostraba paneles de plugins desactivados (p. ej. "Game" del EXP apagado). */
+    const panelesDePluginActivos = new Set(
+        obtenerPluginsVisibles()
+            .filter(plugin => pluginsActivos.includes(plugin.id))
+            .flatMap(plugin => plugin.panelesIds)
+    );
+
+    const paneles = useMemo(() => obtenerIdsPaneles().filter(id => panelesDePluginActivos.has(id) || !obtenerPluginDePanelId(id)), [panelesDePluginActivos]);
 
     /* Un item del menú por panel registrado (título + icono del registro) */
     const opciones = useMemo<OpcionMenu[]>(() => paneles.map(panelId => {
