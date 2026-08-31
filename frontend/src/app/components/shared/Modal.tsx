@@ -8,6 +8,7 @@
  */
 
 import {X, ArrowLeft} from 'lucide-react';
+import {createPortal} from 'react-dom';
 import {Boton} from '../ui';
 import {useModal} from '../../hooks/shared/useModal';
 
@@ -37,7 +38,11 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
 
     if (!estaAbierto) return null;
 
-    return (
+    return createPortal(
+        /* [318A-2 fb] Portal a document.body: dentro de paneles con transform
+         * (modo vistas) el overlay position:fixed queda confinado/recortado por
+         * el contexto de apilamiento del panel; con portal el modal se abre
+         * global como el resto de modales. */
         <div className={`modalOverlay ${claseOverlay}`} onClick={manejarClickOverlay}>
             <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
                 <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
@@ -63,6 +68,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                 </div>
                 <div className={`modalContenido ${claseContenido}`}>{children}</div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

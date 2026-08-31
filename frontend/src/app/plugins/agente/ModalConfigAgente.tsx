@@ -1,5 +1,6 @@
 /* Configuración del agente: todos los valores se persisten y se envían al runtime. */
 import {useEffect, useState} from 'react';
+import {createPortal} from 'react-dom';
 import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, Layers, Check, Plus, X} from 'lucide-react';
 import {useAgenteStore} from './store';
 import type {ConfigAgente, SkillAgente} from './service';
@@ -27,7 +28,11 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
         onCerrar();
     };
 
-    return (
+    return createPortal(
+        /* [318A-2 fb] Portal a document.body: dentro del panel (modo vistas) el
+         * overlay position:fixed queda confinado/recortado por el transform del
+         * panel arrastrable y los overflow:hidden de los contenedores de vistas;
+         * con portal el modal se abre global como el resto de modales. */
         <div className="modalConfigAgenteOverlay" onMouseDown={e => {if (e.target === e.currentTarget) onCerrar();}}>
             <div className="modalConfigAgente" role="dialog" aria-modal="true" aria-label="Configuración del agente">
                 <div className="modalConfigAgenteCabecera">
@@ -143,6 +148,7 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                 </div>
                 <div className="modalConfigAgentePie"><Boton type="button" variante="primario" onClick={guardar}>Guardar</Boton></div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
