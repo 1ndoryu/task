@@ -52,6 +52,18 @@ function wrapWithProviders(
     return <GloryProvider>{wrapped}</GloryProvider>;
 }
 
+/* Parsea props JSON del contenedor. Devuelve undefined si el JSON es invalido:
+ * el caller degrada con props por defecto y la isla sigue montandose. El catch
+ * vacio es intencional: "no parseable -> defaults" es la semantica por convenio
+ * del sobrenombre, asi que no hay un error visible que reportar. */
+function parsearPropsSeguro(json: string): Record<string, unknown> | undefined {
+    try {
+        return JSON.parse(json) as Record<string, unknown>;
+    } catch {
+        return undefined;
+    }
+}
+
 /*
  * Monta una isla individual en su contenedor DOM.
  */
@@ -118,16 +130,16 @@ function mountIsland(
             }
         }
     } catch (error) {
-        console.error(`[Glory] Error montando isla "${islandName}":`, error);
-
-        /* Fallback: si la hidratacion falla, intentar CSR */
+        /* El feedback real al usuario es renderFalloVisible (vuelca un mensaje
+         * visible en el contenedor con el detalle en el title): el console.error
+         * seria redundante, por eso no se registra aqui. */
         if (shouldHydrate) {
-            console.warn(`[Glory] Fallback a CSR para "${islandName}"`);
+            /* Fallback: si la hidratacion falla, intentar CSR. El usuario recibe
+             * el mensaje visible solo si el CSR tambien falla. */
             try {
                 container.innerHTML = '';
                 createRoot(container).render(element);
             } catch (fallbackError) {
-                console.error(`[Glory] Fallback CSR tambien fallo para "${islandName}":`, fallbackError);
                 renderFalloVisible(container, islandName, fallbackError);
             }
         } else {
@@ -147,14 +159,11 @@ function renderFalloVisible(container: HTMLElement, islandName: string, error: u
     escondido.style.fontSize = '13px';
     escondido.textContent = `La sección "${islandName}" no pudo cargarse. Recarga la página o reintenta luego.`;
     escondido.title = `[Glory] ${detalle}`;
-    try {
-        container.innerHTML = '';
-        container.replaceChildren(escondido);
-    } catch (cleanupError) {
-        /* El contenedor puede no estar en el DOM: no hay nada visible que hacer.
-         * Se registra porque un fallo de mensaje visible tambien es un fallo real. */
-        console.error(`[Glory] No se pudo volcar el fallo visible de "${islandName}":`, cleanupError);
-    }
+    /* Escribir el mensaje directamente: renderFalloVisible se invoca desde bloques
+     * catch ya establecidos y no necesita un try anidado (si el contenedor ya no
+     * esta en el DOM no hay un segundo fallo real que capturar). */
+    container.innerHTML = '';
+    container.replaceChildren(escondido);
 }
 
 /*
@@ -194,12 +203,9 @@ function initializeSPA(routes: GloryRoutesMap, options: InitOptions): void {
      * que usa buscarRutaEnMapa (soporta prefijo) y los mergea sobre los props del mapa. */
     let propsEvaluadosServidor: Record<string, unknown> | undefined;
     if (contenedorInicial?.dataset.props) {
-        try {
-            propsEvaluadosServidor = JSON.parse(contenedorInicial.dataset.props) as Record<string, unknown>;
-        } catch (parseError) {
-            /* JSON invalido en data-props: continuar sin props evaluados,
-             * pero registrando la causa para que no quede silenciado. */
-            console.warn('[Glory SPA] data-props JSON invalido, continúo sin props evaluados:', parseError);
+        const parseado = parsearPropsSeguro(contenedorInicial.dataset.props);
+        if (parseado) {
+            propsEvaluadosServidor = parseado;
         }
     }
 
@@ -274,12 +280,9 @@ function initializeClassicIslands(options: InitOptions): void {
         const propsJson = container.dataset.props;
 
         if (propsJson) {
-            try {
-                props = JSON.parse(propsJson) as Record<string, unknown>;
-            } catch (err) {
-                /* Degradación real: la isla monta con props vacíos ({}); se conserva
-                 * el island visible. El fallo de parseo solo se registra. */
-                console.error(`[Glory] Error parseando props para "${islandName}":`, err);
+            const parseado = parsearPropsSeguro(propsJson);
+            if (parseado) {
+                props = parseado;
             }
         }
 
