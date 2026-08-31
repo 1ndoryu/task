@@ -6,102 +6,30 @@
  */
 
 import {useState, useCallback, useEffect, useMemo, useRef} from 'react';
-import type {NivelImportancia, DatosNuevoHabito, FrecuenciaHabito, Habito, SubHabito, Participante, Tarea, DatosEdicionTarea, DatosNuevoSubHabito, VentanaOportunidad} from '../../types/dashboard';
-import type {ParticipanteChat} from '../usePanelChat';
-import {FRECUENCIA_POR_DEFECTO} from '../../types/dashboard';
+import type {Habito, SubHabito, Tarea, DatosNuevoSubHabito} from '../../types/dashboard';
 import type {EstadoHabito} from '../../components/shared';
+import type {UseModalHabitoProps, UseModalHabitoReturn} from './modalHabitoTipos';
 import {usePanelChat} from '../usePanelChat';
+import {useFormularioHabitoModal} from './useFormularioHabitoModal';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {usePluginsStore} from '../../stores/pluginsStore';
 import {useExpStore} from '../../plugins/exp/store';
 import {estimarDificultad} from '../../plugins/exp/service';
 import type {Dificultad} from '../../plugins/exp/types';
 import {obtenerFechaHoy} from '../../utils/fecha';
+export type {
+    DatosFormulario,
+    UseModalHabitoProps,
+    UseModalHabitoReturn,
+    BaseModalHabito,
+    CallbacksModalHabito,
+    UmhEdicion,
+    UmhAtributos,
+    UmhGrupo,
+    UmhChat,
+    UmhSubHabitos
+} from './modalHabitoTipos';
 
-type DatosFormulario = DatosNuevoHabito;
-
-interface BaseModalHabito {
-    estaAbierto: boolean;
-    onCerrar: () => void;
-    onGuardar: (datos: DatosFormulario) => void;
-    onPausarHabito?: (id: number) => void;
-    habito?: Habito;
-    participantes?: Participante[];
-    tareas?: Tarea[];
-}
-
-interface CallbacksModalHabito {
-    onToggleTarea?: (id: number) => void;
-    onCrearTarea?: (datos: DatosEdicionTarea) => void;
-    onEliminarTarea?: (id: number) => void;
-    onConfigurarTarea?: (tarea: Tarea) => void;
-    onActualizarOrdenTareasHabito?: (habitoId: number, tareasIds: number[]) => void;
-    onEditarTarea?: (id: number, datos: DatosEdicionTarea) => void;
-    subHabito?: SubHabito | null;
-    habitoPadre?: Habito | null;
-}
-
-export interface UseModalHabitoProps extends BaseModalHabito, CallbacksModalHabito {}
-
-/* Fragmentos del retorno, cohesionados por dominio (ISP). */
-interface UmhEdicion {
-    modoEdicion: boolean;
-    nombre: string;
-    setNombre: (v: string) => void;
-    descripcion: string;
-    setDescripcion: (v: string) => void;
-    icono: string;
-    setIcono: (v: string) => void;
-    colorIcono: string;
-    setColorIcono: (v: string) => void;
-}
-
-interface UmhAtributos {
-    importancia: NivelImportancia;
-    setImportancia: (v: NivelImportancia) => void;
-    dificultad: Dificultad;
-    setDificultad: (v: Dificultad) => void;
-    frecuencia: FrecuenciaHabito;
-    setFrecuencia: (v: FrecuenciaHabito) => void;
-    ventanaOportunidad: VentanaOportunidad | undefined;
-    setVentanaOportunidad: (v: VentanaOportunidad | undefined) => void;
-    dependencias: import('../../types/dashboard').ReferenciaDependencia[];
-    setDependencias: (v: import('../../types/dashboard').ReferenciaDependencia[]) => void;
-}
-
-interface UmhGrupo {
-    grupoEjecucion: string | null;
-    setGrupoEjecucion: (v: string | null) => void;
-    errores: {nombre?: string};
-    esHabitoEspecialAyuno: boolean;
-    esModoSubHabito: boolean;
-    estadoHoy: EstadoHabito;
-    manejarCambioEstado: (nuevoEstado: EstadoHabito) => void;
-}
-
-interface UmhChat {
-    chatVisible: boolean;
-    toggleChat: () => void;
-    tieneMensajesSinLeer: boolean;
-    participantesChat: ParticipanteChat[];
-    mostrarChatColumna: boolean;
-    tareasDelHabito: Tarea[];
-    manejarReordenarTareas: (tareasIds: number[]) => void;
-}
-
-interface UmhSubHabitos {
-    manejarCrearSubHabito: (datos: DatosNuevoSubHabito) => void;
-    manejarEditarSubHabito: (subHabitoId: number, datos: DatosNuevoSubHabito) => void;
-    manejarEliminarSubHabito: (subHabitoId: number) => void;
-    manejarToggleSubHabito: (subHabitoId: number) => void;
-    manejarMarcarDiaSubHabito: (fecha: string, estado: EstadoHabito) => boolean;
-    manejarDesmarcarDiaSubHabito: (fecha: string) => boolean;
-    manejarGuardar: () => void;
-    manejarCerrarConGuardado: () => void;
-    manejarPausarHabito: (() => void) | undefined;
-}
-
-export interface UseModalHabitoReturn extends UmhEdicion, UmhAtributos, UmhGrupo, UmhChat, UmhSubHabitos {}
 
 export function useModalHabito({
     estaAbierto,
@@ -121,23 +49,16 @@ export function useModalHabito({
     const habitoAyunoId = usePluginsStore(s => (s.configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined)?.habitoId);
     const esHabitoEspecialAyuno = !!(habito && habitoAyunoId && habito.id === habitoAyunoId);
 
-    /* Estado local para edición */
-    const [nombre, setNombre] = useState((subHabito ? subHabito.nombre : habito?.nombre) || '');
-    const [descripcion, setDescripcion] = useState(habito?.descripcion || '');
-    const [icono, setIcono] = useState(habito?.icono || 'check-circle');
-    const [colorIcono, setColorIcono] = useState(habito?.colorIcono || '#888888');
-    const [importancia, setImportancia] = useState<NivelImportancia>((subHabito ? subHabito.importancia : habito?.importancia) || 'Media');
+    /* Estado local para edición (extracto a useFormularioHabito) */
+    const form = useFormularioHabitoModal({habito, subHabito, esModoSubHabito, esHabitoEspecialAyuno});
+    const {nombre, setNombre, descripcion, setDescripcion, icono, setIcono, colorIcono, setColorIcono, importancia, setImportancia, frecuencia, setFrecuencia, ventanaOportunidad, setVentanaOportunidad, dependencias, setDependencias, grupoEjecucion, setGrupoEjecucion, errores, validarFormulario, construirDatosSubHabito, construirDatosHabito} = form;
+
     /* [28-08-2026] Dificultad del plugin EXP: misma escala que la importancia.
      * Se lee del store (dificultades[String(id)]) y se asigna automáticamente al
      * abrir la edición de un hábito sin dificultad. */
     const dificultades = useExpStore(s => s.dificultades);
     const asignarDificultad = useExpStore(s => s.asignarDificultad);
     const [dificultad, setDificultad] = useState<Dificultad>('Media');
-    const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>((subHabito ? subHabito.frecuencia : habito?.frecuencia) || FRECUENCIA_POR_DEFECTO);
-    const [ventanaOportunidad, setVentanaOportunidad] = useState<VentanaOportunidad | undefined>(subHabito ? subHabito.ventanaOportunidad : habito?.ventanaOportunidad);
-    const [dependencias, setDependencias] = useState<import('../../types/dashboard').ReferenciaDependencia[]>((subHabito ? subHabito.dependencias : habito?.dependencias) || []);
-    const [grupoEjecucion, setGrupoEjecucion] = useState<string | null>((subHabito ? undefined : habito?.grupoEjecucion) || null);
-    const [errores, setErrores] = useState<{nombre?: string}>({});
 
     /* Hook para panel de chat (solo en modo hábito) */
     const {chatVisible, toggleChat, tieneMensajesSinLeer, participantesChat, mostrarChatColumna} = usePanelChat({
@@ -274,41 +195,7 @@ export function useModalHabito({
         return tareasHabito;
     }, [habito, tareas]);
 
-    /* Sincronizar estado cuando cambia el hábito o subhábito */
-    useEffect(() => {
-        if (subHabito) {
-            setNombre(subHabito.nombre);
-            setDescripcion('');
-            setIcono('check-circle');
-            setColorIcono('#888888');
-            setImportancia(subHabito.importancia);
-            setFrecuencia(subHabito.frecuencia || FRECUENCIA_POR_DEFECTO);
-            setVentanaOportunidad(subHabito.ventanaOportunidad);
-            setDependencias(subHabito.dependencias || []);
-            setGrupoEjecucion(null);
-        } else if (habito) {
-            setNombre(habito.nombre);
-            setDescripcion(habito.descripcion || '');
-            setIcono(habito.icono || 'check-circle');
-            setColorIcono(habito.colorIcono || '#888888');
-            setImportancia(habito.importancia);
-            setFrecuencia(habito.frecuencia || FRECUENCIA_POR_DEFECTO);
-            setVentanaOportunidad(habito.ventanaOportunidad);
-            setDependencias(habito.dependencias || []);
-            setGrupoEjecucion(habito.grupoEjecucion || null);
-        } else {
-            setNombre('');
-            setDescripcion('');
-            setIcono('check-circle');
-            setColorIcono('#888888');
-            setImportancia('Media');
-            setFrecuencia(FRECUENCIA_POR_DEFECTO);
-            setVentanaOportunidad(undefined);
-            setDependencias([]);
-            setGrupoEjecucion(null);
-        }
-        setErrores({});
-    }, [habito?.id, subHabito?.id, estaAbierto]);
+    /* Sincronizar estado cuando cambia el hábito o subhábito (vive en useFormularioHabito) */
 
     /* Manejador de cambio de estado del hábito o subhábito */
     const manejarCambioEstado = useCallback(
@@ -336,47 +223,17 @@ export function useModalHabito({
         [subHabito, habitoPadre, habito, estadoHoy, toggleSubHabito, posponerSubHabito, toggleHabito, posponerHabito]
     );
 
-    /* Validar formulario (mínimo 2 chars para subhábitos, 3 para hábitos) */
-    const validarFormulario = useCallback((): boolean => {
-        const nuevosErrores: {nombre?: string} = {};
-        const minLength = esModoSubHabito ? 2 : 3;
-
-        if (!nombre.trim()) {
-            nuevosErrores.nombre = 'El nombre es obligatorio';
-        } else if (nombre.trim().length < minLength) {
-            nuevosErrores.nombre = `El nombre debe tener al menos ${minLength} caracteres`;
-        }
-
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
-    }, [nombre, esModoSubHabito]);
+    /* Validar formulario (vive en useFormularioHabito) */
+    const validarFormularioMemo = validarFormulario;
 
     /* Guardar hábito o subhábito */
     const manejarGuardar = useCallback(() => {
         if (!validarFormulario()) return;
 
         if (esModoSubHabito && subHabito && habitoPadre) {
-            editarSubHabito(habitoPadre.id, subHabito.id, {
-                nombre: nombre.trim(),
-                importancia,
-                frecuencia,
-                ventanaOportunidad,
-                dependencias
-            });
+            editarSubHabito(habitoPadre.id, subHabito.id, construirDatosSubHabito());
         } else {
-            const nombreSeguro = esHabitoEspecialAyuno ? 'Ayuno' : nombre.trim();
-            onGuardar({
-                nombre: nombreSeguro,
-                importancia,
-                tags: [],
-                frecuencia,
-                descripcion: descripcion.trim() || undefined,
-                icono,
-                colorIcono,
-                ventanaOportunidad,
-                dependencias,
-                grupoEjecucion
-            });
+            onGuardar(construirDatosHabito());
         }
         /* [28-08-2026] Persistir la dificultad (manual o auto-estimada) en el
          * store EXP al guardar la edición de un hábito con id. Clave
@@ -386,7 +243,7 @@ export function useModalHabito({
             asignarDificultad(habito.id, dificultad);
         }
         onCerrar();
-    }, [esModoSubHabito, subHabito, habitoPadre, habito, nombre, importancia, dificultad, frecuencia, ventanaOportunidad, descripcion, icono, colorIcono, grupoEjecucion, dependencias, validarFormulario, editarSubHabito, onGuardar, onCerrar, esHabitoEspecialAyuno, asignarDificultad]);
+    }, [esModoSubHabito, subHabito, habitoPadre, habito, dificultad, validarFormulario, construirDatosSubHabito, construirDatosHabito, editarSubHabito, onGuardar, onCerrar, asignarDificultad]);
 
     /* Auto-guardado: al cerrar el modal, guardar si hay nombre válido */
     const manejarCerrarConGuardado = useCallback(() => {

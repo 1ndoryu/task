@@ -12,6 +12,8 @@
 
 import {generarVisibilidadDefecto, generarAlturasDefecto} from '../config/registroPaneles';
 import {generarOrdenPanelesDefecto, generarConfigLayoutDefecto} from './layoutFactory';
+import {sanitizarAltura} from './alturasPanel';
+import {normalizarPosiciones} from './normalizarLayout';
 import type {ConfiguracionLayout} from '../types/paneles';
 
 /*
@@ -22,6 +24,7 @@ import type {ConfiguracionLayout} from '../types/paneles';
  */
 export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPaneles: string[]): ConfiguracionLayout {
     let config = {...valorActual};
+    let cambio = false;
     const ordenDefecto = generarOrdenPanelesDefecto();
     const configDefecto = generarConfigLayoutDefecto();
 
@@ -31,6 +34,7 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
             ...config,
             ordenPaneles: ordenDefecto[config.modoColumnas]
         };
+        cambio = true;
     }
 
     /* Verificar que todos los paneles del registro existan en el orden */
@@ -48,6 +52,7 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
             ...config,
             ordenPaneles: [...config.ordenPaneles, ...panelesNuevos]
         };
+        cambio = true;
     }
 
     /* Migrar visibilidad para paneles nuevos */
@@ -56,6 +61,7 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
     todosLosPaneles.forEach(id => {
         if (visibilidadActualizada[id] === undefined) {
             visibilidadActualizada[id] = visibilidadDefecto[id] ?? false;
+            cambio = true;
         }
     });
     config = {...config, visibilidad: visibilidadActualizada};
@@ -64,11 +70,22 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
     const alturasDefecto = generarAlturasDefecto();
     if (!config.alturas) {
         config = {...config, alturas: alturasDefecto};
+        cambio = true;
     } else {
         const alturasActualizadas = {...config.alturas};
         todosLosPaneles.forEach(id => {
             if (alturasActualizadas[id] === undefined) {
                 alturasActualizadas[id] = alturasDefecto[id] ?? 'auto';
+                cambio = true;
+            } else {
+                /* [30-08-2026] Sanear alturas corruptas persistidas (p. ej.
+                 * "2px" por un resize previo): subir al mínimo 120px evita que
+                 * un panel quede colapsado a una franja invisible. */
+                const alturaSegura = sanitizarAltura(alturasActualizadas[id]);
+                if (alturaSegura !== alturasActualizadas[id]) {
+                    alturasActualizadas[id] = alturaSegura;
+                    cambio = true;
+                }
             }
         });
         config = {...config, alturas: alturasActualizadas};
@@ -80,6 +97,7 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
             ...config,
             anchoTotal: configDefecto.anchoTotal
         };
+        cambio = true;
     }
 
     /* [300A-1] Migrar tipoLayout: configs viejas sin el campo van a 'grid' (default histórico) */
@@ -88,10 +106,78 @@ export function migrarConfiguracion(valorActual: ConfiguracionLayout, todosLosPa
             ...config,
             tipoLayout: 'grid'
         };
+        cambio = true;
     }
 
-    return config;
+    /* [30-08-2026] Si nada cambió, devolver la misma referencia para que el
+     * consumidor pueda detectar "sin migración pendiente" y no re-persistir
+     * (evita loops de escritura en localStorage). */
+    return cambio ? config : valorActual;
 }
+
+/*
+ * Reordenamientos puros: reciben el estado previo y devuelven el nuevo orden.
+ * Están separadas del hook para que la lógica sea testeable y el archivo del
+ * hook quede dentro del límite de líneas.
+ */
+
+export function reordenarPanelEn(config: ConfiguracionLayout, ordenDefecto: Record<number, OrdenPanelMini[]>, panelId: string, nuevaColumna: 1 | 2 | 3, nuevaPosicion: number): ConfiguracionLayout {
+    const paneles = [...(config.ordenPaneles || [])];
+    const indicePanel = paneles.findIndex(p => p.id === panelId);
+    if (indicePanel === -1) return config;
+
+    const panelActual = paneles[indicePanel];
+    paneles.splice(indicePanel, 1);
+
+    paneles
+        .filter(p => p.columna === panelActual.columna && p.posicion > panelActual.posicion)
+        .forEach(p => { p.posicion--; });
+    paneles
+        .filter(p => p.columna === nuevaColumna && p.posicion >= nuevaPosicion)
+        .forEach(p => { p.posicion++; });
+
+    paneles.push({id: panelId, columna: nuevaColumna, posicion: nuevaPosicion});
+    return {...config, ordenPaneles: normalizarPosiciones(paneles)};
+}
+
+export function moverPanelEn(config: ConfiguracionLayout, ordenDefecto: Record<number, OrdenPanelMini[]>, panelId: string, delta: number): ConfiguracionLayout {
+    const paneles = [...(config.ordenPaneles || [])];
+    const panel = paneles.find(p => p.id === panelId);
+    if (!panel) return config;
+
+    const columna = panel.columna;
+    const posiciones = paneles.filter(p => p.columna === columna).map(p => p.posicion);
+    const maxPosicion = Math.max(...posiciones);
+    const objetivo = panel.posicion + delta;
+    const destino = paneles.find(p => p.columna === columna && p.posicion === objetivo);
+
+    if (!destino || objetivo < 0 || objetivo > maxPosicion) return config;
+
+    const nuevasPosiciones = paneles.map(p => {
+        if (p.id === panelId) return {...p, posicion: objetivo};
+        if (p.id === destino.id) return {...p, posicion: panel.posicion};
+        return p;
+    });
+    return {...config, ordenPaneles: nuevasPosiciones};
+}
+
+export function moverPanelAColumnaEn(config: ConfiguracionLayout, ordenDefecto: Record<number, OrdenPanelMini[]>, panelId: string, columnaDestino: 1 | 2 | 3): ConfiguracionLayout {
+    const paneles = [...(config.ordenPaneles || [])];
+    const panel = paneles.find(p => p.id === panelId);
+    if (!panel || panel.columna === columnaDestino) return config;
+
+    const panelsEnDestino = paneles.filter(p => p.columna === columnaDestino);
+    const nuevaPosicion = panelsEnDestino.length > 0 ? Math.max(...panelsEnDestino.map(p => p.posicion)) + 1 : 0;
+
+    const nuevasPosiciones = paneles.map(p => {
+        if (p.id === panelId) return {...p, columna: columnaDestino, posicion: nuevaPosicion};
+        if (p.columna === panel.columna && p.posicion > panel.posicion) return {...p, posicion: p.posicion - 1};
+        return p;
+    });
+    return {...config, ordenPaneles: normalizarPosiciones(nuevasPosiciones)};
+}
+
+type OrdenPanelMini = {id: string; columna: 1 | 2 | 3; posicion: number};
 
 export {normalizarPosiciones} from './normalizarLayout';
 export {crearDuplicadoPanel, crearDivisionPanel, eliminarPanelDuplicado} from './duplicadosPanel';
