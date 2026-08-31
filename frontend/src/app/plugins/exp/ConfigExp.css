@@ -3,7 +3,8 @@
  * Estilos de la configuración del plugin EXP. Sigue el lenguaje visual de la
  * configuración de déficit calórico (secciones con título/nota, preview, pie
  * con acciones) usando variables del sistema; el toggle usa el componente
- * compartido ToggleSwitch (toggleSlider) y los ranges se estilizan custom.
+ * compartido ToggleSwitch (toggleSlider) y los ranges el componente
+ * compartido Range (track fino con thumb cuadrado).
  */
 
 .configExp {
@@ -75,42 +76,7 @@
     padding-top: var(--dashboard-espacioMini, 3px);
 }
 
-/* Ranges custom — track fino con thumb circular en el acento del sistema. */
-.configExpRange {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 4px;
-    border-radius: 0;
-    background: var(--dashboard-bordeSutil);
-    outline: none;
-    cursor: pointer;
-}
-
-.configExpRange::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 0;
-    background: var(--dashboard-acento);
-    border: 2px solid var(--dashboard-fondoSecundario);
-    box-shadow: none;
-}
-
-.configExpRange::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 0;
-    background: var(--dashboard-acento);
-    border: 2px solid var(--dashboard-fondoSecundario);
-    box-shadow: none;
-}
-
-.configExpRange:focus-visible {
-    outline: 2px solid var(--dashboard-acento);
-    outline-offset: 1px;
-}
+/* Ranges: usa el componente compartido Range (range.css). */
 
 .configExpMultiplicadores {
     display: flex;

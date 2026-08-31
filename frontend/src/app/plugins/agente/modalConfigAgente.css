@@ -199,7 +199,7 @@
 }
 
 .modalConfigAgenteInput,
-.modalConfigAgenteCampo input,
+.modalConfigAgenteCampo input:not([type="range"]),
 .modalConfigAgenteCampo select,
 .modalConfigAgenteCampo textarea {
     width: 100%;
@@ -215,7 +215,7 @@
 }
 
 .modalConfigAgenteInput:focus,
-.modalConfigAgenteCampo input:focus,
+.modalConfigAgenteCampo input:not([type="range"]):focus,
 .modalConfigAgenteCampo select:focus,
 .modalConfigAgenteCampo textarea:focus {
     outline: none;
@@ -232,11 +232,7 @@
     line-height: 1.4;
 }
 
-.modalConfigAgenteCampo input[type="range"] {
-    accent-color: var(--dashboard-acento);
-    padding: 0;
-}
-
+/* Ranges: usa el componente compartido Range (range.css). */
 .modalConfigAgenteSeccion code {
     color: var(--dashboard-textoSecundario);
     font-family: var(--dashboard-fuenteMonoespaciada);
@@ -268,14 +264,22 @@
     flex-wrap: wrap;
 }
 
+/* El Checkbox compartido se muestra como control compacto en la fila del skill:
+ * el checkboxContenedor por defecto es flex-column width:100%; aquí se limita
+ * al control para no romper el layout horizontal de la fila. */
 .modalConfigAgenteSkillActiva {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
 }
 
-.modalConfigAgenteSkillActiva input {
-    accent-color: var(--dashboard-acento);
+.modalConfigAgenteSkillActiva .checkboxContenedor {
+    width: auto;
+    gap: 0;
+}
+
+.modalConfigAgenteSkillActiva .checkboxLabel {
+    gap: 0;
 }
 
 .modalConfigAgenteSkillTexto {

@@ -7,6 +7,7 @@
  * (recordatorios, búsqueda web). Todo persistido en iaStore (no sensible). */
 
 import {Checkbox, Input, Select, Textarea} from '../../../ui';
+import {Range} from '../../../shared/Range';
 import {useIAStore} from '../../../../stores/iaStore';
 import {MODELOS_IA, MODELO_FLASH_POR_PROVEEDOR, PROVEEDORES_IA} from '../../../../services/iaService';
 import {esUsuarioAdmin} from '../../../../utils/dashboardRuntime';
@@ -140,14 +141,13 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
                     <span className="descripcionOpcionConfig">Menor = más preciso y determinista; mayor = más creativo.</span>
                 </div>
             </div>
-            <input
-                type="range"
+            <Range
                 min={0}
                 max={1}
                 step={0.1}
-                className="input input--range"
                 value={temperatura}
-                onChange={e => setTemperatura(Number(e.target.value))}
+                onChange={setTemperatura}
+                aria-label="Temperatura"
             />
             <div className="itemOpcionConfig">
                 <div className="detallesOpcionConfig">

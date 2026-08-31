@@ -5,6 +5,8 @@ import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, La
 import {useAgenteStore} from './store';
 import type {ConfigAgente, SkillAgente} from './service';
 import {Boton} from '../../components/ui/Boton';
+import {Range} from '../../components/shared/Range';
+import {Checkbox} from '../../components/ui/Checkbox';
 import {AvisoModoAutonomo, SelectorModo, SkillFila} from './componentes';
 import {useGestionSkills} from './useGestionSkills';
 import './modalConfigAgente.css';
@@ -59,10 +61,10 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Gauge size={12}/> Respuesta y límites</h3>
-                        <label className="modalConfigAgenteCampo">Temperatura <output>{draft.temperatura.toFixed(1)}</output><input type="range" min="0" max="2" step="0.1" value={draft.temperatura} onChange={e => actualizar('temperatura', clamped(Number(e.target.value), 0, 2))}/></label>
-                        <label className="modalConfigAgenteCampo">Máximo de tokens <output>{draft.maxTokens}</output><input type="range" min="64" max="4096" step="64" value={draft.maxTokens} onChange={e => actualizar('maxTokens', clamped(Number(e.target.value), 64, 4096))}/></label>
-                        <label className="modalConfigAgenteCampo">Turnos máximos <output>{draft.maxTurns}</output><input type="range" min="1" max="10" step="1" value={draft.maxTurns} onChange={e => actualizar('maxTurns', clamped(Number(e.target.value), 1, 10))}/></label>
-                        <label className="modalConfigAgenteCampo">Timeout por herramienta (segundos) <output>{draft.timeoutToolSecs}</output><input type="range" min="1" max="15" step="1" value={draft.timeoutToolSecs} onChange={e => actualizar('timeoutToolSecs', clamped(Number(e.target.value), 1, 15))}/></label>
+                        <label className="modalConfigAgenteCampo">Temperatura <output>{draft.temperatura.toFixed(1)}</output><Range min={0} max={2} step={0.1} value={draft.temperatura} onChange={v => actualizar('temperatura', clamped(v, 0, 2))} aria-label="Temperatura" /></label>
+                        <label className="modalConfigAgenteCampo">Máximo de tokens <output>{draft.maxTokens}</output><Range min={64} max={4096} step={64} value={draft.maxTokens} onChange={v => actualizar('maxTokens', clamped(v, 64, 4096))} aria-label="Máximo de tokens" /></label>
+                        <label className="modalConfigAgenteCampo">Turnos máximos <output>{draft.maxTurns}</output><Range min={1} max={10} step={1} value={draft.maxTurns} onChange={v => actualizar('maxTurns', clamped(v, 1, 10))} aria-label="Turnos máximos" /></label>
+                        <label className="modalConfigAgenteCampo">Timeout por herramienta (segundos) <output>{draft.timeoutToolSecs}</output><Range min={1} max={15} step={1} value={draft.timeoutToolSecs} onChange={v => actualizar('timeoutToolSecs', clamped(v, 1, 15))} aria-label="Timeout por herramienta" /></label>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Sparkles size={12}/> Comportamiento</h3>
@@ -91,7 +93,14 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                             ['permitirRecordatorios', 'Permitir recordatorios'],
                             ['incluirMemoria', 'Incluir memoria persistente'],
                             ['incluirSkills', 'Incluir skills activas'],
-                        ] as const).map(([campo, etiqueta]) => <label key={campo} className="modalConfigAgenteCheck"><input type="checkbox" checked={draft[campo]} onChange={e => actualizar(campo, e.target.checked)}/>{etiqueta}</label>)}
+                        ] as const).map(([campo, etiqueta]) => (
+                            <Checkbox
+                                key={campo}
+                                etiqueta={etiqueta}
+                                checked={draft[campo]}
+                                onChange={e => actualizar(campo, e.target.checked)}
+                            />
+                        ))}
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><FileText size={12}/> Prompt de sistema</h3>
@@ -112,7 +121,7 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                                 {[32768, 65536, 128000, 256000, 512000].map(v => <option key={v} value={v}>{v.toLocaleString('es')} tokens</option>)}
                             </select>
                         </label>
-                        <label className="modalConfigAgenteCampo">Umbral de compactación <output>{(draft.umbralCompactacion * 100).toFixed(0)}%</output><input type="range" min="0.3" max="0.85" step="0.05" value={draft.umbralCompactacion} onChange={e => actualizar('umbralCompactacion', clamped(Number(e.target.value), 0.1, 0.9))}/></label>
+                        <label className="modalConfigAgenteCampo">Umbral de compactación <output>{(draft.umbralCompactacion * 100).toFixed(0)}%</output><Range min={0.3} max={0.85} step={0.05} value={draft.umbralCompactacion} onChange={v => actualizar('umbralCompactacion', clamped(v, 0.1, 0.9))} aria-label="Umbral de compactación" /></label>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Brain size={12}/> Skills</h3>

@@ -8,7 +8,7 @@
     color: var(--dashboard-textoNormal);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
-    padding: 4px 8px;
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSmMd);
     font-size: var(--dashboard-tamanoMovilPequeno);
     outline: none;
     cursor: pointer;

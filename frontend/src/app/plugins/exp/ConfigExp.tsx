@@ -11,7 +11,7 @@
  */
 
 import {useExpStore} from './store';
-import {ToggleSwitch} from '../../components/shared/ToggleSwitch';
+import {ToggleSwitch, Range} from '../../components/shared';
 import {Boton} from '../../components/ui/Boton';
 
 function FilaRange({etiqueta, ayuda, min, max, step, valor, onChange}: {
@@ -27,14 +27,13 @@ function FilaRange({etiqueta, ayuda, min, max, step, valor, onChange}: {
         <label className="configExpCampo">
             <span className="configExpLabel">{etiqueta}</span>
             {ayuda && <span className="configExpAyuda">{ayuda}</span>}
-            <input
-                type="range"
+            <Range
                 min={min}
                 max={max}
                 step={step}
-                className="configExpRange"
                 value={valor}
-                onChange={e => onChange(Number(e.target.value))}
+                onChange={onChange}
+                aria-label={etiqueta}
             />
         </label>
     );

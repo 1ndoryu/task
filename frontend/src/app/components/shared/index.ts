@@ -7,6 +7,7 @@ export * from './Modal';
 export * from './SelectorNivel';
 export * from './SeccionPanel';
 export * from './ToggleSwitch';
+export * from './Range';
 export * from './SelectorDias';
 export * from './DashboardPanel';
 export * from './BadgeInfo';

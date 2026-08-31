@@ -1,0 +1,55 @@
+/*
+ * RANGE
+ * Estilos del componente compartido Range (input type="range").
+ * Track fino con thumb cuadrado en el acento del sistema (bordes 0 por
+ * monocromo). Unifica las 3 implementaciones previas en una sola:
+ * - configExpRange (custom, el patrón de referencia)
+ * - range nativo del agente (accent-color + heredaba border/fondo)
+ * - .input.input--range del chat IA (heredaba el padding de un campo de texto)
+ */
+
+.range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 0;
+    background: var(--dashboard-bordeSutil);
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin: 2px 0;
+    box-sizing: border-box;
+    display: block;
+}
+
+.range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 0;
+    background: var(--dashboard-acento);
+    border: 2px solid var(--dashboard-fondoSecundario);
+    box-shadow: none;
+}
+
+.range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 0;
+    background: var(--dashboard-acento);
+    border: 2px solid var(--dashboard-fondoSecundario);
+    box-shadow: none;
+}
+
+.range:focus-visible {
+    outline: 2px solid var(--dashboard-acento);
+    outline-offset: 1px;
+}
+
+.range:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

@@ -8,6 +8,7 @@
 
 import {AlertTriangle, Check, Loader2, Pencil, Trash2, X} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
+import {Checkbox} from '../../components/ui/Checkbox';
 /* Burbujas de mensaje y tarjetas de tool viven en mensajes.tsx; esto re-exporta
  * sus tipos/componentes para no romper los imports de los call-sites. */
 export type {HerramientaVisual, ContextoVisual} from './mensajes';
@@ -247,9 +248,11 @@ export function SkillFila({skill, onActivar, onEditar, onEliminar}: SkillFilaPro
     return (
         <div className="modalConfigAgenteSkill">
             {onActivar && (
-                <label className="modalConfigAgenteSkillActiva" title={skill.activa ? 'Desactivar' : 'Activar'}>
-                    <input type="checkbox" checked={skill.activa} onChange={() => onActivar(skill)} />
-                </label>
+                <Checkbox
+                    checked={skill.activa}
+                    onChange={() => onActivar(skill)}
+                    aria-label={skill.activa ? 'Desactivar' : 'Activar'}
+                />
             )}
             <div className="modalConfigAgenteSkillTexto">
                 <span className="modalConfigAgenteSkillNombre">{skill.nombre}</span>

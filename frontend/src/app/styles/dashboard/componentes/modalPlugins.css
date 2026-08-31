@@ -158,10 +158,9 @@
 }
 
 .configDeficitInput {
-    height: 32px;
     width: 100%;
-    padding: 0 8px;
     box-sizing: border-box;
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSmMd);
     border-radius: var(--dashboard-radioSm);
     border: 1px solid var(--dashboard-bordePrincipal);
     background: var(--dashboard-fondoTerciario);
