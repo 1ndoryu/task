@@ -7,6 +7,7 @@
 
 import type {ConfiguracionLayout, ModoColumnas, OrdenPanel} from '../types/paneles';
 import {normalizarPosiciones} from './normalizarLayout';
+import {sanitizarAltura} from './alturasPanel';
 
 /* [263A-3] Crear un panel duplicado con ID sufijo (e.g., scratchpad-1).
  * Se ubica en la misma columna que el original, justo después.
@@ -44,7 +45,7 @@ export function crearDuplicadoPanel(
         ...prev,
         ordenPaneles: normalizarPosiciones(panelesActualizados),
         visibilidad: {...(prev.visibilidad || {}), [nuevoId]: true},
-        alturas: {...(prev.alturas || {}), [nuevoId]: prev.alturas?.[baseId] || 'auto'}
+        alturas: {...(prev.alturas || {}), [nuevoId]: sanitizarAltura(prev.alturas?.[baseId])}
     };
 }
 
@@ -119,7 +120,7 @@ export function crearDivisionPanel(prev: ConfiguracionLayout, baseId: string): C
         ...prev,
         ordenPaneles: normalizarPosiciones(conOriginalDividido),
         visibilidad: {...visibilidad, [nuevoId]: true},
-        alturas: {...alturas, [nuevoId]: prev.alturas?.[baseId] || 'auto'}
+        alturas: {...alturas, [nuevoId]: sanitizarAltura(prev.alturas?.[baseId])}
     };
 }
 

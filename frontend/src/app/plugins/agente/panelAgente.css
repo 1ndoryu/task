@@ -166,42 +166,14 @@
     margin-top: var(--dashboard-espacioSm, 6px);
 }
 
-/* Tareas programadas (sección colapsable del panel) */
-.panelAgenteTareas {
-    flex-shrink: 0;
-    border-top: 1px solid var(--dashboard-bordeSutil);
-}
-
-.panelAgenteTareasCabecera {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm, 6px);
-    width: 100%;
-    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 12px);
-    border: none;
-    background: transparent;
-    color: var(--dashboard-textoSecundario, #666);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.panelAgenteTareasCabecera:hover {
-    color: var(--dashboard-textoActivo);
-    background: var(--dashboard-superposicionSutil);
-}
-
-.panelAgenteTareasCabecera span {
-    flex: 1;
-    text-align: left;
-}
-
+/* Tareas programadas (contenido del modal reutilizable del design system).
+ * El modal en sí usa el componente Modal (modalOverlay/modalContenedor), que no
+ * matchea el override [class*="panel"] de dashboardPanelView.css. */
 .panelAgenteTareasContenido {
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioSm, 6px);
-    padding: 0 var(--dashboard-espacioMd, 12px) var(--dashboard-espacioSm, 6px);
-    max-height: 180px;
+    padding: var(--dashboard-espacioLg);
     overflow-y: auto;
 }
 

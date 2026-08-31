@@ -1,5 +1,5 @@
 import {useMemo, useCallback, useEffect, useRef} from 'react';
-import {devLog, devWarn} from '../../utils/devLog';
+import {devWarn} from '../../utils/devLog';
 import type {Habito, Tarea, Proyecto} from '../../types/dashboard';
 import type {DashboardData} from '../useDashboardApi';
 import {useHabitosStore, useHabitosInicializado} from '../../stores/habitosStore';

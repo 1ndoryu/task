@@ -9,9 +9,10 @@
  */
 
 import {useEffect, useRef, useState} from 'react';
-import {ArrowUp, Bot, ChevronDown, ChevronUp, Clock, Loader2, Plus, Settings} from 'lucide-react';
+import {ArrowUp, Bot, Clock, Loader2, Plus, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../../components/dashboard';
 import {Boton, Textarea} from '../../components/ui';
+import {Modal} from '../../components/shared/Modal';
 import {useAgenteStore, useTabActivaAgente} from './store';
 import {ModalConfigAgente} from './ModalConfigAgente';
 import {
@@ -168,6 +169,13 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                         <Boton
                             variante="badge"
                             soloIcono
+                            onClick={() => setTareasAbiertas(true)}
+                            icono={<Clock size={12} />}
+                            title="Tareas programadas"
+                        />
+                        <Boton
+                            variante="badge"
+                            soloIcono
                             onClick={() => setConfigAbierta(true)}
                             icono={<Settings size={12} />}
                             title="Configurar agente"
@@ -248,84 +256,77 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                 })}
             </div>
 
-            {/* Tareas programadas (sección colapsable) */}
-            <div className="panelAgenteTareas">
-                <button
-                    type="button"
-                    className="panelAgenteTareasCabecera"
-                    onClick={() => setTareasAbiertas(v => !v)}
-                >
-                    <Clock size={11} />
-                    <span>Tareas programadas ({tareasProgramadas.length})</span>
-                    {tareasAbiertas ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                </button>
-                {tareasAbiertas && (
-                    <div className="panelAgenteTareasContenido">
-                        {errorTareas && <div className="panelIAError">{errorTareas}</div>}
-                        {cargandoTareas && (
-                            <div className="panelAgenteTareasVacio">
-                                <Loader2 size={12} className="animacionGirar" /> Cargando...
-                            </div>
-                        )}
-                        {!cargandoTareas && tareasProgramadas.length === 0 && !errorTareas && (
-                            <div className="panelAgenteTareasVacio">Sin tareas programadas todavía.</div>
-                        )}
-                        {tareasProgramadas.map(tarea => (
-                            <TarjetaTareaProgramada
-                                key={tarea.id}
-                                tarea={tarea}
-                                onEliminar={id => void eliminarTarea(id)}
-                            />
-                        ))}
-                        <form className="panelAgenteTareaForm" onSubmit={manejarCrearTarea}>
+            {/* Tareas programadas (modal reutilizable del design system) */}
+            <Modal
+                estaAbierto={tareasAbiertas}
+                onCerrar={() => setTareasAbiertas(false)}
+                titulo={`Tareas programadas (${tareasProgramadas.length})`}
+            >
+                <div className="panelAgenteTareasContenido">
+                    {errorTareas && <div className="panelIAError">{errorTareas}</div>}
+                    {cargandoTareas && (
+                        <div className="panelAgenteTareasVacio">
+                            <Loader2 size={12} className="animacionGirar" /> Cargando...
+                        </div>
+                    )}
+                    {!cargandoTareas && tareasProgramadas.length === 0 && !errorTareas && (
+                        <div className="panelAgenteTareasVacio">Sin tareas programadas todavía.</div>
+                    )}
+                    {tareasProgramadas.map(tarea => (
+                        <TarjetaTareaProgramada
+                            key={tarea.id}
+                            tarea={tarea}
+                            onEliminar={id => void eliminarTarea(id)}
+                        />
+                    ))}
+                    <form className="panelAgenteTareaForm" onSubmit={manejarCrearTarea}>
+                        <input
+                            className="panelAgenteTareaInput"
+                            placeholder="Nombre"
+                            value={tareaNombre}
+                            maxLength={255}
+                            required
+                            onChange={e => setTareaNombre(e.target.value)}
+                        />
+                        <textarea
+                            className="panelAgenteTareaInput panelAgenteTareaPrompt"
+                            placeholder="Instrucciones para el agente"
+                            value={tareaPrompt}
+                            maxLength={4000}
+                            required
+                            onChange={e => setTareaPrompt(e.target.value)}
+                        />
+                        <select
+                            className="panelAgenteTareaInput"
+                            value={tareaTipo}
+                            onChange={e => setTareaTipo(e.target.value as 'una_vez' | 'recurrente')}
+                        >
+                            <option value="una_vez">Una vez</option>
+                            <option value="recurrente">Recurrente</option>
+                        </select>
+                        {tareaTipo === 'recurrente' ? (
                             <input
                                 className="panelAgenteTareaInput"
-                                placeholder="Nombre"
-                                value={tareaNombre}
-                                maxLength={255}
+                                placeholder="diario | cada30min | cada2h | cada3d"
+                                value={tareaCron}
                                 required
-                                onChange={e => setTareaNombre(e.target.value)}
+                                onChange={e => setTareaCron(e.target.value)}
                             />
-                            <textarea
-                                className="panelAgenteTareaInput panelAgenteTareaPrompt"
-                                placeholder="Instrucciones para el agente"
-                                value={tareaPrompt}
-                                maxLength={4000}
-                                required
-                                onChange={e => setTareaPrompt(e.target.value)}
-                            />
-                            <select
+                        ) : (
+                            <input
                                 className="panelAgenteTareaInput"
-                                value={tareaTipo}
-                                onChange={e => setTareaTipo(e.target.value as 'una_vez' | 'recurrente')}
-                            >
-                                <option value="una_vez">Una vez</option>
-                                <option value="recurrente">Recurrente</option>
-                            </select>
-                            {tareaTipo === 'recurrente' ? (
-                                <input
-                                    className="panelAgenteTareaInput"
-                                    placeholder="diario | cada30min | cada2h | cada3d"
-                                    value={tareaCron}
-                                    required
-                                    onChange={e => setTareaCron(e.target.value)}
-                                />
-                            ) : (
-                                <input
-                                    className="panelAgenteTareaInput"
-                                    type="datetime-local"
-                                    value={tareaEjecutarEn}
-                                    onChange={e => setTareaEjecutarEn(e.target.value)}
-                                />
-                            )}
-                            <Boton type="submit" variante="primario" tamano="pequeño" disabled={tareaGuardando}>
-                                {tareaGuardando ? <Loader2 size={11} className="animacionGirar" /> : <Plus size={11} />}
-                                Programar
-                            </Boton>
-                        </form>
-                    </div>
-                )}
-            </div>
+                                type="datetime-local"
+                                value={tareaEjecutarEn}
+                                onChange={e => setTareaEjecutarEn(e.target.value)}
+                            />
+                        )}
+                        <Boton type="submit" variante="primario" tamano="pequeño" disabled={tareaGuardando}>
+                            {tareaGuardando ? <Loader2 size={11} className="animacionGirar" /> : <Plus size={11} />}
+                            Programar
+                        </Boton>
+                    </form>
+                </div>
+            </Modal>
 
             {/* Input */}
             <div className="panelIAInput">

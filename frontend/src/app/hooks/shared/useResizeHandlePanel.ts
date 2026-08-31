@@ -6,9 +6,7 @@
 
 import {useState, useRef, useEffect, useCallback} from 'react';
 import type {PanelId} from '../useConfiguracionLayout';
-
-/* Límite mínimo de altura en píxeles */
-const ALTURA_MINIMA = 120;
+import {ALTURA_MINIMA, sanitizarAltura} from '../../utils/alturasPanel';
 
 /* Margen de tolerancia para activar el anclaje a auto (snap) */
 const MARGEN_ANCLAJE = 20;
@@ -34,7 +32,11 @@ interface UseResizeHandlePanelReturn {
 export function useResizeHandlePanel({panelId, alturaInicial, onCambiarAltura}: UseResizeHandlePanelParams): UseResizeHandlePanelReturn {
     const contenedorRef = useRef<HTMLDivElement>(null);
     const [isResizing, setIsResizing] = useState(false);
-    const [alturaLocal, setAlturaLocal] = useState<string>(alturaInicial);
+
+    /* [30-08-2026] Sanitizar la altura inicial: un valor corrupto persistido
+     * (p. ej. "2px" por un resize previo) colapsaba el panel a una franja
+     * invisible. Aquí se sube al mínimo de una vez. */
+    const [alturaLocal, setAlturaLocal] = useState<string>(() => sanitizarAltura(alturaInicial));
 
     /* Determinar si está en modo auto */
     const esAuto = alturaLocal === 'auto';
@@ -42,7 +44,7 @@ export function useResizeHandlePanel({panelId, alturaInicial, onCambiarAltura}: 
     /* Sincronizar con altura externa cuando no se está redimensionando */
     useEffect(() => {
         if (!isResizing) {
-            setAlturaLocal(alturaInicial);
+            setAlturaLocal(sanitizarAltura(alturaInicial));
         }
     }, [alturaInicial, isResizing]);
 
@@ -112,7 +114,7 @@ export function useResizeHandlePanel({panelId, alturaInicial, onCambiarAltura}: 
     const handleDoubleClick = useCallback(() => {
         if (esAuto) {
             const alturaActual = contenedorRef.current?.getBoundingClientRect().height || 300;
-            onCambiarAltura(panelId, `${Math.round(alturaActual)}px`);
+            onCambiarAltura(panelId, sanitizarAltura(`${Math.round(alturaActual)}px`));
         } else {
             onCambiarAltura(panelId, 'auto');
         }

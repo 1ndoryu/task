@@ -1,21 +1,27 @@
 /*
  * generadoresPropsPanel.ts
- * Funciones generadoras de props para cada tipo de panel del Dashboard
+ * Funciones generadoras de props para los paneles del Dashboard que requieren
+ * contexto amplio del dashboard (ejecución, foco prioritario, proyectos).
  *
- * Son funciones puras que reciben el contexto y parámetros de renderizado,
- * y devuelven el objeto de props para el componente del panel.
- * Extraídas de useDashboardGrid para respetar límite de líneas.
+ * Los generadores ligeros viven en generadoresPropsLigeros.ts (mismo patrón
+ * puro, extraídos aquí abajo para respetar el límite de líneas).
  */
 
 import type {DashboardCompletoRetorno} from '../useDashboardCompleto';
-import {usePluginsStore} from '../../stores/pluginsStore';
 import {useHabitosStore} from '../../stores/habitosStore';
 import type {DatosEdicionTarea, DatosNuevoHabito, Tarea, Habito} from '../../types/dashboard';
+import {
+    generarPropsPanelBase,
+    generarPropsPanelScratchpad,
+    generarPropsPanelActividad,
+    generarPropsPanelAyuno,
+    generarPropsPanelDeficitCalorico,
+    generarPropsPanelIA,
+    generarPropsPanelRecordatorios,
+    generarPropsPanelGruposFb,
+    generarPropsPanelExp
+} from './generadoresPropsLigeros';
 
-/*
- * Props que se pasan a cada panel según su tipo
- * Centraliza la lógica de qué props necesita cada panel
- */
 /* Fragmentos cohesivos de PropsContextoPaneles: el nombre exportado se mantiene
  * (composición por extends), los call-sites ven la misma forma plana. */
 export interface PropsContextoPanelesNucleo {
@@ -44,14 +50,6 @@ export interface PropsContextoPanelesConfig {
 
 export interface PropsContextoPaneles extends PropsContextoPanelesNucleo, PropsContextoPanelesConfig {}
 
-export function generarPropsPanelBase(
-    _ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    return {renderHandleArrastre, handleMinimizar};
-}
-
 export function generarPropsPanelEjecucion(
     ctx: PropsContextoPaneles,
     renderHandleArrastre: (titulo?: string) => JSX.Element,
@@ -70,10 +68,8 @@ export function generarPropsPanelEjecucion(
 
     const manejarConfigurarTarea = (tarea: Tarea) => {
         /* [243A-19] Tareas virtuales de hábito (IDs negativos) no existen en BD.
-         * Abrirlas como modal de tarea causa fallos silenciosos.
-         * - Hábito principal: generarIdTareaHabito = -habitoId - 10000 → ID ∈ (-100000, -10000]
-         * - Sub-hábito:       generarIdSubHabitoTarea = -(habitoId*1000+subId) - 100000 → ID < -100000
-         * En ambos casos abrimos el modal del hábito padre. */
+         * - Hábito principal: -habitoId - 10000 → ID ∈ (-100000, -10000]
+         * - Sub-hábito:       -(habitoId*1000+subId) - 100000 → ID < -100000 */
         if (tarea.id < -100000) {
             const habitoId = Math.floor(-(tarea.id + 100000) / 1000);
             manejarEditarHabitoPorId(habitoId);
@@ -99,7 +95,7 @@ export function generarPropsPanelEjecucion(
         ocultarBadgeProyecto: configTareas.configuracion.ocultarBadgeProyecto,
         ocultarSubtareasAutomaticamente: configTareas.configuracion.ocultarSubtareasAutomaticamente,
         modoOrden: ordenTareas.modoActual,
-        valorFiltroActual: valorFiltroActual,
+        valorFiltroActual,
         opcionesFiltro: opciones.opcionesFiltro,
         opcionesOrdenTareas: opciones.opcionesOrdenTareas,
         esOrdenManual: ordenTareas.esOrdenManual,
@@ -109,8 +105,7 @@ export function generarPropsPanelEjecucion(
         onToggleTarea: manejarToggleTarea,
         onCrearTarea: crearTareaConLimite,
         onEditarTarea: dashboard.editarTarea,
-        /* [263A-2] Interceptar eliminación de subhábitos virtuales (IDs negativos).
-         * Antes llamaba directo a eliminarTarea del store que no los encuentra → falla silenciosa. */
+        /* [263A-2] Interceptar subhábitos virtuales (IDs negativos). */
         onEliminarTarea: (id: number) => {
             const fueSubhabito = habitosComoTareas.manejarEliminarTareaHabito(id);
             if (!fueSubhabito) dashboard.eliminarTarea(id);
@@ -129,11 +124,7 @@ export function generarPropsPanelEjecucion(
         onPosponerHabito: dashboard.posponerHabito,
         onPosponerHabitoConTiempo: dashboard.posponerHabitoConTiempo,
         onPausarHabito: dashboard.pausarHabito,
-        /* [21-08-2026] onActualizarHabito es un parche parcial (grupo, importancia,
-         * etc.) — va directo al store, que ya fusiona (undefined = no tocar).
-         * Antes pasaba por dashboard.editarHabito, que es el flujo del modal de
-         * edición: mostraba el toast 'Habito "undefined" actualizado' y su
-         * detección de cambios comparaba contra un objeto parcial. */
+        /* [21-08-2026] onActualizarHabito va directo al store (undefined = no tocar). */
         onActualizarHabito: (id: number, datos: Partial<Habito>) => useHabitosStore.getState().editarHabito(id, datos as DatosNuevoHabito),
         /* [207A-3] Subhábitos: store directo para toggle y eliminar */
         onToggleSubHabito: useHabitosStore.getState().toggleSubHabito,
@@ -144,8 +135,7 @@ export function generarPropsPanelEjecucion(
         onConfigurarSubHabito: dashboard.abrirModalEditarSubHabito,
         modoCompacto: configTareas.configuracion.modoCompacto,
         onConfigurarTarea: manejarConfigurarTarea,
-        /* [218A-2] Actualizar orden de hábitos desde drag en panel de ejecución.
-         * Usamos el orden específico de Ejecución para no tocar el panel de Hábitos. */
+        /* [218A-2] Orden de hábitos desde drag en panel de ejecución. */
         onReordenarHabitos: (ordenes: Map<number, number>) => {
             useHabitosStore.getState().actualizarOrdenEjecucionHabitos(ordenes);
         }
@@ -187,7 +177,7 @@ export function generarPropsPanelFocoPrioritario(
         onPausarHabito: dashboard.pausarHabito,
         onMarcarDiaHabito: ctx.marcarDiaHabitoConSync,
         onDesmarcarDiaHabito: ctx.desmarcarDiaHabitoConSync,
-        /* [21-08-2026] Parche parcial directo al store (ver generarPropsPanelEjecucion) */
+        /* [21-08-2026] Parche parcial directo al store (ver ejecucion) */
         onActualizarHabito: (id: number, datos: Partial<Habito>) => useHabitosStore.getState().editarHabito(id, datos as DatosNuevoHabito),
         onCambiarModoHabitos: ordenHabitos.cambiarModo,
         /* [217A-5] Subhábitos en panel de hábitos */
@@ -237,133 +227,8 @@ export function generarPropsPanelProyectos(
     };
 }
 
-export function generarPropsPanelScratchpad(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    const {modales, configScratchpad} = ctx;
-    return {
-        configuracion: configScratchpad.configuracion,
-        onAbrirModalConfigScratchpad: () => modales.abrirModalConfigGlobal('notas'),
-        onCambiarAltura: configScratchpad.cambiarAltura,
-        renderHandleArrastre,
-        handleMinimizar
-    };
-}
-
-export function generarPropsPanelActividad(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    const {modales, configActividad} = ctx;
-    return {
-        configuracion: configActividad.configuracion,
-        onAbrirModalConfigActividad: () => modales.abrirModalConfigGlobal('actividad'),
-        onAbrirUpgrade: modales.abrirModalUpgrade,
-        renderHandleArrastre,
-        handleMinimizar
-    };
-}
-
-export function generarPropsPanelAyuno(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element,
-    esMovilActual = false
-) {
-    const {dashboard, modales} = ctx;
-
-    const configAyuno = usePluginsStore.getState().configuracionPlugins['ayuno'] as unknown as {habitoId?: number} | undefined;
-    const habitoAyuno = configAyuno?.habitoId ? dashboard.habitos.find((h: Habito) => h.id === configAyuno.habitoId) : undefined;
-
-    return {
-        renderHandleArrastre,
-        handleMinimizar,
-        onAbrirConfiguracion: () => {
-            if (!habitoAyuno) return;
-            if (esMovilActual) {
-                modales.abrirEdicionHabitoMovil(habitoAyuno);
-            } else {
-                dashboard.abrirModalEditarHabito(habitoAyuno);
-            }
-        }
-    };
-}
-
-export function generarPropsPanelDeficitCalorico(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    const {modales} = ctx;
-    return {
-        renderHandleArrastre,
-        handleMinimizar,
-        onAbrirConfiguracion: () => modales.abrirModalConfigGlobal('deficitCalorico')
-    };
-}
-
-/* [233A-69] Panel IA: props base + ejecutores de tareas para acciones del LLM.
- * Hábitos se leen directamente del store Zustand (habitosStore).
- * [243A-1] onAbrirConfigIA abre el modal global en sección 'panelIA'. */
-export function generarPropsPanelIA(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    return {
-        renderHandleArrastre,
-        handleMinimizar,
-        crearTarea: ctx.dashboard.crearTarea,
-        toggleTarea: ctx.dashboard.toggleTarea,
-        editarTarea: ctx.dashboard.editarTarea,
-        eliminarTarea: ctx.dashboard.eliminarTarea,
-        tareas: ctx.dashboard.tareas,
-        onAbrirConfigIA: () => ctx.modales.abrirModalConfigGlobal('panelIA')
-    };
-}
-
-/* [253A-11] Props para PanelGruposFb
- * [263A-5] Agrega callback para abrir config (token, API URL) */
-export function generarPropsPanelRecordatorios(
-    _ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    return {renderHandleArrastre, handleMinimizar};
-}
-
-export function generarPropsPanelGruposFb(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    return {
-        renderHandleArrastre,
-        handleMinimizar,
-        onAbrirConfigGruposFb: () => ctx.modales.abrirModalConfigGlobal('gruposFb')
-    };
-}
-
-/* [27-08-2026] Panel del plugin EXP (Game): mismo patrón que ayuno — solo
- * necesita los helpers base + abrir la configuración del plugin. */
-export function generarPropsPanelExp(
-    ctx: PropsContextoPaneles,
-    renderHandleArrastre: (titulo?: string) => JSX.Element,
-    handleMinimizar: JSX.Element
-) {
-    return {
-        renderHandleArrastre,
-        handleMinimizar,
-        onAbrirConfig: () => ctx.modales.abrirModalPluginsConConfig('exp')
-    };
-}
-
 /* [H-F12-11] Tipo concreto del generador: ctx + helpers de renderizado comunes
- * y props extra posicionales por tipo de panel (el dispatch acotado vive en
- * DashboardGrid/DashboardPanelView). Sustituye al tipo `Function` (any). */
+ * y props extra posicionales por tipo de panel. Sustituye a `Function` (any). */
 export type GeneradorPropsPanel = (
     ctx: PropsContextoPaneles,
     renderHandleArrastre: (titulo?: string) => JSX.Element,
@@ -371,13 +236,9 @@ export type GeneradorPropsPanel = (
     ...rest: unknown[]
 ) => unknown;
 
-/*
- * Mapeo de panelId a función generadora de props
- * TO-DO: En el futuro, cada panel podría registrar su propia función generadora
- * Los generadores con argumentos extra (ejecucion, focoPrioritario, ayuno) se
- * asignan con cast acotado: sus params específicos son subtipos de `unknown`
- * y el chequeo real ocurre en el caller (dispatch por tipo de panel).
- */
+/* Mapeo de panelId a función generadora de props. Los generadores con argumentos
+ * extra se asignan con cast acotado: sus params específicos son subtipos de
+ * `unknown` y el chequeo real ocurre en el caller (dispatch por tipo de panel). */
 export const GENERADORES_PROPS: Record<string, GeneradorPropsPanel> = {
     ejecucion: generarPropsPanelEjecucion as GeneradorPropsPanel,
     focoPrioritario: generarPropsPanelFocoPrioritario as GeneradorPropsPanel,
@@ -396,4 +257,4 @@ export const GENERADORES_PROPS: Record<string, GeneradorPropsPanel> = {
 
 export function obtenerGeneradorPropsPanel(panelId: string, baseId: string): GeneradorPropsPanel {
     return GENERADORES_PROPS[panelId] || GENERADORES_PROPS[baseId] || generarPropsPanelBase;
-}
+}
