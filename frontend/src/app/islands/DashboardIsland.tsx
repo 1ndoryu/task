@@ -12,6 +12,8 @@ import {useEffect, useMemo, useState, useCallback} from 'react';
 import '../stores/configuracionUsuarioStore';
 
 import {DashboardEncabezado, DashboardGrid, DashboardModales, SidebarMenu, DashboardSidebarGrid} from '../components/dashboard';
+import {DashboardVistas} from '../components/dashboard/DashboardVistas';
+import {SelectorVistas} from '../components/dashboard/vistas/SelectorVistas';
 import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
@@ -30,6 +32,7 @@ import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
 import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
 import {obtenerTodosPanelesNavegables} from '../config/registroPaneles';
 import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
+import {useConfiguracionVistas, PANELES_VISTA_DEFECTO} from '../hooks/useConfiguracionVistas';
 import {useExpPlugin} from '../plugins/exp';
 import {useGruposEjecucion} from '../hooks/useGruposEjecucion';
 import {useGruposEjecucionStore} from '../stores/gruposEjecucionStore';
@@ -87,6 +90,11 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
         ajustarAnchos,
         ajustarAlturasFilas
     } = useSidebarPaneles(panelSidebarActivo);
+
+    /* [318A-2] Hook del Modo Vistas: vistas configurables con grid libre.
+     * Persistencia en localStorage (glory_config_vistas) + preferencias BD. */
+    const vistasConfig = useConfiguracionVistas();
+    const {vistaActiva, vistas, seleccionarVista, crearVista, renombrarVista, eliminarVista, duplicarVista, cambiarPanelCelda, quitarPanelVista, moverPanelVista, ajustarProporcionesFilas, ajustarProporcionesColumnas} = vistasConfig;
 
     /* [300A-2] Si el panel activo se oculta desde config, cambiar al primero visible */
     /* [multi-panel-sidebar] También quita de la grilla los paneles ocultos */
@@ -255,54 +263,151 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     }
 
     /* Clase del contenedor con padding extra para navegación móvil */
-    const clasesContenedor = `dashboardContenedor ${esMovil && auth.user ? 'dashboardContenedor--conNavegacionInferior' : ''} ${tipoLayout === 'sidebar' && !esMovil ? 'dashboardContenedor--sidebar' : ''}`;
+    const clasesContenedor = `dashboardContenedor ${esMovil && auth.user ? 'dashboardContenedor--conNavegacionInferior' : ''} ${tipoLayout === 'sidebar' && !esMovil ? 'dashboardContenedor--sidebar' : ''} ${tipoLayout === 'vistas' && !esMovil ? 'dashboardContenedor--vistas' : ''}`;
+
+    /* [318A-2] Encabezado compartido entre modo grid y modo vistas. Extraído a
+     * variable para no duplicar las ~40 props del DashboardEncabezado. */
+    const renderEncabezado = (
+        <DashboardEncabezado
+            titulo={titulo}
+            version={version}
+            usuario={auth.user ? auth.user.name : usuario}
+            avatarUrl={auth.user?.avatarUrl}
+            sincronizacion={sincronizacionConAuth}
+            suscripcion={suscripcion}
+            esAdmin={esAdmin}
+            equiposPendientes={equipos.pendientes}
+            notificacionesPendientes={notificaciones.noLeidas}
+            onClickPlan={modales.abrirModalUpgrade}
+            onClickSeguridad={() => modales.abrirModalConfigGlobal('seguridad')}
+            onClickAdmin={modales.abrirPanelAdmin}
+            onClickLayout={() => modales.abrirModalConfigGlobal('layout')}
+            onClickPaneles={modales.abrirModalPaneles}
+            onClickVersion={modales.abrirModalVersiones}
+            onClickUsuario={() => modales.abrirModalConfigGlobal('perfil')}
+            onClickEquipos={modales.abrirModalEquipos}
+            onClickNotificaciones={(evento?: React.MouseEvent) => { if (evento) acciones.manejarClickNotificaciones(evento); }}
+            onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
+            onClickTemas={() => modales.abrirModalConfigGlobal('temas')}
+            onClickConfigUsuario={() => modales.abrirModalConfigGlobal(null)}
+            onClickBackups={() => modales.abrirModalConfigGlobal('backups')}
+            onClickConfigMCP={() => modales.abrirModalConfigGlobal('ia')}
+            onClickPlugins={modales.abrirModalPlugins}
+            onClickFeedback={modales.abrirModalFeedback}
+            onExportarDatos={dashboard.exportarTodosDatos}
+            onImportarDatos={dashboard.importarTodosDatos}
+            tareas={dashboard.tareas}
+            habitos={dashboard.habitos}
+            proyectos={dashboard.proyectos}
+            onSeleccionarTarea={modales.abrirModalEditarTarea}
+            onSeleccionarHabito={dashboard.abrirModalEditarHabito}
+            onSeleccionarProyecto={modales.abrirModalEditarProyecto}
+            onCrearRapido={modales.abrirCreacionRapida}
+            opcionesMovil={esMovil ? opcionesMovil : undefined}
+            paginaMovilActiva={esMovil ? paginaMovil.paginaActiva : undefined}
+            onCambiarPagina={esMovil ? paginaMovil.cambiarPagina : undefined}
+            modoSeleccionActivo={modoSeleccionActivo}
+            onToggleSeleccion={toggleModoSeleccionManual}
+        />
+    );
+
+    /* [318A-2] Crear una vista nueva con los paneles principales por defecto */
+    const manejarCrearVista = useCallback(() => {
+        crearVista({nombre: `Vista ${vistas.length + 1}`, paneles: PANELES_VISTA_DEFECTO});
+    }, [crearVista, vistas.length]);
+
+    /* [318A-2] Selector de vistas: va en la zona del título del encabezado
+     * (el título se oculta en este modo y los botones quedan donde estaba). */
+    const renderSelectorVistas = (
+        <SelectorVistas
+            vistas={vistas}
+            vistaActivaId={vistaActiva.id}
+            onSeleccionar={seleccionarVista}
+            onCrear={manejarCrearVista}
+            onRenombrar={renombrarVista}
+            onDuplicar={duplicarVista}
+            onEliminar={eliminarVista}
+        />
+    );
+
+    /* [318A-2] Encabezado del Modo Vistas: el mismo encabezado pero con el
+     * selector de vistas en la zona del título (que se oculta). */
+    const renderEncabezadoConVistas = (
+        <DashboardEncabezado
+            titulo={titulo}
+            version={version}
+            usuario={auth.user ? auth.user.name : usuario}
+            avatarUrl={auth.user?.avatarUrl}
+            sincronizacion={sincronizacionConAuth}
+            suscripcion={suscripcion}
+            esAdmin={esAdmin}
+            equiposPendientes={equipos.pendientes}
+            notificacionesPendientes={notificaciones.noLeidas}
+            onClickPlan={modales.abrirModalUpgrade}
+            onClickSeguridad={() => modales.abrirModalConfigGlobal('seguridad')}
+            onClickAdmin={modales.abrirPanelAdmin}
+            onClickLayout={() => modales.abrirModalConfigGlobal('layout')}
+            onClickPaneles={modales.abrirModalPaneles}
+            onClickVersion={modales.abrirModalVersiones}
+            onClickUsuario={() => modales.abrirModalConfigGlobal('perfil')}
+            onClickEquipos={modales.abrirModalEquipos}
+            onClickNotificaciones={(evento?: React.MouseEvent) => { if (evento) acciones.manejarClickNotificaciones(evento); }}
+            onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
+            onClickTemas={() => modales.abrirModalConfigGlobal('temas')}
+            onClickConfigUsuario={() => modales.abrirModalConfigGlobal(null)}
+            onClickBackups={() => modales.abrirModalConfigGlobal('backups')}
+            onClickConfigMCP={() => modales.abrirModalConfigGlobal('ia')}
+            onClickPlugins={modales.abrirModalPlugins}
+            onClickFeedback={modales.abrirModalFeedback}
+            onExportarDatos={dashboard.exportarTodosDatos}
+            onImportarDatos={dashboard.importarTodosDatos}
+            tareas={dashboard.tareas}
+            habitos={dashboard.habitos}
+            proyectos={dashboard.proyectos}
+            onSeleccionarTarea={modales.abrirModalEditarTarea}
+            onSeleccionarHabito={dashboard.abrirModalEditarHabito}
+            onSeleccionarProyecto={modales.abrirModalEditarProyecto}
+            onCrearRapido={modales.abrirCreacionRapida}
+            opcionesMovil={esMovil ? opcionesMovil : undefined}
+            paginaMovilActiva={esMovil ? paginaMovil.paginaActiva : undefined}
+            onCambiarPagina={esMovil ? paginaMovil.cambiarPagina : undefined}
+            modoSeleccionActivo={modoSeleccionActivo}
+            onToggleSeleccion={toggleModoSeleccionManual}
+            selectorVistas={renderSelectorVistas}
+        />
+    );
 
     return (
         <div id="dashboard-contenedor" className={clasesContenedor}>
-            {esMovil || tipoLayout !== 'sidebar' ? (
+            {tipoLayout === 'vistas' && !esMovil ? (
+                /* ── MODO VISTAS: grid libre configurable (hasta 4 paneles) ── */
+                <div className="dashboardVistasLayout">
+                    {/* Encabezado en cuadro con botones de vista en el título */}
+                    <div className="dashboardVistasEncabezado">
+                        {renderEncabezadoConVistas}
+                    </div>
+
+                    {dashboard.cargandoDatos ? (
+                        <IndicadorCarga />
+                    ) : (
+                        <div className="dashboardVistasMain">
+                            <DashboardVistas
+                                vista={vistaActiva}
+                                ctx={ctx}
+                                onCambiarPanelCelda={cambiarPanelCelda}
+                                onQuitarPanel={quitarPanelVista}
+                                onMoverPanel={moverPanelVista}
+                                onAjustarProporcionesFilas={ajustarProporcionesFilas}
+                                onAjustarProporcionesColumnas={ajustarProporcionesColumnas}
+                                onDividirPanel={dividirPanelEnVista}
+                            />
+                        </div>
+                    )}
+                </div>
+            ) : esMovil || tipoLayout !== 'sidebar' ? (
                 /* ── MODO GRID (clásico) o móvil ── */
                 <>
-                    <DashboardEncabezado
-                        titulo={titulo}
-                        version={version}
-                        usuario={auth.user ? auth.user.name : usuario}
-                        avatarUrl={auth.user?.avatarUrl}
-                        sincronizacion={sincronizacionConAuth}
-                        suscripcion={suscripcion}
-                        esAdmin={esAdmin}
-                        equiposPendientes={equipos.pendientes}
-                        notificacionesPendientes={notificaciones.noLeidas}
-                        onClickPlan={modales.abrirModalUpgrade}
-                        onClickSeguridad={() => modales.abrirModalConfigGlobal('seguridad')}
-                        onClickAdmin={modales.abrirPanelAdmin}
-                        onClickLayout={() => modales.abrirModalConfigGlobal('layout')}
-                        onClickPaneles={modales.abrirModalPaneles}
-                        onClickVersion={modales.abrirModalVersiones}
-                        onClickUsuario={() => modales.abrirModalConfigGlobal('perfil')}
-                        onClickEquipos={modales.abrirModalEquipos}
-                        onClickNotificaciones={(evento?: React.MouseEvent) => { if (evento) acciones.manejarClickNotificaciones(evento); }}
-                        onClickExperimentos={esAdmin ? modales.abrirModalExperimentos : undefined}
-                        onClickTemas={() => modales.abrirModalConfigGlobal('temas')}
-                        onClickConfigUsuario={() => modales.abrirModalConfigGlobal(null)}
-                        onClickBackups={() => modales.abrirModalConfigGlobal('backups')}
-                        onClickConfigMCP={() => modales.abrirModalConfigGlobal('ia')}
-                        onClickPlugins={modales.abrirModalPlugins}
-                        onClickFeedback={modales.abrirModalFeedback}
-                        onExportarDatos={dashboard.exportarTodosDatos}
-                        onImportarDatos={dashboard.importarTodosDatos}
-                        tareas={dashboard.tareas}
-                        habitos={dashboard.habitos}
-                        proyectos={dashboard.proyectos}
-                        onSeleccionarTarea={modales.abrirModalEditarTarea}
-                        onSeleccionarHabito={dashboard.abrirModalEditarHabito}
-                        onSeleccionarProyecto={modales.abrirModalEditarProyecto}
-                        onCrearRapido={modales.abrirCreacionRapida}
-                        opcionesMovil={esMovil ? opcionesMovil : undefined}
-                        paginaMovilActiva={esMovil ? paginaMovil.paginaActiva : undefined}
-                        onCambiarPagina={esMovil ? paginaMovil.cambiarPagina : undefined}
-                        modoSeleccionActivo={modoSeleccionActivo}
-                        onToggleSeleccion={toggleModoSeleccionManual}
-                    />
+                    {renderEncabezado}
 
                     {/* [27-08-2026] El panel EXP se renderiza como panel real
                      * del grid (registrado en plugins/exp/index.ts); el toggle

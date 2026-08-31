@@ -1,0 +1,259 @@
+/*
+ * dashboardVistas.css
+ *
+ * [318A-2] Estilos del Modo Vistas: dashboard con vistas configurables.
+ *
+ * Jerarquía DOM:
+ *   .dashboardContenedor--vistas (contenedor raíz, altura completa, sin scroll)
+ *     └─ .dashboardVistasLayout (flex column, altura completa)
+ *         ├─ .dashboardVistasEncabezado (cuadro con encabezado + botones de vista)
+ *         │   ├─ .dashboardEncabezado (reutilizado)
+ *         │   └─ .selectorVistas (botones de vista)
+ *         └─ .dashboardVistasMain (flex 1, min-height 0)
+ *             └─ .dashboardVistas (grid CSS libre, altura completa)
+ *                 ├─ .dashboardVistasCelda (área del grid)
+ *                 │   └─ .dashboardPanelView (panel interno)
+ *                 ├─ .dashboardVistasResize (handle de resize)
+ *                 └─ .selectorPanelCelda (selector de panel de una celda)
+ *
+ * Principios:
+ *  - Sin scroll exterior: el contenedor raíz no hace scroll; solo los paneles
+ *    internos hacen scroll (sus propios estilos ya lo gestionan).
+ *  - Los 4 paneles ajustan su tamaño para encajar perfectamente (grid fr).
+ *  - Monocromo: tokens --dashboard-*, sin colores/radios/sombras hardcodeadas.
+ */
+
+/* ── CONTENEDOR RAÍZ ──
+ * [318A-2] Selector compuesto (.dashboardContenedor.dashboardContenedor--vistas)
+ * para vencer la cascada de `.dashboardContenedor` (padding 24px en base.css
+ * que se carga después): sin esto el contenedor crece 48px y la página hace
+ * scroll. */
+.dashboardContenedor.dashboardContenedor--vistas {
+    height: 100vh; /* Fallback para navegadores sin soporte dvh */
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+    gap: 0;
+}
+
+/* ── LAYOUT DEL MODO VISTAS ── */
+.dashboardVistasLayout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    gap: 0;
+}
+
+/* ── ENCABEZADO EN CUADRO CON BORDES ──
+ * El selector de vistas va dentro del encabezado (zona del título), por lo
+ * que este contenedor solo envuelve el DashboardEncabezado en un cuadro con
+ * borde completo. El padding lateral coincide con el del main para que la
+ * caja quede alineada con los paneles de abajo. */
+.dashboardVistasEncabezado {
+    flex-shrink: 0;
+    margin: var(--dashboard-espacioS, 6px) var(--dashboard-espacioMd, 0.75rem) 0;
+    padding: var(--dashboard-espacioS, 6px) var(--dashboard-espacioMd, 0.75rem);
+    border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
+    background: var(--dashboard-fondoSecundario, #0a0a0a);
+}
+
+.dashboardVistasEncabezado .dashboardEncabezado {
+    margin-bottom: 0;
+    z-index: 100;
+}
+
+/* Los botones de vista van donde estaba el título: el selector de vistas se
+ * coloca en la zona izquierda del encabezado (donde iría el título) y el
+ * título del dashboard se oculta en este modo. */
+.dashboardVistasEncabezado .encabezadoTitulo {
+    display: none;
+}
+
+.dashboardVistasEncabezado .encabezadoIzquierda {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS, 6px);
+}
+
+.dashboardVistasEncabezado .selectorVistas {
+    margin-right: auto;
+}
+
+/* ── SELECTOR DE VISTAS (botones) ── */
+.selectorVistas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dashboard-espacioS, 6px);
+}
+
+.selectorVistasItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXxs, 2px);
+    position: relative;
+}
+
+.selectorVistasMenuWrap {
+    position: relative;
+}
+
+.selectorVistasMenu {
+    position: absolute;
+    top: calc(100% + var(--dashboard-espacioS, 6px));
+    left: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs, 2px);
+    padding: var(--dashboard-espacioS, 6px);
+    background: var(--dashboard-fondoTerciario, #0a0a0a);
+    border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
+}
+
+/* ── MAIN (grid libre) ──
+ * Mismo margen/padding lateral que el encabezado para que los paneles queden
+ * alineados con la caja del header. */
+.dashboardVistasMain {
+    flex: 1;
+    min-height: 0;
+    margin: var(--dashboard-espacioS, 6px) var(--dashboard-espacioMd, 0.75rem) var(--dashboard-espacioMd, 0.75rem);
+    padding: 0;
+    overflow: hidden;
+}
+
+/* ── GRID LIBRE ── */
+.dashboardVistas {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    gap: var(--dashboard-espacioS, 6px);
+    position: relative;
+    /* grid-template-columns/rows se inyectan inline desde el componente */
+}
+
+/* ── CELDA: CUADRO SEPARADO CON BORDE ── */
+.dashboardVistasCelda {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
+    background: var(--dashboard-fondoSecundario, #0a0a0a);
+}
+
+.dashboardVistasCelda .dashboardPanelView {
+    height: 100%;
+    min-height: 0;
+}
+
+/* Estado "eligiendo panel" y "origen de mover" */
+.dashboardVistasCelda--eligiendo,
+.dashboardVistasCelda--origenMover {
+    outline: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-acento, #fff);
+    outline-offset: calc(-1 * var(--dashboard-espacioHairline, 1px));
+}
+
+/* ── HANDLES DE RESIZE EN BORDES REALES ──
+ * Cada celda (cuadro) tiene handles en sus bordes derecho e inferior. Al
+ * hacer hover sobre el borde del cuadro aparece la línea de resize y se puede
+ * arrastrar para cambiar el tamaño de la fila/columna de esa celda.
+ * Se renderizan DENTRO de la celda, posicionados sobre el borde (mitad hacia
+ * dentro, mitad hacia fuera) para un agarre cómodo. */
+.dashboardVistasResize {
+    position: absolute;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity var(--dashboard-transicionRapida, 0.15s);
+}
+
+.dashboardVistasCelda:hover .dashboardVistasResize,
+.dashboardVistasResize:hover,
+.dashboardVistasResize--arrastrando {
+    opacity: 1;
+}
+
+/* Handle en el borde derecho de la celda (ajusta la columna de la celda) */
+.dashboardVistasResize--derecha {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    transform: translateX(50%);
+    cursor: col-resize;
+}
+
+/* Handle en el borde inferior de la celda (ajusta la fila de la celda) */
+.dashboardVistasResize--abajo {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    transform: translateY(50%);
+    cursor: row-resize;
+}
+
+.dashboardVistasResizeLinea {
+    background: var(--dashboard-bordeSutil, #1c1c1c);
+    transition: background var(--dashboard-transicionRapida, 0.15s);
+}
+
+.dashboardVistasResize--derecha .dashboardVistasResizeLinea {
+    width: 2px;
+    height: 40%;
+}
+
+.dashboardVistasResize--abajo .dashboardVistasResizeLinea {
+    width: 40%;
+    height: 2px;
+}
+
+.dashboardVistasResize:hover .dashboardVistasResizeLinea,
+.dashboardVistasResize--arrastrando .dashboardVistasResizeLinea {
+    background: var(--dashboard-acento, #fff);
+}
+
+/* ── SELECTOR DE PANEL DE CELDA ── */
+.selectorPanelCelda {
+    position: absolute;
+    top: var(--dashboard-espacioMd, 0.75rem);
+    left: var(--dashboard-espacioMd, 0.75rem);
+    z-index: 300;
+    min-width: 200px;
+    max-width: 280px;
+    max-height: 60%;
+    overflow: auto;
+    padding: var(--dashboard-espacioSm, 0.5rem);
+    background: var(--dashboard-fondoTerciario, #0a0a0a);
+    border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioS, 6px);
+}
+
+.selectorPanelCeldaEncabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dashboard-espacioS, 6px);
+}
+
+.selectorPanelCeldaTitulo {
+    font-family: var(--dashboard-fuenteMonoespaciada, monospace);
+    font-size: var(--dashboard-tamanoBase, 13px);
+    color: var(--dashboard-textoActivo, #fff);
+}
+
+.selectorPanelCeldaLista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs, 2px);
+}

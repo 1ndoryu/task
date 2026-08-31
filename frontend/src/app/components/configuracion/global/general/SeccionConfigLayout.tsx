@@ -1,5 +1,5 @@
-/* [233A-27] Configuración de layout: modo grid/sidebar, columnas y orden de paneles. */
-import {Square, Columns2, Columns3, ArrowUpDown, RotateCcw, LayoutGrid, PanelLeft, PanelsTopLeft} from 'lucide-react';
+/* [233A-27] Configuración de layout: modo grid/sidebar/vistas, columnas y orden de paneles. */
+import {Square, Columns2, Columns3, ArrowUpDown, RotateCcw, LayoutGrid, PanelLeft, PanelsTopLeft, LayoutDashboard} from 'lucide-react';
 import {Boton} from '../../../ui';
 import {ListaOrdenPaneles} from '../../../dashboard/ListaOrdenPaneles';
 import {useConfiguracionLayout} from '../../../../hooks/useConfiguracionLayout';
@@ -11,30 +11,41 @@ export function SeccionConfigLayout(): JSX.Element {
 
     return (
         <div className="configLayoutContenido">
-            {/* [300A-2] Selector de modo: Grid ↔ Sidebar */}
+            {/* [300A-2][318A-2] Selector de modo: Grid ↔ Sidebar ↔ Vistas */}
             <div className="configLayoutSeccion">
                 <h4 className="configLayoutSeccionTitulo">Modo de Visualización</h4>
-                <p className="configLayoutSeccionDescripcion">Grid muestra todos los paneles a la vez. Sidebar los muestra uno por uno.</p>
+                <p className="configLayoutSeccionDescripcion">Grid muestra todos los paneles a la vez. Sidebar los muestra uno por uno. Vistas permite crear vistas configurables de hasta 4 paneles.</p>
                 <div className="configLayoutColumnasOpciones">
                     <Boton
-                        variante={esGrid ? 'primario' : 'ghost'}
+                        variante={tipoLayout === 'grid' ? 'primario' : 'ghost'}
                         onClick={() => cambiarTipoLayout('grid')}
                         title="Modo grid"
-                        claseAdicional={`configLayoutColumnaOpcion ${esGrid ? 'activo' : ''}`}
+                        claseAdicional={`configLayoutColumnaOpcion ${tipoLayout === 'grid' ? 'activo' : ''}`}
                         icono={<LayoutGrid size={20} />}
                     >
                         Grid
                     </Boton>
                     <Boton
-                        variante={!esGrid ? 'primario' : 'ghost'}
+                        variante={tipoLayout === 'sidebar' ? 'primario' : 'ghost'}
                         onClick={() => {
                             cambiarTipoLayout('sidebar');
                         }}
                         title="Modo sidebar"
-                        claseAdicional={`configLayoutColumnaOpcion ${!esGrid ? 'activo' : ''}`}
+                        claseAdicional={`configLayoutColumnaOpcion ${tipoLayout === 'sidebar' ? 'activo' : ''}`}
                         icono={<PanelLeft size={20} />}
                     >
                         Sidebar
+                    </Boton>
+                    <Boton
+                        variante={tipoLayout === 'vistas' ? 'primario' : 'ghost'}
+                        onClick={() => {
+                            cambiarTipoLayout('vistas');
+                        }}
+                        title="Modo vistas (grid libre configurable)"
+                        claseAdicional={`configLayoutColumnaOpcion ${tipoLayout === 'vistas' ? 'activo' : ''}`}
+                        icono={<LayoutDashboard size={20} />}
+                    >
+                        Vistas
                     </Boton>
                 </div>
             </div>

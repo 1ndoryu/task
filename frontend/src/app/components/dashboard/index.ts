@@ -25,6 +25,7 @@ export {ModalNotasExpandido} from './notas/ModalNotasExpandido';
 export {SidebarMenu} from './SidebarMenu';
 export {DashboardPanelView} from './DashboardPanelView';
 export {DashboardSidebarGrid} from './DashboardSidebarGrid';
+export {DashboardVistas} from './DashboardVistas';
 export {BuscadorGlobal} from './BuscadorGlobal';
 export {BottomSheetTarea} from './BottomSheetTarea';
 export {BottomSheetHabito} from './BottomSheetHabito';
@@ -33,3 +34,6 @@ export type {DatosFormulario} from '../../hooks/dashboard/useFormularioHabito';
 
 /* Importar CSS multi-panel sidebar (efecto secundario) */
 import '../../styles/dashboard/componentes/dashboardSidebarGrid.css';
+
+/* [318A-2] CSS del Modo Vistas (grid libre configurable) */
+import '../../styles/dashboard/componentes/dashboardVistas.css';

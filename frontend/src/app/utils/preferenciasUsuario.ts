@@ -38,6 +38,7 @@ export const CLAVES_PREFERENCIAS: string[] = [
     'glory_sidebar_paneles',
     'glory_sidebar_expandido',
     'glory_chat_panel_visible',
+    'glory_config_vistas',
     /* Configuración por dominio */
     'glory_config_tareas',
     'glory_config_habitos_desktop',

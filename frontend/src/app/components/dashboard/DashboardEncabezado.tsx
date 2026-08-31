@@ -84,7 +84,13 @@ interface DashboardEncabezadoSeleccion {
     onToggleSeleccion?: () => void;
 }
 
-interface DashboardEncabezadoProps extends DashboardEncabezadoBase, DashboardEncabezadoAcciones, DashboardEncabezadoAccionesExtra, DashboardEncabezadoBuscador, DashboardEncabezadoMovil, DashboardEncabezadoSeleccion {}
+interface DashboardEncabezadoVistas {
+    /* [318A-2] Selector de vistas del Modo Vistas. Se renderiza en la zona
+     * izquierda del encabezado (donde estaba el título), que se oculta. */
+    selectorVistas?: React.ReactNode;
+}
+
+interface DashboardEncabezadoProps extends DashboardEncabezadoBase, DashboardEncabezadoAcciones, DashboardEncabezadoAccionesExtra, DashboardEncabezadoBuscador, DashboardEncabezadoMovil, DashboardEncabezadoSeleccion, DashboardEncabezadoVistas {}
 
 export function DashboardEncabezado({
     titulo = APP_TEXTS.dashboard.titulo,
@@ -129,7 +135,9 @@ export function DashboardEncabezado({
     onCambiarPagina,
     // Selección
     modoSeleccionActivo: _modoSeleccionActivo,
-    onToggleSeleccion: _onToggleSeleccion
+    onToggleSeleccion: _onToggleSeleccion,
+    // Vistas (318A-2)
+    selectorVistas
 }: DashboardEncabezadoProps): JSX.Element {
     const esTablet = useEsDispositivoMovil();
     const estaConectado = sincronizacion?.estaLogueado ?? false;
@@ -183,7 +191,9 @@ export function DashboardEncabezado({
                 onCrearRapido={onCrearRapido}
             />
 
-            <EncabezadoTitulo titulo={titulo} paginaMovilActiva={paginaMovilActiva} esTablet={esTablet} />
+            <EncabezadoTitulo titulo={titulo} paginaMovilActiva={paginaMovilActiva} esTablet={esTablet}>
+                {selectorVistas}
+            </EncabezadoTitulo>
 
             <EncabezadoBuscador tareas={tareas} habitos={habitos} proyectos={proyectos} onSeleccionarTarea={onSeleccionarTarea} onSeleccionarHabito={onSeleccionarHabito} onSeleccionarProyecto={onSeleccionarProyecto} mostrarModal={mostrarBuscadorMovil} onCerrarModal={() => setMostrarBuscadorMovil(false)} estaConectado={estaConectado} colapsado={buscadorColapsado} />
 
