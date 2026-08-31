@@ -1,7 +1,7 @@
 # Plan: Modo Vistas — dashboard con vistas configurables (318A-2)
 
 **Fecha:** 31-08-2026
-**Estado:** en curso
+**Estado:** completado (31-08-2026) — verificado visualmente y gate PASS
 **ID:** 318A-2
 
 ## Objetivo
@@ -54,4 +54,7 @@ No afecta a los modos grid ni sidebar existentes.
 - Type-check pasa; gate `task-check.mjs GLORY-BASELINE` pasa; commit `318A-2: ...` + push.
 
 ## Siguiente paso
-Fase 1: tipos + hook de vistas.
+Completado. Evidencia: `Agente/completados/tareas-2026-08-31.md`. Commits `8a53451`,
+`89068ce`, `ebf689f` (rama `main`, push a `origin/main`). Gate `GLORY-BASELINE` PASS en cada
+commit. Retirado del roadmap por no tener entrada propia (trabajo abierto ya archivado en
+completados).
