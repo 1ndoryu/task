@@ -18,3 +18,12 @@
     outline-offset: 2px;
     box-shadow: none !important;
 }
+
+/* [318A-2 fb] Títulos h2 sin negrita en general: los encabezados usaban
+ * font-weight 600/700 y en monocromo quedan a peso normal (aspecto más
+ * uniforme con el resto de la tipografía). Se usa !important igual que el
+ * resto de monocromo.css para ganar a cualquier h2 cargado después
+ * (p. ej. .seccionLegal h2 de paginasLegales.css). */
+[data-theme] h2 {
+    font-weight: normal !important;
+}
