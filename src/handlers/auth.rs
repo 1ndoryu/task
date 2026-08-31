@@ -65,6 +65,14 @@ pub async fn login(
     headers: HeaderMap,
     Json(req): Json<LoginRequest>,
 ) -> Result<Response, AppError> {
+    /* [local-dev] Solo en modo local (loopback -> cookie_secure=false) se
+     * resuelve el alias "admin" a admin@nakomi.studio. Fuera de loopback
+     * nunca se aceptan identificadores sin email: el login exige email
+     * completo y el alias falla con 400 de validación. */
+    let req = LoginRequest {
+        email: resolver_email_local(req.email, !state.cookie_secure),
+        password: req.password,
+    };
     req.validate()
         .map_err(|error| AppError::Validation(error.to_string()))?;
     let client_ip = state
@@ -226,6 +234,17 @@ fn cookie_header(name: &str, value: &str, state: &AppState, max_age: u64) -> Str
     cookie
 }
 
+/// [local-dev] Acceso rápido en local: el identificador `admin` se mapea a
+/// `admin@nakomi.studio`. Solo aplica en modo local y si el identificador no
+/// es un email; cualquier otro valor se devuelve intacto (validará abajo).
+fn resolver_email_local(email: String, local: bool) -> String {
+    if local && email.trim().eq_ignore_ascii_case("admin") && !email.contains('@') {
+        "admin@nakomi.studio".to_string()
+    } else {
+        email
+    }
+}
+
 fn header_value<'a>(headers: &'a HeaderMap, name: &str) -> Option<&'a str> {
     headers.get(name).and_then(|value| value.to_str().ok())
 }
@@ -236,4 +255,31 @@ fn cookie_from_header<'a>(headers: &'a HeaderMap, name: &str) -> Option<&'a str>
         let (key, value) = pair.split_once('=')?;
         (key == name).then_some(value)
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolver_email_local;
+
+    #[test]
+    fn alias_admin_solo_en_local() {
+        assert_eq!(
+            resolver_email_local("admin".to_string(), true),
+            "admin@nakomi.studio"
+        );
+        /* Fuera de local el alias nunca se resuelve. */
+        assert_eq!(resolver_email_local("admin".to_string(), false), "admin");
+    }
+
+    #[test]
+    fn emails_se_devuelven_intactos() {
+        assert_eq!(
+            resolver_email_local("Admin@Nakomi.Studio".to_string(), true),
+            "Admin@Nakomi.Studio"
+        );
+        assert_eq!(
+            resolver_email_local("otro@local.test".to_string(), true),
+            "otro@local.test"
+        );
+    }
 }
