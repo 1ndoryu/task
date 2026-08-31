@@ -51,10 +51,12 @@
  * El selector de vistas va dentro del encabezado (zona del título), por lo
  * que este contenedor solo envuelve el DashboardEncabezado en un cuadro con
  * borde completo. El padding lateral coincide con el del main para que la
- * caja quede alineada con los paneles de abajo. */
+ * caja quede alineada con los paneles de abajo.
+ * [318A-2 fb] Margen superior igual al del main inferior: simetría vertical
+ * (arriba = entre header y paneles = abajo) y más aire entre header y grid. */
 .dashboardVistasEncabezado {
     flex-shrink: 0;
-    margin: var(--dashboard-espacioS, 6px) var(--dashboard-espacioMd, 0.75rem) 0;
+    margin: var(--dashboard-espacioMd, 0.75rem) var(--dashboard-espacioMd, 0.75rem) 0;
     padding: var(--dashboard-espacioS, 6px) var(--dashboard-espacioMd, 0.75rem);
     border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
     background: var(--dashboard-fondoSecundario, #0a0a0a);
@@ -116,22 +118,26 @@
 
 /* ── MAIN (grid libre) ──
  * Mismo margen/padding lateral que el encabezado para que los paneles queden
- * alineados con la caja del header. */
+ * alineados con la caja del header.
+ * [318A-2 fb] Margen superior igual al inferior (12px): separación uniforme
+ * entre header y paneles y entre paneles y borde inferior (simetría). */
 .dashboardVistasMain {
     flex: 1;
     min-height: 0;
-    margin: var(--dashboard-espacioS, 6px) var(--dashboard-espacioMd, 0.75rem) var(--dashboard-espacioMd, 0.75rem);
+    margin: var(--dashboard-espacioMd, 0.75rem) var(--dashboard-espacioMd, 0.75rem) var(--dashboard-espacioMd, 0.75rem);
     padding: 0;
     overflow: hidden;
 }
 
-/* ── GRID LIBRE ── */
+/* ── GRID LIBRE ──
+ * [318A-2 fb] Gap entre paneles igual al margen exterior (12px): separaciones
+ * simétricas — el espacio entre paneles coincide con el del borde del grid. */
 .dashboardVistas {
     display: grid;
     width: 100%;
     height: 100%;
     min-height: 0;
-    gap: var(--dashboard-espacioS, 6px);
+    gap: var(--dashboard-espacioMd, 0.75rem);
     position: relative;
     /* grid-template-columns/rows se inyectan inline desde el componente */
 }
@@ -221,39 +227,27 @@
     background: var(--dashboard-acento, #fff);
 }
 
-/* ── SELECTOR DE PANEL DE CELDA ── */
-.selectorPanelCelda {
+/* ── BOTÓN FLOTANTE "AGREGAR PANEL" ──
+ * [318A-2 fb] Aparece cuando quedan paneles sin usar (tras quitar uno) y la
+ * vista no llegó al máximo. Abre el menú contextual estándar (menuContextual)
+ * con los paneles disponibles. Se coloca en la esquina inferior derecha del
+ * grid, sin tapar el contenido (los paneles tienen su propio scroll). */
+.dashboardVistasAgregar {
     position: absolute;
-    top: var(--dashboard-espacioMd, 0.75rem);
-    left: var(--dashboard-espacioMd, 0.75rem);
-    z-index: 300;
-    min-width: 200px;
-    max-width: 280px;
-    max-height: 60%;
-    overflow: auto;
-    padding: var(--dashboard-espacioSm, 0.5rem);
-    background: var(--dashboard-fondoTerciario, #0a0a0a);
+    right: var(--dashboard-espacioSm, 0.5rem);
+    bottom: var(--dashboard-espacioSm, 0.5rem);
+    z-index: 50;
+}
+
+.dashboardVistasAgregar .boton--soloIcono {
+    width: 32px;
+    height: 32px;
     border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioS, 6px);
-}
-
-.selectorPanelCeldaEncabezado {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--dashboard-espacioS, 6px);
-}
-
-.selectorPanelCeldaTitulo {
-    font-family: var(--dashboard-fuenteMonoespaciada, monospace);
-    font-size: var(--dashboard-tamanoBase, 13px);
+    background: var(--dashboard-fondoSecundario, #0a0a0a);
     color: var(--dashboard-textoActivo, #fff);
+    border-radius: 0;
 }
 
-.selectorPanelCeldaLista {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXxs, 2px);
+.dashboardVistasAgregar .boton--soloIcono:hover {
+    background: var(--dashboard-fondoHover, #1a1a1a);
 }

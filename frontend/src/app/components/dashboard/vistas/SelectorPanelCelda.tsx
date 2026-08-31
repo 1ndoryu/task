@@ -3,56 +3,52 @@
  *
  * [318A-2] Selector de panel para una celda del Modo Vistas.
  * Se abre al pulsar "Elegir panel" en una celda: muestra la lista de paneles
- * disponibles (registro) para elegir cuál muestra esa celda.
+ * existentes (registro) para elegir cuál muestra esa celda.
  *
- * Reutiliza el registro de paneles (obtenerIdsPaneles) para listar los
- * paneles existentes; solo se permite elegir paneles distintos a los ya
- * usados en la vista (opcional — el hook valida el máx de 4).
+ * [318A-2 fb] Reutiliza el sistema estándar de menú contextual (MenuContextual
+ * + menuContextual.css) en lugar de estilos propios, para mantener coherencia
+ * visual con el resto de menús del dashboard. El menú se cierra con click
+ * fuera, Escape o al elegir una opción.
  */
 
 import {useCallback, useMemo} from 'react';
-import {X} from 'lucide-react';
 import {obtenerIdsPaneles, obtenerPanel} from '../../../config/registroPaneles';
 import type {PanelId} from '../../../hooks/useConfiguracionLayout';
-import {Boton} from '../../ui';
+import {MenuContextual} from '../../shared';
+import type {OpcionMenu} from '../../shared';
 
 interface SelectorPanelCeldaProps {
-    vistaId: string;
     celdaId: string;
+    posicionX: number;
+    posicionY: number;
     onSeleccionar: (celdaId: string, panelId: PanelId) => void;
     onCerrar: () => void;
 }
 
-export function SelectorPanelCelda({vistaId, celdaId, onSeleccionar, onCerrar}: SelectorPanelCeldaProps): JSX.Element {
+export function SelectorPanelCelda({celdaId, posicionX, posicionY, onSeleccionar, onCerrar}: SelectorPanelCeldaProps): JSX.Element {
     const paneles = useMemo(() => obtenerIdsPaneles(), []);
 
-    const handleSeleccionar = useCallback((panelId: PanelId) => {
-        onSeleccionar(celdaId, panelId);
+    /* Un item del menú por panel registrado (título + icono del registro) */
+    const opciones = useMemo<OpcionMenu[]>(() => paneles.map(panelId => {
+        const def = obtenerPanel(panelId);
+        return {
+            id: panelId,
+            etiqueta: def?.titulo ?? panelId,
+            icono: def?.icono
+        };
+    }), [paneles]);
+
+    const handleSeleccionar = useCallback((opcionId: string) => {
+        onSeleccionar(celdaId, opcionId as PanelId);
     }, [celdaId, onSeleccionar]);
 
     return (
-        <div className="selectorPanelCelda">
-            <div className="selectorPanelCeldaEncabezado">
-                <span className="selectorPanelCeldaTitulo">Elegir panel</span>
-                <Boton variante="badge" soloIcono onClick={onCerrar} icono={<X size={12} />} title="Cerrar" />
-            </div>
-            <div className="selectorPanelCeldaLista">
-                {paneles.map(panelId => {
-                    const def = obtenerPanel(panelId);
-                    if (!def) return null;
-                    return (
-                        <Boton
-                            key={panelId}
-                            variante="opcion"
-                            onClick={() => handleSeleccionar(panelId)}
-                            icono={def.icono}
-                            title={def.titulo}
-                        >
-                            {def.titulo}
-                        </Boton>
-                    );
-                })}
-            </div>
-        </div>
+        <MenuContextual
+            opciones={opciones}
+            posicionX={posicionX}
+            posicionY={posicionY}
+            onSeleccionar={handleSeleccionar}
+            onCerrar={onCerrar}
+        />
     );
 }

@@ -32,7 +32,7 @@ interface VistaCeldaProps {
     /* Handles de resize en los bordes reales de esta celda (opcional) */
     handles?: React.ReactNode;
     /* Permitir elegir qué panel muestra esta celda */
-    onElegirPanel?: (celdaId: string) => void;
+    onElegirPanel?: (celdaId: string, x: number, y: number) => void;
     /* Intercambiar el panel de esta celda con otra */
     onMover?: (celdaId: string) => void;
     /* Quitar el panel de la vista */
@@ -60,11 +60,17 @@ export function VistaCelda({
         onQuitar?.(panelId);
     }, [panelId, onQuitar]);
 
+    /* Anclar el menú contextual al borde del botón que lo abre */
+    const handleElegir = useCallback((evento: React.MouseEvent) => {
+        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
+        onElegirPanel?.(celdaId, rect.left, rect.bottom + 4);
+    }, [celdaId, onElegirPanel]);
+
     /* Acciones extra del panel (en seccionAcciones) */
     const accionesExtra = total > 1 ? (
         <>
             {onElegirPanel && (
-                <Boton variante="badge" soloIcono onClick={() => onElegirPanel(celdaId)} icono={<LayoutGrid size={12} />} title="Elegir panel que muestra" />
+                <Boton variante="badge" soloIcono onClick={handleElegir} icono={<LayoutGrid size={12} />} title="Elegir panel que muestra" />
             )}
             {onMover && (
                 <Boton variante="badge" soloIcono onClick={() => onMover(celdaId)} icono={<Shuffle size={12} />} title={estaOrigenMover ? 'Intercambiar con otra celda' : 'Mover / intercambiar'} />

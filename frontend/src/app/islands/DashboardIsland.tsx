@@ -94,7 +94,7 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
     /* [318A-2] Hook del Modo Vistas: vistas configurables con grid libre.
      * Persistencia en localStorage (glory_config_vistas) + preferencias BD. */
     const vistasConfig = useConfiguracionVistas();
-    const {vistaActiva, vistas, seleccionarVista, crearVista, renombrarVista, eliminarVista, duplicarVista, cambiarPanelCelda, quitarPanelVista, moverPanelVista, ajustarProporcionesFilas, ajustarProporcionesColumnas} = vistasConfig;
+    const {vistaActiva, vistas, seleccionarVista, crearVista, renombrarVista, eliminarVista, duplicarVista, cambiarPanelCelda, quitarPanelVista, moverPanelVista, agregarPanelVista, obtenerPanelesDisponiblesVista, ajustarProporcionesFilas, ajustarProporcionesColumnas} = vistasConfig;
 
     /* [300A-2] Si el panel activo se oculta desde config, cambiar al primero visible */
     /* [multi-panel-sidebar] También quita de la grilla los paneles ocultos */
@@ -397,6 +397,8 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
                                 onCambiarPanelCelda={cambiarPanelCelda}
                                 onQuitarPanel={quitarPanelVista}
                                 onMoverPanel={moverPanelVista}
+                                onAgregarPanel={agregarPanelVista}
+                                obtenerPanelesDisponibles={obtenerPanelesDisponiblesVista}
                                 onAjustarProporcionesFilas={ajustarProporcionesFilas}
                                 onAjustarProporcionesColumnas={ajustarProporcionesColumnas}
                                 onDividirPanel={dividirPanelEnVista}
