@@ -20,18 +20,12 @@
  */
 
 import {useCallback, useMemo, useState} from 'react';
-import {Plus} from 'lucide-react';
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 import type {CeldaVista, Vista} from '../../types/vistas';
-import {MAX_PANELES_VISTA} from '../../types/vistas';
 import {VistaCelda} from './vistas/VistaCelda';
 import {VistaResizeHandle} from './vistas/VistaResizeHandle';
 import {SelectorPanelCelda} from './vistas/SelectorPanelCelda';
-import {MenuContextual} from '../shared';
-import type {OpcionMenu} from '../shared';
-import {obtenerPanel} from '../../config/registroPaneles';
-import {Boton} from '../ui';
 
 interface DashboardVistasProps {
     vista: Vista;
@@ -66,8 +60,6 @@ export function DashboardVistas({
     onDividirPanel
 }: DashboardVistasProps): JSX.Element | null {
     const [selectorCelda, setSelectorCelda] = useState<SelectorEstado | null>(null);
-    const [menuAgregarAbierto, setMenuAgregarAbierto] = useState(false);
-    const [posicionAgregar, setPosicionAgregar] = useState({x: 0, y: 0});
     const [celdaOrigenMover, setCeldaOrigenMover] = useState<string | null>(null);
 
     const celdas = vista.celdas;
@@ -148,28 +140,9 @@ export function DashboardVistas({
         onQuitarPanel(vista.id, panelId);
     }, [onQuitarPanel, vista.id]);
 
-    /* Abrir el menú de "agregar panel" anclado al botón flotante "+" */
-    const abrirMenuAgregar = useCallback((evento: React.MouseEvent) => {
-        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
-        setPosicionAgregar({x: rect.left, y: rect.bottom + 4});
-        setMenuAgregarAbierto(true);
-    }, []);
-
-    /* Paneles disponibles para agregar a la vista (no usados aún) */
-    const panelesDisponibles = useMemo<PanelId[]>(() => obtenerPanelesDisponibles(vista.id), [obtenerPanelesDisponibles, vista.id]);
-
-    /* Opciones del menú de agregar panel */
-    const opcionesAgregar = useMemo<OpcionMenu[]>(() => panelesDisponibles.map(panelId => {
-        const def = obtenerPanel(panelId);
-        return {
-            id: panelId,
-            etiqueta: def?.titulo ?? panelId,
-            icono: def?.icono
-        };
-    }), [panelesDisponibles]);
-
-    /* Se puede agregar si no se llegó al máximo y quedan paneles sin usar */
-    const puedeAgregar = total < MAX_PANELES_VISTA && panelesDisponibles.length > 0;
+    /* [318A-4] El botón "agregar panel" (antes flotante aquí) vive ahora en el
+     * encabezado nav (DashboardIsland → DashboardEncabezado → EncabezadoAcciones).
+     * DashboardVistas solo conserva `onAgregarPanel` para aplicar la selección. */
 
     return (
         <div className="dashboardVistas" style={estiloGrid}>
@@ -218,32 +191,6 @@ export function DashboardVistas({
                     }}
                     onCerrar={() => setSelectorCelda(null)}
                 />
-            )}
-
-            {/* Botón flotante para agregar un panel (tras quitar uno) */}
-            {puedeAgregar && (
-                <div className="dashboardVistasAgregar">
-                    <Boton
-                        type="button"
-                        variante="primario"
-                        soloIcono
-                        onClick={abrirMenuAgregar}
-                        icono={<Plus size={16} />}
-                        title={`Agregar panel (${total}/${MAX_PANELES_VISTA})`}
-                    />
-                    {menuAgregarAbierto && (
-                        <MenuContextual
-                            opciones={opcionesAgregar}
-                            posicionX={posicionAgregar.x}
-                            posicionY={posicionAgregar.y}
-                            onSeleccionar={panelId => {
-                                onAgregarPanel(vista.id, panelId as PanelId);
-                                setMenuAgregarAbierto(false);
-                            }}
-                            onCerrar={() => setMenuAgregarAbierto(false)}
-                        />
-                    )}
-                </div>
             )}
         </div>
     );

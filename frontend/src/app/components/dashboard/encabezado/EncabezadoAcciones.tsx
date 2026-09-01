@@ -1,6 +1,7 @@
 import {useState} from 'react';
-import {LayoutGrid, Bell, Settings, Plus, CheckSquare, Activity, Folder, PanelsTopLeft} from 'lucide-react';
+import {LayoutGrid, Bell, Settings, Plus, CheckSquare, Activity, Folder, PanelsTopLeft, SquarePlus} from 'lucide-react';
 import {IndicadorPlan, MenuContextual} from '../../shared';
+import type {OpcionMenu} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
 
@@ -24,11 +25,23 @@ interface EncabezadoAccionesAcciones {
     onClickAdmin?: () => void;
     onClickEquipos?: () => void;
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
+    /* [318A-4] Botón "agregar panel" del modo vistas, en el nav. Antes era un
+     * botón flotante en la vista. `undefined` = no se muestra. */
+    agregarPanelVista?: {
+        total: number;
+        maximo: number;
+        opciones: OpcionMenu[];
+        abierto: boolean;
+        posicion: {x: number; y: number};
+        onAbrir: (evento: React.MouseEvent) => void;
+        onSeleccionar: (panelId: string) => void;
+        onCerrar: () => void;
+    };
 }
 
 interface EncabezadoAccionesProps extends EncabezadoAccionesContexto, EncabezadoAccionesAcciones {}
 
-export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido}: EncabezadoAccionesProps) {
+export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido, agregarPanelVista}: EncabezadoAccionesProps) {
     const [menuCrear, setMenuCrear] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
@@ -69,6 +82,31 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
                         <Plus size={14} />
                     </Boton>
                     {menuCrear.visible && <MenuContextual opciones={opcionesMenuCrear} posicionX={menuCrear.x} posicionY={menuCrear.y} onSeleccionar={manejarSeleccionCrear} onCerrar={() => setMenuCrear({...menuCrear, visible: false})} />}
+                </>
+            )}
+
+            {/* [318A-4] Agregar panel a la vista (modo vistas). Antes era un
+             * botón flotante en la esquina de la vista; ahora vive en el nav.
+             * Icono SquarePlus (cambio desde Plus para distinguirlo de "Crear"). */}
+            {agregarPanelVista && (
+                <>
+                    <Boton
+                        type="button"
+                        claseAdicional="botonIconoEncabezado"
+                        onClick={agregarPanelVista.onAbrir}
+                        title={esTablet ? undefined : `Agregar panel (${agregarPanelVista.total}/${agregarPanelVista.maximo})`}
+                    >
+                        <SquarePlus size={14} />
+                    </Boton>
+                    {agregarPanelVista.abierto && (
+                        <MenuContextual
+                            opciones={agregarPanelVista.opciones}
+                            posicionX={agregarPanelVista.posicion.x}
+                            posicionY={agregarPanelVista.posicion.y}
+                            onSeleccionar={agregarPanelVista.onSeleccionar}
+                            onCerrar={agregarPanelVista.onCerrar}
+                        />
+                    )}
                 </>
             )}
 

@@ -7,6 +7,7 @@
  */
 
 import {useEffect, useMemo, useState, useCallback} from 'react';
+import {SquarePlus} from 'lucide-react';
 
 /* Importar store de configuración temprano para inicializar horaFinDia antes que otros módulos */
 import '../stores/configuracionUsuarioStore';
@@ -18,7 +19,8 @@ import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
 import {devLog} from '../utils/devLog';
-import {NavegacionInferior} from '../components/shared';
+import {NavegacionInferior, MenuContextual} from '../components/shared';
+import type {OpcionMenu} from '../components/shared';
 import {DockTracking} from '../components/shared/DockTracking';
 
 import {useEsMovil} from '../hooks/useEsMovil';
@@ -30,9 +32,12 @@ import {habitosActions} from '../stores/habitosStore';
 import {ModalNotasExpandido} from '../components/dashboard/notas/ModalNotasExpandido';
 import {useBackButtonCapacitor} from '../hooks/useBackButtonCapacitor';
 import {useDeteccionCambioDia} from '../hooks/useDeteccionCambioDia';
-import {obtenerTodosPanelesNavegables} from '../config/registroPaneles';
+import {obtenerTodosPanelesNavegables, obtenerPanel} from '../config/registroPaneles';
 import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
 import {useConfiguracionVistas, PANELES_VISTA_DEFECTO} from '../hooks/useConfiguracionVistas';
+import {MAX_PANELES_VISTA} from '../types/vistas';
+import type {PanelId} from '../hooks/useConfiguracionLayout';
+import {Boton} from '../components/ui';
 import {useExpPlugin} from '../plugins/exp';
 import {useGruposEjecucion} from '../hooks/useGruposEjecucion';
 import {useGruposEjecucionStore} from '../stores/gruposEjecucionStore';
@@ -95,6 +100,35 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
      * Persistencia en localStorage (glory_config_vistas) + preferencias BD. */
     const vistasConfig = useConfiguracionVistas();
     const {vistaActiva, vistas, seleccionarVista, crearVista, renombrarVista, eliminarVista, duplicarVista, cambiarPanelCelda, quitarPanelVista, moverPanelVista, agregarPanelVista, obtenerPanelesDisponiblesVista, ajustarProporcionesFilas, ajustarProporcionesColumnas} = vistasConfig;
+
+    /* [318A-4] Menú "agregar panel" movido al encabezado nav (antes era un
+     * botón flotante en la vista). El estado vive aquí (DashboardIsland) para
+     * compartirse entre el botón del header y el menú contextual. */
+    const [menuAgregarPanelAbierto, setMenuAgregarPanelAbierto] = useState(false);
+    const [posicionAgregarPanel, setPosicionAgregarPanel] = useState({x: 0, y: 0});
+
+    /* Paneles disponibles de la vista activa + opciones del menú */
+    const panelesDisponiblesVista = useMemo<PanelId[]>(
+        () => obtenerPanelesDisponiblesVista(vistaActiva.id),
+        [obtenerPanelesDisponiblesVista, vistaActiva.id]
+    );
+    const opcionesAgregarPanel = useMemo<OpcionMenu[]>(() => panelesDisponiblesVista.map(panelId => {
+        const def = obtenerPanel(panelId);
+        return {
+            id: panelId,
+            etiqueta: def?.titulo ?? panelId,
+            icono: def?.icono
+        };
+    }), [panelesDisponiblesVista]);
+
+    /* Se puede agregar si no se llegó al máximo y quedan paneles sin usar */
+    const puedeAgregarPanel = vistaActiva.celdas.length < MAX_PANELES_VISTA && panelesDisponiblesVista.length > 0;
+
+    const abrirMenuAgregarPanel = useCallback((evento: React.MouseEvent) => {
+        const rect = (evento.currentTarget as HTMLElement).getBoundingClientRect();
+        setPosicionAgregarPanel({x: rect.left, y: rect.bottom + 4});
+        setMenuAgregarPanelAbierto(true);
+    }, []);
 
     /* [300A-2] Si el panel activo se oculta desde config, cambiar al primero visible */
     /* [multi-panel-sidebar] También quita de la grilla los paneles ocultos */
@@ -374,6 +408,23 @@ export function DashboardIsland({titulo = 'DASHBOARD_01', version = VERSION_ACTU
             modoSeleccionActivo={modoSeleccionActivo}
             onToggleSeleccion={toggleModoSeleccionManual}
             selectorVistas={renderSelectorVistas}
+            /* [318A-4] Botón "agregar panel" en el nav (modo vistas). Solo se
+             * muestra cuando puedeAgregarPanel; el menú contextual vive aquí. */
+            agregarPanelVista={
+                puedeAgregarPanel ? {
+                    total: vistaActiva.celdas.length,
+                    maximo: MAX_PANELES_VISTA,
+                    opciones: opcionesAgregarPanel,
+                    abierto: menuAgregarPanelAbierto,
+                    posicion: posicionAgregarPanel,
+                    onAbrir: abrirMenuAgregarPanel,
+                    onSeleccionar: (panelId: PanelId) => {
+                        agregarPanelVista(vistaActiva.id, panelId);
+                        setMenuAgregarPanelAbierto(false);
+                    },
+                    onCerrar: () => setMenuAgregarPanelAbierto(false),
+                } : undefined
+            }
         />
     );
 

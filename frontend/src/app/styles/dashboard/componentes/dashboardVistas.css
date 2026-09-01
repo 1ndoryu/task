@@ -217,26 +217,7 @@
 }
 
 /* ── BOTÓN FLOTANTE "AGREGAR PANEL" ──
- * [318A-2 fb] Aparece cuando quedan paneles sin usar (tras quitar uno) y la
- * vista no llegó al máximo. Abre el menú contextual estándar (menuContextual)
- * con los paneles disponibles. Se coloca en la esquina inferior derecha del
- * grid, sin tapar el contenido (los paneles tienen su propio scroll). */
-.dashboardVistasAgregar {
-    position: absolute;
-    right: var(--dashboard-espacioSm, 0.5rem);
-    bottom: var(--dashboard-espacioSm, 0.5rem);
-    z-index: 50;
-}
-
-.dashboardVistasAgregar .boton--soloIcono {
-    width: 32px;
-    height: 32px;
-    border: var(--dashboard-espacioHairline, 1px) solid var(--dashboard-bordePrincipal, #000);
-    background: var(--dashboard-fondoSecundario, #0a0a0a);
-    color: var(--dashboard-textoActivo, #fff);
-    border-radius: 0;
-}
-
-.dashboardVistasAgregar .boton--soloIcono:hover {
-    background: var(--dashboard-fondoHover, #1a1a1a);
-}
+ * [318A-2 fb] Aparecía cuando quedaban paneles sin usar (tras quitar uno) y la
+ * vista no llegó al máximo. [318A-4] El botón se MOVIÓ al encabezado nav
+ * (botonIconoEncabezado + icono SquarePlus, ver EncabezadoAcciones); este CSS
+ * quedó sin uso y se elimina. El menú contextual usa el estándar (menuContextual). */

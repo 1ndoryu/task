@@ -51,7 +51,7 @@
 }
 
 .encabezadoEnlace:hover {
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
 }
 
 /* 
@@ -213,7 +213,7 @@
 }
 
 .seccionBoton:hover {
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
 }
 
 /* 

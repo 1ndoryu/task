@@ -12,6 +12,7 @@ import {useEsDispositivoMovil} from '../../hooks/useEsMovil';
 import {useEstadoCabecera} from '../../hooks/useEstadoCabecera';
 import type {InfoSuscripcion, Tarea, Habito, Proyecto, SincronizacionInfo} from '../../types/dashboard';
 import type {GrupoOpciones, OpcionMenuPanel} from '../shared/MenuOpcionesPanel';
+import type {OpcionMenu} from '../shared';
 
 // Sub-componentes
 import {EncabezadoTitulo} from './encabezado/EncabezadoTitulo';
@@ -88,6 +89,19 @@ interface DashboardEncabezadoVistas {
     /* [318A-2] Selector de vistas del Modo Vistas. Se renderiza en la zona
      * izquierda del encabezado (donde estaba el título), que se oculta. */
     selectorVistas?: React.ReactNode;
+    /* [318A-4] Botón "agregar panel" en el nav (modo vistas). Antes era un
+     * botón flotante en la vista; ahora vive en el encabezado con su menú
+     * contextual. Si es `undefined`, el botón no se muestra. */
+    agregarPanelVista?: {
+        total: number;
+        maximo: number;
+        opciones: OpcionMenu[];
+        abierto: boolean;
+        posicion: {x: number; y: number};
+        onAbrir: (evento: React.MouseEvent) => void;
+        onSeleccionar: (panelId: string) => void;
+        onCerrar: () => void;
+    };
 }
 
 interface DashboardEncabezadoProps extends DashboardEncabezadoBase, DashboardEncabezadoAcciones, DashboardEncabezadoAccionesExtra, DashboardEncabezadoBuscador, DashboardEncabezadoMovil, DashboardEncabezadoSeleccion, DashboardEncabezadoVistas {}
@@ -137,7 +151,9 @@ export function DashboardEncabezado({
     modoSeleccionActivo: _modoSeleccionActivo,
     onToggleSeleccion: _onToggleSeleccion,
     // Vistas (318A-2)
-    selectorVistas
+    selectorVistas,
+    // Agregar panel en el nav (318A-4)
+    agregarPanelVista
 }: DashboardEncabezadoProps): JSX.Element {
     const esTablet = useEsDispositivoMovil();
     const estaConectado = sincronizacion?.estaLogueado ?? false;
@@ -207,7 +223,7 @@ export function DashboardEncabezado({
                     </Boton>
                 )}
 
-                <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickPaneles={onClickPaneles} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} />
+                <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickPaneles={onClickPaneles} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} agregarPanelVista={agregarPanelVista} />
 
                 <EncabezadoEstado sincronizacion={sincronizacion} />
 
