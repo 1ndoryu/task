@@ -146,15 +146,15 @@ La frontera de desacople se hace con **traits (puertos)**: persistencia, búsque
 
 | Artefacto | ¿A Glory Harness? | Nota |
 |---|---|---|
-| `src/agent/runtime.rs` (loop, system prompt, ejecutar_turno) | ✅ sí | el corazón; queda agnóstico vía puertos |
+| `src/agent/runtime.rs` (loop, system prompt, ejecutar_turno) | ✅ sí (**parcial**) | el corazón queda agnóstico vía puertos; **pero** dentro del archivo viven `persistir_turno`, `cargar_historial`, `cargar_memoria_agente` y `cargar_skills_agente` con SQL inline de tablas de task (dominio: tareas/hábitos/notas, memoria, skills) — esas funciones **NO se mueven**: pasan al puerto `AgentPersistence` implementado por task. Verificado: `runtime.rs` usa `&AppState`/`&state.pool` (L22, L233, L266, L614-832) |
 | `src/agent/tool.rs` (trait + registry) | ✅ sí | H9, contrato público |
 | `src/agent/sandbox.rs` | ✅ sí | ya agnóstico (H6) |
 | `src/agent/context.rs` (compresión/límites) | ✅ sí | agnóstico |
 | `src/agent/diff.rs` | ✅ sí | agnóstico |
 | `src/agent/tools_archivo.rs` | ✅ sí | agnóstico (usa sandbox) |
 | `src/agent/tools.rs` (`crear_tarea`, `crear_habito`, `crear_recordatorio`, `crear_nota`, `web_search`) | ⚠️ **parcial** | `crear_*` son **tools de dominio de task** → se quedan como tools registradas por task contra el trait; `web_search` es agnóstica → al núcleo |
-| `src/agent/scheduler.rs` | ✅ sí (núcleo genérico) | la cola de tareas programadas se persiste vía `AgentPersistence`; la lógica de reprogramación es agnóstica |
-| `src/services/ai.rs` (`LlmProviderService`) | ✅ sí | H4 ya es genérico |
+| `src/agent/scheduler.rs` | ✅ sí (**con requisito**) | hoy está 100% acoplado a `AppState`+SQL (`correr_scheduler(state: AppState)`, verificado); al moverlo, **todas** sus queries pasan a métodos del trait `AgentPersistence` (`tarea_programada_*`); la lógica de reprogramación es agnóstica, pero el desacople query-a-trait es el grueso del trabajo |
+| `src/services/ai.rs` (`LlmProviderService`) | ✅ sí (**con requisito**) | H4 no usa `AppState`/`PgPool` (verificado), pero depende de `crate::config::AiProviderKeys` y `crate::errors::AppError`; al moverlo hay que mover/reexportar esos tipos al núcleo o desacoplarlos (tipos propios de error/config del crate) |
 | `src/handlers/agente.rs` | ❌ **se queda en task** | orquesta HTTP/SSE, auth, rate limit, config por usuario |
 | `src/lib.rs` (`AppState`) | ❌ **se queda en task** | glue del servidor |
 | Tablas `agente_*` | ❌ **se quedan en task** | la BD es del consumidor |
@@ -167,6 +167,8 @@ La frontera de desacople se hace con **traits (puertos)**: persistencia, búsque
 ### 6.1 Frontera del contrato: el runtime no sabe quién lo llama
 
 El núcleo define un `AgentRuntime` que recibe un `AgentSession` (config del turno + puertos) y produce eventos. **No** recibe `user_id` de task como concepto de negocio; recibe un `session_id` opaco (string) que el consumidor mapea a su usuario. Toda consulta a BD pasa por `AgentPersistence`.
+
+**Gotcha de la frontera (verificado):** las funciones `persistir_turno`, `cargar_historial`, `cargar_memoria_agente` y `cargar_skills_agente` viven HOY dentro de `runtime.rs` con SQL inline de dominio de task. Al mover `runtime.rs` al núcleo, estas funciones **no se mueven con él**: se convierten en implementación del puerto `AgentPersistence` (en task). El núcleo solo conserva el loop y el flujo de turno; toda query de dominio viaja por el trait.
 
 ### 6.2 Puertos (traits) que define el núcleo
 
@@ -293,6 +295,9 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 
 ### Fase 1 — Definir traits y mover módulos agnósticos (como crate lib)
 - [ ] Definir `AgentPersistence`, `WebSearchProvider`, `ProviderPort` en el núcleo (validar S2/S3: ¿sqlx fuera?).
+- [ ] Extraer de `runtime.rs` las funciones de persistencia/dominio (`persistir_turno`, `cargar_historial`, `cargar_memoria_agente`, `cargar_skills_agente`) → implementación del puerto `AgentPersistence` en task (**no se mueven al núcleo**).
+- [ ] Desacoplar `LlmProviderService` de `crate::config::AiProviderKeys` y `crate::errors::AppError` (tipos propios del núcleo o reexportados).
+- [ ] Convertir **todas** las queries de `scheduler.rs` a métodos del trait `AgentPersistence` (`tarea_programada_*`) antes de moverlo.
 - [ ] Mover a `glory-harness-core`: `tool.rs`, `sandbox.rs`, `context.rs`, `diff.rs`, `tools_archivo.rs`, `scheduler.rs` (lógica genérica), `runtime.rs` (sin SQL), `services/ai.rs` (como `providers`).
 - [ ] `web_search` (agnóstica) al núcleo; `crear_tarea`/`crear_habito`/`crear_recordatorio`/`crear_nota` quedan en task como tools registradas contra el trait.
 - [ ] Task implementa `AgentPersistence` con sus repositorios `agente_*`; `WebSearchProvider` con `WebSearchService`; `ProviderPort` con el provider movido.
@@ -329,6 +334,6 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 
 ## 14. SIGUIENTE ACCIÓN
 
-1. **Revisa y valida este plan** (especialmente §5.3 frontera, §6.6 UI, §13 riesgos abiertos).
-2. Si lo apruebas: **Fase 0 + Fase 1** como primer bloque (skeleton + traits + mover módulos agnósticos), con gate y commit por bloque.
-3. Registrar este plan en el roadmap de task como **318A-13** (pendiente) y crear la entrada de completados **solo cuando se ejecute**.
+1. **Revisado con `supervisor-thinking` (01-09-2026): VEREDICTO VIABLE CON RESERVAS** — se corrigió la frontera de `runtime.rs`/`scheduler.rs`/`services/ai.rs` (§5.3, §6.1, Fase 1) con evidencia de código (SQL inline y dependencias reales). Reservas: (a) funciones de persistencia/dominio dentro de `runtime.rs` **no se mueven** (van al puerto `AgentPersistence`), (b) `LlmProviderService` arrastra `AiProviderKeys`+`AppError`, (c) `scheduler.rs` requiere desacople query-a-trait antes de moverse.
+2. **Estado de registro:** el plan ya está registrado en el roadmap de task como **318A-13** y commiteado (`bf2b0e7`); la entrada de completados se crea **solo cuando se ejecute**.
+3. **Pendiente de tu validación:** §13 (repo Git vs local, nombre/carpeta, alcance de fases, lib vs daemon). Si lo apruebas: **Fase 0 + Fase 1** como primer bloque (skeleton + traits + mover módulos agnósticos), con gate y commit por bloque.
