@@ -19,8 +19,14 @@
 /* [318A-5] Tabs con borde visible en todos los estados (pedido del usuario) y
  * fuente explícita: el título y el input de renombrado heredan la fuente del
  * proyecto. Antes el input del renombrado perdía la fuente (heredaba la del
- * navegador), por eso al editar el nombre de la tab se "quitaba la fuente". */
-.panelAgenteTab {
+ * navegador), por eso al editar el nombre de la tab se "quitaba la fuente".
+ * [318A-5] !important + clase duplicada: la regla global
+ * .dashboardPanelView [class*="panel"] (dashboardPanelView.css, 0,2,0) con
+ * border:none !important matchea esta clase (contiene "panelAgenteTab"); con
+ * ambos !important gana la mayor especificidad, así que se duplica la clase
+ * para vencerla (mismo patrón que .panelIAInputCaja). Cada tab queda encerrada
+ * en su caja con borde. */
+.dashboardPanelView .panelAgenteTab.panelAgenteTab {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -32,19 +38,19 @@
     cursor: pointer;
     white-space: nowrap;
     max-width: 160px;
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-bottom: none;
+    border: 1px solid var(--dashboard-bordeSutil) !important;
+    background: var(--dashboard-fondoTarjeta) !important;
     user-select: none;
 }
 
 .panelAgenteTab:hover {
-    background: var(--dashboard-superposicionSutil);
-    border-color: var(--dashboard-bordePrincipal);
+    background: var(--dashboard-superposicionSutil) !important;
+    border-color: var(--dashboard-bordePrincipal) !important;
 }
 
 .panelAgenteTab--activa {
-    background: var(--dashboard-fondoTarjeta);
-    border-color: var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoTarjeta) !important;
+    border-color: var(--dashboard-bordePrincipal) !important;
     color: var(--dashboard-textoActivo);
     font-weight: 600;
 }
