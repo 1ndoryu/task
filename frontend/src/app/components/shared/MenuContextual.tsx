@@ -5,6 +5,7 @@
  */
 
 import {ChevronRight, Check} from 'lucide-react';
+import {createPortal} from 'react-dom';
 import {Boton} from '../ui';
 import {useMenuContextual} from '../../hooks/shared/useMenuContextual';
 
@@ -34,7 +35,15 @@ interface MenuContextualProps {
 export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu = false, footer}: MenuContextualProps): JSX.Element {
     const {menuRef, opcionActivaId, estiloSubmenu, manejarClick, manejarMouseEnterOpcion} = useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu});
 
-    return (
+    /* [318A-9] Portal a body: el menú usa position:fixed con coordenadas del
+     * viewport, pero si se renderiza inline dentro de un ancestro con
+     * transform (p. ej. .dashboardSidebarPanel--visible con translateY(0))
+     * el fixed se rompe y el menú aparece desplazado lejos del cursor.
+     * Portaleado a body, fixed es siempre relativo al viewport. Las variables
+     * --dashboard-* están en :root (variables.css), así que no se pierde tema.
+     * Solo se portaléa el menú raíz: los submenús usan position:absolute
+     * relativo a .menuContextualItemWrapper y deben seguir anidados dentro. */
+    const menu = (
         <div id={esSubmenu ? undefined : 'menu-contextual'} ref={menuRef as React.RefObject<HTMLDivElement>} className={`menuContextual ${esSubmenu ? 'menuContextualSubmenu' : ''}`} role="menu" aria-orientation="vertical" style={esSubmenu ? estiloSubmenu : undefined}>
             {opciones.map(opcion => (
                 <div key={opcion.id} className="menuContextualItemWrapper posicionRelativa" onMouseEnter={() => manejarMouseEnterOpcion(opcion.id)}>
@@ -68,6 +77,8 @@ export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, o
             )}
         </div>
     );
+
+    return esSubmenu ? menu : createPortal(menu, document.body);
 }
 
 export type {MenuContextualProps};

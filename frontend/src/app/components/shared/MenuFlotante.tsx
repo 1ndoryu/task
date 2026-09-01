@@ -5,6 +5,7 @@
  */
 
 import {type ReactNode} from 'react';
+import {createPortal} from 'react-dom';
 import {useMenuFlotante} from '../../hooks/shared/useMenuFlotante';
 
 interface MenuFlotanteProps {
@@ -19,7 +20,9 @@ interface MenuFlotanteProps {
 export function MenuFlotante({children, posicionX, posicionY, onCerrar, anchoMinimo = 200, claseAdicional = ''}: MenuFlotanteProps): JSX.Element {
     const {menuRef} = useMenuFlotante({posicionX, posicionY, onCerrar});
 
-    return (
+    /* [318A-9] Mismo fix que MenuContextual: portal a body para que
+     * position:fixed no se rompa por un ancestro con transform. */
+    const menu = (
         <div
             ref={menuRef as React.RefObject<HTMLDivElement>}
             className={`menuContextual ${claseAdicional}`} // Reutilizamos estilos base de menuContextual
@@ -34,4 +37,6 @@ export function MenuFlotante({children, posicionX, posicionY, onCerrar, anchoMin
             {children}
         </div>
     );
+
+    return createPortal(menu, document.body);
 }
