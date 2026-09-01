@@ -369,8 +369,10 @@ generan **warnings (no errores)** y que la próxima pasada debería migrar:
 - `ConfigExp.tsx`/`ConfigDeficitCalorico.tsx`: escapes documentados por layout de plugin (`FilaRange` local).
 
 **Recomendación:** migrar primero los de menor riesgo y mayor beneficio visual:
-`ModalConfiguracionActividad` (estructura ya canónica: `Modal` + `SeccionPanel` + `SelectorNivel` +
-`ToggleSwitch` — solo la label necesita `FormCampo`), `SeccionConfigPerfil` (labels → `FormCampo`) y
+`ModalConfiguracionActividad` (estructura canónica `Modal` + `SeccionPanel`, pero con controles de
+selector propios además de la label: `<Boton>` + `selectorPeriodoBoton` en 2 secciones y
+`SelectorNivel` local en otra — migrar los selectores a `Boton` canónico con variantes y la label a
+`FormCampo`), `SeccionConfigPerfil` (labels → `FormCampo`) y
 `ModalConfiguracionUsuario` (campos → `CampoEspecificacion` tipo numero). Los botones de
 `ModalConfigAgente` → `Boton` (patrón del sidebar ya migrado en 318A-5). `PanelAgente` (form programar
 tarea) puede usar `FormCampo`/`Input`/`Textarea`/`Select`.
