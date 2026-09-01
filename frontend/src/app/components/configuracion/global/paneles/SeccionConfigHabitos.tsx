@@ -52,7 +52,6 @@ export function SeccionConfigHabitos(): JSX.Element {
                             </Boton>
                         ))}
                     </div>
-                    <div className="separadorOpcionesConfig" />
                 </div>
             )}
 
