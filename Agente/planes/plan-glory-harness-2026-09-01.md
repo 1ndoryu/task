@@ -310,21 +310,22 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 > **La ejecución NO se inicia sin tu visto bueno.** Cada fase es un bloque cerrado con su propio gate y commit. Paridad funcional obligatoria al cierre de cada fase.
 
 ### Fase 0 — Skeleton y decisión de frontera
-- [ ] Crear `glory-harness/` en `area-trabajo` (carpeta nueva, no toca task).
-- [ ] `Cargo.toml` con 2 crates (o workspace): `glory-harness-core` (lib) + `glory-harness` (bin CLI/daemon). Validar S1.
-- [ ] Declarar en el README el contrato de puertos (6.2), eventos (6.3/6.4) y la frontera 5.3.
-- [ ] Bootstrappear gate propio de Glory Harness (sentinel + doctor) y verificar `cargo build`/`cargo test` vacío en `C:\tmp`.
+- [x] Crear `glory-harness/` en `area-trabajo` (carpeta nueva, no toca task).
+- [x] `Cargo.toml` con 2 crates (workspace): `glory-harness-core` (lib) + `glory-harness` (bin CLI/daemon). Validado S1.
+- [x] Declarar en el README el contrato de puertos (6.2), eventos (6.3/6.4) y la frontera 5.3.
+- [x] Bootstrappear gate propio de Glory Harness (sentinel + doctor) y verificar `cargo build`/`cargo test` vacío en `C:\tmp`.
 - [ ] **Checklist:** repo creado, compila, gate propio verde, frontera documentada.
+  - Hecho: repo + workspace compilan (target `C:/tmp/glory-harness-target`); gate propio autónomo `0016142`: checkouts propios (sentinel v0.7.7, varsense v2.2.1) en commits publicados, `quality:setup` con evidencia real, doctor `readyForGate=true`, analyze 0 errores. VarSense 0 archivos escaneables por diseño (linter CSS/TS y el repo es Rust puro). Fix de config: la policy v2 exige las 4 listas de guard (`npmScripts`/`npxTools` vacías en proyecto Rust).
 
 ### Fase 1 — Definir traits y mover módulos agnósticos (como crate lib)
-- [ ] Definir `AgentPersistence`, `WebSearchProvider`, `ProviderPort` en el núcleo (validar S2/S3: ¿sqlx fuera?).
-- [ ] Extraer de `runtime.rs` las funciones de persistencia/dominio (`persistir_turno`, `cargar_historial`, `cargar_memoria_agente`, `cargar_skills_agente`) → implementación del puerto `AgentPersistence` en task (**no se mueven al núcleo**).
-- [ ] Desacoplar `LlmProviderService` de `crate::config::AiProviderKeys` y `crate::errors::AppError` (tipos propios del núcleo o reexportados).
-- [ ] Convertir **todas** las queries de `scheduler.rs` a métodos del trait `AgentPersistence` (`tarea_programada_*`) antes de moverlo.
-- [ ] Mover a `glory-harness-core`: `tool.rs`, `sandbox.rs`, `context.rs`, `diff.rs`, `tools_archivo.rs`, `scheduler.rs` (lógica genérica), `runtime.rs` (sin SQL), `services/ai.rs` (como `providers`).
-- [ ] `web_search` (agnóstica) al núcleo; `crear_tarea`/`crear_habito`/`crear_recordatorio`/`crear_nota` quedan en task como tools registradas contra el trait.
-- [ ] Task implementa `AgentPersistence` con sus repositorios `agente_*`; `WebSearchProvider` con `WebSearchService`; `ProviderPort` con el provider movido.
-- [ ] `handlers/agente.rs` y `AppState` se adaptan: construyen el runtime con los puertos, sin lógica de núcleo.
+- [x] Definir `AgentPersistence`, `WebSearchProvider`, `ProviderPort` en el núcleo (validado S2/S3: sin sqlx, sin tipos de task). Contrato serde snake_case con tests (`contrato_tests.rs`, 12/12).
+- [x] Desacoplar `LlmProviderService` de `crate::config::AiProviderKeys` y `crate::errors::AppError` → `core/src/llm.rs` con tipos propios y tests portados 12/12 (commit `ff65ccf`). 3 warnings estructurales heredados (`limite-lineas`, `funcion-larga` en `llm.rs`) documentados; 0 errores gate.
+- [ ] Extraer de `runtime.rs` las funciones de persistencia/dominio (`persistir_turno`, `cargar_historial`, `cargar_memoria_agente`, `cargar_skills_agente`) → implementación del puerto `AgentPersistence` en task (**no se mueven al núcleo**; bloque de Fase 2).
+- [x] Convertir **todas** las queries de `scheduler.rs` a métodos del trait `AgentPersistence` — puerto extendido con `tarea_reprogramar` (commit `5125589`); scheduler 100% sin SQL.
+- [x] Mover a `glory-harness-core`: `diff.rs`, `context.rs`, `sandbox.rs` (commit `fe47ccc`); `tool.rs`, `tools_archivo.rs`, `tools_web.rs` (commit `def5aa7`); `scheduler.rs` (commit `5125589`); `runtime.rs` sin SQL sobre puertos con contrato H3 alineado al SSE de task (commit `ad57f54`); `services/ai.rs` como `llm.rs` desacoplado (commit `ff65ccf`). 44/44 tests core, 0 warnings, gate 0 errores (warnings estructurales heredados documentados).
+- [x] `web_search` (agnóstica) al núcleo (`tools_web.rs`); `crear_tarea`/`crear_habito`/`crear_recordatorio`/`crear_nota` quedan en task como tools registradas contra el trait (Fase 2).
+- [ ] Task implementa `AgentPersistence` con sus repositorios `agente_*`; `WebSearchProvider` con `WebSearchService`; `ProviderPort` con el provider movido (Fase 2).
+- [ ] `handlers/agente.rs` y `AppState` se adaptan: construyen el runtime con los puertos, sin lógica de núcleo (Fase 2).
 - [ ] **Checklist:** núcleo compila sin task; task compila y un turno de chat real funciona igual (evidencia SSE); tests movidos pasan; tests de task sin regresión; gate task PASS; commit por bloque.
 
 ### Fase 2 — Integración como lib en task
