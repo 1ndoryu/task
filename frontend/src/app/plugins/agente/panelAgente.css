@@ -174,50 +174,58 @@
 
 /* [318A-5] Barra de uso de contexto inferior (sobre el input). Muestra el uso
  * con una pista de progreso y un tooltip al hacer hover con el detalle
- * (usado, máximo, %, salida, skills). Monocromo: usa tokens del tema. */
-.panelIAContextoBarra {
+ * (usado, máximo, %, salida, skills). Monocromo: usa tokens del tema.
+ * [318A-7] Clase duplicada + !important (mismo patrón que .panelIAInputCaja de
+ * 318A-4): la regla global .dashboardPanelView [class*="panel"]
+ * (dashboardPanelView.css, 0,2,0) con background transparent / border none
+ * !important matchea estas clases (contienen "panelIA") y dejaba la barra
+ * invisible (solo se veía el tooltip al hover). Con especificidad (0,3,0) y
+ * !important se vence. */
+.dashboardPanelView .panelIAContextoBarra.panelIAContextoBarra {
     position: relative;
     display: flex;
     align-items: center;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
-    border-top: 1px solid var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoSecundario);
+    border-top: 1px solid var(--dashboard-bordeSutil) !important;
+    background: var(--dashboard-fondoSecundario) !important;
     cursor: default;
 }
 
-.panelIAContextoBarraPista {
+.dashboardPanelView .panelIAContextoBarraPista.panelIAContextoBarraPista {
     flex: 1;
     height: 4px;
     border-radius: var(--dashboard-radioSm);
-    background: var(--dashboard-superposicionSutil);
+    background: var(--dashboard-superposicionSutil) !important;
     overflow: hidden;
 }
 
-.panelIAContextoBarraRelleno {
+.dashboardPanelView .panelIAContextoBarraRelleno.panelIAContextoBarraRelleno {
     height: 100%;
-    background: var(--dashboard-textoActivo);
+    background: var(--dashboard-textoActivo) !important;
     transition: width 0.3s ease;
 }
 
-.panelIAContextoBarraRelleno--alto {
-    background: var(--dashboard-estadoAdvertencia);
+.dashboardPanelView .panelIAContextoBarraRelleno--alto.panelIAContextoBarraRelleno--alto {
+    background: var(--dashboard-estadoAdvertencia) !important;
 }
 
-.panelIAContextoBarraRelleno--critico {
-    background: var(--dashboard-peligroClaro);
+.dashboardPanelView .panelIAContextoBarraRelleno--critico.panelIAContextoBarraRelleno--critico {
+    background: var(--dashboard-peligroClaro) !important;
 }
 
 /* Tooltip: aparece al hacer hover sobre la barra completa (zona cómoda).
- * Posición absoluta encima de la barra, alineado a la derecha del panel. */
-.panelIAContextoBarraTooltip {
+ * Posición absoluta encima de la barra, alineado a la derecha del panel.
+ * [318A-7] También clase duplicada + !important en fondo/borde: la regla
+ * global [class*="panel"] lo dejaba transparente y sin borde sobre el panel. */
+.dashboardPanelView .panelIAContextoBarraTooltip.panelIAContextoBarraTooltip {
     position: absolute;
     bottom: calc(100% + var(--dashboard-espacioSm));
     right: var(--dashboard-espacioMd);
     min-width: 220px;
     max-width: 320px;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: var(--dashboard-fondoTarjeta);
-    border: 1px solid var(--dashboard-bordePrincipal);
+    background: var(--dashboard-fondoTarjeta) !important;
+    border: 1px solid var(--dashboard-bordePrincipal) !important;
     border-radius: var(--dashboard-radioSm);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoNormal);

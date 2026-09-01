@@ -237,10 +237,14 @@ async function correrTurno(
                         );
                         break;
                     case 'usage':
+                        /* El runtime emite `usage` con ocupacion_pct: None (y el
+                         * final con tokens_prompt: 0): conserva los valores
+                         * previos (contexto_detalle/turnos con tools) cuando el
+                         * evento no trae dato, para no borrar la barra. */
                         objetivo.contexto = {
-                            ocupacionPct: evento.ocupacion_pct ?? null,
-                            tokensPrompt: evento.tokens_prompt ?? 0,
-                            tokensComplecion: evento.tokens_complecion ?? 0,
+                            ocupacionPct: evento.ocupacion_pct ?? objetivo.contexto?.ocupacionPct ?? null,
+                            tokensPrompt: (evento.tokens_prompt ?? 0) > 0 ? (evento.tokens_prompt ?? 0) : objetivo.contexto?.tokensPrompt ?? 0,
+                            tokensComplecion: (evento.tokens_complecion ?? 0) > 0 ? (evento.tokens_complecion ?? 0) : objetivo.contexto?.tokensComplecion ?? 0,
                             skills: objetivo.contexto?.skills ?? 0,
                         };
                         break;
@@ -258,7 +262,12 @@ async function correrTurno(
                     case 'contexto_detalle':
                         objetivo.contexto = {
                             ocupacionPct: evento.ocupacion_pct,
-                            tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
+                            /* total_entrada es la suma de entrada del desglose
+                             * (system+tools+mensajes+resultados): si aún no
+                             * llegó usage, úsalo como tokens de entrada. */
+                            tokensPrompt: (objetivo.contexto?.tokensPrompt ?? 0) > 0
+                                ? objetivo.contexto?.tokensPrompt ?? 0
+                                : evento.total_entrada ?? 0,
                             tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
                             skills: objetivo.contexto?.skills ?? 0,
                             maxVentana: evento.max_ventana,
