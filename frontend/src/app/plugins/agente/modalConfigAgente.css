@@ -1,8 +1,9 @@
 /* [por que] Capa de estilos propia del proyecto (design system local).
- * sentinel-disable-file css-adhoc-button-style
- * sentinel-disable-file css-especificacion-diseno-local
+ * [318A-4] Coherencia con el sistema: SelectorModo usa la receta Radio canónica
+ * (radioGrupo/radioLabel en ui-formulario.css), los botones de skill usan el
+ * componente Boton (variante icono) y los campos usan FormCampo. Aquí queda
+ * solo layout contextual del modal: no se redefinen botones ni opciones.
  */
-
 
 /* ---- Overlay coherente con los demás modales ---- */
 .modalConfigAgenteOverlay {
@@ -56,29 +57,6 @@
     color: var(--dashboard-textoActivo);
 }
 
-.modalConfigAgenteCerrar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    background: none;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoMediano);
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    border-radius: var(--dashboard-radioSm);
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
-}
-
-.modalConfigAgenteCerrar:hover {
-    background: var(--dashboard-superposicionSutil);
-    color: var(--dashboard-textoActivo);
-}
-
 /* ---- Cuerpo ---- */
 .modalConfigAgenteCuerpo {
     /* [318A-5] Fila: sidebar (izquierda) + contenido (derecha), como el modal
@@ -111,9 +89,6 @@
 }
 
 .modalConfigAgenteSeccionTitulo {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dashboard-espacioMini);
     margin: 0;
     font-size: var(--dashboard-tamanoPequeno);
     font-weight: 600;
@@ -127,99 +102,9 @@
     line-height: 1.4;
 }
 
-/* ---- Opciones tipo radio (modo) ---- */
-.modalConfigAgenteOpciones {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioMini);
-}
-
-.modalConfigAgenteOpcion {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--dashboard-espacioS);
-    background: none;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-    padding: var(--dashboard-espacioS) var(--dashboard-espacioSmMd);
-    text-align: left;
-    cursor: pointer;
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-weight: 400;
-    transition: border-color var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
-}
-
-.modalConfigAgenteOpcion:hover {
-    background: var(--dashboard-superposicionSutil);
-}
-
-.modalConfigAgenteOpcion--activa {
-    border-color: var(--dashboard-acento);
-    background: var(--dashboard-superposicionSutil);
-}
-
-.modalConfigAgenteOpcionRadio {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 14px;
-    height: 14px;
-    margin-top: 1px;
-    border: 1.5px solid var(--dashboard-textoApagado);
-    border-radius: var(--dashboard-radioCirculo);
-    color: var(--dashboard-fondoSecundario);
-    flex-shrink: 0;
-    transition: border-color var(--dashboard-transicionRapida), background var(--dashboard-transicionRapida);
-}
-
-.modalConfigAgenteOpcion--activa .modalConfigAgenteOpcionRadio {
-    border-color: var(--dashboard-acento);
-    background: var(--dashboard-acento);
-    color: var(--dashboard-fondoSecundario);
-}
-
-.modalConfigAgenteOpcionTexto {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXxs);
-}
-
-.modalConfigAgenteOpcionNombre {
-    font-size: var(--dashboard-tamanoBase);
-    color: var(--dashboard-textoActivo);
-}
-
-.modalConfigAgenteOpcionDesc {
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
-    line-height: 1.35;
-}
-
 /* ---- Campos (texto/select/textarea/range) ---- */
-.modalConfigAgenteCampo {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioMini);
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
-.modalConfigAgenteCampo output {
-    color: var(--dashboard-textoActivo);
-}
-
-.modalConfigAgenteCheck {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioS);
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
 .modalConfigAgenteInput,
-.modalConfigAgenteCampo input:not([type="range"]),
-.modalConfigAgenteCampo select,
-.modalConfigAgenteCampo textarea {
+.modalConfigAgenteTextarea {
     width: 100%;
     box-sizing: border-box;
     background: var(--dashboard-fondoTerciario);
@@ -233,9 +118,7 @@
 }
 
 .modalConfigAgenteInput:focus,
-.modalConfigAgenteCampo input:not([type="range"]):focus,
-.modalConfigAgenteCampo select:focus,
-.modalConfigAgenteCampo textarea:focus {
+.modalConfigAgenteTextarea:focus {
     outline: none;
     border-color: var(--dashboard-acento);
 }
@@ -282,24 +165,6 @@
     flex-wrap: wrap;
 }
 
-/* El Checkbox compartido se muestra como control compacto en la fila del skill:
- * el checkboxContenedor por defecto es flex-column width:100%; aquí se limita
- * al control para no romper el layout horizontal de la fila. */
-.modalConfigAgenteSkillActiva {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.modalConfigAgenteSkillActiva .checkboxContenedor {
-    width: auto;
-    gap: 0;
-}
-
-.modalConfigAgenteSkillActiva .checkboxLabel {
-    gap: 0;
-}
-
 .modalConfigAgenteSkillTexto {
     display: flex;
     flex-direction: column;
@@ -325,27 +190,6 @@
     display: inline-flex;
     gap: var(--dashboard-espacioMini);
     flex-shrink: 0;
-}
-
-.modalConfigAgenteSkillBoton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    background: none;
-    border: none;
-    border-radius: var(--dashboard-radioSm);
-    color: var(--dashboard-textoApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    cursor: pointer;
-    padding: 0;
-    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
-}
-
-.modalConfigAgenteSkillBoton:hover {
-    background: var(--dashboard-superposicionSutil);
-    color: var(--dashboard-textoActivo);
 }
 
 .modalConfigAgenteSkillNueva {

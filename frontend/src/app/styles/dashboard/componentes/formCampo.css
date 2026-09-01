@@ -18,3 +18,10 @@
     color: var(--dashboard-textoApagado);
     line-height: 1.2;
 }
+
+/* [318A-4] El valor de los rangos (patrón A) se muestra en el título vía
+ * <output>; conserva el color activo que antes daba el CSS del modal del
+ * agente (modalConfigAgenteCampo output). */
+.tituloOpcionConfig output {
+    color: var(--dashboard-textoActivo);
+}
