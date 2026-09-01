@@ -102,9 +102,12 @@
     margin-top: var(--dashboard-espacioSm);
 }
 
-.panelAgenteHerramienta {
+/* Duplicar la clase sube la especificidad (0,3,0) por encima de la regla global
+ * `.dashboardPanelView [class*="panel"] { border: none !important }` del dashboard,
+ * que de otro modo dejaría las tarjetas sin borde dentro del chat real. */
+.panelAgenteHerramientas .panelAgenteHerramienta.panelAgenteHerramienta {
     font-size: var(--dashboard-tamanoPequeno);
-    border: 1px solid var(--dashboard-bordeSutil);
+    border: 1px solid var(--dashboard-bordeSutil) !important;
     border-radius: var(--dashboard-radioSm);
     background: transparent;
     overflow: hidden;
@@ -148,10 +151,10 @@
     margin: 0;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-top: 1px solid var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoCodigo);
-    color: var(--dashboard-textoCodigo);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    opacity: 0.8;
     white-space: pre-wrap;
     word-break: break-word;
     max-height: 120px;
