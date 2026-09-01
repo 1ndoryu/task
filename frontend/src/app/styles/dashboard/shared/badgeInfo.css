@@ -149,16 +149,6 @@
 /* 
  * FRECUENCIA (sutil, junto al nombre)
  */
-.badgeInfo--frecuencia {
-    padding: 0;
-    margin-left: var(--dashboard-espacioXs);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-weight: 400;
-    color: var(--dashboard-textoApagado);
-    background-color: transparent;
-    border: none;
-    opacity: 0.8;
-}
 
 /* 
  * HABITO (tarea virtual de habito)

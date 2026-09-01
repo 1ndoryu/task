@@ -237,36 +237,6 @@ body {
  * GESTOS TACTILES
  * Estilos para elementos con swipe
  */
-@media (max-width: 480px) {
-    .swipeable {
-        touch-action: pan-y;
-        user-select: none;
-    }
-
-    .swipeable__contenido {
-        transition: transform 0.2s ease;
-    }
-
-    .swipeable__accion {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .swipeable__accion--izquierda {
-        left: 0;
-        background: var(--dashboard-estadoAlta);
-    }
-
-    .swipeable__accion--derecha {
-        right: 0;
-        background: var(--dashboard-estadoExito);
-    }
-}
 
 /*
  * NOTA: Los estilos de PullToRefresh están en 

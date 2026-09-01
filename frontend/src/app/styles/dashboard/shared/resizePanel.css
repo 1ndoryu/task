@@ -125,9 +125,3 @@
 /*
  * Contenedor con scroll interno (clase auxiliar)
  */
-.panelContenidoScroll {
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex: 1;
-    min-height: 0;
-}

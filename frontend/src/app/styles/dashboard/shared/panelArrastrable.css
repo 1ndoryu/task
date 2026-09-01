@@ -76,25 +76,6 @@
  * ZONA DE DROP
  * Linea brillante que indica donde se insertara el panel
  */
-.indicadorZonaDrop {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--dashboard-acento);
-    border-radius: var(--dashboard-radioSm);
-    z-index: 100;
-    box-shadow: 0 0 12px var(--dashboard-acento), 0 0 24px rgba(var(--dashboard-acentoRgb), 0.4);
-    animation: pulsoZona 1s ease-in-out infinite;
-}
-
-.indicadorZonaDropSuperior {
-    top: -6px;
-}
-
-.indicadorZonaDropInferior {
-    bottom: -6px;
-}
 
 @keyframes pulsoZona {
     0%,

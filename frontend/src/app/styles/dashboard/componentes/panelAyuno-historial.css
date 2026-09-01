@@ -111,21 +111,6 @@
     margin: 0;
 }
 
-.modalAyunoUltimaComidaCampo {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioMd);
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioMd);
-    background: var(--dashboard-superposicionSutil);
-}
-
-.modalAyunoUltimaComidaIcono {
-    color: var(--dashboard-textoSecundario);
-    display: inline-flex;
-}
-
 /* Selector custom de hora (reemplaza input type=time) */
 .selectorHoraAyuno {
     display: flex;
@@ -218,4 +203,3 @@
     border-color: var(--dashboard-estadoAltaBorde);
     background: var(--dashboard-estadoAltaFondo);
 }
-

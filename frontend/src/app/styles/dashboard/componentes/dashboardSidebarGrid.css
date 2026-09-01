@@ -143,15 +143,6 @@
 }
 
 /* ESTADO VACÍO */
-.sidebarGridVacio {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--dashboard-textoApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoBase);
-}
 
 /* RESPONSIVE: móvil */
 @media (max-width: 767px) {

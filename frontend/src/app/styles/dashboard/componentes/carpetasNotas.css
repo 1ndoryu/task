@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* Navegador de Carpetas - Contenedor principal */
 .navegadorCarpetas {
     display: flex;
@@ -284,16 +283,6 @@
     min-width: 150px;
 }
 
-.menuMoverACarpetaTitulo {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoMuyApagado);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
-    margin-bottom: var(--dashboard-espacioXs);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
 .menuMoverACarpetaOpcion {
     display: flex;
     align-items: center;
@@ -314,17 +303,7 @@
     background: var(--dashboard-fondoHover);
 }
 
-.menuMoverACarpetaOpcion--activa {
-    background: rgba(var(--dashboard-acentoRgb), 0.1);
-    color: var(--dashboard-acento);
-}
-
 /* Estilos para botones de acción en lista de notas */
-.listaNotasItemAcciones {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-}
 
 .listaNotasItemBotonAccion {
     display: flex;

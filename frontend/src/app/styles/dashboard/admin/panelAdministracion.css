@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 /* 
  * MODAL DEL PANEL
  */
@@ -497,9 +496,4 @@
 .adminTab:hover {
     color: var(--dashboard-textoNormal);
     background: var(--dashboard-fondoHover);
-}
-
-.adminTabActiva {
-    color: var(--dashboard-textoActivo);
-    background: var(--dashboard-fondoPrincipal);
 }

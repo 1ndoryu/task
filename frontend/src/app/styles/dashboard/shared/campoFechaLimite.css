@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 /* 
  * Contenedor principal 
  */
@@ -11,21 +10,6 @@
     align-items: center;
     gap: var(--dashboard-espacioSm);
     position: relative;
-}
-
-.campoFechaLimiteVencida {
-    border-left: 3px solid var(--dashboard-estadoAlta);
-    padding-left: var(--dashboard-espacioSm);
-}
-
-.campoFechaLimiteUrgente {
-    border-left: 3px solid var(--dashboard-estadoMedia);
-    padding-left: var(--dashboard-espacioSm);
-}
-
-.campoFechaLimiteProxima {
-    border-left: 3px solid var(--dashboard-estadoExito);
-    padding-left: var(--dashboard-espacioSm);
 }
 
 /* 

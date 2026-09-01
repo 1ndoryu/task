@@ -2,7 +2,6 @@
  * sentinel-disable-file css-elemento-html-directo
  */
 
-
 .modalFeedback {
     max-width: 480px;
     width: 95%;
@@ -131,11 +130,6 @@
 }
 
 /* Contador de caracteres */
-.modalFeedbackContador {
-    text-align: right;
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
-}
 
 /* Resultado */
 .modalFeedbackResultado {

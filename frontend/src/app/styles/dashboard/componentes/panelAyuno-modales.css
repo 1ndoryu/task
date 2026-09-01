@@ -115,11 +115,6 @@
     background: var(--dashboard-estadoExitoFondo);
 }
 
-.modalAyunoTimelineIcono--comida {
-    color: var(--dashboard-textoSecundario);
-    border-color: var(--dashboard-bordeSutil);
-}
-
 .modalAyunoTimelineIcono--proximo {
     color: var(--dashboard-acento);
     border-color: var(--dashboard-acento);

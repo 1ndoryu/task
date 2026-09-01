@@ -184,32 +184,3 @@
 /* Boton eliminar badge migrado a Boton variante="icono" (Fase 6.5) */
 
 /* Variantes de color para badges - Usan variables de estado existentes */
-.badgesPropiedad__badge--proyecto {
-    color: var(--dashboard-acentoPrimario);
-    border-color: rgba(var(--dashboard-acentoPrimarioRgb), 0.4);
-}
-
-.badgesPropiedad__badge--prioridad {
-    color: var(--dashboard-estadoMedia);
-    border-color: var(--dashboard-estadoMediaBorde);
-}
-
-.badgesPropiedad__badge--urgencia {
-    color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
-
-.badgesPropiedad__badge--fecha {
-    color: var(--dashboard-estadoInfo);
-    border-color: var(--dashboard-estadoInfoBorde);
-}
-
-.badgesPropiedad__badge--frecuencia {
-    color: var(--dashboard-estadoExito);
-    border-color: var(--dashboard-estadoExitoBorde);
-}
-
-.badgesPropiedad__badge--importancia {
-    color: var(--dashboard-estadoMuyAlta);
-    border-color: var(--dashboard-estadoMuyAltaBorde);
-}

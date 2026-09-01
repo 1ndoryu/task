@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * CONTENEDOR 
  */
@@ -126,15 +125,6 @@
     display: flex; /* Cambiado a flex para mejor centrado vertical */
     align-items: center;
     justify-content: center;
-}
-
-.selectorBadgeFlecha {
-    transition: transform var(--dashboard-transicionRapida);
-    opacity: 0.8; /* Unificado ligeramente menos que 1 para jerarquía visual, pero más consistente */
-}
-
-.selectorBadgeFlechaAbierta {
-    transform: rotate(180deg);
 }
 
 /* 

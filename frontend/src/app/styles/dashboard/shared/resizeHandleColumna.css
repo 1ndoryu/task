@@ -106,10 +106,6 @@
     width: 100%;
 }
 
-.dashboardGridColumnas--1col {
-    grid-template-columns: 1fr;
-}
-
 /* 
  * Convertimos porcentajes a proporciones fr
  * Ejemplo: 58% y 42% se convierten a 58fr y 42fr

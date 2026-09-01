@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* Overlay oscuro detras del bottom sheet */
 .bottomSheetOverlay {
     position: fixed;
@@ -79,22 +78,6 @@
 }
 
 /* Cabecera con titulo - Compacto */
-.bottomSheetCabecera {
-    padding: 0 var(--dashboard-espacioSm) 4px;
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
-    flex-shrink: 0;
-}
-
-.bottomSheetTitulo {
-    font-size: var(--dashboard-tamanoMovilPequeno);
-    font-weight: 600;
-    color: var(--dashboard-textoActivo);
-    margin: 0;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
 /* [014A-9] Contenido scrolleable — padding espacioLg para más respiro */
 .bottomSheetContenido {
@@ -104,7 +87,6 @@
     flex: 1;
     min-height: 0;
 }
-
 
 /* Items dentro del bottom sheet (para menus) - Diseño compacto unificado */
 /* Orden visual: Texto | Icono (texto primero, icono al lado derecho) */

@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .modalNotasGuardadas {
     display: flex;
     flex-direction: column;
@@ -122,11 +121,6 @@
     background: var(--dashboard-fondoHover);
 }
 
-.modalNotasItemEliminando {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
 .modalNotasItemContenido {
     flex: 1;
     min-width: 0;
@@ -153,14 +147,6 @@
     overflow: hidden;
     font-family: var(--dashboard-fuenteMonoespaciada);
     flex: 1;
-}
-
-.modalNotasItemFecha {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoMuyApagado);
 }
 
 /* Fecha de creaciÃ³n debajo del tÃ­tulo */
@@ -229,4 +215,3 @@
     color: var(--dashboard-textoMuyApagado);
     text-align: center;
 }
-

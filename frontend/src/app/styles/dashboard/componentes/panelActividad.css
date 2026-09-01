@@ -3,13 +3,9 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * Contenedor Principal 
  */
-.panelActividadContenedor {
-    min-height: 120px;
-}
 
 /* 
  * Cuerpo con el mapa 
@@ -91,32 +87,7 @@
     gap: var(--dashboard-espacioXs);
 }
 
-.panelActividadDetalleItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background: var(--dashboard-fondoHover);
-    border: 1px solid var(--dashboard-bordePrincipal);
-}
-
-.panelActividadDetalleInfo {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXxs);
-}
-
-.panelActividadDetalleTipo {
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoNormal);
-}
-
 .panelActividadDetalleElemento,
-.panelActividadDetalleProyecto {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoSecundario);
-}
 
 .panelActividadDetalleHora {
     font-family: var(--dashboard-fuenteMonoespaciada);

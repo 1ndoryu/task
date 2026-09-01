@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 .accionesDatosContenedor {
     margin-top: var(--dashboard-espacioLg);
     padding: var(--dashboard-espacioMd);
@@ -46,14 +45,6 @@
 .accionIcono {
     font-size: var(--dashboard-tamanoMovilBase);
     line-height: 1;
-}
-
-.botonExportar:hover {
-    border-color: var(--dashboard-estadoMedia);
-}
-
-.botonImportar:hover {
-    border-color: var(--dashboard-estadoExito);
 }
 
 .inputArchivoOculto {

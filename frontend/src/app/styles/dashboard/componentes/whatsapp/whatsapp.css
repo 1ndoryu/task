@@ -132,10 +132,6 @@
     align-items: center;
 }
 
-.whatsappQRRenovar {
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
 .whatsappQRRefreshHint {
     color: var(--dashboard-textoMuyApagado);
     font-size: var(--dashboard-tamanoMuyPequeno);

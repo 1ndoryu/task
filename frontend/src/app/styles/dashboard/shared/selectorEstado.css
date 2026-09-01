@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * SELECTOR ESTADO TAREA
  */
@@ -169,18 +168,6 @@
     margin-right: var(--dashboard-espacioSm);
 }
 
-.selectorEstadoHabitoValor--completado {
-    color: var(--dashboard-estadoExito);
-}
-
-.selectorEstadoHabitoValor--pospuesto {
-    color: var(--dashboard-estadoMedia);
-}
-
-.selectorEstadoHabitoValor--omitido {
-    color: var(--dashboard-estadoAlta);
-}
-
 .selectorEstadoHabitoFlecha {
     color: var(--dashboard-textoMuyApagado);
     font-size: var(--dashboard-tamanoMicro);
@@ -220,16 +207,4 @@
     background-color: var(--dashboard-fondoHover);
     border-color: var(--dashboard-bordePrincipal);
     color: var(--dashboard-textoNormal);
-}
-
-.selectorEstadoHabitoOpcion--completado {
-    color: var(--dashboard-estadoExito);
-}
-
-.selectorEstadoHabitoOpcion--pospuesto {
-    color: var(--dashboard-estadoMedia);
-}
-
-.selectorEstadoHabitoOpcion--omitido {
-    color: var(--dashboard-estadoAlta);
 }

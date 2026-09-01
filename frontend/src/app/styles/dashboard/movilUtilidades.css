@@ -28,24 +28,12 @@
         display: flex !important;
     }
 
-    .mostrarSoloEnMovil--block {
-        display: block !important;
-    }
-
-    .mostrarSoloEnMovil--inline {
-        display: inline !important;
-    }
 }
 
 /* 
  * OCULTAR EN TABLET
  * Elementos visibles en desktop pero ocultos en tablet y menor
  */
-@media (max-width: 768px) {
-    .ocultarEnTablet {
-        display: none !important;
-    }
-}
 
 /* 
  * MOSTRAR SOLO EN TABLET

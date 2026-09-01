@@ -2,7 +2,6 @@
  * sentinel-disable-file css-elemento-html-directo
  */
 
-
 /* Sistema de diseno del proyecto (CSS Variables + componentes) */
 @import '../assets/css/init.css';
 
@@ -170,15 +169,3 @@
 }
 
 /* Estilos para single posts */
-.single-post-container {
-    max-width: 48rem;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.single-post-featured-image {
-    width: 100%;
-    height: auto;
-    border-radius: 0;
-    object-fit: cover;
-}

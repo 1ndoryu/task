@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .adjuntosContenedor {
     display: flex;
     flex-direction: column;
@@ -153,15 +152,6 @@
     color: var(--dashboard-textoApagado);
 }
 
-.adjuntosVacio {
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado);
-    font-style: italic;
-    text-align: center;
-    padding: var(--dashboard-espacioSm);
-}
-
 /* Reproductor de Audio Minimalista */
 .adjuntoAudioControl {
     display: flex;
@@ -304,10 +294,6 @@
 .adjuntosIconoCarga {
     color: var(--dashboard-textoApagado);
     transition: color var(--dashboard-transicionNormal);
-}
-
-.adjuntosIconoPremium {
-    color: var(--dashboard-estadoAdvertencia) !important;
 }
 
 .adjuntosIconoLimite {

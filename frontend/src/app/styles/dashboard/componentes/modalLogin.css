@@ -137,15 +137,3 @@
     font-size: var(--dashboard-tamanoPequeno);
     border-radius: var(--dashboard-radioMd);
 }
-
-.mensajeRecuperar--exito {
-    background-color: var(--dashboard-estadoExitoFondo);
-    color: var(--dashboard-estadoExito);
-    border: 1px solid var(--dashboard-estadoExitoBorde);
-}
-
-.mensajeRecuperar--error {
-    background-color: var(--dashboard-estadoAltaFondo);
-    color: var(--dashboard-estadoAlta);
-    border: 1px solid var(--dashboard-estadoAltaBorde);
-}

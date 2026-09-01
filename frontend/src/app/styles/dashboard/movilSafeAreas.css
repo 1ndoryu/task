@@ -10,12 +10,6 @@
  * SAFE AREAS CONTENEDOR
  * Contenedor principal con safe areas
  */
-.contenedorConSafeArea {
-    padding-top: var(--dashboard-safeAreaTop);
-    padding-bottom: var(--dashboard-safeAreaBottom);
-    padding-left: var(--dashboard-safeAreaLeft);
-    padding-right: var(--dashboard-safeAreaRight);
-}
 
 /* 
  * HEADER CON SAFE AREA SUPERIOR

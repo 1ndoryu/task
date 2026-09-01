@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 /* 
  * CONTENEDOR PRINCIPAL
  */
@@ -124,18 +123,6 @@
     gap: var(--dashboard-espacioSm);
     padding: 2px 0;
     opacity: 0.6;
-}
-
-.timelineMensajeSistemaIcono {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    background-color: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoMuyApagado);
-    flex-shrink: 0;
 }
 
 .timelineMensajeSistemaTexto {
@@ -435,6 +422,3 @@
 /* 
  * LEGACY: Clases antiguas de pestañas (mantener por compatibilidad)
  */
-.panelChatHistorialPestanas {
-    display: none;
-}

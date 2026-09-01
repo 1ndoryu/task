@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .swipeableItem {
     position: relative;
     overflow: hidden;
@@ -100,10 +99,6 @@
     100% {
         transform: scale(1);
     }
-}
-
-.swipeableItem__accionIcono--activo {
-    animation: swipeActivado 0.2s ease-out;
 }
 
 /* Solo habilitar en móvil - en desktop se ocultan las acciones */

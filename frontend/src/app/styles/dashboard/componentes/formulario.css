@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 /* 
  * ESTRUCTURA DEL FORMULARIO 
  */
@@ -22,10 +21,6 @@
  * Campo de mapa de calor (historial de habito)
  * Se asegura de ocupar todo el ancho disponible
  */
-.formularioCampo--mapaCalor {
-    width: 100%;
-    margin-top: var(--dashboard-espacioSm);
-}
 
 .formularioEtiqueta {
     font-size: var(--dashboard-tamanoPequeno);
@@ -74,10 +69,6 @@
 /* 
  * BOTONES DE IMPORTANCIA 
  */
-.formularioGrupoBotones {
-    display: flex;
-    gap: var(--dashboard-espacioSm);
-}
 
 .formularioBotonImportancia {
     flex: 1;
@@ -94,32 +85,6 @@
 .formularioBotonImportancia:hover:not(:disabled) {
     border-color: var(--dashboard-textoMuyApagado);
     color: var(--dashboard-textoSecundario);
-}
-
-.formularioBotonImportanciaActivo {
-    font-weight: 600;
-}
-
-.formularioBotonImportanciaAlta {
-    color: var(--dashboard-estadoAlta);
-    background-color: var(--dashboard-estadoAltaFondo);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
-
-.formularioBotonImportanciaMedia {
-    color: var(--dashboard-estadoMedia);
-    background-color: var(--dashboard-estadoMediaFondo);
-    border-color: var(--dashboard-estadoMediaBorde);
-}
-
-.formularioBotonImportanciaBaja {
-    color: var(--dashboard-estadoBaja);
-    border-color: var(--dashboard-estadoBajaBorde);
-}
-
-.formularioBotonImportanciaMuyBaja {
-    color: var(--dashboard-estadoMuyBaja);
-    border-color: var(--dashboard-estadoMuyBajaBorde);
 }
 
 /* 
@@ -187,13 +152,6 @@
 /* 
  * BOTONES DE ACCION 
  */
-.formularioAcciones {
-    display: flex;
-    gap: var(--dashboard-espacioSm);
-    margin-top: var(--dashboard-espacioSm);
-    padding-top: var(--dashboard-espacioLg);
-    border-top: 1px solid var(--dashboard-bordePrincipal);
-}
 
 .formularioBotonCancelar {
     flex: 1;
@@ -238,11 +196,6 @@
 /* 
  * ZONA DE PELIGRO (ELIMINAR) 
  */
-.formularioZonaPeligro {
-    margin-top: var(--dashboard-espacioSm);
-    padding-top: var(--dashboard-espacioMd);
-    border-top: 1px dashed var(--dashboard-estadoAltaBorde);
-}
 
 .formularioBotonEliminar {
     width: 100%;

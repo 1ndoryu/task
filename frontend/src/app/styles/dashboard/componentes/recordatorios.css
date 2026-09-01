@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* Contenido principal del panel */
 .recordatoriosContenido {
     display: flex;
@@ -92,14 +91,6 @@
 }
 
 /* Indicador de total de recordatorios */
-.recordatoriosIndicador {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXxs);
-    color: var(--dashboard-textoMuyApagado);
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-}
 
 /* Overlay enfoque: imágenes grandes */
 .recordatoriosEnfoqueImagenes {
@@ -128,13 +119,6 @@
 }
 
 /* === Modal Recordatorios Guardados === */
-
-.recordatoriosLista {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm) 0;
-}
 
 .recordatorioCard {
     display: flex;
@@ -187,39 +171,8 @@
 }
 
 /* Texto de la card */
-.recordatorioCardTexto {
-    margin: 0;
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno);
-    line-height: 1.4;
-    word-break: break-word;
-}
-
-.recordatorioCardTexto--imagen {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXxs);
-    color: var(--dashboard-textoApagado);
-    font-style: italic;
-}
 
 /* Edición inline en la card */
-.recordatorioCardEdicion {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-}
-
-.recordatorioCardEdicionInput {
-    flex: 1;
-    font-size: var(--dashboard-tamanoPequeno) !important;
-}
-
-.recordatorioCardEdicionAcciones {
-    display: flex;
-    gap: var(--dashboard-espacioXxs);
-    flex-shrink: 0;
-}
 
 /* Acciones de la card (visibles en hover) */
 .recordatorioCardAcciones {
@@ -257,28 +210,6 @@
 }
 
 /* Confirmación de imágenes múltiples */
-.recordatorioConfirmacion {
-    padding: var(--dashboard-espacioLg);
-    text-align: center;
-}
-
-.recordatorioConfirmacionPregunta {
-    margin-bottom: var(--dashboard-espacioMd);
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
-}
-
-.recordatorioConfirmacionSub {
-    margin-bottom: var(--dashboard-espacioLg);
-    color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
-.recordatorioConfirmacionAcciones {
-    display: flex;
-    gap: var(--dashboard-espacioSm);
-    justify-content: center;
-}
 
 /* Thumbnails de adjuntos en creación */
 .recordatorioAdjuntosPreview {

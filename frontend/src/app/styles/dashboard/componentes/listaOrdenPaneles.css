@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .listaOrdenPaneles {
     display: flex;
     flex-direction: column;
@@ -152,38 +151,3 @@
 }
 
 /* Vista previa compacta del layout */
-.listaOrdenPreview {
-    display: grid;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioMd);
-    background-color: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-    margin-top: var(--dashboard-espacioMd);
-}
-
-.listaOrdenPreview--2col {
-    grid-template-columns: 1fr 1fr;
-}
-
-.listaOrdenPreview--3col {
-    grid-template-columns: 1fr 1fr 1fr;
-}
-
-.listaOrdenPreviewColumna {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXxs);
-}
-
-.listaOrdenPreviewItem {
-    height: 12px;
-    background-color: var(--dashboard-fondoTerciario);
-    border-radius: var(--dashboard-radioXs);
-    border: 1px solid var(--dashboard-bordePrincipal);
-}
-
-.listaOrdenPreviewItem--activo {
-    background-color: var(--dashboard-acento);
-    border-color: var(--dashboard-acento);
-}

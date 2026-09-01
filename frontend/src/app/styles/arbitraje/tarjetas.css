@@ -56,24 +56,7 @@
     background-color: var(--dashboard-superposicionClara);
 }
 
-.badgePesimista {
-    color: var(--dashboard-estadoAlta);
-}
-
-.badgeRealista {
-    color: var(--dashboard-estadoMedia);
-}
-
-.badgeOptimista {
-    color: var(--dashboard-estadoExito);
-}
-
 /* Métricas principales */
-.metricaPrincipal {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXxs);
-}
 
 .valorMetrica {
     font-size: var(--dashboard-tamanoTitulo);
@@ -87,11 +70,6 @@
 
 .valorMetrica.negativo {
     color: var(--dashboard-estadoAlta);
-}
-
-.etiquetaMetrica {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoApagado);
 }
 
 /* Lista de detalles */

@@ -303,23 +303,3 @@
  * PROPIEDADES COMPACTAS EXTENDIDAS
  * Fila de propiedades para tareas/habitos estilo Linear
  */
-.propiedadesCompactasExtendidas {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioXs) 0;
-}
-
-.propiedadesCompactasExtendidas__grupo {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-}
-
-.propiedadesCompactasExtendidas__separador {
-    width: 1px;
-    height: 20px;
-    background: var(--dashboard-bordeSutil);
-    margin: 0 var(--dashboard-espacioXs);
-}

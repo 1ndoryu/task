@@ -369,22 +369,6 @@
     background: var(--dashboard-superposicionSutil);
 }
 
-.panelAgenteTareaEstado--pendiente {
-    color: var(--dashboard-acento);
-}
-
-.panelAgenteTareaEstado--ejecutando {
-    color: var(--dashboard-acento);
-}
-
-.panelAgenteTareaEstado--completada {
-    color: var(--dashboard-exito);
-}
-
-.panelAgenteTareaEstado--fallida {
-    color: var(--dashboard-peligroClaro);
-}
-
 .panelAgenteTareaBorrar {
     display: inline-flex;
     align-items: center;

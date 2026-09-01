@@ -113,9 +113,6 @@
 /* 
  * MODAL MODERNA EXPANDIDA
  */
-.modalModerna {
-    max-width: 600px;
-}
 
 .modalModerna__header {
     padding: var(--dashboard-espacioLg);
@@ -234,4 +231,3 @@
     color: var(--dashboard-textoMuyApagado);
     margin-left: var(--dashboard-espacioSm);
 }
-

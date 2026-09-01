@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .panelDeficitCalorico {
     display: flex;
     flex-direction: column;
@@ -229,13 +228,6 @@
 }
 
 /* Lista de comidas */
-.deficitListaComidas {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    max-height: 200px;
-    overflow-y: auto;
-}
 
 .deficitComidaItem {
     display: flex;
@@ -507,35 +499,3 @@
 }
 
 /* Ajustes para mantener retrocompatibilidad */
-.deficitHistorialItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 0;
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
-.deficitHistorialFecha {
-    color: var(--dashboard-textoSecundario);
-    min-width: 60px;
-}
-
-.deficitHistorialCalorias {
-    color: var(--dashboard-textoNormal);
-    font-variant-numeric: tabular-nums;
-}
-
-.deficitHistorialBalance {
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    min-width: 50px;
-    text-align: right;
-}
-
-.deficitHistorialBalance--deficit {
-    color: var(--dashboard-estadoExito);
-}
-
-.deficitHistorialBalance--superavit {
-    color: var(--dashboard-estadoAlta);
-}

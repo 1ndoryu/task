@@ -361,16 +361,6 @@
     gap: var(--dashboard-espacioLg);
 }
 
-.radioGrupo--vertical {
-    flex-direction: column;
-    gap: var(--dashboard-espacioMd);
-}
-
-.radioGrupo--horizontal {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
 .radioLabel {
     display: flex;
     align-items: flex-start;

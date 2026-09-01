@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * ITEM DE TAREA
  */
@@ -103,47 +102,9 @@
     text-decoration-color: var(--dashboard-textoIndice);
 }
 
-.tareaPrioridadIndicador {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.8;
-}
-
 /* 
  * INDICADOR DE FECHA LIMITE
  */
-.tareaFechaIndicador {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dashboard-espacioMini);
-    padding: 1px 5px;
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    color: var(--dashboard-textoApagado);
-    background-color: var(--dashboard-fondoHover);
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioXs);
-    white-space: nowrap;
-}
-
-.tareaFechaVencida {
-    color: var(--dashboard-estadoAlta);
-    background-color: var(--dashboard-estadoAltaFondo);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
-
-.tareaFechaUrgente {
-    color: var(--dashboard-estadoAdvertencia);
-    background-color: var(--dashboard-estadoAdvertenciaFondo);
-    border-color: var(--dashboard-estadoAdvertenciaBorde);
-}
-
-.tareaFechaProxima {
-    color: var(--dashboard-estadoExito);
-    background-color: var(--dashboard-estadoExitoFondo);
-    border-color: var(--dashboard-estadoExitoBorde);
-}
 
 /* 
  * ACCIONES DE TAREA (eliminar, etc)
@@ -238,13 +199,6 @@
 
 .tareaItemEditando:hover {
     background-color: var(--dashboard-fondoHover);
-}
-
-.tareaEdicionContenedor {
-    flex: 1;
-    display: flex;
-    align-items: flex-start;
-    gap: var(--dashboard-espacioSm);
 }
 
 /* 
@@ -343,14 +297,6 @@
 /* 
  * FORMULARIO NUEVA TAREA
  */
-.tareaNuevoFormulario {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
-    background-color: var(--dashboard-fondoSecundario);
-}
 
 .tareaNuevoInput {
     width: 100%;
@@ -370,12 +316,6 @@
 
 .tareaNuevoInput::placeholder {
     color: var(--dashboard-textoPlaceholder);
-}
-
-.tareaNuevoAcciones {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
 }
 
 .tareaNuevoConfirmar,
@@ -446,14 +386,6 @@
     line-height: 1.4;
     outline: none;
     text-align: left;
-}
-
-.tareaNuevoInlineInputOculto {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    pointer-events: none;
 }
 
 .tareaNuevoInlineInput::placeholder {
@@ -595,8 +527,6 @@
 .tareaItem:hover .tareaArrastreHandle {
     opacity: 0.7;
 }
-
-
 
 /*
  * Contenedor del item padre en el reorder
@@ -760,9 +690,6 @@
 /* 
  * Indicador para tarea principal
  */
-.tareaDropIndicadorPrincipal {
-    background-color: var(--dashboard-estadoExito);
-}
 
 /* 
  * Zona de drop superior de la lista (primera posición)

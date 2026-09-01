@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* Barra de navegación principal */
 .navegacionInferiorBarra {
     display: none;
@@ -28,23 +27,8 @@
 /* Items de navegacion migrados a Boton variante="navegacion" (Fase 6.5) */
 
 /* Contenedor de icono con badge */
-.navegacionInferiorIconoConBadge {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 /* Badge de notificaciones - punto simple */
-.navegacionInferiorBadge {
-    position: absolute;
-    top: -2px;
-    right: -4px;
-    width: 6px;
-    height: 6px;
-    background: var(--dashboard-textoActivo);
-    border-radius: var(--dashboard-radioCirculo);
-}
 
 /* 
  * FAB CENTRAL

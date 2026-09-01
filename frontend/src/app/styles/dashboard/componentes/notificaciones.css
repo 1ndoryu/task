@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 /* 
  * Modal de Notificaciones (Dropdown)
  */
@@ -236,10 +235,6 @@
 .itemNotificacion__boton:hover {
     background: var(--dashboard-fondoHover);
     color: var(--dashboard-estadoExito);
-}
-
-.itemNotificacion__boton--eliminar:hover {
-    color: var(--dashboard-estadoAlta);
 }
 
 /* 

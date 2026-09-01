@@ -35,7 +35,7 @@ body {
   line-height: 1.5;
 }
 
-.auth-layout, .workspace-layout {
+.workspace-layout {
   display: grid;
   min-height: 100vh;
   place-items: center;

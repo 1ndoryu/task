@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * OVERLAY 
  */
@@ -133,14 +132,6 @@
     text-overflow: ellipsis;
 }
 
-.drawerMovilEmail {
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /*
  * BADGE DE PLAN - Ahora dentro de la info del perfil
  */
@@ -163,12 +154,6 @@
 .drawerMovilPlanBadge--premium {
     background: linear-gradient(135deg, var(--dashboard-estadoAdvertencia) 0%, var(--dashboard-estadoAdvertenciaFuerte) 100%);
     color: var(--dashboard-textoSobreAcento);
-}
-
-.drawerMovilPlanBadge--trial {
-    background: rgba(var(--dashboard-acentoRgb), 0.2);
-    color: var(--dashboard-estadoInfo);
-    border: 1px solid var(--dashboard-estadoInfoBorde);
 }
 
 .drawerMovilPlanBadge--free {

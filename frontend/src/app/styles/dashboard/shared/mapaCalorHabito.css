@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * Contenedor Principal 
  */
@@ -74,12 +73,6 @@
     min-height: 100px;
 }
 
-.mapaCalorHabitoCargando {
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
-}
-
 .mapaCalorHabitoError {
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
@@ -94,16 +87,6 @@
     flex-direction: column;
     gap: var(--dashboard-espacioSm);
     margin-bottom: var(--dashboard-espacioMd);
-}
-
-.mapaCalorHabitoTitulo {
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-weight: 600;
-    color: var(--dashboard-textoNormal);
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .mapaCalorHabitoStats {

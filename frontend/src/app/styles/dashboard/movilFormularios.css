@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * FORMULARIO COMPACTO MÓVIL
  * Compacta la vista de propiedades del formulario de tarea/hábito para móvil
@@ -165,18 +164,6 @@
     /* 
      * ADJUNTOS COMPACTOS
      */
-    .seccionAdjuntos__boton {
-        padding: var(--dashboard-espacioMovilSm) var(--dashboard-espacioMovilMd);
-        font-size: var(--dashboard-tamanoMuyPequeno);
-    }
-
-    .gridAdjuntos {
-        gap: var(--dashboard-espacioMovilSm);
-    }
-
-    .gridAdjuntos__item {
-        padding: var(--dashboard-espacioMovilSm);
-    }
 
     /* 
      * MODAL MODERNA - Ajustes de padding

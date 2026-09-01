@@ -56,21 +56,6 @@
  * Modificadores de fuente
  * Nota: --dashboard-tamanoBase = 12px, por eso usamos valores distintos
  */
-.scratchpadFuente-pequeno {
-    font-size: var(--dashboard-tamanoPequeno);
-    line-height: 1.4;
-}
-
-.scratchpadFuente-normal {
-    font-size: var(--dashboard-tamanoBase);
-    line-height: 1.5;
-}
-
-.scratchpadFuente-grande {
-    font-size: var(--dashboard-tamanoNormal);
-    line-height: 1.6;
-    letter-spacing: 0.02em;
-}
 
 .scratchpadTextarea::placeholder {
     color: var(--dashboard-textoPlaceholder);
@@ -173,4 +158,3 @@
     user-select: none; /* Prevenir selecciÃ³n de texto al arrastrar */
     pointer-events: none; /* Desactivar eventos de panel interno */
 }
-

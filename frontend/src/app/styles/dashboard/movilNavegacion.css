@@ -2,7 +2,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 /* 
  * NAVEGACION INFERIOR
  * Barra de navegacion fija inferior para movil
@@ -38,33 +37,11 @@
         transition: color var(--dashboard-transicionRapida);
     }
 
-    .navegacionInferior__item--activo {
-        color: var(--dashboard-textoActivo);
-    }
-
     .navegacionInferior__item:hover {
         color: var(--dashboard-textoNormal);
     }
 
-    .navegacionInferior__icono {
-        font-size: var(--dashboard-tamanoTitulo);
-    }
-
     /* FAB central destacado */
-    .navegacionInferior__fab {
-        position: relative;
-        top: -12px;
-        width: 56px;
-        height: 56px;
-        border-radius: var(--dashboard-radioCirculo);
-        background: var(--dashboard-acento);
-        color: var(--dashboard-textoSobreAcento);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--dashboard-tamanoSubtitulo);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
 
     /* Compensar espacio para la barra inferior */
     .dashboardContenedor--conNavegacion {
@@ -76,46 +53,3 @@
  * HEADER MOVIL
  * Header compacto con hamburguesa y busqueda
  */
-@media (max-width: 480px) {
-    .headerMovil {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--dashboard-espacioMd);
-        background: var(--dashboard-fondoSecundario);
-        border-bottom: 1px solid var(--dashboard-bordePrincipal);
-        position: sticky;
-        top: 0;
-        z-index: 50;
-    }
-
-    .headerMovil__hamburguesa {
-        width: var(--dashboard-tamanoTactilMinimo);
-        height: var(--dashboard-tamanoTactilMinimo);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        color: var(--dashboard-textoNormal);
-        cursor: pointer;
-    }
-
-    .headerMovil__titulo {
-        font-size: var(--dashboard-tamanoMovilBase);
-        font-weight: 600;
-        color: var(--dashboard-textoActivo);
-    }
-
-    .headerMovil__busqueda {
-        width: var(--dashboard-tamanoTactilMinimo);
-        height: var(--dashboard-tamanoTactilMinimo);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        color: var(--dashboard-textoNormal);
-        cursor: pointer;
-    }
-}

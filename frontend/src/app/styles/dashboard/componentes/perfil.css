@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 .contenedorPerfil {
     display: flex;
     flex-direction: column;
@@ -208,16 +207,4 @@
     padding: var(--dashboard-espacioSm);
     margin-top: var(--dashboard-espacioMd);
     font-size: var(--dashboard-tamanoPequeno);
-}
-
-.mensajePerfil--exito {
-    background-color: var(--dashboard-estadoExitoFondo);
-    color: var(--dashboard-estadoExito);
-    border: 1px solid var(--dashboard-estadoExitoBorde);
-}
-
-.mensajePerfil--error {
-    background-color: var(--dashboard-estadoAltaFondo);
-    color: var(--dashboard-estadoAlta);
-    border: 1px solid var(--dashboard-estadoAltaBorde);
 }

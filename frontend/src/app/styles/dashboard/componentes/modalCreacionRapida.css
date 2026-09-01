@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 .creacionRapidaOverlay {
     position: fixed;
     top: 0;
@@ -51,16 +50,6 @@
     padding: 0;
 }
 
-.creacionRapidaIcono {
-    color: var(--dashboard-textoSecundario);
-    margin-right: var(--dashboard-espacioMd);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-}
-
 /* New Selector Styles */
 .creacionRapidaIconoSelector {
     display: flex;
@@ -77,20 +66,6 @@
 .creacionRapidaIconoSelector:hover {
     background-color: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoActivo);
-}
-
-.creacionRapidaChevron {
-    opacity: 0.6;
-}
-
-.iconoTipoTarea {
-    color: var(--dashboard-estadoInfo);
-}
-.iconoTipoHabito {
-    color: var(--dashboard-estadoExito);
-}
-.iconoTipoProyecto {
-    color: var(--dashboard-estadoMedia);
 }
 
 .creacionRapidaInput {

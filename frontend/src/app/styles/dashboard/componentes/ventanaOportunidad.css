@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 .selectorVentanaOportunidad {
     position: relative;
 }
@@ -151,11 +150,6 @@
 }
 
 /* Marcadores de hora en el reloj */
-.relojMarcador {
-    font-size: var(--dashboard-tamanoMicro);
-    fill: var(--dashboard-textoMuyApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-}
 
 /* Indicador de hora actual (punto de contraste según tema) */
 .indicadorHoraActual {

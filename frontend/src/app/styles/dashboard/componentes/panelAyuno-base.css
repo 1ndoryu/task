@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .panelAyuno {
     display: flex;
     flex-direction: column;
@@ -236,12 +235,6 @@
 }
 
 /* Botones de acciÃ³n */
-.panelAyunoBotones {
-    display: flex;
-    gap: var(--dashboard-espacioSm);
-    justify-content: center;
-    width: 100%;
-}
 
 .panelAyunoBoton {
     display: flex;
@@ -293,4 +286,3 @@
 .panelAyunoBoton--reiniciar:hover {
     background: var(--dashboard-estadoAltaFondo);
 }
-

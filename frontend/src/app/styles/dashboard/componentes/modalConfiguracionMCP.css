@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 /* 
  * CONTENEDOR PRINCIPAL 
  */
@@ -231,11 +230,6 @@
 .mcpPestana:hover {
     background-color: var(--dashboard-fondoHover);
     color: var(--dashboard-textoNormal);
-}
-
-.mcpPestana--activa {
-    background-color: var(--dashboard-fondoTerciario);
-    color: var(--dashboard-textoActivo);
 }
 
 /* 

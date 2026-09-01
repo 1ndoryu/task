@@ -29,26 +29,6 @@
  * Ambos usan inset:0 para ocupar todo el contenedor.
  * El div de resaltado tiene padding-right extra para compensar la scrollbar.
  */
-.scratchpadResaltado {
-    position: absolute;
-    inset: 0;
-    /* 
-     * Compensar el ancho de la scrollbar del textarea (~17px en la mayorÃ­a de navegadores).
-     * Usamos padding-right extra para que el texto no se desalinee.
-     */
-    padding: var(--dashboard-espacioLg);
-    padding-right: calc(var(--dashboard-espacioLg) + 17px);
-    overflow: hidden;
-    color: var(--dashboard-textoSecundario);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    white-space: pre-wrap;
-    word-break: break-word;
-    pointer-events: none;
-    z-index: 0;
-    box-sizing: border-box;
-    width: 100%;
-    padding-right: var(--dashboard-espacioMd);
-}
 
 .scratchpadTextarea--resaltado {
     position: absolute;
@@ -102,23 +82,8 @@
     font-weight: 600;
 }
 
-.scratchpadVistaPreviaTitulo--h1 {
-    font-size: var(--dashboard-tamanoGrande);
-}
-
-.scratchpadVistaPreviaTitulo--h2 {
-    font-size: var(--dashboard-tamanoNormal);
-}
-
-.scratchpadVistaPreviaTitulo--h3 {
-    font-size: var(--dashboard-tamanoNormal);
-}
-
 .scratchpadVistaPreviaTitulo--h4,
 .scratchpadVistaPreviaTitulo--h5,
-.scratchpadVistaPreviaTitulo--h6 {
-    font-size: var(--dashboard-tamanoMovilBase);
-}
 
 .scratchpadVistaPreviaLista {
     list-style: none;
@@ -232,45 +197,11 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
-.listaNotasItemMetas {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--dashboard-espacioXs);
-    flex-shrink: 0;
-}
-
 /* Contenedor inferior de metas (modo lista) */
-.listaNotasItemMetasInferiores {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-}
 
 /* Contador de caracteres (modo lista) */
-.listaNotasItemContador {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoIndice);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-}
 
 /* Fecha de modificaciÃ³n con icono (modo lista) */
-.listaNotasItemFechaModificacion {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioMini);
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoApagado);
-}
-
-.listaNotasItemFecha {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoMuyApagado);
-    white-space: nowrap;
-}
 
 .listaNotasItemEliminar {
     padding: var(--dashboard-espacioXs);
@@ -306,15 +237,3 @@
     border-color: var(--dashboard-bordeSutil);
     background: var(--dashboard-fondoHover);
 }
-
-.modalNotasBotonIcono {
-    display: flex;
-    align-items: center;
-}
-
-.modalNotasBotonTexto {
-    font-size: var(--dashboard-tamanoPequeno);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-

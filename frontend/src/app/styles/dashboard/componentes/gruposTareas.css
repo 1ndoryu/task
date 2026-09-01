@@ -66,11 +66,6 @@
     background: var(--dashboard-fondoHover);
 }
 
-.grupoTareasIcono {
-    color: var(--dashboard-textoSecundario);
-    flex-shrink: 0;
-}
-
 /* Input para editar nombre */
 .grupoTareasInputNombre {
     flex: 1;
@@ -85,15 +80,6 @@
 }
 
 /* Contador de tareas */
-.grupoTareasContador {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoSecundario);
-    background: var(--dashboard-fondoTarjeta);
-    padding: 0 6px;
-    border-radius: var(--dashboard-radioLg);
-    min-width: 18px;
-    text-align: center;
-}
 
 /* Botón eliminar grupo */
 .grupoTareasEliminar {
@@ -122,14 +108,6 @@
 }
 
 /* Contenedor de tareas del grupo */
-.grupoTareasContenido {
-    margin-left: var(--dashboard-espacioMd);
-    padding-left: var(--dashboard-espacioXs);
-}
-
-.grupoTareasContenido--colapsado {
-    display: none;
-}
 
 /* Contenedor principal de todos los grupos */
 .listaTareasGrupos {
@@ -153,15 +131,4 @@
 /* Tareas sin grupo (cuando secciones activas) */
 .tareasSinGrupo {
     margin-bottom: var(--dashboard-espacioMd);
-}
-
-.tareasSinGrupoHeader {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoSecundario);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }

@@ -2,7 +2,6 @@
  * sentinel-disable-file css-adhoc-button-style
  */
 
-
 .modalPlugins {
     /* Sobrescribe ancho del Modal compartido sutilmente si es necesario */
     max-width: 420px;
@@ -176,16 +175,6 @@
 
 .configDeficitInput::placeholder {
     color: var(--dashboard-textoApagado);
-}
-
-.configDeficitApiKey {
-    display: flex;
-    gap: var(--dashboard-espacioXs);
-    align-items: center;
-}
-
-.configDeficitInputApiKey {
-    flex: 1;
 }
 
 .configDeficitBotonOjo {

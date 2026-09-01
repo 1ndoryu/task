@@ -3,7 +3,6 @@
  * sentinel-disable-file css-especificacion-diseno-local
  */
 
-
 .modalLimiteAlcanzado {
     display: flex;
     flex-direction: column;
@@ -104,16 +103,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioSm);
-    width: 100%;
-}
-
-.modalLimiteAlcanzadoBoton {
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border: 1px solid var(--dashboard-bordeSutil);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
     width: 100%;
 }
 
