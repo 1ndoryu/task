@@ -151,6 +151,7 @@ export type EventoAgente =
     | {tipo: 'tool_result'; tool: string; ok: boolean; resumen: string; diff?: string}
     | {tipo: 'usage'; tokens_prompt?: number; tokens_complecion?: number; ocupacion_pct?: number | null}
     | {tipo: 'contexto'; skills: number}
+    | {tipo: 'contexto_detalle'; max_ventana: number; reserva_salida: number; system_instrucciones: number; definiciones_tools: number; mensajes: number; resultados_tools: number; total_entrada: number; ocupacion_pct: number}
     | {tipo: 'requiere_aprobacion'; tool: string; argumentos: unknown}
     | {tipo: 'error'; mensaje: string; retryable: boolean}
     | {tipo: 'done'; turno_id: string};
@@ -240,6 +241,15 @@ export async function rebobinarConversacion(id: string, hastaId: number, editar 
     return apiFetch<MensajeConversacion[]>(`/agente/conversaciones/${id}/rebobinar`, {
         method: 'POST',
         body: {hastaId, editar},
+    });
+}
+
+/* [318A-7] Compacta la conversación de forma persistente: el backend marca los
+ * mensajes antiguos como compactados, inserta un resumen system (que el
+ * historial sí vuelve a cargar) y devuelve el historial resultante. */
+export async function compactarConversacion(id: string): Promise<MensajeConversacion[]> {
+    return apiFetch<MensajeConversacion[]>(`/agente/conversaciones/${id}/compactar`, {
+        method: 'POST',
     });
 }
 

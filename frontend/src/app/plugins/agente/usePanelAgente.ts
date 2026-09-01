@@ -27,6 +27,7 @@ export function usePanelAgente() {
         reintentarMensaje,
         limpiarErrorTab,
         rebobinarTab,
+        compactarTab,
         tareasProgramadas,
         cargandoTareas,
         errorTareas,
@@ -47,6 +48,8 @@ export function usePanelAgente() {
     const [tareaCron, setTareaCron] = useState('');
     const [tareaEjecutarEn, setTareaEjecutarEn] = useState('');
     const [tareaGuardando, setTareaGuardando] = useState(false);
+    /* [318A-7] La compactación está en curso (deshabilita el botón de la barra). */
+    const [compactando, setCompactando] = useState(false);
     const refScroll = useRef<HTMLDivElement>(null);
     const refAbort = useRef<AbortController | null>(null);
 
@@ -110,6 +113,13 @@ export function usePanelAgente() {
         setEditandoTitulo(null);
     };
 
+    /* [318A-7] Compacta la conversación activa desde la barra de contexto. */
+    const manejarCompactar = () => {
+        if (!tabActiva || compactando) return;
+        setCompactando(true);
+        void compactarTab(tabActiva.conversacion.id).finally(() => setCompactando(false));
+    };
+
     const manejarCrearTarea = (evento: FormEvent) => {
         evento.preventDefault();
         const nombre = tareaNombre.trim();
@@ -165,12 +175,14 @@ export function usePanelAgente() {
         tareaEjecutarEn,
         setTareaEjecutarEn,
         tareaGuardando,
+        compactando,
         abrirTab,
         crearTab,
         cerrarTab,
         limpiarErrorTab,
         reintentarMensaje,
         rebobinarTab,
+        compactarTab,
         eliminarTarea,
         cancelarTurno,
         manejarEnviar,
@@ -178,5 +190,6 @@ export function usePanelAgente() {
         iniciarRenombrado,
         confirmarRenombrado,
         manejarCrearTarea,
+        manejarCompactar,
     };
 }

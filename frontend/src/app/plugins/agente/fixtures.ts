@@ -22,6 +22,14 @@ export interface FixtureContexto {
     tokensPrompt: number;
     tokensComplecion: number;
     skills: number;
+    /* [318A-7] Desglose de la ventana de contexto (evento contexto_detalle). */
+    maxVentana?: number;
+    reservaSalida?: number;
+    systemInstrucciones?: number;
+    definicionesTools?: number;
+    mensajes?: number;
+    resultadosTools?: number;
+    totalEntrada?: number;
 }
 
 export interface FixtureMensaje {
@@ -87,6 +95,7 @@ export const CATALOGO: FixtureEntrada[] = [
     {id: '17-propuesta-skill', titulo: 'Propuesta de skill (automejora)', descripcion: 'Aprobar / descartar una skill sugerida tras un turno.', estados: ['propuesta', 'aprobar', 'descartar'], pendiente: 'Automejora post-turno aplazada (Fase 3): sin contrato backend ni componente en el chat.'},
     {id: '18-aviso-meta', titulo: 'Aviso de meta (modo meta)', descripcion: '"Meta: … · cumplida: sí/no · continúo" visible en turnos meta.', estados: ['cumplida', 'no cumplida'], pendiente: 'Sin contrato SSE de meta en el runtime; aplazada con Fase 3.'},
     {id: '19-verificacion-autonoma', titulo: 'Verificación autónoma', descripcion: 'Razonamiento del verificador visible (seguro/inseguro) en modo autónomo.', estados: ['seguro', 'inseguro'], pendiente: 'Verificador autónomo sin implementar; aplazado.'},
+    {id: '20-contexto-detallado', titulo: 'Barra de contexto con desglose (318A-7)', descripcion: 'Barra inferior con desglose por secciones (System Instructions, Tool Definitions, Messages, Tool Results, Reservado para respuesta) + botón Compactar.', estados: ['desglose', 'compactar']},
 ];
 
 /* ---------- Fixtures de datos realistas ---------- */
@@ -166,6 +175,23 @@ export const fixtureContexto: FixtureContexto = {
     tokensPrompt: 10160,
     tokensComplecion: 1440,
     skills: 3,
+};
+
+/* [318A-7] Contexto con desglose completo (evento contexto_detalle real).
+ * Valores coherentes: totalEntrada = system + tools + mensajes + resultados;
+ * ocupacionPct = totalEntrada / (maxVentana − reservaSalida). */
+export const fixtureContextoDetallado: FixtureContexto = {
+    ocupacionPct: 18.6,
+    tokensPrompt: 15872,
+    tokensComplecion: 320,
+    skills: 2,
+    maxVentana: 128000,
+    reservaSalida: 20000,
+    systemInstrucciones: 1920,
+    definicionesTools: 2176,
+    mensajes: 12800,
+    resultadosTools: 3072,
+    totalEntrada: 19968,
 };
 
 export const fixtureTareas: FixtureTarea[] = [

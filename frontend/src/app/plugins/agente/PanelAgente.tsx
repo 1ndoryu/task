@@ -65,6 +65,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         tareaEjecutarEn,
         setTareaEjecutarEn,
         tareaGuardando,
+        compactando,
         abrirTab,
         crearTab,
         cerrarTab,
@@ -78,6 +79,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         iniciarRenombrado,
         confirmarRenombrado,
         manejarCrearTarea,
+        manejarCompactar,
     } = usePanelAgente();
 
     /* [318A-4] Config global del agente (modelo/modo) para los selectores del
@@ -285,10 +287,14 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
 
             {/* [318A-5] Barra de uso de contexto inferior: uso del último turno
              * con tooltip (usado, máximo, %, salida, skills). La maxVentana
-             * viene de la config de la tab (o la global). */}
+             * viene de la config de la tab (o la global). [318A-7] Con el
+             * desglose por secciones + botón Compactar (cuando el runtime
+             * emitió contexto_detalle). */}
             <BarraContextoInferior
                 contexto={tabActiva ? [...tabActiva.mensajes].reverse().find(m => m.contexto)?.contexto ?? null : null}
                 maxVentana={tabActiva?.config.maxVentana ?? configAgente.maxVentana}
+                onCompactar={tabActiva ? manejarCompactar : undefined}
+                compactando={compactando}
             />
 
             {/* Input */}

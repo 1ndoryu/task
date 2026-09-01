@@ -208,6 +208,55 @@ impl AgenteRepository {
             .map(|r| r.rows_affected())
     }
 
+    /// [318A-7] Marca como compactados los mensajes de una conversación con
+    /// `id <= hasta_id` (el último turno verbatim queda fuera). Verifica
+    /// propiedad vía `agente_conversaciones`; devuelve filas marcadas.
+    pub async fn marcar_compactados(
+        pool: &PgPool,
+        conversacion_id: Uuid,
+        user_id: Uuid,
+        hasta_id: i64,
+    ) -> Result<u64, sqlx::Error> {
+        sqlx::query(
+            "UPDATE agente_mensajes m
+             SET compactado = TRUE
+             FROM agente_conversaciones c
+             WHERE c.id = m.conversacion_id
+               AND c.id = $1 AND c.user_id = $2
+               AND m.id <= $3 AND NOT m.compactado",
+        )
+        .bind(conversacion_id)
+        .bind(user_id)
+        .bind(hasta_id)
+        .execute(pool)
+        .await
+        .map(|r| r.rows_affected())
+    }
+
+    /// [318A-7] Inserta un mensaje `system` con el resumen de la parte
+    /// compactada. Se inserta con `compactado = FALSE` para que
+    /// `cargar_historial` (filtro `NOT compactado`) lo cargue en el contexto
+    /// del LLM; los mensajes antiguos quedan marcados como compactados por
+    /// `marcar_compactados` y dejan de enviarse verbatim.
+    pub async fn insertar_resumen(
+        pool: &PgPool,
+        conversacion_id: Uuid,
+        user_id: Uuid,
+        resumen: &str,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "INSERT INTO agente_mensajes (conversacion_id, user_id, rol, contenido, compactado, tokens_estimados)
+             VALUES ($1, $2, 'system', $3, FALSE, $4)",
+        )
+        .bind(conversacion_id)
+        .bind(user_id)
+        .bind(resumen)
+        .bind(crate::agent::context::estimar_tokens(resumen) as i32)
+        .execute(pool)
+        .await
+        .map(|_| ())
+    }
+
     /// Tareas programadas en estados activos (para el límite por usuario).
     pub async fn contar_tareas_activas(pool: &PgPool, user_id: Uuid) -> Result<i64, sqlx::Error> {
         let (n,): (i64,) = sqlx::query_as(

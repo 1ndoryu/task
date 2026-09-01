@@ -48,8 +48,75 @@ pub enum AgenteEvento {
     /// inyectaron como contexto en este turno (observabilidad real del
     /// contexto recibido; el front lo ignora de forma segura).
     Contexto { skills: usize },
+    /// [318A-7] Desglose de la ventana de contexto de la conversación: total
+    /// usado por sección + reserva de salida + ventana máxima, para que el
+    /// front lo muestre en una barra con desglose (estilo Claude) en español.
+    ContextoDetalle {
+        max_ventana: u32,
+        reserva_salida: u32,
+        system_instrucciones: u32,
+        definiciones_tools: u32,
+        mensajes: u32,
+        resultados_tools: u32,
+        total_entrada: u32,
+        ocupacion_pct: f32,
+    },
     Error { mensaje: String, retryable: bool },
     Done { turno_id: Uuid },
+}
+
+/// Desglose de la ventana de contexto calculado en el runtime (318A-7).
+/// Separa los tokens de entrada por sección para el tooltip del front.
+#[derive(Debug, Clone)]
+pub struct DesgloseContexto {
+    pub max_ventana: u32,
+    pub reserva_salida: u32,
+    pub system_instrucciones: u32,
+    pub definiciones_tools: u32,
+    pub mensajes: u32,
+    pub resultados_tools: u32,
+    pub total_entrada: u32,
+    pub ocupacion_pct: f32,
+}
+
+impl DesgloseContexto {
+    /// Calcula el desglose a partir de los mensajes listos para enviar al LLM
+    /// y los schemas de tools. La reserva de salida y la ventana máxima vienen
+    /// de la config del turno (el front muestra "Reservado para respuesta").
+    #[must_use]
+    pub fn calcular(
+        mensajes: &[AiMessage],
+        schemas: &[Value],
+        config: &ContextoConfig,
+    ) -> Self {
+        let mut system_instrucciones = 0u32;
+        let mut mensajes_usuario = 0u32;
+        let mut resultados_tools = 0u32;
+        for m in mensajes {
+            match m.role.as_str() {
+                "system" => system_instrucciones += crate::agent::context::tokens_de_mensaje(m),
+                "tool" => resultados_tools += crate::agent::context::tokens_de_mensaje(m),
+                _ => mensajes_usuario += crate::agent::context::tokens_de_mensaje(m),
+            }
+        }
+        let definiciones_tools = schemas
+            .iter()
+            .map(|s| crate::agent::context::estimar_tokens(&s.to_string()))
+            .sum();
+        let total_entrada = system_instrucciones + definiciones_tools + mensajes_usuario + resultados_tools;
+        let ventana_efectiva = config.ventana_efectiva();
+        let ocupacion_pct = (total_entrada as f32 / ventana_efectiva.max(1) as f32) * 100.0;
+        Self {
+            max_ventana: config.max_ventana,
+            reserva_salida: config.reserva_salida,
+            system_instrucciones,
+            definiciones_tools,
+            mensajes: mensajes_usuario,
+            resultados_tools,
+            total_entrada,
+            ocupacion_pct,
+        }
+    }
 }
 
 /// Sistema del agente: prompt estable con directiva anti prompt-injection.
@@ -247,6 +314,24 @@ impl AgentRuntime {
             }
             let ids_ref: Vec<&str> = ids;
             let schemas = self.registry.schemas_openai(Some(&ids_ref));
+            /* [318A-7] Desglose de contexto: emitir el desglose de la ventana
+             * (system, tools, mensajes, resultados, reserva de salida) para que
+             * el front muestre la barra de uso con secciones y el botón
+             * Compactar. Se emite en cada llamada LLM (los tool results se
+             * acumulan entre iteraciones y el desglose los refleja). */
+            let desglose = DesgloseContexto::calcular(&mensajes, &schemas, &self.turno_config.contexto);
+            let _ = tx
+                .send(AgenteEvento::ContextoDetalle {
+                    max_ventana: desglose.max_ventana,
+                    reserva_salida: desglose.reserva_salida,
+                    system_instrucciones: desglose.system_instrucciones,
+                    definiciones_tools: desglose.definiciones_tools,
+                    mensajes: desglose.mensajes,
+                    resultados_tools: desglose.resultados_tools,
+                    total_entrada: desglose.total_entrada,
+                    ocupacion_pct: desglose.ocupacion_pct,
+                })
+                .await;
             let mut ultimo_contenido = String::new();
             let tool_calls = {
                 /* [01-09-2026] Fase 4: `on_token` devuelve false para abortar
@@ -772,5 +857,64 @@ mod tests {
         let contenido = mensajes[0].content.as_str().unwrap();
         assert!(contenido.chars().count() <= 4100);
         assert!(contenido.ends_with('…'));
+    }
+
+    /* [318A-7] Tests del desglose de contexto emitido en cada llamada LLM:
+     * separa system / definiciones de tools / mensajes / resultados de tools
+     * y calcula la ocupación contra la ventana efectiva. */
+
+    fn config_prueba() -> crate::agent::context::ContextoConfig {
+        crate::agent::context::ContextoConfig {
+            max_ventana: 128_000,
+            reserva_salida: 20_000,
+            umbral: 0.5,
+            cola_verbatim: 0.025,
+            umbral_piso: 0.75,
+            umbral_degenerado: 0.85,
+        }
+    }
+
+    fn mensaje(rol: &str, texto: impl Into<String>) -> crate::services::ai::AiMessage {
+        crate::services::ai::AiMessage::texto(rol, texto)
+    }
+
+    #[test]
+    fn desglose_separa_secciones() {
+        /* "aaaa" = 4 chars = 1 token; "bbbbbbbb" = 8 chars = 2 tokens. */
+        let mensajes = vec![
+            mensaje("system", "aaaa"),
+            mensaje("user", "bbbbbbbb"),
+            mensaje("assistant", "bbbbbbbb"),
+            mensaje("tool", "aaaa"),
+        ];
+        /* JSON serializado: {"name":"aaaa"} = 14 chars = 4 tokens. */
+        let schemas = vec![serde_json::json!({"name": "aaaa"})];
+        let desglose = super::DesgloseContexto::calcular(&mensajes, &schemas, &config_prueba());
+
+        assert_eq!(desglose.system_instrucciones, 1);
+        assert_eq!(desglose.mensajes, 4); // user 2 + assistant 2
+        assert_eq!(desglose.resultados_tools, 1);
+        assert_eq!(desglose.definiciones_tools, 4);
+        assert_eq!(desglose.total_entrada, 10);
+        assert_eq!(desglose.max_ventana, 128_000);
+        assert_eq!(desglose.reserva_salida, 20_000);
+    }
+
+    #[test]
+    fn desglose_calcula_ocupacion_sobre_ventana_efectiva() {
+        /* Ventana efectiva = 128_000 − 20_000 = 108_000. 10_800 tokens = 10%. */
+        let mut mensajes = Vec::new();
+        mensajes.push(mensaje("system", "a".repeat(43_200))); // 10_800 tokens
+        let desglose = super::DesgloseContexto::calcular(&mensajes, &[], &config_prueba());
+
+        assert_eq!(desglose.total_entrada, 10_800);
+        assert!((desglose.ocupacion_pct - 10.0).abs() < 0.001, "esperado 10%, got {}", desglose.ocupacion_pct);
+    }
+
+    #[test]
+    fn desglose_sin_mensajes_es_cero() {
+        let desglose = super::DesgloseContexto::calcular(&[], &[], &config_prueba());
+        assert_eq!(desglose.total_entrada, 0);
+        assert_eq!(desglose.ocupacion_pct, 0.0);
     }
 }

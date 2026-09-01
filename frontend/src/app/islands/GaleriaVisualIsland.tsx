@@ -7,6 +7,7 @@
  * fixtures realistas (plugins/agente/fixtures.ts) — no hay copias ni maquetas
  * divergentes. Incluye toggle de los 3 temas (data-theme real del proyecto:
  * 'original' cae a :root (oscuro) y 'claro' tiene selector propio).
+ * 318A-7: se añadió el ítem 20-contexto-detallado (desglose + botón Compactar).
  */
 
 import {useEffect, useState} from 'react';
@@ -15,6 +16,7 @@ import {
     CATALOGO,
     fixtureAvisoMeta,
     fixtureContexto,
+    fixtureContextoDetallado,
     fixtureMensajes,
     fixturePropuestaSkill,
     fixtureSkills,
@@ -28,6 +30,7 @@ import type {FixtureEntrada} from '../plugins/agente/fixtures';
 import {
     AvisoModoAutonomo,
     BarraContexto,
+    BarraContextoInferior,
     BotonCancelar,
     EstadoCarga,
     EstadoVacio,
@@ -120,6 +123,21 @@ function VistaTrabajando(): JSX.Element {
 
 function VistaContexto(): JSX.Element {
     return <BarraContexto contexto={fixtureContexto} />;
+}
+
+/* [318A-7] Barra inferior con el desglose por secciones y botón Compactar.
+ * Usa el MISMO componente del panel (BarraContextoInferior) con el fixture
+ * de contexto detallado; el botón es demo (no compacta en la galería). */
+function VistaContextoDetallado(): JSX.Element {
+    return (
+        <div className="galeriaChat">
+            <BarraContextoInferior
+                contexto={fixtureContextoDetallado}
+                maxVentana={fixtureContextoDetallado.maxVentana ?? 128000}
+                onCompactar={() => undefined}
+            />
+        </div>
+    );
 }
 
 function VistaTareas(): JSX.Element {
@@ -265,6 +283,7 @@ const VISTAS: Record<string, () => JSX.Element> = {
     '17-propuesta-skill': VistaPropuestaSkill,
     '18-aviso-meta': VistaAvisoMeta,
     '19-verificacion-autonoma': VistaVerificacion,
+    '20-contexto-detallado': VistaContextoDetallado,
 };
 
 function Entrada({entrada, children}: {entrada: FixtureEntrada; children: React.ReactNode}): JSX.Element {
@@ -306,7 +325,8 @@ export function GaleriaVisualIsland(): JSX.Element {
                 <div>
                     <h1 className="galeriaVisualTitulo">Galería visual del agente</h1>
                     <p className="galeriaVisualSub">
-                        Los 19 ítems de la sección 9.5 del plan con los mismos componentes del chat
+                        Los 19 ítems de la sección 9.5 + el ítem 20-contexto-detallado (318A-7)
+                        con los mismos componentes del chat
                         (plugins/agente/componentes.tsx) y fixtures compartidos (fixtures.ts). Dev only.
                     </p>
                 </div>

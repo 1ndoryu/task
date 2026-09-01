@@ -237,9 +237,68 @@
     transform: translateY(0);
 }
 
+/* [318A-7] Con el desglose el tooltip muestra el botón Compactar: necesita
+ * recibir clicks (pointer-events auto) mientras está visible. */
+.panelIAContextoBarra:hover .panelIAContextoBarraTooltip--conAccion {
+    pointer-events: auto;
+}
+
 .panelIAContextoBarraDetalle {
     display: block;
     color: var(--dashboard-textoSecundario);
+}
+
+/* [318A-7] Desglose de la ventana de contexto (System Instructions, Tool
+ * Definitions, Messages, Tool Results, Reservado para respuesta). Monocromo:
+ * solo tokens del tema, sin colores literales. */
+.panelIAContextoBarraTooltipTitulo {
+    display: flex;
+    align-items: baseline;
+    gap: var(--dashboard-espacioXs);
+}
+
+.panelIAContextoBarraTooltipTitulo strong {
+    font-size: var(--dashboard-tamanoMediano);
+    color: var(--dashboard-textoActivo);
+}
+
+.panelIAContextoBarraSecciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+}
+
+.panelIAContextoBarraSeccionTitulo {
+    font-weight: 600;
+    color: var(--dashboard-textoNormal);
+    margin-bottom: var(--dashboard-espacioXs);
+}
+
+.panelIAContextoBarraSeccion {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--dashboard-espacioMd);
+}
+
+.panelIAContextoBarraSeccionNombre {
+    color: var(--dashboard-textoNormal);
+}
+
+.panelIAContextoBarraSeccionValor {
+    color: var(--dashboard-textoSecundario);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Botón Compactar dentro del tooltip: margen superior para separarlo del
+ * desglose. La variante secundaria del design system ya es monocroma. */
+.panelIAContextoBarraTooltip .boton {
+    margin-top: var(--dashboard-espacioSm);
+    width: 100%;
 }
 
 .panelAgentePensando {

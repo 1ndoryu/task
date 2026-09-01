@@ -247,7 +247,9 @@ pub fn tokens_de_mensaje(mensaje: &AiMessage) -> u32 {
 }
 
 /// Genera el bloque de resumen estructurado del medio compactado.
-fn resumen_de_mensajes(mensajes: &[AiMessage]) -> String {
+/// [318A-7] `pub(crate)` para reutilizarla en el endpoint de compactación manual
+/// (el resumen que se guarda en BD al marcar mensajes como compactados).
+pub(crate) fn resumen_de_mensajes(mensajes: &[AiMessage]) -> String {
     let mut partes: Vec<String> = Vec::new();
     for m in mensajes {
         let texto = match &m.content {

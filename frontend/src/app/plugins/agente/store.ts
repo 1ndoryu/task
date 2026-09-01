@@ -13,6 +13,7 @@ import type {ConversacionAgente, ConfigAgente, MensajeConversacion, TareaProgram
 import {
     aConfigFrontend,
     cargarHistorial,
+    compactarConversacion,
     crearConversacion,
     crearTareaProgramada,
     eliminarTareaProgramada,
@@ -38,8 +39,21 @@ export interface MensajeTabAgente {
     claveIdempotencia?: string | null;
     /* Fallo retryable del proveedor; el botón reintentar reenvía con la misma clave. */
     reintentar?: boolean | null;
-    /* Contexto real recibido por el agente en este turno (eventos usage/contexto). */
-    contexto?: {ocupacionPct: number | null; tokensPrompt: number; tokensComplecion: number; skills: number} | null;
+    /* Contexto real recibido por el agente en este turno (eventos usage/contexto).
+     * [318A-7] `contexto_detalle` añade el desglose por secciones de la ventana. */
+    contexto?: {
+        ocupacionPct: number | null;
+        tokensPrompt: number;
+        tokensComplecion: number;
+        skills: number;
+        maxVentana?: number;
+        reservaSalida?: number;
+        systemInstrucciones?: number;
+        definicionesTools?: number;
+        mensajes?: number;
+        resultadosTools?: number;
+        totalEntrada?: number;
+    } | null;
 }
 
 export interface TabAgente {
@@ -145,6 +159,10 @@ interface EstadoAgenteAccionesConversacion {
      * borra los mensajes posteriores en BD y en la sesión local. `editar=true`
      * elimina también el mensaje objetivo (para reescribirlo); false lo conserva. */
     rebobinarTab: (id: string, hastaId: number, hastaMensajeId: string, editar?: boolean) => Promise<void>;
+    /* [318A-7] Compacta la conversación de forma persistente (marca mensajes
+     * antiguos como compactados + inserta resumen system) y reconcilia la
+     * sesión local con el historial resultante del servidor. */
+    compactarTab: (id: string) => Promise<void>;
     establecerConfig: (config: Partial<ConfigAgente>) => void;
 }
 
@@ -232,6 +250,24 @@ async function correrTurno(
                             tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
                             tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
                             skills: evento.skills,
+                        };
+                        break;
+                    /* [318A-7] Desglose de la ventana de contexto (evento del
+                     * runtime en cada llamada LLM). Conserva los campos previos
+                     * (usage/contexto) y añade las secciones del desglose. */
+                    case 'contexto_detalle':
+                        objetivo.contexto = {
+                            ocupacionPct: evento.ocupacion_pct,
+                            tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
+                            tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
+                            skills: objetivo.contexto?.skills ?? 0,
+                            maxVentana: evento.max_ventana,
+                            reservaSalida: evento.reserva_salida,
+                            systemInstrucciones: evento.system_instrucciones,
+                            definicionesTools: evento.definiciones_tools,
+                            mensajes: evento.mensajes,
+                            resultadosTools: evento.resultados_tools,
+                            totalEntrada: evento.total_entrada,
                         };
                         break;
                     case 'requiere_aprobacion':
@@ -607,6 +643,39 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                 tabs: state.tabs.map(t =>
                     t.conversacion.id === id
                         ? {...t, error: error instanceof Error ? error.message : 'No se pudo rebobinar la conversación'}
+                        : t
+                ),
+            }));
+        }
+    },
+
+    /* [318A-7] Compacta la conversación: el backend marca los mensajes antiguos
+     * como compactados e inserta un resumen system (que el historial sí vuelve a
+     * cargar). La sesión local se reconcilia con el historial resultante. */
+    compactarTab: async (id) => {
+        const tab = tabDe(get(), id);
+        if (!tab) return;
+        try {
+            const historial = await compactarConversacion(id);
+            set(state => ({
+                tabs: state.tabs.map(t =>
+                    t.conversacion.id === id
+                        ? {
+                              ...t,
+                              mensajes: historial.map(h => ({
+                                  id: `db-${h.id}`,
+                                  rol: h.rol === 'user' ? 'user' as const : 'assistant' as const,
+                                  contenido: h.contenido,
+                              })),
+                          }
+                        : t
+                ),
+            }));
+        } catch (error) {
+            set(state => ({
+                tabs: state.tabs.map(t =>
+                    t.conversacion.id === id
+                        ? {...t, error: error instanceof Error ? error.message : 'No se pudo compactar la conversación'}
                         : t
                 ),
             }));

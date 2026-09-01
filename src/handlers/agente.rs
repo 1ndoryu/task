@@ -529,6 +529,86 @@ pub async fn rebobinar_conversacion(
     ))
 }
 
+/// [318A-7] Compacta la conversación de forma persistente: marca los mensajes
+/// antiguos (excepto el último turno) como `compactado = TRUE` y guarda un
+/// resumen system. Devuelve el historial resultante (como listar mensajes).
+pub async fn compactar_conversacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(conversacion_id): Path<Uuid>,
+) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
+    /* Propiedad: nunca confiar en el front. */
+    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
+        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
+    if filas.len() < 4 {
+        /* Historias muy cortas: compactar no aporta; devolver tal cual. */
+        return Ok(Json(
+            filas
+                .into_iter()
+                .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
+                    id,
+                    rol,
+                    contenido,
+                    creadoEn: creado_en.to_rfc3339(),
+                })
+                .collect(),
+        ));
+    }
+
+    /* Dejar el último turno verbatim (el último par user+assistant). Retroceder
+     * desde el final hasta el último mensaje `user` (inicio del último turno). */
+    let mut umbral = filas.last().map(|(id, _, _, _)| *id).unwrap_or(0);
+    for (id, rol, _, _) in filas.iter().rev() {
+        if rol == "user" {
+            umbral = *id;
+            break;
+        }
+    }
+    let hasta_id = umbral.saturating_sub(1);
+    if hasta_id <= 0 {
+        /* Solo hay un turno: nada que compactar. */
+        return Ok(Json(
+            filas
+                .into_iter()
+                .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
+                    id,
+                    rol,
+                    contenido,
+                    creadoEn: creado_en.to_rfc3339(),
+                })
+                .collect(),
+        ));
+    }
+
+    /* Resumen de los mensajes que se van a marcar. */
+    let a_resumir: Vec<AiMessage> = filas
+        .iter()
+        .filter(|(id, _, _, _)| *id <= hasta_id)
+        .map(|(_, rol, contenido, _)| AiMessage::texto(rol, contenido))
+        .collect();
+    let resumen = crate::agent::context::resumen_de_mensajes(&a_resumir);
+
+    AgenteRepository::marcar_compactados(&state.pool, conversacion_id, auth.user_id, hasta_id)
+        .await?;
+    AgenteRepository::insertar_resumen(&state.pool, conversacion_id, auth.user_id, &resumen)
+        .await?;
+
+    /* Devolver el historial visible. */
+    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
+        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
+    Ok(Json(
+        filas
+            .into_iter()
+            .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
+                id,
+                rol,
+                contenido,
+                creadoEn: creado_en.to_rfc3339(),
+            })
+            .collect(),
+    ))
+}
+
 /// Límite de tareas programadas activas por usuario.
 const MAX_TAREAS_PROGRAMADAS: i64 = 20;
 
@@ -908,6 +988,12 @@ pub fn routes() -> Router<AppState> {
         .route(
             "/agente/conversaciones/:id/rebobinar",
             axum::routing::post(rebobinar_conversacion),
+        )
+        /* [318A-7] Compactar: marca los mensajes antiguos como compactados y
+         * guarda un resumen system (persistente). */
+        .route(
+            "/agente/conversaciones/:id/compactar",
+            axum::routing::post(compactar_conversacion),
         )
         .route(
             "/agente/tareas-programadas",

@@ -6,6 +6,9 @@
  * GaleriaVisualIsland.tsx). Node 24 importa TS nativo (type-stripping), por eso
  * el fixtures es un archivo de datos puro sin React.
  *
+ * Nota 318A-7: el catálogo ahora tiene 20 ítems (se añadió
+ * '20-contexto-detallado' con la barra de desglose + botón Compactar).
+ *
  * Uso: node .freebuff/galeria-visual.mjs
  */
 
@@ -27,12 +30,12 @@ const ok = (msg) => { pasados++; console.log(`  ✔ ${msg}`); };
 
 console.log('Galería visual (Fase 4.5):\n');
 
-/* 1. Catálogo: exactamente los 19 ítems de la sección 9.5. */
-assert.equal(CATALOGO.length, 19, `catálogo debe tener 19 ítems, tiene ${CATALOGO.length}`);
-ok('catálogo con los 19 ítems (ids ' + CATALOGO[0].id + ' … ' + CATALOGO[18].id + ')');
+/* 1. Catálogo: los 20 ítems (19 de la sección 9.5 + 20-contexto-detallado de 318A-7). */
+assert.equal(CATALOGO.length, 20, `catálogo debe tener 20 ítems, tiene ${CATALOGO.length}`);
+ok('catálogo con los 20 ítems (ids ' + CATALOGO[0].id + ' … ' + CATALOGO[19].id + ')');
 
 const ids = new Set(CATALOGO.map(e => e.id));
-assert.equal(ids.size, 19, 'los ids deben ser únicos');
+assert.equal(ids.size, 20, 'los ids deben ser únicos');
 for (const e of CATALOGO) {
     assert.ok(e.titulo && e.titulo.length > 0, `${e.id}: título no vacío`);
     assert.ok(Array.isArray(e.estados) && e.estados.length > 0, `${e.id}: estados no vacíos`);
@@ -64,17 +67,30 @@ const idsEnIsla = idsPara(isla);
 for (const e of CATALOGO) {
     assert.ok(idsEnIsla.has(e.id), `la isla debe tener una vista para ${e.id}`);
 }
-ok('la isla mapea una vista para los 19 ítems');
+ok('la isla mapea una vista para los 20 ítems');
 
-/* 4. Los componentes compartidos existen y la isla los importa (sin copias divergentes). */
+/* 4. Los componentes compartidos existen y la isla los importa (sin copias divergentes).
+ * Unos viven en componentes.tsx (export function) y otros (burbujas/tarjetas de
+ * mensaje) viven en mensajes.tsx y se re-exportan desde componentes.tsx. */
 const componentes = readFileSync(join(raiz, 'frontend/src/app/plugins/agente/componentes.tsx'), 'utf8');
-const importsIsla = [...isla.matchAll(/\b([A-Z]\w+)\b/g)].map(m => m[1]);
-for (const nombre of ['MensajeUsuario', 'MensajeAsistente', 'TarjetaTool', 'BarraContexto', 'TabsWorkspace', 'SelectorModo', 'SkillFila', 'BotonCancelar', 'BotonReintentar', 'EstadoVacio', 'EstadoCarga', 'IndicadorPensando']) {
+const mensajes = readFileSync(join(raiz, 'frontend/src/app/plugins/agente/mensajes.tsx'), 'utf8');
+/* Definidos directamente en componentes.tsx. */
+const EN_COMPONENTES = ['TabsWorkspace', 'SelectorModo', 'SkillFila', 'BotonCancelar', 'EstadoVacio', 'EstadoCarga'];
+/* Re-exportados: definidos en mensajes.tsx y exportados de nuevo en componentes.tsx. */
+const RE_EXPORTADOS = ['MensajeUsuario', 'MensajeAsistente', 'TarjetaTool', 'BarraContexto', 'BarraContextoInferior', 'BotonReintentar', 'IndicadorPensando'];
+for (const nombre of EN_COMPONENTES) {
     assert.ok(componentes.includes(`export function ${nombre}`), `componentes.tsx debe exportar ${nombre}`);
 }
+for (const nombre of RE_EXPORTADOS) {
+    assert.ok(mensajes.includes(`export function ${nombre}`), `mensajes.tsx debe definir ${nombre}`);
+    const reExporta = new RegExp(`export \\{[^}]*\\n\\s*${nombre}\\b[^}]*\\} from './mensajes'`);
+    assert.ok(reExporta.test(componentes), `componentes.tsx debe re-exportar ${nombre} desde mensajes.tsx`);
+}
 /* El botón de reintentar se renderiza vía MensajeAsistente (reintentar=true),
- * no duplicado en la isla: la vista 13 debe usar el componente compartido. */
-for (const nombre of ['MensajeUsuario', 'MensajeAsistente', 'TarjetaTool', 'BarraContexto', 'TabsWorkspace', 'SelectorModo', 'SkillFila', 'BotonCancelar', 'EstadoVacio', 'EstadoCarga', 'IndicadorPensando']) {
+ * no duplicado en la isla: la vista 13 debe usar el componente compartido.
+ * Por eso BotonReintentar no se exige "usado" en la isla y sí se prohíbe aparte. */
+const USADOS_EN_ISLA = [...EN_COMPONENTES, ...RE_EXPORTADOS].filter(n => n !== 'BotonReintentar');
+for (const nombre of USADOS_EN_ISLA) {
     assert.ok(isla.includes(nombre), `la isla debe usar ${nombre}`);
 }
 assert.ok(!isla.includes('BotonReintentar'), 'la isla no debe renderizar BotonReintentar aparte (MensajeAsistente ya lo hace)');
