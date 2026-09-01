@@ -62,6 +62,60 @@ export function BarraContexto({contexto}: {contexto: ContextoVisual}): JSX.Eleme
     );
 }
 
+/* ---------- Barra de uso de contexto inferior (318A-5) ---------- */
+
+interface BarraContextoInferiorProps {
+    /* Contexto del último turno del chat (si lo hay). */
+    contexto?: ContextoVisual | null;
+    /* Ventana máxima de contexto configurada (tokens). */
+    maxVentana: number;
+}
+
+/* [318A-5] Barra fija sobre el input que muestra el uso del contexto con una
+ * barra de progreso. Al poner el mouse encima muestra un tooltip con el
+ * detalle: tokens usados, máximo, porcentaje, skills y tokens de salida.
+ * Fuente de datos: eventos usage/contexto del último turno (el runtime solo
+ * emite tokens_prompt reales del proveedor cuando el streaming termina). */
+export function BarraContextoInferior({contexto, maxVentana}: BarraContextoInferiorProps): JSX.Element {
+    const ocupacionPct =
+        contexto?.ocupacionPct !== null && contexto?.ocupacionPct !== undefined
+            ? contexto.ocupacionPct
+            : maxVentana > 0 && (contexto?.tokensPrompt ?? 0) > 0
+                ? Math.min(100, ((contexto?.tokensPrompt ?? 0) / maxVentana) * 100)
+                : null;
+    const usado = contexto?.tokensPrompt ?? 0;
+    const porc = ocupacionPct !== null ? ocupacionPct : 0;
+    const mostrado = ocupacionPct !== null;
+    return (
+        <div className="panelIAContextoBarra" title="">
+            <div className="panelIAContextoBarraPista">
+                <div
+                    className={`panelIAContextoBarraRelleno ${porc >= 85 ? 'panelIAContextoBarraRelleno--critico' : porc >= 70 ? 'panelIAContextoBarraRelleno--alto' : ''}`}
+                    style={{width: mostrado ? `${Math.max(2, Math.min(100, porc))}%` : '0%'}}
+                />
+            </div>
+            <div className="panelIAContextoBarraTooltip" role="tooltip">
+                {mostrado ? (
+                    <>
+                        <strong>{porc.toFixed(0)}%</strong> de contexto usado
+                        <span className="panelIAContextoBarraDetalle">
+                            {usado.toLocaleString('es')} tok usados · {maxVentana.toLocaleString('es')} tok máx
+                        </span>
+                        {contexto?.tokensComplecion ? (
+                            <span className="panelIAContextoBarraDetalle">{contexto.tokensComplecion.toLocaleString('es')} tok de salida</span>
+                        ) : null}
+                        {contexto?.skills ? (
+                            <span className="panelIAContextoBarraDetalle">{contexto.skills} skills activas</span>
+                        ) : null}
+                    </>
+                ) : (
+                    <>Sin datos de contexto del último turno · ventana {maxVentana.toLocaleString('es')} tok</>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export function AprobacionPendiente({tool}: {tool: string}): JSX.Element {
     return (
         <div className="panelIAAccionBadge panelIAAccionBadge--pendiente">
@@ -95,9 +149,56 @@ export function IndicadorPensando(): JSX.Element {
 
 /* ---------- Burbujas de mensaje ---------- */
 
-export function MensajeUsuario({contenido}: {contenido: string}): JSX.Element {
+/* [318A-5] Botones de acción del mensaje (volver atrás / editar). Se muestran
+ * sobre la burbuja (usuario) o bajo ella (asistente) en hover. */
+function AccionesMensaje({
+    onVolver,
+    onEditar,
+    alineacion,
+}: {
+    onVolver?: () => void;
+    onEditar?: () => void;
+    alineacion: 'izquierda' | 'derecha';
+}): JSX.Element | null {
+    if (!onVolver && !onEditar) return null;
+    return (
+        <div className={`panelIAMensajeAcciones panelIAMensajeAcciones--${alineacion}`}>
+            {onVolver && (
+                <button
+                    type="button"
+                    className="panelIAMensajeAccion"
+                    title="Volver a este mensaje (descarta el contexto posterior)"
+                    onClick={onVolver}
+                >
+                    ← Volver
+                </button>
+            )}
+            {onEditar && (
+                <button
+                    type="button"
+                    className="panelIAMensajeAccion"
+                    title="Editar este mensaje (el contexto vuelve a este punto)"
+                    onClick={onEditar}
+                >
+                    ✎ Editar
+                </button>
+            )}
+        </div>
+    );
+}
+
+interface MensajeUsuarioProps {
+    contenido: string;
+    /* [318A-5] id real del mensaje en BD (para rebobinar). */
+    idBd?: number;
+    onVolver?: () => void;
+    onEditar?: () => void;
+}
+
+export function MensajeUsuario({contenido, onVolver, onEditar}: MensajeUsuarioProps): JSX.Element {
     return (
         <div className="panelIAMensaje panelIAMensaje--usuario">
+            <AccionesMensaje onVolver={onVolver} onEditar={onEditar} alineacion="derecha" />
             <div className="panelIAMensajeBurbuja">
                 <span className="panelIAMensajeTexto">{contenido || '...'}</span>
             </div>
@@ -114,6 +215,9 @@ interface MensajeAsistenteProps {
     enviando?: boolean;
     ultimo?: boolean;
     onReintentar?: () => void;
+    /* [318A-5] Botones volver/editar. */
+    onVolver?: () => void;
+    onEditar?: () => void;
 }
 
 export function MensajeAsistente({
@@ -125,6 +229,8 @@ export function MensajeAsistente({
     enviando,
     ultimo,
     onReintentar,
+    onVolver,
+    onEditar,
 }: MensajeAsistenteProps): JSX.Element {
     const contextoVisible = Boolean(
         contexto && (contexto.ocupacionPct !== null || contexto.tokensPrompt > 0 || contexto.skills > 0)
@@ -150,6 +256,7 @@ export function MensajeAsistente({
 
                 {enviando && ultimo && contenido === '' && <IndicadorPensando />}
             </div>
+            <AccionesMensaje onVolver={onVolver} onEditar={onEditar} alineacion="izquierda" />
         </div>
     );
 }

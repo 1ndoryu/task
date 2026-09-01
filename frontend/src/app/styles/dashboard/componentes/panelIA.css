@@ -123,6 +123,51 @@
     white-space: pre-wrap;
 }
 
+/* [318A-5] Acciones del mensaje (volver atrás / editar). Se muestran en hover
+ * junto a la burbuja: a la izquierda para el asistente, a la derecha para el
+ * usuario. Pequeños y discretos, monocromo. */
+.panelIAMensajeAcciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioXxs, 2px);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+.panelIAMensaje--usuario .panelIAMensajeAcciones {
+    order: 1;
+}
+
+.panelIAMensaje:hover .panelIAMensajeAcciones,
+.panelIAMensajeAcciones:focus-within {
+    opacity: 1;
+}
+
+.panelIAMensajeAccion {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border: 1px solid var(--dashboard-bordeSutil);
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-fondoTarjeta);
+    color: var(--dashboard-textoApagado);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    line-height: 1.4;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+}
+
+.panelIAMensajeAccion:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
 /* Error */
 .panelIAError {
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);

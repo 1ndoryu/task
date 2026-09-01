@@ -173,6 +173,41 @@ impl AgenteRepository {
             .map(|r| r.rows_affected())
     }
 
+    /// [318A-5] Rebobina la conversación hasta el mensaje `hasta_id`.
+    /// - `incluye_mensaje=false` (Volver): borra los mensajes con id > `hasta_id`
+    ///   (el mensaje objetivo se conserva).
+    /// - `incluye_mensaje=true` (Editar): borra los mensajes con id >= `hasta_id`
+    ///   (el mensaje objetivo también se elimina para reescribirlo).
+    /// Verifica propiedad de la conversación; devuelve filas borradas.
+    pub async fn rebobinar_hasta(
+        pool: &PgPool,
+        conversacion_id: Uuid,
+        user_id: Uuid,
+        hasta_id: i64,
+        incluye_mensaje: bool,
+    ) -> Result<u64, sqlx::Error> {
+        let sql = if incluye_mensaje {
+            "DELETE FROM agente_mensajes m
+             USING agente_conversaciones c
+             WHERE c.id = m.conversacion_id
+               AND c.id = $1 AND c.user_id = $2
+               AND m.id >= $3"
+        } else {
+            "DELETE FROM agente_mensajes m
+             USING agente_conversaciones c
+             WHERE c.id = m.conversacion_id
+               AND c.id = $1 AND c.user_id = $2
+               AND m.id > $3"
+        };
+        sqlx::query(sql)
+            .bind(conversacion_id)
+            .bind(user_id)
+            .bind(hasta_id)
+            .execute(pool)
+            .await
+            .map(|r| r.rows_affected())
+    }
+
     /// Tareas programadas en estados activos (para el límite por usuario).
     pub async fn contar_tareas_activas(pool: &PgPool, user_id: Uuid) -> Result<i64, sqlx::Error> {
         let (n,): (i64,) = sqlx::query_as(

@@ -19,6 +19,7 @@ export type {HerramientaVisual, ContextoVisual} from './mensajes';
 export {
     TarjetaTool,
     BarraContexto,
+    BarraContextoInferior,
     AprobacionPendiente,
     BotonReintentar,
     IndicadorPensando,

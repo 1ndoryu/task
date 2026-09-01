@@ -17,6 +17,7 @@ import {ModalConfigAgente} from './ModalConfigAgente';
 import {usePanelAgente} from './usePanelAgente';
 import {useAgenteStore} from './store';
 import {
+    BarraContextoInferior,
     BotonCancelar,
     ControlesInputIA,
     EstadoCarga,
@@ -71,6 +72,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         reintentarMensaje,
         eliminarTarea,
         cancelarTurno,
+        rebobinarTab,
         manejarEnviar,
         manejarTecla,
         iniciarRenombrado,
@@ -170,8 +172,27 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                 )}
 
                 {tabActiva?.mensajes.map(mensaje => {
+                    /* [318A-5] Rebobinar hasta este mensaje (volver atrás o
+                     * editar): el contexto vuelve a ese punto. `idBd` es el id
+                     * real en BD (los mensajes locales usan `db-<id>`); los
+                     * mensajes nuevos sin idBd (no persistidos) no pueden
+                     * rebobinar el servidor. Volver conserva el mensaje
+                     * objetivo; editar lo elimina para reescribirlo. */
+                    const idBd = /^db-(\d+)$/.exec(mensaje.id)?.[1];
+                    const rebobinarAqui = (editar: boolean) => {
+                        if (idBd && !tabActiva.enviando) {
+                            void rebobinarTab(tabActiva.conversacion.id, Number(idBd), mensaje.id, editar);
+                        }
+                    };
                     if (mensaje.rol === 'user') {
-                        return <MensajeUsuario key={mensaje.id} contenido={mensaje.contenido} />;
+                        return (
+                            <MensajeUsuario
+                                key={mensaje.id}
+                                contenido={mensaje.contenido}
+                                onVolver={() => rebobinarAqui(false)}
+                                onEditar={() => rebobinarAqui(true)}
+                            />
+                        );
                     }
                     const ultimo = mensaje.id === tabActiva.mensajes[tabActiva.mensajes.length - 1]?.id;
                     return (
@@ -185,6 +206,8 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                             enviando={tabActiva.enviando}
                             ultimo={ultimo}
                             onReintentar={() => void reintentarMensaje()}
+                            onVolver={() => rebobinarAqui(false)}
+                            onEditar={() => rebobinarAqui(true)}
                         />
                     );
                 })}
@@ -261,6 +284,14 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                     </form>
                 </div>
             </Modal>
+
+            {/* [318A-5] Barra de uso de contexto inferior: uso del último turno
+             * con tooltip (usado, máximo, %, salida, skills). La maxVentana
+             * viene de la config de la tab (o la global). */}
+            <BarraContextoInferior
+                contexto={tabActiva ? [...tabActiva.mensajes].reverse().find(m => m.contexto)?.contexto ?? null : null}
+                maxVentana={tabActiva?.config.maxVentana ?? configAgente.maxVentana}
+            />
 
             {/* Input */}
             <div className="panelIAInput panelIAInput--agente">

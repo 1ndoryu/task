@@ -480,6 +480,55 @@ pub async fn eliminar_conversacion(
     Ok(axum::http::StatusCode::NO_CONTENT)
 }
 
+/// [318A-5] Rebobina la conversación hasta un mensaje (volver atrás / editar):
+/// borra los mensajes posteriores (o desde, si es editar) a `hastaId`. El front
+/// recarga el historial tras rebobinar. Se verifica propiedad de la conversación
+/// (el DELETE con USING ya lo garantiza).
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+pub struct RebobinarRequest {
+    pub hastaId: i64,
+    /// true = editar (borra también el mensaje objetivo); false/ausente = volver.
+    #[serde(default)]
+    pub editar: bool,
+}
+
+pub async fn rebobinar_conversacion(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(conversacion_id): Path<Uuid>,
+    Json(req): Json<RebobinarRequest>,
+) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
+    if req.hastaId <= 0 {
+        return Err(AppError::BadRequest("hastaId inválido".into()));
+    }
+    let borradas = AgenteRepository::rebobinar_hasta(
+        &state.pool,
+        conversacion_id,
+        auth.user_id,
+        req.hastaId,
+        req.editar,
+    )
+    .await?;
+    if borradas == 0 {
+        /* Sin mensajes posteriores = nada que borrar (idempotente); el front
+         * siempre recarga el historial actual. */
+    }
+    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
+        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
+    Ok(Json(
+        filas
+            .into_iter()
+            .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
+                id,
+                rol,
+                contenido,
+                creadoEn: creado_en.to_rfc3339(),
+            })
+            .collect(),
+    ))
+}
+
 /// Límite de tareas programadas activas por usuario.
 const MAX_TAREAS_PROGRAMADAS: i64 = 20;
 
@@ -854,6 +903,12 @@ pub fn routes() -> Router<AppState> {
                 .get(listar_mensajes_conversacion),
         )
         .route("/agente/conversaciones/:id/config", axum::routing::put(guardar_config_conversacion))
+        /* [318A-5] Rebobinar: borra los mensajes posteriores a un mensaje
+         * (volver atrás / editar un mensaje reescribe el contexto a ese punto). */
+        .route(
+            "/agente/conversaciones/:id/rebobinar",
+            axum::routing::post(rebobinar_conversacion),
+        )
         .route(
             "/agente/tareas-programadas",
             post(crear_tarea_programada).get(listar_tareas_programadas),

@@ -24,7 +24,9 @@
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioMd);
-    width: min(460px, 100%);
+    /* [318A-5] Mismo ancho/alto que el modal de configuración global. */
+    width: min(720px, 100%);
+    height: 750px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -79,6 +81,68 @@
 
 /* ---- Cuerpo ---- */
 .modalConfigAgenteCuerpo {
+    /* [318A-5] Fila: sidebar (izquierda) + contenido (derecha), como el modal
+     * de configuración global (configGlobalLayout). */
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* [318A-5] Sidebar de navegación (patrón configGlobalSidebar, 180px). */
+.modalConfigAgenteSidebar {
+    width: 180px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioLg) var(--dashboard-espacioS);
+    border-right: 1px solid var(--dashboard-bordePrincipal);
+    overflow-y: auto;
+    background: var(--dashboard-fondoTarjeta);
+}
+
+.modalConfigAgenteNavGrupo {
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioSm);
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--dashboard-textoApagado);
+}
+
+.modalConfigAgenteNavItem {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioMini);
+    width: 100%;
+    padding: 6px var(--dashboard-espacioSm);
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+    border-radius: var(--dashboard-radioSm);
+    background: none;
+    color: var(--dashboard-textoSecundario);
+    font-family: inherit;
+    font-size: var(--dashboard-tamanoPequeno);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
+}
+
+.modalConfigAgenteNavItem:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-textoNormal);
+}
+
+.modalConfigAgenteNavItem.activo {
+    background: var(--dashboard-superposicionActiva);
+    color: var(--dashboard-textoActivo);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.modalConfigAgenteContenido {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--dashboard-espacioLg);

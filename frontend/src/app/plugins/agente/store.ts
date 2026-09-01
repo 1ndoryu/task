@@ -21,6 +21,7 @@ import {
     enviarMensajeAgente,
     listarConversaciones,
     listarTareasProgramadas,
+    rebobinarConversacion,
     renombrarConversacion,
 } from './service';
 
@@ -140,6 +141,10 @@ interface EstadoAgenteAccionesConversacion {
     enviarMensaje: (texto: string, signal?: AbortSignal, claveIdempotencia?: string) => Promise<void>;
     reintentarMensaje: () => Promise<void>;
     limpiarErrorTab: (id: string) => void;
+    /* [318A-5] Rebobina la conversación hasta un mensaje (volver atrás/editar):
+     * borra los mensajes posteriores en BD y en la sesión local. `editar=true`
+     * elimina también el mensaje objetivo (para reescribirlo); false lo conserva. */
+    rebobinarTab: (id: string, hastaId: number, hastaMensajeId: string, editar?: boolean) => Promise<void>;
     establecerConfig: (config: Partial<ConfigAgente>) => void;
 }
 
@@ -570,6 +575,42 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         set(state => ({
             tabs: state.tabs.map(t => (t.conversacion.id === id ? {...t, error: null} : t)),
         }));
+    },
+
+    /* [318A-5] Rebobina hasta un mensaje (volver atrás/editar): el backend borra
+     * los mensajes posteriores (o desde, si `editar`) y devuelve el historial
+     * resultante; la sesión local se reconcilia con él. `hastaMensajeId` es el id
+     * local (p.ej. `db-123`) del mensaje objetivo. */
+    rebobinarTab: async (id, hastaId, hastaMensajeId, editar = false) => {
+        const tab = tabDe(get(), id);
+        if (!tab) return;
+        try {
+            const historial = await rebobinarConversacion(id, hastaId, editar);
+            /* Reconciliar la sesión local con el historial real del servidor
+             * (los ids `db-N` coinciden con el backend). */
+            set(state => ({
+                tabs: state.tabs.map(t =>
+                    t.conversacion.id === id
+                        ? {
+                              ...t,
+                              mensajes: historial.map(h => ({
+                                  id: `db-${h.id}`,
+                                  rol: h.rol === 'user' ? 'user' as const : 'assistant' as const,
+                                  contenido: h.contenido,
+                              })),
+                          }
+                        : t
+                ),
+            }));
+        } catch (error) {
+            set(state => ({
+                tabs: state.tabs.map(t =>
+                    t.conversacion.id === id
+                        ? {...t, error: error instanceof Error ? error.message : 'No se pudo rebobinar la conversación'}
+                        : t
+                ),
+            }));
+        }
     },
 
     cargarTareasProgramadas: async () => {

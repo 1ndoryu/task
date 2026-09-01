@@ -232,6 +232,17 @@ export async function cargarHistorial(id: string): Promise<MensajeConversacion[]
     return apiFetch<MensajeConversacion[]>(`/agente/conversaciones/${id}`);
 }
 
+/* [318A-5] Rebobina la conversación hasta un mensaje (volver atrás / editar):
+ * el backend borra los mensajes posteriores (o desde, si `editar`) y devuelve
+ * el historial resultante. `editar=true` también elimina el mensaje objetivo
+ * (para reescribirlo); `false` lo conserva. */
+export async function rebobinarConversacion(id: string, hastaId: number, editar = false): Promise<MensajeConversacion[]> {
+    return apiFetch<MensajeConversacion[]>(`/agente/conversaciones/${id}/rebobinar`, {
+        method: 'POST',
+        body: {hastaId, editar},
+    });
+}
+
 /* ---------- Stream SSE ---------- */
 
 /**

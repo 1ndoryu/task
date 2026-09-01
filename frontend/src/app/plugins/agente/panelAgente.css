@@ -16,6 +16,10 @@
     border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
+/* [318A-5] Tabs con borde visible en todos los estados (pedido del usuario) y
+ * fuente explícita: el título y el input de renombrado heredan la fuente del
+ * proyecto. Antes el input del renombrado perdía la fuente (heredaba la del
+ * navegador), por eso al editar el nombre de la tab se "quitaba la fuente". */
 .panelAgenteTab {
     display: flex;
     align-items: center;
@@ -23,17 +27,19 @@
     padding: 3px 6px 3px 10px;
     border-radius: 0;
     font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     white-space: nowrap;
     max-width: 160px;
-    border: 1px solid transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
     border-bottom: none;
     user-select: none;
 }
 
 .panelAgenteTab:hover {
     background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-bordePrincipal);
 }
 
 .panelAgenteTab--activa {
@@ -46,6 +52,7 @@
 .panelAgenteTabTitulo {
     overflow: hidden;
     text-overflow: ellipsis;
+    font-family: inherit;
 }
 
 .panelAgenteTabCerrar {
@@ -71,6 +78,8 @@
     width: 100%;
     min-width: 80px;
     font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit; /* [318A-5] hereda la fuente del proyecto (bug: al
+                           * editar el nombre se perdía la fuente). */
     padding: 2px 4px;
     border: 1px solid var(--dashboard-primario);
     border-radius: 0;
@@ -155,6 +164,76 @@
     background: var(--dashboard-superposicionSutil);
     padding: 1px var(--dashboard-espacioSm, 6px);
     border-radius: var(--dashboard-radioSm);
+}
+
+/* [318A-5] Barra de uso de contexto inferior (sobre el input). Muestra el uso
+ * con una pista de progreso y un tooltip al hacer hover con el detalle
+ * (usado, máximo, %, salida, skills). Monocromo: usa tokens del tema. */
+.panelIAContextoBarra {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--dashboard-espacioXs, 4px) var(--dashboard-espacioMd, 12px);
+    border-top: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoSecundario);
+    cursor: default;
+}
+
+.panelIAContextoBarraPista {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--dashboard-radioSm);
+    background: var(--dashboard-superposicionSutil);
+    overflow: hidden;
+}
+
+.panelIAContextoBarraRelleno {
+    height: 100%;
+    background: var(--dashboard-textoActivo);
+    transition: width 0.3s ease;
+}
+
+.panelIAContextoBarraRelleno--alto {
+    background: var(--dashboard-estadoAdvertencia);
+}
+
+.panelIAContextoBarraRelleno--critico {
+    background: var(--dashboard-peligroClaro);
+}
+
+/* Tooltip: aparece al hacer hover sobre la barra completa (zona cómoda).
+ * Posición absoluta encima de la barra, alineado a la derecha del panel. */
+.panelIAContextoBarraTooltip {
+    position: absolute;
+    bottom: calc(100% + var(--dashboard-espacioSm, 6px));
+    right: var(--dashboard-espacioMd, 12px);
+    min-width: 220px;
+    max-width: 320px;
+    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 12px);
+    background: var(--dashboard-fondoTarjeta);
+    border: 1px solid var(--dashboard-bordePrincipal);
+    border-radius: var(--dashboard-radioSm);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoNormal);
+    box-shadow: 0 2px 8px var(--dashboard-sombra);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    z-index: 10;
+    pointer-events: none;
+    line-height: 1.4;
+}
+
+.panelIAContextoBarra:hover .panelIAContextoBarraTooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.panelIAContextoBarraDetalle {
+    display: block;
+    color: var(--dashboard-textoSecundario);
 }
 
 .panelAgentePensando {
