@@ -91,7 +91,7 @@
 
 .adjuntoNombre:hover {
     text-decoration: underline;
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
 }
 
 .adjuntoMeta {

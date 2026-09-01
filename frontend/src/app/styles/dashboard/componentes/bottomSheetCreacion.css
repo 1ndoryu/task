@@ -151,15 +151,16 @@
     padding: 0;
 }
 
-/* [034A-8] Botón guardar: sin fondo, sin borde, color blanco.
- * El .boton--primario heredado agrega fondo/borde — se sobreescribe aquí. */
+/* [034A-8] Botón guardar: sin fondo, sin borde, color inverso por tema.
+ * El .boton--primario heredado agrega fondo/borde — se sobreescribe aquí.
+ * Sin fondo propio usa textoActivo (textoSobreAcento exigiría fondo acento). */
 .bottomSheetHabito__botonGuardar {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 24px;
     height: 24px;
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
     background: none !important;
     border: none !important;
     border-radius: var(--dashboard-radioSm);
@@ -182,7 +183,7 @@
 
 .bottomSheetHabito__botonGuardar:hover,
 .bottomSheetHabito__botonGuardar:active {
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
     background: none !important;
     transform: scale(1.1);
 }

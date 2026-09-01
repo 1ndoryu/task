@@ -184,11 +184,12 @@
 
 .modalAyunoUltimaComidaBoton--primario {
     border-color: var(--dashboard-acento);
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
 }
 
 .modalAyunoUltimaComidaBoton--primario:hover {
     background: var(--dashboard-acentoHover);
+    color: var(--dashboard-textoSobreAcento);
 }
 
 .modalAyunoFinalizarBoton--primario:hover {

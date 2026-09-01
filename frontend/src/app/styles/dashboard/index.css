@@ -83,8 +83,8 @@
 @import './componentes/frecuencia.css';
 @import './componentes/panelConfiguracion.css';
 @import './componentes/adjuntos.css';
-@import './componentes/proyectos.css';
-@import './componentes/configuracionTareas.css';
+@import './componentes/proyectos.css';@import './componentes/configuracionTareas.css';
+@import './componentes/formCampo.css';
 @import './componentes/configuracionHabitos.css';
 @import './componentes/modalMoverTarea.css';
 @import './componentes/listaOrdenPaneles.css';

@@ -227,10 +227,11 @@
     color: var(--dashboard-textoActivo);
 }
 
-/* [243A-20] Sin background en opción activa */
+/* [243A-20] Sin background en opción activa: color textoActivo (inversión por
+ * tema); textoSobreAcento exigiría un fondo acento sólido que aquí no hay. */
 .panelAyunoDuracionOpcion--activa {
     background: transparent;
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
     border-color: var(--dashboard-acento);
 }
 

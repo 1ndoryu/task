@@ -157,9 +157,9 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
-/* Indicador de hora actual (punto blanco brillante) */
+/* Indicador de hora actual (punto de contraste según tema) */
 .indicadorHoraActual {
-    fill: var(--dashboard-textoSobreAcento);
+    fill: var(--dashboard-textoActivo);
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
     pointer-events: none;
     z-index: 10;

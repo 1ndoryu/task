@@ -46,7 +46,7 @@ body {
 
 .dashboardContenedor::selection {
     background-color: var(--dashboard-barraNormal);
-    color: var(--dashboard-textoSobreAcento);
+    color: var(--dashboard-textoActivo);
 }
 
 /* 

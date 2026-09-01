@@ -140,7 +140,7 @@
 }
 
 .modalCompartirAcciones .botonPrimario:hover:not(:disabled) {
-    background: var(--dashboard-textoSobreAcento);
+    background: var(--dashboard-botonPrimarioHover);
 }
 
 .modalCompartirAcciones .botonPrimario:disabled,
