@@ -24,10 +24,10 @@ const clamped = (value: number, min: number, max: number) => Math.max(min, Math.
 type SeccionAgente = 'general' | 'comportamiento' | 'avanzado';
 
 /* [318A-5] Secciones del sidebar (mismo patrón que ModalConfiguracionGlobal). */
-const SECCIONES_SIDEBAR: ReadonlyArray<{id: SeccionAgente; nombre: string; icono: JSX.Element; grupo: string}> = Object.freeze([
-    {id: 'general', nombre: 'Modo y modelo', icono: <Route size={14} />, grupo: 'General'},
-    {id: 'comportamiento', nombre: 'Estilo y preferencias', icono: <MessageSquare size={14} />, grupo: 'Comportamiento'},
-    {id: 'avanzado', nombre: 'Workspace y contexto', icono: <SlidersHorizontal size={14} />, grupo: 'Avanzado'},
+const SECCIONES_SIDEBAR: ReadonlyArray<{id: SeccionAgente; nombre: string; icono: JSX.Element}> = Object.freeze([
+    {id: 'general', nombre: 'Modo y modelo', icono: <Route size={14} />},
+    {id: 'comportamiento', nombre: 'Estilo y preferencias', icono: <MessageSquare size={14} />},
+    {id: 'avanzado', nombre: 'Workspace y contexto', icono: <SlidersHorizontal size={14} />},
 ]);
 
 export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): JSX.Element | null {
@@ -59,24 +59,22 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                     <button type="button" className="modalConfigAgenteCerrar" onClick={onCerrar} aria-label="Cerrar">×</button>
                 </div>
                 <div className="modalConfigAgenteCuerpo">
-                    {/* [318A-5] Sidebar de navegación: mismo patrón visual que el
-                     * modal de configuración global (configGlobalSidebar). */}
-                    <nav className="modalConfigAgenteSidebar">
-                        {['General', 'Comportamiento', 'Avanzado'].map(grupo => (
-                            <div key={grupo}>
-                                <div className="modalConfigAgenteNavGrupo">{grupo}</div>
-                                {SECCIONES_SIDEBAR.filter(s => s.grupo === grupo).map(s => (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        className={`modalConfigAgenteNavItem ${seccion === s.id ? 'activo' : ''}`}
-                                        onClick={() => setSeccion(s.id)}
-                                    >
-                                        {s.icono}
-                                        <span>{s.nombre}</span>
-                                    </button>
-                                ))}
-                            </div>
+                    {/* [318A-5] Sidebar de navegación: REUTILIZA las mismas clases que
+                     * el modal de configuración global (configGlobalSidebar,
+                     * configGlobalNavGrupo, configGlobalNavItem + Boton ghost) para
+                     * que ambas navegaciones sean visualmente idénticas. */}
+                    <nav className="configGlobalSidebar">
+                        {SECCIONES_SIDEBAR.map(s => (
+                            <Boton
+                                key={s.id}
+                                type="button"
+                                variante="ghost"
+                                claseAdicional={`configGlobalNavItem ${seccion === s.id ? 'activo' : ''}`}
+                                onClick={() => setSeccion(s.id)}
+                            >
+                                {s.icono}
+                                <span>{s.nombre}</span>
+                            </Boton>
                         ))}
                     </nav>
 
