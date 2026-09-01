@@ -73,7 +73,7 @@
           "unwrap-produccion-rs": { "severidad": "error" },
           "panic-produccion-rs": { "severidad": "error" },
           "git-add-all": { "severidad": "error" },
-          "css-especificacion-diseno-local": { "severidad": "information" },
+          "css-especificacion-diseno-local": { "severidad": "warning" },
           "console-production": { "severidad": "information" },
           "unsafe-process-shell": { "severidad": "error" },
           "default-export": { "habilitada": false },
@@ -85,7 +85,7 @@
           "html-nativo-en-vez-de-componente": { "severidad": "warning" },
           "button-clase-especifica": { "severidad": "warning" },
           "componente-sin-hook-glory": { "severidad": "warning" },
-          "menu-contextual-override-diseno": { "habilitada": false },
+          "menu-contextual-override-diseno": { "severidad": "warning" },
           "componente-artesanal": { "severidad": "warning" }
         }
       }

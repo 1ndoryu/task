@@ -64,7 +64,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: var(--dashboard-espacioXs);
-    padding: 6px var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSm); /* 6px = --dashboard-espacioS */
     margin: 0 var(--dashboard-espacioXs);
     border-radius: var(--dashboard-radioSm);
     font-size: var(--dashboard-tamanoPequeno);
@@ -74,7 +74,7 @@
     background: none;
     text-align: left;
     width: calc(100% - var(--dashboard-espacioSm));
-    transition: background-color 0.15s, color 0.15s;
+    transition: background-color var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
 }
 
 .configGlobalNavItem:hover {
@@ -97,13 +97,8 @@
     overflow: auto;
 }
 
-/* Título de sección en el contenido */
-.configGlobalTituloSeccion {
-    font-size: var(--dashboard-tamanoBase);
-    font-weight: 600;
-    color: var(--dashboard-textoActivo);
-    margin-bottom: var(--dashboard-espacioMd);
-}
+/* [318A-7V1] .configGlobalTituloSeccion eliminado: clase muerta (no referenciada en tsx/ts),
+ * reportada como claseHuerfana por varsense. */
 
 /* Responsive: en móvil, sidebar se convierte en horizontal */
 @media (max-width: 600px) {
@@ -137,7 +132,7 @@
         white-space: nowrap;
         width: auto;
         margin: 0;
-        padding: 6px var(--dashboard-espacioSm);
+        padding: var(--dashboard-espacioS) var(--dashboard-espacioSm);
     }
 
     .configGlobalContenido {

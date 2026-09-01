@@ -35,7 +35,9 @@
       "border-radius": true,
       "font-size": true,
       "font-family": true,
-      "box-shadow": true
+      "box-shadow": true,
+      "font-weight": true,
+      "line-height": true
     },
     "allowedValues": [
       "0",
