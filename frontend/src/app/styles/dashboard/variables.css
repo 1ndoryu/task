@@ -14,6 +14,8 @@
     --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
     --dashboard-fondoHover: #111111;
     --dashboard-fondoCristal: rgba(0, 0, 0, 0.85);
+    --dashboard-fondoCodigo: rgba(255, 255, 255, 0.8);
+    --dashboard-textoCodigo: #000000;
     --dashboard-sidebarFondo: #000000;
 
     /* Bordes — grises sobre negro */
@@ -242,6 +244,8 @@
     --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
     --dashboard-fondoHover: #e6e6e6;
     --dashboard-fondoCristal: rgba(255, 255, 255, 0.9);
+    --dashboard-fondoCodigo: rgba(0, 0, 0, 0.8);
+    --dashboard-textoCodigo: #ffffff;
     --dashboard-sidebarFondo: #ffffff;
 
     --dashboard-bordePrincipal: #000000;

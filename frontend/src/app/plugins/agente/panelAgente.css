@@ -104,8 +104,9 @@
 
 .panelAgenteHerramienta {
     font-size: var(--dashboard-tamanoPequeno);
+    border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
-    background: var(--dashboard-superposicionSutil);
+    background: transparent;
     overflow: hidden;
 }
 
@@ -147,9 +148,10 @@
     margin: 0;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-top: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoCodigo);
+    color: var(--dashboard-textoCodigo);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoSecundario);
     white-space: pre-wrap;
     word-break: break-word;
     max-height: 120px;
@@ -167,7 +169,8 @@
 }
 
 .panelAgenteContexto span {
-    background: var(--dashboard-superposicionSutil);
+    background: transparent;
+    border: 1px solid var(--dashboard-bordeSutil);
     padding: 1px var(--dashboard-espacioSm);
     border-radius: var(--dashboard-radioSm);
 }
@@ -344,7 +347,7 @@
     padding: var(--dashboard-espacioSm);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
-    background: var(--dashboard-superposicionSutil);
+    background: transparent;
 }
 
 .panelAgenteTareaFila {
@@ -365,8 +368,9 @@
 .panelAgenteTareaEstado {
     font-size: var(--dashboard-tamanoPequeno);
     padding: 0 var(--dashboard-espacioSm);
+    border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
-    background: var(--dashboard-superposicionSutil);
+    background: transparent;
 }
 
 .panelAgenteTareaBorrar {

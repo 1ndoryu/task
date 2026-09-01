@@ -119,7 +119,7 @@
     margin: 0;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     border: 1px solid var(--dashboard-estadoAdvertenciaBorde);
-    background: var(--dashboard-estadoAdvertenciaFondo);
+    background: transparent;
     color: var(--dashboard-estadoAdvertenciaFuerte);
     font-size: var(--dashboard-tamanoPequeno);
     border-radius: var(--dashboard-espacioXs);
@@ -185,10 +185,10 @@
 
 .galeriaVerificacionSeguro {
     border: 1px solid var(--dashboard-estadoAltaBorde);
-    background: var(--dashboard-estadoAltaFondo);
+    background: transparent;
 }
 
 .galeriaVerificacionInseguro {
     border: 1px solid var(--dashboard-estadoErrorBorde);
-    background: var(--dashboard-estadoErrorFondo);
+    background: transparent;
 }
