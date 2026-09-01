@@ -65,7 +65,7 @@ export function EncabezadoMenuMovil({usuario, avatarUrl, suscripcion, esAdmin: _
         <>
             <Boton type="button" claseAdicional="botonIconoEncabezado botonMenuMovil" onClick={onAbrirDrawer} title={esTablet ? undefined : 'Menú'} aria-label="Abrir menú de navegación">
                 <Menu size={18} />
-                {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="botonIconoEncabezado__puntoNotificacion" />}
+                {(notificacionesPendientes > 0 || equiposPendientes > 0) && <span className="encabezadoPuntoNotificacion" />}
             </Boton>
 
             <DrawerMovil estaAbierto={drawerAbierto} onCerrar={onCerrarDrawer} usuario={{nombre: usuario, avatar: avatarUrl}} suscripcion={suscripcion} opciones={opcionesDrawer} onSeleccionar={manejarOpcionDrawer} opcionesSecundarias={opcionesSecundariasDrawer} onClickPerfil={onClickUsuario} onClickPlan={onClickPlan} />

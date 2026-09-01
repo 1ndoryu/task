@@ -2,6 +2,8 @@
  * Glory Page Builder - Block Renderer
  *
  * Componente que toma un array de bloques (JSON) y los renderiza
+ * sentinel-disable-file button-clase-especifica — clases de accion del editor editorial (glory-core):
+ * capa de framework/editorial sin design system de la app (§4.2 plan 318A-3); no migrar a ui/Boton.
  * usando los componentes registrados en BlockRegistry.
  *
  * Soporta dos modos:

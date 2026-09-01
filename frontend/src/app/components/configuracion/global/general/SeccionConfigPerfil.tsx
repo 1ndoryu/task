@@ -47,7 +47,7 @@ export function SeccionConfigPerfil({onCerrar}: {onCerrar: () => void}): JSX.Ele
             {mensaje && <div className={`mensajePerfil mensajePerfil--${mensaje.tipo}`}>{mensaje.texto}</div>}
             <div className="accionesPerfil">
                 <Boton claseAdicional="botonPerfil botonGuardar" onClick={handleSubmit} disabled={cargando}>
-                    <div className="botonPerfilContenido">{cargando ? <span className="cargandoSpinner cargandoSpinner--pequeno"></span> : <Save size={14} />} Guardar Cambios</div>
+                    <div className="perfilContenido">{cargando ? <span className="cargandoSpinner cargandoSpinner--pequeno"></span> : <Save size={14} />} Guardar Cambios</div>
                 </Boton>
             </div>
         </div>

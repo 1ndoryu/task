@@ -244,8 +244,39 @@ autorización explícita.**
    ModalConfiguracionTareas, ModalConfiguracionProyectos (FormularioConfiguracion declarativo),
    SeccionConfigGruposFb (FormCampo con `accionesDetalles` — caso escape), ItemToggle (wrappeado con
    FormCampo). Patrones B/C cerrados en la pasada siguiente; los escapes quedan intencionales y documentados.
-5. **F5 — Reactivar reglas** + limpiar hallazgos residuales (botones/overlays restantes). (pendiente)
-6. **F6 — Gate PASS + commit + push** (PT).
+5. **F5 — Reactivar reglas** + limpiar hallazgos residuales (botones/overlays restantes). ✅ HECHO (2026-09-01)
+   - Reactivadas en `sentinel.config.json`: `html-nativo-en-vez-de-componente`, `button-clase-especifica`,
+     `componente-artesanal`, `componente-sin-hook-glory` (warning). Línea base con reglas off: 38
+     (0e/32w/6h). Tras reactivar: 74 → **59** (0e/53w/6h) tras limpieza.
+   - **Renombres visual-neutrales** (clases internas BEM de botón, no variantes → fuera de
+     `button-clase-especifica`): `botonIconoEncabezado__contador*` → `encabezadoContador*`,
+     `botonPerfilContenido` → `perfilContenido`, `botonAccionIcono` → `accionIcono` (CSS +
+     usos en EncabezadoMovil/EncabezadoAcciones/AccionesDatos/ModalPerfil/SeccionConfigPerfil).
+   - **glory-core (§4.2)**: `sentinel-disable-file` justificado en BlockEditorModal
+     (button-clase + html-nativo), BlockRenderer (button-clase), EditorPixelArt, GloryLink,
+     PageRenderer (componente-sin-hook) — capa de framework editorial sin design system de app.
+   - **Residuales documentados (excepción, sin forzar)**: 17× `html-nativo` = `<Select>`
+     deprecated (§4.1: `SelectDropdown` no existe en el proyecto); 2× `componente-sin-hook-glory` + 2×
+     `componente-artesanal` en ModalCrearRecordatorio/ModalDependencias/SubmenuNuevoInline — `Modal`
+     exige título/encabezado propio y `MenuContextual` es de cursor; sin seam visual-neutral
+     (verificado: ModalDependencias ya usa el Modal canónico; los 2 restantes quedan como escape
+     documentado igual que ConfigExp/ConfigDeficitCalorico).
+   - **Desync compartido corregido (patrón F2)**: el checkout compartido `.quality-tools/varsense`
+     estaba en la rama local `fix/308A-6-j8-clases-dinamicas` (`303e7f9`, nunca integrada en
+     origin/main) y bloqueaba el preflight del gate (tool-release-unpublished). Restaurado al pin
+     `88f281f` (== origin/main, que es el commit fijado en `quality-tools.json`), árbol limpio,
+     `dist/` reconstruido desde el pin, y evidencia regenerada con `npm run quality:setup`
+     (compile + smoke:lsp OK). Nota: el fix J-8 de `claseHuerfana` queda en esa rama local sin
+     publicar — los consumidores fijados al pin corren el analizador publicado.
+   - Verificación: `npm run type-check` (frontend) exit 0; varsense config-scoped **293 (0 errores)**
+     y `all` **1701 (0 errores)** — los 2 `variableNoDefinida` del WIP 318A-5 (tokens
+     `--dashboard-superposicionActiva`/`--dashboard-sombra`) resueltos declarando los tokens con
+     alias en ambos temas de `frontend/src/app/styles/dashboard/variables.css`. Sin huérfanas nuevas
+     (0 hallazgos de las clases renombradas en claseHuerfana).
+6. **F6 — Gate PASS + commit + push** (PT). ✅ Gate `sentinel check 318A-3` **PASS** (exit 0, 6.3s,
+   0 errores / 53 warnings / 6 info, scope incremental 17 archivos; reporte en
+   `.quality-reports/check/318A-3/latest.md`). Commit y push: a decisión del usuario (el árbol de PT
+   lleva sus commits 318A-5; no se pushea sin su OK explícito).
 7. **F7 — Otros proyectos**: informe + registro de tareas (RESTAURANTE/WANDORIUS). (pendiente)
 8. **F8 — Evidencia** (completadas + plan a completados) + roadmap + push final.
 

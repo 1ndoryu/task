@@ -1,6 +1,8 @@
 /*
  * glory-core/components/pixelart/EditorPixelArt.tsx
  * Editor de pixel art AGNÓSTICO y reutilizable (glory-core).
+ * sentinel-disable-file componente-sin-hook-glory — editor editorial (glory-core): capa de
+ * framework/editorial sin design system de la app (§4.2 plan 318A-3); no extraer hook de producto.
  *
  * No conoce nada del plugin Game ni del árbol: es un lienzo de cuadrícula
  * dibujable donde un consumidor pinta/borra celdas. Útil para cualquier otro

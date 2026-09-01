@@ -1,6 +1,8 @@
 /*
  * PageRenderer — Renderiza la isla correcta segun la ruta SPA actual.
  * Observa el navigationStore y mantiene islas visitadas montadas (keep-alive).
+ * sentinel-disable-file componente-sin-hook-glory — componente de framework (glory-core),
+ * estado minimo de montaje; no aplica hook de producto (§4.2 plan 318A-3).
  *
  * C133: Las páginas visitadas se mantienen en DOM con display:none para
  * preservar estado local (scroll, datos cargados, refs). Solo la isla

@@ -77,7 +77,7 @@ export function ModalPerfil({estaAbierto, onCerrar}: ModalPerfilProps): JSX.Elem
                         Cancelar
                     </Boton>
                     <Boton claseAdicional="botonPerfil botonGuardar" onClick={handleSubmit} disabled={cargando}>
-                        <div className="botonPerfilContenido">
+                        <div className="perfilContenido">
                             {cargando ? <span className="cargandoSpinner cargandoSpinner--pequeno"></span> : <Save size={14} />}
                             Guardar Cambios
                         </div>

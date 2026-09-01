@@ -82,11 +82,11 @@
           "modal-con-titulo": { "habilitada": false },
           "modal-estructura-no-canonica": { "habilitada": false },
           "modal-acciones-no-canonico": { "habilitada": false },
-          "html-nativo-en-vez-de-componente": { "habilitada": false },
-          "button-clase-especifica": { "habilitada": false },
-          "componente-sin-hook-glory": { "habilitada": false },
+          "html-nativo-en-vez-de-componente": { "severidad": "warning" },
+          "button-clase-especifica": { "severidad": "warning" },
+          "componente-sin-hook-glory": { "severidad": "warning" },
           "menu-contextual-override-diseno": { "habilitada": false },
-          "componente-artesanal": { "habilitada": false }
+          "componente-artesanal": { "severidad": "warning" }
         }
       }
     },

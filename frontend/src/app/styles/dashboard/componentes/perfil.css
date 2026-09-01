@@ -184,7 +184,8 @@
     border-color: var(--dashboard-bordeSutil);
 }
 
-.botonPerfilContenido {
+/* [318A-3 F5] Contenido interno del boton (no variante): sin prefijo "boton". */
+.perfilContenido {
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);

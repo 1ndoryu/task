@@ -128,7 +128,7 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
             {onClickNotificaciones && estaConectado && (
                 <Boton type="button" claseAdicional={`botonIconoEncabezado botonIconoEncabezado--notificaciones ${notificacionesPendientes > 0 ? 'tieneNuevas' : ''}`} onClick={onClickNotificaciones} title={esTablet ? undefined : 'Notificaciones'}>
                     <Bell size={14} />
-                    {notificacionesPendientes > 0 && <span className="botonIconoEncabezado__contadorNotificaciones">{notificacionesPendientes}</span>}
+                    {notificacionesPendientes > 0 && <span className="encabezadoContadorNotificaciones">{notificacionesPendientes}</span>}
                 </Boton>
             )}
 
@@ -143,7 +143,7 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
             {onClickEquipos && estaConectado && (
                 <Boton type="button" claseAdicional="botonIconoEncabezado botonIconoEncabezado--equipo" onClick={onClickEquipos} title={esTablet ? undefined : 'Mi Equipo'}>
                     <Users size={14} />
-                    {equiposPendientes > 0 && <span className="botonIconoEncabezado__contador">{equiposPendientes}</span>}
+                    {equiposPendientes > 0 && <span className="encabezadoContador">{equiposPendientes}</span>}
                 </Boton>
             )}
             */}

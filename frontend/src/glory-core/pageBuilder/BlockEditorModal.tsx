@@ -2,6 +2,10 @@
  * Glory Page Builder - Block Editor Modal
  *
  * Modal generico para editar las propiedades de un bloque.
+ * sentinel-disable-file button-clase-especifica — botones del editor editorial (glory-core):
+ * capa de framework/editorial sin design system de la app (§4.2 plan 318A-3); no migrar a ui/Boton.
+ * sentinel-disable-file html-nativo-en-vez-de-componente — select/controles propios del editor
+ * editorial (glory-core), fuera del design system de producto (§4.2).
  * Genera campos dinamicos basados en la definicion de `editableFields`
  * del bloque registrado en BlockRegistry.
  */

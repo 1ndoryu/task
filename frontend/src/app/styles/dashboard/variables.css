@@ -104,6 +104,7 @@
     --dashboard-superposicionMuyClara: rgba(255, 255, 255, 0.02);
     --dashboard-superposicionSutil: rgba(255, 255, 255, 0.08);
     --dashboard-superposicionMedia: rgba(255, 255, 255, 0.12);
+    --dashboard-superposicionActiva: var(--dashboard-superposicionMedia);
     --dashboard-superposicionMedioOscuro: rgba(255, 255, 255, 0.08);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.5);
     --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.7);
@@ -118,6 +119,7 @@
     --dashboard-sombraElevada: none;
     --dashboard-sombraSutil: none;
     --dashboard-sombraFlotante: none;
+    --dashboard-sombra: var(--dashboard-sombraSutil);
 
     /* Barras y scroll — grises */
     --dashboard-barraFondo: #111111;
@@ -325,6 +327,7 @@
     --dashboard-superposicionMuyClara: rgba(0, 0, 0, 0.02);
     --dashboard-superposicionSutil: rgba(0, 0, 0, 0.08);
     --dashboard-superposicionMedia: rgba(0, 0, 0, 0.12);
+    --dashboard-superposicionActiva: var(--dashboard-superposicionMedia);
     --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.08);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.4);
     --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.55);
@@ -338,6 +341,7 @@
     --dashboard-sombraElevada: none;
     --dashboard-sombraSutil: none;
     --dashboard-sombraFlotante: none;
+    --dashboard-sombra: var(--dashboard-sombraSutil);
 
     --dashboard-barraFondo: #f2f2f2;
     --dashboard-barraNormal: #cccccc;

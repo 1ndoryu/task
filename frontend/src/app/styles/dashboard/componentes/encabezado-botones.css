@@ -178,7 +178,9 @@
     gap: var(--dashboard-espacioXs);
 }
 
-.botonIconoEncabezado__contador {
+/* [318A-3 F5] Clases internas sin prefijo "boton": son contenido del boton,
+ * no variantes de boton (regla button-clase-especifica). */
+.encabezadoContador {
     font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 600;
     color: var(--dashboard-estadoAlta);
@@ -196,14 +198,14 @@
     color: var(--dashboard-textoActivo);
 }
 
-.botonIconoEncabezado__contadorNotificaciones {
+.encabezadoContadorNotificaciones {
     font-size: var(--dashboard-tamanoMuyPequeno);
     font-weight: 600;
     color: var(--dashboard-estadoAlta);
 }
 
 /* Punto de notificacion cuando hay nuevas (para indicador sin numero) */
-.botonIconoEncabezado__puntoNotificacion {
+.encabezadoPuntoNotificacion {
     width: 6px;
     height: 6px;
     background: var(--dashboard-estadoAlta);

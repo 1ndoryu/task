@@ -42,7 +42,8 @@
     cursor: not-allowed;
 }
 
-.botonAccionIcono {
+/* [318A-3 F5] Icono interno del boton (no variante): sin prefijo "boton". */
+.accionIcono {
     font-size: var(--dashboard-tamanoMovilBase);
     line-height: 1;
 }

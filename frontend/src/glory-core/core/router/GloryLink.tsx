@@ -2,6 +2,8 @@
  * GloryLink — Componente para navegacion SPA entre islas.
  * Intercepta clicks en enlaces internos y navega sin recarga.
  * Si la ruta no esta en el mapa SPA, hace navegacion tradicional.
+ * sentinel-disable-file componente-sin-hook-glory — componente de framework (glory-core),
+ * logica minima de enrutado; no aplica hook de producto (§4.2 plan 318A-3).
  *
  * Uso: <GloryLink href="/servicios/">Ver servicios</GloryLink>
  */
