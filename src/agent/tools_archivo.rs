@@ -63,7 +63,11 @@ impl AgentTool for ToolFileRead {
         };
         Ok(AgentToolResult::ok(
             format!("```\n{contenido}\n```{aviso}"),
-            format!("lectura {ruta} ({} bytes)", contenido.len()),
+            format!(
+                "lectura {} ({} bytes)",
+                sandbox.ruta_presentable(ruta),
+                contenido.len()
+            ),
         ))
     }
 }
@@ -113,8 +117,12 @@ impl AgentTool for ToolFileWrite {
             .unwrap_or_default();
         sandbox.escribir(ruta, contenido)?;
         Ok(AgentToolResult::ok_con_diff(
-            format!("Archivo '{ruta}' escrito ({} bytes).", contenido.len()),
-            format!("escritura {ruta}"),
+            format!(
+                "Archivo '{}' escrito ({} bytes).",
+                sandbox.ruta_presentable(ruta),
+                contenido.len()
+            ),
+            format!("escritura {}", sandbox.ruta_presentable(ruta)),
             crate::agent::diff::diff_lineas(&previo, contenido),
         ))
     }
@@ -181,8 +189,8 @@ impl AgentTool for ToolFilePatch {
         let nuevo = original.replacen(buscar, &reemplazar, 1);
         sandbox.escribir(ruta, &nuevo)?;
         Ok(AgentToolResult::ok_con_diff(
-            format!("Parche aplicado en '{ruta}'.",),
-            format!("parche {ruta}"),
+            format!("Parche aplicado en '{}'.", sandbox.ruta_presentable(ruta)),
+            format!("parche {}", sandbox.ruta_presentable(ruta)),
             crate::agent::diff::diff_lineas(&original, &nuevo),
         ))
     }

@@ -147,9 +147,12 @@
 
 .panelAgenteHerramientaTexto {
     color: var(--dashboard-textoSecundario);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* [318A-11] El resumen muestra rutas completas de archivo; sin wrap ni
+     * ellipsis la ruta larga quedaría cortada con "…". */
+    min-width: 0;
+    flex: 1;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .panelAgenteHerramientaArgs {

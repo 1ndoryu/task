@@ -99,6 +99,16 @@ impl SandboxArchivos {
         &self.raiz
     }
 
+    /// Ruta absoluta presentable de un archivo relativo al workspace, para los
+    /// resúmenes de las tools: `canonicalize` deja el prefijo verbatim de
+    /// Windows (`\\?\`); se quita para mostrar la ruta completa limpia.
+    pub fn ruta_presentable(&self, relativa: &str) -> String {
+        let completa = self.raiz.join(relativa);
+        let s = completa.to_string_lossy();
+        let sin_prefijo = s.strip_prefix(r"\\?\").unwrap_or(&s);
+        sin_prefijo.to_string()
+    }
+
     /// ¿La ruta (relativa) es un secreto que el agente no puede leer?
     pub fn es_secreto(&self, relativa: &str) -> bool {
         let normalizada = relativa.replace('\\', "/").trim_start_matches("./").to_string();
@@ -267,5 +277,16 @@ mod tests {
         let (contenido, truncado) = sb.leer("grande.txt", 100).expect("leer");
         assert_eq!(contenido.len(), 100);
         assert!(truncado);
+    }
+
+    #[test]
+    fn ruta_presentable_incluye_raiz_y_quita_prefijo_verbatim() {
+        let sb = sandbox_tmp("ruta");
+        let presentable = sb.ruta_presentable("sub/nota.txt");
+        /* Nunca debe aparecer el prefijo verbatim de Windows en el resumen. */
+        assert!(!presentable.contains(r"\\?\"));
+        /* Debe terminar en la ruta relativa y empezar con la raíz absoluta. */
+        assert!(presentable.ends_with(&format!("sub\\nota.txt")) || presentable.ends_with("sub/nota.txt"));
+        assert!(presentable.contains("agente-sandbox-ruta"));
     }
 }

@@ -143,7 +143,7 @@ export const fixtureMensajes: FixtureMensaje[] = [
             {
                 tool: 'file_write',
                 ok: true,
-                resumen: '3 líneas cambiadas en src/tareas.rs',
+                resumen: 'escritura C:\\Users\\Owner\\OneDrive\\Documentos\\area-trabajo\\PROYECTO TASKS\\src\\tareas.rs',
                 diff: DIFF_EJEMPLO,
             },
         ],
