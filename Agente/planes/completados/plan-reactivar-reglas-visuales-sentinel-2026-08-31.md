@@ -437,6 +437,47 @@ Esta revisión se realiza POST-cierre sobre el estado final, sin pisar su trabaj
 5. ✅ (F7) registros en RESTAURANTE/WANDORIUS hechos (escritura solo en roadmaps, sin tocar su
    gate); (F8) plan movido a `planes/completados/` y evidencia en completadas (commit de cierre).
 
+### 12.7 Verificación visual del DoD en navegador (2026-09-01) — HECHO, con hallazgo real registrado
+
+**DoD originalmente sin marcar** (verificación visual) cerrado 2026-09-01 con la island dev-only
+`frontend/src/app/islands/VerificacionFormularios318A3Island.tsx` (ruta `/agente/formularios318a3`,
+registrada bajo `import.meta.env.DEV` en `main.tsx` + `inicializarIslands.ts`, patrón
+`GaleriaVisualIsland`): monta los MISMOS componentes de producción con fixtures de los hooks reales
+y abre los modales uno a uno con interacción real (servidor dev :5177, verificación por snapshot
+DOM + captura visual + type-check exit 0).
+
+**Verificado OK (patrón A, 9/9 + B):** 4 secciones inline (SeccionConfigIAPanelChat FormCampo 1:1,
+SeccionConfigScratchpad declarativo, SeccionConfigGruposFb escape accionesDetalles, ItemToggle ×2)
+y 5 modales A (Tareas 10 controles, Proyectos 5, Hábitos 17, Recordatorios 3, Scratchpad 3) + B
+(ModalConfigAgente 6 controles + 8 botones). Render correcto en todos.
+
+**HALLAZGO REAL — ModalConfigAgente (patrón B) rompe la coherencia visual del sistema:**
+- **Iconos en títulos de sección:** `modalConfigAgenteSeccionTitulo` lleva iconos lucide inline
+  (`<Route size={12}/>` Modo por defecto, `<Cpu size={12}/>` Proveedor y modelo, `<Gauge/>`,
+  `<Sparkles/>`, `<Languages/>`, `<FileText/>`, `<Folder/>`, `<Layers/>`, `<Brain/>`), mientras
+  FormCampo/`tituloOpcionConfig` del patrón A usa títulos de texto plano — dos convenciones
+  distintas de encabezado de sección en el mismo sistema.
+- **Ritmo de espaciado distinto:** `modalConfigAgenteSeccion` usa `gap: --dashboard-espacioS` y
+  campos en columna (`CampoAgente`/`modalConfigAgenteCampo`), mientras el patrón A usa filas
+  `itemOpcionConfig` horizontales con `separadorOpcionesConfig` (configuracionTareas.css). Mis-
+  mo modal, dos ritmos: sidebar de pestañas (idéntico a config global) + cuerpo con su propio
+  layout de secciones.
+- **Por qué NINGUNA herramienta lo detecta (gap de detección honesto):**
+  1. `modalConfigAgente.css` declara `sentinel-disable-file css-especificacion-diseno-local` y
+     `sentinel-disable-file css-adhoc-button-style` — exactamente las 2 reglas que podrían marcar
+     su CSS artesanal (decisiones documentadas de fases previas, hoy el lado oscuro de ese
+     disable: oculta la inconsistencia al gate).
+  2. VarSense valida tokens/hardcodes: este CSS está 100% tokenizado (`--dashboard-*`), así que
+     produce 0 hallazgos por diseño — no modela "los formularios hermanos deben compartir ritmo".
+  3. Ninguna regla modela coherencia visual entre componentes hermanos. La propuesta del plan
+     §14 (`formulario-config-sin-sistema-declarativo`) detectaría "ModalConfig* construido a mano
+     sin FormCampo" — exactamente este caso — pero **no existe todavía** (requiere protocolo §6
+     para publicar el commit de glory-sentinel). Incluso esa regla no vería iconos-en-título ni
+     valores de gap: la coherencia fina sigue dependiendo de verificación visual humana/island.
+- **Acción:** registrado como caso de prueba canónico de la regla §14 en el roadmap (entrada
+  "Mecanismo de detección...", 01-09-2026). No se modifica código: el usuario lo pidió así
+  ("no me preocupa que falte arreglarlo; me preocupa que no lo detectes").
+
 ## 13. Ajustes de revisión de especificaciones de diseño (2026-09-01)
 
 Segunda revisión tras el cierre de 318A-3 (F1–F8) y de la §12 (brecha de cobertura). Foco pedido por el

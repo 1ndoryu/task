@@ -52,7 +52,11 @@ window.__GLORY_ROUTES__ = {
     /* [Fase 4.5] Galería visual del agente: SOLO en dev (import.meta.env.DEV).
      * En build de producción esta entrada no existe: la ruta no se puede navegar. */
     ...(import.meta.env.DEV
-        ? {'/agente/visuales/': { island: 'GaleriaVisualIsland', title: 'Galería visual del agente', props: {} }}
+        ? {
+            '/agente/visuales/': { island: 'GaleriaVisualIsland', title: 'Galería visual del agente', props: {} },
+            /* [318A-3] Verificación visual del DoD (dev only). */
+            '/agente/formularios318a3/': { island: 'VerificacionFormularios318A3Island', title: 'Verificación 318A-3', props: {} },
+        }
         : {}),
 } as GloryRoutesMap;
 

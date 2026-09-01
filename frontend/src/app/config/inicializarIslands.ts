@@ -21,6 +21,7 @@ import {registrarIsland, marcarIslandsInicializadas} from './registroIslands';
 import {DashboardIsland} from '../islands/DashboardIsland';
 import {PaginaPruebaIsland} from '../islands/PaginaPruebaIsland';
 import {GaleriaVisualIsland} from '../islands/GaleriaVisualIsland';
+import {VerificacionFormularios318A3Island} from '../islands/VerificacionFormularios318A3Island';
 import {ArbitrajeIsland} from '../islands/ArbitrajeIsland';
 import PoliticaPrivacidadIsland from '../islands/PoliticaPrivacidadIsland';
 import TerminosServicioIsland from '../islands/TerminosServicioIsland';
@@ -36,6 +37,11 @@ registrarIsland('PaginaPruebaIsland', PaginaPruebaIsland, 'Página de prueba par
 /* [Fase 4.5] Galería visual del agente: ruta /agente/visuales solo en dev
  * (ver main.tsx, registrada bajo import.meta.env.DEV). */
 registrarIsland('GaleriaVisualIsland', GaleriaVisualIsland, 'Galería visual del chat del agente (Fase 4.5, dev only)');
+
+/* [318A-3] Verificación visual del DoD: formularios migrados al sistema
+ * centralizado (patrón A 9/9 + B). Ruta /agente/formularios318a3 solo en dev
+ * (ver main.tsx, registrada bajo import.meta.env.DEV). */
+registrarIsland('VerificacionFormularios318A3Island', VerificacionFormularios318A3Island, 'Verificación visual de formularios centralizados 318A-3 (dev only)');
 
 registrarIsland('ArbitrajeIsland', ArbitrajeIsland, 'Calculadora de arbitraje para compra/venta internacional con conversión de divisas');
 
