@@ -21,6 +21,9 @@ export interface ConversacionAgente {
 export interface ConfigAgenteModelo {
     modo: ModoAgente;
     modelo: string;
+    /* [02-09-2026] Proveedor elegido en el selector (glory | commandcode | ...).
+     * Se persiste junto al modelo para que el backend enrute directo. */
+    provider: string;
     temperatura: number;
     maxTokens: number;
     idioma: 'es' | 'en' | 'pt' | 'fr';
@@ -60,6 +63,7 @@ export interface ConfigAgente extends ConfigAgenteModelo, ConfigAgenteDatos, Con
 export function aConfigBackend(config: Partial<ConfigAgente>): Record<string, unknown> {
     const salida: Record<string, unknown> = {};
     if (config.modo) salida.modo = config.modo;
+    if (config.provider) salida.provider = config.provider;
     if (config.modelo) salida.modelo = config.modelo;
     if (config.temperatura !== undefined) salida.temperatura = config.temperatura;
     if (config.maxTokens !== undefined) salida.max_tokens = config.maxTokens;
@@ -92,6 +96,7 @@ export function aConfigFrontend(cruda: unknown): Partial<ConfigAgente> {
     const texto = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
     return {
         modo: c.modo === 'meta' || c.modo === 'autonomo' ? c.modo : c.modo === 'predeterminado' ? 'predeterminado' : undefined,
+        provider: texto(c.provider),
         modelo: texto(c.modelo),
         temperatura: numero(c.temperatura),
         maxTokens: numero(c.max_tokens),
@@ -215,7 +220,12 @@ export async function eliminarTareaProgramada(id: string): Promise<void> {
 /* ---------- Historial (persistencia en servidor) ---------- */
 
 export async function guardarConfigConversacion(id: string, config: Partial<ConfigAgente>): Promise<ConversacionAgente> {
-    return apiFetch<ConversacionAgente>(`/agente/conversaciones/${id}/config`, {method: 'PUT', body: {config: aConfigBackend(config)}});
+    /* [318A-4] Se envía también `modo` para que el backend persista la columna
+     * `modo` (de donde se lee el modo real en cada turno); el JSON `config`
+     * sigue viajando como antes. */
+    const body: Record<string, unknown> = {config: aConfigBackend(config)};
+    if (config.modo) body.modo = config.modo;
+    return apiFetch<ConversacionAgente>(`/agente/conversaciones/${id}/config`, {method: 'PUT', body});
 }
 
 export async function cargarHistorial(id: string): Promise<MensajeConversacion[]> {

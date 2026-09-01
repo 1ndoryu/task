@@ -34,6 +34,9 @@ pub struct AiProviderKeys {
     pub groq: Vec<String>,
     pub deepseek: Vec<String>,
     pub glory: Vec<String>,
+    /// [02-09-2026] Command Code Provider API directa (api.commandcode.ai).
+    /// Env: COMMAND_CODE_API_KEY (la misma key del Studio/CLI).
+    pub commandcode: Vec<String>,
 }
 
 impl AiProviderKeys {
@@ -51,6 +54,7 @@ impl AiProviderKeys {
             groq: env_list(&["GROQ_API", "GROQ_API_1", "GROQ_API_2", "GROQ_API_3"]),
             deepseek: env_list(&["DEEPSEEK_API", "DEEPSEEK-API", "DEEPSEEK_API_KEY"]),
             glory: env_list(&["GLORY_API_KEY", "GLORY_API", "EMPERO_API_KEY"]),
+            commandcode: env_list(&["COMMAND_CODE_API_KEY"]),
         }
     }
 }

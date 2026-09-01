@@ -126,20 +126,41 @@ impl AgenteRepository {
     }
 
     /// Actualiza la config de una conversación; devuelve la fila si el propietario existía.
+    /// `modo` opcional: si es `Some`, actualiza también la columna `modo` (de
+    /// donde el runtime lee el modo de operación real en cada turno). Antes el
+    /// modo solo viajaba en el JSON `config` y quedaba inerte.
     pub async fn actualizar_config(
         pool: &PgPool,
         config: &Value,
+        modo: Option<&str>,
         id: Uuid,
         user_id: Uuid,
     ) -> Result<Option<(Uuid, String, String, Value)>, sqlx::Error> {
-        sqlx::query_as(
-            "UPDATE agente_conversaciones SET config = $1, actualizado_en = NOW() WHERE id = $2 AND user_id = $3 RETURNING id, titulo, modo, config",
-        )
-        .bind(config)
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await
+        match modo {
+            Some(modo) => {
+                sqlx::query_as(
+                    "UPDATE agente_conversaciones SET config = $1, modo = $2, actualizado_en = NOW()
+                     WHERE id = $3 AND user_id = $4 RETURNING id, titulo, modo, config",
+                )
+                .bind(config)
+                .bind(modo)
+                .bind(id)
+                .bind(user_id)
+                .fetch_optional(pool)
+                .await
+            }
+            None => {
+                sqlx::query_as(
+                    "UPDATE agente_conversaciones SET config = $1, actualizado_en = NOW()
+                     WHERE id = $2 AND user_id = $3 RETURNING id, titulo, modo, config",
+                )
+                .bind(config)
+                .bind(id)
+                .bind(user_id)
+                .fetch_optional(pool)
+                .await
+            }
+        }
     }
 
     /// Elimina una conversación; devuelve filas afectadas.

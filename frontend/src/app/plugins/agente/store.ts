@@ -54,7 +54,7 @@ export interface TabAgente {
 const CLAVE_CONFIG = 'glory-agente-config';
 
 const CONFIG_DEFECTO: ConfigAgente = {
-    modo: 'predeterminado', modelo: 'commandcode', temperatura: 0.2, maxTokens: 2048,
+    modo: 'predeterminado', modelo: 'commandcode', provider: 'glory', temperatura: 0.2, maxTokens: 2048,
     idioma: 'es', incluirNotas: false, incluirTareasCompletadas: false,
     incluirHabitosPausados: false, permitirBusquedaWeb: true,
     permitirRecordatorios: true, promptSistema: '', maxTurns: 10,
@@ -67,6 +67,7 @@ function normalizarConfig(config: Partial<ConfigAgente>): ConfigAgente {
     const base = {...CONFIG_DEFECTO, ...config};
     return {
         ...base,
+        provider: typeof base.provider === 'string' && base.provider.trim() ? base.provider.trim() : 'glory',
         modelo: (typeof base.modelo === 'string' ? base.modelo.trim().replace(/^glory\//, '') : '') || 'commandcode',
         temperatura: Math.max(0, Math.min(2, Number(base.temperatura) || 0)),
         maxTokens: Math.max(64, Math.min(4096, Math.round(Number(base.maxTokens) || 2048))),
@@ -93,6 +94,7 @@ function cargarConfig(): ConfigAgente {
                 ...CONFIG_DEFECTO,
                 ...parsed,
                 modo: parsed.modo === 'meta' || parsed.modo === 'autonomo' || parsed.modo === 'predeterminado' ? parsed.modo : 'predeterminado',
+                provider: typeof parsed.provider === 'string' && parsed.provider.trim() ? parsed.provider.trim() : 'glory',
                 modelo: typeof parsed.modelo === 'string' && parsed.modelo.trim() ? parsed.modelo.replace(/^glory\//, '') : CONFIG_DEFECTO.modelo,
                 temperatura: typeof parsed.temperatura === 'number' ? Math.max(0, Math.min(2, parsed.temperatura)) : CONFIG_DEFECTO.temperatura,
                 maxTokens: typeof parsed.maxTokens === 'number' ? Math.max(64, Math.min(4096, Math.round(parsed.maxTokens))) : CONFIG_DEFECTO.maxTokens,
@@ -606,6 +608,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
     establecerConfig: (config) => {
         const tabId = get().tabActivaId;
         const nueva = {...get().config, ...config};
+        nueva.provider = (nueva.provider ?? '').trim() || 'glory';
         nueva.modelo = nueva.modelo.trim().replace(/^glory\//, '') || 'commandcode';
         nueva.temperatura = Math.max(0, Math.min(2, Number(nueva.temperatura) || 0));
         nueva.maxTokens = Math.max(64, Math.min(4096, Math.round(Number(nueva.maxTokens) || 2048)));

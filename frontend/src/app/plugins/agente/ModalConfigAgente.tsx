@@ -5,9 +5,12 @@ import {Bot, Cpu, Route, Gauge, Languages, FileText, Brain, Sparkles, Folder, La
 import {useAgenteStore} from './store';
 import type {ConfigAgente, SkillAgente} from './service';
 import {Boton} from '../../components/ui/Boton';
+import {Input} from '../../components/ui/Input';
+import {Select} from '../../components/ui/Select';
+import {Textarea} from '../../components/ui/Textarea';
 import {Range} from '../../components/shared/Range';
 import {Checkbox} from '../../components/ui/Checkbox';
-import {AvisoModoAutonomo, SelectorModo, SkillFila} from './componentes';
+import {AvisoModoAutonomo, CampoAgente, MODELOS_AGENTE, SelectorModo, SkillFila} from './componentes';
 import {useGestionSkills} from './useGestionSkills';
 import './modalConfigAgente.css';
 
@@ -49,42 +52,62 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Cpu size={12}/> Proveedor y modelo</h3>
-                        <label className="modalConfigAgenteCampo">Proveedor
-                            <select className="modalConfigAgenteInput" value="glory" disabled><option value="glory">Glory API · ruta auto</option></select>
-                        </label>
-                        {/* El backend fija provider/modelo a Glory API / commandcode
-                         * (ruta auto → DeepSeek Flash); el campo no es editable para
-                         * no dejar un control que parezca configurable pero sea inerte. */}
-                        <label className="modalConfigAgenteCampo">Modelo
-                            <input className="modalConfigAgenteInput" value="commandcode" disabled />
-                        </label>
+                        {/* [02-09-2026] El backend ya lee provider/modelo de la
+                         * config guardada (config_desde_guardada), así que el
+                         * selector es editable y coherente con el del input.
+                         * Incluye el modelo gratuito laguna-s-2.1-free. */}
+                        <CampoAgente etiqueta="Proveedor">
+                            <Select claseAdicional="modalConfigAgenteInput"
+                                opciones={[{valor: 'glory', etiqueta: 'Glory API · ruta auto'}, {valor: 'commandcode', etiqueta: 'Command Code Provider (directo)'}]}
+                                value={draft.provider}
+                                onChange={e => actualizar('provider', e.target.value as ConfigAgente['provider'])} />
+                        </CampoAgente>
+                        <CampoAgente etiqueta="Modelo">
+                            <Select claseAdicional="modalConfigAgenteInput"
+                                opciones={MODELOS_AGENTE.map(m => ({valor: m.id, etiqueta: m.nombre}))}
+                                value={draft.modelo}
+                                onChange={e => {
+                                    const modelo = e.target.value as ConfigAgente['modelo'];
+                                    /* [02-09-2026] Fijar también el proveedor del
+                                     * catálogo para que el backend enrute directo
+                                     * (p.ej. laguna-s-2.1-free → commandcode). */
+                                    const entrada = MODELOS_AGENTE.find(m => m.id === modelo);
+                                    actualizar('modelo', modelo);
+                                    if (entrada) actualizar('provider', entrada.proveedor as ConfigAgente['provider']);
+                                }} />
+                        </CampoAgente>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Gauge size={12}/> Respuesta y límites</h3>
-                        <label className="modalConfigAgenteCampo">Temperatura <output>{draft.temperatura.toFixed(1)}</output><Range min={0} max={2} step={0.1} value={draft.temperatura} onChange={v => actualizar('temperatura', clamped(v, 0, 2))} aria-label="Temperatura" /></label>
-                        <label className="modalConfigAgenteCampo">Máximo de tokens <output>{draft.maxTokens}</output><Range min={64} max={4096} step={64} value={draft.maxTokens} onChange={v => actualizar('maxTokens', clamped(v, 64, 4096))} aria-label="Máximo de tokens" /></label>
-                        <label className="modalConfigAgenteCampo">Turnos máximos <output>{draft.maxTurns}</output><Range min={1} max={10} step={1} value={draft.maxTurns} onChange={v => actualizar('maxTurns', clamped(v, 1, 10))} aria-label="Turnos máximos" /></label>
-                        <label className="modalConfigAgenteCampo">Timeout por herramienta (segundos) <output>{draft.timeoutToolSecs}</output><Range min={1} max={15} step={1} value={draft.timeoutToolSecs} onChange={v => actualizar('timeoutToolSecs', clamped(v, 1, 15))} aria-label="Timeout por herramienta" /></label>
+                        <CampoAgente etiqueta="Temperatura"><output>{draft.temperatura.toFixed(1)}</output><Range min={0} max={2} step={0.1} value={draft.temperatura} onChange={v => actualizar('temperatura', clamped(v, 0, 2))} aria-label="Temperatura" /></CampoAgente>
+                        <CampoAgente etiqueta="Máximo de tokens"><output>{draft.maxTokens}</output><Range min={64} max={4096} step={64} value={draft.maxTokens} onChange={v => actualizar('maxTokens', clamped(v, 64, 4096))} aria-label="Máximo de tokens" /></CampoAgente>
+                        <CampoAgente etiqueta="Turnos máximos"><output>{draft.maxTurns}</output><Range min={1} max={10} step={1} value={draft.maxTurns} onChange={v => actualizar('maxTurns', clamped(v, 1, 10))} aria-label="Turnos máximos" /></CampoAgente>
+                        <CampoAgente etiqueta="Timeout por herramienta (segundos)"><output>{draft.timeoutToolSecs}</output><Range min={1} max={15} step={1} value={draft.timeoutToolSecs} onChange={v => actualizar('timeoutToolSecs', clamped(v, 1, 15))} aria-label="Timeout por herramienta" /></CampoAgente>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Sparkles size={12}/> Comportamiento</h3>
                         <p className="modalConfigAgenteSeccionDesc">Migrado de la configuración del chat IA: cómo redacta el agente y qué prefiere el usuario.</p>
-                        <label className="modalConfigAgenteCampo">Estilo de respuesta
-                            <select className="modalConfigAgenteInput" value={draft.estilo} onChange={e => actualizar('estilo', e.target.value as ConfigAgente['estilo'])}>
-                                <option value="conciso">Conciso — respuestas cortas y directas</option>
-                                <option value="detallado">Detallado — explica el razonamiento</option>
-                                <option value="amable">Amable — tono cercano y motivador</option>
-                            </select>
-                        </label>
-                        <label className="modalConfigAgenteCampo">Preferencias personales
-                            <textarea className="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={2000} value={draft.preferencias} onChange={e => actualizar('preferencias', e.target.value)} placeholder="Ej: Prefiero tareas cortas. Trabajo mejor de 9 a 14. Evitar notificaciones tarde..." />
-                        </label>
+                        <CampoAgente etiqueta="Estilo de respuesta">
+                            <Select claseAdicional="modalConfigAgenteInput" opciones={[
+                                {valor: 'conciso', etiqueta: 'Conciso — respuestas cortas y directas'},
+                                {valor: 'detallado', etiqueta: 'Detallado — explica el razonamiento'},
+                                {valor: 'amable', etiqueta: 'Amable — tono cercano y motivador'},
+                            ]} value={draft.estilo} onChange={e => actualizar('estilo', e.target.value as ConfigAgente['estilo'])} />
+                        </CampoAgente>
+                        <CampoAgente etiqueta="Preferencias personales">
+                            <Textarea claseAdicional="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={2000} value={draft.preferencias} onChange={e => actualizar('preferencias', e.target.value)} placeholder="Ej: Prefiero tareas cortas. Trabajo mejor de 9 a 14. Evitar notificaciones tarde..." />
+                        </CampoAgente>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Languages size={12}/> Idioma y contexto</h3>
-                        <label className="modalConfigAgenteCampo">Idioma
-                            <select className="modalConfigAgenteInput" value={draft.idioma} onChange={e => actualizar('idioma', e.target.value as ConfigAgente['idioma'])}><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option></select>
-                        </label>
+                        <CampoAgente etiqueta="Idioma">
+                            <Select claseAdicional="modalConfigAgenteInput" opciones={[
+                                {valor: 'es', etiqueta: 'Español'},
+                                {valor: 'en', etiqueta: 'English'},
+                                {valor: 'pt', etiqueta: 'Português'},
+                                {valor: 'fr', etiqueta: 'Français'},
+                            ]} value={draft.idioma} onChange={e => actualizar('idioma', e.target.value as ConfigAgente['idioma'])} />
+                        </CampoAgente>
                         {([
                             ['incluirNotas', 'Incluir notas'],
                             ['incluirTareasCompletadas', 'Incluir tareas completadas'],
@@ -104,24 +127,22 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><FileText size={12}/> Prompt de sistema</h3>
-                        <textarea className="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={4000} value={draft.promptSistema} onChange={e => actualizar('promptSistema', e.target.value)} placeholder="Instrucciones adicionales para el agente..." />
+                        <Textarea claseAdicional="modalConfigAgenteInput modalConfigAgenteTextarea" maxLength={4000} value={draft.promptSistema} onChange={e => actualizar('promptSistema', e.target.value)} placeholder="Instrucciones adicionales para el agente..." />
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Folder size={12}/> Workspace</h3>
                         <p className="modalConfigAgenteSeccionDesc">Carpeta de trabajo de las herramientas de archivo. Solo aplica en modo local/dev (AGENTE_MODO=local); en producción el agente corre sin tools de archivo y este valor se ignora.</p>
-                        <label className="modalConfigAgenteCampo">Ruta de la carpeta (solo local)
-                            <input className="modalConfigAgenteInput" value={draft.workspace} onChange={e => actualizar('workspace', e.target.value)} placeholder="C:\ruta\al\workspace (vacío = AGENTE_WORKSPACE_ROOT o el directorio del servidor)" />
-                        </label>
+                        <CampoAgente etiqueta="Ruta de la carpeta (solo local)">
+                            <Input claseAdicional="modalConfigAgenteInput" value={draft.workspace} onChange={e => actualizar('workspace', e.target.value)} placeholder="C:\ruta\al\workspace (vacío = AGENTE_WORKSPACE_ROOT o el directorio del servidor)" />
+                        </CampoAgente>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Layers size={12}/> Contexto y compactación</h3>
                         <p className="modalConfigAgenteSeccionDesc">La ventana de contexto del modelo y cuándo el agente compacta el historial. La compactación nunca borra mensajes: marca el historial como compactado en BD.</p>
-                        <label className="modalConfigAgenteCampo">Ventana máxima de contexto
-                            <select className="modalConfigAgenteInput" value={draft.maxVentana} onChange={e => actualizar('maxVentana', Number(e.target.value))}>
-                                {[32768, 65536, 128000, 256000, 512000].map(v => <option key={v} value={v}>{v.toLocaleString('es')} tokens</option>)}
-                            </select>
-                        </label>
-                        <label className="modalConfigAgenteCampo">Umbral de compactación <output>{(draft.umbralCompactacion * 100).toFixed(0)}%</output><Range min={0.3} max={0.85} step={0.05} value={draft.umbralCompactacion} onChange={v => actualizar('umbralCompactacion', clamped(v, 0.1, 0.9))} aria-label="Umbral de compactación" /></label>
+                        <CampoAgente etiqueta="Ventana máxima de contexto">
+                            <Select claseAdicional="modalConfigAgenteInput" opciones={[32768, 65536, 128000, 256000, 512000].map(v => ({valor: v, etiqueta: `${v.toLocaleString('es')} tokens`}))} value={draft.maxVentana} onChange={e => actualizar('maxVentana', Number(e.target.value))} />
+                        </CampoAgente>
+                        <CampoAgente etiqueta="Umbral de compactación"><output>{(draft.umbralCompactacion * 100).toFixed(0)}%</output><Range min={0.3} max={0.85} step={0.05} value={draft.umbralCompactacion} onChange={v => actualizar('umbralCompactacion', clamped(v, 0.1, 0.9))} aria-label="Umbral de compactación" /></CampoAgente>
                     </section>
                     <section className="modalConfigAgenteSeccion">
                         <h3 className="modalConfigAgenteSeccionTitulo"><Brain size={12}/> Skills</h3>
@@ -131,8 +152,8 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                             {skills.length === 0 && !skillsError && <p className="modalConfigAgenteSeccionDesc">Sin skills todavía.</p>}
                             {skills.map(s => editandoId === s.id ? (
                                 <div key={s.id} className="modalConfigAgenteSkill modalConfigAgenteSkill--editando">
-                                    <input className="modalConfigAgenteInput" value={editando.nombre} onChange={e => setEditando({...editando, nombre: e.target.value})} placeholder="Nombre" onKeyDown={e => {if (e.key === 'Enter') void guardarEdicion(s); if (e.key === 'Escape') setEditandoId(null);}} />
-                                    <input className="modalConfigAgenteInput" value={editando.descripcion} onChange={e => setEditando({...editando, descripcion: e.target.value})} placeholder="Descripción" />
+                                    <Input claseAdicional="modalConfigAgenteInput" value={editando.nombre} onChange={e => setEditando({...editando, nombre: e.target.value})} placeholder="Nombre" onKeyDown={e => {if (e.key === 'Enter') void guardarEdicion(s); if (e.key === 'Escape') setEditandoId(null);}} />
+                                    <Input claseAdicional="modalConfigAgenteInput" value={editando.descripcion} onChange={e => setEditando({...editando, descripcion: e.target.value})} placeholder="Descripción" />
                                     <div className="modalConfigAgenteSkillAcciones">
                                         <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => void guardarEdicion(s)} aria-label="Guardar skill"><Check size={13}/></button>
                                         <button type="button" className="modalConfigAgenteSkillBoton" onClick={() => setEditandoId(null)} aria-label="Cancelar edición"><X size={13}/></button>
@@ -149,8 +170,8 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                             ))}
                         </div>
                         <div className="modalConfigAgenteSkillNueva">
-                            <input className="modalConfigAgenteInput" value={nuevaSkill.nombre} onChange={e => setNuevaSkill({...nuevaSkill, nombre: e.target.value})} placeholder="Nombre de la skill" onKeyDown={e => {if (e.key === 'Enter') void crear();}} />
-                            <input className="modalConfigAgenteInput" value={nuevaSkill.descripcion} onChange={e => setNuevaSkill({...nuevaSkill, descripcion: e.target.value})} placeholder="Descripción" />
+                            <Input claseAdicional="modalConfigAgenteInput" value={nuevaSkill.nombre} onChange={e => setNuevaSkill({...nuevaSkill, nombre: e.target.value})} placeholder="Nombre de la skill" onKeyDown={e => {if (e.key === 'Enter') void crear();}} />
+                            <Input claseAdicional="modalConfigAgenteInput" value={nuevaSkill.descripcion} onChange={e => setNuevaSkill({...nuevaSkill, descripcion: e.target.value})} placeholder="Descripción" />
                             <Boton type="button" variante="secundario" disabled={!nuevaSkill.nombre.trim() || !nuevaSkill.descripcion.trim()} onClick={() => void crear()}><Plus size={13}/> Añadir</Boton>
                         </div>
                     </section>

@@ -15,12 +15,15 @@ import {Boton, Textarea} from '../../components/ui';
 import {Modal} from '../../components/shared/Modal';
 import {ModalConfigAgente} from './ModalConfigAgente';
 import {usePanelAgente} from './usePanelAgente';
+import {useAgenteStore} from './store';
 import {
     BotonCancelar,
+    ControlesInputIA,
     EstadoCarga,
     EstadoVacio,
     MensajeAsistente,
     MensajeUsuario,
+    MODELOS_AGENTE,
     TabsWorkspace,
     TarjetaTareaProgramada,
 } from './componentes';
@@ -74,6 +77,12 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         confirmarRenombrado,
         manejarCrearTarea,
     } = usePanelAgente();
+
+    /* [318A-4] Config global del agente (modelo/modo) para los selectores del
+     * input. Mismo patrón que ModalConfigAgente: `establecerConfig` persiste en
+     * localStorage + config de la conversación activa. */
+    const configAgente = useAgenteStore(s => s.config);
+    const establecerConfig = useAgenteStore(s => s.establecerConfig);
 
     return (
         <div className="internaColumna panelIA panelAgente">
@@ -254,33 +263,54 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
             </Modal>
 
             {/* Input */}
-            <div className="panelIAInput">
-                <Textarea
-                    claseAdicional="panelIAInputTexto"
-                    claseContenedor="panelIAInputContenedor"
-                    value={inputTexto}
-                    onChange={e => setInputTexto(e.target.value)}
-                    onKeyDown={manejarTecla}
-                    placeholder={tabActiva ? 'Escribe un mensaje...' : 'Crea o abre una conversación'}
-                    disabled={!tabActiva || tabActiva.enviando}
-                    filas={1}
-                    autoAjustar
-                />
-                {tabActiva?.enviando ? (
-                    <BotonCancelar onCancelar={cancelarTurno} />
-                ) : (
-                    <Boton
-                        type="button"
-                        variante="icono"
-                        tamano="pequeño"
-                        soloIcono
-                        claseAdicional="panelIAInputEnviar"
-                        onClick={() => manejarEnviar(inputTexto)}
-                        disabled={!tabActiva || !inputTexto.trim()}
-                        icono={<ArrowUp size={16} />}
-                        title="Enviar"
+            <div className="panelIAInput panelIAInput--agente">
+                <div className="panelIAInputCaja">
+                    <Textarea
+                        claseAdicional="panelIAInputTexto"
+                        claseContenedor="panelIAInputContenedor"
+                        value={inputTexto}
+                        onChange={e => setInputTexto(e.target.value)}
+                        onKeyDown={manejarTecla}
+                        placeholder={tabActiva ? 'Escribe un mensaje...' : 'Crea o abre una conversación'}
+                        disabled={!tabActiva || tabActiva.enviando}
+                        filas={1}
+                        autoAjustar
                     />
-                )}
+                    {tabActiva?.enviando ? (
+                        <BotonCancelar onCancelar={cancelarTurno} />
+                    ) : (
+                        <Boton
+                            type="button"
+                            variante="icono"
+                            tamano="pequeño"
+                            soloIcono
+                            claseAdicional="panelIAInputEnviar"
+                            onClick={() => manejarEnviar(inputTexto)}
+                            disabled={!tabActiva || !inputTexto.trim()}
+                            icono={<ArrowUp size={16} />}
+                            title="Enviar"
+                        />
+                    )}
+                    {/* [318A-4] Selector de modelo + modo DENTRO de la misma
+                     * caja del input. Cuando no hay tab activa o está
+                     * enviando, se deshabilitan. */}
+                    <ControlesInputIA
+                        modelo={configAgente.modelo}
+                        modo={configAgente.modo}
+                        deshabilitado={!tabActiva || tabActiva.enviando}
+                        onCambiarModelo={modelo => {
+                            /* [02-09-2026] Al elegir modelo también se fija su
+                             * proveedor (del catálogo) para que el backend enrute
+                             * directo (p.ej. laguna-s-2.1-free → commandcode). */
+                            const entrada = MODELOS_AGENTE.find(m => m.id === modelo);
+                            establecerConfig({
+                                modelo,
+                                provider: entrada?.proveedor ?? configAgente.provider,
+                            });
+                        }}
+                        onCambiarModo={modo => establecerConfig({modo})}
+                    />
+                </div>
             </div>
         </div>
     );

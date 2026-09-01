@@ -76,18 +76,9 @@
     align-self: flex-start;
 }
 
-/* Avatar del bot */
-.panelIAMensajeAvatar {
-    width: 24px;
-    height: 24px;
-    border-radius: var(--dashboard-radioCirculo);
-    background: var(--dashboard-fondoTerciario);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--dashboard-textoSecundario);
-}
+/* Avatar del bot — [318A-4] ELIMINADO: el chat es texto puro sin icono de IA
+ * (pedido del usuario). La clase queda documentada como retirada; el bloque
+ * .panelIAMensajeAvatar ya no se renderiza. */
 
 /* Burbuja */
 .panelIAMensajeBurbuja {
@@ -98,15 +89,26 @@
     word-break: break-word;
 }
 
-.panelIAMensaje--usuario .panelIAMensajeBurbuja {
-    background: var(--dashboard-acento);
-    color: var(--dashboard-textoSobreAcento);
+/* [318A-4] Ambos mensajes (usuario y asistente) en CUADRO con borde, sin fondo.
+ * El texto usa textoActivo (inversión por tema) para ser visible en claro y
+ * oscuro: textoSobreAcento solo vale sobre fondo acento sólido, y el fondo
+ * acento lo borra la regla global [class*="panel"]{background:transparent}
+ * de dashboardPanelView.css, dejando el texto invisible en light mode.
+ * !important + especificidad (0,3,0) para ganar a esa regla global (0,2,0)
+ * dentro del dashboard. Se usa SIN prefijo .dashboardPanelView para que las
+ * mismas reglas apliquen también en la galería dev /agente/visuales (que
+ * monta los mismos componentes sin ese ancestro). */
+.panelIAMensaje--usuario .panelIAMensajeBurbuja.panelIAMensajeBurbuja {
+    background: transparent !important;
+    color: var(--dashboard-textoActivo);
+    border: 1px solid var(--dashboard-bordePrincipal) !important;
     border-bottom-right-radius: 0;
 }
 
-.panelIAMensaje--asistente .panelIAMensajeBurbuja {
-    background: var(--dashboard-fondoSecundario);
+.panelIAMensaje--asistente .panelIAMensajeBurbuja.panelIAMensajeBurbuja {
+    background: transparent !important;
     color: var(--dashboard-textoNormal);
+    border: 1px solid var(--dashboard-bordeSutil) !important;
     border-bottom-left-radius: 0;
 }
 
@@ -142,19 +144,59 @@
     position: relative;
 }
 
+/* [318A-4] Variante del PanelAgente (el panel de IA activo): column para
+ * apilar la caja del input (textarea + enviar) y la fila de controles debajo.
+ * El PanelIA clásico no usa esta variante y conserva la fila original.
+ * [318A-4] Margen para separar el cuadro del resto del panel (input flotante). */
+.panelIAInput.panelIAInput--agente {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--dashboard-espacioSm);
+    padding: 0 var(--dashboard-espacioMd) var(--dashboard-espacioMd);
+    border-top: none;
+}
+
+/* [318A-4] Caja contenedora del input con borde visible (monocromo). Envuelve
+ * textarea + botón enviar. Sustituye el borde invisible anterior (el textarea
+ * llevaba border: none y background: transparent).
+ * [318A-4] !important + especificidad (0,3,0): la regla global
+ * .dashboardPanelView [class*="panel"] (dashboardPanelView.css, 0,2,0) con
+ * border:none !important matchea esta clase (contiene "panelIA"); con ambos
+ * !important gana la mayor especificidad, así que se duplica la clase para
+ * vencerla. Sin esto la caja queda sin borde y el único "borde" visible
+ * pasaba a ser el outline de foco del textarea al escribir. */
+.dashboardPanelView .panelIAInputCaja.panelIAInputCaja {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-end;
+    gap: var(--dashboard-espacioS);
+    border: 1px solid var(--dashboard-bordePrincipal) !important;
+    background: var(--dashboard-fondoSecundario) !important;
+    padding: var(--dashboard-espacioS) var(--dashboard-espacioSm);
+    position: relative;
+}
+
 /* Textarea UI component wrapper — quitar padding/márgenes extra */
 /* [014A-1] min-width: 0 para que flex: 1 funcione correctamente y el textarea
  * ocupe el 100% del espacio disponible sin desbordarse */
+/* [318A-4] height: auto anula el height: 100% de .textareaContenedor base
+ * (ui-formulario.css): con height 100% + flex: 1 la primera fila absorbe todo
+ * el alto de .panelIAInputCaja y la fila de controles (flex-basis: 100%)
+ * queda fuera del borde. Con height auto la caja crece para incluir ambas
+ * filas. */
 .panelIAInput .textareaContenedor {
     flex: 1;
     min-width: 0;
+    height: auto;
 }
 
 /* [303A-6] width: 100% para que el textarea ocupe todo el ancho del contenedor */
-/* [28-08-2026] padding-right reserva espacio para el botón de enviar embebido */
 /* [28-08-2026] Fuente reducida a tamanoPequeno para el texto del input. Selector
  * compuesto (.textarea.panelIAInputTexto) para ganar a .textarea base de
  * ui-formulario.css que fija tamanoBase. */
+/* [318A-4] El textarea no muestra borde propio (lo lleva .panelIAInputCaja) y
+ * ocupa el 100% del ancho SIN padding interno: el padding lo pone la caja. */
 .panelIAInputTexto.textarea {
     width: 100%;
     border: none;
@@ -166,21 +208,27 @@
     outline: none;
     min-height: 20px;
     max-height: 80px;
-    padding: 4px 32px 4px 0;
+    padding: 0;
     font-family: inherit;
     box-sizing: border-box;
 }
 
-/* [28-08-2026] Botón de enviar embebido: sin fondo, icono blanco, anclado a la
- * derecha del input y centrado verticalmente. El estado deshabilitado usa la
- * opacidad base de .boton:disabled. */
-/* [28-08-2026] right += 3px desplaza el botón 3px a la izquierda */
+/* [318A-4] Sin outline de foco: el borde del foco lo comunica la caja
+ * (.panelIAInputCaja), no el textarea. Especificidad (0,3,0) para ganar al
+ * [data-theme] :focus-visible global de monocromo.css (0,2,0) que se importa
+ * al final de index.css. */
+.panelIAInputTexto.textarea:focus,
+.panelIAInputTexto.textarea:focus-visible {
+    outline: none;
+}
+
+/* [318A-4] Botón de enviar: anclado a la derecha dentro de .panelIAInputCaja,
+ * centrado verticalmente con el textarea. Sin fondo propio (es .boton--icono),
+ * así que el color debe ser textoActivo (inversión por tema): textoSobreAcento
+ * solo vale sobre un fondo acento sólido y aquí quedaría invisible en claro. */
 .panelIAInputEnviar.boton--icono {
-    position: absolute;
-    right: calc(var(--dashboard-espacioMd) + 3px);
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--dashboard-textoSobreAcento);
+    flex-shrink: 0;
+    color: var(--dashboard-textoActivo);
     padding: var(--dashboard-espacioS);
 }
 
@@ -199,6 +247,45 @@
 .panelIAInputTexto.textarea:disabled {
     opacity: 0.5;
 }
+
+/* [318A-4] Fila de controles del input: selector de modelo + selector de modo.
+ * Ahora son botones que abren el MenuContextual global (patrón del header), no
+ * selects nativos. Viven DENTRO de .panelIAInputCaja (una sola caja con borde
+ * para textarea + enviar + selectores): flex-basis 100% los baja a su propia
+ * línea dentro de la caja, sin borde ni fondo propios. */
+.panelIAInputControles {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-espacioS);
+    flex-wrap: wrap;
+    flex-basis: 100%;
+    padding-top: var(--dashboard-espacioXs);
+}
+
+.panelIAInputControl.boton--ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoSecundario);
+    border: none;
+    background: transparent;
+    padding: 2px var(--dashboard-espacioXs) 2px var(--dashboard-espacioSm);
+    line-height: 1.4;
+}
+
+.panelIAInputControl.boton--ghost:hover:not(:disabled) {
+    background: var(--dashboard-fondoHover);
+    filter: none;
+}
+
+.panelIAInputControl.boton--ghost:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* [318A-4] Tooltip del control (title) no requiere estilo propio; los select
+ * nativos no muestran ::after. */
 
 /* [233A-69] Fase 2+3: Badges de acciones ejecutadas por el LLM */
 .panelIAAcciones {

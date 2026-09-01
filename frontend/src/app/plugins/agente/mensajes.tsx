@@ -5,7 +5,7 @@
  * los imports de los call-sites (galería visual, PanelAgente, ModalConfigAgente).
  */
 
-import {AlertTriangle, Bot, CheckCircle, Loader2, Wrench, XCircle} from 'lucide-react';
+import {AlertTriangle, CheckCircle, Loader2, Wrench, XCircle} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
 
 /* ---------- Tipos visuales (espejo del store) ---------- */
@@ -131,9 +131,6 @@ export function MensajeAsistente({
     );
     return (
         <div className="panelIAMensaje panelIAMensaje--asistente">
-            <div className="panelIAMensajeAvatar">
-                <Bot size={14} />
-            </div>
             <div className="panelIAMensajeBurbuja">
                 <span className="panelIAMensajeTexto">{contenido || '...'}</span>
 

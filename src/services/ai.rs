@@ -30,15 +30,27 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
         "https://api.deepseek.com/chat/completions",
         &["deepseek-v4-flash"],
     ),
-    /* [27-08-2026] Glory API (free.empero.org) responde sin API key. La ruta
-     * "auto" del proveedor usa el modelo `commandcode`, que resuelve
-     * internamente a DeepSeek Flash (la vía que el usuario prefiere usar por
-     * ser la que siempre funciona). `glm-5.3-flash` se mantiene como modelo
-     * disponible. */
+    /* [02-09-2026] Glory API = gloryapi LOCAL (http://127.0.0.1:3101). La URL
+     * real se resuelve en tiempo de ejecución por url_proveedor(): env
+     * GLORY_API_URL con default gloryapi local; la URL estática de aquí solo
+     * alimenta la validación del allowlist de modelos. La ruta "auto" usa el
+     * modelo `commandcode`, que mapea a deepseek/deepseek-v4-flash en gloryapi
+     * (la vía que el usuario prefiere porque siempre funciona). */
     (
         "glory",
-        "https://free.empero.org/v1/chat/completions",
+        "http://127.0.0.1:3101/v1/chat/completions",
         &["commandcode", "glm-5.3-flash"],
+    ),
+    /* [02-09-2026] Command Code Provider API DIRECTA (sin gloryapi): la key
+     * del Studio/CLI (COMMAND_CODE_API_KEY) autentica Bearer. Modelo gratuito
+     * `poolside/laguna-s-2.1-free` (Laguna S 2.1 de Poolside, 100% OFF while
+     * capacity lasts) — el prefijo `poolside/` es el ID real que el endpoint
+     * Provider espera (verificado contra GET /provider/v1/models el 02-09).
+     * Requiere al menos $1 de créditos en la cuenta para arrancar. */
+    (
+        "commandcode",
+        "https://api.commandcode.ai/provider/v1/chat/completions",
+        &["poolside/laguna-s-2.1-free"],
     ),
     (
         "cerebras",
@@ -53,6 +65,11 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
  * JSON en pocos tokens (ideal nutrición); gpt-oss son de razonamiento y
  * agotan el presupuesto corto dejando content vacío, por eso van detrás. */
 const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
+    /* [02-09-2026] Command Code Provider API directa con el modelo GRATIS
+     * `poolside/laguna-s-2.1-free` va PRIMERO: cuesta $0 y es la vía
+     * preferida para probar el agente sin pasar por gloryapi. Si no hay key
+     * o falla, cae a glory (ruta auto -> DeepSeek Flash). */
+    ("commandcode", "poolside/laguna-s-2.1-free"),
     /* [29-08-2026] Glory API/`commandcode` (ruta auto -> DeepSeek Flash) sin
      * clave va PRIMERO: es la vía que siempre funciona y el default del agente.
      * La nutrición no cambia: pasa un modelo groq válido, que `candidato_valido`
@@ -68,6 +85,43 @@ const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
     ("groq", "qwen/qwen3.6-27b"),
     ("deepseek", "deepseek-v4-flash"),
 ];
+
+/* [02-09-2026] Glory API = gloryapi LOCAL. URL configurable por env
+ * (GLORY_API_URL, default http://127.0.0.1:3101/v1/chat/completions) para no
+ * hardcodear loopback en producción: si el operador despliega contra una
+ * gloryapi remota o mantiene free.empero.org, lo decide el entorno, no el
+ * código. */
+fn url_proveedor(proveedor: &str) -> String {
+    if proveedor == "glory" {
+        return std::env::var("GLORY_API_URL").unwrap_or_else(|_| {
+            "http://127.0.0.1:3101/v1/chat/completions".to_string()
+        });
+    }
+    PROVIDERS
+        .iter()
+        .find(|(id, _, _)| *id == proveedor)
+        .map(|(_, url, _)| (*url).to_string())
+        .unwrap_or_default()
+}
+
+/* [02-09-2026] Glory API local mapea el alias interno `commandcode` (y
+ * `glm-5.3-flash`) al ID real del catálogo de gloryapi. El alias que el
+ * usuario ve en la UI es `commandcode`; el request real usa el ID del
+ * catálogo para que gloryapi lo enrute a DeepSeek V4 Flash.
+ * [02-09-2026] El proveedor `commandcode` (Provider API directa) NO mapea:
+ * sus modelos (`poolside/laguna-s-2.1-free`) son IDs reales y se pasan tal cual. */
+fn modelo_proveedor(proveedor: &str, modelo: &str) -> String {
+    if proveedor == "glory" {
+        match modelo {
+            "commandcode" => "deepseek/deepseek-v4-flash".to_string(),
+            "glm-5.3-flash" => "deepseek/deepseek-v4-flash".to_string(),
+            otro => otro.to_string(),
+        }
+    } else {
+        modelo.to_string()
+    }
+}
+
 
 /// Prompt de nutrición calibrado regional (mismo que el front para que el
 /// admin reciba el mismo comportamiento que un usuario con key propia).
@@ -298,10 +352,11 @@ impl LlmProviderService {
                 continue;
             }
             let keys = self.keys_para(proveedor);
-            /* [27-08-2026] Glory API (free.empero.org) responde sin API key
-             * (verificado contra /models y /chat/completions). Para ese
-             * proveedor, sin clave configurada se prueba una llamada sin
-             * Authorization en vez de fallar por ausencia de key. */
+            /* [27-08-2026] Glory API (free.empero.org) respondía sin API key.
+             * [02-09-2026] Glory API ahora es gloryapi LOCAL (127.0.0.1:3101)
+             * y SÍ requiere la unified key (GLORY_API_KEY). Se conserva el
+             * intento sin key como fallback defensivo por si el operador
+             * apunta GLORY_API_URL a un endpoint que no la exija. */
             if keys.is_empty() {
                 if proveedor == "glory" {
                     match self
@@ -546,11 +601,8 @@ impl LlmProviderService {
         tools: &[serde_json::Value],
         on_token: &mut (dyn FnMut(&str) -> bool + Send),
     ) -> Result<AiStreamResult, AppError> {
-        let (_, url, _) = PROVIDERS
-            .iter()
-            .find(|(id, _, _)| *id == proveedor)
-            .ok_or_else(|| AppError::BadRequest("Proveedor IA no soportado".into()))?;
-        let url = *url;
+        let url = url_proveedor(proveedor);
+        let modelo = modelo_proveedor(proveedor, modelo);
 
         let mut body = serde_json::json!({
             "model": modelo,
@@ -655,6 +707,7 @@ impl LlmProviderService {
             "groq" => &self.keys.groq,
             "deepseek" => &self.keys.deepseek,
             "glory" => &self.keys.glory,
+            "commandcode" => &self.keys.commandcode,
             _ => &[],
         }
     }
@@ -667,11 +720,8 @@ impl LlmProviderService {
         mensajes: &[AiMessage],
         opciones: &AiChatOptions,
     ) -> Result<AiChatResult, AppError> {
-        let (_, url, _) = PROVIDERS
-            .iter()
-            .find(|(id, _, _)| *id == proveedor)
-            .ok_or_else(|| AppError::BadRequest("Proveedor IA no soportado".into()))?;
-        let url = *url;
+        let url = url_proveedor(proveedor);
+        let modelo = modelo_proveedor(proveedor, modelo);
 
         /* Groq usa max_completion_tokens; el resto max_tokens (paridad PHP). */
         let mut body = serde_json::json!({
@@ -687,7 +737,9 @@ impl LlmProviderService {
 
         /* [27-08-2026] Glory API (free.empero.org) responde sin API key y
          * REJECTA un header Authorization vacío (400). Con key presente se
-         * envía el header; sin key no se envía Authorization en absoluto. */
+         * envía el header; sin key no se envía Authorization en absoluto.
+         * [02-09-2026] Con gloryapi local la key SÍ es necesaria (unified key
+         * de gloryapi); el header se envía si la env trae clave. */
         let mut request = self.client.post(url);
         if !api_key.is_empty() {
             request = request.bearer_auth(api_key);

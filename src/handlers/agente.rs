@@ -210,15 +210,31 @@ pub struct ConversacionResponse {
 
 /* Mapea la config_guardada (serde_json) de una conversación a TurnoConfig
  * con validaciones y defaults. Extraída de agente_stream para acortarla
- * (funcion-larga-rs). Glory/commandcode son política del servidor. */
+ * (funcion-larga-rs).
+ * [02-09-2026] provider/modelo se leen de la config guardada (el selector del
+ * front los persiste) para permitir elegir el modelo directo gratuito
+ * `commandcode/poolside/laguna-s-2.1-free`; el default sigue siendo glory/commandcode
+ * (ruta auto -> DeepSeek Flash), política previa del servidor. */
 fn config_desde_guardada(
     config: serde_json::Value,
     modo: String,
 ) -> Result<TurnoConfig, AppError> {
     let defaults = TurnoConfig::default();
     Ok(TurnoConfig {
-        provider: "glory".into(),
-        modelo: "commandcode".into(),
+        provider: config
+            .get("provider")
+            .and_then(serde_json::Value::as_str)
+            .map(str::trim)
+            .filter(|p| !p.is_empty())
+            .unwrap_or("glory")
+            .to_string(),
+        modelo: config
+            .get("modelo")
+            .and_then(serde_json::Value::as_str)
+            .map(str::trim)
+            .filter(|m| !m.is_empty())
+            .unwrap_or("commandcode")
+            .to_string(),
         temperatura: config.get("temperatura").and_then(serde_json::Value::as_f64).unwrap_or(defaults.temperatura as f64).clamp(0.0, 2.0) as f32,
         max_tokens: config.get("max_tokens").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_tokens as u64).clamp(64, 4096) as u32,
         idioma: validar_idioma(config.get("idioma").and_then(serde_json::Value::as_str).map(str::to_owned))?,
@@ -244,7 +260,9 @@ fn config_desde_guardada(
             ..defaults.contexto.clone()
         },
         modo,
-        ..defaults
+        /* [318A-4] `..defaults` final es redundante: todos los campos de
+         * TurnoConfig ya están listados explícitamente arriba (clippy
+         * needless_update). */
     })
 }
 
@@ -434,8 +452,17 @@ pub async fn guardar_config_conversacion(
     let config = req.get("config").cloned().unwrap_or_else(|| serde_json::json!({}));
     let json = serde_json::to_string(&config).map_err(|_| AppError::BadRequest("Configuración inválida".into()))?;
     if json.len() > 8000 { return Err(AppError::BadRequest("Configuración demasiado grande".into())); }
+    /* [318A-4] El modo de operación (predeterminado|meta|autonomo) se lee de la
+     * columna `modo` en cada turno (no del JSON config). Antes el selector de
+     * modo del front persistía el valor solo en config y quedaba inerte; ahora
+     * el request puede traer `modo` y se persiste en la columna real. */
+    let modo = req.get("modo")
+        .and_then(serde_json::Value::as_str)
+        .map(str::trim)
+        .filter(|m| matches!(*m, "predeterminado" | "meta" | "autonomo"))
+        .map(str::to_owned);
     let fila: Option<(Uuid, String, String, serde_json::Value)> =
-        AgenteRepository::actualizar_config(&state.pool, &config, id, auth.user_id).await?;
+        AgenteRepository::actualizar_config(&state.pool, &config, modo.as_deref(), id, auth.user_id).await?;
     let Some((id, titulo, modo, config)) = fila else { return Err(AppError::NotFound("Conversación no encontrada".into())); };
     Ok(Json(ConversacionResponse { id, titulo, modo, config }))
 }
