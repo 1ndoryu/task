@@ -113,7 +113,7 @@ La frontera de desacople se hace con **traits (puertos)**: persistencia, búsque
 |---|---|
 | Consumidores | v1: task (lib + daemon). Objetivo de diseño: N proyectos (WANDORIUS, Ágape, scripts locales) sin cambios en el núcleo |
 | Throughput | El mismo del agente actual (turnos por usuario/hora limitados en el consumidor); el daemon añade 1 proceso de fondo por host, sin límite propio |
-| Concurrencia | Mismo modelo: 1 agente activo por usuario (lock de sesión en el consumidor); el núcleo es stateless por turno (todo el estado entra por el contexto), así N turnos paralelos son seguros |
+| Concurrencia | Mismo modelo: 1 agente activo por sesión (lock de sesión). **Con N interfaces (task + CLI + escritorio) compartiendo daemon, el lock vive en el daemon por `session_id`** (multi-sesión), no en cada consumidor; el núcleo es stateless por turno (todo el estado entra por el contexto), así N turnos paralelos en sesiones distintas son seguros |
 | Latencia | Streaming: primer token < 2-3s (heredado). La vía daemon añade <1ms de overhead local (loopback) |
 | Volumen de datos | La BD sigue en task; el núcleo no guarda estado persistente propio (solo el estado del turno en memoria) |
 | Despliegue | Local (dev) y producción (Coolify, mismo binario, config por env: `AGENTE_MODO`, `AGENTE_WORKSPACE_ROOT` solo en local). Glory Harness es un crate más del workspace de task en el build, o un binario separado desplegado junto a task |
@@ -132,7 +132,7 @@ La frontera de desacople se hace con **traits (puertos)**: persistencia, búsque
 | B. **Proceso daemon** (binario separado, SSE/JSON en loopback) | Independencia real del ciclo de vida; task puede actualizar el núcleo sin recompilar; escala a otros proyectos sin acoplar builds | Overhead de proceso + serialización; auth del socket; gestión de lifecycle del daemon | ✅ **Fase 3**: el modo "harness corre de fondo" que pediste |
 | C. CLI one-shot (subproceso por prompt) | Simple para scripts | Latencia de arranque por prompt; sin estado de sesión; ineficiente para chat interactivo | ✅ **Complementario** (CLI `run`), no sustituto del daemon |
 
-**Decisión:** **A ahora, B como destino, C como bonus.** La extracción se hace como crate lib (permite refactor incremental y tests), y el binario `glory-harness` ofrece `daemon` (B) y `run` (C). Task puede empezar consumiendo como lib y migrar a daemon cuando el daemon esté maduro, sin cambiar el contrato.
+**Decisión:** **A ahora, B como destino, C como bonus.** La extracción se hace como crate lib (permite refactor incremental y tests), y el binario `glory-harness` ofrece `daemon` (B) y `run` (C). Task puede empezar consumiendo como lib y migrar a daemon cuando el daemon esté maduro, sin cambiar el contrato. **El daemon (B) es además el punto de extensión para interfaces futuras (CLI interactiva, escritorio):** un solo proceso multi-sesión que sirve el contrato SSE a N clientes sin que task cambie (ver §6.7).
 
 ### 5.2 Qué transporte usa el daemon
 
@@ -227,6 +227,29 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 
 **Criterio de revisión:** si un proyecto nuevo quiere el mismo chat del agente y NO puede consumir el SSE directamente, se reevalúa extraer la UI como librería compartida. Hasta entonces, UI nativa de task.
 
+### 6.7 Interfaces futuras (CLI + escritorio) sin romper task — decisión de diseño
+
+> [01-09-2026] Pregunta del usuario: *"¿y si más adelante creamos una interfaz para harness — una versión CLI y otra de escritorio? no es para hacerlo ahora, pero se podrá, me imagino, sin romper la integración task."*
+
+**Respuesta de diseño: SÍ se podrá, sin romper task.** Es consecuencia directa de los invariantes del plan:
+
+1. **El contrato SSE (`AgenteEvento`) es la interfaz estable** (§6.4): una interfaz nueva (CLI, escritorio) es un cliente más del mismo contrato. Añadir clientes no cambia el contrato → task no se entera.
+2. **La persistencia es por consumidor** (trait `AgentPersistence`, §6.2): un escritorio implementa la suya (p. ej. SQLite local), **nunca** las tablas `agente_*` de task. Cero acoplamiento de datos entre interfaces.
+3. **Las tools de dominio son del consumidor** (§6.3): el escritorio registra sus propias tools (o ninguna); el núcleo solo aporta las agnósticas (archivo con sandbox, web, contexto). Cada interfaz decide sus permisos.
+
+**Vías de consumo de una interfaz nueva:**
+
+| Interfaz | Vía | Detalle |
+|---|---|---|
+| **CLI** (`glory-harness run`) | one-shot (Fase 3, §5.1 opción C) | ya previsto; también TUI interactiva sobre el mismo contrato |
+| **Escritorio** | **daemon compartido** (recomendado) o **lib embebida** | task y desktop hablan con el mismo `glory-harness daemon` (SSE loopback multi-sesión), o el desktop embebe `glory-harness-core` en su proceso (Tauri/Wails/Electron) e implementa sus puertos |
+
+**Único requisito nuevo que revela esta pregunta (se incorpora a Fase 3):** el daemon debe ser **multi-sesión** (lock por `session_id` dentro del daemon, no en cada consumidor) para que task + escritorio puedan compartirlo sin pisarse (§4).
+
+**Límites honestos (decisión de producto futura, no de arquitectura hoy):**
+- Si el escritorio usa su propia persistencia, su memoria/skills son **distintas** a las de task. Si algún día se quiere memoria compartida entre interfaces, eso exige un `AgentPersistence` compartido (p. ej. el daemon con BD propia) — se decide cuando exista ese requisito, no ahora.
+- La UI React de task **no se reutiliza** en un escritorio nativo (design system distinto); pero la lógica del cliente SSE (`service.ts` → parseo de eventos) es portable 1:1.
+
 ---
 
 ## 7. Seguridad
@@ -312,9 +335,10 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 
 ### Fase 3 — CLI y daemon (el "corre de fondo" que pediste)
 - [ ] Binario `glory-harness` con subcomandos `run` (one-shot CLI) y `daemon` (SSE loopback, opción A de 5.2; `--stdio` futuro).
+- [ ] **Daemon multi-sesión** (requisito §6.7): lock por `session_id` dentro del daemon, no en cada consumidor — habilita task + CLI + escritorio compartiendo el mismo proceso sin pisarse.
 - [ ] Task puede delegar en el daemon (opción B de 5.1) o seguir con lib — decisión al cerrar la fase según estabilidad.
 - [ ] Auth del daemon: bind loopback + token de sesión.
-- [ ] **Checklist:** `glory-harness run --prompt "..."` responde; `daemon` emite H3 en loopback con token; task usa lib o daemon con paridad; gate ambos proyectos PASS.
+- [ ] **Checklist:** `glory-harness run --prompt "..."` responde; `daemon` emite H3 en loopback con token y atiende ≥2 sesiones en paralelo; task usa lib o daemon con paridad; gate ambos proyectos PASS.
 
 ### Fase 4 — Segundo consumidor (opcional, validar contigo)
 - [ ] Identificar un proyecto real (p. ej. WANDORIUS o un script) y consumir `glory-harness run`/lib.
