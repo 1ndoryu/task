@@ -1,7 +1,7 @@
 # Plan: paridad de sync y export completo (bug reappear + export incompleto)
 
 - **Fecha:** 2026-08-26
-- **Estado:** activo (en curso)
+- **Estado:** CERRADO 2026-09-02 (verificado; código completo desde 28-08, documentación stale cerrada ahora)
 - **Dependencias:** ninguna bloqueante. Headless / sin credenciales externas.
 - **Tipo:** corrección de arquitectura + cierre de brecha de export.
 
@@ -127,3 +127,32 @@ navegador pierde lo que vivía solo en localStorage.
 - Export/import cubre todos los dominios persistentes; round-trip verificado.
 - `tsc --noEmit` limpio; suite `verify-parity.mjs` 100% (asserts nuevos).
 - Commit con solo los archivos del plan.
+
+---
+
+## Cierre (verificado 2026-09-02)
+
+Ambas fases estaban implementadas y commiteadas; la deuda era solo documental
+(roadmap/plan marcaban "en curso" stale). Evidencia:
+
+- **Fase 1 (reappear) — HECHO**: `useSyncManager.refrescarDesdeServidor` es
+  tombstones-aware + no-clobber: guard `guardadoPendienteRef` (no pisa edición en
+  debounce), guard `lastModified > lastSync` (no pisa save fallido), re-verificación
+  de guards DESPUÉS del fetch, y `aplicarTombstonesAlPayload(serverData)` (no
+  resucita filas borradas). Commits: `27cce4d`, `7506156`, `dda873d`, `e041bc6`.
+- **Fase 2 (export v2) — HECHO**: `DatosDashboardExportados` v2.0.0 con blob
+  `extensiones` (opcional, backwards-compat v1.x) que lleva los 8 stores
+  local-only (`CLAVES_EXTENSIONES_LOCAL`: recordatorios, grupos ejecución,
+  plugins, time-tracker, config-usuario, grupos-tareas, grupos-FB, panel IA) vía
+  `recolectarExtensionesLocal()`/`aplicarExtensionesLocal()`; cableado en
+  `useDashboard.ts` (export L184, import L205); validación tolerante. Los dominios
+  que el sync por entidad SÍ persigue (ayuno, déficit, preferencias, notas) se
+  excluyen del blob por diseño (el servidor es su respaldo). Commit: `ed27b94`.
+- **Verificación DoD**: `.freebuff/verify-parity.mjs` **113 pasados / 0 fallados /
+  2 omitidos** (proveedor externo) — incluye la suite de regresión de tombstones
+  ("borrar no debe reaparecer" 8/8) y el round-trip LWW. `tsc --noEmit` exit 0
+  (2026-09-02).
+- **Nota 318A-1**: el bug visual de modales de tareas mencionado en el análisis
+  era el refactor visual monocromo 318A-1, ya resuelto (31-08-2026); el overlap
+  `panelAgenteTarea*` quedó resuelto por el form "Programar tarea" migrado
+  (`14f0060`). Sin ítem abierto.

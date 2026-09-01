@@ -27,9 +27,7 @@ hardcoded → tokens. Gate `GLORY-BASELINE` PASS. Evidencia:
 `Agente/completados/tareas-2026-08-31.md`. Pendiente real detectado (no bloqueante): bug visual
 del modal de tareas programadas (`[class*="panel"]` vs `panelAgenteTarea*`).
 
-**En curso (26-08-2026): paridad de sync y export.** Dos bugs profundos heredados del legacy:
-1. **Reappear**: al borrar/completar una tarea a veces reaparece/des-completa (race intermitente entre el guardado debounced 2s y el refresco 30s/foco que sobrescribe local con datos stale). Fix: refresco tombstones-aware + no-clobber en `useSyncManager`. Plan: `Agente/planes/plan-paridad-sync-export-2026-08-26.md`.
-2. **Export incompleto**: el archivo solo lleva habitos/tareas/proyectos/notas-scratchpad; faltan recordatorios, notas guardadas, grupos (tareas/ejecución/FB), ayuno, déficit, timeTracker, plugins, config, preferencias. Fix: ampliar formato v2 con todas las secciones + validación tolerante + restore.
+✅ **Resuelto (verificado 02-09-2026): paridad de sync y export.** Ambas fases implementadas y commiteadas (la deuda era solo documental): (1) **Reappear** resuelto con refresco tombstones-aware + no-clobber en `useSyncManager` (`guardadoPendienteRef`, `lastModified > lastSync`, re-check post-fetch, `aplicarTombstonesAlPayload`; commits `27cce4d`, `7506156`, `dda873d`, `e041bc6`); (2) **Export v2** (`ed27b94`): `DatosDashboardExportados` 2.0.0 con blob `extensiones` (8 stores local-only: recordatorios, grupos ejecución, plugins, time-tracker, config-usuario, grupos-tareas, grupos-FB, panel IA), backwards-compat v1.x, cableado export/import en `useDashboard.ts`; los dominios que el sync por entidad persigue (ayuno/déficit/preferencias/notas) quedan fuera del blob por diseño (el servidor es su respaldo). Verificación: `.freebuff/verify-parity.mjs` **113/0/2** + `tsc --noEmit` exit 0. Plan archivado en `Agente/planes/completados/plan-paridad-sync-export-2026-08-26.md`.
 
 ✅ **Resuelto (27-08-2026): scroll interno en modo sidebar.** Cuando el contenido del panel
 superaba la altura, la barra aparecía "por fuera" (body/página). Fix CSS acotado a sidebar:
