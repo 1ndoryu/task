@@ -16,14 +16,14 @@
 .panelExpCuerpo {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioLg, 16px);
-    padding: var(--dashboard-espacioMd, 10px) var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
 }
 
 /* Fila superior: Nivel + barras de Vida y EXP lado a lado. */
 .panelExpFila {
     display: flex;
-    gap: var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
     align-items: stretch;
 }
 
@@ -98,8 +98,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--dashboard-espacioLg, 16px);
-    margin-top: var(--dashboard-espacioXl, 24px);
+    gap: var(--dashboard-espacioLg);
+    margin-top: var(--dashboard-espacioXl);
 }
 
 /* Árbol pixel art del estado de vida: blanco sobre el fondo del panel, sin
@@ -215,8 +215,8 @@
 /* Móvil: compacto, una sola línea utilizable. */
 @media (max-width: 640px) {
     .panelExpCuerpo {
-        gap: var(--dashboard-espacioMd, 10px);
-        padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 10px);
+        gap: var(--dashboard-espacioMd);
+        padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     }
 
     .panelExpFila {

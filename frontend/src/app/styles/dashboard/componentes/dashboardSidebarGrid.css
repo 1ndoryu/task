@@ -133,7 +133,7 @@
     height: 40%;
     background: var(--dashboard-bordeSutil);
     border-radius: 0;
-    transition: background var(--dashboard-transicionRapida, 0.15s), height var(--dashboard-transicionRapida, 0.15s);
+    transition: background var(--dashboard-transicionRapida), height var(--dashboard-transicionRapida);
 }
 
 .sidebarGridResizeHandle:hover .sidebarGridResizeHandleLinea,
@@ -149,8 +149,8 @@
     justify-content: center;
     height: 100%;
     color: var(--dashboard-textoApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada, monospace);
-    font-size: var(--dashboard-tamanoBase, 13px);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
 }
 
 /* RESPONSIVE: móvil */

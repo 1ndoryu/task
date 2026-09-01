@@ -10,7 +10,7 @@
 .configExp {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
     padding: 4px 0;
 }
 
@@ -18,12 +18,12 @@
 .configExpPreview {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
     padding: 8px 10px;
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
     border: 1px solid var(--dashboard-bordePrincipal);
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
 
@@ -35,18 +35,18 @@
 .configExpSeccion {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
 }
 
 .configExpSeccionTitulo {
-    font-size: var(--dashboard-tamanoBase, 13px);
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
     margin: 0;
 }
 
 .configExpSeccionNota {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     margin: 0;
 }
@@ -54,16 +54,16 @@
 .configExpCampo {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioMini, 3px);
+    gap: var(--dashboard-espacioMini);
 }
 
 .configExpLabel {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
 
 .configExpAyuda {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
 }
 
@@ -72,15 +72,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--dashboard-espacioSm, 6px);
-    padding-top: var(--dashboard-espacioMini, 3px);
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioMini);
 }
 
 /* Ranges: usa el componente compartido Range (range.css). */
 
 .configExpMultiplicadores {
     display: flex;
-    gap: var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
 }
 
 .configExpMultiplicadores .configExpCampo {
@@ -91,7 +91,7 @@
 .configExpAcciones {
     display: flex;
     justify-content: flex-end;
-    gap: var(--dashboard-espacioSm, 6px);
-    padding-top: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
     border-top: 1px solid var(--dashboard-bordePrincipal);
 }

@@ -129,7 +129,7 @@
 .panelIAMensajeAcciones {
     display: flex;
     flex-direction: row;
-    gap: var(--dashboard-espacioXxs, 2px);
+    gap: var(--dashboard-espacioXxs);
     opacity: 0;
     transition: opacity 0.15s ease;
     align-self: center;

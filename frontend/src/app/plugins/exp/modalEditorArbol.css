@@ -21,7 +21,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--dashboard-espacioLg, 16px);
+    padding: var(--dashboard-espacioLg);
     animation: aparecerModal 0.15s ease-out;
 }
 
@@ -35,8 +35,8 @@
     flex-direction: column;
     overflow: hidden;
     box-shadow: var(--dashboard-sombraElevada);
-    font-family: var(--dashboard-fuenteMonoespaciada, inherit);
-    font-size: var(--dashboard-tamanoBase, 13px);
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoBase);
     color: var(--dashboard-textoNormal);
     animation: deslizarModal 0.2s ease-out;
 }
@@ -46,16 +46,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--dashboard-espacioSm, 6px);
-    padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioSm);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioLg);
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalEditorArbolTitulo {
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioMini, 4px);
-    font-size: var(--dashboard-tamanoBase, 13px);
+    gap: var(--dashboard-espacioMini);
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
 }
@@ -69,7 +69,7 @@
     background: none;
     border: none;
     color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoMediano, 14px);
+    font-size: var(--dashboard-tamanoMediano);
     line-height: 1;
     cursor: pointer;
     padding: 0;
@@ -85,20 +85,20 @@
 /* ---- Pestañas de estado ---- */
 .modalEditorArbolPestanas {
     display: flex;
-    gap: var(--dashboard-espacioMini, 4px);
-    padding: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
+    padding: var(--dashboard-espacioMini);
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
 .modalEditorArbolPestana {
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
     background: none;
     border: 1px solid transparent;
     border-radius: var(--dashboard-radioSm);
-    padding: var(--dashboard-espacioMini, 4px) var(--dashboard-espacioSmMd, 10px);
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioSmMd);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
@@ -126,8 +126,8 @@
 .modalEditorArbolCuerpo {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 180px;
-    gap: var(--dashboard-espacioLg, 16px);
-    padding: var(--dashboard-espacioLg, 16px);
+    gap: var(--dashboard-espacioLg);
+    padding: var(--dashboard-espacioLg);
     overflow-y: auto;
     align-items: start;
 }
@@ -136,12 +136,12 @@
 .modalEditorArbolPreview {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
 }
 
 .modalEditorArbolLienzoTitulo,
 .modalEditorArbolPreviewTitulo {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
 
@@ -169,15 +169,15 @@
     align-self: flex-start;
     display: inline-flex;
     align-items: center;
-    gap: var(--dashboard-espacioMini, 4px);
+    gap: var(--dashboard-espacioMini);
     background: none;
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno, 11px);
-    padding: var(--dashboard-espacioMini, 4px) var(--dashboard-espacioSmMd, 10px);
+    font-size: var(--dashboard-tamanoPequeno);
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioSmMd);
     cursor: pointer;
-    margin-top: var(--dashboard-espacioMini, 4px);
+    margin-top: var(--dashboard-espacioMini);
     transition: border-color 0.15s ease, color 0.15s ease;
 }
 
@@ -194,12 +194,12 @@
     min-height: 96px;
     border: 1px dashed var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
-    padding: var(--dashboard-espacioSm, 6px);
+    padding: var(--dashboard-espacioSm);
     background: var(--dashboard-superposicionSutil);
 }
 
 .modalEditorArbolAyuda {
-    font-size: var(--dashboard-tamanoPequeno, 11px);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
     line-height: 1.4;
     margin: 0;
@@ -209,7 +209,7 @@
 .modalEditorArbolPie {
     display: flex;
     justify-content: flex-end;
-    padding: var(--dashboard-espacioSmMd, 10px) var(--dashboard-espacioLg, 16px);
+    padding: var(--dashboard-espacioSmMd) var(--dashboard-espacioLg);
     border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 

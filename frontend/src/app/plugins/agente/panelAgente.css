@@ -8,9 +8,9 @@
 /* Tabs de conversaciones */
 .panelAgenteTabs {
     display: flex;
-    gap: var(--dashboard-espacioXs, 4px);
-    padding: 0 var(--dashboard-espacioMd, 12px);
-    padding-top: var(--dashboard-espacioSm, 8px);
+    gap: var(--dashboard-espacioXs);
+    padding: 0 var(--dashboard-espacioMd);
+    padding-top: var(--dashboard-espacioSm);
     overflow-x: auto;
     flex-shrink: 0;
     border-bottom: 1px solid var(--dashboard-bordeSutil);
@@ -98,8 +98,8 @@
 .panelAgenteHerramientas {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioXs, 4px);
-    margin-top: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioXs);
+    margin-top: var(--dashboard-espacioSm);
 }
 
 .panelAgenteHerramienta {
@@ -112,7 +112,7 @@
 .panelAgenteHerramienta summary {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioXs, 4px);
+    gap: var(--dashboard-espacioXs);
     padding: 3px 8px;
     cursor: pointer;
     list-style: none;
@@ -145,9 +145,9 @@
 
 .panelAgenteHerramientaArgs {
     margin: 0;
-    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 12px);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     border-top: 1px solid var(--dashboard-bordeSutil);
-    font-family: var(--dashboard-fuenteMonoespaciada, monospace);
+    font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
     white-space: pre-wrap;
@@ -160,15 +160,15 @@
 .panelAgenteContexto {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--dashboard-espacioSm, 6px);
-    margin-top: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
+    margin-top: var(--dashboard-espacioSm);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
 }
 
 .panelAgenteContexto span {
     background: var(--dashboard-superposicionSutil);
-    padding: 1px var(--dashboard-espacioSm, 6px);
+    padding: 1px var(--dashboard-espacioSm);
     border-radius: var(--dashboard-radioSm);
 }
 
@@ -179,7 +179,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    padding: var(--dashboard-espacioXs, 4px) var(--dashboard-espacioMd, 12px);
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd);
     border-top: 1px solid var(--dashboard-bordeSutil);
     background: var(--dashboard-fondoSecundario);
     cursor: default;
@@ -211,11 +211,11 @@
  * Posición absoluta encima de la barra, alineado a la derecha del panel. */
 .panelIAContextoBarraTooltip {
     position: absolute;
-    bottom: calc(100% + var(--dashboard-espacioSm, 6px));
-    right: var(--dashboard-espacioMd, 12px);
+    bottom: calc(100% + var(--dashboard-espacioSm));
+    right: var(--dashboard-espacioMd);
     min-width: 220px;
     max-width: 320px;
-    padding: var(--dashboard-espacioSm, 6px) var(--dashboard-espacioMd, 12px);
+    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background: var(--dashboard-fondoTarjeta);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
@@ -245,10 +245,10 @@
 .panelAgentePensando {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
     color: var(--dashboard-textoSecundario);
     font-size: var(--dashboard-tamanoPequeno);
-    margin-top: var(--dashboard-espacioSm, 6px);
+    margin-top: var(--dashboard-espacioSm);
 }
 
 /* Tareas programadas (contenido del modal reutilizable del design system).
@@ -257,7 +257,7 @@
 .panelAgenteTareasContenido {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
     padding: var(--dashboard-espacioLg);
     overflow-y: auto;
 }
@@ -265,7 +265,7 @@
 .panelAgenteTareasVacio {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
 }
@@ -274,7 +274,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: var(--dashboard-espacioSm, 6px);
+    padding: var(--dashboard-espacioSm);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
@@ -283,7 +283,7 @@
 .panelAgenteTareaFila {
     display: flex;
     align-items: center;
-    gap: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
 }
 
 .panelAgenteTareaNombre {
@@ -297,7 +297,7 @@
 
 .panelAgenteTareaEstado {
     font-size: var(--dashboard-tamanoPequeno);
-    padding: 0 var(--dashboard-espacioSm, 6px);
+    padding: 0 var(--dashboard-espacioSm);
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-superposicionSutil);
 }
@@ -347,14 +347,14 @@
 .panelAgenteTareaForm {
     display: flex;
     flex-direction: column;
-    gap: var(--dashboard-espacioSm, 6px);
-    padding-top: var(--dashboard-espacioSm, 6px);
+    gap: var(--dashboard-espacioSm);
+    padding-top: var(--dashboard-espacioSm);
     border-top: 1px dashed var(--dashboard-bordePrincipal);
 }
 
 .panelAgenteTareaInput {
     width: 100%;
-    padding: var(--dashboard-espacioSm, 6px);
+    padding: var(--dashboard-espacioSm);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioSm);
     background: var(--dashboard-fondoTarjeta);
