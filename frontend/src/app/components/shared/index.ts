@@ -8,7 +8,14 @@ export * from './SelectorNivel';
 export * from './SeccionPanel';
 export * from './ToggleSwitch';
 export * from './Range';
-/* 318A-3 - Sistema centralizado de formularios de configuración */
+/* 318A-3 - Sistema centralizado de formularios de configuración
+ *
+ * Contrato (ver §12.4 del plan 318A-3):
+ * - SeccionPanel AGRUPA (contenedor con titulo/icono).
+ * - FormCampo/FormularioConfiguracion RENDERIZAN campos individuales
+ *   (titulo + control del sistema). Los campos viven DENTRO de SeccionPanel.
+ * - FormularioConfiguracion renderiza una lista de CampoEspecificacion.
+ */
 export * from './FormCampo';
 export * from './CampoEspecificacion';
 export * from './FormularioConfiguracion';

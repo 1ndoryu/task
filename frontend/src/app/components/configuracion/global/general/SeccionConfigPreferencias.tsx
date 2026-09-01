@@ -7,7 +7,10 @@ import {useConfiguracionUsuario} from '../../../../stores/configuracionUsuarioSt
 export function SeccionConfigPreferencias(): JSX.Element {
     const {horaFinDia, setHoraFinDia} = useConfiguracionUsuario();
     return (
-        <div className="formularioConfiguracion">
+        /* [318A-3 §12.3] Clase CSS renombrada de `formularioConfiguracion` (colisionaba con
+ * el componente FormularioConfiguracion) a `formularioConfigGlobal`. Es un marcador
+ * semantico de contenedor sin estilos propios: cero cambio visual. */
+        <div className="formularioConfigGlobal">
             <SeccionPanel titulo="Fin del día (Jornada)">
                 <p className="configuracionUsuarioDescripcion">Define a qué hora termina realmente tu día.</p>
                 <div className="configuracionUsuarioControles">

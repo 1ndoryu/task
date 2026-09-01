@@ -1,6 +1,10 @@
 /*
  * SeccionPanel
- * Componente contenedor para secciones en formularios y paneles
+ * Componente contenedor para secciones en formularios y paneles.
+ * [318A-3 §12.4] Contrato del sistema centralizado: SeccionPanel AGRUPA
+ * (titulo/icono + contenido); los campos individuales van DENTRO con
+ * FormCampo (campo suelto) o FormularioConfiguracion (lista declarativa de
+ * CampoEspecificacion). No renderiza controles por si mismo.
  */
 
 import {ReactNode} from 'react';

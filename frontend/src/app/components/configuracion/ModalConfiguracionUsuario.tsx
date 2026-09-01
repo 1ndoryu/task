@@ -18,7 +18,7 @@ export function ModalConfiguracionUsuario({estaAbierto, onCerrar}: ModalConfigur
 
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Preferencias de Usuario">
-            <div id="modal-config-usuario" className="formularioConfiguracion">
+            <div id="modal-config-usuario" className="formularioConfigGlobal">
                 {/* Configuración de Jornada */}
                 <SeccionPanel titulo="Fin del día (Jornada)">
                     <p className="configuracionUsuarioDescripcion">

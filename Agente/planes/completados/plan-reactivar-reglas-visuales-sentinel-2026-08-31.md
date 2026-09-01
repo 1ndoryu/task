@@ -1,6 +1,6 @@
 # Plan v2: Sistema centralizado de formularios de configuración + arreglo de Sentinel (318A-3)
 
-> Fecha: 2026-08-31 · Estado: ACTIVO (v2, replanificado, EN CIERRE — F1-F6 ✅, F7 parcial, F8 pendiente de decisión) · Proyecto: PROYECTO TASKS (repo `task`)
+> Fecha: 2026-08-31 · Estado: CERRADO 2026-09-01 (v2, replanificado — F1–F8 ✅, §12 ✅, §13/§14 registrados como deuda) · Proyecto: PROYECTO TASKS (repo `task`)
 > Revisión post-cierre: 2026-09-01 (supervisor-thinking) — ver §12 con los ajustes de la revisión.
 > Dirección del usuario: primero crear una **funcionalidad centralizada para formularios** para que
 > todas las configuraciones en modales sean consistentes entre sí y se pueda **especificar y
@@ -278,11 +278,12 @@ autorización explícita.**
    0 errores / 53 warnings / 6 info, scope incremental 17 archivos; reporte en
    `.quality-reports/check/318A-3/latest.md`). Commit y push: a decisión del usuario (el árbol de PT
    lleva sus commits 318A-5; no se pushea sin su OK explícito).
-7. **F7 — Otros proyectos**: informe entregado como nota en `Agente/completados/tareas-2026-09-01.md`
-   (RESTAURANTE/WANDORIUS sin tocar sus gates); el registro formal de tareas de seguimiento en sus
-   roadmaps queda pendiente. (parcial)
-8. **F8 — Evidencia**: `Agente/completados/tareas-2026-09-01.md` ✅ (commit `03b0528`, pusheado).
-   Plan a `planes/completados/` + push final quedan a decisión del usuario tras esta expansión (§12).
+7. **F7 — Otros proyectos**: ✅ cerrado — informe como nota en `Agente/completados/tareas-2026-09-01.md`
+   y registro formal de seguimiento en los roadmaps de RESTAURANTE (evaluar reactivación de
+   `html-nativo-en-vez-de-componente`/`componente-artesanal`/`componente-sin-hook-glory`) y WANDORIUS
+   (`mixed-barrel-logic`), sin tocar sus gates.
+8. **F8 — Evidencia**: ✅ cerrado — `Agente/completados/tareas-2026-09-01.md` (commits `03b0528` +
+   cierre §12), plan movido a `Agente/planes/completados/` (commit de cierre).
 
 ## 9. Riesgos
 
@@ -400,14 +401,41 @@ El plan fue ejecutado en paralelo por otro agente (F1–F8). Riesgo de colisión
 commiteó `03b0528` (F5–F8, gate PASS) y pusheó; el árbol de PT quedó sincronizado con `origin/main`.
 Esta revisión se realiza POST-cierre sobre el estado final, sin pisar su trabajo.
 
-### 12.6 Próximos pasos (no bloqueantes)
+### 12.6 Próximos pasos (no bloqueantes) — CERRADO 2026-09-01
 
-1. Registrar en roadmap la tarea de seguimiento de 12.1 (extensión del sistema declarativo).
-2. Migrar los escapes de 12.2 (empezar por Actividad/Perfil/Usuario).
-3. Renombrar la clase CSS de 12.3.
-4. Documentar el contrato SeccionPanel/FormCampo de 12.4.
-5. (F7) registrar tareas en RESTAURANTE/WANDORIUS; (F8) mover el plan a `planes/completados/` cuando
-   el usuario confirme el cierre.
+1. ✅ Registrar en roadmap la tarea de seguimiento de 12.1 (extensión del sistema declarativo).
+   Hecho (commit `c41e9ff` del usuario, entrada en `roadmap.md`).
+2. ✅ Evaluado y **EXCEPCIONADO con evidencia** (no se migra — ver bloque de evidencia abajo):
+   los escapes de 12.2 (ModalConfigAgente botones, PanelAgente form, Actividad label,
+   Perfil labels, Usuario campos) NO generan hallazgos bajo el runtime fijado del proyecto
+   y migrarlos sería churn con riesgo visual o regresión neta. Detalle:
+   - `existeComponenteUi` del analizador fijado (pin `643353d`/`88f281f`) solo sondea
+     `frontend/src/components/ui`/`src/components/ui`/..., pero la UI de PT vive en
+     `frontend/src/app/components/ui` — el fix F2 (`aa606a8`, rama local sin publicar)
+     añade esa ruta. Por eso los `<button>`/`<input>`/`<textarea>` nativos de `app/`
+     producen **0 hallazgos** hoy (baseline fresco 2026-09-01: 59 = 0e/53w/6h;
+     los 17× `html-nativo` restantes son todos de la familia `<Select>` genérico →
+     `SelectDropdown` inexistente, excepción §4.1).
+   - Migrar inputs/textarea/buttons/labels → componentes: delta 0 en sentinel, pero los
+     componentes envuelven en `inputContenedor`/`inputWrapper`/`textareaContenedor` y añaden
+     clases base que compiten con el CSS local (p.ej. `panelAgenteTareaInput`) → riesgo
+     visual sin verificación en navegador disponible.
+   - Migrar el `<select>` nativo de PanelAgente → `<Select>` **añadiría** 1 hallazgo
+     (deprecación §4.1): regresión neta en el conteo visible.
+   - `ModalConfiguracionActividad`/`SeccionConfigPerfil`/`ModalConfiguracionUsuario` ya usan
+     componentes canónicos (`Boton`, `Input`, `ToggleSwitch`, `SeccionPanel`, `Modal`); lo
+     único nativo son `<label>` (la regla no las marca) y layouts custom (icono/sufijo de
+     Usuario, fila ToggleSwitch de Actividad) sin slot en `FormCampo`/`FormularioConfiguracion`.
+   - Re-evaluar cuando el fix F2 se publique y el runtime marque los nativos de `app/`.
+3. ✅ Renombrar la clase CSS de 12.3: HECHO — `formularioConfiguracion` → `formularioConfigGlobal`
+   en `SeccionConfigPreferencias.tsx` y `ModalConfiguracionUsuario.tsx` (clase sin CSS propio,
+   marcador semántico → visual-neutral verificado por grep: sin definición ni colisiones;
+   `npm run type-check` exit 0; sentinel 59 sin regresión).
+4. ✅ Documentar el contrato SeccionPanel/FormCampo de 12.4: HECHO — contrato añadido en
+   `components/shared/index.ts` y cabecera de `SeccionPanel.tsx` (SeccionPanel agrupa;
+   FormCampo/FormularioConfiguracion renderiza campos).
+5. ✅ (F7) registros en RESTAURANTE/WANDORIUS hechos (escritura solo en roadmaps, sin tocar su
+   gate); (F8) plan movido a `planes/completados/` y evidencia en completadas (commit de cierre).
 
 ## 13. Ajustes de revisión de especificaciones de diseño (2026-09-01)
 
