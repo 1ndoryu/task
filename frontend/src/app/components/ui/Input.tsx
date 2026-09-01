@@ -6,7 +6,7 @@ import {type InputHTMLAttributes, type ReactNode, forwardRef} from 'react';
  * Incluye soporte para iconos, etiquetas y mensajes de error
  */
 
-export type TipoInput = 'text' | 'password' | 'email' | 'number' | 'date' | 'file' | 'tel' | 'url' | 'search';
+export type TipoInput = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-local' | 'file' | 'tel' | 'url' | 'search';
 
 export interface PropsInput extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'className'> {
     tipo?: TipoInput;

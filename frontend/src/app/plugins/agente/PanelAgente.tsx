@@ -9,11 +9,11 @@
  * mantener el componente bajo el límite de línea y sin usestate-excesivo.
  */
 
-import {ArrowUp, Bot, Clock, Loader2, Plus, Settings} from 'lucide-react';
+import {ArrowUp, Bot, Clock, Plus, Settings} from 'lucide-react';
 import {SeccionEncabezado} from '../../components/dashboard';
 import {Boton, Textarea} from '../../components/ui';
-import {Modal} from '../../components/shared/Modal';
 import {ModalConfigAgente} from './ModalConfigAgente';
+import {ModalTareasProgramadas} from './ModalTareasProgramadas';
 import {usePanelAgente} from './usePanelAgente';
 import {useAgenteStore} from './store';
 import {
@@ -26,7 +26,6 @@ import {
     MensajeUsuario,
     MODELOS_AGENTE,
     TabsWorkspace,
-    TarjetaTareaProgramada,
 } from './componentes';
 import type {PanelBaseProps} from '../../types/paneles';
 
@@ -54,23 +53,13 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         setConfigAbierta,
         tareasAbiertas,
         setTareasAbiertas,
-        tareaNombre,
-        setTareaNombre,
-        tareaPrompt,
-        setTareaPrompt,
-        tareaTipo,
-        setTareaTipo,
-        tareaCron,
-        setTareaCron,
-        tareaEjecutarEn,
-        setTareaEjecutarEn,
-        tareaGuardando,
         compactando,
         abrirTab,
         crearTab,
         cerrarTab,
         limpiarErrorTab,
         reintentarMensaje,
+        crearTarea,
         eliminarTarea,
         cancelarTurno,
         rebobinarTab,
@@ -78,7 +67,6 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         manejarTecla,
         iniciarRenombrado,
         confirmarRenombrado,
-        manejarCrearTarea,
         manejarCompactar,
     } = usePanelAgente();
 
@@ -214,76 +202,15 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
             </div>
 
             {/* Tareas programadas (modal reutilizable del design system) */}
-            <Modal
+            <ModalTareasProgramadas
                 estaAbierto={tareasAbiertas}
                 onCerrar={() => setTareasAbiertas(false)}
-                titulo={`Tareas programadas (${tareasProgramadas.length})`}
-            >
-                <div className="panelAgenteTareasContenido">
-                    {errorTareas && <div className="panelIAError">{errorTareas}</div>}
-                    {cargandoTareas && (
-                        <div className="panelAgenteTareasVacio">
-                            <Loader2 size={12} className="animacionGirar" /> Cargando...
-                        </div>
-                    )}
-                    {!cargandoTareas && tareasProgramadas.length === 0 && !errorTareas && (
-                        <div className="panelAgenteTareasVacio">Sin tareas programadas todavía.</div>
-                    )}
-                    {tareasProgramadas.map(tarea => (
-                        <TarjetaTareaProgramada
-                            key={tarea.id}
-                            tarea={tarea}
-                            onEliminar={id => void eliminarTarea(id)}
-                        />
-                    ))}
-                    <form className="panelAgenteTareaForm" onSubmit={manejarCrearTarea}>
-                        <input
-                            className="panelAgenteTareaInput"
-                            placeholder="Nombre"
-                            value={tareaNombre}
-                            maxLength={255}
-                            required
-                            onChange={e => setTareaNombre(e.target.value)}
-                        />
-                        <textarea
-                            className="panelAgenteTareaInput panelAgenteTareaPrompt"
-                            placeholder="Instrucciones para el agente"
-                            value={tareaPrompt}
-                            maxLength={4000}
-                            required
-                            onChange={e => setTareaPrompt(e.target.value)}
-                        />
-                        <select
-                            className="panelAgenteTareaInput"
-                            value={tareaTipo}
-                            onChange={e => setTareaTipo(e.target.value as 'una_vez' | 'recurrente')}
-                        >
-                            <option value="una_vez">Una vez</option>
-                            <option value="recurrente">Recurrente</option>
-                        </select>
-                        {tareaTipo === 'recurrente' ? (
-                            <input
-                                className="panelAgenteTareaInput"
-                                placeholder="diario | cada30min | cada2h | cada3d"
-                                value={tareaCron}
-                                required
-                                onChange={e => setTareaCron(e.target.value)}
-                            />
-                        ) : (
-                            <input
-                                className="panelAgenteTareaInput"
-                                type="datetime-local"
-                                value={tareaEjecutarEn}
-                                onChange={e => setTareaEjecutarEn(e.target.value)}
-                            />
-                        )}
-                        <Boton type="submit" variante="primario" tamano="pequeño" disabled={tareaGuardando}>
-                            {tareaGuardando ? <Loader2 size={11} className="animacionGirar" /> : <Plus size={11} />}
-                            Programar
-                        </Boton>
-                    </form>
-                </div>
-            </Modal>
+                tareas={tareasProgramadas}
+                cargando={cargandoTareas}
+                error={errorTareas}
+                onEliminar={eliminarTarea}
+                onCrear={crearTarea}
+            />
 
             {/* [318A-5] Barra de uso de contexto inferior: uso del último turno
              * con tooltip (usado, máximo, %, salida, skills). La maxVentana

@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import type {KeyboardEvent, FormEvent} from 'react';
+import type {KeyboardEvent} from 'react';
 import {useAgenteStore, useTabActivaAgente} from './store';
 
 /*
@@ -42,12 +42,6 @@ export function usePanelAgente() {
     const [tituloEdicion, setTituloEdicion] = useState('');
     const [configAbierta, setConfigAbierta] = useState(false);
     const [tareasAbiertas, setTareasAbiertas] = useState(false);
-    const [tareaNombre, setTareaNombre] = useState('');
-    const [tareaPrompt, setTareaPrompt] = useState('');
-    const [tareaTipo, setTareaTipo] = useState<'una_vez' | 'recurrente'>('una_vez');
-    const [tareaCron, setTareaCron] = useState('');
-    const [tareaEjecutarEn, setTareaEjecutarEn] = useState('');
-    const [tareaGuardando, setTareaGuardando] = useState(false);
     /* [318A-7] La compactación está en curso (deshabilita el botón de la barra). */
     const [compactando, setCompactando] = useState(false);
     const refScroll = useRef<HTMLDivElement>(null);
@@ -120,30 +114,6 @@ export function usePanelAgente() {
         void compactarTab(tabActiva.conversacion.id).finally(() => setCompactando(false));
     };
 
-    const manejarCrearTarea = (evento: FormEvent) => {
-        evento.preventDefault();
-        const nombre = tareaNombre.trim();
-        const prompt = tareaPrompt.trim();
-        if (!nombre || !prompt || tareaGuardando) return;
-        setTareaGuardando(true);
-        void crearTarea({
-            nombre,
-            prompt,
-            tipo: tareaTipo,
-            ...(tareaTipo === 'recurrente'
-                ? {cron_expr: tareaCron.trim() || undefined}
-                : tareaEjecutarEn
-                    ? {ejecutar_en: new Date(tareaEjecutarEn).toISOString()}
-                    : {}),
-        }).finally(() => {
-            setTareaGuardando(false);
-            setTareaNombre('');
-            setTareaPrompt('');
-            setTareaCron('');
-            setTareaEjecutarEn('');
-        });
-    };
-
     return {
         tabs,
         tabActivaId,
@@ -164,17 +134,6 @@ export function usePanelAgente() {
         setConfigAbierta,
         tareasAbiertas,
         setTareasAbiertas,
-        tareaNombre,
-        setTareaNombre,
-        tareaPrompt,
-        setTareaPrompt,
-        tareaTipo,
-        setTareaTipo,
-        tareaCron,
-        setTareaCron,
-        tareaEjecutarEn,
-        setTareaEjecutarEn,
-        tareaGuardando,
         compactando,
         abrirTab,
         crearTab,
@@ -183,13 +142,13 @@ export function usePanelAgente() {
         reintentarMensaje,
         rebobinarTab,
         compactarTab,
+        crearTarea,
         eliminarTarea,
         cancelarTurno,
         manejarEnviar,
         manejarTecla,
         iniciarRenombrado,
         confirmarRenombrado,
-        manejarCrearTarea,
         manejarCompactar,
     };
 }
