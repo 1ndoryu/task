@@ -149,21 +149,19 @@ export function IndicadorPensando(): JSX.Element {
 
 /* ---------- Burbujas de mensaje ---------- */
 
-/* [318A-5] Botones de acción del mensaje (volver atrás / editar). Se muestran
- * sobre la burbuja (usuario) o bajo ella (asistente) en hover. Solo icono: el
- * nombre completo va en el tooltip (title). */
+/* [318A-5] Botones de acción del mensaje (volver atrás / editar). Solo en los
+ * mensajes del USUARIO, sobre la burbuja, en fila (uno al lado del otro) y
+ * solo icono: el nombre completo va en el tooltip (title). */
 function AccionesMensaje({
     onVolver,
     onEditar,
-    alineacion,
 }: {
     onVolver?: () => void;
     onEditar?: () => void;
-    alineacion: 'izquierda' | 'derecha';
 }): JSX.Element | null {
     if (!onVolver && !onEditar) return null;
     return (
-        <div className={`panelIAMensajeAcciones panelIAMensajeAcciones--${alineacion}`}>
+        <div className="panelIAMensajeAcciones panelIAMensajeAcciones--usuario">
             {onVolver && (
                 <button
                     type="button"
@@ -201,7 +199,7 @@ interface MensajeUsuarioProps {
 export function MensajeUsuario({contenido, onVolver, onEditar}: MensajeUsuarioProps): JSX.Element {
     return (
         <div className="panelIAMensaje panelIAMensaje--usuario">
-            <AccionesMensaje onVolver={onVolver} onEditar={onEditar} alineacion="derecha" />
+            <AccionesMensaje onVolver={onVolver} onEditar={onEditar} />
             <div className="panelIAMensajeBurbuja">
                 <span className="panelIAMensajeTexto">{contenido || '...'}</span>
             </div>
@@ -218,9 +216,6 @@ interface MensajeAsistenteProps {
     enviando?: boolean;
     ultimo?: boolean;
     onReintentar?: () => void;
-    /* [318A-5] Botones volver/editar. */
-    onVolver?: () => void;
-    onEditar?: () => void;
 }
 
 export function MensajeAsistente({
@@ -232,8 +227,6 @@ export function MensajeAsistente({
     enviando,
     ultimo,
     onReintentar,
-    onVolver,
-    onEditar,
 }: MensajeAsistenteProps): JSX.Element {
     const contextoVisible = Boolean(
         contexto && (contexto.ocupacionPct !== null || contexto.tokensPrompt > 0 || contexto.skills > 0)
@@ -259,7 +252,6 @@ export function MensajeAsistente({
 
                 {enviando && ultimo && contenido === '' && <IndicadorPensando />}
             </div>
-            <AccionesMensaje onVolver={onVolver} onEditar={onEditar} alineacion="izquierda" />
         </div>
     );
 }

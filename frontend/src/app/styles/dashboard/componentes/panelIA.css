@@ -123,12 +123,12 @@
     white-space: pre-wrap;
 }
 
-/* [318A-5] Acciones del mensaje (volver atrás / editar). Se muestran en hover
- * junto a la burbuja: a la izquierda para el asistente, a la derecha para el
- * usuario. Pequeños y discretos, monocromo. */
+/* [318A-5] Acciones del mensaje (volver atrás / editar). Solo en los mensajes
+ * del USUARIO, junto a la burbuja, en fila (uno al lado del otro) y en hover.
+ * Iconos algo más grandes que el texto base, monocromo. */
 .panelIAMensajeAcciones {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--dashboard-espacioXxs, 2px);
     opacity: 0;
     transition: opacity 0.15s ease;
@@ -155,8 +155,8 @@
     background: var(--dashboard-fondoTarjeta);
     color: var(--dashboard-textoApagado);
     font-family: inherit;
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    line-height: 1.4;
+    font-size: var(--dashboard-tamanoNormal);
+    line-height: 1;
     cursor: pointer;
     white-space: nowrap;
     transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);

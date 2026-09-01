@@ -206,8 +206,6 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                             enviando={tabActiva.enviando}
                             ultimo={ultimo}
                             onReintentar={() => void reintentarMensaje()}
-                            onVolver={() => rebobinarAqui(false)}
-                            onEditar={() => rebobinarAqui(true)}
                         />
                     );
                 })}
