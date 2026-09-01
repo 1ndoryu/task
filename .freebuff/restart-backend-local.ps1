@@ -19,9 +19,14 @@ if (-not (Test-Path $exe)) { throw "No existe el binario: $exe" }
 if (-not (Test-Path $envFile)) { throw "No existe .env: $envFile" }
 
 # Leer .env en un Hashtable (evita que dotenvy herede nada; nosotros pasamos el mapa)
+# [02-09-2026] Bug 318A-10: el regex anterior `[A-Za-z0-9_]+` NO capturaba la
+# variable `DEEPSEEK-API` (con guion) -> la key válida de DeepSeek nunca llegaba
+# al backend y la ruta `deepseek/deepseek-v4-flash` (la que "siempre funciona")
+# fallaba con "No hay API key configurada para deepseek en el entorno". El nuevo
+# regex `[A-Za-z0-9_-]+` admite guiones; se mantiene el filtro de comentarios.
 $envs = @{}
 Get-Content $envFile | ForEach-Object {
-    if ($_ -match '^\s*([A-Za-z0-9_]+)=(.*)$' -and $_ -notmatch '^\s*#') {
+    if ($_ -match '^\s*([A-Za-z0-9_-]+)=(.*)$' -and $_ -notmatch '^\s*#') {
         $envs[$matches[1]] = $matches[2].Trim()
     }
 }

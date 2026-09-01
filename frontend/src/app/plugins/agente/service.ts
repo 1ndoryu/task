@@ -26,6 +26,10 @@ export interface ConfigAgenteModelo {
     provider: string;
     temperatura: number;
     maxTokens: number;
+    /* [318A-10 02-09-2026] Nivel de razonamiento del modelo (contrato OpenAI
+     * reasoning_effort): low | medium | high. El backend lo envía a los
+     * proveedores que lo aceptan (deepseek/groq/cerebras y glory/gloryapi). */
+    nivelRazonamiento: 'low' | 'medium' | 'high';
     idioma: 'es' | 'en' | 'pt' | 'fr';
 }
 
@@ -67,6 +71,7 @@ export function aConfigBackend(config: Partial<ConfigAgente>): Record<string, un
     if (config.modelo) salida.modelo = config.modelo;
     if (config.temperatura !== undefined) salida.temperatura = config.temperatura;
     if (config.maxTokens !== undefined) salida.max_tokens = config.maxTokens;
+    if (config.nivelRazonamiento) salida.nivel_razonamiento = config.nivelRazonamiento;
     if (config.idioma) salida.idioma = config.idioma;
     if (config.incluirNotas !== undefined) salida.incluir_notas = config.incluirNotas;
     if (config.incluirTareasCompletadas !== undefined) salida.incluir_tareas_completadas = config.incluirTareasCompletadas;
@@ -100,6 +105,7 @@ export function aConfigFrontend(cruda: unknown): Partial<ConfigAgente> {
         modelo: texto(c.modelo),
         temperatura: numero(c.temperatura),
         maxTokens: numero(c.max_tokens),
+        nivelRazonamiento: c.nivel_razonamiento === 'low' || c.nivel_razonamiento === 'medium' || c.nivel_razonamiento === 'high' ? c.nivel_razonamiento : undefined,
         idioma: c.idioma === 'es' || c.idioma === 'en' || c.idioma === 'pt' || c.idioma === 'fr' ? c.idioma : undefined,
         incluirNotas: bool(c.incluir_notas),
         incluirTareasCompletadas: bool(c.incluir_tareas_completadas),

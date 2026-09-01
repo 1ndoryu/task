@@ -5,7 +5,7 @@
  * los imports de los call-sites (galería visual, PanelAgente, ModalConfigAgente).
  */
 
-import {AlertTriangle, CheckCircle, Loader2, Wrench, XCircle} from 'lucide-react';
+import {AlertTriangle, Loader2} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
 
 /* ---------- Tipos visuales (espejo del store) ---------- */
@@ -44,8 +44,6 @@ export function TarjetaTool({h}: {h: HerramientaVisual}): JSX.Element {
             open={h.resumen === 'ejecutando...'}
         >
             <summary className="panelAgenteHerramientaResumen">
-                {h.ok ? <CheckCircle size={10} /> : <XCircle size={10} />}
-                <Wrench size={10} />
                 <span className="panelAgenteHerramientaNombre">{h.tool}</span>
                 <span className="panelAgenteHerramientaTexto">{h.resumen}</span>
             </summary>

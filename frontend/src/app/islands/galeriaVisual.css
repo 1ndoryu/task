@@ -82,25 +82,26 @@
 }
 
 .galeriaEntradaId {
-    font-size: var(--dashboard-tamanoMicro);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
     letter-spacing: 0.08em;
 }
 
 .galeriaEntradaTitulo {
     margin: 0;
-    font-size: var(--dashboard-tamanoMediano);
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 600;
     color: var(--dashboard-textoNormal);
 }
 
 .galeriaEntradaEstados {
-    font-size: var(--dashboard-tamanoMicro);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
 }
 
 .galeriaEntradaDesc {
     margin: 0;
-    font-size: var(--dashboard-tamanoNormal);
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
 }
 

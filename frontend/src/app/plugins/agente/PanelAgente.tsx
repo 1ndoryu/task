@@ -24,7 +24,6 @@ import {
     EstadoVacio,
     MensajeAsistente,
     MensajeUsuario,
-    MODELOS_AGENTE,
     TabsWorkspace,
 } from './componentes';
 import type {PanelBaseProps} from '../../types/paneles';
@@ -255,22 +254,20 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                     )}
                     {/* [318A-4] Selector de modelo + modo DENTRO de la misma
                      * caja del input. Cuando no hay tab activa o está
-                     * enviando, se deshabilitan. */}
+                     * enviando, se deshabilitan.
+                     * [318A-11 02-09-2026] Se añade el selector de nivel de
+                     * razonamiento junto al de modelo. El modelo del catálogo
+                     * ahora se identifica por (modelo, proveedor) y el id de
+                     * opción es el del catálogo, no el modelo persistido. */}
                     <ControlesInputIA
                         modelo={configAgente.modelo}
+                        proveedor={configAgente.provider}
                         modo={configAgente.modo}
+                        nivelRazonamiento={configAgente.nivelRazonamiento}
                         deshabilitado={!tabActiva || tabActiva.enviando}
-                        onCambiarModelo={modelo => {
-                            /* [02-09-2026] Al elegir modelo también se fija su
-                             * proveedor (del catálogo) para que el backend enrute
-                             * directo (p.ej. laguna-s-2.1-free → commandcode). */
-                            const entrada = MODELOS_AGENTE.find(m => m.id === modelo);
-                            establecerConfig({
-                                modelo,
-                                provider: entrada?.proveedor ?? configAgente.provider,
-                            });
-                        }}
+                        onCambiarModelo={(modelo, proveedor) => establecerConfig({modelo, provider: proveedor})}
                         onCambiarModo={modo => establecerConfig({modo})}
+                        onCambiarNivelRazonamiento={nivel => establecerConfig({nivelRazonamiento: nivel})}
                     />
                 </div>
             </div>

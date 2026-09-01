@@ -15,9 +15,9 @@ import {Radio} from '../../components/ui/Radio';
  * catalogoModelos.tsx (seam natural del split de limite-lineas); aquí se
  * importan para uso interno y se re-exportan para no romper los imports de
  * los call-sites. */
-import {MODOS_AGENTE, MODELOS_AGENTE, ControlesInputIA, type ModoAgente} from './catalogoModelos';
-export {MODOS_AGENTE, MODELOS_AGENTE, ControlesInputIA};
-export type {ModoAgente};
+import {MODOS_AGENTE, MODELOS_AGENTE, ControlesInputIA, entradaModelo, GRUPOS_MODELOS, type ModoAgente, type NivelRazonamiento, type ModeloAgente} from './catalogoModelos';
+export {MODOS_AGENTE, MODELOS_AGENTE, ControlesInputIA, entradaModelo, GRUPOS_MODELOS};
+export type {ModoAgente, NivelRazonamiento, ModeloAgente};
 /* Burbujas de mensaje y tarjetas de tool viven en mensajes.tsx; esto re-exporta
  * sus tipos/componentes para no romper los imports de los call-sites. */
 export type {HerramientaVisual, ContextoVisual} from './mensajes';

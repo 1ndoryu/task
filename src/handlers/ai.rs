@@ -120,6 +120,7 @@ pub async fn ai_chat(
             AiChatOptions {
                 temperature: req.temperature.unwrap_or(0.7),
                 max_tokens: req.maxTokens.unwrap_or(2048).clamp(64, 4096),
+                reasoning_effort: None,
             },
         )
         .await?;

@@ -253,6 +253,10 @@ fn config_desde_guardada(
         estilo: validar_estilo(config.get("estilo").and_then(serde_json::Value::as_str).map(str::to_owned))?,
         preferencias: validar_preferencias(config.get("preferencias").and_then(serde_json::Value::as_str).map(str::to_owned))?,
         workspace: config.get("workspace").and_then(serde_json::Value::as_str).map(str::trim).filter(|w| !w.is_empty()).map(str::to_owned),
+        /* [318A-10 02-09-2026] Nivel de razonamiento (low|medium|high) que
+         * decide el usuario; se envía como `reasoning_effort` a los
+         * proveedores que lo aceptan (deepseek/groq/cerebras). */
+        nivel_razonamiento: validar_nivel_razonamiento(config.get("nivel_razonamiento").and_then(serde_json::Value::as_str).map(str::to_owned))?,
         contexto: ContextoConfig {
             max_ventana: config.get("max_ventana").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.max_ventana as u64).clamp(8_192, 512_000) as u32,
             reserva_salida: config.get("reserva_salida").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.reserva_salida as u64).clamp(1_024, 64_000) as u32,
@@ -959,6 +963,24 @@ fn validar_estilo(estilo: Option<String>) -> Result<String, AppError> {
         return Err(AppError::BadRequest("Estilo inválido (conciso|detallado|amable)".into()));
     }
     Ok(valor)
+}
+
+/* [318A-10 02-09-2026] Nivel de razonamiento del modelo (contrato OpenAI
+ * `reasoning_effort`): low|medium|high. Opcional: sin valor el proveedor usa
+ * su default. Se mapea a snake_case `nivel_razonamiento` en la config. */
+fn validar_nivel_razonamiento(nivel: Option<String>) -> Result<Option<String>, AppError> {
+    let Some(valor) = nivel.map(|v| v.trim().to_string()) else {
+        return Ok(None);
+    };
+    if valor.is_empty() {
+        return Ok(None);
+    }
+    if !matches!(valor.as_str(), "low" | "medium" | "high") {
+        return Err(AppError::BadRequest(
+            "Nivel de razonamiento inválido (low|medium|high)".into(),
+        ));
+    }
+    Ok(Some(valor))
 }
 
 fn validar_preferencias(preferencias: Option<String>) -> Result<String, AppError> {

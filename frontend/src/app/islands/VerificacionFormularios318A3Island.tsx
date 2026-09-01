@@ -74,7 +74,7 @@ function EntradaSeccion({id, titulo, children}: {id: string; titulo: string; chi
         <section className="galeriaEntrada" id={id}>
             <header className="galeriaEntradaCabecera">
                 <span className="galeriaEntradaId">{id}</span>
-                <h2 className="galeriaEntradaTitulo">{titulo}</h2>
+                <span className="galeriaEntradaTitulo">{titulo}</span>
             </header>
             <div className="galeriaEntradaVista">{children}</div>
         </section>

@@ -70,7 +70,7 @@ const CLAVE_CONFIG = 'glory-agente-config';
 
 const CONFIG_DEFECTO: ConfigAgente = {
     modo: 'predeterminado', modelo: 'commandcode', provider: 'glory', temperatura: 0.2, maxTokens: 2048,
-    idioma: 'es', incluirNotas: false, incluirTareasCompletadas: false,
+    nivelRazonamiento: 'medium', idioma: 'es', incluirNotas: false, incluirTareasCompletadas: false,
     incluirHabitosPausados: false, permitirBusquedaWeb: true,
     permitirRecordatorios: true, promptSistema: '', maxTurns: 10,
     timeoutToolSecs: 15, incluirMemoria: true, incluirSkills: true,
@@ -86,6 +86,7 @@ function normalizarConfig(config: Partial<ConfigAgente>): ConfigAgente {
         modelo: (typeof base.modelo === 'string' ? base.modelo.trim().replace(/^glory\//, '') : '') || 'commandcode',
         temperatura: Math.max(0, Math.min(2, Number(base.temperatura) || 0)),
         maxTokens: Math.max(64, Math.min(4096, Math.round(Number(base.maxTokens) || 2048))),
+        nivelRazonamiento: base.nivelRazonamiento === 'low' || base.nivelRazonamiento === 'high' ? base.nivelRazonamiento : 'medium',
         maxTurns: Math.max(1, Math.min(10, Math.round(Number(base.maxTurns) || 10))),
         timeoutToolSecs: Math.max(1, Math.min(15, Math.round(Number(base.timeoutToolSecs) || 15))),
         promptSistema: typeof base.promptSistema === 'string' ? base.promptSistema.trim().slice(0, 4000) : '',
@@ -113,6 +114,7 @@ function cargarConfig(): ConfigAgente {
                 modelo: typeof parsed.modelo === 'string' && parsed.modelo.trim() ? parsed.modelo.replace(/^glory\//, '') : CONFIG_DEFECTO.modelo,
                 temperatura: typeof parsed.temperatura === 'number' ? Math.max(0, Math.min(2, parsed.temperatura)) : CONFIG_DEFECTO.temperatura,
                 maxTokens: typeof parsed.maxTokens === 'number' ? Math.max(64, Math.min(4096, Math.round(parsed.maxTokens))) : CONFIG_DEFECTO.maxTokens,
+                nivelRazonamiento: parsed.nivelRazonamiento === 'low' || parsed.nivelRazonamiento === 'high' ? parsed.nivelRazonamiento : 'medium',
                 maxTurns: typeof parsed.maxTurns === 'number' ? Math.max(1, Math.min(10, Math.round(parsed.maxTurns))) : CONFIG_DEFECTO.maxTurns,
                 timeoutToolSecs: typeof parsed.timeoutToolSecs === 'number' ? Math.max(1, Math.min(15, Math.round(parsed.timeoutToolSecs))) : CONFIG_DEFECTO.timeoutToolSecs,
                 idioma: parsed.idioma === 'es' || parsed.idioma === 'en' || parsed.idioma === 'pt' || parsed.idioma === 'fr' ? parsed.idioma : 'es',
@@ -760,6 +762,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
         nueva.modelo = nueva.modelo.trim().replace(/^glory\//, '') || 'commandcode';
         nueva.temperatura = Math.max(0, Math.min(2, Number(nueva.temperatura) || 0));
         nueva.maxTokens = Math.max(64, Math.min(4096, Math.round(Number(nueva.maxTokens) || 2048)));
+        nueva.nivelRazonamiento = nueva.nivelRazonamiento === 'low' || nueva.nivelRazonamiento === 'high' ? nueva.nivelRazonamiento : 'medium';
         nueva.maxTurns = Math.max(1, Math.min(10, Math.round(Number(nueva.maxTurns) || 10)));
         nueva.timeoutToolSecs = Math.max(1, Math.min(15, Math.round(Number(nueva.timeoutToolSecs) || 15)));
         nueva.promptSistema = nueva.promptSistema.trim().slice(0, 4000);

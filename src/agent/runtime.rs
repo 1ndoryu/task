@@ -157,6 +157,10 @@ pub struct TurnoConfig {
     /// [02-09-2026] Fase 5: raíz del workspace SOLO en AGENTE_MODO=local
     /// (dev). None → AGENTE_WORKSPACE_ROOT env o cwd. En prod se ignora.
     pub workspace: Option<String>,
+    /// [318A-10 02-09-2026] Nivel de razonamiento del modelo
+    /// (low|medium|high). None = proveedor usa su default. Se envía como
+    /// `reasoning_effort` a los proveedores que lo aceptan.
+    pub nivel_razonamiento: Option<String>,
 }
 
 impl Default for TurnoConfig {
@@ -186,6 +190,7 @@ impl Default for TurnoConfig {
             estilo: "conciso".into(),
             preferencias: String::new(),
             workspace: None,
+            nivel_razonamiento: None,
         }
     }
 }
@@ -409,13 +414,19 @@ impl AgentRuntime {
                         }]),
                         tool_call_id: None,
                     });
-                    mensajes.push(AiMessage::texto(
+                    /* [318A-10 02-09-2026] El tool del "requiere aprobación"
+                     * DEBE llevar el mismo tool_call_id que la tool_call del
+                     * assistant previo (contrato OpenAI); sin él el proveedor
+                     * responde 400 "Tool message must have tool_call_id". */
+                    let mut tool_aprobacion = AiMessage::texto(
                         "tool",
                         format!(
                             "[{} REQUIERE APROBACIÓN DEL USUARIO] La acción no se ejecutó; explica al usuario qué se hará y pide confirmación.",
                             call.nombre
                         ),
-                    ));
+                    );
+                    tool_aprobacion.tool_call_id = Some(call.id.clone());
+                    mensajes.push(tool_aprobacion);
                     continue;
                 }
 
@@ -542,6 +553,7 @@ impl AgentRuntime {
                 AiChatOptions {
                     temperature: self.turno_config.temperatura,
                     max_tokens: self.turno_config.max_tokens,
+                    reasoning_effort: self.turno_config.nivel_razonamiento.clone(),
                 },
                 schemas.to_vec(),
                 on_token,

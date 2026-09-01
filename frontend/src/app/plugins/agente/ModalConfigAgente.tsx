@@ -18,7 +18,7 @@ import {Textarea} from '../../components/ui/Textarea';
 import {Range} from '../../components/shared/Range';
 import {Checkbox} from '../../components/ui/Checkbox';
 import {FormCampo} from '../../components/shared/FormCampo';
-import {AvisoModoAutonomo, MODELOS_AGENTE, SelectorModo, SkillFila} from './componentes';
+import {AvisoModoAutonomo, MODELOS_AGENTE, GRUPOS_MODELOS, entradaModelo, SelectorModo, SkillFila} from './componentes';
 import {useGestionSkills} from './useGestionSkills';
 import './modalConfigAgente.css';
 
@@ -106,33 +106,61 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                                     {/* [02-09-2026] El backend ya lee provider/modelo de la
                                      * config guardada (config_desde_guardada), así que el
                                      * selector es editable y coherente con el del input.
-                                     * Incluye el modelo gratuito laguna-s-2.1-free. */}
-                                    <FormCampo
-                                        titulo="Proveedor"
-                                        orientacion="vertical"
-                                        control={
-                                            <Select claseAdicional="modalConfigAgenteInput"
-                                                opciones={[{valor: 'glory', etiqueta: 'Glory API · ruta auto'}, {valor: 'commandcode', etiqueta: 'Command Code Provider (directo)'}]}
-                                                value={draft.provider}
-                                                onChange={e => actualizar('provider', e.target.value as ConfigAgente['provider'])} />
-                                        }
-                                    />
+                                     * Incluye el modelo gratuito laguna-s-2.1-free.
+                                     * [318A-11 02-09-2026] El proveedor se deriva del modelo
+                                     * (igual que en el input del panel): se elimina el
+                                     * selector manual para no crear combinaciones inválidas
+                                     * (p. ej. proveedor deepseek + modelo commandcode). */}
                                     <FormCampo
                                         titulo="Modelo"
                                         orientacion="vertical"
                                         control={
                                             <Select claseAdicional="modalConfigAgenteInput"
-                                                opciones={MODELOS_AGENTE.map(m => ({valor: m.id, etiqueta: m.nombre}))}
-                                                value={draft.modelo}
+                                                /* [318A-11 02-09-2026] Agrupado por proveedor.
+                                                 * Select no soporta optgroup nativo, así que el
+                                                 * grupo va como prefijo de la etiqueta, coherente
+                                                 * con el menú del input (submenús por proveedor).
+                                                 * El valor es el modelo persistido (config.modelo). */
+                                                opciones={GRUPOS_MODELOS.flatMap(grupo =>
+                                                    MODELOS_AGENTE.filter(m => m.proveedor === grupo.id).map(m => ({
+                                                        /* [318A-11] El valor es el id ÚNICO del
+                                                         * catálogo (grupo:modelo) para desambiguar
+                                                         * IDs repetidos (p.ej. deepseek-v4-flash
+                                                         * existe en glory y en deepseek directo). */
+                                                        valor: m.id,
+                                                        etiqueta: `${grupo.etiqueta} — ${m.nombre}`,
+                                                    }))
+                                                )}
+                                                /* [318A-11] El valor actual se deriva del modelo
+                                                 * persistido + proveedor actual. */
+                                                value={entradaModelo(draft.modelo, draft.provider)?.id ?? ''}
                                                 onChange={e => {
-                                                    const modelo = e.target.value as ConfigAgente['modelo'];
+                                                    const entrada = MODELOS_AGENTE.find(m => m.id === e.target.value);
+                                                    if (!entrada) return;
                                                     /* [02-09-2026] Fijar también el proveedor del
-                                                     * catálogo para que el backend enrute directo
-                                                     * (p.ej. laguna-s-2.1-free → commandcode). */
-                                                    const entrada = MODELOS_AGENTE.find(m => m.id === modelo);
-                                                    actualizar('modelo', modelo);
-                                                    if (entrada) actualizar('provider', entrada.proveedor as ConfigAgente['provider']);
+                                                     * catálogo para que el backend enrute directo.
+                                                     * [318A-11] El id del catálogo trae el modelo
+                                                     * real + proveedor sin ambigüedad. */
+                                                    actualizar('modelo', entrada.modelo as ConfigAgente['modelo']);
+                                                    actualizar('provider', entrada.proveedor as ConfigAgente['provider']);
                                                 }} />
+                                        }
+                                    />
+                                    {/* [318A-10 02-09-2026] Selector de nivel de razonamiento
+                                     * (contrato OpenAI reasoning_effort). Se envía a los
+                                     * proveedores que lo aceptan (deepseek/groq/cerebras y
+                                     * glory/gloryapi, verificado 02-09); en el resto el
+                                     * backend lo ignora. Va junto al selector de modelo,
+                                     * que es donde lo busca el usuario. */}
+                                    <FormCampo
+                                        titulo="Nivel de razonamiento"
+                                        orientacion="vertical"
+                                        control={
+                                            <Select claseAdicional="modalConfigAgenteInput" opciones={[
+                                                {valor: 'low', etiqueta: 'Bajo — más rápido, menos análisis'},
+                                                {valor: 'medium', etiqueta: 'Medio — equilibrio (recomendado)'},
+                                                {valor: 'high', etiqueta: 'Alto — más análisis, más lento'},
+                                            ]} value={draft.nivelRazonamiento} onChange={e => actualizar('nivelRazonamiento', e.target.value as ConfigAgente['nivelRazonamiento'])} />
                                         }
                                     />
                                 </section>

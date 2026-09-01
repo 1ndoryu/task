@@ -291,7 +291,7 @@ function Entrada({entrada, children}: {entrada: FixtureEntrada; children: React.
         <section className="galeriaEntrada" id={entrada.id}>
             <header className="galeriaEntradaCabecera">
                 <span className="galeriaEntradaId">{entrada.id}</span>
-                <h2 className="galeriaEntradaTitulo">{entrada.titulo}</h2>
+                <span className="galeriaEntradaTitulo">{entrada.titulo}</span>
                 <span className="galeriaEntradaEstados">{entrada.estados.join(' · ')}</span>
             </header>
             <p className="galeriaEntradaDesc">{entrada.descripcion}</p>

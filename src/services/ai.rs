@@ -35,11 +35,29 @@ const PROVIDERS: &[(&str, &str, &[&str])] = &[
      * GLORY_API_URL con default gloryapi local; la URL estática de aquí solo
      * alimenta la validación del allowlist de modelos. La ruta "auto" usa el
      * modelo `commandcode`, que mapea a deepseek/deepseek-v4-flash en gloryapi
-     * (la vía que el usuario prefiere porque siempre funciona). */
+     * (la vía que el usuario prefiere porque siempre funciona).
+     * [318A-11 02-09-2026] Allowlist ampliada con los modelos REALES del
+     * catálogo de gloryapi (verificado contra GET /v1/models el 02-09):
+     * deepseek-v4-flash y sus variantes, deepseek-ai/deepseek-v4-flash-0731,
+     * deepseek/deepseek-v4-flash, meta/muse-spark-1.2-contributor y
+     * stealth/ox-alpha. Se conservan los alias legacy commandcode/glm-5.3-flash
+     * (ruta auto) y `auto` como router explícito. Los IDs reales se pasan tal
+     * cual a gloryapi en modelo_proveedor(). */
     (
         "glory",
         "http://127.0.0.1:3101/v1/chat/completions",
-        &["commandcode", "glm-5.3-flash"],
+        &[
+            "auto",
+            "commandcode",
+            "glm-5.3-flash",
+            "deepseek-v4-flash",
+            "deepseek-v4-flash-free",
+            "deepseek-v4-flash:free",
+            "deepseek-ai/deepseek-v4-flash-0731",
+            "deepseek/deepseek-v4-flash",
+            "meta/muse-spark-1.2-contributor",
+            "stealth/ox-alpha",
+        ],
     ),
     /* [02-09-2026] Command Code Provider API DIRECTA (sin gloryapi): la key
      * del Studio/CLI (COMMAND_CODE_API_KEY) autentica Bearer. Modelo gratuito
@@ -70,6 +88,15 @@ const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
      * preferida para probar el agente sin pasar por gloryapi. Si no hay key
      * o falla, cae a glory (ruta auto -> DeepSeek Flash). */
     ("commandcode", "poolside/laguna-s-2.1-free"),
+    /* [318A-10 02-09-2026] DeepSeek DIRECTO (api.deepseek.com) va SEGUNDO:
+     * es la vía que "siempre funciona" (modelo `deepseek-v4-flash` verificado
+     * contra GET /models con la key real de DEEPSEEK-API). Antes quedaba de
+     * ÚLTIMO, tras 6 proveedores que fallan con 400/403/402, y además la key
+     * no llegaba al backend por el bug del regex del script de reinicio. Con
+     * key presente y posición temprana, cuando commandcode (gratis pero
+     * inestable, da 503 puntuales) falla, el agente salta directo a la vía
+     * fiable en lugar de encadenar 8 fallos. */
+    ("deepseek", "deepseek-v4-flash"),
     /* [29-08-2026] Glory API/`commandcode` (ruta auto -> DeepSeek Flash) sin
      * clave va PRIMERO: es la vía que siempre funciona y el default del agente.
      * La nutrición no cambia: pasa un modelo groq válido, que `candidato_valido`
@@ -83,7 +110,6 @@ const CHAT_FALLBACK_CHAIN: &[(&str, &str)] = &[
     ("groq", "openai/gpt-oss-20b"),
     ("groq", "openai/gpt-oss-120b"),
     ("groq", "qwen/qwen3.6-27b"),
-    ("deepseek", "deepseek-v4-flash"),
 ];
 
 /* [02-09-2026] Glory API = gloryapi LOCAL. URL configurable por env
@@ -109,12 +135,18 @@ fn url_proveedor(proveedor: &str) -> String {
  * usuario ve en la UI es `commandcode`; el request real usa el ID del
  * catálogo para que gloryapi lo enrute a DeepSeek V4 Flash.
  * [02-09-2026] El proveedor `commandcode` (Provider API directa) NO mapea:
- * sus modelos (`poolside/laguna-s-2.1-free`) son IDs reales y se pasan tal cual. */
+ * sus modelos (`poolside/laguna-s-2.1-free`) son IDs reales y se pasan tal cual.
+ * [318A-11 02-09-2026] `auto` (router explícito de gloryapi) también se
+ * resuelve a deepseek/deepseek-v4-flash: es la vía que "siempre funciona"
+ * (preferencia documentada del usuario). Los demás IDs reales del catálogo
+ * (deepseek-v4-flash*, deepseek-ai/..., meta/muse-spark-1.2-contributor,
+ * stealth/ox-alpha) se pasan tal cual a gloryapi: ya son IDs del catálogo. */
 fn modelo_proveedor(proveedor: &str, modelo: &str) -> String {
     if proveedor == "glory" {
         match modelo {
-            "commandcode" => "deepseek/deepseek-v4-flash".to_string(),
-            "glm-5.3-flash" => "deepseek/deepseek-v4-flash".to_string(),
+            "commandcode" | "glm-5.3-flash" | "auto" => {
+                "deepseek/deepseek-v4-flash".to_string()
+            }
             otro => otro.to_string(),
         }
     } else {
@@ -226,6 +258,12 @@ pub struct AiStreamResult {
 pub struct AiChatOptions {
     pub temperature: f32,
     pub max_tokens: u32,
+    /// [318A-10 02-09-2026] Nivel de razonamiento del modelo (contrato OpenAI
+    /// `reasoning_effort`): `low` | `medium` | `high`. `None` = no se envía
+    /// (el proveedor usa su default). Lo decide el usuario en el panel del
+    /// agente; solo se envía a proveedores que lo aceptan (deepseek, groq,
+    /// cerebras con modelos de razonamiento).
+    pub reasoning_effort: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -260,6 +298,55 @@ struct CircuitoProveedor {
 /// Umbral de fallos consecutivos antes de abrir el circuito (cooldown 60s).
 const CIRCUITO_UMBRAL: u32 = 3;
 const CIRCUITO_COOLDOWN: std::time::Duration = std::time::Duration::from_secs(60);
+
+/* [318A-10 02-09-2026] Reintentos con backoff para errores TRANSITORIOS.
+ * Antes cada proveedor/key se probaba una sola vez: un 503 puntual de
+ * commandcode (overload de Laguna) o un timeout de red abandonaba la vía sin
+ * reintentar y saltaba a la siguiente, encadenando fallos hasta el error final.
+ * Ahora los errores transitorios (503/429/5xx/timeout/red) se reintentan con
+ * backoff exponencial; los permanentes (400/401/403/402/404) se descartan al
+ * instante porque reintentar no los arregla (auth/billing/schema). */
+const REINTENTOS_TRANSITORIOS: u32 = 2;
+const BACKOFF_BASE_MS: u64 = 500;
+
+/// ¿El error del proveedor es transitorio (reintentar tiene sentido)?
+/// `AppError::Upstream` con prefijo de red (reqwest send/read) o con un
+/// código HTTP 5xx/429; el resto (4xx de auth/billing/schema) es permanente.
+fn es_error_transitorio(error: &AppError) -> bool {
+    let AppError::Upstream(detalle) = error else {
+        return false;
+    };
+    if detalle.starts_with("Error de red:") || detalle.contains("Error leyendo el stream") {
+        return true;
+    }
+    /* El detalle tiene la forma "{proveedor} {status}: {mensaje}" donde
+     * {status} es el Display de reqwest StatusCode, p. ej. "503 Service
+     * Unavailable" (incluye la razón). Extraemos el primer token numérico
+     * tras el proveedor (el código de 3 dígitos). */
+    let despues_proveedor = detalle
+        .find(' ')
+        .and_then(|i| detalle.get(i + 1..))
+        .unwrap_or("");
+    let status_txt = despues_proveedor
+        .split_whitespace()
+        .next()
+        .unwrap_or("")
+        .trim();
+    let Ok(status) = status_txt.parse::<u16>() else {
+        return false;
+    };
+    status == 429 || (500..=599).contains(&status)
+}
+
+/// Espera de backoff exponencial entre reintentos (0.5s, 1.5s). Devuelve
+/// inmediatamente si el intento es el primero (sin espera previa).
+async fn esperar_backoff(intento: u32) {
+    if intento == 0 {
+        return;
+    }
+    let ms = BACKOFF_BASE_MS * 2u64.pow(intento);
+    tokio::time::sleep(std::time::Duration::from_millis(ms)).await;
+}
 
 /// Servicio LLM con las keys del entorno. `Clone` es barato (reqwest::Client
 /// comparte el pool internamente), así que vive directo en `AppState`.
@@ -332,6 +419,15 @@ impl LlmProviderService {
         }
     }
 
+    /* [318A-10 02-09-2026] Fallo PERMANENTE (400/401/403/402/404): NO abre el
+     * circuito ni cuenta para el cooldown. Reintentar no arregla auth/billing/
+     * schema, y contarlos solo provocaba que proveedores con 403 (groq) o 402
+     * (cerebras) entraran en cooldown injustificadamente y bloquearan la vía
+     * durante 60s aunque el problema fuera de la cuenta, no del servicio. */
+    fn registrar_fallo_permanente(&self, proveedor: &str) {
+        tracing::debug!(proveedor, "fallo permanente del proveedor (no abre circuito)");
+    }
+
     pub async fn enviar_chat(
         &self,
         mensajes: Vec<AiMessage>,
@@ -360,7 +456,7 @@ impl LlmProviderService {
             if keys.is_empty() {
                 if proveedor == "glory" {
                     match self
-                        .ejecutar_request(proveedor, "", modelo, &mensajes_validos, &opciones)
+                        .ejecutar_request_con_reintentos(proveedor, "", modelo, &mensajes_validos, &opciones)
                         .await
                     {
                         Ok(resultado) => {
@@ -369,7 +465,11 @@ impl LlmProviderService {
                         }
                         Err(error) => {
                             tracing::warn!(%error, proveedor, modelo, "glory sin key falló");
-                            self.registrar_fallo(proveedor);
+                            if es_error_transitorio(&error) {
+                                self.registrar_fallo(proveedor);
+                            } else {
+                                self.registrar_fallo_permanente(proveedor);
+                            }
                             errores.push(format!("{proveedor}/{modelo}: {error}"));
                         }
                     }
@@ -382,7 +482,7 @@ impl LlmProviderService {
             }
             for key in keys {
                 match self
-                    .ejecutar_request(proveedor, key, modelo, &mensajes_validos, &opciones)
+                    .ejecutar_request_con_reintentos(proveedor, key, modelo, &mensajes_validos, &opciones)
                     .await
                 {
                     Ok(resultado) => {
@@ -390,7 +490,11 @@ impl LlmProviderService {
                         return Ok(resultado);
                     }
                     Err(error) => {
-                        self.registrar_fallo(proveedor);
+                        if es_error_transitorio(&error) {
+                            self.registrar_fallo(proveedor);
+                        } else {
+                            self.registrar_fallo_permanente(proveedor);
+                        }
                         errores.push(format!("{proveedor}/{modelo}: {error}"));
                     }
                 }
@@ -445,6 +549,7 @@ impl LlmProviderService {
                      * responder: con presupuesto corto se cortan en <think> y
                      * devuelven content vacío o JSON truncado. 512 deja margen. */
                     max_tokens: 512,
+                    reasoning_effort: None,
                 },
             )
             .await?;
@@ -553,7 +658,7 @@ impl LlmProviderService {
             };
             for key in &keys {
                 match self
-                    .ejecutar_request_stream(proveedor, key, modelo, &mensajes_validos, &opciones, &tools, on_token)
+                    .ejecutar_request_stream_con_reintentos(proveedor, key, modelo, &mensajes_validos, &opciones, &tools, on_token)
                     .await
                 {
                     Ok(resultado) => {
@@ -564,7 +669,11 @@ impl LlmProviderService {
                      * hay que probar el siguiente — abortar el stream. */
                     Err(AppError::Cancelado) => return Err(AppError::Cancelado),
                     Err(error) => {
-                        self.registrar_fallo(proveedor);
+                        if es_error_transitorio(&error) {
+                            self.registrar_fallo(proveedor);
+                        } else {
+                            self.registrar_fallo_permanente(proveedor);
+                        }
                         tracing::warn!(%error, proveedor, modelo, "stream del proveedor falló");
                         errores.push(format!("{proveedor}/{modelo}: {error}"));
                     }
@@ -617,6 +726,19 @@ impl LlmProviderService {
             body["max_completion_tokens"] = serde_json::json!(opciones.max_tokens);
         } else {
             body["max_tokens"] = serde_json::json!(opciones.max_tokens);
+        }
+        /* [318A-10 02-09-2026] Mismo criterio que ejecutar_request: solo se
+         * envía `reasoning_effort` a proveedores que lo aceptan.
+         * [318A-11 02-09-2026] Incluye `glory` (gloryapi local lo acepta,
+         * verificado 02-09). */
+        if let Some(esfuerzo) = &opciones.reasoning_effort {
+            if proveedor == "deepseek"
+                || proveedor == "groq"
+                || proveedor == "cerebras"
+                || proveedor == "glory"
+            {
+                body["reasoning_effort"] = serde_json::json!(esfuerzo);
+            }
         }
 
         let mut request = self.client.post(url);
@@ -701,6 +823,83 @@ impl LlmProviderService {
         })
     }
 
+    /* [318A-10 02-09-2026] Envoltorio con reintentos: solo reintenta errores
+     * transitorios (503/429/5xx/timeout/red) con backoff exponencial. Los
+     * errores permanentes (4xx de auth/billing/schema) fallan al primer
+     * intento para no añadir latencia inútil. */
+    async fn ejecutar_request_con_reintentos(
+        &self,
+        proveedor: &str,
+        api_key: &str,
+        modelo: &str,
+        mensajes: &[AiMessage],
+        opciones: &AiChatOptions,
+    ) -> Result<AiChatResult, AppError> {
+        let mut ultimo_error: Option<AppError> = None;
+        for intento in 0..=REINTENTOS_TRANSITORIOS {
+            match self
+                .ejecutar_request(proveedor, api_key, modelo, mensajes, opciones)
+                .await
+            {
+                Ok(resultado) => return Ok(resultado),
+                Err(error) if es_error_transitorio(&error) && intento < REINTENTOS_TRANSITORIOS => {
+                    tracing::warn!(
+                        %error,
+                        proveedor,
+                        modelo,
+                        intento,
+                        "error transitorio del proveedor, reintentando"
+                    );
+                    ultimo_error = Some(error);
+                    esperar_backoff(intento).await;
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        Err(ultimo_error.unwrap_or_else(|| {
+            AppError::Upstream("Error transitorio sin detalle".into())
+        }))
+    }
+
+    /// Igual que `ejecutar_request_con_reintentos` pero para streaming (agente).
+    /// La cancelación del cliente (AppError::Cancelado) se propaga sin reintento.
+    async fn ejecutar_request_stream_con_reintentos(
+        &self,
+        proveedor: &str,
+        api_key: &str,
+        modelo: &str,
+        mensajes: &[AiMessage],
+        opciones: &AiChatOptions,
+        tools: &[serde_json::Value],
+        on_token: &mut (dyn FnMut(&str) -> bool + Send),
+    ) -> Result<AiStreamResult, AppError> {
+        let mut ultimo_error: Option<AppError> = None;
+        for intento in 0..=REINTENTOS_TRANSITORIOS {
+            match self
+                .ejecutar_request_stream(proveedor, api_key, modelo, mensajes, opciones, tools, on_token)
+                .await
+            {
+                Ok(resultado) => return Ok(resultado),
+                Err(AppError::Cancelado) => return Err(AppError::Cancelado),
+                Err(error) if es_error_transitorio(&error) && intento < REINTENTOS_TRANSITORIOS => {
+                    tracing::warn!(
+                        %error,
+                        proveedor,
+                        modelo,
+                        intento,
+                        "error transitorio del proveedor, reintentando"
+                    );
+                    ultimo_error = Some(error);
+                    esperar_backoff(intento).await;
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        Err(ultimo_error.unwrap_or_else(|| {
+            AppError::Upstream("Error transitorio sin detalle".into())
+        }))
+    }
+
     fn keys_para(&self, proveedor: &str) -> &[String] {
         match proveedor {
             "cerebras" => &self.keys.cerebras,
@@ -733,6 +932,22 @@ impl LlmProviderService {
             body["max_completion_tokens"] = serde_json::json!(opciones.max_tokens);
         } else {
             body["max_tokens"] = serde_json::json!(opciones.max_tokens);
+        }
+        /* [318A-10 02-09-2026] Nivel de razonamiento elegido en el panel del
+         * agente. Solo se envía si el usuario lo fijó y el proveedor lo acepta
+         * (deepseek/groq/cerebras con modelos de razonamiento). No se envía a
+         * proveedores tipo commandcode que pueden rechazar el campo.
+         * [318A-11 02-09-2026] Se añade `glory`: gloryapi local SÍ acepta
+         * `reasoning_effort` (verificado el 02-09: POST /v1/chat/completions
+         * con reasoning_effort:"low" responde 200 con reasoning_content). */
+        if let Some(esfuerzo) = &opciones.reasoning_effort {
+            if proveedor == "deepseek"
+                || proveedor == "groq"
+                || proveedor == "cerebras"
+                || proveedor == "glory"
+            {
+                body["reasoning_effort"] = serde_json::json!(esfuerzo);
+            }
         }
 
         /* [27-08-2026] Glory API (free.empero.org) responde sin API key y
@@ -819,6 +1034,20 @@ fn validar_mensajes(mensajes: Vec<AiMessage>) -> Result<Vec<AiMessage>, AppError
             ) {
                 return false;
             }
+            /* [01-09-2026] Fix 318A-11: el `assistant` con `tool_calls` lleva
+             * content a Null (contrato OpenAI: assistant con tool_calls +
+             * tool con tool_call_id). El filtro anterior lo descartaba por
+             * `_ => false`, dejando `tool` huérfanos y el proveedor
+             * (commandcode/deepseek) respondía 400 "Messages with role 'tool'
+             * must be a response to a preceding message with 'tool_calls'". */
+            if mensaje.role == "assistant"
+                && mensaje
+                    .tool_calls
+                    .as_ref()
+                    .is_some_and(|tc| !tc.is_empty())
+            {
+                return true;
+            }
             match &mensaje.content {
                 serde_json::Value::String(texto) => !texto.trim().is_empty(),
                 serde_json::Value::Array(items) => !items.is_empty(),
@@ -834,12 +1063,57 @@ fn validar_mensajes(mensajes: Vec<AiMessage>) -> Result<Vec<AiMessage>, AppError
         })
         .collect();
 
-    if validos.is_empty() {
+    /* [01-09-2026] Fix 318A-11: saneo defensivo. Si el recorte a 25 rompe un
+     * par assistant(tool_calls)/tool, descartamos los `tool` huérfanos en vez
+     * de enviarlos (el proveedor los rechaza con 400).
+     * [318A-10 02-09-2026] Además se repara el `tool` que precede a un
+     * assistant con tool_calls pero sin `tool_call_id` (o con id vacío): se le
+     * copia el primer id de la tool_call del assistant previo. Así el par
+     * cumple el contrato OpenAI aunque el historial venga de un turno roto. */
+    let mut sanitizados: Vec<AiMessage> = Vec::with_capacity(validos.len());
+    let mut precedido_por_tool_calls = false;
+    let mut id_tool_call_previo: Option<String> = None;
+    for mut mensaje in validos {
+        if mensaje.role == "tool" && !precedido_por_tool_calls {
+            continue;
+        }
+        if mensaje.role == "tool" {
+            let id_ok = mensaje
+                .tool_call_id
+                .as_deref()
+                .is_some_and(|id| !id.trim().is_empty());
+            if !id_ok {
+                if let Some(id) = id_tool_call_previo.clone() {
+                    mensaje.tool_call_id = Some(id);
+                } else {
+                    /* tool sin id y sin assistant previo con id: huérfano de
+                     * facto, mejor descartarlo que mandar un 400. */
+                    continue;
+                }
+            }
+        }
+        precedido_por_tool_calls = mensaje.role == "assistant"
+            && mensaje
+                .tool_calls
+                .as_ref()
+                .is_some_and(|tc| !tc.is_empty());
+        if precedido_por_tool_calls {
+            id_tool_call_previo = mensaje
+                .tool_calls
+                .as_ref()
+                .and_then(|tc| tc.first())
+                .map(|call| call.id.clone())
+                .filter(|id| !id.trim().is_empty());
+        }
+        sanitizados.push(mensaje);
+    }
+
+    if sanitizados.is_empty() {
         return Err(AppError::BadRequest(
             "No hay mensajes válidos para enviar a la IA".into(),
         ));
     }
-    Ok(validos)
+    Ok(sanitizados)
 }
 
 /// Candidatos a probar: el solicitado (si el modelo es válido para el
@@ -961,13 +1235,33 @@ async fn hojear_stream(
 }
 
 /* Convierte las tool_calls crudas del SSE a la estructura tipada del dominio.
- * Función pura extraída del método stream para acortarlo (funcion-larga-rs). */
+ * Función pura extraída del método stream para acortarlo (funcion-larga-rs).
+ * [318A-10 02-09-2026] Sanidad defensiva: Laguna S 2.1 free (commandcode)
+ * devuelve tool_calls en streaming con `id` y `function.name` VACÍOS. Antes
+ * eso llegaba al runtime como AiToolCall{id:"", nombre:"", ...} → la tool
+ * fallaba con "Tool desconocida: " y, al reenviar el par assistant/tool, el
+ * `tool_call_id` vacío hacía que el proveedor respondiera 400 "Tool message
+ * must have tool_call_id". Ahora:
+ * - si `function.name` falta o es vacío → se descarta la tool_call (malformada);
+ * - si `id` falta o es vacío → se sintetiza uno estable para que el par
+ *   assistant(tool_calls)/tool conserve un tool_call_id válido. */
 fn parsear_tool_calls(tool_calls: Vec<serde_json::Value>) -> Vec<AiToolCall> {
     tool_calls
         .into_iter()
         .filter_map(|call| {
-            let nombre = call.pointer("/function/name")?.as_str()?.to_string();
-            let id = call.get("id").and_then(serde_json::Value::as_str).unwrap_or("").to_string();
+            let nombre = call
+                .pointer("/function/name")
+                .and_then(serde_json::Value::as_str)
+                .map(str::trim)
+                .filter(|nombre| !nombre.is_empty())
+                .map(str::to_owned)?;
+            let id = call
+                .get("id")
+                .and_then(serde_json::Value::as_str)
+                .map(str::trim)
+                .filter(|id| !id.is_empty())
+                .map(str::to_owned)
+                .unwrap_or_else(|| format!("call_{nombre}_{:x}", rand_fallback()));
             let argumentos: serde_json::Value = call
                 .pointer("/function/arguments")
                 .and_then(serde_json::Value::as_str)
@@ -978,10 +1272,165 @@ fn parsear_tool_calls(tool_calls: Vec<serde_json::Value>) -> Vec<AiToolCall> {
         .collect()
 }
 
+/// Fuente de entropía para sintetizar `tool_call_id` (sin dependencia nueva):
+/// mezcla un contador volátil con el reloj. Suficiente para un id estable
+/// dentro del turno; el proveedor solo exige que NO sea vacío y que el par
+/// assistant/tool lo repita.
+fn rand_fallback() -> u64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.subsec_nanos())
+        .unwrap_or(0);
+    (nanos as u64) ^ (nanos as u64).rotate_left(17)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::LlmProviderService;
+    use super::*;
     use crate::config::AiProviderKeys;
+
+    #[test]
+    fn parsear_tool_calls_descarta_malformadas_y_sintetiza_id() {
+        // tool_call completa con id y nombre.
+        let completa = serde_json::json!({
+            "id": "call_abc",
+            "type": "function",
+            "function": { "name": "crear_tarea", "arguments": "{\"texto\":\"x\"}" }
+        });
+        // tool_call sin id (Laguna S 2.1 free): se sintetiza id.
+        let sin_id = serde_json::json!({
+            "type": "function",
+            "function": { "name": "crear_tarea", "arguments": "{\"texto\":\"y\"}" }
+        });
+        // tool_call sin nombre (malformada): se descarta.
+        let sin_nombre = serde_json::json!({
+            "id": "call_xyz",
+            "type": "function",
+            "function": { "name": "", "arguments": "{}" }
+        });
+        let resultado = parsear_tool_calls(vec![completa, sin_id, sin_nombre]);
+        assert_eq!(resultado.len(), 2, "la malformada sin nombre se descarta");
+        assert_eq!(resultado[0].id, "call_abc");
+        assert_eq!(resultado[0].nombre, "crear_tarea");
+        assert_eq!(resultado[1].nombre, "crear_tarea");
+        assert!(
+            !resultado[1].id.is_empty(),
+            "el id faltante se sintetiza (no vacío)"
+        );
+        assert_ne!(resultado[1].id, resultado[0].id, "ids sintetizados únicos");
+    }
+
+    #[test]
+    fn parsear_tool_calls_argumentos_invalidos_son_objeto_vacio() {
+        let con_args_rotos = serde_json::json!({
+            "id": "call_1",
+            "function": { "name": "buscar", "arguments": "no-json" }
+        });
+        let resultado = parsear_tool_calls(vec![con_args_rotos]);
+        assert_eq!(resultado.len(), 1);
+        assert_eq!(resultado[0].argumentos, serde_json::json!({}));
+    }
+
+    #[test]
+    fn es_error_transitorio_distingue_5xx_y_429_de_permanentes() {
+        // "503 Service Unavailable" (Display de reqwest incluye la razón).
+        let t503 = AppError::Upstream("commandcode 503 Service Unavailable: overloaded".into());
+        assert!(es_error_transitorio(&t503));
+        let t500 = AppError::Upstream("groq 500 Internal Server Error: x".into());
+        assert!(es_error_transitorio(&t500));
+        let t429 = AppError::Upstream("groq 429 Too Many Requests: limit".into());
+        assert!(es_error_transitorio(&t429));
+        // Red / stream.
+        let red = AppError::Upstream("Error de red: timeout".into());
+        assert!(es_error_transitorio(&red));
+        let stream = AppError::Upstream("Error leyendo el stream del proveedor: eof".into());
+        assert!(es_error_transitorio(&stream));
+        // Permanentes: 4xx de auth/billing/schema y errores sin status.
+        let p400 = AppError::Upstream("commandcode 400 Bad Request: tool_call_id".into());
+        assert!(!es_error_transitorio(&p400));
+        let p403 = AppError::Upstream("groq 403 Forbidden: Forbidden".into());
+        assert!(!es_error_transitorio(&p403));
+        let p402 = AppError::Upstream("cerebras 402 Payment Required: x".into());
+        assert!(!es_error_transitorio(&p402));
+        let sin_status = AppError::Upstream("No se pudo contactar un modelo IA disponible".into());
+        assert!(!es_error_transitorio(&sin_status));
+    }
+
+    #[test]
+    fn validar_mensajes_conserva_par_assistant_tool_calls_y_tool() {
+        let mensajes = vec![
+            AiMessage::texto("system", "sistema"),
+            AiMessage::texto("user", "crea una tarea"),
+            AiMessage {
+                role: "assistant".into(),
+                content: serde_json::Value::Null,
+                tool_calls: Some(vec![AiToolCall {
+                    id: "call_1".into(),
+                    nombre: "crear_tarea".into(),
+                    argumentos: serde_json::json!({"texto": "x"}),
+                }]),
+                tool_call_id: None,
+            },
+            AiMessage {
+                role: "tool".into(),
+                content: serde_json::Value::String("ok".into()),
+                tool_calls: None,
+                tool_call_id: Some("call_1".into()),
+            },
+            AiMessage::texto("user", "termina"),
+        ];
+        let result = validar_mensajes(mensajes).expect("debe validar");
+        // assistant(tool_calls) + tool se conservan, en orden.
+        let idx_assistant = result.iter().position(|m| m.role == "assistant").unwrap();
+        let idx_tool = result.iter().position(|m| m.role == "tool").unwrap();
+        assert!(idx_assistant < idx_tool, "assistant precede a tool");
+        let tool = &result[idx_tool];
+        assert_eq!(tool.tool_call_id.as_deref(), Some("call_1"));
+    }
+
+    #[test]
+    fn validar_mensajes_elimina_tool_huerfano_y_repara_id_vacio() {
+        // tool huérfano (sin assistant previo con tool_calls): se descarta.
+        let huerfano = vec![
+            AiMessage::texto("user", "hola"),
+            AiMessage {
+                role: "tool".into(),
+                content: serde_json::Value::String("residuo".into()),
+                tool_calls: None,
+                tool_call_id: Some("call_99".into()),
+            },
+        ];
+        let result = validar_mensajes(huerfano).expect("debe validar");
+        assert!(
+            !result.iter().any(|m| m.role == "tool"),
+            "tool huérfano se elimina"
+        );
+
+        // tool con id vacío precedido por assistant con tool_calls: se repara.
+        let reparar = vec![
+            AiMessage::texto("user", "haz algo"),
+            AiMessage {
+                role: "assistant".into(),
+                content: serde_json::Value::Null,
+                tool_calls: Some(vec![AiToolCall {
+                    id: "call_7".into(),
+                    nombre: "crear_tarea".into(),
+                    argumentos: serde_json::json!({}),
+                }]),
+                tool_call_id: None,
+            },
+            AiMessage {
+                role: "tool".into(),
+                content: serde_json::Value::String("hecho".into()),
+                tool_calls: None,
+                tool_call_id: Some(String::new()),
+            },
+        ];
+        let result = validar_mensajes(reparar).expect("debe validar");
+        let tool = result.iter().find(|m| m.role == "tool").unwrap();
+        assert_eq!(tool.tool_call_id.as_deref(), Some("call_7"));
+    }
 
     #[test]
     fn circuito_abre_tras_fallos_y_cierra_con_acierto() {
