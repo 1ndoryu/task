@@ -1,14 +1,16 @@
 /*
  * ModalConfiguracionTareas
  * Modal para ajustar preferencias de visualización de tareas
+ * [318A-3] Migrado al sistema centralizado: toggles declarativos con
+ * FormularioConfiguracion; los separadores automáticos replican el patrón
+ * previo itemOpcionConfig (visual-neutral).
  */
 
 import {Modal} from '../shared/Modal';
-import {ToggleSwitch} from '../shared/ToggleSwitch';
+import {FormularioConfiguracion} from '../shared/FormularioConfiguracion';
+import type {CampoEspecificacion} from '../shared/CampoEspecificacion';
 import type {ConfiguracionTareas} from '../../hooks/useConfiguracionTareas';
 import {usePluginActivo} from '../../stores/pluginsStore';
-import {useGruposTareasStore} from '../../stores/gruposTareasStore';
-import {useShallow} from 'zustand/react/shallow';
 
 interface MctModalBase {
     estaAbierto: boolean;
@@ -37,151 +39,95 @@ interface MctTogglesBadges {
 interface ModalConfiguracionTareasProps extends MctModalBase, MctTogglesVisibilidad, MctTogglesBadges {}
 
 export function ModalConfiguracionTareas({estaAbierto, onCerrar, configuracion, onToggleCompletadas, onToggleBadgeProyecto, onToggleEliminarCompletadas, onToggleMostrarHabitos, onToggleModoCompacto, onToggleOcultarSubtareas, onToggleIgnorarUrgencia, onToggleBadgeUrgencia, onToggleBadgeImportancia, onToggleBadgeDificultad}: ModalConfiguracionTareasProps): JSX.Element {
-    const {seccionesActivas: _seccionesActivas, toggleSecciones: _toggleSecciones, ordenamientoGrupos: _ordenamientoGrupos, setOrdenamientoGrupos: _setOrdenamientoGrupos} = useGruposTareasStore(useShallow(s => ({seccionesActivas: s.seccionesActivas, toggleSecciones: s.toggleSecciones, ordenamientoGrupos: s.ordenamientoGrupos, setOrdenamientoGrupos: s.setOrdenamientoGrupos})));
     /* [28-08-2026] La opción de dificultad solo aplica con el plugin EXP activo. */
     const expActivo = usePluginActivo('exp');
 
+    const campos: CampoEspecificacion<ConfiguracionTareas>[] = [
+        {
+            clave: 'ocultarCompletadas',
+            titulo: 'Ocultar tareas completadas',
+            descripcion: 'Las tareas finalizadas no apareceran en la lista principal',
+            tipo: 'toggle',
+            alCambiar: () => onToggleCompletadas()
+        },
+        {
+            clave: 'ocultarBadgeProyecto',
+            titulo: 'Ocultar nombre de proyecto',
+            descripcion: 'No mostrar el badge del proyecto en las tareas de la lista',
+            tipo: 'toggle',
+            alCambiar: () => onToggleBadgeProyecto()
+        },
+        /* Badge de urgencia (global) */
+        {
+            clave: 'ocultarBadgeUrgencia',
+            titulo: 'Ocultar badge de urgencia',
+            descripcion: 'No mostrar el indicador de urgencia en las tareas',
+            tipo: 'toggle',
+            alCambiar: () => onToggleBadgeUrgencia()
+        },
+        /* Badge de importancia (global) */
+        {
+            clave: 'ocultarBadgeImportancia',
+            titulo: 'Ocultar badge de importancia',
+            descripcion: 'No mostrar el indicador de prioridad/importancia en las tareas',
+            tipo: 'toggle',
+            alCambiar: () => onToggleBadgeImportancia()
+        },
+        /* Badge de dificultad (global, solo plugin EXP) */
+        {
+            clave: 'ocultarBadgeDificultad',
+            titulo: 'Ocultar badge de dificultad',
+            descripcion: 'No mostrar la barra de dificultad (plugin EXP) en las tareas',
+            tipo: 'toggle',
+            cuando: () => expActivo,
+            alCambiar: () => onToggleBadgeDificultad()
+        },
+        {
+            clave: 'ocultarSubtareasAutomaticamente',
+            titulo: 'Colapsar subtareas automáticamente',
+            descripcion: 'Las subtareas estarán colapsadas por defecto',
+            tipo: 'toggle',
+            alCambiar: () => onToggleOcultarSubtareas()
+        },
+        {
+            clave: 'eliminarCompletadasDespuesDeUnDia',
+            titulo: 'Limpieza automática',
+            descripcion: 'Eliminar tareas completadas después de 24 horas',
+            tipo: 'toggle',
+            alCambiar: () => onToggleEliminarCompletadas()
+        },
+        {
+            clave: 'mostrarHabitosEnEjecucion',
+            titulo: 'Mostrar hábitos en Ejecución',
+            descripcion: 'Los hábitos que tocan hoy aparecerán como tareas en la lista',
+            tipo: 'toggle',
+            alCambiar: () => onToggleMostrarHabitos()
+        },
+        {
+            clave: 'modoCompacto',
+            titulo: 'Modo Compacto',
+            descripcion: 'Reducir el tamaño de la fuente y el espaciado',
+            tipo: 'toggle',
+            alCambiar: () => onToggleModoCompacto()
+        },
+        {
+            clave: 'ignorarUrgenciaEnPrioridad',
+            titulo: 'Ignorar urgencia en Prioridad',
+            descripcion: 'Permite reordenar tareas (y hábitos) de igual prioridad sin que la urgencia altere el orden',
+            tipo: 'toggle',
+            alCambiar: () => onToggleIgnorarUrgencia()
+        }
+    ];
+
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Vista">
-            <div className="contenedorOpcionesConfig">
-                {/* Opcion 1: Ocultar Completadas */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar tareas completadas</span>
-                        <span className="descripcionOpcionConfig">Las tareas finalizadas no apareceran en la lista principal</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarCompletadas} onChange={onToggleCompletadas} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 2: Ocultar Badge Proyecto */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar nombre de proyecto</span>
-                        <span className="descripcionOpcionConfig">No mostrar el badge del proyecto en las tareas de la lista</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarBadgeProyecto} onChange={onToggleBadgeProyecto} />
-                </div>
-                <div className="separadorOpcionesConfig" />
-
-                {/* Badge de urgencia (global) */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar badge de urgencia</span>
-                        <span className="descripcionOpcionConfig">No mostrar el indicador de urgencia en las tareas</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarBadgeUrgencia} onChange={onToggleBadgeUrgencia} />
-                </div>
-                <div className="separadorOpcionesConfig" />
-
-                {/* Badge de importancia (global) */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar badge de importancia</span>
-                        <span className="descripcionOpcionConfig">No mostrar el indicador de prioridad/importancia en las tareas</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarBadgeImportancia} onChange={onToggleBadgeImportancia} />
-                </div>
-
-                {expActivo && (
-                    <>
-                        <div className="separadorOpcionesConfig" />
-                        {/* Badge de dificultad (global, solo plugin EXP) */}
-                        <div className="itemOpcionConfig">
-                            <div className="detallesOpcionConfig">
-                                <span className="tituloOpcionConfig">Ocultar badge de dificultad</span>
-                                <span className="descripcionOpcionConfig">No mostrar la barra de dificultad (plugin EXP) en las tareas</span>
-                            </div>
-                            <ToggleSwitch checked={configuracion.ocultarBadgeDificultad} onChange={onToggleBadgeDificultad} />
-                        </div>
-                    </>
-                )}
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 3: Ocultar Subtareas Automáticamente */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Colapsar subtareas automáticamente</span>
-                        <span className="descripcionOpcionConfig">Las subtareas estarán colapsadas por defecto</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarSubtareasAutomaticamente} onChange={onToggleOcultarSubtareas} />
-                </div>
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 4: Eliminar Completadas */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Limpieza automática</span>
-                        <span className="descripcionOpcionConfig">Eliminar tareas completadas después de 24 horas</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.eliminarCompletadasDespuesDeUnDia} onChange={onToggleEliminarCompletadas} />
-                </div>
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 5: Mostrar Hábitos en Ejecución */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Mostrar hábitos en Ejecución</span>
-                        <span className="descripcionOpcionConfig">Los hábitos que tocan hoy aparecerán como tareas en la lista</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.mostrarHabitosEnEjecucion} onChange={onToggleMostrarHabitos} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 6: Modo Compacto */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Modo Compacto</span>
-                        <span className="descripcionOpcionConfig">Reducir el tamaño de la fuente y el espaciado</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 7: Ignorar urgencia en ordenamiento por prioridad */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ignorar urgencia en Prioridad</span>
-                        <span className="descripcionOpcionConfig">Permite reordenar tareas (y hábitos) de igual prioridad sin que la urgencia altere el orden</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ignorarUrgenciaEnPrioridad} onChange={onToggleIgnorarUrgencia} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Opcion 8 y 9: Secciones y Ordenamiento (DESACTIVADO TEMPORALMENTE)
-                   TO-DO: Reactivar cuando se corrija la lógica de grupos
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Activar secciones</span>
-                        <span className="descripcionOpcionConfig">Permite agrupar tareas en secciones con Ctrl+Click y "Agrupar"</span>
-                    </div>
-                    <ToggleSwitch checked={seccionesActivas} onChange={toggleSecciones} />
-                </div>
-
-                {seccionesActivas && (
-                    <>
-                        <div className="separadorOpcionesConfig" />
-                        <div className="itemOpcionConfig">
-                            <div className="detallesOpcionConfig">
-                                <span className="tituloOpcionConfig">Ordenar secciones por</span>
-                                <span className="descripcionOpcionConfig">Criterio para ordenar las secciones entre sí</span>
-                            </div>
-                            <Select
-                                claseAdicional="selectorOrdenamiento"
-                                value={ordenamientoGrupos}
-                                onChange={e => setOrdenamientoGrupos(e.target.value as OrdenamientoGrupos)}
-                                opciones={opcionesOrdenamiento}
-                            />
-                        </div>
-                    </>
-                )}
-                */}
-            </div>
+            <FormularioConfiguracion
+                campos={campos}
+                valores={configuracion}
+                alCambiar={() => {
+                    /* La persistencia la manejan los alCambiar de cada campo. */
+                }}
+            />
         </Modal>
     );
 }

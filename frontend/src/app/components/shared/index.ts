@@ -8,6 +8,10 @@ export * from './SelectorNivel';
 export * from './SeccionPanel';
 export * from './ToggleSwitch';
 export * from './Range';
+/* 318A-3 - Sistema centralizado de formularios de configuración */
+export * from './FormCampo';
+export * from './CampoEspecificacion';
+export * from './FormularioConfiguracion';
 export * from './SelectorDias';
 export * from './DashboardPanel';
 export * from './BadgeInfo';

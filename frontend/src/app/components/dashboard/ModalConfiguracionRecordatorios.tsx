@@ -2,10 +2,14 @@
  * ModalConfiguracionRecordatorios
  * Modal para ajustar opciones del panel de Recordatorios.
  * Replica el patrón de ModalConfiguracionScratchpad.
+ * [318A-3] Migrado al sistema centralizado: campos declarativos con
+ * FormularioConfiguracion (Select del sistema con selectOpcionConfig,
+ * idéntico al esqueleto previo → visual-neutral).
  */
 
 import {Modal} from '../shared/Modal';
-import {Select} from '../ui';
+import {FormularioConfiguracion} from '../shared/FormularioConfiguracion';
+import type {CampoEspecificacion} from '../shared/CampoEspecificacion';
 import type {ConfigRecordatorios, TamanoFuenteRecordatorio} from '../../types/recordatorios';
 
 /* Opciones de intervalo predefinidas */
@@ -34,46 +38,38 @@ export function ModalConfiguracionRecordatorios({
     estaAbierto, onCerrar, configuracion,
     onCambiarIntervaloMs, onCambiarTamanoFuente
 }: ModalConfiguracionRecordatoriosProps): JSX.Element {
+    const campos: CampoEspecificacion<ConfigRecordatorios>[] = [
+        {
+            clave: 'tamanoFuente',
+            titulo: 'Tamaño de fuente',
+            descripcion: 'Ajustar legibilidad del texto del recordatorio',
+            tipo: 'select',
+            opciones: [
+                {valor: 'pequeno', etiqueta: 'Pequeño'},
+                {valor: 'normal', etiqueta: 'Normal'},
+                {valor: 'grande', etiqueta: 'Grande'}
+            ],
+            alCambiar: (valor) => onCambiarTamanoFuente(valor as TamanoFuenteRecordatorio)
+        },
+        {
+            clave: 'intervaloMs',
+            titulo: 'Intervalo de rotación',
+            descripcion: 'Cada cuánto tiempo se muestra un recordatorio diferente',
+            tipo: 'select',
+            opciones: OPCIONES_INTERVALO,
+            alCambiar: (valor) => onCambiarIntervaloMs(Number(valor))
+        }
+    ];
+
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuración Recordatorios">
-            <div className="contenedorOpcionesConfig">
-                {/* Tamaño de fuente */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Tamaño de fuente</span>
-                        <span className="descripcionOpcionConfig">Ajustar legibilidad del texto del recordatorio</span>
-                    </div>
-                    <Select
-                        claseAdicional="selectOpcionConfig"
-                        value={configuracion.tamanoFuente}
-                        onChange={e => onCambiarTamanoFuente(e.target.value as TamanoFuenteRecordatorio)}
-                        opciones={[
-                            {valor: 'pequeno', etiqueta: 'Pequeño'},
-                            {valor: 'normal', etiqueta: 'Normal'},
-                            {valor: 'grande', etiqueta: 'Grande'}
-                        ]}
-                    />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Intervalo de rotación */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Intervalo de rotación</span>
-                        <span className="descripcionOpcionConfig">Cada cuánto tiempo se muestra un recordatorio diferente</span>
-                    </div>
-                    <Select
-                        claseAdicional="selectOpcionConfig"
-                        value={configuracion.intervaloMs}
-                        onChange={e => {
-                            const ms = Number(e.target.value);
-                            onCambiarIntervaloMs(ms);
-                        }}
-                        opciones={OPCIONES_INTERVALO}
-                    />
-                </div>
-            </div>
+            <FormularioConfiguracion
+                campos={campos}
+                valores={configuracion}
+                alCambiar={() => {
+                    /* La persistencia la manejan los alCambiar de cada campo. */
+                }}
+            />
         </Modal>
     );
 }

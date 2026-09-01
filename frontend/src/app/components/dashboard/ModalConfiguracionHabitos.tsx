@@ -1,9 +1,14 @@
 /*
  * ModalConfiguracionHabitos
  * Modal para ajustar preferencias de visualización del panel de hábitos
+ * [318A-3] Toggles migrados al sistema centralizado (FormularioConfiguracion);
+ * los grids custom (Tolerancia/Columnas) se mantienen — son selectores
+ * visuales propios, no campos de formulario. Visual-neutral.
  */
 
 import {Modal} from '../shared/Modal';
+import {FormularioConfiguracion} from '../shared/FormularioConfiguracion';
+import type {CampoEspecificacion} from '../shared/CampoEspecificacion';
 import {ToggleSwitch} from '../shared/ToggleSwitch';
 import {Boton} from '../ui';
 import type {ConfiguracionHabitos, ColumnasHabitos, ToleranciaPreset} from '../../hooks/useConfiguracionHabitos';
@@ -99,49 +104,47 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
     /* Filtrar columnas según dispositivo */
     const columnasAMostrar = esMovil ? (Object.keys(configuracion.columnasVisibles) as Array<keyof ColumnasHabitos>).filter(col => columnasRelevantesMovil.includes(col)) : (Object.keys(configuracion.columnasVisibles) as Array<keyof ColumnasHabitos>);
 
+    const campos: CampoEspecificacion<ConfiguracionHabitos>[] = [
+        {
+            clave: 'ocultarCompletadosHoy',
+            titulo: 'Ocultar habitos completados hoy',
+            descripcion: 'Los habitos ya realizados desapareceran de la lista hasta manana',
+            tipo: 'toggle',
+            alCambiar: () => onToggleCompletadosHoy()
+        },
+        /* [014A-13] Modo compacto siempre activo en móvil — ocultar toggle */
+        {
+            clave: 'modoCompacto',
+            titulo: 'Modo Compacto',
+            descripcion: 'Reducir el espaciado vertical de las filas',
+            tipo: 'toggle',
+            cuando: () => !esMovil,
+            alCambiar: () => onToggleModoCompacto()
+        },
+        {
+            clave: 'mostrarPausados',
+            titulo: 'Mostrar habitos pausados',
+            descripcion: 'Incluye una seccion separada con los habitos en pausa',
+            tipo: 'toggle',
+            alCambiar: () => onToggleMostrarPausados()
+        }
+    ];
+
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuracion de Habitos">
             <div className="contenedorOpcionesConfig">
-                {/* Opcion 1: Ocultar Completados */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar habitos completados hoy</span>
-                        <span className="descripcionOpcionConfig">Los habitos ya realizados desapareceran de la lista hasta manana</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarCompletadosHoy} onChange={onToggleCompletadosHoy} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* [014A-13] Modo compacto siempre activo en móvil — ocultar toggle */}
-                {!esMovil && (
-                    <>
-                        <div className="itemOpcionConfig">
-                            <div className="detallesOpcionConfig">
-                                <span className="tituloOpcionConfig">Modo Compacto</span>
-                                <span className="descripcionOpcionConfig">Reducir el espaciado vertical de las filas</span>
-                            </div>
-                            <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
-                        </div>
-
-                        <div className="separadorOpcionesConfig" />
-                    </>
-                )}
-
-                {/* Opcion 3: Mostrar Pausados */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Mostrar habitos pausados</span>
-                        <span className="descripcionOpcionConfig">Incluye una seccion separada con los habitos en pausa</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.mostrarPausados} onChange={onToggleMostrarPausados} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
+                <FormularioConfiguracion
+                    campos={campos}
+                    valores={configuracion}
+                    alCambiar={() => {
+                        /* La persistencia la manejan los alCambiar de cada campo. */
+                    }}
+                />
 
                 {/* Seccion: Tolerancia de Urgencia - Solo en desktop (no relevante en móvil) */}
                 {!esMovil && (
                     <>
+                        <div className="separadorOpcionesConfig" />
                         <div className="seccionConfiguracion">
                             <h4 className="tituloSeccionConfig">Tolerancia de Urgencia</h4>
                             <span className="descripcionSeccionConfig">Define que tan estricto es el sistema al marcar habitos como urgentes por inactividad</span>
@@ -159,12 +162,11 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
                                 })}
                             </div>
                         </div>
-
-                        <div className="separadorOpcionesConfig" />
                     </>
                 )}
 
                 {/* Seccion: Columnas Visibles */}
+                <div className="separadorOpcionesConfig" />
                 <div className="seccionConfiguracion">
                     <h4 className="tituloSeccionConfig">Columnas Visibles</h4>
                     {esMovil && <span className="descripcionSeccionConfig">Columnas disponibles para móvil</span>}
@@ -189,4 +191,4 @@ export function ModalConfiguracionHabitos({estaAbierto, onCerrar, configuracion,
             </div>
         </Modal>
     );
-}
+}

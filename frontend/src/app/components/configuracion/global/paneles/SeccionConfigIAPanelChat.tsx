@@ -4,10 +4,14 @@
  * [27-08-2026] Configuración detallada (plan IA): comportamiento del modelo
  * (temperatura, max tokens, idioma, estilo), contexto incluido (tareas
  * completadas, hábitos pausados, notas) y permisos de herramientas
- * (recordatorios, búsqueda web). Todo persistido en iaStore (no sensible). */
+ * (recordatorios, búsqueda web). Todo persistido en iaStore (no sensible).
+ * [318A-3] Migrado al sistema centralizado: cada fila usa FormCampo (mismo
+ * layout que el esqueleto itemOpcionConfig previo → visual-neutral). Este
+ * panel combina cabeceras de sección (FormCampo sin control) + controles en
+ * fila propia; los modales canónicos usan FormularioConfiguracion declarativo. */
 
 import {Checkbox, Input, Select, Textarea} from '../../../ui';
-import {Range} from '../../../shared/Range';
+import {FormCampo, Range} from '../../../shared';
 import {useIAStore} from '../../../../stores/iaStore';
 import {MODELOS_IA, MODELO_FLASH_POR_PROVEEDOR, PROVEEDORES_IA} from '../../../../services/iaService';
 import {esUsuarioAdmin} from '../../../../utils/dashboardRuntime';
@@ -70,12 +74,10 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
 
     return (
         <div className="contenedorOpcionesConfig">
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Proveedor de IA</span>
-                    <span className="descripcionOpcionConfig">El admin usa las claves del entorno; los usuarios normales configuran sus propias claves aquí.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Proveedor de IA"
+                descripcion="El admin usa las claves del entorno; los usuarios normales configuran sus propias claves aquí."
+            />
             <Select
                 value={proveedor}
                 onChange={e => manejarProveedor(e.target.value)}
@@ -107,20 +109,16 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
                 />
             )}
             {esAdmin && (
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">API del entorno activa</span>
-                        <span className="descripcionOpcionConfig">Se usarán CEREBRAS_API_KEY, GROQ_API/GROQ_API_1..3, DEEPSEEK_API/DEEPSEEK-API o Glory API (sin key) desde el servidor.</span>
-                    </div>
-                </div>
+                <FormCampo
+                    titulo="API del entorno activa"
+                    descripcion="Se usarán CEREBRAS_API_KEY, GROQ_API/GROQ_API_1..3, DEEPSEEK_API/DEEPSEEK-API o Glory API (sin key) desde el servidor."
+                />
             )}
             <div className="separadorOpcionesConfig" />
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Modelo de IA</span>
-                    <span className="descripcionOpcionConfig">Modelo de lenguaje a usar en el chat</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Modelo de IA"
+                descripcion="Modelo de lenguaje a usar en el chat"
+            />
             <Select
                 value={modelo}
                 onChange={e => setModelo(e.target.value)}
@@ -129,18 +127,14 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
             <div className="separadorOpcionesConfig" />
 
             {/* [27-08-2026] Comportamiento del modelo (plan IA, Fase 4) */}
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Comportamiento</span>
-                    <span className="descripcionOpcionConfig">Temperatura, longitud máxima, idioma y estilo de las respuestas.</span>
-                </div>
-            </div>
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Temperatura: {temperatura.toFixed(1)}</span>
-                    <span className="descripcionOpcionConfig">Menor = más preciso y determinista; mayor = más creativo.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Comportamiento"
+                descripcion="Temperatura, longitud máxima, idioma y estilo de las respuestas."
+            />
+            <FormCampo
+                titulo={`Temperatura: ${temperatura.toFixed(1)}`}
+                descripcion="Menor = más preciso y determinista; mayor = más creativo."
+            />
             <Range
                 min={0}
                 max={1}
@@ -149,12 +143,10 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
                 onChange={setTemperatura}
                 aria-label="Temperatura"
             />
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Máximo de tokens: {maxTokens}</span>
-                    <span className="descripcionOpcionConfig">Límite de tokens de la respuesta (64–4096).</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo={`Máximo de tokens: ${maxTokens}`}
+                descripcion="Límite de tokens de la respuesta (64–4096)."
+            />
             <Input
                 tipo="number"
                 min={64}
@@ -163,23 +155,19 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
                 value={maxTokens}
                 onChange={e => setMaxTokens(Math.max(64, Math.min(4096, Number(e.target.value) || 2048)))}
             />
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Idioma</span>
-                    <span className="descripcionOpcionConfig">Idioma de las respuestas.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Idioma"
+                descripcion="Idioma de las respuestas."
+            />
             <Select
                 value={idioma}
                 onChange={e => setIdioma(e.target.value)}
                 opciones={OPCIONES_IDIOMA}
             />
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Estilo de respuesta</span>
-                    <span className="descripcionOpcionConfig">Cómo redacta el asistente.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Estilo de respuesta"
+                descripcion="Cómo redacta el asistente."
+            />
             <Select
                 value={estilo}
                 onChange={e => setEstilo(e.target.value)}
@@ -188,12 +176,10 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
             <div className="separadorOpcionesConfig" />
 
             {/* Contexto incluido en el prompt */}
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Contexto</span>
-                    <span className="descripcionOpcionConfig">Qué información del dashboard se inyecta al asistente.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Contexto"
+                descripcion="Qué información del dashboard se inyecta al asistente."
+            />
             <Checkbox
                 etiqueta="Incluir tareas completadas"
                 descripcion="Añade las tareas completadas hoy al contexto."
@@ -215,12 +201,10 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
             <div className="separadorOpcionesConfig" />
 
             {/* Permisos de herramientas */}
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Permisos</span>
-                    <span className="descripcionOpcionConfig">Herramientas que el asistente puede proponer. Las acciones destructivas siempre requieren confirmación.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Permisos"
+                descripcion="Herramientas que el asistente puede proponer. Las acciones destructivas siempre requieren confirmación."
+            />
             <Checkbox
                 etiqueta="Crear recordatorios"
                 descripcion="El asistente puede proponer recordatorios con fecha; se crean solo al confirmar."
@@ -235,12 +219,10 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
             />
             <div className="separadorOpcionesConfig" />
 
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Prompt system</span>
-                    <span className="descripcionOpcionConfig">Instrucciones persistentes que se añaden al sistema del asistente sin reemplazar sus permisos seguros.</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Prompt system"
+                descripcion="Instrucciones persistentes que se añaden al sistema del asistente sin reemplazar sus permisos seguros."
+            />
             <Textarea
                 value={promptSistema}
                 onChange={e => setPromptSistema(e.target.value)}
@@ -248,12 +230,10 @@ export function SeccionConfigIAPanelChat(): JSX.Element {
                 filas={3}
             />
             <div className="separadorOpcionesConfig" />
-            <div className="itemOpcionConfig">
-                <div className="detallesOpcionConfig">
-                    <span className="tituloOpcionConfig">Preferencias personales</span>
-                    <span className="descripcionOpcionConfig">Contexto extra que la IA tendrá en cuenta (horarios, estilo de trabajo, etc.)</span>
-                </div>
-            </div>
+            <FormCampo
+                titulo="Preferencias personales"
+                descripcion="Contexto extra que la IA tendrá en cuenta (horarios, estilo de trabajo, etc.)"
+            />
             <Textarea
                 value={preferencias}
                 onChange={e => setPreferencias(e.target.value)}

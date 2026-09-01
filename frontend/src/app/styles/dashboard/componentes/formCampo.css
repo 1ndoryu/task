@@ -1,0 +1,20 @@
+/*
+ * FORM CAMPO (sistema centralizado de configuraciones, 318A-3)
+ * Solamente los modificadores que el esqueleto base (configuracionTareas.css)
+ * no cubre: orientación vertical y texto de ayuda. Mismo vocabulario de tokens
+ * (--dashboard-*) para garantizar cero cambio visual respecto a los patrones
+ * previos (itemOpcionConfig / modalConfigAgenteCampo / configExp).
+ */
+
+.itemOpcionConfig--vertical {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--dashboard-espacioXs);
+    justify-content: flex-start;
+}
+
+.formCampoAyuda {
+    font-size: var(--dashboard-tamanoMuyPequeno);
+    color: var(--dashboard-textoApagado);
+    line-height: 1.2;
+}

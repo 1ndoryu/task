@@ -1,10 +1,13 @@
 /*
  * ModalConfiguracionProyectos
  * Modal para ajustar preferencias de visualización de proyectos
+ * [318A-3] Migrado al sistema centralizado: toggles declarativos con
+ * FormularioConfiguracion (visual-neutral).
  */
 
 import {Modal} from '../../shared/Modal';
-import {ToggleSwitch} from '../../shared/ToggleSwitch';
+import {FormularioConfiguracion} from '../../shared/FormularioConfiguracion';
+import type {CampoEspecificacion} from '../../shared/CampoEspecificacion';
 import type {ConfiguracionProyectos} from '../../../hooks/useConfiguracionProyectos';
 
 interface ModalConfiguracionProyectosProps {
@@ -18,51 +21,46 @@ interface ModalConfiguracionProyectosProps {
 }
 
 export function ModalConfiguracionProyectos({estaAbierto, onCerrar, configuracion, onToggleCompletados, onToggleTareasCompletadas, onToggleProgreso, onToggleModoCompacto}: ModalConfiguracionProyectosProps): JSX.Element {
+    const campos: CampoEspecificacion<ConfiguracionProyectos>[] = [
+        {
+            clave: 'ocultarCompletados',
+            titulo: 'Ocultar proyectos completados',
+            descripcion: 'Los proyectos finalizados no aparecerán en la lista principal',
+            tipo: 'toggle',
+            alCambiar: () => onToggleCompletados()
+        },
+        {
+            clave: 'ocultarTareasCompletadas',
+            titulo: 'Ocultar tareas completadas',
+            descripcion: 'Las tareas finalizadas no aparecerán dentro de los proyectos',
+            tipo: 'toggle',
+            alCambiar: () => onToggleTareasCompletadas()
+        },
+        {
+            clave: 'mostrarProgreso',
+            titulo: 'Mostrar progreso',
+            descripcion: 'Visualizar la barra de progreso de tareas',
+            tipo: 'toggle',
+            alCambiar: () => onToggleProgreso()
+        },
+        {
+            clave: 'modoCompacto',
+            titulo: 'Modo Compacto',
+            descripcion: 'Reducir el tamaño de la fuente y el espaciado',
+            tipo: 'toggle',
+            alCambiar: () => onToggleModoCompacto()
+        }
+    ];
+
     return (
         <Modal estaAbierto={estaAbierto} onCerrar={onCerrar} titulo="Configuración de Proyectos">
-            <div className="contenedorOpcionesConfig">
-                {/* Ocultar Proyectos Completados */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar proyectos completados</span>
-                        <span className="descripcionOpcionConfig">Los proyectos finalizados no aparecerán en la lista principal</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarCompletados} onChange={onToggleCompletados} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Ocultar Tareas Completadas */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Ocultar tareas completadas</span>
-                        <span className="descripcionOpcionConfig">Las tareas finalizadas no aparecerán dentro de los proyectos</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.ocultarTareasCompletadas} onChange={onToggleTareasCompletadas} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Mostrar Progreso */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Mostrar progreso</span>
-                        <span className="descripcionOpcionConfig">Visualizar la barra de progreso de tareas</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.mostrarProgreso} onChange={onToggleProgreso} />
-                </div>
-
-                <div className="separadorOpcionesConfig" />
-
-                {/* Modo Compacto */}
-                <div className="itemOpcionConfig">
-                    <div className="detallesOpcionConfig">
-                        <span className="tituloOpcionConfig">Modo Compacto</span>
-                        <span className="descripcionOpcionConfig">Reducir el tamaño de la fuente y el espaciado</span>
-                    </div>
-                    <ToggleSwitch checked={configuracion.modoCompacto} onChange={onToggleModoCompacto} />
-                </div>
-            </div>
+            <FormularioConfiguracion
+                campos={campos}
+                valores={configuracion}
+                alCambiar={() => {
+                    /* La persistencia la manejan los alCambiar de cada campo. */
+                }}
+            />
         </Modal>
     );
-}
+}
