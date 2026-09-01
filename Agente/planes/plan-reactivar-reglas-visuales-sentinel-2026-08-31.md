@@ -408,3 +408,282 @@ Esta revisión se realiza POST-cierre sobre el estado final, sin pisar su trabaj
 4. Documentar el contrato SeccionPanel/FormCampo de 12.4.
 5. (F7) registrar tareas en RESTAURANTE/WANDORIUS; (F8) mover el plan a `planes/completados/` cuando
    el usuario confirme el cierre.
+
+## 13. Ajustes de revisión de especificaciones de diseño (2026-09-01)
+
+Segunda revisión tras el cierre de 318A-3 (F1–F8) y de la §12 (brecha de cobertura). Foco pedido por el
+usuario: **¿quedan especificaciones de diseño que generen inconsistencias aunque todo esté
+centralizado, y qué mecanismo (Sentinel/VarSense) las detecta para eliminarlas?** Veredicto:
+**VIABLE CON RESERVAS — la centralización unifica la ESTRUCTURA (FormCampo/FormularioConfiguracion)
+pero NO garantiza el uso de TOKENS de diseño; el mecanismo de detección está incompleto y hay valores
+hardcodeados que ningún gate detecta hoy.**
+
+### 13.1 La centralización no elimina las especificaciones de diseño
+
+`FormCampo` y `FormularioConfiguracion` (componentes, visual-neutrales por construcción) reutilizan
+clases CSS del sistema centralizado que **todavía contienen literales sin tokenizar**. Aunque el
+componente no tenga `style={{}}` ni hex en TSX, sus estilos importados arrastran especificaciones de
+diseño locales:
+
+- `frontend/src/app/styles/dashboard/componentes/configuracionTareas.css`:
+  - `.itemOpcionConfig` → `padding: 2px 0`
+  - `.tituloOpcionConfig` → `font-weight: 500`
+  - `.descripcionOpcionConfig` → `line-height: 1.2`
+  - `.separadorOpcionesConfig` → `height: 0.8px`
+  - `.selectorOrdenamiento` → `min-width: 100px`
+- `frontend/src/app/styles/dashboard/componentes/modalConfigGlobal.css` (sidebar de config global,
+  reutilizado también por `ModalConfigAgente`):
+  - `max-width: 720px`, `height: 750px`, `max-height: 90vh`, `min-height: 400px`
+  - `width: 180px`, `min-width: 180px`
+  - `letter-spacing: 0.5px`, `padding: 6px var(--dashboard-espacioSm)`
+  - `transition: background-color 0.15s, color 0.15s` (existen tokens `--dashboard-transicionRapida`
+    `0.15s ease` y `--dashboard-transicionNormal` `0.2s ease` sin usar aquí)
+  - `font-weight: 500/600` repetidos
+
+Conclusión: **incluso el sistema "centralizado" porta especificaciones de diseño** (espaciados,
+grosores, alturas, transiciones) que no son tokens. Migrarlos a `--dashboard-*` es parte de la
+consistencia visual total.
+
+### 13.2 Mecanismo de detección INCOMPLETO (hallazgo crítico)
+
+El usuario pide que "Sentinel o VarSense las detecte". Estado real verificado (2026-09-01):
+
+| Mecanismo | Estado | Qué detecta hoy |
+|---|---|---|
+| Sentinel `css-hardcoded-value` | **DESCONECTADA** | Nada — código muerto |
+| Sentinel `css-especificacion-diseno-local` | Cableada, severidad `information` en PT | Clases con rol interactivo y ≥2 propiedades de diseño |
+| Sentinel `inline-style-prohibido` | Habilitada (warning) | `style={{}}` en TSX |
+| Sentinel reglas `modal-*` + `menu-contextual-override-diseno` | `habilitada: false` | Nada |
+| VarSense `hardcodedDetection` | Habilitado (warning, ruleId `valorHardcoded`) | Solo CSS: `color`, `background`, `background-color`, `border-color`, `font-size`, `font-family`, `box-shadow` |
+
+Detalle del hallazgo crítico (`css-hardcoded-value`):
+
+- La implementación **existe completa** en `glory-sentinel/src/analyzers/static/staticCssRules.ts`
+  (`verificarCssHardcoded`, líneas ~468-530): detecta hex `#[0-9a-fA-F]{3,8}` y `rgb/rgba/hsl/hsla`,
+  salta `variables.css`/`init.css`/`theme.css`/`tokens.css`, bloques `:root`, líneas con `var(` y
+  definiciones `--*`, y respeta `sentinel-disable-next-line css-hardcoded-value`.
+- Pero está **desactivada en dos niveles**:
+  1. `ruleRegistry.ts` líneas 156-157: la entrada está COMENTADA (`/* css-hardcoded-value: desactivada.
+     Descomentar para re-activar. */`).
+  2. `staticAnalyzer.ts`: la función **nunca se invoca** (solo `verificarCssEspecificacionDisenoLocal`
+     se llama en la línea 151). Es código muerto.
+- Por tanto, los ~195 valores hex/rgba literales en los CSS del frontend (p. ej.
+  `rgba(255,255,255,0.02)` en `suscripcion.css`, `rgba(0,0,0,0.5)`/`rgba(0,0,0,0.3)` en `tooltip.css`,
+  `rgba(0,0,0,0.4)` en `selectorBadge.css`, `rgba(255,255,255,0.3)` en `resizeHandleColumna.css`) **no
+  los reporta nadie** en el gate.
+
+VarSense sí cubre el hueco de colores CSS con `valorHardcoded`, pero:
+
+- **`hardcodedDetection` solo aplica a propiedades CSS, no a literales dentro de JSX**: la config de
+  PT (`varsense.config.json`) tiene `includePatterns: ["frontend/src/**/*.css",
+  "frontend/src/**/*.ts", "frontend/src/**/*.tsx"]`, así que VarSense SÍ lee `.tsx` (para tokens,
+  clases, variables), pero el chequeo `valorHardcoded` se aplica a declaraciones de propiedades CSS;
+  un hex literal dentro de JSX (p. ej. `color={COLORES_PRIORIDAD.muy_alta}` o un hex en un prop de
+  componente) **no pasa por esa verificación**. Por eso los 8 hex de `SelectorIconoProyecto.tsx` no
+  los ve VarSense.
+- **No cubre propiedades de layout**: la config de PT (`varsense.config.json`) solo verifica
+  `color`, `background`, `background-color`, `border-color`, `border-radius`, `font-size`,
+  `font-family`, `box-shadow`; `padding`, `margin`, `gap`, `font-weight`, `line-height`, `width`,
+  `height` quedan fuera (los defaults de VarSense tienen `padding: false`, `gap: false`,
+  `border-radius: false`).
+
+### 13.3 Valores hardcodeados concretos a eliminar (inventario verificado)
+
+1. **`SelectorIconoProyecto.tsx`** (`frontend/src/app/components/shared/`): paleta de 8 colores hex
+   literales — `#888888` (gris), `#ef4444` (rojo), `#f97316` (naranja), `#eab308` (amarillo),
+   `#22c55e` (verde), `#3b82f6` (azul), `#a855f7` (morado), `#ec4899` (rosa). Es la única paleta de
+   color hardcodeada en componentes compartidos (contraste: `nivelesConfig.tsx` SÍ está tokenizado
+   con `var(--dashboard-estado*)`). Migrar a tokens o a una paleta declarada en `variables.css`.
+2. **CSS con rgba/hex literales**: inventario a regenerar con comando reproducible al ejecutar la
+   tarea (un grep sobre `frontend/src/**/*.css` da ~242 coincidencias en 14 archivos incluyendo
+   `variables.css`/`App.css` que son tokens legítimos; excluyendo esos, el subconjunto problemático
+   ronda ~195 en 9+ archivos). Archivos representativos citados por el diagnóstico:
+   `suscripcion.css` (`rgba(255,255,255,0.02)`), `tooltip.css` (`rgba(0,0,0,0.5)`/`rgba(0,0,0,0.3)`),
+   `selectorBadge.css` (`rgba(0,0,0,0.4)`), `resizeHandleColumna.css` (`rgba(255,255,255,0.3)`),
+   `paginaPrueba.css` — **distinguir los literales puros (a tokenizar) de los var-based** (p. ej.
+   `panelSeguridad.css` usa `rgba(var(--dashboard-violetaRgb), 0.1)`, que es var-based OK y NO
+   requiere tokenización). Comando sugerido para el inventario exacto: `rg 'rgba?\(|#[0-9a-fA-F]{3,8}\b' --glob 'frontend/src/**/*.css' --glob '!**/variables.css' --glob '!**/init.css'` con filtrado manual de líneas con `var(`.
+3. **Literales de `configuracionTareas.css` y `modalConfigGlobal.css`** (detallados en 13.1).
+
+### 13.4 Recomendación: mecanismo de enforcement (registrado como tarea, no ejecutado aquí)
+
+Para que "todo sea consistente y coherente visualmente" y que el gate LO GARANTICE, se propone (en
+orden de impacto):
+
+1. **Reactivar `css-hardcoded-value` en Sentinel** como `warning`: descomentar en `ruleRegistry.ts`,
+   cablear `verificarCssHardcoded(...)` en `staticAnalyzer.ts`, y añadir el override en
+   `sentinel.config.json` de PT. Requiere el flujo completo del protocolo §6 (publicar commit en
+   glory-sentinel → alinear gitlink/lock → regenerar `sentinel.lock.json` → doctor → gate), por lo
+   que es una **tarea separada con autorización**; no se ejecuta en esta revisión.
+2. **Subir `css-especificacion-diseno-local` a `warning`** en `sentinel.config.json` (hoy `information`),
+   ya que la implementación está cableada y solo falta endurecer la severidad.
+3. **Ampliar `hardcodedDetection.properties` de VarSense** en `varsense.config.json` para incluir
+   `padding`, `margin`, `gap`, `font-weight`, `line-height`, `width`, `height` (con `allowedValues`
+   adecuados para no ahogar en falsos positivos).
+4. **Tokenizar los literales verificados** (13.1 + 13.3) usando la escala existente de `variables.css`
+   (`--dashboard-espacio*`, `--dashboard-tamano*`, `--dashboard-transicion*`, `--dashboard-texto*`).
+5. **Incluir TSX en el escaneo de colores** (VarSense o una regla Sentinel para hex en `.tsx`) para
+   cubrir `SelectorIconoProyecto` y futuros escapes; o, alternativamente, mover la paleta a
+   `variables.css` y consumirla por `var()`.
+6. **Conservar los `inline-style-prohibido` con `sentinel-disable` justificado**: valores dinámicos
+   legítimos (progress bars, colores derivados de datos, `COLORES_PRIORIDAD`/`COLORES_URGENCIA`
+   tokenizados) no son especificaciones de diseño y deben mantener su excepción documentada.
+
+### 13.5 Próximos pasos (tarea de seguimiento en roadmap)
+
+Registrar en roadmap una tarea de seguimiento: **"Mecanismo de detección de especificaciones de
+diseño: reactivar `css-hardcoded-value` (Sentinel) + endurecer `css-especificacion-diseno-local` +
+ampliar VarSense + tokenizar literales verificados"**, con referencia a esta §13. No ampliar el diff
+del gate ya cerrado sin autorización; esta revisión solo REGISTRA la deuda pendiente, no la ejecuta.
+
+### 13.6 Nota de concurrencia
+
+Esta §13 se añade como sección nueva al final del plan, sin modificar la §12 ni las secciones previas.
+Si otro agente está expandiendo el plan en paralelo, su trabajo (si ya está commiteado o en el árbol)
+se respeta; esta sección es aditiva y no interfiere con §1–§12.
+
+**Mecanismo operativo (verificado 2026-09-01):** en el árbol hay además **4 archivos del otro agente
+sin commitear** que implementan §12.3/§12.4 (renombre `formularioConfiguracion`→`formularioConfigGlobal`
+en `ModalConfiguracionUsuario.tsx` y `SeccionConfigPreferencias.tsx`, documentación del contrato en
+`SeccionPanel.tsx` y `shared/index.ts`). El commit de esta revisión (§13 + §14) debe incluir **SOLO**
+los 2 archivos propios (`Agente/planes/plan-reactivar-reglas-visuales-sentinel-2026-08-31.md` y
+`roadmap.md`), con `git add` explícito por archivo, sin `git add .` ni `--all`. Los 4 archivos ajenos
+los commitea el otro agente (o se coordina quién incluye qué) — no se tocan ni se mezclan frentes.
+
+## 14. Ajustes de revisión: detección de centralización y de CSS innecesario sobre componentes (2026-09-01)
+
+Tercera revisión, ampliación pedida por el usuario: (1) **que Sentinel detecte cuándo un formulario de
+configuración NO usa el sistema centralizado**, y que **todos los proyectos** funcionen con un sistema
+igual; (2) que se detecte **el error frecuente de la IA: usar un componente del sistema y añadirle CSS
+innecesario encima**, rompiendo la consistencia aunque centralice. Veredicto: **HAY UN HUECO REAL DE
+REGLA EN SENTINEL para ambas cosas — ninguna regla existente detecta "no usar el sistema declarativo de
+formularios", y la regla de "especificación de diseño local sobre componente" existe pero está débil
+(`information`) y desactivada en parte.**
+
+### 14.1 Hueco de regla: no existe detección de "formulario de configuración que no usa el sistema centralizado"
+
+Verificado en `glory-sentinel/src/config/ruleRegistry.ts` (inventario completo de reglas): **no hay
+ninguna regla que detecte un `ModalConfig*`/`SeccionConfig*` que construya su formulario a mano en vez
+de usar `FormCampo`/`FormularioConfiguracion`/`CampoEspecificacion`**. Las reglas React existentes
+cubren HTML nativo (`html-nativo-en-vez-de-componente`), botones (`button-clase-especifica`), modales
+(`modal-*`), menús (`menu-contextual-override-diseno`) y artefactos (`componente-artesanal`), pero
+ninguna entiende el **contrato del sistema declarativo** (que un formulario de configuración se
+declare con `especificaciones` y se renderice con `FormularioConfiguracion`).
+
+Por eso, aunque 318A-3 centralizó los 12 formularios del alcance, los ~23 archivos fuera de alcance
+(§12.1) pueden seguir construyéndose a mano **sin que el gate diga nada**: el gate solo los marcaría
+si usan HTML nativo o patrones artesanales, no por "no usar el sistema declarativo".
+
+**Propuesta de regla nueva (para Sentinel, aplicable a TODOS los proyectos con el sistema):**
+`formulario-config-sin-sistema-declarativo` (warning). Heurística sugerida:
+
+- Detecta componentes cuyo nombre encaja con `*Config*`, `*Configuracion*`, `*Ajustes*`, `*Settings*`
+  (o que rendericen un formulario de configuración) y que **NO importan/usen** `FormCampo`,
+  `FormularioConfiguracion` o `CampoEspecificacion` del sistema.
+- **Condición adicional obligatoria** para evitar falsos positivos: que el componente renderice
+  controles de entrada (`<input>`, `<select>`, `<textarea>` o props `onChange`/`value`), no solo que
+  tenga un nombre `*Config*`. Componentes como `ConfigExp`/`ConfigDeficitCalorico` (escapes
+  legítimos con layout de plugin, §12.2) o vistas previas de configuración que no sean formularios
+  deben quedar fuera del reporte.
+- Si además construyen el formulario con JSX manual (`<label>`, `<input>`, `<select>`, `<textarea>`,
+  o `ItemToggle`/`FilaRange` locales), lo marca con el mensaje de migrar al sistema declarativo.
+- Excepción documentada: escapes legítimos con layout específico de plugin (`ConfigExp`,
+  `ConfigDeficitCalorico` — ver §12.2) pueden usar `sentinel-disable` justificado (por archivo, como
+  `sentinel-disable-file`) o un registro de escapes aprobados; **no** una exclusión global por
+  patrón de nombre.
+
+**Visión "todos los proyectos con un sistema igual":** el sistema declarativo (`FormCampo` +
+`FormularioConfiguracion`) vive en `frontend/src/app/components/shared/` de PT; los demás proyectos
+(RESTAURANTE, WANDORIUS, ONG AGAPE, glory-rs consumers) deberían tener su equivalente en su
+`components/shared` y la misma regla aplicada por proyecto vía su `sentinel.config.json`. La regla
+nueva debe ser **agnóstica de proyecto** (detectar el patrón de "config manual sin usar el sistema
+declarativo local") y no depender de la ruta de PT. Esto es coherente con el protocolo §9: cada
+proyecto declara su gate, pero la regla vive en el core de glory-sentinel.
+
+### 14.2 Detección del error de la IA: "usar componente del sistema + CSS innecesario encima"
+
+El usuario describe el fallo recurrente: la IA usa el componente canónico (botón, modal, menú,
+campo) y **le añade CSS local innecesario**, produciendo inconsistencias aunque centralice. Estado de
+la detección hoy:
+
+| Regla | Qué detecta | Estado en PT |
+|---|---|---|
+| `css-especificacion-diseno-local` | Clase CSS con rol interactivo (Trigger/Opcion/Dropdown/Menu/Item/...) que define ≥2 propiedades de diseño (background, border, padding, tipografía, transiciones...) | `information` (demasiado débil) |
+| `menu-contextual-override-diseno` | `<MenuContextual>` recibiendo props de diseño (`className`, `panelClassName`, etc.) | `habilitada: false` |
+| `inline-style-prohibido` | `style={{}}` en TSX | warning (habilitada) |
+| `button-clase-especifica` | Clase específica en botón | warning (habilitada) |
+| `css-hardcoded-value` | Colores hex/rgb literales en CSS | **desconectada** (código muerto, ver §13.2) |
+
+**La regla clave para el error descrito es `css-especificacion-diseno-local`**: ya implementada y
+cableada en `staticAnalyzer.ts` (línea 151), detecta justo "clase local que reimplementa la receta
+visual de un componente del sistema". Pero está en `information` en PT, así que **no aparece ni como
+warning** en el gate. Para que Sentinel "detecte el error frecuente de la IA" hay que:
+
+1. **Subir `css-especificacion-diseno-local` a `warning`** en `sentinel.config.json` de PT (y en el
+   config de los demás proyectos que declaren el sistema).
+2. **Reactivar `menu-contextual-override-diseno`** (está implementada y cableada en `reactAnalyzer.ts`
+   líneas 148-149, solo falta `habilitada: true` en el config).
+3. **Mejorar la heurística** (si los falsos positivos lo piden): la regla ya salta clases base del
+   sistema y `ARCHIVOS_RECETA_DISENO` (button.css, contextmenu.css, modal.css, reset.css, init.css,
+   variables.css); conviene añadir a la exención las clases de los componentes del sistema declarativo
+   (`formCampo*`, `formularioConfiguracion*`, `itemOpcionConfig*`, `configGlobal*`) para no marcar el
+   propio sistema, solo el CSS ajeno que lo sobreescribe. **Esto no es opcional, es necesario:** la
+   heurística `PATRONES_ROL_INTERACTIVO_LOCAL` incluye los sufijos `Item` y `Panel`, y el propio
+   sistema usa clases `itemOpcionConfig`, `configGlobalNavItem`, `configGlobalSidebar` que con ≥2
+   propiedades de diseño (p. ej. `padding` + `font-weight` en `.itemOpcionConfig`) dispararían la
+   regla como falso positivo hoy mismo. La exención debe incluir un test de regresión en
+   glory-sentinel con `itemOpcionConfig`/`configGlobalNavItem` como casos de NO-reporte.
+4. **Reactivar las reglas `modal-*`** (`modal-semantica-no-canonica`, `modal-con-titulo`,
+   `modal-estructura-no-canonica`, `modal-acciones-no-canonico`): están implementadas y cableadas,
+   solo `habilitada: false` en el config. Cubren "modal que no sigue la estructura canónica" — el
+   mismo patrón de inconsistencia en modales.
+
+### 14.3 Síntesis: qué debería detectar el gate tras esta ampliación
+
+Con las reactivaciones/endurecimientos propuestos (13.2 + 14.1 + 14.2), el gate de un proyecto con el
+sistema declarativo detectaría y marcaría como warning (no error) todo esto:
+
+- Formulario de configuración construido a mano sin usar `FormularioConfiguracion`/`FormCampo`
+  (`formulario-config-sin-sistema-declarativo`, **regla nueva**).
+- Componente del sistema (botón/modal/menú/campo) con CSS local que reimplementa su receta visual
+  (`css-especificacion-diseno-local`, a warning).
+- Componente del sistema recibiendo props de diseño (`menu-contextual-override-diseno`, reactivada;
+  `button-clase-especifica`, ya activa).
+- Colores hex/rgb literales en CSS (`css-hardcoded-value`, reactivada — ver §13.2).
+- Modal que no sigue la estructura/acciones canónicas (`modal-*`, reactivadas).
+- HTML nativo en vez de componentes del sistema (`html-nativo-en-vez-de-componente`, ya activa).
+
+El **criterio de cierre** quedaría: un formulario de configuración está "bien" si (a) usa el sistema
+declarativo, (b) no añade CSS de diseño local sobre los componentes, y (c) solo usa tokens
+`--dashboard-*`. Eso es exactamente "todo consistente y coherente visualmente" garantizado por el
+gate, no por buena voluntad.
+
+### 14.4 Alcance y no-alcance de esta revisión
+
+**Alcance:** registrar en el plan (y en roadmap como tarea de seguimiento) la regla nueva
+`formulario-config-sin-sistema-declarativo` y las reactivaciones/endurecimientos de 14.2, como deuda
+pendiente con prioridad y orden de ejecución.
+
+**No alcance (requiere autorización, protocolo §6):** implementar la regla nueva en glory-sentinel
+(publicar commit → alinear gitlink/lock → regenerar lock → doctor → gate), reactivar las reglas en
+`sentinel.config.json`, ni tocar `varsense.config.json`. Esta revisión solo DOCUMENTA la deuda y su
+mecanismo; la ejecución es una tarea separada (ver §13.5).
+
+### 14.5 Próximos pasos (añade a la tarea de seguimiento de 13.5)
+
+1. Crear en glory-sentinel la regla `formulario-config-sin-sistema-declarativo` (agnóstica de
+   proyecto, patrón "config manual sin el sistema declarativo local", con la condición adicional de
+   controles de entrada de 14.1), con tests (incluyendo `ConfigExp`/`ConfigDeficitCalorico` como
+   casos de NO-reporte).
+2. Subir `css-especificacion-diseno-local` a `warning` y reactivar `menu-contextual-override-diseno`
+   y las 4 reglas `modal-*` en `sentinel.config.json` de PT (y replicar en los proyectos con el
+   sistema: RESTAURANTE, WANDORIUS, ONG AGAPE según su propio roadmap).
+3. Eximir en la heurística las clases propias del sistema declarativo (`formCampo*`,
+   `formularioConfiguracion*`, `itemOpcionConfig*`, `configGlobal*`) **con test de regresión
+   (`itemOpcionConfig`/`configGlobalNavItem` como NO-reporte)**; sin esta exención la regla marcaría
+   hoy el propio sistema como falso positivo.
+4. Verificar que el gate pase tras las reactivaciones (esperar warnings controlados, no errores) y
+   que el conteo sea interpretable (similar al 38→74→59 de 318A-3 F5).
+5. Replicar la regla nueva y los endurecimientos en el `sentinel.config.json`/roadmap de los demás
+   proyectos, respetando su propio contrato (no imponer la estructura de PT; cada proyecto declara su
+   gate).
