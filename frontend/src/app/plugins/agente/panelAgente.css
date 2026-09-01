@@ -102,15 +102,20 @@
     margin-top: var(--dashboard-espacioSm);
 }
 
-/* Duplicar la clase sube la especificidad (0,3,0) por encima de la regla global
- * `.dashboardPanelView [class*="panel"] { border: none !important }` del dashboard,
- * que de otro modo dejaría las tarjetas sin borde dentro del chat real. */
-.panelAgenteHerramientas .panelAgenteHerramienta.panelAgenteHerramienta {
+.panelAgenteHerramienta {
     font-size: var(--dashboard-tamanoPequeno);
-    border: 1px solid var(--dashboard-bordeSutil) !important;
+    border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioSm);
     background: transparent;
     overflow: hidden;
+}
+
+/* Refuerzo SOLO para el chat real: la regla global del dashboard
+ * `.dashboardPanelView [class*="panel"] { border: none !important }` (0,2,0)
+ * elimina el borde de la tarjeta; este selector (0,3,0) con ancestro de la
+ * burbuja la vence sin afectar a la galería, que no tiene ese ancestro. */
+.panelIAMensajeBurbuja .panelAgenteHerramienta.panelAgenteHerramienta {
+    border: 1px solid var(--dashboard-bordeSutil) !important;
 }
 
 .panelAgenteHerramienta summary {
@@ -147,14 +152,10 @@
     white-space: nowrap;
 }
 
-/* Duplicar clase del ancestro sube la especificidad (0,3,0) por encima de la
- * regla global `.dashboardPanelView [class*="panel"] { border: none !important }`,
- * que de otro modo eliminaría la línea divisoria superior del bloque de args
- * dentro del chat real. */
-.panelAgenteHerramienta.panelAgenteHerramienta .panelAgenteHerramientaArgs {
+.panelAgenteHerramientaArgs {
     margin: 0;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border-top: 1px solid var(--dashboard-bordeSutil) !important;
+    border-top: 1px solid var(--dashboard-bordeSutil);
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
@@ -163,6 +164,13 @@
     word-break: break-word;
     max-height: 120px;
     overflow-y: auto;
+}
+
+/* Refuerzo SOLO para el chat real: misma regla global del dashboard que quita
+ * los bordes; este selector (0,3,0) con ancestros de la burbuja y la tarjeta
+ * conserva la línea divisoria entre el summary y el bloque de args. */
+.panelIAMensajeBurbuja .panelAgenteHerramienta.panelAgenteHerramienta .panelAgenteHerramientaArgs {
+    border-top: 1px solid var(--dashboard-bordeSutil) !important;
 }
 
 /* Contexto real recibido por el agente (eventos usage/contexto) */
