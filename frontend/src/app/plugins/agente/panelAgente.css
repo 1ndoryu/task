@@ -147,10 +147,14 @@
     white-space: nowrap;
 }
 
-.panelAgenteHerramientaArgs {
+/* Duplicar clase del ancestro sube la especificidad (0,3,0) por encima de la
+ * regla global `.dashboardPanelView [class*="panel"] { border: none !important }`,
+ * que de otro modo eliminaría la línea divisoria superior del bloque de args
+ * dentro del chat real. */
+.panelAgenteHerramienta.panelAgenteHerramienta .panelAgenteHerramientaArgs {
     margin: 0;
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border-top: 1px solid var(--dashboard-bordeSutil);
+    border-top: 1px solid var(--dashboard-bordeSutil) !important;
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoSecundario);
