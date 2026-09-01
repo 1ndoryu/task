@@ -150,7 +150,8 @@ export function IndicadorPensando(): JSX.Element {
 /* ---------- Burbujas de mensaje ---------- */
 
 /* [318A-5] Botones de acción del mensaje (volver atrás / editar). Se muestran
- * sobre la burbuja (usuario) o bajo ella (asistente) en hover. */
+ * sobre la burbuja (usuario) o bajo ella (asistente) en hover. Solo icono: el
+ * nombre completo va en el tooltip (title). */
 function AccionesMensaje({
     onVolver,
     onEditar,
@@ -168,9 +169,10 @@ function AccionesMensaje({
                     type="button"
                     className="panelIAMensajeAccion"
                     title="Volver a este mensaje (descarta el contexto posterior)"
+                    aria-label="Volver a este mensaje"
                     onClick={onVolver}
                 >
-                    ← Volver
+                    ←
                 </button>
             )}
             {onEditar && (
@@ -178,9 +180,10 @@ function AccionesMensaje({
                     type="button"
                     className="panelIAMensajeAccion"
                     title="Editar este mensaje (el contexto vuelve a este punto)"
+                    aria-label="Editar este mensaje"
                     onClick={onEditar}
                 >
-                    ✎ Editar
+                    ✎
                 </button>
             )}
         </div>
