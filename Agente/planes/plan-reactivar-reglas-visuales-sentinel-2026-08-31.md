@@ -1,6 +1,7 @@
 # Plan v2: Sistema centralizado de formularios de configuración + arreglo de Sentinel (318A-3)
 
-> Fecha: 2026-08-31 · Estado: ACTIVO (v2, replanificado) · Proyecto: PROYECTO TASKS (repo `task`)
+> Fecha: 2026-08-31 · Estado: ACTIVO (v2, replanificado, EN CIERRE — F1-F6 ✅, F7 parcial, F8 pendiente de decisión) · Proyecto: PROYECTO TASKS (repo `task`)
+> Revisión post-cierre: 2026-09-01 (supervisor-thinking) — ver §12 con los ajustes de la revisión.
 > Dirección del usuario: primero crear una **funcionalidad centralizada para formularios** para que
 > todas las configuraciones en modales sean consistentes entre sí y se pueda **especificar y
 > hardcodear configuraciones** de forma declarativa. Después arreglar el bug de Sentinel.
@@ -277,8 +278,11 @@ autorización explícita.**
    0 errores / 53 warnings / 6 info, scope incremental 17 archivos; reporte en
    `.quality-reports/check/318A-3/latest.md`). Commit y push: a decisión del usuario (el árbol de PT
    lleva sus commits 318A-5; no se pushea sin su OK explícito).
-7. **F7 — Otros proyectos**: informe + registro de tareas (RESTAURANTE/WANDORIUS). (pendiente)
-8. **F8 — Evidencia** (completadas + plan a completados) + roadmap + push final.
+7. **F7 — Otros proyectos**: informe entregado como nota en `Agente/completados/tareas-2026-09-01.md`
+   (RESTAURANTE/WANDORIUS sin tocar sus gates); el registro formal de tareas de seguimiento en sus
+   roadmaps queda pendiente. (parcial)
+8. **F8 — Evidencia**: `Agente/completados/tareas-2026-09-01.md` ✅ (commit `03b0528`, pusheado).
+   Plan a `planes/completados/` + push final quedan a decisión del usuario tras esta expansión (§12).
 
 ## 9. Riesgos
 
@@ -295,16 +299,19 @@ autorización explícita.**
 
 - [x] `FormCampo` + `CampoEspecificacion` + `FormularioConfiguracion` creados y usados en ≥1 modal.
       (usados en 9 formularios de configuración).
-- [ ] 12 formularios de configuración migrados al sistema declarativo (sin HTML nativo en `app/`).
-      Patrón A ✅; pendientes B (ModalConfigAgente) y C (ConfigExp/ConfigDeficitCalorico).
-- [ ] Verificación por bloque: `npm run type-check` (frontend/package.json) exit 0 en cada bloque.
+- [x] 12 formularios de configuración del alcance migrados al sistema declarativo (patrones A/B/C).
+      Patrón A ✅ (9/9), patrón B ✅ (`ModalConfigAgente` con `CampoAgente`), patrón C → escapes
+      documentados (`ConfigExp`/`ConfigDeficitCalorico` por layout de plugin específico, controles canónicos).
+- [x] Verificación por bloque: `npm run type-check` (frontend/package.json) exit 0 en cada bloque.
 - [ ] Verificación visual en navegador queda como pendiente del usuario (no despliego la app);
       los cambios reutilizan las clases existentes → visual-neutral por construcción.
 - [x] Bug de Sentinel arreglado (rutas + Range + tests + doctor + lock); checkout operativo restaurado al pin y artefacto reconstruido.
-- [ ] Reglas reactivadas y gate `GLORY-BASELINE` PASS en PT (el commit en PT queda a criterio del
-      usuario, que trabaja en el repo; no se commitea sin su OK).
-- [ ] Informe de otros proyectos + tareas registradas (sin tocar sus gates).
-- [ ] Evidencia en `Agente/completados/` (sin commit en PT hasta OK del usuario).
+- [x] Reglas reactivadas (4 en warning) y gate `sentinel check 318A-3` PASS (0e/53w/6i, exit 0).
+- [x] Informe de otros proyectos entregado como nota en completadas (sin tocar sus gates); registro de
+      tareas de seguimiento en RESTAURANTE/WANDORIUS queda como pendiente real (F7 parcial).
+- [x] Evidencia en `Agente/completados/tareas-2026-09-01.md` (commit `03b0528`, pusheado).
+- [ ] Expansión de cobertura a los ~23 archivos de configuración fuera de alcance (§12.1) — tarea de
+      seguimiento en roadmap, no bloqueante para el cierre del plan.
 
 ## 11. Pendientes / decisiones
 
@@ -313,8 +320,89 @@ autorización explícita.**
       `itemOpcionConfig--vertical` y `formCampoAyuda`. Visual-neutral por construcción.
 - [x] Sistema vive en `components/shared` (confirmado; reutilizable por plugins y dashboard).
 - [x] `titulo` de FormCampo acepta `ReactNode` (caso GruposFb con icono Clock).
-- [ ] Confirmar alcance de reactivación de reglas tras unificar (todas las listadas o subset).
-- [ ] Confirmar decisión glory-core = Opción A (sección §4.2; puede cambiarse).
-- [ ] Confirmar migración de las 4 reglas `modal-*` (depende de estado de `Modal.tsx` canónico).
-- [ ] Autorización para push de `glory-sentinel` (publicar commit del gate).
+- [x] Alcance de reactivación tras unificar: se reactivaron las 4 (html-nativo, button-clase,
+      componente-artesanal, componente-sin-hook-glory) en warning; las `modal-*` y `mixed-barrel-logic`
+      quedan fuera (decisión F5).
+- [x] Decisión glory-core = Opción A (sección §4.2): `sentinel-disable-file` justificado en
+      BlockEditorModal/BlockRenderer/EditorPixelArt/GloryLink/PageRenderer.
+- [ ] Migración de las 4 reglas `modal-*` (depende de estado de `Modal.tsx` canónico; seguimiento).
+- [ ] Autorización para push de `glory-sentinel` (publicar el fix F2 `aa606a8`, sigue en rama local).
 - [ ] Autorización para reactivar/migrar en RESTAURANTE y WANDORIUS (escrituras en otros repos).
+- [ ] Extender el sistema declarativo a los ~23 archivos de configuración fuera de alcance (§12.1).
+- [ ] Migrar los escapes de HTML nativo residuales en configuración (§12.2) para bajar los 17× warning
+      `html-nativo` restantes.
+- [ ] Renombrar la clase CSS `formularioConfiguracion` vs el componente `FormularioConfiguracion` (§12.3).
+- [ ] Documentar el contrato `SeccionPanel` (agrupa) vs `FormCampo`/`FormularioConfiguracion` (renderiza) (§12.4).
+
+## 12. Ajustes de revisión arquitectónica (supervisor-thinking, 2026-09-01)
+
+Revisión dura del plan tras la ejecución (v2, F1–F6 cerradas en `03b0528`). Veredicto: **VIABLE CON
+RESERVAS**. El sistema centralizado quedó bien diseñado y ejecutado (`FormCampo` +
+`CampoEspecificacion` + `FormularioConfiguracion` en `components/shared`, visual-neutral por
+construcción, gate PASS), pero la revisión detectó 4 reservas que el plan original no contemplaba.
+
+### 12.1 Brecha de cobertura: ~23 archivos de configuración fuera de alcance
+
+El plan migró los 12 formularios del alcance (patrones A/B/C), pero el inventario exhaustivo muestra
+que **la mayoría de los modales/secciones de configuración del proyecto NO pasaron por el sistema**:
+
+| Categoría | Archivos | Estado |
+|---|---|---|
+| Modales de configuración no migrados | `ModalConfiguracionActividad`, `ModalConfiguracionUsuario`, `ModalConfiguracionGlobal`, `ModalConfiguracionMCP`, `ModalConfiguracionLayout`, `ModalPlugins`, `ModalConfigDeficitCalorico`, `SeccionTokenMCP` | Fuera de alcance |
+| Secciones generales (config global) | `SeccionConfigLayout`, `SeccionConfigPreferencias`, `SeccionConfigTemas`, `SeccionConfigPerfil`, `SeccionConfigSeguridad`, `SeccionConfigMCP`, `SeccionConfigBackups`, `SeccionConfigPaneles`, `SeccionConfigPlugins` | Fuera de alcance |
+| Secciones de paneles (ItemToggle) | `SeccionConfigTareas`, `SeccionConfigHabitos`, `SeccionConfigProyectos`, `SeccionConfigActividad` | Cubiertas vía `ItemToggle` (ya migrado con `FormCampo`) |
+
+**Decisión (Opción A):** declarar explícitamente estos archivos **fuera de alcance** de 318A-3 y crear
+una **tarea de seguimiento en roadmap** ("extender el sistema declarativo a los modales/secciones de
+configuración restantes") priorizada tras el cierre. No migrarlos aquí evita ampliar el diff del gate
+ya cerrado; la intención del usuario (centralizar TODAS las configuraciones) se cumple incrementalmente.
+
+### 12.2 HTML nativo residual que la reactivación volverá a marcar
+
+Tras reactivar `html-nativo-en-vez-de-componente` (F5), quedan escapes nativos en configuración que ya
+generan **warnings (no errores)** y que la próxima pasada debería migrar:
+
+- `ModalConfigAgente.tsx`: 2 botones nativos (`modalConfigAgenteCerrar` + `modalConfigAgenteSkillBoton` ×2).
+- `PanelAgente.tsx`: form "Programar tarea" — 5 inputs nativos (input, textarea, select, 2× input).
+- `ModalConfiguracionActividad.tsx`: label nativa `opcionVisualActividad` (candidata natural a `FormCampo`).
+- `SeccionConfigPerfil.tsx`: 5 labels nativos `labelPerfil`.
+- `ConfigExp.tsx`/`ConfigDeficitCalorico.tsx`: escapes documentados por layout de plugin (`FilaRange` local).
+
+**Recomendación:** migrar primero los de menor riesgo y mayor beneficio visual:
+`ModalConfiguracionActividad` (estructura ya canónica: `Modal` + `SeccionPanel` + `SelectorNivel` +
+`ToggleSwitch` — solo la label necesita `FormCampo`), `SeccionConfigPerfil` (labels → `FormCampo`) y
+`ModalConfiguracionUsuario` (campos → `CampoEspecificacion` tipo numero). Los botones de
+`ModalConfigAgente` → `Boton` (patrón del sidebar ya migrado en 318A-5). `PanelAgente` (form programar
+tarea) puede usar `FormCampo`/`Input`/`Textarea`/`Select`.
+
+### 12.3 Confusión de nomenclatura: CSS `formularioConfiguracion` vs componente `FormularioConfiguracion`
+
+Existe una clase CSS `formularioConfiguracion` (usada en `SeccionConfigPreferencias.tsx` y
+`ModalConfiguracionUsuario.tsx`) con el MISMO nombre que el nuevo componente
+`FormularioConfiguracion` (el renderer declarativo). Riesgo real de confusión al leer el código.
+
+**Recomendación:** renombrar la clase CSS a algo no ambiguo (p. ej. `cuerpoConfigGlobal` o
+`formularioConfigGlobal`) en la siguiente pasada, o documentar la distinción en el barrel de `shared`.
+No urgente (no rompe nada), pero conviene resolverlo junto a 12.1.
+
+### 12.4 Relación `SeccionPanel` vs `FormCampo` (no documentada)
+
+`SeccionPanel` (contenedor de sección con título/icono) coexiste con `FormCampo` (campo individual) sin
+relación formal documentada. Conviene fijar el contrato: **`SeccionPanel` agrupa;
+`FormCampo`/`FormularioConfiguracion` renderiza campos**. En la migración de 12.1, las secciones con
+título usan `SeccionPanel` como wrapper y los campos dentro como `FormCampo`/`FormularioConfiguracion`.
+
+### 12.5 Concurrencia con otro agente (resuelta)
+
+El plan fue ejecutado en paralelo por otro agente (F1–F8). Riesgo de colisión mitigado: el otro agente
+commiteó `03b0528` (F5–F8, gate PASS) y pusheó; el árbol de PT quedó sincronizado con `origin/main`.
+Esta revisión se realiza POST-cierre sobre el estado final, sin pisar su trabajo.
+
+### 12.6 Próximos pasos (no bloqueantes)
+
+1. Registrar en roadmap la tarea de seguimiento de 12.1 (extensión del sistema declarativo).
+2. Migrar los escapes de 12.2 (empezar por Actividad/Perfil/Usuario).
+3. Renombrar la clase CSS de 12.3.
+4. Documentar el contrato SeccionPanel/FormCampo de 12.4.
+5. (F7) registrar tareas en RESTAURANTE/WANDORIUS; (F8) mover el plan a `planes/completados/` cuando
+   el usuario confirme el cierre.
