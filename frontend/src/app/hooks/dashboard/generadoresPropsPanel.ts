@@ -94,6 +94,8 @@ export function generarPropsPanelEjecucion(
         ocultarCompletadas: configTareas.configuracion.ocultarCompletadas,
         ocultarBadgeProyecto: configTareas.configuracion.ocultarBadgeProyecto,
         ocultarSubtareasAutomaticamente: configTareas.configuracion.ocultarSubtareasAutomaticamente,
+        /* [318A-14] Tabs de grupos en el panel de tareas (activable en config). */
+        usarTabsGrupos: configTareas.configuracion.usarTabsGrupos,
         modoOrden: ordenTareas.modoActual,
         valorFiltroActual,
         opcionesFiltro: opciones.opcionesFiltro,
@@ -257,4 +259,4 @@ export const GENERADORES_PROPS: Record<string, GeneradorPropsPanel> = {
 
 export function obtenerGeneradorPropsPanel(panelId: string, baseId: string): GeneradorPropsPanel {
     return GENERADORES_PROPS[panelId] || GENERADORES_PROPS[baseId] || generarPropsPanelBase;
-}
+}

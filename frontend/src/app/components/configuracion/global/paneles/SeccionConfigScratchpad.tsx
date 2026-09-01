@@ -10,12 +10,21 @@ import type {TamanoFuente} from '../../../../hooks/useConfiguracionScratchpad';
 interface FormaScratchpad {
     tamanoFuente: TamanoFuente;
     autoGuardadoIntervalo: number;
+    /* [318A-14] Tabs de notas en el panel. */
+    usarTabsNotas: boolean;
 }
 
 export function SeccionConfigScratchpad(): JSX.Element {
-    const {configuracion, cambiarTamanoFuente, cambiarAutoGuardado} = useConfiguracionScratchpad();
+    const {configuracion, cambiarTamanoFuente, cambiarAutoGuardado, toggleUsarTabsNotas} = useConfiguracionScratchpad();
 
     const campos: CampoEspecificacion<FormaScratchpad>[] = [
+        {
+            clave: 'usarTabsNotas',
+            titulo: 'Tabs de notas',
+            descripcion: 'Cada nota se muestra como una pestaña en el panel de notas',
+            tipo: 'toggle',
+            alCambiar: () => toggleUsarTabsNotas()
+        },
         {
             clave: 'tamanoFuente',
             titulo: 'Tamaño de fuente',

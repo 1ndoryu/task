@@ -1,0 +1,90 @@
+/*
+ * styles/dashboard/shared/tabsCompartidas.css
+ * Barra de tabs agnóstica (318A-14): IA (conversaciones), TAREAS (grupos),
+ * NOTAS (notas). Solo tokens --dashboard-* del design system.
+ *
+ * [318A-5→318A-14] La antigua .panelAgenteTab necesitaba selector duplicado +
+ * !important para vencer `.dashboardPanelView [class*="panel"] { border:none
+ * !important }` porque la clase CONTENÍA "panel". Estas clases usan el prefijo
+ * `tabCompartida` (sin "panel"), así que borde/fondo se ven sin !important.
+ */
+
+/* Barra contenedora con scroll horizontal */
+.tabsCompartidas {
+    display: flex;
+    gap: var(--dashboard-espacioXs);
+    padding: 0 var(--dashboard-espacioMd);
+    padding-top: var(--dashboard-espacioSm);
+    overflow-x: auto;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--dashboard-bordeSutil);
+}
+
+/* Cada tab encerrada en su caja con borde y fondo de tarjeta */
+.tabCompartida {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px 3px 10px;
+    border-radius: 0;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit;
+    color: var(--dashboard-textoSecundario);
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 160px;
+    border: 1px solid var(--dashboard-bordeSutil);
+    background: var(--dashboard-fondoTarjeta);
+    user-select: none;
+}
+
+.tabCompartida:hover {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
+.tabCompartida--activa {
+    background: var(--dashboard-fondoTarjeta);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoActivo);
+    font-weight: 600;
+}
+
+.tabCompartidaTitulo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: inherit;
+}
+
+.tabCompartidaCerrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    color: var(--dashboard-textoSecundario);
+    border-radius: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.tabCompartidaCerrar:hover {
+    background: var(--dashboard-superposicionSutil);
+    color: var(--dashboard-peligroClaro);
+}
+
+/* Input de renombrado inline */
+.tabCompartidaInput {
+    width: 100%;
+    min-width: 80px;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-family: inherit; /* [318A-5] hereda la fuente del proyecto */
+    padding: 2px 4px;
+    border: 1px solid var(--dashboard-primario);
+    border-radius: 0;
+    background: var(--dashboard-fondoTarjeta);
+    color: var(--dashboard-textoActivo);
+    outline: none;
+}

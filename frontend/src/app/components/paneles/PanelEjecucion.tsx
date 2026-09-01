@@ -8,10 +8,10 @@
 import {useState, useMemo, useCallback} from 'react';
 import {ArrowUpDown, Plus, Settings, Maximize2, Columns, X} from 'lucide-react';
 import {SeccionEncabezado, ListaTareas, SubmenuNuevoInline} from '../dashboard';
-import {SelectorBadge, OverlayEnfoque, SelectorGrupo} from '../shared';
+import {SelectorBadge, OverlayEnfoque, SelectorGrupo, TabsPanel} from '../shared';
 import {Boton} from '../ui';
 import type {Tarea, Proyecto, Participante, DatosEdicionTarea, Habito} from '../../types/dashboard';
-import {useGruposEjecucionStore, NOMBRE_GRUPO_DEFECTO} from '../../stores/gruposEjecucionStore';
+import {useGruposEjecucionStore, NOMBRE_GRUPO_DEFECTO, GRUPO_SIN_GRUPO} from '../../stores/gruposEjecucionStore';
 import {useHabitosStore} from '../../stores/habitosStore';
 import {useGruposEjecucion} from '../../hooks/useGruposEjecucion';
 
@@ -38,6 +38,8 @@ interface PanelEjecucionDatos {
     ocultarSubtareasAutomaticamente?: boolean;
     /* ID del panel para persistir grupo activo */
     panelId?: string;
+    /* [318A-14] Tabs de grupos en el panel (cada grupo es una tab). */
+    usarTabsGrupos?: boolean;
 }
 
 interface PanelEjecucionOrden {
@@ -102,7 +104,7 @@ interface PanelEjecucionExtras {
 
 interface PanelEjecucionProps extends PanelEjecucionDatos, PanelEjecucionOrden, PanelEjecucionAccionesTarea, PanelEjecucionTarea, PanelEjecucionHabitos, PanelEjecucionSubHabitos, PanelEjecucionExtras {}
 
-export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, ocultarSubtareasAutomaticamente = false, panelId, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalCrearHabito, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, modoCompacto = false, onConfigurarTarea, onReordenarHabitos, onDividirPanel, onCerrarPanel}: PanelEjecucionProps): JSX.Element {
+export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarCompletadas, ocultarBadgeProyecto, ocultarSubtareasAutomaticamente = false, panelId, usarTabsGrupos = false, modoOrden, valorFiltroActual, opcionesFiltro, opcionesOrdenTareas, esOrdenManual, onAbrirModalNuevaTarea, onAbrirModalCrearHabito, onAbrirModalConfigTareas, onToggleTarea, onCrearTarea, onEditarTarea, onEliminarTarea, onReordenarTareas, onCambiarFiltro, onCambiarModoOrden, onCompartirTarea, estaCompartida, obtenerParticipantes, renderHandleArrastre, handleMinimizar, onEditarHabito, onEliminarHabito, onToggleHabito, onPosponerHabito, onPosponerHabitoConTiempo, onPausarHabito, onActualizarHabito, onToggleSubHabito, onEliminarSubHabito, onPosponerSubHabitoConTiempo, onActualizarSubHabito, onConfigurarSubHabito, modoCompacto = false, onConfigurarTarea, onReordenarHabitos, onDividirPanel, onCerrarPanel}: PanelEjecucionProps): JSX.Element {
     const [modoEnfoque, setModoEnfoque] = useState(false);
 
     /* [20-08-2026] Submenu del botón "+" del header: mismo submenu Tarea/Hábito
@@ -122,6 +124,17 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
     const habitos = useHabitosStore(state => state.habitos);
 
     const gruposDisponibles = useGruposEjecucion(tareas, habitos);
+
+    /* [318A-14] Tabs de grupos: el primer tab es "Tareas" (sin grupo, id
+     * GRUPO_SIN_GRUPO) y cada grupo disponible es una tab. La activa es el
+     * grupo actual (o GRUPO_SIN_GRUPO si no hay grupo). */
+    const tabsGrupos = useMemo(() => {
+        const tabs = [{id: GRUPO_SIN_GRUPO, titulo: NOMBRE_GRUPO_DEFECTO}];
+        gruposDisponibles.forEach(g => tabs.push({id: g, titulo: g}));
+        return tabs;
+    }, [gruposDisponibles]);
+
+    const tabGrupoActivaId = grupoActivo || GRUPO_SIN_GRUPO;
 
     /* [20-08-2026] Renombrar un grupo propaga el nuevo nombre a tareas y hábitos
      * que lo usan (además del store gruposConocidos/grupoPorPanel). */
@@ -257,6 +270,17 @@ export function PanelEjecucion({tareas, proyectos, proyectoIdActual, ocultarComp
                     </>
                 }
             />
+            {/* [318A-14] Tabs de grupos: cada grupo es una tab; el tab "Tareas"
+             * (GRUPO_SIN_GRUPO) muestra las tareas sin grupo. Solo navegación
+             * (sin renombrar/cerrar aquí). El SelectorGrupo del header sigue
+             * disponible para crear/renombrar/eliminar grupos. */}
+            {usarTabsGrupos && (
+                <TabsPanel
+                    tabs={tabsGrupos}
+                    activaId={tabGrupoActivaId}
+                    onActivar={id => cambiarGrupo(id === GRUPO_SIN_GRUPO ? null : id)}
+                />
+            )}
             {listaTareasComun}
 
             <OverlayEnfoque estaActivo={modoEnfoque} onCerrar={() => setModoEnfoque(false)} titulo="Tareas">

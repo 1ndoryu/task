@@ -27,6 +27,8 @@ export function generarPropsPanelScratchpad(
         configuracion: configScratchpad.configuracion,
         onAbrirModalConfigScratchpad: () => modales.abrirModalConfigGlobal('notas'),
         onCambiarAltura: configScratchpad.cambiarAltura,
+        /* [318A-14] Tabs de notas en el panel (activable en config). */
+        usarTabsNotas: configScratchpad.configuracion.usarTabsNotas,
         renderHandleArrastre,
         handleMinimizar
     };

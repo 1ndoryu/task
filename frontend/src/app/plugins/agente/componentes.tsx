@@ -10,6 +10,8 @@ import {AlertTriangle, Loader2, Pencil, Trash2, X} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
 import {Checkbox} from '../../components/ui/Checkbox';
 import {Radio} from '../../components/ui/Radio';
+/* [318A-14] TabsPanel: componente de tabs agnóstico del design system. */
+import {TabsPanel} from '../../components/shared/TabsPanel';
 
 /* [318A-4] Catálogo de modelos/modos y controles del input viven en
  * catalogoModelos.tsx (seam natural del split de limite-lineas); aquí se
@@ -59,63 +61,41 @@ interface TabsWorkspaceProps {
     onCerrar: (id: string) => void;
 }
 
-export function TabsWorkspace(props: TabsWorkspaceProps): JSX.Element {
-    const {
-        tabs,
-        activaId,
-        editandoId,
-        tituloEdicion,
-        onActivar,
-        onIniciarRenombrado,
-        onCambiarTituloEdicion,
-        onConfirmarRenombrado,
-        onCancelarRenombrado,
-        onCerrar,
-    } = props;
+/*
+ * [318A-14] TabsWorkspace ahora delega en el componente agnóstico TabsPanel
+ * del design system (components/shared/TabsPanel.tsx), compartido con los
+ * paneles de TAREAS (grupos) y NOTAS (notas). Sin duplicación: esta función
+ * es solo un wrapper que conserva la API pública (el test de la galería
+ * verifica `export function TabsWorkspace`) y traduce a las props del
+ * componente compartido. Los estilos viven en
+ * styles/dashboard/shared/tabsCompartidas.css (clases `tabCompartida*`).
+ */
+export function TabsWorkspace({
+    tabs,
+    activaId,
+    editandoId,
+    tituloEdicion,
+    onActivar,
+    onIniciarRenombrado,
+    onCambiarTituloEdicion,
+    onConfirmarRenombrado,
+    onCancelarRenombrado,
+    onCerrar,
+}: TabsWorkspaceProps): JSX.Element {
     return (
-        <div className="panelAgenteTabs">
-            {tabs.map(tab => {
-                const activa = tab.id === activaId;
-                const editando = editandoId === tab.id;
-                return (
-                    <div
-                        key={tab.id}
-                        className={`panelAgenteTab ${activa ? 'panelAgenteTab--activa' : ''}`}
-                        onClick={() => onActivar(tab.id)}
-                        onDoubleClick={() => onIniciarRenombrado(tab.id, tab.titulo)}
-                        title={tab.titulo}
-                    >
-                        {editando ? (
-                            <input
-                                className="panelAgenteTabInput"
-                                value={tituloEdicion}
-                                autoFocus
-                                onChange={e => onCambiarTituloEdicion(e.target.value)}
-                                onClick={e => e.stopPropagation()}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter') onConfirmarRenombrado(tab.id);
-                                    if (e.key === 'Escape') onCancelarRenombrado();
-                                    e.stopPropagation();
-                                }}
-                            />
-                        ) : (
-                            <span className="panelAgenteTabTitulo">{tab.titulo}</span>
-                        )}
-                        <button
-                            type="button"
-                            className="panelAgenteTabCerrar"
-                            title="Cerrar conversación"
-                            onClick={e => {
-                                e.stopPropagation();
-                                onCerrar(tab.id);
-                            }}
-                        >
-                            <X size={10} />
-                        </button>
-                    </div>
-                );
-            })}
-        </div>
+        <TabsPanel
+            tabs={tabs}
+            activaId={activaId}
+            onActivar={onActivar}
+            onCerrar={onCerrar}
+            editandoId={editandoId}
+            tituloEdicion={tituloEdicion}
+            onIniciarRenombrado={onIniciarRenombrado}
+            onCambiarTituloEdicion={onCambiarTituloEdicion}
+            onConfirmarRenombrado={onConfirmarRenombrado}
+            onCancelarRenombrado={onCancelarRenombrado}
+            tituloCerrar="Cerrar conversación"
+        />
     );
 }
 

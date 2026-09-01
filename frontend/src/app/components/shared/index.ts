@@ -1,5 +1,7 @@
 export * from './AccionesFormulario';
 export * from './AccionesPanelResponsivas';
+/* 318A-14 - Barra de tabs agnóstica (IA/tareas/notas) */
+export * from './TabsPanel';
 export * from './MenuContextual';
 export * from './RevealElement';
 export * from './ToastDeshacer';

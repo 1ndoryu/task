@@ -16,6 +16,8 @@ export interface ConfiguracionTareas {
     ocultarBadgeUrgencia: boolean;
     ocultarBadgeImportancia: boolean;
     ocultarBadgeDificultad: boolean;
+    /* [318A-14] Tabs de grupos en el panel de tareas (cada grupo es una tab). */
+    usarTabsGrupos: boolean;
 }
 
 /* 
@@ -33,7 +35,9 @@ export const CONFIG_POR_DEFECTO: ConfiguracionTareas = {
     ignorarUrgenciaEnPrioridad: false,
     ocultarBadgeUrgencia: false,
     ocultarBadgeImportancia: false,
-    ocultarBadgeDificultad: false
+    ocultarBadgeDificultad: false,
+    /* [318A-14] Tabs de grupos: activo por defecto (paridad con selector). */
+    usarTabsGrupos: true
 };
 
 export function useConfiguracionTareas() {
@@ -81,8 +85,16 @@ export function useConfiguracionTareas() {
         setValor(prev => ({...prev, ocultarBadgeDificultad: !prev.ocultarBadgeDificultad}));
     };
 
+    /* [318A-14] Toggle de tabs de grupos en el panel de tareas. */
+    const toggleUsarTabsGrupos = () => {
+        setValor(prev => ({...prev, usarTabsGrupos: !prev.usarTabsGrupos}));
+    };
+
     return {
-        configuracion: valor,
+        /* [318A-14] Merge con defaults: la config guardada puede ser anterior a
+         * un campo nuevo (ej: usarTabsGrupos), así que siempre se completa con
+         * CONFIG_POR_DEFECTO para que el campo nunca quede undefined. */
+        configuracion: {...CONFIG_POR_DEFECTO, ...valor},
         actualizarConfiguracion: setValor,
         toggleOcultarCompletadas,
         toggleOcultarBadgeProyecto,
@@ -93,6 +105,7 @@ export function useConfiguracionTareas() {
         toggleIgnorarUrgenciaEnPrioridad,
         toggleOcultarBadgeUrgencia,
         toggleOcultarBadgeImportancia,
-        toggleOcultarBadgeDificultad
+        toggleOcultarBadgeDificultad,
+        toggleUsarTabsGrupos
     };
 }

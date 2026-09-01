@@ -11,13 +11,14 @@
  * Fase 15.6: Se añadió autoguardado debounced y restauración de última nota
  */
 
-import {useState, useRef} from 'react';
+import {useState, useRef, useCallback, useMemo} from 'react';
 import {Eraser, Settings, FolderOpen, Plus, Maximize2, X, Copy, FileText, Columns} from 'lucide-react';
 import {SeccionEncabezado, Scratchpad, ModalNotasExpandido} from '../dashboard';
-import {OverlayEnfoque, MenuContextual} from '../shared';
+import {OverlayEnfoque, MenuContextual, TabsPanel} from '../shared';
 import {Boton} from '../ui';
 import type {ConfiguracionScratchpad} from '../../hooks/useConfiguracionScratchpad';
 import {usePanelScratchpad} from '../../hooks/paneles/usePanelScratchpad';
+import {useNotasStore} from '../../stores/notasStore';
 
 interface PanelScratchpadProps {
     configuracion: ConfiguracionScratchpad;
@@ -30,12 +31,55 @@ interface PanelScratchpadProps {
     onDuplicarPanel?: () => void;
     onCerrarPanel?: () => void;
     onDividirPanel?: () => void;
+    /* [318A-14] Tabs de notas en el panel (cada nota es una tab). */
+    usarTabsNotas?: boolean;
 }
 
-export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar, onDuplicarPanel, onCerrarPanel, onDividirPanel, panelId}: PanelScratchpadProps): JSX.Element {
+export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, onCambiarAltura, renderHandleArrastre, handleMinimizar, onDuplicarPanel, onCerrarPanel, onDividirPanel, panelId, usarTabsNotas = false}: PanelScratchpadProps): JSX.Element {
     /* [263A-12] Cada panel usa su propio panelId para notas independientes */
     const panelIdResuelto = panelId ?? 'scratchpad';
     const {modalNotasExpandidoAbierto, setModalNotasExpandidoAbierto, modoEnfoque, setModoEnfoque, notaActiva, actualizarContenido, tituloActivo, esNotaNueva, manejarNuevaNota, manejarLimpiar, manejarAbrirCarpeta} = usePanelScratchpad(panelIdResuelto);
+
+    /* [318A-14] Tabs de notas: se alimentan del store de notas (notas guardadas)
+     * + la nota activa del panel. La activa siempre es un tab (la nueva si no
+     * está guardada). */
+    const notasGuardadas = useNotasStore(s => s.notas);
+    const seleccionarNotaStore = useNotasStore(s => s.seleccionarNota);
+
+    /* [318A-14] Cambiar de tab de nota: guarda la nota actual si tiene cambios
+     * y luego selecciona la nota destino (mismo patrón que manejarAbrirCarpeta). */
+    const cambiarNota = useCallback(async (id: string) => {
+        const estado = useNotasStore.getState();
+        const notaPanel = estado.notasActivaPorPanel[panelIdResuelto];
+        if (notaPanel?.modificada && notaPanel.contenido.trim()) {
+            await estado.guardarNotaActiva(panelIdResuelto);
+        }
+        const notaDestino = useNotasStore.getState().notas.find(n => n.id === id);
+        if (notaDestino) {
+            seleccionarNotaStore(panelIdResuelto, notaDestino);
+        }
+    }, [panelIdResuelto, seleccionarNotaStore]);
+
+    /* Tabs: la nota activa primero (si es nueva con id null, se marca con su
+     * título derivado), luego las notas guardadas que no sean la activa. */
+    const tabsNotas = useMemo(() => {
+        const tabs: {id: string; titulo: string}[] = [];
+        const idActivo = notaActiva.id;
+        if (idActivo) {
+            tabs.push({id: idActivo, titulo: tituloActivo || 'Nota'});
+        } else {
+            /* Nota nueva sin guardar: tab virtual con título derivado */
+            tabs.push({id: '__nueva__', titulo: tituloActivo || 'Nueva nota'});
+        }
+        notasGuardadas.forEach(n => {
+            if (n.id !== idActivo) {
+                tabs.push({id: n.id, titulo: n.titulo || 'Nota'});
+            }
+        });
+        return tabs;
+    }, [notaActiva.id, tituloActivo, notasGuardadas]);
+
+    const tabNotaActivaId = notaActiva.id || '__nueva__';
 
     /* [253A-10] Submenú del botón + para crear nota en panel o ventana */
     const [menuNuevaNota, setMenuNuevaNota] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
@@ -126,6 +170,15 @@ export function PanelScratchpad({configuracion, onAbrirModalConfigScratchpad, on
                     </>
                 }
             />
+            {/* [318A-14] Tabs de notas: cada nota es una tab. Solo navegación
+             * (sin renombrar/cerrar aquí; la gestión vive en el modal). */}
+            {usarTabsNotas && (
+                <TabsPanel
+                    tabs={tabsNotas}
+                    activaId={tabNotaActivaId}
+                    onActivar={id => void cambiarNota(id)}
+                />
+            )}
             <Scratchpad valorInicial={notaActiva.contenido} onChange={actualizarContenido} tamanoFuente={configuracion.tamanoFuente} altura={configuracion.altura} delayGuardado={configuracion.autoGuardadoIntervalo} onCambiarAltura={onCambiarAltura} />
 
             <ModalNotasExpandido abierto={modalNotasExpandidoAbierto} onCerrar={() => setModalNotasExpandidoAbierto(false)} tamanoFuente={configuracion.tamanoFuente} delayGuardado={configuracion.autoGuardadoIntervalo} panelId={panelIdResuelto} />

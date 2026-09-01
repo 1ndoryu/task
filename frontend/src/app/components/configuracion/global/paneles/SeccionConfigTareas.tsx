@@ -4,11 +4,12 @@ import {usePluginActivo} from '../../../../stores/pluginsStore';
 import {ItemToggle} from './ItemToggle';
 
 export function SeccionConfigTareas(): JSX.Element {
-    const {configuracion, toggleOcultarCompletadas, toggleOcultarBadgeProyecto, toggleEliminarCompletadasDespuesDeUnDia, toggleMostrarHabitosEnEjecucion, toggleModoCompacto, toggleOcultarSubtareasAutomaticamente, toggleIgnorarUrgenciaEnPrioridad, toggleOcultarBadgeUrgencia, toggleOcultarBadgeImportancia, toggleOcultarBadgeDificultad} = useConfiguracionTareas();
+    const {configuracion, toggleOcultarCompletadas, toggleOcultarBadgeProyecto, toggleEliminarCompletadasDespuesDeUnDia, toggleMostrarHabitosEnEjecucion, toggleModoCompacto, toggleOcultarSubtareasAutomaticamente, toggleIgnorarUrgenciaEnPrioridad, toggleOcultarBadgeUrgencia, toggleOcultarBadgeImportancia, toggleOcultarBadgeDificultad, toggleUsarTabsGrupos} = useConfiguracionTareas();
     /* [28-08-2026] La opción de dificultad solo aplica con el plugin EXP activo. */
     const expActivo = usePluginActivo('exp');
     return (
         <div className="contenedorOpcionesConfig">
+            <ItemToggle titulo="Tabs de grupos" descripcion="Cada grupo de ejecución se muestra como una pestaña en el panel de tareas" checked={configuracion.usarTabsGrupos} onChange={toggleUsarTabsGrupos} />
             <ItemToggle titulo="Ocultar tareas completadas" descripcion="Las tareas finalizadas no aparecerán en la lista" checked={configuracion.ocultarCompletadas} onChange={toggleOcultarCompletadas} />
             <ItemToggle titulo="Ocultar nombre de proyecto" descripcion="No mostrar el badge del proyecto en las tareas" checked={configuracion.ocultarBadgeProyecto} onChange={toggleOcultarBadgeProyecto} />
             <ItemToggle titulo="Ocultar badge de urgencia" descripcion="No mostrar el indicador de urgencia en las tareas" checked={configuracion.ocultarBadgeUrgencia} onChange={toggleOcultarBadgeUrgencia} />

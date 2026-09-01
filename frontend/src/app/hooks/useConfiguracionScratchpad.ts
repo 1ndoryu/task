@@ -7,12 +7,15 @@ export interface ConfiguracionScratchpad {
     tamanoFuente: TamanoFuente;
     altura: AlturaScratchpad;
     autoGuardadoIntervalo: number; // milisegundos
+    /* [318A-14] Tabs de notas en el panel (cada nota es una tab). */
+    usarTabsNotas: boolean;
 }
 
 export const CONFIG_SCRATCHPAD_DEFECTO: ConfiguracionScratchpad = {
     tamanoFuente: 'normal',
     altura: '100%',
-    autoGuardadoIntervalo: 1500
+    autoGuardadoIntervalo: 1500,
+    usarTabsNotas: true
 };
 
 export function useConfiguracionScratchpad() {
@@ -32,11 +35,20 @@ export function useConfiguracionScratchpad() {
         setValor(prev => ({...prev, autoGuardadoIntervalo: intervalo}));
     };
 
+    /* [318A-14] Toggle de tabs de notas en el panel. */
+    const toggleUsarTabsNotas = () => {
+        setValor(prev => ({...prev, usarTabsNotas: !prev.usarTabsNotas}));
+    };
+
     return {
-        configuracion: valor,
+        /* [318A-14] Merge con defaults: la config guardada puede ser anterior a
+         * un campo nuevo (ej: usarTabsNotas), así que siempre se completa con
+         * CONFIG_SCRATCHPAD_DEFECTO para que el campo nunca quede undefined. */
+        configuracion: {...CONFIG_SCRATCHPAD_DEFECTO, ...valor},
         actualizarConfiguracion: setValor,
         cambiarTamanoFuente,
         cambiarAltura,
-        cambiarAutoGuardado
+        cambiarAutoGuardado,
+        toggleUsarTabsNotas
     };
 }

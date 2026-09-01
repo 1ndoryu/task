@@ -43,6 +43,7 @@
 @import './shared/panelSeguridad.css';
 @import './shared/selectorBadge.css';
 @import './shared/selectorGrupo.css';
+@import './shared/tabsCompartidas.css';
 @import './shared/tooltip.css';
 @import './shared/layoutManager.css';
 @import './shared/panelArrastrable.css';
@@ -84,7 +85,8 @@
 @import './componentes/panelConfiguracion.css';
 @import './componentes/adjuntos.css';
 @import './componentes/proyectos.css';@import './componentes/configuracionTareas.css';
-@import './componentes/formCampo.css';
+@import './componentes/formCampo.css';
+
 @import './componentes/configuracionHabitos.css';
 @import './componentes/modalMoverTarea.css';
 @import './componentes/listaOrdenPaneles.css';
