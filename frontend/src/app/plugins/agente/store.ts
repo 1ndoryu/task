@@ -194,6 +194,16 @@ function tabDe(estado: EstadoAgente, id: string): TabAgente | undefined {
     return estado.tabs.find(t => t.conversacion.id === id);
 }
 
+/* [318A-8] La config de la conversación activa es la fuente de verdad del
+ * selector/modal: al abrir una tab (o cargar la lista) se sincroniza la config
+ * global del store con la de esa conversación para que el selector muestre lo
+ * que realmente se guardó en el servidor (antes quedaba la del localStorage,
+ * que podía pertenecer a otra conversación). */
+function configDeTab(estado: EstadoAgente, id: string | null): ConfigAgente {
+    const tab = id ? tabDe(estado, id) : undefined;
+    return tab?.config ?? estado.config;
+}
+
 /* Ejecuta el stream SSE de un turno y aplica los eventos a la burbuja del
  * asistente. Idempotencia y reintento: la clave ya viene fijada. */
 async function correrTurno(
@@ -398,17 +408,22 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                 error: null,
                 config: c.config ? normalizarConfig(aConfigFrontend(c.config)) : cargarConfig(),
             }));
+            const tabActivaId = get().tabActivaId && tabs.some(t => t.conversacion.id === get().tabActivaId)
+                ? get().tabActivaId
+                : (tabs[0]?.conversacion.id ?? null);
+            /* [318A-8] Al cargar, la config global se alinea con la de la
+             * conversación activa (fuente de verdad del selector); si no hay
+             * conversaciones, conserva la del localStorage. */
+            const tabActiva = tabActivaId ? tabs.find(t => t.conversacion.id === tabActivaId) : undefined;
             set({
                 tabs,
+                config: tabActiva?.config ?? get().config,
                 conversacionesCargadas: true,
                 cargandoLista: false,
-                tabActivaId: get().tabActivaId && tabs.some(t => t.conversacion.id === get().tabActivaId)
-                    ? get().tabActivaId
-                    : (tabs[0]?.conversacion.id ?? null),
+                tabActivaId,
             });
-            const activa = get().tabActivaId;
-            if (activa) {
-                void get().abrirTab(activa);
+            if (tabActivaId) {
+                void get().abrirTab(tabActivaId);
             }
         } catch (error) {
             set({
@@ -419,7 +434,13 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
     },
 
     abrirTab: async (id) => {
-        set({tabActivaId: id});
+        set(state => ({
+            tabActivaId: id,
+            /* [318A-8] Al cambiar de conversación, el selector/modal deben
+             * mostrar la config de ESA conversación (persistida en el
+             * servidor), no la del localStorage. */
+            config: configDeTab(state, id),
+        }));
         const tab = tabDe(get(), id);
         if (!tab || tab.mensajes.length > 0) return;
         set(state => ({
@@ -507,13 +528,17 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
             logWarn('agenteStore', 'no se pudo eliminar la conversación en el servidor', error);
         }
         const resto = get().tabs.filter(t => t.conversacion.id !== id);
-        set(state => ({
-            tabs: resto,
-            tabActivaId:
-                state.tabActivaId === id
-                    ? (resto[0]?.conversacion.id ?? null)
-                    : state.tabActivaId,
-        }));
+        const nuevaActiva = (state: EstadoAgente) => {
+            const activaId = state.tabActivaId === id ? (resto[0]?.conversacion.id ?? null) : state.tabActivaId;
+            /* [318A-8] Si no queda ninguna conversación, la config global vuelve
+             * a la del localStorage (defaults); si queda, se alinea con la nueva
+             * tab activa para que el selector no muestre la de la cerrada. */
+            const config = activaId
+                ? (resto.find(t => t.conversacion.id === activaId)?.config ?? state.config)
+                : cargarConfig();
+            return {tabs: resto, tabActivaId: activaId, config};
+        };
+        set(nuevaActiva);
         const activa = get().tabActivaId;
         if (activa && resto.some(t => t.conversacion.id === activa) && !tabDe(get(), activa)?.mensajes.length) {
             void get().abrirTab(activa);
@@ -726,7 +751,11 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
 
     establecerConfig: (config) => {
         const tabId = get().tabActivaId;
-        const nueva = {...get().config, ...config};
+        /* [318A-8] La base es la config de la conversación activa (fuente de
+         * verdad), no la global: así cada conversación conserva sus propios
+         * valores y el selector no arrastra los de otra conversación. */
+        const base = configDeTab(get(), tabId);
+        const nueva = {...base, ...config};
         nueva.provider = (nueva.provider ?? '').trim() || 'glory';
         nueva.modelo = nueva.modelo.trim().replace(/^glory\//, '') || 'commandcode';
         nueva.temperatura = Math.max(0, Math.min(2, Number(nueva.temperatura) || 0));
