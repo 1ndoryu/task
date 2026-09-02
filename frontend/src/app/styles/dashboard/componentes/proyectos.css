@@ -88,15 +88,6 @@
     flex-shrink: 0;
 }
 
-/* Acciones en linea (editar/eliminar) */
-.proyectoAcciones {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    flex-shrink: 0;
-    margin-left: var(--dashboard-espacioSm);
-}
-
 .proyectoAcciones .botonIcono {
     padding: var(--dashboard-espacioXs);
 }
@@ -160,15 +151,6 @@
     color: var(--dashboard-estadoAlta);
 }
 
-.vistaProyectoProgreso {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioMd);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-}
 
 .vistaProyectoProgreso .barraProgresoFondo {
     flex: 1;

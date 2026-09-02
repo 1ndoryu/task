@@ -34,6 +34,12 @@
     font-size: var(--dashboard-tamanoPequeno);
 }
 
+.estadoViabilidad.noViable {
+    background-color: var(--dashboard-estadoAltaFondo);
+    border: 1px solid var(--dashboard-estadoAltaBorde);
+    color: var(--dashboard-estadoAlta);
+}
+
 .estadoViabilidad.viable {
     background-color: var(--dashboard-estadoExitoFondo);
     border: 1px solid var(--dashboard-estadoExitoBorde);
@@ -46,11 +52,6 @@
     color: var(--dashboard-estadoMedia);
 }
 
-.estadoViabilidad.noViable {
-    background-color: var(--dashboard-estadoAltaFondo);
-    border: 1px solid var(--dashboard-estadoAltaBorde);
-    color: var(--dashboard-estadoAlta);
-}
 
 .iconoViabilidad {
     font-size: var(--dashboard-tamanoMovilPequeno);

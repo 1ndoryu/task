@@ -117,13 +117,6 @@
     color: var(--dashboard-textoActivo);
     font-weight: 500;
 }
-
-.filaTags {
-    display: flex;
-    gap: var(--dashboard-espacioSm);
-    margin-top: var(--dashboard-espacioXs);
-}
-
 /* 
  * INDICADOR DE FRECUENCIA EN TITULO 
  * Muestra icono de reloj y numero de intervalo junto al nombre

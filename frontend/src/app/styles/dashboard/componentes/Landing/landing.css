@@ -252,8 +252,6 @@
         padding: calc(var(--dashboard-espacioXl) * 3) var(--dashboard-espacioMd);
     }
 
-    .landingBotonPrimario,
-
     .landingSeccion {
         padding: calc(var(--dashboard-espacioXl) * 2) var(--dashboard-espacioMd);
     }

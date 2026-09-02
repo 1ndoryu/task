@@ -141,53 +141,8 @@
 }
 
 /* Modificamos .tareaAcciones para que herede o se comporte bien dentro del contenedor */
-.tareaAcciones {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    /* opacity: 1; -> Ya no necesario, controlado por contenedor */
-}
-
-.tareaBotonEliminar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioXs);
-    transition: all var(--dashboard-transicionRapida);
-}
 
 /* [233A-31] Sin background hover — solo cambio de color */
-.tareaBotonEliminar:hover {
-    color: var(--dashboard-estadoAlta);
-    border-color: transparent;
-    background-color: transparent;
-}
-
-.tareaBotonEditar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioXs);
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.tareaBotonEditar:hover {
-    color: var(--dashboard-textoNormal);
-    border-color: var(--dashboard-bordePrincipal);
-    background-color: var(--dashboard-fondoHover);
-}
 
 /* 
  * MODO EDICION INLINE
@@ -226,133 +181,23 @@
 /* 
  * Acciones de edicion - ocultas por defecto, visibles en hover de item
  */
-.tareaEdicionAcciones {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    opacity: 0;
-    transition: opacity var(--dashboard-transicionRapida);
-}
 
 .tareaItemEditando:hover .tareaEdicionAcciones {
     opacity: 1;
 }
 
 .tareaEdicionConfirmar,
-.tareaEdicionCancelar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    background: transparent;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.tareaEdicionConfirmar {
-    color: var(--dashboard-estadoExito);
-}
-
-.tareaEdicionConfirmar:hover {
-    background-color: var(--dashboard-estadoExitoFondo);
-    border-color: var(--dashboard-estadoExitoBorde);
-}
-
-.tareaEdicionCancelar {
-    color: var(--dashboard-textoApagado);
-}
-
-.tareaEdicionCancelar:hover {
-    color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
 
 /* 
  * BOTON NUEVA TAREA
  */
-.tareaNuevoBoton {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    width: 100%;
-    padding: var(--dashboard-espacioMd);
-    background: transparent;
-    border: none;
-    border-bottom: 1px dashed var(--dashboard-bordePunteado);
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    font-size: var(--dashboard-tamanoBase);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    text-align: left;
-    transition: all var(--dashboard-transicionNormal);
-}
-
-.tareaNuevoBoton:hover {
-    color: var(--dashboard-textoNormal);
-    background-color: var(--dashboard-fondoHover);
-}
 
 /* 
  * FORMULARIO NUEVA TAREA
  */
 
-.tareaNuevoInput {
-    width: 100%;
-    padding: var(--dashboard-espacioSm);
-    background-color: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    outline: none;
-    transition: border-color var(--dashboard-transicionNormal);
-}
-
-.tareaNuevoInput:focus {
-    border-color: var(--dashboard-textoApagado);
-}
-
-.tareaNuevoInput::placeholder {
-    color: var(--dashboard-textoPlaceholder);
-}
 
 .tareaNuevoConfirmar,
-.tareaNuevoCancelar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.tareaNuevoConfirmar {
-    color: var(--dashboard-estadoExito);
-}
-
-.tareaNuevoConfirmar:hover:not(:disabled) {
-    background-color: var(--dashboard-estadoExitoFondo);
-    border-color: var(--dashboard-estadoExitoBorde);
-}
-
-.tareaNuevoConfirmar:disabled {
-    color: var(--dashboard-textoIndice);
-    cursor: not-allowed;
-}
-
-.tareaNuevoCancelar {
-    color: var(--dashboard-textoApagado);
-}
-
-.tareaNuevoCancelar:hover {
-    color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
 
 /* 
  * INPUT INLINE NUEVA TAREA
@@ -374,23 +219,6 @@
 /* 
  * Input oculto por defecto, visible al enfocar
  */
-.tareaNuevoInlineInput {
-    flex: 1;
-    padding: 0;
-    margin: 0;
-    background-color: transparent;
-    border: none;
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    line-height: 1.4;
-    outline: none;
-    text-align: left;
-}
-
-.tareaNuevoInlineInput::placeholder {
-    color: var(--dashboard-textoApagado);
-}
 
 /* 
  * Boton de confirmar - solo visible cuando hay texto
@@ -502,27 +330,6 @@
  */
 
 /* [218A-3] Handle de arrastre dedicado para Reorder.Item (clase legacy) */
-.tareaArrastreHandle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    color: var(--dashboard-textoApagado);
-    opacity: 0.35;
-    padding: 0 4px;
-    margin-left: -4px;
-    transition: opacity var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida);
-    flex-shrink: 0;
-}
-
-.tareaArrastreHandle:hover {
-    opacity: 0.9;
-    color: var(--dashboard-textoNormal);
-}
-
-.tareaArrastreHandle:active {
-    cursor: grabbing;
-}
 
 .tareaItem:hover .tareaArrastreHandle {
     opacity: 0.7;
@@ -694,26 +501,6 @@
 /* 
  * Zona de drop superior de la lista (primera posición)
  */
-.listaTareasDropZonaSuperior {
-    height: 8px;
-    background: transparent;
-    position: relative;
-    transition: background-color var(--dashboard-transicionRapida);
-}
-
-.listaTareasDropZonaSuperior.dropActivo {
-    background-color: rgba(var(--dashboard-exitoRgb), 0.1);
-}
-
-.listaTareasDropZonaSuperior.dropActivo::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: var(--dashboard-estadoExito);
-}
 
 /* [014A-21] Padding en lista pendientes solo desktop para respiro visual */
 @media (min-width: 481px) {

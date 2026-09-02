@@ -162,20 +162,6 @@
     font-size: var(--dashboard-tamanoPequeno);
 }
 
-/* Input de grupo de ejecución */
-.inputGrupoEjecucion {
-    width: 100%;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border: 1px solid var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioSutil);
-    background: var(--dashboard-fondoPrincipal);
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    outline: none;
-    transition: border-color var(--dashboard-transicionRapida);
-}
-
 .inputGrupoEjecucion:focus {
     border-color: var(--dashboard-primario);
 }

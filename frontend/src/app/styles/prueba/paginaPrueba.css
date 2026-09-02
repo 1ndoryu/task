@@ -80,21 +80,6 @@
     gap: var(--dashboard-espacioMd);
 }
 
-.botonContador {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--dashboard-radioCirculo);
-    border: 2px solid var(--dashboard-superposicionMedia);
-    background: transparent;
-    color: var(--dashboard-textoSobreAcento);
-    font-size: var(--dashboard-tamanoSubtitulo);
-    font-weight: 300;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 .botonContador:hover {
     background: var(--dashboard-superposicionSutil);

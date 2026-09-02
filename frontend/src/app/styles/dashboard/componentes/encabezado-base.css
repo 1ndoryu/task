@@ -203,14 +203,6 @@
     border-bottom: 1px solid var(--dashboard-panelHeaderBorde);
 }
 
-.seccionBoton {
-    background: none;
-    border: none;
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    padding: var(--dashboard-espacioXs);
-    transition: color var(--dashboard-transicionNormal);
-}
 
 .seccionBoton:hover {
     color: var(--dashboard-textoActivo);

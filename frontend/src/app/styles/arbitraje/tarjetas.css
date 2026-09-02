@@ -4,18 +4,6 @@
  */
 
 /* Tarjetas de escenario */
-.tarjetasEscenarios {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--dashboard-espacioMd);
-}
-
-@media (max-width: 700px) {
-    .tarjetasEscenarios {
-        grid-template-columns: 1fr;
-    }
-}
-
 .tarjetaEscenario {
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -37,6 +25,19 @@
     border-left: 2px solid var(--dashboard-estadoExito);
 }
 
+.tarjetasEscenarios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--dashboard-espacioMd);
+}
+
+@media (max-width: 700px) {
+    .tarjetasEscenarios {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 .cabeceraEscenario {
     display: flex;
     justify-content: space-between;
@@ -55,15 +56,6 @@
     padding: 2px 6px;
     background-color: var(--dashboard-superposicionClara);
 }
-
-/* Métricas principales */
-
-.valorMetrica {
-    font-size: var(--dashboard-tamanoTitulo);
-    font-weight: 600;
-    color: var(--dashboard-textoActivo);
-}
-
 .valorMetrica.positivo {
     color: var(--dashboard-estadoExito);
 }

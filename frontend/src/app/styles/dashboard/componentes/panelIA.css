@@ -365,7 +365,7 @@
 /* [303A-11] Acciones destructivas pendientes de confirmación */
 .panelIAAccionBadge--pendiente {
     background: transparent;
-    border: 1px solid var(--dashboard-estadoPendienteBorde, var(--dashboard-bordeNeutro));
+    border: 1px solid var(--dashboard-bordeNeutro);
     color: var(--dashboard-estadoPendiente);
     flex-wrap: wrap;
 }

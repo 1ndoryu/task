@@ -14,21 +14,6 @@
     gap: var(--dashboard-espacioSm);
 }
 
-.botonAccionDatos {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
 
 .botonAccionDatos:hover {
     background-color: var(--dashboard-fondoHover);

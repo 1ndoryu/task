@@ -136,7 +136,6 @@ body {
  */
 @media (max-width: 480px) {
     /* Botones y elementos interactivos */
-    .botonAccion,
     .botonOpcion,
     .pillOpcion,
     .botonOpcionCompacta {
@@ -222,14 +221,6 @@ body {
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-    }
-
-    /* Listas scrolleables */
-    .listaScrolleable {
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
     }
 }
 

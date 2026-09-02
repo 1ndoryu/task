@@ -187,18 +187,6 @@
     }
 }
 
-.botonReintentar {
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    border-radius: var(--dashboard-radioSm);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
 
 .botonReintentar:hover {
     border-color: var(--dashboard-bordeSutil);
@@ -366,19 +354,6 @@
     flex-shrink: 0;
 }
 
-.solicitudBoton,
-.companeroBoton {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs);
-    background: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
 
 .solicitudBoton span {
     font-size: var(--dashboard-tamanoPequeno);

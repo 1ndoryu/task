@@ -139,10 +139,6 @@
         padding: var(--dashboard-espacioMovilXs) 0;
     }
 
-    .seccionModerna__tituloTexto {
-        font-size: var(--dashboard-tamanoMuyPequeno);
-        min-width: 70px;
-    }
 
     .seccionModerna__botonAgregar {
         padding: 2px 6px;
@@ -172,13 +168,6 @@
         padding: var(--dashboard-espacioMovilMd);
     }
 
-    .modalModerna__cuerpo {
-        padding: var(--dashboard-espacioMovilMd);
-    }
-
-    .modalModerna__footer {
-        padding: var(--dashboard-espacioMovilSm) var(--dashboard-espacioMovilMd);
-    }
 
     /* 
      * RESUMEN TAREAS PROYECTO - Más compacto

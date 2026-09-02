@@ -24,32 +24,6 @@
         margin: 0 !important;
     }
 
-    /* Header del modal movil */
-    .modalMovil__cabecera {
-        display: flex;
-        align-items: center;
-        padding: var(--dashboard-espacioMd);
-        border-bottom: 1px solid var(--dashboard-bordePrincipal);
-        position: sticky;
-        top: 0;
-        background: var(--dashboard-fondoSecundario);
-        z-index: 10;
-    }
-
-    /* Boton volver en lugar de X */
-    .modalMovil__botonVolver {
-        display: flex;
-        align-items: center;
-        gap: var(--dashboard-espacioSm);
-        background: none;
-        border: none;
-        color: var(--dashboard-textoNormal);
-        font-size: var(--dashboard-tamanoMovilBase);
-        cursor: pointer;
-        padding: var(--dashboard-espacioSm);
-        min-height: var(--dashboard-tamanoTactilMinimo);
-    }
-
     .modalMovil__botonVolver:hover {
         color: var(--dashboard-textoActivo);
     }

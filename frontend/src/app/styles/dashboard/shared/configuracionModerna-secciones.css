@@ -35,12 +35,6 @@
     padding: var(--dashboard-espacioXs) 0;
 }
 
-.seccionModerna__titulo {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioMd);
-    margin-bottom: 0;
-}
 
 .seccionModerna__tituloTexto {
     font-size: var(--dashboard-tamanoPequeno);
@@ -69,22 +63,6 @@
     color: var(--dashboard-textoNormal);
 }
 
-.seccionModerna__contenido {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--dashboard-espacioSm);
-}
-
-.seccionModerna__vacio {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: 2px 8px;
-    color: var(--dashboard-textoApagado);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-style: normal;
-    border: 1px solid transparent;
-}
 
 /* 
  * RESUMEN TAREAS PROYECTO

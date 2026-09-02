@@ -198,28 +198,6 @@
 }
 
 /* Cancelar / Cerrar */
-.bottomSheetCancelar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--dashboard-espacioSm);
-    min-height: 40px;
-    color: var(--dashboard-textoApagado);
-    background: none;
-    border: none;
-    border-top: 1px solid var(--dashboard-bordePrincipal);
-    width: 100%;
-    font-size: var(--dashboard-tamanoMovilPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    cursor: pointer;
-    margin-top: auto;
-}
-
-.bottomSheetCancelar:hover {
-    color: var(--dashboard-textoNormal);
-    background: var(--dashboard-fondoHover);
-}
-
 /* 
  * ANIMACION DE ENTRADA DESDE ABAJO 
  */

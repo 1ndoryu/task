@@ -478,22 +478,3 @@
     margin-bottom: var(--dashboard-espacioMd);
 }
 
-.adminTab {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border: none;
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoBase);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioMini);
-    transition: var(--dashboard-transicionRapida);
-}
-
-.adminTab:hover {
-    color: var(--dashboard-textoNormal);
-    background: var(--dashboard-fondoHover);
-}

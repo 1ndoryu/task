@@ -146,12 +146,3 @@
 .dockTrackingBoton--ajusteTiempo:hover {
     color: var(--dashboard-estadoInfo);
 }
-
-/* Padding adicional al body cuando el dock está visible */
-.conDockTracking {
-    padding-bottom: var(--dashboard-tamanoTactilMinimo) !important;
-}
-
-.conDockTracking.conDockTrackingMovil {
-    padding-bottom: var(--dashboard-espacio6xl) !important;
-}

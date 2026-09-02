@@ -90,24 +90,6 @@
     font-size: var(--dashboard-tamanoPequeno);
 }
 
-.detalleCerrarBoton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    border-radius: var(--dashboard-radioSm);
-    cursor: pointer;
-    transition: var(--dashboard-transicionRapida);
-}
-
-.detalleCerrarBoton:hover {
-    color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-textoApagado);
-}
 
 /* 
  * SECCIONES
@@ -162,6 +144,7 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
+
 .detallePlan {
     padding: 2px 8px;
     border-radius: var(--dashboard-radioMini);
@@ -180,6 +163,7 @@
     color: var(--dashboard-textoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
 }
+
 
 .detalleEstado {
     padding: 2px 8px;
