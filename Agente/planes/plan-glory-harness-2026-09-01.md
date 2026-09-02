@@ -343,9 +343,15 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 - [ ] **Checklist:** `glory-harness run --prompt "..."` responde (el subcomando funciona; un turno real requiere proveedor LLM en env); `daemon` NDJSON emitido y validado end-to-end (abrir sesión → stream `AgenteEvento` → `done` → cerrar; ≥2 sesiones se soportan por diseño con lock por sesión); gate glory-harness PASS (318A-13). Queda pendiente demostrar ≥2 sesiones en paralelo con turno real + paridad/evidencia SSE con proveedor externo.
 
 ### Fase 4 — Segundo consumidor (opcional, validar contigo)
-- [ ] Identificar un proyecto real (p. ej. WANDORIUS o un script) y consumir `glory-harness run`/lib.
-- [ ] Documentar en README el caso de uso del segundo consumidor.
-- [ ] **Checklist:** segundo consumidor funcional; sin cambios en el núcleo (o cambios justificados).
+- [x] Identificar un proyecto real (p. ej. WANDORIUS o un script) y consumir `glory-harness run`/lib
+  — se eligió un **script de ejemplo** (`examples/consumidor-daemon.mjs`) que consume el daemon como
+  servicio de fondo vía NDJSON; decisión autónoma de bajo riesgo (sin tocar WANDORIUS, que requiere
+  autorización explícita). Probado end-to-end contra el daemon release.
+- [x] Documentar en README el caso de uso del segundo consumidor.
+- [ ] **Checklist:** segundo consumidor funcional ✅; sin cambios en el núcleo ✅.
+  Pendiente para cerrar del todo: integrar el daemon en un consumidor de producción (WANDORIUS u
+  otro) cuando el usuario lo elija; evidencia de turno SSE real con proveedor externo (requiere
+  clave LLM en env).
 
 ---
 
