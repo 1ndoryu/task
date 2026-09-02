@@ -320,19 +320,20 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 ### Fase 1 — Definir traits y mover módulos agnósticos (como crate lib)
 - [x] Definir `AgentPersistence`, `WebSearchProvider`, `ProviderPort` en el núcleo (validado S2/S3: sin sqlx, sin tipos de task). Contrato serde snake_case con tests (`contrato_tests.rs`, 12/12).
 - [x] Desacoplar `LlmProviderService` de `crate::config::AiProviderKeys` y `crate::errors::AppError` → `core/src/llm.rs` con tipos propios y tests portados 12/12 (commit `ff65ccf`). 3 warnings estructurales heredados (`limite-lineas`, `funcion-larga` en `llm.rs`) documentados; 0 errores gate.
-- [ ] Extraer de `runtime.rs` las funciones de persistencia/dominio (`persistir_turno`, `cargar_historial`, `cargar_memoria_agente`, `cargar_skills_agente`) → implementación del puerto `AgentPersistence` en task (**no se mueven al núcleo**; bloque de Fase 2).
+- [x] Extraer de `runtime.rs` las funciones de persistencia/dominio (`persistir_turno`, `cargar_historial`, `cargar_memoria_agente`, `cargar_skills_agente`) → implementación del puerto `AgentPersistence` en task (**no se mueven al núcleo**; bloque de Fase 2; commit task `d9d523f`: `src/agent/adaptador.rs`).
 - [x] Convertir **todas** las queries de `scheduler.rs` a métodos del trait `AgentPersistence` — puerto extendido con `tarea_reprogramar` (commit `5125589`); scheduler 100% sin SQL.
 - [x] Mover a `glory-harness-core`: `diff.rs`, `context.rs`, `sandbox.rs` (commit `fe47ccc`); `tool.rs`, `tools_archivo.rs`, `tools_web.rs` (commit `def5aa7`); `scheduler.rs` (commit `5125589`); `runtime.rs` sin SQL sobre puertos con contrato H3 alineado al SSE de task (commit `ad57f54`); `services/ai.rs` como `llm.rs` desacoplado (commit `ff65ccf`). 44/44 tests core, 0 warnings, gate 0 errores (warnings estructurales heredados documentados).
 - [x] `web_search` (agnóstica) al núcleo (`tools_web.rs`); `crear_tarea`/`crear_habito`/`crear_recordatorio`/`crear_nota` quedan en task como tools registradas contra el trait (Fase 2).
-- [ ] Task implementa `AgentPersistence` con sus repositorios `agente_*`; `WebSearchProvider` con `WebSearchService`; `ProviderPort` con el provider movido (Fase 2).
-- [ ] `handlers/agente.rs` y `AppState` se adaptan: construyen el runtime con los puertos, sin lógica de núcleo (Fase 2).
+- [x] Task implementa `AgentPersistence` con sus repositorios `agente_*`; `WebSearchProvider` con `WebSearchService`; `ProviderPort` con el provider movido (Fase 2; commit task `d9d523f`).
+- [x] `handlers/agente.rs` y `AppState` se adaptan: construyen el runtime con los puertos, sin lógica de núcleo (Fase 2; commit task `d9d523f`).
 - [ ] **Checklist:** núcleo compila sin task; task compila y un turno de chat real funciona igual (evidencia SSE); tests movidos pasan; tests de task sin regresión; gate task PASS; commit por bloque.
+  - Parcial (02-09): núcleo compila (44/44 tests core, gate glory-harness PASS); task compila (`cargo check` 0 errores) y tests 23 pass sin regresión; `export-openapi` incluye `AiMessage` como schema. **Gate task queda bloqueado por desync varsense preexistente (318A-6VAR)**: `readyForGate:false` por varsense commit `38889aa` no alcanzable + evidencia de compilación ausente; NO se forzó (trabajo separado). Turno de chat real con proveedor externo pendiente de evidencia SSE.
 
 ### Fase 2 — Integración como lib en task
-- [ ] task declara `glory-harness-core` como dependencia path (opción A de 5.1).
-- [ ] Eliminar de task `src/agent/*` movidos y `src/services/ai.rs` (ahora import del crate).
-- [ ] Verificación funcional completa: chat real, tools de archivo (local), memoria, skills, tareas programadas, compactación.
-- [ ] **Checklist:** task sin `src/agent/` movido; todo el contrato SSE funciona; gate task PASS; evidencia de turno real.
+- [x] task declara `glory-harness-core` como dependencia path (opción A de 5.1) — `Cargo.toml` `path="../glory-harness/core"`.
+- [x] Eliminar de task `src/agent/*` movidos y `src/services/ai.rs` (ahora import del crate) — 6 módulos huérfanos borrados (`context/diff/runtime/sandbox/tool/tools_archivo`), `services/ai.rs` reducido a re-export, `mod.rs`/`scheduler.rs`/`tools.rs` re-apuntan al crate (commit task `d9d523f`).
+- [ ] Verificación funcional completa: chat real, tools de archivo (local), memoria, skills, tareas programadas, compactación — parcial: compilación 0 errores, tests 23 pass, tests adaptador (skills) pasan, OpenAPI incluye `AiMessage`; falta turno SSE real con proveedor externo.
+- [ ] **Checklist:** task sin `src/agent/` movido; todo el contrato SSE funciona; gate task PASS; evidencia de turno real — código completo y compila; gate task bloqueado por 318A-6VAR (preexistente); falta evidencia de turno SSE real.
 
 ### Fase 3 — CLI y daemon (el "corre de fondo" que pediste)
 - [ ] Binario `glory-harness` con subcomandos `run` (one-shot CLI) y `daemon` (SSE loopback, opción A de 5.2; `--stdio` futuro).
