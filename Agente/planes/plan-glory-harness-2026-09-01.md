@@ -336,11 +336,11 @@ Tu duda: *"¿separar también la interfaz? no lo sé, creo que mejor no"*.
 - [ ] **Checklist:** task sin `src/agent/` movido; todo el contrato SSE funciona; gate task PASS; evidencia de turno real — código completo y compila; gate task bloqueado por 318A-6VAR (preexistente); falta evidencia de turno SSE real.
 
 ### Fase 3 — CLI y daemon (el "corre de fondo" que pediste)
-- [ ] Binario `glory-harness` con subcomandos `run` (one-shot CLI) y `daemon` (SSE loopback, opción A de 5.2; `--stdio` futuro).
-- [ ] **Daemon multi-sesión** (requisito §6.7): lock por `session_id` dentro del daemon, no en cada consumidor — habilita task + CLI + escritorio compartiendo el mismo proceso sin pisarse.
-- [ ] Task puede delegar en el daemon (opción B de 5.1) o seguir con lib — decisión al cerrar la fase según estabilidad.
-- [ ] Auth del daemon: bind loopback + token de sesión.
-- [ ] **Checklist:** `glory-harness run --prompt "..."` responde; `daemon` emite H3 en loopback con token y atiende ≥2 sesiones en paralelo; task usa lib o daemon con paridad; gate ambos proyectos PASS.
+- [x] Binario `glory-harness` con subcomandos `run` (one-shot CLI), `daemon` (NDJSON TCP loopback, opción A de 5.2), `tools` y `doctor` (commit glory-harness `5da99d0`).
+- [x] **Daemon multi-sesión** (requisito §6.7): lock por `session_id` dentro del daemon — varios consumidores comparten el mismo proceso sin pisarse.
+- [x] Auth del daemon: bind loopback + token de sesión (`sesion_abrir` valida token; token inválido → `error`).
+- [ ] Task puede delegar en el daemon (opción B de 5.1) o seguir con lib — decisión al cerrar la fase según estabilidad (actual: mantenido en lib tras Fase 2).
+- [ ] **Checklist:** `glory-harness run --prompt "..."` responde (el subcomando funciona; un turno real requiere proveedor LLM en env); `daemon` NDJSON emitido y validado end-to-end (abrir sesión → stream `AgenteEvento` → `done` → cerrar; ≥2 sesiones se soportan por diseño con lock por sesión); gate glory-harness PASS (318A-13). Queda pendiente demostrar ≥2 sesiones en paralelo con turno real + paridad/evidencia SSE con proveedor externo.
 
 ### Fase 4 — Segundo consumidor (opcional, validar contigo)
 - [ ] Identificar un proyecto real (p. ej. WANDORIUS o un script) y consumir `glory-harness run`/lib.
