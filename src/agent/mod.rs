@@ -1,14 +1,16 @@
-/* [29-08-2026] Plugin de agente de IA (plan-agente-ia-plugin-2026-08-27.md).
- * Módulo `agent/`: framework de tools (tool.rs), manejo de contexto con
- * autocompactación (context.rs), runtime del loop (runtime.rs) y tools de
- * dominio (tools.rs). Frontera limpia: lo agnóstico (trait, registry,
- * contexto) puede extraerse a glory-rs cuando exista un segundo consumidor. */
+/* [03-09-2026] Fase 2 Glory Harness: `agent/` en task solo conserva lo que
+ * pertenece al dominio — el adaptador de persistencia (`adaptador.rs`) y las
+ * tools de dominio (`tools.rs`). El runtime, scheduler, contexto y tools
+ * agnósticas viven en `glory-harness-core`; aquí se re-exportan los tipos
+ * que el handler y main usan, para que los consumidores no importen el crate
+ * a pelo. */
 
-pub mod context;
-pub mod diff;
-pub mod runtime;
-pub mod sandbox;
+pub mod adaptador;
 pub mod scheduler;
-pub mod tool;
 pub mod tools;
-pub mod tools_archivo;
+
+pub use glory_harness_core::context::ContextoConfig;
+pub use glory_harness_core::evento::AgenteEvento;
+pub use glory_harness_core::runtime::{AgentRuntime, PuertosHarness, TurnoConfig};
+pub use glory_harness_core::scheduler::correr_scheduler;
+pub use glory_harness_core::tool::AgentToolRegistry;

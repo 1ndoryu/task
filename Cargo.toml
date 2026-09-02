@@ -52,6 +52,10 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 async-trait = "0.1"
 tokio-stream = { version = "0.1", features = ["sync"] }
 
+# Núcleo de IA agnóstico (plan Glory Harness 318A-13, Fase 2): runtime de
+# agente, tools agnósticas, scheduler y puertos; task implementa los ports.
+glory-harness-core = { path = "../glory-harness/core" }
+
 [dev-dependencies]
 tokio-test = "0.4"
 

@@ -1,7 +1,13 @@
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
 use glory_backend::services::SessionService;
+use std::sync::Arc;
 use std::time::Duration;
+
+use chrono::{DateTime, Utc};
+use glory_backend::agent::adaptador::PersistenciaAgente;
+use glory_backend::agent::scheduler::ejecutar_tarea_harness;
+use glory_harness_core::ports::TareaProgramadaPendiente;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -45,11 +51,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     /* [29-08-2026] Scheduler de tareas programadas del agente (Fase 1, sección
      * 8.1 del plan): worker ligero que ejecuta las tareas programadas como
-     * turnos de agente. Recibe el mismo AppState que el router. */
+     * turnos de agente. Desde la Fase 2 (Glory Harness) el loop vive en
+     * `glory-harness-core::scheduler` (heartbeat, toma atómica, cron); aquí
+     * solo se inyecta la persistencia (adaptador) y el runner del consumidor
+     * (`ejecutar_tarea_harness`). El estado es el mismo AppState del router. */
     let scheduler_state = handlers::estado_completo(pool.clone(), &config);
+    let persistencia = Arc::new(PersistenciaAgente::nuevo(pool.clone()));
+    let runner_state = scheduler_state.clone();
     tokio::spawn(async move {
-        glory_backend::agent::scheduler::correr_scheduler(scheduler_state, Duration::from_secs(30))
-            .await;
+        let ejecutar = move |tarea: TareaProgramadaPendiente, _ahora: DateTime<Utc>| {
+            let state = runner_state.clone();
+            async move { ejecutar_tarea_harness(&state, &tarea).await }
+        };
+        glory_backend::agent::correr_scheduler(
+            persistencia.as_ref(),
+            ejecutar,
+            Duration::from_secs(30),
+        )
+        .await;
     });
 
     let addr = format!("{}:{}", config.host, config.port);

@@ -673,6 +673,7 @@ dependencies = [
  "chrono",
  "dotenvy",
  "futures-util",
+ "glory-harness-core",
  "hex",
  "reqwest",
  "serde",
@@ -691,6 +692,22 @@ dependencies = [
  "utoipa-swagger-ui",
  "uuid",
  "validator",
+]
+
+[[package]]
+name = "glory-harness-core"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "futures-util",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "utoipa",
+ "uuid",
 ]
 
 [[package]]

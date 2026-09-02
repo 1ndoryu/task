@@ -52,6 +52,30 @@ pub enum AppError {
     Cancelado,
 }
 
+/* [Fase 2 Glory Harness] El runtime y el LLM viven ahora en
+ * `glory-harness-core`; sus errores se traducen aquí al contrato HTTP del
+ * edificio (misma semántica que los convertidores previos del proxy LLM). */
+impl From<glory_harness_core::HarnessError> for AppError {
+    fn from(err: glory_harness_core::HarnessError) -> Self {
+        use glory_harness_core::HarnessError;
+        match err {
+            HarnessError::Argumentos(msg) | HarnessError::ToolDesconocida(msg) => {
+                AppError::BadRequest(msg)
+            }
+            HarnessError::Proveedor { detalle, .. } => AppError::Upstream(detalle),
+            HarnessError::Validacion(msg) => AppError::Validation(msg),
+            /* Errores de persistencia: detalle al log, mensaje genérico al
+             * cliente (el puerto no expone SQL). */
+            HarnessError::Persistencia(msg) => AppError::Internal(msg),
+            HarnessError::Sandbox(msg) => AppError::Forbidden(msg),
+            HarnessError::NoEncontrado(msg) => AppError::NotFound(msg),
+            HarnessError::Limite(_) => AppError::TooManyRequests,
+            HarnessError::Cancelado => AppError::Cancelado,
+            HarnessError::Interno(msg) => AppError::Internal(msg),
+        }
+    }
+}
+
 /// Estructura de respuesta de error expuesta en la API
 #[derive(Serialize, ToSchema)]
 pub struct ErrorResponse {

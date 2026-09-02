@@ -1,18 +1,64 @@
-/* [29-08-2026] Tools de dominio del agente (plan-agente-ia-plugin, Fase 1).
- * Cada tool valida por user_id (nunca confía en el front) y reutiliza los
- * servicios existentes (misma validación que los handlers HTTP). En v1 no hay
- * tools de archivo (Fase 2, solo AGENTE_MODO=local) ni execute_code. */
+/* [03-09-2026] Tools de dominio del agente (plan Glory Harness, Fase 2):
+ * retargetizadas al trait `AgentTool` del núcleo. El contexto del núcleo no
+ * lleva tipos concretos de task: el pool viaja en el slot opaco `dominio`
+ * (downcast aquí) y la búsqueda web por el puerto `WebSearchProvider`. Cada
+ * tool valida por user_id (nunca confía en el front). */
 
 use async_trait::async_trait;
 use serde_json::{json, Value};
+use sqlx::PgPool;
 
-use crate::agent::tool::{AgentTool, AgentToolContext, AgentToolResult};
-use crate::errors::AppError;
-use crate::models::productivity::{
-    ProductivityWriteResponse, UpsertHabitRequest, UpsertTaskRequest,
-};
+use glory_harness_core::ports::{ResultadoWeb, WebSearchProvider};
+use glory_harness_core::tool::{AgentTool, AgentToolContext, AgentToolResult};
+use glory_harness_core::{HarnessError, HarnessResult};
+
+use crate::models::productivity::{UpsertHabitRequest, UpsertTaskRequest};
 use crate::models::{CreateNoteRequest, CreateReminderRequest};
 use crate::services::{NoteService, ProductivityService, ReminderService};
+use crate::services::web_search::{WebSearchRequest, WebSearchService};
+
+/// Puente del servicio real de búsqueda web al puerto del núcleo
+/// (`WebSearchProvider`). El núcleo solo conoce `ResultadoWeb`; el límite entra
+/// acotado (1-10) para no abusar del proveedor externo.
+pub struct BuscadorWeb(pub WebSearchService);
+
+#[async_trait]
+impl WebSearchProvider for BuscadorWeb {
+    async fn buscar(&self, query: &str, limite: usize) -> HarnessResult<Vec<ResultadoWeb>> {
+        let resultado = self
+            .0
+            .search(&WebSearchRequest {
+                query: query.to_string(),
+                limit: limite.clamp(1, 10) as u32,
+            })
+            .await
+            .map_err(|error| HarnessError::Proveedor {
+                detalle: error.to_string(),
+                causa: None,
+            })?;
+        Ok(resultado
+            .results
+            .into_iter()
+            .map(|item| ResultadoWeb {
+                titulo: item.title,
+                url: item.url,
+                fragmento: item.summary,
+            })
+            .collect())
+    }
+}
+
+/// Servicios de dominio de task que las tools inyectan en el slot opaco del
+/// núcleo. El núcleo no interpreta este tipo (DIP); aquí se downcastea.
+pub struct DominioAgente {
+    pub pool: PgPool,
+}
+
+fn dominio<'a>(ctx: &'a AgentToolContext<'_>) -> HarnessResult<&'a DominioAgente> {
+    ctx.dominio
+        .and_then(|d| d.downcast_ref::<DominioAgente>())
+        .ok_or_else(|| HarnessError::Interno("slot de dominio del agente ausente".into()))
+}
 
 /// ID legacy para crear: la BD exige `legacy_id > 0`. Se usa el timestamp
 /// actual en ms (positivo). El front real genera IDs tipo `Date.now()*1000+n`;
@@ -54,11 +100,12 @@ impl AgentTool for ToolTarea {
         &self,
         ctx: &AgentToolContext<'_>,
         argumentos: Value,
-    ) -> Result<AgentToolResult, AppError> {
+    ) -> HarnessResult<AgentToolResult> {
+        let d = dominio(ctx)?;
         let texto = argumentos
             .get("texto")
             .and_then(Value::as_str)
-            .ok_or_else(|| AppError::BadRequest("texto requerido".into()))?
+            .ok_or_else(|| HarnessError::Validacion("texto requerido".into()))?
             .to_string();
         let legacy_id = legacy_id_de(&argumentos);
         let request = UpsertTaskRequest {
@@ -76,8 +123,9 @@ impl AgentTool for ToolTarea {
             payload: json!({}),
             expected_updated_at: None,
         };
-        let respuesta: ProductivityWriteResponse =
-            ProductivityService::upsert_task(ctx.pool, ctx.user_id, legacy_id, request).await?;
+        let respuesta = ProductivityService::upsert_task(&d.pool, ctx.user_id, legacy_id, request)
+            .await
+            .map_err(harness_de_app)?;
         Ok(AgentToolResult::ok(
             format!("Tarea '{}' guardada (id {}).", respuesta.item["texto"], respuesta.id),
             format!("tarea {}", respuesta.id),
@@ -113,11 +161,12 @@ impl AgentTool for ToolHabito {
         &self,
         ctx: &AgentToolContext<'_>,
         argumentos: Value,
-    ) -> Result<AgentToolResult, AppError> {
+    ) -> HarnessResult<AgentToolResult> {
+        let d = dominio(ctx)?;
         let nombre = argumentos
             .get("nombre")
             .and_then(Value::as_str)
-            .ok_or_else(|| AppError::BadRequest("nombre requerido".into()))?
+            .ok_or_else(|| HarnessError::Validacion("nombre requerido".into()))?
             .to_string();
         let legacy_id = legacy_id_de(&argumentos);
         /* Frecuencia: si viene {tipo, cadaDias} se conserva el objeto completo
@@ -144,8 +193,9 @@ impl AgentTool for ToolHabito {
             payload,
             expected_updated_at: None,
         };
-        let respuesta =
-            ProductivityService::upsert_habit(ctx.pool, ctx.user_id, legacy_id, request).await?;
+        let respuesta = ProductivityService::upsert_habit(&d.pool, ctx.user_id, legacy_id, request)
+            .await
+            .map_err(harness_de_app)?;
         Ok(AgentToolResult::ok(
             format!("Hábito '{}' guardado (id {}).", respuesta.item["nombre"], respuesta.id),
             format!("hábito {}", respuesta.id),
@@ -181,16 +231,17 @@ impl AgentTool for ToolRecordatorio {
         &self,
         ctx: &AgentToolContext<'_>,
         argumentos: Value,
-    ) -> Result<AgentToolResult, AppError> {
+    ) -> HarnessResult<AgentToolResult> {
+        let d = dominio(ctx)?;
         let titulo = argumentos
             .get("titulo")
             .and_then(Value::as_str)
-            .ok_or_else(|| AppError::BadRequest("titulo requerido".into()))?
+            .ok_or_else(|| HarnessError::Validacion("titulo requerido".into()))?
             .to_string();
         let fecha_str = argumentos
             .get("programado_para")
             .and_then(Value::as_str)
-            .ok_or_else(|| AppError::BadRequest("programado_para requerido".into()))?
+            .ok_or_else(|| HarnessError::Validacion("programado_para requerido".into()))?
             .to_string();
         let programado_para = parse_fecha_local(&fecha_str)?;
         let request = CreateReminderRequest {
@@ -206,7 +257,9 @@ impl AgentTool for ToolRecordatorio {
                 .and_then(Value::as_str)
                 .map(str::to_string),
         };
-        let reminder = ReminderService::create(ctx.pool, ctx.user_id, request).await?;
+        let reminder = ReminderService::create(&d.pool, ctx.user_id, request)
+            .await
+            .map_err(harness_de_app)?;
         Ok(AgentToolResult::ok(
             format!(
                 "Recordatorio '{}' programado para {}.",
@@ -242,7 +295,8 @@ impl AgentTool for ToolNota {
         &self,
         ctx: &AgentToolContext<'_>,
         argumentos: Value,
-    ) -> Result<AgentToolResult, AppError> {
+    ) -> HarnessResult<AgentToolResult> {
+        let d = dominio(ctx)?;
         let titulo = argumentos
             .get("titulo")
             .and_then(Value::as_str)
@@ -254,7 +308,7 @@ impl AgentTool for ToolNota {
             .unwrap_or("")
             .to_string();
         let nota = NoteService::create(
-            ctx.pool,
+            &d.pool,
             ctx.user_id,
             CreateNoteRequest {
                 title: titulo,
@@ -262,7 +316,8 @@ impl AgentTool for ToolNota {
                 folder_id: None,
             },
         )
-        .await?;
+        .await
+        .map_err(harness_de_app)?;
         Ok(AgentToolResult::ok(
             format!("Nota '{}' creada (id {}).", nota.title, nota.id),
             format!("nota {}", nota.id),
@@ -294,32 +349,24 @@ impl AgentTool for ToolWebSearch {
         &self,
         ctx: &AgentToolContext<'_>,
         argumentos: Value,
-    ) -> Result<AgentToolResult, AppError> {
+    ) -> HarnessResult<AgentToolResult> {
         let query = argumentos
             .get("query")
             .and_then(Value::as_str)
-            .ok_or_else(|| AppError::BadRequest("query requerido".into()))?
+            .ok_or_else(|| HarnessError::Validacion("query requerido".into()))?
             .to_string();
-        let resultado = ctx
-            .web_search
-            .search(&crate::services::web_search::WebSearchRequest {
-                query,
-                limit: 5,
-            })
-            .await?;
-        let resumen = format!(
-            "{} resultados para '{}'",
-            resultado.results.len(),
-            resultado.query
-        );
-        let contenido = if resultado.results.is_empty() {
+        let proveedor = ctx.web_search.ok_or_else(|| {
+            HarnessError::Interno("búsqueda web no disponible en este entorno".into())
+        })?;
+        let resultados = proveedor.buscar(&query, 5).await?;
+        let resumen = format!("{} resultados para '{}'", resultados.len(), query);
+        let contenido = if resultados.is_empty() {
             "Sin resultados.".to_string()
         } else {
-            resultado
-                .results
+            resultados
                 .iter()
                 .take(5)
-                .map(|r| format!("- {}: {}", r.title, r.url))
+                .map(|r| format!("- {}: {}", r.titulo, r.url))
                 .collect::<Vec<_>>()
                 .join("\n")
         };
@@ -329,7 +376,7 @@ impl AgentTool for ToolWebSearch {
 
 /// Fecha ISO local (sin sufijo de zona) → UTC. El contrato del front es hora
 /// local sin sufijo; el backend persiste UTC y el front muestra en hora local.
-fn parse_fecha_local(fecha: &str) -> Result<chrono::DateTime<chrono::Utc>, AppError> {
+fn parse_fecha_local(fecha: &str) -> HarnessResult<chrono::DateTime<chrono::Utc>> {
     let fecha = fecha.trim();
     let naive = chrono::NaiveDateTime::parse_from_str(fecha, "%Y-%m-%dT%H:%M:%S")
         .or_else(|_| {
@@ -337,7 +384,7 @@ fn parse_fecha_local(fecha: &str) -> Result<chrono::DateTime<chrono::Utc>, AppEr
                 .map(|d| d.and_hms_opt(9, 0, 0).expect("hora fija"))
         })
         .map_err(|_| {
-            AppError::BadRequest(format!(
+            HarnessError::Validacion(format!(
                 "Fecha inválida: {fecha} (use ISO 8601 local, ej. 2026-08-30T09:00:00)"
             ))
         })?;
@@ -348,8 +395,12 @@ fn parse_fecha_local(fecha: &str) -> Result<chrono::DateTime<chrono::Utc>, AppEr
     Ok(chrono::TimeZone::from_utc_datetime(&chrono::Utc, &naive) + chrono::Duration::hours(5))
 }
 
-/// Registro de las tools de dominio en el registry.
-pub fn registrar_tools(registry: &mut crate::agent::tool::AgentToolRegistry) {
+fn harness_de_app(error: crate::errors::AppError) -> HarnessError {
+    HarnessError::Persistencia(error.to_string())
+}
+
+/// Registro de las tools de dominio en el registry del núcleo.
+pub fn registrar_tools(registry: &mut glory_harness_core::tool::AgentToolRegistry) {
     registry.registrar(Box::new(ToolTarea));
     registry.registrar(Box::new(ToolHabito));
     registry.registrar(Box::new(ToolRecordatorio));

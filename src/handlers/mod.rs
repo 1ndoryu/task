@@ -302,7 +302,7 @@ pub fn estado_completo(pool: sqlx::PgPool, config: &crate::config::AppConfig) ->
         auth_crypto_semaphore: std::sync::Arc::new(tokio::sync::Semaphore::new(
             config.auth_crypto_semaphore_permits,
         )),
-        ai_provider: crate::services::LlmProviderService::new(config.ai_provider_keys.clone()),
+        ai_provider: crate::services::LlmProviderService::new(config.ai_provider_keys.clone().into()),
         ai_chat_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
             config.ai_chat_rate_limit_per_hour,
             std::time::Duration::from_secs(60 * 60),

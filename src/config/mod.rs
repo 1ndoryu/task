@@ -39,6 +39,20 @@ pub struct AiProviderKeys {
     pub commandcode: Vec<String>,
 }
 
+/* [Fase 2 Glory Harness] El proxy LLM vive en el núcleo; esta conversión
+ * permite construir `LlmProviderService` desde la config del edificio. */
+impl From<AiProviderKeys> for glory_harness_core::llm::LlavesProveedor {
+    fn from(keys: AiProviderKeys) -> Self {
+        Self {
+            cerebras: keys.cerebras,
+            groq: keys.groq,
+            deepseek: keys.deepseek,
+            glory: keys.glory,
+            commandcode: keys.commandcode,
+        }
+    }
+}
+
 impl AiProviderKeys {
     pub fn from_env() -> Self {
         fn env_list(names: &[&str]) -> Vec<String> {

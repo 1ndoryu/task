@@ -18,20 +18,23 @@ use futures_util::stream::Stream;
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use uuid::Uuid;
 
-use crate::agent::context::ContextoConfig;
-use crate::agent::runtime::{
-    cargar_historial, cargar_memoria_agente, cargar_skills_agente, guardar_mensaje_usuario,
-    persistir_turno, AgenteEvento, AgentRuntime, TurnoConfig,
+use crate::agent::adaptador::PersistenciaAgente;
+use crate::agent::tools::{BuscadorWeb, DominioAgente, registrar_tools};
+use crate::agent::{
+    AgenteEvento, AgentRuntime, AgentToolRegistry, ContextoConfig, PuertosHarness, TurnoConfig,
 };
 use crate::services::ai::AiMessage;
 use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
 use crate::repositories::{AgenteRepository, TareaInsert};
 use crate::AppState;
+use glory_harness_core::ports::TurnoPersistido;
+use glory_harness_core::AgentPersistence;
 
 #[derive(Debug, Deserialize)]
 #[allow(non_snake_case)] // contrato del front (camelCase)
@@ -104,13 +107,30 @@ pub async fn agente_stream(
     let (tx, rx) = mpsc::channel::<AgenteEvento>(128);
     /* Glory/commandcode es política del servidor. Los parámetros avanzados se
      * toman de la conversación; el request solo conserva compatibilidad con
-     * clientes antiguos y no puede cambiar proveedor/modelo. */
-    let runtime = AgentRuntime::nuevo(config_desde_guardada(config_guardada, modo)?);
+     * clientes antiguos y no puede cambiar proveedor/modelo. Fase 2 (Glory
+     * Harness): el runtime del núcleo recibe el registro de tools de dominio
+     * (task) y los puertos (persistencia = adaptador, LLM = provider del
+     * estado, web = BuscadorWeb, dominio = pool para downcast). */
+    let persistencia = Arc::new(PersistenciaAgente::nuevo(state.pool.clone()));
+    let persistencia_port: Arc<dyn AgentPersistence> = persistencia.clone();
+    let mut registry = AgentToolRegistry::new();
+    registrar_tools(&mut registry);
+    let puertos = PuertosHarness {
+        persistencia: persistencia_port,
+        llm: Arc::new(state.ai_provider.clone()),
+        web_search: Some(Arc::new(BuscadorWeb(state.web_search.clone()))),
+        dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
+    };
+    let runtime = AgentRuntime::nuevo(
+        registry,
+        puertos,
+        config_desde_guardada(config_guardada, modo)?,
+    );
 
     /* Persistir el turno como ejecutando y el mensaje del usuario ANTES de
      * arrancar (recuperación de fallos). */
     persistir_turno_y_mensaje(
-        &state,
+        &persistencia,
         turno_id,
         auth.user_id,
         &req,
@@ -119,28 +139,27 @@ pub async fn agente_stream(
     )
     .await?;
 
-    let mut historial = cargar_historial(&state.pool, req.conversacionId, auth.user_id).await?;
+    let mut historial = persistencia
+        .cargar_historial(req.conversacionId, auth.user_id)
+        .await?;
     inyectar_contexto(
-        &state.pool,
+        &persistencia,
         auth.user_id,
         &runtime.turno_config,
         &tx,
         &mut historial,
     )
     .await?;
-    let state_clone = state.clone();
+    let persistencia_loop = Arc::clone(&persistencia);
     let tx_clone = tx.clone();
     let mensaje = req.mensaje.clone();
     let user_id = auth.user_id;
     let conversacion_id = req.conversacionId;
-    let provider = runtime.turno_config.provider.clone();
-    let modelo = runtime.turno_config.modelo.clone();
 
     /* Loop del agente en background; al terminar cierra el canal. */
     tokio::spawn(async move {
         let resultado = runtime
             .ejecutar_turno(
-                &state_clone,
                 user_id,
                 turno_id,
                 conversacion_id,
@@ -150,13 +169,14 @@ pub async fn agente_stream(
             )
             .await;
         if let Err(error) = resultado {
+            let app_error: AppError = error.into();
             let retryable = matches!(
-                error,
+                &app_error,
                 AppError::Upstream(_) | AppError::ServiceUnavailable(_) | AppError::NotConfigured(_)
             );
             let _ = tx_clone
                 .send(AgenteEvento::Error {
-                    mensaje: error.to_string(),
+                    mensaje: app_error.to_string(),
                     retryable,
                 })
                 .await;
@@ -164,21 +184,13 @@ pub async fn agente_stream(
              * turno en 'pendiente' (no 'fallido') con el prompt reconstruido,
              * para que un reintento del usuario (o worker) lo retome. El
              * front ofrece "reintentar" cuando `retryable` es true. */
-            let _ = persistir_turno(
-                &state_clone,
-                turno_id,
-                user_id,
-                if retryable { "pendiente" } else { "fallido" },
-                &mensaje,
-                &provider,
-                &modelo,
-                0,
-                0,
-                0,
-                0,
-                Some(&error.to_string()),
-            )
-            .await;
+            let _ = persistencia_loop
+                .finalizar_turno(
+                    turno_id,
+                    if retryable { "pendiente" } else { "fallido" },
+                    Some(&app_error.to_string()),
+                )
+                .await;
         }
     });
 
@@ -273,9 +285,10 @@ fn config_desde_guardada(
 /* [memoria/skills] Inyecta la memoria persistente y las skills activas como
  * contexto system al inicio del historial, si el turno las tiene habilitadas;
  * emite el evento observable de cuántas skills entraron. Extraída de
- * agente_stream para acortarla (funcion-larga-rs). */
+ * agente_stream para acortarla (funcion-larga-rs). Las consultas viven en el
+ * adaptador `PersistenciaAgente` (Fase 2 Glory Harness). */
 async fn inyectar_contexto(
-    pool: &sqlx::PgPool,
+    persistencia: &PersistenciaAgente,
     user_id: Uuid,
     turno: &TurnoConfig,
     tx: &mpsc::Sender<AgenteEvento>,
@@ -285,13 +298,13 @@ async fn inyectar_contexto(
      * usuario como mensajes system al inicio del historial (tras el
      * SYSTEM_PROMPT) para que el agente recuerde preferencias/lecciones. */
     if turno.incluir_memoria {
-        let memoria = cargar_memoria_agente(pool, user_id, 50).await?;
+        let memoria = persistencia.cargar_memoria_agente(user_id, 50).await?;
         historial.splice(0..0, memoria);
     }
     /* [31-08-2026] Fase 3 (skills v1): inyectar las skills activas como
      * contexto system y emitir el evento observable de cuántas entraron. */
     if turno.incluir_skills {
-        let skills = cargar_skills_agente(pool, user_id, 20).await?;
+        let skills = persistencia.cargar_skills_agente(user_id, 20).await?;
         let cantidad = skills.len();
         if cantidad > 0 {
             let _ = tx.send(AgenteEvento::Contexto { skills: cantidad }).await;
@@ -303,38 +316,41 @@ async fn inyectar_contexto(
 
 /* Persiste el turno (estado ejecutando) y el mensaje del usuario ANTES de
  * arrancar el loop, para recuperación de fallos. Extraída de agente_stream
- * para acortarla (funcion-larga-rs). */
+ * para acortarla (funcion-larga-rs). Fase 2 (Glory Harness): la persistencia
+ * entra por `PersistenciaAgente` (adaptador del puerto del núcleo). */
 async fn persistir_turno_y_mensaje(
-    state: &AppState,
+    persistencia: &PersistenciaAgente,
     turno_id: Uuid,
     user_id: Uuid,
     req: &AgenteStreamRequest,
     proveedor: &str,
     modelo: &str,
 ) -> Result<(), AppError> {
-    persistir_turno(
-        state,
-        turno_id,
-        user_id,
-        "ejecutando",
-        &req.mensaje,
-        proveedor,
-        modelo,
-        0,
-        0,
-        0,
-        0,
-        None,
-    )
-    .await?;
-    guardar_mensaje_usuario(
-        &state.pool,
-        req.conversacionId,
-        user_id,
-        &req.mensaje,
-        req.clave_idempotencia,
-    )
-    .await?;
+    persistencia
+        .guardar_turno(&TurnoPersistido {
+            id: turno_id,
+            conversacion_id: req.conversacionId,
+            user_id,
+            estado: "ejecutando".into(),
+            resumen: Some(req.mensaje.clone()),
+            creado_en: chrono::Utc::now(),
+            provider: Some(proveedor.to_string()),
+            modelo: Some(modelo.to_string()),
+            tokens_prompt: 0,
+            tokens_complecion: 0,
+            tools_ejecutadas: 0,
+            duracion_ms: 0,
+            error: None,
+        })
+        .await?;
+    persistencia
+        .guardar_mensaje_usuario(
+            req.conversacionId,
+            user_id,
+            &req.mensaje,
+            req.clave_idempotencia,
+        )
+        .await?;
     Ok(())
 }
 
@@ -590,7 +606,7 @@ pub async fn compactar_conversacion(
         .filter(|(id, _, _, _)| *id <= hasta_id)
         .map(|(_, rol, contenido, _)| AiMessage::texto(rol, contenido))
         .collect();
-    let resumen = crate::agent::context::resumen_de_mensajes(&a_resumir);
+    let resumen = glory_harness_core::context::resumen_de_mensajes(&a_resumir);
 
     AgenteRepository::marcar_compactados(&state.pool, conversacion_id, auth.user_id, hasta_id)
         .await?;

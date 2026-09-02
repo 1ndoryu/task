@@ -251,7 +251,7 @@ impl AgenteRepository {
         .bind(conversacion_id)
         .bind(user_id)
         .bind(resumen)
-        .bind(crate::agent::context::estimar_tokens(resumen) as i32)
+        .bind(glory_harness_core::context::estimar_tokens(resumen) as i32)
         .execute(pool)
         .await
         .map(|_| ())
