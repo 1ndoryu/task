@@ -308,16 +308,6 @@
     color: var(--dashboard-acento);
 }
 
-/* Botón premium en modo moderno */
-.pillOpcion--premium {
-    border-color: var(--dashboard-estadoAdvertencia) !important;
-    color: var(--dashboard-estadoAdvertencia) !important;
-    background-color: var(--dashboard-estadoAdvertenciaFondo) !important;
-}
-
-.pillOpcion--premium:hover {
-    background-color: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.2) !important;
-}
 
 /* 
  * Mensaje de error

@@ -218,17 +218,6 @@
         color: var(--dashboard-textoActivo);
     }
 
-    /* Badge de filtros activos - sutil, no rojo */
-    .botonOpcionesMovil .badgeFiltrosActivos {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 6px;
-        height: 6px;
-        background: var(--dashboard-acento);
-        border-radius: var(--dashboard-radioCirculo);
-        pointer-events: none;
-    }
 
     /* Nav con botones de bÃºsqueda y opciones */
     .encabezadoNav {
