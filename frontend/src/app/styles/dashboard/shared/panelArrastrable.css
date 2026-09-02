@@ -148,25 +148,6 @@
 }
 
 /* 
- * ANIMACION DE SNAP AL SOLTAR
- */
-@keyframes panelSnap {
-    0% {
-        transform: scale(1.02);
-    }
-    50% {
-        transform: scale(0.99);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-.panelArrastrable.recienSoltado {
-    animation: panelSnap 0.25s ease-out;
-}
-
-/* 
  * ESTADO GLOBAL DE ARRASTRE
  * Estilos cuando hay un arrastre activo
  * Nota: la clase arrastrandoPanel se aplica a .dashboardGridColumnas

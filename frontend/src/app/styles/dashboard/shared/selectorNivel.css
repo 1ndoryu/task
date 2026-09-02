@@ -56,16 +56,14 @@
 }
 
 /* ALTA */
-.selectorNivelBotonAlta.selectorNivelBotonActivo,
-.selectorNivelBotonCritical.selectorNivelBotonActivo {
+.selectorNivelBotonAlta.selectorNivelBotonActivo {
     color: var(--dashboard-estadoAlta);
     background-color: var(--dashboard-estadoAltaFondo);
     border-color: var(--dashboard-estadoAltaBorde);
 }
 
 /* MEDIA */
-.selectorNivelBotonMedia.selectorNivelBotonActivo,
-.selectorNivelBotonHigh.selectorNivelBotonActivo {
+.selectorNivelBotonMedia.selectorNivelBotonActivo {
     color: var(--dashboard-estadoMedia);
     background-color: var(--dashboard-estadoMediaFondo);
     border-color: var(--dashboard-estadoMediaBorde);
@@ -73,7 +71,6 @@
 
 /* BAJA */
 .selectorNivelBotonBaja.selectorNivelBotonActivo,
-.selectorNivelBotonLow.selectorNivelBotonActivo,
 .selectorNivelBotonNormal.selectorNivelBotonActivo {
     color: var(--dashboard-estadoBaja);
     border-color: var(--dashboard-estadoBajaBorde);
