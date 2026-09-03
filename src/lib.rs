@@ -42,4 +42,6 @@ pub struct AppState {
     pub web_search: WebSearchService,
     /// [Agente] Límite de turnos del agente por usuario/hora.
     pub agente_limiter: Arc<FixedWindowLimiter>,
+    /// [Agente] Reglas de permiso y aprobaciones por conversación (F2, 318A-16).
+    pub agente_permisos: Arc<crate::handlers::agente_aprobacion::AlmacenPermisos>,
 }

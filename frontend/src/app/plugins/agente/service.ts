@@ -180,6 +180,9 @@ export type EventoAgente =
     | {tipo: 'contexto'; skills: number}
     | {tipo: 'contexto_detalle'; max_ventana: number; reserva_salida: number; system_instrucciones: number; definiciones_tools: number; mensajes: number; resultados_tools: number; total_entrada: number; ocupacion_pct: number}
     | {tipo: 'requiere_aprobacion'; tool: string; argumentos: unknown}
+    /* [318A-16 F2] Petición de aprobación con id y clasificación para
+     * responder por canal explícito (Rechazar / Permitir / Permitir siempre). */
+    | {tipo: 'peticion_aprobacion'; id: string; tool: string; argumentos: unknown; clasificacion: string}
     | {tipo: 'error'; mensaje: string; retryable: boolean}
     | {tipo: 'done'; turno_id: string};
 
@@ -243,6 +246,29 @@ export async function crearTareaProgramada(datos: {
 
 export async function eliminarTareaProgramada(id: string): Promise<void> {
     await apiFetch<void>(`/agente/tareas-programadas/${id}`, {method: 'DELETE'});
+}
+
+/* ---------- Aprobaciones (respuesta por canal explícito, 318A-16 F2) ---------- */
+
+export type DecisionAprobacion = 'aprobar' | 'siempre' | 'rechazar';
+
+export interface ReglaConversacion {
+    categoria: string;
+    patron: string;
+    accion: 'allow' | 'deny';
+}
+
+/** Responde una petición de aprobación pendiente (POST por conversación).
+ * `aprobar` = una vez; `siempre`/`rechazar` = regla de clase F1 persistida. */
+export async function responderAprobacionConversacion(
+    id: string,
+    body: {decision: DecisionAprobacion; tool: string; clasificacion: string}
+): Promise<ReglaConversacion[]> {
+    const respuesta = await apiFetch<{reglas: ReglaConversacion[]}>(`/agente/conversaciones/${id}/aprobacion`, {
+        method: 'POST',
+        body,
+    });
+    return respuesta.reglas;
 }
 
 /* ---------- Historial (persistencia en servidor) ---------- */

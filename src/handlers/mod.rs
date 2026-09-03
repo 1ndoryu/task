@@ -3,6 +3,7 @@
 mod activity;
 pub mod admin;
 pub mod agente;
+pub mod agente_aprobacion;
 pub mod agente_config;
 pub mod agente_historial;
 pub mod agente_memoria;
@@ -321,6 +322,7 @@ pub fn estado_completo(pool: sqlx::PgPool, config: &crate::config::AppConfig) ->
             crate::handlers::agente::MAX_TURNOS_HORA,
             std::time::Duration::from_secs(60 * 60),
         )),
+        agente_permisos: crate::handlers::agente_aprobacion::AlmacenPermisos::nuevo(),
     }
 }
 
@@ -427,6 +429,7 @@ fn api_routes(state: &AppState) -> Router<AppState> {
         .merge(health::routes())
         .merge(ai::routes())
         .merge(agente::routes())
+        .merge(agente_aprobacion::rutas_aprobacion())
         .merge(public_auth)
         .merge(auth::protected_routes())
         .merge(dashboard::routes())

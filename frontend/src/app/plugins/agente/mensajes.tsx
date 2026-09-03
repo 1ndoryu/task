@@ -5,6 +5,7 @@
  * los imports de los call-sites (galería visual, PanelAgente, ModalConfigAgente).
  */
 
+import {useState} from 'react';
 import {AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Loader2} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
 /* [02-09-2026] Para mostrar el nombre amigable del modelo REAL que respondió
@@ -260,11 +261,64 @@ export function BarraContextoInferior({contexto, maxVentana, onCompactar, compac
     );
 }
 
-export function AprobacionPendiente({tool}: {tool: string}): JSX.Element {
+/* [318A-16 F2] Decisión de aprobación con las tres vías (Rechazar / Permitir
+ * una vez / Permitir siempre). `Permitir siempre` pide confirmación en un
+ * segundo clic (patrón opencode: "Always" pasa por confirmación); sin
+ * `onResponder` (petición sin id, backend que solo emite `requiere_aprobacion`)
+ * muestra solo la insignia informativa del flujo conversacional previo. */
+export type DecisionAprobacionUI = 'aprobar' | 'siempre' | 'rechazar';
+
+export function AprobacionPendiente({
+    tool,
+    clasificacion,
+    onResponder,
+}: {
+    tool: string;
+    clasificacion?: string;
+    onResponder?: (decision: DecisionAprobacionUI) => void;
+}): JSX.Element {
+    const [confirmandoSiempre, setConfirmandoSiempre] = useState(false);
+    const responder = (decision: DecisionAprobacionUI) => {
+        if (decision === 'siempre' && !confirmandoSiempre) {
+            setConfirmandoSiempre(true);
+            return;
+        }
+        setConfirmandoSiempre(false);
+        onResponder?.(decision);
+    };
     return (
         <div className="panelIAAccionBadge panelIAAccionBadge--pendiente">
-            <AlertTriangle size={10} />
-            <span>{tool} requiere aprobación del usuario</span>
+            <div className="panelAprobacionInfo">
+                <AlertTriangle size={10} />
+                <span>
+                    {tool} requiere aprobación
+                    {clasificacion ? ` · ${clasificacion}` : ''}
+                </span>
+            </div>
+            {onResponder && (
+                <div className="panelAprobacionBotones">
+                    <Boton variante="ghost" tamano="pequeño" onClick={() => responder('rechazar')} title="Denegar esta clase de acción (regla deny persistente)">
+                        Rechazar
+                    </Boton>
+                    <Boton variante="secundario" tamano="pequeño" onClick={() => responder('aprobar')} title="Permitir esta acción una sola vez">
+                        Permitir una vez
+                    </Boton>
+                    {confirmandoSiempre ? (
+                        <>
+                            <Boton variante="primario" tamano="pequeño" onClick={() => responder('siempre')} title="Confirmar: recordar y permitir siempre esta clase">
+                                Confirmar siempre
+                            </Boton>
+                            <Boton variante="ghost" tamano="pequeño" onClick={() => setConfirmandoSiempre(false)}>
+                                No
+                            </Boton>
+                        </>
+                    ) : (
+                        <Boton variante="primario" tamano="pequeño" onClick={() => responder('siempre')} title="Recordar esta clase de acción como siempre permitida">
+                            Permitir siempre
+                        </Boton>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
@@ -355,11 +409,14 @@ interface MensajeAsistenteProps {
     contenido: string;
     herramientas?: HerramientaVisual[];
     contexto?: ContextoVisual | null;
-    aprobacionPendiente?: {tool: string; argumentos: unknown} | null;
+    aprobacionPendiente?: {id: string; tool: string; argumentos: unknown; clasificacion: string} | null;
     reintentar?: boolean | null;
     enviando?: boolean;
     ultimo?: boolean;
     onReintentar?: () => void;
+    /* [318A-16 F2] Responde la petición con las tres vías; sin ella la tarjeta
+     * queda informativa (flujo conversacional). */
+    onResponderAprobacion?: (decision: DecisionAprobacionUI) => void;
 }
 
 export function MensajeAsistente({
@@ -371,6 +428,7 @@ export function MensajeAsistente({
     enviando,
     ultimo,
     onReintentar,
+    onResponderAprobacion,
 }: MensajeAsistenteProps): JSX.Element {
     const contextoVisible = Boolean(
         contexto && (contexto.ocupacionPct !== null || contexto.tokensPrompt > 0 || contexto.skills > 0)
@@ -392,7 +450,13 @@ export function MensajeAsistente({
 
                 {reintentar && !enviando && <BotonReintentar onClick={onReintentar} />}
 
-                {aprobacionPendiente && <AprobacionPendiente tool={aprobacionPendiente.tool} />}
+                {aprobacionPendiente && (
+                    <AprobacionPendiente
+                        tool={aprobacionPendiente.tool}
+                        clasificacion={aprobacionPendiente.clasificacion || undefined}
+                        onResponder={aprobacionPendiente.id ? onResponderAprobacion : undefined}
+                    />
+                )}
 
                 {enviando && ultimo && contenido === '' && <IndicadorPensando />}
             </div>

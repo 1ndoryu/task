@@ -58,6 +58,7 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
         cerrarTab,
         limpiarErrorTab,
         reintentarMensaje,
+        responderAprobacion,
         crearTarea,
         eliminarTarea,
         cancelarTurno,
@@ -195,6 +196,9 @@ export function PanelAgente({renderHandleArrastre, handleMinimizar}: PanelBasePr
                             enviando={tabActiva.enviando}
                             ultimo={ultimo}
                             onReintentar={() => void reintentarMensaje()}
+                            onResponderAprobacion={(decision) =>
+                                void responderAprobacion(tabActiva.conversacion.id, decision)
+                            }
                         />
                     );
                 })}

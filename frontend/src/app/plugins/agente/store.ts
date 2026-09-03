@@ -24,6 +24,8 @@ import {
     listarTareasProgramadas,
     rebobinarConversacion,
     renombrarConversacion,
+    responderAprobacionConversacion,
+    type DecisionAprobacion,
 } from './service';
 
 export interface MensajeTabAgente {
@@ -32,7 +34,11 @@ export interface MensajeTabAgente {
     contenido: string;
     /* Eventos de tool del último turno (para las tarjetas). */
     herramientas?: Array<{tool: string; ok: boolean; resumen: string; argumentos?: unknown; diff?: string}>;
-    aprobacionPendiente?: {tool: string; argumentos: unknown} | null;
+    /* [318A-16 F2] Petición de aprobación con canal explícito: `id` +
+     * `clasificacion` (clase F1) llegan en el evento `peticion_aprobacion`;
+     * sin `id` (backend viejo / solo `requiere_aprobacion`) la UI muestra
+     * solo la insignia informativa. */
+    aprobacionPendiente?: {id: string; tool: string; argumentos: unknown; clasificacion: string} | null;
     /* Clave de idempotencia del mensaje del usuario: un reintento con la misma
      * clave no duplica la fila en BD (ON CONFLICT DO NOTHING). Se genera en el
      * envío y se conserva en el mensaje para que el botón reintentar reutilice. */
@@ -160,6 +166,10 @@ interface EstadoAgenteAccionesConversacion {
     cerrarTab: (id: string) => Promise<void>;
     enviarMensaje: (texto: string, signal?: AbortSignal, claveIdempotencia?: string) => Promise<void>;
     reintentarMensaje: () => Promise<void>;
+    /* [318A-16 F2] Responde la petición de aprobación pendiente del tab con las
+     * tres vías (aprobar | siempre | rechazar) y reenvía el turno para que la
+     * decisión surta efecto (token de una vez / regla de clase sembrados). */
+    responderAprobacion: (tabId: string, decision: DecisionAprobacion) => Promise<void>;
     limpiarErrorTab: (id: string) => void;
     /* [318A-5] Rebobina la conversación hasta un mensaje (volver atrás/editar):
      * borra los mensajes posteriores en BD y en la sesión local. `editar=true`
@@ -372,8 +382,28 @@ async function correrTurno(
                             totalEntrada: evento.total_entrada,
                         };
                         break;
+                    /* [318A-16 F2] El runtime emite `peticion_aprobacion`
+                     * (con id + clasificacion) y después `requiere_aprobacion`
+                     * (compat). La petición rica gana; `requiere_aprobacion`
+                     * solo actúa como fallback si aún no hay pendiente (backend
+                     * que solo emita el evento viejo). */
+                    case 'peticion_aprobacion':
+                        objetivo.aprobacionPendiente = {
+                            id: evento.id,
+                            tool: evento.tool,
+                            argumentos: evento.argumentos,
+                            clasificacion: evento.clasificacion,
+                        };
+                        break;
                     case 'requiere_aprobacion':
-                        objetivo.aprobacionPendiente = {tool: evento.tool, argumentos: evento.argumentos};
+                        if (!objetivo.aprobacionPendiente) {
+                            objetivo.aprobacionPendiente = {
+                                id: '',
+                                tool: evento.tool,
+                                argumentos: evento.argumentos,
+                                clasificacion: '',
+                            };
+                        }
                         break;
                     case 'error':
                         /* El error retryable se muestra en la burbuja con el
@@ -718,6 +748,41 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
             msgAsistente,
             tab.config,
         );
+    },
+
+    /* [318A-16 F2] Responde la aprobación pendiente del último mensaje del
+     * tab y reenvía el turno: el POST persiste la decisión (token de una vez
+     * o regla de clase) y el siguiente stream la siembra en el registro del
+     * runtime antes de evaluar la primera tool_call. Rechazar también reenvía
+     * para que el modelo vea el deny silencioso y cambie de plan. */
+    responderAprobacion: async (tabId, decision) => {
+        const tab = tabId ? tabDe(get(), tabId) : undefined;
+        if (!tab || tab.enviando) return;
+        const pendiente = [...tab.mensajes].reverse().find(m => m.rol === 'assistant' && m.aprobacionPendiente)?.aprobacionPendiente;
+        if (!pendiente) return;
+        if (!pendiente.id) {
+            /* Sin canal explícito: solo se puede confirmar por texto (flujo
+             * conversacional previo); no hay botones habilitados. */
+            return;
+        }
+        try {
+            await responderAprobacionConversacion(tab.conversacion.id, {
+                decision,
+                tool: pendiente.tool,
+                clasificacion: pendiente.clasificacion,
+            });
+        } catch (error) {
+            const mensajeError = error instanceof Error ? error.message : 'No se pudo guardar la decisión de aprobación';
+            set(state => ({
+                tabs: state.tabs.map(t =>
+                    t.conversacion.id === tabId ? {...t, error: mensajeError} : t
+                ),
+            }));
+            return;
+        }
+        /* La decisión quedó guardada: reenvía el turno para que surta efecto
+         * (misma clave de idempotencia; la fila del usuario ya existe). */
+        await get().reintentarMensaje();
     },
 
     limpiarErrorTab: (id) => {

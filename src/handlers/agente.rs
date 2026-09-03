@@ -130,6 +130,32 @@ pub async fn agente_stream(
         config_desde_guardada(config_guardada, modo)?,
     );
 
+    /* [318A-16 F2] Sembrar permisos por conversación: el runtime se
+     * reconstruye POR TURNO en PT, así que las decisiones de los botones de
+     * aprobación (endpoint agente_aprobacion) se inyectan aquí, antes de la
+     * primera tool_call: reglas de clase (Siempre/Rechazar) y tokens de una
+     * vez (Permitir). El token se consume en la primera llamada cuya clase
+     * coincida; la regla persiste mientras no se borre. */
+    {
+        use glory_harness_core::permiso::Permiso as PermisoCore;
+        use glory_harness_core::regla::ReglaPermiso;
+        for regla in state.agente_permisos.reglas_de(req.conversacionId) {
+            let accion = if regla.accion == "deny" {
+                PermisoCore::Deny
+            } else {
+                PermisoCore::Allow
+            };
+            runtime.registry.establecer_regla(ReglaPermiso::nueva(
+                regla.categoria,
+                regla.patron,
+                accion,
+            ));
+        }
+        for (categoria, patron) in state.agente_permisos.tomar_tokens_una_vez(req.conversacionId) {
+            runtime.registry.aprobacion_una_vez(categoria, patron);
+        }
+    }
+
     /* Persistir el turno como ejecutando y el mensaje del usuario ANTES de
      * arrancar (recuperación de fallos). */
     persistir_turno_y_mensaje(

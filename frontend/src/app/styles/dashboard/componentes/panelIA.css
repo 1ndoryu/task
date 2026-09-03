@@ -370,4 +370,22 @@
     flex-wrap: wrap;
 }
 
+/* [318A-16 F2] Tarjeta de aprobación con las tres vías (Rechazar / Permitir
+ * una vez / Permitir siempre). Tokens del sistema; los botones son el
+ * componente Boton estándar (sin literales de estilo aquí). */
+.panelAprobacionInfo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    margin-right: var(--dashboard-espacioSm);
+}
+
+.panelAprobacionBotones {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dashboard-espacioXs);
+    margin-top: 2px;
+}
+
 /* [243A-1] Config inline eliminada — ahora vive en el modal global (sección 'panelIA') */
