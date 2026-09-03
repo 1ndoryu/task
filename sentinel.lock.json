@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-02T17:33:42.167Z",
+  "generatedAt": "2026-09-03T09:55:00.000Z",
   "runtime": {
     "status": "project-adapter",
     "version": "1.0.0-local",
@@ -19,8 +19,8 @@
     "varsense": {
       "version": "2.2.1",
       "protocolVersion": 1,
-      "commit": "544e3c87abfc99cafa46baba1fadb0af9fa7d9d5",
-      "sha256": "ba16ab816aa046b51a2a17ff1da9fda0d6c803fec7b279af67534c29f22a5f9a",
+      "commit": "21d8a704380ea00054c60e1ab9beed9fd565c8d7",
+      "sha256": "28bb2b87288d3e0f33222dce7859bb966c363c944b0ca0e9f62c0b97fae585c3",
       "patchSha256": null,
       "capabilities": {
         "filesFrom": true,

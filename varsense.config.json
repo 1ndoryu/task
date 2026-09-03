@@ -4,6 +4,7 @@
     "frontend/src/glory-core/index.css",
     "frontend/src/App.css",
     "frontend/src/app/plugins/exp/PanelExp.css",
+    "frontend/src/app/styles/dashboard/shared/badgeInfo.css",
     "frontend/src/app/styles/dashboard/shared/resizeHandleColumna.css",
     "frontend/src/app/styles/dashboard/componentes/pullToRefresh.css",
     "frontend/src/app/plugins/exp/modalEditorArbol.css",
