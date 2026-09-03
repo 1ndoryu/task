@@ -19,6 +19,11 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 ## Bloque actual
 
+🔧 **En curso (03-09-2026): 029A-1 — campaña cero-deuda Sentinel+VarSense.** Resolver por bloques seguros fuera del WIP del usuario: (1) import-muerto x4 ✅ aplicado + type-check PASS; (2) limite-lineas pequeños + emoji; (3) html-nativo/inline/dom ✅ (7 corregidos + fix sintaxis ModalEditorArbol, resto documentado); (4) Rust sqlx+límites ✅ (sqlx x21→disable justificado, parámetros x3→structs, agente.rs→4 submódulos; css-hardcoded x28 documentado) — sentinel 0e/88w/9h → **0e/66w/6h**, 0 errores, sin commit; (5) VarSense no-WIP ✅ (varsense 4e/436w → **0e/429w**; resto = excepciones documentadas) — sentinel invariante 0e/66w/6h, tsc PASS, sin commit. **Gate reparado ✅ (03-09):** revert 0.7.6 descartado (restore 0559576), VarSense re-pineado a V22 (tag local v2.2.1-v22 + setup 573 tests/smoke OK + lock) — `doctor` 0 issues, readyForGate:true; re-medición invariante.
+� **Plan maestro 039A-1 (03-09): `Agente/planes/plan-cero-deuda-todos-proyectos-2026-09-03.md`** — cero-deuda en los 10 proyectos (incluye fix de herramientas ante FPs y sub-planes para riesgo). Estado: activo, siguiente = Fase 0 re-baselining. Baseline: sentinel 0e/83w/10h (87 hall), varsense 536/0e. Tabla viva: `TABLA-sentinel-varsense-2026-09-02.md`.
+
+🔧 **En curso (03-09-2026): 039A-2 — historial del agente persistente + diff acotado.** Las tarjetas de tools y la barra CONTX sobrevivían solo en memoria SSE y se perdían al recargar; el diff mostraba el archivo completo. Plan: `Agente/planes/plan-039a-2-historial-agente-2026-09-03.md` (core hunks ±3, backend sin migración vía JOIN turnos+acciones, frontend rehidrata + fix mapping misma-tool).
+
 ✅ **Resuelto (31-08-2026): refactor visual monocromo (318A-1).** Blanco y negro puro, sin
 colores, sin radios, sin sombras. `variables.css` reescrito a escala de grises (2 temas:
 `:root` oscuro `original` + `claro`), tema `oscuro` eliminado de `useTema` y TSX, anulación
