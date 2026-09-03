@@ -1,0 +1,111 @@
+La leyenda del Unicornio de 2024
+
+Había una vez, en un valle oculto entre montañas que ningún mapa osaba dibujar, un bosque de árboles de cristal que cantaban al amanecer. [Nota de prueba: archivo editado] Allí vivía un unicornio muy especial, conocido por todos los animales del reino como Lumen. Lumen no era un unicornio cualquiera: su cuerno brillaba con la luz de mil y una estrellas doradas, y cada noche, cuando el sol se escondía tras los picos nevados, proyectaba en el cielo las historias más hermosas jamás contadas.
+
+```javascript
+// El brillo del cuerno, modelado como una función
+function brilloDelCuerno(estrellas) {
+  return Math.pow(estrellas, 2) * 100;
+}
+console.log(brilloDelCuerno(1000)); // 1,000,000,000
+```
+
+Pero Lumen guardaba un secreto. Cada año, justo cuando el invierno comenzaba a despedirse, su cuerno perdía el brillo y se volvía opaco como una piedra común. Era el momento de la gran migración: debía viajar hasta la Fuente de los Recuerdos, un manantial sagrado escondido en el corazón del continente, para renovar su luz.
+
+```javascript
+const secretosDeLumen = {
+  brilloActual: "opaco",
+  estacion: "invierno",
+  renovarLuz() {
+    this.brilloActual = "radiante";
+    return "Luz renovada en la Fuente de los Recuerdos";
+  }
+};
+console.log(secretosDeLumen.renovarLuz());
+```
+
+El año 2024 no iba a ser diferente, salvo por un detalle: esta vez, Lumen no estaría solo. Una pequeña ardilla llamada Nuez, curiosa y muy valiente, había decidido acompañarlo en su aventura. Los demás animales del bosque la advirtieron de los peligros: el Puente de los Suspiros, que solo se sostenía si cruzabas sin mirar atrás; el Desierto de las Sombras, donde los ecos repetían tus miedos; y la Cueva de los Espejos, donde cada viajero debía enfrentarse a la versión de sí mismo que nunca quiso ser.
+
+```javascript
+const peligros = ["Puente de los Suspiros", "Desierto de las Sombras", "Cueva de los Espejos"];
+peligros.forEach((lugar, i) => console.log(`Peligro ${i + 1}: ${lugar}`));
+```
+
+Lumen y Nuez partieron al amanecer del primer día de primavera. Atravesaron praderas doradas donde las mariposas tejían alfombras de mil colores, y bosques de helechos gigantes que susurraban secretos de tiempos antiguos. Cuando llegaron al Puente de los Suspiros, un viejo búho los detuvo.
+
+```javascript
+class Viajero {
+  constructor(nombre) {
+    this.nombre = nombre;
+    this.recuerdos = [];
+  }
+  soltarAlgoValioso(objeto) {
+    this.recuerdos.push(objeto);
+    return `${this.nombre} dejó atrás: ${objeto}`;
+  }
+}
+const nuez = new Viajero("Nuez");
+console.log(nuez.soltarAlgoValioso("bellota dorada"));
+```
+
+—Ninguno de vosotros podrá cruzar sin dejar atrás algo muy valioso —dijo el búho, con voz grave como una tormenta lejana—. Los puentes no se cruzan gratis.
+
+Nuez miró a Lumen, y Lumen miró a Nuez. La ardilla sacó de su bolsillo una bellota dorada que había guardado desde pequeña, el único recuerdo de su madre.
+
+```javascript
+// A veces soltar es la única manera de avanzar
+const avanzar = (carga) => (carga.length === 0 ? "Camino libre" : "Camino bloqueado");
+console.log(avanzar([])); // Camino libre
+```
+
+—Toma —le dijo al búho—. Es lo más valioso que tengo.
+
+El búho sonrió y abrió el puente. Al cruzarlo, Nuez sintió que su corazón pesaba menos, y comprendió que a veces soltar es la única manera de avanzar.
+
+El Desierto de las Sombras fue más difícil. Durante tres días, los ecos les gritaron todas sus inseguridades. A Nuez le decían que era demasiado pequeña para una aventura tan grande. A Lumen le recordaban que quizá este año su luz no volvería jamás. Pero ambos aprendieron a avanzar sin escuchar, y cuando el silencio finalmente regresó, se dieron cuenta de que los miedos solo tienen poder si les prestamos atención.
+
+```javascript
+const miedos = new Map();
+miedos.set("Nuez", "ser demasiado pequeña");
+miedos.set("Lumen", "no recuperar su luz jamás");
+miedos.forEach((miedo, quien) => console.log(`${quien} teme: ${miedo}`));
+```
+
+Finalmente, llegaron a la Cueva de los Espejos. Allí, Lumen se enfrentó a la imagen de sí mismo sin luz: un unicornio gris, olvidado y sin propósito. Fue la prueba más dura de todas. Pero Nuez, que lo observaba desde la entrada, gritó:
+
+—¡Tu luz no está en tu cuerno, Lumen! ¡Tu luz está en lo que haces por los demás!
+
+```javascript
+const luzInterior = (cuerno, acciones) => (cuerno + acciones) / 2;
+console.log(`Luz real de Lumen: ${luzInterior(0, 100)}%`);
+```
+
+Y en ese instante, Lumen comprendió la verdad que había buscado durante siglos: su brillo nunca había dependido de la fuente, sino de las historias que contaba, de la esperanza que sembraba, de la compañía que ofrecía. Su cuerno comenzó a brillar con una intensidad nunca vista, y la cueva entera se iluminó con un resplandor dorado.
+
+Cuando llegaron a la Fuente de los Recuerdos, Lumen ya no necesitaba renovar su luz, porque había descubierto que la llevaba dentro. Aun así, se acercó al manantial y bebió, no por necesidad, sino por gratitud hacia el viaje. Y al hacerlo, el agua devolvió no solo su brillo, sino también el recuerdo de todas las historias que había contado a lo largo de su vida.
+
+```javascript
+async function beberDeLaFuente() {
+  const promesa = new Promise((resolve) => setTimeout(() => resolve("Brillo renovado"), 1000));
+  return await promesa;
+}
+beberDeLaFuente().then(console.log);
+```
+
+Lumen y Nuez regresaron al valle convertidos en leyenda. Desde entonces, cada primavera, el unicornio cuenta la historia de su viaje, y quien lo escucha aprende que el verdadero tesoro nunca estuvo en el destino, sino en los pasos dados para alcanzarlo. Y la pequeña ardilla Nuez, que una vez fue la más diminuta del bosque, se convirtió en la guardiana de la bellota de la sabiduría, porque había aprendido que lo que se da con amor siempre regresa multiplicado.
+
+```javascript
+const moraleja = "dar con amor";
+const resultado = (moraleja) => `regresa ${moraleja.split(" ").length} veces multiplicado`;
+console.log(resultado(moraleja));
+```
+
+Y así, en aquel bosque de árboles de cristal que cantan al amanecer, la luz de Lumen siguió brillando por muchos años, recordándole al mundo que todos llevamos una historia dentro, esperando el momento justo de ser contada.
+
+```javascript
+setInterval(() => {
+  console.log("✨ La luz de Lumen sigue brillando... ✨");
+}, 1000);
+```
+
+Fin.
