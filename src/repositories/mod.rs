@@ -19,7 +19,7 @@ mod subscription;
 mod timeline;
 mod user;
 
-pub use agente::{AgenteRepository, TareaInsert};
+pub use agente::{AgenteRepository, FilaAccionHistorial, FilaTurnoHistorial, TareaInsert};
 pub use health::HealthRepository;
 pub use activity::{
     ActivityCountRow, ActivityDetailParams, ActivityInsert, ActivityRepository, DerivedActivityRow,
@@ -39,6 +39,6 @@ pub use admin::AdminRepository;
 pub use backup::BackupRepository;
 pub use feedback::{AdminFeedbackRow, FeedbackRepository};
 pub use security::SecurityRepository;
-pub use storage::StorageRepository;
+pub use storage::{NuevoAdjunto, StorageRepository};
 pub use subscription::SubscriptionRepository;
 pub use user::UserRepository;

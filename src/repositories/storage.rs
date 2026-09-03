@@ -7,20 +7,24 @@ use crate::models::storage::AttachmentRow;
 
 pub struct StorageRepository;
 
+/// Datos para crear un adjunto. Agrupa los 10 campos de
+/// `StorageRepository::create` en un único parámetro
+/// ([029A-1] parametros-excesivos-rs) sin cambiar la SQL.
+pub struct NuevoAdjunto<'a> {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub entity_type: Option<&'a str>,
+    pub entity_id: Option<i64>,
+    pub nombre: &'a str,
+    pub tipo: &'a str,
+    pub mime: &'a str,
+    pub tamano: i64,
+    pub ruta: &'a str,
+    pub thumbnail_ruta: Option<&'a str>,
+}
+
 impl StorageRepository {
-    pub async fn create(
-        pool: &PgPool,
-        id: Uuid,
-        user_id: Uuid,
-        entity_type: Option<&str>,
-        entity_id: Option<i64>,
-        nombre: &str,
-        tipo: &str,
-        mime: &str,
-        tamano: i64,
-        ruta: &str,
-        thumbnail_ruta: Option<&str>,
-    ) -> Result<AttachmentRow, sqlx::Error> {
+    pub async fn create(pool: &PgPool, nuevo: NuevoAdjunto<'_>) -> Result<AttachmentRow, sqlx::Error> {
         sqlx::query_as::<_, AttachmentRow>(
             "INSERT INTO attachments
                 (id, user_id, entity_type, entity_id, nombre, tipo, mime, tamano, ruta, thumbnail_ruta)
@@ -28,16 +32,16 @@ impl StorageRepository {
              RETURNING id, user_id, entity_type, entity_id, nombre, tipo, mime,
                        tamano, ruta, thumbnail_ruta, creado_en",
         )
-        .bind(id)
-        .bind(user_id)
-        .bind(entity_type)
-        .bind(entity_id)
-        .bind(nombre)
-        .bind(tipo)
-        .bind(mime)
-        .bind(tamano)
-        .bind(ruta)
-        .bind(thumbnail_ruta)
+        .bind(nuevo.id)
+        .bind(nuevo.user_id)
+        .bind(nuevo.entity_type)
+        .bind(nuevo.entity_id)
+        .bind(nuevo.nombre)
+        .bind(nuevo.tipo)
+        .bind(nuevo.mime)
+        .bind(nuevo.tamano)
+        .bind(nuevo.ruta)
+        .bind(nuevo.thumbnail_ruta)
         .fetch_one(pool)
         .await
     }

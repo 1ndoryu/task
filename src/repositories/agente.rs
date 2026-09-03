@@ -23,6 +23,26 @@ pub struct TareaInsert<'a> {
 
 pub struct AgenteRepository;
 
+/// [039A-2] Fila de turno para rehidratar el historial:
+/// (id, proveedor, modelo, tokens_prompt, tokens_complecion,
+/// tools_ejecutadas, creado_en).
+/// Los tokens/tools son `i32`: las columnas `agente_turnos.tokens_prompt`,
+/// `tokens_complecion` y `tools_ejecutadas` son `integer` (INT4) en la BD y
+/// sqlx exige el tipo exacto al decodificar (i64/INT8 falla con
+/// "mismatched types").
+pub type FilaTurnoHistorial = (
+    Uuid,
+    Option<String>,
+    Option<String>,
+    i32,
+    i32,
+    i32,
+    DateTime<Utc>,
+);
+/// [039A-2] Acción auditada de un turno:
+/// (tool_id, argumentos, resultado_resumen, estado).
+pub type FilaAccionHistorial = (String, Value, String, String);
+
 impl AgenteRepository {
     /// Conversación por id y propietario: `(id, modo, config)`.
     pub async fn buscar_conversacion(
@@ -91,6 +111,62 @@ impl AgenteRepository {
         .bind(user_id)
         .fetch_all(pool)
         .await
+    }
+
+    /// [039A-2] Turnos de una conversación con sus acciones auditadas, para
+    /// rehidratar las tarjetas de tools tras recargar (el historial SSE en vivo
+    /// se pierde; la BD sí guarda `agente_turnos` + `agente_acciones`).
+    /// Sin migración: el `diff` nunca se persistió, así que no viaja aquí
+    /// (las tarjetas restauradas muestran resumen + argumentos).
+    /// Devuelve `(turnos, acciones_por_turno)`: turnos ordenados por
+    /// `creado_en` con `(id, proveedor, modelo, tokens_prompt, tokens_complecion,
+    /// tools_ejecutadas, creado_en)`; acciones por `turno_id` ordenadas por id
+    /// con `(tool_id, argumentos, resultado_resumen, estado)`.
+    pub async fn listar_turnos_con_acciones(
+        pool: &PgPool,
+        conversacion_id: Uuid,
+        user_id: Uuid,
+    ) -> Result<
+        (
+            Vec<FilaTurnoHistorial>,
+            std::collections::HashMap<Uuid, Vec<FilaAccionHistorial>>,
+        ),
+        sqlx::Error,
+    > {
+        let turnos: Vec<FilaTurnoHistorial> = sqlx::query_as(
+                "SELECT id, proveedor, modelo, tokens_prompt, tokens_complecion, tools_ejecutadas, creado_en
+                 FROM agente_turnos
+                 WHERE conversacion_id = $1 AND user_id = $2
+                 ORDER BY creado_en ASC, id ASC",
+            )
+            .bind(conversacion_id)
+            .bind(user_id)
+            .fetch_all(pool)
+            .await?;
+        /* Tupla PLANA de 5 columnas: sqlx decodifica tuplas Rust anidadas como
+         * un RECORD compuesto de SQL y falla contra columnas sueltas (VARCHAR /
+         * JSONB) con "RECORD is not compatible with SQL type VARCHAR". Se agrupa
+         * por turno_id después de decodificar. */
+        let filas: Vec<(Uuid, String, Value, String, String)> = sqlx::query_as(
+            "SELECT a.turno_id, a.tool_id, a.argumentos, a.resultado_resumen, a.estado
+             FROM agente_acciones a
+             JOIN agente_turnos t ON t.id = a.turno_id
+             WHERE t.conversacion_id = $1 AND t.user_id = $2
+             ORDER BY t.creado_en ASC, a.id ASC",
+        )
+        .bind(conversacion_id)
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+        let mut acciones_por_turno: std::collections::HashMap<Uuid, Vec<FilaAccionHistorial>> =
+            std::collections::HashMap::new();
+        for (turno_id, tool_id, argumentos, resumen, estado) in filas {
+            acciones_por_turno
+                .entry(turno_id)
+                .or_default()
+                .push((tool_id, argumentos, resumen, estado));
+        }
+        Ok((turnos, acciones_por_turno))
     }
 
     /// Renombra una conversación; devuelve filas afectadas (0 = no encontrada).

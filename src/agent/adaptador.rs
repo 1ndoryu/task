@@ -1,3 +1,5 @@
+// sentinel-disable-file sqlx-query-sin-macro sqlx-query-as-sin-macro
+// [por que] sqlx sin feature "macros" ni DB en compile-time: query! rompe el build.
 /* [03-09-2026] Adaptador de persistencia del agente (plan Glory Harness, Fase
  * 2): implementa el puerto `AgentPersistence` del núcleo con el SQL real de
  * task. El núcleo nunca persiste por su cuenta (R3 del plan); todo acceso a
@@ -42,11 +44,7 @@ fn estado_turno_db(estado: &str) -> String {
 /// Traduce el estado del contrato del núcleo al CHECK de
 /// `agente_tareas_programadas` (pendiente|ejecutando|completada|fallida|cancelada).
 fn estado_tarea_db(ok: bool) -> &'static str {
-    if ok {
-        "completada"
-    } else {
-        "fallida"
-    }
+    if ok { "completada" } else { "fallida" }
 }
 
 /// Adaptador concreto: `PersistenciaAgente` envuelve el `PgPool` de task e

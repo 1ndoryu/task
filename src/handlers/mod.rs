@@ -3,6 +3,11 @@
 mod activity;
 pub mod admin;
 pub mod agente;
+pub mod agente_config;
+pub mod agente_historial;
+pub mod agente_memoria;
+pub mod agente_skills;
+pub mod agente_tareas;
 pub mod ai;
 pub mod auth;
 mod backup;

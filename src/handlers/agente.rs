@@ -16,7 +16,7 @@ use axum::routing::{delete, post};
 use axum::{Json, Router};
 use futures_util::stream::Stream;
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::convert::Infallible;
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -26,15 +26,18 @@ use uuid::Uuid;
 use crate::agent::adaptador::PersistenciaAgente;
 use crate::agent::tools::{BuscadorWeb, DominioAgente, registrar_tools};
 use crate::agent::{
-    AgenteEvento, AgentRuntime, AgentToolRegistry, ContextoConfig, PuertosHarness, TurnoConfig,
+    AgenteEvento, AgentRuntime, AgentToolRegistry, PuertosHarness, TurnoConfig,
 };
 use crate::services::ai::AiMessage;
 use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
-use crate::repositories::{AgenteRepository, TareaInsert};
+use crate::repositories::AgenteRepository;
 use crate::AppState;
 use glory_harness_core::ports::TurnoPersistido;
 use glory_harness_core::AgentPersistence;
+
+use super::agente_config::config_desde_guardada;
+use super::agente_historial::{historial_enriquecido, MensajeHistorial};
 
 #[derive(Debug, Deserialize)]
 #[allow(non_snake_case)] // contrato del front (camelCase)
@@ -227,60 +230,7 @@ pub struct ConversacionResponse {
  * front los persiste) para permitir elegir el modelo directo gratuito
  * `commandcode/poolside/laguna-s-2.1-free`; el default sigue siendo glory/commandcode
  * (ruta auto -> DeepSeek Flash), política previa del servidor. */
-fn config_desde_guardada(
-    config: serde_json::Value,
-    modo: String,
-) -> Result<TurnoConfig, AppError> {
-    let defaults = TurnoConfig::default();
-    Ok(TurnoConfig {
-        provider: config
-            .get("provider")
-            .and_then(serde_json::Value::as_str)
-            .map(str::trim)
-            .filter(|p| !p.is_empty())
-            .unwrap_or("glory")
-            .to_string(),
-        modelo: config
-            .get("modelo")
-            .and_then(serde_json::Value::as_str)
-            .map(str::trim)
-            .filter(|m| !m.is_empty())
-            .unwrap_or("commandcode")
-            .to_string(),
-        temperatura: config.get("temperatura").and_then(serde_json::Value::as_f64).unwrap_or(defaults.temperatura as f64).clamp(0.0, 2.0) as f32,
-        max_tokens: config.get("max_tokens").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_tokens as u64).clamp(64, 4096) as u32,
-        idioma: validar_idioma(config.get("idioma").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        incluir_notas: config.get("incluir_notas").and_then(serde_json::Value::as_bool).unwrap_or(false),
-        incluir_tareas_completadas: config.get("incluir_tareas_completadas").and_then(serde_json::Value::as_bool).unwrap_or(false),
-        incluir_habitos_pausados: config.get("incluir_habitos_pausados").and_then(serde_json::Value::as_bool).unwrap_or(false),
-        permitir_busqueda_web: config.get("permitir_busqueda_web").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        permitir_recordatorios: config.get("permitir_recordatorios").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        prompt_sistema: validar_prompt_sistema(config.get("prompt_sistema").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        incluir_memoria: config.get("incluir_memoria").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        incluir_skills: config.get("incluir_skills").and_then(serde_json::Value::as_bool).unwrap_or(true),
-        max_turns: config.get("max_turns").and_then(serde_json::Value::as_u64).unwrap_or(defaults.max_turns as u64).clamp(1, 10) as usize,
-        timeout_tool: std::time::Duration::from_secs(config.get("timeout_tool_secs").and_then(serde_json::Value::as_u64).unwrap_or(defaults.timeout_tool.as_secs()).clamp(1, 15)),
-        /* [02-09-2026] Fase 5: estilo, preferencias, workspace (solo local) y
-         * ventana/umbral de compactación vienen de la config de la conversación. */
-        estilo: validar_estilo(config.get("estilo").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        preferencias: validar_preferencias(config.get("preferencias").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        workspace: config.get("workspace").and_then(serde_json::Value::as_str).map(str::trim).filter(|w| !w.is_empty()).map(str::to_owned),
-        /* [318A-10 02-09-2026] Nivel de razonamiento (low|medium|high) que
-         * decide el usuario; se envía como `reasoning_effort` a los
-         * proveedores que lo aceptan (deepseek/groq/cerebras). */
-        nivel_razonamiento: validar_nivel_razonamiento(config.get("nivel_razonamiento").and_then(serde_json::Value::as_str).map(str::to_owned))?,
-        contexto: ContextoConfig {
-            max_ventana: config.get("max_ventana").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.max_ventana as u64).clamp(8_192, 512_000) as u32,
-            reserva_salida: config.get("reserva_salida").and_then(serde_json::Value::as_u64).unwrap_or(defaults.contexto.reserva_salida as u64).clamp(1_024, 64_000) as u32,
-            umbral: config.get("umbral_compactacion").and_then(serde_json::Value::as_f64).unwrap_or(defaults.contexto.umbral as f64).clamp(0.1, 0.9) as f32,
-            ..defaults.contexto.clone()
-        },
-        modo,
-        /* [318A-4] `..defaults` final es redundante: todos los campos de
-         * TurnoConfig ya están listados explícitamente arriba (clippy
-         * needless_update). */
-    })
-}
+/* [029A-1] `config_desde_guardada` + validadores → `handlers/agente_config.rs`. */
 
 /* [memoria/skills] Inyecta la memoria persistente y las skills activas como
  * contexto system al inicio del historial, si el turno las tiene habilitadas;
@@ -403,37 +353,16 @@ pub async fn listar_conversaciones(
     ))
 }
 
-/// Mensaje de una conversación (para historial en el front).
-#[derive(Debug, Serialize)]
-#[allow(non_snake_case)]
-pub struct MensajeConversacionResponse {
-    pub id: i64,
-    pub rol: String,
-    pub contenido: String,
-    pub creadoEn: String,
-}
-
 /// [29-08-2026] Fase 4: historial completo de una conversación (persistencia
 /// de chats en el servidor). El front carga los mensajes al abrir una tab.
+/// [039A-2] Enriquecido con las tarjetas de tools y el contexto del turno (el
+/// tipo `MensajeHistorial` vive en `agente_historial`).
 pub async fn listar_mensajes_conversacion(
     State(state): State<AppState>,
     auth: AuthUser,
     Path(conversacion_id): Path<Uuid>,
-) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
-    /* Propiedad: nunca confiar en el front. */
-    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
-        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
-    Ok(Json(
-        filas
-            .into_iter()
-            .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
-                id,
-                rol,
-                contenido,
-                creadoEn: creado_en.to_rfc3339(),
-            })
-            .collect(),
-    ))
+) -> Result<Json<Vec<MensajeHistorial>>, AppError> {
+    Ok(Json(historial_enriquecido(&state.pool, conversacion_id, &auth).await?))
 }
 
 /// Renombra una conversación (tabs: editar nombre).
@@ -518,7 +447,7 @@ pub async fn rebobinar_conversacion(
     auth: AuthUser,
     Path(conversacion_id): Path<Uuid>,
     Json(req): Json<RebobinarRequest>,
-) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
+) -> Result<Json<Vec<MensajeHistorial>>, AppError> {
     if req.hastaId <= 0 {
         return Err(AppError::BadRequest("hastaId inválido".into()));
     }
@@ -534,19 +463,7 @@ pub async fn rebobinar_conversacion(
         /* Sin mensajes posteriores = nada que borrar (idempotente); el front
          * siempre recarga el historial actual. */
     }
-    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
-        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
-    Ok(Json(
-        filas
-            .into_iter()
-            .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
-                id,
-                rol,
-                contenido,
-                creadoEn: creado_en.to_rfc3339(),
-            })
-            .collect(),
-    ))
+    Ok(Json(historial_enriquecido(&state.pool, conversacion_id, &auth).await?))
 }
 
 /// [318A-7] Compacta la conversación de forma persistente: marca los mensajes
@@ -556,23 +473,14 @@ pub async fn compactar_conversacion(
     State(state): State<AppState>,
     auth: AuthUser,
     Path(conversacion_id): Path<Uuid>,
-) -> Result<Json<Vec<MensajeConversacionResponse>>, AppError> {
+) -> Result<Json<Vec<MensajeHistorial>>, AppError> {
     /* Propiedad: nunca confiar en el front. */
     let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
         AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
     if filas.len() < 4 {
-        /* Historias muy cortas: compactar no aporta; devolver tal cual. */
-        return Ok(Json(
-            filas
-                .into_iter()
-                .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
-                    id,
-                    rol,
-                    contenido,
-                    creadoEn: creado_en.to_rfc3339(),
-                })
-                .collect(),
-        ));
+        /* Historias muy cortas: compactar no aporta; devolver tal cual
+         * (enriquecido con sus tools, como el resto de respuestas). */
+        return Ok(Json(historial_enriquecido(&state.pool, conversacion_id, &auth).await?));
     }
 
     /* Dejar el último turno verbatim (el último par user+assistant). Retroceder
@@ -587,17 +495,7 @@ pub async fn compactar_conversacion(
     let hasta_id = umbral.saturating_sub(1);
     if hasta_id <= 0 {
         /* Solo hay un turno: nada que compactar. */
-        return Ok(Json(
-            filas
-                .into_iter()
-                .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
-                    id,
-                    rol,
-                    contenido,
-                    creadoEn: creado_en.to_rfc3339(),
-                })
-                .collect(),
-        ));
+        return Ok(Json(historial_enriquecido(&state.pool, conversacion_id, &auth).await?));
     }
 
     /* Resumen de los mensajes que se van a marcar. */
@@ -613,399 +511,28 @@ pub async fn compactar_conversacion(
     AgenteRepository::insertar_resumen(&state.pool, conversacion_id, auth.user_id, &resumen)
         .await?;
 
-    /* Devolver el historial visible. */
-    let filas: Vec<(i64, String, String, chrono::DateTime<chrono::Utc>)> =
-        AgenteRepository::listar_mensajes(&state.pool, conversacion_id, auth.user_id).await?;
-    Ok(Json(
-        filas
-            .into_iter()
-            .map(|(id, rol, contenido, creado_en)| MensajeConversacionResponse {
-                id,
-                rol,
-                contenido,
-                creadoEn: creado_en.to_rfc3339(),
-            })
-            .collect(),
-    ))
+    /* Devolver el historial visible (enriquecido con tools y contexto). */
+    Ok(Json(historial_enriquecido(&state.pool, conversacion_id, &auth).await?))
 }
 
-/// Límite de tareas programadas activas por usuario.
-const MAX_TAREAS_PROGRAMADAS: i64 = 20;
+/* [029A-1] Tareas programadas → `handlers/agente_tareas.rs`, memoria →
+ * `handlers/agente_memoria.rs`, skills → `handlers/agente_skills.rs`
+ * (limite-lineas: este controlador superaba 500 líneas efectivas).
+ * `TareaProgramadaResponse` + `crear_tarea_programada` también movidos. */
 
-#[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct CrearTareaProgramadaRequest {
-    pub nombre: String,
-    pub prompt: String,
-    #[serde(default = "default_tipo")]
-    pub tipo: String,
-    pub cron_expr: Option<String>,
-    pub ejecutar_en: Option<chrono::DateTime<chrono::Utc>>,
-}
+/* [029A-1] `listar_tareas_programadas` + `eliminar_tarea_programada` →
+ * `handlers/agente_tareas.rs`. */
 
-fn default_tipo() -> String {
-    "una_vez".to_string()
-}
+/* [029A-1] `MemoriaResponse`/`GuardarMemoriaRequest` +
+ * `listar/guardar/eliminar_memoria` → `handlers/agente_memoria.rs`. */
 
-#[derive(Debug, serde::Serialize)]
-#[allow(non_snake_case)]
-pub struct TareaProgramadaResponse {
-    pub id: Uuid,
-    pub nombre: String,
-    pub prompt: String,
-    pub tipo: String,
-    pub cron_expr: Option<String>,
-    pub estado: String,
-    pub proxima_ejecucion: Option<chrono::DateTime<chrono::Utc>>,
-    pub result_summary: Option<String>,
-}
+/* [029A-1] Skills (`SkillResponse`, requests, validación y endpoints) +
+ * `tipo_clave_invalido` (solo lo usaba `guardar_memoria`) →
+ * `handlers/agente_skills.rs` y `handlers/agente_memoria.rs`. */
 
-/// Crea una tarea programada (el usuario programa; el agente ejecuta como
-/// turno). Valida nombre/prompt y el límite de activas por usuario.
-pub async fn crear_tarea_programada(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    Json(req): Json<CrearTareaProgramadaRequest>,
-) -> Result<Json<TareaProgramadaResponse>, AppError> {
-    let nombre = req.nombre.trim();
-    if nombre.is_empty() || nombre.chars().count() > 255 {
-        return Err(AppError::BadRequest("Nombre inválido".into()));
-    }
-    let prompt = req.prompt.trim();
-    if prompt.is_empty() || prompt.chars().count() > 4000 {
-        return Err(AppError::BadRequest("Prompt inválido".into()));
-    }
-    if !matches!(req.tipo.as_str(), "una_vez" | "recurrente") {
-        return Err(AppError::BadRequest("Tipo inválido (una_vez|recurrente)".into()));
-    }
-    if req.tipo == "recurrente" && req.cron_expr.is_none() {
-        return Err(AppError::BadRequest(
-            "Las tareas recurrentes requieren cron_expr (diario, cada{N}min, cada{N}h, cada{N}d)".into(),
-        ));
-    }
-    let activas = AgenteRepository::contar_tareas_activas(&state.pool, auth.user_id).await?;
-    if activas >= MAX_TAREAS_PROGRAMADAS {
-        return Err(AppError::Validation(format!(
-            "Límite de tareas programadas alcanzado ({MAX_TAREAS_PROGRAMADAS})"
-        )));
-    }
-
-    let id = Uuid::new_v4();
-    let proxima: Option<chrono::DateTime<chrono::Utc>> = if req.tipo == "recurrente" {
-        Some(chrono::Utc::now() + chrono::Duration::minutes(1))
-    } else {
-        req.ejecutar_en
-    };
-    AgenteRepository::crear_tarea(
-        &state.pool,
-        &TareaInsert {
-            id,
-            user_id: auth.user_id,
-            nombre,
-            prompt,
-            tipo: &req.tipo,
-            cron_expr: req.cron_expr.as_deref(),
-            ejecutar_en: req.ejecutar_en,
-            proxima,
-        },
-    )
-    .await?;
-
-    Ok(Json(TareaProgramadaResponse {
-        id,
-        nombre: nombre.to_string(),
-        prompt: prompt.to_string(),
-        tipo: req.tipo.clone(),
-        cron_expr: req.cron_expr,
-        estado: "pendiente".to_string(),
-        proxima_ejecucion: proxima,
-        result_summary: None,
-    }))
-}
-
-/// Lista las tareas programadas del usuario.
-pub async fn listar_tareas_programadas(
-    State(state): State<AppState>,
-    auth: AuthUser,
-) -> Result<Json<Vec<TareaProgramadaResponse>>, AppError> {
-    let filas: Vec<(Uuid, String, String, String, Option<String>, String, Option<chrono::DateTime<chrono::Utc>>, Option<String>)> =
-        AgenteRepository::listar_tareas(&state.pool, auth.user_id).await?;
-    Ok(Json(
-        filas
-            .into_iter()
-            .map(
-                |(id, nombre, prompt, tipo, cron_expr, estado, proxima_ejecucion, result_summary)| {
-                    TareaProgramadaResponse {
-                        id,
-                        nombre,
-                        prompt,
-                        tipo,
-                        cron_expr,
-                        estado,
-                        proxima_ejecucion,
-                        result_summary,
-                    }
-                },
-            )
-            .collect(),
-    ))
-}
-
-/// Elimina una tarea programada (solo del propietario).
-pub async fn eliminar_tarea_programada(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    axum::extract::Path(id): axum::extract::Path<Uuid>,
-) -> Result<axum::http::StatusCode, AppError> {
-    let borrada = AgenteRepository::eliminar_tarea(&state.pool, id, auth.user_id).await?;
-    if borrada == 0 {
-        return Err(AppError::NotFound("Tarea programada no encontrada".into()));
-    }
-    Ok(axum::http::StatusCode::NO_CONTENT)
-}
-
-#[derive(Debug, serde::Serialize)]
-#[allow(non_snake_case)]
-pub struct MemoriaResponse {
-    pub clave: String,
-    pub contenido: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct GuardarMemoriaRequest {
-    pub clave: String,
-    pub contenido: String,
-}
-
-/// Lista la memoria persistente del usuario (preferencias/lecciones).
-pub async fn listar_memoria(
-    State(state): State<AppState>,
-    auth: AuthUser,
-) -> Result<Json<Vec<MemoriaResponse>>, AppError> {
-    let filas: Vec<(String, String)> =
-        AgenteRepository::listar_memoria(&state.pool, auth.user_id).await?;
-    Ok(Json(
-        filas.into_iter()
-            .map(|(clave, contenido)| MemoriaResponse { clave, contenido })
-            .collect(),
-    ))
-}
-
-/// U ata actualiza una entrada de memoria (upsert por clave, idempotente).
-pub async fn guardar_memoria(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    Json(req): Json<GuardarMemoriaRequest>,
-) -> Result<Json<MemoriaResponse>, AppError> {
-    let clave = req.clave.trim();
-    let contenido = req.contenido.trim();
-    if clave.is_empty() || tipo_clave_invalido(clave) {
-        return Err(AppError::BadRequest("Clave inválida (1-128 chars alfanumérica/._-".into()));
-    }
-    if contenido.is_empty() || contenido.chars().count() > 4000 {
-        return Err(AppError::BadRequest("El contenido debe tener entre 1 y 4000 caracteres".into()));
-    }
-    AgenteRepository::guardar_memoria(&state.pool, auth.user_id, clave, contenido).await?;
-    Ok(Json(MemoriaResponse { clave: clave.into(), contenido: contenido.into() }))
-}
-
-/// Borra una entrada de memoria (solo del propietario).
-pub async fn eliminar_memoria(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    axum::extract::Path(clave): axum::extract::Path<String>,
-) -> Result<axum::http::StatusCode, AppError> {
-    let borrada = AgenteRepository::eliminar_memoria(&state.pool, auth.user_id, &clave).await?;
-    if borrada == 0 {
-        return Err(AppError::NotFound("Entrada de memoria no encontrada".into()));
-    }
-    Ok(axum::http::StatusCode::NO_CONTENT)
-}
-
-#[derive(Debug, serde::Serialize)]
-#[allow(non_snake_case)]
-pub struct SkillResponse {
-    pub id: Uuid,
-    pub nombre: String,
-    pub descripcion: String,
-    pub activa: bool,
-}
-
-#[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct CrearSkillRequest {
-    pub nombre: String,
-    pub descripcion: String,
-    #[serde(default = "default_activa")]
-    pub activa: bool,
-}
-
-#[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct ActualizarSkillRequest {
-    pub nombre: Option<String>,
-    pub descripcion: Option<String>,
-    pub activa: Option<bool>,
-}
-
-fn default_activa() -> bool {
-    true
-}
-
-fn validar_skill(nombre: &str, descripcion: &str) -> Result<(), AppError> {
-    let nombre = nombre.trim();
-    if nombre.is_empty() || nombre.chars().count() > 128 {
-        return Err(AppError::BadRequest("El nombre de la skill debe tener entre 1 y 128 caracteres".into()));
-    }
-    if descripcion.trim().is_empty() || descripcion.chars().count() > 4000 {
-        return Err(AppError::BadRequest("La descripción de la skill debe tener entre 1 y 4000 caracteres".into()));
-    }
-    Ok(())
-}
-
-/// Lista las skills del usuario (activas e inactivas).
-pub async fn listar_skills(
-    State(state): State<AppState>,
-    auth: AuthUser,
-) -> Result<Json<Vec<SkillResponse>>, AppError> {
-    let filas: Vec<(Uuid, String, String, bool)> =
-        AgenteRepository::listar_skills(&state.pool, auth.user_id).await?;
-    Ok(Json(
-        filas.into_iter()
-            .map(|(id, nombre, descripcion, activa)| SkillResponse {
-                id,
-                nombre,
-                descripcion,
-                activa,
-            })
-            .collect(),
-    ))
-}
-
-/// Crea o actualiza una skill por nombre (idempotente: misma clave => misma
-/// fila, sin duplicados). La crea inactiva si `activa=false`.
-pub async fn crear_skill(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    Json(req): Json<CrearSkillRequest>,
-) -> Result<Json<SkillResponse>, AppError> {
-    let nombre = req.nombre.trim();
-    let descripcion = req.descripcion.trim();
-    validar_skill(nombre, descripcion)?;
-    let fila: (Uuid, String, String, bool) =
-        AgenteRepository::crear_skill(&state.pool, auth.user_id, nombre, descripcion, req.activa)
-            .await?;
-    Ok(Json(fila_a_skill(fila)))
-}
-
-/// Actualiza nombre/descripción/activa de una skill (solo del propietario).
-pub async fn actualizar_skill(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    Path(id): Path<Uuid>,
-    Json(req): Json<ActualizarSkillRequest>,
-) -> Result<Json<SkillResponse>, AppError> {
-    let actual: (String, String, bool) = AgenteRepository::cargar_skill(&state.pool, id, auth.user_id)
-        .await?
-        .ok_or_else(|| AppError::NotFound("Skill no encontrada".into()))?;
-    let nombre = req.nombre.as_deref().unwrap_or(&actual.0).trim().to_string();
-    let descripcion = req.descripcion.as_deref().unwrap_or(&actual.1).trim().to_string();
-    let activa = req.activa.unwrap_or(actual.2);
-    validar_skill(&nombre, &descripcion)?;
-    let fila: (Uuid, String, String, bool) = AgenteRepository::actualizar_skill(
-        &state.pool,
-        &nombre,
-        &descripcion,
-        activa,
-        id,
-        auth.user_id,
-    )
-    .await?;
-    Ok(Json(fila_a_skill(fila)))
-}
-
-/// Borra una skill (solo del propietario).
-pub async fn eliminar_skill(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    Path(id): Path<Uuid>,
-) -> Result<axum::http::StatusCode, AppError> {
-    let borrada = AgenteRepository::eliminar_skill(&state.pool, id, auth.user_id).await?;
-    if borrada == 0 {
-        return Err(AppError::NotFound("Skill no encontrada".into()));
-    }
-    Ok(axum::http::StatusCode::NO_CONTENT)
-}
-
-fn fila_a_skill((id, nombre, descripcion, activa): (Uuid, String, String, bool)) -> SkillResponse {
-    SkillResponse {
-        id,
-        nombre,
-        descripcion,
-        activa,
-    }
-}
-
-/// Valida una clave de memoria: 1-128 chars, alfanumérico + . _ -
-/// Rechaza claves de solo puntos o con `..` (para evitar ambigüedad de ruta
-/// en el DELETE /:clave y colisiones de segmentos).
-fn tipo_clave_invalido(clave: &str) -> bool {
-    clave.len() > 128
-        || clave.contains("..")
-        || clave.chars().all(|c| c == '.')
-        || !clave.chars().all(|c| c.is_alphanumeric() || c == '.' || c == '_' || c == '-')
-}
-
-fn validar_idioma(idioma: Option<String>) -> Result<String, AppError> {
-    let valor = idioma.unwrap_or_else(|| "es".into());
-    if !matches!(valor.as_str(), "es" | "en" | "pt" | "fr") {
-        return Err(AppError::BadRequest("Idioma inválido (es|en|pt|fr)".into()));
-    }
-    Ok(valor)
-}
-
-fn validar_prompt_sistema(prompt: Option<String>) -> Result<String, AppError> {
-    let valor = prompt.unwrap_or_default().trim().to_string();
-    if valor.chars().count() > 4000 {
-        return Err(AppError::BadRequest("El prompt de sistema no puede exceder 4000 caracteres".into()));
-    }
-    Ok(valor)
-}
-
-fn validar_estilo(estilo: Option<String>) -> Result<String, AppError> {
-    let valor = estilo.unwrap_or_else(|| "conciso".into());
-    if !matches!(valor.as_str(), "conciso" | "detallado" | "amable") {
-        return Err(AppError::BadRequest("Estilo inválido (conciso|detallado|amable)".into()));
-    }
-    Ok(valor)
-}
-
-/* [318A-10 02-09-2026] Nivel de razonamiento del modelo (contrato OpenAI
- * `reasoning_effort`): low|medium|high. Opcional: sin valor el proveedor usa
- * su default. Se mapea a snake_case `nivel_razonamiento` en la config. */
-fn validar_nivel_razonamiento(nivel: Option<String>) -> Result<Option<String>, AppError> {
-    let Some(valor) = nivel.map(|v| v.trim().to_string()) else {
-        return Ok(None);
-    };
-    if valor.is_empty() {
-        return Ok(None);
-    }
-    if !matches!(valor.as_str(), "low" | "medium" | "high") {
-        return Err(AppError::BadRequest(
-            "Nivel de razonamiento inválido (low|medium|high)".into(),
-        ));
-    }
-    Ok(Some(valor))
-}
-
-fn validar_preferencias(preferencias: Option<String>) -> Result<String, AppError> {
-    let valor = preferencias.unwrap_or_default().trim().to_string();
-    if valor.chars().count() > 2000 {
-        return Err(AppError::BadRequest("Las preferencias personales no pueden exceder 2000 caracteres".into()));
-    }
-    Ok(valor)
-}
+/* [029A-1] Validadores de config (`validar_idioma`, `validar_prompt_sistema`,
+ * `validar_estilo`, `validar_nivel_razonamiento`, `validar_preferencias`) →
+ * `handlers/agente_config.rs` (los usa `config_desde_guardada`). */
 
 pub fn routes() -> Router<AppState> {
     Router::new()
@@ -1033,28 +560,9 @@ pub fn routes() -> Router<AppState> {
             "/agente/conversaciones/:id/compactar",
             axum::routing::post(compactar_conversacion),
         )
-        .route(
-            "/agente/tareas-programadas",
-            post(crear_tarea_programada).get(listar_tareas_programadas),
-        )
-        .route(
-            "/agente/tareas-programadas/:id",
-            axum::routing::delete(eliminar_tarea_programada),
-        )
-        .route(
-            "/agente/memoria",
-            axum::routing::get(listar_memoria).put(guardar_memoria),
-        )
-        .route(
-            "/agente/memoria/:clave",
-            axum::routing::delete(eliminar_memoria),
-        )
-        .route(
-            "/agente/skills",
-            axum::routing::get(listar_skills).post(crear_skill),
-        )
-        .route(
-            "/agente/skills/:id",
-            axum::routing::put(actualizar_skill).delete(eliminar_skill),
-        )
+        /* [029A-1] Tareas, memoria y skills viven en sus submódulos
+         * (limite-lineas); las rutas y handlers son los mismos. */
+        .merge(super::agente_tareas::rutas_tareas())
+        .merge(super::agente_memoria::rutas_memoria())
+        .merge(super::agente_skills::rutas_skills())
 }

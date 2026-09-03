@@ -11,34 +11,110 @@ use super::lectura::{HabitRow, ProjectRow, SharedProjectRow, SharedTaskRow, Task
 /// Límite de ítems devueltos por categoría (proyectos, tareas, hábitos).
 const MAX_DASHBOARD_ITEMS: usize = 500;
 
+/// Campos base de un proyecto para su proyección a JSON. Agrupa los 8
+/// escalares que recibía `project_object` en un único parámetro
+/// ([029A-1] parametros-excesivos-rs); se construye desde `ProjectRow` o
+/// `SharedProjectRow` (los campos propios del compartido no entran aquí).
+struct DatosProyecto {
+    legacy_id: i64,
+    nombre: String,
+    estado: String,
+    prioridad: Option<String>,
+    urgencia: String,
+    fecha_limite: Option<DateTime<Utc>>,
+    orden: i32,
+    payload: Value,
+}
+
+impl From<ProjectRow> for DatosProyecto {
+    fn from(row: ProjectRow) -> Self {
+        Self {
+            legacy_id: row.legacy_id,
+            nombre: row.name,
+            estado: row.status,
+            prioridad: row.priority,
+            urgencia: row.urgency,
+            fecha_limite: row.due_at,
+            orden: row.sort_order,
+            payload: row.payload,
+        }
+    }
+}
+
+impl From<SharedProjectRow> for DatosProyecto {
+    fn from(row: SharedProjectRow) -> Self {
+        Self {
+            legacy_id: row.legacy_id,
+            nombre: row.name,
+            estado: row.status,
+            prioridad: row.priority,
+            urgencia: row.urgency,
+            fecha_limite: row.due_at,
+            orden: row.sort_order,
+            payload: row.payload,
+        }
+    }
+}
+
+/// Campos base de una tarea para su proyección a JSON. Agrupa los 9
+/// escalares que recibía `task_object` en un único parámetro
+/// ([029A-1] parametros-excesivos-rs); se construye desde `TaskRow` o
+/// `SharedTaskRow`.
+struct DatosTarea {
+    legacy_id: i64,
+    proyecto_id: Option<i64>,
+    padre_id: Option<i64>,
+    texto: String,
+    completada: bool,
+    prioridad: Option<String>,
+    urgencia: String,
+    orden: i32,
+    payload: Value,
+}
+
+impl From<TaskRow> for DatosTarea {
+    fn from(row: TaskRow) -> Self {
+        Self {
+            legacy_id: row.legacy_id,
+            proyecto_id: row.project_legacy_id,
+            padre_id: row.parent_legacy_id,
+            texto: row.text,
+            completada: row.completed,
+            prioridad: row.priority,
+            urgencia: row.urgency,
+            orden: row.sort_order,
+            payload: row.payload,
+        }
+    }
+}
+
+impl From<SharedTaskRow> for DatosTarea {
+    fn from(row: SharedTaskRow) -> Self {
+        Self {
+            legacy_id: row.legacy_id,
+            proyecto_id: row.project_legacy_id,
+            padre_id: row.parent_legacy_id,
+            texto: row.text,
+            completada: row.completed,
+            prioridad: row.priority,
+            urgencia: row.urgency,
+            orden: row.sort_order,
+            payload: row.payload,
+        }
+    }
+}
+
 pub(super) fn project_value(row: ProjectRow) -> Value {
-    let mut object = project_object(
-        row.legacy_id,
-        &row.name,
-        &row.status,
-        row.priority.as_deref(),
-        &row.urgency,
-        row.due_at,
-        row.sort_order,
-        row.payload,
-    );
-    object.insert(String::from("updatedAt"), updated_at_value(row.updated_at));
+    let updated_at = row.updated_at;
+    let mut object = project_object(DatosProyecto::from(row));
+    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
     Value::Object(object)
 }
 
 pub(super) fn task_value(row: TaskRow) -> Value {
-    let mut object = task_object(
-        row.legacy_id,
-        row.project_legacy_id,
-        row.parent_legacy_id,
-        &row.text,
-        row.completed,
-        row.priority.as_deref(),
-        &row.urgency,
-        row.sort_order,
-        row.payload,
-    );
-    object.insert(String::from("updatedAt"), updated_at_value(row.updated_at));
+    let updated_at = row.updated_at;
+    let mut object = task_object(DatosTarea::from(row));
+    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
     Value::Object(object)
 }
 
@@ -53,95 +129,105 @@ pub(super) fn habit_value(row: HabitRow) -> Value {
 }
 
 pub(super) fn shared_project_value(row: SharedProjectRow) -> Value {
-    let mut object = project_object(
-        row.legacy_id,
-        &row.name,
-        &row.status,
-        row.priority.as_deref(),
-        &row.urgency,
-        row.due_at,
-        row.sort_order,
-        row.payload,
-    );
-    object.insert(String::from("updatedAt"), updated_at_value(row.updated_at));
+    let SharedProjectRow {
+        legacy_id,
+        name,
+        status,
+        priority,
+        urgency,
+        due_at,
+        sort_order,
+        payload,
+        updated_at,
+        owner_id,
+        owner_display_name,
+        owner_avatar_url,
+        role,
+    } = row;
+    let mut object = project_object(DatosProyecto {
+        legacy_id,
+        nombre: name,
+        estado: status,
+        prioridad: priority,
+        urgencia: urgency,
+        fecha_limite: due_at,
+        orden: sort_order,
+        payload,
+    });
+    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
     insert_shared_metadata(
         &mut object,
-        row.owner_id,
-        &row.owner_display_name,
-        row.owner_avatar_url.as_deref(),
-        &row.role,
+        owner_id,
+        &owner_display_name,
+        owner_avatar_url.as_deref(),
+        &role,
     );
     Value::Object(object)
 }
 
 pub(super) fn shared_task_value(row: SharedTaskRow) -> Value {
-    let mut object = task_object(
-        row.legacy_id,
-        row.project_legacy_id,
-        row.parent_legacy_id,
-        &row.text,
-        row.completed,
-        row.priority.as_deref(),
-        &row.urgency,
-        row.sort_order,
-        row.payload,
-    );
-    object.insert(String::from("updatedAt"), updated_at_value(row.updated_at));
+    let SharedTaskRow {
+        legacy_id,
+        project_legacy_id,
+        parent_legacy_id,
+        text,
+        completed,
+        priority,
+        urgency,
+        sort_order,
+        payload,
+        updated_at,
+        owner_id,
+        owner_display_name,
+        owner_avatar_url,
+        role,
+    } = row;
+    let mut object = task_object(DatosTarea {
+        legacy_id,
+        proyecto_id: project_legacy_id,
+        padre_id: parent_legacy_id,
+        texto: text,
+        completada: completed,
+        prioridad: priority,
+        urgencia: urgency,
+        orden: sort_order,
+        payload,
+    });
+    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
     insert_shared_metadata(
         &mut object,
-        row.owner_id,
-        &row.owner_display_name,
-        row.owner_avatar_url.as_deref(),
-        row.role.as_deref().unwrap_or("colaborador"),
+        owner_id,
+        &owner_display_name,
+        owner_avatar_url.as_deref(),
+        role.as_deref().unwrap_or("colaborador"),
     );
     Value::Object(object)
 }
 
-// Proyección cohesiva de una fila a objeto JSON; los argumentos son los campos de la fila,
-// no un contrato público, por lo que el límite de aridad de clippy no aplica aquí.
-#[allow(clippy::too_many_arguments)]
-fn project_object(
-    legacy_id: i64,
-    name: &str,
-    status: &str,
-    priority: Option<&str>,
-    urgency: &str,
-    due_at: Option<DateTime<Utc>>,
-    sort_order: i32,
-    payload: Value,
-) -> Map<String, Value> {
-    let mut object = object_with_id(payload, legacy_id);
-    insert_if_missing(&mut object, "nombre", name);
-    insert_if_missing(&mut object, "estado", status);
-    insert_if_missing(&mut object, "prioridad", priority);
-    insert_if_missing(&mut object, "urgencia", urgency);
-    insert_if_missing(&mut object, "fechaLimite", due_at);
-    insert_if_missing(&mut object, "orden", sort_order);
+// Proyección cohesiva de una fila a objeto JSON; recibe la fila ya agrupada
+// en `DatosProyecto` (un solo parámetro en vez de 8 escalares).
+fn project_object(datos: DatosProyecto) -> Map<String, Value> {
+    let mut object = object_with_id(datos.payload, datos.legacy_id);
+    insert_if_missing(&mut object, "nombre", datos.nombre);
+    insert_if_missing(&mut object, "estado", datos.estado);
+    insert_if_missing(&mut object, "prioridad", datos.prioridad);
+    insert_if_missing(&mut object, "urgencia", datos.urgencia);
+    insert_if_missing(&mut object, "fechaLimite", datos.fecha_limite);
+    insert_if_missing(&mut object, "orden", datos.orden);
     object
 }
 
-// Proyección cohesiva de una fila a objeto JSON; los argumentos son los campos de la fila,
-// no un contrato público, por lo que el límite de aridad de clippy no aplica aquí.
-#[allow(clippy::too_many_arguments)]
-fn task_object(
-    legacy_id: i64,
-    project_legacy_id: Option<i64>,
-    parent_legacy_id: Option<i64>,
-    text: &str,
-    completed: bool,
-    priority: Option<&str>,
-    urgency: &str,
-    sort_order: i32,
-    payload: Value,
-) -> Map<String, Value> {
-    let mut object = object_with_id(payload, legacy_id);
-    insert_if_missing(&mut object, "texto", text);
-    insert_if_missing(&mut object, "completado", completed);
-    insert_if_missing(&mut object, "prioridad", priority);
-    insert_if_missing(&mut object, "urgencia", urgency);
-    insert_if_missing(&mut object, "proyectoId", project_legacy_id);
-    insert_if_missing(&mut object, "parentId", parent_legacy_id);
-    insert_if_missing(&mut object, "orden", sort_order);
+// Proyección cohesiva de una fila a objeto JSON; recibe la fila ya agrupada
+// en `DatosTarea` (un solo parámetro en vez de 9 escalares).
+fn task_object(datos: DatosTarea) -> Map<String, Value> {
+    let mut object = object_with_id(datos.payload, datos.legacy_id);
+    insert_if_missing(&mut object, "texto", datos.texto);
+    insert_if_missing(&mut object, "completado", datos.completada);
+    insert_if_missing(&mut object, "prioridad", datos.prioridad);
+    insert_if_missing(&mut object, "urgencia", datos.urgencia);
+    insert_if_missing(&mut object, "proyectoId", datos.proyecto_id);
+    insert_if_missing(&mut object, "parentId", datos.padre_id);
+    insert_if_missing(&mut object, "orden", datos.orden);
     object
 }
 

@@ -226,19 +226,22 @@ pub async fn upload_file(
     .ok_or_else(|| AppError::Conflict("No tienes espacio suficiente para este archivo".into()))?;
 
     let (file_id, ruta) = persistir_archivo(&auth.user_id, &nombre, &bytes).await?;
+    let ruta_texto = ruta.to_string_lossy();
 
     let row = crate::repositories::StorageRepository::create(
         &state.pool,
-        file_id,
-        auth.user_id,
-        campos.entity_type.as_deref(),
-        campos.entity_id,
-        &nombre,
-        &tipo,
-        &mime,
-        tamano,
-        &ruta.to_string_lossy(),
-        None,
+        crate::repositories::NuevoAdjunto {
+            id: file_id,
+            user_id: auth.user_id,
+            entity_type: campos.entity_type.as_deref(),
+            entity_id: campos.entity_id,
+            nombre: &nombre,
+            tipo: &tipo,
+            mime: &mime,
+            tamano,
+            ruta: &ruta_texto,
+            thumbnail_ruta: None,
+        },
     )
     .await?;
 
