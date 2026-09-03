@@ -55,6 +55,18 @@
     border-color: var(--dashboard-acentoPrimario);
 }
 
+/* [029A-1] Blindaje de la migracion a <Input>: la base .input empata en
+ * especificidad con la receta local, asi que se re-afirman con selector
+ * compuesto (0,2,0) las 3 propiedades que difieren (fondo/color/fuente) mas
+ * la transicion. El layout se conserva: .inputContenedor es flex-columna al
+ * 100% y el input interno ya trae width:100% de la base. */
+.input.whatsappConnectInput {
+    background: var(--dashboard-fondoTerciario);
+    color: var(--dashboard-textoActivo);
+    font-size: var(--dashboard-tamanoMediano);
+    transition: border-color 0.2s;
+}
+
 .whatsappConnectInput:disabled {
     opacity: 0.5;
     cursor: not-allowed;

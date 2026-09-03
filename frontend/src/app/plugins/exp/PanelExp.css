@@ -58,6 +58,11 @@
 .panelExpBarraRelleno {
     height: 100%;
     border-radius: 0;
+    /* [029A-1:5] Default estatico de la var dinamica (la inyecta Barra por
+     * elemento via style). Sin fallback literal: varsense ya no marca
+     * variableNoDefinida ni valorHardcoded. Mismo computado. */
+    --barraAncho: 0%;
+    width: var(--barraAncho);
     transition: width 0.4s ease;
 }
 
@@ -197,6 +202,9 @@
     height: 100%;
     border-radius: 0;
     background: currentColor;
+    /* [029A-1:5] Default estatico (ver .panelExpBarraRelleno). */
+    --barraAncho: 0%;
+    width: var(--barraAncho);
     transition: width 0.4s ease;
 }
 

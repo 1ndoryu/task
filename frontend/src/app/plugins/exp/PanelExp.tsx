@@ -47,7 +47,7 @@ function Barra({valor, maximo, clase, icono, etiqueta, colorClase}: {valor: numb
                 <span className="panelExpValor">{Math.round(valor)} / {Math.round(maximo)}</span>
             </div>
             <div className={`panelExpBarra ${clase}`}>
-                <div className={`panelExpBarraRelleno ${colorClase}`} style={{width: `${porcentaje}%`}} />
+                <div className={`panelExpBarraRelleno ${colorClase}`} style={{/* sentinel-disable inline-style-prohibido -- var dinamica por elemento (patron TareaBadges/MapaCalor) */ '--barraAncho': `${porcentaje}%`} as React.CSSProperties} />
             </div>
         </div>
     );
@@ -150,7 +150,7 @@ export function PanelExp({renderHandleArrastre, handleMinimizar, onAbrirConfig}:
                     <div className="panelExpArbolLateral panelExpArbolLateral--izq" title={`Hábitos que debían cumplirse hoy y aún no se completaron`}>
                         <div className="panelExpArbolLateralFila">
                             <div className="panelExpArbolLateralBarra">
-                                <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--pendientes" style={{width: `${pctPendientes}%`}} />
+                                <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--pendientes" style={{/* sentinel-disable inline-style-prohibido -- var dinamica por elemento (patron TareaBadges/MapaCalor) */ '--barraAncho': `${pctPendientes}%`} as React.CSSProperties} />
                             </div>
                             <span className="panelExpArbolLateralValor">{pendientesHoy}</span>
                         </div>
@@ -164,7 +164,7 @@ export function PanelExp({renderHandleArrastre, handleMinimizar, onAbrirConfig}:
                     <div className="panelExpArbolLateral panelExpArbolLateral--der" title={`Hábitos completados ayer`}>
                         <div className="panelExpArbolLateralFila">
                             <div className="panelExpArbolLateralBarra">
-                                <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--ayer" style={{width: `${pctCompletadosAyer}%`}} />
+                                <div className="panelExpArbolLateralBarraRelleno panelExpArbolLateralBarra--ayer" style={{/* sentinel-disable inline-style-prohibido -- var dinamica por elemento (patron TareaBadges/MapaCalor) */ '--barraAncho': `${pctCompletadosAyer}%`} as React.CSSProperties} />
                             </div>
                             <span className="panelExpArbolLateralValor">{completadosAyer}</span>
                         </div>

@@ -17,7 +17,6 @@
     padding-top: var(--dashboard-espacioSm);
     overflow-x: auto;
     flex-shrink: 0;
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
 }
 
 /* Cada tab encerrada en su caja con borde y fondo de tarjeta */

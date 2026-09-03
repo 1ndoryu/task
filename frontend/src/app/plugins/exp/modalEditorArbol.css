@@ -82,6 +82,54 @@
     color: var(--dashboard-textoActivo);
 }
 
+/* [029A-1] Blindaje de la migracion a <Boton> del sistema: las clases base
+ * (.boton/.boton--icono/.boton--ghost/.boton--mediano) empatan en especificidad
+ * con las recetas locales, asi que se re-afirman aqui con selector compuesto
+ * (0,2,0) para que los computados no cambien. Micro-delta aceptado: el hover
+ * del sistema suma filter:brightness (consistente con el resto de la app). */
+.boton.modalEditorArbolCerrar {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    font-size: var(--dashboard-tamanoMediano);
+    line-height: 1;
+    color: var(--dashboard-textoApagado);
+    border-radius: var(--dashboard-radioSm);
+    gap: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.boton.modalEditorArbolPestana {
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 400;
+    line-height: normal;
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioSmMd);
+    color: var(--dashboard-textoSecundario);
+    border: 1px solid transparent;
+    gap: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.boton.modalEditorArbolPestana--activa {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoActivo);
+}
+
+.boton.modalEditorArbolRestaurar {
+    align-self: flex-start;
+    font-size: var(--dashboard-tamanoPequeno);
+    font-weight: 400;
+    line-height: normal;
+    padding: var(--dashboard-espacioMini) var(--dashboard-espacioSmMd);
+    background: none;
+    border: 1px solid var(--dashboard-bordePrincipal);
+    color: var(--dashboard-textoSecundario);
+    gap: var(--dashboard-espacioMini);
+    margin-top: var(--dashboard-espacioMini);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
 /* ---- Pestañas de estado ---- */
 .modalEditorArbolPestanas {
     display: flex;

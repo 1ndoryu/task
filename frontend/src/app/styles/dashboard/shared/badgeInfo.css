@@ -250,5 +250,12 @@
     display: block;
     height: 100%;
     border-radius: 0;
+    /* [029A-1:5] Defaults estaticos de las vars dinamicas (las inyecta
+     * TareaBadges por tarea). Sin fallback literal: varsense ya no marca
+     * variableNoDefinida ni valorHardcoded. Mismos computados. */
+    --dificultadAncho: 0%;
+    --dificultadColor: transparent;
+    width: var(--dificultadAncho);
+    background-color: var(--dificultadColor);
     transition: width var(--dashboard-transicionRapida);
 }

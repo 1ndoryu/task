@@ -66,8 +66,11 @@ export const TareaBadges: React.FC<TareaBadgesProps> = ({tarea, nombreProyecto, 
                 role="img"
                 aria-label={`Dificultad ${nivel}`}
             >
+                {/* [029A-1] Valores dinamicos por tarea (% y color): no pueden vivir en CSS estatico.
+                  * Patron canonico MapaCalor (style solo con CSS vars + disable inline): el binario
+                  * instalado solo exime objetos de 1 var autocerrados; el de 2 vars lo sigue marcando. */}
                 <span className="badgeDificultadTrack">
-                    <span className="badgeDificultadFill" style={{width: `${pct}%`, backgroundColor: color}} />
+                    <span className="badgeDificultadFill" style={{/* sentinel-disable inline-style-prohibido */ '--dificultadAncho': `${pct}%`, '--dificultadColor': color} as React.CSSProperties} />
                 </span>
             </span>
         );

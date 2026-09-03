@@ -53,7 +53,9 @@ export function ModalEditorArbol({activo, onCerrar}: ModalEditorArbolProps): JSX
             <div className="modalEditorArbol" role="dialog" aria-modal="true" aria-label="Editor del árbol de vida">
                 <div className="modalEditorArbolCabecera">
                     <span className="modalEditorArbolTitulo">Editor del árbol de vida</span>
-                    <button type="button" className="modalEditorArbolCerrar" onClick={onCerrar} aria-label="Cerrar">×</button>
+                    {/* [029A-1] <Boton> del sistema (patron ModalConfigAgente). El blindaje visual vive en
+                      * modalEditorArbol.css (.boton.modalEditorArbolCerrar) para no cambiar computados. */}
+                    <Boton type="button" variante="icono" tamano="pequeño" soloIcono icono={<span aria-hidden="true">×</span>} claseAdicional="modalEditorArbolCerrar" onClick={onCerrar} aria-label="Cerrar" />
                 </div>
 
                 {/* Pestañas de estado */}
@@ -61,16 +63,20 @@ export function ModalEditorArbol({activo, onCerrar}: ModalEditorArbolProps): JSX
                     {ESTADOS_ARBOL.map(e => {
                         const editado = Boolean(copasArbol[String(e)]);
                         return (
-                            <button
+                            /* [029A-1] <Boton> del sistema; role/tab y aria-selected se propagan via ...props.
+                             * La regla no lo marcaba por el salto de linea tras <button (mismo patron que L56). */
+                            <Boton
                                 key={e}
+                                type="button"
                                 role="tab"
                                 aria-selected={estadoSel === e}
-                                className={`modalEditorArbolPestana ${estadoSel === e ? 'modalEditorArbolPestana--activa' : ''}`}
+                                variante="ghost"
+                                claseAdicional={`modalEditorArbolPestana ${estadoSel === e ? 'modalEditorArbolPestana--activa' : ''}`}
                                 onClick={() => setEstadoSel(e)}
                             >
                                 <span>{e}%</span>
                                 {editado && <span className="modalEditorArbolPestanaPunto" title="Personalizado" />}
-                            </button>
+                            </Boton>
                         );
                     })}
                 </div>
@@ -87,13 +93,16 @@ export function ModalEditorArbol({activo, onCerrar}: ModalEditorArbolProps): JSX
                             mostrarCuadricula={true}
                         />
                         {editada && (
-                            <button
+                            /* [029A-1] <Boton> del sistema (mismo patron no marcado por el salto de linea). */
+                            <Boton
                                 type="button"
-                                className="modalEditorArbolRestaurar"
+                                variante="ghost"
+                                icono={<RotateCcw size={13} />}
+                                claseAdicional="modalEditorArbolRestaurar"
                                 onClick={() => restablecerCopaArbol(estadoSel)}
                             >
-                                <RotateCcw size={13} /> Volver al árbol por defecto
-                            </button>
+                                Volver al árbol por defecto
+                            </Boton>
                         )}
                     </div>
 

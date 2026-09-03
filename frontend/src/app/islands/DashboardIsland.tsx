@@ -7,7 +7,6 @@
  */
 
 import {useEffect, useMemo, useState, useCallback} from 'react';
-import {SquarePlus} from 'lucide-react';
 
 /* Importar store de configuración temprano para inicializar horaFinDia antes que otros módulos */
 import '../stores/configuracionUsuarioStore';
@@ -19,7 +18,7 @@ import {useDashboardCompleto} from '../hooks/useDashboardCompleto';
 import {VERSION_ACTUAL} from '../data/changelog';
 import {Landing} from '../components/landing/Landing';
 import {devLog} from '../utils/devLog';
-import {NavegacionInferior, MenuContextual} from '../components/shared';
+import {NavegacionInferior} from '../components/shared';
 import type {OpcionMenu} from '../components/shared';
 import {DockTracking} from '../components/shared/DockTracking';
 
@@ -37,7 +36,6 @@ import {useSidebarPaneles} from '../hooks/dashboard/useSidebarPanels';
 import {useConfiguracionVistas, PANELES_VISTA_DEFECTO} from '../hooks/useConfiguracionVistas';
 import {MAX_PANELES_VISTA} from '../types/vistas';
 import type {PanelId} from '../hooks/useConfiguracionLayout';
-import {Boton} from '../components/ui';
 import {useExpPlugin} from '../plugins/exp';
 import {useGruposEjecucion} from '../hooks/useGruposEjecucion';
 import {useGruposEjecucionStore} from '../stores/gruposEjecucionStore';

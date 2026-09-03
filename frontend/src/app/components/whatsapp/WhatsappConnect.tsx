@@ -7,7 +7,7 @@
  */
 
 import {Smartphone, QrCode, AlertTriangle, Loader2} from 'lucide-react';
-import {Boton} from '../ui';
+import {Boton, Input} from '../ui';
 import {WhatsappQRDisplay} from './WhatsappQRDisplay';
 import {WhatsappStatus} from './WhatsappStatus';
 import {WhatsappSettings} from './WhatsappSettings';
@@ -93,10 +93,13 @@ export function WhatsappConnect(): JSX.Element {
                 <label className="whatsappConnectLabel" htmlFor="whatsapp-phone">
                     Tu número de WhatsApp (formato internacional)
                 </label>
-                <input
+                {/* [029A-1] <Input> del sistema. id/placeholder/value/onChange/disabled/onKeyDown se
+                  * propagan via ...props; el blindaje visual vive en whatsapp.css
+                  * (.input.whatsappConnectInput). El <label htmlFor> externo se mantiene. */}
+                <Input
                     id="whatsapp-phone"
-                    className="whatsappConnectInput"
-                    type="tel"
+                    tipo="tel"
+                    claseAdicional="whatsappConnectInput"
                     placeholder="+584141234567"
                     value={phoneInput}
                     onChange={(e) => setPhoneInput(e.target.value)}
