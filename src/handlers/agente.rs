@@ -151,6 +151,7 @@ pub async fn agente_stream(
         &runtime.turno_config,
         &tx,
         &mut historial,
+        &runtime,
     )
     .await?;
     let persistencia_loop = Arc::clone(&persistencia);
@@ -234,15 +235,19 @@ pub struct ConversacionResponse {
 
 /* [memoria/skills] Inyecta la memoria persistente y las skills activas como
  * contexto system al inicio del historial, si el turno las tiene habilitadas;
- * emite el evento observable de cuántas skills entraron. Extraída de
- * agente_stream para acortarla (funcion-larga-rs). Las consultas viven en el
- * adaptador `PersistenciaAgente` (Fase 2 Glory Harness). */
+ * emite el evento observable de cuántas skills entraron. [318A-15 F2] Las
+ * skills ya no van como mensaje system suelto: entran por la capa [REGLAS]
+ * del núcleo (protegida en compactación, F1); la memoria persiste en el
+ * historial como antes. Extraída de agente_stream para acortarla
+ * (funcion-larga-rs). Las consultas viven en el adaptador `PersistenciaAgente`
+ * (Fase 2 Glory Harness). */
 async fn inyectar_contexto(
     persistencia: &PersistenciaAgente,
     user_id: Uuid,
     turno: &TurnoConfig,
     tx: &mpsc::Sender<AgenteEvento>,
     historial: &mut Vec<AiMessage>,
+    runtime: &AgentRuntime,
 ) -> Result<(), AppError> {
     /* [29-08-2026] Fase 3 (memoria v1): inyectar la memoria persistente del
      * usuario como mensajes system al inicio del historial (tras el
@@ -252,13 +257,21 @@ async fn inyectar_contexto(
         historial.splice(0..0, memoria);
     }
     /* [31-08-2026] Fase 3 (skills v1): inyectar las skills activas como
-     * contexto system y emitir el evento observable de cuántas entraron. */
+     * contexto system y emitir el evento observable de cuántas entraron.
+     * [318A-15 F2]: en vez de ensuciar el historial, el bloque entra en la
+     * ranura [REGLAS] del núcleo (interior mutable, no persiste) — misma
+     * capa que AGENTS.md en el CLI; compactación nunca lo toca (F1). */
     if turno.incluir_skills {
         let skills = persistencia.cargar_skills_agente(user_id, 20).await?;
         let cantidad = skills.len();
         if cantidad > 0 {
             let _ = tx.send(AgenteEvento::Contexto { skills: cantidad }).await;
-            historial.splice(0..0, skills);
+            let reglas = skills
+                .iter()
+                .filter_map(|m| m.content.as_str())
+                .collect::<Vec<_>>()
+                .join("\n\n");
+            runtime.establecer_reglas(reglas);
         }
     }
     Ok(())
