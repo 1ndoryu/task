@@ -63,7 +63,7 @@ export const habitosIniciales: Habito[] = [
 export const tareasIniciales: Tarea[] = [
     {
         id: 1,
-        texto: '👋 ¡Bienvenido! Explora el dashboard',
+        texto: '¡Bienvenido! Explora el dashboard',
         completado: false,
         prioridad: 'alta',
         urgencia: 'urgente',
@@ -97,30 +97,30 @@ export const tareasIniciales: Tarea[] = [
 /*
  * Notas iniciales del scratchpad - Nota de bienvenida Beta
  */
-export const notasIniciales = `# ¡Bienvenido a la Beta de Nakomi Task! 🎉
+export const notasIniciales = `# ¡Bienvenido a la Beta de Nakomi Task!
 
 Gracias por unirte a nuestra primera beta abierta. Este proyecto está hecho con mucho cariño, pensando en una gestión de tareas y hábitos **inteligente y minimalista**.
 
-## 🎁 Tu regalo de bienvenida
+## Tu regalo de bienvenida
 
 Durante esta beta (Enero 2026), te regalamos **30 días gratis** sin necesidad de tarjeta de crédito para que pruebes todas las funciones:
 
-- ✅ Copias de seguridad cada 30 minutos
-- ✅ Cifrado de archivos  
-- ✅ 1 GB de almacenamiento (expandiremos con el tiempo)
-- ✅ Envío de comentarios y sugerencias
+- Copias de seguridad cada 30 minutos
+- Cifrado de archivos
+- 1 GB de almacenamiento (expandiremos con el tiempo)
+- Envío de comentarios y sugerencias
 
-## ⚠️ Importante
+## Importante
 
 Al ser una beta, podrían existir bugs o pérdida de datos. Trabajamos duro para que esto no suceda, pero te recomendamos usar las copias de seguridad.
 
-## 🚀 Próximamente
+## Próximamente
 
 - Sistema de trabajo en equipos
 - Plugins personalizados
 - Integración más profunda con IA (con opción de desactivarla si prefieres trabajo 100% humano)
 
-## 💬 Tu opinión es oro
+## Tu opinión es oro
 
 Esperamos tus sugerencias, reportes de bugs, ideas locas... ¡todo es bienvenido! Leeremos cada comentario.
 

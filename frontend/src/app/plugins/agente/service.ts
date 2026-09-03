@@ -125,11 +125,32 @@ export function aConfigFrontend(cruda: unknown): Partial<ConfigAgente> {
     };
 }
 
+export interface HerramientaHistorial {
+    tool: string;
+    ok: boolean;
+    resumen: string;
+    argumentos?: unknown;
+    diff?: string | null;
+}
+
+/* [039A-2] Contexto del turno que respondió, restaurado desde `agente_turnos`
+ * (snake_case como el SSE). `ocupacion_pct`/`skills` no se persisten por turno. */
+export interface ContextoHistorial {
+    tokens_prompt: number;
+    tokens_complecion: number;
+    provider?: string | null;
+    modelo?: string | null;
+}
+
 export interface MensajeConversacion {
     id: number;
     rol: 'user' | 'assistant' | 'system' | 'tool';
     contenido: string;
     creadoEn: string;
+    /* [039A-2] Tarjetas y contexto restaurados por el backend (vacío/ausente
+     * en mensajes sin tools o de clientes antiguos). */
+    herramientas?: HerramientaHistorial[];
+    contexto?: ContextoHistorial | null;
 }
 
 export interface SkillAgente {
@@ -155,7 +176,7 @@ export type EventoAgente =
     | {tipo: 'token'; texto: string}
     | {tipo: 'tool_start'; tool: string; argumentos: unknown}
     | {tipo: 'tool_result'; tool: string; ok: boolean; resumen: string; diff?: string}
-    | {tipo: 'usage'; tokens_prompt?: number; tokens_complecion?: number; ocupacion_pct?: number | null}
+    | {tipo: 'usage'; tokens_prompt?: number; tokens_complecion?: number; ocupacion_pct?: number | null; provider?: string | null; modelo?: string | null}
     | {tipo: 'contexto'; skills: number}
     | {tipo: 'contexto_detalle'; max_ventana: number; reserva_salida: number; system_instrucciones: number; definiciones_tools: number; mensajes: number; resultados_tools: number; total_entrada: number; ocupacion_pct: number}
     | {tipo: 'requiere_aprobacion'; tool: string; argumentos: unknown}

@@ -22,6 +22,9 @@ export interface FixtureContexto {
     tokensPrompt: number;
     tokensComplecion: number;
     skills: number;
+    /* [02-09-2026] Proveedor/modelo REAL que respondió (fallback del core). */
+    provider?: string | null;
+    modelo?: string | null;
     /* [318A-7] Desglose de la ventana de contexto (evento contexto_detalle). */
     maxVentana?: number;
     reservaSalida?: number;
@@ -134,7 +137,7 @@ export const fixtureMensajes: FixtureMensaje[] = [
                 argumentos: {titulo: 'Revisar el plan de la semana', prioridad: 'media', vencimiento: '2026-08-30'},
             },
         ],
-        contexto: {ocupacionPct: 18, tokensPrompt: 2410, tokensComplecion: 120, skills: 2},
+        contexto: {ocupacionPct: 18, tokensPrompt: 2410, tokensComplecion: 120, skills: 2, provider: 'commandcode', modelo: 'poolside/laguna-s-2.1-free'},
     },
     {
         rol: 'assistant',
@@ -147,7 +150,7 @@ export const fixtureMensajes: FixtureMensaje[] = [
                 diff: DIFF_EJEMPLO,
             },
         ],
-        contexto: {ocupacionPct: 41, tokensPrompt: 6720, tokensComplecion: 388, skills: 2},
+        contexto: {ocupacionPct: 41, tokensPrompt: 6720, tokensComplecion: 388, skills: 2, provider: 'glory', modelo: 'deepseek/deepseek-v4-flash'},
     },
     {
         rol: 'assistant',

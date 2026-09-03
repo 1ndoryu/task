@@ -84,6 +84,16 @@
     overflow-y: auto;
 }
 
+/* [039A-2] Cabecera del diff ("N líneas · M cambios"): misma tipografía mono
+ * del bloque, sin borde superior propio (lo aporta el <pre> que sigue). */
+.panelAgenteHerramientaDifCabecera {
+    margin: 0;
+    padding: var(--dashboard-espacioXs) var(--dashboard-espacioMd) 0;
+    font-family: var(--dashboard-fuenteMonoespaciada);
+    font-size: var(--dashboard-tamanoPequeno);
+    color: var(--dashboard-textoApagado);
+}
+
 /* Refuerzo SOLO para el chat real: misma regla global del dashboard que quita
  * los bordes; este selector (0,3,0) con ancestros de la burbuja y la tarjeta
  * conserva la línea divisoria entre el summary y el bloque de args. */
@@ -106,6 +116,28 @@
     border: 1px solid var(--dashboard-bordeSutil);
     padding: 1px var(--dashboard-espacioSm);
     border-radius: var(--dashboard-radioSm);
+}
+
+/* [02-09-2026] Chips de tokens (entrada/salida) con icono lucide alineado en
+ * columna vertical al texto; gap mínimo entre icono y cifra compacta.
+ * Clase duplicada + !important (mismo patrón que .panelIAContextoBarra de
+ * 318A-7): la regla global .dashboardPanelView [class*="panel"] (0,2,0) con
+ * border none !important matchea esta clase porque contiene "panel" y dejaba
+ * el chip SIN borde, a diferencia de los otros <span> del contexto (que no
+ * tienen clase y conservaban su borde de .panelAgenteContexto span). Con
+ * especificidad (0,3,0) y !important se restaura el borde uniforme. */
+.dashboardPanelView .panelAgenteContexto .panelAgenteContextoChip.panelAgenteContextoChip {
+    border: 1px solid var(--dashboard-bordeSutil) !important;
+}
+.panelAgenteContexto .panelAgenteContextoChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+.panelAgenteContextoChip svg {
+    flex-shrink: 0;
 }
 
 /* [318A-5] Barra de uso de contexto inferior (sobre el input). Muestra el uso

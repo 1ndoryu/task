@@ -5,8 +5,12 @@
  * los imports de los call-sites (galería visual, PanelAgente, ModalConfigAgente).
  */
 
-import {AlertTriangle, Loader2} from 'lucide-react';
+import {AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Loader2} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
+/* [02-09-2026] Para mostrar el nombre amigable del modelo REAL que respondió
+ * (el catálogo mapea provider+modelo → etiqueta; sin ciclo de imports:
+ * catalogoModelos.tsx no importa mensajes.tsx). */
+import {entradaModelo} from './catalogoModelos';
 
 /* ---------- Tipos visuales (espejo del store) ---------- */
 
@@ -20,12 +24,16 @@ export interface HerramientaVisual {
 
 /* [318A-7] Contexto del último turno. `contexto_detalle` (evento del runtime)
  * añade el desglose por secciones de la ventana: system, definiciones de
- * tools, mensajes, resultados de tools, reserva de salida y ventana máxima. */
+ * tools, mensajes, resultados de tools, reserva de salida y ventana máxima.
+ * [02-09-2026] `provider`/`modelo` = proveedor/modelo REAL que respondió
+ * (llega en el evento usage de cada llamada LLM tras resolver el fallback). */
 export interface ContextoVisual {
     ocupacionPct: number | null;
     tokensPrompt: number;
     tokensComplecion: number;
     skills: number;
+    provider?: string | null;
+    modelo?: string | null;
     maxVentana?: number;
     reservaSalida?: number;
     systemInstrucciones?: number;
@@ -35,7 +43,57 @@ export interface ContextoVisual {
     totalEntrada?: number;
 }
 
+/* [02-09-2026] Etiqueta del modelo real que respondió. Resuelve el nombre
+ * amigable del catálogo (provider+modelo → etiqueta) y cae al ID crudo si el
+ * modelo no está en el catálogo (p. ej. un proveedor del fallback distinto).
+ * Si no hay dato (turnos previos sin el campo) devuelve null: no se muestra. */
+function etiquetaModeloReal(contexto: ContextoVisual): string | null {
+    const modelo = contexto.modelo?.trim();
+    const provider = contexto.provider?.trim();
+    if (!modelo) return null;
+    const entrada = entradaModelo(modelo, provider || undefined);
+    if (entrada) {
+        return provider && provider !== entrada.proveedor
+            ? `${entrada.nombre} (${provider})`
+            : entrada.nombre;
+    }
+    return provider ? `${provider}/${modelo}` : modelo;
+}
+
+/* [02-09-2026] Formato compacto tipo HUD para cantidades de tokens: 3 → "3",
+ * 1400 → "1.4k", 12000 → "12k". Usa notación compacta con separador "." y
+ * una cifra decimal máxima; sin sufijo para < 1000 (evita "0.3k" y ruido). */
+function formatearCompacto(n: number): string {
+    if (n < 1000) return `${n}`;
+    const abs = Math.abs(n);
+    const unidades = ['', 'k', 'M'];
+    const grado = Math.min(2, Math.floor(Math.log10(abs) / 3));
+    const valor = abs / Math.pow(10, grado * 3);
+    const texto = valor >= 100 ? `${Math.round(valor)}` : valor.toFixed(1);
+    return `${texto}${unidades[grado]}`;
+}
+
+/* [02-09-2026] Etiqueta de tokens con icono de dirección de entrada/salida
+ * (lucide). "CONTX" es la abreviatura de contexto pedida por el usuario. */
+function etiquetaTokens(direccion: 'entrada' | 'salida', cantidad: number): JSX.Element {
+    const Icono = direccion === 'entrada' ? ArrowDownToLine : ArrowUpFromLine;
+    return (
+        <span className="panelAgenteContextoChip" title={direccion === 'entrada' ? 'Tokens de entrada (prompt)' : 'Tokens de salida (respuesta)'}>
+            <Icono size={9} aria-hidden="true" />
+            {formatearCompacto(cantidad)}
+        </span>
+    );
+}
+
 /* ---------- Tarjetas de tool y contexto ---------- */
+
+/* [039A-2] Cabecera del diff: "N líneas · M cambios" para ver de un vistazo
+ * que el parche es puntual (los hunks ya colapsan el contexto en el core). */
+function encabezadoDiff(diff: string): string {
+    const lineas = diff.split('\n').filter(l => l.length > 0);
+    const cambios = lineas.filter(l => l.startsWith('-') || l.startsWith('+')).length;
+    return `${lineas.length} líneas · ${cambios} cambios`;
+}
 
 export function TarjetaTool({h}: {h: HerramientaVisual}): JSX.Element {
     return (
@@ -48,7 +106,10 @@ export function TarjetaTool({h}: {h: HerramientaVisual}): JSX.Element {
                 <span className="panelAgenteHerramientaTexto">{h.resumen}</span>
             </summary>
             {h.diff !== undefined && h.diff !== null && h.diff !== '' ? (
-                <pre className="panelAgenteHerramientaArgs">{h.diff}</pre>
+                <>
+                    <div className="panelAgenteHerramientaDifCabecera">{encabezadoDiff(h.diff)}</div>
+                    <pre className="panelAgenteHerramientaArgs">{h.diff}</pre>
+                </>
             ) : (
                 h.argumentos !== undefined && (
                     <pre className="panelAgenteHerramientaArgs">{JSON.stringify(h.argumentos, null, 2)}</pre>
@@ -59,12 +120,20 @@ export function TarjetaTool({h}: {h: HerramientaVisual}): JSX.Element {
 }
 
 export function BarraContexto({contexto}: {contexto: ContextoVisual}): JSX.Element {
+    const modeloReal = etiquetaModeloReal(contexto);
     return (
         <div className="panelAgenteContexto">
+            {modeloReal && <span title="Modelo que respondió este turno">{modeloReal}</span>}
             {contexto.skills > 0 && <span>{contexto.skills} skills</span>}
-            {contexto.ocupacionPct !== null && <span>{contexto.ocupacionPct.toFixed(0)}% contexto</span>}
+            {contexto.ocupacionPct !== null && (
+                <span title="Contexto ocupado en este turno">{contexto.ocupacionPct.toFixed(0)}% CONTX</span>
+            )}
             {contexto.tokensPrompt > 0 && (
-                <span>{contexto.tokensPrompt} tok entrada · {contexto.tokensComplecion} salida</span>
+                <>
+                    {etiquetaTokens('entrada', contexto.tokensPrompt)}
+                    {contexto.tokensComplecion >= 0 &&
+                        etiquetaTokens('salida', contexto.tokensComplecion)}
+                </>
             )}
         </div>
     );

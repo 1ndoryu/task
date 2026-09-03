@@ -40,12 +40,16 @@ export interface MensajeTabAgente {
     /* Fallo retryable del proveedor; el botón reintentar reenvía con la misma clave. */
     reintentar?: boolean | null;
     /* Contexto real recibido por el agente en este turno (eventos usage/contexto).
-     * [318A-7] `contexto_detalle` añade el desglose por secciones de la ventana. */
+     * [318A-7] `contexto_detalle` añade el desglose por secciones de la ventana.
+     * [02-09-2026] `provider`/`modelo` = proveedor/modelo REAL que respondió
+     * (el fallback del core puede saltar a otro distinto del solicitado). */
     contexto?: {
         ocupacionPct: number | null;
         tokensPrompt: number;
         tokensComplecion: number;
         skills: number;
+        provider?: string | null;
+        modelo?: string | null;
         maxVentana?: number;
         reservaSalida?: number;
         systemInstrucciones?: number;
@@ -196,6 +200,39 @@ function tabDe(estado: EstadoAgente, id: string): TabAgente | undefined {
     return estado.tabs.find(t => t.conversacion.id === id);
 }
 
+/* [039A-2] Convierte un mensaje del historial del servidor a mensaje de tab,
+ * conservando las tarjetas de tools y el contexto restaurados por el backend
+ * (antes se mapeaban solo id/rol/contenido y todo se perdía al recargar).
+ * El `diff` nunca viajó persistido: las tarjetas restauradas muestran
+ * resumen + argumentos (suficiente para ver el cambio específico). */
+function aMensajeTab(h: MensajeConversacion): MensajeTabAgente {
+    const herramientas = (h.herramientas ?? []).map(t => ({
+        tool: t.tool,
+        ok: t.ok,
+        resumen: t.resumen,
+        argumentos: t.argumentos,
+    }));
+    const base: MensajeTabAgente = {
+        id: `db-${h.id}`,
+        rol: h.rol === 'user' ? 'user' as const : 'assistant' as const,
+        contenido: h.contenido,
+    };
+    if (herramientas.length > 0) base.herramientas = herramientas;
+    if (h.contexto) {
+        base.contexto = {
+            /* La ocupación % no se persistió por turno: null (el front deriva
+             * el % en la barra inferior desde tokens/maxVentana). */
+            ocupacionPct: null,
+            tokensPrompt: h.contexto.tokens_prompt ?? 0,
+            tokensComplecion: h.contexto.tokens_complecion ?? 0,
+            skills: 0,
+            provider: h.contexto.provider ?? null,
+            modelo: h.contexto.modelo ?? null,
+        };
+    }
+    return base;
+}
+
 /* [318A-8] La config de la conversación activa es la fuente de verdad del
  * selector/modal: al abrir una tab (o cargar la lista) se sincroniza la config
  * global del store con la de esa conversación para que el selector muestre lo
@@ -241,23 +278,63 @@ async function correrTurno(
                             {tool: evento.tool, ok: true, resumen: 'ejecutando...', argumentos: evento.argumentos},
                         ];
                         break;
-                    case 'tool_result':
-                        objetivo.herramientas = (objetivo.herramientas ?? []).map(h =>
-                            h.tool === evento.tool
-                                ? {tool: evento.tool, ok: evento.ok, resumen: evento.resumen, argumentos: h.argumentos, diff: evento.diff}
-                                : h
-                        );
+                    case 'tool_result': {
+                        /* [039A-2] Actualiza SOLO la última tarjeta pendiente
+                         * con ese nombre (antes el `.map` pisaba TODAS las
+                         * tarjetas con el mismo tool: 3× file_search mostraban
+                         * las 3 el último resultado). Sin pendiente, la última
+                         * con ese nombre; sin ninguna, se añade. */
+                        const lista = [...(objetivo.herramientas ?? [])];
+                        let idx = -1;
+                        for (let k = lista.length - 1; k >= 0; k--) {
+                            const h = lista[k];
+                            if (h && h.tool === evento.tool && h.resumen === 'ejecutando...') {
+                                idx = k;
+                                break;
+                            }
+                        }
+                        if (idx === -1) {
+                            for (let k = lista.length - 1; k >= 0; k--) {
+                                if (lista[k]?.tool === evento.tool) {
+                                    idx = k;
+                                    break;
+                                }
+                            }
+                        }
+                        const actualizada = {
+                            tool: evento.tool,
+                            ok: evento.ok,
+                            resumen: evento.resumen,
+                            argumentos: idx >= 0 ? lista[idx]?.argumentos : undefined,
+                            diff: evento.diff,
+                        };
+                        if (idx >= 0) {
+                            lista[idx] = actualizada;
+                        } else {
+                            lista.push(actualizada);
+                        }
+                        objetivo.herramientas = lista;
                         break;
+                    }
                     case 'usage':
                         /* El runtime emite `usage` con ocupacion_pct: None (y el
                          * final con tokens_prompt: 0): conserva los valores
                          * previos (contexto_detalle/turnos con tools) cuando el
-                         * evento no trae dato, para no borrar la barra. */
+                         * evento no trae dato, para no borrar la barra. El
+                         * provider/modelo real llegan en el Usage de cada llamada
+                         * LLM y el Usage final los trae null: se conservan los
+                         * primeros. */
                         objetivo.contexto = {
                             ocupacionPct: evento.ocupacion_pct ?? objetivo.contexto?.ocupacionPct ?? null,
                             tokensPrompt: (evento.tokens_prompt ?? 0) > 0 ? (evento.tokens_prompt ?? 0) : objetivo.contexto?.tokensPrompt ?? 0,
                             tokensComplecion: (evento.tokens_complecion ?? 0) > 0 ? (evento.tokens_complecion ?? 0) : objetivo.contexto?.tokensComplecion ?? 0,
                             skills: objetivo.contexto?.skills ?? 0,
+                            provider: typeof evento.provider === 'string' && evento.provider.trim()
+                                ? evento.provider
+                                : objetivo.contexto?.provider ?? null,
+                            modelo: typeof evento.modelo === 'string' && evento.modelo.trim()
+                                ? evento.modelo
+                                : objetivo.contexto?.modelo ?? null,
                         };
                         break;
                     case 'contexto':
@@ -266,6 +343,8 @@ async function correrTurno(
                             tokensPrompt: objetivo.contexto?.tokensPrompt ?? 0,
                             tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
                             skills: evento.skills,
+                            provider: objetivo.contexto?.provider ?? null,
+                            modelo: objetivo.contexto?.modelo ?? null,
                         };
                         break;
                     /* [318A-7] Desglose de la ventana de contexto (evento del
@@ -282,6 +361,8 @@ async function correrTurno(
                                 : evento.total_entrada ?? 0,
                             tokensComplecion: objetivo.contexto?.tokensComplecion ?? 0,
                             skills: objetivo.contexto?.skills ?? 0,
+                            provider: objetivo.contexto?.provider ?? null,
+                            modelo: objetivo.contexto?.modelo ?? null,
                             maxVentana: evento.max_ventana,
                             reservaSalida: evento.reserva_salida,
                             systemInstrucciones: evento.system_instrucciones,
@@ -458,11 +539,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                         ? {
                               ...t,
                               cargandoHistorial: false,
-                              mensajes: historial.map(h => ({
-                                  id: `db-${h.id}`,
-                                  rol: h.rol === 'user' ? 'user' as const : 'assistant' as const,
-                                  contenido: h.contenido,
-                              })),
+                              mensajes: historial.map(aMensajeTab),
                           }
                         : t
                 ),
@@ -665,11 +742,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                     t.conversacion.id === id
                         ? {
                               ...t,
-                              mensajes: historial.map(h => ({
-                                  id: `db-${h.id}`,
-                                  rol: h.rol === 'user' ? 'user' as const : 'assistant' as const,
-                                  contenido: h.contenido,
-                              })),
+                              mensajes: historial.map(aMensajeTab),
                           }
                         : t
                 ),
@@ -698,11 +771,7 @@ export const useAgenteStore = create<EstadoAgente>()((set, get) => ({
                     t.conversacion.id === id
                         ? {
                               ...t,
-                              mensajes: historial.map(h => ({
-                                  id: `db-${h.id}`,
-                                  rol: h.rol === 'user' ? 'user' as const : 'assistant' as const,
-                                  contenido: h.contenido,
-                              })),
+                              mensajes: historial.map(aMensajeTab),
                           }
                         : t
                 ),
