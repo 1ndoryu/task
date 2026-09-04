@@ -43,6 +43,10 @@ pub async fn ejecutar_tarea(
         llm: Arc::new(state.ai_provider.clone()),
         web_search: Some(Arc::new(BuscadorWeb(state.web_search.clone()))),
         dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
+        /* [318A-16 F3] task-IA nunca ejecuta comandos (invariante de
+         * seguridad): sin runner, el núcleo no registra la tool `comando`. */
+        ejecutor_comando: None,
+        programador_tareas: None,
     };
     let runtime = AgentRuntime::nuevo(registry, puertos, TurnoConfig::default());
 

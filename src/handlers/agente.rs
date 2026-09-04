@@ -123,6 +123,11 @@ pub async fn agente_stream(
         llm: Arc::new(state.ai_provider.clone()),
         web_search: Some(Arc::new(BuscadorWeb(state.web_search.clone()))),
         dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
+        /* [318A-16 F3/F6] task-IA nunca ejecuta comandos ni programa tareas
+         * (invariante de seguridad): sin runner ni programador, el núcleo no
+         * registra las tools `comando`/`programar_tarea`. */
+        ejecutor_comando: None,
+        programador_tareas: None,
     };
     let runtime = AgentRuntime::nuevo(
         registry,
