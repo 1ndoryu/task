@@ -638,6 +638,18 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   `TabsPanel.tsx:71` excepcion (input inline layout-critico); `TabsPanel.tsx:87` + `mensajes.tsx:244,255` excepcion
   (icon-actions con chrome custom); glory-core x10 excepcion arquitectonica (el framework no puede importar
   `components/ui` del producto sin invertir la dependencia; incluye `ExampleIsland` demo).
+- **FASE-FINAL PT odds HECHA 11-09** - fixes reales: `emoji` -> Lucide (`mensajes.tsx:252,263` <-/U+270E por
+  `Undo2`/`Pencil` size 14, `panelIAMensajeAccion` inline-flex hereda currentColor, `tsc` exit 0);
+  `css-hardcoded` `suscripcion.css:64` -> `var(--dashboard-superposicionMuyClara)` (match exacto 0.02; en claro el
+  token resuelve a negro 0.02, corrige bug latente de sheen blanco sobre fondo blanco). Decisiones:
+  `todo-pendiente` FP (palabra "pendiente" en doc-comment `agente_aprobacion.rs:192`, lenguaje de dominio, sin cambio);
+  `inline-style` `barraContexto.tsx:64` excepcion (ancho % runtime de la barra de progreso, misma clase que las 17
+  geometrias con decision); `css-hardcoded` `resizeHandleColumna.css:52` excepcion (glow de arrastre sin token al
+  0.3, quitarlo mata affordance); `css-hardcoded` x4 + `css-adhoc` x3 DIFERIDOS (archivos con WIP ajeno sin commitear:
+  panelAyuno-modales, panelGruposFb, ventanaOportunidad, mapaCalorHabito, encabezado-botones/movil; se retoman cuando
+  el WIP aterrice); `funcion-larga-rs` `agente_stream` 131 lineas DIFERIDO (`agente.rs` con WIP ajeno);
+  `large-interface-isp` x5 excepcion (props idiomaticas React 11-14 campos, partirlas multiplica tipos sin beneficio);
+  artesanal x2 + sin-hook x2 + menu-override x3 ya firmados en commit `eba8c67`, se reafirman. Commit `1e72f62`.
   Restan 39w+6h: `html-nativo`×20, `large-interface`×5(+6h), `menu-override`×3(FP), sin-hook/artesanal×4
   (excepción), `css-adhoc`×3, `css-hardcoded`×6, `emoji`×1, `inline-style`×1, `funcion-larga-rs`×1, `todo`×1.
 - **F5 HECHA 11-09** (autorización general «el wip no importa», gate 1x1 levantado) — `dashboard/variables.css`:
