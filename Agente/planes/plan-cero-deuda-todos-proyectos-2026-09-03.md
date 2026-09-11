@@ -704,6 +704,17 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   21 inline (geometría drag/zoom/pan por frame + barra % + shadcn vendor). Commit local `7a65d35` sin push.
   NOTA: `npm --prefix frontend run type-check` rojo PRE-EXISTENTE en el submódulo `glory-rs/frontend`
   (Boton/Input/Modal/Select/Textarea, ajeno al cambio CSS-only); registrado como deuda aparte, no mezclado.
+- **FASE-FINAL AGAPE CERRADA 11-09** - full scan VarSense 2.2.1 compartido
+  (`C:\tmp\varsense-agape-20260911.json` → `...b.json` tras fixes): 0e/15w/1i/4h → 0e/3w/1i/1h,
+  20 ítems: 15 borrados reales + 5 decisiones (1 ya firmada por usuario en fase final 1x1).
+  Borrados: 4 tokens muertos (`--colorLavanda/Salvia/Botanico/MisionBorde`, 0 usos en frontend-v2/src;
+  refs solo en legacy `frontend/` y `dist/` generados) + `--textoMarcaMini` (cascada del lockup muerto) +
+  10 reglas huérfanas (lockup marca ×3+2 descendientes, panelAviso/Error/AccionesTabla, opcionalDonar,
+  tituloBlog, enlaceInstagram+hover, etiquetaHero), cada una con contraparte viva verificada.
+  Decisiones: 2 dup (alias semánticos Blanco/MisionFondo) + 1 hardcoded (hamburguesa 4px sin token exacto).
+  Evidencia: `tsc` frontend-v2 exit 0 + `vite build` exit 0. Commit local `f689f2e` sin push
+  (ajeno quality-tools/lock intacto; scanner del submódulo `tools/varsense` sin dist —se usó el
+  artefacto canónico 2.2.1 compartido).
 
 ### 9.3 Medición del frente — `039A-3` ✅ (la consola debe medir con el artefacto del gate)
 
