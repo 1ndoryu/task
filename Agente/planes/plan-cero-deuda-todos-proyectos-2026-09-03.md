@@ -684,6 +684,16 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   38 `token-unused` FP (consumo vía utilidades Tailwind en build-time: bg-card 13, text-muted-foreground 92,
   bg-primary 4, bg-popover 3, font-heading 2); 1 `cssInlineReact` (patrón canónico dnd-kit por frame).
   Commit local `99b4ba4` sin push (WIP ajeno en bridge/roadmap intacto).
+- **FASE-FINAL workspace-manager CERRADA 11-09** - full scan VarSense 2.2.1
+  (`C:\tmp\varsense-wm-20260911.json`): 0e/7w/4i/0h, 11 ítems: 1 BUG REAL corregido + 10 decisiones.
+  Bug: `PanelConfig.tsx badgesDe()` emitía clase `badge--sin` que NO existe en ningún CSS (el estado
+  "no/none" de gate/sentinel/varsense/puerta nunca se atenuaba); la regla existe como `.configBadge--sin`
+  (opacity 0.45, BEM del `.configBadge` base). Fix: 5 literales → `configBadge--sin`; `tsc --noEmit` exit 0.
+  Decisiones en `workspace-manager/excepciones-varsense.json` (2 hardcoded ya firmadas por usuario en fase
+  final 1x1 —confirmadas— + 8 agente): 4 `token-duplicate` (radios vs espaciados coincidentes, semántica
+  distinta; monocromo v2: nombres semánticos que divergirían con otro tema) + 4 `cssInlineReact`
+  (geometría runtime: paneles redimensionables con defaults+consumidores CSS, tooltip con clamp, tooltip
+  vía portal, menú en coords del click). Commit local `f32491a` sin push (ajeno quality-tools/lock intacto).
 
 ### 9.3 Medición del frente — `039A-3` ✅ (la consola debe medir con el artefacto del gate)
 
