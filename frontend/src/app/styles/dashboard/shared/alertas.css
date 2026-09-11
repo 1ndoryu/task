@@ -27,7 +27,7 @@
     padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
     background-color: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--dashboard-sombraElevada);
     animation: deslizarToast 0.25s ease-out;
     pointer-events: auto;
 }
@@ -124,7 +124,7 @@
     width: 90%;
     padding: var(--dashboard-espacioXl);
     animation: aparecerConfirmacion 0.2s ease-out;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--dashboard-sombraFuerte);
 }
 
 /* 

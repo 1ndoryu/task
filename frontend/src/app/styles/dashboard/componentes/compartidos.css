@@ -421,7 +421,7 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioXs);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--dashboard-sombraMedia);
     z-index: 100;
     min-width: 120px;
     overflow: hidden;
@@ -598,7 +598,7 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioXs);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--dashboard-sombraMedia);
     z-index: 100;
     max-height: 200px;
     overflow-y: auto;

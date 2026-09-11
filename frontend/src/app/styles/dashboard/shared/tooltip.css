@@ -24,7 +24,7 @@
     font-size: var(--dashboard-tamanoPequeno);
     font-family: var(--dashboard-fuenteMonoespaciada);
     border-radius: var(--dashboard-radioSm);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--dashboard-sombraElevada);
     max-width: 250px;
     white-space: pre-wrap;
     line-height: 1.4;

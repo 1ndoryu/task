@@ -253,7 +253,7 @@
     border-radius: var(--dashboard-radioMd);
     /* overflow: hidden;  <-- CAUSING CLIPPING OF RESULTS */
     overflow: visible;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--dashboard-sombraElevada);
     animation: entradaModal 0.2s ease-out;
     position: relative; /* Context for absolute results if needed */
 }

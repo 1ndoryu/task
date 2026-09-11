@@ -85,7 +85,7 @@
 /* Feedback visual cuando se supera el umbral */
 .swipeableItem__accion[style*="opacity: 1"],
 .swipeableItem__accion[style*="opacity:1"] {
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dashboard-sombraSutil);
 }
 
 /* Animación sutil al activar */

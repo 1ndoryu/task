@@ -307,7 +307,7 @@
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
     padding: 4px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--dashboard-sombraSutil);
 }
 
 .panelGruposFb__menuColumnasItem {
@@ -508,7 +508,7 @@
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
     padding: var(--dashboard-espacioS);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dashboard-sombraSutil);
     display: grid;
     gap: var(--dashboard-espacioXs);
 }
@@ -637,7 +637,7 @@
     background: var(--dashboard-fondoSecundario);
     border: 1px solid var(--dashboard-bordeSutil);
     border-radius: var(--dashboard-radioMd);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--dashboard-sombraMedia);
     padding: var(--dashboard-espacioXs) 0;
 }
 

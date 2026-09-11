@@ -353,7 +353,7 @@
 
 .tareaPadreReorder[style*='transform'] {
     background-color: var(--dashboard-fondoSecundario);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--dashboard-sombraSutil);
     border-radius: var(--dashboard-radioSm);
 }
 
