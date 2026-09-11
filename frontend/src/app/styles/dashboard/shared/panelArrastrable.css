@@ -27,6 +27,24 @@
     border-color: var(--dashboard-acento);
 }
 
+/* [039A-1/FASE-FINAL] Seam: antes objeto static inline (cssInlineReact). Solo con
+ * titulo. Especificidad alta a proposito: el inline ganaba a todos los estados,
+ * asi que el reemplazo tambien debe ganar (fondo/borde transparentes siempre).
+ * El color sigue heredando los estados como antes (el inline nunca lo fijaba). */
+.handleArrastre.handleArrastre--conTitulo,
+.handleArrastre.handleArrastre--conTitulo:hover,
+.handleArrastre.handleArrastre--conTitulo:active,
+.handleArrastre.handleArrastre--conTitulo.activo {
+    width: auto;
+    padding: 0;
+    gap: 6px;
+    justify-content: flex-start;
+    background: transparent;
+    border: none;
+    height: auto;
+    min-height: unset;
+}
+
 /* 
  * INDICADOR FLOTANTE
  * Preview del panel que sigue el cursor
@@ -142,10 +160,6 @@
     transform: scale(0.98);
 }
 
-/* Otros paneles mientras hay arrastre activo */
-.panelArrastrable.puedeRecibirDrop {
-    position: relative;
-}
 
 /* 
  * ESTADO GLOBAL DE ARRASTRE

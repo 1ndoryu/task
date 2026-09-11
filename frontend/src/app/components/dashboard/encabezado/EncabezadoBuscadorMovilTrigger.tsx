@@ -13,18 +13,6 @@ interface EncabezadoBuscadorMovilTriggerProps {
 export function EncabezadoBuscadorMovilTrigger({onClick, esTablet, mostrarBotonSeleccion: _mostrarBotonSeleccion, modoSeleccionActivo: _modoSeleccionActivo, onToggleSeleccion: _onToggleSeleccion}: EncabezadoBuscadorMovilTriggerProps) {
     if (!esTablet) return null;
 
-    /* Si estamos en modo selección (tareas), mostrar botón de toggle en vez de buscar 
-    if (mostrarBotonSeleccion && onToggleSeleccion) {
-        return (
-           
-            <Boton type="button" claseAdicional={`botonIconoEncabezado botonBuscadorMovil ${modoSeleccionActivo ? 'botonIconoEncabezado--activo' : ''}`} onClick={onToggleSeleccion} title={modoSeleccionActivo ? 'Desactivar selección múltiple' : 'Activar selección múltiple'} style={modoSeleccionActivo ? {color: 'var(--color-primario)'} : {}}>
-                <ListChecks size={18} />
-            </Boton>
-          
-        );
-    }
-    */
-   
     /* Versión normal (buscador) */
     return (
         <Boton type="button" claseAdicional="botonIconoEncabezado botonBuscadorMovil" onClick={onClick} title="Buscar">

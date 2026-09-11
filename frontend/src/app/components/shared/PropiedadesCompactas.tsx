@@ -13,7 +13,7 @@ import {MenuContextual} from './MenuContextual';
 import {SelectorFechaCalendario} from './SelectorFechaCalendario';
 import type {NivelPrioridad, NivelUrgencia} from '../../types/dashboard';
 import {Boton} from '../ui';
-import {ETIQUETAS_PRIORIDAD, ETIQUETAS_URGENCIA, COLORES_PRIORIDAD, COLORES_URGENCIA, opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../utils/nivelesConfig';
+import {ETIQUETAS_PRIORIDAD, ETIQUETAS_URGENCIA, opcionesMenuPrioridad, opcionesMenuUrgencia} from '../../utils/nivelesConfig';
 import {SelectorDificultadPill, type SelectorDificultadPillProps} from './SelectorDificultadPill';
 
 interface PropiedadesCompactasProps {
@@ -65,7 +65,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
             <div className="propiedadesCompactas__contenido">
                 {/* Prioridad */}
                 <div className="propiedadesCompactas__item">
-                    <Boton ref={prioridadRef} type="button" claseAdicional={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad" style={prioridad !== 'media' ? {color: COLORES_PRIORIDAD[prioridad]} : undefined}>
+                    <Boton ref={prioridadRef} type="button" claseAdicional={`pillOpcion${prioridad === 'media' ? ' pillOpcion--vacio' : ` pillOpcion--prioridad-${prioridad}`}`} onClick={() => abrirMenu('prioridad', prioridadRef)} title="Prioridad">
                         <Flag size={14} />
                         <span>{ETIQUETAS_PRIORIDAD[prioridad]}</span>
                     </Boton>
@@ -73,7 +73,7 @@ export function PropiedadesCompactas({prioridad, onPrioridadChange, urgencia, on
 
                 {/* Urgencia */}
                 <div className="propiedadesCompactas__item">
-                    <Boton ref={urgenciaRef} type="button" claseAdicional={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ''}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia" style={urgencia ? {color: COLORES_URGENCIA[urgencia]} : undefined}>
+                    <Boton ref={urgenciaRef} type="button" claseAdicional={`pillOpcion${!urgencia ? ' pillOpcion--vacio' : ` pillOpcion--urgencia-${urgencia}`}`} onClick={() => abrirMenu('urgencia', urgenciaRef)} title="Urgencia">
                         <Zap size={14} />
                         <span>{urgencia ? ETIQUETAS_URGENCIA[urgencia] : 'Urgencia'}</span>
                     </Boton>

@@ -145,6 +145,28 @@
     color: var(--dashboard-textoNormal);
 }
 
+/* [039A-1/FASE-FINAL] Seam color pills: antes style={{color}} inline (cssInlineReact).
+ * Cada modificador replica el token del mapa COLORES_* en nivelesConfig; solo se
+ * aplica con la misma condicion que antes activaba el inline (visual-neutral). */
+.pillOpcion--prioridad-muy_alta { color: var(--dashboard-estadoMuyAlta); }
+.pillOpcion--prioridad-alta { color: var(--dashboard-estadoAlta); }
+.pillOpcion--prioridad-baja { color: var(--dashboard-estadoBaja); }
+.pillOpcion--prioridad-muy_baja { color: var(--dashboard-estadoMuyBaja); }
+.pillOpcion--urgencia-bloqueante { color: var(--dashboard-estadoAlta); }
+.pillOpcion--urgencia-urgente { color: var(--dashboard-estadoMedia); }
+.pillOpcion--urgencia-normal { color: var(--dashboard-textoSecundario); }
+.pillOpcion--urgencia-chill { color: var(--dashboard-estadoExito); }
+.pillOpcion--dificultad-muyalta { color: var(--dashboard-estadoMuyAlta); }
+.pillOpcion--dificultad-alta { color: var(--dashboard-estadoAlta); }
+.pillOpcion--dificultad-baja { color: var(--dashboard-estadoBaja); }
+.pillOpcion--dificultad-muybaja { color: var(--dashboard-estadoMuyBaja); }
+.pillOpcion--importancia-muyalta { color: var(--dashboard-estadoMuyAlta); }
+.pillOpcion--importancia-alta { color: var(--dashboard-estadoAlta); }
+.pillOpcion--importancia-baja { color: var(--dashboard-estadoBaja); }
+.pillOpcion--importancia-muybaja { color: var(--dashboard-estadoMuyBaja); }
+.pillOpcion--estado-completada { color: var(--dashboard-estadoExito); }
+.pillOpcion--repeticion-activa { color: var(--dashboard-textoNormal); }
+
 .pillOpcion--disabled {
     cursor: default;
     opacity: 0.6;

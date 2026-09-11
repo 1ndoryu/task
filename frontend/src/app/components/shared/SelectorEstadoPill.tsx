@@ -44,7 +44,7 @@ export function SelectorEstadoPill({completada, onChange, deshabilitado = false}
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${completada ? '' : 'pillOpcion--vacio'} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado" style={completada ? {color: 'var(--dashboard-estadoExito)'} : undefined}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${completada ? 'pillOpcion--estado-completada' : 'pillOpcion--vacio'} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Estado">
                 {completada ? <CheckCircle2 size={14} /> : <Circle size={14} />}
                 <span>{completada ? 'Completada' : 'Pendiente'}</span>
             </Boton>

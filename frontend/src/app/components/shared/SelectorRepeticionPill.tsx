@@ -32,7 +32,7 @@ export function SelectorRepeticionPill({tieneRepeticion, onTieneRepeticionChange
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef as React.Ref<HTMLButtonElement>} type="button" variante="ghost" claseAdicional={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición" style={tieneRepeticion ? {color: 'var(--dashboard-textoNormal)'} : undefined}>
+            <Boton ref={botonRef as React.Ref<HTMLButtonElement>} type="button" variante="ghost" claseAdicional={`pillOpcion ${!tieneRepeticion ? 'pillOpcion--vacio' : 'pillOpcion--repeticion-activa'} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={activarRepeticion} title="Repetición">
                 <Repeat size={14} />
                 <span>{descripcion}</span>
                 {/* [19-08-2026] span en vez de Boton: un <button> dentro de otro

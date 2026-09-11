@@ -9,7 +9,7 @@ import {Star} from 'lucide-react';
 import type {NivelImportancia} from '../../types/dashboard';
 import {MenuContextual} from './MenuContextual';
 import {Boton} from '../ui';
-import {COLORES_IMPORTANCIA, ETIQUETAS_IMPORTANCIA, opcionesMenuImportancia} from '../../utils/nivelesConfig';
+import {ETIQUETAS_IMPORTANCIA, opcionesMenuImportancia} from '../../utils/nivelesConfig';
 
 interface SelectorImportanciaPillProps {
     importancia: NivelImportancia;
@@ -22,7 +22,6 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
     const [posicionMenu, setPosicionMenu] = useState({x: 0, y: 0});
     const botonRef = useRef<HTMLButtonElement>(null);
 
-    const color = COLORES_IMPORTANCIA[importancia];
     const etiqueta = ETIQUETAS_IMPORTANCIA[importancia];
 
     const abrirMenu = () => {
@@ -38,7 +37,7 @@ export function SelectorImportanciaPill({importancia, onChange, deshabilitado = 
 
     return (
         <div className="propiedadesCompactas__item">
-            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : ''} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia" style={importancia !== 'Media' ? {color} : undefined}>
+            <Boton ref={botonRef} type="button" variante="ghost" claseAdicional={`pillOpcion ${importancia === 'Media' ? 'pillOpcion--vacio' : `pillOpcion--importancia-${importancia.toLowerCase().replace(/ /g, '')}`} ${deshabilitado ? 'pillOpcion--disabled' : ''}`} onClick={abrirMenu} title="Importancia">
                 {/* [19-08-2026] Sin relleno: el nivel se comunica con el color, igual que en los menús. */}
                 <Star size={14} />
                 <span>{etiqueta}</span>

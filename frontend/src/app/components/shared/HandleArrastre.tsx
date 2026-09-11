@@ -20,21 +20,8 @@ export function HandleArrastre({panelId, onMouseDown, estaArrastrando, titulo}: 
         onMouseDown(panelId, evento);
     };
 
-    const estiloConTitulo: React.CSSProperties = titulo
-        ? {
-              width: 'auto',
-              padding: 0,
-              gap: '6px',
-              justifyContent: 'flex-start',
-              background: 'transparent',
-              border: 'none',
-              height: 'auto' /* Permitir altura natural */,
-              minHeight: 'unset'
-          }
-        : {};
-
     return (
-        <Boton claseAdicional={`selectorBadgeBoton handleArrastre ${estaArrastrando ? 'activo' : ''}`} onMouseDown={manejarMouseDown} title="Arrastrar para mover panel" type="button" style={estiloConTitulo}>
+        <Boton claseAdicional={`selectorBadgeBoton handleArrastre${titulo ? ' handleArrastre--conTitulo' : ''} ${estaArrastrando ? 'activo' : ''}`} onMouseDown={manejarMouseDown} title="Arrastrar para mover panel" type="button">
             <span className="selectorBadgeIcono">
                 <GripVertical size={10} />
             </span>
