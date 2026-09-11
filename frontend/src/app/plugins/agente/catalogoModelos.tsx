@@ -4,6 +4,7 @@
  * componentes visuales del plugin. */
 import {useState} from 'react';
 import {createPortal} from 'react-dom';
+import {obtenerRaizPortales} from '../../utils/portales';
 import {ChevronDown} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
 import {MenuContextual} from '../../components/shared/MenuContextual';
@@ -190,7 +191,7 @@ export function ControlesInputIA({modelo, proveedor, modo, nivelRazonamiento, on
                     onSeleccionar={id => seleccionar('modelo', id)}
                     onCerrar={() => setMenuActivo(null)}
                 />,
-                document.body
+                obtenerRaizPortales()
             )}
 
             {soportaRazonamiento ? (
@@ -237,7 +238,7 @@ export function ControlesInputIA({modelo, proveedor, modo, nivelRazonamiento, on
                     onSeleccionar={id => seleccionar('razonamiento', id)}
                     onCerrar={() => setMenuActivo(null)}
                 />,
-                document.body
+                obtenerRaizPortales()
             )}
 
             <Boton
@@ -263,7 +264,7 @@ export function ControlesInputIA({modelo, proveedor, modo, nivelRazonamiento, on
                     onSeleccionar={id => seleccionar('modo', id)}
                     onCerrar={() => setMenuActivo(null)}
                 />,
-                document.body
+                obtenerRaizPortales()
             )}
         </div>
     );

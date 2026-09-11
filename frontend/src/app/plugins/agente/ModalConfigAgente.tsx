@@ -8,6 +8,7 @@
  * nativos -> Boton. Se retiran los 2 sentinel-disable-file del CSS. */
 import {useEffect, useState} from 'react';
 import {createPortal} from 'react-dom';
+import {obtenerRaizPortales} from '../../utils/portales';
 import {Route, Check, Plus, X, MessageSquare, SlidersHorizontal} from 'lucide-react';
 import {useAgenteStore} from './store';
 import type {ConfigAgente, SkillAgente} from './service';
@@ -62,7 +63,7 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
     );
 
     return createPortal(
-        /* [318A-2 fb] Portal a document.body: dentro del panel (modo vistas) el
+        /* [318A-2 fb] Portal a la raíz de portales (ver utils/portales): dentro del panel
          * overlay position:fixed queda confinado/recortado por el transform del
          * panel arrastrable y los overflow:hidden de los contenedores de vistas;
          * con portal el modal se abre global como el resto de modales. */
@@ -311,6 +312,6 @@ export function ModalConfigAgente({activo, onCerrar}: ModalConfigAgenteProps): J
                 <div className="modalConfigAgentePie"><Boton type="button" variante="primario" onClick={guardar}>Guardar</Boton></div>
             </div>
         </div>,
-        document.body
+        obtenerRaizPortales()
     );
 }
