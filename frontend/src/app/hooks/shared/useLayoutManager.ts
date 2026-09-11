@@ -91,14 +91,13 @@ export function useLayoutManager({modoColumnas, anchos, onAjustarAnchos}: UseLay
 
         document.addEventListener('mousemove', manejarMovimiento);
         document.addEventListener('mouseup', finalizarArrastre);
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
+        /* [039A-1/F4] Seam CSS: body.arrastrandoCol en base.css (antes style.cursor/userSelect) */
+        document.body.classList.add('arrastrandoCol');
 
         return () => {
             document.removeEventListener('mousemove', manejarMovimiento);
             document.removeEventListener('mouseup', finalizarArrastre);
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
+            document.body.classList.remove('arrastrandoCol');
         };
     }, [arrastrando, manejarMovimiento, finalizarArrastre]);
 

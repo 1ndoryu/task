@@ -42,13 +42,14 @@ export function useDrawerMovil({estaAbierto, onCerrar, onSeleccionar, onClickPer
     useEffect(() => {
         if (estaAbierto) {
             document.addEventListener('keydown', manejarTecla);
-            document.body.style.overflow = 'hidden';
+            /* [039A-1/F4] Seam CSS: body.bloqueoScroll en base.css (antes style.overflow) */
+            document.body.classList.add('bloqueoScroll');
             document.body.classList.add('drawerAbierto');
         }
 
         return () => {
             document.removeEventListener('keydown', manejarTecla);
-            document.body.style.overflow = '';
+            document.body.classList.remove('bloqueoScroll');
             document.body.classList.remove('drawerAbierto');
         };
     }, [estaAbierto, manejarTecla]);

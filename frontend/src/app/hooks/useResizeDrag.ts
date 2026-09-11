@@ -53,8 +53,8 @@ export function useResizeDrag(
 
                     activo = true;
                     setArrastrando(true);
-                    document.body.style.cursor = axis === 'x' ? 'col-resize' : 'row-resize';
-                    document.body.style.userSelect = 'none';
+                    /* [039A-1/F4] Seam CSS: body.arrastrandoCol/Fila en base.css (antes style.cursor/userSelect) */
+                    document.body.classList.add(axis === 'x' ? 'arrastrandoCol' : 'arrastrandoFila');
                     window.getSelection()?.removeAllRanges();
                 }
 
@@ -78,8 +78,7 @@ export function useResizeDrag(
             const handleMouseUp = () => {
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
-                document.body.style.cursor = '';
-                document.body.style.userSelect = '';
+                document.body.classList.remove('arrastrandoCol', 'arrastrandoFila');
                 setArrastrando(false);
             };
 

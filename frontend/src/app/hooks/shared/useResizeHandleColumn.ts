@@ -117,15 +117,14 @@ export function useResizeHandleColumn({tipo, posicion, modoColumnas, anchos, anc
             const handleMouseUp = () => {
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
-                document.body.style.cursor = '';
-                document.body.style.userSelect = '';
+                /* [039A-1/F4] Seam CSS: body.arrastrandoCol en base.css (antes style.cursor/userSelect) */
+                document.body.classList.remove('arrastrandoCol');
                 setArrastrando(false);
             };
 
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
+            document.body.classList.add('arrastrandoCol');
         },
         [tipo, posicion, modoColumnas, anchos, anchoTotal, onCambiarAnchos, onCambiarAnchoTotal]
     );

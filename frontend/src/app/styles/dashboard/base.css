@@ -49,54 +49,6 @@ body {
     color: var(--dashboard-textoActivo);
 }
 
-/* 
- * GRID PRINCIPAL 
- */
-/* 
- * MODO 1 COLUMNA - Todo vertical 
- */
-.dashboardGrid--1col .columnaHabitos,
-/* 
- * MODO 2 COLUMNAS - Layout por defecto 
- */
-@media (min-width: 1024px) {
-    .dashboardGrid--2col {
-        grid-template-columns: repeat(12, 1fr);
-    }
-
-    .dashboardGrid--2col .columnaHabitos {
-        grid-column: span 7;
-    }
-
-    .dashboardGrid--2col .columnaTareas {
-        grid-column: span 5;
-    }
-}
-
-/* 
- * MODO 3 COLUMNAS - Tres columnas iguales 
- */
-@media (min-width: 1024px) {
-    .dashboardGrid--3col {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .dashboardGrid--3col .columnaHabitos {
-        grid-column: span 1;
-    }
-
-    .dashboardGrid--3col .columnaTareas {
-        grid-column: span 2;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--dashboard-espacioXl);
-    }
-
-    .dashboardGrid--3col .columnaTareas .internaColumna {
-        grid-column: span 1;
-    }
-}
-
 /* [034A-6] internaColumna sin gap — el usuario pidió eliminarlo explícitamente */
 .internaColumna {
     display: flex;
@@ -108,7 +60,6 @@ body {
 
 /* 
  * COLUMNA DINAMICA - Para el sistema de orden de paneles
- * Reemplaza columnaHabitos y columnaTareas cuando se usa renderizado dinámico
  */
 /* 
  * Panel individual dentro de una columna dinámica
@@ -121,21 +72,6 @@ body {
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioMd);
     overflow: hidden;
-}
-
-/* Asegurar que las columnas dinámicas se comporten como las fijas */
-@media (min-width: 1024px) {
-    .dashboardGrid--2col .columnaDashboard:first-child {
-        grid-column: span 7;
-    }
-
-    .dashboardGrid--2col .columnaDashboard:nth-child(2) {
-        grid-column: span 5;
-    }
-
-    .dashboardGrid--3col .columnaDashboard {
-        grid-column: span 1;
-    }
 }
 
 /* 
@@ -182,3 +118,25 @@ body {
  * en Chromium 121+ su presencia DESACTIVA el estilo ::-webkit-scrollbar y se
  * muestra el scrollbar nativo (grande, con flechas y radio). El estilo WebKit
  * global de arriba es el único mecanismo de aspecto. */
+
+/* [039A-1/F4] Seams de runtime antes imperativos (body.style.* en hooks):
+ * misma declaración visual, ahora como clase para que VarSense la vea.
+ * Visual-neutral: el estilo computado no cambia. */
+body.bloqueoScroll {
+    overflow: hidden;
+}
+
+body.arrastrandoCol {
+    cursor: col-resize;
+    user-select: none;
+}
+
+body.arrastrandoFila {
+    cursor: row-resize;
+    user-select: none;
+}
+
+body.arrastrandoAgarrando {
+    cursor: grabbing;
+    user-select: none;
+}

@@ -25,12 +25,13 @@ export function useModoEnfoque(): UseModoEnfoqueRetorno {
 
     const enfocarPanel = useCallback((panelId: PanelId) => {
         setPanelEnfocado(panelId);
-        document.body.style.overflow = 'hidden';
+        /* [039A-1/F4] Seam CSS: body.bloqueoScroll en base.css (antes style.overflow) */
+        document.body.classList.add('bloqueoScroll');
     }, []);
 
     const salirModoEnfoque = useCallback(() => {
         setPanelEnfocado(null);
-        document.body.style.overflow = '';
+        document.body.classList.remove('bloqueoScroll');
     }, []);
 
     const toggleModoEnfoque = useCallback(

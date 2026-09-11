@@ -135,15 +135,13 @@ export function useArrastrePaneles(ordenPaneles: OrdenPanel[], onReordenar: (pan
         document.addEventListener('mousemove', manejarMovimiento);
         document.addEventListener('mouseup', manejarSoltar);
 
-        /* Cambiar cursor y deshabilitar selección de texto */
-        document.body.style.cursor = 'grabbing';
-        document.body.style.userSelect = 'none';
+        /* [039A-1/F4] Seam CSS: body.arrastrandoAgarrando en base.css (antes style.cursor/userSelect) */
+        document.body.classList.add('arrastrandoAgarrando');
 
         return () => {
             document.removeEventListener('mousemove', manejarMovimiento);
             document.removeEventListener('mouseup', manejarSoltar);
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
+            document.body.classList.remove('arrastrandoAgarrando');
         };
     }, [estado.estaArrastrando, estado.panelArrastrando, estado.zonaDropActiva, ordenPaneles, onReordenar, detectarZonaDrop]);
 
