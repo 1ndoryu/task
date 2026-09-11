@@ -14,8 +14,6 @@
     --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
     --dashboard-fondoHover: #111111;
     --dashboard-fondoCristal: rgba(0, 0, 0, 0.85);
-    --dashboard-fondoCodigo: rgba(255, 255, 255, 0.8);
-    --dashboard-textoCodigo: #000000;
     --dashboard-sidebarFondo: #000000;
 
     /* Bordes — grises sobre negro */
@@ -48,7 +46,6 @@
     --dashboard-estadoBaja: #9a9a9a;
     --dashboard-estadoBajaBorde: #5a5a5a;
     --dashboard-estadoMuyBaja: #6e6e6e;
-    --dashboard-estadoMuyBajaFondo: rgba(255, 255, 255, 0.06);
     --dashboard-estadoMuyBajaBorde: rgba(255, 255, 255, 0.2);
     --dashboard-estadoExito: #ffffff;
     --dashboard-estadoExitoFondo: rgba(255, 255, 255, 0.12);
@@ -79,7 +76,6 @@
 
     /* Acentos — blanco puro */
     --dashboard-acentoPrimario: #ffffff;
-    --dashboard-acentoPrimarioRgb: 255, 255, 255;
     --dashboard-acentoSecundario: #d4d4d4;
     --dashboard-acentoSecundarioRgb: 212, 212, 212;
     --dashboard-acento: #ffffff;
@@ -88,7 +84,6 @@
     --dashboard-violeta: #d4d4d4;
     --dashboard-violetaRgb: 212, 212, 212;
     --dashboard-grisNeutro: #b3b3b3;
-    --dashboard-grisNeutroRgb: 179, 179, 179;
     --dashboard-violetaPalido: #e5e5e5;
     --dashboard-peligroClaro: #ffffff;
     --dashboard-gris100Rgb: 100, 100, 100;
@@ -106,7 +101,6 @@
     --dashboard-superposicionMuyClara: rgba(255, 255, 255, 0.02);
     --dashboard-superposicionSutil: rgba(255, 255, 255, 0.08);
     --dashboard-superposicionMedia: rgba(255, 255, 255, 0.12);
-    --dashboard-superposicionActiva: var(--dashboard-superposicionMedia);
     --dashboard-superposicionMedioOscuro: rgba(255, 255, 255, 0.08);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.5);
     --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.7);
@@ -120,7 +114,6 @@
     --dashboard-sombraMedia: none;
     --dashboard-sombraElevada: none;
     --dashboard-sombraSutil: none;
-    --dashboard-sombraFlotante: none;
     --dashboard-sombra: var(--dashboard-sombraSutil);
 
     /* Barras y scroll — grises */
@@ -169,7 +162,6 @@
     --dashboard-espacio3xl: 3rem;
     --dashboard-espacio4xl: 3.75rem;
     --dashboard-espacio5xl: 4.5rem;
-    --dashboard-espacio6xl: 6.25rem;
 
     /* Radios — eliminados (0) */
     --dashboard-radioMinimo: 0;
@@ -189,7 +181,6 @@
     --dashboard-botonPrimarioFondo: #ffffff;
     --dashboard-botonPrimarioTexto: #000000;
     --dashboard-botonPrimarioHover: #d4d4d4;
-    --dashboard-botonPrimarioSombra: none;
 
     /* Transiciones */
     --dashboard-transicionRapida: 0.15s ease;
@@ -200,16 +191,10 @@
     --dashboard-panelHeaderFondo: var(--dashboard-fondoSecundario);
     --dashboard-panelHeaderBorde: var(--dashboard-bordePrincipal);
 
-    /* Breakpoints */
-    --breakpointMovil: 480px;
-    --breakpointTablet: 768px;
-    --breakpointEscritorio: 1024px;
-
     /* Móvil */
     --dashboard-espacioMovilXs: 0.125rem;
     --dashboard-espacioMovilSm: 0.25rem;
     --dashboard-espacioMovilMd: 0.5rem;
-    --dashboard-espacioMovilLg: 0.75rem;
     --dashboard-tamanoMovilBase: calc(14px + var(--dashboard-ajusteTipografia));
     --dashboard-tamanoMovilPequeno: calc(12px + var(--dashboard-ajusteTipografia));
     --dashboard-tamanoTactilMinimo: 44px;
@@ -217,7 +202,6 @@
     --dashboard-safeAreaTop: env(safe-area-inset-top, 0px);
     --dashboard-safeAreaBottom: env(safe-area-inset-bottom, 0px);
     --dashboard-safeAreaLeft: env(safe-area-inset-left, 0px);
-    --dashboard-safeAreaRight: env(safe-area-inset-right, 0px);
     --dashboard-alturaHeaderMovil: 56px;
     --dashboard-alturaNavInferior: 52px;
 
@@ -225,12 +209,6 @@
     --mapa-calor-tamano-celda: 14px;
     --dashboard-landingGradienteClaro: #ffffff;
     --dashboard-landingGradienteLavanda: #ffffff;
-
-    /* Fuentes del proyecto */
-    --font-primary: "Neue Montreal", system-ui, -apple-system, sans-serif;
-    --font-serif: "Anthropic Serif", serif;
-    --font-mono: "JetBrains Mono", monospace;
-    --font-sans-alt: "Anthropic Sans", sans-serif;
 }
 
 /* 
@@ -244,8 +222,6 @@
     --dashboard-fondoTarjeta: var(--dashboard-fondoSecundario);
     --dashboard-fondoHover: #e6e6e6;
     --dashboard-fondoCristal: rgba(255, 255, 255, 0.9);
-    --dashboard-fondoCodigo: rgba(0, 0, 0, 0.8);
-    --dashboard-textoCodigo: #ffffff;
     --dashboard-sidebarFondo: #ffffff;
 
     --dashboard-bordePrincipal: #000000;
@@ -275,7 +251,6 @@
     --dashboard-estadoBaja: #6e6e6e;
     --dashboard-estadoBajaBorde: #b3b3b3;
     --dashboard-estadoMuyBaja: #9a9a9a;
-    --dashboard-estadoMuyBajaFondo: rgba(0, 0, 0, 0.04);
     --dashboard-estadoMuyBajaBorde: rgba(0, 0, 0, 0.15);
     --dashboard-estadoExito: #000000;
     --dashboard-estadoExitoFondo: rgba(0, 0, 0, 0.08);
@@ -305,7 +280,6 @@
     --dashboard-estadoPendienteRgb: 0, 0, 0;
 
     --dashboard-acentoPrimario: #000000;
-    --dashboard-acentoPrimarioRgb: 0, 0, 0;
     --dashboard-acentoSecundario: #333333;
     --dashboard-acentoSecundarioRgb: 51, 51, 51;
     --dashboard-acento: #000000;
@@ -314,7 +288,6 @@
     --dashboard-violeta: #333333;
     --dashboard-violetaRgb: 51, 51, 51;
     --dashboard-grisNeutro: #6e6e6e;
-    --dashboard-grisNeutroRgb: 110, 110, 110;
     --dashboard-violetaPalido: #1a1a1a;
     --dashboard-peligroClaro: #000000;
     --dashboard-gris100Rgb: 100, 100, 100;
@@ -331,7 +304,6 @@
     --dashboard-superposicionMuyClara: rgba(0, 0, 0, 0.02);
     --dashboard-superposicionSutil: rgba(0, 0, 0, 0.08);
     --dashboard-superposicionMedia: rgba(0, 0, 0, 0.12);
-    --dashboard-superposicionActiva: var(--dashboard-superposicionMedia);
     --dashboard-superposicionMedioOscuro: rgba(0, 0, 0, 0.08);
     --dashboard-superposicionModerada: rgba(0, 0, 0, 0.4);
     --dashboard-superposicionOscuro: rgba(0, 0, 0, 0.55);
@@ -344,7 +316,6 @@
     --dashboard-sombraMedia: none;
     --dashboard-sombraElevada: none;
     --dashboard-sombraSutil: none;
-    --dashboard-sombraFlotante: none;
     --dashboard-sombra: var(--dashboard-sombraSutil);
 
     --dashboard-barraFondo: #f2f2f2;
@@ -358,7 +329,6 @@
     --dashboard-botonPrimarioFondo: #000000;
     --dashboard-botonPrimarioTexto: #ffffff;
     --dashboard-botonPrimarioHover: #333333;
-    --dashboard-botonPrimarioSombra: none;
 
     --dashboard-radioMinimo: 0;
     --dashboard-radioXs: 0;
