@@ -669,6 +669,14 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   (WANDORIUS, coolify, WM, PT), one-offs sin token honesto, runtime sin seam, monolitos/no-aplicables.
   Cada decisión se registra en `excepciones.json` con categoría + evidencia. **Meta: 0 hallazgos sin
   decisión.**
+- **FASE-FINAL Laminal CERRADA 11-09** - full scan VarSense 2.2.1 (`C:\tmp\varsense-laminal-20260911.json`):
+  0e/1w/23i/14h, 38 ítems todos decididos. Fixes (6 `cssInlineScript` estáticos -> clases en `styles/editor.css`:
+  4 `gridArea` a `.cabeceraViewport/.ventanaViewport/.barraLateral/.pieViewport`, `flex:1 1 auto` a
+  `.cuerpoSidebar` que ya tenía `overflow-y:auto` redundante; `type-check` + `build` exit 0). Decisiones en
+  `Glory-Laminal/excepciones-varsense.json`: 1 `token-duplicate` (alias semántico intencional [308A-6GL], ambos
+  usados); 14 `token-unused` FP (todos con >=2 refs repo-wide, el snapshot no ve usos desde TS; RETENER);
+  17 `cssInlineScript` runtime (regiones/splits/tooltip/host-montaje, sin CSS estático posible). Re-scan:
+  0e/1w/17i/14h. Commit local `3834242` sin push (ajeno `quality-tools.json`/`sentinel.lock.json` intacto).
 
 ### 9.3 Medición del frente — `039A-3` ✅ (la consola debe medir con el artefacto del gate)
 
