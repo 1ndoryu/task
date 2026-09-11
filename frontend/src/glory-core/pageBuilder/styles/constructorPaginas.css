@@ -43,7 +43,7 @@
 
 .bloqueControlEtiqueta {
     color: var(--dashboard-textoApagado);
-    font-size: 12px;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     margin-right: 8px;
     display: flex;
     align-items: center;
@@ -56,7 +56,7 @@
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 0;
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
 }
 
 .botonControlBloque:disabled {
@@ -71,7 +71,7 @@
     cursor: pointer;
     padding: 4px 12px;
     border-radius: 0;
-    font-size: 12px;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     font-weight: 500;
 }
 
@@ -82,7 +82,7 @@
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 0;
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
 }
 
 .bloquesVacio {
@@ -100,7 +100,7 @@
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: 0;
     color: var(--dashboard-textoActivo);
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     outline: none;
     transition: border-color 0.2s;
 }
@@ -135,7 +135,7 @@
 }
 
 .campoArrayItemNumero {
-    font-size: 12px;
+    font-size: var(--dashboard-tamanoMovilPequeno);
     color: var(--dashboard-textoApagado);
 }
 
@@ -155,7 +155,7 @@
 
 .campoArraySubEtiqueta {
     display: block;
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
     color: var(--dashboard-textoApagado);
     margin-bottom: 4px;
     text-transform: uppercase;
@@ -172,7 +172,7 @@
     border-radius: 0;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
-    font-size: 13px;
+    font-size: var(--dashboard-tamanoBase);
     transition: all 0.2s;
 }
 
@@ -227,7 +227,7 @@
 
 .modalTitulo {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--dashboard-tamanoMediano);
     font-weight: 600;
     color: var(--dashboard-textoActivo);
 }
@@ -259,7 +259,7 @@
 
 .campoEtiqueta {
     display: block;
-    font-size: 13px;
+    font-size: var(--dashboard-tamanoBase);
     font-weight: 500;
     color: var(--dashboard-textoSecundario);
     margin-bottom: 8px;
@@ -280,7 +280,7 @@
     background: transparent;
     color: var(--dashboard-textoApagado);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
 }
 
 .botonGuardar {
@@ -290,6 +290,6 @@
     background: var(--dashboard-acento);
     color: var(--dashboard-textoSobreAcento);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--dashboard-tamanoMovilBase);
     font-weight: 500;
 }

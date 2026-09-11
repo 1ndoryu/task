@@ -118,23 +118,7 @@
     padding: var(--dashboard-espacioMd);
 }
 
-/* === Modal Recordatorios Guardados === */
 
-.recordatorioCard {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-    transition: background-color var(--dashboard-transicionRapida);
-    position: relative;
-}
-
-.recordatorioCard:hover {
-    background-color: var(--dashboard-fondoHover);
-}
 
 /* Imágenes en la card */
 .recordatorioCardImagenes {
@@ -170,24 +154,7 @@
     flex-shrink: 0;
 }
 
-/* Texto de la card */
 
-/* Edición inline en la card */
-
-/* Acciones de la card (visibles en hover) */
-.recordatorioCardAcciones {
-    display: flex;
-    gap: var(--dashboard-espacioXxs);
-    opacity: 0;
-    transition: opacity var(--dashboard-transicionRapida);
-    position: absolute;
-    right: var(--dashboard-espacioSm);
-    top: var(--dashboard-espacioSm);
-}
-
-.recordatorioCard:hover .recordatorioCardAcciones {
-    opacity: 1;
-}
 
 /* === Modal Crear Recordatorio === */
 
@@ -245,7 +212,7 @@
     color: var(--dashboard-estadoAltaTexto);
     border: none;
     cursor: pointer;
-    font-size: 10px;
+    font-size: var(--dashboard-tamanoMuyPequeno);
     display: flex;
     align-items: center;
     justify-content: center;

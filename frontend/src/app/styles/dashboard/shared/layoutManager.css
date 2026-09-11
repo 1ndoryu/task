@@ -250,28 +250,7 @@
     color: var(--dashboard-estadoAlta);
 }
 
-/* 
- * BOTÓN DE CONFIGURACIÓN DE LAYOUT EN HEADER
- */
-.botonConfigLayout {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioMini);
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.botonConfigLayout:hover {
-    background: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoNormal);
-}
 
 /* 
  * [18-08-2026] MODAL DE GESTIÓN DE PANELES
@@ -347,7 +326,7 @@
 }
 
 .gestionPanelesBadgeMinimizado {
-    font-size: 11px;
+    font-size: var(--dashboard-tamanoPequeno);
     padding: 1px 6px;
     border-radius: var(--dashboard-radioMini);
     background: var(--dashboard-estadoAdvertenciaFondo);
