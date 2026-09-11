@@ -325,7 +325,18 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
 ## 8. Estado y siguiente paso
 
 - **Estado:** activo (actualizado 10-09). Fase 0 ✅ completa (18 JSONs en `C:\tmp\fase0-rebaseline\`) y **re-baselinada el 10-09 con 0.7.8** (§3.1: 1.729 hallazgos / 163 errores — cuatro proyectos que figuraban en 0 errores los tienen). **Fase 1: Bloque 1.A ✅ ejecutado** — TASKS 17→**1** errores `expect-produccion-rs`, y el gate quedó desbloqueado por causa raíz (se vendorizó `scripts/quality/lock-generator.mjs`, que `.gitignore /scripts/*` mantenía huérfano, y se regeneró `sentinel.lock.json`): `doctor` 0 issues, `readyForGate:true`, `quality:setup` OK con evidencia release de `902c45e` (pendiente bloqueado desde el 07-09). **Fase 1 aún no cerrable**, por los bloqueos de abajo.
-- **Bloqueos abiertos:** `109A-7` (submódulo `glory-rs`, 1 error, candidato a FP) y `109A-8` (adopción de `AmbitoMemoria` de glory-harness 109A-2 — 4 errores de compilación **ya commiteados en `HEAD`**: `main` de TASKS no compila, así que no hay verificación funcional posible).
+- **Bloqueos abiertos:** `109A-7` (submódulo `glory-rs`, 1 error, candidato a FP).
+  `109A-8` **RESUELTO el 11-09 (decisión autónoma):** `main` de TASKS vuelve a compilar —
+  `check` 0 errores/0 warnings, `clippy` exit 0 (120 warnings preexistentes de estilo, ninguno en líneas
+  tocadas), `test` 33 passed/0 failed. Fixes: harness `scheduler.rs` (`parse_campo_minuto/hora`:
+  `and_then` sobre `Option<Vec>` en vez de `into_iter().next()` sobre el `Option`, E0308) + retirar
+  `use crate::scheduler` sin uso en `tareas.rs` (commit harness `990e9a2`) + `adaptador.rs`:
+  `programacion: None` (sin columna en el esquema TASKS → fila legacy, fix E0063; commit TASKS `b0f11cf`).
+  Ambos commits incluyen WIP previo del árbol en esos archivos (declarado en el mensaje; lección
+  `git add <archivo>` confirmada por 3ª vez). Límite honesto: los unit tests del scheduler de harness
+  no se ejecutaron (el shim `cargo` bloquea `cargo test` directo y harness no tiene wrapper; corren en
+  gate/CI). Previamente se liberó `C:\tmp` (6.98→0.01 GB, purga de `glory-target\glory-harness` sin tocar
+  desde hacía >60 min).
 - **Decisión pendiente del usuario:** commit/push de los cambios de TASKS (hoy sin commit) y autorización para la transacción de submódulo de `109A-7`.
 - **Fase 2:** GLORYPORT ✅ (sentinel 1w→0, gate completo verificado por orquestador, sin commit) → en curso: **gloryapi** (A Sentinel 2×limite-lineas, B VarSense index.css+1 tsx).
 - [x] ~~GLORYPORT (sentinel 0/0/0/0, varsense 0)~~ → **reabierto por 0.7.8: 5 errores `expect-produccion-rs`** (§3.1). Su refactor de `popup.rs` sigue siendo válido; lo que caduca es el «cero»
@@ -440,6 +451,7 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   - Detalle completo en `Agente/completados/tareas-2026-09-10.md` (§Bloque 1.D) y en la TABLA.
 
 - **Evidencia de la re-medición (09-10 02:18):** `PROYECTO TASKS/.quality-reports/analyze.json` (Sentinel 0.7.8, `severityCounts {error:17, warning:71, hint:7}`, 991 archivos) y `C:\tmp\varsense-task-20260910.json` (VarSense 2.2.1, `{error:0, warning:303}`, 1844 archivos). TABLA con corte 09-10.
+- **Re-medición Sentinel 0.7.9 (11-09, artefacto del gate):** 10/10 proyectos → **2 errores**, ambos `limite-lineas-nivel-3` con sub-plan Fase 4. **Excepción mismo día (orden del usuario):** `bdp_simulator_integration.rs` con marcador firmado → archivo 0/0/0/0 verificado; el área queda en **1 error** (`deploy_service.rs`, sub-plan 10-09). TASKS 0e/70w/7h (Fase 1 Sentinel cerrada), WANDORIUS 0, GLORYPORT 0, glory-harness 0e/1h, gloryapi 0e con 3 warnings en WIP (excepción). Evidencia: `C:\tmp\remedicion-079-*.json` + `verif-079-bdp-excepcion.json`; TABLA §«Re-medición Sentinel 0.7.9». Sin commit; un solo archivo de tests tocado (comentario).
 
 ## 9. Frente VarSense del área — campaña a CERO (heredado del «PLAN ÚNICO» de workspace-manager)
 
@@ -492,27 +504,140 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   obsoleta: **F2 no tiene ya ninguna muerta confirmada pendiente**; lo que queda son los FP de
   `claseHuerfana`. Evidencia: `excepciones.json` §J-11 V13/V21/V22.
   Nuevo FP de `claseHuerfana` (no resuelve clases interpoladas) → candidato de Fase 3.
-- **F3 ABIERTA** — `valorHardcoded` con token exacto (patrón V5/V9/J-3): AGAPE 69, coolify 11, WM 34,
-  REST 15, Laminal 4, PT 14; sustitución solo con match exacto y visual-neutral; el resto (one-off sin
-  token honesto) pasa a la fase final con su línea como evidencia. Esperado: −15..−25 en el área.
-  **Reconocimiento de PT (10-09, con el informe VarSense del área):** los 14 casos son **todos
-  `font-size` en px** y **12 de ellos están en un solo archivo**
-  (`frontend/src/glory-core/pageBuilder/styles/constructorPaginas.css`, líneas 46/59/74/85/103/138/158/
-  175/230/262/283/293) más `dashboard/componentes/recordatorios.css:215` y
-  `dashboard/shared/layoutManager.css:329`. Ahora bien: **PT no tiene tokens de tamaño de fuente** —
-  el único `variables.css` (`frontend/src/app/styles/dashboard/variables.css`) declara solo 4 familias
-  (`--font-primary`, `--font-serif`, `--font-mono`, `--font-sans-alt`) y ningún `--fs-*`; el único
-  «ajuste» de tipografía es el delta `--dashboard-ajusteTipografia: -1.5px`. Por tanto la sustitución
-  «con token exacto» **no tiene token destino** y crearlo exige editar `variables.css` → **PT queda
-  gated por la misma precondición que F5 (WIP del usuario)**. Los otros cuatro proyectos sí pueden
-  avanzar (coolify 11, REST 15, Laminal 4, WM 34, AGAPE 69) y se miden con su propio informe; inventar
-  una escala nueva en un archivo aparte queda descartado por «no inventar tokens» (§9.4).
-- **F4 ABIERTA** — seams reales de CSS runtime: `body.overflow`/`userSelect`/`cursor` durante modal/drag
-  (clase en CSS + toggles en los hooks, con prueba de interacción real) y geometría expresable como
-  custom property estática. Lo puramente imperativo (getBoundingClientRect, progresos %) → fase final.
-- **F5 ABIERTA (gated al usuario)** — tokens del WIP de PT (`variables.css`: 175 token-duplicate + 20
-  token-unused + 1 variableNoDefinida). Precondición: el usuario commitea su WIP; hasta entonces NO se
-  toca ese archivo.
+- **F3 PARCIAL (11-09)** — `valorHardcoded` con token exacto (patrón V5/V9/J-3): solo
+  PT 14 queda abierto y gated (ver abajo). **Avanzados el 11-09:** Laminal 4→0 (tokens `--asaHover`,
+  `--botonHover`, `--elementoActivo`, `--hervorClaro`, `--sombraGizmo`; commit local `62ac0eb` sin push;
+  Sentinel Laminal 0/0/0/0 con 0.7.10), coolify 11→0 (verificado con 2.2.1, sin cambios necesarios),
+  REST 15→0 (15 tokens `--plano-*` en `frontend/src/index.css`; Sentinel 0/0/0/0 en ambos CSS; commit local
+  `e97da61` sin push, WIP ajeno intacto). **WM 34→19 el 11-09:** 15 sustituciones exactas (`13px`→`--v2-textMd`,
+  `11px`→`--v2-textSm` documentado, `#000`→`--v2-texto`, `#fff`→`--v2-invertido`) en `Button.css`,
+  `MenuContextual.css`, `paneles.css`; commit local `efffdad` sin push, WIP `quality-tools/sentinel.lock` intacto. Residual WM 19 =
+  15 `border-radius` sin token (regla v2 «sin radios», `.v2App *{radius:0!important}`) + 2 `12px` sin token +
+  `0.85em` relativo + raíz `v2.css` (intocable: es la base del rem) → fase final. **Fase final WM 1x1 el 11-09
+  (decisiones del usuario):** radios v2 → 3 tokens nuevos (`--v2-radioMini:2px`, `--v2-radioChico:3px`,
+  `--v2-radioPildora:11px`); `badge.css:999px` → `--radioPildora` en `variables.css` v1; `12px` fantasma →
+  `--v2-textFantasma:0.92rem`; `0.85em` consola → **excepción** (relativo intencional); raíz `v2.css:13px` →
+  **intocable** (base del rem, token sería circular).   WM queda en **valorHardcoded×2** (ambos excepcionados).
+  Commit local fase-final `5ebf9fc` sin push, WIP intacto. Evidencia: `C:\tmp\varsense-wm-20260911-post3.json` (0e/7w/4i/0h). **AGAPE 69→72 el 11-09
+  (re-medido con 2.2.1, +3 por código nuevo): 0 ejecutables** — ningún literal coincide con un token exacto de
+  `frontend-v2/src/styles/variables.css` (radios 4/8/12/14/16/18/30/46px vs tokens 10px/40.5px; fuentes
+  1/1.1/1.25/1.4/1.5rem y 0.52em vs escala clamp fluida; fondos rgb negros vs 88%/68% y pie 78% blanco):
+  inventar escala o reasignar cambiaría el visual → todo a fase final 1x1. **Fase final AGAPE 1x1 COMPLETADA el 11-09
+  (decisiones del usuario):** `--radioEtiqueta:46px` (18×), `--radioTarjetaGrande:14px` (17×), 12px→`--radioTarjeta`,
+  16px→`--radioTarjetaGrande`, 30px→`--radioBoton`, 8px→`--radioTarjeta`, 18px→`--radioTarjetaGrande`;
+  1rem/1.1rem/1.25rem→`--textoBase` (fluido, aceptado tras aviso), 1.5rem→`--textoMarca`, 1.4rem→`--textoMarcaSimbolo`,
+  `--textoHero:0.52em` nuevo; 6 `--colorVelo*` nuevos (78/8/45/55/75% + cálido).
+  Corrección honesta: `--textoSubtitulo` no existe (nota de triaje errónea; ediciones revertidas y re-decididas).
+  Excepción firmada: `Donar.tsx:288` inline dinámico (`progresoMeta%`, dato runtime, no diseño).
+  AGAPE queda en **valorHardcoded×0**. Commit local `8b4cb1d` sin push, WIP intacto.
+  Evidencia: `C:\tmp\varsense-agape-20260911-post.json` (0 valorHardcoded; 1e cssInlineReact excepcionado + 8w propiedadProhibida),
+  `C:\tmp\verif-0710-agape.json` (Sentinel 0e/19w en 16 archivos).
+  **Reconocimiento de PT corregido el 11-09:** el triaje decía «PT no tiene tokens de fuente» pero
+  `frontend/src/app/styles/dashboard/variables.css:138-215` SÍ tiene escala completa
+  (`--dashboard-tamano{Micro,MuyPequeno,Pequeno,Detalle,Base,Normal,Grande,Mediano,Encabezado,Titulo,Hero,Subtitulo,H2,Display,MovilBase,MovilPequeno}`,
+  todas con `+ var(--dashboard-ajusteTipografia)` configurable). Además `constructorPaginas.css` ya usaba
+  tokens `--dashboard-*` de color, por lo que mapear sus fuentes a la escala es coherente, no invento.
+  **Fase final PT COMPLETADA el 11-09 (decisión autónoma por orden del usuario):**
+  12 `font-size` px en `constructorPaginas.css` (12/14/11/13/18px → `tamanoMovilPequeno/MovilBase/Pequeno/Base/Mediano`)
+  + `recordatorios.css:215` 10px → `tamanoMuyPequeno` + `layoutManager.css:329` 11px → `tamanoPequeno`.
+  PT queda en **valorHardcoded×0** (verificado `C:\tmp\varsense-pt-20260911-post.json`; los 27 `variableNoDefinida`
+  son de archivos no tocados, artefacto de alcance). Sentinel 0/0/0/0 en los 3 archivos
+  (`C:\tmp\verif-0710-pt.json`). Commit local `e9faf4b` sin push — incluye WIP previo del usuario en 2 CSS
+  (bloques ya ausentes en el árbol antes de mis ediciones; verificado por líneas 215/329 vs 248/350 del parent).
+  Lección: `git add <archivo>` arrastra WIP; el mensaje lo declara.
+- **F4 HECHA 11-09** — seams `body.style.overflow/cursor/userSelect` → clases en `base.css`
+  (`bloqueoScroll`, `arrastrandoCol/Fila/Agarrando`, misma especificidad `body.clase`): 5 bloqueadores
+  scroll (useModal, useDrawerMovil, useModoEnfoque, BottomSheet, AlertaConfirmacion) + 5 arrastres
+  (useAnchoSidebar, useArrastrePaneles, useLayoutManager, useResizeDrag, useResizeHandleColumn).
+  `grep body.style.(overflow|cursor|userSelect)` en `frontend/src`: 0. `tsc --noEmit` exit 0.
+  VarSense scope hooks: `cssInlineScript` 32→6 (restan solo `left/top` imperativos de posicionamiento —
+  van a fase final). Commit local `95d5092` sin push (base.css arrastra WIP previo del usuario,
+  declarado en el mensaje). Evidencia `C:\tmp\varsense-pt-f4-hooks.json`.
+- **FASE-FINAL PT posicionamiento HECHA 11-09** — los 6 `left/top` restantes → seam `--menuX/--menuY`
+  (useMenuFlotante/Contextual/SelectorBadge + consumidores `.menuContextual:not(.submenu)` con fallback
+  -9999px y `.selectorBadgeMenu` con fallback auto; experimento previo demostró que VarSense no flaggea
+  `setProperty` de custom properties). VarSense scope hooks: 6→0 findings. `tsc` exit 0.
+  Commit local `4f6c890` sin push (bloque limpio, sin WIP). Evidencia `C:\tmp\varsense-pt-fasefinal-pos.json`.
+- **FASE-FINAL PT huérfanas HECHA 11-09** — full scan: `valorHardcoded` 2→0 (`-9999px` de mi seam a
+  `--menuFueraPantalla` local), 2 bloques `.seccionModerna` muertos eliminados (hijo BEM vivo),
+  5 `claseHuerfana` restantes = FP por interpolación dinámica → `excepciones-varsense.json`
+  (detallePlan premium/free, detalleEstado trial/expirada, noViable; evidencia de uso dinámico citada).
+  Full frontend: 77→76 entries, `valorHardcoded` 0, `claseHuerfana` 5/5 exceptuadas. `tsc` exit 0.
+  Commit local `6394e41` sin push. Evidencia `C:\tmp\varsense-pt-full-20260911d.json`.
+- **FASE-FINAL PT vars HECHA 11-09** — 31 `variableNoDefinida` con decisión: 27 runtime/component-scoped
+  (PanelExp, pullToRefresh, badgeInfo, resizeHandleColumna, editorPixelArt — defaults locales + override
+  runtime/mapeo consumidor, todo verificado) + 4 `--menuX/--menuY` de mi seam (defaults en la propia regla;
+  el scanner exige definición global: límite documentado). `--menuX/--menuY` pasaron de fallback a defaults
+  en regla (mismo comportamiento). Commit local `6bb27eb` sin push.
+  Evidencia `C:\tmp\varsense-pt-full-20260911e.json`.
+  Queda: `propiedadProhibida` 88 (box-shadow), resto zona gris, `109A-7`, gate final.
+- **FASE-FINAL PT inline HECHA 11-09** — `cssInlineReact` 25→17: 8 convertidos a clases (18 modificadores
+  `pillOpcion--*` que replican tokens `COLORES_*`, `HandleArrastre--conTitulo` con especificidad que preserva
+  semántica inline, bloque muerto borrado en `EncabezadoBuscadorMovilTrigger`) + 17 geometría runtime no
+  estatizable con excepción firmada. Commit local `51476f4` sin push, `tsc` exit 0.
+  Evidencia `C:\tmp\varsense-pt-full-20260911g.json`.
+  Lo puramente imperativo (getBoundingClientRect, progresos %) → excepción documentada.
+- **FASE-FINAL PT box-shadow HECHA 11-09** — 22 sombras literales → tokens por magnitud (19 elevaciones a
+  `--dashboard-sombra*`, 3 anillos focus/error legacy a `rgba(var(--dashboard-acentoRgb/estadoErrorRgb),0.1)`);
+  quedan literales solo resizeHandleColumna:53 (glow drag) y buscador:27 (anillo focus con acentoRgb).
+  Límite del scanner: flaggea hasta `box-shadow:none` y `var(--dashboard-sombra*)` aunque `allowedValues`
+  lista `none` y `bannedProperties.properties` está vacío → excepción 88 firmada.
+  Commit local `482ad45` sin push (17 archivos, 23+/23-, solo swaps 1-línea; `tsc` exit 0).
+  Evidencia `C:\tmp\varsense-pt-full-20260911h.json`.
+  REPARACIÓN: el commit previo `93abf1c` había arrastrado WIP ajeno (260 borrados en 9 archivos); se reseteó
+  (soft, sin pérdida), se re-aplicaron solo mis 22 swaps verificados (0 líneas extrañas) y el WIP ajeno quedó
+  restaurado sin commitear encima.   Commits `6bb27eb`/`51476f4` auditados: limpios.
+- **FASE-FINAL PT 0 ERRORES 11-09** — re-scan full: `variableNoDefinida` 31→4 errores restantes (`--menuX/--menuY`
+  en mis 2 archivos: el scanner flaggea el uso aunque haya default local). Fix en la fuente: default global
+  en `:root` (`variables.css`, fuera-de-pantalla; los defaults locales prevalecen por cascada,
+  behavior-neutral, 0 consumidores externos). Re-scan: **error:0**, warning:195 (17 inline + 5 huérfanas con
+  decisión; 173 duplicate = 168 variables.css incl. el par del seam + 5 espejos intencionales de componente →
+  excepción actualizada). Commit local `f4ef066` sin push. Evidencia `C:\tmp\varsense-pt-full-20260911j.json`.
+  PT VarSense queda en 0 errores con todo lo restante decidido. Queda: resto zona gris multi-proyecto,
+  `109A-7`, gate final por proyecto.
+- **GATE PT Sentinel 11-09** — `quality:doctor` verde (`readyForGate:true`, sin issues) + `sentinel analyze`:
+  **error:0, warning:48, hint:7** (evidencia `.quality-reports/analyze.json`). Triaje MIO (commiteado) vs WIP
+  (ajeno, se deja): WIP×8 (`css-adhoc-button-style`×3, `css-hardcoded-value`×4, `funcion-larga-rs`×1 — del
+  trabajo en curso del usuario, NO se tocan). Decisiones registradas: `css-hardcoded-value` MIO×2
+  (resizeHandleColumna:53 glow drag, suscripcion:64 sheen 0.02) = one-offs sin token honesto (sin precedente
+  `color-mix` en el repo, regla no-inventar-tokens; el glow ya exceptuado en VarSense) → sin cambio;
+  `todo-pendiente` hint (agente_aprobacion.rs:192) = FP («petición pendiente» es lenguaje de dominio, no
+  marcador) → sin cambio.   Pendientes de decisión por lotes: `html-nativo`×20 (10 glory-core), `large-interface`×6+6 hints,
+  `menu-override`×3, `componente-sin-hook/artesanal`×4, `limite-lineas`×4.
+- **FASE-FINAL PT portales HECHA 11-09** — `dom-access-outside-platform` 5→0 con fix real (no excepción): los 4
+  `document.body` (3 portales de menús en `catalogoModelos.tsx` + modal en `ModalConfigAgente.tsx`) ahora pasan
+  por el helper `obtenerRaizPortales()` en `app/utils/portales.ts` (boundary de plataforma permitido; los
+  portales son necesarios: los ancestros con transform/overflow recortan los overlays fixed — justificación
+  [318A-2] conservada). El 5.º hallazgo era el comentario que mencionaba `document.body` → reescrito.
+  Warnings Sentinel 48→43, `tsc` exit 0. Commit local `a3b452c` sin push. Evidencia `.quality-reports/analyze.json`.
+- **FASE-FINAL PT menú/modal HECHA 11-09** — decisiones firmadas (gate en 0 errores, severidad warning):
+  `menu-contextual-override-diseno`×3 = FP del matcher (EncabezadoPerfil `inputOculto` está en un `<div>` propio,
+  no inyectado en `<MenuContextual>`; los 2 de `MenuContextual.tsx` son su propio render, no override externo) →
+  sin cambio. `componente-artesanal` ModalCrearRecordatorio: migrar a `<Modal>` impondría header+título chrome y
+  rompería el composer glass sin título con zona drag&drop → se mantiene, justificado. `componente-sin-hook`×2:
+  lógica de un solo uso acoplada a la vista (picker con auto-guardado; composer con focus/reset/dnd; lo
+  reutilizable ya vive en `useAdjuntos`) → extracción añadiría indirección sin reuso. `componente-artesanal`
+  SubmenuNuevoInline: modo dual inline/portal con dirección por CSS que `<MenuContextual>` (solo portal por
+  coordenadas) no soporta → se mantiene; como consistencia su portal pasa por `obtenerRaizPortales()`.
+  Commit local `eba8c67` sin push (`tsc` exit 0).
+- **FASE-FINAL PT store/adaptador HECHA 11-09** - `limite-lineas`+`nivel-2`+`import-muerto` → 0 con fixes reales:
+  `store.ts` 863→42 líneas partiendo en 6 módulos por dominio (tiposAgente 102, ayudasAgente 67, turnoAgente 251,
+  sliceTabs 155, sliceTurnos 208, sliceTareas 79; patrón `StateCreator` + spreads; API externa intacta:
+  `useAgenteStore`/`useTabActivaAgente`/tipos re-exportados; `establecerConfig` vive en sliceTareas vía
+  `Pick` documentado). `adaptador.rs` 670→~517: ayudas puras → `adaptador_base.rs` (+4 tests),
+  SELECTs → `adaptador_lecturas.rs`, `estado_tarea_db` (un solo uso) inlineado en el `.bind`.
+  `check:back` sin errores nuevos, `npm test` 33 passed, `tsc` exit 0.
+  Sentinel run7: error 0, warning 39 (era 43), hint 6 (era 7). Commits locales sin push:
+  `dbc5127` (import muerto), `654281c` (lecturas), `b171ea9` (store).
+  Restan 39w+6h: `html-nativo`×20, `large-interface`×5(+6h), `menu-override`×3(FP), sin-hook/artesanal×4
+  (excepción), `css-adhoc`×3, `css-hardcoded`×6, `emoji`×1, `inline-style`×1, `funcion-larga-rs`×1, `todo`×1.
+- **F5 HECHA 11-09** (autorización general «el wip no importa», gate 1x1 levantado) — `dashboard/variables.css`:
+  204w (178 token-duplicate + 26 token-unused) → 167w (167 duplicate, 0 unused). 26 defs muertas borradas
+  (18 `:root` + 8 `[data-theme=claro]`, 0 consumidores: grep repo-wide + sin acceso dinámico), commit local
+  `874dd41` sin push. 44 alias probados y REVERTIDOS: VarSense compara valores resueltos (aliasar no reduce)
+  y 1 rompía el tema claro (`landingGradienteClaro` solo-raíz heredado bajo claro). 167 duplicate =
+  monocromo intencional → `excepciones-varsense.json` (categoría, con evidencia
+  `C:\tmp\varsense-pt-f5-post2.json`). Queda: fase final, `109A-7`, gate final.
 - **FASE FINAL ABIERTA (requiere al usuario)** — ~700 ítems de zona gris/unused a decidir uno a uno:
   zona gris PT (~4: premium/free/trial/expirada/noViable), límite real del scanner (~24 PT + 1 Laminal),
   puente generado Tailwind/shadcn (REST, gloryapi, AGAPE), cross-scope/cross-dominio intencionales
