@@ -7,6 +7,13 @@
  */
 
 :root {
+    /* [039A-1/FASE-FINAL] Default global del seam de posicionamiento de menús: los hooks
+       useMenuFlotante/useMenuContextual/useSelectorBadge publican --menuX/--menuY por elemento
+       vía setProperty. El default global es fuera-de-pantalla; cada regla conserva además su
+       propio default local (menuContextual: -9999px, selectorBadge: auto), que prevalece por
+       cascada. Behavior-neutral: ningún otro consumidor referencia estas variables. */
+    --menuX: -9999px;
+    --menuY: -9999px;
     /* Fondos — escala de negro puro */
     --dashboard-fondoPrincipal: #000000;
     --dashboard-fondoSecundario: #000000;
