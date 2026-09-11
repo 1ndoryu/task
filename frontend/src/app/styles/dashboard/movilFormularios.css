@@ -132,14 +132,8 @@
         height: 20px;
     }
 
-    /* 
-     * SECCIÓN MODERNA COMPACTA (Tags, Adjuntos)
-     */
-    .seccionModerna {
-        padding: var(--dashboard-espacioMovilXs) 0;
-    }
-
-
+    /* [039A-1/FASE-FINAL] Bloque .seccionModerna eliminado: sin uso (verificado
+     * repo-wide; el hijo BEM .seccionModerna__botonAgregar sigue vivo). */
     .seccionModerna__botonAgregar {
         padding: 2px 6px;
         font-size: var(--dashboard-tamanoMuyPequeno);
@@ -161,12 +155,10 @@
      * ADJUNTOS COMPACTOS
      */
 
-    /* 
+    /*
      * MODAL MODERNA - Ajustes de padding
+     * [039A-1/F2] .modalModerna__header eliminada: 0 consumidores repo-wide.
      */
-    .modalModerna__header {
-        padding: var(--dashboard-espacioMovilMd);
-    }
 
 
     /* 

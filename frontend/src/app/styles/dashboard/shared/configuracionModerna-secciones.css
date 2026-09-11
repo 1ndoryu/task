@@ -26,23 +26,9 @@
     position: relative;
 }
 
-/* 
- * SECCION GENERICA
- * Contenedor para secciones como Responsables, Adjuntos
- * SIN separadores, con titulo pequeÃ±o a la izquierda
- */
-.seccionModerna {
-    padding: var(--dashboard-espacioXs) 0;
-}
-
-
-.seccionModerna__tituloTexto {
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado);
-    min-width: 80px;
-    flex-shrink: 0;
-}
-
+/* [039A-1/FASE-FINAL] Bloque .seccionModerna eliminado: ningun elemento lo aplica
+ * (verificado repo-wide; solo se usa el hijo BEM .seccionModerna__botonAgregar,
+ * selector independiente que sigue vivo). Visual-neutral. */
 .seccionModerna__botonAgregar {
     display: flex;
     align-items: center;

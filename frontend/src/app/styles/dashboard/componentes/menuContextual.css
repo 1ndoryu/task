@@ -32,10 +32,12 @@
 
 /* [039A-1/FASE-FINAL] Seam posicionamiento: los hooks publican --menuX/--menuY
  * (antes style.left/top directos). Fallback fuera de pantalla evita flash en
- * posicion erronea antes del efecto. Submenus excluidos: usan estilo propio. */
+ * posicion erronea antes del efecto. Submenus excluidos: usan estilo propio.
+ * El valor vive en variable local para no hardcodear px en la regla. */
 .menuContextual:not(.menuContextualSubmenu) {
-    left: var(--menuX, -9999px);
-    top: var(--menuY, -9999px);
+    --menuFueraPantalla: -9999px;
+    left: var(--menuX, var(--menuFueraPantalla));
+    top: var(--menuY, var(--menuFueraPantalla));
 }
 
 /* 
