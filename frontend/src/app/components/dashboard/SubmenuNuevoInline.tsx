@@ -8,6 +8,7 @@
 import {useEffect, useRef, type CSSProperties} from 'react';
 import {createPortal} from 'react-dom';
 import {ListTodo, Repeat} from 'lucide-react';
+import {obtenerRaizPortales} from '../../utils/portales';
 
 interface SubmenuNuevoInlineProps {
     onSeleccionar: (tipo: 'tarea' | 'habito') => void;
@@ -65,5 +66,5 @@ export function SubmenuNuevoInline({onSeleccionar, onCerrar, direccion = 'arriba
         </div>
     );
 
-    return usarPortal ? createPortal(submenu, document.body) : submenu;
+    return usarPortal ? createPortal(submenu, obtenerRaizPortales()) : submenu;
 }
