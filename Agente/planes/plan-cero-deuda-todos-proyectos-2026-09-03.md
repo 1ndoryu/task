@@ -629,6 +629,15 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   `check:back` sin errores nuevos, `npm test` 33 passed, `tsc` exit 0.
   Sentinel run7: error 0, warning 39 (era 43), hint 6 (era 7). Commits locales sin push:
   `dbc5127` (import muerto), `654281c` (lecturas), `b171ea9` (store).
+- **FASE-FINAL PT html-nativo HECHA 11-09** - `html-nativo-en-vez-de-componente` x20 con decision (0 migraciones):
+  `Boton` impone chrome base (`ui.css:5` inline-flex/padding sm-lg/font-size base/line-height 1.5) y envuelve
+  children en spans; migrar `tabCompartidaCerrar`/`panelIAMensajeAccion`/`pillOpcion` no es visual-neutro sin retocar
+  su CSS (misma especificidad, orden fragil). `Input` envuelve en 2 divs (`inputContenedor`/`inputWrapper`) e impone
+  `input input--text`, rompiendo el layout del rename inline del tab. Decisiones: `SelectorRepeticionPill.tsx:37`
+  FP (es `<span role="button">` deliberado, button-en-button es HTML invalido, comentado 19-08-2026);
+  `TabsPanel.tsx:71` excepcion (input inline layout-critico); `TabsPanel.tsx:87` + `mensajes.tsx:244,255` excepcion
+  (icon-actions con chrome custom); glory-core x10 excepcion arquitectonica (el framework no puede importar
+  `components/ui` del producto sin invertir la dependencia; incluye `ExampleIsland` demo).
   Restan 39w+6h: `html-nativo`×20, `large-interface`×5(+6h), `menu-override`×3(FP), sin-hook/artesanal×4
   (excepción), `css-adhoc`×3, `css-hardcoded`×6, `emoji`×1, `inline-style`×1, `funcion-larga-rs`×1, `todo`×1.
 - **F5 HECHA 11-09** (autorización general «el wip no importa», gate 1x1 levantado) — `dashboard/variables.css`:
