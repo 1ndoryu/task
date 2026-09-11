@@ -16,8 +16,8 @@ use uuid::Uuid;
 use glory_harness_core::context::estimar_tokens;
 use glory_harness_core::llm::AiMessage;
 use glory_harness_core::ports::{
-    AccionAuditable, AgentPersistence, MemoriaEntrada, MensajePersistido, SkillEntrada,
-    TareaProgramadaPendiente, TurnoPersistido,
+    AccionAuditable, AgentPersistence, AmbitoMemoria, MemoriaEntrada, MensajePersistido,
+    SkillEntrada, TareaProgramadaPendiente, TurnoPersistido,
 };
 use glory_harness_core::scheduler::HEARTBEAT_STALE;
 use glory_harness_core::{HarnessError, HarnessResult};
@@ -403,39 +403,94 @@ impl AgentPersistence for PersistenciaAgente {
         Ok(())
     }
 
-    async fn memoria_listar(&self, user_id: Uuid) -> HarnessResult<Vec<MemoriaEntrada>> {
-        let filas: Vec<(String, String)> = sqlx::query_as(
-            "SELECT clave, contenido FROM agente_memoria
-             WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT 100",
-        )
-        .bind(user_id)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(harness_err)?;
+    async fn memoria_listar(
+        &self,
+        user_id: Uuid,
+        ambito: AmbitoMemoria,
+    ) -> HarnessResult<Vec<MemoriaEntrada>> {
+        /* [11-09-2026] 109A-8 (F0 Global temporal): la tienda aún no separa
+         * ámbitos (`UNIQUE(user_id, clave)`, un solo ámbito lógico); el turno
+         * corre siempre en global y el default de `memoria_ambitos` ya
+         * devuelve `[Global]`. El parámetro se acepta por contrato y se ignora
+         * hasta la fase de aislamiento real. */
+        let _ = ambito;
+        /* [07-09-2026] 069A-4: el contrato de `MemoriaEntrada` incluye los
+         * metadatos de auditoría (actualizada_en/origen/usos/ultimo_uso) que
+         * el proveedor y el curador del núcleo mantienen. La columna `usos`
+         * es INTEGER en Postgres; se decodifica a i32 y se eleva a u32 del
+         * contrato sin perder el orden (el curador ordena por usos desc). */
+        let filas: Vec<(String, String, DateTime<Utc>, String, i32, Option<DateTime<Utc>>)> =
+            sqlx::query_as(
+                "SELECT clave, contenido, actualizado_en, origen, usos, ultimo_uso
+                 FROM agente_memoria
+                 WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT 100",
+            )
+            .bind(user_id)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(harness_err)?;
         Ok(filas
             .into_iter()
-            .map(|(clave, contenido)| MemoriaEntrada { clave, contenido })
+            .map(
+                |(clave, contenido, actualizada_en, origen, usos, ultimo_uso)| MemoriaEntrada {
+                    clave,
+                    contenido,
+                    actualizada_en,
+                    origen,
+                    usos: usize::try_from(usos).unwrap_or(0) as u32,
+                    ultimo_uso,
+                },
+            )
             .collect())
     }
 
-    async fn memoria_upsert(&self, user_id: Uuid, entrada: &MemoriaEntrada) -> HarnessResult<()> {
+    async fn memoria_upsert(
+        &self,
+        user_id: Uuid,
+        ambito: AmbitoMemoria,
+        entrada: &MemoriaEntrada,
+    ) -> HarnessResult<()> {
+        /* [11-09-2026] 109A-8 (F0 Global temporal): ver `memoria_listar`. */
+        let _ = ambito;
+        /* [07-09-2026] 069A-4: se persisten también los metadatos de
+         * auditoría. Se usa `actualizada_en`/`origen`/`usos`/`ultimo_uso` de
+         * la entrada (el proveedor del núcleo los mantiene: incrementa usos y
+         * fija ultimo_uso al recordar); `NOW()` solo como fallback del default
+         * de la columna cuando la entrada no los trae. `usos` se enlaza como
+         * i32 (columna INTEGER; el contrato usa u32, acotado al rango de la
+         * columna). */
         sqlx::query(
-            "INSERT INTO agente_memoria (user_id, clave, contenido, actualizado_en)
-             VALUES ($1, $2, $3, NOW())
+            "INSERT INTO agente_memoria
+               (user_id, clave, contenido, actualizado_en, origen, usos, ultimo_uso)
+             VALUES ($1, $2, $3, COALESCE($4, NOW()), $5, $6, $7)
              ON CONFLICT (user_id, clave) DO UPDATE SET
                contenido = EXCLUDED.contenido,
-               actualizado_en = NOW()",
+               actualizado_en = EXCLUDED.actualizado_en,
+               origen = EXCLUDED.origen,
+               usos = EXCLUDED.usos,
+               ultimo_uso = EXCLUDED.ultimo_uso",
         )
         .bind(user_id)
         .bind(&entrada.clave)
         .bind(&entrada.contenido)
+        .bind(entrada.actualizada_en)
+        .bind(&entrada.origen)
+        .bind(entrada.usos as i32)
+        .bind(entrada.ultimo_uso)
         .execute(&self.pool)
         .await
         .map_err(harness_err)?;
         Ok(())
     }
 
-    async fn memoria_borrar(&self, user_id: Uuid, clave: &str) -> HarnessResult<()> {
+    async fn memoria_borrar(
+        &self,
+        user_id: Uuid,
+        ambito: AmbitoMemoria,
+        clave: &str,
+    ) -> HarnessResult<()> {
+        /* [11-09-2026] 109A-8 (F0 Global temporal): ver `memoria_listar`. */
+        let _ = ambito;
         sqlx::query("DELETE FROM agente_memoria WHERE user_id = $1 AND clave = $2")
             .bind(user_id)
             .bind(clave)
@@ -509,6 +564,9 @@ impl AgentPersistence for PersistenciaAgente {
                     prompt,
                     tipo,
                     cron_expr,
+                    /* Sin columna `programacion` en el esquema TASKS: fila legacy;
+                    el scheduler cae a `tipo` + `cron_expr` (119A-6 F2). */
+                    programacion: None,
                 },
             )
             .collect())
