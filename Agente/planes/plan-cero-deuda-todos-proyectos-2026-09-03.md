@@ -693,7 +693,17 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   final 1x1 —confirmadas— + 8 agente): 4 `token-duplicate` (radios vs espaciados coincidentes, semántica
   distinta; monocromo v2: nombres semánticos que divergirían con otro tema) + 4 `cssInlineReact`
   (geometría runtime: paneles redimensionables con defaults+consumidores CSS, tooltip con clamp, tooltip
-  vía portal, menú en coords del click). Commit local `f32491a` sin push (ajeno quality-tools/lock intacto).
+  vía portal, menú en coords del click).   Commit local `f32491a` sin push (ajeno quality-tools/lock intacto).
+- **FASE-FINAL RESTAURANTE CERRADA 11-09** - full scan VarSense 2.2.1
+  (`C:\tmp\varsense-rest-20260911.json`): 0e/62w/21i/39h, 122 ítems: 1 fix + 121 decisiones.
+  Fix: `PlanoSala.css:131` literal `box-shadow: 0 0 0 2px var(--primary)` → token nuevo
+  `--plano-sombra-seleccion` (`index.css:183`, junto a sus 4 hermanas); sin literales restantes.
+  Decisiones en `RESTAURANTE/excepciones-varsense.json`: 49 dup + 39 unused (puente shadcn, difieren en
+  `.dark` oklch; consumo Tailwind evidenciado text-muted-foreground 364, bg-primary 18); 6 huérfanas FP
+  (composición dinámica `mesaOcupacion ${estado} ${forma}` L191); 6 box-shadow-con-token FP matcher;
+  21 inline (geometría drag/zoom/pan por frame + barra % + shadcn vendor). Commit local `7a65d35` sin push.
+  NOTA: `npm --prefix frontend run type-check` rojo PRE-EXISTENTE en el submódulo `glory-rs/frontend`
+  (Boton/Input/Modal/Select/Textarea, ajeno al cambio CSS-only); registrado como deuda aparte, no mezclado.
 
 ### 9.3 Medición del frente — `039A-3` ✅ (la consola debe medir con el artefacto del gate)
 
