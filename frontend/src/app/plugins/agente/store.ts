@@ -75,7 +75,7 @@ export interface TabAgente {
     config: ConfigAgente;
 }
 
-import {CONFIG_DEFECTO, cargarConfig, guardarConfig, normalizarConfig} from './configAgente';
+import {cargarConfig, guardarConfig, normalizarConfig} from './configAgente';
 /* EstadoAgente se divide en estado puro + acciones, compuesto vía extends. */
 interface EstadoAgenteDatos {
     tabs: TabAgente[];
