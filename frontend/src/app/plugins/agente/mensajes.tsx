@@ -6,7 +6,7 @@
  */
 
 import {useState} from 'react';
-import {AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Loader2} from 'lucide-react';
+import {AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Loader2, Pencil, Undo2} from 'lucide-react';
 import {Boton} from '../../components/ui/Boton';
 /* [02-09-2026] Para mostrar el nombre amigable del modelo REAL que respondió
  * (el catálogo mapea provider+modelo → etiqueta; sin ciclo de imports:
@@ -249,7 +249,7 @@ function AccionesMensaje({
                     aria-label="Volver a este mensaje"
                     onClick={onVolver}
                 >
-                    ←
+                    <Undo2 size={14} />
                 </button>
             )}
             {onEditar && (
@@ -260,7 +260,7 @@ function AccionesMensaje({
                     aria-label="Editar este mensaje"
                     onClick={onEditar}
                 >
-                    ✎
+                    <Pencil size={14} />
                 </button>
             )}
         </div>

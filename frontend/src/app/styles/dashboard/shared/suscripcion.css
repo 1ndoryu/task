@@ -62,7 +62,7 @@
 }
 
 .indicadorPlan--free::before {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+    background: linear-gradient(135deg, var(--dashboard-superposicionMuyClara) 0%, transparent 100%);
 }
 
 .indicadorPlan--free:hover {
