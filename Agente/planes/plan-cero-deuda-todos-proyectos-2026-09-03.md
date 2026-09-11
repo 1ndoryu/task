@@ -677,6 +677,13 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   usados); 14 `token-unused` FP (todos con >=2 refs repo-wide, el snapshot no ve usos desde TS; RETENER);
   17 `cssInlineScript` runtime (regiones/splits/tooltip/host-montaje, sin CSS estático posible). Re-scan:
   0e/1w/17i/14h. Commit local `3834242` sin push (ajeno `quality-tools.json`/`sentinel.lock.json` intacto).
+- **FASE-FINAL gloryapi CERRADA 11-09** - full scan VarSense 2.2.1 (`C:\tmp\varsense-gloryapi-20260911.json`):
+  0e/37w/1i/38h, 76 ítems todos decididos con CERO cambios de código (todo es puente generado o seam documentado).
+  Decisiones en `gloryapi/excepciones-varsense.json`: 37 `token-duplicate` (alias `--color-X: var(--X)` del
+  `@theme inline` que coinciden en claro pero difieren en `.dark` L97 + par dnd-kit del seam [308A-6]);
+  38 `token-unused` FP (consumo vía utilidades Tailwind en build-time: bg-card 13, text-muted-foreground 92,
+  bg-primary 4, bg-popover 3, font-heading 2); 1 `cssInlineReact` (patrón canónico dnd-kit por frame).
+  Commit local `99b4ba4` sin push (WIP ajeno en bridge/roadmap intacto).
 
 ### 9.3 Medición del frente — `039A-3` ✅ (la consola debe medir con el artefacto del gate)
 
