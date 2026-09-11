@@ -714,7 +714,23 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   Decisiones: 2 dup (alias semánticos Blanco/MisionFondo) + 1 hardcoded (hamburguesa 4px sin token exacto).
   Evidencia: `tsc` frontend-v2 exit 0 + `vite build` exit 0. Commit local `f689f2e` sin push
   (ajeno quality-tools/lock intacto; scanner del submódulo `tools/varsense` sin dist —se usó el
-  artefacto canónico 2.2.1 compartido).
+   artefacto canónico 2.2.1 compartido).
+- **FASE-FINAL WANDORIUS CERRADA 11-09** - `varsense all` 2.2.1 del submódulo propio
+  (`tools/varsense`, `C:\tmp\varsense-wan-20260911.json` → `...b.json` tras fixes):
+  0e/57w/89i → 0e/57w/43i, 40 sitios estáticos migrados a clases + resto decidido.
+  Fixes (22 archivos): `Misc.css` nuevas `.fuera-pantalla/.visor-imagen/.error-carga-app`;
+  `desktop-shell.css` `.desktop-windows-container` (absolute+inset 0+pointer-events none);
+  `mobile-prototype.css` `.movilOs__routerOutlet:not(.oculto)` + ghost fixed/z10000;
+  `desktop-context-menu.css` `.desktop-context-menu--fixed`; `layout.css` `#app.sin-barra`;
+  TS: trash/finder/gallery/media-library/nav-commands/article/mobile-shell/popover/registry/
+  upload/main/windows/ghosts/dropdown a toggles de clase. Decisiones en
+  `WANDORIUS/excepciones-varsense.json`: 54 dup (aliases activo/checked/disabled/select,
+  se dejarían de igualar con otro tema) + 43 inline runtime (geometría por frame/evento:
+  band/selection/ghosts, drag-resize, clamp viewport, `--win-*`/zIndex/minimized,
+  scroll-lock+maxWidth por llamada, motor de fuente/escala del usuario, `touchAction`
+  gesture-cycle) + 3 huérfanas FP (dynamic desktop-*, modal-, boton/campo*).
+  Evidencia: `tsc` exit 0 + `vite build` exit 0. Commit local `ae7f917c` sin push
+  (WIP ajeno `auth.rs`/`seo.rs`/`totp.rs` intacto, no stageado).
 
 ### 9.3 Medición del frente — `039A-3` ✅ (la consola debe medir con el artefacto del gate)
 
