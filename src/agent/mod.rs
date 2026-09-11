@@ -6,6 +6,7 @@
  * a pelo. */
 
 pub mod adaptador;
+pub mod adaptador_base;
 pub mod scheduler;
 pub mod tools;
 
