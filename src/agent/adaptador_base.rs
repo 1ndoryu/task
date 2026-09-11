@@ -22,12 +22,6 @@ pub(crate) fn estado_turno_db(estado: &str) -> String {
     }
 }
 
-/// Traduce el estado del contrato del núcleo al CHECK de
-/// `agente_tareas_programadas` (pendiente|ejecutando|completada|fallida|cancelada).
-pub(crate) fn estado_tarea_db(ok: bool) -> &'static str {
-    if ok { "completada" } else { "fallida" }
-}
-
 /// Construye el mensaje system con las skills activas. Puro y testeable:
 /// devuelve `None` si no hay skills que inyectar. Verbatim del runtime
 /// original.

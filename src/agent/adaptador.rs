@@ -14,7 +14,6 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use glory_harness_core::context::estimar_tokens;
-use glory_harness_core::llm::AiMessage;
 use glory_harness_core::ports::{
     AccionAuditable, AgentPersistence, AmbitoMemoria, MemoriaEntrada, MensajePersistido,
     SkillEntrada, TareaProgramadaPendiente, TurnoPersistido,
@@ -24,7 +23,7 @@ use glory_harness_core::HarnessResult;
 
 use crate::errors::AppError;
 
-use super::adaptador_base::{construir_mensaje_skills, estado_tarea_db, estado_turno_db, harness_err};
+use super::adaptador_base::{estado_turno_db, harness_err};
 
 /// Adaptador concreto: `PersistenciaAgente` envuelve el `PgPool` de task e
 /// implementa el puerto del núcleo. Además expone los helpers de consulta que
@@ -38,72 +37,6 @@ impl PersistenciaAgente {
     #[must_use]
     pub fn nuevo(pool: PgPool) -> Self {
         Self { pool }
-    }
-
-    /// Historial de una conversación (mensajes no compactados), ordenado por
-    /// id ascendente — mismo SQL que el `cargar_historial` original.
-    pub async fn cargar_historial(
-        &self,
-        conversacion_id: Uuid,
-        user_id: Uuid,
-    ) -> Result<Vec<AiMessage>, AppError> {
-        let filas: Vec<(String, String)> = sqlx::query_as(
-            "SELECT rol, contenido FROM agente_mensajes
-             WHERE conversacion_id = $1 AND user_id = $2 AND NOT compactado
-             ORDER BY id ASC",
-        )
-        .bind(conversacion_id)
-        .bind(user_id)
-        .fetch_all(&self.pool)
-        .await?;
-        Ok(filas
-            .into_iter()
-            .map(|(rol, contenido)| AiMessage::texto(&rol, contenido))
-            .collect())
-    }
-
-    /// Memoria persistente del usuario (Fase 3 v1): las 50 entradas más
-    /// recientes como un mensaje `system` (el agente "recuerda" preferencias
-    /// dichas en sesiones anteriores).
-    pub async fn cargar_memoria_agente(
-        &self,
-        user_id: Uuid,
-        limite: i64,
-    ) -> Result<Vec<AiMessage>, AppError> {
-        let filas: Vec<String> = sqlx::query_scalar(
-            "SELECT clave || ': ' || contenido FROM agente_memoria
-             WHERE user_id = $1 ORDER BY actualizado_en DESC LIMIT $2",
-        )
-        .bind(user_id)
-        .bind(limite)
-        .fetch_all(&self.pool)
-        .await?;
-        if filas.is_empty() {
-            return Ok(Vec::new());
-        }
-        let bloque = format!(
-            "Memoria persistente del usuario (preferencias/lecciones de sesiones anteriores):\n{}",
-            filas.join("\n")
-        );
-        Ok(vec![AiMessage::texto("system", bloque)])
-    }
-
-    /// Skills activas del usuario como contexto `system` (mismo patrón que la
-    /// memoria). `incluir_skills` las inyecta en el handler antes del loop.
-    pub async fn cargar_skills_agente(
-        &self,
-        user_id: Uuid,
-        limite: i64,
-    ) -> Result<Vec<AiMessage>, AppError> {
-        let filas: Vec<(String, String)> = sqlx::query_as(
-            "SELECT nombre, descripcion FROM agente_skills
-             WHERE user_id = $1 AND activa ORDER BY nombre LIMIT $2",
-        )
-        .bind(user_id)
-        .bind(limite)
-        .fetch_all(&self.pool)
-        .await?;
-        Ok(construir_mensaje_skills(filas))
     }
 
     /// Guarda el mensaje del usuario. Fase 4: idempotente — si el cliente
@@ -553,7 +486,7 @@ impl AgentPersistence for PersistenciaAgente {
              WHERE id = $1",
         )
         .bind(id)
-        .bind(estado_tarea_db(ok))
+        .bind(if ok { "completada" } else { "fallida" })
         .bind(resumen)
         .execute(&self.pool)
         .await

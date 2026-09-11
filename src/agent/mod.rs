@@ -1,5 +1,7 @@
 /* [03-09-2026] Fase 2 Glory Harness: `agent/` en task solo conserva lo que
- * pertenece al dominio — el adaptador de persistencia (`adaptador.rs`) y las
+ * pertenece al dominio — el adaptador de persistencia (`adaptador.rs`,
+ * lecturas SELECT en `adaptador_lecturas.rs`, ayudas puras en
+ * `adaptador_base.rs`) y las
  * tools de dominio (`tools.rs`). El runtime, scheduler, contexto y tools
  * agnósticas viven en `glory-harness-core`; aquí se re-exportan los tipos
  * que el handler y main usan, para que los consumidores no importen el crate
@@ -7,6 +9,7 @@
 
 pub mod adaptador;
 pub mod adaptador_base;
+pub mod adaptador_lecturas;
 pub mod scheduler;
 pub mod tools;
 
