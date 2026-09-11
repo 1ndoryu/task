@@ -29,10 +29,10 @@ export function MenuFlotante({children, posicionX, posicionY, onCerrar, anchoMin
             style={{ /* sentinel-disable inline-style-prohibido */
                 position: 'fixed',
                 minWidth: `${anchoMinimo}px`,
-                zIndex: 9999, // Asegurar que este por encima de todo
-                // Inicialmente fuera de pantalla para calcular dimensiones
-                left: '-9999px',
-                top: '-9999px'
+                zIndex: 9999 // Asegurar que este por encima de todo
+                // [039A-1/FASE-FINAL] left/top fuera de pantalla viven en
+                // .menuContextual (fallback de --menuX/--menuY); el hook publica
+                // las coordenadas reales por custom properties
             }}>
             {children}
         </div>

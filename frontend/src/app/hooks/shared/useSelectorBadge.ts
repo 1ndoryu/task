@@ -100,8 +100,10 @@ export function useSelectorBadge<T extends string = string>({opciones, valorActu
             left = 10;
         }
 
-        menu.style.top = `${top}px`;
-        menu.style.left = `${left}px`;
+        /* [039A-1/FASE-FINAL] Seam CSS: coordenadas por custom properties (--menuX/--menuY),
+           consumidas por .selectorBadgeMenu en selectorBadge.css (antes style.left/top directos) */
+        menu.style.setProperty('--menuX', `${left}px`);
+        menu.style.setProperty('--menuY', `${top}px`);
     }, [menuAbierto]);
 
     const toggleMenu = () => setMenuAbierto(!menuAbierto);

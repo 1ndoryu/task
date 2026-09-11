@@ -80,8 +80,10 @@ export function useMenuFlotante({posicionX, posicionY, onCerrar}: UseMenuFlotant
     useEffect(() => {
         if (menuRef.current) {
             const {x, y} = calcularPosicion();
-            menuRef.current.style.left = `${x}px`;
-            menuRef.current.style.top = `${y}px`;
+            /* [039A-1/FASE-FINAL] Seam CSS: coordenadas por custom properties (--menuX/--menuY),
+               consumidas por .menuFlotante en menus.css (antes style.left/top directos) */
+            menuRef.current.style.setProperty('--menuX', `${x}px`);
+            menuRef.current.style.setProperty('--menuY', `${y}px`);
         }
     }, [calcularPosicion]);
 

@@ -132,6 +132,10 @@
  */
 .selectorBadgeMenu {
     position: fixed;
+    /* [039A-1/FASE-FINAL] Seam posicionamiento: useSelectorBadge publica
+     * --menuX/--menuY (antes style.left/top directos) */
+    left: var(--menuX, auto);
+    top: var(--menuY, auto);
     z-index: 10000;
     min-width: 220px;
     width: max-content;
