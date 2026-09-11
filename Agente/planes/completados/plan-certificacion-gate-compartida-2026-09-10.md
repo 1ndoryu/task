@@ -8,9 +8,10 @@
   es necesario para que no se vuelva a perder tiempo así"*.
 - **Estado:** ✅ **completado** (B1–B5 ejecutados el 2026-09-10, con autorización explícita del usuario:
   *"confío en ti, impleméntalo de la mejor forma"*). Evidencia en §9.
-- **Próximo paso verificable:** ninguno. Pendiente de decisión ajena a este plan: commitear el gitlink
-  de submódulo en `RESTAURANTE`/`WANDORIUS` (autorización del usuario) y commitear los cambios en los
-  repos consumidores.
+- **Próximo paso verificable:** ninguno. **Familia B cerrada el 2026-09-11** con autorización
+  explícita del usuario (*"autorizado para todo, continúa"*): gitlink de submódulo commiteado en
+  `RESTAURANTE` y `WANDORIUS`, lock regenerado, evidencia de release escrita en ambos y cambios
+  commiteados en los repos consumidores. Ver §9.5.
 
 ---
 
@@ -241,9 +242,30 @@ shims resolvieron su carencia histórica de lock y setup.
 La certificación prueba el **commit**, no los artefactos gitignored (`out/`). La caché no introduce ni
 empeora ese límite: lo documenta la skill `build-artefactos` v1.1.0.
 
-### 9.5 Pendiente fuera de alcance
+### 9.5 Familia B y commits — cerrado (2026-09-11)
 
-- `RESTAURANTE` y `WANDORIUS` (familia B): `bloqueado` con
-  `gitlink del workspace no coincide con el checkout instalado` hasta commitear el gitlink en el padre
-  — requiere autorización explícita; no se "arregla" en silencio.
-- Commit de los cambios en los repos consumidores (shims + manifiestos): requiere autorización.
+Con autorización explícita del usuario se cerró lo que §9.5 dejaba fuera de alcance:
+
+- **Gitlink de submódulo:** `RESTAURANTE` (`4be5e53`) y `WANDORIUS` (`eefead81`) commiteados, lo que
+  resolvió el bloqueo `gitlink del workspace no coincide con el checkout instalado`. `sync:quality`
+  pasó a **11/11 alineados (exit 0)** y `verificar-alineacion.mjs` a **17 filas ALINEADO (exit 0)**.
+- **Lock y evidencia:** lock regenerado a 0.7.9 en ambos y `.sentinel/release-evidence/{sentinel,varsense}.json`
+  escrito con `compile=passed`, `suite=passed`, `cleanStaging=true` para el commit fijado.
+- **Commits de consumidores:** shims + manifiestos en 9 consumidores de familia A (`gloryapi` incluido,
+  que pasa a verde sin vendorizar nada) y `WANDORIUS` (`2dea9747`, presupuesto de staging).
+
+**Presupuesto del runner (hallazgo real de este cierre).** El `setup` de `WANDORIUS` abortaba a mitad sin
+escribir evidencia: el runner aplicaba un presupuesto fijo de 300 s a instalar, compilar y ejecutar la
+suite, y la suite de Sentinel hace I/O real (git, worktrees) con duración carga-intermitente (**180 s**
+medidos en una corrida y **344 s** sin terminar en otra). El presupuesto es un **suelo del runner, no un
+techo del test**: se declaró explícito (`STAGE_TIMEOUT_MS = 900_000`) solo para las tres etapas de
+staging, dejando los defaults de `run()` en 300 s. Con eso el setup terminó en **464,6 s, exit 0**.
+
+**Regresión detectada y restaurada (no se silenció).** El working tree de `WANDORIUS/scripts/quality/setup.mjs`
+había **revertido el fix de `tar` de `318A-4C`** (HEAD usa la ruta relativa `..\<basename>`, robusta para
+GNU tar y bsdtar; el working tree había vuelto a la variante absoluta anterior). Se restauró la versión
+commiteada conservando **solo** el cambio de presupuesto, de modo que el diff final es exactamente eso.
+
+**Límite de la evidencia:** `.sentinel/` está gitignored en ambos repos (regla preexistente), así que la
+evidencia es local y regenerable por `quality:setup`; su presencia la verifica `doctor`
+(`releaseEvidencePresent: true`). No es una decisión de este plan.
