@@ -28,6 +28,9 @@ desktop.ini
 # Local runtime scratch space
 /temp/
 
+# Runtime persistente (target + binarios + pids + logs del arranque permanente)
+/.runtime/
+
 # Python local envs / caches
 **/.venv/
 **/__pycache__/
@@ -45,6 +48,10 @@ desktop.ini
 !/scripts/normalize-openapi.mjs
 !/scripts/normalize-generated.mjs
 !/scripts/preflight-exposure.mjs
+# Adapter del gate: sin estas negaciones el generador del lock no puede
+# rastrearse y sentinel.lock.json queda a la deriva (defecto detectado 10-09).
+!/scripts/quality/
+!/scripts/quality/*
 /backups/
 /clients/
 /frontend/public/legacy-assets/
@@ -59,6 +66,7 @@ glory-rust-template.code-workspace
 .sentinel/
 .quality-tools/
 .quality-reports/
+sentinel.lock.json.bak
 .cargo/config.toml
 
 # Artefactos de arranque del preview (Freebuff)

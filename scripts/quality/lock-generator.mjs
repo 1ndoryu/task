@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* quality-setup.mjs (router) — NO contiene lógica del gate: delega en el adapter único
+/* lock-generator.mjs (router) — NO contiene lógica del gate: delega en el adapter único
  * del área. [por que] Este archivo estaba copiado en 9 proyectos y cada fix había
  * que aplicarlo tantas veces (109A-9). Si necesitas cambiar el comportamiento,
  * cambia el adapter, no este router: se propaga con `quality:bump --shims --write`.
@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ADAPTER = 'quality-setup.mjs';
+const ADAPTER = 'lock-generator.mjs';
 const RELATIVO = path.join('workspace-manager', 'scripts', 'quality', ADAPTER);
 const AREA_POR_DEFECTO = 'C:/Users/Owner/OneDrive/Documentos/area-trabajo';
 
@@ -33,8 +33,8 @@ function raizDelArea(proyecto) {
 const proyecto = process.cwd();
 const adapter = path.join(raizDelArea(proyecto), RELATIVO);
 if (!fs.existsSync(adapter)) {
-  process.stderr.write('[quality:setup] router: falta el adapter único del área en ' + adapter + '\n');
-  process.stderr.write('[quality:setup] router: define WS_AREA_ROOT o provisiona el área; no se simula evidencia\n');
+  process.stderr.write('[quality:lock] router: falta el adapter único del área en ' + adapter + '\n');
+  process.stderr.write('[quality:lock] router: define WS_AREA_ROOT o provisiona el área; no se simula evidencia\n');
   process.exit(2);
 }
 /* Guard anti-recursión: si el destino resuelve al propio router, delegar sería
@@ -42,8 +42,8 @@ if (!fs.existsSync(adapter)) {
  * sobrescrito por un router; el fallo se veía como error de job object, no como
  * recursión, y costó diagnosticarlo. Mejor un error explícito. */
 if (path.resolve(adapter) === path.resolve(process.argv[1] ?? '')) {
-  process.stderr.write('[quality:setup] router: el adapter resuelve al propio router (' + adapter + ')\n');
-  process.stderr.write('[quality:setup] router: restaura el adapter canónico; no se delega en sí mismo\n');
+  process.stderr.write('[quality:lock] router: el adapter resuelve al propio router (' + adapter + ')\n');
+  process.stderr.write('[quality:lock] router: restaura el adapter canónico; no se delega en sí mismo\n');
   process.exit(2);
 }
 const resultado = spawnSync(process.execPath, [adapter, ...process.argv.slice(2)], {
@@ -52,7 +52,7 @@ const resultado = spawnSync(process.execPath, [adapter, ...process.argv.slice(2)
   windowsHide: true,
 });
 if (resultado.error) {
-  process.stderr.write('[quality:setup] router: no se pudo ejecutar el adapter: ' + resultado.error.message + '\n');
+  process.stderr.write('[quality:lock] router: no se pudo ejecutar el adapter: ' + resultado.error.message + '\n');
   process.exit(2);
 }
 process.exit(resultado.status ?? 2);
